@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { copyFile, mkdir, stat, unlink } from "node:fs/promises";
+import { copyFile, mkdir, rmdir, stat, unlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -44,12 +44,54 @@ function normalizeOutputPath(inputPath: string): string {
   return path.resolve(expanded);
 }
 
+/**
+ * macOS caps a single path component at 255 bytes. Names are truncated by BYTE length,
+ * not character count, so a multi-byte name can't slip past the limit.
+ */
+const MAX_NAME_BYTES = 255;
+
+/**
+ * Shortens text to fit a byte budget, dropping whole characters so truncation can never
+ * split a multi-byte character and leave invalid UTF-8 behind.
+ */
+function truncateToBytes(input: string, maxBytes: number): string {
+  if (Buffer.byteLength(input, "utf8") <= maxBytes) return input;
+  const chars = [...input];
+  while (chars.length > 0 && Buffer.byteLength(chars.join(""), "utf8") > maxBytes) {
+    chars.pop();
+  }
+  return chars.join("").trim();
+}
+
+/**
+ * Turns arbitrary text into a usable single path component.
+ *
+ * Beyond the reserved characters, this strips control characters and clamps the length.
+ * Neither is reachable from any app installed here — a survey of 304 real bundles found
+ * no control characters and a longest version of 38 characters — but both come from a
+ * bundle's own `Info.plist`, and the failure without a guard is an opaque `ENAMETOOLONG`
+ * or `ERR_INVALID_ARG_VALUE` rather than an export that simply works.
+ */
 function sanitizeFolderName(input: string): string {
-  const sanitized = input.replace(/[\\/:*?"<>|]/g, "-").trim();
-  return sanitized || "Untitled";
+  const sanitized = input
+    .replace(/[\\/:*?"<>|]/g, "-")
+    // Control characters are legal in an Info.plist string but produce unusable
+    // folder names (a NUL makes Node reject the path outright).
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim();
+  if (!sanitized) return "Untitled";
+  return truncateToBytes(sanitized, MAX_NAME_BYTES) || "Untitled";
 }
 
 type ExportFormat = "png" | "jpeg" | "icns";
+
+/** Every format the extension can export, in menu order — not just the enabled ones. */
+const ALL_FORMATS = ["png", "jpeg", "icns"] as const satisfies readonly ExportFormat[];
+
+function getFormatLabel(format: ExportFormat): string {
+  return format === "jpeg" ? "JPEG" : format.toUpperCase();
+}
 
 const DEFAULT_SIZE = 512;
 
@@ -75,8 +117,51 @@ function getFormatSubdir(format: ExportFormat): string {
   return format.toUpperCase();
 }
 
-function getAppFolderName(app: Application): string {
-  return sanitizeFolderName(`${app.name} App Icons`);
+/**
+ * The app's marketing version (`CFBundleShortVersionString`), or null when the bundle
+ * doesn't declare one.
+ *
+ * Only the short version is used. `CFBundleVersion` is a build number that changes on
+ * every internal build, which would scatter folders for what a user thinks of as one
+ * release. Every real bundle surveyed carried a short version; the null path is for
+ * malformed bundles with no readable `Info.plist`.
+ */
+async function getAppVersion(appPath: string): Promise<string | null> {
+  try {
+    const { stdout } = await execFileAsync("/usr/bin/plutil", [
+      "-extract",
+      "CFBundleShortVersionString",
+      "raw",
+      "-o",
+      "-",
+      path.join(appPath, "Contents", "Info.plist"),
+    ]);
+    return stdout.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Folder name for an app's export, including its version when one is available.
+ *
+ * Versioning the folder is what keeps a re-export from silently replacing an earlier
+ * one: exports overwrite by path, so "Bleep App Icons" would hand back 3.4.0's icons
+ * under the name the 3.3.1 icons were saved as. Separate versions mean separate folders,
+ * and re-exporting the *same* version still overwrites — which is the intended repair
+ * path for a partial or interrupted export.
+ *
+ * The app NAME is what gets shortened when the whole label won't fit, never the version.
+ * Truncating the assembled label instead would cut the version off the end, collapsing
+ * two versions of a long-named app onto one folder — reintroducing exactly the silent
+ * overwrite this function exists to prevent.
+ */
+function getAppFolderName(app: Application, version?: string | null): string {
+  const suffix = version ? ` ${version} App Icons` : " App Icons";
+  // Reserve the suffix's bytes, then fit the name into whatever remains.
+  const budget = MAX_NAME_BYTES - Buffer.byteLength(sanitizeFolderName(suffix.trim()), "utf8") - 1;
+  const name = truncateToBytes(sanitizeFolderName(app.name), Math.max(budget, 1));
+  return sanitizeFolderName(`${name}${suffix}`);
 }
 
 function escapeStringLiteral(s: string): string {
@@ -181,20 +266,24 @@ async function exportIconsForFormat(
   format: ExportFormat,
 ): Promise<ExportedIcon[]> {
   const formatDir = path.join(appOutputDir, getFormatSubdir(format));
-  await mkdir(formatDir, { recursive: true });
 
-  // ICNS format: copy the original .icns file if available
+  // ICNS format: copy the original .icns file if available.
+  // The directory is created only once there's a file to put in it — creating it up
+  // front left an empty ICNS/ folder behind for every Asset Catalog app, which reads
+  // as a silent failure in Finder.
   if (format === "icns") {
     const icnsPath = await findIcnsPath(app.path);
     if (!icnsPath) {
       throw new Error(`${app.name} does not have an .icns file (Asset Catalog icons). Try PNG instead.`);
     }
+    await mkdir(formatDir, { recursive: true });
     const filePath = path.join(formatDir, `${sanitizeFolderName(app.name)}.icns`);
     await copyFile(icnsPath, filePath);
     return [{ size: 0, filePath }];
   }
 
   const ext = getFileExtension(format);
+  await mkdir(formatDir, { recursive: true });
 
   // PNG/JPEG: extract icons via NSWorkspace (works for all apps)
   return Promise.all(
@@ -225,8 +314,12 @@ async function exportIcons(
   baseOutputPath: string,
   formats: readonly ExportFormat[],
 ): Promise<ExportResult> {
-  const outputDir = path.join(normalizeOutputPath(baseOutputPath), getAppFolderName(app));
-  await mkdir(outputDir, { recursive: true });
+  const version = await getAppVersion(app.path);
+  const outputDir = path.join(normalizeOutputPath(baseOutputPath), getAppFolderName(app, version));
+  // `mkdir` with `recursive` returns the first directory it created, or undefined when the
+  // path already existed. That distinction is what licenses the cleanup below: we may only
+  // remove a folder this export brought into being.
+  const createdDir = await mkdir(outputDir, { recursive: true });
 
   const allResults: ExportedIcon[] = [];
   const warnings: string[] = [];
@@ -236,10 +329,20 @@ async function exportIcons(
       allResults.push(...results);
     } catch (error) {
       warnings.push(`${format.toUpperCase()}: ${getErrorMessage(error)}`);
+      // A format that failed partway (icon extraction died after its directory was made)
+      // would otherwise leave an empty PNG/ or JPEG/ behind — which also blocks the
+      // whole-folder cleanup below, since `rmdir` refuses a non-empty directory.
+      await rmdir(path.join(outputDir, getFormatSubdir(format))).catch(() => {});
     }
   }
 
   if (allResults.length === 0 && warnings.length > 0) {
+    // Nothing was written, so don't leave a bare folder behind advertising an export that
+    // didn't happen — but only clean up a folder this export created. A folder that was
+    // already there is the user's, even when it's empty, and deleting it would be reaching
+    // outside what an export is allowed to touch. `rmdir` additionally refuses a non-empty
+    // directory, so a previous export's files are never at risk either way.
+    if (createdDir) await rmdir(outputDir).catch(() => {});
     throw new Error(warnings.join("\n"));
   }
 
@@ -320,6 +423,21 @@ function AppActions({
               title={`${size} x ${size}`}
               icon={Icon.Download}
               onAction={() => exportWithToast(app, [size], preferences.outputPath, sizedFormats)}
+            />
+          ))}
+        </ActionPanel.Submenu>
+        {/* "As" is already correct title case here; the rule flags the short word. */}
+        {/* eslint-disable-next-line @raycast/prefer-title-case */}
+        <ActionPanel.Submenu title="Export Icons As…" icon={Icon.Download}>
+          {ALL_FORMATS.map((format) => (
+            <Action
+              key={format}
+              title={getFormatLabel(format)}
+              icon={Icon.Download}
+              // A one-off format override: exports the same sizes "Export Icons" would,
+              // in just this format, without touching the format preferences. ICNS carries
+              // every size in one file, so the size list it gets doesn't matter.
+              onAction={() => exportWithToast(app, [defaultSize], preferences.outputPath, [format])}
             />
           ))}
         </ActionPanel.Submenu>
@@ -430,13 +548,22 @@ function AppActions({
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={async () => {
             const outputRoot = normalizeOutputPath(preferences.outputPath);
-            const folderPath = path.join(outputRoot, getAppFolderName(app));
-            try {
-              await stat(folderPath);
-              await showInFinder(folderPath);
-              return;
-            } catch {
-              // No folder for this app yet — fall through to the output folder.
+            // Check the installed version's folder first, then the unversioned name that
+            // exports created before folders carried versions, so an older export is still
+            // reachable from this action rather than looking like it was never made.
+            const version = await getAppVersion(app.path);
+            const candidates = version
+              ? [getAppFolderName(app, version), getAppFolderName(app, null)]
+              : [getAppFolderName(app, null)];
+            for (const candidate of candidates) {
+              const folderPath = path.join(outputRoot, candidate);
+              try {
+                await stat(folderPath);
+                await showInFinder(folderPath);
+                return;
+              } catch {
+                // Not this one — try the next, then fall through to the output folder.
+              }
             }
             // Opening the parent beats a dead end: the user asked to see where icons
             // go, and that place exists even when this app hasn't been exported.

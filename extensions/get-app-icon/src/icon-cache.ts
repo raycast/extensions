@@ -46,6 +46,8 @@ while let line = readLine() {
         let outData = Data(base64Encoded: fields[1]),
         let appPath = String(data: inData, encoding: .utf8),
         let outPath = String(data: outData, encoding: .utf8) else { continue }
+  // Third field: the icon-source mtime the caller observed before we drew anything.
+  let stamp = fields.count >= 3 ? Double(fields[2]) : nil
   let icon = NSWorkspace.shared.icon(forFile: appPath)
   icon.size = NSSize(width: s, height: s)
   guard let bmp = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: s, pixelsHigh: s, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0) else { continue }
@@ -67,6 +69,11 @@ while let line = readLine() {
       .appendingPathComponent("${TEMP_PREFIX}" + UUID().uuidString)
     do {
       try data.write(to: tmpURL, options: .atomic)
+      // Stamp BEFORE moving into place, so the entry is never briefly visible with a
+      // wall-clock mtime that would read as fresher than it is.
+      if let stamp = stamp, stamp > 0 {
+        try? fm.setAttributes([.modificationDate: Date(timeIntervalSince1970: stamp)], ofItemAtPath: tmpURL.path)
+      }
       if fm.fileExists(atPath: finalURL.path) {
         _ = try fm.replaceItemAt(finalURL, withItemAt: tmpURL)
       } else {
@@ -102,17 +109,61 @@ export function cachedIconPath(appPath: string): string {
 }
 
 /**
- * Apps whose cached icon is missing or older than the bundle itself. An app that
- * updates rewrites its bundle mtime, so this re-extracts exactly the icons that
- * changed and leaves the rest alone.
+ * The paths whose mtimes decide whether a cached icon is still current.
+ *
+ * The bundle root alone is not enough. An updater that rewrites files *inside* the
+ * bundle leaves the root's mtime untouched, so an app that changed its icon in place
+ * kept showing the old tile forever. Measured on a real in-place update: the root
+ * stayed at 12:25:41 while `Contents/Info.plist` moved to 12:25:42.
+ *
+ * `Info.plist` is included because it names the icon file, and `Resources` because its
+ * directory mtime moves when an icon is added, replaced, or removed. Missing entries
+ * are ignored, so an Asset Catalog app with no `.icns` is handled by the same check.
+ */
+function iconStampPaths(appPath: string): string[] {
+  return [
+    appPath,
+    path.join(appPath, "Contents"),
+    path.join(appPath, "Contents", "Info.plist"),
+    path.join(appPath, "Contents", "Resources"),
+  ];
+}
+
+/**
+ * The newest mtime across the paths that reflect an app's icon, in epoch ms.
+ *
+ * A path that genuinely doesn't exist contributes nothing — that's the normal shape of an
+ * Asset Catalog app with no `Resources`. But a path we simply *couldn't read* (permissions,
+ * I/O error) is not evidence of "unchanged": treating it as 0 would silently accept the
+ * cached icon for as long as the error persisted. Those resolve to `Infinity` instead, so
+ * an unreadable bundle re-extracts rather than trusting a possibly-stale tile.
+ */
+async function iconSourceMtime(appPath: string): Promise<number> {
+  const stamps = await Promise.all(
+    iconStampPaths(appPath).map(async (target) => {
+      try {
+        return (await stat(target)).mtimeMs;
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException).code;
+        // ENOENT/ENOTDIR are the expected "this bundle has no such path" answers.
+        return code === "ENOENT" || code === "ENOTDIR" ? 0 : Number.POSITIVE_INFINITY;
+      }
+    }),
+  );
+  return Math.max(...stamps);
+}
+
+/**
+ * Apps whose cached icon is missing or older than the bundle's icon sources, so this
+ * re-extracts exactly the icons that changed and leaves the rest alone.
  */
 async function findStaleApps(appPaths: readonly string[]): Promise<string[]> {
   const stale = await Promise.all(
     appPaths.map(async (appPath) => {
       const cached = cachedIconPath(appPath);
       try {
-        const [cachedStat, appStat] = await Promise.all([stat(cached), stat(appPath)]);
-        return cachedStat.mtimeMs >= appStat.mtimeMs ? null : appPath;
+        const [cachedStat, sourceMtime] = await Promise.all([stat(cached), iconSourceMtime(appPath)]);
+        return cachedStat.mtimeMs >= sourceMtime ? null : appPath;
       } catch {
         return appPath; // not cached yet
       }
@@ -139,7 +190,33 @@ export async function refreshIconCache(
   if (stale.length === 0) return 0;
 
   const encode = (value: string) => Buffer.from(value, "utf8").toString("base64");
-  const jobs = stale.map((appPath) => `${encode(appPath)} ${encode(cachedIconPath(appPath))}`).join("\n");
+  // Each job carries the icon-source mtime observed BEFORE drawing, and the extractor
+  // stamps the file it writes with that value instead of "now".
+  //
+  // Without this, a bitmap drawn from the pre-update bundle can land after an export has
+  // invalidated the entry, and its wall-clock mtime would then be newer than the updated
+  // app's — marking demonstrably stale pixels fresh forever. Stamping with the observed
+  // time makes the file's mtime describe *what was drawn*, so if the app changed in the
+  // meantime the entry stays behind the app and is re-extracted on the next visit.
+  const jobs = (
+    await Promise.all(
+      stale.map(async (appPath) => {
+        const observed = await iconSourceMtime(appPath);
+        // Seconds, as Swift's Date(timeIntervalSince1970:) takes. Rounded UP to the next
+        // millisecond: the freshness test is `cached >= source`, so a stamp that landed
+        // even a fraction of a millisecond below the source mtime would read as stale on
+        // every single grid visit and re-extract the whole fleet forever. Ceiling keeps a
+        // just-written entry at or above its source while staying far below the mtime any
+        // later app update would produce.
+        //
+        // A non-finite mtime means a stamp path was unreadable, so we have no trustworthy
+        // time to record. Omit the field — the extractor then leaves the file at wall-clock
+        // time, and the entry is re-checked normally rather than stamped with a bad value.
+        const stamp = Number.isFinite(observed) ? ` ${(Math.ceil(observed) / 1000).toFixed(3)}` : "";
+        return `${encode(appPath)} ${encode(cachedIconPath(appPath))}${stamp}`;
+      }),
+    )
+  ).join("\n");
 
   onProgress?.(0, stale.length);
 

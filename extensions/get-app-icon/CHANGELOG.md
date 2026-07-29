@@ -1,5 +1,35 @@
 # Get App Icon Changelog
 
+## [Versioned Export Folders] - {PR_MERGE_DATE}
+
+### Added
+
+- **Export folders now include the app's version**, e.g. `Bleep 3.4.0 App Icons`. Exporting an icon
+  after an app updates previously wrote over the earlier export, because both used the same folder
+  name — the old icons were gone with no warning. Each version now keeps its own folder. Re-exporting
+  the same version still overwrites, which is what repairs a partial export.
+- **Export Icons As…** action — pick a single format for a one-off export without changing your
+  format preferences. For keeping PNG as the default but occasionally wanting just the ICNS.
+
+### Fixed
+
+- **The grid now notices when an app changes its icon in place.** Staleness was judged from the app
+  bundle's own timestamp, but an updater that rewrites files *inside* the bundle leaves that
+  timestamp untouched — an updated app kept showing its old icon indefinitely. The check now also
+  looks at `Contents`, `Info.plist`, and `Resources`, which do move.
+- **Show Export Folder in Finder** finds exports made before folders were versioned, instead of
+  treating them as missing.
+- A failed export no longer leaves empty folders behind. Exporting ICNS for an app that uses Asset
+  Catalog icons created the folders before discovering there was nothing to put in them, leaving an
+  empty `ICNS/` — or an empty app folder — sitting in your output directory. Cleanup now only ever
+  removes a folder the export itself created, so a folder you made is left alone even when empty.
+- **A grid refresh that overlapped an export could cache the wrong icon permanently.** Icons are
+  drawn first and written second; if an export invalidated the entry in between, the older drawing
+  landed afterwards carrying a current timestamp, so it looked up to date forever. Cached icons are
+  now timestamped with what they actually depict rather than when they were written.
+- An app bundle that can't be read (permissions, I/O error) no longer counts as evidence that its
+  icon is unchanged, which had let a possibly-stale tile persist for as long as the error lasted.
+
 ## [Sharper Grid Icons and Simpler Preferences] - 2026-07-27
 
 ### Added
