@@ -292,6 +292,39 @@ export async function getCreatedIssues() {
   return data?.viewer.createdIssues.nodes;
 }
 
+export async function getSubscribedIssues() {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
+    `
+      query {
+        issues(orderBy: updatedAt, filter: { subscribers: { some: { isMe: { eq: true } } }${getCompletedIssuesFilter({
+          inFilterBlock: true,
+          addComma: true,
+        })} }) {
+          nodes {
+            ${IssueFragment}
+          }
+        }
+      }
+    `,
+  );
+
+  return data?.issues.nodes;
+}
+
+export type MyIssuesView = "assigned" | "created" | "subscribed";
+
+export function getMyIssuesByView(view: MyIssuesView) {
+  switch (view) {
+    case "assigned":
+      return getMyIssues();
+    case "created":
+      return getCreatedIssues();
+    case "subscribed":
+      return getSubscribedIssues();
+  }
+}
+
 export async function getActiveCycleIssues(cycleId?: string) {
   if (!cycleId) {
     return [];
