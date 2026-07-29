@@ -1,6 +1,6 @@
 # Netease-Music Changelog
 
-## [Add Dislike and Next Track Command] - {PR_MERGE_DATE}
+## [Add Dislike and Next Track Command] - 2026-07-29
 
 - Added a command to dislike the currently playing track and skip to the next track.
 
