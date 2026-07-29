@@ -2,6 +2,8 @@
 
 Control Elsewhere from focused Raycast commands without leaving your current context.
 
+Elsewhere for macOS is required.
+
 ## Commands
 
 ### Audio and Spaces
@@ -33,7 +35,3 @@ Elsewhere publishes the versioned `elsewhere-control-v1.json` snapshot in its ma
 discovers that file below `~/Library/Application Support` using the app-family identifier
 `app.glaze.macos.27b0yt1l*`, validates schema version 1 at runtime, and never reads Elsewhere's editable Space
 documents directly.
-
-The current development build uses `app.glaze.macos.27b0yt1l-local`. Before Store submission, confirm that the
-released Elsewhere build retains the `app.glaze.macos.27b0yt1l` identifier prefix. If the release identifier changes,
-only `ELSEWHERE_USER_DATA_PREFIX` in `src/state-reader.ts` needs updating.
