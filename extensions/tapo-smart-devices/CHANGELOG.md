@@ -1,5 +1,11 @@
 # Tapo Smart Devices Changelog
 
+## [Fix crash on unrecognised device types] - {PR_MERGE_DATE}
+
+- Gracefully ignore devices with a type not recognised by the extension, rather than crashing when the Tapo API returns an unknown device type (fixes #29744)
+- Fix loading state getting stuck indefinitely when network errors occur during local device discovery
+- Updated all dependencies to their latest versions
+
 ## [Security Maintenance] - 2026-05-21
 
 - Updated the extension to address security advisories.

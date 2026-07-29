@@ -14,18 +14,15 @@ import { split } from "./lib/utils";
 import { usePromise } from "@raycast/utils";
 
 const fetchDevices = async () => {
-  let devices;
   try {
-    devices = await getDevices();
+    const devices = await getDevices();
+    const locatedDevices = await locateDevicesOnLocalNetwork(devices);
+    const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
+    return augmentedLocatedDevices;
   } catch (error) {
     showToast({ title: (error as Error).toString(), style: Toast.Style.Failure });
     return [];
   }
-
-  const locatedDevices = await locateDevicesOnLocalNetwork(devices);
-  const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
-
-  return augmentedLocatedDevices;
 };
 
 export default function Command() {
