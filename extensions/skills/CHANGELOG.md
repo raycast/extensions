@@ -3,7 +3,8 @@
 ## [Fix Runtime Detection and Skill Lookup] - {PR_MERGE_DATE}
 
 - Detect `bun`/`node` installed outside a version manager or Homebrew, so "Unable to find a working bunx or npx command" no longer appears for Bun's official installer (`~/.bun/bin`), Nix / nix-darwin profiles, mise, and asdf
-- Fall back to `npx` when `bunx` fails without any diagnostic output, so a silent `bunx` failure no longer surfaces as "Command failed: bunx --silent skills@latest …" with no reason and no retry
+- Report what the `skills` CLI printed when it exits non-zero, instead of only "Command failed: bunx --silent skills@latest …" with no reason — the CLI writes its errors to stdout, which was being discarded
+- Fall back to `npx` when `bunx` dies without printing anything at all, limited to read-only commands so a mutating `add`/`remove`/`update` is never run twice
 - Resolve skills whose `SKILL.md` sits at the repository root (single-skill repos), which previously failed to load in the detail view
 - Make the `read-skill` AI tool use the same repo-layout resolution as the detail view, so nested and root-level skills are readable
 
