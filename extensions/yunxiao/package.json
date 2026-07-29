@@ -1,0 +1,119 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "yunxiao",
+    "type": "module",
+    "title": "Yunxiao",
+    "version": "1.0.0",
+    "description": "Yunxiao (Alibaba Cloud DevOps) is an end-to-end BizDevOps platform integrating project management, task tracking, code hosting, test management and automated delivery for software teams.",
+    "icon": "icon.png",
+    "author": "imvkmark",
+    "categories": [
+        "Productivity"
+    ],
+    "license": "MIT",
+    "keywords": [
+        "yunxiao",
+        "aliyun",
+        "devops",
+        "云效"
+    ],
+    "preferences": [
+        {
+            "name": "personalAccessToken",
+            "title": "Personal Access Token",
+            "type": "password",
+            "required": true,
+            "description": "在 devops.aliyun.com 个人信息 -> 个人访问令牌 中生成。"
+        },
+        {
+            "name": "organizationId",
+            "title": "Organization Id",
+            "type": "textfield",
+            "required": true,
+            "description": "企业标识，多企业用户必填。"
+        },
+        {
+            "name": "endpointMode",
+            "title": "接入点",
+            "type": "dropdown",
+            "required": true,
+            "default": "central",
+            "data": [
+                {
+                    "title": "中心版 (openapi-rdc.aliyuncs.com)",
+                    "value": "central"
+                },
+                {
+                    "title": "Region 版 (自部署/其他地域)",
+                    "value": "region"
+                }
+            ],
+            "description": "中心版与 Region 版的 URL 形态不同：中心版 path 含 organizations/{organizationId}/，Region 版不带。"
+        },
+        {
+            "name": "regionUrl",
+            "title": "Region 版 API Base URL",
+            "type": "textfield",
+            "required": false,
+            "placeholder": "https://devops.cn-hangzhou.aliyuncs.com",
+            "description": "仅在「接入点 = Region 版」时使用。自部署实例可填自建域名。"
+        }
+    ],
+    "commands": [
+        {
+            "name": "yunxiao-entry",
+            "title": "Yunxiao",
+            "description": "工作台 / 项目协作 / 测试管理 / 代码管理 / 制品仓库 / 企业管理后台 / 个人设置 一键直达。",
+            "icon": "icon.png",
+            "mode": "view"
+        },
+        {
+            "name": "list-projects",
+            "title": "Project List",
+            "description": "浏览我可访问的云效项目。",
+            "icon": "project.png",
+            "mode": "view"
+        },
+        {
+            "name": "list-repositories",
+            "title": "List Repositories",
+            "description": "浏览当前组织下可访问的代码库，支持名称 / 路径 / 命名空间本地搜索，回车在 Codeup 中打开。",
+            "icon": "codeup.png",
+            "mode": "view"
+        },
+        {
+            "name": "list-merge-requests",
+            "title": "List Merge Requests",
+            "description": "查看合并请求，支持按开启 / 已合并 / 已关闭 状态筛选。",
+            "icon": "codeup.png",
+            "mode": "view"
+        },
+        {
+            "name": "list-test-plans",
+            "title": "Search Test Plan",
+            "description": "按项目列出测试计划，支持 TODO / DOING / DONE 状态过滤，回车在 Testhub 中打开。",
+            "icon": "testhub.png",
+            "mode": "view"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.104.23"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.1.1",
+        "@types/node": "^20.0.0",
+        "@types/react": "^18.2.0",
+        "eslint": "^9.0.0",
+        "typescript": "^5.4.0"
+    },
+    "overrides": {
+        "@types/react": "^18.2.0"
+    },
+    "scripts": {
+        "test": "node --test --experimental-strip-types test/*.test.mjs",
+        "build": "ray build",
+        "dev": "ray develop",
+        "lint": "ray lint",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
