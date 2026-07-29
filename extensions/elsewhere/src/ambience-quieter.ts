@@ -1,8 +1,8 @@
-import { executeElsewhereCommand } from "./command-runner";
+import { executeFromCurrentState } from "./state-gated-command";
 
 export default async function Command() {
-  await executeElsewhereCommand(
-    { kind: "volume", target: "ambience", delta: -10 },
-    { successTitle: "Ambience Volume Decreased" },
-  );
+  await executeFromCurrentState({
+    command: () => ({ kind: "volume", target: "ambience", delta: -10 }),
+    successTitle: () => "Ambience Volume Decreased",
+  });
 }

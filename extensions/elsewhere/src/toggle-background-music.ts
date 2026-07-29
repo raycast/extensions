@@ -1,7 +1,7 @@
-import { toggleFromCurrentState } from "./toggle-state";
+import { executeFromCurrentState } from "./state-gated-command";
 
 export default async function Command() {
-  await toggleFromCurrentState({
+  await executeFromCurrentState({
     command: (snapshot) => ({
       kind: "music",
       action: snapshot.backgroundMusicEnabled ? "off" : "on",

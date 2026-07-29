@@ -13,13 +13,12 @@ interface ElsewhereStateListProps {
 
 function StateEmptyView({ state, refresh }: { state: ElsewhereStateReadResult; refresh: () => Promise<void> }) {
   let title = "Open Elsewhere to Connect";
-  let description =
-    "Elsewhere publishes its controls after it starts. Make sure the app is installed and has been opened once.";
+  let description = "Press Enter to open Elsewhere. This command will continue automatically when it’s ready.";
   let icon = Icon.Waveform;
 
   if (state.kind === "stale") {
     title = "Elsewhere Isn’t Running";
-    description = "The last state snapshot is no longer connected to a running Elsewhere process.";
+    description = "Press Enter to open Elsewhere. This command will continue automatically when it’s ready.";
     icon = Icon.Stop;
   } else if (state.kind === "malformed") {
     title = "Elsewhere State Could Not Be Read";
@@ -49,7 +48,7 @@ function StateEmptyView({ state, refresh }: { state: ElsewhereStateReadResult; r
       actions={
         <ActionPanel>
           <Action
-            title="Open Elsewhere"
+            title="Open Elsewhere and Continue"
             icon={Icon.AppWindow}
             onAction={() =>
               executeElsewhereCommand(

@@ -22,6 +22,9 @@ Control Elsewhere from focused Raycast commands without leaving your current con
 Immediate actions are no-view commands. Commands that require choosing a Space or track open a focused
 Raycast list with current-state context.
 
+If Elsewhere is not running, selection commands offer to open it and populate automatically when it is ready.
+Immediate commands provide an **Open Elsewhere and Retry** confirmation.
+
 ## State snapshot contract
 
 Elsewhere publishes the versioned `elsewhere-control-v1.json` snapshot in its macOS user-data directory. The extension
