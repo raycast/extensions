@@ -2,8 +2,16 @@ import { showToast, Toast } from "@raycast/api";
 
 import type { ApiConfig, ProjectLite, TaskLite, UserLite, Subtask } from "./types";
 
+function authenticatedUrl(config: ApiConfig, path: string) {
+  const url = `${config.baseUrl}${path}`;
+  if (new URL(url).protocol !== "https:") {
+    throw new Error("API Base URL must use HTTPS");
+  }
+  return url;
+}
+
 async function request<T>(config: ApiConfig, path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${config.baseUrl}${path}`, {
+  const res = await fetch(authenticatedUrl(config, path), {
     ...init,
     headers: {
       Authorization: `Bearer ${config.token}`,
@@ -39,7 +47,7 @@ export async function listUsers(config: ApiConfig) {
 }
 
 export async function myTasks(config: ApiConfig): Promise<TaskLite[]> {
-  const res = await fetch(`${config.baseUrl}/api/tasks.my`, {
+  const res = await fetch(authenticatedUrl(config, "/api/tasks.my"), {
     headers: {
       Authorization: `Bearer ${config.token}`,
       "Content-Type": "application/json",

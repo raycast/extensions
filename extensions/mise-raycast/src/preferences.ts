@@ -5,10 +5,18 @@ export function getConfig() {
   let baseUrl = (prefs.baseUrl || "").trim();
   if (!baseUrl) {
     baseUrl = "https://api.mise.work";
-  } else if (!/^https?:\/\//i.test(baseUrl)) {
+  } else if (!/^[a-z][a-z0-9+.-]*:\/\//i.test(baseUrl)) {
     baseUrl = `https://${baseUrl}`;
   }
-  baseUrl = baseUrl.replace(/\/+$/, "");
+
+  const parsedBaseUrl = new URL(baseUrl);
+  if (parsedBaseUrl.protocol !== "https:") {
+    throw new Error("API Base URL must use HTTPS");
+  }
+
+  parsedBaseUrl.hash = "";
+  parsedBaseUrl.search = "";
+  baseUrl = `${parsedBaseUrl.origin}${parsedBaseUrl.pathname.replace(/\/+$/, "")}`;
   return { baseUrl, token: prefs.token };
 }
 

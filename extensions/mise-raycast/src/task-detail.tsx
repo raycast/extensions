@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Form, Icon, confirmAlert, showToast, Toast, Color } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  Form,
+  Icon,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import type { ProjectLite, TaskLite, UserLite } from "./types";
 import { deleteTask, getTask, listProjects, listUsers, updateTask } from "./api";
@@ -9,9 +20,10 @@ export default function TaskDetail(props: {
   task: TaskLite;
   appHost: string;
   __openSubtasks?: boolean;
-  onUpdated?: (updated?: TaskLite) => void;
+  onUpdated?: (updated?: TaskLite) => void | Promise<void>;
 }) {
   const { task } = props;
+  const { pop } = useNavigation();
   const [subtasks, setSubtasks] = useState<Array<{ id: string; text: string; completed: boolean }>>(
     () => task.subtasks || [],
   );
@@ -79,12 +91,12 @@ export default function TaskDetail(props: {
             : us;
         setProjects(mergedProjects);
         setUsers(mergedUsers);
-        if (projectDefault && projList.some((p) => p._id === projectDefault)) {
+        if (projectDefault) {
           setSelectedProjectId(projectDefault);
         } else if (projList.length > 0) {
           setSelectedProjectId(projList[0]._id);
         }
-        if (assigneeDefault && us.some((u) => u._id === assigneeDefault)) {
+        if (assigneeDefault) {
           setSelectedAssigneeId(assigneeDefault);
         } else if (us.length > 0) {
           setSelectedAssigneeId(us[0]._id);
@@ -301,6 +313,12 @@ export default function TaskDetail(props: {
                   style: Toast.Style.Success,
                   title: "Task deleted",
                 });
+                try {
+                  await props.onUpdated?.();
+                } catch {
+                  /* the task was deleted successfully; leave the stale detail view */
+                }
+                pop();
               } catch (e) {
                 await showToast({
                   style: Toast.Style.Failure,
