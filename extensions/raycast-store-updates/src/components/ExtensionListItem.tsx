@@ -1,6 +1,6 @@
 import { List, Icon, Color } from "@raycast/api";
 import { StoreItem, FilterValue } from "../types";
-import { MACOS_TINT_COLOR, WINDOWS_TINT_COLOR } from "../utils";
+import { extensionIconImage, MACOS_TINT_COLOR, platformSupport, WINDOWS_TINT_COLOR } from "../utils";
 import { FilterToggles } from "../hooks/useFilterToggles";
 import { ExtensionItemDetail } from "./ExtensionItemDetail";
 import { ExtensionActions } from "./ExtensionActions";
@@ -53,8 +53,7 @@ export function ExtensionListItem({
   // Always show platform icons so users remember which platforms are visible
   // Removed extensions don't have reliable platform data, so skip those icons
   if (item.type !== "removed") {
-    const hasMac = item.platforms?.some((p) => p.toLowerCase() === "macos") ?? true;
-    const hasWindows = item.platforms?.some((p) => p.toLowerCase() === "windows") ?? false;
+    const { hasMac, hasWindows } = platformSupport(item.platforms);
     if (hasMac) {
       accessories.push({ icon: { source: "platform-macos.svg", tintColor: MACOS_TINT_COLOR }, tooltip: "macOS" });
     }
@@ -77,7 +76,7 @@ export function ExtensionListItem({
 
   return (
     <List.Item
-      icon={{ source: item.image, fallback: Icon.Box }}
+      icon={extensionIconImage(item)}
       title={item.title}
       accessories={accessories}
       detail={<ExtensionItemDetail item={item} />}
