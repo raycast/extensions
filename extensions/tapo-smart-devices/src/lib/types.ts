@@ -1,6 +1,5 @@
 import { TapoDevice, TapoDeviceKey } from "tp-link-tapo-connect";
 
-
 export enum DeviceTypeEnum {
   Bulb = "bulb",
   Plug = "plug",
