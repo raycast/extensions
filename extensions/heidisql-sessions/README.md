@@ -35,11 +35,11 @@ You only need to set the path manually if HeidiSQL lives somewhere else.
 
 Open the command preferences to adjust:
 
-| Preference              | Description                                                                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Preference              | Description                                                                                                                              |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | **HeidiSQL Executable** | Optional. Path to `heidisql.exe` (Windows) or `heidisql.app` (macOS). Leave empty to auto-detect. A configured path always overrides it. |
-| **Portable mode**       | _Windows only._ When enabled, sessions are read from `portable_settings.txt` next to the executable instead of the Windows registry.    |
-| **Open HeidiSQL entry** | When enabled, always show an entry that opens HeidiSQL without a session.                                                              |
+| **Portable mode**       | _Windows only._ When enabled, sessions are read from `portable_settings.txt` next to the executable instead of the Windows registry.     |
+| **Open HeidiSQL entry** | When enabled, always show an entry that opens HeidiSQL without a session.                                                                |
 
 ### Where sessions come from
 
