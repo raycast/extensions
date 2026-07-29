@@ -47,12 +47,32 @@ interface ExecuteCommandOptions {
   onSettled?: () => void | Promise<void>;
 }
 
+interface ToastFeedback {
+  style: Toast.Style;
+  title: string;
+  message?: string;
+}
+
+async function presentFeedback(toast: Toast | undefined, feedback: ToastFeedback): Promise<void> {
+  if (!toast) {
+    await showToast(feedback);
+    return;
+  }
+
+  toast.style = feedback.style;
+  toast.title = feedback.title;
+  toast.message = feedback.message;
+}
+
 async function sendCommand(command: ElsewhereCommand, options: ExecuteCommandOptions): Promise<void> {
   const correlationId = requestId();
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Sending to Elsewhere…",
-  });
+  const toast =
+    command.kind === "volume"
+      ? undefined
+      : await showToast({
+          style: Toast.Style.Animated,
+          title: "Sending to Elsewhere…",
+        });
 
   try {
     const url = buildElsewhereUrl(command, correlationId);
@@ -62,10 +82,11 @@ async function sendCommand(command: ElsewhereCommand, options: ExecuteCommandOpt
       await open(url);
     }
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Could Not Reach Elsewhere";
-    toast.message =
-      error instanceof Error ? error.message : "Make sure Elsewhere is installed and has been opened once.";
+    await presentFeedback(toast, {
+      style: Toast.Style.Failure,
+      title: "Could Not Reach Elsewhere",
+      message: error instanceof Error ? error.message : "Make sure Elsewhere is installed and has been opened once.",
+    });
     await options.onSettled?.();
     return;
   }
@@ -73,23 +94,29 @@ async function sendCommand(command: ElsewhereCommand, options: ExecuteCommandOpt
   try {
     const correlated = await waitForCorrelatedResult(correlationId);
     if (!correlated) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Command Sent";
-      toast.message = "Elsewhere did not publish a correlated result in time.";
+      await presentFeedback(toast, {
+        style: Toast.Style.Success,
+        title: "Command Sent",
+        message: "Elsewhere did not publish a correlated result in time.",
+      });
     } else if (correlated.result.status === "error") {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Elsewhere Could Not Complete the Command";
-      toast.message =
-        correlated.result.message ?? correlated.result.code ?? "The app reported an unknown command error.";
+      await presentFeedback(toast, {
+        style: Toast.Style.Failure,
+        title: "Elsewhere Could Not Complete the Command",
+        message: correlated.result.message ?? correlated.result.code ?? "The app reported an unknown command error.",
+      });
     } else {
-      toast.style = Toast.Style.Success;
-      toast.title = successToastTitle(command, correlated.snapshot, options.successTitle);
-      toast.message = undefined;
+      await presentFeedback(toast, {
+        style: Toast.Style.Success,
+        title: successToastTitle(command, correlated.snapshot, options.successTitle),
+      });
     }
   } catch {
-    toast.style = Toast.Style.Success;
-    toast.title = "Command Sent";
-    toast.message = "Raycast could not read Elsewhere’s correlated result.";
+    await presentFeedback(toast, {
+      style: Toast.Style.Success,
+      title: "Command Sent",
+      message: "Raycast could not read Elsewhere’s correlated result.",
+    });
   }
   await options.onSettled?.();
 }
