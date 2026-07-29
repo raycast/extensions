@@ -1,4 +1,5 @@
 import { ActionPanel, List, Action, showToast, Toast, Keyboard } from "@raycast/api";
+import { useRef } from "react";
 import { AvailableDevice, Device } from "./lib/types";
 import {
   getDeviceIcon,
@@ -26,9 +27,16 @@ const fetchDevices = async () => {
 };
 
 export default function Command() {
-  const { data: devices, isLoading, revalidate } = usePromise(fetchDevices, [], { keepPreviousData: true });
+  const lastDevicesRef = useRef<Device[]>([]);
+  const { data: devices, isLoading, revalidate } = usePromise(fetchDevices, []);
 
-  const [availableDevices, unavailableDevices] = split(devices || [], isAvailableDevice);
+  // Preserve the last successfully loaded device list so a transient refresh
+  // failure doesn't wipe the list and show an empty state.
+  if (devices !== undefined) {
+    lastDevicesRef.current = devices;
+  }
+
+  const [availableDevices, unavailableDevices] = split(lastDevicesRef.current, isAvailableDevice);
 
   const revalidateFn = () => {
     if (!isLoading) revalidate();
