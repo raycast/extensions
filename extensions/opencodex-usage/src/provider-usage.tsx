@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences, type Image, Keyboard } from "@raycast/api";
+import { useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { fetchSnapshot, getPreferences, type ProviderInfo, type ProviderQuotaReport } from "./api";
 import { providerLogo, usageRing } from "./branding";
@@ -86,11 +87,24 @@ function detailMarkdown(report: ProviderQuotaReport, rows: QuotaRow[], paceChoic
 
 export default function ProviderUsageCommand() {
   const { usageRange, baseUrl, ringWindow, paceWindow } = getPreferences();
-  const { data, isLoading, revalidate, error } = useCachedPromise(
-    async (refresh: boolean) => fetchSnapshot({ refresh }),
-    [false],
+  // `revalidate()` replays the hook's original arguments, so a plain call would keep asking the
+  // proxy for its cached quotas. This flag lets an explicit Refresh/Retry force an upstream re-poll
+  // exactly once, without changing the cache key.
+  const forceNextFetch = useRef(false);
+  const { data, isLoading, error, revalidate } = useCachedPromise(
+    async () => {
+      const refresh = forceNextFetch.current;
+      forceNextFetch.current = false;
+      return fetchSnapshot({ refresh });
+    },
+    [],
     { keepPreviousData: true, failureToastOptions: { title: "Cannot reach OpenCodex" } },
   );
+
+  const forceRefresh = () => {
+    forceNextFetch.current = true;
+    revalidate();
+  };
 
   const reports = data?.quotas.reports ?? [];
   const providerByName = new Map((data?.providers ?? []).map((provider) => [provider.name, provider]));
@@ -110,7 +124,7 @@ export default function ProviderUsageCommand() {
             title="Refresh"
             icon={Icon.ArrowClockwise}
             shortcut={Keyboard.Shortcut.Common.Refresh}
-            onAction={() => revalidate()}
+            onAction={forceRefresh}
           />
           <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
@@ -127,7 +141,7 @@ export default function ProviderUsageCommand() {
                 title="Retry"
                 icon={Icon.ArrowClockwise}
                 shortcut={Keyboard.Shortcut.Common.Refresh}
-                onAction={() => revalidate()}
+                onAction={forceRefresh}
               />
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
@@ -236,7 +250,7 @@ export default function ProviderUsageCommand() {
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
                       shortcut={Keyboard.Shortcut.Common.Refresh}
-                      onAction={() => revalidate()}
+                      onAction={forceRefresh}
                     />
                     <Action.OpenInBrowser title="Open OpenCodex Dashboard" url={baseUrl} />
                     <Action.CopyToClipboard

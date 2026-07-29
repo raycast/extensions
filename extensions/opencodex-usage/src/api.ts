@@ -130,13 +130,6 @@ export type WindowChoice = "weekly" | "5h" | "monthly" | "worst";
 /** Which window the pace hint tracks, or `off` to hide it entirely. */
 export type PaceWindowChoice = "weekly" | "5h" | "monthly" | "off";
 
-interface Preferences {
-  baseUrl: string;
-  usageRange: string;
-  ringWindow: WindowChoice;
-  paceWindow: PaceWindowChoice;
-}
-
 const DEFAULT_BASE_URL = "http://127.0.0.1:10100";
 
 /** Tolerates `localhost:10100` and stray trailing slashes so the preference is forgiving. */
@@ -157,24 +150,19 @@ export function getPreferences(): Preferences {
   };
 }
 
-export interface MenuBarPreferences extends Preferences {
-  /** Provider id the pill is pinned to, or `all` to consider every provider. */
-  menuBarProvider: string;
+export interface MenuBarPreferences extends Omit<Preferences.UsageMenuBar, "menuBarWindow"> {
+  /** Resolved window: `inherit` has already been folded into the shared ring window. */
   menuBarWindow: WindowChoice;
-  menuBarShowProvider: "percent" | "provider" | "none";
 }
 
 export function getMenuBarPreferences(): MenuBarPreferences {
   const shared = getPreferences();
-  const prefs = getPreferenceValues<{
-    menuBarProvider?: string;
-    menuBarWindow?: WindowChoice | "inherit";
-    menuBarShowProvider?: "percent" | "provider" | "none";
-  }>();
+  const prefs = getPreferenceValues<Preferences.UsageMenuBar>();
   const window = prefs.menuBarWindow && prefs.menuBarWindow !== "inherit" ? prefs.menuBarWindow : shared.ringWindow;
   return {
     ...shared,
-    menuBarProvider: (prefs.menuBarProvider ?? "all").trim().toLowerCase() || "all",
+    menuBarProvider: ((prefs.menuBarProvider ?? "all").trim().toLowerCase() ||
+      "all") as Preferences.UsageMenuBar["menuBarProvider"],
     menuBarWindow: window,
     menuBarShowProvider: prefs.menuBarShowProvider || "percent",
   };
@@ -183,7 +171,28 @@ export function getMenuBarPreferences(): MenuBarPreferences {
 /** The proxy is local, so anything slower than this is a hang rather than a slow network. */
 const REQUEST_TIMEOUT_MS = 10_000;
 
-async function getJson<T>(baseUrl: string, path: string, signal?: AbortSignal): Promise<T> {
+/**
+ * Narrows an unknown payload, so a healthy-looking response from a different service (or an
+ * incompatible OpenCodex version) surfaces as a connection error instead of crashing a consumer
+ * that dereferences missing fields.
+ */
+type Guard<T> = (value: unknown) => value is T;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+const isProviderQuotasResponse: Guard<ProviderQuotasResponse> = (value): value is ProviderQuotasResponse =>
+  isRecord(value) && Array.isArray(value.reports) && value.reports.every((report) => isRecord(report));
+
+const isProviderInfoList: Guard<ProviderInfo[]> = (value): value is ProviderInfo[] =>
+  Array.isArray(value) && value.every((entry) => isRecord(entry) && typeof entry.name === "string");
+
+const isConfigResponse: Guard<ConfigResponse> = (value): value is ConfigResponse => isRecord(value);
+
+const isUsageResponse: Guard<UsageResponse> = (value): value is UsageResponse => isRecord(value);
+
+async function getJson<T>(baseUrl: string, path: string, isValid: Guard<T>, signal?: AbortSignal): Promise<T> {
   const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
   // Callers may cancel on unmount; the timeout guards against a proxy that accepts the
   // connection but never answers.
@@ -209,7 +218,16 @@ async function getJson<T>(baseUrl: string, path: string, signal?: AbortSignal): 
   if (!contentType.includes("json")) {
     throw new Error(`Unexpected response from ${path}. Is ${baseUrl} an OpenCodex server?`);
   }
-  return (await response.json()) as T;
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch {
+    throw new Error(`Malformed JSON from ${path}. Is ${baseUrl} an OpenCodex server?`);
+  }
+  if (!isValid(payload)) {
+    throw new Error(`Unexpected payload from ${path}. Is ${baseUrl} an OpenCodex server?`);
+  }
+  return payload;
 }
 
 export interface Snapshot {
@@ -225,10 +243,10 @@ export async function fetchSnapshot(options?: { refresh?: boolean; signal?: Abor
   const quotaPath = `/api/provider-quotas${options?.refresh ? "?refresh=1" : ""}`;
 
   const [quotas, providers, config, usage] = await Promise.all([
-    getJson<ProviderQuotasResponse>(baseUrl, quotaPath, signal),
-    getJson<ProviderInfo[]>(baseUrl, "/api/providers", signal).catch(() => [] as ProviderInfo[]),
-    getJson<ConfigResponse>(baseUrl, "/api/config", signal).catch(() => undefined),
-    getJson<UsageResponse>(baseUrl, `/api/usage?range=${encodeURIComponent(usageRange)}`, signal).catch(
+    getJson(baseUrl, quotaPath, isProviderQuotasResponse, signal),
+    getJson(baseUrl, "/api/providers", isProviderInfoList, signal).catch(() => [] as ProviderInfo[]),
+    getJson(baseUrl, "/api/config", isConfigResponse, signal).catch(() => undefined),
+    getJson(baseUrl, `/api/usage?range=${encodeURIComponent(usageRange)}`, isUsageResponse, signal).catch(
       () => undefined,
     ),
   ]);
@@ -245,9 +263,10 @@ export async function fetchUsage(
   signal?: AbortSignal,
 ): Promise<UsageResponse> {
   const { baseUrl } = getPreferences();
-  return getJson<UsageResponse>(
+  return getJson(
     baseUrl,
     `/api/usage?range=${encodeURIComponent(range)}&surface=${encodeURIComponent(surface)}`,
+    isUsageResponse,
     signal,
   );
 }
