@@ -12,9 +12,20 @@ Primary use case: quote CLI agent output and paste it into the next prompt.
 
 Your original clipboard is restored afterward.
 
+## Where it works best
+
+- **Terminals.** Select agent output (Claude Code, Codex, and friends), run the command, and the quote lands at your prompt, ready for the next message. Terminals that auto-copy on select are handled.
+- **Anywhere Markdown renders.** GitHub comments, Slack, Notion, Linear, email drafts.
+
+## Where it doesn't
+
+- **Password fields and secure inputs.** macOS blocks synthetic keystrokes while secure input is active, so neither read path can run. That is a macOS security feature, not a bug.
+- **Non-text selections.** Images, files, and other non-text content can't be quoted.
+- **Rich text.** The pasted quote is plain text; styling from the original is not preserved.
+
 ## Requirements
 
-Raycast needs macOS Accessibility permission — grant it in **System Settings → Privacy & Security → Accessibility**.
+Raycast needs macOS Accessibility permission. Grant it in **System Settings → Privacy & Security → Accessibility**. Both read paths depend on it: the Accessibility API read and the `Cmd+C` keystroke fallback.
 
 ## How it reads the selection
 
