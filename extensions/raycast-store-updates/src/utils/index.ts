@@ -558,6 +558,25 @@ export function getExtensionIconUrl(slug: string, iconFilename: string): string 
 }
 
 /**
+ * Confirms an extension is genuinely gone from the monorepo.
+ *
+ * Only a definitive 404 proves removal. fetchExtensionPackageInfo() collapses EVERY
+ * failure to null — a 500, a network error, a malformed body — and additionally caches
+ * that miss for 15 minutes, so using it here would let one transient blip display a live
+ * extension as "Removed" and keep doing so. Anything that is not an explicit 404 is
+ * treated as "still exists": a missed removal is invisible, a false removal is a wrong
+ * claim on screen. (Reported by Greptile on raycast/extensions#29819.)
+ */
+async function isExtensionGone(slug: string): Promise<boolean> {
+  try {
+    const response = await fetch(`${RAW_CONTENT_BASE}/${slug}/package.json`, { method: "HEAD" });
+    return response.status === 404;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Converts merged GitHub PRs into StoreItems, separated into updated and removed.
  * Filters for only merged PRs and deduplicates by extension slug.
  * Fetches package.json for each update to get the correct store owner.
@@ -704,9 +723,9 @@ export async function convertPRsToStoreItems(
       // that deleted the same extension both pass the check and emit a duplicate item.
       if (removedSeen.has(slug)) continue;
       removedSeen.add(slug);
-      // Confirm the extension is truly gone (package.json 404)
-      const pkgInfo = await fetchExtensionPackageInfo(slug);
-      if (pkgInfo !== null) continue; // Still exists — not actually removed
+      // Confirm the extension is truly gone. Only an explicit 404 counts — a transient
+      // 5xx or network error must not be reported to the user as a removal.
+      if (!(await isExtensionGone(slug))) continue;
       const title = titleFromSlug(slug);
       items.push({
         id: `pr-${pr.number}-removed-${slug}`,

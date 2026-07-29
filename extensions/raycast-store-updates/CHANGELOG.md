@@ -9,7 +9,7 @@
 - Reduce GitHub API usage: extension slugs are resolved from the `extension:` label already present in the pull-request response, and the per-pull-request file lookup is now capped per refresh so a single scan can no longer exhaust the hourly budget
 - Only adopt a slug the pull request's own label asserts. A branch name that happens to match another extension could previously produce the wrong store link and changelog
 - Fix duplicate entries when two removal pull requests deleted the same extension
-- Only report an extension as removed on a definitive 404, so a transient server error no longer marks a live extension as deleted
+- Only report an extension as removed on a definitive 404, so a transient server error or rate limit no longer marks a live extension as deleted
 - Keep previously loaded updates on screen when a refresh fails, instead of clearing the list
 - Show the extension's own icon in the menu bar, with rounded corners in both the menu bar and the main list
 - Hold ⌥ on a menu bar item to open that extension's changelog inside Raycast instead of its store page
