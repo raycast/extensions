@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Add menu bar section visibility toggles] - {PR_MERGE_DATE}
+## [Add menu bar section visibility toggles] - 2026-07-29
 
 ### Added
 
