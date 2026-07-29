@@ -19,12 +19,12 @@ async function clipboardChangeCount(): Promise<number> {
   return Number(stdout.trim());
 }
 
-interface CopyFallbackResult {
+interface SelectionResult {
   selection: string | null;
   clipboardOverwritten: boolean;
 }
 
-async function readSelectionViaCopy(originalText: string): Promise<CopyFallbackResult> {
+async function readSelectionViaCopy(originalText: string): Promise<SelectionResult> {
   const before = { text: originalText, changeCount: await clipboardChangeCount() };
   await runAppleScript(`tell application "System Events" to keystroke "c" using command down`);
   await new Promise((resolve) => setTimeout(resolve, COPY_DELAY_MS));
@@ -35,25 +35,26 @@ async function readSelectionViaCopy(originalText: string): Promise<CopyFallbackR
   };
 }
 
-export default async function main() {
-  const originalClipboard = await Clipboard.read();
-
-  let selection: string | null = null;
-
+async function readSelection(originalText: string): Promise<SelectionResult> {
   try {
     const accessibilitySelection = await getSelectedText();
     if (accessibilitySelection && isMeaningfulSelection(accessibilitySelection)) {
-      selection = accessibilitySelection;
+      return { selection: accessibilitySelection, clipboardOverwritten: false };
     }
   } catch {
     // Accessibility path failed (terminal may not expose AX selection) — fall through to keystroke fallback.
   }
+  return readSelectionViaCopy(originalText);
+}
 
-  if (!selection) {
-    selection = await readSelectionViaCopy(originalClipboard.text);
-  }
+export default async function main() {
+  const originalClipboard = await Clipboard.read();
+  const { selection, clipboardOverwritten } = await readSelection(originalClipboard.text);
 
   if (!selection || !isMeaningfulSelection(selection)) {
+    if (clipboardOverwritten) {
+      await Clipboard.copy(toRestorableContent(originalClipboard));
+    }
     await showHUD("No text selected");
     return;
   }

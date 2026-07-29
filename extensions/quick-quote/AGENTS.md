@@ -10,10 +10,11 @@ npm run build      # production build via `ray build`
 npm run lint       # ESLint via `ray lint`
 npm run fix-lint   # auto-fix lint issues
 npm test           # pure-logic unit tests (vitest)
+npm run typecheck  # tsc --noEmit; run before every publish (ray build does NOT typecheck)
 npm run publish    # submit to Raycast Store
 ```
 
-Unit tests cover pure quote/selection logic only. Host integration (AX, AppleScript, paste) is validated by running `npm run dev` and triggering the command inside Raycast.
+Unit tests cover pure quote/selection logic only. Host integration (AX, AppleScript, paste) is validated by running `npm run dev` and triggering the command inside Raycast. `ray build` bundles with esbuild and does not typecheck, so always run `npm run typecheck` before publishing.
 
 **Use npm, not pnpm.** The Raycast store publish validates `package-lock.json` (`raycast/extensions` monorepo runs on npm), and `ray publish` fails without it.
 

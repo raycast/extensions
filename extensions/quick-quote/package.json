@@ -47,7 +47,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
   },
   "allowScripts": {
     "esbuild@0.27.7": true
