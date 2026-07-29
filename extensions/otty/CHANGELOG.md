@@ -1,6 +1,6 @@
 # Otty Changelog
 
-## [Changed] - 2026-07-29
+## [Changed] - {PR_MERGE_DATE}
 
 - Update the extension icon.
 
