@@ -1,0 +1,87 @@
+{
+  "name": "teamwork-raycast-extension",
+  "version": "0.1.0",
+  "type": "module",
+  "title": "Teamwork",
+  "description": "Search Teamwork tasks and control your Teamwork timer from Raycast",
+  "icon": "icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "main": "dist/index.js",
+  "author": "defaced",
+  "license": "MIT",
+  "scripts": {
+    "publish": "npx @raycast/api@latest publish",
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.15.0",
+    "@types/react": "^19.1.0",
+    "eslint": "^9.25.0",
+    "prettier": "^3.5.3",
+    "react": "^19.1.0",
+    "typescript": "^5.8.3"
+  },
+  "preferences": [
+    {
+      "name": "siteUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "Teamwork Site URL",
+      "description": "For example: https://yourcompany.teamwork.com",
+      "placeholder": "https://yourcompany.teamwork.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Teamwork API Token",
+      "description": "A Teamwork bearer token/API token"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-tasks",
+      "title": "Search Teamwork Tasks",
+      "description": "Search tasks assigned to you and control timers",
+      "mode": "view"
+    },
+    {
+      "name": "timer-menu-bar",
+      "title": "Teamwork Timer Menu Bar",
+      "description": "Show the current Teamwork timer in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "pause-timer",
+      "title": "Pause Timer",
+      "description": "Pause the current Teamwork timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "resume-timer",
+      "title": "Resume Timer",
+      "description": "Resume the paused Teamwork timer",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-timer",
+      "title": "Stop and Log Timer",
+      "description": "Stop the current Teamwork timer and log the time",
+      "mode": "no-view"
+    }
+  ],
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}
