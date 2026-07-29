@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Webhound MCP Server] - {PR_MERGE_DATE}
+## [Add Webhound MCP Server] - 2026-07-29
 
 Add Webhound to the official registry for private, budgeted reports and datasets. The remote Streamable HTTP MCP server uses OAuth so each connection authenticates to that user's own Webhound account.
 
