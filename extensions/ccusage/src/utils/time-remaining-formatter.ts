@@ -15,7 +15,7 @@ export function formatTimeRemainingCustom(resetAt: string | null | undefined, fo
   const diffMs = new Date(resetAt).getTime() - Date.now();
   if (Number.isNaN(diffMs) || diffMs <= 0) return null;
 
-  const totalMinutes = Math.max(0, Math.round(diffMs / 60000));
+  const totalMinutes = Math.round(diffMs / 60000);
   const h = Math.floor(totalMinutes / 60);
   const m = totalMinutes % 60;
 

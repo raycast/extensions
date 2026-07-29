@@ -19,6 +19,7 @@ import {
   getMenuBarIconStyle,
   getMenuBarTimeRemaining,
   getMenuBarTimeRemainingFormat,
+  isSectionVisible,
 } from "./preferences";
 import { TotalUsageData } from "./types/usage-types";
 
@@ -59,9 +60,33 @@ export default function MenuBarccusage() {
 
   const effectiveLimitsData = MOCK_LIMITS_ENABLED ? MOCK_LIMITS_DATA : limitsData;
 
-  const hasData = todayUsage || weeklyUsage || monthlyUsage || totalUsage;
-  const hasError = !hasData && (dailyError || weeklyError || monthlyError || totalError);
-  const isLoading = dailyLoading || monthlyLoading || totalLoading;
+  const sections = {
+    rateLimits: isSectionVisible("sectionRateLimits"),
+    todayUsage: isSectionVisible("sectionTodayUsage"),
+    thisWeek: isSectionVisible("sectionThisWeek"),
+    monthlyUsage: isSectionVisible("sectionMonthlyUsage"),
+    totalUsage: isSectionVisible("sectionTotalUsage"),
+    currentBlock: isSectionVisible("sectionCurrentBlock"),
+    workingTime: isSectionVisible("sectionWorkingTime"),
+  };
+
+  // A hidden section's hook still runs (rules of hooks), but its loading/error
+  // state shouldn't block sections the user actually chose to see.
+  const hasData =
+    (sections.todayUsage ? todayUsage : undefined) ||
+    (sections.thisWeek ? weeklyUsage : undefined) ||
+    (sections.monthlyUsage ? monthlyUsage : undefined) ||
+    (sections.totalUsage ? totalUsage : undefined);
+  const hasError =
+    !hasData &&
+    ((sections.todayUsage ? dailyError : undefined) ||
+      (sections.thisWeek ? weeklyError : undefined) ||
+      (sections.monthlyUsage ? monthlyError : undefined) ||
+      (sections.totalUsage ? totalError : undefined));
+  const isLoading =
+    (sections.todayUsage && dailyLoading) ||
+    (sections.monthlyUsage && monthlyLoading) ||
+    (sections.totalUsage && totalLoading);
 
   if (isLoading) {
     return <MenuBarExtra icon={{ source: Icon.Clock }} tooltip="Loading Claude usage..." isLoading={true} />;
@@ -195,7 +220,7 @@ export default function MenuBarccusage() {
 
       {!hasError && (
         <>
-          {isUsageLimitsAvailable && (
+          {sections.rateLimits && isUsageLimitsAvailable && (
             <MenuBarExtra.Section title={rateLimitsSectionTitle}>
               {limitsRateLimited && !limitsData && (
                 <MenuBarExtra.Item
@@ -274,49 +299,65 @@ export default function MenuBarccusage() {
             </MenuBarExtra.Section>
           )}
 
-          <MenuBarExtra.Section title="Today's Usage">
-            <MenuBarExtra.Item
-              title={formatUsageTitle(dailyLoading, todayUsage, "No usage data available")}
-              subtitle={
-                todayUsage && previousDayData
-                  ? `vs yesterday: ${formatCostDelta(todayUsage.totalCost, previousDayData.totalCost)}`
-                  : undefined
-              }
-              icon={Icon.Calendar}
-              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
-            />
-          </MenuBarExtra.Section>
+          {sections.todayUsage && (
+            <MenuBarExtra.Section title="Today's Usage">
+              <MenuBarExtra.Item
+                title={formatUsageTitle(dailyLoading, todayUsage, "No usage data available")}
+                subtitle={
+                  todayUsage && previousDayData
+                    ? `vs yesterday: ${formatCostDelta(todayUsage.totalCost, previousDayData.totalCost)}`
+                    : undefined
+                }
+                icon={Icon.Calendar}
+                onAction={() =>
+                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
+                }
+              />
+            </MenuBarExtra.Section>
+          )}
 
-          <MenuBarExtra.Section title="This Week">
-            <MenuBarExtra.Item
-              title={formatUsageTitle(weeklyLoading, weeklyUsage, "No usage data available")}
-              subtitle={
-                weeklyUsage && previousWeekData
-                  ? `vs last week: ${formatCostDelta(weeklyUsage.totalCost, previousWeekData.totalCost)}`
-                  : undefined
-              }
-              icon={Icon.Calendar}
-              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
-            />
-          </MenuBarExtra.Section>
+          {sections.thisWeek && (
+            <MenuBarExtra.Section title="This Week">
+              <MenuBarExtra.Item
+                title={formatUsageTitle(weeklyLoading, weeklyUsage, "No usage data available")}
+                subtitle={
+                  weeklyUsage && previousWeekData
+                    ? `vs last week: ${formatCostDelta(weeklyUsage.totalCost, previousWeekData.totalCost)}`
+                    : undefined
+                }
+                icon={Icon.Calendar}
+                onAction={() =>
+                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
+                }
+              />
+            </MenuBarExtra.Section>
+          )}
 
-          <MenuBarExtra.Section title="Monthly Usage">
-            <MenuBarExtra.Item
-              title={formatUsageTitle(monthlyLoading, monthlyUsage, "No usage data available")}
-              icon={Icon.BarChart}
-              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
-            />
-          </MenuBarExtra.Section>
+          {sections.monthlyUsage && (
+            <MenuBarExtra.Section title="Monthly Usage">
+              <MenuBarExtra.Item
+                title={formatUsageTitle(monthlyLoading, monthlyUsage, "No usage data available")}
+                icon={Icon.BarChart}
+                onAction={() =>
+                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
+                }
+              />
+            </MenuBarExtra.Section>
+          )}
 
-          <MenuBarExtra.Section title="Total Usage">
-            <MenuBarExtra.Item
-              title={formatUsageTitle(totalLoading, totalUsage, "No usage data available")}
-              icon={Icon.Coins}
-              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
-            />
-          </MenuBarExtra.Section>
+          {sections.totalUsage && (
+            <MenuBarExtra.Section title="Total Usage">
+              <MenuBarExtra.Item
+                title={formatUsageTitle(totalLoading, totalUsage, "No usage data available")}
+                icon={Icon.Coins}
+                onAction={() =>
+                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
+                }
+              />
+            </MenuBarExtra.Section>
+          )}
 
-          {workingTime.activeBlock && (
+          {sections.currentBlock && workingTime.activeBlock && (
             <MenuBarExtra.Section title="Current Block">
               <MenuBarExtra.Item
                 title={
@@ -343,22 +384,26 @@ export default function MenuBarccusage() {
             </MenuBarExtra.Section>
           )}
 
-          <MenuBarExtra.Section title="Working Time">
-            <MenuBarExtra.Item
-              title={
-                workingTime.isLoading
-                  ? "Loading..."
-                  : workingTime.todayMs > 0
-                    ? formatDuration(workingTime.todayMs)
-                    : "No activity today"
-              }
-              subtitle={
-                workingTime.yesterdayMs > 0 ? `vs yesterday: ${formatDuration(workingTime.yesterdayMs)}` : undefined
-              }
-              icon={Icon.Clock}
-              onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)}
-            />
-          </MenuBarExtra.Section>
+          {sections.workingTime && (
+            <MenuBarExtra.Section title="Working Time">
+              <MenuBarExtra.Item
+                title={
+                  workingTime.isLoading
+                    ? "Loading..."
+                    : workingTime.todayMs > 0
+                      ? formatDuration(workingTime.todayMs)
+                      : "No activity today"
+                }
+                subtitle={
+                  workingTime.yesterdayMs > 0 ? `vs yesterday: ${formatDuration(workingTime.yesterdayMs)}` : undefined
+                }
+                icon={Icon.Clock}
+                onAction={() =>
+                  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/nyatinte/ccusage/ccusage`)
+                }
+              />
+            </MenuBarExtra.Section>
+          )}
 
           <MenuBarExtra.Section>
             <MenuBarExtra.Item title="Configure Command" icon={Icon.Gear} onAction={openCommandPreferences} />
