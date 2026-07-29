@@ -35,16 +35,16 @@ You only need to set the path manually if HeidiSQL lives somewhere else.
 
 Open the command preferences to adjust:
 
-| Preference              | Description                                                                                                                              |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **HeidiSQL Executable** | Optional. Path to `heidisql.exe` (Windows) or `heidisql.app` (macOS). Leave empty to auto-detect. A configured path always overrides it. |
-| **Portable mode**       | _Windows only._ When enabled, sessions are read from `portable_settings.txt` next to the executable instead of the Windows registry.     |
-| **Open HeidiSQL entry** | When enabled, always show an entry that opens HeidiSQL without a session.                                                                |
+| Preference              | Description                                                                                                                                                                                                             |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **HeidiSQL Executable** | Optional. Path to `heidisql.exe` (Windows) or `heidisql.app` (macOS). Leave empty to auto-detect. A configured path always overrides it.                                                                                |
+| **Session Source**      | _Windows only._ Portable mode is auto-detected when `portable_settings.txt` sits next to the executable. Enable **Force portable mode** only to read from that file when auto-detection cannot. Has no effect on macOS. |
+| **Open HeidiSQL entry** | When enabled, always show an entry that opens HeidiSQL without a session.                                                                                                                                               |
 
 ### Where sessions come from
 
 - **Windows — Registry mode (default):** sessions are read recursively from `HKEY_CURRENT_USER\Software\HeidiSQL\Servers`. Any key that has a `Host` value is treated as a session.
-- **Windows — Portable mode:** sessions are parsed from `portable_settings.txt` located in the same folder as the executable.
+- **Windows — Portable mode (auto-detected or forced):** sessions are parsed from `portable_settings.txt` located in the same folder as the executable. Portable mode is used automatically when that file exists; use **Force portable mode** in preferences only when auto-detection cannot find it.
 - **macOS:** sessions are read from `~/.config/heidisql/settings.json`. The `Servers` object is walked recursively and any entry that has a `Host` value is treated as a session, so folder structure is preserved just like on Windows.
 
 ## Requirements
