@@ -342,7 +342,7 @@ export namespace RemoteWebPageAction {
           title={remote.displayName}
           icon={RemoteHostIcon(remote)}
         >
-          {children(remote)}
+          <>{children(remote)}</>
         </ActionPanel.Submenu>
       ));
     }
