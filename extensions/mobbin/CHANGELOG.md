@@ -1,6 +1,6 @@
 # Mobbin Search Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-29
 
 - Make OAuth MCP the default for new installations while preserving existing
   saved preferences.
