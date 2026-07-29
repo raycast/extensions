@@ -26,7 +26,7 @@ function config() {
 function normalizeSiteUrl(input: string): string {
   const trimmed = input.trim();
   const withScheme = /^https?:\/\//i.test(trimmed)
-    ? trimmed
+    ? trimmed.replace(/^http:\/\//i, "https://")
     : `https://${trimmed}`;
   try {
     // Keep only the origin (scheme + host), dropping any trailing path/query/hash.
@@ -143,10 +143,9 @@ export async function getRunningTimer(): Promise<TeamworkTimer | undefined> {
     included?: Included;
   }>(`/projects/api/v3/me/timers.json?${params}`);
 
-  const raw =
-    (data.timers ?? []).find(
-      (timer) => timer.running === true || timer.isRunning === true,
-    ) ?? data.timers?.[0];
+  const raw = (data.timers ?? []).find(
+    (timer) => timer.running === true || timer.isRunning === true,
+  );
   if (!raw) return undefined;
 
   const taskId = Number(raw.taskId ?? 0);
@@ -164,6 +163,59 @@ export async function getRunningTimer(): Promise<TeamworkTimer | undefined> {
     serverTime: typeof raw.serverTime === "string" ? raw.serverTime : undefined,
     taskName: relatedName(data.included?.tasks, taskId),
     projectName: relatedName(data.included?.projects, projectId),
+  };
+}
+
+export type TimerState = {
+  running?: TeamworkTimer;
+  paused: TeamworkTimer[];
+};
+
+export async function getTimerState(): Promise<TimerState> {
+  const params = new URLSearchParams({
+    include:
+      "projects,projects.companies,tasks,tasks.tasklists,tasks.parentTasks",
+    "fields[tasks]": "tasklistId,parentTaskId,name",
+    "fields[projects]": "name,companyId",
+    skipCounts: "true",
+    pageSize: "50",
+  });
+  const data = await request<{
+    timers?: Array<Record<string, unknown>>;
+    included?: Included;
+  }>(`/projects/api/v3/me/timers.json?${params}`);
+
+  const toTimer = (raw: Record<string, unknown>): TeamworkTimer => {
+    const taskId = Number(raw.taskId ?? 0);
+    const projectId = Number(raw.projectId ?? 0);
+    return {
+      id: Number(raw.id),
+      taskId,
+      projectId,
+      description:
+        typeof raw.description === "string" ? raw.description : undefined,
+      running: Boolean(raw.running ?? raw.isRunning),
+      duration: typeof raw.duration === "number" ? raw.duration : undefined,
+      lastStartedAt:
+        typeof raw.lastStartedAt === "string" ? raw.lastStartedAt : undefined,
+      serverTime:
+        typeof raw.serverTime === "string" ? raw.serverTime : undefined,
+      taskName: relatedName(data.included?.tasks, taskId),
+      projectName: relatedName(data.included?.projects, projectId),
+    };
+  };
+
+  const timers = data.timers ?? [];
+  const running = timers.find(
+    (t) => t.running === true || t.isRunning === true,
+  );
+  const paused = timers.filter(
+    (t) => t.running !== true && t.isRunning !== true,
+  );
+
+  return {
+    running: running ? toTimer(running) : undefined,
+    paused: paused.map(toTimer),
   };
 }
 

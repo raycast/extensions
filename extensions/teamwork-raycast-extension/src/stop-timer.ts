@@ -1,9 +1,10 @@
 import { showHUD } from "@raycast/api";
-import { completeTimer, formatElapsed, getRunningTimer } from "./teamwork";
+import { completeTimer, formatElapsed, getTimerState } from "./teamwork";
 
 export default async function Command() {
   try {
-    const timer = await getRunningTimer();
+    const { running, paused } = await getTimerState();
+    const timer = running ?? paused[0];
     if (!timer) {
       await showHUD("No Teamwork timer found");
       return;
