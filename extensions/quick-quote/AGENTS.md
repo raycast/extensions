@@ -26,10 +26,10 @@ Single-command Raycast extension (`mode: "no-view"`). Command glue lives in `src
 
 1. Save the current clipboard (full `Clipboard.read()` content: text, HTML, or file) before touching anything.
 2. Attempt to read selected text via the macOS Accessibility API (`getSelectedText`). This is the preferred path but fails silently in apps (like terminals) that don't expose AX text selection.
-3. If AX fails or returns empty, fall back to `Cmd+C` via AppleScript. Read the NSPasteboard `changeCount` (via JXA `osascript`) before and after the keystroke: only a bump proves the keystroke actually copied a selection, which distinguishes a real selection from a stale clipboard that must never be quoted. Terminals that auto-copy on select still work because they re-copy on `Cmd+C`. If the fallback overwrote the clipboard but the selection is empty or whitespace-only, restore the original clipboard before bailing.
+3. If AX fails or returns empty, fall back to `Cmd+C` via AppleScript. Read the NSPasteboard `changeCount` (via JXA `osascript`) before and after the keystroke: only a bump proves the keystroke actually copied a selection, which distinguishes a real selection from a stale clipboard that must never be quoted. Terminals that auto-copy on select still work because they re-copy on `Cmd+C`.
 4. Transform the selection: normalize CRLF/CR to LF, strip trailing newlines, prefix every line with `> `, append a single trailing newline.
 5. `Clipboard.paste()` the quoted text directly into the focused app.
-6. Restore the original clipboard after a short delay so the user's prior clipboard content survives (restoring file and HTML content, not just text). Restoration runs in a `finally`, so a failed paste still restores. Show a brief HUD on success.
+6. Restore the original clipboard after a short delay so the user's prior clipboard content survives (restoring file and HTML content, not just text). The whole selection → paste path sits in a `finally` that always restores, so a post-Cmd+C probe failure, empty selection, or failed paste never leaves the clipboard as the raw selection. Show a brief HUD on success.
 
 **Why the timing delays exist:** `COPY_DELAY_MS` (150ms) gives the `Cmd+C` keystroke time to reach the target app and update the clipboard before we read it. `PASTE_DELAY_MS` (200ms) gives `Clipboard.paste()` time to complete before we overwrite the clipboard with the restore.
 
