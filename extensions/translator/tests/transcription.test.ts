@@ -37,7 +37,7 @@ test("requires an OpenAI API key before reading or uploading audio", async () =>
   );
 });
 
-test("uploads WAV audio as multipart data using gpt-4o-transcribe", async () => {
+test("uploads WAV audio as multipart data using gpt-transcribe", async () => {
   let receivedBody = "";
   let receivedContentType: string | undefined;
   let receivedAuthorization: string | undefined;

@@ -5,7 +5,7 @@ Translate typed text or recorded speech with an OpenAI-compatible API, then past
 ## Features
 
 - Choose which target languages appear in the extension. Spanish, English, and Brazilian Portuguese are enabled by default, with French, German, Italian, Japanese, Korean, and Simplified Chinese available.
-- Record speech and transcribe it with `gpt-4o-transcribe` before choosing the target language.
+- Record speech and transcribe it with `gpt-transcribe` before choosing the target language.
 - Paste translations at the current cursor position, with an automatic clipboard fallback.
 - Search, paste, copy, or delete up to 100 locally stored translations.
 - Use OpenAI or another provider that implements compatible chat completion and audio transcription endpoints.
@@ -30,7 +30,7 @@ Configure these extension preferences in Raycast:
 - `Target Languages`: choose which languages appear in the text and voice translation commands.
 
 Text translation calls `POST <base-url>/chat/completions`. Voice transcription calls
-`POST <base-url>/audio/transcriptions` with the fixed `gpt-4o-transcribe` model.
+`POST <base-url>/audio/transcriptions` with the fixed `gpt-transcribe` model.
 
 ## Translate Text
 

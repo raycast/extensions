@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { basename } from "node:path";
 import { isLoopbackHostname, type OpenAICompatiblePreferences } from "./openai-compatible.ts";
 
-export const TRANSCRIPTION_MODEL = "gpt-4o-transcribe";
+export const TRANSCRIPTION_MODEL = "gpt-transcribe";
 export const TRANSCRIPTION_PROMPT =
   "Transcribe the speech faithfully in its original language. Preserve punctuation, capitalization, names, URLs, and technical terms.";
 const TRANSCRIPTION_TIMEOUT_MS = 120_000;

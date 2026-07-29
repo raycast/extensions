@@ -147,7 +147,7 @@
       "name": "record-and-translate",
       "title": "Record and Translate",
       "subtitle": "AI Translator",
-      "description": "Record your voice, transcribe it with gpt-4o-transcribe, choose a language, and paste the translation.",
+      "description": "Record your voice, transcribe it with gpt-transcribe, choose a language, and paste the translation.",
       "mode": "view",
       "keywords": [
         "voice",
