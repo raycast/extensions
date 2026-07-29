@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import { executeElsewhereCommand } from "./command-runner";
 import { ElsewhereStateList } from "./elsewhere-state-list";
@@ -14,7 +14,7 @@ export default function Command() {
             return (
               <List.Item
                 key={track.id}
-                icon={isActive ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Music}
+                icon={Icon.Music}
                 title={track.name}
                 accessories={isActive ? [{ text: activeMusicTrackStatus(snapshot.backgroundMusicEnabled) }] : undefined}
                 actions={

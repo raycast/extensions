@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
 import { executeElsewhereCommand } from "./command-runner";
 import { ElsewhereStateList } from "./elsewhere-state-list";
@@ -13,7 +13,14 @@ export default function Command() {
             return (
               <List.Item
                 key={space.id}
-                icon={isActive ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
+                icon={
+                  space.color
+                    ? {
+                        source: Icon.CircleFilled,
+                        tintColor: { light: space.color, dark: space.color, adjustContrast: true },
+                      }
+                    : Icon.Circle
+                }
                 title={space.name}
                 accessories={isActive ? [{ text: "Active" }] : undefined}
                 actions={

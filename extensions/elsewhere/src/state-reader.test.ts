@@ -57,6 +57,7 @@ async function withApplicationSupport(
 test("parses the published schema v1 contract", () => {
   const parsed = parseElsewhereSnapshot(
     snapshot({
+      spaces: [{ id: "space-1", name: "Coffee and Thunder", color: "#917784" }],
       lastCommand: {
         requestId: "raycast_123",
         status: "success",
@@ -70,7 +71,21 @@ test("parses the published schema v1 contract", () => {
   if (parsed.kind === "valid") {
     assert.equal(parsed.snapshot.lastCommand?.requestId, "raycast_123");
     assert.equal(parsed.snapshot.sources[0].enabled, true);
+    assert.equal(parsed.snapshot.spaces[0].color, "#917784");
   }
+});
+
+test("accepts rollout snapshots without Space colors and rejects malformed colors", () => {
+  assert.equal(parseElsewhereSnapshot(snapshot()).kind, "valid");
+  assert.equal(
+    parseElsewhereSnapshot(snapshot({ spaces: [{ id: "space-1", name: "Coffee and Thunder", color: "#91778" }] })).kind,
+    "malformed",
+  );
+  assert.equal(
+    parseElsewhereSnapshot(snapshot({ spaces: [{ id: "space-1", name: "Coffee and Thunder", color: "#91778a" }] }))
+      .kind,
+    "malformed",
+  );
 });
 
 test("rejects malformed and unsupported snapshots", () => {

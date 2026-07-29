@@ -9,10 +9,15 @@ export const SUPPORTED_SNAPSHOT_SCHEMA_VERSION = 1;
 
 const IDENTIFIER_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/;
 const REQUEST_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/;
+const SPACE_COLOR_PATTERN = /^#[0-9A-F]{6}$/;
 
 export interface ElsewhereNamedItem {
   id: string;
   name: string;
+}
+
+export interface ElsewhereSpace extends ElsewhereNamedItem {
+  color?: string;
 }
 
 export interface ElsewhereSource extends ElsewhereNamedItem {
@@ -40,7 +45,7 @@ export interface ElsewhereSnapshotV1 {
   requiresSetup: boolean;
   playing: boolean;
   activeSpaceId: string;
-  spaces: ElsewhereNamedItem[];
+  spaces: ElsewhereSpace[];
   ambienceVolume: number;
   backgroundMusicEnabled: boolean;
   backgroundMusicLoading: boolean;
@@ -122,6 +127,28 @@ function parseNamedItems(value: unknown): ElsewhereNamedItem[] | null {
   return items;
 }
 
+function parseSpaces(value: unknown): ElsewhereSpace[] | null {
+  if (!Array.isArray(value)) return null;
+  const spaces: ElsewhereSpace[] = [];
+  for (const entry of value) {
+    if (
+      !isObject(entry) ||
+      !isIdentifier(entry.id) ||
+      typeof entry.name !== "string" ||
+      entry.name.length === 0 ||
+      (entry.color !== undefined && (typeof entry.color !== "string" || !SPACE_COLOR_PATTERN.test(entry.color)))
+    ) {
+      return null;
+    }
+    spaces.push({
+      id: entry.id,
+      name: entry.name,
+      ...(typeof entry.color === "string" ? { color: entry.color } : {}),
+    });
+  }
+  return spaces;
+}
+
 function parseSources(value: unknown): ElsewhereSource[] | null {
   if (!Array.isArray(value)) return null;
   const sources: ElsewhereSource[] = [];
@@ -180,7 +207,7 @@ export function parseElsewhereSnapshot(value: unknown): SnapshotParseResult {
     return { kind: "unsupported", schemaVersion: value.schemaVersion };
   }
 
-  const spaces = parseNamedItems(value.spaces);
+  const spaces = parseSpaces(value.spaces);
   const musicTracks = parseNamedItems(value.musicTracks);
   const sources = parseSources(value.sources);
   const lastCommand = parseLastCommand(value.lastCommand);
