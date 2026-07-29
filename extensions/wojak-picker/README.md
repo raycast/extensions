@@ -22,6 +22,7 @@ Open Raycast and run `Search Wojaks`.
 - Press `Enter` to copy the selected image to your clipboard
 - Use `Cmd+O` to open the source image in the browser
 - Use `Cmd+Shift+C` to copy the source image URL
+- Use `Cmd+Shift+O` to open the category page on wojakland.com
 
 ## Image hosting
 
