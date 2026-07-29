@@ -12,7 +12,7 @@
  * toast 只显示一行短因，详情保留在 EmptyView + 「复制错误详情」动作里。
  */
 
-import { Action, ActionPanel, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast, Keyboard } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { resolveCredentials } from "./api/client";
 import { listProjects } from "./api/projects";
@@ -231,7 +231,7 @@ export default function ListTestPlans() {
                             <Action.CopyToClipboard
                                 title="复制错误详情"
                                 content={plansError.details}
-                                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                                shortcut={Keyboard.Shortcut.Common.Copy}
                             />
                         </ActionPanel>
                     ) : undefined

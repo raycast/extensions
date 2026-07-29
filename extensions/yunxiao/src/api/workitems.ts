@@ -77,29 +77,6 @@ export async function listWorkitems(opts: ListWorkitemsOptions): Promise<Paginat
     };
 }
 
-/**
- * 拉取单个工作项详情。
- * 官方文档：/oapi/v1/projex/organizations/{organizationId}/workitems/{workitemId}?spaceId=...
- */
-export async function getWorkitem(workitemId: string, projectId?: string): Promise<Workitem> {
-    const creds = resolveCredentials();
-    const id = (workitemId ?? "").trim();
-    if (!id) throw new Error("缺少 workitemId。");
-
-    const path = `${buildProjectPath(creds, `workitems/${encodeURIComponent(id)}`)}${
-        projectId ? `?spaceId=${encodeURIComponent(projectId)}` : ""
-    }`;
-
-    // 详情接口直接返回对象（或对象包装），按需适配
-    const data = await request<Workitem | { workitem?: Workitem }>(path);
-    if (data && typeof data === "object" && "subject" in (data as object)) {
-        return data as Workitem;
-    }
-    const wrapped = (data as { workitem?: Workitem })?.workitem;
-    if (wrapped) return wrapped;
-    throw new Error("工作项详情为空。");
-}
-
 function clampPerPage(n: number): number {
     if (!Number.isFinite(n)) return 50;
     return Math.min(200, Math.max(1, Math.floor(n)));

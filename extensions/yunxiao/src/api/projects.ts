@@ -11,16 +11,6 @@
 import { buildProjectPath, resolveCredentials, request } from "./client";
 import type { Project } from "./types";
 
-interface SearchProjectsResponse {
-    /** 响应头里取分页信息 */
-    pagination?: {
-        page?: number;
-        perPage?: number;
-        total?: number;
-        nextPage?: string;
-    };
-}
-
 export interface ListProjectsOptions {
     /** 每页大小，默认 50 */
     perPage?: number;
@@ -79,6 +69,3 @@ function clampPerPage(n: number): number {
     if (!Number.isFinite(n)) return 50;
     return Math.min(200, Math.max(1, Math.floor(n)));
 }
-
-// 重新导出方便调用方读取分页头（如需做"加载更多"再启用）
-export type { SearchProjectsResponse };

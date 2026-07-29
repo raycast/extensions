@@ -9,7 +9,7 @@
  *  - 详情（完整 URL、status、响应体）保留在 EmptyView 与 Action.CopyToClipboard
  */
 
-import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation, Keyboard } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { resolveCredentials } from "./api/client";
 import { listProjects } from "./api/projects";
@@ -168,19 +168,11 @@ export default function ListProjects() {
                 actions={
                     error ? (
                         <ActionPanel>
-                            <Action
-                                title="重新加载"
-                                onAction={() => {
-                                    setProjects(null);
-                                    setError(undefined);
-                                    setErrorDetails(undefined);
-                                }}
-                            />
                             {errorDetails ? (
                                 <Action.CopyToClipboard
                                     title="复制错误详情"
                                     content={errorDetails}
-                                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                                    shortcut={Keyboard.Shortcut.Common.Copy}
                                 />
                             ) : null}
                             <Action.CopyToClipboard
@@ -221,7 +213,7 @@ export default function ListProjects() {
                                 <Action.OpenInBrowser
                                     title="访问迭代 Backlog"
                                     url={sprintBacklogUrl(pid)}
-                                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                                    shortcut={Keyboard.Shortcut.Common.Duplicate}
                                 />
                                 <Action
                                     title="查看测试计划"
@@ -262,7 +254,7 @@ export default function ListProjects() {
                                 <Action.OpenInBrowser
                                     title="查看原始诉求"
                                     url={projectCategoryUrl(pid, "request")}
-                                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                                    shortcut={Keyboard.Shortcut.Common.OpenWith}
                                 />
                                 <Action.CopyToClipboard title="复制项目 ID" content={pid} />
                                 <Action.OpenInBrowser title="在云效中打开" url={projectUrl(pid)} />

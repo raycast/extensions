@@ -5,7 +5,7 @@
  * 错误展示策略与 src/list-projects.tsx 一致：toast 只放一行短因，详情在 EmptyView + 复制错误详情 Action 里查看。
  */
 
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { listRepositories, type Repository } from "./api/codeup";
 import { codeupRepositoryFallbackUrl, diagnosticUrl, safeHttpsUrl } from "./utils/urls";
@@ -55,11 +55,7 @@ function ErrorActions({ details, onReload }: ErrorActionsProps) {
     return (
         <ActionPanel>
             <Action title="重新加载" icon={Icon.ArrowClockwise} onAction={onReload} />
-            <Action.CopyToClipboard
-                title="复制错误详情"
-                content={details}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
+            <Action.CopyToClipboard title="复制错误详情" content={details} shortcut={Keyboard.Shortcut.Common.Copy} />
         </ActionPanel>
     );
 }

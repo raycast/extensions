@@ -64,12 +64,6 @@ export interface Workitem {
     participants?: WorkitemUserRef[];
 }
 
-export interface WorkitemListResponse {
-    items?: Workitem[];
-    /** 分页标记，对应 nextToken */
-    nextToken?: string;
-}
-
 export interface PaginatedResult<T> {
     items: T[];
     nextToken?: string;
