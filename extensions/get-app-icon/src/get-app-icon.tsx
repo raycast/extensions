@@ -1,4 +1,5 @@
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { copyFile, mkdir, rmdir, stat, unlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
@@ -151,17 +152,40 @@ async function getAppVersion(appPath: string): Promise<string | null> {
  * and re-exporting the *same* version still overwrites — which is the intended repair
  * path for a partial or interrupted export.
  *
- * The app NAME is what gets shortened when the whole label won't fit, never the version.
- * Truncating the assembled label instead would cut the version off the end, collapsing
- * two versions of a long-named app onto one folder — reintroducing exactly the silent
- * overwrite this function exists to prevent.
+ * Uniqueness of the *version* is the invariant, so the app NAME absorbs any shortening.
+ * Truncating the assembled label instead cuts the version off the end, collapsing two
+ * versions onto one folder — the silent overwrite this function exists to prevent.
+ *
+ * A version too long to fit even on its own is replaced by a truncated form plus a digest
+ * of the full string. Two releases differing only in their tail (`…aaa` vs `…aab`) would
+ * otherwise share a folder; the digest keeps them apart at the cost of readability, which
+ * is the right trade when the alternative is losing an export.
  */
+const VERSION_DIGEST_BYTES = 12;
+
 function getAppFolderName(app: Application, version?: string | null): string {
-  const suffix = version ? ` ${version} App Icons` : " App Icons";
-  // Reserve the suffix's bytes, then fit the name into whatever remains.
-  const budget = MAX_NAME_BYTES - Buffer.byteLength(sanitizeFolderName(suffix.trim()), "utf8") - 1;
-  const name = truncateToBytes(sanitizeFolderName(app.name), Math.max(budget, 1));
-  return sanitizeFolderName(`${name}${suffix}`);
+  const suffix = " App Icons";
+  const sanitizedName = sanitizeFolderName(app.name);
+  if (!version) {
+    const nameOnly = truncateToBytes(sanitizedName, MAX_NAME_BYTES - Buffer.byteLength(suffix, "utf8"));
+    return sanitizeFolderName(`${nameOnly}${suffix}`);
+  }
+
+  // Fixed cost: the suffix plus the single space between name and version.
+  const fixedBytes = Buffer.byteLength(suffix, "utf8") + 1;
+  // Leave at least one byte for the name so the folder never becomes version-only.
+  const versionBudget = MAX_NAME_BYTES - fixedBytes - 1;
+
+  let sanitizedVersion = sanitizeFolderName(version);
+  if (Buffer.byteLength(sanitizedVersion, "utf8") > versionBudget) {
+    const digest = createHash("sha256").update(version).digest("hex").slice(0, VERSION_DIGEST_BYTES);
+    const head = truncateToBytes(sanitizedVersion, Math.max(versionBudget - (VERSION_DIGEST_BYTES + 1), 1));
+    sanitizedVersion = truncateToBytes(`${head}-${digest}`, versionBudget);
+  }
+
+  const nameBudget = MAX_NAME_BYTES - Buffer.byteLength(sanitizedVersion, "utf8") - fixedBytes;
+  const name = truncateToBytes(sanitizedName, Math.max(nameBudget, 1));
+  return sanitizeFolderName(`${name} ${sanitizedVersion}${suffix}`);
 }
 
 function escapeStringLiteral(s: string): string {

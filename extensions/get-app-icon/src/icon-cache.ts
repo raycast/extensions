@@ -132,21 +132,26 @@ function iconStampPaths(appPath: string): string[] {
 /**
  * The newest mtime across the paths that reflect an app's icon, in epoch ms.
  *
- * A path that genuinely doesn't exist contributes nothing — that's the normal shape of an
- * Asset Catalog app with no `Resources`. But a path we simply *couldn't read* (permissions,
- * I/O error) is not evidence of "unchanged": treating it as 0 would silently accept the
- * cached icon for as long as the error persisted. Those resolve to `Infinity` instead, so
- * an unreadable bundle re-extracts rather than trusting a possibly-stale tile.
+ * Every unreadable path — whether genuinely absent (`ENOENT`, the normal shape of an
+ * Asset Catalog app with no `Resources`) or merely unreadable (`EACCES`, I/O error) —
+ * contributes nothing and the readable stamps decide.
+ *
+ * An earlier revision returned `Infinity` for the unreadable case, reasoning that "we
+ * can't prove it's unchanged" should force a re-extract. That is unsatisfiable: no file
+ * can have an mtime >= Infinity, so the entry stayed stale *forever* and every grid visit
+ * relaunched the Swift extractor for an icon it had already successfully cached — trading
+ * a rare stale tile for a permanent extraction storm. Extraction reads the icon through
+ * `NSWorkspace`, which often succeeds even when a subpath can't be stat'd, so the cached
+ * PNG is usually perfectly good. Treating an unreadable stamp as no-evidence re-extracts
+ * once (the bundle's own mtime still moves on a real update) and then converges.
  */
 async function iconSourceMtime(appPath: string): Promise<number> {
   const stamps = await Promise.all(
     iconStampPaths(appPath).map(async (target) => {
       try {
         return (await stat(target)).mtimeMs;
-      } catch (error) {
-        const code = (error as NodeJS.ErrnoException).code;
-        // ENOENT/ENOTDIR are the expected "this bundle has no such path" answers.
-        return code === "ENOENT" || code === "ENOTDIR" ? 0 : Number.POSITIVE_INFINITY;
+      } catch {
+        return 0; // absent or unreadable — contributes no evidence of change
       }
     }),
   );
@@ -209,10 +214,12 @@ export async function refreshIconCache(
         // just-written entry at or above its source while staying far below the mtime any
         // later app update would produce.
         //
-        // A non-finite mtime means a stamp path was unreadable, so we have no trustworthy
-        // time to record. Omit the field — the extractor then leaves the file at wall-clock
-        // time, and the entry is re-checked normally rather than stamped with a bad value.
-        const stamp = Number.isFinite(observed) ? ` ${(Math.ceil(observed) / 1000).toFixed(3)}` : "";
+        // Guard the serialization: a non-finite or zero value has no sane representation
+        // here ("Infinity" doesn't parse as a Swift Double, and 1970 would mark the entry
+        // stale forever). Omitting the field leaves the file at wall-clock time, which is
+        // the safe default. `iconSourceMtime` shouldn't produce either, so this is an
+        // invariant rather than an expected path.
+        const stamp = Number.isFinite(observed) && observed > 0 ? ` ${(Math.ceil(observed) / 1000).toFixed(3)}` : "";
         return `${encode(appPath)} ${encode(cachedIconPath(appPath))}${stamp}`;
       }),
     )

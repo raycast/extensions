@@ -27,8 +27,10 @@
   drawn first and written second; if an export invalidated the entry in between, the older drawing
   landed afterwards carrying a current timestamp, so it looked up to date forever. Cached icons are
   now timestamped with what they actually depict rather than when they were written.
-- An app bundle that can't be read (permissions, I/O error) no longer counts as evidence that its
-  icon is unchanged, which had let a possibly-stale tile persist for as long as the error lasted.
+- An unreadable path inside an app bundle no longer forces its icon to be re-extracted on every
+  visit to the grid.
+- Two releases whose version strings are identical for the first ~240 characters now still get
+  separate export folders, instead of the second overwriting the first.
 
 ## [Sharper Grid Icons and Simpler Preferences] - 2026-07-27
 
