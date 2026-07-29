@@ -233,7 +233,10 @@ export default function Command() {
   const [visibleCount, setVisibleCount] = useState(pageSize);
   const [isCopying, setIsCopying] = useState(false);
   const [isLoadingRemoteData, setIsLoadingRemoteData] = useState(true);
-  const [remoteError, setRemoteError] = useState<string | null>(null);
+  // Kept separate on purpose: loadError means we have nothing to show, while isOffline
+  // means the library loaded from cache and is perfectly usable.
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isOffline, setIsOffline] = useState(false);
   const [wojaks, setWojaks] = useState<Wojak[]>([]);
   const { value: storedCategory, setValue: setStoredCategory, isLoading: isCategoryLoading } = useStoredCategory();
 
@@ -259,17 +262,18 @@ export default function Command() {
 
     async function run() {
       setIsLoadingRemoteData(true);
-      setRemoteError(null);
+      setLoadError(null);
 
       try {
         const result = await loadWojaks();
         if (!cancelled) {
           setWojaks(result.data);
-          setRemoteError(result.stale ? "Offline mode: showing cached metadata from the last successful sync." : null);
+          setIsOffline(result.stale);
         }
       } catch (error) {
         if (!cancelled) {
-          setRemoteError(error instanceof Error ? error.message : String(error));
+          setLoadError(error instanceof Error ? error.message : String(error));
+          setIsOffline(false);
           setWojaks([]);
         }
       } finally {
@@ -356,6 +360,7 @@ export default function Command() {
       columns={6}
       inset={Grid.Inset.Small}
       isLoading={isCopying || isFiltering}
+      navigationTitle={isOffline ? "Search Wojaks (offline — showing last synced library)" : undefined}
       searchBarPlaceholder="Search wojaks by name or category"
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -377,13 +382,13 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {remoteError && visibleWojaks.length === 0 ? (
-        <Grid.EmptyView icon={Icon.ExclamationMark} title="Couldn't load wojaks" description={remoteError} />
+      {loadError ? (
+        <Grid.EmptyView icon={Icon.ExclamationMark} title="Couldn't load wojaks" description={loadError} />
       ) : visibleWojaks.length === 0 ? (
         <Grid.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No wojaks found"
-          description={remoteError || "Try a different search term or category."}
+          description="Try a different search term or category."
         />
       ) : (
         visibleWojaks.map((wojak: Wojak) => (
