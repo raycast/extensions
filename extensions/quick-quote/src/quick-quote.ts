@@ -58,9 +58,11 @@ export default async function main() {
     return;
   }
 
-  await Clipboard.paste(quoteText(selection));
-
-  await new Promise((resolve) => setTimeout(resolve, PASTE_DELAY_MS));
-  await Clipboard.copy(toRestorableContent(originalClipboard));
+  try {
+    await Clipboard.paste(quoteText(selection));
+    await new Promise((resolve) => setTimeout(resolve, PASTE_DELAY_MS));
+  } finally {
+    await Clipboard.copy(toRestorableContent(originalClipboard));
+  }
   await showHUD("Quoted");
 }
