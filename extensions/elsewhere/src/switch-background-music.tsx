@@ -4,12 +4,12 @@ import { executeElsewhereCommand } from "./command-runner";
 import { ElsewhereStateList } from "./elsewhere-state-list";
 import { activeMusicTrackStatus } from "./music-state";
 
-const musicTrackIcons: Record<string, string> = {
+const musicTrackIcons: Record<string, Image.Source> = {
   "lo-fi": "music/headphones.svg",
   "quiet-canopy": "music/leaf.svg",
   "night-lines": "music/moon.svg",
   "pressure-system": "music/cloud.svg",
-  "gathering-light": "music/horizon-glow.svg",
+  "gathering-light": Icon.Sun,
 };
 
 function musicTrackIcon(trackId: string): Image.ImageLike {
