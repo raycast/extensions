@@ -75,10 +75,12 @@ async function runSkillsCliCommand(args: string[]): Promise<string> {
     try {
       return await executeSkillsCli("bunx", args);
     } catch (error) {
-      if (!isNpxCommandResolutionFailure(error, "bunx")) {
+      if (isNpxCommandResolutionFailure(error, "bunx")) {
+        bunxResolutionFailed = true;
+      } else if (!isSilentFailure(error)) {
+        // bunx explained itself, so npx would only repeat the same failure.
         throw normalizeCliError(error, "bunx");
       }
-      bunxResolutionFailed = true;
     }
   }
 
@@ -102,6 +104,16 @@ async function executeSkillsCli(runner: PackageRunner, args: string[], executabl
     shell: isWindows,
   });
   return stdout.toString();
+}
+
+/**
+ * `bunx --silent` suppresses bun's own diagnostics, so a failed run can reject
+ * with nothing beyond "Command failed: bunx …" — no reason the user can act on.
+ * Such a failure is retried through npx, which either succeeds or reports why.
+ */
+function isSilentFailure(error: unknown): boolean {
+  const stderr = (error as ExecFailure | undefined)?.stderr;
+  return !stderr || stderr.toString().trim().length === 0;
 }
 
 function normalizeCliError(error: unknown, npxCommand: string): Error {

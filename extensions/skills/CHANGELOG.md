@@ -1,5 +1,12 @@
 # Skills Changelog
 
+## [Fix Runtime Detection and Skill Lookup] - {PR_MERGE_DATE}
+
+- Detect `bun`/`node` installed outside a version manager or Homebrew, so "Unable to find a working bunx or npx command" no longer appears for Bun's official installer (`~/.bun/bin`), Nix / nix-darwin profiles, mise, and asdf
+- Fall back to `npx` when `bunx` fails without any diagnostic output, so a silent `bunx` failure no longer surfaces as "Command failed: bunx --silent skills@latest …" with no reason and no retry
+- Resolve skills whose `SKILL.md` sits at the repository root (single-skill repos), which previously failed to load in the detail view
+- Make the `read-skill` AI tool use the same repo-layout resolution as the detail view, so nested and root-level skills are readable
+
 ## [Document Custom Registry Configuration] - 2026-07-03
 
 - Add README guidance for pointing `bunx`/`npx` at a custom package registry (corporate proxy) via `~/.npmrc` and `~/.bunfig.toml`, since Raycast does not inherit shell environment variables
