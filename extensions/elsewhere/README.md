@@ -1,0 +1,34 @@
+# Elsewhere
+
+Control Elsewhere from focused Raycast commands without leaving your current context.
+
+## Commands
+
+### Audio and Spaces
+
+- **Toggle Audio**
+- **Switch Space**
+
+### Background music
+
+- **Toggle Background Music**
+- **Switch Background Music**
+
+### Volume
+
+- **Make Ambience Louder** and **Make Ambience Quieter** (±10%)
+- **Make Music Louder** and **Make Music Quieter** (±10%)
+
+Immediate actions are no-view commands. Commands that require choosing a Space or track open a focused
+Raycast list with current-state context.
+
+## State snapshot contract
+
+Elsewhere publishes the versioned `elsewhere-control-v1.json` snapshot in its macOS user-data directory. The extension
+discovers that file below `~/Library/Application Support` using the app-family identifier
+`app.glaze.macos.27b0yt1l*`, validates schema version 1 at runtime, and never reads Elsewhere's editable Space
+documents directly.
+
+The current development build uses `app.glaze.macos.27b0yt1l-local`. Before Store submission, confirm that the
+released Elsewhere build retains the `app.glaze.macos.27b0yt1l` identifier prefix. If the release identifier changes,
+only `ELSEWHERE_USER_DATA_PREFIX` in `src/state-reader.ts` needs updating.
