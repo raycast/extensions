@@ -35,7 +35,8 @@ export function buildQuotaRows(quota?: AccountQuota | null): QuotaRow[] {
     rows.push({ label: "Monthly", percent: quota.monthlyPercent, resetAt: toMillis(quota.monthlyResetAt) });
   }
   for (const custom of quota.customWindows ?? []) {
-    if (typeof custom.percent !== "number") continue;
+    // Vendor-specific windows are free-form, so both fields are checked before use.
+    if (typeof custom?.percent !== "number" || typeof custom.label !== "string") continue;
     rows.push({ label: custom.label, percent: custom.percent, resetAt: toMillis(custom.resetAt) });
   }
   return rows.sort((a, b) => windowRank(a.label) - windowRank(b.label));

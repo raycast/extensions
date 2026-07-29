@@ -182,15 +182,40 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
+/** Every entry of an optional array field must match, but the field itself may be absent. */
+function isOptionalArrayOf(value: unknown, matches: (entry: unknown) => boolean): boolean {
+  if (value === undefined || value === null) return true;
+  return Array.isArray(value) && value.every(matches);
+}
+
+function hasStringField(value: unknown, field: string): boolean {
+  return isRecord(value) && typeof value[field] === "string";
+}
+
+// Quota reports are keyed and titled by `provider`, so a missing id would break rendering.
 const isProviderQuotasResponse: Guard<ProviderQuotasResponse> = (value): value is ProviderQuotasResponse =>
-  isRecord(value) && Array.isArray(value.reports) && value.reports.every((report) => isRecord(report));
+  isRecord(value) &&
+  Array.isArray(value.reports) &&
+  value.reports.every((report) => hasStringField(report, "provider"));
 
 const isProviderInfoList: Guard<ProviderInfo[]> = (value): value is ProviderInfo[] =>
-  Array.isArray(value) && value.every((entry) => isRecord(entry) && typeof entry.name === "string");
+  Array.isArray(value) && value.every((entry) => hasStringField(entry, "name"));
 
-const isConfigResponse: Guard<ConfigResponse> = (value): value is ConfigResponse => isRecord(value);
+const isConfigResponse: Guard<ConfigResponse> = (value): value is ConfigResponse =>
+  isRecord(value) && (value.defaultProvider === undefined || typeof value.defaultProvider === "string");
 
-const isUsageResponse: Guard<UsageResponse> = (value): value is UsageResponse => isRecord(value);
+// Usage rows are grouped and labelled by these ids, so each collection is checked for them.
+const isUsageResponse: Guard<UsageResponse> = (value): value is UsageResponse =>
+  isRecord(value) &&
+  isOptionalArrayOf(value.providers, (entry) => hasStringField(entry, "provider")) &&
+  isOptionalArrayOf(value.models, (entry) => hasStringField(entry, "provider") && hasStringField(entry, "model")) &&
+  isOptionalArrayOf(
+    value.days,
+    (entry) =>
+      hasStringField(entry, "date") &&
+      isRecord(entry) &&
+      isOptionalArrayOf(entry.models, (model) => hasStringField(model, "model")),
+  );
 
 async function getJson<T>(baseUrl: string, path: string, isValid: Guard<T>, signal?: AbortSignal): Promise<T> {
   const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
