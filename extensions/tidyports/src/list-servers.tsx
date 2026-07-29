@@ -52,6 +52,32 @@ export default function Command() {
     );
   }
 
+  // Any other failure — the CLI timing out, exiting non-zero, or returning malformed
+  // JSON — must not fall through to the list below, where `data ?? []` would render
+  // "Nothing listening". For a tool whose whole job is telling you what is running, a
+  // false "nothing" is worse than an error: it is the exact misdiagnosis this exists
+  // to prevent.
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Couldn't list your servers"
+          description={error.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Try Again"
+                icon={Icon.ArrowClockwise}
+                onAction={revalidate}
+              />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   const dev = (data ?? []).filter(isLikelyDevServer);
   const other = (data ?? []).filter((l) => !isLikelyDevServer(l));
 
