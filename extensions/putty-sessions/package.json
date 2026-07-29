@@ -19,7 +19,13 @@
       "title": "Search Sessions",
       "subtitle": "PuTTY",
       "description": "Search and launch your saved PuTTY sessions.",
-      "mode": "view"
+      "mode": "view",
+      "keywords": [
+        "putty",
+        "ssh",
+        "telnet",
+        "session"
+      ]
     }
   ],
   "preferences": [

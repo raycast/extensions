@@ -29,11 +29,11 @@ You only need to set the executable path manually if PuTTY lives somewhere else.
 
 Open the command preferences to adjust:
 
-| Preference                  | Description                                                                                                      |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **PuTTY Executable**        | Optional. Path to `putty.exe`. Leave empty to auto-detect. A configured path always wins.                       |
-| **Open PuTTY entry**        | When enabled, always show an entry that opens PuTTY without a session.                                           |
-| **Start sessions maximized**| When enabled, sessions launch in a maximized window (`Start-Process -WindowStyle Maximized`).                    |
+| Preference                   | Description                                                                                   |
+| ---------------------------- | --------------------------------------------------------------------------------------------- |
+| **PuTTY Executable**         | Optional. Path to `putty.exe`. Leave empty to auto-detect. A configured path always wins.     |
+| **Open PuTTY entry**         | When enabled, always show an entry that opens PuTTY without a session.                        |
+| **Start sessions maximized** | When enabled, sessions launch in a maximized window (`Start-Process -WindowStyle Maximized`). |
 
 ### Where sessions come from
 

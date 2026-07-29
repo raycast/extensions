@@ -9,7 +9,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { getSessions, launchPutty, PuttySession, resolvePuttyExe, sessionSubtitle } from "./putty";
 
@@ -20,7 +20,7 @@ export default function Command() {
   const { puttyExePath, showOpenEntry, startMaximized } = getPreferenceValues<Preferences.SearchSessions>();
   const [searchText, setSearchText] = useState("");
 
-  const { data, isLoading } = usePromise(
+  const { data, isLoading } = useCachedPromise(
     async (configured?: string) => {
       const exePath = await resolvePuttyExe(configured);
       if (!exePath) {
@@ -114,6 +114,7 @@ export default function Command() {
             icon={PuttyIcon}
             title={session.identifier}
             subtitle={sessionSubtitle(session) || undefined}
+            accessories={session.protocol ? [{ tag: session.protocol }] : undefined}
             actions={
               <ActionPanel>
                 <Action title="Load Session" icon={PuttyIcon} onAction={() => launch({ session })} />
