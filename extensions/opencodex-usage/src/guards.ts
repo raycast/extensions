@@ -71,6 +71,7 @@ export const isConfigResponse: Guard<ConfigResponse> = (value): value is ConfigR
 // Usage rows are grouped by these ids and sorted by their counters.
 export const isUsageResponse: Guard<UsageResponse> = (value): value is UsageResponse =>
   isRecord(value) &&
+  hasOptionalStringField(value, "error") &&
   (value.summary === undefined || isRecord(value.summary)) &&
   isOptionalArrayOf(value.providers, (entry) => isUsageRow(entry, "provider")) &&
   isOptionalArrayOf(value.models, (entry) => isUsageRow(entry, "provider", "model")) &&

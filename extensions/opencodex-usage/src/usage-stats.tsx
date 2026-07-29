@@ -4,6 +4,7 @@ import { useState } from "react";
 import {
   fetchUsage,
   getPreferences,
+  UsageQueryError,
   type UsageDay,
   type UsageModel,
   type UsageRange,
@@ -131,12 +132,17 @@ export default function UsageStatsCommand() {
   );
 
   if (error) {
+    // A reachable proxy that rejects the query is a different problem from an unreachable one,
+    // so the message points at the query rather than the connection.
+    const reported = error instanceof UsageQueryError;
     return (
       <List>
         <List.EmptyView
-          icon={{ source: Icon.Plug, tintColor: Color.Red }}
-          title="Cannot reach OpenCodex"
-          description={`${error.message}\n\nChecked ${baseUrl}.`}
+          icon={{ source: reported ? Icon.ExclamationMark : Icon.Plug, tintColor: Color.Red }}
+          title={reported ? "OpenCodex Could Not Return Usage" : "Cannot reach OpenCodex"}
+          description={
+            reported ? `${error.message}\n\nReported by ${baseUrl}.` : `${error.message}\n\nChecked ${baseUrl}.`
+          }
           actions={actions}
         />
       </List>

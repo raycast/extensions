@@ -226,9 +226,11 @@ export async function fetchSnapshot(options?: { refresh?: boolean; signal?: Abor
     getJson(baseUrl, quotaPath, isProviderQuotasResponse, signal),
     getJson(baseUrl, "/api/providers", isProviderInfoList, signal).catch(() => [] as ProviderInfo[]),
     getJson(baseUrl, "/api/config", isConfigResponse, signal).catch(() => undefined),
-    getJson(baseUrl, `/api/usage?range=${encodeURIComponent(usageRange)}`, isUsageResponse, signal).catch(
-      () => undefined,
-    ),
+    // Usage only enriches the quota rows here, so a failure or a server-reported error simply
+    // drops the extra request/token totals rather than failing the whole snapshot.
+    getJson(baseUrl, `/api/usage?range=${encodeURIComponent(usageRange)}`, isUsageResponse, signal)
+      .then((usage) => (usage.error ? undefined : usage))
+      .catch(() => undefined),
   ]);
 
   return { quotas, providers, config, usage };
@@ -237,16 +239,28 @@ export async function fetchSnapshot(options?: { refresh?: boolean; signal?: Abor
 export type UsageRange = "7d" | "30d" | "all";
 export type UsageSurface = "all" | "codex" | "claude" | "grok";
 
+/** The proxy was reachable and answered, but reported that it could not serve the query. */
+export class UsageQueryError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "UsageQueryError";
+  }
+}
+
 export async function fetchUsage(
   range: UsageRange,
   surface: UsageSurface,
   signal?: AbortSignal,
 ): Promise<UsageResponse> {
   const { baseUrl } = getPreferences();
-  return getJson(
+  const usage = await getJson(
     baseUrl,
     `/api/usage?range=${encodeURIComponent(range)}&surface=${encodeURIComponent(surface)}`,
     isUsageResponse,
     signal,
   );
+  // The proxy reports query failures as a 200 with an `error` field, so surface it as a real
+  // failure instead of letting the view render an empty "No usage data" state.
+  if (usage.error) throw new UsageQueryError(usage.error);
+  return usage;
 }
