@@ -5,8 +5,11 @@ import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
+  // Reading `title of tabs` / `URL of tabs` fetches a whole window in one Apple Event,
+  // instead of two round-trips per tab. The favicon still needs one event per tab,
+  // so it is only evaluated when the preference is on.
   const faviconFormula = useOriginalFavicon
-    ? `execute t javascript ¬
+    ? `execute tab i of w javascript ¬
         "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
     : '""';
 
@@ -18,13 +21,11 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
       tell application "Google Chrome"
         repeat with w in windows
           set _w_id to get id of w as inches as string
-          set _tab_index to 1
-          repeat with t in tabs of w
-            set _title to get title of t
-            set _url to get URL of t
+          set _titles to title of tabs of w
+          set _urls to URL of tabs of w
+          repeat with i from 1 to count of _titles
             set _favicon to ${faviconFormula}
-            set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & _tab_index & "\\n")
-            set _tab_index to _tab_index + 1
+            set _output to (_output & item i of _titles & "${Tab.TAB_CONTENTS_SEPARATOR}" & item i of _urls & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & i & "\\n")
           end repeat
         end repeat
       end tell
