@@ -1,6 +1,6 @@
 # HeidiSQL Sessions Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-29
 
 - Search your HeidiSQL sessions and open any of them directly
 - Works on Windows (registry or portable installs) and macOS (native build)
