@@ -1,20 +1,20 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
 
 import { executeElsewhereCommand } from "./command-runner";
 import { ElsewhereStateList } from "./elsewhere-state-list";
 import { activeMusicTrackStatus } from "./music-state";
 
-const musicTrackIcons: Record<string, Icon> = {
-  "lo-fi": Icon.Headphones,
-  "quiet-canopy": Icon.Leaf,
-  "night-lines": Icon.Moon,
-  "pressure-system": Icon.Cloud,
-  "gathering-light": Icon.Sunrise,
+const musicTrackIcons: Record<string, string> = {
+  "lo-fi": "music/headphones.svg",
+  "quiet-canopy": "music/leaf.svg",
+  "night-lines": "music/moon.svg",
+  "pressure-system": "music/cloud.svg",
+  "gathering-light": "music/sunrise.svg",
 };
 
-function musicTrackIcon(trackId: string) {
+function musicTrackIcon(trackId: string): Image.ImageLike {
   return {
-    source: musicTrackIcons[trackId] ?? Icon.Music,
+    source: musicTrackIcons[trackId] ?? "music/note.svg",
     tintColor: Color.SecondaryText,
   };
 }
