@@ -1,6 +1,6 @@
 import { List, ActionPanel, Action, Icon, showToast, Toast, LocalStorage, closeMainWindow } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface Connection {
   id: string;
@@ -42,7 +42,6 @@ async function fetchConnections(): Promise<Connection[]> {
     return [];
   }
   const connections = result
-    .trim()
     .split("\u001E")
     .map((record) => {
       const parts = record.split("\u001F");
@@ -79,6 +78,16 @@ async function connectAdHoc(hostname: string): Promise<void> {
   `);
 }
 
+function parseRecentIds(value: string | undefined): string[] {
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) && parsed.every((x) => typeof x === "string") ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
 function filterConnections(connections: Connection[], searchText: string): Connection[] {
   const normalized = searchText.trim().replace(/\s+/g, " ");
   if (!normalized) return connections;
@@ -92,6 +101,18 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [recentIds, setRecentIds] = useState<string[]>([]);
+  const recentIdsLoadRef = useRef<Promise<string[]> | null>(null);
+
+  function getRecentIds(): Promise<string[]> {
+    if (!recentIdsLoadRef.current) {
+      recentIdsLoadRef.current = LocalStorage.getItem<string>("recent-connections").then((value) => {
+        const validated = parseRecentIds(value);
+        console.debug(`Command: loaded ${validated.length} recent connection id(s) from LocalStorage`);
+        return validated;
+      });
+    }
+    return recentIdsLoadRef.current;
+  }
 
   useEffect(() => {
     fetchConnections()
@@ -108,31 +129,24 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    LocalStorage.getItem<string>("recent-connections").then((value) => {
-      if (value) {
-        try {
-          const parsed = JSON.parse(value);
-          const validated = Array.isArray(parsed) && parsed.every((x) => typeof x === "string") ? parsed : [];
-          console.debug(`Command: loaded ${validated.length} recent connection id(s) from LocalStorage`);
-          setRecentIds(validated);
-        } catch (err) {
-          console.error("Command: failed to parse recent-connections from LocalStorage", err);
-          setRecentIds([]);
-        }
-      } else {
-        console.debug("Command: no recent-connections found in LocalStorage");
-      }
-    });
+    getRecentIds()
+      .then(setRecentIds)
+      .catch((err) => {
+        console.error("Command: failed to load recent-connections from LocalStorage", err);
+        setRecentIds([]);
+      });
   }, []);
 
   function saveRecentIds(ids: string[]) {
     LocalStorage.setItem("recent-connections", JSON.stringify(ids));
   }
 
-  function addToRecent(id: string) {
+  async function addToRecent(id: string) {
     console.debug(`addToRecent: id=${id}`);
-    const updated = [id, ...recentIds.filter((r) => r !== id)].slice(0, 10);
+    const current = await getRecentIds();
+    const updated = [id, ...current.filter((r) => r !== id)].slice(0, 10);
     setRecentIds(updated);
+    recentIdsLoadRef.current = Promise.resolve(updated);
     saveRecentIds(updated);
   }
 
@@ -152,7 +166,7 @@ export default function Command() {
       await showToast({ style: Toast.Style.Animated, title: "Connecting…" });
       await connectToConnection(id);
       console.debug(`handleConnect: successfully connected id=${id}`);
-      addToRecent(id);
+      await addToRecent(id);
       await closeMainWindow();
     } catch (err) {
       console.error(`handleConnect: failed for id=${id}`, err);
