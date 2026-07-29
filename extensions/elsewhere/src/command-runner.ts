@@ -4,6 +4,7 @@ import { Toast, open, showToast } from "@raycast/api";
 
 import { buildElsewhereUrl, ElsewhereCommand } from "./control-url";
 import { ElsewhereCommandResult, readElsewhereState } from "./state-reader";
+import { dispatchElsewhereUrlInBackground } from "./url-dispatcher";
 
 const CORRELATION_TIMEOUT_MS = 3_000;
 const POLL_INTERVAL_MS = 80;
@@ -43,7 +44,12 @@ async function sendCommand(command: ElsewhereCommand, options: ExecuteCommandOpt
   });
 
   try {
-    await open(buildElsewhereUrl(command, correlationId));
+    const url = buildElsewhereUrl(command, correlationId);
+    if (command.kind === "volume") {
+      await dispatchElsewhereUrlInBackground(url);
+    } else {
+      await open(url);
+    }
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could Not Reach Elsewhere";

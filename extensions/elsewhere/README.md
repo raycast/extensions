@@ -19,6 +19,8 @@ Control Elsewhere from focused Raycast commands without leaving your current con
 - **Make Ambience Louder** and **Make Ambience Quieter** (±10%)
 - **Make Music Louder** and **Make Music Quieter** (±10%)
 
+Volume commands leave Raycast open, so press Enter repeatedly for quick adjustments.
+
 Immediate actions are no-view commands. Commands that require choosing a Space or track open a focused
 Raycast list with current-state context.
 
