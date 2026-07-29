@@ -346,6 +346,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "webhound",
+    title: "Webhound",
+    description:
+      "Run private, budgeted reports and datasets with Hound, Webhound's research harness built with DeepSeek V4 Pro and GPT-5.4. The user's dollar budget controls research effort, and each connection authenticates to that user's own Webhound account through OAuth.",
+    icon: "https://www.webhound.ai/favicon.ico",
+    homepage: "https://github.com/WebhoundAI/webhound-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.webhound.ai/api/v2/mcp"],
+    },
+  },
+  {
     name: "sanity",
     title: "Sanity",
     description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",

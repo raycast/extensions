@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Webhound MCP Server] - 2026-07-29
+
+Add Webhound to the official registry for private, budgeted reports and datasets. The remote Streamable HTTP MCP server uses OAuth so each connection authenticates to that user's own Webhound account.
+
 ## [Update UseMyContext description] - 2026-07-28
 
 Remove the hard-coded tool count from the UseMyContext description. The server's tool surface has grown since the original submission (now 13 tools), and a number in the listing goes stale with every addition - the description now names the capabilities without a count.
