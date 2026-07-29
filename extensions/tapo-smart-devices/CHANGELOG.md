@@ -4,6 +4,7 @@
 
 - Gracefully ignore devices with a type not recognised by the extension, rather than crashing when the Tapo API returns an unknown device type (fixes #29744)
 - Fix loading state getting stuck indefinitely when network errors occur during local device discovery
+- Fix a failed manual refresh wiping the device list instead of preserving it
 - Updated all dependencies to their latest versions
 
 ## [Security Maintenance] - 2026-05-21
