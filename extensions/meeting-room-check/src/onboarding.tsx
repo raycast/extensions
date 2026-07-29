@@ -220,21 +220,30 @@ export default function Onboarding({
     setPhase("checking");
     const { token } = getAccessToken();
 
-    const auto = await tryDirectoryApi(token);
-    if (auto && auto.length > 0) {
-      await saveRooms(auto);
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Found ${auto.length} room(s) automatically`,
-      });
-      onComplete(auto);
-      return;
-    }
+    try {
+      const auto = await tryDirectoryApi(token);
+      if (auto && auto.length > 0) {
+        await saveRooms(auto);
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Found ${auto.length} room(s) automatically`,
+        });
+        onComplete(auto);
+        return;
+      }
 
-    const results = await scanCalendarForRooms(token);
-    setFound(results);
-    setSelected(new Set(results.map((room) => room.email))); // preselect everything found
-    setPhase("checklist");
+      const results = await scanCalendarForRooms(token);
+      setFound(results);
+      setSelected(new Set(results.map((room) => room.email))); // preselect everything found
+      setPhase("checklist");
+    } catch (error) {
+      setPhase("choose");
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't check your calendar",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   async function confirmSelection() {
