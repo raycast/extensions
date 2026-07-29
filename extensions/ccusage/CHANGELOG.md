@@ -1,6 +1,6 @@
 # Claude Usage (ccusage) Changelog
 
-## [Rename to Claude Usage] - {PR_MERGE_DATE}
+## [Rename to Claude Usage] - 2026-07-29
 
 ### Changed
 
