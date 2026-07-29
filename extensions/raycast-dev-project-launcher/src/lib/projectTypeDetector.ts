@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import type { BuiltinProjectType } from "../types";
+import type { BuiltinProjectType, ProjectType } from "../types";
 
 /**
  * Ordered marker rules used to fingerprint a directory as a specific project
@@ -27,8 +27,7 @@ const RULES: MarkerRule[] = [
     type: "xcode",
     label: "Xcode Project",
     markers: [],
-    extra: (entries) =>
-      [...entries].some((e) => e.endsWith(".xcodeproj") || e.endsWith(".xcworkspace")),
+    extra: (entries) => [...entries].some((e) => e.endsWith(".xcodeproj") || e.endsWith(".xcworkspace")),
   },
   {
     type: "swift-package",
@@ -87,17 +86,37 @@ const RULES: MarkerRule[] = [
 ];
 
 export interface DetectionResult {
-  type: BuiltinProjectType;
+  type: ProjectType;
   label: string;
+}
+
+/** A project type registered by the user in "Manage App Paths", with the markers that identify it. */
+export interface CustomTypeRule {
+  type: ProjectType;
+  markers: string[];
 }
 
 /**
  * Inspects the immediate children of `dirPath` and returns the best-matching
  * project type. Falls back to "generic" if the folder contains a `.git`
  * directory (so it's clearly a repo of *some* kind) or "unknown" otherwise.
+ *
+ * User-registered types are matched first: someone who declares `deno.json` as
+ * a `deno` marker means it, even though such a folder usually also holds the
+ * `package.json` that would otherwise make it a Node project.
  */
-export function detectProjectType(dirPath: string, dirEntries: string[]): DetectionResult {
+export function detectProjectType(
+  dirPath: string,
+  dirEntries: string[],
+  customRules: CustomTypeRule[] = [],
+): DetectionResult {
   const entries = new Set(dirEntries);
+
+  for (const rule of customRules) {
+    if (rule.markers.some((m) => entries.has(m))) {
+      return { type: rule.type, label: rule.type };
+    }
+  }
 
   for (const rule of RULES) {
     const markerHit = rule.markers.some((m) => entries.has(m));

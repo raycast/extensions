@@ -51,6 +51,12 @@ export interface ProjectEntity {
 
 /** Per-project-type editor application path mapping. */
 export interface AppPathMapping {
+  /**
+   * File or folder names that identify this project type, e.g. `["deno.json"]`.
+   * Only meaningful for user-registered types — builtin types are fingerprinted
+   * by the rules in `projectTypeDetector.ts`.
+   */
+  markers?: string[];
   /** App used by the primary "Open" action — the natural tool for this project type. */
   preferred?: string;
   vscode?: string;

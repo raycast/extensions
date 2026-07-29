@@ -40,6 +40,7 @@ mapping per project type.
 raycast-dev-project-launcher/
 ├── mise.toml                    # Task runner (wraps the npm scripts)
 ├── package.json                 # Raycast extension manifest + preferences
+├── metadata/                    # Store screenshots (2000x1250)
 ├── tsconfig.json
 ├── raycast-env.d.ts              # Typed preference/argument declarations
 ├── .eslintrc.json / .prettierrc
@@ -63,7 +64,7 @@ Configured from Raycast → Extensions → Dev Project Launcher → Preferences:
 
 | Preference | Type | Default | Description |
 | --- | --- | --- | --- |
-| Development Root Directory | directory | `~/Developer` | Root folder scanned recursively. Leave it empty and the extension auto-detects the first existing of `~/Developer`, `~/Development`, `~/Projects`, `~/Code`, `~/dev`. |
+| Development Root Directory | directory | *(empty)* | Root folder scanned recursively. Left empty — the default — the extension scans whichever of `~/Developer`, `~/Development`, `~/Projects`, `~/Code`, `~/dev` exist. |
 | Additional Project Directories | text | *(empty)* | Comma-separated extra absolute paths, e.g. `~/Work,~/OpenSource`. |
 | Scan Depth | dropdown | `2` | How many levels deep to search below each root (1–6, 8, 10). |
 | Exclude Folder Names | text | `node_modules,.git,DerivedData,build,dist,.build,Pods,.gradle,.idea,.vscode` | Extra folder names to skip while walking. Folders starting with `.` or `_` are always skipped. |
@@ -83,7 +84,11 @@ project type. Open the **Manage App Paths** command to:
 - Edit the **Preferred App** (what `Enter` uses) plus the VS Code / WebStorm /
   iTerm path for any existing type.
 - Register a completely new project type (e.g. `unity3d`) with its own
-  mapping — no source changes or extension re-install needed.
+  **marker files** and mapping — no source changes or extension re-install
+  needed. A custom type is matched before the builtin rules, so declaring
+  `deno.json` for a `deno` type wins over the `package.json` that would
+  otherwise make the folder a Node project. A custom type registered without
+  markers can never match a folder, so the field is required in practice.
 - Remove custom types you no longer need (builtin types simply revert to
   their shipped defaults).
 
@@ -155,10 +160,51 @@ as a dependency.
 | `mise run typecheck` | `tsc --noEmit` | Type sanity check. |
 | `mise run lint` / `mise run fix` | `ray lint` (`--fix`) | `@raycast/eslint-config` rules. |
 | `mise run check` | typecheck + lint + build | Everything before a publish. |
+| `mise run release-preview` | `semantic-release --dry-run` | Show the next version and notes, changing nothing. |
+| `mise run release` | `semantic-release` | Cut a release. Run by CI, not by hand. |
 | `mise run publish` | `npx @raycast/api publish` | Publish to the Raycast Store. |
 
 Publishing requires the `author` field in `package.json` to be a real Raycast
 username, otherwise validation fails with `Invalid author`.
+
+### Releasing (GitHub Actions)
+
+The Raycast Store ignores `package.json` `version` — it versions extensions by
+`CHANGELOG.md` entries and PR merge dates. The version and git tags here exist
+for this repository only.
+
+Releases are cut by [semantic-release](https://semantic-release.gitbook.io)
+from the conventional commit messages, so nothing is bumped by hand:
+
+| Commit prefix | Bump |
+| --- | --- |
+| `fix:`, `perf:` | patch |
+| `feat:` | minor |
+| any `BREAKING CHANGE:` footer | major |
+| `chore:`, `docs:`, `refactor:`, `test:`, `ci:` | none |
+
+**[`.github/workflows/release.yml`](.github/workflows/release.yml)** is run by
+hand from the Actions tab: it runs `check`, works out the next version from the
+commits, writes the `CHANGELOG.md` entry, commits `chore(release): X.Y.Z`,
+tags, and creates the GitHub release. It needs no secrets — the built-in
+`GITHUB_TOKEN` is enough. Preview what it would do first with:
+
+```bash
+mise run release-preview
+```
+
+**[`.github/workflows/publish.yml`](.github/workflows/publish.yml)** is a
+separate manual workflow — releasing does not publish, and publishing does not
+release. Re-running it updates the existing `raycast/extensions` pull request
+rather than opening a second one. It needs two repository secrets:
+
+| Secret | Where it comes from |
+| --- | --- |
+| `RAY_TOKEN` | `npx ray token` (after `npx ray login`) |
+| `RAYCAST_GITHUB_TOKEN` | a GitHub personal access token that can fork `raycast/extensions` |
+
+When submitting to the Store, replace the date of the entry you're shipping
+with the `{PR_MERGE_DATE}` placeholder, which Raycast fills in on merge.
 
 ## Commands
 

@@ -26,9 +26,7 @@ function buildAugmentedEnv(): NodeJS.ProcessEnv {
     path.join(home, ".local/bin"),
   ];
   const currentPath = process.env.PATH ?? "";
-  const merged = Array.from(
-    new Set([...currentPath.split(":").filter(Boolean), ...extraPaths]),
-  ).join(":");
+  const merged = Array.from(new Set([...currentPath.split(":").filter(Boolean), ...extraPaths])).join(":");
   return { ...process.env, PATH: merged };
 }
 
@@ -50,11 +48,7 @@ function looksLikeBundleIdentifier(value: string): boolean {
 }
 
 /** Opens `projectPath` with the app registered under `bundleId` via `open -b`. */
-async function openWithBundleIdentifier(
-  bundleId: string,
-  projectPath: string,
-  target: EditorTarget,
-): Promise<void> {
+async function openWithBundleIdentifier(bundleId: string, projectPath: string, target: EditorTarget): Promise<void> {
   try {
     await execFileAsync("open", ["-b", bundleId, projectPath], { env: buildAugmentedEnv() });
   } catch {
@@ -78,11 +72,7 @@ export class OpenActionError extends Error {
 }
 
 /** Opens `projectPath` using an app bundle path or a Spotlight-resolvable app display name via `open -a`. */
-async function openWithAppBundle(
-  appPathOrName: string,
-  projectPath: string,
-  target: EditorTarget,
-): Promise<void> {
+async function openWithAppBundle(appPathOrName: string, projectPath: string, target: EditorTarget): Promise<void> {
   try {
     await execFileAsync("open", ["-a", appPathOrName, projectPath], { env: buildAugmentedEnv() });
   } catch (error) {
@@ -95,11 +85,7 @@ async function openWithAppBundle(
 }
 
 /** Opens `projectPath` by invoking a CLI binary (absolute path or bare command resolved via PATH) directly. */
-async function openWithCliBinary(
-  binary: string,
-  projectPath: string,
-  target: EditorTarget,
-): Promise<void> {
+async function openWithCliBinary(binary: string, projectPath: string, target: EditorTarget): Promise<void> {
   try {
     await execFileAsync(binary, [projectPath], { env: buildAugmentedEnv() });
   } catch (error) {
@@ -111,11 +97,7 @@ async function openWithCliBinary(
         `${binary} "${projectPath}"`,
       );
     }
-    throw new OpenActionError(
-      `Failed to launch "${binary}": ${err.message}`,
-      target,
-      `${binary} "${projectPath}"`,
-    );
+    throw new OpenActionError(`Failed to launch "${binary}": ${err.message}`, target, `${binary} "${projectPath}"`);
   }
 }
 
@@ -149,11 +131,7 @@ export async function openInWebStorm(projectPath: string, resolvedPath: string):
  */
 export async function openInITerm(projectPath: string, resolvedPath: string): Promise<void> {
   const target: EditorTarget = "iterm";
-  if (
-    looksLikeAbsoluteBinaryPath(resolvedPath) &&
-    fs.existsSync(resolvedPath) &&
-    fs.statSync(resolvedPath).isFile()
-  ) {
+  if (looksLikeAbsoluteBinaryPath(resolvedPath) && fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isFile()) {
     // Rare case: user pointed straight at an executable rather than the .app bundle or a name.
     await openWithCliBinary(resolvedPath, projectPath, target);
     return;
@@ -161,11 +139,7 @@ export async function openInITerm(projectPath: string, resolvedPath: string): Pr
   await openWithAppBundle(resolvedPath, projectPath, target);
 }
 
-async function openWithEditor(
-  projectPath: string,
-  resolvedPath: string,
-  target: EditorTarget,
-): Promise<void> {
+async function openWithEditor(projectPath: string, resolvedPath: string, target: EditorTarget): Promise<void> {
   if (looksLikeAppBundle(resolvedPath)) {
     await openWithAppBundle(resolvedPath, projectPath, target);
     return;

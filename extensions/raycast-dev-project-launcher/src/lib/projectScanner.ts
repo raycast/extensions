@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import os from "os";
 import type { ProjectEntity } from "../types";
+import type { CustomTypeRule } from "./projectTypeDetector";
 import { detectProjectType, hasGitRepo, safeReadDir } from "./projectTypeDetector";
 
 export interface ScanOptions {
@@ -11,6 +12,8 @@ export interface ScanOptions {
   maxDepth: number;
   /** Folder names to skip entirely (e.g. node_modules, .git, build). */
   excludeNames: Set<string>;
+  /** Project types the user registered in "Manage App Paths", matched before the builtin rules. */
+  customRules?: CustomTypeRule[];
 }
 
 /** Expands a leading `~` to the user's home directory. */
@@ -78,7 +81,7 @@ function scanRoot(rootPath: string, options: ScanOptions): ProjectEntity[] {
     const entries = safeReadDir(currentPath);
     if (entries.length === 0 && depth > 0) return;
 
-    const detection = detectProjectType(currentPath, entries);
+    const detection = detectProjectType(currentPath, entries, options.customRules);
     const isGit = hasGitRepo(currentPath);
     const isRecognizedProject = detection.type !== "generic" || isGit;
 

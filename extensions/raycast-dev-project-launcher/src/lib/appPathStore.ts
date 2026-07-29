@@ -1,5 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import type { AppPathMapping, AppPathStore, EditorTarget, ProjectType } from "../types";
+import type { CustomTypeRule } from "./projectTypeDetector";
 
 /**
  * Persisted, user-editable mapping of `projectType -> { vscode, webstorm, iterm }`
@@ -74,10 +75,7 @@ export async function saveAppPathStore(store: AppPathStore): Promise<void> {
 }
 
 /** Upserts (creates or updates) the mapping for a single project type. */
-export async function upsertAppPathMapping(
-  projectType: ProjectType,
-  mapping: AppPathMapping,
-): Promise<AppPathStore> {
+export async function upsertAppPathMapping(projectType: ProjectType, mapping: AppPathMapping): Promise<AppPathStore> {
   const store = await loadAppPathStore();
   store[projectType] = { ...store[projectType], ...mapping };
   await saveAppPathStore(store);
@@ -119,6 +117,17 @@ export function resolveAppPath(
     case "iterm":
       return ITERM;
   }
+}
+
+/**
+ * Extracts the detection rules for every user-registered type that declares
+ * marker files, so a mapping added from "Manage App Paths" actually gets
+ * matched against scanned folders instead of sitting unused.
+ */
+export function customTypeRules(store: AppPathStore): CustomTypeRule[] {
+  return Object.entries(store)
+    .filter(([type, mapping]) => !(type in DEFAULT_APP_PATH_STORE) && mapping.markers?.length)
+    .map(([type, mapping]) => ({ type, markers: mapping.markers ?? [] }));
 }
 
 /** Display names for CLI launchers whose command doesn't match the app's name. */

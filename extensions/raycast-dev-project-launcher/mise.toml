@@ -1,5 +1,6 @@
 [tools]
-node = "20"
+# 22+ is required by semantic-release; Raycast itself only needs 20+.
+node = "22"
 
 [tasks.install]
 description = "Install dependencies"
@@ -40,3 +41,17 @@ depends = ["typecheck", "lint", "build"]
 description = "Publish to the Raycast Store"
 depends = ["install"]
 run = "npm run publish"
+
+[tasks.release]
+description = "Run semantic-release (CI cuts the real release; use release-preview locally)"
+depends = ["check"]
+run = "npx semantic-release"
+
+[tasks.release-preview]
+description = "Show the version and notes semantic-release would produce, changing nothing"
+depends = ["install"]
+run = '''
+set -eu
+export GITHUB_TOKEN="${GITHUB_TOKEN:-$(gh auth token 2>/dev/null || true)}"
+npx semantic-release --dry-run --no-ci
+'''

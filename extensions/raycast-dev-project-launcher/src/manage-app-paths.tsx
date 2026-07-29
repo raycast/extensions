@@ -21,6 +21,7 @@ import {
   DEFAULT_APP_PATH_STORE,
 } from "./lib/appPathStore";
 import { iconForProjectType } from "./lib/projectIcons";
+import { parseCommaSeparated } from "./lib/projectScanner";
 
 /**
  * "Manage App Paths" — lists every project type currently known to the
@@ -49,13 +50,7 @@ export default function Command() {
                   title="Edit Mapping"
                   icon={Icon.Pencil}
                   onAction={() =>
-                    push(
-                      <AppPathForm
-                        existingType={type}
-                        existingMapping={mapping}
-                        onSaved={revalidate}
-                      />,
-                    )
+                    push(<AppPathForm existingType={type} existingMapping={mapping} onSaved={revalidate} />)
                   }
                 />
                 <Action
@@ -114,6 +109,7 @@ function isBuiltin(type: ProjectType): boolean {
 
 function summarize(mapping: AppPathMapping): string {
   const parts: string[] = [];
+  if (mapping.markers?.length) parts.push(`Markers: ${mapping.markers.join(", ")}`);
   if (mapping.preferred) parts.push(`Preferred: ${mapping.preferred}`);
   if (mapping.vscode) parts.push(`VS Code: ${mapping.vscode}`);
   if (mapping.webstorm) parts.push(`WebStorm: ${mapping.webstorm}`);
@@ -134,6 +130,8 @@ function AppPathForm({ existingType, existingMapping, onSaved }: AppPathFormProp
 
   async function handleSubmit(values: {
     typeName: string;
+    // Absent for builtin types, whose markers are fixed in the detector.
+    markers?: string;
     preferred: string;
     vscode: string;
     webstorm: string;
@@ -150,7 +148,10 @@ function AppPathForm({ existingType, existingMapping, onSaved }: AppPathFormProp
     }
     setTypeNameError(undefined);
 
+    const markers = parseCommaSeparated(values.markers);
+
     const mapping: AppPathMapping = {
+      markers: markers.length > 0 ? markers : undefined,
       preferred: values.preferred.trim() || undefined,
       vscode: values.vscode.trim() || undefined,
       webstorm: values.webstorm.trim() || undefined,
@@ -200,6 +201,15 @@ function AppPathForm({ existingType, existingMapping, onSaved }: AppPathFormProp
         error={typeNameError}
         onChange={() => setTypeNameError(undefined)}
       />
+      {!isEditing || !isBuiltin(existingType ?? "") ? (
+        <Form.TextField
+          id="markers"
+          title="Marker Files"
+          placeholder="deno.json,deno.jsonc"
+          defaultValue={(existingMapping?.markers ?? []).join(",")}
+          info="Comma-separated file or folder names that identify this project type. Without them a custom type is never matched while scanning."
+        />
+      ) : null}
       <Form.Separator />
       <Form.TextField
         id="preferred"

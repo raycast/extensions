@@ -1,3 +1,10 @@
+# 1.0.0 (2026-07-29)
+
+
+### Features
+
+* first commit ([532e7b7](https://github.com/amine2233/raycast-dev-project-launcher/commit/532e7b7ddc485a58abe2c7eb2dd1d5f1f0021bf1))
+
 # Dev Project Launcher Changelog
 
 ## [Initial Release] - {PR_MERGE_DATE}

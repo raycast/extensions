@@ -16,13 +16,8 @@ import os from "os";
 import path from "path";
 
 import type { AppPathStore, EditorTarget, ProjectEntity } from "./types";
-import {
-  detectDefaultRoots,
-  expandHome,
-  parseCommaSeparated,
-  scanForProjects,
-} from "./lib/projectScanner";
-import { appDisplayName, loadAppPathStore, resolveAppPath } from "./lib/appPathStore";
+import { detectDefaultRoots, expandHome, parseCommaSeparated, scanForProjects } from "./lib/projectScanner";
+import { appDisplayName, customTypeRules, loadAppPathStore, resolveAppPath } from "./lib/appPathStore";
 import { iconForProjectType } from "./lib/projectIcons";
 import {
   openInITerm,
@@ -67,17 +62,17 @@ async function loadEverything(): Promise<{ projects: ProjectEntity[]; store: App
 
   const excludeNames = new Set(
     parseCommaSeparated(
-      prefs.excludeFolderNames ??
-        "node_modules,.git,DerivedData,build,dist,.build,Pods,.gradle,.idea,.vscode",
+      prefs.excludeFolderNames ?? "node_modules,.git,DerivedData,build,dist,.build,Pods,.gradle,.idea,.vscode",
     ),
   );
 
   const maxDepth = Number.parseInt(prefs.scanDepth ?? "2", 10) || 2;
 
-  const [projects, store] = await Promise.all([
-    Promise.resolve(scanForProjects({ roots, maxDepth, excludeNames })),
-    loadAppPathStore(),
-  ]);
+  // The store has to be read before the scan: it carries the marker files for
+  // user-registered project types, which the detector needs to match them.
+  const store = await loadAppPathStore();
+  const customRules = customTypeRules(store);
+  const projects = scanForProjects({ roots, maxDepth, excludeNames, customRules });
 
   return { projects, store };
 }
@@ -125,9 +120,7 @@ export default function Command() {
   }
 
   function preferredAppName(project: ProjectEntity): string {
-    return appDisplayName(
-      resolveAppPath(store, project.type, "preferred", fallbackFor("preferred")),
-    );
+    return appDisplayName(resolveAppPath(store, project.type, "preferred", fallbackFor("preferred")));
   }
 
   async function handleOpen(project: ProjectEntity, target: EditorTarget) {
@@ -197,11 +190,7 @@ export default function Command() {
         />
       ) : (
         Array.from(grouped.entries()).map(([root, items]) => (
-          <List.Section
-            key={root}
-            title={root}
-            subtitle={`${items.length} project${items.length === 1 ? "" : "s"}`}
-          >
+          <List.Section key={root} title={root} subtitle={`${items.length} project${items.length === 1 ? "" : "s"}`}>
             {items.map((project) => (
               <List.Item
                 key={project.path}
@@ -209,9 +198,7 @@ export default function Command() {
                 title={project.name}
                 subtitle={toDisplayPath(path.dirname(project.path))}
                 accessories={[
-                  ...(project.isGitRepo
-                    ? [{ icon: Icon.CodeBlock, tooltip: "Git repository" }]
-                    : []),
+                  ...(project.isGitRepo ? [{ icon: Icon.CodeBlock, tooltip: "Git repository" }] : []),
                   { tag: { value: project.typeLabel, color: Color.SecondaryText } },
                   { text: relativeTime(project.lastModified), tooltip: "Last modified" },
                 ]}
@@ -255,10 +242,7 @@ export default function Command() {
                         content={project.path}
                         shortcut={Keyboard.Shortcut.Common.Copy}
                       />
-                      <Action.OpenWith
-                        path={project.path}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-                      />
+                      <Action.OpenWith path={project.path} shortcut={{ modifiers: ["cmd", "shift"], key: "o" }} />
                       <Action
                         title="Rescan Projects"
                         icon={Icon.ArrowClockwise}

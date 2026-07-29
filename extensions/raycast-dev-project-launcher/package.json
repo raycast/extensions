@@ -33,7 +33,6 @@
       "type": "directory",
       "title": "Development Root Directory",
       "description": "The root folder that will be scanned recursively for projects. Leave empty to auto-detect ~/Developer, ~/Development, ~/Projects, ~/Code or ~/dev.",
-      "default": "~/Developer",
       "required": false
     },
     {
@@ -51,14 +50,38 @@
       "description": "How many directory levels deep to search for projects below each root.",
       "default": "2",
       "data": [
-        { "title": "1 level (direct children only)", "value": "1" },
-        { "title": "2 levels", "value": "2" },
-        { "title": "3 levels", "value": "3" },
-        { "title": "4 levels", "value": "4" },
-        { "title": "5 levels", "value": "5" },
-        { "title": "6 levels", "value": "6" },
-        { "title": "8 levels", "value": "8" },
-        { "title": "10 levels (slow on large trees)", "value": "10" }
+        {
+          "title": "1 level (direct children only)",
+          "value": "1"
+        },
+        {
+          "title": "2 levels",
+          "value": "2"
+        },
+        {
+          "title": "3 levels",
+          "value": "3"
+        },
+        {
+          "title": "4 levels",
+          "value": "4"
+        },
+        {
+          "title": "5 levels",
+          "value": "5"
+        },
+        {
+          "title": "6 levels",
+          "value": "6"
+        },
+        {
+          "title": "8 levels",
+          "value": "8"
+        },
+        {
+          "title": "10 levels (slow on large trees)",
+          "value": "10"
+        }
       ],
       "required": false
     },
@@ -101,10 +124,13 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
+    "@semantic-release/changelog": "^7.0.0",
+    "@semantic-release/git": "^11.0.1",
     "@types/node": "20.8.10",
     "@types/react": "18.3.3",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
+    "semantic-release": "^25.0.8",
     "typescript": "^5.4.5"
   },
   "scripts": {
