@@ -4,12 +4,14 @@ import { MobbinRestClient } from "../lib/rest-client";
 import type { SearchOptions } from "../lib/types";
 
 const options: SearchOptions = {
+  kind: "screen",
   query: "login screen",
   platform: "ios",
   mode: "deep",
-  image_quality: "optimized",
+  imageQuality: "optimized",
+  mcpImageFormat: "webp",
   limit: 20,
-  exclude_screen_ids: [],
+  excludeScreenIds: [],
 };
 
 function jsonResponse(
@@ -29,32 +31,48 @@ describe("MobbinRestClient", () => {
     vi.useRealTimers();
   });
 
-  it("posts search options and normalizes screens", async () => {
+  it("posts the documented wire fields and preserves image metadata", async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       jsonResponse(200, {
         screens: [
           {
             id: "screen-1",
-            image_url: "https://example.com/screen.png",
-            mobbin_url: "https://mobbin.com/screen",
+            image: {
+              url: "https://example.com/screen.webp",
+              url_expires_at: "2030-01-01T00:00:00Z",
+              width: 1200,
+              height: 2400,
+            },
+            mobbin_url: "https://mobbin.com/screens/screen-1",
             app_name: "Example",
-            platform: "ios",
           },
         ],
       }),
     );
     vi.stubGlobal("fetch", fetchMock);
 
-    const result = await new MobbinRestClient("secret").searchScreens(options);
+    const result = await new MobbinRestClient(" secret ").search(options);
 
-    expect(result).toHaveLength(1);
-    expect(fetchMock).toHaveBeenCalledWith(
-      "https://api.mobbin.com/v1/screens/search",
-      expect.objectContaining({
-        method: "POST",
-        headers: expect.objectContaining({ Authorization: "Bearer secret" }),
-      }),
-    );
+    expect(result[0]).toMatchObject({
+      kind: "screen",
+      appName: "Example",
+      image: {
+        url: "https://example.com/screen.webp",
+        expiresAt: "2030-01-01T00:00:00Z",
+        width: 1200,
+        height: 2400,
+      },
+    });
+    const init = fetchMock.mock.calls[0]?.[1] as RequestInit;
+    expect(JSON.parse(String(init.body))).toEqual({
+      query: "login screen",
+      platform: "ios",
+      mode: "deep",
+      limit: 20,
+      image_quality: "optimized",
+      exclude_screen_ids: [],
+    });
+    expect(init.headers).toMatchObject({ Authorization: "Bearer secret" });
   });
 
   it.each([
@@ -66,14 +84,39 @@ describe("MobbinRestClient", () => {
   ] as const)("maps HTTP %s to %s", async (status, code) => {
     vi.stubGlobal(
       "fetch",
-      vi.fn().mockResolvedValue(jsonResponse(status, { error: "failed" })),
+      vi.fn().mockResolvedValue(
+        jsonResponse(status, {
+          error: { code: "failed", message: "Detailed failure" },
+        }),
+      ),
     );
 
     await expect(
-      new MobbinRestClient("secret").searchScreens(options),
+      new MobbinRestClient("secret").search(options),
     ).rejects.toMatchObject({
       code,
+      message: "Detailed failure",
+      details: { status, serverCode: "failed" },
     } satisfies Partial<MobbinError>);
+  });
+
+  it("retries a rate limit and returns a later successful response", async () => {
+    vi.useFakeTimers();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse(
+          429,
+          { error: { message: "wait" } },
+          { "Retry-After": "0" },
+        ),
+      )
+      .mockResolvedValueOnce(jsonResponse(200, { screens: [] }));
+    vi.stubGlobal("fetch", fetchMock);
+    const pending = new MobbinRestClient("secret").search(options);
+    await vi.runAllTimersAsync();
+    await expect(pending).resolves.toEqual([]);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
   });
 
   it("retries 429 responses and preserves Retry-After metadata", async () => {
@@ -84,30 +127,119 @@ describe("MobbinRestClient", () => {
       vi
         .fn()
         .mockResolvedValue(
-          jsonResponse(429, { error: "rate limited" }, { "Retry-After": "1" }),
+          jsonResponse(429, { error: "limited" }, { "Retry-After": "0" }),
         ),
     );
 
     const promise = new MobbinRestClient("secret")
-      .searchScreens(options)
-      .catch((error) => error as MobbinError);
+      .search(options)
+      .catch((error: unknown) => error as MobbinError);
     await vi.runAllTimersAsync();
 
     await expect(promise).resolves.toMatchObject({
       code: "rate-limited",
-      details: { retryAfterSeconds: 1 },
-    } satisfies Partial<MobbinError>);
+      details: { retryAfterSeconds: 0 },
+    });
   });
 
-  it("rejects missing API keys before network calls", async () => {
-    const fetchMock = vi.fn();
-    vi.stubGlobal("fetch", fetchMock);
-
+  it("rejects unsupported kinds, missing keys, and oversized queries", async () => {
     await expect(
-      new MobbinRestClient("").searchScreens(options),
+      new MobbinRestClient("secret").search({ ...options, kind: "flow" }),
+    ).rejects.toMatchObject({ code: "unsupported-kind" });
+    await expect(
+      new MobbinRestClient("").search(options),
+    ).rejects.toMatchObject({ code: "missing-api-key" });
+    await expect(
+      new MobbinRestClient("secret").search({
+        ...options,
+        query: "x".repeat(501),
+      }),
+    ).rejects.toMatchObject({ code: "invalid-query" });
+    await expect(
+      new MobbinRestClient("secret").search({
+        ...options,
+        excludeScreenIds: Array.from({ length: 101 }, (_, index) =>
+          String(index),
+        ),
+      }),
+    ).rejects.toMatchObject({ code: "bad-request" });
+  });
+
+  it("reports invalid JSON and response contract mismatches", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(new Response("not-json", { status: 200 })),
+    );
+    await expect(
+      new MobbinRestClient("secret").search(options),
+    ).rejects.toMatchObject({ code: "contract-mismatch" });
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValueOnce(jsonResponse(200, { results: [] })),
+    );
+    await expect(
+      new MobbinRestClient("secret").search(options),
+    ).rejects.toMatchObject({ code: "contract-mismatch" });
+  });
+
+  it("forwards cancellation to fetch", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url: string, init: RequestInit) => {
+        return new Promise((_resolve, reject) => {
+          if (init.signal?.aborted) {
+            reject(new DOMException("aborted", "AbortError"));
+            return;
+          }
+          init.signal?.addEventListener("abort", () => {
+            reject(new DOMException("aborted", "AbortError"));
+          });
+        });
+      }),
+    );
+    const controller = new AbortController();
+    const promise = new MobbinRestClient("secret").search(
+      options,
+      controller.signal,
+    );
+    controller.abort();
+    await expect(promise).rejects.toMatchObject({ name: "AbortError" });
+  });
+
+  it("reports search timeouts distinctly", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url: string, init: RequestInit) => {
+        return new Promise((_resolve, reject) => {
+          const rejectAbort = () =>
+            reject(init.signal?.reason ?? new Error("aborted"));
+          if (init.signal?.aborted) rejectAbort();
+          else
+            init.signal?.addEventListener("abort", rejectAbort, {
+              once: true,
+            });
+        });
+      }),
+    );
+    const pending = new MobbinRestClient("secret")
+      .search(options)
+      .catch((error: unknown) => error);
+    await vi.advanceTimersByTimeAsync(60_000);
+    await expect(pending).resolves.toMatchObject({ code: "timeout" });
+  });
+
+  it("preserves ordinary network failures", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockRejectedValue(new TypeError("socket closed")),
+    );
+    await expect(
+      new MobbinRestClient("secret").search(options),
     ).rejects.toMatchObject({
-      code: "missing-api-key",
-    } satisfies Partial<MobbinError>);
-    expect(fetchMock).not.toHaveBeenCalled();
+      code: "network-error",
+      message: "socket closed",
+    });
   });
 });

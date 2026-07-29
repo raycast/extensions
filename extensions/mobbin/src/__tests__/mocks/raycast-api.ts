@@ -1,5 +1,7 @@
 export const environment = {
   supportPath: "/tmp/mobbin-raycast-test",
+  isDevelopment: false,
+  commandName: "test",
 };
 
 export const Clipboard = {
@@ -41,6 +43,7 @@ export function getPreferenceValues() {
     defaultPlatform: "ios",
     defaultSearchMode: "deep",
     defaultImageQuality: "optimized",
+    defaultMcpImageFormat: "webp",
     defaultLimit: "20",
   };
 }

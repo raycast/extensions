@@ -3,20 +3,26 @@ import {
   ActionPanel,
   Grid,
   Icon,
-  Keyboard,
   showToast,
   Toast,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { SetupView } from "./SetupView";
-import { MobbinActions } from "./MobbinActions";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useProgressiveImages } from "../hooks/useProgressiveImages";
 import { MOBBIN_ICON } from "../lib/assets";
-import { MobbinError, getErrorMessage, isAbortError } from "../lib/errors";
+import { MobbinError } from "../lib/errors";
 import { connectMobbinOAuth } from "../lib/oauth-connect";
-import { clearMobbinOAuthState } from "../lib/oauth-provider";
+import {
+  clearMobbinOAuthState,
+  getMobbinOAuthStatus,
+} from "../lib/oauth-provider";
 import { getPreferences, hasApiKey } from "../lib/preferences";
-import { createSearchClient } from "../lib/search-client";
+import {
+  REFERENCE_GRID_COLUMNS,
+  canExcludeFromSearch,
+  oauthActionStatus,
+  searchGridAspectRatio,
+} from "../lib/presentation";
 import {
   addSearchHistory,
   clearSearchHistory,
@@ -24,164 +30,218 @@ import {
   getSearchHistory,
 } from "../lib/storage";
 import type {
-  FavoriteScreen,
-  ImageQuality,
-  Platform,
-  Screen,
+  FavoriteReference,
+  FlowReference,
+  ImageReference,
+  MobbinReference,
   SearchHistoryEntry,
-  SearchMode,
+  SearchKind,
+  SearchOptions,
 } from "../lib/types";
+import {
+  invalidateMobbinSearchCache,
+  useMobbinSearch,
+} from "../hooks/useMobbinSearch";
+import { FlowDetail } from "./FlowDetail";
+import { GlobalActions, type OAuthStatus } from "./GlobalActions";
+import { ReferenceActions } from "./ReferenceActions";
+import { SearchOptionsForm } from "./SearchOptionsForm";
+import { SetupView } from "./SetupView";
 
 type Props = {
+  kind: SearchKind;
   initialSearchText?: string;
   navigationTitle?: string;
 };
 
-type State = {
-  results: Screen[];
-  favorites: FavoriteScreen[];
-  history: SearchHistoryEntry[];
-  favoriteIds: Set<string>;
-  downloadedPaths: Map<string, string>;
-  error: MobbinError | Error | undefined;
-  isLoading: boolean;
-};
+function imageForReference(reference: MobbinReference) {
+  return reference.kind === "flow" ? reference.coverImage : reference.image;
+}
 
 export function SearchView({
+  kind,
   initialSearchText = "",
   navigationTitle = "Search Mobbin",
 }: Props) {
   const preferences = getPreferences();
   const [searchText, setSearchText] = useState(initialSearchText);
-  const [platform, setPlatform] = useState<Platform>(
-    preferences.defaultPlatform,
-  );
-  const [mode, setMode] = useState<SearchMode>(preferences.defaultSearchMode);
-  const [imageQuality, setImageQuality] = useState<ImageQuality>(
-    preferences.defaultImageQuality,
-  );
-  const [limit, setLimit] = useState(Number(preferences.defaultLimit));
+  const [config, setConfig] = useState(() => ({
+    platform:
+      kind === "section" ? ("web" as const) : preferences.defaultPlatform,
+    mode: preferences.defaultSearchMode,
+    imageQuality: preferences.defaultImageQuality,
+    mcpImageFormat: preferences.defaultMcpImageFormat,
+    limit: Number(preferences.defaultLimit),
+  }));
   const [excludedIds, setExcludedIds] = useState<string[]>([]);
-  const [state, setState] = useState<State>({
-    results: [],
-    favorites: [],
-    history: [],
-    favoriteIds: new Set(),
-    downloadedPaths: new Map(),
-    error: undefined,
-    isLoading: false,
-  });
+  const [favorites, setFavorites] = useState<FavoriteReference[]>([]);
+  const [history, setHistory] = useState<SearchHistoryEntry[]>([]);
+  const [downloadedPaths, setDownloadedPaths] = useState<Map<string, string>>(
+    new Map(),
+  );
+  const [refreshVersion, setRefreshVersion] = useState(0);
+  const [clientVersion, setClientVersion] = useState(0);
+  const [selectedReferenceId, setSelectedReferenceId] = useState<
+    string | undefined
+  >();
+  const [oauthStatus, setOAuthStatus] = useState<OAuthStatus>(
+    preferences.authMode === "oauth-mcp" ? "checking" : "disconnected",
+  );
+  const canSearch =
+    preferences.authMode === "api-key" || oauthStatus === "connected";
 
-  const abortRef = useRef<AbortController | null>(null);
-  const trimmedQuery = searchText.trim();
+  const options = useMemo<SearchOptions>(
+    () => ({
+      kind,
+      query: canSearch ? searchText : "",
+      platform: kind === "section" ? "web" : config.platform,
+      mode: config.mode,
+      imageQuality: config.imageQuality,
+      mcpImageFormat: config.mcpImageFormat,
+      limit: config.limit,
+      excludeScreenIds: kind === "screen" ? excludedIds : [],
+    }),
+    [canSearch, config, excludedIds, kind, searchText],
+  );
 
   const reloadStoredState = useCallback(async () => {
-    const [favorites, history] = await Promise.all([
+    const [nextFavorites, nextHistory] = await Promise.all([
       getFavorites(),
       getSearchHistory(),
     ]);
-    setState((previous) => ({
-      ...previous,
-      favorites,
-      history,
-      favoriteIds: new Set(favorites.map((screen) => screen.id)),
-    }));
+    setFavorites(nextFavorites);
+    setHistory(nextHistory);
   }, []);
 
+  const handleCompletedSearch = useCallback(
+    async (completedOptions: SearchOptions, signal: AbortSignal) => {
+      await addSearchHistory(completedOptions, signal);
+      if (!signal.aborted) await reloadStoredState();
+    },
+    [reloadStoredState],
+  );
+
+  const search = useMobbinSearch({
+    preferences,
+    options,
+    refreshVersion,
+    clientVersion,
+    onCompleted: handleCompletedSearch,
+  });
+
+  const refreshOAuthStatus = useCallback(async () => {
+    if (preferences.authMode !== "oauth-mcp") return;
+    try {
+      const status = await getMobbinOAuthStatus();
+      setOAuthStatus(
+        status.hasTokens
+          ? status.isExpired
+            ? "expired"
+            : "connected"
+          : "disconnected",
+      );
+    } catch {
+      setOAuthStatus("disconnected");
+    }
+  }, [preferences.authMode]);
+
   useEffect(() => {
-    reloadStoredState();
-  }, [reloadStoredState]);
+    void reloadStoredState();
+    void refreshOAuthStatus();
+  }, [refreshOAuthStatus, reloadStoredState]);
 
   useEffect(() => {
     setSearchText(initialSearchText);
   }, [initialSearchText]);
 
-  useEffect(() => {
-    abortRef.current?.abort();
+  const trimmedQuery = searchText.trim();
+  const favoriteKeys = useMemo(
+    () =>
+      new Set(favorites.map((favorite) => `${favorite.kind}:${favorite.id}`)),
+    [favorites],
+  );
+  const kindHistory = useMemo(
+    () => history.filter((entry) => entry.kind === kind),
+    [history, kind],
+  );
+  const visibleItems = useMemo<MobbinReference[]>(() => {
+    if (trimmedQuery) return search.results;
+    if (kind === "flow") return [];
+    return favorites.filter(
+      (favorite) =>
+        favorite.kind === kind &&
+        (kind === "section" || favorite.platform === config.platform),
+    );
+  }, [config.platform, favorites, kind, search.results, trimmedQuery]);
 
-    if (!trimmedQuery) {
-      setState((previous) => ({
-        ...previous,
-        results: [],
-        error: undefined,
-        isLoading: false,
-      }));
-      return;
+  const updateDownloadedPath = useCallback(
+    (referenceId: string, imagePath?: string) => {
+      setDownloadedPaths((current) => {
+        const next = new Map(current);
+        if (imagePath) next.set(referenceId, imagePath);
+        else next.delete(referenceId);
+        return next;
+      });
+    },
+    [],
+  );
+
+  useProgressiveImages({
+    references: visibleItems,
+    loadedPaths: downloadedPaths,
+    onLoaded: updateDownloadedPath,
+    ...(selectedReferenceId ? { priorityKey: selectedReferenceId } : {}),
+  });
+
+  function applyOptions(next: typeof config) {
+    setConfig(next);
+    setExcludedIds([]);
+  }
+
+  function applyHistory(entry: SearchHistoryEntry) {
+    setSearchText(entry.query);
+    setConfig({
+      platform: entry.platform,
+      mode: entry.mode,
+      imageQuality: entry.imageQuality,
+      mcpImageFormat: entry.mcpImageFormat,
+      limit: entry.limit,
+    });
+    setExcludedIds([]);
+    setRefreshVersion((value) => value + 1);
+  }
+
+  async function handleConnectOAuth() {
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title:
+        oauthStatus === "expired" ? "Reconnecting Mobbin" : "Connecting Mobbin",
+    });
+    try {
+      await connectMobbinOAuth(preferences);
+      setClientVersion((value) => value + 1);
+      setRefreshVersion((value) => value + 1);
+      await refreshOAuthStatus();
+      toast.style = Toast.Style.Success;
+      toast.title = "Mobbin OAuth Connected";
+    } catch (error) {
+      await toast.hide();
+      await showFailureToast(error, { title: "OAuth Connection Failed" });
+      await refreshOAuthStatus();
     }
+  }
 
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    async function search() {
-      setState((previous) => ({
-        ...previous,
-        isLoading: true,
-        error: undefined,
-      }));
-      try {
-        const client = createSearchClient();
-        const options = {
-          query: trimmedQuery,
-          platform,
-          mode,
-          image_quality: imageQuality,
-          limit,
-          exclude_screen_ids: excludedIds,
-        };
-        const results = await client.searchScreens(options, controller.signal);
-        if (controller.signal.aborted) return;
-
-        await addSearchHistory(options);
-        const [favorites, history] = await Promise.all([
-          getFavorites(),
-          getSearchHistory(),
-        ]);
-        setState((previous) => ({
-          ...previous,
-          results,
-          favorites,
-          history,
-          favoriteIds: new Set(favorites.map((screen) => screen.id)),
-          isLoading: false,
-        }));
-      } catch (error) {
-        if (controller.signal.aborted || isAbortError(error)) return;
-        setState((previous) => ({
-          ...previous,
-          error:
-            error instanceof Error ? error : new Error(getErrorMessage(error)),
-          isLoading: false,
-        }));
-      }
-    }
-
-    const timeout = setTimeout(search, 250);
-    return () => {
-      clearTimeout(timeout);
-      controller.abort();
-    };
-  }, [trimmedQuery, platform, mode, imageQuality, limit, excludedIds]);
-
-  const visibleItems = useMemo(() => {
-    return trimmedQuery ? state.results : state.favorites;
-  }, [state.favorites, state.results, trimmedQuery]);
-
-  const emptyTitle = state.error
-    ? "Search failed"
-    : trimmedQuery
-      ? "No screens found"
-      : "Search Mobbin";
-  const emptyDescription = state.error
-    ? getErrorMessage(state.error)
-    : trimmedQuery
-      ? "Try a broader prompt or switch platform."
-      : "Type a natural language prompt to find UI references.";
-
-  function setDownloadedPath(screenId: string, imagePath: string) {
-    setState((previous) => {
-      const next = new Map(previous.downloadedPaths);
-      next.set(screenId, imagePath);
-      return { ...previous, downloadedPaths: next };
+  async function handleDisconnectOAuth() {
+    await clearMobbinOAuthState();
+    invalidateMobbinSearchCache();
+    setSearchText("");
+    setExcludedIds([]);
+    setClientVersion((value) => value + 1);
+    setOAuthStatus("disconnected");
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Disconnected Mobbin OAuth Locally",
+      message: "Use Mobbin settings to revoke server-side access.",
     });
   }
 
@@ -190,237 +250,220 @@ export function SearchView({
     await reloadStoredState();
     await showToast({
       style: Toast.Style.Success,
-      title: "Cleared search history",
+      title: "Cleared Search History",
     });
   }
 
-  async function handleConnectOAuth() {
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Connecting Mobbin OAuth",
-    });
-    try {
-      await connectMobbinOAuth(preferences);
-      toast.style = Toast.Style.Success;
-      toast.title = "Mobbin OAuth connected";
-      setState((previous) => ({ ...previous, error: undefined }));
-      setExcludedIds((current) => [...current]);
-    } catch (error) {
-      await toast.hide();
-      await showFailureToast(error, { title: "OAuth connection failed" });
-    }
+  function handleRefresh() {
+    invalidateMobbinSearchCache();
+    setRefreshVersion((value) => value + 1);
   }
 
-  async function handleDisconnectOAuth() {
-    await clearMobbinOAuthState();
-    setState((previous) => ({ ...previous, error: undefined }));
-    setExcludedIds((current) => [...current]);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Mobbin OAuth disconnected",
-    });
-  }
+  const optionsTarget = (
+    <SearchOptionsForm
+      authMode={preferences.authMode}
+      kind={kind}
+      value={config}
+      onChange={applyOptions}
+    />
+  );
+  const effectiveOAuthStatus = oauthActionStatus(oauthStatus, search.error);
 
-  function handleRefreshSearch() {
-    setState((previous) => ({ ...previous, error: undefined }));
-    setExcludedIds((current) => [...current]);
+  const globalActions = (
+    <GlobalActions
+      authMode={preferences.authMode}
+      kind={kind}
+      oauthStatus={effectiveOAuthStatus}
+      optionsTarget={optionsTarget}
+      history={kindHistory}
+      onConnect={handleConnectOAuth}
+      onDisconnect={handleDisconnectOAuth}
+      onRefresh={handleRefresh}
+      onSelectHistory={applyHistory}
+      onClearHistory={handleClearHistory}
+      onUseExample={setSearchText}
+    />
+  );
+
+  if (kind !== "screen" && preferences.authMode !== "oauth-mcp") {
+    return (
+      <SetupView
+        title={`Mobbin ${kind === "flow" ? "flows" : "sections"} require OAuth MCP`}
+        message="Switch Authentication Mode to OAuth MCP in extension preferences. Mobbin's REST API currently supports screen search only."
+      />
+    );
   }
 
   if (preferences.authMode === "api-key" && !hasApiKey(preferences)) {
     return (
       <SetupView
-        title="Mobbin API key required"
+        title="Mobbin API Key Required"
         message="REST API mode requires a Mobbin Team or Enterprise API key."
       />
     );
   }
 
-  const shouldShowOAuthAction = preferences.authMode === "oauth-mcp";
-  const hasOAuthError =
-    state.error instanceof MobbinError && state.error.code === "oauth-required";
+  const aspectRatio = searchGridAspectRatio(kind, config.platform);
+  const requiresOAuthConnection =
+    preferences.authMode === "oauth-mcp" && oauthStatus !== "connected";
+  const emptyTitle = requiresOAuthConnection
+    ? oauthStatus === "checking"
+      ? "Checking Mobbin Connection"
+      : oauthStatus === "expired"
+        ? "Reconnect Mobbin OAuth"
+        : "Connect Mobbin OAuth"
+    : search.isLoading && trimmedQuery
+      ? "Searching Mobbin"
+      : search.error
+        ? search.error instanceof MobbinError &&
+          search.error.code === "oauth-required"
+          ? "Connect Mobbin OAuth"
+          : "Search Failed"
+        : trimmedQuery
+          ? `No ${kind === "screen" ? "Screens" : kind === "flow" ? "Flows" : "Sections"} Found`
+          : kind === "screen"
+            ? "Search Mobbin"
+            : kind === "flow"
+              ? "Search Product Flows"
+              : "Search Website Sections";
+  const emptyDescription = requiresOAuthConnection
+    ? "Use the action panel to authorize this extension with your Mobbin account."
+    : search.isLoading && trimmedQuery
+      ? "Results will appear immediately; reference images will fill in progressively."
+      : search.error
+        ? search.error instanceof MobbinError &&
+          search.error.code === "contract-mismatch" &&
+          search.error.details?.safeKeys?.length
+          ? `${search.error.message} Top-level fields: ${search.error.details.safeKeys.join(", ")}`
+          : search.error.message
+        : trimmedQuery
+          ? "Try one specific UI intent, name an app, or switch platform."
+          : "Describe one UI in plain language. Avoid multiple intents, negations, platform names, and vague style words.";
+
   return (
     <Grid
       navigationTitle={navigationTitle}
-      searchBarPlaceholder="Search screens, e.g. login screen with biometric authentication"
+      searchBarPlaceholder={
+        kind === "flow"
+          ? "Search flows, e.g. fintech account onboarding"
+          : kind === "section"
+            ? "Search sections, e.g. SaaS pricing comparison"
+            : "Search screens, e.g. login with biometric authentication"
+      }
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      throttle
-      isLoading={state.isLoading}
-      columns={4}
-      aspectRatio="9/16"
+      filtering={false}
+      onSelectionChange={(id) => setSelectedReferenceId(id ?? undefined)}
+      isLoading={search.isLoading}
+      columns={REFERENCE_GRID_COLUMNS}
+      aspectRatio={aspectRatio}
       inset={Grid.Inset.Small}
       fit={Grid.Fit.Contain}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Search Options"
-          value={`${platform}:${mode}:${imageQuality}:${limit}`}
-          onChange={(value) => {
-            const [nextPlatform, nextMode, nextQuality, nextLimit] =
-              value.split(":");
-            setPlatform(nextPlatform as Platform);
-            setMode(nextMode as SearchMode);
-            setImageQuality(nextQuality as ImageQuality);
-            setLimit(Number(nextLimit));
-            setExcludedIds([]);
-          }}
-        >
-          <Grid.Dropdown.Section title="iOS">
-            <Grid.Dropdown.Item
-              title="Deep, Optimized, 20"
-              value="ios:deep:optimized:20"
-            />
-            <Grid.Dropdown.Item
-              title="Standard, Optimized, 20"
-              value="ios:standard:optimized:20"
-            />
-            <Grid.Dropdown.Item
-              title="Deep, High, 20"
-              value="ios:deep:high:20"
-            />
-            <Grid.Dropdown.Item
-              title="Deep, Optimized, 50"
-              value="ios:deep:optimized:50"
-            />
-          </Grid.Dropdown.Section>
-          <Grid.Dropdown.Section title="Web">
-            <Grid.Dropdown.Item
-              title="Deep, Optimized, 20"
-              value="web:deep:optimized:20"
-            />
-            <Grid.Dropdown.Item
-              title="Standard, Optimized, 20"
-              value="web:standard:optimized:20"
-            />
-            <Grid.Dropdown.Item
-              title="Deep, High, 20"
-              value="web:deep:high:20"
-            />
-            <Grid.Dropdown.Item
-              title="Deep, Optimized, 50"
-              value="web:deep:optimized:50"
-            />
-          </Grid.Dropdown.Section>
-        </Grid.Dropdown>
+        kind !== "section" ? (
+          <Grid.Dropdown
+            tooltip="Platform"
+            value={config.platform}
+            onChange={(value) => {
+              setConfig((current) => ({
+                ...current,
+                platform: value === "web" ? "web" : "ios",
+              }));
+              setExcludedIds([]);
+            }}
+          >
+            <Grid.Dropdown.Item title="iOS" value="ios" />
+            <Grid.Dropdown.Item title="Web" value="web" />
+          </Grid.Dropdown>
+        ) : undefined
       }
-      actions={
-        <ActionPanel>
-          {shouldShowOAuthAction ? (
-            <Action
-              title="Connect OAuth MCP"
-              icon={MOBBIN_ICON}
-              onAction={handleConnectOAuth}
-            />
-          ) : null}
-          {shouldShowOAuthAction ? (
-            <Action
-              title="Refresh OAuth Search"
-              icon={Icon.ArrowClockwise}
-              onAction={handleRefreshSearch}
-            />
-          ) : null}
-          {shouldShowOAuthAction ? (
-            <Action
-              title="Disconnect OAuth MCP"
-              icon={Icon.XMarkCircle}
-              style={Action.Style.Destructive}
-              onAction={handleDisconnectOAuth}
-            />
-          ) : null}
-          {state.history.map((entry) => (
-            <Action
-              key={entry.id}
-              title={`Search "${entry.query}"`}
-              icon={Icon.MagnifyingGlass}
-              onAction={() => {
-                setSearchText(entry.query);
-                setPlatform(entry.platform);
-                setMode(entry.mode);
-                setImageQuality(entry.image_quality);
-                setLimit(entry.limit);
-              }}
-            />
-          ))}
-          {state.history.length > 0 ? (
-            <Action
-              title="Clear Search History"
-              icon={Icon.Trash}
-              onAction={handleClearHistory}
-            />
-          ) : null}
-        </ActionPanel>
-      }
+      actions={<ActionPanel>{globalActions}</ActionPanel>}
     >
       {visibleItems.length === 0 ? (
         <Grid.EmptyView
           icon={MOBBIN_ICON}
-          title={hasOAuthError ? "Connect Mobbin OAuth" : emptyTitle}
-          description={
-            hasOAuthError
-              ? "OAuth MCP registers its client and stores tokens when you connect."
-              : emptyDescription
-          }
-          actions={
-            hasOAuthError ? (
-              <ActionPanel>
-                <Action
-                  title="Connect OAuth MCP"
-                  icon={MOBBIN_ICON}
-                  onAction={handleConnectOAuth}
-                />
-                <Action
-                  title="Refresh OAuth Search"
-                  icon={Icon.ArrowClockwise}
-                  onAction={handleRefreshSearch}
-                />
-                <Action
-                  title="Disconnect OAuth MCP"
-                  icon={Icon.XMarkCircle}
-                  style={Action.Style.Destructive}
-                  onAction={handleDisconnectOAuth}
-                />
-              </ActionPanel>
-            ) : undefined
-          }
+          title={emptyTitle}
+          description={emptyDescription}
+          actions={<ActionPanel>{globalActions}</ActionPanel>}
         />
       ) : null}
 
-      {visibleItems.map((screen) => {
-        const localPath = state.downloadedPaths.get(screen.id);
+      {visibleItems.map((reference) => {
+        const image = imageForReference(reference);
+        const downloadedPath = downloadedPaths.get(
+          `${reference.kind}:${reference.id}`,
+        );
+        const favoriteLocalPath =
+          reference.kind !== "flow" ? reference.image.localPath : undefined;
+        const localPath = downloadedPath ?? favoriteLocalPath;
+        const source = localPath ?? image?.dataUrl;
+        const isFavorite = favoriteKeys.has(
+          `${reference.kind}:${reference.id}`,
+        );
+
         return (
           <Grid.Item
-            key={screen.id}
-            id={screen.id}
-            content={{ source: screen.image_url }}
-            title={screen.app_name}
-            subtitle={`${screen.platform.toUpperCase()} | ${screen.source.toUpperCase()}`}
-            keywords={[screen.app_name, screen.platform, screen.id]}
+            key={`${reference.kind}:${reference.id}`}
+            id={`${reference.kind}:${reference.id}`}
+            content={source ? { source } : MOBBIN_ICON}
+            title={reference.title}
+            subtitle={`${reference.appName} · ${reference.platform.toUpperCase()}`}
+            keywords={[
+              reference.appName,
+              reference.platform,
+              reference.id,
+              reference.kind,
+            ]}
             {...(localPath
               ? {
                   quickLook: {
                     path: localPath,
-                    name: `${screen.app_name}.png`,
+                    name: `${reference.appName}${localPath.slice(localPath.lastIndexOf("."))}`,
                   },
                 }
               : {})}
             actions={
               <ActionPanel>
-                <MobbinActions
-                  screen={screen}
-                  isFavorite={state.favoriteIds.has(screen.id)}
-                  onFavoriteChange={reloadStoredState}
-                  onExclude={(screenId) =>
-                    setExcludedIds((current) => [
-                      ...new Set([...current, screenId]),
-                    ])
-                  }
-                  onDownloaded={setDownloadedPath}
-                />
-                {localPath ? (
-                  <Action.ToggleQuickLook
-                    title="Quick Look Image"
-                    shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+                {reference.kind === "flow" ? (
+                  <>
+                    <Action.Push
+                      title="Open Flow Screens"
+                      icon={Icon.List}
+                      target={
+                        <FlowDetail
+                          flow={reference as FlowReference}
+                          favorites={favorites}
+                          downloadedPaths={downloadedPaths}
+                          onFavoriteChange={reloadStoredState}
+                          onDownloaded={updateDownloadedPath}
+                          globalActions={globalActions}
+                        />
+                      }
+                    />
+                    <Action.OpenInBrowser
+                      title="Open Flow in Mobbin"
+                      url={reference.mobbinUrl}
+                      icon={Icon.Globe}
+                    />
+                  </>
+                ) : (
+                  <ReferenceActions
+                    reference={reference as ImageReference}
+                    isFavorite={isFavorite}
+                    onFavoriteChange={reloadStoredState}
+                    onDownloaded={updateDownloadedPath}
+                    {...(localPath ? { localPath } : {})}
+                    {...(canExcludeFromSearch(kind, trimmedQuery)
+                      ? {
+                          onExclude: (screenId: string) =>
+                            setExcludedIds((current) => [
+                              ...new Set([...current, screenId]),
+                            ]),
+                        }
+                      : {})}
                   />
-                ) : null}
+                )}
+                {globalActions}
               </ActionPanel>
             }
           />

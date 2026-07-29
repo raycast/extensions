@@ -99,7 +99,7 @@ describe("RaycastMcpOAuthProvider", () => {
   it("starts authorization with Raycast's tracked request object", async () => {
     const authorizationRequest = {
       codeChallenge: "raycast-code-challenge",
-      codeVerifier: "raycast-code-verifier",
+      codeVerifier: "v".repeat(64),
       redirectURI: "https://raycast.com/redirect?packageName=mobbin",
       state: "raycast-state",
       toURL: () => "https://auth.example.com/oauth/authorize",
@@ -137,12 +137,66 @@ describe("RaycastMcpOAuthProvider", () => {
     });
     expect(raycastMock.localStorage.setItem).toHaveBeenCalledWith(
       "mobbin.oauth.codeVerifier",
-      "raycast-code-verifier",
+      "v".repeat(64),
     );
     expect(oauthClient.authorize).toHaveBeenCalledWith(authorizationRequest);
     expect(provider.redirectUrl).toBe(
       "https://raycast.com/redirect?packageName=mobbin",
     );
     expect(provider.takeAuthorizationCode()).toBe("authorization-code");
+  });
+
+  it("rejects corrupt persisted OAuth structures", async () => {
+    raycastMock.localStorage.getItem.mockImplementation(async (key: string) => {
+      if (key === "mobbin.oauth.clientSchemaVersion") return "2";
+      if (key === "mobbin.oauth.clientInformation")
+        return JSON.stringify({ client_id: 42 });
+      if (key === "mobbin.oauth.discoveryState")
+        return JSON.stringify({
+          authorizationServerUrl: "javascript:alert(1)",
+        });
+      if (key === "mobbin.oauth.codeVerifier") return "short";
+      return undefined;
+    });
+    const provider = new RaycastMcpOAuthProvider({} as never);
+    await expect(provider.clientInformation()).resolves.toBeUndefined();
+    await expect(provider.discoveryState()).resolves.toBeUndefined();
+    await expect(provider.codeVerifier()).rejects.toThrow("Missing or invalid");
+  });
+
+  it("bridges Raycast token storage for initial and refreshed tokens", async () => {
+    const setTokens = vi.fn();
+    const oauthClient = {
+      getTokens: vi.fn(async () => ({
+        accessToken: "access",
+        refreshToken: "refresh",
+        expiresIn: 3600,
+        updatedAt: new Date(),
+        isExpired: () => false,
+        scope: "openid",
+      })),
+      setTokens,
+    };
+    const provider = new RaycastMcpOAuthProvider(oauthClient as never);
+    await expect(provider.tokens()).resolves.toEqual({
+      access_token: "access",
+      refresh_token: "refresh",
+      expires_in: 3600,
+      token_type: "Bearer",
+      scope: "openid",
+    });
+    await provider.saveTokens({
+      access_token: "refreshed",
+      refresh_token: "new-refresh",
+      token_type: "Bearer",
+      expires_in: 7200,
+      scope: "openid",
+    });
+    expect(setTokens).toHaveBeenCalledWith({
+      access_token: "refreshed",
+      refresh_token: "new-refresh",
+      expires_in: 7200,
+      scope: "openid",
+    });
   });
 });

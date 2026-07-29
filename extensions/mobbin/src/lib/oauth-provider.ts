@@ -25,13 +25,57 @@ const DEFAULT_REDIRECT_URL =
   "https://raycast.com/redirect?packageName=Extension";
 const SUPPORTED_REDIRECT_URLS = [DEFAULT_REDIRECT_URL];
 
-function parseJson<T>(value: string | undefined): T | undefined {
+function parseJson(value: string | undefined): unknown {
   if (!value) return undefined;
   try {
-    return JSON.parse(value) as T;
+    return JSON.parse(value) as unknown;
   } catch {
     return undefined;
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function isHttpsUrl(value: unknown): value is string {
+  if (typeof value !== "string") return false;
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+function validClientInformation(
+  value: unknown,
+): OAuthClientInformationMixed | undefined {
+  if (!isRecord(value) || typeof value.client_id !== "string") return undefined;
+  if (
+    value.redirect_uris !== undefined &&
+    (!Array.isArray(value.redirect_uris) ||
+      !value.redirect_uris.every(isHttpsUrl))
+  )
+    return undefined;
+  return value as OAuthClientInformationMixed;
+}
+
+function validDiscoveryState(value: unknown): OAuthDiscoveryState | undefined {
+  if (!isRecord(value) || !isHttpsUrl(value.authorizationServerUrl))
+    return undefined;
+  if (
+    value.resourceMetadataUrl !== undefined &&
+    !isHttpsUrl(value.resourceMetadataUrl)
+  )
+    return undefined;
+  if (
+    value.authorizationServerMetadata !== undefined &&
+    !isRecord(value.authorizationServerMetadata)
+  )
+    return undefined;
+  if (value.resourceMetadata !== undefined && !isRecord(value.resourceMetadata))
+    return undefined;
+  return value as unknown as OAuthDiscoveryState;
 }
 
 export function createRaycastOAuthClient(): OAuth.PKCEClient {
@@ -41,7 +85,7 @@ export function createRaycastOAuthClient(): OAuth.PKCEClient {
     providerId: "mobbin-mcp",
     providerIcon: MOBBIN_ICON,
     description:
-      "Connect your Mobbin account to search screens through the Mobbin MCP server.",
+      "Connect your Mobbin account to search screens, flows, and sections through Mobbin MCP.",
   });
 }
 
@@ -83,10 +127,13 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
       return undefined;
     }
 
-    const clientInformation = parseJson<OAuthClientInformationMixed>(
+    const storedClientInformation = parseJson(
       await LocalStorage.getItem<string>(CLIENT_INFORMATION_KEY),
     );
+    const clientInformation = validClientInformation(storedClientInformation);
     if (!clientInformation) {
+      if (storedClientInformation !== undefined)
+        await LocalStorage.removeItem(CLIENT_INFORMATION_KEY);
       await appendDebugLog("oauth.client-information.missing");
       return undefined;
     }
@@ -121,6 +168,8 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
   async saveClientInformation(
     clientInformation: OAuthClientInformationMixed,
   ): Promise<void> {
+    if (!validClientInformation(clientInformation))
+      throw new Error("Mobbin returned invalid OAuth client information.");
     await appendDebugLog("oauth.client-information.save", {
       hasClientId: "client_id" in clientInformation,
       redirectUris:
@@ -287,6 +336,8 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
   }
 
   async saveCodeVerifier(codeVerifier: string): Promise<void> {
+    if (codeVerifier.length < 43 || codeVerifier.length > 128)
+      throw new Error("Mobbin returned an invalid OAuth code verifier.");
     await appendDebugLog("oauth.code-verifier.save", {
       length: codeVerifier.length,
     });
@@ -299,9 +350,13 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
       found: Boolean(verifier),
       length: verifier?.length,
     });
-    if (!verifier)
+    if (
+      typeof verifier !== "string" ||
+      verifier.length < 43 ||
+      verifier.length > 128
+    )
       throw new Error(
-        "Missing OAuth code verifier. Start Mobbin authorization again.",
+        "Missing or invalid OAuth code verifier. Start Mobbin authorization again.",
       );
     return verifier;
   }
@@ -316,8 +371,8 @@ export class RaycastMcpOAuthProvider implements OAuthClientProvider {
   }
 
   async discoveryState(): Promise<OAuthDiscoveryState | undefined> {
-    const state = parseJson<OAuthDiscoveryState>(
-      await LocalStorage.getItem<string>(DISCOVERY_STATE_KEY),
+    const state = validDiscoveryState(
+      parseJson(await LocalStorage.getItem<string>(DISCOVERY_STATE_KEY)),
     );
     await appendDebugLog("oauth.discovery-state.read", {
       found: Boolean(state),
@@ -377,7 +432,7 @@ export async function getMobbinOAuthStatus(): Promise<{
     // so don't report it as present here.
     hasClientInformation:
       storedSchemaVersion === CLIENT_SCHEMA_VERSION &&
-      Boolean(clientInformation),
+      Boolean(validClientInformation(parseJson(clientInformation))),
     ...(tokens ? { isExpired: tokens.isExpired() } : {}),
   };
 }

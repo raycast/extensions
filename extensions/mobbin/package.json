@@ -2,12 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mobbin",
   "title": "Mobbin Search",
-  "description": "Search Mobbin screens and copy design references from Raycast.",
+  "description": "Search Mobbin screens, flows, and sections from Raycast.",
   "icon": "icon.png",
   "author": "noss",
   "license": "MIT",
-  "categories": ["Design Tools", "Developer Tools"],
-  "platforms": ["macOS"],
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "search-mobbin",
@@ -20,6 +25,18 @@
       "title": "Search Selected Text",
       "description": "Search Mobbin using the selected text from the frontmost app.",
       "mode": "view"
+    },
+    {
+      "name": "search-mobbin-flows",
+      "title": "Search Mobbin Flows",
+      "description": "Search multi-step product flows through Mobbin MCP.",
+      "mode": "view"
+    },
+    {
+      "name": "search-mobbin-sections",
+      "title": "Search Mobbin Sections",
+      "description": "Search website sections through Mobbin MCP.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -29,10 +46,16 @@
       "description": "Choose how the extension should access Mobbin.",
       "type": "dropdown",
       "required": true,
-      "default": "api-key",
+      "default": "oauth-mcp",
       "data": [
-        { "title": "REST API Key", "value": "api-key" },
-        { "title": "OAuth MCP", "value": "oauth-mcp" }
+        {
+          "title": "REST API Key",
+          "value": "api-key"
+        },
+        {
+          "title": "OAuth MCP",
+          "value": "oauth-mcp"
+        }
       ]
     },
     {
@@ -51,8 +74,14 @@
       "required": true,
       "default": "ios",
       "data": [
-        { "title": "iOS", "value": "ios" },
-        { "title": "Web", "value": "web" }
+        {
+          "title": "iOS",
+          "value": "ios"
+        },
+        {
+          "title": "Web",
+          "value": "web"
+        }
       ]
     },
     {
@@ -63,34 +92,76 @@
       "required": true,
       "default": "deep",
       "data": [
-        { "title": "Deep", "value": "deep" },
-        { "title": "Standard", "value": "standard" }
+        {
+          "title": "Deep",
+          "value": "deep"
+        },
+        {
+          "title": "Standard",
+          "value": "standard"
+        }
       ]
     },
     {
       "name": "defaultImageQuality",
-      "title": "Default Image Quality",
-      "description": "Optimized is best for normal Raycast browsing; high is larger.",
+      "title": "REST Image Quality",
+      "description": "Image quality used for REST API searches.",
       "type": "dropdown",
       "required": true,
       "default": "optimized",
       "data": [
-        { "title": "Optimized", "value": "optimized" },
-        { "title": "High", "value": "high" }
+        {
+          "title": "Optimized",
+          "value": "optimized"
+        },
+        {
+          "title": "High",
+          "value": "high"
+        }
+      ]
+    },
+    {
+      "name": "defaultMcpImageFormat",
+      "title": "MCP Image Format",
+      "description": "WebP is smaller; JPEG is useful for clients without WebP support.",
+      "type": "dropdown",
+      "required": true,
+      "default": "webp",
+      "data": [
+        {
+          "title": "WebP",
+          "value": "webp"
+        },
+        {
+          "title": "JPEG",
+          "value": "jpg"
+        }
       ]
     },
     {
       "name": "defaultLimit",
       "title": "Default Result Limit",
-      "description": "Maximum screens requested from Mobbin.",
+      "description": "Maximum references requested from Mobbin.",
       "type": "dropdown",
       "required": true,
       "default": "20",
       "data": [
-        { "title": "10", "value": "10" },
-        { "title": "20", "value": "20" },
-        { "title": "50", "value": "50" },
-        { "title": "100", "value": "100" }
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "50",
+          "value": "50"
+        },
+        {
+          "title": "100",
+          "value": "100"
+        }
       ]
     }
   ],
@@ -98,14 +169,18 @@
     "dev": "ray develop",
     "build": "ray build -e dist",
     "lint": "ray lint",
+    "eslint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
     "publish": "ray publish"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.18.1",
-    "@raycast/api": "^1.102.5",
-    "@raycast/utils": "^1.19.1"
+    "@modelcontextprotocol/sdk": "^1.30.0",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

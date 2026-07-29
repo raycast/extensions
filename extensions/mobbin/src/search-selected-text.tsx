@@ -17,6 +17,7 @@ export default function Command() {
     return <Detail isLoading markdown="Loading selected text..." />;
   return (
     <SearchView
+      kind="screen"
       initialSearchText={selectedText}
       navigationTitle="Search Selected Text"
     />

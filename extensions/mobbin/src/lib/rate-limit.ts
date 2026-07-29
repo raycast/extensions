@@ -1,4 +1,5 @@
 import { MobbinError } from "./errors";
+import { abortError } from "./errors";
 
 const MAX_ATTEMPTS = 3;
 
@@ -18,18 +19,18 @@ export function parseRetryAfterSeconds(
 }
 
 function delay(ms: number, signal?: AbortSignal): Promise<void> {
-  if (signal?.aborted) return Promise.reject(signal.reason);
+  if (signal?.aborted) return Promise.reject(abortError(signal.reason));
 
   return new Promise((resolve, reject) => {
-    const timeout = setTimeout(resolve, ms);
-    signal?.addEventListener(
-      "abort",
-      () => {
-        clearTimeout(timeout);
-        reject(signal.reason);
-      },
-      { once: true },
-    );
+    const onAbort = () => {
+      clearTimeout(timeout);
+      reject(abortError(signal?.reason));
+    };
+    const timeout = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
   });
 }
 
@@ -54,10 +55,12 @@ export async function withRateLimitRetry<T>(
       }
 
       const retryAfterSeconds = error.details?.retryAfterSeconds;
-      const baseMs = retryAfterSeconds
-        ? retryAfterSeconds * 1000
-        : 2 ** attempt * 750;
-      const jitterMs = Math.floor(Math.random() * 250);
+      const baseMs =
+        retryAfterSeconds !== undefined
+          ? retryAfterSeconds * 1000
+          : 2 ** attempt * 750;
+      const jitterMs =
+        retryAfterSeconds === undefined ? Math.floor(Math.random() * 250) : 0;
       await delay(baseMs + jitterMs, signal);
     }
   }

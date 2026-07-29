@@ -7,18 +7,20 @@ export async function connectMobbinOAuth(
   await appendDebugLog("oauth.connect.start", {
     platform: preferences.defaultPlatform,
     mode: preferences.defaultSearchMode,
-    imageQuality: preferences.defaultImageQuality,
+    imageFormat: preferences.defaultMcpImageFormat,
   });
 
   try {
-    await new MobbinMcpClient().searchScreens({
-      query: "login screen",
-      platform: preferences.defaultPlatform,
-      mode: preferences.defaultSearchMode,
-      image_quality: preferences.defaultImageQuality,
-      limit: 1,
-      exclude_screen_ids: [],
-    });
+    const client = new MobbinMcpClient();
+    try {
+      await client.connect();
+      const capabilities = await client.getCapabilities();
+      await appendDebugLog("oauth.connect.capabilities", {
+        ...capabilities,
+      });
+    } finally {
+      await client.dispose();
+    }
     await appendDebugLog("oauth.connect.success");
   } catch (error) {
     await appendDebugLog("oauth.connect.failure", { error });

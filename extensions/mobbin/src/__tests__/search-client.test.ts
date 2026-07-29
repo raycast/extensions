@@ -22,6 +22,7 @@ vi.mock("../lib/preferences", () => ({
     defaultPlatform: "ios",
     defaultSearchMode: "deep",
     defaultImageQuality: "optimized",
+    defaultMcpImageFormat: "webp",
     defaultLimit: "20",
   })),
 }));
@@ -38,6 +39,7 @@ describe("createSearchClient", () => {
       defaultPlatform: "ios",
       defaultSearchMode: "deep",
       defaultImageQuality: "optimized",
+      defaultMcpImageFormat: "webp",
       defaultLimit: "20",
     });
 
