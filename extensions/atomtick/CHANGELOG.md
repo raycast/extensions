@@ -1,6 +1,6 @@
 # AtomTick Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-29
 
 - Analog Clock: live SVG watch face with a centered digital `HH:MM:SS` caption, NTP-corrected.
 - Copy Atomic Time: copy the NTP-synchronized instant to the clipboard as ISO-8601.
