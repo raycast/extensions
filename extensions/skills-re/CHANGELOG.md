@@ -1,6 +1,6 @@
 # skills.re Changelog
 
-## [Initial Version] - 2026-07-29
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Keyword search
 - AI search
