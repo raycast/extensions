@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 
-import { Toast, open, showToast } from "@raycast/api";
+import { Toast, showToast } from "@raycast/api";
 import openUrl from "open";
 
 import { buildElsewhereUrl, ElsewhereCommand } from "./control-url";
@@ -76,11 +76,7 @@ async function sendCommand(command: ElsewhereCommand, options: ExecuteCommandOpt
 
   try {
     const url = buildElsewhereUrl(command, correlationId);
-    if (command.kind === "volume") {
-      await openUrl(url, { background: true });
-    } else {
-      await open(url);
-    }
+    await openUrl(url, { background: true });
   } catch (error) {
     await presentFeedback(toast, {
       style: Toast.Style.Failure,
