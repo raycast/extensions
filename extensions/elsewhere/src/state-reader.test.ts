@@ -57,7 +57,15 @@ async function withApplicationSupport(
 test("parses the published schema v1 contract", () => {
   const parsed = parseElsewhereSnapshot(
     snapshot({
-      spaces: [{ id: "space-1", name: "Coffee and Thunder", color: "#917784" }],
+      spaces: [
+        {
+          id: "space-1",
+          name: "Coffee and Thunder",
+          description: "Rain on window, distant thunder, and 6 more",
+          color: "#917784",
+        },
+      ],
+      musicTracks: [{ id: "lo-fi", name: "Lo-fi Hip-Hop", description: "Warm keys and a soft pocket" }],
       lastCommand: {
         requestId: "raycast_123",
         status: "success",
@@ -72,10 +80,12 @@ test("parses the published schema v1 contract", () => {
     assert.equal(parsed.snapshot.lastCommand?.requestId, "raycast_123");
     assert.equal(parsed.snapshot.sources[0].enabled, true);
     assert.equal(parsed.snapshot.spaces[0].color, "#917784");
+    assert.equal(parsed.snapshot.spaces[0].description, "Rain on window, distant thunder, and 6 more");
+    assert.equal(parsed.snapshot.musicTracks[0].description, "Warm keys and a soft pocket");
   }
 });
 
-test("accepts rollout snapshots without Space colors and rejects malformed colors", () => {
+test("accepts rollout snapshots without optional presentation metadata and rejects malformed values", () => {
   assert.equal(parseElsewhereSnapshot(snapshot()).kind, "valid");
   assert.equal(
     parseElsewhereSnapshot(snapshot({ spaces: [{ id: "space-1", name: "Coffee and Thunder", color: "#91778" }] })).kind,
@@ -86,6 +96,17 @@ test("accepts rollout snapshots without Space colors and rejects malformed color
       .kind,
     "malformed",
   );
+  assert.equal(
+    parseElsewhereSnapshot(
+      snapshot({ musicTracks: [{ id: "lo-fi", name: "Lo-fi Hip-Hop", description: 72 as unknown as string }] }),
+    ).kind,
+    "malformed",
+  );
+  const normalized = parseElsewhereSnapshot(
+    snapshot({ musicTracks: [{ id: "lo-fi", name: "Lo-fi Hip-Hop", description: "  Warm keys  " }] }),
+  );
+  assert.equal(normalized.kind, "valid");
+  if (normalized.kind === "valid") assert.equal(normalized.snapshot.musicTracks[0].description, "Warm keys");
 });
 
 test("rejects malformed and unsupported snapshots", () => {

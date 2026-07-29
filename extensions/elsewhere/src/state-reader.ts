@@ -16,7 +16,11 @@ export interface ElsewhereNamedItem {
   name: string;
 }
 
-export interface ElsewhereSpace extends ElsewhereNamedItem {
+export interface ElsewhereDescribedItem extends ElsewhereNamedItem {
+  description?: string;
+}
+
+export interface ElsewhereSpace extends ElsewhereDescribedItem {
   color?: string;
 }
 
@@ -51,7 +55,7 @@ export interface ElsewhereSnapshotV1 {
   backgroundMusicLoading: boolean;
   activeMusicTrackId: string;
   musicVolume: number;
-  musicTracks: ElsewhereNamedItem[];
+  musicTracks: ElsewhereDescribedItem[];
   sources: ElsewhereSource[];
   lastCommand: ElsewhereCommandResult | null;
 }
@@ -115,14 +119,27 @@ function isIdentifier(value: unknown, allowEmpty = false): value is string {
   );
 }
 
-function parseNamedItems(value: unknown): ElsewhereNamedItem[] | null {
+function optionalDescription(value: unknown): string | null | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "string") return null;
+  const description = value.trim();
+  return description.length > 0 ? description : undefined;
+}
+
+function parseNamedItems(value: unknown): ElsewhereDescribedItem[] | null {
   if (!Array.isArray(value)) return null;
-  const items: ElsewhereNamedItem[] = [];
+  const items: ElsewhereDescribedItem[] = [];
   for (const entry of value) {
     if (!isObject(entry) || !isIdentifier(entry.id) || typeof entry.name !== "string" || entry.name.length === 0) {
       return null;
     }
-    items.push({ id: entry.id, name: entry.name });
+    const description = optionalDescription(entry.description);
+    if (description === null) return null;
+    items.push({
+      id: entry.id,
+      name: entry.name,
+      ...(description ? { description } : {}),
+    });
   }
   return items;
 }
@@ -131,11 +148,13 @@ function parseSpaces(value: unknown): ElsewhereSpace[] | null {
   if (!Array.isArray(value)) return null;
   const spaces: ElsewhereSpace[] = [];
   for (const entry of value) {
+    const description = isObject(entry) ? optionalDescription(entry.description) : null;
     if (
       !isObject(entry) ||
       !isIdentifier(entry.id) ||
       typeof entry.name !== "string" ||
       entry.name.length === 0 ||
+      description === null ||
       (entry.color !== undefined && (typeof entry.color !== "string" || !SPACE_COLOR_PATTERN.test(entry.color)))
     ) {
       return null;
@@ -143,6 +162,7 @@ function parseSpaces(value: unknown): ElsewhereSpace[] | null {
     spaces.push({
       id: entry.id,
       name: entry.name,
+      ...(description ? { description } : {}),
       ...(typeof entry.color === "string" ? { color: entry.color } : {}),
     });
   }
