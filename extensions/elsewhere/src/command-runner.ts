@@ -4,7 +4,8 @@ import { Toast, open, showToast } from "@raycast/api";
 import openUrl from "open";
 
 import { buildElsewhereUrl, ElsewhereCommand } from "./control-url";
-import { ElsewhereCommandResult, readElsewhereState } from "./state-reader";
+import { ElsewhereCommandResult, ElsewhereSnapshotV1, readElsewhereState } from "./state-reader";
+import { successToastTitle } from "./success-toast";
 
 const CORRELATION_TIMEOUT_MS = 3_000;
 const POLL_INTERVAL_MS = 80;
@@ -19,12 +20,22 @@ function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-async function waitForCorrelatedResult(id: string): Promise<ElsewhereCommandResult | null> {
+interface CorrelatedResult {
+  result: ElsewhereCommandResult;
+  snapshot: ElsewhereSnapshotV1;
+}
+
+async function waitForCorrelatedResult(id: string): Promise<CorrelatedResult | null> {
   const deadline = Date.now() + CORRELATION_TIMEOUT_MS;
   while (Date.now() < deadline) {
     const state = await readElsewhereState();
     if (state.kind === "ready" || state.kind === "stale") {
-      if (state.snapshot.lastCommand?.requestId === id) return state.snapshot.lastCommand;
+      if (state.snapshot.lastCommand?.requestId === id) {
+        return {
+          result: state.snapshot.lastCommand,
+          snapshot: state.snapshot,
+        };
+      }
     }
     await delay(POLL_INTERVAL_MS);
   }
@@ -60,18 +71,19 @@ async function sendCommand(command: ElsewhereCommand, options: ExecuteCommandOpt
   }
 
   try {
-    const result = await waitForCorrelatedResult(correlationId);
-    if (!result) {
+    const correlated = await waitForCorrelatedResult(correlationId);
+    if (!correlated) {
       toast.style = Toast.Style.Success;
       toast.title = "Command Sent";
       toast.message = "Elsewhere did not publish a correlated result in time.";
-    } else if (result.status === "error") {
+    } else if (correlated.result.status === "error") {
       toast.style = Toast.Style.Failure;
       toast.title = "Elsewhere Could Not Complete the Command";
-      toast.message = result.message ?? result.code ?? "The app reported an unknown command error.";
+      toast.message =
+        correlated.result.message ?? correlated.result.code ?? "The app reported an unknown command error.";
     } else {
       toast.style = Toast.Style.Success;
-      toast.title = options.successTitle;
+      toast.title = successToastTitle(command, correlated.snapshot, options.successTitle);
       toast.message = undefined;
     }
   } catch {
