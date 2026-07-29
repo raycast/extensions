@@ -7,4 +7,5 @@
 - Usage in Menu Bar command showing the provider under most pressure, refreshed every 10 minutes.
 - Plain-language pace hints comparing quota consumed against time elapsed in the window.
 - Menu bar shortcut to open the OpenCodex dashboard in the browser.
+- Menu bar ring rendered in 5% steps, with light and dark variants.
 - Bundled vendor logos for 39 providers.

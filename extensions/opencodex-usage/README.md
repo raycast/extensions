@@ -37,10 +37,17 @@ opencodex dashboard renders.
 - `Pill Window` — window reported by the pill, or inherit the `Ring Window` setting.
 - `Pill Label` — percentage only, provider and percentage, or ring only.
 
-The menu bar renders icons as monochrome template images and only resolves bundled icons or asset
-filenames, so the pill uses Raycast's `CircleProgress` glyphs (quantised to the nearest quarter)
-rather than the generated progress ring used in list views. The exact percentage stays in the pill
-label and tooltip.
+The menu bar only resolves bundled icons or asset filenames — inline `data:` SVG URIs render as
+nothing, which rules out the generated progress ring used in list views. The pill therefore uses
+rings pre-rendered into `assets/rings` in 5% steps, in light and dark variants:
+
+```sh
+npm run rings
+```
+
+This requires `rsvg-convert` (`brew install librsvg`). Change `STEP` in
+`scripts/render-rings.mjs` to trade asset count against granularity, and keep `RING_STEP` in
+`src/branding.ts` in sync.
 
 ## Requirements
 

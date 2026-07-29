@@ -45,21 +45,22 @@ export function usageRing(percent: number): Image.ImageLike {
   return getProgressIcon(clamped / 100, usageColor(clamped), { background: Color.SecondaryText });
 }
 
+/** Percentage granularity of the pre-rendered ring assets. Must match `scripts/render-rings.mjs`. */
+const RING_STEP = 5;
+
 /**
  * Menu bar variant of {@link usageRing}.
  *
- * The menu bar only resolves bundled icons and asset filenames — inline `data:` SVG
- * URIs silently render as nothing, and `getProgressIcon` produces exactly that. macOS
- * also draws the result as a monochrome template image, so tint colours are discarded.
- * Raycast's circle-progress glyphs are built for this context, at the cost of
- * quantising to the nearest quarter.
+ * The menu bar only resolves bundled icons and asset filenames — inline `data:` SVG URIs
+ * render as nothing, which rules out `getProgressIcon`. Raycast's `CircleProgress` glyphs
+ * work but only step in quarters, so the pill instead uses rings pre-rendered into
+ * `assets/rings` at {@link RING_STEP}% granularity by `npm run rings`.
+ *
+ * Light and dark variants are shipped because asset images are not tinted in the menu bar.
  */
 export function menuBarUsageRing(percent: number): Image.ImageLike {
   if (!Number.isFinite(percent) || percent < 0) return Icon.CircleProgress;
   const clamped = Math.max(0, Math.min(100, percent));
-  if (clamped < 12.5) return Icon.CircleProgress;
-  if (clamped < 37.5) return Icon.CircleProgress25;
-  if (clamped < 62.5) return Icon.CircleProgress50;
-  if (clamped < 87.5) return Icon.CircleProgress75;
-  return Icon.CircleProgress100;
+  const step = String(Math.round(clamped / RING_STEP) * RING_STEP).padStart(3, "0");
+  return { source: { light: `rings/ring-${step}-light.png`, dark: `rings/ring-${step}-dark.png` } };
 }
