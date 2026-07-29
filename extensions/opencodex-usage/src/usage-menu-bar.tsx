@@ -19,7 +19,7 @@ export default function UsageMenuBarCommand() {
     menuBarProvider === "all"
       ? reports
       : reports.filter((report) => {
-          const id = report.provider.trim().toLowerCase();
+          const id = typeof report.provider === "string" ? report.provider.trim().toLowerCase() : "";
           return (
             id === menuBarProvider ||
             id.split(/[-_/]/)[0] === menuBarProvider ||

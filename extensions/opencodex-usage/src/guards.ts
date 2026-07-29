@@ -24,6 +24,12 @@ function hasStringField(value: unknown, field: string): boolean {
   return isRecord(value) && typeof value[field] === "string";
 }
 
+/** Absent is fine, but a present value must be a string: consumers call `.trim()` on these. */
+function hasOptionalStringField(value: unknown, field: string): boolean {
+  const candidate = isRecord(value) ? value[field] : undefined;
+  return candidate === undefined || candidate === null || typeof candidate === "string";
+}
+
 /** Rows are sorted, filtered and scaled by these counters, so a non-number would skew the view. */
 function hasFiniteField(value: unknown, field: string): boolean {
   const candidate = isRecord(value) ? value[field] : undefined;
@@ -48,6 +54,11 @@ export const isProviderQuotasResponse: Guard<ProviderQuotasResponse> = (value): 
     (report) =>
       hasStringField(report, "provider") &&
       isRecord(report) &&
+      // `label` is trimmed for display names and `source`/`error` are rendered directly, so a
+      // non-string here would crash the detail pane rather than show a connection error.
+      hasOptionalStringField(report, "label") &&
+      hasOptionalStringField(report, "source") &&
+      hasOptionalStringField(report, "error") &&
       (report.quota === undefined || report.quota === null || isRecord(report.quota)),
   );
 

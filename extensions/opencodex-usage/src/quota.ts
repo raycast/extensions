@@ -195,14 +195,19 @@ export function formatResetAbsolute(resetAt?: number): string | undefined {
   });
 }
 
+/** Defensive: the response guard enforces string fields, but naming must never throw. */
+function trimmed(value: unknown): string | undefined {
+  return typeof value === "string" ? value.trim() || undefined : undefined;
+}
+
 export function providerTitle(report: ProviderQuotaReport): string {
-  return report.label?.trim() || report.provider;
+  return trimmed(report.label) ?? trimmed(report.provider) ?? "Unknown provider";
 }
 
 /** Compact display name for narrow list rows: "Anthropic Claude" -> "Claude". */
 export function providerShortTitle(report: ProviderQuotaReport): string {
-  const key = report.provider.trim().toLowerCase();
-  return shortProviderName(key) ?? fallbackShortName(report);
+  const key = trimmed(report.provider)?.toLowerCase();
+  return (key ? shortProviderName(key) : undefined) ?? fallbackShortName(report);
 }
 
 /** Product-facing names, matching how the vendors brand their coding surfaces. */
@@ -253,13 +258,13 @@ export function shortProviderName(provider: string): string | undefined {
 }
 
 function fallbackShortName(report: ProviderQuotaReport): string {
-  const label = report.label?.trim();
+  const label = trimmed(report.label);
   if (label) {
     // Strip parenthetical suffixes such as "OpenAI (Codex login)" and keep the first word group.
     const withoutParens = label.replace(/\s*\(.*?\)\s*/g, " ").trim();
     if (withoutParens) return withoutParens.split(/\s+/)[0];
   }
-  return report.provider;
+  return trimmed(report.provider) ?? "Unknown provider";
 }
 
 export function formatNumber(value?: number): string {
