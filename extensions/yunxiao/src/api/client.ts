@@ -7,12 +7,7 @@
  */
 
 import { getPreferenceValues } from "@raycast/api";
-import {
-    type CredentialPreferences,
-    parseCredentials,
-    redactSensitiveText,
-    type ResolvedCredentials,
-} from "../utils/credentials";
+import { parseCredentials, redactSensitiveText, type ResolvedCredentials } from "../utils/credentials";
 import { NotFoundError, UnauthorizedError, YunxiaoApiError } from "./types";
 
 export type { EndpointMode, ResolvedCredentials } from "../utils/credentials";
@@ -33,7 +28,7 @@ export function buildProjectPath(creds: ResolvedCredentials, suffix: string): st
 
 /** 读取 Raycast 偏好并使用纯解析器进行统一校验。 */
 export function resolveCredentials(): ResolvedCredentials {
-    return parseCredentials(getPreferenceValues<CredentialPreferences>());
+    return parseCredentials(getPreferenceValues<Preferences>());
 }
 
 interface RequestOptions {

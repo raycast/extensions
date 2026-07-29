@@ -28,10 +28,6 @@ const ACCOUNT_ROOT = "https://account-devops.aliyun.com";
 /** 「个人工作项」视图的 viewIdentifier（云效固定值，从官方页面 URL 复制） */
 const PERSONAL_WORKITEM_VIEW_ID = "441e17ad4f72718076eedcf5";
 
-interface OrgAdminPreferences {
-    organizationId?: string;
-}
-
 type SectionId = "workbench" | "projex" | "test" | "codeup" | "packages" | "admin" | "settings";
 
 interface PortalItem {
@@ -49,7 +45,7 @@ interface PortalItem {
 }
 
 /** 「企业管理后台」依赖偏好里的 Organization Id */
-const ORGANIZATION_ID = (getPreferenceValues<OrgAdminPreferences>().organizationId ?? "").trim();
+const ORGANIZATION_ID = (getPreferenceValues<Preferences>().organizationId ?? "").trim();
 
 const ORG_ADMIN_UNAVAILABLE = "缺少 Organization Id，请在扩展偏好中设置后再试。";
 const ORG_ADMIN_SUBTITLE_READY = "Members / Permissions";

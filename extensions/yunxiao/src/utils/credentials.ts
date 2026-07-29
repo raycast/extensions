@@ -2,13 +2,6 @@ export const DEFAULT_BASE_URL = "https://openapi-rdc.aliyuncs.com";
 
 export type EndpointMode = "central" | "region";
 
-export interface CredentialPreferences {
-    personalAccessToken?: string;
-    organizationId?: string;
-    endpointMode?: EndpointMode;
-    regionUrl?: string;
-}
-
 export interface ResolvedCredentials {
     baseUrl: string;
     personalAccessToken: string;
@@ -37,7 +30,7 @@ export function redactSensitiveText(value: string, secret: string): string {
     return secret ? value.split(secret).join("[REDACTED]") : value;
 }
 
-export function parseCredentials(preferences: CredentialPreferences): ResolvedCredentials {
+export function parseCredentials(preferences: Preferences): ResolvedCredentials {
     const personalAccessToken = (preferences.personalAccessToken ?? "").trim();
     if (!personalAccessToken) {
         throw new CredentialsError("MISSING_PERSONAL_ACCESS_TOKEN", "缺少 Personal Access Token，请在扩展偏好中设置。");
