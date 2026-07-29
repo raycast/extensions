@@ -1,5 +1,5 @@
 # raycast-zabbix Changelog
 
-## [Added raycast-zabbix] - {PR_MERGE_DATE}
+## [Added raycast-zabbix] - 2026-07-29
 
 Initial version
