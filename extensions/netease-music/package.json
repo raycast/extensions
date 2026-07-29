@@ -6,7 +6,8 @@
   "icon": "netease-music.png",
   "author": "chyroc",
   "contributors": [
-    "IceGiraffe"
+    "IceGiraffe",
+    "Anoninz"
   ],
   "keywords": [
     "music",
@@ -57,6 +58,13 @@
       "title": "Dislike Track",
       "subtitle": "NeteaseMusic",
       "description": "Dislike currently playing track in NeteaseMusic.",
+      "mode": "no-view"
+    },
+    {
+      "name": "dislike-and-next",
+      "title": "Dislike Track & Next Track",
+      "subtitle": "NeteaseMusic",
+      "description": "Dislike the currently playing track and skip to the next track in NeteaseMusic.",
       "mode": "no-view"
     },
     {
