@@ -37,24 +37,40 @@ describe("quoteText", () => {
 });
 
 describe("resolveSelectionAfterCopy", () => {
-  it("returns null when the clipboard is empty after copy", () => {
-    expect(resolveSelectionAfterCopy("x", "")).toBeNull();
+  it("uses the new clipboard text when Cmd+C bumped the change count", () => {
+    const before = { text: "old", changeCount: 1 };
+    const after = { text: "new", changeCount: 2 };
+    expect(resolveSelectionAfterCopy(before, after)).toBe("new");
   });
 
-  it("uses the unchanged non-empty clipboard (terminal auto-copy)", () => {
-    expect(resolveSelectionAfterCopy("sel", "sel")).toBe("sel");
+  it("uses the text when the count bumped even if identical (terminal re-copy on Cmd+C)", () => {
+    const before = { text: "sel", changeCount: 1 };
+    const after = { text: "sel", changeCount: 2 };
+    expect(resolveSelectionAfterCopy(before, after)).toBe("sel");
   });
 
-  it("returns null when original and after are both empty", () => {
-    expect(resolveSelectionAfterCopy("", "")).toBeNull();
+  it("returns whitespace-only text on a bump and lets the caller reject it", () => {
+    const before = { text: "token", changeCount: 1 };
+    const after = { text: "  ", changeCount: 2 };
+    expect(resolveSelectionAfterCopy(before, after)).toBe("  ");
   });
 
-  it("uses the new clipboard content when copy changed it", () => {
-    expect(resolveSelectionAfterCopy("old", "new")).toBe("new");
+  it("returns null when the count did not change (nothing selected, stale clipboard)", () => {
+    const before = { text: "secret", changeCount: 1 };
+    const after = { text: "secret", changeCount: 1 };
+    expect(resolveSelectionAfterCopy(before, after)).toBeNull();
   });
 
-  it("uses the new content when the original clipboard was empty", () => {
-    expect(resolveSelectionAfterCopy("", "new")).toBe("new");
+  it("returns null when both are empty and unchanged", () => {
+    const before = { text: "", changeCount: 1 };
+    const after = { text: "", changeCount: 1 };
+    expect(resolveSelectionAfterCopy(before, after)).toBeNull();
+  });
+
+  it("returns null when a bump produced empty text", () => {
+    const before = { text: "x", changeCount: 1 };
+    const after = { text: "", changeCount: 2 };
+    expect(resolveSelectionAfterCopy(before, after)).toBeNull();
   });
 });
 

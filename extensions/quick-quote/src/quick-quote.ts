@@ -1,15 +1,38 @@
 import { Clipboard, getSelectedText, showHUD } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { isMeaningfulSelection, quoteText, resolveSelectionAfterCopy, toRestorableContent } from "./quote";
 
 const COPY_DELAY_MS = 150;
 const PASTE_DELAY_MS = 200;
 
-async function readSelectionViaCopy(originalClipboard: string): Promise<string | null> {
+const execFileAsync = promisify(execFile);
+
+async function clipboardChangeCount(): Promise<number> {
+  const { stdout } = await execFileAsync("osascript", [
+    "-l",
+    "JavaScript",
+    "-e",
+    'ObjC.import("AppKit"); $.NSPasteboard.generalPasteboard.changeCount',
+  ]);
+  return Number(stdout.trim());
+}
+
+interface CopyFallbackResult {
+  selection: string | null;
+  clipboardOverwritten: boolean;
+}
+
+async function readSelectionViaCopy(originalText: string): Promise<CopyFallbackResult> {
+  const before = { text: originalText, changeCount: await clipboardChangeCount() };
   await runAppleScript(`tell application "System Events" to keystroke "c" using command down`);
   await new Promise((resolve) => setTimeout(resolve, COPY_DELAY_MS));
-  const after = (await Clipboard.read()).text;
-  return resolveSelectionAfterCopy(originalClipboard, after);
+  const after = { text: (await Clipboard.read()).text, changeCount: await clipboardChangeCount() };
+  return {
+    selection: resolveSelectionAfterCopy(before, after),
+    clipboardOverwritten: after.changeCount !== before.changeCount,
+  };
 }
 
 export default async function main() {

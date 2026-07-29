@@ -25,7 +25,7 @@ Single-command Raycast extension (`mode: "no-view"`). Command glue lives in `src
 
 1. Save the current clipboard (full `Clipboard.read()` content: text, HTML, or file) before touching anything.
 2. Attempt to read selected text via the macOS Accessibility API (`getSelectedText`). This is the preferred path but fails silently in apps (like terminals) that don't expose AX text selection.
-3. If AX fails or returns empty, fall back to `Cmd+C` via AppleScript and read the updated clipboard. If the clipboard changed, use the new content. If it didn't change but is non-empty, use it as-is — terminals that auto-copy on select already have the selection in the clipboard before Cmd+C fires. If it's empty or whitespace-only, bail.
+3. If AX fails or returns empty, fall back to `Cmd+C` via AppleScript. Read the NSPasteboard `changeCount` (via JXA `osascript`) before and after the keystroke: only a bump proves the keystroke actually copied a selection, which distinguishes a real selection from a stale clipboard that must never be quoted. Terminals that auto-copy on select still work because they re-copy on `Cmd+C`. If the fallback overwrote the clipboard but the selection is empty or whitespace-only, restore the original clipboard before bailing.
 4. Transform the selection: normalize CRLF/CR to LF, strip trailing newlines, prefix every line with `> `, append a single trailing newline.
 5. `Clipboard.paste()` the quoted text directly into the focused app.
 6. Restore the original clipboard after a short delay so the user's prior clipboard content survives (restoring file and HTML content, not just text). Show a brief HUD on success.

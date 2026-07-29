@@ -13,10 +13,22 @@ export function quoteText(text: string): string {
   return `${prefixed}\n`;
 }
 
-export function resolveSelectionAfterCopy(original: string, after: string): string | null {
-  if (!after) return null;
-  if (after === original) return original;
-  return after;
+export interface ClipboardState {
+  text: string;
+  changeCount: number;
+}
+
+/**
+ * NSPasteboard.changeCount bumps on every clipboard write, so only a bump
+ * proves the Cmd+C keystroke actually copied a selection. An unchanged
+ * clipboard is ambiguous: it could be a terminal that auto-copied on select,
+ * or stale contents (a password copied earlier) with no selection at all.
+ * Quoting on ambiguity risks pasting secrets, so we bail instead. Auto-copy
+ * terminals still work because they re-copy the selection on Cmd+C.
+ */
+export function resolveSelectionAfterCopy(before: ClipboardState, after: ClipboardState): string | null {
+  if (after.changeCount === before.changeCount) return null;
+  return after.text || null;
 }
 
 export interface ClipboardSnapshot {

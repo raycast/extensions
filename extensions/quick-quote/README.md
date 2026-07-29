@@ -20,6 +20,7 @@ Your original clipboard is restored afterward.
 ## Where it doesn't
 
 - **Password fields and secure inputs.** macOS blocks synthetic keystrokes while secure input is active, so neither read path can run. That is a macOS security feature, not a bug.
+- **Non-editable surfaces.** The quote is pasted back where keyboard focus is. Selecting text on a web page or in a PDF viewer can be read, but there is no text box to receive the paste, so nothing happens.
 - **Non-text selections.** Images, files, and other non-text content can't be quoted.
 - **Rich text.** The pasted quote is plain text; styling from the original is not preserved.
 
@@ -31,7 +32,7 @@ Raycast needs macOS Accessibility permission. Grant it in **System Settings → 
 
 Most apps: via the macOS Accessibility API.
 
-Terminals and other apps that block AX: falls back to `Cmd+C` and reads the clipboard. Terminals that auto-copy on select are handled correctly.
+Terminals and other apps that block AX: the command sends `Cmd+C` itself and reads the clipboard. It checks the macOS pasteboard change count around that keystroke and only quotes text the keystroke actually copied, so a stale clipboard (say, a password copied earlier) is never pasted. Terminals that auto-copy on select work too, because they re-copy the selection on `Cmd+C`.
 
 ## Development
 
