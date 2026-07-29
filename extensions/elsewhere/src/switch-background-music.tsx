@@ -9,7 +9,7 @@ const musicTrackIcons: Record<string, Image.Source> = {
   "quiet-canopy": "music/leaf.svg",
   "night-lines": "music/moon.svg",
   "pressure-system": "music/cloud.svg",
-  "gathering-light": Icon.Sun,
+  "gathering-light": "music/sun.svg",
 };
 
 function musicTrackIcon(trackId: string): Image.ImageLike {
