@@ -137,17 +137,17 @@ export default function Command() {
       });
   }, []);
 
-  function saveRecentIds(ids: string[]) {
-    LocalStorage.setItem("recent-connections", JSON.stringify(ids));
+  async function saveRecentIds(ids: string[]): Promise<void> {
+    await LocalStorage.setItem("recent-connections", JSON.stringify(ids));
   }
 
   async function addToRecent(id: string) {
     console.debug(`addToRecent: id=${id}`);
-    const current = await getRecentIds();
-    const updated = [id, ...current.filter((r) => r !== id)].slice(0, 10);
+    const update = getRecentIds().then((current) => [id, ...current.filter((r) => r !== id)].slice(0, 10));
+    recentIdsLoadRef.current = update;
+    const updated = await update;
     setRecentIds(updated);
-    recentIdsLoadRef.current = Promise.resolve(updated);
-    saveRecentIds(updated);
+    await saveRecentIds(updated);
   }
 
   const recentConnections = recentIds
