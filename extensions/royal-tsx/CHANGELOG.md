@@ -1,6 +1,6 @@
 # Royal TSX Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-29
 
 - 1.0.0
 - 🎉 Initial release of the Royal TSX Raycast extension.
