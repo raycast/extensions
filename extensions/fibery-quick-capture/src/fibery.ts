@@ -144,6 +144,11 @@ function isDeletedSchemaItem(item: { "fibery/name": string; "fibery/deleted?"?: 
   return item["fibery/deleted?"] === true || /_deleted$/i.test(item["fibery/name"]);
 }
 
+function requiresInput(field: SchemaField): boolean {
+  const defaultValue = field["fibery/meta"]?.["fibery/default-value"];
+  return field["fibery/meta"]?.["fibery/required?"] === true && (defaultValue === undefined || defaultValue === null);
+}
+
 function relationLabelField(type: SchemaType): string | undefined {
   const fields = type["fibery/fields"].filter(
     (field) =>
@@ -174,7 +179,7 @@ export function captureDatabasesFromSchema(schema: FiberySchema): CaptureDatabas
         type["fibery/meta"]?.["fibery/platform?"] !== true &&
         type["fibery/meta"]?.["fibery/primitive?"] !== true,
     )
-    .map((type) => {
+    .map<CaptureDatabase | undefined>((type) => {
       const writableFields = type["fibery/fields"].filter(
         (field) =>
           !isDeletedSchemaItem(field) &&
@@ -191,9 +196,7 @@ export function captureDatabasesFromSchema(schema: FiberySchema): CaptureDatabas
               name: field["fibery/name"],
               type: field["fibery/type"],
               kind: primitiveKind,
-              required:
-                field["fibery/meta"]?.["fibery/required?"] === true &&
-                field["fibery/meta"]?.["fibery/default-value"] === undefined,
+              required: requiresInput(field),
               inputType: field["fibery/meta"]?.["ui/type"],
             },
           ];
@@ -208,9 +211,7 @@ export function captureDatabasesFromSchema(schema: FiberySchema): CaptureDatabas
             name: field["fibery/name"],
             type: field["fibery/type"],
             kind: field["fibery/meta"]?.["fibery/collection?"] === true ? "relation-collection" : "relation",
-            required:
-              field["fibery/meta"]?.["fibery/required?"] === true &&
-              field["fibery/meta"]?.["fibery/default-value"] === undefined,
+            required: requiresInput(field),
             relationType: relatedType["fibery/name"],
             relationLabelField: labelField,
           },
@@ -228,14 +229,20 @@ export function captureDatabasesFromSchema(schema: FiberySchema): CaptureDatabas
       const canonicalNameField = titleFields.find(
         (field) => localName(field["fibery/name"]).toLocaleLowerCase() === "name",
       );
+      const supportedFieldNames = new Set(fields.map((field) => field.name));
+      const hasUnsupportedRequiredField = writableFields.some(
+        (field) => requiresInput(field) && !supportedFieldNames.has(field["fibery/name"]),
+      );
+
+      if (!canonicalNameField || hasUnsupportedRequiredField) return undefined;
 
       return {
         name: type["fibery/name"],
         fields,
-        taskNameField: canonicalNameField?.["fibery/name"] ?? "",
+        taskNameField: canonicalNameField["fibery/name"],
       };
     })
-    .filter((database) => database.taskNameField)
+    .filter((database): database is CaptureDatabase => database !== undefined)
     .sort((a, b) => a.name.localeCompare(b.name));
 }
 
@@ -335,8 +342,9 @@ export class FiberyClient {
       type: database,
       field,
       entity: {
-        [entityId]: relatedEntityIds,
+        "fibery/id": entityId,
       },
+      items: relatedEntityIds.map((id) => ({ "fibery/id": id })),
     });
   }
 }
