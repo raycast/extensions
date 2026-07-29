@@ -166,35 +166,27 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
       });
     }
 
-    return result;
-  }, [context.branch, hasConflicts, hasUncommittedChanges]);
+    if (attachedWorktree) {
+      result.push({
+        tag: { value: "", color: Color.Blue },
+        icon: Icon.Layers,
+        tooltip: `Checked out in worktree '${attachedWorktree.name}'`,
+      });
+    }
 
-  // Plain icon for actions; list icon may wrap it with a tooltip for worktree branches
-  const branchIcon: Image.ImageLike = useMemo(() => {
+    return result;
+  }, [context.branch, hasConflicts, hasUncommittedChanges, attachedWorktree, context.remotes.data]);
+
+  // Determine icon based on branch type
+  const icon: Image.ImageLike = useMemo(() => {
     if (context.branch.type === "current") {
       return { source: Icon.Dot, tintColor: Color.Green };
     } else if (context.branch.type === "remote") {
       return RemoteHostProviderIcon(context.remotes.data[context.branch.remote!]?.provider);
-    } else if (attachedWorktree) {
-      return {
-        source: Icon.Layers,
-        tintColor: Color.SecondaryText,
-      };
     } else {
       return { source: Icon.Dot, tintColor: Color.SecondaryText };
     }
-  }, [context.branch.type, attachedWorktree, context.remotes.data, context.branch.remote]);
-
-  const icon: List.Item.Props["icon"] = useMemo(() => {
-    if (attachedWorktree && context.branch.type === "local") {
-      return {
-        value: branchIcon,
-        tooltip: "Worktree",
-      };
-    }
-
-    return branchIcon;
-  }, [attachedWorktree, branchIcon, context.branch.type]);
+  }, [context.branch.type, context.remotes.data, context.branch.remote]);
 
   return (
     <List.Item
@@ -224,7 +216,7 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
                 <BranchRenameAction {...context} />
                 <CopyToClipboardMenuAction
                   contents={[
-                    { title: "Branch Name", content: context.branch.displayName, icon: branchIcon },
+                    { title: "Branch Name", content: context.branch.displayName, icon: icon },
                     ...(context.branch.upstream
                       ? [
                           {
@@ -264,7 +256,7 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
                 <BranchRenameAction {...context} />
                 <CopyToClipboardMenuAction
                   contents={[
-                    { title: "Branch Name", content: context.branch.displayName, icon: branchIcon },
+                    { title: "Branch Name", content: context.branch.displayName, icon: icon },
                     ...(context.branch.upstream
                       ? [
                           {

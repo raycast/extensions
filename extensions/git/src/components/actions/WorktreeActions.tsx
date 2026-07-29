@@ -149,17 +149,11 @@ function WorktreeCreateForm(context: RepositoryContext) {
     ? branchName
     : (availableBranches[0]?.name ?? "");
 
-  // Sibling of the main worktree so the new directory does not appear as untracked files
-  const repositoryRootPath = context.gitManager.repositoryRootPath;
-  const trimmedWorktreeName = worktreeName.trim();
-  const targetPath =
-    trimmedWorktreeName.length > 0
-      ? join(dirname(repositoryRootPath), `${basename(repositoryRootPath)}-${trimmedWorktreeName}`)
-      : "";
-
   const handleSubmit = async (values: { worktreeName: string; branchName: string }) => {
     setIsLoading(true);
     const name = values.worktreeName.trim();
+    // Sibling of the main worktree so the new directory does not appear as untracked files
+    const repositoryRootPath = context.gitManager.repositoryRootPath;
     const path = join(dirname(repositoryRootPath), `${basename(repositoryRootPath)}-${name}`);
 
     try {
@@ -196,7 +190,6 @@ function WorktreeCreateForm(context: RepositoryContext) {
         onChange={(value) => setWorktreeName(value.replace(/ /g, "-"))}
         error={worktreeName.trim().length === 0 ? "Required" : undefined}
       />
-      <Form.Description title="Path" text={targetPath ? prettyPath(targetPath) : "—"} />
       <Form.Dropdown
         id="branchName"
         title="Branch"
