@@ -7,10 +7,12 @@ import { startLiveMicMeter } from "./signal-meter";
 
 const execFileAsync = promisify(execFile);
 
+export type MonitorTimer = ReturnType<typeof setInterval>;
+
 export interface RecordingMonitorDeps {
   now?: () => number;
-  setInterval?: typeof setInterval;
-  clearInterval?: typeof clearInterval;
+  setInterval?: (fn: () => void, ms: number) => MonitorTimer;
+  clearInterval?: (timer: MonitorTimer) => void;
   resolveDefaultMicInfo?: () => Promise<RecordingPatch["mic"]>;
   startLiveMicMeter?: (onSignal: (signal: SignalLevel) => void) => () => void;
 }

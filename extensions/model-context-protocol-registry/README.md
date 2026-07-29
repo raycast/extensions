@@ -58,6 +58,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [Supabase](https://supabase.com/docs/guides/getting-started/mcp) | This project follows the Model Context Protocol standard, allowing AI assistants to interact with Supabase's API. |
 | [Tavily](https://github.com/tavily-ai/tavily-mcp) | This project follows the Model Context Protocol standard, allowing AI assistants to interact with Tavily's API. |
 | [Thena](https://thena.ai) | A Model Context Protocol server that enables AI assistants to interact with Thena's services, providing seamless integration and enhanced capabilities for AI-powered applications. |
+| [Trends MCP](https://trendsmcp.ai) | Live cross-platform trend data for AI agents. Query Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more: historical series, growth rates, and live leaderboards in one connection. Free API key at trendsmcp.ai. |
 | [Xero](https://github.com/XeroAPI/xero-mcp-server) | This is a Model Context Protocol (MCP) server implementation for Xero. It provides a bridge between the MCP protocol and Xero's API, allowing for standardized access to Xero's accounting and business features. |
 | [Firecrawl](https://github.com/mendableai/firecrawl-mcp-server) | A Model Context Protocol (MCP) server implementation that integrates with Firecrawl for web scraping capabilities. |
 | [Playwright](https://github.com/microsoft/playwright-mcp) | A Model Context Protocol server that provides browser automation capabilities using Playwright. This server enables LLMs to interact with web pages through structured accessibility snapshots, bypassing the need for screenshots or visually-tuned models. |
@@ -81,6 +82,7 @@ To add a new MCP registry to the registry, you need to create a new entry in the
 | [plori](https://plori.ai/mcp) | Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups. |
 | [Appwrite](https://github.com/appwrite/mcp) | The official Appwrite MCP server lets AI assistants securely inspect and manage Appwrite projects and resources through Appwrite's API. |
 | [Agentcard](https://agentcard.sh) | Prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Connects to the remote Agentcard MCP server over OAuth 2.0. |
+| [UseMyContext](https://usemycontext.ai) | The personal context layer for AI: one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. 8 tools for profile, file search and reads, cited answers from your documents, and exact table queries. Connects to the remote UseMyContext server over OAuth 2.1. |
 
 ### Community MCP Servers
 

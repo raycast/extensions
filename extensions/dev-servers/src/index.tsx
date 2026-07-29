@@ -24,6 +24,13 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_TERMINAL } from "./constants";
+import { detectFavicons } from "./favicons";
+import {
+  PendingStart,
+  SpawnFailure,
+  readPendingStarts,
+  writePendingStarts,
+} from "./pendingStore";
 import {
   recordSeen,
   recordSeenBatch,
@@ -31,9 +38,13 @@ import {
   updateRecentFavicon,
 } from "./recents";
 import {
+  EPHEMERAL_PORT_MIN,
+  byRecency,
   fetchServers,
   killProcess,
   killServer,
+  openInBackground,
+  reapProjectHelpersWhenDown,
   restartServer,
   spawnLogPath,
   startDevServer,
@@ -127,167 +138,6 @@ function formatUptime(startedAt: Date): string {
   return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
 }
 
-// Fetch with a hard 3s timeout. Returns null on any failure so callers can
-// chain fallbacks cleanly without nested try/catch.
-async function fetchWithTimeout(
-  url: string,
-  init: RequestInit & { method?: string } = {},
-): Promise<Response | null> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 3000);
-  try {
-    return await fetch(url, { ...init, signal: controller.signal });
-  } catch {
-    return null;
-  } finally {
-    clearTimeout(timeout);
-  }
-}
-
-// Some SVG favicons are authored as a single-color glyph that inherits the
-// page's text color through `currentColor` and declare no color of their own.
-// Raycast renders a data-URI SVG with no surrounding color context, so those
-// collapse to a flat black square. Detect that specific case — currentColor
-// AND no explicit fill/stroke/gradient color — so the resolver can prefer a
-// real colored icon. A colored SVG that merely mentions currentColor on one
-// sub-path is left alone, to avoid regressing icons that render fine today.
-function isMonochromeSvg(svg: string): boolean {
-  if (!/currentColor/i.test(svg)) return false;
-  // Proof the SVG paints an explicit color somewhere: a hex/rgb/hsl value, a
-  // gradient, or a CSS named color (red, navy, …). Keywords that aren't real
-  // colors — currentColor/none/inherit/transparent/unset/initial/context-* —
-  // don't count, so an SVG that only pairs currentColor with those stays
-  // monochrome. (Named-color check via negative lookahead so it doesn't match
-  // currentColor itself, which would defeat the whole test.)
-  const hasExplicitColor =
-    /(?:fill|stroke|stop-color)\s*[:=]\s*["']?\s*(?:#|rgb|hsl)/i.test(svg) ||
-    /(?:fill|stroke|stop-color)\s*[:=]\s*["']?\s*(?!currentcolor|none|inherit|transparent|unset|initial|context-)[a-z]/i.test(
-      svg,
-    ) ||
-    /<(?:linear|radial)Gradient\b/i.test(svg);
-  return !hasExplicitColor;
-}
-
-// Fetch a favicon and return it as an inline data URI, or undefined if the URL
-// doesn't serve an image. Inlining the bytes (rather than handing Raycast a
-// URL to fetch) sidesteps CORS, since some dev servers (notably Astro) don't set
-// Access-Control-Allow-Origin on static assets, and Raycast's image loader
-// refuses those.
-//
-// SVG uses URL-encoded payload, raster uses base64. That split mirrors what
-// @raycast/utils does internally for its own SVG icons.
-async function fetchFaviconDataUri(
-  url: string,
-  opts: { rejectMonochromeSvg?: boolean } = {},
-): Promise<string | undefined> {
-  const res = await fetchWithTimeout(url);
-  if (!res || !res.ok) return undefined;
-  const ct = (res.headers.get("content-type") ?? "")
-    .split(";")[0]
-    .trim()
-    .toLowerCase();
-  if (!ct.startsWith("image/")) return undefined;
-  if (ct.includes("svg")) {
-    const svg = await res.text();
-    // A monochrome/currentColor SVG would show as a black square; let the
-    // caller fall through to a colored raster icon or the tinted fallback.
-    if (opts.rejectMonochromeSvg && isMonochromeSvg(svg)) return undefined;
-    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
-  }
-  const buf = Buffer.from(await res.arrayBuffer());
-  return `data:${ct};base64,${buf.toString("base64")}`;
-}
-
-interface ResolvedFavicons {
-  // Best overall icon for the dashboard's List, which renders SVGs in color.
-  best?: string;
-  // Raster-only icon (PNG/ICO) for the menu bar, which renders SVG images as a
-  // monochrome black template and so can't display an SVG favicon in color.
-  raster?: string;
-}
-
-// Resolve favicons for a localhost dev server. Collects every icon <link> in
-// the page HTML and fetches them best-first — that document order is arbitrary
-// and routinely lists a monochrome Safari mask-icon (a black silhouette) ahead
-// of the real icon, which is why some favicons render as a black blob. Ranking,
-// high→low:
-//   3. colored raster — apple-touch-icon, or an icon whose type/extension is
-//      png/ico/jpg/webp/gif. Raster keeps its own colors, so it never blackens.
-//   2. SVG icons — used only when they aren't currentColor-monochrome.
-//   1. anything else icon-ish (type/extension unknown; content-type decides).
-// `rel="mask-icon"` is skipped outright (monochrome by design).
-//
-// Returns two icons: `best` for the dashboard (SVG allowed), and a `raster`
-// variant for the menu bar. When the page only declares an SVG, `raster` is
-// filled from the conventional paths (/favicon.ico, /apple-touch-icon.png) so
-// the menu bar can still show a real icon instead of falling back to a dot.
-async function detectFavicons(port: string): Promise<ResolvedFavicons> {
-  const origin = `http://localhost:${port}`;
-
-  const html = await fetchWithTimeout(`${origin}/`).then((r) =>
-    r ? r.text() : null,
-  );
-
-  const candidates: Array<{ url: string; rank: number }> = [];
-  if (html) {
-    const linkTags = html.match(/<link[^>]+>/gi) ?? [];
-    for (const tag of linkTags) {
-      const rel = tag.match(/rel=["']([^"']+)["']/i)?.[1].toLowerCase();
-      if (!rel) continue;
-      // Safari's pinned-tab icon is a black silhouette meant to be tinted by
-      // the browser; taken as-is it renders as a black blob.
-      if (rel.includes("mask-icon")) continue;
-      const isAppleTouch = rel.includes("apple-touch-icon");
-      if (!isAppleTouch && !/\bicon\b/.test(rel)) continue;
-
-      const href = tag.match(/href=["']([^"']+)["']/i)?.[1];
-      if (!href) continue;
-      const url = href.startsWith("http")
-        ? href
-        : `${origin}${href.startsWith("/") ? href : `/${href}`}`;
-
-      const type = (
-        tag.match(/type=["']([^"']+)["']/i)?.[1] ?? ""
-      ).toLowerCase();
-      const isSvg = type.includes("svg") || /\.svg(?:[?#]|$)/i.test(url);
-      const isRaster =
-        !isSvg &&
-        (isAppleTouch ||
-          type.startsWith("image/") ||
-          /\.(?:png|ico|jpe?g|webp|gif)(?:[?#]|$)/i.test(url));
-      candidates.push({ url, rank: isRaster ? 3 : isSvg ? 2 : 1 });
-    }
-  }
-
-  // Array.sort is stable in V8, so document order is preserved within a rank.
-  candidates.sort((a, b) => b.rank - a.rank);
-
-  let best: string | undefined;
-  let raster: string | undefined;
-  const consider = (dataUri: string | undefined) => {
-    if (!dataUri) return;
-    if (!best) best = dataUri;
-    if (!raster && !dataUri.startsWith("data:image/svg")) raster = dataUri;
-  };
-
-  for (const c of candidates) {
-    if (best && raster) break;
-    consider(await fetchFaviconDataUri(c.url, { rejectMonochromeSvg: true }));
-  }
-
-  // The page declared no usable raster (SVG-only, or no icons at all). Probe the
-  // conventional raster paths so the menu bar still gets a real icon; these also
-  // serve as the universal fallback when nothing was declared in the HTML.
-  if (!best || !raster) {
-    for (const path of ["/favicon.ico", "/apple-touch-icon.png"]) {
-      if (best && raster) break;
-      consider(await fetchFaviconDataUri(`${origin}${path}`));
-    }
-  }
-
-  return { best, raster };
-}
-
 // On-demand view of a project's startup log. When a dev server fails to
 // bind a port, the failure detail is in the spawn log (stdout+stderr) that
 // `startDevServer` redirects to `spawnLogPath(cwd)`, not in any terminal
@@ -295,19 +145,44 @@ async function detectFavicons(port: string): Promise<ResolvedFavicons> {
 // setup (portless needing sudo, a missing binary, a crashing build) is
 // diagnosable from inside Raycast instead of failing opaquely.
 //
-// Reached on demand only: from a per-row action, and from the "View
-// Startup Log" action on the failure toast when a spawn isn't detected.
-function SpawnLogView({ cwd, name }: { cwd: string; name: string }) {
+// Reached on demand only: from a per-row action, and from a failed start row.
+//
+// `logStart` is the byte offset that attempt began writing at. The log is
+// opened append-only and never rotated, so it holds every run for that cwd
+// until the OS clears tmpdir: by the fourth restart of a crashing project the
+// file is four near-identical failures deep, oldest first, and the run you
+// opened the view to read is the one scrolled off the bottom. Given the offset
+// we show that run alone, which is the same slice diagnoseSpawnFailure reads.
+// Without one (a server row, where no single attempt is in question) we show
+// the file. Either way the whole file stays one action away.
+function SpawnLogView({
+  cwd,
+  name,
+  logStart,
+}: {
+  cwd: string;
+  name: string;
+  logStart?: number;
+}) {
   const logPath = spawnLogPath(cwd);
+  const [showAll, setShowAll] = useState(logStart === undefined);
   const { data, isLoading, revalidate } = useCachedPromise(
-    async (p: string): Promise<string> => {
+    async (p: string, from: number): Promise<string> => {
       try {
-        return await fs.promises.readFile(p, "utf8");
+        const buf = await fs.promises.readFile(p);
+        // Only a file shorter than the offset falls back to the whole log:
+        // it means the log was cleared out from under us, and showing
+        // everything beats showing nothing. A file exactly as long as the
+        // offset is the attempt that wrote nothing at all, so the empty
+        // slice is the honest answer and the view says so.
+        return from > 0 && from <= buf.length
+          ? buf.subarray(from).toString("utf8")
+          : buf.toString("utf8");
       } catch {
         return "";
       }
     },
-    [logPath],
+    [logPath, showAll ? 0 : (logStart ?? 0)],
   );
 
   // Follow the file while the view is open so a server that's still booting
@@ -320,27 +195,43 @@ function SpawnLogView({ cwd, name }: { cwd: string; name: string }) {
 
   const log = (data ?? "").trim();
   const exists = fs.existsSync(logPath);
-  const body = log
+  const scopable = logStart !== undefined && logStart > 0;
+  // The body is the log and nothing else. The heading used to repeat the
+  // navigation title word for word, and the footer spelled out a tmpdir path
+  // long enough to wrap mid-token; between them they took the top and bottom
+  // of a view whose whole job is to show as many lines of output as possible.
+  // The path is still one keystroke away as Copy Log Path.
+  const markdown = log
     ? "```\n" + log + "\n```"
     : exists
-      ? "_The log file exists but is empty. The process wrote no output before exiting._"
+      ? scopable && !showAll
+        ? "_This attempt wrote nothing before exiting. Earlier runs are in the full log._"
+        : "_The log file exists but is empty. The process wrote no output before exiting._"
       : "_No startup log found. This server may have been started outside Dev Servers, so we never captured its output._";
-  const markdown = `# Startup log: ${name}\n\n${body}\n\n---\n\n\`${logPath}\``;
 
   return (
     <Detail
       isLoading={isLoading}
       markdown={markdown}
-      navigationTitle={`Startup log: ${name}`}
+      navigationTitle={
+        scopable && !showAll
+          ? `Startup log: ${name} (this attempt)`
+          : `Startup log: ${name}`
+      }
       actions={
         <ActionPanel>
-          <Action
-            title="Refresh"
-            icon={Icon.ArrowClockwise}
-            onAction={revalidate}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
+          {/* Refresh was the ↵ action, which this view had already made
+              pointless by tailing the file every 2s. Copying the log is what
+              you actually want next: into a search, an issue, or a chat. */}
           {log && <Action.CopyToClipboard title="Copy Log" content={log} />}
+          {scopable && (
+            <Action
+              title={showAll ? "Show This Attempt Only" : "Show Full Log"}
+              icon={showAll ? Icon.Filter : Icon.List}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              onAction={() => setShowAll((v) => !v)}
+            />
+          )}
           {exists && (
             <Action.Open
               title="Open Log File"
@@ -348,7 +239,19 @@ function SpawnLogView({ cwd, name }: { cwd: string; name: string }) {
               icon={Icon.BlankDocument}
             />
           )}
+          <Action.CopyToClipboard
+            title="Copy Log Path"
+            icon={Icon.Clipboard}
+            content={logPath}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          />
           {exists && <Action.ShowInFinder path={logPath} />}
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            onAction={revalidate}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+          />
         </ActionPanel>
       }
     />
@@ -629,11 +532,23 @@ interface SpawnRequest {
   // Multi-folder confirm gate, set by the Start command's preference.
   // Always false for single-target spawns (picker rows, folder picker).
   confirmMulti: boolean;
-  // Open each new server's URL in the browser when it binds.
-  autoOpen: boolean;
   // Attach a one-time "Auto-open in Browser?" CTA to the Starting toast.
   // The Start command pre-decides this based on a usage counter.
   showAutoOpenHint: boolean;
+  // Fresh per send, and the only thing that tells one request from another.
+  // The dashboard's spawn flow is once-only per mount, so a request delivered
+  // to a dashboard that is already loaded needs an identity the receiver can
+  // compare against the last one it handled (see the re-arm effect). Optional
+  // because a sender that omits it still works through the mount path, which
+  // is the only path Raycast is known to take.
+  requestId?: string;
+  //
+  // Deliberately NOT carrying autoOpen. It is an extension-level preference,
+  // so every command already reads the same value, and the dashboard is where
+  // the opening happens. Passing it through here made a second source of
+  // truth for one setting, and the two disagreed: starting from the menu bar
+  // opened no tab while the identical start from the dashboard did. Whichever
+  // copy was wrong, a caller cannot get this wrong if it never supplies it.
 }
 
 interface DashboardLaunchContext {
@@ -658,12 +573,11 @@ async function confirmRestartBatch(
     target: { name: string };
     existing: DevServer;
   }>,
-  totalCount: number,
+  total: number,
 ): Promise<boolean> {
   if (runningTargets.length === 0) return true;
   const names = runningTargets.map((r) => r.target.name);
   const running = runningTargets.length;
-  const total = totalCount;
   const remainingCount = total - running;
 
   if (total === 1) {
@@ -704,42 +618,447 @@ type SpawnPhase =
       phase: "spawning";
       // Keyed by cwd. `logStart` is the spawn log's byte size at spawn time:
       // the log is append-mode, so only bytes past this offset belong to the
-      // current attempt (see spawnHitPortConflict).
-      expecting: Map<string, { name: string; logStart: number }>;
-      autoOpen: boolean;
+      // current attempt (see diagnoseSpawnFailure). `ignorePids` is the very
+      // array the cwd's pending row carries, so the watcher and the watchdog
+      // put the same question to resolvingServer that the row does, and go on
+      // being able to ask it after the cleanup effect has dropped the row.
+      expecting: Map<
+        string,
+        { name: string; logStart: number; ignorePids: readonly number[] }
+      >;
     }
   | { phase: "done" };
 
-// Whether the chunk of the startup log written by this spawn (from byte
-// `logStart`) shows the server dying on a port conflict. That's the one
-// failure worth naming on the watchdog toast: it reads as "the extension
-// broke" but is really another process owning the port, and the fix
-// (kill the other server, or for Shopify themes let the auto-port pick a
-// free one) is nothing like debugging a crashed build. Scoped to the new
-// bytes because earlier runs in the same log may have hit — and since
-// resolved — the same error.
-function spawnHitPortConflict(cwd: string, logStart: number): boolean {
+// How long a spawned server gets to bind a port before the watchdog calls it
+// failed. Also spelled into the undiagnosed failed-row title, so the number
+// the user reads always matches the wait they actually got.
+const SPAWN_TIMEOUT_MS = 15000;
+
+// How long past its deadline a persisted pending row is still worth
+// rehydrating. Everything a failed row has to offer comes out of the spawn
+// log, which lives in tmpdir and is cleared on the OS's own schedule, so an
+// older row would put up remedies pointing at a file that is no longer there.
+// A day also matches what the row is for: a start that failed while the window
+// was closed is news the next time you look, not a week later.
+const PENDING_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
+// A restart polls on this staggered backoff instead of the watchdog; the sum
+// is the window its failed-row title quotes.
+const RESTART_POLL_DELAYS = [1000, 2000, 3000, 4000];
+const RESTART_WINDOW_S =
+  RESTART_POLL_DELAYS.reduce((total, ms) => total + ms, 0) / 1000;
+
+// The failure's title becomes the failed row's title, and a nameable fix
+// becomes its Copy Fix Command action.
+const SPAWN_FAILURE: Record<SpawnFailure, { title: string; fix?: string }> = {
+  "port-conflict": { title: "Port already in use" },
+  "portless-proxy-down": {
+    title: "Portless proxy isn't running",
+    fix: "portless service install",
+  },
+};
+
+// Size of the (append-mode) spawn log before an attempt writes to it. Taken
+// right before every spawn so the watchdog and the log view can scope
+// themselves to that attempt's bytes alone.
+function spawnLogOffset(cwd: string): number {
   try {
-    const tail = fs
-      .readFileSync(spawnLogPath(cwd))
-      .subarray(logStart)
-      .toString("utf8");
-    return /EADDRINUSE|address already in use/i.test(tail);
+    return fs.statSync(spawnLogPath(cwd)).size;
   } catch {
-    return false;
+    // No log yet; the spawn writes from byte 0.
+    return 0;
   }
+}
+
+// Whether the chunk of the startup log written by this spawn (from byte
+// `logStart`) shows the server dying for one of those reasons. Scoped to the
+// new bytes because earlier runs in the same log may have hit the same error
+// and since resolved it.
+//
+// Reads only this attempt's bytes rather than slurping the file: the log is
+// opened append-only and never rotated, so it holds every run for this cwd
+// until the OS clears tmpdir. Seeking past `logStart` also bounds the read to
+// what one 15-second attempt managed to write.
+function diagnoseSpawnFailure(
+  cwd: string,
+  logStart: number,
+): SpawnFailure | null {
+  let fd: number | undefined;
+  try {
+    fd = fs.openSync(spawnLogPath(cwd), "r");
+    const length = fs.fstatSync(fd).size - logStart;
+    if (length <= 0) return null;
+    const buf = Buffer.alloc(length);
+    fs.readSync(fd, buf, 0, length, logStart);
+    const tail = buf.toString("utf8");
+    // Another process owns the port. The fix (kill the other server, or for
+    // Shopify themes let the auto-port pick a free one) is nothing like
+    // debugging a crashed build.
+    if (/EADDRINUSE|address already in use/i.test(tail)) return "port-conflict";
+    // A dev script wrapped in `portless run` needs the portless proxy up.
+    // When it isn't, portless tries to auto-start it, finds no TTY to run
+    // sudo on (always the case for our detached spawn) and exits before the
+    // framework ever boots. Starting the proxy by hand once per reboot works
+    // but is exactly the manual step the extension exists to remove; the
+    // startup service makes it permanent.
+    //
+    // Matched on portless's full sentence, "Proxy is not running and no TTY
+    // is available for sudo." Its shorter "Proxy is not running" lines come
+    // from `portless proxy stop` and `portless doctor`, which say nothing
+    // about a failed start, so the prefix alone would name this cause for a
+    // server that is merely slow to boot.
+    if (/proxy is not running and no tty/i.test(tail))
+      return "portless-proxy-down";
+    return null;
+  } catch {
+    return null;
+  } finally {
+    if (fd !== undefined) {
+      try {
+        fs.closeSync(fd);
+      } catch {
+        // Already closed / invalid fd; nothing to do.
+      }
+    }
+  }
+}
+
+// Open a URL the user did not press a key for. Background is what we want, so
+// the dashboard is not torn away mid-glance, but never at the cost of the tab
+// itself: `openInBackground` shells out to `/usr/bin/open -g`, and a
+// subprocess has more ways to fail than an API call does. Swallowing that
+// failure turned "opened behind your window" into "nothing happened at all",
+// which is indistinguishable from the preference being off.
+//
+// So: try background, and if it will not go, fall back to Raycast's `open`.
+// Foreground is a worse outcome than background and a far better one than
+// silence. Which one you get is also the diagnosis, since a tab that steals
+// focus means the subprocess is being refused.
+function openAutomatically(url: string): void {
+  openInBackground(url).catch(() => {
+    open(url).catch(() => {});
+  });
+}
+
+// The one question every part of the pending-row machinery asks: has the
+// server this row was waiting for arrived? Visibility, state cleanup, the
+// selection handoff, the success watcher, the watchdog and the restart poll
+// all route through here, so they can never disagree about whether a row has
+// resolved.
+//
+// Two conditions, and both are about not mistaking something else for the
+// arrival:
+//
+//   1. A deliberate port. An OS-assigned one is plumbing, the same call
+//      suppressHelperRows makes, and while a start is in flight its mid-start
+//      rule keeps those rows out of the fetch entirely. A workerd helper
+//      resolving the row would therefore retire the spinner in favour of a row
+//      the list is not even drawing, and the failure would never be diagnosed.
+//   2. A pid the row was not already looking at, per `ignorePids`.
+function resolvingServer(
+  cwd: string,
+  entry: Pick<PendingStart, "ignorePids">,
+  servers: DevServer[],
+): DevServer | undefined {
+  return servers.find(
+    (s) =>
+      s.cwd === cwd &&
+      parseInt(s.port, 10) < EPHEMERAL_PORT_MIN &&
+      !entry.ignorePids.includes(s.pid),
+  );
+}
+
+// Row ids for pending starts are namespaced so they can never collide with a
+// server row's, which is a bare pid. The prefix is also how the render-time
+// selection handoff recognizes a cursor parked on a pending row.
+const PENDING_ID_PREFIX = "starting:";
+
+function pendingRowId(cwd: string): string {
+  return `${PENDING_ID_PREFIX}${cwd}`;
+}
+
+// Spinner timing. Smoothness is the size of each step, not the frame rate, so
+// the two knobs pull apart: 18 frames over a revolution is a 20 degree step
+// against the 30 degrees a 12-frame turn moved, and holding the frame rate
+// steady spends that on a slower turn (810ms) rather than a choppier one.
+// Slower also lands nearer the animated toast's spinner, which the 600ms
+// version overshot.
+//
+// The frame rate itself is near its ceiling. Each frame costs one prop change
+// on one row, the frames are precomputed (see SPINNER_ICONS), and the interval
+// only runs while something is actually starting, so it is bounded by the 15s
+// watchdog. But every frame is still a render round trip to Raycast, and the
+// toast's own spinner is native and far smoother than anything reachable from
+// here. Buy smoothness with degrees per step first; raise the rate only after
+// that runs out.
+const SPINNER_FRAMES = 18;
+const SPINNER_FRAME_MS = 45;
+// Neutral gray, readable on both the light and the dark theme. Hardcoded
+// rather than tinted or drawn in currentColor: Raycast gives a data-URI SVG
+// no surrounding color context, so a currentColor-only icon renders as a
+// black square (the same trap isMonochromeSvg exists to dodge for favicons).
+const SPINNER_COLOR = "#8E8E93";
+const SPINNER_RADIUS = 5.5;
+// Quarter of the circle is the moving head; the rest is the gap that rides
+// around behind it.
+const SPINNER_ARC = 2 * Math.PI * SPINNER_RADIUS * 0.25;
+const SPINNER_GAP = 2 * Math.PI * SPINNER_RADIUS - SPINNER_ARC;
+
+// One frame of a buffering spinner, as an SVG data URI. Raycast has no
+// animated icons and no per-row loading state, so the animation is frames we
+// swap ourselves: a faint full-circle track with a quarter-circle arc stepped
+// around it one frame at a time, which is the same shape a CSS spinner draws
+// with stroke-dasharray.
+function spinnerFrame(frame: number): string {
+  const angle = frame * (360 / SPINNER_FRAMES);
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16">` +
+    `<g fill="none" stroke="${SPINNER_COLOR}" stroke-width="1.8" stroke-linecap="round">` +
+    `<circle cx="8" cy="8" r="${SPINNER_RADIUS}" opacity="0.22"/>` +
+    `<circle cx="8" cy="8" r="${SPINNER_RADIUS}"` +
+    ` stroke-dasharray="${SPINNER_ARC.toFixed(2)} ${SPINNER_GAP.toFixed(2)}"` +
+    ` transform="rotate(${angle} 8 8)"/>` +
+    `</g></svg>`;
+  return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+}
+
+// The frames are a fixed set, so build them once at module load instead of
+// re-encoding an SVG twenty times a second. Leaves the animation as an array
+// index, which is what keeps the frame rate cheap enough to raise.
+const SPINNER_ICONS: readonly string[] = Array.from(
+  { length: SPINNER_FRAMES },
+  (_, frame) => spinnerFrame(frame),
+);
+
+// The synthetic row for a pending start. While starting it spins; once the
+// watchdog gives up it turns red and carries the remedies. A row can do that
+// and a toast cannot: a toast's actions die with it, and it degrades to an
+// actionless HUD as soon as the Raycast window closes, which is exactly when
+// a 15-second failure lands.
+//
+// The spinner's frame counter lives here rather than in the dashboard so that
+// ten re-renders a second stay inside this one row. Hoisting it would re-run
+// the whole list, which is the churn sameServers and the polling cadence were
+// both written to avoid.
+function PendingItem({
+  id,
+  cwd,
+  entry,
+  terminalApp,
+  editorApp,
+  failedCount,
+  onDismiss,
+  onDismissAll,
+  onRefresh,
+}: {
+  id: string;
+  cwd: string;
+  entry: PendingStart;
+  terminalApp: Application;
+  // Unset when the user hasn't picked an editor; the action is hidden then.
+  editorApp?: Application;
+  // How many pending rows are currently failed, across the whole list. Drives
+  // whether Dismiss All is worth offering.
+  failedCount: number;
+  onDismiss: () => void;
+  onDismissAll: () => void;
+  onRefresh: () => void;
+}) {
+  const { push } = useNavigation();
+  const [frame, setFrame] = useState(0);
+  const spinning = entry.status === "starting";
+  useEffect(() => {
+    if (!spinning) return;
+    const id = setInterval(
+      () => setFrame((f) => (f + 1) % SPINNER_FRAMES),
+      SPINNER_FRAME_MS,
+    );
+    return () => clearInterval(id);
+  }, [spinning]);
+
+  // The project actions, identical on both states and on the same chords
+  // server rows use. A pending row is still a row about a folder: leaving it
+  // actionless meant ⌘N, the way you start anything from this dashboard,
+  // silently did nothing on the row you were most likely looking at.
+  const projectActions = (
+    <ActionPanel.Section>
+      {/* Editor before terminal, the order server rows use. */}
+      {editorApp && (
+        <Action.Open
+          title={`Open in ${editorApp.name}`}
+          icon={Icon.Code}
+          target={cwd}
+          application={editorApp}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+        />
+      )}
+      <Action.Open
+        title={`Open in ${terminalApp.name}`}
+        icon={Icon.Terminal}
+        target={cwd}
+        application={terminalApp}
+        shortcut={{ modifiers: ["cmd"], key: "t" }}
+      />
+      <Action.ShowInFinder
+        path={cwd}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+      />
+      <Action
+        title="Start Dev Server"
+        icon={Icon.Play}
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        onAction={openStartCommand}
+      />
+      <Action
+        title="Refresh"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={onRefresh}
+      />
+    </ActionPanel.Section>
+  );
+
+  if (spinning) {
+    return (
+      <List.Item
+        id={id}
+        icon={SPINNER_ICONS[frame]}
+        // The section header is already the project name, so the row says
+        // what is happening instead of repeating it. Server rows title on
+        // their host and port; a row with no port yet has its state to give.
+        title={entry.kind === "restart" ? "Restarting…" : "Starting…"}
+        // The project name lives in the section header, which Raycast's search
+        // doesn't index, so without this typing a project's name filters its
+        // own pending row out from under the user.
+        keywords={[entry.name, cwd]}
+        actions={
+          <ActionPanel>
+            {/* Tailing the log of a server that is still booting is the one
+                thing you can usefully do while waiting on it. */}
+            <Action
+              title="View Startup Log"
+              icon={Icon.Terminal}
+              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              onAction={() =>
+                push(
+                  <SpawnLogView
+                    cwd={cwd}
+                    name={entry.name}
+                    logStart={entry.logStart}
+                  />,
+                )
+              }
+            />
+            {projectActions}
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  const failure = entry.reason ? SPAWN_FAILURE[entry.reason] : undefined;
+  return (
+    <List.Item
+      id={id}
+      icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+      // The cause is the title, for the same reason it is the title on a
+      // toast: it is the one part that always survives. The section above
+      // already says which project this is.
+      title={
+        failure?.title ??
+        (entry.kind === "restart"
+          ? `Didn't come back after ${RESTART_WINDOW_S}s`
+          : `Didn't start after ${SPAWN_TIMEOUT_MS / 1000}s`)
+      }
+      // As above: the name is only in the section header, and a filtered-out
+      // failed row takes its remedies with it.
+      keywords={[entry.name, cwd]}
+      accessories={[{ tag: { value: "Failed", color: Color.Red } }]}
+      actions={
+        <ActionPanel>
+          {/* What went wrong. */}
+          <ActionPanel.Section>
+            <Action
+              title="View Startup Log"
+              icon={Icon.Terminal}
+              shortcut={{ modifiers: ["cmd"], key: "l" }}
+              onAction={() =>
+                push(
+                  <SpawnLogView
+                    cwd={cwd}
+                    name={entry.name}
+                    logStart={entry.logStart}
+                  />,
+                )
+              }
+            />
+            {failure?.fix && (
+              <Action.CopyToClipboard
+                title="Copy Fix Command"
+                icon={Icon.Clipboard}
+                content={failure.fix}
+              />
+            )}
+          </ActionPanel.Section>
+          {projectActions}
+          <ActionPanel.Section>
+            <Action
+              title="Dismiss"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              onAction={onDismiss}
+            />
+            {/* Only worth offering once there is more than one to clear;
+                below that it is Dismiss under a longer name. */}
+            {failedCount > 1 && (
+              <Action
+                title={`Dismiss All ${failedCount} Failed`}
+                icon={Icon.XMarkCircleFilled}
+                shortcut={{ modifiers: ["cmd", "opt"], key: "d" }}
+                onAction={onDismissAll}
+              />
+            )}
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 export default function Command(
   props: LaunchProps<{ launchContext?: DashboardLaunchContext }>,
 ) {
   const prefs = getPreferenceValues<Preferences.Index>();
-  const { push } = useNavigation();
+  // Read straight from the preference rather than from the launch context.
+  // It is extension-level, so this is the same value every caller would have
+  // sent, minus the chance of a caller sending a different one.
+  const autoOpen = prefs.autoOpenInBrowser ?? false;
   // Capture launchContext once at mount. The destructured props are new
   // identities every render, so reading via a ref keeps every effect's
   // closure stable.
   const launchContextRef = useRef(props.launchContext);
   const spawnRequest = launchContextRef.current?.spawn;
+
+  // Starts in flight, keyed by cwd. Deliberately its own state slice rather
+  // than synthetic entries in the useCachedPromise data: every kill and
+  // restart handler runs an optimisticUpdate filter over that array typed as
+  // DevServer[], and a fake entry would flow through all of them.
+  //
+  // Declared ahead of the fetch below because the fetch reads it: which
+  // projects are mid-start is exactly what lets fetchServers drop their helper
+  // rows.
+  const [pendingStarts, setPendingStarts] = useState<Map<string, PendingStart>>(
+    new Map(),
+  );
+  // Mirrored so async readers get the current map without taking it as a
+  // dependency: the watchdog has to know which rows are still standing when it
+  // fires, and it cannot take `pendingStarts` as a dependency without
+  // restarting its 15s timer every time a row changes. The fetch reads it for
+  // the same reason, which is what lets its identity stay stable across polls.
+  const pendingStartsRef = useRef(pendingStarts);
+  useEffect(() => {
+    pendingStartsRef.current = pendingStarts;
+  }, [pendingStarts]);
 
   // Dedupe `servers` references when content is unchanged. Without this,
   // every poll (every 1s while expecting servers) hands React a new array
@@ -750,11 +1069,29 @@ export default function Command(
   // when pid+port content matches lets React's Object.is bail out of
   // the re-render entirely.
   const fetchStableServers = useMemo(() => {
-    let last: DevServer[] = [];
+    // null until the first poll, so that poll always writes the snapshot:
+    // the cache may hold a stale one from a previous session, and an empty
+    // first result must replace it just as surely as a full one.
+    let last: DevServer[] | null = null;
     return async (): Promise<DevServer[]> => {
-      const next = await fetchServers();
+      // Which projects are mid-start, as of this poll. fetchServers wants it
+      // because a starting project's helpers are the one kind of plumbing it
+      // cannot recognise on its own (see suppressHelperRows, rule 4). Handing
+      // it to the fetch rather than filtering the result afterwards is what
+      // puts the same judgment in the snapshot the menu bar reads.
+      const settling = new Set(
+        [...pendingStartsRef.current]
+          .filter(([, entry]) => entry.status === "starting")
+          .map(([cwd]) => cwd),
+      );
+      const next = await fetchServers(settling);
+      if (last && sameServers(next, last)) return last;
+      // Written only on change, and "change" is sameServers' definition:
+      // pid, port, branch. A field it ignores (a portless alias attaching to
+      // a running server) also skips the write, so the menu bar's first paint
+      // can be that little bit staler; its own fetch corrects it in the same
+      // open, which is the eventual consistency those fields already accept.
       writeSnapshot(next);
-      if (sameServers(next, last)) return last;
       last = next;
       return next;
     };
@@ -803,6 +1140,116 @@ export default function Command(
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(
     undefined,
   );
+  // Mirrored for the watch effect, which must not take `selectedItemId` as a
+  // dependency: that effect keys on `servers` and `spawnState`, and adding
+  // selection to it would re-run the whole detection body every time the user
+  // moved the cursor.
+  const selectedIdRef = useRef(selectedItemId);
+  useEffect(() => {
+    selectedIdRef.current = selectedItemId;
+  }, [selectedItemId]);
+
+  // Flipped once the persisted rows have been merged in. Until then the
+  // write-through below holds its fire: the initial state is an empty map, and
+  // writing it would erase the very rows the rehydrate is on its way to read.
+  // State rather than a ref so the write-through runs the moment it flips,
+  // even when the merge added nothing: a mount that starts a server against
+  // empty storage must still persist that row without waiting for it to change
+  // again.
+  const [rehydrated, setRehydrated] = useState(false);
+
+  // Write-through, so what the dashboard knows survives the command being
+  // unloaded. Best-effort: a storage failure costs the next mount its rows and
+  // must never break the one that is running.
+  useEffect(() => {
+    if (!rehydrated) return;
+    writePendingStarts(pendingStarts).catch(() => {});
+  }, [pendingStarts, rehydrated]);
+
+  // Pick up starts fired by an earlier mount. Raycast unloads the command the
+  // moment the user pops back to root, which is usually well inside a start's
+  // window, so this mount routinely inherits rows nobody was left watching.
+  //
+  // Live entries win on a cwd collision: this mount fired them just now, and
+  // the persisted copy is at best the same row a write behind.
+  useEffect(() => {
+    void (async () => {
+      const persisted = await readPendingStarts();
+      const now = Date.now();
+      // Diagnosed up front rather than inside the updater: the read hits the
+      // filesystem synchronously, and an updater must stay callable twice.
+      const inherited = [...persisted]
+        .filter(([, entry]) => now <= entry.deadline + PENDING_MAX_AGE_MS)
+        .map(([cwd, entry]): [string, PendingStart] =>
+          entry.status === "starting" && now > entry.deadline
+            ? [
+                cwd,
+                {
+                  ...entry,
+                  status: "failed",
+                  reason: diagnoseSpawnFailure(cwd, entry.logStart),
+                },
+              ]
+            : [cwd, entry],
+        );
+      setRehydrated(true);
+      if (inherited.length === 0) return;
+      setPendingStarts((prev) => {
+        const next = new Map(prev);
+        for (const [cwd, entry] of inherited) {
+          if (!next.has(cwd)) next.set(cwd, entry);
+        }
+        // Selection is deliberately left alone. Nothing here happened while
+        // the user was looking, so none of it has earned the cursor.
+        return next.size === prev.size ? prev : next;
+      });
+    })();
+  }, []);
+
+  // Forget entries whose cwd now has a real server row. This is bookkeeping
+  // only: visible rows are derived from the same `servers` array (see
+  // visiblePending), so the handoff already happened in the render that first
+  // listed the server, and this cleanup can land whenever it likes.
+  //
+  // Keyed on the entries as well as on `servers` because a rehydrated row
+  // arrives without either one moving: `servers` hands back the previous array
+  // reference when a poll finds nothing changed, so a row for a server that
+  // has been running quietly since before this mount could otherwise sit in
+  // the map until something else on the machine moved. Invisible while it sat
+  // there, but it would surface the moment the user killed that server, as a
+  // failed row for a start that had in fact succeeded. Re-running on deletions
+  // is free: the second pass finds nothing and hands `prev` straight back.
+  useEffect(() => {
+    setPendingStarts((prev) => {
+      if (prev.size === 0) return prev;
+      const next = new Map(prev);
+      for (const [cwd, entry] of prev) {
+        if (resolvingServer(cwd, entry, servers)) next.delete(cwd);
+      }
+      return next.size === prev.size ? prev : next;
+    });
+  }, [servers, pendingStarts]);
+
+  function dismissPending(cwd: string) {
+    setPendingStarts((prev) => {
+      if (!prev.has(cwd)) return prev;
+      const next = new Map(prev);
+      next.delete(cwd);
+      return next;
+    });
+  }
+
+  // Clears failed entries only. A start still in flight is not the user's to
+  // dismiss: its row is about to resolve one way or the other by itself.
+  function dismissAllFailed() {
+    setPendingStarts((prev) => {
+      const next = new Map(prev);
+      for (const [cwd, entry] of prev) {
+        if (entry.status === "failed") next.delete(cwd);
+      }
+      return next.size === prev.size ? prev : next;
+    });
+  }
 
   // Dashboard polling cadence. Faster only while actively watching for a
   // just-spawned server to bind a port, so it appears within ~1s. We do NOT
@@ -909,21 +1356,23 @@ export default function Command(
       //    see step 6.
       const spawned = await Promise.all(
         spawn.targets.map(async (t) => {
-          // Size of the (append-mode) spawn log before this attempt writes
-          // to it, so the watchdog can inspect only this attempt's output.
-          let logStart = 0;
-          try {
-            logStart = fs.statSync(spawnLogPath(t.cwd)).size;
-          } catch {
-            // No log yet; the spawn writes from byte 0.
-          }
+          const logStart = spawnLogOffset(t.cwd);
+          // Whatever holds this cwd right now is either a sibling the kill
+          // above left standing or the corpse of the server it just took down,
+          // which the poll has yet to clear. Never the server we are about to
+          // wait for. Taken once here and handed to both the pending row and
+          // the watchers below, so no two of them can disagree about which
+          // server counts as the arrival. Empty for a genuinely cold start.
+          const ignorePids = serversRef.current
+            .filter((s) => s.cwd === t.cwd)
+            .map((s) => s.pid);
           try {
             await startDevServer(t.cwd);
             await recordSeen({
               cwd: t.cwd,
               projectName: t.name,
             });
-            return { ...t, logStart };
+            return { ...t, logStart, ignorePids };
           } catch (err) {
             await showFailureToast(err, {
               title: `Failed to start ${t.name}`,
@@ -950,46 +1399,136 @@ export default function Command(
         return;
       }
 
+      // Give every spawned target a row of its own straight away, so the
+      // dashboard shows what is in flight and already has somewhere to put the
+      // failure if the watchdog fires. Writing by cwd also means starting a
+      // project that currently shows a failed row resets that row instead of
+      // stacking a second one.
+      setPendingStarts((prev) => {
+        const next = new Map(prev);
+        for (const t of succeeded) {
+          next.set(t.cwd, {
+            name: t.name,
+            projectKey:
+              serversRef.current.find((s) => s.cwd === t.cwd)?.projectKey ??
+              t.cwd,
+            logStart: t.logStart,
+            deadline: Date.now() + SPAWN_TIMEOUT_MS,
+            status: "starting",
+            reason: null,
+            kind: "start",
+            ignorePids: t.ignorePids,
+          });
+        }
+        return next;
+      });
+      // Follow the thing the user just asked for, from the first row it has
+      // through to the server row it becomes (the watch effect re-points
+      // selection at the real pid on handoff). Without this the cursor sits
+      // on whatever was selected before, and the row they are watching is
+      // not the row ↵ would act on.
+      setSelectedItemId(pendingRowId(succeeded[0].cwd));
+
       // The watch effect below takes over, flipping the toast to Success once
       // every spawned cwd appears in the servers state (driven by the normal
       // polling, now at 1s).
       setSpawnState({
         phase: "spawning",
         expecting: new Map(
-          succeeded.map((t) => [t.cwd, { name: t.name, logStart: t.logStart }]),
+          succeeded.map((t) => [
+            t.cwd,
+            { name: t.name, logStart: t.logStart, ignorePids: t.ignorePids },
+          ]),
         ),
-        autoOpen: spawn.autoOpen,
       });
     })();
   }, [spawnState.phase, hasLoaded]);
 
-  // Watch for every expected cwd to show up in the servers state.
-  // Drives the toast to Success and auto-hides after a brief beat.
+  // Re-arm the flow for a spawn request that arrives at a dashboard which is
+  // already mounted. Every start seen so far reaches a fresh mount, and that
+  // mount reads its request off the capture above; what Raycast does when the
+  // dashboard is already loaded and a start is sent from the menu bar inside
+  // the same window is not documented. If the context lands on this mount
+  // instead of a new one, the capture never sees it and the start goes nowhere:
+  // no spawn, no pending row, nothing said to the user.
+  //
+  // `requestId` is the whole test. Object identity cannot serve: the
+  // destructured props are new every render, so an unchanged context looks
+  // like news on every single one. Comparing ids makes repeated renders of the
+  // same request a no-op, and the same goes for a sender too old to send one.
+  const handledRequestId = useRef(spawnRequest?.requestId);
+  useEffect(() => {
+    const incoming = props.launchContext?.spawn;
+    if (!incoming?.requestId) return;
+    if (incoming.requestId === handledRequestId.current) return;
+    // A start still in flight keeps the machine. The phases in between own a
+    // toast, a set of rows, and possibly a confirm dialog the user has yet to
+    // answer, and cutting in would strand all three. Dropping the newcomer
+    // here is no worse than what happens today, whereas dropping one while
+    // nothing is in flight is the hole this effect exists to close.
+    if (spawnState.phase !== "idle" && spawnState.phase !== "done") return;
+    handledRequestId.current = incoming.requestId;
+    // Enter exactly where a mount enters: the flow effect reads the request
+    // off the ref, and runs on "pending" once its guard is clear. `hasLoaded`
+    // flipped long ago on a dashboard that is already up, so the confirms are
+    // still based on a completed fetch, same as at mount.
+    launchContextRef.current = props.launchContext;
+    spawnFlowFired.current = false;
+    setSpawnState({ phase: "pending" });
+  }, [props.launchContext, spawnState.phase]);
+
+  // Watch for every expected start to land. Drives the toast to Success and
+  // auto-hides after a brief beat.
+  //
+  // "Landed" is the rows' own predicate, not the mere presence of the cwd in
+  // `servers`: a sibling server or the corpse of the one the pre-spawn kill
+  // took down would satisfy presence, and then a start that never bound a port
+  // would get a success toast and open somebody else's URL.
+  //
+  // The predicate is put to `expecting`, which carries each row's own
+  // ignorePids, rather than to the live pending entries. The cleanup effect
+  // above deletes an entry in the very render it resolves, so in a batch that
+  // lands one server at a time the early entries are already gone by the time
+  // the last one arrives. Reading state here would lose track of precisely the
+  // servers this effect then has to focus and open.
   useEffect(() => {
     if (spawnState.phase !== "spawning") return;
     const expecting = spawnState.expecting;
-    const remaining = new Map(expecting);
-    for (const s of servers) {
-      if (remaining.has(s.cwd)) remaining.delete(s.cwd);
+    const landed = new Map<string, DevServer>();
+    for (const [cwd, target] of expecting) {
+      const server = resolvingServer(cwd, target, servers);
+      if (!server) return;
+      landed.set(cwd, server);
     }
-    if (remaining.size > 0) return;
 
     // All expected servers detected. Move the cursor onto the newly started
     // server so the default ↵ action operates on it instead of whatever row
-    // happened to be selected (the list is ordered by PID, not start time, so
-    // a new server usually lands at the bottom — see the grouping below). When
-    // several were started at once, focus the first; the user can step through
-    // the rest. Resolving by cwd picks whichever server is now listening for
-    // that cwd, which is the freshly spawned one even after a kill+respawn.
-    const firstCwd = [...expecting.keys()][0];
-    const focusTarget = servers.find((x) => x.cwd === firstCwd);
-    if (focusTarget) setSelectedItemId(String(focusTarget.pid));
+    // happened to be selected. When several were started at once, focus the
+    // first; the user can step through the rest. The server to focus is the one
+    // the predicate resolved, which is the row the pending one just handed over
+    // to, rather than whatever else happens to share the cwd.
+    //
+    // Skipped while the cursor sits on a pending row: the render-time handoff
+    // has already carried it to that row's server, and that is the one the
+    // user was watching. Overriding it here would drag them to the first of a
+    // batch for no reason.
+    if (!selectedIdRef.current?.startsWith(PENDING_ID_PREFIX)) {
+      const firstCwd = [...expecting.keys()][0];
+      const focusTarget = landed.get(firstCwd);
+      if (focusTarget) setSelectedItemId(String(focusTarget.pid));
+    }
 
-    if (spawnState.autoOpen) {
-      for (const cwd of expecting.keys()) {
-        const s = servers.find((x) => x.cwd === cwd);
-        if (s) open(s.url).catch(() => {});
-      }
+    // Auto-open is the extension acting on its own, so it opens the tab
+    // behind whatever the user is looking at. Raycast's `open()` activates
+    // the browser, and Raycast hides itself the moment it loses focus, which
+    // tore the dashboard away mid-glance a couple of seconds after a start.
+    // Losing the window also loses everything else it was offering: copying
+    // the URL for a different browser, opening a terminal on the project.
+    //
+    // Opens the resolving server's URL rather than the first server sharing
+    // the cwd, so a surviving sibling's URL is never the one that gets a tab.
+    if (autoOpen) {
+      for (const s of landed.values()) openAutomatically(s.url);
     }
     pokeMenuBar();
     const toast = toastRef.current;
@@ -1006,59 +1545,111 @@ export default function Command(
     setSpawnState({ phase: "done" });
   }, [servers, spawnState]);
 
-  // Hard 15s timeout. If some expected servers still haven't bound a port,
-  // escalate the toast to a Failure that offers the startup log, since that's
-  // where the reason lives (e.g. portless needing sudo, a missing binary,
-  // a crashing build). A server that exits before binding is otherwise
-  // indistinguishable from one still booting, so without this the toast
-  // would just vanish and the user would have no thread to pull on.
+  // Hard 15s timeout. Any expected server that still hasn't bound a port turns
+  // its pending row red. A server that exits before binding is otherwise
+  // indistinguishable from one still booting, so without this the row would
+  // spin forever and the user would have no thread to pull on.
   //
-  // Wording stays soft ("not detected yet") because a genuinely slow build
-  // can exceed 15s; we assert "not seen", not "failed forever". `servers`
-  // is read from the ref so we compare against the latest poll, not the
-  // stale snapshot this effect closed over.
+  // The failure lands on the row rather than the toast because the remedies
+  // have to outlive the moment: a toast takes its actions with it when it
+  // goes, and it degrades to an actionless HUD whenever the Raycast window is
+  // closed, which is most of the time 15 seconds after a start. Each missing
+  // target diagnoses itself, so several servers failing for different reasons
+  // each say their own piece, which one toast line could never do.
+  //
+  // `servers` is read from the ref so we compare against the latest poll, not
+  // the stale snapshot this effect closed over.
   useEffect(() => {
     if (spawnState.phase !== "spawning") return;
     const expecting = spawnState.expecting;
     const timer = setTimeout(() => {
-      const present = new Set(serversRef.current.map((s) => s.cwd));
+      // The same predicate the rows resolve on, so a start is only failed here
+      // while its row is still spinning. A cwd whose entry has gone is either
+      // one the predicate has already resolved (so it is not in here anyway) or
+      // one the user dismissed, and a row thrown away is not ours to fail or to
+      // move the cursor onto.
       const missing = [...expecting.entries()].filter(
-        ([cwd]) => !present.has(cwd),
+        ([cwd, target]) =>
+          pendingStartsRef.current.has(cwd) &&
+          !resolvingServer(cwd, target, serversRef.current),
       );
-      const toast = toastRef.current;
-      if (toast && missing.length > 0) {
-        const names = joinNames(missing.map(([, v]) => v.name));
-        // Name the failure when the log can: a port conflict gets a message
-        // that says what to do instead of the generic "check the log". The
-        // conflicted server (not just missing[0]) becomes the log-action
-        // target, so the message and the log the user lands on tell the
-        // same story even when several servers failed for different reasons.
-        const conflicted = missing.find(([cwd, v]) =>
-          spawnHitPortConflict(cwd, v.logStart),
+      if (missing.length > 0) {
+        const diagnosed = missing.map(
+          ([cwd, target]) =>
+            [cwd, diagnoseSpawnFailure(cwd, target.logStart)] as const,
         );
-        toast.style = Toast.Style.Failure;
-        toast.title =
-          missing.length === 1
-            ? `${names} hasn't started yet`
-            : `${names} haven't started yet`;
-        toast.message = conflicted
-          ? "Port conflict: a port is already in use by another process. See the startup log."
-          : "Not detected after 15s. Check the startup log.";
-        const [logCwd, logTarget] = conflicted ?? missing[0];
-        toast.primaryAction = {
-          title: "View Startup Log",
-          onAction: (t) => {
-            t.hide().catch(() => {});
-            push(<SpawnLogView cwd={logCwd} name={logTarget.name} />);
-          },
-        };
-      } else {
-        toast?.hide().catch(() => {});
+        setPendingStarts((prev) => {
+          const next = new Map(prev);
+          for (const [cwd, reason] of diagnosed) {
+            const entry = next.get(cwd);
+            if (entry) next.set(cwd, { ...entry, status: "failed", reason });
+          }
+          return next;
+        });
+        // Put the cursor on the first failed row so its remedies are one ↵
+        // away. Safe to pin: this row has been on screen since the spawn, so
+        // we are only re-pointing selection at an id the list already has.
+        setSelectedItemId(pendingRowId(missing[0][0]));
       }
+      // The rows carry the failure now, and the success path has its own
+      // toast, so nothing is left for this one to say.
+      toastRef.current?.hide().catch(() => {});
+      // The pre-spawn kill may have taken servers down that never came back,
+      // so the count changed on a path that used to poke only on success.
+      pokeMenuBar();
       setSpawnState({ phase: "done" });
-    }, 15000);
+    }, SPAWN_TIMEOUT_MS);
     return () => clearTimeout(timer);
   }, [spawnState.phase]);
+
+  // The same giving-up, driven by the rows instead of by the spawn phase. The
+  // watchdog above is armed by `spawnState`, which only the mount that fired
+  // the start ever has; a mount that inherited its rows from storage would
+  // leave them spinning forever. This one arms off the rows themselves, on the
+  // earliest deadline still outstanding, and re-arms whenever they change.
+  //
+  // It flips status and nothing else: no toast to hide, no selection to move,
+  // no phase to advance, because none of that belongs to a start this mount
+  // did not make. When both are armed at once they agree by construction. The
+  // sweep only ever flips entries that are still "starting" and overdue, so it
+  // is idempotent, and firing first costs nothing: the watchdog's own filter
+  // asks whether the row is still in the map, which a flipped row is, so it
+  // re-diagnoses from the same log offset, reaches the same reason, and goes
+  // on to pin selection exactly as it does today.
+  useEffect(() => {
+    const deadlines = [...pendingStarts.values()]
+      .filter((entry) => entry.status === "starting")
+      .map((entry) => entry.deadline);
+    if (deadlines.length === 0) return;
+    const timer = setTimeout(
+      () => {
+        const now = Date.now();
+        const overdue = [...pendingStartsRef.current].filter(
+          ([, entry]) => entry.status === "starting" && entry.deadline <= now,
+        );
+        if (overdue.length === 0) return;
+        const diagnosed = overdue.map(
+          ([cwd, entry]) =>
+            [cwd, diagnoseSpawnFailure(cwd, entry.logStart)] as const,
+        );
+        setPendingStarts((prev) => {
+          const next = new Map(prev);
+          let flipped = false;
+          for (const [cwd, reason] of diagnosed) {
+            const entry = next.get(cwd);
+            if (entry?.status !== "starting" || entry.deadline > now) continue;
+            next.set(cwd, { ...entry, status: "failed", reason });
+            flipped = true;
+          }
+          // Handing back `prev` when nothing qualified keeps this effect from
+          // re-arming on a map that only changed identity.
+          return flipped ? next : prev;
+        });
+      },
+      Math.max(0, Math.min(...deadlines) - Date.now()),
+    );
+    return () => clearTimeout(timer);
+  }, [pendingStarts]);
 
   // Every observed server feeds the recents store, so the Start Recent
   // Dev Server picker has an up-to-date list of projects without the user
@@ -1077,12 +1668,20 @@ export default function Command(
   }, [servers]);
 
   async function kill(pid: number) {
+    // Captured before the kill: afterwards this pid is gone from `servers`.
+    const cwd = servers.find((s) => s.pid === pid)?.cwd;
     try {
       await mutate(killProcess(pid), {
         optimisticUpdate: (current) =>
           (current ?? []).filter((s) => s.pid !== pid),
         rollbackOnError: true,
       });
+      // Take the project's leftover helpers with it: the kill above does not.
+      // It is a bare SIGTERM that returns before the port is released, so the
+      // helper waits for the project to actually go down. It backs out if
+      // another server is still serving this cwd once it does, so a project
+      // running two dev servers keeps the survivor's plumbing.
+      if (cwd) await reapProjectHelpersWhenDown([cwd]);
       pokeMenuBar();
     } catch (err) {
       await showFailureToast(err, { title: "Failed to kill server" });
@@ -1107,6 +1706,10 @@ export default function Command(
       await mutate(
         (async () => {
           await Promise.all(targets.map((s) => killProcess(s.pid)));
+          // Killing does not take the helpers with it, and SIGTERM returns
+          // before the servers release their ports, so this waits for each
+          // folder to go quiet before reaping it.
+          await reapProjectHelpersWhenDown(targets.map((s) => s.cwd));
         })(),
         {
           optimisticUpdate: (current) =>
@@ -1138,6 +1741,10 @@ export default function Command(
       await mutate(
         (async () => {
           await Promise.all(servers.map((s) => killProcess(s.pid)));
+          // Killing does not take the helpers with it, and SIGTERM returns
+          // before the servers release their ports, so this waits for each
+          // folder to go quiet before reaping it.
+          await reapProjectHelpersWhenDown(servers.map((s) => s.cwd));
         })(),
         {
           optimisticUpdate: () => [],
@@ -1151,17 +1758,44 @@ export default function Command(
   }
 
   async function restart(server: DevServer) {
-    // Snapshot the project's server count BEFORE killing the old one so we
-    // can detect when a new server has bound a port. We use serversRef.current
-    // so we always see the latest state across the polling loop. The pid set
-    // (excluding the one we're about to kill) lets us single out the
-    // replacement afterwards so we can move the cursor onto it.
-    const priorPids = new Set(
-      serversRef.current
+    // Every pid holding this cwd before the kill, including the one being
+    // replaced. Hoisted because the pending row and the poll below both put it
+    // to resolvingServer: one array means the toast and the row can never
+    // disagree about whether the restart landed. A kill-resistant old listener
+    // used to make a bare count exceed its baseline while the row went on
+    // spinning, and a sibling exiting mid-window used to do the reverse.
+    const ignorePids = [
+      ...serversRef.current
         .filter((s) => s.cwd === server.cwd && s.pid !== server.pid)
         .map((s) => s.pid),
+      server.pid,
+    ];
+    // Same log baseline the spawn flow takes: a restart respawns through
+    // startDevServer, so it fails for the same nameable reasons and deserves
+    // the same diagnosis instead of a bare file path.
+    const logStart = spawnLogOffset(server.cwd);
+    // The row goes up before the kill, so the project never blinks out of the
+    // list: the old row goes, this one is already standing in its place.
+    // ignorePids is every server that held this cwd a moment ago, so the row
+    // waits for a genuinely new one rather than resolving against a sibling
+    // or against the corpse of the server being replaced.
+    setPendingStarts((prev) =>
+      new Map(prev).set(server.cwd, {
+        name: server.projectName,
+        projectKey: server.projectKey,
+        logStart,
+        // The restart runs its own poll rather than the watchdog, so the
+        // deadline trails that window by a beat: a sweep on a later mount must
+        // never call a start failed while the poll that owns it is still
+        // asking.
+        deadline: Date.now() + RESTART_WINDOW_S * 1000 + 2000,
+        status: "starting",
+        reason: null,
+        kind: "restart",
+        ignorePids,
+      }),
     );
-    const baseline = priorPids.size;
+    setSelectedItemId(pendingRowId(server.cwd));
     try {
       await mutate(restartServer(server), {
         optimisticUpdate: (current) =>
@@ -1173,17 +1807,15 @@ export default function Command(
         title: "Restarting…",
         message: server.projectName,
       });
-      // Poll at staggered intervals up to ~10s. Bail early as soon as the
-      // server count for this project rises above baseline (new port bound).
-      const delays = [1000, 2000, 3000, 4000];
+      // Poll at staggered intervals up to RESTART_WINDOW_S. Bail early as soon
+      // as the row's own predicate finds the replacement, so "Restarted" and
+      // the spinner going away are the same event rather than two guesses at
+      // it.
       let restored = false;
-      for (const delay of delays) {
+      for (const delay of RESTART_POLL_DELAYS) {
         await new Promise((r) => setTimeout(r, delay));
         await revalidate();
-        const current = serversRef.current.filter(
-          (s) => s.cwd === server.cwd,
-        ).length;
-        if (current > baseline) {
+        if (resolvingServer(server.cwd, { ignorePids }, serversRef.current)) {
           restored = true;
           break;
         }
@@ -1191,20 +1823,44 @@ export default function Command(
       if (restored) {
         toast.style = Toast.Style.Success;
         toast.title = "Restarted";
-        // Focus the replacement: the cwd's server whose pid wasn't running
-        // before the kill. Falls back to any current server for the cwd in the
-        // unlikely case the new pid matches a prior one (pid reuse).
-        const sameCwd = serversRef.current.filter((s) => s.cwd === server.cwd);
-        const replacement =
-          sameCwd.find((s) => !priorPids.has(s.pid)) ?? sameCwd[0];
-        if (replacement) setSelectedItemId(String(replacement.pid));
+        // Same exit the start toast makes: confirmation is a moment, not a
+        // fixture, and a toast never dismisses itself.
+        setTimeout(() => {
+          toast.hide().catch(() => {});
+        }, 2500);
+        // Selection has already followed the row across in render, and the
+        // cleanup effect drops the entry: both ran off the same predicate the
+        // poll just did. Nothing to do here but the toast. The server it
+        // resolved against is the newest for this cwd, so the sort puts it at
+        // the top of its project and its project at the top of the list.
         pokeMenuBar();
       } else {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Restart timed out";
-        toast.message = `Check ${spawnLogPath(server.cwd)}`;
+        // Same surface as a failed start. A toast cannot hold the remedies
+        // past its own lifetime, and 10 seconds after a restart the Raycast
+        // window is usually already gone.
+        toast.hide().catch(() => {});
+        const reason = diagnoseSpawnFailure(server.cwd, logStart);
+        setPendingStarts((prev) => {
+          // Defensive only. The poll and the cleanup effect now share one
+          // predicate, so an entry already dropped means the restart landed,
+          // which is not this branch.
+          const entry = prev.get(server.cwd);
+          if (!entry) return prev;
+          return new Map(prev).set(server.cwd, {
+            ...entry,
+            status: "failed",
+            reason,
+          });
+        });
+        // The old server is dead and nothing replaced it: the menu bar's
+        // count changed on a failure just as surely as on a success.
+        pokeMenuBar();
       }
     } catch (err) {
+      // The respawn never got off the ground, so there is nothing for a row
+      // to wait on. Drop it and let the error speak for itself.
+      dismissPending(server.cwd);
+      pokeMenuBar();
       await showFailureToast(err, {
         title: `Failed to restart ${server.projectName}`,
       });
@@ -1251,29 +1907,117 @@ export default function Command(
     return Array.from(seen).sort();
   }, [servers]);
 
+  // Mid-start helper rows are already gone: the fetch drops them, so `servers`
+  // never carries one and the snapshot the menu bar reads doesn't either.
   const visible =
     toolFilter === "all"
       ? servers
       : servers.filter((s) => s.tool === toolFilter);
 
+  // Which pending starts still deserve a row. Derived every render, never
+  // stored: an entry shows only while `resolvingServer` finds nothing for it.
+  // Reading the same array the server rows are built from is what makes the
+  // handoff atomic, since the synthetic row can only vanish in the very
+  // render that lists the real one. If this were a stored flag there would be
+  // a frame with neither row, and selection would jump to a stranger.
+  //
+  // "The same array" holds because the predicate only ever resolves against a
+  // deliberate port, and the fetch's mid-start rule drops nothing on a
+  // deliberate port: the server that retires this row is always one `servers`
+  // is carrying.
+  const visiblePending = [...pendingStarts].filter(
+    ([cwd, entry]) => !resolvingServer(cwd, entry, servers),
+  );
+
   // Group by projectKey (git common-dir for git projects, cwd otherwise) so
   // sibling worktrees of the same repo collapse into one section. Each row
   // still carries its own cwd/branch so per-row actions stay correct.
-  const grouped = Object.entries(
-    visible.reduce(
-      (acc, s) => {
-        (acc[s.projectKey] ??= []).push(s);
-        return acc;
-      },
-      {} as Record<string, DevServer[]>,
-    ),
-  );
+  //
+  // Pending rows sit in their project's own section rather than a separate
+  // "Starting" one. A section header names a project, and a project does not
+  // stop being itself while one of its servers boots: the old header went
+  // stale the moment a row failed, since "Starting" was then describing a row
+  // that had given up. Keeping the header constant also means nothing moves
+  // when the row resolves, because it was already in the section it was
+  // always going to land in.
+  type Group = {
+    key: string;
+    pending: [string, PendingStart][];
+    servers: DevServer[];
+  };
+  const groupsByKey = new Map<string, Group>();
+  const groupFor = (key: string) => {
+    const found = groupsByKey.get(key);
+    if (found) return found;
+    const made: Group = { key, pending: [], servers: [] };
+    groupsByKey.set(key, made);
+    return made;
+  };
+  // Pending first, so their projects lead the list purely by insertion order:
+  // something happening right now outranks something up for an hour.
+  for (const [cwd, entry] of visiblePending) {
+    groupFor(entry.projectKey).pending.push([cwd, entry]);
+  }
+  for (const s of visible) groupFor(s.projectKey).servers.push(s);
+
+  const grouped = (() => {
+    const all = [...groupsByKey.values()];
+    for (const g of all) g.servers.sort(byRecency);
+    const busy = all.filter((g) => g.pending.length > 0);
+    const idle = all
+      .filter((g) => g.pending.length === 0)
+      .sort((a, b) => byRecency(a.servers[0], b.servers[0]));
+    return [...busy, ...idle];
+  })();
+
+  // A section is titled for its project whether or not anything of it is
+  // running yet. Prefer a real server's name: a pending entry only knows the
+  // name the spawn target was given, while a server has been through project
+  // detection.
+  const groupTitle = (g: Group) =>
+    g.servers.length > 0
+      ? prefs.showFullPath
+        ? g.servers[0].cwd
+        : g.servers[0].projectName
+      : prefs.showFullPath
+        ? g.pending[0][0]
+        : g.pending[0][1].name;
+  const visibleFailedCount = visiblePending.filter(
+    ([, entry]) => entry.status === "failed",
+  ).length;
+
+  // Hand the cursor across the same handoff the rows make, in render, for the
+  // same reason the rows are derived: an effect runs *after* the commit that
+  // dropped the pending row, so for one frame `selectedItemId` names a row
+  // that no longer exists. Raycast reacts to that by picking a row itself and
+  // reporting it through onSelectionChange, which lands in our state and wins
+  // over whatever the effect set a moment later. Resolving it here means the
+  // id never dangles, so there is nothing for Raycast to correct.
+  //
+  // Following the row the cursor is actually on also beats jumping to the
+  // first of a batch: with several starting at once, the user is watching a
+  // specific one.
+  const selectedPendingCwd = selectedItemId?.startsWith(PENDING_ID_PREFIX)
+    ? selectedItemId.slice(PENDING_ID_PREFIX.length)
+    : undefined;
+  const selectedPendingEntry = selectedPendingCwd
+    ? pendingStarts.get(selectedPendingCwd)
+    : undefined;
+  const landed =
+    selectedPendingCwd && selectedPendingEntry
+      ? resolvingServer(selectedPendingCwd, selectedPendingEntry, servers)
+      : undefined;
+  const effectiveSelectedItemId = landed ? String(landed.pid) : selectedItemId;
 
   return (
     <List
       isLoading={effectiveLoading}
       searchBarPlaceholder="Filter servers..."
-      selectedItemId={selectedItemId}
+      // Search still filters natively, but the Starting section stays put:
+      // a start in flight is the thing the user is waiting on, so a query
+      // must not demote it below the servers already running.
+      filtering={{ keepSectionOrder: true }}
+      selectedItemId={effectiveSelectedItemId}
       onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
       searchBarAccessory={
         availableTools.length > 1 ? (
@@ -1296,46 +2040,71 @@ export default function Command(
         ) : undefined
       }
     >
-      {servers.length === 0 && !effectiveLoading && (
-        <List.EmptyView
-          title="No Dev Servers Running"
-          description={`Refreshing every ${prefs.refreshInterval}s.`}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Start Dev Server"
-                icon={Icon.Play}
-                onAction={openStartCommand}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={refresh}
-              />
-              <Action
-                title="Open Extension Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
-            </ActionPanel>
-          }
-        />
-      )}
-      {grouped.map(([projectKey, projectServers]) => (
+      {servers.length === 0 &&
+        visiblePending.length === 0 &&
+        !effectiveLoading && (
+          <List.EmptyView
+            title="No Dev Servers Running"
+            description={`Refreshing every ${prefs.refreshInterval}s.`}
+            actions={
+              <ActionPanel>
+                {/* ↵ runs it as the primary action, but ⌘N has to work here
+                    too: it is the chord for starting a server from every row
+                    in this list, and the empty state is exactly where someone
+                    reaches for it. */}
+                <Action
+                  title="Start Dev Server"
+                  icon={Icon.Play}
+                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  onAction={openStartCommand}
+                />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={refresh}
+                />
+                <Action
+                  title="Open Extension Preferences"
+                  icon={Icon.Gear}
+                  onAction={openExtensionPreferences}
+                />
+              </ActionPanel>
+            }
+          />
+        )}
+      {grouped.map((group) => (
         <List.Section
-          key={projectKey}
-          title={
-            // When showFullPath is on, use the first row's cwd as a concrete
-            // path hint. (For multi-worktree sections the per-row branch tag
-            // and its tooltip distinguish which worktree each row belongs to.)
-            prefs.showFullPath
-              ? projectServers[0].cwd
-              : projectServers[0].projectName
+          key={group.key}
+          // When showFullPath is on, use a cwd as a concrete path hint. (For
+          // multi-worktree sections the per-row branch tag and its tooltip
+          // distinguish which worktree each row belongs to.)
+          title={groupTitle(group)}
+          subtitle={
+            group.servers.length > 0
+              ? `${group.servers.length} server${group.servers.length > 1 ? "s" : ""}`
+              : undefined
           }
-          subtitle={`${projectServers.length} server${projectServers.length > 1 ? "s" : ""}`}
         >
-          {projectServers.map((server) => (
+          {/* In flight first: it is the newest thing in the project, and it
+              becomes the row directly below it. */}
+          {group.pending.map(([cwd, entry]) => (
+            <PendingItem
+              key={pendingRowId(cwd)}
+              // Namespaced so a synthetic id can never collide with a server
+              // row's, which is a bare pid.
+              id={pendingRowId(cwd)}
+              cwd={cwd}
+              entry={entry}
+              terminalApp={terminalApp}
+              editorApp={editorApp}
+              failedCount={visibleFailedCount}
+              onDismiss={() => dismissPending(cwd)}
+              onDismissAll={dismissAllFailed}
+              onRefresh={refresh}
+            />
+          ))}
+          {group.servers.map((server) => (
             <ServerItem
               key={server.pid}
               id={String(server.pid)}
@@ -1345,7 +2114,7 @@ export default function Command(
               lanIp={lanIp}
               show={show}
               onKill={() => kill(server.pid)}
-              onKillProject={() => killProject(projectKey)}
+              onKillProject={() => killProject(group.key)}
               onKillAll={killAll}
               onRestart={() => restart(server)}
               onRefresh={refresh}

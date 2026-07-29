@@ -1,5 +1,20 @@
 # aerospace Changelog
 
+## [Maintenance] - 2026-07-28
+
+- Eliminate 1-2s startup delay by removing `shell-env` (no longer spawns a login shell)
+- Convert all commands to async — UI shows loading states instead of blocking
+- Use Raycast `getApplications()` instead of shelling out to `mdfind` for app icons
+- Replace `@iarna/toml` with `smol-toml` for TOML 1.1 support (aerospace config uses 1.1)
+- Add extension preference to set a custom aerospace binary path
+- Fix empty bindings (`[]`) showing as blank list items
+- Fix shortcut execution in non-main modes (now switches mode and restores after)
+- Escape shortcut keys before interpolating them into AppleScript, so bindings containing `"` or `\` no longer produce a broken script
+- Show a persistent error state in the shortcuts, workspace, and config views instead of an empty view once the failure toast dismisses
+- Surface a clear “AeroSpace isn’t running” message (with an Open AeroSpace toast action) instead of a raw Node `execFile` error when the CLI can’t reach the server
+- Only switch to binding modes the running AeroSpace server reports, so a config that is ahead of the loaded config can no longer strand you in a mode with no bindings
+- Fix workspace shortcut lookup for bindings that pass flags (e.g. `workspace --auto-back-and-forth 1`) and stop treating `workspace next`/`prev` as workspace names
+
 ## [Fix] - 2026-04-24
 
 - Fix window switcher search to match on both app name and window title, enabling fuzzy finding by title keywords (e.g. searching "huddle" now finds Slack Huddle windows)

@@ -65,28 +65,26 @@ import {
   apiHost,
   authHeaders,
   errorMessage,
+  WRITABLE_ROLES,
 } from "./lib/api";
 import type {
   WorkspacesResponse,
   ListsResponse,
   ListRow,
   SearchEntryResult,
+  Workspace,
 } from "./lib/api";
 import {
   iconForList,
   iconForWorkspace,
   listVisibility,
 } from "./lib/listIconCatalog";
+import { crossShortcut } from "./lib/platform";
 import { stopSpeaking } from "./lib/tts";
 import AddEntryCommand from "./add-entry";
 import { EntrySearchRow } from "./components/EntrySearchRow";
 
 const ALL_WORKSPACES = "all";
-
-// Roles that can edit an entry, matching the server's can_edit_list
-// gate (owner/admin/editor; viewer is read-only). Used to decide
-// whether the "Edit Entry" action appears on a search result row.
-const WRITABLE_ROLES = new Set(["owner", "admin", "editor"]);
 
 interface SearchListResult {
   id: number;
@@ -146,6 +144,18 @@ export default function SearchCommand() {
   );
 
   const workspaces = workspacesQuery.data?.workspaces ?? [];
+
+  // Look up a workspace by id so each result row can show its avatar
+  // beside the workspace name in the detail pane. The /api/v1/search
+  // rows don't carry avatar_url, but the workspaces fetch above already
+  // has it for every workspace the caller belongs to (which is every
+  // workspace a result can come from), so we resolve it client-side
+  // rather than widening the search response.
+  const workspacesById = useMemo(() => {
+    const map = new Map<number, Workspace>();
+    for (const w of workspaces) map.set(w.id, w);
+    return map;
+  }, [workspaces]);
 
   // Fetch the caller's lists once so we can (a) gate the "Edit Entry"
   // action to lists the caller can write to, and (b) hand the list's
@@ -232,7 +242,7 @@ export default function SearchCommand() {
     <Action
       title={showingDetail ? "Hide Detail" : "Show Detail"}
       icon={Icon.AppWindowSidebarRight}
-      shortcut={{ modifiers: ["cmd"], key: "i" }}
+      shortcut={crossShortcut(["cmd"], "i")}
       onAction={() => setShowingDetail((v) => !v)}
     />
   );
@@ -335,6 +345,9 @@ export default function SearchCommand() {
                 entry={e}
                 listIcon={bucket.listIcon}
                 listColor={bucket.listColor}
+                workspaceAvatarUrl={
+                  workspacesById.get(e.workspaceId)?.avatar_url ?? null
+                }
                 showingDetail={showingDetail}
                 detailToggleAction={toggleDetailAction}
                 canEdit={canEdit}

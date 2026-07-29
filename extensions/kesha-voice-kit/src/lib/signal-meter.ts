@@ -67,17 +67,8 @@ export function parseMeterLine(line: string): SignalLevel | null {
     const rms = numberValue(parsed.rms) ?? 0;
     const peak = numberValue(parsed.peak) ?? 0;
     const percent = Math.max(0, Math.min(100, Math.round(parsed.percent ?? 0)));
-    return {
-      rms,
-      peak,
-      percent,
-      state:
-        peak > SILENCE_PEAK_THRESHOLD || percent > 0 ? "signal" : "listening",
-      status:
-        peak > SILENCE_PEAK_THRESHOLD || percent > 0
-          ? "Signal detected"
-          : "Listening...",
-    };
+    const active = peak > SILENCE_PEAK_THRESHOLD || percent > 0;
+    return { rms, peak, percent, state: active ? "signal" : "listening" };
   } catch {
     return null;
   }
@@ -111,24 +102,23 @@ export function startLiveMicMeter(
   });
   let stopped = false;
   let stdout = "";
-  let sawSignal = false;
 
   proc.stdout?.on("data", (chunk: Buffer) => {
     const parsed = parseMeterChunk(stdout, chunk.toString("utf8"));
     stdout = parsed.remainder;
     for (const signal of parsed.signals) {
-      sawSignal = true;
       if (!stopped) onSignal(signal);
     }
   });
 
   proc.once("error", () => {
-    if (!stopped) onSignal(emptySignal("Meter unavailable", "unavailable"));
+    if (!stopped) onSignal(emptySignal("unavailable"));
   });
+  // `stopped` already covers our own teardown, so any other exit means the
+  // meter died — report it even after samples, or the silence auto-stop would
+  // keep waiting on a state that can no longer change.
   proc.once("exit", () => {
-    if (!stopped && !sawSignal) {
-      onSignal(emptySignal("Meter unavailable", "unavailable"));
-    }
+    if (!stopped) onSignal(emptySignal("unavailable"));
   });
 
   return () => {

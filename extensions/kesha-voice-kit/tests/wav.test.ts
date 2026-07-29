@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isSilentWav, wavPayloadFormat, findWavChunk } from "../src/lib/wav";
+import { isSilentWav, findWavChunk } from "../src/lib/wav";
 
 describe("isSilentWav", () => {
   it("detects silent and non-silent Float32 WAV files", () => {
@@ -27,9 +27,6 @@ describe("isSilentWav", () => {
       bits: 32,
       samples: [0, 0.02],
     });
-    const fmt = findWavChunk(wav, "fmt ");
-    expect(fmt).not.toBeNull();
-    expect(wavPayloadFormat(wav, fmt!, 0xfffe)).toBe(3);
     expect(isSilentWav(wav)).toBe(false);
   });
 

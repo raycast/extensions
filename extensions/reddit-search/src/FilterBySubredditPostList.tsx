@@ -42,7 +42,9 @@ export default function FilterBySubredditPostList({
   // Shares the "is-showing-detail" cache key with the other lists so the pane's
   // visibility follows the user across views instead of resetting per screen.
   const [isShowingDetail, setIsShowingDetail] = useCachedState("is-showing-detail", true);
-  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow } = useRateLimitCooldown();
+  const { secondsRemaining, startCooldown, settleAfterRequest, releaseReservation, reserveRequestSlot, isCoolingDown } =
+    useRateLimitCooldown();
+  const reservationRef = useRef<string | null>(null);
   const [cachedAt, setCachedAt] = useState<number | undefined>(undefined);
 
   const doSearch = async (query: string, sort = redditSort.relevance, { forceRefresh = false } = {}) => {
@@ -60,15 +62,21 @@ export default function FilterBySubredditPostList({
       ? undefined
       : readCache<RedditResult>(cacheKey(["posts", subreddit, query, preferences.resultLimit, sort?.sortValue ?? ""]));
 
-    // Gate on the SYNCHRONOUS cache read, not the polled `isCoolingDown` (see Home.tsx).
-    if (!cached && isCoolingDownNow()) {
-      setSearching(false);
-      return;
-    }
-
     abortControllerRef.current?.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
+
+    // RESERVE the shared slot before sending; a same-command supersede reuses the hold
+    // we already own (see Home.tsx for the full rationale).
+    let reservation = reservationRef.current;
+    if (!cached && !reservation) {
+      reservation = reserveRequestSlot();
+      if (!reservation) {
+        setSearching(false);
+        return;
+      }
+      reservationRef.current = reservation;
+    }
 
     setSearching(true);
     queryRef.current = query;
@@ -81,16 +89,21 @@ export default function FilterBySubredditPostList({
       setSearchRedditUrl(apiResults.url);
       setResults(apiResults.items);
       setCachedAt(apiResults.cachedAt);
-      // Arm the cooldown the moment Reddit's budget is spent (before the next 429).
-      armIfSpent(apiResults.rateLimit);
+      // Settle the reservation: hold if the budget is spent, release if it remained.
+      if (reservation) settleAfterRequest(reservation, apiResults.rateLimit);
+      reservationRef.current = null;
     } catch (error) {
       if (isAbortError(error)) {
+        // Superseded — leave the reservation for the replacement to reuse (see Home.tsx).
         return;
       }
 
       if (isRateLimited(error)) {
         startCooldown(error.retryAfterSeconds ?? RATE_LIMIT_COOLDOWN_SECONDS);
+      } else if (reservation) {
+        releaseReservation(reservation);
       }
+      reservationRef.current = null;
 
       filterLog.error("Subreddit post search failed", error);
       await failureToast(`Couldn’t search r/${subredditName}`, error);

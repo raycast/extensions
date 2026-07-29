@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="76" height="76" viewBox="0 0 76 76" role="img" aria-label="UseMyContext keyhole">
+  <clipPath id="khm"><rect x="2" y="2" width="72" height="72" rx="16"/></clipPath>
+  <g clip-path="url(#khm)">
+    <rect x="2" y="2" width="72" height="26" fill="#24A860"/>
+    <rect x="2" y="26" width="72" height="24" fill="#902460"/>
+    <rect x="2" y="50" width="72" height="24" fill="#E49024"/>
+  </g>
+  <rect x="2" y="2" width="72" height="72" rx="16" fill="none" stroke="#E4DCCB" stroke-width="1.5"/>
+  <circle cx="38" cy="33" r="8" fill="#FAF6EC"/>
+  <path d="M33 38 L43 38 L45 56 L31 56 Z" fill="#FAF6EC"/>
+</svg>
