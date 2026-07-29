@@ -14,7 +14,7 @@ export type RemotesHosts = Record<string, Remote>;
  */
 export function useGitRemotes(gitManager: GitManager): RepositoryContext["remotes"] {
   const [providerOverrides, setProviderOverrides] = useCachedState<Record<string, RemoteProvider>>(
-    `git-remote-provider-overrides:${gitManager.repoPath}`,
+    `git-remote-provider-overrides:${gitManager.repositoryRootPath}`,
     {},
   );
 
