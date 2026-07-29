@@ -1,0 +1,42 @@
+[tools]
+node = "20"
+
+[tasks.install]
+description = "Install dependencies"
+run = "npm install"
+sources = ["package.json", "package-lock.json"]
+outputs = ["node_modules/.package-lock.json"]
+
+[tasks.dev]
+description = "Run ray develop (registers the extension in Raycast)"
+depends = ["install"]
+run = "npm run dev"
+
+[tasks.build]
+description = "Produce the production bundle in dist/"
+depends = ["install"]
+run = "npm run build"
+
+[tasks.typecheck]
+description = "tsc --noEmit"
+depends = ["install"]
+run = "npm run typecheck"
+
+[tasks.lint]
+description = "ray lint"
+depends = ["install"]
+run = "npm run lint"
+
+[tasks.fix]
+description = "ray lint --fix"
+depends = ["install"]
+run = "npm run fix-lint"
+
+[tasks.check]
+description = "typecheck + lint + build"
+depends = ["typecheck", "lint", "build"]
+
+[tasks.publish]
+description = "Publish to the Raycast Store"
+depends = ["install"]
+run = "npm run publish"

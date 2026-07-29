@@ -1,0 +1,118 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-dev-project-launcher",
+  "title": "Dev Project Launcher",
+  "description": "Recursively scans your development directories, maps subfolders to project entities, and lets you jump straight into VS Code, WebStorm, or iTerm.",
+  "icon": "extension-icon.png",
+  "author": "amine2233",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "list-projects",
+      "title": "Browse Development Projects",
+      "subtitle": "Dev Project Launcher",
+      "description": "Recursively scans your configured development directories and lists every detected project with quick-open actions.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-app-paths",
+      "title": "Manage App Paths",
+      "subtitle": "Dev Project Launcher",
+      "description": "View, add, or edit the executable/app path used to open each project type in VS Code, WebStorm, and iTerm.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "developmentPath",
+      "type": "directory",
+      "title": "Development Root Directory",
+      "description": "The root folder that will be scanned recursively for projects. Leave empty to auto-detect ~/Developer, ~/Development, ~/Projects, ~/Code or ~/dev.",
+      "default": "~/Developer",
+      "required": false
+    },
+    {
+      "name": "customProjectDirectories",
+      "type": "textfield",
+      "title": "Additional Project Directories",
+      "description": "Comma-separated list of extra absolute paths to scan alongside the root directory (e.g. ~/Work,~/OpenSource).",
+      "placeholder": "~/Work,~/OpenSource",
+      "required": false
+    },
+    {
+      "name": "scanDepth",
+      "type": "dropdown",
+      "title": "Scan Depth",
+      "description": "How many directory levels deep to search for projects below each root.",
+      "default": "2",
+      "data": [
+        { "title": "1 level (direct children only)", "value": "1" },
+        { "title": "2 levels", "value": "2" },
+        { "title": "3 levels", "value": "3" },
+        { "title": "4 levels", "value": "4" },
+        { "title": "5 levels", "value": "5" },
+        { "title": "6 levels", "value": "6" },
+        { "title": "8 levels", "value": "8" },
+        { "title": "10 levels (slow on large trees)", "value": "10" }
+      ],
+      "required": false
+    },
+    {
+      "name": "excludeFolderNames",
+      "type": "textfield",
+      "title": "Exclude Folder Names",
+      "description": "Comma-separated folder names to skip while scanning.",
+      "default": "node_modules,.git,DerivedData,build,dist,.build,Pods,.gradle,.idea,.vscode",
+      "required": false
+    },
+    {
+      "name": "defaultVSCodePath",
+      "type": "textfield",
+      "title": "Default VS Code Command/Path",
+      "description": "Fallback command or absolute path used to open projects in VS Code when a project type has no specific mapping.",
+      "default": "code",
+      "required": false
+    },
+    {
+      "name": "defaultWebStormPath",
+      "type": "textfield",
+      "title": "Default WebStorm Command/Path",
+      "description": "Fallback command or absolute path used to open projects in WebStorm when a project type has no specific mapping.",
+      "default": "webstorm",
+      "required": false
+    },
+    {
+      "name": "defaultITermPath",
+      "type": "textfield",
+      "title": "Default iTerm App Path",
+      "description": "Fallback path to the iTerm.app bundle used when a project type has no specific mapping.",
+      "default": "/Applications/iTerm.app",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit"
+  }
+}
