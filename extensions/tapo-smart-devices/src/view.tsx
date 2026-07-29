@@ -21,12 +21,12 @@ const fetchDevices = async () => {
     return augmentedLocatedDevices;
   } catch (error) {
     showToast({ title: (error as Error).toString(), style: Toast.Style.Failure });
-    return [];
+    throw error;
   }
 };
 
 export default function Command() {
-  const { data: devices, isLoading, revalidate } = usePromise(fetchDevices, []);
+  const { data: devices, isLoading, revalidate } = usePromise(fetchDevices, [], { keepPreviousData: true });
 
   const [availableDevices, unavailableDevices] = split(devices || [], isAvailableDevice);
 
