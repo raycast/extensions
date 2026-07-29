@@ -1,6 +1,6 @@
 # PuTTY Sessions Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-29
 
 - Search your saved PuTTY sessions and launch any of them directly
 - Connect to any typed host over SSH without saving a session first
