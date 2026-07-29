@@ -1,10 +1,10 @@
 import { randomUUID } from "node:crypto";
 
 import { Toast, open, showToast } from "@raycast/api";
+import openUrl from "open";
 
 import { buildElsewhereUrl, ElsewhereCommand } from "./control-url";
 import { ElsewhereCommandResult, readElsewhereState } from "./state-reader";
-import { dispatchElsewhereUrlInBackground } from "./url-dispatcher";
 
 const CORRELATION_TIMEOUT_MS = 3_000;
 const POLL_INTERVAL_MS = 80;
@@ -46,7 +46,7 @@ async function sendCommand(command: ElsewhereCommand, options: ExecuteCommandOpt
   try {
     const url = buildElsewhereUrl(command, correlationId);
     if (command.kind === "volume") {
-      await dispatchElsewhereUrlInBackground(url);
+      await openUrl(url, { background: true });
     } else {
       await open(url);
     }
