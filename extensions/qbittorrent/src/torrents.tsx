@@ -2,13 +2,16 @@ import {
   ActionPanel,
   Action,
   Color,
+  Form,
   Icon,
   Keyboard,
   List,
   LocalStorage,
   getPreferenceValues,
+  open,
   showToast,
   Toast,
+  useNavigation,
 } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QBittorrent, Torrent, TorrentFilters, TorrentState } from "@ctrl/qbittorrent";
@@ -29,6 +32,7 @@ enum TorrentActionType {
 const SHOW_DETAILS_KEY = "show-torrent-details";
 const SORT_KEY = "torrent-sort";
 const LIST_DETAILS_KEY = "torrent-list-details-v2";
+const LOCAL_DOWNLOAD_FOLDER_KEY = "local-download-folder";
 const openInBrowserShortcut: Keyboard.Shortcut = {
   Windows: { modifiers: ["ctrl"], key: "enter" },
   macOS: { modifiers: ["cmd"], key: "enter" },
@@ -257,6 +261,53 @@ function formatListAccessories(torrent: Torrent, details: ListDetail[]) {
     .filter((accessory): accessory is List.Item.Accessory => accessory !== null);
 }
 
+function isLocalAddress(address: string) {
+  try {
+    return ["localhost", "127.0.0.1", "[::1]"].includes(new URL(address).hostname);
+  } catch {
+    return false;
+  }
+}
+
+function LocalDownloadFolderForm({ storageKey, savePath }: { storageKey: string; savePath: string }) {
+  const { pop } = useNavigation();
+
+  const saveFolder = async ({ folder }: { folder: string[] }) => {
+    if (!folder[0]) {
+      await showToast({ style: Toast.Style.Failure, title: "Choose a local folder" });
+      return;
+    }
+
+    try {
+      await LocalStorage.setItem(storageKey, folder[0]);
+      await open(folder[0]);
+      pop();
+    } catch {
+      await showToast({ style: Toast.Style.Failure, title: "Failed to use local folder" });
+    }
+  };
+
+  return (
+    <Form
+      navigationTitle="Set Local Download Folder"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Save and Open" onSubmit={saveFolder} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="qBittorrent Folder" text={savePath} />
+      <Form.FilePicker
+        id="folder"
+        title="Local Folder"
+        allowMultipleSelection={false}
+        canChooseDirectories
+        canChooseFiles={false}
+      />
+    </Form>
+  );
+}
+
 function TorrentDetail({ torrent }: { torrent: Torrent }) {
   return (
     <List.Item.Detail
@@ -279,6 +330,7 @@ function TorrentDetail({ torrent }: { torrent: Torrent }) {
 }
 
 export default function Torrents() {
+  const { push } = useNavigation();
   const [filter, setFilter] = useState<TorrentFilters>();
   const [torrents, setTorrents] = useState<Torrent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -299,6 +351,24 @@ export default function Torrents() {
       password,
     });
   }, [address, username, password]);
+
+  const openDownloadFolder = async (savePath: string) => {
+    const storageKey = `${LOCAL_DOWNLOAD_FOLDER_KEY}:${address}:${savePath}`;
+
+    try {
+      const mappedPath = await LocalStorage.getItem<string>(storageKey);
+      const target = mappedPath || (isLocalAddress(address) && existsSync(savePath) ? savePath : undefined);
+
+      if (target && existsSync(target)) {
+        await open(target);
+        return;
+      }
+    } catch {
+      // Fall through to folder selection.
+    }
+
+    push(<LocalDownloadFolderForm storageKey={storageKey} savePath={savePath} />);
+  };
 
   const updateTorrents = async () => {
     const request = ++updateRequestRef.current;
@@ -461,9 +531,11 @@ export default function Torrents() {
             accessories={formatListAccessories(torrent, listDetails)}
             actions={
               <ActionPanel>
-                {existsSync(torrent.save_path) ? (
-                  <Action.Open title="Open Download Folder" target={torrent.save_path} icon={Icon.Folder} />
-                ) : null}
+                <Action
+                  title="Open Download Folder"
+                  icon={Icon.Folder}
+                  onAction={() => openDownloadFolder(torrent.save_path)}
+                />
                 <Action.OpenInBrowser title="Open in Browser" url={address} shortcut={openInBrowserShortcut} />
                 <Action.CopyToClipboard
                   title="Copy Save Path"
