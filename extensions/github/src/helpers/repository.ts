@@ -195,6 +195,56 @@ const formatRepositoryUrl = (repoNameWithOwner: string, protocol: "https" | "ssh
   protocol === "https" ? `https://github.com/${repoNameWithOwner}.git` : `git@github.com:${repoNameWithOwner}.git`;
 
 /**
+ * Rewrite relative links and images in a README so they render correctly in a
+ * Raycast `Detail` view.
+ *
+ * GitHub returns README content with paths relative to the repository, which
+ * Raycast cannot resolve on its own. Using the raw `download_url` of the README
+ * (e.g. `https://raw.githubusercontent.com/owner/repo/main/README.md`) as the
+ * base, relative image sources are rewritten to absolute `raw.githubusercontent.com`
+ * URLs (so they display) and relative links are rewritten to `github.com/.../blob/...`
+ * URLs (so they open the right page). Absolute URLs, anchors and other schemes are
+ * left untouched.
+ *
+ * @param markdown {string} Raw README markdown.
+ * @param rawDownloadUrl {string} The README's raw download URL from the GitHub API.
+ * @returns {string} Markdown with relative URLs rewritten to absolute ones.
+ */
+export function rewriteReadmeUrls(markdown: string, rawDownloadUrl: string): string {
+  if (!rawDownloadUrl) {
+    return markdown;
+  }
+
+  const rawBase = rawDownloadUrl.slice(0, rawDownloadUrl.lastIndexOf("/") + 1);
+  const blobBase = rawBase
+    .replace("https://raw.githubusercontent.com/", "https://github.com/")
+    .replace(/\/([^/]+)\/$/, "/blob/$1/");
+
+  const isAbsolute = (url: string) => /^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith("//") || url.startsWith("#");
+
+  const resolve = (url: string, base: string) => {
+    const trimmed = url.trim();
+    if (!trimmed || isAbsolute(trimmed)) {
+      return url;
+    }
+    try {
+      return new URL(trimmed.replace(/^\/+/, ""), base).toString();
+    } catch {
+      return url;
+    }
+  };
+
+  return markdown
+    .replace(/!\[([^\]]*)\]\(([^)\s]+)([^)]*)\)/g, (_m, alt, url, tail) => `![${alt}](${resolve(url, rawBase)}${tail})`)
+    .replace(
+      /(?<!!)\[([^\]]+)\]\(([^)\s]+)([^)]*)\)/g,
+      (_m, text, url, tail) => `[${text}](${resolve(url, blobBase)}${tail})`,
+    )
+    .replace(/(<img[^>]+src=["'])([^"']+)(["'])/gi, (_m, pre, url, post) => `${pre}${resolve(url, rawBase)}${post}`)
+    .replace(/(<a[^>]+href=["'])([^"']+)(["'])/gi, (_m, pre, url, post) => `${pre}${resolve(url, blobBase)}${post}`);
+}
+
+/**
  * Get the repository filter string based on the filter mode, repository list, and selected repository.
  *
  * @param {Preferences.MyIssues["repositoryFilterMode"]} filterMode - The mode to filter repositories ("all", "include", or "exclude").
