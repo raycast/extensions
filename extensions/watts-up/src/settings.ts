@@ -76,14 +76,27 @@ export async function getSleepAssertions(): Promise<SleepAssertion[]> {
 }
 
 /**
- * Change a pmset setting for all power sources. Requires admin — macOS shows
- * a password prompt via osascript. Only fixed, known keys are passed in.
+ * pmset flag for the power source currently in use. `pmset -g` only reports the
+ * active profile, so writes must target that same profile — using `-a` would
+ * overwrite the inactive profile's value too.
+ */
+async function getActiveSourceFlag(): Promise<"-b" | "-c" | "-u"> {
+  const { source } = await getBatteryStatus();
+  if (source === "Battery Power") return "-b";
+  if (source === "UPS Power") return "-u";
+  return "-c";
+}
+
+/**
+ * Change a pmset setting for the active power source. Requires admin — macOS
+ * shows a password prompt via osascript. Only fixed, known keys are passed in.
  */
 export async function setPmsetSetting(
   key: "lowpowermode" | "powernap",
   value: 0 | 1,
 ): Promise<void> {
+  const flag = await getActiveSourceFlag();
   await execAsync(
-    `/usr/bin/osascript -e 'do shell script "/usr/bin/pmset -a ${key} ${value}" with administrator privileges'`,
+    `/usr/bin/osascript -e 'do shell script "/usr/bin/pmset ${flag} ${key} ${value}" with administrator privileges'`,
   );
 }
