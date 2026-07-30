@@ -5,8 +5,12 @@
   "description": "Control Tutti — play the same audio through many output devices at once — from the Raycast launcher.",
   "icon": "extension-icon.png",
   "author": "Barrybarrywu",
-  "categories": ["Media"],
-  "platforms": ["macOS"],
+  "categories": [
+    "Media"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "license": "MIT",
   "commands": [
     {
