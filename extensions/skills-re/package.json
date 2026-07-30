@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "skills-re",
+  "description": "Search and manage agent skills from skills.re.",
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "author": "escwxyz",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.17",
+    "eslint": "^9.22.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "description": "Search public skills by keyword.",
+      "mode": "view"
+    },
+    {
+      "name": "ai-search",
+      "title": "AI Search",
+      "description": "Search public skills by meaning with a skills.re API token.",
+      "mode": "view"
+    },
+    {
+      "name": "saved-skills",
+      "title": "Saved Skills",
+      "description": "View and manage your saved skills.",
+      "mode": "view"
+    },
+    {
+      "name": "auth",
+      "title": "Configure API Token",
+      "description": "Generate and configure a skills.re API token.",
+      "mode": "view"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "title": "Skills.re"
+}
