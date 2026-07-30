@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchMoviesByTitle, getFullURL } from "./letterboxd-api";
+import { AsyncStatus, fetchMoviesByTitle, getFullURL } from "./letterboxd-api";
 import type { Movie } from "./types";
 import MovieDetails from "./movie-details";
 import { STRINGS } from "./strings";
@@ -14,11 +14,13 @@ interface SearchMoviesPageProps {
 
 export default function SearchMoviesPage(props: SearchMoviesPageProps) {
   const [searchQuery, setSearch] = useState(props.arguments.title);
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, revalidate } = useCachedPromise(
     fetchMoviesByTitle,
     [searchQuery],
-    { execute: searchQuery.length > 0 },
+    { execute: searchQuery.trim().length > 0 },
   );
+
+  const hasError = data?.status === AsyncStatus.Error && !isLoading;
 
   return (
     <List
@@ -28,9 +30,19 @@ export default function SearchMoviesPage(props: SearchMoviesPageProps) {
       searchBarPlaceholder={STRINGS.searchMoviesPlaceholder}
       onSearchTextChange={setSearch}
     >
-      {data?.data?.map((movie) => (
-        <MovieItem key={movie.id} movie={movie} />
-      ))}
+      {hasError ? (
+        <List.EmptyView
+          title={STRINGS.somethingWentWrong}
+          description={STRINGS.tryAgain}
+          actions={
+            <ActionPanel>
+              <Action title={STRINGS.retry} onAction={revalidate} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        data?.data.map((movie) => <MovieItem key={movie.id} movie={movie} />)
+      )}
     </List>
   );
 }

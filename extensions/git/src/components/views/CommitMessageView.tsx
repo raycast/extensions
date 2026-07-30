@@ -169,10 +169,19 @@ export function CommitMessageForm(context: RepositoryContext & { commit?: Commit
 
     // Push if requested
     if (push && remote) {
-      try {
-        await context.gitManager.pushBranch(context.branches.data.currentBranch!, remote, forcePush);
-      } catch {
-        // Git error is already shown by GitManager
+      const currentBranch = context.branches.data.currentBranch;
+      if (!currentBranch) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot push",
+          message: "No current branch (detached HEAD).",
+        });
+      } else {
+        try {
+          await context.gitManager.pushBranch(currentBranch, remote, forcePush);
+        } catch {
+          // Git error is already shown by GitManager
+        }
       }
     }
     // Clear draft after successful commit

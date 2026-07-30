@@ -1,4 +1,26 @@
-# Claude Code Usage (ccusage) Changelog
+# Claude Usage (ccusage) Changelog
+
+## [Rename to Claude Usage] - 2026-07-29
+
+### Changed
+
+- Renamed the extension from "Claude Code Usage" to "Claude Usage" — the Usage Limits and menu bar tracking reflect your overall Claude plan, not just Claude Code
+- Documented the Pie Chart menu bar icon style in the README
+
+## [Add menu bar section visibility toggles] - 2026-07-29
+
+### Added
+
+- **Section visibility toggles:** Individually show or hide each menu bar dropdown section — Rate Limits, Today's Usage, This Week, Monthly Usage, Total Usage, Current Block, and Working Time. All default to visible, so existing menus are unchanged.
+
+## [Add pie chart icon, pies progress style, and time remaining display] - 2026-07-28
+
+### Added
+
+- **Menu Bar Icon Style:** 'Pie Chart' — SVG pie icon showing 5-hour utilization, filling clockwise with Claude's orange
+- **Progress Bar Style:** 'Pies' — per-row pie SVG icons on rate limit rows instead of Icon.Gauge
+- **Time Remaining Display:** Show Time Remaining toggle appends 5-hour session countdown to the menu bar title text
+- **Time Remaining Format:** Customizable template string with placeholders: `{h}h{m}m`, `{M}m`, `{h.f}h`, etc.
 
 ## [More progress bar styles] - 2026-07-12
 

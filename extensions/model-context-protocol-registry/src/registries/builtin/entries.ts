@@ -346,6 +346,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "webhound",
+    title: "Webhound",
+    description:
+      "Run private, budgeted reports and datasets with Hound, Webhound's research harness built with DeepSeek V4 Pro and GPT-5.4. The user's dollar budget controls research effort, and each connection authenticates to that user's own Webhound account through OAuth.",
+    icon: "https://www.webhound.ai/favicon.ico",
+    homepage: "https://github.com/WebhoundAI/webhound-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.webhound.ai/api/v2/mcp"],
+    },
+  },
+  {
     name: "sanity",
     title: "Sanity",
     description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
@@ -456,6 +468,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.thena.ai/sse"],
+    },
+  },
+  {
+    name: "trends-mcp",
+    title: "Trends MCP",
+    description:
+      "Live cross-platform trend data for AI agents. Query Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more: historical series, growth rates, and live leaderboards in one connection. Free API key at trendsmcp.ai.",
+    icon: "https://www.trendsmcp.ai/static/pages/trendsmcp/assets/trend.svg",
+    homepage: "https://trendsmcp.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.trendsmcp.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -761,6 +785,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.agentcard.sh/mcp"],
+    },
+  },
+  {
+    name: "usemycontext",
+    title: "UseMyContext",
+    description:
+      "The personal context layer for AI: one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. Tools for profile, file search and reads, cited answers from your documents, and exact table queries. Connects to the remote UseMyContext server over OAuth 2.1.",
+    icon: "usemycontext.svg",
+    homepage: "https://usemycontext.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.usemycontext.ai/mcp"],
     },
   },
 ];

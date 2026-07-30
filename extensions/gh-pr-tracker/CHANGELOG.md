@@ -4,6 +4,28 @@ All notable changes to the **GitHub Pull Requests** Raycast extension are docume
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.0] - 2026-07-30
+
+### Fixed
+
+- **Unread PR Alert** now reads its badge from a synchronous shared cache, so a background refresh can render the current count immediately instead of waiting on an asynchronous read that could resolve after Raycast had already captured the menu bar. This addresses the badge showing a stale count.
+- **Unread PR Alert** reuses the main command's freshly fetched data instead of running its own duplicate pull-request scan, reducing the GitHub API requests used when both commands refresh in the same window.
+- Rate-limit errors now say so. Exhausting your token's hourly quota previously surfaced as a bare "403 Forbidden", which read like a permissions problem; the message now explains the quota, roughly when it resets, and which preferences reduce per-refresh cost.
+- Failure toasts now carry a **Copy Error** action.
+- Corrupt or partially-written local data (cached pull requests, seen state, event filters) is now detected and reset instead of causing a crash on the next launch.
+
+### Added
+
+- **Faster Fetching** preference (experimental, off by default) — fetches pull request activity over the GraphQL API, using far less of your hourly GitHub API quota on large repositories. Falls back to the standard API automatically if anything goes wrong.
+- **Menu Bar Icon** preference. The icon still appears only when pull requests have unread activity, as before; enable this to keep it visible at all times.
+- **Verbose Logging** preference for troubleshooting. Off by default; tokens and other sensitive values are redacted from log output.
+
+### Changed
+
+- **One-time only:** label changes and force pushes you had already read may reappear as unread after updating. Their identity is now derived from the event itself rather than an API-assigned id, so read state stays stable across future updates and both fetching modes. Everything else — reviews, comments, and commits — keeps its read state.
+- The empty state now offers **Refresh** and **Event Filters** as its primary actions. Previously the only available action was Demo Mode, and filtering every event type out left no way back.
+- Action titles use consistent Title Case ("Mark PR as Caught Up").
+
 ## [1.1.1] - 2026-07-22
 
 ### Added
