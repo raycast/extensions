@@ -115,7 +115,6 @@ export default function Playlists({
         <List.Item
           icon={Icon.Plus}
           title="Create New Playlist"
-          shortcut={Keyboard.Shortcut.Common.New}
           actions={
             <ActionPanel>
               <Action.Push

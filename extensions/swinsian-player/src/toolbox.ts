@@ -316,13 +316,16 @@ export const TOOLBOX_SERVICES: ToolboxService[] = [
     ],
     ["time-capsule", "Time Capsule", (u: string) => `https://bxh9261.github.io/last-fm-time-capsule/?username=${q(u)}`],
     ["manual-scrobbler", "Manual Scrobbler", () => "https://www.bijou.fm/manual-scrobbler"],
-  ].map(([id, title, makeUrl]) => ({
-    id,
-    title,
-    category: "lastfm" as const,
-    icon: "lastfm.png",
-    url: (_c: ToolboxContext, username: string) => (makeUrl as (u: string) => string)(username),
-  })),
+  ].map(
+    ([id, title, makeUrl]) =>
+      ({
+        id,
+        title,
+        category: "lastfm" as const,
+        icon: "lastfm.png",
+        url: (_c: ToolboxContext, username: string) => (makeUrl as (u: string) => string)(username),
+      }) as ToolboxService,
+  ),
 ];
 
 export function parseCustomServices(raw: string): ToolboxService[] {
