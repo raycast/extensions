@@ -35,9 +35,6 @@ export const FILE_CONSTANTS = {
   /** Default zshrc filename */
   ZSHRC_FILENAME: ".zshrc",
 
-  /** Maximum content length after reading (in characters) */
-  MAX_CONTENT_LENGTH: 10000,
-
   /** Maximum line length to prevent DoS attacks (in characters) */
   MAX_LINE_LENGTH: 1000,
 } as const;
