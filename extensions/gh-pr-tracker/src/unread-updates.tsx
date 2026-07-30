@@ -8,12 +8,13 @@ import {
   showToast,
   Toast,
   Keyboard,
+  Clipboard,
   launchCommand,
   LaunchType,
   type LaunchProps,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { fetchPRsWithActivity, getFetchLimits } from "./api";
 import { loadSeen, saveSeen, markItemSeen, markPRSeen, markAllSeen } from "./seen";
 import { loadCachedPRs, saveCachedPRs } from "./cache";
@@ -36,6 +37,33 @@ import {
 } from "./utils";
 import type { ActivityItem, PRWithActivity, SeenMap } from "./types";
 import { prKey } from "./types";
+import { viewLog as log, getErrorMessage } from "./logger";
+import { writeMenuBarCache } from "./menu-bar-cache";
+
+type FetchResult = Awaited<ReturnType<typeof fetchPRsWithActivity>>;
+
+// Raycast's development renderer replays effect setup in the same microtask. Keep that one
+// expensive request shared; a later user revalidate must still start a fresh request.
+let viewMountFetch: Promise<FetchResult> | undefined;
+
+// Monotonic counter identifying the newest fetch. Results from an older generation are discarded
+// rather than published — see the guard in fetchAndSync.
+let latestFetchGeneration = 0;
+
+function fetchLatestPRs(): Promise<FetchResult> {
+  if (viewMountFetch) return viewMountFetch;
+
+  const request = (async () => {
+    const seen = await loadSeen();
+    const filters = await loadEventFilters();
+    return fetchPRsWithActivity({ seen, filters, source: "view" });
+  })();
+  viewMountFetch = request;
+  queueMicrotask(() => {
+    if (viewMountFetch === request) viewMountFetch = undefined;
+  });
+  return request;
+}
 
 // ─── Review state → color mapping ───────────────────────────────────────────
 
@@ -94,14 +122,28 @@ function isReplyComment(item: ActivityItem, pr: PRWithActivity): boolean {
  * whose window is tighter than local development's).
  */
 async function refreshMenuBar(items: MenuBarPr[]): Promise<void> {
+  // Publish to the shared Cache FIRST, so the payload is available synchronously even if the
+  // launch below throws — which it does in Store installs where the menu-bar command has not yet
+  // been activated for background refresh (§1). The cache write is the durable half of this
+  // handoff; launchCommand is only the nudge to re-render.
+  writeMenuBarCache(items);
   try {
+    log.debug("Pushing unread list to menu bar", { count: items.length });
     await launchCommand({
       name: "unread-menu-bar",
       type: LaunchType.Background,
       context: { source: "view-refresh", items },
     });
-  } catch {
-    // menu-bar command may be disabled; ignore
+    log.debug("Menu bar launch succeeded");
+  } catch (error) {
+    // The menu-bar command may be disabled, or — in a Store install — not yet activated for
+    // background refresh, in which case launchCommand throws. Swallowing this silently is what
+    // made the "badge never updates in Store builds" bug undiagnosable; log it, don't toast
+    // (this fires on every refresh and is non-fatal to the list itself).
+    log.warn("Menu bar launch failed — badge will be stale", {
+      error: getErrorMessage(error),
+      itemCount: items.length,
+    });
   }
 }
 
@@ -130,18 +172,28 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     });
   }, []);
 
-  const { isLoading, revalidate, error } = usePromise(async () => {
-    // Load seen + filters up front: the fetch caps itself to ~MAX_UNREAD_PRS PRs with unread
-    // activity, so it needs to know what's already seen/filtered as it scans (see api.ts).
-    const seenBeforeFetch = await loadSeen();
-    const filters = await loadEventFilters();
-    const { prs: fetchedPrs, activeKeys } = await fetchPRsWithActivity({ seen: seenBeforeFetch, filters });
+  // usePromise treats its function as a latest-value ref; its documented trigger is the argument
+  // array, not function identity. This callback only keeps `focusPrKey` current for the local
+  // collapsed-state update below.
+  const fetchAndSync = useCallback(async () => {
+    // Generation guard: ⌘R during an in-flight fetch starts a second one. Without this, whichever
+    // finishes LAST wins — and that can be the OLDER request, overwriting newer data in the cache,
+    // LocalStorage, and React state. Only the newest generation is allowed to publish.
+    const generation = ++latestFetchGeneration;
+    const { prs: fetchedPrs, activeKeys, activeKeysComplete } = await fetchLatestPRs();
+    if (generation !== latestFetchGeneration) {
+      log.debug("Discarding superseded fetch result", { generation, latest: latestFetchGeneration });
+      return;
+    }
 
     // Reload seen + filters after the (potentially long) fetch so marks and filter toggles made
     // during it aren't overwritten, and the pushed menu-bar count matches what the list now renders.
     const fetchedSeen = await loadSeen();
     const freshFilters = await loadEventFilters();
-    await saveSeen(fetchedSeen, new Set(activeKeys));
+    if (generation !== latestFetchGeneration) return;
+    // Only prune closed-PR seen state when the fetch walked every open PR. Pruning against a
+    // partial key set deletes read history for still-open PRs that simply weren't scanned.
+    await saveSeen(fetchedSeen, activeKeysComplete ? new Set(activeKeys) : undefined);
     setSeenMap(fetchedSeen);
     await saveCachedPRs(fetchedPrs);
     // Push the freshly computed unread list to the menu-bar command so it re-renders
@@ -164,14 +216,23 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
       }
       return updated;
     });
-  });
+    // focusPrKey is the only outer value read here; everything else is a setState or module import.
+  }, [focusPrKey]);
+
+  const { isLoading, revalidate, error } = usePromise(fetchAndSync);
 
   useEffect(() => {
     if (error) {
+      const isRateLimit = error.message.includes("rate limit");
       showToast({
         style: Toast.Style.Failure,
-        title: "Failed to fetch PR data",
+        title: isRateLimit ? "GitHub rate limit reached" : "Failed to fetch PR data",
         message: error.message,
+        primaryAction: {
+          title: "Copy Error",
+          shortcut: Keyboard.Shortcut.Common.Copy,
+          onAction: () => Clipboard.copy(error.message),
+        },
       });
     }
   }, [error]);
@@ -181,6 +242,14 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
   const { maxUnread } = getFetchLimits();
 
   const prsWithUnseen = computePrsWithUnseen(activePrs ?? [], activeSeenMap, eventFilters).slice(0, maxUnread);
+
+  // Distinguishes "genuinely caught up" from "you filtered everything out" — otherwise hiding
+  // every event type produces an "All caught up!" screen that is actively misleading.
+  const allFiltersOff = Object.values(eventFilters).every((enabled) => !enabled);
+
+  // The last refresh errored AND left nothing to show. Distinguishes an outage from a genuine
+  // zero, which are otherwise identical once the failure toast has faded.
+  const fetchFailed = !demoMode && error !== undefined && displayPrs === undefined;
 
   const toggleCollapse = (pr: PRWithActivity) => {
     const key = prKey(pr);
@@ -297,19 +366,49 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
     const updated = { ...eventFilters, [type]: !eventFilters[type] };
     setEventFilters(updated);
     await saveEventFilters(updated);
+    // Filters change the unread COUNT, not just the view — hiding the only visible activity type
+    // empties the list immediately, so the badge must follow or it keeps a number the list no
+    // longer shows. Fire-and-forget, matching the mark-as-read handlers.
+    void refreshMenuBar(toMenuBarPrs(computePrsWithUnseen(displayPrs ?? [], seenMap, updated)));
   };
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter PR updates…">
-      {prsWithUnseen.length === 0 && !isLoading && !demoMode && (
+      {/* Render whenever there is nothing to list — including mid-refresh and in demo mode.
+          Gating this on `!isLoading` left a completely blank window after "Mark All as Caught
+          Up" (which triggers a revalidate), and gating on `!demoMode` did the same once every
+          demo PR was marked read. A List with no children and no EmptyView renders empty. */}
+      {prsWithUnseen.length === 0 && (
         <List.EmptyView
-          icon={Icon.Checkmark}
-          title="All caught up!"
-          description="No unread PR updates"
+          // A failed fetch with no cached data must NOT claim "All caught up!" — the toast that
+          // reported the failure disappears, and the user is then left with a screen asserting
+          // something the extension does not actually know.
+          icon={isLoading ? Icon.ArrowClockwise : fetchFailed ? Icon.Warning : Icon.Checkmark}
+          title={isLoading ? "Checking for updates…" : fetchFailed ? "Couldn’t reach GitHub" : "All caught up!"}
+          description={
+            isLoading
+              ? "Looking for new pull request activity."
+              : fetchFailed
+                ? `${error?.message ?? "The last refresh failed."} Refresh to try again.`
+                : allFiltersOff
+                  ? "Every event type is hidden. Turn one back on in Event Filters to see activity."
+                  : demoMode
+                    ? "No unread activity in the demo data. Exit demo mode to see your real pull requests."
+                    : "No unread pull request activity. Refresh to check again."
+          }
           actions={
             <ActionPanel>
+              {/* Refresh is primary: "all caught up" and "the fetch failed" look identical here,
+                  so the first thing a user needs is a way to re-check. */}
               <Action
-                title="Demo Mode"
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
+                onAction={revalidate}
+              />
+              <FilterSubmenu filters={eventFilters} onToggle={handleToggleFilter} />
+              <Action
+                title={demoMode ? "Exit Demo Mode" : "Demo Mode"}
                 icon={Icon.Wand}
                 shortcut={{
                   modifiers: ["cmd", "opt", "ctrl", "shift"],
@@ -354,13 +453,17 @@ export default function UnreadUpdates(props: LaunchProps<{ launchContext?: Focus
                   <Action.Push title="View PR Summary" icon={Icon.List} target={<PRSummaryDetail pr={pr} />} />
                   <Action.OpenInBrowser title="Open PR on GitHub" url={pr.html_url} />
                   <Action
-                    title="Mark PR as Caught up"
+                    // "as" is a preposition — AP, Chicago, and Apple's HIG all lowercase short
+                    // prepositions in Title Case ("Save as…"). The linter wants "As"; we don't.
+                    // eslint-disable-next-line @raycast/prefer-title-case -- intentional lowercase preposition
+                    title="Mark PR as Caught Up"
                     icon={Icon.Checkmark}
                     shortcut={Keyboard.Shortcut.Common.Save}
                     onAction={() => handleMarkPRSeen(pr)}
                   />
                   <Action
-                    title="Mark All as Caught up"
+                    // eslint-disable-next-line @raycast/prefer-title-case -- intentional lowercase preposition
+                    title="Mark All as Caught Up"
                     icon={Icon.CheckCircle}
                     // Intentional custom shortcut — do NOT replace with Keyboard.Shortcut.Common.*
                     // eslint-disable-next-line @raycast/prefer-common-shortcut -- keep cmd+shift+s on purpose
@@ -584,13 +687,15 @@ function ActivityListItem({
             onAction={onMarkItemSeen}
           />
           <Action
-            title="Mark Entire PR as Caught up"
+            // eslint-disable-next-line @raycast/prefer-title-case -- intentional lowercase preposition
+            title="Mark Entire PR as Caught Up"
             icon={Icon.Checkmark}
             shortcut={Keyboard.Shortcut.Common.Save}
             onAction={onMarkPRSeen}
           />
           <Action
-            title="Mark All as Caught up"
+            // eslint-disable-next-line @raycast/prefer-title-case -- intentional lowercase preposition
+            title="Mark All as Caught Up"
             icon={Icon.CheckCircle}
             // Intentional custom shortcut — do NOT replace with Keyboard.Shortcut.Common.*
             // eslint-disable-next-line @raycast/prefer-common-shortcut -- keep cmd+shift+s on purpose

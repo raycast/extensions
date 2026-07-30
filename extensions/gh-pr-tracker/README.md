@@ -25,6 +25,9 @@ A [Raycast](https://raycast.com) extension that tracks unread pull request activ
 | **Repositories**          | Comma-separated `owner/repo` list                                          |
 | **Max Unread PRs**        | Max PRs with unread activity to show (1–1000, default 25)                  |
 | **Max PRs to Scan**       | Safety cap on PRs fetched while finding unread ones (1–1000, default 150)   |
+| **Menu Bar Icon**         | Keep the menu bar icon visible even when everything is read (off by default) |
+| **Faster Fetching**       | Use the GraphQL API — far less API quota on large repos (experimental, off)  |
+| **Verbose Logging**       | Detailed console logs for troubleshooting; secrets redacted (off by default) |
 
 ## Usage
 
