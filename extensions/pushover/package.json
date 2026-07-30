@@ -70,5 +70,8 @@
       "type": "password",
       "required": true
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
