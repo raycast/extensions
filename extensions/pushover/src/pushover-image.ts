@@ -44,7 +44,7 @@ async function chooseImageWithDialog(): Promise<string | undefined> {
   try {
     const { stdout } = await execFileAsync("osascript", [
       "-e",
-      'POSIX path of (choose file with prompt "Select an image to send via Pushover" of type {"public.image"})',
+      'POSIX path of (choose file with prompt "Select an image to send via Pushover" of type {"public.png", "public.jpeg", "com.compuserve.gif", "org.webmproject.webp"})',
     ]);
     return stdout.trim();
   } catch {
