@@ -30,20 +30,11 @@ note to the Trash.
 The editor uses its first non-empty line as the title and autosaves after 500
 ms. `Enter` saves and closes; `⇧Enter` inserts a line break.
 
-## Installation
+## Setup
 
-Requires macOS, [Raycast](https://www.raycast.com/), and Node.js 22 or newer.
-This repository is currently distributed as a local Raycast extension.
-
-```bash
-git clone https://github.com/efekurucay/raynotes.git
-cd raynotes
-npm ci
-npm run dev
-```
-
-After Raycast installs the extension, configure **Notes Folder** and optional
-command hotkeys under **Raycast Settings → Extensions → Notes**.
+After installing Raynotes, configure **Notes Folder** and optional command
+hotkeys under **Raycast Settings → Extensions → Raynotes**. The folder defaults
+to `~/notes` and is created automatically on first use.
 
 ## Storage
 
@@ -63,7 +54,11 @@ paths stay stable even if a note's title changes.
 
 ## Development
 
+Requires Node.js 22 or newer.
+
 ```bash
+git clone https://github.com/efekurucay/raynotes.git
+cd raynotes
 npm ci
 npm run check   # tests, types, lint, formatting, and production build
 npm run dev     # install into Raycast and hot-reload
@@ -74,8 +69,7 @@ Filesystem behavior is covered by the dependency-free checks in
 are documented in the
 [design spec](docs/superpowers/specs/2026-07-29-raynotes-design.md).
 
-`npm run lint:raycast` additionally runs Raycast Store metadata validation. A
-registered Raycast author account is required before Store submission.
+`npm run lint:raycast` additionally runs Raycast Store metadata validation.
 
 ## License
 

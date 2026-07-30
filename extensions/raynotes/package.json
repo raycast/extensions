@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "raynotes",
-  "title": "Notes",
+  "title": "Raynotes",
   "description": "Plain markdown notes in a folder you own",
   "icon": "icon.png",
   "author": "efekurucay",
@@ -9,11 +9,14 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "quick-note",
       "title": "Quick Note",
-      "subtitle": "Notes",
+      "subtitle": "Raynotes",
       "description": "Append a line to today's daily note",
       "mode": "no-view",
       "arguments": [
@@ -28,7 +31,7 @@
     {
       "name": "new-note",
       "title": "New Note",
-      "subtitle": "Notes",
+      "subtitle": "Raynotes",
       "description": "Write a new note",
       "mode": "view"
     },
@@ -50,7 +53,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.3"
+    "@raycast/api": "^1.104.23"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -62,13 +65,14 @@
   },
   "scripts": {
     "build": "ray build",
-    "check": "npm run verify && npm run typecheck && npm run lint:code && npm run format:check && npm run build",
+    "check": "npm run verify && npm run typecheck && npm run lint:code && npm run format:check && npm run lint:raycast && npm run build",
     "dev": "ray develop",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "npm run lint:code && npm run format:check",
     "lint:code": "eslint src scripts --max-warnings 0",
     "lint:raycast": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
     "typecheck": "tsc --noEmit",
     "verify": "node --experimental-strip-types --no-warnings scripts/verify.ts"
   },

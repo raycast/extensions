@@ -30,17 +30,19 @@ export function Editor({ root, note, onSaved, onClose }: EditorProps) {
   const latest = useRef(content);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const persist = useCallback(() => {
+  const persist = useCallback((): boolean => {
     const text = latest.current;
     // A new note that never received content is discarded instead of written.
-    if (!path.current && !text.trim()) return;
+    if (!path.current && !text.trim()) return true;
     if (!path.current) path.current = uniqueNotePath(root, slugify(titleOf(text)));
 
     try {
       writeFileSync(path.current, text);
       onSaved?.();
+      return true;
     } catch (error) {
       showToast({ style: Toast.Style.Failure, title: "Could not save", message: describe(error) });
+      return false;
     }
   }, [root, onSaved]);
 
@@ -71,8 +73,7 @@ export function Editor({ root, note, onSaved, onClose }: EditorProps) {
             shortcut={{ modifiers: [], key: "return" }}
             onSubmit={() => {
               clearTimeout(timer.current);
-              persist();
-              onClose();
+              if (persist()) onClose();
             }}
           />
         </ActionPanel>

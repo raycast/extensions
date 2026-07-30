@@ -1,13 +1,4 @@
-import {
-  appendFileSync,
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  readdirSync,
-  renameSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { basename, extname, join, relative } from "node:path";
 import { homedir } from "node:os";
 
@@ -137,16 +128,4 @@ export function appendToDaily(root: string, text: string, now: Date): string {
 
   appendFileSync(path, `- ${localTime(now)} ${text}\n`);
   return path;
-}
-
-/** Deletion is recoverable: files move to the Trash rather than being unlinked. */
-export function moveToTrash(path: string): void {
-  const trash = join(homedir(), ".Trash");
-  const name = basename(path, ".md");
-
-  let target = join(trash, `${name}.md`);
-  for (let n = 2; existsSync(target); n++) {
-    target = join(trash, `${name}-${n}.md`);
-  }
-  renameSync(path, target);
 }

@@ -8,11 +8,12 @@ import {
   Toast,
   confirmAlert,
   showToast,
+  trash,
   useNavigation,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { Editor } from "./components/editor";
-import { Note, moveToTrash, scanNotes } from "./lib/notes";
+import { Note, scanNotes } from "./lib/notes";
 import { notesRoot } from "./lib/prefs";
 
 function describe(error: unknown): string {
@@ -48,7 +49,7 @@ export default function Notes() {
     if (!confirmed) return;
 
     try {
-      moveToTrash(note.path);
+      await trash(note.path);
       reload();
       await showToast({ style: Toast.Style.Success, title: "Moved to Trash" });
     } catch (error) {
