@@ -27,28 +27,28 @@
     {
       "name": "index",
       "title": "Show Power and Charger Info",
-      "subtitle": "Watt's Up",
+      "subtitle": "Watts Up",
       "description": "Show power adapter wattage, voltage, current and battery details",
       "mode": "view"
     },
     {
       "name": "energy-impact",
       "title": "Show Energy Impact",
-      "subtitle": "Watt's Up",
+      "subtitle": "Watts Up",
       "description": "List the apps and processes using the most energy (runs a ~2s top sample only when launched)",
       "mode": "view"
     },
     {
       "name": "energy-settings",
       "title": "Manage Energy Settings",
-      "subtitle": "Watt's Up",
+      "subtitle": "Watts Up",
       "description": "View and toggle Low Power Mode and Power Nap, see sleep timers and what's preventing sleep",
       "mode": "view"
     },
     {
       "name": "menu-bar",
       "title": "Power Wattage in Menu Bar",
-      "subtitle": "Watt's Up",
+      "subtitle": "Watts Up",
       "description": "Show the negotiated power adapter wattage — or the battery percentage when unplugged — in the menu bar",
       "mode": "menu-bar",
       "interval": "1m"
