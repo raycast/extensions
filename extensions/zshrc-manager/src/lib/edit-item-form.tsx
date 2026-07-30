@@ -20,6 +20,7 @@ import { saveToHistory } from "./history";
 import { log } from "../utils/logger";
 import { computeDiff } from "../utils/diff";
 import { validateStructure } from "../utils/validation";
+import { SaveCancelledError } from "../utils/errors";
 
 /**
  * Configuration for EditItemForm component
@@ -357,6 +358,9 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
         onSave?.();
         pop();
       } catch (error) {
+        if (error instanceof SaveCancelledError) {
+          return; // user cancelled from the validation dialog — stay on the form
+        }
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",
@@ -419,6 +423,9 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
       onSave?.();
       pop();
     } catch (error) {
+      if (error instanceof SaveCancelledError) {
+        return;
+      }
       log.edit.error(`Failed to delete ${config.itemType}`, error);
       await showToast({
         style: Toast.Style.Failure,

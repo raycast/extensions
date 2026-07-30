@@ -9,6 +9,7 @@ import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { readZshrcFileRaw, writeZshrcFile, getZshrcPath } from "./zsh";
 import { clearCache } from "./cache";
 import { log } from "../utils/logger";
+import { SaveCancelledError } from "../utils/errors";
 
 /** Maximum number of history entries to keep */
 const MAX_HISTORY_ENTRIES = 10;
@@ -155,6 +156,9 @@ export async function undoLastChange(): Promise<boolean> {
 
     return true;
   } catch (error) {
+    if (error instanceof SaveCancelledError) {
+      return false;
+    }
     log.history.error("Undo failed", error);
     await showToast({
       style: Toast.Style.Failure,
@@ -234,6 +238,9 @@ export async function undoToPoint(index: number): Promise<boolean> {
 
     return true;
   } catch (error) {
+    if (error instanceof SaveCancelledError) {
+      return false;
+    }
     log.history.error("Undo to point failed", error);
     await showToast({
       style: Toast.Style.Failure,

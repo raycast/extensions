@@ -10,7 +10,14 @@ import { readFile, writeFile, stat, rename, lstat, realpath, copyFile } from "no
 import { dirname } from "node:path";
 import { getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
 import { FILE_CONSTANTS, ERROR_MESSAGES } from "../constants";
-import { FileNotFoundError, PermissionError, FileTooLargeError, ReadError, WriteError } from "../utils/errors";
+import {
+  FileNotFoundError,
+  PermissionError,
+  FileTooLargeError,
+  ReadError,
+  WriteError,
+  SaveCancelledError,
+} from "../utils/errors";
 import { validateFilePath, validateFileSize, validateFilePathForWrite, validateZshrcContent } from "../utils/sanitize";
 import { access } from "node:fs/promises";
 import { constants } from "node:fs";
@@ -422,7 +429,7 @@ export async function writeZshrcFile(content: string): Promise<void> {
       });
       if (!confirmed) {
         log.zsh.info("Save cancelled by user after validation warnings");
-        throw new WriteError(zshrcPath, new Error("Save cancelled"));
+        throw new SaveCancelledError(zshrcPath);
       }
     }
 
@@ -459,8 +466,11 @@ export async function writeZshrcFile(content: string): Promise<void> {
     await rename(tmpPath, effectivePath);
     log.zsh.info(`Successfully wrote zshrc file: ${effectivePath}`);
   } catch (error) {
+    // Re-throw our custom errors as-is; cancellation is a user decision, not a failure
+    if (error instanceof SaveCancelledError) {
+      throw error;
+    }
     log.zsh.error("Write failed", error);
-    // Re-throw our custom errors as-is
     if (error instanceof PermissionError || error instanceof WriteError) {
       throw error;
     }
