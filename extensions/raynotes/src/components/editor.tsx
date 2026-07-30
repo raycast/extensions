@@ -29,6 +29,7 @@ export function Editor({ root, note, onSaved, onClose }: EditorProps) {
   const path = useRef(note?.path);
   const latest = useRef(content);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const skipUnmountSave = useRef(false);
 
   const persist = useCallback((): boolean => {
     const text = latest.current;
@@ -57,7 +58,7 @@ export function Editor({ root, note, onSaved, onClose }: EditorProps) {
   useEffect(
     () => () => {
       clearTimeout(timer.current);
-      persist();
+      if (!skipUnmountSave.current) persist();
     },
     [persist],
   );
@@ -73,7 +74,10 @@ export function Editor({ root, note, onSaved, onClose }: EditorProps) {
             shortcut={{ modifiers: [], key: "return" }}
             onSubmit={() => {
               clearTimeout(timer.current);
-              if (persist()) onClose();
+              if (persist()) {
+                skipUnmountSave.current = true;
+                onClose();
+              }
             }}
           />
         </ActionPanel>
