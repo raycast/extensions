@@ -80,7 +80,6 @@ export default function SwitchDeploymentCommand() {
                   title="Open Preferences"
                   icon={Icon.Gear}
                   onAction={openExtensionPreferences}
-                  shortcut={{ modifiers: ["cmd"], key: "," }}
                 />
               </ActionPanel>
             }
@@ -120,7 +119,11 @@ export default function SwitchDeploymentCommand() {
 
   // Handle deployment selection
   const handleSelectDeployment = async (deployment: Deployment) => {
-    await setSelectedContext({ deploymentName: deployment.name });
+    await setSelectedContext({
+      deploymentName: deployment.name,
+      deploymentType: deployment.deploymentType,
+      deploymentUrl: deployment.url ?? null,
+    });
     await showToast({
       style: Toast.Style.Success,
       title: "Deployment Selected",
@@ -169,7 +172,9 @@ export default function SwitchDeploymentCommand() {
                 />
                 <Action.CopyToClipboard
                   title="Copy Deployment URL"
-                  content={`https://${deployment.name}.convex.cloud`}
+                  content={
+                    deployment.url ?? `https://${deployment.name}.convex.cloud`
+                  }
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
                 />
               </ActionPanel>

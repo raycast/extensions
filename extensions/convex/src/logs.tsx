@@ -13,6 +13,7 @@ import {
   List,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useState } from "react";
 import { useConvexAuth } from "./hooks/useConvexAuth";
@@ -45,6 +46,7 @@ export default function ViewLogsCommand() {
 
   const accessToken = session?.accessToken ?? null;
   const deploymentName = selectedContext.deploymentName;
+  const deploymentUrl = selectedContext.deploymentUrl;
 
   // Fetch context data (only in OAuth mode - not available with deploy keys)
   const { data: teams } = useTeams(isDeployKeyMode ? null : accessToken);
@@ -61,6 +63,7 @@ export default function ViewLogsCommand() {
     accessToken,
     deploymentName,
     deployKeyConfig,
+    deploymentUrl,
   );
 
   const selectedTeam = teams?.find((t) => t.id === selectedContext.teamId);
@@ -81,6 +84,7 @@ export default function ViewLogsCommand() {
   } = useLogs(accessToken, deploymentName, {
     autoRefresh: true,
     deployKeyConfig,
+    deploymentUrl,
   });
 
   // Handle authentication
@@ -251,25 +255,25 @@ export default function ViewLogsCommand() {
                       />
                     )}
                     <Action.CopyToClipboard
-                      title="Copy Request Id"
+                      title="Copy Request ID"
                       content={log.requestId}
                       shortcut={{ modifiers: ["cmd"], key: "c" }}
                     />
                     <Action.CopyToClipboard
-                      title="Copy Execution Id"
+                      title="Copy Execution ID"
                       content={log.executionId}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                     />
                     <Action.CopyToClipboard
                       title="Copy Full Log JSON"
                       content={JSON.stringify(log.raw, null, 2)}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                     {log.errorMessage && (
                       <Action.CopyToClipboard
                         title="Copy Error Message"
                         content={log.errorMessage}
-                        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                        shortcut={Keyboard.Shortcut.Common.CopyName}
                       />
                     )}
                   </ActionPanel.Section>
@@ -293,7 +297,7 @@ export default function ViewLogsCommand() {
                           title: "Logs refreshed",
                         });
                       }}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                     />
                     <Action
                       title="Clear Logs"
@@ -307,12 +311,12 @@ export default function ViewLogsCommand() {
                     <Action.OpenInBrowser
                       title="Open Execution in Dashboard"
                       url={`https://dashboard.convex.dev/t/${selectedTeam?.slug}/${selectedProject?.slug}/${selectedDeployment?.deploymentType}/logs?request=${log.requestId}`}
-                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.Open}
                     />
                     <Action.OpenInBrowser
                       title="Open Logs in Dashboard"
                       url={`https://dashboard.convex.dev/t/${selectedTeam?.slug}/${selectedProject?.slug}/${selectedDeployment?.deploymentType}/logs`}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.OpenWith}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
@@ -327,11 +331,8 @@ export default function ViewLogsCommand() {
           title="No Logs Found"
           description={
             functionFilter
-              ? `No logs for function "${functionFilter}"\n\nTotal logs: ${logs.length}\nSample log paths: ${logs
-                  .slice(0, 3)
-                  .map((l) => l.functionPath)
-                  .join(", ")}`
-              : `No recent function executions\n\nTotal logs: ${logs.length}`
+              ? `No logs for function "${functionFilter}"`
+              : "No recent function executions"
           }
           icon={Icon.Document}
           actions={

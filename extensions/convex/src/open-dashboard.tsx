@@ -3,12 +3,23 @@
  *
  * Opens the current deployment in the Convex dashboard.
  * No-view command that immediately opens the browser.
+ * Works in both OAuth and deploy key mode.
  */
 
 import { open, showToast, Toast } from "@raycast/api";
 import { loadSession, loadSelectedContext } from "./lib/auth";
+import { getDeployKeyConfigAsync } from "./lib/deployKeyAuth";
 
 export default async function OpenDashboardCommand() {
+  const baseUrl = "https://dashboard.convex.dev";
+
+  // Deploy key mode: the dashboard resolves deployments directly by name
+  const deployKeyConfig = await getDeployKeyConfigAsync();
+  if (deployKeyConfig) {
+    await open(`${baseUrl}/d/${deployKeyConfig.deploymentName}`);
+    return;
+  }
+
   const session = await loadSession();
   const selectedContext = await loadSelectedContext();
 
@@ -30,9 +41,6 @@ export default async function OpenDashboardCommand() {
     return;
   }
 
-  // Build dashboard URL using the stored context
-  const baseUrl = "https://dashboard.convex.dev";
-
   if (
     selectedContext.teamSlug &&
     selectedContext.projectSlug &&
@@ -41,12 +49,6 @@ export default async function OpenDashboardCommand() {
     const url = `${baseUrl}/t/${selectedContext.teamSlug}/${selectedContext.projectSlug}/${selectedContext.deploymentType}`;
     await open(url);
   } else {
-    // Fallback to base dashboard
-    await open(baseUrl);
+    await open(`${baseUrl}/d/${selectedContext.deploymentName}`);
   }
-
-  await showToast({
-    style: Toast.Style.Success,
-    title: "Opening Dashboard",
-  });
 }
