@@ -11,6 +11,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { getAccessToken } from "@raycast/utils";
 import { Room, getStoredRooms, saveRooms, clearRooms } from "./roomStore";
@@ -96,26 +97,29 @@ export default function ManageRooms({ onChanged }: { onChanged: () => void }) {
 
   async function recheckAll() {
     setIsChecking(true);
-    const { token } = getAccessToken();
-    const map = await getValidityMap();
+    try {
+      const { token } = getAccessToken();
+      const map = await getValidityMap();
 
-    // Sequential, not Promise.all — keeps this well under Calendar API's
-    // per-second rate limit even with a large room list.
-    for (const room of rooms) {
-      map[room.calendarId] = await checkRoom(token, room);
+      // Sequential, not Promise.all — keeps this well under Calendar API's
+      // per-second rate limit even with a large room list.
+      for (const room of rooms) {
+        map[room.calendarId] = await checkRoom(token, room);
+      }
+
+      await saveValidityMap(map);
+      setValidity(map);
+      const invalidCount = Object.values(map).filter((v) => !v.valid).length;
+      await showToast({
+        style: invalidCount > 0 ? Toast.Style.Failure : Toast.Style.Success,
+        title:
+          invalidCount > 0
+            ? `${invalidCount} room(s) look invalid`
+            : "All rooms check out",
+      });
+    } finally {
+      setIsChecking(false);
     }
-
-    await saveValidityMap(map);
-    setValidity(map);
-    setIsChecking(false);
-    const invalidCount = Object.values(map).filter((v) => !v.valid).length;
-    await showToast({
-      style: invalidCount > 0 ? Toast.Style.Failure : Toast.Style.Success,
-      title:
-        invalidCount > 0
-          ? `${invalidCount} room(s) look invalid`
-          : "All rooms check out",
-    });
   }
 
   async function removeRoom(calendarId: string) {
@@ -167,13 +171,13 @@ export default function ManageRooms({ onChanged }: { onChanged: () => void }) {
       <Action
         title="Recheck All Rooms"
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={recheckAll}
       />
       <Action
         title="Add Room Manually"
         icon={Icon.Plus}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        shortcut={Keyboard.Shortcut.Common.New}
         onAction={() =>
           push(<ManualAddForm onSaved={refreshAfterChildAction} />)
         }

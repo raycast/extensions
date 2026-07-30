@@ -8,6 +8,7 @@ import {
   Toast,
   Color,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { withAccessToken, getAccessToken, usePromise } from "@raycast/utils";
 import { google } from "./google";
@@ -340,7 +341,6 @@ function RoomList({
                       <Action
                         title={`Block Until Next Meeting (${formatDuration(room.minutes)}${room.beyondWindow ? "+" : ""})`}
                         icon={Icon.Clock}
-                        shortcut={{ modifiers: ["cmd"], key: "enter" }}
                         onAction={() => handleBlock(room, room.minutes)}
                       />
                     )}
@@ -359,13 +359,16 @@ function RoomList({
                     <Action
                       title="Refresh"
                       icon={Icon.ArrowClockwise}
-                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                      shortcut={Keyboard.Shortcut.Common.Refresh}
                       onAction={revalidate}
                     />
                     <Action
                       title="Manage Rooms"
                       icon={Icon.List}
-                      shortcut={{ modifiers: ["cmd"], key: "m" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "m" },
+                        Windows: { modifiers: ["ctrl"], key: "m" },
+                      }}
                       onAction={() =>
                         push(<ManageRooms onChanged={onRoomsChanged} />)
                       }

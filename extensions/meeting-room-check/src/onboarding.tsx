@@ -23,21 +23,38 @@ type FoundRoom = { name: string; email: string; count: number };
  */
 async function tryDirectoryApi(token: string): Promise<Room[] | null> {
   try {
-    const res = await fetch(
-      "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/resources/calendars?maxResults=200",
-      { headers: { Authorization: `Bearer ${token}` } },
-    );
-    if (!res.ok) return null;
+    const items: {
+      resourceName?: string;
+      resourceEmail?: string;
+      capacity?: number;
+      floorName?: string;
+    }[] = [];
+    let pageToken: string | undefined;
 
-    const data = (await res.json()) as {
-      items?: {
-        resourceName?: string;
-        resourceEmail?: string;
-        capacity?: number;
-        floorName?: string;
-      }[];
-    };
-    const items = data.items ?? [];
+    do {
+      const url =
+        "https://admin.googleapis.com/admin/directory/v1/customer/my_customer/resources/calendars?maxResults=200" +
+        (pageToken ? `&pageToken=${encodeURIComponent(pageToken)}` : "");
+
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) return null;
+
+      const data = (await res.json()) as {
+        items?: {
+          resourceName?: string;
+          resourceEmail?: string;
+          capacity?: number;
+          floorName?: string;
+        }[];
+        nextPageToken?: string;
+      };
+
+      items.push(...(data.items ?? []));
+      pageToken = data.nextPageToken;
+    } while (pageToken);
+
     if (items.length === 0) return null;
 
     return items
@@ -379,7 +396,6 @@ export default function Onboarding({
                 <Action
                   title={`Save ${selected.size} Selected Room(s)`}
                   icon={Icon.SaveDocument}
-                  shortcut={{ modifiers: ["cmd"], key: "enter" }}
                   onAction={confirmSelection}
                 />
                 <Action

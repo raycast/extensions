@@ -12,23 +12,23 @@
   "commands": [
     {
       "name": "list-rooms",
-      "title": "Meeting Room Check",
-      "subtitle": "Meeting Rooms",
+      "title": "List Meeting Rooms",
+      "subtitle": "Google Calendar",
       "description": "Lists currently empty rooms and lets you block one for 15/30/60 min.",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.19.17",
-    "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.17",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -36,5 +36,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
