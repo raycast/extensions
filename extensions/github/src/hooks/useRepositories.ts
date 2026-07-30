@@ -46,6 +46,8 @@ export function useReleases(repository: ExtendedRepositoryFieldsFragment) {
   return useCachedPromise((owner, name) => github.repositoryReleases({ owner, name }), [owner, name]);
 }
 
+const MARKDOWN_EXTENSION = /\.(md|markdown|mdown|mkdn?)$/i;
+
 export function useReadme(repository: ExtendedRepositoryFieldsFragment) {
   const { octokit } = getGitHubClient();
 
@@ -53,9 +55,26 @@ export function useReadme(repository: ExtendedRepositoryFieldsFragment) {
   return useCachedPromise(
     async (owner: string, name: string) => {
       try {
-        const { data } = await octokit.rest.repos.getReadme({ owner, repo: name });
+        const { data } = await octokit.repos.getReadme({ owner, repo: name });
+
+        // The Contents API omits the body (encoding "none") for files larger than 1 MB.
+        if (data.encoding !== "base64" || !data.content) {
+          return {
+            markdown: "> This README is too large to preview here. Open the repository in your browser to read it.",
+            found: true,
+          };
+        }
+
         const content = Buffer.from(data.content, "base64").toString("utf-8");
-        return { markdown: rewriteReadmeUrls(content, data.download_url ?? ""), found: true };
+
+        // `getReadme` returns whatever file GitHub picked, which isn't always Markdown
+        // (e.g. README.rst, README.asciidoc). Show non-Markdown content verbatim in a
+        // code block instead of letting Raycast mangle it as Markdown.
+        const markdown = MARKDOWN_EXTENSION.test(data.name)
+          ? rewriteReadmeUrls(content, data.download_url ?? "", data.path)
+          : `\`\`\`\n${content}\n\`\`\``;
+
+        return { markdown, found: true };
       } catch (error) {
         if ((error as { status?: number }).status === 404) {
           return { markdown: "", found: false };

@@ -7,7 +7,7 @@ export default function RepositoryReadme({ repository }: { repository: ExtendedR
   const { data, isLoading } = useReadme(repository);
 
   const markdown =
-    !isLoading && data && !data.found
+    data && !data.found
       ? `# ${repository.nameWithOwner}\n\n> This repository doesn't have a README.`
       : (data?.markdown ?? "");
 

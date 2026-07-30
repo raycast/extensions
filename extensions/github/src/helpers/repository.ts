@@ -208,30 +208,38 @@ const formatRepositoryUrl = (repoNameWithOwner: string, protocol: "https" | "ssh
  *
  * @param markdown {string} Raw README markdown.
  * @param rawDownloadUrl {string} The README's raw download URL from the GitHub API.
+ * @param readmePath {string} The README's path within the repository (e.g. `.github/README.md`),
+ *   used to resolve root-relative paths (starting with `/`) against the repository root.
  * @returns {string} Markdown with relative URLs rewritten to absolute ones.
  */
-export function rewriteReadmeUrls(markdown: string, rawDownloadUrl: string): string {
+export function rewriteReadmeUrls(markdown: string, rawDownloadUrl: string, readmePath = ""): string {
   if (!rawDownloadUrl) {
     return markdown;
   }
 
   // Insert `/blob/` after `owner/repo` instead of guessing the ref segment, so
   // subdirectory READMEs (`.github/`, `docs/`) and slash-containing refs stay intact.
-  const rawBase = rawDownloadUrl.slice(0, rawDownloadUrl.lastIndexOf("/") + 1);
-  const blobBase = rawBase.replace(
-    /^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\//,
-    "https://github.com/$1/$2/blob/",
-  );
+  const toBlob = (raw: string) =>
+    raw.replace(/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\//, "https://github.com/$1/$2/blob/");
+
+  // `*Dir` is the README's own directory (for normal relative paths); `*Root` is the
+  // repository root at the same ref (for root-relative paths that start with `/`).
+  const rawDir = rawDownloadUrl.slice(0, rawDownloadUrl.lastIndexOf("/") + 1);
+  const rawRoot = readmePath ? rawDownloadUrl.slice(0, rawDownloadUrl.length - readmePath.length) : rawDir;
+  const blobDir = toBlob(rawDir);
+  const blobRoot = toBlob(rawRoot);
 
   const isAbsolute = (url: string) => /^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith("//") || url.startsWith("#");
 
-  const resolve = (url: string, base: string) => {
+  const resolve = (url: string, dirBase: string, rootBase: string) => {
     const trimmed = url.trim();
     if (!trimmed || isAbsolute(trimmed)) {
       return url;
     }
     try {
-      return new URL(trimmed.replace(/^\/+/, ""), base).toString();
+      return trimmed.startsWith("/")
+        ? new URL(trimmed.replace(/^\/+/, ""), rootBase).toString()
+        : new URL(trimmed, dirBase).toString();
     } catch {
       return url;
     }
@@ -244,10 +252,16 @@ export function rewriteReadmeUrls(markdown: string, rawDownloadUrl: string): str
   const linkPattern = new RegExp(`(?<!!)\\[([^\\]]+)\\]\\(${destination}\\)`, "g");
 
   return markdown
-    .replace(imagePattern, (_m, alt, url, tail) => `![${alt}](${resolve(url, rawBase)}${tail})`)
-    .replace(linkPattern, (_m, text, url, tail) => `[${text}](${resolve(url, blobBase)}${tail})`)
-    .replace(/(<img[^>]+src=["'])([^"']+)(["'])/gi, (_m, pre, url, post) => `${pre}${resolve(url, rawBase)}${post}`)
-    .replace(/(<a[^>]+href=["'])([^"']+)(["'])/gi, (_m, pre, url, post) => `${pre}${resolve(url, blobBase)}${post}`);
+    .replace(imagePattern, (_m, alt, url, tail) => `![${alt}](${resolve(url, rawDir, rawRoot)}${tail})`)
+    .replace(linkPattern, (_m, text, url, tail) => `[${text}](${resolve(url, blobDir, blobRoot)}${tail})`)
+    .replace(
+      /(<img[^>]+src=["'])([^"']+)(["'])/gi,
+      (_m, pre, url, post) => `${pre}${resolve(url, rawDir, rawRoot)}${post}`,
+    )
+    .replace(
+      /(<a[^>]+href=["'])([^"']+)(["'])/gi,
+      (_m, pre, url, post) => `${pre}${resolve(url, blobDir, blobRoot)}${post}`,
+    );
 }
 
 /**
