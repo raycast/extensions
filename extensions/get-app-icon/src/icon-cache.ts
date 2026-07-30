@@ -277,12 +277,25 @@ async function findStaleApps(appPaths: readonly string[]): Promise<string[]> {
     appPaths.map(async (appPath) => {
       const cached = cachedIconPath(appPath);
       try {
-        const [cachedStat, source] = await Promise.all([stat(cached), iconSourceStamp(appPath)]);
+        // Gather the evidence first, then confirm the entry still exists.
+        //
+        // The ORDER is the point. Everything here is compared against a cache entry, so a
+        // timestamp captured before the other reads can outlive the file it describes: an
+        // export invalidating the icon mid-check would leave a stale mtime that still
+        // satisfies the comparison, judging a deleted PNG "fresh". The app is then skipped,
+        // `refreshIconCache` reports nothing extracted, and because the grid only
+        // re-derives `cachedApps` when something *was* extracted, the tile keeps pointing
+        // at a file that is gone. Stat'ing last means a deleted entry throws into the catch
+        // below — which is already the "not cached yet" path, so it re-extracts.
+        const [source, vouchedFor] = await Promise.all([
+          iconSourceStamp(appPath),
+          readFile(blindMarkerPath(appPath), "utf8").catch(() => null),
+        ]);
+        const cachedStat = await stat(cached);
         if (source.unverifiable) {
           // Blind: re-draw once, then trust it. The marker is believed only if it vouches
           // for the PNG that is actually there — a marker naming a different mtime belongs
           // to a superseded entry, so it can't suppress a redraw that is still owed.
-          const vouchedFor = await readFile(blindMarkerPath(appPath), "utf8").catch(() => null);
           return vouchedFor === String(cachedStat.mtimeMs) ? null : appPath;
         }
         // No marker cleanup here. A readable pass that rewrites the entry gives it a new
