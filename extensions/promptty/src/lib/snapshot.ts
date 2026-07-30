@@ -107,8 +107,9 @@ export async function loadSnapshotWithCache(path: string, cache: StringCache): P
     const cacheUpdated = Buffer.byteLength(cacheValue, "utf8") <= MAX_LAST_KNOWN_GOOD_BYTES;
     if (cacheUpdated) {
       cache.set(LAST_KNOWN_GOOD_CACHE_KEY, cacheValue);
-    } else {
-      // An older entry is no longer last-known-good once a newer export is read.
+    } else if (isCachedSourceId(cache.get(LAST_KNOWN_GOOD_CACHE_KEY), sourceId)) {
+      // This source has a newer export than the cache holds, so the entry is no
+      // longer last-known-good. Another source's entry is left untouched.
       cache.remove(LAST_KNOWN_GOOD_CACHE_KEY);
     }
     return { ...parsed, source: "file", cacheUpdated };
@@ -143,6 +144,17 @@ export function isSnapshotStale(generatedAt: string, now = Date.now()): boolean 
 function snapshotSourceId(path: string): string {
   const normalizedPath = resolve(path).normalize("NFC");
   return createHash("sha256").update(normalizedPath, "utf8").digest("hex");
+}
+
+function isCachedSourceId(json: string | undefined, expectedSourceId: string): boolean {
+  if (!json) return false;
+  let value: unknown;
+  try {
+    value = JSON.parse(json);
+  } catch {
+    return false;
+  }
+  return isObject(value) && value.cacheVersion === CACHE_FORMAT_VERSION && value.sourceId === expectedSourceId;
 }
 
 function parseCachedSnapshot(json: string, expectedSourceId: string): ParsedSnapshot | undefined {

@@ -169,6 +169,29 @@ test("drops the last-known-good cache when a newer export exceeds the cache budg
   );
 });
 
+test("keeps another source's cache when the selected export exceeds the cache budget", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "promptty-raycast-"));
+  const cachedPath = join(directory, "cached-prompts-v1.json");
+  const oversizedPath = join(directory, "oversized-prompts-v1.json");
+  const cache = new MemoryCache();
+
+  await writeFile(cachedPath, JSON.stringify(validSnapshot()), "utf8");
+  await loadSnapshotWithCache(cachedPath, cache);
+  const cached = cache.get(LAST_KNOWN_GOOD_CACHE_KEY);
+  assert.ok(cached);
+
+  const oversizedPrompt = { ...validPrompt, content: "x".repeat(MAX_LAST_KNOWN_GOOD_BYTES + 1) };
+  await writeFile(oversizedPath, JSON.stringify(validSnapshot([oversizedPrompt])), "utf8");
+  const oversized = await loadSnapshotWithCache(oversizedPath, cache);
+  assert.equal(oversized.cacheUpdated, false);
+  assert.equal(cache.get(LAST_KNOWN_GOOD_CACHE_KEY), cached);
+
+  await unlink(cachedPath);
+  const fallback = await loadSnapshotWithCache(cachedPath, cache);
+  assert.equal(fallback.source, "cache");
+  assert.equal(fallback.snapshot.prompts[0]?.content, validPrompt.content);
+});
+
 test("does not return or delete a cached snapshot from a different source path", async () => {
   const directory = await mkdtemp(join(tmpdir(), "promptty-raycast-"));
   const availablePath = join(directory, "available-prompts-v1.json");
