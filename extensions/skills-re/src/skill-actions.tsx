@@ -4,13 +4,14 @@ import { homedir } from "node:os";
 import { basename, extname, join } from "node:path";
 import { useEffect, useState } from "react";
 
-import { checkSaved, getActiveCredential, resolveInstall, saveSkill, skillPath, skillUrl, unsaveSkill } from "./api";
+import { checkSaved, resolveInstall, saveSkill, skillPath, skillUrl, unsaveSkill } from "./api";
 import type { AuthCredential, SavedSkill, Skill } from "./api";
 import { getErrorMessage } from "./api-error";
 import { ApiTokenForm } from "./auth";
 import { SkillReviewForm } from "./skill-review-form";
 
 interface Props {
+  credential?: AuthCredential | null;
   detailTarget?: Action.Push.Props["target"];
   onChanged?: () => void;
   showReviewAction?: boolean;
@@ -73,29 +74,26 @@ const showFailure = async (title: string, error: unknown) => {
   });
 };
 
-export function SkillActions({ detailTarget, onChanged, showReviewAction, skill }: Props) {
-  const [credential, setCredential] = useState<AuthCredential | null>(null);
+export function SkillActions({ credential, detailTarget, onChanged, showReviewAction, skill }: Props) {
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     const loadSavedState = async () => {
-      try {
-        const activeCredential = await getActiveCredential();
-        setCredential(activeCredential);
-        if (!activeCredential) {
-          return;
-        }
+      if (!credential) {
+        setSaved(false);
+        return;
+      }
 
-        const result = await checkSaved(skill.slug, activeCredential.token);
+      try {
+        const result = await checkSaved(skill.slug, credential.token);
         setSaved(result.saved);
       } catch {
-        setCredential(null);
         setSaved(false);
       }
     };
 
     void loadSavedState();
-  }, [skill.slug]);
+  }, [credential, skill.slug]);
 
   const toggleSaved = async () => {
     if (!credential) {
@@ -191,9 +189,9 @@ export function SkillActions({ detailTarget, onChanged, showReviewAction, skill 
           title={saved ? "Remove from Saved Skills" : "Save Skill"}
           onAction={toggleSaved}
         />
-      ) : (
+      ) : credential === null ? (
         <Action.Push icon={Icon.Key} title="Configure API Token" target={<ApiTokenForm />} />
-      )}
+      ) : null}
     </ActionPanel>
   );
 }

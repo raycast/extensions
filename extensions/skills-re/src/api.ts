@@ -222,7 +222,7 @@ export const searchSkills = async (input: SearchSkillsInput) => {
 
 export const listSavedSkills = async (input: { cursor?: string; limit?: number; token: string }) =>
   await request<SavedSkillPage>("/skills/saved", {
-    query: { cursor: input.cursor },
+    query: { cursor: input.cursor, limit: input.limit },
     token: input.token,
   });
 

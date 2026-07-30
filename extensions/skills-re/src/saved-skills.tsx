@@ -95,7 +95,14 @@ export default function Command() {
           keywords={keywordsForSkill(skill)}
           subtitle={authorLabelForSkill(skill) ?? skillPath(skill)}
           title={skill.title}
-          actions={<SkillActions detailTarget={<SkillDetail skill={skill} />} skill={skill} onChanged={refresh} />}
+          actions={
+            <SkillActions
+              credential={credential}
+              detailTarget={<SkillDetail credential={credential} skill={skill} />}
+              skill={skill}
+              onChanged={refresh}
+            />
+          }
         />
       ))}
       {isDone ? null : (

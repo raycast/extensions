@@ -8,7 +8,7 @@ import {
   listSnapshotsBySkill,
   readSnapshotFileContent,
 } from "./api";
-import type { Skill, Snapshot, SnapshotFileContent, SnapshotTreeEntry } from "./api";
+import type { AuthCredential, Skill, Snapshot, SnapshotFileContent, SnapshotTreeEntry } from "./api";
 import { getErrorMessage } from "./api-error";
 import {
   buildSkillDetailMarkdown,
@@ -22,6 +22,7 @@ import { buildSkillViewPath, recordSkillViewMetric } from "./metrics";
 import { SkillActions } from "./skill-actions";
 
 interface Props {
+  credential?: AuthCredential | null;
   skill: Skill;
 }
 
@@ -71,11 +72,13 @@ function AuthorMetadata({ skill }: { skill: Skill }) {
 
 function IdentityMetadata({ fileContent, skill }: Pick<DetailState, "fileContent" | "skill">) {
   const frontmatter = parseSkillMarkdownDocument(fileContent?.content ?? "").frontmatter;
+  const description = frontmatter?.description ?? skill.description;
 
   return (
     <>
       <AuthorMetadata skill={skill} />
       {frontmatter?.name ? <Detail.Metadata.Label title="Name" text={frontmatter.name} /> : null}
+      {description ? <Detail.Metadata.Label title="Description" text={description} /> : null}
       {skill.repoUrl ? (
         <Detail.Metadata.Link title="GitHub" target={skill.repoUrl} text={skill.repoName ?? "Repository"} />
       ) : null}
@@ -196,7 +199,7 @@ function SkillMetadata(state: DetailState) {
   );
 }
 
-export function SkillDetail({ skill: initialSkill }: Props) {
+export function SkillDetail({ credential, skill: initialSkill }: Props) {
   const [state, setState] = useState<DetailState>({
     fileContent: null,
     skill: initialSkill,
@@ -269,7 +272,7 @@ export function SkillDetail({ skill: initialSkill }: Props) {
 
   return (
     <Detail
-      actions={<SkillActions showReviewAction skill={skill} />}
+      actions={<SkillActions credential={credential} showReviewAction skill={skill} />}
       isLoading={isLoading}
       markdown={markdown}
       navigationTitle={skill.title}
