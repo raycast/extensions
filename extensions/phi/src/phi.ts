@@ -35,10 +35,6 @@ export type AppleScriptRunner = (
 export type TabScope =
   { kind: "all" } | { kind: "current" } | { kind: "space"; spaceId: string };
 
-interface Preferences {
-  applicationChannel: string;
-}
-
 function applicationId(channel: ApplicationChannel): string {
   return channel === "stable"
     ? "com.phibrowser.Mac"

@@ -28,10 +28,6 @@ import { formatURLHost } from "./url-utils";
 import { usePhiHistory } from "./use-history-search";
 import { runViewAction } from "./window-command";
 
-interface Preferences {
-  applicationChannel: string;
-}
-
 function HistoryErrorView({
   error,
   onRetry,
