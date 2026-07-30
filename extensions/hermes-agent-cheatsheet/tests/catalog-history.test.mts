@@ -4,10 +4,12 @@ import { createCatalogHistoryStore } from "../src/lib/catalog-history.ts";
 
 function deferred() {
   let resolve = () => undefined;
-  const promise = new Promise<void>((fulfill) => {
+  let reject = (_reason?: unknown) => undefined;
+  const promise = new Promise<void>((fulfill, fail) => {
     resolve = fulfill;
+    reject = fail;
   });
-  return { promise, resolve };
+  return { promise, resolve, reject };
 }
 
 test("hydrates current subscribers and survives unsubscribe-resubscribe cycles", async () => {
@@ -126,4 +128,78 @@ test("rolls back optimistic history updates when storage writes fail", async () 
 
   await assert.rejects(store.recordRecent("new"), /recent write failure/);
   assert.deepEqual(store.getSnapshot().recentIds, ["recent"]);
+});
+
+test("rolls back overlapping failed recent writes to the last persisted state", async () => {
+  const firstWrite = deferred();
+  const secondWrite = deferred();
+  const secondWriteStarted = deferred();
+  let writeCount = 0;
+  const store = createCatalogHistoryStore({
+    readFavorites: async () => [],
+    readRecents: async () => ["saved"],
+    writeFavorites: async () => undefined,
+    writeRecents: async () => {
+      writeCount += 1;
+      if (writeCount === 1) {
+        await firstWrite.promise;
+      } else {
+        secondWriteStarted.resolve();
+        await secondWrite.promise;
+      }
+    },
+  });
+
+  await store.hydrate();
+  const recordFirst = store.recordRecent("first");
+  await Promise.resolve();
+  const recordSecond = store.recordRecent("second");
+  await Promise.resolve();
+
+  assert.deepEqual(store.getSnapshot().recentIds, ["second", "first", "saved"]);
+
+  firstWrite.reject(new Error("first write failure"));
+  await assert.rejects(recordFirst, /first write failure/);
+  await secondWriteStarted.promise;
+  secondWrite.reject(new Error("second write failure"));
+  await assert.rejects(recordSecond, /second write failure/);
+
+  assert.deepEqual(store.getSnapshot().recentIds, ["saved"]);
+});
+
+test("rolls back overlapping failed favorite writes to the last persisted state", async () => {
+  const firstWrite = deferred();
+  const secondWrite = deferred();
+  const secondWriteStarted = deferred();
+  let writeCount = 0;
+  const store = createCatalogHistoryStore({
+    readFavorites: async () => ["saved"],
+    readRecents: async () => [],
+    writeFavorites: async () => {
+      writeCount += 1;
+      if (writeCount === 1) {
+        await firstWrite.promise;
+      } else {
+        secondWriteStarted.resolve();
+        await secondWrite.promise;
+      }
+    },
+    writeRecents: async () => undefined,
+  });
+
+  await store.hydrate();
+  const addFirst = store.toggleFavorite("first");
+  await Promise.resolve();
+  const addSecond = store.toggleFavorite("second");
+  await Promise.resolve();
+
+  assert.deepEqual(store.getSnapshot().favoriteIds, ["second", "first", "saved"]);
+
+  firstWrite.reject(new Error("first write failure"));
+  await assert.rejects(addFirst, /first write failure/);
+  await secondWriteStarted.promise;
+  secondWrite.reject(new Error("second write failure"));
+  await assert.rejects(addSecond, /second write failure/);
+
+  assert.deepEqual(store.getSnapshot().favoriteIds, ["saved"]);
 });

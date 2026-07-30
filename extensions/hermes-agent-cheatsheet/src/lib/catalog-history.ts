@@ -27,6 +27,8 @@ export function createCatalogHistoryStore({
   recentLimit = 8,
 }: CatalogHistoryStoreOptions): CatalogHistoryStore {
   let snapshot: CatalogHistorySnapshot = { favoriteIds: [], recentIds: [] };
+  let persistedFavoriteIds: string[] = [];
+  let persistedRecentIds: string[] = [];
   let hydrationPromise: Promise<void> | undefined;
   let favoriteWrite = Promise.resolve();
   let recentWrite = Promise.resolve();
@@ -40,6 +42,8 @@ export function createCatalogHistoryStore({
   const hydrate = () => {
     hydrationPromise ??= Promise.all([readFavorites(), readRecents()])
       .then(([favoriteIds, recentIds]) => {
+        persistedFavoriteIds = favoriteIds;
+        persistedRecentIds = recentIds;
         updateSnapshot({ favoriteIds, recentIds });
       })
       .catch((error) => {
@@ -51,17 +55,21 @@ export function createCatalogHistoryStore({
 
   const toggleFavorite = async (id: string) => {
     await hydrate();
-    const previousFavoriteIds = snapshot.favoriteIds;
     const added = !snapshot.favoriteIds.includes(id);
     const favoriteIds = added
       ? [id, ...snapshot.favoriteIds]
       : snapshot.favoriteIds.filter((favoriteId) => favoriteId !== id);
     updateSnapshot({ ...snapshot, favoriteIds });
-    favoriteWrite = favoriteWrite.catch(() => undefined).then(() => writeFavorites(favoriteIds));
+    favoriteWrite = favoriteWrite
+      .catch(() => undefined)
+      .then(async () => {
+        await writeFavorites(favoriteIds);
+        persistedFavoriteIds = favoriteIds;
+      });
     try {
       await favoriteWrite;
     } catch (error) {
-      if (snapshot.favoriteIds === favoriteIds) updateSnapshot({ ...snapshot, favoriteIds: previousFavoriteIds });
+      if (snapshot.favoriteIds === favoriteIds) updateSnapshot({ ...snapshot, favoriteIds: persistedFavoriteIds });
       throw error;
     }
     return added;
@@ -69,14 +77,18 @@ export function createCatalogHistoryStore({
 
   const recordRecent = async (id: string) => {
     await hydrate();
-    const previousRecentIds = snapshot.recentIds;
     const recentIds = [id, ...snapshot.recentIds.filter((recentId) => recentId !== id)].slice(0, recentLimit);
     updateSnapshot({ ...snapshot, recentIds });
-    recentWrite = recentWrite.catch(() => undefined).then(() => writeRecents(recentIds));
+    recentWrite = recentWrite
+      .catch(() => undefined)
+      .then(async () => {
+        await writeRecents(recentIds);
+        persistedRecentIds = recentIds;
+      });
     try {
       await recentWrite;
     } catch (error) {
-      if (snapshot.recentIds === recentIds) updateSnapshot({ ...snapshot, recentIds: previousRecentIds });
+      if (snapshot.recentIds === recentIds) updateSnapshot({ ...snapshot, recentIds: persistedRecentIds });
       throw error;
     }
   };
