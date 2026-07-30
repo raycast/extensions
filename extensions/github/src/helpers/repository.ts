@@ -215,10 +215,13 @@ export function rewriteReadmeUrls(markdown: string, rawDownloadUrl: string): str
     return markdown;
   }
 
+  // Insert `/blob/` after `owner/repo` instead of guessing the ref segment, so
+  // subdirectory READMEs (`.github/`, `docs/`) and slash-containing refs stay intact.
   const rawBase = rawDownloadUrl.slice(0, rawDownloadUrl.lastIndexOf("/") + 1);
-  const blobBase = rawBase
-    .replace("https://raw.githubusercontent.com/", "https://github.com/")
-    .replace(/\/([^/]+)\/$/, "/blob/$1/");
+  const blobBase = rawBase.replace(
+    /^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\//,
+    "https://github.com/$1/$2/blob/",
+  );
 
   const isAbsolute = (url: string) => /^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith("//") || url.startsWith("#");
 
@@ -234,12 +237,15 @@ export function rewriteReadmeUrls(markdown: string, rawDownloadUrl: string): str
     }
   };
 
+  // Allow one level of balanced parentheses so filenames like `image(1).png`
+  // aren't truncated; the trailing group captures an optional title.
+  const destination = "((?:\\([^)]*\\)|[^()\\s])+)([^)]*)";
+  const imagePattern = new RegExp(`!\\[([^\\]]*)\\]\\(${destination}\\)`, "g");
+  const linkPattern = new RegExp(`(?<!!)\\[([^\\]]+)\\]\\(${destination}\\)`, "g");
+
   return markdown
-    .replace(/!\[([^\]]*)\]\(([^)\s]+)([^)]*)\)/g, (_m, alt, url, tail) => `![${alt}](${resolve(url, rawBase)}${tail})`)
-    .replace(
-      /(?<!!)\[([^\]]+)\]\(([^)\s]+)([^)]*)\)/g,
-      (_m, text, url, tail) => `[${text}](${resolve(url, blobBase)}${tail})`,
-    )
+    .replace(imagePattern, (_m, alt, url, tail) => `![${alt}](${resolve(url, rawBase)}${tail})`)
+    .replace(linkPattern, (_m, text, url, tail) => `[${text}](${resolve(url, blobBase)}${tail})`)
     .replace(/(<img[^>]+src=["'])([^"']+)(["'])/gi, (_m, pre, url, post) => `${pre}${resolve(url, rawBase)}${post}`)
     .replace(/(<a[^>]+href=["'])([^"']+)(["'])/gi, (_m, pre, url, post) => `${pre}${resolve(url, blobBase)}${post}`);
 }
