@@ -23,6 +23,19 @@ export interface CommandExample {
   description?: string;
 }
 
+export interface CommandParameter {
+  name: string;
+  description: string;
+}
+
+export interface CommandDetails {
+  whenToUse?: string;
+  prerequisites?: string[];
+  parameters?: CommandParameter[];
+  workflow?: CommandExample[];
+  notes?: string[];
+}
+
 export const STATUS_BADGES = ["CAUTION", "PERSISTS", "SESSION", "RESTART", "DEPRECATED", "NEW"] as const;
 export type StatusBadge = (typeof STATUS_BADGES)[number];
 
@@ -39,6 +52,7 @@ export interface CheatsheetItem {
   warning?: string;
   platforms?: string[];
   statuses?: StatusBadge[];
+  details?: CommandDetails;
 }
 
 export interface GeneratedCheatsheetData {

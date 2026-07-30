@@ -28,6 +28,10 @@ const docs = {
     local: "website/docs/reference/slash-commands.md",
     remote: "website/docs/reference/slash-commands.md",
   },
+  profile: {
+    local: "website/docs/reference/profile-commands.md",
+    remote: "website/docs/reference/profile-commands.md",
+  },
 };
 
 async function loadDocument(document, commit) {
@@ -228,6 +232,7 @@ function createItem({
   warning,
   platforms,
   statuses = [],
+  details,
   idKey = usage,
 }) {
   const normalizedExamples = normalizeExamples(usage, example, examples);
@@ -273,6 +278,7 @@ function createItem({
     ...(warning ? { warning } : {}),
     ...(platforms?.length ? { platforms } : {}),
     ...(inferredStatuses.length ? { statuses: [...new Set(inferredStatuses)] } : {}),
+    ...(details ? { details } : {}),
   };
 }
 
@@ -368,6 +374,207 @@ function parseSlashCommands(markdown) {
     if (!existing || item.description.length > existing.description.length) itemByUsage.set(item.usage, item);
   }
   return [...itemByUsage.values()];
+}
+
+function commandHeadingSections(markdown) {
+  const matches = [...markdown.matchAll(/^(#{2,3}) (`[^`]+`.*)$/gm)];
+
+  return matches.map((match) => {
+    const level = match[1].length;
+    const contentStart = match.index + match[0].length;
+    const tail = markdown.slice(contentStart);
+    const nextHeading = new RegExp(`^#{2,${level}}\\s`, "m").exec(tail);
+
+    return {
+      heading: cleanMarkdown(match[2]),
+      content: tail.slice(0, nextHeading?.index ?? tail.length),
+    };
+  });
+}
+
+function firstCommandBlock(section) {
+  const fence = section.match(/```(?:bash)?\s*\n([\s\S]*?)```/);
+  if (!fence) return [];
+
+  return fence[1]
+    .split("\n")
+    .map((line) => line.trim().replace(/^\$\s*/, ""))
+    .filter((line) => line.startsWith("hermes "));
+}
+
+function firstProseParagraph(section) {
+  const withoutFirstFence = section.replace(/```(?:bash)?\s*\n[\s\S]*?```/, "");
+
+  return withoutFirstFence
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+    .filter((paragraph) => !/^(?:\||#{2,3}\s|:::|Argument\b|Option\b|Subcommand\b)/.test(paragraph))
+    .map(cleanMarkdown)
+    .find(Boolean);
+}
+
+function parametersFromSection(section) {
+  const seen = new Set();
+  const parameters = [];
+
+  for (const line of section.split("\n")) {
+    if (!line.trim().startsWith("| `")) continue;
+    const [nameCell, descriptionCell] = splitTableRow(line);
+    if (!nameCell || !descriptionCell) continue;
+    const name = cleanMarkdown(nameCell);
+    if (seen.has(name)) continue;
+    seen.add(name);
+    parameters.push({ name, description: cleanMarkdown(descriptionCell) });
+  }
+
+  return parameters;
+}
+
+function curatedProfileContent(usage) {
+  if (usage.startsWith("hermes profile create ")) {
+    return {
+      examples: [
+        {
+          title: "Blank Profile",
+          command: "hermes profile create work",
+          description: "Create an isolated profile that still needs model and credential setup.",
+        },
+        {
+          title: "Clone Current Configuration",
+          command: "hermes profile create work --clone",
+          description: "Copy config, credentials, SOUL.md, and skills while starting with fresh sessions and memory.",
+        },
+        {
+          title: "Clone a Specific Profile",
+          command: "hermes profile create work --clone-from coder",
+          description: "Use coder as the source instead of the active profile.",
+        },
+      ],
+      details: {
+        whenToUse:
+          "Create a separate Hermes agent for a role, project, identity, credential set, or messaging gateway without mixing its state with another profile.",
+        prerequisites: ["Choose a unique profile name made from letters, numbers, hyphens, or underscores."],
+        workflow: [
+          {
+            title: "1. Create the profile",
+            command: "hermes profile create work --clone",
+            description: "Clone the current setup or omit --clone to start blank.",
+          },
+          {
+            title: "2. Configure models and tools",
+            command: "hermes -p work setup --portal",
+            description: "Run setup explicitly inside the new profile.",
+          },
+          {
+            title: "3. Set its project directory",
+            command: "hermes -p work config set terminal.cwd /absolute/path/to/project",
+            description: "Profiles isolate state; terminal.cwd separately controls where shell commands begin.",
+          },
+          {
+            title: "4. Validate the profile",
+            command: "hermes -p work doctor",
+            description: "Check credentials, providers, dependencies, and runtime configuration.",
+          },
+          {
+            title: "5. Start using it",
+            command: "hermes -p work chat",
+            description: "Use -p for an explicit one-command selection or run work chat through its generated alias.",
+          },
+        ],
+        notes: [
+          "Use --clone for shared configuration with fresh sessions and memory.",
+          "Use --clone-all only when you need a fuller snapshot; per-profile history remains excluded.",
+        ],
+      },
+    };
+  }
+
+  if (usage === "hermes profile use <name>") {
+    return {
+      examples: [
+        {
+          title: "Select Work",
+          command: "hermes profile use work",
+          description: "Make work the sticky default for plain hermes commands.",
+        },
+        {
+          title: "Return to Default",
+          command: "hermes profile use default",
+          description: "Restore the base profile as the sticky default.",
+        },
+      ],
+      details: {
+        whenToUse: "Choose a profile as the default for subsequent commands that do not include -p or --profile.",
+        notes: ["Prefer hermes -p <name> for one-off commands when you do not want to change the sticky default."],
+      },
+    };
+  }
+
+  if (usage.startsWith("hermes -p <name>")) {
+    return {
+      examples: [
+        { title: "Configure a Profile", command: "hermes -p work setup --portal" },
+        { title: "Edit Profile Configuration", command: "hermes -p work config edit" },
+        { title: "Validate a Profile", command: "hermes -p work doctor" },
+        { title: "Chat with a Profile", command: "hermes -p work chat" },
+      ],
+      details: {
+        whenToUse:
+          "Target one profile for a command without changing the sticky default selected by hermes profile use.",
+        notes: ["The generated <name> command alias is equivalent to hermes -p <name>."],
+      },
+    };
+  }
+
+  return {};
+}
+
+function parseProfileCommands(markdown) {
+  const stableIdKeys = new Map([
+    ["hermes profile create", "hermes profile create <name>"],
+    ["hermes profile use", "hermes profile use <name>"],
+  ]);
+
+  return commandHeadingSections(markdown)
+    .map(({ heading, content }) => {
+      const commands = firstCommandBlock(content);
+      if (!commands.length) return undefined;
+      const usage = commands[0].replace(/\s+/g, " ").trim();
+      const description = firstProseParagraph(content);
+      if (!usage || !description) return undefined;
+
+      const curated = curatedProfileContent(usage);
+      const parameters = parametersFromSection(content);
+      const persists = /^hermes profile (?:create|use|describe|delete|alias|rename|export|import|install|update)\b/.test(
+        usage,
+      );
+      const details = {
+        whenToUse: curated.details?.whenToUse ?? description,
+        ...(curated.details?.prerequisites?.length
+          ? { prerequisites: curated.details.prerequisites }
+          : {}),
+        ...(parameters.length ? { parameters } : {}),
+        ...(curated.details?.workflow?.length ? { workflow: curated.details.workflow } : {}),
+        ...(curated.details?.notes?.length ? { notes: curated.details.notes } : {}),
+      };
+
+      return createItem({
+        category: "configuration",
+        name: heading,
+        description,
+        usage,
+        examples: curated.examples,
+        aliases: commands.slice(1),
+        tags: ["cli", "terminal", "configuration", "profile"],
+        documentationUrl: `${DOCS_BASE}/reference/profile-commands#${docusaurusHeadingId(heading)}`,
+        platforms: ["Terminal"],
+        statuses: persists ? ["PERSISTS"] : [],
+        details,
+        idKey: stableIdKeys.get(heading) ?? heading,
+      });
+    })
+    .filter(Boolean);
 }
 
 const URLS = {
@@ -547,9 +754,6 @@ const manualItems = [
     ["hermes config env-path", "Print the active .env path."],
     ["hermes config check", "Check for missing or stale configuration."],
     ["hermes config migrate", "Add newly introduced configuration options interactively."],
-    ["hermes profile list", "List isolated Hermes profiles."],
-    ["hermes profile create <name>", "Create a new isolated Hermes profile."],
-    ["hermes profile use <name>", "Make a profile the sticky default."],
   ].map(([usage, description]) =>
     createItem({
       category: "configuration",
@@ -868,12 +1072,18 @@ const manualItems = [
 ];
 
 const commit = await getSourceCommit();
-const [cliMarkdown, slashMarkdown] = await Promise.all([
+const [cliMarkdown, slashMarkdown, profileMarkdown] = await Promise.all([
   loadDocument(docs.cli, commit),
   loadDocument(docs.slash, commit),
+  loadDocument(docs.profile, commit),
 ]);
 
-const allItems = [...manualItems, ...parseTopLevelCommands(cliMarkdown), ...parseSlashCommands(slashMarkdown)];
+const allItems = [
+  ...manualItems,
+  ...parseProfileCommands(profileMarkdown),
+  ...parseTopLevelCommands(cliMarkdown),
+  ...parseSlashCommands(slashMarkdown),
+];
 const seenIds = new Set();
 const seenUsages = new Set();
 const items = allItems.filter((item) => {

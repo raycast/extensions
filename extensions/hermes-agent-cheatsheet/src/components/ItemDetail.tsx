@@ -3,6 +3,7 @@ import { cheatsheetItems } from "../data";
 import { getExamples, getPrimarySelection } from "../lib/examples";
 import { getRelatedItems } from "../lib/related";
 import { createItemMarkdown } from "../lib/markdown";
+import { getEffectiveStatuses } from "../lib/status";
 import type { CheatsheetItem, ExtensionPreferences } from "../types";
 import { ItemActions } from "./ItemActions";
 import { ItemMetadata } from "./ItemMetadata";
@@ -29,7 +30,12 @@ export function ItemDetail({ item, preferences, onUse, contextCommand }: ItemDet
   const primarySelection = getPrimarySelection(item, "", preferences, contextCommand);
   return (
     <Detail
-      markdown={createItemMarkdown(item, { examples, effectiveCommand: primarySelection.content })}
+      markdown={createItemMarkdown(item, {
+        examples,
+        effectiveCommand: primarySelection.content,
+        effectiveStatuses: getEffectiveStatuses(item, primarySelection.content),
+        relatedItems,
+      })}
       metadata={<ItemMetadata item={item} relatedItems={relatedItems} effectiveCommand={primarySelection.content} />}
       actions={
         <ItemActions

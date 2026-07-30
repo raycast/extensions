@@ -5,7 +5,7 @@ import { cheatsheetItems } from "../data";
 import { useCatalogHistory } from "../hooks/useCatalogHistory";
 import { getExamples, getPrimarySelection } from "../lib/examples";
 import { filterItems } from "../lib/filter";
-import { createItemMarkdown } from "../lib/markdown";
+import { createItemPreviewMarkdown } from "../lib/markdown";
 import { getRelatedItems } from "../lib/related";
 import type { CategoryFilter, CheatsheetItem, ExtensionPreferences } from "../types";
 import { ItemActions } from "./ItemActions";
@@ -37,11 +37,6 @@ function CommandRow({
   onUse,
 }: CommandRowProps) {
   const primarySelection = getPrimarySelection(item, searchText, preferences);
-  const primaryExample = primarySelection.example;
-  const examples = getExamples(item, preferences);
-  const orderedExamples = primaryExample
-    ? [primaryExample, ...examples.filter((example) => example.command !== primaryExample.command)]
-    : examples;
 
   return (
     <List.Item
@@ -51,10 +46,7 @@ function CommandRow({
       keywords={[...item.tags, ...(item.aliases ?? [])]}
       detail={
         <List.Item.Detail
-          markdown={createItemMarkdown(item, {
-            examples: orderedExamples,
-            effectiveCommand: primarySelection.content,
-          })}
+          markdown={createItemPreviewMarkdown(item, { effectiveCommand: primarySelection.content })}
           metadata={
             <ItemMetadata item={item} relatedItems={relatedItems} effectiveCommand={primarySelection.content} />
           }

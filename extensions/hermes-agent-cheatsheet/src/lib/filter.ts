@@ -14,6 +14,11 @@ export function getSearchableText(item: CheatsheetItem): string {
     item.description,
     item.usage,
     ...(item.examples?.flatMap((example) => [example.title, example.command, example.description]) ?? []),
+    item.details?.whenToUse,
+    ...(item.details?.prerequisites ?? []),
+    ...(item.details?.parameters?.flatMap((parameter) => [parameter.name, parameter.description]) ?? []),
+    ...(item.details?.workflow?.flatMap((step) => [step.title, step.command, step.description]) ?? []),
+    ...(item.details?.notes ?? []),
     item.warning,
     ...(item.tags ?? []),
     ...(item.aliases ?? []),
@@ -24,7 +29,13 @@ export function getSearchableText(item: CheatsheetItem): string {
 }
 
 function getCommandSearchableValues(item: CheatsheetItem): string[] {
-  return [item.name, item.usage, ...(item.examples?.map((example) => example.command) ?? []), ...(item.aliases ?? [])];
+  return [
+    item.name,
+    item.usage,
+    ...(item.examples?.map((example) => example.command) ?? []),
+    ...(item.details?.workflow?.map((step) => step.command) ?? []),
+    ...(item.aliases ?? []),
+  ];
 }
 
 function matchesQuery(value: string, query: string): boolean {

@@ -36,6 +36,12 @@ const fixture: CheatsheetItem[] = [
     category: "automation",
     tags: ["scheduled", "jobs"],
     documentationUrl: "https://hermes-agent.nousresearch.com/docs/user-guide/features/cron",
+    details: {
+      whenToUse: "Inspect recurring automation.",
+      parameters: [{ name: "--delivery", description: "Choose where results are sent." }],
+      workflow: [{ title: "Inspect status", command: "hermes cron status" }],
+      notes: ["Paused jobs remain configured."],
+    },
   },
   {
     id: "slash-statusbar",
@@ -61,6 +67,9 @@ test("searches command names, descriptions, usage, and tags", () => {
   assert.equal(filterItems(fixture, "all", "cron list").length, 1);
   assert.equal(filterItems(fixture, "all", "gpt-5.6-sol").length, 1);
   assert.equal(filterItems(fixture, "all", "persist openai").length, 1);
+  assert.equal(filterItems(fixture, "all", "recurring automation").length, 1);
+  assert.equal(filterItems(fixture, "all", "--delivery").length, 1);
+  assert.equal(filterItems(fixture, "all", "paused jobs").length, 1);
 });
 
 test("search is case-insensitive", () => {

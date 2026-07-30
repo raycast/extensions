@@ -77,6 +77,42 @@ test("includes copy-ready recipes for multi-option model switching", () => {
   assert.ok((modelCommand.examples?.length ?? 0) >= 4, "expected multiple /model recipes");
 });
 
+test("includes a complete profile configuration workflow from the official profile reference", () => {
+  const createProfile = itemByUsage("hermes profile create <name> [options]");
+  const targetProfile = itemByUsage("hermes -p <name> <command> [options]");
+  const useProfile = itemByUsage("hermes profile use <name>");
+
+  assert.ok(createProfile, "missing profile creation reference");
+  assert.equal(createProfile.id, "command-hermes-profile-create-name", "profile creation must preserve its stable ID");
+  assert.match(createProfile.documentationUrl, /\/reference\/profile-commands#hermes-profile-create$/);
+  assert.ok(
+    createProfile.details?.parameters?.some((parameter) => parameter.name === "--clone"),
+    "missing the documented --clone option",
+  );
+  assert.deepEqual(
+    createProfile.details?.workflow?.map((step) => step.command),
+    [
+      "hermes profile create work --clone",
+      "hermes -p work setup --portal",
+      "hermes -p work config set terminal.cwd /absolute/path/to/project",
+      "hermes -p work doctor",
+      "hermes -p work chat",
+    ],
+  );
+  assert.ok(createProfile.statuses?.includes("PERSISTS"));
+
+  assert.ok(targetProfile, "missing the explicit profile selector");
+  assert.ok(
+    targetProfile.examples?.some((example) => example.command === "hermes -p work setup --portal"),
+    "missing the profile-specific setup recipe",
+  );
+  assert.match(targetProfile.documentationUrl, /#hermes--p--hermes---profile$/);
+
+  assert.equal(useProfile?.id, "command-hermes-profile-use-name", "profile selection must preserve its stable ID");
+  assert.ok(useProfile?.statuses?.includes("PERSISTS"));
+  assert.ok(useProfile?.examples?.some((example) => example.command === "hermes profile use default"));
+});
+
 test("records the upstream source commit", () => {
   assert.equal(data.source.repository, "https://github.com/NousResearch/hermes-agent");
   assert.match(data.source.commit, /^[a-f0-9]{40}$/);

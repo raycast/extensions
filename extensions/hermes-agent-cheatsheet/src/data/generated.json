@@ -1,8 +1,8 @@
 {
   "source": {
     "repository": "https://github.com/NousResearch/hermes-agent",
-    "commit": "a4973c3f11d9cc92da986cbe150d1e79d094626f",
-    "generatedAt": "2026-07-29T20:47:34.588Z"
+    "commit": "acfd376d66836a2542f0b2d9bca0252f0663fdd1",
+    "generatedAt": "2026-07-30T16:08:17.334Z"
   },
   "items": [
     {
@@ -258,6 +258,29 @@
       "statuses": ["CAUTION", "PERSISTS"]
     },
     {
+      "id": "command-hermes-p-hermes-profile",
+      "name": "hermes -p / hermes --profile",
+      "description": "Global flag to run any Hermes command under a specific profile without changing the sticky default. This overrides the active profile for the duration of the command.",
+      "usage": "hermes -p <name> <command> [options]",
+      "examples": [
+        { "title": "Configure a Profile", "command": "hermes -p work setup --portal" },
+        { "title": "Edit Profile Configuration", "command": "hermes -p work config edit" },
+        { "title": "Validate a Profile", "command": "hermes -p work doctor" },
+        { "title": "Chat with a Profile", "command": "hermes -p work chat" }
+      ],
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes--p--hermes---profile",
+      "aliases": ["hermes --profile <name> <command> [options]"],
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Target one profile for a command without changing the sticky default selected by hermes profile use.",
+        "parameters": [{ "name": "-p <name>, --profile <name>", "description": "Profile to use for this command." }],
+        "notes": ["The generated <name> command alias is equivalent to hermes -p <name>."]
+      }
+    },
+    {
       "id": "command-hermes-approvals",
       "name": "hermes approvals",
       "description": "Approval-prompt tools — mine approval history into allowlist proposals.",
@@ -290,12 +313,16 @@
     {
       "id": "command-hermes-completion",
       "name": "hermes completion",
-      "description": "Print shell completion scripts (bash/zsh/fish).",
-      "usage": "hermes completion",
+      "description": "Generates shell completion scripts. Includes completions for profile names and profile subcommands.",
+      "usage": "hermes completion <shell>",
       "category": "configuration",
-      "tags": ["cli", "terminal", "completion"],
-      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
-      "platforms": ["Terminal"]
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-completion",
+      "platforms": ["Terminal"],
+      "details": {
+        "whenToUse": "Generates shell completion scripts. Includes completions for profile names and profile subcommands.",
+        "parameters": [{ "name": "<shell>", "description": "Shell to generate completions for: bash, zsh, or fish." }]
+      }
     },
     {
       "id": "command-hermes-config",
@@ -512,43 +539,356 @@
     {
       "id": "command-hermes-profile",
       "name": "hermes profile",
-      "description": "Manage profiles — multiple isolated Hermes instances.",
-      "usage": "hermes profile",
+      "description": "Top-level command for managing profiles. Running hermes profile without a subcommand shows help.",
+      "usage": "hermes profile <subcommand>",
       "category": "configuration",
-      "tags": ["cli", "terminal", "profile"],
-      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
-      "platforms": ["Terminal"]
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile",
+      "platforms": ["Terminal"],
+      "details": {
+        "whenToUse": "Top-level command for managing profiles. Running hermes profile without a subcommand shows help.",
+        "parameters": [
+          { "name": "list", "description": "List all profiles." },
+          { "name": "use", "description": "Set the active (default) profile." },
+          { "name": "create", "description": "Create a new profile." },
+          {
+            "name": "describe",
+            "description": "Read or set a profile's description (used by the kanban orchestrator for routing)."
+          },
+          { "name": "delete", "description": "Delete a profile." },
+          { "name": "show", "description": "Show details about a profile." },
+          { "name": "alias", "description": "Regenerate the shell alias for a profile." },
+          { "name": "rename", "description": "Rename a profile." },
+          { "name": "export", "description": "Export a profile to a tar.gz archive." },
+          { "name": "import", "description": "Import a profile from a tar.gz archive." },
+          {
+            "name": "install",
+            "description": "Install a profile distribution from a git URL or local directory. See Profile Distributions."
+          },
+          { "name": "update", "description": "Re-pull a distribution-managed profile and re-apply its bundle." },
+          {
+            "name": "info",
+            "description": "Show distribution metadata for a profile (origin URL, commit, last update)."
+          }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-alias",
+      "name": "hermes profile alias",
+      "description": "Regenerates the shell alias script at ~/.local/bin/<name>. Useful if the alias was accidentally deleted or if you need to update it after moving your Hermes installation.",
+      "usage": "hermes profile alias <name> [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-alias",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Regenerates the shell alias script at ~/.local/bin/<name>. Useful if the alias was accidentally deleted or if you need to update it after moving your Hermes installation.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile to create/update the alias for." },
+          { "name": "--remove", "description": "Remove the wrapper script instead of creating it." },
+          { "name": "--name <alias>", "description": "Custom alias name (default: profile name)." }
+        ]
+      }
     },
     {
       "id": "command-hermes-profile-create-name",
-      "name": "hermes profile create <name>",
-      "description": "Create a new isolated Hermes profile.",
-      "usage": "hermes profile create <name>",
+      "name": "hermes profile create",
+      "description": "Creates a new profile.",
+      "usage": "hermes profile create <name> [options]",
+      "examples": [
+        {
+          "title": "Blank Profile",
+          "command": "hermes profile create work",
+          "description": "Create an isolated profile that still needs model and credential setup."
+        },
+        {
+          "title": "Clone Current Configuration",
+          "command": "hermes profile create work --clone",
+          "description": "Copy config, credentials, SOUL.md, and skills while starting with fresh sessions and memory."
+        },
+        {
+          "title": "Clone a Specific Profile",
+          "command": "hermes profile create work --clone-from coder",
+          "description": "Use coder as the source instead of the active profile."
+        }
+      ],
       "category": "configuration",
-      "tags": ["configuration", "profile"],
-      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
-      "platforms": ["Terminal"]
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-create",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Create a separate Hermes agent for a role, project, identity, credential set, or messaging gateway without mixing its state with another profile.",
+        "prerequisites": ["Choose a unique profile name made from letters, numbers, hyphens, or underscores."],
+        "parameters": [
+          {
+            "name": "<name>",
+            "description": "Name for the new profile. Must be a valid directory name (alphanumeric, hyphens, underscores)."
+          },
+          { "name": "--clone", "description": "Copy config.yaml, .env, SOUL.md, and skills from the current profile." },
+          {
+            "name": "--clone-all",
+            "description": "Copy everything (config, memories, skills, cron, plugins) from the current profile. Excludes per-profile history: sessions, state.db, backups, state-snapshots, checkpoints."
+          },
+          {
+            "name": "--clone-from <profile>",
+            "description": "Clone config/skills/SOUL from a specific profile instead of the current one. Implies --clone unless paired with --clone-all."
+          },
+          { "name": "--no-alias", "description": "Skip wrapper script creation." },
+          {
+            "name": "--description \"<text>\"",
+            "description": "One- or two-sentence description of what this profile is good at. Used by the kanban orchestrator to route tasks based on role instead of profile name alone. Skip and add later via hermes profile describe. Persisted in <profile_dir>/profile.yaml."
+          },
+          {
+            "name": "--no-skills",
+            "description": "Create an empty profile with zero bundled skills enabled. Writes a .no-bundled-skills marker into the profile so future hermes update runs won't re-seed the bundled set, and refuses to combine with --clone, --clone-from, or --clone-all (which would copy skills in anyway). Useful for narrow orchestrator profiles or sandbox profiles that should not inherit the full skill catalog. To toggle this on an already-created profile (including the default ~/.hermes), use hermes skills opt-out / hermes skills opt-in."
+          }
+        ],
+        "workflow": [
+          {
+            "title": "1. Create the profile",
+            "command": "hermes profile create work --clone",
+            "description": "Clone the current setup or omit --clone to start blank."
+          },
+          {
+            "title": "2. Configure models and tools",
+            "command": "hermes -p work setup --portal",
+            "description": "Run setup explicitly inside the new profile."
+          },
+          {
+            "title": "3. Set its project directory",
+            "command": "hermes -p work config set terminal.cwd /absolute/path/to/project",
+            "description": "Profiles isolate state; terminal.cwd separately controls where shell commands begin."
+          },
+          {
+            "title": "4. Validate the profile",
+            "command": "hermes -p work doctor",
+            "description": "Check credentials, providers, dependencies, and runtime configuration."
+          },
+          {
+            "title": "5. Start using it",
+            "command": "hermes -p work chat",
+            "description": "Use -p for an explicit one-command selection or run work chat through its generated alias."
+          }
+        ],
+        "notes": [
+          "Use --clone for shared configuration with fresh sessions and memory.",
+          "Use --clone-all only when you need a fuller snapshot; per-profile history remains excluded."
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-delete",
+      "name": "hermes profile delete",
+      "description": "Deletes a profile and removes its shell alias.",
+      "usage": "hermes profile delete <name> [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-delete",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS", "CAUTION"],
+      "details": {
+        "whenToUse": "Deletes a profile and removes its shell alias.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile to delete." },
+          { "name": "--yes, -y", "description": "Skip confirmation prompt." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-describe",
+      "name": "hermes profile describe",
+      "description": "Read or set a profile's description. The description is consumed by the kanban orchestrator to route tasks based on what each profile is good at, rather than guessing from the profile name alone. Persisted in <profile_dir>/profile.yaml so it survives reboots and is shared with the gateway.",
+      "usage": "hermes profile describe [<name>] [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-describe",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Read or set a profile's description. The description is consumed by the kanban orchestrator to route tasks based on what each profile is good at, rather than guessing from the profile name alone. Persisted in <profile_dir>/profile.yaml so it survives reboots and is shared with the gateway.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile to describe. Required unless --all --auto is used." },
+          {
+            "name": "--text \"<text>\"",
+            "description": "Set the description to this exact text (user-authored). Overwrites any existing description."
+          },
+          {
+            "name": "--auto",
+            "description": "Auto-generate a 1-2 sentence description via the auxiliary LLM, based on the profile's installed skills, configured model, and name. Configure the model under auxiliary.profile_describer in config.yaml. Auto-generated descriptions are marked description_auto: true so the dashboard can flag them for review."
+          },
+          {
+            "name": "--overwrite",
+            "description": "With --auto, replace user-authored descriptions too (default: skip profiles whose description was set explicitly)."
+          },
+          { "name": "--all", "description": "With --auto, sweep every profile missing a description." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-export",
+      "name": "hermes profile export",
+      "description": "Exports a profile as a compressed tar.gz archive.",
+      "usage": "hermes profile export <name> [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-export",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Exports a profile as a compressed tar.gz archive.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile to export." },
+          { "name": "-o, --output <path>", "description": "Output file path (default: <name>.tar.gz)." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-import",
+      "name": "hermes profile import",
+      "description": "Imports a profile from a tar.gz archive.",
+      "usage": "hermes profile import <archive> [options]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-import",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Imports a profile from a tar.gz archive.",
+        "parameters": [
+          { "name": "<archive>", "description": "Path to the tar.gz archive to import." },
+          { "name": "--name <name>", "description": "Name for the imported profile (default: inferred from archive)." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-info",
+      "name": "hermes profile info",
+      "description": "Prints the profile's distribution manifest — name, version, required Hermes version, author, env var requirements, the source URL/path, and the Installed: timestamp recorded when the distribution was last install-ed or update-d. Useful for checking what a shared profile needs before installing it, and for spotting \"this profile was installed 6 months ago and hasn't been updated.\"",
+      "usage": "hermes profile info <name>",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-info",
+      "platforms": ["Terminal"],
+      "details": {
+        "whenToUse": "Prints the profile's distribution manifest — name, version, required Hermes version, author, env var requirements, the source URL/path, and the Installed: timestamp recorded when the distribution was last install-ed or update-d. Useful for checking what a shared profile needs before installing it, and for spotting \"this profile was installed 6 months ago and hasn't been updated.\""
+      }
+    },
+    {
+      "id": "command-hermes-profile-install",
+      "name": "hermes profile install",
+      "description": "Installs a profile distribution from a git URL or a local directory.",
+      "usage": "hermes profile install <source> [--name <name>] [--alias] [--force] [--yes]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-install",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Installs a profile distribution from a git URL or a local directory.",
+        "parameters": [
+          {
+            "name": "<source>",
+            "description": "Git URL (github.com/user/repo, https://..., git@..., ssh://, git://) or a local directory containing distribution.yaml at its root."
+          },
+          { "name": "--name NAME", "description": "Override the profile name from the manifest." },
+          { "name": "--alias", "description": "Also create a shell wrapper (e.g. telemetry → hermes -p telemetry)." },
+          {
+            "name": "--force",
+            "description": "Overwrite an existing profile of the same name. User data is still preserved."
+          },
+          { "name": "-y, --yes", "description": "Skip the manifest-preview confirmation prompt." }
+        ]
+      }
     },
     {
       "id": "command-hermes-profile-list",
       "name": "hermes profile list",
-      "description": "List isolated Hermes profiles.",
+      "description": "Lists all profiles. The currently active profile is marked with *.",
       "usage": "hermes profile list",
       "category": "configuration",
-      "tags": ["configuration", "profile"],
-      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
-      "platforms": ["Terminal"]
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-list",
+      "platforms": ["Terminal"],
+      "details": { "whenToUse": "Lists all profiles. The currently active profile is marked with *." }
+    },
+    {
+      "id": "command-hermes-profile-rename",
+      "name": "hermes profile rename",
+      "description": "Renames a profile. Updates the directory and shell alias.",
+      "usage": "hermes profile rename <old-name> <new-name>",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-rename",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Renames a profile. Updates the directory and shell alias.",
+        "parameters": [
+          { "name": "<old-name>", "description": "Current profile name." },
+          { "name": "<new-name>", "description": "New profile name." }
+        ]
+      }
+    },
+    {
+      "id": "command-hermes-profile-show",
+      "name": "hermes profile show",
+      "description": "Displays details about a profile including its home directory, configured model, gateway status, skills count, and configuration file status.",
+      "usage": "hermes profile show <name>",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-show",
+      "platforms": ["Terminal"],
+      "details": {
+        "whenToUse": "Displays details about a profile including its home directory, configured model, gateway status, skills count, and configuration file status.",
+        "parameters": [{ "name": "<name>", "description": "Profile to inspect." }]
+      }
+    },
+    {
+      "id": "command-hermes-profile-update",
+      "name": "hermes profile update",
+      "description": "Re-clones the distribution from its recorded source and applies updates. Distribution-owned files (SOUL.md, skills/, cron/, mcp.json) are overwritten; user data (memories, sessions, auth, .env) is never touched.",
+      "usage": "hermes profile update <name> [--force-config] [--yes]",
+      "category": "configuration",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-update",
+      "platforms": ["Terminal"],
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Re-clones the distribution from its recorded source and applies updates. Distribution-owned files (SOUL.md, skills/, cron/, mcp.json) are overwritten; user data (memories, sessions, auth, .env) is never touched."
+      }
     },
     {
       "id": "command-hermes-profile-use-name",
-      "name": "hermes profile use <name>",
-      "description": "Make a profile the sticky default.",
+      "name": "hermes profile use",
+      "description": "Sets <name> as the active profile. All subsequent hermes commands (without -p) will use this profile.",
       "usage": "hermes profile use <name>",
+      "examples": [
+        {
+          "title": "Select Work",
+          "command": "hermes profile use work",
+          "description": "Make work the sticky default for plain hermes commands."
+        },
+        {
+          "title": "Return to Default",
+          "command": "hermes profile use default",
+          "description": "Restore the base profile as the sticky default."
+        }
+      ],
       "category": "configuration",
-      "tags": ["configuration", "profile"],
-      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/cli-commands",
+      "tags": ["cli", "terminal", "configuration", "profile"],
+      "documentationUrl": "https://hermes-agent.nousresearch.com/docs/reference/profile-commands#hermes-profile-use",
       "platforms": ["Terminal"],
-      "statuses": ["PERSISTS"]
+      "statuses": ["PERSISTS"],
+      "details": {
+        "whenToUse": "Choose a profile as the default for subsequent commands that do not include -p or --profile.",
+        "parameters": [
+          { "name": "<name>", "description": "Profile name to activate. Use default to return to the base profile." }
+        ],
+        "notes": ["Prefer hermes -p <name> for one-off commands when you do not want to change the sticky default."]
+      }
     },
     {
       "id": "command-hermes-secrets",
