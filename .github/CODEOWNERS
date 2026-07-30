@@ -1716,7 +1716,7 @@
 /extensions/nippon-colors                                           @nagauta
 /extensions/niuma-logs                                              @mapleeit
 /extensions/nix-flake-templates                                     @lex-unix
-/extensions/nixpkgs-search                                          @aiotter @xmok @0xdhrv @SConaway
+/extensions/nixpkgs-search                                          @aiotter @xmok @0xdhrv @SConaway @ridemountainpig
 /extensions/nl-news-headlines                                       @namzo
 /extensions/nmbs-planner                                            @SamuelVanhaecke @0xdhrv
 /extensions/no-as-a-service                                         @matholamew
