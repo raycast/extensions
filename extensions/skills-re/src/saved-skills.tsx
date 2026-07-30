@@ -5,6 +5,7 @@ import { getActiveCredential, listSavedSkills, skillPath } from "./api";
 import type { AuthCredential, SavedSkill } from "./api";
 import { getErrorMessage } from "./api-error";
 import { ApiTokenForm } from "./auth";
+import { createSingleFlight } from "./request-generation";
 import { SkillDetail } from "./skill-detail";
 import { SkillActions } from "./skill-actions";
 import { authorLabelForSkill, keywordsForSkill, savedAccessoriesForSkill } from "./skill-list-metadata";
@@ -18,6 +19,7 @@ export default function Command() {
   const [cursor, setCursor] = useState("");
   const [isDone, setIsDone] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  const [runLoadMore] = useState(createSingleFlight);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
@@ -54,21 +56,24 @@ export default function Command() {
     if (!credential || !cursor || isDone) {
       return;
     }
-    setIsLoading(true);
-    try {
-      const result = await listSavedSkills({ cursor, limit: 25, token: credential.token });
-      setSkills((current) => [...current, ...result.page]);
-      setCursor(result.continueCursor);
-      setIsDone(result.isDone);
-    } catch (error) {
-      await showToast({
-        message: getErrorMessage(error),
-        style: Toast.Style.Failure,
-        title: "Could not load more saved skills",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+
+    await runLoadMore(async () => {
+      setIsLoading(true);
+      try {
+        const result = await listSavedSkills({ cursor, limit: 25, token: credential.token });
+        setSkills((current) => [...current, ...result.page]);
+        setCursor(result.continueCursor);
+        setIsDone(result.isDone);
+      } catch (error) {
+        await showToast({
+          message: getErrorMessage(error),
+          style: Toast.Style.Failure,
+          title: "Could not load more saved skills",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    });
   };
 
   if (!isLoading && !credential) {
