@@ -294,22 +294,34 @@ export async function getCreatedIssues() {
 
 export async function getSubscribedIssues() {
   const { graphQLClient } = getLinearClient();
-  const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
-    `
-      query {
-        issues(orderBy: updatedAt, filter: { subscribers: { some: { isMe: { eq: true } } }${getCompletedIssuesFilter({
-          inFilterBlock: true,
-          addComma: true,
-        })} }) {
-          nodes {
-            ${IssueFragment}
-          }
-        }
-      }
-    `,
-  );
 
-  return data?.issues.nodes;
+  const { pageSize, pageLimit } = getPageLimits();
+
+  return getPaginated(
+    async (cursor) =>
+      graphQLClient.rawRequest<{ issues: { nodes: IssueResult[]; pageInfo: PageInfo } }, Record<string, unknown>>(
+        `
+          query($cursor: String) {
+            issues(first: ${pageSize}, after: $cursor, orderBy: updatedAt, filter: { subscribers: { some: { isMe: { eq: true } } }${getCompletedIssuesFilter(
+              { inFilterBlock: true, addComma: true },
+            )} }) {
+              nodes {
+                ${IssueFragment}
+              }
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+            }
+          }
+        `,
+        { cursor },
+      ),
+    (r) => r.data?.issues.pageInfo,
+    (accumulator: IssueResult[], currentValue) => accumulator.concat(currentValue.data?.issues.nodes || []),
+    [],
+    pageLimit,
+  );
 }
 
 export type MyIssuesView = "assigned" | "created" | "subscribed";
