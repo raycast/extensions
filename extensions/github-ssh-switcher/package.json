@@ -11,7 +11,8 @@
   "screenshots": [
     { "path": "metadata/github-ssh-switcher/1.png" },
     { "path": "metadata/github-ssh-switcher/2.png" },
-    { "path": "metadata/github-ssh-switcher/3.png" }
+    { "path": "metadata/github-ssh-switcher/3.png" },
+    { "path": "metadata/github-ssh-switcher/4.png" }
   ],
   "commands": [
     {
