@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="430" viewBox="0 0 960 430">
+  <defs>
+    <linearGradient id="case" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b2420"/>
+      <stop offset="1" stop-color="#151210"/>
+    </linearGradient>
+    <linearGradient id="ivory" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fffdf4"/>
+      <stop offset="1" stop-color="#d8d2c2"/>
+    </linearGradient>
+    <linearGradient id="ebony" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#34312e"/>
+      <stop offset="1" stop-color="#090807"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="12" stdDeviation="13" flood-color="#000" flood-opacity=".55"/>
+    </filter>
+    <filter id="blackShadow" x="-40%" y="-20%" width="180%" height="160%">
+      <feDropShadow dx="0" dy="8" stdDeviation="5" flood-color="#000" flood-opacity=".65"/>
+    </filter>
+  </defs>
+
+  <rect width="960" height="430" rx="28" fill="url(#case)"/>
+  <path d="M28 92H932" stroke="#a8874e" stroke-opacity=".32"/>
+  <text x="480" y="55" text-anchor="middle" fill="#d5bd84" font-family="Georgia, serif" font-size="16" letter-spacing="8">RAYCAST PIANO</text>
+  <circle cx="46" cy="45" r="4" fill="#d3b472"/>
+  <circle cx="914" cy="45" r="4" fill="#d3b472"/>
+
+  <g transform="translate(42 112)" filter="url(#shadow)">
+    <rect x="0" y="0" width="876" height="276" rx="8" fill="#0b0a09"/>
+    <g fill="url(#ivory)" stroke="#8a8377" stroke-width="2">
+      <path d="M2 2H111V260Q111 270 101 270H12Q2 270 2 260Z"/>
+      <path d="M111 2H220V260Q220 270 210 270H121Q111 270 111 260Z"/>
+      <path d="M220 2H329V260Q329 270 319 270H230Q220 270 220 260Z"/>
+      <path d="M329 2H438V260Q438 270 428 270H339Q329 270 329 260Z"/>
+      <path d="M438 2H547V260Q547 270 537 270H448Q438 270 438 260Z"/>
+      <path d="M547 2H656V260Q656 270 646 270H557Q547 270 547 260Z"/>
+      <path d="M656 2H765V260Q765 270 755 270H666Q656 270 656 260Z"/>
+      <path d="M765 2H874V260Q874 270 864 270H775Q765 270 765 260Z"/>
+    </g>
+    <g fill="url(#ebony)" filter="url(#blackShadow)">
+      <path d="M78 0H144V166Q144 174 136 174H86Q78 174 78 166Z"/>
+      <path d="M187 0H253V166Q253 174 245 174H195Q187 174 187 166Z"/>
+      <path d="M405 0H471V166Q471 174 463 174H413Q405 174 405 166Z"/>
+      <path d="M514 0H580V166Q580 174 572 174H522Q514 174 514 166Z"/>
+      <path d="M623 0H689V166Q689 174 681 174H631Q623 174 623 166Z"/>
+    </g>
+    <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-weight="600" text-anchor="middle">
+      <g fill="#655e55" font-size="20">
+        <text x="56" y="238">A</text><text x="165" y="238">S</text><text x="275" y="238">D</text>
+        <text x="384" y="238">F</text><text x="493" y="238">G</text><text x="602" y="238">H</text>
+        <text x="711" y="238">J</text><text x="820" y="238">K</text>
+      </g>
+      <g fill="#d8c38d" font-size="17">
+        <text x="111" y="142">W</text><text x="220" y="142">E</text><text x="438" y="142">T</text>
+        <text x="547" y="142">Y</text><text x="656" y="142">U</text>
+      </g>
+    </g>
+  </g>
+</svg>
