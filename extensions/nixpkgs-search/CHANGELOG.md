@@ -1,5 +1,9 @@
 # NixPkgs Search Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Show the evaluation system (`package_system`) alongside the indexed version to clarify which system the version applies to
+
 ## [Update] - 2026-06-15
 
 - Add support for 26.05
