@@ -1,4 +1,4 @@
-# cl1p.net Save
+# cl1p.net
 
 A Raycast extension that saves text to [cl1p.net](https://cl1p.net) and copies the resulting URL to your clipboard.
 

@@ -1,15 +1,6 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  getPreferenceValues,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form } from "@raycast/api";
 import { useState } from "react";
-import { saveToCl1p } from "./lib/cl1p";
+import { saveWithFeedback } from "./lib/save-with-feedback";
 
 interface FormValues {
   title: string;
@@ -30,32 +21,7 @@ export default function Command() {
       return;
     }
 
-    const { apiToken } = getPreferenceValues<Preferences>();
-
-    await showToast({ style: Toast.Style.Animated, title: "Saving..." });
-
-    try {
-      const result = await saveToCl1p(values.title, values.content, apiToken);
-      if (!result.ok) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Save failed",
-          message: result.message,
-        });
-        return;
-      }
-
-      await Clipboard.copy(result.url);
-      await showHUD(
-        `Saved · ${result.url} copied to clipboard\nDestroyed after first view`,
-      );
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Network error",
-        message: String(error),
-      });
-    }
+    await saveWithFeedback(values.title, values.content);
   }
 
   return (
