@@ -4,7 +4,7 @@
 
 - Added a toggleable details pane for torrent information
 - Added sorting and options for choosing which details appear in the list
-- Added an action to open the qBittorrent Web UI
+- Added actions to open local download folders and the qBittorrent Web UI
 - Updated the shortcuts for copying save paths and magnet links
 - Made the username and password optional
 

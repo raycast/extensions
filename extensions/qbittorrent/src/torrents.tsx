@@ -15,6 +15,7 @@ import { QBittorrent, Torrent, TorrentFilters, TorrentState } from "@ctrl/qbitto
 import { filesize } from "filesize";
 import { filterStates } from "./types/filterStates";
 import { sentenceCase } from "change-case";
+import { existsSync } from "node:fs";
 
 enum TorrentActionType {
   RESUME,
@@ -286,6 +287,7 @@ export default function Torrents() {
   const [sort, setSort] = useState<{ field?: string; reverse: boolean }>({ reverse: false });
   const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [updateTimestamp, setUpdateTimestamp] = useState(+new Date());
+  const updateRequestRef = useRef(0);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { address, username, password, timeout } = getPreferenceValues<Preferences.Torrents>();
@@ -299,6 +301,8 @@ export default function Torrents() {
   }, [address, username, password]);
 
   const updateTorrents = async () => {
+    const request = ++updateRequestRef.current;
+
     if (+timeout && updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current);
     }
@@ -307,20 +311,26 @@ export default function Torrents() {
     try {
       await qbit.login();
       const torrents = await qbit.listTorrents({ filter, sort: sort.field, reverse: sort.reverse });
-      setTorrents(torrents);
+      if (request === updateRequestRef.current) {
+        setTorrents(torrents);
+      }
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to connect to qBittorrent",
-        message: "Please check your Web UI settings and make sure qBittorrent is running.",
-      });
-      setTorrents([]);
+      if (request === updateRequestRef.current) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to connect to qBittorrent",
+          message: "Please check your Web UI settings and make sure qBittorrent is running.",
+        });
+        setTorrents([]);
+      }
     } finally {
-      setLoading(false);
-      if (+timeout) {
-        updateTimeoutRef.current = setTimeout(() => {
-          setUpdateTimestamp(+new Date());
-        }, +timeout * 1000);
+      if (request === updateRequestRef.current) {
+        setLoading(false);
+        if (+timeout) {
+          updateTimeoutRef.current = setTimeout(() => {
+            setUpdateTimestamp(+new Date());
+          }, +timeout * 1000);
+        }
       }
     }
   };
@@ -451,6 +461,9 @@ export default function Torrents() {
             accessories={formatListAccessories(torrent, listDetails)}
             actions={
               <ActionPanel>
+                {existsSync(torrent.save_path) ? (
+                  <Action.Open title="Open Download Folder" target={torrent.save_path} icon={Icon.Folder} />
+                ) : null}
                 <Action.OpenInBrowser title="Open in Browser" url={address} shortcut={openInBrowserShortcut} />
                 <Action.CopyToClipboard
                   title="Copy Save Path"
