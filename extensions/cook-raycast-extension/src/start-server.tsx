@@ -23,19 +23,34 @@ export default function Command() {
       .then(() => setState("already-running"))
       .catch(() => {
         try {
-          const child = spawn(cookPath, ["server", recipePath, "-p", serverPort], {
-            detached: true,
-            stdio: "ignore",
+          let spawnFailed = false;
+          const child = spawn(
+            cookPath,
+            ["server", recipePath, "-p", serverPort],
+            {
+              detached: true,
+              stdio: "ignore",
+            },
+          );
+
+          child.on("error", (err) => {
+            spawnFailed = true;
+            setState("error");
+            setErrorMsg(err.message);
           });
+
           child.unref();
 
           setTimeout(async () => {
+            if (spawnFailed) return;
             try {
               await fetch(url);
               setState("started");
             } catch {
               setState("error");
-              setErrorMsg("Server process started but not responding. Check your preferences.");
+              setErrorMsg(
+                "Server process started but not responding. Check your preferences.",
+              );
             }
           }, 2000);
         } catch (err) {
@@ -48,7 +63,8 @@ export default function Command() {
   const { serverPort, recipePath } = getPreferences();
   const url = `http://localhost:${serverPort}`;
 
-  if (state === "loading") return <Detail isLoading markdown="*Checking server…*" />;
+  if (state === "loading")
+    return <Detail isLoading markdown="*Checking server…*" />;
 
   if (state === "already-running") {
     return (

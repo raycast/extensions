@@ -25,32 +25,57 @@
  *     Timer buttons appear when a step has a timer
  */
 
-import { Detail, ActionPanel, Action, Icon, Form, showHUD, useNavigation } from "@raycast/api";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  Icon,
+  Form,
+  showHUD,
+  useNavigation,
+} from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import {
-  runCook, recipeToMarkdown, RecipeData, formatQuantity, stepImgTag,
+  runCook,
+  recipeToMarkdown,
+  RecipeData,
+  formatQuantity,
+  stepImgTag,
 } from "./utils";
 import { basename } from "path";
 
 /** Shape of a timer: value=string, unit=string, label=display text. isCountable=false for ranges. */
-interface TimerInfo { value: string; unit: string; label: string; isCountable: boolean; rangeFrom?: number; rangeTo?: number }
+interface TimerInfo {
+  value: string;
+  unit: string;
+  label: string;
+  isCountable: boolean;
+  rangeFrom?: number;
+  rangeTo?: number;
+}
 
-export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?: number }) {
+export function CookingMode({
+  filePath,
+  scale = 1,
+}: {
+  filePath: string;
+  scale?: number;
+}) {
   // === REACT STATE ===
   // Each variable is a piece of memory that, when changed, causes the UI to redraw.
   // useState returns [currentValue, setterFunction].
   // Think of it like a sticky note React watches — when you call setter, React redraws.
 
-  const [data, setData] = useState<RecipeData | null>(null);        // the parsed recipe JSON
-  const [loading, setLoading] = useState(true);                      // is the recipe still loading?
-  const [stepIdx, setStepIdx] = useState(0);                         // which step are we on? (0-based)
-  const [timerSec, setTimerSec] = useState<number | null>(null);     // seconds remaining on timer
-  const [timerRunning, setTimerRunning] = useState(false);           // is the countdown active?
-  const [timerPaused, setTimerPaused] = useState(false);             // is it paused mid-countdown?
+  const [data, setData] = useState<RecipeData | null>(null); // the parsed recipe JSON
+  const [loading, setLoading] = useState(true); // is the recipe still loading?
+  const [stepIdx, setStepIdx] = useState(0); // which step are we on? (0-based)
+  const [timerSec, setTimerSec] = useState<number | null>(null); // seconds remaining on timer
+  const [timerRunning, setTimerRunning] = useState(false); // is the countdown active?
+  const [timerPaused, setTimerPaused] = useState(false); // is it paused mid-countdown?
 
   // useRef holds values that survive renders without triggering redraws
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const timerTotalRef = useRef<number>(0);                           // initial seconds when countdown started (for progress bar)
+  const timerTotalRef = useRef<number>(0); // initial seconds when countdown started (for progress bar)
 
   // === LOAD RECIPE DATA (runs ONCE, when filePath changes) ===
   //
@@ -66,14 +91,26 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
   //     IF there's a running interval → clean it up when navigating away
   //
   useEffect(() => {
-    try {
-      const recipePath = scale === 1 ? filePath : `${filePath}:${scale}`;
-      const json = runCook(["recipe", recipePath, "-f", "json"]);
-      setData(JSON.parse(json));
-    } catch { /* data stays null → shows error state */ }
-    setLoading(false);
+    let cancelled = false;
+
+    async function loadRecipe() {
+      try {
+        const recipePath = scale === 1 ? filePath : `${filePath}:${scale}`;
+        const json = await runCook(["recipe", recipePath, "-f", "json"]);
+        if (!cancelled) setData(JSON.parse(json));
+      } catch {
+        /* data stays null → shows error state */
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadRecipe();
     // CLEANUP: runs when the component is removed from the screen
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+    return () => {
+      cancelled = true;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [filePath, scale]);
 
   // === GUARD: loading or missing data ===
@@ -84,7 +121,9 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
   // === DERIVED VALUES (computed from state, not stored separately) ===
 
   // Recipe name: use title from metadata, or fall back to the filename without extension
-  const recipeName = (data.metadata.map.title as string) || basename(filePath).replace(/\.(cook|menu)$/i, "");
+  const recipeName =
+    (data.metadata.map.title as string) ||
+    basename(filePath).replace(/\.(cook|menu)$/i, "");
 
   // Flatten ALL sections into ONE list of steps.
   //
@@ -96,14 +135,19 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
   //         result.push(contentBlock.value)  ← the actual step object
   //   RETURN result
   //
-  const steps = data.sections.flatMap((s) =>
-    s.content.filter((c) => c.type === "step").map((c) => c.value)
-  ).map((s, i) => ({ ...s, number: i + 1 }));  // renumber sequentially across sections
+  const steps = data.sections
+    .flatMap((s) =>
+      s.content.filter((c) => c.type === "step").map((c) => c.value),
+    )
+    .map((s, i) => ({ ...s, number: i + 1 })); // renumber sequentially across sections
 
   // Get the single step for our current index
   const step = steps[stepIdx];
   // If we somehow went past the last step, show "done" screen
-  if (!step) return <Detail markdown="# Done! 🎉\n\nAll steps completed. Enjoy your meal!" />;
+  if (!step)
+    return (
+      <Detail markdown="# Done! 🎉\n\nAll steps completed. Enjoy your meal!" />
+    );
 
   // === RENDER STEP TEXT ===
   //
@@ -116,19 +160,32 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
   //       "timer"       → return "⏱ **value unit**" (look up timer by index)
   //   JOIN all pieces together into one string
   //
-  const stepText = step.items.map((item) => {
-    switch (item.type) {
-      case "text": return item.value || "";
-      case "ingredient": return `**${data.ingredients[item.index!]?.name || "??"}**`;
-      case "cookware": return `*${data.cookware[item.index!]?.name || "??"}*`;
-      case "timer": {
-        const t = data.timers[item.index!] as { quantity?: { value?: { type?: string; value?: unknown }, unit?: string } } | undefined;
-        const label = timerLabel(t);
-        return label ? `⏱ **${label}**` : "⏱ timer";
+  const stepText = step.items
+    .map((item) => {
+      switch (item.type) {
+        case "text":
+          return item.value || "";
+        case "ingredient":
+          return `**${data.ingredients[item.index!]?.name || "??"}**`;
+        case "cookware":
+          return `*${data.cookware[item.index!]?.name || "??"}*`;
+        case "timer": {
+          const t = data.timers[item.index!] as
+            | {
+                quantity?: {
+                  value?: { type?: string; value?: unknown };
+                  unit?: string;
+                };
+              }
+            | undefined;
+          const label = timerLabel(t);
+          return label ? `⏱ **${label}**` : "⏱ timer";
+        }
+        default:
+          return "";
       }
-      default: return "";
-    }
-  }).join("");
+    })
+    .join("");
 
   // === FIND THIS STEP'S TIMER (if it has one) ===
   //
@@ -142,14 +199,32 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
   //     RETURN null
   //
   const timerRef = step.items.find((i) => i.type === "timer");
-  const timer: TimerInfo | null = timerRef ? (() => {
-    const t = data.timers[timerRef.index!] as { quantity?: { value?: { type?: string; value?: unknown }, unit?: string } } | undefined;
-    const info = parseTimer(t);
-    return info;
-  })() : null;
+  const timer: TimerInfo | null = timerRef
+    ? (() => {
+        const t = data.timers[timerRef.index!] as
+          | {
+              quantity?: {
+                value?: { type?: string; value?: unknown };
+                unit?: string;
+              };
+            }
+          | undefined;
+        const info = parseTimer(t);
+        return info;
+      })()
+    : null;
 
   /** Extract a display label from timer data. Handles both "number" (single value) and "text" (range like "10-20"). */
-  function timerLabel(t: { quantity?: { value?: { type?: string; value?: unknown }, unit?: string } } | undefined): string | null {
+  function timerLabel(
+    t:
+      | {
+          quantity?: {
+            value?: { type?: string; value?: unknown };
+            unit?: string;
+          };
+        }
+      | undefined,
+  ): string | null {
     const q = t?.quantity;
     if (!q) return null;
     const unit = q.unit || "";
@@ -159,14 +234,24 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
     if (v.type === "text") return `${v.value} ${unit}`.trim();
     // type "number" → drill into nested value
     if (v.type === "number") {
-      const n = (v.value as { type?: string; value?: unknown })?.value as number | undefined;
+      const n = (v.value as { type?: string; value?: unknown })?.value as
+        number | undefined;
       if (n !== undefined) return `${n} ${unit}`.trim();
     }
     return unit || null;
   }
 
   /** Parse timer data into TimerInfo. Returns null if unparseable. */
-  function parseTimer(t: { quantity?: { value?: { type?: string; value?: unknown }, unit?: string } } | undefined): TimerInfo | null {
+  function parseTimer(
+    t:
+      | {
+          quantity?: {
+            value?: { type?: string; value?: unknown };
+            unit?: string;
+          };
+        }
+      | undefined,
+  ): TimerInfo | null {
     const q = t?.quantity;
     if (!q) return null;
     const unit = q.unit || "";
@@ -177,14 +262,27 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
       const s = String(v.value);
       const match = s.match(/^(\d+)-(\d+)$/);
       return match
-        ? { value: s, unit, label: `${s} ${unit}`.trim(), isCountable: false, rangeFrom: parseInt(match[1]), rangeTo: parseInt(match[2]) }
+        ? {
+            value: s,
+            unit,
+            label: `${s} ${unit}`.trim(),
+            isCountable: false,
+            rangeFrom: parseInt(match[1]),
+            rangeTo: parseInt(match[2]),
+          }
         : { value: s, unit, label: `${s} ${unit}`.trim(), isCountable: false };
     }
     // Number timers: can count down
     if (v.type === "number") {
-      const n = (v.value as { type?: string; value?: unknown })?.value as number | undefined;
+      const n = (v.value as { type?: string; value?: unknown })?.value as
+        number | undefined;
       if (n !== undefined) {
-        return { value: String(n), unit, label: `${n} ${unit}`.trim(), isCountable: true };
+        return {
+          value: String(n),
+          unit,
+          label: `${n} ${unit}`.trim(),
+          isCountable: true,
+        };
       }
     }
     return null;
@@ -213,7 +311,9 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
   function fmtTime(s: number): string {
     const m = Math.floor(s / 60);
     const sec = s % 60;
-    return m > 0 ? `${m}:${sec.toString().padStart(2, "0")}` : `0:${sec.toString().padStart(2, "0")}`;
+    return m > 0
+      ? `${m}:${sec.toString().padStart(2, "0")}`
+      : `0:${sec.toString().padStart(2, "0")}`;
   }
 
   // === TIMER CONTROLS ===
@@ -278,6 +378,11 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
     if (intervalRef.current) clearInterval(intervalRef.current);
   }
 
+  function goToStep(next: number | ((prev: number) => number)) {
+    stopTimer();
+    setStepIdx(next);
+  }
+
   // FUNCTION tick(remainingSeconds):
   //   // Wall-clock timer — uses Date.now() for accuracy, not interval counting
   //   startTime = current timestamp in milliseconds
@@ -326,9 +431,16 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
   //   // Filter the full ingredients list to only those indices
   //   RETURN data.ingredients WHERE index is in indices
   //
-  const stepIngredientIndices = new Set(step.items.filter((i) => i.type === "ingredient").map((i) => i.index!));
-  const stepIngredients = data.ingredients.filter((_, i) => stepIngredientIndices.has(i));
-  const stepCookware = step.items.filter((i) => i.type === "cookware").map((i) => data.cookware[i.index!]).filter(Boolean);
+  const stepIngredientIndices = new Set(
+    step.items.filter((i) => i.type === "ingredient").map((i) => i.index!),
+  );
+  const stepIngredients = data.ingredients.filter((_, i) =>
+    stepIngredientIndices.has(i),
+  );
+  const stepCookware = step.items
+    .filter((i) => i.type === "cookware")
+    .map((i) => data.cookware[i.index!])
+    .filter(Boolean);
 
   // === BUILD THE MARKDOWN DISPLAY ===
   //
@@ -371,7 +483,10 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
     if (timerRunning && timerSec !== null) {
       const label = timerPaused ? "⏸ PAUSED" : "⏳ counting down";
       const total = timerTotalRef.current;
-      const pct = Math.max(0, Math.min(20, total > 0 ? Math.round((timerSec / total) * 20) : 0));
+      const pct = Math.max(
+        0,
+        Math.min(20, total > 0 ? Math.round((timerSec / total) * 20) : 0),
+      );
       md += `### ⏱ Timer — ${label}\n\n**${fmtTime(timerSec)}** of ${fmtTime(total)}\n\n`;
       // Visual progress bar: █ = elapsed, ░ = remaining (20 chars wide)
       md += "`" + "█".repeat(pct) + "░".repeat(20 - pct) + "`\n\n";
@@ -383,16 +498,23 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
   // Progress tracker — build full text then truncate at word boundary
   md += "---\n\n";
   for (let i = 0; i < steps.length; i++) {
-    const icon = i === stepIdx ? "▶" : (i < stepIdx ? "✓" : "  ");
-    const fullText = steps[i].items.map((it) =>
-      it.type === "ingredient" ? data.ingredients[it.index!]?.name || "?" :
-        it.type === "cookware" ? data.cookware[it.index!]?.name || "?" :
-          it.type === "timer" ? "⏱" :
-            (it.value || "")
-    ).join(" ").replace(/\s+/g, " ");
-    const preview = fullText.length > 75
-      ? fullText.slice(0, 75).replace(/\s+\S*$/, "") + "…"
-      : fullText;
+    const icon = i === stepIdx ? "▶" : i < stepIdx ? "✓" : "  ";
+    const fullText = steps[i].items
+      .map((it) =>
+        it.type === "ingredient"
+          ? data.ingredients[it.index!]?.name || "?"
+          : it.type === "cookware"
+            ? data.cookware[it.index!]?.name || "?"
+            : it.type === "timer"
+              ? "⏱"
+              : it.value || "",
+      )
+      .join(" ")
+      .replace(/\s+/g, " ");
+    const preview =
+      fullText.length > 75
+        ? fullText.slice(0, 75).replace(/\s+\S*$/, "") + "…"
+        : fullText;
     md += `${icon} **${steps[i].number}.** ${preview}\n\n`;
   }
 
@@ -407,52 +529,88 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
   // "Full Recipe" push navigates to a separate static view
   //
   return (
-    <Detail key={stepIdx} isLoading={loading} markdown={md}
+    <Detail
+      key={stepIdx}
+      isLoading={loading}
+      markdown={md}
       actions={
         <ActionPanel>
           {/* === NEXT (first = default Enter key) === */}
           {stepIdx < steps.length - 1 && (
-            <Action title="Next →" icon={Icon.ArrowRight}
-              onAction={() => setStepIdx((prev) => prev + 1)} />
+            <Action
+              title="Next →"
+              icon={Icon.ArrowRight}
+              onAction={() => goToStep((prev) => prev + 1)}
+            />
           )}
           {/* === PREVIOUS (Shift+Enter, never steals default Enter) === */}
           {stepIdx > 0 && (
-            <Action title="← Previous" icon={Icon.ArrowLeft}
+            <Action
+              title="← Previous"
+              icon={Icon.ArrowLeft}
               shortcut={{ modifiers: ["shift"], key: "enter" }}
-              onAction={() => setStepIdx((prev) => prev - 1)} />
+              onAction={() => goToStep((prev) => prev - 1)}
+            />
           )}
           {/* === TIMER: start (Ctrl+Enter, only for countable timers) === */}
           {timer && timer.isCountable && !timerRunning && (
-            <Action title={`Start Timer (${timer.label})`} icon={Icon.Clock}
+            <Action
+              title={`Start Timer (${timer.label})`}
+              icon={Icon.Clock}
               shortcut={{ modifiers: ["ctrl"], key: "enter" }}
-              onAction={startTimer} />
+              onAction={startTimer}
+            />
           )}
           {/* === TIMER RANGE: pick any number between rangeFrom and rangeTo === */}
-          {timer && !timer.isCountable && timer.rangeFrom && timer.rangeTo && !timerRunning && (
-            <Action.Push title={`Set Timer (${timer.rangeFrom}-${timer.rangeTo} ${timer.unit})`} icon={Icon.Clock}
-              target={<RangeTimerForm rangeFrom={timer.rangeFrom} rangeTo={timer.rangeTo} unit={timer.unit}
-                onStart={(val) => { setTimerRunning(true); startCountdown(val); }} />} />
-          )}
+          {timer &&
+            !timer.isCountable &&
+            timer.rangeFrom &&
+            timer.rangeTo &&
+            !timerRunning && (
+              <Action.Push
+                title={`Set Timer (${timer.rangeFrom}-${timer.rangeTo} ${timer.unit})`}
+                icon={Icon.Clock}
+                target={
+                  <RangeTimerForm
+                    rangeFrom={timer.rangeFrom}
+                    rangeTo={timer.rangeTo}
+                    unit={timer.unit}
+                    onStart={(val) => {
+                      setTimerRunning(true);
+                      startCountdown(val);
+                    }}
+                  />
+                }
+              />
+            )}
           {/* === TIMER: pause (Ctrl+Enter, shown when running, not paused) === */}
           {timerRunning && !timerPaused && (
-            <Action title="Pause Timer" icon={Icon.Pause}
+            <Action
+              title="Pause Timer"
+              icon={Icon.Pause}
               shortcut={{ modifiers: ["ctrl"], key: "enter" }}
-              onAction={pauseTimer} />
+              onAction={pauseTimer}
+            />
           )}
           {/* === TIMER: resume (Ctrl+Enter, shown when running AND paused) === */}
           {timerRunning && timerPaused && (
-            <Action title="Resume Timer" icon={Icon.Play}
+            <Action
+              title="Resume Timer"
+              icon={Icon.Play}
               shortcut={{ modifiers: ["ctrl"], key: "enter" }}
-              onAction={resumeTimer} />
+              onAction={resumeTimer}
+            />
           )}
           {/* === TIMER: stop (shown whenever timer is running) === */}
           {timerRunning && (
-            <Action title="Stop Timer" icon={Icon.Stop}
-              onAction={stopTimer} />
+            <Action title="Stop Timer" icon={Icon.Stop} onAction={stopTimer} />
           )}
           {/* === VIEW FULL RECIPE (pushes a new screen) === */}
-          <Action.Push title="Full Recipe" icon={Icon.Document}
-            target={<StaticRecipe filePath={filePath} />} />
+          <Action.Push
+            title="Full Recipe"
+            icon={Icon.Document}
+            target={<StaticRecipe filePath={filePath} />}
+          />
         </ActionPanel>
       }
     />
@@ -472,10 +630,21 @@ export function CookingMode({ filePath, scale = 1 }: { filePath: string; scale?:
 function StaticRecipe({ filePath }: { filePath: string }) {
   const [md, setMd] = useState("*Loading…*");
   useEffect(() => {
-    try {
-      const json = runCook(["recipe", filePath, "-f", "json"]);
-      setMd(recipeToMarkdown(JSON.parse(json), filePath));
-    } catch { setMd("# Error"); }
+    let cancelled = false;
+
+    async function loadRecipe() {
+      try {
+        const json = await runCook(["recipe", filePath, "-f", "json"]);
+        if (!cancelled) setMd(recipeToMarkdown(JSON.parse(json), filePath));
+      } catch {
+        if (!cancelled) setMd("# Error");
+      }
+    }
+
+    loadRecipe();
+    return () => {
+      cancelled = true;
+    };
   }, [filePath]);
   return <Detail markdown={md} />;
 }
@@ -487,8 +656,15 @@ function StaticRecipe({ filePath }: { filePath: string }) {
 //   // User can type any number between rangeFrom and rangeTo
 //   // Submit calls onStart(value) and pops back to cooking mode
 //
-function RangeTimerForm({ rangeFrom, rangeTo, unit, onStart }: {
-  rangeFrom: number; rangeTo: number; unit: string;
+function RangeTimerForm({
+  rangeFrom,
+  rangeTo,
+  unit,
+  onStart,
+}: {
+  rangeFrom: number;
+  rangeTo: number;
+  unit: string;
   onStart: (val: number) => void;
 }) {
   const defaultValue = String(rangeFrom);
@@ -506,7 +682,11 @@ function RangeTimerForm({ rangeFrom, rangeTo, unit, onStart }: {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Start Timer" icon={Icon.Clock} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Start Timer"
+            icon={Icon.Clock}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >

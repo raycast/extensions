@@ -23,11 +23,11 @@ interface PantryItem {
   name: string;
   quantity: string;
   extra?: string;
-  isDepleted: boolean;   // qty === "0"
-  isLow: boolean;         // qty === "some"
-  isUnlimited: boolean;   // qty === "unlim"
-  isExpiring: boolean;    // has expires: with date within 7 days
-  isExpired: boolean;     // has expires: with date in the past
+  isDepleted: boolean; // qty === "0"
+  isLow: boolean; // qty === "some"
+  isUnlimited: boolean; // qty === "unlim"
+  isExpiring: boolean; // has expires: with date within 7 days
+  isExpired: boolean; // has expires: with date in the past
 }
 
 interface PantryCategory {
@@ -95,7 +95,16 @@ function parsePantryText(raw: string): PantryCategory[] {
         }
       }
 
-      current.items.push({ name, quantity: qtyPart, extra, isDepleted, isLow, isUnlimited, isExpiring, isExpired });
+      current.items.push({
+        name,
+        quantity: qtyPart,
+        extra,
+        isDepleted,
+        isLow,
+        isUnlimited,
+        isExpiring,
+        isExpired,
+      });
     }
   }
   return categories;
@@ -105,32 +114,48 @@ function parsePantryText(raw: string): PantryCategory[] {
 
 export default function Command() {
   const [categories, setCategories] = useState<PantryCategory[]>([]);
-  const [recipesSections, setRecipesSections] = useState<{ title: string; items: string[] }[]>([]);
+  const [recipesSections, setRecipesSections] = useState<
+    { title: string; items: string[] }[]
+  >([]);
   const [showRecipes, setShowRecipes] = useState(false);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<FilterMode>("all");
 
   useEffect(() => {
-    setLoading(true);
-    try {
-      const raw = runCook(["pantry", "list"]);
-      setCategories(parsePantryText(raw));
-    } catch {
-      setCategories([]);
-    } finally {
-      setLoading(false);
+    let cancelled = false;
+
+    async function loadPantry() {
+      setLoading(true);
+      try {
+        const raw = await runCook(["pantry", "list"]);
+        if (!cancelled) setCategories(parsePantryText(raw));
+      } catch {
+        if (!cancelled) setCategories([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
+
+    loadPantry();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  function loadRecipes() {
+  async function loadRecipes() {
     setLoading(true);
     try {
-      const raw = runCook(["pantry", "recipes"]);
+      const raw = await runCook(["pantry", "recipes"]);
       const sections = parsePantryRecipes(raw);
       setRecipesSections(sections);
       setShowRecipes(true);
     } catch (err) {
-      setRecipesSections([{ title: "Error", items: [err instanceof Error ? err.message : String(err)] }]);
+      setRecipesSections([
+        {
+          title: "Error",
+          items: [err instanceof Error ? err.message : String(err)],
+        },
+      ]);
       setShowRecipes(true);
     } finally {
       setLoading(false);
@@ -139,44 +164,71 @@ export default function Command() {
 
   // Filter items within each category based on selected filter
   const filteredCategories = useMemo(() => {
-    return categories.map((cat) => ({
-      ...cat,
-      items: cat.items.filter((item) => {
-        switch (filter) {
-          case "in-stock": return !item.isDepleted && !item.isLow;
-          case "low-out": return item.isDepleted || item.isLow;
-          case "expiring": return item.isExpiring || item.isExpired;
-          case "unlimited": return item.isUnlimited;
-          default: return true;
-        }
-      }),
-    })).filter((cat) => cat.items.length > 0); // hide empty categories
+    return categories
+      .map((cat) => ({
+        ...cat,
+        items: cat.items.filter((item) => {
+          switch (filter) {
+            case "in-stock":
+              return !item.isDepleted && !item.isLow && !item.isExpired;
+            case "low-out":
+              return item.isDepleted || item.isLow;
+            case "expiring":
+              return item.isExpiring || item.isExpired;
+            case "unlimited":
+              return item.isUnlimited;
+            default:
+              return true;
+          }
+        }),
+      }))
+      .filter((cat) => cat.items.length > 0); // hide empty categories
   }, [categories, filter]);
 
   // Count depleted items for the badge
-  const depletedCount = useMemo(() =>
-    categories.reduce((sum, cat) => sum + cat.items.filter((i) => i.isDepleted || i.isLow).length, 0),
-    [categories]
+  const depletedCount = useMemo(
+    () =>
+      categories.reduce(
+        (sum, cat) =>
+          sum + cat.items.filter((i) => i.isDepleted || i.isLow).length,
+        0,
+      ),
+    [categories],
   );
-  const expiringCount = useMemo(() =>
-    categories.reduce((sum, cat) => sum + cat.items.filter((i) => i.isExpiring || i.isExpired).length, 0),
-    [categories]
+  const expiringCount = useMemo(
+    () =>
+      categories.reduce(
+        (sum, cat) =>
+          sum + cat.items.filter((i) => i.isExpiring || i.isExpired).length,
+        0,
+      ),
+    [categories],
   );
 
   // "What Can I Make?" view
   if (showRecipes) {
     return (
-      <List isLoading={loading} navigationTitle="What Can I Make?"
+      <List
+        isLoading={loading}
+        navigationTitle="What Can I Make?"
         actions={
           <ActionPanel>
-            <Action title="Back to Pantry" icon={Icon.ArrowLeft} onAction={() => setShowRecipes(false)} />
+            <Action
+              title="Back to Pantry"
+              icon={Icon.ArrowLeft}
+              onAction={() => setShowRecipes(false)}
+            />
           </ActionPanel>
         }
       >
         {recipesSections.map((sec, i) => (
           <List.Section key={i} title={sec.title}>
             {sec.items.map((item, j) => (
-              <List.Item key={j} title={item} icon={sec.title.includes("✓") ? Icon.CheckCircle : Icon.Circle} />
+              <List.Item
+                key={j}
+                title={item}
+                icon={sec.title.includes("✓") ? Icon.CheckCircle : Icon.Circle}
+              />
             ))}
           </List.Section>
         ))}
@@ -194,35 +246,69 @@ export default function Command() {
   ];
 
   return (
-    <List isLoading={loading} navigationTitle="Pantry"
+    <List
+      isLoading={loading}
+      navigationTitle="Pantry"
       searchBarPlaceholder="Search pantry…"
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter pantry" value={filter} onChange={(v) => setFilter(v as FilterMode)}>
+        <List.Dropdown
+          tooltip="Filter pantry"
+          value={filter}
+          onChange={(v) => setFilter(v as FilterMode)}
+        >
           {filterOptions.map((opt) => (
-            <List.Dropdown.Item key={opt.value} title={opt.title} value={opt.value} />
+            <List.Dropdown.Item
+              key={opt.value}
+              title={opt.title}
+              value={opt.value}
+            />
           ))}
         </List.Dropdown>
       }
       actions={
         <ActionPanel>
-          <Action title="What Can I Make?" icon={Icon.LightBulb} onAction={loadRecipes} />
-          <Action title="Show All Items" icon={Icon.List} onAction={() => setFilter("all")} />
-          <Action title={`Show Low / Out (${depletedCount})`} icon={Icon.XmarkCircle} onAction={() => setFilter("low-out")} />
-          <Action title={`Show Expiring (${expiringCount})`} icon={Icon.Clock} onAction={() => setFilter("expiring")} />
+          <Action
+            title="What Can I Make?"
+            icon={Icon.LightBulb}
+            onAction={loadRecipes}
+          />
+          <Action
+            title="Show All Items"
+            icon={Icon.List}
+            onAction={() => setFilter("all")}
+          />
+          <Action
+            title={`Show Low / out (${depletedCount})`}
+            icon={Icon.XmarkCircle}
+            onAction={() => setFilter("low-out")}
+          />
+          <Action
+            title={`Show Expiring (${expiringCount})`}
+            icon={Icon.Clock}
+            onAction={() => setFilter("expiring")}
+          />
         </ActionPanel>
       }
     >
       {filteredCategories.map((cat) => (
-        <List.Section key={cat.name} title={cat.name} subtitle={`${cat.items.length} items`}>
+        <List.Section
+          key={cat.name}
+          title={cat.name}
+          subtitle={`${cat.items.length} items`}
+        >
           {cat.items.map((item, i) => {
             // Status dot color
-            const dotColor =
-              item.isDepleted ? Color.Red :
-              item.isLow ? Color.Orange :
-              item.isExpired ? Color.Red :
-              item.isExpiring ? Color.Yellow :
-              item.isUnlimited ? Color.Blue :
-              Color.Green;
+            const dotColor = item.isDepleted
+              ? Color.Red
+              : item.isLow
+                ? Color.Orange
+                : item.isExpired
+                  ? Color.Red
+                  : item.isExpiring
+                    ? Color.Yellow
+                    : item.isUnlimited
+                      ? Color.Blue
+                      : Color.Green;
 
             return (
               <List.Item
@@ -242,10 +328,26 @@ export default function Command() {
                         icon={Icon.Cart}
                       />
                     )}
-                    <Action title="What Can I Make?" icon={Icon.LightBulb} onAction={loadRecipes} />
-                    <Action title={`Show Low / Out (${depletedCount})`} icon={Icon.XmarkCircle} onAction={() => setFilter("low-out")} />
-                    <Action title={`Show Expiring (${expiringCount})`} icon={Icon.Clock} onAction={() => setFilter("expiring")} />
-                    <Action title="Show All Items" icon={Icon.List} onAction={() => setFilter("all")} />
+                    <Action
+                      title="What Can I Make?"
+                      icon={Icon.LightBulb}
+                      onAction={loadRecipes}
+                    />
+                    <Action
+                      title={`Show Low / out (${depletedCount})`}
+                      icon={Icon.XmarkCircle}
+                      onAction={() => setFilter("low-out")}
+                    />
+                    <Action
+                      title={`Show Expiring (${expiringCount})`}
+                      icon={Icon.Clock}
+                      onAction={() => setFilter("expiring")}
+                    />
+                    <Action
+                      title="Show All Items"
+                      icon={Icon.List}
+                      onAction={() => setFilter("all")}
+                    />
                   </ActionPanel>
                 }
               />
@@ -277,7 +379,7 @@ function parsePantryRecipes(raw: string): { title: string; items: string[] }[] {
     if (!t || /^=/.test(t) || /^Recipes You Can Make/i.test(t)) continue;
 
     // Category header: "✓ Complete Matches" or "Partial Matches"
-    if (t.startsWith("✓") || /^[A-Z]/.test(t) && t.includes(":")) {
+    if (t.startsWith("✓") || (/^[A-Z]/.test(t) && t.includes(":"))) {
       if (currentItems.length > 0) {
         sections.push({ title: currentTitle, items: [...currentItems] });
       }
@@ -297,5 +399,7 @@ function parsePantryRecipes(raw: string): { title: string; items: string[] }[] {
     sections.push({ title: currentTitle, items: currentItems });
   }
 
-  return sections.length > 0 ? sections : [{ title: "Results", items: ["No recipes found"] }];
+  return sections.length > 0
+    ? sections
+    : [{ title: "Results", items: ["No recipes found"] }];
 }

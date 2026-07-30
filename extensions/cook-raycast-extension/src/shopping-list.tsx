@@ -1,6 +1,12 @@
 import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { listRecipes, friendlyName, runCook, DirEntry, getPreferences } from "./utils";
+import {
+  listRecipes,
+  friendlyName,
+  runCook,
+  DirEntry,
+  getPreferences,
+} from "./utils";
 import { basename } from "path";
 
 export default function Command() {
@@ -9,14 +15,22 @@ export default function Command() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try { setRecipes(flatRecipes(getPreferences().recipePath)); } catch { /* empty */ }
+    try {
+      setRecipes(flatRecipes(getPreferences().recipePath));
+    } catch {
+      /* empty */
+    }
     setLoading(false);
   }, []);
 
   function toggle(path: string) {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(path) ? next.delete(path) : next.add(path);
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
       return next;
     });
   }
@@ -35,12 +49,19 @@ export default function Command() {
           accessories={selected.has(r.fullPath) ? [{ text: "✓ selected" }] : []}
           actions={
             <ActionPanel>
-              <Action title={selected.has(r.fullPath) ? "Deselect" : "Select"}
-                icon={selected.has(r.fullPath) ? Icon.XmarkCircle : Icon.PlusCircle}
-                onAction={() => toggle(r.fullPath)} />
+              <Action
+                title={selected.has(r.fullPath) ? "Deselect" : "Select"}
+                icon={
+                  selected.has(r.fullPath) ? Icon.XmarkCircle : Icon.PlusCircle
+                }
+                onAction={() => toggle(r.fullPath)}
+              />
               {selected.size > 0 && (
-                <Action.Push title={`Generate List (${selected.size})`} icon={Icon.Cart}
-                  target={<ShoppingResult paths={Array.from(selected)} />} />
+                <Action.Push
+                  title={`Generate List (${selected.size})`}
+                  icon={Icon.Cart}
+                  target={<ShoppingResult paths={Array.from(selected)} />}
+                />
               )}
             </ActionPanel>
           }
@@ -59,10 +80,19 @@ export default function Command() {
 //
 // Items are tabular — name left-aligned, quantity right-aligned with whitespace.
 
-interface ShopItem { name: string; quantity: string }
-interface ShopSection { name: string; items: ShopItem[] }
+interface ShopItem {
+  name: string;
+  quantity: string;
+}
+interface ShopSection {
+  name: string;
+  items: ShopItem[];
+}
 
-function parseShoppingList(raw: string): { sections: ShopSection[]; raw: string } {
+function parseShoppingList(raw: string): {
+  sections: ShopSection[];
+  raw: string;
+} {
   const lines = raw.split("\n");
   const sections: ShopSection[] = [];
   let current: ShopSection | null = null;
@@ -82,7 +112,10 @@ function parseShoppingList(raw: string): { sections: ShopSection[]; raw: string 
       // Item: name (spaces) quantity — split on 2+ spaces
       const match = t.match(/^(.+?)\s{2,}(.+)$/);
       if (match) {
-        current.items.push({ name: match[1].trim(), quantity: match[2].trim() });
+        current.items.push({
+          name: match[1].trim(),
+          quantity: match[2].trim(),
+        });
       } else {
         current.items.push({ name: t, quantity: "" });
       }
@@ -101,17 +134,33 @@ function ShoppingResult({ paths }: { paths: string[] }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try {
-      const raw = runCook(["shopping-list", ...paths]);
-      const parsed = parseShoppingList(raw);
-      setSections(parsed.sections);
-      setRawText(parsed.raw);
-    } catch { /* handled by empty view */ }
-    setLoading(false);
+    let cancelled = false;
+
+    async function loadShoppingList() {
+      try {
+        const raw = await runCook(["shopping-list", ...paths]);
+        const parsed = parseShoppingList(raw);
+        if (!cancelled) {
+          setSections(parsed.sections);
+          setRawText(parsed.raw);
+        }
+      } catch {
+        /* handled by empty view */
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    loadShoppingList();
+    return () => {
+      cancelled = true;
+    };
   }, [paths]);
 
   return (
-    <List isLoading={loading} navigationTitle="Shopping List"
+    <List
+      isLoading={loading}
+      navigationTitle="Shopping List"
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy as Text" content={rawText} />
@@ -128,7 +177,11 @@ function ShoppingResult({ paths }: { paths: string[] }) {
               key={`${sec.name}-${i}`}
               title={item.name}
               accessories={item.quantity ? [{ text: item.quantity }] : []}
-              icon={item.name.startsWith("?") ? { source: Icon.QuestionMark, tintColor: Color.Yellow } : Icon.Circle}
+              icon={
+                item.name.startsWith("?")
+                  ? { source: Icon.QuestionMark, tintColor: Color.Yellow }
+                  : Icon.Circle
+              }
             />
           ))}
         </List.Section>

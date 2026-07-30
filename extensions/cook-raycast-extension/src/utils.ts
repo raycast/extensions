@@ -8,15 +8,18 @@
  *   4. formatQuantity(qty)       — turn {value: 6, unit: "balls"} into "6 balls"
  *   5. recipeToMarkdown(data)    — turn CookCLI JSON into pretty markdown
  *
- * KEY CONCEPT: execFileSync vs execSync
+ * KEY CONCEPT: execFile vs execSync
  *   execSync runs through a shell (cmd.exe on Windows). The shell interprets
  *   backslashes in paths as escape characters, mangling things like
- *   "C:\Users\spiri\..." into garbage. execFileSync skips the shell entirely —
+ *   "C:\Users\spiri\..." into garbage. execFile skips the shell entirely —
  *   it launches the .exe directly with the arguments as an array. No escaping
  *   issues, no mangling.
  */
 
-import { execFileSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
+
+const execFileAsync = promisify(execFile);
 import { existsSync, readdirSync, statSync } from "fs";
 import { join, basename } from "path";
 import { pathToFileURL } from "url";
@@ -32,10 +35,19 @@ export function resolveCookPath(): string {
   const { cookCliPath } = getPreferences();
 
   // If the preference points to a valid executable, use it
-  if (cookCliPath && existsSync(cookCliPath) && !statSync(cookCliPath).isDirectory()) return cookCliPath;
+  if (
+    cookCliPath &&
+    existsSync(cookCliPath) &&
+    !statSync(cookCliPath).isDirectory()
+  )
+    return cookCliPath;
 
   // If preference is a directory, look for cook binary inside it
-  if (cookCliPath && existsSync(cookCliPath) && statSync(cookCliPath).isDirectory()) {
+  if (
+    cookCliPath &&
+    existsSync(cookCliPath) &&
+    statSync(cookCliPath).isDirectory()
+  ) {
     const isWin = process.platform === "win32";
     const exePath = join(cookCliPath, isWin ? "cook.exe" : "cook");
     if (existsSync(exePath)) return exePath;
@@ -49,10 +61,10 @@ export function resolveCookPath(): string {
         "C:\\Program Files\\cook\\cook.exe",
       ]
     : [
-        "/opt/homebrew/bin/cook",                    // macOS Apple Silicon Homebrew
-        "/usr/local/bin/cook",                       // macOS Intel Homebrew
-        "/home/linuxbrew/.linuxbrew/bin/cook",       // Linux Homebrew
-        "/usr/bin/cook",                             // Linux system
+        "/opt/homebrew/bin/cook", // macOS Apple Silicon Homebrew
+        "/usr/local/bin/cook", // macOS Intel Homebrew
+        "/home/linuxbrew/.linuxbrew/bin/cook", // Linux Homebrew
+        "/usr/bin/cook", // Linux system
         join(process.env.HOME || "~", ".cargo/bin/cook"), // cargo install
       ];
 
@@ -79,29 +91,29 @@ export function validateRecipePath(): boolean {
  *   folder = user's recipe folder
  *
  *   TRY:
- *     // execFileSync: launch the .exe directly, NO shell
+ *     // execFile: launch the .exe directly, NO shell (async — does not block UI)
  *     // args = ["recipe", "pizza.cook", "-f", "json"]
  *     // becomes: cook.exe recipe pizza.cook -f json
- *     result = execFileSync(path, args, {
+ *     result = await execFile(path, args, {
  *       cwd: folder,          ← run from the recipe folder
  *       encoding: "utf-8",    ← text output, not binary
  *       maxBuffer: 10 MB,     ← don't crash on huge recipes
  *       timeout: 15000,       ← 15 seconds max
- *       windowsHide: true,    ← don't flash a terminal window
  *     })
- *     RETURN result.trim()
+ *     RETURN result.stdout.trim()
  *   CATCH error:
  *     THROW "CookCLI error: " + error message
  */
-export function runCook(args: string[]): string {
+export async function runCook(args: string[]): Promise<string> {
   const { recipePath } = getPreferences();
   try {
-    return execFileSync(resolveCookPath(), args, {
+    const { stdout } = await execFileAsync(resolveCookPath(), args, {
       cwd: recipePath,
       encoding: "utf-8",
       maxBuffer: 10 * 1024 * 1024,
       timeout: 15000,
-    }).trim();
+    });
+    return stdout.trim();
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     throw new Error(`CookCLI error: ${msg}`);
@@ -111,9 +123,9 @@ export function runCook(args: string[]): string {
 // ── FILESYSTEM RECIPE LISTING ──
 
 export interface DirEntry {
-  name: string;        // filename (e.g. "pizza.cook")
-  fullPath: string;    // absolute path (e.g. "C:\...\Cook\pizza.cook")
-  isDir: boolean;      // is this a folder?
+  name: string; // filename (e.g. "pizza.cook")
+  fullPath: string; // absolute path (e.g. "C:\...\Cook\pizza.cook")
+  isDir: boolean; // is this a folder?
 }
 
 /**
@@ -140,7 +152,11 @@ export function listRecipes(dir: string): DirEntry[] {
   for (const name of readdirSync(dir)) {
     const fp = join(dir, name);
     let isDir = false;
-    try { isDir = statSync(fp).isDirectory(); } catch { continue; }
+    try {
+      isDir = statSync(fp).isDirectory();
+    } catch {
+      continue;
+    }
     if (isDir || name.endsWith(".cook") || name.endsWith(".menu"))
       items.push({ name, fullPath: fp, isDir });
   }
@@ -162,7 +178,13 @@ export function friendlyName(name: string): string {
 //   Fraction:  { value: { type: "number", value: { type: "fraction", value: { whole, num, den, err } } }, unit: "tsp" }
 type QuantityValue =
   | { type: "number"; value: { type: "regular"; value: number } }
-  | { type: "number"; value: { type: "fraction"; value: { whole: number; num: number; den: number; err: number } } }
+  | {
+      type: "number";
+      value: {
+        type: "fraction";
+        value: { whole: number; num: number; den: number; err: number };
+      };
+    }
   | { type: string; value: unknown };
 
 interface Quantity {
@@ -320,7 +342,9 @@ export function recipeToMarkdown(data: RecipeData, filePath: string): string {
   if (meta.time) pills.push(`⏱ ${meta.time}`);
   if (meta.servings) pills.push(`👥 ${meta.servings} servings`);
   if (meta.tags) {
-    const tagArr = Array.isArray(meta.tags) ? meta.tags : (meta.tags as string).split(",").map((s) => s.trim());
+    const tagArr = Array.isArray(meta.tags)
+      ? meta.tags
+      : (meta.tags as string).split(",").map((s) => s.trim());
     pills.push(`🏷 ${tagArr.join(", ")}`);
   }
   if (meta.difficulty) pills.push(`⚡ ${meta.difficulty}`);
@@ -361,9 +385,11 @@ export function recipeToMarkdown(data: RecipeData, filePath: string): string {
   }
 
   // Steps — flatten all sections, resolve item references
-  const steps = data.sections.flatMap((s) =>
-    s.content.filter((c) => c.type === "step").map((c) => c.value)
-  ).map((s, i) => ({ ...s, number: i + 1 }));  // renumber sequentially across sections
+  const steps = data.sections
+    .flatMap((s) =>
+      s.content.filter((c) => c.type === "step").map((c) => c.value),
+    )
+    .map((s, i) => ({ ...s, number: i + 1 })); // renumber sequentially across sections
   if (steps.length) {
     md += "## 📋 Steps\n\n";
     for (const step of steps) {
@@ -413,7 +439,10 @@ function localImgUrl(absPath: string): string {
 }
 
 /** Return an <img> tag for a title image. Local files get file:/// URLs, HTTP URLs used directly. */
-export function titleImgTag(recipePath: string, metadataImage?: string): string {
+export function titleImgTag(
+  recipePath: string,
+  metadataImage?: string,
+): string {
   // YAML metadata: image: https://...
   if (metadataImage && /^https?:\/\//.test(metadataImage)) {
     return `<img src="${metadataImage}" width="320" />`;
