@@ -1,4 +1,4 @@
-## [Faster Image Library] - {PR_MERGE_DATE}
+## [Faster Image Library] - 2026-07-30
 
 - Images now load from a public jsDelivr CDN instead of hotlinking the source site
 - Pre-generated compressed thumbnails for a faster, lighter grid
