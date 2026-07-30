@@ -68,3 +68,16 @@ test("public menu labels and Swinsian window commands match the product UI", () 
   );
   assert(menuBar.includes('<MenuBarExtra.Section title="Reports">'), "Reports are missing from Tools");
 });
+
+test("Store metadata and boundary-safe integrations are present", () => {
+  const metadata = fs
+    .readdirSync(path.join(projectRoot, "metadata"))
+    .filter((entry) => /\.png$/i.test(entry));
+  assert(metadata.length >= 2, "Store metadata needs at least two screenshots");
+
+  const swinsian = fs.readFileSync(path.join(projectRoot, "src/helpers/swinsian.ts"), "utf8");
+  assert(swinsian.includes('execFileAsync("/usr/bin/open", ["-R", filePath])'));
+  assert(!swinsian.includes("execAsync(`open"), "Finder paths must not pass through a shell");
+  assert(swinsian.includes("make new playlist with properties {name:item 1 of argv}"));
+  assert(swinsian.includes('(album artist is "") and (artist is artistName)'));
+});

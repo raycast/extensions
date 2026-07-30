@@ -34,7 +34,9 @@ function createFixtureDatabase(): { databasePath: string; cleanup: () => void } 
       (1, 'First', 'Alpha', 'One', 'Metal', 2024, 65.2, 4, '/Music/First.flac', 'Alpha', 1, 1, 1),
       (2, 'Second', 'Alpha', 'One', 'Metal', 2024, 125.8, 0, '/Music/Second.flac', 'Alpha', 1, 2, 1),
       (3, 'Third', 'Beta', 'Two', 'Rock', 2023, 3600, 5, '/Music/Third.flac', '', 1, 1, 1),
-      (4, 'Disabled', 'Gamma', 'Three', 'Rock', 2022, 90, 3, '/Music/Disabled.flac', 'Gamma', 1, 1, 0);
+      (4, 'Disabled', 'Gamma', 'Three', 'Rock', 2022, 90, 3, '/Music/Disabled.flac', 'Gamma', 1, 1, 0),
+      (5, 'Other', 'Beta', 'One', 'Metal', 2024, 90, 0, '/Music/Other.flac', 'Beta', 1, 1, 1);
+
   `;
   execFileSync("/usr/bin/sqlite3", [databasePath, statements]);
   return { databasePath, cleanup: () => fs.rmSync(directory, { recursive: true, force: true }) };
@@ -69,6 +71,27 @@ test("facet track queries return a bounded lightweight payload with formatted du
         path: "/Music/Second.flac",
       },
     ]);
+  } finally {
+    fixture.cleanup();
+  }
+});
+
+test("album facets keep same-titled releases separate by effective artist", async () => {
+  const fixture = createFixtureDatabase();
+  try {
+    const albums = await queryLibraryFacets(fixture.databasePath, "album", "One", 20);
+    assert.deepEqual(
+      albums.map((album) => ({ title: album.title, artist: album.artist, year: album.year })),
+      [
+        { title: "One", artist: "Alpha", year: 2024 },
+        { title: "One", artist: "Beta", year: 2024 },
+      ],
+    );
+
+    const alphaTracks = await queryLibraryTracksByFacet(fixture.databasePath, "album", "One", "", 20, "Alpha");
+    const betaTracks = await queryLibraryTracksByFacet(fixture.databasePath, "album", "One", "", 20, "Beta");
+    assert.deepEqual(alphaTracks.map((track) => track.name), ["First", "Second"]);
+    assert.deepEqual(betaTracks.map((track) => track.name), ["Other"]);
   } finally {
     fixture.cleanup();
   }

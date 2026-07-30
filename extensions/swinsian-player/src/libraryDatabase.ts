@@ -9,6 +9,8 @@ export interface LibraryFacetRow {
   value: string;
   title: string;
   subtitle?: string;
+  artist?: string;
+  year?: number;
   count: number;
 }
 
@@ -34,6 +36,8 @@ interface SqliteFacetRow {
   value: string | number;
   title: string | number;
   subtitle?: string | number | null;
+  artist?: string | number | null;
+  year?: number | null;
   count: number;
 }
 
@@ -67,6 +71,9 @@ function facetExpressions(mode: LibraryBrowseMode): {
   value: string;
   subtitle: string;
   subtitleAggregate: string;
+  artistAggregate: string;
+  yearAggregate: string;
+  groupBy: string;
   count: string;
   order: string;
 } {
@@ -76,6 +83,9 @@ function facetExpressions(mode: LibraryBrowseMode): {
         value: "artist",
         subtitle: "COALESCE(NULLIF(genre, ''), '')",
         subtitleAggregate: "MIN(NULLIF(subtitle, ''))",
+        artistAggregate: "''",
+        yearAggregate: "0",
+        groupBy: "value",
         count: "COUNT(DISTINCT NULLIF(album, ''))",
         order: "title COLLATE NOCASE",
       };
@@ -84,6 +94,9 @@ function facetExpressions(mode: LibraryBrowseMode): {
         value: "COALESCE(NULLIF(albumartist, ''), artist)",
         subtitle: "COALESCE(NULLIF(genre, ''), '')",
         subtitleAggregate: "MIN(NULLIF(subtitle, ''))",
+        artistAggregate: "''",
+        yearAggregate: "0",
+        groupBy: "value",
         count: "COUNT(DISTINCT NULLIF(album, ''))",
         order: "title COLLATE NOCASE",
       };
@@ -93,6 +106,9 @@ function facetExpressions(mode: LibraryBrowseMode): {
         subtitle:
           "COALESCE(NULLIF(albumartist, ''), artist, '') || CASE WHEN year > 0 THEN ' • ' || CAST(year AS TEXT) ELSE '' END",
         subtitleAggregate: "MAX(subtitle)",
+        artistAggregate: "MAX(effective_artist)",
+        yearAggregate: "MAX(year)",
+        groupBy: "value, effective_artist",
         count: "COUNT(*)",
         order: "title COLLATE NOCASE",
       };
@@ -101,6 +117,9 @@ function facetExpressions(mode: LibraryBrowseMode): {
         value: "genre",
         subtitle: "''",
         subtitleAggregate: "MAX(subtitle)",
+        artistAggregate: "''",
+        yearAggregate: "0",
+        groupBy: "value",
         count: "COUNT(*)",
         order: "title COLLATE NOCASE",
       };
@@ -109,13 +128,16 @@ function facetExpressions(mode: LibraryBrowseMode): {
         value: "CAST(year AS TEXT)",
         subtitle: "''",
         subtitleAggregate: "MAX(subtitle)",
+        artistAggregate: "''",
+        yearAggregate: "0",
+        groupBy: "value",
         count: "COUNT(*)",
         order: "CAST(value AS INTEGER) DESC",
       };
   }
 }
 
-function facetPredicate(mode: LibraryBrowseMode, value: string): string {
+function facetPredicate(mode: LibraryBrowseMode, value: string, artist?: string): string {
   const literal = sqlString(value);
   switch (mode) {
     case "artist":
@@ -123,7 +145,9 @@ function facetPredicate(mode: LibraryBrowseMode, value: string): string {
     case "albumArtist":
       return `COALESCE(NULLIF(albumartist, ''), artist) = ${literal}`;
     case "album":
-      return `album = ${literal}`;
+      return artist
+        ? `album = ${literal} AND COALESCE(NULLIF(albumartist, ''), artist) = ${sqlString(artist)}`
+        : `album = ${literal}`;
     case "genre":
       return `genre = ${literal}`;
     case "year":
@@ -154,19 +178,29 @@ export async function queryLibraryFacets(
   const resultLimit = boundedInteger(limit, 5000);
   const sql = `
     WITH source AS (
-      SELECT ${expressions.value} AS value, ${expressions.subtitle} AS subtitle, COALESCE(album, '') AS album
+      SELECT ${expressions.value} AS value,
+             ${expressions.subtitle} AS subtitle,
+             COALESCE(NULLIF(albumartist, ''), artist, '') AS effective_artist,
+             COALESCE(album, '') AS album,
+             COALESCE(year, 0) AS year
       FROM track
       WHERE enabled = 1
     ),
     grouped AS (
-      SELECT value, ${expressions.subtitleAggregate} AS subtitle, ${expressions.count} AS count
+      SELECT value,
+             ${expressions.subtitleAggregate} AS subtitle,
+             ${expressions.artistAggregate} AS artist,
+             ${expressions.yearAggregate} AS year,
+             ${expressions.count} AS count
       FROM source
       WHERE TRIM(COALESCE(value, '')) <> ''
-      GROUP BY value
+      GROUP BY ${expressions.groupBy}
     )
     SELECT CAST(value AS TEXT) AS value,
            CAST(value AS TEXT) AS title,
            NULLIF(subtitle, '') AS subtitle,
+           NULLIF(artist, '') AS artist,
+           year,
            count
     FROM grouped
     WHERE ${sqlString(query.trim())} = ''
@@ -183,6 +217,10 @@ export async function queryLibraryFacets(
       count: Number(row.count) || 0,
     };
     if (row.subtitle != null && row.subtitle !== "") facet.subtitle = String(row.subtitle);
+    if (mode === "album") {
+      if (row.artist != null && row.artist !== "") facet.artist = String(row.artist);
+      facet.year = Number(row.year) || 0;
+    }
     return facet;
   });
 }
@@ -219,6 +257,7 @@ export async function queryLibraryTracksByFacet(
   value: string,
   query = "",
   limit = 100,
+  artist?: string,
 ): Promise<LibraryTrackRow[]> {
   const needle = `%${query.trim()}%`;
   const resultLimit = boundedInteger(limit, 500);
@@ -232,7 +271,7 @@ export async function queryLibraryTracksByFacet(
            COALESCE(path, '') AS path
     FROM track
     WHERE enabled = 1
-      AND ${facetPredicate(mode, value)}
+      AND ${facetPredicate(mode, value, artist)}
       AND (
         ${sqlString(query.trim())} = ''
         OR LOWER(COALESCE(title, '')) LIKE LOWER(${sqlString(needle)})

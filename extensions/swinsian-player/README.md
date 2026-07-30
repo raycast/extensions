@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/graf-banner-swinsian.png" width="" alt="Swinsian Player logo">
+  <img src="https://raw.githubusercontent.com/deathrashed/gupload/main/Uploads/Images/graf-banner-swinsian.png" width="" alt="Swinsian Player logo">
 
 
 # Swinsian Player

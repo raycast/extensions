@@ -3,7 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 import fs from "fs";
 import path from "path";
 import os from "os";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { readFileMetadataReport } from "../fileMetadata";
 import {
@@ -16,7 +16,7 @@ import {
   type LibraryFacetRow,
 } from "../libraryDatabase";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 const libraryCache = new Cache({ namespace: "library-browser" });
 
 // ─────────────────────────────────────────────
@@ -737,11 +737,16 @@ export async function playPlaylist(playlistId: string): Promise<void> {
 }
 
 export async function createPlaylist(name: string): Promise<void> {
-  await runAppleScript(`
-    tell application "Swinsian"
-      make new playlist with properties {name:"${name.replace(/"/g, '\\"')}"}
-    end tell
-  `);
+  await runAppleScript(
+    `
+      on run argv
+        tell application "Swinsian"
+          make new playlist with properties {name:item 1 of argv}
+        end tell
+      end run
+    `,
+    [name],
+  );
 }
 
 export async function addTrackToPlaylist(playlistId: string, trackId?: string): Promise<void> {
@@ -934,8 +939,9 @@ export async function getLibraryTracksByFacet(
   value: string,
   query = "",
   limit = 100,
+  artist?: string,
 ): Promise<SearchTrack[]> {
-  return queryLibraryTracksByFacet(getLibraryDatabasePath(), mode, value, query, limit);
+  return queryLibraryTracksByFacet(getLibraryDatabasePath(), mode, value, query, limit, artist);
 }
 
 export async function getArtistAlbums(
@@ -1028,7 +1034,7 @@ export async function addAlbumToQueue(mode: "artist" | "albumArtist", artist: st
 
         tell application "Swinsian"
           if artistMode is "albumArtist" then
-            set matches to every track whose album is albumName and album artist is artistName
+            set matches to every track whose album is albumName and ((album artist is artistName) or ((album artist is "") and (artist is artistName)))
           else
             set matches to every track whose album is albumName and artist is artistName
           end if
@@ -1117,8 +1123,7 @@ export async function saveExternalReport(report: ExternalReport): Promise<string
 // ─────────────────────────────────────────────
 export async function revealInFinder(filePath: string): Promise<void> {
   if (!filePath) return;
-  // Use shell open -R for better reliability with different path types
-  await execAsync(`open -R ${JSON.stringify(filePath)}`);
+  await execFileAsync("/usr/bin/open", ["-R", filePath]);
 }
 
 export async function revealArtistInFinder(filePath: string): Promise<void> {
@@ -1126,7 +1131,7 @@ export async function revealArtistInFinder(filePath: string): Promise<void> {
   const albumDir = path.dirname(filePath);
   const artistDir = path.dirname(albumDir);
   const targetDir = fs.existsSync(artistDir) ? artistDir : albumDir;
-  await execAsync(`open ${JSON.stringify(targetDir)}`);
+  await execFileAsync("/usr/bin/open", [targetDir]);
 }
 
 export async function copyAlbumPathToClipboard(filePath: string): Promise<void> {

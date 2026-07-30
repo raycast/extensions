@@ -87,7 +87,9 @@ export default function LibraryBrowser() {
       >
         {mode === "tracks"
           ? tracks.map((track) => <TrackItem key={track.id || track.path} track={track} />)
-          : filteredFacets.map((facet) => <FacetItem key={facet.value} mode={mode} facet={facet} />)}
+          : filteredFacets.map((facet) => (
+              <FacetItem key={`${facet.value}-${facet.artist ?? ""}`} mode={mode} facet={facet} />
+            ))}
       </List.Section>
 
       {!isLoading && mode !== "tracks" && filteredFacets.length === 0 && (
@@ -202,11 +204,11 @@ function FacetItem({ mode, facet }: { mode: LibraryBrowseMode; facet: LibraryFac
                 contextType="album"
                 subject={{
                   name: "",
-                  artist: facet.subtitle?.split(" • ")[0] ?? "",
-                  albumArtist: facet.subtitle?.split(" • ")[0] ?? "",
+                  artist: facet.artist ?? facet.subtitle?.split(" • ")[0] ?? "",
+                  albumArtist: facet.artist ?? facet.subtitle?.split(" • ")[0] ?? "",
                   album: facet.value,
                   genre: "",
-                  year: Number(facet.subtitle?.split(" • ")[1]) || 0,
+                  year: facet.year ?? (Number(facet.subtitle?.split(" • ")[1]) || 0),
                   path: "",
                 }}
               />
@@ -328,9 +330,11 @@ function ArtistAlbumTracks({ mode, album }: { mode: "artist" | "albumArtist"; al
 
 export function FacetTracks({ mode, facet }: { mode: LibraryBrowseMode; facet: LibraryFacet }) {
   const [query, setQuery] = useCachedState<string>(`swinsian-library-browser-${mode}-${facet.value}-query`, "");
-  const { data: tracks = [], isLoading } = useCachedPromise(getLibraryTracksByFacet, [mode, facet.value, query, 150], {
-    keepPreviousData: true,
-  });
+  const { data: tracks = [], isLoading } = useCachedPromise(
+    getLibraryTracksByFacet,
+    [mode, facet.value, query, 150, facet.artist],
+    { keepPreviousData: true },
+  );
 
   return (
     <List
