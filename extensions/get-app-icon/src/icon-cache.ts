@@ -408,7 +408,19 @@ export async function refreshIconCache(
     //
     // In `finally` so an abort still records the icons that DID complete before the kill;
     // dropping those would re-extract work that genuinely finished.
-    await Promise.all(redrawn.map((appPath) => writeFile(blindMarkerPath(appPath), "").catch(() => {})));
+    //
+    // Readability is re-checked at write time, not trusted from job-construction time.
+    // Extraction can outlast the outage — and `findStaleApps` clears the marker the moment
+    // sources read cleanly — so an unconditional write here could resurrect a marker
+    // another pass had just retired, and that stale marker would then suppress the redraw
+    // a genuine later outage requires. Writing only while still blind keeps the marker's
+    // meaning exact: "this entry was drawn without being able to see its sources".
+    await Promise.all(
+      redrawn.map(async (appPath) => {
+        if (!(await iconSourceStamp(appPath)).unverifiable) return;
+        await writeFile(blindMarkerPath(appPath), "").catch(() => {});
+      }),
+    );
   }
 
   // Report what actually succeeded. Claiming `stale.length` here would paper over a
