@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, readdir, stat, unlink } from "node:fs/promises";
+import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { environment } from "@raycast/api";
@@ -129,6 +129,23 @@ export function cachedIconPath(appPath: string): string {
 }
 
 /**
+ * Marker written beside a cache entry that was drawn while the app's icon sources were
+ * unreadable.
+ *
+ * Timestamps alone can't express "drawn blind". An entry written *before* an outage and
+ * one written *during* it are both newer than the app's last readable stamp, so no mtime
+ * comparison can tell them apart — and that ambiguity is what forced a choice between
+ * serving a pre-update icon forever and relaunching the extractor on every grid visit.
+ * The marker records the fact directly: present means "we already re-drew this while
+ * blind, don't do it again"; absent means we haven't, so do it once.
+ */
+const BLIND_SUFFIX = ".blind";
+
+function blindMarkerPath(appPath: string): string {
+  return path.join(CACHE_DIR, `${cacheFileName(appPath)}${BLIND_SUFFIX}`);
+}
+
+/**
  * The paths whose mtimes decide whether a cached icon is still current.
  *
  * The bundle root alone is not enough. An updater that rewrites files *inside* the
@@ -218,10 +235,21 @@ async function iconSourceStamp(appPath: string): Promise<IconSourceStamp> {
  * sources couldn't be read — so this re-extracts exactly the icons that changed, plus the
  * ones we can't vouch for, and leaves the rest alone.
  *
- * An unreadable source counts as stale because the alternative is serving a pre-update
- * icon indefinitely. It doesn't loop: the entry written for such an app is stamped at
- * wall-clock time (see `refreshIconCache`), and once access recovers the readable stamps
- * are older than that, so it settles.
+ * An unreadable source counts as stale, because the alternative is serving a pre-update
+ * icon indefinitely — but only until one extraction has actually run against it.
+ *
+ * The bound matters as much as the trigger. Returning stale on `unverifiable` alone
+ * relaunches the Swift extractor on *every* grid visit for as long as the condition
+ * lasts, and a bundle can be unreadable permanently (restrictive permissions, a mount
+ * that never comes back). That is a ~1s process launch and a progress toast on every
+ * open, for an icon already sitting correctly in the cache — measured: five visits, five
+ * extractions, no convergence.
+ *
+ * A cache entry written *after* the newest readable evidence has already incorporated
+ * whatever we last saw, so it is re-extracted once and then trusted while the condition
+ * persists. Real change still gets through: any readable stamp that moves — including the
+ * bundle root, which an installer or a mount cycle touches — pushes `source.mtime` past
+ * the entry and marks it stale again.
  */
 async function findStaleApps(appPaths: readonly string[]): Promise<string[]> {
   const stale = await Promise.all(
@@ -229,7 +257,21 @@ async function findStaleApps(appPaths: readonly string[]): Promise<string[]> {
       const cached = cachedIconPath(appPath);
       try {
         const [cachedStat, source] = await Promise.all([stat(cached), iconSourceStamp(appPath)]);
-        if (source.unverifiable) return appPath;
+        if (source.unverifiable) {
+          // Blind: re-draw once, then trust it. The marker — not a timestamp — is what
+          // distinguishes "already re-drawn during this outage" from "written before it",
+          // which mtimes cannot express.
+          const alreadyRedrawn = await stat(blindMarkerPath(appPath)).then(
+            () => true,
+            () => false,
+          );
+          return alreadyRedrawn ? null : appPath;
+        }
+        // Sources are readable again, so the marker has served its purpose. Clear it here
+        // rather than during extraction: a recovered app is usually *not* stale, so the
+        // extractor never runs for it and a marker cleared only there would outlive the
+        // outage — and then suppress the one re-draw a genuine later outage should get.
+        await unlink(blindMarkerPath(appPath)).catch(() => {});
         return cachedStat.mtimeMs >= source.mtime ? null : appPath;
       } catch {
         return appPath; // not cached yet
@@ -277,14 +319,25 @@ export async function refreshIconCache(
         // later app update would produce.
         //
         // Omit the stamp when the sources couldn't be fully read, or when there is no
-        // usable time at all. `observed` then describes only the *readable* subset, which
-        // for an unverifiable app is precisely the pre-update root that hid the change in
-        // the first place — stamping with it would re-assert the freshness we just refused
-        // to believe. Omitting leaves the file at wall-clock time, which is both honest
-        // ("this is when we drew it") and self-clearing: once access recovers, the readable
-        // stamps are older than the write, so the entry settles instead of looping.
+        // usable time at all. `source.mtime` then describes only the *readable* subset,
+        // which for an unverifiable app is precisely the pre-update root that hid the
+        // change in the first place — stamping with it would leave the entry looking older
+        // than it is and re-extract on every visit.
+        //
+        // Wall-clock is the correct mtime here, and it is what bounds the work: it records
+        // when these pixels were drawn, it is necessarily >= every readable stamp, so the
+        // freshness test in `findStaleApps` accepts the entry on the next visit instead of
+        // relaunching the extractor. The pixels are current regardless of the unreadable
+        // path, because `NSWorkspace` resolves an app's icon without needing to stat the
+        // bundle's interior.
         const usable = !source.unverifiable && Number.isFinite(source.mtime) && source.mtime > 0;
         const stamp = usable ? ` ${(Math.ceil(source.mtime) / 1000).toFixed(3)}` : "";
+        // Record that this entry was drawn blind, which is what bounds the unreadable case
+        // to a single extraction. Clearing is `findStaleApps`'s job — it happens the moment
+        // the sources read cleanly, whether or not anything needed extracting.
+        if (source.unverifiable) {
+          await writeFile(blindMarkerPath(appPath), "").catch(() => {});
+        }
         return `${encode(appPath)} ${encode(cachedIconPath(appPath))}${stamp}`;
       }),
     )
@@ -357,6 +410,9 @@ export async function listCachedApps(appPaths: readonly string[]): Promise<Set<s
  */
 export async function invalidateCachedIcon(appPath: string): Promise<void> {
   await unlink(cachedIconPath(appPath)).catch(() => {});
+  // Drop the blind marker too, or an app cached during an outage would keep its
+  // "already re-drawn" pass and skip the re-extraction this invalidation exists to force.
+  await unlink(blindMarkerPath(appPath)).catch(() => {});
 }
 
 /**
@@ -365,13 +421,18 @@ export async function invalidateCachedIcon(appPath: string): Promise<void> {
  */
 export async function pruneIconCache(appPaths: readonly string[]): Promise<void> {
   const live = new Set(appPaths.map((appPath) => cacheFileName(appPath)));
+  // A `<name>.blind` marker belongs to a live entry too. Without this it would be pruned
+  // on every grid visit — and a marker that never survives is a marker that never bounds
+  // anything, putting the blind case straight back into re-extracting forever.
+  const isLive = (entry: string) =>
+    live.has(entry) || (entry.endsWith(BLIND_SUFFIX) && live.has(entry.slice(0, -BLIND_SUFFIX.length)));
   try {
     const entries = await readdir(CACHE_DIR);
     await Promise.all(
       entries
         // Never touch a `.tmp-*` sibling: it belongs to an extraction that may still be
         // running in another window, and deleting it mid-write fails that icon.
-        .filter((entry) => !entry.startsWith(TEMP_PREFIX) && !live.has(entry))
+        .filter((entry) => !entry.startsWith(TEMP_PREFIX) && !isLive(entry))
         .map((entry) => unlink(path.join(CACHE_DIR, entry)).catch(() => {})),
     );
   } catch {
