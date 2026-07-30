@@ -172,7 +172,8 @@ function RunResult({ agent, values }: { agent: Agent; values: RunFormValues }) {
 
 export function RunAgent({ agent }: { agent: Agent }) {
   const preferences = getPreferenceValues<ExtensionPreferences>();
-  const preferredProvider = isProvider(preferences.defaultProvider ?? "") ? preferences.defaultProvider : "openrouter";
+  const configuredProvider = preferences.defaultProvider ?? "";
+  const preferredProvider: Provider = isProvider(configuredProvider) ? configuredProvider : "openrouter";
   const [provider, setProvider] = useState<Provider>(preferredProvider);
   const [model, setModel] = useState(DEFAULT_MODELS[preferredProvider]);
   const { push } = useNavigation();
