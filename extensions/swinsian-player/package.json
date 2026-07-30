@@ -1,0 +1,310 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "swinsian-player",
+  "title": "Swinsian Player",
+  "description": "Control Swinsian from Raycast. Play, pause, skip tracks, set ratings, search your library, and see what's playing in your menu bar.",
+  "icon": "extension-icon.png",
+  "author": "deathrashed",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "libraryDatabasePath",
+      "title": "Swinsian Library Database",
+      "description": "Optional override for Swinsian's Library.sqlite file. Leave empty to use the standard Application Support location.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "libraryRoot",
+      "title": "Music Folder",
+      "description": "Optional root music folder shown in Browse Library for quick Finder access. Browsing data comes from Swinsian's database above.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "toolboxHiddenCategories",
+      "title": "Hidden Discovery Categories",
+      "description": "Comma-separated category IDs to hide: databases, streaming, lyrics, covers, social, utilities, lastfm.",
+      "type": "textfield",
+      "label": "Hidden Categories",
+      "default": "",
+      "required": false,
+      "placeholder": "social,lastfm"
+    },
+    {
+      "name": "toolboxHiddenServices",
+      "title": "Hidden Discovery Services",
+      "description": "Comma-separated service IDs to hide. IDs are documented in the README.",
+      "type": "textfield",
+      "label": "Hidden Services",
+      "default": "",
+      "required": false,
+      "placeholder": "facebook,twitter"
+    },
+    {
+      "name": "toolboxCustomServices",
+      "title": "Custom Services",
+      "description": "JSON array of custom links using {artist}, {album}, {track}, {query}, and {type} placeholders.",
+      "type": "textfield",
+      "label": "Custom Discovery Services",
+      "default": "",
+      "required": false,
+      "placeholder": "[{\"title\":\"Example\",\"url\":\"https://example.com/?q={query}\"}]"
+    },
+    {
+      "name": "toolboxLastfmUsername",
+      "title": "Last.fm Username",
+      "description": "Username used by Last.fm statistics, collage, dashboard, and time-capsule services.",
+      "type": "textfield",
+      "label": "Last.fm Username",
+      "default": "",
+      "required": false,
+      "placeholder": "username"
+    }
+  ],
+  "commands": [
+    {
+      "name": "nowPlaying",
+      "title": "Now Playing",
+      "subtitle": "Swinsian",
+      "description": "See what's currently playing in Swinsian. Control playback, set rating, copy info, and more.",
+      "mode": "view",
+      "keywords": [
+        "current track",
+        "player",
+        "rating",
+        "metadata"
+      ]
+    },
+    {
+      "name": "nowPlayingMenuBar",
+      "title": "Menu Bar Player",
+      "subtitle": "Swinsian",
+      "description": "See what's currently playing in your Menu Bar. Click for quick controls. Refreshes every 15 seconds.",
+      "mode": "menu-bar",
+      "interval": "15s",
+      "preferences": [
+        {
+          "name": "hideIconWhenIdle",
+          "title": "Appearance",
+          "description": "If enabled, the icon will be hidden when Swinsian is not running or nothing is playing",
+          "type": "checkbox",
+          "label": "Hide icon when idle",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "hideArtistName",
+          "title": "",
+          "description": "If enabled, the artist's name will be hidden in the Menu Bar",
+          "type": "checkbox",
+          "label": "Hide artist's name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "maxTextLength",
+          "title": "Now Playing Text Length",
+          "description": "Maximum number of characters to show for the currently playing track. Leave empty to use default (30).",
+          "type": "textfield",
+          "default": "30",
+          "required": false,
+          "placeholder": "30"
+        },
+        {
+          "name": "showControlsSection",
+          "title": "Menu Sections",
+          "description": "Toggle the visibility of the playback controls section in the menu bar player",
+          "type": "checkbox",
+          "label": "Show Controls",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showModesSection",
+          "title": "",
+          "description": "Toggle the visibility of the playback modes (repeat/shuffle) section",
+          "type": "checkbox",
+          "label": "Show Playback Options",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showVolumeSection",
+          "title": "",
+          "description": "Toggle the visibility of the volume controls section",
+          "type": "checkbox",
+          "label": "Show Volume Controls",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showDiscoverySection",
+          "title": "Action Sections",
+          "description": "Toggle the visibility of web discovery shortcuts in the menu bar player",
+          "type": "checkbox",
+          "label": "Show Discovery",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showCopySection",
+          "title": "",
+          "description": "Toggle metadata, files, Last.fm tools, and bundled reports in the menu bar player",
+          "type": "checkbox",
+          "label": "Show Tools",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showLastfmSection",
+          "title": "",
+          "description": "Toggle the visibility of Love in Now Playing and Ban in Playback",
+          "type": "checkbox",
+          "label": "Show Last.fm Controls",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showOutputSection",
+          "title": "",
+          "description": "Toggle the visibility of the audio device inspector shortcut",
+          "type": "checkbox",
+          "label": "Show Device Inspector",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showWindowsSection",
+          "title": "",
+          "description": "Toggle the visibility of Swinsian windows and utility shortcuts",
+          "type": "checkbox",
+          "label": "Show Options",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showLibrarySection",
+          "title": "",
+          "description": "Toggle the visibility of the library management actions",
+          "type": "checkbox",
+          "label": "Show Library Maintenance",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showOpenCommandsSection",
+          "title": "",
+          "description": "Toggle the visibility of shortcuts that open full Raycast library and playlist commands",
+          "type": "checkbox",
+          "label": "Show Raycast",
+          "default": true,
+          "required": false
+        }
+      ],
+      "keywords": [
+        "menu bar",
+        "now playing",
+        "controls"
+      ]
+    },
+    {
+      "name": "libraryBrowser",
+      "title": "Browse Library",
+      "subtitle": "Swinsian",
+      "description": "Navigate Swinsian hierarchically by artist, album artist, album, genre, or year. Artist results open albums, then tracks.",
+      "mode": "view",
+      "keywords": [
+        "browse",
+        "artist",
+        "album",
+        "genre",
+        "year"
+      ]
+    },
+    {
+      "name": "search",
+      "title": "Quick Search",
+      "subtitle": "Swinsian",
+      "description": "Quickly find tracks across titles, artists, and albums, then play the selected result.",
+      "mode": "view",
+      "keywords": [
+        "library",
+        "track",
+        "find"
+      ]
+    },
+    {
+      "name": "playlists",
+      "title": "Browse Playlists",
+      "subtitle": "Swinsian",
+      "description": "Browse and play your Swinsian playlists.",
+      "mode": "view",
+      "keywords": [
+        "playlist",
+        "queue"
+      ]
+    },
+    {
+      "name": "addToPlaylist",
+      "title": "Add Track to Playlist",
+      "subtitle": "Swinsian",
+      "description": "Choose a playlist and add the current Swinsian track to it.",
+      "mode": "view",
+      "keywords": [
+        "playlist",
+        "add current track"
+      ]
+    },
+    {
+      "name": "togglePlayPause",
+      "title": "Play/Pause",
+      "subtitle": "Swinsian",
+      "description": "Toggle the playback of the current track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next Track",
+      "subtitle": "Swinsian",
+      "description": "Skip to the next track.",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous Track",
+      "subtitle": "Swinsian",
+      "description": "Skip to the previous track.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "music-metadata": "^11.14.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "tsx": "^4.23.1",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "tsx --test tests/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
