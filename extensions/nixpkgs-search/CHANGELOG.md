@@ -1,6 +1,6 @@
 # NixPkgs Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-07-30
 
 - Show the evaluation system (`package_system`) alongside the indexed version to clarify which system the version applies to
 
