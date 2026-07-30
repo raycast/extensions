@@ -18,20 +18,16 @@ const refreshDevices = async (
   setDevicesFn: (devices: Device[]) => void,
   setIsLoadingFn: (isLoading: boolean) => void,
 ): Promise<void> => {
-  let devices;
-
   try {
-    devices = await getDevices();
+    const devices = await getDevices();
+    const locatedDevices = await locateDevicesOnLocalNetwork(devices);
+    const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
+    setDevicesFn(augmentedLocatedDevices);
   } catch {
+    // silently ignore errors in the menu bar context
+  } finally {
     setIsLoadingFn(false);
-    return;
   }
-
-  const locatedDevices = await locateDevicesOnLocalNetwork(devices);
-  const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
-  setDevicesFn(augmentedLocatedDevices);
-
-  setIsLoadingFn(false);
 };
 
 export default function Command() {
