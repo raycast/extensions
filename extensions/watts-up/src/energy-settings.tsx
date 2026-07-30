@@ -13,6 +13,7 @@ import {
   getEnergySettings,
   getSleepAssertions,
   setPmsetSetting,
+  type PowerSourceFlag,
 } from "./settings";
 
 export default function Command() {
@@ -30,15 +31,16 @@ export default function Command() {
     key: "lowpowermode" | "powernap",
     title: string,
     current?: boolean,
+    sourceFlag?: PowerSourceFlag,
   ) {
-    if (current === undefined) return;
+    if (current === undefined || sourceFlag === undefined) return;
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `${current ? "Disabling" : "Enabling"} ${title}…`,
       message: "macOS will ask for your password",
     });
     try {
-      await setPmsetSetting(key, current ? 0 : 1);
+      await setPmsetSetting(key, current ? 0 : 1, sourceFlag);
       toast.style = Toast.Style.Success;
       toast.title = `${title} ${current ? "off" : "on"}`;
       toast.message = undefined;
@@ -110,6 +112,7 @@ export default function Command() {
                     "lowpowermode",
                     "Low Power Mode",
                     settings.data?.lowPowerMode,
+                    settings.data?.sourceFlag,
                   )
                 }
               />
@@ -132,7 +135,12 @@ export default function Command() {
                 }
                 icon={Icon.Power}
                 onAction={() =>
-                  toggle("powernap", "Power Nap", settings.data?.powerNap)
+                  toggle(
+                    "powernap",
+                    "Power Nap",
+                    settings.data?.powerNap,
+                    settings.data?.sourceFlag,
+                  )
                 }
               />
               <RefreshOnly revalidate={revalidate} />

@@ -3,7 +3,16 @@ import { promisify } from "node:util";
 
 const execAsync = promisify(exec);
 
+/** pmset flag for a single power source profile */
+export type PowerSourceFlag = "-b" | "-c" | "-u";
+
 export interface EnergySettings {
+  /**
+   * The profile these values were read from. Pass it back to
+   * `setPmsetSetting` so a write lands on the same profile that was displayed,
+   * even if the Mac has switched power source in the meantime.
+   */
+  sourceFlag: PowerSourceFlag;
   lowPowerMode?: boolean;
   powerNap?: boolean;
   /** Minutes until display sleeps (0 = never) */
@@ -26,15 +35,39 @@ export interface SleepAssertion {
   reason: string;
 }
 
+/** pmset flag for the power source currently in use */
+async function getActiveSourceFlag(): Promise<PowerSourceFlag> {
+  const { source } = await getBatteryStatus();
+  if (source === "Battery Power") return "-b";
+  if (source === "UPS Power") return "-u";
+  return "-c";
+}
+
+/**
+ * The block of `pmset -g custom` belonging to one profile. Falls back to the
+ * whole output if the header is missing (e.g. a Mac with a single profile).
+ */
+function profileBlock(stdout: string, flag: PowerSourceFlag): string {
+  const header =
+    flag === "-b" ? "Battery Power" : flag === "-u" ? "UPS Power" : "AC Power";
+  const block = stdout.match(new RegExp(`^${header}:\\n((?: .*\\n?)*)`, "m"));
+  return block?.[1] ?? stdout;
+}
+
 export async function getEnergySettings(): Promise<EnergySettings> {
-  const { stdout } = await execAsync("/usr/bin/pmset -g");
+  // Read the configured values for one named profile rather than `pmset -g`,
+  // which only reports whichever profile is active at that instant.
+  const sourceFlag = await getActiveSourceFlag();
+  const { stdout } = await execAsync("/usr/bin/pmset -g custom");
+  const block = profileBlock(stdout, sourceFlag);
   const num = (key: string) =>
-    stdout.match(new RegExp(`^\\s*${key}\\s+(\\d+)`, "m"))?.[1];
+    block.match(new RegExp(`^\\s*${key}\\s+(\\d+)`, "m"))?.[1];
   const lowPowerMode = num("lowpowermode");
   const powerNap = num("powernap");
   const displaySleep = num("displaysleep");
   const sleep = num("sleep");
   return {
+    sourceFlag,
     lowPowerMode: lowPowerMode !== undefined ? lowPowerMode === "1" : undefined,
     powerNap: powerNap !== undefined ? powerNap === "1" : undefined,
     displaySleepMin:
@@ -76,27 +109,18 @@ export async function getSleepAssertions(): Promise<SleepAssertion[]> {
 }
 
 /**
- * pmset flag for the power source currently in use. `pmset -g` only reports the
- * active profile, so writes must target that same profile — using `-a` would
- * overwrite the inactive profile's value too.
- */
-async function getActiveSourceFlag(): Promise<"-b" | "-c" | "-u"> {
-  const { source } = await getBatteryStatus();
-  if (source === "Battery Power") return "-b";
-  if (source === "UPS Power") return "-u";
-  return "-c";
-}
-
-/**
- * Change a pmset setting for the active power source. Requires admin — macOS
- * shows a password prompt via osascript. Only fixed, known keys are passed in.
+ * Change a pmset setting for one power source profile. `sourceFlag` comes from
+ * the `EnergySettings` the value was read from, so the write cannot land on a
+ * different profile than the one shown; `-a` would overwrite every profile.
+ * Requires admin — macOS shows a password prompt via osascript. Only fixed,
+ * known keys are passed in.
  */
 export async function setPmsetSetting(
   key: "lowpowermode" | "powernap",
   value: 0 | 1,
+  sourceFlag: PowerSourceFlag,
 ): Promise<void> {
-  const flag = await getActiveSourceFlag();
   await execAsync(
-    `/usr/bin/osascript -e 'do shell script "/usr/bin/pmset ${flag} ${key} ${value}" with administrator privileges'`,
+    `/usr/bin/osascript -e 'do shell script "/usr/bin/pmset ${sourceFlag} ${key} ${value}" with administrator privileges'`,
   );
 }
