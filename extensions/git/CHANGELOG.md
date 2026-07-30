@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-07-30
 
 ### Added
 - **Worktrees**: Add "Worktrees" view listing all worktrees of the repository with actions to open, copy the path and delete a worktree
