@@ -1,4 +1,15 @@
-import { ActionPanel, Action, Color, Icon, Keyboard, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  LocalStorage,
+  getPreferenceValues,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { QBittorrent, Torrent, TorrentFilters, TorrentState } from "@ctrl/qbittorrent";
 import { filesize } from "filesize";
@@ -13,6 +24,34 @@ enum TorrentActionType {
   DELETE,
   DELETE_INCLUDING_DATA,
 }
+
+const SHOW_DETAILS_KEY = "show-torrent-details";
+const SORT_KEY = "torrent-sort";
+const LIST_DETAILS_KEY = "torrent-list-details-v2";
+const openInBrowserShortcut: Keyboard.Shortcut = {
+  Windows: { modifiers: ["ctrl"], key: "enter" },
+  macOS: { modifiers: ["cmd"], key: "enter" },
+};
+const copyMagnetLinkShortcut: Keyboard.Shortcut = {
+  Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+  macOS: { modifiers: ["cmd", "shift"], key: "c" },
+};
+const toggleDetailsShortcut: Keyboard.Shortcut = {
+  Windows: { modifiers: ["ctrl"], key: "d" },
+  macOS: { modifiers: ["cmd"], key: "d" },
+};
+const sortOptions = [
+  { title: "Name", field: "name" },
+  { title: "Seeds", field: "num_seeds" },
+  { title: "Peers", field: "num_leechs" },
+  { title: "Down Speed", field: "dlspeed" },
+  { title: "Up Speed", field: "upspeed" },
+  { title: "ETA", field: "eta" },
+  { title: "Ratio", field: "ratio" },
+  { title: "Popularity", field: "popularity" },
+  { title: "Category", field: "category" },
+  { title: "Tags", field: "tags" },
+] as const;
 
 function getProgressIcon(progress: number) {
   if (progress >= 1) {
@@ -132,10 +171,119 @@ function formatSpeedAccessory(
   };
 }
 
+function formatEta(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds >= 8_640_000) {
+    return "∞";
+  }
+
+  if (seconds < 60) {
+    return `${Math.max(0, Math.round(seconds))}s`;
+  }
+
+  const days = Math.floor(seconds / 86_400);
+  const hours = Math.floor((seconds % 86_400) / 3_600);
+  const minutes = Math.floor((seconds % 3_600) / 60);
+
+  return [days && `${days}d`, hours && `${hours}h`, minutes && `${minutes}m`].filter(Boolean).slice(0, 2).join(" ");
+}
+
+function formatRatio(ratio: number) {
+  return ratio === -1 || !Number.isFinite(ratio) ? "∞" : ratio.toFixed(2);
+}
+
+function formatPopularity(torrent: Torrent) {
+  const activeMonths = torrent.time_active / 2_629_746;
+  return formatRatio(activeMonths > 0 ? torrent.ratio / activeMonths : 0);
+}
+
+function formatTextAccessory(value: string | undefined, icon: Icon, tooltip: string): List.Item.Accessory | null {
+  return value ? { tag: { value, color: Color.SecondaryText }, icon, tooltip } : null;
+}
+
+const listDetailOptions = [
+  { title: "File Size", value: "size", accessory: formatSizeAccessory },
+  {
+    title: "Ratio",
+    value: "ratio",
+    accessory: (torrent: Torrent) => formatTextAccessory(formatRatio(torrent.ratio), Icon.Gauge, "Share ratio"),
+  },
+  {
+    title: "Seeds",
+    value: "seeds",
+    accessory: (torrent: Torrent) =>
+      formatTextAccessory(`${torrent.num_seeds} (${torrent.num_complete})`, Icon.TwoPeople, "Seeds connected (total)"),
+  },
+  {
+    title: "Peers",
+    value: "peers",
+    accessory: (torrent: Torrent) =>
+      formatTextAccessory(`${torrent.num_leechs} (${torrent.num_incomplete})`, Icon.Person, "Peers connected (total)"),
+  },
+  {
+    title: "Download Speed",
+    value: "downloadSpeed",
+    accessory: (torrent: Torrent) => formatSpeedAccessory("Download", torrent.dlspeed, Color.Green, Icon.Download),
+  },
+  {
+    title: "Upload Speed",
+    value: "uploadSpeed",
+    accessory: (torrent: Torrent) => formatSpeedAccessory("Upload", torrent.upspeed, Color.Blue, Icon.Upload),
+  },
+  {
+    title: "ETA",
+    value: "eta",
+    accessory: (torrent: Torrent) => formatTextAccessory(formatEta(torrent.eta), Icon.Clock, "ETA"),
+  },
+  {
+    title: "Popularity",
+    value: "popularity",
+    accessory: (torrent: Torrent) => formatTextAccessory(formatPopularity(torrent), Icon.Star, "Popularity"),
+  },
+  {
+    title: "Category",
+    value: "category",
+    accessory: (torrent: Torrent) => formatTextAccessory(torrent.category, Icon.Folder, "Category"),
+  },
+  { title: "Tags", value: "tags", accessory: formatTagsAccessory },
+] as const;
+type ListDetail = (typeof listDetailOptions)[number]["value"];
+const defaultListDetails: ListDetail[] = ["size", "downloadSpeed", "uploadSpeed", "tags"];
+
+function formatListAccessories(torrent: Torrent, details: ListDetail[]) {
+  return listDetailOptions
+    .filter((option) => details.includes(option.value))
+    .map((option) => option.accessory(torrent))
+    .filter((accessory): accessory is List.Item.Accessory => accessory !== null);
+}
+
+function TorrentDetail({ torrent }: { torrent: Torrent }) {
+  return (
+    <List.Item.Detail
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Seeds" text={`${torrent.num_seeds} (${torrent.num_complete})`} />
+          <List.Item.Detail.Metadata.Label title="Peers" text={`${torrent.num_leechs} (${torrent.num_incomplete})`} />
+          <List.Item.Detail.Metadata.Label title="Down Speed" text={`${filesize(torrent.dlspeed)}/s`} />
+          <List.Item.Detail.Metadata.Label title="Up Speed" text={`${filesize(torrent.upspeed)}/s`} />
+          <List.Item.Detail.Metadata.Label title="ETA" text={formatEta(torrent.eta)} />
+          <List.Item.Detail.Metadata.Label title="Ratio" text={formatRatio(torrent.ratio)} />
+          <List.Item.Detail.Metadata.Label title="Popularity" text={formatPopularity(torrent)} />
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Category" text={torrent.category || "None"} />
+          <List.Item.Detail.Metadata.Label title="Tags" text={torrent.tags || "None"} />
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
+}
+
 export default function Torrents() {
   const [filter, setFilter] = useState<TorrentFilters>();
   const [torrents, setTorrents] = useState<Torrent[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isShowingDetail, setIsShowingDetail] = useState(false);
+  const [listDetails, setListDetails] = useState<ListDetail[]>(defaultListDetails);
+  const [sort, setSort] = useState<{ field?: string; reverse: boolean }>({ reverse: false });
   const [updateTimestamp, setUpdateTimestamp] = useState(+new Date());
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -157,7 +305,7 @@ export default function Torrents() {
     setLoading(true);
     try {
       await qbit.login();
-      const torrents = await qbit.listTorrents({ filter });
+      const torrents = await qbit.listTorrents({ filter, sort: sort.field, reverse: sort.reverse });
       setTorrents(torrents);
     } catch (error) {
       await showToast({
@@ -211,9 +359,53 @@ export default function Torrents() {
     }
   };
 
+  const toggleDetails = async () => {
+    const nextValue = !isShowingDetail;
+    setIsShowingDetail(nextValue);
+    await LocalStorage.setItem(SHOW_DETAILS_KEY, nextValue);
+  };
+
+  const toggleListDetail = async (detail: ListDetail) => {
+    const selected = new Set(listDetails);
+    selected.has(detail) ? selected.delete(detail) : selected.add(detail);
+    const nextDetails = listDetailOptions.map((option) => option.value).filter((value) => selected.has(value));
+
+    setListDetails(nextDetails);
+    await LocalStorage.setItem(LIST_DETAILS_KEY, nextDetails.join(","));
+  };
+
+  const selectSort = async (field?: string) => {
+    const nextSort = field && sort.field === field ? { field, reverse: !sort.reverse } : { field, reverse: false };
+
+    setSort(nextSort);
+    await (field
+      ? LocalStorage.setItem(SORT_KEY, `${field}:${nextSort.reverse ? "desc" : "asc"}`)
+      : LocalStorage.removeItem(SORT_KEY));
+  };
+
+  useEffect(() => {
+    Promise.all([
+      LocalStorage.getItem<boolean>(SHOW_DETAILS_KEY),
+      LocalStorage.getItem<string>(SORT_KEY),
+      LocalStorage.getItem<string>(LIST_DETAILS_KEY),
+    ]).then(([showDetails, storedSort, storedDetails]) => {
+      setIsShowingDetail(showDetails ?? false);
+
+      const [field, direction] = storedSort?.split(":") ?? [];
+      if (field && sortOptions.some((option) => option.field === field)) {
+        setSort({ field, reverse: direction === "desc" });
+      }
+
+      if (storedDetails !== undefined) {
+        const selected = storedDetails.split(",");
+        setListDetails(listDetailOptions.map((option) => option.value).filter((value) => selected.includes(value)));
+      }
+    });
+  }, []);
+
   useEffect(() => {
     updateTorrents();
-  }, [updateTimestamp, filter]);
+  }, [updateTimestamp, filter, sort]);
 
   useEffect(() => {
     return () => {
@@ -226,6 +418,7 @@ export default function Torrents() {
   return (
     <List
       isLoading={loading}
+      isShowingDetail={isShowingDetail}
       filtering
       searchBarPlaceholder="Search your torrents"
       searchBarAccessory={
@@ -243,24 +436,65 @@ export default function Torrents() {
       }
     >
       {torrents.map((torrent) => {
-        const tagsAccessory = formatTagsAccessory(torrent);
-
         return (
           <List.Item
             icon={formatProgressIcon(torrent)}
             title={torrent.name}
-            subtitle={formatTorrentSubtitle(torrent)}
+            subtitle={listDetails.includes("category") ? undefined : formatTorrentSubtitle(torrent)}
             key={torrent.hash}
-            accessories={[
-              formatSizeAccessory(torrent),
-              ...(tagsAccessory ? [tagsAccessory] : []),
-              formatSpeedAccessory("Download", torrent.dlspeed, Color.Green, Icon.Download),
-              formatSpeedAccessory("Upload", torrent.upspeed, Color.Blue, Icon.Upload),
-            ]}
+            detail={<TorrentDetail torrent={torrent} />}
+            accessories={formatListAccessories(torrent, listDetails)}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard title="Copy Torrent Magnet Link" content={torrent.magnet_uri} />
-                <Action.CopyToClipboard title="Copy Save Path" content={torrent.save_path} />
+                <Action.Open title="Open Download Folder" target={torrent.save_path} icon={Icon.Folder} />
+                <Action.OpenInBrowser title="Open in Browser" url={address} shortcut={openInBrowserShortcut} />
+                <Action.CopyToClipboard
+                  title="Copy Save Path"
+                  content={torrent.save_path}
+                  shortcut={Keyboard.Shortcut.Common.Copy}
+                />
+                <Action.CopyToClipboard
+                  title="Copy Torrent Magnet Link"
+                  content={torrent.magnet_uri}
+                  shortcut={copyMagnetLinkShortcut}
+                />
+                <Action
+                  icon={isShowingDetail ? Icon.EyeDisabled : Icon.AppWindowSidebarRight}
+                  title={isShowingDetail ? "Hide Details" : "Show Details"}
+                  shortcut={toggleDetailsShortcut}
+                  onAction={toggleDetails}
+                />
+                <ActionPanel.Submenu icon={Icon.List} title="List Details">
+                  {listDetailOptions.map((option) => (
+                    <Action
+                      key={option.value}
+                      icon={listDetails.includes(option.value) ? Icon.CheckCircle : Icon.Circle}
+                      title={option.title}
+                      onAction={() => toggleListDetail(option.value)}
+                    />
+                  ))}
+                </ActionPanel.Submenu>
+                <ActionPanel.Submenu icon={sort.reverse ? Icon.ArrowDown : Icon.ArrowUp} title="Sort By">
+                  <Action
+                    icon={!sort.field ? Icon.CheckCircle : Icon.List}
+                    title="Default Order"
+                    onAction={() => selectSort()}
+                  />
+                  {sortOptions.map((option) => {
+                    const isSelected = sort.field === option.field;
+
+                    return (
+                      <Action
+                        key={option.field}
+                        icon={isSelected ? (sort.reverse ? Icon.ArrowDown : Icon.ArrowUp) : undefined}
+                        title={
+                          isSelected ? `${option.title} (${sort.reverse ? "Descending" : "Ascending"})` : option.title
+                        }
+                        onAction={() => selectSort(option.field)}
+                      />
+                    );
+                  })}
+                </ActionPanel.Submenu>
                 <Action
                   icon={Icon.Play}
                   title="Resume Torrent"
