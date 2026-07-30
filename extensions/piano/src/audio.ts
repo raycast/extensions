@@ -1,81 +1,56 @@
-import { spawn } from "node:child_process";
-import { existsSync, mkdirSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
+import { environment } from "@raycast/api";
+import { ChildProcess, spawn } from "node:child_process";
 import { join } from "node:path";
 
-const SAMPLE_RATE = 44_100;
-const AUDIO_DIRECTORY = join(tmpdir(), "raycast-piano");
+const MAX_POLYPHONY = 8;
+const NORMAL_NOTE_SECONDS = 1.8;
+const SUSTAINED_NOTE_SECONDS = 4.5;
+const WATCHDOG_GRACE_MS = 1_000;
 
-function midiToFrequency(midi: number): number {
-  return 440 * 2 ** ((midi - 69) / 12);
-}
+type ActiveNote = {
+  midi: number;
+  player: ChildProcess;
+  watchdog: ReturnType<typeof setTimeout>;
+};
 
-function writeAscii(buffer: Buffer, offset: number, value: string): void {
-  buffer.write(value, offset, value.length, "ascii");
-}
+const activeNotes: ActiveNote[] = [];
 
-function buildPianoWave(midi: number, sustained: boolean): Buffer {
-  const duration = sustained ? 4.8 : 2.6;
-  const sampleCount = Math.floor(SAMPLE_RATE * duration);
-  const dataSize = sampleCount * 2;
-  const output = Buffer.alloc(44 + dataSize);
-  const frequency = midiToFrequency(midi);
-
-  writeAscii(output, 0, "RIFF");
-  output.writeUInt32LE(36 + dataSize, 4);
-  writeAscii(output, 8, "WAVE");
-  writeAscii(output, 12, "fmt ");
-  output.writeUInt32LE(16, 16);
-  output.writeUInt16LE(1, 20);
-  output.writeUInt16LE(1, 22);
-  output.writeUInt32LE(SAMPLE_RATE, 24);
-  output.writeUInt32LE(SAMPLE_RATE * 2, 28);
-  output.writeUInt16LE(2, 32);
-  output.writeUInt16LE(16, 34);
-  writeAscii(output, 36, "data");
-  output.writeUInt32LE(dataSize, 40);
-
-  for (let index = 0; index < sampleCount; index++) {
-    const time = index / SAMPLE_RATE;
-    const attack = Math.min(1, time / 0.008);
-    const decay = Math.exp(-time * (sustained ? 0.72 : 1.65));
-    const releaseStart = duration - 0.22;
-    const release = time > releaseStart ? Math.max(0, (duration - time) / (duration - releaseStart)) : 1;
-
-    // A compact additive model: a warm fundamental, struck upper partials, and
-    // a tiny inharmonic component that gives the attack a piano-like shimmer.
-    const tone =
-      Math.sin(2 * Math.PI * frequency * time) * 0.7 +
-      Math.sin(2 * Math.PI * frequency * 2 * time) * 0.2 * Math.exp(-time * 1.2) +
-      Math.sin(2 * Math.PI * frequency * 3 * time) * 0.08 * Math.exp(-time * 2.1) +
-      Math.sin(2 * Math.PI * frequency * 4.03 * time) * 0.035 * Math.exp(-time * 5.5);
-    const hammer = Math.sin(2 * Math.PI * 2_400 * time) * Math.exp(-time * 65) * 0.025;
-    const sample = Math.max(-1, Math.min(1, (tone + hammer) * attack * decay * release * 0.72));
-    output.writeInt16LE(Math.round(sample * 32_767), 44 + index * 2);
+function stopNote(note: ActiveNote): void {
+  clearTimeout(note.watchdog);
+  if (note.player.exitCode === null && note.player.signalCode === null) {
+    note.player.kill("SIGTERM");
   }
-
-  return output;
-}
-
-function audioPath(midi: number, sustained: boolean): string {
-  return join(AUDIO_DIRECTORY, `${midi}-${sustained ? "sustain" : "short"}.wav`);
-}
-
-export function preparePiano(): void {
-  mkdirSync(AUDIO_DIRECTORY, { recursive: true });
+  const index = activeNotes.indexOf(note);
+  if (index >= 0) activeNotes.splice(index, 1);
 }
 
 export function playNote(midi: number, sustained: boolean, volume: number): void {
-  const path = audioPath(midi, sustained);
+  // Re-triggering a key replaces its previous voice instead of accumulating
+  // multiple players for the same sample.
+  const previousVoice = activeNotes.find((note) => note.midi === midi);
+  if (previousVoice) stopNote(previousVoice);
 
-  if (!existsSync(path)) {
-    mkdirSync(AUDIO_DIRECTORY, { recursive: true });
-    writeFileSync(path, buildPianoWave(midi, sustained));
+  while (activeNotes.length >= MAX_POLYPHONY) {
+    const oldestVoice = activeNotes[0];
+    if (oldestVoice) stopNote(oldestVoice);
   }
 
-  const player = spawn("/usr/bin/afplay", ["-v", String(volume), path], {
-    detached: true,
+  const duration = sustained ? SUSTAINED_NOTE_SECONDS : NORMAL_NOTE_SECONDS;
+  const samplePath = join(environment.assetsPath, "samples", `${midi}.mp3`);
+  const player = spawn("/usr/bin/afplay", ["-v", String(volume), "-t", String(duration), samplePath], {
     stdio: "ignore",
   });
-  player.unref();
+  const note = {
+    midi,
+    player,
+    watchdog: setTimeout(() => stopNote(note), duration * 1_000 + WATCHDOG_GRACE_MS),
+  };
+
+  activeNotes.push(note);
+  player.once("error", () => stopNote(note));
+  player.once("exit", () => stopNote(note));
+}
+
+export function stopAllNotes(): void {
+  for (const note of [...activeNotes]) stopNote(note);
 }

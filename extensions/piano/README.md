@@ -1,6 +1,7 @@
 # Piano for Raycast
 
-A playable piano that lives entirely inside Raycast. It uses Raycast's native Detail and Action Panel APIs and synthesizes its own audio locally.
+A playable piano that lives entirely inside Raycast. It uses Raycast's native Detail and Action Panel APIs and
+MIT-licensed MuseScore piano recordings for a natural acoustic sound.
 
 ## Play
 
@@ -20,4 +21,10 @@ The notes are also available as clickable actions in Raycast's action panel (`‚å
 3. Run `npm run dev`.
 4. Search for **Play Piano** in Raycast.
 
-Audio is generated on-device as short WAV files and played through `/usr/bin/afplay`. No network access or sample library is needed.
+Audio samples are bundled with the extension and played locally through `/usr/bin/afplay`; the extension makes no
+network requests. Playback is capped at eight simultaneous notes, every player has a watchdog, and all playback is
+stopped when the command closes.
+
+Samples are derived from
+[Leethring/piano-sound-samples](https://github.com/Leethring/piano-sound-samples) under the MIT License. See
+[`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon, Keyboard } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { playNote, preparePiano } from "./audio";
+import { playNote, stopAllNotes } from "./audio";
 
 type PianoKey = {
   key: Keyboard.KeyEquivalent;
@@ -40,10 +40,9 @@ export default function Piano() {
   const noteTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
-    preparePiano();
-
     return () => {
       if (noteTimer.current) clearTimeout(noteTimer.current);
+      stopAllNotes();
     };
   }, []);
 
