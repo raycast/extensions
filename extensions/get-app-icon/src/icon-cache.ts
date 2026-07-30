@@ -69,8 +69,8 @@ while let line = readLine() {
       .appendingPathComponent("${TEMP_PREFIX}" + UUID().uuidString)
     do {
       try data.write(to: tmpURL, options: .atomic)
-      // Stamp BEFORE moving into place, so the entry is never briefly visible with a
-      // wall-clock mtime that would read as fresher than it is.
+      // Stamp the temp file first so the entry is never even briefly visible carrying a
+      // wall-clock mtime; the post-finalization block below is what actually enforces it.
       if let stamp = stamp, stamp > 0 {
         try? fm.setAttributes([.modificationDate: Date(timeIntervalSince1970: stamp)], ofItemAtPath: tmpURL.path)
       }
@@ -78,6 +78,26 @@ while let line = readLine() {
         _ = try fm.replaceItemAt(finalURL, withItemAt: tmpURL)
       } else {
         try fm.moveItem(at: tmpURL, to: finalURL)
+      }
+      // Re-apply the stamp AFTER finalization and verify it took. \`moveItem\` preserves
+      // metadata within a volume, but \`replaceItemAt\` makes no broad cross-filesystem
+      // guarantee about the modification date — and if the stamp silently reverts to
+      // wall-clock time, an old bitmap drawn before an update reads as newer than the
+      // updated app and the stale icon is served forever. That is the exact race the
+      // stamp exists to prevent, so it must not depend on an unchecked \`try?\`.
+      if let stamp = stamp, stamp > 0 {
+        let target = Date(timeIntervalSince1970: stamp)
+        try fm.setAttributes([.modificationDate: target], ofItemAtPath: finalURL.path)
+        let applied = (try fm.attributesOfItem(atPath: finalURL.path)[.modificationDate] as? Date)
+        // Sub-millisecond slack: the stamp is serialized to 3 decimal places, so an exact
+        // equality check would fail on filesystems with finer resolution.
+        guard let applied = applied, abs(applied.timeIntervalSince1970 - stamp) < 0.002 else {
+          // Leave no entry rather than one whose mtime lies about what it depicts.
+          try? fm.removeItem(at: finalURL)
+          print("fail")
+          fflush(stdout)
+          continue
+        }
       }
       wrote = true
     } catch {
@@ -119,56 +139,98 @@ export function cachedIconPath(appPath: string): string {
  * `Info.plist` is included because it names the icon file, and `Resources` because its
  * directory mtime moves when an icon is added, replaced, or removed. Missing entries
  * are ignored, so an Asset Catalog app with no `.icns` is handled by the same check.
+ *
+ * The icon payloads themselves are sampled too, because a directory's mtime moves only
+ * when an *entry* changes — rewriting an existing file's bytes leaves it untouched.
+ * Verified: overwriting `AppIcon.icns` in place moved only that file's mtime, and none of
+ * the four directory/plist stamps, so the change was invisible without this.
+ *
+ * `AppIcon.icns` and `Assets.car` are the conventional names and cover the overwhelming
+ * majority; a bundle using a different `CFBundleIconFile` still gets caught by the
+ * `Resources` directory stamp on any add/replace/remove. Reading the plist to resolve the
+ * real name would cost a `plutil` spawn per app per grid visit, which is a bad trade for
+ * a case the directory stamp already handles.
  */
 function iconStampPaths(appPath: string): string[] {
+  const resources = path.join(appPath, "Contents", "Resources");
   return [
     appPath,
     path.join(appPath, "Contents"),
     path.join(appPath, "Contents", "Info.plist"),
-    path.join(appPath, "Contents", "Resources"),
+    resources,
+    path.join(resources, "AppIcon.icns"),
+    path.join(resources, "Assets.car"),
   ];
 }
 
 /**
- * The newest mtime across the paths that reflect an app's icon, in epoch ms.
+ * What the icon-source timestamps say about an app.
  *
- * Every unreadable path — whether genuinely absent (`ENOENT`, the normal shape of an
- * Asset Catalog app with no `Resources`) or merely unreadable (`EACCES`, I/O error) —
- * contributes nothing and the readable stamps decide.
- *
- * An earlier revision returned `Infinity` for the unreadable case, reasoning that "we
- * can't prove it's unchanged" should force a re-extract. That is unsatisfiable: no file
- * can have an mtime >= Infinity, so the entry stayed stale *forever* and every grid visit
- * relaunched the Swift extractor for an icon it had already successfully cached — trading
- * a rare stale tile for a permanent extraction storm. Extraction reads the icon through
- * `NSWorkspace`, which often succeeds even when a subpath can't be stat'd, so the cached
- * PNG is usually perfectly good. Treating an unreadable stamp as no-evidence re-extracts
- * once (the bundle's own mtime still moves on a real update) and then converges.
+ * `mtime` is the newest readable stamp. `unverifiable` records that a stamp existed but
+ * couldn't be read, which is *not* the same as "unchanged" — see below.
  */
-async function iconSourceMtime(appPath: string): Promise<number> {
-  const stamps = await Promise.all(
+type IconSourceStamp = {
+  mtime: number;
+  unverifiable: boolean;
+};
+
+/**
+ * The icon-source timestamps for an app: the newest readable mtime, plus whether any
+ * stamp was unreadable.
+ *
+ * Three-way, because two of these are easy to conflate and each collapse is a real bug:
+ *
+ * - **Absent** (`ENOENT`/`ENOTDIR`) contributes nothing. That's the ordinary shape of an
+ *   Asset Catalog app with no `Resources`, so it must not force re-extraction.
+ * - **Unreadable** (`EACCES`, I/O error) is *no information at all*. Treating it as 0 lets
+ *   an in-place update hide: if the only paths that moved are the unreadable ones, the
+ *   stale-but-newer-than-the-root cache passes the freshness test and the grid serves the
+ *   pre-update icon forever. Verified with the bundle root at mode 000 — `Contents`,
+ *   `Info.plist` and `Resources` all `EACCES`, root mtime unchanged, cache judged FRESH.
+ * - **Readable** decides normally.
+ *
+ * `unverifiable` is deliberately *not* folded into `mtime` as a sentinel. An earlier
+ * revision returned `Infinity` for the unreadable case; that is unsatisfiable — no file's
+ * mtime is >= Infinity — so entries stayed stale forever and every grid visit relaunched
+ * the extractor for an icon already cached successfully. Callers get the fact and decide,
+ * which is what lets extraction converge once access recovers.
+ */
+async function iconSourceStamp(appPath: string): Promise<IconSourceStamp> {
+  const results = await Promise.all(
     iconStampPaths(appPath).map(async (target) => {
       try {
-        return (await stat(target)).mtimeMs;
-      } catch {
-        return 0; // absent or unreadable — contributes no evidence of change
+        return { mtime: (await stat(target)).mtimeMs, unverifiable: false };
+      } catch (error) {
+        const code = (error as NodeJS.ErrnoException).code;
+        const absent = code === "ENOENT" || code === "ENOTDIR";
+        return { mtime: 0, unverifiable: !absent };
       }
     }),
   );
-  return Math.max(...stamps);
+  return {
+    mtime: Math.max(...results.map((result) => result.mtime)),
+    unverifiable: results.some((result) => result.unverifiable),
+  };
 }
 
 /**
- * Apps whose cached icon is missing or older than the bundle's icon sources, so this
- * re-extracts exactly the icons that changed and leaves the rest alone.
+ * Apps whose cached icon is missing, older than the bundle's icon sources, or whose
+ * sources couldn't be read — so this re-extracts exactly the icons that changed, plus the
+ * ones we can't vouch for, and leaves the rest alone.
+ *
+ * An unreadable source counts as stale because the alternative is serving a pre-update
+ * icon indefinitely. It doesn't loop: the entry written for such an app is stamped at
+ * wall-clock time (see `refreshIconCache`), and once access recovers the readable stamps
+ * are older than that, so it settles.
  */
 async function findStaleApps(appPaths: readonly string[]): Promise<string[]> {
   const stale = await Promise.all(
     appPaths.map(async (appPath) => {
       const cached = cachedIconPath(appPath);
       try {
-        const [cachedStat, sourceMtime] = await Promise.all([stat(cached), iconSourceMtime(appPath)]);
-        return cachedStat.mtimeMs >= sourceMtime ? null : appPath;
+        const [cachedStat, source] = await Promise.all([stat(cached), iconSourceStamp(appPath)]);
+        if (source.unverifiable) return appPath;
+        return cachedStat.mtimeMs >= source.mtime ? null : appPath;
       } catch {
         return appPath; // not cached yet
       }
@@ -206,7 +268,7 @@ export async function refreshIconCache(
   const jobs = (
     await Promise.all(
       stale.map(async (appPath) => {
-        const observed = await iconSourceMtime(appPath);
+        const source = await iconSourceStamp(appPath);
         // Seconds, as Swift's Date(timeIntervalSince1970:) takes. Rounded UP to the next
         // millisecond: the freshness test is `cached >= source`, so a stamp that landed
         // even a fraction of a millisecond below the source mtime would read as stale on
@@ -214,12 +276,15 @@ export async function refreshIconCache(
         // just-written entry at or above its source while staying far below the mtime any
         // later app update would produce.
         //
-        // Guard the serialization: a non-finite or zero value has no sane representation
-        // here ("Infinity" doesn't parse as a Swift Double, and 1970 would mark the entry
-        // stale forever). Omitting the field leaves the file at wall-clock time, which is
-        // the safe default. `iconSourceMtime` shouldn't produce either, so this is an
-        // invariant rather than an expected path.
-        const stamp = Number.isFinite(observed) && observed > 0 ? ` ${(Math.ceil(observed) / 1000).toFixed(3)}` : "";
+        // Omit the stamp when the sources couldn't be fully read, or when there is no
+        // usable time at all. `observed` then describes only the *readable* subset, which
+        // for an unverifiable app is precisely the pre-update root that hid the change in
+        // the first place — stamping with it would re-assert the freshness we just refused
+        // to believe. Omitting leaves the file at wall-clock time, which is both honest
+        // ("this is when we drew it") and self-clearing: once access recovers, the readable
+        // stamps are older than the write, so the entry settles instead of looping.
+        const usable = !source.unverifiable && Number.isFinite(source.mtime) && source.mtime > 0;
+        const stamp = usable ? ` ${(Math.ceil(source.mtime) / 1000).toFixed(3)}` : "";
         return `${encode(appPath)} ${encode(cachedIconPath(appPath))}${stamp}`;
       }),
     )
