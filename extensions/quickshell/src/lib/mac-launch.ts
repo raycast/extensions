@@ -10,6 +10,11 @@ export type MacLaunchInvocation = {
   displayName: string;
 };
 
+type MacLaunchEntryGroup = {
+  hostId: MacTerminalHostId;
+  entries: LaunchPlanEntry[];
+};
+
 const TERMINAL_APP_CANDIDATES = ["/System/Applications/Utilities/Terminal.app", "/Applications/Utilities/Terminal.app"];
 const ITERM_APP_CANDIDATES = ["/Applications/iTerm.app", "/Applications/iTerm2.app"];
 
@@ -67,6 +72,44 @@ export function buildMacShellCommand(directory: string, command: string | null |
   return `${cd} && ${trimmed}`;
 }
 
+/**
+ * Group Mac launches by terminal host. When `separateWindows` is false, compatible
+ * entries share one Terminal.app / iTerm window as tabs. Elevation is ignored on Mac.
+ */
+export function groupMacLaunchEntries(
+  entries: LaunchPlanEntry[],
+  settings: QuickShellSettings,
+  separateWindows: boolean,
+): MacLaunchEntryGroup[] {
+  if (separateWindows) {
+    return entries.map((entry) => ({
+      hostId: resolveMacTerminalHostId(entry.launch.terminal, settings),
+      entries: [entry],
+    }));
+  }
+
+  const groups: MacLaunchEntryGroup[] = [];
+  const groupIndexByHost = new Map<MacTerminalHostId, number>();
+  let previousHostId: MacTerminalHostId | undefined;
+
+  for (const entry of entries) {
+    const hostId =
+      entry.launch.terminal?.trim().toLowerCase() === "same-as-previous" && previousHostId
+        ? previousHostId
+        : resolveMacTerminalHostId(entry.launch.terminal, settings);
+    previousHostId = hostId;
+    const existingIndex = groupIndexByHost.get(hostId);
+    if (existingIndex !== undefined) {
+      groups[existingIndex].entries.push(entry);
+      continue;
+    }
+    groupIndexByHost.set(hostId, groups.length);
+    groups.push({ hostId, entries: [entry] });
+  }
+
+  return groups;
+}
+
 /** Directory-only: `open -a App /path`. With command: osascript do-script / iTerm write text. */
 export function buildMacLaunchInvocation(
   directory: string,
@@ -108,8 +151,55 @@ export function buildMacLaunchInvocation(
   };
 }
 
+/** One window with tabs for multiple entries sharing a Mac terminal host. */
+export function buildMacTabbedLaunchInvocation(
+  entries: LaunchPlanEntry[],
+  hostId: MacTerminalHostId,
+): MacLaunchInvocation {
+  if (entries.length === 0) {
+    throw new Error("Mac tabbed launch requires at least one entry.");
+  }
+  if (entries.length === 1) {
+    return buildMacLaunchInvocation(entries[0].directory, entries[0].command, hostId);
+  }
+
+  const { appName, displayName } = resolveMacAppName(hostId);
+  const shellCommands = entries.map((entry) => buildMacShellCommand(entry.directory, entry.command));
+
+  if (appName === "iTerm" || appName === "iTerm2") {
+    const lines = ['tell application "iTerm"', "  activate", "  create window with default profile"];
+    lines.push(`  tell current session of current window to write text ${appleScriptString(shellCommands[0])}`);
+    for (let index = 1; index < shellCommands.length; index += 1) {
+      lines.push("  tell current window");
+      lines.push("    create tab with default profile");
+      lines.push(`    tell current session to write text ${appleScriptString(shellCommands[index])}`);
+      lines.push("  end tell");
+    }
+    lines.push("end tell");
+    return {
+      executable: "osascript",
+      args: ["-e", lines.join("\n")],
+      displayName,
+    };
+  }
+
+  const lines = ['tell application "Terminal"', "  activate"];
+  lines.push(`  do script ${appleScriptString(shellCommands[0])}`);
+  for (let index = 1; index < shellCommands.length; index += 1) {
+    lines.push(`  do script ${appleScriptString(shellCommands[index])} in front window`);
+  }
+  lines.push("end tell");
+  return {
+    executable: "osascript",
+    args: ["-e", lines.join("\n")],
+    displayName,
+  };
+}
+
 export function buildMacLaunchInvocations(plan: LaunchPlan, settings: QuickShellSettings): MacLaunchInvocation[] {
-  return plan.entries.map((entry) => buildMacLaunchInvocationForEntry(entry, settings));
+  const separateWindows = settings.multiLaunchPresentation === "separateWindows";
+  const groups = groupMacLaunchEntries(plan.entries, settings, separateWindows);
+  return groups.map((group) => buildMacTabbedLaunchInvocation(group.entries, group.hostId));
 }
 
 export function buildMacLaunchInvocationForEntry(

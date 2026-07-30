@@ -51,14 +51,20 @@ describe("extension-preferences", () => {
     expect(windows.multiLaunchPresentation).toBe("separateWindows");
   });
 
-  it("normalizes Windows terminals to Terminal.app on macOS and forces separate windows", () => {
+  it("normalizes Windows terminals to Terminal.app on macOS and respects tab preference", () => {
     Object.defineProperty(process, "platform", { configurable: true, value: "darwin" });
     const settings = preferencesToSettings({
       terminalApplication: "wt",
       singleWindowTabs: true,
     });
     expect(settings.terminalApplication).toBe("terminal");
-    expect(settings.multiLaunchPresentation).toBe("separateWindows");
+    expect(settings.multiLaunchPresentation).toBe("singleWindowTabs");
+
+    const separate = preferencesToSettings({
+      terminalApplication: "terminal",
+      singleWindowTabs: false,
+    });
+    expect(separate.multiLaunchPresentation).toBe("separateWindows");
   });
 
   it("accepts iterm on macOS", () => {

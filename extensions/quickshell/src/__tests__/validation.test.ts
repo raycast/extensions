@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeWorkspace, validateWorkspace } from "../lib/validation";
+import { normalizeWorkspace, validateWorkspace, workspaceHasConfiguredCompanions } from "../lib/validation";
 import type { Workspace } from "../lib/schema";
 
 function sampleWorkspace(overrides: Partial<Workspace> = {}): Workspace {
@@ -54,5 +54,24 @@ describe("validation", () => {
     );
     expect(workspace.launches).toHaveLength(1);
     expect(workspace.launches[0].command).toBe("dotnet run");
+  });
+
+  it("detects configured companion apps for list actions", () => {
+    expect(workspaceHasConfiguredCompanions(sampleWorkspace())).toBe(false);
+    expect(
+      workspaceHasConfiguredCompanions(
+        sampleWorkspace({
+          companionApps: [
+            {
+              id: "c1",
+              path: "C:\\Editors\\Code.exe",
+              arguments: null,
+              openOnLaunch: false,
+              order: 0,
+            },
+          ],
+        }),
+      ),
+    ).toBe(true);
   });
 });

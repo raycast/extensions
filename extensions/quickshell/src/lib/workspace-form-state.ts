@@ -17,6 +17,7 @@ export type LaunchFormRow = {
   runAsAdmin: boolean;
   isEnabled: boolean;
   label: string;
+  taskType: string;
 };
 
 export type CompanionFormRow = {
@@ -89,7 +90,7 @@ export function buildWorkspaceFromFormState(initialWorkspace: Workspace, state: 
       runAsAdmin: usesSharedLaunchControls(state) ? state.runAsAdmin : row.runAsAdmin || state.runAsAdmin,
       isEnabled: row.isEnabled,
       order: index,
-      taskType: "none",
+      taskType: row.taskType?.trim() || "none",
     }));
 
   const primary = launches.find((entry) => entry.isEnabled) ?? launches[0];
@@ -136,6 +137,7 @@ export function workspaceFormStateFromWorkspace(workspace: Workspace): Workspace
         runAsAdmin: launch.runAsAdmin,
         isEnabled: launch.isEnabled,
         label: launch.label,
+        taskType: launch.taskType?.trim() || "none",
       }))
     : [
         {
@@ -146,6 +148,7 @@ export function workspaceFormStateFromWorkspace(workspace: Workspace): Workspace
           runAsAdmin: workspace.runAsAdmin,
           isEnabled: true,
           label: workspace.name || "Launch",
+          taskType: "none",
         },
       ];
 
@@ -179,7 +182,7 @@ export function workspaceFormStateFromWorkspace(workspace: Workspace): Workspace
 }
 
 export function launchRowsFromSuggestions(
-  suggestions: Array<{ label: string; command: string }>,
+  suggestions: Array<{ label: string; command: string; taskType?: string }>,
   terminal = "default",
 ): LaunchFormRow[] {
   return suggestions.map((suggestion, index) => ({
@@ -191,7 +194,55 @@ export function launchRowsFromSuggestions(
     runAsAdmin: false,
     isEnabled: true,
     label: suggestion.label,
+    taskType: suggestion.taskType?.trim() || "none",
   }));
+}
+
+/**
+ * Apply a suggestion pill like Core LaunchRowListEditor.ApplyPill:
+ * fill the first empty command row, otherwise append.
+ */
+export function applySuggestionPillToLaunchRows(
+  rows: LaunchFormRow[],
+  pill: { command: string; taskType: string; displayTitle?: string; typeTitle?: string },
+  options?: { runAsAdmin?: boolean; firstLaunchTerminal?: string },
+): LaunchFormRow[] {
+  const command = pill.command.trim();
+  if (!command) {
+    return rows;
+  }
+
+  const label = (pill.displayTitle || pill.typeTitle || command).trim() || command;
+  const taskType = pill.taskType?.trim() || "none";
+  const emptyIndex = rows.findIndex((row) => !row.command.trim());
+  if (emptyIndex >= 0) {
+    return rows.map((row, index) =>
+      index === emptyIndex
+        ? {
+            ...row,
+            command,
+            label,
+            taskType,
+            isEnabled: true,
+          }
+        : row,
+    );
+  }
+
+  const terminal = terminalForAddedLaunch(rows, options?.firstLaunchTerminal ?? "default");
+  return [
+    ...rows,
+    {
+      id: createStableId(),
+      command,
+      terminal: terminal.terminal,
+      wtProfile: terminal.wtProfile,
+      runAsAdmin: options?.runAsAdmin ?? false,
+      isEnabled: true,
+      label,
+      taskType,
+    },
+  ];
 }
 
 /**

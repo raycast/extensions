@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { Workspace } from "../lib/schema";
 import {
   additionalLaunchCount,
+  applySuggestionPillToLaunchRows,
   buildWorkspaceFromFormState,
   filterWorkspacesForEdit,
   launchRowsFromSuggestions,
@@ -31,7 +32,7 @@ const multiLaunchWorkspace: Workspace = {
       runAsAdmin: false,
       isEnabled: true,
       order: 0,
-      taskType: "none",
+      taskType: "api",
     },
     {
       id: "1b",
@@ -42,7 +43,7 @@ const multiLaunchWorkspace: Workspace = {
       runAsAdmin: false,
       isEnabled: true,
       order: 1,
-      taskType: "none",
+      taskType: "frontend",
     },
   ],
 };
@@ -60,6 +61,31 @@ const defaultExtras = {
   repoUrl: "",
 };
 
+function launchRow(
+  overrides: Partial<{
+    id: string;
+    command: string;
+    terminal: string;
+    wtProfile: string | null;
+    runAsAdmin: boolean;
+    isEnabled: boolean;
+    label: string;
+    taskType: string;
+  }> = {},
+) {
+  return {
+    id: "1a",
+    command: "dotnet run",
+    terminal: "wt",
+    wtProfile: null as string | null,
+    runAsAdmin: false,
+    isEnabled: true,
+    label: "API",
+    taskType: "none",
+    ...overrides,
+  };
+}
+
 describe("workspace-form-state", () => {
   it("preserves additional launches when editing the primary launch", () => {
     const next = buildWorkspaceFromFormState(multiLaunchWorkspace, {
@@ -71,24 +97,13 @@ describe("workspace-form-state", () => {
       isPinned: false,
       runAsAdmin: false,
       launches: [
-        {
-          id: "1a",
-          command: "dotnet watch run",
-          terminal: "wt",
-          wtProfile: null,
-          runAsAdmin: false,
-          isEnabled: true,
-          label: "API",
-        },
-        {
+        launchRow({ id: "1a", command: "dotnet watch run", label: "API", taskType: "api" }),
+        launchRow({
           id: "1b",
           command: "npm run dev",
-          terminal: "wt",
-          wtProfile: null,
-          runAsAdmin: false,
-          isEnabled: true,
           label: "Web",
-        },
+          taskType: "frontend",
+        }),
       ],
       ...defaultExtras,
     });
@@ -109,24 +124,8 @@ describe("workspace-form-state", () => {
       isPinned: false,
       runAsAdmin: false,
       launches: [
-        {
-          id: "1a",
-          command: "dotnet run",
-          terminal: "wt",
-          wtProfile: null,
-          runAsAdmin: false,
-          isEnabled: true,
-          label: "API",
-        },
-        {
-          id: "1b",
-          command: "",
-          terminal: "wt",
-          wtProfile: null,
-          runAsAdmin: false,
-          isEnabled: true,
-          label: "Web",
-        },
+        launchRow({ id: "1a", command: "dotnet run", label: "API", taskType: "api" }),
+        launchRow({ id: "1b", command: "", label: "Web", taskType: "frontend" }),
       ],
       ...defaultExtras,
     });
@@ -145,24 +144,22 @@ describe("workspace-form-state", () => {
       isPinned: false,
       runAsAdmin: false,
       launches: [
-        {
+        launchRow({
           id: "1a",
           command: "dotnet run",
           terminal: "wt",
           wtProfile: "PowerShell",
-          runAsAdmin: false,
-          isEnabled: true,
           label: "API",
-        },
-        {
+          taskType: "api",
+        }),
+        launchRow({
           id: "1b",
           command: "",
           terminal: "wt",
           wtProfile: "Ubuntu",
-          runAsAdmin: false,
-          isEnabled: true,
           label: "Web",
-        },
+          taskType: "frontend",
+        }),
       ],
       ...defaultExtras,
     });
@@ -193,15 +190,14 @@ describe("workspace-form-state", () => {
       isPinned: false,
       runAsAdmin: false,
       launches: [
-        {
+        launchRow({
           id: "1a",
           command: "dotnet run",
           terminal: "wt",
           wtProfile: "PowerShell",
-          runAsAdmin: false,
-          isEnabled: true,
           label: "API",
-        },
+          taskType: "api",
+        }),
       ],
       ...defaultExtras,
     });
@@ -219,11 +215,27 @@ describe("workspace-form-state", () => {
     expect(state.launches[1].label).toBe("Web");
   });
 
-  it("builds launch rows from project suggestions", () => {
+  it("round-trips taskType through form state load and save", () => {
+    const state = workspaceFormStateFromWorkspace(multiLaunchWorkspace);
+    expect(state.launches[0].taskType).toBe("api");
+    expect(state.launches[1].taskType).toBe("frontend");
+
+    const next = buildWorkspaceFromFormState(multiLaunchWorkspace, {
+      ...state,
+      ...defaultExtras,
+      companions: state.companions,
+      launches: state.launches,
+    });
+
+    expect(next.launches[0].taskType).toBe("api");
+    expect(next.launches[1].taskType).toBe("frontend");
+  });
+
+  it("builds launch rows from project suggestions including taskType", () => {
     const rows = launchRowsFromSuggestions(
       [
-        { label: "Dev", command: "npm run dev" },
-        { label: "Tests", command: "npm run test" },
+        { label: "Dev", command: "npm run dev", taskType: "frontend" },
+        { label: "Tests", command: "npm run test", taskType: "test" },
       ],
       "wt",
     );
@@ -231,8 +243,42 @@ describe("workspace-form-state", () => {
     expect(rows).toHaveLength(2);
     expect(rows[0].command).toBe("npm run dev");
     expect(rows[0].terminal).toBe("wt");
+    expect(rows[0].taskType).toBe("frontend");
     expect(rows[1].label).toBe("Tests");
     expect(rows[1].terminal).toBe("same-as-previous");
+    expect(rows[1].taskType).toBe("test");
+  });
+
+  it("applies suggestion pills into the first empty row and preserves taskType", () => {
+    const filled = applySuggestionPillToLaunchRows(
+      [
+        launchRow({ id: "empty", command: "", label: "Launch", taskType: "none" }),
+        launchRow({ id: "kept", command: "npm test", label: "Tests", taskType: "test" }),
+      ],
+      {
+        command: "claude",
+        taskType: "agent",
+        displayTitle: "Claude",
+      },
+    );
+
+    expect(filled[0].command).toBe("claude");
+    expect(filled[0].label).toBe("Claude");
+    expect(filled[0].taskType).toBe("agent");
+    expect(filled[1].command).toBe("npm test");
+  });
+
+  it("appends a suggestion pill when every command row is filled", () => {
+    const appended = applySuggestionPillToLaunchRows(
+      [launchRow({ id: "1a", command: "npm run dev", label: "Dev", taskType: "frontend" })],
+      { command: "dotnet watch", taskType: "api", typeTitle: "API" },
+    );
+
+    expect(appended).toHaveLength(2);
+    expect(appended[1].command).toBe("dotnet watch");
+    expect(appended[1].taskType).toBe("api");
+    expect(appended[1].label).toBe("API");
+    expect(appended[1].terminal).toBe("same-as-previous");
   });
 
   it("defaults added launch terminal like CmdPal (default then same-as-previous)", () => {
@@ -281,15 +327,13 @@ describe("workspace-form-state", () => {
       isPinned: false,
       runAsAdmin: true,
       launches: [
-        {
+        launchRow({
           id: "1a",
           command: "npm run dev",
           terminal: "default",
-          wtProfile: null,
-          runAsAdmin: false,
-          isEnabled: true,
           label: "Dev",
-        },
+          taskType: "frontend",
+        }),
       ],
       ...defaultExtras,
     });

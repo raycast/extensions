@@ -1,10 +1,19 @@
 # Quick Shell Changelog
 
-## [macOS Tier A] - {PR_MERGE_DATE}
+## [Command suggestions] - {PR_MERGE_DATE}
+
+- Package Windows `QuickShell.Suggest.exe` into Raycast assets for richer command suggestions
+- Manual Add Workspace shows suggestions in the dropdown without auto-applying them
+- Keep leftover suggestions selectable; fall back to local folder heuristics on macOS or when Suggest is unavailable
+- Improve discovered-repo workspace seeding and suggestion reliability
+
+## [macOS Tier A] - 2026-07-22
 
 - Add macOS to Raycast platforms: Terminal.app / iTerm2 launch, Mac companions, discover roots, import/export dialogs
-- Multi-launch on Mac opens separate windows; Windows Terminal tab grouping unchanged on Windows
-- Dual-platform keyboard shortcuts; CI macOS test job alongside Windows lint/build
+- Multi-launch tabs on Mac (Terminal.app / iTerm2) when the preference is enabled; Windows Terminal tab grouping unchanged on Windows
+- Open Directory allows POSIX paths; hide Run as administrator on Mac
+- Richer Mac discover roots (`~/Code`, `~/Library/Developer`, Desktop/Documents Projects, …)
+- Dual-platform keyboard shortcuts; CI macOS lint/test/build alongside Windows
 - Distribution is Raycast Store only (no GitHub Release / WinGet sideload packages)
 
 ## [Preferences, useForm, and navigation] - 2026-07-06

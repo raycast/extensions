@@ -1,22 +1,22 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import WorkspaceForm from "./workspace-form";
 import UnsupportedPlatformView from "./unsupported-platform-view";
 import { detectCompanionSeed } from "../lib/companion-detection";
 import { detectDevServerUrl } from "../lib/detect-dev-server-url";
-import { buildProjectSetupSuggestions } from "../lib/project-setup-suggestion";
-import { discoverGitReposCached } from "../lib/git-repo-discovery";
+import { createWorkspaceFromDiscoveredGitRepo } from "../lib/discovered-workspace-seed";
+import { resolveWorkspaceSetupSuggestions } from "../lib/suggest-commands";
+import {
+  discoverGitReposCached,
+  discoverGitReposForQueryAsync,
+  type GitRepoCandidate,
+} from "../lib/git-repo-discovery";
 import { searchRootsFromWorkspaces } from "../lib/git-repo-search-roots";
-import { deriveAbbreviationFromName, deriveNameFromDirectory } from "../lib/directory-helpers";
-import { tryGetGitRemoteUrl } from "../lib/git-remote-url";
 import { getQuickShellStorage } from "../lib/raycast-storage";
 import { showStorageFailure } from "../lib/failure-feedback";
 import { isSupportedPlatform } from "../lib/platform";
 import { useLoadErrorToast } from "../lib/use-load-error-toast";
-import { launchRowsFromSuggestions } from "../lib/workspace-form-state";
-import { normalizeWorkspace } from "../lib/validation";
-import { createStableId } from "../lib/ids";
 import type { Workspace } from "../lib/schema";
 
 type ReviewWorkspaceFormProps = {
@@ -26,108 +26,43 @@ type ReviewWorkspaceFormProps = {
   onCreated: (workspace: Workspace) => Promise<void>;
 };
 
-/** Full seed for Review: launches, companions, remotes, project suggestions. */
-function buildWorkspaceFromRepo(directory: string, name: string, remoteUrl?: string | null): Workspace {
-  const suggestions = buildProjectSetupSuggestions(directory);
-  const rows = launchRowsFromSuggestions(suggestions);
-  const launchEntries =
-    rows.length > 0
-      ? rows.map((row, index) => ({
-          id: row.id,
-          label: row.label,
-          terminal: row.terminal,
-          wtProfile: row.wtProfile ?? null,
-          command: row.command || null,
-          runAsAdmin: row.runAsAdmin,
-          isEnabled: row.isEnabled,
-          order: index,
-          taskType: "none" as const,
-        }))
-      : [
-          {
-            id: createStableId(),
-            label: "Launch",
-            terminal: "default" as const,
-            wtProfile: null,
-            command: null,
-            runAsAdmin: false,
-            isEnabled: true,
-            order: 0,
-            taskType: "none" as const,
-          },
-        ];
-  const derivedName = name || deriveNameFromDirectory(directory);
-  const companionSeed = detectCompanionSeed(directory);
-  const resolvedRemote = remoteUrl ?? tryGetGitRemoteUrl(directory);
-  return normalizeWorkspace({
-    id: createStableId(),
-    name: derivedName,
-    abbreviation: deriveAbbreviationFromName(derivedName),
+/** Full seed for every repository selected from Discover Git Repos. */
+async function buildWorkspaceFromRepo(directory: string, name: string, remoteUrl?: string | null): Promise<Workspace> {
+  const resolved = await resolveWorkspaceSetupSuggestions(directory, [], Date.now(), environment.assetsPath);
+  return createWorkspaceFromDiscoveredGitRepo({
     directory,
-    isPinned: false,
-    pinOrder: null,
-    lastUsedUtc: null,
-    terminal: "default",
-    wtProfile: null,
-    command: null,
-    runAsAdmin: false,
-    repoUrl: resolvedRemote,
+    name,
+    remoteUrl,
     devServerUrl: detectDevServerUrl(directory),
-    launches: launchEntries,
-    companionApps: companionSeed
-      ? [
-          {
-            id: createStableId(),
-            path: companionSeed.path,
-            arguments: companionSeed.arguments || null,
-            openOnLaunch: true,
-            order: 0,
-          },
-        ]
-      : [],
-  });
-}
-
-/** One-click Quick Add: blank launch row only, no deep project/companion walk. */
-function buildLightWorkspaceFromRepo(directory: string, name: string, remoteUrl?: string | null): Workspace {
-  const derivedName = name || deriveNameFromDirectory(directory);
-  const resolvedRemote = remoteUrl ?? tryGetGitRemoteUrl(directory);
-  return normalizeWorkspace({
-    id: createStableId(),
-    name: derivedName,
-    abbreviation: deriveAbbreviationFromName(derivedName),
-    directory,
-    isPinned: false,
-    pinOrder: null,
-    lastUsedUtc: null,
-    terminal: "default",
-    wtProfile: null,
-    command: null,
-    runAsAdmin: false,
-    repoUrl: resolvedRemote,
-    devServerUrl: null,
-    launches: [
-      {
-        id: createStableId(),
-        label: "Launch",
-        terminal: "default",
-        wtProfile: null,
-        command: null,
-        runAsAdmin: false,
-        isEnabled: true,
-        order: 0,
-        taskType: "none",
-      },
-    ],
-    companionApps: [],
+    tasks: resolved.tasks,
+    companionSeed: detectCompanionSeed(directory),
   });
 }
 
 function ReviewWorkspaceForm({ directory, name, remoteUrl, onCreated }: ReviewWorkspaceFormProps) {
-  const initialWorkspace = useMemo(
-    () => buildWorkspaceFromRepo(directory, name, remoteUrl),
-    [directory, name, remoteUrl],
-  );
+  const {
+    data: initialWorkspace,
+    isLoading,
+    error,
+  } = usePromise(async () => buildWorkspaceFromRepo(directory, name, remoteUrl));
+
+  useLoadErrorToast(error, "Failed to prepare workspace");
+
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView icon={Icon.ExclamationMark} title="Workspace prep failed" description={error.message} />
+      </List>
+    );
+  }
+
+  if (!initialWorkspace) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView title="Preparing workspace…" description="Loading suggestions for this repository." />
+      </List>
+    );
+  }
 
   return (
     <WorkspaceForm mode="create" initialWorkspace={initialWorkspace} directorySeedMode="full" onCreated={onCreated} />
@@ -140,39 +75,125 @@ type DiscoverGitReposViewProps = {
   popOnAdd?: boolean;
 };
 
+function discoveryContextForWorkspaces(workspaces: Workspace[]) {
+  return {
+    existingDirs: new Set(workspaces.map((workspace) => workspace.directory.toLowerCase())),
+    extraRoots: searchRootsFromWorkspaces(workspaces.map((workspace) => workspace.directory)),
+  };
+}
+
 export default function DiscoverGitReposView({ onWorkspaceAdded, popOnAdd = true }: DiscoverGitReposViewProps) {
   const [searchText, setSearchText] = useState("");
+  const [targetedSearch, setTargetedSearch] = useState<{ query: string; repos: GitRepoCandidate[] } | null>(null);
+  const [targetedLoadingQuery, setTargetedLoadingQuery] = useState<string | null>(null);
+  const [addedDirectoryKeys, setAddedDirectoryKeys] = useState<Set<string>>(() => new Set());
+  const [pendingQuickAddKeys, setPendingQuickAddKeys] = useState<Set<string>>(() => new Set());
+  const pendingQuickAddKeysRef = useRef(new Set<string>());
   const { pop } = useNavigation();
   const storage = getQuickShellStorage();
 
   const { data, isLoading, error, revalidate } = usePromise(async () => {
     const existing = await storage.getWorkspaces();
-    const extraRoots = searchRootsFromWorkspaces(existing.map((workspace) => workspace.directory));
+    const { existingDirs, extraRoots } = discoveryContextForWorkspaces(existing);
     const repos = await discoverGitReposCached(extraRoots);
-    const existingDirs = new Set(existing.map((workspace) => workspace.directory.toLowerCase()));
     return repos.filter((repo) => !existingDirs.has(repo.directory.toLowerCase()));
   }, []);
 
   useLoadErrorToast(error, "Failed to scan git repositories");
 
-  const filtered = useMemo(() => {
+  useEffect(() => {
     if (!data) {
-      return [];
+      return;
     }
+
+    const cachedKeys = new Set(data.map((repo) => repo.directory.toLowerCase()));
+    setAddedDirectoryKeys((current) => {
+      const next = new Set([...current].filter((key) => cachedKeys.has(key)));
+      return next.size === current.size ? current : next;
+    });
+  }, [data]);
+
+  useEffect(() => {
+    const query = searchText.trim();
+    setTargetedLoadingQuery(null);
+    if (!query) {
+      setTargetedSearch(null);
+      return;
+    }
+
+    let cancelled = false;
+    const controller = new AbortController();
+    const timer = setTimeout(() => {
+      setTargetedLoadingQuery(query);
+      void (async () => {
+        try {
+          const existing = await storage.getWorkspaces();
+          const { existingDirs, extraRoots } = discoveryContextForWorkspaces(existing);
+          const repos = (await discoverGitReposForQueryAsync(query, extraRoots, { signal: controller.signal })).filter(
+            (repo) => !existingDirs.has(repo.directory.toLowerCase()),
+          );
+          if (!cancelled) {
+            setTargetedSearch({ query, repos });
+          }
+        } catch (searchError) {
+          if (!cancelled) {
+            setTargetedSearch({ query, repos: [] });
+            await showStorageFailure("Search git repositories", searchError);
+          }
+        } finally {
+          if (!cancelled) {
+            setTargetedLoadingQuery(null);
+          }
+        }
+      })();
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+      clearTimeout(timer);
+    };
+  }, [searchText]);
+
+  const filtered = useMemo(() => {
+    const cached = data ?? [];
+    const cachedVisible = cached.filter((repo) => !addedDirectoryKeys.has(repo.directory.toLowerCase()));
     const query = searchText.trim().toLowerCase();
     if (!query) {
-      return data;
+      return cachedVisible;
     }
-    return data.filter(
+    const cachedMatches = cachedVisible.filter(
       (repo) =>
         repo.name.toLowerCase().includes(query) ||
         repo.directory.toLowerCase().includes(query) ||
         (repo.remoteUrl ?? "").toLowerCase().includes(query),
     );
-  }, [data, searchText]);
+    const targetedMatches = targetedSearch?.query === searchText.trim() ? targetedSearch.repos : [];
+    const seen = new Set(cachedMatches.map((repo) => repo.directory.toLowerCase()));
+    return [
+      ...cachedMatches,
+      ...targetedMatches.filter((repo) => {
+        const key = repo.directory.toLowerCase();
+        if (addedDirectoryKeys.has(key) || seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      }),
+    ];
+  }, [addedDirectoryKeys, data, searchText, targetedSearch]);
 
   async function finishAdd(workspace: Workspace) {
-    await revalidate();
+    const addedKey = workspace.directory.toLowerCase();
+    setAddedDirectoryKeys((current) => new Set(current).add(addedKey));
+    setTargetedSearch((current) =>
+      current ? { ...current, repos: current.repos.filter((repo) => repo.directory.toLowerCase() !== addedKey) } : null,
+    );
+    try {
+      await revalidate();
+    } catch (refreshError) {
+      await showStorageFailure("Refresh git repositories", refreshError);
+    }
     await onWorkspaceAdded?.(workspace);
     if (popOnAdd) {
       pop();
@@ -180,8 +201,14 @@ export default function DiscoverGitReposView({ onWorkspaceAdded, popOnAdd = true
   }
 
   async function handleQuickAdd(directory: string, name: string, remoteUrl?: string | null) {
+    const pendingKey = directory.toLowerCase();
+    if (pendingQuickAddKeysRef.current.has(pendingKey)) {
+      return;
+    }
+    pendingQuickAddKeysRef.current.add(pendingKey);
+    setPendingQuickAddKeys((current) => new Set(current).add(pendingKey));
     try {
-      const workspace = buildLightWorkspaceFromRepo(directory, name, remoteUrl);
+      const workspace = await buildWorkspaceFromRepo(directory, name, remoteUrl);
       await storage.upsertWorkspace(workspace);
       await showToast({
         style: Toast.Style.Success,
@@ -191,6 +218,13 @@ export default function DiscoverGitReposView({ onWorkspaceAdded, popOnAdd = true
       await finishAdd(workspace);
     } catch (addError) {
       await showStorageFailure("Add workspace", addError);
+    } finally {
+      pendingQuickAddKeysRef.current.delete(pendingKey);
+      setPendingQuickAddKeys((current) => {
+        const next = new Set(current);
+        next.delete(pendingKey);
+        return next;
+      });
     }
   }
 
@@ -200,20 +234,22 @@ export default function DiscoverGitReposView({ onWorkspaceAdded, popOnAdd = true
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || targetedLoadingQuery === searchText.trim()}
       searchText={searchText}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search discovered git repositories..."
       throttle
     >
-      {error ? (
+      {error && filtered.length === 0 ? (
         <List.EmptyView icon={Icon.ExclamationMark} title="Discovery failed" description={error.message} />
       ) : null}
 
       {!error && filtered.length === 0 ? (
         <List.EmptyView
-          title={isLoading ? "Scanning folders..." : "No repositories found"}
-          description="Quick Shell scans common project folders on each drive, plus folders near your saved workspaces."
+          title={
+            isLoading || targetedLoadingQuery === searchText.trim() ? "Searching folders..." : "No repositories found"
+          }
+          description="Type a repository name or an absolute path to run a targeted search beyond the cached results."
         />
       ) : null}
 
@@ -226,15 +262,21 @@ export default function DiscoverGitReposView({ onWorkspaceAdded, popOnAdd = true
           actions={
             <ActionPanel>
               <Action
-                title="Add Workspace"
+                title={pendingQuickAddKeys.has(repo.directory.toLowerCase()) ? "Adding…" : "Add Workspace"}
                 icon={Icon.Plus}
-                onAction={() => handleQuickAdd(repo.directory, repo.name, repo.remoteUrl)}
+                onAction={() => {
+                  if (pendingQuickAddKeys.has(repo.directory.toLowerCase())) {
+                    return;
+                  }
+                  void handleQuickAdd(repo.directory, repo.name, repo.remoteUrl);
+                }}
               />
               <Action.Push
                 title="Review Before Adding"
                 icon={Icon.Pencil}
                 target={
                   <ReviewWorkspaceForm
+                    key={repo.directory}
                     directory={repo.directory}
                     name={repo.name}
                     remoteUrl={repo.remoteUrl}

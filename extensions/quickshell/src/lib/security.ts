@@ -175,9 +175,11 @@ export function authorize(
     });
   } else if (
     directory &&
-    (request.kind === "terminal" || request.kind === "launchEntry" || request.kind === "grantTrust") &&
-    isLocalDirectory(directory) &&
-    !existsSync(directory)
+    (request.kind === "terminal" ||
+      request.kind === "launchEntry" ||
+      request.kind === "grantTrust" ||
+      request.kind === "companion") &&
+    isMissingRequiredDirectory(directory, request.kind)
   ) {
     issues.push({ code: "DirectoryMissing", message: "Workspace directory does not exist.", blocking: true });
   }
@@ -298,7 +300,7 @@ export function authorize(
     } else if (!directory || !isLocalDirectory(directory) || !existsSync(directory)) {
       issues.push({
         code: "DirectoryOpenNotAllowed",
-        message: "Only existing rooted local drive directories can be opened.",
+        message: "Only existing local directories can be opened.",
         blocking: true,
       });
     }
@@ -328,18 +330,27 @@ export function authorize(
 
 export function authorizePostLaunchEffects(
   workspace: StoredWorkspace,
-  options?: { includeCompanion?: boolean; includeDevServer?: boolean },
+  options?: {
+    includeCompanion?: boolean;
+    includeDevServer?: boolean;
+    /** Default openOnLaunch. Use `all` for on-demand Open Companion Apps. */
+    companionSelection?: "openOnLaunch" | "all";
+  },
 ): AuthorizedPostLaunchEffects {
   const companions: AuthorizedCompanionEffect[] = [];
   const warnings: string[] = [];
 
   if (options?.includeCompanion ?? true) {
     const normalizedCompanions = normalizeCompanionApps(workspace.content);
+    const selected =
+      options?.companionSelection === "all"
+        ? normalizedCompanions
+        : normalizedCompanions.filter((entry) => entry.openOnLaunch);
     const effectsWorkspace = {
       ...workspace,
       content: { ...workspace.content, companionApps: normalizedCompanions },
     };
-    for (const companion of normalizedCompanions.filter((entry) => entry.openOnLaunch)) {
+    for (const companion of selected) {
       const authorization = authorize(effectsWorkspace, { kind: "companion", companionId: companion.id });
       if (
         authorization.isAllowed &&
@@ -465,8 +476,39 @@ function canonicalDirectory(value: string): string | null {
   return trimmed;
 }
 
+/** Rooted local path safe to open in Explorer/Finder (drive letter or POSIX absolute). */
 function isLocalDirectory(directory: string): boolean {
-  return /^[a-zA-Z]:[\\/]/.test(directory) && !directory.startsWith("\\\\") && !directory.includes("%");
+  if (directory.includes("%") || directory.startsWith("\\\\")) {
+    return false;
+  }
+  // Windows drive-rooted path (C:\… or C:/…).
+  if (/^[a-zA-Z]:[\\/]/.test(directory)) {
+    return true;
+  }
+  // POSIX absolute (macOS / Linux): /Users/…, /tmp/…, etc. Reject // unc-style.
+  if (directory.startsWith("/") && !directory.startsWith("//")) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Local directories must exist for launch/trust/companion. WSL UNC is format-checked for
+ * terminal/launch (can still hand off to wt/wsl), but companions require the path to exist.
+ */
+function isMissingRequiredDirectory(
+  directory: string,
+  kind: "terminal" | "launchEntry" | "grantTrust" | "companion" | string,
+): boolean {
+  if (!existsSync(directory)) {
+    if (isLocalDirectory(directory)) {
+      return true;
+    }
+    if (kind === "companion" && /^\\\\wsl\$/i.test(directory)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function resolveExecutablePath(path: string): string | null {

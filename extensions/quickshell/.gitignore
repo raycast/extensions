@@ -6,3 +6,5 @@ bin/
 setup-release.iss
 setup-x64.iss
 setup-arm64.iss
+
+assets/QuickShell.Suggest.exe

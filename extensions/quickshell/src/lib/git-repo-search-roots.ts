@@ -17,11 +17,22 @@ export const COMMON_ROOT_FOLDER_NAMES = [
   "Documents",
 ] as const;
 
+/** Extra top-level profile folders scanned on macOS only. */
+export const MAC_ROOT_FOLDER_NAMES = ["Code", "Sites", "workspace", "workspaces", "GitHub"] as const;
+
 /**
  * Nested paths under the user profile only (not every drive).
  * Includes GitHub Desktop's default: Documents/GitHub.
  */
 export const COMMON_PROFILE_RELATIVE_NESTED_ROOTS = [["Documents", "GitHub"]] as const;
+
+/** Extra nested profile paths scanned on macOS only. */
+export const MAC_PROFILE_RELATIVE_NESTED_ROOTS = [
+  ["Library", "Developer"],
+  ["Documents", "Projects"],
+  ["Desktop", "Projects"],
+  ["Desktop", "Developer"],
+] as const;
 
 export type BuildSearchRootsOptions = {
   includeDefaultSearchRoots?: boolean;
@@ -37,7 +48,7 @@ export type BuildSearchRootsOptions = {
   pathStyle?: "win32" | "posix";
 };
 
-function pathApi(options?: BuildSearchRootsOptions): path.PlatformPath {
+function pathApi(options?: BuildSearchRootsOptions): typeof path.posix {
   return useWin32Style(options) ? path.win32 : path.posix;
 }
 
@@ -91,6 +102,15 @@ export function listDefaultRootCandidates(options: BuildSearchRootsOptions = {})
 
   for (const segments of COMMON_PROFILE_RELATIVE_NESTED_ROOTS) {
     candidates.push(api.join(home, ...segments));
+  }
+
+  if (!useWin32Style(options)) {
+    for (const name of MAC_ROOT_FOLDER_NAMES) {
+      candidates.push(api.join(home, name));
+    }
+    for (const segments of MAC_PROFILE_RELATIVE_NESTED_ROOTS) {
+      candidates.push(api.join(home, ...segments));
+    }
   }
 
   if (useWin32Style(options)) {

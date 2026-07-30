@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -250,9 +250,10 @@ describe("workspace security policy", () => {
   });
 
   it("resolves each open-on-launch companion by ID and suppresses invalid effects", () => {
+    const directory = createTempDirectory();
     const content: Workspace = {
       ...workspace,
-      directory: "\\\\wsl$\\Ubuntu\\home\\dev\\project",
+      directory,
       devServerUrl: "https://localhost:5173/?next=a&mode=b",
       openDevServerOnLaunch: true,
       companionApps: [
@@ -285,7 +286,89 @@ describe("workspace security policy", () => {
     expect(effects.warnings).toHaveLength(1);
   });
 
+  it("includes all configured companions when companionSelection is all", () => {
+    const directory = createTempDirectory();
+    const content: Workspace = {
+      ...workspace,
+      directory,
+      companionApps: [
+        {
+          id: "on-launch",
+          path: process.execPath,
+          arguments: null,
+          openOnLaunch: true,
+          order: 0,
+        },
+        {
+          id: "on-demand",
+          path: process.execPath,
+          arguments: "--extra",
+          openOnLaunch: false,
+          order: 1,
+        },
+      ],
+    };
+
+    const openOnLaunchOnly = authorizePostLaunchEffects({ ...stored(true), content });
+    const allCompanions = authorizePostLaunchEffects(
+      { ...stored(true), content },
+      { includeCompanion: true, includeDevServer: false, companionSelection: "all" },
+    );
+
+    expect(openOnLaunchOnly.plan.companions.map((entry) => entry.companionId)).toEqual(["on-launch"]);
+    expect(allCompanions.plan.companions.map((entry) => entry.companionId)).toEqual(["on-launch", "on-demand"]);
+    expect(allCompanions.plan.devServerUrl).toBeNull();
+  });
+
+  it("blocks companion launch when a local workspace directory is missing", () => {
+    const content: Workspace = {
+      ...workspace,
+      directory: "Z:\\QuickShell\\DefinitelyMissingWorkspace",
+      companionApps: [
+        {
+          id: "node",
+          path: process.execPath,
+          arguments: null,
+          openOnLaunch: true,
+          order: 0,
+        },
+      ],
+    };
+    const value = { ...stored(true), content };
+
+    expect(authorize(value, { kind: "companion", companionId: "node" }).primaryIssueCode).toBe("DirectoryMissing");
+
+    const effects = authorizePostLaunchEffects(value, {
+      includeCompanion: true,
+      includeDevServer: false,
+      companionSelection: "all",
+    });
+    expect(effects.plan.companions).toEqual([]);
+    expect(effects.warnings.length).toBeGreaterThan(0);
+  });
+
+  it("blocks companion launch when a WSL workspace directory is missing", () => {
+    const content: Workspace = {
+      ...workspace,
+      directory: "\\\\wsl$\\Ubuntu\\home\\dev\\QuickShellMissingCompanionDir",
+      companionApps: [
+        {
+          id: "node",
+          path: process.execPath,
+          arguments: null,
+          openOnLaunch: true,
+          order: 0,
+        },
+      ],
+    };
+    const value = { ...stored(true), content };
+
+    expect(authorize(value, { kind: "companion", companionId: "node" }).primaryIssueCode).toBe("DirectoryMissing");
+    expect(authorize(value, { kind: "terminal" }).isAllowed).toBe(true);
+  });
+
   it("fails closed for ambiguous duplicate companion IDs", () => {
+    const directory = createTempDirectory();
     const duplicate = {
       id: "duplicate",
       path: process.execPath,
@@ -295,7 +378,7 @@ describe("workspace security policy", () => {
     };
     const content: Workspace = {
       ...workspace,
-      directory: "\\\\wsl$\\Ubuntu\\home\\dev\\project",
+      directory,
       companionApps: [duplicate, { ...duplicate, arguments: "--second", order: 1 }],
     };
     const value = { ...stored(true), content };
@@ -326,27 +409,50 @@ describe("workspace trust kill switch (disabled)", () => {
     expect(authorize(value, { kind: "launchEntry", launchId: "launch-1" }).isAllowed).toBe(true);
     expect(authorize(value, { kind: "url", url: "https://example.com" }).isAllowed).toBe(true);
 
-    // Open-directory still requires an existing rooted Windows drive path (product is
-    // Windows-only). On Linux CI assert trust is not the blocker; on Windows assert allow.
+    // Open-directory allows rooted Windows drive paths and POSIX absolute paths.
     const openDirectory = authorize(value, { kind: "directory" });
     expect(openDirectory.issues.some((issue) => issue.code === "WorkspaceUntrusted")).toBe(false);
-    if (process.platform === "win32") {
-      expect(openDirectory.isAllowed).toBe(true);
-    } else {
-      expect(openDirectory.isAllowed).toBe(false);
-      expect(openDirectory.primaryIssueCode).toBe("DirectoryOpenNotAllowed");
-    }
+    expect(openDirectory.isAllowed).toBe(true);
+  });
+
+  it("open-directory allows rooted Windows drive paths and rejects double-slash paths", () => {
+    setWorkspaceTrustEnabledForTests(false);
+    const driveRoot = createTempDirectory();
+    const allowed = authorize(
+      {
+        content: { ...workspace, directory: driveRoot },
+        security: { isTrusted: false, revision: 1 },
+        revision: 1,
+      },
+      { kind: "directory" },
+    );
+    expect(allowed.isAllowed).toBe(true);
+
+    const rejected = authorize(
+      {
+        content: { ...workspace, directory: "//unc-style/share/project" },
+        security: { isTrusted: false, revision: 1 },
+        revision: 1,
+      },
+      { kind: "directory" },
+    );
+    expect(rejected.isAllowed).toBe(false);
+    expect(["InvalidDirectory", "DirectoryOpenNotAllowed"]).toContain(rejected.primaryIssueCode);
   });
 
   it("matches the shared JSON default", () => {
-    const shared = JSON.parse(
-      readFileSync(resolve(__dirname, "../../../shared/workspace-trust-features.json"), "utf8"),
-    ) as { enabled: boolean };
     const local = JSON.parse(readFileSync(resolve(__dirname, "../lib/workspace-trust-features.json"), "utf8")) as {
       enabled: boolean;
     };
-    expect(local.enabled).toBe(shared.enabled);
-    expect(WORKSPACE_TRUST_DEFAULT_ENABLED).toBe(shared.enabled);
+    const sharedPath = resolve(__dirname, "../../../shared/workspace-trust-features.json");
+    if (existsSync(sharedPath)) {
+      const shared = JSON.parse(readFileSync(sharedPath, "utf8")) as { enabled: boolean };
+      expect(local.enabled).toBe(shared.enabled);
+      expect(WORKSPACE_TRUST_DEFAULT_ENABLED).toBe(shared.enabled);
+      return;
+    }
+    // Store PR layout has no QuickShell shared/ tree; assert the committed local default.
+    expect(WORKSPACE_TRUST_DEFAULT_ENABLED).toBe(local.enabled);
   });
 
   it("coerceTrustedWhileDisabled rewrites untrusted rows", () => {

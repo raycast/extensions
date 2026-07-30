@@ -21,6 +21,13 @@ describe("git-repo-search-roots macOS", () => {
         "/Users/dev/Developer",
         "/Users/dev/Documents",
         "/Users/dev/Documents/GitHub",
+        "/Users/dev/Code",
+        "/Users/dev/Sites",
+        "/Users/dev/GitHub",
+        "/Users/dev/Library/Developer",
+        "/Users/dev/Documents/Projects",
+        "/Users/dev/Desktop/Projects",
+        "/Users/dev/Desktop/Developer",
       ]),
     );
     expect(candidates.some((candidate) => /^[a-zA-Z]:\\/.test(candidate))).toBe(false);

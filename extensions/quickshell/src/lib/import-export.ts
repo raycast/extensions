@@ -1,7 +1,7 @@
-import { createStableId } from "./ids";
+import { createStableId, isStableWorkspaceId } from "./ids";
 import { migrateStoredData } from "./migration";
 import type { LayoutEntry, StoredData, Workspace } from "./schema";
-import { createEmptyStoredData } from "./schema";
+import { SCHEMA_VERSION, createEmptyStoredData } from "./schema";
 import { createIngressSecurity } from "./security";
 
 type UnknownRecord = Record<string, unknown>;
@@ -78,10 +78,77 @@ export function importParsedPayload(parsed: unknown, existing?: StoredData): Imp
     return mergeImportedData(migrated, existing);
   }
 
+  // CmdPal / Core layout envelope: { version, entries: [ shortcut | { Workspace } | separator ] }
+  if (Array.isArray(record.entries)) {
+    if (typeof record.version === "number" && record.version > SCHEMA_VERSION) {
+      throw new Error(`Unsupported Quick Shell data version: ${record.version}`);
+    }
+    return importCmdPalLayoutEnvelope(record.entries, existing);
+  }
+
   const migrated = migrateStoredData(normalizeRecordKeys(record));
   if (migrated.workspaces.length === 0) {
     throw new Error("No workspaces found in import file.");
   }
+  return mergeImportedData(migrated, existing);
+}
+
+/**
+ * Imports desktop CmdPal/Run layout JSON (`entries`), including flat PascalCase
+ * shortcuts and on-disk `{ Workspace, Security }` wrappers. Separators become layout rows.
+ */
+function importCmdPalLayoutEnvelope(entries: unknown[], existing?: StoredData): ImportResult {
+  const workspaces: unknown[] = [];
+  const layoutEntries: LayoutEntry[] = [];
+  /** Envelope-local IDs so duplicate source IDs do not share one idRemap slot. */
+  const usedEnvelopeIds = new Set<string>();
+
+  for (const raw of entries) {
+    const entry = normalizeRecordKeys(raw);
+    if (!entry || typeof entry !== "object") {
+      continue;
+    }
+    const record = entry as UnknownRecord;
+    const type = typeof record.type === "string" ? record.type.trim().toLowerCase() : "";
+    if (type === "separator") {
+      const title = typeof record.title === "string" && record.title.trim() ? record.title.trim() : null;
+      layoutEntries.push({ type: "separator", id: createStableId(), title });
+      continue;
+    }
+
+    const payload = record.workspace && typeof record.workspace === "object" ? record.workspace : record;
+    if (!payload || typeof payload !== "object") {
+      continue;
+    }
+    const workspaceRecord = normalizeRecordKeys(payload) as UnknownRecord;
+    const name = typeof workspaceRecord.name === "string" ? workspaceRecord.name.trim() : "";
+    const directory = typeof workspaceRecord.directory === "string" ? workspaceRecord.directory.trim() : "";
+    if (!name || !directory) {
+      continue;
+    }
+
+    // Stable id ties layout rows to merge retention so skipped duplicates do not shift later rows.
+    // Repeated source IDs get a fresh id so each layout row remaps independently.
+    const rawId = typeof workspaceRecord.id === "string" ? workspaceRecord.id.trim() : "";
+    let workspaceId = isStableWorkspaceId(rawId) ? rawId.toLowerCase() : createStableId();
+    if (usedEnvelopeIds.has(workspaceId)) {
+      workspaceId = createStableId();
+    }
+    usedEnvelopeIds.add(workspaceId);
+    workspaces.push({ ...workspaceRecord, id: workspaceId });
+    layoutEntries.push({ type: "workspace", workspaceId });
+  }
+
+  if (workspaces.length === 0) {
+    throw new Error("No workspaces found in import file.");
+  }
+
+  const migrated = migrateStoredData({
+    version: 1,
+    workspaces,
+    layoutEntries,
+    settings: existing?.settings ?? createEmptyStoredData().settings,
+  });
   return mergeImportedData(migrated, existing);
 }
 
@@ -142,11 +209,16 @@ function mergeImportedData(imported: StoredData, existing?: StoredData): ImportR
 
   const isReplace = base.workspaces.length === 0;
   const newlyImported = merged.slice(base.workspaces.length);
+  const remappedImportLayout = remapImportedLayout(imported.layoutEntries, idRemap);
   const layoutEntries = isReplace
-    ? remapImportedLayout(imported.layoutEntries, idRemap)
+    ? remappedImportLayout
     : [
         ...(base.layoutEntries ?? []),
-        ...newlyImported.map((workspace) => ({ type: "workspace" as const, workspaceId: workspace.id })),
+        // Prefer remapped imported layout (keeps CmdPal separators). Fall back when the
+        // remapped layout has no workspace rows (all skipped, or separators only).
+        ...(remappedImportLayout.some((entry) => entry.type === "workspace")
+          ? remappedImportLayout
+          : newlyImported.map((workspace) => ({ type: "workspace" as const, workspaceId: workspace.id }))),
       ];
 
   return {
@@ -185,7 +257,11 @@ function remapImportedLayout(layout: LayoutEntry[] | undefined, idRemap: Map<str
       next.push({ type: "separator", id: entry.id, title: entry.title ?? null });
       continue;
     }
-    const remapped = idRemap.get(entry.workspaceId) ?? entry.workspaceId;
+    const remapped = idRemap.get(entry.workspaceId);
+    if (!remapped) {
+      // Skipped during merge (e.g. duplicate name) — omit so later rows do not shift.
+      continue;
+    }
     next.push({ type: "workspace", workspaceId: remapped });
   }
   return next;

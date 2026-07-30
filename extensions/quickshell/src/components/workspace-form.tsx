@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  environment,
   Form,
   Icon,
   launchCommand,
@@ -32,7 +33,11 @@ import { tryGetGitRemoteUrl } from "../lib/git-remote-url";
 import { createStableId } from "../lib/ids";
 import type { OpenWorkspaceLaunchContext } from "../lib/launch-context";
 import { buildProjectSetupSuggestions } from "../lib/project-setup-suggestion";
-import { resolveWorkspaceSetupSuggestions, type SuggestionPill } from "../lib/suggest-commands";
+import {
+  combineSuggestionTasksAndPills,
+  resolveWorkspaceSetupSuggestions,
+  type SuggestionPill,
+} from "../lib/suggest-commands";
 import { getQuickShellStorage } from "../lib/raycast-storage";
 import type { Workspace } from "../lib/schema";
 import { suggestionPillIcon } from "../lib/task-type-accent";
@@ -40,8 +45,10 @@ import { choiceForTerminalState, discoverWorkspaceTerminalChoices } from "../lib
 import { getTerminalApplicationChoices } from "../lib/terminal-options";
 import { isMacPlatform } from "../lib/platform";
 import {
+  applySuggestionPillToLaunchRows,
   buildWorkspaceFromFormState,
   createEmptyCompanionFormRow,
+  encodePillKey,
   launchRowsFromSuggestions,
   terminalForAddedLaunch,
   type CompanionFormRow,
@@ -149,6 +156,60 @@ export default function WorkspaceForm({
     const enriched = discoverWorkspaceTerminalChoices({ includeSlowProbes: true });
     setTerminalChoices(enriched);
   }, [mode]);
+
+  // Discover Review already seeds launches before mount. Only refresh leftover Actions
+  // pills here — do not re-run full applyDirectorySuggestions (that would pass seeded
+  // commands as --used and replace the seed rows).
+  useEffect(() => {
+    if (directorySeedMode !== "full" || mode === "edit") {
+      return;
+    }
+    const directory = initialState.directory.trim();
+    if (!directory) {
+      return;
+    }
+    const seededCommands = initialState.launches.map((launch) => launch.command.trim()).filter(Boolean);
+    if (seededCommands.length === 0) {
+      void applyDirectorySuggestions(directory);
+      return;
+    }
+
+    let cancelled = false;
+    void (async () => {
+      const generation = ++suggestionGenerationRef.current;
+      const resolved = await resolveWorkspaceSetupSuggestions(
+        directory,
+        seededCommands,
+        generation,
+        environment.assetsPath,
+      );
+      if (cancelled || generation !== suggestionGenerationRef.current) {
+        return;
+      }
+      setSuggestionSource(resolved.source);
+      // Keep existing seed rows; expose Suggest leftovers (and any unused seed candidates) as pills.
+      const used = new Set(seededCommands.map((command) => command.toLowerCase()));
+      const leftoverFromSeed = resolved.tasks
+        .filter((task) => !used.has(task.command.trim().toLowerCase()))
+        .map((task) => ({
+          command: task.command,
+          taskType: task.taskType?.trim() || "none",
+          typeTitle: task.taskType?.trim() || "Setup",
+          displayTitle: task.label,
+          tooltip: task.command,
+        }));
+      setSuggestionPills([
+        ...leftoverFromSeed,
+        ...resolved.pills.filter((pill) => !used.has(pill.command.trim().toLowerCase())),
+      ]);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+    // Intentionally once on mount for pre-seeded Review/Discover create flows.
+  }, []);
+
   const initialValues = useMemo(
     () => valuesFromState(initialState, terminalChoices, draftValues),
     // terminalChoices intentionally omitted: useForm should keep the first selection id.
@@ -234,10 +295,21 @@ export default function WorkspaceForm({
       }
     }
 
-    // Manual Add Workspace: stop after name / repo / dev-server.
+    // Manual Add Workspace: offer commands without auto-applying them.
     if (directorySeedMode !== "full") {
-      setSuggestionPills([]);
-      setSuggestionSource(null);
+      const generation = ++suggestionGenerationRef.current;
+      const usedCommands = launches.map((launch) => launch.command.trim()).filter(Boolean);
+      const resolved = await resolveWorkspaceSetupSuggestions(
+        nextDirectory,
+        usedCommands,
+        generation,
+        environment.assetsPath,
+      );
+      if (generation !== suggestionGenerationRef.current) {
+        return;
+      }
+      setSuggestionSource(resolved.source);
+      setSuggestionPills(combineSuggestionTasksAndPills(resolved.tasks, resolved.pills));
       return;
     }
 
@@ -256,7 +328,7 @@ export default function WorkspaceForm({
           tasks: [] as Array<{ label: string; command: string }>,
           pills: [] as SuggestionPill[],
         }
-      : await resolveWorkspaceSetupSuggestions(nextDirectory, usedCommands);
+      : await resolveWorkspaceSetupSuggestions(nextDirectory, usedCommands, generation, environment.assetsPath);
     if (generation !== suggestionGenerationRef.current) {
       return;
     }
@@ -281,6 +353,7 @@ export default function WorkspaceForm({
               runAsAdmin: values.runAsAdmin,
               isEnabled: true,
               label: "Launch",
+              taskType: "none",
             },
           ]);
         }
@@ -313,30 +386,12 @@ export default function WorkspaceForm({
 
   function applySuggestionPill(pill: SuggestionPill) {
     commandsCustomizedRef.current = true;
-    setLaunches((current) => {
-      if (current.length === 1 && !current[0].command.trim()) {
-        return [
-          {
-            ...current[0],
-            command: pill.command,
-            label: pill.displayTitle || pill.typeTitle || pill.command,
-          },
-        ];
-      }
-      const terminal = terminalForAddedLaunch(current, "default");
-      return [
-        ...current,
-        {
-          id: createStableId(),
-          command: pill.command,
-          terminal: terminal.terminal,
-          wtProfile: terminal.wtProfile,
-          runAsAdmin: values.runAsAdmin,
-          isEnabled: true,
-          label: pill.displayTitle || pill.typeTitle || pill.command,
-        },
-      ];
-    });
+    setLaunches((current) =>
+      applySuggestionPillToLaunchRows(current, pill, {
+        runAsAdmin: values.runAsAdmin,
+        firstLaunchTerminal: selectedTerminal?.terminal ?? "default",
+      }),
+    );
     setSuggestionPills((current) =>
       current.filter((entry) => entry.command.trim().toLowerCase() !== pill.command.trim().toLowerCase()),
     );
@@ -361,6 +416,7 @@ export default function WorkspaceForm({
           runAsAdmin: values.runAsAdmin,
           isEnabled: true,
           label: `Launch ${current.length + 1}`,
+          taskType: "none",
         },
       ];
     });
@@ -487,7 +543,8 @@ export default function WorkspaceForm({
       terminal: selectedTerminal?.terminal ?? "default",
       wtProfile: selectedTerminal?.wtProfile ?? null,
       isPinned: formValues.isPinned,
-      runAsAdmin: formValues.runAsAdmin,
+      runAsAdmin: isMacPlatform() ? initialWorkspace.runAsAdmin : formValues.runAsAdmin,
+      // Keep elevation metadata on macOS saves so Windows re-import still elevates.
       launches,
       companions,
       devServerUrl: formValues.devServerUrl,
@@ -547,6 +604,7 @@ export default function WorkspaceForm({
           runAsAdmin: false,
           isEnabled: true,
           label: "Launch",
+          taskType: "none",
         },
       ]);
       nameCustomizedRef.current = false;
@@ -658,6 +716,44 @@ export default function WorkspaceForm({
           placeholder={index === 0 ? "npm run dev" : "dotnet watch"}
         />
       ))}
+      {unusedSuggestionPills.length > 0 ? (
+        <Form.Dropdown
+          id="command-suggestions"
+          title="Command suggestions"
+          value="choose-suggestion"
+          placeholder="Search command suggestions..."
+          onChange={(key) => {
+            if (key === "choose-suggestion") {
+              return;
+            }
+            const pill = unusedSuggestionPills.find((candidate) => encodePillKey(candidate) === key);
+            if (pill) {
+              applySuggestionPill(pill);
+            }
+          }}
+        >
+          <Form.Dropdown.Item value="choose-suggestion" title="Choose a suggestion…" />
+          {unusedSuggestionPills.map((pill) => (
+            <Form.Dropdown.Item
+              key={encodePillKey(pill)}
+              value={encodePillKey(pill)}
+              title={pill.displayTitle || pill.typeTitle || pill.command}
+              icon={suggestionPillIcon(pill.taskType)}
+            />
+          ))}
+        </Form.Dropdown>
+      ) : null}
+      {suggestionSource ? (
+        <Form.Description
+          text={
+            suggestionSource === "suggest"
+              ? "Suggestions from Quick Shell Suggest are applied to the first empty command row, or appended."
+              : isMacPlatform()
+                ? "Suggestions use local folder heuristics because the Suggest CLI is Windows-only."
+                : "Suggestions use local folder heuristics because Suggest.exe is unavailable."
+          }
+        />
+      ) : null}
       {launches.length > 1
         ? launches.map((launch, index) => (
             <Form.Dropdown
@@ -679,20 +775,8 @@ export default function WorkspaceForm({
           text="Each command opens as its own launch entry. Use Actions → Remove command to delete a row."
         />
       ) : null}
-      {suggestionSource ? (
-        <Form.Description
-          title="Command suggestions"
-          text={
-            suggestionSource === "suggest"
-              ? "Seeded from Quick Shell Suggest. Use Actions → Suggestions to apply additional pills."
-              : isMacPlatform()
-                ? "Seeded from local folder heuristics (Suggest CLI is Windows-only). Folders are classified with Node heuristics on Mac."
-                : "Seeded from local folder heuristics (Suggest.exe unavailable). Install Suggest beside the extension or set QUICKSHELL_SUGGEST_EXE."
-          }
-        />
-      ) : null}
       <Form.Checkbox {...itemProps.isPinned} label="Favorite" />
-      <Form.Checkbox {...itemProps.runAsAdmin} label="Run as administrator" />
+      {!isMacPlatform() ? <Form.Checkbox {...itemProps.runAsAdmin} label="Run as administrator" /> : null}
       <Form.Separator />
       <Form.TextField
         {...itemProps.repoUrl}
@@ -743,13 +827,25 @@ export default function WorkspaceForm({
           <Form.FilePicker
             key={`companion-exe-${companion.id}`}
             id={`companion-exe-${companion.id}`}
-            title={companions.length === 1 ? "Custom executable" : `Companion ${index + 1} executable`}
+            title={
+              companions.length === 1
+                ? isMacPlatform()
+                  ? "Custom app"
+                  : "Custom executable"
+                : isMacPlatform()
+                  ? `Companion ${index + 1} app`
+                  : `Companion ${index + 1} executable`
+            }
             value={companion.path ? [companion.path] : []}
             onChange={(paths) => handleCompanionExecutableChange(index, paths)}
             canChooseFiles
             canChooseDirectories={false}
             allowMultipleSelection={false}
-            info="Opens the file explorer to pick an .exe (or shortcut)."
+            info={
+              isMacPlatform()
+                ? "Opens Finder to pick an .app bundle or executable."
+                : "Opens the file explorer to pick an .exe (or shortcut)."
+            }
           />
         ) : null,
       )}

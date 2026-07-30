@@ -226,6 +226,10 @@ export function getOpenOnLaunchCompanions(workspace: Workspace): CompanionAppEnt
   return normalizeCompanionApps(workspace).filter((entry) => entry.openOnLaunch);
 }
 
+export function workspaceHasConfiguredCompanions(workspace: Workspace): boolean {
+  return normalizeCompanionApps(workspace).length > 0;
+}
+
 export function normalizeLaunches(launches: LaunchEntry[], workspace: Workspace): LaunchEntry[] {
   if (launches.length === 0) {
     return [

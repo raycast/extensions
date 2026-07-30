@@ -33,6 +33,7 @@ import {
 } from "./lib/failure-feedback";
 import { executeWorkspaceLaunch } from "./lib/launch-executor";
 import type { LaunchDiagnosticsReport } from "./lib/launch-diagnostics";
+import { runPostLaunchActions } from "./lib/post-launch-actions";
 import { raycastExec } from "./lib/raycast-exec";
 import { buildBrowseSections, buildSearchResults, getMostRecentlyUsedWorkspaces } from "./lib/ranking";
 import { getQuickShellStorage, workspaceSubtitle } from "./lib/raycast-storage";
@@ -53,7 +54,7 @@ import {
   resolveOpenWorkspaceSearchSeed,
   type OpenWorkspaceLaunchContext,
 } from "./lib/launch-context";
-import { isSupportedPlatform } from "./lib/platform";
+import { isMacPlatform, isSupportedPlatform } from "./lib/platform";
 import { dualPlatformShortcut } from "./lib/shortcuts";
 import { useLoadErrorToast } from "./lib/use-load-error-toast";
 import { discoverWorkspaceTerminalChoices, invalidateTerminalCatalogCache } from "./lib/terminal-catalog";
@@ -68,6 +69,7 @@ import {
   matchesReviewToken,
 } from "./lib/security";
 import { evaluateGitLaunchGate, resolveWorktreeKey } from "./lib/git-launch-gate";
+import { workspaceHasConfiguredCompanions } from "./lib/validation";
 
 type LoadedData = {
   workspaces: Workspace[];
@@ -78,6 +80,7 @@ type LoadedData = {
   healthIndex: WorkspaceHealthIndex;
   canUndo: boolean;
   canRedo: boolean;
+  hasBackup: boolean;
 };
 
 type WorkspaceRow = {
@@ -122,11 +125,12 @@ export default function OpenWorkspaceCommand({
     error,
     revalidate,
   } = usePromise(async (): Promise<Omit<LoadedData, "healthIndex">> => {
-    const [workspaces, settings, layoutEntries, branchTargets] = await Promise.all([
+    const [workspaces, settings, layoutEntries, branchTargets, hasBackup] = await Promise.all([
       storage.getWorkspaces(),
       storage.getSettings(),
       storage.getLayoutEntries(),
       storage.getBranchTargets(),
+      storage.hasBackup(),
     ]);
 
     const securityById = isWorkspaceTrustEnabled()
@@ -141,6 +145,7 @@ export default function OpenWorkspaceCommand({
       securityById,
       canUndo: storage.canUndo(),
       canRedo: storage.canRedo(),
+      hasBackup,
     };
   }, []);
 
@@ -458,6 +463,50 @@ export default function OpenWorkspaceCommand({
     }
   }
 
+  async function handleOpenCompanions(workspace: Workspace) {
+    try {
+      const stored = await storage.getStoredWorkspace(workspace.id);
+      if (!stored) {
+        await showToast({ style: Toast.Style.Failure, title: "Workspace not found" });
+        return;
+      }
+
+      const authorizedEffects = authorizePostLaunchEffects(stored, {
+        includeCompanion: true,
+        includeDevServer: false,
+        companionSelection: "all",
+      });
+      if (authorizedEffects.plan.companions.length === 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Companion apps blocked",
+          message:
+            authorizedEffects.warnings[0] ?? "Trust this workspace and use a valid local folder with a companion app.",
+        });
+        return;
+      }
+
+      const result = await runPostLaunchActions(authorizedEffects.plan, { phase: "companions" });
+      const warnings = [...authorizedEffects.warnings, ...result.warnings];
+      if (!result.companionOpened) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Companion apps failed",
+          message: warnings[0] ?? "Could not open companion apps.",
+        });
+        return;
+      }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Companion apps opened",
+        message: warnings.length > 0 ? warnings.join(" ") : workspace.name,
+      });
+    } catch (companionError) {
+      await showStorageFailure("Open companion apps", companionError);
+    }
+  }
+
   async function handleOpenUrl(workspace: Workspace, kind: "repo" | "dev") {
     const stored = await storage.getStoredWorkspace(workspace.id);
     const url = kind === "repo" ? stored?.content.repoUrl : stored?.content.devServerUrl;
@@ -527,11 +576,17 @@ export default function OpenWorkspaceCommand({
   }
 
   async function handleExport() {
+    const loading = await showToast({
+      style: Toast.Style.Animated,
+      title: "Opening export dialog…",
+      message: "Windows file dialogs need a short PowerShell startup.",
+    });
     try {
-      const filePath = pickWorkspaceTransferJsonPath("save");
+      const filePath = await pickWorkspaceTransferJsonPath("save");
       if (!filePath) {
         return;
       }
+      loading.title = "Exporting…";
       const json = await storage.exportJson();
       writeWorkspaceExportFile(filePath, json);
       await showToast({
@@ -547,15 +602,23 @@ export default function OpenWorkspaceCommand({
       });
     } catch (exportError) {
       await showStorageFailure("Export workspaces", exportError);
+    } finally {
+      loading.hide();
     }
   }
 
   async function handleImportFromFile() {
+    const loading = await showToast({
+      style: Toast.Style.Animated,
+      title: "Opening import dialog…",
+      message: "Windows file dialogs need a short PowerShell startup.",
+    });
     try {
-      const filePath = pickWorkspaceTransferJsonPath("open");
+      const filePath = await pickWorkspaceTransferJsonPath("open");
       if (!filePath) {
         return;
       }
+      loading.title = "Importing…";
       const trimmed = readWorkspaceImportFile(filePath).trim();
       if (!trimmed) {
         await showToast({
@@ -588,6 +651,72 @@ export default function OpenWorkspaceCommand({
       });
     } catch (importError) {
       await showStorageFailure("Import workspaces", importError);
+    } finally {
+      loading.hide();
+    }
+  }
+
+  async function handleResetAll() {
+    if (!data) {
+      await showToast({ style: Toast.Style.Failure, title: "Still loading workspaces" });
+      return;
+    }
+
+    const count = data.workspaces.length;
+    const itemsLabel = count === 1 ? "workspace" : "workspaces";
+    const countLine = count === 0 ? `No ${itemsLabel} are saved.` : `This will delete all ${count} ${itemsLabel}.`;
+    const confirmed = await confirmAlert({
+      title: "Reset all workspaces?",
+      message: `${countLine} A backup is saved first. You can Undo or use Restore Backup afterward.`,
+      primaryAction: { title: "Reset All", style: Alert.ActionStyle.Destructive },
+      dismissAction: { title: "Cancel" },
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const result = await storage.resetAll();
+      await revalidate();
+      const isNoop = result.outcome === "noop";
+      await showToast({
+        // No-op is terminal; Animated would leave a forever spinner.
+        style: Toast.Style.Success,
+        title: isNoop ? "Nothing to reset" : "Workspaces reset",
+        message: result.message,
+      });
+    } catch (resetError) {
+      await showStorageFailure("Reset workspaces", resetError);
+    }
+  }
+
+  async function handleRestoreBackup() {
+    const confirmed = await confirmAlert({
+      title: "Restore workspace backup?",
+      message: "Replace the current workspace list with the last reset backup.",
+      primaryAction: { title: "Restore Backup", style: Alert.ActionStyle.Destructive },
+      dismissAction: { title: "Cancel" },
+    });
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const result = await storage.restoreFromBackup();
+      await revalidate();
+      const title =
+        result.outcome === "restored"
+          ? "Backup restored"
+          : result.outcome === "discarded"
+            ? "Backup discarded"
+            : "No backup to restore";
+      await showToast({
+        style: result.outcome === "restored" ? Toast.Style.Success : Toast.Style.Failure,
+        title,
+        message: result.message,
+      });
+    } catch (restoreError) {
+      await showStorageFailure("Restore backup", restoreError);
     }
   }
 
@@ -760,6 +889,20 @@ export default function OpenWorkspaceCommand({
         <ActionPanel.Section title="Transfer">
           <Action title="Export Workspaces…" icon={Icon.Upload} onAction={handleExport} />
           <Action title="Import Workspaces…" icon={Icon.Download} onAction={handleImportFromFile} />
+          <Action
+            title="Reset All Workspaces…"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={handleResetAll}
+          />
+          {data?.hasBackup ? (
+            <Action
+              title="Restore Backup…"
+              icon={Icon.Undo}
+              style={Action.Style.Destructive}
+              onAction={handleRestoreBackup}
+            />
+          ) : null}
         </ActionPanel.Section>
       </>
     );
@@ -932,7 +1075,7 @@ export default function OpenWorkspaceCommand({
       accessories.push({ icon: Icon.Star, tooltip: "Favorite" });
     }
 
-    const wantsAdmin = workspace.runAsAdmin || launch?.runAsAdmin;
+    const wantsAdmin = !isMacPlatform() && (workspace.runAsAdmin || launch?.runAsAdmin);
 
     return (
       <List.Item
@@ -961,20 +1104,27 @@ export default function OpenWorkspaceCommand({
                   onAction={() => handleOpen(workspace, launch, { runAsStandard: true })}
                 />
               ) : null}
-              {wantsAdmin ? null : (
+              {!isMacPlatform() && !wantsAdmin ? (
                 <Action
                   title="Run as Administrator"
                   icon={Icon.Shield}
                   shortcut={dualPlatformShortcut({ modifiers: ["cmd", "shift"], key: "return" })}
                   onAction={() => handleOpen(workspace, launch, { runAsAdmin: true })}
                 />
-              )}
+              ) : null}
               <Action
                 title="Open Folder"
                 icon={Icon.Folder}
                 shortcut={Keyboard.Shortcut.Common.OpenWith}
                 onAction={() => handleOpenFolder(workspace)}
               />
+              {workspaceHasConfiguredCompanions(workspace) ? (
+                <Action
+                  title="Open Companion Apps"
+                  icon={Icon.AppWindow}
+                  onAction={() => handleOpenCompanions(workspace)}
+                />
+              ) : null}
               {workspace.repoUrl ? (
                 <Action title="Open Repository" icon={Icon.Globe} onAction={() => handleOpenUrl(workspace, "repo")} />
               ) : null}
@@ -997,7 +1147,7 @@ export default function OpenWorkspaceCommand({
             {!isWorkspaceTrustEnabled() || security.isTrusted ? (
               <ActionPanel.Section title="Git">
                 <Action.Push
-                  title="Set Target Branch…"
+                  title="Switch Branch…"
                   icon={Icon.Code}
                   target={
                     <SetTargetBranchForm

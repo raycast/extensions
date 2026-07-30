@@ -1,13 +1,26 @@
-import { describe, expect, it } from "vitest";
+import { mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { afterEach, describe, expect, it } from "vitest";
 import { authorizePostLaunchEffects } from "../lib/security";
 import type { StoredWorkspace, Workspace } from "../lib/schema";
 
 describe("single-row launch skips companion and dev-server", () => {
+  const dirs: string[] = [];
+
+  afterEach(() => {
+    for (const dir of dirs.splice(0)) {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
   it("suppresses companion and dev-server when include flags are false", () => {
+    const directory = mkdtempSync(path.join(tmpdir(), "qs-single-row-"));
+    dirs.push(directory);
     const content: Workspace = {
       id: "ws",
       name: "Demo",
-      directory: "\\\\wsl$\\Ubuntu\\home\\dev\\project",
+      directory,
       terminal: "wt",
       command: "npm test",
       runAsAdmin: false,

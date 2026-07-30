@@ -144,7 +144,7 @@ describe("launch-executor", () => {
     });
   });
 
-  it("launches via open/osascript on macOS (separate windows)", async () => {
+  it("launches via open/osascript on macOS (tabs when preferred)", async () => {
     const originalPlatform = process.platform;
     Object.defineProperty(process, "platform", { configurable: true, value: "darwin" });
     const calls: Array<{ command: string; args: string[] }> = [];
@@ -186,6 +186,64 @@ describe("launch-executor", () => {
         ...settings,
         terminalApplication: "terminal",
         multiLaunchPresentation: "singleWindowTabs",
+      };
+      const { buildWorkspaceLaunchPlan } = await import("../lib/windows-launch");
+      const plan = buildWorkspaceLaunchPlan(macWorkspace, macSettings);
+      const result = await executeWorkspaceLaunch(plan, macSettings, execFn);
+
+      expect(result.ok).toBe(true);
+      expect(calls).toHaveLength(1);
+      expect(calls[0].command).toBe("osascript");
+      expect(calls[0].args[1]).toContain("in front window");
+      expect(calls[0].args[1]).toContain("npm run dev");
+      expect(calls[0].args[1]).toContain("npm run api");
+    } finally {
+      Object.defineProperty(process, "platform", { configurable: true, value: originalPlatform });
+    }
+  });
+
+  it("opens separate Mac windows when multiLaunchPresentation is separateWindows", async () => {
+    const originalPlatform = process.platform;
+    Object.defineProperty(process, "platform", { configurable: true, value: "darwin" });
+    const calls: Array<{ command: string; args: string[] }> = [];
+    const execFn: ExecFn = async (command, args) => {
+      calls.push({ command, args });
+    };
+
+    try {
+      const macWorkspace: Workspace = {
+        ...workspace,
+        directory: "/Users/dev/Projects/web",
+        terminal: "terminal",
+        launches: [
+          {
+            id: "1a",
+            label: "Web",
+            terminal: "terminal",
+            wtProfile: null,
+            command: "npm run dev",
+            runAsAdmin: false,
+            isEnabled: true,
+            order: 0,
+            taskType: "none",
+          },
+          {
+            id: "1b",
+            label: "API",
+            terminal: "terminal",
+            wtProfile: null,
+            command: "npm run api",
+            runAsAdmin: false,
+            isEnabled: true,
+            order: 1,
+            taskType: "none",
+          },
+        ],
+      };
+      const macSettings: QuickShellSettings = {
+        ...settings,
+        terminalApplication: "terminal",
+        multiLaunchPresentation: "separateWindows",
       };
       const { buildWorkspaceLaunchPlan } = await import("../lib/windows-launch");
       const plan = buildWorkspaceLaunchPlan(macWorkspace, macSettings);

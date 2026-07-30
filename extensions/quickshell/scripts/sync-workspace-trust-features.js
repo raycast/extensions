@@ -10,6 +10,12 @@ const sharedPath = path.join(repoRoot, "shared", "workspace-trust-features.json"
 const raycastPath = path.join(__dirname, "..", "src", "lib", "workspace-trust-features.json");
 
 if (!fs.existsSync(sharedPath)) {
+  // Store PR layout (raycast/extensions) has no QuickShell shared/ tree.
+  // Keep the committed copy under src/lib so lint/test/build can proceed.
+  if (fs.existsSync(raycastPath)) {
+    console.warn(`Missing shared trust features file: ${sharedPath}; using committed ${raycastPath}`);
+    process.exit(0);
+  }
   console.error(`Missing shared trust features file: ${sharedPath}`);
   process.exit(1);
 }

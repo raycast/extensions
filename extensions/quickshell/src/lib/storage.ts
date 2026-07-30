@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import type {
   LaunchEntry,
   LayoutEntry,
@@ -7,7 +8,7 @@ import type {
   Workspace,
   WorkspaceSecurityMetadata,
 } from "./schema";
-import { STORAGE_KEY, createEmptyStoredData } from "./schema";
+import { BACKUP_STORAGE_KEY, STORAGE_KEY, createEmptyStoredData } from "./schema";
 import { createStableId, ensureStableId } from "./ids";
 import {
   parseImportPayload,
@@ -32,8 +33,18 @@ export type StorageAdapter = {
   setItem: (key: string, value: string) => Promise<void>;
 };
 
+type StorageTransferResult = {
+  success: true;
+  outcome: "reset" | "restored" | "noop" | "discarded";
+  message: string;
+};
+
+/** Tracks whether the current async context already holds the write lock. */
+const writeLockContext = new AsyncLocalStorage<true>();
+
 const MAX_HISTORY_ENTRIES = 25;
 const RECENT_WRITE_DEBOUNCE_MS = 500;
+export const WRITE_LOCK_TIMEOUT_MS = 30_000;
 
 export class QuickShellStorage {
   private cache: StoredData | null = null;
@@ -41,6 +52,8 @@ export class QuickShellStorage {
   private redoHistory: StoredData[] = [];
   private recentWriteTimer: ReturnType<typeof setTimeout> | null = null;
   private recentWriteDirty = false;
+  /** Serializes load-modify-save mutations so overlapping commands cannot clobber each other. */
+  private writeTail: Promise<void> = Promise.resolve();
 
   constructor(
     private readonly adapter: StorageAdapter,
@@ -60,44 +73,53 @@ export class QuickShellStorage {
     return this.redoHistory.length > 0;
   }
 
+  async hasBackup(): Promise<boolean> {
+    const raw = await this.adapter.getItem(BACKUP_STORAGE_KEY);
+    return typeof raw === "string" && raw.length > 0;
+  }
+
   async undo(): Promise<boolean> {
-    await this.flushRecentWrites();
-    if (this.undoHistory.length === 0) {
-      return false;
-    }
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      if (this.undoHistory.length === 0) {
+        return false;
+      }
 
-    if (this.cache) {
-      this.redoHistory.push(this.cloneData(this.cache));
-    }
+      if (this.cache) {
+        this.redoHistory.push(this.cloneData(this.cache));
+      }
 
-    const previous = this.undoHistory.pop();
-    if (!previous) {
-      return false;
-    }
+      const previous = this.undoHistory.pop();
+      if (!previous) {
+        return false;
+      }
 
-    this.cache = this.preserveCurrentTrust(this.cloneData(previous), this.cache);
-    await this.persistCache({ recordHistory: false });
-    return true;
+      this.cache = this.preserveCurrentTrust(this.cloneData(previous), this.cache);
+      await this.persistCache({ recordHistory: false });
+      return true;
+    });
   }
 
   async redo(): Promise<boolean> {
-    await this.flushRecentWrites();
-    if (this.redoHistory.length === 0) {
-      return false;
-    }
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      if (this.redoHistory.length === 0) {
+        return false;
+      }
 
-    if (this.cache) {
-      this.undoHistory.push(this.cloneData(this.cache));
-    }
+      if (this.cache) {
+        this.undoHistory.push(this.cloneData(this.cache));
+      }
 
-    const next = this.redoHistory.pop();
-    if (!next) {
-      return false;
-    }
+      const next = this.redoHistory.pop();
+      if (!next) {
+        return false;
+      }
 
-    this.cache = this.preserveCurrentTrust(this.cloneData(next), this.cache);
-    await this.persistCache({ recordHistory: false });
-    return true;
+      this.cache = this.preserveCurrentTrust(this.cloneData(next), this.cache);
+      await this.persistCache({ recordHistory: false });
+      return true;
+    });
   }
 
   async exportJson(): Promise<string> {
@@ -110,11 +132,89 @@ export class QuickShellStorage {
   }
 
   async importJson(raw: string, mode: "merge" | "replace" = "merge"): Promise<ImportResult> {
-    await this.flushRecentWrites();
-    const existing = mode === "merge" ? await this.load() : createEmptyStoredData();
-    const result = parseImportPayload(raw, existing);
-    await this.save(result.data, { preserveSecurity: false, allowSubmittedSecurity: true });
-    return result;
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const existing = mode === "merge" ? await this.load() : createEmptyStoredData();
+      const result = parseImportPayload(raw, existing);
+      await this.saveUnlocked(result.data, { preserveSecurity: false, allowSubmittedSecurity: true });
+      return result;
+    });
+  }
+
+  /**
+   * Clears all workspaces after writing a durable backup snapshot.
+   * Recovery: Undo (in-session) or Restore Backup (survives restart).
+   */
+  async resetAll(): Promise<StorageTransferResult> {
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      await this.ensureLoaded();
+      if (this.cache!.workspaces.length === 0) {
+        return { success: true, outcome: "noop", message: "No workspaces to reset." };
+      }
+
+      const count = this.cache!.workspaces.length;
+      await this.adapter.setItem(BACKUP_STORAGE_KEY, JSON.stringify(this.cache));
+
+      const emptied = createEmptyStoredData();
+      emptied.settings = { ...this.cache!.settings };
+      await this.saveUnlocked(emptied, { preserveSecurity: false, allowSubmittedSecurity: true });
+
+      const itemsLabel = count === 1 ? "workspace" : "workspaces";
+      return {
+        success: true,
+        outcome: "reset",
+        message: `Reset ${count} ${itemsLabel}. Use Undo, or Restore Backup, if you change your mind.`,
+      };
+    });
+  }
+
+  /** Restores the durable reset-all backup into the live store. */
+  async restoreFromBackup(): Promise<StorageTransferResult> {
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const raw = await this.adapter.getItem(BACKUP_STORAGE_KEY);
+      if (!raw) {
+        return { success: true, outcome: "noop", message: "No workspace backup found." };
+      }
+
+      let parsed: unknown;
+      try {
+        parsed = JSON.parse(raw);
+      } catch {
+        await this.adapter.setItem(BACKUP_STORAGE_KEY, "");
+        return {
+          success: true,
+          outcome: "discarded",
+          message: "Workspace backup was not valid JSON and has been discarded.",
+        };
+      }
+
+      if (
+        !parsed ||
+        typeof parsed !== "object" ||
+        Array.isArray(parsed) ||
+        !Array.isArray((parsed as { workspaces?: unknown }).workspaces)
+      ) {
+        await this.adapter.setItem(BACKUP_STORAGE_KEY, "");
+        return {
+          success: true,
+          outcome: "discarded",
+          message: "Workspace backup was malformed and has been discarded.",
+        };
+      }
+
+      const restored = migrateStoredData(parsed, { defaultToTrusted: false });
+      // UI replaces the workspace list only; keep any settings changed after reset.
+      await this.ensureLoaded();
+      restored.settings = { ...this.cache!.settings };
+      await this.saveUnlocked(restored, { preserveSecurity: false, allowSubmittedSecurity: true });
+      return {
+        success: true,
+        outcome: "restored",
+        message: `Restored ${restored.workspaces.length} workspace${restored.workspaces.length === 1 ? "" : "s"} from backup.`,
+      };
+    });
   }
 
   async summarizeImport(raw: string, mode: "merge" | "replace" = "merge"): Promise<ImportConflictSummary> {
@@ -122,7 +222,7 @@ export class QuickShellStorage {
     return summarizeImportConflicts(raw, existing);
   }
 
-  async save(
+  private async saveUnlocked(
     data: StoredData,
     options?: {
       recordHistory?: boolean;
@@ -180,6 +280,20 @@ export class QuickShellStorage {
     await this.persistCache({ recordHistory: false });
   }
 
+  async save(
+    data: StoredData,
+    options?: {
+      recordHistory?: boolean;
+      preserveSecurity?: boolean;
+      allowSubmittedSecurity?: boolean;
+    },
+  ): Promise<void> {
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      await this.saveUnlocked(data, options);
+    });
+  }
+
   async getWorkspaces(): Promise<Workspace[]> {
     await this.ensureLoaded();
     return this.cache!.workspaces.map((workspace) => this.cloneWorkspace(workspace));
@@ -220,45 +334,49 @@ export class QuickShellStorage {
     workspaceId: string,
     reviewToken: WorkspaceReviewToken,
   ): Promise<"granted" | "already" | "changed" | "invalid" | "missing"> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const workspace = data.workspaces.find((candidate) => candidate.id === workspaceId);
-    if (!workspace) {
-      return "missing";
-    }
-    const security = data.workspaceSecurity?.[workspaceId] ?? { isTrusted: true, revision: 1 };
-    const currentStored: StoredWorkspace = { content: workspace, security, revision: security.revision };
-    if (security.isTrusted) {
-      return "already";
-    }
-    if (!matchesReviewToken(currentStored, reviewToken)) {
-      return "changed";
-    }
-    const validation = validateWorkspace(workspace);
-    if (!validation.ok) {
-      return "invalid";
-    }
-    data.workspaceSecurity = { ...(data.workspaceSecurity ?? {}) };
-    data.workspaceSecurity[workspaceId] = { isTrusted: true, revision: security.revision + 1 };
-    await this.save(data, { preserveSecurity: false, allowSubmittedSecurity: true });
-    return "granted";
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const workspace = data.workspaces.find((candidate) => candidate.id === workspaceId);
+      if (!workspace) {
+        return "missing";
+      }
+      const security = data.workspaceSecurity?.[workspaceId] ?? { isTrusted: true, revision: 1 };
+      const currentStored: StoredWorkspace = { content: workspace, security, revision: security.revision };
+      if (security.isTrusted) {
+        return "already";
+      }
+      if (!matchesReviewToken(currentStored, reviewToken)) {
+        return "changed";
+      }
+      const validation = validateWorkspace(workspace);
+      if (!validation.ok) {
+        return "invalid";
+      }
+      data.workspaceSecurity = { ...(data.workspaceSecurity ?? {}) };
+      data.workspaceSecurity[workspaceId] = { isTrusted: true, revision: security.revision + 1 };
+      await this.saveUnlocked(data, { preserveSecurity: false, allowSubmittedSecurity: true });
+      return "granted";
+    });
   }
 
   async revokeTrust(workspaceId: string): Promise<"revoked" | "already" | "missing"> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const workspace = data.workspaces.find((candidate) => candidate.id === workspaceId);
-    if (!workspace) {
-      return "missing";
-    }
-    const security = data.workspaceSecurity?.[workspaceId] ?? { isTrusted: true, revision: 1 };
-    if (!security.isTrusted) {
-      return "already";
-    }
-    data.workspaceSecurity = { ...(data.workspaceSecurity ?? {}) };
-    data.workspaceSecurity[workspaceId] = { isTrusted: false, revision: security.revision + 1 };
-    await this.save(data, { preserveSecurity: false, allowSubmittedSecurity: true });
-    return "revoked";
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const workspace = data.workspaces.find((candidate) => candidate.id === workspaceId);
+      if (!workspace) {
+        return "missing";
+      }
+      const security = data.workspaceSecurity?.[workspaceId] ?? { isTrusted: true, revision: 1 };
+      if (!security.isTrusted) {
+        return "already";
+      }
+      data.workspaceSecurity = { ...(data.workspaceSecurity ?? {}) };
+      data.workspaceSecurity[workspaceId] = { isTrusted: false, revision: security.revision + 1 };
+      await this.saveUnlocked(data, { preserveSecurity: false, allowSubmittedSecurity: true });
+      return "revoked";
+    });
   }
 
   async getSettings(): Promise<QuickShellSettings> {
@@ -271,84 +389,90 @@ export class QuickShellStorage {
   }
 
   async upsertWorkspace(workspace: Workspace): Promise<Workspace> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const normalized = normalizeWorkspace({
-      ...workspace,
-      id: ensureStableId(workspace.id),
-      launches: workspace.launches.map((launch) => ({
-        ...launch,
-        id: ensureStableId(launch.id),
-      })),
-    });
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const normalized = normalizeWorkspace({
+        ...workspace,
+        id: ensureStableId(workspace.id),
+        launches: workspace.launches.map((launch) => ({
+          ...launch,
+          id: ensureStableId(launch.id),
+        })),
+      });
 
-    const validation = validateWorkspace(normalized);
-    if (!validation.ok) {
-      throw new Error(validation.message);
-    }
-
-    const index = data.workspaces.findIndex((item) => item.id === normalized.id);
-    if (index >= 0) {
-      // Form edits snapshot mount-time fields; keep storage-managed usage time authoritative.
-      const existing = data.workspaces[index];
-      data.workspaces[index] = {
-        ...normalized,
-        lastUsedUtc: existing.lastUsedUtc ?? normalized.lastUsedUtc ?? null,
-      };
-    } else {
-      const countResult = validateWorkspaceCount(data.workspaces.length + 1);
-      if (!countResult.ok) {
-        throw new Error(countResult.message);
+      const validation = validateWorkspace(normalized);
+      if (!validation.ok) {
+        throw new Error(validation.message);
       }
-      data.workspaces.push(normalized);
-      data.workspaceSecurity = { ...(data.workspaceSecurity ?? {}) };
-      data.workspaceSecurity[normalized.id] = { isTrusted: true, revision: 1 };
-      data.layoutEntries = [...(data.layoutEntries ?? []), { type: "workspace", workspaceId: normalized.id }];
-    }
 
-    await this.save(data, { allowSubmittedSecurity: true });
-    return normalized;
+      const index = data.workspaces.findIndex((item) => item.id === normalized.id);
+      if (index >= 0) {
+        // Form edits snapshot mount-time fields; keep storage-managed usage time authoritative.
+        const existing = data.workspaces[index];
+        data.workspaces[index] = {
+          ...normalized,
+          lastUsedUtc: existing.lastUsedUtc ?? normalized.lastUsedUtc ?? null,
+        };
+      } else {
+        const countResult = validateWorkspaceCount(data.workspaces.length + 1);
+        if (!countResult.ok) {
+          throw new Error(countResult.message);
+        }
+        data.workspaces.push(normalized);
+        data.workspaceSecurity = { ...(data.workspaceSecurity ?? {}) };
+        data.workspaceSecurity[normalized.id] = { isTrusted: true, revision: 1 };
+        data.layoutEntries = [...(data.layoutEntries ?? []), { type: "workspace", workspaceId: normalized.id }];
+      }
+
+      await this.saveUnlocked(data, { allowSubmittedSecurity: true });
+      return normalized;
+    });
   }
 
   async deleteWorkspace(workspaceId: string): Promise<void> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    data.workspaces = data.workspaces.filter((workspace) => workspace.id !== workspaceId);
-    data.layoutEntries = (data.layoutEntries ?? []).filter(
-      (entry) => entry.type !== "workspace" || entry.workspaceId !== workspaceId,
-    );
-    await this.save(data);
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      data.workspaces = data.workspaces.filter((workspace) => workspace.id !== workspaceId);
+      data.layoutEntries = (data.layoutEntries ?? []).filter(
+        (entry) => entry.type !== "workspace" || entry.workspaceId !== workspaceId,
+      );
+      await this.saveUnlocked(data);
+    });
   }
 
   async duplicateWorkspace(workspaceId: string): Promise<Workspace> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const source = data.workspaces.find((workspace) => workspace.id === workspaceId);
-    if (!source) {
-      throw new Error("Workspace not found.");
-    }
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const source = data.workspaces.find((workspace) => workspace.id === workspaceId);
+      if (!source) {
+        throw new Error("Workspace not found.");
+      }
 
-    const duplicate: Workspace = normalizeWorkspace({
-      ...source,
-      id: createStableId(),
-      name: `${source.name} Copy`,
-      abbreviation: source.abbreviation ? `${source.abbreviation}-copy` : null,
-      isPinned: false,
-      pinOrder: null,
-      lastUsedUtc: null,
-      launches: source.launches.map((launch) => ({
-        ...launch,
+      const duplicate: Workspace = normalizeWorkspace({
+        ...source,
         id: createStableId(),
-      })),
-    });
+        name: `${source.name} Copy`,
+        abbreviation: source.abbreviation ? `${source.abbreviation}-copy` : null,
+        isPinned: false,
+        pinOrder: null,
+        lastUsedUtc: null,
+        launches: source.launches.map((launch) => ({
+          ...launch,
+          id: createStableId(),
+        })),
+      });
 
-    const sourceSecurity = data.workspaceSecurity?.[workspaceId] ?? { isTrusted: true, revision: 1 };
-    data.workspaces.push(duplicate);
-    data.workspaceSecurity = { ...(data.workspaceSecurity ?? {}) };
-    data.workspaceSecurity[duplicate.id] = { isTrusted: sourceSecurity.isTrusted, revision: 1 };
-    data.layoutEntries = [...(data.layoutEntries ?? []), { type: "workspace", workspaceId: duplicate.id }];
-    await this.save(data, { preserveSecurity: false, allowSubmittedSecurity: true });
-    return duplicate;
+      const sourceSecurity = data.workspaceSecurity?.[workspaceId] ?? { isTrusted: true, revision: 1 };
+      data.workspaces.push(duplicate);
+      data.workspaceSecurity = { ...(data.workspaceSecurity ?? {}) };
+      data.workspaceSecurity[duplicate.id] = { isTrusted: sourceSecurity.isTrusted, revision: 1 };
+      data.layoutEntries = [...(data.layoutEntries ?? []), { type: "workspace", workspaceId: duplicate.id }];
+      await this.saveUnlocked(data, { preserveSecurity: false, allowSubmittedSecurity: true });
+      return duplicate;
+    });
   }
 
   async getBranchTargets(): Promise<Record<string, string>> {
@@ -362,31 +486,35 @@ export class QuickShellStorage {
   }
 
   async setBranchTarget(worktreeKey: string, branch: string): Promise<void> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const key = worktreeKey.trim().toLowerCase();
-    const value = branch.trim();
-    if (!key || !value) {
-      throw new Error("Worktree key and branch are required.");
-    }
-    if (!isSafeGitBranchName(value)) {
-      throw new Error("Invalid branch name.");
-    }
-    data.branchTargets = { ...(data.branchTargets ?? {}), [key]: value };
-    await this.save(data);
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const key = worktreeKey.trim().toLowerCase();
+      const value = branch.trim();
+      if (!key || !value) {
+        throw new Error("Worktree key and branch are required.");
+      }
+      if (!isSafeGitBranchName(value)) {
+        throw new Error("Invalid branch name.");
+      }
+      data.branchTargets = { ...(data.branchTargets ?? {}), [key]: value };
+      await this.saveUnlocked(data);
+    });
   }
 
   async clearBranchTarget(worktreeKey: string): Promise<void> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const key = worktreeKey.trim().toLowerCase();
-    if (!data.branchTargets || !(key in data.branchTargets)) {
-      return;
-    }
-    const next = { ...data.branchTargets };
-    delete next[key];
-    data.branchTargets = next;
-    await this.save(data);
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const key = worktreeKey.trim().toLowerCase();
+      if (!data.branchTargets || !(key in data.branchTargets)) {
+        return;
+      }
+      const next = { ...data.branchTargets };
+      delete next[key];
+      data.branchTargets = next;
+      await this.saveUnlocked(data);
+    });
   }
 
   async getLayoutEntries(): Promise<LayoutEntry[]> {
@@ -395,132 +523,144 @@ export class QuickShellStorage {
   }
 
   async insertSeparator(title?: string | null, beforeWorkspaceId?: string): Promise<LayoutEntry> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const separator: LayoutEntry = {
-      type: "separator",
-      id: createStableId(),
-      title: title?.trim() ? title.trim() : null,
-    };
-    const layout = [...(data.layoutEntries ?? [])];
-    const insertAt = beforeWorkspaceId
-      ? layout.findIndex((entry) => entry.type === "workspace" && entry.workspaceId === beforeWorkspaceId)
-      : -1;
-    if (insertAt >= 0) {
-      layout.splice(insertAt, 0, separator);
-    } else {
-      layout.push(separator);
-    }
-    data.layoutEntries = layout;
-    await this.save(data);
-    return separator;
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const separator: LayoutEntry = {
+        type: "separator",
+        id: createStableId(),
+        title: title?.trim() ? title.trim() : null,
+      };
+      const layout = [...(data.layoutEntries ?? [])];
+      const insertAt = beforeWorkspaceId
+        ? layout.findIndex((entry) => entry.type === "workspace" && entry.workspaceId === beforeWorkspaceId)
+        : -1;
+      if (insertAt >= 0) {
+        layout.splice(insertAt, 0, separator);
+      } else {
+        layout.push(separator);
+      }
+      data.layoutEntries = layout;
+      await this.saveUnlocked(data);
+      return separator;
+    });
   }
 
   async removeLayoutEntry(entryId: string): Promise<void> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    data.layoutEntries = (data.layoutEntries ?? []).filter((entry) => !layoutEntryMatchesId(entry, entryId));
-    await this.save(data);
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      data.layoutEntries = (data.layoutEntries ?? []).filter((entry) => !layoutEntryMatchesId(entry, entryId));
+      await this.saveUnlocked(data);
+    });
   }
 
   async moveLayoutEntry(entryId: string, direction: "up" | "down"): Promise<void> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const layout = [...(data.layoutEntries ?? [])];
-    const index = layout.findIndex((entry) => layoutEntryMatchesId(entry, entryId));
-    if (index < 0) {
-      return;
-    }
-    const swapIndex = direction === "up" ? index - 1 : index + 1;
-    if (swapIndex < 0 || swapIndex >= layout.length) {
-      return;
-    }
-    const current = layout[index];
-    layout[index] = layout[swapIndex];
-    layout[swapIndex] = current;
-    data.layoutEntries = layout;
-    await this.save(data);
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const layout = [...(data.layoutEntries ?? [])];
+      const index = layout.findIndex((entry) => layoutEntryMatchesId(entry, entryId));
+      if (index < 0) {
+        return;
+      }
+      const swapIndex = direction === "up" ? index - 1 : index + 1;
+      if (swapIndex < 0 || swapIndex >= layout.length) {
+        return;
+      }
+      const current = layout[index];
+      layout[index] = layout[swapIndex];
+      layout[swapIndex] = current;
+      data.layoutEntries = layout;
+      await this.saveUnlocked(data);
+    });
   }
 
   async setFavorite(workspaceId: string, isPinned: boolean): Promise<Workspace> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const workspace = data.workspaces.find((item) => item.id === workspaceId);
-    if (!workspace) {
-      throw new Error("Workspace not found.");
-    }
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const workspace = data.workspaces.find((item) => item.id === workspaceId);
+      if (!workspace) {
+        throw new Error("Workspace not found.");
+      }
 
-    workspace.isPinned = isPinned;
-    if (isPinned) {
-      const maxPinOrder = data.workspaces
-        .filter((item) => item.isPinned && item.id !== workspaceId)
-        .reduce((max, item) => Math.max(max, item.pinOrder ?? 0), 0);
-      workspace.pinOrder = maxPinOrder + 1;
-    } else {
-      workspace.pinOrder = null;
-    }
+      workspace.isPinned = isPinned;
+      if (isPinned) {
+        const maxPinOrder = data.workspaces
+          .filter((item) => item.isPinned && item.id !== workspaceId)
+          .reduce((max, item) => Math.max(max, item.pinOrder ?? 0), 0);
+        workspace.pinOrder = maxPinOrder + 1;
+      } else {
+        workspace.pinOrder = null;
+      }
 
-    await this.save(data);
-    return { ...workspace };
+      await this.saveUnlocked(data);
+      return { ...workspace };
+    });
   }
 
   /** Returns the moved workspace, or `null` when the move is a boundary no-op. */
   async moveFavorite(workspaceId: string, direction: "up" | "down" | "top" | "bottom"): Promise<Workspace | null> {
-    await this.flushRecentWrites();
-    const data = await this.load();
-    const workspace = data.workspaces.find((item) => item.id === workspaceId);
-    if (!workspace || !workspace.isPinned) {
-      throw new Error("Favorite workspace not found.");
-    }
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      const workspace = data.workspaces.find((item) => item.id === workspaceId);
+      if (!workspace || !workspace.isPinned) {
+        throw new Error("Favorite workspace not found.");
+      }
 
-    // Same order as browse favorites: null pinOrder sorts last, then name.
-    const favorites = getFavoriteWorkspaces(data.workspaces);
-    const index = favorites.findIndex((item) => item.id === workspaceId);
-    if (index < 0) {
-      throw new Error("Favorite workspace not found.");
-    }
+      // Same order as browse favorites: null pinOrder sorts last, then name.
+      const favorites = getFavoriteWorkspaces(data.workspaces);
+      const index = favorites.findIndex((item) => item.id === workspaceId);
+      if (index < 0) {
+        throw new Error("Favorite workspace not found.");
+      }
 
-    const targetIndex =
-      direction === "up"
-        ? index - 1
-        : direction === "down"
-          ? index + 1
-          : direction === "top"
-            ? 0
-            : favorites.length - 1;
-    if (targetIndex < 0 || targetIndex >= favorites.length || targetIndex === index) {
-      return null;
-    }
+      const targetIndex =
+        direction === "up"
+          ? index - 1
+          : direction === "down"
+            ? index + 1
+            : direction === "top"
+              ? 0
+              : favorites.length - 1;
+      if (targetIndex < 0 || targetIndex >= favorites.length || targetIndex === index) {
+        return null;
+      }
 
-    if (direction === "up" || direction === "down") {
-      const current = favorites[index];
-      favorites[index] = favorites[targetIndex];
-      favorites[targetIndex] = current;
-    } else {
-      const [item] = favorites.splice(index, 1);
-      favorites.splice(targetIndex, 0, item);
-    }
+      if (direction === "up" || direction === "down") {
+        const current = favorites[index];
+        favorites[index] = favorites[targetIndex];
+        favorites[targetIndex] = current;
+      } else {
+        const [item] = favorites.splice(index, 1);
+        favorites.splice(targetIndex, 0, item);
+      }
 
-    favorites.forEach((item, orderIndex) => {
-      item.pinOrder = orderIndex + 1;
+      favorites.forEach((item, orderIndex) => {
+        item.pinOrder = orderIndex + 1;
+      });
+
+      await this.saveUnlocked(data);
+      return { ...favorites[targetIndex] };
     });
-
-    await this.save(data);
-    return { ...favorites[targetIndex] };
   }
 
   async markWorkspaceUsed(workspaceId: string, usedAt = new Date()): Promise<void> {
-    await this.ensureLoaded();
-    const workspace = this.cache!.workspaces.find((item) => item.id === workspaceId);
-    if (!workspace) {
-      throw new Error("Workspace not found.");
-    }
-    workspace.lastUsedUtc = usedAt.toISOString();
-    this.recentWriteDirty = true;
-    this.scheduleRecentWriteFlush();
+    return this.withWriteLock(async () => {
+      await this.ensureLoaded();
+      const workspace = this.cache!.workspaces.find((item) => item.id === workspaceId);
+      if (!workspace) {
+        throw new Error("Workspace not found.");
+      }
+      workspace.lastUsedUtc = usedAt.toISOString();
+      this.recentWriteDirty = true;
+      this.scheduleRecentWriteFlush();
+    });
   }
 
-  async flushRecentWrites(): Promise<void> {
+  private async flushRecentWritesUnlocked(): Promise<void> {
     if (this.recentWriteTimer) {
       clearTimeout(this.recentWriteTimer);
       this.recentWriteTimer = null;
@@ -532,15 +672,73 @@ export class QuickShellStorage {
     await this.persistCache({ recordHistory: false });
   }
 
+  async flushRecentWrites(): Promise<void> {
+    return this.withWriteLock(() => this.flushRecentWritesUnlocked());
+  }
+
   async updateSettings(settings: QuickShellSettings): Promise<void> {
     if (this.settingsProvider) {
       throw new Error("Settings are managed in Raycast extension preferences.");
     }
 
-    await this.flushRecentWrites();
-    const data = await this.load();
-    data.settings = { ...settings };
-    await this.save(data);
+    return this.withWriteLock(async () => {
+      await this.flushRecentWritesUnlocked();
+      const data = await this.load();
+      data.settings = { ...settings };
+      await this.saveUnlocked(data);
+    });
+  }
+
+  /**
+   * Runs `operation` exclusively against other writers.
+   * Nested composition must call saveUnlocked / flushRecentWritesUnlocked instead of
+   * public save / flushRecentWrites so concurrent callers always queue.
+   */
+  private async withWriteLock<T>(operation: () => Promise<T>): Promise<T> {
+    if (writeLockContext.getStore()) {
+      throw new Error("Nested QuickShellStorage write lock: use saveUnlocked / flushRecentWritesUnlocked.");
+    }
+
+    let releaseGate!: () => void;
+    let releaseTimer: (() => void) | undefined;
+    const gate = new Promise<void>((resolve) => {
+      releaseGate = resolve;
+    });
+    const release = () => {
+      releaseTimer?.();
+      releaseGate();
+    };
+
+    const previous = this.writeTail;
+    this.writeTail = previous.then(
+      () => gate,
+      () => gate,
+    );
+
+    const timeout = new Promise<never>((_, reject) => {
+      const timer = setTimeout(
+        () => reject(new Error(`lock-timeout: ${WRITE_LOCK_TIMEOUT_MS}ms`)),
+        WRITE_LOCK_TIMEOUT_MS,
+      );
+      releaseTimer = () => clearTimeout(timer);
+    });
+
+    try {
+      await Promise.race([previous, timeout]);
+    } catch (error) {
+      release();
+      throw error;
+    }
+
+    // Lock acquired; cancel the wait timeout so a long-running operation does not cause
+    // an unhandled rejection when the timer eventually fires.
+    releaseTimer?.();
+
+    try {
+      return await writeLockContext.run(true, operation);
+    } finally {
+      release();
+    }
   }
 
   private async ensureLoaded(): Promise<void> {

@@ -4,6 +4,7 @@ import path from "node:path";
 export type WorkspaceSetupTask = {
   label: string;
   command: string;
+  taskType?: string;
 };
 
 const PREFERRED_SCRIPT_NAMES = ["dev", "start", "test", "build"];

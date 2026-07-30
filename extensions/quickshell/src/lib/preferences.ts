@@ -28,11 +28,7 @@ export function preferencesToSettings(prefs: ExtensionPreferences): QuickShellSe
     terminalApplication,
     defaultProfile,
     recentWorkspaceCount: recentCountFromEnabled(prefs.showRecents ?? true),
-    multiLaunchPresentation: isMacPlatform()
-      ? "separateWindows"
-      : (prefs.singleWindowTabs ?? true)
-        ? "singleWindowTabs"
-        : "separateWindows",
+    multiLaunchPresentation: (prefs.singleWindowTabs ?? true) ? "singleWindowTabs" : "separateWindows",
     blockDirtyBranchSwitch: prefs.blockDirtyBranchSwitch ?? DEFAULT_SETTINGS.blockDirtyBranchSwitch,
   };
 }
