@@ -4,83 +4,91 @@ import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { filterTasks } from "./api/tasks";
 import { TaskItem } from "./components/TaskItem";
-import { useState } from "react";
+import { Filter, Project } from "./types/ticktick";
+
+function FilterTasks({
+  filter,
+  projects,
+  onRevalidate,
+}: {
+  filter: Filter;
+  projects: Project[];
+  onRevalidate: () => void;
+}) {
+  const {
+    data: tasks = [],
+    isLoading,
+    revalidate,
+  } = useCachedPromise(
+    async (rule?: string) => {
+      if (!rule) return [];
+      return filterTasks(rule);
+    },
+    [filter.rule],
+  );
+
+  const projectMap = new Map(projects.map((project) => [project.id, project.name]));
+  const refresh = () => {
+    onRevalidate();
+    revalidate();
+  };
+
+  return (
+    <List
+      isLoading={isLoading}
+      navigationTitle={filter.name.length > 32 ? `${filter.name.slice(0, 29)}…` : filter.name}
+      searchBarPlaceholder={`Search ${filter.name} tasks...`}
+    >
+      <List.Section title={filter.name}>
+        {tasks.map((task) => (
+          <TaskItem
+            key={task.id}
+            task={task}
+            projects={projects}
+            projectName={projectMap.get(task.projectId)}
+            onComplete={refresh}
+            onDelete={refresh}
+            onRevalidate={refresh}
+          />
+        ))}
+      </List.Section>
+      {tasks.length === 0 && !isLoading && <List.EmptyView icon={Icon.Checkmark} title="No matching tasks" />}
+    </List>
+  );
+}
 
 export default function Filters() {
   useAlerts();
-  const { data, isLoading: syncLoading, revalidate } = useSync();
-  const [activeFilterId, setActiveFilterId] = useState<string | null>(null);
-
-  const {
-    data: filteredTasks,
-    isLoading: filterLoading,
-    revalidate: refilter,
-  } = useCachedPromise(
-    async (filterId: string | null, filters: typeof data.filters) => {
-      if (!filterId) return [];
-      const filter = filters.find((f) => f.id === filterId);
-      if (!filter?.rule) return [];
-      return filterTasks(filter.rule);
-    },
-    [activeFilterId, data.filters],
-  );
-
-  const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
-  const tasks = activeFilterId ? (filteredTasks ?? []) : [];
-  const isLoading = syncLoading || filterLoading;
+  const { data, isLoading, revalidate } = useSync();
 
   return (
-    <List isLoading={isLoading} navigationTitle="Smart Lists" searchBarPlaceholder="Search filters...">
-      {!activeFilterId ? (
-        data.filters.length === 0 && !syncLoading ? (
-          <List.EmptyView
-            icon={Icon.Filter}
-            title="No smart lists"
-            description="Create filters in TickTick to see them here."
-          />
-        ) : (
-          <List.Section title="Your Smart Lists">
-            {data.filters.map((filter) => (
-              <List.Item
-                key={filter.id}
-                icon={Icon.Filter}
-                title={filter.name}
-                subtitle={filter.rule}
-                actions={
-                  <ActionPanel>
-                    <Action title="Open Filter" icon={Icon.ArrowRight} onAction={() => setActiveFilterId(filter.id)} />
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        )
+    <List isLoading={isLoading} searchBarPlaceholder="Search smart lists...">
+      {data.filters.length === 0 && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.Filter}
+          title="No smart lists"
+          description="Create filters in TickTick to see them here."
+        />
       ) : (
-        <>
-          <List.Section title={data.filters.find((f) => f.id === activeFilterId)?.name ?? "Filter"}>
-            {tasks.map((task) => (
-              <TaskItem
-                key={task.id}
-                task={task}
-                projects={data.projects}
-                projectName={projectMap.get(task.projectId)}
-                onComplete={() => {
-                  revalidate();
-                  refilter();
-                }}
-                onDelete={() => {
-                  revalidate();
-                  refilter();
-                }}
-                onRevalidate={() => {
-                  revalidate();
-                  refilter();
-                }}
-              />
-            ))}
-          </List.Section>
-          {tasks.length === 0 && !isLoading && <List.EmptyView icon={Icon.Checkmark} title="No matching tasks" />}
-        </>
+        <List.Section title="Your Smart Lists">
+          {data.filters.map((filter) => (
+            <List.Item
+              key={filter.id}
+              icon={Icon.Filter}
+              title={filter.name}
+              subtitle={filter.rule}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Open Smart List"
+                    icon={Icon.ArrowRight}
+                    target={<FilterTasks filter={filter} projects={data.projects} onRevalidate={revalidate} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       )}
     </List>
   );

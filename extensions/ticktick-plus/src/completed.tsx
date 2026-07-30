@@ -28,7 +28,7 @@ export default function Completed() {
   const projectMap = new Map(syncData.projects.map((p) => [p.id, p.name]));
 
   return (
-    <List isLoading={isLoading} navigationTitle="Completed" searchBarPlaceholder="Search completed tasks...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search completed tasks...">
       {tasks.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.Checkmark} title="No completed tasks" description="Last 30 days." />
       ) : (

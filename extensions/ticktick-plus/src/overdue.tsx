@@ -22,7 +22,7 @@ export default function Overdue() {
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
 
   return (
-    <List isLoading={isLoading} navigationTitle="Overdue" searchBarPlaceholder="Filter overdue tasks...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter overdue tasks...">
       {overdueTasks.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.Checkmark} title="Nothing overdue!" description="You're all caught up." />
       ) : (

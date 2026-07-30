@@ -65,7 +65,7 @@ export default function QuickAdd(props: LaunchProps<{ arguments: Arguments.Quick
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Add Task" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

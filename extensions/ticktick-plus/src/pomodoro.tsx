@@ -34,7 +34,7 @@ export default function Pomodoro() {
   const todayTasks = syncData.tasks.filter((t) => t.dueDate).slice(0, 20);
 
   return (
-    <List navigationTitle="Pomodoro Timer" searchBarPlaceholder="Search tasks to focus on..." isLoading={isLoading}>
+    <List searchBarPlaceholder="Search tasks to focus on..." isLoading={isLoading}>
       <List.Section title="Timer">
         <List.Item
           icon={{ source: Icon.Clock, tintColor: phaseColors[state.phase] }}
@@ -110,7 +110,7 @@ export default function Pomodoro() {
               accessories={[{ text: state.phase === phase ? "Current" : "" }]}
               actions={
                 <ActionPanel>
-                  <Action title="Start" onAction={() => startPhase(phase)} />
+                  <Action title="Start" icon={Icon.Play} onAction={() => startPhase(phase)} />
                 </ActionPanel>
               }
             />

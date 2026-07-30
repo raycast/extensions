@@ -23,7 +23,7 @@ export default function Profile() {
   const projects = syncData.projects.filter((p) => !p.closed).length;
 
   return (
-    <List isLoading={isLoading} navigationTitle="Profile" searchBarPlaceholder="">
+    <List isLoading={isLoading} searchBarPlaceholder="Search account overview...">
       {profile && (
         <List.Section title="Account">
           <List.Item

@@ -42,7 +42,10 @@ export function TaskDetail({ task, projects, projectName, onMutate }: Props) {
   const otherProjects = projects.filter((p) => p.id !== task.projectId && !p.closed);
 
   return (
-    <List navigationTitle={task.title} searchBarPlaceholder="Filter...">
+    <List
+      navigationTitle={task.title.length > 32 ? `${task.title.slice(0, 29)}…` : task.title}
+      searchBarPlaceholder="Filter details..."
+    >
       <List.Section title="Details">
         <List.Item
           icon={Icon.Info}
@@ -137,6 +140,7 @@ export function TaskDetail({ task, projects, projectName, onMutate }: Props) {
             <ActionPanel>
               <Action
                 title="Paste Clipboard as Comment"
+                icon={Icon.Clipboard}
                 onAction={async () => {
                   const text = await Clipboard.readText();
                   if (!text) {
@@ -168,6 +172,7 @@ export function TaskDetail({ task, projects, projectName, onMutate }: Props) {
                 <ActionPanel>
                   <Action
                     title={`Move to ${p.name}`}
+                    icon={Icon.ArrowRight}
                     onAction={async () => {
                       try {
                         await moveTask(task.projectId, p.id, task.id);

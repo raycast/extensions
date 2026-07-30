@@ -34,7 +34,7 @@ export default function Habits() {
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Habits" searchBarPlaceholder="Search habits...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search habits...">
       {habits.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Star}

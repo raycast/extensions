@@ -70,8 +70,13 @@ export function EditTaskForm({ task, onSave }: Props) {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" defaultValue={task.title} />
-      <Form.TextArea id="content" title="Notes" defaultValue={task.content ?? ""} />
+      <Form.TextField id="title" title="Title" placeholder="Task title" defaultValue={task.title} />
+      <Form.TextArea
+        id="content"
+        title="Notes"
+        placeholder="Optional description..."
+        defaultValue={task.content ?? ""}
+      />
       <Form.Dropdown id="projectId" title="Project" defaultValue={task.projectId}>
         {projects.map((p) => (
           <Form.Dropdown.Item key={p.id} value={p.id} title={p.name} />

@@ -1,8 +1,8 @@
-# TickTick for Raycast
+# TickTick+ for Raycast
 
 Unofficial community [Raycast](https://raycast.com) extension for [TickTick](https://ticktick.com) on **macOS**. Manage tasks, projects, tags, habits, pomodoro, smart lists, and more — from Raycast.
 
-> **Disclaimer:** This is not affiliated with or endorsed by TickTick / Appest. Sign-in uses TickTick's official OAuth — just click **Sign in with TickTick** the first time you run a command. No credentials or setup required.
+> **Disclaimer:** This extension is not affiliated with or endorsed by TickTick or Appest. Sign-in uses TickTick OAuth through Raycast—just select **Sign in with TickTick** the first time you run a command. No API credentials are required.
 
 ## Features
 
@@ -25,7 +25,7 @@ Unofficial community [Raycast](https://raycast.com) extension for [TickTick](htt
 
 1. Run any TickTick command.
 2. Click **Sign in with TickTick** in the Raycast overlay and authorize in your browser.
-3. That's it — no Client ID, Client Secret, or developer app needed. Tokens are stored securely in Raycast's keychain.
+3. That's it—Raycast handles the OAuth session, so no client ID, client secret, or developer app is needed.
 
 ## Install from source (local / GitHub)
 
@@ -46,20 +46,20 @@ Raycast will load the extension in development mode. Run a command and sign in w
 | Inbox | Inbox tasks |
 | Next 7 Days | Upcoming week |
 | Overdue | Past-due tasks |
-| Search | Search all tasks |
-| Quick Add | Create a task |
+| Search Tasks | Search all tasks |
+| Create Task | Create a task |
 | Projects | Browse by project |
 | Eisenhower Matrix | Priority quadrants |
 | Tags | Browse by tag |
-| Filters | Smart lists |
+| Smart Lists | Saved TickTick filters |
 | Completed | Completed tasks |
 | Habits | Habit tracker |
 | Pomodoro | Focus timer |
 | Manage Projects | Create/edit projects |
 | Profile | Account info |
 | Menu Bar | Timer & counts in menu bar |
-| Background Check | Overdue/urgent alerts (runs in background) |
-| Log Out | Clear OAuth session |
+| Background Alerts | Overdue and high-priority alerts (runs in background) |
+| Disconnect TickTick Account | Clear the OAuth session |
 
 **Tip:** Complete a task with **⌘⇧↩** from any task list.
 
@@ -82,7 +82,7 @@ Raycast extensions are open source and live in the [raycast/extensions](https://
    ```bash
    npm run build && npm run lint
    ```
-2. **Screenshots** — add 3–6 images to a `metadata/` folder. In dev mode, press **⌘⇧2** in Raycast to capture store screenshots.
+2. **Screenshots** — add 3–6 PNG images at 2000 × 1250 pixels to a `metadata/` folder. In Raycast v2, assign a hotkey to **Capture Window**, enable **Save to Metadata**, and use one consistent background.
 3. **Naming** — an [official TickTick extension](https://www.raycast.com/appest/ticktick) already exists in the store under the slug `ticktick`. This extension uses **`ticktick-plus`** / **TickTick+** so it publishes as a separate extension (do not use slug `ticktick` or `pull-contributions` will merge the official extension and cause conflicts).
 
 ### Submit

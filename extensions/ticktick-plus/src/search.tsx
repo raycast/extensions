@@ -31,7 +31,7 @@ export default function Search() {
           title="Search TickTick"
           description="Type to search across all your tasks."
         />
-      ) : results.length === 0 ? (
+      ) : results.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.XMarkCircle} title="No results" description={`No tasks match "${query}"`} />
       ) : (
         <List.Section title={`${results.length} result${results.length !== 1 ? "s" : ""}`}>

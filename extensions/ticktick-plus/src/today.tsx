@@ -1,5 +1,5 @@
 import { List, Icon } from "@raycast/api";
-import { format, isToday, parseISO } from "date-fns";
+import { isToday, parseISO } from "date-fns";
 import { useSync } from "./hooks/useSync";
 import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
@@ -19,10 +19,9 @@ export default function Today() {
   const { data, isLoading, revalidate } = useSync();
   const todayTasks = data.tasks.filter(isTaskDueToday);
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
-  const today = format(new Date(), "EEEE, MMMM d");
 
   return (
-    <List isLoading={isLoading} navigationTitle={`Today — ${today}`} searchBarPlaceholder="Filter today's tasks...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter today's tasks...">
       {todayTasks.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.Checkmark} title="All done for today!" description="No tasks due today." />
       ) : (

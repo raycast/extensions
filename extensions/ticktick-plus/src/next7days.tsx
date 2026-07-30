@@ -42,7 +42,7 @@ export default function Next7Days() {
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Next 7 Days" searchBarPlaceholder="Filter upcoming tasks...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter upcoming tasks...">
       {upcoming.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.Calendar} title="Nothing upcoming" description="No tasks in the next 7 days." />
       ) : (

@@ -9,7 +9,7 @@ export default function Inbox() {
   const inboxTasks = data.tasks.filter((t) => t.projectId === data.inboxId);
 
   return (
-    <List isLoading={isLoading} navigationTitle="Inbox" searchBarPlaceholder="Filter inbox tasks...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter inbox tasks...">
       {!data.inboxId && !isLoading ? (
         <List.EmptyView
           icon={Icon.Warning}
@@ -25,7 +25,7 @@ export default function Inbox() {
         <List.EmptyView
           icon={Icon.Tray}
           title="Inbox is empty"
-          description="No unorganised tasks."
+          description="No unorganized tasks."
           actions={
             <ActionPanel>
               <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />

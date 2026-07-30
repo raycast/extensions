@@ -25,7 +25,7 @@ export default function Tags() {
   const sortedTags = [...tagTaskMap.entries()].sort((a, b) => a[0].localeCompare(b[0]));
 
   return (
-    <List isLoading={isLoading} navigationTitle="Tags" searchBarPlaceholder="Search tags...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search tags...">
       {sortedTags.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.Tag} title="No tags" description="Add tags to tasks in TickTick." />
       ) : (

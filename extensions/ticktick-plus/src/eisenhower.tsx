@@ -38,7 +38,7 @@ export default function EisenhowerMatrix() {
   for (const task of data.tasks) grouped[classifyTask(task)].push(task);
 
   return (
-    <List isLoading={isLoading} navigationTitle="Eisenhower Matrix" searchBarPlaceholder="Filter tasks...">
+    <List isLoading={isLoading} searchBarPlaceholder="Filter tasks...">
       {(["ui", "nui", "uni", "nuni"] as Quadrant[]).map((q) => {
         const { title, subtitle, color, icon } = QUADRANTS[q];
         return (

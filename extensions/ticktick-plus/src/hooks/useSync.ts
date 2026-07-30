@@ -30,7 +30,7 @@ export function useSync() {
       keepPreviousData: true,
       failureToastOptions: {
         title: "Failed to sync TickTick",
-        message: "Check your credentials in Raycast Preferences",
+        message: "Sign in again with TickTick if the problem continues",
       },
     },
   );

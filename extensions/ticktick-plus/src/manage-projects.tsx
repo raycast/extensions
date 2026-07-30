@@ -51,7 +51,7 @@ function RenameProjectForm({ project, onRenamed }: { project: Project; onRenamed
   const { pop } = useNavigation();
   return (
     <Form
-      navigationTitle={`Rename "${project.name}"`}
+      navigationTitle={project.name.length > 24 ? `Rename ${project.name.slice(0, 21)}…` : `Rename ${project.name}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -87,7 +87,6 @@ export default function ManageProjects() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Manage Projects"
       searchBarPlaceholder="Search projects..."
       actions={
         <ActionPanel>

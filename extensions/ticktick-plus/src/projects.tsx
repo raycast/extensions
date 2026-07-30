@@ -21,7 +21,11 @@ function ProjectTasks({
   const projectTasks = tasks.filter((t) => t.projectId === project.id);
 
   return (
-    <List isLoading={isLoading} navigationTitle={project.name} searchBarPlaceholder={`Search in ${project.name}...`}>
+    <List
+      isLoading={isLoading}
+      navigationTitle={project.name.length > 32 ? `${project.name.slice(0, 29)}…` : project.name}
+      searchBarPlaceholder={`Search in ${project.name}...`}
+    >
       {projectTasks.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.Checkmark} title="No tasks" description={`${project.name} is empty.`} />
       ) : (
@@ -119,7 +123,7 @@ export default function Projects() {
   }
 
   return (
-    <List isLoading={isLoading} navigationTitle="Projects" searchBarPlaceholder="Search projects...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search projects...">
       {projects.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.List} title="No projects" description="Create a project in TickTick." />
       ) : (
