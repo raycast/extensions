@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hermes-agent-cheatsheet",
+  "title": "Hermes Agent Cheatsheet",
+  "description": "Browse, search, and copy Hermes Agent CLI commands, slash commands, shortcuts, configuration, and automation recipes.",
+  "icon": "extension-icon-hermes-v2.png",
+  "author": "matheuscoelho3006",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Hermes Agent Cheatsheet",
+      "description": "Search and copy Hermes Agent commands, shortcuts, settings, and examples.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "preferredModel",
+      "title": "Preferred Model",
+      "description": "Optional model supplied by you. Fill both model and provider to personalize examples.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Example: gpt-5.6-sol"
+    },
+    {
+      "name": "preferredProvider",
+      "title": "Preferred Provider",
+      "description": "Optional provider supplied by you. Fill both model and provider to personalize examples.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Example: openai-codex"
+    },
+    {
+      "name": "primaryContent",
+      "title": "Primary Content",
+      "description": "Choose concrete examples or generic usage as the primary list action.",
+      "type": "dropdown",
+      "required": false,
+      "default": "example",
+      "data": [
+        {
+          "title": "Concrete Example",
+          "value": "example"
+        },
+        {
+          "title": "Generic Usage",
+          "value": "usage"
+        }
+      ]
+    },
+    {
+      "name": "showDetailPreview",
+      "title": "Detail Preview",
+      "description": "Show the side detail preview when the cheatsheet opens.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show detail preview by default"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.8",
+    "eslint": "^8.57.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test tests/*.test.mts",
+    "sync-data": "node scripts/sync-hermes-docs.mjs",
+    "validate": "npm run test && npm run lint && npm run build",
+    "prepublishOnly": "echo \"Use npm run publish to publish this Raycast extension.\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
