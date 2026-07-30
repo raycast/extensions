@@ -40,17 +40,31 @@ let s = ${CACHE_ICON_SIZE}
 while let line = readLine() {
   // Each field is base64 so a path containing a tab or newline can't forge an extra
   // record. Anything that doesn't decode is skipped rather than guessed at.
+  // EXACTLY ONE line is printed per input line, on every path. The caller pairs the Nth
+  // result with the Nth job, so a silent skip would shift every later result by one and
+  // attribute an outcome to the wrong app. Verified: a job with an undecodable field used
+  // to print nothing, and 3 jobs produced 2 lines.
   let fields = line.components(separatedBy: " ")
   guard fields.count >= 2,
         let inData = Data(base64Encoded: fields[0]),
         let outData = Data(base64Encoded: fields[1]),
         let appPath = String(data: inData, encoding: .utf8),
-        let outPath = String(data: outData, encoding: .utf8) else { continue }
+        let outPath = String(data: outData, encoding: .utf8)
+  else {
+    print("fail")
+    fflush(stdout)
+    continue
+  }
   // Third field: the icon-source mtime the caller observed before we drew anything.
   let stamp = fields.count >= 3 ? Double(fields[2]) : nil
   let icon = NSWorkspace.shared.icon(forFile: appPath)
   icon.size = NSSize(width: s, height: s)
-  guard let bmp = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: s, pixelsHigh: s, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0) else { continue }
+  guard let bmp = NSBitmapImageRep(bitmapDataPlanes: nil, pixelsWide: s, pixelsHigh: s, bitsPerSample: 8, samplesPerPixel: 4, hasAlpha: true, isPlanar: false, colorSpaceName: .deviceRGB, bytesPerRow: 0, bitsPerPixel: 0)
+  else {
+    print("fail")
+    fflush(stdout)
+    continue
+  }
   NSGraphicsContext.saveGraphicsState()
   NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bmp)
   icon.draw(in: NSRect(x: 0, y: 0, width: s, height: s), from: .zero, operation: .copy, fraction: 1.0)
