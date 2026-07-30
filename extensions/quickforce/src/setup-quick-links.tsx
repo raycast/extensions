@@ -25,7 +25,7 @@ const SETUP_PAGES: SetupPage[] = [
     id: "users",
     title: "Users",
     category: "Administration",
-    path: "/lightning/setup/ManageUsers/home",
+    path: "/lightning/setup/ManageUsersLightning/home",
     keywords: ["user", "people", "access"],
     icon: Icon.Person,
   },
@@ -41,7 +41,7 @@ const SETUP_PAGES: SetupPage[] = [
     id: "permission-sets",
     title: "Permission Sets",
     category: "Administration",
-    path: "/lightning/setup/PermSets/home",
+    path: "/lightning/setup/PermissionSetListView/home",
     keywords: ["permission", "access", "security"],
     icon: Icon.Lock,
   },
@@ -143,7 +143,7 @@ const SETUP_PAGES: SetupPage[] = [
     id: "password-policies",
     title: "Password Policies",
     category: "Security",
-    path: "/lightning/setup/SecurityPasswordPolicies/home",
+    path: "/lightning/setup/SecurityPolicies/home",
     keywords: ["password", "security", "policy"],
     icon: Icon.Key,
   },
@@ -151,7 +151,7 @@ const SETUP_PAGES: SetupPage[] = [
     id: "login-access-policies",
     title: "Login Access Policies",
     category: "Security",
-    path: "/lightning/setup/SecurityLoginAccessPolicies/home",
+    path: "/lightning/setup/LoginAccessPolicies/home",
     keywords: ["login", "access", "security", "ip"],
     icon: Icon.Lock,
   },
@@ -217,7 +217,7 @@ const SETUP_PAGES: SetupPage[] = [
   // Integrations
   {
     id: "connected-apps",
-    title: "Connected Apps",
+    title: "Manage Connected Apps",
     category: "Integrations",
     path: "/lightning/setup/ConnectedApplication/home",
     keywords: ["connected", "app", "oauth", "integration"],
@@ -253,7 +253,7 @@ const SETUP_PAGES: SetupPage[] = [
   // Email Administration
   {
     id: "email-templates",
-    title: "Email Templates",
+    title: "Classic Email Templates",
     category: "Email Administration",
     path: "/lightning/setup/CommunicationTemplatesEmail/home",
     keywords: ["email", "template", "communication"],
@@ -281,7 +281,7 @@ const SETUP_PAGES: SetupPage[] = [
     id: "fiscal-year",
     title: "Fiscal Year",
     category: "Company Settings",
-    path: "/lightning/setup/FiscalYear/home",
+    path: "/lightning/setup/ForecastFiscalYear/home",
     keywords: ["fiscal", "year", "period"],
     icon: Icon.Calendar,
   },
@@ -397,7 +397,6 @@ export function SetupQuickLinksList({ initialOrg }: { initialOrg?: string } = {}
             <Action
               title={isPinned ? "Unpin Page" : "Pin Page"}
               icon={isPinned ? Icon.PinDisabled : Icon.Pin}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
               onAction={() => handleTogglePin(page.id)}
             />
 

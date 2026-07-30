@@ -270,11 +270,11 @@ function RecordCreationForm({
 
     switch (field.type) {
       case "textarea":
-        return <Form.TextArea {...commonProps} placeholder={field.placeholder} />;
+        return <Form.TextArea key={field.apiName} {...commonProps} placeholder={field.placeholder} />;
       case "picklist": {
         const options = livePicklists?.[field.apiName]?.length ? livePicklists[field.apiName] : field.options;
         return (
-          <Form.Dropdown {...commonProps}>
+          <Form.Dropdown key={field.apiName} {...commonProps}>
             <Form.Dropdown.Item value="" title="--None--" />
             {options?.map((opt) => (
               <Form.Dropdown.Item key={opt} value={opt} title={opt} />
@@ -285,6 +285,7 @@ function RecordCreationForm({
       case "date":
         return (
           <Form.DatePicker
+            key={field.apiName}
             id={field.apiName}
             title={field.label + (field.required ? " *" : "")}
             value={fieldValues[field.apiName] ? new Date(fieldValues[field.apiName]) : null}
@@ -294,7 +295,7 @@ function RecordCreationForm({
           />
         );
       default:
-        return <Form.TextField {...commonProps} placeholder={field.placeholder} />;
+        return <Form.TextField key={field.apiName} {...commonProps} placeholder={field.placeholder} />;
     }
   };
 
@@ -310,7 +311,6 @@ function RecordCreationForm({
       <Form.Dropdown
         id="org"
         title="Org"
-        storeValue
         value={selectedOrg}
         onChange={setSelectedOrg}
         info="Select the org where the record will be created"
@@ -360,7 +360,7 @@ function RecentRecordsView() {
     <List searchBarPlaceholder="Search recent records...">
       {recentRecords.map((record) => {
         const url = getRecordUrl(record);
-        const createdDate = new Date(record.createdAt).toLocaleString();
+        const createdDate = new Date(record.createdAt).toLocaleString("en-US");
 
         return (
           <List.Item

@@ -385,7 +385,8 @@ export function SoqlForm({ initialOrg }: { initialOrg?: string } = {}) {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="org" title="Select Org" storeValue value={selectedOrg} onChange={setSelectedOrg}>
+      <Form.Dropdown id="org" title="Select Org" value={selectedOrg} onChange={setSelectedOrg}>
+        <Form.Dropdown.Item key="none" value="" title="Select an org..." icon={Icon.Cloud} />
         {orgOptions.map((option) => (
           <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} icon={option.icon} />
         ))}

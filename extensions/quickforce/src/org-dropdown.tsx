@@ -1,6 +1,6 @@
 import { Icon, Image, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { listOrgs, getAllOrgMetadata } from "./lib/sfdx";
 
 const DEFAULT_ORG_COLOR = "#0284C7";
@@ -13,6 +13,7 @@ export interface OrgOption {
 
 export function useDefaultOrgSelection(initialOrg = "") {
   const [selectedOrg, setSelectedOrg] = useState(initialOrg);
+  const previousDefaultOrg = useRef<string | undefined>(undefined);
 
   const {
     data: orgs,
@@ -24,10 +25,19 @@ export function useDefaultOrgSelection(initialOrg = "") {
   });
 
   useEffect(() => {
-    if (orgs && selectedOrg === "" && !initialOrg) {
-      const defaultOrg = orgs.find((org) => org.isDefaultUsername);
-      if (defaultOrg) setSelectedOrg(defaultOrg.alias || defaultOrg.username);
+    if (!orgs || initialOrg) return;
+
+    const defaultOrg = orgs.find((org) => org.isDefaultUsername);
+    const defaultOrgValue = defaultOrg ? defaultOrg.alias || defaultOrg.username : undefined;
+
+    if (
+      defaultOrgValue &&
+      (!previousDefaultOrg.current || selectedOrg === "" || selectedOrg === previousDefaultOrg.current)
+    ) {
+      setSelectedOrg(defaultOrgValue);
     }
+
+    previousDefaultOrg.current = defaultOrgValue;
   }, [orgs, selectedOrg, initialOrg]);
 
   return { selectedOrg, setSelectedOrg, orgs, isLoading, error, revalidate };
@@ -52,7 +62,7 @@ export function OrgListDropdown({ value, onChange }: { value: string; onChange: 
   const options = useOrgOptions();
 
   return (
-    <List.Dropdown tooltip="Select Org" storeValue value={value} onChange={onChange}>
+    <List.Dropdown tooltip="Select Org" value={value} onChange={onChange}>
       <List.Dropdown.Item key="none" value="" title="Select an org..." icon={Icon.Cloud} />
       {options.map((option) => (
         <List.Dropdown.Item key={option.value} value={option.value} title={option.title} icon={option.icon} />

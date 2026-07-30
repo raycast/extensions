@@ -68,57 +68,58 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
           description={`No records found for "${searchText}"`}
         />
       )}
-      {results?.map((record: Record<string, unknown>, index: number) => {
-        const attributes = record.attributes as { type?: string } | undefined;
-        const objectType = attributes?.type || "Record";
-        const title = String(record.Name || record.Subject || record.CaseNumber || `Record ${index + 1}`);
-        const recordId = String(record.Id || "");
-        const subtitle = `${objectType} • ${recordId}`;
+      {searchText.length >= 2 &&
+        results?.map((record: Record<string, unknown>, index: number) => {
+          const attributes = record.attributes as { type?: string } | undefined;
+          const objectType = attributes?.type || "Record";
+          const title = String(record.Name || record.Subject || record.CaseNumber || `Record ${index + 1}`);
+          const recordId = String(record.Id || "");
+          const subtitle = `${objectType} • ${recordId}`;
 
-        const accessories = [
-          record.Email && { text: String(record.Email) },
-          record.Company && { text: String(record.Company) },
-          record.Amount && { text: `$${record.Amount}` },
-        ].filter(Boolean);
+          const accessories = [
+            record.Email && { text: String(record.Email) },
+            record.Company && { text: String(record.Company) },
+            record.Amount && { text: `$${record.Amount}` },
+          ].filter(Boolean);
 
-        const orgData = orgs?.find((o) => (o.alias || o.username) === selectedOrg);
-        const recordUrl = `${orgData?.instanceUrl}/lightning/r/${objectType}/${recordId}/view`;
+          const orgData = orgs?.find((o) => (o.alias || o.username) === selectedOrg);
+          const recordUrl = `${orgData?.instanceUrl}/lightning/r/${objectType}/${recordId}/view`;
 
-        return (
-          <List.Item
-            key={`${objectType}-${recordId}-${index}`}
-            icon={getIconForType(objectType)}
-            title={title}
-            subtitle={subtitle}
-            accessories={accessories as List.Item.Accessory[]}
-            actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url={recordUrl} title="Open in Salesforce" />
-                <Action.CopyToClipboard
-                  title="Copy Record Id"
-                  content={recordId}
-                  shortcut={{ modifiers: ["cmd"], key: "i" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy URL"
-                  content={recordUrl}
-                  shortcut={{ modifiers: ["cmd"], key: "u" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy as JSON"
-                  content={JSON.stringify(record, null, 2)}
-                  shortcut={{ modifiers: ["cmd"], key: "j" }}
-                />
-                <Action.CreateQuicklink
-                  title="Create Quicklink"
-                  quicklink={{ link: recordUrl, name: title }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+          return (
+            <List.Item
+              key={`${objectType}-${recordId}-${index}`}
+              icon={getIconForType(objectType)}
+              title={title}
+              subtitle={subtitle}
+              accessories={accessories as List.Item.Accessory[]}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser url={recordUrl} title="Open in Salesforce" />
+                  <Action.CopyToClipboard
+                    title="Copy Record Id"
+                    content={recordId}
+                    shortcut={{ modifiers: ["cmd"], key: "i" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy URL"
+                    content={recordUrl}
+                    shortcut={{ modifiers: ["cmd"], key: "u" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy as JSON"
+                    content={JSON.stringify(record, null, 2)}
+                    shortcut={{ modifiers: ["cmd"], key: "j" }}
+                  />
+                  <Action.CreateQuicklink
+                    title="Create Quicklink"
+                    quicklink={{ link: recordUrl, name: title }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
     </List>
   );
 }

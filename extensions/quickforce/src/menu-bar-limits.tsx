@@ -14,7 +14,7 @@ const DISPLAYED_LIMITS = ["DailyApiRequests", "DataStorageMB", "FileStorageMB", 
 function formatLimit(limit: OrgLimit): string {
   const used = limit.max - limit.remaining;
   const pct = limit.max > 0 ? Math.round((used / limit.max) * 100) : 0;
-  return `${used.toLocaleString()} / ${limit.max.toLocaleString()} (${pct}%)`;
+  return `${used.toLocaleString("en-US")} / ${limit.max.toLocaleString("en-US")} (${pct}%)`;
 }
 
 export default function Command() {

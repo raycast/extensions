@@ -355,7 +355,6 @@ export default function Command() {
               <Action.Push
                 title="Run Query"
                 icon={Icon.Code}
-                shortcut={{ modifiers: ["cmd"], key: "q" }}
                 target={<SoqlForm initialOrg={org.alias || org.username} />}
               />
             </ActionPanel.Section>

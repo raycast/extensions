@@ -103,7 +103,7 @@ function UserDetailView({ user, orgAlias, orgId }: { user: SalesforceUser; orgAl
 | **Status** | ${isActive ? "Active" : "Inactive"} |
 | **Login Frozen** | ${isFrozen ? "Yes" : "No"} |
 | **Last Login** | ${formatDate(user.LastLoginDate)} |
-| **Created** | ${new Date(user.CreatedDate).toLocaleString()} |
+| **Created** | ${new Date(user.CreatedDate).toLocaleString("en-US")} |
 
 ## Login History
 
@@ -112,7 +112,7 @@ ${
     ? loginHistory
         .map(
           (login: LoginHistoryEntry) => `
-**${new Date(login.LoginTime).toLocaleString()}**
+**${new Date(login.LoginTime).toLocaleString("en-US")}**
 - Status: ${login.Status}
 - Type: ${login.LoginType}
 - IP: ${login.SourceIp || "Unknown"}

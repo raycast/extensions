@@ -123,10 +123,10 @@ export function OrgDetailsView({ username }: { username: string }) {
                 key={limit.name}
                 icon={{ source: Icon.BarChart, tintColor: color }}
                 title={formatLimitName(limit.name)}
-                subtitle={`${used.toLocaleString()} of ${limit.max.toLocaleString()} used`}
+                subtitle={`${used.toLocaleString("en-US")} of ${limit.max.toLocaleString("en-US")} used`}
                 accessories={[
                   { tag: { value: `${Math.round(usagePercent)}%`, color } },
-                  { text: `${limit.remaining.toLocaleString()} remaining` },
+                  { text: `${limit.remaining.toLocaleString("en-US")} remaining` },
                 ]}
                 actions={
                   <ActionPanel>
