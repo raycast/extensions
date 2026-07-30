@@ -42,6 +42,10 @@ test("normalizes case and diacritics", () => {
   assert.equal(normalizeSearchText("RÉSUMÉ"), "resume");
 });
 
+test("folds Turkish dotted capital I to a plain ASCII i", () => {
+  assert.equal(normalizeSearchText("İSTANBUL Insight"), "istanbul insight");
+});
+
 test("searches title, content, and category without exposing tags", () => {
   assert.deepEqual(
     searchPrompts(prompts, "resume").map((prompt) => prompt.id),

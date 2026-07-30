@@ -1,10 +1,11 @@
 import type { PromptRecord } from "../types/snapshot.js";
 
+// Case folding uses toLowerCase so results never vary with the host locale.
 export function normalizeSearchText(value: string): string {
   return value
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "")
-    .toLocaleLowerCase();
+    .toLowerCase();
 }
 
 export function searchPrompts(prompts: PromptRecord[], query: string): PromptRecord[] {

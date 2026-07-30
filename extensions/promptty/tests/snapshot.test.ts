@@ -8,6 +8,7 @@ import { MINIMUM_PROMPTTY_VERSION, isPrompttyVersionSupported } from "../src/lib
 import { SnapshotError } from "../src/lib/errors.js";
 import {
   LAST_KNOWN_GOOD_CACHE_KEY,
+  MAX_LAST_KNOWN_GOOD_BYTES,
   isSnapshotStale,
   loadSnapshotWithCache,
   parseSnapshotJSON,
@@ -142,6 +143,30 @@ test("retains last-known-good cache after a malformed file", async () => {
   assert.equal(fallback.source, "cache");
   assert.equal(fallback.issue?.kind, "malformed");
   assert.equal(fallback.snapshot.prompts[0]?.content, validPrompt.content);
+});
+
+test("drops the last-known-good cache when a newer export exceeds the cache budget", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "promptty-raycast-"));
+  const snapshotPath = join(directory, "prompts-v1.json");
+  const cache = new MemoryCache();
+
+  await writeFile(snapshotPath, JSON.stringify(validSnapshot()), "utf8");
+  const loaded = await loadSnapshotWithCache(snapshotPath, cache);
+  assert.equal(loaded.cacheUpdated, true);
+  assert.ok(cache.get(LAST_KNOWN_GOOD_CACHE_KEY));
+
+  const oversizedPrompt = { ...validPrompt, content: "x".repeat(MAX_LAST_KNOWN_GOOD_BYTES + 1) };
+  await writeFile(snapshotPath, JSON.stringify(validSnapshot([oversizedPrompt])), "utf8");
+  const oversized = await loadSnapshotWithCache(snapshotPath, cache);
+  assert.equal(oversized.source, "file");
+  assert.equal(oversized.cacheUpdated, false);
+  assert.equal(cache.get(LAST_KNOWN_GOOD_CACHE_KEY), undefined);
+
+  await writeFile(snapshotPath, "{broken", "utf8");
+  await assert.rejects(
+    () => loadSnapshotWithCache(snapshotPath, cache),
+    (error: unknown) => error instanceof SnapshotError && error.kind === "malformed",
+  );
 });
 
 test("does not return or delete a cached snapshot from a different source path", async () => {

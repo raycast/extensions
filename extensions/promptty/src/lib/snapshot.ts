@@ -107,6 +107,9 @@ export async function loadSnapshotWithCache(path: string, cache: StringCache): P
     const cacheUpdated = Buffer.byteLength(cacheValue, "utf8") <= MAX_LAST_KNOWN_GOOD_BYTES;
     if (cacheUpdated) {
       cache.set(LAST_KNOWN_GOOD_CACHE_KEY, cacheValue);
+    } else {
+      // An older entry is no longer last-known-good once a newer export is read.
+      cache.remove(LAST_KNOWN_GOOD_CACHE_KEY);
     }
     return { ...parsed, source: "file", cacheUpdated };
   } catch (error) {
