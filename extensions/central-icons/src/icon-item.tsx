@@ -89,7 +89,7 @@ export const IconGridItem = memo(function IconGridItem({
   const variantKey = variantKeyOf(effectiveVariant);
   const inner = getVariantIcons(pack, variantKey)[name] ?? "";
   const svg = buildSvg(maskWrap(inner, `${variantKey}-${name}`, maskMode), "black");
-  const { licenseState, remainingCopies, runExport } = gate;
+  const { licenseState, remainingCopies, resolveLicenseState, runExport } = gate;
 
   async function exportSvgFile() {
     await runExport(async () => {
@@ -108,7 +108,9 @@ export const IconGridItem = memo(function IconGridItem({
   }
 
   async function exportAllIcons() {
-    if (licenseState !== "valid") {
+    // Waits for a validation still in flight, so a licensed user who runs this
+    // immediately after opening the command is not told they need a licence.
+    if ((await resolveLicenseState()) !== "valid") {
       await confirmAlert({
         title: "License Required",
         message:

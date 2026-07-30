@@ -1,5 +1,6 @@
 import { environment } from "@raycast/api";
 import { execFile } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { promisify } from "node:util";
@@ -18,9 +19,46 @@ export interface Pack {
   cacheDir: string;
 }
 
+interface RegistryDist {
+  tarball: string;
+  /** Subresource-integrity string, e.g. "sha512-<base64>". */
+  integrity?: string;
+  /** Legacy sha1 hex digest, still published alongside `integrity`. */
+  shasum?: string;
+}
+
 interface RegistryLatest {
   version: string;
-  dist: { tarball: string };
+  dist: RegistryDist;
+}
+
+/**
+ * Checks the downloaded tarball against the checksum the registry published for
+ * it, before anything is extracted and before `build-cache.js` requires any code
+ * out of it. A tarball that does not match what the registry metadata describes
+ * is discarded.
+ */
+function verifyIntegrity(bytes: Buffer, dist: RegistryDist): void {
+  if (dist.integrity) {
+    // "sha512-<base64>" — split on the first dash only; SRI uses standard
+    // base64, whose alphabet has no dash.
+    const dash = dist.integrity.indexOf("-");
+    const algorithm = dist.integrity.slice(0, dash);
+    const expected = dist.integrity.slice(dash + 1);
+    const actual = createHash(algorithm).update(bytes).digest("base64");
+    if (actual !== expected) {
+      throw new Error("Downloaded icons failed their integrity check and were discarded.");
+    }
+    return;
+  }
+  if (dist.shasum) {
+    const actual = createHash("sha1").update(bytes).digest("hex");
+    if (actual !== dist.shasum) {
+      throw new Error("Downloaded icons failed their integrity check and were discarded.");
+    }
+    return;
+  }
+  throw new Error("The registry did not publish a checksum for this release, so it was not installed.");
 }
 
 function currentVersion(): string | undefined {
@@ -56,8 +94,8 @@ async function fetchLatest(): Promise<RegistryLatest | undefined> {
 
 export type PackProgress = (message: string) => void;
 
-async function downloadAndExtract(tarball: string, dir: string, onProgress?: PackProgress): Promise<void> {
-  const response = await fetch(tarball);
+async function downloadAndExtract(dist: RegistryDist, dir: string, onProgress?: PackProgress): Promise<void> {
+  const response = await fetch(dist.tarball);
   if (!response.ok) throw new Error(`Download failed (HTTP ${response.status})`);
   const archive = join(dir, "package.tgz");
 
@@ -77,7 +115,9 @@ async function downloadAndExtract(tarball: string, dir: string, onProgress?: Pac
         : `Downloading icons… ${(received / 1e6).toFixed(1)} MB`,
     );
   }
-  writeFileSync(archive, Buffer.concat(chunks));
+  const bytes = Buffer.concat(chunks);
+  verifyIntegrity(bytes, dist);
+  writeFileSync(archive, bytes);
 
   // bsdtar (ships with macOS) extracts the npm tarball; npm lifecycle
   // scripts like the package's preinstall license check are NOT run.
@@ -143,7 +183,7 @@ async function ensurePackInner(onProgress?: PackProgress): Promise<{ pack: Pack;
   const pack = packFor(latest.version);
   rmSync(pack.dir, { recursive: true, force: true });
   mkdirSync(pack.dir, { recursive: true });
-  await downloadAndExtract(latest.dist.tarball, pack.dir, onProgress);
+  await downloadAndExtract(latest.dist, pack.dir, onProgress);
   onProgress?.("Preparing icons…");
   await buildCache(pack);
 

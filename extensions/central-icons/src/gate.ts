@@ -8,7 +8,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useLocalStorage } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { checkLicense, FREE_COPY_LIMIT } from "./license";
 
 const COPY_COUNT_KEY = "copy-count";
@@ -18,6 +18,8 @@ export type LicenseState = "unknown" | "none" | "valid" | "invalid";
 export interface ExportGate {
   licenseState: LicenseState;
   remainingCopies: number;
+  /** Settles the licence state, waiting for a validation still in flight. */
+  resolveLicenseState: () => Promise<LicenseState>;
   runExport: (perform: () => Promise<unknown> | void) => Promise<void>;
 }
 
@@ -28,13 +30,23 @@ export function useExportGate(): ExportGate {
   const { value: copyCount = 0, setValue: setCopyCount } = useLocalStorage<number>(COPY_COUNT_KEY, 0);
   const remainingCopies = Math.max(0, FREE_COPY_LIMIT - copyCount);
 
+  // The in-flight validation, so an action fired before it settles can wait for
+  // the real answer instead of reading the not-yet-set "unknown" state.
+  const validation = useRef<Promise<boolean> | null>(null);
+  // Serialises runExport, so two actions cannot both read the same copy count
+  // before either has written its increment back.
+  const queue = useRef<Promise<void>>(Promise.resolve());
+
   useEffect(() => {
     let cancelled = false;
     if (!licenseKey) {
+      validation.current = null;
       setLicenseState("none");
       return;
     }
-    checkLicense(licenseKey).then((valid) => {
+    const pending = checkLicense(licenseKey);
+    validation.current = pending;
+    pending.then((valid) => {
       if (cancelled) return;
       setLicenseState(valid ? "valid" : "invalid");
       if (!valid)
@@ -48,6 +60,16 @@ export function useExportGate(): ExportGate {
       cancelled = true;
     };
   }, [licenseKey]);
+
+  async function resolveLicenseState(): Promise<LicenseState> {
+    if (licenseState !== "unknown") return licenseState;
+    if (!licenseKey) return "none";
+    // Reached when an action runs before the effect's check settles — or before
+    // the effect has even run. Starting the check here is safe: checkLicense
+    // caches, so this collapses into the same request.
+    const pending = (validation.current ??= checkLicense(licenseKey));
+    return (await pending) ? "valid" : "invalid";
+  }
 
   async function promptForLicense() {
     await confirmAlert({
@@ -64,8 +86,16 @@ export function useExportGate(): ExportGate {
     });
   }
 
-  async function runExport(perform: () => Promise<unknown> | void) {
-    if (licenseState === "valid") {
+  function runExport(perform: () => Promise<unknown> | void): Promise<void> {
+    // Chained rather than called directly so overlapping actions run one at a
+    // time; the read-modify-write of the copy count below is not atomic.
+    const run = queue.current.then(() => runExportInner(perform));
+    queue.current = run.catch(() => undefined);
+    return run;
+  }
+
+  async function runExportInner(perform: () => Promise<unknown> | void) {
+    if ((await resolveLicenseState()) === "valid") {
       await perform();
       return;
     }
@@ -84,5 +114,5 @@ export function useExportGate(): ExportGate {
     await perform();
   }
 
-  return { licenseState, remainingCopies, runExport };
+  return { licenseState, remainingCopies, resolveLicenseState, runExport };
 }
