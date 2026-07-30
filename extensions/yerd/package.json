@@ -85,7 +85,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish",
+    "publish": "node scripts/publish.mjs",
     "smoke": "node scripts/smoke.mjs",
     "test": "node --import tsx --test src/yerd/__tests__/*.test.ts src/helpers/__tests__/*.test.ts"
   }

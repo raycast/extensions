@@ -78,7 +78,7 @@ function MailDetailView({ id }: { id: string }) {
           {mail && (
             <Action.CopyToClipboard
               title="Copy Recipient"
-              content={mail.from}
+              content={mail.to.join(", ")}
             />
           )}
         </ActionPanel>
