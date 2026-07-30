@@ -7,6 +7,10 @@ const mocks = vi.hoisted(() => ({
     const callback = args.at(-1) as (error: null, stdout: string, stderr: string) => void;
     callback(null, "", "");
   }),
+  preferences: {
+    remoteDirectory: "~user$(command)/uploads",
+    remoteHost: "example-host",
+  },
   showHUD: vi.fn(),
   toast: { hide: vi.fn(), message: "", style: "", title: "" },
 }));
@@ -15,10 +19,7 @@ vi.mock("node:child_process", () => ({ execFile: mocks.execFile }));
 vi.mock("@raycast/api", () => ({
   Clipboard: { copy: mocks.clipboardCopy },
   Toast: { Style: { Animated: "animated", Failure: "failure" } },
-  getPreferenceValues: () => ({
-    remoteDirectory: "~user$(command)/uploads",
-    remoteHost: "example-host",
-  }),
+  getPreferenceValues: () => mocks.preferences,
   showHUD: mocks.showHUD,
   showToast: () => mocks.toast,
 }));
@@ -53,6 +54,8 @@ describe("uploadFile", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(Date, "now").mockReturnValue(123);
+    mocks.preferences.remoteDirectory = "~user$(command)/uploads";
+    mocks.preferences.remoteHost = "example-host";
   });
 
   test("passes the malicious destination literally to both SSH and SCP", async () => {
@@ -71,5 +74,25 @@ describe("uploadFile", () => {
       expect.any(Function),
     );
     expect(mocks.clipboardCopy).toHaveBeenCalledWith("~user$(command)/uploads/clipboard-123.png");
+  });
+
+  test("uploads to the absolute root destination", async () => {
+    mocks.preferences.remoteDirectory = "/";
+
+    await uploadFile("/tmp/image.png");
+
+    expect(mocks.execFile).toHaveBeenNthCalledWith(
+      1,
+      "/usr/bin/ssh",
+      ["example-host", "mkdir", "-p", "'/'"],
+      expect.any(Function),
+    );
+    expect(mocks.execFile).toHaveBeenNthCalledWith(
+      2,
+      "/usr/bin/scp",
+      ["/tmp/image.png", "example-host:'/clipboard-123.png'"],
+      expect.any(Function),
+    );
+    expect(mocks.clipboardCopy).toHaveBeenCalledWith("/clipboard-123.png");
   });
 });

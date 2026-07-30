@@ -44,8 +44,8 @@ function getErrorMessage(error: unknown) {
 export async function uploadFile(localPath: string) {
   const { remoteHost, remoteDirectory } = getPreferenceValues<Preferences.UploadClipboardFile>();
   const filename = `clipboard-${Date.now()}${extname(localPath)}`;
-  const directory = remoteDirectory.replace(/\/$/, "");
-  const remotePath = `${directory}/${filename}`;
+  const directory = remoteDirectory === "/" ? "/" : remoteDirectory.replace(/\/$/, "");
+  const remotePath = directory === "/" ? `/${filename}` : `${directory}/${filename}`;
   const toast = await showToast({ style: Toast.Style.Animated, title: "Uploading file…" });
 
   try {
