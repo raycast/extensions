@@ -1,6 +1,6 @@
 # Tutti Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-30
 
 - Apply Preset — pick a saved preset and switch to it.
 - Toggle Mute — mute or unmute the whole output.
