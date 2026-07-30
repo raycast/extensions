@@ -1,6 +1,6 @@
 import { execFile } from "node:child_process";
 import { createHash } from "node:crypto";
-import { mkdir, readdir, stat, unlink, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, stat, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { environment } from "@raycast/api";
@@ -150,8 +150,15 @@ export function cachedIconPath(appPath: string): string {
  * one written *during* it are both newer than the app's last readable stamp, so no mtime
  * comparison can tell them apart — and that ambiguity is what forced a choice between
  * serving a pre-update icon forever and relaunching the extractor on every grid visit.
- * The marker records the fact directly: present means "we already re-drew this while
- * blind, don't do it again"; absent means we haven't, so do it once.
+ * The marker records the fact directly.
+ *
+ * It holds the mtime of the PNG it vouches for, and is believed only while that still
+ * matches the cache entry on disk. That binding is what makes the marker safe under
+ * concurrency: an earlier design cleared markers in `findStaleApps` and re-wrote them
+ * after extraction, leaving a check-then-act window where one refresh could recreate a
+ * marker another had just retired — and a resurrected marker suppresses the single redraw
+ * a later outage requires. Here a stale marker simply fails to match the current PNG and
+ * is ignored, so there is no window to lose and nothing to clear.
  */
 const BLIND_SUFFIX = ".blind";
 
@@ -272,20 +279,16 @@ async function findStaleApps(appPaths: readonly string[]): Promise<string[]> {
       try {
         const [cachedStat, source] = await Promise.all([stat(cached), iconSourceStamp(appPath)]);
         if (source.unverifiable) {
-          // Blind: re-draw once, then trust it. The marker — not a timestamp — is what
-          // distinguishes "already re-drawn during this outage" from "written before it",
-          // which mtimes cannot express.
-          const alreadyRedrawn = await stat(blindMarkerPath(appPath)).then(
-            () => true,
-            () => false,
-          );
-          return alreadyRedrawn ? null : appPath;
+          // Blind: re-draw once, then trust it. The marker is believed only if it vouches
+          // for the PNG that is actually there — a marker naming a different mtime belongs
+          // to a superseded entry, so it can't suppress a redraw that is still owed.
+          const vouchedFor = await readFile(blindMarkerPath(appPath), "utf8").catch(() => null);
+          return vouchedFor === String(cachedStat.mtimeMs) ? null : appPath;
         }
-        // Sources are readable again, so the marker has served its purpose. Clear it here
-        // rather than during extraction: a recovered app is usually *not* stale, so the
-        // extractor never runs for it and a marker cleared only there would outlive the
-        // outage — and then suppress the one re-draw a genuine later outage should get.
-        await unlink(blindMarkerPath(appPath)).catch(() => {});
+        // No marker cleanup here. A readable pass that rewrites the entry gives it a new
+        // mtime, which invalidates any marker by itself; one that changes nothing leaves a
+        // marker that is still accurate about what it describes. `pruneIconCache` collects
+        // markers for uninstalled apps.
         return cachedStat.mtimeMs >= source.mtime ? null : appPath;
       } catch {
         return appPath; // not cached yet
@@ -409,16 +412,16 @@ export async function refreshIconCache(
     // In `finally` so an abort still records the icons that DID complete before the kill;
     // dropping those would re-extract work that genuinely finished.
     //
-    // Readability is re-checked at write time, not trusted from job-construction time.
-    // Extraction can outlast the outage — and `findStaleApps` clears the marker the moment
-    // sources read cleanly — so an unconditional write here could resurrect a marker
-    // another pass had just retired, and that stale marker would then suppress the redraw
-    // a genuine later outage requires. Writing only while still blind keeps the marker's
-    // meaning exact: "this entry was drawn without being able to see its sources".
+    // The marker records the mtime of the PNG it vouches for, read back after the write
+    // landed. Binding it to the entry is what makes this safe to run concurrently: if
+    // another refresh replaces the PNG, its mtime moves and this marker stops being
+    // believed on its own — no clear step, and so no check-then-act window in which a
+    // retired marker could be resurrected.
     await Promise.all(
       redrawn.map(async (appPath) => {
-        if (!(await iconSourceStamp(appPath)).unverifiable) return;
-        await writeFile(blindMarkerPath(appPath), "").catch(() => {});
+        const written = await stat(cachedIconPath(appPath)).catch(() => null);
+        if (!written) return;
+        await writeFile(blindMarkerPath(appPath), String(written.mtimeMs)).catch(() => {});
       }),
     );
   }
