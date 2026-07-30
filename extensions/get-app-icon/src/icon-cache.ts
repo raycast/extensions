@@ -299,6 +299,9 @@ export async function refreshIconCache(
   if (stale.length === 0) return 0;
 
   const encode = (value: string) => Buffer.from(value, "utf8").toString("base64");
+  // Apps whose sources couldn't be read this pass. Collected here, marked only after the
+  // extractor confirms each one was actually redrawn.
+  const blind = new Set<string>();
   // Each job carries the icon-source mtime observed BEFORE drawing, and the extractor
   // stamps the file it writes with that value instead of "now".
   //
@@ -332,12 +335,9 @@ export async function refreshIconCache(
         // bundle's interior.
         const usable = !source.unverifiable && Number.isFinite(source.mtime) && source.mtime > 0;
         const stamp = usable ? ` ${(Math.ceil(source.mtime) / 1000).toFixed(3)}` : "";
-        // Record that this entry was drawn blind, which is what bounds the unreadable case
-        // to a single extraction. Clearing is `findStaleApps`'s job — it happens the moment
-        // the sources read cleanly, whether or not anything needed extracting.
-        if (source.unverifiable) {
-          await writeFile(blindMarkerPath(appPath), "").catch(() => {});
-        }
+        // Note which apps are being drawn blind, but do NOT mark them yet — the marker
+        // means "a redraw completed", and nothing has been drawn at this point.
+        if (source.unverifiable) blind.add(appPath);
         return `${encode(appPath)} ${encode(cachedIconPath(appPath))}${stamp}`;
       }),
     )
@@ -359,12 +359,24 @@ export async function refreshIconCache(
   // counts — a failed write must not inflate progress.
   let done = 0;
   let pending = "";
+  // The extractor emits one line per job, in the order the jobs were written, so the
+  // Nth line belongs to `stale[N]`. Tracking that index is what lets a blind app be
+  // marked only once ITS redraw is confirmed.
+  let resultIndex = 0;
+  const redrawn: string[] = [];
   child.child.stdout?.on("data", (chunk: Buffer) => {
     // Chunks can split mid-line, so hold the remainder until its newline arrives.
     pending += chunk.toString();
     const lines = pending.split("\n");
     pending = lines.pop() ?? "";
-    done += lines.filter((line) => line === "done").length;
+    for (const line of lines) {
+      if (line !== "done" && line !== "fail") continue;
+      const appPath = stale[resultIndex];
+      resultIndex += 1;
+      if (line !== "done") continue;
+      done += 1;
+      if (appPath !== undefined && blind.has(appPath)) redrawn.push(appPath);
+    }
     onProgress?.(Math.min(done, stale.length), stale.length);
   });
 
@@ -372,6 +384,17 @@ export async function refreshIconCache(
     await child;
   } finally {
     signal?.removeEventListener("abort", abort);
+    // Mark blind apps only now, and only the ones the extractor confirmed with `done`.
+    //
+    // Writing the marker up front committed a redraw that hadn't happened: leaving the
+    // grid kills the extractor mid-batch, and an individual write can fail, either of
+    // which left the marker claiming "already redrawn" for an entry still holding the old
+    // pixels — so every later visit accepted a stale icon indefinitely. Reproduced before
+    // this change: abort the extractor once and the stale tile persists forever.
+    //
+    // In `finally` so an abort still records the icons that DID complete before the kill;
+    // dropping those would re-extract work that genuinely finished.
+    await Promise.all(redrawn.map((appPath) => writeFile(blindMarkerPath(appPath), "").catch(() => {})));
   }
 
   // Report what actually succeeded. Claiming `stale.length` here would paper over a
