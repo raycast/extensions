@@ -62,9 +62,39 @@ export default function Command() {
   );
 }
 
-/** Accepts both "106.97" and "106,97" since Indonesian users commonly type "," as a decimal separator. */
+/**
+ * Parses Indonesian number notation where "." groups thousands and "," separates
+ * decimals, while still accepting "." as a decimal separator when unambiguous
+ * (e.g. "106.97"). Examples: "9.500" -> 9500, "106,97" -> 106.97, "106.97" -> 106.97
+ */
 function parseNumber(value: string): number {
-  return Number(value.trim().replace(",", "."));
+  const trimmed = value.trim();
+  if (trimmed.length === 0) {
+    return NaN;
+  }
+
+  if (trimmed.includes(",")) {
+    // Indonesian decimal comma: dots are thousands separators.
+    return Number(trimmed.replaceAll(".", "").replace(",", "."));
+  }
+
+  const dotCount = (trimmed.match(/\./g) ?? []).length;
+  if (dotCount === 0) {
+    return Number(trimmed);
+  }
+
+  if (dotCount > 1) {
+    // Multiple dots can only be thousands separators.
+    return Number(trimmed.replaceAll(".", ""));
+  }
+
+  // Single dot: 3 digits after the dot implies thousands (e.g. "9.500").
+  const [, fraction = ""] = trimmed.split(".");
+  if (fraction.length === 3) {
+    return Number(trimmed.replaceAll(".", ""));
+  }
+
+  return Number(trimmed);
 }
 
 function isPositiveNumber(value: number): boolean {
