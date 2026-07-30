@@ -27,6 +27,10 @@
   drawn first and written second; if an export invalidated the entry in between, the older drawing
   landed afterwards carrying a current timestamp, so it looked up to date forever. Cached icons are
   now timestamped with what they actually depict rather than when they were written.
+- **Every export now offers "Reveal in Finder" (`⌘O`) on its success toast.** The action was
+  attached but carried no keyboard shortcut, so nothing on screen indicated it existed and an
+  export appeared to leave you with nowhere to go. Covers **Export Icons**, **Export Icon Size…**,
+  **Export Icons As…**, and **Export All Sizes**.
 - An unreadable path inside an app bundle no longer forces its icon to be re-extracted on every
   visit to the grid.
 - Two releases whose version strings are identical for the first ~240 characters now still get

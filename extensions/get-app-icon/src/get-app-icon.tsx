@@ -395,9 +395,18 @@ async function exportWithToast(
     toast.style = Toast.Style.Success;
     toast.title = `Exported ${countOf(results.length, "icon", { zero: "no icons" })}`;
     toast.message = warnings.length > 0 ? `${outputDir}\n⚠ ${warnings.join("; ")}` : outputDir;
+    // The shortcut is explicit on purpose. `Toast.ActionOptions` accepts one, and without
+    // it the success toast rendered with no visible affordance at all — the action existed
+    // but nothing on screen said so, which reads as "the export gave me nowhere to go".
+    // Every export path funnels through here, so this covers Export Icons, Export Icon
+    // Size…, Export Icons As…, and Export All Sizes in one place.
     toast.primaryAction = {
       title: "Reveal in Finder",
-      onAction: () => showInFinder(outputDir),
+      shortcut: { modifiers: ["cmd"], key: "o" },
+      onAction: (t) => {
+        void showInFinder(outputDir);
+        void t.hide();
+      },
     };
   } catch (error) {
     failToast(toast, error, { title: `Failed to export ${app.name}'s icons` });
