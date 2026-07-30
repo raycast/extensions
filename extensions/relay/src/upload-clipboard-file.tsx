@@ -8,11 +8,11 @@ import { useEffect, useState } from "react";
 const execFileAsync = promisify(execFile);
 
 /**
- * Collapse a remote path into one shell word. The `~/` prefix stays unquoted because
- * quoting any of the tilde prefix suppresses expansion, creating a dir named `~`.
+ * Collapse a remote path into one shell word. Only a shell-safe tilde prefix
+ * stays unquoted; otherwise the whole path is treated literally.
  */
-function quoteRemotePath(path: string) {
-  const tildePrefix = path.match(/^~[^/]*(?:\/|$)/)?.[0] ?? "";
+export function quoteRemotePath(path: string) {
+  const tildePrefix = path.match(/^~(?:[A-Za-z0-9._-]+)?(?:\/|$)/)?.[0] ?? "";
   const literal = path.slice(tildePrefix.length);
 
   if (!literal) {
@@ -41,7 +41,7 @@ function getErrorMessage(error: unknown) {
   return message;
 }
 
-async function uploadFile(localPath: string) {
+export async function uploadFile(localPath: string) {
   const { remoteHost, remoteDirectory } = getPreferenceValues<Preferences.UploadClipboardFile>();
   const filename = `clipboard-${Date.now()}${extname(localPath)}`;
   const directory = remoteDirectory.replace(/\/$/, "");
