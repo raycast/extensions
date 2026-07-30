@@ -18,12 +18,7 @@ import {
   runPortableAgent,
   safeErrorMessage,
   type Provider,
-  type ProviderPreferences,
 } from "./runtime";
-
-type ExtensionPreferences = ProviderPreferences & {
-  defaultProvider?: string;
-};
 
 type RunFormValues = {
   task: string;
@@ -42,7 +37,7 @@ type ExecutionState =
   | { status: "error"; message: string };
 
 function RunResult({ agent, values }: { agent: Agent; values: RunFormValues }) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const [state, setState] = useState<ExecutionState>({ status: "running" });
   const controllerRef = useRef<AbortController | undefined>(undefined);
   const { pop } = useNavigation();
@@ -171,9 +166,8 @@ function RunResult({ agent, values }: { agent: Agent; values: RunFormValues }) {
 }
 
 export function RunAgent({ agent }: { agent: Agent }) {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const configuredProvider = preferences.defaultProvider ?? "";
-  const preferredProvider: Provider = isProvider(configuredProvider) ? configuredProvider : "openrouter";
+  const preferences = getPreferenceValues<Preferences>();
+  const preferredProvider: Provider = preferences.defaultProvider;
   const [provider, setProvider] = useState<Provider>(preferredProvider);
   const [model, setModel] = useState(DEFAULT_MODELS[preferredProvider]);
   const { push } = useNavigation();

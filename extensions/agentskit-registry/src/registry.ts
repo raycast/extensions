@@ -1,5 +1,6 @@
 export const REGISTRY_URL = "https://registry.agentskit.io";
 const INDEX_URL = `${REGISTRY_URL}/r/index.json`;
+const SAFE_AGENT_ID = /^[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?$/;
 
 export type Agent = {
   id: string;
@@ -38,6 +39,10 @@ function getStringArray(value: unknown): string[] {
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
+export function isSafeAgentId(value: string): boolean {
+  return SAFE_AGENT_ID.test(value);
+}
+
 export function parseAgent(value: unknown): Agent | undefined {
   if (!isRecord(value)) return undefined;
 
@@ -46,7 +51,7 @@ export function parseAgent(value: unknown): Agent | undefined {
   const description = getOptionalString(value.description);
   const category = getOptionalString(value.category);
 
-  if (!id || !title || !description || !category) return undefined;
+  if (!id || !isSafeAgentId(id) || !title || !description || !category) return undefined;
 
   const validation = isRecord(value.validation)
     ? {
@@ -82,7 +87,7 @@ export function parseRunnableDefinition(value: unknown): RunnableAgentDefinition
   const skill = isRecord(value.skill) ? value.skill : undefined;
   const systemPrompt = skill ? getOptionalString(skill.systemPrompt) : undefined;
 
-  if (!id || !title || !systemPrompt?.trim()) {
+  if (!id || !isSafeAgentId(id) || !title || !systemPrompt?.trim()) {
     throw new Error("This agent does not expose a portable prompt that Raycast can run safely.");
   }
 
@@ -130,5 +135,8 @@ export function agentDefinitionUrl(agent: Pick<Agent, "id"> | string): string {
 }
 
 export function installCommand(agent: Pick<Agent, "id">): string {
+  if (!isSafeAgentId(agent.id)) {
+    throw new Error("The registry returned an unsafe agent ID.");
+  }
   return `npx agentskit add ${agent.id}`;
 }

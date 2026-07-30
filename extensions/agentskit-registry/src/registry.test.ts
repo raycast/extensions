@@ -5,6 +5,7 @@ import {
   fetchAgents,
   fetchRunnableDefinition,
   installCommand,
+  isSafeAgentId,
   parseAgent,
   parseRunnableDefinition,
 } from "./registry";
@@ -36,6 +37,14 @@ describe("registry parsing", () => {
 
   it("rejects malformed index entries", () => {
     expect(parseAgent({ id: "missing-fields" })).toBeUndefined();
+    expect(
+      parseAgent({
+        id: "writer; rm -rf project",
+        title: "Unsafe",
+        description: "Unsafe ID",
+        category: "content",
+      }),
+    ).toBeUndefined();
     expect(parseAgent(null)).toBeUndefined();
   });
 
@@ -121,7 +130,7 @@ describe("registry parsing", () => {
       vi.fn(async () => ({
         ok: true,
         json: async () => ({
-          id: "writer/pro",
+          id: "writer-pro",
           title: "Writer Pro",
           runnable: true,
           skill: { systemPrompt: "Write." },
@@ -129,10 +138,13 @@ describe("registry parsing", () => {
       })),
     );
 
-    await expect(fetchRunnableDefinition("writer/pro")).resolves.toMatchObject({ systemPrompt: "Write." });
+    await expect(fetchRunnableDefinition("writer-pro")).resolves.toMatchObject({ systemPrompt: "Write." });
     expect(agentPageUrl({ id: "writer/pro" })).toContain("writer%2Fpro");
     expect(agentDefinitionUrl({ id: "writer/pro" })).toContain("writer%2Fpro.json");
     expect(installCommand({ id: "writer" })).toBe("npx agentskit add writer");
+    expect(isSafeAgentId("writer-v2.1")).toBe(true);
+    expect(isSafeAgentId("--help")).toBe(false);
+    expect(() => installCommand({ id: "writer; rm -rf project" })).toThrow("unsafe agent ID");
   });
 
   it("surfaces definition fetch failures", async () => {
