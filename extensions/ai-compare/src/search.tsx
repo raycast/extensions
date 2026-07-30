@@ -5,6 +5,7 @@ import {
   getPreferenceValues,
   List,
   open,
+  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -50,11 +51,7 @@ async function openAiCompare(query: string): Promise<boolean | void> {
     const url = buildAiCompareUrl(preferences, trimmedQuery);
     await open(url, "Google Chrome");
     await closeMainWindow({ clearRootSearch: true });
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Opened AI Compare",
-      message: trimmedQuery,
-    });
+    await showHUD(`Opened AI Compare: ${trimmedQuery}`);
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
