@@ -200,7 +200,7 @@ export function TagRenameAction(context: RepositoryContext & { tagName: string }
       title="Rename"
       icon={{ source: Icon.Pencil, tintColor: Color.Yellow }}
       target={<TagRenameForm {...context} />}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      shortcut={Keyboard.Shortcut.Common.Edit}
     />
   );
 }

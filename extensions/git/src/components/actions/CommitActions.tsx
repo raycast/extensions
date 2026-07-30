@@ -9,6 +9,7 @@ import {
   Clipboard,
   Form,
   Color,
+  Keyboard,
 } from "@raycast/api";
 import { Commit } from "../../types";
 import InteractiveRebaseEditorView from "../views/InteractiveRebaseEditorView";
@@ -176,7 +177,7 @@ export function CommitResetAction(context: RepositoryContext & NavigationContext
         title="Soft Reset (Keep Changes Staged)"
         icon={{ source: Icon.Dot, tintColor: Color.Green }}
         onAction={() => handleReset(ResetMode.SOFT)}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        shortcut={Keyboard.Shortcut.Common.Save}
       />
       <Action
         title="Mixed Reset (Keep Changes Unstaged)"
@@ -265,7 +266,7 @@ export function CommitInteractiveRebaseAction(context: RepositoryContext & Navig
       title="Interactive Rebase from Here"
       icon={{ source: `arrow-rebase.svg`, tintColor: Color.Blue }}
       onAction={handleInteractiveRebase}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      shortcut={Keyboard.Shortcut.Common.Edit}
     />
   );
 }
@@ -278,7 +279,7 @@ export function CommitPatchCreateAction(context: RepositoryContext & NavigationC
     <Action.Push
       title="Save as Patch"
       icon={`patch.svg`}
-      shortcut={{ modifiers: ["cmd"], key: "s" }}
+      shortcut={Keyboard.Shortcut.Common.Save}
       target={PatchCreateForm(context)}
     />
   );
