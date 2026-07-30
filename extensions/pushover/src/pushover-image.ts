@@ -8,11 +8,6 @@ import { promisify } from "util";
 
 const execFileAsync = promisify(execFile);
 
-interface Preferences {
-  pushoverToken: string;
-  pushoverUser: string;
-}
-
 // Pushover only accepts image attachments, capped at 5 MB.
 const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024;
 const IMAGE_MIME_TYPES: Record<string, string> = {
