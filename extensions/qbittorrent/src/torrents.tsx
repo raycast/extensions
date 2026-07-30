@@ -284,6 +284,7 @@ export default function Torrents() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [listDetails, setListDetails] = useState<ListDetail[]>(defaultListDetails);
   const [sort, setSort] = useState<{ field?: string; reverse: boolean }>({ reverse: false });
+  const [preferencesLoaded, setPreferencesLoaded] = useState(false);
   const [updateTimestamp, setUpdateTimestamp] = useState(+new Date());
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -388,24 +389,28 @@ export default function Torrents() {
       LocalStorage.getItem<boolean>(SHOW_DETAILS_KEY),
       LocalStorage.getItem<string>(SORT_KEY),
       LocalStorage.getItem<string>(LIST_DETAILS_KEY),
-    ]).then(([showDetails, storedSort, storedDetails]) => {
-      setIsShowingDetail(showDetails ?? false);
+    ])
+      .then(([showDetails, storedSort, storedDetails]) => {
+        setIsShowingDetail(showDetails ?? false);
 
-      const [field, direction] = storedSort?.split(":") ?? [];
-      if (field && sortOptions.some((option) => option.field === field)) {
-        setSort({ field, reverse: direction === "desc" });
-      }
+        const [field, direction] = storedSort?.split(":") ?? [];
+        if (field && sortOptions.some((option) => option.field === field)) {
+          setSort({ field, reverse: direction === "desc" });
+        }
 
-      if (storedDetails !== undefined) {
-        const selected = storedDetails.split(",");
-        setListDetails(listDetailOptions.map((option) => option.value).filter((value) => selected.includes(value)));
-      }
-    });
+        if (storedDetails !== undefined) {
+          const selected = storedDetails.split(",");
+          setListDetails(listDetailOptions.map((option) => option.value).filter((value) => selected.includes(value)));
+        }
+      })
+      .finally(() => setPreferencesLoaded(true));
   }, []);
 
   useEffect(() => {
-    updateTorrents();
-  }, [updateTimestamp, filter, sort]);
+    if (preferencesLoaded) {
+      updateTorrents();
+    }
+  }, [updateTimestamp, filter, sort, preferencesLoaded]);
 
   useEffect(() => {
     return () => {
@@ -446,7 +451,6 @@ export default function Torrents() {
             accessories={formatListAccessories(torrent, listDetails)}
             actions={
               <ActionPanel>
-                <Action.Open title="Open Download Folder" target={torrent.save_path} icon={Icon.Folder} />
                 <Action.OpenInBrowser title="Open in Browser" url={address} shortcut={openInBrowserShortcut} />
                 <Action.CopyToClipboard
                   title="Copy Save Path"
