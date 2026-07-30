@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Icon, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
@@ -7,49 +7,81 @@ import { Actions } from "../components/Actions";
 import { formatBytes, isObjectEmpty } from "../utils";
 import { getNetworkData, getTopProcess } from "./NetworkUtils";
 
-export default function NetworkMonitor() {
+export default function NetworkMonitor({ isActive = false }: { isActive?: boolean }) {
   const prevProcess = useRef<{ [key: string]: number[] }>({});
-  const { data, isLoading, revalidate } = usePromise(async () => {
-    const currProcess = await getNetworkData();
-    let upload = 0;
-    let download = 0;
-    let processList: [string, number, number][] = [];
+  const prevSampleTime = useRef<number | null>(null);
+  const isActiveRef = useRef(isActive);
 
-    if (!isObjectEmpty(prevProcess.current)) {
-      for (const key in currProcess) {
-        let down = currProcess[key][0] - (key in prevProcess.current ? prevProcess.current[key][0] : 0);
+  useEffect(() => {
+    isActiveRef.current = isActive;
+    if (!isActive) {
+      prevProcess.current = {};
+      prevSampleTime.current = null;
+    }
+  }, [isActive]);
 
-        if (down < 0) {
-          down = 0;
+  const { data, isLoading, revalidate } = usePromise(
+    async () => {
+      const currProcess = await getNetworkData();
+
+      // nettop blocks for seconds; if the tab was deselected while it ran,
+      // discard the sample so stale counters never survive a deactivation reset.
+      if (!isActiveRef.current) {
+        return undefined;
+      }
+      // nettop blocks for one sample interval (multiple seconds on recent
+      // macOS), so rates are derived from the measured time between samples.
+      const now = Date.now();
+      const elapsedSeconds = prevSampleTime.current ? Math.max((now - prevSampleTime.current) / 1000, 0.1) : 1;
+      let upload = 0;
+      let download = 0;
+      let processList: [string, number, number][] = [];
+
+      if (!isObjectEmpty(prevProcess.current)) {
+        for (const key in currProcess) {
+          let down = currProcess[key][0] - (key in prevProcess.current ? prevProcess.current[key][0] : 0);
+
+          if (down < 0) {
+            down = 0;
+          }
+
+          let up = currProcess[key][1] - (key in prevProcess.current ? prevProcess.current[key][1] : 0);
+
+          if (up < 0) {
+            up = 0;
+          }
+
+          down = down / elapsedSeconds;
+          up = up / elapsedSeconds;
+          download += down;
+          upload += up;
+
+          if (key in prevProcess.current) {
+            processList.push([key, down, up]);
+          }
         }
 
-        let up = currProcess[key][1] - (key in prevProcess.current ? prevProcess.current[key][1] : 0);
-
-        if (up < 0) {
-          up = 0;
-        }
-
-        download += down;
-        upload += up;
-
-        if (key in prevProcess.current) {
-          processList.push([key, down, up]);
-        }
+        processList = getTopProcess(processList);
       }
 
-      processList = getTopProcess(processList);
+      prevProcess.current = currProcess;
+      prevSampleTime.current = now;
+
+      return {
+        upload,
+        download,
+        processList,
+      };
+    },
+    [],
+    { execute: isActive },
+  );
+
+  useInterval(() => {
+    if (isActive && !isLoading) {
+      revalidate();
     }
-
-    prevProcess.current = currProcess;
-
-    return {
-      upload,
-      download,
-      processList,
-    };
-  });
-
-  useInterval(revalidate, 1000);
+  }, 1000);
 
   return (
     <List.Item
@@ -58,12 +90,16 @@ export default function NetworkMonitor() {
       icon={Icon.Network}
       accessories={[
         {
-          text: data ? `↓ ${formatBytes(data.download)}/s ↑ ${formatBytes(data.upload)}/s` : "Loading…",
+          text: data
+            ? `↓ ${formatBytes(data.download)}/s ↑ ${formatBytes(data.upload)}/s`
+            : isActive
+              ? "Loading…"
+              : "—",
         },
       ]}
       detail={
         <List.Item.Detail
-          isLoading={isLoading}
+          isLoading={isLoading && !data}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label

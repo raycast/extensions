@@ -1,4 +1,5 @@
-import { execf } from "../utils";
+import { ProcessInfo } from "../Interfaces";
+import { getTopProcesses } from "../lib/process-list";
 
 const UNITS = {
   year: 24 * 60 * 60 * 365,
@@ -9,22 +10,8 @@ const UNITS = {
   second: 0,
 };
 
-export const getTopCpuProcess = async (count: number): Promise<string[][]> => {
-  const output = await execf("/bin/ps", ["-Aceo", "pcpu,comm", "-r"]);
-  const processList: string[] = output
-    .trim()
-    .split("\n")
-    .slice(1, count + 1);
-  const modProcessList: string[][] = [];
-
-  processList.forEach((value) => {
-    let temp: string[] = value.trim().split(" ");
-    temp = [temp[0], temp.slice(1).join(" ")];
-
-    modProcessList.push(temp);
-  });
-
-  return modProcessList;
+export const getTopCpuProcess = async (count: number): Promise<ProcessInfo[]> => {
+  return getTopProcesses("cpu", count);
 };
 
 export const getRelativeTime = (uptime: number): string => {
