@@ -22,7 +22,7 @@ Calculations follow the Bursa Efek Indonesia (IDX) standard: **1 Lot = 100 Share
 
 ## Screenshots
 
-_Add screenshots to `metadata/` once the extension UI is finalized (see [Prepare an Extension for Store](https://developers.raycast.com/basics/prepare-an-extension-for-store#screenshots))._
+![Average Saham Indonesia](metadata/average-saham-indonesia-1.png)
 
 ## Installation
 
@@ -50,6 +50,7 @@ This extension isn't published to the Raycast Store yet. To run it locally:
 3. Read your result instantly:
    - **Total Lot** — your total lot holding after this purchase
    - **Total Modal** — your total capital invested
+   - **New Investment Needed** — cash required for the new purchase alone
    - **Average Price** — your new average price (Average Up / Average Down)
 
 ### Example
@@ -64,9 +65,10 @@ This extension isn't published to the Raycast Store yet. To run it locally:
 Result:
 
 ```
-Total Lot      25
-Total Modal    Rp240.455
-Average Price  Rp96,18
+Total Lot               25 Lot
+Total Modal             Rp240.455
+New Investment Needed   Rp80.000
+Average Price           Rp96,18
 ```
 
 ## Formula
@@ -92,7 +94,7 @@ Average Price = Total Investment / Total Shares
 ├── src/
 │   ├── average.tsx          # Form, validation, state, live calculation
 │   ├── components/
-│   │   └── Result.tsx       # Renders Total Lot / Total Modal / Average Price
+│   │   └── Result.tsx       # Renders Total Lot / Total Modal / New Investment / Average Price
 │   ├── utils/
 │   │   ├── calculator.ts    # Pure calculation logic
 │   │   └── formatter.ts     # Rupiah / lot / price formatting
@@ -105,16 +107,16 @@ Average Price = Total Investment / Total Shares
 
 This is the Version 1 (MVP) release: a focused, single-purpose calculator. Upcoming features:
 
-* Copy result (`⌘C`), reset form (`⌘R`)
-* Multiple buy calculator with an editable transaction list
-* Average Down planner (how many lots to reach a target average)
-* Profit target & break-even calculator (with fees)
-* Stock symbol + calculation history
-* Portfolio mode & summary
-* Average Up / Down simulator with interactive planning
-* Import/export portfolio (CSV/JSON)
-* Dividend & yield calculator
-* Complete Indonesian investor toolkit
+- Copy result (`⌘C`), reset form (`⌘R`)
+- Multiple buy calculator with an editable transaction list
+- Average Down planner (how many lots to reach a target average)
+- Profit target & break-even calculator (with fees)
+- Stock symbol + calculation history
+- Portfolio mode & summary
+- Average Up / Down simulator with interactive planning
+- Import/export portfolio (CSV/JSON)
+- Dividend & yield calculator
+- Complete Indonesian investor toolkit
 
 ## Tech Stack
 

@@ -11,7 +11,7 @@ interface ResultProps {
 
 /**
  * Renders the live calculation output at the bottom of the form:
- * Total Lot, Total Modal, and the (highlighted) Average Price.
+ * Total Lot, Total Modal, New Investment Needed, and the (highlighted) Average Price.
  */
 export function Result({ result, message }: ResultProps) {
   return (
@@ -25,7 +25,7 @@ export function Result({ result, message }: ResultProps) {
           <Form.Description title="⭐ Average Price" text={formatPrice(result.averagePrice)} />
         </>
       ) : (
-        <Form.Description title="Hasil" text={message ?? ""} />
+        <Form.Description title="Result" text={message ?? ""} />
       )}
     </>
   );
