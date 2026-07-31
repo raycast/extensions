@@ -1,5 +1,9 @@
 # Google Workspace Changelog
 
+## [Bug Fix] - 2026-05-22
+
+- Prevent Google Drive search from crashing when the Drive API response does not include a files list.
+
 ## [Add Preferred Browser Preference] - 2026-01-08
 
 - Allow users to specify which browser they want to use.

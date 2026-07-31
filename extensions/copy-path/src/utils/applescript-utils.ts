@@ -1,6 +1,9 @@
 import { runAppleScript } from "@raycast/utils";
 import * as os from "node:os";
-import { Application } from "@raycast/api";
+import { Application, Clipboard } from "@raycast/api";
+
+const APPLESCRIPT_TIMEOUT_MS = 5000;
+const VSCODE_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_active_file__";
 
 export const scriptFinderPath = `
 if application "Finder" is not running then
@@ -15,7 +18,7 @@ end tell
 // finder path, with / at the end
 export const getFocusFinderPath = async () => {
   try {
-    return await runAppleScript(scriptFinderPath);
+    return await runAppleScript(scriptFinderPath, { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return os.homedir();
   }
@@ -54,7 +57,7 @@ end tell
 
 export const getQSpacePathUrls = async () => {
   try {
-    return await runAppleScript(scriptQSpacePath);
+    return await runAppleScript(scriptQSpacePath, { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -78,7 +81,7 @@ return windowPath
 
 export const getFocusWindowPath = async (app: Application) => {
   try {
-    let path = await runAppleScript(scriptWindowPath(app));
+    let path = await runAppleScript(scriptWindowPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
     if (path == "missing value" || path == "") {
       return "";
     }
@@ -95,6 +98,69 @@ export const getFocusWindowPath = async (app: Application) => {
     }
   } catch (e) {
     return "";
+  }
+};
+
+export const scriptVSCodeActiveFilePath = (app: Application) => `
+try
+  tell application id "${app.bundleId}" to activate
+  delay 0.1
+  tell application "System Events"
+    tell process "${app.name}"
+      keystroke "c" using {option down, command down}
+    end tell
+  end tell
+  delay 0.2
+  return the clipboard
+on error
+  return ""
+end try
+`;
+
+export const getVSCodeActiveFilePath = async (app: Application) => {
+  if (!app.bundleId) {
+    return "";
+  }
+
+  const previousClipboard = await Clipboard.read();
+  let path = "";
+  try {
+    await Clipboard.copy(VSCODE_SENTINEL_CLIPBOARD);
+    const clipboardPath = (
+      await runAppleScript(scriptVSCodeActiveFilePath(app), { timeout: APPLESCRIPT_TIMEOUT_MS })
+    ).trim();
+    path = normalizeVSCodeFilePath(clipboardPath);
+  } catch (e) {
+    path = "";
+  } finally {
+    if (path === "") {
+      await restoreClipboard(previousClipboard);
+    }
+  }
+
+  return path;
+};
+
+const normalizeVSCodeFilePath = (path: string) => {
+  try {
+    if (path.startsWith("file://")) {
+      return decodeURIComponent(new URL(path).pathname);
+    }
+  } catch {
+    return "";
+  }
+  return path.startsWith("/") || path.startsWith("~") ? path : "";
+};
+
+const restoreClipboard = async (content: Clipboard.ReadContent) => {
+  if (content.file) {
+    await Clipboard.copy({ file: content.file });
+  } else if (content.html) {
+    await Clipboard.copy({ html: content.html, text: content.text });
+  } else if (content.text) {
+    await Clipboard.copy(content.text);
+  } else {
+    await Clipboard.clear();
   }
 };
 
@@ -117,7 +183,7 @@ return windowTitle
 
 export const getFocusWindowTitle = async (app: Application) => {
   try {
-    return await runAppleScript(scriptWindowTitle(app));
+    return await runAppleScript(scriptWindowTitle(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -132,7 +198,7 @@ return currentURL`;
 
 export const getWebkitBrowserPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptWebkitBrowserPath(app));
+    return await runAppleScript(scriptWebkitBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -147,7 +213,7 @@ return currentURL`;
 
 export const getChromiumBrowserPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptChromiumBrowserPath(app));
+    return await runAppleScript(scriptChromiumBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -172,7 +238,7 @@ end tell`;
 
 export const copyFirefoxBrowserPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptFirefoxBrowserPath(app));
+    return await runAppleScript(scriptFirefoxBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -192,7 +258,7 @@ end tell`;
 
 export const copySafariWebAppPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptSafariWebAppPath(app));
+    return await runAppleScript(scriptSafariWebAppPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }

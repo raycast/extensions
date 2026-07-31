@@ -3,10 +3,11 @@ import path from "path";
 import { showToast, Toast, showInFinder, openCommandPreferences } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { convertMedia, ConvertOptions } from "./converter";
-import { appendHistory } from "./history";
+import { recordConversionHistory } from "./historyRecording";
 import { formatBytes, formatSavings } from "./format";
 import { formatTimeString } from "./time";
 import { AllOutputExtension, QualitySettings, TrimOptions, getMediaType, getOutputCategory } from "../types/media";
+import { resolveTargetSizeQuality } from "./targetSize";
 
 export type BatchOptions = {
   outputFormat: AllOutputExtension;
@@ -16,11 +17,15 @@ export type BatchOptions = {
   trim?: TrimOptions;
   /** When true, individual video conversions show live progress in the toast. */
   showProgress?: boolean;
+  signal?: AbortSignal;
+  onCancel?: () => void;
+  targetSizeMb?: number;
 };
 
 export type BatchResult = {
   successes: { input: string; output: string; inputBytes: number; outputBytes: number }[];
   failures: { input: string; error: string }[];
+  cancelled: boolean;
 };
 
 function safeStatSize(p: string): number {
@@ -39,7 +44,7 @@ function safeStatSize(p: string): number {
  *  - Success/failure summary toast
  */
 export async function runConversionBatch(files: string[], opts: BatchOptions): Promise<BatchResult> {
-  const result: BatchResult = { successes: [], failures: [] };
+  const result: BatchResult = { successes: [], failures: [], cancelled: false };
   if (files.length === 0) return result;
 
   const outputCategory = getOutputCategory(opts.outputFormat);
@@ -48,9 +53,19 @@ export async function runConversionBatch(files: string[], opts: BatchOptions): P
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: buildInitialTitle(files.length, outputCategory),
+    primaryAction: opts.onCancel
+      ? {
+          title: "Cancel Conversion",
+          onAction: opts.onCancel,
+        }
+      : undefined,
   });
 
   for (let i = 0; i < files.length; i++) {
+    if (opts.signal?.aborted) {
+      result.cancelled = true;
+      break;
+    }
     const input = files[i];
     const position = `${i + 1}/${files.length}`;
     toast.title = `Converting ${position}…`;
@@ -64,6 +79,7 @@ export async function runConversionBatch(files: string[], opts: BatchOptions): P
         outputDir: opts.outputDir,
         stripMetadata: opts.stripMetadata,
         trim: opts.trim,
+        signal: opts.signal,
       };
 
       if (canShowProgress) {
@@ -74,30 +90,35 @@ export async function runConversionBatch(files: string[], opts: BatchOptions): P
         };
       }
 
-      const output = await convertMedia(input, opts.outputFormat, opts.quality, convertOpts);
+      const quality = opts.targetSizeMb
+        ? (await resolveTargetSizeQuality(input, opts.outputFormat, opts.quality, opts.targetSizeMb, opts.trim)).quality
+        : opts.quality;
+      const output = await convertMedia(input, opts.outputFormat, quality, convertOpts);
       const outputBytes = safeStatSize(output);
       result.successes.push({ input, output, inputBytes, outputBytes });
 
       // Log to history (non-blocking failures here shouldn't break the batch)
       try {
         const mediaType = outputCategory === "gif" ? "gif" : (getMediaType(path.extname(input)) ?? "video");
-        await appendHistory({
-          inputs: [input],
-          outputs: [output],
+        await recordConversionHistory({
+          input,
+          output,
           outputFormat: opts.outputFormat,
-          quality: opts.quality,
+          quality,
           mediaType,
           trim: opts.trim,
           stripMetadata: opts.stripMetadata,
           outputDir: opts.outputDir,
           durationMs: Date.now() - started,
-          inputBytes,
-          outputBytes,
         });
       } catch (historyErr) {
         console.warn("Failed to write history entry:", historyErr);
       }
     } catch (error) {
+      if (opts.signal?.aborted || (error instanceof Error && error.name === "AbortError")) {
+        result.cancelled = true;
+        break;
+      }
       const errorMessage = String(error);
       result.failures.push({ input, error: errorMessage });
       console.error(`Conversion failed for ${input}:`, errorMessage);
@@ -117,6 +138,17 @@ export async function runConversionBatch(files: string[], opts: BatchOptions): P
   }
 
   await toast.hide();
+  if (result.cancelled) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Conversion cancelled",
+      message:
+        result.successes.length > 0
+          ? `${result.successes.length} file${result.successes.length === 1 ? "" : "s"} completed before cancellation`
+          : undefined,
+    });
+    return result;
+  }
   await presentSummary(result);
   return result;
 }

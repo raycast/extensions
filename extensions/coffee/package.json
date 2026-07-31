@@ -15,7 +15,10 @@
     "zakj",
     "Visual-Studio-Coder",
     "Katsuba",
-    "alexi.build"
+    "alexi.build",
+    "mbuvarp",
+    "frederik_obe",
+    "bsradcliffe"
   ],
   "platforms": [
     "macOS"
@@ -40,7 +43,7 @@
       "name": "caffeinateWhile",
       "title": "Caffeinate While",
       "subtitle": "Coffee",
-      "description": "Prevent your Mac from sleeping while an certain app is running",
+      "description": "Prevent your Mac from sleeping while a certain app is running",
       "mode": "view"
     },
     {
@@ -100,14 +103,14 @@
       "name": "caffeinateUntil",
       "title": "Caffeinate Until",
       "subtitle": "Coffee",
-      "description": "Prevent your Mac from sleeping until a certain time",
-      "mode": "no-view",
+      "description": "Prevent your Mac from sleeping until a certain time. Type one like 5pm, or leave the field empty to pick a date and time.",
+      "mode": "view",
       "arguments": [
         {
           "name": "time",
-          "placeholder": "Time",
+          "placeholder": "Time (e.g. 5pm)",
           "type": "text",
-          "required": true
+          "required": false
         }
       ]
     },
@@ -155,6 +158,21 @@
       "name": "caffeinate-while-app-is-running",
       "title": "Caffeinate While App Is Running",
       "description": "While an app is running, turn on caffeination."
+    },
+    {
+      "name": "caffeinate-until",
+      "title": "Caffeinate Until",
+      "description": "Keep the Mac awake until a specific future date and time."
+    },
+    {
+      "name": "list-caffeination-schedules",
+      "title": "List Caffeination Schedules",
+      "description": "List the recurring caffeination schedules configured for the week."
+    },
+    {
+      "name": "manage-caffeination-schedule",
+      "title": "Manage Caffeination Schedule",
+      "description": "Pause, resume, or delete a recurring caffeination schedule for a day."
     }
   ],
   "preferences": [

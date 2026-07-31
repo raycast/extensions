@@ -78,7 +78,7 @@ export default async function main() {
     const linkUrl = parts[1];
 
     // URL validation
-    if (!linkUrl || !linkUrl.includes("notion.so")) {
+    if (!linkUrl || !linkUrl.includes("notion.com")) {
       await showHUD("Failed to copy Notion link. Please try again.");
       if (previousClipboard) {
         await Clipboard.copy(previousClipboard);

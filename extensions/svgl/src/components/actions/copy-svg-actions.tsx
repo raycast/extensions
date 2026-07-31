@@ -1,15 +1,9 @@
 import { Action, Icon } from "@raycast/api";
 import { Svg } from "../../type";
-import { fetchAndCopySvg } from "../../utils/fetch";
-import { useSvglExtension } from "../app-context";
+import { useFetchSvgCopyAction } from "../../hooks/use-svg-copy-action";
 
 const CopySvgActions = ({ svg }: { svg: Svg }) => {
-  const { addRecentSvgId } = useSvglExtension();
-
-  const handleAction = (url: string, showContent: string) => {
-    addRecentSvgId(svg.id);
-    fetchAndCopySvg(url, showContent);
-  };
+  const handleAction = useFetchSvgCopyAction(svg.id);
 
   if (typeof svg.route === "string") {
     return (
@@ -27,8 +21,8 @@ const CopySvgActions = ({ svg }: { svg: Svg }) => {
         icon={Icon.Clipboard}
         title="Copy Light SVG Text"
         shortcut={{
-          modifiers: ["cmd"],
-          key: "l",
+          macOS: { modifiers: ["cmd"], key: "l" },
+          Windows: { modifiers: ["ctrl"], key: "l" },
         }}
         onAction={() =>
           handleAction(
@@ -42,8 +36,8 @@ const CopySvgActions = ({ svg }: { svg: Svg }) => {
         icon={Icon.Clipboard}
         title="Copy Dark SVG Text"
         shortcut={{
-          modifiers: ["cmd"],
-          key: "d",
+          macOS: { modifiers: ["cmd"], key: "d" },
+          Windows: { modifiers: ["ctrl"], key: "d" },
         }}
         onAction={() =>
           handleAction(typeof svg.route === "string" ? svg.route : svg.route.dark, "Copied Dark SVG text to clipboard")

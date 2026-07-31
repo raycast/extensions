@@ -92,7 +92,7 @@
     "Windows"
   ],
   "overrides": {
-    "axios": "1.15.2",
+    "axios": "^1.8.4",
     "flatted": "^3.4.2",
     "picomatch": "^4.0.4"
   }

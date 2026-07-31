@@ -24,7 +24,9 @@ import {
   Submodule,
   Branch,
   Remote,
+  RemoteProvider,
   Preferences,
+  Worktree,
 } from "./types";
 import { useGitRemotes } from "./hooks/useGitRemotes";
 import RemotesView from "./components/views/RemotesView";
@@ -33,6 +35,8 @@ import { useGitSubmodules } from "./hooks/useGitSubmodules";
 import { GitManager } from "./utils/git-manager";
 import { useGitTags } from "./hooks/useGitTags";
 import SubmodulesView from "./components/views/SubmodulesView";
+import { useGitWorktrees } from "./hooks/useGitWorktrees";
+import WorktreesView from "./components/views/WorktreesView";
 
 interface Arguments {
   path: string;
@@ -53,6 +57,8 @@ export type RepositoryContext = {
     data: Record<string, Remote>;
     isLoading: boolean;
     revalidate: () => void;
+    providerOverrides: Record<string, RemoteProvider>;
+    addProviderOverride: (provider: RemoteProvider, url: string) => void;
   };
   branches: {
     data: BranchesState;
@@ -93,6 +99,16 @@ export type RepositoryContext = {
     isLoading: boolean;
     error: Error | undefined;
     revalidate: () => void;
+  };
+  worktrees: {
+    data: Worktree[];
+    isLoading: boolean;
+    error: Error | undefined;
+    revalidate: () => void;
+    /** Whether the worktree is the one opened in this command. */
+    isOpened: (worktree: Worktree) => boolean;
+    /** Returns the worktree the given branch is checked out in, excluding the opened one. */
+    attachedTo: (branchName: string) => Worktree | undefined;
   };
 };
 
@@ -146,11 +162,13 @@ export default function OpenRepository({ arguments: args }: { arguments: Argumen
   const commitsContext = useGitCommits(gitManager, branchesContext.data);
   const stashesContext = useGitStash(gitManager);
   const statusContext = useGitStatus(gitManager);
+  const worktreesContext = useGitWorktrees(gitManager);
 
   const rootContext: RepositoryContext & NavigationContext = {
     gitManager,
     remotes: remotesContext,
     submodules: submodulesContext,
+    worktrees: worktreesContext,
     branches: branchesContext,
     commits: commitsContext,
     stashes: stashesContext,
@@ -175,6 +193,8 @@ export default function OpenRepository({ arguments: args }: { arguments: Argumen
       return <RemotesView {...rootContext} />;
     case "submodules":
       return <SubmodulesView {...rootContext} />;
+    case "worktrees":
+      return <WorktreesView {...rootContext} />;
     case "stashes":
       return <StashesView {...rootContext} />;
     case "files":

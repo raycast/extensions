@@ -1,35 +1,31 @@
 import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import { buildAppUrl } from "./config";
 import type { Note } from "./types";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
-import { stripHtml } from "./utils/stripHtml";
-import { toMarkdown } from "./utils/toMarkdown";
+import { noteMarkdown, notePlainText, truncate } from "./utils/noteDisplay";
 
 export default function Trash() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [notes, setNotes] = useState<Note[]>([]);
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
-  const fetchTrash = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const result = await remoApi.listNotes({
-        includeDeleted: true,
-      });
-      const deletedNotes = result.filter((n: Note) => n.deletedAt !== undefined);
-      setNotes(deletedNotes.sort((a: Note, b: Note) => (b.deletedAt ?? b.updatedAt) - (a.deletedAt ?? a.updatedAt)));
-    } catch (error) {
-      handleError(error, "Failed to fetch trash");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const {
+    isLoading,
+    data,
+    pagination,
+    revalidate: fetchTrash,
+  } = useCachedPromise(
+    () =>
+      async ({ cursor }: { cursor?: string }) => {
+        const result = await remoApi.infiniteNotes({ view: "trash", cursor, numItems: 30 });
+        return { data: result.page, hasMore: !result.isDone, cursor: result.continueCursor };
+      },
+    [],
+    { onError: (error) => handleError(error, "Failed to fetch trash") },
+  );
 
-  useEffect(() => {
-    fetchTrash();
-  }, [fetchTrash]);
+  const notes = data ?? [];
 
   async function handleRestore(noteId: Note["_id"]) {
     try {
@@ -67,7 +63,12 @@ export default function Trash() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search deleted notes..." isShowingDetail={isShowingDetail}>
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      searchBarPlaceholder="Search deleted notes..."
+      isShowingDetail={isShowingDetail}
+    >
       {notes.length === 0 && !isLoading ? (
         <List.EmptyView title="Trash is empty" icon={{ source: Icon.Trash, tintColor: Color.Green }} />
       ) : (
@@ -75,7 +76,7 @@ export default function Trash() {
           <List.Item
             key={note._id}
             title={note.title || "Untitled"}
-            subtitle={isShowingDetail ? undefined : stripHtml(note.content || "").substring(0, 50)}
+            subtitle={isShowingDetail ? undefined : truncate(notePlainText(note), 50)}
             icon={{ source: Icon.Trash, tintColor: Color.Red }}
             accessories={
               isShowingDetail
@@ -89,7 +90,7 @@ export default function Trash() {
             }
             detail={
               <List.Item.Detail
-                markdown={toMarkdown(note.content || "") || "_No content_"}
+                markdown={noteMarkdown(note) || "_No content_"}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Title" text={note.title || "Untitled"} />
@@ -112,13 +113,15 @@ export default function Trash() {
                 />
                 <Action.OpenInBrowser title="Open in Web App" url={buildAppUrl(`/notes/${note._id}`)} />
                 <Action title="Restore Note" icon={Icon.RotateAntiClockwise} onAction={() => handleRestore(note._id)} />
-                <Action
-                  title="Delete Permanently"
-                  icon={Icon.Xmark}
-                  style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  onAction={() => handlePermanentDelete(note._id)}
-                />
+                {!note.isLocked && !note.isE2E && (
+                  <Action
+                    title="Delete Permanently"
+                    icon={Icon.Xmark}
+                    style={Action.Style.Destructive}
+                    shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                    onAction={() => handlePermanentDelete(note._id)}
+                  />
+                )}
               </ActionPanel>
             }
           />

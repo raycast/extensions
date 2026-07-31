@@ -44,6 +44,8 @@ function getDeploymentStatusIcon(status: DeploymentStatus): Icon {
       return Icon.CheckCircle;
     case 'failure':
       return Icon.XMarkCircle;
+    case 'unknown':
+      return Icon.QuestionMarkCircle;
   }
 }
 

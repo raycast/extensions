@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "area-code-search",
+  "title": "Area Code Search",
+  "description": "Search US area codes by code, city, or state",
+  "icon": "command-icon.png",
+  "author": "mjking",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "area-code-search",
+      "title": "Search Area Codes",
+      "description": "Search US area codes and copy matching locations",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "ray publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.4": true
+  }
+}

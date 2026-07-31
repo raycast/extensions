@@ -113,6 +113,7 @@ export function findSysID(sys_id) {
         return;
       }
     }
+    gs.print("###NOT_FOUND###");
     function findClass(table, sys_id) {
       try {
         var grTable = new GlideRecord(table);

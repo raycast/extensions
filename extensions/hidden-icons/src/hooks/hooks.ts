@@ -7,7 +7,7 @@ export const GenerateFindOutIcons = (
   isGaming: boolean,
   difficultyMode: string,
   lastRandomRow: number,
-  refreshIcon: number
+  refreshIcon: number,
 ) => {
   const [findOutIcons, setFindOutIcons] = useState<string[]>([]);
   const [targetIcon, setTargetIcon] = useState<string>("");
@@ -72,7 +72,7 @@ export const alertDialog = async (
   message: string,
   confirmTitle: string,
   confirmAction: () => void,
-  cancelAction?: () => void
+  cancelAction?: () => void,
 ) => {
   const options: Alert.Options = {
     icon: icon,

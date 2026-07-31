@@ -1,8 +1,7 @@
 import { useCachedPromise } from "@raycast/utils"
 
-import { REKA_COMPONENTS_GITHUB_URL } from "../constants"
-import { getGithubFetchErrorMessage, getGithubHeaders, getGithubPat } from "../github-api"
-import { parseComponentMetaFromGhJson } from "../utils"
+import { REKA_COMPONENTS_RAW_BASE_URL } from "../constants"
+import { parseComponentMetaFromMarkdown } from "../utils"
 import { Component } from "./use-reka-components"
 
 export interface ComponentMeta extends Component {
@@ -12,31 +11,27 @@ export interface ComponentMeta extends Component {
 }
 
 export function useRekaComponentMeta(component: Component) {
-  const ghPat = getGithubPat()
-
   const {
     data: componentMeta,
     isLoading,
     error,
   } = useCachedPromise(
-    async (slug: string, pat: string) => {
-      const res = await fetch(`${REKA_COMPONENTS_GITHUB_URL}/${slug}`, {
-        headers: getGithubHeaders(pat),
-      })
+    async (slug: string) => {
+      const res = await fetch(`${REKA_COMPONENTS_RAW_BASE_URL}/${slug}`)
 
       if (!res.ok) {
-        throw new Error(getGithubFetchErrorMessage(res.status, res.statusText))
+        throw new Error(res.statusText || `Request failed (${res.status})`)
       }
 
-      const json = await res.json()
-      const meta = parseComponentMetaFromGhJson(json)
+      const markdown = await res.text()
+      const meta = parseComponentMetaFromMarkdown(markdown)
 
       return {
         ...component,
         ...meta,
       }
     },
-    [component.slug, ghPat],
+    [component.slug],
     {
       keepPreviousData: true,
       onError(error) {

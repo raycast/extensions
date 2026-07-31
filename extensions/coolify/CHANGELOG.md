@@ -1,10 +1,16 @@
 # Coolify Changelog
 
+## [Resources Enhancements] - 2026-07-17
+
+- In `Resources`:
+    1. view status tooltip
+    2. handle when status is "exited" instead of "exited:..."
+
 ## [Delete Project + Better Error Message] - 2025-11-11
 
 - Better Error Messages are shown
 - In `Projects`:
-    - Delete Project
+    1. Delete Project
 
 ## [Add Windows Support] - 2025-11-03
 

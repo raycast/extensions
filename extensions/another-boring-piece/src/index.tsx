@@ -1,21 +1,22 @@
 import {
-  List,
-  ActionPanel,
   Action,
+  ActionPanel,
+  Icon,
+  Image,
+  Keyboard,
+  List,
+  open,
   showToast,
   Toast,
-  Icon,
-  open,
-  Image,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
+import { DownloadWallpaperAction, SetWallpaperAction } from "./actions";
 import {
-  setDesktopWallpaper,
-  downloadWallpaper,
+  API_TRIPLE_URL,
+  buildWallpaperMarkdown,
   getThumbnailUrl,
   Wallpaper,
-  API_TRIPLE_URL,
 } from "./utils";
 
 export default function Command() {
@@ -39,17 +40,6 @@ export default function Command() {
   return (
     <List isLoading={isLoading} isShowingDetail>
       {wallpapers?.map((wallpaper) => {
-        const imageUrl = getThumbnailUrl(wallpaper.url, { height: 280 });
-        const markdown = `
-<img src="${imageUrl}" alt="${wallpaper.name}" height="280" />
-
-**${wallpaper.name}**
-
-${wallpaper.artist}, ${wallpaper.creationDate}
-
-${wallpaper.description || ""}
-        `;
-
         return (
           <List.Item
             key={wallpaper.id}
@@ -59,64 +49,27 @@ ${wallpaper.description || ""}
               source: getThumbnailUrl(wallpaper.url, { width: 100 }),
               mask: Image.Mask.RoundedRectangle,
             }}
-            detail={<List.Item.Detail markdown={markdown} />}
+            detail={
+              <List.Item.Detail markdown={buildWallpaperMarkdown(wallpaper)} />
+            }
             actions={
               <ActionPanel>
-                <Action
-                  title="Set Desktop Wallpaper"
-                  icon={Icon.Desktop}
-                  onAction={async () => {
-                    const toast = await showToast({
-                      style: Toast.Style.Animated,
-                      title: "Setting wallpaper...",
-                    });
-                    try {
-                      await setDesktopWallpaper(wallpaper.url, wallpaper.id);
-                      toast.style = Toast.Style.Success;
-                      toast.title = "Wallpaper set successfully";
-                    } catch (error) {
-                      toast.style = Toast.Style.Failure;
-                      toast.title = "Failed to set wallpaper";
-                      toast.message =
-                        error instanceof Error ? error.message : String(error);
-                    }
+                <SetWallpaperAction
+                  wallpaper={wallpaper}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "w" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "w" },
                   }}
                 />
                 <ActionPanel.Section>
-                  <Action
-                    title="Download Wallpaper"
-                    icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
-                    onAction={async () => {
-                      const toast = await showToast({
-                        style: Toast.Style.Animated,
-                        title: "Downloading...",
-                      });
-                      try {
-                        const path = await downloadWallpaper(
-                          wallpaper.url,
-                          wallpaper.name,
-                          wallpaper.id,
-                        );
-                        toast.style = Toast.Style.Success;
-                        toast.title = "Wallpaper downloaded";
-                        toast.message = `Saved to ${path}`;
-                      } catch (error) {
-                        toast.style = Toast.Style.Failure;
-                        toast.title = "Download failed";
-                        toast.message =
-                          error instanceof Error
-                            ? error.message
-                            : String(error);
-                      }
-                    }}
-                  />
+                  <DownloadWallpaperAction wallpaper={wallpaper} />
                   <Action
                     title="Learn More"
                     icon={Icon.Globe}
                     onAction={() =>
                       open(`https://anotherboring.day/art/${wallpaper.id}`)
                     }
+                    shortcut={Keyboard.Shortcut.Common.Open}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

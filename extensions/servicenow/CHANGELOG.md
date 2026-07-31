@@ -1,5 +1,11 @@
 # ServiceNow Extension Changelog
 
+## [Database View Support & Clearer Errors] - 2026-05-21
+
+- **Explore Records** now works on database views and other tables that don't track an update time, instead of failing to load.
+- **Find Record by Sys ID** and **Find Record References** now tell you why a lookup failed, whether sign-in failed or your account is missing the admin role, and let you edit the profile and retry without leaving the command. If your instance uses single sign-on, they point you to switch the profile to OAuth.
+- In **Explore Records**, hovering the updater avatar now shows both the person's name and their username.
+
 ## [OAuth, Windows Support & New Commands] - 2026-05-19
 
 - Added OAuth 2.0 (PKCE) as an alternative to Basic Auth, selectable per instance profile. Tokens refresh automatically and a **Sign In / Re-authenticate** action recovers expired profiles; auth failures are flagged in **Manage Instance Profiles**.

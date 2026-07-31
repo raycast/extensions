@@ -2,7 +2,6 @@ import {
   MenuBarExtra,
   openCommandPreferences,
   getPreferenceValues,
-  LaunchProps,
   LaunchType,
   launchCommand,
   Icon,
@@ -12,7 +11,7 @@ import { addDays, format, isBefore } from "date-fns";
 import { useEffect, useMemo } from "react";
 import removeMarkdown from "remove-markdown";
 
-import { SyncData, Task, getProductivityStats } from "./api";
+import { SyncData, SyncResourceType, Task, getProductivityStats } from "./api";
 import MenuBarTask from "./components/MenubarTask";
 import { getToday } from "./helpers/dates";
 import { groupByDates } from "./helpers/groupBy";
@@ -24,14 +23,14 @@ import useFilterTasks from "./hooks/useFilterData";
 import { useFocusedTask } from "./hooks/useFocusedTask";
 import useSyncData from "./hooks/useSyncData";
 
-type MenuBarProps = LaunchProps<{ launchContext: { fromCommand: boolean } }>;
-
 const byPriorityThenDefault = (a: Task, b: Task) => sortByPriority(a, b) || sortByDefault(a, b);
 
-function MenuBar(props: MenuBarProps) {
-  const launchedFromWithinCommand = props.launchContext?.fromCommand ?? false;
-  // Don't perform a full sync if the command was launched from within another commands
-  const { data, setData, isLoading } = useSyncData(!launchedFromWithinCommand);
+const MENU_BAR_RESOURCE_TYPES: SyncResourceType[] = ["user", "projects", "items", "labels", "collaborators"];
+
+const MENU_BAR_CACHE_KEY = "menu-bar-data";
+
+function MenuBar() {
+  const { data, setData, isLoading } = useSyncData(true, MENU_BAR_RESOURCE_TYPES, MENU_BAR_CACHE_KEY);
   const { focusedTask, unfocusTask } = useFocusedTask();
   const {
     view,
@@ -77,12 +76,16 @@ function MenuBar(props: MenuBarProps) {
   const tasks = useMemo(() => [...rawTasks].sort(sorter), [rawTasks, sorter]);
 
   useEffect(() => {
-    const isFocusedTaskInTasks = data?.items?.some((t) => t.id === focusedTask.id);
+    if (!focusedTask.id || isLoading || !data?.items) {
+      return;
+    }
 
-    if (!isFocusedTaskInTasks) {
+    const isFocusedTaskInItems = data.items.some((t) => t.id === focusedTask.id);
+
+    if (!isFocusedTaskInItems) {
       unfocusTask();
     }
-  }, [focusedTask, unfocusTask, data, filter]);
+  }, [focusedTask.id, unfocusTask, data?.items, isLoading]);
 
   const menuBarExtraTitle = useMemo(() => {
     if (focusedTask.id) {

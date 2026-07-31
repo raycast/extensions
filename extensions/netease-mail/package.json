@@ -1,0 +1,141 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "netease-mail",
+  "title": "NetEase Mail",
+  "description": "Read, search, verify codes, and send NetEase Mail from Raycast.",
+  "icon": "netease-mail.png",
+  "author": "ctacta621",
+  "license": "MIT",
+  "type": "module",
+  "categories": [
+    "Communication"
+  ],
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "setup-guide",
+      "title": "Setup Guide",
+      "subtitle": "NetEase Mail",
+      "description": "Learn how to enable IMAP/SMTP and create a NetEase Mail authorization code.",
+      "icon": "netease-mail.png",
+      "mode": "view"
+    },
+    {
+      "name": "inbox",
+      "title": "Inbox",
+      "subtitle": "NetEase Mail",
+      "description": "View recent inbox and unread NetEase Mail messages.",
+      "icon": "netease-mail.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-mail",
+      "title": "Search Mail",
+      "subtitle": "NetEase Mail",
+      "description": "Search recent NetEase Mail messages by subject, sender, and text.",
+      "icon": "netease-mail.png",
+      "mode": "view"
+    },
+    {
+      "name": "extract-code",
+      "title": "Extract Verification Code",
+      "subtitle": "NetEase Mail",
+      "description": "Find recent verification codes or login links and copy them.",
+      "icon": "netease-mail.png",
+      "mode": "view"
+    },
+    {
+      "name": "compose-mail",
+      "title": "Compose Mail",
+      "subtitle": "NetEase Mail",
+      "description": "Send a NetEase Mail message through SMTP.",
+      "icon": "netease-mail.png",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "emailAddress",
+      "title": "Email Address",
+      "description": "Your NetEase email address, for example name@163.com.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "authorizationCode",
+      "title": "Authorization Code",
+      "description": "The 16-character IMAP/SMTP client authorization code from NetEase Mail settings.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "imapHost",
+      "title": "IMAP Host",
+      "description": "Usually imap.163.com, imap.126.com, or imap.yeah.net.",
+      "type": "textfield",
+      "default": "imap.163.com",
+      "required": false
+    },
+    {
+      "name": "imapPort",
+      "title": "IMAP Port",
+      "description": "Use 993 for SSL IMAP.",
+      "type": "textfield",
+      "default": "993",
+      "required": false
+    },
+    {
+      "name": "smtpHost",
+      "title": "SMTP Host",
+      "description": "Usually smtp.163.com, smtp.126.com, or smtp.yeah.net.",
+      "type": "textfield",
+      "default": "smtp.163.com",
+      "required": false
+    },
+    {
+      "name": "smtpPort",
+      "title": "SMTP Port",
+      "description": "Use 465 for SSL SMTP.",
+      "type": "textfield",
+      "default": "465",
+      "required": false
+    },
+    {
+      "name": "defaultSearchDays",
+      "title": "Default Search Days",
+      "description": "How many recent days to search by default.",
+      "type": "textfield",
+      "default": "14",
+      "required": false
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.5",
+    "html-to-text": "^10.0.0",
+    "imapflow": "^1.3.3",
+    "mailparser": "^3.9.8",
+    "nodemailer": "^8.0.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/html-to-text": "^9.0.4",
+    "@types/mailparser": "^3.4.6",
+    "@types/node": "25.9.1",
+    "@types/nodemailer": "^8.0.0",
+    "@types/react": "19.2.15",
+    "eslint": "^9.39.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  }
+}

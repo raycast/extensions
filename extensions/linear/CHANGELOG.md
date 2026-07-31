@@ -1,5 +1,32 @@
 # Linear Changelog
 
+## [My Issues Sub Views] - 2026-07-30
+
+- Add a dropdown to the "My Issues" command to switch between the Assigned, Created, and Subscribed sub views, matching the Linear app. Assigned stays the default.
+
+## [Add Copy Shortcuts] - 2026-07-18
+
+- Add `Cmd/Ctrl + Shift + U` shortcut to the "Copy Issue URL" action.
+- Add `Cmd/Ctrl + Shift + T` shortcut to the "Copy Title as Link" action.
+
+## [AI Comment Attachments] - 2026-07-14
+
+- Add local file attachments to the AI tools for creating and updating comments. Images are embedded in the comment, while other files are added as links.
+
+## [Templates, Copy Title as Link, and Auth Fix] - 2026-06-17
+
+- Add template support to the Create Issue command. Let users pick a Linear issue template to auto-populate the title, description, labels, project, status, priority, assignee, estimate, due date, and cycle. See https://github.com/raycast/extensions/issues/27138
+- Add a "Copy title as link" action to issue copy actions. Copy the issue title as a Markdown/HTML link for pasting into Slack and other apps, matching Linear’s native shortcut. See https://github.com/raycast/extensions/issues/28588
+- Fix initial OAuth connection failures that show Raycast’s generic "Something went wrong" error instead of a recoverable sign-in screen. See https://github.com/raycast/extensions/issues/28214
+
+## [Set Priority shortcut] - 2026-06-10
+
+- Move the `Set Priority` shortcut off `⌘ .` so it no longer collides with `Copy Issue ID`. `Set Priority` is now `⌘ ⌥ P` on macOS and `Ctrl Alt P` on Windows.
+
+## [Label Fetching] - 2026-06-09
+
+- Add an "API Label Limit" preference (default 100) so more labels can be fetched per team when creating or editing issues. Increase it if some labels are missing because your team has more than 100 labels.
+
 ## [Confirmation Fixes] - 2026-05-15
 
 - Fix AI tools (e.g. `create-issue`, `update-issue`) failing with confusing "Entity not found" errors when assistants pass empty strings (`""`) for optional ID fields. `formatConfirmation` now treats `""` and `null` the same as `undefined`, displaying `-` in the preview instead of attempting a doomed entity lookup that aborts the tool before its main mutation runs.

@@ -7,7 +7,7 @@ import { CreateCustomCommandAction } from "./create-custom-command/create-custom
 import { RemoveCustomCommandAction } from "./remove-custom-command/remove-custom-command.action";
 import { EditCustomCommandAction } from "./edit-cusom-command/edit-custom-command.action";
 
-const DEEP_LINK = "raycast://extensions/cyxn/universal-commands/run-custom-command";
+const DEEP_LINK = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/cyxn/universal-commands/run-custom-command`;
 
 function composeFullUrl(id: string): string {
   const args = {
@@ -133,7 +133,7 @@ export default function Command({ isRunPrimary }: { isRunPrimary?: boolean }) {
                   {isRunPrimary && (
                     <Action.OpenInBrowser
                       title="Run"
-                      url={`raycast://extensions/cyxn/universal-commands/run-custom-command?arguments=${encodeURIComponent(JSON.stringify({ id }))}`}
+                      url={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/cyxn/universal-commands/run-custom-command?arguments=${encodeURIComponent(JSON.stringify({ id }))}`}
                     />
                   )}
                   <Action.CreateQuicklink
@@ -144,7 +144,7 @@ export default function Command({ isRunPrimary }: { isRunPrimary?: boolean }) {
                   {isRunPrimary ? null : (
                     <Action.OpenInBrowser
                       title="Run"
-                      url={`raycast://extensions/cyxn/universal-commands/run-custom-command?arguments=${encodeURIComponent(JSON.stringify({ id }))}`}
+                      url={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/cyxn/universal-commands/run-custom-command?arguments=${encodeURIComponent(JSON.stringify({ id }))}`}
                     />
                   )}
                 </ActionPanel.Section>

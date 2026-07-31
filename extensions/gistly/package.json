@@ -16,9 +16,8 @@
     {
       "name": "get-insights",
       "title": "Get YouTube Insights",
-      "subtitle": "Gistly",
-      "description": "Get key insights from any YouTube video.",
       "subtitle": "Gistly For YouTube",
+      "description": "Get key insights from any YouTube video.",
       "mode": "view",
       "arguments": [
         {
@@ -32,9 +31,8 @@
     {
       "name": "get-transcript",
       "title": "Get YouTube Transcript",
-      "subtitle": "Gistly",
-      "description": "Get a transcript of any YouTube video.",
       "subtitle": "Gistly For YouTube",
+      "description": "Get a transcript of any YouTube video.",
       "mode": "view",
       "arguments": [
         {
@@ -48,9 +46,8 @@
     {
       "name": "get-summary",
       "title": "Get YouTube Summary",
-      "subtitle": "Gistly",
-      "description": "Get a timestamped summary of any YouTube video.",
       "subtitle": "Gistly For YouTube",
+      "description": "Get a timestamped summary of any YouTube video.",
       "mode": "view",
       "arguments": [
         {
@@ -78,7 +75,7 @@
     "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "20.8.10",
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",

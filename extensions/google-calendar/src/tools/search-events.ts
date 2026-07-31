@@ -1,101 +1,101 @@
-import { withGoogleAPIs, getCalendarClient } from "../lib/google";
+import { getCalendarClient, withGoogleAPIs } from "../lib/google";
+import { getCalendarWithLabels, getEventLabels } from "../lib/calendar-resources";
+import { serializeEvent } from "../lib/events";
 
 type Input = {
   /**
-   * Free text search terms to find events
-   *
-   * @example When user asks "find my 1:1 with Beth", use query "beth" to find meetings where Beth is an attendee
-   * @example When user asks "show my team meetings", use query "team" to find relevant meetings
-   *
-   * @remarks
-   * - Focus on key identifying terms rather than guessing exact meeting titles
-   * - For 1:1s or meetings with specific people, search for the person's name only
-   * - For topic-based searches, use key topic words (e.g. "standup", "planning", "review")
-   *
-   * Searches across these calendar event fields:
-   * - summary/title
-   * - description
-   * - location
-   * - attendee's displayName and email
-   * - organizer's displayName and email
+   * Free-text terms matched against title, description, location, attendees, organizer, and
+   * special-event/working-location fields. Use identifying keywords rather than guessed titles.
    */
   query?: string;
-
-  /**
-   * The start date to search from
-   *
-   * @example "2024-03-20T00:00:00-07:00" or "2024-03-20T00:00:00+02:00"
-   *
-   * @remarks
-   * Accepts ISO 8601 format dates with timezone offset for accurate timezone handling.
-   * If not provided, defaults to current time.
-   * Can be a date (YYYY-MM-DD) or datetime with timezone offset (YYYY-MM-DDTHH:mm:ss±HH:MM).
-   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
-   */
+  /** RFC3339 lower bound for event end times. Defaults to now unless includePast is true. */
   timeMin?: string;
-
-  /**
-   * The end date to search until
-   *
-   * @example "2024-03-27T23:59:59-07:00" or "2024-03-27T23:59:59+02:00"
-   *
-   * @remarks
-   * Accepts ISO 8601 format dates with timezone offset for accurate timezone handling.
-   * Can be a date (YYYY-MM-DD) or datetime with timezone offset (YYYY-MM-DDTHH:mm:ss±HH:MM).
-   * For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC).
-   */
+  /** RFC3339 exclusive upper bound for event start times. */
   timeMax?: string;
-
-  /**
-   * Maximum number of events to return
-   *
-   * @default 10
-   * @minimum 1
-   * @maximum 2500
-   *
-   * @remarks
-   * The Google Calendar API has a maximum limit of 2500 events per request.
-   */
+  /** Search before the current time when no timeMin is supplied. */
+  includePast?: boolean;
+  /** Maximum page size, from 1 to 2500. Defaults to 10. */
   maxResults?: number;
-
-  /**
-   * The ID of the calendar to search
-   *
-   * @example "primary" or "email@abstract...com"
-   * @default "primary"
-   *
-   * @remarks
-   * If not provided, searches the user's primary calendar. If used, get this from `list-calendars` tool.
-   */
+  /** Opaque token returned as nextPageToken by an earlier search-events call. */
+  pageToken?: string;
+  /** Calendar ID from list-calendars. Defaults to "primary". */
   calendarId?: string;
+  /** Expand recurring series into individual instances. Defaults to true. */
+  singleEvents?: boolean;
+  /** Sort by startTime (requires singleEvents=true) or updated. Defaults to startTime. */
+  orderBy?: "startTime" | "updated";
+  /** Include cancelled/deleted events. */
+  showDeleted?: boolean;
+  /** Include hidden invitations. */
+  showHiddenInvitations?: boolean;
+  /** Comma-separated event types to return. Omit for all types. */
+  eventTypes?: string;
+  /** Find an event by RFC5545 iCalendar UID rather than Google event ID. */
+  iCalUID?: string;
+  /** Only return events updated at or after this RFC3339 timestamp. */
+  updatedMin?: string;
+  /** IANA time zone used to format returned event times. */
+  timeZone?: string;
+  /** Maximum attendees included per event. */
+  maxAttendees?: number;
+  /** Comma-separated private extended-property filters in propertyName=value form. */
+  privateExtendedProperties?: string;
+  /** Comma-separated shared extended-property filters in propertyName=value form. */
+  sharedExtendedProperties?: string;
 };
+
+function parseList(value?: string) {
+  return value
+    ?.split(/[,\n]/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 const tool = async (input: Input) => {
   const calendar = getCalendarClient();
+  const calendarId = input.calendarId ?? "primary";
+  const singleEvents = input.singleEvents ?? true;
+  const orderBy = input.orderBy ?? (singleEvents ? "startTime" : undefined);
+  if (orderBy === "startTime" && !singleEvents) {
+    throw new Error('orderBy="startTime" requires singleEvents=true.');
+  }
+  const maxResults = input.maxResults ?? 10;
+  if (!Number.isInteger(maxResults) || maxResults < 1 || maxResults > 2500) {
+    throw new Error("maxResults must be a whole number from 1 to 2500.");
+  }
 
-  const requestParams = {
-    calendarId: input.calendarId || "primary",
-    q: input.query,
-    timeMin: input.timeMin || new Date().toISOString(),
-    timeMax: input.timeMax,
-    maxResults: input.maxResults || 10,
-    singleEvents: true,
-    orderBy: "startTime" as const,
+  const [response, calendarMetadata] = await Promise.all([
+    calendar.events.list({
+      calendarId,
+      q: input.query,
+      timeMin: input.timeMin ?? (input.includePast ? undefined : new Date().toISOString()),
+      timeMax: input.timeMax,
+      maxResults,
+      pageToken: input.pageToken,
+      singleEvents,
+      orderBy,
+      showDeleted: input.showDeleted,
+      showHiddenInvitations: input.showHiddenInvitations,
+      eventTypes: parseList(input.eventTypes),
+      iCalUID: input.iCalUID,
+      updatedMin: input.updatedMin,
+      timeZone: input.timeZone,
+      maxAttendees: input.maxAttendees,
+      privateExtendedProperty: parseList(input.privateExtendedProperties),
+      sharedExtendedProperty: parseList(input.sharedExtendedProperties),
+    }),
+    getCalendarWithLabels(calendarId),
+  ]);
+
+  return {
+    calendarId,
+    calendarSummary: response.data.summary,
+    timeZone: response.data.timeZone,
+    nextPageToken: response.data.nextPageToken,
+    nextSyncToken: response.data.nextSyncToken,
+    events:
+      response.data.items?.map((event) => serializeEvent(event, calendarId, getEventLabels(calendarMetadata))) ?? [],
   };
-
-  const response = await calendar.events.list(requestParams);
-
-  return (
-    response.data.items?.map((event) => ({
-      id: event.id || "",
-      title: event.summary || "Untitled Event",
-      start: event.start?.dateTime || event.start?.date || "No start date",
-      end: event.end?.dateTime || event.end?.date || "No end date",
-      attendees: event.attendees?.map((a) => a.email) || [],
-      description: event.description,
-      link: event.htmlLink,
-    })) || []
-  );
 };
 
 export default withGoogleAPIs(tool);

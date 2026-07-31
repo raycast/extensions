@@ -1,5 +1,82 @@
 # Slack Changelog
 
+## [Broadcast Slack thread replies to channels] - 2026-07-21
+
+- Add an optional `replyBroadcast` flag to the `reply-thread` AI tool to also send important thread replies to the channel.
+
+## [Add Slack reaction AI tool] - 2026-07-21
+
+- Add an `add-reaction` AI tool that adds an emoji reaction to a Slack message and returns its permalink.
+- Request Slack's `reactions:write` OAuth scope for adding reactions.
+
+## [Add Slack group DM AI tool] - 2026-07-21
+
+- Add an `open-group-dm` AI tool that opens or resumes a group DM with 2 to 8 users and returns its conversation ID for messaging or file uploads.
+
+## [Add Slack Huddle link AI tool] - 2026-07-21
+
+- Add a `get-huddle-link` AI tool that returns a Huddle join link for a channel, DM, group DM, or user.
+
+## [Fix AI signatures on file uploads] - 2026-07-21
+
+- Show the “Sent via Raycast” signature on Slack messages that include uploaded files.
+- Prompt existing OAuth users to reauthorize Slack when file-upload permission is missing.
+- Add the required `files:write` scope to the manual access-token setup instructions.
+
+## [Add Slack file upload AI tool] - 2026-07-18
+
+- Add an `upload-files` AI tool that uploads one or more local files to Slack channels, DMs, group DMs, or threads, optionally with an accompanying message.
+- Request Slack's `files:write` OAuth scope for file uploads.
+
+## [Render AI messages with standard Markdown] - 2026-07-18
+
+- Render messages sent, updated, or replied to by AI tools with Slack's Markdown block so lists, headings, tables, code blocks, links, and mentions appear with native formatting.
+
+## [Add AI signature to updated Slack messages] - 2026-07-17
+
+- Replace the “Sent via Raycast” signature with “Updated via Raycast” when the `update-message` AI tool edits a message.
+
+## [Add Slack update message AI tool] - 2026-07-16
+
+- Add an `update-message` AI tool that edits messages posted by the authenticated Slack user and returns a permalink to the updated message.
+
+## [Add optional AI message signature] - 2026-07-15
+
+- Add an enabled-by-default extension preference that shows a subtle “Sent via Raycast” Block Kit context below messages sent by the `send-message` and `reply-thread` AI tools. Messages sent with the Send Message command are unchanged.
+
+## [Add Slack send message AI tool] - 2026-07-14
+
+- Add a `send-message` AI tool that sends messages to channels, group DMs, existing DMs, or users. User IDs are resolved to a direct-message conversation before posting.
+- Return the sent message permalink so AI can link directly to it.
+- Use the existing `chat:write` and `im:write` OAuth scopes required to post messages and open DMs.
+
+## [Add Slack thread reply AI tool] - 2026-07-14
+
+- Add a `reply-thread` AI tool that posts a message to an existing Slack thread using its channel ID and parent message timestamp.
+
+## [Fix YAML codeblock in README] - 2026-07-09
+
+## [Add Slack thread reader AI tool, fix missing webhook author] - 2026-06-17
+
+- Add a paginated `read-thread` AI tool to fetch a bounded page of messages in a Slack thread using the channel ID and parent message timestamp. The tool returns `hasMore` and `nextCursor` when additional messages are available.
+- Fix the `read-thread` AI tool omitting author identity on incoming webhook messages. Such messages lack a `user` ID or `bot_profile`, but Slack sets `username` on them.
+
+## [Fix Set Status deep link with raw emoji] - 2026-06-13
+
+- Fix the **Set Status** command erroring with `profile_status_set_failed_not_valid_emoji` when the `emoji` argument is a raw emoji (e.g. 👈) inserted by Raycast's emoji picker. Raw emoji are now mapped back to their Slack `:name:` code.
+
+## [Add deep link arguments to Set Status] - 2026-06-09
+
+- The **Set Status** command now accepts optional `statusText` and `emoji` arguments, so a deep link or Quicklink can set your status in one step (e.g. `raycast://extensions/mommertf/slack/set-status?arguments=%7B%22statusText%22%3A%22Lunch%22%2C%22emoji%22%3A%22%3Ahamburger%3A%22%7D`).
+
+## [Fix AI Tool for Channel History Failing] - 2026-06-03
+
+- Add fallback to attachment text for the Channel History AI tool.
+
+## [Fix Windows deep links] - 2026-05-27
+
+- "Open in Slack" and "Open Channel"/"Open Chat" Quicklinks now open the requested channel or user on Windows. Previously the `application="Slack"` hint caused Raycast to launch Slack.exe without forwarding the `slack://` URI; the hint is now macOS-only so Windows routes the URI through the registered protocol handler.
+
 ## [Accent-insensitive search] - 2026-05-07
 
 - "Open Channel" and "Send Message" now match channel and user names regardless of diacritics, so typing `Angeles` finds `Ángeles` (and the same for any accented characters).
@@ -8,7 +85,7 @@
 
 - Merged slack-status Extension into the main Slack extension, enabling users to view, set, update, AI-generate, and clear their status in one place.
 - Added full support for custom workspace emojis (beyond default emojis).
- 
+
 ## [Add proxy support for corporate networks] - 2026-02-13
 
 - Add optional "Proxy URL" preference for routing Slack API requests through a corporate proxy

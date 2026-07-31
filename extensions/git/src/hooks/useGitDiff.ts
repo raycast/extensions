@@ -2,8 +2,8 @@ import { usePromise } from "@raycast/utils";
 import { GitManager } from "../utils/git-manager";
 import { FileStatus } from "../types";
 import { join } from "path";
-import { fileTypeFromFile } from "file-type";
-import { existsSync } from "fs";
+import { fileTypeFromBuffer } from "file-type";
+import { existsSync, openSync, readSync, closeSync } from "fs";
 
 interface UseGitDiffProps {
   gitManager: GitManager;
@@ -12,6 +12,25 @@ interface UseGitDiffProps {
 }
 
 const MAX_DIFF_LINES = 200;
+
+/** Bytes needed for `file-type` magic-number detection (`reasonableDetectionSizeInBytes`). */
+const FILE_TYPE_SAMPLE_SIZE = 4100;
+
+/**
+ * Reads the start of a file for binary/MIME detection without loading the whole file.
+ * Prefer this over `fileTypeFromFile`: that API dynamically imports `strtok3` at runtime,
+ * which fails in Raycast's bundled extension (no `node_modules` next to the command).
+ */
+function readFileHead(filePath: string, size: number): Uint8Array {
+  const fd = openSync(filePath, "r");
+  try {
+    const buffer = Buffer.alloc(size);
+    const bytesRead = readSync(fd, buffer, 0, size, 0);
+    return buffer.subarray(0, bytesRead);
+  } finally {
+    closeSync(fd);
+  }
+}
 
 /**
  * Hook for fetching the diff for a file or commit with smart caching.
@@ -26,7 +45,7 @@ export function useGitDiff({ gitManager, options, execute = true }: UseGitDiffPr
       const absolutePath = join(repoPath, file);
 
       if (existsSync(absolutePath)) {
-        const binaryFormatInfo = await fileTypeFromFile(absolutePath);
+        const binaryFormatInfo = await fileTypeFromBuffer(readFileHead(absolutePath, FILE_TYPE_SAMPLE_SIZE));
 
         if (binaryFormatInfo) {
           if (binaryFormatInfo.mime.startsWith("image/")) {
@@ -37,10 +56,7 @@ export function useGitDiff({ gitManager, options, execute = true }: UseGitDiffPr
         }
       }
 
-      let rawDiff = await gitManager.getDiff({ file, commitHash, status });
-
-      // Remove leading whitespace from diff lines
-      rawDiff = rawDiff.replace(/^\s+([+-])/gm, "$1 ");
+      const rawDiff = await gitManager.getDiff({ file, commitHash, status });
 
       if (rawDiff) {
         const lines = rawDiff.split("\n");

@@ -20,7 +20,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.38.3",
-    "axios": "^0.30.3",
+    "axios": "^1.8.4",
     "cheerio": "^1.0.0-rc.12",
     "moment": "^2.29.4"
   },

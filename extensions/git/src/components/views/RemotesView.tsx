@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { Remote } from "../../types";
 import { useMemo } from "react";
 import { RemoteHostIcon } from "../icons/RemoteHostIcons";
@@ -45,7 +45,7 @@ export default function RemotesView(context: RepositoryContext & NavigationConte
   return (
     <List
       isLoading={isChecking}
-      navigationTitle={context.gitManager.repoName}
+      navigationTitle={context.gitManager.worktreeOrigin?.displayName ?? context.gitManager.repoName}
       searchBarAccessory={WorkspaceNavigationDropdown(context)}
       actions={
         <ActionPanel>
@@ -117,7 +117,9 @@ function RemoteListItem(
       actions={
         <ActionPanel>
           <ActionPanel.Section title={context.remote.name}>
-            <Action.OpenInBrowser title="Open in Browser" url={context.remote.fetchUrl} icon={Icon.Link} />
+            {context.remote.type == "http" && (
+              <Action.OpenInBrowser title="Open in Browser" url={context.remote.fetchUrl} icon={Icon.Link} />
+            )}
             <RemoteOpenInDevAction remote={context.remote} />
             <RemoteEditAction initialRemote={context.remote} {...context} />
 
@@ -154,7 +156,7 @@ function SharedActionsSection(
         title="Check Connectivity Again"
         onAction={context.onCheckAgain}
         icon={Icon.ArrowClockwise}
-        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
       />
       <WorkspaceNavigationActions {...context} />
     </>

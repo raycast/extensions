@@ -13,10 +13,7 @@ export const getComponentUrlFromFilename = (filename: string) => {
   return REKA_COMPONENTS_DOCS_BASE_URL + `/${slug}`
 }
 
-export const parseComponentMetaFromGhJson = (json: object) => {
-  const base64 = String((json as Record<string, unknown>).content)
-  const base64WithoutNewLines = base64.replaceAll("\n", "")
-  const markdown = Buffer.from(base64WithoutNewLines, "base64").toString()
+export const parseComponentMetaFromMarkdown = (markdown: string) => {
   const markdownLines = markdown.split(/\r?\n/)
 
   const description = parseDescription(markdownLines)

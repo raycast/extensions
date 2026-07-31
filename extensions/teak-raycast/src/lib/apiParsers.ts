@@ -1,46 +1,46 @@
 import { RaycastApiError } from "./apiErrors";
 
-export type RaycastCard = {
-  appUrl: string | null;
-  id: string;
-  type: string;
-  content: string;
-  notes: string | null;
-  url: string | null;
-  tags: string[];
-  aiTags: string[];
+export interface RaycastCard {
   aiSummary: string | null;
-  isFavorited: boolean;
+  aiTags: string[];
+  appUrl: string | null;
+  content: string;
   createdAt: number;
-  updatedAt: number;
   fileUrl: string | null;
-  thumbnailUrl: string | null;
-  screenshotUrl: string | null;
+  id: string;
+  isFavorited: boolean;
   linkPreviewImageUrl: string | null;
-  metadataTitle: string | null;
   metadataDescription: string | null;
-};
+  metadataTitle: string | null;
+  notes: string | null;
+  screenshotUrl: string | null;
+  tags: string[];
+  thumbnailUrl: string | null;
+  type: string;
+  updatedAt: number;
+  url: string | null;
+}
 
-export type TagSummary = {
-  name: string;
+export interface TagSummary {
   count: number;
-};
+  name: string;
+}
 
-export type TagsResponse = {
+export interface TagsResponse {
   items: TagSummary[];
-};
+}
 
-export type CardsResponse = {
+export interface CardsResponse {
   items: RaycastCard[];
   total: number;
-};
+}
 
-export type QuickSaveResponse = {
-  status: "created";
-  cardId: string;
+export interface QuickSaveResponse {
   appUrl: string | null;
   card: RaycastCard | null;
-};
+  cardId: string;
+  status: "created";
+}
 
 type JsonObject = Record<string, unknown>;
 
@@ -158,12 +158,15 @@ export const parseQuickSaveResponse = (payload: unknown): QuickSaveResponse => {
     typeof status === "string" &&
     QUICK_SAVE_STATUSES.includes(status as QuickSaveStatus);
 
-  const card =
-    payload.card === undefined || payload.card === null
-      ? null
-      : isRaycastCard(payload.card)
-        ? payload.card
-        : undefined;
+  const parseNullableCard = (
+    value: unknown,
+  ): RaycastCard | null | undefined => {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    return isRaycastCard(value) ? value : undefined;
+  };
+  const card = parseNullableCard(payload.card);
   const appUrl = isNullableString(payload.appUrl) ? payload.appUrl : undefined;
 
   if (

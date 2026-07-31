@@ -54,7 +54,7 @@
     "@raycast/utils": "^2.2.2",
     "dt-sql-parser": "^4.3.1",
     "pg": "^8.13.1",
-    "uuid": "^9.0.0"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@types/pg": "^8.11.10",
