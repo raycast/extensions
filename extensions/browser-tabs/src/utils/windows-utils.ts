@@ -17,7 +17,7 @@ type NativeTab = {
   browser: string;
   browser_path: string;
   window_handle: number;
-  index: number;
+  runtime_id: string;
   title: string;
   url: string;
   favicon: string;
@@ -61,7 +61,7 @@ const readBrowsers = async (): Promise<BrowserTab[]> => {
         url: nativeTab.url,
         domain,
         windowId: String(nativeTab.window_handle),
-        tabId: String(nativeTab.index),
+        tabId: nativeTab.runtime_id,
         favicon: nativeTab.favicon || undefined,
       });
     }
@@ -83,7 +83,7 @@ export const getBrowsersTabs = async (): Promise<BrowserTab[]> => {
 
 export const jumpToBrowserTab = async (browser: Application, tab: Tab) => {
   try {
-    await activate_tab(Number(tab.windowId), Number(tab.tabId), tab.title);
+    await activate_tab(Number(tab.windowId), tab.tabId);
     return "";
   } catch (e) {
     console.error(`Error jumpToBrowserTab for ${browser.name}`);
@@ -105,7 +105,7 @@ export const jumpToBrowserTab = async (browser: Application, tab: Tab) => {
 
 export const closeBrowserTab = async (browser: Application, tab: Tab) => {
   try {
-    await close_tab(Number(tab.windowId), Number(tab.tabId), tab.title);
+    await close_tab(Number(tab.windowId), tab.tabId);
     return "";
   } catch (e) {
     console.error(`Error closeBrowserTab for ${browser.name}`);

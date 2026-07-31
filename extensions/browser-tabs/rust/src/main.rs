@@ -19,6 +19,7 @@ use windows::Win32::System::Com::{
 use windows::Win32::System::Threading::{
     OpenProcess, QueryFullProcessImageNameW, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION,
 };
+use windows::Win32::System::Ole::SafeArrayDestroy;
 use windows::Win32::System::Variant::{VARIANT, VT_I4};
 use windows::Win32::UI::Accessibility::{
     CUIAutomation8, IUIAutomation, IUIAutomationElement, IUIAutomationInvokePattern,
@@ -72,7 +73,8 @@ pub struct TabInfo {
     pub browser: String,
     pub browser_path: String,
     pub window_handle: i64,
-    pub index: u32,
+    /// Identifies this exact tab, so acting on it later cannot land on another one.
+    pub runtime_id: String,
     pub title: String,
     pub url: String,
     /// Path to the site's icon, taken from the browser's own icon store. Empty when the
@@ -90,12 +92,12 @@ fn list_tabs() -> Result<Vec<TabInfo>, String> {
 /// being displayed may not expose its tabs to UI Automation at all, and foregrounding it
 /// makes the browser build that part of the tree.
 #[raycast]
-fn activate_tab(window_handle: i64, index: u32, title: String) -> Result<(), String> {
+fn activate_tab(window_handle: i64, runtime_id: String) -> Result<(), String> {
     run_sta(move || {
         let hwnd = HWND(window_handle as *mut core::ffi::c_void);
         bring_window_to_front(hwnd);
         let automation = create_automation()?;
-        let tab = find_tab(&automation, hwnd, index, &title)?;
+        let tab = find_tab(&automation, hwnd, &runtime_id)?;
         let selection: IUIAutomationSelectionItemPattern = unsafe {
             tab.GetCurrentPattern(UIA_SelectionItemPatternId)
                 .map_err(err)?
@@ -109,11 +111,11 @@ fn activate_tab(window_handle: i64, index: u32, title: String) -> Result<(), Str
 /// Closes a tab by invoking the close button on its tab strip entry. The button is only
 /// present on the selected or hovered tab, so the tab is selected first.
 #[raycast]
-fn close_tab(window_handle: i64, index: u32, title: String) -> Result<(), String> {
+fn close_tab(window_handle: i64, runtime_id: String) -> Result<(), String> {
     run_sta(move || {
         let hwnd = HWND(window_handle as *mut core::ffi::c_void);
         let automation = create_automation()?;
-        let tab = find_tab(&automation, hwnd, index, &title)?;
+        let tab = find_tab(&automation, hwnd, &runtime_id)?;
         unsafe {
             let selection: IUIAutomationSelectionItemPattern = tab
                 .GetCurrentPattern(UIA_SelectionItemPatternId)
@@ -221,7 +223,7 @@ fn list_tabs_sta() -> Result<Vec<TabInfo>, String> {
             }
             let WindowScan { tabs: elements, urls } = scan;
 
-            for (index, tab) in elements.iter().enumerate() {
+            for tab in elements.iter() {
                 let title = tab_title(tab);
                 if title.is_empty() {
                     continue;
@@ -242,7 +244,7 @@ fn list_tabs_sta() -> Result<Vec<TabInfo>, String> {
                     browser: browser.clone(),
                     browser_path: browser_path.clone(),
                     window_handle: hwnd.0 as i64,
-                    index: index as u32,
+                    runtime_id: tab_runtime_id(tab),
                     url,
                     favicon: String::new(),
                     is_active,
@@ -402,34 +404,48 @@ fn document_url(document: &IUIAutomationElement) -> Option<(String, String)> {
     }
 }
 
-/// Resolves a tab by its position, falling back to its title when tabs have moved since the
-/// list was built.
+/// Resolves the tab the user picked.
 ///
-/// Both have to agree on which tab this is. Position alone is not enough: a tab that closed
-/// leaves its neighbour at that position, and acting on whatever now sits there would focus
-/// a tab the user did not pick, or close one they wanted to keep. Reporting the tab as gone
-/// lets the caller open its address instead, or tell the user.
+/// Neither a tab's position nor its title identifies it: tabs move as their neighbours
+/// close, titles change while a tab sits untouched, and several tabs can carry the same
+/// title at once. Acting on a tab matched that way can focus a tab the user did not pick,
+/// or close one they wanted to keep. The runtime id names one specific tab and keeps naming
+/// it as tabs move, so when it is gone the tab really is gone, and the caller can open its
+/// address instead or say so.
 fn find_tab(
     automation: &IUIAutomation,
     hwnd: HWND,
-    index: u32,
-    title: &str,
+    runtime_id: &str,
 ) -> Result<IUIAutomationElement, String> {
     let window = unsafe { automation.ElementFromHandle(hwnd) }
         .map_err(|_| "This browser window is no longer open".to_string())?;
-    let tabs = scan_window(automation, &window, false).tabs;
-
-    // the tab is normally still where it was, and still called what it was called
-    if let Some(tab) = tabs.get(index as usize) {
-        if tab_title(tab) == title {
-            return Ok(tab.clone());
-        }
-    }
-    // otherwise it may have been dragged, or its neighbours closed
-    tabs.iter()
-        .find(|tab| tab_title(tab) == title)
+    scan_window(automation, &window, false)
+        .tabs
+        .iter()
+        .find(|tab| tab_runtime_id(tab) == runtime_id)
         .cloned()
         .ok_or_else(|| "This tab is no longer open".to_string())
+}
+
+/// UI Automation's identifier for an element, as dotted numbers. It stays the same while the
+/// tab exists, including across the separate runs that list and then act on it.
+fn tab_runtime_id(tab: &IUIAutomationElement) -> String {
+    unsafe {
+        let Ok(array) = tab.GetRuntimeId() else {
+            return String::new();
+        };
+        if array.is_null() {
+            return String::new();
+        }
+        let count = (*array).rgsabound[0].cElements as usize;
+        let values = (*array).pvData as *const i32;
+        let id = (0..count)
+            .map(|i| (*values.add(i)).to_string())
+            .collect::<Vec<_>>()
+            .join(".");
+        let _ = SafeArrayDestroy(array);
+        id
+    }
 }
 
 /// Tab elements come from a cached walk, so their name is already in hand.
