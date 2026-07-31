@@ -33,10 +33,6 @@ const SHOW_DETAILS_KEY = "show-torrent-details";
 const SORT_KEY = "torrent-sort";
 const LIST_DETAILS_KEY = "torrent-list-details-v2";
 const LOCAL_DOWNLOAD_FOLDER_KEY = "local-download-folder";
-const openInBrowserShortcut: Keyboard.Shortcut = {
-  Windows: { modifiers: ["ctrl"], key: "enter" },
-  macOS: { modifiers: ["cmd"], key: "enter" },
-};
 const copyMagnetLinkShortcut: Keyboard.Shortcut = {
   Windows: { modifiers: ["ctrl", "shift"], key: "c" },
   macOS: { modifiers: ["cmd", "shift"], key: "c" },
@@ -536,7 +532,7 @@ export default function Torrents() {
                   icon={Icon.Folder}
                   onAction={() => openDownloadFolder(torrent.save_path)}
                 />
-                <Action.OpenInBrowser title="Open in Browser" url={address} shortcut={openInBrowserShortcut} />
+                <Action.OpenInBrowser title="Open in Browser" url={address} />
                 <Action.CopyToClipboard
                   title="Copy Save Path"
                   content={torrent.save_path}
