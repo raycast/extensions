@@ -9,7 +9,8 @@
     "andreaselia",
     "anh_nguyen",
     "jor",
-    "n0kovo"
+    "n0kovo",
+    "muhammadrizo"
   ],
   "categories": [
     "Fun"
@@ -26,80 +27,80 @@
     {
       "name": "favorite1",
       "title": "Play Favourite 1",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 1",
       "mode": "no-view",
       "subtitle": "Soundboard"
     },
     {
       "name": "favorite2",
       "title": "Play Favourite 2",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 2",
       "mode": "no-view",
       "subtitle": "Soundboard"
     },
     {
       "name": "favorite3",
       "title": "Play Favourite 3",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 3",
       "mode": "no-view",
       "subtitle": "Soundboard"
     },
     {
       "name": "favorite4",
       "title": "Play Favourite 4",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 4",
       "mode": "no-view",
       "subtitle": "Soundboard"
     },
     {
       "name": "favorite5",
       "title": "Play Favourite 5",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 5",
       "mode": "no-view",
       "subtitle": "Soundboard"
     },
     {
       "name": "favorite6",
       "title": "Play Favourite 6",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 6",
       "mode": "no-view",
       "subtitle": "Soundboard"
     },
     {
       "name": "favorite7",
       "title": "Play Favourite 7",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 7",
       "mode": "no-view",
       "subtitle": "Soundboard"
     },
     {
       "name": "favorite8",
       "title": "Play Favourite 8",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 8",
       "mode": "no-view",
       "subtitle": "Soundboard"
     },
     {
       "name": "favorite9",
       "title": "Play Favourite 9",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 9",
       "mode": "no-view",
       "subtitle": "Soundboard"
     },
     {
       "name": "favorite10",
       "title": "Play Favourite 10",
-      "description": "Plays favorite one",
+      "description": "Plays favourite 10",
       "mode": "no-view",
       "subtitle": "Soundboard"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.43.0",
-    "@raycast/utils": "^1.4.10",
-    "nanoid": "^4.0.0"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7",
+    "nanoid": "^6.0.0"
   },
-  "preferences":[
+  "preferences": [
     {
       "name": "closeOnTrigger",
       "title": "Close On Trigger",
@@ -111,19 +112,28 @@
     }
   ],
   "devDependencies": {
-    "@types/node": "^18.8.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.2",
+    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/parser": "^8.65.0",
+    "eslint": "^10.8.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0"
   },
   "scripts": {
     "build": "ray build -e dist",
+    "build-rust": "cargo build --manifest-path rust/Cargo.toml --release",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "allowScripts": {
+    "esbuild@0.27.7": true
   }
 }

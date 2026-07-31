@@ -1,0 +1,174 @@
+use raycast_rust_macros::raycast;
+
+#[cfg(windows)]
+use windows::Win32::Foundation::HANDLE;
+
+#[raycast]
+fn play_file(path: String) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        play_windows(&path)
+    }
+
+    #[cfg(not(windows))]
+    {
+        Err("Sound playback is not supported on this platform".to_string())
+    }
+}
+
+#[raycast]
+fn stop_file(path: String) -> Result<(), String> {
+    #[cfg(windows)]
+    {
+        stop_windows(&path)
+    }
+
+    #[cfg(not(windows))]
+    {
+        Err("Sound playback is not supported on this platform".to_string())
+    }
+}
+
+#[cfg(windows)]
+fn play_windows(path: &str) -> Result<(), String> {
+    use std::sync::mpsc;
+    use std::time::Duration;
+    use windows::core::HSTRING;
+    use windows::Foundation::{TypedEventHandler, Uri};
+    use windows::Media::Core::MediaSource;
+    use windows::Media::Playback::MediaPlayer;
+    use windows::Win32::Foundation::WAIT_OBJECT_0;
+    use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
+    use windows::Win32::System::Threading::{ResetEvent, WaitForSingleObject};
+
+    unsafe {
+        let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
+    }
+
+    // Reset the stop signal so a fresh play is not immediately cancelled.
+    let stop_event = create_stop_event(&stop_event_name(path))?;
+    unsafe {
+        let _ = ResetEvent(stop_event);
+    }
+
+    let uri = Uri::CreateUri(&HSTRING::from(path)).map_err(|e| format!("Failed to parse file path: {e}"))?;
+    let source = MediaSource::CreateFromUri(&uri).map_err(|e| format!("Failed to create media source: {e}"))?;
+
+    let player = MediaPlayer::new().map_err(|e| format!("Failed to create MediaPlayer: {e}"))?;
+    player.SetAutoPlay(true).map_err(|e| e.to_string())?;
+    player.SetSource(&source).map_err(|e| e.to_string())?;
+
+    let (tx, rx) = mpsc::channel::<()>();
+    let ended_token = player
+        .MediaEnded(&TypedEventHandler::new(move |_sender, _args| {
+            let _ = tx.send(());
+            Ok(())
+        }))
+        .map_err(|e| e.to_string())?;
+
+    player.Play().map_err(|e| e.to_string())?;
+
+    let session = player.PlaybackSession().map_err(|e| e.to_string())?;
+    let duration = session.NaturalDuration().map_err(|e| e.to_string())?.Duration;
+    let mut last_position = -1i64;
+    let mut stalled_ticks = 0u32;
+
+    loop {
+        match rx.recv_timeout(Duration::from_millis(200)) {
+            Ok(()) | Err(mpsc::RecvTimeoutError::Disconnected) => break,
+            Err(mpsc::RecvTimeoutError::Timeout) => {}
+        }
+
+        // Check whether a stop was requested for this file.
+        if unsafe { WaitForSingleObject(stop_event, 0) } == WAIT_OBJECT_0 {
+            break;
+        }
+
+        let position = session.Position().map_err(|e| e.to_string())?.Duration;
+        if duration > 0 && position >= duration {
+            break;
+        }
+        if position == last_position {
+            stalled_ticks += 1;
+            if stalled_ticks > 25 {
+                break;
+            }
+        } else {
+            last_position = position;
+            stalled_ticks = 0;
+        }
+    }
+
+    let _ = player.RemoveMediaEnded(ended_token);
+    Ok(())
+}
+
+#[raycast]
+fn is_playing(path: String) -> Result<bool, String> {
+    #[cfg(windows)]
+    {
+        Ok(is_playing_windows(&path))
+    }
+
+    #[cfg(not(windows))]
+    {
+        Ok(false)
+    }
+}
+
+#[cfg(windows)]
+fn stop_windows(path: &str) -> Result<(), String> {
+    use windows::core::HSTRING;
+    use windows::Win32::Foundation::CloseHandle;
+    use windows::Win32::System::Threading::{OpenEventW, SetEvent, EVENT_MODIFY_STATE};
+
+    let event_name = stop_event_name(path);
+    let event = unsafe { OpenEventW(EVENT_MODIFY_STATE, false, &HSTRING::from(&event_name)) };
+    let Ok(event) = event else {
+        // No player is currently running for this file.
+        return Ok(());
+    };
+
+    unsafe {
+        let _ = SetEvent(event);
+        let _ = CloseHandle(event);
+    }
+    Ok(())
+}
+
+#[cfg(windows)]
+fn is_playing_windows(path: &str) -> bool {
+    use windows::core::HSTRING;
+    use windows::Win32::Foundation::CloseHandle;
+    use windows::Win32::System::Threading::{OpenEventW, EVENT_MODIFY_STATE};
+
+    let event_name = stop_event_name(path);
+    let event = unsafe { OpenEventW(EVENT_MODIFY_STATE, false, &HSTRING::from(&event_name)) };
+    let Ok(event) = event else {
+        // No player process is currently running for this file.
+        return false;
+    };
+
+    unsafe {
+        let _ = CloseHandle(event);
+    }
+    true
+}
+
+#[cfg(windows)]
+fn stop_event_name(path: &str) -> String {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+
+    let mut hasher = DefaultHasher::new();
+    path.hash(&mut hasher);
+    format!("Local\\RaycastSoundboard_{:016x}", hasher.finish())
+}
+
+#[cfg(windows)]
+fn create_stop_event(event_name: &str) -> Result<HANDLE, String> {
+    use windows::core::HSTRING;
+    use windows::Win32::System::Threading::CreateEventW;
+
+    unsafe { CreateEventW(None, true, false, &HSTRING::from(event_name)).map_err(|e| e.to_string()) }
+}
