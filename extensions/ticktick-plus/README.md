@@ -30,8 +30,8 @@ Unofficial community [Raycast](https://raycast.com) extension for [TickTick](htt
 ## Install from source (local / GitHub)
 
 ```bash
-git clone https://github.com/ysrazsingh/ticktick.git
-cd ticktick
+git clone https://github.com/raycast/extensions.git
+cd extensions/extensions/ticktick-plus
 npm install
 npm run dev
 ```

@@ -17,6 +17,7 @@ import { useAlerts } from "./hooks/useAlerts";
 import { Project } from "./types/ticktick";
 
 function CreateProjectForm({ onCreated }: { onCreated: () => void }) {
+  const { pop } = useNavigation();
   return (
     <Form
       navigationTitle="New Project"
@@ -33,6 +34,7 @@ function CreateProjectForm({ onCreated }: { onCreated: () => void }) {
                 await createProject(values.name.trim(), values.color || "#4A90E2");
                 await showToast({ style: Toast.Style.Success, title: "Project created" });
                 onCreated();
+                pop();
               } catch (err) {
                 await showToast({ style: Toast.Style.Failure, title: "Failed", message: String(err) });
               }
@@ -102,11 +104,6 @@ export default function ManageProjects() {
           subtitle={project.viewMode ?? "list"}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Create Project"
-                icon={Icon.Plus}
-                target={<CreateProjectForm onCreated={revalidate} />}
-              />
               <Action.Push
                 title="Rename Project"
                 icon={Icon.Pencil}

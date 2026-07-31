@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Manage TickTick from Raycast] - {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Sign in to TickTick through Raycast OAuth without manual API credentials
 - View Today, Inbox, Next 7 Days, Overdue, Completed, and Eisenhower Matrix task lists

@@ -8,7 +8,7 @@ import { getCachedTaskCounts } from "./lib/menu-bar-cache";
 /**
  * Menu bar must finish in <9s. No network/API calls here — only LocalStorage reads.
  * Task counts are cached by the background-check command (every 5 min).
- * Timer display is computed from endsAt, refreshed every 10s (Raycast platform minimum).
+ * Timer display is computed from endsAt, refreshed every 1m (Raycast platform minimum).
  */
 export default function MenuBar() {
   const { data, isLoading } = useCachedPromise(
@@ -72,7 +72,7 @@ export default function MenuBar() {
       {pomo && pomo.phase !== "idle" && (
         <MenuBarExtra.Item
           title={`${pomo.phase === "work" ? "Focus" : "Break"}: ${formatTimer(remaining)}`}
-          subtitle={pomo.isRunning ? (isBackground ? "Running · updates every ~10s" : "Running") : "Paused"}
+          subtitle={pomo.isRunning ? (isBackground ? "Running · updates every ~1m" : "Running") : "Paused"}
           icon={pomo.phase === "work" ? Icon.Clock : Icon.Mug}
           onAction={() => launchCommand({ name: "pomodoro", type: LaunchType.UserInitiated })}
         />

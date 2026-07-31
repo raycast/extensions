@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { isToday, isTomorrow, parseISO } from "date-fns";
 import { useSync } from "./hooks/useSync";
+import { useAlerts } from "./hooks/useAlerts";
 import { completeTask, deleteTask, uncompleteTask } from "./api/tasks";
 import { Task } from "./types/ticktick";
 
@@ -31,6 +32,7 @@ function classifyTask(task: Task): Quadrant {
 }
 
 export default function EisenhowerMatrix() {
+  useAlerts();
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
 

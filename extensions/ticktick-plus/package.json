@@ -176,7 +176,7 @@
       "subtitle": "TickTick",
       "description": "TickTick status in your menu bar — timer, overdue count, quick actions",
       "mode": "menu-bar",
-      "interval": "10s",
+      "interval": "1m",
       "icon": "extension-icon.png"
     },
     {

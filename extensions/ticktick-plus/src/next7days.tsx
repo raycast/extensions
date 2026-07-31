@@ -1,6 +1,7 @@
 import { List, Icon } from "@raycast/api";
 import { addDays, format, isToday, isTomorrow, isWithinInterval, parseISO, startOfDay } from "date-fns";
 import { useSync } from "./hooks/useSync";
+import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
 import { Task } from "./types/ticktick";
 
@@ -20,6 +21,7 @@ function getTaskDate(task: Task): Date | null {
 }
 
 export default function Next7Days() {
+  useAlerts();
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));
   const today = startOfDay(new Date());

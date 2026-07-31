@@ -58,7 +58,10 @@ export default function Profile() {
           title="Open TickTick Settings"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser url="https://ticktick.com/webapp/#settings/profile" />
+              <Action.OpenInBrowser
+                title="Open TickTick Settings"
+                url="https://ticktick.com/webapp/#settings/profile"
+              />
             </ActionPanel>
           }
         />

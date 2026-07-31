@@ -1,9 +1,11 @@
 import { List, Icon } from "@raycast/api";
 import { useState } from "react";
 import { useSync } from "./hooks/useSync";
+import { useAlerts } from "./hooks/useAlerts";
 import { TaskItem } from "./components/TaskItem";
 
 export default function Search() {
+  useAlerts();
   const [query, setQuery] = useState("");
   const { data, isLoading, revalidate } = useSync();
   const projectMap = new Map(data.projects.map((p) => [p.id, p.name]));

@@ -64,6 +64,7 @@ export function EditTaskForm({ task, onSave }: Props) {
 
   return (
     <Form
+      navigationTitle="Edit Task"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Changes" onSubmit={handleSubmit} />
