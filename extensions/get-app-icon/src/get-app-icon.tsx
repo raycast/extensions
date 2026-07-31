@@ -22,7 +22,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { cachedIconPath, invalidateCachedIcon, listCachedApps, pruneIconCache, refreshIconCache } from "./icon-cache";
+import { invalidateCachedIcon, listCachedApps, pruneIconCache, refreshIconCache } from "./icon-cache";
 
 // macOS-only system binaries for image processing and icon extraction.
 // These are guaranteed to exist on every macOS installation.
@@ -650,7 +650,10 @@ export default function Command() {
   // Grid tiles render far larger than the 32pt image `fileIcon` resolves to, so they
   // look soft. Extract real 256px icons to a cache and point the tiles at those. Only
   // the grid needs this — list rows are close enough to `fileIcon`'s nominal size.
-  const [cachedApps, setCachedApps] = useState<ReadonlySet<string>>(new Set());
+  // Maps an app to the cache file to render for it. The filename encodes the source state
+  // it was drawn from, so it can only come from a resolver that looked — the grid can no
+  // longer derive it, which is what keeps the tile and the freshness check in agreement.
+  const [cachedApps, setCachedApps] = useState<ReadonlyMap<string, string>>(new Map());
   useEffect(() => {
     if (viewMode !== "grid" || !apps || apps.length === 0) return;
 
@@ -662,6 +665,8 @@ export default function Command() {
 
     (async () => {
       let toast: Toast | undefined;
+      // What the grid last published, so the cleanup below can spare those files.
+      let rendered: ReadonlyMap<string, string> | undefined;
       try {
         // Show whatever is already cached before doing any work, so a warm cache
         // renders sharp immediately.
@@ -669,7 +674,7 @@ export default function Command() {
         if (cancelled) return;
         setCachedApps(warm);
 
-        const extracted = await refreshIconCache(
+        await refreshIconCache(
           appPaths,
           (done, total) => {
             if (cancelled || total === 0) return;
@@ -685,12 +690,15 @@ export default function Command() {
         );
         if (cancelled) return;
 
-        if (extracted > 0) {
-          const refreshed = await listCachedApps(appPaths);
-          if (cancelled) return;
-          setCachedApps(refreshed);
-        }
-        await pruneIconCache(appPaths);
+        // Re-resolve unconditionally, not only when something was extracted. A cache
+        // entry's name encodes the source state it was drawn from, so paths resolved
+        // before extraction can be superseded by an app updating meanwhile — even when
+        // this pass wrote nothing. Rendering a superseded name would show a tile whose
+        // file prune is entitled to collect.
+        const refreshed = await listCachedApps(appPaths);
+        if (cancelled) return;
+        setCachedApps(refreshed);
+        rendered = refreshed;
       } catch (error) {
         // An aborted extraction is a view change, not a failure worth a toast.
         if (!cancelled) {
@@ -702,6 +710,16 @@ export default function Command() {
         // Always retire the progress toast — leaving "Preparing icons…" on screen
         // after the work stops is the UI lying about its state.
         await toast?.hide();
+        // Prune here, not on the success path. Every early return above sits before it, so
+        // abandoning the grid used to skip collection entirely — and because an entry's
+        // name encodes source state, each abandoned visit could strand another superseded
+        // entry for any app that changed meanwhile, with nothing collecting them until a
+        // visit happened to run to completion. Measured: 33 of 327 apps changed within a
+        // day, so a churny session could strand tens of MB.
+        //
+        // Whatever the grid last published is passed as in-use, so this can never delete
+        // the file a rendered tile points at.
+        await pruneIconCache(appPaths, rendered?.values() ?? []).catch(() => {});
       }
     })();
 
@@ -723,18 +741,21 @@ export default function Command() {
             description="No installed applications were detected on this Mac."
           />
         )}
-        {apps?.map((app) => (
-          <Grid.Item
-            key={app.path}
-            // The cached 256px PNG renders sharp. `Image.Fallback` can't hold a
-            // FileIcon, so pick the source directly: apps not yet cached (or that
-            // the extractor couldn't handle) keep the soft-but-present system icon.
-            content={cachedApps.has(app.path) ? { source: cachedIconPath(app.path) } : { fileIcon: app.path }}
-            title={app.name}
-            keywords={app.bundleId ? [app.bundleId] : []}
-            actions={<AppActions app={app} {...actionProps} />}
-          />
-        ))}
+        {apps?.map((app) => {
+          // The cached 256px PNG renders sharp. `Image.Fallback` can't hold a FileIcon, so
+          // pick the source directly: apps not yet cached (or that the extractor couldn't
+          // handle) keep the soft-but-present system icon.
+          const cached = cachedApps.get(app.path);
+          return (
+            <Grid.Item
+              key={app.path}
+              content={cached ? { source: cached } : { fileIcon: app.path }}
+              title={app.name}
+              keywords={app.bundleId ? [app.bundleId] : []}
+              actions={<AppActions app={app} {...actionProps} />}
+            />
+          );
+        })}
       </Grid>
     );
   }

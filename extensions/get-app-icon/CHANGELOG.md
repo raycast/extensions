@@ -23,16 +23,16 @@
   Catalog icons created the folders before discovering there was nothing to put in them, leaving an
   empty `ICNS/` — or an empty app folder — sitting in your output directory. Cleanup now only ever
   removes a folder the export itself created, so a folder you made is left alone even when empty.
-- **A grid refresh that overlapped an export could cache the wrong icon permanently.** Icons are
-  drawn first and written second; if an export invalidated the entry in between, the older drawing
-  landed afterwards carrying a current timestamp, so it looked up to date forever. Cached icons are
-  now timestamped with what they actually depict rather than when they were written.
+- **Grid icons now update when an app changes its icon.** Roughly half of installed apps name their
+  icon file something other than the conventional `AppIcon.icns` — Visual Studio Code's is
+  `Code.icns` — and a changed icon in one of those apps was invisible to the cache, so the grid
+  could show a stale tile indefinitely. The declared icon file is now checked directly.
 - **Every export now offers "Reveal in Finder" (`⌘O`) on its success toast.** The action was
   attached but carried no keyboard shortcut, so nothing on screen indicated it existed and an
   export appeared to leave you with nowhere to go. Covers **Export Icons**, **Export Icon Size…**,
   **Export Icons As…**, and **Export All Sizes**.
-- An unreadable path inside an app bundle no longer forces its icon to be re-extracted on every
-  visit to the grid.
+- The grid no longer re-extracts icons it has already cached when part of an app bundle can't be
+  read, and no longer keeps showing an out-of-date icon once it can be read again.
 - Two releases whose version strings are identical for the first ~240 characters now still get
   separate export folders, instead of the second overwriting the first.
 
