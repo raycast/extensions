@@ -3,6 +3,16 @@
 Control [Tutti](https://tutti.barrybarrywu.com) — play the same audio through many
 output devices at once on macOS — straight from the Raycast launcher.
 
+<p align="center">
+  <img src="metadata/tutti-1.png" alt="Tutti commands in Raycast" width="800" />
+</p>
+
+<p align="center">
+  <a href="https://www.raycast.com/Barrybarrywu/tutti" title="Install Tutti Raycast Extension">
+    <img src="https://www.raycast.com/Barrybarrywu/tutti/install_button@2x.png?v=1.1" height="64" alt="Install Tutti on Raycast" />
+  </a>
+</p>
+
 ## Commands
 
 - **Apply Preset** — pick one of your saved presets and switch to it.
