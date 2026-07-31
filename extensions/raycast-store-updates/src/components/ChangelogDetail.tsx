@@ -20,7 +20,7 @@ export function ChangelogDetail({ slug, title, items, currentIndex }: ChangelogD
       isLoading={isLoading}
       markdown={markdown}
       navigationTitle={`${title} — Changelog`}
-      actions={<ChangelogActions items={items} currentIndex={currentIndex} changelog={changelog} />}
+      actions={<ChangelogActions items={items} currentIndex={currentIndex} changelog={changelog} slug={slug} />}
     />
   );
 }

@@ -33,6 +33,8 @@ interface GitHubPR {
     avatar_url: string;
   };
   labels: { name: string }[];
+  /** Source branch. Raycast's convention is `ext/<slug>`, which resolves the slug for free. */
+  head?: { ref?: string };
 }
 
 interface GitHubPRFile {
