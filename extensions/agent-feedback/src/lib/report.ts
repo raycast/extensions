@@ -1,13 +1,20 @@
 import { copyFileSync, readdirSync, writeFileSync } from "fs";
 import { join } from "path";
+import { loadDomContextTimeline } from "./dom-context";
 import { readMarkers } from "./state";
-import { Preferences, RecordingState, TranscriptSegment } from "./types";
+import {
+  DomContextTarget,
+  Preferences,
+  RecordingState,
+  TranscriptSegment,
+} from "./types";
 
 interface ReportMoment {
   timestampMs: number;
   screenshotPath: string;
   text: string;
   source: "marked" | "automatic";
+  domTarget?: DomContextTarget;
 }
 
 function formatTimestamp(milliseconds: number): string {
@@ -51,12 +58,36 @@ function sampleEvenly<T>(items: T[], maximum: number): T[] {
   return result;
 }
 
+function formatAttributes(attributes: Record<string, string>): string {
+  const entries = Object.entries(attributes);
+  return entries.length
+    ? entries
+        .map(([name, value]) => `${name}=${JSON.stringify(value)}`)
+        .join(", ")
+    : "none";
+}
+
+function pushDomTarget(lines: string[], target: DomContextTarget): void {
+  lines.push(
+    "**Hovered DOM target**",
+    "",
+    `- Page: \`${target.pageUrl}\``,
+    `- Selector: \`${target.selector}\``,
+    `- Element: \`${target.signature}\``,
+    `- Visible text: ${target.text ? JSON.stringify(target.text) : "none"}`,
+    `- Attributes: ${formatAttributes(target.attributes)}`,
+    `- Ancestors (nearest first): ${target.ancestors.length ? target.ancestors.map((ancestor) => `\`${ancestor}\``).join(" ← ") : "none"}`,
+    "",
+  );
+}
+
 export async function buildReport(
   state: RecordingState,
   preferences: Preferences,
   segments: TranscriptSegment[],
 ): Promise<{ markdown: string; reportPath: string }> {
   const markers = readMarkers(state);
+  const domTimeline = loadDomContextTimeline(state);
   const moments: ReportMoment[] = [];
 
   if (markers.length) {
@@ -72,6 +103,7 @@ export async function buildReport(
         screenshotPath: destination,
         text: textNear(segments, marker.timestampMs),
         source: "marked",
+        domTarget: domTimeline.at(marker.timestampMs),
       });
     });
   } else {
@@ -107,6 +139,7 @@ export async function buildReport(
         screenshotPath,
         text: textNear(segments, candidate.timestampMs),
         source: "automatic",
+        domTarget: domTimeline.at(candidate.timestampMs),
       });
     }
   }
@@ -125,6 +158,9 @@ export async function buildReport(
       ? `- Source bundle: ${state.sourceBundleId}`
       : undefined,
     `- Capture started: ${state.startedAt}`,
+    domTimeline.connected
+      ? "- DOM context: connected (framework-agnostic hover capture)"
+      : undefined,
     "",
     "## Feedback moments",
     "",
@@ -136,6 +172,9 @@ export async function buildReport(
       "",
       moment.text || "Review the highlighted moment in the screenshot.",
       "",
+    );
+    if (moment.domTarget) pushDomTarget(lines, moment.domTarget);
+    lines.push(
       `![Feedback frame at ${formatTimestamp(moment.timestampMs)}](<${moment.screenshotPath}>)`,
       "",
     );
@@ -145,8 +184,18 @@ export async function buildReport(
   if (segments.length === 0) {
     lines.push("_No speech detected._", "");
   } else {
+    let previousDomKey = "";
     for (const segment of segments) {
       lines.push(`[${formatTimestamp(segment.fromMs)}] ${segment.text}`, "");
+      const target = domTimeline.at((segment.fromMs + segment.toMs) / 2);
+      const domKey = target ? `${target.pageUrl}\n${target.selector}` : "";
+      if (target && domKey !== previousDomKey) {
+        lines.push(
+          `DOM at this point: \`${target.selector}\` on \`${target.pageUrl}\` (${target.signature})`,
+          "",
+        );
+      }
+      previousDomKey = domKey;
     }
   }
 

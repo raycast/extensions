@@ -62,17 +62,55 @@ Each session contains:
 - `recording.mov` — screen, cursor, click highlights, and microphone
 - `transcript.json` — timestamped local Whisper output
 - `frames/` — manually marked or automatically captured screenshots
+- `dom-context.jsonl` — optional DOM targets hovered during the recording
 - `feedback.md` — the report copied to your clipboard
 
 Use **Open Feedback Sessions** to inspect or delete these artifacts in Finder.
+
+## Advanced: DOM Context for Websites
+
+For richer feedback on a website you are developing, add this development-only loader to the page. It connects to Agent Feedback only while a recording is active, then records the DOM identity of elements you dwell over for about 300 ms. The report pairs those selectors, attributes, text, and ancestors with the relevant transcript moments and screenshots.
+
+```html
+<script>
+  (() => {
+    const origin = "http://127.0.0.1:43127";
+    let session;
+
+    async function connect() {
+      try {
+        const response = await fetch(`${origin}/status`, { cache: "no-store" });
+        if (!response.ok) throw new Error();
+        const status = await response.json();
+        if (session !== status.session) {
+          const script = document.createElement("script");
+          script.src = `${origin}/agent-feedback.js?t=${Date.now()}`;
+          document.head.appendChild(script);
+          session = status.session;
+        }
+      } catch {
+        session = undefined;
+      }
+    }
+
+    connect();
+    setInterval(connect, 2000);
+  })();
+</script>
+```
+
+The bridge listens only on `127.0.0.1:43127`, starts and stops with each recording, and uses a new session token every time. A small **AF recording** badge appears in the top-right when connected; hover capture does not outline or restyle page elements. If the loader is absent or disconnected, screen, voice, transcript, and screenshot capture continue normally.
+
+Only include the loader in local development. Do not ship it in a public production build. Chrome supports this loopback workflow; browser security policy may prevent it in Safari.
 
 ## Privacy
 
 - Recordings and reports remain in Raycast's local extension support directory.
 - Model inference is local.
-- The only network requests are the explicit one-time model downloads.
+- The only external network requests are the explicit one-time model downloads.
 - Model files are integrity checked before use.
 - Nothing is uploaded automatically.
+- Optional DOM context is sent only from your development page to the loopback bridge while recording.
 
 Remember that screen recordings can contain private information. Review a report before sharing it outside your machine.
 

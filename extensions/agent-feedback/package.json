@@ -18,7 +18,8 @@
     "screen recording",
     "voice",
     "whisper",
-    "visual"
+    "visual",
+    "dom"
   ],
   "license": "MIT",
   "commands": [

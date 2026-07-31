@@ -10,6 +10,7 @@ import {
 } from "@raycast/api";
 import { existsSync, writeFileSync } from "fs";
 import { join } from "path";
+import { startDomContextBridge, stopDomContextBridge } from "./lib/dom-context";
 import {
   defaultVadModelPath,
   ensureSupportDirectories,
@@ -72,6 +73,7 @@ async function startRecording(preferences: Preferences): Promise<void> {
     ["-v", "-g", "-k", "-C", `-D${display}`, videoPath],
     recorderLogPath,
   );
+  const domContext = await startDomContextBridge(sessionDir, pid);
   const frameCapturePid = spawnDetached(
     "/bin/sh",
     [
@@ -85,6 +87,7 @@ async function startRecording(preferences: Preferences): Promise<void> {
   const state: RecordingState = {
     pid,
     frameCapturePid,
+    domContext,
     startedAt: new Date().toISOString(),
     sessionDir,
     videoPath,
@@ -99,6 +102,10 @@ async function startRecording(preferences: Preferences): Promise<void> {
   await setRecordingStatus("● Recording — Run to Stop");
   await new Promise((resolve) => setTimeout(resolve, 800));
   if (!isProcessRunning(pid)) {
+    if (isProcessRunning(frameCapturePid)) {
+      process.kill(frameCapturePid, "SIGTERM");
+    }
+    stopDomContextBridge(domContext);
     clearState();
     await setRecordingStatus("Ready to Record");
     await showHUD(
@@ -126,6 +133,7 @@ async function stopRecording(
     if (state.frameCapturePid && isProcessRunning(state.frameCapturePid)) {
       process.kill(state.frameCapturePid, "SIGTERM");
     }
+    stopDomContextBridge(state.domContext);
     clearState();
     await setRecordingStatus("Recording Stopped — Preparing Feedback");
     await showHUD("⏹ Recording stopped — preparing feedback");
@@ -157,6 +165,7 @@ export default async function Command() {
     return;
   }
   if (state) {
+    stopDomContextBridge(state.domContext);
     clearState();
     await setRecordingStatus("Ready to Record");
   }
