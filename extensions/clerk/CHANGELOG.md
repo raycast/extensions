@@ -1,6 +1,6 @@
 # Clerk Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-07-31
 
 - Manage multiple Clerk instances with a clipboard-driven auth flow
 - Search users: details, sessions, ban/unban, revoke sessions, delete, view organizations
