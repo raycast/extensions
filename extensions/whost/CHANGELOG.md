@@ -1,5 +1,5 @@
 # WHost
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-31
 
 - Initial release
