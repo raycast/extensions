@@ -1,6 +1,6 @@
 # Tutti Changelog
 
-## [Documentation] - 2026-07-31
+## [Documentation] - {PR_MERGE_DATE}
 
 - Add a Store screenshot and install button to the README.
 
