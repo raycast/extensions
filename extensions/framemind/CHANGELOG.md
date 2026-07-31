@@ -1,6 +1,6 @@
 # FrameMind Changelog
 
-## [Initial Version] - 2026-07-31
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search the local FrameMind screenshot library with OCR-backed relevance.
 - Browse recent screenshots without an account, network, or AI credits.
