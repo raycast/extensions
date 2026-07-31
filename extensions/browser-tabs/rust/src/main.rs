@@ -149,16 +149,19 @@ fn close_tab(window_handle: i64, runtime_id: String) -> Result<(), String> {
 
 /// Presses Ctrl+W on the browser window.
 ///
-/// This closes whichever tab is selected, so it only runs once the intended tab is known to
-/// be the selected one in a window that is known to be focused. Without both of those the
-/// keystroke could close something the user did not ask to close, and it is safer to report
-/// that the tab could not be closed.
+/// A keystroke goes wherever the focus is, so this closes whichever tab is selected in
+/// whichever window is in front. It only runs once the intended tab is known to be the
+/// selected one in a window that is known to be in front, and the everything-else work is
+/// done first so that the check on the focus, which is the part that can change on its own,
+/// is the last thing before the keystroke. That window cannot be closed completely: another
+/// application can take the focus at any moment, and Windows offers no way to aim a
+/// keystroke at a particular window. It is narrowed to the smallest it can be made.
 fn close_selected_tab(hwnd: HWND, tab: &IUIAutomationElement) -> Result<(), String> {
     unsafe {
         bring_window_to_front(hwnd);
-        if GetForegroundWindow() != hwnd {
-            return Err("Could not close the tab: the browser window is not focused".into());
-        }
+
+        // asking the browser costs a call into it, so it happens before the focus check
+        // rather than between that check and the keystroke
         if !is_selected_now(tab) {
             return Err("Could not close the tab: it is no longer the open tab".into());
         }
@@ -179,6 +182,10 @@ fn close_selected_tab(hwnd: HWND, tab: &IUIAutomationElement) -> Result<(), Stri
             key(VK_W, true),
             key(VK_CONTROL, true),
         ];
+
+        if GetForegroundWindow() != hwnd {
+            return Err("Could not close the tab: the browser window is not focused".into());
+        }
         if SendInput(&keys, std::mem::size_of::<INPUT>() as i32) == 0 {
             return Err("Could not close the tab".into());
         }
