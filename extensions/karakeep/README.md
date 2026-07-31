@@ -97,7 +97,7 @@ If your container is not running, the extension will detect this and offer to st
 
 Requirements: Docker Desktop running, and Karakeep started at least once from Docker so the container exists. The extension never creates containers — it only starts ones you already have.
 
-> **Using a hosted or remote instance?** None of this applies to you and nothing changes: the Docker checks only run for a local address, and the Start action is hidden when there's no local container to start.
+> **Using a hosted or remote instance?** None of this applies to you and nothing changes. The Docker checks only run when your API URL is `localhost` or `127.0.0.1` — an instance on another machine, including one elsewhere on your network, is left alone, and the Start action is hidden when there's no local container to start.
 
 ## Troubleshooting
 

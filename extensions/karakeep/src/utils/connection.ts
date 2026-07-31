@@ -79,7 +79,21 @@ export function describeConnectionError(error: unknown, apiUrl?: string): string
   }
 }
 
-/** Hosts that indicate the instance runs on this machine. */
+/**
+ * Whether the instance is served by THIS machine — i.e. loopback only.
+ *
+ * Deliberately excludes private-LAN and link-local ranges (10.x, 192.168.x,
+ * 172.16–31.x, 169.254.x). Those hosts are "local" in a network sense but are
+ * NOT this machine, and container recovery keys off a published port binding,
+ * which only ever reaches loopback.
+ *
+ * Including them let a Karakeep on a NAS at 192.168.1.50:3000 match an
+ * unrelated stopped container that happened to publish host port 3000 — the
+ * lookup matches on port alone and cannot know which host a container serves.
+ * The extension would then start someone else's Compose project and poll a
+ * remote address for 60s. Starting the wrong containers is a real side effect
+ * on the user's machine; doing nothing is strictly better.
+ */
 export function isLocalHost(apiUrl: string): boolean {
   let host: string;
   try {
@@ -88,19 +102,7 @@ export function isLocalHost(apiUrl: string): boolean {
     return false;
   }
 
-  if (host === "localhost" || host === "::1" || host.endsWith(".local") || host.endsWith(".localhost")) {
-    return true;
-  }
-  // Loopback, private, and link-local ranges — an instance on the LAN is still
-  // plausibly a container the user can start, but only from this machine if it
-  // is loopback. Keep the net wide; the Docker probe is the real gate.
-  return (
-    /^127\./.test(host) ||
-    /^10\./.test(host) ||
-    /^192\.168\./.test(host) ||
-    /^169\.254\./.test(host) ||
-    /^172\.(1[6-9]|2\d|3[01])\./.test(host)
-  );
+  return host === "localhost" || host === "::1" || host === "[::1]" || /^127\./.test(host);
 }
 
 /**
