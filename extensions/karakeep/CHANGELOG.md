@@ -1,5 +1,22 @@
 # Karakeep Changelog
 
+## [2.4.0] - 2026-07-31
+
+### Offline and Docker recovery
+
+- When a self-hosted instance is unreachable, the extension now detects a stopped local Docker container and offers to start it — including every service in a Compose project — then waits for the API to answer before retrying
+- Every command handles an unreachable server: list views show a recovery screen with Start, Try Again, Open Docker, Extension Settings, and Copy Error actions instead of an empty list, and Quick Bookmark recovers inline through its toast
+- The Create Bookmark, Create Note, and Create List forms show an offline notice and promote "Start Karakeep" to the primary action while the server is down, since submitting is blocked until it is running
+- Create commands check reachability before writing, so a stopped instance no longer risks losing typed input; what you typed is copied to the clipboard if the write can't proceed
+- The Start action only appears when a stopped local container actually exists, so remote and hosted instances aren't offered a recovery step that can't help them
+
+### Fixes
+
+- Connection errors now report the underlying cause (e.g. `ECONNREFUSED`) instead of the opaque "fetch failed", and no longer stack a generic "Failed to fetch latest data" toast on top of the recovery screen
+- Fixed a cached list being shown as though it were current while the server was unreachable — the recovery screen now appears whenever no request has succeeded, including after switching to a different list or tag
+- Updated the extension icon
+- Updated dependencies
+
 ## [2.3.2] - 2026-06-05
 
 - Fixed bookmark preview images not rendering by caching previews locally and escaping local image paths in Markdown
