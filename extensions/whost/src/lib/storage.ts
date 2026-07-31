@@ -1,5 +1,5 @@
 import { environment } from "@raycast/api";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, renameSync, writeFileSync } from "fs";
 import { join } from "path";
 import { Profile } from "./types";
 
@@ -20,7 +20,9 @@ export function loadProfiles(): Profile[] {
 }
 
 export function saveProfiles(profiles: Profile[]): void {
-  writeFileSync(PROFILES_FILE, JSON.stringify(profiles, null, 2), "utf8");
+  const tmp = `${PROFILES_FILE}.tmp`;
+  writeFileSync(tmp, JSON.stringify(profiles, null, 2), "utf8");
+  renameSync(tmp, PROFILES_FILE);
 }
 
 export function upsertProfile(

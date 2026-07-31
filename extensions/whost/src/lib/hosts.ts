@@ -8,6 +8,7 @@ import {
 } from "./types";
 import { elevatedWrite } from "./elevate";
 import { flushDns } from "./dns";
+import { saveProfiles } from "./storage";
 
 export function readHosts(): string {
   try {
@@ -104,5 +105,27 @@ export function applyProfiles(profiles: Profile[]): void {
     flushDns();
   } catch {
     /* flushdns failure is non-fatal for the file write */
+  }
+}
+
+/**
+ * Commits a profile change transactionally: writes profiles.json first, then
+ * rebuilds the hosts file. If the hosts write fails (e.g. UAC declined),
+ * profiles.json is rolled back so the two files cannot diverge. The rollback
+ * rewrites the file that was just written successfully, so it can only fail
+ * in pathological cases; the hosts block is rebuilt on the next successful
+ * apply, which heals any residual mismatch.
+ */
+export function commitProfiles(previous: Profile[], next: Profile[]): void {
+  saveProfiles(next);
+  try {
+    applyProfiles(next);
+  } catch (error) {
+    try {
+      saveProfiles(previous);
+    } catch {
+      /* best effort */
+    }
+    throw error;
   }
 }

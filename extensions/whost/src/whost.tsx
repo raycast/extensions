@@ -10,13 +10,8 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Profile, HOSTS_PATH } from "./lib/types";
-import {
-  loadProfiles,
-  removeProfile,
-  saveProfiles,
-  upsertProfile,
-} from "./lib/storage";
-import { applyProfiles } from "./lib/hosts";
+import { loadProfiles, removeProfile, upsertProfile } from "./lib/storage";
+import { commitProfiles } from "./lib/hosts";
 import { flushDns } from "./lib/dns";
 import EditProfile from "./edit-profile";
 
@@ -36,14 +31,13 @@ export default function Command() {
     const next: Profile = { ...profile, enabled: !profile.enabled };
     const all = upsertProfile(profiles, next);
     try {
-      applyProfiles(all);
-      saveProfiles(all);
+      commitProfiles(profiles, all);
     } catch {
       void showToast({
         style: Toast.Style.Failure,
         title: "Failed to Update Hosts File",
         message:
-          "Elevation was declined or the write failed. No changes were saved.",
+          "Elevation was declined or the write failed. No changes were made.",
       });
       return;
     }
@@ -64,8 +58,7 @@ export default function Command() {
     if (!confirmed) return;
     const all = removeProfile(profiles, profile.id);
     try {
-      applyProfiles(all);
-      saveProfiles(all);
+      commitProfiles(profiles, all);
     } catch {
       void showToast({
         style: Toast.Style.Failure,

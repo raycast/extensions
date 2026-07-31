@@ -8,13 +8,8 @@ import {
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { Profile } from "./lib/types";
-import {
-  loadProfiles,
-  saveProfiles,
-  upsertProfile,
-  newId,
-} from "./lib/storage";
-import { applyProfiles, parseEntries, serializeEntries } from "./lib/hosts";
+import { loadProfiles, upsertProfile, newId } from "./lib/storage";
+import { commitProfiles, parseEntries, serializeEntries } from "./lib/hosts";
 
 interface FormValues {
   name: string;
@@ -35,10 +30,10 @@ export default function EditProfile(props: {
         ? { ...profile, name: values.name.trim(), entries }
         : { id: newId(), name: values.name.trim(), enabled: true, entries };
 
-      const all = upsertProfile(loadProfiles(), next);
+      const previous = loadProfiles();
+      const all = upsertProfile(previous, next);
       try {
-        applyProfiles(all);
-        saveProfiles(all);
+        commitProfiles(previous, all);
       } catch {
         void showToast({
           style: Toast.Style.Failure,
