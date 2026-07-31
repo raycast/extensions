@@ -1,6 +1,6 @@
 # Get App Icon Changelog
 
-## [Versioned Export Folders] - {PR_MERGE_DATE}
+## [Versioned Export Folders] - 2026-07-31
 
 ### Added
 
