@@ -1,8 +1,9 @@
 import { access, readFile, readdir } from "fs/promises";
 import * as path from "path";
 import { execSync } from "child_process";
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { WallpaperInfo } from "./types";
+import { getPrefs } from "./prefs";
 
 export async function pathExists(filePath: string): Promise<boolean> {
   try {
@@ -85,7 +86,7 @@ export async function findWallpaperEnginePath(): Promise<string | null> {
 export async function getCurrentWallpaperPath(
   monitorIndex: number,
 ): Promise<string | null> {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPrefs();
   let wePath = prefs.wallpaperEnginePath;
 
   if (!wePath) {
@@ -230,7 +231,7 @@ export async function discoverWallpapers(): Promise<WallpaperInfo[]> {
 }
 
 export async function scanPlaylists(): Promise<string[]> {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPrefs();
   let wePath = prefs.wallpaperEnginePath;
 
   if (!wePath) {
@@ -274,7 +275,7 @@ export async function scanPlaylists(): Promise<string[]> {
 }
 
 export async function scanProfiles(): Promise<string[]> {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPrefs();
   let wePath = prefs.wallpaperEnginePath;
 
   if (!wePath) {

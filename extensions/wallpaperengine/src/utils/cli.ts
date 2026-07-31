@@ -1,13 +1,13 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import * as path from "path";
-import { getPreferenceValues } from "@raycast/api";
 import { findWallpaperEnginePath, pathExists } from "./discovery";
+import { getPrefs } from "./prefs";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 export async function execWallpaperEngine(args: string[]): Promise<string> {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPrefs();
   let basePath = prefs.wallpaperEnginePath;
 
   if (!basePath) {
@@ -35,10 +35,10 @@ export async function execWallpaperEngine(args: string[]): Promise<string> {
     throw new Error(`WallpaperEngine executable not found in ${basePath}`);
   }
 
-  const command = `"${executable}" -control ${args.join(" ")}`;
-
   try {
-    const { stdout } = await execAsync(command, { cwd: basePath });
+    const { stdout } = await execFileAsync(executable, ["-control", ...args], {
+      cwd: basePath,
+    });
     return (stdout || "").trim();
   } catch (error) {
     if (error && typeof error === "object") {
