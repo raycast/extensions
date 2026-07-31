@@ -20,7 +20,7 @@ import { dirname, join } from "node:path";
 import { costOf, emptyTokens } from "./pricing";
 import { Tokens, UsageHistory } from "./types";
 
-const CACHE_VERSION = 3;
+const CACHE_VERSION = 4;
 
 export function projectsDir(): string {
   const dir =
@@ -46,10 +46,12 @@ function hourStart(ms: number): number {
 interface FileEntry {
   size: number;
   mtimeMs: number;
-  /** hourStart epoch ms -> cost USD */
+  /** hourStart epoch ms -> cost USD (already deduped within the file) */
   hours: Record<string, number>;
-  /** short hashes of counted message ids, for cross-file dedup */
-  ids: string[];
+  /** shortHash(id) -> { hour, cost } of each *unique* record in this file.
+   *  Used to remove a specific duplicate's contribution from `hours`
+   *  when the same id was already counted in a newer file. */
+  idCosts: Record<string, { h: string; cost: number }>;
   /** earliest record timestamp in this file */
   first: number | null;
 }
@@ -116,14 +118,18 @@ function parseFile(
   cutoff: number,
 ): Omit<FileEntry, "size" | "mtimeMs"> {
   const hours: Record<string, number> = {};
-  const ids: string[] = [];
+  // shortHash(idKey) -> first occurrence, used to collapse intra-file dupes
+  // (streaming writes the same msgId+reqId/usage on every delta) and to
+  // subtract a record precisely from `hours` when a newer file already
+  // counted it (resumed/forked sessions reuse history verbatim).
+  const idCosts: Record<string, { h: string; cost: number }> = {};
   let first: number | null = null;
 
   let text: string;
   try {
     text = readFileSync(path, "utf8");
   } catch {
-    return { hours, ids, first };
+    return { hours, idCosts, first };
   }
 
   for (const line of text.split("\n")) {
@@ -151,18 +157,21 @@ function parseFile(
     const msgId = typeof msg.id === "string" ? msg.id : "";
     const reqId = typeof rec.requestId === "string" ? rec.requestId : "";
     // Streaming writes several lines per API response sharing one message id;
-    // usage is repeated on each, so count a message id + request id pair once.
+    // usage is repeated on each, so a message id + request id pair counts once.
+    // (Intra-file dupes collapse here; cross-file dupes are subtracted later.)
     const key = `${msgId}:${reqId}`;
     if (key === ":") continue;
-    ids.push(shortId(key));
+    const id = shortId(key);
+    if (id in idCosts) continue;
 
     const cost = costOf(model, tokensFrom(usage));
-    if (cost === 0) continue;
     const h = String(hourStart(ts));
+    idCosts[id] = { h, cost };
+    if (cost === 0) continue;
     hours[h] = (hours[h] ?? 0) + cost;
   }
 
-  return { hours, ids, first };
+  return { hours, idCosts, first };
 }
 
 function cachePath(supportPath: string): string {
@@ -191,10 +200,13 @@ function saveCache(supportPath: string, cache: Cache): void {
 }
 
 /**
- * Dedup problem: one file's cached `ids` cannot be re-derived without re-reading
- * it, so ids are cached alongside the hours. When the same message id appears in
- * two files (resumed or forked sessions copy history), the first file wins and
- * the duplicate's cost is subtracted proportionally.
+ * Dedup problem: one file's cached `idCosts` cannot be re-derived without
+ * re-reading it, so the per-id {hour, cost} map is cached alongside the hours.
+ * When the same message id appears in two files (resumed or forked sessions
+ * copy history), the newer file's copy counts in full and the older file's
+ * contribution for that exact id is subtracted from its specific hour bucket —
+ * rather than scaling the whole file down by a flat ratio, which would also
+ * shrink the file's unique records.
  *
  * Files are processed newest-first so the freshest copy of a message is the one
  * that counts.
@@ -250,21 +262,25 @@ export function scanUsage(
     if (entry.first !== null && (firstSeen === null || entry.first < firstSeen))
       firstSeen = entry.first;
 
-    let dupes = 0;
-    for (const id of entry.ids) {
-      if (seenIds.has(id)) dupes++;
-      else seenIds.add(id);
+    // Remove each id that a newer file already counted from its exact hour
+    // bucket. This subtracts only the duplicates' cost, leaving the file's
+    // unique records at full weight (a flat `keepRatio` would shrink them too).
+    for (const [id, { h, cost }] of Object.entries(entry.idCosts)) {
+      if (seenIds.has(id)) {
+        const remaining = (entry.hours[h] ?? 0) - cost;
+        if (remaining > 0) entry.hours[h] = remaining;
+        else delete entry.hours[h];
+      } else {
+        seenIds.add(id);
+      }
     }
-    // Scale this file's cost down by the share of its messages already counted.
-    const keepRatio = entry.ids.length === 0 ? 1 : 1 - dupes / entry.ids.length;
-    if (keepRatio <= 0) continue;
 
     for (const [h, cost] of Object.entries(entry.hours)) {
+      if (cost <= 0) continue;
       const hs = Number(h);
-      const c = cost * keepRatio;
-      hourly.set(hs, (hourly.get(hs) ?? 0) + c);
+      hourly.set(hs, (hourly.get(hs) ?? 0) + cost);
       const d = localDate(hs);
-      daily.set(d, (daily.get(d) ?? 0) + c);
+      daily.set(d, (daily.get(d) ?? 0) + cost);
     }
   }
 

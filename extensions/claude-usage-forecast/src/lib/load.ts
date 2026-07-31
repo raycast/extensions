@@ -10,14 +10,6 @@ import { scanUsage } from "./jsonl";
 import { fetchRateLimits, UsageApiError } from "./usage-api";
 import { Forecast, RateLimits } from "./types";
 
-export interface Prefs {
-  lookbackDays?: string;
-  warnAt?: string;
-  dangerAt?: string;
-  chartMode?: "dataUri" | "file" | "blocks";
-  menuBarShow?: "weekly" | "both" | "spark" | "icon";
-}
-
 export interface Settings {
   lookbackDays: number;
   warnAt: number;
@@ -38,7 +30,9 @@ function num(
 }
 
 export function settings(): Settings {
-  const p = getPreferenceValues<Prefs>();
+  // `Preferences` is the manifest-generated global type (see raycast-env.d.ts);
+  // shadowing it with a hand-maintained interface would drift from package.json.
+  const p = getPreferenceValues<Preferences>();
   return {
     lookbackDays: Math.round(num(p.lookbackDays, 70, 14, 400)),
     warnAt: num(p.warnAt, 75, 1, 100),
@@ -78,6 +72,12 @@ export async function load(): Promise<LoadResult> {
           ? e.message
           : String(e);
     limits = readLastLimits(support);
+    // A cache whose weekly window already closed is not "current utilization";
+    // presenting yesterday's percentage as now would silently mislead. Discard
+    // it and surface the fetch error instead.
+    if (limits?.weekly?.resetsAt && limits.weekly.resetsAt < Date.now()) {
+      limits = null;
+    }
     stale = limits !== null;
     if (!limits) throw e;
   }
