@@ -7,10 +7,6 @@ import { Asset, Quote, SearchResult } from "../market-types";
 import { BinanceSnapshot, fetchBinanceTicker } from "./binance";
 import { finiteNumber, httpsImageUrl } from "./shared";
 
-type Preferences = {
-  currency?: string;
-};
-
 type CoinGeckoMarket = {
   id: string;
   symbol: string;
@@ -86,7 +82,7 @@ const loadCoinGeckoMarkets = createMicroBatcher<string, CoinGeckoMarket>(
 export async function fetchCryptoQuote(
   asset: Asset,
 ): Promise<Quote | undefined> {
-  const currency = getPreferenceValues<Preferences>().currency ?? "usd";
+  const currency = getPreferenceValues<Preferences>().currency;
   let coin: CoinGeckoMarket | undefined;
 
   if (currency.toLowerCase() === "usd") {

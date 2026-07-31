@@ -1,7 +1,9 @@
-import { launchCommand, LaunchType, LocalStorage } from "@raycast/api";
+import { launchCommand, LaunchType } from "@raycast/api";
 import { shouldRefreshQuote } from "./market-format";
 import { MarketRequestError } from "./market-http";
 import { assetFromId } from "./market-ids";
+import { withMarketStateLock, withRefreshLock } from "./market-lock";
+import { retainCurrentRecords } from "./market-refresh-state";
 import {
   getCachedQuotes,
   getQuoteStatuses,
@@ -11,8 +13,6 @@ import {
 } from "./market-storage";
 import { Asset, RefreshFailure, RefreshReport } from "./market-types";
 import { fetchQuote } from "./providers";
-
-const REFRESH_LOCK_KEY = "refresh-lock.v1";
 
 const PROVIDER_TTLS_MS: Record<Asset["kind"], number> = {
   stock: 2 * 60_000,
@@ -53,72 +53,77 @@ async function refreshQuotesUnlocked(
   const skippedIds = watchlist.filter((id) => !dueIds.includes(id));
   const results = await allSettledWithConcurrency(dueIds, 8, fetchQuote);
 
-  const next =
-    ids === undefined
-      ? Object.fromEntries(
-          watchlist.flatMap((id) => (cached[id] ? [[id, cached[id]]] : [])),
-        )
-      : { ...cached };
   const failures: RefreshFailure[] = [];
   const updatedIds: string[] = [];
-  const nextStatuses =
-    ids === undefined
-      ? Object.fromEntries(
-          watchlist.flatMap((id) => (statuses[id] ? [[id, statuses[id]]] : [])),
-        )
-      : { ...statuses };
 
-  results.forEach((result, index) => {
-    const id = dueIds[index];
-    const asset = assetFromId(id);
-    const attemptedAt = new Date().toISOString();
-    if (result.status === "fulfilled" && result.value) {
-      next[id] = {
-        ...result.value,
-        lastAttemptAt: attemptedAt,
-        lastSuccessAt: attemptedAt,
-        error: undefined,
-        retryAfterAt: undefined,
-      };
+  const next = await withMarketStateLock(async () => {
+    // Network requests can take several seconds. Re-read state only when the
+    // results are ready so a concurrent watchlist edit or detail refresh is
+    // never overwritten by the snapshot captured before the requests began.
+    const activeIds = ids === undefined ? await getWatchlist() : undefined;
+    const activeIdSet = activeIds ? new Set(activeIds) : undefined;
+    const nextQuotes = retainCurrentRecords(await getCachedQuotes(), activeIds);
+    const nextStatuses = retainCurrentRecords(
+      await getQuoteStatuses(),
+      activeIds,
+    );
+
+    results.forEach((result, index) => {
+      const id = dueIds[index];
+      if (activeIdSet && !activeIdSet.has(id)) return;
+
+      const asset = assetFromId(id);
+      const attemptedAt = new Date().toISOString();
+      if (result.status === "fulfilled" && result.value) {
+        nextQuotes[id] = {
+          ...result.value,
+          lastAttemptAt: attemptedAt,
+          lastSuccessAt: attemptedAt,
+          error: undefined,
+          retryAfterAt: undefined,
+        };
+        nextStatuses[id] = {
+          lastAttemptAt: attemptedAt,
+          lastSuccessAt: attemptedAt,
+        };
+        updatedIds.push(id);
+        return;
+      }
+
+      const error =
+        result.status === "rejected"
+          ? normalizeRefreshError(result.reason)
+          : { message: "No quote returned" };
+      failures.push({
+        id,
+        provider: asset?.provider ?? "Unknown provider",
+        message: error.message,
+        status: error.status,
+      });
+      const retryAfterAt = new Date(
+        now + (error.retryAfterMs ?? failureCooldownMs(error.status)),
+      ).toISOString();
       nextStatuses[id] = {
-        lastAttemptAt: attemptedAt,
-        lastSuccessAt: attemptedAt,
-      };
-      updatedIds.push(id);
-      return;
-    }
-
-    const error =
-      result.status === "rejected"
-        ? normalizeRefreshError(result.reason)
-        : { message: "No quote returned" };
-    failures.push({
-      id,
-      provider: asset?.provider ?? "Unknown provider",
-      message: error.message,
-      status: error.status,
-    });
-    const retryAfterAt = new Date(
-      now + (error.retryAfterMs ?? failureCooldownMs(error.status)),
-    ).toISOString();
-    nextStatuses[id] = {
-      ...nextStatuses[id],
-      lastAttemptAt: attemptedAt,
-      error: error.message,
-      retryAfterAt,
-    };
-    if (next[id]) {
-      next[id] = {
-        ...next[id],
+        ...nextStatuses[id],
         lastAttemptAt: attemptedAt,
         error: error.message,
         retryAfterAt,
       };
-    }
+      if (nextQuotes[id]) {
+        nextQuotes[id] = {
+          ...nextQuotes[id],
+          lastAttemptAt: attemptedAt,
+          error: error.message,
+          retryAfterAt,
+        };
+      }
+    });
+
+    await saveCachedQuotes(nextQuotes);
+    await saveQuoteStatuses(nextStatuses);
+    return nextQuotes;
   });
 
-  await saveCachedQuotes(next);
-  await saveQuoteStatuses(nextStatuses);
   return { quotes: next, updatedIds, failures, skippedIds };
 }
 
@@ -134,38 +139,6 @@ export async function refreshMenuBar(options?: { renderOnly?: boolean }) {
   } catch {
     // The menu-bar command is disabled or has not been activated yet.
   }
-}
-
-async function withRefreshLock<Value>(work: () => Promise<Value>) {
-  const owner = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
-  for (let attempt = 0; attempt < 20; attempt += 1) {
-    const current = await LocalStorage.getItem<string>(REFRESH_LOCK_KEY);
-    const [currentOwner, expiresRaw] = current?.split("|") ?? [];
-    const expiresAt = Number(expiresRaw);
-    if (
-      !currentOwner ||
-      !Number.isFinite(expiresAt) ||
-      expiresAt <= Date.now()
-    ) {
-      await LocalStorage.setItem(
-        REFRESH_LOCK_KEY,
-        `${owner}|${Date.now() + 15_000}`,
-      );
-      const confirmed = await LocalStorage.getItem<string>(REFRESH_LOCK_KEY);
-      if (confirmed?.startsWith(`${owner}|`)) {
-        try {
-          return await work();
-        } finally {
-          const latest = await LocalStorage.getItem<string>(REFRESH_LOCK_KEY);
-          if (latest?.startsWith(`${owner}|`)) {
-            await LocalStorage.removeItem(REFRESH_LOCK_KEY);
-          }
-        }
-      }
-    }
-    await wait(50);
-  }
-  throw new Error("Another Ticker Bar refresh is already running");
 }
 
 function normalizeRefreshError(error: unknown): {
@@ -189,10 +162,6 @@ function failureCooldownMs(status?: number) {
   if (status === 429) return 5 * 60_000;
   if (status && status >= 500) return 2 * 60_000;
   return 10 * 60_000;
-}
-
-function wait(milliseconds: number) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
 async function allSettledWithConcurrency<Input, Output>(

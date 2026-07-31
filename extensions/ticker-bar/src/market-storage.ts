@@ -1,10 +1,7 @@
-import { getPreferenceValues, LocalStorage } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { normalizeAssetId, parseWatchlist } from "./market-ids";
+import { withMarketStateLock } from "./market-lock";
 import { LogoDisplay, MenuBarStyle, Quote, QuoteStatus } from "./market-types";
-
-type Preferences = {
-  watchlist?: string;
-};
 
 const WATCHLIST_KEY = "watchlist.v1";
 const QUOTES_KEY = "quotes.v1";
@@ -21,15 +18,12 @@ export async function getWatchlist(): Promise<string[]> {
   if (stored) {
     const parsed = parseWatchlist(stored);
     const ids = reconcileWatchlist(parsed);
-    if (ids.join("\n") !== parsed.join("\n")) await setWatchlist(ids);
+    if (ids.join("\n") !== parsed.join("\n")) {
+      await LocalStorage.setItem(WATCHLIST_KEY, ids.join("\n"));
+    }
     return ids;
   }
-
-  // Migration path for early local builds that stored the watchlist in a
-  // global preference, which Raycast rendered poorly for multi-line data.
-  const preferences = getPreferenceValues<Preferences>();
-  const migrated = parseWatchlist(preferences.watchlist ?? "");
-  return reconcileWatchlist(migrated.length ? migrated : DEFAULT_WATCHLIST);
+  return DEFAULT_WATCHLIST;
 }
 
 export async function setWatchlist(ids: string[]) {
@@ -43,29 +37,34 @@ export async function setWatchlist(ids: string[]) {
       `Ticker Bar supports up to ${MAX_WATCHLIST_SIZE} watchlist items`,
     );
   }
-  await LocalStorage.setItem(WATCHLIST_KEY, normalized.join("\n"));
+  await withMarketStateLock(async () => {
+    await LocalStorage.setItem(WATCHLIST_KEY, normalized.join("\n"));
 
-  const primary = await getPrimaryAssetId();
-  if (primary && !normalized.includes(primary)) {
-    if (normalized[0]) await setPrimaryAssetId(normalized[0]);
-    else await LocalStorage.removeItem(PRIMARY_ASSET_KEY);
-  }
+    const primary = await getPrimaryAssetId();
+    if (primary && !normalized.includes(primary)) {
+      if (normalized[0]) {
+        await LocalStorage.setItem(PRIMARY_ASSET_KEY, normalized[0]);
+      } else {
+        await LocalStorage.removeItem(PRIMARY_ASSET_KEY);
+      }
+    }
 
-  const cached = await getCachedQuotes();
-  const prunedQuotes = Object.fromEntries(
-    normalized.flatMap((id) => (cached[id] ? [[id, cached[id]]] : [])),
-  );
-  if (Object.keys(prunedQuotes).length !== Object.keys(cached).length) {
-    await saveCachedQuotes(prunedQuotes);
-  }
+    const cached = await getCachedQuotes();
+    const prunedQuotes = Object.fromEntries(
+      normalized.flatMap((id) => (cached[id] ? [[id, cached[id]]] : [])),
+    );
+    if (Object.keys(prunedQuotes).length !== Object.keys(cached).length) {
+      await saveCachedQuotes(prunedQuotes);
+    }
 
-  const statuses = await getQuoteStatuses();
-  const prunedStatuses = Object.fromEntries(
-    normalized.flatMap((id) => (statuses[id] ? [[id, statuses[id]]] : [])),
-  );
-  if (Object.keys(prunedStatuses).length !== Object.keys(statuses).length) {
-    await saveQuoteStatuses(prunedStatuses);
-  }
+    const statuses = await getQuoteStatuses();
+    const prunedStatuses = Object.fromEntries(
+      normalized.flatMap((id) => (statuses[id] ? [[id, statuses[id]]] : [])),
+    );
+    if (Object.keys(prunedStatuses).length !== Object.keys(statuses).length) {
+      await saveQuoteStatuses(prunedStatuses);
+    }
+  });
 }
 
 export async function addToWatchlist(id: string): Promise<string | undefined> {
