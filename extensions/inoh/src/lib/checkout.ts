@@ -1,7 +1,6 @@
 import { open, showToast, Toast } from "@raycast/api";
 import { supabase } from "./supabase";
-import { STRIPE_PRICE_ANNUAL, STRIPE_PRICE_MONTHLY } from "./config";
-import { CHECKOUT_SUCCESS_URL, CHECKOUT_CANCEL_URL } from "../constants";
+import { STRIPE_PRICE_ANNUAL, STRIPE_PRICE_MONTHLY, CHECKOUT_SUCCESS_URL, CHECKOUT_CANCEL_URL } from "../constants";
 
 export type BillingInterval = "annual" | "monthly";
 

@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { createClient } from "@supabase/supabase-js";
-import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "./config";
+import { SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY } from "../constants";
 
 /**
  * Supabase auth storage backed by Raycast's {@link LocalStorage}.

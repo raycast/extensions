@@ -1,5 +1,4 @@
-import { IMAGE_BUCKET, AUDIO_BUCKET } from "../constants";
-import { SUPABASE_URL } from "./config";
+import { IMAGE_BUCKET, AUDIO_BUCKET, SUPABASE_URL } from "../constants";
 
 /**
  * Builds a public URL for an object in the given Supabase Storage bucket.

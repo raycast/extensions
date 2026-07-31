@@ -1,17 +1,6 @@
-/**
- * Supabase project credentials per environment. The active set is selected
- * automatically in {@link ./lib/config} based on whether the extension is
- * running as a development command or an installed/published one.
- */
-export const PROD_SUPABASE_URL = "https://fsgiabbxanlcaqpgrrki.supabase.co";
-export const PROD_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_DvcLzEYwjUKsuGtzSJbivA_FLaRrKnh";
-
-/**
- * Local Docker Supabase. The publishable key is the shared default the Supabase
- * CLI generates for every local stack, so it is the same on any machine.
- */
-export const LOCAL_SUPABASE_URL = "http://127.0.0.1:54321";
-export const LOCAL_SUPABASE_PUBLISHABLE_KEY = "sb_publishable_ACJWlzQHlZjBrEguHvfOxg_3BJgxAaH";
+/** Supabase project credentials. */
+export const SUPABASE_URL = "https://fsgiabbxanlcaqpgrrki.supabase.co";
+export const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_DvcLzEYwjUKsuGtzSJbivA_FLaRrKnh";
 
 export const IMAGE_BUCKET = "images";
 export const AUDIO_BUCKET = "audio";
@@ -23,15 +12,9 @@ export const AUDIO_BUCKET = "audio";
  */
 export const FREE_CARD_LIMIT = 300;
 
-/**
- * Stripe price IDs for Inoh Pro. Production uses live prices; local/development
- * uses Stripe test-mode prices (matching the `sk_test_` key on the local stack).
- * The active pair is selected per environment in {@link ./lib/config}.
- */
-export const PROD_STRIPE_PRICE_MONTHLY = "price_1TFIA4RspoCDdtuBLdEpwiH8";
-export const PROD_STRIPE_PRICE_ANNUAL = "price_1TFIA4RspoCDdtuBkJ1RdSAI";
-export const LOCAL_STRIPE_PRICE_MONTHLY = "price_1TEd4ARspoCDdtuBNg19vlqD";
-export const LOCAL_STRIPE_PRICE_ANNUAL = "price_1TEdDkRspoCDdtuBwAkJZurW";
+/** Stripe live price IDs for Inoh Pro. */
+export const STRIPE_PRICE_MONTHLY = "price_1TFIA4RspoCDdtuBLdEpwiH8";
+export const STRIPE_PRICE_ANNUAL = "price_1TFIA4RspoCDdtuBkJ1RdSAI";
 
 /** Where new users create an account and existing users manage their subscription. */
 export const APP_STORE_URL = "https://apps.apple.com/app/id6757024294";
