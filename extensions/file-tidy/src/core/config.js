@@ -17,8 +17,6 @@ function resolveConfigPath() {
 }
 
 const DEFAULT_CONFIG = {
-  // null = ask at runtime (Enter defaults to the current working directory)
-  dest: null,
   categories: {
     Images: ["jpg", "jpeg", "png", "heic", "heif", "gif", "webp", "raw", "dng", "tiff", "tif", "bmp", "avif"],
     Videos: ["mp4", "mov", "avi", "mkv", "webm", "m4v", "wmv", "flv"],
@@ -44,14 +42,6 @@ const DEFAULT_CONFIG = {
   },
   fallbackCategory: "Others",
 };
-
-export function expandTilde(p) {
-  if (p === "~") return os.homedir();
-  if (p.startsWith("~/") || (process.platform === "win32" && p.startsWith("~\\"))) {
-    return path.join(os.homedir(), p.slice(2));
-  }
-  return p;
-}
 
 /**
  * Canonicalize a path for containment checks: resolve symlinks (macOS's

@@ -5,8 +5,13 @@
   "description": "Organize folders into type/year-month archives with byte-level duplicate detection and one-step undo",
   "icon": "icon.png",
   "author": "fhf1121",
-  "platforms": ["macOS", "Windows"],
-  "categories": ["Productivity"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -14,14 +19,21 @@
       "title": "Tidy Folder",
       "description": "Preview and archive a folder's files into type/year-month buckets, quarantining byte-identical duplicates",
       "mode": "view",
-      "keywords": ["organize", "archive", "dedupe"]
+      "keywords": [
+        "organize",
+        "archive",
+        "dedupe"
+      ]
     },
     {
       "name": "undo-tidy",
       "title": "Undo Last Tidy",
       "description": "Move the files from the last tidy run back to where they came from",
       "mode": "view",
-      "keywords": ["revert", "restore"]
+      "keywords": [
+        "revert",
+        "restore"
+      ]
     }
   ],
   "preferences": [
@@ -50,6 +62,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/core.test.js",
     "publish": "npx @raycast/api@latest publish"
   }
 }

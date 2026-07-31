@@ -15,7 +15,8 @@ import {
   useNavigation,
 } from "@raycast/api";
 import fs from "node:fs";
-import { useState } from "react";
+import path from "node:path";
+import { useRef, useState } from "react";
 import { buildExtIndex, canonicalPath, isInsideDir, loadConfig } from "./core/config.js";
 import { findDuplicates } from "./core/dedup.js";
 import { executePlan } from "./core/execute.js";
@@ -27,6 +28,14 @@ interface FormValues {
   dest: string[];
   inPlace: boolean;
   recursive: boolean;
+}
+
+function isDirectory(filePath: string) {
+  try {
+    return fs.statSync(filePath).isDirectory();
+  } catch {
+    return false;
+  }
 }
 
 export default function TidyFolderCommand() {
@@ -46,6 +55,14 @@ export default function TidyFolderCommand() {
     const pickedDest = values.inPlace ? pickedSource : (values.dest[0] ?? defaultDest);
     if (!pickedDest) {
       setDestError("Pick a destination folder, or set a default one in the extension preferences");
+      return;
+    }
+    if (!isDirectory(pickedSource)) {
+      setSourceError("The selected source folder no longer exists");
+      return;
+    }
+    if (fs.existsSync(pickedDest) && !isDirectory(pickedDest)) {
+      setDestError("The selected destination is not a folder");
       return;
     }
     // Canonicalize before the containment check so symlinked or differently
@@ -139,6 +156,8 @@ export default function TidyFolderCommand() {
 }
 
 function PlanView({ entries, sourceDir, destDir }: { entries: PlanEntry[]; sourceDir: string; destDir: string }) {
+  const executingRef = useRef(false);
+  const [executing, setExecuting] = useState(false);
   const archives = entries.filter((e) => e.action === "archive");
   const dups = entries.filter((e) => e.action === "duplicate");
 
@@ -149,18 +168,22 @@ function PlanView({ entries, sourceDir, destDir }: { entries: PlanEntry[]; sourc
   }
 
   async function execute() {
-    const destMissing = !fs.existsSync(destDir);
-    const ok = await confirmAlert({
-      title: destMissing ? "Create destination and tidy?" : "Run this tidy plan?",
-      message:
-        `${destMissing ? `Destination ${destDir} doesn't exist and will be created.\n` : ""}` +
-        `Archive ${archives.length} files, quarantine ${dups.length} duplicates → ${destDir}`,
-      primaryAction: { title: "Tidy", style: Alert.ActionStyle.Default },
-    });
-    if (!ok) return;
-
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Tidying…" });
+    if (executingRef.current) return;
+    executingRef.current = true;
+    setExecuting(true);
+    let toast: Toast | undefined;
     try {
+      const destMissing = !fs.existsSync(destDir);
+      const ok = await confirmAlert({
+        title: destMissing ? "Create destination and tidy?" : "Run this tidy plan?",
+        message:
+          `${destMissing ? `Destination ${destDir} doesn't exist and will be created.\n` : ""}` +
+          `Archive ${archives.length} files, quarantine ${dups.length} duplicates → ${destDir}`,
+        primaryAction: { title: "Tidy", style: Alert.ActionStyle.Default },
+      });
+      if (!ok) return;
+
+      toast = await showToast({ style: Toast.Style.Animated, title: "Tidying…" });
       const { moved } = executePlan(entries, { destDir, sourceDir });
       const dupCount = moved.filter((e) => e.action === "duplicate").length;
       toast.style = Toast.Style.Success;
@@ -172,27 +195,35 @@ function PlanView({ entries, sourceDir, destDir }: { entries: PlanEntry[]; sourc
       };
       await popToRoot();
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Tidy failed";
-      toast.message = err instanceof Error ? err.message : String(err);
+      const message = err instanceof Error ? err.message : String(err);
+      if (toast) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Tidy failed";
+        toast.message = message;
+      } else {
+        await showToast({ style: Toast.Style.Failure, title: "Tidy failed", message });
+      }
+    } finally {
+      executingRef.current = false;
+      setExecuting(false);
     }
   }
 
   const executeAction = (
     <ActionPanel>
       <Action title="Run Tidy Plan" icon={Icon.Checkmark} onAction={execute} />
-      <Action.ShowInFinder title="Show Source Folder" path={sourceDir} />
+      <Action.ShowInFinder path={sourceDir} />
     </ActionPanel>
   );
 
   return (
-    <List navigationTitle={`Tidy Plan → ${destDir} (${entries.length} files)`}>
+    <List isLoading={executing} navigationTitle={`Tidy Plan (${entries.length} Files)`}>
       {[...byBucket.keys()].sort().map((bucket) => (
         <List.Section key={bucket} title={bucket} subtitle={`${byBucket.get(bucket)!.length} files`}>
           {byBucket.get(bucket)!.map((e) => (
             <List.Item
               key={e.from}
-              title={e.name}
+              title={path.basename(e.to)}
               icon={Icon.Document}
               accessories={[
                 { text: formatSize(e.size) },
@@ -213,8 +244,8 @@ function PlanView({ entries, sourceDir, destDir }: { entries: PlanEntry[]; sourc
           {dups.map((e) => (
             <List.Item
               key={e.from}
-              title={e.name}
-              subtitle={`identical to ${e.keeperPath}`}
+              title={path.basename(e.to)}
+              subtitle={`Identical to ${path.basename(e.keeperPath ?? "")}`}
               icon={{ source: Icon.Duplicate, tintColor: Color.Magenta }}
               accessories={[{ text: formatSize(e.size) }]}
               actions={executeAction}

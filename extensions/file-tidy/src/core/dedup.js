@@ -52,7 +52,7 @@ export async function findDuplicates(sourceFiles, destFiles) {
 
   const duplicates = new Map();
   for (const [size, group] of bySize) {
-    if (group.length < 2 || size === 0) continue;
+    if (group.length < 2) continue;
 
     const byQuick = new Map();
     for (const f of group) addTo(byQuick, quickHash(f.path, size), f);

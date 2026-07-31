@@ -57,7 +57,14 @@ export function scanDest(destDir, { onlyDirs } = {}) {
     } else if (entry.isFile()) {
       if (onlyDirs) continue;
       const stat = fs.statSync(full);
-      files.push({ path: full, name: entry.name, size: stat.size, birthtime: realBirthtime(stat) });
+      files.push({
+        path: full,
+        name: entry.name,
+        ext: path.extname(entry.name).slice(1).toLowerCase(),
+        size: stat.size,
+        birthtime: realBirthtime(stat),
+        mtime: stat.mtime,
+      });
     }
   }
   return files;

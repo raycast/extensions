@@ -1,5 +1,7 @@
+import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { moveFile } from "./move.js";
 
 /**
  * Execute the plan: move every file, resolving name collisions with " (n)"
@@ -12,9 +14,11 @@ export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defa
   const runsDir = path.join(destDir, ".tidy", "runs");
   fs.mkdirSync(runsDir, { recursive: true });
   const time = new Date().toISOString();
-  const manifestPath = path.join(runsDir, `${time.replace(/[:.]/g, "-")}.json`);
+  const order = process.hrtime.bigint().toString().padStart(20, "0");
+  const manifestPath = path.join(runsDir, `${time.replace(/[:.]/g, "-")}-${order}-${crypto.randomUUID()}.json`);
 
   const moved = [];
+  const createdDirs = new Set();
   // Write-then-rename so a half-written update (e.g. volume fills up) can
   // never truncate the only undo record — the last good manifest survives.
   const writeManifest = () => {
@@ -26,6 +30,7 @@ export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defa
           time,
           sourceDir,
           moves: moved.map(({ from, to, action }) => ({ from, to, action })),
+          createdDirs: [...createdDirs],
         },
         null,
         2,
@@ -36,12 +41,13 @@ export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defa
 
   for (const entry of entries) {
     const finalTo = resolveCollision(entry.to);
-    fs.mkdirSync(path.dirname(finalTo), { recursive: true });
+    for (const dir of missingDirs(path.dirname(finalTo), destDir)) createdDirs.add(dir);
     // Record the move before performing it, so a move can never happen without
     // a manifest entry. Undo treats a recorded-but-never-performed move (file
     // still at `from`, nothing at `to`) as a no-op.
     moved.push({ ...entry, to: finalTo });
     writeManifest();
+    fs.mkdirSync(path.dirname(finalTo), { recursive: true });
     moveFile(entry.from, finalTo);
   }
 
@@ -54,24 +60,14 @@ export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defa
   return { moved, manifestPath };
 }
 
-/** rename, falling back to copy+verify+unlink across volumes. */
-function moveFile(from, to) {
-  try {
-    fs.renameSync(from, to);
-  } catch (err) {
-    if (err.code !== "EXDEV") throw err;
-    fs.copyFileSync(from, to, fs.constants.COPYFILE_EXCL);
-    const [a, b] = [fs.statSync(from), fs.statSync(to)];
-    if (a.size !== b.size) {
-      fs.unlinkSync(to);
-      // code + path let adapters render this in their own language.
-      const e = new Error(`Cross-volume copy verification failed: ${from}`);
-      e.code = "EXDEV_VERIFY";
-      e.path = from;
-      throw e;
-    }
-    fs.unlinkSync(from);
+function missingDirs(dir, stopDir) {
+  const missing = [];
+  while (dir !== stopDir && dir.startsWith(stopDir + path.sep)) {
+    if (fs.existsSync(dir)) break;
+    missing.push(dir);
+    dir = path.dirname(dir);
   }
+  return missing;
 }
 
 function resolveCollision(target) {
