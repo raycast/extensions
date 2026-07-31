@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Fix Windows crash, reduce API usage, and improve the menu bar] - {PR_MERGE_DATE}
+## [Fix Windows crash, reduce API usage, and improve the menu bar] - 2026-07-31
 
 - Fix a `TypeError: e is not iterable` crash reported on Windows. The GitHub API does not always answer an array-returning endpoint with an array, and on Windows requests traverse a system proxy that can return an HTML error page or an empty body with a 200 status. Responses are now parsed defensively instead of being cast and iterated
 - Handle every non-OK GitHub status, not just 403 and 429, which previously fell through to an unchecked cast
