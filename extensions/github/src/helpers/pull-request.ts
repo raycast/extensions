@@ -1,4 +1,5 @@
-import { Color, Icon, List } from "@raycast/api";
+import { RestEndpointMethodTypes } from "@octokit/rest";
+import { Color, Icon, Image, List } from "@raycast/api";
 import { uniqBy } from "lodash";
 
 import {
@@ -139,6 +140,39 @@ export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState
     default:
       return null;
   }
+}
+
+export type PullRequestFile = RestEndpointMethodTypes["pulls"]["listFiles"]["response"]["data"][0];
+
+export function getFileStatusAccessory(status: PullRequestFile["status"]): { icon: Image.ImageLike; tooltip: string } {
+  switch (status) {
+    case "added":
+      return { icon: { source: Icon.PlusCircle, tintColor: Color.Green }, tooltip: "Added" };
+    case "removed":
+      return { icon: { source: Icon.MinusCircle, tintColor: Color.Red }, tooltip: "Removed" };
+    case "renamed":
+      return { icon: { source: Icon.ArrowRight, tintColor: Color.SecondaryText }, tooltip: "Renamed" };
+    case "copied":
+      return { icon: { source: Icon.CopyClipboard, tintColor: Color.SecondaryText }, tooltip: "Copied" };
+    case "unchanged":
+      return { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, tooltip: "Unchanged" };
+    case "changed":
+      return { icon: { source: Icon.Pencil, tintColor: Color.Orange }, tooltip: "Changed" };
+    default:
+      return { icon: { source: Icon.Pencil, tintColor: Color.Orange }, tooltip: "Modified" };
+  }
+}
+
+export const PATCH_LINE_LIMIT = 400;
+
+export function truncatePatch(patch: string): { patch: string; remainingLines: number } {
+  const lines = patch.split("\n");
+
+  if (lines.length <= PATCH_LINE_LIMIT) {
+    return { patch, remainingLines: 0 };
+  }
+
+  return { patch: lines.slice(0, PATCH_LINE_LIMIT).join("\n"), remainingLines: lines.length - PATCH_LINE_LIMIT };
 }
 
 export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | null): List.Item.Accessory | null {

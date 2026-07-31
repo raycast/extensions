@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [View Pull Request Diffs] - {PR_MERGE_DATE}
+
+- Added a "View Diff" action to pull requests, showing changed files with per-file patches that load progressively as you scroll.
+- Added a `get-pull-request-diff` AI tool.
+
 ## [Mark draft pull requests as ready for review] - 2026-07-09
 
 - Added a "Ready for Review" action to pull request lists, shown for your own draft pull requests.
