@@ -1,7 +1,21 @@
-import { Action, ActionPanel, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  confirmAlert,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Profile, HOSTS_PATH } from "./lib/types";
-import { loadProfiles, removeProfile, saveProfiles, upsertProfile } from "./lib/storage";
+import {
+  loadProfiles,
+  removeProfile,
+  saveProfiles,
+  upsertProfile,
+} from "./lib/storage";
 import { applyProfiles } from "./lib/hosts";
 import { flushDns } from "./lib/dns";
 import EditProfile from "./edit-profile";
@@ -21,10 +35,20 @@ export default function Command() {
   const toggle = (profile: Profile) => {
     const next: Profile = { ...profile, enabled: !profile.enabled };
     const all = upsertProfile(profiles, next);
-    saveProfiles(all);
-    applyProfiles(all);
+    try {
+      applyProfiles(all);
+      saveProfiles(all);
+    } catch {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Update Hosts File",
+        message:
+          "Elevation was declined or the write failed. No changes were saved.",
+      });
+      return;
+    }
     refresh();
-    showToast({
+    void showToast({
       style: Toast.Style.Success,
       title: next.enabled ? "Enabled" : "Disabled",
       message: next.name,
@@ -39,26 +63,47 @@ export default function Command() {
     });
     if (!confirmed) return;
     const all = removeProfile(profiles, profile.id);
-    saveProfiles(all);
-    applyProfiles(all);
+    try {
+      applyProfiles(all);
+      saveProfiles(all);
+    } catch {
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Update Hosts File",
+        message:
+          "Elevation was declined or the write failed. The profile was not deleted.",
+      });
+      return;
+    }
     refresh();
-    showToast({ style: Toast.Style.Success, title: "Deleted", message: profile.name });
+    void showToast({
+      style: Toast.Style.Success,
+      title: "Deleted",
+      message: profile.name,
+    });
   };
 
   const flush = () => {
     try {
       flushDns();
-      showToast({ style: Toast.Style.Success, title: "DNS Flushed" });
+      void showToast({ style: Toast.Style.Success, title: "DNS Flushed" });
     } catch {
-      showToast({ style: Toast.Style.Failure, title: "Failed to Flush DNS" });
+      void showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Flush DNS",
+      });
     }
   };
 
   const snippet = (profile: Profile) =>
-    profile.entries.map((e) => `${e.ip}\t${e.hostname}${e.comment ? ` # ${e.comment}` : ""}`).join("\n");
+    profile.entries
+      .map((e) => `${e.ip}\t${e.hostname}${e.comment ? ` # ${e.comment}` : ""}`)
+      .join("\n");
 
   const detailMarkdown = (p: Profile) => {
-    const rows = p.entries.map((e) => `| ${e.ip} | ${e.hostname} | ${e.comment ?? ""} |`).join("\n");
+    const rows = p.entries
+      .map((e) => `| ${e.ip} | ${e.hostname} | ${e.comment ?? ""} |`)
+      .join("\n");
     return `# ${p.name}
 Status: **${p.enabled ? "Enabled" : "Disabled"}** · Mappings: ${p.entries.length}
 
@@ -71,26 +116,43 @@ ${rows || "| - | - | - |"}
   return (
     <List
       isLoading={loading}
-      navigationTitle="wHost · Profiles"
       searchBarPlaceholder="Search profiles…"
       actions={
         <ActionPanel>
           <Action
             title="New Profile"
             icon={Icon.Plus}
-            onAction={() => push(<EditProfile profile={undefined} onDone={refresh} />)}
+            onAction={() =>
+              push(<EditProfile profile={undefined} onDone={refresh} />)
+            }
           />
-          <Action title="Flush DNS" icon={Icon.ArrowClockwise} onAction={flush} />
-          <Action.Open title="Open Hosts File" icon={Icon.Document} target={HOSTS_PATH} />
+          <Action
+            title="Flush DNS"
+            icon={Icon.ArrowClockwise}
+            onAction={flush}
+          />
+          <Action.Open
+            title="Open Hosts File"
+            icon={Icon.Document}
+            target={HOSTS_PATH}
+          />
         </ActionPanel>
       }
     >
+      <List.EmptyView
+        icon={Icon.Globe}
+        title="No Profiles Yet"
+        description="Create a profile to start managing your Windows hosts file."
+      />
       {profiles.map((p) => (
         <List.Item
           key={p.id}
           title={p.name}
           icon={p.enabled ? Icon.Checkmark : Icon.Circle}
-          accessories={[{ text: p.enabled ? "Enabled" : "Disabled" }, { text: `${p.entries.length} mappings` }]}
+          accessories={[
+            { text: p.enabled ? "Enabled" : "Disabled" },
+            { text: `${p.entries.length} mappings` },
+          ]}
           detail={<List.Item.Detail markdown={detailMarkdown(p)} />}
           actions={
             <ActionPanel>
@@ -102,12 +164,16 @@ ${rows || "| - | - | - |"}
               <Action
                 title="Edit Profile"
                 icon={Icon.Pencil}
-                onAction={() => push(<EditProfile profile={p} onDone={refresh} />)}
+                onAction={() =>
+                  push(<EditProfile profile={p} onDone={refresh} />)
+                }
               />
               <Action
                 title="New Profile"
                 icon={Icon.Plus}
-                onAction={() => push(<EditProfile profile={undefined} onDone={refresh} />)}
+                onAction={() =>
+                  push(<EditProfile profile={undefined} onDone={refresh} />)
+                }
               />
               <Action
                 title="Delete Profile"
@@ -115,9 +181,20 @@ ${rows || "| - | - | - |"}
                 style={Action.Style.Destructive}
                 onAction={() => del(p)}
               />
-              <Action.CopyToClipboard title="Copy Hosts Snippet" content={snippet(p)} />
-              <Action title="Flush DNS" icon={Icon.ArrowClockwise} onAction={flush} />
-              <Action.Open title="Open Hosts File" icon={Icon.Document} target={HOSTS_PATH} />
+              <Action.CopyToClipboard
+                title="Copy Hosts Snippet"
+                content={snippet(p)}
+              />
+              <Action
+                title="Flush DNS"
+                icon={Icon.ArrowClockwise}
+                onAction={flush}
+              />
+              <Action.Open
+                title="Open Hosts File"
+                icon={Icon.Document}
+                target={HOSTS_PATH}
+              />
             </ActionPanel>
           }
         />

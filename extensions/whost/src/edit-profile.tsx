@@ -1,7 +1,19 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { Profile } from "./lib/types";
-import { loadProfiles, saveProfiles, upsertProfile, newId } from "./lib/storage";
+import {
+  loadProfiles,
+  saveProfiles,
+  upsertProfile,
+  newId,
+} from "./lib/storage";
 import { applyProfiles, parseEntries, serializeEntries } from "./lib/hosts";
 
 interface FormValues {
@@ -9,7 +21,10 @@ interface FormValues {
   entries: string;
 }
 
-export default function EditProfile(props: { profile?: Profile; onDone?: () => void }) {
+export default function EditProfile(props: {
+  profile?: Profile;
+  onDone?: () => void;
+}) {
   const { profile, onDone } = props;
   const { pop } = useNavigation();
 
@@ -21,9 +36,19 @@ export default function EditProfile(props: { profile?: Profile; onDone?: () => v
         : { id: newId(), name: values.name.trim(), enabled: true, entries };
 
       const all = upsertProfile(loadProfiles(), next);
-      saveProfiles(all);
-      applyProfiles(all);
-      showToast({
+      try {
+        applyProfiles(all);
+        saveProfiles(all);
+      } catch {
+        void showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Update Hosts File",
+          message:
+            "Elevation was declined or the write failed. The profile was not saved.",
+        });
+        return;
+      }
+      void showToast({
         style: Toast.Style.Success,
         title: profile ? "Profile Updated" : "Profile Created",
         message: next.name,
@@ -36,27 +61,40 @@ export default function EditProfile(props: { profile?: Profile; onDone?: () => v
       entries: profile ? serializeEntries(profile.entries) : "",
     },
     validation: {
-      name: (value) => (value && value.trim().length > 0 ? undefined : "Profile name is required"),
+      name: (value) =>
+        value && value.trim().length > 0
+          ? undefined
+          : "Profile name is required",
       entries: (value) => {
         const entries = parseEntries(value ?? "");
-        return entries.length > 0 ? undefined : "At least one valid IP hostname mapping is required";
+        return entries.length > 0
+          ? undefined
+          : "At least one valid IP hostname mapping is required";
       },
     },
   });
 
   return (
     <Form
-      navigationTitle={profile ? `Edit Profile · ${profile.name}` : "New Profile"}
+      navigationTitle={
+        profile ? `Edit Profile · ${profile.name}` : "New Profile"
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField title="Profile Name" placeholder="e.g. Development / Staging" {...itemProps.name} />
+      <Form.TextField
+        title="Profile Name"
+        placeholder="e.g. Development / Staging"
+        {...itemProps.name}
+      />
       <Form.TextArea
         title="Host Mappings"
-        placeholder={"One mapping per line: IP hostname [# comment]\nExample:\n127.0.0.1 api.local # local API"}
+        placeholder={
+          "One mapping per line: IP hostname [# comment]\nExample:\n127.0.0.1 api.local # local API"
+        }
         info="One mapping per line, separated by spaces between IP and hostname. Optional # for a comment."
         enableMarkdown={false}
         {...itemProps.entries}

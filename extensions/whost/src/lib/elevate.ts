@@ -18,7 +18,6 @@ export function elevatedWrite(content: string): void {
   const ps = [
     `$ErrorActionPreference = 'Stop'`,
     `Copy-Item -Path '${tmp.replace(/'/g, "''")}' -Destination '${HOSTS_PATH.replace(/'/g, "''")}' -Force`,
-    `ipconfig /flushdns | Out-Null`,
     `Remove-Item -Path '${tmp.replace(/'/g, "''")}' -Force -ErrorAction SilentlyContinue`,
   ].join("\n");
 
@@ -29,15 +28,17 @@ export function elevatedWrite(content: string): void {
       "powershell",
       [
         "-Command",
-        `Start-Process -FilePath powershell -Verb RunAs -Wait -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','${script.replace(/'/g, "''")}'`,
+        `$ErrorActionPreference = 'Stop'; $p = Start-Process -FilePath powershell -Verb RunAs -Wait -PassThru -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File "${script.replace(/'/g, "''")}"'; exit $p.ExitCode`,
       ],
       { windowsHide: true },
     );
   } finally {
-    try {
-      unlinkSync(script);
-    } catch {
-      /* ignore */
+    for (const file of [tmp, script]) {
+      try {
+        unlinkSync(file);
+      } catch {
+        /* ignore */
+      }
     }
   }
 }

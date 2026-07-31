@@ -23,7 +23,10 @@ export function saveProfiles(profiles: Profile[]): void {
   writeFileSync(PROFILES_FILE, JSON.stringify(profiles, null, 2), "utf8");
 }
 
-export function upsertProfile(profiles: Profile[], profile: Profile): Profile[] {
+export function upsertProfile(
+  profiles: Profile[],
+  profile: Profile,
+): Profile[] {
   const idx = profiles.findIndex((p) => p.id === profile.id);
   if (idx === -1) {
     return [...profiles, profile];

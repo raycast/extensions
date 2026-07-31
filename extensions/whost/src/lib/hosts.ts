@@ -1,5 +1,11 @@
 import { readFileSync, writeFileSync } from "fs";
-import { HostEntry, Profile, HOSTS_PATH, MANAGED_START, MANAGED_END } from "./types";
+import {
+  HostEntry,
+  Profile,
+  HOSTS_PATH,
+  MANAGED_START,
+  MANAGED_END,
+} from "./types";
 import { elevatedWrite } from "./elevate";
 import { flushDns } from "./dns";
 
@@ -9,6 +15,13 @@ export function readHosts(): string {
   } catch {
     return "";
   }
+}
+
+function isValidIp(ip: string): boolean {
+  if (/^(\d{1,3}\.){3}\d{1,3}$/.test(ip)) {
+    return ip.split(".").every((octet) => Number(octet) <= 255);
+  }
+  return ip.includes(":") && /^[0-9a-fA-F:.]+$/.test(ip);
 }
 
 export function parseEntries(text: string): HostEntry[] {
@@ -29,7 +42,7 @@ export function parseEntries(text: string): HostEntry[] {
       const hostname = parts.slice(1).join(" ");
       return { ip, hostname, comment: comment || undefined };
     })
-    .filter((e) => e.ip && e.hostname);
+    .filter((e) => isValidIp(e.ip) && e.hostname);
 }
 
 export function serializeEntries(entries: HostEntry[]): string {
@@ -61,7 +74,9 @@ function spliceManaged(content: string, block: string): string {
   if (start !== -1 && end !== -1 && end > start) {
     const before = content.slice(0, start).replace(/\n+$/, "");
     const after = content.slice(end + MANAGED_END.length).replace(/^\n+/, "");
-    return after ? `${before}\n\n${block}\n${after}\n` : `${before}\n\n${block}\n`;
+    return after
+      ? `${before}\n\n${block}\n${after}\n`
+      : `${before}\n\n${block}\n`;
   }
   const base = content.replace(/\n+$/, "");
   return base ? `${base}\n\n${block}\n` : `${block}\n`;

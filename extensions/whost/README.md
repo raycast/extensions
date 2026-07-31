@@ -1,4 +1,4 @@
-# wHost
+# WHost
 
 A **Windows-only** [Raycast](https://raycast.com) extension for visually managing and switching the Windows `hosts` file — no more manually editing `C:\Windows\System32\drivers\etc\hosts` and flushing DNS by hand.
 
