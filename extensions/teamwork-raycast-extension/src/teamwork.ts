@@ -15,6 +15,54 @@ type Included = {
   >;
 };
 
+type TeamworkApiErrorEntry = {
+  id?: string;
+  title?: string;
+  detail?: string;
+};
+
+type TeamworkApiErrorBody = {
+  errors?: TeamworkApiErrorEntry[];
+};
+
+export class TeamworkApiError extends Error {
+  status: number;
+  statusText: string;
+  body: string;
+  errors?: TeamworkApiErrorEntry[];
+
+  constructor(status: number, statusText: string, body: string) {
+    super(`Teamwork API ${status}: ${body || statusText}`);
+    this.name = "TeamworkApiError";
+    this.status = status;
+    this.statusText = statusText;
+    this.body = body;
+
+    try {
+      const parsed = JSON.parse(body) as TeamworkApiErrorBody;
+      this.errors = parsed.errors;
+    } catch {
+      this.errors = undefined;
+    }
+  }
+}
+
+export function isTimerAlreadyRunningError(error: unknown): boolean {
+  if (!(error instanceof TeamworkApiError) || error.status !== 403) {
+    return false;
+  }
+
+  return (error.errors ?? []).some((entry) => {
+    const title = (entry.title ?? "").toLowerCase();
+    const detail = (entry.detail ?? "").toLowerCase();
+    return (
+      title.includes("forbidden") &&
+      detail.includes("timer running") &&
+      detail.includes("this task")
+    );
+  });
+}
+
 function config() {
   const preferences = getPreferenceValues<Preferences>();
   return {
@@ -54,9 +102,7 @@ export async function request<T>(
 
   if (!response.ok) {
     const body = await response.text();
-    throw new Error(
-      `Teamwork API ${response.status}: ${body || response.statusText}`,
-    );
+    throw new TeamworkApiError(response.status, response.statusText, body);
   }
 
   if (response.status === 204) return undefined as T;
@@ -82,6 +128,35 @@ async function getMyUserId(): Promise<number> {
   }>("/projects/api/v3/me.json");
   cachedUserId = Number(data.person?.id ?? data.id ?? 0) || undefined;
   return cachedUserId ?? 0;
+}
+
+export async function fetchTask(
+  taskId: number,
+): Promise<TeamworkTask | undefined> {
+  const params = new URLSearchParams({
+    include: "projects,tasklists",
+    "fields[tasks]": "id,projectId,tasklistId,name,status,dueDate",
+    "fields[tasklists]": "id,projectId,name",
+  });
+  const data = await request<{
+    task?: Record<string, unknown>;
+    included?: Included;
+  }>(`/projects/api/v3/tasks/${taskId}.json?${params}`);
+  const raw = data.task;
+  if (!raw) return undefined;
+  const id = Number(raw.id);
+  const tasklistId = Number(raw.tasklistId ?? 0);
+  const tasklist = data.included?.tasklists?.[String(tasklistId)];
+  const projectId = Number(tasklist?.projectId ?? 0);
+  return {
+    id,
+    name: String(raw.name ?? `Task ${id}`),
+    projectId,
+    projectName: relatedName(data.included?.projects, projectId),
+    tasklistName: relatedName(data.included?.tasklists, tasklistId),
+    dueDate: typeof raw.dueDate === "string" ? raw.dueDate : undefined,
+    status: typeof raw.status === "string" ? raw.status : undefined,
+  };
 }
 
 export async function searchTasks(

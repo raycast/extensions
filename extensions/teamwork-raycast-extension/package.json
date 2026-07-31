@@ -46,6 +46,15 @@
       "required": true,
       "title": "Teamwork API Token",
       "description": "A Teamwork bearer token/API token"
+    },
+    {
+      "name": "recentLimit",
+      "type": "textfield",
+      "required": false,
+      "title": "Recent Tasks Limit",
+      "description": "Number of recent tasks to show (default: 5)",
+      "placeholder": "5",
+      "default": "5"
     }
   ],
   "commands": [

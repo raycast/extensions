@@ -41,8 +41,17 @@ Find and manage tasks assigned to you.
 **Filters:**
 - Switch between **Active** and **Completed** tasks using the dropdown
 
+**Starred Tasks:**
+- Star any task to pin it permanently above recents using the **Star Task** action
+- Starred tasks persist independently of the recents list
+- Use **Remove Star** to unpin a task
+- Starred tasks are excluded from the recents section to avoid duplicates
+
 **Recent Tasks:**
-- Your recently accessed/timed tasks appear at the top for quick access
+- Your recently accessed/timed tasks appear below starred tasks for quick re-access
+- Limit controlled by the **Recent Tasks Limit** preference (default: 5)
+- **Refresh Task** (`⌘R`) — fetch the latest task data from Teamwork to update name, status, and due date
+- **Remove from Recents** (`⌃X`) — remove a task from the recents list
 
 ### Timer Menu Bar
 
