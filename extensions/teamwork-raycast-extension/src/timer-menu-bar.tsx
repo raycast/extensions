@@ -52,7 +52,7 @@ export default function Command() {
           />
           <MenuBarExtra.Separator />
           <MenuBarExtra.Item
-            title="Pause Active Timer"
+            title="Pause Timer"
             icon={Icon.Pause}
             onAction={() =>
               update(
