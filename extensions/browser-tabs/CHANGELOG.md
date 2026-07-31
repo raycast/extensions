@@ -2,8 +2,10 @@
 
 ## [Windows Support] - {PR_MERGE_DATE}
 
-- Add Windows support: tabs, URLs and favicons are provided by the Raycast Browser Extension
-- Jump to and close tabs on Windows via UI Automation on the browser's tab strip
+- Add Windows support: tabs are read from running browsers with UI Automation through a native helper, so no browser extension is needed
+- Firefox and Zen Browser are supported on Windows, where they expose their tabs like any other browser
+- Tab URLs are resolved best effort (exact for the tab you're looking at, matched from history for background tabs)
+- Site icons are read from the browser's own icon store instead of being fetched
 
 ## [Add Dia Browser Support] - 2026-01-04
 

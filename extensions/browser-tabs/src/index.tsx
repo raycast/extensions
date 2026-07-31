@@ -13,10 +13,6 @@ import { searchUrlBuilder } from "./utils/common-utils";
 import { SetupBrowsers } from "./setup-browsers";
 import { useBrowserSetup } from "./hooks/useBrowserSetup";
 
-// on Windows all tabs come from the Browser Extension as a single group, so there is
-// nothing to filter by browser
-const isWindows = process.platform === "win32";
-
 export default function Command() {
   const [query, setQuery] = useState("");
   const [selectedBrowser, setSelectedBrowser] = useState("");
@@ -94,19 +90,17 @@ export default function Command() {
       onSearchTextChange={setQuery}
       searchText={query}
       searchBarAccessory={
-        isWindows ? undefined : (
-          <List.Dropdown storeValue={rememberFilterTag} tooltip="Browser" onChange={setSelectedBrowser}>
-            <List.Dropdown.Item icon={Icon.Compass} title="All" value="" />
-            {browserTabs?.map((item) => (
-              <List.Dropdown.Item
-                key={item.browser.path}
-                icon={{ fileIcon: item.browser.path }}
-                title={item.browser.name}
-                value={item.browser.name}
-              />
-            ))}
-          </List.Dropdown>
-        )
+        <List.Dropdown storeValue={rememberFilterTag} tooltip="Browser" onChange={setSelectedBrowser}>
+          <List.Dropdown.Item icon={Icon.Compass} title="All" value="" />
+          {browserTabs?.map((item) => (
+            <List.Dropdown.Item
+              key={item.browser.path}
+              icon={{ fileIcon: item.browser.path }}
+              title={item.browser.name}
+              value={item.browser.name}
+            />
+          ))}
+        </List.Dropdown>
       }
     >
       <List.EmptyView
@@ -153,13 +147,15 @@ export default function Command() {
             key={tabItem.title + index}
             title={tabItem.title}
             subtitle={showDomain ? { value: tabItem.domain, tooltip: tabItem.url } : undefined}
-            accessories={
-              isWindows ? undefined : [{ tag: browserItem.browser.name, icon: { fileIcon: browserItem.browser.path } }]
-            }
+            accessories={[{ tag: browserItem.browser.name, icon: { fileIcon: browserItem.browser.path } }]}
             icon={
+              // Windows reads the icon out of the browser's own store; macOS has no such
+              // file and falls back to the URL, which a tab does not always have
               tabItem.favicon
                 ? { source: tabItem.favicon, mask: Image.Mask.RoundedRectangle }
-                : getFavicon(tabItem.url, { fallback: Icon.Link, mask: Image.Mask.RoundedRectangle })
+                : tabItem.url
+                  ? getFavicon(tabItem.url, { fallback: Icon.Link, mask: Image.Mask.RoundedRectangle })
+                  : Icon.Link
             }
             actions={
               <ActionPanel>

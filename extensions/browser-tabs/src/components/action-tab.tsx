@@ -39,7 +39,7 @@ export function ActionTab(props: {
             await mutate();
           }}
         />
-        {defaultBrowser && defaultBrowser.name != browser.name && (
+        {isNotEmpty(tab.url) && defaultBrowser && defaultBrowser.name != browser.name && (
           <Action
             icon={{ fileIcon: defaultBrowser.path }}
             title={`Open in ${defaultBrowser.name}`}
@@ -50,58 +50,65 @@ export function ActionTab(props: {
             }}
           />
         )}
-        {browserSetup.filter((browserSetup) => {
-          return browserSetup.browser.path !== browser.path || browserSetup.browser.path !== defaultBrowser?.path;
-        }).length > 0 && (
-          <ActionPanel.Submenu
-            title={"Open in"}
-            icon={Icon.Compass}
-            shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
-          >
-            {browserSetup
-              .filter((browserSetup) => {
-                return browserSetup.browser.path !== browser.path || browserSetup.browser.path !== defaultBrowser?.path;
-              })
-              .map((browserSetup, index) => {
-                return (
-                  <Action
-                    key={browserSetup.browser.path + index}
-                    title={browserSetup.browser.name}
-                    icon={{ fileIcon: browserSetup.browser.path }}
-                    onAction={async () => {
-                      await open(tab.url, browserSetup.browser);
-                      await new Promise((r) => setTimeout(r, 500)); // wait for the browser to open
-                      await mutate();
-                    }}
-                  />
-                );
-              })}
-          </ActionPanel.Submenu>
+        {isNotEmpty(tab.url) &&
+          browserSetup.filter((browserSetup) => {
+            return browserSetup.browser.path !== browser.path || browserSetup.browser.path !== defaultBrowser?.path;
+          }).length > 0 && (
+            <ActionPanel.Submenu
+              title={"Open in"}
+              icon={Icon.Compass}
+              shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+            >
+              {browserSetup
+                .filter((browserSetup) => {
+                  return (
+                    browserSetup.browser.path !== browser.path || browserSetup.browser.path !== defaultBrowser?.path
+                  );
+                })
+                .map((browserSetup, index) => {
+                  return (
+                    <Action
+                      key={browserSetup.browser.path + index}
+                      title={browserSetup.browser.name}
+                      icon={{ fileIcon: browserSetup.browser.path }}
+                      onAction={async () => {
+                        await open(tab.url, browserSetup.browser);
+                        await new Promise((r) => setTimeout(r, 500)); // wait for the browser to open
+                        await mutate();
+                      }}
+                    />
+                  );
+                })}
+            </ActionPanel.Submenu>
+          )}
+      </ActionPanel.Section>
+
+      {isNotEmpty(tab.url) && (
+        <ActionPanel.Section>
+          <Action.CreateQuicklink
+            icon={Icon.Link}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            quicklink={{
+              link: tab.url,
+              name: tab.title,
+              application: browser,
+            }}
+          />
+        </ActionPanel.Section>
+      )}
+
+      <ActionPanel.Section>
+        {isNotEmpty(tab.url) && (
+          <Action
+            icon={Icon.Clipboard}
+            title={`Copy URL`}
+            shortcut={{ modifiers: ["opt", "cmd"], key: "c" }}
+            onAction={async () => {
+              await Clipboard.copy(tab.url);
+              await showHUD("🔗 URL copied to clipboard");
+            }}
+          />
         )}
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
-        <Action.CreateQuicklink
-          icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
-          quicklink={{
-            link: tab.url,
-            name: tab.title,
-            application: browser,
-          }}
-        />
-      </ActionPanel.Section>
-
-      <ActionPanel.Section>
-        <Action
-          icon={Icon.Clipboard}
-          title={`Copy URL`}
-          shortcut={{ modifiers: ["opt", "cmd"], key: "c" }}
-          onAction={async () => {
-            await Clipboard.copy(tab.url);
-            await showHUD("🔗 URL copied to clipboard");
-          }}
-        />
         <Action
           icon={Icon.Text}
           title={`Copy Title`}
