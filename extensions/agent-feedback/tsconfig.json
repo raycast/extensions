@@ -1,0 +1,7 @@
+{
+  "$schema": "https://www.raycast.com/schemas/tsconfig.json",
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "strict": true
+  }
+}
