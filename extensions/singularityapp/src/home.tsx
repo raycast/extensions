@@ -10,6 +10,7 @@ import {
   getProjectTasks,
   getProjects,
   getProjectIcon,
+  getProjectIndent,
   withErrorHandling,
   ApiError,
 } from "./api";
@@ -257,9 +258,8 @@ function Home({ launchContext }: LaunchProps<{ launchContext?: { view: ViewType 
               {projects.map((project) => (
                 <List.Dropdown.Item
                   key={project.id}
-                  title={project.title}
+                  title={`${getProjectIndent(project)}${getProjectIcon(project, true).source}  ${project.title}`}
                   value={`project_${project.id}`}
-                  icon={getProjectIcon(project)}
                 />
               ))}
             </List.Dropdown.Section>

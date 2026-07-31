@@ -1,13 +1,18 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cursors",
   "title": "Cursors",
   "description": "All macOS cursors at your fingertips",
   "icon": "cursors.png",
   "author": "storm",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "chrismessina"
   ],
   "license": "MIT",
+  "categories": [
+    "Design Tools"
+  ],
   "commands": [
     {
       "name": "index",
@@ -61,7 +66,7 @@
         },
         {
           "title": "7 Columns",
-          "value": "7x"
+          "value": "7"
         },
         {
           "title": "8 Columns",
@@ -71,25 +76,28 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.0"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.1",
+    "@resvg/resvg-wasm": "^2.6.2"
   },
   "devDependencies": {
-    "@raycast/api": "^1.64.4",
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "@typescript-eslint/eslint-plugin": "^6.11.0",
-    "@typescript-eslint/parser": "^6.11.0",
-    "eslint": "^8.54.0",
-    "eslint-config-prettier": "^9.0.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.9.2",
+    "vitest": "^3.0.9"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

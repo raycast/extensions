@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -23,14 +23,65 @@ const PROFILES = JSON.parse(
   ),
 ) as WindowsTerminalSettings;
 
-function Actions(props: { name: string }) {
+function getWindowsTerminalEnv() {
+  const env = { ...process.env };
+  const pathKey = Object.keys(env).find((key) => key.toLowerCase() === "path") ?? "Path";
+  const systemRoot = env.SystemRoot ?? "C:\\Windows";
+  const pathParts = (env[pathKey] ?? "").split(";").filter(Boolean);
+  const requiredPathParts = [`${systemRoot}\\System32\\OpenSSH`, `${systemRoot}\\System32`, systemRoot];
+  const normalizePathPart = (pathPart: string) => pathPart.toLowerCase().replace(/\\+$/, "");
+
+  env[pathKey] = [
+    ...pathParts,
+    ...requiredPathParts.filter(
+      (requiredPathPart) =>
+        !pathParts.some((pathPart) => normalizePathPart(pathPart) === normalizePathPart(requiredPathPart)),
+    ),
+  ].join(";");
+
+  return env;
+}
+
+// Raycast spawns from System32, so profiles without a startingDirectory inherit
+// that instead of the user's home. Launch from home so the default is sensible;
+// configured startingDirectory values still take precedence.
+function getSpawnOptions() {
+  return { env: getWindowsTerminalEnv(), cwd: os.homedir() };
+}
+
+function launchElevated(name: string) {
+  // Start-Process -Verb RunAs joins ArgumentList tokens with spaces and does not re-quote them
+  // before invoking ShellExecute, so the profile name has to arrive pre-quoted. Single quotes in
+  // the name would end our PowerShell single-quoted string; double quotes in the name would end
+  // the inner "..." wt.exe sees. Escape both.
+  const escapedName = name.replace(/'/g, "''").replace(/"/g, '\\"');
+  const argumentList = `'-p "${escapedName}"'`;
+  // Elevation resets the CWD to System32, so pin the elevated wt.exe to home.
+  // Profiles with their own startingDirectory still win.
+  const workingDirectory = `'${os.homedir().replace(/'/g, "''")}'`;
+  execFile("powershell", [
+    "-NoProfile",
+    "-Command",
+    "Start-Process",
+    "wt.exe",
+    "-ArgumentList",
+    argumentList,
+    "-WorkingDirectory",
+    workingDirectory,
+    "-Verb",
+    "RunAs",
+  ]);
+}
+
+function Actions(props: { name: string; quake: boolean }) {
   return (
     <ActionPanel title={props.name}>
       <Action
         icon={Icon.PlusSquare}
-        title="Open in New Tab"
+        title={props.quake ? "Open in Quake Window" : "Open in New Tab"}
         onAction={async () => {
-          execFile("wt.exe", ["new-tab", "-p", props.name]);
+          const args = props.quake ? ["-w", "_quake", "new-tab", "-p", props.name] : ["new-tab", "-p", props.name];
+          execFile("wt.exe", args, getSpawnOptions());
           await closeMainWindow();
         }}
       />
@@ -38,7 +89,7 @@ function Actions(props: { name: string }) {
         icon={Icon.PlusTopRightSquare}
         title="Open in New Window"
         onAction={async () => {
-          execFile("wt.exe", ["-p", props.name]);
+          execFile("wt.exe", ["-p", props.name], getSpawnOptions());
           await closeMainWindow();
         }}
       />
@@ -47,14 +98,10 @@ function Actions(props: { name: string }) {
         title="Open as Administrator"
         shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
         onAction={async () => {
-          execFile("powershell", [
-            "Start-Process",
-            "wt.exe",
-            "-ArgumentList",
-            `"-p","${props.name}"`,
-            "-Verb",
-            "RunAs",
-          ]);
+          // Always launch elevated in a normal window. Elevated quake windows don't respond to
+          // Windows Terminal's global quake shortcut (Win+`), so once the admin drop-down loses
+          // focus there's no way to summon it back — a regular window avoids that trap.
+          launchElevated(props.name);
           await closeMainWindow();
         }}
       />
@@ -71,6 +118,7 @@ function Actions(props: { name: string }) {
 }
 
 export default function Command() {
+  const { openProfilesInQuakeWindow: quake } = getPreferenceValues<Preferences>();
   return (
     <List searchBarPlaceholder="Search all profiles...">
       <List.Section title="Profiles">
@@ -99,7 +147,7 @@ export default function Command() {
                     ? ["cmd"]
                     : []
               }
-              actions={<Actions name={item.name} />}
+              actions={<Actions name={item.name} quake={quake} />}
             />
           ))}
       </List.Section>
@@ -109,7 +157,12 @@ export default function Command() {
           {PROFILES.profiles.list
             .filter((item) => item.hidden !== true && item.source === "Windows.Terminal.SSH")
             .map((item) => (
-              <List.Item key={item.guid} icon={Icon.Network} title={item.name} actions={<Actions name={item.name} />} />
+              <List.Item
+                key={item.guid}
+                icon={Icon.Network}
+                title={item.name}
+                actions={<Actions name={item.name} quake={quake} />}
+              />
             ))}
         </List.Section>
       ) : null}
@@ -128,7 +181,7 @@ export default function Command() {
                 key={item.guid}
                 icon={Icon.HardDrive}
                 title={item.name}
-                actions={<Actions name={item.name} />}
+                actions={<Actions name={item.name} quake={quake} />}
               />
             ))}
         </List.Section>

@@ -547,7 +547,7 @@ export default function MenuBar() {
         <MenuBarExtra.Item
           title="Open Extension Preferences"
           onAction={() => {
-            open("raycast://extensions/Shadeov/dtf/menu-bar");
+            open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/Shadeov/dtf/menu-bar`);
           }}
         />
       </MenuBarExtra>

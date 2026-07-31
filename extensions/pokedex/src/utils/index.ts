@@ -1,5 +1,5 @@
 import { Detail, getPreferenceValues } from "@raycast/api";
-import { PokemonType, TypeChartType } from "../types";
+import { Name, PokemonType, TypeChartType } from "../types";
 
 type SpriteMode = "bw" | "sv" | "official";
 
@@ -106,6 +106,13 @@ export const typeColor: Record<string, string> = {
   fairy: "#dab4d4",
 };
 
+export const getLocalizedName = (
+  names: Name[] | undefined,
+  fallbackName: string,
+) => {
+  return names?.[0]?.name || fallbackName;
+};
+
 export const calculateEffectiveness = (
   types: PokemonType[],
   allTypes: TypeChartType[],
@@ -129,7 +136,7 @@ export const calculateEffectiveness = (
       effectivenessMap.set(relationName, factor);
       typeNameMap.set(
         relationName,
-        attacker.typenames[0]?.name || attacker.name,
+        getLocalizedName(attacker.typenames, attacker.name),
       );
     }
   });

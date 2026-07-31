@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "glimpse",
+  "title": "Glimpse",
+  "description": "Search your dictations, transcribe files, and control Glimpse from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "garon",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "transcriptions",
+      "title": "Search Transcriptions",
+      "subtitle": "Glimpse",
+      "description": "Search and copy past dictations.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-last",
+      "title": "Copy Last Dictation",
+      "subtitle": "Glimpse",
+      "description": "Copy your latest dictation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-last",
+      "title": "Paste Last Dictation",
+      "subtitle": "Glimpse",
+      "description": "Paste your latest dictation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "transcribe-file",
+      "title": "Transcribe File",
+      "subtitle": "Glimpse",
+      "description": "Transcribe an audio or video file.",
+      "mode": "view"
+    },
+    {
+      "name": "transcribe-selection",
+      "title": "Transcribe Selected File",
+      "subtitle": "Glimpse",
+      "description": "Transcribe the file selected in Finder.",
+      "mode": "no-view"
+    },
+    {
+      "name": "browse-library",
+      "title": "Browse Library",
+      "subtitle": "Glimpse",
+      "description": "Browse and export Library transcripts.",
+      "mode": "view"
+    },
+    {
+      "name": "switch-model",
+      "title": "Switch Speech Model",
+      "subtitle": "Glimpse",
+      "description": "Choose your speech model.",
+      "mode": "view"
+    },
+    {
+      "name": "local-api",
+      "title": "Local API",
+      "subtitle": "Glimpse",
+      "description": "Run a local transcription API.",
+      "mode": "view"
+    },
+    {
+      "name": "add-dictionary-word",
+      "title": "Add Dictionary Word",
+      "subtitle": "Glimpse",
+      "description": "Add a word to your dictionary.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "word",
+          "placeholder": "word",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "manage-dictionary",
+      "title": "Manage Dictionary",
+      "subtitle": "Glimpse",
+      "description": "Add and remove dictionary words.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "Glimpse CLI",
+      "description": "Path to the glimpse binary. Leave blank to find it automatically.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "~/.local/bin/glimpse"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

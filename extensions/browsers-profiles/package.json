@@ -51,7 +51,7 @@
           "name": "browsers.filter",
           "type": "textfield",
           "title": "Browsers Filter",
-          "default": "Chrome,Firefox,Brave,Edge,Chromium"
+          "default": "Chrome,Firefox,Brave,Edge,Chromium,Vivaldi"
         }
       ]
     }

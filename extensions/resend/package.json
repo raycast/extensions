@@ -28,7 +28,7 @@
       "type": "password",
       "placeholder": "re_123456789",
       "description": "API Key From Resend Dashboard",
-      "required": true
+      "required": false
     },
     {
       "name": "sender_name",
@@ -205,9 +205,9 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.103.4",
-    "@raycast/utils": "^2.2.1",
-    "resend": "^6.2.2"
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7",
+    "resend": "^6.17.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

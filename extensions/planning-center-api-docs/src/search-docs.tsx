@@ -1,6 +1,7 @@
-import { List, Action, ActionPanel, getPreferenceValues } from "@raycast/api";
+import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
 import React from "react";
 import { DOCS } from "./data/docs";
+import { copyDocsAsMarkdown } from "./copy-docs";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
@@ -14,6 +15,7 @@ export default function Command() {
       "check-ins": "checkins.png",
       giving: "giving.png",
       groups: "groups.png",
+      current: "pco-logo-blue.png",
       publishing: "publishing.png",
       registrations: "registrations.png",
       services: "services.png",
@@ -35,6 +37,8 @@ export default function Command() {
         return preferences.groupsVersion;
       case "api":
         return preferences.apiVersion;
+      case "current":
+        return preferences.currentVersion;
       case "giving":
         return preferences.givingVersion;
       case "check-ins":
@@ -61,6 +65,7 @@ export default function Command() {
           <List.Dropdown.Item title="API" value="api" />
           <List.Dropdown.Item title="Calendar" value="calendar" />
           <List.Dropdown.Item title="Check-Ins" value="check-ins" />
+          <List.Dropdown.Item title="Current" value="current" />
           <List.Dropdown.Item title="Giving" value="giving" />
           <List.Dropdown.Item title="Groups" value="groups" />
           <List.Dropdown.Item title="People" value="people" />
@@ -78,11 +83,11 @@ export default function Command() {
           if (doc.path.startsWith("http")) {
             url = doc.path;
           } else {
-            url = `https://developer.planning.center/docs/#/${doc.path}`;
+            url = `https://api.planningcenteronline.com/docs/${doc.path}`;
           }
         } else {
           const version = getVersion(doc.app);
-          url = `https://developer.planning.center/docs/#/apps/${doc.app}/${version}/vertices/${doc.vertex}`;
+          url = `https://api.planningcenteronline.com/docs/apps/${doc.app}/versions/${version}/vertices/${doc.vertex}`;
         }
         const allKeywords = [...(doc.keywords || []), doc.app];
 
@@ -96,11 +101,23 @@ export default function Command() {
             key={`${doc.app}-${doc.vertex || doc.path}`}
             title={doc.title}
             subtitle={appName}
-            icon={getAppIcon(doc.app)}
+            icon={doc.icon || getAppIcon(doc.app)}
             keywords={allKeywords}
             actions={
               <ActionPanel>
                 <Action.OpenInBrowser url={url} />
+                {doc.vertex && (
+                  <Action
+                    title="Copy Docs as Markdown"
+                    icon={Icon.Clipboard}
+                    onAction={() => copyDocsAsMarkdown(doc.app, appName, getVersion(doc.app), doc.vertex!)}
+                  />
+                )}
+                <Action.CopyToClipboard
+                  title="Copy URL"
+                  content={url}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
               </ActionPanel>
             }
           />

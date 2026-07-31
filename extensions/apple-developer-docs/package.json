@@ -5,6 +5,9 @@
   "description": "Search from the Apple Developer documentations",
   "icon": "apple-developer-docs.png",
   "author": "cali",
+  "contributors": [
+    "2369233838"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -36,5 +39,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

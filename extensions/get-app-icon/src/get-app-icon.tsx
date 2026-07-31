@@ -1,25 +1,27 @@
-import {
-  Action,
-  ActionPanel,
-  Application,
-  Clipboard,
-  Grid,
-  Icon,
-  List,
-  LocalStorage,
-  Toast,
-  getApplications,
-  getPreferenceValues,
-  showInFinder,
-  showToast,
-} from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
 import { execFile } from "node:child_process";
 import { copyFile, mkdir, stat, unlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
+import { countOf, failToast, getErrorMessage, showError } from "@chrismessina/raycast-kit";
+import { useEffect, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Application,
+  getApplications,
+  getPreferenceValues,
+  Grid,
+  Icon,
+  Keyboard,
+  List,
+  LocalStorage,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { cachedIconPath, invalidateCachedIcon, listCachedApps, pruneIconCache, refreshIconCache } from "./icon-cache";
 
 // macOS-only system binaries for image processing and icon extraction.
 // These are guaranteed to exist on every macOS installation.
@@ -49,15 +51,12 @@ function sanitizeFolderName(input: string): string {
 
 type ExportFormat = "png" | "jpeg" | "icns";
 
-function pluralize(count: number, singular: string, plural?: string): string {
-  if (count === 0) return `no ${plural ?? singular + "s"}`;
-  if (count === 1) return `${count} ${singular}`;
-  return `${count} ${plural ?? singular + "s"}`;
-}
+const DEFAULT_SIZE = 512;
 
-function getEnabledSizes(prefs: ExtensionPreferences): readonly number[] {
-  const sizes = ALL_SIZES.filter((s) => prefs[`size${s}` as keyof ExtensionPreferences]);
-  return sizes.length > 0 ? sizes : [512];
+/** The single size used by "Export Icons". Falls back to 512 if the stored value isn't one we offer. */
+function getDefaultExportSize(prefs: ExtensionPreferences): number {
+  const parsed = Number(prefs.defaultExportSize);
+  return ALL_SIZES.includes(parsed as (typeof ALL_SIZES)[number]) ? parsed : DEFAULT_SIZE;
 }
 
 function getEnabledFormats(prefs: ExtensionPreferences): readonly ExportFormat[] {
@@ -134,12 +133,34 @@ async function findIcnsPath(appPath: string): Promise<string | null> {
   }
 }
 
+/**
+ * Copies an app icon to the clipboard as an image.
+ *
+ * The image DATA goes on the pasteboard, not a file reference. `Clipboard.copy({ file })`
+ * writes a `public.file-url`, which pastes as an image only while that file still exists —
+ * so a temp file we clean up afterwards leaves the clipboard pointing at a deleted path and
+ * apps paste the path as text instead. Writing `public.png` + `public.tiff` means the bytes
+ * are on the pasteboard and the temp file can go away immediately.
+ */
 async function copyIconToClipboard(app: Application, size: number): Promise<void> {
   const tmpFile = path.join(os.tmpdir(), `${sanitizeFolderName(app.name)}-${size}.png`);
   await extractAppIconToFile(app.path, tmpFile, size);
   try {
-    await Clipboard.copy({ file: tmpFile });
+    const script = [
+      "import AppKit",
+      `let path = "${escapeStringLiteral(tmpFile)}"`,
+      "guard let image = NSImage(contentsOfFile: path), let tiff = image.tiffRepresentation,",
+      "      let rep = NSBitmapImageRep(data: tiff),",
+      "      let png = rep.representation(using: .png, properties: [:])",
+      'else { FileHandle.standardError.write("could not read extracted icon".data(using: .utf8)!); exit(1) }',
+      "let pasteboard = NSPasteboard.general",
+      "pasteboard.clearContents()",
+      "pasteboard.setData(png, forType: .png)",
+      "pasteboard.setData(tiff, forType: .tiff)",
+    ].join("\n");
+    await execFileAsync(XCRUN_PATH, ["swift", "-e", script]);
   } finally {
+    // Safe to remove now: the pixels live on the pasteboard, not in this file.
     await unlink(tmpFile).catch(() => {});
   }
 }
@@ -214,7 +235,7 @@ async function exportIcons(
       const results = await exportIconsForFormat(app, sizes, outputDir, format);
       allResults.push(...results);
     } catch (error) {
-      warnings.push(`${format.toUpperCase()}: ${error instanceof Error ? error.message : String(error)}`);
+      warnings.push(`${format.toUpperCase()}: ${getErrorMessage(error)}`);
     }
   }
 
@@ -241,17 +262,18 @@ async function exportWithToast(
   });
   try {
     const { outputDir, results, warnings } = await exportIcons(app, sizes, outputPath, formats);
+    // Exports read the live bundle, so a successful one proves what the icon looks
+    // like now. Drop the cached tile so a stale grid entry re-extracts next visit.
+    await invalidateCachedIcon(app.path);
     toast.style = Toast.Style.Success;
-    toast.title = `Exported ${pluralize(results.length, "icon")}`;
+    toast.title = `Exported ${countOf(results.length, "icon", { zero: "no icons" })}`;
     toast.message = warnings.length > 0 ? `${outputDir}\n⚠ ${warnings.join("; ")}` : outputDir;
     toast.primaryAction = {
       title: "Reveal in Finder",
       onAction: () => showInFinder(outputDir),
     };
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = `Failed to export ${app.name}'s icons`;
-    toast.message = String(error);
+    failToast(toast, error, { title: `Failed to export ${app.name}'s icons` });
   }
 }
 
@@ -260,20 +282,23 @@ const VIEW_MODE_KEY = "viewMode";
 
 function AppActions({
   app,
-  enabledSizes,
+  defaultSize,
   formats,
   preferences,
   viewMode,
   setViewMode,
 }: {
   app: Application;
-  enabledSizes: readonly number[];
+  defaultSize: number;
   formats: readonly ExportFormat[];
   preferences: ExtensionPreferences;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
 }) {
-  const largestSize = enabledSizes[enabledSizes.length - 1];
+  // ICNS copies the whole multi-size .icns file and ignores `sizes`, so it can't honour a
+  // single-size request. Drop it here, falling back to PNG if it was the only format enabled.
+  const rasterFormats = formats.filter((format) => format !== "icns");
+  const sizedFormats: readonly ExportFormat[] = rasterFormats.length > 0 ? rasterFormats : ["png"];
 
   return (
     <ActionPanel>
@@ -281,9 +306,23 @@ function AppActions({
         <Action
           title="Export Icons"
           icon={Icon.Download}
+          // ⌘E matches Common.Edit's chord, but exporting isn't editing — a wrong
+          // semantic match is worse than an honest custom shortcut.
+          // eslint-disable-next-line @raycast/prefer-common-shortcut
           shortcut={{ modifiers: ["cmd"], key: "e" }}
-          onAction={() => exportWithToast(app, enabledSizes, preferences.outputPath, formats)}
+          onAction={() => exportWithToast(app, [defaultSize], preferences.outputPath, formats)}
         />
+        <ActionPanel.Submenu title="Export Icon Size…" icon={Icon.Download}>
+          {ALL_SIZES.map((size) => (
+            <Action
+              key={size}
+              // eslint-disable-next-line @raycast/prefer-title-case
+              title={`${size} x ${size}`}
+              icon={Icon.Download}
+              onAction={() => exportWithToast(app, [size], preferences.outputPath, sizedFormats)}
+            />
+          ))}
+        </ActionPanel.Submenu>
         <Action
           title="Export All Sizes"
           icon={Icon.Download}
@@ -295,20 +334,18 @@ function AppActions({
         <Action
           title="Copy Icon"
           icon={Icon.Clipboard}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.Copy}
           onAction={async () => {
             const toast = await showToast({
               style: Toast.Style.Animated,
-              title: `Copying ${largestSize} x ${largestSize} icon...`,
+              title: `Copying ${defaultSize} x ${defaultSize} icon...`,
             });
             try {
-              await copyIconToClipboard(app, largestSize);
+              await copyIconToClipboard(app, defaultSize);
               toast.style = Toast.Style.Success;
-              toast.title = `Copied ${largestSize} x ${largestSize} icon`;
+              toast.title = `Copied ${defaultSize} x ${defaultSize} icon`;
             } catch (error) {
-              toast.style = Toast.Style.Failure;
-              toast.title = `Failed to copy icon`;
-              toast.message = String(error);
+              failToast(toast, error, { title: "Failed to copy icon" });
             }
           }}
         />
@@ -329,9 +366,7 @@ function AppActions({
                   toast.style = Toast.Style.Success;
                   toast.title = `Copied ${size} x ${size} icon`;
                 } catch (error) {
-                  toast.style = Toast.Style.Failure;
-                  toast.title = `Failed to copy ${size} x ${size} icon`;
-                  toast.message = String(error);
+                  failToast(toast, error, { title: `Failed to copy ${size} x ${size} icon` });
                 }
               }}
             />
@@ -341,13 +376,13 @@ function AppActions({
           title="Copy App Path"
           icon={Icon.Clipboard}
           content={app.path}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
         />
         <Action.CopyToClipboard
           title="Copy App Name"
           icon={Icon.Clipboard}
           content={app.name}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
         {app.bundleId && (
           <Action.CopyToClipboard title="Copy Bundle Identifier" icon={Icon.Tag} content={app.bundleId} />
@@ -371,7 +406,8 @@ function AppActions({
         )}
       </ActionPanel.Section>
       <ActionPanel.Section title="App">
-        <Action.ShowInFinder path={app.path} shortcut={{ modifiers: ["cmd"], key: "return" }} />
+        {/* No explicit shortcut: Raycast reserves ⌘↩ for the panel's secondary action. */}
+        <Action.ShowInFinder path={app.path} />
         <Action
           title="Show Info in Finder"
           icon={Icon.Finder}
@@ -384,11 +420,7 @@ function AppActions({
                 `tell application "Finder" to open information window of (POSIX file "${escapeStringLiteral(app.path)}" as alias)`,
               ]);
             } catch (error) {
-              await showToast({
-                style: Toast.Style.Failure,
-                title: "Failed to show info in Finder",
-                message: String(error),
-              });
+              await showError(error, { title: "Failed to show info in Finder" });
             }
           }}
         />
@@ -397,16 +429,26 @@ function AppActions({
           icon={Icon.Folder}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={async () => {
-            const folderPath = path.join(normalizeOutputPath(preferences.outputPath), getAppFolderName(app));
+            const outputRoot = normalizeOutputPath(preferences.outputPath);
+            const folderPath = path.join(outputRoot, getAppFolderName(app));
             try {
               await stat(folderPath);
               await showInFinder(folderPath);
+              return;
             } catch {
+              // No folder for this app yet — fall through to the output folder.
+            }
+            // Opening the parent beats a dead end: the user asked to see where icons
+            // go, and that place exists even when this app hasn't been exported.
+            try {
+              await showInFinder(outputRoot);
               await showToast({
-                style: Toast.Style.Failure,
-                title: "Export folder not found",
-                message: `No icons have been exported for ${app.name} yet.`,
+                style: Toast.Style.Success,
+                title: `No icons exported for ${app.name} yet`,
+                message: `Opened ${path.basename(outputRoot)} instead`,
               });
+            } catch (error) {
+              await showError(error, { title: "Couldn't Open Export Folder" });
             }
           }}
         />
@@ -417,7 +459,7 @@ function AppActions({
 
 export default function Command() {
   const preferences = getPreferenceValues<ExtensionPreferences>();
-  const enabledSizes = getEnabledSizes(preferences);
+  const defaultSize = getDefaultExportSize(preferences);
   const formats = getEnabledFormats(preferences);
 
   const defaultViewMode: ViewMode = preferences.defaultViewMode === "grid" ? "grid" : "list";
@@ -445,7 +487,71 @@ export default function Command() {
 
   const loading = isLoading || !viewLoaded;
 
-  const actionProps = { enabledSizes, formats, preferences, viewMode, setViewMode };
+  // Grid tiles render far larger than the 32pt image `fileIcon` resolves to, so they
+  // look soft. Extract real 256px icons to a cache and point the tiles at those. Only
+  // the grid needs this — list rows are close enough to `fileIcon`'s nominal size.
+  const [cachedApps, setCachedApps] = useState<ReadonlySet<string>>(new Set());
+  useEffect(() => {
+    if (viewMode !== "grid" || !apps || apps.length === 0) return;
+
+    let cancelled = false;
+    // Leaving the grid kills the extractor rather than letting it finish work nobody
+    // is waiting for.
+    const controller = new AbortController();
+    const appPaths = apps.map((app) => app.path);
+
+    (async () => {
+      let toast: Toast | undefined;
+      try {
+        // Show whatever is already cached before doing any work, so a warm cache
+        // renders sharp immediately.
+        const warm = await listCachedApps(appPaths);
+        if (cancelled) return;
+        setCachedApps(warm);
+
+        const extracted = await refreshIconCache(
+          appPaths,
+          (done, total) => {
+            if (cancelled || total === 0) return;
+            if (!toast) {
+              // Fire the indicator before the work, not after — a silent multi-second
+              // pause on first run reads as a stall.
+              toast = new Toast({ style: Toast.Style.Animated, title: "Preparing icons…" });
+              void toast.show();
+            }
+            toast.message = `${done} of ${countOf(total, "icon")}`;
+          },
+          controller.signal,
+        );
+        if (cancelled) return;
+
+        if (extracted > 0) {
+          const refreshed = await listCachedApps(appPaths);
+          if (cancelled) return;
+          setCachedApps(refreshed);
+        }
+        await pruneIconCache(appPaths);
+      } catch (error) {
+        // An aborted extraction is a view change, not a failure worth a toast.
+        if (!cancelled) {
+          // The grid stays on the system icons, so this is soft-fail: say so rather
+          // than leaving the user wondering why the icons never sharpened.
+          await showError(error, { title: "Couldn't Sharpen Grid Icons" });
+        }
+      } finally {
+        // Always retire the progress toast — leaving "Preparing icons…" on screen
+        // after the work stops is the UI lying about its state.
+        await toast?.hide();
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [viewMode, apps]);
+
+  const actionProps = { defaultSize, formats, preferences, viewMode, setViewMode };
 
   if (viewMode === "grid") {
     return (
@@ -460,7 +566,10 @@ export default function Command() {
         {apps?.map((app) => (
           <Grid.Item
             key={app.path}
-            content={{ fileIcon: app.path }}
+            // The cached 256px PNG renders sharp. `Image.Fallback` can't hold a
+            // FileIcon, so pick the source directly: apps not yet cached (or that
+            // the extractor couldn't handle) keep the soft-but-present system icon.
+            content={cachedApps.has(app.path) ? { source: cachedIconPath(app.path) } : { fileIcon: app.path }}
             title={app.name}
             keywords={app.bundleId ? [app.bundleId] : []}
             actions={<AppActions app={app} {...actionProps} />}

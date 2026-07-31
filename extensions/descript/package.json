@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "descript",
+  "title": "Descript",
+  "description": "Import media, browse projects, monitor jobs, and run Underlord prompts in Descript without leaving Raycast.",
+  "icon": "descript-icon.png",
+  "author": "luarmr",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "descriptApiToken",
+      "title": "Descript API Token",
+      "description": "Personal API token from Descript.",
+      "placeholder": "Paste your Descript API token",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "browse-projects",
+      "title": "Browse Projects",
+      "description": "Search Descript projects with an inline detail pane and drill into their compositions and media files.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-jobs",
+      "title": "Recent Jobs",
+      "description": "See the status of recent imports, Underlord edits, and publish jobs.",
+      "mode": "view"
+    },
+    {
+      "name": "import-selected-media",
+      "title": "Import Selected Media",
+      "description": "Send Finder-selected files to a new or existing Descript project.",
+      "mode": "view"
+    },
+    {
+      "name": "run-underlord-prompt",
+      "title": "Run Underlord Prompt",
+      "description": "Run an Underlord one-shot prompt against an existing project.",
+      "mode": "view"
+    },
+    {
+      "name": "descript-activity",
+      "title": "Descript Activity",
+      "subtitle": "Descript",
+      "description": "Menu bar status for background uploads, in-progress jobs, and recently finished Descript activity.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.22",
+    "@raycast/utils": "^2.2.7",
+    "mime-types": "^3.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/mime-types": "^3.0.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "seed-test-projects": "node scripts/create-test-projects.mjs",
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

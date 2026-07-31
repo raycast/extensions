@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "SuoweiHu",
   "contributors": [
-    "gheorghiuradu"
+    "gheorghiuradu",
+    "mattiacolombomc"
   ],
   "categories": [
     "System"
@@ -36,6 +37,44 @@
       "title": "Show Status",
       "description": "Print information about the current status of Time Machine, or the status of the most recent backup. In order to get the most recent status, full disk access is required.",
       "mode": "view"
+    },
+    {
+      "name": "cmd-clean-snapshots",
+      "title": "Clean Local Snapshots",
+      "description": "Reclaim disk space by listing and bulk-deleting local APFS snapshots. macOS creates these when your backup disk is disconnected, silently consuming 50-200GB+ on Macs with limited storage.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "concurrency",
+          "type": "dropdown",
+          "required": true,
+          "title": "Parallel Deletion Threads",
+          "description": "Number of snapshots to delete simultaneously. Higher = faster but more CPU usage.",
+          "default": "3",
+          "data": [
+            {
+              "title": "1 Thread (Sequential - Slowest, Safest)",
+              "value": "1"
+            },
+            {
+              "title": "2 Threads (Conservative)",
+              "value": "2"
+            },
+            {
+              "title": "3 Threads (Balanced - Recommended)",
+              "value": "3"
+            },
+            {
+              "title": "4 Threads (Aggressive)",
+              "value": "4"
+            },
+            {
+              "title": "5 Threads (Maximum - Fastest, Most CPU)",
+              "value": "5"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -1,5 +1,23 @@
 # Picgo Changelog
 
+## [Bugfix: Upload Result Copy Actions] - 2026-06-29
+
+- Fix automatic URL copying to run only once after a successful upload instead of running again when switching result views.
+- Align copy action titles across result views and clarify when all uploaded image URLs are copied.
+
+## [Bugfix: Image Grid Format Selection] - 2026-06-24
+
+- Fix a crash when switching to the Image Grid view caused by an empty image format selection in newer Raycast versions.
+
+## [Image Preview Grid View] - 2026-04-06
+
+- Add a new `Image Grid` view for uploaded image results.
+- Add new preference `Upload Result View`, you can pick the former `Format List` or newly added `Image Grid` view as the default view to display uploaded image results.
+
+## [Bugfix: Plugin Search Error] - 2026-04-01
+
+- Fix error when a plugin package data has no `description` field.
+
 ## [New Preferences] - 2026-02-21
 
 - Add preference `Auto Copy URLs` to control whether to copy right after uploads complete.

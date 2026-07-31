@@ -13,14 +13,17 @@ export function NotReadableActions({ url, onRetryWithoutCheck, onTryPaywallHoppe
         title="Try Anyway"
         icon={Icon.ArrowRight}
         onAction={onRetryWithoutCheck}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+        }}
       />
       {onTryPaywallHopper && (
         <Action
           title="Try Paywall Hopper"
           icon={Icon.LockUnlocked}
           onAction={onTryPaywallHopper}
-          shortcut={{ modifiers: ["cmd"], key: "p" }}
+          shortcut={{ macOS: { modifiers: ["cmd"], key: "p" }, Windows: { modifiers: ["ctrl"], key: "p" } }}
         />
       )}
       <Action.OpenInBrowser

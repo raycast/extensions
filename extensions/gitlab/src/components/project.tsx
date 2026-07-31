@@ -1,12 +1,12 @@
-import { ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { gitlab } from "../common";
 import { Project, searchData } from "../gitlabapi";
-import { daysInSeconds, getFirstChar, hashRecord, projectIconUrl, showErrorToast } from "../utils";
+import { getFirstChar, projectIconUrl } from "../utils";
 import {
   CloneProjectInGitPod,
   CloneProjectInVSCodeAction,
-  CopyProjectIDToClipboardAction,
   CopyCloneUrlToClipboardAction,
   OpenProjectBranchesPushAction,
   OpenProjectIssuesPushAction,
@@ -19,120 +19,93 @@ import {
   OpenProjectWikiInBrowserAction,
   ProjectDefaultActions,
   ShowProjectLabels,
-  CopyProjectUrlToClipboardAction,
   CreateNewProjectIssuePushAction,
+  CreateProjectQuickLinkAction,
   ShowProjectReadmeAction,
 } from "./project_actions";
-import { GitLabIcons, getTextIcon, useImage } from "../icons";
-import { useCache } from "../cache";
-import { CacheActionPanelSection } from "./cache_actions";
+import { GitLabIcons, getTextIcon } from "../icons";
 
 export enum ProjectScope {
   membership = "membership",
   all = "all",
 }
 
-function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
-  return getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase());
-}
-
-export function ProjectListItem(props: { project: Project; nameOnly?: boolean }) {
-  const project = props.project;
-  const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project));
+export function ProjectListItem(props: { project: Project; nameOnly?: boolean; showCreateQuickLink?: boolean }) {
   const accessories = [];
-  if (project.archived) {
+  if (props.project.archived) {
     accessories.push({ tooltip: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow } });
   }
   accessories.push({
-    text: project.star_count.toString(),
+    text: props.project.star_count.toString(),
     icon: {
       source: Icon.Star,
-      tintColor: project.star_count > 0 ? Color.Yellow : null,
+      tintColor: props.project.star_count > 0 ? Color.Yellow : null,
     },
-    tooltip: `Number of stars: ${project.star_count}`,
+    tooltip: `Number of stars: ${props.project.star_count}`,
   });
   return (
     <List.Item
-      title={props.nameOnly === true ? project.name : project.name_with_namespace}
+      title={props.nameOnly === true ? props.project.name : props.project.name_with_namespace}
       accessories={accessories}
-      icon={localImageFilepath ? { source: localImageFilepath } : getProjectTextIcon(project)}
+      icon={
+        projectIconUrl(props.project)
+          ? { source: projectIconUrl(props.project)! }
+          : getTextIcon((props.project.name ? getFirstChar(props.project.name) : "?").toUpperCase())
+      }
       actions={
         <ActionPanel>
-          <ActionPanel.Section title={project.name_with_namespace}>
-            <ProjectDefaultActions project={project} />
+          <ActionPanel.Section title={props.project.name_with_namespace}>
+            <ProjectDefaultActions project={props.project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <CopyProjectIDToClipboardAction project={project} />
-            <CopyProjectUrlToClipboardAction project={project} />
-            <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
+            <Action.CopyToClipboard title="Copy Project ID" content={props.project.id} />
+            <Action.CopyToClipboard title="Copy Project URL" content={props.project.web_url} />
+            <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={props.project} />
+            {props.showCreateQuickLink && <CreateProjectQuickLinkAction project={props.project} />}
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <ShowProjectReadmeAction project={project} />
-            <OpenProjectIssuesPushAction project={project} />
-            <OpenProjectMergeRequestsPushAction project={project} />
-            <OpenProjectBranchesPushAction project={project} />
-            <OpenProjectPipelinesPushAction project={project} />
-            <OpenProjectMilestonesPushAction project={project} />
-            <OpenProjectWikiInBrowserAction project={project} />
+            <ShowProjectReadmeAction project={props.project} />
+            <OpenProjectIssuesPushAction project={props.project} />
+            <OpenProjectMergeRequestsPushAction project={props.project} />
+            <OpenProjectBranchesPushAction project={props.project} />
+            <OpenProjectPipelinesPushAction project={props.project} />
+            <OpenProjectMilestonesPushAction project={props.project} />
+            <OpenProjectWikiInBrowserAction project={props.project} />
             <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
           </ActionPanel.Section>
           <ActionPanel.Section title="Open in Browser">
-            <CreateNewProjectIssuePushAction project={project} />
-            <OpenProjectLabelsInBrowserAction project={project} />
-            <OpenProjectSecurityComplianceInBrowserAction project={project} />
-            <OpenProjectSettingsInBrowserAction project={project} />
+            <CreateNewProjectIssuePushAction project={props.project} />
+            <OpenProjectLabelsInBrowserAction project={props.project} />
+            <OpenProjectSecurityComplianceInBrowserAction project={props.project} />
+            <OpenProjectSettingsInBrowserAction project={props.project} />
           </ActionPanel.Section>
           <ActionPanel.Section title="IDE">
-            <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
-            <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={project} />
+            <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={props.project} />
+            <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={props.project} />
           </ActionPanel.Section>
-          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
   );
 }
 
-interface ProjectListProps {
-  membership?: boolean;
-  starred?: boolean;
-}
-
 export function ProjectListEmptyView() {
   return <List.EmptyView title="No Projects" icon={{ source: GitLabIcons.project, tintColor: Color.PrimaryText }} />;
 }
 
-export function ProjectList({ membership = true, starred = false }: ProjectListProps) {
+export function ProjectList() {
   const [searchText, setSearchText] = useState<string>();
-  const { data, error, isLoading } = useCache<Project[]>(
-    hashRecord({ membership: membership, starred: starred }, "projects"),
-    async () => {
-      let glProjects: Project[] = [];
-      if (starred) {
-        glProjects = await gitlab.getStarredProjects({ searchText: "", searchIn: "name" }, true);
-      } else {
-        if (membership) {
-          glProjects = await gitlab.getUserProjects({ search: "" }, true);
-        }
-      }
-      return glProjects;
-    },
-    {
-      deps: [searchText, membership, starred],
-      onFilter: async (projects) => {
-        return searchData<Project[]>(projects, {
-          search: searchText || "",
-          keys: ["name_with_namespace"],
-          limit: 50,
-        });
-      },
-      secondsToInvalid: daysInSeconds(7),
-    },
+  const { data, isLoading } = useCachedPromise(
+    () => gitlab.getStarredProjects({ searchText: "", searchIn: "name" }, true),
+    [],
+    { initialData: [] },
   );
 
-  if (error) {
-    showErrorToast(error, "Cannot search Project");
-  }
+  const projects: Project[] = searchData<Project[]>(data, {
+    search: searchText || "",
+    keys: ["name_with_namespace"],
+    limit: 50,
+  });
 
   return (
     <List
@@ -143,9 +116,9 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
     >
       <List.Section
         title={searchText && searchText.length > 0 ? "Search Results" : "Projects"}
-        subtitle={`${data?.length}`}
+        subtitle={`${projects.length}`}
       >
-        {data?.map((project) => (
+        {projects.map((project) => (
           <ProjectListItem key={project.id} project={project} />
         ))}
       </List.Section>
@@ -154,72 +127,94 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
   );
 }
 
-export function useMyProjects(): { projects: Project[] | undefined; error?: string; isLoading?: boolean } {
-  const membership = true;
-  const starred = false;
+const MY_PROJECTS_PAGE_SIZE = 20;
 
-  const {
-    data: projects,
-    error,
+export function useMyProjects(
+  search = "",
+  execute = true,
+): {
+  projects: Project[];
+  isLoading?: boolean;
+} {
+  const { data, isLoading } = useCachedPromise(
+    async (query: string): Promise<Project[]> =>
+      gitlab.getUserProjects({ search: query, per_page: `${MY_PROJECTS_PAGE_SIZE}` }, false),
+    [search],
+    { initialData: [], keepPreviousData: true, execute },
+  );
+  return {
+    projects: data,
     isLoading,
-  } = useCache<Project[]>(
-    hashRecord({ membership: membership, starred: starred }, "projects"),
-    async () => {
-      let glProjects: Project[] = [];
-      if (starred) {
-        glProjects = await gitlab.getStarredProjects({ searchText: "", searchIn: "name" }, true);
-      } else {
-        if (membership) {
-          glProjects = await gitlab.getUserProjects({ search: "" }, true);
-        }
-      }
-      return glProjects;
-    },
-    {
-      deps: [],
-      secondsToInvalid: daysInSeconds(7),
-    },
-  );
-  return { projects, error, isLoading };
-}
-
-function MyProjectsDropdownItem(props: { project: Project }) {
-  const pro = props.project;
-  const { localFilepath } = useImage(projectIconUrl(pro));
-  return (
-    <List.Dropdown.Item
-      title={pro.name_with_namespace}
-      icon={localFilepath ? { source: localFilepath } : getProjectTextIcon(pro)}
-      value={`${pro.id}`}
-    />
-  );
+  };
 }
 
 export function MyProjectsDropdown(props: {
-  onChange: (pro: Project | undefined) => void;
+  onChange: (project: Project | undefined) => void;
+  value?: string;
   storeValue?: boolean;
-}): React.ReactNode | null {
-  const { projects: myprojects } = useMyProjects();
-  if (myprojects) {
-    return (
-      <List.Dropdown
-        tooltip="Select Project"
-        storeValue={props.storeValue}
-        onChange={(newValue) => {
-          const pro = myprojects.find((p) => `${p.id}` === newValue);
-          props.onChange(pro);
-        }}
-      >
+  includeAllItem?: boolean;
+}): React.ReactNode {
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Project>();
+  const { projects, isLoading } = useMyProjects(search);
+  const includeAllItem = props.includeAllItem !== false;
+  const selectedId = props.value ?? (selected ? `${selected.id}` : undefined);
+  const { data: fetchedSelected } = useCachedPromise(
+    async (id: string): Promise<Project> => gitlab.getProject(Number(id)),
+    [selectedId ?? ""],
+    {
+      execute:
+        !!selectedId &&
+        selectedId !== "-" &&
+        !projects.some((project) => `${project.id}` === selectedId) &&
+        (!selected || `${selected.id}` !== selectedId),
+    },
+  );
+  const pinnedProject = selected && `${selected.id}` === selectedId ? selected : fetchedSelected;
+  const myprojects =
+    pinnedProject && !projects.some((project) => project.id === pinnedProject.id)
+      ? [pinnedProject, ...projects]
+      : projects;
+
+  return (
+    <List.Dropdown
+      tooltip="Select Project"
+      placeholder="Search Projects..."
+      value={props.value}
+      storeValue={props.storeValue}
+      isLoading={isLoading}
+      throttle={true}
+      onSearchTextChange={setSearch}
+      onChange={(newValue) => {
+        if (includeAllItem && newValue === "-") {
+          setSelected(undefined);
+          props.onChange(undefined);
+          return;
+        }
+        const nextProject = myprojects.find((project) => `${project.id}` === newValue);
+        setSelected(nextProject);
+        props.onChange(nextProject);
+      }}
+    >
+      {includeAllItem && (
         <List.Dropdown.Section>
           <List.Dropdown.Item title="All Projects" value="-" />
         </List.Dropdown.Section>
-        <List.Dropdown.Section>
-          {myprojects.map((pro) => (
-            <MyProjectsDropdownItem key={`${pro.id}`} project={pro} />
-          ))}
-        </List.Dropdown.Section>
-      </List.Dropdown>
-    );
-  }
-  return null;
+      )}
+      <List.Dropdown.Section>
+        {myprojects.map((project) => (
+          <List.Dropdown.Item
+            key={`${project.id}`}
+            title={project.name_with_namespace}
+            icon={
+              projectIconUrl(project)
+                ? { source: projectIconUrl(project)! }
+                : getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase())
+            }
+            value={`${project.id}`}
+          />
+        ))}
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
 }

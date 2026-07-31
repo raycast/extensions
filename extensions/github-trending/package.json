@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "github-trending",
   "title": "GitHub Trending",
-  "description": "Quick access to trending repositories on GitHub.",
+  "description": "Discover trending GitHub repositories by language and time range, then preview, open, or jump into code from Raycast.",
   "icon": "icon.png",
   "author": "mikqi",
   "categories": [
@@ -13,7 +13,10 @@
   ],
   "keywords": [
     "github",
-    "trending"
+    "trending",
+    "repositories",
+    "open-source",
+    "developer"
   ],
   "license": "MIT",
   "commands": [
@@ -21,7 +24,7 @@
       "name": "index",
       "title": "Trending Repositories",
       "subtitle": "GitHub",
-      "description": "Quick access to trending repositories on GitHub.",
+      "description": "Explore trending GitHub repositories.",
       "mode": "view"
     }
   ],
@@ -29,12 +32,14 @@
     "@raycast/api": "^1.49.3",
     "@raycast/utils": "^1.5.2",
     "cheerio": "^1.0.0-rc.12",
-    "node-fetch": "^3.3.1"
+    "node-fetch": "^3.3.1",
+    "turndown": "^7.2.4"
   },
   "devDependencies": {
     "@types/node": "18.8.3",
     "@types/node-fetch": "^2.6.3",
     "@types/react": "18.0.9",
+    "@types/turndown": "^5.0.6",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
@@ -48,5 +53,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

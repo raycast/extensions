@@ -20,9 +20,13 @@ export interface Notification {
 export enum NotificationSourceKind {
   Github = "Github",
   Todoist = "Todoist",
+  TickTick = "TickTick",
   Linear = "Linear",
   GoogleMail = "GoogleMail",
+  GoogleCalendar = "GoogleCalendar",
+  GoogleDrive = "GoogleDrive",
   Slack = "Slack",
+  API = "API",
 }
 
 export enum NotificationStatus {
@@ -42,5 +46,5 @@ export function getNotificationHtmlUrl(notification: Notification): string {
 }
 
 export function isNotificationBuiltFromTask(notification: Notification) {
-  return notification.kind === NotificationSourceKind.Todoist;
+  return notification.kind === NotificationSourceKind.Todoist || notification.kind === NotificationSourceKind.TickTick;
 }

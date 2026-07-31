@@ -1,8 +1,17 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { LanguageDropdown } from "./components";
-import { SAPSystemFormValues } from "./types";
-import { addSAPSystem, validateClient, validateInstanceNumber } from "./utils";
+import { SAPSystemFormValues, SystemType } from "./types";
+import {
+  addSAPSystem,
+  SYSTEM_TYPE_LABELS,
+  SYSTEM_TYPES,
+  validateApplicationServer,
+  validateClient,
+  validateInstanceNumber,
+  validatePassword,
+  validateUsername,
+} from "./utils";
 
 interface AddSystemFormProps {
   onSave?: () => void;
@@ -16,12 +25,14 @@ export function AddSystemForm({ onSave }: AddSystemFormProps) {
       try {
         await addSAPSystem(
           {
+            customerName: values.customerName.trim(),
             systemId: values.systemId.trim().toUpperCase(),
+            systemType: values.systemType as SystemType,
             applicationServer: values.applicationServer.trim(),
             instanceNumber: values.instanceNumber.trim(),
             client: values.client.trim(),
             username: values.username.trim(),
-            language: values.language || "EN",
+            language: values.language,
           },
           values.password,
         );
@@ -43,11 +54,16 @@ export function AddSystemForm({ onSave }: AddSystemFormProps) {
       }
     },
     initialValues: {
+      systemType: "E",
       language: "EN",
     },
     validation: {
+      customerName: FormValidation.Required,
       systemId: FormValidation.Required,
-      applicationServer: FormValidation.Required,
+      applicationServer: (value) => {
+        if (!value) return "Application server is required";
+        return validateApplicationServer(value);
+      },
       instanceNumber: (value) => {
         if (!value) return "Instance number is required";
         return validateInstanceNumber(value);
@@ -56,8 +72,14 @@ export function AddSystemForm({ onSave }: AddSystemFormProps) {
         if (!value) return "Client is required";
         return validateClient(value);
       },
-      username: FormValidation.Required,
-      password: FormValidation.Required,
+      username: (value) => {
+        if (!value) return "Username is required";
+        return validateUsername(value);
+      },
+      password: (value) => {
+        if (!value) return "Password is required";
+        return validatePassword(value);
+      },
     },
   });
 
@@ -76,11 +98,24 @@ export function AddSystemForm({ onSave }: AddSystemFormProps) {
       />
 
       <Form.TextField
+        {...itemProps.customerName}
+        title="Customer"
+        placeholder="Acme Corp, Müller GmbH..."
+        info="The customer this system belongs to. Used to group and search systems."
+      />
+
+      <Form.TextField
         {...itemProps.systemId}
         title="System ID"
         placeholder="PRD, DEV, QAS..."
         info="The SAP System ID (SID), typically 3 characters"
       />
+
+      <Form.Dropdown {...itemProps.systemType} title="System Type">
+        {SYSTEM_TYPES.map((type) => (
+          <Form.Dropdown.Item key={type} value={type} title={`${type} – ${SYSTEM_TYPE_LABELS[type]}`} />
+        ))}
+      </Form.Dropdown>
 
       <Form.TextField
         {...itemProps.applicationServer}
@@ -116,7 +151,7 @@ export function AddSystemForm({ onSave }: AddSystemFormProps) {
 
       <Form.Separator />
 
-      <LanguageDropdown {...itemProps.language} title="Language" />
+      <LanguageDropdown {...itemProps.language} title="Language" allowAsk />
     </Form>
   );
 }

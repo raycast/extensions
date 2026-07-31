@@ -1,4 +1,5 @@
 import { ActionPanel, List, Action, showToast, Toast, Keyboard } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { AvailableDevice, Device } from "./lib/types";
 import {
   getDeviceIcon,
@@ -11,25 +12,21 @@ import {
   turnDeviceOff,
 } from "./lib/devices";
 import { split } from "./lib/utils";
-import { usePromise } from "@raycast/utils";
 
 const fetchDevices = async () => {
-  let devices;
   try {
-    devices = await getDevices();
+    const devices = await getDevices();
+    const locatedDevices = await locateDevicesOnLocalNetwork(devices);
+    const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
+    return augmentedLocatedDevices;
   } catch (error) {
     showToast({ title: (error as Error).toString(), style: Toast.Style.Failure });
-    return [];
+    throw error;
   }
-
-  const locatedDevices = await locateDevicesOnLocalNetwork(devices);
-  const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
-
-  return augmentedLocatedDevices;
 };
 
 export default function Command() {
-  const { data: devices, isLoading, revalidate } = usePromise(fetchDevices, []);
+  const { data: devices, isLoading, revalidate } = useCachedPromise(fetchDevices, [], { keepPreviousData: true });
 
   const [availableDevices, unavailableDevices] = split(devices || [], isAvailableDevice);
 

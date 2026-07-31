@@ -32,23 +32,18 @@ export async function getActiveProfileName() {
 }
 
 export async function startFocus() {
-  if (!(await isFocusRunning())) return;
   await runAppleScript('do shell script "open -g focus://focus"');
 }
 
 export async function startFocus25(): Promise<void> {
-  if (!(await isFocusRunning())) return;
   await runAppleScript('do shell script "open -g focus://focus?minutes=25"');
 }
 
 export async function startFocusWithProfile25(profile: string): Promise<void> {
-  if (!(await isFocusRunning())) return;
   await runAppleScript(`do shell script "open -g 'focus://focus?profile=${encodeURIComponent(profile)}&minutes=25'"`);
 }
 
 export async function startFocusCustom(hours?: number, minutes?: number, profile?: string): Promise<boolean> {
-  if (!(await isFocusRunning())) return false;
-
   let totalSeconds = 0;
   if (hours !== undefined) {
     totalSeconds += hours * 60 * 60;
@@ -148,7 +143,6 @@ export async function getProfileNames() {
 }
 
 export async function startFocusWithProfile(profileName: string) {
-  if (!(await isFocusRunning())) return;
   await runAppleScript(`do shell script "open -g 'focus://focus?profile=${encodeURIComponent(profileName)}'"`);
 }
 

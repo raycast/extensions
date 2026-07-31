@@ -273,11 +273,19 @@ export default function Command() {
               )}
 
               {emulator.state === EmulatorState.Shutdown && (
-                <Action
-                  title="Start"
-                  icon={Icon.Power}
-                  onAction={() => openEmulator(emulator.name)}
-                />
+                <ActionPanel.Section title="Start">
+                  <Action
+                    title="Start"
+                    icon={Icon.Power}
+                    onAction={() => openEmulator(emulator.name)}
+                  />
+                  <Action
+                    title="Start (Cold Boot)"
+                    icon={Icon.Power}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                    onAction={() => openEmulatorColdBoot(emulator.name)}
+                  />
+                </ActionPanel.Section>
               )}
             </ActionPanel>
           }
@@ -288,13 +296,18 @@ export default function Command() {
 }
 
 function openEmulator(emulator: string) {
+  startEmulator(emulator, undefined, (error) => {
+    showToast(Toast.Style.Failure, "Failed to start emulator", error);
+  });
+}
+
+function openEmulatorColdBoot(emulator: string) {
   startEmulator(
     emulator,
-    (data) => {
-      popToRoot;
-    },
+    undefined,
     (error) => {
-      // showToast(Toast.Style.Failure, error);
-    }
+      showToast(Toast.Style.Failure, "Failed to start emulator", error);
+    },
+    ["-no-snapshot-load"]
   );
 }

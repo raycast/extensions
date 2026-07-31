@@ -68,6 +68,7 @@ export function StatesList(props: {
 
 export function StateListItem(props: { state: State }): React.ReactElement {
   const state = props.state;
+  const areaName = state.area_name;
 
   let icon: Image.ImageLike | undefined;
   const subtitle = (state: State): string | undefined => {
@@ -89,13 +90,12 @@ export function StateListItem(props: { state: State }): React.ReactElement {
         icon = ha.urlJoin(ep);
       }
     }
-    if (shouldDisplayEntityID()) {
-      return extra;
+    if (!shouldDisplayEntityID()) {
+      const parts = [areaName, extra].filter(Boolean);
+      return parts.length > 0 ? parts.join(" | ") : undefined;
     }
-    if (extra) {
-      return `${state.entity_id} | ${extra}`;
-    }
-    return state.entity_id;
+    const parts = [state.entity_id, areaName, extra].filter(Boolean);
+    return parts.length > 0 ? parts.join(" | ") : undefined;
   };
 
   const firstAccessoryTitle = (state: State): string => {

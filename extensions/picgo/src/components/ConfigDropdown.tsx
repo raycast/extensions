@@ -1,5 +1,5 @@
 import { Form, Icon } from "@raycast/api";
-import { IUploaderConfigItem } from "picgo";
+import { type IUploaderConfigItem } from "picgo";
 import { UserUploaderConfig } from "../types/type";
 
 interface Props {

@@ -17,7 +17,9 @@
     "alexandercato",
     "ViGeng",
     "ridemountainpig",
-    "chrismessina"
+    "chrismessina",
+    "clins1994",
+    "alexi.build"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -35,6 +37,14 @@
       "subtitle": "Brew",
       "description": "Search brew formulae & casks",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
       "preferences": [
         {
           "name": "showMetadataPanel",
@@ -60,6 +70,21 @@
       "subtitle": "Brew",
       "description": "Upgrade brew formulae & casks",
       "mode": "view"
+    },
+    {
+      "name": "manage-services",
+      "title": "Manage Services",
+      "subtitle": "Brew",
+      "description": "Start, stop & restart Homebrew services",
+      "mode": "view"
+    },
+    {
+      "name": "services-menu",
+      "title": "Services Menu Bar",
+      "subtitle": "Brew",
+      "description": "Control Homebrew services from the menu bar",
+      "mode": "menu-bar",
+      "interval": "1m"
     },
     {
       "name": "clean-up",

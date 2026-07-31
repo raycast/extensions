@@ -11,7 +11,8 @@
     "LightQuantum",
     "Mmehdi06",
     "abhiy13",
-    "kim-raaschou-nielsen"
+    "kim-raaschou-nielsen",
+    "zhenpewu"
   ],
   "categories": [
     "Productivity",
@@ -30,6 +31,12 @@
       "name": "showConfig",
       "title": "Show Aerospace Config",
       "description": "Show config of the aerospace",
+      "mode": "view"
+    },
+    {
+      "name": "goToWorkspace",
+      "title": "Go to Workspace",
+      "description": "Switch to an Aerospace workspace",
       "mode": "view"
     },
     {
@@ -82,19 +89,28 @@
       ]
     }
   ],
+  "preferences": [
+    {
+      "name": "aerospaceBin",
+      "title": "Aerospace Binary Path",
+      "description": "Path to the aerospace binary. Leave empty to auto-detect from common locations.",
+      "required": false,
+      "type": "textfield",
+      "placeholder": "/opt/homebrew/bin/aerospace"
+    }
+  ],
   "dependencies": {
-    "@iarna/toml": "^3.0.0",
-    "@raycast/api": "^1.69.2",
-    "@raycast/utils": "^1.15.0",
-    "shell-env": "^4.0.1"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.19.1",
+    "smol-toml": "^1.7.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,0 +1,147 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vaulted",
+  "version": "0.1.0",
+  "title": "Vaulted — Secure Secret Sharing",
+  "description": "Zero-knowledge encrypted, self-destructing secret links from your launcher.",
+  "icon": "icon.png",
+  "author": "maxim_novak",
+  "license": "MIT",
+  "categories": [
+    "Security",
+    "Developer Tools",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "create-secret",
+      "title": "Create Secret",
+      "subtitle": "Vaulted",
+      "description": "Encrypt text and get a self-destructing share link. Customize views, expiry, and passphrase.",
+      "mode": "view"
+    },
+    {
+      "name": "create-from-clipboard",
+      "title": "Create Secret from Clipboard",
+      "subtitle": "Vaulted",
+      "description": "Encrypt the current clipboard contents with your default settings and copy the share link back.",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-secret",
+      "title": "View Secret",
+      "subtitle": "Vaulted",
+      "description": "Paste a Vaulted link to decrypt and reveal the secret. Consumes one view.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "title": "Vaulted host",
+      "description": "Base URL of the Vaulted instance. Defaults to https://vaulted.fyi. Use https://... or http://localhost for self-hosted.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://vaulted.fyi"
+    },
+    {
+      "name": "defaultViews",
+      "title": "Default max views",
+      "description": "How many times the secret can be viewed before it's destroyed.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1",
+      "data": [
+        {
+          "title": "1 view",
+          "value": "1"
+        },
+        {
+          "title": "3 views",
+          "value": "3"
+        },
+        {
+          "title": "5 views",
+          "value": "5"
+        },
+        {
+          "title": "10 views",
+          "value": "10"
+        },
+        {
+          "title": "Unlimited (within expiry)",
+          "value": "0"
+        }
+      ]
+    },
+    {
+      "name": "defaultExpiry",
+      "title": "Default expiry",
+      "description": "How long the secret remains available.",
+      "type": "dropdown",
+      "required": false,
+      "default": "24h",
+      "data": [
+        {
+          "title": "1 hour",
+          "value": "1h"
+        },
+        {
+          "title": "24 hours",
+          "value": "24h"
+        },
+        {
+          "title": "7 days",
+          "value": "7d"
+        },
+        {
+          "title": "30 days",
+          "value": "30d"
+        }
+      ]
+    },
+    {
+      "name": "openInBrowser",
+      "title": "Open in browser",
+      "label": "Open the secret link in the browser after creating it",
+      "description": "Useful for visually confirming the link before sending.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "confirmConsume",
+      "title": "Confirm before consuming a view",
+      "label": "Ask before revealing a secret",
+      "description": "Viewing a secret consumes a view. Toggle off if you don't want the confirmation prompt.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@vaulted/crypto": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0",
+    "vitest": "^2.1.9"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

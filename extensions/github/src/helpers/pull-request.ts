@@ -144,13 +144,11 @@ export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState
 export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | null): List.Item.Accessory | null {
   switch (reviewDecision) {
     case "REVIEW_REQUIRED":
-      return { tag: { value: "Review required" } };
+      return { icon: { source: Icon.Eye, tintColor: Color.Yellow }, tooltip: "Review required" };
     case "CHANGES_REQUESTED":
-      return { tag: { value: "Changes requested" } };
+      return { icon: { source: Icon.Pencil, tintColor: Color.Orange }, tooltip: "Changes requested" };
     case "APPROVED":
-      return {
-        tag: { value: "Approved" },
-      };
+      return { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Approved" };
     default:
       return null;
   }

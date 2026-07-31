@@ -10,8 +10,8 @@ import {
   useNavigation,
   Color,
 } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
-import { exec } from "child_process";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { ProjectDropdown } from "./components/ProjectDropdown";
 import { CacheManager, RecentResource, ResourceType, ServiceCounts } from "./utils/CacheManager";
@@ -31,14 +31,7 @@ import { LogsView } from "./services/logs-service";
 import { StreamerModeAction } from "./components/StreamerModeAction";
 import { CloudShellAction } from "./components/CloudShellAction";
 
-const execPromise = promisify(exec);
-
-interface ExtensionPreferences {
-  gcloudPath: string;
-}
-
-// Get configured path (may be empty for auto-detection)
-const CONFIGURED_GCLOUD_PATH = getPreferenceValues<ExtensionPreferences>().gcloudPath;
+const execFilePromise = promisify(execFile);
 
 type ViewMode = "hub" | "compute" | "storage" | "iam" | "network" | "secrets" | "cloudrun" | "cloudfunctions" | "logs";
 
@@ -84,11 +77,12 @@ interface GoogleCloudHubProps {
 }
 
 export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps = {}) {
+  const configuredGcloudPath = getPreferenceValues<Preferences>().gcloudPath;
   const [viewMode, setViewMode] = useState<ViewMode>(initialService || "hub");
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [gcloudPath, setGcloudPath] = useState<string>(CONFIGURED_GCLOUD_PATH || "gcloud");
+  const [gcloudPath, setGcloudPath] = useState<string>(configuredGcloudPath || "gcloud");
 
   const [selectedProject, setSelectedProject] = useState<string | null>(null);
   const [recentResources, setRecentResources] = useState<RecentResource[]>([]);
@@ -96,10 +90,16 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
   const [isLoadingCounts, setIsLoadingCounts] = useState(false);
 
   const { push, pop } = useNavigation();
+  const mountCancelledRef = useRef(false);
+  const countsCancelledRef = useRef(false);
 
   // Check gcloud installation and auth on mount
   useEffect(() => {
+    mountCancelledRef.current = false;
     checkGcloudInstallation();
+    return () => {
+      mountCancelledRef.current = true;
+    };
   }, []);
 
   // Load recent resources
@@ -110,19 +110,24 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
 
   // Load service counts when project changes
   useEffect(() => {
+    countsCancelledRef.current = false;
     if (selectedProject && isAuthenticated) {
       loadServiceCounts(selectedProject);
     }
+    return () => {
+      countsCancelledRef.current = true;
+    };
   }, [selectedProject, isAuthenticated]);
 
   async function checkGcloudInstallation() {
     try {
       // If path is configured, use it; otherwise auto-detect
-      let pathToUse = CONFIGURED_GCLOUD_PATH;
+      let pathToUse = configuredGcloudPath;
 
       if (!pathToUse) {
         // Auto-detect gcloud path
         const detectedPath = await detectGcloudPath();
+        if (mountCancelledRef.current) return;
         if (detectedPath) {
           pathToUse = detectedPath;
           setGcloudPath(detectedPath);
@@ -140,17 +145,19 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
               ? "Download from cloud.google.com/sdk/docs/install"
               : `Install via: ${instructions.command}`;
 
-        setIsLoading(false);
-        setError(`Google Cloud SDK not found. ${message}`);
+        if (!mountCancelledRef.current) {
+          setIsLoading(false);
+          setError(`Google Cloud SDK not found. ${message}`);
+        }
         return;
       }
 
-      // Quote path if it contains spaces
-      const quotedPath = pathToUse.includes(" ") ? `"${pathToUse}"` : pathToUse;
-      await execPromise(`${quotedPath} --version`);
+      await execFilePromise(pathToUse, ["--version"], { timeout: 10000 });
+      if (mountCancelledRef.current) return;
       setGcloudPath(pathToUse);
       checkAuthStatus(pathToUse);
     } catch {
+      if (mountCancelledRef.current) return;
       const instructions = getInstallInstructions();
       setIsLoading(false);
       setError(
@@ -161,12 +168,14 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
 
   async function checkAuthStatus(pathToUse: string) {
     setIsLoading(true);
-    const quotedPath = pathToUse.includes(" ") ? `"${pathToUse}"` : pathToUse;
 
     try {
-      const { stdout } = await execPromise(
-        `${quotedPath} auth list --format="value(account)" --filter="status=ACTIVE"`,
+      const { stdout } = await execFilePromise(
+        pathToUse,
+        ["auth", "list", "--format=value(account)", "--filter=status=ACTIVE"],
+        { timeout: 15000 },
       );
+      if (mountCancelledRef.current) return;
 
       if (stdout.trim()) {
         setIsAuthenticated(true);
@@ -183,7 +192,8 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
         setIsAuthenticated(false);
         setIsLoading(false);
       }
-    } catch (err) {
+    } catch {
+      if (mountCancelledRef.current) return;
       setIsAuthenticated(false);
       setIsLoading(false);
     }
@@ -200,6 +210,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
     setIsLoadingCounts(true);
     try {
       const counts = await fetchResourceCounts(gcloudPath, projectId);
+      if (countsCancelledRef.current) return;
       const countsWithTimestamp: ServiceCounts = { ...counts, timestamp: Date.now() };
       CacheManager.saveServiceCounts(projectId, counts);
       setServiceCounts(countsWithTimestamp);
@@ -207,7 +218,7 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
       console.error("Failed to load service counts:", err);
       // Don't show error toast - counts are non-critical
     } finally {
-      setIsLoadingCounts(false);
+      if (!countsCancelledRef.current) setIsLoadingCounts(false);
     }
   }
 
@@ -250,23 +261,22 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
 
   async function loginWithDifferentAccount() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Logging out..." });
-    const quotedPath = gcloudPath.includes(" ") ? `"${gcloudPath}"` : gcloudPath;
     try {
-      await execPromise(`${quotedPath} auth revoke --all --quiet`);
+      await execFilePromise(gcloudPath, ["auth", "revoke", "--all", "--quiet"], { timeout: 15000 });
       CacheManager.clearAuthCache();
       CacheManager.clearProjectCache();
       setIsAuthenticated(false);
       setSelectedProject(null);
       toast.style = Toast.Style.Success;
       toast.title = "Logged out";
-    } catch (err) {
+    } catch {
       toast.style = Toast.Style.Failure;
       toast.title = "Logout failed";
     }
   }
 
   function openDoctor() {
-    push(<DoctorView configuredPath={CONFIGURED_GCLOUD_PATH} />);
+    push(<DoctorView configuredPath={configuredGcloudPath} />);
   }
 
   function refreshAll() {
@@ -458,61 +468,6 @@ export default function GoogleCloudHub({ initialService }: GoogleCloudHubProps =
             />
           );
         })}
-      </List.Section>
-
-      {/* Settings Section */}
-      <List.Section title="Settings">
-        <List.Item
-          title="Refresh All"
-          subtitle="Reload service counts"
-          icon={{ source: Icon.RotateClockwise, tintColor: Color.Blue }}
-          actions={
-            <ActionPanel>
-              <Action title="Refresh" icon={Icon.RotateClockwise} onAction={refreshAll} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title="Switch Account"
-          subtitle="Log in with a different Google account"
-          icon={{ source: Icon.Person, tintColor: Color.Orange }}
-          actions={
-            <ActionPanel>
-              <Action title="Switch Account" icon={Icon.Person} onAction={loginWithDifferentAccount} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title="Clear Cache"
-          subtitle="Clear all cached data"
-          icon={{ source: Icon.Trash, tintColor: Color.Red }}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Clear Cache"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                onAction={() => {
-                  CacheManager.clearAllCaches();
-                  CacheManager.clearRecentResources();
-                  setRecentResources([]);
-                  setServiceCounts(null);
-                  showToast({ style: Toast.Style.Success, title: "Cache cleared" });
-                }}
-              />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title="Doctor"
-          subtitle="Diagnose gcloud SDK configuration"
-          icon={{ source: Icon.Heartbeat, tintColor: Color.Green }}
-          actions={
-            <ActionPanel>
-              <Action title="Open Doctor" icon={Icon.Heartbeat} onAction={openDoctor} />
-            </ActionPanel>
-          }
-        />
       </List.Section>
     </List>
   );

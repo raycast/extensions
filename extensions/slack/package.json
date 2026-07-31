@@ -11,7 +11,9 @@
     "dev_y0ngha",
     "erayack",
     "clins1994",
-    "stephlv"
+    "stephlv",
+    "artistro08",
+    "andreaselia"
   ],
   "pastContributors": [
     "Elliot67",
@@ -98,7 +100,21 @@
       "title": "Set Status",
       "subtitle": "Slack",
       "description": "Set your status.",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "statusText",
+          "placeholder": "Status text",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "emoji",
+          "placeholder": ":rocket:",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [
@@ -117,6 +133,15 @@
       "required": false,
       "title": "Proxy URL",
       "type": "textfield"
+    },
+    {
+      "title": "AI Message Signature",
+      "label": "Add a Raycast signature to messages written with AI",
+      "description": "Show a subtle Raycast signature below messages written by AI tools.",
+      "name": "showAiMessageSignature",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     },
     {
       "title": "Navigation",
@@ -140,9 +165,19 @@
       "description": "Fetches a channel's history of messages and events."
     },
     {
+      "title": "Read Conversation",
+      "name": "read-conversation",
+      "description": "Read messages from a Slack channel, DM, group DM, user DM, or pasted Slack message permalink. A permalink returns the referenced message and its thread."
+    },
+    {
       "title": "Get Users",
       "name": "get-users",
       "description": "List all users in the Slack team"
+    },
+    {
+      "title": "Find Users",
+      "name": "find-users",
+      "description": "Find Slack users by name, username, display name, or email address. Use this to resolve a person to a user ID before sending a direct message."
     },
     {
       "title": "Set Status",
@@ -158,6 +193,46 @@
       "title": "Search Messages",
       "name": "search-messages",
       "description": "Search all Messages in the Slack team"
+    },
+    {
+      "title": "Read Thread",
+      "name": "read-thread",
+      "description": "Read a bounded page of messages in a Slack thread. Use this when the user asks to summarize, inspect, or answer questions about a specific threaded conversation. Requires the channel ID and the parent message timestamp, which can come from Get Channel History or Search Messages. The response includes hasMore and nextCursor so more messages can be fetched when needed."
+    },
+    {
+      "title": "Open Group DM",
+      "name": "open-group-dm",
+      "description": "Open or resume a Slack group DM with 2 to 8 users. Use Find Users first to resolve each person to a user ID. Do not include the authenticated user. Returns a group conversation ID that can be passed to Send Message or Upload Files."
+    },
+    {
+      "title": "Send Message",
+      "name": "send-message",
+      "description": "Send a Slack message to a channel, group DM, existing DM, or user. Pass a conversation ID or user ID and the message text. When given a user ID, the tool opens or finds the DM first. For messages with file attachments, use Upload Files instead."
+    },
+    {
+      "title": "Update Message",
+      "name": "update-message",
+      "description": "Edit a Slack message posted by the authenticated user. Requires the channel ID, message timestamp, and complete replacement text. Use the permalink or a read/search tool to resolve the message first when needed."
+    },
+    {
+      "title": "Add Reaction",
+      "name": "add-reaction",
+      "description": "Add an emoji reaction to a Slack message. Requires the channel ID, message timestamp, and Slack emoji name. Use Get Emojis to discover custom workspace emoji names."
+    },
+    {
+      "title": "Reply to Thread",
+      "name": "reply-thread",
+      "description": "Post a reply to a Slack thread. Requires the channel ID, the parent message timestamp, and the reply text. Use Read Thread first when context is needed. For replies with file attachments, use Upload Files instead."
+    },
+    {
+      "title": "Get Huddle Link",
+      "name": "get-huddle-link",
+      "description": "Get a Slack Huddle join link for a channel, DM, group DM, or user. Pass a conversation ID or user ID. When given a user ID, the tool opens or finds the DM first."
+    },
+    {
+      "title": "Upload Files",
+      "name": "upload-files",
+      "description": "Upload one or more local files to a Slack channel, DM, group DM, or thread, optionally with message text. Use this instead of Send Message or Reply to Thread when the user asks to attach files. Pass multiple absolute file paths separated by newlines."
     }
   ],
   "ai": {
@@ -211,6 +286,251 @@
             }
           }
         ]
+      },
+      {
+        "input": "@slack reply \"I will take a look\" to this thread: https://example.slack.com/archives/C12345678/p1718899200000100",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "reply-thread",
+              "arguments": {
+                "channel": "C12345678",
+                "threadTs": "1718899200.000100",
+                "text": {
+                  "includes": "I will take a look"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "reply-thread": "success"
+        }
+      },
+      {
+        "input": "@slack reply \"We doubled since this morning 🤯\" to this thread and also send it to the channel: https://example.slack.com/archives/C12345678/p1718899200000100",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "reply-thread",
+              "arguments": {
+                "channel": "C12345678",
+                "threadTs": "1718899200.000100",
+                "text": {
+                  "includes": "We doubled since this morning"
+                },
+                "replyBroadcast": true
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "reply-thread": "success"
+        }
+      },
+      {
+        "input": "@slack react with :thumbsup: to https://example.slack.com/archives/C12345678/p1718899200000100",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-reaction",
+              "arguments": {
+                "channel": "C12345678",
+                "messageTs": "1718899200.000100",
+                "emoji": {
+                  "includes": "thumbsup"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "add-reaction": "success"
+        }
+      },
+      {
+        "input": "@slack edit this message to say \"Updated copy\": https://example.slack.com/archives/C12345678/p1718899200000100",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-message",
+              "arguments": {
+                "channel": "C12345678",
+                "messageTs": "1718899200.000100",
+                "text": {
+                  "includes": "Updated copy"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "update-message": "success"
+        }
+      },
+      {
+        "input": "@slack send this screenshot to Daniel with the message \"Testing Slack attachments\": /Users/me/Desktop/test.png",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-users",
+              "arguments": {
+                "query": {
+                  "includes": "Daniel"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "read-conversation",
+              "arguments": {
+                "conversation": {
+                  "includes": "U12345678"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "upload-files",
+              "arguments": {
+                "channel": {
+                  "includes": "D12345678"
+                },
+                "filePaths": {
+                  "includes": "/Users/me/Desktop/test.png"
+                },
+                "text": {
+                  "includes": "Testing Slack attachments"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "find-users": [
+            {
+              "id": "U12345678",
+              "displayName": "Daniel"
+            }
+          ],
+          "read-conversation": {
+            "channel": "D12345678"
+          },
+          "upload-files": "success"
+        }
+      },
+      {
+        "input": "@slack get me a huddle link with Daniel",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-users",
+              "arguments": {
+                "query": {
+                  "includes": "Daniel"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-huddle-link",
+              "arguments": {
+                "conversation": {
+                  "includes": "U12345678"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "find-users": [
+            {
+              "id": "U12345678",
+              "displayName": "Daniel"
+            }
+          ],
+          "get-huddle-link": {
+            "workspaceId": "T12345678",
+            "channel": "D12345678",
+            "url": "https://app.slack.com/huddle/T12345678/D12345678"
+          }
+        }
+      },
+      {
+        "input": "@slack create a group DM with Alicia and Roy and send them this screenshot: /Users/me/Desktop/test.png",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "find-users",
+              "arguments": {
+                "query": {
+                  "includes": "Alicia"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "find-users",
+              "arguments": {
+                "query": {
+                  "includes": "Roy"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "open-group-dm",
+              "arguments": {
+                "userIds": [
+                  {
+                    "includes": "U12345678"
+                  },
+                  {
+                    "includes": "U87654321"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "upload-files",
+              "arguments": {
+                "channel": {
+                  "includes": "G12345678"
+                },
+                "filePaths": {
+                  "includes": "/Users/me/Desktop/test.png"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "find-users": [
+            {
+              "id": "U12345678",
+              "displayName": "Alicia"
+            },
+            {
+              "id": "U87654321",
+              "displayName": "Roy"
+            }
+          ],
+          "open-group-dm": {
+            "channel": "G12345678",
+            "userIds": [
+              "U12345678",
+              "U87654321"
+            ]
+          },
+          "upload-files": "success"
+        }
       }
     ]
   },

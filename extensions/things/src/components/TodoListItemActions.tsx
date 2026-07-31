@@ -9,15 +9,18 @@ import {
   Keyboard,
   AI,
   environment,
+  useNavigation,
 } from '@raycast/api';
 
 import { AddNewTodo } from '../add-new-todo';
 import { setTodoProperty, deleteProject, deleteTodo, updateTodo, updateProject, handleError } from '../api';
-import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
-import { capitalize } from '../utils';
+import { getChecklistItemsWithAI, getTypeIcon, listItems, statusIcons } from '../helpers';
+import { capitalize, getDateString } from '../utils';
 
 import EditTodo from './EditTodo';
-import { Todo, List as TList, CommandListName, UpdateTodoParams } from '../types';
+import OpenInThings from './OpenInThings';
+import TodoDetail from './TodoDetail';
+import { Todo, List as TList, CommandListName, UpdateTodoParams, UpdateProjectParams } from '../types';
 
 // Match URLs with protocols, with optional //
 const URL_REGEX = /([a-zA-Z][a-zA-Z0-9.+-]+):(?:\/\/\S+|%\S+)/;
@@ -27,7 +30,8 @@ type TodoListItemActionsProps = {
   commandListName: CommandListName;
   tags?: string[];
   lists?: TList[];
-  refreshTodos: () => void;
+  refreshTodos: () => Promise<void>;
+  fromDetail?: boolean;
 };
 
 export default function TodoListItemActions({
@@ -36,7 +40,9 @@ export default function TodoListItemActions({
   commandListName,
   tags,
   lists,
+  fromDetail = false,
 }: TodoListItemActionsProps) {
+  const { pop } = useNavigation();
   const availableTags =
     tags?.filter((tag) => {
       return !todo.tags?.includes(tag);
@@ -46,7 +52,7 @@ export default function TodoListItemActions({
 
   const notesURL = todo.notes.match(URL_REGEX)?.[0];
 
-  async function updateAction(args: UpdateTodoParams, successToastOptions: Toast.Options) {
+  async function updateAction(args: UpdateTodoParams | UpdateProjectParams, successToastOptions: Toast.Options) {
     try {
       if (todo.isProject) {
         await updateProject(todo.id, args);
@@ -58,9 +64,20 @@ export default function TodoListItemActions({
         title: successToastOptions.title,
         message: successToastOptions.message ?? todo.name,
       });
-      refreshTodos();
+      await refreshTodos();
     } catch (error) {
-      handleError(error);
+      await handleError(error);
+    }
+  }
+
+  async function terminalMutation(mutation: () => Promise<unknown>, successTitle: string) {
+    try {
+      await mutation();
+      await showToast({ style: Toast.Style.Success, title: successTitle, message: todo.name });
+      if (fromDetail) pop();
+      await refreshTodos();
+    } catch (error) {
+      await handleError(error);
     }
   }
 
@@ -119,7 +136,7 @@ New title:
     ) {
       await updateAction({ title: newTitle }, { title: 'Made to-do title actionable', message: newTitle });
     } else {
-      toast.hide();
+      await toast.hide();
     }
   }
 
@@ -128,7 +145,11 @@ New title:
   }
 
   async function moveTo(listId: string) {
-    await updateAction({ 'list-id': listId }, { title: 'Made to-do title actionable', message: 'Moved to-do' });
+    if (todo.isProject) {
+      await updateAction({ 'area-id': listId }, { title: 'Moved project' });
+    } else {
+      await updateAction({ 'list-id': listId }, { title: 'Moved to-do' });
+    }
   }
 
   async function addTag(tag: string) {
@@ -144,38 +165,21 @@ New title:
 
   async function deleteToDoOrProject() {
     const isProject = todo.isProject;
+    const confirmed = await confirmAlert({
+      title: isProject ? 'Delete Project' : 'Delete To-Do',
+      message: isProject
+        ? 'Are you sure you want to delete this project?'
+        : 'Are you sure you want to delete this to-do?',
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+    });
+    if (!confirmed) return;
 
-    let title = isProject ? 'Delete Project' : 'Delete To-Do';
-    const message = isProject
-      ? 'Are you sure you want to delete this project?'
-      : 'Are you sure you want to delete this to-do?';
     const deleteFunction = isProject ? deleteProject : deleteTodo;
-
-    if (
-      await confirmAlert({
-        title,
-        message,
-        icon: { source: Icon.Trash, tintColor: Color.Red },
-      })
-    ) {
-      await deleteFunction(todo.id);
-
-      title = isProject ? 'Deleted project' : 'Deleted to-do';
-
-      await showToast({
-        style: Toast.Style.Success,
-        title,
-        message: todo.name,
-      });
-      refreshTodos();
-    }
+    await terminalMutation(() => deleteFunction(todo.id), isProject ? 'Deleted project' : 'Deleted to-do');
   }
 
   function formatDateTime(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    const datePart = `${year}-${month}-${day}`;
+    const datePart = getDateString(date);
 
     // If the user picked a full day, we avoid providing the time, as
     // Things leverages the time part to understand whether a reminder
@@ -192,20 +196,39 @@ New title:
   return (
     <ActionPanel>
       <ActionPanel.Section title={todo.name}>
-        <Action.Open title="Open in Things" icon="things-flat.png" target={`things:///show?id=${todo.id}`} />
+        {fromDetail ? (
+          <OpenInThings id={todo.id} title="Open in Things" />
+        ) : (
+          <Action.Push
+            title="Show Details"
+            icon={Icon.Sidebar}
+            target={
+              <TodoDetail
+                todoId={todo.id}
+                initialTodo={todo}
+                commandListName={commandListName}
+                parentRefresh={refreshTodos}
+                renderActions={(currentTodo, detailRefresh) => (
+                  <TodoListItemActions
+                    todo={currentTodo}
+                    refreshTodos={detailRefresh}
+                    commandListName={commandListName}
+                    lists={lists}
+                    tags={tags}
+                    fromDetail
+                  />
+                )}
+              />
+            }
+          />
+        )}
         {todo.status !== 'completed' && (
           <Action
             title="Mark as Completed"
             icon={statusIcons.completed}
-            onAction={async () => {
-              await setTodoProperty(todo.id, 'status', 'completed');
-              await showToast({
-                style: Toast.Style.Success,
-                title: 'Marked as Completed',
-                message: todo.name,
-              });
-              refreshTodos();
-            }}
+            onAction={() =>
+              terminalMutation(() => setTodoProperty(todo.id, 'status', 'completed'), 'Marked as Completed')
+            }
           />
         )}
 
@@ -214,21 +237,17 @@ New title:
             title="Mark as Canceled"
             icon={statusIcons.canceled}
             shortcut={{ modifiers: ['opt', 'cmd'], key: 'k' }}
-            onAction={async () => {
-              await setTodoProperty(todo.id, 'status', 'canceled');
-              await showToast({
-                style: Toast.Style.Success,
-                title: 'Marked as Canceled',
-                message: todo.name,
-              });
-              refreshTodos();
-            }}
+            onAction={() =>
+              terminalMutation(() => setTodoProperty(todo.id, 'status', 'canceled'), 'Marked as Canceled')
+            }
           />
         )}
+
+        {!fromDetail && <OpenInThings id={todo.id} title="Open in Things" />}
       </ActionPanel.Section>
 
       <ActionPanel.Section>
-        <ActionPanel.Submenu title="Schedule" icon={Icon.Calendar} shortcut={{ modifiers: ['cmd'], key: 's' }}>
+        <ActionPanel.Submenu title="Schedule" icon={Icon.Calendar} shortcut={Keyboard.Shortcut.Common.Save}>
           <Action {...listItems.today} onAction={() => schedule('today')} />
           <Action {...listItems.evening} onAction={() => schedule('evening')} />
           <Action {...listItems.tomorrow} onAction={() => schedule('tomorrow')} />
@@ -254,9 +273,18 @@ New title:
             icon={Icon.ArrowRight}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
           >
-            {lists.map((list) => {
-              return <Action {...listItems.list(list)} key={list.id} onAction={() => moveTo(list.id)} />;
-            })}
+            {lists
+              .filter((list) => !todo.isProject || list.type === 'area')
+              .map((list) => {
+                return (
+                  <Action
+                    title={list.name}
+                    icon={getTypeIcon(list.type)}
+                    key={list.id}
+                    onAction={() => moveTo(list.id)}
+                  />
+                );
+              })}
           </ActionPanel.Submenu>
         ) : null}
 
@@ -290,17 +318,19 @@ New title:
           <Action
             title="Generate Checklist with AI"
             icon={Icon.BulletPoints}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
             onAction={generateChecklistWithAI}
           />
         )}
 
-        <Action
-          title="Make To-Do Actionable with AI"
-          icon={Icon.Text}
-          shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
-          onAction={makeTodoActionable}
-        />
+        {environment.canAccess(AI) && (
+          <Action
+            title="Make To-Do Actionable with AI"
+            icon={Icon.Text}
+            shortcut={{ modifiers: ['cmd', 'shift'], key: 'a' }}
+            onAction={makeTodoActionable}
+          />
+        )}
 
         <Action
           title="Delete"
@@ -316,7 +346,7 @@ New title:
           <Action.OpenInBrowser
             title="Open URL from Notes"
             url={notesURL}
-            shortcut={{ modifiers: ['cmd', 'shift'], key: 'o' }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
           <Action.CopyToClipboard title="Copy URL from Notes" content={notesURL} />
         </ActionPanel.Section>
@@ -345,7 +375,6 @@ New title:
           <Action.Open
             title="Open Project in Things"
             icon="things-flat.png"
-            shortcut={{ modifiers: ['cmd'], key: 'o' }}
             target={`things:///show?id=${todo.project.id}`}
           />
           <Action.CopyToClipboard title="Copy Project URL" content={`things:///show?id=${todo.project.id}`} />
@@ -369,13 +398,13 @@ New title:
         <Action.Open
           title={`Open ${capitalize(commandListName)} List in Things`}
           icon="things-flat.png"
-          shortcut={{ modifiers: ['ctrl'], key: 'o' }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           target={`things:///show?id=${commandListName.toLowerCase()}`}
         />
         <Action.Push
           title="Add New To-Do"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ['cmd'], key: 'n' }}
+          shortcut={Keyboard.Shortcut.Common.New}
           target={<AddNewTodo commandListName={commandListName} />}
         />
         <Action.CopyToClipboard title="Copy List URL" content={`things:///show?id=${commandListName.toLowerCase()}`} />
@@ -384,7 +413,7 @@ New title:
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ['cmd'], key: 'r' }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={refreshTodos}
         />
       </ActionPanel.Section>

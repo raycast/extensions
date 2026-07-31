@@ -6,7 +6,7 @@ import { Todo } from '../types';
 
 type EditTodoProps = {
   todo: Todo;
-  refreshTodos: () => void;
+  refreshTodos: () => Promise<void>;
 };
 
 export default function EditTodo({ todo, refreshTodos }: EditTodoProps) {
@@ -20,10 +20,10 @@ export default function EditTodo({ todo, refreshTodos }: EditTodoProps) {
         } else {
           await updateTodo(todo.id, { notes: values.notes, title: values.title });
         }
-        refreshTodos();
+        await refreshTodos();
         pop();
       } catch (error) {
-        handleError(error);
+        await handleError(error);
       }
     },
     initialValues: { title: todo.name, notes: todo.notes },

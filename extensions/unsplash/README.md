@@ -11,9 +11,7 @@ A [Raycast](https://raycast.com/) extension that lets you communicate with Unspl
 
 ### Installation
 
-You will need some additional steps to install this plugin.
-
-- Create an app on [Unsplash developers page](https://unsplash.com/developers).
+- Create an app on the [Unsplash developers page](https://unsplash.com/developers).
 - Copy your access key and secret key.
 - Scroll down to the "Redirect URI & Permissions" section:
   - Set the "Redirect URI" field to: `https://raycast.com/redirect`

@@ -10,7 +10,8 @@
     "xilopaint",
     "ridemountainpig",
     "litomore",
-    "yusifaliyevpro"
+    "yusifaliyevpro",
+    "shivraj-roy"
   ],
   "platforms": [
     "macOS",
@@ -34,6 +35,17 @@
         "lock",
         "freeze",
         "dirty"
+      ],
+      "preferences": [
+        {
+          "name": "lockFnKeys",
+          "title": "Lock Function Row Keys",
+          "description": "Also block function row keys while cleaning. Original setting is restored on unlock. macOS Tahoe (26+) only.",
+          "type": "checkbox",
+          "label": "Lock Fn / function row keys (macOS Tahoe only)",
+          "default": false,
+          "required": false
+        }
       ]
     }
   ],

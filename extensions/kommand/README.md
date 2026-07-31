@@ -16,11 +16,7 @@ Displays all saved keyboard shortcuts for the currently active application. Shor
 
 ### Search All Shortcuts
 
-Search through your entire shortcut library across all applications. Useful for quickly finding a specific shortcut when you can't remember which app it belongs to.
-
-### Show Global Shortcuts
-
-Displays shortcuts marked as global, which work across all applications regardless of which app is in the foreground.
+Search through your entire shortcut library across all applications. Useful for quickly finding a specific shortcut when you can't remember which app it belongs to. Use the dropdown in the search bar to switch between **All Shortcuts** and **Global Only**.
 
 ## Features
 

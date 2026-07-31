@@ -1,5 +1,23 @@
 # SteamGridDB
 
+## [Maintenance] - 2026-07-19
+
+- Use Ky instead of fetch for better error handling and request management
+- Bump all dependencies to the latest
+
+## [Enhancements] - 2026-07-18
+
+- Add icons to the content type dropdown
+- Fix resetting to Grids while switching types bug
+- Add image detail, download, and browser actions, with download progress and completion feedback.
+- Add configurable download path preference
+- Add toggleable preference to reveal file after download
+- Replaced some dependencies with other methods
+
+## [Fix image type fallback] - 2026-05-20
+
+- Prevent a crash when the selected image type is missing or unexpected.
+
 ## [Maintenance] - 2025-07-11
 
 - Change the default Enter key behavior to Download Image

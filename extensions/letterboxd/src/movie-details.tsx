@@ -1,7 +1,7 @@
 import React from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { AsyncStatus, fetchMovieDetails } from "./letterboxd-api";
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail } from "@raycast/api";
 import { STRINGS } from "./strings";
 import type { MovieDetails, Review } from "./types";
 import { ErrorScreen } from "./components/error-screen";
@@ -12,6 +12,17 @@ interface MovieDetailsProps {
   movieTitle: string;
   qualifier: string;
 }
+
+const HTML_ATTRIBUTE_ESCAPES: Record<string, string> = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+};
+
+const escapeHtmlAttribute = (value: string): string =>
+  value.replace(/[&<>"']/g, (character) => HTML_ATTRIBUTE_ESCAPES[character]);
 
 export default function MovieDetails(props: MovieDetailsProps) {
   const { movieTitle, qualifier } = props;
@@ -45,30 +56,26 @@ export default function MovieDetails(props: MovieDetailsProps) {
 }
 
 const getMarkdown = (data: MovieDetails): string => {
+  const ratingHistogramMarkdown = getRatingsHistogramMarkdown(data);
+
   return `
   # ${data.title}
   by ${data.director}
-  ${data.ratingHistogram?.rating ? `\n\`${data.ratingHistogram?.rating?.average} stars\` based on \`${humanizeInteger(data.ratingHistogram?.rating?.count)}\` reviews ` : ""}
+  ${data.ratingHistogram?.rating ? `\n\`${data.ratingHistogram.rating.average} stars\` based on \`${humanizeInteger(data.ratingHistogram.rating.count)}\` ratings ` : ""}
   ${data.ratingHistogram?.fans ? `\n\`${humanizeInteger(data.ratingHistogram.fans)}\` fans` : ""}
 
-  <img src="${data.posterUrl}" alt="Image" height="230"/>
+  ${data.posterUrl ? `<img src="${escapeHtmlAttribute(data.posterUrl)}" alt="${escapeHtmlAttribute(data.title)}" height="230"/>` : ""}
 
   ${convertHtmlToCommonMark(data.description)}
 
-  ##
-
-  ${getRatingsHistogramMarkdown(data)}  
-
-  ##
-  ---
-  ##
+  ${ratingHistogramMarkdown ? `##\n\n${ratingHistogramMarkdown}\n\n##\n---\n##` : ""}
 
   ${data.reviews?.map((review) => getReviewsMarkdown(review)).join("")}
   `;
 };
 
 const getRatingsHistogramMarkdown = (data: MovieDetails): string => {
-  if (!data.ratingHistogram) {
+  if (!data.ratingHistogram?.histogram.length) {
     return "";
   }
   const numberWithCommas = (x: number) => {
@@ -179,7 +186,7 @@ function Metadata(props: MetadataProps) {
           <Detail.Metadata.TagList.Item
             key={genre}
             text={genre}
-            color={"#ecf0f1"}
+            color={Color.SecondaryText}
           />
         ))}
       </Detail.Metadata.TagList>

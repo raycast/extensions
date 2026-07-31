@@ -1,6 +1,5 @@
 import type { Keyboard } from "@raycast/api";
 import { Action, getPreferenceValues } from "@raycast/api";
-import type { ExtensionPreferences } from "@/types";
 
 type Registries = "yarn" | "npm" | "pnpm" | "bun";
 interface RegistryItem {

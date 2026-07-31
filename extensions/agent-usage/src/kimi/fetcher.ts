@@ -1,53 +1,40 @@
 import { KimiUsage, KimiError } from "./types";
 import { httpFetch } from "../agents/http";
-import { createTokenBasedHook } from "../agents/hooks";
 
-const KIMI_USAGE_API = "https://www.kimi.com/apiv2/kimi.gateway.billing.v1.BillingService/GetUsages";
+export const KIMI_OPENCODE_KEY = "kimi-for-coding";
 
-const KIMI_HEADERS = {
-  Accept: "application/json",
-  "Content-Type": "application/json",
-  "User-Agent":
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-};
+const KIMI_USAGE_API = "https://api.kimi.com/coding/v1/usages";
 
-async function fetchKimiUsage(token: string): Promise<{ usage: KimiUsage | null; error: KimiError | null }> {
-  const { data, error } = await httpFetch({
-    url: KIMI_USAGE_API,
-    method: "POST",
-    token,
-    headers: KIMI_HEADERS,
-    body: JSON.stringify({ scope: ["FEATURE_CODING"] }),
-  });
-  if (error) return { usage: null, error };
-  return parseKimiApiResponse(data);
-}
+// --- API response interfaces ---
 
-interface KimiApiUsage {
-  scope: string;
-  detail: {
-    limit: string;
-    used: string;
-    remaining: string;
-    resetTime: string;
-  };
-  limits?: Array<{
-    window: {
-      duration: number;
-      timeUnit: string;
-    };
-    detail: {
-      limit: string;
-      used: string;
-      remaining: string;
-      resetTime: string;
-    };
-  }>;
+interface KimiApiUsageDetail {
+  limit: number | string;
+  used: number | string;
+  remaining: number | string;
+  resetTime: string;
 }
 
 interface KimiApiResponse {
-  usages?: KimiApiUsage[];
+  usage?: KimiApiUsageDetail;
+  limits?: Array<{
+    window: { duration: number; timeUnit: string };
+    detail: KimiApiUsageDetail;
+  }>;
 }
+
+// --- Helpers ---
+
+function toInt(value: number | string): number {
+  return typeof value === "number" ? value : parseInt(value, 10);
+}
+
+function toWindowMinutes(duration: number, timeUnit: string): number {
+  if (timeUnit === "TIME_UNIT_HOUR") return duration * 60;
+  if (timeUnit === "TIME_UNIT_DAY") return duration * 1440;
+  return duration; // TIME_UNIT_MINUTE or unknown
+}
+
+// --- Parser ---
 
 function parseKimiApiResponse(data: unknown): { usage: KimiUsage | null; error: KimiError | null } {
   try {
@@ -56,46 +43,51 @@ function parseKimiApiResponse(data: unknown): { usage: KimiUsage | null; error: 
     }
 
     const response = data as KimiApiResponse;
-    const codingUsage = response.usages?.find((u) => u.scope === "FEATURE_CODING");
 
-    if (!codingUsage) {
-      return { usage: null, error: { type: "parse_error", message: "No coding usage data found in API response" } };
+    if (!response.usage) {
+      return { usage: null, error: { type: "parse_error", message: "No usage field in API response" } };
     }
 
-    const weeklyDetail = codingUsage.detail;
-    const rateLimitData = codingUsage.limits?.[0];
-
-    if (!rateLimitData) {
-      return { usage: null, error: { type: "parse_error", message: "No rate limit data found in API response" } };
-    }
+    const u = response.usage;
+    const firstLimit = response.limits?.[0];
 
     const usage: KimiUsage = {
-      weeklyUsage: {
-        limit: parseInt(weeklyDetail.limit, 10),
-        used: parseInt(weeklyDetail.used, 10),
-        remaining: parseInt(weeklyDetail.remaining, 10),
-        resetTime: weeklyDetail.resetTime,
-      },
-      rateLimit: {
-        windowMinutes: rateLimitData.window.duration,
-        limit: parseInt(rateLimitData.detail.limit, 10),
-        used: parseInt(rateLimitData.detail.used, 10),
-        remaining: parseInt(rateLimitData.detail.remaining, 10),
-        resetTime: rateLimitData.detail.resetTime,
-      },
+      limit: toInt(u.limit),
+      used: toInt(u.used),
+      remaining: toInt(u.remaining),
+      resetTime: u.resetTime,
+      rateLimit: firstLimit
+        ? {
+            windowMinutes: toWindowMinutes(firstLimit.window.duration, firstLimit.window.timeUnit),
+            limit: toInt(firstLimit.detail.limit),
+            used: toInt(firstLimit.detail.used),
+            remaining: toInt(firstLimit.detail.remaining),
+            resetTime: firstLimit.detail.resetTime,
+          }
+        : undefined,
     };
 
     return { usage, error: null };
-  } catch (error) {
+  } catch (err) {
     return {
       usage: null,
-      error: { type: "parse_error", message: error instanceof Error ? error.message : "Failed to parse API response" },
+      error: {
+        type: "parse_error",
+        message: err instanceof Error ? err.message : "Failed to parse API response",
+      },
     };
   }
 }
 
-export const useKimiUsage = createTokenBasedHook<KimiUsage, KimiError>({
-  preferenceKey: "kimiAuthToken",
-  agentName: "Kimi",
-  fetcher: fetchKimiUsage,
-});
+// --- Core fetcher ---
+
+export async function fetchKimiUsage(token: string): Promise<{ usage: KimiUsage | null; error: KimiError | null }> {
+  const { data, error } = await httpFetch({
+    url: KIMI_USAGE_API,
+    method: "GET",
+    token,
+    headers: { Accept: "application/json" },
+  });
+  if (error) return { usage: null, error };
+  return parseKimiApiResponse(data);
+}

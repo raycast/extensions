@@ -362,7 +362,7 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       {autoMergeAllowed && <Form.Checkbox {...itemProps.autoMerge} label="Enable auto-merge" />}
 
       {autoMergeAllowed && values.autoMerge && allowedMergeMethods.length > 1 && (
-        <Form.Dropdown {...itemProps.autoMergeMethod} title="Auto-Merge Method">
+        <Form.Dropdown {...itemProps.autoMergeMethod} title="Auto-merge Method">
           {allowedMergeMethods.map((method) => (
             <Form.Dropdown.Item key={method} title={getMergeMethodTitle(method)} value={method} />
           ))}

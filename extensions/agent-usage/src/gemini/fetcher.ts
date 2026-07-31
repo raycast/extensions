@@ -1,7 +1,7 @@
 import { GeminiUsage, GeminiError, GeminiModelQuota } from "./types";
 import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth";
-import { createSimpleHook } from "../agents/hooks";
 import { formatResetTime } from "../agents/format";
+import { decodeJwtPayload } from "../agents/jwt";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
@@ -23,6 +23,16 @@ interface OAuthCreds {
   expiry_date: number;
 }
 
+/**
+ * Stable identity of the locally configured Gemini account, for cache
+ * invalidation. The refresh token survives access-token rotation and changes
+ * when the user re-authenticates as a different account.
+ */
+export function readGeminiAuthKey(): string {
+  const creds = readJsonFile<OAuthCreds>(OAUTH_CREDS_PATH);
+  return creds?.refresh_token ?? creds?.access_token ?? "";
+}
+
 function readJsonFile<T>(filePath: string): T | null {
   try {
     if (!fs.existsSync(filePath)) return null;
@@ -38,26 +48,6 @@ function writeJsonFile<T>(filePath: string, data: T): void {
     fs.writeFileSync(filePath, JSON.stringify(data, null, 2), "utf-8");
   } catch {
     // Ignore write errors
-  }
-}
-
-function decodeJwtPayload(token: string): Record<string, unknown> | null {
-  try {
-    const parts = token.split(".");
-    if (parts.length !== 3) return null;
-
-    // Convert base64url to base64
-    let base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    // Add padding if needed
-    const padding = base64.length % 4;
-    if (padding) {
-      base64 += "=".repeat(4 - padding);
-    }
-
-    const payload = Buffer.from(base64, "base64").toString("utf-8");
-    return JSON.parse(payload);
-  } catch {
-    return null;
   }
 }
 
@@ -237,7 +227,7 @@ async function fetchQuota(
   }
 }
 
-async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: GeminiError | null }> {
+export async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: GeminiError | null }> {
   // Check auth type
   const settings = readJsonFile<{ authType?: string; security?: { auth?: { selectedType?: string } } }>(SETTINGS_PATH);
   const authType = resolveGeminiAuthType(settings);
@@ -325,5 +315,3 @@ async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: G
     };
   }
 }
-
-export const useGeminiUsage = createSimpleHook<GeminiUsage, GeminiError>({ fetcher: fetchGeminiUsage });

@@ -4,9 +4,6 @@ import { useEffect, useState } from "react";
 import { getPreferenceValues } from "@raycast/api";
 import type { SearchRepositoriesResponse } from "@/types";
 
-const preferenceValues = getPreferenceValues<ExtensionPreferences>();
-const octokit = new Octokit({ request: { fetch }, auth: preferenceValues.token, baseUrl: preferenceValues.baseUrl });
-
 const SEARCH_REPOSITORIES_QUERY = `
 query SearchRepositories($searchText: String!) {
   search(query: $searchText, type: REPOSITORY, first: 50) {
@@ -36,14 +33,17 @@ query SearchRepositories($searchText: String!) {
   }
 }`;
 
-function buildSearchText(baseSearchText?: string): string | undefined {
+function buildSearchText(
+  baseSearchText: string | undefined,
+  prefs: { users?: string; includeForks?: boolean; additionalFilters?: string },
+): string | undefined {
   if (!baseSearchText) {
     return;
   }
 
   const searchTextParts: string[] = [];
-  if (preferenceValues.users) {
-    const users = preferenceValues.users
+  if (prefs.users) {
+    const users = prefs.users
       .split(",")
       .map((user) => user.trim())
       .filter((user) => user.length > 0);
@@ -53,12 +53,12 @@ function buildSearchText(baseSearchText?: string): string | undefined {
     }
   }
 
-  if (preferenceValues.includeForks) {
+  if (prefs.includeForks) {
     searchTextParts.push("fork:true");
   }
 
-  if (preferenceValues.additionalFilters) {
-    searchTextParts.push(preferenceValues.additionalFilters);
+  if (prefs.additionalFilters) {
+    searchTextParts.push(prefs.additionalFilters);
   }
 
   searchTextParts.push(baseSearchText);
@@ -66,7 +66,8 @@ function buildSearchText(baseSearchText?: string): string | undefined {
   return searchTextParts.join(" ");
 }
 
-export function useRepositories(baseSearchText: string | undefined) {
+export function useRepositories(baseSearchText: string | undefined, token: string, baseUrl?: string) {
+  const prefs = getPreferenceValues<{ users?: string; includeForks?: boolean; additionalFilters?: string }>();
   const [state, setState] = useState<{
     data?: SearchRepositoriesResponse["search"];
     error?: Error;
@@ -74,19 +75,20 @@ export function useRepositories(baseSearchText: string | undefined) {
   }>({ isLoading: false });
 
   useEffect(() => {
-    if (!baseSearchText) {
+    if (!baseSearchText || !token) {
       setState({ isLoading: false });
       return;
     }
 
     let isCanceled = false;
+    const octokit = new Octokit({ request: { fetch }, auth: token, baseUrl: baseUrl ?? undefined });
 
     async function fetchData() {
       setState((oldState) => ({ ...oldState, isLoading: true }));
 
       try {
         const { search } = await octokit.graphql<SearchRepositoriesResponse>(SEARCH_REPOSITORIES_QUERY, {
-          searchText: buildSearchText(baseSearchText),
+          searchText: buildSearchText(baseSearchText, prefs),
         });
 
         if (!isCanceled) {
@@ -111,7 +113,7 @@ export function useRepositories(baseSearchText: string | undefined) {
     return () => {
       isCanceled = true;
     };
-  }, [baseSearchText]);
+  }, [baseSearchText, token, baseUrl]);
 
   return { ...state };
 }

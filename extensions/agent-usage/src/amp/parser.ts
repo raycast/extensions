@@ -1,5 +1,7 @@
 import { AmpUsage, AmpError } from "./types";
 
+const NOT_LOGGED_IN_SIGNALS = ["not logged in", "please sign in", "unauthenticated", "login required"];
+
 // 检测错误类型
 export function detectAmpError(output: string): AmpError | null {
   const cleanOutput = output.toLowerCase();
@@ -8,20 +10,16 @@ export function detectAmpError(output: string): AmpError | null {
     return { type: "not_found", message: "Amp CLI not found. Please install it first." };
   }
 
-  if (
-    cleanOutput.includes("not logged in") ||
-    cleanOutput.includes("login required") ||
-    cleanOutput.includes("unauthorized")
-  ) {
-    return { type: "not_logged_in", message: "Not logged in. Please run 'amp login' first." };
-  }
-
-  if (cleanOutput.includes("signed in as") === false && output.trim().length > 0) {
-    // 有输出但没有登录信息，可能是未登录
+  if (NOT_LOGGED_IN_SIGNALS.some((signal) => cleanOutput.includes(signal))) {
     return { type: "not_logged_in", message: "Not logged in. Please run 'amp login' first." };
   }
 
   return null;
+}
+
+function clampPercent(value: number): number {
+  if (!Number.isFinite(value)) return 0;
+  return Math.min(100, Math.max(0, value));
 }
 
 export function parseAmpUsage(output: string): { usage: AmpUsage | null; error: AmpError | null } {
@@ -50,23 +48,23 @@ export function parseAmpUsage(output: string): { usage: AmpUsage | null; error: 
   const email = emailMatch[1];
   const nickname = emailMatch[2] || "";
 
-  // Parse Amp Free line
-  // Format: "Amp Free: $15/$15 remaining" where first number is REMAINING, second is TOTAL
+  // Amp Free: 100% remaining today (resets daily) - https://...
   const ampFreeLine = lines.find((line) => line.includes("Amp Free:")) || "";
-  const ampFreeMatch = ampFreeLine.match(/Amp Free:\s*\$([\d.]+)\/\$([\d.]+)/);
-  const ampFreeRemaining = ampFreeMatch?.[1] ? parseFloat(ampFreeMatch[1]) : 0;
-  const ampFreeTotal = ampFreeMatch?.[2] ? parseFloat(ampFreeMatch[2]) : 0;
-  const ampFreeUsed = ampFreeTotal - ampFreeRemaining;
+  const ampFreeMatch = ampFreeLine.match(/Amp Free:\s*([\d.]+)%\s*remaining(?:\s+today)?(?:\s+\(([^)]+)\))?/i);
+  if (!ampFreeMatch) {
+    return {
+      usage: null,
+      error: {
+        type: "unknown",
+        message: "Failed to parse Amp Free usage. Please check if the format has changed.",
+      },
+    };
+  }
 
-  // Parse replenish rate
-  const replenishMatch = ampFreeLine.match(/replenishes\s+\+\$([\d.]+)\/hour/);
-  const replenishRate = replenishMatch?.[1] ? `$${replenishMatch[1]}/hour` : undefined;
+  const percentRemaining = clampPercent(parseFloat(ampFreeMatch[1]));
+  const resetNote = ampFreeMatch[2]?.trim() || undefined;
 
-  // Parse bonus
-  const bonusMatch = ampFreeLine.match(/\[(.+?)\]/);
-  const bonus = bonusMatch?.[1];
-
-  // Parse Individual credits line
+  // Individual credits: $10 remaining ...
   const creditsLine = lines.find((line) => line.includes("Individual credits:")) || "";
   const creditsMatch = creditsLine.match(/Individual credits:\s*\$([\d.]+)/);
   const creditsRemaining = creditsMatch?.[1] ? parseFloat(creditsMatch[1]) : 0;
@@ -75,11 +73,8 @@ export function parseAmpUsage(output: string): { usage: AmpUsage | null; error: 
     email,
     nickname,
     ampFree: {
-      used: ampFreeUsed,
-      total: ampFreeTotal,
-      unit: "$",
-      replenishRate,
-      bonus,
+      percentRemaining,
+      resetNote,
     },
     individualCredits: {
       remaining: creditsRemaining,

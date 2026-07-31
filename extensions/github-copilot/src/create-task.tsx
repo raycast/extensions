@@ -14,7 +14,7 @@ import {
 import { FormValidation, showFailureToast, useForm, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
-import { BranchDropdown, RepositoryDropdown, CustomAgentsDropdown } from "./components";
+import { BranchDropdown, RepositoryDropdown, CustomAgentsDropdown, cacheRepository } from "./components";
 import { useViewer } from "./hooks/useViewer";
 import { provider, reauthorize } from "./lib/oauth";
 import { createTask } from "./services/copilot";
@@ -87,6 +87,7 @@ function Command() {
           },
         });
 
+        cacheRepository(values.repository);
         await popToRoot();
       } catch (error) {
         await showFailureToast(error, { title: "Failed creating task" });
@@ -115,7 +116,11 @@ function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.TextArea title="Prompt" placeholder="Describe a coding task to work on" {...itemProps.prompt} />
+      <Form.TextArea
+        title="Prompt"
+        placeholder={"Give Copilot a background task to work on.\nIf you want Copilot to open a PR, just ask."}
+        {...itemProps.prompt}
+      />
       <RepositoryDropdown
         organizations={data?.organizations.nodes.map((org) => org.login)}
         itemProps={itemProps.repository}

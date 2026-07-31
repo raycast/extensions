@@ -1,5 +1,17 @@
 # Dia Changelog
 
+## [Configurable Search Engine] - 2026-06-11
+
+- Added a search engine preference for Search Dia suggestions and web search fallback actions.
+
+## [Fix bookmark opening] - 2026-05-21
+
+- Fixed bookmark results failing to open in Dia on newer Dia versions.
+
+## [Fixed SQL query escaping] - 2026-03-27
+
+- Fixed single quote escaping in SQL queries to use proper SQL string literals instead of double quotes
+
 ## [Fix tab fetching and JSON parsing] - 2026-03-12
 
 - Fix unescaped quotes in JSON from AppleScript so tab data parses correctly

@@ -65,7 +65,7 @@
       "description": "Replace Twitter URLs."
     },
     {
-      "name": "replace",
+      "name": "replaceReddit",
       "label": "Reddit Links",
       "required": false,
       "default": true,
@@ -79,6 +79,14 @@
       "default": true,
       "type": "checkbox",
       "description": "Replace TikTok URLs."
+    },
+    {
+      "name": "replaceBluesky",
+      "label": "Bluesky Links",
+      "required": false,
+      "default": true,
+      "type": "checkbox",
+      "description": "Replace Bluesky URLs."
     }
   ],
   "dependencies": {
@@ -100,5 +108,11 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "contributors": [
+    "based"
+  ],
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,5 +1,6 @@
 import { Icon, List } from "@raycast/api";
 import { TypeChartType } from "../types";
+import { getLocalizedName } from "../utils";
 
 export function TypeDetail({
   type,
@@ -9,7 +10,7 @@ export function TypeDetail({
   allTypes: TypeChartType[];
 }) {
   // Use the localized name if available
-  const typeName = type.typenames[0]?.name || type.name;
+  const typeName = getLocalizedName(type.typenames, type.name);
 
   // OFFENSE: When this type attacks others
   const attacking = {
@@ -29,7 +30,7 @@ export function TypeDetail({
     const factor = efficacyMap.has(target.id)
       ? efficacyMap.get(target.id)
       : 100;
-    const targetName = target.typenames[0]?.name || target.name;
+    const targetName = getLocalizedName(target.typenames, target.name);
 
     if (factor === 200)
       attacking.superEffective.push({
@@ -63,7 +64,7 @@ export function TypeDetail({
 
   allTypes.forEach((attacker) => {
     if (attacker.id >= 10000) return;
-    const attackerName = attacker.typenames[0]?.name || attacker.name;
+    const attackerName = getLocalizedName(attacker.typenames, attacker.name);
 
     const eff = attacker.typeefficacies.find(
       (e) => e.target_type_id === type.id,

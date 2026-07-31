@@ -5,18 +5,22 @@ interface CustomResolutionsListProps {
   customResolutions: Resolution[];
   onResizeWindow: (width: number, height: number) => Promise<void>;
   onDeleteResolution: (resolution: Resolution) => Promise<void>;
+  onEditResolution: (resolution: Resolution) => void;
   onToggleStar: (resolution: Resolution) => Promise<void>;
-  selectedItemId?: string | null | undefined;
   starredResolutions: Resolution[];
+  searchText: string;
+  selectedItemId?: string;
 }
 
 export function CustomResolutionsList({
   customResolutions,
   onResizeWindow,
   onDeleteResolution,
+  onEditResolution,
   onToggleStar,
-  selectedItemId,
   starredResolutions,
+  searchText,
+  selectedItemId,
 }: CustomResolutionsListProps) {
   if (customResolutions.length === 0) {
     return null;
@@ -29,9 +33,11 @@ export function CustomResolutionsList({
       sectionTitle="Custom Sizes"
       showDeleteAction
       onDeleteResolution={onDeleteResolution}
+      onEditResolution={onEditResolution}
       onToggleStar={onToggleStar}
-      selectedItemId={selectedItemId}
       starredResolutions={starredResolutions}
+      searchText={searchText}
+      selectedItemId={selectedItemId}
     />
   );
 }

@@ -360,3 +360,7 @@ Before committing React component changes:
 - **Under Development**: Extension is actively being developed with experimental features
 - **Unofficial**: Not affiliated with Anthropic or ccusage maintainers
 - **Raycast Store**: Use `npm run publish` to submit to Raycast Store (not npm publish)
+
+## Conventions
+
+- **Changelog dates**: Use `{PR_MERGE_DATE}` as the date placeholder in `CHANGELOG.md` entries. The Raycast extensions repo tooling substitutes it automatically when the PR is merged.

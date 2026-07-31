@@ -1,5 +1,6 @@
 import { toshl } from "../utils/toshl";
-import { parseAmount, formatDisplayAmount, AI_INSTRUCTIONS } from "../utils/helpers";
+import { parseAmount, formatDisplayAmount, AI_INSTRUCTIONS, parseExtraJsonForTool } from "../utils/helpers";
+import type { TransactionInput } from "../utils/types";
 import { format } from "date-fns";
 
 type Input = {
@@ -33,9 +34,26 @@ type Input = {
    * Default to today if not provided.
    */
   date?: string;
+  /** Mark as completed (e.g. bill already paid). */
+  completed?: boolean;
+  /** JSON object string for Toshl private `extra` metadata. */
+  extraJson?: string;
+  /** Toshl saved location id (from list-entry-locations or app). */
+  locationId?: string;
+  /** Start a repeating expense (requires repeatFrequency). */
+  isRecurring?: boolean;
+  repeatFrequency?: "daily" | "weekly" | "monthly" | "yearly";
+  repeatInterval?: string;
+  repeatEndDate?: string;
+  repeatCount?: string;
 };
 
 export default async function addExpense(input: Input) {
+  const extraParsed = parseExtraJsonForTool(input.extraJson);
+  if (!extraParsed.ok) {
+    return { success: false, message: extraParsed.message, _instructions: AI_INSTRUCTIONS };
+  }
+
   // Get user's default currency from Toshl API
   const apiDefaultCurrency = await toshl.getDefaultCurrency();
   const { amount, description, categoryId, tagIds, accountId, currency = apiDefaultCurrency, date } = input;
@@ -54,20 +72,30 @@ export default async function addExpense(input: Input) {
   const expenseTags = allTags.filter((t) => t.type === "expense");
 
   // Build payload
-  const payload: {
-    amount: number;
-    currency: { code: string };
-    date: string;
-    desc: string;
-    category?: string;
-    tags?: string[];
-    account?: string;
-  } = {
+  const payload: TransactionInput = {
     amount: -Math.abs(parsedAmount),
     currency: { code: currency },
     date: parsedDate,
     desc: description,
   };
+  if (input.completed === true) payload.completed = true;
+  if (extraParsed.value) payload.extra = extraParsed.value;
+  if (input.locationId?.trim()) {
+    payload.location = { id: input.locationId.trim() };
+  }
+
+  if (input.isRecurring && input.repeatFrequency) {
+    payload.repeat = {
+      frequency: input.repeatFrequency,
+      interval: parseInt(input.repeatInterval || "1", 10) || 1,
+      start: parsedDate,
+    };
+    if (input.repeatEndDate?.trim()) payload.repeat.end = input.repeatEndDate.trim();
+    if (input.repeatCount?.trim()) {
+      const count = parseInt(input.repeatCount, 10);
+      if (!isNaN(count) && count > 0) payload.repeat.count = count;
+    }
+  }
 
   // Use category ID if provided
   let matchedCategory: { id: string; name: string } | undefined;

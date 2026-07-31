@@ -3,6 +3,7 @@ import { getAccessToken } from "@raycast/utils";
 export interface Model {
   name: string;
   id: string;
+  model_picker_category?: string;
   billing?: {
     multiplier: number;
   };

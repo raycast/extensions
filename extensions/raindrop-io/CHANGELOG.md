@@ -1,5 +1,13 @@
 # Raindrop.io Extension Changelog
 
+## [Fixes] - 2026-05-04
+
+- Add AppleScript fallback support for Arc browser in `src/hooks/useBrowserLink.ts`
+
+## [Fixes] - 2026-03-31
+
+- Fix loading collections in the Save Browser Tab form by building the dropdown options directly from the collections API response.
+
 ## [Windows/Linux Compatibility] - 2026-01-07
 
 - Add Windows to the list of supported platforms.

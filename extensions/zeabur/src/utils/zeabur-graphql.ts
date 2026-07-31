@@ -237,7 +237,7 @@ export async function getLatestRunningDeployment(serviceID: string, environmentI
   });
 
   const json = (await res.json()) as Deployments;
-  return json.data.deployments.edges[0];
+  return json.data.deployments.edges[0] ?? null;
 }
 
 export async function getProjectUsage(projectID: string) {

@@ -1,5 +1,25 @@
 # Ente Auth Changelog
 
+## [Fix import with null OTP parameters] - 2026-07-09
+
+- Fixed imports skipping Ente Auth export entries with `algorithm=null`, `digits=null`, or `period=null` by using standard TOTP defaults
+
+## [Service Icons] - 2026-06-22
+
+- Added service icons sourced from the Ente custom-icon registry with a Simple Icons fallback, cached locally and matched by service name
+- Added a "Refresh Icons" action to re-download icons on demand
+- Allowed the Ente CLI Path preference to point at a directory (e.g. `/opt/homebrew/bin`) and resolve the binary automatically
+
+## [Upgrade Raycast deps] - 2026-05-19
+
+- Upgrade @raycast/api and @raycast/utils to make the extension more compatible with Raycast v2.
+
+## [Fixed Ente Auth import] - 2026-05-10
+
+- Fixed parsing of Ente exports with bare issuer parameters
+- Handled secrets containing whitespace, dashes, or plus signs
+- Improved error logging for import failures
+
 ## [Fix spaces in export path] - 2026-03-09
 
 - Fixed issue with spaces in export path causing export to fail

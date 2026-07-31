@@ -1,9 +1,14 @@
 import { MenuBarExtra, Icon, launchCommand, LaunchType, getPreferenceValues } from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
+import { useEffect, useRef } from "react";
 
+import { liteModeSync, isLiteModeSyncDue, type TimeEntry } from "@/api";
+import { get } from "@/api/togglClient";
+import { cacheHelper } from "@/helpers/cache-helper";
 import { sleep } from "@/helpers/common";
 import { formatSeconds } from "@/helpers/formatSeconds";
+import { liteMode } from "@/helpers/preferences";
 import { useCurrentTime } from "@/hooks/useCurrentTime";
 import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
 import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
@@ -22,10 +27,52 @@ export default function Command() {
   } = useProcessedTimeEntries();
 
   const totalDurationToday = useTotalDurationToday(timeEntries, runningTimeEntry);
+  const totalDurationTodayCurrProj = useTotalDurationToday(
+    timeEntries.filter((entry) => entry && entry.project_id === runningTimeEntry?.project_id),
+    runningTimeEntry,
+  );
   const { resumeTimeEntry, stopRunningTimeEntry } = useTimeEntryActions(
     revalidateRunningTimeEntry,
     revalidateTimeEntries,
   );
+  // The menu bar reads exclusively from cache (no API calls) so the 30s interval is safe.
+  // Sync periodically to keep the cache populated:
+  //   LDM: hourly (via liteModeSync — 3 requests)
+  //   Normal: every 3 minutes (running entry only — 1 request)
+  const syncingRef = useRef(false);
+  useEffect(() => {
+    if (syncingRef.current) return;
+    if (liteMode) {
+      if (!isLiteModeSyncDue()) return;
+      syncingRef.current = true;
+      liteModeSync()
+        .then(() => {
+          revalidateRunningTimeEntry();
+          revalidateTimeEntries();
+        })
+        .catch(() => {})
+        .finally(() => {
+          syncingRef.current = false;
+        });
+    } else {
+      // Normal mode: lightweight sync — just fetch the running entry every 3 minutes
+      const lastSync = cacheHelper.getRaw<number>("lastMenuBarSync");
+      if (lastSync && Date.now() - lastSync < 180_000) return;
+      syncingRef.current = true;
+      get<TimeEntry | null>("/me/time_entries/current")
+        .then((entry) => {
+          if (entry) cacheHelper.set("runningTimeEntry", { ...entry, tags: entry.tags ?? [] });
+          else cacheHelper.remove("runningTimeEntry");
+          cacheHelper.set("lastMenuBarSync", Date.now());
+          revalidateRunningTimeEntry();
+        })
+        .catch(() => {})
+        .finally(() => {
+          syncingRef.current = false;
+        });
+    }
+  }, [revalidateRunningTimeEntry, revalidateTimeEntries]);
+
   const { currentTime } = useCurrentTime();
   const runningEntry = runningTimeEntry;
 
@@ -122,8 +169,16 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Today">
+        {runningEntry?.project_id ? (
+          <MenuBarExtra.Item
+            icon={{ source: Icon.Circle, tintColor: runningEntry?.project_color }}
+            title={runningEntry?.project_name || "No Project"}
+            subtitle={isLoading ? "Loading" : formatSeconds(totalDurationTodayCurrProj)}
+          />
+        ) : null}
         <MenuBarExtra.Item
-          title={isLoading ? "Loading" : formatSeconds(totalDurationToday)}
+          title="Total"
+          subtitle={isLoading ? "Loading" : formatSeconds(totalDurationToday)}
           icon={{ source: Icon.Clock }}
         />
       </MenuBarExtra.Section>

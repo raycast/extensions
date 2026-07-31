@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "thaw",
+  "title": "Thaw",
+  "description": "Thaw menu bar manager for Raycast",
+  "icon": "extension-icon.png",
+  "categories": [
+    "Applications",
+    "System"
+  ],
+  "keywords": [
+    "thaw",
+    "menubar",
+    "menu bar",
+    "ice",
+    "statusbar"
+  ],
+  "version": "0.0.2",
+  "author": "diazdesandi",
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Thaw Actions",
+      "description": "Browse all Thaw actions",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-hidden",
+      "title": "Toggle Hidden",
+      "description": "Show or hide the hidden menu bar section",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-always-hidden",
+      "title": "Toggle Always Hidden",
+      "description": "Show or hide the always-hidden menu bar section",
+      "mode": "no-view"
+    },
+    {
+      "name": "search",
+      "title": "Search Menu Bar Items",
+      "description": "Open the menu bar item search panel",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-thawbar",
+      "title": "Toggle ThawBar",
+      "description": "Toggle the ThawBar on the active display",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-application-menus",
+      "title": "Toggle Application Menus",
+      "description": "Show or hide application menus",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "description": "Open the Thaw settings window",
+      "mode": "no-view"
+    },
+    {
+      "name": "authorize-raycast",
+      "title": "Authorize Raycast",
+      "description": "Allow Raycast to use Thaw automation settings",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-auto-rehide",
+      "title": "Toggle Auto Rehide",
+      "description": "Turn automatic hidden-section rehide on or off",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-show-on-hover",
+      "title": "Toggle Show on Hover",
+      "description": "Turn hidden-section reveal on hover on or off",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-hide-application-menus",
+      "title": "Toggle Hide Application Menus",
+      "description": "Turn application menu hiding on or off",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "19.0.10",
+    "@vitest/coverage-v8": "^4.1.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
+    "test:watch": "vitest",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}

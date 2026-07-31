@@ -1,5 +1,18 @@
 # Browser Bookmarks Changelog
 
+## [Chrome Account Bookmarks] - 2026-05-20
+
+- Added support for Chrome account-synced bookmarks stored in `AccountBookmarks`
+
+## [Bug Fix] - 2026-05-19
+
+- Increased the Safari bookmark plist parser limit so large bookmark libraries no longer fail with `maxObjectCount exceeded`
+
+## [Windows Support for Chromium Browsers] - 2026-04-30
+
+- Added Windows support for Chrome, Edge, and Brave bookmarks
+- Automatically refresh Chromium bookmarks when the selected profile changes on disk
+
 ## [Support for Perplexity Comet Browser] - 2026-03-04
 
 - Added support for `Perplexity Comet` browser

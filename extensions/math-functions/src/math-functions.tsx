@@ -1,5 +1,15 @@
-import { ActionPanel, Action, List, showToast, Toast, Icon } from "@raycast/api";
-import { useState, useMemo } from "react";
+import { ActionPanel, Action, List, showToast, Toast, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
+import { useLocalStorage } from "@raycast/utils";
+import { useEffect, useMemo, useState } from "react";
+import {
+  ANGLE_MODE_STORAGE_KEY,
+  AngleMode,
+  AngleModeState,
+  createAngleModeState,
+  createTrigonometricFunctions,
+  getAngleMode,
+  toggleAngleMode,
+} from "./angle-mode";
 
 // Icon cache to prevent regenerating the same SVG icons on every render
 const iconCache = new Map<string, string>();
@@ -289,7 +299,9 @@ function completeExpression(expression: string): string {
 }
 
 // Create a safe evaluation environment with our math functions
-function evaluateMathExpression(expression: string, autoComplete = false): number {
+function evaluateMathExpression(expression: string, autoComplete = false, angleMode: AngleMode = "radians"): number {
+  const trigonometry = createTrigonometricFunctions(angleMode);
+
   // Create a context with available math functions
   const mathContext = {
     sum,
@@ -321,12 +333,7 @@ function evaluateMathExpression(expression: string, autoComplete = false): numbe
     ncr,
     npr,
     // Trigonometry
-    sin: Math.sin,
-    cos: Math.cos,
-    tan: Math.tan,
-    asin: Math.asin,
-    acos: Math.acos,
-    atan: Math.atan,
+    ...trigonometry,
     // Hyperbolic
     sinh,
     cosh,
@@ -376,6 +383,28 @@ function evaluateMathExpression(expression: string, autoComplete = false): numbe
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const preference = getPreferenceValues<Preferences.MathFunctions>().angleMode ?? "radians";
+  const {
+    value: angleModeState,
+    setValue: setAngleModeState,
+    isLoading: isAngleModeLoading,
+  } = useLocalStorage<AngleModeState>(ANGLE_MODE_STORAGE_KEY, createAngleModeState(preference, preference));
+  const angleMode = getAngleMode(angleModeState, preference);
+
+  useEffect(() => {
+    if (!isAngleModeLoading && angleModeState?.preference !== preference) {
+      void setAngleModeState(createAngleModeState(preference, preference));
+    }
+  }, [angleModeState?.preference, isAngleModeLoading, preference, setAngleModeState]);
+
+  async function handleToggleAngleMode() {
+    const nextMode = toggleAngleMode(angleMode);
+    await setAngleModeState(createAngleModeState(nextMode, preference));
+    await showToast({
+      style: Toast.Style.Success,
+      title: `Using ${nextMode === "degrees" ? "degrees" : "radians"}`,
+    });
+  }
 
   // Calculate result for the current expression with memoization
   const result = useMemo((): { value: string; error?: string; completed?: string } | null => {
@@ -384,7 +413,7 @@ export default function Command() {
     }
 
     try {
-      const value = evaluateMathExpression(searchText, true);
+      const value = evaluateMathExpression(searchText, true, angleMode);
       const completed = completeExpression(searchText);
       return { value: value.toString(), completed };
     } catch (error) {
@@ -393,7 +422,7 @@ export default function Command() {
         error: error instanceof Error ? error.message : "Invalid expression",
       };
     }
-  }, [searchText]);
+  }, [angleMode, searchText]);
 
   // Filter function suggestions based on search text with memoization
   const filteredFunctions = useMemo(() => {
@@ -411,6 +440,7 @@ export default function Command() {
 
   return (
     <List
+      isLoading={isAngleModeLoading}
       searchBarPlaceholder="Enter math expression (e.g., sum(5, 7) or lcm(12, 18))"
       onSearchTextChange={setSearchText}
       searchText={searchText}
@@ -422,7 +452,10 @@ export default function Command() {
           title={result.value}
           subtitle={result.completed !== searchText ? `Evaluated: ${result.completed}` : searchText}
           icon={{ source: Icon.Calculator }}
-          accessories={[{ text: "Press ⏎ to copy", icon: Icon.Clipboard }]}
+          accessories={[
+            { tag: angleMode === "degrees" ? "DEG" : "RAD" },
+            { text: "Press ⏎ to copy", icon: Icon.Clipboard },
+          ]}
           actions={
             <ActionPanel>
               <Action.CopyToClipboard
@@ -439,7 +472,16 @@ export default function Command() {
               <Action.CopyToClipboard
                 title="Copy Full Expression"
                 content={`${result.completed} = ${result.value}`}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
+              />
+              <Action
+                title="Toggle Degree/Radian Mode"
+                icon={Icon.Switch}
+                onAction={handleToggleAngleMode}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "m" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+                }}
               />
             </ActionPanel>
           }
@@ -472,7 +514,7 @@ export default function Command() {
                   <Action.CopyToClipboard
                     title="Copy Example"
                     content={func.example}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={Keyboard.Shortcut.Common.Copy}
                   />
                 </ActionPanel>
               }
@@ -502,7 +544,7 @@ export default function Command() {
                     <Action.CopyToClipboard
                       title="Copy Example"
                       content={func.example}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                   </ActionPanel>
                 }

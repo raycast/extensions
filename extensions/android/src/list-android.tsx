@@ -4,7 +4,6 @@ import {
   getPreferenceValues,
   Icon,
   List,
-  popToRoot,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -15,6 +14,7 @@ import {
   listDirectories,
   runCommand,
 } from "./util/utils";
+import { quoteArg } from "./util/shell";
 
 export default function Command() {
   const [items, setItems] = useState<string[]>(() => []);
@@ -72,7 +72,7 @@ export default function Command() {
             <ActionPanel>
               <Action
                 title="Open Project"
-                onAction={() => openProject(projectsDirectory, project)}
+                onAction={() => openProject(`${projectsDirectory}/${project}`)}
               />
             </ActionPanel>
           }
@@ -82,14 +82,20 @@ export default function Command() {
   );
 }
 
-function openProject(projectsDirectory: any, project: string): void {
-  const command = `open -na Android\\ Studio.app --args ${projectsDirectory}/${project}`;
+/**
+ * Open an Android project in Android Studio. The path is POSIX single-quoted so
+ * project directories containing spaces (the verbatim app names produced by the
+ * Create Project command) open correctly. Shared with `create-project`.
+ */
+export function openProject(projectPath: string): void {
+  const command = `open -na 'Android Studio.app' --args ${quoteArg(
+    projectPath
+  )}`;
 
   runCommand(
     command,
     (out) => {
       console.log(out);
-      popToRoot;
     },
     (err) => {
       console.log(err);

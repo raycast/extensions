@@ -1,12 +1,27 @@
 import { useLocalStorage } from "@raycast/utils";
 import { createContext, useContext } from "react";
 
-export const RepoContext = createContext("");
+export type SelectedRepo = ReturnType<typeof useLocalStorage<string>>;
 
-export function useRepoStorage() {
+export const RepoContext = createContext<SelectedRepo>({
+  value: undefined,
+  setValue: () => {
+    throw Error("Cannot set repo value: RepoContext was not initialized");
+  },
+  removeValue: () => {
+    throw Error("Cannot remove repo value: RepoContext was not initialized");
+  },
+  isLoading: false,
+});
+
+export function useSelectedRepoStorage(): SelectedRepo {
   return useLocalStorage<string>("selectedRepo");
 }
 
-export function useRepo() {
+export function useRepo(): string {
+  return useContext(RepoContext).value ?? "";
+}
+
+export function useSelectedRepo(): SelectedRepo {
   return useContext(RepoContext);
 }

@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Action, Color, Image } from "@raycast/api";
+import { ActionPanel, List, Icon, Action, Color, Image, Keyboard } from "@raycast/api";
 import {
   CommitCheckoutAction,
   CommitCherryPickAction,
@@ -38,7 +38,7 @@ export function CommitsView(context: RepositoryContext & NavigationContext) {
     <List
       isLoading={context.commits.isLoading}
       pagination={context.commits.pagination}
-      navigationTitle={context.gitManager.repoName}
+      navigationTitle={context.gitManager.worktreeOrigin?.displayName ?? context.gitManager.repoName}
       searchBarPlaceholder="Search commits by message, sha, author, tags, files..."
       selectedItemId={selectedCommitId || undefined}
       isShowingDetail={toggleDetailController.isShowingDetail}
@@ -426,7 +426,7 @@ function SharedActionsSection(
             context.commits.revalidate();
           }}
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
 
@@ -485,7 +485,7 @@ function CommitBranchFilterAction(context: RepositoryContext) {
               context.commits.filter.kind === "current" && context.commits.filter.upstream
                 ? { source: Icon.Checkmark }
                 : RemoteHostProviderIcon(
-                    context.remotes.data[context.branches.data.currentBranch.upstream.remote].provider,
+                    context.remotes.data[context.branches.data.currentBranch.upstream.remote]?.provider,
                   )
             }
             autoFocus={context.commits.filter.kind === "current" && context.commits.filter.upstream}
@@ -525,7 +525,7 @@ function BranchFilterAction(context: RepositoryContext & { branch: Branch }) {
     let baseIcon: Image.ImageLike = Icon.Dot;
     switch (context.branch.type) {
       case "remote":
-        baseIcon = RemoteHostProviderIcon(context.remotes.data[context.branch.remote!].provider);
+        baseIcon = RemoteHostProviderIcon(context.remotes.data[context.branch.remote!]?.provider);
         break;
       case "local":
         baseIcon = Icon.Dot;

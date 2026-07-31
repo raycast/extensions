@@ -13,8 +13,11 @@ import {
   Image,
   LaunchType,
   launchCommand,
+  Clipboard,
+  Cache,
+  Keyboard,
 } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
 import { RepositoryDirectoryActions, RepositoryQuickLinkAction } from "./components/actions/RepositoryDirectoryActions";
 import OpenRepository from "./open-repository";
@@ -32,6 +35,7 @@ import { existsSync } from "fs";
 import { RemoteWebPageAction } from "./components/actions/RemoteActions";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { CopyToClipboardMenuAction } from "./components/actions/CopyToClipboardMenuAction";
+import { validateGitUrl } from "./utils/url-utils";
 
 export default function ManageRepositories() {
   const {
@@ -203,7 +207,11 @@ function RepositoryListItem({
               ]}
             />
             <RepositoryAttachedLinksAction remotes={remotes} />
-            <RepositoryQuickLinkAction repositoryPath={repo.path} />
+            <RepositoryQuickLinkAction currentWorktreePath={repo.path} />
+          </ActionPanel.Section>
+
+          <ActionPanel.Section>
+            <RepositoriesClearCacheAction />
             <Action
               title="Remove from List"
               onAction={handleRemove}
@@ -214,7 +222,11 @@ function RepositoryListItem({
             <Action.Trash paths={[repo.path]} onTrash={onRemove} />
           </ActionPanel.Section>
 
-          <RepositoryDirectoryActions repositoryPath={repo.path} onOpen={onOpen} />
+          <RepositoryDirectoryActions
+            currentWorktreePath={repo.path}
+            repositoryRootPath={repo.worktree?.repositoryRootPath ?? repo.path}
+            onOpen={onOpen}
+          />
 
           <RepositoriesOrderActionsSection />
 
@@ -228,8 +240,17 @@ function RepositoryListItem({
 }
 
 function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath: string) => void }) {
+  const copiedUrl = useCallback(async () => {
+    const text = await Clipboard.readText();
+    const trimmed = text?.trim();
+    if (trimmed && validateGitUrl(trimmed) === undefined) {
+      return trimmed;
+    }
+    return "";
+  }, []);
+
   return (
-    <ActionPanel.Submenu title="Add Repository" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }}>
+    <ActionPanel.Submenu title="Add Repository" icon={Icon.Plus} shortcut={Keyboard.Shortcut.Common.New}>
       <Action.Push
         title="Create New Repository"
         target={<CreateRepositoryForm onAddRepository={onAddRepository} />}
@@ -242,13 +263,15 @@ function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath:
       />
       <Action
         title="Clone Repository"
-        onAction={async () =>
+        onAction={async () => {
+          const defaultUrl = await copiedUrl();
+
           await launchCommand({
             name: "clone-repository",
             type: LaunchType.UserInitiated,
-            arguments: { url: "" },
-          })
-        }
+            arguments: { url: defaultUrl },
+          });
+        }}
         icon={Icon.Download}
       />
     </ActionPanel.Submenu>
@@ -503,7 +526,7 @@ function CloningRepositoryListItem({
                 title="Retry Clone"
                 icon={Icon.Repeat}
                 onAction={handleRetry}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
               <Action
                 title="Remove from List"
@@ -521,7 +544,11 @@ function CloningRepositoryListItem({
           )}
 
           <Action.CopyToClipboard title="Copy Clone URL" content={repo.cloning!.url} />
-          <RepositoryDirectoryActions repositoryPath={repo.path} onOpen={onOpen} />
+          <RepositoryDirectoryActions
+            currentWorktreePath={repo.path}
+            repositoryRootPath={repo.worktree?.repositoryRootPath ?? repo.path}
+            onOpen={onOpen}
+          />
           <RepositoriesOrderActionsSection />
         </ActionPanel>
       }
@@ -586,4 +613,31 @@ function RepositoryAttachedLinksAction({ remotes }: { remotes: Record<string, Re
       ))}
     </ActionPanel.Submenu>
   );
+}
+
+/**
+ * Action for clearing the extension cache.
+ */
+function RepositoriesClearCacheAction() {
+  const handleClearCache = async () => {
+    const confirmed = await confirmAlert({
+      title: "Clear Extension Cache?",
+      message: "This clears all data stored in Raycast Cache (UI state, filters, drafts, and other cached preferences)",
+      primaryAction: {
+        title: "Clear Cache",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (confirmed) {
+      new Cache().clear();
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Cache cleared",
+        message: "Extension cache has been cleared",
+      });
+    }
+  };
+
+  return <Action title="Clear Cache" icon={Icon.Eraser} onAction={handleClearCache} style={Action.Style.Destructive} />;
 }

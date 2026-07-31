@@ -1,10 +1,14 @@
 # YouTube Thumbnail Grabber Changelog
 
+## [1.1.2] - 2026-05-18
+
+- Fixed memory leak in history thumbnail loader that could exhaust the extension memory limit
+
 ## [1.1.1] - 2026-03-12
 
 - Added thumbnail dimensions to list items
 
-## [1.1.0] - 2024-03-12
+## [1.1.0] - 2026-03-12
 
 ### Added
 

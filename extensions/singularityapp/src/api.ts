@@ -145,6 +145,9 @@ export interface Project {
   title: string;
   emoji?: string;
   color?: string;
+  parent?: string;
+  parentOrder?: number;
+  depth?: number;
 }
 
 export interface ProjectListResponse {
@@ -320,7 +323,72 @@ export async function getNote(noteId: string): Promise<Note | null> {
 }
 
 export async function getProjects(): Promise<Project[]> {
-  return await fetchAllPages<Project>(`${API_BASE_URL}/v2/project`, "projects", new URLSearchParams());
+  const projects = await fetchAllPages<Project>(`${API_BASE_URL}/v2/project`, "projects", new URLSearchParams());
+  return sortProjectsHierarchically(projects);
+}
+
+/** Sorts projects hierarchically: parent followed by its children (recursively), then next sibling */
+function sortProjectsHierarchically(projects: Project[]): Project[] {
+  // Build a set of valid project IDs for orphan detection
+  const projectIds = new Set(projects.map((p) => p.id));
+
+  // Build a map of parent -> children
+  const childrenMap = new Map<string | undefined, Project[]>();
+
+  for (const project of projects) {
+    // Treat as root if no parent, or if parent ID doesn't exist (orphan)
+    const parentId = project.parent && projectIds.has(project.parent) ? project.parent : undefined;
+    if (!childrenMap.has(parentId)) {
+      childrenMap.set(parentId, []);
+    }
+    childrenMap.get(parentId)!.push(project);
+  }
+
+  // Sort children within each parent by parentOrder
+  for (const children of childrenMap.values()) {
+    children.sort((a, b) => {
+      const orderA = a.parentOrder ?? Number.MAX_SAFE_INTEGER;
+      const orderB = b.parentOrder ?? Number.MAX_SAFE_INTEGER;
+      return orderA - orderB;
+    });
+  }
+
+  // Recursively flatten the tree: parent, then all its children (depth-first)
+  const result: Project[] = [];
+  const visited = new Set<string>(); // Cycle detection
+
+  function addProjectWithChildren(project: Project, depth: number) {
+    // Guard against cycles
+    if (visited.has(project.id)) return;
+    visited.add(project.id);
+
+    result.push({ ...project, depth });
+    const children = childrenMap.get(project.id) || [];
+    for (const child of children) {
+      addProjectWithChildren(child, depth + 1);
+    }
+  }
+
+  // Start with root projects (no parent)
+  const rootProjects = childrenMap.get(undefined) || [];
+  for (const project of rootProjects) {
+    addProjectWithChildren(project, 0);
+  }
+
+  // Fallback: include any unvisited projects at root level
+  for (const project of projects) {
+    if (!visited.has(project.id)) {
+      result.push({ ...project, depth: 0 });
+    }
+  }
+
+  return result;
+}
+
+/** Returns indentation prefix for nested projects */
+export function getProjectIndent(project: Project): string {
+  const depth = project.depth ?? 0;
+  return "      ".repeat(depth); // 6 spaces per level
 }
 
 export async function withErrorHandling<T>(

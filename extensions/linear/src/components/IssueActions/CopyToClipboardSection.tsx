@@ -11,6 +11,21 @@ const variables: Record<string, ISSUE_KEY> = {
   ISSUE_BRANCH_NAME: "branchName",
 };
 
+function escapeHtml(str: string) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+function escapeMarkdownLinkText(str: string) {
+  return str.replace(/\[/g, "\\[").replace(/\]/g, "\\]");
+}
+
+function getTitleLink(issue: IssueResult) {
+  return {
+    html: `<a href="${issue.url}">${escapeHtml(issue.title)}</a>`,
+    text: `[${escapeMarkdownLinkText(issue.title)}](${issue.url})`,
+  };
+}
+
 export default function CopyToClipboardSection({ issue }: { issue: IssueResult }) {
   const { issueCustomCopyAction } = getPreferenceValues<Preferences>();
 
@@ -29,13 +44,28 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
         title="Copy Formatted Issue URL"
         shortcut={Keyboard.Shortcut.Common.CopyPath}
       />
-      <Action.CopyToClipboard content={issue.url} title="Copy Issue URL" />
+      <Action.CopyToClipboard
+        content={issue.url}
+        title="Copy Issue URL"
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "u" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+        }}
+      />
       <Action.CopyToClipboard
         content={issue.title}
         title="Copy Issue Title"
         shortcut={{
           macOS: { modifiers: ["cmd", "shift"], key: "'" },
           Windows: { modifiers: ["ctrl", "shift"], key: "'" },
+        }}
+      />
+      <Action.CopyToClipboard
+        content={getTitleLink(issue)}
+        title="Copy Title as Link"
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "t" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "t" },
         }}
       />
       <Action.CopyToClipboard

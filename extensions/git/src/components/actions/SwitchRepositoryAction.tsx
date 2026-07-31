@@ -18,10 +18,16 @@ export function SwitchRepositoryAction({
   const { repositories: allRepositories } = useRepositoriesList();
 
   // Filter out cloning repositories
-  const currentRepositories = useMemo(() => allRepositories.filter((repo) => !repo.cloning), [allRepositories]);
+  const currentRepositories = useMemo(
+    () => allRepositories.filter((repo) => !repo.cloning && repo.path !== repositoryPath),
+    [allRepositories, repositoryPath],
+  );
 
   // Use view hook for grouping repositories
-  const { displayedRepositories } = useRepositoriesView(currentRepositories);
+  const { displayedRepositories } = useRepositoriesView(currentRepositories, {
+    groupBy: "none",
+    orderBy: "visit-date",
+  });
 
   // If no repositories, return null or empty submenu
   if (currentRepositories.length === 0) {
@@ -29,6 +35,7 @@ export function SwitchRepositoryAction({
   }
 
   return (
+    // eslint-disable-next-line @raycast/prefer-common-shortcut -- keep Ctrl+R for Switch Repository; Common.Refresh is ⌘R and conflicts with view refresh
     <ActionPanel.Submenu title="Switch Repository" icon={Icon.Switch} shortcut={{ modifiers: ["ctrl"], key: "r" }}>
       {displayedRepositories.map((group) => (
         <ActionPanel.Section key={group.groupTitle} title={group.groupTitle}>

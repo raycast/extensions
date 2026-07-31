@@ -1,5 +1,5 @@
 import { closeMainWindow, open, showToast, Toast } from "@raycast/api";
-import { getJWTToken, getSSOUrl } from "@/lib/login";
+import { getSSOUrl } from "@/lib/login";
 import { LMS_BASE_URL } from "./lib/constants";
 
 export default async function Command() {
@@ -10,7 +10,7 @@ export default async function Command() {
     title: "Logging in...",
   });
 
-  const [data] = await Promise.all([getSSOUrl({ forLogin: true }), getJWTToken()]);
+  const data = await getSSOUrl({});
 
   if (data) {
     if (data.status === "new") await open(data.loginLink);

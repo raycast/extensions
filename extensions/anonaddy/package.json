@@ -41,6 +41,12 @@
       "title": "Send an Email from an Alias",
       "description": "Send an email using one of your Addy aliases.",
       "mode": "view"
+    },
+    {
+      "name": "create-alias-ai",
+      "title": "Create Alias with AI",
+      "description": "Describe a purpose and let AI generate a meaningful alias name and description.",
+      "mode": "view"
     }
   ],
   "dependencies": {

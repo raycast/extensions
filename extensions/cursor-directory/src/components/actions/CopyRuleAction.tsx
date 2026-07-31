@@ -121,7 +121,7 @@ async function launchCursorRecentProjects(context: { cursorDirectory: { ruleCont
       },
     });
     if (shouldInstall) {
-      open("raycast://extensions/degouville/cursor-recent-projects");
+      open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/degouville/cursor-recent-projects`);
     }
   }
 }

@@ -10,6 +10,8 @@ import {
   Move,
   Ability,
   Item,
+  Pokedex,
+  PokemonDex,
 } from "../types";
 
 const cache = new Cache();
@@ -26,6 +28,7 @@ async function fetchDataWithCaching<T>(
   variables: Record<string, number>,
   prefix: string,
   isArray = false,
+  isComplete: (value: T) => boolean = () => true,
 ): Promise<T | undefined> {
   // Create a simple hash of the query to include in the cache key
   const queryHash = query
@@ -48,7 +51,7 @@ async function fetchDataWithCaching<T>(
         const parsed: CachedData<T> = JSON.parse(cachedData);
 
         // Ensure parsed data has required properties
-        if (parsed.timestamp && parsed.value) {
+        if (parsed.timestamp && parsed.value && isComplete(parsed.value)) {
           if (now - parsed.timestamp < expiration) {
             return parsed.value;
           }
@@ -85,9 +88,11 @@ async function fetchDataWithCaching<T>(
       ? data.data[prefix]
       : data.data[prefix][0]) as unknown as T;
 
-    // Cache the fresh data with a timestamp
-    const dataToCache: CachedData<T> = { timestamp: now, value: fetchedData };
-    cache.set(key, JSON.stringify(dataToCache));
+    // Cache the fresh data with a timestamp, unless the response is incomplete
+    if (fetchedData && isComplete(fetchedData)) {
+      const dataToCache: CachedData<T> = { timestamp: now, value: fetchedData };
+      cache.set(key, JSON.stringify(dataToCache));
+    }
 
     return fetchedData;
   } catch (e: any) {
@@ -387,7 +392,14 @@ export const fetchPokemon = async (
 
   const variables = { language_id, pokemon_id };
 
-  return fetchDataWithCaching(query, variables, "pokemon");
+  return fetchDataWithCaching<Pokemon>(
+    query,
+    variables,
+    "pokemon",
+    false,
+    (pokemon) =>
+      Boolean(pokemon.pokemonstats?.length && pokemon.pokemontypes?.length),
+  );
 };
 
 export const fetchMoves = async (): Promise<Move[] | undefined> => {
@@ -549,7 +561,14 @@ export const fetchTypes = async (): Promise<TypeChartType[] | undefined> => {
 
   const variables = { language_id };
 
-  return fetchDataWithCaching(query, variables, "type", true);
+  return fetchDataWithCaching<TypeChartType[]>(
+    query,
+    variables,
+    "type",
+    true,
+    (types) =>
+      types.length > 0 && types.every((type) => type.typeefficacies?.length),
+  );
 };
 
 export const fetchNatures = async (): Promise<Nature[] | undefined> => {
@@ -692,4 +711,69 @@ export const fetchItem = async (item_id: number): Promise<Item | undefined> => {
   const variables = { language_id, item_id };
 
   return fetchDataWithCaching(query, variables, "item");
+};
+
+export const fetchPokedexes = async (): Promise<Pokedex[] | undefined> => {
+  // exclude national dex (id: 1) since it contains all pokemon and isn't a "regional" dex
+  const query = `query pokedexes($language_id: Int) {
+    pokedex(where: {id: {_neq: 1}, is_main_series: {_eq: true}}) {
+      id
+      name
+      is_main_series
+      pokedexnames(where: {language_id: {_eq: $language_id}}) {
+        name
+      }
+      pokedexversiongroups {
+        version_group_id
+        versiongroup {
+          name
+          generation {
+            name
+            generationnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+          versions {
+            name
+            versionnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+        }
+      }
+    }
+  }`;
+
+  const variables = { language_id };
+
+  return fetchDataWithCaching(query, variables, "pokedex", true);
+};
+
+export const fetchPokedexPokemon = async (
+  pokedexId: number,
+): Promise<PokemonDex[] | undefined> => {
+  const query = `query pokemondexnumber($dex_id: Int, $language_id: Int) {
+    pokemondexnumber(
+      where: {pokedex_id: {_eq: $dex_id}}
+      order_by: [{pokedex_number: asc}]
+    ) {
+      pokedex_number
+      pokemon_species_id
+      pokemonspecy {
+        is_baby
+        is_legendary
+        is_mythical
+        name
+        pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
+          genus
+          name
+          language_id
+        }
+      }
+    }
+  }`;
+
+  const variables = { dex_id: pokedexId, language_id };
+
+  return fetchDataWithCaching(query, variables, "pokemondexnumber", true);
 };

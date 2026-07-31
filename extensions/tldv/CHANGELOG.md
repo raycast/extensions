@@ -1,5 +1,11 @@
 # Changelog
 
+## [Security: Refresh Lockfile] - 2026-03-27
+
+### Changed
+
+- Refreshed `package-lock.json` to update transitive `rollup` to `4.60.0` and address security advisories.
+
 ## [Code Quality & Features] - 2026-02-24
 
 ### Added

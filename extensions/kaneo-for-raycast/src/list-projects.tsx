@@ -5,7 +5,6 @@ import {
   Image,
   List,
   getPreferenceValues,
-  Detail,
   openExtensionPreferences,
   Color,
   Keyboard,
@@ -29,52 +28,20 @@ import {
 import { Project, Task, CreateProjectFormValues, CreateTaskFormValues, ProjectDetail } from "./types";
 import { KaneoAPI } from "./api/kaneo";
 import { useAuthSession } from "./hooks/useAuthSession";
+import { TaskDetailView } from "./components/TaskDetailView";
+import {
+  formatShortDate,
+  cleanDescription,
+  statusKey,
+  priorityKey,
+  priorityColor,
+  columnPriorities,
+  sortTasksByPriority,
+  sortTasksByDueDate,
+  dueDateColor,
+  resolveColumns,
+} from "./lib/task-helpers";
 import { useEffect, useState } from "react";
-
-function formatDate(date: string | null) {
-  if (!date) return "N/A";
-  const d = new Date(date);
-  return isNaN(d.getTime()) ? "N/A" : d.toLocaleString();
-}
-
-const formatShortDate = (date: string | null) => {
-  if (!date) return "N/A";
-  const d = new Date(date);
-  return isNaN(d.getTime()) ? "N/A" : `${d.getDate()} ${d.toLocaleString("en-US", { month: "short" })}`;
-};
-
-const cleanDescription = (description: string) => {
-  return description?.length
-    ? description
-        .replace(/<p>/g, "")
-        .replace(/<\/p>/g, "\n")
-        .replace(/<br\s*\/?>/g, "\n")
-    : "No description";
-};
-
-const statusKey: Record<string, Keyboard.KeyEquivalent> = {
-  backlog: "b",
-  "to-do": "t",
-  "in-progress": "p",
-  "in-review": "r",
-  done: "d",
-};
-
-const priorityKey: Record<string, Keyboard.KeyEquivalent> = {
-  "no-priority": "n",
-  low: "l",
-  medium: "m",
-  high: "h",
-  urgent: "u",
-};
-
-const priorityColor: Record<string, string> = {
-  "no-priority": Color.SecondaryText,
-  low: Color.Blue,
-  medium: Color.Yellow,
-  high: Color.Orange,
-  urgent: Color.Red,
-};
 
 function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void }) {
   const { pop } = useNavigation();
@@ -103,7 +70,15 @@ function CreateProjectForm({ onProjectCreated }: { onProjectCreated: () => void 
     },
     validation: {
       name: FormValidation.Required,
-      slug: FormValidation.Required,
+      slug: (value) => {
+        if (!value) {
+          return "Slug is required";
+        }
+        if (value.length > 8) {
+          return "Slug must be at most 8 characters long";
+        }
+        return undefined;
+      },
     },
   });
 
@@ -211,154 +186,6 @@ function CreateTaskForm({
   );
 }
 
-function TaskDetailView({
-  taskId,
-  projectId,
-  columnStatuses,
-  columnPriorities,
-  onStatusUpdate,
-  onPriorityUpdate,
-}: {
-  taskId: string;
-  projectId: string;
-  columnStatuses: Array<{
-    isDone: boolean;
-    id: string;
-    name: string;
-  }>;
-  columnPriorities: Array<{ id: string; name: string }>;
-  onStatusUpdate: (taskId: string, newStatus: string, taskTitle: string) => Promise<void>;
-  onPriorityUpdate: (taskId: string, newPriority: string, taskTitle: string) => Promise<void>;
-}) {
-  const api = new KaneoAPI();
-  const { webInstanceUrl, workspaceId } = getPreferenceValues<Preferences>();
-
-  const { isLoading, data: task, revalidate } = usePromise((id: string) => api.getTask(id), [taskId]);
-
-  if (isLoading || !task) {
-    return <Detail isLoading markdown="Loading task..." />;
-  }
-
-  const status = task.status ? task.status.charAt(0).toUpperCase() + task.status.slice(1) : "N/A";
-  const priorityRaw = task.priority || "no-priority";
-  const priority = priorityRaw.charAt(0).toUpperCase() + priorityRaw.slice(1).replaceAll("-", " ");
-
-  const markdown = `# ${task.title}
-
-
-## Description
-${cleanDescription(task.description)}
-
-
-## Status
-${status}
-
-
-## Priority
-${priority}
-
-
-## Due Date
-${formatDate(task.dueDate)}
-
-
-## Assignee
-${task.assigneeName || "Unassigned"}
-
-
-## Created At
-${formatDate(task.createdAt)}
-`;
-
-  const openTask = () => {
-    const webUrl = new URL(webInstanceUrl);
-    webUrl.pathname = `/dashboard/workspace/${workspaceId}/project/${projectId}/task/${task.id}`;
-    return webUrl.toString();
-  };
-
-  const handleStatusUpdate = async (taskId: string, newStatus: string, taskTitle: string) => {
-    await onStatusUpdate(taskId, newStatus, taskTitle);
-    await revalidate();
-  };
-
-  const handlePriorityUpdate = async (taskId: string, newPriority: string, taskTitle: string) => {
-    await onPriorityUpdate(taskId, newPriority, taskTitle);
-    await revalidate();
-  };
-
-  return (
-    <Detail
-      navigationTitle={task.title}
-      markdown={markdown}
-      metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Status" text={status} />
-          <Detail.Metadata.Label title="Priority" text={priority} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Due Date" text={formatDate(task.dueDate)} />
-          <Detail.Metadata.Label title="Assignee" text={task.assigneeName || "Unassigned"} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label title="Created At" text={formatDate(task.createdAt)} />
-        </Detail.Metadata>
-      }
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser title="Open in Kaneo Web" url={openTask()} />
-
-          <ActionPanel.Submenu title="Change Status…" icon={Icon.List} shortcut={ChangeStatus}>
-            {columnStatuses
-              .filter((status) => status.id !== task.status)
-              .map((status) => {
-                return (
-                  <Action
-                    key={status.id}
-                    icon={status.isDone ? Icon.CircleProgress100 : Icon.Circle}
-                    shortcut={
-                      statusKey[status.id]
-                        ? {
-                            Windows: { modifiers: ["ctrl", "shift"], key: statusKey[status.id] },
-                            macOS: { modifiers: ["cmd", "shift"], key: statusKey[status.id] },
-                          }
-                        : undefined
-                    }
-                    title={status.name}
-                    onAction={() => handleStatusUpdate(task.id, status.id, task.title)}
-                  />
-                );
-              })}
-          </ActionPanel.Submenu>
-
-          <ActionPanel.Submenu title="Change Priority…" icon={Icon.List} shortcut={ChangePriority}>
-            {columnPriorities
-              .filter((priority) => priority.id !== (task.priority || "no-priority"))
-              .map((priority) => (
-                <Action
-                  key={priority.id}
-                  icon={Icon.Circle}
-                  shortcut={{
-                    Windows: { modifiers: ["ctrl", "shift"], key: priorityKey[priority.id] ?? "p" },
-                    macOS: { modifiers: ["cmd", "shift"], key: priorityKey[priority.id] ?? "p" },
-                  }}
-                  title={priority.name}
-                  onAction={() => handlePriorityUpdate(task.id, priority.id, task.title)}
-                />
-              ))}
-          </ActionPanel.Submenu>
-
-          <Action.CopyToClipboard title="Copy Task Title" content={task.title} shortcut={CopyTaskTitle} />
-          {task.description && (
-            <Action.CopyToClipboard
-              title="Copy Task Description"
-              content={cleanDescription(task.description)}
-              shortcut={CopyTaskDescription}
-            />
-          )}
-        </ActionPanel>
-      }
-    />
-  );
-}
-
 function ProjectTasksList({ project }: { project: Project }) {
   const api = new KaneoAPI();
   const { sort, youAsAssignee } = getPreferenceValues<Preferences>();
@@ -410,19 +237,39 @@ function ProjectTasksList({ project }: { project: Project }) {
 
         return {
           ...prev,
-          columns: prev.columns.map((col) => ({
-            ...col,
-            tasks: col.tasks.map((t) =>
-              t.id === task.id
-                ? {
-                    ...t,
-                    assigneeId: newAssigneeId,
-                    assigneeName: newAssigneeName,
-                    assigneeImage: newAssigneeImage,
-                  }
-                : t,
-            ),
-          })),
+          data: prev.data
+            ? {
+                ...prev.data,
+                columns: prev.data.columns.map((col) => ({
+                  ...col,
+                  tasks: col.tasks.map((t) =>
+                    t.id === task.id
+                      ? {
+                          ...t,
+                          assigneeId: newAssigneeId,
+                          assigneeName: newAssigneeName,
+                          assigneeImage: newAssigneeImage,
+                        }
+                      : t,
+                  ),
+                })),
+              }
+            : undefined,
+          columns: !prev.data
+            ? prev.columns?.map((col) => ({
+                ...col,
+                tasks: col.tasks.map((t) =>
+                  t.id === task.id
+                    ? {
+                        ...t,
+                        assigneeId: newAssigneeId,
+                        assigneeName: newAssigneeName,
+                        assigneeImage: newAssigneeImage,
+                      }
+                    : t,
+                ),
+              }))
+            : undefined,
         };
       });
 
@@ -436,31 +283,6 @@ function ProjectTasksList({ project }: { project: Project }) {
         message: error instanceof Error ? error.message : "Unknown error",
       });
     }
-  };
-
-  const priorityOrder = ["urgent", "high", "medium", "low", "no-priority"];
-
-  const sortTasksByPriority = (tasks: Task[]) => {
-    return [...tasks].sort((a, b) => {
-      const aPriority = a.priority || "no-priority";
-      const bPriority = b.priority || "no-priority";
-
-      const aIndex = priorityOrder.indexOf(aPriority);
-      const bIndex = priorityOrder.indexOf(bPriority);
-
-      const aOrder = aIndex === -1 ? priorityOrder.length : aIndex;
-      const bOrder = bIndex === -1 ? priorityOrder.length : bIndex;
-
-      return aOrder - bOrder;
-    });
-  };
-
-  const sortTasksByDueDate = (tasks: Task[]) => {
-    return [...tasks].sort((a, b) => {
-      const aDueDate = a.dueDate || "";
-      const bDueDate = b.dueDate || "";
-      return new Date(aDueDate).getTime() - new Date(bDueDate).getTime();
-    });
   };
 
   const updateTaskStatus = async (taskId: string, newStatus: string, taskTitle: string) => {
@@ -534,20 +356,13 @@ function ProjectTasksList({ project }: { project: Project }) {
     }
   };
 
-  const columnStatuses =
-    projectDetail?.columns.map((col) => ({
-      id: col.id,
-      name: col.name,
-      isDone: col.isFinal,
-    })) || [];
+  const resolvedColumns = resolveColumns(projectDetail);
 
-  const columnPriorities: Array<{ id: string; name: string }> = [
-    { id: "no-priority", name: "No priority" },
-    { id: "low", name: "Low" },
-    { id: "medium", name: "Medium" },
-    { id: "high", name: "High" },
-    { id: "urgent", name: "Urgent" },
-  ];
+  const columnStatuses = resolvedColumns.map((col) => ({
+    id: col.id,
+    name: col.name,
+    isDone: col.isFinal,
+  }));
 
   if (isLoading || !projectDetail) {
     return <List isLoading navigationTitle={`Tasks - ${project.name}`} />;
@@ -574,7 +389,7 @@ function ProjectTasksList({ project }: { project: Project }) {
         </ActionPanel>
       }
     >
-      {projectDetail.columns.map((column) => {
+      {resolvedColumns.map((column) => {
         const tasks = sort === "priority" ? sortTasksByPriority(column.tasks) : sortTasksByDueDate(column.tasks);
 
         return (
@@ -607,23 +422,7 @@ function ProjectTasksList({ project }: { project: Project }) {
                           {
                             tag: {
                               value: formatShortDate(item.dueDate),
-                              color: (() => {
-                                const today = new Date();
-                                today.setHours(0, 0, 0, 0);
-                                const dueDate = new Date(item.dueDate);
-                                dueDate.setHours(0, 0, 0, 0);
-
-                                const threeDaysFromNow = new Date(today);
-                                threeDaysFromNow.setDate(today.getDate() + 3);
-
-                                if (dueDate < today) {
-                                  return Color.Red;
-                                } else if (dueDate <= threeDaysFromNow) {
-                                  return Color.Orange;
-                                } else {
-                                  return Color.Green;
-                                }
-                              })(),
+                              color: dueDateColor(item.dueDate),
                             },
                             tooltip: "Due Date",
                           },

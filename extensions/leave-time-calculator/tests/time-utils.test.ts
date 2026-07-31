@@ -4,6 +4,7 @@ import {
   calculateRemainingTime,
   formatTimeString,
 } from "../src/lib/time-utils";
+import { buildLeaveStatus } from "../src/lib/leave-status";
 
 describe("formatTimeString", () => {
   test("pads single digit hours to two digits", () => {
@@ -319,6 +320,68 @@ describe("calculateRemainingTime - with mocked time", () => {
     expect(result.hours).toBe(1);
     expect(result.minutes).toBe(30);
     expect(result.isPast).toBe(true);
+  });
+
+  test("saved overnight shift stays overtime late on its leave date", () => {
+    vi.setSystemTime(new Date(2026, 0, 17, 23, 0, 0));
+    const result = calculateRemainingTime(
+      "07:00",
+      "22:00",
+      undefined,
+      "2026-01-16",
+    );
+    expect(result.hours).toBe(16);
+    expect(result.minutes).toBe(0);
+    expect(result.isPast).toBe(true);
+  });
+
+  test("saved overnight shift follows daylight saving time", () => {
+    const originalTimeZone = process.env.TZ;
+    process.env.TZ = "America/New_York";
+
+    try {
+      vi.setSystemTime(new Date("2026-03-08T07:00:00-04:00"));
+      expect(calculateLeaveTime("22:00", 8, 60, "2026-03-07")).toBe(
+        "08:00",
+      );
+
+      const result = calculateRemainingTime(
+        "08:00",
+        "22:00",
+        undefined,
+        "2026-03-07",
+      );
+      expect(result.hours).toBe(1);
+      expect(result.minutes).toBe(0);
+      expect(result.isPast).toBe(false);
+    } finally {
+      process.env.TZ = originalTimeZone;
+    }
+  });
+
+  test("saved 23-hour shift ending at the same wall-clock time follows daylight saving time", () => {
+    const originalTimeZone = process.env.TZ;
+    process.env.TZ = "America/New_York";
+
+    try {
+      vi.setSystemTime(new Date("2026-03-08T21:00:00-04:00"));
+      const status = buildLeaveStatus(
+        "22:00",
+        22,
+        60,
+        undefined,
+        "2026-03-07",
+      );
+
+      expect(status.leaveTime).toBe("22:00");
+      expect(status.remaining).toEqual({
+        hours: 1,
+        minutes: 0,
+        isPast: false,
+      });
+    } finally {
+      process.env.TZ = originalTimeZone;
+    }
   });
 
   test("with currentTime input, ignores current seconds and keeps minute-aligned result", () => {

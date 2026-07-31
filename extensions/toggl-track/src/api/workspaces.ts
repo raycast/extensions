@@ -1,8 +1,16 @@
-import { get } from "@/api/togglClient";
+import { getMeWithRelatedData } from "@/api/me";
 import { cacheHelper } from "@/helpers/cache-helper";
+import { liteMode } from "@/helpers/preferences";
 
-export function getMyWorkspaces() {
-  return cacheHelper.getOrSet("workspaces", () => get<Workspace[]>("/me/workspaces"));
+export async function getMyWorkspaces(): Promise<Workspace[]> {
+  const cached = cacheHelper.get<Workspace[]>("workspaces");
+  if (cached) return cached;
+  if (liteMode) {
+    const stale = cacheHelper.getRaw<Workspace[]>("workspaces");
+    if (stale) return stale;
+  }
+  const data = await getMeWithRelatedData();
+  return cacheHelper.get<Workspace[]>("workspaces") || data.workspaces || [];
 }
 
 // https://developers.track.toggl.com/docs/api/workspaces#response-4

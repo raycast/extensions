@@ -4,16 +4,52 @@ import { cpus, loadavg } from "os";
 
 import { exec } from "child_process";
 import { promisify } from "util";
-import { BatteryState, getBatteryState } from "./BatteryState";
+import { BatteryState, BluetoothBatteryDevice, getBatteryState, getBluetoothBatteryDevices } from "./BatteryState";
 import { calculateCPUUsage, CPUStats, getCPUStats } from "./CPUStats";
 import { getScreenState, ScreenTimeState } from "./screenOn";
 import { openActivityMonitor, openBatterySettings, openScreenTimeSettings } from "./utils";
 
 export const execp = promisify(exec);
 
-type SystemState = BatteryState & { cpu: CPUStats } & { screen: ScreenTimeState };
+type SystemState = {
+  battery: BatteryState;
+  bluetooth: BluetoothBatteryDevice[];
+  cpu: CPUStats;
+  screen: ScreenTimeState;
+  time: number;
+};
 
-const cacheKey = "SystemState-V2";
+const cacheKey = "SystemState-V3";
+
+function getDeviceSubtitle(device: BluetoothBatteryDevice): string {
+  if (device.batteryLevel != null) return `${device.batteryLevel}%`;
+  if (device.batteryLeft != null && device.batteryRight != null) {
+    return `L ${device.batteryLeft}% • R ${device.batteryRight}%${
+      device.batteryCase != null ? ` • Case ${device.batteryCase}%` : ""
+    }`;
+  }
+  if (device.batteryLeft != null) {
+    return `L ${device.batteryLeft}%${device.batteryCase != null ? ` • Case ${device.batteryCase}%` : ""}`;
+  }
+  if (device.batteryRight != null) {
+    return `R ${device.batteryRight}%${device.batteryCase != null ? ` • Case ${device.batteryCase}%` : ""}`;
+  }
+  if (device.batteryCase != null) return `Case ${device.batteryCase}%`;
+  if (!device.isConnected) return "Not connected";
+  return "Unavailable";
+}
+
+function getDeviceIcon(device: BluetoothBatteryDevice): Icon {
+  const lowerName = device.name.toLowerCase();
+  const lowerType = device.type.toLowerCase();
+  if (lowerName.includes("airpods") || lowerType.includes("head")) return Icon.Headphones;
+  if (lowerName.includes("iphone")) return Icon.Mobile;
+  if (lowerName.includes("ipad")) return Icon.Monitor;
+  if (lowerName.includes("watch")) return Icon.Clock;
+  if (lowerType.includes("mouse")) return Icon.Mouse;
+  if (lowerType.includes("keyboard")) return Icon.Keyboard;
+  return Icon.Bluetooth;
+}
 
 export default function Command() {
   const preferences = getPreferenceValues();
@@ -30,91 +66,92 @@ export default function Command() {
   // 2. getCPUStats
   // 3. getScreenState
   const getStats = async () => {
-    const battery = await getBatteryState();
+    const [battery, bluetooth] = await Promise.all([getBatteryState(), getBluetoothBatteryDevices()]);
     const cpu = getCPUStats();
     const screen = getScreenState();
-    return { ...battery, cpu, screen };
+    return { battery, bluetooth, cpu, screen, time: Date.now() };
   };
 
   // periodically call getStats and update the state
   const { isLoading: battIsLoading } = useCachedPromise(getStats, [], {
     onData(data) {
       if (!stats || (stats.prev && stats.prev.time < Date.now() - 5 * 60 * 1000)) {
-        console.log("Resetting battery state", data);
         setBattState({ prev: null, next: data, latest: data });
-      } else if (stats.next.time < Date.now() - 60 * 1000 || stats.next.watts !== data.watts) {
-        console.log("Storing next battery state", data);
+      } else if (stats.next.time < Date.now() - 60 * 1000 || stats.next.battery.watts !== data.battery.watts) {
         setBattState({ prev: stats.next, next: data, latest: data });
       } else {
-        console.log("Storing latest battery state", data);
         setBattState({ prev: stats.prev, next: stats.next, latest: data });
       }
     },
   });
 
   const wattDiff =
-    stats?.prev?.watts && stats.latest.watts && stats.prev.chargingStatus === stats.latest.chargingStatus
-      ? Math.round((stats.latest.watts - stats.prev.watts) * 10) / 10
+    stats?.prev?.battery?.watts != null &&
+    stats.latest.battery.watts != null &&
+    stats.prev.battery.chargingStatus === stats.latest.battery.chargingStatus
+      ? Math.round((stats.latest.battery.watts - stats.prev.battery.watts) * 10) / 10
       : null;
 
+  const latestBattery = stats?.latest?.battery;
   const timeRemaining =
-    stats && stats.latest.hoursRemaining != null
-      ? `${stats.latest.hoursRemaining}:${String(stats.latest.minutesRemaining).padStart(2, "0")}`
+    latestBattery && latestBattery.hoursRemaining != null
+      ? `${latestBattery.hoursRemaining}:${String(latestBattery.minutesRemaining).padStart(2, "0")}`
       : null;
 
-  const cpuUsage = stats?.prev?.cpu && stats.latest.cpu ? calculateCPUUsage(stats?.prev?.cpu, stats?.latest.cpu) : null;
+  const cpuUsage = stats?.prev?.cpu && stats.latest.cpu ? calculateCPUUsage(stats.prev.cpu, stats.latest.cpu) : null;
 
   const screenTime = stats?.prev?.screen && stats.latest.screen ? stats.latest.screen : null;
 
   const batteryColor = !stats
     ? undefined
-    : stats.latest.chargingStatus === "fully charged" || stats.latest.chargingStatus === "on hold"
-    ? Color.Green
-    : stats.latest.chargingStatus === "charging"
-    ? Color.Blue
-    : stats.latest.capacity < 0.1
-    ? Color.Red
-    : stats.latest.capacity < 0.2
-    ? Color.Orange
-    : stats.latest.capacity < 0.3
-    ? Color.Yellow
-    : undefined;
+    : latestBattery?.chargingStatus === "fully charged" || latestBattery?.chargingStatus === "on hold"
+      ? Color.Green
+      : latestBattery?.chargingStatus === "charging"
+        ? Color.Blue
+        : latestBattery?.capacity != null && latestBattery.capacity < 0.1
+          ? Color.Red
+          : latestBattery?.capacity != null && latestBattery.capacity < 0.2
+            ? Color.Orange
+            : latestBattery?.capacity != null && latestBattery.capacity < 0.3
+              ? Color.Yellow
+              : undefined;
 
   const remainingColor =
-    !stats || stats.latest.chargingStatus === "charging"
+    !stats || latestBattery?.chargingStatus === "charging"
       ? undefined
-      : stats.latest.timeRemaining == null
-      ? Color.SecondaryText
-      : stats.latest.timeRemaining < (Number(preferences.remainingRed) || 0) * 60
-      ? Color.Red
-      : stats.latest.timeRemaining < (Number(preferences.remainingOrange) || 0) * 60
-      ? Color.Orange
-      : stats.latest.timeRemaining < (Number(preferences.remainingYellow) || 0) * 60
-      ? Color.Yellow
-      : undefined;
+      : latestBattery?.timeRemaining == null
+        ? Color.SecondaryText
+        : latestBattery.timeRemaining < (Number(preferences.remainingRed) || 0) * 60
+          ? Color.Red
+          : latestBattery.timeRemaining < (Number(preferences.remainingOrange) || 0) * 60
+            ? Color.Orange
+            : latestBattery.timeRemaining < (Number(preferences.remainingYellow) || 0) * 60
+              ? Color.Yellow
+              : undefined;
 
   const powerColor =
-    !stats || stats.latest.chargingStatus === "charging" || !stats.latest.watts
+    !stats || latestBattery?.chargingStatus === "charging" || latestBattery?.watts == null
       ? undefined
-      : -stats.latest.watts > (Number(preferences.highPowerUsage) || 500)
-      ? Color.Purple
-      : undefined;
+      : -latestBattery.watts > (Number(preferences.highPowerUsage) || 500)
+        ? Color.Purple
+        : undefined;
 
   const iconColor = !stats
     ? Color.SecondaryText
     : powerColor
-    ? powerColor
-    : stats.latest.chargingStatus === "fully charged" || stats.latest.chargingStatus === "on hold"
-    ? Color.Green
-    : stats.latest.chargingStatus === "charging"
-    ? Color.Blue
-    : batteryColor
-    ? batteryColor
-    : remainingColor
-    ? remainingColor
-    : undefined;
+      ? powerColor
+      : latestBattery?.chargingStatus === "fully charged" || latestBattery?.chargingStatus === "on hold"
+        ? Color.Green
+        : latestBattery?.chargingStatus === "charging"
+          ? Color.Blue
+          : batteryColor
+            ? batteryColor
+            : remainingColor
+              ? remainingColor
+              : undefined;
 
-  const battPct = stats ? Math.round(stats?.latest.capacity * 100) : null;
+  const battPct = latestBattery?.capacity != null ? Math.round(latestBattery.capacity * 100) : null;
+  const bluetoothDevices = stats?.latest.bluetooth ?? [];
 
   return (
     <MenuBarExtra
@@ -124,9 +161,9 @@ export default function Command() {
             battPct == null
               ? Icon.Battery
               : battPct == 100
-              ? Icon.BatteryCharging
-              : // @ts-expect-error Yep, this is a hack
-                Icon[`Number${String(battPct).padStart(2, "0")}`],
+                ? Icon.BatteryCharging
+                : // @ts-expect-error Yep, this is a hack
+                  Icon[`Number${String(battPct).padStart(2, "0")}`],
           tintColor: iconColor,
         }
         // getProgressIcon(stats?.latest.capacity ?? 0, iconColor)
@@ -136,57 +173,57 @@ export default function Command() {
         preferences.showInfo === "remaining"
           ? timeRemaining || "--:--"
           : preferences.showInfo === "watts"
-          ? stats?.latest.watts
-            ? `${Math.round(stats.latest.watts * 10) / 10}W`
-            : "--W"
-          : preferences.showInfo === "percent"
-          ? "%"
-          : ""
+            ? latestBattery?.watts != null
+              ? `${Math.round(latestBattery.watts * 10) / 10}W`
+              : "--W"
+            : preferences.showInfo === "percent"
+              ? "%"
+              : ""
       }
     >
       <MenuBarExtra.Section title="Battery">
-        {stats?.latest ? (
+        {latestBattery ? (
           <>
             <MenuBarExtra.Item
               icon={{
-                source: stats.latest.connected ? Icon.BatteryCharging : Icon.Battery,
+                source: latestBattery.connected ? Icon.BatteryCharging : Icon.Battery,
                 tintColor: batteryColor,
               }}
               subtitle={
-                stats.latest.chargingStatus === "fully charged"
+                latestBattery.chargingStatus === "fully charged"
                   ? "Fully Charged"
-                  : stats.latest.chargingStatus === "on hold"
-                  ? "Charging on Hold"
-                  : stats.latest.chargingStatus === "charging"
-                  ? "Charging"
-                  : stats.latest.chargingStatus === "discharging"
-                  ? "Discharging"
-                  : "Unknown"
+                  : latestBattery.chargingStatus === "on hold"
+                    ? "Charging on Hold"
+                    : latestBattery.chargingStatus === "charging"
+                      ? "Charging"
+                      : latestBattery.chargingStatus === "discharging"
+                        ? "Discharging"
+                        : "Unknown"
               }
-              title={`${Math.round(stats.latest.capacity * 100)}%`}
+              title={latestBattery.capacity != null ? `${Math.round(latestBattery.capacity * 100)}%` : "--%"}
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
               icon={{ source: Icon.Clock, tintColor: remainingColor }}
               title={timeRemaining || "--:--"}
-              subtitle={stats.latest.chargingStatus === "charging" ? "Time until charged" : "Time remaining"}
+              subtitle={latestBattery.chargingStatus === "charging" ? "Time until charged" : "Time remaining"}
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
-              icon={{ source: Icon.Bolt, tintColor: stats.latest.lowPowerMode ? Color.Yellow : undefined }}
-              title={stats.latest.lowPowerMode ? "On" : "Off"}
+              icon={{ source: Icon.Bolt, tintColor: latestBattery.lowPowerMode ? Color.Yellow : undefined }}
+              title={latestBattery.lowPowerMode ? "On" : "Off"}
               subtitle={"Low Power Mode"}
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
               icon={{ source: Icon.Check, tintColor: iconColor }}
-              title={stats.latest.health.toFixed(2) + "%"}
+              title={latestBattery.health != null ? `${latestBattery.health.toFixed(2)}%` : "--"}
               subtitle={"Battery health"}
               onAction={openBatterySettings}
             />
             <MenuBarExtra.Item
               icon={{ source: Icon.RotateAntiClockwise, tintColor: iconColor }}
-              title={stats.latest.cycles.toFixed(0)}
+              title={latestBattery.cycles != null ? latestBattery.cycles.toFixed(0) : "--"}
               subtitle={"Battery cycles"}
               onAction={openBatterySettings}
             />
@@ -195,12 +232,12 @@ export default function Command() {
                 source: Icon.Bolt,
                 tintColor: powerColor,
               }}
-              title={stats.latest.watts ? `${Math.round(Math.abs(stats.latest.watts))}W` : "--"}
-              subtitle={stats.latest.chargingStatus === "charging" ? "Power input (~1 min)" : "Power draw (~1 min)"}
+              title={latestBattery.watts != null ? `${Math.round(Math.abs(latestBattery.watts))}W` : "--"}
+              subtitle={latestBattery.chargingStatus === "charging" ? "Power input (~1 min)" : "Power draw (~1 min)"}
               onAction={openBatterySettings}
             />
 
-            {stats.latest.chargingStatus === "discharging" && wattDiff ? (
+            {latestBattery.chargingStatus === "discharging" && wattDiff ? (
               <MenuBarExtra.Item
                 icon={{
                   source: wattDiff > 0 ? Icon.Minus : wattDiff < 0 ? Icon.Plus : Icon.Dot,
@@ -217,6 +254,21 @@ export default function Command() {
           </>
         ) : null}
       </MenuBarExtra.Section>
+      {bluetoothDevices.length > 0 ? (
+        <MenuBarExtra.Section title="Devices">
+          {bluetoothDevices.map((device) => (
+            <MenuBarExtra.Item
+              key={device.address}
+              icon={{
+                source: getDeviceIcon(device),
+                tintColor: device.isConnected ? Color.Green : Color.SecondaryText,
+              }}
+              title={device.name}
+              subtitle={getDeviceSubtitle(device)}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      ) : null}
 
       <MenuBarExtra.Section title="Screen">
         <MenuBarExtra.Item
