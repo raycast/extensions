@@ -417,6 +417,11 @@ fn find_tab(
     hwnd: HWND,
     runtime_id: &str,
 ) -> Result<IUIAutomationElement, String> {
+    // a tab whose id could not be read is listed with an empty one, and every such tab
+    // would look like every other, so none of them can be acted on by id
+    if runtime_id.is_empty() {
+        return Err("This tab could not be identified".to_string());
+    }
     let window = unsafe { automation.ElementFromHandle(hwnd) }
         .map_err(|_| "This browser window is no longer open".to_string())?;
     scan_window(automation, &window, false)
