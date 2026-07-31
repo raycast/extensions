@@ -19,10 +19,8 @@ import type { TeamworkTimer } from "./types";
 export default function Command() {
   const { data, isLoading, revalidate } = usePromise(getTimerState, []);
 
-  const timer = data?.running;
+  const running = data?.running;
   const paused = data?.paused ?? [];
-  const selected = timer ?? paused[0];
-  const remaining = timer ? paused : paused.slice(1);
 
   async function update(action: () => Promise<void>, success: string) {
     try {
@@ -39,60 +37,45 @@ export default function Command() {
   return (
     <MenuBarExtra
       icon={Icon.Clock}
-      title={selected ? formatElapsed(selected) : undefined}
+      title={running ? formatElapsed(running) : undefined}
       isLoading={isLoading}
       tooltip={
-        selected
-          ? (selected.taskName ?? selected.description)
+        running
+          ? (running.taskName ?? running.description)
           : "No Teamwork timer running"
       }
     >
-      {selected ? (
+      {running ? (
         <>
           <MenuBarExtra.Item
-            title={
-              selected.taskName ?? selected.description ?? "Teamwork timer"
-            }
+            title={running.taskName ?? running.description ?? "Teamwork timer"}
           />
           <MenuBarExtra.Separator />
-          {selected.running ? (
-            <MenuBarExtra.Item
-              title="Pause Timer"
-              icon={Icon.Pause}
-              onAction={() =>
-                update(
-                  () => pauseTimer(selected.id),
-                  `Paused: ${selected.taskName ?? "Teamwork timer"}`,
-                )
-              }
-            />
-          ) : (
-            <MenuBarExtra.Item
-              title="Resume Timer"
-              icon={Icon.Play}
-              onAction={() =>
-                update(
-                  () => resumeTimer(selected.id),
-                  `Resumed: ${selected.taskName ?? "Teamwork timer"}`,
-                )
-              }
-            />
-          )}
+          <MenuBarExtra.Item
+            title="Pause Active Timer"
+            icon={Icon.Pause}
+            onAction={() =>
+              update(
+                () => pauseTimer(running.id),
+                `Paused: ${running.taskName ?? "Teamwork timer"}`,
+              )
+            }
+          />
           <MenuBarExtra.Item
             title="Stop and Log Timer"
             icon={Icon.Stop}
             onAction={() =>
               update(
-                () => completeTimer(selected),
-                `Logged ${formatElapsed(selected)}: ${selected.taskName ?? "Teamwork timer"}`,
+                () => completeTimer(running),
+                `Logged ${formatElapsed(running)}: ${running.taskName ?? "Teamwork timer"}`,
               )
             }
           />
-          {selected.taskId ? (
+          {running.taskId ? (
             <MenuBarExtra.Item
               title="Open Task"
               icon={Icon.Globe}
-              onAction={() => openUrl(taskUrl(selected.taskId))}
+              onAction={() => openUrl(taskUrl(running.taskId))}
             />
           ) : null}
           <MenuBarExtra.Separator />
@@ -108,22 +91,43 @@ export default function Command() {
           })
         }
       />
-      {remaining.length > 0 ? (
+      {paused.length > 0 ? (
         <>
           <MenuBarExtra.Separator />
-          {remaining.map((t: TeamworkTimer) => (
-            <MenuBarExtra.Item
+          {paused.map((t: TeamworkTimer) => (
+            <MenuBarExtra.Submenu
               key={t.id}
-              title={t.taskName ?? t.description ?? "Teamwork timer"}
-              subtitle={formatElapsed(t)}
+              title={`${t.taskName ?? t.description ?? "Teamwork timer"} (${formatElapsed(t)})`}
               icon={Icon.Pause}
-              onAction={() =>
-                update(
-                  () => resumeTimer(t.id),
-                  `Resumed: ${t.taskName ?? "Teamwork timer"}`,
-                )
-              }
-            />
+            >
+              <MenuBarExtra.Item
+                title="Resume"
+                icon={Icon.Play}
+                onAction={() =>
+                  update(
+                    () => resumeTimer(t.id),
+                    `Resumed: ${t.taskName ?? "Teamwork timer"}`,
+                  )
+                }
+              />
+              <MenuBarExtra.Item
+                title="Stop and Log"
+                icon={Icon.Stop}
+                onAction={() =>
+                  update(
+                    () => completeTimer(t),
+                    `Logged ${formatElapsed(t)}: ${t.taskName ?? "Teamwork timer"}`,
+                  )
+                }
+              />
+              {t.taskId ? (
+                <MenuBarExtra.Item
+                  title="Open Task"
+                  icon={Icon.Globe}
+                  onAction={() => openUrl(taskUrl(t.taskId))}
+                />
+              ) : null}
+            </MenuBarExtra.Submenu>
           ))}
         </>
       ) : null}

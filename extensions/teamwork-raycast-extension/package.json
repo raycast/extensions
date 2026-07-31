@@ -58,27 +58,27 @@
     {
       "name": "timer-menu-bar",
       "title": "Teamwork Timer Menu Bar",
-      "description": "Show the current Teamwork timer in the menu bar",
+      "description": "Show the Teamwork timers in the menu bar",
       "mode": "menu-bar",
       "interval": "10s"
     },
     {
       "name": "pause-timer",
-      "title": "Pause Timer",
-      "description": "Pause the current Teamwork timer",
+      "title": "Pause Active Timer",
+      "description": "Pause the current active Teamwork timer",
       "mode": "no-view"
     },
     {
       "name": "resume-timer",
       "title": "Resume Timer",
-      "description": "Resume the paused Teamwork timer",
-      "mode": "no-view"
+      "description": "Resume a paused Teamwork timer",
+      "mode": "view"
     },
     {
       "name": "stop-timer",
       "title": "Stop and Log Timer",
-      "description": "Stop the current Teamwork timer and log the time",
-      "mode": "no-view"
+      "description": "Stop a Teamwork timer and log the time",
+      "mode": "view"
     }
   ],
   "allowScripts": {

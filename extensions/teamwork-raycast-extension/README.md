@@ -48,16 +48,20 @@ Find and manage tasks assigned to you.
 
 Display your running timer in the macOS menu bar with live updates.
 
-**Actions:**
-- **Pause** Pause a running timer
-- **Resume** Resume a paused timer
+**Running timer actions:**
+- **Pause Active Timer** Pause the running timer
 - **Stop and Log** Complete the timer and create a time entry in Teamwork
 - **Open Task** Jump to the running task in Teamwork
 - **Search Tasks** Quick access to task search
 
+**Paused timers** are listed below with a submenu for each:
+- **Resume** Resume that timer
+- **Stop and Log** Complete that timer and log the time
+- **Open Task** Jump to the task in Teamwork
+
 ### Quick Timer Commands
 
 Speed up your workflow with keyboard-only timer control:
-- **Pause Timer** Pause the running timer
-- **Resume Timer** Resume a paused timer
-- **Stop Timer** Stop and log the current timer
+- **Pause Active Timer** Pause the running timer
+- **Resume Timer** Shows a list of paused timers — select one to resume
+- **Stop and Log Timer** Shows all timers (running and paused) — select one to stop and log
