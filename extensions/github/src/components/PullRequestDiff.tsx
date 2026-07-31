@@ -10,6 +10,7 @@ import { getFileStatusAccessory, PullRequestFile, truncatePatch } from "../helpe
 import { PullRequest } from "./PullRequestActions";
 
 const FILES_PER_PAGE = 100;
+const MIN_FENCE_LENGTH = 4;
 
 type PullRequestDiffProps = {
   pullRequest: PullRequest;
@@ -121,7 +122,8 @@ function getPatchMarkdown(file: PullRequestFile) {
   }
 
   const { patch, remainingLines } = truncatePatch(file.patch);
-  const fencedPatch = `\`\`\`\`diff\n${patch}\n\`\`\`\``;
+  const fence = getFence(patch);
+  const fencedPatch = `${fence}diff\n${patch}\n${fence}`;
 
   if (remainingLines === 0) {
     return fencedPatch;
@@ -130,6 +132,18 @@ function getPatchMarkdown(file: PullRequestFile) {
   return `${fencedPatch}\n\n_… truncated, ${pluralize(remainingLines, "more line", {
     withNumber: true,
   })}. Open the file on GitHub for the full diff._`;
+}
+
+// A fence only holds when it is longer than every backtick run inside it, and diffs of Markdown
+// files routinely carry fences of their own.
+function getFence(patch: string) {
+  let longestRun = 0;
+
+  for (const [backticks] of patch.matchAll(/`+/g)) {
+    longestRun = Math.max(longestRun, backticks.length);
+  }
+
+  return "`".repeat(Math.max(MIN_FENCE_LENGTH, longestRun + 1));
 }
 
 // GitHub anchors each file on the pull request files page by the SHA-256 digest of its path.

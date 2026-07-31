@@ -26,7 +26,7 @@ export default withGitHubClient(async ({ repository, pullRequestNumber }: Input)
   let truncated = false;
 
   for (let page = 1; page <= MAX_PAGES; page++) {
-    const { data } = await octokit.pulls.listFiles({
+    const { data, headers } = await octokit.pulls.listFiles({
       owner,
       repo,
       pull_number: pullRequestNumber,
@@ -49,7 +49,10 @@ export default withGitHubClient(async ({ repository, pullRequestNumber }: Input)
       }),
     );
 
-    if (data.length < FILES_PER_PAGE) {
+    // A full page does not imply another one follows, so trust the pagination header instead of the
+    // page size. Otherwise a pull request with exactly MAX_PAGES * FILES_PER_PAGE files reports as
+    // truncated despite being complete.
+    if (!headers.link?.includes('rel="next"')) {
       break;
     }
 
