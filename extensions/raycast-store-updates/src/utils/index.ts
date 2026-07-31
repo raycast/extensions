@@ -709,8 +709,16 @@ export async function convertPRsToStoreItems(
     };
   });
 
-  // Process removal PRs: fetch their deleted slugs, confirm via 404, emit one item per slug
-  const removedSeen = new Set<string>();
+  // Process removal PRs: fetch their deleted slugs, confirm via 404, emit one item per slug.
+  //
+  // Keyed by slug, this memoizes the in-flight confirmation rather than merely recording
+  // "seen". A Set cannot express what is needed here: two removal PRs deleting the same
+  // extension run concurrently, and the second reaches its check BEFORE the first's
+  // confirmation resolves. With a Set the second skips outright — so a transient failure
+  // on the first silently drops a genuine removal from the scan. Sharing the promise
+  // means the second awaits the same answer instead, and exactly one item is emitted
+  // because only the PR that created the entry emits.
+  const removalConfirmations = new Map<string, Promise<boolean>>();
   const removalResults = await mapWithConcurrency(removalCandidatePRs, 8, async (pr) => {
     // Budgeted like every other /files call — removal PRs were previously exempt, so a
     // scan with six removals issued six billed requests despite the cap.
@@ -718,14 +726,20 @@ export async function convertPRsToStoreItems(
     const slugs = await fetchRemovedSlugsFromPR(pr.number);
     const items: StoreItem[] = [];
     for (const slug of slugs) {
-      // Reserve the slug BEFORE the await. These callbacks run concurrently under
-      // mapWithConcurrency, so a check-then-await-then-add would let two removal PRs
-      // that deleted the same extension both pass the check and emit a duplicate item.
-      if (removedSeen.has(slug)) continue;
-      removedSeen.add(slug);
+      // Only the PR that starts the confirmation may emit; a concurrent PR for the same
+      // slug awaits the same promise and stays silent. That gives dedup (one item) and
+      // retry-safety (a transient failure does not suppress the other PR's answer,
+      // because there is only ever one answer).
+      const inFlight = removalConfirmations.get(slug);
+      if (inFlight) {
+        await inFlight; // keep the budget honest; the owning PR emits if it is gone
+        continue;
+      }
       // Confirm the extension is truly gone. Only an explicit 404 counts — a transient
       // 5xx or network error must not be reported to the user as a removal.
-      if (!(await isExtensionGone(slug))) continue;
+      const confirmation = isExtensionGone(slug);
+      removalConfirmations.set(slug, confirmation);
+      if (!(await confirmation)) continue;
       const title = titleFromSlug(slug);
       items.push({
         id: `pr-${pr.number}-removed-${slug}`,
