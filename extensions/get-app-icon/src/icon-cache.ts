@@ -25,6 +25,15 @@ const CACHE_DIR = path.join(environment.supportPath, "icon-cache");
 const TEMP_PREFIX = ".tmp-";
 
 /**
+ * How long a superseded cache entry is left alone before `pruneIconCache` collects it.
+ *
+ * Long enough that any grid window still displaying it has had a chance to re-resolve,
+ * short enough that the extra disk is a rounding error — a few dozen 43KB PNGs at worst,
+ * and only for apps that changed within the window.
+ */
+const SUPERSEDED_GRACE_MS = 15 * 60 * 1000;
+
+/**
  * `NSWorkspace.icon(forFile:)` returns an image whose *nominal* size is 32pt even
  * though it carries representations up to 2048px. Raycast's `fileIcon` renders that
  * nominal size, so a grid tile upscales 32pt to ~128pt and looks soft. Drawing the
@@ -408,13 +417,13 @@ export async function invalidateCachedIcon(appPath: string): Promise<void> {
  */
 export async function pruneIconCache(appPaths: readonly string[], inUse: Iterable<string> = []): Promise<void> {
   const live = new Set(await Promise.all(appPaths.map((appPath) => cacheKey(appPath))));
-  // Entries the caller is currently displaying are spared even when they no longer match
-  // the live key. State-addressed names made this necessary: a grid resolves a name, then
-  // renders it for as long as the view is open, and if the app's sources move in between,
-  // that name stops being "live" while still being on screen — so pruning purely by
-  // liveness would delete a file out from under a visible tile. The entry is collected on
-  // a later pass once nothing is rendering it.
+  // Entries this caller is displaying are spared even when they no longer match the live
+  // key: a grid resolves a name, then renders it for as long as the view is open, and if
+  // the app's sources move in between, that name stops being "live" while still being on
+  // screen.
   for (const entryPath of inUse) live.add(path.basename(entryPath));
+
+  const now = Date.now();
   try {
     const entries = await readdir(CACHE_DIR);
     await Promise.all(
@@ -422,7 +431,26 @@ export async function pruneIconCache(appPaths: readonly string[], inUse: Iterabl
         // Never touch a `.tmp-*` sibling: it belongs to an extraction that may still be
         // running in another window, and deleting it mid-write fails that icon.
         .filter((entry) => !entry.startsWith(TEMP_PREFIX) && !live.has(entry))
-        .map((entry) => unlink(path.join(CACHE_DIR, entry)).catch(() => {})),
+        .map(async (entry) => {
+          const target = path.join(CACHE_DIR, entry);
+          // `inUse` only covers THIS process. Another Raycast window can be rendering a
+          // superseded entry, and nothing here can see its state — so liveness alone would
+          // delete a file out from under that window's tiles, which then point at nothing
+          // until its own refresh re-resolves them.
+          //
+          // An age gate answers that without shared state. A superseded entry can only be
+          // on screen somewhere if a view resolved it before the app changed, so leaving
+          // recently-written entries alone covers every window that could still hold one.
+          // Coordination — a lock, or a registry of in-use paths — would reintroduce
+          // exactly the cross-process mutable state this cache was rewritten to avoid, and
+          // would need to survive a crash to be worth anything.
+          const age = await stat(target).then(
+            (info) => now - info.mtimeMs,
+            () => Number.POSITIVE_INFINITY, // already gone: let unlink no-op
+          );
+          if (age < SUPERSEDED_GRACE_MS) return;
+          await unlink(target).catch(() => {});
+        }),
     );
   } catch {
     // No cache directory yet — nothing to prune.
