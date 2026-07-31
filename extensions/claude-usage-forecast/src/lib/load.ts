@@ -72,11 +72,18 @@ export async function load(): Promise<LoadResult> {
           ? e.message
           : String(e);
     limits = readLastLimits(support);
-    // A cache whose weekly window already closed is not "current utilization";
-    // presenting yesterday's percentage as now would silently mislead. Discard
-    // it and surface the fetch error instead.
-    if (limits?.weekly?.resetsAt && limits.weekly.resetsAt < Date.now()) {
-      limits = null;
+    // Discard any cached window that has already closed: presenting last
+    // week's or last 5-hour's percentage as "now" would silently mislead.
+    // The weekly window gates the whole reading (the forecast needs it);
+    // the five-hour window is rendered separately and tolerates null.
+    if (limits) {
+      if (limits.weekly?.resetsAt && limits.weekly.resetsAt < Date.now()) {
+        limits.weekly = null;
+      }
+      if (limits.fiveHour?.resetsAt && limits.fiveHour.resetsAt < Date.now()) {
+        limits.fiveHour = null;
+      }
+      if (!limits.weekly) limits = null;
     }
     stale = limits !== null;
     if (!limits) throw e;
