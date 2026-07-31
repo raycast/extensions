@@ -40,26 +40,26 @@ Raycast will load the extension in development mode. Run a command and sign in w
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| Today | Tasks due today |
-| Inbox | Inbox tasks |
-| Next 7 Days | Upcoming week |
-| Overdue | Past-due tasks |
-| Search Tasks | Search all tasks |
-| Create Task | Create a task |
-| Projects | Browse by project |
-| Eisenhower Matrix | Priority quadrants |
-| Tags | Browse by tag |
-| Smart Lists | Saved TickTick filters |
-| Completed | Completed tasks |
-| Habits | Habit tracker |
-| Pomodoro | Focus timer |
-| Manage Projects | Create/edit projects |
-| Profile | Account info |
-| Menu Bar | Timer & counts in menu bar |
-| Background Alerts | Overdue and high-priority alerts (runs in background) |
-| Disconnect TickTick Account | Clear the OAuth session |
+| Command                     | Description                                           |
+| --------------------------- | ----------------------------------------------------- |
+| Today                       | Tasks due today                                       |
+| Inbox                       | Inbox tasks                                           |
+| Next 7 Days                 | Upcoming week                                         |
+| Overdue                     | Past-due tasks                                        |
+| Search Tasks                | Search all tasks                                      |
+| Create Task                 | Create a task                                         |
+| Projects                    | Browse by project                                     |
+| Eisenhower Matrix           | Priority quadrants                                    |
+| Tags                        | Browse by tag                                         |
+| Smart Lists                 | Saved TickTick filters                                |
+| Completed                   | Completed tasks                                       |
+| Habits                      | Habit tracker                                         |
+| Pomodoro                    | Focus timer                                           |
+| Manage Projects             | Create/edit projects                                  |
+| Profile                     | Account info                                          |
+| Menu Bar                    | Timer & counts in menu bar                            |
+| Background Alerts           | Overdue and high-priority alerts (runs in background) |
+| Disconnect TickTick Account | Clear the OAuth session                               |
 
 **Tip:** Complete a task with **⌘⇧↩** from any task list.
 
