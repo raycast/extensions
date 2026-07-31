@@ -402,8 +402,13 @@ fn document_url(document: &IUIAutomationElement) -> Option<(String, String)> {
     }
 }
 
-/// Resolves a tab by its position, falling back to its title when tabs have moved since
-/// the list was built.
+/// Resolves a tab by its position, falling back to its title when tabs have moved since the
+/// list was built.
+///
+/// Both have to agree on which tab this is. Position alone is not enough: a tab that closed
+/// leaves its neighbour at that position, and acting on whatever now sits there would focus
+/// a tab the user did not pick, or close one they wanted to keep. Reporting the tab as gone
+/// lets the caller open its address instead, or tell the user.
 fn find_tab(
     automation: &IUIAutomation,
     hwnd: HWND,
@@ -420,12 +425,9 @@ fn find_tab(
             return Ok(tab.clone());
         }
     }
-    // otherwise it may have been dragged or its neighbours closed
-    if let Some(tab) = tabs.iter().find(|tab| tab_title(tab) == title) {
-        return Ok(tab.clone());
-    }
-    // or the page simply renamed itself, in which case the position is the best guess left
-    tabs.get(index as usize)
+    // otherwise it may have been dragged, or its neighbours closed
+    tabs.iter()
+        .find(|tab| tab_title(tab) == title)
         .cloned()
         .ok_or_else(|| "This tab is no longer open".to_string())
 }
