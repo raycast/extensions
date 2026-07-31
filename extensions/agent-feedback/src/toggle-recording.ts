@@ -121,16 +121,11 @@ async function stopRecording(
     toast.title = "Transcribing locally…";
     const { segments } = await transcribe(state, preferences);
     toast.title = "Extracting feedback frames…";
-    const { markdown, reportPath } = await buildReport(
-      state,
-      preferences,
-      segments,
-    );
+    const { markdown } = await buildReport(state, preferences, segments);
+    await Clipboard.copy(markdown);
     toast.style = Toast.Style.Success;
-    toast.title = "Feedback ready";
-    toast.message = "Pasting into the active app";
-    await Clipboard.paste(markdown);
-    toast.message = reportPath;
+    toast.title = "Feedback copied";
+    toast.message = "Paste it into your agent when ready";
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could not prepare feedback";

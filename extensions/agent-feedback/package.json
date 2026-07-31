@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-feedback",
   "title": "Agent Feedback",
-  "description": "Record narrated UI feedback and paste local, agent-ready context.",
+  "description": "Record narrated UI feedback and copy local, agent-ready context.",
   "icon": "extension-icon.png",
   "author": "vojtaholik",
   "platforms": [
@@ -25,7 +25,7 @@
     {
       "name": "toggle-recording",
       "title": "Record Agent Feedback",
-      "description": "Toggle screen and microphone recording, then paste an agent-ready report.",
+      "description": "Toggle screen and microphone recording, then copy an agent-ready report.",
       "mode": "no-view"
     },
     {

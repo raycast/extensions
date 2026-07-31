@@ -4,7 +4,7 @@
 
 # Agent Feedback
 
-Record your screen, point at the interface, and say what should change. Agent Feedback turns the recording into local, agent-ready Markdown with a timestamped transcript and screenshots, then pastes it into your coding agent.
+Record your screen, point at the interface, and say what should change. Agent Feedback turns the recording into local, agent-ready Markdown with a timestamped transcript and screenshots, then copies it to your clipboard.
 
 Everything after the one-time model download runs on your Mac. There is no account, hosted video, transcription API, analytics, or telemetry.
 
@@ -14,7 +14,7 @@ Everything after the one-time model download runs on your Mac. There is no accou
 2. Talk naturally while navigating your app.
 3. While pointing at something important, run **Mark Feedback Moment** to attach an exact screenshot and timestamp.
 4. Run **Record Agent Feedback** again to stop.
-5. Agent Feedback transcribes locally, assembles the report, and pastes it into the field that was active before Raycast opened.
+5. Agent Feedback transcribes locally, assembles the report, and copies it to your clipboard so you can paste it into your agent when ready.
 
 If you do not mark anything manually, Agent Feedback captures periodic background frames and selects up to the configured maximum automatically.
 
@@ -60,7 +60,7 @@ Each session contains:
 - `recording.mov` — screen, cursor, click highlights, and microphone
 - `transcript.json` — timestamped local Whisper output
 - `frames/` — manually marked or automatically captured screenshots
-- `feedback.md` — the report pasted into your agent
+- `feedback.md` — the report copied to your clipboard
 
 Use **Open Feedback Sessions** to inspect or delete these artifacts in Finder.
 
