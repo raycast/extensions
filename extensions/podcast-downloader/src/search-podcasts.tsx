@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Icon,
   Image,
   List,
@@ -172,19 +173,25 @@ function PodcastItem({
           <Action
             title="Copy Latest Episode URL"
             icon={Icon.Link}
-            shortcut={{ modifiers: ["cmd"], key: "l" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "l" },
+              Windows: { modifiers: ["ctrl"], key: "l" },
+            }}
             onAction={() => void latest(podcast, onOpen, false)}
           />
           <Action
             title="Download Latest Episode"
             icon={Icon.Download}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "d" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+            }}
             onAction={() => void latest(podcast, onOpen, true)}
           />
           <Action.CopyToClipboard
             title="Copy RSS Feed URL"
             content={podcast.url}
-            shortcut={Keyboard.Shortcut.Common.Pin}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         </ActionPanel>
       }
@@ -287,7 +294,10 @@ function EpisodeList({
               <Action
                 title="Download Episode"
                 icon={Icon.Download}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "d" },
+                  Windows: { modifiers: ["ctrl"], key: "d" },
+                }}
                 onAction={() => downloadEpisode(episode)}
               />
             </ActionPanel>
@@ -314,7 +324,6 @@ async function latest(
     if (!episode) throw new Error("No downloadable episode found.");
     if (download) await downloadEpisode(episode);
     else {
-      const { Clipboard } = await import("@raycast/api");
       await Clipboard.copy(episode.enclosureUrl);
       await showToast({
         style: Toast.Style.Success,

@@ -4,7 +4,12 @@ import os from "node:os";
 import path from "node:path";
 import { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  getPreferenceValues,
+  showInFinder,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { safeFetch } from "./network";
 import type { Episode } from "./types";
 
@@ -49,11 +54,8 @@ export async function downloadEpisode(episode: Episode): Promise<void> {
     toast.title = "Episode downloaded";
     toast.message = target;
     toast.primaryAction = {
-      title: "Show in Finder",
-      onAction: () =>
-        void import("@raycast/api").then(({ showInFinder }) =>
-          showInFinder(target),
-        ),
+      title: "Show Download",
+      onAction: () => showInFinder(target),
     };
   } catch (error) {
     toast.style = Toast.Style.Failure;

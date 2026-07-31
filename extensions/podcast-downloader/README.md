@@ -20,7 +20,7 @@ Podcast Index credentials are only needed for directory search. You can paste a 
 
 - Type at least two characters to search Podcast Index.
 - Select a podcast to browse its episodes.
-- Use `⌘ L` to copy the latest episode URL or `⌘ ⇧ D` to download it directly.
+- Use the actions to copy the latest episode URL or download it directly.
 - Paste an RSS feed URL to browse it without Podcast Index.
 
 ## Privacy

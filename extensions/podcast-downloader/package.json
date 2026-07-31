@@ -7,7 +7,8 @@
   "icon": "podcast-downloader.png",
   "author": "volkmar_eich",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Media",
@@ -61,18 +62,18 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.102.3",
-    "fast-xml-parser": "^5.2.5",
+    "@raycast/api": "^1.104.24",
+    "fast-xml-parser": "^5.10.1",
     "ipaddr.js": "^2.4.0",
-    "undici": "^8.7.0"
+    "undici": "^8.9.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.15.29",
-    "@types/react": "^19.1.6",
-    "eslint": "^9.28.0",
-    "prettier": "^3.5.3",
-    "react": "^19.1.0",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "typescript": "~6.0.3"
   }
 }
