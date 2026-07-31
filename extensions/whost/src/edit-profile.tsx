@@ -9,7 +9,12 @@ import {
 import { useForm } from "@raycast/utils";
 import { Profile } from "./lib/types";
 import { loadProfiles, upsertProfile, newId } from "./lib/storage";
-import { commitProfiles, parseEntries, serializeEntries } from "./lib/hosts";
+import {
+  commitProfiles,
+  parseEntries,
+  ProfilesRollbackError,
+  serializeEntries,
+} from "./lib/hosts";
 
 interface FormValues {
   name: string;
@@ -34,12 +39,16 @@ export default function EditProfile(props: {
       const all = upsertProfile(previous, next);
       try {
         commitProfiles(previous, all);
-      } catch {
+      } catch (error) {
+        const rollbackFailed = error instanceof ProfilesRollbackError;
         void showToast({
           style: Toast.Style.Failure,
-          title: "Failed to Update Hosts File",
-          message:
-            "Elevation was declined or the write failed. The profile was not saved.",
+          title: rollbackFailed
+            ? "Profile and Hosts File Out of Sync"
+            : "Failed to Update Hosts File",
+          message: rollbackFailed
+            ? "The profile was saved, but the hosts file was not updated and rollback failed. Retry saving to synchronize them."
+            : "Elevation was declined or the write failed. The profile was not saved.",
         });
         return;
       }

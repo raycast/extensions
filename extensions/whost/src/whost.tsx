@@ -11,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { Profile, HOSTS_PATH } from "./lib/types";
 import { loadProfiles, removeProfile, upsertProfile } from "./lib/storage";
-import { commitProfiles } from "./lib/hosts";
+import { commitProfiles, ProfilesRollbackError } from "./lib/hosts";
 import { flushDns } from "./lib/dns";
 import EditProfile from "./edit-profile";
 
@@ -32,12 +32,17 @@ export default function Command() {
     const all = upsertProfile(profiles, next);
     try {
       commitProfiles(profiles, all);
-    } catch {
+    } catch (error) {
+      const rollbackFailed = error instanceof ProfilesRollbackError;
+      if (rollbackFailed) refresh();
       void showToast({
         style: Toast.Style.Failure,
-        title: "Failed to Update Hosts File",
-        message:
-          "Elevation was declined or the write failed. No changes were made.",
+        title: rollbackFailed
+          ? "Profile and Hosts File Out of Sync"
+          : "Failed to Update Hosts File",
+        message: rollbackFailed
+          ? "The profile change was saved, but the hosts file was not updated and rollback failed."
+          : "Elevation was declined or the write failed. No changes were made.",
       });
       return;
     }
@@ -59,12 +64,17 @@ export default function Command() {
     const all = removeProfile(profiles, profile.id);
     try {
       commitProfiles(profiles, all);
-    } catch {
+    } catch (error) {
+      const rollbackFailed = error instanceof ProfilesRollbackError;
+      if (rollbackFailed) refresh();
       void showToast({
         style: Toast.Style.Failure,
-        title: "Failed to Update Hosts File",
-        message:
-          "Elevation was declined or the write failed. The profile was not deleted.",
+        title: rollbackFailed
+          ? "Profile and Hosts File Out of Sync"
+          : "Failed to Update Hosts File",
+        message: rollbackFailed
+          ? "The profile was deleted from storage, but the hosts file was not updated and rollback failed."
+          : "Elevation was declined or the write failed. The profile was not deleted.",
       });
       return;
     }
