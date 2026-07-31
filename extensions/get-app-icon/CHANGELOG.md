@@ -1,5 +1,41 @@
 # Get App Icon Changelog
 
+## [Versioned Export Folders] - 2026-07-31
+
+### Added
+
+- **Export folders now include the app's version**, e.g. `Bleep 3.4.0 App Icons`. Exporting an icon
+  after an app updates previously wrote over the earlier export, because both used the same folder
+  name — the old icons were gone with no warning. Each version now keeps its own folder. Re-exporting
+  the same version still overwrites, which is what repairs a partial export.
+- **Export Icons As…** action — pick a single format for a one-off export without changing your
+  format preferences. For keeping PNG as the default but occasionally wanting just the ICNS.
+
+### Fixed
+
+- **The grid now notices when an app changes its icon in place.** Staleness was judged from the app
+  bundle's own timestamp, but an updater that rewrites files *inside* the bundle leaves that
+  timestamp untouched — an updated app kept showing its old icon indefinitely. The check now also
+  looks at `Contents`, `Info.plist`, and `Resources`, which do move.
+- **Show Export Folder in Finder** finds exports made before folders were versioned, instead of
+  treating them as missing.
+- A failed export no longer leaves empty folders behind. Exporting ICNS for an app that uses Asset
+  Catalog icons created the folders before discovering there was nothing to put in them, leaving an
+  empty `ICNS/` — or an empty app folder — sitting in your output directory. Cleanup now only ever
+  removes a folder the export itself created, so a folder you made is left alone even when empty.
+- **Grid icons now update when an app changes its icon.** Roughly half of installed apps name their
+  icon file something other than the conventional `AppIcon.icns` — Visual Studio Code's is
+  `Code.icns` — and a changed icon in one of those apps was invisible to the cache, so the grid
+  could show a stale tile indefinitely. The declared icon file is now checked directly.
+- **Every export now offers "Reveal in Finder" (`⌘O`) on its success toast.** The action was
+  attached but carried no keyboard shortcut, so nothing on screen indicated it existed and an
+  export appeared to leave you with nowhere to go. Covers **Export Icons**, **Export Icon Size…**,
+  **Export Icons As…**, and **Export All Sizes**.
+- The grid no longer re-extracts icons it has already cached when part of an app bundle can't be
+  read, and no longer keeps showing an out-of-date icon once it can be read again.
+- Two releases whose version strings are identical for the first ~240 characters now still get
+  separate export folders, instead of the second overwriting the first.
+
 ## [Sharper Grid Icons and Simpler Preferences] - 2026-07-27
 
 ### Added
