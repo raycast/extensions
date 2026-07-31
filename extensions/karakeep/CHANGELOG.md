@@ -1,6 +1,6 @@
 # Karakeep Changelog
 
-## [2.4.0] - {PR_MERGE_DATE}
+## [2.4.0] - 2026-07-31
 
 ### Offline and Docker recovery
 
