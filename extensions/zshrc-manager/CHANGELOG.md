@@ -1,5 +1,13 @@
 # Changelog
 
+## [Read/write correctness] - 2026-07-31
+
+### Fixed
+
+- Configurations larger than 10 KB are no longer silently truncated — all views, statistics, health checks, search, and the backup diff now see the entire file
+- Saving is no longer permanently blocked by pre-existing content (e.g. a long `PATH=` line); validation findings now show a confirmation dialog with Save Anyway / Cancel instead of failing the write
+- Coverage thresholds in the test config are now actually enforced (they were previously nested in a shape Vitest ignores)
+
 ## [2.0.0] - 2026-01-26
 
 ### Added

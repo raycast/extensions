@@ -4,6 +4,7 @@ import { clearCache } from "./cache";
 import { saveToHistory } from "./history";
 import type { EditItemConfig } from "./edit-item-form";
 import { log } from "../utils/logger";
+import { SaveCancelledError } from "../utils/errors";
 
 /**
  * Delete an item from the zshrc file after user confirmation
@@ -82,6 +83,9 @@ export async function deleteItem(key: string, config: EditItemConfig, skipConfir
       message: `Deleted ${config.itemType} "${key}"`,
     });
   } catch (error) {
+    if (error instanceof SaveCancelledError) {
+      throw error;
+    }
     log.delete.error(`Failed to delete ${config.itemType} "${key}"`, error);
     await showToast({
       style: Toast.Style.Failure,

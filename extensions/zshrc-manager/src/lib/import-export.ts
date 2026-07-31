@@ -10,6 +10,7 @@ import { readZshrcFileRaw, writeZshrcFile, getZshrcPath } from "./zsh";
 import { clearCache } from "./cache";
 import { saveToHistory } from "./history";
 import { validateAliasName, validateVarName, shellQuoteSingle, shellQuoteDouble } from "../utils/shell-escape";
+import { SaveCancelledError } from "../utils/errors";
 
 /**
  * Exported alias format
@@ -144,6 +145,9 @@ export async function importAliasesFromJson(json: string, sectionLabel?: string)
 
     return data.aliases.length;
   } catch (error) {
+    if (error instanceof SaveCancelledError) {
+      throw error;
+    }
     await showToast({
       style: Toast.Style.Failure,
       title: "Import Failed",
@@ -210,6 +214,9 @@ export async function importExportsFromJson(json: string, sectionLabel?: string)
 
     return data.exports.length;
   } catch (error) {
+    if (error instanceof SaveCancelledError) {
+      throw error;
+    }
     await showToast({
       style: Toast.Style.Failure,
       title: "Import Failed",

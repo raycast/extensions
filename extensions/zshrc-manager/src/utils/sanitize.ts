@@ -146,21 +146,6 @@ export function validateFileSize(fileSize: number): boolean {
 }
 
 /**
- * Truncates content to a safe length to prevent memory issues
- *
- * @param content The content to truncate
- * @param maxLength Maximum allowed length (defaults to FILE_CONSTANTS.MAX_CONTENT_LENGTH)
- * @returns Truncated content with ellipsis if truncated
- */
-export function truncateContent(content: string, maxLength: number = FILE_CONSTANTS.MAX_CONTENT_LENGTH): string {
-  if (content.length <= maxLength) {
-    return content;
-  }
-
-  return content.slice(0, maxLength) + "\n... (truncated)";
-}
-
-/**
  * Suspicious patterns to detect in zshrc content.
  * These are heuristics and can be bypassed - they serve as a warning mechanism,
  * not a security boundary. The user's zshrc is already trusted code.

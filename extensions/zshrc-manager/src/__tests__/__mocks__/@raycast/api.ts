@@ -162,6 +162,15 @@ export const List = (props: any) => {
   if (props.navigationTitle) {
     content.push(React.createElement("div", { key: "navigation-title" }, props.navigationTitle));
   }
+  if (props.searchBarAccessory) {
+    content.push(
+      React.createElement(
+        "div",
+        { key: "search-bar-accessory", "data-testid": "search-bar-accessory" },
+        props.searchBarAccessory,
+      ),
+    );
+  }
   if (props.children) {
     content.push(props.children);
   }

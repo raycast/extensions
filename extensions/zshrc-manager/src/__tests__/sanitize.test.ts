@@ -4,7 +4,6 @@ import {
   validateFilePath,
   validateFilePathForWrite,
   validateFileSize,
-  truncateContent,
   validateZshrcContent,
 } from "../utils/sanitize";
 import { FILE_CONSTANTS } from "../constants";
@@ -150,37 +149,6 @@ describe("sanitize.ts", () => {
     it("should reject negative file sizes", () => {
       expect(validateFileSize(-1)).toBe(false);
       expect(validateFileSize(-100)).toBe(false);
-    });
-  });
-
-  describe("truncateContent", () => {
-    it("should return content unchanged if within limit", () => {
-      const content = "Short content";
-      const result = truncateContent(content, 100);
-      expect(result).toBe("Short content");
-    });
-
-    it("should truncate content exceeding limit", () => {
-      const content = "A".repeat(1000);
-      const result = truncateContent(content, 100);
-      expect(result).toBe("A".repeat(100) + "\n... (truncated)");
-    });
-
-    it("should use default max length", () => {
-      const content = "A".repeat(20000);
-      const result = truncateContent(content);
-      expect(result).toBe("A".repeat(10000) + "\n... (truncated)");
-    });
-
-    it("should handle empty content", () => {
-      const result = truncateContent("");
-      expect(result).toBe("");
-    });
-
-    it("should handle content exactly at limit", () => {
-      const content = "A".repeat(100);
-      const result = truncateContent(content, 100);
-      expect(result).toBe("A".repeat(100));
     });
   });
 
