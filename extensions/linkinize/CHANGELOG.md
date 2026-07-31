@@ -1,6 +1,6 @@
 # Linkinize Changelog
 
-## [Favicon Fallback] - {PR_MERGE_DATE}
+## [Favicon Fallback] - 2026-07-31
 
 - Added initial letter avatars as fallback for bookmarks with broken or missing favicons
 - Favicon validation results are cached for faster subsequent loads
