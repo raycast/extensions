@@ -1,7 +1,8 @@
 import { activate_tab, close_tab, list_tabs } from "rust:../../rust";
-import { Application, captureException, LocalStorage } from "@raycast/api";
+import { Application, captureException, LocalStorage, open, showHUD } from "@raycast/api";
 import { BrowserSetup, BrowserTab, Tab } from "../types/types";
 import { CacheKey } from "./constants";
+import { isNotEmpty } from "./common-utils";
 import { recentOnTop } from "../types/preferences";
 
 // Windows implementation.
@@ -86,6 +87,18 @@ export const jumpToBrowserTab = async (browser: Application, tab: Tab) => {
     return "";
   } catch (e) {
     console.error(`Error jumpToBrowserTab for ${browser.name}`);
+    // Raycast has already closed by this point, so a failure here would otherwise be
+    // invisible. Opening the tab's address gets the user where they asked to go, the same
+    // way macOS falls back when a tab cannot be focused.
+    if (isNotEmpty(tab.url)) {
+      try {
+        await open(tab.url, browser);
+        return "";
+      } catch {
+        // nothing left to try
+      }
+    }
+    await showHUD("Could not switch to the tab");
     return String(e);
   }
 };
