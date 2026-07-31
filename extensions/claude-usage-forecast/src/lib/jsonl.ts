@@ -20,7 +20,7 @@ import { dirname, join } from "node:path";
 import { costOf, emptyTokens } from "./pricing";
 import { Tokens, UsageHistory } from "./types";
 
-const CACHE_VERSION = 4;
+const CACHE_VERSION = 5;
 
 export function projectsDir(): string {
   const dir =
@@ -263,19 +263,22 @@ export function scanUsage(
       firstSeen = entry.first;
 
     // Remove each id that a newer file already counted from its exact hour
-    // bucket. This subtracts only the duplicates' cost, leaving the file's
-    // unique records at full weight (a flat `keepRatio` would shrink them too).
+    // bucket. We mutate a COPY of `entry.hours`, never `entry.hours` itself:
+    // on a cache hit `entry` is the persisted object, so mutating it in place
+    // would subtract the same duplicates again on the next scan, and the
+    // forecast would drift downward every menu-bar refresh.
+    const dedupedHours: Record<string, number> = { ...entry.hours };
     for (const [id, { h, cost }] of Object.entries(entry.idCosts)) {
       if (seenIds.has(id)) {
-        const remaining = (entry.hours[h] ?? 0) - cost;
-        if (remaining > 0) entry.hours[h] = remaining;
-        else delete entry.hours[h];
+        const remaining = (dedupedHours[h] ?? 0) - cost;
+        if (remaining > 0) dedupedHours[h] = remaining;
+        else delete dedupedHours[h];
       } else {
         seenIds.add(id);
       }
     }
 
-    for (const [h, cost] of Object.entries(entry.hours)) {
+    for (const [h, cost] of Object.entries(dedupedHours)) {
       if (cost <= 0) continue;
       const hs = Number(h);
       hourly.set(hs, (hourly.get(hs) ?? 0) + cost);
