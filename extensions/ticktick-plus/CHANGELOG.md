@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-07-31
 
 - Sign in to TickTick through Raycast OAuth without manual API credentials
 - View Today, Inbox, Next 7 Days, Overdue, Completed, and Eisenhower Matrix task lists
