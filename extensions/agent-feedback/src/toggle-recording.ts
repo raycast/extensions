@@ -6,6 +6,7 @@ import {
   getPreferenceValues,
   showHUD,
   showToast,
+  updateCommandMetadata,
 } from "@raycast/api";
 import { existsSync, writeFileSync } from "fs";
 import { join } from "path";
@@ -27,6 +28,14 @@ import {
   transcribe,
 } from "./lib/transcribe";
 import { Preferences, RecordingState } from "./lib/types";
+
+async function setRecordingStatus(subtitle: string): Promise<void> {
+  try {
+    await updateCommandMetadata({ subtitle });
+  } catch {
+    // Recording should still work if Raycast cannot persist command metadata.
+  }
+}
 
 async function startRecording(preferences: Preferences): Promise<void> {
   ensureSupportDirectories();
@@ -87,21 +96,24 @@ async function startRecording(preferences: Preferences): Promise<void> {
     join(sessionDir, "session.json"),
     JSON.stringify(state, null, 2),
   );
+  await setRecordingStatus("● Recording — Run to Stop");
   await new Promise((resolve) => setTimeout(resolve, 800));
   if (!isProcessRunning(pid)) {
     clearState();
+    await setRecordingStatus("Ready to Record");
     await showHUD(
       "⚠️ Allow Raycast in Screen & System Audio Recording settings",
     );
     return;
   }
-  await showHUD("🔴 Agent feedback recording started");
+  await showHUD("🔴 Recording started — run this command again to stop");
 }
 
 async function stopRecording(
   state: RecordingState,
   preferences: Preferences,
 ): Promise<void> {
+  await setRecordingStatus("Stopping Recording…");
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Stopping feedback recording…",
@@ -115,6 +127,8 @@ async function stopRecording(
       process.kill(state.frameCapturePid, "SIGTERM");
     }
     clearState();
+    await setRecordingStatus("Recording Stopped — Preparing Feedback");
+    await showHUD("⏹ Recording stopped — preparing feedback");
     if (!existsSync(state.videoPath))
       throw new Error("The recorder did not create a video file");
 
@@ -130,6 +144,8 @@ async function stopRecording(
     toast.style = Toast.Style.Failure;
     toast.title = "Could not prepare feedback";
     toast.message = error instanceof Error ? error.message : String(error);
+  } finally {
+    await setRecordingStatus("Ready to Record");
   }
 }
 
@@ -140,6 +156,9 @@ export default async function Command() {
     await stopRecording(state, preferences);
     return;
   }
-  if (state) clearState();
+  if (state) {
+    clearState();
+    await setRecordingStatus("Ready to Record");
+  }
   await startRecording(preferences);
 }

@@ -25,6 +25,7 @@
     {
       "name": "toggle-recording",
       "title": "Record Agent Feedback",
+      "subtitle": "Ready to Record",
       "description": "Toggle screen and microphone recording, then copy an agent-ready report.",
       "mode": "no-view"
     },

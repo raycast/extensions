@@ -16,6 +16,8 @@ Everything after the one-time model download runs on your Mac. There is no accou
 4. Run **Record Agent Feedback** again to stop.
 5. Agent Feedback transcribes locally, assembles the report, and copies it to your clipboard so you can paste it into your agent when ready.
 
+While capture is active, the command subtitle changes to **Recording — Run to Stop**. Stopping immediately confirms that recording has ended before local transcription begins.
+
 If you do not mark anything manually, Agent Feedback captures periodic background frames and selects up to the configured maximum automatically.
 
 ## Recommended Hotkeys
