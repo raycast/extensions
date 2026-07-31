@@ -1,6 +1,8 @@
-import { copyFileSync, readdirSync, writeFileSync } from "fs";
+import { copyFileSync, existsSync, readdirSync, writeFileSync } from "fs";
 import { join } from "path";
+import { AttentionMoment, detectAttentionMoments } from "./attention-cues";
 import { loadDomContextTimeline } from "./dom-context";
+import { runFile } from "./process";
 import { readMarkers } from "./state";
 import {
   DomContextTarget,
@@ -13,8 +15,14 @@ interface ReportMoment {
   timestampMs: number;
   screenshotPath: string;
   text: string;
-  source: "marked" | "automatic";
+  source: "marked" | "attention" | "automatic";
+  voiceCue?: string;
   domTarget?: DomContextTarget;
+}
+
+interface AutomaticFrame {
+  name: string;
+  timestampMs: number;
 }
 
 function formatTimestamp(milliseconds: number): string {
@@ -58,6 +66,71 @@ function sampleEvenly<T>(items: T[], maximum: number): T[] {
   return result;
 }
 
+function automaticFrames(state: RecordingState): AutomaticFrame[] {
+  return readdirSync(join(state.sessionDir, "automatic"))
+    .map((name) => ({ name, match: /^frame-(\d+)\.png$/.exec(name) }))
+    .filter(
+      (candidate): candidate is { name: string; match: RegExpExecArray } =>
+        Boolean(candidate.match),
+    )
+    .map((candidate) => ({
+      name: candidate.name,
+      timestampMs: Number(candidate.match[1]),
+    }))
+    .sort((left, right) => left.timestampMs - right.timestampMs);
+}
+
+function nearestFrame(
+  frames: AutomaticFrame[],
+  timestampMs: number,
+): AutomaticFrame | undefined {
+  return frames.reduce<AutomaticFrame | undefined>((nearest, frame) => {
+    if (!nearest) return frame;
+    return Math.abs(frame.timestampMs - timestampMs) <
+      Math.abs(nearest.timestampMs - timestampMs)
+      ? frame
+      : nearest;
+  }, undefined);
+}
+
+function resolveFfmpegPath(): string | undefined {
+  return ["/opt/homebrew/bin/ffmpeg", "/usr/local/bin/ffmpeg"].find(existsSync);
+}
+
+async function captureAttentionFrame(
+  state: RecordingState,
+  cue: AttentionMoment,
+  frames: AutomaticFrame[],
+  destination: string,
+): Promise<boolean> {
+  const ffmpegPath = resolveFfmpegPath();
+  if (ffmpegPath) {
+    try {
+      await runFile(ffmpegPath, [
+        "-hide_banner",
+        "-loglevel",
+        "error",
+        "-ss",
+        (cue.timestampMs / 1000).toFixed(3),
+        "-i",
+        state.videoPath,
+        "-frames:v",
+        "1",
+        "-y",
+        destination,
+      ]);
+      if (existsSync(destination)) return true;
+    } catch {
+      // Fall back to the nearest periodic frame below.
+    }
+  }
+
+  const nearest = nearestFrame(frames, cue.timestampMs);
+  if (!nearest) return false;
+  copyFileSync(join(state.sessionDir, "automatic", nearest.name), destination);
+  return true;
+}
+
 function formatAttributes(attributes: Record<string, string>): string {
   const entries = Object.entries(attributes);
   return entries.length
@@ -89,6 +162,11 @@ export async function buildReport(
   const markers = readMarkers(state);
   const domTimeline = loadDomContextTimeline(state);
   const moments: ReportMoment[] = [];
+  const maximum = Math.max(
+    1,
+    Math.min(20, Number.parseInt(preferences.maxFrames, 10) || 8),
+  );
+  const candidates = automaticFrames(state);
 
   if (markers.length) {
     markers.forEach((marker, index) => {
@@ -106,23 +184,46 @@ export async function buildReport(
         domTarget: domTimeline.at(marker.timestampMs),
       });
     });
-  } else {
-    const maximum = Math.max(
-      1,
-      Math.min(20, Number.parseInt(preferences.maxFrames, 10) || 8),
+  }
+
+  const attentionCues = detectAttentionMoments(segments)
+    .filter(
+      (cue) =>
+        !markers.some(
+          (marker) => Math.abs(marker.timestampMs - cue.timestampMs) < 3_000,
+        ),
+    )
+    .slice(0, maximum);
+  for (let index = 0; index < attentionCues.length; index++) {
+    const cue = attentionCues[index];
+    const screenshotPath = join(
+      state.sessionDir,
+      "frames",
+      `attention-${String(index + 1).padStart(2, "0")}.png`,
     );
-    const candidates = readdirSync(join(state.sessionDir, "automatic"))
-      .map((name) => ({ name, match: /^frame-(\d+)\.png$/.exec(name) }))
-      .filter(
-        (candidate): candidate is { name: string; match: RegExpExecArray } =>
-          Boolean(candidate.match),
-      )
-      .map((candidate) => ({
-        name: candidate.name,
-        timestampMs: Number(candidate.match[1]),
-      }))
-      .sort((a, b) => a.timestampMs - b.timestampMs);
-    const selected = sampleEvenly(candidates, maximum);
+    if (!(await captureAttentionFrame(state, cue, candidates, screenshotPath)))
+      continue;
+    moments.push({
+      timestampMs: cue.timestampMs,
+      screenshotPath,
+      text: textNear(segments, cue.timestampMs),
+      source: "attention",
+      voiceCue: cue.cue,
+      domTarget: domTimeline.at(cue.timestampMs),
+    });
+  }
+
+  if (markers.length === 0) {
+    const remainingCandidates = candidates.filter((candidate) =>
+      moments.every(
+        (moment) =>
+          Math.abs(moment.timestampMs - candidate.timestampMs) >= 3_000,
+      ),
+    );
+    const selected = sampleEvenly(
+      remainingCandidates,
+      Math.max(0, maximum - moments.length),
+    );
     for (let index = 0; index < selected.length; index++) {
       const candidate = selected[index];
       const screenshotPath = join(
@@ -143,6 +244,8 @@ export async function buildReport(
       });
     }
   }
+
+  moments.sort((left, right) => left.timestampMs - right.timestampMs);
 
   const title = `UI Feedback — ${new Date(state.startedAt).toLocaleString()}`;
   const lines = [
@@ -167,8 +270,14 @@ export async function buildReport(
   ].filter((line): line is string => line !== undefined);
 
   moments.forEach((moment, index) => {
+    const sourceLabel =
+      moment.source === "marked"
+        ? " — manually marked"
+        : moment.source === "attention"
+          ? ` — voice cue: “${moment.voiceCue}”`
+          : "";
     lines.push(
-      `### ${index + 1}. ${formatTimestamp(moment.timestampMs)}${moment.source === "marked" ? " — manually marked" : ""}`,
+      `### ${index + 1}. ${formatTimestamp(moment.timestampMs)}${sourceLabel}`,
       "",
       moment.text || "Review the highlighted moment in the screenshot.",
       "",

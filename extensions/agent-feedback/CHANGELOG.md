@@ -11,3 +11,4 @@
 - Verify downloaded model files with pinned SHA-256 digests.
 - Produce screenshot-only reports when no speech is detected.
 - Optionally pair website feedback with framework-agnostic DOM hover context through a recording-scoped local bridge.
+- Recognize spoken visual-attention cues and prioritize exact screenshots from those moments.

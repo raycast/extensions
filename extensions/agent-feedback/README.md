@@ -12,13 +12,24 @@ Everything after the one-time model download runs on your Mac. There is no accou
 
 1. Run **Record Agent Feedback** to start screen and microphone capture.
 2. Talk naturally while navigating your app.
-3. While pointing at something important, run **Mark Feedback Moment** to attach an exact screenshot and timestamp.
-4. Run **Record Agent Feedback** again to stop.
-5. Agent Feedback transcribes locally, assembles the report, and copies it to your clipboard so you can paste it into your agent when ready.
+3. Use phrases such as **“look here,” “this button,” “move this,”** or **“where my cursor is”** while pointing. Agent Feedback recognizes these attention cues and captures the corresponding video frame.
+4. For an explicit marker, run **Mark Feedback Moment** to attach an exact screenshot and timestamp.
+5. Run **Record Agent Feedback** again to stop.
+6. Agent Feedback transcribes locally, assembles the report, and copies it to your clipboard so you can paste it into your agent when ready.
 
 While capture is active, the command subtitle changes to **Recording — Run to Stop**. Stopping immediately confirms that recording has ended before local transcription begins.
 
-If you do not mark anything manually, Agent Feedback captures periodic background frames and selects up to the configured maximum automatically.
+Voice cues are detected locally from the transcript. When `ffmpeg` is installed, Agent Feedback extracts the exact frame from the recording; otherwise it uses the nearest periodic screenshot. If there are no manual markers or voice cues, it selects periodic frames evenly.
+
+Recognized English cue patterns include:
+
+- Direct attention: “look here,” “notice this,” “take a look at that”
+- Cursor and pointing: “where my cursor is,” “I’m pointing at,” “hovering over”
+- UI references: “this button,” “that section,” “the title here”
+- Change references: “move this,” “remove that,” “resize this”
+- Visual comparison or emphasis: “like this,” “this is the problem,” “specifically here”
+
+The detector requires compound cues like these; a bare “this” or “there” does not create a screenshot.
 
 ## Recommended Hotkeys
 
@@ -35,6 +46,12 @@ Agent Feedback requires [`whisper-cli`](https://github.com/ggml-org/whisper.cpp)
 
 ```sh
 brew install whisper-cpp
+```
+
+For exact screenshots at spoken attention cues, install `ffmpeg` (optional):
+
+```sh
+brew install ffmpeg
 ```
 
 Then run **Download Local Models** once in Raycast. It downloads:
