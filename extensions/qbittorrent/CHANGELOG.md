@@ -1,6 +1,6 @@
 # qBittorrent Changelog
 
-## [Torrent List Improvements] - {PR_MERGE_DATE}
+## [Torrent List Improvements] - 2026-07-31
 
 - Added a toggleable details pane for torrent information
 - Added sorting and options for choosing which details appear in the list
