@@ -1,6 +1,6 @@
 # Changelog
 
-## [Read/write correctness] - {PR_MERGE_DATE}
+## [Read/write correctness] - 2026-07-31
 
 ### Fixed
 
