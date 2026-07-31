@@ -1,0 +1,29 @@
+# Changelog
+
+## [New Logo] - {PR_MERGE_DATE}
+
+- Fresh new Inoh logo across the extension and store listing
+
+## [Renamed to Inoh] - {PR_MERGE_DATE}
+
+- Joey is now **Inoh** — same extension, new name
+- Because the extension identity changed, you will be asked to sign in again
+  with your email one-time code; your decks and cards are untouched
+- Hotkeys, aliases, and quicklinks pointing at the old extension need to be
+  re-assigned
+
+## [Free Search & Passwordless Sign-In] - {PR_MERGE_DATE}
+
+- Search the dictionary for free — no account required
+- Sign in with a one-time code sent to your email, no password needed
+- A single email field signs you in or creates your account automatically
+- See which account you're signed in as, and sign out, from the actions menu
+- Add up to 300 cards on the free plan, with an upgrade to Inoh Pro for more
+
+## [Initial Release] - {PR_MERGE_DATE}
+
+- Search vocabulary words with definitions, images, and example sentences
+- Pronounce words with audio playback
+- Add cards to your Inoh decks
+- Search selected text from any app
+- Request missing words to be added
