@@ -175,28 +175,29 @@ async function iconStampPaths(appPath: string): Promise<string[]> {
  * filename. `.icns` is appended when omitted, which is the documented shorthand.
  */
 const XML_ENTITIES: Record<string, string> = {
-  "&amp;": "&",
-  "&lt;": "<",
-  "&gt;": ">",
-  "&quot;": '"',
-  "&apos;": "'",
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  apos: "'",
 };
+
+/** One source for both the decode and the "did anything unknown survive?" check. */
+const XML_ENTITY_PATTERN = new RegExp(`&(${Object.keys(XML_ENTITIES).join("|")});`, "g");
 
 async function declaredIconFile(appPath: string): Promise<string | null> {
   try {
     const plist = await readFile(path.join(appPath, "Contents", "Info.plist"), "utf8");
     // Strip comments first: a commented-out key would otherwise be read as live.
-    const match = plist
+    const raw = plist
       .replace(/<!--[\s\S]*?-->/g, "")
-      .match(/<key>CFBundleIconFile<\/key>\s*<string>([^<]*)<\/string>/);
-    const raw = match?.[1];
+      .match(/<key>CFBundleIconFile<\/key>\s*<string>([^<]*)<\/string>/)?.[1];
     if (raw === undefined) return null;
-    // Refuse on the RAW text: an `&` still present after the known entities are removed is
-    // one this doesn't decode (numeric, or a DTD definition), so the value can't be trusted.
-    // Checking the decoded string instead would reject `&amp;`, which decodes perfectly well.
-    const decoded = raw.replace(/&(amp|lt|gt|quot|apos);/g, (entity) => XML_ENTITIES[entity]);
-    if (raw.replace(/&(amp|lt|gt|quot|apos);/g, "").includes("&")) return null;
-    const name = decoded.trim();
+    // Judge the RAW text: an `&` left after the known entities are stripped is one this
+    // doesn't decode (numeric, or DTD-defined), so the value can't be trusted. Testing the
+    // decoded string instead would reject `&amp;`, which decodes perfectly well.
+    if (raw.replace(XML_ENTITY_PATTERN, "").includes("&")) return null;
+    const name = raw.replace(XML_ENTITY_PATTERN, (_, entity) => XML_ENTITIES[entity]).trim();
     if (!name || /[\\/]/.test(name)) return null;
     return name.endsWith(".icns") ? name : `${name}.icns`;
   } catch {
@@ -444,11 +445,11 @@ export async function pruneIconCache(appPaths: readonly string[], inUse: Iterabl
           // Coordination — a lock, or a registry of in-use paths — would reintroduce
           // exactly the cross-process mutable state this cache was rewritten to avoid, and
           // would need to survive a crash to be worth anything.
-          const age = await stat(target).then(
-            (info) => now - info.mtimeMs,
-            () => Number.POSITIVE_INFINITY, // already gone: let unlink no-op
+          const recent = await stat(target).then(
+            (info) => now - info.mtimeMs < SUPERSEDED_GRACE_MS,
+            () => false, // already gone
           );
-          if (age < SUPERSEDED_GRACE_MS) return;
+          if (recent) return;
           await unlink(target).catch(() => {});
         }),
     );
