@@ -560,6 +560,11 @@ export function getExtensionIconUrl(slug: string, iconFilename: string): string 
 /**
  * Confirms an extension is genuinely gone from the monorepo.
  *
+ * Returns a TRI-STATE, not a boolean. "present" and "unknown" are different answers:
+ * the first is a fact worth sharing between concurrent PRs, the second is an absence
+ * of information that must not be. Collapsing them into `false` is what let a
+ * transient error on one PR suppress a sibling PR's genuine 404.
+ *
  * Only a definitive 404 proves removal. fetchExtensionPackageInfo() collapses EVERY
  * failure to null — a 500, a network error, a malformed body — and additionally caches
  * that miss for 15 minutes, so using it here would let one transient blip display a live
@@ -567,12 +572,17 @@ export function getExtensionIconUrl(slug: string, iconFilename: string): string 
  * treated as "still exists": a missed removal is invisible, a false removal is a wrong
  * claim on screen. (Reported by Greptile on raycast/extensions#29819.)
  */
-async function isExtensionGone(slug: string): Promise<boolean> {
+type RemovalCheck = "gone" | "present" | "unknown";
+
+async function isExtensionGone(slug: string): Promise<RemovalCheck> {
   try {
     const response = await fetch(`${RAW_CONTENT_BASE}/${slug}/package.json`, { method: "HEAD" });
-    return response.status === 404;
+    if (response.status === 404) return "gone";
+    if (response.ok) return "present";
+    // 5xx, 429, anything else: we did not learn whether it is gone.
+    return "unknown";
   } catch {
-    return false;
+    return "unknown";
   }
 }
 
@@ -712,13 +722,16 @@ export async function convertPRsToStoreItems(
   // Process removal PRs: fetch their deleted slugs, confirm via 404, emit one item per slug.
   //
   // Keyed by slug, this memoizes the in-flight confirmation rather than merely recording
-  // "seen". A Set cannot express what is needed here: two removal PRs deleting the same
+  // "seen". A Set cannot express what is needed: two removal PRs deleting the same
   // extension run concurrently, and the second reaches its check BEFORE the first's
-  // confirmation resolves. With a Set the second skips outright — so a transient failure
-  // on the first silently drops a genuine removal from the scan. Sharing the promise
-  // means the second awaits the same answer instead, and exactly one item is emitted
-  // because only the PR that created the entry emits.
-  const removalConfirmations = new Map<string, Promise<boolean>>();
+  // confirmation resolves, so with a Set the second skips outright.
+  //
+  // The memoized value must be a TRI-STATE. A boolean conflates "present" with "could
+  // not tell", and sharing that ambiguity reproduces the bug in a new shape: a transient
+  // 5xx on whichever PR wins the race would be inherited by a sibling that would have
+  // received a real 404. Only a DEFINITIVE answer ("gone" / "present") is worth sharing;
+  // "unknown" is discarded so the next PR for that slug retries independently.
+  const removalConfirmations = new Map<string, Promise<RemovalCheck>>();
   const removalResults = await mapWithConcurrency(removalCandidatePRs, 8, async (pr) => {
     // Budgeted like every other /files call — removal PRs were previously exempt, so a
     // scan with six removals issued six billed requests despite the cap.
@@ -730,16 +743,39 @@ export async function convertPRsToStoreItems(
       // slug awaits the same promise and stays silent. That gives dedup (one item) and
       // retry-safety (a transient failure does not suppress the other PR's answer,
       // because there is only ever one answer).
-      const inFlight = removalConfirmations.get(slug);
-      if (inFlight) {
-        await inFlight; // keep the budget honest; the owning PR emits if it is gone
-        continue;
+      // Resolve this slug to a definitive verdict, retrying past inconclusive answers.
+      //
+      // The loop is load-bearing. A sibling PR reaches this point while the owner's
+      // confirmation is still in flight, so it cannot simply skip — by the time the
+      // owner discovers "unknown" and clears the entry, a skipping sibling has already
+      // moved on and the genuine removal is lost. Awaiting the shared promise and
+      // looping means whoever is still here retries, while a definitive answer is
+      // resolved exactly once and shared.
+      let verdict: RemovalCheck = "unknown";
+      let owned = false;
+      for (;;) {
+        const inFlight = removalConfirmations.get(slug);
+        if (inFlight) {
+          const shared = await inFlight;
+          if (shared !== "unknown") {
+            verdict = shared; // someone else got a definitive answer; they emit, not us
+            break;
+          }
+          // Inconclusive and already cleared by its owner — fall through and retry.
+          if (removalConfirmations.get(slug) === inFlight) removalConfirmations.delete(slug);
+          continue;
+        }
+        const confirmation = isExtensionGone(slug);
+        removalConfirmations.set(slug, confirmation);
+        verdict = await confirmation;
+        if (verdict === "unknown") {
+          removalConfirmations.delete(slug);
+          break; // our own attempt failed; do not spin on a persistent outage
+        }
+        owned = true; // we produced the definitive answer, so we are the one who emits
+        break;
       }
-      // Confirm the extension is truly gone. Only an explicit 404 counts — a transient
-      // 5xx or network error must not be reported to the user as a removal.
-      const confirmation = isExtensionGone(slug);
-      removalConfirmations.set(slug, confirmation);
-      if (!(await confirmation)) continue;
+      if (!owned || verdict !== "gone") continue;
       const title = titleFromSlug(slug);
       items.push({
         id: `pr-${pr.number}-removed-${slug}`,
