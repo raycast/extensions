@@ -1,4 +1,4 @@
-import { spawn } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { appendFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -53,19 +53,15 @@ const isPlayerAlive = async (audioPath: string): Promise<boolean> => {
       return false;
     }
   }
-  return readRegisteredPids(audioPath).some((pid) => {
-    try {
-      process.kill(pid, 0);
-      return true;
-    } catch {
-      return false;
-    }
-  });
+  return readRegisteredPlayers(audioPath).some(isPlayerRunning);
 };
 
 export const getLivePlayingPaths = async (): Promise<string[]> => {
   const live: string[] = [];
   for (const audioPath of getPlayingPaths()) {
+    if (process.platform !== "win32") {
+      pruneRegisteredPlayers(audioPath);
+    }
     if (await isPlayerAlive(audioPath)) {
       live.push(audioPath);
     } else {
@@ -75,22 +71,50 @@ export const getLivePlayingPaths = async (): Promise<string[]> => {
   return live;
 };
 
-const readRegisteredPids = (audioPath: string): number[] => {
+interface PlayerRecord {
+  pid: number;
+  startTime: string;
+}
+
+const getProcessStartTime = (pid: number): string | null => {
+  try {
+    const output = execFileSync("ps", ["-p", String(pid), "-o", "lstart="], { encoding: "utf8" }).trim();
+    return output || null;
+  } catch {
+    return null;
+  }
+};
+
+const readRegisteredPlayers = (audioPath: string): PlayerRecord[] => {
   try {
     return readFileSync(registryFile(audioPath), "utf8")
       .split("\n")
       .filter((line) => line !== "")
-      .map((line) => Number(line))
-      .filter((pid) => !Number.isNaN(pid));
+      .map((line) => {
+        const separator = line.indexOf(":");
+        if (separator <= 0) {
+          return null;
+        }
+        const pid = Number(line.slice(0, separator));
+        const startTime = line.slice(separator + 1);
+        return Number.isNaN(pid) || startTime === "" ? null : { pid, startTime };
+      })
+      .filter((record): record is PlayerRecord => record !== null);
   } catch {
     return [];
   }
 };
 
+const isPlayerRunning = (record: PlayerRecord): boolean => getProcessStartTime(record.pid) === record.startTime;
+
 const registerPlayer = (audioPath: string, pid: number) => {
   try {
+    const startTime = getProcessStartTime(pid);
+    if (startTime === null) {
+      return;
+    }
     mkdirSync(registryDir(), { recursive: true });
-    appendFileSync(registryFile(audioPath), `${pid}\n`);
+    appendFileSync(registryFile(audioPath), `${pid}:${startTime}\n`);
   } catch {
     // Best effort only, playback still works.
   }
@@ -99,11 +123,25 @@ const registerPlayer = (audioPath: string, pid: number) => {
 const unregisterPlayer = (audioPath: string, pid: number) => {
   try {
     const file = registryFile(audioPath);
-    const pids = readRegisteredPids(audioPath).filter((existing) => existing !== pid);
-    if (pids.length === 0) {
+    const remaining = readRegisteredPlayers(audioPath).filter((record) => record.pid !== pid);
+    if (remaining.length === 0) {
       rmSync(file, { force: true });
     } else {
-      writeFileSync(file, `${pids.join("\n")}\n`);
+      writeFileSync(file, `${remaining.map((record) => `${record.pid}:${record.startTime}`).join("\n")}\n`);
+    }
+  } catch {
+    // Best effort only.
+  }
+};
+
+const pruneRegisteredPlayers = (audioPath: string) => {
+  try {
+    const file = registryFile(audioPath);
+    const remaining = readRegisteredPlayers(audioPath).filter(isPlayerRunning);
+    if (remaining.length === 0) {
+      rmSync(file, { force: true });
+    } else {
+      writeFileSync(file, `${remaining.map((record) => `${record.pid}:${record.startTime}`).join("\n")}\n`);
     }
   } catch {
     // Best effort only.
@@ -111,19 +149,15 @@ const unregisterPlayer = (audioPath: string, pid: number) => {
 };
 
 const stopMacOSPlayers = (audioPath: string) => {
-  try {
-    const pids = readRegisteredPids(audioPath);
-    for (const pid of pids) {
-      try {
-        process.kill(pid);
-      } catch {
-        // The process already exited.
-      }
+  const players = readRegisteredPlayers(audioPath).filter(isPlayerRunning);
+  for (const { pid } of players) {
+    try {
+      process.kill(pid);
+    } catch {
+      // The process already exited.
     }
-    rmSync(registryFile(audioPath), { force: true });
-  } catch {
-    // Best effort only.
   }
+  rmSync(registryFile(audioPath), { force: true });
 };
 
 export const playSoundFromIndex = async (index: number) => {
@@ -149,7 +183,11 @@ export const playFile = async (item: Item) => {
   if (process.platform === "win32") {
     setPlaying(audioPath, true);
     playFileWindows(audioPath)
-      .then(() => setPlaying(audioPath, false))
+      .then(async () => {
+        if (!(await isPlayerAlive(audioPath))) {
+          setPlaying(audioPath, false);
+        }
+      })
       .catch((error) => {
         setPlaying(audioPath, false);
         showToast({ style: Toast.Style.Failure, title: "Failed to play sound", message: String(error) });
@@ -165,7 +203,9 @@ export const playFile = async (item: Item) => {
       if (pid !== undefined) {
         unregisterPlayer(audioPath, pid);
       }
-      setPlaying(audioPath, false);
+      if (readRegisteredPlayers(audioPath).length === 0) {
+        setPlaying(audioPath, false);
+      }
     };
     child.on("exit", unregister);
     child.on("error", unregister);
