@@ -56,7 +56,10 @@ const RING_STEP = 5;
  * work but only step in quarters, so the pill instead uses rings pre-rendered into
  * `assets/rings` at {@link RING_STEP}% granularity by `npm run rings`.
  *
- * Light and dark variants are shipped because asset images are not tinted in the menu bar.
+ * The assets are supersampled PNGs: SVG assets do not render in the menu bar, and Raycast
+ * does not resolve Apple's `@2x`/`@3x` suffixes, so a single image has to suit every
+ * display. Light and dark variants are shipped because asset images are not tinted in the
+ * menu bar.
  */
 export function menuBarUsageRing(percent: number): Image.ImageLike {
   if (!Number.isFinite(percent) || percent < 0) return Icon.CircleProgress;

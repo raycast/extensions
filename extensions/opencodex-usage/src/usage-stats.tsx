@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences, Keybo
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import {
+  AdminTokenError,
   fetchUsage,
   getPreferences,
   UsageQueryError,
@@ -135,13 +136,25 @@ export default function UsageStatsCommand() {
     // A reachable proxy that rejects the query is a different problem from an unreachable one,
     // so the message points at the query rather than the connection.
     const reported = error instanceof UsageQueryError;
+    const unauthorised = error instanceof AdminTokenError;
     return (
       <List>
         <List.EmptyView
-          icon={{ source: reported ? Icon.ExclamationMark : Icon.Plug, tintColor: Color.Red }}
-          title={reported ? "OpenCodex Could Not Return Usage" : "Cannot reach OpenCodex"}
+          icon={{
+            source: unauthorised ? Icon.Lock : reported ? Icon.ExclamationMark : Icon.Plug,
+            tintColor: Color.Red,
+          }}
+          title={
+            unauthorised
+              ? "OpenCodex Rejected the Admin Token"
+              : reported
+                ? "OpenCodex Could Not Return Usage"
+                : "Cannot reach OpenCodex"
+          }
           description={
-            reported ? `${error.message}\n\nReported by ${baseUrl}.` : `${error.message}\n\nChecked ${baseUrl}.`
+            reported || unauthorised
+              ? `${error.message}\n\nReported by ${baseUrl}.`
+              : `${error.message}\n\nChecked ${baseUrl}.`
           }
           actions={actions}
         />

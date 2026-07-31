@@ -1,3 +1,6 @@
+import { readFileSync, statSync } from "node:fs";
+import { homedir } from "node:os";
+import { join, resolve } from "node:path";
 import { getPreferenceValues } from "@raycast/api";
 import { isConfigResponse, isProviderInfoList, isProviderQuotasResponse, isUsageResponse, type Guard } from "./guards";
 
@@ -141,10 +144,77 @@ function normaliseBaseUrl(value?: string): string {
   return withScheme.replace(/\/+$/, "");
 }
 
+/**
+ * Newer OpenCodex builds gate every `/api/*` route behind an admin token. The server keeps it in
+ * `$OPENCODEX_HOME/admin-api-token` (default `~/.opencodex`), so read it from there instead of
+ * making everyone paste a secret into preferences.
+ */
+const ADMIN_TOKEN_FILE = "admin-api-token";
+
+function expandUserPath(value: string): string {
+  if (value === "~") return homedir();
+  if (value.startsWith("~/")) return join(homedir(), value.slice(2));
+  return value;
+}
+
+function openCodexConfigDir(): string {
+  const raw = process.env.OPENCODEX_HOME?.trim();
+  return raw ? resolve(expandUserPath(raw)) : join(homedir(), ".opencodex");
+}
+
+/** The token file is local, tiny and mode 0600; anything else is not the secret we expect. */
+function readAdminTokenFile(): string | undefined {
+  try {
+    const path = join(openCodexConfigDir(), ADMIN_TOKEN_FILE);
+    const stat = statSync(path);
+    if (!stat.isFile() || stat.size > 512) return undefined;
+    return readFileSync(path, "utf8").trim() || undefined;
+  } catch {
+    // Missing file simply means an older server that does not require the token.
+    return undefined;
+  }
+}
+
+/**
+ * Hosts the machine's own OpenCodex secret may be sent to. A token discovered from the
+ * environment or disk was never meant for a third party, so it is withheld from anything but
+ * loopback; pointing the extension at a remote proxy requires pasting a token deliberately.
+ */
+function isLoopbackUrl(baseUrl: string): boolean {
+  try {
+    const { hostname } = new URL(baseUrl);
+    const host = hostname.replace(/^\[|\]$/g, "").toLowerCase();
+    // IPv4-mapped loopback reaches the same local server. `URL` normalises `::ffff:127.0.0.1`
+    // to its hex form (`::ffff:7f00:1`), so both spellings are unwrapped here.
+    const mapped = host.startsWith("::ffff:") ? host.slice(7) : undefined;
+    if (mapped && /^7f[0-9a-f]{2}:[0-9a-f]{1,4}$/.test(mapped)) return true;
+    const bare = mapped ?? host;
+    return (
+      bare === "localhost" ||
+      bare === "::1" ||
+      bare === "0.0.0.0" ||
+      bare.endsWith(".localhost") ||
+      /^127\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(bare)
+    );
+  } catch {
+    return false;
+  }
+}
+
+/** Preference wins, then the env var the server itself honours, then the on-disk token. */
+function resolveAdminToken(preference: string | undefined, baseUrl: string): string | undefined {
+  const explicit = preference?.trim();
+  if (explicit) return explicit;
+  if (!isLoopbackUrl(baseUrl)) return undefined;
+  return process.env.OPENCODEX_ADMIN_AUTH_TOKEN?.trim() || readAdminTokenFile();
+}
+
 export function getPreferences(): Preferences {
   const prefs = getPreferenceValues<Preferences>();
+  const baseUrl = normaliseBaseUrl(prefs.baseUrl);
   return {
-    baseUrl: normaliseBaseUrl(prefs.baseUrl),
+    baseUrl,
+    adminToken: resolveAdminToken(prefs.adminToken, baseUrl) ?? "",
     usageRange: prefs.usageRange || "30d",
     ringWindow: prefs.ringWindow || "weekly",
     paceWindow: prefs.paceWindow || "weekly",
@@ -172,7 +242,21 @@ export function getMenuBarPreferences(): MenuBarPreferences {
 /** The proxy is local, so anything slower than this is a hang rather than a slow network. */
 const REQUEST_TIMEOUT_MS = 10_000;
 
-async function getJson<T>(baseUrl: string, path: string, isValid: Guard<T>, signal?: AbortSignal): Promise<T> {
+/** The proxy answered, but refused the management call because the admin token is missing/wrong. */
+export class AdminTokenError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "AdminTokenError";
+  }
+}
+
+interface Endpoint {
+  baseUrl: string;
+  adminToken?: string;
+}
+
+async function getJson<T>(endpoint: Endpoint, path: string, isValid: Guard<T>, signal?: AbortSignal): Promise<T> {
+  const { baseUrl, adminToken } = endpoint;
   const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
   // Callers may cancel on unmount; the timeout guards against a proxy that accepts the
   // connection but never answers.
@@ -182,7 +266,11 @@ async function getJson<T>(baseUrl: string, path: string, isValid: Guard<T>, sign
   try {
     response = await fetch(`${baseUrl}${path}`, {
       signal: combined,
-      headers: { Accept: "application/json" },
+      headers: {
+        Accept: "application/json",
+        // Newer servers reject unauthenticated management calls with 401; older ones ignore it.
+        ...(adminToken ? { "x-opencodex-api-key": adminToken } : {}),
+      },
     });
   } catch (cause) {
     if (timeout.aborted) {
@@ -192,6 +280,18 @@ async function getJson<T>(baseUrl: string, path: string, isValid: Guard<T>, sign
   }
 
   if (!response.ok) {
+    if (response.status === 401 || response.status === 403) {
+      // Without a token the advice depends on where the proxy runs: the local token file only
+      // applies to this machine's own server, so a remote host is told to paste its own token.
+      const missingTokenHint = isLoopbackUrl(baseUrl)
+        ? `Copy it from ${join(openCodexConfigDir(), ADMIN_TOKEN_FILE)} into the extension preferences.`
+        : "Paste the token for that server into the extension preferences.";
+      throw new AdminTokenError(
+        adminToken
+          ? `${baseUrl} rejected the OpenCodex admin token. Check the token in the extension preferences.`
+          : `${baseUrl} requires an OpenCodex admin token. ${missingTokenHint}`,
+      );
+    }
     throw new Error(`Request to ${path} failed with status ${response.status}.`);
   }
   const contentType = response.headers.get("content-type") ?? "";
@@ -218,17 +318,18 @@ export interface Snapshot {
 }
 
 export async function fetchSnapshot(options?: { refresh?: boolean; signal?: AbortSignal }): Promise<Snapshot> {
-  const { baseUrl, usageRange } = getPreferences();
+  const { baseUrl, adminToken, usageRange } = getPreferences();
+  const endpoint: Endpoint = { baseUrl, adminToken };
   const signal = options?.signal;
   const quotaPath = `/api/provider-quotas${options?.refresh ? "?refresh=1" : ""}`;
 
   const [quotas, providers, config, usage] = await Promise.all([
-    getJson(baseUrl, quotaPath, isProviderQuotasResponse, signal),
-    getJson(baseUrl, "/api/providers", isProviderInfoList, signal).catch(() => [] as ProviderInfo[]),
-    getJson(baseUrl, "/api/config", isConfigResponse, signal).catch(() => undefined),
+    getJson(endpoint, quotaPath, isProviderQuotasResponse, signal),
+    getJson(endpoint, "/api/providers", isProviderInfoList, signal).catch(() => [] as ProviderInfo[]),
+    getJson(endpoint, "/api/config", isConfigResponse, signal).catch(() => undefined),
     // Usage only enriches the quota rows here, so a failure or a server-reported error simply
     // drops the extra request/token totals rather than failing the whole snapshot.
-    getJson(baseUrl, `/api/usage?range=${encodeURIComponent(usageRange)}`, isUsageResponse, signal)
+    getJson(endpoint, `/api/usage?range=${encodeURIComponent(usageRange)}`, isUsageResponse, signal)
       .then((usage) => (usage.error ? undefined : usage))
       .catch(() => undefined),
   ]);
@@ -252,9 +353,9 @@ export async function fetchUsage(
   surface: UsageSurface,
   signal?: AbortSignal,
 ): Promise<UsageResponse> {
-  const { baseUrl } = getPreferences();
+  const { baseUrl, adminToken } = getPreferences();
   const usage = await getJson(
-    baseUrl,
+    { baseUrl, adminToken },
     `/api/usage?range=${encodeURIComponent(range)}&surface=${encodeURIComponent(surface)}`,
     isUsageResponse,
     signal,

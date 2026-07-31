@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences, type Image, Keyboard } from "@raycast/api";
 import { useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchSnapshot, getPreferences, type ProviderInfo, type ProviderQuotaReport } from "./api";
+import { AdminTokenError, fetchSnapshot, getPreferences, type ProviderInfo, type ProviderQuotaReport } from "./api";
 import { providerLogo, usageRing } from "./branding";
 import {
   bar,
@@ -136,9 +136,13 @@ export default function ProviderUsageCommand() {
     >
       {error ? (
         <List.EmptyView
-          icon={{ source: Icon.Plug, tintColor: Color.Red }}
-          title="Cannot reach OpenCodex"
-          description={`${error.message}\n\nChecked ${baseUrl}. Make sure the proxy is running.`}
+          icon={{ source: error instanceof AdminTokenError ? Icon.Lock : Icon.Plug, tintColor: Color.Red }}
+          title={error instanceof AdminTokenError ? "OpenCodex Rejected the Admin Token" : "Cannot reach OpenCodex"}
+          description={
+            error instanceof AdminTokenError
+              ? `${error.message}\n\nReported by ${baseUrl}.`
+              : `${error.message}\n\nChecked ${baseUrl}. Make sure the proxy is running.`
+          }
           actions={
             <ActionPanel>
               <Action

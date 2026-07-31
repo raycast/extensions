@@ -23,6 +23,11 @@ opencodex dashboard renders.
 ## Preferences
 
 - `OpenCodex URL` — base URL of the proxy (default `http://127.0.0.1:10100`).
+- `Admin Token` — token for the proxy's management API. Recent opencodex builds answer `/api/*`
+  with `401 opencodex admin token required` unless the request carries it. Leave the field empty
+  and the extension reads `~/.opencodex/admin-api-token` (or `$OPENCODEX_HOME/admin-api-token`)
+  itself; set it explicitly for a remote proxy or when the server runs with
+  `OPENCODEX_ADMIN_AUTH_TOKEN`.
 - `Usage Range` — default range for request/token statistics (`7d`, `30d`, `all`).
 - `Ring Window` — which rate-limit window the ring next to a provider reports (`Weekly`, `5h`,
   `Monthly`, `Highest usage`). Providers that do not report the chosen window fall back to their
@@ -48,6 +53,17 @@ npm run rings
 This requires `rsvg-convert` (`brew install librsvg`). Change `STEP` in
 `scripts/render-rings.mjs` to trade asset count against granularity, and keep `RING_STEP` in
 `src/branding.ts` in sync.
+
+Menu bar icon assets have three constraints worth knowing: SVG files do not render there at all,
+Raycast does not resolve Apple's `@2x`/`@3x` suffixes, and Raycast fits the image to the slot
+itself (~29 physical pixels on a 2x display). Since that is not an integer fraction of any sensible
+source size, the rings are supersampled at 144px instead of chasing a "magic" size — sizes close to
+the target look worst, because a near-1:1 fractional resample smears edges.
+
+The unused portion of the ring reuses the foreground colour at 27% opacity (`TRACK_OPACITY` in
+`scripts/render-rings.mjs`), the same approach Tailscale uses for its dimmed menu bar dots. On a
+dark menu bar that composites to `rgb(75, 76, 77)`, matching Tailscale exactly, and it follows the
+wallpaper instead of being pinned to one hex value.
 
 ## Requirements
 

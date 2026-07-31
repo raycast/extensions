@@ -9,3 +9,4 @@
 - Menu bar shortcut to open the OpenCodex dashboard in the browser.
 - Menu bar ring rendered in 5% steps, with light and dark variants.
 - Bundled vendor logos for 39 providers.
+- Admin-token support for opencodex builds that require one on `/api/*`, read automatically from `~/.opencodex/admin-api-token` or set in preferences.

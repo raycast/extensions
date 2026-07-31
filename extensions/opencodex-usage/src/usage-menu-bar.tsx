@@ -1,6 +1,6 @@
 import { Icon, MenuBarExtra, launchCommand, LaunchType, open, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { fetchSnapshot, getMenuBarPreferences } from "./api";
+import { AdminTokenError, fetchSnapshot, getMenuBarPreferences } from "./api";
 import { menuBarUsageRing } from "./branding";
 import { buildQuotaRows, findPaceRow, formatReset, paceLabel, providerShortTitle, selectQuotaRow } from "./quota";
 
@@ -43,7 +43,9 @@ export default function UsageMenuBarCommand() {
   if (leader && menuBarShowProvider === "percent") title = `${percent}%`;
   if (leader && menuBarShowProvider === "provider") title = `${providerShortTitle(leader.report)} ${percent}%`;
   const tooltip = error
-    ? `Cannot reach ${baseUrl}`
+    ? error instanceof AdminTokenError
+      ? `${baseUrl} requires an admin token`
+      : `Cannot reach ${baseUrl}`
     : leader
       ? `${providerShortTitle(leader.report)} · ${leader.row.label} ${percent}%`
       : "OpenCodex usage";
@@ -52,8 +54,8 @@ export default function UsageMenuBarCommand() {
     <MenuBarExtra isLoading={isLoading} icon={menuBarUsageRing(percent)} title={title} tooltip={tooltip}>
       {error && (
         <MenuBarExtra.Item
-          icon={Icon.Plug}
-          title="Cannot reach OpenCodex"
+          icon={error instanceof AdminTokenError ? Icon.Lock : Icon.Plug}
+          title={error instanceof AdminTokenError ? "OpenCodex admin token required" : "Cannot reach OpenCodex"}
           subtitle={baseUrl}
           onAction={openExtensionPreferences}
         />

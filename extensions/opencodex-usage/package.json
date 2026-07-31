@@ -194,6 +194,13 @@
       "default": "http://127.0.0.1:10100"
     },
     {
+      "name": "adminToken",
+      "title": "Admin Token",
+      "description": "Admin token for the OpenCodex management API. Leave empty to read ~/.opencodex/admin-api-token automatically for a local proxy. Required when the proxy is not on this machine.",
+      "type": "password",
+      "required": false
+    },
+    {
       "name": "usageRange",
       "title": "Usage Range",
       "description": "Time range used for request and token statistics",
