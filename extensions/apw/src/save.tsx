@@ -22,13 +22,11 @@ interface SaveFormValues {
 
 type PasswordType = "random" | "alphanumeric" | "memorable" | "pin";
 
-// ponytail: modulo bias negligible for password generation
 const CHARS_RANDOM =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*-_";
 const CHARS_ALNUM =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-// ~200 common words; bias per word ≈ (256 % 200) / 256 < 0.25 — acceptable for passphrases
 const WORDS = [
   "amber",
   "ash",

@@ -85,16 +85,12 @@ const renderItem = (entry: APWEntry) => {
   const accessories = [];
   const actions = [];
   actions.push(renderAction("usr", entry.domain, entry.username));
-  // Every login entry has a password; the real value is fetched on demand via
-  // `pw get`, so always offer the action rather than relying on the list payload.
   accessories.push({ tag: { value: "Password", color: Color.Blue } });
   actions.push(renderAction("pw", entry.domain, entry.username));
   if (entry.hasOtp) {
     accessories.push({ tag: { value: "OTP", color: Color.Green } });
     actions.push(renderAction("otp", entry.domain, entry.username));
   }
-  // When a custom title exists show it as the primary label; move the username
-  // into the subtitle alongside the domain so it's still visible.
   const title = entry.title ?? entry.username;
   const subtitle = entry.title
     ? `${entry.username} · ${entry.domain}`
