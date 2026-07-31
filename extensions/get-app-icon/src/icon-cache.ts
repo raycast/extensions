@@ -155,16 +155,40 @@ async function iconStampPaths(appPath: string): Promise<string[]> {
 /**
  * The `CFBundleIconFile` value, normalised to a filename, or null when it can't be read.
  *
- * XML plists are matched textually; a binary plist yields null rather than a wrong answer,
- * because a bogus path would hash into the key and churn it. `.icns` is appended when the
- * declared value omits it, which is the documented shorthand.
+ * XML plists are matched textually; a binary plist yields null. Returning nothing is always
+ * safe — the conventional names and directory stamps still cover the app — whereas a WRONG
+ * name is not, because it hashes into the cache key and would stamp a file that does not
+ * exist, hiding real changes to the one that does.
+ *
+ * So the text is decoded the way a plist parser would (the five predefined XML entities),
+ * and anything still ambiguous afterwards is refused rather than guessed at: a stray `&`
+ * means an entity this doesn't know, and a path separator means the value isn't a plain
+ * filename. `.icns` is appended when omitted, which is the documented shorthand.
  */
+const XML_ENTITIES: Record<string, string> = {
+  "&amp;": "&",
+  "&lt;": "<",
+  "&gt;": ">",
+  "&quot;": '"',
+  "&apos;": "'",
+};
+
 async function declaredIconFile(appPath: string): Promise<string | null> {
   try {
     const plist = await readFile(path.join(appPath, "Contents", "Info.plist"), "utf8");
-    const match = plist.match(/<key>CFBundleIconFile<\/key>\s*<string>([^<]+)<\/string>/);
-    const name = match?.[1]?.trim();
-    if (!name || name.includes("/")) return null;
+    // Strip comments first: a commented-out key would otherwise be read as live.
+    const match = plist
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .match(/<key>CFBundleIconFile<\/key>\s*<string>([^<]*)<\/string>/);
+    const raw = match?.[1];
+    if (raw === undefined) return null;
+    // Refuse on the RAW text: an `&` still present after the known entities are removed is
+    // one this doesn't decode (numeric, or a DTD definition), so the value can't be trusted.
+    // Checking the decoded string instead would reject `&amp;`, which decodes perfectly well.
+    const decoded = raw.replace(/&(amp|lt|gt|quot|apos);/g, (entity) => XML_ENTITIES[entity]);
+    if (raw.replace(/&(amp|lt|gt|quot|apos);/g, "").includes("&")) return null;
+    const name = decoded.trim();
+    if (!name || /[\\/]/.test(name)) return null;
     return name.endsWith(".icns") ? name : `${name}.icns`;
   } catch {
     return null;
@@ -279,6 +303,12 @@ export async function refreshIconCache(
 
   const stale = await findStaleApps(appPaths);
   if (stale.length === 0) return 0;
+
+  // Both awaits above can outlast the view. Adding a listener to an already-aborted signal
+  // never fires — the event does not replay — so without this check a grid closed during
+  // `mkdir` or the stale resolve would still launch the extractor and run the whole batch
+  // for nobody.
+  if (signal?.aborted) return 0;
 
   const encode = (value: string) => Buffer.from(value, "utf8").toString("base64");
   // Two fields: the app to draw, and exactly where to write it. Pixels drawn from an older

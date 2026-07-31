@@ -673,6 +673,10 @@ export default function Command() {
         const warm = await listCachedApps(appPaths);
         if (cancelled) return;
         setCachedApps(warm);
+        // Pin as soon as it is on screen, not after the refresh. Extraction can abort or
+        // fail in between, and the cleanup below would then see no pinned entries and
+        // happily delete the very files these tiles point at.
+        rendered = warm;
 
         await refreshIconCache(
           appPaths,
