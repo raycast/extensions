@@ -17,7 +17,7 @@ export default function NextWallpaper() {
 
   useEffect(() => {
     async function load() {
-      const monitors = getMonitors();
+      const monitors = await getMonitors();
       setMonitors(monitors);
       setIsLoading(false);
     }

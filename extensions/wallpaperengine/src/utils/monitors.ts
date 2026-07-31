@@ -1,13 +1,16 @@
-import { execSync } from "child_process";
+import { exec } from "child_process";
+import { promisify } from "util";
 import { MonitorInfo } from "./types";
 
-export function getMonitors(): MonitorInfo[] {
+const execAsync = promisify(exec);
+
+export async function getMonitors(): Promise<MonitorInfo[]> {
   try {
-    const output = execSync(
+    const { stdout } = await execAsync(
       'powershell -Command "Get-CimInstance Win32_DesktopMonitor | Select-Object DeviceID, Name, ScreenWidth, ScreenHeight | ConvertTo-Json"',
       { encoding: "utf-8" },
     );
-    const monitors = JSON.parse(output);
+    const monitors = JSON.parse(stdout);
     const monitorArray = Array.isArray(monitors) ? monitors : [monitors];
 
     return monitorArray.map((m: Record<string, unknown>, i: number) => ({

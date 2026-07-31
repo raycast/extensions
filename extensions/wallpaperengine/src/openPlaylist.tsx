@@ -20,7 +20,7 @@ export default function OpenPlaylist() {
 
   useEffect(() => {
     async function load() {
-      const monitors = getMonitors();
+      const monitors = await getMonitors();
       setMonitors(monitors);
       setIsLoading(false);
     }

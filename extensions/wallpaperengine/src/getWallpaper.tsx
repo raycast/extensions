@@ -12,7 +12,7 @@ export default function GetWallpaper() {
 
   useEffect(() => {
     async function load() {
-      const monitors = getMonitors();
+      const monitors = await getMonitors();
       const results = [];
       for (const m of monitors) {
         try {

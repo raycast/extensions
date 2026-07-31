@@ -1,9 +1,21 @@
 import { Form, Action, ActionPanel, showToast, Toast } from "@raycast/api";
+import { useState, useEffect } from "react";
 import { getMonitors } from "./utils/monitors";
 import { execWallpaperEngine } from "./utils/cli";
+import { MonitorInfo } from "./utils/types";
 
 export default function ApplyProperties() {
-  const monitors = getMonitors();
+  const [monitors, setMonitors] = useState<MonitorInfo[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      const monitors = await getMonitors();
+      setMonitors(monitors);
+      setIsLoading(false);
+    }
+    load();
+  }, []);
 
   async function handleSubmit(values: { json: string; monitor: string }) {
     const jsonText = values.json.trim();
@@ -50,6 +62,7 @@ export default function ApplyProperties() {
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Apply Properties" onSubmit={handleSubmit} />
