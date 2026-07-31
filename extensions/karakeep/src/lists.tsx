@@ -10,6 +10,7 @@ import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
+import { connectionGuard } from "./components/ConnectionErrorView";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
 import { runWithToast } from "./utils/toast";
 
@@ -47,7 +48,7 @@ function buildHierarchy(lists: ListWithCount[]): ListWithCount[] {
 }
 
 function ListBookmarksView({ listId, listName }: { listId: string; listName: string }) {
-  const { bookmarks, isLoading, revalidate, pagination } = useGetListsBookmarks(listId);
+  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetListsBookmarks(listId);
   const { t } = useTranslation();
 
   const handleRefresh = async () => {
@@ -68,6 +69,9 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
     });
   };
 
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
+
   return (
     <BookmarkList
       bookmarks={bookmarks}
@@ -82,10 +86,13 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
 }
 
 function ArchivedBookmarks() {
-  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
+  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetAllBookmarks({
     archived: true,
   });
   const { t } = useTranslation();
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <BookmarkList
@@ -101,10 +108,14 @@ function ArchivedBookmarks() {
 }
 
 function FavoritedBookmarks() {
-  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
+  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetAllBookmarks({
     favourited: true,
   });
   const { t } = useTranslation();
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
+
   return (
     <BookmarkList
       bookmarks={bookmarks}
@@ -375,7 +386,7 @@ function ListItem({ list, level, apiUrl, onOpen, onEdit, onCreate, onDelete, t }
 }
 
 export default function Lists() {
-  const { isLoading, lists, revalidate } = useGetAllLists();
+  const { isLoading, lists, error, hasLiveData, revalidate } = useGetAllLists();
   const { push } = useNavigation();
   const { config } = useConfig();
   const { t } = useTranslation();
@@ -462,6 +473,9 @@ export default function Lists() {
     },
     [apiUrl, push, revalidate, handleCreateList, handleDeleteList, t, lists],
   );
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <List
