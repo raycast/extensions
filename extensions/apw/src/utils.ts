@@ -43,6 +43,14 @@ const CACHE_TIMEOUT = 1000 * 60 * parseInt(PREFERENCES.cacheTimeout || "0", 10);
 const cache = new Cache();
 
 const CACHE_EXCLUDED_COMMANDS = ["otp", "auth", "save"];
+
+export function invalidateCacheForURL(url: string): void {
+  for (const prefix of ["pw_list", "pw_get", "otp_list"]) {
+    const key = `${prefix}_${url}`;
+    cache.remove(key);
+    cache.remove(`${key}_lastUpdated`);
+  }
+}
 const execFileAsync = promisify(execFile);
 
 function execWithStdin(args: string[], input: string): Promise<APWMsg> {

@@ -12,7 +12,7 @@ import {
 import { useForm, FormValidation } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { randomBytes } from "crypto";
-import { execAPWCommand, getActiveURL, PREFERENCES } from "./utils";
+import { invalidateCacheForURL, execAPWCommand, getActiveURL, PREFERENCES } from "./utils";
 
 interface SaveFormValues {
   url: string;
@@ -282,6 +282,7 @@ export default function Command() {
           password,
         );
         if (result.status === 0) {
+          invalidateCacheForURL(url);
           await toast.hide();
           await showHUD(
             hasBrowserURL
