@@ -7,7 +7,13 @@ import {
   Toast,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { isWebAppInstalled, isAutoPiPInstalled, createWebApp } from "./webapp";
+import {
+  isWebAppInstalled,
+  isAutoPiPInstalled,
+  createWebApp,
+  isSafariJSEnabled,
+  openSafariSettings,
+} from "./webapp";
 
 type Status =
   "checking" | "not-installed" | "installing" | "installed" | "failed";
@@ -15,6 +21,7 @@ type Status =
 export default function SetupCommand() {
   const [webAppStatus, setWebAppStatus] = useState<Status>("checking");
   const [autoPiPStatus, setAutoPiPStatus] = useState<Status>("checking");
+  const [jsStatus, setJsStatus] = useState<Status>("checking");
 
   async function checkAndInstall() {
     // Check web app
@@ -25,7 +32,6 @@ export default function SetupCommand() {
       setWebAppStatus("installing");
       try {
         await createWebApp();
-        // Wait a moment for the web app to be created
         await new Promise((resolve) => setTimeout(resolve, 3000));
         const nowInstalled = await isWebAppInstalled();
         setWebAppStatus(nowInstalled ? "installed" : "failed");
@@ -49,6 +55,14 @@ export default function SetupCommand() {
           message: "Make sure Safari is running and try again",
         });
       }
+    }
+
+    // Check Safari JS
+    const jsEnabled = await isSafariJSEnabled();
+    setJsStatus(jsEnabled ? "installed" : "not-installed");
+    if (!jsEnabled) {
+      // Auto-open Safari Settings so user can enable it
+      await openSafariSettings();
     }
 
     // Check AutoPiP
@@ -80,15 +94,17 @@ export default function SetupCommand() {
       case "checking":
         return "Checking...";
       case "not-installed":
-        return "Not installed";
+        return "Not enabled";
       case "installing":
         return "Installing...";
       case "installed":
-        return "Installed";
+        return "Enabled";
       case "failed":
         return "Failed — retry needed";
     }
   }
+
+  const allReady = webAppStatus === "installed" && jsStatus === "installed";
 
   const markdown = `
 # YouTube Setup
@@ -96,7 +112,8 @@ export default function SetupCommand() {
 | Component | Status |
 |-----------|--------|
 | Safari Web App | ${statusIcon(webAppStatus)} ${statusText(webAppStatus)} |
-| AutoPiP Extension | ${statusIcon(autoPiPStatus)} ${statusText(autoPiPStatus)} |
+| Safari JavaScript (for real history) | ${statusIcon(jsStatus)} ${statusText(jsStatus)} |
+| AutoPiP Extension (optional) | ${statusIcon(autoPiPStatus)} ${statusText(autoPiPStatus)} |
 
 ${
   webAppStatus === "installing"
@@ -111,14 +128,26 @@ ${
 }
 
 ${
-  webAppStatus === "installed" && autoPiPStatus === "not-installed"
+  jsStatus === "not-installed"
+    ? '### Enable Safari JavaScript\n\nSafari Settings just opened. In the **Advanced** tab:\n1. Check **"Show features for web developers"** at the bottom\n2. Check **"Allow JavaScript from Apple Events"**\n3. Close Settings\n\nThis lets the extension read your **real watch history** and **continue watching** from your authenticated YouTube session.'
+    : ""
+}
+
+${
+  jsStatus === "installed"
+    ? "### Safari JavaScript Enabled ✅\n\nYour real YouTube watch history and continue-watching are available."
+    : ""
+}
+
+${
+  autoPiPStatus === "not-installed"
     ? "### Optional: AutoPiP\n\nAutoPiP enables automatic Picture-in-Picture for YouTube videos. Install it from the App Store, then enable it in Safari → Settings → Extensions."
     : ""
 }
 
 ${
-  webAppStatus === "installed" && autoPiPStatus === "installed"
-    ? "### All Set! 🎉\n\nEverything is configured. Use any YT command in Raycast:\n- **Search Videos** — Search YouTube\n- **Continue Watching** — Opens the web app\n- **Browse Trending** — See what's popular\n- **Browse History** — Quick access to recent videos"
+  allReady
+    ? "### All Set! 🎉\n\nEverything is configured. Use any YT command in Raycast:\n- **Search Videos** — Search YouTube\n- **Continue Watching** — Opens your last watched video\n- **Browse Trending** — See what's popular\n- **Browse History** — Your real YouTube watch history"
     : ""
 }
 `;
@@ -145,12 +174,27 @@ ${
               }}
             />
           ) : null}
+          {jsStatus === "not-installed" ? (
+            <Action
+              title="Open Safari Settings"
+              icon={Icon.Gear}
+              onAction={async () => {
+                await openSafariSettings();
+                await showToast({
+                  style: Toast.Style.Animated,
+                  title: "Enable 'Allow JavaScript from Apple Events'",
+                  message: "Safari → Settings → Advanced",
+                });
+              }}
+            />
+          ) : null}
           <Action
             title="Recheck Status"
             icon={Icon.ArrowClockwise}
             onAction={() => {
               setWebAppStatus("checking");
               setAutoPiPStatus("checking");
+              setJsStatus("checking");
               checkAndInstall();
             }}
           />
