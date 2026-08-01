@@ -26,9 +26,18 @@ function closeServer(server) {
   });
 }
 
-function runWorker(workerPath, dbPath, apiBase) {
+function runWorker(workerPath, dbPath, apiBase, options = {}) {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, [workerPath, "--db", dbPath], {
+    const workerArguments = options.disableFts5
+      ? [
+          "--require",
+          path.resolve(__dirname, "fixtures", "disable-fts5.js"),
+          workerPath,
+          "--db",
+          dbPath,
+        ]
+      : [workerPath, "--db", dbPath];
+    const child = spawn(process.execPath, workerArguments, {
       env: {
         ...process.env,
         WORKFLOWY_API_BASE: apiBase,
@@ -134,6 +143,7 @@ async function main() {
 
   const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), "workflowy-raycast-smoke-"));
   const databasePath = path.join(tempDirectory, "Windows Path With Spaces", "cache.db");
+  const noFtsDatabasePath = path.join(tempDirectory, "No FTS5", "cache.db");
   const workerPath = path.resolve(__dirname, "..", "assets", "sync-worker.js");
   let database = null;
 
@@ -176,6 +186,18 @@ async function main() {
     const rateLimitedRun = await runWorker(workerPath, databasePath, apiBase);
     assertWorkerSucceeded(rateLimitedRun, "rate-limit");
     assert.equal(requestedPaths.length, 4);
+
+    const noFtsRun = await runWorker(workerPath, noFtsDatabasePath, apiBase, { disableFts5: true });
+    assertWorkerSucceeded(noFtsRun, "done");
+    assert.equal(noFtsRun.events.at(-1).nodeCount, 2);
+    assert.equal(requestedPaths.length, 6);
+
+    database = new DatabaseSync(noFtsDatabasePath, { timeout: 5000 });
+    assert.equal(database.prepare("SELECT COUNT(*) AS count FROM nodes").get().count, 2);
+    assert.throws(() => database.prepare("SELECT COUNT(*) FROM nodes_fts").get(), /no such table: nodes_fts/i);
+    assert.equal(database.prepare("SELECT COUNT(*) AS count FROM nodes WHERE LOWER(name) LIKE ?").get("%windows%").count, 1);
+    database.close();
+    database = null;
 
     console.log(`Sync worker smoke test passed on ${process.platform} (${process.arch}).`);
   } finally {
