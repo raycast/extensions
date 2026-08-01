@@ -15,6 +15,7 @@ export type Account = z.infer<typeof Account>;
 type CreateAccount = Omit<Account, 'id'>;
 
 const STORAGE_KEY = 'one-time-password-accounts';
+const LAST_USED_ACCOUNT_KEY = 'one-time-password-last-used-account';
 
 function generateAccountId(account: Pick<Account, 'name' | 'secret'>) {
   const hash = crypto.createHash('sha256');
@@ -87,4 +88,21 @@ function swap<T>(array: T[], a: number, b: number) {
   const draft = [...array];
   [draft[a], draft[b]] = [draft[b], draft[a]];
   return draft;
+}
+
+export async function setLastUsedAccountId(id: string) {
+  await LocalStorage.setItem(LAST_USED_ACCOUNT_KEY, id);
+}
+
+export async function getLastUsedAccount() {
+  const accounts = await getAccounts();
+  if (accounts.length === 0) return undefined;
+
+  const lastUsedId = await LocalStorage.getItem<string>(LAST_USED_ACCOUNT_KEY);
+  if (lastUsedId) {
+    const account = accounts.find((acc) => acc.id === lastUsedId);
+    if (account) return account;
+  }
+
+  return accounts[0];
 }

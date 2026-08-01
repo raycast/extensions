@@ -167,10 +167,10 @@ export default () => {
   const globalActions = (
     <ActionPanel.Section>
       <ActionPanel.Submenu title="Create New" icon={Icon.Plus} shortcut={{ modifiers: ['cmd'], key: 'n' }}>
-        <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
+        <Action title="Scan a Qr Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
         <Action.Push title="Enter a Setup Key" icon={Icon.Keyboard} target={<SetupKey onSubmit={handleFormSubmit} />} />
         <Action
-          title="Select a QR Code"
+          title="Select a Qr Code"
           icon={Icon.Camera}
           shortcut={{ modifiers: ['cmd'], key: 'i' }}
           onAction={() => scanQRCode('select')}
@@ -219,8 +219,14 @@ export default () => {
             actions={
               <ActionPanel>
                 {...[
-                  <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />,
-                  <Action.Paste content={getCopyToClipboardContent(account.secret)} />,
+                  <Action.CopyToClipboard
+                    content={getCopyToClipboardContent(account.secret)}
+                    onCopy={() => store.setLastUsedAccountId(account.id)}
+                  />,
+                  <Action.Paste
+                    content={getCopyToClipboardContent(account.secret)}
+                    onPaste={() => store.setLastUsedAccountId(account.id)}
+                  />,
                 ][preferences.primaryAction === 'paste' ? 'reverse' : 'slice']()}
                 {index > 0 && (
                   <Action
@@ -289,7 +295,7 @@ export default () => {
                   target={<SetupKey onSubmit={handleFormSubmit} />}
                 />
                 <Action
-                  title="Scan a QR Code"
+                  title="Scan a Qr Code"
                   icon={Icon.Camera}
                   onAction={() => scanQRCode('scan')}
                   shortcut={{
@@ -298,7 +304,7 @@ export default () => {
                   }}
                 />
                 <Action
-                  title="Select a QR Code"
+                  title="Select a Qr Code"
                   icon={Icon.Camera}
                   shortcut={{
                     macOS: { modifiers: ['cmd'], key: 's' },
