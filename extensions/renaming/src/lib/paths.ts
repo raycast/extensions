@@ -2,7 +2,7 @@
  * Shared path helpers for rename operations.
  */
 
-import { realpath } from "fs/promises";
+import { lstat, realpath } from "fs/promises";
 import { dirname, resolve } from "path";
 
 /**
@@ -31,15 +31,43 @@ export async function validatePathTraversal(oldPath: string, newPath: string): P
 }
 
 /**
- * Normalize a path for case-insensitive comparison (macOS uses case-insensitive FS by default)
+ * Group paths that a case-insensitive filesystem would collapse onto each other.
+ *
+ * This is a deliberately conservative bucketing key, not a claim that two paths are
+ * the same file — on a case-sensitive volume it groups paths that are in fact
+ * distinct. Use it to decide which comparisons are worth making; use
+ * {@link isSameFile} to decide whether two paths actually are one file.
  */
 export function normalizePath(filePath: string): string {
   return process.platform === "darwin" || process.platform === "win32" ? filePath.toLowerCase() : filePath;
 }
 
 /**
- * Check if two paths refer to the same file on the current filesystem
+ * Check whether two paths refer to the same underlying filesystem entry.
+ *
+ * Compares device + inode rather than the path strings, so the answer is a property
+ * of the volume rather than of the platform. macOS is case-insensitive by default
+ * but not by requirement — APFS can be formatted case-sensitive. On a
+ * case-insensitive volume `FOO.txt` and `foo.txt` resolve to one inode and a
+ * case-only rename is a no-op; on a case-sensitive volume they are two files and
+ * that same rename would overwrite one with the other.
+ *
+ * Uses `lstat`, not `stat`: rename operates on the directory entry, so two distinct
+ * symlinks pointing at one target are different files for this purpose.
+ *
+ * Returns false when either path cannot be stat'd (it does not exist, or vanished
+ * mid-operation). That is the conservative answer — callers then treat the
+ * destination as a distinct file and refuse to overwrite it.
  */
-export function isSamePath(a: string, b: string): boolean {
-  return normalizePath(a) === normalizePath(b);
+export async function isSameFile(a: string, b: string): Promise<boolean> {
+  if (a === b) {
+    return true;
+  }
+
+  try {
+    const [statA, statB] = await Promise.all([lstat(a), lstat(b)]);
+    return statA.dev === statB.dev && statA.ino === statB.ino;
+  } catch {
+    return false;
+  }
 }

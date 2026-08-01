@@ -1,5 +1,10 @@
 # Rename Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix a case-only rename silently overwriting a different file on case-sensitive volumes
+- Decide whether a rename target is the same file by inode identity rather than by lowercasing the path, so the overwrite guard and batch conflict detection are correct on any filesystem
+
 ## [Security Fix] - 2026-04-06
 
 - Replace AppleScript-based renaming with native Node.js `fs.rename()` to fix shell injection vulnerability
