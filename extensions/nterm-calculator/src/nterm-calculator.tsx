@@ -118,7 +118,7 @@ function WijzigMaxPuntenForm({
     >
       <Form.TextField
         id="maxPunten"
-        title="Maximum punten (L)"
+        title="Maximum punten"
         placeholder="bijv. 75"
         defaultValue={String(huidigeMax)}
         info="Het maximaal te behalen aantal scorepunten op de toets"
