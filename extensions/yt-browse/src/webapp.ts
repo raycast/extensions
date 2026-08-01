@@ -4,27 +4,10 @@ import { runAppleScript } from "@raycast/utils";
 import { homedir } from "os";
 
 const WEB_APP_PATH = `${homedir()}/Applications/YouTube.app`;
-let webAppBundleId = "";
 
-async function detectWebAppBundleId(): Promise<string> {
-  if (webAppBundleId) return webAppBundleId;
-  try {
-    const result = await runAppleScript(`
-      tell application "System Events"
-        try
-          set bundleId to bundle identifier of file "${WEB_APP_PATH}"
-          return bundleId
-        end try
-      end tell
-      return ""
-    `);
-    webAppBundleId = result;
-    return result;
-  } catch {
-    return "";
-  }
-}
-
+/**
+ * Check if the YouTube Safari web app exists
+ */
 export async function isWebAppInstalled(): Promise<boolean> {
   try {
     const result = await runAppleScript(`
@@ -38,6 +21,9 @@ export async function isWebAppInstalled(): Promise<boolean> {
   }
 }
 
+/**
+ * Create the YouTube Safari web app if it doesn't exist
+ */
 export async function createWebApp(): Promise<void> {
   await runAppleScript(`
     -- Launch Safari if not running
@@ -74,11 +60,15 @@ async function openInBrowser(url: string): Promise<void> {
   await runAppleScript(`do shell script "open \\"${url}\\""`);
 }
 
-async function bringToFront(bundleId: string, autoPlay = false): Promise<void> {
-  // Use bundle ID to target the specific web app, not the generic "Web App" process name
+/**
+ * Bring the Web App process to front and optionally send spacebar to auto-play.
+ * Safari web apps share a single process called "Web App" — opening a
+ * specific .app file loads that URL in the shared process.
+ */
+async function bringToFrontAndPlay(autoPlay: boolean): Promise<void> {
   await runAppleScript(`
     tell application "System Events"
-      set procList to (every process whose bundle identifier is "${bundleId}")
+      set procList to (every process whose name is "Web App")
       if (count of procList) > 0 then
         tell item 1 of procList
           set frontmost to true
@@ -87,10 +77,10 @@ async function bringToFront(bundleId: string, autoPlay = false): Promise<void> {
     end tell
   `);
   if (autoPlay) {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     await runAppleScript(`
       tell application "System Events"
-        set procList to (every process whose bundle identifier is "${bundleId}")
+        set procList to (every process whose name is "Web App")
         if (count of procList) > 0 then
           tell item 1 of procList
             keystroke space
@@ -101,6 +91,10 @@ async function bringToFront(bundleId: string, autoPlay = false): Promise<void> {
   }
 }
 
+/**
+ * Open the YouTube web app (resumes last watched video).
+ * Falls back to browser if web app is not installed.
+ */
 export async function openYouTube(): Promise<void> {
   const installed = await isWebAppInstalled();
   if (!installed) {
@@ -109,19 +103,19 @@ export async function openYouTube(): Promise<void> {
   }
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
-  const bundleId = await detectWebAppBundleId();
-
   try {
     await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    if (bundleId) {
-      await bringToFront(bundleId, true);
-    }
+    await bringToFrontAndPlay(true);
   } catch {
     await openInBrowser("https://www.youtube.com");
   }
 }
 
+/**
+ * Open the YouTube web app and navigate to a URL.
+ * Falls back to browser if web app is not installed.
+ */
 export async function openYouTubeURL(url: string): Promise<void> {
   const installed = await isWebAppInstalled();
   if (!installed) {
@@ -130,32 +124,20 @@ export async function openYouTubeURL(url: string): Promise<void> {
   }
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
-  const bundleId = await detectWebAppBundleId();
-
   try {
-    if (bundleId) {
-      await runAppleScript(`
-        do shell script "open -a \\"${escapedPath}\\""
-      `);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      await runAppleScript(`
-        tell application id "${bundleId}"
-          open location "${url}"
-        end tell
-      `);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await bringToFront(bundleId);
-    } else {
-      await runAppleScript(`
-        do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""
-      `);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    }
+    await runAppleScript(
+      `do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""`,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await bringToFrontAndPlay(false);
   } catch {
     await openInBrowser(url);
   }
 }
 
+/**
+ * Check if the AutoPiP Safari extension is installed
+ */
 export async function isAutoPiPInstalled(): Promise<boolean> {
   try {
     const result = await runAppleScript(`
