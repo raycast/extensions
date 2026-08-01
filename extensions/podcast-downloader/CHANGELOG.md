@@ -1,6 +1,6 @@
 # Podcast Downloader Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-01
 
 - Search the open Podcast Index directory.
 - Browse and filter podcast episodes.
