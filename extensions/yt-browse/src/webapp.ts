@@ -74,6 +74,20 @@ async function openInBrowser(url: string): Promise<void> {
   await runAppleScript(`do shell script "open \\"${url}\\""`);
 }
 
+async function bringToFront(bundleId: string): Promise<void> {
+  // Use bundle ID to target the specific web app, not the generic "Web App" process name
+  await runAppleScript(`
+    tell application "System Events"
+      set procList to (every process whose bundle identifier is "${bundleId}")
+      if (count of procList) > 0 then
+        tell item 1 of procList
+          set frontmost to true
+        end tell
+      end if
+    end tell
+  `);
+}
+
 export async function openYouTube(): Promise<void> {
   const installed = await isWebAppInstalled();
   if (!installed) {
@@ -82,16 +96,14 @@ export async function openYouTube(): Promise<void> {
   }
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+  const bundleId = await detectWebAppBundleId();
+
   try {
-    await runAppleScript(`
-      do shell script "open -a \\"${escapedPath}\\""
-      delay 2
-      tell application "System Events"
-        tell process "Web App"
-          set frontmost to true
-        end tell
-      end tell
-    `);
+    await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    if (bundleId) {
+      await bringToFront(bundleId);
+    }
   } catch {
     await openInBrowser("https://www.youtube.com");
   }
@@ -111,27 +123,20 @@ export async function openYouTubeURL(url: string): Promise<void> {
     if (bundleId) {
       await runAppleScript(`
         do shell script "open -a \\"${escapedPath}\\""
-        delay 2
+      `);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await runAppleScript(`
         tell application id "${bundleId}"
           open location "${url}"
         end tell
-        delay 1
-        tell application "System Events"
-          tell process "Web App"
-            set frontmost to true
-          end tell
-        end tell
       `);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await bringToFront(bundleId);
     } else {
       await runAppleScript(`
         do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""
-        delay 2
-        tell application "System Events"
-          tell process "Web App"
-            set frontmost to true
-          end tell
-        end tell
       `);
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     }
   } catch {
     await openInBrowser(url);
