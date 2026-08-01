@@ -146,3 +146,59 @@ export async function isAutoPiPInstalled(): Promise<boolean> {
     return false;
   }
 }
+
+/**
+ * Fetch the most recent episode URL from Crunchyroll's history page.
+ * Uses Safari JS to read the authenticated session's watch history.
+ * Returns a /watch/ URL that auto-plays the episode.
+ */
+export async function fetchLastEpisodeUrl(): Promise<string | null> {
+  const script = `
+    tell application "Safari"
+      if (count of windows) is 0 then
+        make new document
+      end if
+      tell front window
+        set histTab to (make new tab with properties {URL:"https://www.crunchyroll.com/history"})
+      end tell
+      tell application "System Events"
+        tell process "Safari"
+          set originalPos to position of front window
+          set position of front window to {-2000, -2000}
+        end tell
+      end tell
+      delay 5
+      set jsResult to do JavaScript "
+        (function(){
+          var q = 'a[href*=' + String.fromCharCode(34) + '/watch/' + String.fromCharCode(34) + ']';
+          var links = document.querySelectorAll(q);
+          var seen = {};
+          for (var i = 0; i < links.length; i++) {
+            var href = links[i].href;
+            if (seen[href]) continue;
+            seen[href] = true;
+            var text = links[i].textContent.trim();
+            if (text.length > 2) return href;
+          }
+          for (var j = 0; j < links.length; j++) {
+            if (links[j].href) return links[j].href;
+          }
+          return '';
+        })();
+      " in histTab
+      close histTab
+      tell application "System Events"
+        tell process "Safari"
+          set position of front window to originalPos
+        end tell
+      end tell
+      return jsResult
+    end tell
+  `;
+  try {
+    const result = await runAppleScript(script);
+    return result || null;
+  } catch {
+    return null;
+  }
+}

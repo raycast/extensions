@@ -1,5 +1,8 @@
-import { openCrunchyroll, openCrunchyrollURL } from "./webapp";
-import { fetchHistory, getHistoryFromCache } from "./query";
+import {
+  openCrunchyroll,
+  openCrunchyrollURL,
+  fetchLastEpisodeUrl,
+} from "./webapp";
 import { showToast, Toast } from "@raycast/api";
 
 export default async function WatchingCommand() {
@@ -10,28 +13,22 @@ export default async function WatchingCommand() {
   });
 
   try {
-    // Try cached first (instant), then fresh fetch
-    let history = await getHistoryFromCache();
-    if (!history || history.length === 0) {
-      history = await fetchHistory();
-    }
-
-    if (history && history.length > 0) {
-      const last = history[0];
+    const url = await fetchLastEpisodeUrl();
+    if (url) {
       toast.style = Toast.Style.Success;
-      toast.title = "Opening last watched anime";
-      toast.message = last.title;
-      await openCrunchyrollURL(last.url);
+      toast.title = "Opening last watched episode";
+      toast.message = "Auto-resuming in web app";
+      await openCrunchyrollURL(url);
       return;
     }
-
     toast.style = Toast.Style.Failure;
     toast.title = "No history found";
-    toast.message = "Opening Crunchyroll homepage instead";
+    toast.message = "Watch something on Crunchyroll first";
   } catch {
     toast.style = Toast.Style.Failure;
     toast.title = "Couldn't fetch history";
-    toast.message = "Opening Crunchyroll homepage instead";
+    toast.message =
+      "Enable 'Allow JavaScript from Apple Events' in Safari Settings";
   }
 
   await openCrunchyroll();
