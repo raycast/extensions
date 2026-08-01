@@ -1,0 +1,104 @@
+// Helper to open Crunchyroll in the Safari web app with fullscreen + PiP
+
+import { runAppleScript } from "@raycast/utils";
+import { homedir } from "os";
+
+const WEB_APP_PATH = `${homedir()}/Applications/Crunchyroll Web.app`;
+const WEB_APP_BUNDLE_ID =
+  "com.apple.Safari.WebApp.ACE072C2-02DF-4B26-AFE4-A51ABE7DF472";
+
+/**
+ * Check if the Crunchyroll Safari web app exists
+ */
+export async function isWebAppInstalled(): Promise<boolean> {
+  try {
+    const result = await runAppleScript(`
+      tell application "System Events"
+        return exists file "${WEB_APP_PATH}"
+      end tell
+    `);
+    return result === "true";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Create the Crunchyroll Safari web app if it doesn't exist
+ */
+export async function createWebApp(): Promise<void> {
+  await runAppleScript(`
+    tell application "Safari"
+      activate
+      if (count of windows) is 0 then
+        make new document with properties {URL:"https://www.crunchyroll.com"}
+      else
+        tell front window
+          set current tab to (make new tab with properties {URL:"https://www.crunchyroll.com"})
+        end tell
+      end if
+    end tell
+    delay 4
+    tell application "System Events"
+      tell process "Safari"
+        click menu item "Add to Dock…" of menu "File" of menu bar item "File" of menu bar 1
+      end tell
+    end tell
+  `);
+}
+
+/**
+ * Open the Crunchyroll web app (resumes last watched page).
+ * No fullscreen.
+ */
+export async function openCrunchyroll(): Promise<void> {
+  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+
+  await runAppleScript(`
+    do shell script "open -a \\"${escapedPath}\\""
+    delay 2
+    tell application "System Events"
+      tell process "Web App"
+        set frontmost to true
+      end tell
+    end tell
+  `);
+}
+
+/**
+ * Open the Crunchyroll web app and navigate to a URL.
+ * No fullscreen.
+ */
+export async function openCrunchyrollURL(url: string): Promise<void> {
+  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+
+  await runAppleScript(`
+    do shell script "open -a \\"${escapedPath}\\""
+    delay 2
+    tell application id "${WEB_APP_BUNDLE_ID}"
+      open location "${url}"
+    end tell
+    delay 1
+    tell application "System Events"
+      tell process "Web App"
+        set frontmost to true
+      end tell
+    end tell
+  `);
+}
+
+/**
+ * Check if the AutoPiP Safari extension is installed
+ */
+export async function isAutoPiPInstalled(): Promise<boolean> {
+  try {
+    const result = await runAppleScript(`
+      tell application "System Events"
+        return exists file "/Applications/AutoPiP.app"
+      end tell
+    `);
+    return result === "true";
+  } catch {
+    return false;
+  }
+}
