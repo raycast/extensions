@@ -38,7 +38,7 @@ export default function Command() {
       if (favorites.has(project.metadata.name)) favs.push(project);
       else others.push(project);
     }
-    return { favoriteProjects: favs, otherProjects: others.slice(0, MAX_RESULTS) };
+    return { favoriteProjects: favs, otherProjects: searchText ? others : others.slice(0, MAX_RESULTS) };
   }, [data, searchText, favorites]);
 
   if (error) {

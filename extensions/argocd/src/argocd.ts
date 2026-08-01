@@ -4,12 +4,6 @@ import { homedir } from "node:os";
 import { resolve } from "node:path";
 import { load as parseYaml } from "js-yaml";
 
-interface Preferences {
-  serverUrl: string;
-  apiToken?: string;
-  configPath?: string;
-}
-
 export interface Application {
   metadata: {
     name: string;
@@ -147,15 +141,21 @@ export function serverHost(): string {
   return new URL(baseUrl()).host;
 }
 
-function expandHome(path: string): string {
+export function expandHome(path: string): string {
   if (path === "~") return homedir();
   if (path.startsWith("~/")) return resolve(homedir(), path.slice(2));
   return path;
 }
 
-function tokenFromCliConfig(): string {
+export const DEFAULT_CLI_CONFIG_PATH = "~/.config/argocd/config";
+
+export function cliConfigPath(): string {
   const { configPath } = getPreferenceValues<Preferences>();
-  const path = expandHome(configPath?.trim() || "~/.config/argocd/config");
+  return expandHome(configPath?.trim() || DEFAULT_CLI_CONFIG_PATH);
+}
+
+function tokenFromCliConfig(): string {
+  const path = cliConfigPath();
 
   let raw: string;
   try {

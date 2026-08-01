@@ -1,7 +1,7 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { serverHost } from "./argocd";
+import { cliConfigPath, serverHost } from "./argocd";
 
 const execFileAsync = promisify(execFile);
 
@@ -9,6 +9,7 @@ const EXTRA_PATH_DIRS = ["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin", "/bi
 
 export default async function Command() {
   const host = serverHost();
+  const configPath = cliConfigPath();
 
   await showToast({
     style: Toast.Style.Animated,
@@ -17,7 +18,7 @@ export default async function Command() {
   });
 
   try {
-    await execFileAsync("argocd", ["login", host, "--sso"], {
+    await execFileAsync("argocd", ["login", host, "--sso", "--config", configPath], {
       env: { ...process.env, PATH: [...EXTRA_PATH_DIRS, process.env.PATH].join(":") },
       timeout: 120_000,
     });

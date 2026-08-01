@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 export type FavoritesBucket = "applications" | "projects";
 
@@ -25,6 +25,7 @@ async function writeFavorites(bucket: FavoritesBucket, list: string[]): Promise<
 export function useFavorites(bucket: FavoritesBucket) {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [ready, setReady] = useState(false);
+  const writeQueue = useRef(Promise.resolve());
 
   useEffect(() => {
     readFavorites(bucket).then((list) => {
@@ -39,7 +40,7 @@ export function useFavorites(bucket: FavoritesBucket) {
         const next = new Set(prev);
         if (next.has(name)) next.delete(name);
         else next.add(name);
-        writeFavorites(bucket, [...next]);
+        writeQueue.current = writeQueue.current.then(() => writeFavorites(bucket, [...next]));
         return next;
       });
     },

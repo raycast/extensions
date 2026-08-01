@@ -44,7 +44,7 @@ export function ApplicationList({ project }: { project?: string } = {}) {
       if (favorites.has(app.metadata.name)) favs.push(app);
       else others.push(app);
     }
-    return { favoriteApps: favs, otherApps: others.slice(0, MAX_RESULTS) };
+    return { favoriteApps: favs, otherApps: searchText ? others : others.slice(0, MAX_RESULTS) };
   }, [data, searchText, favorites]);
 
   if (error) {
