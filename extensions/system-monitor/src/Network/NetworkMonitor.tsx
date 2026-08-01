@@ -4,8 +4,13 @@ import { usePromise } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
 
 import { Actions } from "../components/Actions";
+import { bytesPerSecond } from "../lib/rate";
 import { formatBytes, isObjectEmpty } from "../utils";
 import { getNetworkData, getTopProcess } from "./NetworkUtils";
+
+// Floor the sampling window so clock jitter between two nearly simultaneous
+// samples cannot inflate the derived rate.
+const MIN_ELAPSED_MS = 100;
 
 export default function NetworkMonitor({ isActive = false }: { isActive?: boolean }) {
   const prevProcess = useRef<{ [key: string]: number[] }>({});
@@ -32,33 +37,29 @@ export default function NetworkMonitor({ isActive = false }: { isActive?: boolea
       // nettop blocks for one sample interval (multiple seconds on recent
       // macOS), so rates are derived from the measured time between samples.
       const now = Date.now();
-      const elapsedSeconds = prevSampleTime.current ? Math.max((now - prevSampleTime.current) / 1000, 0.1) : 1;
+      const elapsedMs = prevSampleTime.current ? Math.max(now - prevSampleTime.current, MIN_ELAPSED_MS) : 0;
       let upload = 0;
       let download = 0;
       let processList: [string, number, number][] = [];
 
       if (!isObjectEmpty(prevProcess.current)) {
         for (const key in currProcess) {
-          let down = currProcess[key][0] - (key in prevProcess.current ? prevProcess.current[key][0] : 0);
+          const prev = prevProcess.current[key];
 
-          if (down < 0) {
-            down = 0;
+          // nettop counters are cumulative over a process's lifetime, so a
+          // process first seen in this sample has no baseline to subtract.
+          // Counting it would report its entire history as one interval's
+          // traffic, spiking the aggregate rate.
+          if (prev === undefined) {
+            continue;
           }
 
-          let up = currProcess[key][1] - (key in prevProcess.current ? prevProcess.current[key][1] : 0);
+          const down = bytesPerSecond(currProcess[key][0] - prev[0], elapsedMs);
+          const up = bytesPerSecond(currProcess[key][1] - prev[1], elapsedMs);
 
-          if (up < 0) {
-            up = 0;
-          }
-
-          down = down / elapsedSeconds;
-          up = up / elapsedSeconds;
           download += down;
           upload += up;
-
-          if (key in prevProcess.current) {
-            processList.push([key, down, up]);
-          }
+          processList.push([key, down, up]);
         }
 
         processList = getTopProcess(processList);
