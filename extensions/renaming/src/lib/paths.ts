@@ -3,7 +3,7 @@
  */
 
 import { lstat, readdir, realpath } from "fs/promises";
-import { basename, dirname, resolve } from "path";
+import { dirname, join, resolve } from "path";
 
 /**
  * Validate that a new path stays within the expected directory (prevents path traversal).
@@ -82,11 +82,21 @@ export async function isSameFile(a: string, b: string): Promise<boolean> {
  * between them does nothing at all, so letting one through would report a rename
  * that never happened while both entries remain on disk.
  *
- * When both spellings reach one inode, the two are told apart by asking the
- * directory which names it actually holds — not by case-folding, which would have
- * to guess at the volume. If `to` is listed, it is a real entry of its own and must
- * be protected; if it is not, the filesystem resolved it case-insensitively onto
- * `from`, and the rename is the case-only no-op it appears to be.
+ * When both spellings reach one inode, the two are told apart by counting entries,
+ * never by comparing names — a case-insensitive volume resolves case *and* Unicode
+ * normalization, and string comparison would have to replicate its exact folding
+ * rules to be right. Instead:
+ *
+ * - A directory is always its own sole entry (hard links to directories don't
+ *   exist), so same inode means same entry.
+ * - A file whose inode has a single link anywhere (`nlink === 1`) has exactly one
+ *   entry for both spellings to resolve to — same entry.
+ * - Otherwise, count this directory's entries sharing the inode. One means the
+ *   remaining links live elsewhere and both spellings still resolve to it — same
+ *   entry. Two or more means `to` may be a distinct entry, and the guard applies.
+ *   This conservatively blocks a case-only rename of a file that also has a hard
+ *   link in the same directory, which is the safe direction: rename() between two
+ *   links is a silent no-op, not an overwrite.
  */
 export async function isSameEntry(from: string, to: string): Promise<boolean> {
   if (from === to) {
@@ -98,8 +108,24 @@ export async function isSameEntry(from: string, to: string): Promise<boolean> {
   }
 
   try {
-    const entries = await readdir(dirname(to));
-    return !entries.includes(basename(to));
+    const fromStat = await lstat(from);
+    if (fromStat.isDirectory() || fromStat.nlink === 1) {
+      return true;
+    }
+
+    const dir = dirname(to);
+    const entries = await readdir(dir);
+    let linksInDir = 0;
+    for (const entry of entries) {
+      const entryStat = await lstat(join(dir, entry)).catch(() => null);
+      if (entryStat && entryStat.dev === fromStat.dev && entryStat.ino === fromStat.ino) {
+        linksInDir++;
+        if (linksInDir > 1) {
+          return false;
+        }
+      }
+    }
+    return linksInDir === 1;
   } catch {
     return false;
   }

@@ -140,6 +140,45 @@ describe("isSameEntry", () => {
     expect(await isSameEntry(file1, file2)).toBe(false);
   });
 
+  it("should return false for a hard link spelled in a different Unicode normalization", async () => {
+    // macOS resolves either normalization to the same entry, so matching the name
+    // against the directory listing would miss the link and wrongly clear a rename
+    // that rename() will silently refuse to perform
+    const source = join(testDir, "plain.txt");
+    const composed = "café.txt"; // é as one codepoint
+    const decomposed = "café.txt"; // e + combining acute
+    await writeFile(source, "content");
+    await link(source, join(testDir, composed));
+
+    expect(await isSameEntry(source, join(testDir, decomposed))).toBe(false);
+  });
+
+  it("should return false for a hard link spelled in a different case", async () => {
+    // On a case-insensitive volume "BAR.txt" resolves onto the existing bar.txt
+    // entry, and POSIX rename() between two links to one inode is a silent no-op —
+    // so skipping the guard would report a rename that never happened. On a
+    // case-sensitive volume "BAR.txt" simply doesn't exist and the answer is the
+    // same for the simpler reason.
+    const foo = join(testDir, "foo.txt");
+    const bar = join(testDir, "bar.txt");
+    await writeFile(foo, "content");
+    await link(foo, bar);
+
+    expect(await isSameEntry(foo, join(testDir, "BAR.txt"))).toBe(false);
+  });
+
+  it("should conservatively block a case-only rename of a file that has a hard link in the same directory", async () => {
+    // With two entries for one inode in the directory, telling which entry a
+    // differently-spelled target resolves to would require replicating the volume's
+    // folding rules — so the guard stays on. Blocking is the safe direction: the
+    // rename it prevents is at worst a no-op, never an overwrite.
+    const file = join(testDir, "CASE.txt");
+    await writeFile(file, "content");
+    await link(file, join(testDir, "other-link.txt"));
+
+    expect(await isSameEntry(file, join(testDir, "case.txt"))).toBe(false);
+  });
+
   it("should return false for hard links whose names differ only in case", async () => {
     // Only constructible on a case-sensitive volume — elsewhere the two names are
     // one entry by definition and this scenario cannot exist
@@ -152,8 +191,8 @@ describe("isSameEntry", () => {
     await writeFile(upper, "content");
     await link(upper, lower);
 
-    // Case-folding the names would call these one entry; the directory listing
-    // shows they are two
+    // Case-folding the names would call these one entry; counting the directory's
+    // entries for the inode shows they are two
     expect(await isSameFile(upper, lower)).toBe(true);
     expect(await isSameEntry(upper, lower)).toBe(false);
   });
