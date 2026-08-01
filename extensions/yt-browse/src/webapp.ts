@@ -214,7 +214,7 @@ export async function fetchRealHistory(): Promise<HistoryVideo[]> {
           set position of front window to {-2000, -2000}
         end tell
       end tell
-      delay 5
+      delay 3
       set jsResult to do JavaScript "
         (function() {
           var videos = [];
