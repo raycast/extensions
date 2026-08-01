@@ -7,7 +7,7 @@
   "license": "MIT",
   "platforms": ["macOS"],
   "categories": ["Fun", "Media"],
-  "version": "1.0.15",
+  "version": "1.0.16",
   "commands": [
     {
       "name": "search",
