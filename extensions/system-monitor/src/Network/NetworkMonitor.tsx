@@ -59,7 +59,8 @@ export default function NetworkMonitor({ isActive = false }: { isActive?: boolea
 
           download += down;
           upload += up;
-          processList.push([key, down, up]);
+          // Keys carry nettop's ".pid" suffix for identity; strip it for display.
+          processList.push([key.replace(/\.\d+$/, ""), down, up]);
         }
 
         processList = getTopProcess(processList);
