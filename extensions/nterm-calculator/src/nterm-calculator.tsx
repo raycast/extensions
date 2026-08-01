@@ -65,6 +65,13 @@ function fmt(n: number): string {
   return n.toFixed(1).replace(".", ",");
 }
 
+// Strikt: wijst "75.5" en "75abc" af in plaats van ze stilzwijgend af te kappen tot 75.
+function parseGeheelGetal(tekst: string): number | null {
+  const getrimd = tekst.trim();
+  if (!/^\d+$/.test(getrimd)) return null;
+  return parseInt(getrimd, 10);
+}
+
 const N_STAP = 0.1;
 const N_MIN = 0;
 const N_MAX = 2.5;
@@ -83,8 +90,8 @@ function WijzigMaxPuntenForm({
   const [error, setError] = useState<string | undefined>();
 
   function handleSubmit(values: { maxPunten: string }) {
-    const nieuw = parseInt(values.maxPunten, 10);
-    if (!values.maxPunten.trim() || isNaN(nieuw) || nieuw <= 0 || nieuw > 500) {
+    const nieuw = parseGeheelGetal(values.maxPunten);
+    if (nieuw === null || nieuw <= 0 || nieuw > 500) {
       setError("Voer een geheel getal in tussen 1 en 500");
       return;
     }
@@ -463,8 +470,8 @@ export default function Command() {
     nTerm: string;
     behaaldePunten: string;
   }) {
-    const max = parseInt(values.maxPunten, 10);
-    if (!values.maxPunten.trim() || isNaN(max) || max <= 0 || max > 500) {
+    const max = parseGeheelGetal(values.maxPunten);
+    if (max === null || max <= 0 || max > 500) {
       setMaxPuntenError("Voer een geheel getal in tussen 1 en 500");
       return;
     }
@@ -473,8 +480,8 @@ export default function Command() {
       const n = parseFloat(values.nTerm);
       push(<TabelNterm maxPunten={max} nTerm={n} />);
     } else {
-      const p = parseInt(values.behaaldePunten, 10);
-      if (!values.behaaldePunten?.trim() || isNaN(p) || p < 0 || p > max) {
+      const p = parseGeheelGetal(values.behaaldePunten);
+      if (p === null || p < 0 || p > max) {
         setPuntenError(`Voer een geheel getal in tussen 0 en ${max}`);
         return;
       }
