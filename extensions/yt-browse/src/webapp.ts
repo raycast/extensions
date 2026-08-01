@@ -195,52 +195,46 @@ export interface HistoryVideo {
 
 /**
  * Fetch real watch history from YouTube using Safari's authenticated session.
- * Requires "Allow JavaScript from Apple Events" to be enabled.
- * Opens a background tab, extracts history data via JS, then closes it.
+ * Uses a minimized window so the user doesn't see a tab flash open.
  */
 export async function fetchRealHistory(): Promise<HistoryVideo[]> {
   const script = `
     tell application "Safari"
-      if (count of windows) is 0 then
-        make new document
-      end if
-      tell front window
-        set histTab to (make new tab with properties {URL:"https://www.youtube.com/feed/history"})
-      end tell
-      delay 4
+      -- Create a new minimized window so it doesn't steal focus
+      set newWin to make new document with properties {URL:"https://www.youtube.com/feed/history"}
+      set miniaturized of newWin to true
+      delay 5
       set jsResult to do JavaScript "
         (function() {
           var videos = [];
-          var items = document.querySelectorAll('ytd-video-renderer, ytd-rich-item-renderer, ytd-compact-video-renderer');
+          var items = document.querySelectorAll('yt-lockup-view-model');
           items.forEach(function(item, i) {
             if (i >= 20) return;
-            var link = item.querySelector('a#thumbnail, a.yt-simple-endpoint, #video-title');
-            var titleEl = item.querySelector('#video-title, .title, yt-formatted-string#video-title');
-            var channelEl = item.querySelector('#channel-name, .ytd-channel-name, yt-formatted-string.ytd-channel-name');
-            var durEl = item.querySelector('.style-scope ytd-thumbnail-overlay-time-status-renderer, span.ytd-thumbnail-overlay-time-status-renderer');
-            var thumbEl = item.querySelector('img');
+            var link = item.querySelector('a[href*=watch]');
+            var titleEl = item.querySelector('a.ytLockupMetadataViewModelTitle, h3 a, h3');
+            var metaEl = item.querySelector('yt-content-metadata-view-model');
+            var badgeEl = item.querySelector('yt-thumbnail-badge-view-model');
             var href = link ? link.href : '';
             var videoId = '';
             if (href) {
               var match = href.match(/v=([^&]+)/);
               if (match) videoId = match[1];
             }
-            if (videoId && titleEl) {
+            if (videoId) {
               videos.push({
                 id: videoId,
-                title: titleEl.textContent.trim(),
-                channel: channelEl ? channelEl.textContent.trim() : '',
+                title: titleEl ? titleEl.textContent.trim() : '',
+                channel: metaEl ? metaEl.textContent.trim().split('•')[0].trim() : '',
                 url: 'https://www.youtube.com/watch?v=' + videoId,
                 thumbnail: 'https://i.ytimg.com/vi/' + videoId + '/hqdefault.jpg',
-                duration: durEl ? durEl.textContent.trim() : ''
+                duration: badgeEl ? badgeEl.textContent.trim() : ''
               });
             }
           });
           return JSON.stringify(videos);
         })();
-      " in histTab
-      delay 1
-      close histTab
+      " in current tab of newWin
+      close newWin
       return jsResult
     end tell
   `;
@@ -249,41 +243,32 @@ export async function fetchRealHistory(): Promise<HistoryVideo[]> {
 }
 
 /**
- * Fetch the continue-watching video from YouTube homepage using Safari's
- * authenticated session. Returns the URL of the first continue-watching video.
- * Requires "Allow JavaScript from Apple Events" to be enabled.
+ * Fetch the continue-watching video URL from YouTube homepage.
+ * Uses a minimized window so the user doesn't see a tab flash.
  */
 export async function fetchContinueWatchingUrl(): Promise<string | null> {
   const script = `
     tell application "Safari"
-      if (count of windows) is 0 then
-        make new document
-      end if
-      tell front window
-        set homeTab to (make new tab with properties {URL:"https://www.youtube.com"})
-      end tell
-      delay 4
+      set newWin to make new document with properties {URL:"https://www.youtube.com"}
+      set miniaturized of newWin to true
+      delay 5
       set jsResult to do JavaScript "
         (function() {
-          var shelves = document.querySelectorAll('ytd-rich-shelf-renderer, ytd-shelf-renderer');
+          var shelves = document.querySelectorAll('ytd-rich-shelf-renderer, ytd-shelf-renderer, yt-rich-shelf-renderer');
           for (var s = 0; s < shelves.length; s++) {
-            var title = shelves[s].querySelector('#title, .title');
+            var title = shelves[s].querySelector('#title, .title, h2');
             if (title && /continue watching|watch again/i.test(title.textContent)) {
-              var link = shelves[s].querySelector('a#thumbnail, a.yt-simple-endpoint');
+              var link = shelves[s].querySelector('a[href*=watch]');
               if (link && link.href) return link.href;
             }
           }
-          // Fallback: look for any item with progress bar (partially watched)
-          var progressItems = document.querySelectorAll('ytd-continuation-item-renderer, [data-sessionlink*=continue]');
-          if (progressItems.length > 0) {
-            var link = progressItems[0].querySelector('a#thumbnail, a.yt-simple-endpoint');
-            if (link) return link.href;
-          }
+          // Fallback: any watch link on the homepage
+          var links = document.querySelectorAll('a[href*=watch]');
+          if (links.length > 0) return links[0].href;
           return '';
         })();
-      " in homeTab
-      delay 1
-      close homeTab
+      " in current tab of newWin
+      close newWin
       return jsResult
     end tell
   `;
