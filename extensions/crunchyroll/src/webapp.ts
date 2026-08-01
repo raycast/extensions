@@ -104,8 +104,10 @@ export async function openCrunchyroll(): Promise<void> {
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
   try {
-    await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await runAppleScript(
+      `do shell script "open -a \\"${escapedPath}\\" \\"https://www.crunchyroll.com\\""`,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     await bringToFrontAndPlay(true);
   } catch {
     await openInBrowser("https://www.crunchyroll.com");
