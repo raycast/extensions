@@ -8,7 +8,7 @@ import type { FileInfo, RenameResult } from "../types";
 import { validateFilename } from "./validation";
 import { getUserFriendlyErrorMessage } from "./errors";
 import { log } from "./logger";
-import { validatePathTraversal, isSameFile } from "./paths";
+import { validatePathTraversal, isSameEntry } from "./paths";
 
 /**
  * Get detailed file info
@@ -91,11 +91,11 @@ export async function renameFile(oldPath: string, newName: string): Promise<Rena
   }
 
   // Check if target already exists (safety check).
-  // Whether the destination is "the same file" is decided by inode identity, not by
-  // name: a case-only rename resolves to the source itself on a case-insensitive
-  // volume and is allowed through, but on a case-sensitive volume it is a distinct
-  // existing file that fs.rename would silently overwrite.
-  if ((await fileExists(newPath)) && !(await isSameFile(oldPath, newPath))) {
+  // The guard is skipped only when the destination is the very entry being renamed:
+  // a case-only rename resolves to the source itself on a case-insensitive volume,
+  // but on a case-sensitive volume it is a distinct existing file that fs.rename
+  // would silently overwrite.
+  if ((await fileExists(newPath)) && !(await isSameEntry(oldPath, newPath))) {
     log.files.warn("Target already exists", { oldPath, newPath, newName });
     return {
       oldPath,

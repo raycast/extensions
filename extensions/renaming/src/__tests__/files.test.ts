@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { tmpdir } from "os";
-import { mkdtemp, writeFile, rm, mkdir, symlink, readlink, lstat } from "fs/promises";
+import { mkdtemp, writeFile, rm, mkdir, symlink, readlink, lstat, link } from "fs/promises";
 import { join } from "path";
 import { getFileInfo, fileExists, renameFile } from "../lib/files";
 
@@ -147,6 +147,23 @@ describe("renameFile", () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toContain("already exists");
+  });
+
+  it("should refuse to rename onto a hard link of the same file", async () => {
+    // Both names are one inode but two directory entries, and POSIX rename() between
+    // them does nothing at all — so allowing it would report a rename that never
+    // happened and leave both entries in place
+    const filePath = join(testDir, "file.txt");
+    const hardLink = join(testDir, "link.txt");
+    await writeFile(filePath, "content");
+    await link(filePath, hardLink);
+
+    const result = await renameFile(filePath, "link.txt");
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("already exists");
+    expect(await fileExists(filePath)).toBe(true);
+    expect(await fileExists(hardLink)).toBe(true);
   });
 
   it("should refuse to overwrite a dangling symlink at the target", async () => {

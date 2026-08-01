@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { tmpdir } from "os";
 import { mkdtemp, writeFile, rm, mkdir, link, symlink } from "fs/promises";
 import { join } from "path";
-import { isSameFile, normalizePath } from "../lib/paths";
+import { isSameEntry, isSameFile, normalizePath } from "../lib/paths";
 
 /**
  * Whether the volume backing `dir` collapses names that differ only in case.
@@ -99,6 +99,60 @@ describe("isSameFile", () => {
     // Case-insensitive: both names reach one inode, so a case-only rename is a no-op.
     // Case-sensitive: they are two files, and a case-only rename would overwrite one.
     expect(await isSameFile(upper, lower)).toBe(caseInsensitive);
+  });
+});
+
+describe("isSameEntry", () => {
+  let testDir: string;
+
+  beforeEach(async () => {
+    testDir = await mkdtemp(join(tmpdir(), "renaming-test-"));
+  });
+
+  afterEach(async () => {
+    await rm(testDir, { recursive: true, force: true });
+  });
+
+  it("should return true for the identical path", async () => {
+    const filePath = join(testDir, "file.txt");
+    await writeFile(filePath, "content");
+
+    expect(await isSameEntry(filePath, filePath)).toBe(true);
+  });
+
+  it("should return false for two hard links to one inode", async () => {
+    // One file, but two directory entries — narrower than isSameFile on purpose
+    const original = join(testDir, "original.txt");
+    const hardLink = join(testDir, "hardlink.txt");
+    await writeFile(original, "content");
+    await link(original, hardLink);
+
+    expect(await isSameFile(original, hardLink)).toBe(true);
+    expect(await isSameEntry(original, hardLink)).toBe(false);
+  });
+
+  it("should return false for two unrelated files", async () => {
+    const file1 = join(testDir, "file1.txt");
+    const file2 = join(testDir, "file2.txt");
+    await writeFile(file1, "content1");
+    await writeFile(file2, "content2");
+
+    expect(await isSameEntry(file1, file2)).toBe(false);
+  });
+
+  it("should answer case-only renames according to the volume", async () => {
+    const upper = join(testDir, "CASE.txt");
+    const lower = join(testDir, "case.txt");
+    await writeFile(upper, "content");
+
+    const caseInsensitive = await isCaseInsensitiveVolume(testDir);
+    if (!caseInsensitive) {
+      await writeFile(lower, "other content");
+    }
+
+    // The one case the overwrite guard is allowed to skip — and only where the
+    // volume really does treat both spellings as a single entry
+    expect(await isSameEntry(upper, lower)).toBe(caseInsensitive);
   });
 });
 

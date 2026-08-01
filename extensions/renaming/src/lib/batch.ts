@@ -8,7 +8,7 @@ import path, { basename, dirname, join } from "path";
 import type { RenameOperation, RenameResult } from "../types";
 import { getUserFriendlyErrorMessage } from "./errors";
 import { log } from "./logger";
-import { validatePathTraversal, normalizePath, isSameFile } from "./paths";
+import { validatePathTraversal, normalizePath, isSameEntry } from "./paths";
 import { fileExists, renameFile } from "./files";
 
 /**
@@ -26,7 +26,7 @@ export async function checkConflicts(operations: RenameOperation[]): Promise<str
   // a differently-cased source as if it were vacating the target slot.
   const sourcesBeingMoved = new Map<string, string[]>();
   for (const op of operations) {
-    if (!(await isSameFile(op.oldPath, op.newPath))) {
+    if (!(await isSameEntry(op.oldPath, op.newPath))) {
       const key = normalizePath(op.oldPath);
       const bucket = sourcesBeingMoved.get(key);
       if (bucket) {
@@ -57,11 +57,11 @@ export async function checkConflicts(operations: RenameOperation[]): Promise<str
     // Check if target already exists (and isn't the source file itself — decided by
     // inode identity, so a case-only rename onto a distinct file on a case-sensitive
     // volume is reported as the conflict it is)
-    if ((await fileExists(op.newPath)) && !(await isSameFile(op.oldPath, op.newPath))) {
+    if ((await fileExists(op.newPath)) && !(await isSameEntry(op.oldPath, op.newPath))) {
       // Not a conflict if the file at the target is itself being moved away in this batch
       let vacatedByBatch = false;
       for (const source of sourcesBeingMoved.get(normalizedNewPath) ?? []) {
-        if (await isSameFile(source, op.newPath)) {
+        if (await isSameEntry(source, op.newPath)) {
           vacatedByBatch = true;
           break;
         }
@@ -95,18 +95,31 @@ export async function batchRename(
 
   // --- Phase 0: Detect within-batch conflicts ---
   // A source is "blocking" if another operation wants to write to its path.
-  const sourceToIndex = new Map<string, number>();
+  // Sources are bucketed by normalized path and every index in a bucket is kept: on a
+  // case-sensitive volume two sources can differ only in case, and keeping just one
+  // would stage the wrong file and leave the target still occupied.
+  const sourcesByPath = new Map<string, number[]>();
   for (let i = 0; i < operations.length; i++) {
-    sourceToIndex.set(normalizePath(operations[i]!.oldPath), i);
+    const key = normalizePath(operations[i]!.oldPath);
+    const bucket = sourcesByPath.get(key);
+    if (bucket) {
+      bucket.push(i);
+    } else {
+      sourcesByPath.set(key, [i]);
+    }
   }
 
   const needsTemp = new Set<number>();
   for (const op of operations) {
-    if (await isSameFile(op.oldPath, op.newPath)) continue;
-    const blockingIdx = sourceToIndex.get(normalizePath(op.newPath));
-    if (blockingIdx !== undefined && !(await isSameFile(operations[blockingIdx]!.oldPath, op.oldPath))) {
-      // The file at our target is also a source being moved — it needs to go to temp first
-      needsTemp.add(blockingIdx);
+    if (await isSameEntry(op.oldPath, op.newPath)) continue;
+    for (const blockingIdx of sourcesByPath.get(normalizePath(op.newPath)) ?? []) {
+      const blocking = operations[blockingIdx]!.oldPath;
+      // The file at our target is also a source being moved — it needs to go to temp
+      // first. Confirm it really occupies the target rather than merely sharing a
+      // normalized key with it, and that it isn't this operation's own source.
+      if ((await isSameEntry(blocking, op.newPath)) && !(await isSameEntry(blocking, op.oldPath))) {
+        needsTemp.add(blockingIdx);
+      }
     }
   }
 

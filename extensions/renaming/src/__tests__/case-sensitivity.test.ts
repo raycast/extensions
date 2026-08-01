@@ -3,7 +3,7 @@
  *
  * macOS is case-insensitive by default but APFS can be formatted case-sensitive,
  * and neither CI nor a contributor's machine can be assumed to be either. These
- * tests therefore fake the *identity* answer rather than the volume: `isSameFile`
+ * tests therefore fake the *identity* answer rather than the volume: `isSameEntry`
  * is stubbed to compare exact paths, which is how a case-sensitive volume behaves
  * and is the single fact that separates the two filesystems as far as rename
  * safety is concerned.
@@ -26,7 +26,7 @@ vi.mock("../lib/paths", async (importOriginal) => {
 
   return {
     ...actual,
-    isSameFile: async (a: string, b: string) => (volume.caseSensitive ? a === b : actual.isSameFile(a, b)),
+    isSameEntry: async (a: string, b: string) => (volume.caseSensitive ? a === b : actual.isSameEntry(a, b)),
   };
 });
 

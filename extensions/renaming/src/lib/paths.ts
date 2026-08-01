@@ -55,9 +55,10 @@ export function normalizePath(filePath: string): string {
  * Uses `lstat`, not `stat`: rename operates on the directory entry, so two distinct
  * symlinks pointing at one target are different files for this purpose.
  *
- * Returns false when either path cannot be stat'd (it does not exist, or vanished
- * mid-operation). That is the conservative answer — callers then treat the
- * destination as a distinct file and refuse to overwrite it.
+ * Two identical paths are trivially one entry and answer true without touching the
+ * filesystem. Otherwise, returns false when either path cannot be stat'd (it does
+ * not exist, or vanished mid-operation) — the conservative answer, which makes
+ * callers treat the destination as a distinct file and refuse to overwrite it.
  */
 export async function isSameFile(a: string, b: string): Promise<boolean> {
   if (a === b) {
@@ -70,4 +71,22 @@ export async function isSameFile(a: string, b: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/**
+ * Check whether renaming `from` to `to` would land on the very entry being renamed.
+ *
+ * This is the only case in which the "target already exists" guard may be skipped,
+ * and it is narrower than {@link isSameFile}: the paths must also be the same name
+ * up to case. Sharing an inode is not enough, because two hard links are one file
+ * under two distinct directory entries — POSIX rename() between them does nothing
+ * at all, so letting one through would report a rename that never happened while
+ * both entries remain on disk.
+ *
+ * True for a rename to an identical path, and for a case-only rename on a volume
+ * that treats the two spellings as one entry. False on a case-sensitive volume,
+ * where those spellings are two files and the destination must be protected.
+ */
+export async function isSameEntry(from: string, to: string): Promise<boolean> {
+  return normalizePath(from) === normalizePath(to) && (await isSameFile(from, to));
 }
