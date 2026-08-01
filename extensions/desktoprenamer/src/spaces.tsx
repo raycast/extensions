@@ -12,8 +12,7 @@ export interface Space {
 }
 
 export function isMoveTarget(space: Pick<Space, "isFullscreen">) {
-  // Legacy responses cannot distinguish normal and fullscreen spaces.
-  return space.isFullscreen === false;
+  return space.isFullscreen !== true;
 }
 
 export function useSpaces() {

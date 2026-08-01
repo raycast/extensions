@@ -129,6 +129,11 @@ export default function Command() {
         return;
       }
       const targetId = currentIds[0];
+      const targetSpace = allSpaces.find((space) => space.id === targetId);
+      if (!targetSpace || !isMoveTarget(targetSpace)) {
+        await showToast({ style: Toast.Style.Failure, title: "Current space cannot receive moved windows" });
+        return;
+      }
       if (targetId === entry.space.id) {
         await showToast({ style: Toast.Style.Success, title: "Window is already on current desktop" });
         return;
