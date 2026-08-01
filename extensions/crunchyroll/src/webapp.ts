@@ -185,8 +185,10 @@ export async function openCrunchyrollURL(url: string): Promise<void> {
 }
 
 /**
- * Trigger video fullscreen by double-clicking the center of the web app window.
- * Uses cliclick for reliable mouse events (not affected by Vimium etc).
+ * Trigger video fullscreen by sending the "f" key to the web app.
+ * This is the standard HTML5 video player fullscreen shortcut on both
+ * YouTube and Crunchyroll. If you use Vimium, add an exception for the
+ * video site domain so "f" reaches the player instead of Vimium.
  */
 export async function enterFullscreen(): Promise<void> {
   try {
@@ -197,11 +199,7 @@ export async function enterFullscreen(): Promise<void> {
           tell item 1 of procList
             set frontmost to true
             delay 0.5
-            set winPos to position of front window
-            set winSize to size of front window
-            set centerX to (item 1 of winPos) + (item 1 of winSize) / 2 as integer
-            set centerY to (item 2 of winPos) + (item 2 of winSize) / 2 as integer
-            do shell script "cliclick dd:" & centerX & "," & centerY & " du:" & centerX & "," & centerY
+            keystroke "f"
           end tell
         end if
       end tell
