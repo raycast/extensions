@@ -71,12 +71,19 @@ The following require an authenticated WebSocket connection (NIP-42) and are not
 
 ## Getting Started
 
+### Raycast Store
+
+Install directly from the [Raycast Store](https://www.raycast.com/caasols/buzz).
+
+### Manual
+
 ```bash
 git clone https://github.com/caasols/raycast-buzz.git
 cd raycast-buzz
-npm install
-npm run dev
+npm install && npm run dev
 ```
+
+### Development
 
 Other useful scripts:
 
