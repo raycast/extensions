@@ -7,7 +7,7 @@
   "license": "MIT",
   "platforms": ["macOS"],
   "categories": ["Fun", "Media"],
-  "version": "1.0.17",
+  "version": "1.0.18",
   "commands": [
     {
       "name": "search",
@@ -27,6 +27,12 @@
       "name": "watching",
       "title": "Continue Watching",
       "description": "Open YouTube web app (resumes last watched video)",
+      "mode": "no-view"
+    },
+    {
+      "name": "watching-fullscreen",
+      "title": "Continue Watching in Fullscreen",
+      "description": "Open YouTube web app and enter video fullscreen",
       "mode": "no-view"
     },
     {
