@@ -4,26 +4,6 @@ import { runAppleScript } from "@raycast/utils";
 import { homedir } from "os";
 
 const WEB_APP_PATH = `${homedir()}/Applications/Crunchyroll Web.app`;
-let webAppBundleId = "";
-
-async function detectWebAppBundleId(): Promise<string> {
-  if (webAppBundleId) return webAppBundleId;
-  try {
-    const result = await runAppleScript(`
-      tell application "System Events"
-        try
-          set bundleId to bundle identifier of file "${WEB_APP_PATH}"
-          return bundleId
-        end try
-      end tell
-      return ""
-    `);
-    webAppBundleId = result;
-    return result;
-  } catch {
-    return "";
-  }
-}
 
 /**
  * Check if the Crunchyroll Safari web app exists
@@ -80,10 +60,15 @@ async function openInBrowser(url: string): Promise<void> {
   await runAppleScript(`do shell script "open \\"${url}\\""`);
 }
 
-async function bringToFront(bundleId: string, autoPlay = false): Promise<void> {
+/**
+ * Bring the Web App process to front and optionally send spacebar to auto-play.
+ * Safari web apps share a single process called "Web App" — opening a
+ * specific .app file loads that URL in the shared process.
+ */
+async function bringToFrontAndPlay(autoPlay: boolean): Promise<void> {
   await runAppleScript(`
     tell application "System Events"
-      set procList to (every process whose bundle identifier is "${bundleId}")
+      set procList to (every process whose name is "Web App")
       if (count of procList) > 0 then
         tell item 1 of procList
           set frontmost to true
@@ -92,10 +77,10 @@ async function bringToFront(bundleId: string, autoPlay = false): Promise<void> {
     end tell
   `);
   if (autoPlay) {
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     await runAppleScript(`
       tell application "System Events"
-        set procList to (every process whose bundle identifier is "${bundleId}")
+        set procList to (every process whose name is "Web App")
         if (count of procList) > 0 then
           tell item 1 of procList
             keystroke space
@@ -118,13 +103,10 @@ export async function openCrunchyroll(): Promise<void> {
   }
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
-  const bundleId = await detectWebAppBundleId();
   try {
     await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    if (bundleId) {
-      await bringToFront(bundleId, true);
-    }
+    await bringToFrontAndPlay(true);
   } catch {
     await openInBrowser("https://www.crunchyroll.com");
   }
@@ -142,19 +124,12 @@ export async function openCrunchyrollURL(url: string): Promise<void> {
   }
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
-  const bundleId = await detectWebAppBundleId();
   try {
-    await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
+    await runAppleScript(
+      `do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""`,
+    );
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    if (bundleId) {
-      await runAppleScript(`
-        tell application id "${bundleId}"
-          open location "${url}"
-        end tell
-      `);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      await bringToFront(bundleId);
-    }
+    await bringToFrontAndPlay(false);
   } catch {
     await openInBrowser(url);
   }
