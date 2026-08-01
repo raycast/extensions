@@ -175,7 +175,7 @@ export default () => {
           icon={Icon.Camera}
           shortcut={{
             macOS: { modifiers: ['cmd'], key: 'i' },
-            windows: { modifiers: ['ctrl'], key: 'i' },
+            Windows: { modifiers: ['ctrl'], key: 'i' },
           }}
           onAction={() => scanQRCode('select')}
         />
@@ -242,7 +242,7 @@ export default () => {
                     }}
                     shortcut={{
                       macOS: { modifiers: ['cmd', 'opt'], key: 'arrowUp' },
-                      windows: { modifiers: ['ctrl', 'alt'], key: 'arrowUp' },
+                      Windows: { modifiers: ['ctrl', 'alt'], key: 'arrowUp' },
                     }}
                   />
                 )}
@@ -256,7 +256,7 @@ export default () => {
                     }}
                     shortcut={{
                       macOS: { modifiers: ['cmd', 'opt'], key: 'arrowDown' },
-                      windows: { modifiers: ['ctrl', 'alt'], key: 'arrowDown' },
+                      Windows: { modifiers: ['ctrl', 'alt'], key: 'arrowDown' },
                     }}
                   />
                 )}
@@ -274,7 +274,7 @@ export default () => {
                   style={Action.Style.Destructive}
                   shortcut={{
                     macOS: { modifiers: ['cmd'], key: 'backspace' },
-                    windows: { modifiers: ['ctrl'], key: 'backspace' },
+                    Windows: { modifiers: ['ctrl'], key: 'backspace' },
                   }}
                   onAction={() => handleRemoveAccount(account)}
                 />
@@ -313,7 +313,7 @@ export default () => {
                   onAction={() => scanQRCode('scan')}
                   shortcut={{
                     macOS: { modifiers: ['cmd'], key: 'i' },
-                    windows: { modifiers: ['ctrl'], key: 'i' },
+                    Windows: { modifiers: ['ctrl'], key: 'i' },
                   }}
                 />
                 <Action
