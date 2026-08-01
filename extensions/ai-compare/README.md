@@ -5,8 +5,12 @@ Use Raycast to send a keyword or question directly to the AI Compare browser ext
 ## Setup
 
 1. Install and enable the AI Compare Chrome extension.
-2. In this folder, run `npm install`.
-3. Run `npm run dev` and import the extension into Raycast.
+2. Install AI Compare from the Raycast Store.
+
+## Development
+
+1. Install dependencies with `npm install`.
+2. Run `npm run dev` and import the extension into Raycast.
 
 ## Usage
 
