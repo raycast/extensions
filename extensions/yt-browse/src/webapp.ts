@@ -4,8 +4,6 @@ import { runAppleScript } from "@raycast/utils";
 import { homedir } from "os";
 
 const WEB_APP_PATH = `${homedir()}/Applications/YouTube.app`;
-// YouTube web app bundle ID will be set after user creates it via "Add to Dock"
-// We detect it dynamically, but use a common pattern
 let webAppBundleId = "";
 
 async function detectWebAppBundleId(): Promise<string> {
@@ -56,54 +54,75 @@ export async function createWebApp(): Promise<void> {
     tell application "System Events"
       tell process "Safari"
         click menu item "Add to Dock…" of menu "File" of menu bar item "File" of menu bar 1
-      end tell
     end tell
   `);
+}
+
+async function openInBrowser(url: string): Promise<void> {
+  await runAppleScript(`do shell script "open \\"${url}\\""`);
 }
 
 export async function openYouTube(): Promise<void> {
+  const installed = await isWebAppInstalled();
+  if (!installed) {
+    await openInBrowser("https://www.youtube.com");
+    return;
+  }
+
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
-
-  await runAppleScript(`
-    do shell script "open -a \\"${escapedPath}\\""
-    delay 2
-    tell application "System Events"
-      tell process "Web App"
-        set frontmost to true
-      end tell
-    end tell
-  `);
-}
-
-export async function openYouTubeURL(url: string): Promise<void> {
-  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
-  const bundleId = await detectWebAppBundleId();
-
-  if (bundleId) {
+  try {
     await runAppleScript(`
       do shell script "open -a \\"${escapedPath}\\""
       delay 2
-      tell application id "${bundleId}"
-        open location "${url}"
-      end tell
-      delay 1
       tell application "System Events"
         tell process "Web App"
           set frontmost to true
         end tell
       end tell
     `);
-  } else {
-    // Fallback: just open the URL in the web app
-    await runAppleScript(`
-      do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""
-      delay 2
-      tell application "System Events"
-        tell process "Web App"
-          set frontmost to true
+  } catch {
+    await openInBrowser("https://www.youtube.com");
+  }
+}
+
+export async function openYouTubeURL(url: string): Promise<void> {
+  const installed = await isWebAppInstalled();
+  if (!installed) {
+    await openInBrowser(url);
+    return;
+  }
+
+  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+  const bundleId = await detectWebAppBundleId();
+
+  try {
+    if (bundleId) {
+      await runAppleScript(`
+        do shell script "open -a \\"${escapedPath}\\""
+        delay 2
+        tell application id "${bundleId}"
+          open location "${url}"
         end tell
-      end tell
-    `);
+        delay 1
+        tell application "System Events"
+          tell process "Web App"
+            set frontmost to true
+          end tell
+        end tell
+      `);
+    } else {
+      await runAppleScript(`
+        do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""
+        delay 2
+        tell application "System Events"
+          tell process "Web App"
+            set frontmost to true
+          end tell
+        end tell
+      `);
+    }
+  } catch {
+    await openInBrowser(url);
   }
 }
 
