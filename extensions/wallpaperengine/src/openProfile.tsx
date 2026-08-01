@@ -16,14 +16,17 @@ export default function OpenProfile() {
 
   useEffect(() => {
     async function load() {
-      const cached = await getCachedProfiles();
-      if (cached.length > 0) {
-        setProfiles(cached);
+      try {
+        const cached = await getCachedProfiles();
+        if (cached.length > 0) {
+          setProfiles(cached);
+          setIsLoading(false);
+        }
+        const discovered = await discoverProfiles();
+        setProfiles(discovered);
+      } finally {
         setIsLoading(false);
       }
-      const discovered = await discoverProfiles();
-      setProfiles(discovered);
-      setIsLoading(false);
     }
     load();
   }, []);

@@ -209,7 +209,11 @@ export async function scanWallpapers(): Promise<WallpaperInfo[]> {
 export async function getCachedWallpapers(): Promise<WallpaperInfo[]> {
   const cached = await LocalStorage.getItem<string>("wallpaper-cache");
   if (cached) {
-    return JSON.parse(cached);
+    try {
+      return JSON.parse(cached);
+    } catch {
+      return [];
+    }
   }
   return [];
 }
@@ -321,7 +325,11 @@ export async function scanProfiles(): Promise<string[]> {
 export async function getCachedPlaylists(): Promise<string[]> {
   const cached = await LocalStorage.getItem<string>("playlist-cache");
   if (cached) {
-    return JSON.parse(cached);
+    try {
+      return JSON.parse(cached);
+    } catch {
+      return [];
+    }
   }
   return [];
 }
@@ -340,7 +348,11 @@ export async function discoverPlaylists(): Promise<string[]> {
 export async function getCachedProfiles(): Promise<string[]> {
   const cached = await LocalStorage.getItem<string>("profile-cache");
   if (cached) {
-    return JSON.parse(cached);
+    try {
+      return JSON.parse(cached);
+    } catch {
+      return [];
+    }
   }
   return [];
 }

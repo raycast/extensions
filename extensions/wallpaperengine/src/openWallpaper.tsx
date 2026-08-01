@@ -78,14 +78,17 @@ function WallpaperPicker({
 
   useEffect(() => {
     async function load() {
-      const cached = await getCachedWallpapers();
-      if (cached.length > 0) {
-        setWallpapers(cached);
+      try {
+        const cached = await getCachedWallpapers();
+        if (cached.length > 0) {
+          setWallpapers(cached);
+          setIsLoading(false);
+        }
+        const discovered = await discoverWallpapers();
+        setWallpapers(discovered);
+      } finally {
         setIsLoading(false);
       }
-      const discovered = await discoverWallpapers();
-      setWallpapers(discovered);
-      setIsLoading(false);
     }
     load();
   }, []);

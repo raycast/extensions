@@ -78,14 +78,17 @@ function PlaylistPicker({
 
   useEffect(() => {
     async function load() {
-      const cached = await getCachedPlaylists();
-      if (cached.length > 0) {
-        setPlaylists(cached);
+      try {
+        const cached = await getCachedPlaylists();
+        if (cached.length > 0) {
+          setPlaylists(cached);
+          setIsLoading(false);
+        }
+        const discovered = await discoverPlaylists();
+        setPlaylists(discovered);
+      } finally {
         setIsLoading(false);
       }
-      const discovered = await discoverPlaylists();
-      setPlaylists(discovered);
-      setIsLoading(false);
     }
     load();
   }, []);
