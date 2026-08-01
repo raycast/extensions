@@ -61,38 +61,32 @@ async function openInBrowser(url: string): Promise<void> {
 }
 
 /**
- * Bring the Web App process to front and optionally send spacebar to auto-play.
- * Safari web apps share a single process called "Web App" — opening a
- * specific .app file loads that URL in the shared process.
+ * Safari web apps share one process called "Web App".
+ * Quit it before opening a different web app to avoid conflicts.
  */
-async function bringToFrontAndPlay(autoPlay: boolean): Promise<void> {
-  await runAppleScript(`
-    tell application "System Events"
-      set procList to (every process whose name is "Web App")
-      if (count of procList) > 0 then
-        tell item 1 of procList
-          set frontmost to true
-        end tell
-      end if
-    end tell
-  `);
-  if (autoPlay) {
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+async function quitExistingWebApp(): Promise<void> {
+  try {
     await runAppleScript(`
       tell application "System Events"
         set procList to (every process whose name is "Web App")
         if (count of procList) > 0 then
           tell item 1 of procList
-            keystroke space
+            set frontmost to true
           end tell
         end if
       end tell
+      delay 0.5
+      do shell script "pkill -x 'Web App'"
+      delay 1
     `);
+  } catch {
+    // ignore — process might not exist
   }
 }
 
 /**
- * Open the Crunchyroll web app (resumes last watched page).
+ * Open the Crunchyroll web app.
+ * Quits any existing web app (e.g. YouTube) first to avoid conflicts.
  * Falls back to browser if web app is not installed.
  */
 export async function openCrunchyroll(): Promise<void> {
@@ -104,11 +98,11 @@ export async function openCrunchyroll(): Promise<void> {
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
   try {
+    await quitExistingWebApp();
     await runAppleScript(
       `do shell script "open -a \\"${escapedPath}\\" \\"https://www.crunchyroll.com\\""`,
     );
     await new Promise((resolve) => setTimeout(resolve, 3000));
-    await bringToFrontAndPlay(true);
   } catch {
     await openInBrowser("https://www.crunchyroll.com");
   }
@@ -116,7 +110,7 @@ export async function openCrunchyroll(): Promise<void> {
 
 /**
  * Open the Crunchyroll web app and navigate to a URL.
- * Falls back to browser if web app is not installed.
+ * Quits any existing web app first. Falls back to browser.
  */
 export async function openCrunchyrollURL(url: string): Promise<void> {
   const installed = await isWebAppInstalled();
@@ -127,11 +121,11 @@ export async function openCrunchyrollURL(url: string): Promise<void> {
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
   try {
+    await quitExistingWebApp();
     await runAppleScript(
       `do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""`,
     );
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    await bringToFrontAndPlay(false);
+    await new Promise((resolve) => setTimeout(resolve, 3000));
   } catch {
     await openInBrowser(url);
   }

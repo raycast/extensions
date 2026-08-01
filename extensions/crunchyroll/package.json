@@ -12,7 +12,7 @@
     "Fun",
     "Media"
   ],
-  "version": "1.0.7",
+  "version": "1.0.8",
   "commands": [
     {
       "name": "search",
