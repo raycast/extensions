@@ -2,8 +2,7 @@
  * Single-file operations: info, existence checks, renaming, unique name generation.
  */
 
-import { rename, stat, access } from "fs/promises";
-import { constants } from "fs";
+import { rename, stat, lstat } from "fs/promises";
 import { basename, dirname, extname, join } from "path";
 import type { FileInfo, RenameResult } from "../types";
 import { validateFilename } from "./validation";
@@ -34,11 +33,16 @@ export async function getFileInfo(filePath: string): Promise<FileInfo> {
 }
 
 /**
- * Check if a file exists at the given path
+ * Check whether a directory entry exists at the given path.
+ *
+ * Uses `lstat` rather than `access`, for the same reason {@link isSameFile} does:
+ * rename operates on the directory entry, so a symlink occupies its path even when
+ * the target it points at is missing. `access` follows symlinks and would report a
+ * dangling symlink as absent, letting fs.rename silently destroy it.
  */
 export async function fileExists(filePath: string): Promise<boolean> {
   try {
-    await access(filePath, constants.F_OK);
+    await lstat(filePath);
     return true;
   } catch {
     return false;
