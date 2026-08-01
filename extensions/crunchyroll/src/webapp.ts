@@ -149,8 +149,9 @@ export async function openCrunchyroll(): Promise<void> {
 
 /**
  * Open the Crunchyroll web app and navigate to a URL.
- * If Crunchyroll web app is already running, just focus the window (don't reload).
- * If a different web app is running, quit it first.
+ * Used by Search/Trending/History — always navigates to the URL.
+ * If same app is running, navigates without restarting.
+ * If different app is running, quits it first.
  * Falls back to browser if web app is not installed.
  */
 export async function openCrunchyrollURL(url: string): Promise<void> {
@@ -164,8 +165,10 @@ export async function openCrunchyrollURL(url: string): Promise<void> {
   try {
     const runningPath = await getRunningWebAppPath();
     if (runningPath && runningPath.includes("Crunchyroll")) {
-      // Same web app already running — just focus, don't reload
-      await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
+      // Same web app already running — navigate to URL without restarting
+      await runAppleScript(
+        `do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""`,
+      );
       return;
     }
     // Different web app or none running — quit if needed, then open
@@ -178,6 +181,47 @@ export async function openCrunchyrollURL(url: string): Promise<void> {
     await new Promise((resolve) => setTimeout(resolve, 3000));
   } catch {
     await openInBrowser(url);
+  }
+}
+
+/**
+ * Check if the Crunchyroll web app is currently running.
+ */
+export async function isCrunchyrollRunning(): Promise<boolean> {
+  const runningPath = await getRunningWebAppPath();
+  return runningPath !== null && runningPath.includes("Crunchyroll");
+}
+
+/**
+ * Focus the Crunchyroll web app if it's already running.
+ * If not running, open it with the given URL.
+ * Used by Continue Watching — doesn't disrupt playback if already playing.
+ */
+export async function focusOrOpenCrunchyroll(url?: string): Promise<void> {
+  const installed = await isWebAppInstalled();
+  if (!installed) {
+    await openInBrowser(url ?? "https://www.crunchyroll.com");
+    return;
+  }
+
+  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+  try {
+    const runningPath = await getRunningWebAppPath();
+    if (runningPath && runningPath.includes("Crunchyroll")) {
+      // Same web app already running — just focus, don't reload
+      await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
+      return;
+    }
+    // Different web app or none running — quit if needed, then open with URL
+    if (runningPath) {
+      await quitWebApp();
+    }
+    await runAppleScript(
+      `do shell script "open -a \\"${escapedPath}\\" \\"${url ?? "https://www.crunchyroll.com"}\\""`,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+  } catch {
+    await openInBrowser(url ?? "https://www.crunchyroll.com");
   }
 }
 
