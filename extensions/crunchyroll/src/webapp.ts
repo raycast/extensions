@@ -115,7 +115,7 @@ async function quitWebApp(): Promise<void> {
 
 /**
  * Open the Crunchyroll web app.
- * If Crunchyroll web app is already running, just bring it to front.
+ * If Crunchyroll web app is already running, just focus the window.
  * If a different web app (e.g. YouTube) is running, quit it first.
  * Falls back to browser if web app is not installed.
  */
@@ -130,10 +130,8 @@ export async function openCrunchyroll(): Promise<void> {
   try {
     const runningPath = await getRunningWebAppPath();
     if (runningPath && runningPath.includes("Crunchyroll")) {
-      // Same web app already running — just bring to front and navigate
-      await runAppleScript(
-        `do shell script "open -a \\"${escapedPath}\\" \\"https://www.crunchyroll.com\\""`,
-      );
+      // Same web app already running — just focus, don't reload
+      await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
       return;
     }
     // Different web app or none running — quit if needed, then open
@@ -151,7 +149,7 @@ export async function openCrunchyroll(): Promise<void> {
 
 /**
  * Open the Crunchyroll web app and navigate to a URL.
- * If Crunchyroll web app is already running, just navigate without restarting.
+ * If Crunchyroll web app is already running, just focus the window (don't reload).
  * If a different web app is running, quit it first.
  * Falls back to browser if web app is not installed.
  */
@@ -166,10 +164,8 @@ export async function openCrunchyrollURL(url: string): Promise<void> {
   try {
     const runningPath = await getRunningWebAppPath();
     if (runningPath && runningPath.includes("Crunchyroll")) {
-      // Same web app already running — just navigate
-      await runAppleScript(
-        `do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""`,
-      );
+      // Same web app already running — just focus, don't reload
+      await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
       return;
     }
     // Different web app or none running — quit if needed, then open
