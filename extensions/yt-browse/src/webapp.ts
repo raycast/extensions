@@ -162,7 +162,8 @@ export async function isSafariJSEnabled(): Promise<boolean> {
         do JavaScript "1+1" in current tab of front window
       end tell
     `);
-    return result === "2";
+    // Safari returns "2.0" not "2"
+    return result === "2" || result === "2.0" || parseFloat(result) === 2;
   } catch {
     return false;
   }
