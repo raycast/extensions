@@ -1,4 +1,5 @@
-import { openYouTube, openYouTubeURL, fetchRealHistory } from "./webapp";
+import { openYouTube, openYouTubeURL } from "./webapp";
+import { fetchHistory, getHistoryFromCache } from "./query";
 import { showToast, Toast } from "@raycast/api";
 
 export default async function WatchingCommand() {
@@ -9,14 +10,20 @@ export default async function WatchingCommand() {
   });
 
   try {
-    const history = await fetchRealHistory();
-    if (history.length > 0) {
+    // Try cached first (instant), then fresh fetch
+    let history = await getHistoryFromCache();
+    if (!history || history.length === 0) {
+      history = await fetchHistory();
+    }
+
+    if (history && history.length > 0) {
       toast.style = Toast.Style.Success;
       toast.title = "Opening last watched video";
       toast.message = history[0].title;
       await openYouTubeURL(history[0].url);
       return;
     }
+
     toast.style = Toast.Style.Failure;
     toast.title = "No history found";
     toast.message = "Opening YouTube homepage instead";
