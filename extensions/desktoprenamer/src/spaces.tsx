@@ -12,7 +12,7 @@ export interface Space {
 }
 
 export function isMoveTarget(space: Pick<Space, "isFullscreen">) {
-  return space.isFullscreen !== true;
+  return space.isFullscreen === false;
 }
 
 export function useSpaces() {
