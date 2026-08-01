@@ -74,7 +74,7 @@ async function openInBrowser(url: string): Promise<void> {
   await runAppleScript(`do shell script "open \\"${url}\\""`);
 }
 
-async function bringToFront(bundleId: string): Promise<void> {
+async function bringToFront(bundleId: string, autoPlay = false): Promise<void> {
   // Use bundle ID to target the specific web app, not the generic "Web App" process name
   await runAppleScript(`
     tell application "System Events"
@@ -86,6 +86,19 @@ async function bringToFront(bundleId: string): Promise<void> {
       end if
     end tell
   `);
+  if (autoPlay) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    await runAppleScript(`
+      tell application "System Events"
+        set procList to (every process whose bundle identifier is "${bundleId}")
+        if (count of procList) > 0 then
+          tell item 1 of procList
+            keystroke space
+          end tell
+        end if
+      end tell
+    `);
+  }
 }
 
 export async function openYouTube(): Promise<void> {
@@ -102,7 +115,7 @@ export async function openYouTube(): Promise<void> {
     await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
     if (bundleId) {
-      await bringToFront(bundleId);
+      await bringToFront(bundleId, true);
     }
   } catch {
     await openInBrowser("https://www.youtube.com");
