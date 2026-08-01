@@ -1,5 +1,9 @@
 # Search npm Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Adjusted list icon colors to reduce visual clutter
+
 ## [Improvements] - 2026-07-15
 
 - Add pagination for search results
