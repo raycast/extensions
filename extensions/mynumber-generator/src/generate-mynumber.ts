@@ -10,12 +10,6 @@ import { formatMyNumber, generateMyNumber } from "./mynumber";
 
 const MY_NUMBERS_MAX_NUMBER = 10000;
 
-interface Preferences {
-  defaultAction: "copy" | "paste";
-  hyphenSeparated: boolean;
-  defaultNumberOfMyNumbers: string;
-}
-
 export default async function Command(
   props: LaunchProps<{ arguments: Arguments.GenerateMynumber }>,
 ) {
