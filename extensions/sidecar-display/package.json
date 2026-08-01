@@ -46,8 +46,9 @@
       "name": "sidecar-status",
       "title": "Sidecar Status",
       "subtitle": "Sidecar Display",
-      "description": "Menu-bar item showing the iPad name and connection status, with connect, disconnect, and extend/mirror actions. It does not auto-refresh (to stay friendly with menu-bar managers like Bartender); enable Background Refresh on this command if you want live status.",
-      "mode": "menu-bar"
+      "description": "Menu-bar item showing the iPad name, connection status, and whether the iPad is nearby, with connect, disconnect, and extend/mirror actions. Refreshes about every 30 seconds so the status stays live; turn Background Refresh off on this command if you would rather it only update when opened (friendlier to menu-bar managers like Bartender, and easier on battery).",
+      "mode": "menu-bar",
+      "interval": "30s"
     }
   ],
   "preferences": [
@@ -56,7 +57,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Engine",
-      "description": "Automatic uses BetterDisplay when its CLI is installed, otherwise the bundled Native helper. BetterDisplay drives betterdisplaycli (proven, needs the app). Native uses macOS SidecarCore and CoreGraphics with no dependency.",
+      "description": "Which tool actually talks to Sidecar. Automatic uses BetterDisplay when its command-line tool is installed and the built-in helper otherwise — leave it on Automatic unless one engine misbehaves. BetterDisplay is the proven path but needs the app running. Native needs nothing installed.",
       "default": "auto",
       "data": [
         {
@@ -77,18 +78,18 @@
       "name": "showDeviceName",
       "type": "checkbox",
       "required": false,
-      "title": "Menu Bar",
-      "label": "Show the connected device name next to the icon",
-      "description": "Off keeps a constant-width icon that is friendlier to menu-bar managers like Bartender. On shows the device name when connected.",
+      "title": "Show iPad Name",
+      "label": "Show the iPad's name beside the menu-bar icon",
+      "description": "On: the name appears whenever the iPad is connected or nearby, and disappears when it is out of range. Off: icon only, which keeps a constant width — friendlier to menu-bar managers like Bartender or Ice.",
       "default": false
     },
     {
       "name": "fixMirrorAfterConnect",
       "type": "checkbox",
       "required": false,
-      "title": "Fix Mirroring",
-      "label": "Fix mirroring on a fresh connect",
-      "description": "Reconnects the main virtual screen whenever the iPad newly attaches — through Connect, the menu bar, or a background auto-reconnect after sleep — but not when re-running connect on an already-connected iPad, to clear macOS Sidecar's own mirror mode. That mirror mode is invisible to the display APIs, so this cannot detect it directly — it fires on every fresh connect, and briefly reshuffles the desktop. Requires BetterDisplay; ignored without it. Turn off to trigger it manually with the Fix Mirroring command.",
+      "title": "Auto-Fix Mirroring",
+      "label": "Fix mirroring automatically when the iPad connects",
+      "description": "If your iPad connects showing a copy of your main screen instead of extending it, this repairs it each time it newly attaches. macOS gives no way to detect that state, so it runs on every fresh connect rather than only when needed — which briefly reshuffles your desktop. Turn this off if your iPad only occasionally mirrors, and use the Fix Mirroring command by hand instead. Requires BetterDisplay; ignored without it.",
       "default": true
     },
     {
@@ -96,7 +97,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Display Mode",
-      "description": "How the iPad should sit in the arrangement once connected.",
+      "description": "What the iPad should do once connected. Extend gives you extra desktop space (the usual choice). Mirror shows a copy of your main display on the iPad.",
       "default": "extend",
       "data": [
         {
@@ -114,7 +115,7 @@
       "type": "textfield",
       "required": false,
       "title": "iPad Name",
-      "description": "Leave empty to auto-detect. Required only if you have more than one Sidecar device.",
+      "description": "Leave empty and the iPad is detected automatically. Fill this in only if you have more than one Sidecar device and want to pin a specific one — the name must match exactly as macOS shows it.",
       "placeholder": "Auto-detect"
     },
     {
@@ -122,64 +123,32 @@
       "type": "checkbox",
       "required": false,
       "title": "Auto-Reconnect",
-      "label": "Reconnect the iPad automatically after it drops",
-      "description": "Default for whether the background command restores a link that dropped on its own (e.g. waking from sleep), backing off over time and never chasing a deliberate disconnect. This is only the default: the menu-bar Auto-Reconnect toggle overrides it once used. Turn off to stop automatic reconnects — running the Auto-Reconnect Sidecar command by hand still reconnects. Automatic reconnects also require Raycast's Background Refresh to be enabled on that command.",
+      "label": "Reconnect the iPad automatically after the link drops",
+      "description": "Brings the iPad back on its own after a drop — for example when your Mac wakes from sleep. It only ever chases a link that dropped by itself; disconnecting on purpose is never fought. This preference is the default: the Auto-Reconnect item in the menu bar overrides it once you use it. Also needs Background Refresh enabled on the Auto-Reconnect Sidecar command in Raycast's settings.",
       "default": true
     },
     {
-      "name": "fastReconnectAttempts",
+      "name": "giveUpAfterHours",
       "type": "textfield",
       "required": false,
-      "title": "Fast Reconnect Attempts",
-      "description": "Quick reconnect attempts after a drop before slowing to the heartbeat. Waking the Mac restarts the fast phase. Never gives up entirely.",
-      "default": "3"
-    },
-    {
-      "name": "backoffBaseSeconds",
-      "type": "textfield",
-      "required": false,
-      "title": "Backoff Base (seconds)",
-      "description": "Initial wait between fast reconnect attempts; it doubles each try up to the cap. Note: the background command only runs about once a minute, so values under ~60s effectively mean 'every tick'.",
-      "default": "15"
-    },
-    {
-      "name": "backoffCapSeconds",
-      "type": "textfield",
-      "required": false,
-      "title": "Backoff Cap (seconds)",
-      "description": "Longest wait the doubling backoff reaches during the fast phase.",
-      "default": "60"
-    },
-    {
-      "name": "slowRetrySeconds",
-      "type": "textfield",
-      "required": false,
-      "title": "Slow Retry (seconds)",
-      "description": "How often to retry once the fast attempts are spent and the iPad is still absent.",
-      "default": "300"
-    },
-    {
-      "name": "wakeThresholdSeconds",
-      "type": "textfield",
-      "required": false,
-      "title": "Wake Threshold (seconds)",
-      "description": "A gap this long between background ticks is treated as the Mac having slept, so the next tick reconnects immediately and restarts the fast phase.",
-      "default": "120"
+      "title": "Give Up After (hours)",
+      "description": "How long to keep trying an iPad that appears to be nearby but refuses to connect, before stopping so macOS stops showing connection-failed notifications. The clock only runs while the iPad is actually detected nearby, so time it spends genuinely away — a trip, a weekend — never counts against it. Set to 0 to keep trying indefinitely.",
+      "default": "24"
     },
     {
       "name": "betterDisplayCliPath",
       "type": "textfield",
       "required": false,
-      "title": "BetterDisplay CLI",
-      "description": "Path to the betterdisplaycli binary.",
+      "title": "BetterDisplay CLI Path",
+      "description": "Where the betterdisplaycli tool lives. The default suits Apple-silicon Homebrew; on Intel Macs it is usually /usr/local/bin/betterdisplaycli. Only used by the BetterDisplay engine and by Fix Mirroring.",
       "default": "/opt/homebrew/bin/betterdisplaycli"
     },
     {
       "name": "settleTimeoutSeconds",
       "type": "textfield",
       "required": false,
-      "title": "Settle Timeout",
-      "description": "Seconds to wait for a display change to take effect. Clamped to 2-60.",
+      "title": "Give Display Changes (seconds)",
+      "description": "How long to wait for the iPad's display to settle into the requested mode before reporting what happened. macOS spends about a second rearranging a freshly connected display, so short values can report failure too early. Raise it if connecting reports 'could not extend' on a display that does eventually settle.",
       "default": "6"
     }
   ],
@@ -204,7 +173,7 @@
     "lint": "ray lint",
     "lint:fix": "ray lint --fix",
     "test": "npm run test:unit",
-    "test:unit": "npm run build:test && node --test .test-build/test/keepalive.test.js .test-build/test/messages.test.js .test-build/test/orchestration.test.js .test-build/test/virtualscreens.test.js",
+    "test:unit": "npm run build:test && node --test .test-build/test/keepalive.test.js .test-build/test/presence.test.js .test-build/test/messages.test.js .test-build/test/orchestration.test.js .test-build/test/virtualscreens.test.js",
     "test:safety": "npm run test:unit && node --test .test-build/test/safety.test.js",
     "test:hardware": "npm run test:safety && node --test .test-build/test/display-mode.test.js && node --test .test-build/test/lifecycle.test.js",
     "verify": "npm run lint && npm run build && npm run test:unit",

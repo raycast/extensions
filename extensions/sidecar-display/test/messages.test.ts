@@ -18,7 +18,10 @@ import {
   describeModeSwitch,
   describeOutcome,
   disconnectedMessage,
+  gaveUpMessage,
   mirroringFixedMessage,
+  nearbyMessage,
+  presenceTooltip,
   reconnectedMessage,
 } from "../src/lib/messages";
 
@@ -91,5 +94,24 @@ describe("link and toggle messages", () => {
     assert.equal(autoReconnectMessage(false), "⚪ Auto-Reconnect - OFF");
     assert.equal(autoReconnectLabel(true), "Auto-Reconnect - ON");
     assert.equal(autoReconnectLabel(false), "Auto-Reconnect - OFF");
+  });
+});
+
+describe("presence messages", () => {
+  it("names the device in the nearby and gave-up lines", () => {
+    assert.equal(nearbyMessage("Cip’s iPad"), "⚪ Cip’s iPad - Nearby");
+    assert.equal(gaveUpMessage("Cip’s iPad"), "⚠️ Cip’s iPad - Gave up reconnecting");
+  });
+
+  it("distinguishes nearby from away in the tooltip, and both from unknown", () => {
+    assert.equal(presenceTooltip("iPad", true, null), "iPad - Connected");
+    assert.equal(presenceTooltip("iPad", false, true), "iPad - Nearby, not connected");
+    assert.equal(presenceTooltip("iPad", false, false), "iPad - Away");
+    // An unavailable probe must not claim the iPad is away.
+    assert.equal(presenceTooltip("iPad", false, null), "iPad - Disconnected");
+  });
+
+  it("reports connected regardless of what the probe said", () => {
+    assert.equal(presenceTooltip("iPad", true, false), "iPad - Connected");
   });
 });

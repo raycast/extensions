@@ -76,8 +76,11 @@ async function pollUntil(probe: () => Promise<boolean>, timeoutMs: number): Prom
  * @param override - Name from preferences/selection; empty means auto-detect.
  * @returns The Sidecar device name to act on.
  *
- * WARN: A device list includes paired-but-unreachable devices, so a returned
- *   name is not a promise that the iPad can connect.
+ * WARN: The list is unreliable in both directions. A listed device may still be
+ *   unreachable (radios off), and an iPad that is simply out of range drops off
+ *   the list entirely — so auto-detection throws while it is away. Callers that
+ *   must survive that (the background tick) pass a remembered name as `override`;
+ *   see `loadConfig`.
  */
 export async function resolveIpadName(backend: SidecarBackend, override: string): Promise<string> {
   const pinned = override.trim();

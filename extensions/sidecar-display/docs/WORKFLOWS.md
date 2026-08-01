@@ -81,7 +81,7 @@ npm run lint:fix      # ...and fix what it can
 npm run typecheck     # tsc --noEmit, src and tests  (also runs inside `build`)
 npm run build         # ray build (compiles Swift, generates types) + typecheck
 npm test              # alias for test:unit
-npm run test:unit     # hardware-free: keep-alive, orchestration, mirror fix
+npm run test:unit     # hardware-free: keep-alive, presence, orchestration, mirror fix
 npm run test:safety   # + absent-device guard   (needs BetterDisplay, no iPad)
 npm run test:hardware # + full lifecycle        (needs BetterDisplay AND an iPad)
 npm run clean         # delete every build artifact

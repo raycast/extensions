@@ -5,7 +5,7 @@
 
 import { showHUD, showToast, Toast } from "@raycast/api";
 
-import { reportError } from "./lib/feedback";
+import { refreshMenuBar, reportError } from "./lib/feedback";
 import { disconnectedMessage } from "./lib/messages";
 import { getBackend, loadConfig } from "./lib/preferences";
 import { disconnectSidecar } from "./lib/sidecar";
@@ -24,6 +24,9 @@ export default async function command(): Promise<void> {
 
     await recordIntent("disconnected");
     await disconnectSidecar(backend, config);
+    // The link just changed, so bring the menu bar with it rather than leaving it
+    // claiming "connected" until the next background tick notices.
+    await refreshMenuBar();
     await showHUD(disconnectedMessage(config.ipadName));
   } catch (error) {
     await reportError(error, "Could not disconnect Sidecar");

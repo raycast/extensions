@@ -10,8 +10,8 @@
 
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { setTimeout as sleep } from "node:timers/promises";
 import { before, describe, it } from "node:test";
+import { setTimeout as sleep } from "node:timers/promises";
 
 import { createBetterDisplayBackend } from "../src/lib/betterdisplay";
 import { ensureDisplayMode, isConnected, resolveIpadName } from "../src/lib/sidecar";

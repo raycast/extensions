@@ -11,7 +11,7 @@ import { LocalStorage } from "@raycast/api";
 
 import { INITIAL_STATE, stateForIntent } from "./keepalive";
 
-import type { KeepAliveState, LinkIntent } from "./keepalive";
+import type { KeepAliveState, LinkIntent, Reachability } from "./keepalive";
 
 const KEEP_ALIVE_KEY = "keepAliveState";
 const DEVICE_KEY = "selectedDeviceName";
@@ -35,10 +35,28 @@ export async function loadKeepAliveState(): Promise<KeepAliveState> {
       failedAttempts: typeof parsed.failedAttempts === "number" ? parsed.failedAttempts : 0,
       lastAttemptAtMs: typeof parsed.lastAttemptAtMs === "number" ? parsed.lastAttemptAtMs : 0,
       lastTickAtMs: typeof parsed.lastTickAtMs === "number" ? parsed.lastTickAtMs : 0,
+      // Absent from state written before the probe existed; 0 is the correct
+      // reading of "no chase running, nothing seen absent yet".
+      chasingSinceMs: typeof parsed.chasingSinceMs === "number" ? parsed.chasingSinceMs : 0,
+      absentReads: typeof parsed.absentReads === "number" ? parsed.absentReads : 0,
+      announcedGiveUp: parsed.announcedGiveUp === true,
+      lastLinkUp: parsed.lastLinkUp === true,
+      lastReachability: parseReachability(parsed.lastReachability),
     };
   } catch {
     return INITIAL_STATE;
   }
+}
+
+/**
+ * Narrows a stored probe reading back to the union.
+ *
+ * @param value - Whatever JSON.parse produced.
+ * @returns The reading, or "unknown" for anything unrecognised — the honest
+ *   default, and what state written before the probe existed should mean.
+ */
+function parseReachability(value: unknown): Reachability {
+  return value === "reachable" || value === "absent" ? value : "unknown";
 }
 
 /**

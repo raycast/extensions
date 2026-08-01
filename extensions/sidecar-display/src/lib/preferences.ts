@@ -11,9 +11,10 @@ import { getPreferenceValues } from "@raycast/api";
 import { existsSync } from "node:fs";
 
 import { createBetterDisplayBackend } from "./betterdisplay";
+import { FIXED_TUNING } from "./keepalive";
 import { createNativeBackend } from "./native";
 import { resolveIpadName } from "./sidecar";
-import { loadSelectedDevice } from "./state";
+import { loadSelectedDevice, saveSelectedDevice } from "./state";
 
 import type { DisplayMode, SidecarBackend } from "./backend";
 import type { KeepAliveTuning } from "./keepalive";
@@ -28,23 +29,6 @@ export interface Tuning {
 const MIN_TIMEOUT_SECONDS = 2;
 const MAX_TIMEOUT_SECONDS = 60;
 const DEFAULT_TIMEOUT_SECONDS = 6;
-
-/**
- * Parses a clamped integer preference, falling back when unset or invalid.
- *
- * @param value - Raw preference text.
- * @param fallback - Value to use when the text is empty or non-numeric.
- * @param min - Lower bound.
- * @param max - Upper bound.
- * @returns The clamped integer.
- */
-function parseIntClamped(value: string | undefined, fallback: number, min: number, max: number): number {
-  const parsed = Number.parseInt((value ?? "").trim(), 10);
-  if (!Number.isInteger(parsed)) {
-    return fallback;
-  }
-  return Math.min(Math.max(parsed, min), max);
-}
 
 /**
  * Parses a seconds preference into clamped milliseconds.
@@ -67,22 +51,33 @@ function parseSecondsMs(
 }
 
 /**
+ * Parses an hours preference into clamped milliseconds.
+ *
+ * @param value - Raw preference text in hours.
+ * @param fallbackHours - Value to use when the text is empty or non-numeric.
+ * @param minHours - Lower bound.
+ * @param maxHours - Upper bound.
+ * @returns The clamped duration in milliseconds.
+ */
+function parseHoursMs(value: string | undefined, fallbackHours: number, minHours: number, maxHours: number): number {
+  const parsed = Number.parseFloat((value ?? "").trim());
+  const hours = Number.isFinite(parsed) ? parsed : fallbackHours;
+  return Math.min(Math.max(hours, minHours), maxHours) * 3_600_000;
+}
+
+/**
  * Reads the auto-reconnect timing knobs from preferences, clamped.
  *
  * @returns Fully resolved keep-alive tuning.
  */
 export function readKeepAliveTuning(): KeepAliveTuning {
   const prefs = getPreferenceValues<Preferences>();
-  const backoffBaseMs = parseSecondsMs(prefs.backoffBaseSeconds, 15, 1, 3_600);
-  // The cap is a ceiling on the doubling backoff, so it can never sit below the
-  // base — otherwise every attempt would collapse to the (smaller) cap.
-  const backoffCapMs = Math.max(parseSecondsMs(prefs.backoffCapSeconds, 60, 1, 3_600), backoffBaseMs);
   return {
-    fastAttempts: parseIntClamped(prefs.fastReconnectAttempts, 3, 1, 100),
-    backoffBaseMs,
-    backoffCapMs,
-    dormantRetryMs: parseSecondsMs(prefs.slowRetrySeconds, 300, 30, 86_400),
-    wakeGapMs: parseSecondsMs(prefs.wakeThresholdSeconds, 120, 30, 3_600),
+    ...FIXED_TUNING,
+    // The only retry knob left worth exposing: how long to keep trying an iPad
+    // that reads as present but will not connect. 0 means never give up, so the
+    // floor is 0 rather than 1.
+    giveUpAfterMs: parseHoursMs(prefs.giveUpAfterHours, 24, 0, 720),
   };
 }
 
@@ -195,6 +190,17 @@ export async function loadConfig(backend: SidecarBackend): Promise<SidecarConfig
   // menu bar, then auto-detection.
   const prefs = getPreferenceValues<Preferences>();
   const override = (prefs.ipadName ?? "").trim() || (await loadSelectedDevice());
+  const ipadName = await resolveIpadName(backend, override);
 
-  return buildConfig(await resolveIpadName(backend, override));
+  // An out-of-range iPad drops out of the device list entirely (verified: both
+  // SidecarCore and `get --sidecarList` return nothing once it is far enough
+  // away), which would make auto-detection throw and take the whole tick with
+  // it. Remembering the name the first time it resolves keeps presence tracking
+  // and the menu bar working while the iPad is away. Only reached when exactly
+  // one device is paired — resolveIpadName refuses to guess between several.
+  if (override === "") {
+    await saveSelectedDevice(ipadName);
+  }
+
+  return buildConfig(ipadName);
 }

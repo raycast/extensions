@@ -25,6 +25,18 @@ struct Status: Encodable {
   sidecarDevices(try sidecarManager()).map(deviceName).filter { !$0.isEmpty }
 }
 
+/// Reports whether the named device currently looks reachable.
+///
+/// NOTE: A pure read of SidecarCore's cached device record — it attempts no
+///   connection, so unlike a failed connect it produces no macOS error banner.
+///   That is the whole point: it lets a background tick ask "is the iPad back?"
+///   as often as it likes for free. Returns false when the device is not paired.
+@raycast func reachable(name: String) throws -> Bool {
+  let manager = try sidecarManager()
+  guard let device = sidecarDevices(manager).first(where: { deviceName($0) == name }) else { return false }
+  return deviceIsReachable(device)
+}
+
 /// Attaches the named Sidecar device.
 @raycast func connect(name: String) throws {
   let (manager, device) = try findDevice(named: name)

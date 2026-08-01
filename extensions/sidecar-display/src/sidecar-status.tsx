@@ -13,7 +13,7 @@
 import { Color, getPreferenceValues, Icon, MenuBarExtra, openExtensionPreferences, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { reportError } from "./lib/feedback";
+import { refreshMenuBar, reportError } from "./lib/feedback";
 import { effectiveAutoReconnect } from "./lib/keepalive";
 import {
   autoReconnectLabel,
@@ -22,6 +22,7 @@ import {
   describeModeSwitch,
   disconnectedMessage,
   mirroringFixedMessage,
+  presenceTooltip,
 } from "./lib/messages";
 import { fixMirrorAfterFreshConnect } from "./lib/mirrorfix";
 import {
@@ -31,6 +32,7 @@ import {
   getBackend,
   getBetterDisplayCliPath,
 } from "./lib/preferences";
+import { probeReachability } from "./lib/reachability";
 import { connectSidecar, disconnectSidecar, ensureDisplayMode, isConnected } from "./lib/sidecar";
 import {
   loadAutoReconnectOverride,
@@ -50,23 +52,57 @@ interface StatusModel {
   readonly connected: boolean;
   readonly canReconnectVirtual: boolean;
   readonly autoReconnectOn: boolean;
+  /** Presence while disconnected; null when the probe could not answer. */
+  readonly nearby: boolean | null;
 }
+
+/** What the menu falls back to when the status read fails outright. */
+const EMPTY_MODEL: StatusModel = {
+  devices: [],
+  selected: "",
+  connected: false,
+  nearby: null,
+  canReconnectVirtual: false,
+  autoReconnectOn: false,
+};
 
 /**
  * Gathers the current Sidecar picture for the menu.
  *
  * @returns Paired devices, the selected device, whether it is connected, whether
- *   the virtual-screen reconnect is available (BetterDisplay present), and the
- *   effective auto-reconnect state.
+ *   the iPad is nearby when it is not, whether the virtual-screen reconnect is
+ *   available (BetterDisplay present), and the effective auto-reconnect state.
+ *
+ * NOTE: The presence probe runs only while disconnected — a live link already
+ *   proves the iPad is there. It is a silent read, so it costs no error banner.
  */
 async function loadStatus(): Promise<StatusModel> {
   const backend = getBackend();
   const devices = await backend.listDevices();
   const pinned = await loadSelectedDevice();
   const selected = pinned !== "" ? pinned : (devices[0]?.name ?? "");
-  const connected = selected !== "" && (await isConnected(backend, buildConfig(selected)));
+  // An out-of-range iPad is absent from the device list entirely, and a device
+  // that is not listed cannot be connected — so an empty list answers the
+  // connection question for free, skipping the second CLI call. This is the
+  // common all-day case, and it is derived from the list rather than from the
+  // undocumented presence bit, so nothing here trusts that bit.
+  const connectable = selected !== "" && devices.length > 0;
+  const connected = connectable && (await isConnected(backend, buildConfig(selected)));
   const autoReconnectOn = effectiveAutoReconnect(await loadAutoReconnectOverride(), autoReconnectPreference());
-  return { devices, selected, connected, canReconnectVirtual: betterDisplayAvailable(), autoReconnectOn };
+  const nearby = connected || selected === "" ? null : await probeNearby(selected);
+  return { devices, selected, connected, nearby, canReconnectVirtual: betterDisplayAvailable(), autoReconnectOn };
+}
+
+/**
+ * Resolves the presence probe into a tri-state for the menu.
+ *
+ * @param name - The Sidecar device to probe.
+ * @returns True/false when the probe answers, null when it cannot — so an
+ *   unavailable probe reads as "unknown" rather than as "away".
+ */
+async function probeNearby(name: string): Promise<boolean | null> {
+  const reading = await probeReachability(name);
+  return reading === "unknown" ? null : reading === "reachable";
 }
 
 /**
@@ -132,6 +168,10 @@ async function toggleAutoReconnect(currentlyOn: boolean): Promise<string> {
  * NOTE: Menu-bar actions have no ambient error surface, so without this a failed
  *   click would be silent and leak an unhandled rejection. This mirrors the
  *   try/catch + feedback every command entry point uses.
+ * NOTE: Re-runs this command afterwards. Every action here changes something the
+ *   menu displays, and a menu-bar command renders only when it runs — without the
+ *   nudge the item would still be showing the pre-click state next time it is
+ *   opened. Also runs after a failure, since a half-applied action still moves it.
  */
 async function runAction(action: () => Promise<string | void>, errorTitle: string, successHUD?: string): Promise<void> {
   try {
@@ -143,6 +183,8 @@ async function runAction(action: () => Promise<string | void>, errorTitle: strin
     }
   } catch (error) {
     await reportError(error, errorTitle);
+  } finally {
+    await refreshMenuBar();
   }
 }
 
@@ -155,11 +197,20 @@ async function runAction(action: () => Promise<string | void>, errorTitle: strin
  *
  * @param props.selected  - The device the actions act on.
  * @param props.connected - Whether that device is currently attached.
+ * @param props.nearby    - Presence while disconnected; null when unknown.
  * @returns The device section.
  */
-function DeviceSection({ selected, connected }: { selected: string; connected: boolean }): React.JSX.Element {
+function DeviceSection({
+  selected,
+  connected,
+  nearby,
+}: {
+  selected: string;
+  connected: boolean;
+  nearby: boolean | null;
+}): React.JSX.Element {
   return (
-    <MenuBarExtra.Section title={selected}>
+    <MenuBarExtra.Section title={presenceTooltip(selected, connected, nearby)}>
       {connected ? (
         <>
           <MenuBarExtra.Item
@@ -256,6 +307,31 @@ function FixMirroringSection(): React.JSX.Element {
 }
 
 /**
+ * The menu-bar icon for the current link and presence state.
+ *
+ * @param connected - Whether the link is up.
+ * @param nearby    - Presence while disconnected; null when unknown.
+ * @returns The monitor glyph, tinted green (connected), full-contrast (nearby),
+ *   or greyed out (away, or the probe could not answer).
+ *
+ * NOTE: One glyph throughout, so the item never changes shape in the menu bar —
+ *   only its weight changes, which is what a status light should do. Green reads
+ *   as attached, full-contrast as available-to-connect, greyed-out as nothing to
+ *   connect to (which makes a quiet auto-reconnect read as "nothing to do"
+ *   rather than "broken"). An unanswered probe greys out too: wrongly looking
+ *   unavailable is a kinder error than inviting a click that cannot work.
+ */
+function statusIcon(connected: boolean, nearby: boolean | null): { source: Icon; tintColor: Color } {
+  if (connected) {
+    return { source: Icon.Monitor, tintColor: Color.Green };
+  }
+  if (nearby === true) {
+    return { source: Icon.Monitor, tintColor: Color.PrimaryText };
+  }
+  return { source: Icon.Monitor, tintColor: Color.SecondaryText };
+}
+
+/**
  * The menu-bar command.
  *
  * @returns The rendered menu-bar item.
@@ -264,17 +340,7 @@ export default function Command(): React.JSX.Element {
   const [model, setModel] = useState<StatusModel | null>(null);
 
   useEffect(() => {
-    loadStatus()
-      .then(setModel)
-      .catch(() =>
-        setModel({
-          devices: [],
-          selected: "",
-          connected: false,
-          canReconnectVirtual: false,
-          autoReconnectOn: false,
-        }),
-      );
+    loadStatus().then(setModel).catch(setModel.bind(null, EMPTY_MODEL));
   }, []);
 
   const connected = model?.connected ?? false;
@@ -282,17 +348,26 @@ export default function Command(): React.JSX.Element {
   // Default is icon-only (constant width, friendly to menu-bar managers like
   // Bartender). The optional title shows the device name when connected.
   const showName = getPreferenceValues<Preferences>().showDeviceName === true;
-  // Green when connected, neutral (default menu tint) when not — the persistent
-  // colour cue a HUD cannot carry.
-  const icon = connected ? { source: Icon.Monitor, tintColor: Color.Green } : Icon.MinusCircle;
-  const tooltip = connected ? `${device} - Connected` : `${device} - Disconnected`;
-  const title = showName && connected ? device : undefined;
+  const nearby = model?.nearby ?? null;
+  const icon = statusIcon(connected, nearby);
+  const tooltip = presenceTooltip(device, connected, nearby);
+  // Named whenever the iPad is actually there — attached or merely within reach —
+  // since that is when knowing WHICH iPad is useful. Stays anonymous when it is
+  // away, so the item does not carry a name for something you cannot connect to.
+  const title = showName && (connected || nearby === true) ? device : undefined;
 
   return (
     <MenuBarExtra icon={icon} title={title} tooltip={tooltip} isLoading={model === null}>
-      {model !== null && model.devices.length === 0 && <MenuBarExtra.Item title="No Sidecar devices found" />}
+      {/* Only when nothing is known at all. An out-of-range iPad drops off the
+          device list, so an empty list plus a remembered device means "away",
+          not "you have no iPad". */}
+      {model !== null && model.devices.length === 0 && model.selected === "" && (
+        <MenuBarExtra.Item title="No Sidecar devices found" />
+      )}
 
-      {model !== null && model.selected !== "" && <DeviceSection selected={model.selected} connected={connected} />}
+      {model !== null && model.selected !== "" && (
+        <DeviceSection selected={model.selected} connected={connected} nearby={model.nearby} />
+      )}
 
       {model !== null && model.devices.length > 1 && (
         <DevicesSection devices={model.devices} selected={model.selected} />

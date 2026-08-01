@@ -110,3 +110,54 @@ export function autoReconnectMessage(on: boolean): string {
 export function autoReconnectLabel(on: boolean): string {
   return on ? "Auto-Reconnect - ON" : "Auto-Reconnect - OFF";
 }
+
+// ------------------------------------------------------------
+// PRESENCE MESSAGES
+// ------------------------------------------------------------
+
+/**
+ * HUD for an iPad that has come back within reach.
+ *
+ * @param name - The Sidecar device.
+ * @returns A single line suitable for a HUD.
+ *
+ * NOTE: Only shown when nothing is going to act on it (auto-reconnect off, or a
+ *   deliberate disconnect). While chasing, the reconnect is the feedback.
+ */
+export function nearbyMessage(name: string): string {
+  return `${NEUTRAL} ${name} - Nearby`;
+}
+
+/**
+ * HUD for auto-reconnect abandoning a chase.
+ *
+ * @param name - The Sidecar device.
+ * @returns A single line suitable for a HUD.
+ *
+ * NOTE: Announced once per chase. Without it, giving up is invisible — the user
+ *   would just notice, eventually, that reconnects stopped happening.
+ */
+export function gaveUpMessage(name: string): string {
+  return `${WARN} ${name} - Gave up reconnecting`;
+}
+
+/**
+ * Menu-bar tooltip describing the link and, when down, whether the iPad is there.
+ *
+ * @param name      - The Sidecar device.
+ * @param connected - Whether the link is up.
+ * @param nearby    - Presence when disconnected; null when the probe is unavailable.
+ * @returns The tooltip line.
+ */
+export function presenceTooltip(name: string, connected: boolean, nearby: boolean | null): string {
+  if (connected) {
+    return `${name} - Connected`;
+  }
+  if (nearby === true) {
+    return `${name} - Nearby, not connected`;
+  }
+  if (nearby === false) {
+    return `${name} - Away`;
+  }
+  return `${name} - Disconnected`;
+}

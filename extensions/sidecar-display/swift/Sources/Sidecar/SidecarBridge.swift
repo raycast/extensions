@@ -53,6 +53,22 @@ func deviceName(_ device: NSObject) -> String {
   (device.perform(NSSelectorFromString("name"))?.takeUnretainedValue() as? String) ?? ""
 }
 
+// SidecarDevice.status is an undocumented bitfield. Bit 9 is set whenever the
+// device is reachable — connected OR merely nearby and idle — and clears when its
+// radios go away. Established empirically (macOS 26.6) by sampling the field
+// across connect, disconnect, and Airplane Mode; see docs/ARCHITECTURE.md.
+//
+// WARN: Bits 1, 8, 39 flap on their own and mean nothing useful. Bit 9 itself has
+//   been observed to dip for ~10s while the device stayed connected, so a single
+//   clear read is NOT proof of absence — callers must debounce.
+let reachableStatusBit: UInt64 = 1 << 9
+
+/// Whether the device's status bitfield marks it as currently reachable.
+func deviceIsReachable(_ device: NSObject) -> Bool {
+  guard let status = device.value(forKey: "status") as? UInt64 else { return false }
+  return status & reachableStatusBit != 0
+}
+
 /// Locates a paired device by name, returning it with its manager.
 func findDevice(named target: String) throws -> (NSObject, NSObject) {
   let manager = try sidecarManager()

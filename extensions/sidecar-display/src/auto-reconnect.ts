@@ -13,11 +13,12 @@
 
 import { environment, LaunchType, showHUD } from "@raycast/api";
 
-import { reportError } from "./lib/feedback";
-import { decideKeepAlive, keepAliveEnabled } from "./lib/keepalive";
-import { alreadyConnectedMessage, reconnectedMessage } from "./lib/messages";
+import { refreshMenuBar, reportError } from "./lib/feedback";
+import { decideKeepAlive, keepAliveEnabled, shouldRefreshMenuBar } from "./lib/keepalive";
+import { alreadyConnectedMessage, gaveUpMessage, nearbyMessage, reconnectedMessage } from "./lib/messages";
 import { fixMirrorAfterFreshConnect } from "./lib/mirrorfix";
 import { autoReconnectPreference, getBackend, loadConfig, readKeepAliveTuning } from "./lib/preferences";
+import { probeReachability } from "./lib/reachability";
 import { connectSidecar, isConnected } from "./lib/sidecar";
 import { loadAutoReconnectOverride, loadKeepAliveState, recordIntent, saveKeepAliveState } from "./lib/state";
 
@@ -41,15 +42,28 @@ export default async function command(): Promise<void> {
 
     const enabled = keepAliveEnabled(isManual, await loadAutoReconnectOverride(), autoReconnectPreference());
 
+    // Probed whenever the link is down — including with auto-reconnect off, since
+    // that is exactly when a "your iPad is back" HUD carries information. There is
+    // nothing to ask when the iPad is already attached.
+    const reachability = linkUp ? "unknown" : await probeReachability(config.ipadName);
+
+    const previous = await loadKeepAliveState();
     const decision = decideKeepAlive({
       ...readKeepAliveTuning(),
       enabled,
       isConnected: linkUp,
       nowMs: Date.now(),
-      state: await loadKeepAliveState(),
+      reachability,
+      state: previous,
     });
 
     await saveKeepAliveState(decision.nextState);
+
+    if (decision.notice === "nearby") {
+      await showHUD(nearbyMessage(config.ipadName));
+    } else if (decision.notice === "gaveUp") {
+      await showHUD(gaveUpMessage(config.ipadName));
+    }
 
     if (decision.action === "reconnect") {
       const outcome = await connectSidecar(backend, config);
@@ -64,6 +78,12 @@ export default async function command(): Promise<void> {
       // A manual run decides "none" only when the link is already up (the intent
       // was just re-armed), so acknowledge rather than doing nothing silently.
       await showHUD(alreadyConnectedMessage(config.ipadName));
+    }
+
+    // Last, so the menu bar re-renders against the post-reconnect reality rather
+    // than the state this tick started from.
+    if (shouldRefreshMenuBar(previous, decision)) {
+      await refreshMenuBar();
     }
   } catch (error) {
     // A failed background attempt is expected when the iPad is genuinely gone;

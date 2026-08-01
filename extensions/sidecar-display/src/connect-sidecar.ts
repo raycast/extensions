@@ -5,7 +5,7 @@
 
 import { showHUD, showToast, Toast } from "@raycast/api";
 
-import { reportError } from "./lib/feedback";
+import { refreshMenuBar, reportError } from "./lib/feedback";
 import { describeOutcome } from "./lib/messages";
 import { fixMirrorAfterFreshConnect } from "./lib/mirrorfix";
 import { getBackend, loadConfig } from "./lib/preferences";
@@ -29,6 +29,9 @@ export default async function command(): Promise<void> {
     // treated as "wanted" by auto-reconnect, matching disconnect and the menu.
     await recordIntent("connected");
     const outcome = await connectSidecar(backend, config);
+    // Before the mirror fix, so the menu bar catches up even if that step fails —
+    // the link is up either way, and the fix does not touch it.
+    await refreshMenuBar();
 
     // The connect already succeeded here, so a failing fix is reported on its
     // own rather than as a connect failure.

@@ -3,51 +3,18 @@
 // Pure logic; no hardware, no BetterDisplay. Runs anywhere.
 // -----------------------------------------------------------------------------
 // Context: Proves the state machine reconnects a self-dropped link, backs off,
-//   slows to a heartbeat (never abandons), re-arms instantly after the Mac
-//   sleeps, and never fights a deliberate disconnect.
+//   slows to a heartbeat, parks once the retry budget is spent (so an
+//   unreachable iPad stops generating macOS error banners), re-arms after the
+//   Mac sleeps, and never fights a deliberate disconnect.
 // =============================================================================
 
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  decideKeepAlive,
-  effectiveAutoReconnect,
-  INITIAL_STATE,
-  keepAliveEnabled,
-  stateForIntent,
-} from "../src/lib/keepalive";
+import { effectiveAutoReconnect, INITIAL_STATE, keepAliveEnabled, stateForIntent } from "../src/lib/keepalive";
+import { connectedState, decide, HOUR, NOW } from "./support/keepalive";
 
-import type { KeepAliveDecision, KeepAliveState, KeepAliveTuning } from "../src/lib/keepalive";
-
-const TUNING: KeepAliveTuning = {
-  fastAttempts: 3,
-  backoffBaseMs: 1_000,
-  backoffCapMs: 60_000,
-  dormantRetryMs: 900_000,
-  wakeGapMs: 180_000,
-};
-const NOW = 10_000_000;
-
-/** A recent tick (not a sleep gap), so wake logic stays out of the way. */
-function connectedState(overrides: Partial<KeepAliveState> = {}): KeepAliveState {
-  return {
-    intent: "connected",
-    failedAttempts: 0,
-    lastAttemptAtMs: 0,
-    lastTickAtMs: NOW - 60_000,
-    ...overrides,
-  };
-}
-
-function decide(input: {
-  isConnected: boolean;
-  state: KeepAliveState;
-  enabled?: boolean;
-}): KeepAliveDecision {
-  const { enabled = true, ...rest } = input;
-  return decideKeepAlive({ ...TUNING, nowMs: NOW, enabled, ...rest });
-}
+import type { KeepAliveState } from "../src/lib/keepalive";
 
 describe("keep-alive decisions", () => {
   it("does nothing when the user wants it disconnected", () => {
@@ -86,7 +53,7 @@ describe("keep-alive decisions", () => {
     assert.equal(decide({ isConnected: false, state: due }).action, "reconnect");
   });
 
-  it("slows to a heartbeat after the fast burst but never abandons", () => {
+  it("slows to a heartbeat after the fast burst, and with the cap off never abandons", () => {
     const spent = connectedState({ failedAttempts: 3, lastAttemptAtMs: NOW - 60_000 });
     assert.equal(decide({ isConnected: false, state: spent }).action, "none");
 
@@ -110,6 +77,89 @@ describe("keep-alive decisions", () => {
   it("records the tick time on every decision, so wake detection works next time", () => {
     const d = decide({ isConnected: false, state: connectedState() });
     assert.equal(d.nextState.lastTickAtMs, NOW);
+  });
+});
+
+describe("the silent reachability probe", () => {
+  /** State that has already read absent enough times to be trusted. */
+  function trustedAbsent(overrides: Partial<KeepAliveState> = {}): KeepAliveState {
+    return connectedState({ absentReads: 1, lastAttemptAtMs: NOW - 60_000, ...overrides });
+  }
+
+  it("does not attempt when the iPad has read absent on consecutive ticks", () => {
+    const d = decide({ isConnected: false, state: trustedAbsent(), reachability: "absent" });
+    assert.equal(d.action, "none");
+    assert.equal(d.nextState.absentReads, 2);
+  });
+
+  it("still attempts on a single absent read, because the probe flickers", () => {
+    // The underlying status bit was observed dipping for ~10s with the iPad
+    // connected, so one clear read must never be trusted as proof of absence.
+    const first = decide({ isConnected: false, state: connectedState(), reachability: "absent" });
+    assert.equal(first.action, "reconnect");
+    assert.equal(first.nextState.absentReads, 1);
+  });
+
+  it("reconnects the moment the iPad comes back, without waiting out the backoff", () => {
+    // 9 failed attempts would normally impose the 15-minute heartbeat, but those
+    // failures were earned while the iPad was away — returning clears the slate.
+    const away = trustedAbsent({ absentReads: 40, failedAttempts: 9, lastAttemptAtMs: NOW - 30_000 });
+    const d = decide({ isConnected: false, state: away, reachability: "reachable" });
+    assert.equal(d.action, "reconnect");
+    assert.equal(d.nextState.absentReads, 0);
+  });
+
+  it("fires a sanity attempt even while absent, so a misreading probe cannot disable reconnect", () => {
+    const stale = trustedAbsent({ absentReads: 500, lastAttemptAtMs: NOW - 2 * HOUR });
+    assert.equal(decide({ isConnected: false, state: stale, reachability: "absent" }).action, "reconnect");
+  });
+
+  it("falls back to plain backoff when the probe is unavailable", () => {
+    const d = decide({ isConnected: false, state: connectedState(), reachability: "unknown" });
+    assert.equal(d.action, "reconnect");
+  });
+
+  it("clears the probe bookkeeping once the link is back", () => {
+    const away = trustedAbsent({ absentReads: 30, chasingSinceMs: NOW - HOUR });
+    const d = decide({ isConnected: true, state: away, reachability: "reachable" });
+    assert.equal(d.nextState.absentReads, 0);
+    assert.equal(d.nextState.chasingSinceMs, 0);
+  });
+});
+
+describe("the give-up budget", () => {
+  it("stops attempting once a present-but-failing iPad has been chased too long", () => {
+    const chasing = connectedState({ chasingSinceMs: NOW - 25 * HOUR, lastAttemptAtMs: NOW - HOUR });
+    assert.equal(decide({ isConnected: false, state: chasing, reachability: "reachable" }).action, "none");
+  });
+
+  it("keeps attempting while still inside the budget", () => {
+    const chasing = connectedState({ chasingSinceMs: NOW - 23 * HOUR, lastAttemptAtMs: NOW - HOUR });
+    assert.equal(decide({ isConnected: false, state: chasing, reachability: "reachable" }).action, "reconnect");
+  });
+
+  it("does not burn the budget while the iPad is genuinely away", () => {
+    // A weekend trip must not exhaust the budget, or auto-reconnect would be
+    // dead on return. The clock only runs while the iPad is detected nearby.
+    const away = connectedState({ chasingSinceMs: NOW - 100 * HOUR, absentReads: 5, lastAttemptAtMs: NOW - 60_000 });
+    const d = decide({ isConnected: false, state: away, reachability: "absent" });
+    assert.equal(d.action, "none");
+    assert.equal(d.nextState.chasingSinceMs, 0);
+
+    const back = decide({ isConnected: false, state: d.nextState, reachability: "reachable" });
+    assert.equal(back.nextState.chasingSinceMs, NOW, "clock restarts rather than resuming a spent budget");
+    assert.equal(back.action, "reconnect");
+  });
+
+  it("starts the clock on the first tick of a chase", () => {
+    const d = decide({ isConnected: false, state: connectedState(), reachability: "reachable" });
+    assert.equal(d.nextState.chasingSinceMs, NOW);
+  });
+
+  it("chases forever when the budget is 0", () => {
+    const chasing = connectedState({ chasingSinceMs: NOW - 1_000 * HOUR, lastAttemptAtMs: NOW - HOUR });
+    const d = decide({ isConnected: false, state: chasing, reachability: "reachable", giveUpAfterMs: 0 });
+    assert.equal(d.action, "reconnect");
   });
 });
 
