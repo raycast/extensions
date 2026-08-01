@@ -196,14 +196,24 @@ export interface HistoryVideo {
 
 /**
  * Fetch real watch history from YouTube using Safari's authenticated session.
- * Uses a minimized window so the user doesn't see a tab flash open.
+ * Opens a background tab, moves the window off-screen while fetching, then
+ * restores position and closes the tab.
  */
 export async function fetchRealHistory(): Promise<HistoryVideo[]> {
   const script = `
     tell application "Safari"
-      -- Create a new minimized window so it doesn't steal focus
-      set newWin to make new document with properties {URL:"https://www.youtube.com/feed/history"}
-      set miniaturized of newWin to true
+      if (count of windows) is 0 then
+        make new document
+      end if
+      tell front window
+        set histTab to (make new tab with properties {URL:"https://www.youtube.com/feed/history"})
+      end tell
+      tell application "System Events"
+        tell process "Safari"
+          set originalPos to position of front window
+          set position of front window to {-2000, -2000}
+        end tell
+      end tell
       delay 5
       set jsResult to do JavaScript "
         (function() {
@@ -234,8 +244,13 @@ export async function fetchRealHistory(): Promise<HistoryVideo[]> {
           });
           return JSON.stringify(videos);
         })();
-      " in current tab of newWin
-      close newWin
+      " in histTab
+      close histTab
+      tell application "System Events"
+        tell process "Safari"
+          set position of front window to originalPos
+        end tell
+      end tell
       return jsResult
     end tell
   `;
@@ -245,13 +260,23 @@ export async function fetchRealHistory(): Promise<HistoryVideo[]> {
 
 /**
  * Fetch the continue-watching video URL from YouTube homepage.
- * Uses a minimized window so the user doesn't see a tab flash.
+ * Opens a background tab, moves window off-screen, then restores and closes.
  */
 export async function fetchContinueWatchingUrl(): Promise<string | null> {
   const script = `
     tell application "Safari"
-      set newWin to make new document with properties {URL:"https://www.youtube.com"}
-      set miniaturized of newWin to true
+      if (count of windows) is 0 then
+        make new document
+      end if
+      tell front window
+        set homeTab to (make new tab with properties {URL:"https://www.youtube.com"})
+      end tell
+      tell application "System Events"
+        tell process "Safari"
+          set originalPos to position of front window
+          set position of front window to {-2000, -2000}
+        end tell
+      end tell
       delay 5
       set jsResult to do JavaScript "
         (function() {
@@ -263,13 +288,17 @@ export async function fetchContinueWatchingUrl(): Promise<string | null> {
               if (link && link.href) return link.href;
             }
           }
-          // Fallback: any watch link on the homepage
           var links = document.querySelectorAll('a[href*=watch]');
           if (links.length > 0) return links[0].href;
           return '';
         })();
-      " in current tab of newWin
-      close newWin
+      " in homeTab
+      close homeTab
+      tell application "System Events"
+        tell process "Safari"
+          set position of front window to originalPos
+        end tell
+      end tell
       return jsResult
     end tell
   `;
