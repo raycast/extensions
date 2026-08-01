@@ -291,6 +291,113 @@ function ev(partial: Partial<NostrEvent>): NostrEvent {
   return { id: "", pubkey: "", created_at: 0, kind: 0, tags: [], content: "", sig: "", ...partial };
 }
 
+describe("BuzzClient paging over the shared kind:39000 space", () => {
+  /** A full page of 500 distinct channel events, oldest last. */
+  function page(startId: number, createdFrom: number): NostrEvent[] {
+    return Array.from({ length: 500 }, (_, i) =>
+      ev({
+        id: `e${startId + i}`,
+        kind: 39000,
+        created_at: createdFrom - i,
+        tags: [
+          ["d", `chan-${startId + i}`],
+          ["name", `c${startId + i}`],
+        ],
+      }),
+    );
+  }
+
+  it("keeps paging while the relay returns a full page, so nothing is lost past 500", async () => {
+    // Channels and conversations share kind 39000, so a single capped query
+    // would hand back an arbitrary 500 of the combined set and each caller
+    // would filter that truncated slice.
+    const client = new BuzzClient("https://relay.test", SK);
+    const q = vi
+      .spyOn(client, "query")
+      .mockResolvedValueOnce(page(0, 9000))
+      .mockResolvedValueOnce(page(500, 8000))
+      .mockResolvedValueOnce([ev({ id: "tail", kind: 39000, tags: [["d", "chan-tail"]] })]);
+
+    const channels = await client.listChannels();
+
+    expect(channels).toHaveLength(1001);
+    expect(channels[0].id).toBe("chan-0");
+    expect(channels[channels.length - 1].id).toBe("chan-tail");
+    expect(q).toHaveBeenCalledTimes(3);
+  });
+
+  it("walks backwards with until set to the oldest event seen, inclusive", async () => {
+    const client = new BuzzClient("https://relay.test", SK);
+    const q = vi.spyOn(client, "query").mockResolvedValueOnce(page(0, 9000)).mockResolvedValueOnce([]);
+
+    await client.listChannels();
+
+    // First page carries no cursor; the second resumes at the oldest timestamp
+    // of the first (9000 - 499), inclusive so a run of events sharing a
+    // timestamp cannot fall through the gap between pages.
+    expect(q.mock.calls[0][0]).toEqual([{ kinds: [39000], limit: 500 }]);
+    expect(q.mock.calls[1][0]).toEqual([{ kinds: [39000], limit: 500, until: 8501 }]);
+  });
+
+  it("deduplicates the overlap the inclusive cursor causes", async () => {
+    const client = new BuzzClient("https://relay.test", SK);
+    const first = page(0, 9000);
+    // The relay repeats the boundary event on the next page, as an inclusive
+    // `until` invites it to.
+    const second = [first[first.length - 1], ...page(500, 8000).slice(0, 499)];
+    // The second page is full too, so paging correctly asks for a third.
+    vi.spyOn(client, "query").mockResolvedValueOnce(first).mockResolvedValueOnce(second).mockResolvedValueOnce([]);
+
+    const channels = await client.listChannels();
+    const ids = channels.map((c) => c.id);
+
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ids.filter((id) => id === "chan-499")).toHaveLength(1);
+  });
+
+  it("stops when a full page carries nothing new, so a relay ignoring until cannot spin", async () => {
+    const client = new BuzzClient("https://relay.test", SK);
+    const repeated = page(0, 9000);
+    const q = vi.spyOn(client, "query").mockResolvedValue(repeated);
+
+    const channels = await client.listChannels();
+
+    expect(channels).toHaveLength(500);
+    expect(q).toHaveBeenCalledTimes(2);
+  });
+
+  it("stops at the page cap rather than walking a relay forever", async () => {
+    const client = new BuzzClient("https://relay.test", SK);
+    let n = 0;
+    const q = vi.spyOn(client, "query").mockImplementation(async () => {
+      const events = page(n * 500, 9000 - n * 500);
+      n++;
+      return events;
+    });
+
+    const channels = await client.listChannels();
+
+    expect(q).toHaveBeenCalledTimes(10);
+    expect(channels).toHaveLength(5000);
+  });
+
+  it("pages the conversation list too, since it reads the same shared space", async () => {
+    const me = ownPubkey();
+    const client = new BuzzClient("https://relay.test", SK);
+    const q = vi
+      .spyOn(client, "query")
+      .mockResolvedValueOnce(page(0, 9000))
+      .mockResolvedValueOnce([dmEvent("chan-dm", [me, "aa".repeat(32)])])
+      .mockResolvedValueOnce([]);
+
+    const dms = await client.listDirectMessages();
+
+    // Two paging calls over kind 39000, then the profile lookup for the name.
+    expect(q).toHaveBeenCalledTimes(3);
+    expect(dms.map((d) => d.channelId)).toEqual(["chan-dm"]);
+  });
+});
+
 describe("BuzzClient.listChannels", () => {
   it("queries kind 39000 and maps d/name/about tags", async () => {
     const client = new BuzzClient("https://relay.test", SK);

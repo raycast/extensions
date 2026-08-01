@@ -3,11 +3,6 @@ import { parseSecretKey } from "./nostr";
 import { normalizeRelayUrl } from "./relay-url";
 import { BuzzClient } from "./buzz-client";
 
-interface RawPreferences {
-  relayUrl: string;
-  privateKey: string;
-}
-
 export interface BuzzConfig {
   relayUrl: string;
   secretKey: Uint8Array;
@@ -19,7 +14,11 @@ export interface BuzzConfig {
  * malformed. The private key is never included in any thrown message.
  */
 export function getBuzzConfig(): BuzzConfig {
-  const { relayUrl, privateKey } = getPreferenceValues<RawPreferences>();
+  // `Preferences` is generated from package.json into raycast-env.d.ts, which
+  // both tsconfig projects include. Using it rather than a hand-written shape
+  // means a preference renamed in the manifest fails typecheck here instead of
+  // silently arriving as undefined.
+  const { relayUrl, privateKey } = getPreferenceValues<Preferences>();
   const url = normalizeRelayUrl(relayUrl ?? "");
   if (!/^https?:\/\//i.test(url)) {
     throw new Error("Set your Buzz relay URL (https:// or wss://) in extension preferences");

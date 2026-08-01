@@ -10,6 +10,12 @@ import type { Channel, DirectMessage, Filter, Message, NostrEvent, UserStatus } 
 const OVER_FETCH = 4;
 /** The relay's documented maximum results per filter. */
 const RELAY_MAX_RESULTS = 500;
+/**
+ * How many pages `queryAll` will walk before giving up, bounding both the work
+ * and a relay that ignores `until`. 10 pages covers 5000 kind:39000 events,
+ * far beyond any workspace this extension is likely to meet.
+ */
+const MAX_PAGES = 10;
 
 export class RelayError extends Error {
   constructor(message: string) {
@@ -198,6 +204,51 @@ export class BuzzClient {
     return data as NostrEvent[];
   }
 
+  /**
+   * Every event matching a filter, paging past the relay's per-query ceiling.
+   *
+   * This exists because channels and DM conversations are both kind 39000 and
+   * are told apart only by a `t` tag, which a Nostr filter cannot express as an
+   * exclusion. A single capped query would hand back an arbitrary 500 of the
+   * combined set and each caller would then filter that truncated slice, so a
+   * workspace with more than 500 of them would silently lose channels from
+   * Search Channels and conversations from Send Message, with no way for the
+   * caller to tell a short list from a complete one.
+   *
+   * Paging walks backwards with `until` set to the oldest `created_at` seen,
+   * inclusive rather than one second earlier, so a run of events sharing a
+   * timestamp cannot fall through the gap between pages. The overlap that
+   * causes is absorbed by deduplicating on event id. `MAX_PAGES` bounds the
+   * walk, and a page that contributes nothing new ends it early, so a relay
+   * that ignores `until` cannot spin here.
+   */
+  private async queryAll(filter: Filter): Promise<NostrEvent[]> {
+    const seen = new Set<string>();
+    const all: NostrEvent[] = [];
+    let until: number | undefined;
+
+    for (let page = 0; page < MAX_PAGES; page++) {
+      const paged: Filter = { ...filter, limit: RELAY_MAX_RESULTS };
+      if (until !== undefined) paged.until = until;
+      const events = await this.query([paged]);
+
+      // Only the deliberate overlap between pages is deduplicated. What a
+      // single page contains is the relay's own answer and is passed through
+      // untouched, so a one-page result is exactly what `query` returned.
+      const fresh = page === 0 ? events : events.filter((event) => !seen.has(event.id));
+      all.push(...fresh);
+      for (const event of events) seen.add(event.id);
+
+      // A short page means the relay had nothing more to give.
+      if (events.length < RELAY_MAX_RESULTS) break;
+      // A full page carrying nothing new means paging cannot make progress.
+      if (fresh.length === 0) break;
+      until = Math.min(...events.map((event) => event.created_at));
+    }
+
+    return all;
+  }
+
   async publish(event: NostrEvent): Promise<{ accepted: boolean; message: string }> {
     const data = (await this.post("/events", event)) as {
       accepted?: boolean;
@@ -207,11 +258,7 @@ export class BuzzClient {
   }
 
   async listChannels(): Promise<Channel[]> {
-    // The limit is explicit rather than left to the relay's default: channels
-    // and DM conversations share the kind:39000 space, so both queries compete
-    // for the same documented 500-result ceiling. Asking for it outright makes
-    // the truncation point a stated one instead of whatever the relay picks.
-    const events = await this.query([{ kinds: [39000], limit: RELAY_MAX_RESULTS }]);
+    const events = await this.queryAll({ kinds: [39000] });
     // DM conversations are 39000 events too (tagged ["t","dm"]); they are
     // surfaced by listDirectMessages instead, not the regular channel list.
     // A channel with no `d` tag has no usable identifier: it would collide with
@@ -371,7 +418,7 @@ export class BuzzClient {
    */
   async listDirectMessages(): Promise<DirectMessage[]> {
     const me = getPublicKeyHex(this.secretKey);
-    const events = await this.query([{ kinds: [39000], limit: RELAY_MAX_RESULTS }]);
+    const events = await this.queryAll({ kinds: [39000] });
 
     const conversations = events
       .filter((event) => isDmChannel(event) && hasParticipant(event, me))
