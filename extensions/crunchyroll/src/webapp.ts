@@ -1,4 +1,4 @@
-// Helper to open Crunchyroll in the Safari web app with fullscreen + PiP
+// Helper to open Crunchyroll in the Safari web app with PiP
 
 import { runAppleScript } from "@raycast/utils";
 import { homedir } from "os";
@@ -58,44 +58,46 @@ export async function createWebApp(): Promise<void> {
   `);
 }
 
-/**
- * Open the Crunchyroll web app (resumes last watched page).
- * No fullscreen.
- */
-export async function openCrunchyroll(): Promise<void> {
-  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
-
+async function bringToFront(bundleId: string): Promise<void> {
+  // Use bundle ID to target the specific web app, not the generic "Web App" process name
   await runAppleScript(`
-    do shell script "open -a \\"${escapedPath}\\""
-    delay 2
     tell application "System Events"
-      tell process "Web App"
-        set frontmost to true
-      end tell
+      set procList to (every process whose bundle identifier is "${bundleId}")
+      if (count of procList) > 0 then
+        tell item 1 of procList
+          set frontmost to true
+        end tell
+      end if
     end tell
   `);
 }
 
 /**
+ * Open the Crunchyroll web app (resumes last watched page).
+ */
+export async function openCrunchyroll(): Promise<void> {
+  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+
+  await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  await bringToFront(WEB_APP_BUNDLE_ID);
+}
+
+/**
  * Open the Crunchyroll web app and navigate to a URL.
- * No fullscreen.
  */
 export async function openCrunchyrollURL(url: string): Promise<void> {
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
 
+  await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
+  await new Promise((resolve) => setTimeout(resolve, 2000));
   await runAppleScript(`
-    do shell script "open -a \\"${escapedPath}\\""
-    delay 2
     tell application id "${WEB_APP_BUNDLE_ID}"
       open location "${url}"
     end tell
-    delay 1
-    tell application "System Events"
-      tell process "Web App"
-        set frontmost to true
-      end tell
-    end tell
   `);
+  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await bringToFront(WEB_APP_BUNDLE_ID);
 }
 
 /**
