@@ -35,6 +35,12 @@
       "mode": "no-view"
     },
     {
+      "name": "watching-fullscreen",
+      "title": "Continue Watching in Fullscreen",
+      "description": "Open Crunchyroll web app and enter video fullscreen",
+      "mode": "no-view"
+    },
+    {
       "name": "trending",
       "title": "Browse Trending",
       "description": "Browse popular and trending anime on Crunchyroll",

@@ -185,6 +185,33 @@ export async function openCrunchyrollURL(url: string): Promise<void> {
 }
 
 /**
+ * Trigger video fullscreen by double-clicking the center of the web app window.
+ * Uses cliclick for reliable mouse events (not affected by Vimium etc).
+ */
+export async function enterFullscreen(): Promise<void> {
+  try {
+    await runAppleScript(`
+      tell application "System Events"
+        set procList to (every process whose name is "Web App")
+        if (count of procList) > 0 then
+          tell item 1 of procList
+            set frontmost to true
+            delay 0.5
+            set winPos to position of front window
+            set winSize to size of front window
+            set centerX to (item 1 of winPos) + (item 1 of winSize) / 2 as integer
+            set centerY to (item 2 of winPos) + (item 2 of winSize) / 2 as integer
+            do shell script "cliclick dd:" & centerX & "," & centerY & " du:" & centerX & "," & centerY
+          end tell
+        end if
+      end tell
+    `);
+  } catch {
+    // ignore
+  }
+}
+
+/**
  * Check if the Crunchyroll web app is currently running.
  */
 export async function isCrunchyrollRunning(): Promise<boolean> {
