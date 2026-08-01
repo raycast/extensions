@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mynumber-generator",
+  "version": "0.1.1",
+  "description": "Generate dummy but checksum-valid Mynumbers (Japanese Individual Numbers) for testing.",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "author": "serizawa",
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "lint": "oxlint src",
+    "fmt": "oxfmt",
+    "fmt:check": "oxfmt --check",
+    "knip": "knip",
+    "test": "bun test src",
+    "publish": "npm install --package-lock-only && bunx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.85.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "knip": "^6.31.0",
+    "oxfmt": "^0.61.0",
+    "oxlint": "^1.76.0",
+    "typescript": "^5.6.0"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "generate-mynumber",
+      "title": "Generate Mynumbers",
+      "description": "Generate dummy Mynumbers with a valid check digit and copy or paste them.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfMyNumbersToGenerate",
+          "placeholder": "Number of Mynumbers",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "title": "Default Action",
+      "description": "The default action to perform with the generated Mynumbers.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste to Current Window",
+          "value": "paste"
+        }
+      ]
+    },
+    {
+      "name": "hyphenSeparated",
+      "title": "Format",
+      "label": "Insert hyphens (XXXX-XXXX-XXXX)",
+      "description": "Format the generated Mynumbers with hyphens every 4 digits.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "defaultNumberOfMyNumbers",
+      "title": "Default Number of Mynumbers",
+      "description": "The number of Mynumbers to generate when no argument is given.",
+      "type": "textfield",
+      "required": false,
+      "default": "1"
+    }
+  ],
+  "title": "Mynumber Generator"
+}
