@@ -40,8 +40,17 @@ export async function isWebAppInstalled(): Promise<boolean> {
 
 export async function createWebApp(): Promise<void> {
   await runAppleScript(`
+    -- Launch Safari if not running
+    tell application "System Events"
+      if not (exists process "Safari") then
+        do shell script "open -a Safari"
+        delay 3
+      end if
+    end tell
+
     tell application "Safari"
       activate
+      delay 1
       if (count of windows) is 0 then
         make new document with properties {URL:"https://www.youtube.com"}
       else
@@ -50,10 +59,13 @@ export async function createWebApp(): Promise<void> {
         end tell
       end if
     end tell
-    delay 4
+
+    delay 5
+
     tell application "System Events"
       tell process "Safari"
         click menu item "Add to Dock…" of menu "File" of menu bar item "File" of menu bar 1
+      end tell
     end tell
   `);
 }
