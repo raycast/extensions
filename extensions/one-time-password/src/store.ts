@@ -56,6 +56,11 @@ export async function removeAccount(id: string) {
   accounts.splice(index, 1);
 
   await save(accounts);
+
+  const lastUsedId = await LocalStorage.getItem<string>(LAST_USED_ACCOUNT_KEY);
+  if (lastUsedId === id) {
+    await LocalStorage.removeItem(LAST_USED_ACCOUNT_KEY);
+  }
 }
 
 export async function updateAccount(account: Account) {
@@ -99,10 +104,11 @@ export async function getLastUsedAccount() {
   if (accounts.length === 0) return undefined;
 
   const lastUsedId = await LocalStorage.getItem<string>(LAST_USED_ACCOUNT_KEY);
-  if (lastUsedId) {
-    const account = accounts.find((acc) => acc.id === lastUsedId);
-    if (account) return account;
-  }
+  if (!lastUsedId) return undefined;
 
-  return accounts[0];
+  const account = accounts.find((acc) => acc.id === lastUsedId);
+  if (account) return account;
+
+  await LocalStorage.removeItem(LAST_USED_ACCOUNT_KEY);
+  return undefined;
 }

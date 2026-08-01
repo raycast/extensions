@@ -71,7 +71,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
+    "@raycast/api": "^1.104.24",
     "@raycast/utils": "^2.2.0",
     "hi-base32": "^0.5.1",
     "jimp": "^0.22.7",
@@ -81,7 +81,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "^24.0.13",
     "@types/react": "^19.1.8",
     "eslint": "^9.31.0",

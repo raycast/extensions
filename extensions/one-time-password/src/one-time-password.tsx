@@ -14,6 +14,7 @@ import {
   confirmAlert,
   Color,
   environment,
+  Keyboard,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
@@ -166,13 +167,16 @@ export default () => {
 
   const globalActions = (
     <ActionPanel.Section>
-      <ActionPanel.Submenu title="Create New" icon={Icon.Plus} shortcut={{ modifiers: ['cmd'], key: 'n' }}>
-        <Action title="Scan a Qr Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
+      <ActionPanel.Submenu title="Create New" icon={Icon.Plus} shortcut={Keyboard.Shortcut.Common.New}>
+        <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
         <Action.Push title="Enter a Setup Key" icon={Icon.Keyboard} target={<SetupKey onSubmit={handleFormSubmit} />} />
         <Action
-          title="Select a Qr Code"
+          title="Select a QR Code"
           icon={Icon.Camera}
-          shortcut={{ modifiers: ['cmd'], key: 'i' }}
+          shortcut={{
+            macOS: { modifiers: ['cmd'], key: 'i' },
+            windows: { modifiers: ['ctrl'], key: 'i' },
+          }}
           onAction={() => scanQRCode('select')}
         />
       </ActionPanel.Submenu>
@@ -236,7 +240,10 @@ export default () => {
                       await store.moveAccount(account.id, MoveDir.UP);
                       await loadAccounts();
                     }}
-                    shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowUp' }}
+                    shortcut={{
+                      macOS: { modifiers: ['cmd', 'opt'], key: 'arrowUp' },
+                      windows: { modifiers: ['ctrl', 'alt'], key: 'arrowUp' },
+                    }}
                   />
                 )}
                 {index < accounts.length - 1 && (
@@ -247,12 +254,15 @@ export default () => {
                       await store.moveAccount(account.id, MoveDir.DOWN);
                       await loadAccounts();
                     }}
-                    shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowDown' }}
+                    shortcut={{
+                      macOS: { modifiers: ['cmd', 'opt'], key: 'arrowDown' },
+                      windows: { modifiers: ['ctrl', 'alt'], key: 'arrowDown' },
+                    }}
                   />
                 )}
                 <Action.Push
                   title="Edit Account"
-                  shortcut={{ modifiers: ['cmd'], key: 'e' }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                   icon={Icon.Pencil}
                   target={
                     <SetupKey id={account.id} name={account.name} secret={account.secret} onSubmit={handleFormSubmit} />
@@ -262,7 +272,10 @@ export default () => {
                   title="Remove Account"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
+                  shortcut={{
+                    macOS: { modifiers: ['cmd'], key: 'backspace' },
+                    windows: { modifiers: ['ctrl'], key: 'backspace' },
+                  }}
                   onAction={() => handleRemoveAccount(account)}
                 />
                 {globalActions}
@@ -295,7 +308,7 @@ export default () => {
                   target={<SetupKey onSubmit={handleFormSubmit} />}
                 />
                 <Action
-                  title="Scan a Qr Code"
+                  title="Scan a QR Code"
                   icon={Icon.Camera}
                   onAction={() => scanQRCode('scan')}
                   shortcut={{
@@ -304,12 +317,9 @@ export default () => {
                   }}
                 />
                 <Action
-                  title="Select a Qr Code"
+                  title="Select a QR Code"
                   icon={Icon.Camera}
-                  shortcut={{
-                    macOS: { modifiers: ['cmd'], key: 's' },
-                    windows: { modifiers: ['ctrl'], key: 's' },
-                  }}
+                  shortcut={Keyboard.Shortcut.Common.Save}
                   onAction={() => scanQRCode('select')}
                 />
               </ActionPanel>
