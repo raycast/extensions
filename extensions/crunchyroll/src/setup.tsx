@@ -7,63 +7,119 @@ import {
   Toast,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import {
-  isWebAppInstalled,
-  createWebApp,
-  isAutoPiPInstalled,
-  openCrunchyroll,
-} from "./webapp";
+import { isWebAppInstalled, isAutoPiPInstalled, createWebApp } from "./webapp";
+
+type Status =
+  "checking" | "not-installed" | "installing" | "installed" | "failed";
 
 export default function SetupCommand() {
-  const [webAppInstalled, setWebAppInstalled] = useState<boolean | null>(null);
-  const [autoPiPInstalled, setAutoPiPInstalled] = useState<boolean | null>(
-    null,
-  );
+  const [webAppStatus, setWebAppStatus] = useState<Status>("checking");
+  const [autoPiPStatus, setAutoPiPStatus] = useState<Status>("checking");
+
+  async function checkAndInstall() {
+    // Check web app
+    const webAppInstalled = await isWebAppInstalled();
+    if (webAppInstalled) {
+      setWebAppStatus("installed");
+    } else {
+      setWebAppStatus("installing");
+      try {
+        await createWebApp();
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+        const nowInstalled = await isWebAppInstalled();
+        setWebAppStatus(nowInstalled ? "installed" : "failed");
+        if (nowInstalled) {
+          await showToast({
+            style: Toast.Style.Success,
+            title: "Crunchyroll web app installed",
+          });
+        } else {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Web app installation failed",
+            message: "Click 'Add to Dock' in the Safari dialog",
+          });
+        }
+      } catch {
+        setWebAppStatus("failed");
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Web app installation failed",
+          message: "Make sure Safari is running and try again",
+        });
+      }
+    }
+
+    // Check AutoPiP
+    const autoPiPInstalled = await isAutoPiPInstalled();
+    setAutoPiPStatus(autoPiPInstalled ? "installed" : "not-installed");
+  }
 
   useEffect(() => {
-    async function check() {
-      const webApp = await isWebAppInstalled();
-      const autoPiP = await isAutoPiPInstalled();
-      setWebAppInstalled(webApp);
-      setAutoPiPInstalled(autoPiP);
-    }
-    check();
+    checkAndInstall();
   }, []);
 
-  const allReady = webAppInstalled === true && autoPiPInstalled === true;
+  function statusIcon(status: Status): string {
+    switch (status) {
+      case "checking":
+        return "⏳";
+      case "not-installed":
+        return "❌";
+      case "installing":
+        return "🔄";
+      case "installed":
+        return "✅";
+      case "failed":
+        return "⚠️";
+    }
+  }
+
+  function statusText(status: Status): string {
+    switch (status) {
+      case "checking":
+        return "Checking...";
+      case "not-installed":
+        return "Not installed";
+      case "installing":
+        return "Installing...";
+      case "installed":
+        return "Installed";
+      case "failed":
+        return "Failed — retry needed";
+    }
+  }
 
   const markdown = `
 # Crunchyroll Setup
 
-## Status
+| Component | Status |
+|-----------|--------|
+| Safari Web App | ${statusIcon(webAppStatus)} ${statusText(webAppStatus)} |
+| AutoPiP Extension | ${statusIcon(autoPiPStatus)} ${statusText(autoPiPStatus)} |
 
-${webAppInstalled === null ? "Checking..." : webAppInstalled ? "✅ **Crunchyroll Web App** — Installed" : "❌ **Crunchyroll Web App** — Not installed"}
+${
+  webAppStatus === "installing"
+    ? "### Installing Web App\n\nSafari is opening and adding Crunchyroll to your Dock. **Click 'Add'** when the dialog appears."
+    : ""
+}
 
-${autoPiPInstalled === null ? "Checking..." : autoPiPInstalled ? "✅ **AutoPiP Extension** — Installed" : "❌ **AutoPiP Extension** — Not installed"}
+${
+  webAppStatus === "failed"
+    ? "### Installation Failed\n\nClick **Retry Web App Install** below. Make sure Safari is running and click 'Add' in the dialog."
+    : ""
+}
 
----
+${
+  webAppStatus === "installed" && autoPiPStatus === "not-installed"
+    ? "### Optional: AutoPiP\n\nAutoPiP enables automatic Picture-in-Picture for Crunchyroll videos. Install it from the App Store, then enable it in Safari → Settings → Extensions."
+    : ""
+}
 
-## What This Extension Does
-
-1. **Search anime** directly from Raycast — no browser needed
-2. **Open Crunchyroll** in a fullscreen Safari web app (standalone window, not the full browser)
-3. **Auto Picture-in-Picture** — when you swipe to another workspace, the video automatically pops out into a floating PiP window
-4. **Remembers your progress** — the web app resumes your last watched episode
-
-## Setup Steps
-
-### 1. Crunchyroll Web App
-${webAppInstalled ? "Already installed! 🎉" : "Click **Install Web App** below. This opens Crunchyroll in Safari and creates a standalone web app (Add to Dock)."}
-
-### 2. AutoPiP Safari Extension
-${autoPiPInstalled ? "Already installed! 🎉" : "Download AutoPiP from [GitHub](https://github.com/vordenken/AutoPiP/releases), install it, then enable it in Safari → Settings → Extensions."}
-
-### 3. Grant Accessibility Permission
-When you first use **Open Crunchyroll**, macOS may prompt you to grant Accessibility permission to the script. Approve it in **System Settings → Privacy & Security → Accessibility**.
-
----
-
-${allReady ? "## ✅ All Ready!\n\nEverything is set up. Use **Search Anime** or **Open Crunchyroll** from Raycast." : "## ⏳ Setup Incomplete\n\nComplete the steps above to get the full experience."}
+${
+  webAppStatus === "installed" && autoPiPStatus === "installed"
+    ? "### All Set! 🎉\n\nEverything is configured. Use any Crunchyroll command in Raycast:\n- **Search Anime** — Search Crunchyroll\n- **Continue Watching** — Opens the web app\n- **Browse Trending** — See what's popular\n- **Browse History** — Quick access to recent anime"
+    : ""
+}
 `;
 
   return (
@@ -71,44 +127,43 @@ ${allReady ? "## ✅ All Ready!\n\nEverything is set up. Use **Search Anime** or
       markdown={markdown}
       actions={
         <ActionPanel>
-          {!webAppInstalled && (
+          {webAppStatus === "failed" || webAppStatus === "not-installed" ? (
             <Action
-              title="Install Web App"
-              icon={Icon.Download}
+              title="Retry Web App Install"
+              icon={Icon.ArrowClockwise}
               onAction={async () => {
-                const toast = await showToast({
-                  style: Toast.Style.Animated,
-                  title: "Creating web app...",
-                  message: "Opening Crunchyroll in Safari",
-                });
+                setWebAppStatus("installing");
                 try {
                   await createWebApp();
-                  toast.style = Toast.Style.Success;
-                  toast.title = "Web app created!";
-                  toast.message = "Check your Applications folder";
-                  setWebAppInstalled(true);
+                  await new Promise((resolve) => setTimeout(resolve, 3000));
+                  const nowInstalled = await isWebAppInstalled();
+                  setWebAppStatus(nowInstalled ? "installed" : "failed");
                 } catch {
-                  toast.style = Toast.Style.Failure;
-                  toast.title = "Failed to create web app";
-                  toast.message = "Make sure Safari is not in fullscreen";
+                  setWebAppStatus("failed");
                 }
               }}
             />
-          )}
+          ) : null}
           <Action
-            title="Open Crunchyroll"
-            icon={Icon.Play}
-            onAction={() => openCrunchyroll()}
+            title="Recheck Status"
+            icon={Icon.ArrowClockwise}
+            onAction={() => {
+              setWebAppStatus("checking");
+              setAutoPiPStatus("checking");
+              checkAndInstall();
+            }}
           />
-          {allReady && (
-            <Action
-              title="Search Anime"
-              icon={Icon.MagnifyingGlass}
-              onAction={() => {
-                // The user can just search from Raycast root
-              }}
+          {autoPiPStatus === "not-installed" ? (
+            <Action.OpenInBrowser
+              title="Get AutoPiP from App Store"
+              icon={Icon.AppWindow}
+              url="https://apps.apple.com/app/autopip"
             />
-          )}
+          ) : null}
+          <Action.OpenInBrowser
+            title="Open Crunchyroll"
+            url="https://www.crunchyroll.com"
+          />
         </ActionPanel>
       }
     />

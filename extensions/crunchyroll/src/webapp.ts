@@ -58,8 +58,11 @@ export async function createWebApp(): Promise<void> {
   `);
 }
 
+async function openInBrowser(url: string): Promise<void> {
+  await runAppleScript(`do shell script "open \\"${url}\\""`);
+}
+
 async function bringToFront(bundleId: string): Promise<void> {
-  // Use bundle ID to target the specific web app, not the generic "Web App" process name
   await runAppleScript(`
     tell application "System Events"
       set procList to (every process whose bundle identifier is "${bundleId}")
@@ -74,30 +77,50 @@ async function bringToFront(bundleId: string): Promise<void> {
 
 /**
  * Open the Crunchyroll web app (resumes last watched page).
+ * Falls back to browser if web app is not installed.
  */
 export async function openCrunchyroll(): Promise<void> {
-  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+  const installed = await isWebAppInstalled();
+  if (!installed) {
+    await openInBrowser("https://www.crunchyroll.com");
+    return;
+  }
 
-  await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  await bringToFront(WEB_APP_BUNDLE_ID);
+  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+  try {
+    await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await bringToFront(WEB_APP_BUNDLE_ID);
+  } catch {
+    await openInBrowser("https://www.crunchyroll.com");
+  }
 }
 
 /**
  * Open the Crunchyroll web app and navigate to a URL.
+ * Falls back to browser if web app is not installed.
  */
 export async function openCrunchyrollURL(url: string): Promise<void> {
-  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+  const installed = await isWebAppInstalled();
+  if (!installed) {
+    await openInBrowser(url);
+    return;
+  }
 
-  await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
-  await new Promise((resolve) => setTimeout(resolve, 2000));
-  await runAppleScript(`
-    tell application id "${WEB_APP_BUNDLE_ID}"
-      open location "${url}"
-    end tell
-  `);
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  await bringToFront(WEB_APP_BUNDLE_ID);
+  const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+  try {
+    await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await runAppleScript(`
+      tell application id "${WEB_APP_BUNDLE_ID}"
+        open location "${url}"
+      end tell
+    `);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await bringToFront(WEB_APP_BUNDLE_ID);
+  } catch {
+    await openInBrowser(url);
+  }
 }
 
 /**
