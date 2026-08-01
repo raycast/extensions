@@ -158,12 +158,7 @@ export interface EnginePreflightResult {
 }
 
 const MISSING_ENGINE_MARKER = "not installed";
-// A corrupt binary is not repaired by a plain `kesha install`: that hits the
-// cached-engine path and only re-trusts it. `--no-cache` forces the re-download,
-// except on a read-only engine dir (Nix store), where it is deliberately a no-op
-// (`cacheValid = versionMatches && (!noCache || !canWriteEngineDir)`). The probe
-// cannot tell the two installs apart, so the hint names both rather than
-// promising a fix that would silently skip.
+// Plain `kesha install` only re-trusts a cached binary; `--no-cache` re-downloads, except on a read-only (Nix) dir.
 const REPAIR_HINT =
   "Run `kesha install --no-cache` to re-download the engine. On a read-only (Nix) install, repair it through your package manager instead.";
 const CONTRACT_HINT =
@@ -176,23 +171,28 @@ function runKesha(spawn: KeshaSpawn, args: string[], deps: ProbeDeps) {
   });
 }
 
-function parseStatusObject(stdout: string): Record<string, unknown> | null {
+type StatusStdout =
+  | { kind: "payload"; value: Record<string, unknown> }
+  | { kind: "contract" }
+  | { kind: "prose" };
+
+// An older CLI prints human text, never JSON — so a non-object is a broken contract, not a fallback.
+function classifyStatusStdout(stdout: string): StatusStdout {
   const trimmed = stdout.trim();
-  if (!trimmed.startsWith("{")) return null;
+  if (!trimmed) return { kind: "prose" };
+  let parsed: unknown;
   try {
-    const parsed: unknown = JSON.parse(trimmed);
-    return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-      ? (parsed as Record<string, unknown>)
-      : null;
+    parsed = JSON.parse(trimmed);
   } catch {
-    return null;
+    return { kind: "prose" };
   }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { kind: "contract" };
+  }
+  return { kind: "payload", value: parsed as Record<string, unknown> };
 }
 
-// Anchored to the Binary line rather than the whole output: "not installed" is
-// `formatStatusLine`'s default missing label, so a future missing line would
-// otherwise read as the engine being absent. No Binary line means this is not
-// status output at all — garbage fails open rather than matching loose text.
+// Anchored to the Binary line: "not installed" is the default missing label, so other lines would false-positive.
 function proseSaysEngineMissing(stdout: string): boolean {
   const binaryLine = stdout
     .split("\n")
@@ -200,9 +200,7 @@ function proseSaysEngineMissing(stdout: string): boolean {
   return binaryLine !== undefined && binaryLine.includes(MISSING_ENGINE_MARKER);
 }
 
-// The CLI validates this shape too, but the extension ships through the Raycast
-// Store against whatever CLI version is on the machine — including ones that
-// predate that validation and forward `{}` or `[]` as capabilities.
+// Re-checked here because the Store extension meets CLI versions predating the CLI-side validation.
 function capabilitiesAreReadable(capabilities: unknown): boolean {
   return (
     typeof capabilities === "object" &&
@@ -229,8 +227,7 @@ function readStructuredStatus(
     const hint = typeof payload.hint === "string" ? payload.hint.trim() : "";
     return { ok: false, reason: "missing", hint: hint || undefined };
   }
-  // Present is not usable: a binary that cannot report its capabilities would
-  // fail during transcription, after the recording is already gone (#647).
+  // Present is not usable: it would fail during transcription, after the recording is gone (#647).
   if (!capabilitiesAreReadable(capabilities)) {
     return { ok: false, reason: "unusable", hint: REPAIR_HINT };
   }
@@ -258,8 +255,12 @@ export async function probeEngineAvailability(
       ["status", "--json"],
       deps,
     );
-    const payload = parseStatusObject(stdout);
-    if (payload) return readStructuredStatus(payload);
+    const classified = classifyStatusStdout(stdout);
+    if (classified.kind === "payload")
+      return readStructuredStatus(classified.value);
+    if (classified.kind === "contract") {
+      return { ok: false, reason: "contract", hint: CONTRACT_HINT };
+    }
     if (proseSaysEngineMissing(stdout)) {
       return { ok: false, reason: "missing", hint: stderr.trim() || undefined };
     }

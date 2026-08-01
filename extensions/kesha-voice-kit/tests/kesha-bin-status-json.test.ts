@@ -2,8 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { probeEngineAvailability } from "../src/lib/kesha-bin";
 import type { ProbeDeps } from "../src/lib/kesha-bin";
 
-// One case per row of the probe matrix in
-// openspec/changes/status-json-output/design.md.
+// One case per row of the probe matrix in the status-json-output design.
 describe("probeEngineAvailability — structured status (#647)", () => {
   const kesha = { command: "/opt/homebrew/bin/kesha", prefixArgs: [] };
 
@@ -63,8 +62,7 @@ describe("probeEngineAvailability — structured status (#647)", () => {
     expect(result.ok).toBe(false);
     expect(result.reason).toBe("unusable");
     expect(result.hint).toContain("--no-cache");
-    // A read-only (Nix) install ignores --no-cache for the engine, so the hint
-    // must not promise a fix those users cannot get.
+    // A read-only (Nix) install ignores --no-cache, so the hint must not promise that fix alone.
     expect(result.hint).toContain("read-only");
   });
 
@@ -133,9 +131,12 @@ describe("probeEngineAvailability — structured status (#647)", () => {
     }
   });
 
-  it("fails open on a JSON array", async () => {
-    expect(await probeEngineAvailability(kesha, { execFile: textStdout("[1,2,3]") })).toEqual({
-      ok: true,
-    });
+  it("fails closed on valid JSON that is not an object", async () => {
+    // As prose this would miss the marker and report a missing engine as healthy.
+    for (const stdout of ["[1,2,3]", "42", '"ok"', "null", "true"]) {
+      const result = await probeEngineAvailability(kesha, { execFile: textStdout(stdout) });
+      expect(result.ok).toBe(false);
+      expect(result.reason).toBe("contract");
+    }
   });
 });

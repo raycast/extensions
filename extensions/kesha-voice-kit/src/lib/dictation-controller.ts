@@ -248,9 +248,7 @@ export function startDictationSession(
   }
 }
 
-// Each reason has its own remedy, so the headline tracks it: re-downloading a
-// broken engine, finishing a first install, and upgrading a version-skewed CLI
-// are three different instructions (#647).
+// Each reason has a different remedy, so the headline tracks it, not just the hint (#647).
 function preflightMessage(reason: EnginePreflightResult["reason"]): string {
   switch (reason) {
     case "unusable":
