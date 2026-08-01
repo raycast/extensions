@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add JobYap MCP Server] - {PR_MERGE_DATE}
+
+Add JobYap to the official registry: search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server via mcp-remote; no auth required.
+
 ## [Add Webhound MCP Server] - 2026-07-29
 
 Add Webhound to the official registry for private, budgeted reports and datasets. The remote Streamable HTTP MCP server uses OAuth so each connection authenticates to that user's own Webhound account.
