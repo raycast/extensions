@@ -1,5 +1,11 @@
 # Kesha Voice Kit Changelog
 
+## [Sturdier setup detection] - {PR_MERGE_DATE}
+
+- Detect whether the engine is installed from the CLI's machine-readable status output instead of matching its wording, so a reworded CLI message can no longer be mistaken for a broken install. Older CLIs keep working through the previous check.
+- Refuse to start a session when the engine is installed but cannot run, instead of recording audio that could never be transcribed, and say how to repair it.
+- Tell a CLI/extension version mismatch apart from a broken engine, so the suggested fix matches the actual problem.
+
 ## [Setup guidance and faster failure feedback] - 2026-07-27
 
 - Rewrite the "kesha CLI not found" message as numbered setup steps, leading with Homebrew so the guidance works without knowing about bun, and include the required `kesha install` step.
