@@ -267,7 +267,15 @@ export async function brewFetchInstalled(useCache: boolean, cancel?: AbortSignal
   return mapped;
 }
 
-async function brewFetchInstallableResults(
+/**
+ * Fetch all installed packages with full metadata, in their serialisable form.
+ *
+ * Prefer this over {@link brewFetchInstalled} when the result is persisted:
+ * `InstalledMap` holds `Map`s, and `JSON.stringify(new Map())` is `{}`, so a
+ * mapped value does not survive a cache round-trip. Rebuild the lookup
+ * structures on read with {@link brewMapInstalled}.
+ */
+export async function brewFetchInstallableResults(
   useCache: boolean,
   cancel?: AbortSignal,
 ): Promise<InstallableResults | undefined> {
@@ -362,7 +370,28 @@ async function brewFetchInstallableResults(
   }
 }
 
-function brewMapInstalled(installed?: InstallableResults): InstalledMap | undefined {
+/**
+ * Narrow an untrusted value to {@link InstallableResults}.
+ *
+ * Values read back out of a cache are not guaranteed to be what was written:
+ * an entry persisted by an earlier version of the extension holds the mapped
+ * form, whose `Map`s serialised to `{}`. Such an entry must be rejected rather
+ * than rendered as an empty package list.
+ */
+export function asInstallableResults(value: unknown): InstallableResults | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+
+  const { formulae, casks } = value as Partial<InstallableResults>;
+  if (!Array.isArray(formulae) || !Array.isArray(casks)) {
+    return undefined;
+  }
+
+  return { formulae, casks };
+}
+
+export function brewMapInstalled(installed?: InstallableResults): InstalledMap | undefined {
   if (!installed) {
     return undefined;
   }
