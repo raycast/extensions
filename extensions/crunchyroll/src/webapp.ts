@@ -62,9 +62,38 @@ async function openInBrowser(url: string): Promise<void> {
 
 /**
  * Safari web apps share one process called "Web App".
- * Quit it before opening a different web app to avoid conflicts.
+ * Check which web app is currently running by its file path.
+ * Returns the path of the running web app, or null if none is running.
  */
-async function quitExistingWebApp(): Promise<void> {
+async function getRunningWebAppPath(): Promise<string | null> {
+  try {
+    const result = await runAppleScript(`
+      tell application "System Events"
+        set procList to (every process whose name is "Web App")
+        if (count of procList) > 0 then
+          set p to item 1 of procList
+          return (file of p) as string
+        else
+          return ""
+        end if
+      end tell
+    `);
+    if (!result) return null;
+    // Convert "file Macintosh HD:Users:...:Crunchyroll Web.app:" to path
+    const path = result
+      .replace(/^file Macintosh HD:/, "/")
+      .replace(/:$/, "")
+      .replace(/:/g, "/");
+    return path;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Quit the running "Web App" process if it exists.
+ */
+async function quitWebApp(): Promise<void> {
   try {
     await runAppleScript(`
       tell application "System Events"
@@ -86,7 +115,8 @@ async function quitExistingWebApp(): Promise<void> {
 
 /**
  * Open the Crunchyroll web app.
- * Quits any existing web app (e.g. YouTube) first to avoid conflicts.
+ * If Crunchyroll web app is already running, just bring it to front.
+ * If a different web app (e.g. YouTube) is running, quit it first.
  * Falls back to browser if web app is not installed.
  */
 export async function openCrunchyroll(): Promise<void> {
@@ -98,7 +128,18 @@ export async function openCrunchyroll(): Promise<void> {
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
   try {
-    await quitExistingWebApp();
+    const runningPath = await getRunningWebAppPath();
+    if (runningPath && runningPath.includes("Crunchyroll")) {
+      // Same web app already running — just bring to front and navigate
+      await runAppleScript(
+        `do shell script "open -a \\"${escapedPath}\\" \\"https://www.crunchyroll.com\\""`,
+      );
+      return;
+    }
+    // Different web app or none running — quit if needed, then open
+    if (runningPath) {
+      await quitWebApp();
+    }
     await runAppleScript(
       `do shell script "open -a \\"${escapedPath}\\" \\"https://www.crunchyroll.com\\""`,
     );
@@ -110,7 +151,9 @@ export async function openCrunchyroll(): Promise<void> {
 
 /**
  * Open the Crunchyroll web app and navigate to a URL.
- * Quits any existing web app first. Falls back to browser.
+ * If Crunchyroll web app is already running, just navigate without restarting.
+ * If a different web app is running, quit it first.
+ * Falls back to browser if web app is not installed.
  */
 export async function openCrunchyrollURL(url: string): Promise<void> {
   const installed = await isWebAppInstalled();
@@ -121,7 +164,18 @@ export async function openCrunchyrollURL(url: string): Promise<void> {
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
   try {
-    await quitExistingWebApp();
+    const runningPath = await getRunningWebAppPath();
+    if (runningPath && runningPath.includes("Crunchyroll")) {
+      // Same web app already running — just navigate
+      await runAppleScript(
+        `do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""`,
+      );
+      return;
+    }
+    // Different web app or none running — quit if needed, then open
+    if (runningPath) {
+      await quitWebApp();
+    }
     await runAppleScript(
       `do shell script "open -a \\"${escapedPath}\\" \\"${url}\\""`,
     );
