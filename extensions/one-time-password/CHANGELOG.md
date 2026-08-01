@@ -1,10 +1,10 @@
 # One Time Password Changelog
 
-## [Paste Recent Otp] - {PR_MERGE_DATE}
+## [Paste Recent OTP] - {PR_MERGE_DATE}
 
 ### Added
 
-- Added "Paste Recent Otp" no-view command that pastes the OTP from the most recently used account into the active app
+- Added "Paste Recent OTP" no-view command that pastes the OTP from the most recently used account into the active app
 
 ## [Windows Support] - 2025-08-27
 
