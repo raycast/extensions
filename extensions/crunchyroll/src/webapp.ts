@@ -4,8 +4,26 @@ import { runAppleScript } from "@raycast/utils";
 import { homedir } from "os";
 
 const WEB_APP_PATH = `${homedir()}/Applications/Crunchyroll Web.app`;
-const WEB_APP_BUNDLE_ID =
-  "com.apple.Safari.WebApp.ACE072C2-02DF-4B26-AFE4-A51ABE7DF472";
+let webAppBundleId = "";
+
+async function detectWebAppBundleId(): Promise<string> {
+  if (webAppBundleId) return webAppBundleId;
+  try {
+    const result = await runAppleScript(`
+      tell application "System Events"
+        try
+          set bundleId to bundle identifier of file "${WEB_APP_PATH}"
+          return bundleId
+        end try
+      end tell
+      return ""
+    `);
+    webAppBundleId = result;
+    return result;
+  } catch {
+    return "";
+  }
+}
 
 /**
  * Check if the Crunchyroll Safari web app exists
@@ -100,10 +118,13 @@ export async function openCrunchyroll(): Promise<void> {
   }
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+  const bundleId = await detectWebAppBundleId();
   try {
     await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    await bringToFront(WEB_APP_BUNDLE_ID, true);
+    if (bundleId) {
+      await bringToFront(bundleId, true);
+    }
   } catch {
     await openInBrowser("https://www.crunchyroll.com");
   }
@@ -121,16 +142,19 @@ export async function openCrunchyrollURL(url: string): Promise<void> {
   }
 
   const escapedPath = WEB_APP_PATH.replace(/"/g, '\\"');
+  const bundleId = await detectWebAppBundleId();
   try {
     await runAppleScript(`do shell script "open -a \\"${escapedPath}\\""`);
     await new Promise((resolve) => setTimeout(resolve, 2000));
-    await runAppleScript(`
-      tell application id "${WEB_APP_BUNDLE_ID}"
-        open location "${url}"
-      end tell
-    `);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    await bringToFront(WEB_APP_BUNDLE_ID);
+    if (bundleId) {
+      await runAppleScript(`
+        tell application id "${bundleId}"
+          open location "${url}"
+        end tell
+      `);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await bringToFront(bundleId);
+    }
   } catch {
     await openInBrowser(url);
   }
