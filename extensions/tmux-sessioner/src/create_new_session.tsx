@@ -25,6 +25,7 @@ interface Preferences {
   defaultDirectory?: string;
   defaultStartupCommand?: string;
   createFolderByDefault?: boolean;
+  openAfterCreate?: boolean;
 }
 
 export default function CreateNewTmuxSession(props: LaunchProps<{ arguments: { sessionName?: string } }>) {
@@ -173,12 +174,24 @@ export default function CreateNewTmuxSession(props: LaunchProps<{ arguments: { s
       navigationTitle="Create New Tmux Session"
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create New Session" onSubmit={(values) => handleSubmit(values, false)} />
-          {openTarget && (
-            <Action.SubmitForm
-              title={`Create and Open in New ${openTarget === "tab" ? "Tab" : "Window"}`}
-              onSubmit={(values) => handleSubmit(values, true)}
-            />
+          {preferences.openAfterCreate && openTarget ? (
+            <>
+              <Action.SubmitForm
+                title={`Create and Open in New ${openTarget === "tab" ? "Tab" : "Window"}`}
+                onSubmit={(values) => handleSubmit(values, true)}
+              />
+              <Action.SubmitForm title="Create New Session" onSubmit={(values) => handleSubmit(values, false)} />
+            </>
+          ) : (
+            <>
+              <Action.SubmitForm title="Create New Session" onSubmit={(values) => handleSubmit(values, false)} />
+              {openTarget && (
+                <Action.SubmitForm
+                  title={`Create and Open in New ${openTarget === "tab" ? "Tab" : "Window"}`}
+                  onSubmit={(values) => handleSubmit(values, true)}
+                />
+              )}
+            </>
           )}
         </ActionPanel>
       }

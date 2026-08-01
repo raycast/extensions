@@ -24,6 +24,7 @@ This is a extension for raycast to manage tmux sessions.
 - **Create New Folder**: creates `<New Session Default Directory>/<name>` and starts the session inside it. Enable it per-launch in the form, or permanently with the *Create New Folder by Default* preference.
 - **Startup Command**: any shell line typed into the fresh session (so the session survives when the command exits). Set a default once in the *New Session Startup Command* preference — e.g. `npm run dev`, `claude`, or compose steps like `git init && claude` — and tweak it per-launch when needed.
 - The command accepts the session name as an argument, so `Create New Session myproject` from the Raycast root search prefills everything: press `⌘⏎` and you get a new terminal tab, in a new folder, with your startup command already running.
+- With the *Open in Terminal After Create* preference enabled, opening the session in a new tab/window becomes the default submit action — plain `⏎` does it all.
 
 ## How to use
 

@@ -75,6 +75,15 @@
       "type": "checkbox",
       "required": false,
       "default": false
+    },
+    {
+      "name": "openAfterCreate",
+      "description": "Make opening the new session in a terminal tab/window the default submit action of Create New Session",
+      "label": "Open in Terminal After Create",
+      "title": "After Creating a Session",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
