@@ -139,38 +139,44 @@ export async function openSessionInTerminal(session: string, target: OpenTarget,
   const toast = await showToast({ style: Toast.Style.Animated, title: "" });
   setLoading(true);
 
-  exec(`tmux has-session -t ${shq("=" + session)}`, { env }, async (error, stdout, stderr) => {
-    if (error || stderr) {
-      console.error(`exec error: ${error || stderr}`);
-
-      toast.style = Toast.Style.Failure;
-      toast.title = `Session ${session} no longer exists 😢`;
-      toast.message = error ? error.message : stderr;
-      setLoading(false);
-
-      return;
-    }
-
-    try {
-      await openCommandInTerminal(target, attachCommand(session));
-
-      toast.style = Toast.Style.Success;
-      toast.title = `Opened session ${session} in new ${target}`;
-      await showHUD(`Opened session ${session} in new ${target}`);
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-
-      if (e instanceof UnsupportedTerminalError) {
-        toast.title = "Not supported 😢";
-        toast.message = `${e.message} — use Switch to Selected Session instead`;
-      } else {
-        toast.title = `Failed to open session in new ${target} 😢`;
-        toast.message = e instanceof Error ? e.message : String(e);
-      }
-    }
-
-    setLoading(false);
+  // Fully awaited (no floating exec callback) so callers can popToRoot
+  // afterwards without tearing down the command before the work is done
+  const sessionExists = await new Promise<{ exists: boolean; message: string }>((resolve) => {
+    exec(`tmux has-session -t ${shq("=" + session)}`, { env }, (error, _stdout, stderr) => {
+      resolve({ exists: !error && !stderr, message: error ? error.message : stderr });
+    });
   });
+
+  if (!sessionExists.exists) {
+    console.error(`exec error: ${sessionExists.message}`);
+
+    toast.style = Toast.Style.Failure;
+    toast.title = `Session ${session} no longer exists 😢`;
+    toast.message = sessionExists.message;
+    setLoading(false);
+
+    return;
+  }
+
+  try {
+    await openCommandInTerminal(target, attachCommand(session));
+
+    toast.style = Toast.Style.Success;
+    toast.title = `Opened session ${session} in new ${target}`;
+    await showHUD(`Opened session ${session} in new ${target}`);
+  } catch (e) {
+    toast.style = Toast.Style.Failure;
+
+    if (e instanceof UnsupportedTerminalError) {
+      toast.title = "Not supported 😢";
+      toast.message = `${e.message} — use Switch to Selected Session instead`;
+    } else {
+      toast.title = `Failed to open session in new ${target} 😢`;
+      toast.message = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  setLoading(false);
 }
 
 export async function deleteSession(session: string, setLoading: (value: boolean) => void, callback: () => void) {
