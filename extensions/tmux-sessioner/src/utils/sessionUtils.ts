@@ -111,6 +111,17 @@ export async function switchToSession(session: string, setLoading: (value: boole
   });
 }
 
+export function sendStartupCommand(
+  session: string,
+  command: string,
+  callback: (error: ExecException | null, stdout: string, stderr: string) => void,
+): ChildProcess {
+  // Typing the command into the session shell (instead of making it the
+  // session command) keeps the session alive after the command exits.
+  // send-keys takes a pane target, where exact session match is "=name:"
+  return exec(`tmux send-keys -t ${shq("=" + session + ":")} ${shq(command)} Enter`, { env }, callback);
+}
+
 export function killSessions(
   sessions: string[],
   callback: (error: ExecException | null, stdout: string, stderr: string) => void,

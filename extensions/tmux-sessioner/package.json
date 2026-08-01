@@ -33,7 +33,15 @@
       "name": "create_new_session",
       "title": "Create New Session",
       "description": "Create New Tmux Session",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "sessionName",
+          "placeholder": "Session Name",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "manage_tmux_windows",
@@ -50,6 +58,23 @@
       "placeholder": "Select a directory",
       "type": "directory",
       "required": false
+    },
+    {
+      "name": "defaultStartupCommand",
+      "description": "Command executed inside newly created sessions, e.g. a dev server or an AI coding agent",
+      "title": "New Session Startup Command",
+      "placeholder": "e.g. claude or npm run dev",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "createFolderByDefault",
+      "description": "Pre-check 'Create New Folder' in the Create New Session form",
+      "label": "Create New Folder by Default",
+      "title": "New Session Folder",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {
