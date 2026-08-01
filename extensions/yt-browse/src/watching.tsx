@@ -1,21 +1,16 @@
-import {
-  openYouTube,
-  openYouTubeURL,
-  fetchContinueWatchingUrl,
-} from "./webapp";
+import { openYouTube, openYouTubeURL, fetchRealHistory } from "./webapp";
 import { showToast, Toast } from "@raycast/api";
 
 export default async function WatchingCommand() {
-  // Try to fetch the actual continue-watching video URL from Safari's
-  // authenticated YouTube session
+  // Fetch real history and open the most recent video
   try {
-    const url = await fetchContinueWatchingUrl();
-    if (url) {
-      await openYouTubeURL(url);
+    const history = await fetchRealHistory();
+    if (history.length > 0) {
+      await openYouTubeURL(history[0].url);
       return;
     }
   } catch {
-    // Safari JS not enabled or no continue-watching found — fall through
+    // Safari JS not enabled or fetch failed — fall through
   }
 
   // Fallback: just open YouTube homepage
