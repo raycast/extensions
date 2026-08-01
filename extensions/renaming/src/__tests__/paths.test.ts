@@ -140,6 +140,24 @@ describe("isSameEntry", () => {
     expect(await isSameEntry(file1, file2)).toBe(false);
   });
 
+  it("should return false for hard links whose names differ only in case", async () => {
+    // Only constructible on a case-sensitive volume — elsewhere the two names are
+    // one entry by definition and this scenario cannot exist
+    if (await isCaseInsensitiveVolume(testDir)) {
+      return;
+    }
+
+    const upper = join(testDir, "LINKED.txt");
+    const lower = join(testDir, "linked.txt");
+    await writeFile(upper, "content");
+    await link(upper, lower);
+
+    // Case-folding the names would call these one entry; the directory listing
+    // shows they are two
+    expect(await isSameFile(upper, lower)).toBe(true);
+    expect(await isSameEntry(upper, lower)).toBe(false);
+  });
+
   it("should answer case-only renames according to the volume", async () => {
     const upper = join(testDir, "CASE.txt");
     const lower = join(testDir, "case.txt");

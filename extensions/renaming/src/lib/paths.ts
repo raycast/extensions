@@ -2,8 +2,8 @@
  * Shared path helpers for rename operations.
  */
 
-import { lstat, realpath } from "fs/promises";
-import { dirname, resolve } from "path";
+import { lstat, readdir, realpath } from "fs/promises";
+import { basename, dirname, resolve } from "path";
 
 /**
  * Validate that a new path stays within the expected directory (prevents path traversal).
@@ -77,16 +77,30 @@ export async function isSameFile(a: string, b: string): Promise<boolean> {
  * Check whether renaming `from` to `to` would land on the very entry being renamed.
  *
  * This is the only case in which the "target already exists" guard may be skipped,
- * and it is narrower than {@link isSameFile}: the paths must also be the same name
- * up to case. Sharing an inode is not enough, because two hard links are one file
- * under two distinct directory entries — POSIX rename() between them does nothing
- * at all, so letting one through would report a rename that never happened while
- * both entries remain on disk.
+ * and it is narrower than {@link isSameFile}. Sharing an inode is not enough: two
+ * hard links are one file under two distinct directory entries, and POSIX rename()
+ * between them does nothing at all, so letting one through would report a rename
+ * that never happened while both entries remain on disk.
  *
- * True for a rename to an identical path, and for a case-only rename on a volume
- * that treats the two spellings as one entry. False on a case-sensitive volume,
- * where those spellings are two files and the destination must be protected.
+ * When both spellings reach one inode, the two are told apart by asking the
+ * directory which names it actually holds — not by case-folding, which would have
+ * to guess at the volume. If `to` is listed, it is a real entry of its own and must
+ * be protected; if it is not, the filesystem resolved it case-insensitively onto
+ * `from`, and the rename is the case-only no-op it appears to be.
  */
 export async function isSameEntry(from: string, to: string): Promise<boolean> {
-  return normalizePath(from) === normalizePath(to) && (await isSameFile(from, to));
+  if (from === to) {
+    return true;
+  }
+
+  if (!(await isSameFile(from, to))) {
+    return false;
+  }
+
+  try {
+    const entries = await readdir(dirname(to));
+    return !entries.includes(basename(to));
+  } catch {
+    return false;
+  }
 }
