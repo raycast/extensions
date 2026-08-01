@@ -4,7 +4,8 @@
   "version": "0.1.1",
   "description": "Generate dummy but checksum-valid Mynumbers (Japanese Individual Numbers) for testing.",
   "categories": [
-    "Developer Tools"
+    "Developer Tools",
+    "Data"
   ],
   "license": "MIT",
   "author": "serizawa",
@@ -19,7 +20,7 @@
     "publish": "npm install --package-lock-only && bunx @raycast/api@latest publish"
   },
   "dependencies": {
-    "@raycast/api": "^1.85.0"
+    "@raycast/api": "^1.104.24"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
@@ -79,7 +80,8 @@
       "description": "The number of Mynumbers to generate when no argument is given.",
       "type": "textfield",
       "required": false,
-      "default": "1"
+      "default": "1",
+      "placeholder": "1"
     }
   ],
   "title": "Mynumber Generator"
