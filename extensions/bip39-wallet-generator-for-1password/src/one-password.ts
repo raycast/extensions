@@ -10,16 +10,12 @@ export { CliMissingError } from "./cli-path";
 
 const execFileAsync = promisify(execFile);
 
-interface Preferences {
-  cliPath?: string;
-}
-
 export class AuthenticationRequiredError extends Error {}
 
 const AUTH_ERROR_PATTERN = /not signed in|authorization|authenticate|session/i;
 
 export function getCliPath(): string {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<ExtensionPreferences>();
   return resolveCliPath(preferences.cliPath);
 }
 

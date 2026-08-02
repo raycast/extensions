@@ -7,6 +7,8 @@ export function buildItemTemplate(result: WalletResult, title: string) {
 
   return {
     title,
+    // This exact pair is returned by `op item template get "Crypto Wallet"`.
+    // The CLI rejects `CRYPTO_WALLET` as a JSON template category.
     category: "CUSTOM",
     category_id: "115",
     sections: [recoverySection, addressesSection, derivationSection],

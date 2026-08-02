@@ -16,10 +16,6 @@ import { addressCardDataUri, phraseCardDataUri } from "./phrase-card";
 import type { WalletResult } from "./types";
 import { buildWalletResult, generateMnemonic } from "./wallet";
 
-interface Preferences {
-  wordCount?: "12" | "24";
-}
-
 interface GeneratedWalletDetailProps {
   onRecoveryPhraseAction: (result: WalletResult) => ReactElement;
 }
@@ -45,7 +41,8 @@ ${hint}
 export function GeneratedWalletDetail({
   onRecoveryPhraseAction,
 }: GeneratedWalletDetailProps) {
-  const wordCount = getPreferenceValues<Preferences>().wordCount ?? "12";
+  const wordCount =
+    getPreferenceValues<ExtensionPreferences>().wordCount ?? "12";
   const [result, setResult] = useState<WalletResult>();
   const [revealed, setRevealed] = useState(false);
 
