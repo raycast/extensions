@@ -1,10 +1,12 @@
 # AI Compare Raycast Extension
 
-Use Raycast to send a keyword or question directly to the AI Compare browser extension.
+Search from Raycast, then compare answers across selected AI sites in AI Compare.
+
+> **Requirement:** Google Chrome and the AI Compare Chrome extension must be installed and enabled before using this command.
 
 ## Setup
 
-1. Install and enable the AI Compare Chrome extension.
+1. Install and enable the AI Compare Chrome extension in Google Chrome.
 2. Install AI Compare from the Raycast Store.
 
 ## Development
@@ -14,7 +16,7 @@ Use Raycast to send a keyword or question directly to the AI Compare browser ext
 
 ## Usage
 
-Run `Search with AI Compare` in Raycast, enter a query, and Raycast opens:
+Run `Search with AI Compare` in Raycast, enter a question or keyword, and press Enter. Raycast opens AI Compare in Google Chrome, where it searches the selected AI sites.
 
 ```text
 chrome-extension://dkhpgbbhlnmjbkihoeniojpkggkabbbl/iframe/iframe.html?sites=<sites>&type=<type>&query=<query>
