@@ -61,14 +61,15 @@ export async function createCustomShortcut(values: ShortcutFormValues): Promise<
 }
 
 export async function updateCustomShortcut(id: string, values: ShortcutFormValues): Promise<Shortcut> {
-  const existingRaw = await LocalStorage.getItem<string>(getItemKey(id));
+  const itemKey = getItemKey(id);
+  const existingRaw = await LocalStorage.getItem<string>(itemKey);
   let existing: Shortcut | undefined;
 
   if (existingRaw) {
     try {
       existing = parseStoredShortcut(JSON.parse(existingRaw));
     } catch {
-      // Fallback to searching all items if single key look up fails
+      // Fallback to searching all items if single key lookup fails
     }
   }
 
@@ -94,7 +95,13 @@ export async function updateCustomShortcut(id: string, values: ShortcutFormValue
     updatedAt: new Date().toISOString(),
   };
 
-  await LocalStorage.setItem(getItemKey(id), JSON.stringify(updated));
+  // Pre-write key validation: abort if shortcut was deleted concurrently prior to saving
+  const preWriteRaw = await LocalStorage.getItem<string>(itemKey);
+  if (!preWriteRaw) {
+    throw new Error("That custom shortcut was deleted prior to saving updates.");
+  }
+
+  await LocalStorage.setItem(itemKey, JSON.stringify(updated));
   return updated;
 }
 
