@@ -76,64 +76,64 @@ interface VariableValueEntry<T extends EntryType> extends BaseEntry {
 
 /** Alias: name + command */
 export interface AliasEntry extends BaseEntry {
-  readonly type: EntryType.ALIAS;
+  readonly type: typeof EntryType.ALIAS;
   readonly name: string;
   readonly command: string;
 }
 
 /** Export: variable + value */
-export type ExportEntry = VariableValueEntry<EntryType.EXPORT>;
+export type ExportEntry = VariableValueEntry<typeof EntryType.EXPORT>;
 
 /** Eval: command */
-export type EvalEntry = CommandEntry<EntryType.EVAL>;
+export type EvalEntry = CommandEntry<typeof EntryType.EVAL>;
 
 /** Setopt: option */
 export interface SetoptEntry extends BaseEntry {
-  readonly type: EntryType.SETOPT;
+  readonly type: typeof EntryType.SETOPT;
   readonly option: string;
 }
 
 /** Plugin: name */
-export type PluginEntry = NamedEntry<EntryType.PLUGIN>;
+export type PluginEntry = NamedEntry<typeof EntryType.PLUGIN>;
 
 /** Function: name */
-export type FunctionEntry = NamedEntry<EntryType.FUNCTION>;
+export type FunctionEntry = NamedEntry<typeof EntryType.FUNCTION>;
 
 /** Source: path */
 export interface SourceEntry extends BaseEntry {
-  readonly type: EntryType.SOURCE;
+  readonly type: typeof EntryType.SOURCE;
   readonly path: string;
 }
 
 /** Autoload: function name */
 export interface AutoloadEntry extends BaseEntry {
-  readonly type: EntryType.AUTOLOAD;
+  readonly type: typeof EntryType.AUTOLOAD;
   readonly function: string;
 }
 
 /** Fpath: directories array */
 export interface FpathEntry extends BaseEntry {
-  readonly type: EntryType.FPATH;
+  readonly type: typeof EntryType.FPATH;
   readonly directories: string[];
 }
 
 /** Path: value */
 export interface PathEntry extends BaseEntry {
-  readonly type: EntryType.PATH;
+  readonly type: typeof EntryType.PATH;
   readonly value: string;
 }
 
 /** Theme: name */
-export type ThemeEntry = NamedEntry<EntryType.THEME>;
+export type ThemeEntry = NamedEntry<typeof EntryType.THEME>;
 
 /** Completion: command */
-export type CompletionEntry = CommandEntry<EntryType.COMPLETION>;
+export type CompletionEntry = CommandEntry<typeof EntryType.COMPLETION>;
 
 /** History config: variable + value */
-export type HistoryEntry = VariableValueEntry<EntryType.HISTORY>;
+export type HistoryEntry = VariableValueEntry<typeof EntryType.HISTORY>;
 
 /** Keybinding: command */
-export type KeybindingEntry = CommandEntry<EntryType.KEYBINDING>;
+export type KeybindingEntry = CommandEntry<typeof EntryType.KEYBINDING>;
 
 /**
  * Union type for all possible zshrc entries
