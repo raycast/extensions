@@ -53,7 +53,7 @@ const isPlayerAlive = async (audioPath: string): Promise<boolean> => {
       return false;
     }
   }
-  return readRegisteredPlayers(audioPath).some(isPlayerRunning);
+  return readRegisteredPlayers(audioPath).some((record) => isPlayerRunning(record, audioPath));
 };
 
 export const getLivePlayingPaths = async (): Promise<string[]> => {
@@ -85,6 +85,34 @@ const getProcessStartTime = (pid: number): string | null => {
   }
 };
 
+const getProcessCommand = (pid: number): string | null => {
+  try {
+    const output = execFileSync("ps", ["-p", String(pid), "-o", "command="], { encoding: "utf8" }).trim();
+    return output || null;
+  } catch {
+    return null;
+  }
+};
+
+// macOS exposes no stable process identity to Node, so before ever signaling a
+// registered player we require ALL of the following to hold:
+//   1. The PID still exists.
+//   2. The process start time still matches the one captured at spawn.
+//   3. The process is still the `afplay` invocation for this exact audio file.
+// This makes killing an unrelated process after PID reuse practically
+// unreachable: a reused PID would additionally have to collide on the
+// second-granularity start time (macOS PIDs are allocated monotonically and
+// only wrap after ~2M forks) AND have a command line naming `afplay` with the
+// same audio path. Registration is best-effort - if any `ps` probe fails the
+// player is treated as not running and playback continues without Stop.
+const isPlayerRunning = (record: PlayerRecord, audioPath: string): boolean => {
+  if (getProcessStartTime(record.pid) !== record.startTime) {
+    return false;
+  }
+  const command = getProcessCommand(record.pid);
+  return command !== null && command.includes("afplay") && command.includes(audioPath);
+};
+
 const readRegisteredPlayers = (audioPath: string): PlayerRecord[] => {
   try {
     return readFileSync(registryFile(audioPath), "utf8")
@@ -104,8 +132,6 @@ const readRegisteredPlayers = (audioPath: string): PlayerRecord[] => {
     return [];
   }
 };
-
-const isPlayerRunning = (record: PlayerRecord): boolean => getProcessStartTime(record.pid) === record.startTime;
 
 const registerPlayer = (audioPath: string, pid: number) => {
   try {
@@ -137,7 +163,7 @@ const unregisterPlayer = (audioPath: string, pid: number) => {
 const pruneRegisteredPlayers = (audioPath: string) => {
   try {
     const file = registryFile(audioPath);
-    const remaining = readRegisteredPlayers(audioPath).filter(isPlayerRunning);
+    const remaining = readRegisteredPlayers(audioPath).filter((record) => isPlayerRunning(record, audioPath));
     if (remaining.length === 0) {
       rmSync(file, { force: true });
     } else {
@@ -149,7 +175,7 @@ const pruneRegisteredPlayers = (audioPath: string) => {
 };
 
 const stopMacOSPlayers = (audioPath: string) => {
-  const players = readRegisteredPlayers(audioPath).filter(isPlayerRunning);
+  const players = readRegisteredPlayers(audioPath).filter((record) => isPlayerRunning(record, audioPath));
   for (const { pid } of players) {
     try {
       process.kill(pid);
