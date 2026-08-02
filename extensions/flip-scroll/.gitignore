@@ -1,0 +1,7 @@
+node_modules
+raycast-env.d.ts
+.eslintcache
+dist
+.claude/
+.DS_Store
+.idea/
