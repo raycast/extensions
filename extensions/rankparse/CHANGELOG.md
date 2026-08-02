@@ -1,6 +1,6 @@
 # RankParse Changelog
 
-## [Initial Version] - 2026-07-01
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search Backlinks: backlinks, referring domains, outbound links, anchor text, top pages
 - Domain Snapshot: domain authority, domain rank, crawl history, with Link Audit and Site Explorer deep dives

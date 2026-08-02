@@ -26,10 +26,6 @@ import type {
   UsageResponse,
 } from "./types";
 
-interface Preferences {
-  apiKey: string;
-}
-
 interface RequestOptions {
   limit?: number;
   offset?: number;
