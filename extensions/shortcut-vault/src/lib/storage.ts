@@ -22,11 +22,13 @@ class CrossProcessMutex {
   async runExclusive<T>(task: () => Promise<T>): Promise<T> {
     const start = Date.now();
     const timeoutMs = 5000;
+    let acquired = false;
 
     while (Date.now() - start < timeoutMs) {
       try {
         fs.mkdirSync(this.lockDir);
         fs.writeFileSync(this.lockFile, Date.now().toString());
+        acquired = true;
         break;
       } catch (e: unknown) {
         const err = e as { code?: string };
@@ -52,7 +54,7 @@ class CrossProcessMutex {
       }
     }
 
-    if (Date.now() - start >= timeoutMs) {
+    if (!acquired) {
       throw new Error("Could not acquire cross-process storage lock. Please try again.");
     }
 
