@@ -6,9 +6,10 @@ import { createSerialTaskQueue } from "./serial-task-queue";
 import { formatShortcutDisplay, normalizeKey, normalizeModifiers } from "./shortcut-format";
 
 const CUSTOM_SHORTCUTS_KEY = "shortcut-vault.custom-shortcuts";
-const CUSTOM_SHORTCUTS_RECOVERY_KEY_PREFIX = "shortcut-vault.custom-shortcuts-recovery";
 const CUSTOM_SHORTCUTS_LOCK_KEY = "shortcut-vault.custom-shortcuts-lock";
 const customShortcutMutationQueue = createSerialTaskQueue();
+
+let activeProcessLockId: string | null = null;
 
 export { GENERAL_OWNER_NAME };
 
@@ -18,6 +19,10 @@ type CustomShortcutMutation<T> = {
 };
 
 async function withCrossProcessLock<T>(fn: () => Promise<T>): Promise<T> {
+  if (activeProcessLockId) {
+    return await fn();
+  }
+
   const lockId = `${Date.now()}-${crypto.randomUUID()}`;
   let acquired = false;
 
@@ -28,6 +33,7 @@ async function withCrossProcessLock<T>(fn: () => Promise<T>): Promise<T> {
       const verifyLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
       if (verifyLock === lockId) {
         acquired = true;
+        activeProcessLockId = lockId;
         break;
       }
     } else {
@@ -46,9 +52,12 @@ async function withCrossProcessLock<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } finally {
-    const currentLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
-    if (currentLock === lockId) {
-      await LocalStorage.removeItem(CUSTOM_SHORTCUTS_LOCK_KEY);
+    if (activeProcessLockId === lockId) {
+      activeProcessLockId = null;
+      const currentLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
+      if (currentLock === lockId) {
+        await LocalStorage.removeItem(CUSTOM_SHORTCUTS_LOCK_KEY);
+      }
     }
   }
 }
@@ -63,17 +72,17 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
   try {
     parsed = JSON.parse(raw);
   } catch {
-    return recoverCustomShortcuts(raw, [], "invalid JSON");
+    console.warn("Shortcut Vault encountered invalid JSON in custom shortcut storage.");
+    return [];
   }
 
   if (!Array.isArray(parsed)) {
-    return recoverCustomShortcuts(raw, [], "an unexpected top-level value");
+    console.warn("Shortcut Vault encountered an unexpected non-array value in custom shortcut storage.");
+    return [];
   }
 
   const shortcuts: Shortcut[] = [];
   const seenIds = new Set<string>();
-  let discardedCount = 0;
-  let regeneratedIds = 0;
 
   for (const value of parsed) {
     try {
@@ -81,18 +90,13 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
 
       if (seenIds.has(shortcut.id)) {
         shortcut.id = crypto.randomUUID();
-        regeneratedIds += 1;
       }
 
       seenIds.add(shortcut.id);
       shortcuts.push(shortcut);
     } catch {
-      discardedCount += 1;
+      // Ignore invalid individual items during read without mutation side-effects
     }
-  }
-
-  if (discardedCount > 0 || regeneratedIds > 0) {
-    return recoverCustomShortcuts(raw, shortcuts, "invalid or duplicate shortcut records");
   }
 
   return shortcuts;
@@ -100,7 +104,7 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
 
 /**
  * Executes a cross-command safe serial mutation on custom shortcuts using cross-process LocalStorage locking.
- * Enforces atomic lock acquisition across independent command runtimes before executing mutations.
+ * Enforces re-entrant atomic lock acquisition across independent command runtimes before executing mutations.
  */
 export function mutateCustomShortcuts<T>(
   mutation: (shortcuts: Shortcut[]) => CustomShortcutMutation<T> | Promise<CustomShortcutMutation<T>>,
@@ -222,22 +226,6 @@ export async function duplicateCustomShortcut(id: string): Promise<Shortcut> {
 
 async function writeCustomShortcuts(shortcuts: Shortcut[]): Promise<void> {
   await LocalStorage.setItem(CUSTOM_SHORTCUTS_KEY, JSON.stringify(shortcuts));
-}
-
-async function recoverCustomShortcuts(
-  raw: string,
-  recoveredShortcuts: Shortcut[],
-  reason: string,
-): Promise<Shortcut[]> {
-  return withCrossProcessLock(async () => {
-    const recoveryKey = `${CUSTOM_SHORTCUTS_RECOVERY_KEY_PREFIX}.${Date.now()}.${crypto.randomUUID()}`;
-
-    await LocalStorage.setItem(recoveryKey, raw);
-    await writeCustomShortcuts(recoveredShortcuts);
-    console.warn(`Shortcut Vault recovered custom shortcut storage containing ${reason}.`);
-
-    return recoveredShortcuts;
-  });
 }
 
 function parseStoredShortcut(value: unknown): Shortcut {
