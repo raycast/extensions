@@ -7,5 +7,5 @@
  * @see ./icons/index.ts for the main implementation
  */
 
-export { getSectionIcon, getAvailableSectionIcons } from "./icons";
+export { getSectionIcon, getSectionImage, getAvailableSectionIcons } from "./icons";
 export type { IconSource } from "./icons";
