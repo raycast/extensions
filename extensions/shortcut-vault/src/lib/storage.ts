@@ -7,6 +7,7 @@ import { formatShortcutDisplay, normalizeKey, normalizeModifiers } from "./short
 
 const CUSTOM_SHORTCUTS_KEY = "shortcut-vault.custom-shortcuts";
 const CUSTOM_SHORTCUTS_RECOVERY_KEY_PREFIX = "shortcut-vault.custom-shortcuts-recovery";
+const CUSTOM_SHORTCUTS_LOCK_KEY = "shortcut-vault.custom-shortcuts-lock";
 const customShortcutMutationQueue = createSerialTaskQueue();
 
 export { GENERAL_OWNER_NAME };
@@ -15,6 +16,42 @@ type CustomShortcutMutation<T> = {
   shortcuts: Shortcut[];
   result: T;
 };
+
+async function withCrossProcessLock<T>(fn: () => Promise<T>): Promise<T> {
+  const lockId = `${Date.now()}-${crypto.randomUUID()}`;
+  let acquired = false;
+
+  for (let i = 0; i < 30; i++) {
+    const existingLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
+    if (!existingLock) {
+      await LocalStorage.setItem(CUSTOM_SHORTCUTS_LOCK_KEY, lockId);
+      const verifyLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
+      if (verifyLock === lockId) {
+        acquired = true;
+        break;
+      }
+    } else {
+      const lockTime = parseInt(existingLock.split("-")[0] ?? "0", 10);
+      if (!isNaN(lockTime) && Date.now() - lockTime > 10000) {
+        await LocalStorage.removeItem(CUSTOM_SHORTCUTS_LOCK_KEY);
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
+
+  if (!acquired) {
+    throw new Error("Storage lock timeout. Please retry.");
+  }
+
+  try {
+    return await fn();
+  } finally {
+    const currentLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
+    if (currentLock === lockId) {
+      await LocalStorage.removeItem(CUSTOM_SHORTCUTS_LOCK_KEY);
+    }
+  }
+}
 
 export async function getCustomShortcuts(): Promise<Shortcut[]> {
   const raw = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_KEY);
@@ -62,29 +99,20 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
 }
 
 /**
- * Executes a cross-command safe serial mutation on custom shortcuts using strict Compare-And-Swap (CAS).
- * Re-verifies LocalStorage state prior to persisting to prevent concurrent process overwrites.
+ * Executes a cross-command safe serial mutation on custom shortcuts using cross-process LocalStorage locking.
+ * Enforces atomic lock acquisition across independent command runtimes before executing mutations.
  */
 export function mutateCustomShortcuts<T>(
   mutation: (shortcuts: Shortcut[]) => CustomShortcutMutation<T> | Promise<CustomShortcutMutation<T>>,
 ): Promise<T> {
-  return customShortcutMutationQueue.run(async () => {
-    let attempts = 0;
-    while (attempts < 10) {
-      const rawBefore = (await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_KEY)) ?? "";
+  return customShortcutMutationQueue.run(() =>
+    withCrossProcessLock(async () => {
       const currentShortcuts = await getCustomShortcuts();
       const { shortcuts, result } = await mutation(currentShortcuts);
-
-      const rawCheck = (await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_KEY)) ?? "";
-      if (rawBefore === rawCheck) {
-        await writeCustomShortcuts(shortcuts);
-        return result;
-      }
-      attempts++;
-    }
-
-    throw new Error("Storage is busy with concurrent updates. Please try again.");
-  });
+      await writeCustomShortcuts(shortcuts);
+      return result;
+    }),
+  );
 }
 
 export async function createCustomShortcut(values: ShortcutFormValues): Promise<Shortcut> {
