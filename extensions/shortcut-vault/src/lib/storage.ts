@@ -18,9 +18,9 @@ type CustomShortcutMutation<T> = {
   result: T;
 };
 
-async function withCrossProcessLock<T>(fn: () => Promise<T>): Promise<T> {
+async function withCrossProcessLock<T>(fn: (lockId: string) => Promise<T>): Promise<T> {
   if (activeProcessLockId) {
-    return await fn();
+    return await fn(activeProcessLockId);
   }
 
   const lockId = `${Date.now()}-${crypto.randomUUID()}`;
@@ -62,7 +62,7 @@ async function withCrossProcessLock<T>(fn: () => Promise<T>): Promise<T> {
   }
 
   try {
-    return await fn();
+    return await fn(lockId);
   } finally {
     if (activeProcessLockId === lockId) {
       activeProcessLockId = null;
@@ -116,15 +116,22 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
 
 /**
  * Executes a cross-command safe serial mutation on custom shortcuts using cross-process LocalStorage locking.
- * Enforces re-entrant atomic lock acquisition with jitter verification across independent command runtimes.
+ * Enforces pre-write lock ownership validation to prevent writes if the lock lease expired during computation.
  */
 export function mutateCustomShortcuts<T>(
   mutation: (shortcuts: Shortcut[]) => CustomShortcutMutation<T> | Promise<CustomShortcutMutation<T>>,
 ): Promise<T> {
   return customShortcutMutationQueue.run(() =>
-    withCrossProcessLock(async () => {
+    withCrossProcessLock(async (lockId) => {
       const currentShortcuts = await getCustomShortcuts();
       const { shortcuts, result } = await mutation(currentShortcuts);
+
+      // Pre-write lock ownership verification to prevent writing if lease expired or was reclaimed
+      const verifyLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
+      if (verifyLock !== lockId) {
+        throw new Error("Storage lock lease expired during mutation calculation. Please retry.");
+      }
+
       await writeCustomShortcuts(shortcuts);
       return result;
     }),
