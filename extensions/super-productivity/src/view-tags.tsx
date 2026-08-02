@@ -1,16 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  Color,
-  Form,
-  Alert,
-  confirmAlert,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Color, Form, Alert, confirmAlert } from "@raycast/api";
 import { getTags, createTag, deleteTag } from "./api";
 import type { Tag } from "./types";
 
@@ -67,12 +56,7 @@ function CreateTagForm({ onCreated }: { onCreated: () => void }) {
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Tag Name"
-        placeholder="e.g., Urgent, Today, Focus"
-        autoFocus
-      />
+      <Form.TextField id="title" title="Tag Name" placeholder="e.g., Urgent, Today, Focus" autoFocus />
       <Form.Dropdown id="color" title="Color" defaultValue="">
         <Form.Dropdown.Item title="None" value="" />
         {TAG_COLORS.map((color) => (
@@ -135,11 +119,7 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search tags..."
-      navigationTitle="Manage Tags"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search tags..." navigationTitle="Manage Tags">
       {tags.map((tag) => (
         <List.Item
           key={tag.id}
@@ -179,11 +159,7 @@ export default function Command() {
           description="Create a tag to organize your tasks."
           actions={
             <ActionPanel>
-              <Action.Push
-                title="Create Tag"
-                icon={Icon.Plus}
-                target={<CreateTagForm onCreated={fetchTags} />}
-              />
+              <Action.Push title="Create Tag" icon={Icon.Plus} target={<CreateTagForm onCreated={fetchTags} />} />
             </ActionPanel>
           }
         />

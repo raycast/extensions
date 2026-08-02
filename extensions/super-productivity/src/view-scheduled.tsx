@@ -1,34 +1,10 @@
 import { useState, useEffect } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  Color,
-  Alert,
-  confirmAlert,
-} from "@raycast/api";
-import {
-  getTasks,
-  getProjects,
-  getTags,
-  startTask,
-  archiveTask,
-  deleteTask,
-  updateTask,
-} from "./api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Color, Alert, confirmAlert } from "@raycast/api";
+import { getTasks, getProjects, getTags, startTask, archiveTask, deleteTask, updateTask } from "./api";
 import type { Task, Project, Tag } from "./types";
 import { getProjectTitle, getTagTitles, getTodayStr } from "./utils";
 
-type TimeBucket =
-  | "overdue"
-  | "today"
-  | "tomorrow"
-  | "thisWeek"
-  | "later"
-  | "undated";
+type TimeBucket = "overdue" | "today" | "tomorrow" | "thisWeek" | "later" | "undated";
 
 interface TaskGroup {
   bucket: TimeBucket;
@@ -114,9 +90,7 @@ export default function Command() {
         });
 
         if (bucketTasks.length > 0) {
-          bucketTasks.sort((a, b) =>
-            (a.dueDay || "").localeCompare(b.dueDay || ""),
-          );
+          bucketTasks.sort((a, b) => (a.dueDay || "").localeCompare(b.dueDay || ""));
           groups.push({
             bucket: cfg.bucket,
             label: cfg.label,
@@ -201,9 +175,7 @@ export default function Command() {
     }
   }
 
-  const visibleGroups = showUndated
-    ? taskGroups
-    : taskGroups.filter((g) => g.bucket !== "undated");
+  const visibleGroups = showUndated ? taskGroups : taskGroups.filter((g) => g.bucket !== "undated");
 
   return (
     <List
@@ -211,10 +183,7 @@ export default function Command() {
       searchBarPlaceholder="Search scheduled tasks..."
       navigationTitle="Scheduled Tasks"
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Show/hide undated tasks"
-          onChange={(value) => setShowUndated(value === "yes")}
-        >
+        <List.Dropdown tooltip="Show/hide undated tasks" onChange={(value) => setShowUndated(value === "yes")}>
           <List.Dropdown.Item title="Scheduled only" value="no" />
           <List.Dropdown.Item title="Include undated" value="yes" />
         </List.Dropdown>
@@ -225,8 +194,7 @@ export default function Command() {
           {group.tasks.map((task) => {
             const tagStr = getTagTitles(task.tagIds, tags);
             const projectTitle = getProjectTitle(task.projectId, projects);
-            const timeEstimate =
-              task.timeEstimate > 0 ? `${task.timeEstimate / 3600000}h` : "";
+            const timeEstimate = task.timeEstimate > 0 ? `${task.timeEstimate / 3600000}h` : "";
             const dueLabel = task.dueDay ? formatDueDay(task.dueDay) : "";
 
             return (
@@ -234,21 +202,11 @@ export default function Command() {
                 key={task.id}
                 title={task.title}
                 subtitle={projectTitle}
-                keywords={[
-                  task.title,
-                  projectTitle,
-                  tagStr,
-                  dueLabel,
-                  group.label,
-                ]}
+                keywords={[task.title, projectTitle, tagStr, dueLabel, group.label]}
                 accessories={[
-                  ...(task.dueDay
-                    ? [{ text: dueLabel, icon: Icon.Calendar }]
-                    : []),
+                  ...(task.dueDay ? [{ text: dueLabel, icon: Icon.Calendar }] : []),
                   ...(tagStr ? [{ text: tagStr, icon: Icon.Tag }] : []),
-                  ...(timeEstimate
-                    ? [{ text: timeEstimate, icon: Icon.Clock }]
-                    : []),
+                  ...(timeEstimate ? [{ text: timeEstimate, icon: Icon.Clock }] : []),
                 ]}
                 actions={
                   <ActionPanel>
@@ -259,9 +217,7 @@ export default function Command() {
                             ? `Resume Tracking (${(task.timeSpent / 3600000).toFixed(1)}h spent)`
                             : "Start Tracking"
                         }
-                        icon={
-                          task.timeSpent > 0 ? Icon.ArrowClockwise : Icon.Play
-                        }
+                        icon={task.timeSpent > 0 ? Icon.ArrowClockwise : Icon.Play}
                         onAction={() => handleStartTask(task.id)}
                       />
                       <Action

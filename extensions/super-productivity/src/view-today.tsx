@@ -1,22 +1,6 @@
 import { useState, useEffect } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  Color,
-  Alert,
-  confirmAlert,
-} from "@raycast/api";
-import {
-  getTasks,
-  startTask,
-  archiveTask,
-  deleteTask,
-  updateTask,
-} from "./api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Color, Alert, confirmAlert } from "@raycast/api";
+import { getTasks, startTask, archiveTask, deleteTask, updateTask } from "./api";
 import type { Task } from "./types";
 
 export default function Command() {
@@ -98,18 +82,10 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search today's tasks..."
-      navigationTitle="Today's Tasks"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search today's tasks..." navigationTitle="Today's Tasks">
       {tasks.map((task) => {
-        const timeEstimate =
-          task.timeEstimate > 0 ? `${task.timeEstimate / 3600000}h` : "";
-        const timeSpent =
-          task.timeSpent > 0
-            ? `${(task.timeSpent / 3600000).toFixed(1)}h spent`
-            : "";
+        const timeEstimate = task.timeEstimate > 0 ? `${task.timeEstimate / 3600000}h` : "";
+        const timeSpent = task.timeSpent > 0 ? `${(task.timeSpent / 3600000).toFixed(1)}h spent` : "";
 
         return (
           <List.Item

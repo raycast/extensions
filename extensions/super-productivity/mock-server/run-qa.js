@@ -31,9 +31,7 @@ const RESET = "\x1b[0m";
 const useColor = process.stdout.isTTY && process.env.NO_COLOR === undefined;
 
 function tag(text) {
-  return useColor
-    ? `${CYAN}[qa-runner]${RESET} ${text}`
-    : `[qa-runner] ${text}`;
+  return useColor ? `${CYAN}[qa-runner]${RESET} ${text}` : `[qa-runner] ${text}`;
 }
 function dim(text) {
   return useColor ? `${DIM}${text}${RESET}` : text;
@@ -68,19 +66,9 @@ async function main() {
     console.log(tag(`probing ${SP_DEFAULT}/health …`));
     const up = await probe(SP_DEFAULT + "/health", PROBE_MS);
     if (!up) {
-      console.error(
-        tag(
-          `${RED}Super Productivity is not reachable at ${SP_DEFAULT}${RESET}`,
-        ),
-      );
-      console.error(
-        tag(`Make sure SP is running with the Local REST API enabled.`),
-      );
-      console.error(
-        tag(
-          `Or set SP_API_URL to point at your SP instance (e.g. SP_API_URL=http://192.168.1.50:3876).`,
-        ),
-      );
+      console.error(tag(`${RED}Super Productivity is not reachable at ${SP_DEFAULT}${RESET}`));
+      console.error(tag(`Make sure SP is running with the Local REST API enabled.`));
+      console.error(tag(`Or set SP_API_URL to point at your SP instance (e.g. SP_API_URL=http://192.168.1.50:3876).`));
       process.exit(1);
     }
     console.log(tag(`${GREEN}SP reachable${RESET}`));

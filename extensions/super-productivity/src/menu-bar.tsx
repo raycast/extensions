@@ -1,17 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  MenuBarExtra,
-  Icon,
-  Color,
-  launchCommand,
-  LaunchType,
-} from "@raycast/api";
-import {
-  getCurrentTask,
-  stopCurrentTask,
-  getTasks,
-  setCurrentTask,
-} from "./api";
+import { MenuBarExtra, Icon, Color, launchCommand, LaunchType } from "@raycast/api";
+import { getCurrentTask, stopCurrentTask, getTasks, setCurrentTask } from "./api";
 import type { CurrentTask, Task } from "./types";
 
 function formatTime(ms: number): string {
@@ -57,20 +46,13 @@ export default function Command() {
 
   async function fetchCurrentTask() {
     try {
-      const [task, tasks] = await Promise.all([
-        getCurrentTask(),
-        getTasks({ source: "active" }),
-      ]);
+      const [task, tasks] = await Promise.all([getCurrentTask(), getTasks({ source: "active" })]);
 
       // Reset elapsed timer when task changes
       if (task?.id !== lastTaskIdRef.current) {
         lastTaskIdRef.current = task?.id ?? null;
         startTimeRef.current = Date.now();
-        setElapsedMs(
-          task
-            ? Object.values(task.timeSpentOnDay).reduce((s, v) => s + v, 0)
-            : 0,
-        );
+        setElapsedMs(task ? Object.values(task.timeSpentOnDay).reduce((s, v) => s + v, 0) : 0);
       }
 
       currentTaskRef.current = task;
@@ -98,9 +80,7 @@ export default function Command() {
       const task = currentTaskRef.current;
       if (task) {
         const since = Date.now() - startTimeRef.current;
-        setElapsedMs(
-          Object.values(task.timeSpentOnDay).reduce((s, v) => s + v, 0) + since,
-        );
+        setElapsedMs(Object.values(task.timeSpentOnDay).reduce((s, v) => s + v, 0) + since);
       }
     }, 1000);
     return () => clearInterval(id);
@@ -127,26 +107,18 @@ export default function Command() {
     }
   }
 
-  const title = currentTask
-    ? `${truncateTitle(currentTask.title, 20)} ${formatMenuBarTitle(elapsedMs)}`
-    : "⏸";
+  const title = currentTask ? `${truncateTitle(currentTask.title, 20)} ${formatMenuBarTitle(elapsedMs)}` : "⏸";
 
-  const icon = currentTask
-    ? { source: Icon.Play, tintColor: Color.Green }
-    : { source: Icon.Stop };
+  const icon = currentTask ? { source: Icon.Play, tintColor: Color.Green } : { source: Icon.Stop };
 
   return (
     <MenuBarExtra
       icon={icon}
       title={title}
       isLoading={isLoading}
-      tooltip={
-        currentTask ? `Tracking: ${currentTask.title}` : "Not tracking any task"
-      }
+      tooltip={currentTask ? `Tracking: ${currentTask.title}` : "Not tracking any task"}
     >
-      <MenuBarExtra.Section
-        title={currentTask ? "Currently Tracking" : "Not Tracking"}
-      >
+      <MenuBarExtra.Section title={currentTask ? "Currently Tracking" : "Not Tracking"}>
         {currentTask ? (
           <MenuBarExtra.Item
             title={currentTask.title}
@@ -170,11 +142,7 @@ export default function Command() {
 
       {currentTask && (
         <MenuBarExtra.Section>
-          <MenuBarExtra.Item
-            title="Stop Tracking"
-            icon={Icon.Stop}
-            onAction={handleStop}
-          />
+          <MenuBarExtra.Item title="Stop Tracking" icon={Icon.Stop} onAction={handleStop} />
         </MenuBarExtra.Section>
       )}
 
@@ -214,11 +182,7 @@ export default function Command() {
             });
           }}
         />
-        <MenuBarExtra.Item
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          onAction={fetchCurrentTask}
-        />
+        <MenuBarExtra.Item title="Refresh" icon={Icon.ArrowClockwise} onAction={fetchCurrentTask} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

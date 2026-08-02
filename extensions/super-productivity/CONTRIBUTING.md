@@ -48,11 +48,11 @@ This is what `npm run qa` exercises. Skipping step 2 makes the new command untes
 
 ## Validation scripts
 
-| Script | What it does | When to run |
-|--------|--------------|-------------|
-| `npm run qa` | Drives `mock-server/qa-exercise.js` against your running SP instance | Before every commit on a feature |
-| `npm run lint` | `ray lint` | Before every PR |
-| `npm run build` | `ray build` — produces a `.raycast` package | Before shipping a release-tagged PR |
+| Script          | What it does                                                         | When to run                         |
+| --------------- | -------------------------------------------------------------------- | ----------------------------------- |
+| `npm run qa`    | Drives `mock-server/qa-exercise.js` against your running SP instance | Before every commit on a feature    |
+| `npm run lint`  | `ray lint`                                                           | Before every PR                     |
+| `npm run build` | `ray build` — produces a `.raycast` package                          | Before shipping a release-tagged PR |
 
 ### One-shot QA
 
@@ -87,7 +87,7 @@ console.log("\n<N>. <command-name>");
 }
 ```
 
-`assertShape` asserts only the *required* fields declared in `src/types.ts`. Optional fields (e.g. `notes`, `tagIds`) are still asserted when the test exercises them via `expectOk(...)`.
+`assertShape` asserts only the _required_ fields declared in `src/types.ts`. Optional fields (e.g. `notes`, `tagIds`) are still asserted when the test exercises them via `expectOk(...)`.
 
 ## CI
 

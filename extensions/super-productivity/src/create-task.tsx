@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  popToRoot,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, popToRoot } from "@raycast/api";
 import { createTask, getProjects, getTags } from "./api";
 import type { Project, Tag } from "./types";
 
@@ -19,10 +11,7 @@ export default function Command() {
   useEffect(() => {
     async function fetch() {
       try {
-        const [fetchedProjects, fetchedTags] = await Promise.all([
-          getProjects(),
-          getTags(),
-        ]);
+        const [fetchedProjects, fetchedTags] = await Promise.all([getProjects(), getTags()]);
         setProjects(fetchedProjects);
         setTags(fetchedTags);
       } catch (e) {
@@ -50,13 +39,9 @@ export default function Command() {
       return;
     }
 
-    const timeEstimate = values.timeEstimateHours
-      ? parseFloat(values.timeEstimateHours) * 3600000
-      : undefined;
+    const timeEstimate = values.timeEstimateHours ? parseFloat(values.timeEstimateHours) * 3600000 : undefined;
 
-    const dueDay = values.dueDay
-      ? values.dueDay.toISOString().slice(0, 10)
-      : undefined;
+    const dueDay = values.dueDay ? values.dueDay.toISOString().slice(0, 10) : undefined;
 
     try {
       await createTask({
@@ -85,33 +70,16 @@ export default function Command() {
       navigationTitle="Create Task"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Task"
-            icon={Icon.Plus}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Create Task" icon={Icon.Plus} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        placeholder="What needs to be done?"
-        autoFocus
-      />
-      <Form.TextArea
-        id="notes"
-        title="Notes"
-        placeholder="Additional details..."
-      />
+      <Form.TextField id="title" title="Title" placeholder="What needs to be done?" autoFocus />
+      <Form.TextArea id="notes" title="Notes" placeholder="Additional details..." />
       <Form.Dropdown id="projectId" title="Project" defaultValue="">
         <Form.Dropdown.Item title="None (Inbox)" value="" />
         {projects.map((project) => (
-          <Form.Dropdown.Item
-            key={project.id}
-            title={project.title}
-            value={project.id}
-          />
+          <Form.Dropdown.Item key={project.id} title={project.title} value={project.id} />
         ))}
       </Form.Dropdown>
       <Form.TagPicker id="tagIds" title="Tags">
@@ -120,11 +88,7 @@ export default function Command() {
         ))}
       </Form.TagPicker>
       <Form.DatePicker id="dueDay" title="Due Date" />
-      <Form.TextField
-        id="timeEstimateHours"
-        title="Time Estimate (hours)"
-        placeholder="e.g. 1.5"
-      />
+      <Form.TextField id="timeEstimateHours" title="Time Estimate (hours)" placeholder="e.g. 1.5" />
     </Form>
   );
 }

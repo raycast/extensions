@@ -184,10 +184,10 @@
   "title": "Super Productivity",
   "author": "pvnkmnk",
   "platforms": [
+    "macOS",
     "Windows"
   ],
   "categories": [
     "Productivity"
-  ],
-  "allowScripts": {}
+  ]
 }

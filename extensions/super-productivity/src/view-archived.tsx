@@ -1,15 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  Color,
-  Alert,
-  confirmAlert,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Color, Alert, confirmAlert } from "@raycast/api";
 import { getTasks, getProjects, getTags, restoreTask, deleteTask } from "./api";
 import type { Task, Project, Tag } from "./types";
 import { getProjectTitle, getTagTitles } from "./utils";
@@ -83,11 +73,7 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search archived tasks..."
-      navigationTitle="Archived Tasks"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search archived tasks..." navigationTitle="Archived Tasks">
       {tasks.map((task) => {
         const tagStr = getTagTitles(task.tagIds, tags);
         const projectTitle = getProjectTitle(task.projectId, projects);
@@ -99,22 +85,14 @@ export default function Command() {
             subtitle={projectTitle}
             keywords={[task.title, projectTitle, tagStr]}
             accessories={[
-              ...(task.isDone
-                ? [{ icon: Icon.CheckCircle, text: "Done" }]
-                : []),
+              ...(task.isDone ? [{ icon: Icon.CheckCircle, text: "Done" }] : []),
               ...(tagStr ? [{ text: tagStr, icon: Icon.Tag }] : []),
-              ...(task.dueDay
-                ? [{ text: task.dueDay.slice(0, 10), icon: Icon.Calendar }]
-                : []),
+              ...(task.dueDay ? [{ text: task.dueDay.slice(0, 10), icon: Icon.Calendar }] : []),
             ]}
             actions={
               <ActionPanel>
                 <ActionPanel.Section>
-                  <Action
-                    title="Restore"
-                    icon={Icon.Redo}
-                    onAction={() => handleRestore(task)}
-                  />
+                  <Action title="Restore" icon={Icon.Redo} onAction={() => handleRestore(task)} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action

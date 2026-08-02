@@ -49,8 +49,7 @@ function errorResponse(status: number, message: string) {
   return {
     ok: false,
     status,
-    json: () =>
-      Promise.resolve({ ok: false as const, error: { code: "ERR", message } }),
+    json: () => Promise.resolve({ ok: false as const, error: { code: "ERR", message } }),
     text: () => Promise.resolve(message),
   };
 }
@@ -76,15 +75,10 @@ beforeEach(() => {
 
 describe("checkHealth", () => {
   it("returns health data on success", async () => {
-    mockFetch.mockResolvedValue(
-      okResponse({ server: "SP", rendererReady: true }),
-    );
+    mockFetch.mockResolvedValue(okResponse({ server: "SP", rendererReady: true }));
     const result = await checkHealth();
     expect(result).toEqual({ server: "SP", rendererReady: true });
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://test:3876/health",
-      expect.any(Object),
-    );
+    expect(mockFetch).toHaveBeenCalledWith("http://test:3876/health", expect.any(Object));
   });
 });
 
@@ -92,10 +86,7 @@ describe("getTasks", () => {
   it("calls /tasks with no params", async () => {
     mockFetch.mockResolvedValue(okResponse([]));
     await getTasks();
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://test:3876/tasks",
-      expect.any(Object),
-    );
+    expect(mockFetch).toHaveBeenCalledWith("http://test:3876/tasks", expect.any(Object));
   });
 
   it("applies query parameters", async () => {
@@ -118,9 +109,7 @@ describe("getTasks", () => {
   it("throws on non-ok HTTP status and shows toast", async () => {
     mockFetch.mockResolvedValue(errorResponse(500, "Server error"));
     await expect(getTasks()).rejects.toThrow("HTTP 500: Server error");
-    expect(mockShowToast).toHaveBeenCalledWith(
-      expect.objectContaining({ style: "failure", title: "API Error" }),
-    );
+    expect(mockShowToast).toHaveBeenCalledWith(expect.objectContaining({ style: "failure", title: "API Error" }));
   });
 
   it("throws on API error response", async () => {
@@ -145,10 +134,7 @@ describe("getTask", () => {
     mockFetch.mockResolvedValue(okResponse({ id: "t1", title: "Test" }));
     const result = await getTask("t1");
     expect(result).toEqual({ id: "t1", title: "Test" });
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://test:3876/tasks/t1",
-      expect.any(Object),
-    );
+    expect(mockFetch).toHaveBeenCalledWith("http://test:3876/tasks/t1", expect.any(Object));
   });
 });
 
@@ -172,9 +158,7 @@ describe("createTask", () => {
 
 describe("updateTask", () => {
   it("sends PATCH with partial payload", async () => {
-    mockFetch.mockResolvedValue(
-      okResponse({ id: "t1", title: "Updated", isDone: true }),
-    );
+    mockFetch.mockResolvedValue(okResponse({ id: "t1", title: "Updated", isDone: true }));
     const result = await updateTask("t1", { isDone: true });
     expect(result.isDone).toBe(true);
     expect(mockFetch).toHaveBeenCalledWith(
@@ -240,15 +224,10 @@ describe("restoreTask", () => {
 
 describe("getStatus", () => {
   it("returns status data", async () => {
-    mockFetch.mockResolvedValue(
-      okResponse({ currentTask: null, currentTaskId: null, taskCount: 5 }),
-    );
+    mockFetch.mockResolvedValue(okResponse({ currentTask: null, currentTaskId: null, taskCount: 5 }));
     const result = await getStatus();
     expect(result.taskCount).toBe(5);
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://test:3876/status",
-      expect.any(Object),
-    );
+    expect(mockFetch).toHaveBeenCalledWith("http://test:3876/status", expect.any(Object));
   });
 });
 
@@ -265,10 +244,7 @@ describe("getCurrentTask", () => {
     );
     const result = await getCurrentTask();
     expect(result?.id).toBe("t1");
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://test:3876/task-control/current",
-      expect.any(Object),
-    );
+    expect(mockFetch).toHaveBeenCalledWith("http://test:3876/task-control/current", expect.any(Object));
   });
 });
 
@@ -311,19 +287,13 @@ describe("getProjects", () => {
     mockFetch.mockResolvedValue(okResponse([{ id: "p1", title: "Work" }]));
     const result = await getProjects();
     expect(result).toHaveLength(1);
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://test:3876/projects",
-      expect.any(Object),
-    );
+    expect(mockFetch).toHaveBeenCalledWith("http://test:3876/projects", expect.any(Object));
   });
 
   it("applies query parameter", async () => {
     mockFetch.mockResolvedValue(okResponse([]));
     await getProjects("work");
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://test:3876/projects?query=work",
-      expect.any(Object),
-    );
+    expect(mockFetch).toHaveBeenCalledWith("http://test:3876/projects?query=work", expect.any(Object));
   });
 });
 
@@ -332,18 +302,13 @@ describe("getTags", () => {
     mockFetch.mockResolvedValue(okResponse([{ id: "t1", title: "urgent" }]));
     const result = await getTags();
     expect(result).toHaveLength(1);
-    expect(mockFetch).toHaveBeenCalledWith(
-      "http://test:3876/tags",
-      expect.any(Object),
-    );
+    expect(mockFetch).toHaveBeenCalledWith("http://test:3876/tags", expect.any(Object));
   });
 });
 
 describe("createTag", () => {
   it("sends POST with tag payload", async () => {
-    mockFetch.mockResolvedValue(
-      okResponse({ id: "new", title: "urgent", color: "red" }),
-    );
+    mockFetch.mockResolvedValue(okResponse({ id: "new", title: "urgent", color: "red" }));
     const result = await createTag({ title: "urgent", color: "red" });
     expect(result.title).toBe("urgent");
     expect(mockFetch).toHaveBeenCalledWith(

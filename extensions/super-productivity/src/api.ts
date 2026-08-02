@@ -15,10 +15,6 @@ import type {
   UpdateTagPayload,
 } from "./types";
 
-interface Preferences {
-  apiBaseUrl: string;
-}
-
 function getBaseUrl(): string {
   const { apiBaseUrl } = getPreferenceValues<Preferences>();
   return apiBaseUrl || "http://127.0.0.1:3876";
@@ -50,15 +46,11 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     return json.data;
   } catch (error) {
     if (error instanceof Error) {
-      if (
-        error.message.includes("fetch") ||
-        error.message.includes("connect")
-      ) {
+      if (error.message.includes("fetch") || error.message.includes("connect")) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Connection failed",
-          message:
-            "Make sure Super Productivity is running and the Local REST API is enabled in Settings → Misc.",
+          message: "Make sure Super Productivity is running and the Local REST API is enabled in Settings → Misc.",
         });
       } else {
         await showToast({
@@ -102,10 +94,7 @@ export async function createTask(payload: CreateTaskPayload): Promise<Task> {
   });
 }
 
-export async function updateTask(
-  id: string,
-  payload: UpdateTaskPayload,
-): Promise<Task> {
+export async function updateTask(id: string, payload: UpdateTaskPayload): Promise<Task> {
   const task = await request<Task>(`/tasks/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),
@@ -181,10 +170,7 @@ export async function createTag(payload: CreateTagPayload): Promise<Tag> {
   });
 }
 
-export async function updateTag(
-  id: string,
-  payload: UpdateTagPayload,
-): Promise<Tag> {
+export async function updateTag(id: string, payload: UpdateTagPayload): Promise<Tag> {
   return request<Tag>(`/tags/${id}`, {
     method: "PATCH",
     body: JSON.stringify(payload),

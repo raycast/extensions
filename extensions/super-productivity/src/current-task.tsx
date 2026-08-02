@@ -1,11 +1,6 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
-import {
-  getCurrentTask,
-  setCurrentTask,
-  stopCurrentTask,
-  getTasks,
-} from "./api";
+import { getCurrentTask, setCurrentTask, stopCurrentTask, getTasks } from "./api";
 import type { CurrentTask, Task } from "./types";
 
 export default function Command() {
@@ -13,13 +8,10 @@ export default function Command() {
   const [recentTasks, setRecentTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  async function fetch() {
+  async function fetchData() {
     setIsLoading(true);
     try {
-      const [task, tasks] = await Promise.all([
-        getCurrentTask(),
-        getTasks({ source: "active" }),
-      ]);
+      const [task, tasks] = await Promise.all([getCurrentTask(), getTasks({ source: "active" })]);
       setCurrentTaskState(task);
       setRecentTasks(tasks.slice(0, 20));
     } catch (e) {
@@ -30,13 +22,13 @@ export default function Command() {
   }
 
   useEffect(() => {
-    fetch();
+    fetchData();
   }, []);
 
   async function handleStartTask(taskId: string) {
     try {
       await setCurrentTask(taskId);
-      fetch();
+      fetchData();
     } catch (e) {
       console.error("Failed to start task:", e);
     }
@@ -45,18 +37,14 @@ export default function Command() {
   async function handleStopTask() {
     try {
       await stopCurrentTask();
-      fetch();
+      fetchData();
     } catch (e) {
       console.error("Failed to stop task:", e);
     }
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Current Task"
-      searchBarPlaceholder="Search tasks to start..."
-    >
+    <List isLoading={isLoading} navigationTitle="Current Task" searchBarPlaceholder="Search tasks to start...">
       {/* Current Task Section */}
       <List.Section title={currentTask ? "Currently Tracking" : "Not Tracking"}>
         {currentTask ? (
@@ -88,7 +76,7 @@ export default function Command() {
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    onAction={fetch}
+                    onAction={fetchData}
                     shortcut={{ modifiers: ["cmd"], key: "r" }}
                   />
                 </ActionPanel.Section>
@@ -96,11 +84,7 @@ export default function Command() {
             }
           />
         ) : (
-          <List.Item
-            key="none"
-            title="No task currently tracked"
-            icon={Icon.Clock}
-          />
+          <List.Item key="none" title="No task currently tracked" icon={Icon.Clock} />
         )}
       </List.Section>
 
@@ -132,9 +116,7 @@ export default function Command() {
                           ? `Resume Tracking (+ Focus Session) (${(task.timeSpent / 3600000).toFixed(1)}h spent)`
                           : "Start Tracking (+ Focus Session)"
                       }
-                      icon={
-                        task.timeSpent > 0 ? Icon.ArrowClockwise : Icon.Play
-                      }
+                      icon={task.timeSpent > 0 ? Icon.ArrowClockwise : Icon.Play}
                       onAction={() => handleStartTask(task.id)}
                     />
                   </ActionPanel>

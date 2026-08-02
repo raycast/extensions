@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  Color,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Color } from "@raycast/api";
 import { getProjects, getTasks, startTask, updateTask } from "./api";
 import type { Project, Task } from "./types";
 
@@ -77,20 +69,15 @@ export default function Command() {
         searchBarPlaceholder={`Search tasks in ${selectedProject.title}...`}
       >
         {projectTasks.map((task) => {
-          const timeEstimate =
-            task.timeEstimate > 0 ? `${task.timeEstimate / 3600000}h` : "";
+          const timeEstimate = task.timeEstimate > 0 ? `${task.timeEstimate / 3600000}h` : "";
           return (
             <List.Item
               key={task.id}
               title={task.title}
               keywords={[task.title]}
               accessories={[
-                ...(timeEstimate
-                  ? [{ text: timeEstimate, icon: Icon.Clock }]
-                  : []),
-                ...(task.dueDay
-                  ? [{ text: task.dueDay.slice(0, 10), icon: Icon.Calendar }]
-                  : []),
+                ...(timeEstimate ? [{ text: timeEstimate, icon: Icon.Clock }] : []),
+                ...(task.dueDay ? [{ text: task.dueDay.slice(0, 10), icon: Icon.Calendar }] : []),
               ]}
               actions={
                 <ActionPanel>
@@ -101,9 +88,7 @@ export default function Command() {
                           ? `Resume Tracking (${(task.timeSpent / 3600000).toFixed(1)}h spent)`
                           : "Start Tracking"
                       }
-                      icon={
-                        task.timeSpent > 0 ? Icon.ArrowClockwise : Icon.Play
-                      }
+                      icon={task.timeSpent > 0 ? Icon.ArrowClockwise : Icon.Play}
                       onAction={() => handleStartTask(task.id)}
                     />
                     <Action
@@ -144,11 +129,7 @@ export default function Command() {
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Projects"
-      searchBarPlaceholder="Search projects..."
-    >
+    <List isLoading={isLoading} navigationTitle="Projects" searchBarPlaceholder="Search projects...">
       {projects.map((project) => (
         <List.Item
           key={project.id}
@@ -156,11 +137,7 @@ export default function Command() {
           icon={{ source: Icon.Folder, tintColor: Color.Blue }}
           actions={
             <ActionPanel>
-              <Action
-                title="View Tasks"
-                icon={Icon.List}
-                onAction={() => handleSelectProject(project)}
-              />
+              <Action title="View Tasks" icon={Icon.List} onAction={() => handleSelectProject(project)} />
               <Action
                 title="Refresh"
                 icon={Icon.ArrowClockwise}

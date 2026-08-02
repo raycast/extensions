@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  popToRoot,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, popToRoot } from "@raycast/api";
 import { createTask, createTag, getProjects, getTags } from "./api";
 import type { Project, Tag } from "./types";
 import { getTodayStr } from "./utils";
@@ -82,9 +74,7 @@ function parseDueDate(expr: string): string | undefined {
   return undefined;
 }
 
-function parseTimeEstimate(
-  token: string,
-): { ms: number; consumed: string } | undefined {
+function parseTimeEstimate(token: string): { ms: number; consumed: string } | undefined {
   let remaining = token;
   let totalMs = 0;
   let consumed = "";
@@ -116,8 +106,7 @@ function tokenize(input: string): { tokens: Token[]; title: string } {
   const tagRegex = /\s#(\S+)/g;
   const dueRegex = /(?:\s|^)@(\S+)/g;
   const deadlineRegex = /(?:\s|^)!(\S+)/g;
-  const timeRegex =
-    /(?:\s|^)([\d]+(\.[\d]+)?\s*(?:h|m)(?:\s*[\d]+(\.[\d]+)?\s*(?:h|m))*)/gi;
+  const timeRegex = /(?:\s|^)([\d]+(\.[\d]+)?\s*(?:h|m)(?:\s*[\d]+(\.[\d]+)?\s*(?:h|m))*)/gi;
 
   // Collect all matches with positions
   const matches: {
@@ -218,11 +207,7 @@ function tokenize(input: string): { tokens: Token[]; title: string } {
   };
 }
 
-function parseInput(
-  input: string,
-  projects: Project[],
-  tags: Tag[],
-): ParsedInput {
+function parseInput(input: string, projects: Project[], tags: Tag[]): ParsedInput {
   const { tokens, title } = tokenize(input);
 
   let projectId: string | undefined;
@@ -291,12 +276,7 @@ function parseInput(
 function findProject(name: string, projects: Project[]): Project | undefined {
   if (name.length < 3) return undefined;
   const lower = name.toLowerCase();
-  const matches = projects.filter((p) =>
-    p.title
-      .toLowerCase()
-      .replace(/\s/g, "")
-      .startsWith(lower.replace(/\s/g, "")),
-  );
+  const matches = projects.filter((p) => p.title.toLowerCase().replace(/\s/g, "").startsWith(lower.replace(/\s/g, "")));
   if (matches.length === 0) return undefined;
   // Prefer shortest matching title
   matches.sort((a, b) => a.title.length - b.title.length);
@@ -351,8 +331,7 @@ export default function Command() {
       await showToast({
         style: Toast.Style.Failure,
         title: "Enter a task title",
-        message:
-          "Type your task, e.g. 'Buy milk +Shopping #groceries @tomorrow 30m'",
+        message: "Type your task, e.g. 'Buy milk +Shopping #groceries @tomorrow 30m'",
       });
       return;
     }
@@ -401,11 +380,7 @@ export default function Command() {
       navigationTitle="Quick Add Task"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Task"
-            icon={Icon.Plus}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Create Task" icon={Icon.Plus} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -426,24 +401,18 @@ export default function Command() {
               [
                 parsed.title && `📝 ${parsed.title}`,
                 parsed.projectTitle && `📁 ${parsed.projectTitle}`,
-                (parsed.tagTitles.length > 0 ||
-                  parsed.newTagTitles.length > 0) &&
-                  `🏷️ ${[
-                    ...parsed.tagTitles.map((t) => `#${t}`),
-                    ...parsed.newTagTitles.map((t) => `+${t}`),
-                  ].join(", ")}`,
+                (parsed.tagTitles.length > 0 || parsed.newTagTitles.length > 0) &&
+                  `🏷️ ${[...parsed.tagTitles.map((t) => `#${t}`), ...parsed.newTagTitles.map((t) => `+${t}`)].join(
+                    ", ",
+                  )}`,
                 parsed.dueDay && `📅 ${formatDueLabel(parsed.dueDay)}`,
-                parsed.timeEstimate &&
-                  `⏱️ ${formatTimeEstimate(parsed.timeEstimate)}`,
+                parsed.timeEstimate && `⏱️ ${formatTimeEstimate(parsed.timeEstimate)}`,
               ]
                 .filter(Boolean)
                 .join("   •   ") || "No fields parsed"
             }
           />
-          <Form.Description
-            title="Syntax"
-            text="+project   #tag   @today/@tomorrow/@fri/@2025-12-25   30m/1h/1.5h"
-          />
+          <Form.Description title="Syntax" text="+project   #tag   @today/@tomorrow/@fri/@2025-12-25   30m/1h/1.5h" />
         </>
       )}
       {!parsed && !isLoading && (

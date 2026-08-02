@@ -36,8 +36,7 @@ function checkType(val, expected) {
   return opts.some((t) => {
     if (t === "array") return Array.isArray(val);
     if (t === "null") return val === null;
-    if (t === "object")
-      return typeof val === "object" && val !== null && !Array.isArray(val);
+    if (t === "object") return typeof val === "object" && val !== null && !Array.isArray(val);
     return typeof val === t;
   });
 }
@@ -55,37 +54,22 @@ function collectErrors(obj, fieldTypes, prefix) {
       // Config-object spec
       if (!checkType(val, expected.type)) {
         errors.push(`${path}: expected ${expected.type}, got ${typeName(val)}`);
-      } else if (
-        expected.type === "object" &&
-        typeof val === "object" &&
-        val !== null &&
-        !Array.isArray(val)
-      ) {
+      } else if (expected.type === "object" && typeof val === "object" && val !== null && !Array.isArray(val)) {
         for (const key of Object.keys(val)) {
           if (expected.keyPattern && !expected.keyPattern.test(key)) {
-            errors.push(
-              `${path}.key "${key}": does not match ${expected.keyPattern}`,
-            );
+            errors.push(`${path}.key "${key}": does not match ${expected.keyPattern}`);
           }
           if (expected.valueType && !checkType(val[key], expected.valueType)) {
-            errors.push(
-              `${path}["${key}"]: expected ${expected.valueType}, got ${typeName(val[key])}`,
-            );
+            errors.push(`${path}["${key}"]: expected ${expected.valueType}, got ${typeName(val[key])}`);
           }
         }
         if (expected.fields) {
           errors.push(...collectErrors(val, expected.fields, path));
         }
-      } else if (
-        expected.type === "array" &&
-        Array.isArray(val) &&
-        expected.elementType
-      ) {
+      } else if (expected.type === "array" && Array.isArray(val) && expected.elementType) {
         for (let i = 0; i < val.length; i++) {
           if (!checkType(val[i], expected.elementType)) {
-            errors.push(
-              `${path}[${i}]: expected ${expected.elementType}, got ${typeName(val[i])}`,
-            );
+            errors.push(`${path}[${i}]: expected ${expected.elementType}, got ${typeName(val[i])}`);
           }
         }
       }
@@ -99,11 +83,8 @@ function isOptional(expected) {
 }
 
 function assertShape(label, obj, fieldTypes) {
-  const missing = Object.keys(fieldTypes).filter(
-    (k) => !(k in (obj ?? {})) && !isOptional(fieldTypes[k]),
-  );
-  const typeErrors =
-    missing.length === 0 ? collectErrors(obj, fieldTypes, "") : [];
+  const missing = Object.keys(fieldTypes).filter((k) => !(k in (obj ?? {})) && !isOptional(fieldTypes[k]));
+  const typeErrors = missing.length === 0 ? collectErrors(obj, fieldTypes, "") : [];
   if (missing.length === 0 && typeErrors.length === 0) {
     passed++;
     console.log(`  ✓ ${label}`);
@@ -140,9 +121,7 @@ function expectOk(label, { status, body }) {
     failed++;
     const msg = `${label}: status=${status} body=${JSON.stringify(body).slice(0, 120)}`;
     failures.push(msg);
-    console.log(
-      `  ✗ ${label} (expected ok=true, got ${JSON.stringify(body).slice(0, 150)})`,
-    );
+    console.log(`  ✗ ${label} (expected ok=true, got ${JSON.stringify(body).slice(0, 150)})`);
     return null;
   }
   passed++;
@@ -251,8 +230,7 @@ console.log("health & status");
 {
   const hb = await call("GET", "/health");
   expectOk("GET /health", hb);
-  if (hb.body?.ok)
-    assertShape("HealthResponse shape", hb.body.data, HEALTH_FIELDS);
+  if (hb.body?.ok) assertShape("HealthResponse shape", hb.body.data, HEALTH_FIELDS);
 
   const sr = await call("GET", "/status");
   const sd = expectOk("GET /status", sr);
@@ -376,9 +354,7 @@ console.log("\n7. view-scheduled");
     const today = new Date().toISOString().slice(0, 10);
     const overdue = d.filter((t) => t.dueDay && t.dueDay < today);
     const todayTasks = d.filter((t) => t.dueDay === today);
-    console.log(
-      `  (overdue=${overdue.length}, today=${todayTasks.length}, total=${d.length})`,
-    );
+    console.log(`  (overdue=${overdue.length}, today=${todayTasks.length}, total=${d.length})`);
     if (d[0]) assertShape("Scheduled task sample", d[0], TASK_FIELDS);
   }
   await call("GET", "/projects");
@@ -418,9 +394,7 @@ console.log("\n10. view-projects");
 console.log(`\n${"─".repeat(60)}`);
 console.log(`RESULT: ${passed} passed, ${failed} failed`);
 if (failures.length === 0) {
-  console.log(
-    "✅ Every endpoint used by every command returned the expected envelope and shape.",
-  );
+  console.log("✅ Every endpoint used by every command returned the expected envelope and shape.");
 } else {
   console.log(`❌ ${failures.length} mismatch(es):`);
   for (const f of failures) console.log(`   - ${f}`);

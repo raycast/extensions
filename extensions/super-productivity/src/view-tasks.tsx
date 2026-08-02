@@ -1,24 +1,6 @@
 import { useState, useEffect } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  Color,
-  Alert,
-  confirmAlert,
-} from "@raycast/api";
-import {
-  getTasks,
-  getProjects,
-  getTags,
-  startTask,
-  archiveTask,
-  deleteTask,
-  updateTask,
-} from "./api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Color, Alert, confirmAlert } from "@raycast/api";
+import { getTasks, getProjects, getTags, startTask, archiveTask, deleteTask, updateTask } from "./api";
 import type { Task, Project, Tag } from "./types";
 import { getProjectTitle, getTagTitles } from "./utils";
 
@@ -153,11 +135,7 @@ export default function Command() {
           <List.Dropdown.Item title="All" value="all" />
           <List.Dropdown.Section title="Projects">
             {projects.map((project) => (
-              <List.Dropdown.Item
-                key={`project-${project.id}`}
-                title={project.title}
-                value={`project:${project.id}`}
-              />
+              <List.Dropdown.Item key={`project-${project.id}`} title={project.title} value={`project:${project.id}`} />
             ))}
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Tags">
@@ -166,11 +144,7 @@ export default function Command() {
                 key={`tag-${tag.id}`}
                 title={`#${tag.title}`}
                 value={`tag:${tag.id}`}
-                icon={
-                  tag.color
-                    ? { source: Icon.Tag, tintColor: tag.color }
-                    : Icon.Tag
-                }
+                icon={tag.color ? { source: Icon.Tag, tintColor: tag.color } : Icon.Tag}
               />
             ))}
           </List.Dropdown.Section>
@@ -180,8 +154,7 @@ export default function Command() {
       {tasks.map((task) => {
         const tagStr = getTagTitles(task.tagIds, tags);
         const projectTitle = getProjectTitle(task.projectId, projects);
-        const timeEstimate =
-          task.timeEstimate > 0 ? `${task.timeEstimate / 3600000}h` : "";
+        const timeEstimate = task.timeEstimate > 0 ? `${task.timeEstimate / 3600000}h` : "";
 
         return (
           <List.Item
@@ -191,12 +164,8 @@ export default function Command() {
             keywords={[task.title, projectTitle, tagStr]}
             accessories={[
               ...(tagStr ? [{ text: tagStr, icon: Icon.Tag }] : []),
-              ...(timeEstimate
-                ? [{ text: timeEstimate, icon: Icon.Clock }]
-                : []),
-              ...(task.dueDay
-                ? [{ text: task.dueDay.slice(0, 10), icon: Icon.Calendar }]
-                : []),
+              ...(timeEstimate ? [{ text: timeEstimate, icon: Icon.Clock }] : []),
+              ...(task.dueDay ? [{ text: task.dueDay.slice(0, 10), icon: Icon.Calendar }] : []),
             ]}
             actions={
               <ActionPanel>
