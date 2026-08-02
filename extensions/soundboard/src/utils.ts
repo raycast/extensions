@@ -198,8 +198,19 @@ const stopMacOSPlayers = (audioPath: string) => {
     } catch {
       // The process already exited.
     }
+    // Unregister only the players we just stopped. A same-path playback that is
+    // registered concurrently keeps its own file, so it retains liveness
+    // tracking and a working Stop action.
+    unregisterPlayer(audioPath, pid);
   }
-  rmSync(playersDir(audioPath), { recursive: true, force: true });
+  // Best-effort removal of the per-sound directory only once it is empty. It is
+  // non-recursive on purpose: if a player registered during this stop the
+  // removal fails and that new registration is preserved.
+  try {
+    rmSync(playersDir(audioPath), { force: true });
+  } catch {
+    // Best effort only.
+  }
 };
 
 export const playSoundFromIndex = async (index: number) => {
