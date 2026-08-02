@@ -28,8 +28,11 @@ async function withCrossProcessLock<T>(fn: () => Promise<T>): Promise<T> {
 
   for (let i = 0; i < 30; i++) {
     const existingLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
+
     if (!existingLock) {
       await LocalStorage.setItem(CUSTOM_SHORTCUTS_LOCK_KEY, lockId);
+      const jitterMs = Math.floor(Math.random() * 10) + 5;
+      await new Promise((r) => setTimeout(r, jitterMs));
       const verifyLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
       if (verifyLock === lockId) {
         acquired = true;
@@ -39,7 +42,16 @@ async function withCrossProcessLock<T>(fn: () => Promise<T>): Promise<T> {
     } else {
       const lockTime = parseInt(existingLock.split("-")[0] ?? "0", 10);
       if (!isNaN(lockTime) && Date.now() - lockTime > 10000) {
-        await LocalStorage.removeItem(CUSTOM_SHORTCUTS_LOCK_KEY);
+        // Atomic reclaim with randomized jitter verification to prevent dual-writer race
+        await LocalStorage.setItem(CUSTOM_SHORTCUTS_LOCK_KEY, lockId);
+        const jitterMs = Math.floor(Math.random() * 10) + 5;
+        await new Promise((r) => setTimeout(r, jitterMs));
+        const verifyLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
+        if (verifyLock === lockId) {
+          acquired = true;
+          activeProcessLockId = lockId;
+          break;
+        }
       }
     }
     await new Promise((resolve) => setTimeout(resolve, 50));
@@ -104,7 +116,7 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
 
 /**
  * Executes a cross-command safe serial mutation on custom shortcuts using cross-process LocalStorage locking.
- * Enforces re-entrant atomic lock acquisition across independent command runtimes before executing mutations.
+ * Enforces re-entrant atomic lock acquisition with jitter verification across independent command runtimes.
  */
 export function mutateCustomShortcuts<T>(
   mutation: (shortcuts: Shortcut[]) => CustomShortcutMutation<T> | Promise<CustomShortcutMutation<T>>,
