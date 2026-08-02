@@ -2,16 +2,25 @@ import { LocalStorage } from "@raycast/api";
 import { MODIFIERS, OWNER_TYPES, SCOPE_TYPES, type Shortcut, type ShortcutFormValues } from "../types/shortcut";
 import { GENERAL_OWNER_NAME, inferCustomOwnerType } from "./owner-type";
 import { isSafeHttpUrl } from "./safe-url";
+import { createSerialTaskQueue } from "./serial-task-queue";
 import { formatShortcutDisplay, normalizeKey, normalizeModifiers } from "./shortcut-format";
+import { prepareImportedShortcuts, type PreparedImport } from "./import-export-format";
 
 const LEGACY_CUSTOM_SHORTCUTS_KEY = "shortcut-vault.custom-shortcuts";
 const SHORTCUT_KEY_PREFIX = "shortcut-vault.shortcut.";
+// Raycast LocalStorage has asynchronous reads and writes but no transaction or CAS API.
+// Keep every access in one FIFO queue so a same-runtime command cannot interleave a read-modify-write sequence.
+const storageOperationQueue = createSerialTaskQueue();
+
+let hasMigratedLegacyStorage = false;
 
 export { GENERAL_OWNER_NAME };
 
 export async function getCustomShortcuts(): Promise<Shortcut[]> {
-  await migrateLegacyStorageIfNeeded();
+  return withStorageAccess(readCustomShortcuts);
+}
 
+async function readCustomShortcuts(): Promise<Shortcut[]> {
   const allItems = await LocalStorage.allItems();
   const shortcuts: Shortcut[] = [];
   const seenIds = new Set<string>();
@@ -40,135 +49,136 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
 }
 
 export async function createCustomShortcut(values: ShortcutFormValues): Promise<Shortcut> {
-  const now = new Date().toISOString();
-  const shortcut: Shortcut = {
-    id: crypto.randomUUID(),
-    commandName: values.commandName.trim(),
-    modifiers: normalizeModifiers(values.modifiers),
-    key: normalizeKey(values.key),
-    shortcutDisplay: formatShortcutDisplay(values.modifiers, values.key),
-    ownerName: normalizeOwnerName(values.ownerName),
-    ownerType: values.ownerType ?? inferCustomOwnerType(values.ownerName, values.scope),
-    scope: values.scope,
-    notes: values.notes.trim() || undefined,
-    sourceType: "custom",
-    createdAt: now,
-    updatedAt: now,
-  };
+  return withStorageAccess(async () => {
+    const now = new Date().toISOString();
+    const shortcut: Shortcut = {
+      id: crypto.randomUUID(),
+      commandName: values.commandName.trim(),
+      modifiers: normalizeModifiers(values.modifiers),
+      key: normalizeKey(values.key),
+      shortcutDisplay: formatShortcutDisplay(values.modifiers, values.key),
+      ownerName: normalizeOwnerName(values.ownerName),
+      ownerType: values.ownerType ?? inferCustomOwnerType(values.ownerName, values.scope),
+      scope: values.scope,
+      notes: values.notes.trim() || undefined,
+      sourceType: "custom",
+      createdAt: now,
+      updatedAt: now,
+    };
 
-  await LocalStorage.setItem(getItemKey(shortcut.id), JSON.stringify(shortcut));
-  return shortcut;
+    await LocalStorage.setItem(getItemKey(shortcut.id), JSON.stringify(shortcut));
+    return shortcut;
+  });
 }
 
 export async function updateCustomShortcut(id: string, values: ShortcutFormValues): Promise<Shortcut> {
-  const itemKey = getItemKey(id);
-  const rawBefore = await LocalStorage.getItem<string>(itemKey);
+  return withStorageAccess(async () => {
+    const itemKey = getItemKey(id);
+    const raw = await LocalStorage.getItem<string>(itemKey);
 
-  if (!rawBefore) {
-    throw new Error("That custom shortcut could not be found or was deleted.");
-  }
+    if (!raw) {
+      throw new Error("That custom shortcut could not be found or was deleted.");
+    }
 
-  let existing: Shortcut;
-  try {
-    existing = parseStoredShortcut(JSON.parse(rawBefore));
-  } catch {
-    throw new Error("That custom shortcut is invalid and cannot be updated.");
-  }
+    let existing: Shortcut;
+    try {
+      existing = parseStoredShortcut(JSON.parse(raw));
+    } catch {
+      throw new Error("That custom shortcut is invalid and cannot be updated.");
+    }
 
-  const updated: Shortcut = {
-    ...existing,
-    commandName: values.commandName.trim(),
-    modifiers: normalizeModifiers(values.modifiers),
-    key: normalizeKey(values.key),
-    shortcutDisplay: formatShortcutDisplay(values.modifiers, values.key),
-    ownerName: normalizeOwnerName(values.ownerName),
-    ownerType: values.ownerType ?? inferCustomOwnerType(values.ownerName, values.scope),
-    scope: values.scope,
-    notes: values.notes.trim() || undefined,
-    updatedAt: new Date().toISOString(),
-  };
+    const updated: Shortcut = {
+      ...existing,
+      commandName: values.commandName.trim(),
+      modifiers: normalizeModifiers(values.modifiers),
+      key: normalizeKey(values.key),
+      shortcutDisplay: formatShortcutDisplay(values.modifiers, values.key),
+      ownerName: normalizeOwnerName(values.ownerName),
+      ownerType: values.ownerType ?? inferCustomOwnerType(values.ownerName, values.scope),
+      scope: values.scope,
+      notes: values.notes.trim() || undefined,
+      updatedAt: new Date().toISOString(),
+    };
 
-  const rawCheck = await LocalStorage.getItem<string>(itemKey);
-
-  if (!rawCheck) {
-    throw new Error("That custom shortcut was deleted prior to saving updates.");
-  }
-
-  if (rawCheck !== rawBefore) {
-    throw new Error("That custom shortcut was modified concurrently. Please try your edit again.");
-  }
-
-  await LocalStorage.setItem(itemKey, JSON.stringify(updated));
-  return updated;
+    await LocalStorage.setItem(itemKey, JSON.stringify(updated));
+    return updated;
+  });
 }
 
-export async function importCustomShortcuts(shortcutsToImport: Shortcut[]): Promise<void> {
-  for (const shortcut of shortcutsToImport) {
-    await LocalStorage.setItem(getItemKey(shortcut.id), JSON.stringify(shortcut));
-  }
+export async function importCustomShortcuts(
+  shortcutsToImport: Shortcut[],
+  reservedShortcuts: Shortcut[] = [],
+): Promise<PreparedImport> {
+  return withStorageAccess(async () => {
+    const prepared = prepareImportedShortcuts(shortcutsToImport, [
+      ...(await readCustomShortcuts()),
+      ...reservedShortcuts,
+    ]);
+
+    for (const shortcut of prepared.shortcuts) {
+      await LocalStorage.setItem(getItemKey(shortcut.id), JSON.stringify(shortcut));
+    }
+
+    return prepared;
+  });
 }
 
 export async function deleteCustomShortcut(id: string): Promise<void> {
-  const itemKey = getItemKey(id);
-  const rawCheck = await LocalStorage.getItem<string>(itemKey);
-  if (rawCheck) {
-    await LocalStorage.removeItem(itemKey);
-  }
+  await withStorageAccess(async () => LocalStorage.removeItem(getItemKey(id)));
 }
 
 export async function duplicateCustomShortcut(id: string): Promise<Shortcut> {
-  const itemKey = getItemKey(id);
-  const rawBefore = await LocalStorage.getItem<string>(itemKey);
+  return withStorageAccess(async () => {
+    const itemKey = getItemKey(id);
+    const raw = await LocalStorage.getItem<string>(itemKey);
 
-  if (!rawBefore) {
-    throw new Error("That custom shortcut could not be found or was deleted.");
-  }
+    if (!raw) {
+      throw new Error("That custom shortcut could not be found or was deleted.");
+    }
 
-  let existing: Shortcut;
-  try {
-    existing = parseStoredShortcut(JSON.parse(rawBefore));
-  } catch {
-    throw new Error("That custom shortcut is invalid and cannot be duplicated.");
-  }
+    let existing: Shortcut;
+    try {
+      existing = parseStoredShortcut(JSON.parse(raw));
+    } catch {
+      throw new Error("That custom shortcut is invalid and cannot be duplicated.");
+    }
 
-  const rawCheck = await LocalStorage.getItem<string>(itemKey);
-  if (!rawCheck) {
-    throw new Error("That custom shortcut was deleted prior to duplicating.");
-  }
+    const now = new Date().toISOString();
+    const duplicate: Shortcut = {
+      ...existing,
+      id: crypto.randomUUID(),
+      commandName: `${existing.commandName} Copy`,
+      createdAt: now,
+      updatedAt: now,
+    };
 
-  const now = new Date().toISOString();
-  const duplicate: Shortcut = {
-    ...existing,
-    id: crypto.randomUUID(),
-    commandName: `${existing.commandName} Copy`,
-    createdAt: now,
-    updatedAt: now,
-  };
-
-  await LocalStorage.setItem(getItemKey(duplicate.id), JSON.stringify(duplicate));
-  return duplicate;
+    await LocalStorage.setItem(getItemKey(duplicate.id), JSON.stringify(duplicate));
+    return duplicate;
+  });
 }
 
 export async function findDuplicateCustomShortcut(
   values: ShortcutFormValues,
   excludedId?: string,
 ): Promise<Shortcut | undefined> {
-  const shortcuts = await getCustomShortcuts();
-  const ownerName = normalizeOwnerName(values.ownerName).toLocaleLowerCase();
-  const key = normalizeKey(values.key);
-  const modifiers = normalizeModifiers(values.modifiers);
+  return withStorageAccess(async () => {
+    const shortcuts = await readCustomShortcuts();
+    const ownerName = normalizeOwnerName(values.ownerName).toLocaleLowerCase();
+    const key = normalizeKey(values.key);
+    const modifiers = normalizeModifiers(values.modifiers);
 
-  return shortcuts.find((shortcut) => {
-    if (shortcut.id === excludedId) {
-      return false;
-    }
+    return shortcuts.find((shortcut) => {
+      if (shortcut.id === excludedId) {
+        return false;
+      }
 
-    return (
-      shortcut.ownerName.toLocaleLowerCase() === ownerName &&
-      shortcut.scope === values.scope &&
-      shortcut.key === key &&
-      areModifiersEqual(shortcut.modifiers, modifiers)
-    );
+      return (
+        shortcut.ownerName.toLocaleLowerCase() === ownerName &&
+        shortcut.scope === values.scope &&
+        shortcut.key === key &&
+        areModifiersEqual(shortcut.modifiers, modifiers)
+      );
+    });
   });
 }
 
@@ -181,18 +191,30 @@ function getItemKey(id: string): string {
 }
 
 async function migrateLegacyStorageIfNeeded(): Promise<void> {
+  if (hasMigratedLegacyStorage) {
+    return;
+  }
+
   const legacyRaw = await LocalStorage.getItem<string>(LEGACY_CUSTOM_SHORTCUTS_KEY);
   if (!legacyRaw) {
+    hasMigratedLegacyStorage = true;
     return;
   }
 
   try {
     const parsed = JSON.parse(legacyRaw);
     if (Array.isArray(parsed)) {
+      const existingItems = await LocalStorage.allItems();
+
       for (const item of parsed) {
         try {
           const shortcut = parseStoredShortcut(item);
-          await LocalStorage.setItem(getItemKey(shortcut.id), JSON.stringify(shortcut));
+          const itemKey = getItemKey(shortcut.id);
+          if (!existingItems[itemKey]) {
+            const serializedShortcut = JSON.stringify(shortcut);
+            await LocalStorage.setItem(itemKey, serializedShortcut);
+            existingItems[itemKey] = serializedShortcut;
+          }
         } catch {
           // Ignore unparseable legacy items
         }
@@ -202,7 +224,15 @@ async function migrateLegacyStorageIfNeeded(): Promise<void> {
     // Ignore invalid legacy JSON
   } finally {
     await LocalStorage.removeItem(LEGACY_CUSTOM_SHORTCUTS_KEY);
+    hasMigratedLegacyStorage = true;
   }
+}
+
+function withStorageAccess<T>(operation: () => Promise<T>): Promise<T> {
+  return storageOperationQueue.run(async () => {
+    await migrateLegacyStorageIfNeeded();
+    return operation();
+  });
 }
 
 function parseStoredShortcut(value: unknown): Shortcut {
