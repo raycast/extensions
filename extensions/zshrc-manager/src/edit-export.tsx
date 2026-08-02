@@ -1,4 +1,6 @@
 import EditItemForm, { type EditItemConfig } from "./lib/edit-item-form";
+import { parseExports } from "./utils/parsers";
+import { escapeRegExp } from "./utils/shell-escape";
 
 interface EditExportProps {
   /** Existing variable name (for editing) */
@@ -7,6 +9,8 @@ interface EditExportProps {
   existingValue?: string;
   /** Section where this export belongs */
   sectionLabel?: string;
+  /** 0-based instance of the section label for duplicate labels */
+  sectionOccurrence?: number | undefined;
   /** Callback when export is saved */
   onSave?: () => void;
 }
@@ -22,24 +26,24 @@ export const exportConfig: EditItemConfig = {
   keyPattern: /^[A-Z_][A-Z0-9_]*$/,
   keyValidationError: "Variable name must be uppercase and contain only letters, numbers, and underscores",
   generateLine: (variable, value) => `export ${variable}=${value}`,
-  // Match export lines with quoted or unquoted values and optional inline comments
-  // Examples:
-  //   export PATH="/usr/local/bin:$PATH"
-  //   export PATH=/usr/local/bin:$PATH # comment
-  //   typeset -x PATH=/usr/local/bin
-  // Regex pattern breakdown:
-  //   ^(\s*)                    - Group 1: Leading whitespace (preserved)
-  //   (?:export|typeset\s+-x)    - Non-capturing group: matches "export" or "typeset -x"
-  //   \s+                        - Whitespace after export/typeset
-  //   ${variable}                - The variable name (escaped in actual usage)
-  //   \s*=\s*                   - Optional whitespace around equals sign
-  //   ([^\n#]*?)               - Group 2: Value (non-greedy, stops at newline or #)
-  //   (\s*#.*)?                - Group 3: Optional inline comment
-  //   $                         - End of line
-  //   gm                        - Global and multiline flags
+  // Match export lines with quoted or unquoted values and optional inline
+  // comments. The name is regex-escaped, and whitespace is horizontal-only:
+  // `\s` would cross the newline and swallow the next line when the value is
+  // empty.
+  // Groups: (1) leading whitespace, (2) value, (3) inline comment.
   generatePattern: (variable) =>
-    new RegExp(`^(\\s*)(?:export|typeset\\s+-x)\\s+${variable}\\s*=\\s*([^\\\n#]*?)(\\s*#.*)?$`, "gm"),
+    new RegExp(
+      `^([ \\t]*)(?:export|typeset[ \\t]+-x)[ \\t]+${escapeRegExp(variable)}[ \\t]*=[ \\t]*([^\\n#]*?)([ \\t]*#.*)?$`,
+      "gm",
+    ),
   generateReplacement: (variable, value) => `export ${variable}=${value}`,
+  // The same parser that rendered the item in the UI decides which lines are
+  // its definitions, so the write path can never target a line the user
+  // never saw (e.g. an empty export the display parser skips). Values
+  // containing `#` are excluded: the write pattern splits the line at `#`,
+  // so rewriting such a line would corrupt it — refusing is safer.
+  matchesDisplayLine: (line, variable) =>
+    parseExports(line).some((exp) => exp.variable === variable && !exp.value.includes("#")),
   itemType: "export",
   itemTypeCapitalized: "Export",
 };
@@ -47,12 +51,19 @@ export const exportConfig: EditItemConfig = {
 /**
  * Form component for creating or editing exports
  */
-export default function EditExport({ existingVariable, existingValue, sectionLabel, onSave }: EditExportProps) {
+export default function EditExport({
+  existingVariable,
+  existingValue,
+  sectionLabel,
+  sectionOccurrence,
+  onSave,
+}: EditExportProps) {
   return (
     <EditItemForm
       existingKey={existingVariable}
       existingValue={existingValue}
       sectionLabel={sectionLabel}
+      sectionOccurrence={sectionOccurrence}
       onSave={onSave}
       config={exportConfig}
     />
