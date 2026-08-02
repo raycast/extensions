@@ -8,7 +8,18 @@ export const ASIDE_BUNDLE_ID = "at.studio.AsideBrowser";
 export const ASIDE_USER_DATA_DIR = join(homedir(), "Library", "Application Support", "Aside");
 
 export function resolveAsideProfile(profile?: string): string {
-  return profile?.trim() || "Default";
+  const directory = profile?.trim();
+  if (
+    !directory ||
+    directory === "." ||
+    directory === ".." ||
+    directory.includes("/") ||
+    directory.includes("\\") ||
+    directory.includes("\0")
+  ) {
+    return "Default";
+  }
+  return directory;
 }
 
 export const APPLESCRIPT_TIMEOUT_MS = 5000;
