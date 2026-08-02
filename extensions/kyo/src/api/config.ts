@@ -28,10 +28,11 @@ export const ANON_KEY =
 
 /**
  * The extension's first-party OAuth client, registered (verified, public/PKCE)
- * in Kyo alongside `kyo_cli` with Raycast's redirect URIs
- * (`https://raycast.com/redirect?packageName=Extension` + the query-less
- * alternate). Power users can override it in preferences to point the extension
- * at their own registered app (Kyo Settings -> API, `kyoapp_…` ids).
+ * in Kyo alongside `kyo_cli` with Raycast's redirect URIs — the custom-scheme
+ * ones (`raycast://oauth?package_name=Extension` and its beta/reverse-DNS
+ * variants) plus the legacy `https://raycast.com/redirect` web bounce. Power
+ * users can override it in preferences to point the extension at their own
+ * registered app (Kyo Settings -> API, `kyoapp_…` ids).
  */
 const DEFAULT_CLIENT_ID = "kyo_raycast";
 

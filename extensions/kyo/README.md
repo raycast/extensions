@@ -44,11 +44,12 @@ Power users can point the extension at their own registered app:
 
 1. In the Kyo app, open **Settings → API** and create a new OAuth application
    (**public client** — no client secret; PKCE only).
-2. Add this exact **redirect URI** (Raycast's OAuth redirect, matched exactly
-   including the query string):
+2. Add this exact **redirect URI** (Raycast's app-scheme OAuth redirect,
+   matched exactly including the query string — the browser hands the
+   authorization code directly to the Raycast app):
 
    ```
-   https://raycast.com/redirect?packageName=Extension
+   raycast://oauth?package_name=Extension
    ```
 
 3. Paste the generated client id (prefix `kyoapp_…`) into the extension's

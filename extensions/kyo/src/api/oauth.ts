@@ -19,7 +19,10 @@ import {
  */
 
 export const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.Web,
+  // App = custom-scheme redirect (raycast://oauth?package_name=Extension): the
+  // browser hands the code straight to the Raycast app, with no dependency on
+  // the raycast.com/redirect bounce (which some networks cannot reach).
+  redirectMethod: OAuth.RedirectMethod.App,
   providerName: "Kyo",
   providerId: "kyo",
   providerIcon: "kyo-icon.png",
