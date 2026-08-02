@@ -497,8 +497,7 @@ export const defaultShortcutDatasets: DefaultShortcutDataset[] = [
   {
     ownerName: "Figma",
     ownerType: "webapp",
-    sourceUrl:
-      "https://help.figma.com/hc/en-us/articles/360040328653-Use-Figma-products-with-a-keyboard",
+    sourceUrl: "https://help.figma.com/hc/en-us/articles/360040328653-Use-Figma-products-with-a-keyboard",
     shortcuts: [
       {
         id: "show-keyboard-shortcuts",
@@ -904,8 +903,7 @@ export const defaultShortcutDatasets: DefaultShortcutDataset[] = [
   {
     ownerName: "Freeform",
     ownerType: "mac-app",
-    sourceUrl:
-      "https://support.apple.com/guide/freeform/keyboard-shortcuts-and-gestures-frfm46c25187e/mac",
+    sourceUrl: "https://support.apple.com/guide/freeform/keyboard-shortcuts-and-gestures-frfm46c25187e/mac",
     shortcuts: [
       {
         id: "new-board",
@@ -1689,8 +1687,7 @@ export const defaultShortcutDatasets: DefaultShortcutDataset[] = [
   {
     ownerName: "Notes",
     ownerType: "mac-app",
-    sourceUrl:
-      "https://support.apple.com/guide/notes/keyboard-shortcuts-and-gestures-apd46c25187e/mac",
+    sourceUrl: "https://support.apple.com/guide/notes/keyboard-shortcuts-and-gestures-apd46c25187e/mac",
     shortcuts: [
       {
         id: "new-note",

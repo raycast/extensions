@@ -30,10 +30,7 @@ export async function getShortcutOwnerOptions(): Promise<ShortcutOwnerOption[]> 
 
     const existing = owners.get(key);
 
-    if (
-      !existing ||
-      getOwnerTypePriority(shortcut.ownerType) < getOwnerTypePriority(existing.ownerType)
-    ) {
+    if (!existing || getOwnerTypePriority(shortcut.ownerType) < getOwnerTypePriority(existing.ownerType)) {
       owners.set(key, { ownerName: shortcut.ownerName, ownerType: shortcut.ownerType });
     }
   }

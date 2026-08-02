@@ -1,11 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import {
-  MODIFIERS,
-  OWNER_TYPES,
-  SCOPE_TYPES,
-  type Shortcut,
-  type ShortcutFormValues,
-} from "../types/shortcut";
+import { MODIFIERS, OWNER_TYPES, SCOPE_TYPES, type Shortcut, type ShortcutFormValues } from "../types/shortcut";
 import { GENERAL_OWNER_NAME, inferCustomOwnerType } from "./owner-type";
 import { isSafeHttpUrl } from "./safe-url";
 import { createSerialTaskQueue } from "./serial-task-queue";
@@ -67,10 +61,12 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
   return shortcuts;
 }
 
+/**
+ * Executes a serial mutation on custom shortcuts.
+ * Re-reads fresh shortcuts directly from LocalStorage on every execution turn to prevent stale state.
+ */
 export function mutateCustomShortcuts<T>(
-  mutation: (
-    shortcuts: Shortcut[],
-  ) => CustomShortcutMutation<T> | Promise<CustomShortcutMutation<T>>,
+  mutation: (shortcuts: Shortcut[]) => CustomShortcutMutation<T> | Promise<CustomShortcutMutation<T>>,
 ): Promise<T> {
   return customShortcutMutationQueue.run(async () => {
     const currentShortcuts = await getCustomShortcuts();
@@ -102,10 +98,7 @@ export async function createCustomShortcut(values: ShortcutFormValues): Promise<
   });
 }
 
-export async function updateCustomShortcut(
-  id: string,
-  values: ShortcutFormValues,
-): Promise<Shortcut> {
+export async function updateCustomShortcut(id: string, values: ShortcutFormValues): Promise<Shortcut> {
   return mutateCustomShortcuts((shortcuts) => {
     const existing = shortcuts.find((shortcut) => shortcut.id === id);
 

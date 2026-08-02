@@ -1,23 +1,8 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  Clipboard,
-  Color,
-  Icon,
-  List,
-  Toast,
-  confirmAlert,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, Clipboard, Color, Icon, List, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { deleteCustomShortcut, duplicateCustomShortcut } from "../lib/storage";
 import { getShortcuts } from "../lib/shortcut-data";
-import {
-  buildSearchKeywords,
-  getFullShortcutText,
-  getShortcutSubtitle,
-} from "../lib/shortcut-format";
+import { buildSearchKeywords, getFullShortcutText, getShortcutSubtitle } from "../lib/shortcut-format";
 import { searchShortcuts } from "../lib/shortcut-search";
 import { SCOPE_LABELS, SOURCE_LABELS } from "../lib/labels";
 import type { ScopeType, Shortcut, ShortcutFilter, SourceType } from "../types/shortcut";
@@ -47,10 +32,7 @@ export function ShortcutList({ filter, intent = "search" }: Props) {
       setShortcuts(await getShortcuts(filter));
       setLoadError(undefined);
     } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Open Shortcut Vault again after checking storage.";
+      const message = error instanceof Error ? error.message : "Open Shortcut Vault again after checking storage.";
       setLoadError(message);
       await showToast({
         style: Toast.Style.Failure,
@@ -74,10 +56,7 @@ export function ShortcutList({ filter, intent = "search" }: Props) {
     }
   }, [availableFilters, viewFilter]);
 
-  const filteredShortcuts = useMemo(
-    () => applyViewFilter(shortcuts, viewFilter),
-    [shortcuts, viewFilter],
-  );
+  const filteredShortcuts = useMemo(() => applyViewFilter(shortcuts, viewFilter), [shortcuts, viewFilter]);
 
   const displayedShortcuts = useMemo(() => {
     const results = searchShortcuts(filteredShortcuts, searchText);
@@ -133,15 +112,7 @@ export function ShortcutList({ filter, intent = "search" }: Props) {
       title: "No shortcuts available",
       description: "Shortcut Vault could not find any shortcuts to show.",
     };
-  }, [
-    activeFilterLabel,
-    filteredShortcuts.length,
-    filter,
-    hasActiveViewFilter,
-    intent,
-    loadError,
-    searchText,
-  ]);
+  }, [activeFilterLabel, filteredShortcuts.length, filter, hasActiveViewFilter, intent, loadError, searchText]);
 
   const canAddShortcut = filter !== "default";
   const emptyActions =
@@ -149,18 +120,10 @@ export function ShortcutList({ filter, intent = "search" }: Props) {
       <ActionPanel>
         {loadError ? <Action title="Retry" icon={Icon.Redo} onAction={refresh} /> : null}
         {hasActiveViewFilter ? (
-          <Action
-            title="Show All Results"
-            icon={Icon.XMarkCircle}
-            onAction={() => setViewFilter("all")}
-          />
+          <Action title="Show All Results" icon={Icon.XMarkCircle} onAction={() => setViewFilter("all")} />
         ) : null}
         {canAddShortcut ? (
-          <Action.Push
-            title="Add Shortcut"
-            icon={Icon.Plus}
-            target={<ShortcutForm onSaved={refresh} />}
-          />
+          <Action.Push title="Add Shortcut" icon={Icon.Plus} target={<ShortcutForm onSaved={refresh} />} />
         ) : null}
       </ActionPanel>
     ) : undefined;
@@ -174,11 +137,7 @@ export function ShortcutList({ filter, intent = "search" }: Props) {
       onSearchTextChange={setSearchText}
       searchBarAccessory={
         shortcuts.length > 0 ? (
-          <ShortcutFilterDropdown
-            availableFilters={availableFilters}
-            value={viewFilter}
-            onChange={setViewFilter}
-          />
+          <ShortcutFilterDropdown availableFilters={availableFilters} value={viewFilter} onChange={setViewFilter} />
         ) : undefined
       }
     >
@@ -277,9 +236,7 @@ function getAvailableViewFilters(shortcuts: Shortcut[]): AvailableViewFilters {
       shortcuts.map((shortcut) => shortcut.scope),
       ["global", "app", "webapp"],
     ),
-    owners: Array.from(new Set(shortcuts.map((shortcut) => shortcut.ownerName))).sort((a, b) =>
-      a.localeCompare(b),
-    ),
+    owners: Array.from(new Set(shortcuts.map((shortcut) => shortcut.ownerName))).sort((a, b) => a.localeCompare(b)),
   };
 }
 
@@ -288,10 +245,7 @@ function getUniqueValues<T extends string>(values: T[], order: T[]): T[] {
   return order.filter((value) => valueSet.has(value));
 }
 
-function isViewFilterAvailable(
-  value: ViewFilterValue,
-  availableFilters: AvailableViewFilters,
-): boolean {
+function isViewFilterAvailable(value: ViewFilterValue, availableFilters: AvailableViewFilters): boolean {
   if (value === "all") {
     return true;
   }
@@ -504,20 +458,11 @@ function ShortcutActions({
           }}
         />
         <Action.CopyToClipboard title="Copy Command Name" content={shortcut.commandName} />
-        <Action.CopyToClipboard
-          title="Copy Full Shortcut"
-          content={getFullShortcutText(shortcut)}
-        />
+        <Action.CopyToClipboard title="Copy Full Shortcut" content={getFullShortcutText(shortcut)} />
       </ActionPanel.Section>
       <ActionPanel.Section title="Details">
-        <Action.Push
-          title="Show Details"
-          icon={Icon.Sidebar}
-          target={<ShortcutDetails shortcut={shortcut} />}
-        />
-        {shortcut.sourceUrl ? (
-          <Action.OpenInBrowser title="Open Source URL" url={shortcut.sourceUrl} />
-        ) : null}
+        <Action.Push title="Show Details" icon={Icon.Sidebar} target={<ShortcutDetails shortcut={shortcut} />} />
+        {shortcut.sourceUrl ? <Action.OpenInBrowser title="Open Source URL" url={shortcut.sourceUrl} /> : null}
       </ActionPanel.Section>
       {intent === "search" ? manageActions : null}
     </ActionPanel>

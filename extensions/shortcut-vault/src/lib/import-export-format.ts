@@ -19,8 +19,7 @@ const MAX_KEY_LENGTH = 128;
 const MAX_OWNER_NAME_LENGTH = 512;
 const MAX_NOTES_LENGTH = 4_000;
 const MAX_SOURCE_URL_LENGTH = 2_048;
-const ISO_DATE_TIME_PATTERN =
-  /^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
+const ISO_DATE_TIME_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
 
 export type PreparedImport = {
   shortcuts: Shortcut[];
@@ -97,9 +96,7 @@ export function validateExportFile(value: unknown): ShortcutExportFile {
   }
 
   if (value.version !== EXPORT_VERSION) {
-    throw new Error(
-      `Unsupported import version. Shortcut Vault currently supports version ${EXPORT_VERSION}.`,
-    );
+    throw new Error(`Unsupported import version. Shortcut Vault currently supports version ${EXPORT_VERSION}.`);
   }
 
   if (!Array.isArray(value.shortcuts)) {
@@ -191,9 +188,7 @@ function hasValidCalendarDate(match: RegExpMatchArray): boolean {
   const day = Number(match[3]);
   const date = new Date(Date.UTC(year, month - 1, day));
 
-  return (
-    date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day
-  );
+  return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 && date.getUTCDate() === day;
 }
 
 function getOptionalHttpUrl(value: unknown, fieldName: string): string | undefined {
@@ -206,11 +201,7 @@ function getOptionalHttpUrl(value: unknown, fieldName: string): string | undefin
   return text;
 }
 
-function getOptionalString(
-  value: unknown,
-  fieldName: string,
-  maxLength: number,
-): string | undefined {
+function getOptionalString(value: unknown, fieldName: string, maxLength: number): string | undefined {
   if (value === undefined || value === null || value === "") {
     return undefined;
   }

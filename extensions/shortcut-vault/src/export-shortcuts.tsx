@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Detail,
-  Icon,
-  Toast,
-  showInFinder,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, Icon, Toast, showInFinder, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { ShortcutForm } from "./components/ShortcutForm";
 import { createExportFile, writeExportFile } from "./lib/import-export";

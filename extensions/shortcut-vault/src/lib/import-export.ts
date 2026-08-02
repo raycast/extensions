@@ -2,19 +2,10 @@ import { environment } from "@raycast/api";
 import { mkdir, readFile, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import type { ShortcutExportFile } from "../types/shortcut";
-import {
-  createExportFile,
-  prepareImportedShortcuts,
-  validateExportFile,
-} from "./import-export-format";
+import { createExportFile, prepareImportedShortcuts, validateExportFile } from "./import-export-format";
 import { getDefaultShortcuts } from "./default-shortcuts";
 import { getCustomShortcuts, mutateCustomShortcuts } from "./storage";
-export {
-  EXAMPLE_EXPORT,
-  EXPORT_FORMAT,
-  EXPORT_VERSION,
-  createExportFile,
-} from "./import-export-format";
+export { EXAMPLE_EXPORT, EXPORT_FORMAT, EXPORT_VERSION, createExportFile } from "./import-export-format";
 
 export type ImportResult = {
   importedCount: number;
@@ -71,10 +62,7 @@ export async function importShortcuts(filePath: string): Promise<ImportResult> {
   const exportFile = await readImportFile(filePath);
 
   return mutateCustomShortcuts((existing) => {
-    const imported = prepareImportedShortcuts(exportFile.shortcuts, [
-      ...existing,
-      ...getDefaultShortcuts(),
-    ]);
+    const imported = prepareImportedShortcuts(exportFile.shortcuts, [...existing, ...getDefaultShortcuts()]);
 
     return {
       shortcuts: [...imported.shortcuts, ...existing],

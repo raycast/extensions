@@ -36,10 +36,7 @@ export function ShortcutDetails({ shortcut }: Props) {
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard title="Copy Shortcut" content={shortcut.shortcutDisplay} />
             <Action.CopyToClipboard title="Copy Command Name" content={shortcut.commandName} />
-            <Action.CopyToClipboard
-              title="Copy Full Shortcut"
-              content={getFullShortcutText(shortcut)}
-            />
+            <Action.CopyToClipboard title="Copy Full Shortcut" content={getFullShortcutText(shortcut)} />
           </ActionPanel.Section>
           {shortcut.sourceUrl ? (
             <ActionPanel.Section title="Source">

@@ -14,19 +14,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { MODIFIER_LABELS, SCOPE_LABELS } from "../lib/labels";
 import { GENERAL_OWNER_NAME, inferCustomOwnerType } from "../lib/owner-type";
 import { getShortcutOwnerOptions, type ShortcutOwnerOption } from "../lib/shortcut-data";
-import {
-  createCustomShortcut,
-  findDuplicateCustomShortcut,
-  updateCustomShortcut,
-} from "../lib/storage";
+import { createCustomShortcut, findDuplicateCustomShortcut, updateCustomShortcut } from "../lib/storage";
 import { formatShortcutDisplay } from "../lib/shortcut-format";
 import { hasFormErrors, validateShortcutForm, type FormErrors } from "../lib/validation";
-import {
-  MODIFIERS,
-  type Shortcut,
-  type ShortcutFormValues,
-  type ShortcutModifier,
-} from "../types/shortcut";
+import { MODIFIERS, type Shortcut, type ShortcutFormValues, type ShortcutModifier } from "../types/shortcut";
 
 type Props = {
   shortcut?: Shortcut;
@@ -77,14 +68,8 @@ export function ShortcutForm({ shortcut, onSaved }: Props) {
 
     setIsSubmitting(true);
     try {
-      const nextSubmittedValues = getCanonicalOwnerValues(
-        getSubmittedFormValues(formValues, values),
-        ownerOptions,
-      );
-      const nextPreview = formatShortcutDisplay(
-        nextSubmittedValues.modifiers,
-        nextSubmittedValues.key,
-      );
+      const nextSubmittedValues = getCanonicalOwnerValues(getSubmittedFormValues(formValues, values), ownerOptions);
+      const nextPreview = formatShortcutDisplay(nextSubmittedValues.modifiers, nextSubmittedValues.key);
       const nextOwnerPreview = nextSubmittedValues.ownerName.trim() || GENERAL_OWNER_NAME;
       const nextErrors = validateShortcutForm(nextSubmittedValues);
       setErrors(nextErrors);
@@ -188,9 +173,7 @@ export function ShortcutForm({ shortcut, onSaved }: Props) {
         title="Modifiers"
         info="Pick every modifier in the shortcut. The preview updates immediately."
         value={values.modifiers}
-        onChange={(modifiers) =>
-          setValues((current) => ({ ...current, modifiers: modifiers as ShortcutModifier[] }))
-        }
+        onChange={(modifiers) => setValues((current) => ({ ...current, modifiers: modifiers as ShortcutModifier[] }))}
         ref={modifiersRef}
       >
         {MODIFIERS.map((modifier) => (
@@ -239,9 +222,7 @@ export function ShortcutForm({ shortcut, onSaved }: Props) {
         info="Scope controls the colored scope bubble shown in search results."
         value={values.scope}
         error={errors.scope}
-        onChange={(scope) =>
-          setValues((current) => ({ ...current, scope: scope as ShortcutFormValues["scope"] }))
-        }
+        onChange={(scope) => setValues((current) => ({ ...current, scope: scope as ShortcutFormValues["scope"] }))}
         ref={scopeRef}
       >
         <Form.Dropdown.Item
@@ -314,10 +295,7 @@ function createEmptyValues(): ShortcutFormValues {
   };
 }
 
-function getSubmittedFormValues(
-  formValues: Form.Values,
-  fallbackValues: ShortcutFormValues,
-): ShortcutFormValues {
+function getSubmittedFormValues(formValues: Form.Values, fallbackValues: ShortcutFormValues): ShortcutFormValues {
   const rawKey = getStringFormValue(formValues.key, fallbackValues.key);
   return {
     commandName: getStringFormValue(formValues.commandName, fallbackValues.commandName),
@@ -334,39 +312,26 @@ function getStringFormValue(value: Form.Value, fallback: string): string {
   return typeof value === "string" ? value : fallback;
 }
 
-function getModifierFormValues(
-  value: Form.Value,
-  fallback: ShortcutModifier[],
-): ShortcutModifier[] {
+function getModifierFormValues(value: Form.Value, fallback: ShortcutModifier[]): ShortcutModifier[] {
   if (!Array.isArray(value)) {
     return fallback;
   }
 
-  return value.filter((modifier): modifier is ShortcutModifier =>
-    MODIFIERS.includes(modifier as ShortcutModifier),
-  );
+  return value.filter((modifier): modifier is ShortcutModifier => MODIFIERS.includes(modifier as ShortcutModifier));
 }
 
-function getScopeFormValue(
-  value: Form.Value,
-  fallback: ShortcutFormValues["scope"],
-): ShortcutFormValues["scope"] {
+function getScopeFormValue(value: Form.Value, fallback: ShortcutFormValues["scope"]): ShortcutFormValues["scope"] {
   return value === "global" || value === "app" || value === "webapp" ? value : fallback;
 }
 
-function getCanonicalOwnerValues(
-  values: ShortcutFormValues,
-  ownerOptions: ShortcutOwnerOption[],
-): ShortcutFormValues {
+function getCanonicalOwnerValues(values: ShortcutFormValues, ownerOptions: ShortcutOwnerOption[]): ShortcutFormValues {
   const ownerName = values.ownerName.trim();
 
   if (!ownerName) {
     return { ...values, ownerName: GENERAL_OWNER_NAME, ownerType: "other" };
   }
 
-  const option = ownerOptions.find(
-    (owner) => owner.ownerName.toLocaleLowerCase() === ownerName.toLocaleLowerCase(),
-  );
+  const option = ownerOptions.find((owner) => owner.ownerName.toLocaleLowerCase() === ownerName.toLocaleLowerCase());
 
   if (option) {
     return { ...values, ownerName: option.ownerName, ownerType: option.ownerType };
@@ -385,9 +350,7 @@ function getMatchingOwnerOption(
     return undefined;
   }
 
-  return ownerOptions.find(
-    (owner) => owner.ownerName.toLocaleLowerCase() === trimmedOwnerName.toLocaleLowerCase(),
-  );
+  return ownerOptions.find((owner) => owner.ownerName.toLocaleLowerCase() === trimmedOwnerName.toLocaleLowerCase());
 }
 
 function getOwnerStatus(ownerName: string, ownerMatch: ShortcutOwnerOption | undefined): string {
@@ -412,11 +375,7 @@ function upsertOwnerOption(
     return ownerOptions;
   }
 
-  if (
-    ownerOptions.some(
-      (owner) => owner.ownerName.toLocaleLowerCase() === savedOwner.ownerName.toLocaleLowerCase(),
-    )
-  ) {
+  if (ownerOptions.some((owner) => owner.ownerName.toLocaleLowerCase() === savedOwner.ownerName.toLocaleLowerCase())) {
     return ownerOptions;
   }
 
