@@ -1,0 +1,280 @@
+{
+  "ownerName": "Chrome",
+  "ownerType": "mac-app",
+  "sourceUrl": "https://support.google.com/chrome/answer/157179",
+  "shortcuts": [
+    {
+      "id": "new-window",
+      "commandName": "New Window",
+      "modifiers": ["command"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "new-incognito-window",
+      "commandName": "New Incognito Window",
+      "modifiers": ["command", "shift"],
+      "key": "N",
+      "scope": "app"
+    },
+    {
+      "id": "close-window",
+      "commandName": "Close Current Window",
+      "modifiers": ["command", "shift"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "minimize-window",
+      "commandName": "Minimize Window",
+      "modifiers": ["command"],
+      "key": "M",
+      "scope": "app"
+    },
+    {
+      "id": "hide-chrome",
+      "commandName": "Hide Chrome",
+      "modifiers": ["command"],
+      "key": "H",
+      "scope": "app"
+    },
+    {
+      "id": "quit-chrome",
+      "commandName": "Quit Chrome",
+      "modifiers": ["command"],
+      "key": "Q",
+      "scope": "app"
+    },
+    {
+      "id": "new-tab",
+      "commandName": "New Tab",
+      "modifiers": ["command"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "reopen-closed-tab",
+      "commandName": "Reopen Closed Tab",
+      "modifiers": ["command", "shift"],
+      "key": "T",
+      "scope": "app"
+    },
+    {
+      "id": "next-tab",
+      "commandName": "Next Tab",
+      "modifiers": ["command", "option"],
+      "key": "Right",
+      "scope": "app"
+    },
+    {
+      "id": "previous-tab",
+      "commandName": "Previous Tab",
+      "modifiers": ["command", "option"],
+      "key": "Left",
+      "scope": "app"
+    },
+    {
+      "id": "jump-to-tab-1",
+      "commandName": "Jump to Tab 1",
+      "modifiers": ["command"],
+      "key": "1",
+      "scope": "app"
+    },
+    {
+      "id": "jump-to-tab-8",
+      "commandName": "Jump to Tab 8",
+      "modifiers": ["command"],
+      "key": "8",
+      "scope": "app"
+    },
+    {
+      "id": "jump-to-last-tab",
+      "commandName": "Jump to Last Tab",
+      "modifiers": ["command"],
+      "key": "9",
+      "scope": "app"
+    },
+    {
+      "id": "back",
+      "commandName": "Back",
+      "modifiers": ["command"],
+      "key": "[",
+      "scope": "app"
+    },
+    {
+      "id": "forward",
+      "commandName": "Forward",
+      "modifiers": ["command"],
+      "key": "]",
+      "scope": "app"
+    },
+    {
+      "id": "close-tab",
+      "commandName": "Close Current Tab",
+      "modifiers": ["command"],
+      "key": "W",
+      "scope": "app"
+    },
+    {
+      "id": "open-location",
+      "commandName": "Open Location",
+      "modifiers": ["command"],
+      "key": "L",
+      "scope": "app"
+    },
+    {
+      "id": "search-web",
+      "commandName": "Search the Web",
+      "modifiers": ["command", "option"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "toggle-bookmarks-bar",
+      "commandName": "Show or Hide Bookmarks Bar",
+      "modifiers": ["command", "shift"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "open-bookmark-manager",
+      "commandName": "Open Bookmark Manager",
+      "modifiers": ["command", "option"],
+      "key": "B",
+      "scope": "app"
+    },
+    {
+      "id": "open-settings",
+      "commandName": "Open Settings",
+      "modifiers": ["command"],
+      "key": ",",
+      "scope": "app"
+    },
+    {
+      "id": "open-history",
+      "commandName": "Open History",
+      "modifiers": ["command"],
+      "key": "Y",
+      "scope": "app"
+    },
+    {
+      "id": "reload-page",
+      "commandName": "Reload Page",
+      "modifiers": ["command"],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "hard-reload",
+      "commandName": "Reload Ignoring Cache",
+      "modifiers": ["command", "shift"],
+      "key": "R",
+      "scope": "app"
+    },
+    {
+      "id": "find",
+      "commandName": "Find",
+      "modifiers": ["command"],
+      "key": "F",
+      "scope": "app"
+    },
+    {
+      "id": "find-next",
+      "commandName": "Find Next",
+      "modifiers": ["command"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "find-previous",
+      "commandName": "Find Previous",
+      "modifiers": ["command", "shift"],
+      "key": "G",
+      "scope": "app"
+    },
+    {
+      "id": "print",
+      "commandName": "Print",
+      "modifiers": ["command"],
+      "key": "P",
+      "scope": "app"
+    },
+    {
+      "id": "save-page",
+      "commandName": "Save Page",
+      "modifiers": ["command"],
+      "key": "S",
+      "scope": "app"
+    },
+    {
+      "id": "bookmark-page",
+      "commandName": "Bookmark Page",
+      "modifiers": ["command"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "bookmark-all-tabs",
+      "commandName": "Bookmark All Tabs",
+      "modifiers": ["command", "shift"],
+      "key": "D",
+      "scope": "app"
+    },
+    {
+      "id": "view-source",
+      "commandName": "View Page Source",
+      "modifiers": ["command", "option"],
+      "key": "U",
+      "scope": "app"
+    },
+    {
+      "id": "developer-tools",
+      "commandName": "Open Developer Tools",
+      "modifiers": ["command", "option"],
+      "key": "I",
+      "scope": "app"
+    },
+    {
+      "id": "javascript-console",
+      "commandName": "Open JavaScript Console",
+      "modifiers": ["command", "option"],
+      "key": "J",
+      "scope": "app"
+    },
+    {
+      "id": "open-downloads",
+      "commandName": "Open Downloads",
+      "modifiers": ["command", "shift"],
+      "key": "J",
+      "scope": "app"
+    },
+    {
+      "id": "zoom-in",
+      "commandName": "Zoom In",
+      "modifiers": ["command"],
+      "key": "+",
+      "scope": "app"
+    },
+    {
+      "id": "zoom-out",
+      "commandName": "Zoom Out",
+      "modifiers": ["command"],
+      "key": "-",
+      "scope": "app"
+    },
+    {
+      "id": "reset-zoom",
+      "commandName": "Reset Zoom",
+      "modifiers": ["command"],
+      "key": "0",
+      "scope": "app"
+    },
+    {
+      "id": "open-home-page",
+      "commandName": "Open Home Page",
+      "modifiers": ["command", "shift"],
+      "key": "H",
+      "scope": "app"
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "noEmit": false,
+    "outDir": ".tmp/test-build"
+  },
+  "include": [
+    "scripts/test-*.ts",
+    "src/lib/import-export-format.ts",
+    "src/lib/serial-task-queue.ts",
+    "src/lib/shortcut-format.ts",
+    "src/lib/shortcut-search.ts",
+    "src/lib/labels.ts",
+    "src/types/shortcut.ts"
+  ]
+}
