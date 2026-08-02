@@ -4,8 +4,6 @@ import { promisify } from "node:util";
 
 export type ProfileSlot = "profile1" | "profile2" | "profile3" | "profile4" | "profile5";
 
-type Preferences = Record<ProfileSlot, string | undefined>;
-
 const execFileAsync = promisify(execFile);
 
 // ponytail: English Safari menu labels only; add localized labels if non-English macOS support is needed.
@@ -15,19 +13,29 @@ const clickSafariProfileMenuItem = (profileName: string) =>
     `
       on run argv
         set menuItemName to "New " & item 1 of argv & " Window"
-        if application "Safari" is not running then tell application "Safari" to launch
-        tell application "System Events"
-          tell process "Safari"
-            tell menu "File" of menu bar 1
-              if not (exists menu item menuItemName) then
-                error "Safari does not have a profile named " & item 1 of argv & ". Check the profile name in Raycast settings."
-              end if
-              click menu item menuItemName
-            end tell
-            -- Activate only after the new window exists so macOS stays in the current Space.
-            set frontmost to true
+        set launchedSafari to application "Safari" is not running
+        if launchedSafari then tell application "Safari" to launch
+
+        set maxAttempts to 1
+        if launchedSafari then set maxAttempts to 100
+
+        repeat maxAttempts times
+          tell application "System Events"
+            if exists process "Safari" then
+              tell process "Safari"
+                if exists menu item menuItemName of menu "File" of menu bar 1 then
+                  click menu item menuItemName of menu "File" of menu bar 1
+                  -- Activate only after the new window exists so macOS stays in the current Space.
+                  set frontmost to true
+                  return
+                end if
+              end tell
+            end if
           end tell
-        end tell
+          if launchedSafari then delay 0.1
+        end repeat
+
+        error "Safari does not have a profile named " & item 1 of argv & ". Check the profile name in Raycast settings."
       end run
     `,
     "--",
