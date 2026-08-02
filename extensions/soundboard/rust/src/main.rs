@@ -37,7 +37,7 @@ fn play_windows(path: &str) -> Result<(), String> {
     use windows::Foundation::{TypedEventHandler, Uri};
     use windows::Media::Core::MediaSource;
     use windows::Media::Playback::MediaPlayer;
-    use windows::Win32::Foundation::WAIT_OBJECT_0;
+    use windows::Win32::Foundation::{CloseHandle, WAIT_OBJECT_0};
     use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
     use windows::Win32::System::Threading::{ResetEvent, WaitForSingleObject};
 
@@ -100,6 +100,11 @@ fn play_windows(path: &str) -> Result<(), String> {
     }
 
     let _ = player.RemoveMediaEnded(ended_token);
+    // Explicitly destroy the stop event so a finished playback is no longer
+    // reported as active, independent of the player process lifetime.
+    unsafe {
+        let _ = CloseHandle(stop_event);
+    }
     Ok(())
 }
 
