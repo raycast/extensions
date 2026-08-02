@@ -6,10 +6,7 @@ import { createSerialTaskQueue } from "./serial-task-queue";
 import { formatShortcutDisplay, normalizeKey, normalizeModifiers } from "./shortcut-format";
 
 const CUSTOM_SHORTCUTS_KEY = "shortcut-vault.custom-shortcuts";
-const CUSTOM_SHORTCUTS_LOCK_KEY = "shortcut-vault.custom-shortcuts-lock";
 const customShortcutMutationQueue = createSerialTaskQueue();
-
-let activeProcessLockId: string | null = null;
 
 export { GENERAL_OWNER_NAME };
 
@@ -17,62 +14,6 @@ type CustomShortcutMutation<T> = {
   shortcuts: Shortcut[];
   result: T;
 };
-
-async function withCrossProcessLock<T>(fn: (lockId: string) => Promise<T>): Promise<T> {
-  if (activeProcessLockId) {
-    return await fn(activeProcessLockId);
-  }
-
-  const lockId = `${Date.now()}-${crypto.randomUUID()}`;
-  let acquired = false;
-
-  for (let i = 0; i < 30; i++) {
-    const existingLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
-
-    if (!existingLock) {
-      await LocalStorage.setItem(CUSTOM_SHORTCUTS_LOCK_KEY, lockId);
-      const jitterMs = Math.floor(Math.random() * 10) + 5;
-      await new Promise((r) => setTimeout(r, jitterMs));
-      const verifyLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
-      if (verifyLock === lockId) {
-        acquired = true;
-        activeProcessLockId = lockId;
-        break;
-      }
-    } else {
-      const lockTime = parseInt(existingLock.split("-")[0] ?? "0", 10);
-      if (!isNaN(lockTime) && Date.now() - lockTime > 10000) {
-        // Atomic reclaim with randomized jitter verification to prevent dual-writer race
-        await LocalStorage.setItem(CUSTOM_SHORTCUTS_LOCK_KEY, lockId);
-        const jitterMs = Math.floor(Math.random() * 10) + 5;
-        await new Promise((r) => setTimeout(r, jitterMs));
-        const verifyLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
-        if (verifyLock === lockId) {
-          acquired = true;
-          activeProcessLockId = lockId;
-          break;
-        }
-      }
-    }
-    await new Promise((resolve) => setTimeout(resolve, 50));
-  }
-
-  if (!acquired) {
-    throw new Error("Storage lock timeout. Please retry.");
-  }
-
-  try {
-    return await fn(lockId);
-  } finally {
-    if (activeProcessLockId === lockId) {
-      activeProcessLockId = null;
-      const currentLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
-      if (currentLock === lockId) {
-        await LocalStorage.removeItem(CUSTOM_SHORTCUTS_LOCK_KEY);
-      }
-    }
-  }
-}
 
 export async function getCustomShortcuts(): Promise<Shortcut[]> {
   const raw = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_KEY);
@@ -107,7 +48,7 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
       seenIds.add(shortcut.id);
       shortcuts.push(shortcut);
     } catch {
-      // Ignore invalid individual items during read without mutation side-effects
+      // Ignore invalid individual items during read
     }
   }
 
@@ -115,27 +56,17 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
 }
 
 /**
- * Executes a cross-command safe serial mutation on custom shortcuts using cross-process LocalStorage locking.
- * Enforces pre-write lock ownership validation to prevent writes if the lock lease expired during computation.
+ * Executes a serialized mutation on custom shortcuts using the task queue.
  */
 export function mutateCustomShortcuts<T>(
   mutation: (shortcuts: Shortcut[]) => CustomShortcutMutation<T> | Promise<CustomShortcutMutation<T>>,
 ): Promise<T> {
-  return customShortcutMutationQueue.run(() =>
-    withCrossProcessLock(async (lockId) => {
-      const currentShortcuts = await getCustomShortcuts();
-      const { shortcuts, result } = await mutation(currentShortcuts);
-
-      // Pre-write lock ownership verification to prevent writing if lease expired or was reclaimed
-      const verifyLock = await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_LOCK_KEY);
-      if (verifyLock !== lockId) {
-        throw new Error("Storage lock lease expired during mutation calculation. Please retry.");
-      }
-
-      await writeCustomShortcuts(shortcuts);
-      return result;
-    }),
-  );
+  return customShortcutMutationQueue.run(async () => {
+    const currentShortcuts = await getCustomShortcuts();
+    const { shortcuts, result } = await mutation(currentShortcuts);
+    await LocalStorage.setItem(CUSTOM_SHORTCUTS_KEY, JSON.stringify(shortcuts));
+    return result;
+  });
 }
 
 export async function createCustomShortcut(values: ShortcutFormValues): Promise<Shortcut> {
@@ -241,10 +172,6 @@ export async function duplicateCustomShortcut(id: string): Promise<Shortcut> {
 
     return { shortcuts: [duplicate, ...shortcuts], result: duplicate };
   });
-}
-
-async function writeCustomShortcuts(shortcuts: Shortcut[]): Promise<void> {
-  await LocalStorage.setItem(CUSTOM_SHORTCUTS_KEY, JSON.stringify(shortcuts));
 }
 
 function parseStoredShortcut(value: unknown): Shortcut {
