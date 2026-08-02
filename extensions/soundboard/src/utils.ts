@@ -98,19 +98,31 @@ const getProcessCommand = (pid: number): string | null => {
 // registered player we require ALL of the following to hold:
 //   1. The PID still exists.
 //   2. The process start time still matches the one captured at spawn.
-//   3. The process is still the `afplay` invocation for this exact audio file.
+//   3. The process command line is exactly the `afplay` invocation we spawned
+//      for this audio file: the executable basename is `afplay` and the
+//      re-joined arguments equal the audio path (not merely contain it).
 // This makes killing an unrelated process after PID reuse practically
 // unreachable: a reused PID would additionally have to collide on the
 // second-granularity start time (macOS PIDs are allocated monotonically and
-// only wrap after ~2M forks) AND have a command line naming `afplay` with the
-// same audio path. Registration is best-effort - if any `ps` probe fails the
-// player is treated as not running and playback continues without Stop.
+// only wrap after ~2M forks) AND have a command line that exactly matches the
+// captured `afplay <path>` invocation. Registration is best-effort - if any
+// `ps` probe fails the player is treated as not running and playback continues
+// without Stop.
 const isPlayerRunning = (record: PlayerRecord, audioPath: string): boolean => {
   if (getProcessStartTime(record.pid) !== record.startTime) {
     return false;
   }
   const command = getProcessCommand(record.pid);
-  return command !== null && command.includes("afplay") && command.includes(audioPath);
+  if (command === null) {
+    return false;
+  }
+  // `ps -o command=` joins argv with single spaces, so joining the tokens back
+  // with a single space reconstructs the original argument (paths with spaces
+  // included), while an exact comparison rejects any process whose command
+  // merely contains the registered path as a substring.
+  const tokens = command.split(" ");
+  const executable = tokens[0]?.split("/").pop() ?? "";
+  return executable === "afplay" && tokens.slice(1).join(" ") === audioPath;
 };
 
 const readRegisteredPlayers = (audioPath: string): PlayerRecord[] => {
