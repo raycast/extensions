@@ -1,16 +1,75 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, environment } from "@raycast/api";
 import { MODIFIERS, OWNER_TYPES, SCOPE_TYPES, type Shortcut, type ShortcutFormValues } from "../types/shortcut";
 import { GENERAL_OWNER_NAME, inferCustomOwnerType } from "./owner-type";
 import { isSafeHttpUrl } from "./safe-url";
 import { createSerialTaskQueue } from "./serial-task-queue";
 import { formatShortcutDisplay, normalizeKey, normalizeModifiers } from "./shortcut-format";
 import { prepareImportedShortcuts, type PreparedImport } from "./import-export-format";
+import fs from "fs";
+import path from "path";
 
 const LEGACY_CUSTOM_SHORTCUTS_KEY = "shortcut-vault.custom-shortcuts";
 const SHORTCUT_KEY_PREFIX = "shortcut-vault.shortcut.";
+
 // Raycast LocalStorage has asynchronous reads and writes but no transaction or CAS API.
 // Keep every access in one FIFO queue so a same-runtime command cannot interleave a read-modify-write sequence.
 const storageOperationQueue = createSerialTaskQueue();
+
+class CrossProcessMutex {
+  private readonly lockDir = path.join(environment.supportPath, "storage.lock");
+  private readonly lockFile = path.join(this.lockDir, "pid.txt");
+
+  async runExclusive<T>(task: () => Promise<T>): Promise<T> {
+    const start = Date.now();
+    const timeoutMs = 5000;
+
+    while (Date.now() - start < timeoutMs) {
+      try {
+        fs.mkdirSync(this.lockDir);
+        fs.writeFileSync(this.lockFile, Date.now().toString());
+        break;
+      } catch (e: unknown) {
+        const err = e as { code?: string };
+        if (err.code === "EEXIST") {
+          try {
+            const timestampStr = fs.readFileSync(this.lockFile, "utf-8");
+            const timestamp = parseInt(timestampStr, 10);
+            if (!isNaN(timestamp) && Date.now() - timestamp > 10000) {
+              if (fs.existsSync(this.lockFile)) fs.unlinkSync(this.lockFile);
+              if (fs.existsSync(this.lockDir)) fs.rmdirSync(this.lockDir);
+              continue;
+            }
+          } catch {
+            // Ignore stale check errors
+          }
+          await new Promise((resolve) => setTimeout(resolve, 50));
+        } else if (err.code === "ENOENT") {
+          fs.mkdirSync(environment.supportPath, { recursive: true });
+          continue;
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (Date.now() - start >= timeoutMs) {
+      throw new Error("Could not acquire cross-process storage lock. Please try again.");
+    }
+
+    try {
+      return await task();
+    } finally {
+      try {
+        if (fs.existsSync(this.lockFile)) fs.unlinkSync(this.lockFile);
+        if (fs.existsSync(this.lockDir)) fs.rmdirSync(this.lockDir);
+      } catch {
+        // Ignore cleanup errors
+      }
+    }
+  }
+}
+
+const storageMutex = new CrossProcessMutex();
 
 let hasMigratedLegacyStorage = false;
 
@@ -35,13 +94,17 @@ async function readCustomShortcuts(): Promise<Shortcut[]> {
       const shortcut = parseStoredShortcut(parsed);
 
       if (seenIds.has(shortcut.id)) {
+        const oldKey = getItemKey(shortcut.id);
         shortcut.id = crypto.randomUUID();
+        // The ID was duplicated in storage. Fix it by saving the new one and deleting the old duplicate entry
+        await LocalStorage.setItem(getItemKey(shortcut.id), JSON.stringify(shortcut));
+        await LocalStorage.removeItem(oldKey);
       }
 
       seenIds.add(shortcut.id);
       shortcuts.push(shortcut);
     } catch {
-      // Ignore invalid stored items
+      // Ignore unparseable items
     }
   }
 
@@ -249,8 +312,10 @@ async function migrateLegacyStorageIfNeeded(): Promise<void> {
 
 function withStorageAccess<T>(operation: () => Promise<T>): Promise<T> {
   return storageOperationQueue.run(async () => {
-    await migrateLegacyStorageIfNeeded();
-    return operation();
+    return storageMutex.runExclusive(async () => {
+      await migrateLegacyStorageIfNeeded();
+      return await operation();
+    });
   });
 }
 
