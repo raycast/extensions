@@ -69,11 +69,11 @@ export default function Command() {
       const parsedResults: RepoResult[] = apiResults.map((item) => {
         const orgRepo = item.repo_name
         const [owner, repo] = orgRepo.split("/")
-        const stars = item.stargazers_count !== undefined ? String(item.stargazers_count) : ""
+        const stars = item.stargazers_count != null ? String(item.stargazers_count) : ""
         return {
           id: orgRepo,
           orgRepo,
-          description: item.description || "No description available",
+          description: item.description || "",
           stars,
           deepWikiUrl: owner && repo ? `https://deepwiki.com/${owner}/${repo}` : `https://deepwiki.com/${orgRepo}`,
           githubUrl: `https://github.com/${orgRepo}`,
@@ -134,13 +134,17 @@ function getRepoIcon(orgRepo: string) {
   return owner ? `https://github.com/${owner}.png` : Icon.Code
 }
 
+function hasStars(stars: string) {
+  return stars !== "" && stars !== "null"
+}
+
 function RepoListItem({ repo, onOpen }: { repo: RepoResult; onOpen: (repo: RepoResult) => void }) {
   return (
     <List.Item
       icon={getRepoIcon(repo.orgRepo)}
       title={repo.orgRepo}
-      subtitle={repo.description}
-      accessories={repo.stars ? [{ text: repo.stars, icon: Icon.Star }] : []}
+      subtitle={repo.description || undefined}
+      accessories={hasStars(repo.stars) ? [{ text: repo.stars, icon: Icon.Star }] : []}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser title="Open in DeepWiki" url={repo.deepWikiUrl} onOpen={() => onOpen(repo)} />

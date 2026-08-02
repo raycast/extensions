@@ -4,6 +4,7 @@
 
 - Added recent search history when the search field is empty
 - Show GitHub owner avatars in search results and history
+- Hide star count and description when missing from the API
 - Refresh store screenshots
 - Updated Raycast API and related dependencies
 
