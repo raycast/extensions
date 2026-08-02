@@ -1,11 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
-import { Action, ActionPanel, Grid, AI, environment } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon, AI, environment } from "@raycast/api";
 import { useAI, useCachedPromise } from "@raycast/utils";
 import { withSlackClient } from "./shared/withSlackClient";
 import { SlackClient } from "./shared/client";
 
-// To prevent memory exhaustion in workspaces with tens of thousands of custom emojis, the grid is paginated.
-const PAGE_SIZE = 200;
+const DISPLAY_LIMIT = 1000;
 
 function EmojiItem({ name, url }: { name: string; url: string }) {
   return (
@@ -24,7 +23,7 @@ function EmojiItem({ name, url }: { name: string; url: string }) {
 
 function Command() {
   const [searchText, setSearchText] = useState("");
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [displayLimit, setDisplayLimit] = useState(DISPLAY_LIMIT);
 
   const { data, isLoading } = useCachedPromise(SlackClient.getWorkspaceEmojis);
 
@@ -57,11 +56,12 @@ function Command() {
     return filteredEmojis;
   }, [searchText, emojis, filteredEmojis, aiEmojiEntries, executeAISearch]);
 
-  const visibleEmojis = useMemo(() => emojiEntries.slice(0, visibleCount), [emojiEntries, visibleCount]);
+  const visibleEmojis = useMemo(() => emojiEntries.slice(0, displayLimit), [emojiEntries, displayLimit]);
+  const hiddenCount = emojiEntries.length - visibleEmojis.length;
 
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);
-    setVisibleCount(PAGE_SIZE);
+    setDisplayLimit(DISPLAY_LIMIT);
   }, []);
 
   return (
@@ -71,15 +71,23 @@ function Command() {
       inset={Grid.Inset.Medium}
       onSearchTextChange={handleSearchTextChange}
       throttle
-      pagination={{
-        pageSize: PAGE_SIZE,
-        hasMore: visibleCount < emojiEntries.length,
-        onLoadMore: () => setVisibleCount((count) => count + PAGE_SIZE),
-      }}
     >
       {visibleEmojis.map(([name, url]) => (
         <EmojiItem key={name} name={name} url={url} />
       ))}
+
+      {hiddenCount > 0 && (
+        <Grid.Item
+          content={Icon.Ellipsis}
+          title="Show More"
+          subtitle={`${hiddenCount} more`}
+          actions={
+            <ActionPanel>
+              <Action title="Show More" onAction={() => setDisplayLimit((limit) => limit + DISPLAY_LIMIT)} />
+            </ActionPanel>
+          }
+        />
+      )}
 
       <Grid.EmptyView title={isAILoading ? "Searching Slack emojis with AI…" : "No emojis found"} />
     </Grid>
