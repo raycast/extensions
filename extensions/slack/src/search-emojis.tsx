@@ -4,8 +4,7 @@ import { useAI, useCachedPromise } from "@raycast/utils";
 import { withSlackClient } from "./shared/withSlackClient";
 import { SlackClient } from "./shared/client";
 
-// Rendering every emoji at once can exhaust the worker's memory limit in
-// workspaces with tens of thousands of custom emojis, so the grid is paginated.
+// To prevent memory exhaustion in workspaces with tens of thousands of custom emojis, the grid is paginated.
 const PAGE_SIZE = 200;
 
 function EmojiItem({ name, url }: { name: string; url: string }) {
