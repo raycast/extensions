@@ -23,7 +23,7 @@ export function ShortcutDetails({ shortcut }: Props) {
     `**Source:** ${SOURCE_LABELS[shortcut.sourceType]}`,
     "",
     shortcut.notes ? `**Notes:** ${escapeMarkdown(shortcut.notes)}` : undefined,
-    shortcut.sourceUrl ? `**Source URL:** ${shortcut.sourceUrl}` : undefined,
+    shortcut.sourceUrl ? `**Source URL:** [${escapeMarkdown(shortcut.sourceUrl)}](${shortcut.sourceUrl})` : undefined,
   ]
     .filter(Boolean)
     .join("\n");

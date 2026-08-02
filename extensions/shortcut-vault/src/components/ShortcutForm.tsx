@@ -61,6 +61,12 @@ export function ShortcutForm({ shortcut, onSaved }: Props) {
     void refreshOwnerOptions();
   }, [refreshOwnerOptions]);
 
+  useEffect(() => {
+    if (formResetKey > 0) {
+      commandNameRef.current?.focus();
+    }
+  }, [formResetKey]);
+
   async function handleSubmit(formValues: Form.Values) {
     if (isSubmitting) {
       return;
@@ -300,7 +306,7 @@ function getSubmittedFormValues(formValues: Form.Values, fallbackValues: Shortcu
   return {
     commandName: getStringFormValue(formValues.commandName, fallbackValues.commandName),
     modifiers: getModifierFormValues(formValues.modifiers, fallbackValues.modifiers),
-    key: rawKey === " " ? "Space" : rawKey,
+    key: rawKey.trim() === "" && rawKey.length > 0 ? "Space" : rawKey,
     ownerName: getStringFormValue(formValues.ownerName, fallbackValues.ownerName),
     ownerType: fallbackValues.ownerType,
     scope: getScopeFormValue(formValues.scope, fallbackValues.scope),
