@@ -25,8 +25,13 @@ export default function SetupCommand() {
       setWebAppStatus("installing");
       try {
         await createWebApp();
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        const nowInstalled = await isWebAppInstalled();
+        // Poll for installation — user may take time to click "Add" in Safari dialog
+        let nowInstalled = false;
+        for (let i = 0; i < 10; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+          nowInstalled = await isWebAppInstalled();
+          if (nowInstalled) break;
+        }
         setWebAppStatus(nowInstalled ? "installed" : "failed");
         if (nowInstalled) {
           await showToast({
@@ -37,7 +42,7 @@ export default function SetupCommand() {
           await showToast({
             style: Toast.Style.Failure,
             title: "Web app installation failed",
-            message: "Click 'Add to Dock' in the Safari dialog",
+            message: "Click 'Add to Dock' in the Safari dialog, then Recheck",
           });
         }
       } catch {
@@ -135,8 +140,12 @@ ${
                 setWebAppStatus("installing");
                 try {
                   await createWebApp();
-                  await new Promise((resolve) => setTimeout(resolve, 3000));
-                  const nowInstalled = await isWebAppInstalled();
+                  let nowInstalled = false;
+                  for (let i = 0; i < 10; i++) {
+                    await new Promise((resolve) => setTimeout(resolve, 2000));
+                    nowInstalled = await isWebAppInstalled();
+                    if (nowInstalled) break;
+                  }
                   setWebAppStatus(nowInstalled ? "installed" : "failed");
                 } catch {
                   setWebAppStatus("failed");

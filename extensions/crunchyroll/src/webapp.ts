@@ -6,19 +6,57 @@ import { homedir } from "os";
 const WEB_APP_PATH = `${homedir()}/Applications/Crunchyroll Web.app`;
 
 /**
- * Check if the Crunchyroll Safari web app exists
+ * Find the Crunchyroll Safari web app path, searching for any .app
+ * in ~/Applications whose name contains "Crunchyroll" (case-insensitive).
+ * Falls back to the default name if found.
+ */
+async function findWebAppPath(): Promise<string | null> {
+  try {
+    const result = await runAppleScript(`
+      tell application "System Events"
+        set appsFolder to (path to applications folder from user domain) as string
+        set foundPath to ""
+        repeat with f in (every file of folder appsFolder whose name ends with ".app")
+          set fName to name of f
+          if fName contains "Crunchyroll" then
+            set foundPath to (f as string)
+            exit repeat
+          end if
+        end repeat
+        return foundPath
+      end tell
+    `);
+    if (!result) return null;
+    // Convert HFS path to POSIX
+    const posix = result
+      .replace(/^file Macintosh HD:/, "/")
+      .replace(/:$/, "")
+      .replace(/:/g, "/");
+    return posix;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check if the Crunchyroll Safari web app exists.
+ * Searches for any app containing "Crunchyroll" in ~/Applications.
  */
 export async function isWebAppInstalled(): Promise<boolean> {
+  // First try the default path
   try {
     const result = await runAppleScript(`
       tell application "System Events"
         return exists file "${WEB_APP_PATH}"
       end tell
     `);
-    return result === "true";
+    if (result === "true") return true;
   } catch {
-    return false;
+    // ignore
   }
+  // Search for any Crunchyroll-named web app
+  const found = await findWebAppPath();
+  return found !== null;
 }
 
 /**
