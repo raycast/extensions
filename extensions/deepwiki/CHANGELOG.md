@@ -1,8 +1,10 @@
 # DeepWiki Changelog
 
-## [Search History] - {PR_MERGE_DATE}
+## [Search History and Avatars] - {PR_MERGE_DATE}
 
 - Added recent search history when the search field is empty
+- Show GitHub owner avatars in search results and history
+- Refresh store screenshots
 - Updated Raycast API and related dependencies
 
 ## [0.2.3] - 2026-03-26

@@ -129,9 +129,15 @@ export default function Command() {
   )
 }
 
+function getRepoIcon(orgRepo: string) {
+  const [owner] = orgRepo.split("/")
+  return owner ? `https://github.com/${owner}.png` : Icon.Code
+}
+
 function RepoListItem({ repo, onOpen }: { repo: RepoResult; onOpen: (repo: RepoResult) => void }) {
   return (
     <List.Item
+      icon={getRepoIcon(repo.orgRepo)}
       title={repo.orgRepo}
       subtitle={repo.description}
       accessories={repo.stars ? [{ text: repo.stars, icon: Icon.Star }] : []}
