@@ -1,8 +1,14 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { getPreferenceValues } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
+  if (process.platform === "win32") {
+    const appData = process.env.APPDATA ?? path.join(os.homedir(), "AppData", "Roaming");
+    return path.join(appData, "Mozilla", "Firefox", "Profiles");
+  }
+
   if (!process.env.HOME) {
     throw new Error("$HOME environment variable is not set.");
   }
@@ -76,16 +82,16 @@ export const getSessionManagerExtensionPath = (extensionId: string) => {
   );
 };
 
-export const getSessionInactivePath = async () => {
+export const getSessionInactivePath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore.jsonlz4");
 };
 
-export const getSessionActivePath = async () => {
+export const getSessionActivePath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
   return path.join(
     userDirectoryPath,
-    await getProfileName(userDirectoryPath),
+    getProfileName(userDirectoryPath),
     "sessionstore-backups",
     "recovery.jsonlz4",
   );

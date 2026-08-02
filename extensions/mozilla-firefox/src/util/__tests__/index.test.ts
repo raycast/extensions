@@ -1,4 +1,5 @@
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -34,13 +35,16 @@ const mockStatIsDir = (dirs: string[]) =>
 // ---------------------------------------------------------------------------
 
 describe("getProfileName (via getHistoryDbPath)", () => {
+  const originalPlatform = process.platform;
   const originalHome = process.env.HOME;
 
   beforeEach(() => {
+    Object.defineProperty(process, "platform", { value: "darwin", configurable: true });
     process.env.HOME = "/fake-home";
   });
 
   afterEach(() => {
+    Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
     process.env.HOME = originalHome;
     vi.restoreAllMocks();
   });
@@ -181,5 +185,131 @@ describe("getProfileName (via getHistoryDbPath)", () => {
     const result = getBookmarksDirectoryPath();
 
     expect(result).toBe(path.join(PROFILES_BASE, "abc123.default-release", "bookmarkbackups"));
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Windows platform tests
+// ---------------------------------------------------------------------------
+
+describe("getProfileName on Windows (via getHistoryDbPath)", () => {
+  const originalPlatform = process.platform;
+  const originalHome = process.env.HOME;
+  const originalAppData = process.env.APPDATA;
+
+  const PROFILES_BASE_WIN = path.join("C:\\Users\\test\\AppData\\Roaming", "Mozilla", "Firefox", "Profiles");
+
+  beforeEach(() => {
+    Object.defineProperty(process, "platform", { value: "win32", configurable: true });
+    process.env.APPDATA = "C:\\Users\\test\\AppData\\Roaming";
+    // Unset HOME so we can confirm the Windows branch doesn't rely on it
+    delete process.env.HOME;
+  });
+
+  afterEach(() => {
+    Object.defineProperty(process, "platform", { value: originalPlatform, configurable: true });
+    process.env.HOME = originalHome;
+    process.env.APPDATA = originalAppData;
+    vi.restoreAllMocks();
+  });
+
+  it("resolves the profile path from APPDATA on Windows", () => {
+    setPrefs("default-release");
+    mockProfiles(["abc123.default-release"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-release", "places.sqlite"));
+  });
+
+  it("falls back to os.homedir() when APPDATA is not set on Windows", () => {
+    delete process.env.APPDATA;
+    vi.spyOn(os, "homedir").mockReturnValue("C:\\Users\\test");
+    setPrefs("default-release");
+    mockProfiles(["abc123.default-release"]);
+
+    const result = getHistoryDbPath();
+
+    const fallbackBase = path.join("C:\\Users\\test", "AppData", "Roaming", "Mozilla", "Firefox", "Profiles");
+    expect(result).toBe(path.join(fallbackBase, "abc123.default-release", "places.sqlite"));
+  });
+
+  it("falls back to .default-release on Windows when custom suffix doesn't match", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["abc.default-release", "def.default-nightly"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc.default-release", "places.sqlite"));
+  });
+
+  it("falls back to .default-nightly on Windows when only nightly profile is present", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["abc123.default-nightly"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-nightly", "places.sqlite"));
+  });
+
+  it("falls back to .default-esr on Windows when only ESR profile is present", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["abc123.default-esr"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-esr", "places.sqlite"));
+  });
+
+  it("getBookmarksDirectoryPath uses APPDATA on Windows", () => {
+    setPrefs("default-release");
+    mockProfiles(["abc123.default-release"]);
+
+    const result = getBookmarksDirectoryPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-release", "bookmarkbackups"));
+  });
+
+  it("returns an empty path segment when the Profiles directory does not exist on Windows", () => {
+    setPrefs("default-release");
+    vi.spyOn(fs, "readdirSync").mockImplementation(() => {
+      throw new Error("ENOENT: no such file or directory");
+    });
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("returns an empty path segment when the Profiles directory is empty on Windows", () => {
+    setPrefs("nonexistent");
+    mockProfiles([]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("returns an empty path segment when all entries are non-profile files on Windows", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["installs.ini", "profiles.ini"]);
+    vi.spyOn(fs, "statSync").mockReturnValue({ isDirectory: () => false } as fs.Stats);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
+  });
+
+  it("skips a catch-all candidate when statSync throws on Windows (e.g. a dangling symlink)", () => {
+    setPrefs("nonexistent");
+    mockProfiles(["broken-link", "good.profile"]);
+    vi.spyOn(fs, "statSync").mockImplementation((filePath) => {
+      if (String(filePath).endsWith("broken-link")) throw new Error("ENOENT");
+      return { isDirectory: () => true } as fs.Stats;
+    });
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "good.profile", "places.sqlite"));
   });
 });

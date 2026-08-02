@@ -1,52 +1,99 @@
-import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
-import { exec } from "child_process";
+import { closeMainWindow, getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
+import { exec, spawn } from "child_process";
+import { existsSync } from "fs";
 import { promisify } from "util";
 import { Preferences, Tab } from "../interfaces";
 import { SEARCH_ENGINE } from "../constants";
 
 const execAsync = promisify(exec);
 
-export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
+const WINDOWS_FIREFOX_PATHS: Record<string, string[]> = {
+  Firefox: ["C:\\Program Files\\Mozilla Firefox\\firefox.exe", "C:\\Program Files (x86)\\Mozilla Firefox\\firefox.exe"],
+  "Firefox Nightly": [
+    "C:\\Program Files\\Firefox Nightly\\firefox.exe",
+    "C:\\Program Files (x86)\\Firefox Nightly\\firefox.exe",
+  ],
+  "Firefox ESR": [
+    "C:\\Program Files\\Mozilla Firefox ESR\\firefox.exe",
+    "C:\\Program Files (x86)\\Mozilla Firefox ESR\\firefox.exe",
+  ],
+  "Firefox Developer Edition": [
+    "C:\\Program Files\\Firefox Developer Edition\\firefox.exe",
+    "C:\\Program Files (x86)\\Firefox Developer Edition\\firefox.exe",
+  ],
+};
 
-  const preferences = getPreferenceValues<Preferences>();
-  const browserApp = preferences.browserApp || "Firefox";
+function getWindowsFirefoxExe(browserApp: string): string {
+  const candidates = WINDOWS_FIREFOX_PATHS[browserApp] ?? WINDOWS_FIREFOX_PATHS["Firefox"];
+  return candidates.find(existsSync) ?? "firefox.exe";
+}
 
-  if (queryText) {
-    const searchEngine = preferences.searchEngine?.toLowerCase() || "google";
-    const searchUrl = SEARCH_ENGINE[searchEngine] || SEARCH_ENGINE["google"];
-    const fullUrl = `${searchUrl}${encodeURIComponent(queryText)}`;
-    const command = `open -a "${browserApp}" "${fullUrl}"`;
+/**
+ * Spawns Firefox as a detached, independent process on Windows.
+ * Resolves once the child process has started successfully, or rejects
+ * with a descriptive error if the executable cannot be launched.
+ */
+function spawnFirefoxWindows(exe: string, url: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const child = spawn(exe, [url], { detached: true, stdio: "ignore" });
+    child.once("spawn", () => {
+      child.unref(); // let Firefox live independently of the Raycast process
+      resolve();
+    });
+    child.once("error", reject);
+  });
+}
 
-    const { stdout } = await execAsync(command);
-    return stdout || "success";
+/**
+ * Opens a URL in the configured Firefox variant, handling both Windows and macOS.
+ */
+async function launchFirefox(url: string, browserApp: string): Promise<void> {
+  if (process.platform === "win32") {
+    await spawnFirefoxWindows(getWindowsFirefoxExe(browserApp), url);
   } else {
-    const command = `open -a "${browserApp}" "about:newtab"`;
+    await execAsync(`open -a "${browserApp}" "${url}"`);
+  }
+}
 
-    const { stdout } = await execAsync(command);
-    return stdout || "success";
+function getBrowserApp(): string {
+  return getPreferenceValues<Preferences>().browserApp || "Firefox";
+}
+
+export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
+  const searchEngine = getPreferenceValues<Preferences>().searchEngine?.toLowerCase() || "google";
+  const url = queryText
+    ? `${SEARCH_ENGINE[searchEngine] ?? SEARCH_ENGINE["google"]}${encodeURIComponent(queryText)}`
+    : "about:newtab";
+
+  try {
+    await launchFirefox(url, getBrowserApp());
+    popToRoot();
+    closeMainWindow({ clearRootSearch: true });
+    return "success";
+  } catch (err) {
+    await showToast({ style: Toast.Style.Failure, title: "Failed to open Firefox", message: String(err) });
+    return "error";
   }
 }
 
 export async function openHistoryTab(url: string): Promise<boolean | string> {
-  popToRoot();
-  closeMainWindow({ clearRootSearch: true });
-
-  const preferences = getPreferenceValues<Preferences>();
-  const browserApp = preferences.browserApp || "Firefox";
-  const command = `open -a "${browserApp}" "${url}"`;
-
-  const { stdout } = await execAsync(command);
-  return stdout || "success";
+  try {
+    await launchFirefox(url, getBrowserApp());
+    popToRoot();
+    closeMainWindow({ clearRootSearch: true });
+    return "success";
+  } catch (err) {
+    await showToast({ style: Toast.Style.Failure, title: "Failed to open Firefox", message: String(err) });
+    return "error";
+  }
 }
 
 export async function setActiveTab(tab: Tab): Promise<void> {
-  const preferences = getPreferenceValues<Preferences>();
-  const browserApp = preferences.browserApp || "Firefox";
-
-  // Instead of trying to find and activate the existing tab,
-  // just open the URL which is more reliable and simpler
-  const command = `open -a "${browserApp}" "${tab.url}"`;
-  await execAsync(command);
+  try {
+    // Instead of trying to find and activate the existing tab,
+    // just open the URL which is more reliable and simpler
+    await launchFirefox(tab.url, getBrowserApp());
+  } catch (err) {
+    await showToast({ style: Toast.Style.Failure, title: "Failed to open Firefox", message: String(err) });
+  }
 }
