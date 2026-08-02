@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rankparse",
+  "title": "RankParse",
+  "description": "Look up backlinks, domain authority, tech stack, and SEO/site audits from the RankParse API without leaving Raycast.",
+  "icon": "icon.png",
+  "author": "abhi_bavishi",
+  "categories": [
+    "Developer Tools",
+    "Data"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "search-backlinks",
+      "title": "Search Backlinks",
+      "subtitle": "RankParse",
+      "description": "Browse backlinks, referring domains, outbound links, anchor text, and top pages for a domain.",
+      "mode": "view"
+    },
+    {
+      "name": "domain-snapshot",
+      "title": "Domain Snapshot",
+      "subtitle": "RankParse",
+      "description": "See domain authority, domain rank, and crawl history for a domain at a glance.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "domain",
+          "placeholder": "stripe.com",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "cross-domain-compare",
+      "title": "Cross-Domain Compare",
+      "subtitle": "RankParse",
+      "description": "Find domain overlap, link intersect, competitor gaps, and similar domains.",
+      "mode": "view"
+    },
+    {
+      "name": "page-site-audit",
+      "title": "Page & Site Audit",
+      "subtitle": "RankParse",
+      "description": "Audit page SEO, performance, tech stack, site health, and sitemap for a URL or domain.",
+      "mode": "view"
+    },
+    {
+      "name": "account",
+      "title": "RankParse Account",
+      "subtitle": "RankParse",
+      "description": "Shows your remaining RankParse credit balance in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "batch-backlinks",
+      "title": "Batch Backlinks Lookup",
+      "subtitle": "RankParse",
+      "description": "Look up backlinks for up to 50 domains at once.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-backlinks",
+      "title": "Get Backlinks",
+      "description": "Get backlinks pointing to a domain, with source domain, anchor text, and link type."
+    },
+    {
+      "name": "get-domain-authority",
+      "title": "Get Domain Authority",
+      "description": "Get the domain authority score and referring domain count for a domain."
+    },
+    {
+      "name": "get-tech-stack",
+      "title": "Get Tech Stack",
+      "description": "Detect the technology stack (CMS, framework, analytics, hosting, etc.) used by a domain."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "RankParse API Key",
+      "description": "Your RankParse API key (starts with rp_). Get a free one at rankparse.com/dashboard.",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "rankparse": "^0.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
