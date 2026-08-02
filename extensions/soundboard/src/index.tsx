@@ -2,6 +2,7 @@ import {
   ActionPanel,
   Action,
   List,
+  Grid,
   Icon,
   confirmAlert,
   Color,
@@ -9,10 +10,12 @@ import {
   Toast,
   environment,
   Keyboard,
+  getPreferenceValues,
 } from "@raycast/api";
 import { getItems, saveItems } from "./storage";
 import { Item } from "./types";
 import { useState, useEffect } from "react";
+import { useCachedState } from "@raycast/utils";
 import { SoundForm } from "./soundform";
 import { addItem, getLivePlayingPaths, getPlayingPaths, playFile, removeItemEntry, stopFile } from "./utils";
 
@@ -21,6 +24,11 @@ export default function Command() {
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const [loading, setLoading] = useState<boolean>(true);
   const [playingPaths, setPlayingPaths] = useState<Set<string>>(new Set());
+  const preferences = getPreferenceValues<{ layout?: string }>();
+  const defaultLayout = preferences.layout ?? "list";
+  const [layout, setLayout] = useCachedState("layout", defaultLayout);
+
+  const toggleLayout = () => setLayout((current) => (current === "list" ? "grid" : "list"));
 
   useEffect(() => {
     (async () => {
@@ -75,7 +83,65 @@ export default function Command() {
     setSelectedItemId(item.id);
   }
 
-  return (
+  return layout === "grid" ? (
+    <Grid
+      isLoading={loading}
+      columns={5}
+      selectedItemId={selectedItemId}
+      actions={
+        <ActionPanel>
+          <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
+        </ActionPanel>
+      }
+    >
+      <Grid.EmptyView
+        title={connectionsList.length === 0 ? "No Sounds Found" : "No Results"}
+        description={connectionsList.length === 0 ? "Press ⌘+N to add a file" : "Try a different search"}
+        icon={{ source: "no-view.png" }}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Add New Sound"
+              shortcut={Keyboard.Shortcut.Common.New}
+              icon={Icon.Document}
+              target={
+                <SoundForm
+                  onEdit={async function (item: Item): Promise<void> {
+                    await handleCreate(item);
+                  }}
+                />
+              }
+            />
+            <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
+          </ActionPanel>
+        }
+      />
+      {connectionsList.map((item) => (
+        <Grid.Item
+          key={item.id}
+          id={item.id}
+          content={getItemIcon(item)}
+          title={item.title}
+          subtitle={item.path.toString()}
+          accessory={getGridAccessory(item)}
+          actions={
+            <Actions
+              item={item}
+              items={connectionsList}
+              isPlaying={playingPaths.has(item.path[0])}
+              layout={layout}
+              refreshPlaying={refreshPlaying}
+              refreshPlayingFromRegistry={refreshPlayingFromRegistry}
+              onToggleLayout={toggleLayout}
+              onEdit={handleCreate}
+              onItemRemove={removeItem}
+              saveItemEntries={saveItemEntries}
+            />
+          }
+        />
+      ))}
+    </Grid>
+  ) : (
     <List isLoading={loading} selectedItemId={selectedItemId}>
       <List.EmptyView
         title={connectionsList.length === 0 ? "No Sounds Found" : "No Results"}
@@ -95,6 +161,7 @@ export default function Command() {
                 />
               }
             />
+            <ToggleLayoutAction layout={layout} onToggleLayout={toggleLayout} />
           </ActionPanel>
         }
       />
@@ -111,11 +178,13 @@ export default function Command() {
               item={item}
               items={connectionsList}
               isPlaying={playingPaths.has(item.path[0])}
+              layout={layout}
               refreshPlaying={refreshPlaying}
               refreshPlayingFromRegistry={refreshPlayingFromRegistry}
-              saveItemEntries={saveItemEntries}
+              onToggleLayout={toggleLayout}
               onEdit={handleCreate}
               onItemRemove={removeItem}
+              saveItemEntries={saveItemEntries}
             />
           }
         />
@@ -126,6 +195,25 @@ export default function Command() {
 
 function getItemIcon(item: Item) {
   return item.icon ? (Icon[item.icon as keyof typeof Icon] ?? Icon.Music) : Icon.Music;
+}
+
+function getGridAccessory(item: Item) {
+  const favoriteNumber = parseInt(item.favourite);
+  if (favoriteNumber > 0) {
+    return { icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: `Favourite #${favoriteNumber}` };
+  }
+  return undefined;
+}
+
+function ToggleLayoutAction({ layout, onToggleLayout }: { layout: string; onToggleLayout: () => void }) {
+  return (
+    <Action
+      title="Toggle Layout"
+      icon={layout === "list" ? Icon.AppWindowGrid3x3 : Icon.AppWindowList}
+      shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
+      onAction={onToggleLayout}
+    />
+  );
 }
 
 function getAccessories(item: Item) {
@@ -141,8 +229,10 @@ function Actions({
   item,
   items,
   isPlaying,
+  layout,
   refreshPlaying,
   refreshPlayingFromRegistry,
+  onToggleLayout,
   onEdit,
   saveItemEntries,
   onItemRemove,
@@ -150,8 +240,10 @@ function Actions({
   item: Item;
   items: Item[];
   isPlaying: boolean;
+  layout: string;
   refreshPlaying: () => void;
   refreshPlayingFromRegistry: () => void;
+  onToggleLayout: () => void;
   onEdit: (item: Item) => Promise<void>;
   saveItemEntries: (items: Item[], item: Item) => Promise<void>;
   onItemRemove: (item: Item) => Promise<void>;
@@ -231,8 +323,9 @@ function Actions({
       />
 
       <ActionPanel.Section>
+        <ToggleLayoutAction layout={layout} onToggleLayout={onToggleLayout} />
         <Action
-          title="Refresh Playing State"
+          title="Refresh"
           shortcut={Keyboard.Shortcut.Common.Refresh}
           icon={Icon.ArrowClockwise}
           onAction={() => {

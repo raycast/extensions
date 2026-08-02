@@ -109,6 +109,25 @@
       "label": "Close window after sound is triggered",
       "required": false,
       "default": false
+    },
+    {
+      "type": "dropdown",
+      "name": "layout",
+      "label": "Layout",
+      "title": "Layout",
+      "description": "The layout for displaying the sounds",
+      "required": false,
+      "default": "list",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
     }
   ],
   "devDependencies": {
