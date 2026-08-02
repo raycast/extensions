@@ -229,13 +229,15 @@ async function recoverCustomShortcuts(
   recoveredShortcuts: Shortcut[],
   reason: string,
 ): Promise<Shortcut[]> {
-  const recoveryKey = `${CUSTOM_SHORTCUTS_RECOVERY_KEY_PREFIX}.${Date.now()}.${crypto.randomUUID()}`;
+  return withCrossProcessLock(async () => {
+    const recoveryKey = `${CUSTOM_SHORTCUTS_RECOVERY_KEY_PREFIX}.${Date.now()}.${crypto.randomUUID()}`;
 
-  await LocalStorage.setItem(recoveryKey, raw);
-  await writeCustomShortcuts(recoveredShortcuts);
-  console.warn(`Shortcut Vault recovered custom shortcut storage containing ${reason}.`);
+    await LocalStorage.setItem(recoveryKey, raw);
+    await writeCustomShortcuts(recoveredShortcuts);
+    console.warn(`Shortcut Vault recovered custom shortcut storage containing ${reason}.`);
 
-  return recoveredShortcuts;
+    return recoveredShortcuts;
+  });
 }
 
 function parseStoredShortcut(value: unknown): Shortcut {
