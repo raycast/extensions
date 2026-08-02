@@ -1,6 +1,6 @@
 import { execFileSync, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
-import { appendFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { Item } from "./types";
@@ -14,8 +14,15 @@ import {
 
 const registryDir = () => join(tmpdir(), "raycast-soundboard");
 
-const registryFile = (audioPath: string) =>
-  join(registryDir(), `${createHash("sha256").update(audioPath).digest("hex").slice(0, 16)}.pids`);
+// Each macOS player is recorded in its own file so that registration and
+// cleanup are atomic per player: `registerPlayer` creates one file and
+// `unregisterPlayer` removes that same file. Because no two players share a
+// file, concurrent operations never produce a lost update that could erase
+// another live player's record.
+const playersDir = (audioPath: string) =>
+  join(registryDir(), "players", createHash("sha256").update(audioPath).digest("hex").slice(0, 16));
+
+const playerFile = (audioPath: string, pid: number) => join(playersDir(audioPath), String(pid));
 
 const playingRegistryFile = () => join(registryDir(), "playing.json");
 
@@ -127,17 +134,23 @@ const isPlayerRunning = (record: PlayerRecord, audioPath: string): boolean => {
 
 const readRegisteredPlayers = (audioPath: string): PlayerRecord[] => {
   try {
-    return readFileSync(registryFile(audioPath), "utf8")
-      .split("\n")
-      .filter((line) => line !== "")
-      .map((line) => {
-        const separator = line.indexOf(":");
-        if (separator <= 0) {
+    const dir = playersDir(audioPath);
+    if (!existsSync(dir)) {
+      return [];
+    }
+    return readdirSync(dir)
+      .map((name) => {
+        const pid = Number(name);
+        if (Number.isNaN(pid)) {
           return null;
         }
-        const pid = Number(line.slice(0, separator));
-        const startTime = line.slice(separator + 1);
-        return Number.isNaN(pid) || startTime === "" ? null : { pid, startTime };
+        let startTime = "";
+        try {
+          startTime = readFileSync(join(dir, name), "utf8").trim();
+        } catch {
+          return null;
+        }
+        return startTime === "" ? null : { pid, startTime };
       })
       .filter((record): record is PlayerRecord => record !== null);
   } catch {
@@ -151,8 +164,8 @@ const registerPlayer = (audioPath: string, pid: number) => {
     if (startTime === null) {
       return;
     }
-    mkdirSync(registryDir(), { recursive: true });
-    appendFileSync(registryFile(audioPath), `${pid}:${startTime}\n`);
+    mkdirSync(playersDir(audioPath), { recursive: true });
+    writeFileSync(playerFile(audioPath, pid), startTime, { flag: "w" });
   } catch {
     // Best effort only, playback still works.
   }
@@ -160,29 +173,17 @@ const registerPlayer = (audioPath: string, pid: number) => {
 
 const unregisterPlayer = (audioPath: string, pid: number) => {
   try {
-    const file = registryFile(audioPath);
-    const remaining = readRegisteredPlayers(audioPath).filter((record) => record.pid !== pid);
-    if (remaining.length === 0) {
-      rmSync(file, { force: true });
-    } else {
-      writeFileSync(file, `${remaining.map((record) => `${record.pid}:${record.startTime}`).join("\n")}\n`);
-    }
+    rmSync(playerFile(audioPath, pid), { force: true });
   } catch {
     // Best effort only.
   }
 };
 
 const pruneRegisteredPlayers = (audioPath: string) => {
-  try {
-    const file = registryFile(audioPath);
-    const remaining = readRegisteredPlayers(audioPath).filter((record) => isPlayerRunning(record, audioPath));
-    if (remaining.length === 0) {
-      rmSync(file, { force: true });
-    } else {
-      writeFileSync(file, `${remaining.map((record) => `${record.pid}:${record.startTime}`).join("\n")}\n`);
+  for (const record of readRegisteredPlayers(audioPath)) {
+    if (!isPlayerRunning(record, audioPath)) {
+      unregisterPlayer(audioPath, record.pid);
     }
-  } catch {
-    // Best effort only.
   }
 };
 
@@ -195,7 +196,7 @@ const stopMacOSPlayers = (audioPath: string) => {
       // The process already exited.
     }
   }
-  rmSync(registryFile(audioPath), { force: true });
+  rmSync(playersDir(audioPath), { recursive: true, force: true });
 };
 
 export const playSoundFromIndex = async (index: number) => {
