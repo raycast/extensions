@@ -94,7 +94,10 @@ const getProcessStartTime = (pid: number): string | null => {
 
 const getProcessCommand = (pid: number): string | null => {
   try {
-    const output = execFileSync("ps", ["-p", String(pid), "-o", "command="], { encoding: "utf8" }).trim();
+    // `-ww` disables ps's default output-width truncation so long audio paths
+    // are returned in full; otherwise a truncated command would fail the exact
+    // identity match below and hide a live player.
+    const output = execFileSync("ps", ["-ww", "-p", String(pid), "-o", "command="], { encoding: "utf8" }).trim();
     return output || null;
   } catch {
     return null;

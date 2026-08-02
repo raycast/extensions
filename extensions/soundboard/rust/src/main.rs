@@ -3,6 +3,21 @@ use raycast_rust_macros::raycast;
 #[cfg(windows)]
 use windows::Win32::Foundation::HANDLE;
 
+// Owns the stop event handle and releases it when dropped, so the handle is
+// always closed regardless of how `play_windows` returns (including via `?`
+// early-returns when media-player setup fails).
+#[cfg(windows)]
+struct StopEventGuard(HANDLE);
+
+#[cfg(windows)]
+impl Drop for StopEventGuard {
+    fn drop(&mut self) {
+        unsafe {
+            let _ = windows::Win32::Foundation::CloseHandle(self.0);
+        }
+    }
+}
+
 #[raycast]
 fn play_file(path: String) -> Result<(), String> {
     #[cfg(windows)]
@@ -37,7 +52,7 @@ fn play_windows(path: &str) -> Result<(), String> {
     use windows::Foundation::{TypedEventHandler, Uri};
     use windows::Media::Core::MediaSource;
     use windows::Media::Playback::MediaPlayer;
-    use windows::Win32::Foundation::{CloseHandle, WAIT_OBJECT_0};
+    use windows::Win32::Foundation::WAIT_OBJECT_0;
     use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
     use windows::Win32::System::Threading::{ResetEvent, WaitForSingleObject};
 
@@ -45,8 +60,11 @@ fn play_windows(path: &str) -> Result<(), String> {
         let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
     }
 
-    // Reset the stop signal so a fresh play is not immediately cancelled.
+    // Reset the stop signal so a fresh play is not immediately cancelled. The
+    // guard releases the handle on every return path, so a setup error below
+    // never leaks the event as an active-playback signal.
     let stop_event = create_stop_event(&stop_event_name(path))?;
+    let _stop_event_guard = StopEventGuard(stop_event);
     unsafe {
         let _ = ResetEvent(stop_event);
     }
@@ -100,11 +118,6 @@ fn play_windows(path: &str) -> Result<(), String> {
     }
 
     let _ = player.RemoveMediaEnded(ended_token);
-    // Explicitly destroy the stop event so a finished playback is no longer
-    // reported as active, independent of the player process lifetime.
-    unsafe {
-        let _ = CloseHandle(stop_event);
-    }
     Ok(())
 }
 
