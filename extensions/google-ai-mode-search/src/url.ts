@@ -1,13 +1,9 @@
 const GOOGLE_SEARCH_URL = "https://www.google.com/search";
 
 export function buildGoogleAiModeUrl(query?: string): string {
-  const url = new URL(GOOGLE_SEARCH_URL);
-
-  if (query) {
-    url.searchParams.set("q", query);
+  if (!query) {
+    return `${GOOGLE_SEARCH_URL}?udm=50`;
   }
 
-  url.searchParams.set("udm", "50");
-
-  return url.toString();
+  return `${GOOGLE_SEARCH_URL}?q=${encodeURIComponent(query)}&udm=50`;
 }
