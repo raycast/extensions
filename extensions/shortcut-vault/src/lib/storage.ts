@@ -62,7 +62,7 @@ export async function getCustomShortcuts(): Promise<Shortcut[]> {
 }
 
 /**
- * Executes a cross-command safe serial mutation on custom shortcuts using Compare-And-Swap (CAS).
+ * Executes a cross-command safe serial mutation on custom shortcuts using strict Compare-And-Swap (CAS).
  * Re-verifies LocalStorage state prior to persisting to prevent concurrent process overwrites.
  */
 export function mutateCustomShortcuts<T>(
@@ -70,23 +70,20 @@ export function mutateCustomShortcuts<T>(
 ): Promise<T> {
   return customShortcutMutationQueue.run(async () => {
     let attempts = 0;
-    while (attempts < 5) {
+    while (attempts < 10) {
       const rawBefore = (await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_KEY)) ?? "";
       const currentShortcuts = await getCustomShortcuts();
       const { shortcuts, result } = await mutation(currentShortcuts);
 
       const rawCheck = (await LocalStorage.getItem<string>(CUSTOM_SHORTCUTS_KEY)) ?? "";
-      if (rawBefore === rawCheck || attempts === 4) {
+      if (rawBefore === rawCheck) {
         await writeCustomShortcuts(shortcuts);
         return result;
       }
       attempts++;
     }
 
-    const currentShortcuts = await getCustomShortcuts();
-    const { shortcuts, result } = await mutation(currentShortcuts);
-    await writeCustomShortcuts(shortcuts);
-    return result;
+    throw new Error("Storage is busy with concurrent updates. Please try again.");
   });
 }
 
