@@ -1,5 +1,10 @@
 # DeepWiki Changelog
 
+## [Search History] - {PR_MERGE_DATE}
+
+- Added recent search history when the search field is empty
+- Updated Raycast API and related dependencies
+
 ## [0.2.3] - 2026-03-26
 
 - Make the Open DeepWiki Page and Crawl DeepWiki Docs command arguments optional by falling back to the current browser tab URL via the Raycast Browser Extension.
