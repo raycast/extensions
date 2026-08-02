@@ -263,6 +263,11 @@ export function getStateValue(state: State): string | undefined {
       return "✔";
     }
     return state.state;
+  } else if (state.entity_id.startsWith("person")) {
+    const inZones = state.attributes.in_zones;
+    if (Array.isArray(inZones) && inZones.every((zone) => typeof zone === "string")) {
+      return inZones.map((zone) => zone.replace(/^zone\./, "")).join(", ");
+    }
   }
   return state.state;
 }
