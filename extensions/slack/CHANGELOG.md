@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Fix Search Emojis crash in large workspaces] - {PR_MERGE_DATE}
+
+- Fix a "Worker terminated due to reaching memory limit: JS heap out of memory" crash in the Search Emojis command by paginating the emoji grid instead of rendering every custom emoji at once.
+
 ## [Broadcast Slack thread replies to channels] - 2026-07-21
 
 - Add an optional `replyBroadcast` flag to the `reply-thread` AI tool to also send important thread replies to the channel.
