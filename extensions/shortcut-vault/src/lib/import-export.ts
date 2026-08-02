@@ -4,7 +4,7 @@ import path from "node:path";
 import type { ShortcutExportFile } from "../types/shortcut";
 import { createExportFile, prepareImportedShortcuts, validateExportFile } from "./import-export-format";
 import { getDefaultShortcuts } from "./default-shortcuts";
-import { getCustomShortcuts, mutateCustomShortcuts } from "./storage";
+import { getCustomShortcuts, importCustomShortcuts } from "./storage";
 export { EXAMPLE_EXPORT, EXPORT_FORMAT, EXPORT_VERSION, createExportFile } from "./import-export-format";
 
 export type ImportResult = {
@@ -60,16 +60,13 @@ export async function readImportFile(filePath: string): Promise<ShortcutExportFi
 
 export async function importShortcuts(filePath: string): Promise<ImportResult> {
   const exportFile = await readImportFile(filePath);
+  const existing = await getCustomShortcuts();
+  const imported = prepareImportedShortcuts(exportFile.shortcuts, [...existing, ...getDefaultShortcuts()]);
 
-  return mutateCustomShortcuts((existing) => {
-    const imported = prepareImportedShortcuts(exportFile.shortcuts, [...existing, ...getDefaultShortcuts()]);
+  await importCustomShortcuts(imported.shortcuts);
 
-    return {
-      shortcuts: [...imported.shortcuts, ...existing],
-      result: {
-        importedCount: imported.shortcuts.length,
-        regeneratedIds: imported.regeneratedIds,
-      },
-    };
-  });
+  return {
+    importedCount: imported.shortcuts.length,
+    regeneratedIds: imported.regeneratedIds,
+  };
 }
