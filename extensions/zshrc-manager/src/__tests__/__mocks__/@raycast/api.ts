@@ -36,6 +36,8 @@ export const Icon = {
   Undo: "undo" as const,
   Clipboard: "clipboard" as const,
   List: "list" as const,
+  Lock: "lock" as const,
+  MagnifyingGlass: "magnifying-glass" as const,
 };
 
 // Mock ActionPanel component
@@ -178,7 +180,7 @@ export const List = (props: any) => {
   return React.createElement("div", { "data-testid": "list", className: props.className }, content);
 };
 
-List.Item = ({ children, title, subtitle, accessories, detail, ...props }: any) => {
+List.Item = ({ children, title, subtitle, accessories, detail, actions, ...props }: any) => {
   const content = [];
   if (title) content.push(React.createElement("div", { key: "title" }, title));
   if (subtitle) content.push(React.createElement("div", { key: "subtitle" }, subtitle));
@@ -198,6 +200,8 @@ List.Item = ({ children, title, subtitle, accessories, detail, ...props }: any) 
     content.push(React.createElement("div", { key: "accessories" }, accessoryContent));
   }
   if (detail) content.push(React.createElement("div", { key: "detail" }, detail));
+  if (actions)
+    content.push(React.createElement("div", { key: "actions", "data-testid": "list-item-actions" }, actions));
   if (children) content.push(children);
 
   return React.createElement("div", { "data-testid": "list-item", ...props }, content);

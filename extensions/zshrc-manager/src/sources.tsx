@@ -33,6 +33,8 @@ export default function Sources({ searchBarAccessory }: SourcesProps) {
       searchFields={["path", "section"]}
       searchBarAccessory={searchBarAccessory}
       generateTitle={(source) => truncateValueMiddle(source.path)}
+      getItemName={(source) => source.path}
+      getItemValue={(source) => source.path}
       generateOverviewMarkdown={(_, allSources, grouped) => `
 # Source Summary
 

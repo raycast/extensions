@@ -1,6 +1,6 @@
 import type React from "react";
 import { useState, useMemo } from "react";
-import { Action, ActionPanel, List, Icon, Color, Clipboard, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, List, Icon } from "@raycast/api";
 import { getZshrcPath } from "./lib/zsh";
 import Sections from "./sections";
 import Aliases from "./aliases";
@@ -11,161 +11,22 @@ import Sources from "./sources";
 import Evals from "./evals";
 import Setopts from "./setopts";
 import { MODERN_COLORS } from "./constants";
-import { getSectionIcon } from "./lib/section-icons";
+import { getSectionImage } from "./lib/section-icons";
 import { useZshrcLoader } from "./hooks/useZshrcLoader";
 import { truncateValueMiddle } from "./utils/formatters";
-import { calculateStatistics, hasContent, getTopEntries, type ZshrcStatistics as StatsType } from "./utils/statistics";
+import { calculateStatistics, hasContent, getTopEntries } from "./utils/statistics";
 import { StatListItem } from "./components";
-import { shellQuoteSingle, shellQuoteDouble } from "./utils/shell-escape";
+import {
+  createSearchResults,
+  filterResults,
+  groupResultsByType,
+  getTypeDisplayName,
+  SearchResultListItem,
+} from "./lib/search-results";
+import { isSecretName, maskValue } from "./utils/secrets";
 
 interface ZshrcStatisticsProps {
   searchBarAccessory?: React.ReactElement;
-}
-
-/**
- * Unified search result item for search functionality
- */
-interface SearchResult {
-  id: string;
-  type: "alias" | "export" | "function" | "plugin" | "source" | "eval" | "setopt";
-  title: string;
-  subtitle: string;
-  keywords: string[];
-  icon: { source: Icon; tintColor: string };
-  copyValue: string;
-}
-
-/**
- * Creates searchable results from statistics
- */
-function createSearchResults(stats: StatsType): SearchResult[] {
-  const results: SearchResult[] = [];
-
-  stats.aliases.forEach((alias, idx) => {
-    results.push({
-      id: `alias-${idx}`,
-      type: "alias",
-      title: alias.name,
-      subtitle: alias.command,
-      keywords: [alias.name.toLowerCase(), alias.command.toLowerCase(), "alias"],
-      icon: { source: Icon.Terminal, tintColor: MODERN_COLORS.success },
-      copyValue: `alias ${alias.name}='${shellQuoteSingle(alias.command)}'`,
-    });
-  });
-
-  stats.exports.forEach((exp, idx) => {
-    results.push({
-      id: `export-${idx}`,
-      type: "export",
-      title: exp.variable,
-      subtitle: exp.value,
-      keywords: [exp.variable.toLowerCase(), exp.value.toLowerCase(), "export", "env"],
-      icon: { source: Icon.Upload, tintColor: MODERN_COLORS.primary },
-      copyValue: `export ${exp.variable}="${shellQuoteDouble(exp.value)}"`,
-    });
-  });
-
-  stats.functions.forEach((func, idx) => {
-    results.push({
-      id: `function-${idx}`,
-      type: "function",
-      title: func.name,
-      subtitle: "function",
-      keywords: [func.name.toLowerCase(), "function", "func"],
-      icon: { source: Icon.Code, tintColor: MODERN_COLORS.purple },
-      copyValue: func.name,
-    });
-  });
-
-  stats.plugins.forEach((plugin, idx) => {
-    results.push({
-      id: `plugin-${idx}`,
-      type: "plugin",
-      title: plugin.name,
-      subtitle: "plugin",
-      keywords: [plugin.name.toLowerCase(), "plugin"],
-      icon: { source: Icon.Plug, tintColor: MODERN_COLORS.warning },
-      copyValue: plugin.name,
-    });
-  });
-
-  stats.sources.forEach((source, idx) => {
-    results.push({
-      id: `source-${idx}`,
-      type: "source",
-      title: source.path,
-      subtitle: "source",
-      keywords: [source.path.toLowerCase(), "source"],
-      icon: { source: Icon.Document, tintColor: Color.Orange },
-      copyValue: `source ${source.path}`,
-    });
-  });
-
-  stats.evals.forEach((evalCmd, idx) => {
-    results.push({
-      id: `eval-${idx}`,
-      type: "eval",
-      title: truncateValueMiddle(evalCmd.command, 60),
-      subtitle: "eval",
-      keywords: [evalCmd.command.toLowerCase(), "eval"],
-      icon: { source: Icon.Terminal, tintColor: MODERN_COLORS.error },
-      copyValue: `eval "${shellQuoteDouble(evalCmd.command)}"`,
-    });
-  });
-
-  stats.setopts.forEach((setopt, idx) => {
-    results.push({
-      id: `setopt-${idx}`,
-      type: "setopt",
-      title: setopt.option,
-      subtitle: "setopt",
-      keywords: [setopt.option.toLowerCase(), "setopt", "option"],
-      icon: { source: Icon.Gear, tintColor: MODERN_COLORS.neutral },
-      copyValue: `setopt ${setopt.option}`,
-    });
-  });
-
-  return results;
-}
-
-/**
- * Filters results based on search text
- */
-function filterResults(results: SearchResult[], searchText: string): SearchResult[] {
-  if (!searchText.trim()) {
-    return results;
-  }
-  const query = searchText.toLowerCase();
-  return results.filter((result) => result.keywords.some((keyword) => keyword.includes(query)));
-}
-
-/**
- * Groups results by type for display
- */
-function groupResultsByType(results: SearchResult[]): Map<string, SearchResult[]> {
-  const groups = new Map<string, SearchResult[]>();
-  results.forEach((result) => {
-    const existing = groups.get(result.type) || [];
-    existing.push(result);
-    groups.set(result.type, existing);
-  });
-  return groups;
-}
-
-/**
- * Gets display name for result type
- */
-function getTypeDisplayName(type: string): string {
-  const names: Record<string, string> = {
-    alias: "Aliases",
-    export: "Exports",
-    function: "Functions",
-    plugin: "Plugins",
-    source: "Sources",
-    eval: "Evals",
-    setopt: "Setopts",
-  };
-  return names[type] || type;
 }
 
 /**
@@ -179,9 +40,10 @@ export default function ZshrcStatistics({ searchBarAccessory }: ZshrcStatisticsP
   const [searchText, setSearchText] = useState("");
   const stats = useMemo(() => (sections.length > 0 ? calculateStatistics(sections) : null), [sections]);
 
-  const allResults = useMemo(() => (stats ? createSearchResults(stats) : []), [stats]);
+  const allResults = useMemo(() => createSearchResults(sections || []), [sections]);
   const filteredResults = useMemo(() => filterResults(allResults, searchText), [allResults, searchText]);
   const groupedResults = useMemo(() => groupResultsByType(filteredResults), [filteredResults]);
+  const [revealedIds, setRevealedIds] = useState<ReadonlySet<string>>(new Set());
 
   const isSearching = searchText.trim().length > 0;
 
@@ -189,14 +51,21 @@ export default function ZshrcStatistics({ searchBarAccessory }: ZshrcStatisticsP
     refresh();
   };
 
-  const handleCopy = async (value: string) => {
-    await Clipboard.copy(value);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Copied to Clipboard",
-      message: truncateValueMiddle(value, 40),
+  const toggleReveal = (id: string) => {
+    setRevealedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
     });
   };
+
+  // Masking is display-only: copy actions always receive the real value
+  const displayExportValue = (variable: string, value: string): string =>
+    isSecretName(variable) ? maskValue(value) : value;
 
   const renderOverview = () => {
     if (!stats) {
@@ -310,10 +179,7 @@ Press ⌘R to refresh after making changes.
                       key={`section-${idx}`}
                       title={section.label}
                       text={`Lines ${section.startLine}-${section.endLine}`}
-                      icon={{
-                        source: getSectionIcon(section.label).icon,
-                        tintColor: getSectionIcon(section.label).color,
-                      }}
+                      icon={getSectionImage(section.label)}
                     />
                   ))}
                 </List.Item.Detail.Metadata>
@@ -363,14 +229,14 @@ ${getTopEntries(aliases, 5)
           tintColor={MODERN_COLORS.primary}
           items={exports}
           getItemLabel={(e) => e.variable}
-          getItemSubtitle={(e) => e.value}
+          getItemSubtitle={(e) => displayExportValue(e.variable, e.value)}
           markdownContent={`
 # Exports
 
 **${exports.length}** environment variables
 
 ${getTopEntries(exports, 5)
-  .map((exp) => `- **\`${exp.variable}\`** = \`${exp.value}\``)
+  .map((exp) => `- **\`${exp.variable}\`** = \`${displayExportValue(exp.variable, exp.value)}\``)
   .join("\n")}
           `}
           viewAllTarget={<Exports />}
@@ -530,35 +396,12 @@ ${getTopEntries(setopts, 10)
     return Array.from(groupedResults.entries()).map(([type, results]) => (
       <List.Section key={type} title={getTypeDisplayName(type)} subtitle={`${results.length}`}>
         {results.slice(0, 50).map((result) => (
-          <List.Item
+          <SearchResultListItem
             key={result.id}
-            title={result.title}
-            subtitle={result.subtitle !== result.type ? truncateValueMiddle(result.subtitle, 50) : ""}
-            icon={result.icon}
-            accessories={[{ tag: result.type }]}
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Copy Definition"
-                  icon={Icon.Clipboard}
-                  onAction={() => handleCopy(result.copyValue)}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
-                <Action
-                  title="Copy Name/Value"
-                  icon={Icon.Clipboard}
-                  onAction={() => handleCopy(result.title)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-                <Action.Open title="Open ~/.Zshrc" target={getZshrcPath()} icon={Icon.Document} />
-                <Action
-                  title="Refresh"
-                  icon={Icon.ArrowClockwise}
-                  onAction={handleRefresh}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
-                />
-              </ActionPanel>
-            }
+            result={result}
+            refresh={handleRefresh}
+            revealed={revealedIds.has(result.id)}
+            onToggleReveal={() => toggleReveal(result.id)}
           />
         ))}
       </List.Section>
@@ -567,7 +410,6 @@ ${getTopEntries(setopts, 10)
 
   return (
     <List
-      navigationTitle={`Zshrc Statistics${isFromCache ? " (Cached)" : ""}`}
       searchBarPlaceholder="Search aliases, exports, functions, plugins, or sections..."
       searchBarAccessory={searchBarAccessory as List.Props["searchBarAccessory"]}
       onSearchTextChange={setSearchText}

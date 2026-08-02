@@ -149,9 +149,9 @@ Press the key combination to trigger the bound action.
           <SharedActionsSection onRefresh={refresh} />
         </ActionPanel>
       )}
-      generateItemActions={(_, refresh) => (
+      generateItemActions={(item, refresh) => (
         <ActionPanel>
-          <SharedActionsSection onRefresh={refresh} />
+          <SharedActionsSection onRefresh={refresh} item={{ copyName: item.key, copyValue: item.command }} />
         </ActionPanel>
       )}
     />

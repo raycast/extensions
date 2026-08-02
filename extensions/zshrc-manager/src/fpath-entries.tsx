@@ -139,9 +139,9 @@ This path will be searched for autoloadable functions and completion definitions
           <SharedActionsSection onRefresh={refresh} />
         </ActionPanel>
       )}
-      generateItemActions={(_, refresh) => (
+      generateItemActions={(item, refresh) => (
         <ActionPanel>
-          <SharedActionsSection onRefresh={refresh} />
+          <SharedActionsSection onRefresh={refresh} item={{ copyName: item.entry, copyValue: item.entry }} />
         </ActionPanel>
       )}
     />
