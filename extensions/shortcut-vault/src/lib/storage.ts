@@ -62,55 +62,34 @@ export async function createCustomShortcut(values: ShortcutFormValues): Promise<
 
 export async function updateCustomShortcut(id: string, values: ShortcutFormValues): Promise<Shortcut> {
   const itemKey = getItemKey(id);
+  const raw = await LocalStorage.getItem<string>(itemKey);
 
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const rawBefore = await LocalStorage.getItem<string>(itemKey);
-    let existing: Shortcut | undefined;
-
-    if (rawBefore) {
-      try {
-        existing = parseStoredShortcut(JSON.parse(rawBefore));
-      } catch {
-        // Fallback
-      }
-    }
-
-    if (!existing) {
-      const all = await getCustomShortcuts();
-      existing = all.find((item) => item.id === id);
-    }
-
-    if (!existing) {
-      throw new Error("That custom shortcut could not be found or was deleted.");
-    }
-
-    const updated: Shortcut = {
-      ...existing,
-      commandName: values.commandName.trim(),
-      modifiers: normalizeModifiers(values.modifiers),
-      key: normalizeKey(values.key),
-      shortcutDisplay: formatShortcutDisplay(values.modifiers, values.key),
-      ownerName: normalizeOwnerName(values.ownerName),
-      ownerType: values.ownerType ?? inferCustomOwnerType(values.ownerName, values.scope),
-      scope: values.scope,
-      notes: values.notes.trim() || undefined,
-      updatedAt: new Date().toISOString(),
-    };
-
-    const payload = JSON.stringify(updated);
-    const rawCheck = await LocalStorage.getItem<string>(itemKey);
-
-    if (!rawCheck) {
-      throw new Error("That custom shortcut was deleted prior to saving updates.");
-    }
-
-    if (rawCheck === rawBefore) {
-      await LocalStorage.setItem(itemKey, payload);
-      return updated;
-    }
+  if (!raw) {
+    throw new Error("That custom shortcut could not be found or was deleted.");
   }
 
-  throw new Error("Storage is busy with concurrent updates. Please try again.");
+  let existing: Shortcut;
+  try {
+    existing = parseStoredShortcut(JSON.parse(raw));
+  } catch {
+    throw new Error("That custom shortcut is invalid and cannot be updated.");
+  }
+
+  const updated: Shortcut = {
+    ...existing,
+    commandName: values.commandName.trim(),
+    modifiers: normalizeModifiers(values.modifiers),
+    key: normalizeKey(values.key),
+    shortcutDisplay: formatShortcutDisplay(values.modifiers, values.key),
+    ownerName: normalizeOwnerName(values.ownerName),
+    ownerType: values.ownerType ?? inferCustomOwnerType(values.ownerName, values.scope),
+    scope: values.scope,
+    notes: values.notes.trim() || undefined,
+    updatedAt: new Date().toISOString(),
+  };
+
+  await LocalStorage.setItem(itemKey, JSON.stringify(updated));
+  return updated;
 }
 
 export async function importCustomShortcuts(shortcutsToImport: Shortcut[]): Promise<void> {
@@ -124,24 +103,18 @@ export async function deleteCustomShortcut(id: string): Promise<void> {
 }
 
 export async function duplicateCustomShortcut(id: string): Promise<Shortcut> {
-  const existingRaw = await LocalStorage.getItem<string>(getItemKey(id));
-  let existing: Shortcut | undefined;
+  const itemKey = getItemKey(id);
+  const raw = await LocalStorage.getItem<string>(itemKey);
 
-  if (existingRaw) {
-    try {
-      existing = parseStoredShortcut(JSON.parse(existingRaw));
-    } catch {
-      // Fallback
-    }
+  if (!raw) {
+    throw new Error("That custom shortcut could not be found or was deleted.");
   }
 
-  if (!existing) {
-    const all = await getCustomShortcuts();
-    existing = all.find((item) => item.id === id);
-  }
-
-  if (!existing) {
-    throw new Error("That custom shortcut could not be found.");
+  let existing: Shortcut;
+  try {
+    existing = parseStoredShortcut(JSON.parse(raw));
+  } catch {
+    throw new Error("That custom shortcut is invalid and cannot be duplicated.");
   }
 
   const now = new Date().toISOString();
