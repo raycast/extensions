@@ -68,19 +68,19 @@ export default function LatestTeardowns() {
             <ActionPanel>
               <Action.Push
                 title="Preview Teardown"
-                target={<TeardownDetail teardown={teardown} source="latest" />}
+                target={<TeardownDetail teardown={teardown} />}
               />
               <Action.OpenInBrowser
                 title="Read Full Teardown"
-                url={teardownUrl(teardown, "latest")}
+                url={teardownUrl(teardown)}
               />
               <Action.OpenInBrowser
                 title="Explore Validated Ideas Free"
-                url={registrationUrl("latest")}
+                url={registrationUrl()}
               />
               <Action.CopyToClipboard
                 title="Copy Teardown Link"
-                content={teardownUrl(teardown, "latest")}
+                content={teardownUrl(teardown)}
               />
             </ActionPanel>
           }
