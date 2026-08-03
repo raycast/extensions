@@ -33,7 +33,8 @@
     "raxityo",
     "yusifaliyevpro",
     "jkker",
-    "sillashead"
+    "sillashead",
+    "muhammadrizo"
   ],
   "keywords": [
     "vscode",
@@ -249,5 +250,8 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
 }

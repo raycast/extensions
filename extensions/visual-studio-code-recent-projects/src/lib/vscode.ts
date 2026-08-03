@@ -384,6 +384,7 @@ const buildSchemes: Record<string, string> = {
   "IBM Bob": "bobide",
   Kiro: "kiro",
   VSCodium: "vscode-oss",
+  "VSCodium - Insiders": "vscode-oss-insiders",
   Positron: "positron",
   Qoder: "qoder",
   Devin: "devin",
