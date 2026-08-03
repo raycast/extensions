@@ -69,9 +69,9 @@ export function CaskActionPanel(props: {
               target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
-          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
           {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -134,8 +134,8 @@ export function CaskActionPanel(props: {
               target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
-          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
@@ -208,11 +208,11 @@ export function FormulaActionPanel(props: {
               target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
-          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
           {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
           <Actions.FormulaShowAllInstalled onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -270,8 +270,8 @@ export function FormulaActionPanel(props: {
               target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
-          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard
