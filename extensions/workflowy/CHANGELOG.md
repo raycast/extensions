@@ -1,6 +1,6 @@
 # Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-03
 
 - Add Windows support with platform-specific keyboard shortcuts
 - Improve SQLite sync and search compatibility on Windows, including fallback when FTS5 is unavailable
