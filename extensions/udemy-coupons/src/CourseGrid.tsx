@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
 import { Action, ActionPanel, Color, Grid, Icon, Keyboard } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { courseCategoriesUrl, courseCouponUrl, courseListUrl, parseCourseList, transformCourse } from "./api";
-import type { CourseListResponse, CourseSummary } from "./types";
+import { usePromise } from "@raycast/utils";
+import { CATEGORIES, courseCouponUrl, fetchAllCourses } from "./api";
+import type { CourseSummary } from "./types";
 import {
   formatDate,
   formatEnrollments,
@@ -32,45 +32,24 @@ export function CourseGrid({ favorites, isFavorite, onToggleFavorite, onSelect }
 
   const isFavoritesView = selectedCategory === FAVORITES_FILTER;
 
-  const { isLoading, data, pagination, revalidate, error } = useFetch<CourseListResponse, undefined, CourseSummary[]>(
-    ({ page }) =>
-      courseListUrl(page + 1, {
-        search: debouncedSearch || undefined,
-        category: isFavoritesView || selectedCategory === "all" ? undefined : selectedCategory,
-      }),
-    {
-      parseResponse: parseCourseList,
-      mapResult: (result) => ({
-        data: result.data.map(transformCourse),
-        hasMore: result.pagination.page < result.pagination.pageCount,
-      }),
-      keepPreviousData: true,
-      failureToastOptions: {
-        title: "Failed to fetch courses",
-        message: "Could not retrieve the latest course information",
-      },
-    },
+  // Favorites need the unfiltered catalogue (a saved slug may live on any page), and every
+  // other view needs the full filtered result set so sorts are applied globally rather than
+  // across only the loaded pages. Search and category still run server-side. usePromise
+  // re-runs whenever the args below change by shallow comparison.
+  const { isLoading, data, error, revalidate } = usePromise(
+    (isFav: boolean, search: string, category: string) =>
+      fetchAllCourses(
+        isFav ? {} : { search: search || undefined, category: category === "all" ? undefined : category },
+      ),
+    [isFavoritesView, debouncedSearch, selectedCategory],
   );
 
-  // Unfiltered fetch used only to build the category dropdown (server-side filtering
-  // would otherwise collapse it down to the currently selected category).
-  const categoriesFetch = useFetch<CourseListResponse>(courseCategoriesUrl(), {
-    parseResponse: parseCourseList,
-    keepPreviousData: true,
-  });
-
-  const allCourses = data ?? [];
-
-  const categories = useMemo(
-    () => ["all", ...Array.from(new Set((categoriesFetch.data?.data ?? []).map((c) => c.category))).sort()],
-    [categoriesFetch.data],
-  );
+  const favoriteSlugs = useMemo(() => new Set(favorites), [favorites]);
 
   const filteredCourses = useMemo(() => {
-    let list = allCourses;
+    let list = data ?? [];
     if (isFavoritesView) {
-      const favoriteSlugs = new Set(favorites);
-      list = list.filter((c) => favoriteSlugs.has(c.slug));
+      list = list.filter((course) => favoriteSlugs.has(course.slug));
     }
 
     const sorted = [...list];
@@ -88,7 +67,7 @@ export function CourseGrid({ favorites, isFavorite, onToggleFavorite, onSelect }
         sorted.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
     }
     return sorted;
-  }, [allCourses, selectedCategory, sortKey, favorites, isFavoritesView]);
+  }, [data, sortKey, isFavoritesView, favoriteSlugs]);
 
   if (error) {
     return (
@@ -113,7 +92,6 @@ export function CourseGrid({ favorites, isFavorite, onToggleFavorite, onSelect }
       aspectRatio="16/9"
       fit={Grid.Fit.Fill}
       isLoading={isLoading}
-      pagination={pagination}
       filtering={false}
       searchText={searchText}
       onSearchTextChange={setSearchText}
@@ -130,16 +108,9 @@ export function CourseGrid({ favorites, isFavorite, onToggleFavorite, onSelect }
             <Grid.Dropdown.Item title="All Categories" value="all" icon={Icon.AppWindowGrid3x3} />
             <Grid.Dropdown.Item title="⭐ Favorites" value={FAVORITES_FILTER} icon={Icon.Star} />
             <Grid.Dropdown.Section title="Categories">
-              {categories
-                .filter((cat) => cat !== "all")
-                .map((category) => (
-                  <Grid.Dropdown.Item
-                    key={category}
-                    title={category}
-                    value={category}
-                    icon={getCategoryIcon(category)}
-                  />
-                ))}
+              {CATEGORIES.map((category) => (
+                <Grid.Dropdown.Item key={category} title={category} value={category} icon={getCategoryIcon(category)} />
+              ))}
             </Grid.Dropdown.Section>
           </Grid.Dropdown>
           <Grid.Dropdown
