@@ -33,6 +33,8 @@ export default function Evals({ searchBarAccessory }: EvalsProps) {
       searchFields={["command", "section"]}
       searchBarAccessory={searchBarAccessory}
       generateTitle={(evalItem) => truncateValueMiddle(evalItem.command)}
+      getItemName={(evalItem) => evalItem.command}
+      getItemValue={(evalItem) => evalItem.command}
       generateOverviewMarkdown={(_, allEvals, grouped) => `
 # Eval Summary
 

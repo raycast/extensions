@@ -11,6 +11,11 @@ vi.mock("../lib/zsh", () => ({
 
 vi.mock("@raycast/api", () => ({
   showToast: vi.fn(),
+  getPreferenceValues: vi.fn(() => ({
+    enableDefaults: true,
+    enableCustomHeaderPattern: false,
+    enableCustomStartEndPatterns: false,
+  })),
   Toast: {
     Style: {
       Success: "Success",
@@ -57,6 +62,7 @@ describe("delete-item.ts", () => {
     generateLine: (k: string, v: string) => `alias ${k}='${v}'`,
     generatePattern: (k: string) => new RegExp(`^alias\\s+${k}\\s*=.*$`, "m"),
     generateReplacement: (k: string, v: string) => `alias ${k}='${v}'`,
+    matchesDisplayLine: (line: string, k: string) => new RegExp(`^(?:alias|export)\\s+${k}\\s*=`).test(line),
     itemType: "alias",
     itemTypeCapitalized: "Alias",
   };
@@ -94,7 +100,7 @@ describe("delete-item.ts", () => {
 
       expect(mockReadZshrcFileRaw).toHaveBeenCalledTimes(2);
       expect(mockWriteZshrcFile).toHaveBeenCalled();
-      expect(writtenContent).toBe(`\nalias gs='git status'\n`);
+      expect(writtenContent).toBe(`alias gs='git status'\n`);
       expect(mockClearCache).toHaveBeenCalledWith("/Users/test/.zshrc");
       expect(mockShowToast).toHaveBeenCalledWith({
         style: "Success",
@@ -105,7 +111,7 @@ describe("delete-item.ts", () => {
 
     it("should handle deletion with trailing newlines", async () => {
       const originalContent = `alias ll='ls -la'\n\n`;
-      const expectedContent = `\n\n`;
+      const expectedContent = `\n`;
 
       mockReadZshrcFileRaw.mockResolvedValueOnce(originalContent).mockResolvedValueOnce(expectedContent);
       mockWriteZshrcFile.mockResolvedValue(undefined);
@@ -130,7 +136,7 @@ describe("delete-item.ts", () => {
       await deleteItem("ll", mockConfig);
 
       expect(mockWriteZshrcFile).toHaveBeenCalled();
-      expect(writtenContent).toBe(`\nalias ll='ls -lah'\n`);
+      expect(writtenContent).toBe(`alias ll='ls -lah'\n`);
     });
 
     it("should handle deletion with different config types", async () => {
@@ -142,7 +148,7 @@ describe("delete-item.ts", () => {
       };
 
       const originalContent = `export PATH=/usr/local/bin:$PATH\n`;
-      const expectedContent = `\n`;
+      const expectedContent = ``;
 
       mockReadZshrcFileRaw.mockResolvedValueOnce(originalContent).mockResolvedValueOnce(expectedContent);
       mockWriteZshrcFile.mockResolvedValue(undefined);
@@ -252,6 +258,60 @@ describe("delete-item.ts", () => {
     });
   });
 
+  describe("deleteItem - section scoping", () => {
+    it("deletes the occurrence in the given section, not the first file match", async () => {
+      const content = [
+        "# --- First --- #",
+        "alias gs='git status'",
+        "",
+        "# --- Second --- #",
+        "alias gs='git stash'",
+      ].join("\n");
+      mockReadZshrcFileRaw.mockImplementation(async () => writtenContent ?? content);
+
+      await deleteItem("gs", mockConfig, true, "Second");
+
+      expect(writtenContent).toContain("alias gs='git status'");
+      expect(writtenContent).not.toContain("alias gs='git stash'");
+    });
+
+    it("refuses same-section duplicates instead of guessing", async () => {
+      const content = ["# --- S --- #", "alias gs='git status'", "alias gs='git stash'"].join("\n");
+      mockReadZshrcFileRaw.mockImplementation(async () => writtenContent ?? content);
+
+      await expect(deleteItem("gs", mockConfig, true, "S")).rejects.toThrow(/Multiple definitions/);
+      expect(writtenContent).toBeUndefined();
+    });
+
+    it("deletes from the second same-labeled section instance", async () => {
+      const content = ["# --- Env --- #", "alias gs='git status'", "", "# --- Env --- #", "alias gs='git stash'"].join(
+        "\n",
+      );
+      mockReadZshrcFileRaw.mockImplementation(async () => writtenContent ?? content);
+
+      await deleteItem("gs", mockConfig, true, "Env", 1);
+
+      expect(writtenContent).toContain("alias gs='git status'");
+      expect(writtenContent).not.toContain("alias gs='git stash'");
+    });
+
+    it("falls back to the first file match without a section", async () => {
+      const content = [
+        "# --- First --- #",
+        "alias gs='git status'",
+        "",
+        "# --- Second --- #",
+        "alias gs='git stash'",
+      ].join("\n");
+      mockReadZshrcFileRaw.mockImplementation(async () => writtenContent ?? content);
+
+      await deleteItem("gs", mockConfig, true);
+
+      expect(writtenContent).not.toContain("alias gs='git status'");
+      expect(writtenContent).toContain("alias gs='git stash'");
+    });
+  });
+
   describe("deleteItem - pattern handling", () => {
     it("should handle global regex patterns correctly", async () => {
       const globalPattern = /^alias\s+ll\s*=.*$/gm;
@@ -268,7 +328,7 @@ describe("delete-item.ts", () => {
 
       // Should create non-global version and delete only first match
       expect(mockWriteZshrcFile).toHaveBeenCalled();
-      expect(writtenContent).toBe(`\nalias ll='ls -lah'\n`);
+      expect(writtenContent).toBe(`alias ll='ls -lah'\n`);
     });
 
     it("should handle patterns with whitespace", async () => {
@@ -280,7 +340,7 @@ describe("delete-item.ts", () => {
       await deleteItem("ll", mockConfig);
 
       expect(mockWriteZshrcFile).toHaveBeenCalled();
-      expect(writtenContent).toBe(`\n`);
+      expect(writtenContent).toBe(``);
     });
   });
 

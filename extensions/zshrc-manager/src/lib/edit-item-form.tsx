@@ -14,6 +14,7 @@ import { useForm } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import { readZshrcFileRaw, writeZshrcFile, checkZshrcAccess, getZshrcPath, readZshrcFile } from "./zsh";
 import { findSectionBounds } from "./section-detector";
+import { replaceFirstScoped } from "./scoped-replace";
 import { clearCache } from "./cache";
 import { toLogicalSections } from "./parse-zshrc";
 import { saveToHistory } from "./history";
@@ -21,6 +22,37 @@ import { log } from "../utils/logger";
 import { computeDiff } from "../utils/diff";
 import { validateStructure } from "../utils/validation";
 import { SaveCancelledError } from "../utils/errors";
+import type { ScopedReplaceFailure } from "./scoped-replace";
+
+/** Error message for a scoped replacement that refused to guess */
+function scopedFailureMessage(
+  reason: ScopedReplaceFailure | undefined,
+  itemTypeCapitalized: string,
+  key: string,
+): string {
+  switch (reason) {
+    case "ambiguous":
+      return `Multiple definitions of "${key}" exist and the selected one could not be identified — edit ~/.zshrc directly`;
+    case "unsupported":
+      return `The definition of "${key}" uses a format this extension cannot rewrite safely — edit ~/.zshrc directly`;
+    default:
+      return `${itemTypeCapitalized} "${key}" not found in zshrc`;
+  }
+}
+
+/**
+ * Replaces a matched definition line while preserving its leading whitespace
+ * and inline comment (pattern groups 1 and 3)
+ */
+function preservingReplacer(pattern: RegExp, replacement: string): (matchedLine: string) => string {
+  return (matchedLine) => {
+    const single = new RegExp(pattern.source, pattern.flags.replace("g", ""));
+    const match = single.exec(matchedLine);
+    const leadingWhitespace = match?.[1] ?? "";
+    const comment = match?.[3] ?? "";
+    return `${leadingWhitespace}${replacement.trimStart()}${comment}`;
+  };
+}
 
 /**
  * Configuration for EditItemForm component
@@ -44,6 +76,12 @@ export interface EditItemConfig {
   generatePattern: (key: string) => RegExp;
   /** Function to generate replacement line for update */
   generateReplacement: (key: string, value: string) => string;
+  /**
+   * Whether a line holds a definition of `key` as the display parser sees it.
+   * The write path only ever targets lines this predicate accepts, so it can
+   * never rewrite a line the UI did not show.
+   */
+  matchesDisplayLine: (line: string, key: string) => boolean;
   /** Item type name for messages (e.g., "alias" or "export") */
   itemType: string;
   /** Item type capitalized for titles (e.g., "Alias" or "Export") */
@@ -57,6 +95,8 @@ interface EditItemFormProps {
   existingValue?: string | undefined;
   /** Section where this item belongs */
   sectionLabel?: string | undefined;
+  /** 0-based instance of the section label when the same label appears more than once */
+  sectionOccurrence?: number | undefined;
   /** Callback when item is saved */
   onSave?: (() => void) | undefined;
   /** Configuration for the form */
@@ -79,7 +119,14 @@ interface EditItemFormProps {
  * @param onSave - Callback invoked after successful save
  * @param config - Configuration object defining item-specific behavior
  */
-export default function EditItemForm({ existingKey, existingValue, sectionLabel, onSave, config }: EditItemFormProps) {
+export default function EditItemForm({
+  existingKey,
+  existingValue,
+  sectionLabel,
+  sectionOccurrence,
+  onSave,
+  config,
+}: EditItemFormProps) {
   const { pop } = useNavigation();
   const isEditing = !!existingKey;
   // Initialize sections with sectionLabel if it exists to avoid dropdown value mismatch
@@ -181,19 +228,24 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
           const sectionChanged = sectionLabel !== targetSection;
 
           if (sectionChanged) {
-            // Moving to a different section - remove from old location and add to new
+            // Moving to a different section - remove from old location and add to new.
+            // Scoped to the original section so a duplicate definition elsewhere
+            // is not the one removed.
             const pattern = config.generatePattern(existingKey!);
-            const match = zshrcContent.match(pattern);
+            const removal = replaceFirstScoped(
+              zshrcContent,
+              sectionLabel,
+              pattern,
+              () => "",
+              (line) => config.matchesDisplayLine(line, existingKey!),
+              sectionOccurrence ?? 0,
+            );
 
-            if (!match || match.length === 0) {
-              throw new Error(`${config.itemTypeCapitalized} "${existingKey}" not found in zshrc`);
+            if (!removal.found) {
+              throw new Error(scopedFailureMessage(removal.reason, config.itemTypeCapitalized, existingKey!));
             }
 
-            // Create a non-global version to replace only first match
-            const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-            // Remove the old line
-            let updatedContent = zshrcContent.replace(nonGlobalPattern, () => "");
+            let updatedContent = removal.content;
 
             // Clean up empty lines left behind
             updatedContent = updatedContent.replace(/\n\n\n+/g, "\n\n");
@@ -201,7 +253,9 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
             // Generate the new line
             const itemLine = config.generateLine(key, value);
 
-            // Find the target section to add to
+            // Find the target section to add to. The section dropdown offers
+            // labels, not instances, so when the target label is duplicated
+            // the item is inserted into its first instance by design.
             const targetSectionBounds = findSectionBounds(updatedContent, targetSection);
 
             if (targetSectionBounds) {
@@ -252,25 +306,23 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
               message: `Updated ${config.itemType} "${key}" and moved to "${targetSection}"`,
             });
           } else {
-            // Same section - just update the line in place
+            // Same section - just update the line in place, scoped to the item's
+            // section so a duplicate definition elsewhere is not the one edited
             const pattern = config.generatePattern(existingKey!);
-            const match = zshrcContent.match(pattern);
+            const update = replaceFirstScoped(
+              zshrcContent,
+              sectionLabel,
+              pattern,
+              preservingReplacer(pattern, config.generateReplacement(key, value)),
+              (line) => config.matchesDisplayLine(line, existingKey!),
+              sectionOccurrence ?? 0,
+            );
 
-            if (!match || match.length === 0) {
-              throw new Error(`${config.itemTypeCapitalized} "${existingKey}" not found in zshrc`);
+            if (!update.found) {
+              throw new Error(scopedFailureMessage(update.reason, config.itemTypeCapitalized, existingKey!));
             }
 
-            // Create a non-global version of the pattern to replace only first match
-            const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-            // Use replace with a function to preserve whitespace
-            const updatedContent = zshrcContent.replace(nonGlobalPattern, (matchedLine) => {
-              // Extract leading whitespace from the original line
-              const leadingWhitespace = matchedLine.match(/^(\s*)/)?.[1] || "";
-              // Generate replacement and preserve whitespace
-              const replacement = config.generateReplacement(key, value);
-              return `${leadingWhitespace}${replacement.trimStart()}`;
-            });
+            const updatedContent = update.content;
             log.edit.info(`Updating ${config.itemType} "${key}" in place`);
             await writeZshrcFile(updatedContent);
             clearCache(getZshrcPath());
@@ -389,20 +441,22 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
     try {
       const zshrcContent = await readZshrcFileRaw();
       const pattern = config.generatePattern(existingKey);
-      const match = zshrcContent.match(pattern);
+      // Scoped to the item's section so a duplicate definition elsewhere is
+      // not the one removed
+      const removal = replaceFirstScoped(
+        zshrcContent,
+        sectionLabel,
+        pattern,
+        () => "",
+        (line) => config.matchesDisplayLine(line, existingKey),
+        sectionOccurrence ?? 0,
+      );
 
-      if (!match || match.length === 0) {
-        throw new Error(`${config.itemTypeCapitalized} "${existingKey}" not found in zshrc`);
+      if (!removal.found) {
+        throw new Error(scopedFailureMessage(removal.reason, config.itemTypeCapitalized, existingKey));
       }
 
-      // Create a non-global version to replace only first match
-      const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-      // Replace only the first match with empty string
-      const updatedContent = zshrcContent.replace(nonGlobalPattern, () => {
-        // Remove the line entirely
-        return "";
-      });
+      const updatedContent = removal.content;
       log.edit.info(`Deleting ${config.itemType} "${existingKey}"`);
       await saveToHistory(`Delete ${config.itemType} "${existingKey}"`);
       await writeZshrcFile(updatedContent);
@@ -462,6 +516,7 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
             target={
               <DiffPreviewView
                 existingKey={existingKey}
+                sectionOccurrence={sectionOccurrence}
                 currentKey={itemProps.key.value || ""}
                 currentValue={itemProps.value.value || ""}
                 currentSection={itemProps.section.value || "Uncategorized"}
@@ -512,6 +567,7 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
  */
 interface DiffPreviewViewProps {
   existingKey?: string | undefined;
+  sectionOccurrence?: number | undefined;
   currentKey: string;
   currentValue: string;
   currentSection: string;
@@ -527,6 +583,7 @@ interface DiffPreviewViewProps {
  */
 function DiffPreviewView({
   existingKey,
+  sectionOccurrence,
   currentKey,
   currentValue,
   currentSection,
@@ -575,12 +632,20 @@ Please provide a name for the new section to preview changes.
         const sectionChanged = originalSection !== targetSection;
 
         if (sectionChanged) {
-          // Moving to a different section
+          // Moving to a different section (scoped to the original section)
           const pattern = config.generatePattern(existingKey);
-          const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-          // Remove the old line
-          modifiedContent = zshrcContent.replace(nonGlobalPattern, () => "");
+          const removal = replaceFirstScoped(
+            zshrcContent,
+            originalSection,
+            pattern,
+            () => "",
+            (line) => config.matchesDisplayLine(line, existingKey),
+            sectionOccurrence ?? 0,
+          );
+          if (!removal.found) {
+            throw new Error(scopedFailureMessage(removal.reason, config.itemTypeCapitalized, existingKey));
+          }
+          modifiedContent = removal.content;
           modifiedContent = modifiedContent.replace(/\n\n\n+/g, "\n\n");
 
           // Generate the new line
@@ -613,15 +678,20 @@ Please provide a name for the new section to preview changes.
             modifiedContent = `${modifiedContent}\n\n# --- ${targetSection} --- #\n${itemLine}`;
           }
         } else {
-          // Same section - update in place
+          // Same section - update in place (scoped to the item's section)
           const pattern = config.generatePattern(existingKey);
-          const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-          modifiedContent = zshrcContent.replace(nonGlobalPattern, (matchedLine) => {
-            const leadingWhitespace = matchedLine.match(/^(\s*)/)?.[1] || "";
-            const replacement = config.generateReplacement(key, value);
-            return `${leadingWhitespace}${replacement.trimStart()}`;
-          });
+          const update = replaceFirstScoped(
+            zshrcContent,
+            originalSection,
+            pattern,
+            preservingReplacer(pattern, config.generateReplacement(key, value)),
+            (line) => config.matchesDisplayLine(line, existingKey),
+            sectionOccurrence ?? 0,
+          );
+          if (!update.found) {
+            throw new Error(scopedFailureMessage(update.reason, config.itemTypeCapitalized, existingKey));
+          }
+          modifiedContent = update.content;
         }
       } else {
         // Adding new item
@@ -682,7 +752,17 @@ ${error instanceof Error ? error.message : "Unknown error occurred"}
     } finally {
       setIsLoading(false);
     }
-  }, [currentKey, currentValue, currentSection, newSectionName, originalSection, existingKey, config, isEditing]);
+  }, [
+    currentKey,
+    currentValue,
+    currentSection,
+    newSectionName,
+    originalSection,
+    existingKey,
+    sectionOccurrence,
+    config,
+    isEditing,
+  ]);
 
   useEffect(() => {
     generatePreview();

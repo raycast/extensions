@@ -7,6 +7,7 @@ import { MODERN_COLORS } from "./constants";
 import { ListViewController, type FilterableItem, type ItemWarning } from "./lib/list-view-controller";
 import { deleteItem } from "./lib/delete-item";
 import { SharedActionsSection } from "./lib/shared-actions";
+import { shellQuoteSingle } from "./utils/shell-escape";
 import BrowseAliases from "./browse-aliases";
 
 /**
@@ -200,50 +201,45 @@ Use the actions below to edit or manage this alias.
       )}
       generateItemActions={(alias, refresh, visitItem) => (
         <ActionPanel>
-          <Action.Push
-            title="Edit Alias"
-            target={
-              <EditAlias
-                existingName={alias.name}
-                existingCommand={alias.command}
-                sectionLabel={alias.section}
-                onSave={() => {
-                  visitItem?.(alias);
+          <SharedActionsSection
+            onRefresh={refresh}
+            item={{
+              editTitle: "Edit Alias",
+              editTarget: (
+                <EditAlias
+                  existingName={alias.name}
+                  existingCommand={alias.command}
+                  sectionLabel={alias.section}
+                  sectionOccurrence={alias._sectionOccurrence}
+                  onSave={() => {
+                    visitItem?.(alias);
+                    refresh();
+                  }}
+                />
+              ),
+              deleteTitle: "Delete Alias",
+              onDelete: async () => {
+                try {
+                  await deleteItem(alias.name, aliasConfig, false, alias.section, alias._sectionOccurrence);
                   refresh();
-                }}
-              />
-            }
-            icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Alias Definition"
-            content={`alias ${alias.name}='${alias.command}'`}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-            onCopy={() => visitItem?.(alias)}
-          />
-          <Action
-            title="Delete Alias"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
-            onAction={async () => {
-              visitItem?.(alias);
-              try {
-                await deleteItem(alias.name, aliasConfig);
-                refresh();
-              } catch {
-                // Error already shown in deleteItem
-              }
+                } catch {
+                  // Error already shown in deleteItem
+                }
+              },
+              copyName: alias.name,
+              copyValue: alias.command,
+              copyDefinition: `alias ${alias.name}='${shellQuoteSingle(alias.command)}'`,
+              onVisit: () => visitItem?.(alias),
             }}
           />
-          <Action.Push
-            title="Add New Alias"
-            target={<EditAlias onSave={refresh} />}
-            shortcut={Keyboard.Shortcut.Common.New}
-            icon={Icon.Plus}
-          />
-          <SharedActionsSection onRefresh={refresh} />
+          <ActionPanel.Section>
+            <Action.Push
+              title="Add New Alias"
+              target={<EditAlias onSave={refresh} />}
+              shortcut={Keyboard.Shortcut.Common.New}
+              icon={Icon.Plus}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       )}
     />

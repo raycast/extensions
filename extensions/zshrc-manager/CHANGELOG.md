@@ -1,5 +1,31 @@
 # Changelog
 
+## [Actions everywhere and secret masking] - 2026-08-03
+
+### Added
+
+- Search results can now be edited and deleted in place (aliases and exports) — the fastest way to find an item is no longer the only place you cannot act on one
+- Copy Value (`⌘C`) and Copy Name (`⌘⇧C`) actions on every entry in every view, replacing the mislabeled "Copy Name/Value" action that only copied the name
+- Secret values (names matching KEY, TOKEN, SECRET, PASSWORD, PASSWD, CREDENTIAL, AUTH, PRIVATE, API) are now masked everywhere they render — lists, detail panes, section previews, and section markdown — with a Reveal Value action (`⌘U`) and a Secret tag; copy actions always copy the real value, copy it concealed (kept out of clipboard-manager history), and never echo it in the confirmation toast
+
+### Fixed
+
+- Copying a value on its own is now possible — previously the "Copy Name/Value" action copied only the name
+- Copied export values no longer include the quotes from the file, and copied definitions are reproduced as written instead of being re-quoted (which could change what the line meant when pasted back)
+- Editing or deleting an entry whose name is defined in more than one section now targets the definition in the entry's own section; when the exact definition cannot be identified, the extension refuses with a clear message instead of silently rewriting the first match in the file
+- Editing an entry no longer deletes its inline comment, and deleting an entry no longer leaves a blank line behind
+- Brand icons (Docker, Python, npm, and all alias-collection icons) render again on current Raycast builds, which stopped drawing tinted data-URL SVGs; brand colors are now baked into the icons instead
+
+### Changed
+
+- The Statistics view's built-in search now shares one implementation with the rest of the extension, so searching from the landing view gets the same edit, delete, copy, and secret-masking behavior
+- Pressing Enter on overview and summary rows now opens `~/.zshrc` or refreshes instead of triggering Undo Last Change
+
+### Removed
+
+- The separate Global Search view — the landing view's search does the same job, so the dropdown entry was redundant
+- Dead code: unused `sanitizeMarkdown` and `escapeShellContent` helpers, six unused enums, and an unreachable section list view with its item components
+
 ## [Read/write correctness] - 2026-07-31
 
 ### Fixed

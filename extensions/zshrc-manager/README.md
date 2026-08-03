@@ -85,7 +85,6 @@
 | ⚙️ **Setopts**          | View setopt configurations                  | —        |
 | 🛤️ **PATH Entries**     | Manage PATH modifications                   | —        |
 | ⌨️ **Keybindings**      | View bindkey configurations                 | —        |
-| 🔍 **Global Search**    | Search across all content types             | —        |
 | 🏥 **Health Check**     | Diagnose configuration issues               | —        |
 | 💾 **Backup Manager**   | Manage zshrc backups                        | —        |
 
@@ -137,7 +136,7 @@ export EDITOR=code
 - Use the search bar in any command
 - Search by name, command, section, or value
 - Results update in real-time as you type
-- Use **Global Search** to search across all entry types at once
+- The landing view searches across all entry types at once — and every result can be edited, deleted, or copied in place
 
 </details>
 
