@@ -1,5 +1,18 @@
 # Changelog
 
+## [Resolved facts: shadowed commands, missing sources, missing plugins] - 2026-08-03
+
+### Added
+
+- Aliases that shadow a real command now say so: the detail pane shows a `Shadows` row with the executable's path when an alias masks something on PATH (scanning the environment PATH plus PATH entries declared in the config — no subprocess involved)
+- Sources gain a `Source Exists` row — Yes, Missing, or Unknown. Paths that cannot be expanded without a shell (e.g. `${XDG_CACHE_HOME:-$HOME/.cache}`) deliberately report Unknown rather than a false Missing
+- Plugins gain an `Installed` row, checked against the Oh My Zsh plugins directories (`$ZSH_CUSTOM` first, then `$ZSH` or `~/.oh-my-zsh` as the base). When no Oh My Zsh installation exists, the answer is Unknown — absence of OMZ says nothing about other plugin managers
+- The three facts also surface as list warning triangles (the same affordance duplicates already use), so problems are scannable without opening each detail pane: orange for a shadowing alias, red for a missing source file or uninstalled plugin. The "With Warnings" filter now covers them, and Unknown never warns — only definite problems do
+
+### Fixed
+
+- `LIMITATIONS.md` no longer claims extensions cannot spawn child processes (they can — the limitation is the absence of a terminal UI), and the file-watching limitation is narrowed to background watching: `fs.watch` works while a command is open
+
 ## [Actions everywhere and secret masking] - 2026-08-03
 
 ### Added
