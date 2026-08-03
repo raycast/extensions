@@ -1,6 +1,6 @@
 # Hypersonic Changelog
 
-## [Create tasks with details] - {PR_MERGE_DATE}
+## [Create tasks with details] - 2026-08-03
 
 #### New
 
