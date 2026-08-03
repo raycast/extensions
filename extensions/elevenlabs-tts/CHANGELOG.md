@@ -1,6 +1,6 @@
 # Raycast ElevenLabs TTS Changelog
 
-## [Unreleased]
+## [Speak Copied Text] - {PR_MERGE_DATE}
 
 ### Added
 
