@@ -196,8 +196,11 @@ export function sparkline(
   return out.join("");
 }
 
-/** A fixed-width bar for the detail view's per-day table. */
-export function bar(value: number, max: number, width = 18): string {
+/**
+ * A fixed-width bar for the detail view's per-day table. Kept short: a markdown
+ * table column in Raycast's detail pane wraps well before 18 glyphs.
+ */
+export function bar(value: number, max: number, width = 10): string {
   if (max <= 0) return "░".repeat(width);
   const filled = Math.max(
     0,

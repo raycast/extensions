@@ -127,6 +127,16 @@ export default function Command() {
           }
         />
         <MenuBarExtra.Item
+          title="How This Forecast Works"
+          icon={Icon.Book}
+          onAction={() =>
+            launchCommand({
+              name: "methodology",
+              type: LaunchType.UserInitiated,
+            })
+          }
+        />
+        <MenuBarExtra.Item
           title="Refresh"
           icon={Icon.ArrowClockwise}
           shortcut={Keyboard.Shortcut.Common.Refresh}

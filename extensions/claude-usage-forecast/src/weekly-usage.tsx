@@ -10,11 +10,11 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { bar, buildChartSvg, sparkline, svgToDataUri } from "./lib/chart";
-import { DOW_NAMES, formatDuration } from "./lib/forecast";
-import { localDate } from "./lib/jsonl";
+import { buildChartSvg, sparkline, svgToDataUri } from "./lib/chart";
+import { formatDuration } from "./lib/forecast";
 import { load, severityOf, settings } from "./lib/load";
 import { Forecast } from "./lib/types";
+import { METHODOLOGY_DEEPLINK, Methodology } from "./methodology";
 
 const SEV_COLOR = {
   ok: Color.Green,
@@ -54,77 +54,6 @@ function chartMarkdown(
   return `![Weekly usage](${svgToDataUri(svg)}?raycast-width=760&raycast-height=300)\n\n`;
 }
 
-/** Per-day view of the current window: what actually happened, then what is expected. */
-function dayTable(f: Forecast): string {
-  const rows: string[] = [];
-  const now = Date.now();
-  const day = 86_400_000;
-
-  // Cost per day inside the window, reconstructed from the actual curve.
-  const perDay = new Map<string, number>();
-  for (let i = 1; i < f.actual.length; i++) {
-    const d = localDate(f.actual[i - 1].t);
-    perDay.set(
-      d,
-      (perDay.get(d) ?? 0) + (f.actual[i].pct - f.actual[i - 1].pct),
-    );
-  }
-  const projPerDay = new Map<string, number>();
-  for (let i = 1; i < f.projected.length; i++) {
-    const d = localDate(f.projected[i - 1].t);
-    projPerDay.set(
-      d,
-      (projPerDay.get(d) ?? 0) + (f.projected[i].pct - f.projected[i - 1].pct),
-    );
-  }
-
-  const start = new Date(f.windowStart);
-  start.setHours(0, 0, 0, 0);
-  const values: Array<{
-    label: string;
-    actual: number;
-    proj: number;
-    future: boolean;
-    weekend: boolean;
-  }> = [];
-  for (let t = start.getTime(); t < f.windowEnd; t += day) {
-    const d = new Date(t);
-    const key = localDate(t);
-    const dow = d.getDay();
-    values.push({
-      label: `${DOW_NAMES[dow]} ${String(d.getDate()).padStart(2, "0")}`,
-      actual: perDay.get(key) ?? 0,
-      proj: projPerDay.get(key) ?? 0,
-      future: t + day <= now ? false : true,
-      weekend: dow === 0 || dow === 6,
-    });
-  }
-  const max = Math.max(1, ...values.map((v) => v.actual + v.proj));
-
-  rows.push("| Day | Used % | Projected % | |");
-  rows.push("| --- | --- | --- | --- |");
-  for (const v of values) {
-    const total = v.actual + v.proj;
-    rows.push(
-      `| ${v.label}${v.weekend ? " ·" : ""} | ${v.actual > 0.05 ? v.actual.toFixed(1) : "–"} | ${v.proj > 0.05 ? v.proj.toFixed(1) : "–"} | \`${bar(total, max)}\` |`,
-    );
-  }
-  return rows.join("\n");
-}
-
-function patternTable(f: Forecast): string {
-  const max = Math.max(...f.dowProfile, 0.0001);
-  const rows = ["| Weekday | Learned weight | |", "| --- | --- | --- |"];
-  // Monday-first reads better than the JS Sunday-first index.
-  for (const i of [1, 2, 3, 4, 5, 6, 0]) {
-    const rel = f.dowProfile[i] / max;
-    rows.push(
-      `| ${DOW_NAMES[i]} | ${(rel * 100).toFixed(0)}% | \`${bar(f.dowProfile[i], max)}\` |`,
-    );
-  }
-  return rows.join("\n");
-}
-
 export default function Command() {
   const s = settings();
   const { data, isLoading, revalidate, error } = useCachedPromise(load, [], {
@@ -155,11 +84,6 @@ export default function Command() {
   const projSev = severityOf(f.pctAtReset, s);
   const resetIn = f.windowEnd - Date.now();
 
-  const verdict =
-    f.hitsLimitAt === null
-      ? `**On track.** Projected **${f.pctAtReset.toFixed(0)}%** by reset — ${(100 - f.pctAtReset).toFixed(0)}% headroom.`
-      : `**Projected to hit the weekly limit ${formatDuration(f.hitsLimitAt - Date.now())} from now** — ${timeLabel(f.hitsLimitAt)}, which is ${formatDuration(f.windowEnd - f.hitsLimitAt)} before the reset.`;
-
   const markdown = [
     chartMarkdown(f, s.chartMode),
     s.chartMode === "blocks"
@@ -167,27 +91,9 @@ export default function Command() {
       : "",
     `## ${f.pctNow.toFixed(1)}% of the weekly limit used`,
     "",
-    verdict,
-    "",
-    `Window: ${timeLabel(f.windowStart)} → ${timeLabel(f.windowEnd)} (resets in ${formatDuration(resetIn)})`,
-    "",
-    "### This week, day by day",
-    "",
-    dayTable(f),
-    "",
-    "### Your learned weekly pattern",
-    "",
-    `Weighted from ${f.profileDays} days of local transcripts, recent weeks counting more (21-day half-life).`,
-    "",
-    patternTable(f),
-    "",
     f.warnings.length > 0
       ? `### Caveats\n\n${f.warnings.map((w) => `- ${w}`).join("\n")}`
       : "",
-    "",
-    "---",
-    "",
-    "The percentage is the real figure from Anthropic's usage endpoint. The shape of the curve and the forecast come from your local `~/.claude/projects` transcripts, calibrated against that percentage — so the forecast follows your own weekday rhythm rather than a flat average.",
   ]
     .filter((x) => x !== "")
     .join("\n");
@@ -210,7 +116,7 @@ export default function Command() {
           </Detail.Metadata.TagList>
           <Detail.Metadata.Label
             title="Resets"
-            text={timeLabel(f.windowEnd)}
+            text={`${timeLabel(f.windowEnd)} · in ${formatDuration(resetIn)}`}
             icon={Icon.ArrowClockwise}
           />
           <Detail.Metadata.Label
@@ -218,7 +124,7 @@ export default function Command() {
             text={
               f.hitsLimitAt === null
                 ? "Not this week"
-                : timeLabel(f.hitsLimitAt)
+                : `${timeLabel(f.hitsLimitAt)} · in ${formatDuration(f.hitsLimitAt - Date.now())}`
             }
             icon={
               f.hitsLimitAt === null
@@ -267,6 +173,12 @@ export default function Command() {
             title="Transcripts read"
             text={`${data.filesScanned} new / ${data.filesTotal}`}
           />
+          <Detail.Metadata.Separator />
+          <Detail.Metadata.Link
+            title="Methodology"
+            text="How this forecast works"
+            target={METHODOLOGY_DEEPLINK}
+          />
           <Detail.Metadata.Label
             title="Fetched"
             text={timeLabel(limits.fetchedAt)}
@@ -279,6 +191,12 @@ export default function Command() {
             title="Refresh"
             icon={Icon.ArrowClockwise}
             onAction={revalidate}
+          />
+          <Action.Push
+            title="Methodology"
+            icon={Icon.Book}
+            shortcut={{ modifiers: ["cmd"], key: "m" }}
+            target={<Methodology f={f} />}
           />
           <Action
             title="Open Claude Usage Settings"
