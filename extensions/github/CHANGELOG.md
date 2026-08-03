@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Show README in repository actions] - {PR_MERGE_DATE}
+## [Show README in repository actions] - 2026-08-03
 
 - Added a "Show Readme" action to the Search Repositories, My Latest Repositories, and My Starred Repositories commands that renders the repository's README inside Raycast, with relative links and images resolved to absolute URLs.
 
