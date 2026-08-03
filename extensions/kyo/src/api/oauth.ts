@@ -19,10 +19,12 @@ import {
  */
 
 export const client = new OAuth.PKCEClient({
-  // App = custom-scheme redirect (raycast://oauth?package_name=Extension): the
-  // browser hands the code straight to the Raycast app, with no dependency on
-  // the raycast.com/redirect bounce (which some networks cannot reach).
-  redirectMethod: OAuth.RedirectMethod.App,
+  // Web redirect (https://raycast.com/redirect?packageName=Extension). The
+  // custom-scheme App method is a trap on the beta (raycast-x) build: the
+  // raycast:// deeplink activates the app but the callback never reaches the
+  // pending session — codes get minted server-side and are never exchanged.
+  // Do not switch methods again without verifying a full end-to-end exchange.
+  redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Kyo",
   providerId: "kyo",
   providerIcon: "kyo-icon.png",
@@ -64,8 +66,45 @@ async function readTokenResponse(response: Response): Promise<TokenResponse> {
   return body as TokenResponse;
 }
 
+// Every token operation runs strictly one-at-a-time. Raycast commands mount
+// several data hooks that fire API calls concurrently; without this, parallel
+// callers present the same refresh token twice — Kyo rotates on every use, so
+// the second presentation trips reuse detection and revokes the WHOLE token
+// family (hard sign-out) — and parallel sign-ins open competing PKCE sessions
+// whose redirect Raycast silently drops (approve → "nothing happens").
+let queue: Promise<unknown> = Promise.resolve();
+function enqueue<T>(op: () => Promise<T>): Promise<T> {
+  const run = queue.then(op, op);
+  queue = run.then(
+    () => undefined,
+    () => undefined,
+  );
+  return run;
+}
+
+/**
+ * How recently a stored pair must have been rotated for a queued refresher to
+ * trust it instead of rotating again. Callers queue behind an in-flight token
+ * op because their access token failed; if the pair changed while they waited,
+ * that fresh pair IS the fix.
+ */
+const JUST_ROTATED_MS = 10_000;
+
 /** Ensure we hold a valid access token, running the full sign-in flow if needed. */
-export async function authorize(): Promise<string> {
+export function authorize(): Promise<string> {
+  // Deduplicate on top of serializing: concurrent callers share ONE sign-in
+  // attempt (and one rejection if the user cancels), instead of queueing N
+  // interactive prompts back-to-back.
+  if (!authInFlight) {
+    authInFlight = enqueue(doAuthorize).finally(() => {
+      authInFlight = null;
+    });
+  }
+  return authInFlight;
+}
+let authInFlight: Promise<string> | null = null;
+
+async function doAuthorize(): Promise<string> {
   const existing = await client.getTokens();
 
   if (existing?.accessToken) {
@@ -133,16 +172,40 @@ export async function refreshTokens(
 }
 
 /** Force a refresh right now and persist the rotated pair. Returns the new access token. */
-export async function forceRefresh(): Promise<string | undefined> {
+export function forceRefresh(): Promise<string | undefined> {
+  return enqueue(doForceRefresh);
+}
+
+async function doForceRefresh(): Promise<string | undefined> {
   const tokens = await client.getTokens();
   if (!tokens?.refreshToken) return undefined;
-  const refreshed = await refreshTokens(tokens.refreshToken);
-  await client.setTokens(refreshed);
-  return refreshed.access_token;
+  // A queued sibling may have already rotated the pair while we waited — the
+  // 401 that brought us here was for the OLD access token, so use the new one.
+  if (
+    tokens.accessToken &&
+    !tokens.isExpired() &&
+    Date.now() - tokens.updatedAt.getTime() < JUST_ROTATED_MS
+  ) {
+    return tokens.accessToken;
+  }
+  try {
+    const refreshed = await refreshTokens(tokens.refreshToken);
+    await client.setTokens(refreshed);
+    return refreshed.access_token;
+  } catch {
+    // invalid_grant: rotated-out or reuse-revoked. Wipe the dead credentials
+    // so the next authorize() runs a clean sign-in instead of replaying them.
+    await client.removeTokens();
+    return undefined;
+  }
 }
 
 /** RFC 7009 revocation + local credential wipe (used by "Log Out"). */
-export async function logout(): Promise<void> {
+export function logout(): Promise<void> {
+  return enqueue(doLogout);
+}
+
+async function doLogout(): Promise<void> {
   const tokens = await client.getTokens();
   if (tokens?.refreshToken) {
     const params = new URLSearchParams();

@@ -83,6 +83,11 @@ async function request<T>(
     if (refreshed) {
       return request<T>(path, { ...options, _retried: true });
     }
+    // Refresh token dead (rotated-out or revoked family): forceRefresh wiped
+    // the stored credentials, so this authorize() runs a clean interactive
+    // sign-in rather than replaying a dead access token.
+    await authorize();
+    return request<T>(path, { ...options, _retried: true });
   }
 
   if (response.status === 204) {
