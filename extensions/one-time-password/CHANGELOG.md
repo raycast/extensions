@@ -1,6 +1,6 @@
 # One Time Password Changelog
 
-## [Paste Recent OTP] - {PR_MERGE_DATE}
+## [Paste Recent OTP] - 2026-08-03
 
 ### Added
 
