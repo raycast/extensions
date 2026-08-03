@@ -1,6 +1,6 @@
 # Wallpaper Engine Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-03
 
 - Add commands to pause, play, stop, mute, and unmute wallpapers
 - Add commands to hide and show desktop icons
