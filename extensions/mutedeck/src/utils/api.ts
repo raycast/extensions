@@ -19,14 +19,19 @@ export interface MuteDeckPreferences {
 export const getPreferences = getPreferenceValues<MuteDeckPreferences>;
 
 // API Response Types
-export type CallStatus = "active";
+// MuteDeck reports "inactive" when no meeting is detected. Treating "inactive"
+// as invalid caused every command to fail outside a meeting (MuteDeck >= 4.x).
+export type CallStatus = "active" | "inactive";
+/** Platforms MuteDeck is known to report. It may add more at any time. */
 export type ControlSystem = "system" | "zoom" | "webex" | "teams" | "google-meet";
 export type ActiveStatus = "active" | "inactive";
 export type FeatureStatus = "active" | "inactive" | "disabled";
 
 export interface MuteDeckStatus {
   call?: CallStatus;
-  control?: ControlSystem;
+  /** A {@link ControlSystem} when recognized. Typed as string because MuteDeck
+   * can introduce new platforms, and an unknown one must not fail validation. */
+  control?: string;
   mute: ActiveStatus;
   video: FeatureStatus;
   share: FeatureStatus;
@@ -78,7 +83,7 @@ function isValidFeatureStatus(value: unknown): value is FeatureStatus {
   return value === "active" || value === "inactive" || value === "disabled";
 }
 
-function isValidControlSystem(value: unknown): value is ControlSystem {
+function isKnownControlSystem(value: unknown): value is ControlSystem {
   return value === "system" || value === "zoom" || value === "webex" || value === "teams" || value === "google-meet";
 }
 
@@ -107,8 +112,15 @@ function isValidMuteDeckStatus(value: unknown): value is MuteDeckStatus {
   if (!isValidFeatureStatus(status.record)) return false;
 
   // Optional fields
-  if (status.call !== undefined && status.call !== "active") return false;
-  if (status.control !== undefined && !isValidControlSystem(status.control)) return false;
+  if (status.call !== undefined && !isValidActiveStatus(status.call)) return false;
+  // Warn-and-continue: an unrecognized platform is surfaced in the logs but must
+  // not fail the whole response, or every command breaks on a MuteDeck update.
+  if (status.control !== undefined) {
+    if (typeof status.control !== "string") return false;
+    if (!isKnownControlSystem(status.control)) {
+      console.warn(`MuteDeck reported an unrecognized control system: ${status.control}`);
+    }
+  }
 
   return true;
 }
