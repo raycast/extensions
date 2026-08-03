@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-08-03
 
 - Fix badge preview positioning issue
 
