@@ -99,7 +99,7 @@ Open Raycast → **Search Artifacts**. Sorted most-recent-first, because the one
       "updated": "2026-07-24", // optional — absent on shared artifacts
       "owner": "mine", // "mine" | "shared"
       "project": "offline-fans", // optional — basename of the publishing directory
-      "cwd": "/Users/you/dev/offline-fans", // optional — powers "Open Project Folder"
+      "cwd": "/Users/you/dev/offline-fans", // optional — powers "Open Folder"
     },
   ],
 }
@@ -136,7 +136,9 @@ This extension maintains a **local mirror**, not a live view. Be clear-eyed abou
 - **Renames and deletions don't propagate.** If you rename an artifact on claude.ai, the index keeps the old title until that artifact is republished. Over months, the index will drift from reality.
 - **Artifacts created outside Claude Code** — in the Claude desktop app or on claude.ai directly — won't be captured by the hook.
 - **Chat artifacts are not supported.** Claude has two separate artifact systems; this covers Claude Code artifacts (`claude.ai/code/artifact/…`). Chat artifacts have no sanctioned programmatic access at all.
-- **Rename, Share, Delete, and Version history are not available here.** Those exist on the artifact's page on claude.ai, but they're backed by session-cookie web endpoints, not by anything the `Artifact` tool exposes — it offers only publish and list. Automating them would mean driving claude.ai with your session cookie, which [Anthropic's Consumer Terms](https://www.anthropic.com/legal/consumer-terms) prohibit (§3, automated access) and which no Store extension could ship. **Open Artifact** (⏎) takes you to the page where those controls live; that's the honest boundary.
+
+Because of those last two, every state in this extension — including "no artifacts" and "no matches" — offers **View Claude Code Artifacts** (⌘⇧O) and **View Claude Artifacts** (⌘⇧G), which jump to `claude.ai/code/artifacts` and `claude.ai/artifacts`. When an artifact isn't in the index, it usually isn't missing — it was published somewhere the hook can't see, and that gallery is where it actually lives.
+- **Rename, Share, Delete, and Version history are not available here.** Those exist on the artifact's page on claude.ai, but they're backed by session-cookie web endpoints, not by anything the `Artifact` tool exposes — it offers only publish and list. Automating them would mean driving claude.ai with your session cookie, which [Anthropic's Consumer Terms](https://www.anthropic.com/legal/consumer-terms) prohibit (§3, automated access) and which no Store extension could ship. **Open** (⏎) takes you to the page where those controls live; that's the honest boundary.
 
 ### Why not just call an API?
 
@@ -169,7 +171,7 @@ Shipping `platforms: ["macOS", "Windows"]` without that would be a UI lying abou
 3. **Verifying `$HOME` expansion**, or substituting `$env:USERPROFILE`, in the hook's `command` field on Windows. This is unverified there; on macOS it works (see [`docs/hook-payload.md`](./docs/hook-payload.md)).
 4. **Confirming the payload shape is identical** on Windows — run [`scripts/probe-artifact-hook.sh`](./scripts/probe-artifact-hook.sh)'s PowerShell equivalent and compare against the captured macOS payload.
 
-There's a plausible better path than a second script: a **"Setup Hook" command** inside the extension that writes the correct hook for the host platform, using [`runPowerShellScript`](https://developers.raycast.com/utilities/functions/runpowershellscript) on Windows. That would improve the setup story on macOS too, which today is "copy a file and hand-edit JSON." Notes in [`docs/shelf.md`](./docs/shelf.md).
+There's a plausible better path than a second script: a **"Setup Hook" command** inside the extension that writes the correct hook for the host platform, using [`runPowerShellScript`](https://developers.raycast.com/utilities/functions/runpowershellscript) on Windows. That would improve the setup story on macOS too, which today is "copy a file and hand-edit JSON."
 
 ### Want it? Help test it
 
