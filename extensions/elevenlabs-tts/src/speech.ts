@@ -1,24 +1,13 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { execFile } from "child_process";
-import { promisify } from "util";
 import { AudioManager } from "./audio/AudioManager";
+import { stopActivePlayback } from "./audio/playback";
 import { getTextPreview, getTextStats } from "./text/processing";
 import { prepareVoiceSettings } from "./voice/settings";
 
-const execFileAsync = promisify(execFile);
-
 async function stopExistingPlayback(): Promise<boolean> {
-  let stdout: string;
-  try {
-    ({ stdout } = await execFileAsync("pgrep", ["afplay"]));
-  } catch {
-    return false;
-  }
+  if (!(await stopActivePlayback())) return false;
 
-  if (!stdout.trim()) return false;
-
-  await execFileAsync("pkill", ["afplay"]);
   await showToast({
     style: Toast.Style.Success,
     title: "⏹️ Stopped",
