@@ -1,6 +1,6 @@
 # Multi Links Changelog
 
-## [2.0.0] - {PR_MERGE_DATE}
+## [2.0.0] - 2026-08-03
 
 - Added "Open Multiple Links History" view-mode command — replay past batches with Open All Again / Copy URLs / Pin / Delete actions
 - Added "Filter Multiple Links" view-mode command — group extracted links by host/type, multi-select with ⌘T, Open Selected
