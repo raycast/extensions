@@ -1,6 +1,6 @@
 import { execFile } from "child_process";
 import { accessSync, constants, existsSync } from "fs";
-import { readdir, rename, rm, stat } from "fs/promises";
+import { link, readdir, rename, rm, stat } from "fs/promises";
 import { randomUUID } from "crypto";
 import { homedir } from "os";
 import { basename, dirname, extname, join } from "path";
@@ -90,6 +90,33 @@ function uniquePath(path: string): string {
 /** Best-effort delete; a missing file is the desired end state either way. */
 async function discard(path: string): Promise<void> {
   await rm(path, { force: true }).catch(() => undefined);
+}
+
+/**
+ * Moves `tempPath` to `desiredPath`, or to the next free " 1", " 2", … variant.
+ *
+ * `link` is the load-bearing detail: it creates the destination and fails with
+ * EEXIST if something is already there, atomically. Checking with existsSync and
+ * then renaming would leave a window in which a concurrent conversion claims the
+ * same name, and rename would silently overwrite it.
+ */
+async function claimOutputPath(tempPath: string, desiredPath: string): Promise<string> {
+  const dir = dirname(desiredPath);
+  const stem = basename(desiredPath, ".gif");
+
+  for (let attempt = 0; attempt < 10000; attempt++) {
+    const candidate = attempt === 0 ? desiredPath : join(dir, `${stem} ${attempt}.gif`);
+    try {
+      await link(tempPath, candidate);
+      await discard(tempPath);
+      return candidate;
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+        throw error;
+      }
+    }
+  }
+  throw new Error(`Could not find a free filename for ${basename(desiredPath)}.`);
 }
 
 /**
@@ -308,15 +335,13 @@ export async function convertToGif(options: ConvertOptions): Promise<string> {
       }
     }
 
-    // Re-check the destination: a concurrent conversion of the same video may
-    // have claimed it while this one was encoding. Skipped when the caller named
-    // the path explicitly, since then overwriting is what was asked for.
-    const finalPath = options.outputPath ? outputPath : uniquePath(outputPath);
-
-    // Only now does a file appear at finalPath. Same directory, so this is an
-    // atomic rename rather than a copy.
-    await rename(tempPath, finalPath);
-    return finalPath;
+    // Only now does a file appear at the destination.
+    if (options.outputPath) {
+      // An explicit path means overwriting is what the caller asked for.
+      await rename(tempPath, outputPath);
+      return outputPath;
+    }
+    return await claimOutputPath(tempPath, outputPath);
   } catch (error) {
     await discard(tempPath);
     const stderr = (error as { stderr?: string }).stderr?.trim();
