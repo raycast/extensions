@@ -1,9 +1,4 @@
-import {
-  Cache,
-  getFrontmostApplication,
-  getPreferenceValues,
-  PreferenceValues,
-} from "@raycast/api";
+import { getFrontmostApplication, getPreferenceValues, PreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { execFile, spawn } from "child_process";
 import { existsSync } from "fs";
@@ -35,17 +30,12 @@ class BrowserError extends Error {
 }
 
 export const PREFERENCES = getPreferenceValues<PreferenceValues>();
-const CLI_PATH =
-  PREFERENCES.cliPathAPW ||
-  ["/opt/homebrew/bin/apw", "/usr/local/bin/apw"].find(existsSync) ||
-  "apw";
+const CLI_PATH = PREFERENCES.cliPathAPW || ["/opt/homebrew/bin/apw", "/usr/local/bin/apw"].find(existsSync) || "apw";
 const CACHE_TIMEOUT = 1000 * 60 * parseInt(PREFERENCES.cacheTimeout || "0", 10);
-const cache = new Cache();
-
-const CACHE_EXCLUDED_COMMANDS = ["otp", "auth", "save"];
+const passwordCache = new Map<string, { password: string }>();
 
 export function clearCache(): void {
-  cache.clear();
+  passwordCache.clear();
 }
 const execFileAsync = promisify(execFile);
 
@@ -69,21 +59,14 @@ function execWithStdin(args: string[], input: string): Promise<APWMsg> {
   });
 }
 
-export async function execAPWCommand(
-  args: string[],
-  stdin?: string,
-): Promise<APWMsg> {
-  const cacheKey = args.join("_");
-  const cachedData = cache.get(cacheKey);
-  const lastUpdated = parseInt(cache.get(`${cacheKey}_lastUpdated`) || "0", 10);
-  const cacheValid = Date.now() - lastUpdated < CACHE_TIMEOUT;
-  const isCacheExcluded = CACHE_EXCLUDED_COMMANDS.some((cmd) =>
-    args.includes(cmd),
-  );
+export async function execAPWCommand(args: string[], stdin?: string): Promise<APWMsg> {
+  const shouldCache = args[0] === "pw" && args[1] === "get" && args.length === 4 && CACHE_TIMEOUT > 0;
+  const cacheKey = shouldCache ? `${args[2]}\0${args[3]}` : "";
+  const cached = passwordCache.get(cacheKey);
 
-  if (cachedData && cacheValid && !isCacheExcluded) {
-    console.info("Cache hit: " + cacheKey);
-    return JSON.parse(cachedData);
+  if (cached) {
+    console.info("Cache hit: pw get");
+    return { status: 0, results: [{ domain: args[2], username: args[3], password: cached.password }] };
   }
 
   if (stdin !== undefined) return execWithStdin(args, stdin);
@@ -91,16 +74,17 @@ export async function execAPWCommand(
   try {
     const { stdout } = await execFileAsync(CLI_PATH, args);
     const data = JSON.parse(stdout.trim()) as APWMsg;
-    if (data.status === 0) {
-      cache.set(cacheKey, JSON.stringify(data));
-      cache.set(`${cacheKey}_lastUpdated`, Date.now().toString());
+    const password = data.results?.[0]?.password;
+    if (data.status === 0 && shouldCache && password !== undefined) {
+      const cached = { password };
+      passwordCache.set(cacheKey, cached);
+      setTimeout(() => {
+        if (passwordCache.get(cacheKey) === cached) passwordCache.delete(cacheKey);
+      }, CACHE_TIMEOUT).unref();
     }
     return data;
   } catch (error) {
-    const stderr =
-      error && typeof error === "object" && "stderr" in error
-        ? String(error.stderr).trim()
-        : "";
+    const stderr = error && typeof error === "object" && "stderr" in error ? String(error.stderr).trim() : "";
     if (!stderr) throw error;
     let message = stderr;
     let apwStatus: number | undefined;
@@ -121,15 +105,10 @@ function parseDomain(url: string): string {
   return parsed.domain;
 }
 
-function mergeEntries(
-  passwordList: APWEntry[],
-  otpList: APWEntry[],
-): APWEntry[] {
+function mergeEntries(passwordList: APWEntry[], otpList: APWEntry[]): APWEntry[] {
   return passwordList.map((entry) => {
     const otpEntry = otpList.find(
-      (otp) =>
-        parseDomain(otp.domain) === parseDomain(entry.domain) &&
-        otp.username === entry.username,
+      (otp) => parseDomain(otp.domain) === parseDomain(entry.domain) && otp.username === entry.username,
     );
     return {
       ...entry,
@@ -146,15 +125,15 @@ export async function listAPWEntries(url: string): Promise<APWEntry[]> {
   return mergeEntries(passwordList.results ?? [], otpList.results ?? []);
 }
 
-export async function getAPWEntries(
-  url: string,
-  action: "otp" | "pw",
-): Promise<APWEntry[]> {
-  const result = await execAPWCommand([action, "get", url]);
-  return (result.results ?? []).map((entry) => ({
-    ...entry,
-    domain: parseDomain(entry.domain),
-  }));
+export async function getAPWEntry(url: string, action: "otp" | "pw", username: string): Promise<APWEntry | undefined> {
+  const result = await execAPWCommand(action === "pw" ? [action, "get", url, username] : [action, "get", url]);
+  if (action === "pw") {
+    const password = result.results?.[0]?.password;
+    return password === undefined ? undefined : { domain: parseDomain(url), username, password };
+  }
+  return (result.results ?? [])
+    .map((entry) => ({ ...entry, domain: parseDomain(entry.domain) }))
+    .find((entry) => entry.username === username && entry.domain === parseDomain(url));
 }
 
 const getBrowserCommand = (browserName: string) => {
@@ -178,9 +157,7 @@ export const getActiveURL = async (): Promise<string> => {
   try {
     const frontmostApplication = await getFrontmostApplication();
     try {
-      const res = await runAppleScript(
-        getBrowserCommand(frontmostApplication.name),
-      );
+      const res = await runAppleScript(getBrowserCommand(frontmostApplication.name));
       const parsed = psl.parse(new URL(res).hostname);
       if ("error" in parsed) {
         throw new Error(parsed.error.toString());

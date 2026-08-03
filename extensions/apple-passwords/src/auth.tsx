@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Form,
   launchCommand,
+  LaunchProps,
   LaunchType,
   showToast,
   Toast,
@@ -10,7 +11,7 @@ import {
 import { useEffect, useState } from "react";
 import { execAPWCommand } from "./utils";
 
-export default function Command() {
+export default function Command(props: LaunchProps<{ launchContext: { returnUrl?: string } }>) {
   const [ready, setReady] = useState(false);
 
   // Trigger the challenge on open; macOS then displays the PIN to enter below.
@@ -50,7 +51,7 @@ export default function Command() {
 
       if (result.status === 0) {
         await showToast({ style: Toast.Style.Success, title: "Authenticated" });
-        await launchCommand({ name: "list", type: LaunchType.UserInitiated });
+        await launchCommand({ name: "list", type: LaunchType.UserInitiated, arguments: props.launchContext?.returnUrl ? { url: props.launchContext.returnUrl } : {} });
       } else {
         throw new Error(result.error || "Authentication failed");
       }
