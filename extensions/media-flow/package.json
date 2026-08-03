@@ -1,0 +1,138 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "media-flow",
+  "title": "MediaFlow",
+  "description": "Universal now-playing monitor and audio device switcher for macOS.",
+  "icon": "icon.png",
+  "author": "egorxyz",
+  "license": "MIT",
+  "categories": [
+    "Media"
+  ],
+  "commands": [
+    {
+      "name": "nowPlaying",
+      "title": "Now Playing",
+      "description": "Current media in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "mediaDetails",
+      "title": "Media Details",
+      "description": "Rich view of all active media sources",
+      "mode": "view"
+    },
+    {
+      "name": "searchDevices",
+      "title": "Audio Devices",
+      "description": "List and switch audio input/output devices",
+      "mode": "view"
+    },
+    {
+      "name": "nextTrack",
+      "title": "Next Track",
+      "description": "Skip to the next track on the active media source",
+      "mode": "no-view"
+    },
+    {
+      "name": "previousTrack",
+      "title": "Previous Track",
+      "description": "Go back to the previous track on the active media source",
+      "mode": "no-view"
+    },
+    {
+      "name": "togglePlayPause",
+      "title": "Play/Pause",
+      "description": "Toggle play/pause on the active media source",
+      "mode": "no-view"
+    },
+    {
+      "name": "openPlayer",
+      "title": "Open Player",
+      "description": "Focus the app window of the active media source",
+      "mode": "no-view"
+    },
+    {
+      "name": "copySongName",
+      "title": "Copy Song Name",
+      "description": "Copy the current track title and artist to the clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-now-playing",
+      "title": "Get Now Playing",
+      "description": "Returns the currently playing tracks"
+    },
+    {
+      "name": "control-playback",
+      "title": "Control Playback",
+      "description": "Play, pause or skip the current track"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "menuBarStyle",
+      "title": "Menu Bar Style",
+      "description": "Show icon with track title, or icon only",
+      "type": "dropdown",
+      "required": false,
+      "default": "iconAndTitle",
+      "data": [
+        {
+          "title": "Icon and Title",
+          "value": "iconAndTitle"
+        },
+        {
+          "title": "Icon Only",
+          "value": "iconOnly"
+        }
+      ]
+    },
+    {
+      "name": "showWhenStopped",
+      "title": "Visibility",
+      "label": "Show menu bar icon when nothing is playing",
+      "description": "Keep the icon visible while no media plays",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "maxTitleLength",
+      "title": "Max Title Length",
+      "description": "Truncate the menu bar title after this many characters",
+      "type": "textfield",
+      "required": false,
+      "default": "30"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "^22.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.0.0",
+    "macos-audio-devices": "^1.4.0",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "eslint .",
+    "lint:ray": "ray lint",
+    "fix-lint": "eslint . --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
