@@ -23,7 +23,7 @@ lifecycles is safe.
 tool calls. It runs two things concurrently:
 
 1. **`media-control` CLI** (`src/providers/mediaControl.ts`), the primary engine. It
-   shells out to the `media-control` binary (see below) and covers *any* app
+   shells out to the `media-control` binary (see below) and covers _any_ app
    registered with the macOS Now Playing service — Music, Spotify, TIDAL, Deezer,
    Amazon Music, VLC, browsers, podcast apps — with title, artist, album, duration,
    elapsed position, playback state, bundle id, and base64 artwork.
@@ -102,12 +102,12 @@ no MediaFlow UI element that triggers them.
 
 ## Platform constraints (why the UI looks the way it does)
 
-| Constraint | Detail |
-| --- | --- |
-| No slider component | Raycast has no Slider primitive. Progress and volume render via `getProgressIcon()` (a static circular icon) plus discrete menu items (25/50/75/100%, etc). |
-| `MenuBarExtra` is a native NSMenu | Only `Item`, `Submenu`, `Section`, and `Separator` exist — no custom row layout, inline buttons, progress bars, or multi-line rows. |
-| Read-only preferences | `getPreferenceValues()` reads `package.json`-declared preferences at runtime; they cannot be mutated from code. Runtime state (pinned source, etc.) lives in `LocalStorage` instead. |
-| Minimum background interval | `menu-bar` command background refresh cannot go below 10s; MediaFlow defaults to `1m`. While the menu is open, an in-process interval can poll faster for live position updates, but it stops the moment the menu closes. |
+| Constraint                        | Detail                                                                                                                                                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| No slider component               | Raycast has no Slider primitive. Progress and volume render via `getProgressIcon()` (a static circular icon) plus discrete menu items (25/50/75/100%, etc).                                                               |
+| `MenuBarExtra` is a native NSMenu | Only `Item`, `Submenu`, `Section`, and `Separator` exist — no custom row layout, inline buttons, progress bars, or multi-line rows.                                                                                       |
+| Read-only preferences             | `getPreferenceValues()` reads `package.json`-declared preferences at runtime; they cannot be mutated from code. Runtime state (pinned source, etc.) lives in `LocalStorage` instead.                                      |
+| Minimum background interval       | `menu-bar` command background refresh cannot go below 10s; MediaFlow defaults to `1m`. While the menu is open, an in-process interval can poll faster for live position updates, but it stops the moment the menu closes. |
 
 These constraints are why the rich UI (large artwork, detailed metadata panel) lives
 in the `mediaDetails` view command rather than the menu bar, and why control is

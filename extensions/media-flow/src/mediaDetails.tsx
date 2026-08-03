@@ -39,9 +39,7 @@ export default function Command() {
           accessories={[
             { tag: s.appName },
             {
-              text: s.duration
-                ? `${formatTime(s.position)} / ${formatTime(s.duration)}`
-                : undefined,
+              text: s.duration ? `${formatTime(s.position)} / ${formatTime(s.duration)}` : undefined,
             },
             { icon: s.isPlaying ? Icon.Play : Icon.Pause },
           ]}
@@ -84,10 +82,7 @@ export default function Command() {
                 }}
               />
               {s.url && <Action.OpenInBrowser url={s.url} />}
-              <Action.CopyToClipboard
-                title="Copy Title — Artist"
-                content={`${s.title} — ${s.artist ?? ""}`}
-              />
+              <Action.CopyToClipboard title="Copy Title — Artist" content={`${s.title} — ${s.artist ?? ""}`} />
             </ActionPanel>
           }
         />
@@ -101,27 +96,18 @@ function ItemDetail(props: { source: MediaSource }) {
   // encodeURI so spaces in the path (e.g. "Application Support") don't break the
   // markdown image link and make it render as literal text. Markdown shows only the
   // artwork; the track details live in the metadata table below it.
-  const markdown = s.artworkPath
-    ? `![artwork](file://${encodeURI(s.artworkPath)}?raycast-height=180)`
-    : "";
+  const markdown = s.artworkPath ? `![artwork](file://${encodeURI(s.artworkPath)}?raycast-height=180)` : "";
   return (
     <List.Item.Detail
       markdown={markdown}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Title" text={s.title} />
-          {s.artist && (
-            <List.Item.Detail.Metadata.Label title="Artist" text={s.artist} />
-          )}
-          {s.album && (
-            <List.Item.Detail.Metadata.Label title="Album" text={s.album} />
-          )}
+          {s.artist && <List.Item.Detail.Metadata.Label title="Artist" text={s.artist} />}
+          {s.album && <List.Item.Detail.Metadata.Label title="Album" text={s.album} />}
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="App" text={s.appName} />
-          <List.Item.Detail.Metadata.Label
-            title="Status"
-            text={s.isPlaying ? "Playing" : "Paused"}
-          />
+          <List.Item.Detail.Metadata.Label title="Status" text={s.isPlaying ? "Playing" : "Paused"} />
           {s.duration !== undefined && (
             <List.Item.Detail.Metadata.Label
               title="Position"
@@ -129,13 +115,7 @@ function ItemDetail(props: { source: MediaSource }) {
             />
           )}
           <List.Item.Detail.Metadata.Label title="Source" text={s.origin} />
-          {s.url && (
-            <List.Item.Detail.Metadata.Link
-              title="URL"
-              target={s.url}
-              text="Open"
-            />
-          )}
+          {s.url && <List.Item.Detail.Metadata.Link title="URL" target={s.url} text="Open" />}
         </List.Item.Detail.Metadata>
       }
     />

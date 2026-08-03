@@ -24,10 +24,7 @@ const cache = new Map<string, string>();
  * browser-PWA id (e.g. `com.google.Chrome.app.<hash>`) into "YouTube Music". Results are
  * cached per bundle id, and it falls back to the provided name when nothing resolves.
  */
-export async function resolveAppName(
-  bundleId: string | undefined,
-  fallback: string,
-): Promise<string> {
+export async function resolveAppName(bundleId: string | undefined, fallback: string): Promise<string> {
   if (!bundleId) return fallback;
   const known = PRETTY_NAMES[bundleId];
   if (known) return known;
@@ -37,11 +34,7 @@ export async function resolveAppName(
   let resolved = fallback;
   // Guard the Spotlight query against anything but a plain bundle id.
   if (/^[A-Za-z0-9._-]+$/.test(bundleId)) {
-    const out = await execSafe(
-      "mdfind",
-      [`kMDItemCFBundleIdentifier == '${bundleId}'`],
-      { retries: 0 },
-    );
+    const out = await execSafe("mdfind", [`kMDItemCFBundleIdentifier == '${bundleId}'`], { retries: 0 });
     const path = out?.split("\n")[0]?.trim();
     const name = path
       ?.split("/")

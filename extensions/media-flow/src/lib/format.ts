@@ -1,7 +1,6 @@
 /** Seconds → "m:ss" / "h:mm:ss"; en-dash placeholder for unknown. */
 export function formatTime(seconds: number | undefined): string {
-  if (seconds === undefined || !Number.isFinite(seconds) || seconds < 0)
-    return "–:––";
+  if (seconds === undefined || !Number.isFinite(seconds) || seconds < 0) return "–:––";
   const s = Math.floor(seconds);
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);

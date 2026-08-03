@@ -58,8 +58,16 @@ describe("getDevices", () => {
 
     const devices = await getDevices();
     const airpodsOut = devices.find((d) => d.id === "2" && d.kind === "output")!;
-    expect(airpodsOut).toMatchObject({ name: "AirPods Pro", isWireless: true, isDefault: true });
-    expect(devices.find((d) => d.id === "1")).toMatchObject({ isWireless: false, isDefault: false, volume: 0.5 });
+    expect(airpodsOut).toMatchObject({
+      name: "AirPods Pro",
+      isWireless: true,
+      isDefault: true,
+    });
+    expect(devices.find((d) => d.id === "1")).toMatchObject({
+      isWireless: false,
+      isDefault: false,
+      volume: 0.5,
+    });
     // device 2 is both input and output → two entries
     expect(devices.filter((d) => d.id === "2")).toHaveLength(2);
   });
@@ -95,7 +103,9 @@ describe("getDevices", () => {
     });
 
     const devices = await getDevices();
-    expect(devices.find((d) => d.id === "3")).toMatchObject({ isWireless: true });
+    expect(devices.find((d) => d.id === "3")).toMatchObject({
+      isWireless: true,
+    });
   });
 
   it("empty array when the CLI fails", async () => {

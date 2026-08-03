@@ -11,9 +11,7 @@ export interface LastPlayer {
 
 export const LAST_PLAYER_KEY = "lastPlayer";
 
-export function parseLastPlayer(
-  raw: string | undefined,
-): LastPlayer | undefined {
+export function parseLastPlayer(raw: string | undefined): LastPlayer | undefined {
   if (!raw) return undefined;
   try {
     const v = JSON.parse(raw) as LastPlayer;
@@ -33,8 +31,6 @@ export async function writeLastPlayer(player: LastPlayer): Promise<void> {
 
 /** Launch (or focus, if already running) the player's app. */
 export function openPlayerApp(player: LastPlayer): void {
-  const args = player.bundleId
-    ? ["-b", player.bundleId]
-    : ["-a", player.appName];
+  const args = player.bundleId ? ["-b", player.bundleId] : ["-a", player.appName];
   void execSafe("open", args);
 }

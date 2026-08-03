@@ -34,8 +34,7 @@ function matchesPlayerDomain(url: string): boolean {
   if (hostname === "music.youtube.com") return true;
   if (isYouTubeHost(hostname) && pathname.startsWith("/watch")) return true;
   if (hostname === "open.spotify.com") return true;
-  if (hostname === "soundcloud.com" || hostname.endsWith(".soundcloud.com"))
-    return true;
+  if (hostname === "soundcloud.com" || hostname.endsWith(".soundcloud.com")) return true;
   return false;
 }
 
@@ -49,9 +48,7 @@ function isYouTubeDomain(url: string): boolean {
  * prefix (e.g. "(3) ") and the trailing " - YouTube" suffix, then splits on the
  * first " - " into artist/title when present. Null when nothing is left.
  */
-export function parseYouTubeTitle(
-  tabTitle: string,
-): { title: string; artist?: string } | null {
+export function parseYouTubeTitle(tabTitle: string): { title: string; artist?: string } | null {
   let s = tabTitle.replace(NOTIFICATION_PREFIX, "");
   if (s.endsWith(YOUTUBE_SUFFIX)) {
     s = s.slice(0, -YOUTUBE_SUFFIX.length);

@@ -11,27 +11,18 @@ export interface MediaSnapshot {
 
 /** Strips keys whose value is explicitly undefined so they cannot clobber merge targets. */
 function defined<T extends object>(o: T): Partial<T> {
-  return Object.fromEntries(
-    Object.entries(o).filter(([, v]) => v !== undefined),
-  ) as Partial<T>;
+  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as Partial<T>;
 }
 
 const keyOf = (s: MediaSource) => s.bundleId ?? s.id;
 
-export async function getMediaSources(
-  pinnedId?: string,
-): Promise<MediaSnapshot> {
-  const engineAvailablePromise = mediaControlProvider
-    .isAvailable()
-    .catch(() => false);
+export async function getMediaSources(pinnedId?: string): Promise<MediaSnapshot> {
+  const engineAvailablePromise = mediaControlProvider.isAvailable().catch(() => false);
   const primaryPromise = engineAvailablePromise.then((ok) =>
     ok ? mediaControlProvider.getSource().catch(() => null) : null,
   );
 
-  const [engineAvailable, primary] = await Promise.all([
-    engineAvailablePromise,
-    primaryPromise,
-  ]);
+  const [engineAvailable, primary] = await Promise.all([engineAvailablePromise, primaryPromise]);
 
   const providerSources = (
     await Promise.all(
@@ -90,10 +81,7 @@ export async function getMediaSources(
  * position on every live re-poll while a native menu is open — only the id *set* changing
  * (a source appearing/disappearing) should reshuffle rows; state flips like isPlaying should not.
  */
-export function stabilizeOrder(
-  prev: string[],
-  sources: MediaSource[],
-): MediaSource[] {
+export function stabilizeOrder(prev: string[], sources: MediaSource[]): MediaSource[] {
   const byId = new Map(sources.map((s) => [s.id, s]));
   const ordered: MediaSource[] = [];
   for (const id of prev) {
@@ -111,9 +99,7 @@ export function stabilizeOrder(
 
 /** Bring the source's app window to the front (activates the app). */
 export async function focusSource(source: MediaSource): Promise<void> {
-  const args = source.bundleId
-    ? ["-b", source.bundleId]
-    : ["-a", source.appName];
+  const args = source.bundleId ? ["-b", source.bundleId] : ["-a", source.appName];
   await execSafe("open", args);
 }
 
@@ -144,13 +130,8 @@ export async function goToPreviousTrack(source: MediaSource): Promise<void> {
   if (!movedToAnotherTrack) await controlSource(source, "previous");
 }
 
-export async function controlSource(
-  source: MediaSource,
-  cmd: PlaybackCommand,
-): Promise<void> {
-  const owner = source.bundleId
-    ? findProviderForBundle(source.bundleId)
-    : undefined;
+export async function controlSource(source: MediaSource, cmd: PlaybackCommand): Promise<void> {
+  const owner = source.bundleId ? findProviderForBundle(source.bundleId) : undefined;
   if (owner?.capabilities.control && owner.control) {
     await owner.control(cmd);
     return;

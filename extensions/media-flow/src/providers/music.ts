@@ -1,8 +1,4 @@
-import type {
-  MediaSource,
-  PlaybackCommand,
-  SourceProvider,
-} from "../core/types";
+import type { MediaSource, PlaybackCommand, SourceProvider } from "../core/types";
 import { runAppleScript } from "../lib/applescript";
 
 const NOW_PLAYING_SCRIPT = `tell application "Music"
@@ -57,9 +53,7 @@ export const musicProvider: SourceProvider = {
   capabilities: { control: true, artwork: false, seek: false },
 
   async isAvailable() {
-    const out = await runAppleScript(
-      'tell application "System Events" to (name of processes) contains "Music"',
-    );
+    const out = await runAppleScript('tell application "System Events" to (name of processes) contains "Music"');
     return out === "true";
   },
 

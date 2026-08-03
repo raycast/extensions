@@ -35,7 +35,12 @@ describe("musicProvider", () => {
   it("getSource maps record", async () => {
     vi.mocked(runAppleScript).mockResolvedValue("Song|Artist|Album|100|5|playing");
     const s = await musicProvider.getSource();
-    expect(s).toMatchObject({ id: "com.apple.Music", appName: "Music", title: "Song", origin: "applescript" });
+    expect(s).toMatchObject({
+      id: "com.apple.Music",
+      appName: "Music",
+      title: "Song",
+      origin: "applescript",
+    });
   });
   it("getSource null on script failure", async () => {
     vi.mocked(runAppleScript).mockResolvedValue(null);

@@ -61,8 +61,16 @@
     }
   ],
   "tools": [
-    { "name": "get-now-playing", "title": "Get Now Playing", "description": "Returns the currently playing tracks" },
-    { "name": "control-playback", "title": "Control Playback", "description": "Play, pause or skip the current track" }
+    {
+      "name": "get-now-playing",
+      "title": "Get Now Playing",
+      "description": "Returns the currently playing tracks"
+    },
+    {
+      "name": "control-playback",
+      "title": "Control Playback",
+      "description": "Play, pause or skip the current track"
+    }
   ],
   "preferences": [
     {
@@ -73,8 +81,14 @@
       "required": false,
       "default": "iconAndTitle",
       "data": [
-        { "title": "Icon and Title", "value": "iconAndTitle" },
-        { "title": "Icon Only", "value": "iconOnly" }
+        {
+          "title": "Icon and Title",
+          "value": "iconAndTitle"
+        },
+        {
+          "title": "Icon Only",
+          "value": "iconOnly"
+        }
       ]
     },
     {
@@ -113,6 +127,7 @@
     "dev": "ray develop",
     "lint": "eslint .",
     "lint:ray": "ray lint",
+    "fix-lint": "eslint . --fix",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"

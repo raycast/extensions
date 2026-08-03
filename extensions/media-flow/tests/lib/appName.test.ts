@@ -14,12 +14,8 @@ describe("resolveAppName", () => {
   });
 
   it("resolves an unknown bundle id to the installed app's file name", async () => {
-    execSafe.mockResolvedValue(
-      "/Users/x/Applications/Chrome Apps.localized/YouTube Music.app",
-    );
-    expect(
-      await resolveAppName("com.google.Chrome.app.abcdef", "abcdef"),
-    ).toBe("YouTube Music");
+    execSafe.mockResolvedValue("/Users/x/Applications/Chrome Apps.localized/YouTube Music.app");
+    expect(await resolveAppName("com.google.Chrome.app.abcdef", "abcdef")).toBe("YouTube Music");
   });
 
   it("caches per bundle id so Spotlight runs once", async () => {
@@ -31,9 +27,7 @@ describe("resolveAppName", () => {
 
   it("falls back to the given name when Spotlight finds nothing", async () => {
     execSafe.mockResolvedValue(null);
-    expect(await resolveAppName("com.example.missing", "Fallback Name")).toBe(
-      "Fallback Name",
-    );
+    expect(await resolveAppName("com.example.missing", "Fallback Name")).toBe("Fallback Name");
   });
 
   it("does not query Spotlight for a malformed bundle id", async () => {

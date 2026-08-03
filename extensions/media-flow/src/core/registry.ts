@@ -11,9 +11,7 @@ export function getProviders(): SourceProvider[] {
   return [...providers];
 }
 
-export function findProviderForBundle(
-  bundleId: string,
-): SourceProvider | undefined {
+export function findProviderForBundle(bundleId: string): SourceProvider | undefined {
   return providers.find((p) => p.bundleIds.includes(bundleId));
 }
 

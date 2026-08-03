@@ -46,12 +46,12 @@ Notes from the Spotify implementation worth carrying over:
   fails), but returning `null` explicitly is clearer and faster.
 - **Parsing is a pure, exported function** (`parseSpotifyRecord`) separate from the
   AppleScript call itself, so it can be unit-tested without mocking `osascript`.
-  Delimiter choice matters: fields are pipe-joined and parsed from the *right* first
+  Delimiter choice matters: fields are pipe-joined and parsed from the _right_ first
   (duration, position, state, urls popped off the end) so a `|` inside a track title
   doesn't break the split — mirror this if your app's titles can contain the
   delimiter you choose.
 - **`control()`** maps `PlaybackCommand` (`"play" | "pause" | "playpause" | "next" |
-  "previous"`) to your app's AppleScript verbs via a small `Record` lookup table.
+"previous"`) to your app's AppleScript verbs via a small `Record` lookup table.
 - Only set `capabilities.control` / `.artwork` / `.seek` to `true` for things you
   actually implement — `mediaService.controlSource()` checks `capabilities.control`
   before calling `control()`, and falls back to `media-control` otherwise.
@@ -86,13 +86,13 @@ Run `npm test` (or scope it with `npm test -- your-provider`) before opening a P
 
 ## Which apps get which treatment
 
-| App | AppleScript dictionary | Coverage today |
-| --- | --- | --- |
-| Music.app | Full metadata (`player state`, `current track`) + control; artwork via `media-control` (AppleScript raw `artwork 1` is possible but not implemented) | `media-control` + AppleScript enrichment/control |
-| Spotify | Full metadata (`player state`, `current track`, `spotify url`) + control; artwork via `media-control` (the dictionary exposes `artwork url`, but the provider does not fetch it) | `media-control` + AppleScript enrichment/control |
-| VLC | Transport control only — no reliable metadata via AppleScript | `media-control` only today; a control-only VLC provider is possible but not implemented |
-| Safari / Chrome | No media dictionary — tab title + URL only (YouTube-title heuristic) | Browser tab-title fallback provider (`src/providers/browser.ts`), no position/artwork |
-| TIDAL, Deezer, Amazon Music, Firefox | No AppleScript dictionary at all | `media-control`-only — no provider needed or possible today |
+| App                                  | AppleScript dictionary                                                                                                                                                           | Coverage today                                                                          |
+| ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Music.app                            | Full metadata (`player state`, `current track`) + control; artwork via `media-control` (AppleScript raw `artwork 1` is possible but not implemented)                             | `media-control` + AppleScript enrichment/control                                        |
+| Spotify                              | Full metadata (`player state`, `current track`, `spotify url`) + control; artwork via `media-control` (the dictionary exposes `artwork url`, but the provider does not fetch it) | `media-control` + AppleScript enrichment/control                                        |
+| VLC                                  | Transport control only — no reliable metadata via AppleScript                                                                                                                    | `media-control` only today; a control-only VLC provider is possible but not implemented |
+| Safari / Chrome                      | No media dictionary — tab title + URL only (YouTube-title heuristic)                                                                                                             | Browser tab-title fallback provider (`src/providers/browser.ts`), no position/artwork   |
+| TIDAL, Deezer, Amazon Music, Firefox | No AppleScript dictionary at all                                                                                                                                                 | `media-control`-only — no provider needed or possible today                             |
 
 If the app you're adding has no AppleScript dictionary, it likely doesn't need a new
 provider at all — check first whether it's already covered by `media-control` alone

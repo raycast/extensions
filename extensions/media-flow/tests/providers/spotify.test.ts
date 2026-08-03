@@ -21,16 +21,12 @@ describe("parseSpotifyRecord", () => {
   });
   it("null for stopped", () => expect(parseSpotifyRecord("stopped")).toBeNull());
   it("survives pipes inside title", () => {
-    const r = parseSpotifyRecord(
-      "A|B Song|Artist|Album|10000|1|paused|https://i.scdn.co/image/abc|spotify:track:xyz",
-    )!;
+    const r = parseSpotifyRecord("A|B Song|Artist|Album|10000|1|paused|https://i.scdn.co/image/abc|spotify:track:xyz")!;
     expect(r.title).toBe("A|B Song");
     expect(r.isPlaying).toBe(false);
   });
   it("passes through non-matching spotify url unchanged", () => {
-    const r = parseSpotifyRecord(
-      "Song|Artist|Album|225500|83|playing|https://i.scdn.co/image/abc|not-a-spotify-uri",
-    )!;
+    const r = parseSpotifyRecord("Song|Artist|Album|225500|83|playing|https://i.scdn.co/image/abc|not-a-spotify-uri")!;
     expect(r.url).toBe("not-a-spotify-uri");
   });
 });

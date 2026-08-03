@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("../../src/lib/exec", () => ({ execSafe: vi.fn() }));
-vi.mock("../../src/core/artworkCache", () => ({ cacheArtwork: vi.fn(async () => "/tmp/a.jpg") }));
+vi.mock("../../src/core/artworkCache", () => ({
+  cacheArtwork: vi.fn(async () => "/tmp/a.jpg"),
+}));
 import { execSafe } from "../../src/lib/exec";
 import { MEDIA_CONTROL_BIN, mediaControlProvider, parseMediaControlOutput } from "../../src/providers/mediaControl";
 

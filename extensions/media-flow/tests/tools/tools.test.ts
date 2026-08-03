@@ -3,7 +3,16 @@ import { describe, expect, it, vi } from "vitest";
 vi.mock("../../src/core/mediaService", () => ({
   getMediaSources: vi.fn(async () => ({
     engineAvailable: true,
-    sources: [{ id: "a", appName: "Music", title: "Song", artist: "Artist", isPlaying: true, origin: "applescript" }],
+    sources: [
+      {
+        id: "a",
+        appName: "Music",
+        title: "Song",
+        artist: "Artist",
+        isPlaying: true,
+        origin: "applescript",
+      },
+    ],
   })),
   controlSource: vi.fn(),
 }));

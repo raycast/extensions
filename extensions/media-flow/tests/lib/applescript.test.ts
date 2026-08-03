@@ -11,11 +11,9 @@ describe("runAppleScript", () => {
     vi.mocked(execSafe).mockResolvedValue("ok");
     const out = await runAppleScript('tell app "Music" to get player state');
     expect(out).toBe("ok");
-    expect(execSafe).toHaveBeenCalledWith(
-      "osascript",
-      ["-e", 'tell app "Music" to get player state'],
-      { timeoutMs: 1500 },
-    );
+    expect(execSafe).toHaveBeenCalledWith("osascript", ["-e", 'tell app "Music" to get player state'], {
+      timeoutMs: 1500,
+    });
   });
   it("propagates null", async () => {
     vi.mocked(execSafe).mockResolvedValue(null);

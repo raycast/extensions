@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getDevices, setDefaultOutput } from "./audio/devices";
 import { getSystemVolume, setSystemVolume } from "./audio/volume";
@@ -37,10 +29,7 @@ export default function Command() {
   );
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder={`Search devices — system volume ${data?.volume ?? "–"}%`}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder={`Search devices — system volume ${data?.volume ?? "–"}%`}>
       <List.Section title="Output">
         {outputs.map((d) => (
           <List.Item
@@ -60,9 +49,7 @@ export default function Command() {
                   color: d.isWireless ? Color.Blue : Color.SecondaryText,
                 },
               },
-              ...(d.volume !== undefined
-                ? [{ text: `${Math.round(d.volume * 100)}%` }]
-                : []),
+              ...(d.volume !== undefined ? [{ text: `${Math.round(d.volume * 100)}%` }] : []),
             ]}
             actions={
               <ActionPanel>

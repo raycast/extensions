@@ -24,13 +24,7 @@ import {
 import { registerAllProviders } from "./core/setup";
 import type { MediaSource } from "./core/types";
 import { truncate } from "./lib/format";
-import {
-  LAST_PLAYER_KEY,
-  openPlayerApp,
-  parseLastPlayer,
-  writeLastPlayer,
-  type LastPlayer,
-} from "./lib/lastPlayer";
+import { LAST_PLAYER_KEY, openPlayerApp, parseLastPlayer, writeLastPlayer, type LastPlayer } from "./lib/lastPlayer";
 import { streamNowPlaying } from "./lib/stream";
 
 registerAllProviders();
@@ -57,11 +51,7 @@ export default function Command() {
       LocalStorage.getItem<string>(TITLE_HIDDEN_KEY),
       LocalStorage.getItem<string>(LAST_PLAYER_KEY),
     ]);
-    const [snapshot, devices, volume] = await Promise.all([
-      getMediaSources(),
-      getDevices(),
-      getSystemVolume(),
-    ]);
+    const [snapshot, devices, volume] = await Promise.all([getMediaSources(), getDevices(), getSystemVolume()]);
     const sources = stabilizeOrder(orderRef.current, snapshot.sources);
     orderRef.current = sources.map((s) => s.id);
     const titleHidden = titleHiddenValue === "true";
@@ -116,10 +106,7 @@ export default function Command() {
   const playing = data?.snapshot.sources.find((s) => s.isPlaying);
   const title =
     prefs.menuBarStyle === "iconAndTitle" && !data?.titleHidden && playing
-      ? truncate(
-          `${playing.title} – ${playing.artist ?? playing.appName}`,
-          maxLen,
-        )
+      ? truncate(`${playing.title} – ${playing.artist ?? playing.appName}`, maxLen)
       : undefined;
 
   if (!playing && !prefs.showWhenStopped && !isLoading) return null;
@@ -129,11 +116,7 @@ export default function Command() {
       isLoading={isLoading}
       icon={playing?.artworkPath ? { source: playing.artworkPath } : Icon.Music}
       title={title}
-      tooltip={
-        playing
-          ? `${playing.title} — ${playing.artist ?? ""} — ${playing.appName}`
-          : "MediaFlow"
-      }
+      tooltip={playing ? `${playing.title} — ${playing.artist ?? ""} — ${playing.appName}` : "MediaFlow"}
     >
       {data && <Menu {...data} onAction={revalidate} />}
     </MenuBarExtra>
@@ -148,8 +131,7 @@ function Menu(props: {
   lastPlayer: LastPlayer | undefined;
   onAction: () => void;
 }) {
-  const { snapshot, devices, volume, titleHidden, lastPlayer, onAction } =
-    props;
+  const { snapshot, devices, volume, titleHidden, lastPlayer, onAction } = props;
   const outputs = devices.filter((d) => d.kind === "output");
 
   // When something is playing, show only the playing source(s) so the dropdown matches
@@ -167,11 +149,7 @@ function Menu(props: {
               <MenuBarExtra.Item
                 title="Nothing playing"
                 icon={Icon.SpeakerOff}
-                subtitle={
-                  snapshot.engineAvailable
-                    ? undefined
-                    : "brew install media-control for full coverage"
-                }
+                subtitle={snapshot.engineAvailable ? undefined : "brew install media-control for full coverage"}
               />
               {lastPlayer ? (
                 <MenuBarExtra.Item
@@ -213,10 +191,7 @@ function Menu(props: {
         // Multiple sources playing at once: give each its own labeled section so the
         // controls and Copy are unambiguous.
         shown.map((s) => (
-          <MenuBarExtra.Section
-            key={s.id}
-            title={`${s.title}${s.artist ? ` — ${s.artist}` : ""}`}
-          >
+          <MenuBarExtra.Section key={s.id} title={`${s.title}${s.artist ? ` — ${s.artist}` : ""}`}>
             <SourceItems source={s} onAction={onAction} />
           </MenuBarExtra.Section>
         ))
@@ -231,13 +206,7 @@ function Menu(props: {
             <MenuBarExtra.Item
               key={d.id}
               title={d.name}
-              icon={
-                d.isDefault
-                  ? Icon.CheckCircle
-                  : d.isWireless
-                    ? Icon.Bluetooth
-                    : Icon.Plug
-              }
+              icon={d.isDefault ? Icon.CheckCircle : d.isWireless ? Icon.Bluetooth : Icon.Plug}
               onAction={async () => {
                 await setDefaultOutput(d.id);
                 onAction();
@@ -245,10 +214,7 @@ function Menu(props: {
             />
           ))}
         </MenuBarExtra.Submenu>
-        <MenuBarExtra.Submenu
-          title={`Volume: ${volume ?? "–"}%`}
-          icon={Icon.SpeakerHigh}
-        >
+        <MenuBarExtra.Submenu title={`Volume: ${volume ?? "–"}%`} icon={Icon.SpeakerHigh}>
           {/* cmd+arrowUp/Down aren't in @raycast/eslint-plugin's reserved-shortcut list, so they're safe here. */}
           <MenuBarExtra.Item
             title="Louder"
@@ -272,11 +238,7 @@ function Menu(props: {
             <MenuBarExtra.Item
               key={v}
               title={v === 0 ? "Mute" : `${v}%`}
-              icon={
-                volume !== null && Math.abs(volume - v) < 13
-                  ? Icon.CheckCircle
-                  : undefined
-              }
+              icon={volume !== null && Math.abs(volume - v) < 13 ? Icon.CheckCircle : undefined}
               onAction={async () => {
                 await setSystemVolume(v);
                 onAction();
@@ -296,11 +258,7 @@ function Menu(props: {
             onAction();
           }}
         />
-        <MenuBarExtra.Item
-          title="Settings"
-          icon={Icon.Gear}
-          onAction={() => openExtensionPreferences()}
-        />
+        <MenuBarExtra.Item title="Settings" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
       </MenuBarExtra.Section>
     </>
   );
@@ -311,11 +269,7 @@ function SourceItems(props: { source: MediaSource; onAction: () => void }) {
 
   return (
     <>
-      <MenuBarExtra.Item
-        title={`Open ${s.appName}`}
-        icon={Icon.Music}
-        onAction={() => focusSource(s)}
-      />
+      <MenuBarExtra.Item title={`Open ${s.appName}`} icon={Icon.Music} onAction={() => focusSource(s)} />
       <MenuBarExtra.Item
         title="Play/Pause"
         icon={s.isPlaying ? Icon.Pause : Icon.Play}

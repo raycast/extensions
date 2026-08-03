@@ -11,9 +11,7 @@ export default async function Command(): Promise<void> {
     await showHUD("No active media source");
     return;
   }
-  const text = target.artist
-    ? `${target.title} — ${target.artist}`
-    : target.title;
+  const text = target.artist ? `${target.title} — ${target.artist}` : target.title;
   await Clipboard.copy(text);
   await showHUD(`Copied: ${text}`);
 }

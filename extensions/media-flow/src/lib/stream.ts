@@ -17,18 +17,13 @@ export interface StreamHandle {
  * Never throws. If the process fails to spawn or the stream dies, `onError` fires (once) so
  * the caller can degrade to polling. Killing it via `stop()` does NOT count as an error.
  */
-export function streamNowPlaying(
-  onChange: () => void,
-  onError?: () => void,
-): StreamHandle {
+export function streamNowPlaying(onChange: () => void, onError?: () => void): StreamHandle {
   let stopped = false;
   let child: ReturnType<typeof spawn>;
   try {
-    child = spawn(
-      MEDIA_CONTROL_BIN,
-      ["stream", "--no-artwork", "--debounce=200"],
-      { stdio: ["ignore", "pipe", "ignore"] },
-    );
+    child = spawn(MEDIA_CONTROL_BIN, ["stream", "--no-artwork", "--debounce=200"], {
+      stdio: ["ignore", "pipe", "ignore"],
+    });
   } catch {
     onError?.();
     return { stop: () => {} };

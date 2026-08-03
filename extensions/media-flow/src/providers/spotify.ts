@@ -1,8 +1,4 @@
-import type {
-  MediaSource,
-  PlaybackCommand,
-  SourceProvider,
-} from "../core/types";
+import type { MediaSource, PlaybackCommand, SourceProvider } from "../core/types";
 import { runAppleScript } from "../lib/applescript";
 
 const NOW_PLAYING_SCRIPT = `tell application "Spotify"
@@ -23,10 +19,7 @@ interface SpotifyRecord {
 }
 
 function toWebUrl(raw: string): string {
-  return raw.replace(
-    /^spotify:track:(.+)$/,
-    "https://open.spotify.com/track/$1",
-  );
+  return raw.replace(/^spotify:track:(.+)$/, "https://open.spotify.com/track/$1");
 }
 
 /**
@@ -73,9 +66,7 @@ export const spotifyProvider: SourceProvider = {
   capabilities: { control: true, artwork: false, seek: false },
 
   async isAvailable() {
-    const out = await runAppleScript(
-      'tell application "System Events" to (name of processes) contains "Spotify"',
-    );
+    const out = await runAppleScript('tell application "System Events" to (name of processes) contains "Spotify"');
     return out === "true";
   },
 

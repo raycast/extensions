@@ -8,7 +8,9 @@ afterEach(() => {
 });
 
 async function loadBinWith(existing: string[]): Promise<string> {
-  vi.doMock("node:fs", () => ({ existsSync: (p: string) => existing.includes(p) }));
+  vi.doMock("node:fs", () => ({
+    existsSync: (p: string) => existing.includes(p),
+  }));
   const mod = await import("../../src/providers/mediaControl");
   return mod.MEDIA_CONTROL_BIN;
 }
