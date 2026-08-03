@@ -1,9 +1,12 @@
 import { access, readFile, readdir } from "fs/promises";
 import * as path from "path";
-import { execSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import { LocalStorage } from "@raycast/api";
 import { WallpaperInfo } from "./types";
 import { getPrefs } from "./prefs";
+
+const execFileAsync = promisify(execFile);
 
 export async function pathExists(filePath: string): Promise<boolean> {
   try {
@@ -14,7 +17,7 @@ export async function pathExists(filePath: string): Promise<boolean> {
   }
 }
 
-export function getSteamPath(): string | null {
+export async function getSteamPath(): Promise<string | null> {
   const regPaths = [
     "HKLM\\SOFTWARE\\Valve\\Steam",
     "HKLM\\SOFTWARE\\WOW6432Node\\Valve\\Steam",
@@ -22,10 +25,14 @@ export function getSteamPath(): string | null {
 
   for (const regPath of regPaths) {
     try {
-      const output = execSync(`reg query "${regPath}" /v InstallPath`, {
-        encoding: "utf-8",
-      });
-      const match = output.match(/InstallPath\s+REG_SZ\s+(.+)/);
+      const { stdout } = await execFileAsync(
+        "reg",
+        ["query", regPath, "/v", "InstallPath"],
+        {
+          encoding: "utf-8",
+        },
+      );
+      const match = stdout.match(/InstallPath\s+REG_SZ\s+(.+)/);
       if (match) {
         return match[1].trim();
       }
@@ -37,12 +44,12 @@ export function getSteamPath(): string | null {
   return null;
 }
 
-export function getSteamLibraries(steamPath: string): string[] {
+export async function getSteamLibraries(steamPath: string): Promise<string[]> {
   const libraries = [steamPath];
   const vdfPath = path.join(steamPath, "steamapps", "libraryfolders.vdf");
 
   try {
-    const content = execSync(`type "${vdfPath}"`, { encoding: "utf-8" });
+    const content = await readFile(vdfPath, "utf-8");
     const regex = /"path"\s+"([^"]+)"/g;
     let match;
     while ((match = regex.exec(content)) !== null) {
@@ -59,12 +66,12 @@ export function getSteamLibraries(steamPath: string): string[] {
 }
 
 export async function findWallpaperEnginePath(): Promise<string | null> {
-  const steamPath = getSteamPath();
+  const steamPath = await getSteamPath();
   if (!steamPath) {
     return null;
   }
 
-  const libraries = getSteamLibraries(steamPath);
+  const libraries = await getSteamLibraries(steamPath);
   for (const library of libraries) {
     const wePath = path.join(
       library,
@@ -134,12 +141,12 @@ export async function getCurrentWallpaperPath(
 }
 
 export async function scanWallpapers(): Promise<WallpaperInfo[]> {
-  const steamPath = getSteamPath();
+  const steamPath = await getSteamPath();
   if (!steamPath) {
     return [];
   }
 
-  const libraries = getSteamLibraries(steamPath);
+  const libraries = await getSteamLibraries(steamPath);
   const wallpapers: WallpaperInfo[] = [];
 
   for (const library of libraries) {
