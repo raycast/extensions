@@ -4,6 +4,10 @@
   "description": "Discover why MicroSaaS ideas fail and find validated ideas worth building.",
   "icon": "extension-icon.png",
   "author": "backlooplabs",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Productivity"
   ],
