@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Update] - 2026-08-03
+
+- Show multiple zones for person entities
+
 ## [Update] - 2026-04-20
 
 - Add custom headers on all request
