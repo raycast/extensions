@@ -4,9 +4,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 // vi.hoisted ensures mock fns are created before the mock factory runs
 const mockShowToast = vi.hoisted(() => vi.fn());
 const mockShowHUD = vi.hoisted(() => vi.fn());
+const mockPreferences = vi.hoisted(() => ({ apiBaseUrl: "http://test:3876" }));
 
 vi.mock("@raycast/api", () => ({
-  getPreferenceValues: () => ({ apiBaseUrl: "http://test:3876" }),
+  getPreferenceValues: () => mockPreferences,
   showToast: mockShowToast,
   showHUD: mockShowHUD,
   Toast: { Style: { Success: "success", Failure: "failure" } },
@@ -68,6 +69,7 @@ function apiErrorResponse(message: string) {
 }
 
 beforeEach(() => {
+  mockPreferences.apiBaseUrl = "http://test:3876";
   mockFetch.mockReset();
   mockShowToast.mockReset();
   mockShowHUD.mockReset();
@@ -86,6 +88,15 @@ describe("getTasks", () => {
   it("calls /tasks with no params", async () => {
     mockFetch.mockResolvedValue(okResponse([]));
     await getTasks();
+    expect(mockFetch).toHaveBeenCalledWith("http://test:3876/tasks", expect.any(Object));
+  });
+
+  it("normalizes whitespace and trailing slashes in the API base URL", async () => {
+    mockPreferences.apiBaseUrl = "  http://test:3876///  ";
+    mockFetch.mockResolvedValue(okResponse([]));
+
+    await getTasks();
+
     expect(mockFetch).toHaveBeenCalledWith("http://test:3876/tasks", expect.any(Object));
   });
 

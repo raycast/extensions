@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, Alert, confirmAlert } from "@raycast/api";
 import { getTasks, getProjects, getTags, startTask, archiveTask, deleteTask, updateTask } from "./api";
 import type { Task, Project, Tag } from "./types";
-import { getProjectTitle, getTagTitles, getTodayStr } from "./utils";
+import { formatLocalDate, getProjectTitle, getTagTitles, getTodayStr } from "./utils";
 
 type TimeBucket = "overdue" | "today" | "tomorrow" | "thisWeek" | "later" | "undated";
 
@@ -15,7 +15,7 @@ interface TaskGroup {
 function getTomorrowStr(): string {
   const d = new Date();
   d.setDate(d.getDate() + 1);
-  return d.toISOString().slice(0, 10);
+  return formatLocalDate(d);
 }
 
 function getEndOfWeekStr(): string {
@@ -23,7 +23,7 @@ function getEndOfWeekStr(): string {
   const dayOfWeek = d.getDay();
   const daysUntilEnd = dayOfWeek === 0 ? 0 : 7 - dayOfWeek;
   d.setDate(d.getDate() + daysUntilEnd);
-  return d.toISOString().slice(0, 10);
+  return formatLocalDate(d);
 }
 
 function getBucket(dueDay: string): TimeBucket {
@@ -69,9 +69,11 @@ export default function Command() {
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showUndated, setShowUndated] = useState(false);
+  const [hasError, setHasError] = useState(false);
 
   async function fetchScheduledTasks() {
     setIsLoading(true);
+    setHasError(false);
     try {
       const [fetchedTasks, fetchedProjects, fetchedTags] = await Promise.all([
         getTasks({ source: "active" }),
@@ -102,6 +104,7 @@ export default function Command() {
       setTaskGroups(groups);
     } catch (e) {
       console.error("Failed to fetch scheduled tasks:", e);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -175,13 +178,24 @@ export default function Command() {
     }
   }
 
+  if (hasError) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load scheduled tasks"
+          description="Make sure Super Productivity is running and its Local REST API is enabled."
+        />
+      </List>
+    );
+  }
+
   const visibleGroups = showUndated ? taskGroups : taskGroups.filter((g) => g.bucket !== "undated");
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search scheduled tasks..."
-      navigationTitle="Scheduled Tasks"
       searchBarAccessory={
         <List.Dropdown tooltip="Show/hide undated tasks" onChange={(value) => setShowUndated(value === "yes")}>
           <List.Dropdown.Item title="Scheduled only" value="no" />

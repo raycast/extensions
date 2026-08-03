@@ -17,7 +17,6 @@ A Raycast extension that brings your [Super Productivity](https://super-producti
 - **Quick-add** with natural-language parsing (`+project #tag @tomorrow 30m`).
 - **Create task** form with project + tag pickers.
 - Live, read-only sync via Super Productivity’s **Local REST API** (port `127.0.0.1:3876` by default).
-- CI via `npm run qa` — contract tests against your running SP instance (GitHub Actions on every PR).
 
 ## Install
 
@@ -66,18 +65,18 @@ This extension calls `POST /tasks/{id}/start` (via `startTask` in `src/api.ts`) 
 
 ## Commands
 
-| Command                     | Mode       | What it does                                                                                                                                          |
-| --------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Menu Bar — Current Task** | `menu-bar` | Live readout of the currently tracked task + elapsed time.                                                                                            |
-| **View Tasks**              | `view`     | Browse, search, filter by project/tag, start tracking, complete, archive, delete. _Starting tracking here also starts a SP focus session if enabled._ |
-| **Today’s Tasks**           | `view`     | Tasks due today; same actions.                                                                                                                        |
-| **Create Task**             | `view`     | Form: title / notes / estimate / due date / project / tags.                                                                                           |
-| **Current Task**            | `view`     | Currently-tracking panel + recent-task picker for one-key start. _Starting tracking here also starts a SP focus session if enabled._                  |
-| **Quick Add Task**          | `view`     | Natural-language: `+project #tag @tomorrow 30m`.                                                                                                      |
-| **Scheduled Tasks**         | `view`     | Grouped overdue / today / tomorrow / this week / later.                                                                                               |
-| **Archived Tasks**          | `view`     | Browse archived, restore, delete permanently.                                                                                                         |
-| **Manage Tags**             | `view`     | CRUD tags (name, color).                                                                                                                              |
-| **Browse Projects**         | `view`     | Project list with per-project task drill-down.                                                                                                        |
+| Command                   | Mode       | What it does                                                                                                                                          |
+| ------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Show Task in Menu Bar** | `menu-bar` | Live readout of the currently tracked task + elapsed time.                                                                                            |
+| **View Tasks**            | `view`     | Browse, search, filter by project/tag, start tracking, complete, archive, delete. _Starting tracking here also starts a SP focus session if enabled._ |
+| **Today’s Tasks**         | `view`     | Tasks in Super Productivity’s Today list; same actions.                                                                                               |
+| **Create Task**           | `view`     | Form: title / notes / estimate / due date / project / tags.                                                                                           |
+| **Current Task**          | `view`     | Currently-tracking panel + recent-task picker for one-key start. _Starting tracking here also starts a SP focus session if enabled._                  |
+| **Quick Add Task**        | `view`     | Natural-language: `+project #tag @tomorrow 30m`.                                                                                                      |
+| **Scheduled Tasks**       | `view`     | Grouped overdue / today / tomorrow / this week / later.                                                                                               |
+| **Archived Tasks**        | `view`     | Browse archived, restore, delete permanently.                                                                                                         |
+| **Manage Tags**           | `view`     | CRUD tags (name, color).                                                                                                                              |
+| **Browse Projects**       | `view`     | Project list with per-project task drill-down.                                                                                                        |
 
 Every command that has a **Start / Resume Tracking** action — `View Tasks`, `Today’s Tasks`, `Project drill-down`, `Current Task` — participates in the [Auto-focus on tracking](#auto-focus-on-tracking) flow. The HUD toast confirms the side-effect:
 
@@ -121,7 +120,6 @@ In `Archived Tasks`, `Enter` triggers **Restore**, and **Delete Permanently** is
 
 - **No focus-session endpoint.** Super Productivity does _not_ expose the focus-mode API. We rely on its own internal `autoStartFocusOnPlay` to wire `/tasks/{id}/start` to the focus-session start, exactly as if the user had clicked Play in the UI.
 - **Read-only by design.** The extension only triggers task timers; it never writes to task content unless the user explicitly invokes an action (Complete, Archive, Delete, etc.).
-- **Contract QA.** `npm run qa` runs `mock-server/qa-exercise.js`, which exercises every endpoint the extension uses and validates response shapes against the real SP instance.
 
 ## Development
 
@@ -129,12 +127,9 @@ In `Archived Tasks`, `Enter` triggers **Restore**, and **Delete Permanently** is
 npm install
 npm run dev       # ray develop — hot reload
 npm run lint
-npm run qa        # contract QA against your running SP instance (SP must be running with Local REST API enabled)
+npm test
+npm run build
 ```
-
-A GitHub Actions workflow at `.github/workflows/qa.yml` runs `npm run qa` on every PR to `main`. PRs must be green before merge.
-
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full branching / commit / review workflow.
 
 ## FAQ
 
@@ -159,4 +154,4 @@ Change the **API Base URL** preference in this extension’s Raycast preferences
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+MIT

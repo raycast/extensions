@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, Icon, popToRoot } from "@raycast/api";
 import { createTask, createTag, getProjects, getTags } from "./api";
 import type { Project, Tag } from "./types";
-import { getTodayStr } from "./utils";
+import { formatLocalDate, getTodayStr } from "./utils";
 
 interface ParsedInput {
   title: string;
@@ -33,7 +33,7 @@ function getNextDayOfWeek(dayAbbr: string): string {
   let daysUntil = target - currentDay;
   if (daysUntil <= 0) daysUntil += 7;
   today.setDate(today.getDate() + daysUntil);
-  return today.toISOString().slice(0, 10);
+  return formatLocalDate(today);
 }
 
 function parseDueDate(expr: string): string | undefined {
@@ -43,12 +43,12 @@ function parseDueDate(expr: string): string | undefined {
   if (trimmed === "tomorrow") {
     const d = new Date();
     d.setDate(d.getDate() + 1);
-    return d.toISOString().slice(0, 10);
+    return formatLocalDate(d);
   }
   if (trimmed === "next week") {
     const d = new Date();
     d.setDate(d.getDate() + 7);
-    return d.toISOString().slice(0, 10);
+    return formatLocalDate(d);
   }
   if (["sun", "mon", "tue", "wed", "thu", "fri", "sat"].includes(trimmed)) {
     return getNextDayOfWeek(trimmed);
@@ -60,7 +60,7 @@ function parseDueDate(expr: string): string | undefined {
     const m = isoMatch[2];
     const d = isoMatch[3];
     const date = new Date(Number(y), Number(m) - 1, Number(d));
-    if (!isNaN(date.getTime())) return trimmed;
+    if (formatLocalDate(date) === trimmed) return trimmed;
   }
   // MM-DD (this year)
   const mdMatch = trimmed.match(/^(\d{1,2})-(\d{1,2})$/);
@@ -69,7 +69,8 @@ function parseDueDate(expr: string): string | undefined {
     const da = mdMatch[2];
     const year = new Date().getFullYear();
     const date = new Date(year, Number(mo) - 1, Number(da));
-    if (!isNaN(date.getTime())) return date.toISOString().slice(0, 10);
+    const candidate = `${year}-${String(Number(mo)).padStart(2, "0")}-${String(Number(da)).padStart(2, "0")}`;
+    if (formatLocalDate(date) === candidate) return candidate;
   }
   return undefined;
 }
@@ -293,7 +294,7 @@ function formatDueLabel(dueDay: string): string {
   if (dueDay === today) return "Today";
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  if (dueDay === tomorrow.toISOString().slice(0, 10)) return "Tomorrow";
+  if (dueDay === formatLocalDate(tomorrow)) return "Tomorrow";
   return dueDay;
 }
 
@@ -310,7 +311,7 @@ export default function Command() {
   const [input, setInput] = useState("");
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchOptions() {
       try {
         const [fp, ft] = await Promise.all([getProjects(), getTags()]);
         setProjects(fp);
@@ -321,7 +322,7 @@ export default function Command() {
         setIsLoading(false);
       }
     }
-    fetch();
+    fetchOptions();
   }, []);
 
   const parsed = input.trim() ? parseInput(input, projects, tags) : null;
@@ -344,8 +345,9 @@ export default function Command() {
         try {
           const newTag = await createTag({ title: tagName });
           allTagIds.push(newTag.id);
-        } catch (e) {
-          console.error(`Failed to create tag "${tagName}":`, e);
+        } catch (error) {
+          console.error(`Failed to create tag "${tagName}":`, error);
+          throw error;
         }
       }
 
@@ -377,7 +379,6 @@ export default function Command() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Quick Add Task"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" icon={Icon.Plus} onSubmit={handleSubmit} />

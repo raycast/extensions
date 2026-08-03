@@ -9,9 +9,11 @@ export default function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   async function fetchArchived() {
     setIsLoading(true);
+    setHasError(false);
     try {
       const [fetchedTasks, fetchedProjects, fetchedTags] = await Promise.all([
         getTasks({ source: "archived" }),
@@ -23,6 +25,7 @@ export default function Command() {
       setTags(fetchedTags);
     } catch (e) {
       console.error("Failed to fetch archived tasks:", e);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -72,8 +75,20 @@ export default function Command() {
     }
   }
 
+  if (hasError) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load archived tasks"
+          description="Make sure Super Productivity is running and its Local REST API is enabled."
+        />
+      </List>
+    );
+  }
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search archived tasks..." navigationTitle="Archived Tasks">
+    <List isLoading={isLoading} searchBarPlaceholder="Search archived tasks...">
       {tasks.map((task) => {
         const tagStr = getTagTitles(task.tagIds, tags);
         const projectTitle = getProjectTitle(task.projectId, projects);

@@ -31,9 +31,18 @@ function TagColorIcon({ color }: { color?: string }) {
 
 function CreateTagForm({ onCreated }: { onCreated: () => void }) {
   async function handleSubmit(values: { title: string; color: string }) {
+    const title = values.title.trim();
+    if (!title) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Tag name is required",
+      });
+      return;
+    }
+
     try {
       await createTag({
-        title: values.title.trim(),
+        title,
         color: values.color || undefined,
       });
       await showToast({
@@ -119,7 +128,7 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search tags..." navigationTitle="Manage Tags">
+    <List isLoading={isLoading} searchBarPlaceholder="Search tags...">
       {tags.map((tag) => (
         <List.Item
           key={tag.id}

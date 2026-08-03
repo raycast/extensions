@@ -17,7 +17,7 @@ import type {
 
 function getBaseUrl(): string {
   const { apiBaseUrl } = getPreferenceValues<Preferences>();
-  return apiBaseUrl || "http://127.0.0.1:3876";
+  return (apiBaseUrl || "http://127.0.0.1:3876").trim().replace(/\/+$/, "");
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {

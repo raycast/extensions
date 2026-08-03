@@ -1,13 +1,20 @@
-import { describe, it, expect } from "vitest";
+import { afterEach, describe, it, expect, vi } from "vitest";
 import { getTodayStr, getProjectTitle, getTagTitles } from "./utils";
 import type { Project, Tag } from "./types";
 
+afterEach(() => {
+  vi.useRealTimers();
+});
+
 describe("getTodayStr", () => {
-  it("returns today's date in YYYY-MM-DD format", () => {
+  it("returns the local calendar date in YYYY-MM-DD format", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date(2026, 7, 3, 0, 30));
+
     const result = getTodayStr();
+
     expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-    const expected = new Date().toISOString().slice(0, 10);
-    expect(result).toBe(expected);
+    expect(result).toBe("2026-08-03");
   });
 });
 

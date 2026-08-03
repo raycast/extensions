@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { List, ActionPanel, Action, Icon, showToast, Toast, Color, Alert, confirmAlert } from "@raycast/api";
 import { getTasks, getProjects, getTags, startTask, archiveTask, deleteTask, updateTask } from "./api";
 import type { Task, Project, Tag } from "./types";
@@ -9,22 +9,29 @@ export default function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const requestIdRef = useRef(0);
 
   async function fetchTasks() {
+    const requestId = ++requestIdRef.current;
     setIsLoading(true);
+    setHasError(false);
     try {
       const [fetchedTasks, fetchedProjects, fetchedTags] = await Promise.all([
         getTasks({ source: "active" }),
         getProjects(),
         getTags(),
       ]);
-      setTasks(fetchedTasks);
-      setProjects(fetchedProjects);
-      setTags(fetchedTags);
+      if (requestId === requestIdRef.current) {
+        setTasks(fetchedTasks);
+        setProjects(fetchedProjects);
+        setTags(fetchedTags);
+      }
     } catch (e) {
       console.error("Failed to fetch tasks:", e);
+      if (requestId === requestIdRef.current) setHasError(true);
     } finally {
-      setIsLoading(false);
+      if (requestId === requestIdRef.current) setIsLoading(false);
     }
   }
 
@@ -90,11 +97,22 @@ export default function Command() {
     }
   }
 
+  if (hasError) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load tasks"
+          description="Make sure Super Productivity is running and its Local REST API is enabled."
+        />
+      </List>
+    );
+  }
+
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search tasks..."
-      navigationTitle="View Tasks"
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter by project or tag"
@@ -102,32 +120,38 @@ export default function Command() {
             if (newValue === "all") {
               fetchTasks();
             } else if (newValue.startsWith("project:")) {
+              const requestId = ++requestIdRef.current;
               const projectId = newValue.slice(8);
               setIsLoading(true);
+              setHasError(false);
               try {
                 const t = await getTasks({
                   source: "active",
-                  projectId: projectId === "inbox" ? "" : projectId,
+                  projectId,
                 });
-                setTasks(t);
+                if (requestId === requestIdRef.current) setTasks(t);
               } catch (e) {
                 console.error("Failed to filter tasks:", e);
+                if (requestId === requestIdRef.current) setHasError(true);
               } finally {
-                setIsLoading(false);
+                if (requestId === requestIdRef.current) setIsLoading(false);
               }
             } else if (newValue.startsWith("tag:")) {
+              const requestId = ++requestIdRef.current;
               const tagId = newValue.slice(4);
               setIsLoading(true);
+              setHasError(false);
               try {
                 const t = await getTasks({
                   source: "active",
                   tagId,
                 });
-                setTasks(t);
+                if (requestId === requestIdRef.current) setTasks(t);
               } catch (e) {
                 console.error("Failed to filter tasks:", e);
+                if (requestId === requestIdRef.current) setHasError(true);
               } finally {
-                setIsLoading(false);
+                if (requestId === requestIdRef.current) setIsLoading(false);
               }
             }
           }}
@@ -173,8 +197,8 @@ export default function Command() {
                   <Action
                     title={
                       task.timeSpent > 0
-                        ? `Resume Tracking (+ Focus Session) (${(task.timeSpent / 3600000).toFixed(1)}h spent)`
-                        : "Start Tracking (+ Focus Session)"
+                        ? `Resume Tracking (${(task.timeSpent / 3600000).toFixed(1)}h spent)`
+                        : "Start Tracking"
                     }
                     icon={task.timeSpent > 0 ? Icon.ArrowClockwise : Icon.Play}
                     onAction={() => handleStartTask(task.id)}

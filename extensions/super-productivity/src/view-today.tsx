@@ -6,14 +6,17 @@ import type { Task } from "./types";
 export default function Command() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   async function fetchTodayTasks() {
     setIsLoading(true);
+    setHasError(false);
     try {
       const fetchedTasks = await getTasks({ tagId: "TODAY", source: "active" });
       setTasks(fetchedTasks);
     } catch (e) {
       console.error("Failed to fetch today's tasks:", e);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -81,8 +84,20 @@ export default function Command() {
     }
   }
 
+  if (hasError) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load today's tasks"
+          description="Make sure Super Productivity is running and its Local REST API is enabled."
+        />
+      </List>
+    );
+  }
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search today's tasks..." navigationTitle="Today's Tasks">
+    <List isLoading={isLoading} searchBarPlaceholder="Search today's tasks...">
       {tasks.map((task) => {
         const timeEstimate = task.timeEstimate > 0 ? `${task.timeEstimate / 3600000}h` : "";
         const timeSpent = task.timeSpent > 0 ? `${(task.timeSpent / 3600000).toFixed(1)}h spent` : "";

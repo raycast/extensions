@@ -1,21 +1,24 @@
 import { useState, useEffect } from "react";
 import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
-import { getCurrentTask, setCurrentTask, stopCurrentTask, getTasks } from "./api";
+import { getCurrentTask, startTask, stopCurrentTask, getTasks } from "./api";
 import type { CurrentTask, Task } from "./types";
 
 export default function Command() {
   const [currentTask, setCurrentTaskState] = useState<CurrentTask | null>(null);
   const [recentTasks, setRecentTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   async function fetchData() {
     setIsLoading(true);
+    setHasError(false);
     try {
       const [task, tasks] = await Promise.all([getCurrentTask(), getTasks({ source: "active" })]);
       setCurrentTaskState(task);
       setRecentTasks(tasks.slice(0, 20));
     } catch (e) {
       console.error("Failed to fetch current task:", e);
+      setHasError(true);
     } finally {
       setIsLoading(false);
     }
@@ -27,8 +30,8 @@ export default function Command() {
 
   async function handleStartTask(taskId: string) {
     try {
-      await setCurrentTask(taskId);
-      fetchData();
+      await startTask(taskId);
+      await fetchData();
     } catch (e) {
       console.error("Failed to start task:", e);
     }
@@ -43,8 +46,20 @@ export default function Command() {
     }
   }
 
+  if (hasError) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could not load tasks"
+          description="Make sure Super Productivity is running and its Local REST API is enabled."
+        />
+      </List>
+    );
+  }
+
   return (
-    <List isLoading={isLoading} navigationTitle="Current Task" searchBarPlaceholder="Search tasks to start...">
+    <List isLoading={isLoading} searchBarPlaceholder="Search tasks to start...">
       {/* Current Task Section */}
       <List.Section title={currentTask ? "Currently Tracking" : "Not Tracking"}>
         {currentTask ? (
@@ -113,8 +128,8 @@ export default function Command() {
                     <Action
                       title={
                         task.timeSpent > 0
-                          ? `Resume Tracking (+ Focus Session) (${(task.timeSpent / 3600000).toFixed(1)}h spent)`
-                          : "Start Tracking (+ Focus Session)"
+                          ? `Resume Tracking (${(task.timeSpent / 3600000).toFixed(1)}h spent)`
+                          : "Start Tracking"
                       }
                       icon={task.timeSpent > 0 ? Icon.ArrowClockwise : Icon.Play}
                       onAction={() => handleStartTask(task.id)}

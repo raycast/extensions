@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { MenuBarExtra, Icon, Color, launchCommand, LaunchType } from "@raycast/api";
-import { getCurrentTask, stopCurrentTask, getTasks, setCurrentTask } from "./api";
+import { getCurrentTask, stopCurrentTask, getTasks, startTask } from "./api";
 import type { CurrentTask, Task } from "./types";
 
 function formatTime(ms: number): string {
@@ -41,27 +41,19 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [elapsedMs, setElapsedMs] = useState(0);
   const startTimeRef = useRef<number>(Date.now());
-  const lastTaskIdRef = useRef<string | null>(null);
   const currentTaskRef = useRef<CurrentTask | null>(null);
 
   async function fetchCurrentTask() {
     try {
       const [task, tasks] = await Promise.all([getCurrentTask(), getTasks({ source: "active" })]);
 
-      // Reset elapsed timer when task changes
-      if (task?.id !== lastTaskIdRef.current) {
-        lastTaskIdRef.current = task?.id ?? null;
-        startTimeRef.current = Date.now();
-        setElapsedMs(task ? Object.values(task.timeSpentOnDay).reduce((s, v) => s + v, 0) : 0);
-      }
-
+      setElapsedMs(task ? Object.values(task.timeSpentOnDay).reduce((s, v) => s + v, 0) : 0);
+      startTimeRef.current = Date.now();
       currentTaskRef.current = task;
       setCurrentTaskState(task);
       setRecentTasks(tasks.slice(0, 10));
     } catch (e) {
       console.error("Menu bar fetch failed:", e);
-      currentTaskRef.current = null;
-      setCurrentTaskState(null);
     } finally {
       setIsLoading(false);
     }
@@ -91,7 +83,6 @@ export default function Command() {
       await stopCurrentTask();
       currentTaskRef.current = null;
       setCurrentTaskState(null);
-      lastTaskIdRef.current = null;
       setElapsedMs(0);
     } catch (e) {
       console.error("Failed to stop task:", e);
@@ -100,8 +91,8 @@ export default function Command() {
 
   async function handleStartTask(taskId: string) {
     try {
-      await setCurrentTask(taskId);
-      fetchCurrentTask();
+      await startTask(taskId);
+      await fetchCurrentTask();
     } catch (e) {
       console.error("Failed to start task:", e);
     }

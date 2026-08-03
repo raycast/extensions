@@ -2,7 +2,9 @@
 
 This guide walks through configuring Super Productivity so that **starting a task timer from this Raycast extension also auto-starts a focus session** in Super Productivity.
 
-When this works, every **Start Tracking** _or_ **Resume Tracking** action you fire from Raycast drops you into a Super Productivity focus / Pomodoro block against that task — no separate start click needed, no watching two timers. Tasks with prior tracked time (`timeSpent > 0`) auto-promote to **Resume Tracking (X.Xh spent)** while firing the _same_ focus wiring — see [Resume Tracking and focus sessions](#resume-tracking-and-focus-sessions) below for the _why_.> ⏱ **Five-minute setup.** If Super Productivity is already running with Pomodoro enabled, this is two clicks.
+When this works, every **Start Tracking** _or_ **Resume Tracking** action you fire from Raycast drops you into a Super Productivity focus / Pomodoro block against that task — no separate start click needed, no watching two timers. Tasks with prior tracked time (`timeSpent > 0`) auto-promote to **Resume Tracking (X.Xh spent)** while firing the _same_ focus wiring — see [Resume Tracking and focus sessions](#resume-tracking-and-focus-sessions) below for the _why_.
+
+> ⏱ **Five-minute setup.** If Super Productivity is already running with Pomodoro enabled, this is two clicks.
 
 ---
 
@@ -106,7 +108,7 @@ You're done. From here on:
 └──────────────────┘                         └──────────────────┘
 ```
 
-Internally, when `autoStartFocusOnPlay` is on, SP fires a focus-session-start event in the same tick as the active-task-set event. There is no separate endpoint to call and no separate response we can verify — but the _precondition_ (that the active task is set via `/tasks/{id}/start`) is the thing we own, and `npm run qa` validates this at the contract level by confirming `POST /tasks/{id}/start` updates the current task.
+Internally, when `autoStartFocusOnPlay` is on, SP fires a focus-session-start event in the same tick as the active-task-set event. There is no separate endpoint to call and no separate response the extension can verify; it only owns the request that sets the active task through `/tasks/{id}/start`.
 
 Beyond that, the focus-mode overlay is owned by SP's renderer and is out of scope for this extension.
 

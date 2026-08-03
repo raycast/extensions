@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, Icon, popToRoot } from "@raycast/api";
 import { createTask, getProjects, getTags } from "./api";
 import type { Project, Tag } from "./types";
+import { formatLocalDate } from "./utils";
 
 export default function Command() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -9,7 +10,7 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function fetch() {
+    async function fetchOptions() {
       try {
         const [fetchedProjects, fetchedTags] = await Promise.all([getProjects(), getTags()]);
         setProjects(fetchedProjects);
@@ -20,7 +21,7 @@ export default function Command() {
         setIsLoading(false);
       }
     }
-    fetch();
+    fetchOptions();
   }, []);
 
   async function handleSubmit(values: {
@@ -39,9 +40,18 @@ export default function Command() {
       return;
     }
 
-    const timeEstimate = values.timeEstimateHours ? parseFloat(values.timeEstimateHours) * 3600000 : undefined;
+    const estimateInput = values.timeEstimateHours.trim();
+    const estimateHours = Number(estimateInput);
+    if (estimateInput && (!Number.isFinite(estimateHours) || estimateHours <= 0)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Time estimate must be a positive number",
+      });
+      return;
+    }
+    const timeEstimate = estimateInput ? estimateHours * 3600000 : undefined;
 
-    const dueDay = values.dueDay ? values.dueDay.toISOString().slice(0, 10) : undefined;
+    const dueDay = values.dueDay ? formatLocalDate(values.dueDay) : undefined;
 
     try {
       await createTask({
@@ -67,7 +77,6 @@ export default function Command() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Create Task"
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" icon={Icon.Plus} onSubmit={handleSubmit} />
