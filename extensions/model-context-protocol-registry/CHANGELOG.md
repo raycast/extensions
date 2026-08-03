@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add JobYap MCP Server] - {PR_MERGE_DATE}
+## [Add JobYap MCP Server] - 2026-08-03
 
 Add JobYap to the official registry: search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server via mcp-remote; no auth required.
 
