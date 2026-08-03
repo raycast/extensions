@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  closeMainWindow,
-  Form,
-  Icon,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, closeMainWindow, Form, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { randomBytes } from "crypto";
@@ -22,10 +12,8 @@ interface SaveFormValues {
 
 type PasswordType = "random" | "alphanumeric" | "memorable" | "pin";
 
-const CHARS_RANDOM =
-  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*-_";
-const CHARS_ALNUM =
-  "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const CHARS_RANDOM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*-_";
+const CHARS_ALNUM = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 const WORDS = [
   "amber",
@@ -234,9 +222,7 @@ function generatePassword(type: PasswordType, length = 20): string {
   switch (type) {
     case "random": {
       const b = randomBytes(length);
-      return Array.from(b, (x) => CHARS_RANDOM[x % CHARS_RANDOM.length]).join(
-        "",
-      );
+      return Array.from(b, (x) => CHARS_RANDOM[x % CHARS_RANDOM.length]).join("");
     }
     case "alphanumeric": {
       const b = randomBytes(length);
@@ -275,17 +261,12 @@ export default function Command() {
         title: "Saving…",
       });
       try {
-        const result = await execAPWCommand(
-          ["pw", "save", "--stdin", url, username],
-          password,
-        );
+        const result = await execAPWCommand(["pw", "save", "--stdin", url, username], password);
         if (result.status === 0) {
           clearCache();
           await toast.hide();
           await showHUD(
-            hasBrowserURL
-              ? `Password saved and ${PREFERENCES.copySecrets ? "copied" : "filled"}`
-              : "Password saved",
+            hasBrowserURL ? `Password saved and ${PREFERENCES.copySecrets ? "copied" : "filled"}` : "Password saved",
           );
         } else {
           toast.style = Toast.Style.Failure;
@@ -295,8 +276,7 @@ export default function Command() {
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed to save";
-        toast.message =
-          error instanceof Error ? error.message : "Unknown error";
+        toast.message = error instanceof Error ? error.message : "Unknown error";
       }
     },
     validation: {
@@ -307,10 +287,7 @@ export default function Command() {
   });
 
   useEffect(() => {
-    Promise.all([
-      getActiveURL().catch(() => ""),
-      Clipboard.readText().catch(() => null),
-    ])
+    Promise.all([getActiveURL().catch(() => ""), Clipboard.readText().catch(() => null)])
       .then(([activeURL, clipText]) => {
         if (activeURL) {
           setValue("url", activeURL);
@@ -331,44 +308,22 @@ export default function Command() {
             title="Generate Password"
             icon={Icon.Key}
             shortcut={{ modifiers: ["cmd"], key: "g" }}
-            onAction={() =>
-              setValue(
-                "password",
-                generatePassword(passwordType, passwordLength),
-              )
-            }
+            onAction={() => setValue("password", generatePassword(passwordType, passwordLength))}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        title="URL"
-        placeholder="example.com"
-        {...itemProps.url}
-      />
-      <Form.TextField
-        title="Username"
-        placeholder="you@example.com"
-        {...itemProps.username}
-      />
+      <Form.TextField title="URL" placeholder="example.com" {...itemProps.url} />
+      <Form.TextField title="Username" placeholder="you@example.com" {...itemProps.username} />
       <Form.Dropdown
         id="passwordType"
         title="Type"
         value={passwordType}
         onChange={(v) => setPasswordType(v as PasswordType)}
       >
-        <Form.Dropdown.Item
-          value="random"
-          title="Random (letters, digits & symbols)"
-        />
-        <Form.Dropdown.Item
-          value="alphanumeric"
-          title="Alphanumeric (letters & digits)"
-        />
-        <Form.Dropdown.Item
-          value="memorable"
-          title="Memorable (4-word passphrase)"
-        />
+        <Form.Dropdown.Item value="random" title="Random (letters, digits & symbols)" />
+        <Form.Dropdown.Item value="alphanumeric" title="Alphanumeric (letters & digits)" />
+        <Form.Dropdown.Item value="memorable" title="Memorable (4-word passphrase)" />
         <Form.Dropdown.Item value="pin" title="PIN (6 digits)" />
       </Form.Dropdown>
       {(passwordType === "random" || passwordType === "alphanumeric") && (

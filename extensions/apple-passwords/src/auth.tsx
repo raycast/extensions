@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  launchCommand,
-  LaunchProps,
-  LaunchType,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, launchCommand, LaunchProps, LaunchType, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { execAPWCommand } from "./utils";
 
@@ -43,15 +34,15 @@ export default function Command(props: LaunchProps<{ launchContext: { returnUrl?
     }
 
     try {
-      const result = await execAPWCommand([
-        "auth",
-        "response",
-        `--pin=${vcode}`,
-      ]);
+      const result = await execAPWCommand(["auth", "response", `--pin=${vcode}`]);
 
       if (result.status === 0) {
         await showToast({ style: Toast.Style.Success, title: "Authenticated" });
-        await launchCommand({ name: "list", type: LaunchType.UserInitiated, arguments: props.launchContext?.returnUrl ? { url: props.launchContext.returnUrl } : {} });
+        await launchCommand({
+          name: "list",
+          type: LaunchType.UserInitiated,
+          arguments: props.launchContext?.returnUrl ? { url: props.launchContext.returnUrl } : {},
+        });
       } else {
         throw new Error(result.error || "Authentication failed");
       }
@@ -73,11 +64,7 @@ export default function Command(props: LaunchProps<{ launchContext: { returnUrl?
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="vcode"
-        title="PIN"
-        placeholder="Enter the 6-digit PIN displayed by macOS"
-      />
+      <Form.TextField id="vcode" title="PIN" placeholder="Enter the 6-digit PIN displayed by macOS" />
     </Form>
   );
 }
