@@ -214,10 +214,8 @@ export default function Command() {
         <MenuBarExtra.Section key={section.title} title={section.title}>
           {section.items.map((reminder) => {
             const attachedUrls = getAttachedUrls(reminder);
-
             const formattedTime = formatReminderTime(reminder);
-            const timePrefix = formattedTime ? `${formattedTime}  ` : "";
-
+            const timePrefix = formattedTime ? `${formattedTime}`: "";
             return (
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
