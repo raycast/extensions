@@ -1,6 +1,6 @@
 # DeepWiki Changelog
 
-## [Search History and Avatars] - {PR_MERGE_DATE}
+## [Search History and Avatars] - 2026-08-03
 
 - Added recent search history when the search field is empty
 - Show GitHub owner avatars in search results and history
