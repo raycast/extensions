@@ -1,6 +1,6 @@
 # Changelog
 
-## [Resolved facts: shadowed commands, missing sources, missing plugins] - {PR_MERGE_DATE}
+## [Resolved facts: shadowed commands, missing sources, missing plugins] - 2026-08-03
 
 ### Added
 
