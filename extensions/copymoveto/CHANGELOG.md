@@ -1,6 +1,6 @@
 # CopyMoveTo Changelog
 
-## [Changed Extension Author] - {PR_MERGE_DATE}
+## [Changed Extension Author] - 2026-08-03
 
 ## [Enhancement] - 2025-04-14
 
