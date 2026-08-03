@@ -1,5 +1,7 @@
 # CopyMoveTo Changelog
 
+## [Changed Extension Author] - {PR_MERGE_DATE}
+
 ## [Enhancement] - 2025-04-14
 
 - Add a preference to show hidden folders in directory picker.
