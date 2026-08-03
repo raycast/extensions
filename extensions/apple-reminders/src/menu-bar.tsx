@@ -1,4 +1,5 @@
 import {
+  Alert,
   Color,
   Icon,
   MenuBarExtra,
@@ -10,7 +11,6 @@ import {
   launchCommand,
   LaunchType,
   openCommandPreferences,
-  openExtensionPreferences,
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { addWeeks, endOfWeek, format, startOfToday, startOfTomorrow, startOfWeek } from "date-fns";
@@ -157,8 +157,6 @@ export default function Command() {
     }
   }, [reminders, countType]);
 
-  const now = new Date();
-
   function addPriorityToTitle(title: string, priority: Priority) {
     switch (priority) {
       case "high":
@@ -190,7 +188,7 @@ export default function Command() {
   if (displayReminderTitle) {
     const firstReminder = sections[0].items[0];
     const formattedTime = formatReminderTime(firstReminder);
-    const timePrefix = formattedTime ? `${formattedTime}  ` : "";
+    const timePrefix = formattedTime ? `${formattedTime} ` : "";
     title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
 
