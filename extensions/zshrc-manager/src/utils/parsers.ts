@@ -117,7 +117,9 @@ export function parseFunctions(content: string): ReadonlyArray<{ name: string }>
  * @returns Array of source objects with path
  */
 export function parseSources(content: string): ReadonlyArray<{ path: string }> {
-  const regex = /^(?:\s*)source\s+(.+?)(?:\s*)$/gm;
+  // Capture only the operand: a quoted string, or an unquoted token —
+  // an inline `# comment` after the operand is not part of the path.
+  const regex = /^(?:\s*)source\s+("(?:[^"\\]|\\.)*"|'[^']*'|[^\s#]+)/gm;
   const result: Array<{ path: string }> = [];
   let match: RegExpExecArray | null;
   while ((match = regex.exec(content)) !== null) {

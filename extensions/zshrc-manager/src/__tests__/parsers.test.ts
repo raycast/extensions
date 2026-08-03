@@ -1,4 +1,11 @@
-import { parseAliases, parseExports, parsePathEntries, parseFpathEntries, parseKeybindings } from "../utils/parsers";
+import {
+  parseAliases,
+  parseExports,
+  parsePathEntries,
+  parseFpathEntries,
+  parseKeybindings,
+  parseSources,
+} from "../utils/parsers";
 
 describe("parsers.ts", () => {
   describe("parseAliases", () => {
@@ -211,6 +218,27 @@ export NODE_ENV=development`;
         { variable: "PYTHON_PATH", value: "/usr/local/bin/python" },
         { variable: "NODE_ENV", value: "development" },
       ]);
+    });
+  });
+
+  describe("parseSources", () => {
+    it("should capture only the operand, not a trailing inline comment", () => {
+      const content = `source "/opt/zsh/highlight.zsh" # syntax highlighting
+source /opt/zsh/plain.zsh # plain form
+source ~/.config/zsh/simple.zsh`;
+
+      const result = parseSources(content);
+
+      expect(result).toEqual([
+        { path: '"/opt/zsh/highlight.zsh"' },
+        { path: "/opt/zsh/plain.zsh" },
+        { path: "~/.config/zsh/simple.zsh" },
+      ]);
+    });
+
+    it("should keep quoted operands intact including spaces", () => {
+      const content = `source "/opt/with space/file.zsh"`;
+      expect(parseSources(content)).toEqual([{ path: '"/opt/with space/file.zsh"' }]);
     });
   });
 
