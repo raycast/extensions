@@ -1,5 +1,17 @@
 # Udemy Coupons Changelog
 
+## [Unreleased]
+
+### Added
+- "Most Enrolled" sort option in the grid.
+- Language, course length, and enrollments shown in course detail.
+
+### Changed
+- Search and category filtering now run server-side, so results span the full catalogue instead of only the currently loaded pages.
+- Grid subtitles now show rating and enrollment counts alongside recency.
+- Split the command into focused modules (CourseGrid, CourseDetail, api, types, utils, favorites) for maintainability.
+- Dropped the unrelated "Communication" store category.
+
 ## [Store Listing Optimization] - 2025-11-07
 - Enhanced extension title and description for better visibility in Raycast Store
 - Added SEO-optimized keywords including "Free", "Premium", "Verified Coupons"
