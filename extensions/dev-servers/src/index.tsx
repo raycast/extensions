@@ -298,13 +298,22 @@ function ServerItem({
   onRefresh,
 }: ServerItemProps) {
   const { push } = useNavigation();
-  // Cache the favicon URL by port. Survives revalidations and command
-  // relaunches, so the icon doesn't flash back to a placeholder every
-  // refresh interval. keepPreviousData keeps the prior URL visible while
-  // a fresh fetch is in flight.
-  const { data: favicons } = useCachedPromise(detectFavicons, [server.port], {
-    keepPreviousData: true,
-  });
+  // Cache the favicon URL by port AND project. Survives revalidations and
+  // command relaunches, so the icon doesn't flash back to a placeholder
+  // every refresh interval. keepPreviousData keeps the prior URL visible
+  // while a fresh fetch is in flight.
+  //
+  // The cwd is not fetched from — it exists to key the cache. Keyed by port
+  // alone, a project starting on a port another project used last week was
+  // handed the old project's cached icon on first render, and the persist
+  // effect below wrote that wrong icon onto the new project's recents entry
+  // before the real fetch could correct it.
+  const { data: favicons } = useCachedPromise(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (port: string, _cwd: string) => detectFavicons(port),
+    [server.port, server.cwd],
+    { keepPreviousData: true },
+  );
   const faviconUrl = favicons?.best;
   const faviconRaster = favicons?.raster;
   // Persist resolved favicons onto the project's recents entry so the picker
@@ -528,13 +537,27 @@ function ServerItem({
 // the user sees the dashboard immediately rather than waiting on a blank
 // Start view for the pre-spawn `fetchServers` call.
 interface SpawnRequest {
-  targets: Array<{ cwd: string; name: string }>;
+  // `pid` names the exact server a restart replaces. Without it the flow
+  // falls back to "whatever runs from this cwd", which is ambiguous the
+  // moment a project runs two servers from one folder: the sender clicked a
+  // specific row, and killing the sibling instead is the worst possible
+  // reading of that click. A pid that has died by the time the request is
+  // handled resolves to nothing, which is a cold start, which is right.
+  targets: Array<{ cwd: string; name: string; pid?: number }>;
   // Multi-folder confirm gate, set by the Start command's preference.
   // Always false for single-target spawns (picker rows, folder picker).
   confirmMulti: boolean;
   // Attach a one-time "Auto-open in Browser?" CTA to the Starting toast.
   // The Start command pre-decides this based on a usage counter.
   showAutoOpenHint: boolean;
+  // False skips the "already running — Restart?" confirm for targets that
+  // are up. Set by the menu bar's per-server Restart item, whose click IS
+  // the restart intent: it delegates here because its own process is torn
+  // down too fast to respawn anything itself, and re-asking what the user
+  // just asked for would turn one click into two. Absent means true, which
+  // every start surface wants (a start colliding with a running server is
+  // a surprise worth confirming).
+  confirmRestarts?: boolean;
   // Fresh per send, and the only thing that tells one request from another.
   // The dashboard's spawn flow is once-only per mount, so a request delivered
   // to a dashboard that is already loaded needs an identity the receiver can
@@ -1304,33 +1327,88 @@ export default function Command(
       // 2. Batch restart confirmation: one alert for any number of
       //    already-running targets.
       const runningTargets = spawn.targets
-        .map((t) => ({ target: t, existing: running.get(t.cwd) }))
+        .map((t) => ({
+          target: t,
+          // By pid when the sender named one (see SpawnRequest.targets); the
+          // cwd map otherwise.
+          existing: t.pid
+            ? serversRef.current.find((s) => s.pid === t.pid)
+            : running.get(t.cwd),
+        }))
         .filter(
           (
             x,
           ): x is {
-            target: { cwd: string; name: string };
+            target: { cwd: string; name: string; pid?: number };
             existing: DevServer;
           } => !!x.existing,
         );
-      const proceed = await confirmRestartBatch(
-        runningTargets,
-        spawn.targets.length,
-      );
+      const proceed =
+        spawn.confirmRestarts === false
+          ? true
+          : await confirmRestartBatch(runningTargets, spawn.targets.length);
       if (!proceed) {
         setSpawnState({ phase: "done" });
         return;
       }
 
-      // 3. Show the "Starting…" toast before doing the kill+spawn work
-      //    so the user has feedback the moment they confirm.
+      // Targets being replaced get their "Restarting…" row up before the
+      // kill, mirroring the dashboard's own restart(): the row stands in for
+      // the old server row, which the optimistic update in step 4 removes in
+      // the same breath, so the project never shows a "Starting…" row stacked
+      // above the corpse of the server it is replacing. logStart and
+      // ignorePids are captured pre-kill for restart()'s reasons: log bytes
+      // past the offset belong to the respawn, and the row must wait for a
+      // genuinely new server rather than resolve against the one going down.
+      const replacing = new Map(
+        runningTargets.map((rt) => [
+          rt.target.cwd,
+          {
+            projectKey: rt.existing.projectKey,
+            logStart: spawnLogOffset(rt.target.cwd),
+            ignorePids: serversRef.current
+              .filter((s) => s.cwd === rt.target.cwd)
+              .map((s) => s.pid),
+          },
+        ]),
+      );
+      if (replacing.size > 0) {
+        setPendingStarts((prev) => {
+          const next = new Map(prev);
+          for (const rt of runningTargets) {
+            const pre = replacing.get(rt.target.cwd);
+            if (!pre) continue;
+            next.set(rt.target.cwd, {
+              name: rt.target.name,
+              projectKey: pre.projectKey,
+              logStart: pre.logStart,
+              deadline: Date.now() + SPAWN_TIMEOUT_MS,
+              status: "starting",
+              reason: null,
+              kind: "restart",
+              ignorePids: pre.ignorePids,
+            });
+          }
+          return next;
+        });
+      }
+
+      // 3. Show the toast before doing the kill+spawn work so the user has
+      //    feedback the moment they confirm. "Restarting" when every target
+      //    is a replacement (the menu bar's Restart, or starting only
+      //    already-running projects); mixed batches stay "Starting".
       const label =
         spawn.targets.length === 1
           ? spawn.targets[0].name
           : `${spawn.targets.length} dev servers`;
+      const verb =
+        runningTargets.length > 0 &&
+        runningTargets.length === spawn.targets.length
+          ? "Restarting"
+          : "Starting";
       const toast = await showToast({
         style: Toast.Style.Animated,
-        title: `Starting ${label}…`,
+        title: `${verb} ${label}…`,
         primaryAction: spawn.showAutoOpenHint
           ? {
               title: "Auto-open in Browser?",
@@ -1344,9 +1422,18 @@ export default function Command(
       toastRef.current = toast;
 
       // 4. Kill running PIDs first so they release their ports before
-      //    we spawn replacements. Parallelized, since they're independent processes.
-      await Promise.all(
-        runningTargets.map((rt) => killServer(rt.existing.pid)),
+      //    we spawn replacements. Parallelized, since they're independent
+      //    processes. The optimistic update drops the doomed rows from the
+      //    list immediately, restart()-style, so each "Restarting…" row from
+      //    above stands in for its server rather than sitting on top of it.
+      const doomedPids = new Set(runningTargets.map((rt) => rt.existing.pid));
+      await mutate(
+        Promise.all(runningTargets.map((rt) => killServer(rt.existing.pid))),
+        {
+          optimisticUpdate: (current) =>
+            (current ?? []).filter((s) => !doomedPids.has(s.pid)),
+          rollbackOnError: false,
+        },
       );
 
       // 5. Spawn every approved target in parallel. The spawn itself
@@ -1356,16 +1443,19 @@ export default function Command(
       //    see step 6.
       const spawned = await Promise.all(
         spawn.targets.map(async (t) => {
-          const logStart = spawnLogOffset(t.cwd);
-          // Whatever holds this cwd right now is either a sibling the kill
-          // above left standing or the corpse of the server it just took down,
-          // which the poll has yet to clear. Never the server we are about to
-          // wait for. Taken once here and handed to both the pending row and
-          // the watchers below, so no two of them can disagree about which
-          // server counts as the arrival. Empty for a genuinely cold start.
-          const ignorePids = serversRef.current
-            .filter((s) => s.cwd === t.cwd)
-            .map((s) => s.pid);
+          // A replaced target's baseline was captured before the kill (the
+          // optimistic update above has since dropped its old server from the
+          // list, so it cannot be re-derived here). For the rest: whatever
+          // holds this cwd right now is a sibling the kill left standing,
+          // never the server we are about to wait for. Taken once and handed
+          // to both the pending row and the watchers below, so no two of them
+          // can disagree about which server counts as the arrival. Empty for
+          // a genuinely cold start.
+          const pre = replacing.get(t.cwd);
+          const logStart = pre?.logStart ?? spawnLogOffset(t.cwd);
+          const ignorePids =
+            pre?.ignorePids ??
+            serversRef.current.filter((s) => s.cwd === t.cwd).map((s) => s.pid);
           try {
             await startDevServer(t.cwd);
             await recordSeen({
@@ -1374,6 +1464,11 @@ export default function Command(
             });
             return { ...t, logStart, ignorePids };
           } catch (err) {
+            // A replaced target's "Restarting…" row went up before the kill;
+            // the respawn never got off the ground, so there is nothing for
+            // it to wait on. Same exit restart() takes: drop the row and let
+            // the error speak for itself.
+            if (pre) dismissPending(t.cwd);
             await showFailureToast(err, {
               title: `Failed to start ${t.name}`,
             });
@@ -1403,10 +1498,13 @@ export default function Command(
       // dashboard shows what is in flight and already has somewhere to put the
       // failure if the watchdog fires. Writing by cwd also means starting a
       // project that currently shows a failed row resets that row instead of
-      // stacking a second one.
+      // stacking a second one. Replaced targets are skipped: their
+      // "Restarting…" row went up before the kill with the same baseline, and
+      // rewriting it here would only relabel it "Starting…" mid-flight.
       setPendingStarts((prev) => {
         const next = new Map(prev);
         for (const t of succeeded) {
+          if (replacing.has(t.cwd)) continue;
           next.set(t.cwd, {
             name: t.name,
             projectKey:

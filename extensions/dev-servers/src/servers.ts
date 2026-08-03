@@ -652,7 +652,9 @@ export const EPHEMERAL_PORT_MIN = 49152;
 //   1. Descent. The process is a descendant of another row's process: the
 //      plain "helper the dev server forked with port 0" case.
 //   2. Same project. Some other row on a deliberate port has this cwd.
-//   3. Orphaned. Its parent is init, so whatever launched it is dead.
+//   3. Orphaned helper. Its parent is init AND its command names a known
+//      leaky helper (REAPABLE_HELPERS), so whatever launched it is dead and
+//      it is the kind of process that leaks this way.
 //   4. Mid-start. The caller says a start is in flight for this cwd.
 //
 // Rule 2 exists because rule 1 loses to reparenting. Miniflare's workerd is
@@ -667,8 +669,11 @@ export const EPHEMERAL_PORT_MIN = 49152;
 // died leaves its workerd behind holding an ephemeral port, and that lone
 // orphan was rendering as "Simac, 1 server, localhost:57018" — a project
 // reported as running when nothing of it was, and a row whose Kill did
-// nothing, since orphaned workerd ignores SIGTERM. An ephemeral port plus a
-// dead parent is not a dev server anyone started.
+// nothing, since orphaned workerd ignores SIGTERM. The name gate is what
+// keeps the rule honest: every server this extension starts is spawned
+// detached and so is init-parented within seconds, and without the gate a
+// dev script that deliberately binds a port >= 49152 was permanently
+// invisible on every surface.
 //
 // Rule 4 is the one we cannot see for ourselves. A project mid-start has a
 // window where its helpers are listening and the dev server itself is not, and
@@ -679,9 +684,9 @@ export const EPHEMERAL_PORT_MIN = 49152;
 // once the project settles, and a caller that knows nothing about starts in
 // flight passes nothing and gets the other three rules unchanged.
 //
-// What survives all four is an ephemeral-port listener with a living parent
-// that we are not showing: somebody's own tool, which we have no business
-// hiding.
+// What survives all four is an ephemeral-port listener that no rule can tie
+// to a shown server or to a known leaky helper: somebody's own tool, which
+// we have no business hiding.
 function suppressHelperRows(
   servers: DevServer[],
   procByPid: Map<number, RawProcess>,
@@ -701,7 +706,15 @@ function suppressHelperRows(
     if (anchoredCwds.has(server.cwd)) return false;
     if (settlingCwds?.has(server.cwd)) return false;
     const self = procByPid.get(server.pid);
-    if (self && self.ppid <= 1) return false;
+    // Orphaned alone is not enough: every server this extension starts is
+    // spawned detached, so init is its parent the moment the command that
+    // launched it unloads, and a dev script that deliberately picks a port
+    // >= 49152 (vitest --ui defaults to one) would be a running server no
+    // surface could see. Same lesson the reap learned: a victim must be
+    // NAMED, not merely look abandoned.
+    if (self && self.ppid <= 1 && namesReapableHelper(self.command)) {
+      return false;
+    }
     let cur = self;
     for (let depth = 0; depth < ANCESTOR_SCAN_DEPTH && cur; depth++) {
       cur = procByPid.get(cur.ppid);
@@ -1114,6 +1127,18 @@ async function snapshotListeners(): Promise<ListenerSnapshot> {
 // seen leaking a port-holding orphan; a future one that leaks the same way gets
 // its name added here. See reapHelpersFromSnapshot for why the name matters.
 const REAPABLE_HELPERS = new Set(["workerd"]);
+
+// Whether a full `ps` command line names one of the reapable helpers as its
+// executable. suppressHelperRows' rule 3 shares the reap's judgment (hide
+// only what we would be willing to kill), but only has the command line to
+// go by, and executable paths can contain spaces, so the name is matched as
+// a path segment (allowing the platform-suffixed form, workerd-darwin-arm64)
+// rather than parsed out of argv.
+function namesReapableHelper(command: string): boolean {
+  return [...REAPABLE_HELPERS].some((name) =>
+    new RegExp(`(^|/)${name}(-\\S*)?(\\s|/|$)`).test(command),
+  );
+}
 
 // Kill the ephemeral-port helpers a dead dev server left behind, judging the
 // project by a snapshot the caller took. Returns false, having touched

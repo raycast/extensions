@@ -8,19 +8,40 @@
 // the bytes it fetches are inlined straight into the Raycast UI. So an icon URL
 // must never turn into an arbitrary outbound GET: it could otherwise reach an
 // external host or a private-network address the user never pointed us at.
-// Every favicon fetch is therefore pinned to the server's own origin, both at
-// the URL it asks for and at the URL the response actually came from.
+// Every favicon fetch is therefore pinned to the server's own origin at every
+// redirect hop, checked BEFORE each request goes out (fetchWithTimeout), with
+// a final check on the URL the response actually came from.
 
-// Fetch with a hard 3s timeout. Returns null on any failure so callers can
-// chain fallbacks cleanly without nested try/catch.
+// Fetch with a hard 3s timeout, never leaving `origin`. Returns null on any
+// failure so callers can chain fallbacks cleanly without nested try/catch.
+//
+// Redirects are walked by hand because fetch's transparent mode contacts the
+// destination before anyone can inspect it: a dev server that redirects off
+// itself would turn our request into an outbound GET to a host the user
+// never pointed us at, even though the response got discarded afterwards.
+// Manual mode lets the walk stop BEFORE the off-origin request is made; the
+// hop cap only bounds a redirect loop.
 async function fetchWithTimeout(
   url: string,
+  origin: string,
   init: RequestInit & { method?: string } = {},
 ): Promise<Response | null> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 3000);
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    let target = url;
+    for (let hop = 0; hop < 4; hop++) {
+      if (!isSameOrigin(target, origin)) return null;
+      const res = await fetch(target, {
+        ...init,
+        redirect: "manual",
+        signal: controller.signal,
+      });
+      const location = res.headers.get("location");
+      if (res.status < 300 || res.status >= 400 || !location) return res;
+      target = new URL(location, target).toString();
+    }
+    return null;
   } catch {
     return null;
   } finally {
@@ -81,12 +102,12 @@ async function fetchFaviconDataUri(
   origin: string,
   opts: { rejectMonochromeSvg?: boolean } = {},
 ): Promise<string | undefined> {
-  const res = await fetchWithTimeout(url);
+  const res = await fetchWithTimeout(url, origin);
   if (!res || !res.ok) return undefined;
-  // fetch follows redirects transparently, so even an on-origin URL can end up
-  // served by another host. `res.url` is the URL the body actually came from,
-  // after every hop; if it isn't on the origin, treat it like any other failed
-  // lookup and never touch the body.
+  // fetchWithTimeout walked every hop on-origin, so this cannot fire; it
+  // stays as the last line of defense at the single place bytes get inlined
+  // into the UI. An empty res.url (a response we cannot account for) counts
+  // as off-origin, same as always.
   if (!isSameOrigin(res.url, origin)) return undefined;
   const ct = (res.headers.get("content-type") ?? "")
     .split(";")[0]
@@ -102,6 +123,103 @@ async function fetchFaviconDataUri(
   }
   const buf = Buffer.from(await res.arrayBuffer());
   return `data:${ct};base64,${buf.toString("base64")}`;
+}
+
+// Dominant color of a cached SVG favicon, as a #rrggbb hex string, or
+// undefined when no usable color can be extracted. For the menu bar, which
+// cannot render an SVG favicon (it becomes a black template) but can tint its
+// fallback glyph with the project's real brand color — far more recognizable
+// at a glance than the framework badge color, which paints every SvelteKit
+// project the same orange.
+//
+// "Dominant" here is textual, not rendered: the most frequent chromatic color
+// painted by a fill/stroke/stop-color. Grays and near-black/white are ignored
+// (they'd vanish against one menu theme or the other, and they're usually
+// detail strokes, not brand). Ties go to the more saturated color, which for
+// gradient logos picks the vivid stop rather than the washed-out one. No
+// chromatic color at all — a genuinely monochrome logo — yields undefined so
+// the caller keeps its existing fallback.
+export function svgFaviconTint(dataUri: string): string | undefined {
+  if (!dataUri.startsWith("data:image/svg")) return undefined;
+  const comma = dataUri.indexOf(",");
+  if (comma === -1) return undefined;
+  const payload = dataUri.slice(comma + 1);
+  let svg: string;
+  try {
+    svg = dataUri.slice(0, comma).includes(";base64")
+      ? Buffer.from(payload, "base64").toString("utf8")
+      : decodeURIComponent(payload);
+  } catch {
+    return undefined;
+  }
+
+  // Hex and rgb()/rgba() only. Named colors and hsl() are rare in favicon
+  // SVGs; a logo using only those falls back like a monochrome one.
+  const matches = svg.matchAll(
+    /(?:fill|stroke|stop-color)\s*[:=]\s*["']?\s*(#[0-9a-f]{3,8}\b|rgba?\([^)]*\))/gi,
+  );
+  const counts = new Map<string, { count: number; chroma: number }>();
+  for (const m of matches) {
+    const rgb = parseColor(m[1]);
+    if (!rgb) continue;
+    const [r, g, b] = rgb;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const chroma = max - min;
+    const lightness = (max + min) / 2 / 255;
+    // Achromatic or near-invisible against a menu background: not brand.
+    if (chroma < 25 || lightness < 0.12 || lightness > 0.9) continue;
+    const hex = `#${[r, g, b]
+      .map((v) => v.toString(16).padStart(2, "0"))
+      .join("")}`;
+    const entry = counts.get(hex) ?? { count: 0, chroma };
+    entry.count += 1;
+    counts.set(hex, entry);
+  }
+
+  let best: { hex: string; count: number; chroma: number } | undefined;
+  for (const [hex, { count, chroma }] of counts) {
+    if (
+      !best ||
+      count > best.count ||
+      (count === best.count && chroma > best.chroma)
+    ) {
+      best = { hex, count, chroma };
+    }
+  }
+  return best?.hex;
+}
+
+// "#rgb", "#rrggbb" (longer forms: alpha digits ignored), or "rgb(a)(...)" to
+// [r, g, b]. Returns undefined for anything unparseable or fully transparent.
+function parseColor(raw: string): [number, number, number] | undefined {
+  if (raw.startsWith("#")) {
+    const hex = raw.slice(1);
+    if (hex.length === 3 || hex.length === 4) {
+      const [r, g, b] = hex;
+      return [parseInt(r + r, 16), parseInt(g + g, 16), parseInt(b + b, 16)];
+    }
+    if (hex.length >= 6) {
+      return [
+        parseInt(hex.slice(0, 2), 16),
+        parseInt(hex.slice(2, 4), 16),
+        parseInt(hex.slice(4, 6), 16),
+      ];
+    }
+    return undefined;
+  }
+  const nums = raw
+    .slice(raw.indexOf("(") + 1, raw.indexOf(")"))
+    .split(/[\s,/]+/)
+    .filter(Boolean);
+  if (nums.length < 3) return undefined;
+  const [r, g, b] = nums.map((n) =>
+    n.endsWith("%") ? (parseFloat(n) / 100) * 255 : parseFloat(n),
+  );
+  const alpha = nums[3] !== undefined ? parseFloat(nums[3]) : 1;
+  if ([r, g, b].some((v) => !Number.isFinite(v)) || alpha === 0)
+    return undefined;
+  return [Math.round(r), Math.round(g), Math.round(b)];
 }
 
 export interface ResolvedFavicons {
@@ -130,12 +248,12 @@ export interface ResolvedFavicons {
 export async function detectFavicons(port: string): Promise<ResolvedFavicons> {
   const origin = `http://localhost:${port}`;
 
-  // The page read gets the same origin pin as the icon fetches below: a root
-  // that redirects off this server would otherwise hand us someone else's HTML
-  // to parse, and the GET itself would reach a host the user never pointed us
-  // at. Off-origin means no HTML, and the conventional-path probes still run.
-  const html = await fetchWithTimeout(`${origin}/`).then((r) =>
-    r && isSameOrigin(r.url, origin) ? r.text() : null,
+  // The page read gets the same origin pin as the icon fetches below
+  // (fetchWithTimeout refuses to follow a hop off this server): a root that
+  // redirects elsewhere yields no HTML, and the conventional-path probes
+  // still run.
+  const html = await fetchWithTimeout(`${origin}/`, origin).then((r) =>
+    r ? r.text() : null,
   );
 
   const candidates: Array<{ url: string; rank: number }> = [];
