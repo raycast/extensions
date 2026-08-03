@@ -1,11 +1,15 @@
-import { Toast, getSelectedText, showHUD, showToast } from "@raycast/api";
+import { Clipboard, Toast, showHUD, showToast } from "@raycast/api";
 import { openLinks } from "./openLinks";
 import { friendly } from "./errors";
 
 export default async function main() {
   try {
-    const text = await getSelectedText();
-    const result = await openLinks(text, { source: "selection" });
+    const clipboardText = await Clipboard.readText();
+    if (!clipboardText) {
+      await showHUD("Clipboard is empty");
+      return;
+    }
+    const result = await openLinks(clipboardText, { source: "clipboard" });
 
     if (result.cancelled) return;
     if (result.total === 0) {
@@ -22,6 +26,6 @@ export default async function main() {
     }
     await showHUD(`Opened ${result.total} link(s)`);
   } catch (e) {
-    await showHUD(e instanceof Error && /selection/i.test(e.message) ? "No text selected" : `Error: ${friendly(e)}`);
+    await showHUD(`Error: ${friendly(e)}`);
   }
 }

@@ -1,0 +1,46 @@
+# Mixed-type notes excerpt — multi-links Phase 2 test fixture
+
+## Reading list
+- https://www.anthropic.com/research
+- https://raycast.com/extensions
+- https://github.com/anthropics/anthropic-sdk-python
+- Visit www.example.com for more.
+- Quick: www.raycast.com/store
+- Also try fly.io and vercel.app today.
+
+## Notes I want to reopen
+- /Users/timothygailey/prototypes/ux-frameworks-diag/nielsen.html
+- /Users/timothygailey/Documents/spec.md
+- ~/Documents/meeting-notes.md
+- ~/Downloads/report.pdf
+- /tmp/scratch.json
+- file:///Users/timothygailey/Library/foo.txt
+- file:///Applications/Calculator.app
+- file:///tmp/notes.md
+
+## Contacts
+- Email me at mailto:tim@timgailey.com
+- Or tel:+15551234567
+
+## App actions
+- obsidian://open?vault=Vault&file=Note
+- raycast://extensions/raycast/raycast-explorer
+- vscode://file//Users/timothygailey/projects/raycast/multi-links
+
+## Markdown
+- See [Anthropic homepage](https://anthropic.com) for details.
+- Open [my vault](obsidian://open?vault=Vault).
+- Email [Tim](mailto:tim@timgailey.com).
+
+## Relative file refs
+- docs/architecture.md
+- ./CHANGELOG.md
+
+## Duplicate (dedupe test)
+- https://anthropic.com
+
+## Intentional noise (must NOT extract)
+- We bumped version 1.84 last week.
+- report.pdf in folder
+- foo@bar.com is just an email
+- Path not.a.real.thing here

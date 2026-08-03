@@ -2,12 +2,16 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "multi-links",
   "title": "Open Multiple Links",
-  "description": "Opens all the links from the selected text in the default browser",
+  "description": "Opens all the links from the selected text in the default browser.",
   "icon": "extension-icon.png",
   "author": "wrick17",
+  "contributors": [
+    "tim_gailey"
+  ],
   "categories": [
     "Productivity"
   ],
+  "platforms": ["macOS"],
   "license": "MIT",
   "commands": [
     {
@@ -15,20 +19,83 @@
       "title": "Open Multiple Links",
       "description": "Opens all the links from the selected text in the default browser",
       "mode": "no-view"
+    },
+    {
+      "name": "open-links-clipboard",
+      "title": "Open Multiple Links from Clipboard",
+      "description": "Opens all the links from the clipboard text in the default browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "history",
+      "title": "Open Multiple Links History",
+      "description": "Browse and replay past batches of links",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    },
+    {
+      "name": "filter",
+      "title": "Filter Multiple Links",
+      "description": "Group extracted links by domain and type; open selected",
+      "mode": "view",
+      "icon": "extension-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "browser",
+      "type": "appPicker",
+      "required": false,
+      "title": "Browser",
+      "description": "Browser to open web URLs in. Default = system default. Local files, mailto:, and custom schemes always use the macOS default handler."
+    },
+    {
+      "name": "openDelayMs",
+      "type": "textfield",
+      "required": false,
+      "default": "50",
+      "title": "Open Delay (ms)",
+      "description": "Milliseconds between opens. 0 = parallel (chunked at 10). Higher values help cold-start apps (Obsidian, VSCode) accept URIs."
+    },
+    {
+      "name": "openAnyUriType",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Open all URI types (mailto:, file:, custom schemes, local paths)",
+      "title": "URI Types",
+      "description": "When off, only http(s) and www. URLs open. Other extracted types are silently skipped."
+    },
+    {
+      "name": "confirmEnabled",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show confirmation when opening many links",
+      "title": "Safety",
+      "description": "When enabled, shows a confirmation dialog with type breakdown and a preview before opening a large batch."
+    },
+    {
+      "name": "confirmThreshold",
+      "type": "textfield",
+      "required": false,
+      "default": "10",
+      "title": "Confirm Threshold",
+      "description": "Show confirmation when extracted link count meets or exceeds this number."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.3",
-    "@raycast/utils": "^1.17.0",
-    "extract-urls": "^1.4.1"
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/react": "^19.2.0",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "typescript": "^5.4.5",
+    "vitest": "^4.1.6"
   },
   "scripts": {
     "build": "ray build",
@@ -36,6 +103,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
   }
 }
