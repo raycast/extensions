@@ -1,6 +1,6 @@
 # I Don't Have Spotify Changelog
 
-## [Self-Hosted Instances & Error Handling] - {PR_MERGE_DATE}
+## [Self-Hosted Instances & Error Handling] - 2026-08-03
 
 - Add `Self-Hosted Instance URL` preference to point at your own I Don't Have Spotify instance.
 - Show clearer error messages for rate limits, network failures, and service outages.
