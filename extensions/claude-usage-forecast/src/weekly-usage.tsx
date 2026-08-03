@@ -157,27 +157,6 @@ export default function Command() {
             />
           ) : null}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Plan"
-            text={limits.rateLimitTier ?? "unknown"}
-          />
-          <Detail.Metadata.Label
-            title="Calibration"
-            text={
-              f.k === null
-                ? "not calibrated"
-                : `${f.k.toFixed(2)} % per $ · $${f.costSoFar.toFixed(2)} local this week`
-            }
-          />
-          <Detail.Metadata.Label
-            title="Real samples this window"
-            text={String(f.samples.length)}
-          />
-          <Detail.Metadata.Label
-            title="Transcripts read"
-            text={`${data.filesScanned} new / ${data.filesTotal}`}
-          />
-          <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="Methodology"
             text="How this forecast works"
