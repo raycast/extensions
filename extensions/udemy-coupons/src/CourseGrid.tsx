@@ -32,15 +32,16 @@ export function CourseGrid({ favorites, isFavorite, onToggleFavorite, onSelect }
 
   const isFavoritesView = selectedCategory === FAVORITES_FILTER;
 
-  // Favorites need the unfiltered catalogue (a saved slug may live on any page), and every
-  // other view needs the full filtered result set so sorts are applied globally rather than
-  // across only the loaded pages. Search and category still run server-side. usePromise
-  // re-runs whenever the args below change by shallow comparison.
+  // Search runs server-side in both views. Favorites span every category, so category is
+  // ignored there and the fetched set is intersected with saved favorite slugs. With no
+  // search text, favorites fetch the full catalogue so every saved course shows; with a
+  // query, only favorites matching it remain. usePromise re-runs when the args change.
   const { isLoading, data, error, revalidate } = usePromise(
     (isFav: boolean, search: string, category: string) =>
-      fetchAllCourses(
-        isFav ? {} : { search: search || undefined, category: category === "all" ? undefined : category },
-      ),
+      fetchAllCourses({
+        search: search || undefined,
+        category: isFav || category === "all" ? undefined : category,
+      }),
     [isFavoritesView, debouncedSearch, selectedCategory],
   );
 
