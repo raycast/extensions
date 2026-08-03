@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Reliability Overhaul & PWA Support] - {PR_MERGE_DATE}
+## [Reliability Overhaul & PWA Support] - 2026-08-03
 
 - Replace the fixed-delay, unbounded-recursion URL lookup with a single shared `createMeeting` pipeline used by all four commands: it polls for the generated link at a fixed interval with a hard deadline instead of guessing a one-shot sleep, and never casts a missing URL to `string`.
 - Search every window (and every tab, where the browser's scripting dictionary supports it) instead of only the active tab of the front window, so a meeting opened in a background tab or a non-frontmost window is still found. Applies to Safari, Chrome and other Chromium-family browsers, and Arc/Dia.
