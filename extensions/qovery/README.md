@@ -1,84 +1,43 @@
-# Qovery Services Raycast Extension
+# Qovery Raycast Extension
 
-This Raycast extension displays all services from a Qovery organization with dynamic credential management.
+Find and open services across every Qovery organization available to your user account.
 
 ## Features
 
-- **Dynamic Credentials**: Enter your API token and organization ID directly in the extension
-- **Easy Management**: Change credentials anytime with keyboard shortcuts
-- **Service List**: View all services in your Qovery organization
-- **Quick Actions**:
-  - Open services directly in Qovery Console
-  - Copy service IDs and names to clipboard
-  - Refresh services list
-  - Change credentials (⌘ + C)
-  - Clear stored credentials
+- Sign in to Qovery with the browser (GitHub, Google, GitLab, and the other providers enabled by Qovery)
+- OAuth 2.0 Authorization Code flow with PKCE; no API token preference
+- Secure access and refresh-token storage through Raycast's OAuth API
+- Services from all accessible organizations loaded in parallel
+- Organization filter and global search across services, projects, environments, and organizations
+- Direct links to the current Qovery Console service overview
+- Public links for applications, containers, and Helm services
+- Copy actions for service, project, and environment IDs
 
-## Setup
+## OAuth Configuration
 
-1. **Install the extension** in Raycast
-2. **First Run**: The extension will prompt you to enter your credentials
-3. **Enter your credentials**:
-   - Qovery API Token
-   - Organization ID
+The extension uses Qovery's public Auth0 client, the `https://core.qovery.com` audience, and this static Raycast callback:
 
-### Getting your Qovery API Token
+```text
+https://raycast.com/redirect/extension
+```
 
-1. Log in to your Qovery account
-2. Go to your profile settings
-3. Navigate to the API Tokens section
-4. Create a new API token
+That URL must be present in the Auth0 application's **Allowed Callback URLs**. The client must allow the Authorization Code and Refresh Token grant types. For production, a dedicated public/native Auth0 client for the Raycast extension is preferable; update `CLIENT_ID` in `src/oauth.ts` if one is created.
+
+No client secret belongs in the extension. PKCE protects the authorization-code exchange.
 
 ## Usage
 
-1. Open Raycast
-2. Type "Show Qovery Services" or use the command palette
-3. If it's your first time, enter your credentials
-4. View your services list
-5. Use the action panel to:
-   - Open services in Qovery Console
-   - Copy service information
-   - Refresh the list (⌘ + R)
-   - Change credentials (⌘ + C)
-   - Clear stored credentials
-
-## Keyboard Shortcuts
-
-- **⌘ + R**: Refresh services list
-- **⌘ + C**: Change credentials
-- **⌘ + Enter**: Submit credential form
-
-### Changing Credentials
-
-- Use the "Change Credentials" action in any view
-- Or press ⌘ + C from the services list
-- Enter new credentials and save
-
-### Clearing Credentials
-
-- Use the "Clear Credentials" action (destructive action)
-- This will remove all stored credentials
-- You'll need to re-enter them on next use
-
-### Security
-
-- Credentials are stored locally using Raycast's LocalStorage
-- They are not transmitted anywhere except to Qovery's API
-- You can clear them anytime using the clear action
+1. Run **Find Services** in Raycast.
+2. Complete the Qovery sign-in in your browser.
+3. Search across all your services or use the dropdown to select an organization.
+4. Open the action panel to visit the Console, view links, copy IDs, refresh, or sign out.
 
 ## Development
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development mode
 npm run dev
-
-# Build for production
 npm run build
-
-# Lint code
 npm run lint
 ```
 
