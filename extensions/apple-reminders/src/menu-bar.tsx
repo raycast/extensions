@@ -188,7 +188,7 @@ export default function Command() {
   if (displayReminderTitle) {
     const firstReminder = sections[0].items[0];
     const formattedTime = formatReminderTime(firstReminder);
-    const timePrefix = formattedTime ? `${formattedTime} ` : "";
+    const timePrefix = formattedTime ? `${formattedTime}  ` : "";
     title = truncate(`${timePrefix}${addPriorityToTitle(firstReminder.title, firstReminder.priority)}`, 30);
   }
 
@@ -303,12 +303,14 @@ export default function Command() {
                   />
                   <MenuBarExtra.Item
                     title="Next Week"
-                    onAction={() => setDueDate(reminder.id, startOfWeek(addWeeks(startOfToday(), 1)))}
+                    onAction={() =>
+                      setDueDate(reminder.id, startOfWeek(addWeeks(startOfToday(), 1), { weekStartsOn: 1 }))
+                    }
                     icon={Icon.Calendar}
                   />
                   <MenuBarExtra.Item
                     title="This Weekend"
-                    onAction={() => setDueDate(reminder.id, endOfWeek(startOfToday()))}
+                    onAction={() => setDueDate(reminder.id, endOfWeek(startOfToday(), { weekStartsOn: 1 }))}
                     icon={Icon.Calendar}
                   />
                   <MenuBarExtra.Item
@@ -361,17 +363,39 @@ export default function Command() {
         </MenuBarExtra.Section>
       ))}
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Create Reminder" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }} onAction={() => launchCommand({ name: "create-reminder", type: LaunchType.UserInitiated })} />
-        <MenuBarExtra.Submenu title={`Select List (${list?.title ?? "All"})`} icon={{ source: Icon.Circle, tintColor: list?.color }}>
+        <MenuBarExtra.Item
+          title="Create Reminder"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          onAction={() => launchCommand({ name: "create-reminder", type: LaunchType.UserInitiated })}
+        />
+        <MenuBarExtra.Submenu
+          title={`Select List (${list?.title ?? "All"})`}
+          icon={{ source: Icon.Circle, tintColor: list?.color }}
+        >
           <MenuBarExtra.Item title="All" icon={Icon.Circle} onAction={() => handleListChange()} />
           {data?.lists.map((l) => (
-            <MenuBarExtra.Item key={l.id} title={l.title} icon={{ source: Icon.Circle, tintColor: l.color }} onAction={() => handleListChange(l.id)} />
+            <MenuBarExtra.Item
+              key={l.id}
+              title={l.title}
+              icon={{ source: Icon.Circle, tintColor: l.color }}
+              onAction={() => handleListChange(l.id)}
+            />
           ))}
         </MenuBarExtra.Submenu>
-        <MenuBarExtra.Item title="Configure Command" icon={Icon.Gear} shortcut={{ modifiers: ["cmd"], key: "," }} onAction={() => openCommandPreferences()} />
+        <MenuBarExtra.Item
+          title="Configure Command"
+          icon={Icon.Gear}
+          shortcut={{ modifiers: ["cmd"], key: "," }}
+          onAction={() => openCommandPreferences()}
+        />
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Open Reminders" icon={{ fileIcon: REMINDERS_FILE_ICON }} onAction={() => open("x-apple-reminderkit://", "com.apple.reminders")} />
+        <MenuBarExtra.Item
+          title="Open Reminders"
+          icon={{ fileIcon: REMINDERS_FILE_ICON }}
+          onAction={() => open("x-apple-reminderkit://", "com.apple.reminders")}
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
