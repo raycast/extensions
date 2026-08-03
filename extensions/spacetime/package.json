@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "spacetime",
-  "title": "Spacetime",
+  "title": "Spacetime Tracking",
   "description": "Track how much time you spend in each macOS space, with inactivity detection and CSV export.",
   "icon": "icon.png",
   "author": "olivier_bossel",
@@ -15,7 +15,7 @@
     {
       "name": "tracker",
       "title": "Menubar",
-      "subtitle": "Spacetime",
+      "subtitle": "Spacetime Tracking",
       "description": "Menu bar tracker: start/stop a session and record time per macOS space.",
       "mode": "menu-bar",
       "interval": "10s"
@@ -23,49 +23,49 @@
     {
       "name": "sessions",
       "title": "Sessions",
-      "subtitle": "Spacetime",
+      "subtitle": "Spacetime Tracking",
       "description": "Browse recorded sessions, view per-space breakdowns and export to CSV.",
       "mode": "view"
     },
     {
       "name": "spaces",
       "title": "Spaces",
-      "subtitle": "Spacetime",
+      "subtitle": "Spacetime Tracking",
       "description": "List your macOS spaces: switch to one, or rename it. Names are used everywhere time is shown.",
       "mode": "view"
     },
     {
       "name": "name-current",
       "title": "Rename Space",
-      "subtitle": "Spacetime",
+      "subtitle": "Spacetime Tracking",
       "description": "Name the space you're currently on.",
       "mode": "view"
     },
     {
       "name": "setup",
       "title": "Setup",
-      "subtitle": "Spacetime",
+      "subtitle": "Spacetime Tracking",
       "description": "Apply the macOS settings and permissions the extension needs to switch spaces.",
       "mode": "view"
     },
     {
       "name": "start-session",
       "title": "New Session",
-      "subtitle": "Spacetime",
+      "subtitle": "Spacetime Tracking",
       "description": "Start a new time-tracking session (replacing any current one).",
       "mode": "no-view"
     },
     {
       "name": "stop-session",
       "title": "Stop Session",
-      "subtitle": "Spacetime",
+      "subtitle": "Spacetime Tracking",
       "description": "Stop the active time-tracking session.",
       "mode": "no-view"
     },
     {
       "name": "export-last-session",
       "title": "Export Last Session",
-      "subtitle": "Spacetime",
+      "subtitle": "Spacetime Tracking",
       "description": "Export the most recent session to a CSV file, choosing where to save it.",
       "mode": "no-view"
     }

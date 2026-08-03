@@ -1,6 +1,6 @@
-<img src="assets/icon.png" alt="Spacetime Raycast Extension Icon" width="150" />
+<img src="assets/icon.png" alt="Spacetime Tracking Raycast Extension Icon" width="150" />
 
-# Spacetime
+# Spacetime Tracking
 
 Track how much time you spend in each of your macOS Spaces.
 Spacetime lives in your menu bar, **records time per desktop** while you work, and lets you name your spaces, **jump between them**, and export your day to a spreadsheet.
@@ -9,7 +9,7 @@ Spacetime lives in your menu bar, **records time per desktop** while you work, a
 
 ## Key features
 
-<img src="metadata/spacetime-0.png" alt="Spacetime Raycast Extension Screenshot" />
+<img src="metadata/spacetime-0.png" alt="Spacetime Tracking Raycast Extension Screenshot" />
 
 - ⏱️ **Automatic time tracking** per macOS Space
 - 🏷️ **Name your spaces** — real names instead of "Desktop 1, 2, 3…"
@@ -76,7 +76,7 @@ Turn on **Automatic Daily Session** to have Spacetime start a fresh session for 
 
 ## Settings
 
-Open Raycast › Extensions › Spacetime to adjust:
+Open Raycast › Extensions › Spacetime Tracking to adjust:
 
 - **Inactivity Detection** — automatically pause tracking when you stop using the computer (on by default).
 - **Idle Threshold** — how many minutes of inactivity before tracking pauses (default 10).

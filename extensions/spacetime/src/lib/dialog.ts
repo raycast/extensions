@@ -7,7 +7,7 @@ const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
  * icon) — far more visible than a HUD, and works from no-view commands. Detached
  * and unref'd so it never blocks the calling command's process.
  */
-export function showWarningAlert(message: string, title = "Spacetime"): void {
+export function showWarningAlert(message: string, title = "Spacetime Tracking"): void {
   const script = `display alert "${esc(title)}" message "${esc(message)}" as warning buttons {"OK"} default button "OK"`;
   const child = spawn("/usr/bin/osascript", ["-e", script], { detached: true, stdio: "ignore" });
   child.unref();

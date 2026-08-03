@@ -1,6 +1,6 @@
-# Spacetime Changelog
+# Spacetime Tracking Changelog
 
-## [Initial Version] - 2026-07-13
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Track time spent in each macOS Space, right from the menu bar
 - One combined Spaces list in the menu bar — see each space's recorded time and click to switch to it

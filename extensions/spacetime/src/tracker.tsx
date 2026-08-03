@@ -64,7 +64,7 @@ export default function Command() {
   const { icon, title } = menuBarSummary(state);
 
   return (
-    <MenuBarExtra icon={icon} title={title} isLoading={loading} tooltip="Spacetime">
+    <MenuBarExtra icon={icon} title={title} isLoading={loading} tooltip="Spacetime Tracking">
       {status === "idle" && <MenuBarExtra.Item title="No active session" icon={Icon.Circle} />}
 
       {session && (
