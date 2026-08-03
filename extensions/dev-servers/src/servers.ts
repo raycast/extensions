@@ -634,7 +634,26 @@ export async function fetchServers(
       startedAt: new Date(proc.lstart),
     });
   }
-  return suppressHelperRows(servers, procByPid, settlingCwds);
+  // Rule 3's evidence, gathered only when there is a candidate to judge: the
+  // executables of orphaned ephemeral-port listeners, from the same targeted
+  // `ps -o comm` the reap reads. The full command line cannot answer this
+  // question (a project folder named workerd-demo would satisfy any name
+  // scan), so the rule goes by what the process actually runs, and pays one
+  // extra ps only in the rare poll that has an orphan at all.
+  const orphanPids = servers
+    .filter((s) => {
+      if (parseInt(s.port, 10) < EPHEMERAL_PORT_MIN) return false;
+      const self = procByPid.get(s.pid);
+      return self !== undefined && self.ppid <= 1;
+    })
+    .map((s) => s.pid);
+  const orphanHelperPids = new Set<number>();
+  if (orphanPids.length > 0) {
+    for (const [pid, info] of await listParentInfo(orphanPids)) {
+      if (REAPABLE_HELPERS.has(info.name)) orphanHelperPids.add(pid);
+    }
+  }
+  return suppressHelperRows(servers, procByPid, orphanHelperPids, settlingCwds);
 }
 
 // macOS hands out dynamic ports from this range when a process binds port 0.
@@ -652,9 +671,10 @@ export const EPHEMERAL_PORT_MIN = 49152;
 //   1. Descent. The process is a descendant of another row's process: the
 //      plain "helper the dev server forked with port 0" case.
 //   2. Same project. Some other row on a deliberate port has this cwd.
-//   3. Orphaned helper. Its parent is init AND its command names a known
-//      leaky helper (REAPABLE_HELPERS), so whatever launched it is dead and
-//      it is the kind of process that leaks this way.
+//   3. Orphaned helper. Its parent is init AND its executable (by `ps -o
+//      comm`, the same evidence the reap reads) is a known leaky helper
+//      (REAPABLE_HELPERS), so whatever launched it is dead and it is the
+//      kind of process that leaks this way.
 //   4. Mid-start. The caller says a start is in flight for this cwd.
 //
 // Rule 2 exists because rule 1 loses to reparenting. Miniflare's workerd is
@@ -690,6 +710,7 @@ export const EPHEMERAL_PORT_MIN = 49152;
 function suppressHelperRows(
   servers: DevServer[],
   procByPid: Map<number, RawProcess>,
+  orphanHelperPids: ReadonlySet<number>,
   settlingCwds?: ReadonlySet<string>,
 ): DevServer[] {
   const shownPids = new Set(servers.map((s) => s.pid));
@@ -705,16 +726,16 @@ function suppressHelperRows(
     if (parseInt(server.port, 10) < EPHEMERAL_PORT_MIN) return true;
     if (anchoredCwds.has(server.cwd)) return false;
     if (settlingCwds?.has(server.cwd)) return false;
-    const self = procByPid.get(server.pid);
     // Orphaned alone is not enough: every server this extension starts is
     // spawned detached, so init is its parent the moment the command that
     // launched it unloads, and a dev script that deliberately picks a port
     // >= 49152 (vitest --ui defaults to one) would be a running server no
     // surface could see. Same lesson the reap learned: a victim must be
-    // NAMED, not merely look abandoned.
-    if (self && self.ppid <= 1 && namesReapableHelper(self.command)) {
-      return false;
-    }
+    // NAMED, not merely look abandoned. Membership was decided by the
+    // caller from `ps -o comm` (see fetchServers), so being in the set
+    // already means orphaned AND running a known leaky helper.
+    if (orphanHelperPids.has(server.pid)) return false;
+    const self = procByPid.get(server.pid);
     let cur = self;
     for (let depth = 0; depth < ANCESTOR_SCAN_DEPTH && cur; depth++) {
       cur = procByPid.get(cur.ppid);
@@ -1127,18 +1148,6 @@ async function snapshotListeners(): Promise<ListenerSnapshot> {
 // seen leaking a port-holding orphan; a future one that leaks the same way gets
 // its name added here. See reapHelpersFromSnapshot for why the name matters.
 const REAPABLE_HELPERS = new Set(["workerd"]);
-
-// Whether a full `ps` command line names one of the reapable helpers as its
-// executable. suppressHelperRows' rule 3 shares the reap's judgment (hide
-// only what we would be willing to kill), but only has the command line to
-// go by, and executable paths can contain spaces, so the name is matched as
-// a path segment (allowing the platform-suffixed form, workerd-darwin-arm64)
-// rather than parsed out of argv.
-function namesReapableHelper(command: string): boolean {
-  return [...REAPABLE_HELPERS].some((name) =>
-    new RegExp(`(^|/)${name}(-\\S*)?(\\s|/|$)`).test(command),
-  );
-}
 
 // Kill the ephemeral-port helpers a dead dev server left behind, judging the
 // project by a snapshot the caller took. Returns false, having touched
