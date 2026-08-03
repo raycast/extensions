@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
-import { Action, ActionPanel, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import type { NpmFetchResponse } from "@/model/npmResponse.model";
 import { addToHistory, getHistory } from "@/utils/history-storage";
@@ -113,7 +113,7 @@ export default function PackageList() {
               {showLinkToSearchResultsInListView ? (
                 <List.Item
                   title={`View search results for "${searchTerm}" on npmjs.com`}
-                  icon={Icon.MagnifyingGlass}
+                  icon={{ source: Icon.MagnifyingGlass, tintColor: Color.SecondaryText }}
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser
