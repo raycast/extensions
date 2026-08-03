@@ -22,6 +22,10 @@ export function registrationUrl(content: AttributionContent): string {
   return trackedUrl("https://nichefund.app/register/", content);
 }
 
+export function teardownArchiveUrl(content: "latest" | "daily"): string {
+  return trackedUrl("https://nichefund.app/teardowns/", content);
+}
+
 export function teardownUrl(
   teardown: Teardown,
   content: "latest" | "daily",

@@ -14,7 +14,7 @@ ${teardown.excerpt}
 
 ---
 
-This is the public hook. Read the full teardown on NicheFund, then explore validated ideas worth building.
+Read the full teardown on NicheFund for the failure mechanics, reality check, and safer alternatives. Then explore validated ideas that avoid the same trap.
 `;
 
   return (
@@ -27,7 +27,7 @@ This is the public hook. Read the full teardown on NicheFund, then explore valid
             url={teardownUrl(teardown, source)}
           />
           <Action.OpenInBrowser
-            title="Create Free Account"
+            title="Explore Validated Ideas Free"
             url={registrationUrl(source)}
           />
           <Action.CopyToClipboard

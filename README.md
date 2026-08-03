@@ -6,9 +6,9 @@ Browse NicheFund's latest public MicroSaaS idea teardowns without leaving your k
 
 - **Latest Teardowns** — searchable, paginated teardown list with category filtering.
 - **Teardown of the Day** — opens the latest published teardown in a compact detail view.
-- **Random Business Idea** — fetches one validated idea from NicheFund's free-preview range.
+- **Random Business Idea** — previews one validated opportunity and its target audience, with the full solution and monetization strategy available in NicheFund.
 
-Actions open the full public article, copy its link or title, or open NicheFund's free registration page. Links include `utm_source=raycast` so registrations can be measured.
+Every result offers a useful preview plus a relevant next step: read the full teardown, explore and filter validated ideas with a free account, or copy the insight for later. Links include `utm_source=raycast` so registrations can be measured.
 
 ## Development
 

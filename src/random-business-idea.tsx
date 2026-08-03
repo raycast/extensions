@@ -4,10 +4,6 @@ import { RANDOM_IDEA_API_URL } from "./api";
 import { RandomIdeaResponse } from "./types";
 import { registrationUrl } from "./urls";
 
-function section(title: string, value: string | null): string {
-  return value ? `## ${title}\n\n${value}\n` : "";
-}
-
 export default function RandomBusinessIdea() {
   const { data, isLoading, error, revalidate } = useFetch<RandomIdeaResponse>(
     RANDOM_IDEA_API_URL,
@@ -32,6 +28,10 @@ export default function RandomBusinessIdea() {
         actions={
           <ActionPanel>
             <Action title="Try Again" onAction={revalidate} />
+            <Action.OpenInBrowser
+              title="Explore Validated Ideas Free"
+              url={registrationUrl("random")}
+            />
           </ActionPanel>
         }
       />
@@ -45,11 +45,11 @@ export default function RandomBusinessIdea() {
 
 ${idea.summary}
 
-${section("The Problem", idea.problem)}
-${section("Suggested Solution", idea.suggested_solution)}
-${section("Target Audience", idea.target_audience)}
-${section("Monetization", idea.monetization_model)}
-${idea.keywords.length > 0 ? `**Keywords:** ${idea.keywords.join(", ")}` : ""}
+${idea.target_audience ? `## Who Needs This\n\n${idea.target_audience}` : ""}
+
+---
+
+Explore the solution blueprint, monetization model, and more validated ideas on NicheFund. A free account lets you filter the Idea Bank and find opportunities that fit your skills.
 `;
 
   return (
@@ -57,12 +57,15 @@ ${idea.keywords.length > 0 ? `**Keywords:** ${idea.keywords.join(", ")}` : ""}
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action title="Show Another Idea" onAction={revalidate} />
           <Action.OpenInBrowser
-            title="Explore More Ideas"
+            title="Explore & Filter Ideas Free"
             url={registrationUrl("random")}
           />
-          <Action.CopyToClipboard title="Copy Idea" content={markdown} />
+          <Action title="Show Another Idea" onAction={revalidate} />
+          <Action.CopyToClipboard
+            title="Copy Idea Summary"
+            content={`${idea.title}\n\n${idea.summary}`}
+          />
         </ActionPanel>
       }
     />

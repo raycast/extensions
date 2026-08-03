@@ -3,6 +3,7 @@ import { useFetch } from "@raycast/utils";
 import TeardownDetail from "./teardown-detail";
 import { API_URL } from "./api";
 import { TeardownResponse } from "./types";
+import { registrationUrl, teardownArchiveUrl } from "./urls";
 
 export default function TeardownOfTheDay() {
   const { data, isLoading, error, revalidate } = useFetch<TeardownResponse>(
@@ -23,6 +24,14 @@ export default function TeardownOfTheDay() {
       actions={
         <ActionPanel>
           <Action title="Refresh" onAction={revalidate} />
+          <Action.OpenInBrowser
+            title="Browse Teardowns on Website"
+            url={teardownArchiveUrl("daily")}
+          />
+          <Action.OpenInBrowser
+            title="Explore Validated Ideas Free"
+            url={registrationUrl("daily")}
+          />
         </ActionPanel>
       }
     />

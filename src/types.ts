@@ -24,11 +24,7 @@ export type BusinessIdea = {
   category: string;
   score: number;
   summary: string;
-  problem: string | null;
-  suggested_solution: string | null;
   target_audience: string | null;
-  monetization_model: string | null;
-  keywords: string[];
   is_b2c: boolean;
 };
 

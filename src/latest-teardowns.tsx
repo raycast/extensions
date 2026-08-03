@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useTeardowns } from "./api";
 import TeardownDetail from "./teardown-detail";
 import { Teardown } from "./types";
+import { registrationUrl, teardownUrl } from "./urls";
 
 const categories = [
   "",
@@ -65,8 +66,20 @@ export default function LatestTeardowns() {
           actions={
             <ActionPanel>
               <Action.Push
-                title="Show Teardown"
+                title="Preview Teardown"
                 target={<TeardownDetail teardown={teardown} source="latest" />}
+              />
+              <Action.OpenInBrowser
+                title="Read Full Teardown"
+                url={teardownUrl(teardown, "latest")}
+              />
+              <Action.OpenInBrowser
+                title="Explore Validated Ideas Free"
+                url={registrationUrl("latest")}
+              />
+              <Action.CopyToClipboard
+                title="Copy Teardown Link"
+                content={teardownUrl(teardown, "latest")}
               />
             </ActionPanel>
           }
