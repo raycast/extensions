@@ -19,5 +19,12 @@ export const STRIPE_PRICE_ANNUAL = "price_1TFIA4RspoCDdtuBkJ1RdSAI";
 /** Where new users create an account and existing users manage their subscription. */
 export const APP_STORE_URL = "https://apps.apple.com/app/id6757024294";
 export const WEBSITE_URL = "https://inoh.app";
+
+/**
+ * Product pages for the other Inoh ecosystem apps, listed in the Apps action
+ * section. The iOS app (mid-rebrand) and Chrome extension (unpublished) have
+ * no URL yet and surface as "Coming soon" — add their constants once live.
+ */
+export const OBSIDIAN_PLUGIN_URL = "https://obsidian.md/plugins?id=inoh";
 export const CHECKOUT_SUCCESS_URL = `${WEBSITE_URL}/checkout-success`;
 export const CHECKOUT_CANCEL_URL = `${WEBSITE_URL}/checkout-cancel`;

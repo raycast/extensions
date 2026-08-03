@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, showToast, Toast, useNavigation, Icon } from "@raycast/api";
+import { List, Action, ActionPanel, Color, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
@@ -8,7 +8,7 @@ import { useUserCardIds } from "../hooks/useUserCardIds";
 import { isProUser } from "../lib/pro-gate";
 import { addCardToDeck, removeCardFromDeck, PLAN_LIMIT_ERROR } from "../lib/card";
 import { pronounceWord } from "../lib/audio";
-import { FREE_CARD_LIMIT, APP_STORE_URL } from "../constants";
+import { FREE_CARD_LIMIT, OBSIDIAN_PLUGIN_URL, WEBSITE_URL } from "../constants";
 import { EntryDetail } from "./EntryDetail";
 import { RequestCardForm } from "./RequestCardForm";
 import { UpgradeToPro } from "./UpgradeToPro";
@@ -22,6 +22,10 @@ import type { DictionaryEntry } from "../types";
  * Search is free for everyone — no account required. Authentication and the
  * Pro/free card limit only come into play when adding a card to a deck.
  */
+function showComingSoonToast(appName: string) {
+  void showToast({ title: "Coming soon", message: `${appName} isn't available yet — stay tuned!` });
+}
+
 export function CommandRoot({ initialSearchText }: { initialSearchText?: string }) {
   const [searchText, setSearchText] = useState(initialSearchText ?? "");
   const { push, pop } = useNavigation();
@@ -86,6 +90,33 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
       <Action title="Sign Out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={handleSignOut} />
     </ActionPanel.Section>
   ) : null;
+
+  // Cross-promotion links to the other Inoh apps, shown in every ActionPanel.
+  // iOS (App Store listing mid-rebrand) and the Chrome extension (not yet on
+  // the Web Store) have no public page, so they toast instead of linking.
+  // Brand marks are Simple Icons SVGs in assets/, tinted to match the theme.
+  const appsActions = (
+    <ActionPanel.Section title="Apps">
+      {/* eslint-disable @raycast/prefer-title-case -- "iOS" is Apple's casing; the rule also mangles "(Coming Soon)" */}
+      <Action
+        title="iOS App (Coming Soon)"
+        icon={{ source: "apple.svg", tintColor: Color.PrimaryText }}
+        onAction={() => showComingSoonToast("The iOS app")}
+      />
+      <Action.OpenInBrowser title="Web App" icon={Icon.Globe} url={WEBSITE_URL} />
+      <Action
+        title="Chrome Extension (Coming Soon)"
+        icon={{ source: "googlechrome.svg", tintColor: Color.PrimaryText }}
+        onAction={() => showComingSoonToast("The Chrome extension")}
+      />
+      {/* eslint-enable @raycast/prefer-title-case */}
+      <Action.OpenInBrowser
+        title="Obsidian Plugin"
+        icon={{ source: "obsidian.svg", tintColor: Color.PrimaryText }}
+        url={OBSIDIAN_PLUGIN_URL}
+      />
+    </ActionPanel.Section>
+  );
 
   // Reason: `refreshAuth` loads the session before popping the sign-in view,
   // so the search list renders signed-in state immediately.
@@ -203,12 +234,10 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
                   onAction={() => push(<RequestCardForm userId={user.id} initialWord={searchText} />)}
                 />
               ) : (
-                <>
-                  <Action title="Sign in to Request a Card" icon={Icon.Key} onAction={promptSignIn} />
-                  <Action.OpenInBrowser title="Get the Inoh App" icon={Icon.Mobile} url={APP_STORE_URL} />
-                </>
+                <Action title="Sign in to Request a Card" icon={Icon.Key} onAction={promptSignIn} />
               )}
               {accountActions}
+              {appsActions}
             </ActionPanel>
           }
         />
@@ -236,10 +265,8 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
                     shortcut={{ modifiers: ["cmd"], key: "return" }}
                     onAction={() => pronounceWord(entry.word_audio_path, entry.word)}
                   />
-                  {!isSignedIn && (
-                    <Action.OpenInBrowser title="Get the Inoh App" icon={Icon.Mobile} url={APP_STORE_URL} />
-                  )}
                   {accountActions}
+                  {appsActions}
                 </ActionPanel>
               }
             />
