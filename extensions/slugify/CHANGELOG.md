@@ -1,6 +1,6 @@
 # Slugify Changelog
 
-## [Prefer Selected Text] - {PR_MERGE_DATE}
+## [Prefer Selected Text] - 2026-08-03
 
 - Prefer selected text when available, otherwise fall back to the clipboard
 
