@@ -1,6 +1,6 @@
 # Changelog
 
-## [Render Stability] - 2026-08-03
+## [Render Stability] - {PR_MERGE_DATE}
 
 - Prevent large transcription histories from overflowing Raycast's render payload
 - Use Raycast's native SQLite utility and show database errors instead of silently returning an empty history

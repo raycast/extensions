@@ -47,10 +47,15 @@ export function getDatabaseInfo(): DatabaseInfo {
     case "custom":
       if (prefs.customDatabasePath) {
         const customPath = expandTilde(prefs.customDatabasePath);
+        const customSource = customPath.includes("com.prakashjoshipax.VoiceInk")
+          ? "official"
+          : customPath.includes("com.metrovoc.VoiceInk")
+            ? "ce"
+            : "custom";
         return {
           path: customPath,
           available: existsSync(customPath),
-          source: "custom",
+          source: customSource,
         };
       }
       return { path: "", available: false, source: "none" };
