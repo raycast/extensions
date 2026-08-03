@@ -1,6 +1,6 @@
 # Claude Artifacts Changelog
 
-## [Open the Artifact Galleries] - {PR_MERGE_DATE}
+## [Open the Artifact Galleries] - 2026-08-03
 
 - Added **View Claude Code Artifacts** (⌘⇧O) and **View Claude Artifacts** (⌘⇧G), which open the two galleries on claude.ai
 - These appear in every state, including the empty ones — when an artifact was published from the chat app or from another machine, it is legitimately absent from the local index, and the gallery is where it actually lives
