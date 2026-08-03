@@ -84,8 +84,9 @@ export async function listPaperFiles(): Promise<PaperFile[]> {
       session,
     );
 
-    return parseListFilesToolResult(await parseJsonRpcResult(listFilesResponse))
-      .files;
+    return parseListFilesToolResult(
+      await parseJsonRpcResult(listFilesResponse, 2),
+    ).files;
   });
 }
 
@@ -105,7 +106,7 @@ export async function createPaperFile(name: string): Promise<string> {
     );
 
     return parseCreatedPaperFileId(
-      await parseJsonRpcResult(createFileResponse),
+      await parseJsonRpcResult(createFileResponse, 2),
     );
   });
 }
@@ -126,7 +127,7 @@ export async function listPaperTokens(fileId: string): Promise<PaperToken[]> {
     );
 
     return parsePaperTokens(
-      parseJson(parseToolText(await parseJsonRpcResult(getTokensResponse))),
+      parseJson(parseToolText(await parseJsonRpcResult(getTokensResponse, 2))),
     );
   });
 }
@@ -150,7 +151,9 @@ export async function createPaperToken(
     );
 
     parsePaperTokenMutation(
-      parseJson(parseToolText(await parseJsonRpcResult(createTokensResponse))),
+      parseJson(
+        parseToolText(await parseJsonRpcResult(createTokensResponse, 2)),
+      ),
     );
   });
 }
@@ -174,7 +177,7 @@ export async function updatePaperToken(
     );
 
     parsePaperTokenMutation(
-      parseJson(parseToolText(await parseJsonRpcResult(setTokensResponse))),
+      parseJson(parseToolText(await parseJsonRpcResult(setTokensResponse, 2))),
     );
   });
 }
@@ -198,7 +201,7 @@ export async function deletePaperToken(
     );
 
     parsePaperTokenMutation(
-      parseJson(parseToolText(await parseJsonRpcResult(setTokensResponse))),
+      parseJson(parseToolText(await parseJsonRpcResult(setTokensResponse, 2))),
     );
   });
 }
@@ -232,7 +235,7 @@ async function withPaperMcpSession<T>(
       sessionId: initializeResponse.headers.get("mcp-session-id") ?? undefined,
     };
     session.protocolVersion = parseNegotiatedProtocolVersion(
-      await parseJsonRpcResult(initializeResponse),
+      await parseJsonRpcResult(initializeResponse, 1),
     );
 
     await notifyPaperMcpInitialized(session);
@@ -314,16 +317,21 @@ function createPaperMcpHeaders(
   };
 }
 
-async function parseJsonRpcResult(response: Response): Promise<unknown> {
+async function parseJsonRpcResult(
+  response: Response,
+  requestId: number,
+): Promise<unknown> {
   const body = await response.text();
   const message = parseMcpResponseBody(
     body,
     response.headers.get("content-type"),
+    requestId,
   );
 
   if (
     !isRecord(message) ||
     message.jsonrpc !== "2.0" ||
+    message.id !== requestId ||
     "error" in message ||
     !("result" in message)
   ) {
@@ -336,6 +344,7 @@ async function parseJsonRpcResult(response: Response): Promise<unknown> {
 function parseMcpResponseBody(
   body: string,
   contentType: string | null,
+  requestId: number,
 ): unknown {
   const trimmedBody = body.trim();
 
@@ -347,18 +356,64 @@ function parseMcpResponseBody(
     contentType?.includes("text/event-stream") ||
     /^data:/m.test(trimmedBody)
   ) {
-    const dataLine = trimmedBody
-      .split(/\r?\n/)
-      .find((line) => line.startsWith("data:"));
+    const responseMessage = parseSseDataEvents(body)
+      .filter((data) => data.trim())
+      .map(parseJson)
+      .find(
+        (message) =>
+          isRecord(message) &&
+          message.jsonrpc === "2.0" &&
+          message.id === requestId &&
+          ("result" in message || "error" in message),
+      );
 
-    if (!dataLine) {
+    if (!responseMessage) {
       throw new PaperMcpResponseError();
     }
 
-    return parseJson(dataLine.slice("data:".length).trim());
+    return responseMessage;
   }
 
   return parseJson(trimmedBody);
+}
+
+function parseSseDataEvents(body: string): string[] {
+  const events: string[] = [];
+  let dataLines: string[] = [];
+
+  const finishEvent = () => {
+    if (dataLines.length > 0) {
+      events.push(dataLines.join("\n"));
+      dataLines = [];
+    }
+  };
+
+  for (const line of body.split(/\r?\n/)) {
+    if (line === "") {
+      finishEvent();
+      continue;
+    }
+
+    if (line.startsWith(":")) {
+      continue;
+    }
+
+    const separatorIndex = line.indexOf(":");
+    const field = separatorIndex === -1 ? line : line.slice(0, separatorIndex);
+
+    if (field !== "data") {
+      continue;
+    }
+
+    let value = separatorIndex === -1 ? "" : line.slice(separatorIndex + 1);
+    if (value.startsWith(" ")) {
+      value = value.slice(1);
+    }
+    dataLines.push(value);
+  }
+
+  finishEvent();
+  return events;
 }
 
 function parseJson(value: string): unknown {
