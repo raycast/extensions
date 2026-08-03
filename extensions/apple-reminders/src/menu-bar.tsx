@@ -236,7 +236,6 @@ export default function Command() {
                     : reminder.title,
                   reminder.priority,
                 )}`}
-                subtitle={formattedTime}
               >
                 <MenuBarExtra.Item
                   title="Open Reminder"
