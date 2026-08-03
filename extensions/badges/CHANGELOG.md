@@ -1,5 +1,9 @@
 # Badges Changelog
 
+## [Bugfix] - 2026-08-03
+
+- Fix badge preview positioning issue
+
 ## [Maintenance] - 2026-07-20
 
 - Change default social badge style to Flat
