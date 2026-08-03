@@ -1,6 +1,6 @@
 # Changelog
 
-## [Actions everywhere and secret masking] - {PR_MERGE_DATE}
+## [Actions everywhere and secret masking] - 2026-08-03
 
 ### Added
 
