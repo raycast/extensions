@@ -13,10 +13,6 @@ import { useMemo, useState } from 'react';
 import { executeOperation, parseJsonObject } from './api';
 import { OPERATION_BY_ID, REEPL_OPERATIONS, ReeplOperation } from './operations';
 
-type Preferences = {
-  apiKey: string;
-};
-
 type FormValues = {
   operationId: string;
   pathParamsJson: string;
@@ -61,7 +57,7 @@ function ResponseDetail({
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Response" content={response} />
           <Action.CopyToClipboard title="Copy Request URL" content={result.url} />
-          <Action.OpenInBrowser url={result.url} />
+          <Action.OpenInBrowser title="Open API Documentation" url="https://developers.reepl.io" />
         </ActionPanel>
       }
     />
@@ -69,7 +65,7 @@ function ResponseDetail({
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.RunOperation>();
   const { push } = useNavigation();
   const [operationId, setOperationId] = useState<string>(REEPL_OPERATIONS[0].id);
   const selectedOperation = useMemo<ReeplOperation>(
