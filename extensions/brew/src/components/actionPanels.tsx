@@ -15,6 +15,15 @@ import * as Actions from "./actions";
 import { CaskInfo } from "./caskInfo";
 import { FormulaInfo } from "./formulaInfo";
 
+const ToggleDetailsAction = (props: { onToggleDetails: () => void }) => (
+  <Action
+    title="Toggle Details"
+    icon={Icon.AppWindowSidebarRight}
+    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+    onAction={props.onToggleDetails}
+  />
+);
+
 const DebugSection = (props: { obj: Cask | Formula }) => (
   <ActionPanel.Section>
     <Action.Push
@@ -44,6 +53,7 @@ export function CaskActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
+  onToggleDetails?: () => void;
 }) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -59,6 +69,7 @@ export function CaskActionPanel(props: {
               target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
           {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
         </ActionPanel.Section>
@@ -123,6 +134,7 @@ export function CaskActionPanel(props: {
               target={<CaskInfo cask={cask} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -180,6 +192,7 @@ export function FormulaActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
+  onToggleDetails?: () => void;
 }) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -195,6 +208,7 @@ export function FormulaActionPanel(props: {
               target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
           {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
@@ -256,6 +270,7 @@ export function FormulaActionPanel(props: {
               target={<FormulaInfo formula={formula} isInstalled={props.isInstalled} onAction={props.onAction} />}
             />
           )}
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>

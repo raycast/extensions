@@ -14,17 +14,19 @@ import { showInstalledPackages } from "./utils/installed";
 
 function InstalledContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
+  const [showMetadataPanel, setShowMetadataPanel] = useState(false);
   const { isLoading, data: installed, revalidate } = useBrewInstalled();
   const [excludeDependencies] = useBrewDependencies();
-  const { formulae, casks } = showInstalledPackages(installed, filter, excludeDependencies);
+  const { formulae, pinnedFormulae, casks } = showInstalledPackages(installed, filter, excludeDependencies);
 
   // Log rendering statistics
   if (installed && !isLoading) {
     uiLogger.log("Installed view rendered", {
       filter,
       formulaeDisplayed: formulae.length,
+      pinnedFormulaeDisplayed: pinnedFormulae.length,
       casksDisplayed: casks.length,
-      totalDisplayed: formulae.length + casks.length,
+      totalDisplayed: formulae.length + pinnedFormulae.length + casks.length,
       totalAvailable: (installed.formulae?.size ?? 0) + (installed.casks?.size ?? 0),
     });
   }
@@ -35,11 +37,14 @@ function InstalledContent() {
   return (
     <FormulaList
       formulae={formulae}
+      pinnedFormulae={pinnedFormulae}
       casks={casks}
       searchBarPlaceholder={searchBarPlaceholder}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={isLoading}
       dataFetched={installed !== undefined}
+      showMetadataPanel={showMetadataPanel}
+      onToggleDetails={() => setShowMetadataPanel((current) => !current)}
       isInstalled={(name) => isInstalled(name, installed)}
       onAction={() => {
         uiLogger.log("Revalidating installed packages");
