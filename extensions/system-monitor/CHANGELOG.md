@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-08-03
 
 - Extract parsing and stat derivation into a tested `src/lib/` layer with a vitest harness
 - Poll only the active tab; inactive monitors stop shelling out to system tools
