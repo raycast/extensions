@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-08-03
 
 - Show multiple zones for person entities
 
