@@ -1,5 +1,9 @@
 # Apple Reminders Changelog
 
+## [Display due time in menu bar] - 2026-08-03
+
+- Display scheduled due time before reminder titles in menu bar items.
+
 ## [Tighten AI reminder defaults] - 2026-06-16
 
 - Prevent AI tool calls from defaulting title-only reminders to dated, prioritized, or recurring reminders.
