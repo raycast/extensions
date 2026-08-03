@@ -2,9 +2,9 @@ import { Action, ActionPanel, Detail } from "@raycast/api";
 import { Teardown } from "./types";
 import { registrationUrl, teardownUrl } from "./urls";
 
-type Props = { teardown: Teardown };
+type Props = { teardown: Teardown; source: "latest" | "daily" };
 
-export default function TeardownDetail({ teardown }: Props) {
+export default function TeardownDetail({ teardown, source }: Props) {
   const date = new Date(teardown.published_at).toLocaleDateString();
   const markdown = `# ${teardown.title}
 
@@ -24,15 +24,15 @@ Read the full teardown on NicheFund for the failure mechanics, reality check, an
         <ActionPanel>
           <Action.OpenInBrowser
             title="Read Full Teardown"
-            url={teardownUrl(teardown)}
+            url={teardownUrl(teardown, source)}
           />
           <Action.OpenInBrowser
             title="Explore Validated Ideas Free"
-            url={registrationUrl()}
+            url={registrationUrl(source)}
           />
           <Action.CopyToClipboard
             title="Copy Link"
-            content={teardownUrl(teardown)}
+            content={teardownUrl(teardown, source)}
           />
           <Action.CopyToClipboard title="Copy Title" content={teardown.title} />
         </ActionPanel>

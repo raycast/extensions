@@ -12,7 +12,7 @@ export default function TeardownOfTheDay() {
   );
   const teardown = data?.results?.[0];
 
-  if (teardown) return <TeardownDetail teardown={teardown} />;
+  if (teardown) return <TeardownDetail teardown={teardown} source="daily" />;
   return (
     <Detail
       isLoading={isLoading}
@@ -26,11 +26,11 @@ export default function TeardownOfTheDay() {
           <Action title="Refresh" onAction={revalidate} />
           <Action.OpenInBrowser
             title="Browse Teardowns on Website"
-            url={teardownArchiveUrl()}
+            url={teardownArchiveUrl("daily")}
           />
           <Action.OpenInBrowser
             title="Explore Validated Ideas Free"
-            url={registrationUrl()}
+            url={registrationUrl("daily")}
           />
         </ActionPanel>
       }
