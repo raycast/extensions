@@ -1,20 +1,11 @@
 import { statSync } from "fs";
 import { basename } from "path";
 import { Toast, getPreferenceValues, getSelectedFinderItems, open, showInFinder, showToast } from "@raycast/api";
-import { FfmpegNotFoundError, OptimizeLevel, convertToGif, isVideoFile } from "./ffmpeg";
-
-interface Preferences {
-  defaultSize: string;
-  defaultFps: string;
-  defaultOptimize: OptimizeLevel;
-  defaultLoop: boolean;
-  defaultDenoise: boolean;
-  defaultReveal: boolean;
-}
+import { FfmpegNotFoundError, convertToGif, isVideoFile } from "./ffmpeg";
 
 export default async function Command() {
   const { defaultSize, defaultFps, defaultOptimize, defaultLoop, defaultDenoise, defaultReveal } =
-    getPreferenceValues<Preferences>();
+    getPreferenceValues<Preferences.QuickGif>();
 
   let selected;
   try {

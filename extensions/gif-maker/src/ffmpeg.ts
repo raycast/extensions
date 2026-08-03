@@ -1,6 +1,7 @@
 import { execFile } from "child_process";
 import { accessSync, constants, existsSync } from "fs";
-import { rename, rm } from "fs/promises";
+import { readdir, rename, rm, stat } from "fs/promises";
+import { randomUUID } from "crypto";
 import { homedir } from "os";
 import { basename, dirname, extname, join } from "path";
 import { promisify } from "util";
@@ -49,7 +50,7 @@ function findExecutable(candidates: string[]): string | undefined {
 }
 
 export function resolveFfmpeg(): string {
-  const { ffmpegPath } = getPreferenceValues<{ ffmpegPath?: string }>();
+  const { ffmpegPath } = getPreferenceValues<Preferences>();
   const found = findExecutable(ffmpegPath ? [ffmpegPath, ...FFMPEG_CANDIDATES] : FFMPEG_CANDIDATES);
   if (!found) {
     throw new FfmpegNotFoundError();
@@ -89,6 +90,36 @@ function uniquePath(path: string): string {
 /** Best-effort delete; a missing file is the desired end state either way. */
 async function discard(path: string): Promise<void> {
   await rm(path, { force: true }).catch(() => undefined);
+}
+
+/**
+ * Unique temp names mean a hard-killed run can't be cleaned up by its successor,
+ * so old leftovers are swept here instead. The age floor is far longer than any
+ * plausible conversion, so a temp belonging to a still-running invocation is
+ * never removed.
+ */
+async function sweepStaleTemps(dir: string, prefix: string): Promise<void> {
+  const maxAgeMs = 6 * 60 * 60 * 1000;
+  try {
+    const names = await readdir(dir);
+    await Promise.all(
+      names
+        .filter((name) => name.startsWith(prefix) && name.endsWith(".part"))
+        .map(async (name) => {
+          const path = join(dir, name);
+          try {
+            const { mtimeMs } = await stat(path);
+            if (Date.now() - mtimeMs > maxAgeMs) {
+              await discard(path);
+            }
+          } catch {
+            // Raced with another sweep, or vanished. Either way, nothing to do.
+          }
+        }),
+    );
+  } catch {
+    // Unreadable directory — sweeping is best-effort.
+  }
 }
 
 export function defaultOutputPath(inputPath: string): string {
@@ -204,11 +235,14 @@ export async function convertToGif(options: ConvertOptions): Promise<string> {
   const outputPath = options.outputPath ?? defaultOutputPath(options.inputPath);
 
   // ffmpeg writes here, and the result is renamed into place only once the whole
-  // pipeline succeeds. A failed or killed run therefore never leaves a partial
-  // GIF at outputPath — at worst a dot-prefixed leftover Finder hides, which the
-  // next run for the same output sweeps up.
-  const tempPath = join(dirname(outputPath), `.${basename(outputPath)}.part`);
-  await discard(tempPath);
+  // pipeline succeeds, so a failed or killed run never leaves a partial GIF at
+  // outputPath. The suffix is unique per invocation: two commands converting the
+  // same video pick the same outputPath (neither file exists yet), and a shared
+  // temp path would let each clobber the other's intermediate.
+  const outputDir = dirname(outputPath);
+  const tempPrefix = `.${basename(outputPath)}.`;
+  const tempPath = join(outputDir, `${tempPrefix}${process.pid}-${randomUUID().slice(0, 8)}.part`);
+  await sweepStaleTemps(outputDir, tempPrefix);
 
   // -ss before -i seeks by keyframe (fast); ffmpeg re-syncs accurately on decode.
   const trimArgs: string[] = [];
@@ -274,14 +308,18 @@ export async function convertToGif(options: ConvertOptions): Promise<string> {
       }
     }
 
-    // Only now does a file appear at outputPath. Same directory, so this is an
+    // Re-check the destination: a concurrent conversion of the same video may
+    // have claimed it while this one was encoding. Skipped when the caller named
+    // the path explicitly, since then overwriting is what was asked for.
+    const finalPath = options.outputPath ? outputPath : uniquePath(outputPath);
+
+    // Only now does a file appear at finalPath. Same directory, so this is an
     // atomic rename rather than a copy.
-    await rename(tempPath, outputPath);
+    await rename(tempPath, finalPath);
+    return finalPath;
   } catch (error) {
     await discard(tempPath);
     const stderr = (error as { stderr?: string }).stderr?.trim();
     throw new Error(stderr && stderr.length > 0 ? stderr.split("\n").slice(-3).join("\n") : String(error));
   }
-
-  return outputPath;
 }

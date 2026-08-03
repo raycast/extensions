@@ -38,12 +38,6 @@ const SIZE_PRESETS = [
   { value: "800", name: "Large" },
 ] as const;
 
-interface Preferences {
-  defaultLoop: boolean;
-  defaultDenoise: boolean;
-  defaultReveal: boolean;
-}
-
 interface FormValues {
   files: string[];
   size: string;
@@ -61,7 +55,7 @@ export default function Command() {
   const [files, setFiles] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.CreateGif>();
   const ffmpegMissing = !isFfmpegInstalled();
   const [size, setSize] = useState("480");
   const [customSize, setCustomSize] = useState("");
