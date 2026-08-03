@@ -39,20 +39,22 @@ export default function LatestTeardowns() {
       isLoading={isLoading}
       pagination={pagination}
       searchBarPlaceholder="Search teardowns"
+      searchBarAccessory={
+        <List.Dropdown
+          tooltip="Filter by category"
+          value={category}
+          onChange={setCategory}
+        >
+          {categories.map((value) => (
+            <List.Dropdown.Item
+              key={value || "all"}
+              title={value || "All Categories"}
+              value={value}
+            />
+          ))}
+        </List.Dropdown>
+      }
     >
-      <List.Dropdown
-        tooltip="Filter by category"
-        value={category}
-        onChange={setCategory}
-      >
-        {categories.map((value) => (
-          <List.Dropdown.Item
-            key={value || "all"}
-            title={value || "All Categories"}
-            value={value}
-          />
-        ))}
-      </List.Dropdown>
       {data.map((teardown: Teardown) => (
         <List.Item
           key={teardown.slug}
@@ -62,7 +64,6 @@ export default function LatestTeardowns() {
             { tag: teardown.category },
             { text: `${teardown.score.toFixed(1)}/10` },
           ]}
-          detail={<TeardownDetail teardown={teardown} source="latest" />}
           actions={
             <ActionPanel>
               <Action.Push
