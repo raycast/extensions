@@ -1,5 +1,12 @@
 # Hypersonic Changelog
 
+## [Create tasks with details] - 2026-08-03
+
+#### New
+
+- Added an optional "Create Task with Details" form (`⌘` `⇧` `↵` on a new task) to set status, date, assignee, label, project, and URL in one window, pre-filled from what you typed. The quick natural-language capture in the search bar is unchanged.
+- The form also includes a note that is written to the body of the new Notion page — each line becomes a block, and a line that is only a URL becomes a bookmark (closes #3884).
+
 ## [2.1.1] - 2025-08-04
 
 #### New

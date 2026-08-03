@@ -108,12 +108,16 @@ export function useTodoList() {
     }
   }
 
-  const handleCreate = async (action?: 'SHARE' | 'OPEN') => {
+  const handleCreate = async (
+    action?: 'SHARE' | 'OPEN',
+    overrides?: Partial<Todo>
+  ): Promise<boolean> => {
     try {
-      if (!newTodo) return null
+      if (!newTodo) return false
 
       const optimisticTodo = {
         ...newTodo,
+        ...overrides,
         id: `fake-id-${Math.random() * 1000}`,
       }
 
@@ -169,8 +173,11 @@ export function useTodoList() {
           await openBrowser(createdTodo.shareUrl)
         }
       }
+
+      return true
     } catch (e: any) {
       showToast(Toast.Style.Failure, e?.message)
+      return false
     }
   }
 
@@ -507,6 +514,7 @@ export function useTodoList() {
     hasAssigneeProperty: !!preferences?.properties?.assignee,
     hasProjectProperty: !!preferences?.properties?.project,
     hasTagProperty: !!preferences?.properties?.tag,
+    hasUrlProperty: !!preferences?.properties?.url,
     loading: isLoading,
     handleCreate,
     handleComplete,
