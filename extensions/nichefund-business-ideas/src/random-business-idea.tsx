@@ -33,7 +33,7 @@ export default function RandomBusinessIdea() {
             <Action title="Try Again" onAction={revalidate} />
             <Action.OpenInBrowser
               title="Explore Validated Ideas Free"
-              url={registrationUrl()}
+              url={registrationUrl("random")}
             />
           </ActionPanel>
         }
@@ -62,7 +62,7 @@ Explore the solution blueprint, monetization model, and more validated ideas on 
         <ActionPanel>
           <Action.OpenInBrowser
             title="Explore & Filter Ideas Free"
-            url={registrationUrl()}
+            url={registrationUrl("random")}
           />
           <Action title="Show Another Idea" onAction={revalidate} />
           <Action.CopyToClipboard
