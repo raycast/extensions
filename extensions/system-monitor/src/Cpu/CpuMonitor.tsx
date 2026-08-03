@@ -170,6 +170,19 @@ function CpuMonitorDetail({
           <List.Item.Detail.Metadata.Separator />
           <MetadataLabel title="Usage" text={cpu ? `${cpu} %` : "Loading…"} percentMode={cpu ? "usage" : undefined} />
           <List.Item.Detail.Metadata.Separator />
+          <MetadataSection title="Top Processes" />
+          {topProcess?.length ? (
+            topProcess.map((process, index) => (
+              <MetadataLabel
+                key={process.pid}
+                title={`#${index + 1} · ${process.name} (PID ${process.pid})`}
+                text={process.metric}
+              />
+            ))
+          ) : (
+            <MetadataLabel title="Status" text="Collecting sample…" />
+          )}
+          <List.Item.Detail.Metadata.Separator />
           <MetadataSection title="Per-Core Usage" />
           {perCoreUsage?.hasPreviousSample ? (
             perCoreUsage.cores.map((core) => (
@@ -193,19 +206,6 @@ function CpuMonitorDetail({
           <MetadataLabel title="15 min" text={avgLoad?.[2] ?? "Loading…"} />
           <List.Item.Detail.Metadata.Separator />
           <MetadataLabel title="Uptime" text={uptime ?? "Loading…"} />
-          <List.Item.Detail.Metadata.Separator />
-          <MetadataSection title="Top Processes" />
-          {topProcess?.length ? (
-            topProcess.map((process, index) => (
-              <MetadataLabel
-                key={process.pid}
-                title={`#${index + 1} · ${process.name} (PID ${process.pid})`}
-                text={process.metric}
-              />
-            ))
-          ) : (
-            <MetadataLabel title="Status" text="Collecting sample…" />
-          )}
         </List.Item.Detail.Metadata>
       }
     />
