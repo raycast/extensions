@@ -47,7 +47,7 @@
     "@raycast/eslint-config": "latest",
     "@types/node": "latest",
     "@types/react": "latest",
-    "eslint": "^8.57.0",
+    "eslint": "^10.8.0",
     "typescript": "latest"
   },
   "engines": {
