@@ -1,0 +1,43 @@
+{
+  "name": "nichefund-teardowns",
+  "title": "NicheFund Teardowns",
+  "description": "Discover why MicroSaaS ideas fail and find validated ideas worth building.",
+  "icon": "extension-icon.png",
+  "author": "cannblw",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "latest-teardowns",
+      "title": "Latest Teardowns",
+      "description": "Browse the latest NicheFund idea teardowns",
+      "mode": "view"
+    },
+    {
+      "name": "teardown-of-the-day",
+      "title": "Teardown of the Day",
+      "description": "Read the latest NicheFund teardown",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "latest",
+    "@raycast/utils": "latest"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "latest",
+    "@types/node": "latest",
+    "@types/react": "latest",
+    "eslint": "^8.57.0",
+    "typescript": "latest"
+  },
+  "engines": {
+    "node": ">=22.14.0"
+  }
+}
