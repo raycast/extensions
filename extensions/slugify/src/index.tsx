@@ -1,5 +1,5 @@
+import { Action, ActionPanel, Clipboard, Icon, List, getPreferenceValues, getSelectedText } from "@raycast/api";
 import React from "react";
-import { List, ActionPanel, Action, Clipboard, Icon, getPreferenceValues } from "@raycast/api";
 import slugify from "slugify";
 
 enum DefaultActionPreference {
@@ -13,6 +13,7 @@ interface Preferences {
 interface ActionsOpts {
   value: string;
 }
+
 function _getActions({ value }: ActionsOpts) {
   const defaultPreference = getPreferenceValues<Preferences>().defaultAction;
   const ACTIONS = [
@@ -31,6 +32,19 @@ function _getActions({ value }: ActionsOpts) {
   );
 }
 
+async function getInitialText(): Promise<string> {
+  try {
+    const selectedText = await getSelectedText();
+    if (selectedText) {
+      return selectedText;
+    }
+  } catch {
+    // No text selected in the frontmost application.
+  }
+
+  return (await Clipboard.readText()) ?? "";
+}
+
 type Result = {
   default: string;
   noLower: string;
@@ -38,38 +52,46 @@ type Result = {
   underscoreNoLower: string;
 };
 
+function slugifyResult(value: string, strict: boolean): Result {
+  return {
+    default: slugify(value, { lower: true, replacement: "-", strict }),
+    noLower: slugify(value, { lower: false, replacement: "-", strict }),
+    underscore: slugify(value, { lower: true, replacement: "_", strict }),
+    underscoreNoLower: slugify(value, { lower: false, replacement: "_", strict }),
+  };
+}
+
 export default function Command() {
-  const [clipboardText, setClipboardText] = React.useState<string | undefined>(undefined);
-  const [input, setInput] = React.useState(clipboardText);
-  const [result, setResult] = React.useState<Result | undefined>(undefined);
+  const [fallbackText, setFallbackText] = React.useState<string | undefined>(undefined);
+  const [input, setInput] = React.useState<string | undefined>(undefined);
   const [strict, setStrict] = React.useState(true);
+  const [isLoading, setIsLoading] = React.useState(true);
 
   React.useEffect(() => {
-    Clipboard.readText().then((clipboardContents) => {
-      setClipboardText(clipboardContents ?? "");
+    let isActive = true;
+
+    getInitialText().then((text) => {
+      if (!isActive) {
+        return;
+      }
+      setFallbackText(text);
+      setIsLoading(false);
     });
+
+    return () => {
+      isActive = false;
+    };
   }, []);
-  React.useEffect(() => {
-    const _input = input || clipboardText;
-    if (_input) {
-      setResult({
-        default: slugify(_input, { lower: true, replacement: "-", strict }),
-        noLower: slugify(_input, { lower: false, replacement: "-", strict }),
-        underscore: slugify(_input, { lower: true, replacement: "_", strict }),
-        underscoreNoLower: slugify(_input, { lower: false, replacement: "_", strict }),
-      });
-    } else {
-      setResult(undefined);
-    }
-  }, [input, clipboardText, strict]);
+
+  const source = input || fallbackText;
+  const result = source ? slugifyResult(source, strict) : undefined;
 
   return (
     <List
-      onSearchTextChange={(newValue) => {
-        setInput(newValue || clipboardText);
-      }}
+      filtering={false}
+      onSearchTextChange={setInput}
       searchBarPlaceholder={"Text to slugify"}
-      isLoading={!clipboardText}
+      isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown tooltip="Strict" onChange={(val) => setStrict(val === "1")}>
           <List.Dropdown.Item icon={Icon.Check} title="Strict" value={"1"} />
@@ -78,18 +100,16 @@ export default function Command() {
       }
     >
       {result ? (
-        <>
-          <List.Section title={`Input: ${input || clipboardText}`}>
-            {Object.entries(result).map(([key, value]) => (
-              <List.Item key={key} title={value} actions={result ? _getActions({ value }) : undefined} />
-            ))}
-          </List.Section>
-        </>
+        <List.Section title={`Input: ${source}`}>
+          {Object.entries(result).map(([key, value]) => (
+            <List.Item key={key} title={value} actions={_getActions({ value })} />
+          ))}
+        </List.Section>
       ) : (
         <List.EmptyView
           icon={Icon.QuestionMarkCircle}
           title={"Nothing to slugify"}
-          description={"Copy some content to your clipboard, or start typing text to slugify."}
+          description={"Select some text, copy content to your clipboard, or start typing text to slugify."}
         />
       )}
     </List>
