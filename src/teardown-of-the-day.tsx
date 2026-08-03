@@ -9,14 +9,16 @@ export default function TeardownOfTheDay() {
     `${API_URL}?sort=newest&limit=1`,
     { failureToastOptions: { title: "Couldn’t load today’s teardown" } },
   );
-  const teardown = data?.results[0];
+  const teardown = data?.results?.[0];
 
   if (teardown) return <TeardownDetail teardown={teardown} source="daily" />;
   return (
     <Detail
       isLoading={isLoading}
       markdown={
-        error ? "## Couldn’t load today’s teardown\n\nPlease try again." : ""
+        error
+          ? "## Couldn’t load today’s teardown\n\nPlease try again."
+          : "## No teardown available yet\n\nPlease try again later."
       }
       actions={
         <ActionPanel>
