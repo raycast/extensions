@@ -99,7 +99,14 @@ export function formatDuration(seconds: number): string {
   return `${mins}m ${secs}s`;
 }
 
-export function buildQuery(limit: number, searchTerm?: string): string {
+export function buildQuery(limit: number, searchTerm?: string, source: DatabaseInfo["source"] = "custom"): string {
+  const modeColumns =
+    source === "official"
+      ? "ZPOWERMODENAME as powerModeName, ZPOWERMODEEMOJI as powerModeEmoji"
+      : source === "ce"
+        ? "ZMODENAME as powerModeName, ZMODEEMOJI as powerModeEmoji"
+        : "NULL as powerModeName, NULL as powerModeEmoji";
+
   const baseQuery = `
     SELECT
       hex(ZID) as id,
@@ -108,8 +115,7 @@ export function buildQuery(limit: number, searchTerm?: string): string {
       ZTIMESTAMP as timestamp,
       ZDURATION as duration,
       ZTRANSCRIPTIONMODELNAME as modelName,
-      ZPOWERMODENAME as powerModeName,
-      ZPOWERMODEEMOJI as powerModeEmoji
+      ${modeColumns}
     FROM ZTRANSCRIPTION
     WHERE ZTRANSCRIPTIONSTATUS = 'completed'
   `;
@@ -130,27 +136,20 @@ export function buildQuery(limit: number, searchTerm?: string): string {
 }
 
 function escapeSqlString(str: string): string {
-  return str.replace(/'/g, "''").replace(/%/g, "\\%").replace(/_/g, "\\_");
+  return str.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/%/g, "\\%").replace(/_/g, "\\_");
 }
 
-export function parseTranscriptions(stdout: string): Transcription[] {
-  if (!stdout.trim()) return [];
-
-  try {
-    const rows: Transcription[] = JSON.parse(stdout);
-    return rows.map((row) => ({
-      id: row.id,
-      text: row.text || "",
-      enhancedText: row.enhancedText,
-      timestamp: row.timestamp,
-      duration: row.duration || 0,
-      modelName: row.modelName,
-      powerModeName: row.powerModeName,
-      powerModeEmoji: row.powerModeEmoji,
-    }));
-  } catch {
-    return [];
-  }
+export function normalizeTranscriptions(rows: Transcription[]): Transcription[] {
+  return rows.map((row) => ({
+    id: row.id,
+    text: row.text || "",
+    enhancedText: row.enhancedText,
+    timestamp: row.timestamp,
+    duration: row.duration || 0,
+    modelName: row.modelName,
+    powerModeName: row.powerModeName,
+    powerModeEmoji: row.powerModeEmoji,
+  }));
 }
 
 export function truncateText(text: string, maxLength: number): string {
