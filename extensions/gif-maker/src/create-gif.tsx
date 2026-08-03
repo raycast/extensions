@@ -227,6 +227,16 @@ export default function Command() {
           }
         />
       )}
+      {!hasGifsicle && (
+        <Form.Description
+          title="ℹ️ Compression Unavailable"
+          text={
+            "The Compression setting needs gifsicle, which isn't installed. GIFs will still be created, " +
+            "just larger than they could be.\n\nTo enable it, run this in Terminal:\n\n    brew install gifsicle\n\n" +
+            "Then reopen this command."
+          }
+        />
+      )}
       <Form.FilePicker
         id="files"
         title="Video File"
