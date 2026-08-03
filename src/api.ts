@@ -1,12 +1,12 @@
 import { useFetch } from "@raycast/utils";
-import { TeardownResponse } from "./types";
+import { Teardown, TeardownResponse } from "./types";
 
 export const API_URL = "https://nichefund.app/api/public/teardowns/";
 export const RANDOM_IDEA_API_URL =
   "https://nichefund.app/api/public/random-idea/";
 
 export function useTeardowns(category?: string) {
-  return useFetch<TeardownResponse>(
+  return useFetch<TeardownResponse, Teardown[], Teardown[]>(
     (options) => {
       const params = new URLSearchParams({
         page: String(options.page + 1),
