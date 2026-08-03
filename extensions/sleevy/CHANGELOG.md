@@ -1,6 +1,6 @@
 # Sleevy Changelog
 
-## [Add website and API documentation links] - {PR_MERGE_DATE}
+## [Add website and API documentation links] - 2026-08-03
 
 - Add links to the Sleevy Raycast landing page and API documentation.
 
