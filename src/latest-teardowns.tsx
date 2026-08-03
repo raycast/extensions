@@ -6,11 +6,23 @@ import { Teardown } from "./types";
 
 const categories = [
   "",
-  "Developer Tools",
-  "E-commerce",
+  "Automotive",
+  "Beauty & Personal Care",
+  "Childcare",
+  "Creative Services",
+  "Developer Tools & Infrastructure",
+  "E-commerce & Retail",
   "Education",
-  "Operations",
-  "Marketing",
+  "Events & Entertainment",
+  "Field Services",
+  "Food & Hospitality",
+  "Health & Fitness",
+  "Non-profit",
+  "Other",
+  "Pet Care",
+  "Professional Services",
+  "Property Management",
+  "Small Business",
 ];
 
 export default function LatestTeardowns() {
