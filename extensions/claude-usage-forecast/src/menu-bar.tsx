@@ -7,10 +7,19 @@ import {
   open,
   Keyboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { sparkline } from "./lib/chart";
 import { formatDuration } from "./lib/forecast";
 import { load, severityOf, settings } from "./lib/load";
+
+/** Menu bar items swallow rejected promises, so a failed launch is invisible. */
+async function openCommand(name: string) {
+  try {
+    await launchCommand({ name, type: LaunchType.UserInitiated });
+  } catch (e) {
+    await showFailureToast(e, { title: `Cannot open ${name}` });
+  }
+}
 
 const ICON: Record<string, { source: Icon; tintColor: Color }> = {
   ok: { source: Icon.CircleProgress75, tintColor: Color.Green },
@@ -119,22 +128,12 @@ export default function Command() {
           title="Open Usage Graph"
           icon={Icon.BarChart}
           shortcut={Keyboard.Shortcut.Common.Open}
-          onAction={() =>
-            launchCommand({
-              name: "weekly-usage",
-              type: LaunchType.UserInitiated,
-            })
-          }
+          onAction={() => openCommand("weekly-usage")}
         />
         <MenuBarExtra.Item
           title="How This Forecast Works"
           icon={Icon.Book}
-          onAction={() =>
-            launchCommand({
-              name: "methodology",
-              type: LaunchType.UserInitiated,
-            })
-          }
+          onAction={() => openCommand("methodology")}
         />
         <MenuBarExtra.Item
           title="Refresh"
