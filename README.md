@@ -1,4 +1,4 @@
-# NicheFund Teardowns for Raycast
+# NicheFund Business Ideas for Raycast
 
 Browse NicheFund's latest public MicroSaaS idea teardowns without leaving your keyboard. The extension requires no account, token, or configuration.
 

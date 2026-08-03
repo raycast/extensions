@@ -1,4 +1,4 @@
-# Submitting NicheFund Teardowns to the Raycast Store
+# Submitting NicheFund Business Ideas to the Raycast Store
 
 This repository is the source for the public NicheFund Raycast extension.
 
