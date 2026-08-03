@@ -1,5 +1,10 @@
 # Brew Changelog
 
+## [Bug fix] - 2026-08-03
+
+- Fixed "Show Installed" listing no packages on every open after the first. The installed-package lookups are `Map`s, which serialise to `{}`, so the cached value was emptied on write and then re-served empty forever. The serialisable form is cached now and the lookups are rebuilt on read; cache entries written by earlier versions are discarded rather than trusted.
+- Fixed Search intermittently failing to mark packages as installed, which had the same cause.
+
 ## [Bug fix] - 2026-07-10
 
 - Search now works instantly against the existing package index while it refreshes in the background, instead of blocking until the refresh completes
