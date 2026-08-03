@@ -1,6 +1,6 @@
 import { spawn as defaultSpawn } from "node:child_process";
 import type { ChildProcess } from "node:child_process";
-import { SILENCE_PEAK_THRESHOLD } from "./dictation-config";
+import { SPEECH_RMS_THRESHOLD } from "./dictation-config";
 import type { SignalLevel } from "./dictation-types";
 import { emptySignal } from "./recording-view";
 import { numberValue } from "./mic-info";
@@ -41,8 +41,7 @@ input.installTap(onBus: 0, bufferSize: 2048, format: format) { buffer, _ in
   }
 
   let rms = sqrt(sum / Float(max(count, 1)))
-  let percent = min(100, Int(max(sqrt(peak) * 100, rms * 600).rounded()))
-  print("{\\"rms\\":\\(rms),\\"peak\\":\\(peak),\\"percent\\":\\(percent)}")
+  print("{\\"rms\\":\\(rms),\\"peak\\":\\(peak)}")
   fflush(stdout)
 }
 
@@ -61,14 +60,24 @@ interface LiveMicMeterDeps {
   setTimeout?: typeof setTimeout;
 }
 
+// dBFS, not sqrt(peak) — the square root rendered a silent room at ~30% (#648).
+export function percentFromPeak(peak: number): number {
+  if (peak <= 0) return 0;
+  const dbfs = 20 * Math.log10(peak);
+  return Math.max(0, Math.min(100, Math.round(((dbfs + 50) / 50) * 100)));
+}
+
 export function parseMeterLine(line: string): SignalLevel | null {
   try {
     const parsed = JSON.parse(line) as Partial<SignalLevel>;
     const rms = numberValue(parsed.rms) ?? 0;
     const peak = numberValue(parsed.peak) ?? 0;
-    const percent = Math.max(0, Math.min(100, Math.round(parsed.percent ?? 0)));
-    const active = peak > SILENCE_PEAK_THRESHOLD || percent > 0;
-    return { rms, peak, percent, state: active ? "signal" : "listening" };
+    return {
+      rms,
+      peak,
+      percent: percentFromPeak(peak),
+      state: rms > SPEECH_RMS_THRESHOLD ? "signal" : "listening",
+    };
   } catch {
     return null;
   }

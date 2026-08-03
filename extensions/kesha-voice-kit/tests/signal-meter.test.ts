@@ -14,6 +14,7 @@ import {
 import {
   parseMeterChunk,
   parseMeterLine,
+  percentFromPeak,
   startLiveMicMeter,
 } from "../src/lib/signal-meter";
 import type { DictationState, SignalLevel } from "../src/lib/dictation-types";
@@ -21,46 +22,44 @@ import type { spawn } from "node:child_process";
 import { FakeProcess } from "./helpers/fake-process";
 
 describe("signal parsing", () => {
-  it("parses valid meter JSON into listening and signal states", () => {
-    expect(parseMeterLine('{"rms":0,"peak":0,"percent":0}')).toMatchObject({
-      state: "listening",
-      percent: 0,
-    });
-    expect(
-      parseMeterLine('{"rms":0.01,"peak":0.04,"percent":20}'),
-    ).toMatchObject({
-      state: "signal",
-      percent: 20,
-    });
+  // Thresholds are the rms percentiles measured on a built-in mic (#648).
+  it("separates a quiet room from speech", () => {
+    expect(parseMeterLine('{"rms":0.0075,"peak":0.02}')?.state).toBe("listening");
+    expect(parseMeterLine('{"rms":0.0021,"peak":0.0085}')?.state).toBe("listening");
+    expect(parseMeterLine('{"rms":0.0352,"peak":0.09}')?.state).toBe("signal");
+    expect(parseMeterLine('{"rms":0.012,"peak":0.03}')?.state).toBe("signal");
   });
 
-  it("ignores invalid lines and clamps percent", () => {
+  it("keeps a noisy room audible rather than cutting the speaker off", () => {
+    // Auto-stop then never fires there — today's behaviour, and the safe way to be wrong.
+    expect(parseMeterLine('{"rms":0.027,"peak":0.078}')?.state).toBe("signal");
+  });
+
+  it("ignores invalid lines", () => {
     expect(parseMeterLine("nope")).toBeNull();
-    expect(parseMeterLine('{"rms":0,"peak":0,"percent":999}')).toMatchObject({
-      percent: 100,
-    });
-    expect(parseMeterLine('{"rms":0,"peak":0,"percent":-10}')).toMatchObject({
-      percent: 0,
-    });
+    expect(parseMeterLine("")).toBeNull();
+  });
+
+  it("maps peak to percent on a dB scale, not sqrt", () => {
+    // #648's formula yields 17% for a quiet room, not the 0% it predicted.
+    expect(percentFromPeak(0)).toBe(0);
+    expect(percentFromPeak(0.0085)).toBe(17);
+    expect(percentFromPeak(0.0368)).toBe(43);
+    expect(percentFromPeak(1)).toBe(100);
   });
 
   it("handles partial chunks without losing complete signals", () => {
-    const first = parseMeterChunk(
-      "",
-      '{"rms":0,"peak":0,"percent":0}\n{"rms":',
-    );
+    const first = parseMeterChunk("", '{"rms":0,"peak":0}\n{"rms":');
     expect(first.signals).toHaveLength(1);
     expect(first.remainder).toBe('{"rms":');
 
-    const second = parseMeterChunk(
-      first.remainder,
-      '0.02,"peak":0.1,"percent":32}\n',
-    );
+    const second = parseMeterChunk(first.remainder, '0.02,"peak":0.1}\n');
     expect(second.signals).toHaveLength(1);
-    expect(second.signals[0]).toMatchObject({ percent: 32, state: "signal" });
+    expect(second.signals[0]).toMatchObject({ rms: 0.02, state: "signal" });
     expect(second.remainder).toBe("");
   });
 });
+
 
 describe("recording markdown", () => {
   it("keeps recording markdown calm and moves operational detail to metadata helpers", () => {
@@ -147,19 +146,21 @@ describe("startLiveMicMeter", () => {
   it("reports unavailable when the meter dies after delivering samples", () => {
     const { proc, signals } = startWithFakeProcess();
 
-    proc.emitStdout('{"rms":0.01,"peak":0.04,"percent":20}\n');
+    proc.emitStdout('{"rms":0.05,"peak":0.1}\n');
     proc.emit("exit", 1, null);
 
-    expect(signals.map((s) => s.state)).toEqual(["signal", "unavailable"]);
+    expect(signals.at(-2)?.state).toBe("signal");
+    expect(signals.at(-1)?.state).toBe("unavailable");
   });
 
   it("stays quiet when the session stops the meter itself", () => {
     const { proc, signals, stop } = startWithFakeProcess();
 
-    proc.emitStdout('{"rms":0.01,"peak":0.04,"percent":20}\n');
+    proc.emitStdout('{"rms":0.05,"peak":0.1}\n');
     stop();
     proc.emit("exit", 0, "SIGTERM");
 
-    expect(signals.map((s) => s.state)).toEqual(["signal"]);
+    expect(signals.map((s) => s.state)).not.toContain("unavailable");
+    expect(signals.at(-1)?.state).toBe("signal");
   });
 });
