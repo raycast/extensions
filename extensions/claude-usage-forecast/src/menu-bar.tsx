@@ -29,9 +29,37 @@ const ICON: Record<string, { source: Icon; tintColor: Color }> = {
 
 export default function Command() {
   const s = settings();
-  const { data, isLoading, revalidate } = useCachedPromise(load, [], {
+  const {
+    data,
+    isLoading,
+    revalidate,
+    error: loadError,
+  } = useCachedPromise(load, [], {
     keepPreviousData: true,
   });
+
+  // `load` only rejects when it cannot present a valid reading, so whatever
+  // `keepPreviousData` retained is expired: report the failure instead.
+  if (loadError) {
+    return (
+      <MenuBarExtra
+        isLoading={isLoading}
+        icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+        tooltip="Cannot read Claude usage"
+      >
+        <MenuBarExtra.Item
+          title={`Cannot read Claude usage: ${loadError.message}`}
+          icon={Icon.XMarkCircle}
+        />
+        <MenuBarExtra.Item
+          title="Retry"
+          icon={Icon.ArrowClockwise}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
+          onAction={revalidate}
+        />
+      </MenuBarExtra>
+    );
+  }
 
   if (!data) {
     return (

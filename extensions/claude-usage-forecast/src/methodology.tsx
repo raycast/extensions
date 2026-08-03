@@ -169,7 +169,8 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  if (error && !data) {
+  // Retained data is expired once `load` rejects, so never prefer it.
+  if (error) {
     return (
       <Detail
         markdown={`# Cannot read Claude usage\n\n\`\`\`\n${error.message}\n\`\`\``}

@@ -66,7 +66,9 @@ export default function Command() {
     keepPreviousData: true,
   });
 
-  if (error && !data) {
+  // `load` only rejects when it cannot present a valid reading, so any data
+  // `keepPreviousData` retained is expired — the error wins over it.
+  if (error) {
     return (
       <Detail
         markdown={`# Cannot read Claude usage\n\n\`\`\`\n${error.message}\n\`\`\`\n\nThis extension reads your Claude Code OAuth token from the macOS Keychain item **Claude Code-credentials**. Run \`claude\` once and sign in, then retry.`}
