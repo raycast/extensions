@@ -160,11 +160,12 @@ function LocalItem(
   });
 
   useEffect(() => {
+    const controller = new AbortController();
     let mounted = true;
 
     async function fetchGitBranch() {
       try {
-        const branch = await getGitBranch(path);
+        const branch = await getGitBranch(path, controller.signal);
         if (mounted) {
           setGitBranch(branch);
         }
@@ -178,8 +179,9 @@ function LocalItem(
     }
     return () => {
       mounted = false;
+      controller.abort();
     };
-  }, [path, name]);
+  }, [path]);
 
   const getTitle = (revert = false) => {
     return `Open in ${build} ${closeOtherWindows !== revert ? "and Close Other" : ""}`;

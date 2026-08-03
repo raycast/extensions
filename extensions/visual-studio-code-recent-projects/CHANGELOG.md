@@ -1,5 +1,10 @@
 # Visual Studio Code Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Resolved the shortcut conflict between `Open With…` and `Open with Terminal`. The terminal action now uses `Cmd` + `Shift` + `T` (`Ctrl` + `Shift` + `T` on Windows). Fixes [#28408](https://github.com/raycast/extensions/issues/28408).
+- Limited concurrent Git branch lookups and briefly cached results so `Search Recent Projects` stays responsive with large project lists.
+
 ## [Revert: Windows project opening] - 2026-06-21
 
 - `getSelectedFinderItems` works on Windows; reverted.
