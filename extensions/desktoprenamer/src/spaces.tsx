@@ -7,6 +7,12 @@ export interface Space {
   name: string;
   displayID: string;
   num: number;
+  isFullscreen: boolean | undefined;
+  appPath?: string;
+}
+
+export function isMoveTarget(space: Pick<Space, "isFullscreen">) {
+  return space.isFullscreen === false;
 }
 
 export function useSpaces() {
@@ -16,7 +22,8 @@ export function useSpaces() {
         tell application "DesktopRenamer"
           set allSpaces to get all spaces
           set currentName to get current space name
-          return allSpaces & "~~~" & currentName
+          set currentId to get current space id
+          return allSpaces & "~~~" & currentName & "~~~" & currentId
         end tell
       `);
     } catch {
@@ -26,10 +33,12 @@ export function useSpaces() {
 
   let spaces: Space[] = [];
   let currentName = "";
+  let currentId = "";
 
   if (data) {
-    const [spacesStr, curName] = data.split("~~~");
+    const [spacesStr, curName, curId] = data.split("~~~");
     currentName = curName ? curName.trim() : "";
+    currentId = curId ? curId.trim() : "";
     spaces = spacesStr
       .split("\n")
       .filter((line) => line.trim().length > 0)
@@ -40,6 +49,10 @@ export function useSpaces() {
           name: parts[1] || "Unknown",
           displayID: parts[2] || "Main",
           num: parseInt(parts[3] || "0", 10),
+          // parts[4] (isFullscreen) is only present in the 5-field format.
+          // When absent (legacy 4-field format), leave undefined as unknown.
+          isFullscreen: parts.length >= 5 ? parts[4] === "1" : undefined,
+          appPath: parts[5] || undefined,
         };
       });
   }
@@ -58,6 +71,7 @@ export function useSpaces() {
   return {
     spaces,
     currentName,
+    currentId,
     groupedSpaces,
     isLoading,
     revalidate,
