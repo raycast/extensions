@@ -1,5 +1,15 @@
 # Visual Studio Code Changelog
 
+## [Fixes] - 2026-08-03
+
+- Fix `saveEntries` failing on Windows with `spawn sqlite3 ENOENT` by writing to the VS Code state database through `node:sqlite`, with a fallback to the `sqlite3` CLI
+- Fix VSCodium - Insiders extensions folder and URL handler resolution
+- Fix `Open With VSCode` on network shares (UNC paths) and local drives
+- Fix the `Commands` command hanging on mid-write reads; now polls with a timeout and retries
+- Add `Copy Error` primary action to failure toasts.
+- Add icons to the recent projects entry type dropdown.
+- Bump all dependencies to the latest
+
 ## [Revert: Windows project opening] - 2026-06-21
 
 - `getSelectedFinderItems` works on Windows; reverted.
