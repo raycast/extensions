@@ -6,7 +6,7 @@ This repository is the source for the public NicheFund Raycast extension.
 
 1. Install Node.js 22.14 or newer and npm 7 or newer.
 2. Install Raycast on macOS and sign in.
-3. Confirm the `author` in `package.json` is the exact Raycast username that will submit the extension (`backlooplabs` currently).
+3. Confirm the `author` in `package.json` is the exact Raycast username that will submit the extension (`edgar` currently).
 4. Replace `extension-icon.png` with the final NicheFund 512×512 PNG icon if branding changes.
 5. Capture three Raycast Window Capture screenshots and save them under `metadata/` as 2000×1250 PNGs:
    - Latest Teardowns list

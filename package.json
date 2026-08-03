@@ -3,7 +3,7 @@
   "title": "NicheFund Teardowns",
   "description": "Discover why MicroSaaS ideas fail and find validated ideas worth building.",
   "icon": "extension-icon.png",
-  "author": "cannblw",
+  "author": "edgar",
   "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
