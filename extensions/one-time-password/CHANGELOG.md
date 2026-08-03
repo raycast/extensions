@@ -1,5 +1,11 @@
 # One Time Password Changelog
 
+## [Paste Recent OTP] - 2026-08-03
+
+### Added
+
+- Added "Paste Recent OTP" no-view command that pastes the OTP from the most recently used account into the active app
+
 ## [Windows Support] - 2025-08-27
 
 - Added Windows support.
