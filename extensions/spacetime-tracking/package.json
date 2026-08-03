@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "spacetime",
+  "name": "spacetime-tracking",
   "title": "Spacetime Tracking",
   "description": "Track how much time you spend in each macOS space, with inactivity detection and CSV export.",
   "icon": "icon.png",
