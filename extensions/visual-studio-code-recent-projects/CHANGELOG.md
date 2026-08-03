@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-08-03
 
 - Fix `saveEntries` failing on Windows with `spawn sqlite3 ENOENT` by writing to the VS Code state database through `node:sqlite`, with a fallback to the `sqlite3` CLI
 - Fix VSCodium - Insiders extensions folder and URL handler resolution
