@@ -2,6 +2,8 @@ import { useFetch } from "@raycast/utils";
 import { TeardownResponse } from "./types";
 
 export const API_URL = "https://nichefund.app/api/public/teardowns/";
+export const RANDOM_IDEA_API_URL =
+  "https://nichefund.app/api/public/random-idea/";
 
 export function useTeardowns(category?: string) {
   return useFetch<TeardownResponse>(

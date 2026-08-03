@@ -4,7 +4,9 @@
   "description": "Discover why MicroSaaS ideas fail and find validated ideas worth building.",
   "icon": "extension-icon.png",
   "author": "backlooplabs",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -17,6 +19,12 @@
       "name": "teardown-of-the-day",
       "title": "Teardown of the Day",
       "description": "Read the latest NicheFund teardown",
+      "mode": "view"
+    },
+    {
+      "name": "random-business-idea",
+      "title": "Random Business Idea",
+      "description": "Discover a random validated business idea",
       "mode": "view"
     }
   ],

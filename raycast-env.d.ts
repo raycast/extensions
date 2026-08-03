@@ -17,6 +17,8 @@ declare namespace Preferences {
   export type LatestTeardowns = ExtensionPreferences & {}
   /** Preferences accessible in the `teardown-of-the-day` command */
   export type TeardownOfTheDay = ExtensionPreferences & {}
+  /** Preferences accessible in the `random-business-idea` command */
+  export type RandomBusinessIdea = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -24,5 +26,7 @@ declare namespace Arguments {
   export type LatestTeardowns = {}
   /** Arguments passed to the `teardown-of-the-day` command */
   export type TeardownOfTheDay = {}
+  /** Arguments passed to the `random-business-idea` command */
+  export type RandomBusinessIdea = {}
 }
 
