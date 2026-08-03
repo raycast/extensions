@@ -1,0 +1,342 @@
+{
+  "version": "1.1.0",
+  "source": "reepl-zapier-app/openapi.yaml",
+  "baseUrl": "https://api.reepl.io/v1",
+  "auth": {
+    "type": "apiKey",
+    "header": "X-API-Key",
+    "testOperationId": "getCurrentUser",
+    "testEndpoint": "/external/me"
+  },
+  "operations": [
+    {
+      "id": "getCurrentUser",
+      "name": "Get Current User",
+      "method": "GET",
+      "path": "/external/me",
+      "group": "User",
+      "scopes": ["user:read"],
+      "description": "Returns the authenticated user's profile information."
+    },
+    {
+      "id": "listDrafts",
+      "name": "List Drafts",
+      "method": "GET",
+      "path": "/external/drafts",
+      "group": "Drafts",
+      "scopes": ["drafts:read"],
+      "description": "Returns a paginated list of drafts.",
+      "query": [
+        { "name": "limit", "type": "number", "required": false },
+        { "name": "offset", "type": "number", "required": false }
+      ]
+    },
+    {
+      "id": "createDraft",
+      "name": "Create Draft",
+      "method": "POST",
+      "path": "/external/drafts",
+      "group": "Drafts",
+      "scopes": ["drafts:write"],
+      "description": "Creates a new draft.",
+      "bodyExample": {
+        "content": "Draft body text",
+        "title": "Optional title",
+        "media": []
+      }
+    },
+    {
+      "id": "getDraft",
+      "name": "Get Draft",
+      "method": "GET",
+      "path": "/external/drafts/{draftId}",
+      "group": "Drafts",
+      "scopes": ["drafts:read"],
+      "description": "Returns a draft by ID.",
+      "pathParams": [
+        { "name": "draftId", "required": true }
+      ]
+    },
+    {
+      "id": "updateDraft",
+      "name": "Update Draft",
+      "method": "PUT",
+      "path": "/external/drafts/{draftId}",
+      "group": "Drafts",
+      "scopes": ["drafts:write"],
+      "description": "Updates content, title, or media for a draft.",
+      "pathParams": [
+        { "name": "draftId", "required": true }
+      ],
+      "bodyExample": {
+        "content": "Updated draft body",
+        "title": "Updated title",
+        "media": []
+      }
+    },
+    {
+      "id": "deleteDraft",
+      "name": "Delete Draft",
+      "method": "DELETE",
+      "path": "/external/drafts/{draftId}",
+      "group": "Drafts",
+      "scopes": ["drafts:write"],
+      "description": "Deletes a draft.",
+      "pathParams": [
+        { "name": "draftId", "required": true }
+      ]
+    },
+    {
+      "id": "listPosts",
+      "name": "List Posts",
+      "method": "GET",
+      "path": "/external/posts",
+      "group": "Posts",
+      "scopes": ["posts:read"],
+      "description": "Returns posts with optional status filter.",
+      "query": [
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "enum": ["published", "scheduled", "failed", "draft"]
+        },
+        { "name": "limit", "type": "number", "required": false },
+        { "name": "offset", "type": "number", "required": false }
+      ]
+    },
+    {
+      "id": "publishPost",
+      "name": "Publish Post",
+      "method": "POST",
+      "path": "/external/posts/publish",
+      "group": "Posts",
+      "scopes": ["posts:write"],
+      "description": "Publishes a post immediately.",
+      "bodyExample": {
+        "content": "Publishing right now",
+        "media": []
+      }
+    },
+    {
+      "id": "schedulePost",
+      "name": "Schedule Post",
+      "method": "POST",
+      "path": "/external/posts/schedule",
+      "group": "Posts",
+      "scopes": ["posts:write"],
+      "description": "Schedules a post for later.",
+      "bodyExample": {
+        "content": "Scheduled post content",
+        "scheduledFor": "2026-07-01T10:30:00.000Z",
+        "media": []
+      }
+    },
+    {
+      "id": "updatePost",
+      "name": "Update Post",
+      "method": "PUT",
+      "path": "/external/posts/{postId}",
+      "group": "Posts",
+      "scopes": ["posts:write"],
+      "description": "Updates a scheduled post.",
+      "pathParams": [
+        { "name": "postId", "required": true }
+      ],
+      "bodyExample": {
+        "content": "Updated scheduled content",
+        "scheduledFor": "2026-07-01T12:30:00.000Z",
+        "mediaUrls": []
+      }
+    },
+    {
+      "id": "deletePost",
+      "name": "Delete Post",
+      "method": "DELETE",
+      "path": "/external/posts/{postId}",
+      "group": "Posts",
+      "scopes": ["posts:write"],
+      "description": "Deletes a scheduled post.",
+      "pathParams": [
+        { "name": "postId", "required": true }
+      ]
+    },
+    {
+      "id": "publishPostNow",
+      "name": "Publish Post Now",
+      "method": "POST",
+      "path": "/external/posts/{postId}/publish-now",
+      "group": "Posts",
+      "scopes": ["posts:write"],
+      "description": "Immediately publishes a scheduled post.",
+      "pathParams": [
+        { "name": "postId", "required": true }
+      ]
+    },
+    {
+      "id": "addComment",
+      "name": "Add Comment",
+      "method": "POST",
+      "path": "/external/posts/{postId}/comments",
+      "group": "Posts",
+      "scopes": ["posts:write"],
+      "description": "Adds a comment to a post.",
+      "pathParams": [
+        { "name": "postId", "required": true }
+      ],
+      "bodyExample": {
+        "commentText": "Great insights. Thanks for sharing!"
+      }
+    },
+    {
+      "id": "checkVirality",
+      "name": "Check Virality",
+      "method": "POST",
+      "path": "/external/tools/virality",
+      "group": "Tools",
+      "scopes": ["tools:use"],
+      "description": "Analyzes content virality potential.",
+      "bodyExample": {
+        "content": "This is a sample LinkedIn post",
+        "language": "en"
+      }
+    },
+    {
+      "id": "createCarousel",
+      "name": "Create Carousel",
+      "method": "POST",
+      "path": "/external/carousel",
+      "group": "Carousel",
+      "scopes": ["carousel:write"],
+      "description": "Creates a carousel draft.",
+      "bodyExample": {
+        "topic": "How to grow on LinkedIn",
+        "numberOfSlides": 7,
+        "theme": "minimal"
+      }
+    },
+    {
+      "id": "getCarousel",
+      "name": "Get Carousel",
+      "method": "GET",
+      "path": "/external/carousel/{draftId}",
+      "group": "Carousel",
+      "scopes": ["carousel:read"],
+      "description": "Returns a carousel draft.",
+      "pathParams": [
+        { "name": "draftId", "required": true }
+      ]
+    },
+    {
+      "id": "updateCarousel",
+      "name": "Update Carousel",
+      "method": "PUT",
+      "path": "/external/carousel/{draftId}",
+      "group": "Carousel",
+      "scopes": ["carousel:write"],
+      "description": "Updates a carousel draft.",
+      "pathParams": [
+        { "name": "draftId", "required": true }
+      ],
+      "bodyExample": {
+        "title": "Updated carousel title",
+        "theme": "dark",
+        "slides": [
+          {
+            "headline": "Slide 1",
+            "body": "Updated slide copy"
+          }
+        ]
+      }
+    },
+    {
+      "id": "deleteCarousel",
+      "name": "Delete Carousel",
+      "method": "DELETE",
+      "path": "/external/carousel/{draftId}",
+      "group": "Carousel",
+      "scopes": ["carousel:write"],
+      "description": "Deletes a carousel draft.",
+      "pathParams": [
+        { "name": "draftId", "required": true }
+      ]
+    },
+    {
+      "id": "listWebhookSubscriptions",
+      "name": "List Webhook Subscriptions",
+      "method": "GET",
+      "path": "/external/webhooks/subscriptions",
+      "group": "Webhooks",
+      "scopes": ["webhooks:manage"],
+      "description": "Lists webhook subscriptions."
+    },
+    {
+      "id": "createWebhookSubscription",
+      "name": "Create Webhook Subscription",
+      "method": "POST",
+      "path": "/external/webhooks/subscriptions",
+      "group": "Webhooks",
+      "scopes": ["webhooks:manage"],
+      "description": "Creates a webhook subscription.",
+      "bodyExample": {
+        "targetUrl": "https://example.com/webhooks/reepl",
+        "eventTypes": ["post_published"],
+        "platform": "custom"
+      }
+    },
+    {
+      "id": "getWebhookSubscription",
+      "name": "Get Webhook Subscription",
+      "method": "GET",
+      "path": "/external/webhooks/subscriptions/{subscriptionId}",
+      "group": "Webhooks",
+      "scopes": ["webhooks:manage"],
+      "description": "Gets one webhook subscription.",
+      "pathParams": [
+        { "name": "subscriptionId", "required": true }
+      ]
+    },
+    {
+      "id": "updateWebhookSubscription",
+      "name": "Update Webhook Subscription",
+      "method": "PUT",
+      "path": "/external/webhooks/subscriptions/{subscriptionId}",
+      "group": "Webhooks",
+      "scopes": ["webhooks:manage"],
+      "description": "Updates a webhook subscription.",
+      "pathParams": [
+        { "name": "subscriptionId", "required": true }
+      ],
+      "bodyExample": {
+        "targetUrl": "https://example.com/webhooks/reepl-updated",
+        "eventTypes": ["post_published", "publish_failed"],
+        "isActive": true
+      }
+    },
+    {
+      "id": "deleteWebhookSubscription",
+      "name": "Delete Webhook Subscription",
+      "method": "DELETE",
+      "path": "/external/webhooks/subscriptions/{subscriptionId}",
+      "group": "Webhooks",
+      "scopes": ["webhooks:manage"],
+      "description": "Deletes a webhook subscription.",
+      "pathParams": [
+        { "name": "subscriptionId", "required": true }
+      ]
+    },
+    {
+      "id": "testWebhook",
+      "name": "Send Test Webhook",
+      "method": "POST",
+      "path": "/external/webhooks/test",
+      "group": "Webhooks",
+      "scopes": ["webhooks:manage"],
+      "description": "Sends a signed test webhook to a target URL.",
+      "bodyExample": {
+        "targetUrl": "https://example.com/webhooks/reepl",
+        "eventType": "post_published"
+      }
+    }
+  ]
+}
