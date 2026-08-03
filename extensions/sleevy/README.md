@@ -2,6 +2,8 @@
 
 Save links to Sleevy from Raycast and browse your saved library without leaving your keyboard.
 
+Learn more about the [Sleevy Raycast extension](https://sleevy.app/raycast) or read the [Sleevy API documentation](https://sleevy.app/docs).
+
 ## Setup
 
 The first time you run a Sleevy command, Raycast opens your browser to connect the extension to your Sleevy account. Approve the connection and you are returned to Raycast — no manual API key entry is required.
