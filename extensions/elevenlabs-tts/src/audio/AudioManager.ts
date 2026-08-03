@@ -334,14 +334,14 @@ export class AudioManager extends EventEmitter {
     const completion = new Promise<void>((resolve, reject) => {
       audioProcess.once("error", async (error) => {
         closed = true;
-        if (pid) await clearPlayback(pid);
+        if (pid) await clearPlayback(this.config.sessionId, pid);
         console.error("Audio player process error:", error);
         reject(error);
       });
 
       audioProcess.once("close", async (code, signal) => {
         closed = true;
-        if (pid) await clearPlayback(pid);
+        if (pid) await clearPlayback(this.config.sessionId, pid);
 
         if (code === 0 || signal === "SIGTERM") {
           console.log("Audio player process completed successfully");
@@ -356,12 +356,12 @@ export class AudioManager extends EventEmitter {
     if (!pid) throw new Error("Failed to start afplay");
 
     try {
-      await registerPlayback(pid, this.tempFile);
+      await registerPlayback(this.config.sessionId, pid, this.tempFile);
     } catch (error) {
       audioProcess.kill("SIGTERM");
       throw error;
     }
-    if (closed) await clearPlayback(pid);
+    if (closed) await clearPlayback(this.config.sessionId, pid);
     return completion;
   }
 

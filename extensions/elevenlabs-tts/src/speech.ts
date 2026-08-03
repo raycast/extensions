@@ -1,23 +1,26 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { AudioManager } from "./audio/AudioManager";
-import { stopActivePlayback } from "./audio/playback";
+import { beginSpeechSession, endSpeechSession, stopActivePlayback } from "./audio/playback";
 import { getTextPreview, getTextStats } from "./text/processing";
 import { prepareVoiceSettings } from "./voice/settings";
 
-async function stopExistingPlayback(): Promise<boolean> {
-  if (!(await stopActivePlayback())) return false;
-
+async function showActiveSessionStatus(): Promise<void> {
+  const stopped = await stopActivePlayback();
   await showToast({
     style: Toast.Style.Success,
-    title: "⏹️ Stopped",
+    title: stopped ? "⏹️ Stopped" : "🎙️ Already reading",
   });
-  return true;
 }
 
 export async function speakText(getText: () => Promise<string>): Promise<void> {
+  let sessionId: string | undefined;
   try {
-    if (await stopExistingPlayback()) return;
+    sessionId = await beginSpeechSession();
+    if (!sessionId) {
+      await showActiveSessionStatus();
+      return;
+    }
 
     await showToast({
       style: Toast.Style.Animated,
@@ -31,6 +34,7 @@ export async function speakText(getText: () => Promise<string>): Promise<void> {
     const settings = prepareVoiceSettings(preferences);
 
     const audioManager = new AudioManager({
+      sessionId,
       text,
       voiceId: preferences.voiceId,
       apiKey: preferences.elevenLabsApiKey,
@@ -50,5 +54,7 @@ export async function speakText(getText: () => Promise<string>): Promise<void> {
     await showFailureToast(error, {
       title: "Failed to play audio",
     });
+  } finally {
+    if (sessionId) await endSpeechSession(sessionId);
   }
 }

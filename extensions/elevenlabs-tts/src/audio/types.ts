@@ -29,6 +29,7 @@ export interface WSMessage {
  * Centralizes settings to reduce function argument counts
  */
 export interface StreamConfig {
+  sessionId: string;
   text: string;
   voiceId: string;
   apiKey: string;
