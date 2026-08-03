@@ -16,10 +16,13 @@ export default function RandomBusinessIdea() {
   );
   const idea = data?.idea;
 
+  if (isLoading) {
+    return <Detail isLoading markdown="" />;
+  }
+
   if (!idea) {
     return (
       <Detail
-        isLoading={isLoading}
         markdown={
           error
             ? "## Couldn’t load a business idea\n\nPlease wait a moment and try again."
