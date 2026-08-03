@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, Image, Keyboard, List } from "@raycas
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
 
+import { GalleryActionSection } from "./actions/gallery";
 import { RevealInFinderAction } from "./actions/reveal-in-finder";
 import { NoArtifactsEmptyView, NoMatchesEmptyView, emptyViewForProblem } from "./components/empty-views";
 import { formatRelativeDate } from "./utils/dates";
@@ -53,7 +54,7 @@ function ArtifactListItem({ artifact }: { artifact: Artifact }) {
       keywords={artifact.project ? [artifact.project] : undefined}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser title="Open Artifact" url={artifact.url} />
+          <Action.OpenInBrowser title="Open" url={artifact.url} />
           <Action.CopyToClipboard
             title="Copy Link"
             content={artifact.url}
@@ -65,24 +66,23 @@ function ArtifactListItem({ artifact }: { artifact: Artifact }) {
             shortcut={Keyboard.Shortcut.Common.CopyName}
           />
           {artifact.cwd ? (
-            <RevealInFinderAction
-              title="Open Project Folder"
-              path={artifact.cwd}
-              shortcut={Keyboard.Shortcut.Common.Open}
-            />
+            <RevealInFinderAction title="Open Folder" path={artifact.cwd} shortcut={Keyboard.Shortcut.Common.Open} />
           ) : null}
-          <RevealInFinderAction
-            title="Reveal Index File"
-            // The FILE, not its directory — `showInFinder` selects the target it
-            // is given, so passing the folder merely opened ~/.claude without
-            // highlighting anything.
-            path={INDEX_PATH}
-            // No `Common` member covers "reveal the backing config file", so a
-            // custom shortcut is correct. Plain object because `platforms` is
-            // macOS-only — a `{ macOS, Windows }` pair here would imply a
-            // portability this extension does not have.
-            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-          />
+          <GalleryActionSection />
+          <ActionPanel.Section>
+            <RevealInFinderAction
+              title="Reveal Index File"
+              // The FILE, not its directory — `showInFinder` selects the target
+              // it is given, so passing the folder merely opened ~/.claude
+              // without highlighting anything.
+              path={INDEX_PATH}
+              // No `Common` member covers "reveal the backing config file", so a
+              // custom shortcut is correct. Plain object because `platforms` is
+              // macOS-only — a `{ macOS, Windows }` pair here would imply a
+              // portability this extension does not have.
+              shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
