@@ -1,6 +1,6 @@
 # Kesha Voice Kit Changelog
 
-## [Sturdier setup detection] - {PR_MERGE_DATE}
+## [Sturdier setup detection] - 2026-08-03
 
 - Detect whether the engine is installed from the CLI's machine-readable status output instead of matching its wording, so a reworded CLI message can no longer be mistaken for a broken install. Older CLIs keep working through the previous check.
 - Refuse to start a session when the engine is installed but cannot run, instead of recording audio that could never be transcribed, and say how to repair it.
