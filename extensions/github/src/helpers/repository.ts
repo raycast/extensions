@@ -195,6 +195,76 @@ const formatRepositoryUrl = (repoNameWithOwner: string, protocol: "https" | "ssh
   protocol === "https" ? `https://github.com/${repoNameWithOwner}.git` : `git@github.com:${repoNameWithOwner}.git`;
 
 /**
+ * Rewrite relative links and images in a README so they render correctly in a
+ * Raycast `Detail` view.
+ *
+ * GitHub returns README content with paths relative to the repository, which
+ * Raycast cannot resolve on its own. Using the raw `download_url` of the README
+ * (e.g. `https://raw.githubusercontent.com/owner/repo/main/README.md`) as the
+ * base, relative image sources are rewritten to absolute `raw.githubusercontent.com`
+ * URLs (so they display) and relative links are rewritten to `github.com/.../blob/...`
+ * URLs (so they open the right page). Absolute URLs, anchors and other schemes are
+ * left untouched.
+ *
+ * @param markdown {string} Raw README markdown.
+ * @param rawDownloadUrl {string} The README's raw download URL from the GitHub API.
+ * @param readmePath {string} The README's path within the repository (e.g. `.github/README.md`),
+ *   used to resolve root-relative paths (starting with `/`) against the repository root.
+ * @returns {string} Markdown with relative URLs rewritten to absolute ones.
+ */
+export function rewriteReadmeUrls(markdown: string, rawDownloadUrl: string, readmePath = ""): string {
+  if (!rawDownloadUrl) {
+    return markdown;
+  }
+
+  // Insert `/blob/` after `owner/repo` instead of guessing the ref segment, so
+  // subdirectory READMEs (`.github/`, `docs/`) and slash-containing refs stay intact.
+  const toBlob = (raw: string) =>
+    raw.replace(/^https:\/\/raw\.githubusercontent\.com\/([^/]+)\/([^/]+)\//, "https://github.com/$1/$2/blob/");
+
+  // `*Dir` is the README's own directory (for normal relative paths); `*Root` is the
+  // repository root at the same ref (for root-relative paths that start with `/`).
+  const rawDir = rawDownloadUrl.slice(0, rawDownloadUrl.lastIndexOf("/") + 1);
+  const rawRoot = readmePath ? rawDownloadUrl.slice(0, rawDownloadUrl.length - readmePath.length) : rawDir;
+  const blobDir = toBlob(rawDir);
+  const blobRoot = toBlob(rawRoot);
+
+  const isAbsolute = (url: string) => /^[a-z][a-z0-9+.-]*:/i.test(url) || url.startsWith("//") || url.startsWith("#");
+
+  const resolve = (url: string, dirBase: string, rootBase: string) => {
+    const trimmed = url.trim();
+    if (!trimmed || isAbsolute(trimmed)) {
+      return url;
+    }
+    try {
+      return trimmed.startsWith("/")
+        ? new URL(trimmed.replace(/^\/+/, ""), rootBase).toString()
+        : new URL(trimmed, dirBase).toString();
+    } catch {
+      return url;
+    }
+  };
+
+  // Allow one level of balanced parentheses so filenames like `image(1).png`
+  // aren't truncated; the trailing group captures an optional title.
+  const destination = "((?:\\([^)]*\\)|[^()\\s])+)([^)]*)";
+  const imagePattern = new RegExp(`!\\[([^\\]]*)\\]\\(${destination}\\)`, "g");
+  const linkPattern = new RegExp(`(?<!!)\\[([^\\]]+)\\]\\(${destination}\\)`, "g");
+
+  return markdown
+    .replace(imagePattern, (_m, alt, url, tail) => `![${alt}](${resolve(url, rawDir, rawRoot)}${tail})`)
+    .replace(linkPattern, (_m, text, url, tail) => `[${text}](${resolve(url, blobDir, blobRoot)}${tail})`)
+    .replace(
+      /(<img[^>]+src=["'])([^"']+)(["'])/gi,
+      (_m, pre, url, post) => `${pre}${resolve(url, rawDir, rawRoot)}${post}`,
+    )
+    .replace(
+      /(<a[^>]+href=["'])([^"']+)(["'])/gi,
+      (_m, pre, url, post) => `${pre}${resolve(url, blobDir, blobRoot)}${post}`,
+    );
+}
+
+/**
  * Get the repository filter string based on the filter mode, repository list, and selected repository.
  *
  * @param {Preferences.MyIssues["repositoryFilterMode"]} filterMode - The mode to filter repositories ("all", "include", or "exclude").

@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Show README in repository actions] - 2026-08-03
+
+- Added a "Show Readme" action to the Search Repositories, My Latest Repositories, and My Starred Repositories commands that renders the repository's README inside Raycast, with relative links and images resolved to absolute URLs.
+
 ## [Mark draft pull requests as ready for review] - 2026-07-09
 
 - Added a "Ready for Review" action to pull request lists, shown for your own draft pull requests.
