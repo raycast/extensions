@@ -1,6 +1,6 @@
 # Vercast Changelog
 
-## [2.20] - 2026-07-15
+## [2.20] - 2026-08-03
 
 - Added AI Gateway leaderboards for popular models and creators
 - Added an AI Gateway Playground for sending prompts to language models
