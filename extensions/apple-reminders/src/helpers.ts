@@ -25,6 +25,9 @@ export function formatReminderTime(reminder: Reminder): string {
 }
 
 export function getDateString(date: string) {
+  return isFullDay(date) ? date : formatISO(date, { representation: "date" });
+}
+
 export function getTodayInLocalTime() {
   return formatISO(new Date(), { representation: "date" });
 }
