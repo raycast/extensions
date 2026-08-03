@@ -95,13 +95,22 @@ function PlaylistPicker({
 
   const refreshPlaylists = async () => {
     setIsLoading(true);
-    const discovered = await discoverPlaylists();
-    setPlaylists(discovered);
-    setIsLoading(false);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Playlist list refreshed",
-    });
+    try {
+      const discovered = await discoverPlaylists();
+      setPlaylists(discovered);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Playlist list refreshed",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Refresh failed",
+        message: String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   async function handleOpen(playlist: string) {

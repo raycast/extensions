@@ -33,13 +33,22 @@ export default function OpenProfile() {
 
   const refreshProfiles = async () => {
     setIsLoading(true);
-    const discovered = await discoverProfiles();
-    setProfiles(discovered);
-    setIsLoading(false);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Profile list refreshed",
-    });
+    try {
+      const discovered = await discoverProfiles();
+      setProfiles(discovered);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Profile list refreshed",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Refresh failed",
+        message: String(error),
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   async function handleOpen(profile: string) {
