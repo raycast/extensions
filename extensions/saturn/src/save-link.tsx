@@ -23,6 +23,7 @@ import {
   enqueueCapture,
   filterCollections,
   findDuplicateLink,
+  SATURN_APP_URL,
   sortCollections,
   type SaturnCollection,
   useSaturnLibrary,
@@ -85,29 +86,6 @@ function previewMarkdown(capture: PendingCapture): string {
     return `![](${fileUrlForLocalPath(capture.previewImagePath)}?raycast-height=420)`;
   }
   return "_Capturing page preview…_";
-}
-
-function AlreadySavedView({ collectionName }: { collectionName: string }) {
-  return (
-    <List navigationTitle="Already Saved">
-      <List.EmptyView
-        icon={Icon.CheckCircle}
-        title="Already saved"
-        description={`This link is already in “${collectionName}”.`}
-        actions={
-          <ActionPanel>
-            <Action
-              title="Dismiss"
-              onAction={() => {
-                clearPendingCapture();
-                popToRoot();
-              }}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>
-  );
 }
 
 function saveCaptureWithCollectionName(
@@ -283,17 +261,12 @@ function PendingCapturePicker({
     candidate.type === "link"
       ? findDuplicateLink(library.links, candidate.payload)
       : undefined;
-
-  if (duplicate) {
-    const dupCollection = library.collections.find(
-      (c) => c.id === duplicate.collectionId,
-    );
-    return (
-      <AlreadySavedView
-        collectionName={dupCollection?.name ?? "your library"}
-      />
-    );
-  }
+  const duplicateCollection = duplicate
+    ? library.collections.find((c) => c.id === duplicate.collectionId)
+    : undefined;
+  const duplicatePath = duplicateCollection
+    ? collectionPathName(duplicateCollection, collections)
+    : undefined;
 
   const detail = (
     <List.Item.Detail
@@ -317,6 +290,18 @@ function PendingCapturePicker({
               text={candidate.sourceApp}
             />
           ) : null}
+          {duplicatePath ? (
+            <List.Item.Detail.Metadata.Label
+              title="Already saved"
+              text={duplicatePath}
+            />
+          ) : null}
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Link
+            title="Saturn"
+            target={SATURN_APP_URL}
+            text="glaze.app/app/saturn"
+          />
         </List.Item.Detail.Metadata>
       }
     />
@@ -345,16 +330,21 @@ function PendingCapturePicker({
             <List.Item
               key="__create__"
               icon={Icon.Plus}
-              title={`Create collection "${trimmedQuery}"`}
+              title={`Create “${trimmedQuery}”`}
               detail={detail}
               actions={
                 <ActionPanel>
                   <Action
-                    title="Create and Save"
+                    title="Save to Saturn"
                     icon={Icon.Bookmark}
                     onAction={() =>
                       saveCaptureWithCollectionName(capture, trimmedQuery)
                     }
+                  />
+                  <Action.OpenInBrowser
+                    title="Open Saturn App"
+                    icon={Icon.Globe}
+                    url={SATURN_APP_URL}
                   />
                 </ActionPanel>
               }
@@ -366,12 +356,12 @@ function PendingCapturePicker({
               <List.Item
                 key={collection.id}
                 icon={collection.isInbox ? Icon.Tray : Icon.Folder}
-                title={pathName}
+                title={{ value: pathName, tooltip: pathName }}
                 detail={detail}
                 actions={
                   <ActionPanel>
                     <Action
-                      title="Save to Collection"
+                      title="Save to Saturn"
                       icon={Icon.Bookmark}
                       onAction={() =>
                         saveCapture(capture, collection, collections)
@@ -387,6 +377,11 @@ function PendingCapturePicker({
                           initialCollectionId={collection.id}
                         />
                       }
+                    />
+                    <Action.OpenInBrowser
+                      title="Open Saturn App"
+                      icon={Icon.Globe}
+                      url={SATURN_APP_URL}
                     />
                   </ActionPanel>
                 }

@@ -1,22 +1,44 @@
-# Saturn (Raycast extension)
+# Saturn
 
-Companion to the **Saturn** macOS app — **never lose a bookmark again**. Search and save bookmarks from Raycast without leaving your keyboard.
+**Bookmarks are text. Memory is visual.**
+
+Companion Raycast extension for the [Saturn](https://www.glaze.app/app/saturn-ewPgBX) macOS app.
+
+Saved a website and never opened it again? Stared at a folder of links trying to work out which one was the one?
+
+Saturn does one thing — capture websites so they're easy to find later. This extension brings that into Raycast: search your library and save from the keyboard.
+
+- Captures visual + text at Retina resolution, written to a folder on your Mac that you own. No account, no server.
+- Indexes every word of every page locally — search a sentence you half-remember from a site you can't name, and spot the answer as a thumbnail before you finish reading it.
+- Exploratory, playful UI keeps the bookmarks in order.
+
+Saturn — named after the planet that keeps what it captures.
 
 Source: [github.com/sachin-dabas/saturn-raycast](https://github.com/sachin-dabas/saturn-raycast)
 
 ## Requirements
 
-- **Saturn macOS app** installed and launched at least once (creates `~/Saturn/`)
+- **[Saturn macOS app](https://www.glaze.app/app/saturn-ewPgBX)** installed and launched at least once (creates `~/Saturn/`)
 - **macOS** with Raycast
 - For **Save to Saturn**: Saturn must be running (⌘B hands off from the app to Raycast)
 - For **full-text search**: a recent Saturn build that writes `~/Saturn/search-index.json` and `~/Saturn/page-texts.json` (older builds fall back to title/tag search)
+
+### Saturn app permissions
+
+In **System Settings → Privacy & Security**, grant Saturn:
+
+- Screen Recording
+- Accessibility
+- Automation (System Events + your browser)
+
+Restart Saturn after granting Screen Recording.
 
 No API keys, tokens, or Raycast preferences to configure.
 
 ## Commands
 
 - **Search Bookmarks** — type to search titles, tags, and extracted page text. Assign a **global hotkey** in Raycast (see below). Enter opens the bookmark in your default browser.
-- **Save to Saturn** — opened from Saturn with **⌘B** (Saturn must be running). You can also assign a Raycast hotkey for this command. Saturn’s in-app save panel is **⌘⌃L**; the global capture palette is **⌘⇧S**.
+- **Save to Saturn** — opened from Saturn with **⌘B** (Saturn must be running). You can also assign a Raycast hotkey for this command. In the Saturn app, **⌘⇧L** saves and **⌘⇧R** retrieves.
 
 ## Hotkeys
 
@@ -61,10 +83,10 @@ Links only — no other Saturn item types (text/color/image/file), no settings s
 ```
 npm install
 npm run dev
-npm test   # tokenizer parity + page-text/search/app-module fixtures
+npm test
 ```
 
-The search tokenizer (`src/lib/tokenize.ts`) is mirrored byte-identically in the Saturn app at `main/saturn/tokenize.ts` — `npm test` fails if the two copies drift.
+The search tokenizer (`src/lib/tokenize.ts`) is mirrored byte-identically in the Saturn app at `main/saturn/tokenize.ts` — app-parity tests fail if the two copies drift.
 
 ## Author
 

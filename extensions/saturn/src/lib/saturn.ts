@@ -21,6 +21,9 @@ export const SEARCH_INDEX_FILE = path.join(SATURN_ROOT, "search-index.json");
 export const PAGE_TEXTS_FILE = path.join(SATURN_ROOT, "page-texts.json");
 export const INBOX_DIR = path.join(SATURN_ROOT, "inbox");
 
+/** Public listing for the Saturn macOS app on Glaze. */
+export const SATURN_APP_URL = "https://www.glaze.app/app/saturn-ewPgBX";
+
 /**
  * Glaze per-app URL scheme for the Saturn macOS app (package id `1v0xag7h`).
  * Opens the library window on that collection: glaze-1v0xag7h-local://collection/<id>
@@ -323,10 +326,6 @@ export function domainFromUrl(url: string): string {
   } catch {
     return url;
   }
-}
-
-export function faviconUrl(domain: string): string {
-  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
 }
 
 /** Human-phrased relative time for metadata labels: "yesterday", "3 months ago". */

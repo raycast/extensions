@@ -3,18 +3,20 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Image,
   Keyboard,
   List,
   open,
   showToast,
   Toast,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import {
   SaturnCollection,
   SaturnLink,
+  SATURN_APP_URL,
   collectionDeepLink,
   domainFromUrl,
-  faviconUrl,
   relativeTime,
 } from "./saturn";
 import { buildDetailMarkdown, SearchResult } from "./search";
@@ -28,6 +30,21 @@ interface LinkListItemProps {
   match?: SearchResult;
   /** Records a frecency visit (opening or copying counts as using the link). */
   onVisit?: (link: SaturnLink) => void;
+}
+
+/**
+ * List row favicon via Raycast's provider + cache.
+ * Local Saturn captures stay in the detail markdown (not valid List icon sources).
+ */
+export function linkListIcon(link: SaturnLink): Image.ImageLike {
+  try {
+    return getFavicon(link.url, {
+      fallback: Icon.Link,
+      mask: Image.Mask.RoundedRectangle,
+    });
+  } catch {
+    return Icon.Link;
+  }
 }
 
 async function openAllInCollection(
@@ -97,7 +114,7 @@ export function LinkListItem({
   return (
     <List.Item
       id={link.id}
-      icon={{ source: faviconUrl(domain) }}
+      icon={linkListIcon(link)}
       title={link.title}
       accessories={accessories}
       detail={
@@ -133,6 +150,12 @@ export function LinkListItem({
                     ? relativeTime(link.lastOpenedAt)
                     : "Never opened"
                 }
+              />
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Link
+                title="Saturn"
+                target={SATURN_APP_URL}
+                text="glaze.app/app/saturn"
               />
             </List.Item.Detail.Metadata>
           }
@@ -179,6 +202,11 @@ export function LinkListItem({
               onAction={() => open(collectionDeepLink(collection.id))}
             />
           )}
+          <Action.OpenInBrowser
+            title="Open Saturn App"
+            icon={Icon.Globe}
+            url={SATURN_APP_URL}
+          />
         </ActionPanel>
       }
     />

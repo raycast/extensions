@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "saturn",
   "title": "Saturn",
-  "description": "Never lose a bookmark again. Search and save bookmarks with the Saturn macOS app.",
+  "description": "Bookmarks are text. Memory is visual. Search and save websites captured by the Saturn macOS app.",
   "icon": "app-icon.png",
   "author": "sachindabas",
   "platforms": [
@@ -42,6 +42,21 @@
       ]
     },
     {
+      "name": "browse-collections",
+      "title": "Browse Collections",
+      "subtitle": "Saturn",
+      "description": "Browse your Saturn collections and open a saved bookmark directly.",
+      "mode": "view",
+      "keywords": [
+        "saturn",
+        "collections",
+        "folders",
+        "bookmarks",
+        "links",
+        "saved"
+      ]
+    },
+    {
       "name": "save-link",
       "title": "Save to Saturn",
       "subtitle": "Saturn",
@@ -75,7 +90,8 @@
     "dev": "RAY_Target=x ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "node test/tokenizer-parity.mjs && node test/page-text-fixtures.mjs && node test/search-fixtures.mjs && node test/deep-link-fixtures.mjs && node test/app-modules-fixtures.mjs",
+    "test": "node test/deep-link-fixtures.mjs && node test/search-fixtures.mjs",
+    "test:app": "node test/tokenizer-parity.mjs && node test/page-text-fixtures.mjs && node test/app-modules-fixtures.mjs",
     "publish": "npx @raycast/api@latest publish"
   }
 }
