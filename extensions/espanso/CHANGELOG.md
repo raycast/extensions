@@ -1,6 +1,6 @@
 # Espanso Changelog
 
-## [Fix Espanso binary not being found] - {PR_MERGE_DATE}
+## [Fix Espanso binary not being found] - 2026-08-03
 
 ### Bug Fixes
 
