@@ -1,6 +1,6 @@
 # Rename Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-08-03
 
 - Fix a case-only rename silently overwriting a different file on case-sensitive volumes
 - Decide whether a rename target is the same file by inode identity rather than by lowercasing the path, so the overwrite guard and batch conflict detection are correct on any filesystem
