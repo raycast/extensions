@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFA05C"/>
+      <stop offset="0.52" stop-color="#EE6A3C"/>
+      <stop offset="1" stop-color="#C9412F"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.22" cy="0.14" r="0.85">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#bg)"/>
+  <rect x="0" y="0" width="512" height="512" rx="116" fill="url(#glow)"/>
+
+  <!-- the ceiling you are forecasting against -->
+  <line x1="80" y1="126" x2="438" y2="126" stroke="#FFFFFF" stroke-opacity="0.55"
+        stroke-width="10" stroke-linecap="round" stroke-dasharray="4 30"/>
+
+  <!-- measured usage so far -->
+  <path d="M92,372 C140,362 168,338 200,318 C232,298 240,288 262,272"
+        fill="none" stroke="#FFFFFF" stroke-width="30"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- forecast, running into the ceiling -->
+  <path d="M262,272 C300,246 330,204 356,172 C382,140 400,132 420,126"
+        fill="none" stroke="#FFFFFF" stroke-opacity="0.92" stroke-width="22"
+        stroke-linecap="round" stroke-dasharray="34 30"/>
+
+  <circle cx="420" cy="126" r="30" fill="#FFFFFF"/>
+  <circle cx="420" cy="126" r="13" fill="#E2563A"/>
+</svg>
