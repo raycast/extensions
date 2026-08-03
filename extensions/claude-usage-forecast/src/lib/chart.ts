@@ -8,8 +8,14 @@
 import { DOW_NAMES } from "./forecast";
 import { Forecast, ForecastPoint } from "./types";
 
-const W = 760;
-const H = 300;
+/**
+ * Rendered size. Raycast scales a markdown image to the pane width, so the only
+ * way to gain screen area is a taller aspect ratio — hence the deep canvas.
+ */
+export const CHART_W = 800;
+export const CHART_H = 480;
+const W = CHART_W;
+const H = CHART_H;
 // Extra top padding keeps the legend clear of the curve, which always ends high.
 const PAD = { top: 34, right: 18, bottom: 30, left: 38 };
 const PLOT_W = W - PAD.left - PAD.right;

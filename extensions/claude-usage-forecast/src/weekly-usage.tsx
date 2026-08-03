@@ -10,7 +10,13 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { join } from "node:path";
-import { buildChartSvg, sparkline, svgToDataUri } from "./lib/chart";
+import {
+  CHART_H,
+  CHART_W,
+  buildChartSvg,
+  sparkline,
+  svgToDataUri,
+} from "./lib/chart";
 import { formatDuration } from "./lib/forecast";
 import { load, severityOf, settings } from "./lib/load";
 import { Forecast } from "./lib/types";
@@ -46,12 +52,12 @@ function chartMarkdown(
         `chart-${Math.floor(Date.now() / 60000)}.svg`,
       );
       writeFileSync(p, svg);
-      return `![Weekly usage](file://${p}?raycast-width=760&raycast-height=300)\n\n`;
+      return `![Weekly usage](file://${p}?raycast-width=${CHART_W}&raycast-height=${CHART_H})\n\n`;
     } catch {
       return "";
     }
   }
-  return `![Weekly usage](${svgToDataUri(svg)}?raycast-width=760&raycast-height=300)\n\n`;
+  return `![Weekly usage](${svgToDataUri(svg)}?raycast-width=${CHART_W}&raycast-height=${CHART_H})\n\n`;
 }
 
 export default function Command() {
@@ -89,8 +95,6 @@ export default function Command() {
     s.chartMode === "blocks"
       ? `\`${sparkline(f.actual, 40)}\` actual\n\n\`${sparkline(f.projected, 40)}\` forecast\n`
       : "",
-    `## ${f.pctNow.toFixed(1)}% of the weekly limit used`,
-    "",
     f.warnings.length > 0
       ? `### Caveats\n\n${f.warnings.map((w) => `- ${w}`).join("\n")}`
       : "",
