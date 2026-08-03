@@ -799,6 +799,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.usemycontext.ai/mcp"],
     },
   },
+  {
+    name: "jobyap",
+    title: "JobYap",
+    description:
+      "Search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server; no auth required.",
+    icon: "https://raw.githubusercontent.com/jobyap/agent-skills/main/assets/logo.png",
+    homepage: "https://jobyap.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jobyap.com/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
