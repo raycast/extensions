@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nichefund-business-ideas",
   "title": "NicheFund Business Ideas",
   "description": "Discover why MicroSaaS ideas fail and find validated ideas worth building.",
