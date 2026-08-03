@@ -14,7 +14,7 @@
 import { readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { parsePathEntries } from "../utils/parsers";
+import { parseExports, parsePathEntries } from "../utils/parsers";
 import { getZshrcPath } from "./zsh";
 
 /** Three-valued answer for facts that may be undecidable. */
@@ -25,6 +25,7 @@ const shadowCache = new Map<string, string | null>();
 const existsCache = new Map<string, ResolvedFact>();
 const pluginCache = new Map<string, ResolvedFact>();
 let configPathDirsCache: string[] | null = null;
+let configContentCache: string | null | undefined;
 
 /** Clear all session caches (exposed for tests). */
 export function clearResolveCaches(): void {
@@ -32,6 +33,31 @@ export function clearResolveCaches(): void {
   existsCache.clear();
   pluginCache.clear();
   configPathDirsCache = null;
+  configContentCache = undefined;
+}
+
+/** The config file's content, read once per session; null when unreadable. */
+function getConfigContent(): string | null {
+  if (configContentCache !== undefined) {
+    return configContentCache;
+  }
+  try {
+    configContentCache = readFileSync(getZshrcPath(), "utf8");
+  } catch {
+    configContentCache = null;
+  }
+  return configContentCache;
+}
+
+/** The raw value of a variable exported in the config, or undefined. */
+function getConfigExport(variable: string): string | undefined {
+  const content = getConfigContent();
+  if (content === null) {
+    return undefined;
+  }
+  // Last assignment wins, as it would in the shell.
+  const matches = parseExports(content).filter((entry) => entry.variable === variable);
+  return matches.at(-1)?.value;
 }
 
 /**
@@ -43,7 +69,11 @@ export function clearResolveCaches(): void {
  * "missing".
  */
 export function expandUserPath(raw: string, home: string = homedir()): string | null {
-  const trimmed = raw.trim();
+  let trimmed = raw.trim();
+  // Shell operands are often quoted; the quotes are not part of the path.
+  if (trimmed.length >= 2 && (trimmed[0] === '"' || trimmed[0] === "'") && trimmed.endsWith(trimmed[0]!)) {
+    trimmed = trimmed.slice(1, -1);
+  }
   if (trimmed.length === 0) {
     return null;
   }
@@ -85,14 +115,12 @@ function getConfigPathDirs(home: string = homedir()): string[] {
     return configPathDirsCache;
   }
   let dirs: string[] = [];
-  try {
-    const content = readFileSync(getZshrcPath(), "utf8");
+  const content = getConfigContent();
+  if (content !== null) {
     dirs = parsePathEntries(content)
       .flatMap((entry) => entry.entry.split(":"))
       .map((dir) => expandUserPath(dir, home))
       .filter((dir): dir is string => dir !== null);
-  } catch {
-    // Unreadable config: fall back to the environment PATH alone.
   }
   configPathDirsCache = dirs;
   return dirs;
@@ -184,10 +212,17 @@ export function sourceFileExists(rawPath: string, home: string = homedir()): Res
  * Is an Oh My Zsh plugin present in the plugins directory?
  *
  * Checks `$ZSH_CUSTOM/plugins`, `$ZSH/plugins` and `~/.oh-my-zsh/plugins`
- * (custom first, mirroring OMZ's own precedence). When no plugins
- * directory exists at all — e.g. a different plugin manager — the answer
- * is "unknown", not "no": absence of Oh My Zsh says nothing about
- * whether zinit or antigen installed the plugin.
+ * (custom first, mirroring OMZ's own precedence). `ZSH` and `ZSH_CUSTOM`
+ * are taken from the process environment first, then from `export`
+ * declarations in the config file — Raycast's environment rarely carries
+ * them, but the user's zshrc often declares them.
+ *
+ * When no plugins directory exists at all — e.g. a different plugin
+ * manager — the answer is "unknown", not "no": absence of Oh My Zsh says
+ * nothing about whether zinit or antigen installed the plugin. The same
+ * applies when a declared root cannot be expanded without a shell: a
+ * plugin missing from the scannable roots may live in the unscannable
+ * one.
  */
 export function pluginInstalled(
   name: string,
@@ -198,34 +233,70 @@ export function pluginInstalled(
     return "unknown";
   }
 
-  const cacheKey = `${name}\0${home}\0${env["ZSH"] ?? ""}\0${env["ZSH_CUSTOM"] ?? ""}`;
+  const zshDecl = env["ZSH"] ?? getConfigExport("ZSH");
+  const customDecl = env["ZSH_CUSTOM"] ?? getConfigExport("ZSH_CUSTOM");
+
+  const cacheKey = `${name}\0${home}\0${zshDecl ?? ""}\0${customDecl ?? ""}`;
   const cached = pluginCache.get(cacheKey);
   if (cached !== undefined) {
     return cached;
   }
 
-  const omzRoot = (env["ZSH"] && expandUserPath(env["ZSH"], home)) || join(home, ".oh-my-zsh");
-  const customRoot = (env["ZSH_CUSTOM"] && expandUserPath(env["ZSH_CUSTOM"], home)) || join(omzRoot, "custom");
+  let hasUnresolvableRoot = false;
+  const resolveRoot = (decl: string | undefined, fallback: string): string => {
+    if (!decl) {
+      return fallback;
+    }
+    const expanded = expandUserPath(decl, home);
+    if (expanded === null) {
+      hasUnresolvableRoot = true;
+      return fallback;
+    }
+    return expanded;
+  };
+
+  const omzRoot = resolveRoot(zshDecl, join(home, ".oh-my-zsh"));
+  const customRoot = resolveRoot(customDecl, join(omzRoot, "custom"));
   const pluginRoots = [join(customRoot, "plugins"), join(omzRoot, "plugins")];
+
+  const isDefinitiveAbsence = (error: unknown): boolean => {
+    const code = error instanceof Error ? (error as NodeJS.ErrnoException).code : undefined;
+    return code === "ENOENT" || code === "ENOTDIR";
+  };
 
   let fact: ResolvedFact = "unknown";
   let sawPluginsDir = false;
+  let sawUndecidable = false;
   for (const root of pluginRoots) {
+    let rootIsDir = false;
     try {
-      if (!statSync(root).isDirectory()) {
-        continue;
+      rootIsDir = statSync(root).isDirectory();
+    } catch (error) {
+      // A root we cannot even stat (EACCES, …) may still hold the plugin.
+      if (!isDefinitiveAbsence(error)) {
+        sawUndecidable = true;
       }
-      sawPluginsDir = true;
+      continue;
+    }
+    if (!rootIsDir) {
+      continue;
+    }
+    sawPluginsDir = true;
+    try {
       if (statSync(join(root, name)).isDirectory()) {
         fact = "yes";
         break;
       }
-    } catch {
-      // Root or plugin directory missing — keep scanning.
+    } catch (error) {
+      if (!isDefinitiveAbsence(error)) {
+        sawUndecidable = true;
+      }
     }
   }
   if (fact !== "yes" && sawPluginsDir) {
-    fact = "no";
+    // A definite "no" is only safe when every declared root was actually
+    // scanned and every miss was a definitive absence.
+    fact = hasUnresolvableRoot || sawUndecidable ? "unknown" : "no";
   }
 
   pluginCache.set(cacheKey, fact);

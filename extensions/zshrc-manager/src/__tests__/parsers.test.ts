@@ -224,6 +224,28 @@ export NODE_ENV=development`;
       expect(result[0]).toEqual({ entry: "/usr/local/bin:$PATH", type: "export" });
     });
 
+    it("should parse typeset -x and declare -x PATH statements", () => {
+      const content = `typeset -x PATH="/custom/bin:$PATH"
+declare -x PATH="/declared/bin:$PATH"`;
+
+      const result = parsePathEntries(content);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ entry: "/custom/bin:$PATH", type: "export" });
+      expect(result[1]).toEqual({ entry: "/declared/bin:$PATH", type: "export" });
+    });
+
+    it("should parse PATH+= string append syntax", () => {
+      const content = `PATH+=:/custom/bin
+PATH+="/quoted/bin"`;
+
+      const result = parsePathEntries(content);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ entry: "/custom/bin", type: "append" });
+      expect(result[1]).toEqual({ entry: "/quoted/bin", type: "append" });
+    });
+
     it("should parse path+= array append syntax", () => {
       const content = `path+=(/usr/local/bin /opt/homebrew/bin)`;
 

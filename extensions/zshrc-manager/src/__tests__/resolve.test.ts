@@ -59,6 +59,13 @@ describe("resolve.ts", () => {
     it("passes plain absolute paths through unchanged", () => {
       expect(expandUserPath("/usr/local/bin/tool", "/Users/me")).toBe("/usr/local/bin/tool");
     });
+
+    it("strips matching surrounding quotes before expanding", () => {
+      expect(expandUserPath('"/opt/with space/file.zsh"', "/Users/me")).toBe("/opt/with space/file.zsh");
+      expect(expandUserPath('"$HOME/file.zsh"', "/Users/me")).toBe("/Users/me/file.zsh");
+      expect(expandUserPath("'/opt/plain.zsh'", "/Users/me")).toBe("/opt/plain.zsh");
+      expect(expandUserPath('"$cache_file"', "/Users/me")).toBeNull();
+    });
   });
 
   describe("findShadowedExecutable", () => {
@@ -110,6 +117,20 @@ describe("resolve.ts", () => {
       expect(findShadowedExecutable("configtool", "", undefined, tmpRoot)).toBe(join(configBin, "configtool"));
     });
 
+    it("scans PATH dirs declared via typeset -x and PATH+=", () => {
+      const typesetBin = join(tmpRoot, "typeset-bin");
+      const appendBin = join(tmpRoot, "append-bin");
+      mkdirSync(typesetBin);
+      mkdirSync(appendBin);
+      makeExecutable(join(typesetBin, "typesettool"));
+      makeExecutable(join(appendBin, "appendtool"));
+      mockZshrcPath = join(tmpRoot, ".zshrc");
+      writeFileSync(mockZshrcPath, `typeset -x PATH="${typesetBin}:$PATH"\nPATH+=:${appendBin}\n`);
+
+      expect(findShadowedExecutable("typesettool", "", undefined, tmpRoot)).toBe(join(typesetBin, "typesettool"));
+      expect(findShadowedExecutable("appendtool", "", undefined, tmpRoot)).toBe(join(appendBin, "appendtool"));
+    });
+
     it("caches results for the session", () => {
       const binDir = join(tmpRoot, "bin");
       mkdirSync(binDir);
@@ -136,6 +157,12 @@ describe("resolve.ts", () => {
     it("expands tilde against the provided home", () => {
       writeFileSync(join(tmpRoot, "themed.zsh"), "# zsh");
       expect(sourceFileExists("~/themed.zsh", tmpRoot)).toBe("yes");
+    });
+
+    it("reports yes for an existing file whose source operand is quoted", () => {
+      const file = join(tmpRoot, "quoted file.zsh");
+      writeFileSync(file, "# zsh");
+      expect(sourceFileExists(`"${file}"`, tmpRoot)).toBe("yes");
     });
 
     // Root bypasses permission checks, so the EACCES case cannot be
@@ -185,6 +212,26 @@ describe("resolve.ts", () => {
 
     it("reports unknown for an empty name", () => {
       expect(pluginInstalled("", tmpRoot, {})).toBe("unknown");
+    });
+
+    it("honors a ZSH_CUSTOM declared in the config when the environment lacks it", () => {
+      const custom = join(tmpRoot, "my-custom");
+      mkdirSync(join(custom, "plugins", "configplugin"), { recursive: true });
+      // Standard OMZ plugins dir exists but lacks the plugin — without the
+      // config-declared custom root this would report a false "no".
+      mkdirSync(join(tmpRoot, ".oh-my-zsh", "plugins"), { recursive: true });
+      mockZshrcPath = join(tmpRoot, ".zshrc");
+      writeFileSync(mockZshrcPath, `export ZSH_CUSTOM="${custom}"\n`);
+
+      expect(pluginInstalled("configplugin", tmpRoot, {})).toBe("yes");
+    });
+
+    it("reports unknown, not no, when a declared root cannot be expanded", () => {
+      mkdirSync(join(tmpRoot, ".oh-my-zsh", "plugins"), { recursive: true });
+      mockZshrcPath = join(tmpRoot, ".zshrc");
+      writeFileSync(mockZshrcPath, 'export ZSH_CUSTOM="$XDG_DATA_HOME/omz-custom"\n');
+
+      expect(pluginInstalled("maybe-there", tmpRoot, {})).toBe("unknown");
     });
   });
 });

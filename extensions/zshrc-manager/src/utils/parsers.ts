@@ -139,12 +139,20 @@ export function parsePathEntries(
 ): ReadonlyArray<{ entry: string; type: "export" | "append" | "prepend" | "set" }> {
   const result: Array<{ entry: string; type: "export" | "append" | "prepend" | "set" }> = [];
 
-  // Match export PATH="..."
-  const exportRegex = /^(?:\s*)export\s+PATH\s*=\s*["']?(.+?)["']?(?:\s*)$/gm;
+  // Match export PATH="...", typeset -x PATH="...", declare -x PATH="..."
+  const exportRegex = /^(?:\s*)(?:export|(?:typeset|declare)(?:\s+-[A-Za-z]+)*)\s+PATH\s*=\s*["']?(.+?)["']?(?:\s*)$/gm;
   let match: RegExpExecArray | null;
   while ((match = exportRegex.exec(content)) !== null) {
     if (match[1]) {
       result.push({ entry: match[1], type: "export" });
+    }
+  }
+
+  // Match PATH+=:/dir and PATH+="/dir" - string append
+  const stringAppendRegex = /^(?:\s*)PATH\+=\s*["']?:?(.+?)["']?(?:\s*)$/gm;
+  while ((match = stringAppendRegex.exec(content)) !== null) {
+    if (match[1] && !match[1].startsWith("(")) {
+      result.push({ entry: match[1], type: "append" });
     }
   }
 

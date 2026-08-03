@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { Color } from "@raycast/api";
+import { Color, Icon } from "@raycast/api";
 import { findShadowedExecutable, pluginInstalled, sourceFileExists } from "../lib/resolve";
 import { generateAliasWarning } from "../aliases";
 import { generateSourceWarning } from "../sources";
@@ -39,6 +39,7 @@ describe("generateAliasWarning", () => {
 
     const warning = generateAliasWarning(a, [a, b]);
     expect(warning?.type).toBe("duplicate");
+    expect(warning?.icon).toBe(Icon.ExclamationMark);
     expect(warning?.color).toBe(Color.Yellow);
     expect(mockShadow).not.toHaveBeenCalled();
   });
@@ -50,6 +51,7 @@ describe("generateAliasWarning", () => {
     const warning = generateAliasWarning(a, [a]);
     expect(warning?.type).toBe("conflict");
     expect(warning?.message).toBe("Shadows /bin/cat");
+    expect(warning?.icon).toBe(Icon.ExclamationMark);
     expect(warning?.color).toBe(Color.Orange);
   });
 
@@ -66,6 +68,7 @@ describe("generateSourceWarning", () => {
     const warning = generateSourceWarning({ path: "/gone.zsh", section: "S", sectionStartLine: 1 });
     expect(warning?.type).toBe("broken");
     expect(warning?.message).toBe("Source file missing");
+    expect(warning?.icon).toBe(Icon.ExclamationMark);
     expect(warning?.color).toBe(Color.Red);
   });
 
@@ -81,6 +84,7 @@ describe("generatePluginWarning", () => {
     const warning = generatePluginWarning({ name: "ghost", section: "S", sectionStartLine: 1 });
     expect(warning?.type).toBe("broken");
     expect(warning?.message).toBe("Plugin not installed");
+    expect(warning?.icon).toBe(Icon.ExclamationMark);
     expect(warning?.color).toBe(Color.Red);
   });
 
