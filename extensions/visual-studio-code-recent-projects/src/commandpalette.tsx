@@ -93,6 +93,7 @@ function CommandListItem(props: { command: CommandMetadata }) {
   };
   return (
     <List.Item
+      icon={Icon.Terminal}
       title={title(c)}
       actions={
         <ActionPanel>

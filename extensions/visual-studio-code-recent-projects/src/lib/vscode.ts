@@ -258,7 +258,7 @@ export function getProductJSONPath(): string {
 
 class VSCodeCLI {
   private cliFilename: string;
-  private execOptions: child_process.ExecFileOptions | undefined;
+  private execOptions: child_process.ExecFileSyncOptions | undefined;
   constructor(cliFilename: string) {
     this.cliFilename = `"${cliFilename}"`;
     this.execOptions = isWin ? { shell: true } : undefined;

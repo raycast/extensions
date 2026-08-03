@@ -361,35 +361,35 @@ async function saveEntries(
 ) {
   const data = JSON.stringify({ entries });
 
+  let DatabaseSync;
   try {
     // `node:sqlite` is available on Node 22.13+ (which Raycast bundles) and works on
     // all platforms, unlike the `sqlite3` CLI which only ships with macOS.
-    const { DatabaseSync } = await import("node:sqlite");
-    const database = new DatabaseSync(databasePath);
-
-    try {
-      database.exec("BEGIN");
-      const statement = database.prepare("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)");
-      for (const storageKey of storageKeys) {
-        statement.run(storageKey, data);
-      }
-      database.exec("COMMIT");
-    } catch (error) {
-      database.exec("ROLLBACK");
-      throw error;
-    } finally {
-      database.close();
-    }
-    return;
+    ({ DatabaseSync } = await import("node:sqlite"));
   } catch {
     // Fall back to the `sqlite3` CLI on runtimes without `node:sqlite`.
+    const escapedData = data.replace(/'/g, "''");
+    const query = storageKeys
+      .map((storageKey) => `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('${storageKey}', '${escapedData}');`)
+      .join("\n");
+    await execFilePromise("sqlite3", [databasePath, query]);
+    return;
   }
 
-  const escapedData = data.replace(/'/g, "''");
-  const query = storageKeys
-    .map((storageKey) => `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('${storageKey}', '${escapedData}');`)
-    .join("\n");
-  await execFilePromise("sqlite3", [databasePath, query]);
+  const database = new DatabaseSync(databasePath);
+  try {
+    database.exec("BEGIN");
+    const statement = database.prepare("INSERT OR REPLACE INTO ItemTable (key, value) VALUES (?, ?)");
+    for (const storageKey of storageKeys) {
+      statement.run(storageKey, data);
+    }
+    database.exec("COMMIT");
+  } catch (error) {
+    database.exec("ROLLBACK");
+    throw error;
+  } finally {
+    database.close();
+  }
 }
 
 function getFallbackEntries(): EntryLike[] {
