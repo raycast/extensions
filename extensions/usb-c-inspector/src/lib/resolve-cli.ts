@@ -5,10 +5,6 @@ import path from "path";
 
 import { cachedCliPath } from "./paths";
 
-export interface Preferences {
-  whatcablePath?: string;
-}
-
 const APP_HELPER_PATHS = [
   "/Applications/WhatCable.app/Contents/Helpers/whatcable",
   path.join(process.env.HOME ?? "", "Applications/WhatCable.app/Contents/Helpers/whatcable"),

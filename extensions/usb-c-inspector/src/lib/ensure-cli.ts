@@ -115,6 +115,9 @@ async function installFromGitHub(): Promise<string> {
   }
 }
 
+/** Coalesce concurrent installs onto one in-flight promise (shared supportPath target). */
+let installInFlight: Promise<string> | null = null;
+
 /**
  * Resolve a usable WhatCable CLI path, downloading the official release when needed.
  */
@@ -124,13 +127,25 @@ export async function ensureCli(options?: { forceDownload?: boolean }): Promise<
     if (existing) {
       return existing;
     }
-  } else {
-    // Force re-download: remove cached copy so a fresh zip is installed.
-    await rm(cachedCliDir(), { recursive: true, force: true });
-    await LocalStorage.removeItem(VERSION_KEY);
   }
 
-  return installFromGitHub();
+  if (!installInFlight) {
+    installInFlight = (async () => {
+      if (options?.forceDownload) {
+        // Force re-download: remove cached copy so a fresh zip is installed.
+        await rm(cachedCliDir(), { recursive: true, force: true });
+        await LocalStorage.removeItem(VERSION_KEY);
+      }
+      return installFromGitHub();
+    })().finally(() => {
+      installInFlight = null;
+    });
+  } else if (options?.forceDownload) {
+    await installInFlight;
+    return ensureCli({ forceDownload: true });
+  }
+
+  return installInFlight;
 }
 
 export async function getCachedCliVersion(): Promise<string | undefined> {
