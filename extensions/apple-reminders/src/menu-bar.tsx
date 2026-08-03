@@ -22,7 +22,7 @@ import {
   setDueDate as setReminderDueDate,
 } from "swift:../swift/AppleReminders";
 
-import { getAttachedUrls, getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
+import { formatReminderTime, getAttachedUrls, getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
 import { sortByDate } from "./hooks/useViewReminders";
 
@@ -215,18 +215,20 @@ export default function Command() {
           {section.items.map((reminder) => {
             const attachedUrls = getAttachedUrls(reminder);
 
+            const formattedTime = formatReminderTime(reminder);
+            const timePrefix = formattedTime ? `${formattedTime}  ` : "";
+
             return (
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
-                title={truncate(
-                  addPriorityToTitle(
-                    displayListTitleForMenuBarReminders
-                      ? addListTitle(reminder.title, reminder.list?.title)
-                      : reminder.title,
-                    reminder.priority,
-                  ),
-                )}
+                title={`${timePrefix}${addPriorityToTitle(
+                  displayListTitleForMenuBarReminders
+                    ? addListTitle(reminder.title, reminder.list?.title)
+                    : reminder.title,
+                  reminder.priority,
+                )}`}
+                subtitle={formattedTime}
               >
                 <MenuBarExtra.Item
                   title="Open Reminder"
