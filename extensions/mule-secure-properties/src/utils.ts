@@ -456,6 +456,12 @@ export const runSecurePropertiesOperation = async (options: SecurePropertiesOpti
 const SHELL_SINGLE_QUOTE_ESCAPE = String.raw`'\''`;
 
 export const shellQuote = (value: string): string => {
+  if (process.platform === "win32") {
+    const escaped = value
+      .replace(/(\\*)"/g, (_match, backslashes: string) => `${backslashes}${backslashes}\\"`)
+      .replace(/(\\+)$/g, "$1$1");
+    return `"${escaped}"`;
+  }
   if (value === "") {
     return "''";
   }
