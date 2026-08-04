@@ -1,6 +1,6 @@
 # Handy Changelog
 
-## [Improve Linux/Vicinae compatibility] - {PR_MERGE_DATE}
+## [Improve Linux/Vicinae compatibility] - 2026-08-04
 
 ### Changed
 
