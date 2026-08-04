@@ -88,10 +88,11 @@ export interface RegistryEntries {
 const P = PARSING_CONSTANTS.PATTERNS;
 
 /**
- * Tokenizes zsh array body lines into elements, honoring the two pieces
- * of zsh syntax that whitespace-splitting gets wrong: inline comments
- * (`#` at start of word) end the line, and quoted elements may contain
- * whitespace. Quotes are stripped from the returned elements.
+ * Tokenizes zsh array body lines into elements, honoring the pieces of
+ * zsh syntax that whitespace-splitting gets wrong: inline comments
+ * (`#` at start of word) end the line, quoted elements may contain
+ * whitespace, and backslashes escape. Quotes are stripped from the
+ * returned elements.
  */
 export function tokenizeArrayBody(bodyLines: string[]): string[] {
   const tokens: string[] = [];
@@ -103,11 +104,38 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
     let quote: '"' | "'" | null = null;
     for (let i = 0; i < line.length; i += 1) {
       const ch = line[i]!;
-      if (quote) {
-        if (ch === quote) {
+      if (quote === "'") {
+        // Inside single quotes nothing escapes, not even backslash.
+        if (ch === "'") {
           quote = null;
         } else {
           current += ch;
+        }
+        continue;
+      }
+      if (quote === '"') {
+        if (ch === "\\") {
+          const next = line[i + 1];
+          // Inside double quotes a backslash escapes only these; before
+          // anything else it stays a literal backslash.
+          if (next === '"' || next === "\\" || next === "$" || next === "`") {
+            current += next;
+            i += 1;
+          } else {
+            current += ch;
+          }
+        } else if (ch === '"') {
+          quote = null;
+        } else {
+          current += ch;
+        }
+        continue;
+      }
+      if (ch === "\\") {
+        const next = line[i + 1];
+        if (next !== undefined) {
+          current += next;
+          i += 1;
         }
         continue;
       }
@@ -136,14 +164,47 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
 }
 
 /**
- * PATH/FPATH declaration forms. Each variable ("PATH"/"path",
- * "FPATH"/"fpath") gets the same family of matchers. Order matters:
- * the first matching form wins for a given line.
+ * Index of the first `)` that actually closes an array — i.e. is neither
+ * inside quotes nor backslash-escaped — or -1. Shares its quote and
+ * escape semantics with `tokenizeArrayBody`, so termination and
+ * tokenization can never disagree about what a quote covers.
  */
-function matchPathLike(line: string, upper: string, lower: string): PathLikeMatch[] | null {
+function findUnquotedCloseParen(text: string): number {
+  let quote: '"' | "'" | null = null;
+  for (let i = 0; i < text.length; i += 1) {
+    const ch = text[i]!;
+    if (quote === "'") {
+      if (ch === "'") quote = null;
+      continue;
+    }
+    if (ch === "\\") {
+      // Skipping the escaped char is right in both remaining states: it
+      // only changes scanning when it hides a quote or a `)`.
+      i += 1;
+      continue;
+    }
+    if (quote === '"') {
+      if (ch === '"') quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      continue;
+    }
+    if (ch === ")") return i;
+  }
+  return -1;
+}
+
+/**
+ * Scalar PATH/FPATH declaration forms. Each variable ("PATH", "FPATH")
+ * gets the same family of matchers. Order matters: the first matching
+ * form wins for a given line. Array forms (`path=(…)`, `fpath+=(…)`) are
+ * handled by the quote-aware array scanner in `extractDetailed`, which
+ * runs before this and consumes those lines.
+ */
+function matchPathLike(line: string, upper: string): PathLikeMatch[] | null {
   const out = (entry: string, type: PathLikeMatch["type"]): PathLikeMatch[] => [{ entry, type, line: 0 }];
-  const split = (list: string, type: PathLikeMatch["type"]): PathLikeMatch[] =>
-    tokenizeArrayBody([list]).map((entry) => ({ entry, type, line: 0 }));
 
   let m = line.match(
     new RegExp(
@@ -154,12 +215,6 @@ function matchPathLike(line: string, upper: string, lower: string): PathLikeMatc
 
   m = line.match(new RegExp(`^(?:\\s*)${upper}\\+=\\s*["']?:?(.+?)["']?(?:\\s*)$`));
   if (m?.[1] && !m[1].startsWith("(")) return out(m[1], "append");
-
-  m = line.match(new RegExp(`^(?:\\s*)${lower}\\+=\\s*\\(([^)]+)\\)(?:\\s*)$`));
-  if (m?.[1]) return split(m[1], "append");
-
-  m = line.match(new RegExp(`^(?:\\s*)${lower}=\\s*\\(([^)]+)\\)(?:\\s*)$`));
-  if (m?.[1]) return split(m[1], "set");
 
   m = line.match(new RegExp(`^(?:\\s*)${upper}\\s*=\\s*["']?\\$${upper}:(.+?)["']?(?:\\s*)$`));
   if (m?.[1]) return out(m[1], "append");
@@ -259,24 +314,43 @@ export function extractDetailed(content: string): DetailedExtraction {
     if (raw.length > FILE_CONSTANTS.MAX_LINE_LENGTH) continue;
     const line = index + 1;
 
-    // Multi-line array declarations (`plugins=(`, `path+=(`, …) — common
-    // in Oh My Zsh configs — are consumed as one declaration attributed
-    // to their opening line.
-    const arrayOpen = raw.match(/^(\s*)(plugins|path|fpath)(\+?)=\s*\(([^)]*)$/);
-    if (arrayOpen && !raw.includes(")")) {
-      const parts: string[] = [arrayOpen[4] ?? ""];
-      let closeIndex = index + 1;
-      while (closeIndex < lines.length) {
-        const bodyLine = lines[closeIndex] ?? "";
-        const closePos = bodyLine.indexOf(")");
-        if (closePos !== -1) {
-          parts.push(bodyLine.slice(0, closePos));
-          break;
+    // Array declarations (`plugins=(git docker)`, `path+=(`, …) —
+    // single-line or spanning several lines as is common in Oh My Zsh
+    // configs — are consumed as one declaration attributed to their
+    // opening line. Close-paren detection is quote-aware, so a `)`
+    // inside a quoted element does not terminate the array.
+    const arrayOpen = raw.match(/^(\s*)(plugins|path|fpath)(\+?)=\s*\((.*)$/);
+    if (arrayOpen) {
+      const firstBody = arrayOpen[4] ?? "";
+      const parts: string[] = [];
+      let closeIndex = -1;
+
+      const sameLineClose = findUnquotedCloseParen(firstBody);
+      if (sameLineClose !== -1) {
+        // Single line — only when nothing but whitespace or a comment
+        // follows the close.
+        const trailing = firstBody.slice(sameLineClose + 1).trim();
+        if (trailing === "" || trailing.startsWith("#")) {
+          parts.push(firstBody.slice(0, sameLineClose));
+          closeIndex = index;
         }
-        parts.push(bodyLine);
-        closeIndex += 1;
+      } else {
+        parts.push(firstBody);
+        let scan = index + 1;
+        while (scan < lines.length) {
+          const bodyLine = lines[scan] ?? "";
+          const closePos = findUnquotedCloseParen(bodyLine);
+          if (closePos !== -1) {
+            parts.push(bodyLine.slice(0, closePos));
+            closeIndex = scan;
+            break;
+          }
+          parts.push(bodyLine);
+          scan += 1;
+        }
       }
-      if (closeIndex < lines.length) {
+
+      if (closeIndex !== -1) {
         const elements = tokenizeArrayBody(parts);
         const variable = arrayOpen[2]!;
         const type: PathLikeMatch["type"] = arrayOpen[3] === "+" ? "append" : "set";
@@ -309,11 +383,11 @@ export function extractDetailed(content: string): DetailedExtraction {
       result.exports.push({ variable: m[1], value: m[2], line });
     }
 
-    const pathMatches = matchPathLike(raw, "PATH", "path");
+    const pathMatches = matchPathLike(raw, "PATH");
     if (pathMatches) {
       result.pathEntries.push(...withLine(pathMatches, line));
     }
-    const fpathMatches = matchPathLike(raw, "FPATH", "fpath");
+    const fpathMatches = matchPathLike(raw, "FPATH");
     if (fpathMatches) {
       result.fpathEntries.push(...withLine(fpathMatches, line));
     }
@@ -330,15 +404,6 @@ export function extractDetailed(content: string): DetailedExtraction {
     m = raw.match(P.SETOPT);
     if (m?.[1]) {
       result.setopts.push({ option: m[1], line });
-      continue;
-    }
-
-    m = raw.match(P.PLUGIN);
-    if (m?.[1]) {
-      for (const name of tokenizeArrayBody([m[1]])) {
-        result.plugins.push({ name, line });
-      }
-      matchedLines.add(line);
       continue;
     }
 

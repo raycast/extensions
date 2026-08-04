@@ -252,6 +252,30 @@ describe("parser unification", () => {
       const content = 'path+=("/opt/my tools/bin" /usr/local/bin)';
       expect(extractEntries(content).pathEntries.map((p) => p.entry)).toEqual(["/opt/my tools/bin", "/usr/local/bin"]);
     });
+
+    it("a quoted close paren does not terminate a single-line array", () => {
+      const content = 'path+=("/opt/my (tools)/bin" /usr/local/bin)';
+      expect(extractEntries(content).pathEntries.map((p) => p.entry)).toEqual([
+        "/opt/my (tools)/bin",
+        "/usr/local/bin",
+      ]);
+    });
+
+    it("a quoted close paren does not terminate a multi-line array", () => {
+      const content = ["plugins=(", '  "my (cool) plugin"', "  docker", ")"].join("\n");
+      expect(extractEntries(content).plugins.map((p) => p.name)).toEqual(["my (cool) plugin", "docker"]);
+    });
+
+    it("escaped quotes inside double-quoted elements stay part of the element", () => {
+      expect(tokenizeArrayBody(['"my\\" plugin" docker'])).toEqual(['my" plugin', "docker"]);
+      const content = 'plugins=("my\\" plugin" docker)';
+      expect(extractEntries(content).plugins.map((p) => p.name)).toEqual(['my" plugin', "docker"]);
+    });
+
+    it("backslashes escape outside quotes but not inside single quotes", () => {
+      expect(tokenizeArrayBody(["my\\ plugin docker"])).toEqual(["my plugin", "docker"]);
+      expect(tokenizeArrayBody(["'a\\b' next"])).toEqual(["a\\b", "next"]);
+    });
   });
 
   describe("Other counts lines the registry did not recognize", () => {
