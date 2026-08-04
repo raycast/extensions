@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   closeMainWindow,
-  environment,
   Icon,
   Keyboard,
   List,
@@ -13,7 +12,6 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import * as path from "path";
 import { useState } from "react";
 import { Unless, When } from "react-if";
 import useAsyncEffect from "use-async-effect";
@@ -83,7 +81,7 @@ export default function ManageInstances() {
             title={instance.name}
             accessories={instance.favorite ? [{ icon: Icon.Star, tooltip: "Favorited" }] : []}
             icon={{
-              source: instance.icon ?? path.join(environment.assetsPath, "instance-icon.png"),
+              source: instance.icon ?? "instance-icon.png",
             }}
             actions={
               <ActionPanel>
