@@ -76,6 +76,12 @@
       "title": "View Portfolio",
       "subtitle": "Schwab Portfolio",
       "description": "View all Schwab account positions and balances",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
       "mode": "view"
     },
     {
@@ -83,6 +89,12 @@
       "title": "Ticker Lookup",
       "subtitle": "Schwab Portfolio",
       "description": "Search for stock and ETF ticker symbols",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
       "mode": "view"
     },
     {
@@ -90,6 +102,12 @@
       "title": "Market Overview",
       "subtitle": "Schwab Portfolio",
       "description": "Indexes and top market movers",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
       "mode": "view"
     },
     {
@@ -97,6 +115,12 @@
       "title": "Watchlist",
       "subtitle": "Schwab Portfolio",
       "description": "Track symbols without holding them",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
       "mode": "view"
     },
     {
@@ -104,6 +128,12 @@
       "title": "Recent Orders",
       "subtitle": "Schwab Portfolio",
       "description": "Orders placed across your accounts in the last 30 days",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
       "mode": "view"
     },
     {
@@ -111,6 +141,12 @@
       "title": "Portfolio Menu Bar",
       "subtitle": "Schwab Portfolio",
       "description": "Quick portfolio summary in the menu bar",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
       "mode": "menu-bar",
       "interval": "5m"
     }
@@ -172,8 +208,12 @@
           }
         },
         "expected": [
-          { "callsTool": "get-portfolio" },
-          { "includes": "254,310" }
+          {
+            "callsTool": "get-portfolio"
+          },
+          {
+            "includes": "254,310"
+          }
         ]
       },
       {
@@ -194,10 +234,16 @@
           {
             "callsTool": {
               "name": "get-quote",
-              "arguments": { "symbols": { "includes": "AAPL" } }
+              "arguments": {
+                "symbols": {
+                  "includes": "AAPL"
+                }
+              }
             }
           },
-          { "includes": "211.42" }
+          {
+            "includes": "211.42"
+          }
         ]
       },
       {
@@ -205,39 +251,59 @@
         "mocks": {
           "get-market-movers": {
             "gainers": [
-              { "symbol": "NVDA", "description": "NVIDIA CORP", "lastPrice": 182.11, "changePercent": 4.8 }
+              {
+                "symbol": "NVDA",
+                "description": "NVIDIA CORP",
+                "lastPrice": 182.11,
+                "changePercent": 4.8
+              }
             ],
             "losers": [
-              { "symbol": "TSLA", "description": "TESLA INC", "lastPrice": 244.5, "changePercent": -3.9 }
+              {
+                "symbol": "TSLA",
+                "description": "TESLA INC",
+                "lastPrice": 244.5,
+                "changePercent": -3.9
+              }
             ]
           }
         },
         "expected": [
-          { "callsTool": "get-market-movers" },
-          { "meetsCriteria": "Mentions both gainers and losers" }
+          {
+            "callsTool": "get-market-movers"
+          },
+          {
+            "meetsCriteria": "Mentions both gainers and losers"
+          }
         ]
       },
       {
         "input": "@schwab-portfolio buy 10 shares of AAPL",
         "mocks": {},
         "expected": [
-          { "not": { "callsTool": "get-portfolio" } },
-          { "meetsCriteria": "Explains that it cannot place trades because access is read-only" }
+          {
+            "not": {
+              "callsTool": "get-portfolio"
+            }
+          },
+          {
+            "meetsCriteria": "Explains that it cannot place trades because access is read-only"
+          }
         ]
       }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.104.23",
+    "@raycast/api": "1.104.23",
     "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^20.0.0",
-    "@types/react": "^19.0.0",
-    "eslint": "^9.0.0",
-    "prettier": "^3.0.0",
-    "typescript": "^5.6.0"
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "5.6.3"
   },
   "scripts": {
     "build": "ray build",
@@ -245,5 +311,9 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -41,7 +41,7 @@ export function TickerSearchResults({ results, isLoading, searchText, onSearchCh
               <Action.CopyToClipboard
                 title="Copy Ticker"
                 content={instrument.symbol}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
             </ActionPanel>
           }

@@ -1,4 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
+import { normalizeMoverItems } from "../lib/movers";
 import { getMovers } from "../lib/schwab-client";
 import type { MoverItem } from "../types/quotes";
 
@@ -26,11 +27,8 @@ export function useMovers() {
         // Schwab's sort parameter is unreliable (both calls can return mixed
         // signs), so merge, normalize, and partition by actual sign ourselves.
         const bySymbol = new Map<string, MoverItem>();
-        for (const item of [...(up.screeners ?? []), ...(down.screeners ?? [])]) {
-          if (!item.symbol || item.netPercentChange == null) continue;
-          const changePercent =
-            Math.abs(item.netPercentChange) < 1 ? item.netPercentChange * 100 : item.netPercentChange;
-          bySymbol.set(item.symbol, { ...item, netPercentChange: changePercent });
+        for (const item of normalizeMoverItems([...(up.screeners ?? []), ...(down.screeners ?? [])])) {
+          bySymbol.set(item.symbol, item);
         }
 
         const movers = Array.from(bySymbol.values());

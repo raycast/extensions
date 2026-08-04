@@ -1,20 +1,17 @@
 import { withAccessToken } from "@raycast/utils";
+import { normalizeMoverItems } from "../lib/movers";
 import { schwabOAuth } from "../lib/oauth";
 import { getMovers } from "../lib/schwab-client";
 import type { MoverItem } from "../types/quotes";
 
 function summarize(items: MoverItem[]) {
-  return items
-    .filter((item) => item.symbol)
+  return normalizeMoverItems(items)
     .slice(0, 10)
     .map((item) => ({
       symbol: item.symbol,
       description: item.description,
       lastPrice: item.lastPrice,
-      changePercent:
-        item.netPercentChange != null && Math.abs(item.netPercentChange) < 1
-          ? item.netPercentChange * 100
-          : item.netPercentChange,
+      changePercent: item.netPercentChange,
       volume: item.volume,
     }));
 }

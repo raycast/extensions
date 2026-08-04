@@ -1,4 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { searchInstruments } from "../lib/schwab-client";
 
 export function useInstrumentSearch(query: string) {
@@ -15,7 +15,10 @@ export function useInstrumentSearch(query: string) {
     [normalizedQuery],
     {
       keepPreviousData: true,
-      execute: normalizedQuery.length >= 1,
+      execute: normalizedQuery.length >= 2,
+      onError: (error) => {
+        void showFailureToast(error, { title: "Failed to search instruments" });
+      },
     },
   );
 }

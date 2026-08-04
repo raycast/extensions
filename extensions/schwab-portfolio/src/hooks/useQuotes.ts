@@ -1,4 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getQuotes } from "../lib/schwab-client";
 import type { QuoteResponse } from "../types/quotes";
 
@@ -15,6 +15,9 @@ export function useQuotes(symbols: string[]) {
     {
       keepPreviousData: true,
       execute: symbols.length > 0,
+      onError: (error) => {
+        void showFailureToast(error, { title: "Failed to load quotes" });
+      },
     },
   );
 }

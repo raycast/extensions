@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 import { hasSchwabCredentials, schwabOAuth } from "../lib/oauth";
@@ -69,7 +69,7 @@ function Watchlist() {
                   title="Remove from Watchlist"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => removeSymbol(symbol)}
                 />
                 <Action.CopyToClipboard title="Copy Ticker" content={symbol} />

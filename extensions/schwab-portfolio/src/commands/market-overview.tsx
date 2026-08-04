@@ -67,7 +67,19 @@ function MarketOverview() {
           const accessories: List.Item.Accessory[] = [{ text: formatNumber(quote?.lastPrice) }];
           const changeAccessory = percentAccessory(indexPercentChange(quote));
           if (changeAccessory) accessories.push(changeAccessory);
-          return <List.Item key={symbol} title={title} accessories={accessories} />;
+          return (
+            <List.Item
+              key={symbol}
+              title={title}
+              accessories={accessories}
+              actions={
+                <ActionPanel>
+                  <Action.Push title="View Details" icon={Icon.Eye} target={<SymbolDetail symbol={symbol} />} />
+                  <Action.CopyToClipboard title="Copy Ticker" content={symbol} />
+                </ActionPanel>
+              }
+            />
+          );
         })}
       </List.Section>
 

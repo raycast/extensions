@@ -3,19 +3,42 @@
  * Regular hours: 9:30 AM - 4:00 PM ET, Monday - Friday.
  * Does not account for holidays — a future improvement could use the Schwab market hours API.
  */
+const easternTimeFormatter = new Intl.DateTimeFormat("en-US", {
+  timeZone: "America/New_York",
+  weekday: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hourCycle: "h23",
+});
+
+const weekdayNumbers: Record<string, number> = {
+  Sun: 0,
+  Mon: 1,
+  Tue: 2,
+  Wed: 3,
+  Thu: 4,
+  Fri: 5,
+  Sat: 6,
+};
+
+function getEasternTime(date: Date) {
+  const parts = easternTimeFormatter.formatToParts(date);
+  const weekday = parts.find((part) => part.type === "weekday")?.value;
+  const hour = parts.find((part) => part.type === "hour")?.value;
+  const minute = parts.find((part) => part.type === "minute")?.value;
+
+  return {
+    day: weekdayNumbers[weekday ?? "Sun"],
+    hours: Number(hour ?? 0),
+    minutes: Number(minute ?? 0),
+  };
+}
+
 export function isMarketOpen(): boolean {
-  const now = new Date();
-
-  // Convert to ET (Eastern Time)
-  const etString = now.toLocaleString("en-US", { timeZone: "America/New_York" });
-  const et = new Date(etString);
-
-  const day = et.getDay();
+  const { day, hours, minutes } = getEasternTime(new Date());
   // Weekend check (0 = Sunday, 6 = Saturday)
   if (day === 0 || day === 6) return false;
 
-  const hours = et.getHours();
-  const minutes = et.getMinutes();
   const timeInMinutes = hours * 60 + minutes;
 
   // Market open: 9:30 AM (570 min) to 4:00 PM (960 min)
@@ -27,17 +50,12 @@ export function getMarketStatusText(): string {
     return "Market Open";
   }
 
-  const now = new Date();
-  const etString = now.toLocaleString("en-US", { timeZone: "America/New_York" });
-  const et = new Date(etString);
-  const day = et.getDay();
+  const { day, hours, minutes } = getEasternTime(new Date());
 
   if (day === 0 || day === 6) {
     return "Market Closed (Weekend)";
   }
 
-  const hours = et.getHours();
-  const minutes = et.getMinutes();
   const timeInMinutes = hours * 60 + minutes;
 
   if (timeInMinutes < 570) {

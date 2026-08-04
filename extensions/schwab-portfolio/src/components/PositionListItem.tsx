@@ -57,7 +57,7 @@ export function PositionListItem({ position, quote }: PositionListItemProps) {
             icon={Icon.Eye}
             target={<SymbolDetail symbol={symbol} position={position} quote={quote} />}
           />
-          <Action.CopyToClipboard title="Copy Ticker" content={symbol} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard title="Copy Ticker" content={symbol} shortcut={Keyboard.Shortcut.Common.Copy} />
           <Action.OpenInBrowser
             title="Open in Schwab"
             url={SCHWAB_POSITIONS_URL}

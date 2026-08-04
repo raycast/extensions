@@ -1,4 +1,4 @@
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { getPriceHistory } from "../lib/schwab-client";
 import { getTimeframe } from "../lib/constants";
 
@@ -14,6 +14,9 @@ export function usePriceHistory(symbol: string, timeframeValue: string) {
     {
       keepPreviousData: true,
       execute: !!symbol,
+      onError: (error) => {
+        void showFailureToast(error, { title: "Failed to load price history" });
+      },
     },
   );
 }

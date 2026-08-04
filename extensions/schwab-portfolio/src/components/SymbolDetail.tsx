@@ -177,7 +177,10 @@ export function SymbolDetail({ symbol, quote: passedQuote, position }: SymbolDet
             <Action.Push
               title="Browse Price Data"
               icon={Icon.List}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "d" },
+                Windows: { modifiers: ["ctrl"], key: "d" },
+              }}
               target={<PriceHistoryList symbol={symbol} timeframeValue={timeframe} />}
             />
           )}
@@ -190,7 +193,7 @@ export function SymbolDetail({ symbol, quote: passedQuote, position }: SymbolDet
               await showToast({ style: Toast.Style.Success, title: `${symbol} added to Watchlist` });
             }}
           />
-          <Action.CopyToClipboard title="Copy Ticker" content={symbol} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+          <Action.CopyToClipboard title="Copy Ticker" content={symbol} shortcut={Keyboard.Shortcut.Common.Copy} />
           <Action.OpenInBrowser
             title={position ? "Open in Schwab" : "Search on Schwab"}
             url={position ? SCHWAB_POSITIONS_URL : `https://www.schwab.com/research/stocks/${symbol}`}

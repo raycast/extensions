@@ -1,4 +1,4 @@
-import { Detail, ActionPanel, Action, Color, Icon, getPreferenceValues } from "@raycast/api";
+import { Detail, ActionPanel, Action, Color, Icon, Keyboard, getPreferenceValues } from "@raycast/api";
 import { useState, useMemo } from "react";
 import type { Account } from "../types/accounts";
 import { usePortfolioHistory } from "../hooks/usePortfolioHistory";
@@ -119,7 +119,7 @@ export function PortfolioChart({ accounts }: PortfolioChartProps) {
           <Action.CopyToClipboard
             title="Copy Total Value"
             content={formatCurrency(metrics?.currentValue ?? 0)}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         </ActionPanel>
       }
