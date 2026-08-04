@@ -464,7 +464,8 @@ export async function searchServices(query: string): Promise<Service[]> {
       html = res.body;
       break;
     }
-    if (res.status !== 404) throw new Error(`HTTP ${res.status} — ${url}`);
+    if (res.status !== 404 && res.status !== 403)
+      throw new Error(`HTTP ${res.status} — ${url}`);
   }
 
   // Last resort: try the status page directly from the slugified query
