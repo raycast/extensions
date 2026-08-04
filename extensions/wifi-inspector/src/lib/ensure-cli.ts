@@ -127,6 +127,10 @@ let installInFlight: Promise<string> | null = null;
 
 /**
  * Resolve a usable macwifi-cli path, downloading the official release when needed.
+ *
+ * Force re-download must NOT delete the working cache first — `installFromGitHub`
+ * only replaces the cache after the new archive is downloaded, checksum-verified,
+ * and staged. A failed download therefore leaves the previous CLI intact.
  */
 export async function ensureCli(options?: { forceDownload?: boolean }): Promise<string> {
   if (!options?.forceDownload) {
@@ -137,13 +141,7 @@ export async function ensureCli(options?: { forceDownload?: boolean }): Promise<
   }
 
   if (!installInFlight) {
-    installInFlight = (async () => {
-      if (options?.forceDownload) {
-        await rm(cachedCliDir(), { recursive: true, force: true });
-        await LocalStorage.removeItem(VERSION_KEY);
-      }
-      return installFromGitHub();
-    })().finally(() => {
+    installInFlight = installFromGitHub().finally(() => {
       installInFlight = null;
     });
   } else if (options?.forceDownload) {

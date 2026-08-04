@@ -18,11 +18,22 @@ export class SpeedTestError extends Error {
 const DOWNLOAD_URL = "https://speed.cloudflare.com/__down";
 const UPLOAD_URL = "https://speed.cloudflare.com/__up";
 
+const LATENCY_TIMEOUT_MS = 10_000;
+const DOWNLOAD_TIMEOUT_MS = 30_000;
+const UPLOAD_TIMEOUT_MS = 30_000;
+const OVERALL_TIMEOUT_MS = 120_000;
+
 export type SpeedTestPhase = "latency" | "download" | "upload";
 
 export interface SpeedTestProgress {
   phase: SpeedTestPhase;
   message: string;
+}
+
+export interface SpeedTestOptions {
+  /** Cancel the in-flight test (e.g. when the Raycast view unmounts). */
+  signal?: AbortSignal;
+  onProgress?: (progress: SpeedTestProgress) => void;
 }
 
 function median(values: number[]): number {
@@ -44,13 +55,62 @@ function bytesToMbps(bytes: number, durationMs: number): number {
   return (bytes * 8) / (durationMs / 1000) / 1_000_000;
 }
 
-async function measureLatencyMs(samples = 5): Promise<number> {
+function combineSignals(signals: AbortSignal[]): AbortSignal {
+  const controller = new AbortController();
+  const onAbort = () => {
+    controller.abort();
+  };
+  for (const signal of signals) {
+    if (signal.aborted) {
+      controller.abort();
+      return controller.signal;
+    }
+    signal.addEventListener("abort", onAbort, { once: true });
+  }
+  return controller.signal;
+}
+
+function timeoutSignal(timeoutMs: number): AbortSignal {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  // Avoid keeping the event loop alive solely for this timer in long sessions.
+  if (typeof timer === "object" && "unref" in timer && typeof timer.unref === "function") {
+    timer.unref();
+  }
+  return controller.signal;
+}
+
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+  outerSignal?: AbortSignal,
+): Promise<Response> {
+  const signal = outerSignal ? combineSignals([outerSignal, timeoutSignal(timeoutMs)]) : timeoutSignal(timeoutMs);
+
+  try {
+    return await fetch(url, { ...init, signal });
+  } catch (error) {
+    if (outerSignal?.aborted) {
+      throw new SpeedTestError("Speed test cancelled.");
+    }
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new SpeedTestError(`Request timed out after ${Math.round(timeoutMs / 1000)}s.`);
+    }
+    throw error;
+  }
+}
+
+async function measureLatencyMs(samples = 5, signal?: AbortSignal): Promise<number> {
   const timings: number[] = [];
   for (let i = 0; i < samples; i++) {
     const started = performance.now();
-    const response = await fetch(`${DOWNLOAD_URL}?bytes=0&r=${Date.now()}-${i}`, {
-      method: "GET",
-    });
+    const response = await fetchWithTimeout(
+      `${DOWNLOAD_URL}?bytes=0&r=${Date.now()}-${i}`,
+      { method: "GET" },
+      LATENCY_TIMEOUT_MS,
+      signal,
+    );
     if (!response.ok) {
       throw new SpeedTestError(`Latency probe failed (${response.status}).`);
     }
@@ -60,13 +120,16 @@ async function measureLatencyMs(samples = 5): Promise<number> {
   return median(timings);
 }
 
-async function measureDownloadMbps(byteSizes: number[]): Promise<number> {
+async function measureDownloadMbps(byteSizes: number[], signal?: AbortSignal): Promise<number> {
   const rates: number[] = [];
   for (const size of byteSizes) {
     const started = performance.now();
-    const response = await fetch(`${DOWNLOAD_URL}?bytes=${size}&r=${Date.now()}`, {
-      method: "GET",
-    });
+    const response = await fetchWithTimeout(
+      `${DOWNLOAD_URL}?bytes=${size}&r=${Date.now()}`,
+      { method: "GET" },
+      DOWNLOAD_TIMEOUT_MS,
+      signal,
+    );
     if (!response.ok) {
       throw new SpeedTestError(`Download test failed (${response.status}).`);
     }
@@ -77,16 +140,21 @@ async function measureDownloadMbps(byteSizes: number[]): Promise<number> {
   return Math.max(...rates);
 }
 
-async function measureUploadMbps(byteSizes: number[]): Promise<number> {
+async function measureUploadMbps(byteSizes: number[], signal?: AbortSignal): Promise<number> {
   const rates: number[] = [];
   for (const size of byteSizes) {
     const body = Buffer.alloc(size, 0x61);
     const started = performance.now();
-    const response = await fetch(`${UPLOAD_URL}?r=${Date.now()}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/octet-stream" },
-      body,
-    });
+    const response = await fetchWithTimeout(
+      `${UPLOAD_URL}?r=${Date.now()}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/octet-stream" },
+        body,
+      },
+      UPLOAD_TIMEOUT_MS,
+      signal,
+    );
     if (!response.ok) {
       throw new SpeedTestError(`Upload test failed (${response.status}).`);
     }
@@ -101,17 +169,22 @@ async function measureUploadMbps(byteSizes: number[]): Promise<number> {
  * Lightweight Cloudflare edge speed test (download / upload / idle latency).
  * No external CLI — runs entirely inside the Raycast Node runtime.
  */
-export async function runSpeedTest(onProgress?: (progress: SpeedTestProgress) => void): Promise<SpeedTestResult> {
+export async function runSpeedTest(options: SpeedTestOptions = {}): Promise<SpeedTestResult> {
+  const { onProgress, signal } = options;
+  const overallSignal = signal
+    ? combineSignals([signal, timeoutSignal(OVERALL_TIMEOUT_MS)])
+    : timeoutSignal(OVERALL_TIMEOUT_MS);
+
   try {
     onProgress?.({ phase: "latency", message: "Measuring latency…" });
-    const latencyMs = await measureLatencyMs(5);
+    const latencyMs = await measureLatencyMs(5, overallSignal);
 
     onProgress?.({ phase: "download", message: "Measuring download…" });
     // Warm-up + progressively larger payloads; report peak observed Mbps.
-    const downloadMbps = await measureDownloadMbps([250_000, 1_000_000, 5_000_000, 10_000_000]);
+    const downloadMbps = await measureDownloadMbps([250_000, 1_000_000, 5_000_000, 10_000_000], overallSignal);
 
     onProgress?.({ phase: "upload", message: "Measuring upload…" });
-    const uploadMbps = await measureUploadMbps([250_000, 1_000_000, 5_000_000]);
+    const uploadMbps = await measureUploadMbps([250_000, 1_000_000, 5_000_000], overallSignal);
 
     return {
       downloadMbps,

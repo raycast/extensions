@@ -22,5 +22,5 @@ SOFTWARE.
 
 ---
 
-This extension embeds/downloads the WhatCable CLI from https://github.com/darrylmorley/whatcable
+This extension embeds/downloads the macwifi-cli from https://github.com/jaisonerick/macwifi-cli
 (MIT License). See that repository for the CLI copyright and license terms.

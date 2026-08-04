@@ -77,6 +77,13 @@ export function NetworksCommand({ mode, searchBarPlaceholder, emptyTitle, emptyD
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const autoStartedForRef = useRef<string | null>(null);
   const isSpeedTestingRef = useRef(false);
+  const speedAbortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    return () => {
+      speedAbortRef.current?.abort();
+    };
+  }, []);
 
   useEffect(() => {
     if (!environment.isDevelopment) {
@@ -140,6 +147,10 @@ export function NetworksCommand({ mode, searchBarPlaceholder, emptyTitle, emptyD
         return;
       }
 
+      speedAbortRef.current?.abort();
+      const abortController = new AbortController();
+      speedAbortRef.current = abortController;
+
       isSpeedTestingRef.current = true;
       setIsSpeedTesting(true);
       setSpeedSsid(ssid);
@@ -149,19 +160,29 @@ export function NetworksCommand({ mode, searchBarPlaceholder, emptyTitle, emptyD
         message: ssid,
       });
       try {
-        const result = await runSpeedTest((progress) => {
-          toast.message = progress.message;
+        const result = await runSpeedTest({
+          signal: abortController.signal,
+          onProgress: (progress) => {
+            toast.message = progress.message;
+          },
         });
         setSpeedResult(result);
         toast.style = Toast.Style.Success;
         toast.title = "Speed test complete";
         toast.message = `↓ ${formatMbps(result.downloadMbps)} · ↑ ${formatMbps(result.uploadMbps)} · ${Math.round(result.latencyMs)} ms`;
       } catch (err) {
+        if (abortController.signal.aborted) {
+          toast.hide();
+          return;
+        }
         toast.style = Toast.Style.Failure;
         toast.title = "Speed test failed";
         toast.message =
           err instanceof SpeedTestError ? err.message : err instanceof Error ? err.message : "Unknown error";
       } finally {
+        if (speedAbortRef.current === abortController) {
+          speedAbortRef.current = null;
+        }
         isSpeedTestingRef.current = false;
         setIsSpeedTesting(false);
       }
