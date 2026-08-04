@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [More Readable Search Results] - {PR_MERGE_DATE}
+## [More Readable Search Results] - 2026-08-04
 
 ### Improved
 
