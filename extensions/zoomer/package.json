@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoomer",
   "title": "Zoomer",
   "description": "Capture screenshots, control recordings, and open Zoomer from Raycast.",
@@ -9,8 +10,7 @@
     "macOS"
   ],
   "categories": [
-    "Productivity",
-    "Developer Tools"
+    "Applications"
   ],
   "commands": [
     {

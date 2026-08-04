@@ -6,12 +6,8 @@ import {
   zoomerUrl,
 } from "./lib/zoomer";
 
-type Arguments = {
-  section?: string;
-};
-
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.OpenSettings }>,
 ) {
   const section = normalizeSettingsSection(props.arguments.section);
   await openZoomerUrl(zoomerUrl("open-settings", { section }));

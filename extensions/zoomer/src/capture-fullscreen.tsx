@@ -6,12 +6,8 @@ import {
   zoomerUrl,
 } from "./lib/zoomer";
 
-type Arguments = {
-  output?: string;
-};
-
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.CaptureFullscreen }>,
 ) {
   const output = normalizeScreenshotOutput(props.arguments.output);
   await openZoomerUrl(zoomerUrl("capture-fullscreen", { output }));
