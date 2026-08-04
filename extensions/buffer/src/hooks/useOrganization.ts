@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { usePromise } from "@raycast/utils";
 import {
   getOrganizations,
@@ -30,25 +30,33 @@ export function useOrganization(): UseOrganizationResult {
     }
   }, [organizations]);
 
-  const fetchChannels = useCallback(async (org: Organization) => {
-    setChannelsLoading(true);
-    try {
-      const result = await getChannels(org.id);
-      setChannels(result);
-    } catch (err) {
-      console.error("Failed to fetch channels:", err);
-      setChannels(undefined);
-    } finally {
-      setChannelsLoading(false);
-    }
-  }, []);
-
   useEffect(() => {
-    if (selectedOrg) {
-      fetchChannels(selectedOrg);
-    } else {
-      setChannels(undefined);
+    // Clear the previous organization's channels immediately (rather than waiting for the
+    // new fetch to resolve) so a stale channel from the old organization can never be
+    // selected or submitted while the new organization's channels are loading.
+    setChannels(undefined);
+
+    if (!selectedOrg) {
+      return;
     }
+
+    let cancelled = false;
+    setChannelsLoading(true);
+    getChannels(selectedOrg.id)
+      .then((result) => {
+        if (!cancelled) setChannels(result);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch channels:", err);
+        if (!cancelled) setChannels(undefined);
+      })
+      .finally(() => {
+        if (!cancelled) setChannelsLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedOrg]);
 
   const needsOrgPicker = (organizations?.length ?? 0) > 1;

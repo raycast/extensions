@@ -119,8 +119,8 @@ describe("buildGoogleBusinessMetadata", () => {
       ...base,
       googlePostType: "offer",
       googleOfferTitle: "Big Sale",
-      googleOfferStartDate: new Date("2026-03-15T14:30:00.000Z"),
-      googleOfferEndDate: new Date("2026-03-20T09:00:00.000Z"),
+      googleOfferStartDate: new Date(2026, 2, 15, 14, 30),
+      googleOfferEndDate: new Date(2026, 2, 20, 9, 0),
       googleOfferCode: "SAVE20",
     });
 
@@ -143,8 +143,8 @@ describe("buildGoogleBusinessMetadata", () => {
       ...base,
       googlePostType: "event",
       googleEventTitle: "Conference",
-      googleEventStartDate: new Date("2026-03-15T14:30:00.000Z"),
-      googleEventEndDate: new Date("2026-03-16T09:00:00.000Z"),
+      googleEventStartDate: new Date(2026, 2, 15, 14, 30),
+      googleEventEndDate: new Date(2026, 2, 16, 9, 0),
     });
 
     expect(result.google?.detailsEvent).toEqual({
@@ -160,8 +160,8 @@ describe("buildGoogleBusinessMetadata", () => {
       ...base,
       googlePostType: "event",
       googleEventTitle: "Launch Party",
-      googleEventStartDate: new Date("2026-03-15T14:30:00.000Z"),
-      googleEventEndDate: new Date("2026-03-15T23:00:00.000Z"),
+      googleEventStartDate: new Date(2026, 2, 15, 14, 30),
+      googleEventEndDate: new Date(2026, 2, 15, 23, 0),
       googleEventHasTime: true,
       googleEventStartTime: "10:00",
       googleEventEndTime: "18:00",
@@ -169,8 +169,8 @@ describe("buildGoogleBusinessMetadata", () => {
 
     expect(result.google?.detailsEvent).toEqual({
       title: "Launch Party",
-      startDate: "2026-03-15T10:00:00.000Z",
-      endDate: "2026-03-15T18:00:00.000Z",
+      startDate: new Date(2026, 2, 15, 10, 0).toISOString(),
+      endDate: new Date(2026, 2, 15, 18, 0).toISOString(),
       isFullDayEvent: false,
     });
   });

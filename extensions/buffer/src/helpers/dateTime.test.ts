@@ -6,14 +6,14 @@ import {
 } from "./dateTime";
 
 describe("toDateOnlyIso", () => {
-  it("truncates a date to midnight UTC", () => {
-    const date = new Date("2026-03-15T14:30:00.000Z");
+  it("truncates a date to midnight UTC using its local calendar date", () => {
+    const date = new Date(2026, 2, 15, 14, 30);
     expect(toDateOnlyIso(date)).toBe("2026-03-15T00:00:00.000Z");
   });
 
   it("keeps the calendar date stable regardless of the input time of day", () => {
-    const morning = new Date("2026-03-15T00:01:00.000Z");
-    const night = new Date("2026-03-15T23:59:00.000Z");
+    const morning = new Date(2026, 2, 15, 0, 1);
+    const night = new Date(2026, 2, 15, 23, 59);
     expect(toDateOnlyIso(morning)).toBe(toDateOnlyIso(night));
   });
 });
@@ -34,13 +34,15 @@ describe("TIME_FORMAT_REGEX", () => {
 });
 
 describe("combineDateAndTime", () => {
-  it("combines the calendar date with the given HH:mm time", () => {
-    const date = new Date("2026-03-15T00:00:00.000Z");
-    expect(combineDateAndTime(date, "14:30")).toBe("2026-03-15T14:30:00.000Z");
+  it("combines the calendar date with the given HH:mm time in the local timezone", () => {
+    const date = new Date(2026, 2, 15);
+    const expected = new Date(2026, 2, 15, 14, 30).toISOString();
+    expect(combineDateAndTime(date, "14:30")).toBe(expected);
   });
 
   it("ignores any pre-existing time-of-day on the date and uses only its calendar date", () => {
-    const date = new Date("2026-03-15T23:59:00.000Z");
-    expect(combineDateAndTime(date, "09:00")).toBe("2026-03-15T09:00:00.000Z");
+    const date = new Date(2026, 2, 15, 23, 59);
+    const expected = new Date(2026, 2, 15, 9, 0).toISOString();
+    expect(combineDateAndTime(date, "09:00")).toBe(expected);
   });
 });

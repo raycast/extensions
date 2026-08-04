@@ -136,6 +136,13 @@ export default function CreatePostCommand() {
     }
   }
 
+  // Clear the previously selected channel whenever the organization changes so a channel
+  // from the old organization can never remain selected (and thus submitted) while the new
+  // organization's channels are loading or after they've loaded.
+  useEffect(() => {
+    setSelectedChannelId(undefined);
+  }, [selectedOrg?.id]);
+
   useEffect(() => {
     if (!isPinterest || !selectedChannelId) {
       setPinterestBoards(undefined);
@@ -316,6 +323,7 @@ export default function CreatePostCommand() {
       <Form.Dropdown
         id="channelId"
         title="Channel"
+        value={selectedChannelId ?? ""}
         onChange={handleChannelChange}
       >
         {channels?.map((ch) => (
