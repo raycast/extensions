@@ -78,8 +78,7 @@ export const DEMO_OUTPUT: WhatCableOutput = {
       },
       dataLink: {
         summary: "Thunderbolt 4",
-        detail:
-          "Thunderbolt 4 tunnel is up. External SSD is negotiating full 40Gbps bandwidth over a certified cable.",
+        detail: "Thunderbolt 4 tunnel is up. External SSD is negotiating full 40Gbps bandwidth over a certified cable.",
         bottleneck: "none",
         isWarning: false,
       },

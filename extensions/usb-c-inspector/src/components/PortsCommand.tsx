@@ -81,19 +81,18 @@ export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDe
     return all;
   }, [data?.output.ports, filter]);
 
-  const demoActions =
-    environment.isDevelopment ? (
-      useDemoData ? (
-        <Action title="Use Live CLI Data" icon={Icon.Terminal} onAction={disableDemoData} />
-      ) : (
-        <Action
-          title="Use Demo Data (Screenshots)"
-          icon={Icon.Image}
-          onAction={enableDemoData}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-        />
-      )
-    ) : null;
+  const demoActions = environment.isDevelopment ? (
+    useDemoData ? (
+      <Action title="Use Live CLI Data" icon={Icon.Terminal} onAction={disableDemoData} />
+    ) : (
+      <Action
+        title="Use Demo Data (Screenshots)"
+        icon={Icon.Image}
+        onAction={enableDemoData}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      />
+    )
+  ) : null;
 
   if (error && !data) {
     const message =

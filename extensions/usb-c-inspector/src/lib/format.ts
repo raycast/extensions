@@ -71,7 +71,11 @@ function cableQuality(port: Port): string | null {
     return null;
   }
   if (cable.certification?.listings?.length) {
-    const rating = cable.currentRating ? ` (${cable.currentRating})` : cable.maxWatts != null ? ` (${cable.maxWatts}W)` : "";
+    const rating = cable.currentRating
+      ? ` (${cable.currentRating})`
+      : cable.maxWatts != null
+        ? ` (${cable.maxWatts}W)`
+        : "";
     return `Certified${rating}`;
   }
   if (cable.currentRating && cable.maxWatts != null) {
