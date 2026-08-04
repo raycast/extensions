@@ -1,6 +1,6 @@
 # Changelog
 
-## [One parser for every surface] - {PR_MERGE_DATE}
+## [One parser for every surface] - 2026-08-04
 
 ### Fixed
 
