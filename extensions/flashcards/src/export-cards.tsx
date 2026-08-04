@@ -1,13 +1,4 @@
-import {
-  Detail,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  Clipboard,
-  Keyboard,
-} from "@raycast/api";
+import { Detail, ActionPanel, Action, showToast, Toast, Icon, Clipboard, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Flashcard } from "./types";
 import { getAllCards } from "./utils/storage";
@@ -90,11 +81,7 @@ export default function ExportCards() {
       actions={
         cards.length > 0 ? (
           <ActionPanel>
-            <Action
-              title="Copy to Clipboard"
-              icon={Icon.Clipboard}
-              onAction={handleCopyToClipboard}
-            />
+            <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={handleCopyToClipboard} />
             <Action
               title="Save to Downloads Folder"
               icon={Icon.Download}

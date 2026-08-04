@@ -1,12 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  popToRoot,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, popToRoot } from "@raycast/api";
 import { parseMarkdown } from "./utils/parser";
 import { saveCard } from "./utils/storage";
 import { Flashcard } from "./types";
@@ -65,11 +57,7 @@ export default function CreateCard() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Flashcard"
-            icon={Icon.CheckCircle}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Create Flashcard" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
@@ -94,12 +82,7 @@ export default function CreateCard() {
       />
       <Form.Description
         title="Example"
-        text={[
-          "What is the powerhouse of the cell?",
-          "==",
-          "Mitochondria",
-          "#biology #school",
-        ].join("\n")}
+        text={["What is the powerhouse of the cell?", "==", "Mitochondria", "#biology #school"].join("\n")}
       />
 
       <Form.Separator />

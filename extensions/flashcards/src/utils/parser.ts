@@ -22,9 +22,7 @@ import { CardType, Flashcard, Option } from "../types";
  * Blank lines between sections are optional.
  * Tags are normalized to lowercase automatically.
  */
-export function parseMarkdown(
-  input: string,
-): Omit<Flashcard, "id" | "progress" | "createdAt"> {
+export function parseMarkdown(input: string): Omit<Flashcard, "id" | "progress" | "createdAt"> {
   const lines = input.trim().split("\n");
 
   // Extract tags from the last line when it contains only #tags.
@@ -34,9 +32,7 @@ export function parseMarkdown(
   const lastLine = lines[lines.length - 1]?.trim() ?? "";
   // Use a Unicode-aware regex so tags can contain accents and other characters.
   if (/^(#[\p{L}\p{N}_]+\s*)+$/u.test(lastLine)) {
-    tags = (lastLine.match(/#([\p{L}\p{N}_]+)/gu) ?? []).map((t) =>
-      t.slice(1).toLowerCase(),
-    );
+    tags = (lastLine.match(/#([\p{L}\p{N}_]+)/gu) ?? []).map((t) => t.slice(1).toLowerCase());
     contentLines = lines.slice(0, -1);
   }
 
@@ -50,10 +46,7 @@ export function parseMarkdown(
   }
 }
 
-function parseStandard(
-  content: string,
-  tags: string[],
-): Omit<Flashcard, "id" | "progress" | "createdAt"> {
+function parseStandard(content: string, tags: string[]): Omit<Flashcard, "id" | "progress" | "createdAt"> {
   // Split on ==, allowing optional surrounding blank lines.
   const parts = content.split(/\n[\t ]*==[\t ]*\n/);
   const front = parts[0]?.trim() ?? "";
@@ -67,10 +60,7 @@ function parseStandard(
   };
 }
 
-function parseMC(
-  content: string,
-  tags: string[],
-): Omit<Flashcard, "id" | "progress" | "createdAt"> {
+function parseMC(content: string, tags: string[]): Omit<Flashcard, "id" | "progress" | "createdAt"> {
   // Split on ==<, allowing optional surrounding blank lines.
   const [frontPart, rest] = content.split(/\n[\t ]*==<[\t ]*\n/);
   const front = frontPart?.trim() ?? "";
@@ -93,12 +83,8 @@ function parseMC(
   // Parse the correct answer and accept legacy keywords for compatibility.
   const correctMatch = (correctPart ?? "")
     .trim()
-    .match(
-      /^(correct|true|richtig|correcto|正确|सही|правильно|صحيح|correto|corretto|doğru):\s*(\d+)/im,
-    );
-  const correctOption = correctMatch
-    ? parseInt(correctMatch[2], 10)
-    : undefined;
+    .match(/^(correct|true|richtig|correcto|正确|सही|правильно|صحيح|correto|corretto|doğru):\s*(\d+)/im);
+  const correctOption = correctMatch ? parseInt(correctMatch[2], 10) : undefined;
 
   return {
     type: "multiple-choice" as CardType,
@@ -116,9 +102,7 @@ function parseMC(
  * The "-" placeholder (no tags) is removed before parsing.
  * Empty blocks are skipped.
  */
-export function parseMultipleCards(
-  input: string,
-): Omit<Flashcard, "id" | "progress" | "createdAt">[] {
+export function parseMultipleCards(input: string): Omit<Flashcard, "id" | "progress" | "createdAt">[] {
   // Split on --- separators only when --- occupies its own line.
   const blocks = input.split(/\n[ \t]*---[ \t]*\n/);
 
@@ -145,9 +129,7 @@ export function parseMultipleCards(
   return results;
 }
 
-function parseBlock(
-  block: string,
-): Omit<Flashcard, "id" | "progress" | "createdAt">[] {
+function parseBlock(block: string): Omit<Flashcard, "id" | "progress" | "createdAt">[] {
   if (/\n[\t ]*==(?:<)?[\t ]*(?:\n|$)/.test(block)) {
     return [parseMarkdown(block)];
   }
@@ -155,9 +137,7 @@ function parseBlock(
   const lines = block.split("\n");
   const lastLine = lines[lines.length - 1]?.trim() ?? "";
   const tags = /^(#[\p{L}\p{N}_]+\s*)+$/u.test(lastLine)
-    ? (lastLine.match(/#([\p{L}\p{N}_]+)/gu) ?? []).map((tag) =>
-        tag.slice(1).toLowerCase(),
-      )
+    ? (lastLine.match(/#([\p{L}\p{N}_]+)/gu) ?? []).map((tag) => tag.slice(1).toLowerCase())
     : [];
   const contentLines = tags.length > 0 ? lines.slice(0, -1) : lines;
   const cards = contentLines.flatMap((line) => {

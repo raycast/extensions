@@ -1,12 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  popToRoot,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, popToRoot } from "@raycast/api";
 import { useState } from "react";
 import { Flashcard } from "./types";
 import { parseMultipleCards } from "./utils/parser";
@@ -16,10 +8,7 @@ import { readFileSync } from "fs";
 export default function ImportCards() {
   const [mode, setMode] = useState<string>("paste");
 
-  async function handleSubmit(values: {
-    markdown?: string;
-    filePath?: string[];
-  }) {
+  async function handleSubmit(values: { markdown?: string; filePath?: string[] }) {
     let input = "";
 
     if (mode === "paste") {
@@ -91,9 +80,7 @@ export default function ImportCards() {
         style: Toast.Style.Success,
         title: "Import Successful",
         message:
-          savedCount === 1
-            ? "1 flashcard imported successfully."
-            : `${savedCount} flashcards imported successfully.`,
+          savedCount === 1 ? "1 flashcard imported successfully." : `${savedCount} flashcards imported successfully.`,
       });
 
       await popToRoot();
@@ -110,31 +97,14 @@ export default function ImportCards() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Import Flashcards"
-            icon={Icon.Download}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Import Flashcards" icon={Icon.Download} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       {/* Import mode selection */}
-      <Form.Dropdown
-        id="mode"
-        title="Import Source"
-        value={mode}
-        onChange={setMode}
-      >
-        <Form.Dropdown.Item
-          value="paste"
-          title="Paste Markdown"
-          icon={Icon.TextCursor}
-        />
-        <Form.Dropdown.Item
-          value="file"
-          title="Select Markdown File"
-          icon={Icon.Document}
-        />
+      <Form.Dropdown id="mode" title="Import Source" value={mode} onChange={setMode}>
+        <Form.Dropdown.Item value="paste" title="Paste Markdown" icon={Icon.TextCursor} />
+        <Form.Dropdown.Item value="file" title="Select Markdown File" icon={Icon.Document} />
       </Form.Dropdown>
 
       <Form.Separator />

@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  Keyboard,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, Keyboard, showToast, Toast, useNavigation } from "@raycast/api";
 import { parseMarkdown } from "./utils/parser";
 import { cardToMarkdown } from "./utils/serializer";
 import { saveCard } from "./utils/storage";
@@ -40,8 +31,7 @@ export default function EditCard({ card, onSaved }: Props) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Front side is empty",
-          message:
-            "Make sure the flashcard question comes before the == or ==< separator.",
+          message: "Make sure the flashcard question comes before the == or ==< separator.",
         });
         return;
       }
@@ -71,17 +61,8 @@ export default function EditCard({ card, onSaved }: Props) {
       navigationTitle={`Edit Flashcard – ${card.front}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Flashcard"
-            icon={Icon.CheckCircle}
-            onSubmit={handleSubmit}
-          />
-          <Action
-            title="Cancel"
-            icon={Icon.XMarkCircle}
-            shortcut={Keyboard.Shortcut.Common.Pin}
-            onAction={pop}
-          />
+          <Action.SubmitForm title="Save Flashcard" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
+          <Action title="Cancel" icon={Icon.XMarkCircle} shortcut={Keyboard.Shortcut.Common.Pin} onAction={pop} />
         </ActionPanel>
       }
     >

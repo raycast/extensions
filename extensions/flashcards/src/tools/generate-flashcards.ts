@@ -14,9 +14,7 @@ export type GenerateResult = {
   error?: string;
 };
 
-export const confirmation: Tool.Confirmation<GenerateInput> = async ({
-  markdown,
-}) => {
+export const confirmation: Tool.Confirmation<GenerateInput> = async ({ markdown }) => {
   const cardCount = parseMultipleCards(markdown).length;
 
   if (cardCount === 0) {
@@ -30,9 +28,7 @@ export const confirmation: Tool.Confirmation<GenerateInput> = async ({
   };
 };
 
-export default async function generateFlashcards(
-  input: GenerateInput,
-): Promise<GenerateResult> {
+export default async function generateFlashcards(input: GenerateInput): Promise<GenerateResult> {
   if (!input?.markdown?.trim()) {
     return {
       cards: "",

@@ -1,13 +1,4 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Icon,
-  useNavigation,
-  Keyboard,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Icon, useNavigation, Keyboard } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Flashcard } from "./types";
 import { saveCard, getAllTags } from "./utils/storage";
@@ -22,9 +13,7 @@ export default function EditTags({ card, onSaved }: Props) {
   const { pop } = useNavigation();
 
   // Show tags with # prefixes as the default value.
-  const [tagInput, setTagInput] = useState(
-    card.tags.map((tg) => `#${tg}`).join(" "),
-  );
+  const [tagInput, setTagInput] = useState(card.tags.map((tg) => `#${tg}`).join(" "));
   const [existingTags, setExistingTags] = useState<string[]>([]);
 
   // Load existing tags from storage as suggestions.
@@ -61,10 +50,7 @@ export default function EditTags({ card, onSaved }: Props) {
       await showToast({
         style: Toast.Style.Success,
         title: "Tags saved!",
-        message:
-          parsed.length === 0
-            ? "All tags removed"
-            : parsed.map((tg) => `#${tg}`).join(" "),
+        message: parsed.length === 0 ? "All tags removed" : parsed.map((tg) => `#${tg}`).join(" "),
       });
       onSaved?.();
       pop();
@@ -82,17 +68,8 @@ export default function EditTags({ card, onSaved }: Props) {
       navigationTitle={`Edit Tags – ${card.front}`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Save Tags"
-            icon={Icon.CheckCircle}
-            onSubmit={handleSubmit}
-          />
-          <Action
-            title="Cancel"
-            icon={Icon.XMarkCircle}
-            shortcut={Keyboard.Shortcut.Common.Pin}
-            onAction={pop}
-          />
+          <Action.SubmitForm title="Save Tags" icon={Icon.CheckCircle} onSubmit={handleSubmit} />
+          <Action title="Cancel" icon={Icon.XMarkCircle} shortcut={Keyboard.Shortcut.Common.Pin} onAction={pop} />
         </ActionPanel>
       }
     >

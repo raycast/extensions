@@ -1,11 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  useNavigation,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, useNavigation } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { Flashcard } from "./types";
 import { getAllCards } from "./utils/storage";
@@ -32,11 +25,7 @@ function CardsForTag({ tag, cards }: { tag: string; cards: Flashcard[] }) {
   const { push } = useNavigation();
 
   return (
-    <List
-      isShowingDetail
-      navigationTitle={`#${tag}`}
-      searchBarPlaceholder="Search cards..."
-    >
+    <List isShowingDetail navigationTitle={`#${tag}`} searchBarPlaceholder="Search cards...">
       {filtered.length === 0 ? (
         <List.EmptyView icon={Icon.Tag} title="No cards found for this tag" />
       ) : (
@@ -55,11 +44,7 @@ function CardsForTag({ tag, cards }: { tag: string; cards: Flashcard[] }) {
             detail={<List.Item.Detail markdown={cardDetailMarkdown(card)} />}
             actions={
               <ActionPanel>
-                <Action
-                  title="Edit Flashcard"
-                  icon={Icon.Pencil}
-                  onAction={() => push(<EditCard card={card} />)}
-                />
+                <Action title="Edit Flashcard" icon={Icon.Pencil} onAction={() => push(<EditCard card={card} />)} />
               </ActionPanel>
             }
           />
@@ -126,9 +111,7 @@ export default function Tags() {
                     <Action
                       title="Show Cards"
                       icon={Icon.ArrowRight}
-                      onAction={() =>
-                        push(<CardsForTag tag={tag} cards={cards} />)
-                      }
+                      onAction={() => push(<CardsForTag tag={tag} cards={cards} />)}
                     />
                   </ActionPanel>
                 }
@@ -151,11 +134,7 @@ export default function Tags() {
                         push(
                           <CardsForTag
                             tag={"__untagged__"}
-                            cards={cards.map((c) =>
-                              c.tags.length === 0
-                                ? { ...c, tags: ["__untagged__"] }
-                                : c,
-                            )}
+                            cards={cards.map((c) => (c.tags.length === 0 ? { ...c, tags: ["__untagged__"] } : c))}
                           />,
                         )
                       }

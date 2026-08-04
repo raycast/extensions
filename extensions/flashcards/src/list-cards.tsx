@@ -89,8 +89,7 @@ export default function ListCards() {
   async function handleDeleteAll() {
     const confirmed = await confirmAlert({
       title: "Delete All Flashcards",
-      message:
-        "Are you sure you want to delete all flashcards? This action cannot be undone.",
+      message: "Are you sure you want to delete all flashcards? This action cannot be undone.",
       primaryAction: {
         title: "Delete All",
         style: Alert.ActionStyle.Destructive,
@@ -106,15 +105,10 @@ export default function ListCards() {
     }
   }
 
-  const typeIcon = (card: Flashcard) =>
-    card.type === "multiple-choice" ? Icon.List : Icon.TextCursor;
+  const typeIcon = (card: Flashcard) => (card.type === "multiple-choice" ? Icon.List : Icon.TextCursor);
 
   return (
-    <List
-      isLoading={isLoading}
-      isShowingDetail
-      searchBarPlaceholder="Search flashcards..."
-    >
+    <List isLoading={isLoading} isShowingDetail searchBarPlaceholder="Search flashcards...">
       {cards.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Book}
@@ -130,9 +124,7 @@ export default function ListCards() {
             accessories={[
               progressAccessory(card),
               ...(card.tags.length > 0 ? [{ tag: `#${card.tags[0]}` }] : []),
-              ...(card.tags.length > 1
-                ? [{ text: `+${card.tags.length - 1}` }]
-                : []),
+              ...(card.tags.length > 1 ? [{ text: `+${card.tags.length - 1}` }] : []),
             ]}
             detail={
               <List.Item.Detail
@@ -141,29 +133,16 @@ export default function ListCards() {
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label
                       title="Type"
-                      text={
-                        card.type === "standard"
-                          ? "Standard"
-                          : "Multiple Choice"
-                      }
+                      text={card.type === "standard" ? "Standard" : "Multiple Choice"}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Status"
-                      text={
-                        card.progress === "correct"
-                          ? "Correct"
-                          : card.progress === "wrong"
-                            ? "Wrong"
-                            : "New"
-                      }
+                      text={card.progress === "correct" ? "Correct" : card.progress === "wrong" ? "Wrong" : "New"}
                     />
                     {card.tags.length > 0 && (
                       <List.Item.Detail.Metadata.TagList title="Tags">
                         {card.tags.map((tg) => (
-                          <List.Item.Detail.Metadata.TagList.Item
-                            key={tg}
-                            text={`#${tg}`}
-                          />
+                          <List.Item.Detail.Metadata.TagList.Item key={tg} text={`#${tg}`} />
                         ))}
                       </List.Item.Detail.Metadata.TagList>
                     )}
@@ -181,9 +160,7 @@ export default function ListCards() {
                 <Action
                   title="Edit Flashcard"
                   icon={Icon.Pencil}
-                  onAction={() =>
-                    push(<EditCard card={card} onSaved={loadCards} />)
-                  }
+                  onAction={() => push(<EditCard card={card} onSaved={loadCards} />)}
                 />
                 {/* Edit tags in the dedicated form. */}
                 <Action
@@ -193,9 +170,7 @@ export default function ListCards() {
                     macOS: { modifiers: ["cmd"], key: "t" },
                     Windows: { modifiers: ["ctrl"], key: "t" },
                   }}
-                  onAction={() =>
-                    push(<EditTags card={card} onSaved={loadCards} />)
-                  }
+                  onAction={() => push(<EditTags card={card} onSaved={loadCards} />)}
                 />
                 <Action
                   title="Delete"

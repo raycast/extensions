@@ -1,14 +1,4 @@
-import {
-  Detail,
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Detail, List, ActionPanel, Action, Icon, Color, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState, useRef } from "react";
 import { Flashcard } from "./types";
 import { getAllCards, getAllTags, updateProgress } from "./utils/storage";
@@ -59,11 +49,7 @@ function StandardCardQuiz({
       actions={
         <ActionPanel>
           {!revealed ? (
-            <Action
-              title="Reveal Answer"
-              icon={Icon.Eye}
-              onAction={() => setRevealed(true)}
-            />
+            <Action title="Reveal Answer" icon={Icon.Eye} onAction={() => setRevealed(true)} />
           ) : (
             <>
               <Action
@@ -125,10 +111,7 @@ function MCCardQuiz({
   return (
     <List navigationTitle={`Card ${index + 1} / ${total}`} isShowingDetail>
       <List.Section title="Question">
-        <List.Item
-          title={card.front}
-          detail={<List.Item.Detail markdown={questionMd} />}
-        />
+        <List.Item title={card.front} detail={<List.Item.Detail markdown={questionMd} />} />
       </List.Section>
 
       <List.Section title="Options">
@@ -164,16 +147,9 @@ function MCCardQuiz({
             actions={
               <ActionPanel>
                 {!isAnswered ? (
-                  <Action
-                    title={`Choose Option ${opt.id}`}
-                    onAction={() => setSelected(opt.id)}
-                  />
+                  <Action title={`Choose Option ${opt.id}`} onAction={() => setSelected(opt.id)} />
                 ) : (
-                  <Action
-                    title="Next Card"
-                    icon={Icon.ArrowRight}
-                    onAction={() => onAnswer(isCorrect)}
-                  />
+                  <Action title="Next Card" icon={Icon.ArrowRight} onAction={() => onAnswer(isCorrect)} />
                 )}
               </ActionPanel>
             }
@@ -240,11 +216,7 @@ function QuizSession({ cards }: { cards: Flashcard[] }) {
         markdown={summaryMd}
         actions={
           <ActionPanel>
-            <Action
-              title="Back to Main Menu"
-              icon={Icon.ArrowLeft}
-              onAction={pop}
-            />
+            <Action title="Back to Main Menu" icon={Icon.ArrowLeft} onAction={pop} />
           </ActionPanel>
         }
       />
@@ -254,34 +226,16 @@ function QuizSession({ cards }: { cards: Flashcard[] }) {
   if (!card) return null;
 
   return card.type === "standard" ? (
-    <StandardCardQuiz
-      key={card.id}
-      card={card}
-      index={index}
-      total={queue.length}
-      onAnswer={handleAnswer}
-    />
+    <StandardCardQuiz key={card.id} card={card} index={index} total={queue.length} onAnswer={handleAnswer} />
   ) : (
-    <MCCardQuiz
-      key={card.id}
-      card={card}
-      index={index}
-      total={queue.length}
-      onAnswer={handleAnswer}
-    />
+    <MCCardQuiz key={card.id} card={card} index={index} total={queue.length} onAnswer={handleAnswer} />
   );
 }
 
 // ── Tag selection for quiz ───────────────────────────────────────────────────
 
 // Component for selecting tags for the quiz.
-function TagSelector({
-  allCards,
-  tags,
-}: {
-  allCards: Flashcard[];
-  tags: string[];
-}) {
+function TagSelector({ allCards, tags }: { allCards: Flashcard[]; tags: string[] }) {
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const { push } = useNavigation();
 
@@ -295,10 +249,7 @@ function TagSelector({
   }
 
   function startQuiz() {
-    const filtered =
-      selected.size === 0
-        ? allCards
-        : allCards.filter((c) => c.tags.some((tg) => selected.has(tg)));
+    const filtered = selected.size === 0 ? allCards : allCards.filter((c) => c.tags.some((tg) => selected.has(tg)));
 
     if (filtered.length === 0) {
       showToast({
@@ -314,14 +265,8 @@ function TagSelector({
   const shortcutKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
 
   return (
-    <List
-      navigationTitle="Select Quiz Tags"
-      searchBarPlaceholder="Filter tags by name..."
-    >
-      <List.Section
-        title="Select Multiple Tags"
-        subtitle={selected.size === 0 ? "All" : `${selected.size} selected`}
-      >
+    <List navigationTitle="Select Quiz Tags" searchBarPlaceholder="Filter tags by name...">
+      <List.Section title="Select Multiple Tags" subtitle={selected.size === 0 ? "All" : `${selected.size} selected`}>
         {tags.map((tag, i) => {
           const isSelected = selected.has(tag);
           const count = allCards.filter((c) => c.tags.includes(tag)).length;
@@ -330,16 +275,9 @@ function TagSelector({
           return (
             <List.Item
               key={tag}
-              icon={
-                isSelected
-                  ? { source: Icon.CheckCircle, tintColor: Color.Blue }
-                  : Icon.Circle
-              }
+              icon={isSelected ? { source: Icon.CheckCircle, tintColor: Color.Blue } : Icon.Circle}
               title={`#${tag}`}
-              accessories={[
-                { text: `${count}` },
-                ...(hasShortcut ? [{ tag: `⌘${shortcutKeys[i]}` }] : []),
-              ]}
+              accessories={[{ text: `${count}` }, ...(hasShortcut ? [{ tag: `⌘${shortcutKeys[i]}` }] : [])]}
               actions={
                 <ActionPanel>
                   {/* Primary action: start the quiz (Enter). */}
@@ -359,11 +297,7 @@ function TagSelector({
                     <Action
                       key={tg}
                       title={`${selected.has(tg) ? "✓ " : ""}#${tg}`}
-                      icon={
-                        selected.has(tg)
-                          ? { source: Icon.CheckCircle, tintColor: Color.Blue }
-                          : Icon.Circle
-                      }
+                      icon={selected.has(tg) ? { source: Icon.CheckCircle, tintColor: Color.Blue } : Icon.Circle}
                       shortcut={{ modifiers: ["cmd"], key: shortcutKeys[j] }}
                       onAction={() => toggleTag(tg)}
                     />
@@ -381,13 +315,7 @@ function TagSelector({
 // ── Mode selection ────────────────────────────────────────────────────────────
 
 // Component for selecting the quiz mode.
-function ModeSelector({
-  allCards,
-  tags,
-}: {
-  allCards: Flashcard[];
-  tags: string[];
-}) {
+function ModeSelector({ allCards, tags }: { allCards: Flashcard[]; tags: string[] }) {
   const { push } = useNavigation();
 
   const wrongCards = allCards.filter((c) => c.progress === "wrong");
@@ -484,11 +412,7 @@ function ModeSelector({
             actions={
               <ActionPanel>
                 {/* Primary action (Enter) for the focused item. */}
-                <Action
-                  title={mode.actionTitle}
-                  icon={mode.actionIcon}
-                  onAction={mode.onAction}
-                />
+                <Action title={mode.actionTitle} icon={mode.actionIcon} onAction={mode.onAction} />
                 {/* Keep ⌘1-⌘4 available from every item. */}
                 {modes
                   .filter((_, j) => j !== i)
@@ -557,9 +481,7 @@ export default function Quiz() {
           <Action
             title="Start Quiz"
             icon={Icon.Play}
-            onAction={() =>
-              push(<ModeSelector allCards={allCards} tags={tags} />)
-            }
+            onAction={() => push(<ModeSelector allCards={allCards} tags={tags} />)}
           />
         </ActionPanel>
       }

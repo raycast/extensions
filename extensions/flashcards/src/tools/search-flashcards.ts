@@ -12,9 +12,7 @@ export type SearchResult = {
   error?: string;
 };
 
-export default async function searchFlashcards(
-  input: SearchInput,
-): Promise<SearchResult> {
+export default async function searchFlashcards(input: SearchInput): Promise<SearchResult> {
   const query = input?.query?.trim() ?? "";
   if (!query) {
     return {
