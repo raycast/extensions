@@ -41,4 +41,3 @@ Device blocks can trigger lock-screen, sign-out, or shutdown behavior configured
 ## Troubleshooting
 
 If a block has an unknown status, refresh it or choose **CLI Diagnostics** from the action panel. Also check that **Cold Turkey Executable** points to the installed application and, on Windows, that the Cold Turkey interface has been exited from the system tray.
-

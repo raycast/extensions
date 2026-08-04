@@ -70,15 +70,9 @@ test("keeps plural block names instead of treating them as headings", () => {
     { name: "Study Blocks", kind: "unknown" },
   ]);
 
-  const sectionedOutput = [
-    "Website & App Blocks",
-    "Deep Work",
-    "",
-    "Study Blocks",
-    "",
-    "Device Blocks",
-    "Laptop",
-  ].join("\n");
+  const sectionedOutput = ["Website & App Blocks", "Deep Work", "", "Study Blocks", "", "Device Blocks", "Laptop"].join(
+    "\n",
+  );
 
   assert.deepEqual(parseBlockList(sectionedOutput), [
     { name: "Deep Work", kind: "website-app" },
