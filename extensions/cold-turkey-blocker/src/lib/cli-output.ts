@@ -233,7 +233,8 @@ function isUnknownSectionHeading(lines: string[], index: number, hasKnownSection
 
   const isFirstContentLine = lines.slice(0, index).every((line) => !line);
   const followsSectionBreak = index > 0 && !lines[index - 1];
-  return isFirstContentLine || followsSectionBreak;
+  const startsPopulatedSection = index + 1 < lines.length && Boolean(lines[index + 1]);
+  return (isFirstContentLine || followsSectionBreak) && startsPopulatedSection;
 }
 
 function shouldSkipBlockListLine(line: string): boolean {
