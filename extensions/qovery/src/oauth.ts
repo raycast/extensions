@@ -14,6 +14,29 @@ export const oauthClient = new OAuth.PKCEClient({
 });
 
 let authenticationPromise: Promise<string> | undefined;
+let authenticationGeneration = 0;
+
+class AuthenticationCancelledError extends Error {
+  constructor() {
+    super("Authentication was cancelled");
+  }
+}
+
+function assertAuthenticationIsCurrent(generation: number): void {
+  if (generation !== authenticationGeneration) {
+    throw new AuthenticationCancelledError();
+  }
+}
+
+async function persistTokens(tokens: OAuth.TokenResponse, generation: number): Promise<void> {
+  assertAuthenticationIsCurrent(generation);
+  await oauthClient.setTokens(tokens);
+
+  if (generation !== authenticationGeneration) {
+    await oauthClient.removeTokens();
+    throw new AuthenticationCancelledError();
+  }
+}
 
 async function exchangeAuthorizationCode(
   request: OAuth.AuthorizationRequest,
@@ -59,8 +82,9 @@ async function requestTokens(body: URLSearchParams): Promise<OAuth.TokenResponse
   return (await response.json()) as OAuth.TokenResponse;
 }
 
-async function authenticate(): Promise<string> {
+async function authenticate(generation: number): Promise<string> {
   const tokens = await oauthClient.getTokens();
+  assertAuthenticationIsCurrent(generation);
 
   if (tokens?.accessToken && !tokens.isExpired()) {
     return tokens.accessToken;
@@ -69,9 +93,10 @@ async function authenticate(): Promise<string> {
   if (tokens?.refreshToken) {
     try {
       const refreshedTokens = await refreshAccessToken(tokens.refreshToken);
-      await oauthClient.setTokens(refreshedTokens);
+      await persistTokens(refreshedTokens, generation);
       return refreshedTokens.access_token;
     } catch {
+      assertAuthenticationIsCurrent(generation);
       await oauthClient.removeTokens();
     }
   }
@@ -86,8 +111,9 @@ async function authenticate(): Promise<string> {
     },
   });
   const { authorizationCode } = await oauthClient.authorize(request);
+  assertAuthenticationIsCurrent(generation);
   const newTokens = await exchangeAuthorizationCode(request, authorizationCode);
-  await oauthClient.setTokens(newTokens);
+  await persistTokens(newTokens, generation);
   return newTokens.access_token;
 }
 
@@ -95,13 +121,19 @@ export function getAccessToken(): Promise<string> {
   // React development mode can start the initial data-loading effect twice.
   // A single-use authorization code must only be exchanged once, so every
   // concurrent API request shares the same authentication operation.
-  authenticationPromise ??= authenticate().finally(() => {
-    authenticationPromise = undefined;
-  });
+  if (!authenticationPromise) {
+    const promise = authenticate(authenticationGeneration).finally(() => {
+      if (authenticationPromise === promise) {
+        authenticationPromise = undefined;
+      }
+    });
+    authenticationPromise = promise;
+  }
   return authenticationPromise;
 }
 
 export async function signOut(): Promise<void> {
+  authenticationGeneration += 1;
   authenticationPromise = undefined;
   await oauthClient.removeTokens();
 }
