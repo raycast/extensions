@@ -1,6 +1,6 @@
 # Tmux Sessioner Changelog
 
-## [Open sessions in a new terminal tab or window] - {PR_MERGE_DATE}
+## [Open sessions in a new terminal tab or window] - 2026-08-04
 
 ### Added
 
