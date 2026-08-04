@@ -52,11 +52,8 @@ export default function Plugins({ searchBarAccessory }: PluginsProps) {
       warningGenerator={generatePluginWarning}
       showWarningFilter={!searchBarAccessory}
       generateTitle={(plugin) => plugin.name}
-      postProcessItems={(items) => {
-        // Get unique plugins (since they might appear in multiple sections)
-        const uniquePlugins = Array.from(new Set(items.map((p) => p.name)));
-        return items.filter((item) => uniquePlugins.includes(item.name));
-      }}
+      getItemName={(plugin) => plugin.name}
+      getItemValue={(plugin) => plugin.name}
       generateOverviewMarkdown={(_, allPlugins, grouped) => {
         const uniquePlugins = Array.from(new Set(allPlugins.map((p) => p.name)));
         return `
@@ -84,45 +81,15 @@ Plugins extend zsh functionality with additional features and commands. They're 
 Too many plugins can slow down shell startup. Consider using lazy loading or removing unused plugins.
         `;
       }}
-      generateItemMarkdown={(plugin) => `
-# Plugin: \`${plugin.name}\`
-
-## 🔌 Plugin Configuration
-\`\`\`zsh
-plugins=(${plugin.name} ...)
-\`\`\`
-
-## 📍 Location
-- **Section**: ${plugin.section}
-- **File**: ~/.zshrc
-- **Section Start**: Line ${plugin.sectionStartLine}
-
-## 💡 Plugin Information
-- **Name**: ${plugin.name}
-- **Type**: Zsh Plugin
-- **Framework**: Oh My Zsh, Zinit, or Antigen
-
-## 🔍 Common Plugin Features
-- **Aliases**: Shortcuts for common commands
-- **Functions**: Custom shell functions
-- **Completions**: Tab completion enhancements
-- **Themes**: Prompt customization
-- **Utilities**: Development tools and helpers
-
-## ⚠️ Note
-Plugin functionality depends on your zsh plugin manager. Use the "Open ~/.Zshrc" action to view the complete plugin configuration.
-      `}
+      omitValueMarkdown={true}
       generateMetadata={(plugin) => {
         const installed = pluginInstalled(plugin.name);
         return (
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label
-              title="Plugin Name"
+              title="Plugin"
               text={plugin.name}
-              icon={{
-                source: Icon.Plug,
-                tintColor: MODERN_COLORS.warning,
-              }}
+              icon={{ source: Icon.Plug, tintColor: MODERN_COLORS.warning }}
             />
             <List.Item.Detail.Metadata.Label
               title="Installed"
@@ -143,22 +110,8 @@ Plugin functionality depends on your zsh plugin manager. Use the "Open ~/.Zshrc"
                 tintColor: MODERN_COLORS.neutral,
               }}
             />
-            <List.Item.Detail.Metadata.Label
-              title="File"
-              text="~/.zshrc"
-              icon={{
-                source: Icon.Document,
-                tintColor: MODERN_COLORS.neutral,
-              }}
-            />
-            <List.Item.Detail.Metadata.Label
-              title="Type"
-              text="Zsh Plugin"
-              icon={{
-                source: Icon.Gear,
-                tintColor: MODERN_COLORS.success,
-              }}
-            />
+            <List.Item.Detail.Metadata.Label title="Section Starts" text={`Line ${plugin.sectionStartLine}`} />
+            <List.Item.Detail.Metadata.Label title="File" text="~/.zshrc" icon={Icon.Document} />
           </List.Item.Detail.Metadata>
         );
       }}
