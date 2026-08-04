@@ -28,31 +28,49 @@ export function CompanyOfficers({
 }) {
   const [status, setStatus] = useState<StatusFilter>("all");
 
-  // Officers are bounded (almost always one or two pages), so we load the full
-  // set up front. That lets Raycast filter by name across every officer rather
-  // than just the page currently in view.
+  // Officers are loaded in full rather than page by page, so that Raycast's
+  // search filters across every officer instead of only the page in view. The
+  // page budget exists to stop a company with thousands of historic officers
+  // hanging the command, so the result reports whether it was hit — a
+  // truncated list that says nothing is indistinguishable from a complete one.
   const { isLoading, data } = useCachedPromise(
     async (company: string) => {
       const all: CompanyOfficer[] = [];
       let startIndex = 0;
+      let total: number | undefined;
+      let activeCount: number | undefined;
+      let resignedCount: number | undefined;
+
       for (let page = 0; page < MAX_PAGES; page++) {
         const res = await getCompanyOfficers(company, startIndex);
         const items = res.items ?? [];
         all.push(...items);
-        const total = res.total_results ?? all.length;
+        total ??= res.total_results;
+        activeCount ??= res.active_count;
+        resignedCount ??= res.resigned_count;
         startIndex += items.length;
-        if (items.length === 0 || all.length >= total) break;
+        if (items.length === 0 || all.length >= (total ?? all.length)) break;
       }
-      return all;
+
+      return {
+        officers: all,
+        // The API's own totals, not the length of what we managed to read.
+        total: total ?? all.length,
+        activeCount,
+        resignedCount,
+        complete: all.length >= (total ?? all.length),
+      };
     },
     [companyNumber],
   );
 
-  const officers = (data ?? []).filter((officer) => {
+  const officers = (data?.officers ?? []).filter((officer) => {
     if (status === "active") return !officer.resigned_on;
     if (status === "resigned") return Boolean(officer.resigned_on);
     return true;
   });
+
+  const truncated = data ? !data.complete : false;
 
   return (
     <List
@@ -67,19 +85,53 @@ export function CompanyOfficers({
           value={status}
           onChange={(value) => setStatus(value as StatusFilter)}
         >
-          <List.Dropdown.Item title="All Officers" value="all" />
-          <List.Dropdown.Item title="Active" value="active" />
-          <List.Dropdown.Item title="Resigned" value="resigned" />
+          <List.Dropdown.Item
+            title={
+              data?.total ? `All Officers (${data.total})` : "All Officers"
+            }
+            value="all"
+          />
+          <List.Dropdown.Item
+            title={
+              data?.activeCount === undefined
+                ? "Active"
+                : `Active (${data.activeCount})`
+            }
+            value="active"
+          />
+          <List.Dropdown.Item
+            title={
+              data?.resignedCount === undefined
+                ? "Resigned"
+                : `Resigned (${data.resignedCount})`
+            }
+            value="resigned"
+          />
         </List.Dropdown>
       }
     >
-      {officers.length ? (
+      {truncated ? (
+        <List.Section
+          title={`Showing the first ${officers.length} of ${data?.total} officers`}
+        >
+          {officers.map((officer, index) => (
+            <OfficerItem key={`${officer.name}-${index}`} officer={officer} />
+          ))}
+        </List.Section>
+      ) : (
         officers.map((officer, index) => (
           <OfficerItem key={`${officer.name}-${index}`} officer={officer} />
         ))
-      ) : (
-        <List.EmptyView title="No officers found" icon={Icon.PersonLines} />
       )}
+      <List.EmptyView
+        title="No Officers Found"
+        description={
+          status === "all"
+            ? "Companies House lists no officers for this company."
+            : "No officers match this filter."
+        }
+        icon={Icon.PersonLines}
+      />
     </List>
   );
 }

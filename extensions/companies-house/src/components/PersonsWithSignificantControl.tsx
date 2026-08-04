@@ -26,28 +26,47 @@ export function PersonsWithSignificantControl({
 }) {
   const [status, setStatus] = useState<StatusFilter>("all");
 
+  // Loaded in full so search filters across every entry, with the page budget
+  // reported rather than hidden. See CompanyOfficers for the same reasoning.
   const { isLoading, data } = useCachedPromise(
     async (company: string) => {
       const all: PscItem[] = [];
       let startIndex = 0;
+      let total: number | undefined;
+      let activeCount: number | undefined;
+      let ceasedCount: number | undefined;
+
       for (let page = 0; page < MAX_PAGES; page++) {
         const res = await getPersonsWithSignificantControl(company, startIndex);
         const items = res.items ?? [];
         all.push(...items);
-        const total = res.total_results ?? all.length;
+        total ??= res.total_results;
+        activeCount ??= res.active_count;
+        ceasedCount ??= res.ceased_count;
         startIndex += items.length;
-        if (items.length === 0 || all.length >= total) break;
+        if (items.length === 0 || all.length >= (total ?? all.length)) break;
       }
-      return all;
+
+      return {
+        people: all,
+        total: total ?? all.length,
+        activeCount,
+        ceasedCount,
+        complete: all.length >= (total ?? all.length),
+      };
     },
     [companyNumber],
   );
 
-  const people = (data ?? []).filter((psc) => {
+  // A ceased entry stays on the register forever, so anyone described as a
+  // current controller has to be filtered on `ceased_on` first.
+  const people = (data?.people ?? []).filter((psc) => {
     if (status === "active") return !psc.ceased_on;
     if (status === "ceased") return Boolean(psc.ceased_on);
     return true;
   });
+
+  const truncated = data ? !data.complete : false;
 
   const pscWebUrl = `${WEB_BASE}/company/${encodeURIComponent(companyNumber)}/persons-with-significant-control`;
 
@@ -68,13 +87,42 @@ export function PersonsWithSignificantControl({
           value={status}
           onChange={(value) => setStatus(value as StatusFilter)}
         >
-          <List.Dropdown.Item title="All" value="all" />
-          <List.Dropdown.Item title="Active" value="active" />
-          <List.Dropdown.Item title="Ceased" value="ceased" />
+          <List.Dropdown.Item
+            title={data?.total ? `All (${data.total})` : "All"}
+            value="all"
+          />
+          <List.Dropdown.Item
+            title={
+              data?.activeCount === undefined
+                ? "Active"
+                : `Active (${data.activeCount})`
+            }
+            value="active"
+          />
+          <List.Dropdown.Item
+            title={
+              data?.ceasedCount === undefined
+                ? "Ceased"
+                : `Ceased (${data.ceasedCount})`
+            }
+            value="ceased"
+          />
         </List.Dropdown>
       }
     >
-      {people.length ? (
+      {truncated ? (
+        <List.Section
+          title={`Showing the first ${people.length} of ${data?.total} entries`}
+        >
+          {people.map((psc, index) => (
+            <PscRow
+              key={`${psc.name ?? "psc"}-${index}`}
+              psc={psc}
+              pscWebUrl={pscWebUrl}
+            />
+          ))}
+        </List.Section>
+      ) : (
         people.map((psc, index) => (
           <PscRow
             key={`${psc.name ?? "psc"}-${index}`}
@@ -82,12 +130,16 @@ export function PersonsWithSignificantControl({
             pscWebUrl={pscWebUrl}
           />
         ))
-      ) : (
-        <List.EmptyView
-          title="No persons with significant control"
-          icon={Icon.PersonCircle}
-        />
       )}
+      <List.EmptyView
+        title="No Persons with Significant Control"
+        description={
+          status === "all"
+            ? "Nothing is recorded on this company's PSC register."
+            : "No entries match this filter."
+        }
+        icon={Icon.PersonCircle}
+      />
     </List>
   );
 }

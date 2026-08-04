@@ -30,6 +30,7 @@ export function OfficerAppointments({
       let name: string | undefined;
       let dateOfBirth: DateOfBirth | undefined;
       let startIndex = 0;
+      let total: number | undefined;
       for (let page = 0; page < MAX_PAGES; page++) {
         const res = await getOfficerAppointments(id, startIndex);
         if (page === 0) {
@@ -38,17 +39,25 @@ export function OfficerAppointments({
         }
         const pageItems = res.items ?? [];
         items.push(...pageItems);
-        const total = res.total_results ?? items.length;
+        total ??= res.total_results;
         startIndex += pageItems.length;
-        if (pageItems.length === 0 || items.length >= total) break;
+        if (pageItems.length === 0 || items.length >= (total ?? items.length))
+          break;
       }
-      return { name, dateOfBirth, items };
+      return {
+        name,
+        dateOfBirth,
+        items,
+        total: total ?? items.length,
+        complete: items.length >= (total ?? items.length),
+      };
     },
     [officerId],
   );
 
   const born = formatDateOfBirth(data?.dateOfBirth);
   const appointments = data?.items ?? [];
+  const truncated = data ? !data.complete : false;
 
   return (
     <List
@@ -58,7 +67,19 @@ export function OfficerAppointments({
       navigationTitle={data?.name ?? officerName ?? "Appointments"}
       searchBarPlaceholder="Filter appointments by company…"
     >
-      {appointments.length ? (
+      {truncated ? (
+        <List.Section
+          title={`Showing the first ${appointments.length} of ${data?.total} appointments`}
+        >
+          {appointments.map((appointment, index) => (
+            <AppointmentRow
+              key={`${appointment.appointed_to?.company_number ?? index}`}
+              appointment={appointment}
+              born={born}
+            />
+          ))}
+        </List.Section>
+      ) : (
         appointments.map((appointment, index) => (
           <AppointmentRow
             key={`${appointment.appointed_to?.company_number ?? index}`}
@@ -66,9 +87,12 @@ export function OfficerAppointments({
             born={born}
           />
         ))
-      ) : (
-        <List.EmptyView title="No appointments found" icon={Icon.Building} />
       )}
+      <List.EmptyView
+        title="No Appointments Found"
+        description="Companies House lists no company appointments for this officer id."
+        icon={Icon.Building}
+      />
     </List>
   );
 }
