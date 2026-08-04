@@ -1,5 +1,9 @@
 # ossinsight Changelog
 
+## [Update trending repositories API] - 2026-08-04
+
+- Use the current OSS Insight trends API and add the Past 3 Months period
+
 ## [Update] - 2023-08-10
 
 - Updated the UI

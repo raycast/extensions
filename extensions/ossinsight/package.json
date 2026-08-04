@@ -46,6 +46,10 @@
         {
           "title": "Past Month",
           "value": "past_month"
+        },
+        {
+          "title": "Past 3 Months",
+          "value": "past_3_months"
         }
       ]
     }
