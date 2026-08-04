@@ -15,13 +15,15 @@ interface WhisperJson {
   transcription?: WhisperJsonSegment[];
 }
 
-export function resolveModelPath(preferences: Preferences): string {
+export function resolveModelPath(
+  preferences: Preferences.ToggleRecording,
+): string {
   const custom = preferences.whisperModelPath?.trim();
   return custom || defaultModelPath();
 }
 
 export function resolveWhisperCliPath(
-  preferences: Preferences,
+  preferences: Preferences.ToggleRecording,
 ): string | undefined {
   const custom = preferences.whisperCliPath?.trim();
   const candidates = [
@@ -46,7 +48,7 @@ function timestampToMs(value?: string): number {
 
 export async function transcribe(
   state: RecordingState,
-  preferences: Preferences,
+  preferences: Preferences.ToggleRecording,
 ): Promise<{ segments: TranscriptSegment[]; transcriptPath: string }> {
   const modelPath = resolveModelPath(preferences);
   const whisperCliPath = resolveWhisperCliPath(preferences);

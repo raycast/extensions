@@ -151,7 +151,7 @@ function pushDomTarget(lines: string[], target: DomContextTarget): void {
 
 export async function buildReport(
   state: RecordingState,
-  preferences: Preferences,
+  preferences: Preferences.ToggleRecording,
   segments: TranscriptSegment[],
 ): Promise<{ markdown: string; reportPath: string }> {
   const markers = readMarkers(state);
