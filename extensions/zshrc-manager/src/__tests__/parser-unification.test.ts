@@ -191,6 +191,13 @@ describe("parser unification", () => {
     });
   });
 
+  // These are CONSISTENCY tests, not correctness tests: both sides of
+  // every assertion project from extractEntries, so they prove the
+  // surfaces are wired to one parser (the point of the unification), not
+  // that the parser extracts the right things. Extraction correctness is
+  // covered by the hardcoded ground-truth assertions elsewhere in this
+  // file ("extracts the corpus's ground-truth entries", the keybinding
+  // form tests, and the tokenizer tests).
   describe("golden count: statistics equal view counts", () => {
     it("calculateStatistics agrees with each view on the same fixture", () => {
       const sections = toLogicalSections(CORPUS);
