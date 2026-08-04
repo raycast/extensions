@@ -36,6 +36,28 @@ describe("validateGoogleBusiness", () => {
     ).not.toThrow();
   });
 
+  it("throws when an Offer end date is before the start date", () => {
+    expect(() =>
+      validateGoogleBusiness({
+        ...base,
+        googlePostType: "offer",
+        googleOfferStartDate: new Date("2026-01-31"),
+        googleOfferEndDate: new Date("2026-01-01"),
+      }),
+    ).toThrow("Offer end date must not be before the start date");
+  });
+
+  it("passes when an Offer's start and end date are the same day", () => {
+    expect(() =>
+      validateGoogleBusiness({
+        ...base,
+        googlePostType: "offer",
+        googleOfferStartDate: new Date(2026, 0, 15, 8, 0),
+        googleOfferEndDate: new Date(2026, 0, 15, 20, 0),
+      }),
+    ).not.toThrow();
+  });
+
   it("throws when an Event is missing start/end dates", () => {
     expect(() =>
       validateGoogleBusiness({ ...base, googlePostType: "event" }),
@@ -66,6 +88,56 @@ describe("validateGoogleBusiness", () => {
     ).toThrow(
       'Please provide both an "Event Start Time" and "Event End Time", or disable "Specify Event Time" to create an all-day event.',
     );
+  });
+
+  it("throws when an all-day Event's end date is before the start date", () => {
+    expect(() =>
+      validateGoogleBusiness({
+        ...base,
+        googlePostType: "event",
+        googleEventStartDate: new Date(2026, 6, 10),
+        googleEventEndDate: new Date(2026, 6, 1),
+      }),
+    ).toThrow("Event end date must not be before the start date");
+  });
+
+  it("passes when an all-day Event's start and end date are the same day", () => {
+    expect(() =>
+      validateGoogleBusiness({
+        ...base,
+        googlePostType: "event",
+        googleEventStartDate: new Date(2026, 6, 1, 8, 0),
+        googleEventEndDate: new Date(2026, 6, 1, 20, 0),
+      }),
+    ).not.toThrow();
+  });
+
+  it("throws when a timed Event's end is not after its start", () => {
+    expect(() =>
+      validateGoogleBusiness({
+        ...base,
+        googlePostType: "event",
+        googleEventStartDate: new Date(2026, 6, 1),
+        googleEventEndDate: new Date(2026, 6, 1),
+        googleEventHasTime: true,
+        googleEventStartTime: "18:00",
+        googleEventEndTime: "10:00",
+      }),
+    ).toThrow("Event end must be after the event start");
+  });
+
+  it("throws when a timed Event's end equals its start", () => {
+    expect(() =>
+      validateGoogleBusiness({
+        ...base,
+        googlePostType: "event",
+        googleEventStartDate: new Date(2026, 6, 1),
+        googleEventEndDate: new Date(2026, 6, 1),
+        googleEventHasTime: true,
+        googleEventStartTime: "10:00",
+        googleEventEndTime: "10:00",
+      }),
+    ).toThrow("Event end must be after the event start");
   });
 
   it("throws when an Event time is not in 24-hour HH:mm format", () => {

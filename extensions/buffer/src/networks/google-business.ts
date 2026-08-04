@@ -35,6 +35,14 @@ export function validateGoogleBusiness(values: PostFormValues): void {
     if (!values.googleOfferStartDate || !values.googleOfferEndDate) {
       throw new Error("Offer start and end dates are required");
     }
+    // Compare truncated calendar-date strings (rather than the raw Date objects, which may
+    // carry an irrelevant time-of-day component) since offers only ever use the date part.
+    if (
+      toDateOnlyIso(values.googleOfferEndDate) <
+      toDateOnlyIso(values.googleOfferStartDate)
+    ) {
+      throw new Error("Offer end date must not be before the start date");
+    }
   }
   if (values.googlePostType === "event") {
     if (!values.googleEventStartDate || !values.googleEventEndDate) {
@@ -54,6 +62,24 @@ export function validateGoogleBusiness(values: PostFormValues): void {
           "Event times must be in 24-hour HH:mm format, e.g. 14:30.",
         );
       }
+      // ISO timestamps of equal precision compare lexicographically in chronological order.
+      if (
+        combineDateAndTime(
+          values.googleEventEndDate,
+          values.googleEventEndTime,
+        ) <=
+        combineDateAndTime(
+          values.googleEventStartDate,
+          values.googleEventStartTime,
+        )
+      ) {
+        throw new Error("Event end must be after the event start");
+      }
+    } else if (
+      toDateOnlyIso(values.googleEventEndDate) <
+      toDateOnlyIso(values.googleEventStartDate)
+    ) {
+      throw new Error("Event end date must not be before the start date");
     }
   }
 }
