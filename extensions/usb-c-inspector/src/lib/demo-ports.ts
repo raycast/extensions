@@ -72,7 +72,7 @@ export const DEMO_OUTPUT: WhatCableOutput = {
       },
       charging: {
         summary: "Bus-powered",
-        detail: "Accessory is drawing bus power; the Mac is not charging from this port.",
+        detail: "The SSD draws bus power from the Mac. The Mac is not charging from this port.",
         bottleneck: "none",
         isWarning: false,
       },

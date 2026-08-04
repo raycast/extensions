@@ -2,12 +2,6 @@ import { Color, Icon } from "@raycast/api";
 
 import type { Port, USBDevice } from "./types";
 
-const GAUGE_WATTS = [0, 30, 45, 65, 67, 70, 96, 100, 140] as const;
-
-function escapeMarkdown(value: string): string {
-  return value.replace(/([\\`*_{}[\]()#+!|])/g, "\\$1");
-}
-
 function firstMatchWatts(...sources: Array<string | null | undefined>): number | null {
   for (const source of sources) {
     if (!source) continue;
@@ -19,36 +13,43 @@ function firstMatchWatts(...sources: Array<string | null | undefined>): number |
   return null;
 }
 
-/** Negotiated / displayed watts for the gauge; empty ports are 0. */
+/** True when the Mac is taking charge (not bus-powering an accessory). */
+export function isMacCharging(port: Port): boolean {
+  if (!port.connectionActive || !port.charging) {
+    return false;
+  }
+  const summary = port.charging.summary ?? "";
+  if (/bus-?powered|not charging|discharg/i.test(summary)) {
+    return false;
+  }
+  if (port.charging.isWarning) {
+    return true;
+  }
+  return /charg/i.test(`${port.status} ${summary} ${port.headline}`);
+}
+
+/** Negotiated / displayed watts for the gauge; empty / non-charging ports are 0. */
 export function extractNegotiatedWatts(port: Port): number {
   if (!port.connectionActive) {
     return 0;
   }
   const parsed = firstMatchWatts(port.charging?.summary, port.headline, port.status, port.charging?.detail);
   if (parsed != null) {
+    if (!isMacCharging(port) && !port.charging?.isWarning) {
+      return 0;
+    }
     return parsed;
   }
-  if (port.cable?.maxWatts != null) {
+  if (isMacCharging(port) && port.cable?.maxWatts != null) {
     return port.cable.maxWatts;
   }
   return 0;
 }
 
-/** Snap to the nearest pre-rendered gauge asset. */
-export function gaugeAssetForWatts(watts: number): string {
-  let best: (typeof GAUGE_WATTS)[number] = GAUGE_WATTS[0];
-  let bestDelta = Math.abs(watts - best);
-  for (const candidate of GAUGE_WATTS) {
-    const delta = Math.abs(watts - candidate);
-    if (delta < bestDelta) {
-      best = candidate;
-      bestDelta = delta;
-    }
-  }
-  return `gauge-${best}.png`;
-}
-
 function extractNegotiatedPower(port: Port): string | null {
+  if (!isMacCharging(port) && !port.charging?.isWarning) {
+    return null;
+  }
   const sources = [port.charging?.detail, port.charging?.summary, port.headline];
   for (const source of sources) {
     if (!source) continue;
@@ -58,8 +59,8 @@ function extractNegotiatedPower(port: Port): string | null {
     }
   }
   const watts = extractNegotiatedWatts(port);
-  if (watts > 0 && port.connectionActive) {
-    return `${watts}W negotiated`;
+  if (watts > 0) {
+    return `${watts}W`;
   }
   return null;
 }
@@ -133,7 +134,7 @@ function dataSpeed(port: Port): string {
   return port.cable?.speed || port.transports?.usb3Speed || "N/A";
 }
 
-function heroTitle(port: Port): string {
+export function heroTitle(port: Port): string {
   if (!port.connectionActive) {
     return "Empty";
   }
@@ -141,9 +142,9 @@ function heroTitle(port: Port): string {
     const watts = extractNegotiatedWatts(port);
     return watts > 0 ? `Slow Charging · ${watts}W` : "Slow Charging";
   }
-  const watts = extractNegotiatedWatts(port);
-  if (port.charging && watts > 0) {
-    return `Charging · ${watts}W`;
+  if (isMacCharging(port)) {
+    const watts = extractNegotiatedWatts(port);
+    return watts > 0 ? `Charging · ${watts}W` : "Charging";
   }
   const speed = dataSpeed(port);
   if (speed !== "N/A") {
@@ -152,65 +153,45 @@ function heroTitle(port: Port): string {
   return port.headline;
 }
 
-function heroBody(port: Port): string | null {
+export function statusTagColor(port: Port): Color {
+  if (port.charging?.isWarning) {
+    return Color.Orange;
+  }
+  if (isMacCharging(port)) {
+    return Color.Green;
+  }
   if (!port.connectionActive) {
-    return "No cable or accessory on this port.";
+    return Color.SecondaryText;
   }
-  if (port.charging?.detail) {
-    return port.charging.detail;
-  }
-  if (port.dataLink?.detail) {
-    return port.dataLink.detail;
-  }
-  return null;
+  return Color.Blue;
 }
 
-function formatDevices(devices: USBDevice[], indent = 0): string[] {
-  const pad = "  ".repeat(indent);
-  const lines: string[] = [];
-  for (const device of devices) {
-    const label = device.name || device.vendorName || `VID ${device.vendorID.toString(16)}`;
-    lines.push(`${pad}- ${escapeMarkdown(label)} (${escapeMarkdown(device.speed)})`);
-    if (device.children?.length) {
-      lines.push(...formatDevices(device.children, indent + 1));
-    }
-  }
-  return lines;
+function formatDeviceName(device: USBDevice): string {
+  return device.name || device.vendorName || `VID ${device.vendorID.toString(16)}`;
 }
 
-/** Compact markdown for the list detail pane (port title lives in the list). */
-export function portListDetailMarkdown(port: Port): string {
-  const watts = extractNegotiatedWatts(port);
-  const gauge = gaugeAssetForWatts(watts);
-  const sections: string[] = [
-    `![${watts} watts](${gauge})`,
-    "",
-    `**${escapeMarkdown(heroTitle(port))}**`,
-    "",
-  ];
-
-  if (port.subtitle) {
-    sections.push(escapeMarkdown(port.subtitle), "");
-  }
-
-  const body = heroBody(port);
-  if (body) {
-    sections.push(escapeMarkdown(body), "");
-  }
-
-  if (port.displays?.length) {
-    sections.push("## Displays");
-    for (const display of port.displays) {
-      const title = display.monitorName ? escapeMarkdown(display.monitorName) : "Display";
-      sections.push(`### ${title}`, escapeMarkdown(display.summary), "");
-    }
-  }
-
-  if (port.devices?.length) {
-    sections.push("## Connected devices", ...formatDevices(port.devices), "");
-  }
-
-  return sections.join("\n").trim() + "\n";
+export function portDetailFields(port: Port): {
+  connected: string;
+  capabilities: string | null;
+  powerStatus: string | null;
+  powerStatusColor?: Color;
+  negotiated: string | null;
+  cableQuality: string | null;
+  dataProtocol: string;
+  dataSpeed: string;
+  deviceNames: string[];
+} {
+  return {
+    connected: connectedDeviceLabel(port),
+    capabilities: capabilitiesLabel(port),
+    powerStatus: port.charging?.summary ?? (port.connectionActive ? null : "Idle"),
+    powerStatusColor: port.charging?.isWarning ? Color.Orange : undefined,
+    negotiated: extractNegotiatedPower(port),
+    cableQuality: cableQuality(port),
+    dataProtocol: dataProtocol(port),
+    dataSpeed: dataSpeed(port),
+    deviceNames: (port.devices ?? []).map(formatDeviceName),
+  };
 }
 
 export type PortAccessory = {
@@ -219,7 +200,7 @@ export type PortAccessory = {
   icon?: Icon;
 };
 
-/** Single primary accessory for list rows (mockup style). */
+/** Single primary accessory for list rows. */
 export function portAccessories(port: Port): PortAccessory[] {
   if (!port.connectionActive) {
     return [{ tag: { value: "Empty", color: Color.SecondaryText } }];
@@ -231,13 +212,8 @@ export function portAccessories(port: Port): PortAccessory[] {
 
   const watts = extractNegotiatedWatts(port);
   const speed = port.cable?.speed || port.transports?.usb3Speed || null;
-  const dataSummary = port.dataLink?.summary ?? "";
-  const powerOnly =
-    Boolean(port.charging) &&
-    watts > 0 &&
-    (!speed || /power\s*only|none/i.test(dataSummary) || /charg/i.test(`${port.headline} ${port.status}`));
 
-  if (powerOnly) {
+  if (isMacCharging(port) && watts > 0) {
     return [{ tag: { value: `${watts}W`, color: Color.Blue } }];
   }
   if (speed) {
@@ -256,31 +232,8 @@ export function portListIcon(port: Port): { source: Icon; tintColor: Color } {
   if (port.charging?.isWarning) {
     return { source: Icon.Warning, tintColor: Color.Orange };
   }
-  if (port.charging && extractNegotiatedWatts(port) > 0) {
-    return { source: Icon.Bolt, tintColor: Color.Blue };
+  if (isMacCharging(port)) {
+    return { source: Icon.Bolt, tintColor: Color.Green };
   }
   return { source: Icon.Link, tintColor: Color.Blue };
-}
-
-/** Structured fields for List.Item.Detail.Metadata sections. */
-export function portDetailFields(port: Port): {
-  connected: string;
-  capabilities: string | null;
-  powerStatus: string | null;
-  powerStatusColor?: Color;
-  negotiated: string | null;
-  cableQuality: string | null;
-  dataProtocol: string;
-  dataSpeed: string;
-} {
-  return {
-    connected: connectedDeviceLabel(port),
-    capabilities: capabilitiesLabel(port),
-    powerStatus: port.charging?.summary ?? (port.connectionActive ? null : "Idle"),
-    powerStatusColor: port.charging?.isWarning ? Color.Orange : undefined,
-    negotiated: extractNegotiatedPower(port),
-    cableQuality: cableQuality(port),
-    dataProtocol: dataProtocol(port),
-    dataSpeed: dataSpeed(port),
-  };
 }
