@@ -125,8 +125,7 @@ export default function Command() {
     setServices([]);
     setOrganizations([]);
     await showToast({ style: Toast.Style.Success, title: "Signed Out of Qovery" });
-    await loadServices();
-  }, [loadServices]);
+  }, []);
 
   return (
     <List
