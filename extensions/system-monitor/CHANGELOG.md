@@ -1,5 +1,10 @@
 # System Monitor Changelog
 
+## [Apple Silicon Fan Monitoring] - 2026-08-04
+
+- Add fan RPM readings to the CPU view via a bundled SMC reader helper (`tools/smc-fan-reader.m`), following the same pattern as the existing temperature reader
+- Report fanless Macs as "Not available on this Mac" instead of showing an error or empty state
+
 ## [Improvements] - 2026-08-03
 
 - Extract parsing and stat derivation into a tested `src/lib/` layer with a vitest harness
