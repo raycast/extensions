@@ -15,22 +15,9 @@ import {
 } from "@raycast/api";
 import { useEffect, useState, type DependencyList } from "react";
 import { authorize, disconnect, getAccessTokenSilently } from "./lib/oauth";
-import {
-  CalendarSummary,
-  PolledEvent,
-  fetchUpcomingEvents,
-  listCalendars,
-} from "./lib/gcal";
-import {
-  clearSelectedCalendarId,
-  getSelectedCalendarId,
-  setSelectedCalendarId,
-} from "./lib/watcher-store";
-import {
-  CONFIRM_TIMEOUT_SECONDS,
-  FOCUS_CATEGORIES,
-  MIN_DURATION_MINUTES,
-} from "./lib/constants";
+import { CalendarSummary, PolledEvent, fetchUpcomingEvents, listCalendars } from "./lib/gcal";
+import { clearSelectedCalendarId, getSelectedCalendarId, setSelectedCalendarId } from "./lib/watcher-store";
+import { CONFIRM_TIMEOUT_SECONDS, FOCUS_CATEGORIES, MIN_DURATION_MINUTES } from "./lib/constants";
 import { LOG_PATH } from "./lib/logger";
 
 // Phase D.5 — first-run onboarding (spec: specs/phase-d5-first-run-onboarding.md).
@@ -152,15 +139,7 @@ export default function SetUp() {
     return (
       <CalendarPicker
         token={data.token}
-        onPicked={(cal) =>
-          push(
-            <HowItWorks
-              calendarName={cal.summary}
-              token={data.token!}
-              calendarId={cal.id}
-            />,
-          )
-        }
+        onPicked={(cal) => push(<HowItWorks calendarName={cal.summary} token={data.token!} calendarId={cal.id} />)}
       />
     );
   }
@@ -204,11 +183,7 @@ function ConnectGoogle({ onConnected }: { onConnected: () => void }) {
       markdown={S1_MARKDOWN}
       actions={
         <ActionPanel>
-          <Action
-            title="Connect Google Calendar"
-            icon={Icon.Link}
-            onAction={connect}
-          />
+          <Action title="Connect Google Calendar" icon={Icon.Link} onAction={connect} />
         </ActionPanel>
       }
     />
@@ -220,12 +195,7 @@ function ConnectGoogle({ onConnected }: { onConnected: () => void }) {
 // (Google API orderBy=startTime), so the first qualifying entry is the winner.
 function findNextTrigger(events: PolledEvent[]): PolledEvent | null {
   return (
-    events.find(
-      (e) =>
-        e.start !== null &&
-        e.durationMin !== null &&
-        e.durationMin >= MIN_DURATION_MINUTES,
-    ) ?? null
+    events.find((e) => e.start !== null && e.durationMin !== null && e.durationMin >= MIN_DURATION_MINUTES) ?? null
   );
 }
 
@@ -239,23 +209,15 @@ function formatNextTrigger(event: PolledEvent): string {
     hour: "2-digit",
     minute: "2-digit",
   });
-  if (start.toDateString() === now.toDateString())
-    return `**${event.title}**, today at ${timeStr}`;
-  if (start.toDateString() === tomorrow.toDateString())
-    return `**${event.title}**, tomorrow at ${timeStr}`;
+  if (start.toDateString() === now.toDateString()) return `**${event.title}**, today at ${timeStr}`;
+  if (start.toDateString() === tomorrow.toDateString()) return `**${event.title}**, tomorrow at ${timeStr}`;
   const dayName = start.toLocaleDateString([], { weekday: "long" });
   return `**${event.title}**, ${dayName} at ${timeStr}`;
 }
 
 // --- S2 — Pick your calendar ---
 
-function CalendarPicker({
-  token,
-  onPicked,
-}: {
-  token: string;
-  onPicked: (cal: CalendarSummary) => void;
-}) {
+function CalendarPicker({ token, onPicked }: { token: string; onPicked: (cal: CalendarSummary) => void }) {
   const { data, isLoading, revalidate } = useAsync(
     () => listCalendars(token),
     [token],
@@ -297,16 +259,8 @@ function CalendarPicker({
         description="Wrong account? Reconnect. Otherwise retry."
         actions={
           <ActionPanel>
-            <Action
-              title="Retry"
-              icon={Icon.ArrowClockwise}
-              onAction={revalidate}
-            />
-            <Action
-              title="Reconnect Google"
-              icon={Icon.Link}
-              onAction={reconnect}
-            />
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            <Action title="Reconnect Google" icon={Icon.Link} onAction={reconnect} />
           </ActionPanel>
         }
       />
@@ -318,11 +272,7 @@ function CalendarPicker({
             icon={Icon.Calendar}
             actions={
               <ActionPanel>
-                <Action
-                  title="Watch This Calendar"
-                  icon={Icon.Check}
-                  onAction={() => pick(cal)}
-                />
+                <Action title="Watch This Calendar" icon={Icon.Check} onAction={() => pick(cal)} />
               </ActionPanel>
             }
           />
@@ -334,15 +284,7 @@ function CalendarPicker({
 
 // --- S3 — How it works + next trigger preview ---
 
-function HowItWorks({
-  calendarName,
-  token,
-  calendarId,
-}: {
-  calendarName: string;
-  token: string;
-  calendarId: string;
-}) {
+function HowItWorks({ calendarName, token, calendarId }: { calendarName: string; token: string; calendarId: string }) {
   const { push } = useNavigation();
   const { data: nextTrigger, isLoading } = useAsync(
     // Use a 7-day window for the preview (vs the watcher's 14h) so the user
@@ -379,16 +321,8 @@ Keep Raycast running so it's always ready: turn on **Launch at login** in **Rayc
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="Done"
-            icon={Icon.Check}
-            onAction={() => push(<StatusScreen />)}
-          />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Done" icon={Icon.Check} onAction={() => push(<StatusScreen />)} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />
@@ -415,8 +349,7 @@ async function loadStatus(): Promise<{
   if (token && calendarId) {
     try {
       const cals = await listCalendars(token);
-      calendarName =
-        cals.find((c) => c.id === calendarId)?.summary ?? calendarName;
+      calendarName = cals.find((c) => c.id === calendarId)?.summary ?? calendarName;
     } catch {
       // Offline / API error — keep the id as a readable fallback.
     }
@@ -498,29 +431,13 @@ function StatusScreen() {
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
-            title="Change Calendar"
-            icon={Icon.Calendar}
-            onAction={changeCalendar}
-          />
-          <Action
-            title="Reconnect Google"
-            icon={Icon.Link}
-            onAction={reconnect}
-          />
-          <Action
-            title="Test It Now"
-            icon={Icon.Play}
-            onAction={fireTestPrompt}
-          />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Gear}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Change Calendar" icon={Icon.Calendar} onAction={changeCalendar} />
+          <Action title="Reconnect Google" icon={Icon.Link} onAction={reconnect} />
+          <Action title="Test It Now" icon={Icon.Play} onAction={fireTestPrompt} />
+          <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           {environment.isDevelopment && (
             <Action
-              title="Reset Onboarding (dev)"
+              title="Reset Onboarding (Dev)"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={resetOnboarding}

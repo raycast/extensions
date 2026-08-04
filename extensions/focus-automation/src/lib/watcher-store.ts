@@ -1,39 +1,17 @@
 import { LocalStorage } from "@raycast/api";
 
-// Phase C2 — the watcher's cross-tick memory.
-//
-// The Python daemon is one long-running process: it holds last_logged_state,
-// _last_event_count, and the auth-failure flag in RAM for its whole lifetime.
-// A Raycast background command is a FRESH process every 60s, so that RAM is
-// wiped each tick. Without persisting it, the watcher would re-log every event
-// every minute and forget what it had already reported.
-//
-// This module is the daemon's "RAM that lives as long as the process" rebuilt
-// as "LocalStorage that lives as long as the install". It has no daemon-file
-// equivalent (processed_events.json is the real state; this is bookkeeping), so
-// it lives in its own module rather than in state.ts.
-
-const LOG_STATE_KEY = "watcher_log_state"; // <- last_logged_state
-const SYS_STATE_KEY = "watcher_sys_state"; // <- one-shot system-message flags
-const LAST_COUNT_KEY = "watcher_last_count"; // <- _last_event_count
+const LOG_STATE_KEY = "watcher_log_state";
+const SYS_STATE_KEY = "watcher_sys_state";
+const LAST_COUNT_KEY = "watcher_last_count";
 const SELECTED_CALENDAR_KEY = "selected_calendar_id";
-const WATCHER_LOCK_KEY = "watcher_lock"; // <- write-race guard (C4.a), ISO timestamp
-const ACTIVE_SESSION_KEY = "active_session"; // <- skip-if-running model (C4.b)
+const WATCHER_LOCK_KEY = "watcher_lock";
+const ACTIVE_SESSION_KEY = "active_session";
 
-// eventId -> "<action>|<startIso>", so a decision is logged only when it changes.
 export type LogState = Record<string, string>;
-// tag -> last message logged for that tag, so a persistent condition (no auth,
-// no calendar, repeating error) logs once, not every 60s.
 export type SysState = Record<string, string>;
-// The session the watcher last modeled as "running" (C4.b skip-if-running). There
-// is no Raycast API to ask whether Focus is running, so the guard tracks our own
-// fire DECISIONS, not Focus processes: at each fire it records a window ending at
-// fireTime + focusDurationSeconds. `endIso` is when that modeled window closes.
 export type ActiveSession = { eventId: string; endIso: string };
 
-async function loadJsonMap<T extends Record<string, string>>(
-  key: string,
-): Promise<T> {
+async function loadJsonMap<T extends Record<string, string>>(key: string): Promise<T> {
   const raw = await LocalStorage.getItem<string>(key);
   if (!raw) return {} as T;
   try {
@@ -71,15 +49,6 @@ export async function saveLastCount(n: number): Promise<void> {
   await LocalStorage.setItem(LAST_COUNT_KEY, String(n));
 }
 
-// The write-race guard (C4.a). A tick stamps watcher_lock with its start time at
-// the top and clears it on exit; an overlapping tick that finds a fresh lock
-// (younger than WATCHER_LOCK_STALE_SECONDS) bails. Stored as an ISO string so a
-// crashed-tick's stale lock is human-readable in a LocalStorage dump.
-//
-// This is a mitigation, not a mutex: LocalStorage has no atomic get-and-set, so
-// two ticks reading "no lock" in the same millisecond can both proceed. It
-// shrinks the race window from the whole tick to ~ms; mark-before-fire (C4.b)
-// bounds the worst case. See spec C4.a self-critique.
 export async function loadWatcherLock(): Promise<Date | null> {
   const raw = await LocalStorage.getItem<string>(WATCHER_LOCK_KEY);
   if (!raw) return null;
@@ -93,14 +62,6 @@ export async function clearWatcherLock(): Promise<void> {
   await LocalStorage.removeItem(WATCHER_LOCK_KEY);
 }
 
-// The skip-if-running modeled session (C4.b). Written ONLY when a Focus session
-// actually starts — the watcher's auto branch (after `open`) and the confirm
-// modal on "Start" (confirm-focus.tsx). Read at the next fire decision: if `now`
-// is still inside the modeled window, the watcher logs SKIPPED_FOCUS_RUNNING and
-// does not fire. A Skip / timeout / decline / stale-yes writes nothing, so a
-// declined prompt leaves no stale window (the confirm-mode fix, 2026-07-02).
-// Nothing is written in dry-run either, since no Focus starts. No `clear` setter:
-// a session retires by its window passing. (Daemon parity retired with D.4.)
 export async function loadActiveSession(): Promise<ActiveSession | null> {
   const raw = await LocalStorage.getItem<string>(ACTIVE_SESSION_KEY);
   if (!raw) return null;
@@ -130,9 +91,6 @@ export async function getSelectedCalendarId(): Promise<string | null> {
 export async function setSelectedCalendarId(id: string): Promise<void> {
   await LocalStorage.setItem(SELECTED_CALENDAR_KEY, id);
 }
-// Removes the stored calendar id, returning the watcher to "Waiting for
-// onboarding". Used by the D.5 dev-only reset (Raycast's Log Out clears the
-// token but not this key) and as the durable state-reset on rollback.
 export async function clearSelectedCalendarId(): Promise<void> {
   await LocalStorage.removeItem(SELECTED_CALENDAR_KEY);
 }

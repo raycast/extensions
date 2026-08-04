@@ -5,8 +5,7 @@ import { OAuth } from "@raycast/api";
 // ships in this public repo. Replaced the Web-type client + gitignored
 // secrets.ts on 2026-07-02 — CI builds from committed source and couldn't
 // resolve the ignored file (decisions.md 2026-07-02).
-const CLIENT_ID =
-  "647157801043-so41v8vj13es4sfd4n6jrh46uav5rrgu.apps.googleusercontent.com";
+const CLIENT_ID = "647157801043-so41v8vj13es4sfd4n6jrh46uav5rrgu.apps.googleusercontent.com";
 // Two narrow read-only scopes, not the broad calendar.readonly (E.0 scope
 // minimization, 2026-06-02): list calendars (to find/pick the calendar) + read
 // events (to poll them). The watcher's steady state only needs events.readonly;
@@ -117,10 +116,7 @@ export async function authorize(): Promise<string> {
   return tokens.access_token;
 }
 
-async function exchangeCode(
-  authRequest: OAuth.AuthorizationRequest,
-  authCode: string,
-): Promise<GoogleTokenResponse> {
+async function exchangeCode(authRequest: OAuth.AuthorizationRequest, authCode: string): Promise<GoogleTokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", CLIENT_ID);
   params.append("code", authCode);
@@ -139,9 +135,7 @@ async function exchangeCode(
   return (await response.json()) as GoogleTokenResponse;
 }
 
-async function refreshTokens(
-  refreshToken: string,
-): Promise<GoogleTokenResponse> {
+async function refreshTokens(refreshToken: string): Promise<GoogleTokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", CLIENT_ID);
   params.append("refresh_token", refreshToken);
