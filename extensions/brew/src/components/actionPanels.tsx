@@ -15,6 +15,15 @@ import * as Actions from "./actions";
 import { CaskInfo } from "./caskInfo";
 import { FormulaInfo } from "./formulaInfo";
 
+const ToggleDetailsAction = (props: { onToggleDetails: () => void }) => (
+  <Action
+    title="Toggle Details"
+    icon={Icon.AppWindowSidebarRight}
+    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+    onAction={props.onToggleDetails}
+  />
+);
+
 const DebugSection = (props: { obj: Cask | Formula }) => (
   <ActionPanel.Section>
     <Action.Push
@@ -44,6 +53,7 @@ export function CaskActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
+  onToggleDetails?: () => void;
 }) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -61,6 +71,7 @@ export function CaskActionPanel(props: {
           )}
           {cask.outdated && <Actions.FormulaUpgradeAction formula={cask} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(cask)} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -124,6 +135,7 @@ export function CaskActionPanel(props: {
             />
           )}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
@@ -180,6 +192,7 @@ export function FormulaActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
+  onToggleDetails?: () => void;
 }) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
@@ -199,6 +212,7 @@ export function FormulaActionPanel(props: {
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
           <Actions.FormulaShowAllInstalled onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
@@ -257,6 +271,7 @@ export function FormulaActionPanel(props: {
             />
           )}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
+          {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard
