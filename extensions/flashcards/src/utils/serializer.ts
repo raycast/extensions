@@ -6,7 +6,7 @@ import { Flashcard } from "../types";
  * Standard:   Question\n==\nAnswer\n#tags | -
  * MC:         Question\n==<\n1: Option\n…\n--\ncorrect: N\n#tags | -
  */
-function cardToMarkdown(card: Flashcard): string {
+export function cardToMarkdown(card: Flashcard): string {
   const lines: string[] = [];
 
   // Question / front side.

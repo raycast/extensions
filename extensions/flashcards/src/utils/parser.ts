@@ -94,7 +94,7 @@ function parseMC(
   const correctMatch = (correctPart ?? "")
     .trim()
     .match(
-      /^(correct|true|richtig|correcto|正确|सही|правильно|صحيح|correto|doğru):\s*(\d+)/im,
+      /^(correct|true|richtig|correcto|正确|सही|правильно|صحيح|correto|corretto|doğru):\s*(\d+)/im,
     );
   const correctOption = correctMatch
     ? parseInt(correctMatch[2], 10)
@@ -139,12 +139,41 @@ export function parseMultipleCards(
     // Skip empty blocks after cleanup.
     if (!block) continue;
 
-    try {
-      results.push(parseMarkdown(block));
-    } catch {
-      // Skip malformed blocks so the remaining cards can still be imported.
-    }
+    results.push(...parseBlock(block));
   }
 
   return results;
+}
+
+function parseBlock(
+  block: string,
+): Omit<Flashcard, "id" | "progress" | "createdAt">[] {
+  if (/\n[\t ]*==(?:<)?[\t ]*(?:\n|$)/.test(block)) {
+    return [parseMarkdown(block)];
+  }
+
+  const lines = block.split("\n");
+  const lastLine = lines[lines.length - 1]?.trim() ?? "";
+  const tags = /^(#[\p{L}\p{N}_]+\s*)+$/u.test(lastLine)
+    ? (lastLine.match(/#([\p{L}\p{N}_]+)/gu) ?? []).map((tag) =>
+        tag.slice(1).toLowerCase(),
+      )
+    : [];
+  const contentLines = tags.length > 0 ? lines.slice(0, -1) : lines;
+  const cards = contentLines.flatMap((line) => {
+    const match = line.trim().match(/^-\s+\*\*(.+?)\*\*\s+[—–-]\s+(.+?)\s*$/);
+
+    return match
+      ? [
+          {
+            type: "standard" as CardType,
+            front: match[1].trim(),
+            back: match[2].trim(),
+            tags,
+          },
+        ]
+      : [];
+  });
+
+  return cards;
 }

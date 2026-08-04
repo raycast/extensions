@@ -1,5 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { createCardsFromMarkdown } from "../utils/ai-flashcards";
+import { parseMultipleCards } from "../utils/parser";
 import { cardsToMarkdown } from "../utils/serializer";
 
 export type GenerateInput = {
@@ -16,9 +17,11 @@ export type GenerateResult = {
 export const confirmation: Tool.Confirmation<GenerateInput> = async ({
   markdown,
 }) => {
-  const cardCount = markdown
-    .split(/\n[ \t]*---[ \t]*\n/)
-    .filter((block) => block.trim()).length;
+  const cardCount = parseMultipleCards(markdown).length;
+
+  if (cardCount === 0) {
+    return undefined;
+  }
 
   return {
     style: Action.Style.Regular,
@@ -51,6 +54,15 @@ export default async function generateFlashcards(
       ? `${existingTags ? markdown.split("\n").slice(0, -1).join("\n") : markdown}\n${tags.map((tag) => `#${tag}`).join(" ")}`
       : markdown;
   const result = await createCardsFromMarkdown(taggedMarkdown);
+  if (result.cards.length === 0) {
+    return {
+      cards: "",
+      skipped: 1,
+      error:
+        "No flashcards were created. Convert the request into Markdown cards using 'Question\\n==\\nAnswer' and separate cards with '---'.",
+    };
+  }
+
   return {
     cards: cardsToMarkdown(result.cards),
     skipped: result.skipped,

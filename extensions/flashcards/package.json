@@ -61,7 +61,7 @@
     {
       "name": "generate-flashcards",
       "title": "Generate Flashcards",
-      "description": "Create and save one or more flashcards from Markdown notes or a topic."
+      "description": "Create and save flashcards. Before calling this tool, convert the user's topic or notes into Markdown cards using 'Question\\n==\\nAnswer', separate cards with a line containing '---', and put tags on the final line. Pass the generated Markdown in the markdown field; never pass the topic sentence directly."
     },
     {
       "name": "search-flashcards",

@@ -14,6 +14,8 @@ import {
 import { useEffect, useState, useCallback } from "react";
 import { Flashcard } from "./types";
 import { getAllCards, deleteCard, deleteAllCards } from "./utils/storage";
+import { markdownToPlainText } from "./utils/markdown";
+import EditCard from "./edit-card";
 import EditTags from "./edit-tags";
 
 function cardDetailMarkdown(card: Flashcard): string {
@@ -124,7 +126,7 @@ export default function ListCards() {
           <List.Item
             key={card.id}
             icon={typeIcon(card)}
-            title={card.front}
+            title={markdownToPlainText(card.front)}
             accessories={[
               progressAccessory(card),
               ...(card.tags.length > 0 ? [{ tag: `#${card.tags[0]}` }] : []),
@@ -176,6 +178,13 @@ export default function ListCards() {
             }
             actions={
               <ActionPanel>
+                <Action
+                  title="Edit Flashcard"
+                  icon={Icon.Pencil}
+                  onAction={() =>
+                    push(<EditCard card={card} onSaved={loadCards} />)
+                  }
+                />
                 {/* Edit tags in the dedicated form. */}
                 <Action
                   title="Edit Tags"

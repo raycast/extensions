@@ -9,6 +9,8 @@ import {
 import { useEffect, useState, useCallback } from "react";
 import { Flashcard } from "./types";
 import { getAllCards } from "./utils/storage";
+import { markdownToPlainText } from "./utils/markdown";
+import EditCard from "./edit-card";
 
 // ── Card detail view for a tag ───────────────────────────────────────────────
 
@@ -27,6 +29,7 @@ function cardDetailMarkdown(card: Flashcard): string {
 // Show all cards for a specific tag.
 function CardsForTag({ tag, cards }: { tag: string; cards: Flashcard[] }) {
   const filtered = cards.filter((c) => c.tags.includes(tag));
+  const { push } = useNavigation();
 
   return (
     <List
@@ -41,7 +44,7 @@ function CardsForTag({ tag, cards }: { tag: string; cards: Flashcard[] }) {
           <List.Item
             key={card.id}
             icon={card.type === "multiple-choice" ? Icon.List : Icon.TextCursor}
-            title={card.front}
+            title={markdownToPlainText(card.front)}
             accessories={[
               card.progress === "correct"
                 ? { tag: { value: "✓", color: Color.Green } }
@@ -50,6 +53,15 @@ function CardsForTag({ tag, cards }: { tag: string; cards: Flashcard[] }) {
                   : { tag: { value: "·", color: Color.SecondaryText } },
             ]}
             detail={<List.Item.Detail markdown={cardDetailMarkdown(card)} />}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Edit Flashcard"
+                  icon={Icon.Pencil}
+                  onAction={() => push(<EditCard card={card} />)}
+                />
+              </ActionPanel>
+            }
           />
         ))
       )}
