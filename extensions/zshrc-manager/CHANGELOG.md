@@ -8,6 +8,8 @@
 - Multi-line `plugins=(…)`, `path+=(…)` and `fpath=(…)` array declarations — the standard Oh My Zsh layout — are now parsed everywhere; sections and search previously missed them
 - PATH and FPATH declarations in all supported forms (`export`/`typeset -x`/`declare -x`, `+=` string append, array append/set, `$PATH:`-relative, and plain assignment) are recognized consistently across every surface
 - Keybinding counts no longer include bare mode lines like `bindkey -e` that the Keybindings view has nothing to show for
+- Array parsing follows zsh quoting: quoted elements may contain whitespace, parentheses and escaped quotes; `$(…)` command substitutions stay one element with their text kept verbatim; inline comments inside array bodies are ignored
+- A comment inside a multi-line array that happens to match a section-header format (`## group`, `# Section: X`) no longer splits the array — per-section counts stay consistent with the views, and adding an item can no longer insert a line into the middle of an array
 - Sources with quoted operands or trailing inline comments resolve correctly in the detail pane's `Source Exists` fact; plugin install checks honor `ZSH_CUSTOM`/`ZSH` set as plain (unexported) assignments; `$HOMEBREW_PREFIX`-style variables are no longer mis-expanded as `$HOME`
 - **Undo now actually reverts adds and edits.** History entries for add/edit operations recorded the post-change file as their restore point, so undoing them silently restored the very state you were trying to revert. Every write now records the pre-change snapshot, and only after the write is verified — so a failed write can no longer leave a restore point for a change that never happened
 
