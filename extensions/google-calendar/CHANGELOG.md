@@ -1,5 +1,27 @@
 # Google Calendar Changelog
 
+## [Expand AI Calendar API Support] - 2026-07-20
+
+- Expand the AI extension to support rich event creation and editing, including all-day and recurring events, attendees, reminders, visibility, availability, conferencing, attachments, special event types, imports, and recurring instances
+- Add AI tools for event details, invitation responses, suggested meeting times, event moves, quick add, custom event labels, calendar management, calendar-list preferences, sharing rules, settings, and live color palettes
+- Support Google Calendar's custom event labels and colors with `eventLabelId` and `eventLabelVersion=1` while retaining legacy `colorId` compatibility
+- Use safe partial event updates to preserve fields the user did not change, and return consistent rich event data from event tools
+- Upgrade `@googleapis/calendar` to v15 and add unit tests plus expanded AI eval coverage for the new workflows
+
+## [Revert Narrow OAuth Scope] - 2026-07-15
+
+- Revert [#28925](https://github.com/raycast/extensions/pull/28925) and restore the broad `calendar` OAuth scope to avoid forcing re-authentication for existing users
+
+## [Narrow OAuth Scope] - 2026-07-08
+
+- Narrow OAuth scope from `calendar` (full read/write) to `calendar.events` + `calendar.calendarlist.readonly` + `calendar.freebusy` for least-privilege access
+- Derive conference solution types from the calendar list instead of a separate `calendars.get` call
+- Remove unused `getAutoAddHangouts` dead code
+
+## [1.4.4] - 2026-06-26
+
+- Add a `color` parameter to the `create-event` and `edit-event` AI tools so events can be created and recolored with a specific Google Calendar color (named color, `colorId` 1–11, or a hex code that snaps to the nearest supported event color)
+
 ## [1.4.3] - 2026-05-12
 
 - Fix Google OAuth authentication by using Raycast's built-in Google OAuth flow ([#26572](https://github.com/raycast/extensions/issues/26572))

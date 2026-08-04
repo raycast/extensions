@@ -1,5 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
-import debounce from "lodash/debounce.js";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { LaunchOptions } from "raycast-cross-extension";
 import { useEffect, useState } from "react";
 import { ImagePreview } from "./components.js";
@@ -22,14 +21,6 @@ export default function Browse({
   const [game, setGame] = useState<SGDBGame>();
   const [isLoading, setIsLoading] = useState(steamAppId ? true : false);
 
-  const fetchGames = async (searchString: string) => {
-    if (!searchString) return;
-    setIsLoading(true);
-    const games = await db.searchGame(searchString).catch(() => []);
-    setGames(games);
-    setIsLoading(false);
-  };
-
   const loadSteamGame = async (steamAppId: number) => {
     setIsLoading(true);
     const game = await db
@@ -46,7 +37,29 @@ export default function Browse({
   }, []);
 
   useEffect(() => {
-    fetchGames(searchString);
+    if (!searchString) {
+      setGames([]);
+      setIsLoading(false);
+      return;
+    }
+
+    let isCurrentRequest = true;
+
+    const fetchGames = async () => {
+      setIsLoading(true);
+      const games = await db.searchGame(searchString).catch(() => []);
+
+      if (!isCurrentRequest) return;
+
+      setGames(games);
+      setIsLoading(false);
+    };
+
+    void fetchGames();
+
+    return () => {
+      isCurrentRequest = false;
+    };
   }, [searchString]);
 
   if (steamAppId) {
@@ -59,15 +72,13 @@ export default function Browse({
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      onSearchTextChange={debounce(setSearchString, 300)}
-    >
+    <List isLoading={isLoading} throttle onSearchTextChange={setSearchString}>
       {searchString && !isLoading ? (
         games.map((game) => (
           <List.Item
             key={game.id.toString()}
             title={game.name}
+            icon={Icon.GameController}
             accessories={game.types.map((text) => ({ tag: text }))}
             actions={
               <ActionPanel>

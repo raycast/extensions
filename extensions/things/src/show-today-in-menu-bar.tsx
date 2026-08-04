@@ -8,6 +8,7 @@ import {
   LaunchType,
   openCommandPreferences,
   getPreferenceValues,
+  Keyboard,
 } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 
@@ -131,32 +132,32 @@ export default function ShowTodayInMenuBar() {
           <MenuBarExtra.Section>
             <MenuBarExtra.Item
               {...listItems.inbox}
-              shortcut={{ modifiers: ['cmd'], key: 'i' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 'i' }}
               onAction={() => open('things:///show?id=inbox')}
             />
             <MenuBarExtra.Item
               {...listItems.today}
-              shortcut={{ modifiers: ['cmd'], key: 't' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 't' }}
               onAction={() => open('things:///show?id=today')}
             />
             <MenuBarExtra.Item
               {...listItems.upcoming}
-              shortcut={{ modifiers: ['cmd'], key: 'u' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 'u' }}
               onAction={() => open('things:///show?id=upcoming')}
             />
             <MenuBarExtra.Item
               {...listItems.anytime}
-              shortcut={{ modifiers: ['cmd'], key: 'a' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 'a' }}
               onAction={() => open('things:///show?id=anytime')}
             />
             <MenuBarExtra.Item
               {...listItems.someday}
-              shortcut={{ modifiers: ['cmd'], key: 's' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 's' }}
               onAction={() => open('things:///show?id=someday')}
             />
             <MenuBarExtra.Item
               {...listItems.logbook}
-              shortcut={{ modifiers: ['cmd'], key: 'l' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 'l' }}
               onAction={() => open('things:///show?id=logbook')}
             />
           </MenuBarExtra.Section>
@@ -191,7 +192,7 @@ export default function ShowTodayInMenuBar() {
         <MenuBarExtra.Item
           title="Add New To-Do"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ['cmd'], key: 'n' }}
+          shortcut={Keyboard.Shortcut.Common.New}
           onAction={() => {
             launchCommand({ name: 'add-new-todo', type: LaunchType.UserInitiated, context: { list: 'today' } });
           }}
@@ -200,7 +201,7 @@ export default function ShowTodayInMenuBar() {
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
-          shortcut={{ modifiers: ['cmd'], key: ',' }}
+          shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>

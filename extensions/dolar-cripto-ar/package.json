@@ -19,17 +19,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.97.0",
-    "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "axios": "^1.18.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.5",
+    "typescript": "^6.0.0"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -37,5 +37,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

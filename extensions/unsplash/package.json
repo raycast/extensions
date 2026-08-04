@@ -9,7 +9,8 @@
     "Kang",
     "yug2005",
     "xmok",
-    "alexi.build"
+    "alexi.build",
+    "arinbalyan"
   ],
   "license": "MIT",
   "keywords": [
@@ -333,6 +334,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

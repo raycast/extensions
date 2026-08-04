@@ -14,14 +14,14 @@
       "subtitle": "WinSCP"
     }
   ],
-  "preferences": [ 
+  "preferences": [
     {
       "name": "programPath",
       "type": "directory",
       "required": false,
       "title": "WinSCP Installation Folder",
       "default": "",
-      "description": "The folder where WinSCP is installed, only change this if the program is returning errors. You should find it at C:\\Users\\{user}\\AppData\\Local\\Programs\\WinSCP"
+      "description": "The folder that contains WinSCP.exe. You only need to set this if the extension cannot find WinSCP on its own, since it already looks in the usual install folders and on your PATH."
     }
   ],
   "dependencies": {
@@ -34,17 +34,23 @@
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vite": "^6.3.6",
+    "vitest": "^3.2.7"
   },
   "scripts": {
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
+    "test": "vitest run",
     "build": "ray build",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
   "author": "bossdaily",
+  "contributors": [
+    "THEN00P"
+  ],
   "platforms": [
     "Windows"
   ],

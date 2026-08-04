@@ -20,7 +20,12 @@ import { ClipboardImageError, readImageFromClipboard } from "./clipboard-image";
 import { CaptureError, CaptureMode, captureToFile, safeUnlink } from "./capture";
 import { type ChatTurn, continueConversation, type SessionContext } from "./continue-chat";
 import { FetchPageError, fetchPageAsPlainText } from "./fetch-page-text";
-import { effectiveModelPreference, MODEL_PREFERENCE_OPTIONS, parseModelPreference } from "./model";
+import {
+  effectiveModelPreference,
+  effectiveSessionModelPreference,
+  MODEL_PREFERENCE_OPTIONS,
+  parseModelPreference,
+} from "./model";
 import { regenerateLastTurn } from "./regenerate-turn";
 import {
   BUILTIN_PROMPT_PRESETS,
@@ -93,7 +98,7 @@ export default function AnalyzeScreenCommand() {
   const showTokenUsagePref = prefs.showTokenUsage === true;
   const showEstimatedCostPref = showTokenUsagePref && prefs.showEstimatedCost === true;
 
-  const effectiveSessionModel = sessionModel.trim() || prefs.model?.trim() || "openai:gpt-4o-mini";
+  const effectiveSessionModel = effectiveSessionModelPreference(sessionModel, prefs.model);
   const usageHintOpts = useMemo(
     () => ({ modelValue: effectiveSessionModel, showEstimatedCost: showEstimatedCostPref }),
     [effectiveSessionModel, showEstimatedCostPref],
@@ -255,7 +260,7 @@ export default function AnalyzeScreenCommand() {
     (record: StoredSession) => {
       setLastRequestUsage(null);
       setUsageLedger([]);
-      setSessionModel(prefs.model?.trim() || "openai:gpt-4o-mini");
+      setSessionModel(effectiveSessionModelPreference(undefined, prefs.model));
       if (record.source === "browser") {
         setMessages(record.messages);
         setSession({ source: "browser" });
@@ -526,7 +531,7 @@ export default function AnalyzeScreenCommand() {
         info={
           contentSource === "browser"
             ? "AppleScript picks the frontmost supported browser (Chrome, Safari, Arc, Dia, Brave, Edge, Opera, Vivaldi). The page is fetched as plain text—logins and SPAs may differ from what you see."
-            : "Capture from the screen or use a file-backed image from the clipboard."
+            : "Capture from the screen or use an image from the clipboard."
         }
       >
         <Form.Dropdown.Item value="screen" title="Screen capture" icon={Icon.Desktop} />
@@ -537,12 +542,12 @@ export default function AnalyzeScreenCommand() {
           id="mode"
           title="Capture"
           defaultValue="interactive"
-          info="Interactive and Window modes open macOS selection UI. Clipboard uses a file-backed image from the clipboard."
+          info="Interactive and Window modes open macOS selection UI. Clipboard reads copied images and screenshots."
         >
           <Form.Dropdown.Item value="interactive" title="Interactive region" icon={Icon.Crop} />
           <Form.Dropdown.Item value="fullscreen" title="Full screen" icon={Icon.Desktop} />
           <Form.Dropdown.Item value="window" title="Single window" icon={Icon.Window} />
-          <Form.Dropdown.Item value="clipboard" title="Clipboard image (file)" icon={Icon.Clipboard} />
+          <Form.Dropdown.Item value="clipboard" title="Clipboard image" icon={Icon.Clipboard} />
         </Form.Dropdown>
       ) : null}
       <Form.Dropdown

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "include": ["src/**/*", "raycast-env.d.ts"],
+  "include": ["src/**/*", "tests/**/*", "vitest.config.ts", "raycast-env.d.ts"],
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]

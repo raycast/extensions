@@ -16,6 +16,7 @@
 - Quickly resize a window to predefined sizes
 - Add and save custom window sizes
 - Star your frequently used window sizes
+- Search sizes by aspect ratio (`r16:9`)
 - Maximize window
 - Restore previous window size
 - Get current window size

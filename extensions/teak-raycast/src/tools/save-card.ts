@@ -13,11 +13,15 @@ export default async function tool(content: string) {
 
   const url = extractFirstHttpUrl(normalizedContent);
 
-  const result = await createCard({
-    content: normalizedContent,
-    source: "raycast_ai_tool",
-    url: url ?? undefined,
-  });
+  const result = await createCard(
+    {
+      content: normalizedContent,
+      source: "raycast_ai_tool",
+      url: url ?? undefined,
+    },
+    // AI tools run headless — never open the browser sign-in overlay.
+    { interactive: false },
+  );
 
   return `Saved to Teak: ${result.cardId}`;
 }

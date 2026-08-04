@@ -328,7 +328,7 @@ export function EditTransactionForm({
   const client = useLunchMoney();
 
   const currentCategory = categories.find((c) => c.id === transaction.category_id);
-  const transactionTags = transaction.tag_ids
+  const transactionTags = (transaction.tag_ids || [])
     .map((tagId) => tags.find((t) => t.id === tagId))
     .filter((t): t is Tag => t !== undefined);
 
@@ -440,7 +440,7 @@ export function TransactionDetail({
   const isReviewed = transaction.status === "reviewed";
 
   // Get tag objects from tag_ids
-  const transactionTags = transaction.tag_ids
+  const transactionTags = (transaction.tag_ids || [])
     .map((tagId) => tags.find((t) => t.id === tagId))
     .filter((t): t is Tag => t !== undefined);
 

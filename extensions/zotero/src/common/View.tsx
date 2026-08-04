@@ -11,7 +11,7 @@ import {
   open,
 } from "@raycast/api";
 import { dirname, join } from "path";
-import { RefData, Preferences, resolveHome } from "./zoteroApi";
+import { RefData, Preferences, resolveHome, MAX_RENDER_RESULTS } from "./zoteroApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 import {
   exportRef,
@@ -241,7 +241,15 @@ export const View = ({
       searchBarAccessory={<CollectionDropdown onSelection={setCollection} collections={collections} />}
     >
       {sectionNames.map((sectionName, sectionIndex) => (
-        <List.Section key={sectionIndex} title={sectionName} subtitle={`${queryResults[sectionIndex].length}`}>
+        <List.Section
+          key={sectionIndex}
+          title={sectionName}
+          subtitle={
+            queryResults[sectionIndex].length >= MAX_RENDER_RESULTS
+              ? `Top ${MAX_RENDER_RESULTS} — refine your search to see more`
+              : `${queryResults[sectionIndex].length}`
+          }
+        >
           {queryResults[sectionIndex]
             .filter((item) => item.collection?.includes(collection) || collection == "All")
             .map((item) => {

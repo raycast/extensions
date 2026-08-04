@@ -101,7 +101,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.3",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.19.1",
     "date-fns": "^3.6.0",
     "jotai": "^2.12.2",

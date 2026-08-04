@@ -82,16 +82,6 @@ type PullRequest = {
   };
 };
 
-// An agent session returned from the sessions API
-type AgentSession = {
-  resource_global_id: string;
-  premium_requests: number;
-};
-
-type ListAgentSessionsResponse = {
-  sessions: AgentSession[];
-};
-
 type Repository = {
   name: string;
   owner: {
@@ -103,7 +93,6 @@ type Repository = {
 type TaskWithPullRequest = {
   task: Task;
   pullRequest: PullRequest | null;
-  premiumRequests: number;
   repository: Repository | null;
   key: string;
 };
@@ -179,7 +168,7 @@ async function createTask(
   } = {
     event_content: prompt,
     problem_statement: prompt,
-    create_pull_request: true,
+    create_pull_request: false,
     base_ref: branch,
   };
 
@@ -228,10 +217,9 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
     "Copilot-Integration-Id": "copilot-raycast",
   };
 
-  const [listTasksResponse, listSessionsResponse] = await Promise.all([
-    fetch("https://api.githubcopilot.com/agents/tasks?sort=updated_at&direction=desc", { headers }),
-    fetch("https://api.githubcopilot.com/agents/sessions", { headers }),
-  ]);
+  const listTasksResponse = await fetch("https://api.githubcopilot.com/agents/tasks?sort=updated_at&direction=desc", {
+    headers,
+  });
 
   if (!listTasksResponse.ok) {
     const responseText = await listTasksResponse.text();
@@ -241,15 +229,6 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
   }
 
   const { tasks: retrievedTasks } = (await listTasksResponse.json()) as ListTasksResponse;
-
-  // Build a map of PR global ID -> total premium requests from sessions
-  const sessions = listSessionsResponse.ok
-    ? ((await listSessionsResponse.json()) as ListAgentSessionsResponse).sessions
-    : [];
-  const premiumByGlobalId = sessions.reduce<Record<string, number>>((acc, session) => {
-    const key = session.resource_global_id;
-    return { ...acc, [key]: (acc[key] || 0) + (session.premium_requests || 0) };
-  }, {});
 
   // Extract pull request global IDs from task artifacts
   const pullRequestGlobalIds = Array.from(
@@ -328,14 +307,11 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
       ? pullRequests.find((pr) => pr.globalId === pullArtifact.data.global_id) || null
       : null;
 
-    const prGlobalId = pullArtifact?.data.global_id;
-    const premiumRequests = prGlobalId ? premiumByGlobalId[prGlobalId] || 0 : 0;
     const repository = pullRequest?.repository ?? repositories.find((r) => r.repoId === task.repository.id) ?? null;
 
     return {
       task,
       pullRequest,
-      premiumRequests,
       repository,
       key: task.id,
     };

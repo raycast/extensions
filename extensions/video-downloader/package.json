@@ -133,14 +133,38 @@
       "default": "none",
       "required": false,
       "data": [
-        { "title": "None", "value": "none" },
-        { "title": "Safari", "value": "safari" },
-        { "title": "Chrome", "value": "chrome" },
-        { "title": "Brave", "value": "brave" },
-        { "title": "Microsoft Edge", "value": "edge" },
-        { "title": "Firefox", "value": "firefox" },
-        { "title": "Opera", "value": "opera" },
-        { "title": "Vivaldi", "value": "vivaldi" }
+        {
+          "title": "None",
+          "value": "none"
+        },
+        {
+          "title": "Safari",
+          "value": "safari"
+        },
+        {
+          "title": "Chrome",
+          "value": "chrome"
+        },
+        {
+          "title": "Brave",
+          "value": "brave"
+        },
+        {
+          "title": "Microsoft Edge",
+          "value": "edge"
+        },
+        {
+          "title": "Firefox",
+          "value": "firefox"
+        },
+        {
+          "title": "Opera",
+          "value": "opera"
+        },
+        {
+          "title": "Vivaldi",
+          "value": "vivaldi"
+        }
       ]
     }
   ],

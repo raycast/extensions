@@ -1,76 +1,74 @@
+import { promises as fs } from "fs";
 import { Bookmark } from "../types";
-import { getHeliumBookmarks } from "./applescript";
+import { findProfileFile } from "./helium-profile";
 
-/**
- * Parse bookmark string from AppleScript format
- * Format: "name|url|id|folder" (folder is optional/empty string)
- */
-function parseBookmarkString(bookmarkStr: string): Bookmark | null {
-  try {
-    const parts = bookmarkStr.split("|");
+// Chromium bookmark tree node as stored in the profile's `Bookmarks` JSON file.
+interface RawBookmarkNode {
+  id?: string;
+  guid?: string;
+  name?: string;
+  type?: string;
+  url?: string;
+  children?: RawBookmarkNode[];
+}
 
-    if (parts.length < 3) {
-      return null;
-    }
+interface RawBookmarksFile {
+  roots?: Record<string, RawBookmarkNode>;
+}
 
-    // Parse from the end: folder (optional), id, url, then title is everything else
-    const folder = parts.length >= 4 ? parts[parts.length - 1].trim() : undefined;
-    const id = parts[parts.length - 2].trim();
-    const url = parts[parts.length - 3].trim();
-    const title = parts
-      .slice(0, parts.length - 3)
-      .join("|")
-      .trim();
+function collectBookmarks(node: RawBookmarkNode, folderPath: string, bookmarks: Bookmark[]): void {
+  if (node.type === "url" && node.url) {
+    bookmarks.push({
+      id: node.guid ?? node.id ?? node.url,
+      url: node.url,
+      title: node.name?.trim() || "Untitled",
+      folder: folderPath || undefined,
+    });
+    return;
+  }
 
-    if (!url || !id) {
-      return null;
-    }
+  if (!Array.isArray(node.children)) return;
 
-    return {
-      id,
-      url,
-      title: title || "Untitled",
-      folder: folder && folder !== "" ? folder : undefined,
-    };
-  } catch (error) {
-    console.error("Error parsing bookmark string:", bookmarkStr, error);
-    return null;
+  for (const child of node.children) {
+    const childPath =
+      child.type === "folder" && child.name ? (folderPath ? `${folderPath}/${child.name}` : child.name) : folderPath;
+    collectBookmarks(child, childPath, bookmarks);
   }
 }
 
 /**
- * Get all bookmarks from Helium using AppleScript
+ * Extract bookmarks from the parsed contents of a Chromium `Bookmarks` file.
+ * Root containers (bookmark bar, other bookmarks, ...) are not treated as folders;
+ * nested folders become a "Parent/Child" path in `folder`.
+ */
+export function extractBookmarks(raw: unknown): Bookmark[] {
+  const roots = (raw as RawBookmarksFile | undefined)?.roots;
+  if (!roots || typeof roots !== "object") return [];
+
+  const bookmarks: Bookmark[] = [];
+  for (const root of Object.values(roots)) {
+    if (root && typeof root === "object") {
+      collectBookmarks(root, "", bookmarks);
+    }
+  }
+  return bookmarks;
+}
+
+/**
+ * Get all bookmarks by reading the Helium profile's `Bookmarks` JSON file.
+ * Works without the browser running.
  */
 export async function getBookmarks(): Promise<Bookmark[]> {
+  const bookmarksPath = findProfileFile("Bookmarks");
+  if (!bookmarksPath) {
+    return [];
+  }
+
   try {
-    const bookmarkStrings = await getHeliumBookmarks();
-
-    if (!bookmarkStrings || bookmarkStrings.length === 0) {
-      return [];
-    }
-
-    // Parse each bookmark string and filter out any that failed to parse
-    const bookmarks = bookmarkStrings
-      .map(parseBookmarkString)
-      .filter((bookmark): bookmark is Bookmark => bookmark !== null);
-
-    return bookmarks;
+    const fileContents = await fs.readFile(bookmarksPath, "utf8");
+    return extractBookmarks(JSON.parse(fileContents));
   } catch (error) {
-    console.error("Error getting bookmarks from Helium:", error);
-    throw new Error("Failed to get bookmarks from Helium");
+    console.error("Error reading Helium bookmarks file:", error);
+    throw new Error("Failed to read bookmarks from the Helium profile");
   }
-}
-
-/**
- * Search bookmarks by query (matches title or URL)
- */
-export function searchBookmarks(bookmarks: Bookmark[], query: string): Bookmark[] {
-  if (!query) {
-    return bookmarks;
-  }
-
-  const lowerQuery = query.toLowerCase();
-  return bookmarks.filter(
-    (bookmark) => bookmark.title.toLowerCase().includes(lowerQuery) || bookmark.url.toLowerCase().includes(lowerQuery),
-  );
 }

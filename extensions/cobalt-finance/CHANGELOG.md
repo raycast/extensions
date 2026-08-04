@@ -1,9 +1,13 @@
 # Cobalt Changelog
 
-## [Review Fixes] - 2026-06-11
+## [Transaction Logos Fallback] - 2026-07-12
 
-- Force re-auth when the access token is expired and no refresh token is available (or refresh fails)
-- Drop the shared Brandfetch client ID default; the field is now opt-in so users don't share the author's quota
+- Resolve transaction merchant logos via the same `logoLookupName` → logo.dev name flow used by recurring streams (Cobalt's `/v1/transactions` API doesn't expose merchant `website` / `logoUrl`, so all real rows were falling through to `Icon.Coins`)
+
+## [Merchant Logos] - 2026-07-10
+
+- Merchant, institution, and recurring-stream logos now work out of the box — no manual Brandfetch or logo.dev token required
+- Remove `brandfetchClientId` and `logoDevToken` preferences
 
 ## [API Sync] - 2026-06-11
 

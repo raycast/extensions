@@ -1,7 +1,12 @@
-import { closeMainWindow, open } from "@raycast/api";
+import { closeMainWindow, showHUD } from "@raycast/api";
+import { openUrlInHelium } from "./utils/applescript";
 
 export default async function Command() {
-  await closeMainWindow();
-  // Open a new tab in Helium
-  await open("chrome://new-tab-page/", "net.imput.helium");
+  try {
+    await openUrlInHelium("chrome://new-tab-page/");
+    await closeMainWindow();
+  } catch (error) {
+    await showHUD("Failed opening a new Helium tab");
+    console.error("Error opening new tab:", error);
+  }
 }

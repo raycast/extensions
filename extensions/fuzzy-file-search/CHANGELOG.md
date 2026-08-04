@@ -1,5 +1,9 @@
 # Fuzzy File Search Changelog
 
+## [Show in Finder Shortcut] - 2026-07-06
+
+- Add Cmd+Enter shortcut to reveal the selected file in Finder by placing Show in Finder as the secondary action
+
 ## [Directory and File Search Directives] - 2026-06-17
 
 - Add `-d` / `-f` query directives to search directories or files only

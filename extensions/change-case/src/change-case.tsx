@@ -9,7 +9,6 @@ import {
   environment,
   getFrontmostApplication,
   getPreferenceValues,
-  getSelectedText,
   Icon,
   LaunchProps,
   List,
@@ -22,38 +21,9 @@ import {
 } from "@raycast/api";
 import { JSX, useCallback, useEffect, useMemo, useState } from "react";
 import { CaseType, aliases, convert, functions, modifyCasesWrapper } from "./cases.js";
+import { NoTextError, readContent } from "./utils.js";
 
 const MAX_RECENT_CASES = 4;
-
-class NoTextError extends Error {
-  constructor() {
-    super("No text");
-    Object.setPrototypeOf(this, NoTextError.prototype);
-  }
-}
-
-async function getSelection() {
-  try {
-    return await getSelectedText();
-  } catch {
-    return "";
-  }
-}
-
-async function readContent(preferredSource: string) {
-  const clipboard = await Clipboard.readText();
-  const selected = await getSelection();
-
-  if (preferredSource === "clipboard") {
-    if (clipboard) return clipboard;
-    if (selected) return selected;
-  } else {
-    if (selected) return selected;
-    if (clipboard) return clipboard;
-  }
-
-  throw new NoTextError();
-}
 
 const cache = new Cache();
 

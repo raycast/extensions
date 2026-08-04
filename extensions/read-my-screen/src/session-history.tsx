@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { formatVisionError } from "./analyze-image";
 import { ReplyForm, SessionModelForm } from "./chat-forms";
 import { type ChatTurn, continueConversation, type SessionContext } from "./continue-chat";
-import { parseModelPreference } from "./model";
+import { effectiveSessionModelPreference, parseModelPreference } from "./model";
 import { regenerateLastTurn } from "./regenerate-turn";
 import {
   chatToMarkdown,
@@ -32,7 +32,7 @@ export default function SessionHistoryCommand() {
   const [lastRequestUsage, setLastRequestUsage] = useState<TokenUsage | null>(null);
   const [usageLedger, setUsageLedger] = useState<TokenUsage[]>([]);
 
-  const effectiveSessionModel = sessionModel.trim() || prefs.model?.trim() || "openai:gpt-4o-mini";
+  const effectiveSessionModel = effectiveSessionModelPreference(sessionModel, prefs.model);
   const usageHintOpts = useMemo(
     () => ({ modelValue: effectiveSessionModel, showEstimatedCost: showEstimatedCostPref }),
     [effectiveSessionModel, showEstimatedCostPref],
@@ -183,7 +183,7 @@ export default function SessionHistoryCommand() {
     (record: StoredSession) => {
       setLastRequestUsage(null);
       setUsageLedger([]);
-      setSessionModel(prefs.model?.trim() || "openai:gpt-4o-mini");
+      setSessionModel(effectiveSessionModelPreference(undefined, prefs.model));
       if (record.source === "browser") {
         setMessages(record.messages);
         setSession({ source: "browser" });

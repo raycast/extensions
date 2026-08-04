@@ -6,20 +6,19 @@ import { withAccessToken } from "@raycast/utils";
 
 type Meeting = {
   id: number;
+  linkId: string;
   name: string;
   createdAt: string | Date;
 };
 
 const openLastMeeting = async () => {
-  const meetings = await fetchJson<Meeting[]>(
-    "/api/user/meetings?statuses=READY",
-  );
+  const meetings = await fetchJson<Meeting[]>("/api/user/meetings?statuses=READY");
   const latest = meetings[0];
   if (!latest) {
     await showHUD("No meetings found");
     return;
   }
-  await openMeeting(latest.id);
+  await openMeeting(latest.linkId);
   await showHUD("Opening last meeting");
 };
 

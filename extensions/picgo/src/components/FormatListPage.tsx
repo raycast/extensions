@@ -1,25 +1,16 @@
 import { type IImgInfo } from "picgo";
 
-import { Action, ActionPanel, Icon, List, getPreferenceValues, Clipboard, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { exportFormats } from "../util/format";
 import ImagesMetadataPanel from "./ImagesMetadataPanel";
 import ImagesPreviewPage from "./ImagesPreviewPage";
-import { useEffect } from "react";
 
 interface Props {
     result: IImgInfo[];
 }
 
 export default function FormatListPage({ result }: Props) {
-    const { autoCopyAfterUpload } = getPreferenceValues<Preferences.UploadImages>();
     const imgs = result.filter((r) => r.imgUrl);
-
-    useEffect(() => {
-        if (autoCopyAfterUpload) {
-            Clipboard.copy(exportFormats.url.generate(imgs));
-            showToast({ style: Toast.Style.Success, title: "URL Copied!" });
-        }
-    }, []);
 
     if (imgs.length === 0)
         return (
@@ -39,7 +30,7 @@ export default function FormatListPage({ result }: Props) {
                         actions={
                             <ActionPanel>
                                 <Action.CopyToClipboard
-                                    title={`Copy ${f.label} to Clipboard`}
+                                    title={`Copy All ${f.label} to Clipboard`}
                                     content={f.generate(imgs)}
                                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                                 ></Action.CopyToClipboard>

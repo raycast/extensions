@@ -10,8 +10,9 @@ This is a Raycast extension for [Coolify](https://coolify.io/) - _An open-source
 
 **Coolify** is being updated all the time so the extension might not perform well on all versions. This extension has been tested on the following:
 
-1. **v4.0.0-beta.419**
-1. **v4.0.0-beta.434**
+1. **v4.1.2**
+2. **v4.0.0-beta.434**
+3. **v4.0.0-beta.419**
 
 ## 🚀 Getting Started
 

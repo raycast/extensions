@@ -13,7 +13,6 @@ import {
   getTeakUrl,
 } from "../lib/cardDetailModel";
 import { removeCardById, upsertCard } from "../lib/cardListState";
-import { getPreferences } from "../lib/preferences";
 import {
   applyFavoritedFilter,
   applySortFilter,
@@ -23,12 +22,14 @@ import {
   parseSearchFilters,
   type RaycastCardType,
 } from "../lib/searchFilters";
+import { useTeakAuth } from "../lib/useTeakAuth";
 import { CardDetail } from "./CardDetail";
 import { EditCardForm } from "./EditCardForm";
 import { MissingApiKeyDetail } from "./MissingApiKeyDetail";
 import { SetApiKeyAction } from "./SetApiKeyAction";
+import { SignOutAction } from "./SignOutAction";
 
-type CardsListCommandProps = {
+interface CardsListCommandProps {
   emptyDescription: string;
   emptyIcon: Icon;
   emptyTitle: string;
@@ -36,9 +37,10 @@ type CardsListCommandProps = {
   latestSectionTitle: string;
   loadCards: (input: CardSearchInput) => Promise<{ items: RaycastCard[] }>;
   navigationTitle: string;
+  removeTagFilterFromList?: boolean;
   removeUnfavoritedFromList?: boolean;
   searchBarPlaceholder: string;
-};
+}
 
 const TYPE_OPTIONS: Array<{ title: string; value?: RaycastCardType }> = [
   { title: "All Types" },
@@ -100,6 +102,7 @@ export function CardsListCommand({
   latestSectionTitle,
   loadCards,
   navigationTitle,
+  removeTagFilterFromList = false,
   removeUnfavoritedFromList = false,
   searchBarPlaceholder,
 }: CardsListCommandProps) {
@@ -108,8 +111,11 @@ export function CardsListCommand({
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const { apiKey } = getPreferences();
-  const hasApiKey = Boolean(apiKey?.trim());
+  const {
+    isAuthenticated,
+    isLoading: isCheckingAuth,
+    refresh: refreshAuth,
+  } = useTeakAuth();
 
   const parsedFilters = useMemo(() => parseSearchFilters(query), [query]);
   const requestInput = useMemo<CardSearchInput>(
@@ -145,7 +151,11 @@ export function CardsListCommand({
   );
 
   useEffect(() => {
-    if (!hasApiKey) {
+    if (isCheckingAuth) {
+      return;
+    }
+
+    if (!isAuthenticated) {
       setItems([]);
       setError(null);
       setIsLoading(false);
@@ -153,7 +163,7 @@ export function CardsListCommand({
     }
 
     void load(requestInput);
-  }, [hasApiKey, load, requestInput]);
+  }, [isCheckingAuth, isAuthenticated, load, requestInput]);
 
   const handleCardUpdated = useCallback(
     (next: RaycastCard) => {
@@ -198,8 +208,12 @@ export function CardsListCommand({
     [handleCardUpdated],
   );
 
-  if (!hasApiKey) {
-    return <MissingApiKeyDetail />;
+  if (isCheckingAuth) {
+    return <List isLoading navigationTitle={navigationTitle} />;
+  }
+
+  if (!isAuthenticated) {
+    return <MissingApiKeyDetail onSignedIn={refreshAuth} />;
   }
 
   return (
@@ -234,6 +248,7 @@ export function CardsListCommand({
                 />
               ) : null}
               <SetApiKeyAction />
+              <SignOutAction onSignedOut={refreshAuth} />
             </ActionPanel>
           }
           description="Check your API key and network connection, then retry."
@@ -352,7 +367,7 @@ export function CardsListCommand({
                         title="Oldest First"
                       />
                     </ActionPanel.Submenu>
-                    {tagOptions.length > 0 ? (
+                    {tagOptions.length > 0 && !removeTagFilterFromList ? (
                       <ActionPanel.Submenu
                         icon={Icon.Tag}
                         title="Filter by Tag"
@@ -393,6 +408,7 @@ export function CardsListCommand({
                     ) : null}
                   </ActionPanel.Section>
                   <SetApiKeyAction />
+                  <SignOutAction onSignedOut={refreshAuth} />
                 </ActionPanel>
               }
               icon={getItemIcon ? getItemIcon(card) : Icon.Document}

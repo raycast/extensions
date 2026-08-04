@@ -1,5 +1,19 @@
 # Obsidian Changelog
 
+## [Fix Delete Note Shortcut] - 2026-07-18
+
+- Update the Delete Note action to use the common `Keyboard.Shortcut.Common.Remove` shortcut
+- Drop the previous custom `opt+d` shortcut from the Delete Note action
+
+## [Add Open Action Shortcuts] - 2026-07-18
+
+- Add keyboard shortcut to the "Open in Default App" action
+- Assign the common Open shortcut to the "Open in New Obsidian Tab" action
+
+## [Add] - 2026-06-28
+
+- Added vault path display to the Open Vault command
+
 ## [Fix] - 2026-05-05
 
 - Fix vault auto-discovery on Windows and Linux by reading `obsidian.json` from the per-platform Obsidian config dir

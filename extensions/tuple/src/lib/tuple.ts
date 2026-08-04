@@ -1,22 +1,24 @@
 import { execFile } from "node:child_process";
 import { existsSync } from "node:fs";
+import { homedir } from "node:os";
 import { promisify } from "node:util";
 import { getPreferenceValues } from "@raycast/api";
-import {
-  Contact,
-  CurrentCall,
-  StoredCall,
-  TranscriptMatch,
-  TupleError,
-  TupleErrorKind,
-  TupleRooms,
-  TupleState,
-} from "./types";
+import { CallView, Contact, Room, StoredCall, TranscriptMatch, TupleError, TupleErrorKind } from "./types";
 
 const execFileAsync = promisify(execFile);
 
-/** Homebrew (Apple Silicon, then Intel) install locations, tried when no preference is set. */
-const FALLBACK_PATHS = ["/opt/homebrew/bin/tuple", "/usr/local/bin/tuple"];
+/**
+ * Where the `tuple` CLI lives, tried in order when no preference is set. The Tuple app's "Install
+ * CLI" integration symlinks the bundled binary to `/usr/local/bin/tuple`; if the user never ran it,
+ * fall back to the binary bundled inside the app itself (the CLI ships with the app — there is no
+ * Homebrew build), checking the system and user Applications folders.
+ */
+const BUNDLED_CLI = "Tuple.app/Contents/SharedSupport/bin/tuple";
+const FALLBACK_PATHS = [
+  "/usr/local/bin/tuple",
+  `/Applications/${BUNDLED_CLI}`,
+  `${homedir()}/Applications/${BUNDLED_CLI}`,
+];
 
 /**
  * Resolve the `tuple` executable. Raycast does not inherit the user's interactive shell
@@ -33,9 +35,9 @@ export function getBinaryPath(): string {
       return candidate;
     }
   }
-  // Nothing found — return the conventional default so the resulting ENOENT is classified
-  // as NotInstalled and surfaced with a helpful empty state.
-  return FALLBACK_PATHS[FALLBACK_PATHS.length - 1];
+  // Nothing found — return the canonical install location so the resulting ENOENT is classified
+  // as NotInstalled and the empty state points the user at the right place.
+  return FALLBACK_PATHS[0];
 }
 
 /**
@@ -150,23 +152,22 @@ export function parseJson<T>(stdout: string): T {
 }
 
 // --- Read wrappers -------------------------------------------------------------------
-// List/search reads are issued directly by the views via useTupleJson; getActiveCall is the
-// one read also needed imperatively (by the no-view mute toggle).
+// List/search reads are issued directly by the views via useTupleJson; getActiveCall and
+// listRooms are the reads also needed imperatively (the no-view mute toggle and the
+// join-personal-room command).
 
-export function getActiveCall(): Promise<CurrentCall> {
-  return runTupleJson<CurrentCall>(["call", "current"]);
+/** The active call as the normalized flat CallView. Throws NoActiveCall when not in a call. */
+export function getActiveCall(): Promise<CallView> {
+  return runTupleJson<CallView>(["call", "current"]);
 }
 
 export async function listContacts(): Promise<Contact[]> {
   return (await runTupleJson<Contact[]>(["contacts", "list"])) ?? [];
 }
 
-export function getState(): Promise<TupleState> {
-  return runTupleJson<TupleState>(["state"]);
-}
-
-export async function getRooms(): Promise<TupleRooms> {
-  return (await getState()).rooms ?? {};
+/** List rooms as one flat, kind-tagged array. Extra args (e.g. "--kind", "personal") narrow the result. */
+export async function listRooms(...extraArgs: string[]): Promise<Room[]> {
+  return (await runTupleJson<Room[]>(["rooms", "list", ...extraArgs])) ?? [];
 }
 
 // --- Action wrappers -----------------------------------------------------------------
@@ -188,6 +189,11 @@ export async function joinCall(target: string): Promise<void> {
 
 export async function setFavorite(email: string, favorited: boolean): Promise<void> {
   await runTuple(["contacts", favorited ? "favorite" : "unfavorite", email]);
+}
+
+/** Favorite or unfavorite a room, addressed by its slug (the CLI also accepts the room URL). */
+export async function setRoomFavorite(slug: string, favorited: boolean): Promise<void> {
+  await runTuple(["rooms", favorited ? "favorite" : "unfavorite", slug]);
 }
 
 export async function muteCall(): Promise<void> {
@@ -232,19 +238,23 @@ export async function exportTranscripts(directory: string, callId?: string): Pro
   await runTuple(args);
 }
 
-// The CLI's `transcription show` colorizes output with ANSI SGR codes (e.g. ESC[1;36m) even when not
-// a TTY, and NO_COLOR doesn't suppress them. Built without a literal control char to satisfy no-control-regex.
+// Built without a literal control char to satisfy no-control-regex.
 const ANSI_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;]*m`, "g");
 
-/** Strip the CLI's ANSI color codes so transcript text is clean for display, AI prompts, and AI tools. */
+/**
+ * Strip ANSI SGR color codes (e.g. ESC[1;36m) from CLI output. Current `tuple` builds emit clean,
+ * uncolored text from `transcription show` for non-TTY output, so this is defense-in-depth: the
+ * extension can be pointed at an older bundled CLI that still colorized regardless of TTY/NO_COLOR,
+ * and it keeps every consumer — display, AI prompts, AI tools — on plain text either way.
+ */
 export function stripAnsi(text: string): string {
   return text.replace(ANSI_PATTERN, "");
 }
 
 /**
- * Fetch a stored call's transcript as plain text (`transcription show`, default format), with the
- * CLI's ANSI color codes stripped so every consumer — including AI summarization and the
- * read-transcript tool — gets clean text rather than escape sequences.
+ * Fetch a stored call's transcript as plain text (`transcription show`, default format). ANSI codes
+ * are stripped defensively (see {@link stripAnsi}) so every consumer — including AI summarization
+ * and the read-transcript tool — gets clean text even from an older CLI that colorized its output.
  */
 export async function getTranscript(callId: string): Promise<string> {
   return stripAnsi(await runTuple(["transcription", "show", callId]));
@@ -303,6 +313,11 @@ export function searchTranscriptSegments(
   }
 
   return emptyIfTranscriptionUnavailable(() => runTupleJson<TranscriptMatch[]>(args));
+}
+
+/** Remove the `[[...]]` match markers `transcription search` adds around matched terms. */
+export function stripMatchMarkers(text: string): string {
+  return text.replace(/\[\[|\]\]/g, "");
 }
 
 /**

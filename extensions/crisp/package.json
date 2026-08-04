@@ -25,9 +25,9 @@
     "@supabase/supabase-js": "^2.43.4",
     "color-hash": "^2.0.2",
     "date-fns": "^3.6.0",
-    "hono": "^4.4.6",
+    "hono": "^4.12.27",
     "swr": "^2.2.5",
-    "undici": "^6.19.0"
+    "undici": "^6.24.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

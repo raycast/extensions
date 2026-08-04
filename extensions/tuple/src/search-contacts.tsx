@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@rayca
 import { showFailureToast } from "@raycast/utils";
 import { TupleErrorEmptyView } from "./lib/empty-state";
 import { useTupleJson } from "./lib/hooks";
-import { setFavorite, startCall } from "./lib/tuple";
+import { joinCall, setFavorite, startCall } from "./lib/tuple";
 import { Contact } from "./lib/types";
 
 export default function SearchContacts() {
@@ -70,7 +70,12 @@ function ContactItem({ contact, onChange }: { contact: Contact; onChange: () => 
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action title="Start Call" icon={Icon.Phone} onAction={() => startCallWithFeedback(contact)} />
+          {contact.status === "busy" ? (
+            // They're already in a call/room, so joining is the only sensible action.
+            <Action title="Join Call" icon={Icon.Phone} onAction={() => joinCallWithFeedback(contact)} />
+          ) : (
+            <Action title="Start Call" icon={Icon.Phone} onAction={() => startCallWithFeedback(contact)} />
+          )}
           <Action
             title={contact.favorited ? "Remove Favorite" : "Add Favorite"}
             icon={Icon.Star}
@@ -93,6 +98,19 @@ async function startCallWithFeedback(contact: Contact) {
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could Not Start Call";
+    toast.message = error instanceof Error ? error.message : String(error);
+  }
+}
+
+async function joinCallWithFeedback(contact: Contact) {
+  const toast = await showToast({ style: Toast.Style.Animated, title: `Joining ${contact.short_name}'s call…` });
+  try {
+    await joinCall(contact.email);
+    toast.style = Toast.Style.Success;
+    toast.title = `Joined ${contact.short_name}'s call`;
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could Not Join Call";
     toast.message = error instanceof Error ? error.message : String(error);
   }
 }

@@ -1,22 +1,14 @@
 import { useState, useEffect } from "react";
 import { ActionPanel, Detail, List, Action, Icon, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
-import { runPowerShellScript } from "@raycast/utils";
-import { parseNetshWlanProfileEssentials, parseNetshWlanProfiles } from "./utils";
+import { execFile } from "child_process";
+import { promisify } from "util";
+import { parseNetshWlanProfileEssentials, parseNetshWlanProfiles, parseWifiInterface } from "./utils";
 
-// Determine the operating system
+const execFileAsync = promisify(execFile);
+const NETSH = "C:\\Windows\\System32\\netsh.exe";
+
 const isWin = process.platform === "win32";
 const isMacOs = process.platform === "darwin";
-
-/** Escape a string for safe interpolation inside a PowerShell double-quoted string. */
-function escapePowerShellString(value: string): string {
-  return value
-    .replace(/`/g, "``") // backtick (PS escape char) must come first
-    .replace(/"/g, '`"') // double-quote
-    .replace(/\$/g, "`$") // variable sigil
-    .replace(/@\{/g, "`@{") // hashtable literal
-    .replace(/@\(/g, "`@("); // array subexpression
-}
 
 const DetailPassword = ({
   networkName,
@@ -33,49 +25,70 @@ const DetailPassword = ({
       setIsLoading(true);
 
       if (isMacOs) {
-        exec(
-          `security find-generic-password -D "AirPort network password" -a "${networkName}" -w`,
-          async (error, pw) => {
-            if (error) {
-              console.error(`exec error: ${error}`);
-              toast.style = Toast.Style.Failure;
-              toast.title = "Failed to retrieve password ❌";
-              toast.message = error.message;
-              setIsLoading(false);
-              return;
-            }
+        try {
+          // execFile avoids shell interpretation — networkName is passed as a literal
+          // argument, so SSIDs with quotes, $, backticks, etc. are safe.
+          const { stdout: pw } = await execFileAsync("/usr/bin/security", [
+            "find-generic-password",
+            "-D",
+            "AirPort network password",
+            "-a",
+            networkName,
+            "-w",
+          ]);
 
-            // Trigger open raycast app
-            exec("open /Applications/Raycast.app", () => {
-              toast.style = Toast.Style.Success;
-              toast.title = "Password retrieved successfully ✅";
-              setPassword(pw.trim());
-              setIsLoading(false);
-            });
-          },
-        );
+          // Bring Raycast back into focus after the keychain approval dialog
+          // (fire-and-forget; we don't need to wait for it).
+          execFile("/usr/bin/open", ["-a", "Raycast"], () => {});
+
+          toast.style = Toast.Style.Success;
+          toast.title = "Password retrieved successfully ✅";
+          setPassword(pw.trim());
+        } catch (error) {
+          console.error(`security error: ${error}`);
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed to retrieve password ❌";
+          toast.message = error instanceof Error ? error.message : String(error);
+        } finally {
+          setIsLoading(false);
+        }
       }
 
       if (isWin) {
         try {
-          // runPowerShellScript uses PowerShell (not cmd.exe), so Unicode SSIDs and
-          // special characters are handled correctly without shell-quoting pitfalls.
-          const safeName = escapePowerShellString(networkName);
-          const stdout = await runPowerShellScript(`netsh wlan show profile name="${safeName}" key=clear`);
+          const { stdout } = await execFileAsync(
+            NETSH,
+            ["wlan", "show", "profile", `name=${networkName}`, "key=clear"],
+            { windowsHide: true },
+          );
 
           const networkInfo = parseNetshWlanProfileEssentials(stdout);
 
-          if (networkInfo.error || !networkInfo.essentials) {
+          if (networkInfo.error) {
+            const titleMap: Record<typeof networkInfo.error.code, string> = {
+              PermissionDenied: "Insufficient permissions ❌",
+              EnterpriseNetwork: "Enterprise network ❌",
+              ProfileNotFound: "Profile not found ❌",
+              Unknown: "Failed to retrieve password ❌",
+            };
+            toast.style = Toast.Style.Failure;
+            toast.title = titleMap[networkInfo.error.code];
+            toast.message = networkInfo.error.message ?? "Could not parse network essentials.";
+          } else if (!networkInfo.essentials) {
             toast.style = Toast.Style.Failure;
             toast.title = "Failed to retrieve password ❌";
-            toast.message = networkInfo.error?.message ?? "Could not parse network essentials.";
+            toast.message = "Could not parse network essentials.";
+          } else if (networkInfo.essentials.isOpenNetwork) {
+            setPassword("(open network — no password)");
+            toast.style = Toast.Style.Success;
+            toast.title = "Open network — no password set ✅";
           } else {
             setPassword(networkInfo.essentials.keyContent);
             toast.style = Toast.Style.Success;
             toast.title = "Password retrieved successfully ✅";
           }
         } catch (error) {
-          console.error(`runPowerShellScript error: ${error}`);
+          console.error(`netsh error: ${error}`);
           toast.style = Toast.Style.Failure;
           toast.title = "Failed to retrieve password ❌";
           toast.message = error instanceof Error ? error.message : String(error);
@@ -107,42 +120,52 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    setIsLoading(true);
+    (async () => {
+      setIsLoading(true);
 
-    if (isMacOs) {
-      exec("/usr/sbin/networksetup -listpreferredwirelessnetworks en0", (error, stdout) => {
-        if (error) {
-          console.error(`exec error: ${error}`);
-          setIsLoading(false);
-          return;
-        }
-
-        const lines = stdout.trim().split("\n");
-        const networks = lines.slice(1).map((line) => line.trim());
-
-        if (networks?.length > 0) {
-          setNetworks(networks);
-        }
-        setIsLoading(false);
-      });
-    }
-
-    if (isWin) {
-      (async () => {
+      if (isMacOs) {
         try {
-          const stdout = await runPowerShellScript(`netsh wlan show profiles`);
-          const networks = parseNetshWlanProfiles(stdout);
+          // Detect the active Wi-Fi interface (usually en0, but may be en1 or
+          // another device on Macs with USB adapters or multiple radios).
+          let iface = "en0";
+          try {
+            const { stdout: hwPorts } = await execFileAsync("/usr/sbin/networksetup", ["-listallhardwareports"]);
+            iface = parseWifiInterface(hwPorts);
+          } catch {
+            // Non-fatal — keep the en0 fallback.
+          }
 
-          if (networks?.length > 0) {
-            setNetworks(networks);
+          const { stdout } = await execFileAsync("/usr/sbin/networksetup", ["-listpreferredwirelessnetworks", iface]);
+
+          const lines = stdout.trim().split("\n");
+          const discovered = lines
+            .slice(1)
+            .map((line) => line.trim())
+            .filter(Boolean);
+          if (discovered.length > 0) {
+            setNetworks(discovered);
           }
         } catch (error) {
-          console.error(`runPowerShellScript error: ${error}`);
+          console.error(`networksetup error: ${error}`);
         } finally {
           setIsLoading(false);
         }
-      })();
-    }
+      }
+
+      if (isWin) {
+        try {
+          const { stdout } = await execFileAsync(NETSH, ["wlan", "show", "profiles"], { windowsHide: true });
+          const discovered = parseNetshWlanProfiles(stdout);
+          if (discovered.length > 0) {
+            setNetworks(discovered);
+          }
+        } catch (error) {
+          console.error(`netsh error: ${error}`);
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    })();
   }, []);
 
   return (

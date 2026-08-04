@@ -1,0 +1,37 @@
+export const TLD_ALLOWLIST = new Set([
+  // Generic
+  "com",
+  "org",
+  "net",
+  "edu",
+  "gov",
+  "mil",
+  "int",
+  // Tech / startup
+  "io",
+  "dev",
+  "app",
+  "co",
+  "ai",
+  "so",
+  "xyz",
+  "tech",
+  "cloud",
+  // Common ccTLDs
+  "uk",
+  "de",
+  "fr",
+  "jp",
+  "ca",
+  "us",
+  "au",
+  "nl",
+  "br",
+  "in",
+  // Modern gTLDs
+  "info",
+  "biz",
+  "me",
+  "tv",
+  "cc",
+]);

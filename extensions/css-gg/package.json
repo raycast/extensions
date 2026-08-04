@@ -33,7 +33,7 @@
     "css.gg": "^2.1.4",
     "node-fetch": "^3.1.0",
     "react": "^18.2.0",
-    "uuid": "^9.0.0"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@types/node": "~20.3.1",

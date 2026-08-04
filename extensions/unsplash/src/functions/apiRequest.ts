@@ -31,6 +31,10 @@ export const apiRequest = async <T>(path: string, options?: RequestInit): Promis
   return result as T;
 };
 
+export const triggerDownload = (downloadLocation: string): void => {
+  apiRequest<unknown>(downloadLocation).catch(() => undefined);
+};
+
 async function refreshTokens(refreshToken: string) {
   const { accessKey } = getPreferenceValues<Preferences>();
   const params = new URLSearchParams();

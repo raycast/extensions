@@ -1,13 +1,14 @@
 import { showToast, Toast } from "@raycast/api";
 import { internalToKelvin } from "./elgato";
 import { showFailureToast } from "@raycast/utils";
-import { discoverKeyLights } from "./utils";
+import { discoverKeyLights, getTargetLightNames } from "./utils";
 
 const command = async () => {
   try {
     const keyLight = await discoverKeyLights();
+    const targets = await getTargetLightNames();
     try {
-      const temperature = await keyLight.decreaseTemperature();
+      const temperature = await keyLight.decreaseTemperature(targets);
 
       await showToast({
         style: Toast.Style.Success,

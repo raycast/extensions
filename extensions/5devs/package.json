@@ -130,7 +130,7 @@
     "node-fetch": "^3.3.2",
     "random-ipv6": "^1.0.2",
     "react": "^18.2.0",
-    "uuid": "^10.0.0"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",

@@ -1,5 +1,18 @@
 # System Monitor Changelog
 
+## [Improvements] - 2026-08-03
+
+- Extract parsing and stat derivation into a tested `src/lib/` layer with a vitest harness
+- Poll only the active tab; inactive monitors stop shelling out to system tools
+- Reset rate baselines on tab switch so the first reading after switching back is a real measurement
+- Add per-core CPU usage and CPU hardware context (chip and core count) to the CPU view
+- Add GPU / unified memory reporting and model year to System Info
+- Expand Memory view with active, inactive, wired, compressed, purgeable, swap, and memory pressure stats
+- Add Copy System Report, Open System Settings, and Open System Information actions
+- Add semantic color highlighting for percentages and unavailable values across detail views
+- Fix process rows with narrow PIDs being dropped from top-process lists
+- Document what the extension reads and what the system report contains in a README privacy section
+
 ## [Eliminate Zombie Processes] - 2026-03-20
 
 - Replace all `exec()` calls with `execFile()` to avoid spawning shell processes

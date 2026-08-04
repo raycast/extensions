@@ -97,7 +97,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.71.4",
-    "@svrooij/sonos": "^2.5.0",
+    "@svrooij/sonos": "2.6.0-beta.13",
     "prettier-plugin-organize-imports": "^3.2.4"
   },
   "devDependencies": {

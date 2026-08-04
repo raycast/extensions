@@ -1,4 +1,6 @@
-# 滴答清单 Changelog
+# Dida365 Changelog
+
+## [Updated Author] - 2026-07-02
 
 ## [Initial Release] - 2026-06-18
 

@@ -60,10 +60,6 @@ vi.mock("../setopts", () => ({
   default: () => <div data-testid="setopts-view">Setopts View</div>,
 }));
 
-vi.mock("../global-search", () => ({
-  default: () => <div data-testid="search-view">Global Search View</div>,
-}));
-
 vi.mock("../health-check", () => ({
   default: () => <div data-testid="health-view">Health Check View</div>,
 }));
@@ -91,7 +87,6 @@ describe("ZshrcManager", () => {
       render(<ZshrcManager />);
       expect(screen.queryByTestId("sections-view")).not.toBeInTheDocument();
       expect(screen.queryByTestId("aliases-view")).not.toBeInTheDocument();
-      expect(screen.queryByTestId("search-view")).not.toBeInTheDocument();
       expect(screen.queryByTestId("health-view")).not.toBeInTheDocument();
     });
 

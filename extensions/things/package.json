@@ -79,7 +79,7 @@
       "name": "quick-find",
       "title": "Quick Find",
       "subtitle": "Things",
-      "description": "Search across all areas, projects, and to-dos. Requires Full Disk Access granted to Raycast.",
+      "description": "Search across all areas, projects, and to-dos.",
       "mode": "view"
     },
     {
@@ -158,92 +158,121 @@
   ],
   "tools": [
     {
-      "name": "get-list-todos",
-      "title": "Get List To-Dos",
-      "description": "Get all the to-dos from a list in Things"
+      "name": "get-todos",
+      "title": "Get To-Dos",
+      "description": "Get to-dos from Things, optionally filtered by list (inbox/today/anytime/upcoming/someday/logbook/trash), project ID, or area ID. inbox/today/anytime/upcoming/someday return open to-dos; logbook returns completed and canceled to-dos; trash returns all trashed to-dos. WARNING: omitting all filters returns ALL open to-dos — only do this when truly needed."
+    },
+    {
+      "name": "get-todo-details",
+      "title": "Get To-Do Details",
+      "description": "Get full details of a single to-do including status, notes, tags, and checklist items. Note: checklist items are only returned when the unofficial SQL API is enabled in preferences."
+    },
+    {
+      "name": "get-todos-details",
+      "title": "Get To-Dos Details",
+      "description": "Get full details (status, notes, tags, checklist items) for multiple to-dos at once (comma-separated IDs). Always prefer this over calling get-todo-details in a loop. Note: checklist items are only returned when the unofficial SQL API is enabled in preferences."
+    },
+    {
+      "name": "search-todos",
+      "title": "Search To-Dos",
+      "description": "Search for open to-dos by keyword (matches title and notes). Use this as the FIRST step when looking for a to-do by name."
     },
     {
       "name": "get-projects",
       "title": "Get Projects",
-      "description": "Get all the projects in Things"
+      "description": "Get all open projects in Things. Each project includes its id, name, notes, tags, due date, area, and its nested list of open to-dos. Use get-project-details for the open to-do count."
+    },
+    {
+      "name": "get-project-details",
+      "title": "Get Project Details",
+      "description": "Get full details of a single project including status, notes, tags, due date, activation date, area, and open to-do count (completed and canceled to-dos are excluded from the count)."
     },
     {
       "name": "get-areas",
       "title": "Get Areas",
-      "description": "Get all the areas in Things"
+      "description": "Get all areas in Things. Each area includes its id, name, tags, and its nested list of open to-dos that are not inside a project."
+    },
+    {
+      "name": "get-area-details",
+      "title": "Get Area Details",
+      "description": "Get full details of a single area including tags, open project count, and open to-do count. The to-do count only includes to-dos directly in the area, not to-dos inside a project within the area."
     },
     {
       "name": "get-tags",
       "title": "Get Tags",
-      "description": "Get all the tags in Things"
+      "description": "Get all tags in Things."
     },
     {
       "name": "get-lists",
       "title": "Get Lists",
-      "description": "Get all the lists in Things"
-    },
-    {
-      "name": "delete-todo",
-      "title": "Delete To-Do",
-      "description": "Delete a to-do in Things"
-    },
-    {
-      "name": "update-todo",
-      "title": "Update To-Do",
-      "description": "Update a to-do in Things"
-    },
-    {
-      "name": "set-todo-property",
-      "title": "Set To-Do Property",
-      "description": "Set a property of a to-do in Things"
+      "description": "Get all user-created lists (open projects and areas) in Things as a flat array ordered so each area is followed by its projects. Each item has id, name, and type ('area' or 'project')."
     },
     {
       "name": "add-todo",
       "title": "Add To-Do",
-      "description": "Add a to-do in Things"
+      "description": "Add a new to-do in Things. No auth token required. Key params: title, notes, when (today/tomorrow/evening/anytime/someday/YYYY-MM-DD), deadline (YYYY-MM-DD), tags (comma-separated), list-id (project/area ID), checklist-items (newline-separated). Use add-json to add a to-do with headings or nested structure."
     },
     {
       "name": "add-project",
       "title": "Add Project",
-      "description": "Add a project in Things"
+      "description": "Add a new project in Things. No auth token required. Key params: title, notes, when (today/tomorrow/evening/anytime/someday/YYYY-MM-DD), deadline (YYYY-MM-DD), tags (comma-separated), area-id, to-dos (newline-separated to-do titles to add immediately). Use add-json to create a project with headings and nested to-dos in one call."
+    },
+    {
+      "name": "add-json",
+      "title": "Add Via JSON",
+      "description": "Add items to Things using the JSON URL scheme. Requires an auth token in preferences. This is the ONLY tool that supports creating projects with headings and nested to-dos in a single call. Tags must be arrays of strings, NOT comma-separated strings."
+    },
+    {
+      "name": "update-todo",
+      "title": "Update To-Do",
+      "description": "Update multiple fields of a to-do at once. Requires an auth token in preferences. Key params: title, notes, prepend-notes, append-notes, when (today/tomorrow/evening/anytime/someday/YYYY-MM-DD), deadline (YYYY-MM-DD), tags (replaces all), add-tags (adds without replacing), completed (boolean), canceled (boolean), checklist-items, list-id."
     },
     {
       "name": "update-project",
       "title": "Update Project",
-      "description": "Update a project in Things"
+      "description": "Update a project in Things. Requires an auth token in preferences. Key params: title, notes, prepend-notes, append-notes, when, deadline (YYYY-MM-DD), tags (replaces all), add-tags (adds without replacing), area-id (move to a different area), completed (boolean), canceled (boolean)."
+    },
+    {
+      "name": "set-todo-property",
+      "title": "Set To-Do Property",
+      "description": "Set a single property of a to-do via JXA. Does NOT require an auth token. Allowed keys: name, notes, tagNames, dueDate, activationDate, completionDate, cancellationDate. Date values must be YYYY-MM-DD strings. To mark a to-do complete or canceled, use update-todo with completed/canceled instead of setting status here."
+    },
+    {
+      "name": "delete-todo",
+      "title": "Delete To-Do",
+      "description": "Delete a to-do in Things. No auth token required. Prompts the user for confirmation before deleting."
     },
     {
       "name": "delete-project",
       "title": "Delete Project",
-      "description": "Delete a project in Things"
+      "description": "Delete a project in Things. No auth token required. Prompts the user for confirmation before deleting. WARNING: deleting a project also moves all its to-dos to the trash."
     }
   ],
   "ai": {
-    "instructions": "You are a Things task manager assistant.\n\nAVOID OVER-FETCHING: Always use the most specific list available. Never fetch all to-dos when a specific list will do.\n\nWRITE OPERATIONS: Use update-todo for multiple fields, set-todo-property for a single field (faster).\n\nLISTS: Built-in lists (inbox, today, anytime, upcoming, someday, logbook) are always available — never call get-lists to check if they exist. Move a to-do between built-in lists by setting 'when' (today, tomorrow, evening, anytime, someday, or YYYY-MM-DD). Use 'list-id' only to move into a user project or area (ID from get-lists).\n\nDATES: Dates are YYYY-MM-DD. dueDate=\"4000-12-31\" means a recurring placeholder — not a fixed deadline. Never infer recurrence from a to-do's name or notes.",
+    "instructions": "You are a Things task manager assistant.\n\nSEARCH FIRST: When the user refers to a specific to-do or project BY NAME, call search-todos first to find its ID — do not fetch entire lists to find one item. Exception: if the user says 'all to-dos in [list]' or wants to operate on every item in a list, use get-todos with listName instead.\n\nAVOID OVER-FETCHING: Use the most specific filter available (listName, projectId, or areaId). Never fetch all to-dos when a filtered query will do.\n\nBATCH DETAILS: When you need full details (notes, tags, checklist) for multiple to-dos, call get-todos-details once with a comma-separated ID list — never loop over get-todo-details.\n\nWRITE OPERATIONS: Use update-todo for status changes (completed/canceled) and multi-field updates. Use set-todo-property only for a single scalar field like dueDate, activationDate, name, or notes. add-todo, add-project, set-todo-property, delete-todo, and delete-project do NOT require an auth token. update-todo, update-project, and add-json DO require an auth token in preferences.\n\nLISTS: Built-in lists (inbox, today, anytime, upcoming, someday) are always available — never call get-lists to check if they exist. Move a to-do between built-in lists by setting 'when' (today, tomorrow, evening, anytime, someday, or YYYY-MM-DD). Use 'list-id' only to move into a user project or area (get the ID from get-projects or get-areas).\n\nDATES: Dates are YYYY-MM-DD. When dueDateIsRecurring is true, the due date shifts each time the task repeats — do NOT treat it as a fixed deadline. IMPORTANT: dueDateIsRecurring and isRecurring are only populated with real values when the user has enabled the 'Read directly from Things database' preference (useUnofficialApi). On the default JXA path both fields are always false — even for tasks that are genuinely recurring — because Apple Events do not expose recurrence rule internals. When dueDateIsRecurring is false and isRecurring is false, you cannot determine from the data alone whether a task is recurring; treat due dates as fixed deadlines and avoid asserting that a task is non-recurring.\n\nCREATING WITH STRUCTURE: Use add-json to create a project with headings and nested to-dos in one call. Tags in JSON must be arrays (e.g. [\"work\", \"urgent\"]), not comma-separated strings.",
     "evals": [
       {
         "input": "@things what are my to-dos for today?",
         "mocks": {
-          "get-list-todos": [
+          "get-todos": [
             {
-              "status": "open",
-              "dueDate": null,
-              "activationDate": "2025-01-20T23:00:00.000Z",
               "id": "HMm6mQGFoV9SrE3rMkGuCY",
-              "notes": "",
-              "area": null,
-              "project": null,
               "name": "Buy milk",
-              "tags": ""
+              "dueDate": null,
+              "dueDateIsRecurring": false,
+              "activationDate": "2025-01-20",
+              "isRecurring": false,
+              "projectName": null,
+              "areaName": null
             }
           ]
         },
         "expected": [
           {
             "callsTool": {
-              "name": "get-list-todos",
+              "name": "get-todos",
               "arguments": {
-                "commandListName": "today"
+                "listName": "today"
               }
             }
           }
@@ -268,22 +297,23 @@
       {
         "input": "@things mark \"buy milk\" in inbox as done",
         "mocks": {
-          "update-todo": "Successfully called \"update-todo\"",
-          "get-list-todos": [
+          "search-todos": [
             {
-              "status": "open",
               "id": "VBAWWiuRj3yx4KuMp45XBm",
               "name": "buy milk",
-              "completed": false
+              "dueDateIsRecurring": false,
+              "isRecurring": false
             }
-          ]
+          ],
+          "update-todo": "Successfully called \"update-todo\"",
+          "set-todo-property": "Successfully called \"set-todo-property\""
         },
         "expected": [
           {
             "callsTool": {
-              "name": "get-list-todos",
+              "name": "search-todos",
               "arguments": {
-                "commandListName": "inbox"
+                "query": "buy milk"
               }
             }
           },
@@ -291,7 +321,6 @@
             "callsTool": {
               "name": "update-todo",
               "arguments": {
-                "todoParams.completed": true,
                 "todoId": "VBAWWiuRj3yx4KuMp45XBm"
               }
             }
@@ -301,29 +330,24 @@
       {
         "input": "@things set the deadline for \"buy milk\" in inbox to saturday",
         "mocks": {
-          "get-list-todos": [
+          "search-todos": [
             {
-              "status": "open",
-              "dueDate": null,
-              "activationDate": "2025-01-20T23:00:00.000Z",
               "id": "7sGLDpW4qZepHsCcXinGg9",
-              "notes": "",
-              "area": null,
-              "project": null,
               "name": "buy milk",
-              "tags": ""
+              "dueDate": null,
+              "dueDateIsRecurring": false,
+              "isRecurring": false
             }
           ],
-          "update-todo": "Successfully called \"update-todo\"",
           "set-todo-property": "Successfully called \"set-todo-property\""
         },
         "expected": [
           {
             "callsTool": {
+              "name": "search-todos",
               "arguments": {
-                "commandListName": "inbox"
-              },
-              "name": "get-list-todos"
+                "query": "buy milk"
+              }
             }
           },
           {
@@ -331,7 +355,7 @@
               "name": "set-todo-property",
               "arguments": {
                 "todoId": "7sGLDpW4qZepHsCcXinGg9",
-                "key": "deadline"
+                "key": "dueDate"
               }
             }
           }
@@ -340,29 +364,24 @@
       {
         "input": "@things move all to-dos from my inbox to today",
         "mocks": {
-          "update-todo": "Successfully called \"update-todo\"",
-          "set-todo-property": "Successfully called \"set-todo-property\"",
-          "get-lists": [],
-          "get-list-todos": [
+          "get-todos": [
             {
-              "status": "open",
-              "dueDate": null,
-              "activationDate": null,
               "id": "VBAWWiuRj3yx4KuMp45XBm",
-              "notes": "",
-              "area": null,
-              "project": null,
               "name": "buy milk",
-              "tags": ""
+              "dueDate": null,
+              "dueDateIsRecurring": false,
+              "isRecurring": false
             }
-          ]
+          ],
+          "search-todos": [],
+          "update-todo": "Successfully called \"update-todo\""
         },
         "expected": [
           {
             "callsTool": {
-              "name": "get-list-todos",
+              "name": "get-todos",
               "arguments": {
-                "commandListName": "inbox"
+                "listName": "inbox"
               }
             }
           },
@@ -380,11 +399,12 @@
       {
         "input": "@things delete \"buy milk\" from inbox",
         "mocks": {
-          "get-list-todos": [
+          "search-todos": [
             {
-              "status": "open",
               "id": "W74ShepRoZxh4cySkBzsJh",
-              "name": "Buy milk"
+              "name": "Buy milk",
+              "dueDateIsRecurring": false,
+              "isRecurring": false
             }
           ],
           "delete-todo": "Successfully called \"delete-todo\""
@@ -392,10 +412,10 @@
         "expected": [
           {
             "callsTool": {
+              "name": "search-todos",
               "arguments": {
-                "commandListName": "inbox"
-              },
-              "name": "get-list-todos"
+                "query": "buy milk"
+              }
             }
           },
           {
@@ -445,23 +465,32 @@
       "description": "Group to-dos in lists by their project or area",
       "default": true,
       "required": false
+    },
+    {
+      "name": "useUnofficialApi",
+      "type": "checkbox",
+      "title": "Unofficial API",
+      "label": "Read directly from Things database",
+      "description": "Requires Full Disk Access for Raycast and uses an unofficial internal format that may break on Things updates.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.18",
-    "@raycast/utils": "^2.2.5",
-    "dayjs": "^1.11.20",
-    "query-string": "^9.3.1"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "dayjs": "^1.11.21",
+    "query-string": "^9.4.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^25.9.1",
-    "eslint": "^10.4.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "eslint": "^10.6.0",
     "typescript": "^6.0.3"
   },
   "version": "1.0.0",
   "scripts": {
-    "build": "ray build -e dist -o dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

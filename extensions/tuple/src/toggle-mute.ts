@@ -1,12 +1,11 @@
 import { showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { isCallMuted } from "./lib/call";
 import { getActiveCall, isNoActiveCall, muteCall, unmuteCall } from "./lib/tuple";
 
 export default async function ToggleMute() {
   try {
     const call = await getActiveCall();
-    if (isCallMuted(call)) {
+    if (call.muted) {
       await unmuteCall();
       await showHUD("Unmuted");
     } else {

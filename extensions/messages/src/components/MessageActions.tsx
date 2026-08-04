@@ -2,7 +2,7 @@ import { Action, ActionPanel, AI, Icon, Keyboard, open, showToast, Toast, useNav
 import { showFailureToast, useLocalStorage } from "@raycast/utils";
 
 import { extractOTP, getAttachmentType, getMessagesUrl } from "../helpers";
-import { Message } from "../hooks/useMessages";
+import type { Message } from "../types";
 
 import Details from "./Details";
 import Instructions from "./Instructions";
@@ -121,11 +121,7 @@ export default function MessageActions({ message, mutate, showDetails = true }: 
         {otp ? (
           <>
             <Action.Paste title="Paste OTP Code" content={otp} shortcut={{ modifiers: ["cmd", "shift"], key: "p" }} />
-            <Action.CopyToClipboard
-              title="Copy OTP Code"
-              content={otp}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
+            <Action.CopyToClipboard title="Copy OTP Code" content={otp} shortcut={Keyboard.Shortcut.Common.Copy} />
           </>
         ) : null}
         <Action.CopyToClipboard

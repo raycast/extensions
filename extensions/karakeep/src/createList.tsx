@@ -8,6 +8,9 @@ import { useTranslation } from "./hooks/useTranslation";
 import { List } from "./types";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
 import { runWithToast } from "./utils/toast";
+import { ensureReachable } from "./utils/submitGuard";
+import { useApiReachable } from "./hooks/useApiReachable";
+import { OfflineFormNotice, StartKarakeepAction } from "./components/OfflineFormNotice";
 
 const log = logger.child("[CreateList]");
 
@@ -28,7 +31,8 @@ interface CreateListViewProps {
 export default function CreateListView({ onListCreated, showSuccessHUD = true }: CreateListViewProps = {}) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
-  const { lists } = useGetAllLists();
+  const { state: reachability, reachable, offline, isRecovering, canStart, start } = useApiReachable();
+  const { lists } = useGetAllLists(reachable);
 
   const { handleSubmit, itemProps, setValue, values } = useForm<ListFormValues>({
     initialValues: { name: "", icon: "", description: "", parentId: "", type: "manual", query: "" },
@@ -39,6 +43,10 @@ export default function CreateListView({ onListCreated, showSuccessHUD = true }:
     },
     async onSubmit(values) {
       log.info("Creating list", { name: values.name, type: values.type, query: values.query || undefined });
+
+      // Same pre-flight as the other create forms — don't write into a dead
+      // server and lose the filled-in list definition.
+      if ((await ensureReachable(values.name)) === "unreachable") return;
 
       const payload = {
         name: values.name.trim(),
@@ -74,8 +82,11 @@ export default function CreateListView({ onListCreated, showSuccessHUD = true }:
   return (
     <Form
       navigationTitle={t("list.createList")}
+      isLoading={reachability === "checking"}
       actions={
         <ActionPanel>
+          {/* First = bound to ↵ while offline; see OfflineFormNotice. */}
+          <StartKarakeepAction offline={offline} canStart={canStart} isRecovering={isRecovering} onStart={start} />
           <Action.SubmitForm title={t("list.createList")} onSubmit={handleSubmit} icon={Icon.Plus} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
@@ -83,6 +94,8 @@ export default function CreateListView({ onListCreated, showSuccessHUD = true }:
         </ActionPanel>
       }
     >
+      <OfflineFormNotice offline={offline} canStart={canStart} />
+
       <Form.TextField
         {...itemProps.name}
         title={t("list.listName")}

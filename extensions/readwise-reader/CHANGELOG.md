@@ -1,5 +1,12 @@
 # Readwise Reader Changelog
 
+## [Add Windows support] - 2026-07-07
+
+- Add Windows to supported platforms
+- Upgrade `@raycast/api` to 1.104.21 and `@raycast/utils` to 2.2.7 for Windows compatibility
+- Use per-platform keyboard shortcuts so `List Documents` category filters work on Windows
+- Fix `List Documents` crash when a document has no tags (e.g. items in "New")
+
 ## [Add Current Tab Fallback to Save Link Command] - 2026-05-23
 
 - Make the `Save Link` URL argument optional.

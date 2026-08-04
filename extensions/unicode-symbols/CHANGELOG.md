@@ -1,5 +1,9 @@
 # Unicode Symbols
 
+## [Save as Snippet] - 2026-07-18
+
+- Add 'Save as Snippet' action
+
 ## [Bugfix] - 2026-06-24
 
 - Center symbols in Grid view on Raycast 2.0 for macOS (ref: [#28943](https://github.com/raycast/extensions/issues/28943))

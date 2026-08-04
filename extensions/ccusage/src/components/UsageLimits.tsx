@@ -9,6 +9,7 @@ import {
   createProgressBar,
 } from "../utils/usage-limits-formatter";
 import { formatDuration } from "../utils/data-formatter";
+import { showRemainingUsage } from "../preferences";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { ReactNode } from "react";
@@ -35,6 +36,7 @@ export function UsageLimits() {
 
   const fiveHourUtil = data?.five_hour?.utilization ?? 0;
   const sevenDayUtil = data?.seven_day?.utilization ?? 0;
+  const preferRemaining = showRemainingUsage();
 
   const accessories: List.Item.Accessory[] =
     error && !data
@@ -53,8 +55,8 @@ export function UsageLimits() {
             : [
                 {
                   icon: Icon.Gauge,
-                  text: `${fiveHourUtil.toFixed(0)}%`,
-                  tooltip: "5-Hour Limit (higher priority)",
+                  text: `${(preferRemaining ? 100 - fiveHourUtil : fiveHourUtil).toFixed(0)}%`,
+                  tooltip: `5-Hour Limit · ${preferRemaining ? "Remaining" : "Consumed"} (higher priority)`,
                 },
               ];
 

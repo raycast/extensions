@@ -17,8 +17,8 @@
  *   - Encoding: UTF-8.
  *
  * Supported columns:
- *   Account, Account Type, Asset Name, Symbol, Units, Price, Total Value,
- *   Currency, Asset Type, Last Updated, Additional Parameters
+ *   Account, Account Type, Asset Name, Symbol, Units, Price, Average Cost,
+ *   Total Value, Currency, Asset Type, Last Updated, Additional Parameters
  *
  * The "Additional Parameters" column contains a JSON object with non-standard
  * settings for specialised position types (mortgage, property, debt). This
@@ -55,6 +55,7 @@ export const CSV_HEADERS = [
   "Symbol",
   "Units",
   "Price",
+  "Average Cost",
   "Total Value",
   "Currency",
   "Asset Type",
@@ -82,6 +83,8 @@ export interface CsvRow {
   units: number;
   /** Price per unit at export time */
   price: number;
+  /** Average purchase price per unit (undefined when not recorded) */
+  averageCost?: number;
   /** Total value (units × price) */
   totalValue: number;
   /** Currency code (e.g. "GBP") */
@@ -273,6 +276,8 @@ export function exportPortfolioToCsv(positions: ExportPositionData[]): string {
       escapeCsvField(position.symbol),
       formatCsvNumber(position.units, 4),
       formatCsvNumber(currentPrice, 2),
+      // 6 decimals to match validatePrice's max precision for the buy-price input fields
+      position.avgCostPrice !== undefined ? formatCsvNumber(position.avgCostPrice, 6) : "",
       formatCsvNumber(totalValue, 2),
       escapeCsvField(position.currency),
       escapeCsvField(assetTypeLabel),
@@ -591,6 +596,11 @@ export function mapHeaders(headers: string[]): { mapping: Map<CsvHeader, number>
     SHARES: "Units",
     PRICE: "Price",
     "PRICE PER UNIT": "Price",
+    "AVERAGE COST": "Average Cost",
+    "AVG COST": "Average Cost",
+    "AVERAGE BUY PRICE": "Average Cost",
+    "BUY PRICE": "Average Cost",
+    "COST BASIS": "Average Cost",
     "TOTAL VALUE": "Total Value",
     VALUE: "Total Value",
     TOTAL: "Total Value",
@@ -728,6 +738,7 @@ export function parsePortfolioCsv(csvContent: string): CsvParseResult {
     // ── Extract optional fields ──
     const accountType = getValue("Account Type") || "OTHER";
     const priceStr = getValue("Price");
+    const averageCostStr = getValue("Average Cost");
     const totalValueStr = getValue("Total Value");
     const assetTypeStr = getValue("Asset Type") || "UNKNOWN";
     const lastUpdated = getValue("Last Updated") || new Date().toISOString();
@@ -737,6 +748,16 @@ export function parsePortfolioCsv(csvContent: string): CsvParseResult {
     const price = priceStr ? parseFloat(priceStr) : 0;
     if (priceStr && isNaN(price)) {
       rowErrors.push({ row: rowNum, column: "Price", message: "Price must be a number", rawValue: priceStr });
+    }
+
+    const averageCost = averageCostStr ? parseFloat(averageCostStr) : 0;
+    if (averageCostStr && (isNaN(averageCost) || averageCost < 0)) {
+      rowErrors.push({
+        row: rowNum,
+        column: "Average Cost",
+        message: "Average Cost must be a positive number",
+        rawValue: averageCostStr,
+      });
     }
 
     const totalValue = totalValueStr ? parseFloat(totalValueStr) : units * price;
@@ -772,6 +793,7 @@ export function parsePortfolioCsv(csvContent: string): CsvParseResult {
       symbol,
       units,
       price,
+      averageCost: averageCost > 0 ? averageCost : undefined,
       totalValue,
       currency: currency.toUpperCase(),
       assetType: assetTypeStr.toUpperCase(),
@@ -830,6 +852,9 @@ export function buildPortfolioFromCsvRows(rows: CsvRow[]): CsvImportResult {
       !isPropertyAssetType(assetType) && !isDebtAssetType(assetType) && assetType !== AssetType.CASH;
     const priceOverride = !isMarketTraded && row.price > 0 ? row.price : undefined;
 
+    // Average cost only applies to market-traded assets (enables P&L tracking)
+    const avgCostPrice = isMarketTraded && row.averageCost && row.averageCost > 0 ? row.averageCost : undefined;
+
     const position: Position = {
       id: generateId(),
       symbol: row.symbol,
@@ -839,6 +864,7 @@ export function buildPortfolioFromCsvRows(rows: CsvRow[]): CsvImportResult {
       assetType,
       priceOverride,
       addedAt: row.lastUpdated || new Date().toISOString(),
+      ...(avgCostPrice ? { avgCostPrice } : {}),
       ...(mortgageData ? { mortgageData } : {}),
       ...(debtData ? { debtData } : {}),
     };

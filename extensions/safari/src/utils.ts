@@ -86,12 +86,14 @@ export const search = function (collection: LooseTab[], keys: Array<FuseOptionKe
   }
 
   const _formatPerf = performance.now();
-  const formattedCollection = collection.map((item) => {
-    return {
-      ...item,
-      title_formatted: langAdaptor.formatString(searchText, item.title, { id: item.uuid }),
-    };
-  });
+  const formattedCollection = langAdaptor.hasHandlers()
+    ? collection.map((item) => {
+        return {
+          ...item,
+          title_formatted: langAdaptor.formatString(searchText, item.title, { id: item.uuid }),
+        };
+      })
+    : collection;
   const _formatCost = performance.now() - _formatPerf;
 
   const _searchPerf = performance.now();

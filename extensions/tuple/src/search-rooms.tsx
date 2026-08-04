@@ -1,30 +1,32 @@
-import { Action, ActionPanel, Color, Icon, List, showHUD } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { TupleErrorEmptyView } from "./lib/empty-state";
 import { useTupleJson } from "./lib/hooks";
-import { joinCall } from "./lib/tuple";
-import { Room, TupleState } from "./lib/types";
+import { joinCall, setRoomFavorite } from "./lib/tuple";
+import { Room } from "./lib/types";
 
 export default function SearchRooms() {
-  const { data, isLoading, error, revalidate } = useTupleJson<TupleState>(["state"], {
+  // `tuple rooms list` returns one flat, kind-tagged array, with occupants and the active-room
+  // marker resolved server-side. Pass --limit -1: this picker shows the user's complete room
+  // list, so opt out of the CLI's default count cap.
+  const { data, isLoading, error, revalidate } = useTupleJson<Room[]>(["rooms", "list", "--limit", "-1"], {
     failureTitle: "Could Not Load Rooms",
   });
 
-  const rooms = data?.rooms;
-  const activeSlug = data?.current_call?.room?.url?.slug;
-  const personal = sortRooms(rooms?.personal ?? []);
-  const team = sortRooms(rooms?.team ?? []);
+  const rooms = data ?? [];
+  const personal = sortRooms(rooms.filter((room) => room.kind === "personal"));
+  const team = sortRooms(rooms.filter((room) => room.kind === "team"));
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search your rooms">
       <List.Section title="Personal">
         {personal.map((room) => (
-          <RoomItem key={room.slug} room={room} activeSlug={activeSlug} />
+          <RoomItem key={room.slug} room={room} onChange={revalidate} />
         ))}
       </List.Section>
       <List.Section title="Team">
         {team.map((room) => (
-          <RoomItem key={room.slug} room={room} activeSlug={activeSlug} />
+          <RoomItem key={room.slug} room={room} onChange={revalidate} />
         ))}
       </List.Section>
       {error ? (
@@ -40,11 +42,9 @@ export default function SearchRooms() {
   );
 }
 
-function RoomItem({ room, activeSlug }: { room: Room; activeSlug?: string }) {
+function RoomItem({ room, onChange }: { room: Room; onChange: () => void }) {
   const label = roomLabel(room);
-  const occupants = (room.members ?? []).map(
-    (member) => member.full_name ?? member.short_name ?? member.email ?? "Someone",
-  );
+  const occupants = room.members.map((member) => member.full_name || member.email || "Someone");
   const accessories: List.Item.Accessory[] = [];
 
   if (occupants.length > 0) {
@@ -57,7 +57,7 @@ function RoomItem({ room, activeSlug }: { room: Room; activeSlug?: string }) {
   if (room.favorited) {
     accessories.push({ icon: "⭐", tooltip: "Favorite" });
   }
-  if (room.slug === activeSlug) {
+  if (room.active_call) {
     accessories.push({ tag: { value: "Active", color: Color.Green } });
   }
 
@@ -66,11 +66,17 @@ function RoomItem({ room, activeSlug }: { room: Room; activeSlug?: string }) {
       icon={Icon.Window}
       title={label}
       subtitle={occupants.length > 0 ? occupants.join(", ") : undefined}
-      keywords={[room.slug, room.name ?? "", ...occupants]}
+      keywords={[room.slug, room.name, ...occupants]}
       accessories={accessories}
       actions={
         <ActionPanel>
           <Action title="Join Room" icon={Icon.Phone} onAction={() => joinRoom(room.slug, label)} />
+          <Action
+            title={room.favorited ? "Remove Favorite" : "Add Favorite"}
+            icon={Icon.Star}
+            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            onAction={() => toggleFavorite(room, label, onChange)}
+          />
           <Action.CopyToClipboard title="Copy Room Link" content={room.http_value} />
           <Action.OpenInBrowser title="Open in Browser" url={room.http_value} />
         </ActionPanel>
@@ -88,11 +94,25 @@ async function joinRoom(slug: string, label: string) {
   }
 }
 
+async function toggleFavorite(room: Room, label: string, onChange: () => void) {
+  try {
+    await setRoomFavorite(room.slug, !room.favorited);
+    await showToast({
+      style: Toast.Style.Success,
+      title: room.favorited ? "Removed Favorite" : "Added Favorite",
+      message: label,
+    });
+    onChange();
+  } catch (error) {
+    await showFailureToast(error, { title: "Could Not Update Favorite" });
+  }
+}
+
 /** Occupied rooms first, then favorites, then by name. */
 function sortRooms(rooms: Room[]): Room[] {
   return [...rooms].sort((a, b) => {
-    const aOccupied = (a.members?.length ?? 0) > 0;
-    const bOccupied = (b.members?.length ?? 0) > 0;
+    const aOccupied = a.members.length > 0;
+    const bOccupied = b.members.length > 0;
     if (aOccupied !== bOccupied) {
       return aOccupied ? -1 : 1;
     }
@@ -105,5 +125,5 @@ function sortRooms(rooms: Room[]): Room[] {
 
 /** Team rooms have names; personal rooms don't, so label them "Personal Room". */
 function roomLabel(room: Room): string {
-  return room.name?.trim() || "Personal Room";
+  return room.name.trim() || "Personal Room";
 }

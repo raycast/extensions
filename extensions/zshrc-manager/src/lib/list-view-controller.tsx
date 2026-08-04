@@ -42,6 +42,8 @@ export interface FilterableItem {
   sectionStartLine: number;
   /** Stable unique ID assigned during parsing (used for React keys) */
   _stableId?: number;
+  /** 0-based instance of the section label (labels are not unique) */
+  _sectionOccurrence?: number;
   [key: string]: unknown;
 }
 
@@ -110,6 +112,10 @@ export interface ListViewConfig<T extends FilterableItem> {
   generateOverviewActions?: ActionsGenerator<T>;
   /** Generate title for list item */
   generateTitle: TitleGenerator<T>;
+  /** Copyable name for an item (Copy Name ⌘⇧C); defaults to generateTitle */
+  getItemName?: (item: T) => string;
+  /** Copyable value for an item (Copy Value ⌘C); defaults to generateTitle */
+  getItemValue?: (item: T) => string;
   /** Custom post-processing of items */
   postProcessItems?: (items: T[]) => T[];
   /** Optional search bar accessory (e.g., dropdown) */
@@ -147,17 +153,23 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
   // The _stableId is assigned during initial parsing and remains constant
   // through frecency sorting, ensuring React keys stay stable across reorders
   let stableIdCounter = 0;
-  const allItemsRaw = (sections || []).flatMap((section: LogicalSection) =>
-    config.parser(section.content).map(
+  const labelInstances = new Map<string, number>();
+  const allItemsRaw = (sections || []).flatMap((section: LogicalSection) => {
+    // Labels are not unique: track which same-labeled instance this is so
+    // edit/delete can resolve the exact section the item came from
+    const sectionOccurrence = labelInstances.get(section.label) ?? 0;
+    labelInstances.set(section.label, sectionOccurrence + 1);
+    return config.parser(section.content).map(
       (item) =>
         ({
           ...item,
           section: section.label,
           sectionStartLine: section.startLine,
           _stableId: stableIdCounter++,
+          _sectionOccurrence: sectionOccurrence,
         }) as T,
-    ),
-  );
+    );
+  });
 
   // Apply post-processing if configured
   const postProcessedItems = config.postProcessItems ? config.postProcessItems(allItemsRaw) : allItemsRaw;
@@ -227,7 +239,14 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
 
     return (
       <ActionPanel>
-        <SharedActionsSection onRefresh={refresh} />
+        <SharedActionsSection
+          onRefresh={refresh}
+          item={{
+            copyName: (config.getItemName ?? config.generateTitle)(item),
+            copyValue: (config.getItemValue ?? config.generateTitle)(item),
+            onVisit: config.enableFrecency ? () => visitItem(item) : undefined,
+          }}
+        />
       </ActionPanel>
     );
   };

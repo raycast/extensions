@@ -1,9 +1,11 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { optimize } from "svgo";
+import { isOxvgAvailable } from "./oxvg";
+import { optimizeSvgWithSvgo } from "./optimizer";
 import { configHelper, SVGOPlugin } from "./utils-2";
 
 export default function SVGOConfig() {
+  const { provider } = getPreferenceValues<Preferences>();
   const [config, setConfig] = useState<SVGOPlugin[]>([]);
   const [forceUpdate, setForceUpdate] = useState(false);
   const triggerUpdate = () => setForceUpdate((cur) => !cur);
@@ -27,28 +29,62 @@ export default function SVGOConfig() {
     init();
   }, [forceUpdate]);
 
+  const isOxvg = provider === "oxvg";
+  const oxvgAvailable = isOxvg ? isOxvgAvailable() : true;
+
   return (
     <List
-      navigationTitle="Update SVGO config for all commands"
+      navigationTitle="Update SVGO plugin config for all commands"
       searchBarPlaceholder="Search plugin"
       throttle={true}
       isShowingDetail
     >
-      {config.map((item, index) => (
-        <List.Item
-          key={index}
-          icon={item.enabledByDefault ? Icon.CheckCircle : Icon.Circle}
-          title={item.name}
-          detail={<ItemDetail enabled={item.enabledByDefault} id={item.id as string} />}
-          actions={
-            <ActionPanel>
-              <Action title="Toggle (auto save)" onAction={() => updateConfig(index)} />
-              <Action title="Restore default configs" onAction={restoreConfig} />
-              <Action.OpenInBrowser title="Open documentation" url="https://svgo.dev/docs/introduction/" />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {isOxvg && (
+        <List.Section title="OXVG Provider Active">
+          <List.Item
+            icon={{ source: Icon.Info, tintColor: oxvgAvailable ? Color.Blue : Color.Red }}
+            title={
+              oxvgAvailable
+                ? "OXVG is active — SVGO plugin config is used as a best-effort hint"
+                : "OXVG native binding not found — falling back to SVGO"
+            }
+            detail={
+              <List.Item.Detail
+                markdown={
+                  oxvgAvailable
+                    ? `## OXVG Provider\n\nYou are using **OXVG** as the optimization backend. OXVG is a Rust-based SVG optimizer that is significantly faster on large SVGs and batches.\n\nThe plugin settings below are converted to OXVG jobs where possible. Some SVGO plugins may not have an OXVG equivalent and will be silently ignored.\n\n[OXVG on GitHub](https://github.com/noahbald/oxvg)`
+                    : `## OXVG Not Available\n\nThe OXVG native binding could not be loaded. The extension will use **SVGO** as a fallback.\n\nTo enable OXVG, run the following in the extension directory:\n\n\`\`\`\nnpm install --force @oxvg/napi-darwin-arm64\n\`\`\`\n\nOr the appropriate package for your platform:\n- macOS Apple Silicon: \`@oxvg/napi-darwin-arm64\`\n- macOS Intel: \`@oxvg/napi-darwin-x64\`\n- Linux x64: \`@oxvg/napi-linux-x64-gnu\`\n- Windows x64: \`@oxvg/napi-win32-x64-msvc\``
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser title="Open OXVG on GitHub" url="https://github.com/noahbald/oxvg" />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+      <List.Section title={isOxvg ? "SVGO Plugin Config (used as OXVG hint)" : "SVGO Plugin Config"}>
+        {config.map((item, index) => (
+          <List.Item
+            key={index}
+            icon={item.enabledByDefault ? Icon.CheckCircle : Icon.Circle}
+            title={item.name}
+            detail={<ItemDetail enabled={item.enabledByDefault} id={item.id as string} />}
+            actions={
+              <ActionPanel>
+                <Action title="Toggle (Auto Save)" onAction={() => updateConfig(index)} />
+                <Action title="Restore Default Configs" onAction={restoreConfig} />
+                <Action.OpenInBrowser title="Open SVGO Documentation" url="https://svgo.dev/docs/introduction/" />
+                {isOxvg && (
+                  <Action.OpenInBrowser title="Open OXVG Documentation" url="https://github.com/noahbald/oxvg" />
+                )}
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }
@@ -63,12 +99,12 @@ const exampleSVG = `<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE svg PUBLIC "
 function ItemDetail({ id, enabled }: ItemDetailProps) {
   const plugins = configHelper.getEnabledPlugins();
   const filteredPlugins = !enabled ? plugins.filter((item) => item !== id) : plugins;
-  const optimizedSvg = optimize(exampleSVG, { plugins: filteredPlugins }).data;
+  const optimizedSvg = optimizeSvgWithSvgo(exampleSVG, filteredPlugins);
   return (
     <List.Item.Detail
       markdown={`###### Original
 \`${exampleSVG}\`
-###### Optimized
+###### Optimized (SVGO preview)
 \`${optimizedSvg}\`
 `}
     />

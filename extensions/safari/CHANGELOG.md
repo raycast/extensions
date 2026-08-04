@@ -1,5 +1,10 @@
 # Safari Changelog
 
+## [New Command] - 2026-07-24
+
+- Add `Search Tabs, Bookmarks and History` command to search open tabs, bookmarks and history in one place.
+- Replace `pinyin` with the much lighter `pinyin-pro` to fix commands crashing against the extension memory limit (bundle size reduced from ~28 MB to ~6 MB per command).
+
 ## [Bugfix] - 2026-05-22
 
 - Clarify the Full Disk Access requirement when Safari history cannot be opened.

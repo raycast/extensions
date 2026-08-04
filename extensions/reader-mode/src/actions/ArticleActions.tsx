@@ -7,6 +7,7 @@ import {
   Toast,
   getPreferenceValues,
   showInFinder,
+  open,
   Clipboard,
   closeMainWindow,
   showHUD,
@@ -18,6 +19,7 @@ import { SummaryStyle } from "../types/summary";
 import { ArchiveSource } from "../utils/paywall-hopper";
 import { getStyleLabel } from "../utils/summarizer";
 import { markdownToHtml } from "../utils/html-export";
+import { isMacOS } from "../utils/host-api";
 
 export const SUMMARY_STYLES: { style: SummaryStyle; icon: Icon }[] = [
   { style: "overview", icon: Icon.List },
@@ -63,17 +65,30 @@ async function saveFile(content: string, filename: string, extension: string): P
       title: "File Saved",
       message: fullFilename,
       primaryAction: {
-        title: "Reveal in Finder",
+        // showInFinder is macOS-only; on Windows it fails and the action does nothing.
+        title: isMacOS ? "Reveal in Finder" : "Show in Folder",
         onAction: async () => {
-          await showInFinder(filepath);
+          if (isMacOS) {
+            await showInFinder(filepath);
+          } else {
+            await open(saveDir);
+          }
         },
       },
     });
   } catch (error) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     await showToast({
       style: Toast.Style.Failure,
       title: "Save Failed",
-      message: error instanceof Error ? error.message : "Unknown error",
+      message,
+      primaryAction: {
+        title: "Copy Error",
+        shortcut: Keyboard.Shortcut.Common.Copy,
+        onAction: async () => {
+          await Clipboard.copy(message);
+        },
+      },
     });
   }
 }
@@ -100,7 +115,13 @@ export function ArticleActions({
         <ActionPanel.Submenu
           title={currentSummary ? "Change Summary Style" : "Summarize…"}
           icon={Icon.Stars}
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          // No Common shortcut means "summarize", and the obvious ⌘S is Common.Save — which
+          // belongs to "Save as Markdown" below. Declared per platform so the Windows build
+          // does not inherit a bare ⌘ binding that means nothing there.
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "m" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+          }}
         >
           {SUMMARY_STYLES.map(({ style, icon }) => (
             <Action key={style} title={getStyleLabel(style)} icon={icon} onAction={() => onSummarize(style)} />
@@ -130,20 +151,24 @@ export function ArticleActions({
           title="Copy URL"
           content={articleUrl}
           icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          // Common.Copy is "Copy as Markdown" above; CopyPath is the address-shaped sibling.
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
         />
         {archiveSource?.url && (
           <Action.CopyToClipboard
             title="Copy Archived URL"
             content={archiveSource.url}
             icon={Icon.Clock}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "a" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+            }}
           />
         )}
         <Action
           title="Save as Markdown"
           icon={Icon.Document}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          shortcut={Keyboard.Shortcut.Common.Save}
           onAction={() => saveFile(markdown, articleTitle, "md")}
         />
         <Action
@@ -159,7 +184,7 @@ export function ArticleActions({
           <Action
             title="Import from Browser Tab"
             icon={Icon.Globe}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
             onAction={onReimportFromBrowser}
           />
         )}

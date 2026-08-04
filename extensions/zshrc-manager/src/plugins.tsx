@@ -1,8 +1,9 @@
-import { Icon, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import type { ReactElement } from "react";
 import { parsePlugins } from "./utils/parsers";
 import { MODERN_COLORS } from "./constants";
-import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
+import { ListViewController, type FilterableItem, type ItemWarning } from "./lib/list-view-controller";
+import { pluginInstalled } from "./lib/resolve";
 
 /**
  * Plugin item interface
@@ -13,6 +14,23 @@ interface PluginItem extends FilterableItem {
 
 interface PluginsProps {
   searchBarAccessory?: ReactElement | null;
+}
+
+/**
+ * Warning generator for plugins
+ * Flags listed plugins missing from the Oh My Zsh plugins directories
+ * (unknown — no OMZ installation — stays silent)
+ */
+export function generatePluginWarning(plugin: PluginItem): ItemWarning | null {
+  if (pluginInstalled(plugin.name) === "no") {
+    return {
+      type: "broken",
+      message: "Plugin not installed",
+      icon: Icon.ExclamationMark,
+      color: Color.Red,
+    };
+  }
+  return null;
 }
 
 /**
@@ -31,6 +49,8 @@ export default function Plugins({ searchBarAccessory }: PluginsProps) {
       parser={parsePlugins}
       searchFields={["name", "section"]}
       searchBarAccessory={searchBarAccessory}
+      warningGenerator={generatePluginWarning}
+      showWarningFilter={!searchBarAccessory}
       generateTitle={(plugin) => plugin.name}
       postProcessItems={(items) => {
         // Get unique plugins (since they might appear in multiple sections)
@@ -92,42 +112,56 @@ plugins=(${plugin.name} ...)
 ## ⚠️ Note
 Plugin functionality depends on your zsh plugin manager. Use the "Open ~/.Zshrc" action to view the complete plugin configuration.
       `}
-      generateMetadata={(plugin) => (
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
-            title="Plugin Name"
-            text={plugin.name}
-            icon={{
-              source: Icon.Plug,
-              tintColor: MODERN_COLORS.warning,
-            }}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Section"
-            text={plugin.section}
-            icon={{
-              source: Icon.Folder,
-              tintColor: MODERN_COLORS.neutral,
-            }}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="File"
-            text="~/.zshrc"
-            icon={{
-              source: Icon.Document,
-              tintColor: MODERN_COLORS.neutral,
-            }}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Type"
-            text="Zsh Plugin"
-            icon={{
-              source: Icon.Gear,
-              tintColor: MODERN_COLORS.success,
-            }}
-          />
-        </List.Item.Detail.Metadata>
-      )}
+      generateMetadata={(plugin) => {
+        const installed = pluginInstalled(plugin.name);
+        return (
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label
+              title="Plugin Name"
+              text={plugin.name}
+              icon={{
+                source: Icon.Plug,
+                tintColor: MODERN_COLORS.warning,
+              }}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Installed"
+              text={installed === "yes" ? "Installed" : installed === "no" ? "Not Found" : "Unknown"}
+              icon={
+                installed === "yes"
+                  ? { source: Icon.CheckCircle, tintColor: MODERN_COLORS.success }
+                  : installed === "no"
+                    ? { source: Icon.XMarkCircle, tintColor: MODERN_COLORS.error }
+                    : { source: Icon.QuestionMarkCircle, tintColor: MODERN_COLORS.neutral }
+              }
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Section"
+              text={plugin.section}
+              icon={{
+                source: Icon.Folder,
+                tintColor: MODERN_COLORS.neutral,
+              }}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="File"
+              text="~/.zshrc"
+              icon={{
+                source: Icon.Document,
+                tintColor: MODERN_COLORS.neutral,
+              }}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Type"
+              text="Zsh Plugin"
+              icon={{
+                source: Icon.Gear,
+                tintColor: MODERN_COLORS.success,
+              }}
+            />
+          </List.Item.Detail.Metadata>
+        );
+      }}
     />
   );
 }

@@ -15,24 +15,43 @@ interface CreateTaskFormValues {
 export default function CreateTaskForm(props: {
   listId?: string;
   title?: string;
-  onCreate: (listId: string, task: TaskForm) => void;
+  onCreate: (listId: string, task: TaskForm) => Promise<void>;
 }) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [lists, setLists] = useState<{ id: string; title: string }[]>([]);
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<CreateTaskFormValues>({
-    onSubmit(values) {
-      props.onCreate(values.listId, {
-        title: values.title,
-        notes: values.notes,
-        due: values.due,
-      });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Task Created!",
-        message: `${values.title} created`,
-      });
-      pop();
+    async onSubmit(values) {
+      const listId = values.listId || props.listId || lists[0]?.id;
+
+      if (!listId) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "No task list selected",
+        });
+        return;
+      }
+
+      try {
+        await props.onCreate(listId, {
+          title: values.title,
+          notes: values.notes,
+          due: values.due,
+        });
+        showToast({
+          style: Toast.Style.Success,
+          title: "Task Created!",
+          message: `${values.title} created`,
+        });
+        pop();
+      } catch (error) {
+        console.error(error);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to create task",
+          message: String(error),
+        });
+      }
     },
     initialValues: { title: props.title, listId: props.listId },
     validation: {

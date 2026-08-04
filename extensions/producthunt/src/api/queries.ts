@@ -15,6 +15,7 @@ export const FEATURED_POSTS_QUERY = /* GraphQL */ `
           url
           votesCount
           commentsCount
+          isVoted
           createdAt
           featuredAt
           thumbnail {
@@ -40,6 +41,7 @@ export const FEATURED_POSTS_QUERY = /* GraphQL */ `
                 id
                 name
                 slug
+                followersCount
               }
             }
           }
@@ -61,6 +63,14 @@ export const POST_DETAIL_QUERY = /* GraphQL */ `
       website
       votesCount
       commentsCount
+      isVoted
+      reviewsCount
+      reviewsRating
+      dailyRank
+      weeklyRank
+      monthlyRank
+      yearlyRank
+      makerReplies
       createdAt
       featuredAt
       thumbnail {
@@ -104,6 +114,7 @@ export const POST_DETAIL_QUERY = /* GraphQL */ `
             name
             slug
             description
+            followersCount
           }
         }
       }
@@ -123,7 +134,7 @@ export interface ApiUser {
 }
 
 export interface ApiTopicEdge {
-  node: { id: string; name: string; slug: string; description?: string };
+  node: { id: string; name: string; slug: string; description?: string; followersCount?: number | null };
 }
 
 export interface ApiMedia {
@@ -142,6 +153,14 @@ export interface ApiPostNode {
   website?: string; // String! in schema, but absent from FEATURED_POSTS_QUERY which shares this type
   votesCount: number;
   commentsCount: number;
+  isVoted?: boolean | null;
+  reviewsCount?: number | null;
+  reviewsRating?: number | null;
+  dailyRank?: number | null;
+  weeklyRank?: number | null;
+  monthlyRank?: number | null;
+  yearlyRank?: number | null;
+  makerReplies?: number | null;
   createdAt: string;
   featuredAt?: string;
   thumbnail?: { url: string };

@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "starline",
+  "title": "Starline",
+  "description": "Manage your Starline devices. Requires developer account.",
+  "icon": "command-icon.png",
+  "author": "sfominx",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "devices",
+      "title": "Devices",
+      "description": "List Starline devices you have",
+      "mode": "view"
+    },
+    {
+      "name": "arm",
+      "title": "Arm",
+      "description": "Arm the default device",
+      "mode": "no-view"
+    },
+    {
+      "name": "disarm",
+      "title": "Disarm",
+      "description": "Disarm the default device",
+      "mode": "no-view"
+    },
+    {
+      "name": "start_engine",
+      "title": "Start Engine",
+      "description": "Start engine on the default device",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop_engine",
+      "title": "Stop Engine",
+      "description": "Stop engine on the default device",
+      "mode": "no-view"
+    },
+    {
+      "name": "arm_quietly",
+      "title": "Arm Quietly",
+      "description": "Arm the default device without sound confirmation",
+      "mode": "no-view"
+    },
+    {
+      "name": "disarm_quietly",
+      "title": "Disarm Quietly",
+      "description": "Disarm the default device without sound confirmation",
+      "mode": "no-view"
+    },
+    {
+      "name": "horn",
+      "title": "Horn",
+      "description": "Send horn command to the default device",
+      "mode": "no-view"
+    },
+    {
+      "name": "update_position",
+      "title": "Update Position",
+      "description": "Request position update for the default device",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "AppId",
+      "type": "password",
+      "required": true,
+      "title": "Application ID",
+      "description": "The AppId value seen in the Developer section of a Starline account.",
+      "placeholder": "AppID"
+    },
+    {
+      "name": "Secret",
+      "type": "password",
+      "required": true,
+      "title": "Secret",
+      "description": "The Secret value seen in the Developer section of a Starline account.",
+      "placeholder": "Secret"
+    },
+    {
+      "name": "Login",
+      "required": true,
+      "type": "textfield",
+      "title": "Login",
+      "description": "Your Starline login.",
+      "placeholder": "Login"
+    },
+    {
+      "name": "Password",
+      "type": "password",
+      "required": true,
+      "title": "Password",
+      "description": "Your Starline password.",
+      "placeholder": "Password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "react": "^19.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-plugin": "^2.1.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "22.19.17",
+    "@types/react": "^19.2.15",
+    "@types/react-test-renderer": "^19.1.0",
+    "eslint": "^9.39.4",
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.5",
+    "eslint-plugin-promise": "^7.3.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "jest": "^30.4.2",
+    "knip": "^6.14.2",
+    "prettier": "^3.8.3",
+    "react-test-renderer": "^19.2.6",
+    "ts-jest": "^29.4.11",
+    "ts-prune": "^0.10.3",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "check": "npm run build && npm run lint && npm test -- --runInBand",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prune": "ts-prune --ignore \"src/(arm|disarm|start_engine|stop_engine|arm_quietly|disarm_quietly|horn|update_position|devices)\\.tsx|satisfies|Record|CommandValue|src/utils/defaultDeviceCommand\\.ts\"",
+    "knip": "knip --no-progress",
+    "dead-code": "npm run prune && npm run knip",
+    "test": "jest",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

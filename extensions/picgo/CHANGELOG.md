@@ -1,5 +1,10 @@
 # Picgo Changelog
 
+## [Bugfix: Upload Result Copy Actions] - 2026-06-29
+
+- Fix automatic URL copying to run only once after a successful upload instead of running again when switching result views.
+- Align copy action titles across result views and clarify when all uploaded image URLs are copied.
+
 ## [Bugfix: Image Grid Format Selection] - 2026-06-24
 
 - Fix a crash when switching to the Image Grid view caused by an empty image format selection in newer Raycast versions.

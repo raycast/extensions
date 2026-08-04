@@ -1,5 +1,15 @@
 import { useState } from "react";
-import { Icon, ActionPanel, Action, confirmAlert, Color, showToast, Toast, useNavigation } from "@raycast/api";
+import {
+  Icon,
+  ActionPanel,
+  Action,
+  confirmAlert,
+  Color,
+  showToast,
+  Toast,
+  useNavigation,
+  Keyboard,
+} from "@raycast/api";
 import { getAvatarIcon, MutatePromise } from "@raycast/utils";
 import { User } from "../api/users";
 import { Project, addProject, removeProject, Section, addTaskToSection } from "../api/projects";
@@ -220,7 +230,7 @@ export default function TaskActions({
   }
 
   const openTaskInBrowserAction = (
-    <Action.OpenInBrowser url={task.permalink_url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+    <Action.OpenInBrowser url={task.permalink_url} shortcut={Keyboard.Shortcut.Common.Open} />
   );
 
   return (
@@ -240,7 +250,10 @@ export default function TaskActions({
           <Action.Push
             title="Add Subtask"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "n" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "n" },
+            }}
             target={<CreateSubtaskForm parentTask={task} workspace={workspace} mutateSubtasks={mutateSubtasks} />}
           />
         )}
@@ -254,7 +267,10 @@ export default function TaskActions({
         <Action.Push
           title="Rename Task"
           icon={Icon.Pencil}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "r" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+          }}
           target={<RenameTaskForm task={task} mutateList={mutateList} mutateDetail={mutateDetail} />}
         />
 
@@ -276,7 +292,7 @@ export default function TaskActions({
           style={Action.Style.Destructive}
           title="Delete Task"
           icon={Icon.Trash}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+          shortcut={Keyboard.Shortcut.Common.Remove}
           onAction={deleteTask}
         />
       </ActionPanel.Section>
@@ -285,29 +301,35 @@ export default function TaskActions({
         <Action.CopyToClipboard
           title="Copy Task URL"
           content={task.permalink_url}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+          shortcut={Keyboard.Shortcut.Common.CopyPath}
         />
 
-        <Action.CopyToClipboard
-          title="Copy Task Name"
-          content={task.name}
-          shortcut={{ modifiers: ["cmd"], key: "." }}
-        />
+        <Action.CopyToClipboard title="Copy Task Name" content={task.name} shortcut={Keyboard.Shortcut.Common.Pin} />
 
         <Action.CopyToClipboard
           title="Copy Task Formatted URL"
           content={`[${task.name}](${task.permalink_url})`}
-          shortcut={{ modifiers: ["cmd", "ctrl"], key: "." }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "ctrl"], key: "." },
+            Windows: { modifiers: ["ctrl", "alt"], key: "." },
+          }}
         />
 
-        <Action.CopyToClipboard title="Copy Task ID" content={task.gid} shortcut={{ modifiers: ["cmd"], key: "i" }} />
+        <Action.CopyToClipboard
+          title="Copy Task ID"
+          content={task.gid}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "i" },
+            Windows: { modifiers: ["ctrl"], key: "i" },
+          }}
+        />
       </ActionPanel.Section>
 
       <ActionPanel.Section>
         <Action
           title="Refresh"
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={() => {
             if (mutateList) {
               mutateList();
@@ -368,7 +390,10 @@ function UsersSubmenu({ workspace, task, mutate }: UsersSubmenuProps) {
     <ActionPanel.Submenu
       title="Assign to"
       icon={Icon.AddPerson}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "a" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+      }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
@@ -433,7 +458,14 @@ function ProjectsSubmenu({ workspace, task, mutate }: ProjectsSubmenuProps) {
   });
 
   return (
-    <ActionPanel.Submenu title="Change Project" icon={Icon.Folder} shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}>
+    <ActionPanel.Submenu
+      title="Change Project"
+      icon={Icon.Folder}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "p" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+      }}
+    >
       {isLoading ? (
         <Action title="Loading…" />
       ) : (
@@ -502,7 +534,10 @@ function DueOnSubMenu({ task, mutate }: DueOnSubmenuProps) {
 
   return (
     <Action.PickDate
-      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "d" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+      }}
       icon={Icon.Calendar}
       type={Action.PickDate.Type.Date}
       title="Set Due Date…"
@@ -553,7 +588,7 @@ function SectionsSubmenu({ task, mutate }: SectionsSubmenuProps) {
   }
 
   return (
-    <ActionPanel.Submenu title="Move to Section" icon={Icon.Tag} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+    <ActionPanel.Submenu title="Move to Section" icon={Icon.Tag} shortcut={Keyboard.Shortcut.Common.Duplicate}>
       {isLoading ? (
         <Action title="Loading…" />
       ) : (
@@ -682,7 +717,10 @@ function TagsSubmenu({ workspace, task, mutate }: TagsSubmenuProps) {
     <ActionPanel.Submenu
       title="Change Tags"
       icon={Icon.Tag}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "t" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "t" },
+      }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (

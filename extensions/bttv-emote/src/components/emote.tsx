@@ -3,3 +3,5 @@ export interface Emote {
   code: string;
   imageType: string;
 }
+
+export const LIMIT = 32;

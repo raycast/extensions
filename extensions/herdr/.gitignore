@@ -1,0 +1,8 @@
+.DS_Store
+.env
+.env.local
+*.log
+coverage
+dist
+node_modules
+raycast-env.d.ts

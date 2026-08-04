@@ -1,5 +1,6 @@
 import { addHours, addMinutes, differenceInCalendarDays, format, roundToNearestMinutes } from 'date-fns';
 import { CalendarEvent } from './types';
+import { formatOffsetLabel, unadjustDateForTimezone } from './timezones';
 
 export const getHumanDateFormat = 'MMM dd, yyyy';
 export const getHumanTimeFormat = 'h:mm aa';
@@ -42,10 +43,20 @@ export const formatDate = (item: CalendarEvent): string => {
   if (item.isAllDay) {
     return `${formatRelativeDay(item.startDate, new Date())} all-day`;
   } else {
-    return `${formatRelativeDay(item.startDate, new Date())} from ${format(
+    const base = `${formatRelativeDay(item.startDate, new Date())} from ${format(
       item.startDate,
       getHumanTimeFormat,
     )} to ${format(item.endDate, getHumanTimeFormat)}`;
+
+    if (item.timezone) {
+      const originalStart = unadjustDateForTimezone(item.startDate, item.timezone);
+      const originalEnd = unadjustDateForTimezone(item.endDate, item.timezone);
+      const tzLabel = formatOffsetLabel(item.timezone);
+      const originalTimes = `${format(originalStart, getHumanTimeFormat)}–${format(originalEnd, getHumanTimeFormat)} ${tzLabel}`;
+      return `${base} (${originalTimes})`;
+    }
+
+    return base;
   }
 };
 

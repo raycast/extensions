@@ -5,8 +5,7 @@ import { buildAppUrl } from "./config";
 import type { Note } from "./types";
 import { remoApi } from "./utils/api";
 import { handleError } from "./utils/errors";
-import { stripHtml } from "./utils/stripHtml";
-import { toMarkdown } from "./utils/toMarkdown";
+import { noteMarkdown, notePlainText, truncate } from "./utils/noteDisplay";
 
 export default function Trash() {
   const [isShowingDetail, setIsShowingDetail] = useState(false);
@@ -14,14 +13,14 @@ export default function Trash() {
   const {
     isLoading,
     data,
+    pagination,
     revalidate: fetchTrash,
   } = useCachedPromise(
-    async () => {
-      const result = await remoApi.listNotes({ includeDeleted: true });
-      return result
-        .filter((n: Note) => n.deletedAt !== undefined)
-        .sort((a: Note, b: Note) => (b.deletedAt ?? b.updatedAt) - (a.deletedAt ?? a.updatedAt));
-    },
+    () =>
+      async ({ cursor }: { cursor?: string }) => {
+        const result = await remoApi.infiniteNotes({ view: "trash", cursor, numItems: 30 });
+        return { data: result.page, hasMore: !result.isDone, cursor: result.continueCursor };
+      },
     [],
     { onError: (error) => handleError(error, "Failed to fetch trash") },
   );
@@ -64,7 +63,12 @@ export default function Trash() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search deleted notes..." isShowingDetail={isShowingDetail}>
+    <List
+      isLoading={isLoading}
+      pagination={pagination}
+      searchBarPlaceholder="Search deleted notes..."
+      isShowingDetail={isShowingDetail}
+    >
       {notes.length === 0 && !isLoading ? (
         <List.EmptyView title="Trash is empty" icon={{ source: Icon.Trash, tintColor: Color.Green }} />
       ) : (
@@ -72,7 +76,7 @@ export default function Trash() {
           <List.Item
             key={note._id}
             title={note.title || "Untitled"}
-            subtitle={isShowingDetail ? undefined : stripHtml(note.content || "").substring(0, 50)}
+            subtitle={isShowingDetail ? undefined : truncate(notePlainText(note), 50)}
             icon={{ source: Icon.Trash, tintColor: Color.Red }}
             accessories={
               isShowingDetail
@@ -86,7 +90,7 @@ export default function Trash() {
             }
             detail={
               <List.Item.Detail
-                markdown={toMarkdown(note.content || "") || "_No content_"}
+                markdown={noteMarkdown(note) || "_No content_"}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label title="Title" text={note.title || "Untitled"} />

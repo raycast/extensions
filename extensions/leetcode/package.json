@@ -8,7 +8,8 @@
   "contributors": [
     "xmok",
     "doxxx93",
-    "svenhofman"
+    "svenhofman",
+    "harsh_varshney"
   ],
   "categories": [
     "Web"
@@ -28,6 +29,36 @@
       "subtitle": "LeetCode",
       "description": "Search and preview the LeetCode problems.",
       "mode": "view"
+    },
+    {
+      "name": "random-problem",
+      "title": "Pick a Random LeetCode Problem",
+      "subtitle": "LeetCode",
+      "description": "Pick a random LeetCode problem, optionally filtered by difficulty, category, and topic.",
+      "mode": "view"
+    },
+    {
+      "name": "user-profile",
+      "title": "View LeetCode User Profile",
+      "subtitle": "LeetCode",
+      "description": "View solve stats, streak, and contest rating for a username.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "username",
+          "placeholder": "username",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "potd-menu-bar",
+      "title": "Daily Challenge Status",
+      "subtitle": "LeetCode",
+      "description": "Menu bar timer showing whether you've solved the daily challenge and how long is left.",
+      "mode": "menu-bar",
+      "interval": "15m"
     }
   ],
   "dependencies": {
@@ -53,6 +84,13 @@
     "publish": "ray publish"
   },
   "preferences": [
+    {
+      "name": "username",
+      "title": "LeetCode Username",
+      "description": "Your LeetCode username. Used by the daily challenge menu bar to check your status, and as the default for the profile command.",
+      "type": "textfield",
+      "required": false
+    },
     {
       "name": "defaultLanguage",
       "title": "Default Programming Language",
@@ -115,10 +153,18 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "showProblemRatings",
+      "title": "Problem Ratings",
+      "label": "Show zerotrac difficulty ratings",
+      "description": "If enabled, fetches community difficulty ratings from zerotrac and shows them next to each problem.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ]
 }

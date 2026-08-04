@@ -1,4 +1,4 @@
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, Keyboard } from "@raycast/api";
 import { useSvglExtension } from "../app-context";
 import { Svg } from "../../type";
 
@@ -8,28 +8,22 @@ const PinSvgAction = ({ svg }: { svg: Svg }) => {
     <>
       <Action
         icon={Icon.TackDisabled}
-        title="Unpin Svg"
+        title="Unpin SVG"
         onAction={() => {
           unPinSvg(svg.id, svg.title);
         }}
-        shortcut={{
-          modifiers: ["cmd", "shift"],
-          key: "p",
-        }}
+        shortcut={Keyboard.Shortcut.Common.Pin}
       />
 
       {pinnedSvgIds.indexOf(svg.id) !== 0 && (
         <Action
           icon={Icon.ArrowUp}
-          title="Move Up in Pinned"
+          title="Move up in Pinned"
           onAction={() => {
             focusGridItem(svg.id, `pinned`);
             moveUpInPinned(svg.id, svg.title);
           }}
-          shortcut={{
-            modifiers: ["cmd", "opt"],
-            key: "arrowUp",
-          }}
+          shortcut={Keyboard.Shortcut.Common.MoveUp}
         />
       )}
 
@@ -41,24 +35,18 @@ const PinSvgAction = ({ svg }: { svg: Svg }) => {
             focusGridItem(svg.id, `pinned`);
             moveDownInPinned(svg.id, svg.title);
           }}
-          shortcut={{
-            modifiers: ["cmd", "opt"],
-            key: "arrowDown",
-          }}
+          shortcut={Keyboard.Shortcut.Common.MoveDown}
         />
       )}
     </>
   ) : (
     <Action
       icon={Icon.Tack}
-      title="Pin Svg"
+      title="Pin SVG"
       onAction={() => {
         pinSvg(svg.id, svg.title);
       }}
-      shortcut={{
-        modifiers: ["cmd", "shift"],
-        key: "p",
-      }}
+      shortcut={Keyboard.Shortcut.Common.Pin}
     />
   );
 };

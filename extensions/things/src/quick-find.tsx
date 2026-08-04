@@ -15,7 +15,6 @@ interface SearchItem {
 }
 
 export default function Command() {
-  // Single query against Things' SQLite DB — bypasses slow Apple Events
   const { data, isLoading, error, revalidate } = useCachedPromise(getQuickFindData);
 
   const items = useMemo(() => {

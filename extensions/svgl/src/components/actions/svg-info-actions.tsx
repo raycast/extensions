@@ -1,4 +1,4 @@
-import { Action } from "@raycast/api";
+import { Action, Keyboard } from "@raycast/api";
 import { Svg } from "../../type";
 import { APP_URL } from "../../utils/fetch";
 
@@ -10,37 +10,33 @@ const SvgInfoAction = ({ svg, category }: { svg: Svg; category: string }) => {
       <Action.OpenInBrowser
         title="Open SVG in Browser"
         url={typeof svg.route === "string" ? svg.route : svg.route.light}
-        shortcut={{
-          modifiers: ["cmd"],
-          key: "o",
-        }}
+        shortcut={Keyboard.Shortcut.Common.Open}
       />
 
       <Action.OpenInBrowser
         title={`Visit ${svg.title} Website`}
         url={svg.url}
         shortcut={{
-          modifiers: ["cmd"],
-          key: "v",
+          macOS: { modifiers: ["cmd"], key: "v" },
+          Windows: { modifiers: ["ctrl"], key: "v" },
         }}
       />
 
-      <Action.OpenInBrowser
-        title={`Visit ${svg.title} Brand Website`}
-        url={svg.brandUrl}
-        shortcut={{
-          modifiers: ["cmd"],
-          key: "b",
-        }}
-      />
+      {svg.brandUrl && (
+        <Action.OpenInBrowser
+          title={`Visit ${svg.title} Brand Website`}
+          url={svg.brandUrl}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "b" },
+            Windows: { modifiers: ["ctrl"], key: "b" },
+          }}
+        />
+      )}
 
       <Action.OpenInBrowser
         title="Visit This Category in Svgl"
         url={`${APP_URL}/${category !== "All" ? `directory/${category.toLowerCase()}` : ""}`}
-        shortcut={{
-          modifiers: ["cmd"],
-          key: "s",
-        }}
+        shortcut={Keyboard.Shortcut.Common.Save}
       />
     </>
   );

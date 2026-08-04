@@ -1,18 +1,9 @@
-import { Action, Icon, Toast, showToast, Clipboard } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
 import { Svg } from "../../type";
-import { useSvglExtension } from "../app-context";
+import { useCopySvgUrlAction } from "../../hooks/use-svg-copy-action";
 
 const CopyWordmarkSvgUrlAction = ({ svg }: { svg: Svg }) => {
-  const { addRecentSvgId } = useSvglExtension();
-
-  const handleAction = (url: string, showContent: string) => {
-    addRecentSvgId(svg.id);
-    Clipboard.copy(url);
-    showToast({
-      style: Toast.Style.Success,
-      title: showContent,
-    });
-  };
+  const handleAction = useCopySvgUrlAction(svg.id);
 
   if (typeof svg.wordmark === "string") {
     return (
@@ -25,6 +16,7 @@ const CopyWordmarkSvgUrlAction = ({ svg }: { svg: Svg }) => {
   }
 
   if (svg.wordmark !== undefined) {
+    const wordmark = svg.wordmark;
     return (
       <>
         <Action
@@ -32,7 +24,7 @@ const CopyWordmarkSvgUrlAction = ({ svg }: { svg: Svg }) => {
           title="Copy Light SVG Wordmark URL"
           onAction={() =>
             handleAction(
-              typeof svg.wordmark === "string" ? svg.wordmark : svg.wordmark?.light,
+              typeof wordmark === "string" ? wordmark : wordmark.light,
               "Copied Light SVG Wordmark URL to clipboard",
             )
           }
@@ -43,7 +35,7 @@ const CopyWordmarkSvgUrlAction = ({ svg }: { svg: Svg }) => {
           title="Copy Dark SVG Wordmark URL"
           onAction={() =>
             handleAction(
-              typeof svg.wordmark === "string" ? svg.wordmark : svg.wordmark?.dark,
+              typeof wordmark === "string" ? wordmark : wordmark.dark,
               "Copied Dark SVG Wordmark URL to clipboard",
             )
           }

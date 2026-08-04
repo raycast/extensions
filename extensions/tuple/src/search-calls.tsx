@@ -16,8 +16,8 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
 import { useState } from "react";
-import { GenerateCallMetadata, SummarizeCall } from "./call-ai";
-import { stripMatchMarkers } from "./lib/call";
+import { EditCallMetadata, SummarizeCall } from "./call-ai";
+import { CallDraft } from "./lib/ai";
 import { TupleErrorDetail, TupleErrorEmptyView } from "./lib/empty-state";
 import { tupleExecOptions, useTupleJson } from "./lib/hooks";
 import {
@@ -27,6 +27,7 @@ import {
   getBinaryPath,
   getConnectPrompt,
   stripAnsi,
+  stripMatchMarkers,
   toFtsQuery,
 } from "./lib/tuple";
 import { StoredCall, TranscriptMatch, TupleErrorKind } from "./lib/types";
@@ -176,8 +177,73 @@ function groupMatchesByCall(matches: TranscriptMatch[], calls: StoredCall[]): Ma
     .sort((a, b) => b.latest - a.latest);
 }
 
+/** "Summarize with AI" action. `title` is the display title shown in the pushed view. */
+function summarizeAction({
+  callId,
+  title,
+  onApplied,
+}: {
+  callId: string;
+  title: string;
+  onApplied: (applied: CallDraft) => void;
+}) {
+  return (
+    <Action.Push
+      key="summarize"
+      title="Summarize with AI"
+      icon={Icon.Stars}
+      shortcut={{ modifiers: ["cmd"], key: "j" }}
+      target={<SummarizeCall callId={callId} title={title} onApplied={onApplied} />}
+    />
+  );
+}
+
+/** "Edit Title & Summary" action. Seeds the form with the raw stored title (empty when none), not the
+ *  participant-derived display `title`, so editing never writes a fallback name back as a real title. */
+function editMetadataAction({ callId, title, storedTitle, summary, onApplied }: MetadataActionParams) {
+  return (
+    <Action.Push
+      key="edit-metadata"
+      title="Edit Title & Summary"
+      icon={Icon.Pencil}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+      target={
+        <EditCallMetadata callId={callId} title={title} draft={{ title: storedTitle, summary }} onApplied={onApplied} />
+      }
+    />
+  );
+}
+
+interface MetadataActionParams {
+  callId: string;
+  title: string;
+  storedTitle: string;
+  summary: string;
+  onApplied: (applied: CallDraft) => void;
+}
+
+/** The Summarize + Edit actions, ordered by intent: once a summary exists, editing it is the likelier
+ *  next step, so lead with Edit and demote regeneration; before then, Summarize is the only move. */
+function metadataActions(params: MetadataActionParams) {
+  const summarize = summarizeAction(params);
+  const edit = editMetadataAction(params);
+  return params.summary ? (
+    <>
+      {edit}
+      {summarize}
+    </>
+  ) : (
+    <>
+      {summarize}
+      {edit}
+    </>
+  );
+}
+
 function CallActions({ callId, call, onChange }: { callId: string; call?: StoredCall; onChange: () => void }) {
   const title = call ? callTitle(call) : "Call";
+  const storedTitle = call?.title?.trim() ?? "";
+  const summary = call?.summary?.trim() ?? "";
   return (
     <ActionPanel>
       <Action.Push
@@ -185,18 +251,7 @@ function CallActions({ callId, call, onChange }: { callId: string; call?: Stored
         icon={Icon.Text}
         target={<TranscriptDetail callId={callId} call={call} onChange={onChange} />}
       />
-      <Action.Push
-        title="Summarize with AI"
-        icon={Icon.Stars}
-        shortcut={{ modifiers: ["cmd"], key: "j" }}
-        target={<SummarizeCall callId={callId} title={title} onApplied={onChange} />}
-      />
-      <Action.Push
-        title="Generate Title & Summary…"
-        icon={Icon.Stars}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
-        target={<GenerateCallMetadata callId={callId} title={title} onApplied={onChange} />}
-      />
+      {metadataActions({ callId, title, storedTitle, summary, onApplied: onChange })}
       <Action
         title="Copy AI Context"
         icon={Icon.Clipboard}
@@ -244,8 +299,16 @@ function TranscriptDetail({ callId, call, onChange }: { callId: string; call?: S
   const fallbackTitle = call ? callTitle(call) : "Transcript";
   // Title/summary come from the (frozen) call prop, so hold them in state and update on apply —
   // there's no metadata hook on this view to revalidate, and the transcript text itself doesn't change.
-  const [title, setTitle] = useState(fallbackTitle);
+  // storedTitle is the call's raw title (empty when none); the displayed title falls back to participants.
+  const [storedTitle, setStoredTitle] = useState(call?.title?.trim() ?? "");
   const [summary, setSummary] = useState(call?.summary?.trim() ?? "");
+  const title = storedTitle || fallbackTitle;
+
+  const handleApplied = (applied: { title: string; summary: string }) => {
+    setStoredTitle(applied.title);
+    setSummary(applied.summary);
+    onChange?.();
+  };
 
   const { data, isLoading, error, revalidate } = useExec(getBinaryPath(), ["transcription", "show", callId], {
     ...tupleExecOptions(),
@@ -268,35 +331,7 @@ function TranscriptDetail({ callId, call, onChange }: { callId: string; call?: S
       markdown={buildTranscriptMarkdown(title, summary, data)}
       actions={
         <ActionPanel>
-          <Action.Push
-            title="Summarize with AI"
-            icon={Icon.Stars}
-            target={
-              <SummarizeCall
-                callId={callId}
-                title={title}
-                onApplied={(applied) => {
-                  setSummary(applied);
-                  onChange?.();
-                }}
-              />
-            }
-          />
-          <Action.Push
-            title="Generate Title & Summary…"
-            icon={Icon.Stars}
-            target={
-              <GenerateCallMetadata
-                callId={callId}
-                title={title}
-                onApplied={(applied) => {
-                  setTitle(applied.title || fallbackTitle);
-                  setSummary(applied.summary);
-                  onChange?.();
-                }}
-              />
-            }
-          />
+          {metadataActions({ callId, title, storedTitle, summary, onApplied: handleApplied })}
           <Action title="Copy AI Context" icon={Icon.Clipboard} onAction={() => copyAiContext(callId)} />
           <Action
             title="Export Transcript"

@@ -19,14 +19,14 @@ async function restorePresets(): Promise<Status[] | undefined> {
     const data = JSON.parse(content.toString());
     if (Array.isArray(data)) {
       const result: Status[] = [];
-      for (const d of data) {
-        const stat: Status = {
-          emoji: d.emoji || "",
-          message: d.message || "",
-          clear_status_after: d.clear_status_after || "",
+      for (const preset of data) {
+        const status: Status = {
+          emoji: preset.emoji || "",
+          message: preset.message || "",
+          clear_status_after: preset.clear_status_after || "",
         };
-        if (isValidStatus(stat)) {
-          result.push(stat);
+        if (isValidStatus(status)) {
+          result.push(status);
         }
       }
       return result;

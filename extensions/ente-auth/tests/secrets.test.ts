@@ -70,6 +70,32 @@ describe("parseSecrets", () => {
 			secret: "JBSWY3DPEHPK3PXP",
 		});
 	});
+
+	it("parses URLs with null period by using the default period", () => {
+		const url =
+			"otpauth://totp/user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=GitHub&algorithm=SHA1&digits=6&period=null";
+		const [secret] = parseSecrets([url]);
+
+		expect(secret).toMatchObject({
+			issuer: "GitHub",
+			algorithm: "SHA1",
+			digits: 6,
+			period: "30",
+		});
+	});
+
+	it("parses URLs with null algorithm, digits, and period by using defaults", () => {
+		const url =
+			"otpauth://totp/user@example.com?secret=JBSWY3DPEHPK3PXP&issuer=GitHub&algorithm=null&digits=null&period=null";
+		const [secret] = parseSecrets([url]);
+
+		expect(secret).toMatchObject({
+			issuer: "GitHub",
+			algorithm: "SHA1",
+			digits: 6,
+			period: "30",
+		});
+	});
 });
 
 describe("getSecrets", () => {

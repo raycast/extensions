@@ -68,7 +68,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://circleback.ai",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://app.circleback.ai/api/mcp"],
+      args: ["-y", "mcp-remote", "https://circleback.ai/api/mcp"],
     },
   },
   {
@@ -132,6 +132,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         GITLAB_PERSONAL_ACCESS_TOKEN: "<YOUR_TOKEN>",
         GITLAB_API_URL: "https://gitlab.com/api/v4", // Optional, for self-hosted instances
       },
+    },
+  },
+  {
+    name: "glif",
+    title: "Glif",
+    description:
+      "Glif is a media-generation agent: generate images, video, and audio, transcribe, and chain multi-step media workflows from natural language. Hosted remote server with OAuth sign-in.",
+    icon: "https://glif.app/glif-icon-512.png",
+    homepage: "https://glif.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://glif.app/api/mcp"],
     },
   },
   {
@@ -334,6 +346,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "webhound",
+    title: "Webhound",
+    description:
+      "Run private, budgeted reports and datasets with Hound, Webhound's research harness built with DeepSeek V4 Pro and GPT-5.4. The user's dollar budget controls research effort, and each connection authenticates to that user's own Webhound account through OAuth.",
+    icon: "https://www.webhound.ai/favicon.ico",
+    homepage: "https://github.com/WebhoundAI/webhound-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.webhound.ai/api/v2/mcp"],
+    },
+  },
+  {
     name: "sanity",
     title: "Sanity",
     description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
@@ -444,6 +468,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.thena.ai/sse"],
+    },
+  },
+  {
+    name: "trends-mcp",
+    title: "Trends MCP",
+    description:
+      "Live cross-platform trend data for AI agents. Query Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more: historical series, growth rates, and live leaderboards in one connection. Free API key at trendsmcp.ai.",
+    icon: "https://www.trendsmcp.ai/static/pages/trendsmcp/assets/trend.svg",
+    homepage: "https://trendsmcp.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.trendsmcp.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -715,6 +751,66 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.jellypod.com/mcp"],
     },
   },
+  {
+    name: "plori",
+    title: "plori",
+    description:
+      "Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups.",
+    icon: "https://plori.ai/icon-512.png",
+    homepage: "https://plori.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.plori.ai/mcp"],
+    },
+  },
+  {
+    name: "appwrite",
+    title: "Appwrite",
+    description:
+      "The official Appwrite MCP server lets AI assistants securely inspect and manage Appwrite projects and resources through Appwrite's API.",
+    icon: "https://mcp.appwrite.io/favicon.svg",
+    homepage: "https://github.com/appwrite/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.appwrite.io/"],
+    },
+  },
+  {
+    name: "agentcard",
+    title: "Agentcard",
+    description:
+      "Prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Connects to the remote Agentcard MCP server over OAuth 2.0.",
+    icon: "https://www.agentcard.sh/logo-icon.png",
+    homepage: "https://agentcard.sh",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.agentcard.sh/mcp"],
+    },
+  },
+  {
+    name: "usemycontext",
+    title: "UseMyContext",
+    description:
+      "The personal context layer for AI: one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. Tools for profile, file search and reads, cited answers from your documents, and exact table queries. Connects to the remote UseMyContext server over OAuth 2.1.",
+    icon: "usemycontext.svg",
+    homepage: "https://usemycontext.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.usemycontext.ai/mcp"],
+    },
+  },
+  {
+    name: "jobyap",
+    title: "JobYap",
+    description:
+      "Search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server; no auth required.",
+    icon: "https://raw.githubusercontent.com/jobyap/agent-skills/main/assets/logo.png",
+    homepage: "https://jobyap.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jobyap.com/mcp"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
@@ -902,6 +998,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "memo",
+    title: "memo",
+    description:
+      "Local-first persistent memory for AI agents. MLX embeddings on Apple Silicon (CPU fallback elsewhere), sqlite-vec + BM25 hybrid search, and markdown-on-disk storage compatible with Obsidian. No cloud APIs or accounts required.",
+    icon: "https://raw.githubusercontent.com/jagoff/memo/master/docs/logo-400.png",
+    homepage: "https://github.com/jagoff/memo",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "mlx-memo", "memo-mcp"],
+    },
+  },
+  {
     name: "monday",
     title: "Monday",
     description:
@@ -915,6 +1023,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         MONDAY_API_KEY: "your-monday-api-key",
         MONDAY_WORKSPACE_NAME: "your-monday-workspace-name",
       },
+    },
+  },
+  {
+    name: "nika",
+    title: "Nika",
+    description:
+      "Nika is a workflow language for AI — one file, four verbs, one Rust binary. Its MCP server is a read-only oracle: agents validate workflows (nika_check, nika_explain) and learn the language (schema, templates, examples, catalogs) without executing anything. Running stays on the CLI, budget-capped and trace-verified — inspect freely, execute deliberately.",
+    icon: "https://github.com/supernovae-st.png",
+    homepage: "https://github.com/supernovae-st/nika",
+    configuration: {
+      command: "nika",
+      args: ["mcp"],
     },
   },
   {

@@ -1,6 +1,8 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
 import { Quote } from "./yahoo-finance";
 import { FavoritesStore } from "./favorites-store";
+import { MenuBarStore } from "./menubar-store";
+import { MenuBarAddRemoveAction } from "./menubar-actions";
 import StockListItem from "./stock-list-item";
 import { formatTime } from "./utils";
 
@@ -8,11 +10,15 @@ export default function FavoritesList({
   favorites,
   favoriteSymbols,
   favoritesStore,
+  menuBarSymbols,
+  menuBarStore,
   lastUpdated,
 }: {
   favorites: Quote[];
   favoriteSymbols: string[];
   favoritesStore: FavoritesStore;
+  menuBarSymbols: string[];
+  menuBarStore: MenuBarStore;
   lastUpdated: Date | null;
 }) {
   return (
@@ -21,7 +27,16 @@ export default function FavoritesList({
         <StockListItem
           key={quote.symbol}
           quote={quote}
-          actions={<FavouritesActions favorites={favoriteSymbols} quote={quote} favoritesStore={favoritesStore} />}
+          isInMenuBar={!!quote.symbol && menuBarSymbols.includes(quote.symbol)}
+          actions={
+            <FavouritesActions
+              favorites={favoriteSymbols}
+              quote={quote}
+              favoritesStore={favoritesStore}
+              menuBarSymbols={menuBarSymbols}
+              menuBarStore={menuBarStore}
+            />
+          }
         />
       ))}
     </List.Section>
@@ -32,9 +47,11 @@ interface FavouritesActionsProps {
   favorites: string[];
   quote: Quote;
   favoritesStore: FavoritesStore;
+  menuBarSymbols: string[];
+  menuBarStore: MenuBarStore;
 }
 
-function FavouritesActions({ favorites, quote, favoritesStore }: FavouritesActionsProps) {
+function FavouritesActions({ favorites, quote, favoritesStore, menuBarSymbols, menuBarStore }: FavouritesActionsProps) {
   return (
     <ActionPanel.Section>
       <Action
@@ -50,6 +67,7 @@ function FavouritesActions({ favorites, quote, favoritesStore }: FavouritesActio
         onAction={() => favoritesStore.moveDown(quote.symbol!)}
       />
       <FavoritesAddRemoveAction favorites={favorites} favoritesStore={favoritesStore} symbol={quote.symbol!} />
+      <MenuBarAddRemoveAction menuBarSymbols={menuBarSymbols} menuBarStore={menuBarStore} symbol={quote.symbol!} />
     </ActionPanel.Section>
   );
 }

@@ -327,8 +327,8 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action.Open title="Open" target={filepath} />
-                <Action.OpenWith path={filepath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                 <Action.ShowInFinder title="Show in Finder" path={filepath} />
+                <Action.OpenWith path={filepath} shortcut={{ modifiers: ["cmd"], key: "o" }} />
                 <Action.CopyToClipboard
                   title="Copy Path to Clipboard"
                   content={filepath}

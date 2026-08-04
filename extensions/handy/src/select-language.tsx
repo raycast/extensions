@@ -10,7 +10,7 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { getLanguagesForModel, LanguageOption } from "./lib/languages";
-import { MODEL_REGISTRY } from "./lib/models";
+import { getModelCapabilities } from "./lib/catalog";
 import { readSettings, writeSettings } from "./lib/settings";
 
 export default function SelectLanguage() {
@@ -22,19 +22,19 @@ export default function SelectLanguage() {
     try {
       const settings = readSettings();
       const modelId = settings.selected_model;
-      const model = MODEL_REGISTRY.find((m) => m.id === modelId);
+      const caps = getModelCapabilities(modelId);
 
-      // Model found and explicitly does not support language selection
-      if (model && !model.supportsLanguageSelection) {
+      // Model found in the catalog and explicitly does not support language selection
+      if (caps && !caps.supportsLanguageSelection) {
         void showToast({
           style: Toast.Style.Failure,
-          title: `${model.name} does not support language selection`,
+          title: `${caps.name} does not support language selection`,
         });
         void closeMainWindow(); // closeMainWindow returns Promise<void>; void to avoid floating promise in sync callback
         return; // leave isLoading=true so no empty view renders before close
       }
 
-      setLanguages(getLanguagesForModel(model?.supportedLanguages));
+      setLanguages(getLanguagesForModel(caps?.supportedLanguages));
       setCurrentCode(settings.selected_language ?? "auto");
       setIsLoading(false);
     } catch (err) {

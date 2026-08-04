@@ -8,6 +8,7 @@
     "strict": true,
     "jsx": "react-jsx",
     "moduleResolution": "node",
+    "types": ["node", "react"],
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

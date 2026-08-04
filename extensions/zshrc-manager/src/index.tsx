@@ -12,7 +12,6 @@ import Setopts from "./setopts";
 import PathEntries from "./path-entries";
 import FpathEntries from "./fpath-entries";
 import Keybindings from "./keybindings";
-import GlobalSearch from "./global-search";
 import HealthCheck from "./health-check";
 import BackupManager from "./backup-manager";
 import BrowseAliases from "./browse-aliases";
@@ -22,7 +21,6 @@ import BrowseAliases from "./browse-aliases";
  */
 type ViewType =
   | "statistics"
-  | "search"
   | "health"
   | "backup"
   | "browse-aliases"
@@ -42,7 +40,7 @@ type ViewType =
  * Unified command for managing zshrc configuration
  *
  * Provides a single command with a dropdown to switch between different views:
- * - Statistics: Overview of all configuration
+ * - Statistics: Overview of all configuration, with cross-type search built in
  * - Sections: Browse sections
  * - Aliases: Manage aliases
  * - Exports: Manage exports
@@ -63,7 +61,6 @@ export default function ZshrcManager() {
     >
       <List.Dropdown.Section title="Overview">
         <List.Dropdown.Item title="📊 Statistics" value="statistics" />
-        <List.Dropdown.Item title="🔍 Global Search" value="search" />
         <List.Dropdown.Item title="🩺 Health Check" value="health" />
         <List.Dropdown.Item title="💾 Backup Manager" value="backup" />
         <List.Dropdown.Item title="📚 Browse Alias Collections" value="browse-aliases" />
@@ -88,8 +85,6 @@ export default function ZshrcManager() {
     switch (selectedView) {
       case "statistics":
         return <ZshrcStatistics searchBarAccessory={viewDropdown} />;
-      case "search":
-        return <GlobalSearch searchBarAccessory={viewDropdown} />;
       case "health":
         return <HealthCheck searchBarAccessory={viewDropdown} />;
       case "backup":

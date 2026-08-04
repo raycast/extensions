@@ -14,7 +14,7 @@ Search and manage your Vesslo app library directly from Raycast.
 
 - 🔍 **Search Apps** - Find apps by name, developer, tag, or memo
 - 🔄 **View Updates** - Check for pending updates (Homebrew, Sparkle, App Store, Manual)
-- 🍺 **Bulk Update** - Update all Homebrew cask apps at once
+- 🍺 **Bulk Update** - Update eligible Homebrew cask apps from Vesslo's update export
 - 🏷️ **Browse by Tag** - Explore apps organized by your tags
 - 🔗 **Deep Integration** - Open in Vesslo, Finder, or launch directly
 
@@ -31,17 +31,26 @@ Quickly find apps in your Vesslo library with flexible filtering options.
 - **Visuals**: Icons indicate matched fields
 
 ### 🔄 View Updates
-Check all available updates across different sources with Vesslo integration.
-- **Sources**: Homebrew, Sparkle, App Store
-- **Actions**: Update via Vesslo Deep Link (Recommended), Direct execution, or Terminal
+Check available updates across different sources with Vesslo integration.
+- **Sources**: Homebrew, Sparkle, App Store, Manual
+- **Source Priority** (grouped view): Homebrew > Sparkle > App Store > Manual
+- **Actions**: Update in Vesslo, Open in App Store, Direct execution, or Terminal when supported
+
+| Action | Shortcut |
+|--------|----------|
+| Homebrew Quick Update | `⌘⇧↩` |
+| Homebrew Update via Terminal | `⌘⇧T` |
+| Open in App Store | `⌘⇧O` |
+| App Store Update via Terminal (mas) | `⌘⇧M` |
 
 ### 🏷️ Browse by Tag
 Organize and explore your app collection by custom tags.
 
 ### 🍺 Bulk Homebrew Update
-Update all Homebrew cask applications safely using Vesslo's batch update workflow.
-- **Default**: Triggers `vesslo://update-all` for a unified update experience
-- **Alternatives**: Direct Raycast execution or Terminal mode available via Action Panel
+Update eligible Homebrew cask applications safely from Vesslo's visible update export.
+- **Default**: Runs only valid, unique Homebrew cask tokens exported by Vesslo as Homebrew update candidates
+- **Per App**: Open the update in Vesslo, run a direct Homebrew update, or open the command in Terminal
+- **Safety**: Deleted, skipped, ignored, non-Homebrew, and invalid-cask entries are excluded
 
 ## License
 

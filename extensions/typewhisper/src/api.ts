@@ -54,31 +54,17 @@ export function getBaseUrl(): string {
   return `http://127.0.0.1:${discoverPort()}`;
 }
 
-async function request<T>(
-  method: string,
-  path: string,
-  params?: Record<string, string>,
-  body?: unknown,
+async function fetchJson<T>(
+  url: URL,
+  init: RequestInit,
+  timeoutMessage: string,
 ): Promise<T> {
-  const baseUrl = getBaseUrl();
-  const url = new URL(path, baseUrl);
-  if (params) {
-    for (const [key, value] of Object.entries(params)) {
-      url.searchParams.set(key, value);
-    }
-  }
-
   let response: Response;
   try {
-    response = await fetch(url.toString(), {
-      method,
-      headers: body ? { "Content-Type": "application/json" } : undefined,
-      body: body ? JSON.stringify(body) : undefined,
-      signal: AbortSignal.timeout(TIMEOUT_MS),
-    });
+    response = await fetch(url.toString(), init);
   } catch (error) {
     if (error instanceof DOMException && error.name === "TimeoutError") {
-      throw new TypeWhisperError("Request timed out. Is TypeWhisper running?");
+      throw new TypeWhisperError(timeoutMessage);
     }
     throw new TypeWhisperError(
       "Cannot connect to TypeWhisper. Make sure the app is running and the API server is enabled in Settings > Advanced.",
@@ -97,6 +83,32 @@ async function request<T>(
   }
 
   return (await response.json()) as T;
+}
+
+async function request<T>(
+  method: string,
+  path: string,
+  params?: Record<string, string>,
+  body?: unknown,
+): Promise<T> {
+  const baseUrl = getBaseUrl();
+  const url = new URL(path, baseUrl);
+  if (params) {
+    for (const [key, value] of Object.entries(params)) {
+      url.searchParams.set(key, value);
+    }
+  }
+
+  return fetchJson<T>(
+    url,
+    {
+      method,
+      headers: body ? { "Content-Type": "application/json" } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(TIMEOUT_MS),
+    },
+    "Request timed out. Is TypeWhisper running?",
+  );
 }
 
 export async function apiGet<T>(
@@ -131,32 +143,13 @@ export async function apiPostMultipart<T>(
   const baseUrl = getBaseUrl();
   const url = new URL(path, baseUrl);
 
-  let response: Response;
-  try {
-    response = await fetch(url.toString(), {
+  return fetchJson<T>(
+    url,
+    {
       method: "POST",
       body: formData,
       signal: AbortSignal.timeout(60000),
-    });
-  } catch (error) {
-    if (error instanceof DOMException && error.name === "TimeoutError") {
-      throw new TypeWhisperError("Transcription timed out.");
-    }
-    throw new TypeWhisperError(
-      "Cannot connect to TypeWhisper. Make sure the app is running and the API server is enabled in Settings > Advanced.",
-    );
-  }
-
-  if (!response.ok) {
-    let message = `HTTP ${response.status}`;
-    try {
-      const errorBody = (await response.json()) as ApiError;
-      message = errorBody.error?.message || message;
-    } catch {
-      // ignore parse errors
-    }
-    throw new TypeWhisperError(message, response.status);
-  }
-
-  return (await response.json()) as T;
+    },
+    "Transcription timed out.",
+  );
 }

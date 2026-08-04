@@ -13,8 +13,8 @@ The Jira extension supports OAuth authentication by default. But if you want, yo
 
 You can change the default `Git branch name` in preferences; the following keys are available:
 
-* {issueKey}
-* {issueSummary}
-* {issueSummaryShort}
-* {issueType}
-* {projectKey}
+- {issueKey}
+- {issueSummary}
+- {issueSummaryShort}
+- {issueType}
+- {projectKey}

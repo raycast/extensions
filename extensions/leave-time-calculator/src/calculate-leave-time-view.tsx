@@ -13,7 +13,8 @@ import { buildLeaveStatus, formatRemainingLabel } from "./lib/leave-status";
 import { getWorkPreferences } from "./lib/preferences";
 import {
   clearTodayStartTime,
-  getTodayStartTime,
+  getTodayShift,
+  type SavedShift,
   setTodayStartTime,
 } from "./lib/storage";
 import { calculateLeaveTime, formatTimeString } from "./lib/time-utils";
@@ -51,16 +52,16 @@ async function refreshTopCommandSubtitle() {
 export default function Command() {
   const { workHours, breakMinutes } = getWorkPreferences();
 
-  const [todayStart, setTodayStart] = useState<string | null>(null);
+  const [todayShift, setTodayShift] = useState<SavedShift | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
 
   useEffect(() => {
-    getTodayStartTime().then((time) => {
-      setTodayStart(time);
+    getTodayShift(workHours, breakMinutes).then((shift) => {
+      setTodayShift(shift);
       setIsLoading(false);
     });
-  }, []);
+  }, [workHours, breakMinutes]);
 
   // Current time (updated every minute — display is HH:MM precision)
   const [currentTime, setCurrentTime] = useState(getCurrentTimeString);
@@ -68,19 +69,20 @@ export default function Command() {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(getCurrentTimeString());
+      getTodayShift(workHours, breakMinutes).then(setTodayShift);
     }, 60000);
     return () => clearInterval(interval);
-  }, []);
+  }, [workHours, breakMinutes]);
 
   const handleSelect = async (startTime: string) => {
-    await setTodayStartTime(startTime);
-    setTodayStart(startTime);
+    const savedShift = await setTodayStartTime(startTime);
+    setTodayShift(savedShift);
     await refreshTopCommandSubtitle();
   };
 
   const handleClear = async () => {
     await clearTodayStartTime();
-    setTodayStart(null);
+    setTodayShift(null);
     await refreshTopCommandSubtitle();
   };
 
@@ -97,8 +99,14 @@ export default function Command() {
   const customTime = parseCustomTime(searchText);
 
   // Calculate today's leave time and remaining time
-  const todayStatus = todayStart
-    ? buildLeaveStatus(todayStart, workHours, breakMinutes, currentTime)
+  const todayStatus = todayShift
+    ? buildLeaveStatus(
+        todayShift.startTime,
+        workHours,
+        breakMinutes,
+        currentTime,
+        todayShift.startDate,
+      )
     : null;
   const leaveTime = todayStatus?.leaveTime ?? null;
   const remaining = todayStatus?.remaining ?? null;
@@ -114,7 +122,7 @@ export default function Command() {
       onSearchTextChange={setSearchText}
     >
       {/* Today's schedule (if set) */}
-      {todayStart && leaveTime && remaining && (
+      {todayShift && leaveTime && remaining && (
         <List.Section title="📅 Today">
           <List.Item
             key={`today-${currentTime}`}
@@ -125,7 +133,12 @@ export default function Command() {
               tintColor: remaining.isPast ? Color.Orange : Color.Blue,
             }}
             accessories={[
-              { tag: { value: todayStart, color: Color.SecondaryText } },
+              {
+                tag: {
+                  value: todayShift.startTime,
+                  color: Color.SecondaryText,
+                },
+              },
               {
                 tag: {
                   value: `Work ${workHours}h Break ${breakMinutes}m`,
@@ -214,7 +227,7 @@ export default function Command() {
             breakMinutes,
             currentTime,
           ).remaining;
-          const isSelected = time === todayStart;
+          const isSelected = time === todayShift?.startTime;
 
           return (
             <List.Item

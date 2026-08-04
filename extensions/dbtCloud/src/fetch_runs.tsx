@@ -1,28 +1,28 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
-import fetch from "node-fetch";
-import { RunsFetchResponse, Preferences } from "./types";
+import { getPreferenceValues } from "@raycast/api";
+import { dbtV2Response, RunsFetchResponse } from "./types";
 
-const preferences: Preferences = getPreferenceValues();
+const preferences = getPreferenceValues<Preferences>();
 const token = preferences.dbtCloudAPIToken;
 const account_id = preferences.dbtCloudAcountID;
+const account_prefix = preferences.dbtCloudAcountPrefix;
 
 export const returnRuns = async (): Promise<RunsFetchResponse> => {
-  try {
-    const response = await fetch(
-      `https://cloud.getdbt.com/api/v2/accounts/${account_id}/runs?order_by=-finished_at&include_related=["job"]`,
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Token ${token}`,
-        },
-      }
+  if (preferences.dbtCloudEndpoint.includes("{account_prefix}") && !account_prefix) {
+    throw new Error(
+      "The selected endpoint requires a dbt Cloud Account Prefix. Please set it in the extension preferences.",
     );
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const json: any = await response.json();
-    return json["data"] as RunsFetchResponse;
-  } catch (error) {
-    showToast(Toast.Style.Failure, "An error occured", "Could not fetch API, check your credentials");
-    return Promise.resolve([]);
   }
+  const endpoint = preferences.dbtCloudEndpoint.replace("{account_prefix}", account_prefix ?? "");
+  const response = await fetch(
+    `${endpoint}/api/v2/accounts/${account_id}/runs?order_by=-finished_at&include_related=["job"]`,
+    {
+      method: "GET",
+      headers: {
+        Authorization: `Token ${token}`,
+      },
+    },
+  );
+  const json = (await response.json()) as dbtV2Response<RunsFetchResponse>;
+  if (!json.status.is_success) throw new Error(json.status.user_message || response.statusText);
+  return json.data;
 };

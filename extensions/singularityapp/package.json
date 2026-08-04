@@ -64,6 +64,12 @@
       "title": "Add Task",
       "description": "Create a new task in SingularityApp",
       "mode": "view"
+    },
+    {
+      "name": "zen-mode",
+      "title": "Zen Mode",
+      "description": "Focus on one random non-repeating task from a selected bucket.",
+      "mode": "view"
     }
   ],
   "preferences": [

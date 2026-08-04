@@ -5,8 +5,8 @@ import { formatDate } from "../utils";
 
 export function ListComputes({ projectId, branchId }: { projectId: string; branchId: string }) {
   const { isLoading, data: endpoints } = usePromise(async () => {
-    const res = await neon.listProjectBranchEndpoints(projectId, branchId);
-    return res.data.endpoints;
+    const res = await neon.postgres.endpoints.listByBranch(projectId, branchId);
+    return res;
   });
   return (
     <List isLoading={isLoading}>

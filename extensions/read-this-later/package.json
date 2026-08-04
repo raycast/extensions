@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "read-this-later",
+  "title": "Research Sync",
+  "description": "Browse and read your saved articles, and save the current browser tab.",
+  "icon": "icon.png",
+  "author": "shearm",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "commands": [
+    {
+      "name": "list-unread",
+      "title": "Show Saved Links",
+      "subtitle": "Research Sync",
+      "description": "Browse your saved articles, read them, and open them in your browser",
+      "mode": "view"
+    },
+    {
+      "name": "save-current-tab",
+      "title": "Save Current Tab",
+      "subtitle": "Research Sync",
+      "description": "Save the URL of the frontmost browser tab to Research Sync",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "syncToken",
+      "title": "Sync Token",
+      "description": "Bearer token for the Research Sync service (the same token your browser extension and iOS app use).",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0",
+    "dompurify": "^3.4.12",
+    "linkedom": "^0.18.13",
+    "turndown": "^7.2.4",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.3",
+    "@types/turndown": "^5.0.6",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.4.5",
+    "vitest": "^2.1.9"
+  },
+  "overrides": {
+    "@types/react": "$@types/react"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

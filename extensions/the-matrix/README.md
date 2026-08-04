@@ -12,6 +12,7 @@ The overlay is a native macOS window that stays above your desktop, ignores mous
 ## Preferences
 
 - **Audio enabled** controls enter, ambient, and exit sounds.
+- **Speed (ms)** controls the Matrix rain update interval. Enter a whole number from 10 to 200; lower is faster.
 
 ## Notes
 

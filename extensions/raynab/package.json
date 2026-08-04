@@ -122,7 +122,7 @@
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^3.4.2",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.9"
+    "vitest": "^4.1.10"
   },
   "preferences": [
     {

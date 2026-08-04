@@ -1,4 +1,5 @@
 import { gitlab } from "../common";
+import { fetchMergeRequestGqlByProjectIdIid } from "../components/mr_gql";
 
 type Input = {
   projectId: number;
@@ -14,12 +15,15 @@ type Input = {
 };
 
 export async function confirmation({ projectId, mergeRequestIid, squash, shouldRemoveSourceBranch }: Input) {
-  const mr = await gitlab.getMergeRequest(projectId, mergeRequestIid, {});
+  const mergeRequest = await fetchMergeRequestGqlByProjectIdIid(projectId, mergeRequestIid);
 
   return {
     message: `Are you sure you want to merge the merge request?`,
     info: [
-      { name: "Merge Request", value: `${mr.reference_full || `!${mr.iid}`}: ${mr.title}` },
+      {
+        name: "Merge Request",
+        value: `${mergeRequest.reference_full || `!${mergeRequest.iid}`}: ${mergeRequest.title}`,
+      },
       ...(squash !== undefined ? [{ name: "Squash", value: String(squash) }] : []),
       ...(shouldRemoveSourceBranch !== undefined
         ? [{ name: "Remove Source Branch", value: String(shouldRemoveSourceBranch) }]

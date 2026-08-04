@@ -1,5 +1,8 @@
 # Pipedrive Changelog
 
+## [Copy Deal Email Action] - 2026-07-15
+   - Add "Copy Deal Email" action to deal search results and deal detail view
+
 ## [Create & Edit Deals, Contacts, Organizations] - 2025-12-28
 
 ### New Features

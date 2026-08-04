@@ -33,75 +33,56 @@ export interface StoredCall {
 }
 
 /**
- * The active call, as returned by both `tuple call current` and `state.current_call`
- * (confirmed against a live call). Mute state lives in `local.audio_enabled` (false = muted)
- * and the people in the call are `room.members` whose `presence[].value` is "in-call".
- * Fields are optional and the index signature tolerates the parts we do not model.
+ * The active call, normalized by `tuple call current --format json`. The CLI
+ * reconciles the direct-call and room-based shapes into one flat roster:
+ * `participants` is the other people (the local user is already excluded),
+ * `muted` is the local mic state, `transcribing` is whether the local user is
+ * recording the call, and `active_room_slug` is the room slug for room-based
+ * calls (null for direct calls). The command exits non-zero when there is no
+ * active call, so consumers handle absence via the NoActiveCall error rather
+ * than a null payload.
  */
-export interface RoomMemberPresence {
-  value?: string;
+export interface CallView {
+  call_id: string;
+  muted: boolean;
+  transcribing: boolean;
+  active_room_slug: string | null;
+  participants: CallViewParticipant[];
 }
 
-export interface RoomMember {
-  id?: number;
-  email?: string;
-  full_name?: string;
-  short_name?: string;
-  status?: string;
-  presence?: RoomMemberPresence[];
-}
-
-/** A connected participant in a direct (non-room) call — the top-level `participants` entries. */
-export interface ActiveParticipant {
-  id?: number;
-  full_name?: string;
-  short_name?: string;
-  email?: string;
-  audio_enabled?: boolean;
-  connection_state?: string;
-}
-
-export interface CurrentCall {
-  id?: string;
-  started_at?: number;
-  local?: { audio_enabled?: boolean; webcam_enabled?: boolean; connection_state?: string };
-  /** Direct-call participants (the other people; the local user is in `local`, not here). */
-  participants?: ActiveParticipant[];
-  /** Room-based calls list people here instead, with presence "in-call" (includes the local user). */
-  room?: { state?: string; members?: RoomMember[]; url?: { slug?: string; http_value?: string } };
-  /** The local user's transcription lifecycle (per-participant feature); `state === "on"` means you're transcribing. */
-  recorder?: { state?: string; has_model?: boolean };
-}
-
-export interface CurrentUser {
+export interface CallViewParticipant {
   id: number;
+  /** Display name: full name, falling back to short name. */
+  name: string;
   email: string;
+  /** Per-participant mute, when the wire shape carries it (null for room-based calls). */
+  muted: boolean | null;
+  connection_state: string | null;
+}
+
+export type RoomKind = "personal" | "team";
+
+/** A person currently present in a room, from `tuple rooms list`. */
+export interface RoomMember {
+  id: number;
   full_name: string;
-  short_name: string;
+  email: string;
 }
 
-/** A Tuple room. `state.rooms` members are the people currently in that room. */
+/**
+ * A Tuple room from `tuple rooms list --format json`, which returns one flat,
+ * `kind`-tagged list rather than a personal/team split. `members` are the people
+ * currently in the room; `active_call` is set server-side when the user's current
+ * call is in this room.
+ */
 export interface Room {
-  id?: number;
   slug: string;
+  name: string;
   http_value: string;
-  name?: string | null;
-  favorited?: boolean;
-  created_at?: string;
-  members?: RoomMember[];
-}
-
-export interface TupleRooms {
-  personal?: Room[];
-  team?: Room[];
-}
-
-/** Top-level `tuple state --format json` payload (subset we consume). */
-export interface TupleState {
-  current_call?: CurrentCall | null;
-  current_user?: CurrentUser;
-  contacts?: Contact[];
-  rooms?: TupleRooms;
+  favorited: boolean;
+  members: RoomMember[];
+  kind: RoomKind;
+  active_call: boolean;
 }
 
 /** One full-text search hit, from `tuple transcription search --format json`. */

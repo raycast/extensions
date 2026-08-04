@@ -92,11 +92,7 @@ function DocItem({ doc }: { doc: Doc }) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.CreateQuicklink
-              icon={Icon.Link}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
-              quicklink={quicklink}
-            />
+            <Action.CreateQuicklink icon={Icon.Link} shortcut={Keyboard.Shortcut.Common.Save} quicklink={quicklink} />
             <Action.CopyToClipboard content={doc.slug} shortcut={Keyboard.Shortcut.Common.CopyName} />
           </ActionPanel.Section>
           <ActionPanel.Section>

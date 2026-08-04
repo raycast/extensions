@@ -1,6 +1,11 @@
 # Night Light Changelog
 
+## [Fix Color Temperature Not Applying] - 2026-07-15
+
+- Fixed the "Change Night Shift Color Temperature" command not applying the temperature because the view was dismissed (`popToRoot`/`closeMainWindow`) before the `nightlight` CLI command executed. The command now runs before the window is dismissed.
+
 ## [Add Custom Path] - 2023-11-25
+
 - Support custom installation path
 
 ## [Add Extension Preferences] - 2023-06-01

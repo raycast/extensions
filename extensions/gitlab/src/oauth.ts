@@ -1,7 +1,7 @@
 import { OAuth } from "@raycast/api";
 import fetch from "node-fetch";
 import { getHttpAgent } from "./gitlabapi";
-import { getInstance, getPrefs, OAUTH_SCOPES, requireOAuthClientId } from "./preferences";
+import { getInstance, getPreferences, OAUTH_SCOPES, requireOAuthClientId } from "./utils";
 
 // We don't use `@raycast/utils`'s `OAuthService`: it has no hook for injecting
 // an `https.Agent`, which the `customcacert`, `customcert`, and `ignorecerts`
@@ -86,10 +86,10 @@ function runAuthorizationFlow(): Promise<string> {
   if (inflightAuthorizationFlow) return inflightAuthorizationFlow;
   inflightAuthorizationFlow = (async () => {
     try {
-      const prefs = getPrefs();
-      const clientId = requireOAuthClientId(prefs);
+      const preference = getPreferences();
+      const clientId = requireOAuthClientId(preference);
       const authRequest = await client.authorizationRequest({
-        endpoint: `${getInstance(prefs)}/oauth/authorize`,
+        endpoint: `${getInstance(preference)}/oauth/authorize`,
         clientId,
         scope: OAUTH_SCOPES.join(" "),
       });

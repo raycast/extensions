@@ -13,12 +13,12 @@ const periods = [
 ];
 
 export default function Command() {
-  const apiKey = getPreferenceValues()?.api_key;
+  const apiKey = getPreferenceValues<Preferences>().api_key;
 
   const [period, setPeriod] = useState("1");
 
   const { isLoading, data, revalidate } = useFetch<NYTPopularResult>(
-    `https://api.nytimes.com/svc/mostpopular/v2/viewed/${period}.json?api-key=${apiKey}`
+    `https://api.nytimes.com/svc/mostpopular/v2/viewed/${period}.json?api-key=${apiKey}`,
   );
 
   return (

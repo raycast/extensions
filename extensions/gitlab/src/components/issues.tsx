@@ -1,24 +1,21 @@
 import { Action, ActionPanel, List, Color, Detail, Image, Icon } from "@raycast/api";
 import { gql } from "@apollo/client";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { usePromise } from "@raycast/utils";
 import { getGitLabGQL, gitlab } from "../common";
 import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import {
   capitalizeFirstLetter,
   formatDate,
-  getErrorMessage,
-  now,
+  formatDateTime,
   optimizeMarkdownText,
   Query,
-  showErrorToast,
   tokenizeQueryText,
-  toLongDateString,
 } from "../utils";
 import { IssueItemActions } from "./issue_actions";
 import { GitLabOpenInBrowserAction } from "./actions";
-import { userIcon } from "./users";
-import { CacheActionPanelSection } from "./cache_actions";
+import { userIcon, userTagOnAction } from "./users";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -48,10 +45,7 @@ export function IssueListEmptyView() {
 }
 
 export function IssueDetailFetch(props: { project: Project; issueId: number }) {
-  const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
-  if (error) {
-    showErrorToast(error, "Could not fetch Issue Details");
-  }
+  const { issue, isLoading } = useIssue(props.project.id, props.issueId);
   if (isLoading || !issue) {
     return <Detail isLoading={isLoading} />;
   } else {
@@ -64,66 +58,82 @@ interface IssueDetailData {
   projectWebUrl?: string;
 }
 
-function stateColor(state: string): Color.ColorLike {
-  return state === "closed" ? "red" : "green";
-}
-
 export function IssueDetail(props: { issue: Issue }) {
-  const issue = props.issue;
-  const { issueDetail, error, isLoading } = useDetail(props.issue.id);
-  if (error) {
-    showErrorToast(error, "Could not get Issue Details");
-  }
-
-  const desc = (issueDetail?.description ? issueDetail.description : props.issue.description) || "";
-
-  const lines: string[] = [];
-  if (issue) {
-    lines.push(`# ${issue.title}`);
-    lines.push(optimizeMarkdownText(desc, issueDetail?.projectWebUrl));
-  }
-  const md = lines.join("  \n");
+  const { issueDetail, isLoading } = useDetail(props.issue.id);
+  const markdown = useMemo(
+    () =>
+      [
+        `# ${props.issue.title}`,
+        optimizeMarkdownText(
+          (issueDetail?.description ? issueDetail.description : props.issue.description) || "",
+          issueDetail?.projectWebUrl,
+          props.issue.project_id,
+        ),
+      ].join("  \n"),
+    [
+      issueDetail?.description,
+      issueDetail?.projectWebUrl,
+      props.issue.description,
+      props.issue.project_id,
+      props.issue.title,
+    ],
+  );
 
   return (
     <Detail
-      markdown={md}
+      markdown={markdown}
       isLoading={isLoading}
       navigationTitle={`${props.issue.reference_full}`}
       actions={
         <ActionPanel>
           <GitLabOpenInBrowserAction url={props.issue.web_url} />
           <IssueItemActions issue={props.issue} />
-          <Action.CopyToClipboard title="Copy Issue Description" content={issue.description} />
+          <Action.CopyToClipboard title="Copy Issue Description" content={props.issue.description} />
         </ActionPanel>
       }
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item text={capitalizeFirstLetter(issue.state)} color={stateColor(issue.state)} />
+            <Detail.Metadata.TagList.Item
+              text={capitalizeFirstLetter(props.issue.state)}
+              color={props.issue.state === "closed" ? "red" : "green"}
+            />
           </Detail.Metadata.TagList>
-          {issue.author && (
+          {props.issue.author && (
             <Detail.Metadata.TagList title="Author">
-              <Detail.Metadata.TagList.Item key={issue.id} text={issue.author.name} icon={userIcon(issue.author)} />
+              <Detail.Metadata.TagList.Item
+                key={props.issue.id}
+                text={props.issue.author.name}
+                icon={userIcon(props.issue.author)}
+                onAction={userTagOnAction(props.issue.author)}
+              />
             </Detail.Metadata.TagList>
           )}
           <Detail.Metadata.TagList title="Assignee">
-            {issue.assignees.length > 0 ? (
-              issue.assignees.map((a) => <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />)
+            {props.issue.assignees.length > 0 ? (
+              props.issue.assignees.map((assignee) => (
+                <Detail.Metadata.TagList.Item
+                  key={assignee.id}
+                  text={assignee.name}
+                  icon={userIcon(assignee)}
+                  onAction={userTagOnAction(assignee)}
+                />
+              ))
             ) : (
               <Detail.Metadata.TagList.Item text="-" />
             )}
           </Detail.Metadata.TagList>
-          {issue.created_at && <Detail.Metadata.Label title="Created" text={formatDate(issue.created_at)} />}
-          {issue.updated_at && <Detail.Metadata.Label title="Updated" text={formatDate(issue.updated_at)} />}
-          {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
-          {issue.labels.length > 0 && (
+          {props.issue.created_at && (
+            <Detail.Metadata.Label title="Created" text={formatDate(props.issue.created_at)} />
+          )}
+          {props.issue.updated_at && (
+            <Detail.Metadata.Label title="Updated" text={formatDate(props.issue.updated_at)} />
+          )}
+          {props.issue.milestone && <Detail.Metadata.Label title="Milestone" text={props.issue.milestone.title} />}
+          {props.issue.labels.length > 0 && (
             <Detail.Metadata.TagList title="Labels">
-              {issue.labels?.map((i) => (
-                <Detail.Metadata.TagList.Item
-                  key={i.id || (i as any)}
-                  text={i.name || (i as any) || "?"}
-                  color={i.color}
-                />
+              {props.issue.labels?.map((label) => (
+                <Detail.Metadata.TagList.Item key={label.id} text={label.name || "?"} color={label.color} />
               ))}
             </Detail.Metadata.TagList>
           )}
@@ -135,101 +145,66 @@ export function IssueDetail(props: { issue: Issue }) {
 
 function useDetail(issueID: number): {
   issueDetail?: IssueDetailData;
-  error?: string;
   isLoading: boolean;
 } {
-  const [issueDetail, setIssueDetail] = useState<IssueDetailData>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { data, isLoading } = usePromise(
+    async (issueId: number): Promise<IssueDetailData> => {
+      const data = await getGitLabGQL().client.query({
+        query: GET_ISSUE_DETAIL,
+        variables: { id: `gid://gitlab/Issue/${issueId}` },
+      });
+      const webUrl = (data.data.issue.webUrl as string) || "";
+      const index = webUrl.indexOf("/-/");
+      return {
+        description: data.data.issue.description || "<no description>",
+        projectWebUrl: index > 1 ? webUrl.substring(0, index) : undefined,
+      };
+    },
+    [issueID],
+    { execute: issueID > 0 },
+  );
 
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (issueID <= 0 || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const data = await getGitLabGQL().client.query({
-          query: GET_ISSUE_DETAIL,
-          variables: { id: `gid://gitlab/Issue/${issueID}` },
-        });
-        const desc = data.data.issue.description || "<no description>";
-        const webUrl = (data.data.issue.webUrl as string) || "";
-        let projectWebUrl: string | undefined;
-        const index = webUrl.indexOf("/-/");
-        if (index > 1) {
-          projectWebUrl = webUrl.substring(0, index);
-        }
-        if (!didUnmount) {
-          setIssueDetail({
-            description: desc,
-            projectWebUrl: projectWebUrl,
-          });
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [issueID]);
-
-  return { issueDetail, error, isLoading };
+  return { issueDetail: data, isLoading };
 }
 
 export function IssueListItem(props: { issue: Issue; refreshData: () => void }) {
-  const issue = props.issue;
-  const tintColor = issue.state === "opened" ? Color.Green : Color.Red;
   return (
     <List.Item
-      id={issue.id.toString()}
-      title={issue.title}
-      subtitle={"#" + issue.iid}
+      id={props.issue.id.toString()}
+      title={props.issue.title}
+      subtitle={"#" + props.issue.iid}
       icon={{
         value: {
           source: GitLabIcons.issue,
-          tintColor: tintColor,
+          tintColor: props.issue.state === "opened" ? Color.Green : Color.Red,
         },
-        tooltip: `Status: ${capitalizeFirstLetter(issue.state)}`,
+        tooltip: `Status: ${capitalizeFirstLetter(props.issue.state)}`,
       }}
       accessories={[
         {
-          text: issue.merge_requests_count > 0 ? `${issue.merge_requests_count}` : undefined,
-          icon: issue.merge_requests_count > 0 ? { source: "branch.png", tintColor: Color.PrimaryText } : undefined,
+          text: props.issue.merge_requests_count > 0 ? `${props.issue.merge_requests_count}` : undefined,
+          icon:
+            props.issue.merge_requests_count > 0 ? { source: "branch.png", tintColor: Color.PrimaryText } : undefined,
         },
         {
-          icon: issue.user_notes_count && issue.user_notes_count > 0 ? Icon.SpeechBubble : undefined,
-          text: issue.user_notes_count && issue.user_notes_count > 0 ? issue.user_notes_count.toString() : undefined,
+          icon: props.issue.user_notes_count && props.issue.user_notes_count > 0 ? Icon.SpeechBubble : undefined,
+          text:
+            props.issue.user_notes_count && props.issue.user_notes_count > 0
+              ? props.issue.user_notes_count.toString()
+              : undefined,
           tooltip:
-            issue.user_notes_count && issue.user_notes_count > 0
-              ? `Number of Comments ${issue.user_notes_count}`
+            props.issue.user_notes_count && props.issue.user_notes_count > 0
+              ? `Number of Comments ${props.issue.user_notes_count}`
               : undefined,
         },
         {
-          tag: issue.milestone ? issue.milestone.title : "",
-          tooltip: issue.milestone ? `Milestone: ${issue.milestone.title}` : undefined,
+          tag: props.issue.milestone ? props.issue.milestone.title : "",
+          tooltip: props.issue.milestone ? `Milestone: ${props.issue.milestone.title}` : undefined,
         },
-        { date: new Date(issue.updated_at), tooltip: `Updated: ${toLongDateString(issue.updated_at)}` },
+        { date: new Date(props.issue.updated_at), tooltip: `Updated: ${formatDateTime(props.issue.updated_at)}` },
         {
-          icon: { source: issue.author?.avatar_url || "", mask: Image.Mask.Circle },
-          tooltip: issue.author ? `Author: ${issue.author?.name}` : undefined,
+          icon: { source: props.issue.author?.avatar_url || "", mask: Image.Mask.Circle },
+          tooltip: props.issue.author ? `Author: ${props.issue.author?.name}` : undefined,
         },
       ]}
       actions={
@@ -237,15 +212,14 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }) 
           <ActionPanel.Section>
             <Action.Push
               title="Show Details"
-              target={<IssueDetail issue={issue} />}
+              target={<IssueDetail issue={props.issue} />}
               icon={{ source: GitLabIcons.show_details, tintColor: Color.PrimaryText }}
             />
-            <GitLabOpenInBrowserAction url={issue.web_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
+            <GitLabOpenInBrowserAction url={props.issue.web_url} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <IssueItemActions issue={issue} onDataChange={props.refreshData} />
+            <IssueItemActions issue={props.issue} onDataChange={props.refreshData} />
           </ActionPanel.Section>
-          <CacheActionPanelSection />
         </ActionPanel>
       }
     />
@@ -263,16 +237,6 @@ interface IssueListProps {
     | undefined;
 }
 
-function navTitle(project?: Project, group?: Group): string | undefined {
-  if (group) {
-    return `Group Issues ${group.full_path}`;
-  }
-  if (project) {
-    return `${project.name_with_namespace}`;
-  }
-  return undefined;
-}
-
 export function IssueList({
   scope = IssueScope.created_by_me,
   state = IssueState.all,
@@ -281,13 +245,7 @@ export function IssueList({
 }: IssueListProps) {
   const [searchText, setSearchText] = useState<string>();
   const [searchState, setSearchState] = useState<IssueState>(state);
-  const { issues, error, isLoading, refresh } = useSearch(searchText, scope, searchState, project, group);
-
-  if (error) {
-    showErrorToast(error, "Cannot search Issue");
-  }
-
-  const title = scope === IssueScope.assigned_to_me ? "Your Issues" : "Created Recently";
+  const { issues, isLoading, refresh } = useSearch(searchText, scope, searchState, project, group);
 
   return (
     <List
@@ -313,9 +271,14 @@ export function IssueList({
           <List.Dropdown.Item title="All" value={IssueState.all} />
         </List.Dropdown>
       }
-      navigationTitle={navTitle(project, group)}
+      navigationTitle={
+        group ? `Group Issues ${group.full_path}` : project ? `${project.name_with_namespace}` : undefined
+      }
     >
-      <List.Section title={title} subtitle={issues?.length.toString() || ""}>
+      <List.Section
+        title={scope === IssueScope.assigned_to_me ? "Your Issues" : "Created Recently"}
+        subtitle={issues?.length.toString() || ""}
+      >
         {issues?.map((issue) => (
           <IssueListItem key={issue.id} issue={issue} refreshData={refresh} />
         ))}
@@ -333,8 +296,8 @@ function isValidIssueState(texts: string[] | undefined) {
   if (!texts) {
     return false;
   }
-  for (const v of texts) {
-    if (![IssueState.closed.valueOf(), IssueState.opened.valueOf(), IssueState.all.valueOf()].includes(v)) {
+  for (const stateText of texts) {
+    if (![IssueState.closed.valueOf(), IssueState.opened.valueOf(), IssueState.all.valueOf()].includes(stateText)) {
       return false;
     }
   }
@@ -398,73 +361,32 @@ export function useSearch(
   group?: Group,
 ): {
   issues?: Issue[];
-  error?: string;
   isLoading: boolean;
   refresh: () => void;
 } {
-  const [issues, setIssues] = useState<Issue[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [timestamp, setTimestamp] = useState<Date>(now());
+  const { data, isLoading, revalidate } = usePromise(
+    async (
+      queryText: string,
+      issueScope: IssueScope,
+      issueState: IssueState,
+      project?: Project,
+      group?: Group,
+    ): Promise<Issue[]> => {
+      const parsedQuery = getIssueQuery(queryText);
+      const requestParams: Record<string, any> = {
+        state: issueState,
+        scope: issueScope,
+        search: parsedQuery.query || "",
+        in: "title",
+      };
+      injectQueryNamedParameters(requestParams, parsedQuery, issueScope, false);
+      injectQueryNamedParameters(requestParams, parsedQuery, issueScope, true);
+      return group ? gitlab.getGroupIssues(requestParams, group.id) : gitlab.getIssues(requestParams, project);
+    },
+    [query ?? "", scope, state, project, group],
+  );
 
-  const refresh = () => {
-    setTimestamp(now());
-  };
-
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const qd = getIssueQuery(query);
-        query = qd.query;
-        const requestParams: Record<string, any> = {
-          state: state,
-          scope: scope,
-          search: query || "",
-          in: "title",
-        };
-        injectQueryNamedParameters(requestParams, qd, scope, false);
-        injectQueryNamedParameters(requestParams, qd, scope, true);
-        if (group) {
-          const glIssues = await gitlab.getGroupIssues(requestParams, group.id);
-          if (!didUnmount) {
-            setIssues(glIssues);
-          }
-        } else {
-          const glIssues = await gitlab.getIssues(requestParams, project);
-          if (!didUnmount) {
-            setIssues(glIssues);
-          }
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [query, timestamp, project]);
-
-  return { issues, error, isLoading, refresh };
+  return { issues: data, isLoading, refresh: revalidate };
 }
 
 export function useIssue(
@@ -472,48 +394,12 @@ export function useIssue(
   issueID: number,
 ): {
   issue?: Issue;
-  error?: string;
   isLoading: boolean;
 } {
-  const [issue, setIssue] = useState<Issue>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const { data, isLoading } = usePromise(
+    (projectId: number, issueId: number) => gitlab.getIssue(projectId, issueId, {}),
+    [projectID, issueID],
+  );
 
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
-
-    async function fetchData() {
-      if (didUnmount) {
-        return;
-      }
-
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const glIssue = await gitlab.getIssue(projectID, issueID, {});
-        if (!didUnmount) {
-          setIssue(glIssue);
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
-    };
-  }, [projectID, issueID]);
-
-  return { issue, error, isLoading };
+  return { issue: data, isLoading };
 }

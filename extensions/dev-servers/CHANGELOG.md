@@ -1,5 +1,70 @@
 # Dev Servers Changelog
 
+## [Menu bar restart fixed, plus icon and row polish] - 2026-08-03
+
+- **Restarting from the menu bar brings the server back.** Restart used to kill the server and stop there: Raycast unloads a menu bar command shortly after its menu closes, and the respawn was still in flight when that happened. Restart now hands the whole job to the dashboard, the same way menu bar starts already work, so you also get what starts get: a live "Restarting…" row, and a diagnosed failure row if the server never comes back, instead of silence.
+- **The Kill action's icon now reads as a trash can.** The old outlined glyph with its floating handle looked like a jar with a cork once tinted red; the solid-body variant from the same icon family keeps the trash silhouette at menu size.
+- **Every menu icon now draws completely.** Raycast's SVG renderer skips `line`, `polyline`, and `polygon` elements, so Copy Port and Open in Terminal had no icon at all, the trash was missing its lid, and the Restart arrows lost their heads. All glyphs are now built from paths, which render fully.
+- **Projects without a usable favicon get their own color in the menu bar.** When a project's favicon only exists as an SVG (which the menu bar can't render as an image), the fallback glyph is now tinted with the favicon's dominant color instead of the framework color, so a row is recognizable per project rather than per framework. The framework tint remains only for projects with no favicon at all.
+- **Killing from the menu bar confirms itself.** A small system HUD says "Killed <project>" the instant you click (and "Killed both/all N servers" for the per-project kill). The kill really is instant; the SIGKILL cannot be refused. The menu bar count, which used to be the only signal and lagged by several seconds, now updates a few seconds sooner as well.
+- **Branch tags appear only when they mean something.** A project running a single worktree no longer repeats "· main" on every row. The branch shows, main included, when two worktrees of the same project run side by side, or when two entries in the Start section share a project name.
+- **Fixed: restarting one of two servers running from the same folder could kill the wrong one.** The menu bar's Restart now names the exact server that was clicked, so a sibling server sharing the project folder is left alone.
+- **Fixed: a dev server on a deliberately chosen high port (49152 and up) could vanish from every surface.** The phantom-server cleanup now hides only processes it knows to be helpers (`workerd`), instead of anything that looked abandoned. A server this extension starts is handed to the system the moment the command unloads, so a legitimate server looked exactly like a leftover.
+- **Fixed: a project starting on a port another project used earlier could inherit that project's favicon, permanently.** Favicons are now cached per project as well as per port.
+- **Favicon lookups can no longer be redirected off the dev server.** Responses served from elsewhere were already refused; now the request itself stops before a redirect leaves the server's origin, so no other host is ever contacted.
+
+## [Live rows for starts and restarts, and no more phantom servers] - 2026-07-26
+
+- **Every server you start gets a row the moment you confirm it**, spinning in its project's section until the port binds and then handing over to the real server row, cursor and all. Start several at once and you can watch each one come up instead of guessing behind a single toast.
+- **Restarting shows the same row, saying "Restarting…".** It goes up before the old server is stopped, so the project never blinks out of the list and the cursor lands on the replacement.
+- **A start that never binds leaves a red row behind saying why.** It names the cause where it can ("Portless proxy isn't running", "Port already in use") and keeps the remedies on the row: **View Startup Log**, **Copy Fix Command**, **Open in Terminal**, **Dismiss**. This used to be a toast, whose buttons vanished with it and were missing entirely when the Raycast window was closed. Several failures now each say their own piece instead of sharing one line.
+- **A failure waits for you.** The row is not tied to the window that started the server: close Raycast during a start and, if it never comes up, the diagnosed red row is sitting in the dashboard the next time you open it. Rows that go stale are dropped after a day.
+- **The list is ordered newest first.** It used to come out in process-ID order, which only loosely tracks start time, so a server from an hour ago could sit above one from seconds ago. Starting a server now moves its project to the top with it.
+- **The dashboard stays open when a server opens in your browser.** Auto-open used to bring the browser to the front, and Raycast hides itself when it loses focus, so the window vanished a second after a start. The tab now opens behind it. Opening a URL yourself still switches to the browser.
+- **Folders selected in Finder can now be started from the dashboard.** `⌘N` used to ignore your selection, so acting on it meant going back to root search. The picker now offers it at the top under **Selected in Finder**, naming what it would start, and `↵` starts it.
+- **Fixed: Cloudflare and Wrangler projects showed phantom servers on odd ports like `51759`, and restarting one made copies.** The `workerd` helpers those projects run were being taken for dev servers in their own right. They are now recognised as helpers however they were started, and killing or restarting a project clears them out, including leftovers that ignored Kill and held their ports until you rebooted. The cleanup only ever touches orphaned `workerd` processes, so a tool of your own running from the project folder is never caught in the sweep.
+- **Fixed: starting from the menu bar never opened the browser**, even with the setting on. One thing to check after updating: the July 9 release moved that setting to the extension level, which reset it to off. If auto-open has felt broken since, turn **Open in browser when the port binds** back on once.
+- Also: the menu bar count updates when a start or restart fails, not only when it succeeds; typing in the search bar no longer hides a starting or failed row; the "Restarted" confirmation hides itself after a couple of seconds; and Cloudflare Worker projects show a Wrangler tag in the Start picker.
+
+## [Clearer startup failures, on start and on restart] - 2026-07-26
+
+- **A dev server that fails to start because the portless proxy is down now says so.** Dev scripts wrapped in `portless run` need the proxy already running: a background spawn has no TTY for portless's sudo prompt, so portless exits before the framework ever boots. The toast used to report only the generic "not detected after 15s", which reads as an extension bug rather than a machine-setup problem. It now says **Portless proxy isn't running** and offers a **Copy Fix Command** action for `portless service install`, which starts the proxy at boot so starts keep working after a reboot.
+- **A restart that times out now names the cause too.** Restarting respawns a server the same way starting it does, so it dies for the same reasons, but the timeout toast only offered a raw log path in the temp directory. It now reports a port conflict or a downed portless proxy in the same words the start toast uses, with the same actions.
+- **Failure toasts got a lot shorter.** A toast gives you one line, and a long title cuts the rest off mid-word, so the explanation was landing where nobody could read it. The cause is now the title itself ("Port already in use") and the project name moves to the subtitle, with the fix on a button rather than buried in prose.
+
+## [Menu bar polish and sharper tool detection] - 2026-07-09
+
+### Menu bar
+
+- **Running servers now show their real favicon** instead of a colored dot, and stopped projects in the Start section show a framework-tinted folder instead of a stark grey one.
+- **Each running server now leads with its project name**, followed by the port (or custom domain) and branch. For example: `Novera (9292) · flagship-rebuild`. The dim per-project section header is gone (the project name reads clearly in the row instead), and the port makes several servers of the same project on the same branch easy to tell apart.
+- The Start section no longer lists projects whose folder was deleted (e.g. a removed git worktree); it now matches the Start Dev Server command's list, which already filtered them out.
+- **Favicons render in color instead of a black square.** The resolver now skips Safari's monochrome `mask-icon`, prefers colored raster icons (apple-touch-icon, PNG, ICO), and ignores `currentColor`-only SVGs, so it lands on the real icon. Because the menu bar can't render SVGs in color, it uses a separate raster variant pulled from the page or from conventional paths (`/favicon.ico`, `/apple-touch-icon.png`). SVG-favicon sites still show a real icon there, falling back to a tinted dot only when no raster exists anywhere.
+- Starting a project from the menu bar's Start section now opens it in the browser when the port binds, matching the Start Dev Server command. "Open in browser when the port binds" is now an extension-wide preference shared by every start surface (Start command, dashboard, menu bar); since it moved from the command to the extension level, you may need to re-enable it once.
+- The Kill and Kill All actions use a red icon to flag them as destructive, and menu bar actions now use a consistent set of polished Nucleo icons with bundled light/dark variants.
+
+### Tool detection
+
+- **Native helper binaries no longer masquerade as separate servers.** Platform-binary packages (npm's `<pkg>-<os>-<arch>` convention: workerd, esbuild, rollup, swc, sass-embedded, …) are never the tool you chose. Detection recognizes that shape and climbs the process tree to label the helper with its parent's tool. When no ancestor resolves, it strips the platform suffix (`workerd`, not `workerd-darwin-arm64`). Helpers on OS-assigned ephemeral ports under an already-listed server (e.g. the workerd instances the Cloudflare Vite plugin runs under `vite dev`) are hidden; helpers on deliberately configured ports (workerd on 8787 under `wrangler dev`, a Hydrogen storefront under `shopify app dev`) stay visible, since those are the URLs you actually open.
+- New tool tags with Cloudflare styling: Wrangler, Workerd, and Miniflare.
+
+## [Fix tool detection for pnpm and shim-relative launch paths] - 2026-07-07
+
+- Servers launched through pnpm's virtual store or a shim's relative self-exec path no longer show a raw filesystem path as their tool tag. Vite (and any framework) invoked as `node_modules/.bin/../vite/bin/vite.js` or `node_modules/.bin/../.pnpm/vite@<version>_<peers>/node_modules/vite/bin/vite.js` now resolves to its real package name: tool detection normalizes the script path and reads the package directory adjacent to the last `node_modules` segment, instead of pattern-matching the command text. Scoped packages (`@scope/pkg`) and pnpm's encoded scoped store entries (`@scope+pkg@version`) resolve correctly too.
+- The SvelteKit promotion (Vite plus a `svelte.config.*`) now applies on every launch layout, not just the plain `node_modules/.bin/vite` form.
+
+## [Menu Bar Command] - 2026-07-02
+
+- Adds **Dev Servers Menu Bar**, a compact menu bar command that shows running dev servers by project and keeps the count visible when you want it.
+- Each running server gets quick actions for opening, restarting, killing, copying the URL or port, and jumping into your editor or terminal.
+- Recent stopped projects appear in a Start section, ranked by use, and hand off to the dashboard so the normal startup toast and progress flow stay intact.
+- Projects with two or more servers get a kill-all item at the bottom of their section: "Kill Both Servers" for a pair, "Kill All 3 Servers" beyond. It acts on click without a dialog (menus can't confirm), so the label always names the blast radius and single-server projects don't show it at all.
+
+## [Automatic port fallback for Shopify themes] - 2026-07-02
+
+- **Two copies of a theme now run side by side.** `shopify theme dev` has no next-free-port fallback: when its fixed default port 9292 is taken (say, by the main checkout while you start a git worktree of the same theme), the CLI just dies with `EADDRINUSE` ([Shopify/cli#5554](https://github.com/Shopify/cli/issues/5554)). Starting a theme now probes the default port first and, when it's taken, exports `SHOPIFY_FLAG_PORT` with the next free one. Because it's an environment variable, the fix reaches the CLI through any wrapping. A bare theme root started as `shopify theme dev` and a `dev` script that nests it under `concurrently` both come up on their own port. A `--port` written explicitly into your own script still wins.
+- When a spawn dies on a port conflict anyway (a non-Shopify server with a fixed port, or every scanned port taken), the failure toast now says "a port is already in use by another process" instead of the generic "not detected after 15s". Its View Startup Log action opens the log of the server that actually hit the conflict.
+
 ## [Shopify support, faster polling, new actions] - 2026-06-10
 
 ### Shopify

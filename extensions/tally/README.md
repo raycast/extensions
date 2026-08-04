@@ -2,8 +2,6 @@
 
 # Tally
 
-> ⚠️ Tally’s API is currently in public beta and subject to change.
-
 This is a Raycast extension for [Tally](https://tally.so/). With this extension you can:
 - view **Forms**
     - view **Submissions**
@@ -26,15 +24,12 @@ This is a Raycast extension for [Tally](https://tally.so/). With this extension 
 
     d. `Copy` and `Paste` in Extension Preferences
 
-## 🗒️ Note
-
-> ⚠️ Tally’s API is currently in public beta and subject to change.
-
 ---
 
-Looking for more form extensions? Try this:
+Looking for more form extensions? Try these:
 
 <a title="Install jotform Raycast Extension" href="https://www.raycast.com/xmok/jotform"><img src="https://www.raycast.com/xmok/jotform/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install youform Raycast Extension" href="https://www.raycast.com/xmok/youform"><img src="https://www.raycast.com/xmok/youform/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
 
 ---
 <img src="./assets/Tally Logo - White.png" height="50" />

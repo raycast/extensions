@@ -1,3 +1,4 @@
+import { countOf } from "@chrismessina/raycast-kit/plural";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef } from "react";
 
@@ -74,7 +75,7 @@ export function useReadState(enabled: boolean) {
       await persist(updated);
       await showToast({
         style: Toast.Style.Success,
-        title: `Marked ${newlyRead.length} Items as Read`,
+        title: `Marked ${countOf(newlyRead.length, "Item")} as Read`,
         message: "Press ⌘Z to undo",
       });
     },
@@ -83,10 +84,8 @@ export function useReadState(enabled: boolean) {
 
   const undo = useCallback(async () => {
     if (!enabled || !lastAction.current) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Nothing to Undo",
-      });
+      // Not a failure — there is simply nothing queued.
+      await showToast({ style: Toast.Style.Success, title: "Nothing to Undo" });
       return;
     }
     const action = lastAction.current;
@@ -100,7 +99,7 @@ export function useReadState(enabled: boolean) {
     const count = action.itemIds.length;
     await showToast({
       style: Toast.Style.Success,
-      title: count === 1 ? "Unmarked as Read" : `Unmarked ${count} Items as Read`,
+      title: count === 1 ? "Unmarked as Read" : `Unmarked ${countOf(count, "Item")} as Read`,
     });
   }, [enabled, readIds, persist]);
 

@@ -55,9 +55,41 @@ export type SortOrder = "name" | "edhrec" | "usd";
 export const FEEDBACK_URL = "https://github.com/aayushpi/scrycast/issues";
 export const SAVED_CARDS_KEY = "savedCards";
 export const SCRYFALL_API_BASE = "https://api.scryfall.com";
+export const SCRYFALL_USER_AGENT = "Scrycast/1.0 (Raycast Extension; +https://github.com/aayushpi/scrycast)";
+export const SCRYFALL_HEADERS: Record<string, string> = {
+  "User-Agent": SCRYFALL_USER_AGENT,
+  Accept: "application/json",
+};
 export const TAGGER_BASE_URL = "https://tagger.scryfall.com";
 export const TAGGER_BROWSER_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+
+interface ScryfallErrorBody {
+  details?: string;
+  warnings?: string[];
+}
+
+export async function scryfallFetch(url: string, init?: RequestInit): Promise<Response> {
+  return fetch(url, {
+    ...init,
+    headers: { ...SCRYFALL_HEADERS, ...(init?.headers as Record<string, string> | undefined) },
+  });
+}
+
+export async function parseScryfallResponse<T = unknown>(response: Response): Promise<T> {
+  if (!response.ok) {
+    let message = response.statusText;
+    try {
+      const body = (await response.json()) as ScryfallErrorBody;
+      if (body.details) message = body.details;
+      else if (body.warnings?.length) message = body.warnings.join("; ");
+    } catch {
+      /* use statusText */
+    }
+    throw new Error(message);
+  }
+  return (await response.json()) as T;
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -205,14 +237,17 @@ export async function fetchCardTags(set: string, collectorNumber: string): Promi
   return taggings;
 }
 
+function escapeScryfallQuoted(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 export function tagSearchQuery(type: string, name: string): string {
-  if (type === "ORACLE_CARD_TAG") return `oracletag:"${name}"`;
-  if (type === "ILLUSTRATION_TAG") return `arttag:"${name}"`;
-  return `"${name}"`;
+  const escaped = escapeScryfallQuoted(name);
+  if (type === "ORACLE_CARD_TAG") return `oracletag:"${escaped}"`;
+  if (type === "ILLUSTRATION_TAG") return `arttag:"${escaped}"`;
+  return `"${escaped}"`;
 }
 
 export function tagScryfallSearchUrl(type: string, name: string): string {
-  if (type === "ORACLE_CARD_TAG") return `https://scryfall.com/search?q=${encodeURIComponent(`oracletag:"${name}"`)}`;
-  if (type === "ILLUSTRATION_TAG") return `https://scryfall.com/search?q=${encodeURIComponent(`arttag:"${name}"`)}`;
-  return `https://scryfall.com/search?q=${encodeURIComponent(`"${name}"`)}`;
+  return `https://scryfall.com/search?q=${encodeURIComponent(tagSearchQuery(type, name))}`;
 }

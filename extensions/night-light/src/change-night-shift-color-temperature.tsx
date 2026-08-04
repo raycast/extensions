@@ -30,10 +30,10 @@ export default function Main() {
             title="Change Color Temperature"
             onSubmit={async ({ temperature }) => {
               if (validate(temperature)) {
+                await nightlight(`temp ${temperature}`, `Set color temperature to ${temperature}`);
+
                 if (closeWindow) closeMainWindow();
                 else await popToRoot({ clearSearchBar: true });
-
-                await nightlight(`temp ${temperature}`, `Set color temperature to ${temperature}`);
               }
             }}
           />

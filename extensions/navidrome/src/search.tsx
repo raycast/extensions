@@ -6,13 +6,13 @@ import {
   Image,
   Color,
   LocalStorage,
-  showToast,
-  Toast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useState, useEffect, useCallback, useRef } from "react";
 import {
   search3,
+  getPlaylists,
+  filterPlaylists,
   getCoverArtUrl,
   getNavidromeWebUrl,
   formatDuration,
@@ -20,6 +20,7 @@ import {
   type Album,
   type Song,
 } from "./api";
+import { PlaylistItem } from "./components";
 
 const RECENT_SEARCHES_KEY = "recent-searches";
 const MAX_RECENT_SEARCHES = 10;
@@ -75,7 +76,7 @@ export default function SearchCommand() {
     await LocalStorage.removeItem(RECENT_SEARCHES_KEY);
   }, []);
 
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, error } = useCachedPromise(
     async (q: string) => {
       if (!q.trim()) return null;
       return await search3(q);
@@ -84,25 +85,30 @@ export default function SearchCommand() {
     {
       keepPreviousData: true,
       onError: (err) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Search failed",
-          message: err.message,
-        });
+        showFailureToast(err, { title: "Search failed" });
       },
     },
   );
 
+  // Playlists aren't covered by search3, so fetch the list once and filter
+  // it locally per query. Failures degrade silently to no playlist results.
+  const { data: allPlaylists } = useCachedPromise(getPlaylists, [], {
+    keepPreviousData: true,
+    onError: () => {},
+  });
+  const playlists = filterPlaylists(allPlaylists ?? [], query);
+
   const hasResults =
-    data &&
-    (data.artists.length > 0 ||
-      data.albums.length > 0 ||
-      data.songs.length > 0);
+    (data &&
+      (data.artists.length > 0 ||
+        data.albums.length > 0 ||
+        data.songs.length > 0)) ||
+    playlists.length > 0;
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search artists, albums, and songs..."
+      searchBarPlaceholder="Search artists, albums, songs, and playlists..."
       onSearchTextChange={(text) => {
         setQuery(text);
         searchTextRef.current = setQuery;
@@ -150,9 +156,15 @@ export default function SearchCommand() {
           <List.EmptyView
             icon={Icon.MagnifyingGlass}
             title="Search Your Library"
-            description="Type to search for artists, albums, and songs"
+            description="Type to search for artists, albums, songs, and playlists"
           />
         )
+      ) : error && !hasResults ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Search Failed"
+          description="Check your server URL and credentials in Raycast preferences"
+        />
       ) : !hasResults && !isLoading ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
@@ -191,6 +203,18 @@ export default function SearchCommand() {
             <SongItem
               key={song.id}
               song={song}
+              onAction={() => addRecentSearch(query)}
+            />
+          ))}
+        </List.Section>
+      )}
+
+      {playlists.length > 0 && (
+        <List.Section title="Playlists" subtitle={`${playlists.length}`}>
+          {playlists.map((playlist) => (
+            <PlaylistItem
+              key={playlist.id}
+              playlist={playlist}
               onAction={() => addRecentSearch(query)}
             />
           ))}

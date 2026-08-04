@@ -1,6 +1,5 @@
 import { GeminiUsage, GeminiError, GeminiModelQuota } from "./types";
 import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth";
-import { createSimpleHook } from "../agents/hooks";
 import { formatResetTime } from "../agents/format";
 import { decodeJwtPayload } from "../agents/jwt";
 import * as fs from "fs";
@@ -22,6 +21,16 @@ interface OAuthCreds {
   refresh_token?: string;
   id_token: string;
   expiry_date: number;
+}
+
+/**
+ * Stable identity of the locally configured Gemini account, for cache
+ * invalidation. The refresh token survives access-token rotation and changes
+ * when the user re-authenticates as a different account.
+ */
+export function readGeminiAuthKey(): string {
+  const creds = readJsonFile<OAuthCreds>(OAUTH_CREDS_PATH);
+  return creds?.refresh_token ?? creds?.access_token ?? "";
 }
 
 function readJsonFile<T>(filePath: string): T | null {
@@ -218,7 +227,7 @@ async function fetchQuota(
   }
 }
 
-async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: GeminiError | null }> {
+export async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: GeminiError | null }> {
   // Check auth type
   const settings = readJsonFile<{ authType?: string; security?: { auth?: { selectedType?: string } } }>(SETTINGS_PATH);
   const authType = resolveGeminiAuthType(settings);
@@ -306,5 +315,3 @@ async function fetchGeminiUsage(): Promise<{ usage: GeminiUsage | null; error: G
     };
   }
 }
-
-export const useGeminiUsage = createSimpleHook<GeminiUsage, GeminiError>({ fetcher: fetchGeminiUsage });

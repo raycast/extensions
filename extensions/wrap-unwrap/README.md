@@ -35,7 +35,7 @@ Both commands share **Preferred Source**, **Primary Action**, **Hide HUD**, and 
 
 | Preference               | Default | What it does                                                                                                                                                                                                                                                                                                                                        |
 | ------------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Strip Soft Hyphens       | on      | When joining lines, remove a trailing hyphen if it appears to be a soft line-break hyphen (e.g. `inter-` + `esting` → `interesting`). Compounds like `state-of-the-art` are preserved.                                                                                                                                                              |
+| Strip Soft Hyphens       | on      | When joining lines, remove a trailing soft hyphen (U+00AD) — the invisible character that marks an optional break. A regular `-` is always kept, so `well-` + `known` rejoins as `well-known` and `state-of-the-art` stays intact; either way the halves join with no space.                                                                        |
 | Keep Blank Lines         | off     | Preserve blank lines between paragraphs instead of collapsing runs.                                                                                                                                                                                                                                                                                 |
 | Strip Bullet Indentation | off     | Re-indent bullet and numbered lists to a fixed 2-space-per-level step, removing the leading spaces that pasted terminal or rich-text content adds in front of markers. Nesting depth is preserved by relative indent order, so pasting into an email client produces native bullets. Recognizes Unicode bullets (`•`, `‣`, `▪`, `▸`, `–`, `—`) too. |
 
@@ -51,7 +51,7 @@ Bind these in Raycast → Extensions → Wrap Unwrap. Suggestions:
 Wrap Unwrap implements the [LitoMore cross-extension convention](https://github.com/LitoMore/raycast-cross-extension-conventions) on the provider side using only built-in Raycast SDK primitives. Pass a `launchContext` with the text and an optional `callbackLaunchOptions` describing where to send the result:
 
 ```ts
-import { LaunchType, launchCommand } from "@raycast/api";
+import { launchCommand, LaunchType } from "@raycast/api";
 
 await launchCommand({
   name: "unwrap-text",

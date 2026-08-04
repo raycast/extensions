@@ -1,10 +1,14 @@
 import { ActionPanel, List, Action } from "@raycast/api";
 import Components from "./documentation/componentsDocs";
+import VersionSelector from "./version-selector";
+import { useCachedState } from "@raycast/utils";
 
 export default function SearchDocumentation() {
+  const [version] = useCachedState("version");
+
   return (
-    <List>
-      {Object.entries(Components).map(([section, items]) => (
+    <List searchBarAccessory={<VersionSelector />}>
+      {Object.entries(version === "v2" ? Components.v2 : Components.v3).map(([section, items]) => (
         <List.Section title={section} key={section}>
           {items.map((item) => (
             <List.Item

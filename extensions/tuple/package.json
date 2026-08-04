@@ -118,8 +118,15 @@
             "inCall": true,
             "callId": "abc123",
             "muted": false,
+            "transcribing": false,
+            "activeRoomSlug": null,
             "participants": [
-              "Riley Chen"
+              {
+                "name": "Riley Chen",
+                "email": "riley@example.com",
+                "muted": false,
+                "connectionState": "connected"
+              }
             ]
           }
         },
@@ -186,6 +193,7 @@
                 "slug": "tXFZbE",
                 "url": "https://tuple.app/c/tXFZbE",
                 "favorited": false,
+                "activeCall": false,
                 "occupants": [
                   "Riley Chen"
                 ]
@@ -207,7 +215,7 @@
     {
       "name": "tuplePath",
       "title": "Tuple CLI Path",
-      "description": "Path to the tuple CLI executable. Leave blank to auto-detect (/opt/homebrew/bin then /usr/local/bin); set this only if you installed it elsewhere.",
+      "description": "Path to the tuple CLI executable. Leave blank to auto-detect (/usr/local/bin/tuple, then the copy bundled in Tuple.app); set this only if your CLI lives elsewhere.",
       "type": "textfield",
       "required": false,
       "placeholder": "/usr/local/bin/tuple"

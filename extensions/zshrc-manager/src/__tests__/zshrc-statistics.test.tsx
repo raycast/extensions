@@ -36,6 +36,7 @@ vi.mock("../hooks/useZshrcLoader", () => ({
 // Mock section icons
 vi.mock("../lib/section-icons", () => ({
   getSectionIcon: vi.fn(() => ({ icon: "folder", color: "#007AFF" })),
+  getSectionImage: vi.fn(() => ({ source: "folder", tintColor: "#007AFF" })),
 }));
 
 // Mock zsh module
@@ -154,7 +155,7 @@ describe("ZshrcStatistics", () => {
   describe("component rendering", () => {
     it("should render ZshrcStatistics component", async () => {
       render(<ZshrcStatistics />);
-      expect(screen.getByText("Zshrc Statistics")).toBeInTheDocument();
+      expect(screen.getByTestId("list")).toBeInTheDocument();
     });
 
     it("should show loading state", () => {
@@ -168,19 +169,19 @@ describe("ZshrcStatistics", () => {
 
       render(<ZshrcStatistics />);
 
-      expect(screen.getByText("Zshrc Statistics")).toBeInTheDocument();
+      expect(screen.getByTestId("list")).toBeInTheDocument();
     });
 
     it("should accept searchBarAccessory prop", () => {
       const accessory = <div data-testid="custom-accessory">Custom</div>;
       render(<ZshrcStatistics searchBarAccessory={accessory} />);
 
-      expect(screen.getByText("Zshrc Statistics")).toBeInTheDocument();
+      expect(screen.getByTestId("list")).toBeInTheDocument();
     });
 
-    it("should show cached indicator when data is from cache", () => {
+    it("should show cached indicator while loading from cache", () => {
       mockUseZshrcLoader.mockReturnValue({
-        sections: mockSections,
+        sections: [],
         isLoading: false,
         refresh: mockRefresh,
         isFromCache: true,
@@ -189,7 +190,7 @@ describe("ZshrcStatistics", () => {
 
       render(<ZshrcStatistics />);
 
-      expect(screen.getByText("Zshrc Statistics (Cached)")).toBeInTheDocument();
+      expect(screen.getByText("Cached")).toBeInTheDocument();
     });
   });
 
@@ -256,7 +257,7 @@ describe("ZshrcStatistics", () => {
       render(<ZshrcStatistics />);
 
       // Loading state should be shown
-      expect(screen.getByText("Zshrc Statistics")).toBeInTheDocument();
+      expect(screen.getByTestId("list")).toBeInTheDocument();
     });
   });
 
@@ -273,7 +274,7 @@ describe("ZshrcStatistics", () => {
       render(<ZshrcStatistics />);
 
       // Should still render the component
-      expect(screen.getByText("Zshrc Statistics")).toBeInTheDocument();
+      expect(screen.getByTestId("list")).toBeInTheDocument();
     });
 
     it("should show empty configuration message when no entries", async () => {

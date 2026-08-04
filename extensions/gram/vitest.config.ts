@@ -10,6 +10,10 @@ export default defineConfig({
         find: "@raycast/utils",
         replacement: path.resolve(__dirname, "test/__mocks__/raycast.utils.ts"),
       },
+      {
+        find: "@raycast/api",
+        replacement: path.resolve(__dirname, "test/__mocks__/raycast.api.ts"),
+      },
     ],
   },
 });

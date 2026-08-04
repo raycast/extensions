@@ -15,6 +15,9 @@ import {
   getEdhrecUrl,
   copyCardImage,
   FEEDBACK_URL,
+  SCRYFALL_API_BASE,
+  SCRYFALL_HEADERS,
+  parseScryfallResponse,
 } from "./shared";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -118,13 +121,24 @@ function CollectionGrid({
 
   // Search mode: query Scryfall and filter results to collection IDs
   const { isLoading: isSearchLoading, data: searchData } = useFetch<ScryfallSearchResponse>(
-    `https://api.scryfall.com/cards/search?q=${encodeURIComponent(debouncedSearch)}&unique=prints`,
+    `${SCRYFALL_API_BASE}/cards/search?q=${encodeURIComponent(debouncedSearch)}&unique=prints`,
     {
+      headers: SCRYFALL_HEADERS,
+      parseResponse: parseScryfallResponse,
       execute: isSearchMode,
       keepPreviousData: true,
       onError: (err) => {
         const isNotFound = err.message.includes("404") || err.message.includes("No cards found");
-        if (!isNotFound) {
+        const isBadSyntax =
+          err.message.includes("invalid") || err.message.includes("ignored") || err.message.includes("Bad Request");
+        const isRateLimited = err.message.includes("429") || err.message.toLowerCase().includes("too many");
+        if (isRateLimited) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Rate limited by Scryfall",
+            message: "Wait a moment and try again.",
+          });
+        } else if (!isNotFound && !isBadSyntax) {
           showToast({ style: Toast.Style.Failure, title: "Search failed", message: err.message });
         }
       },
@@ -138,12 +152,13 @@ function CollectionGrid({
   }, [collectionIds, isSearchMode]);
 
   const { isLoading: isBrowseLoading, data: browseData } = useFetch<{ data: Card[] }>(
-    "https://api.scryfall.com/cards/collection",
+    `${SCRYFALL_API_BASE}/cards/collection`,
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { ...SCRYFALL_HEADERS, "Content-Type": "application/json" },
       body: browsePayload ?? undefined,
-      execute: !isSearchMode && browsePayload !== null,
+      parseResponse: parseScryfallResponse,
+      execute: !isSearchMode && browsePayload !== null && collectionIds.length > 0,
       keepPreviousData: true,
       onError: (err) => {
         showToast({ style: Toast.Style.Failure, title: "Failed to load collection", message: err.message });

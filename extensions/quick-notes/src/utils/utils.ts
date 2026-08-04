@@ -6,6 +6,7 @@ import path from "path";
 import { TODO_FILE_PATH } from "../services/config";
 import { marked } from "marked";
 import striptags from "striptags";
+import { parseMarkdownNote, serializeNoteToMarkdown } from "./frontmatter";
 
 export const getInitialValuesFromFile = (filepath: string): [] => {
   try {
@@ -36,15 +37,23 @@ export const getSortHumanReadable = (sort: Sort): string => {
   }
 };
 
-export const getSyncWithDirectory = async (dirPath?: string): Promise<Note[]> => {
+export interface SyncResult {
+  notes: Note[];
+  // Files superseded by a title rename in frontmatter; the note is re-exported
+  // under its new slugified filename, so these can be trashed after export
+  staleFiles: string[];
+}
+
+export const getSyncWithDirectory = async (dirPath?: string): Promise<SyncResult> => {
   if (!dirPath) {
     return Promise.reject("No directory path");
   }
   if (!fs.existsSync(dirPath) || !fs.lstatSync(dirPath).isDirectory()) {
     return Promise.reject(`Invalid Folder: ${dirPath}`);
   }
-  return new Promise<Note[]>((resolve, reject) => {
+  return new Promise<SyncResult>((resolve, reject) => {
     const notes = getInitialValuesFromFile(TODO_FILE_PATH) as Note[];
+    const staleFiles: string[] = [];
     fs.readdir(dirPath, (err: NodeJS.ErrnoException | null, files: string[]) => {
       if (err) {
         reject(`Error reading directory: ${dirPath}`);
@@ -60,43 +69,49 @@ export const getSyncWithDirectory = async (dirPath?: string): Promise<Note[]> =>
               if (err) {
                 reject(`Error reading file: ${file}`);
               } else {
-                // if it's an existing note, only update the body
-                const existingNote = notes.find((note) => slugify(note.title) === path.basename(file, ".md"));
+                const fileTitle = path.basename(file, ".md");
+                const parsed = parseMarkdownNote(data.toString());
+
+                // if it's an existing note, only update the body (and tags if the file has frontmatter)
+                const existingNote = notes.find(
+                  (note) => slugify(note.title) === fileTitle || (parsed.title && note.title === parsed.title),
+                );
                 if (existingNote) {
-                  existingNote.body = data.toString();
+                  existingNote.body = parsed.body;
+                  if (parsed.hasFrontmatter && parsed.tags) {
+                    existingNote.tags = parsed.tags;
+                  }
+                  if (file !== `${slugify(existingNote.title)}.md`) {
+                    staleFiles.push(notePath);
+                  }
                   resolve(existingNote);
                   return;
                 }
 
                 // new note
-                const body = data.toString();
-                const title = path.basename(file, ".md");
-                const createdAt = fs.statSync(notePath).birthtime;
-                const updatedAt = fs.statSync(notePath).mtime;
+                const stats = fs.statSync(notePath);
+                const title = parsed.title ?? fileTitle;
                 const noteData: Note = {
                   title,
-                  body,
-                  tags: [],
+                  body: parsed.body,
+                  tags: parsed.tags ?? [],
                   is_draft: false,
-                  createdAt: createdAt ?? new Date(),
-                  updatedAt: updatedAt ?? new Date(),
+                  createdAt: parsed.createdAt ?? stats.birthtime ?? new Date(),
+                  updatedAt: stats.mtime ?? new Date(),
                 };
+                if (file !== `${slugify(title)}.md`) {
+                  staleFiles.push(notePath);
+                }
                 resolve(noteData);
               }
             });
           });
         });
         Promise.all(filePromises)
-          .then((noteData) => {
-            const updatedNotes = noteData.map((note) => {
-              const newNote = notes.find((n) => n.title === note.title);
-              if (newNote) {
-                return newNote;
-              }
-              return note;
-            });
-
-            resolve(updatedNotes);
+          .then((syncedNotes) => {
+            // Keep notes without a file in the folder so a sync can never wipe unsaved notes
+            const unsyncedNotes = notes.filter((note) => !syncedNotes.includes(note));
+            resolve({ notes: [...new Set([...syncedNotes, ...unsyncedNotes])], staleFiles });
           })
           .catch((error) => {
             reject(error);
@@ -115,8 +130,7 @@ export const exportNotes = async (filePath: string, notes: Note[]) => {
   await Promise.all(
     notes.map(async (note) => {
       const notePath = path.join(filePath, `${slugify(note.title)}.md`);
-      const noteBody = `${note.body}`;
-      await fs.promises.writeFile(notePath, noteBody);
+      await fs.promises.writeFile(notePath, serializeNoteToMarkdown(note));
     }),
   );
 };
@@ -125,7 +139,13 @@ export const deleteNotesInFolder = async (dirPath: string, filenames: string[]):
   if (!fs.existsSync(dirPath) || !fs.lstatSync(dirPath).isDirectory()) {
     return Promise.reject(`Invalid Folder: ${dirPath}`);
   }
-  await trash(filenames.map((file) => path.join(dirPath, `${slugify(file)}.md`)));
+  // Only trash files that exist; notes may never have been saved to the folder
+  const filePaths = filenames
+    .map((file) => path.join(dirPath, `${slugify(file)}.md`))
+    .filter((filePath) => fs.existsSync(filePath));
+  if (filePaths.length > 0) {
+    await trash(filePaths);
+  }
 };
 
 export const getOldRenamedTitles = (oldNotes: Note[], newNotes: Note[]): string[] => {

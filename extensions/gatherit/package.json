@@ -1,0 +1,73 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gatherit",
+  "title": "Gather",
+  "description": "Search, copy, and save your Gather design references without leaving the keyboard.",
+  "icon": "extension-icon.png",
+  "author": "samuel_monteiro",
+  "categories": [
+    "Design Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-gather",
+      "title": "Search Gather",
+      "subtitle": "Gather",
+      "description": "Search your Gather reference library and copy any reference.",
+      "mode": "view"
+    },
+    {
+      "name": "save-to-gather",
+      "title": "Save to Gather",
+      "subtitle": "Gather",
+      "description": "Save a link to your Gather library.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-references",
+      "title": "Search References",
+      "description": "Search the user's Gather design-reference library by query, category, tags, and kind."
+    },
+    {
+      "name": "get-reference",
+      "title": "Get Reference",
+      "description": "Fetch one Gather reference by id with its full metadata."
+    },
+    {
+      "name": "list-categories",
+      "title": "List Categories",
+      "description": "List the user's Gather categories with reference counts."
+    },
+    {
+      "name": "save-reference",
+      "title": "Save Reference",
+      "description": "Save a link or image URL to the user's Gather library."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.14.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

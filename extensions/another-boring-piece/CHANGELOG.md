@@ -1,5 +1,11 @@
 # Changelog
 
+## [Windows Support] - 2026-06-30
+
+- Added Windows support for setting wallpapers across all commands (Today's Wallpapers, Set Random Wallpaper, History, and Auto Switch Wallpaper).
+- Wallpaper: uses PowerShell + Win32 `SystemParametersInfo` on Windows; macOS continues to use AppleScript.
+- Downloads now resolve the home directory cross-platform so saving to `~/Downloads` works on Windows.
+
 ## [Metadata Screenshot Cleanup] - 2026-06-03
 
 - Converted metadata screenshots from JPG to PNG format.

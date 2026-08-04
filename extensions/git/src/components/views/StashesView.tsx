@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Keyboard } from "@raycast/api";
 import { StashApplyAction, StashDropAction, StashRenameAction } from "../actions/StashActions";
 import "../../utils/date-utils";
 import { Stash } from "../../types";
@@ -9,7 +9,7 @@ export function StashesView(context: RepositoryContext & NavigationContext) {
   return (
     <List
       isLoading={context.stashes.isLoading}
-      navigationTitle={context.gitManager.repoName}
+      navigationTitle={context.gitManager.worktreeOrigin?.displayName ?? context.gitManager.repoName}
       searchBarPlaceholder="Search stashes by message, author..."
       searchBarAccessory={WorkspaceNavigationDropdown(context)}
       actions={
@@ -70,7 +70,7 @@ function RefreshStashesAction(context: RepositoryContext & NavigationContext) {
       title="Refresh"
       icon={Icon.ArrowClockwise}
       onAction={context.stashes.revalidate}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
     />
   );
 }

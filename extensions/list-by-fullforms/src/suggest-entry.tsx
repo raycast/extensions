@@ -41,9 +41,13 @@ import {
   showToast,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { useEffect } from "react";
-import { ApiError, apiBase, apiFetch } from "./lib/api";
-import { useListPicker } from "./lib/useListPicker";
+import { ApiError, apiBase, apiFetch, errorMessage } from "./lib/api";
+import { iconForList } from "./lib/listIconCatalog";
+import {
+  useAutoSelectFirstList,
+  requireListId,
+  useListPicker,
+} from "./lib/useListPicker";
 
 interface FormValues {
   listId: string;
@@ -65,14 +69,8 @@ export default function SuggestEntryCommand() {
   const { handleSubmit, itemProps, setValue, focus, values } =
     useForm<FormValues>({
       onSubmit: async (input) => {
-        const listId = Number(input.listId);
-        if (!Number.isFinite(listId)) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Pick a list first",
-          });
-          return;
-        }
+        const listId = await requireListId(input.listId);
+        if (listId === null) return;
 
         const toast = await showToast({
           style: Toast.Style.Animated,
@@ -112,11 +110,7 @@ export default function SuggestEntryCommand() {
     });
 
   const firstListId = listsByWorkspace[0]?.lists[0]?.id;
-  useEffect(() => {
-    if (firstListId !== undefined && !values.listId) {
-      setValue("listId", String(firstListId));
-    }
-  }, [firstListId, setValue, values.listId]);
+  useAutoSelectFirstList(firstListId, values.listId, setValue);
 
   if (!isLoading && totalLists === 0) {
     return (
@@ -124,11 +118,15 @@ export default function SuggestEntryCommand() {
         markdown={
           "# No accessible lists\n\n" +
           "You're signed in, but the API token's account isn't a member of any list. " +
-          "Open the web app to create a list or accept an invitation."
+          "Create one in the web app, or accept a workspace invitation, then come back."
         }
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Open List" url={apiBase()} />
+            <Action.OpenInBrowser
+              title="Create a List"
+              icon={Icon.Plus}
+              url={`${apiBase()}/create`}
+            />
             <Action
               title="Open Preferences"
               onAction={openExtensionPreferences}
@@ -167,6 +165,12 @@ export default function SuggestEntryCommand() {
                 key={l.id}
                 value={String(l.id)}
                 title={l.name}
+                icon={iconForList({
+                  icon: l.icon,
+                  color: l.color,
+                  name: l.name,
+                  id: l.id,
+                })}
               />
             ))}
           </Form.Dropdown.Section>
@@ -175,7 +179,7 @@ export default function SuggestEntryCommand() {
 
       <Form.TextField
         title="Entry"
-        placeholder="e.g. NASA"
+        placeholder="Example: NASA"
         {...itemProps.entry}
       />
 
@@ -230,6 +234,5 @@ function friendlySuggestionError(error: unknown): {
       message: error.message,
     };
   }
-  const message = error instanceof Error ? error.message : String(error);
-  return { title: "Could not submit suggestion", message };
+  return { title: "Could not submit suggestion", message: errorMessage(error) };
 }

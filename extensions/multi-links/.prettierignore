@@ -1,0 +1,2 @@
+# Test fixtures are raw sample data, not source — don't reformat them.
+src/__fixtures__/

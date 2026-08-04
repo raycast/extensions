@@ -5,6 +5,7 @@ import Details from "@/views/Details";
 import { copyFileToClipboard } from "@/functions/copyFileToClipboard";
 import { saveImage } from "@/functions/saveImage";
 import { setWallpaper } from "@/functions/setWallpaper";
+import { addUtmParams } from "@/functions/utils";
 import { SearchResult } from "@/types";
 
 interface Props {
@@ -39,6 +40,7 @@ function ActionsContent({ details = false, item, unlike }: Props) {
 
   const imageUrl = item.urls.raw || item.urls.full || item.urls.regular || item.urls.small;
   const clipboardUrl = item.urls[downloadSize] || imageUrl;
+  const downloadLocation = item.links?.download_location;
 
   const handleLike = async () => {
     await likeOrDislike(item.id, liked);
@@ -58,11 +60,15 @@ function ActionsContent({ details = false, item, unlike }: Props) {
           onAction={handleLike}
         />
         {item.links?.html && (
-          <Action.OpenInBrowser url={item.links.html} title="Open Original" shortcut={Keyboard.Shortcut.Common.Open} />
+          <Action.OpenInBrowser
+            url={addUtmParams(item.links.html)}
+            title="Open Original"
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
         )}
         {item.user?.links?.html && (
           <Action.OpenInBrowser
-            url={item.user.links.html}
+            url={addUtmParams(item.user.links.html)}
             icon={Icon.Person}
             shortcut={Keyboard.Shortcut.Common.OpenWith}
             title="Open Author"
@@ -77,13 +83,15 @@ function ActionsContent({ details = false, item, unlike }: Props) {
               title="Copy to Clipboard"
               icon={Icon.Clipboard}
               shortcut={Keyboard.Shortcut.Common.Copy}
-              onAction={() => copyFileToClipboard({ url: clipboardUrl, id: `${item.id}-${downloadSize}` })}
+              onAction={() =>
+                copyFileToClipboard({ url: clipboardUrl, id: `${item.id}-${downloadSize}`, downloadLocation })
+              }
             />
             <Action
               title="Download Image"
               icon={Icon.Desktop}
               shortcut={Keyboard.Shortcut.Common.Save}
-              onAction={() => saveImage({ url: imageUrl, id: String(item.id) })}
+              onAction={() => saveImage({ url: imageUrl, id: String(item.id), downloadLocation })}
             />
           </ActionPanel.Section>
 
@@ -92,13 +100,13 @@ function ActionsContent({ details = false, item, unlike }: Props) {
               title="Current Monitor"
               icon={Icon.Desktop}
               shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-              onAction={() => setWallpaper({ url: imageUrl, id: String(item.id) })}
+              onAction={() => setWallpaper({ url: imageUrl, id: String(item.id), downloadLocation })}
             />
             <Action
               title="Every Monitor"
               icon={Icon.Desktop}
               shortcut={{ modifiers: ["shift", "opt"], key: "w" }}
-              onAction={() => setWallpaper({ url: imageUrl, id: String(item.id), every: true })}
+              onAction={() => setWallpaper({ url: imageUrl, id: String(item.id), every: true, downloadLocation })}
             />
           </ActionPanel.Section>
         </>
@@ -107,7 +115,7 @@ function ActionsContent({ details = false, item, unlike }: Props) {
       <ActionPanel.Section title="Links">
         {item.links?.html && (
           <Action.CopyToClipboard
-            content={item.links.html}
+            content={addUtmParams(item.links.html)}
             title="Copy URL to Clipboard"
             icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
@@ -123,7 +131,7 @@ function ActionsContent({ details = false, item, unlike }: Props) {
         )}
         {item.user?.links?.html && (
           <Action.CopyToClipboard
-            content={item.user.links.html}
+            content={addUtmParams(item.user.links.html)}
             title="Copy Author URL to Clipboard"
             icon={Icon.Clipboard}
             shortcut={Keyboard.Shortcut.Common.CopyName}

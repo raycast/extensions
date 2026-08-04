@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, Icon, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
 import { getAttachmentType, sendMessage } from "../helpers";
-import { Message } from "../hooks/useMessages";
+import type { Message } from "../types";
 
 type ReplyProps = {
   message: Message;

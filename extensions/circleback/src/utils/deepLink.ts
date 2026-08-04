@@ -7,8 +7,7 @@ const CIRCLEBACK_APP_NAME = "Circleback";
 async function isDesktopAppInstalled() {
   const systemApps = await getApplications();
   const userApps = await getApplications("~/Applications");
-  const hasAppInstalled = (apps: typeof systemApps) =>
-    apps.some(({ name }) => name === CIRCLEBACK_APP_NAME);
+  const hasAppInstalled = (apps: typeof systemApps) => apps.some(({ name }) => name === CIRCLEBACK_APP_NAME);
   return hasAppInstalled(systemApps) || hasAppInstalled(userApps);
 }
 
@@ -27,7 +26,7 @@ async function resolveUrl(path: string): Promise<string> {
   return buildWebUrl(path);
 }
 
-export async function openMeeting(meetingId: number) {
+export async function openMeeting(meetingId: string) {
   const url = await resolveUrl(`/meetings/${meetingId}`);
   await open(url);
 }

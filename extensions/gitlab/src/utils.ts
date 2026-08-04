@@ -1,7 +1,6 @@
-import { Clipboard, Image, LocalStorage, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, Image, Keyboard } from "@raycast/api";
 import { Project } from "./gitlabapi";
 import { getSVGText, GitLabIcons } from "./icons";
-import * as fs from "fs/promises";
 import * as fsSync from "fs";
 import { constants } from "fs";
 import * as crypto from "crypto";
@@ -13,6 +12,10 @@ import { emojiSymbol } from "./components/status/utils";
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
 
+export const copyShortcut: Keyboard.Shortcut = { modifiers: ["cmd"], key: "." };
+export const copySecondaryShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "." };
+export const copyMarkdownShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "ctrl"], key: "." };
+
 export function projectIconUrl(project: Project): string | undefined {
   let result: string | undefined;
   // TODO check also namespace for icon
@@ -22,6 +25,17 @@ export function projectIconUrl(project: Project): string | undefined {
     result = project.owner.avatar_url;
   }
   return result;
+}
+
+export function projectFullPathFromWebUrl(webUrl: string): string {
+  if (!webUrl) {
+    return "";
+  }
+  try {
+    return new URL(webUrl).pathname.replace(/^\//, "");
+  } catch {
+    return "";
+  }
 }
 
 export function getFirstChar(text: string): string {
@@ -46,62 +60,9 @@ export function projectIcon(project: Project): Image.ImageLike {
   return { source: result, mask: Image.Mask.Circle, fallback: svgSource() };
 }
 
-export function toDateString(d: string): string {
-  const date = new Date(d);
-  const mo = new Intl.DateTimeFormat("en", { month: "short" }).format(date);
-  const da = new Intl.DateTimeFormat("en", { day: "2-digit" }).format(date);
-  return `${da}. ${mo}`;
-}
-
-export function toLongDateString(d: string) {
-  const date = new Date(d);
-  return date.toLocaleDateString();
-}
-
 export function getIdFromGqlId(id: string): number {
   const splits = id.split("/");
   return parseInt(splits.pop() || "");
-}
-
-export function currentSeconds(): number {
-  return Date.now() / 1000;
-}
-
-export async function getCacheObject<T>(key: string, seconds: number): Promise<T | undefined> {
-  console.log(`get cache object ${key} from store`);
-  const cache = await LocalStorage.getItem(key);
-  console.log("after local storage");
-  console.log(cache);
-  if (cache) {
-    const cache_data = JSON.parse(cache.toString());
-    const timestamp = currentSeconds();
-    const delta = timestamp - cache_data.timestamp;
-    if (delta > seconds) {
-      return undefined;
-    } else {
-      return cache_data.payload;
-    }
-  }
-  return undefined;
-}
-
-export async function setCacheObject<T>(key: string, payload: T): Promise<void> {
-  const cache_data = {
-    timestamp: currentSeconds(),
-    payload: payload,
-  };
-  console.log(key);
-  console.log(cache_data);
-  const text = JSON.stringify(cache_data);
-  console.log(text.length);
-  await LocalStorage.setItem(key, text);
-}
-
-export async function fileExists(filename: string): Promise<boolean> {
-  return fs
-    .access(filename, constants.F_OK | constants.W_OK | constants.R_OK)
-    .then(() => true)
-    .catch(() => false);
 }
 
 export function fileExistsSync(filename: string): boolean {
@@ -113,11 +74,35 @@ export function fileExistsSync(filename: string): boolean {
   }
 }
 
-export function replaceAll(str: string, find: RegExp, replace: string): string {
+function replaceAll(str: string, find: RegExp, replace: string): string {
   return str.replace(find, replace);
 }
 
-export function optimizeMarkdownText(text: string, baseUrl?: string): string {
+function resolveMarkdownUrl(link: string, baseUrl: string, projectId?: number): string {
+  const trimmed = link.trim();
+  if (/^(https?:|mailto:|#)/i.test(trimmed)) {
+    return trimmed;
+  }
+  const uploadsPath = trimmed.replace(/^\//, "");
+  if (projectId && uploadsPath.startsWith("uploads/")) {
+    try {
+      const instanceUrl = new URL(baseUrl).origin;
+      return urljoin(instanceUrl, `-/project/${projectId}`, uploadsPath);
+    } catch {
+      // fall through
+    }
+  }
+  try {
+    if (trimmed.startsWith("/")) {
+      return new URL(trimmed, baseUrl).href;
+    }
+    return urljoin(baseUrl, trimmed);
+  } catch {
+    return trimmed;
+  }
+}
+
+export function optimizeMarkdownText(text: string, baseUrl?: string, projectId?: number): string {
   let result = text;
   // remove html comments
   result = replaceAll(result, /<!--[\s\S]*?-->/g, "");
@@ -131,81 +116,61 @@ export function optimizeMarkdownText(text: string, baseUrl?: string): string {
   // replace all emojis
   result = result.replace(/:(\w+):/g, (original, emoji) => emojiSymbol(emoji) ?? original);
 
+  if (baseUrl) {
+    result = result.replace(/<img\b[^>]*\bsrc=["']([^"']+)["'][^>]*\/?>/gi, (_, source) => {
+      return `![](${resolveMarkdownUrl(source, baseUrl, projectId)})`;
+    });
+    result = result.replace(/!?\[([^[\]]*)\]\(([^)]+)\)/g, (match, label, link) => {
+      const resolved = resolveMarkdownUrl(link, baseUrl, projectId);
+      const image = match.startsWith("!") ? "!" : "";
+      return `${image}[${label}](${resolved})`;
+    });
+  }
+
   // remove inline HTML tags
   result = replaceAll(result, /<[^>]+>/g, "");
-
-  if (baseUrl) {
-    // replace relative links with absolute ones
-    try {
-      const regexMdLinks = /\[([^[]+)\](\(.*\))/gm;
-      const matches = result.match(regexMdLinks);
-      if (matches) {
-        const singleMatch = /\[([^[]+)\]\((.*)\)/;
-        for (let i = 0; i < matches.length; i++) {
-          const text = singleMatch.exec(matches[i]);
-          if (text) {
-            const word = text[1];
-            const link = text[2].trim();
-            if (link.startsWith("/")) {
-              const fullUrl = urljoin(baseUrl, link);
-              const mdUrl = `[${word}](${fullUrl})`;
-              result = result.replace(text[0], mdUrl);
-            }
-          }
-        }
-      }
-    } catch {
-      // Do nothing
-    }
-  }
 
   return result;
 }
 
-export function hashString(text: string): string {
+export function hashRecord(record: Record<string, unknown>, prefix?: string | undefined): string {
   const sha256 = crypto.createHash("sha256");
-  sha256.update(text);
-  return sha256.digest("hex");
-}
-
-export function hashRecord(rec: Record<string, unknown>, prefix?: string | undefined): string {
-  const sha256 = crypto.createHash("sha256");
-  Object.entries(rec)
+  Object.entries(record)
     .sort()
-    .forEach(([k, v]) => {
-      sha256.update(`${k}${v}`);
+    .forEach(([key, value]) => {
+      sha256.update(`${key}${value}`);
     });
-  const h = sha256.digest("hex");
+  const hashHex = sha256.digest("hex");
   if (prefix) {
-    return `${prefix}_${h}`;
+    return `${prefix}_${hashHex}`;
   } else {
-    return h;
+    return hashHex;
   }
 }
 
 export function capitalizeFirstLetter(name: string): string {
-  if (!name || name.length <= 0) {
+  if (!name) {
     return name;
   }
   return name.replace(/^./, name[0].toUpperCase());
 }
 
 export function toFormValues(values: Record<string, unknown>): Record<string, string> {
-  const val: Record<string, string> = {};
-  for (const [k, v] of Object.entries(values)) {
-    if (v) {
-      if (Array.isArray(v)) {
-        if (v.length > 0) {
-          val[k] = v.join(",");
+  const formValues: Record<string, string> = {};
+  for (const [key, value] of Object.entries(values)) {
+    if (value) {
+      if (Array.isArray(value)) {
+        if (value.length > 0) {
+          formValues[key] = value.join(",");
         } else {
           continue;
         }
       } else {
-        val[k] = String(v);
+        formValues[key] = String(value);
       }
     }
   }
-  return val;
+  return formValues;
 }
 
 export function stringToSlug(str: string): string {
@@ -216,8 +181,8 @@ export function stringToSlug(str: string): string {
   const from = "åàáãäâèéëêìíïîòóöôùúüûñç·/_,:;";
   const to = "aaaaaaeeeeiiiioooouuuunc------";
 
-  for (let i = 0, l = from.length; i < l; i++) {
-    str = str.replace(new RegExp(from.charAt(i), "g"), to.charAt(i));
+  for (let index = 0, fromLength = from.length; index < fromLength; index++) {
+    str = str.replace(new RegExp(from.charAt(index), "g"), to.charAt(index));
   }
 
   str = str
@@ -241,26 +206,26 @@ export function tokenizeQueryText(query: string | undefined, namedKeywords: stri
   if (query) {
     const splits = query.split(" ");
     const texts: string[] = [];
-    for (const s of splits) {
-      if (s.indexOf("=") > 0) {
-        const parts = s.split("=");
+    for (const segment of splits) {
+      if (segment.indexOf("=") > 0) {
+        const parts = segment.split("=");
         const keyRaw = parts[0];
         const negative = keyRaw.endsWith("!");
         const key = (negative ? keyRaw.slice(0, keyRaw.length - 1) : keyRaw).toLocaleLowerCase();
         if (namedKeywords.includes(key)) {
-          const val = parts.slice(1).join("=");
-          if (val) {
+          const value = parts.slice(1).join("=");
+          if (value) {
             const pairs = negative ? negativePairs : positivePairs;
             if (key in pairs) {
-              pairs[key].push(val);
+              pairs[key].push(value);
             } else {
-              pairs[key] = [val];
+              pairs[key] = [value];
             }
           }
           continue;
         }
       }
-      texts.push(s);
+      texts.push(segment);
     }
     text = texts.join(" ");
   }
@@ -287,26 +252,123 @@ export function formatDate(input: Date | string): string {
   return timeAgo.format(date) as string;
 }
 
-export function now(): Date {
-  return new Date();
+/** Absolute date/time string used for tooltips (the relative form is `formatDate`). */
+export function formatDateTime(input: Date | string): string {
+  const date = typeof input === "string" ? new Date(input) : input;
+  return date.toLocaleString();
 }
 
-export function daysInSeconds(days: number): number {
-  return days * 24 * 60 * 60;
+export function formatDurationHuman(totalSeconds: number): string {
+  let remaining = Math.floor(totalSeconds);
+  const days = Math.floor(remaining / 86400);
+  remaining %= 86400;
+  const hours = Math.floor(remaining / 3600);
+  remaining %= 3600;
+  const minutes = Math.floor(remaining / 60);
+  const seconds = remaining % 60;
+  const parts: string[] = [];
+  if (days > 0) {
+    parts.push(`${days}d`);
+  }
+  if (hours > 0) {
+    parts.push(`${hours}h`);
+  }
+  if (minutes > 0) {
+    parts.push(`${minutes} min`);
+  }
+  if (seconds > 0 || parts.length === 0) {
+    parts.push(`${seconds} sec`);
+  }
+  return parts.join(" ");
 }
 
-export function showErrorToast(message: string, title?: string): Promise<Toast> {
-  const t = title || "Something went wrong";
-  return showToast({
-    style: Toast.Style.Failure,
-    title: t,
-    message: message,
-    primaryAction: {
-      title: "Copy Error Message",
-      onAction: (toast) => Clipboard.copy(`${t}: ${toast.message ?? ""}`),
-      shortcut: { modifiers: ["cmd", "shift"], key: "c" },
-    },
-  });
+export interface Preferences {
+  instance: string;
+  authType?: "pat" | "oauth";
+  token: string;
+  oauthClientId?: string;
+  artifactDownloadDirectory?: string;
+  primaryaction: "browser" | "detail";
+  poptoroot: boolean;
+  includeEpicAncestor: boolean;
+  ignorecerts: boolean;
+  customcacert?: string;
+  customcert?: string;
+  excludeTodoAuthorUsernames?: string;
+  active?: boolean;
+  flatlist?: boolean;
+  maxtodos?: string;
+  alwaysshow?: boolean;
+  showtext?: boolean;
+  grayicon?: boolean;
+  maxitems?: string;
+  assignedLabels?: string;
+  createdLabels?: string;
+  reviewLabels?: string;
+  includeLabels?: string;
+  excludeLabels?: string;
+  hideArchived?: boolean;
+}
+
+export function getPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
+}
+
+const DEFAULT_GITLAB_INSTANCE = "https://gitlab.com";
+
+// OAuth scopes requested during the PKCE flow. Not user-configurable: the
+// OAuth application's scope checkboxes are the real security gate, and a
+// textfield for scopes mostly produces typos and cryptic `invalid_scope`
+// errors. The application must be registered with at least these scopes.
+export const OAUTH_SCOPES = ["api", "read_user", "read_repository"] as const;
+
+export function getInstance(preferences: Preferences = getPreferences()): string {
+  return (preferences.instance.trim() || DEFAULT_GITLAB_INSTANCE).replace(/\/+$/, "");
+}
+
+export function isOAuthEnabled(preferences: Preferences = getPreferences()): boolean {
+  return preferences.authType === "oauth";
+}
+
+export function requireOAuthClientId(preferences: Preferences = getPreferences()): string {
+  const clientId = preferences.oauthClientId?.trim();
+  if (!clientId) {
+    throw new Error(
+      "GitLab OAuth Application ID is not configured. Open the GitLab extension preferences and either set the Application ID or switch Authentication back to Personal Access Token.",
+    );
+  }
+  return clientId;
+}
+
+export function requirePersonalAccessToken(preferences: Preferences = getPreferences()): string {
+  const token = preferences.token?.trim();
+  if (!token) {
+    throw new Error(
+      "GitLab API Token is not configured. Open the GitLab extension preferences and either set the API Token or switch Authentication to OAuth.",
+    );
+  }
+  return token;
+}
+
+export function parseCommaSeparatedPreference(value: string | undefined): string[] {
+  return (value ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter((item) => item.length > 0);
+}
+
+export function getBoundedPreferenceNumber(
+  preferenceText: string | undefined,
+  params: { min?: number; max?: number; default?: number } = {},
+): number {
+  const boundMin = params.min ?? 1;
+  const boundMax = params.max ?? 100;
+  const fallback = params.default ?? 10;
+  const max = Number(preferenceText ?? "");
+  if (isNaN(max) || max < boundMin || max > boundMax) {
+    return fallback;
+  }
+  return max;
 }
 
 export const isWindows = process.platform === "win32";
@@ -319,8 +381,4 @@ export function shortify(text: string, maxLength: number): string {
     return text.slice(0, maxLength);
   }
   return text.slice(0, maxLength - 3) + "...";
-}
-
-export function isNumber(value?: unknown): value is number {
-  return typeof value === "number" && !isNaN(value);
 }

@@ -1,5 +1,10 @@
 # Raycast Zoxide Changelog
 
+## [Fix Opening Directories] - 2026-07-08
+
+- [Fixed] Opening a directory (most noticeably "Open in Finder") could land on a default or last-used location instead of the selected folder on recent Raycast versions; directories now open reliably at the correct location
+- [Changed] Updated dependencies to their latest compatible versions
+
 ## [Add Features from Zoxide Plus] - 2026-06-07
 
 Inspired by [UnlockHomes](https://github.com/UnlockHomes)' [similar zoxide extension](https://github.com/raycast/extensions/pull/27348), this update brings over several of its ideas — a configurable search mode, opening directories in your terminal or editor, and more per-result actions.

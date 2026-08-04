@@ -1,5 +1,6 @@
 import { directCommand } from "./directCommand";
 
-export default async function ToggleVideo() {
-  await directCommand("leave-call", (msg) => (msg.meetingUpdate.meetingState?.isCameraOn ? "Camera on" : "Camera off"));
+export default async function LeaveCall() {
+  // Leaving a call has no resulting state worth surfacing, so we show no HUD on success.
+  await directCommand("leave-call");
 }

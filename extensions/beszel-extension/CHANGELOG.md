@@ -1,5 +1,15 @@
 # Beszel Changelog
 
+## [2.0.1] - 2026-07-09
+
+- Fixed system detail fields that showed as `undefined` with recent Beszel
+  agent versions (Network, Hostname, Chip, and Kernel)
+- Network now reads the current bandwidth field and displays a human readable
+  rate
+- Hostname falls back to the connection host when the agent does not report one
+- Added GPU, load average, temperature, battery, and extra filesystem metrics
+  when reported by the agent
+
 ## [2.0.0] - 2025-05-07
 
 - Added AI tools for interacting with Beszel. Note that this also changes the

@@ -2,9 +2,15 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mymind",
   "title": "mymind",
-  "description": "Manage and add your thoughts to my mind",
+  "description": "Search, save, upload, and organize your mymind library with the official API",
   "icon": "extension-icon.png",
   "author": "arian",
+  "access": "public",
+  "owner": "mymind",
+  "contributors": [
+    "yannglt",
+    "peduarte"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -16,32 +22,292 @@
   ],
   "commands": [
     {
-      "name": "search-my-mind",
-      "title": "Search My Mind",
+      "name": "search-mymind",
+      "title": "Search mymind",
       "subtitle": "mymind",
-      "description": "Go through past mind entries",
-      "mode": "view"
+      "description": "Search your library, filter by type, and open rich item details",
+      "mode": "view",
+      "keywords": [
+        "mymind",
+        "search",
+        "find",
+        "objects",
+        "library",
+        "details"
+      ]
     },
     {
-      "name": "add-a-new-note",
-      "title": "Add a New Note",
+      "name": "search-spaces",
+      "title": "Search Spaces",
       "subtitle": "mymind",
-      "description": "Adds a new note to mymind",
-      "mode": "view"
+      "description": "Browse, search, and manage spaces and the items inside them",
+      "mode": "view",
+      "keywords": [
+        "mymind",
+        "spaces",
+        "browse",
+        "folders",
+        "organize",
+        "collections"
+      ]
+    },
+    {
+      "name": "search-tags",
+      "title": "Search Tags",
+      "subtitle": "mymind",
+      "description": "Browse your manual tags and the items inside each tag",
+      "mode": "view",
+      "keywords": [
+        "mymind",
+        "tags",
+        "browse",
+        "labels",
+        "organize"
+      ]
+    },
+    {
+      "name": "save-to-mymind",
+      "title": "Save to mymind",
+      "subtitle": "mymind",
+      "description": "Save links, notes, and files with tags, spaces, and attached notes",
+      "mode": "view",
+      "keywords": [
+        "mymind",
+        "save",
+        "note",
+        "link",
+        "capture",
+        "upload",
+        "file",
+        "image",
+        "pdf",
+        "video"
+      ]
+    },
+    {
+      "name": "show-mymind-menu-bar",
+      "title": "Show mymind Menu Bar",
+      "subtitle": "mymind",
+      "description": "Open quick save and search actions for mymind from the menu bar",
+      "mode": "menu-bar",
+      "keywords": [
+        "mymind",
+        "menu bar",
+        "save",
+        "search",
+        "spaces",
+        "quick access"
+      ]
     }
   ],
+  "tools": [
+    {
+      "name": "search-mymind",
+      "title": "Search mymind",
+      "description": "Search the user's mymind library by keyword with an optional type filter and return concise, structured results"
+    },
+    {
+      "name": "get-object",
+      "title": "Get Object",
+      "description": "Fetch the full details of a single mymind object by id, including its note body and attached notes"
+    },
+    {
+      "name": "list-spaces",
+      "title": "List Spaces",
+      "description": "List the user's mymind spaces (collections) with their ids, names, and colors"
+    },
+    {
+      "name": "list-tags",
+      "title": "List Tags",
+      "description": "List the user's own manual tags so they can be reused when tagging items"
+    },
+    {
+      "name": "list-space-colors",
+      "title": "List Space Colors",
+      "description": "List the fixed palette of colors (name and hex) that mymind spaces support"
+    },
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "description": "Save a URL to mymind with an optional title, attached note, tags, and space"
+    },
+    {
+      "name": "save-note",
+      "title": "Save Note",
+      "description": "Save a Markdown text note to mymind with an optional title, tags, and space"
+    },
+    {
+      "name": "create-space",
+      "title": "Create Space",
+      "description": "Create a new space (collection) in mymind, auto-assigning a palette color when one isn't specified"
+    },
+    {
+      "name": "update-space",
+      "title": "Update Space",
+      "description": "Rename or recolor an existing mymind space using one of the palette colors",
+      "confirmation": true
+    },
+    {
+      "name": "add-tags-to-object",
+      "title": "Add Tags to Object",
+      "description": "Add one or more tags to an existing mymind object",
+      "confirmation": true
+    },
+    {
+      "name": "remove-tags-from-object",
+      "title": "Remove Tags from Object",
+      "description": "Remove one or more tags from an existing mymind object",
+      "confirmation": true
+    },
+    {
+      "name": "move-object-to-space",
+      "title": "Move Object to Space",
+      "description": "Move an object into a single space, replacing any spaces it currently belongs to",
+      "confirmation": true
+    },
+    {
+      "name": "add-note-to-object",
+      "title": "Add Note to Object",
+      "description": "Attach a Markdown note to an existing mymind object",
+      "confirmation": true
+    },
+    {
+      "name": "pin-object",
+      "title": "Pin Object",
+      "description": "Pin an object to the top of the user's mymind (Top of Mind)",
+      "confirmation": true
+    },
+    {
+      "name": "unpin-object",
+      "title": "Unpin Object",
+      "description": "Remove an object from Top of Mind",
+      "confirmation": true
+    },
+    {
+      "name": "delete-object",
+      "title": "Delete Object",
+      "description": "Delete an object from mymind, moving it to Recently Deleted",
+      "confirmation": true
+    }
+  ],
+  "ai": {
+    "instructions": "mymind is a personal library (\"your mind\") of saved objects: links and articles, text notes, images, videos, and PDFs. Objects can have manual tags and belong to spaces (collections). Object ids and space ids are opaque strings; always obtain them from search-mymind, get-object, or list-spaces rather than guessing. Use search-mymind to find an object and its id before editing, tagging, moving, pinning, or deleting it. Reuse existing tag names from list-tags instead of inventing near-duplicates. To place an item in a space, resolve the space name to its id with list-spaces first. Saving, creating, tagging, moving, pinning, adding notes, and deleting all require a full-access key; with a read-only key these actions fail with a clear message, so don't retry them. Spaces only support mymind's fixed color palette (Red, Pink, Mauve, Peach, Coral, Orange, Yellow, Lime, Mint, Emerald, Teal, Ice, Sky, Cyan, Blue, Iris, Purple, Lavender, Silver, Black; list-space-colors returns the exact names and hex values). When creating a space, don't require or ask the user to choose a color first—just create it: if the user named a supported palette color pass it, otherwise omit the color and create-space auto-assigns one. Never invent an arbitrary hex color for a space. After creating a space, tell the user it was created and which color was assigned, and mention they can ask for a different color. To change a space's name or color later, use update-space (colors must be one of the palette names).",
+    "evals": [
+      {
+        "input": "@mymind find items about typography",
+        "mocks": {
+          "search-mymind": [
+            {
+              "id": "obj_1",
+              "title": "The Elements of Typographic Style",
+              "type": "link",
+              "url": "https://example.com/typography",
+              "mymindUrl": "https://access.mymind.com/everything/#obj_1",
+              "tags": ["design"],
+              "spaceIds": [],
+              "created": "2024-01-01T00:00:00Z",
+              "modified": "2024-01-01T00:00:00Z"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-mymind",
+              "arguments": {
+                "query": {
+                  "includes": "typography"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@mymind what spaces do I have?",
+        "mocks": {
+          "list-spaces": [
+            {
+              "id": "space_1",
+              "name": "Reading List"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "list-spaces"
+          }
+        ]
+      },
+      {
+        "input": "@mymind save https://www.raycast.com to my mind",
+        "mocks": {
+          "save-link": {
+            "id": "obj_2",
+            "title": "Raycast",
+            "type": "link",
+            "url": "https://www.raycast.com",
+            "mymindUrl": "https://access.mymind.com/everything/#obj_2",
+            "tags": [],
+            "spaceIds": [],
+            "created": "2024-01-01T00:00:00Z",
+            "modified": "2024-01-01T00:00:00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-link",
+              "arguments": {
+                "url": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@mymind save a note that says buy oat milk",
+        "mocks": {
+          "save-note": {
+            "id": "obj_3",
+            "title": "Groceries",
+            "type": "note",
+            "mymindUrl": "https://access.mymind.com/everything/#obj_3",
+            "tags": [],
+            "spaceIds": [],
+            "created": "2024-01-01T00:00:00Z",
+            "modified": "2024-01-01T00:00:00Z"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-note",
+              "arguments": {
+                "body": {
+                  "includes": "oat milk"
+                }
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.91.2",
-    "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.2",
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^1.19.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
+    "tsx": "^4.20.6",
     "typescript": "^5.4.5"
   },
   "scripts": {
@@ -49,30 +315,67 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "tsx --test src/**/*.test.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "preferences": [
     {
-      "name": "jwt",
+      "name": "accessKeyId",
       "type": "password",
       "required": true,
-      "title": "JWT Token",
-      "description": "Your MyMind JWT token value. Go to https://arian.gg/blog/setup for instructions."
+      "title": "Key ID",
+      "description": "From your mymind Extensions page."
     },
     {
-      "name": "cid",
+      "name": "accessKeySecret",
       "type": "password",
       "required": true,
-      "title": "CID",
-      "description": "Your MyMind CID value. Go to https://arian.gg/blog/setup for instructions."
+      "title": "Your Private Key",
+      "description": "The private key for the same key, shown only once when you created it."
     },
     {
-      "name": "authenticityToken",
-      "type": "password",
+      "name": "accessLevel",
+      "type": "dropdown",
       "required": true,
-      "title": "Authenticity Token",
-      "description": "Your MyMind Authenticity Token value. Go to https://arian.gg/blog/setup for instructions."
+      "title": "Access Level",
+      "description": "Choose the access level for this key.",
+      "data": [
+        {
+          "title": "Read only",
+          "value": "read-only"
+        },
+        {
+          "title": "Full access",
+          "value": "full-access"
+        }
+      ]
+    },
+    {
+      "name": "mediaGridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Media Grid Size",
+      "description": "Set the card size for media grids.",
+      "default": "4",
+      "data": [
+        {
+          "title": "X-Large (3 Columns)",
+          "value": "3"
+        },
+        {
+          "title": "Large (4 Columns)",
+          "value": "4"
+        },
+        {
+          "title": "Medium (5 Columns)",
+          "value": "5"
+        },
+        {
+          "title": "Small (6 Columns)",
+          "value": "6"
+        }
+      ]
     }
   ],
   "overrides": {

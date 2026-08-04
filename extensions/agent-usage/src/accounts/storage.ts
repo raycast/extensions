@@ -21,6 +21,7 @@ export async function loadAccounts(provider: AccountsProvider): Promise<AccountE
         e !== null &&
         typeof e.id === "string" &&
         typeof e.label === "string" &&
+        (typeof e.accountId === "undefined" || typeof e.accountId === "string") &&
         typeof e.token === "string" &&
         e.token.trim().length > 0,
     );
@@ -34,9 +35,20 @@ export async function saveAccounts(provider: AccountsProvider, accounts: Account
   await LocalStorage.setItem(storageKey(provider), JSON.stringify(accounts));
 }
 
-export async function addAccount(provider: AccountsProvider, label: string, token: string): Promise<AccountEntry> {
+export async function addAccount(
+  provider: AccountsProvider,
+  label: string,
+  token: string,
+  accountId?: string,
+): Promise<AccountEntry> {
   const accounts = await loadAccounts(provider);
-  const entry: AccountEntry = { id: randomUUID(), label: label.trim(), token: token.trim() };
+  const trimmedAccountId = accountId?.trim();
+  const entry: AccountEntry = {
+    id: randomUUID(),
+    label: label.trim(),
+    token: token.trim(),
+    ...(trimmedAccountId ? { accountId: trimmedAccountId } : {}),
+  };
   await saveAccounts(provider, [...accounts, entry]);
   return entry;
 }
@@ -44,7 +56,7 @@ export async function addAccount(provider: AccountsProvider, label: string, toke
 export async function updateAccount(
   provider: AccountsProvider,
   id: string,
-  patch: Partial<Pick<AccountEntry, "label" | "token">>,
+  patch: Partial<Pick<AccountEntry, "label" | "token" | "accountId">>,
 ): Promise<boolean> {
   const accounts = await loadAccounts(provider);
   const found = accounts.some((a) => a.id === id);

@@ -2,15 +2,15 @@ import { updateCommandMetadata } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { buildLeaveStatus, formatTopSubtitle } from "./leave-status";
 import { getWorkPreferences } from "./preferences";
-import { getTodayStartTime } from "./storage";
+import { getTodayShift } from "./storage";
 import { formatTimeString } from "./time-utils";
 
 export async function updateCurrentCommandSubtitle() {
   try {
     const { workHours, breakMinutes } = getWorkPreferences();
-    const todayStart = await getTodayStartTime();
+    const todayShift = await getTodayShift(workHours, breakMinutes);
 
-    if (!todayStart) {
+    if (!todayShift) {
       await updateCommandMetadata({ subtitle: "" });
       return;
     }
@@ -18,10 +18,11 @@ export async function updateCurrentCommandSubtitle() {
     const now = new Date();
     const currentTime = formatTimeString(now.getHours(), now.getMinutes());
     const status = buildLeaveStatus(
-      todayStart,
+      todayShift.startTime,
       workHours,
       breakMinutes,
       currentTime,
+      todayShift.startDate,
     );
     await updateCommandMetadata({ subtitle: formatTopSubtitle(status) });
   } catch (err) {

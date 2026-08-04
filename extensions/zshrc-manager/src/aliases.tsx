@@ -6,7 +6,9 @@ import EditAlias, { aliasConfig } from "./edit-alias";
 import { MODERN_COLORS } from "./constants";
 import { ListViewController, type FilterableItem, type ItemWarning } from "./lib/list-view-controller";
 import { deleteItem } from "./lib/delete-item";
+import { findShadowedExecutable } from "./lib/resolve";
 import { SharedActionsSection } from "./lib/shared-actions";
+import { shellQuoteSingle } from "./utils/shell-escape";
 import BrowseAliases from "./browse-aliases";
 
 /**
@@ -23,9 +25,10 @@ interface AliasesProps {
 
 /**
  * Warning generator for aliases
- * Detects duplicate alias definitions across sections
+ * Detects duplicate alias definitions across sections, and aliases that
+ * shadow a real executable on PATH
  */
-function generateAliasWarning(alias: AliasItem, allAliases: AliasItem[]): ItemWarning | null {
+export function generateAliasWarning(alias: AliasItem, allAliases: AliasItem[]): ItemWarning | null {
   // Check for duplicates
   const duplicates = allAliases.filter((a) => a.name === alias.name);
   if (duplicates.length > 1) {
@@ -38,6 +41,17 @@ function generateAliasWarning(alias: AliasItem, allAliases: AliasItem[]): ItemWa
       message: `Duplicate alias: also defined in ${otherSections}`,
       icon: Icon.ExclamationMark,
       color: Color.Yellow,
+    };
+  }
+
+  // Check for shadowed commands
+  const shadowedExecutable = findShadowedExecutable(alias.name);
+  if (shadowedExecutable) {
+    return {
+      type: "conflict",
+      message: `Shadows ${shadowedExecutable}`,
+      icon: Icon.ExclamationMark,
+      color: Color.Orange,
     };
   }
 
@@ -151,42 +165,55 @@ ${alias.command}
 ## 🔧 Management
 Use the actions below to edit or manage this alias.
       `}
-      generateMetadata={(alias) => (
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
-            title="Alias Name"
-            text={alias.name}
-            icon={{
-              source: Icon.Terminal,
-              tintColor: MODERN_COLORS.success,
-            }}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Command"
-            text={truncateValueMiddle(alias.command, 60)}
-            icon={{
-              source: Icon.Code,
-              tintColor: MODERN_COLORS.primary,
-            }}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Section"
-            text={alias.section}
-            icon={{
-              source: Icon.Folder,
-              tintColor: MODERN_COLORS.neutral,
-            }}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="File"
-            text="~/.zshrc"
-            icon={{
-              source: Icon.Document,
-              tintColor: MODERN_COLORS.neutral,
-            }}
-          />
-        </List.Item.Detail.Metadata>
-      )}
+      generateMetadata={(alias) => {
+        const shadowedExecutable = findShadowedExecutable(alias.name);
+        return (
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label
+              title="Alias Name"
+              text={alias.name}
+              icon={{
+                source: Icon.Terminal,
+                tintColor: MODERN_COLORS.success,
+              }}
+            />
+            {shadowedExecutable && (
+              <List.Item.Detail.Metadata.Label
+                title="Shadows"
+                text={truncateValueMiddle(shadowedExecutable, 60)}
+                icon={{
+                  source: Icon.ExclamationMark,
+                  tintColor: MODERN_COLORS.warning,
+                }}
+              />
+            )}
+            <List.Item.Detail.Metadata.Label
+              title="Command"
+              text={truncateValueMiddle(alias.command, 60)}
+              icon={{
+                source: Icon.Code,
+                tintColor: MODERN_COLORS.primary,
+              }}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Section"
+              text={alias.section}
+              icon={{
+                source: Icon.Folder,
+                tintColor: MODERN_COLORS.neutral,
+              }}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="File"
+              text="~/.zshrc"
+              icon={{
+                source: Icon.Document,
+                tintColor: MODERN_COLORS.neutral,
+              }}
+            />
+          </List.Item.Detail.Metadata>
+        );
+      }}
       generateOverviewActions={(_, refresh) => (
         <ActionPanel>
           <Action.Push
@@ -200,50 +227,45 @@ Use the actions below to edit or manage this alias.
       )}
       generateItemActions={(alias, refresh, visitItem) => (
         <ActionPanel>
-          <Action.Push
-            title="Edit Alias"
-            target={
-              <EditAlias
-                existingName={alias.name}
-                existingCommand={alias.command}
-                sectionLabel={alias.section}
-                onSave={() => {
-                  visitItem?.(alias);
+          <SharedActionsSection
+            onRefresh={refresh}
+            item={{
+              editTitle: "Edit Alias",
+              editTarget: (
+                <EditAlias
+                  existingName={alias.name}
+                  existingCommand={alias.command}
+                  sectionLabel={alias.section}
+                  sectionOccurrence={alias._sectionOccurrence}
+                  onSave={() => {
+                    visitItem?.(alias);
+                    refresh();
+                  }}
+                />
+              ),
+              deleteTitle: "Delete Alias",
+              onDelete: async () => {
+                try {
+                  await deleteItem(alias.name, aliasConfig, false, alias.section, alias._sectionOccurrence);
                   refresh();
-                }}
-              />
-            }
-            icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Alias Definition"
-            content={`alias ${alias.name}='${alias.command}'`}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-            onCopy={() => visitItem?.(alias)}
-          />
-          <Action
-            title="Delete Alias"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
-            onAction={async () => {
-              visitItem?.(alias);
-              try {
-                await deleteItem(alias.name, aliasConfig);
-                refresh();
-              } catch {
-                // Error already shown in deleteItem
-              }
+                } catch {
+                  // Error already shown in deleteItem
+                }
+              },
+              copyName: alias.name,
+              copyValue: alias.command,
+              copyDefinition: `alias ${alias.name}='${shellQuoteSingle(alias.command)}'`,
+              onVisit: () => visitItem?.(alias),
             }}
           />
-          <Action.Push
-            title="Add New Alias"
-            target={<EditAlias onSave={refresh} />}
-            shortcut={Keyboard.Shortcut.Common.New}
-            icon={Icon.Plus}
-          />
-          <SharedActionsSection onRefresh={refresh} />
+          <ActionPanel.Section>
+            <Action.Push
+              title="Add New Alias"
+              target={<EditAlias onSave={refresh} />}
+              shortcut={Keyboard.Shortcut.Common.New}
+              icon={Icon.Plus}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       )}
     />

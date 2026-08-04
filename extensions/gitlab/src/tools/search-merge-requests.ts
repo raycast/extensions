@@ -1,5 +1,6 @@
 import { gitlab } from "../common";
-import type { Project } from "../gitlabapi";
+import { fetchMergeRequestsGqlList } from "../components/mr_gql";
+import { MRScope, MRState } from "../components/mr";
 
 type Input = {
   /**
@@ -15,9 +16,9 @@ type Input = {
    */
   state?: "opened" | "closed" | "merged" | "all";
   /**
-   * all | assigned_to_me | created_by_me | reviewed_by_me
+   * all | assigned_to_me | created_by_me | reviews_for_me
    */
-  scope?: "all" | "assigned_to_me" | "created_by_me" | "reviewed_by_me";
+  scope?: "all" | "assigned_to_me" | "created_by_me" | "reviews_for_me";
   /**
    * Comma-separated labels to include
    */
@@ -27,13 +28,24 @@ type Input = {
 export default async function ({ search, projectId, state, scope, labels }: Input) {
   const params: Record<string, string> = {};
 
-  if (search) params.search = search;
-  if (state) params.state = state;
-  if (scope) params.scope = scope;
-  if (labels) params.labels = labels;
+  if (search) {
+    params.search = search;
+  }
+  if (state) {
+    params.state = state;
+  }
+  if (scope) {
+    params.scope = scope;
+  } else {
+    params.scope = MRScope.all;
+  }
+  if (labels) {
+    params.labels = labels;
+  }
+  if (!params.state) {
+    params.state = MRState.opened;
+  }
 
-  const projectArg = projectId ? ({ id: projectId } as Project) : undefined;
-  const mrs = await gitlab.getMergeRequests(params, projectArg);
-
-  return mrs;
+  const project = projectId ? await gitlab.getProject(projectId) : undefined;
+  return fetchMergeRequestsGqlList({ params, project });
 }

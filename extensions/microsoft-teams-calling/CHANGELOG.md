@@ -1,5 +1,12 @@
 # Microsoft Teams Changelog
 
+## [Fix Inverted Toggle Notifications] - 2026-06-28
+
+- Fix the microphone and camera toggle notifications showing the inverted state in New Teams. The extension now waits for the actually updated meeting state instead of the stale state Teams reports first.
+- Remove the incorrect camera notification that was shown when leaving a call.
+- Remove support for Classic Teams, which Microsoft has discontinued. The extension now targets New Teams only.
+- Avoid a potential crash when opening Control Meeting before Teams has reported any meeting state.
+
 ## [Fix Teams API 2.0 Permissions] - 2026-04-22
 
 - Stops Teams seeking user permission every time the extension performs an action.

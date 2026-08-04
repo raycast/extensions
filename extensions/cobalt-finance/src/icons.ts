@@ -2,6 +2,13 @@ import { Icon } from "@raycast/api";
 
 const BRANDFETCH_CDN = "https://cdn.brandfetch.io";
 
+/**
+ * Publishable client-side keys shipped with the extension. Same values baked
+ * into the web app via `VITE_BRANDFETCH_CLIENT_ID` / `VITE_LOGO_DEV_PUBLISHABLE_KEY`.
+ */
+const BRANDFETCH_CLIENT_ID = "1idNVtuBlzoaNohNxPI";
+const LOGO_DEV_TOKEN = "pk_HskBniqTTnGkxtC1iry-tQ";
+
 /** Category group systemKey → bundled SVG asset under `assets/categories/`. */
 const CATEGORY_ICON: Record<string, string> = {
   BANK_FEES: "categories/card.svg",
@@ -23,9 +30,7 @@ const CATEGORY_ICON: Record<string, string> = {
 };
 
 /** Bundled SVG for a category group systemKey, or `Icon.BankNote` if unknown. */
-export function categoryIcon(
-  category: string | null | undefined,
-): string | Icon {
+export function categoryIcon(category: string | null | undefined): string | Icon {
   if (!category) {
     return Icon.BankNote;
   }
@@ -54,14 +59,8 @@ function isHttpUrl(url: string): boolean {
 }
 
 /** Brandfetch `type=icon` with `fallback=lettermark` — single-URL fallback chain. */
-function brandfetchIconUrl(
-  domain: string,
-  clientId: string,
-  size = 128,
-): string {
-  const url = new URL(
-    `${BRANDFETCH_CDN}/domain/${domain}/w/${size}/h/${size}/fallback/lettermark/type/icon`,
-  );
+function brandfetchIconUrl(domain: string, clientId: string, size = 128): string {
+  const url = new URL(`${BRANDFETCH_CDN}/domain/${domain}/w/${size}/h/${size}/fallback/lettermark/type/icon`);
   url.searchParams.set("c", clientId);
   return url.toString();
 }
@@ -72,7 +71,6 @@ interface InstitutionIconInput {
   institutionName: string | null;
   /** Fallback when the `plaidConnection` join didn't resolve an institution row. */
   accountName?: string | null;
-  brandfetchClientId?: string;
 }
 
 /** Best-guess domain for common US banks when Plaid `institution.url` is missing. */
@@ -138,30 +136,17 @@ const BANK_FALLBACK_ICON = "categories/bank-fallback.svg";
  *      `institutionUrl` or our name→domain map)
  *   3. Generated letter avatar SVG from `institutionName`
  */
-export function pickInstitutionIcon(
-  input: InstitutionIconInput,
-): string | null {
-  const {
-    accountName,
-    brandfetchClientId,
-    institutionLogo,
-    institutionName,
-    institutionUrl,
-  } = input;
+export function pickInstitutionIcon(input: InstitutionIconInput): string | null {
+  const { accountName, institutionLogo, institutionName, institutionUrl } = input;
   if (institutionLogo?.trim()) {
     const t = institutionLogo.trim();
     if (t.startsWith("data:") || isHttpUrl(t)) {
       return t;
     }
   }
-  if (brandfetchClientId) {
-    const host =
-      hostFromUrl(institutionUrl) ??
-      domainFromName(institutionName) ??
-      domainFromName(accountName);
-    if (host) {
-      return brandfetchIconUrl(host, brandfetchClientId);
-    }
+  const host = hostFromUrl(institutionUrl) ?? domainFromName(institutionName) ?? domainFromName(accountName);
+  if (host) {
+    return brandfetchIconUrl(host, BRANDFETCH_CLIENT_ID);
   }
   return BANK_FALLBACK_ICON;
 }
@@ -192,14 +177,8 @@ export function logoLookupName(raw: string): string {
 const LOGO_DEV_IMG_ORIGIN = "https://img.logo.dev";
 
 /** Logo.dev brand-name URL (public publishable key). Same pattern as web `SubLogo`. */
-export function logoDevUrlByBrandName(
-  brandName: string,
-  token: string,
-  size = 128,
-): string {
-  const url = new URL(
-    `${LOGO_DEV_IMG_ORIGIN}/name/${encodeURIComponent(brandName)}`,
-  );
+export function logoDevUrlByBrandName(brandName: string, token: string, size = 128): string {
+  const url = new URL(`${LOGO_DEV_IMG_ORIGIN}/name/${encodeURIComponent(brandName)}`);
   url.searchParams.set("token", token);
   url.searchParams.set("size", String(size));
   url.searchParams.set("format", "png");
@@ -208,84 +187,63 @@ export function logoDevUrlByBrandName(
 
 interface RecurringIconInput {
   description: string | null;
-  logoDevToken: string | undefined;
   merchantName: string | null;
-  /** Brandfetch fallback when logo.dev token missing or unmatched. */
-  brandfetchClientId?: string;
 }
 
 /**
  * Icon for a recurring stream. Mirrors `SubLogo` on web:
- *   1. logo.dev `name` endpoint with `logoLookupName(merchantName ?? description)`
- *   2. Brandfetch by name → domain map (covers banks like "Chase Direct Deposit")
+ *   1. Brandfetch by name → domain map (covers banks like "Chase Direct Deposit")
+ *   2. logo.dev `name` endpoint with `logoLookupName(merchantName ?? description)`
  *   3. `Icon.Coins`
  */
 export function pickRecurringIcon(input: RecurringIconInput): string | Icon {
-  const { brandfetchClientId, description, logoDevToken, merchantName } = input;
+  const { description, merchantName } = input;
   const raw = merchantName?.trim() || description?.trim() || "";
-  const name = raw ? logoLookupName(raw) : "";
-
-  if (name && logoDevToken?.trim()) {
-    return logoDevUrlByBrandName(name, logoDevToken.trim());
+  if (!raw) {
+    return Icon.Coins;
   }
 
-  if (name && brandfetchClientId) {
-    const host = domainFromName(name);
-    if (host) {
-      return brandfetchIconUrl(host, brandfetchClientId);
-    }
+  const host = domainFromName(raw);
+  if (host) {
+    return brandfetchIconUrl(host, BRANDFETCH_CLIENT_ID);
+  }
+
+  const name = logoLookupName(raw);
+  if (name) {
+    return logoDevUrlByBrandName(name, LOGO_DEV_TOKEN);
   }
 
   return Icon.Coins;
 }
 
 interface MerchantIconInput {
-  logoUrl: string | null;
-  website: string | null;
-  counterparties?:
-    | {
-        type?: string | null;
-        website?: string | null;
-        logo_url?: string | null;
-      }[]
-    | null;
-  brandfetchClientId?: string;
+  /** Cobalt `Transaction.merchant` — cleaned merchant name when available. */
+  merchantName: string | null;
+  /** Cobalt `Transaction.name` — raw institution description. Fallback for logo lookup. */
+  description: string | null;
 }
 
 /**
- * Pick the best single icon source for a transaction row. Raycast only
- * accepts one source per `List.Item.icon`, so order matters:
- *   1. Brandfetch icon by `website` (or counterparty website)
- *   2. Plaid `logoUrl` from Cobalt
- *   3. Counterparty `logo_url`
- *   4. `Icon.Coins` (no merchant data — distinct from the category column)
+ * Pick the best single icon source for a transaction row. Mirrors
+ * `pickRecurringIcon`: try domain-map → logo.dev name lookup → `Icon.Coins`.
+ * Cobalt's public `/v1/transactions` API doesn't expose website/logo URLs,
+ * so all resolution is name-based.
  */
 export function pickMerchantIcon(input: MerchantIconInput): string | Icon {
-  const { brandfetchClientId, counterparties, logoUrl, website } = input;
-
-  if (brandfetchClientId) {
-    const host =
-      hostFromUrl(website) ??
-      hostFromUrl(
-        counterparties?.find((c) => c.type === "merchant" && c.website)
-          ?.website ??
-          counterparties?.find((c) => c.website)?.website ??
-          null,
-      );
-    if (host) {
-      return brandfetchIconUrl(host, brandfetchClientId);
-    }
+  const { description, merchantName } = input;
+  const raw = merchantName?.trim() || description?.trim() || "";
+  if (!raw) {
+    return Icon.Coins;
   }
 
-  if (logoUrl && isHttpUrl(logoUrl)) {
-    return logoUrl;
+  const host = domainFromName(raw);
+  if (host) {
+    return brandfetchIconUrl(host, BRANDFETCH_CLIENT_ID);
   }
 
-  const cpLogo = counterparties?.find(
-    (c) => c.logo_url && isHttpUrl(c.logo_url),
-  )?.logo_url;
-  if (cpLogo) {
-    return cpLogo;
+  const name = logoLookupName(raw);
+  if (name) {
+    return logoDevUrlByBrandName(name, LOGO_DEV_TOKEN);
   }
 
   return Icon.Coins;

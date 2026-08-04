@@ -1,15 +1,15 @@
 import { showFailureToast, runAppleScript } from "@raycast/utils";
 
-export const scriptCompressFiles = async (filePaths: string[]) => {
-  scriptExecuteFiles("compress", filePaths);
+export const scriptCompressFiles = (filePaths: string[]) => {
+  return scriptExecuteFiles("compress", filePaths);
 };
 
-export const scriptExtractFiles = async (filePaths: string[]) => {
-  scriptExecuteFiles("extract", filePaths);
+export const scriptExtractFiles = (filePaths: string[]) => {
+  return scriptExecuteFiles("extract", filePaths);
 };
 
-export const scriptSendFiles = async (filePaths: string[]) => {
-  scriptExecuteFiles("send", filePaths);
+export const scriptSendFiles = (filePaths: string[]) => {
+  return scriptExecuteFiles("send", filePaths);
 };
 
 export const scriptExecuteFiles = async (

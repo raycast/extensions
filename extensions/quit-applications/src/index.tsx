@@ -10,7 +10,7 @@ import {
   Icon,
   popToRoot,
 } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
+import { createDeeplink, DeeplinkType, runAppleScript } from "@raycast/utils";
 import { execSync } from "child_process";
 
 const APPLESCRIPT_TIMEOUT_MS = 5000;
@@ -26,7 +26,7 @@ function applicationNameFromPath(path: string): string {
   if (!appName) {
     throw new Error("appName not found");
   }
-  return appName.replace(".app", "");
+  return appName.replace(/\.app$/, "");
 }
 
 async function getRunningAppsPaths(): Promise<string[]> {
@@ -48,42 +48,50 @@ async function getRunningAppsPaths(): Promise<string[]> {
   };
 
   try {
+    // Discover running apps via NSWorkspace (a local Cocoa API that needs no Automation
+    // permission). Unlike System Events' `background only is false`, this includes menu-bar /
+    // accessory apps (LSUIElement). We then filter to apps a user would want to quit:
+    //   - drop prohibited (background-only daemons / XPC / bare binaries)
+    //   - drop nested helper bundles (e.g. "Google Chrome Helper.app")
+    //   - regular apps: always keep (Dock apps, including /System/Applications/*)
+    //   - accessory apps: keep only those under /Applications or ~/Applications, so third-party
+    //     menu-bar utilities show up while Apple's UI agents (Dock, Spotlight, …) stay hidden
     const result = await runAppleScript(
-      `
-      set appPaths to {}
-      tell application "System Events"
-        repeat with aProcess in (every process whose background only is false)
-          try
-            set processPath to POSIX path of (file of aProcess)
-            set end of appPaths to processPath
-          end try
-        end repeat
-      end tell
-
-      return appPaths
-    `,
-      { timeout: APPLESCRIPT_TIMEOUT_MS },
+      `ObjC.import('AppKit');
+      const home = ObjC.unwrap($.NSHomeDirectory());
+      const apps = $.NSWorkspace.sharedWorkspace.runningApplications;
+      const count = apps.count;
+      const out = [];
+      for (let i = 0; i < count; i++) {
+        const a = apps.objectAtIndex(i);
+        const policy = Number(a.activationPolicy); // 0 regular, 1 accessory, 2 prohibited
+        if (policy === 2) continue;
+        const url = a.bundleURL;
+        if (!url || url.isNil()) continue;
+        const path = ObjC.unwrap(url.path);
+        if (!path.endsWith('.app')) continue;
+        if (path.indexOf('.app/') !== -1) continue; // nested helper bundle
+        if (policy === 1 && !(path.startsWith('/Applications/') || path.startsWith(home + '/Applications/'))) continue;
+        out.push(path);
+      }
+      JSON.stringify(out);`,
+      { language: "JavaScript", timeout: APPLESCRIPT_TIMEOUT_MS },
     );
 
-    return result.split(", ").map((appPath: string) => appPath.trim());
+    const paths = JSON.parse(result) as string[];
+    if (paths.length > 0) {
+      return paths;
+    }
+    // Empty result is unexpected; fall back to ps before giving up.
+    return getRunningAppsPathsWithPs();
   } catch (error: unknown) {
-    const message = typeof error === "string" ? error : (error as Error)?.message ?? "";
-    const isTimedOut =
-      typeof error === "object" &&
-      error !== null &&
-      "timedOut" in error &&
-      (error as { timedOut: unknown }).timedOut === true;
-    if (message.includes("Not authorized to send Apple events") || isTimedOut) {
-      try {
-        const fallbackPaths = getRunningAppsPathsWithPs();
-        if (fallbackPaths.length > 0) {
-          return fallbackPaths;
-        }
-      } catch {
-        // ignore and fall-through to rethrow below
+    try {
+      const fallbackPaths = getRunningAppsPathsWithPs();
+      if (fallbackPaths.length > 0) {
+        return fallbackPaths;
       }
-      // If we reach here, fallback failed as well; rethrow
-      throw error;
+    } catch {
+      // ignore and fall-through to rethrow below
     }
     throw error;
   }
@@ -152,9 +160,11 @@ async function restartAppWithToast(app: string): Promise<boolean> {
 }
 
 function getQuickLinkForApp(appName: string, action: string): string {
-  const context = JSON.stringify({ appName, action });
-  const encodedContext = encodeURIComponent(context);
-  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/mackopes/quit-applications/index?context=${encodedContext}`;
+  return createDeeplink({
+    type: DeeplinkType.Extension,
+    command: "index",
+    context: { appName, action },
+  });
 }
 
 type CommandProps = {
@@ -187,9 +197,7 @@ export default function Command({ launchContext }: CommandProps) {
     const loadApps = async () => {
       try {
         const appCandidatePaths = await getRunningAppsPaths();
-        const mappedApps = appCandidatePaths
-          .filter((path) => path.endsWith(".app"))
-          .map((path) => ({ name: applicationNameFromPath(path), path }));
+        const mappedApps = appCandidatePaths.map((path) => ({ name: applicationNameFromPath(path), path }));
 
         const excludedNames = preferences.excludeApplications
           ? preferences.excludeApplications.split(",").map((name: string) => name.trim().toLowerCase())
@@ -246,16 +254,9 @@ export default function Command({ launchContext }: CommandProps) {
                 onAction={async () => {
                   let remainingApps = [...apps];
 
+                  // Excluded apps were already removed from `apps` at load time (loadApps),
+                  // so every entry here is safe to quit.
                   for (const app of apps) {
-                    if (
-                      preferences.excludeApplications
-                        .split(",")
-                        .map((name: string) => name.trim())
-                        .includes(app.name)
-                    ) {
-                      continue;
-                    }
-
                     const success = await quitAppWithToast(app.name);
 
                     if (success) {
@@ -281,7 +282,7 @@ export default function Command({ launchContext }: CommandProps) {
       {apps.map((app) => (
         <List.Item
           title={app.name}
-          key={app.name}
+          key={app.path}
           id={app.path}
           icon={{ fileIcon: app.path }}
           actions={
@@ -292,8 +293,7 @@ export default function Command({ launchContext }: CommandProps) {
                   const success = await quitAppWithToast(app.name);
 
                   if (success) {
-                    const removedAppIndex = apps.findIndex((a) => a.name === app.name);
-                    setApps((apps) => apps.toSpliced(removedAppIndex, 1));
+                    setApps((prev) => prev.filter((a) => a.path !== app.path));
                   }
 
                   if (searchText) {

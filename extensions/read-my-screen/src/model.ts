@@ -1,3 +1,5 @@
+import modelPreferences from "./model-preferences.json";
+
 export type Provider = "openai" | "anthropic" | "gemini";
 
 export type ParsedModel = {
@@ -5,38 +7,44 @@ export type ParsedModel = {
   modelId: string;
 };
 
-/** Matches `package.json` preferences `model.data` (single source for forms). */
-export const MODEL_PREFERENCE_OPTIONS: { title: string; value: string }[] = [
-  { title: "OpenAI — GPT-4o mini", value: "openai:gpt-4o-mini" },
-  { title: "OpenAI — GPT-4o", value: "openai:gpt-4o" },
-  { title: "OpenAI — GPT-4.1 mini", value: "openai:gpt-4.1-mini" },
-  { title: "OpenAI — GPT-4.1", value: "openai:gpt-4.1" },
-  { title: "Anthropic — Claude Sonnet 4", value: "anthropic:claude-sonnet-4-20250514" },
-  { title: "Anthropic — Claude Haiku 4.5", value: "anthropic:claude-haiku-4-5-20251001" },
-  { title: "Google — Gemini 2.5 Flash", value: "gemini:gemini-2.5-flash" },
-  { title: "Google — Gemini 2.5 Pro", value: "gemini:gemini-2.5-pro" },
-  { title: "Google — Gemini 2.0 Flash", value: "gemini:gemini-2.0-flash" },
-];
+/** Single source: `src/model-preferences.json` (synced to package.json via npm run sync-model-prefs). */
+export const DEFAULT_MODEL_PREFERENCE = modelPreferences.default;
 
-/** Preference value format: `provider:modelId` (e.g. `openai:gpt-4o-mini`). */
+/** Matches Raycast preferences `model.data` (synced from model-preferences.json). */
+export const MODEL_PREFERENCE_OPTIONS: { title: string; value: string }[] = modelPreferences.options;
+
+/** Saved preference, or the extension default when unset. */
+export function resolvedModelPreference(prefsModel: string | undefined): string {
+  return prefsModel?.trim() || DEFAULT_MODEL_PREFERENCE;
+}
+
+/** Per-session model override, then saved preference, then extension default. */
+export function effectiveSessionModelPreference(
+  sessionModel: string | undefined,
+  prefsModel: string | undefined,
+): string {
+  return sessionModel?.trim() || resolvedModelPreference(prefsModel);
+}
+
+/** Preference value format: `provider:modelId` (e.g. `openai:gpt-5.6-luna`). */
 export function parseModelPreference(value: string): ParsedModel {
-  const idx = value.indexOf(":");
+  const normalized = value.trim() || DEFAULT_MODEL_PREFERENCE;
+  const idx = normalized.indexOf(":");
   if (idx <= 0) {
-    return { provider: "openai", modelId: value || "gpt-4o-mini" };
+    return { provider: "openai", modelId: normalized };
   }
-  const provider = value.slice(0, idx) as Provider;
-  const modelId = value.slice(idx + 1);
+  const provider = normalized.slice(0, idx) as Provider;
+  const modelId = normalized.slice(idx + 1);
   if (provider !== "openai" && provider !== "anthropic" && provider !== "gemini") {
-    return { provider: "openai", modelId: value };
+    return { provider: "openai", modelId: normalized };
   }
   return { provider, modelId };
 }
 
-/** Empty or whitespace `override` falls back to saved preference. */
+/** Empty or whitespace `override` falls back to saved preference (then default). */
 export function effectiveModelPreference(prefsModel: string | undefined, override: string | undefined): string {
-  const fromPref = prefsModel?.trim() || "openai:gpt-4o-mini";
   const o = override?.trim();
-  return o || fromPref;
+  return o || resolvedModelPreference(prefsModel);
 }
 
 export function modelTitleForValue(value: string): string {

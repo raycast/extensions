@@ -1,27 +1,14 @@
-import { Action, ActionPanel, Icon, Clipboard, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Clipboard, useNavigation, Keyboard } from "@raycast/api";
 import { memo, useCallback } from "react";
 import { Model } from "../lib/types";
 import { ModelDetail } from "./ModelDetail";
 
-type ActionPanelChildren = Parameters<typeof ActionPanel>[0]["children"];
-
 interface ModelActionsProps {
   model: Model;
-  onAddToComparison?: (model: Model) => void;
-  canAddToComparison?: boolean;
   showViewDetails?: boolean;
-  primaryAction?: ActionPanelChildren;
-  extraActions?: ActionPanelChildren;
 }
 
-export const ModelActions = memo(function ModelActions({
-  model,
-  onAddToComparison,
-  canAddToComparison,
-  showViewDetails = true,
-  primaryAction,
-  extraActions,
-}: ModelActionsProps) {
+export const ModelActions = memo(function ModelActions({ model, showViewDetails = true }: ModelActionsProps) {
   const { push } = useNavigation();
 
   const handleViewDetails = useCallback(() => {
@@ -71,14 +58,13 @@ export const ModelActions = memo(function ModelActions({
 
   return (
     <ActionPanel>
-      {primaryAction && <ActionPanel.Section>{primaryAction}</ActionPanel.Section>}
       <ActionPanel.Section>
         {showViewDetails && <Action title="View Details" icon={Icon.Eye} onAction={handleViewDetails} />}
-        <Action.CopyToClipboard title="Copy Model ID" content={model.id} shortcut={{ modifiers: ["cmd"], key: "." }} />
+        <Action.CopyToClipboard title="Copy Model ID" content={model.id} shortcut={Keyboard.Shortcut.Common.Pin} />
         <Action.CopyToClipboard
           title="Copy Provider/Model"
           content={`${model.providerId}/${model.id}`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+          shortcut={Keyboard.Shortcut.Common.CopyName}
         />
       </ActionPanel.Section>
 
@@ -88,28 +74,15 @@ export const ModelActions = memo(function ModelActions({
           <Action.OpenInBrowser
             title="Open Provider Docs"
             url={model.providerDoc}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
         )}
         <Action.OpenInBrowser
           title="Open Models.dev in Browser"
           url={`https://models.dev`}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
       </ActionPanel.Section>
-
-      {onAddToComparison && canAddToComparison !== false && (
-        <ActionPanel.Section>
-          <Action
-            title="Add to Comparison"
-            icon={Icon.PlusCircle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-            onAction={() => onAddToComparison(model)}
-          />
-        </ActionPanel.Section>
-      )}
-
-      {extraActions}
     </ActionPanel>
   );
 });

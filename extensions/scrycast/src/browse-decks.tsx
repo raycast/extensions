@@ -13,7 +13,17 @@ import {
 } from "@raycast/api";
 import { useLocalStorage, usePromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { Card, getCardImageUri, getEdhrecUrl, getTaggerUrl, copyCardImage, isFlippable, FEEDBACK_URL } from "./shared";
+import {
+  Card,
+  getCardImageUri,
+  getEdhrecUrl,
+  getTaggerUrl,
+  copyCardImage,
+  isFlippable,
+  FEEDBACK_URL,
+  scryfallFetch,
+  SCRYFALL_API_BASE,
+} from "./shared";
 import { CardDetailView, CardTagsView, PrintsView } from "./card-views";
 
 const SAVED_DECKS_KEY = "savedDecks";
@@ -140,7 +150,7 @@ async function fetchScryfallBatch(ids: string[]): Promise<Map<string, Card>> {
   const map = new Map<string, Card>();
   for (let i = 0; i < ids.length; i += 75) {
     const chunk = ids.slice(i, i + 75);
-    const res = await fetch("https://api.scryfall.com/cards/collection", {
+    const res = await scryfallFetch(`${SCRYFALL_API_BASE}/cards/collection`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ identifiers: chunk.map((id) => ({ id })) }),
@@ -191,7 +201,7 @@ interface DeckCardResult extends DeckCard {
 }
 
 async function searchDeckCards(decks: SavedDeck[], query: string): Promise<DeckCardResult[]> {
-  const res = await fetch(`https://api.scryfall.com/cards/search?q=${encodeURIComponent(query)}&unique=cards`);
+  const res = await scryfallFetch(`${SCRYFALL_API_BASE}/cards/search?q=${encodeURIComponent(query)}&unique=cards`);
   if (res.status === 404) return [];
   if (!res.ok) throw new Error(`Scryfall error ${res.status}`);
   const data = (await res.json()) as { data: Card[] };
@@ -273,7 +283,7 @@ async function fetchDeckFromText(deckName: string, text: string): Promise<Fetche
   const cardMap = new Map<string, Card>();
   for (let i = 0; i < names.length; i += 75) {
     const chunk = names.slice(i, i + 75);
-    const res = await fetch("https://api.scryfall.com/cards/collection", {
+    const res = await scryfallFetch(`${SCRYFALL_API_BASE}/cards/collection`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ identifiers: chunk.map((name) => ({ name })) }),

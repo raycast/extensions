@@ -20,6 +20,7 @@ type StartResult = {
 
 type StartOptions = {
   soundsOn: boolean;
+  speedMs: number;
 };
 
 type StopResult = {
@@ -64,6 +65,8 @@ export async function startOverlay(
       overlayDirectoryPath,
       "--audio",
       options.soundsOn ? "1" : "0",
+      "--speed",
+      String(options.speedMs),
     ],
     {
       detached: true,

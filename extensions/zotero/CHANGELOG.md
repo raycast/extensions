@@ -1,5 +1,19 @@
 # Zotero Changelog
 
+## [Fixes] - 2026-07-17
+
+- Fix "Worker terminated due to reaching memory limit: JS heap out of memory" crash on large libraries when browsing or running broad searches: the command rendered every matching item (the whole library on an empty query, or hundreds/thousands for a broad query), and Raycast's per-item detail + action list grows the command worker's memory until it is killed. Results are now capped at 100 rendered items (the section header shows "Top 100 — refine your search to see more" when capped), which keeps the render footprint bounded. Follow-up to #29478 / #29250
+
+## [Fixes] - 2026-07-16
+
+- Prevent a memory spike and cache corruption when several searches run at once (e.g. fast typing right after opening the command): database opens are serialized, the data rebuild is de-duplicated so concurrent searches share one build, and the cache is written atomically (temp file + rename) so an interrupted or interleaved write can no longer leave a truncated cache that crashes on the next launch. Follow-up to #29478 / #29250
+- Fix a memory leak in the collections dropdown: the database opened by `getCollections` is now closed after use
+
+## [Fixes] - 2026-07-16
+
+- Fix "Worker terminated due to reaching memory limit: JS heap out of memory" crash on large libraries by loading only the metadata tables the search needs into `sql.js` (with their indexes) instead of the entire database, which is dominated by the full-text index. See #29250
+- Avoid re-copying and re-opening the database on every keystroke: the cache is now validated against the database file's mtime, and the temporary database copies are written to per-invocation paths in the extension support directory and removed as soon as they are read
+
 ## [Features] - 2026-04-20
 
 - Add "Copy PDF Path" action (`⌘⇧,`) to copy the full filesystem path of the attached PDF to the clipboard

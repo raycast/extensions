@@ -22,6 +22,25 @@ function buildIncidentMarkdown(
   return `### ${incident.name}\n\n${incident.body ?? incident.status}`;
 }
 
+function regionFilterSummary(
+  filter: NonNullable<StatusSnapshot["regionFilter"]>,
+): string | undefined {
+  const parts: string[] = [];
+
+  if (filter.hiddenIncidents > 0) {
+    parts.push(
+      `${filter.hiddenIncidents} incident${filter.hiddenIncidents === 1 ? "" : "s"} hidden`,
+    );
+  }
+  if (filter.hiddenComponents > 0) {
+    parts.push(
+      `${filter.hiddenComponents} component${filter.hiddenComponents === 1 ? "" : "s"} hidden`,
+    );
+  }
+
+  return parts.length > 0 ? parts.join(" · ") : undefined;
+}
+
 function buildOverviewMarkdown(snapshot: StatusSnapshot): string {
   const overviewUptime =
     snapshot.uptimePercent ?? averageComponentUptime(snapshot.components);
@@ -45,15 +64,22 @@ export function SiteDetail({ snapshot }: SiteDetailProps) {
   const overviewIcon = snapshot.error
     ? { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
     : indicatorListIcon(snapshot.indicator);
+  const regionFilterNote = snapshot.regionFilter
+    ? regionFilterSummary(snapshot.regionFilter)
+    : undefined;
+  const overviewSubtitle = [
+    snapshot.error ?? `${snapshot.components.length} components`,
+    regionFilterNote,
+  ]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <List navigationTitle={snapshot.pageName} isShowingDetail>
       <List.Section title="Overview">
         <List.Item
           title={snapshot.overallDescription}
-          subtitle={
-            snapshot.error ?? `${snapshot.components.length} components`
-          }
+          subtitle={overviewSubtitle}
           icon={overviewIcon}
           detail={
             <List.Item.Detail
@@ -74,6 +100,24 @@ export function SiteDetail({ snapshot }: SiteDetailProps) {
                     title="Fetched"
                     text={new Date(snapshot.fetchedAt).toLocaleString()}
                   />
+                  {snapshot.regionFilter && (
+                    <>
+                      <List.Item.Detail.Metadata.Separator />
+                      <List.Item.Detail.Metadata.Label
+                        title="Regions"
+                        text={snapshot.regionFilter.monitored.join(", ")}
+                      />
+                      {regionFilterNote && (
+                        <>
+                          <List.Item.Detail.Metadata.Separator />
+                          <List.Item.Detail.Metadata.Label
+                            title="Region Filter"
+                            text={regionFilterNote}
+                          />
+                        </>
+                      )}
+                    </>
+                  )}
                 </List.Item.Detail.Metadata>
               }
             />
@@ -141,6 +185,11 @@ export function SiteDetail({ snapshot }: SiteDetailProps) {
                   markdown={uptimeMarkdown}
                   metadata={
                     <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label
+                        title="Name"
+                        text={component.name}
+                      />
+                      <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
                         title="Status"
                         text={componentStatusLabel(component.status)}

@@ -1,6 +1,6 @@
 import { useCachedState } from "@raycast/utils";
 import { AsyncStatus } from "./goodreads-api";
-import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import { STRINGS } from "./strings";
 import type { BookDetails, Review } from "./types";
 import { ErrorScreen } from "./components/error-screen";
@@ -38,6 +38,27 @@ export default function BookDetails(props: BookDetailsProps) {
             title={STRINGS.toggleMetadata}
             onAction={() => setShowMetadata(!showMetadata)}
           />
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              shortcut={Keyboard.Shortcut.Common.Pin}
+              title={STRINGS.copyTitle}
+              content={bookTitle}
+            />
+            {details?.url && (
+              <Action.CopyToClipboard
+                shortcut={Keyboard.Shortcut.Common.CopyPath}
+                title={STRINGS.copyUrl}
+                content={details.url}
+              />
+            )}
+            {details?.cover?.source && (
+              <Action.CopyToClipboard
+                shortcut={Keyboard.Shortcut.Common.Copy}
+                title={STRINGS.copyCoverUrl}
+                content={details.cover.source}
+              />
+            )}
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

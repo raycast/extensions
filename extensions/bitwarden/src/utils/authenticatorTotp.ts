@@ -12,6 +12,7 @@ const guardrails = createGuardrails({ MIN_SECRET_BYTES: 10 });
 /** Steam Guard character set (avoids 0, 1, I, L, O, S, Z for readability). */
 const STEAM_CHARS = "23456789BCDFGHJKMNPQRTVWXY";
 const STEAM_PERIOD = 30;
+const SECRET_WHITESPACE = /\s/g;
 
 type HashAlgorithm = "sha1" | "sha256" | "sha512";
 
@@ -54,6 +55,10 @@ const steamHooks = {
   },
 };
 
+function normalizeSecret(secret: string): string {
+  return secret.replace(SECRET_WHITESPACE, "");
+}
+
 /**
  * Creates a TOTP generator for regular or Steam Guard keys.
  * Steam uses HMAC-SHA1 with a custom 5-character alphanumeric encoding.
@@ -70,7 +75,7 @@ export function createTotpGenerator(opts: CreateTotpOptions): TotpGenerator {
   };
 
   if (opts.variant === "steam") {
-    const { secret } = opts;
+    const secret = normalizeSecret(opts.secret);
 
     return {
       period: STEAM_PERIOD,
@@ -90,7 +95,8 @@ export function createTotpGenerator(opts: CreateTotpOptions): TotpGenerator {
     };
   }
 
-  const { secret, period, algorithm, digits } = opts;
+  const { period, algorithm, digits } = opts;
+  const secret = normalizeSecret(opts.secret);
 
   return {
     period,

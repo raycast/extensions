@@ -1,19 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  getPreferenceValues,
-  Icon,
-  Image,
-  List,
-} from "@raycast/api";
-import { showFailureToast, useFetch } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Color, Detail, Icon, Image, List } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 
 import type { components } from "./api-types";
 import { pickInstitutionIcon } from "./icons";
-import { authorize, logout } from "./oauth";
+import { useCobaltSession } from "./use-cobalt-session";
 
 type Account = components["schemas"]["Account"];
 type AccountType = components["schemas"]["AccountType"];
@@ -57,17 +47,10 @@ function utilization(a: Account): number | null {
   if (!a.creditLimit || a.balance === null) {
     return null;
   }
-  return Math.min(
-    100,
-    Math.max(0, (Math.abs(a.balance) / a.creditLimit) * 100),
-  );
+  return Math.min(100, Math.max(0, (Math.abs(a.balance) / a.creditLimit) * 100));
 }
 
-function buildLimitLine(
-  isCredit: boolean,
-  limitStr: string | null,
-  util: number | null,
-): string {
+function buildLimitLine(isCredit: boolean, limitStr: string | null, util: number | null): string {
   if (!(isCredit && limitStr)) {
     return "";
   }
@@ -75,21 +58,13 @@ function buildLimitLine(
   return `\n**Limit:** ${limitStr}${usedSuffix}\n`;
 }
 
-function AccountDetail({
-  account,
-  brandfetchClientId,
-}: {
-  account: Account;
-  brandfetchClientId: string | undefined;
-}) {
+function AccountDetail({ account }: { account: Account }) {
   const a = account;
   const balance = formatBalance(a.balance, a.currency);
-  const limitStr =
-    a.creditLimit === null ? null : formatBalance(a.creditLimit, a.currency);
+  const limitStr = a.creditLimit === null ? null : formatBalance(a.creditLimit, a.currency);
   const util = utilization(a);
   const institutionIcon = pickInstitutionIcon({
     accountName: a.name,
-    brandfetchClientId,
     institutionLogo: null,
     institutionName: a.institution,
     institutionUrl: null,
@@ -114,33 +89,17 @@ function AccountDetail({
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Balance" text={balance} />
-          {isCreditAccount(a) && limitStr ? (
-            <Detail.Metadata.Label title="Credit Limit" text={limitStr} />
-          ) : null}
-          {util === null ? null : (
-            <Detail.Metadata.Label
-              title="Utilization"
-              text={`${util.toFixed(0)}%`}
-            />
-          )}
+          {isCreditAccount(a) && limitStr ? <Detail.Metadata.Label title="Credit Limit" text={limitStr} /> : null}
+          {util === null ? null : <Detail.Metadata.Label title="Utilization" text={`${util.toFixed(0)}%`} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label title="Type" text={accountTypeLabel(a)} />
-          {a.mask ? (
-            <Detail.Metadata.Label title="Account" text={`••••${a.mask}`} />
-          ) : null}
-          <Detail.Metadata.Label
-            title="Currency"
-            text={(a.currency ?? "USD").toUpperCase()}
-          />
+          {a.mask ? <Detail.Metadata.Label title="Account" text={`••••${a.mask}`} /> : null}
+          <Detail.Metadata.Label title="Currency" text={(a.currency ?? "USD").toUpperCase()} />
           <Detail.Metadata.Separator />
           {a.institution ? (
             <Detail.Metadata.Label
               title="Institution"
-              icon={
-                institutionIcon
-                  ? { mask: Image.Mask.Circle, source: institutionIcon }
-                  : undefined
-              }
+              icon={institutionIcon ? { mask: Image.Mask.Circle, source: institutionIcon } : undefined}
               text={a.institution}
             />
           ) : null}
@@ -149,9 +108,7 @@ function AccountDetail({
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Balance" content={balance} />
-          {a.mask ? (
-            <Action.CopyToClipboard title="Copy Mask" content={a.mask} />
-          ) : null}
+          {a.mask ? <Action.CopyToClipboard title="Copy Mask" content={a.mask} /> : null}
         </ActionPanel>
       }
     />
@@ -159,45 +116,14 @@ function AccountDetail({
 }
 
 export default function Command() {
-  const { apiUrl, brandfetchClientId } = getPreferenceValues<Preferences>();
-  const base = (apiUrl || "https://api.cobaltpf.com").replace(/\/+$/, "");
-  const [accessToken, setAccessToken] = useState<string | null>(null);
+  const { accessToken, base, signOutAction } = useCobaltSession();
 
-  useEffect(() => {
-    const run = async () => {
-      try {
-        const token = await authorize(base);
-        setAccessToken(token);
-      } catch (error) {
-        showFailureToast(error, { title: "Sign-in failed" });
-      }
-    };
-    void run();
-  }, [base]);
-
-  const { isLoading, data, revalidate, error } = useFetch<
-    Account[],
-    Account[],
-    Account[]
-  >(`${base}/v1/accounts`, {
+  const { isLoading, data, revalidate, error } = useFetch<Account[], Account[], Account[]>(`${base}/v1/accounts`, {
     execute: !!accessToken,
     headers: accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
-    initialData: [] as Account[],
+    initialData: [],
     keepPreviousData: true,
   });
-
-  const signOutAction = (
-    <Action
-      title="Sign out"
-      icon={Icon.Logout}
-      style={Action.Style.Destructive}
-      shortcut={{ key: "l", modifiers: ["cmd", "shift"] }}
-      onAction={async () => {
-        await logout();
-        setAccessToken(null);
-      }}
-    />
-  );
 
   const accounts = data ?? [];
 
@@ -238,7 +164,6 @@ export default function Command() {
               const balance = formatBalance(a.balance, a.currency);
               const institutionIcon = pickInstitutionIcon({
                 accountName: a.name,
-                brandfetchClientId,
                 institutionLogo: null,
                 institutionName: a.institution,
                 institutionUrl: null,
@@ -284,26 +209,9 @@ export default function Command() {
                   accessories={accessories}
                   actions={
                     <ActionPanel>
-                      <Action.Push
-                        title="Show Details"
-                        icon={Icon.Sidebar}
-                        target={
-                          <AccountDetail
-                            account={a}
-                            brandfetchClientId={brandfetchClientId}
-                          />
-                        }
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Balance"
-                        content={balance}
-                      />
-                      {a.mask ? (
-                        <Action.CopyToClipboard
-                          title="Copy Mask"
-                          content={a.mask}
-                        />
-                      ) : null}
+                      <Action.Push title="Show Details" icon={Icon.Sidebar} target={<AccountDetail account={a} />} />
+                      <Action.CopyToClipboard title="Copy Balance" content={balance} />
+                      {a.mask ? <Action.CopyToClipboard title="Copy Mask" content={a.mask} /> : null}
                       <Action
                         title="Reload"
                         icon={Icon.ArrowClockwise}

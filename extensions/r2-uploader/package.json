@@ -17,7 +17,22 @@
       "title": "Upload File to R2",
       "subtitle": "Cloudflare R2",
       "description": "Upload any files to Cloudflare R2 with optional AVIF conversion for images. After upload, the URL or Markdown link will be copied to clipboard.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "folder",
+          "type": "text",
+          "placeholder": "Folder (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "browse-r2-files",
+      "title": "Browse R2 Files",
+      "subtitle": "Cloudflare R2",
+      "description": "Browse folders and files in your Cloudflare R2 bucket, preview images, and delete files.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -70,6 +85,14 @@
       "placeholder": "{name}_{year}{month}{day}_{hours}{minutes}{seconds}"
     },
     {
+      "name": "uploadPathPrefix",
+      "type": "textfield",
+      "required": false,
+      "title": "Upload Path Prefix",
+      "description": "Optional folder path to store files under, instead of the bucket root. Supports {year}/{month}/{day}/{hours}/{minutes}/{seconds}/{name}/{ext} placeholders",
+      "placeholder": "uploads/{year}/{month}"
+    },
+    {
       "name": "convertToAvif",
       "type": "checkbox",
       "required": false,
@@ -96,17 +119,31 @@
       "default": "80"
     },
     {
-      "name": "generateMarkdown",
-      "type": "checkbox",
+      "name": "linkFormat",
+      "type": "dropdown",
       "required": false,
-      "title": "Generate Markdown",
-      "description": "Generate Markdown formatted links instead of plain URLs",
-      "label": "Generate Markdown",
-      "default": false
+      "title": "Link Format",
+      "description": "Format to use when copying the uploaded link to the clipboard",
+      "default": "url",
+      "data": [
+        {
+          "title": "Plain URL",
+          "value": "url"
+        },
+        {
+          "title": "Markdown",
+          "value": "markdown"
+        },
+        {
+          "title": "HTML",
+          "value": "html"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@aws-sdk/client-s3": "^3.864.0",
+    "@aws-sdk/s3-request-presigner": "^3.864.0",
     "@raycast/api": "^1.102.4",
     "@raycast/utils": "^1.17.0",
     "dayjs": "^1.11.18"

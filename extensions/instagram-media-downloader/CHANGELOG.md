@@ -1,5 +1,10 @@
 # Instagram Media Downloader Changelog
 
+## [Fixes] - 2026-07-04
+
+- Improve Instagram post and reel downloads, including more reliable filename and extension detection.
+- Improve story and highlight story downloads and remove the unused `cheerio` dependency.
+
 ## [Fixes] - 2026-05-11
 
 - Fix gallery (carousel) posts intermittently failing with `401 Unauthorized` or "No media found" by retrying the GraphQL request with exponential backoff (up to 3 attempts) when Instagram rate-limits an unauthenticated caller. Also adds the `X-IG-App-ID` header and a post-specific `Referer`, both of which Instagram's web client sends.

@@ -22,6 +22,10 @@ interface ProductListItemProps {
   totalProducts?: number;
   allProducts?: Product[];
   onRefresh?: () => void;
+  signedIn?: boolean;
+  onSignIn?: () => void;
+  onSignOut?: () => void;
+  onReauthorize?: () => void;
 }
 
 export function ProductListItem({
@@ -33,6 +37,10 @@ export function ProductListItem({
   totalProducts,
   allProducts = [],
   onRefresh,
+  signedIn,
+  onSignIn,
+  onSignOut,
+  onReauthorize,
 }: ProductListItemProps) {
   const { push } = useNavigation();
 
@@ -53,7 +61,7 @@ export function ProductListItem({
       ? [...(submitter ? [{ text: submitter.name }] : [])]
       : [
           { text: product.commentsCount ? `${product.commentsCount}` : undefined, icon: { source: Icon.Bubble } },
-          { text: `${product.votesCount}`, icon: { source: Icon.ArrowUp } },
+          { text: `${product.isVoted ? "▲" : "△"} ${product.votesCount}` },
           ...(submitter ? [{ text: submitter.name }] : []),
         ];
   } else {
@@ -108,6 +116,10 @@ export function ProductListItem({
             viewContext={ViewContext.List}
             showTopics={showTopics}
             onRefresh={onRefresh}
+            signedIn={signedIn}
+            onSignIn={onSignIn}
+            onSignOut={onSignOut}
+            onReauthorize={onReauthorize}
           />
         ) as JSX.Element
       }

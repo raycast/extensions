@@ -3,12 +3,11 @@ import {
   type Movie,
   type MovieDetails,
   type MovieRatingHistogram,
-  type MovieStatistics,
 } from "./types";
 import { parse } from "./parser";
 import type { Element } from "domhandler";
 import { load } from "cheerio";
-import { fetchWithRetry } from "./utils";
+import { fetchJsonWithRetry, fetchWithRetry } from "./utils";
 
 const cache = new Cache();
 
@@ -37,11 +36,6 @@ const addToCache = <T>(key: string, value: T) => {
   cache.set(key, JSON.stringify(cacheEntry));
 };
 
-const enum SEARCH_TYPE {
-  FILMS = "films",
-  PEOPLE = "cast-crew",
-}
-
 export const enum AsyncStatus {
   Success,
   Error,
@@ -53,65 +47,88 @@ interface ApiResponse<T> {
 }
 
 const LETTERBOXD_URL_BASE = "https://letterboxd.com";
-const SEARCH_URL_BASE = `${LETTERBOXD_URL_BASE}/s/search`;
+const LETTERBOXD_API_URL_BASE = "https://api.letterboxd.com/api/v0";
 
-const getSearchPageUrl = (query: string, searchType: SEARCH_TYPE) =>
-  `${SEARCH_URL_BASE}/${searchType}/${encodeURIComponent(query)}/`;
+const getSearchUrl = (query: string) => {
+  const url = new URL(`${LETTERBOXD_API_URL_BASE}/search`);
+  url.searchParams.set("input", query);
+  url.searchParams.set("searchMethod", "Autocomplete");
+  url.searchParams.set("include", "FilmSearchItem");
+  url.searchParams.set("perPage", "20");
+  return url.toString();
+};
 
 export function getFullURL(path: string) {
   return `${LETTERBOXD_URL_BASE}${path}`;
 }
 
-export async function fetchPosterUrl(letterboxdId: string): Promise<string> {
-  const posterUrl = `${LETTERBOXD_URL_BASE}/film/${letterboxdId}/poster/std/230`;
-  const posterResponse = await fetchWithRetry(posterUrl);
-  const posterData = JSON.parse(posterResponse);
-  if (posterData.url2x) {
-    return posterData.url2x;
-  }
-  return posterData.url ?? "";
+interface LetterboxdImage {
+  sizes: Array<{
+    width: number;
+    height: number;
+    url: string;
+  }>;
+}
+
+interface LetterboxdFilmSearchItem {
+  type: "FilmSearchItem";
+  film: {
+    id: string;
+    name: string;
+    link: string;
+    releaseYear?: number;
+    rating?: number | null;
+    poster?: LetterboxdImage | null;
+    directors?: Array<{
+      name: string;
+    }>;
+  };
+}
+
+interface LetterboxdSearchResponse {
+  items: LetterboxdFilmSearchItem[];
+}
+
+function getPreferredImageUrl(
+  image?: LetterboxdImage | null,
+): string | undefined {
+  const sizes = image?.sizes ?? [];
+  return (
+    sizes.find((size) => size.width >= 300)?.url ?? sizes[sizes.length - 1]?.url
+  );
+}
+
+function getPathFromLetterboxdUrl(url: string): string {
+  return new URL(url).pathname;
 }
 
 export const fetchMoviesByTitle = async (
   title: string,
 ): Promise<ApiResponse<Movie[]>> => {
-  const url = getSearchPageUrl(title, SEARCH_TYPE.FILMS);
+  const url = getSearchUrl(title.trim());
 
   try {
-    const response = await fetchWithRetry(url);
-    const movies = extractEntitiesFromMovieSearchPage(response);
-
-    // poster pngs are loaded client side after search results page load, so we mimic that here, namely
-    // for each movie in the search results we need to:
-    // 1. make a request to https://letterboxd.com/ajax/poster/film/<filmID, e.g. aquaman-2018>/std/70x105/
-    // 2. parse the html returned in that request for img src
-    const posterUrls: string[] = await Promise.all(
-      movies.map((movie) => {
-        return fetchPosterUrl(movie.letterboxdId);
-      }),
-    );
-    movies.forEach((movie, index) => {
-      const posterUrl = posterUrls[index];
-      if (posterUrl.includes("empty-poster")) {
-        movie.thumbnail = undefined;
-      } else {
-        movie.thumbnail = posterUrl;
-      }
+    const response = await fetchJsonWithRetry<LetterboxdSearchResponse>(url);
+    const movies = response.items.map(({ film }) => {
+      const detailsPage = getPathFromLetterboxdUrl(film.link);
+      return {
+        id: film.id,
+        letterboxdId: letterboxdIdFromPath(detailsPage),
+        thumbnail: getPreferredImageUrl(film.poster),
+        title: film.name,
+        released: film.releaseYear?.toString() ?? "",
+        director: film.directors?.map(({ name }) => name).join(", ") ?? "",
+        detailsPage,
+        rating: film.rating?.toFixed(2),
+      };
     });
+
     return { status: AsyncStatus.Success, data: movies };
   } catch (error) {
     console.log(`Failed: ${error}`);
     return { status: AsyncStatus.Error, data: [] };
   }
 };
-
-interface MovieResponse {
-  thumbnail: string;
-  title: string;
-  released: string;
-  director: string;
-  detailsPage: string;
-}
 
 function letterboxdIdFromPath(path: string): string {
   // extract the letterboxd id from the details page url, e.g. https://letterboxd.com/film/aquaman-2018/ -> aquaman-2018
@@ -120,179 +137,6 @@ function letterboxdIdFromPath(path: string): string {
     throw new Error(`Failed to extract letterboxd id from path: ${path}`);
   }
   return match[1];
-}
-
-function createMovieFromResponse(data: MovieResponse, index: number): Movie {
-  const { thumbnail, title, released, director, detailsPage } = data;
-  return {
-    id: `${title}-${director}-${index}`,
-    letterboxdId: letterboxdIdFromPath(detailsPage),
-    thumbnail,
-    title,
-    released,
-    director,
-    detailsPage: detailsPage,
-  };
-}
-
-function extractEntitiesFromMovieSearchPage(html: string): Movie[] {
-  const { movies } = parse(html, {
-    movies: [
-      {
-        selector: "ul.results li",
-        value: {
-          thumbnail: {
-            selector: "img",
-            value: "src",
-          },
-          title: {
-            selector: 'span.film-title-wrapper a[href^="/film/"]',
-          },
-          released: {
-            selector: 'span.film-title-wrapper a[href^="/films/year/"]',
-          },
-          director: {
-            selector: 'a[href^="/director/"]',
-          },
-          detailsPage: {
-            selector: 'a[href^="/film/"]',
-            value: "href",
-          },
-        },
-      },
-    ],
-  });
-
-  const movieResponses: MovieResponse[] = movies.map((movie) => ({
-    thumbnail: movie.thumbnail as string,
-    title: movie.title as string,
-    released: movie.released as string,
-    director: movie.director as string,
-    detailsPage: movie.detailsPage as string,
-  }));
-
-  const result: Movie[] = movieResponses.map(createMovieFromResponse);
-  return result;
-}
-
-async function fetchMovieStats(letterboxdId: string): Promise<MovieStatistics> {
-  const statsUrl = `${LETTERBOXD_URL_BASE}/csi/film/${letterboxdId}/stats/`;
-  const statsResponse = await fetchWithRetry(statsUrl);
-  return parse(statsResponse, {
-    watches: {
-      selector: "li.filmstat-watches a",
-      value: (el: Element) => {
-        const $ = load(el);
-        // title attr is something like "Watched by 111,454 members"
-        const match = $(el)
-          .attr("title")
-          ?.trim()
-          .match(/([\d,]+)\smembers/);
-        if (match) {
-          return parseInt(match[1].replaceAll(",", ""));
-        }
-        return 0;
-      },
-    },
-    lists: {
-      selector: "li.filmstat-lists a",
-      value: (el: Element) => {
-        const $ = load(el);
-        // title attr is something like "Appears in 41,036 lists"
-        const match = $(el)
-          .attr("title")
-          ?.trim()
-          .match(/([\d,]+)\slists/);
-        if (match) {
-          return parseInt(match[1].replaceAll(",", ""));
-        }
-        return 0;
-      },
-    },
-    likes: {
-      selector: "li.filmstat-likes a",
-      value: (el: Element) => {
-        const $ = load(el);
-        // title attr is something like "Liked by 15,645 members"
-        const match = $(el)
-          .attr("title")
-          ?.trim()
-          .match(/([\d,]+)\smembers/);
-        if (match) {
-          return parseInt(match[1].replaceAll(",", ""));
-        }
-        return 0;
-      },
-    },
-  });
-}
-
-async function fetchRatingHistogram(
-  letterboxdId: string,
-): Promise<MovieRatingHistogram> {
-  const ratingUrl = `${LETTERBOXD_URL_BASE}/csi/film/${letterboxdId}/rating-histogram/`;
-  const ratingResponse = await fetchWithRetry(ratingUrl);
-  return parse(ratingResponse, {
-    histogram: [
-      {
-        selector: "ul li.rating-histogram-bar",
-        value: (el: Element) => {
-          const $ = load(el);
-          const countIsZero = $(el).attr("title")?.startsWith("No "); // e.g. "No half-★ ratings"
-          if (countIsZero) {
-            return {
-              description: $(el).attr("title")?.split(" ")[1] ?? "", // e.g. "half-★"
-              count: 0,
-              percentage: 0,
-            };
-          }
-          const ratingTooltip = $("a").attr("title") ?? "";
-          const match = ratingTooltip.match(
-            /([\d,]+)\s(.*)\sratings\s\((\d+)%\)/,
-          );
-          if (match) {
-            return {
-              count: parseInt(match[1].replaceAll(",", "")),
-              description: match[2],
-              percentage: parseInt(match[3]),
-            };
-          }
-          return { count: 0, description: "", percentage: 0 };
-        },
-      },
-    ],
-    fans: {
-      selector: "a[href*='/fans']",
-      value: (el: Element) => {
-        const $ = load(el);
-        // element inner text is something like "38 fans"
-        // extract the number from that string using a regex
-        const fansText = $(el).text();
-        const match = fansText.match(/([\d,]+)\sfan[s]*/);
-        if (match) {
-          return parseInt(match[1].replaceAll(",", ""));
-        }
-        return 0;
-      },
-    },
-    rating: {
-      selector: "span.average-rating a",
-      value: (el: Element) => {
-        const $ = load(el);
-        // title attribute is something like "Weighted average of 2.29 based on 94,717 ratings"
-        // extract the average and count from that string using a regex
-        const title = $(el).attr("title") ?? "";
-        const match = title.match(/([\d.]+)\sbased\son\s([\d,]+)\s/);
-        if (match) {
-          return {
-            average: parseFloat(match[1]),
-            count: parseInt(match[2].replaceAll(",", "")),
-          };
-        }
-        return undefined;
-      },
-    },
-  });
 }
 
 export async function fetchMovieDetails(
@@ -315,14 +159,6 @@ export async function fetchMovieDetails(
       letterboxdId,
     );
 
-    const posterUrlPromise = fetchPosterUrl(letterboxdId);
-    const ratingHistogramPromise = fetchRatingHistogram(letterboxdId);
-    const statsPromise = fetchMovieStats(letterboxdId);
-
-    data.posterUrl = await posterUrlPromise;
-    data.ratingHistogram = await ratingHistogramPromise;
-    data.stats = await statsPromise;
-
     addToCache(cacheKey, data);
 
     return { status: AsyncStatus.Success, data };
@@ -337,6 +173,57 @@ function array(str: string | string[] | undefined): string[] {
     return [];
   }
   return Array.isArray(str) ? str : [str];
+}
+
+interface StructuredMovieData {
+  "@type"?: string;
+  image?: string;
+  aggregateRating?: {
+    ratingValue?: number;
+    ratingCount?: number;
+  };
+}
+
+function extractStructuredMovieData(
+  html: string,
+): StructuredMovieData | undefined {
+  const $ = load(html);
+  const scripts = $('script[type="application/ld+json"]').toArray();
+
+  for (const script of scripts) {
+    const rawJson = $(script).text();
+    const start = rawJson.indexOf("{");
+    const end = rawJson.lastIndexOf("}");
+    if (start === -1 || end === -1) {
+      continue;
+    }
+
+    try {
+      const data = JSON.parse(
+        rawJson.slice(start, end + 1),
+      ) as StructuredMovieData;
+      if (data["@type"] === "Movie") {
+        return data;
+      }
+    } catch {
+      // Ignore malformed structured data and continue with the HTML fields.
+    }
+  }
+}
+
+function getRatingFromStructuredData(
+  data?: StructuredMovieData,
+): MovieRatingHistogram | undefined {
+  const average = data?.aggregateRating?.ratingValue;
+  const count = data?.aggregateRating?.ratingCount;
+  if (average === undefined || count === undefined) {
+    return undefined;
+  }
+
+  return {
+    histogram: [],
+    rating: { average, count },
+  };
 }
 
 function extractEntitiesFromMovieDetailsPage(
@@ -468,6 +355,8 @@ function extractEntitiesFromMovieDetailsPage(
       },
     ],
   });
+  const structuredData = extractStructuredMovieData(html);
+
   return {
     id: letterboxId,
     director: director ?? "",
@@ -483,5 +372,7 @@ function extractEntitiesFromMovieDetailsPage(
     genres: array(genres),
     reviews,
     releases,
+    posterUrl: structuredData?.image,
+    ratingHistogram: getRatingFromStructuredData(structuredData),
   };
 }

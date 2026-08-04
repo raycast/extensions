@@ -21,6 +21,15 @@
       "type": "checkbox",
       "default": true,
       "required": true
+    },
+    {
+      "name": "speed",
+      "title": "Speed (ms)",
+      "description": "Matrix rain update interval in milliseconds. Lower is faster. Enter a whole number from 10 to 200.",
+      "type": "textfield",
+      "default": "40",
+      "placeholder": "40",
+      "required": true
     }
   ],
   "commands": [
@@ -43,7 +52,7 @@
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
-    "overlay:dev": "osascript -l JavaScript assets/overlay/main.jxa -- --the-matrix-raycast-overlay --overlay-dir \"$PWD/assets/overlay\" --audio 1",
+    "overlay:dev": "osascript -l JavaScript assets/overlay/main.jxa -- --the-matrix-raycast-overlay --overlay-dir \"$PWD/assets/overlay\" --audio 1 --speed 40",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",

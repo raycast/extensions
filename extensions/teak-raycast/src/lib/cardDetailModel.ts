@@ -119,10 +119,10 @@ export const getHeroMediaUrl = (card: RaycastCard): string | null => {
   return null;
 };
 
-export type DetailStatusChip = {
+export interface DetailStatusChip {
   kind: "type" | "favorite" | "aiSummary" | "aiTags";
   text: string;
-};
+}
 
 export const getDetailStatusChips = (card: RaycastCard): DetailStatusChip[] => {
   return [

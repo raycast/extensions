@@ -1,12 +1,30 @@
-import { execFileSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
+import { getPreferenceValues } from "@raycast/api";
 
-export function getOpenWindowIds(dbPath: string): { sessionId: string | null; windowIds: Set<number> } {
+export function getOpenWindowIds(dbPath: string): {
+  sessionId: string | null;
+  windowIds: Set<number>;
+} {
   try {
+    const { build } = getPreferenceValues<Preferences>();
+
+    try {
+      execSync(`pgrep -f "${build}.app"`, { stdio: "ignore" });
+    } catch {
+      return { sessionId: null, windowIds: new Set() };
+    }
+
     const result = execFileSync(
       "sqlite3",
-      [dbPath, "SELECT key, value FROM kv_store WHERE key IN ('session_id', 'session_window_stack')"],
+      [
+        "-cmd",
+        ".timeout 5000",
+        dbPath,
+        "SELECT key, value FROM kv_store WHERE key IN ('session_id', 'session_window_stack')",
+      ],
       { encoding: "utf8" },
     );
+
     let sessionId: string | null = null;
     let windowIds = new Set<number>();
 

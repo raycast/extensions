@@ -6,7 +6,7 @@
 
 ## Features
 
-- **Download from anywhere yt-dlp supports** — paste a URL, pick a format, and download. Audio-only (MP3) is included.
+- **Download from anywhere yt-dlp supports** — paste a URL, pick a format, and download. Audio-only formats (MP3, M4A, and more) are included, and the download action and progress toasts say "audio" instead of "video" when you pick one.
 - **Auto-fill the URL** — optionally load the link from your clipboard, selected text, or the active browser tab (see preferences).
 - **Use your browser's cookies** — work around auth-protected media, age restrictions, and "Bad guest token" rate-limit errors on X/Twitter by passing your logged-in browser's cookies (see the _Use Cookies from Browser_ preference).
 - **Playlists, opt-in** — for a playlist URL, a _Download entire playlist_ checkbox appears; leave it unchecked to grab just the linked video.

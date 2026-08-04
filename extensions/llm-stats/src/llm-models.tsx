@@ -158,10 +158,11 @@ function comparePrices(a: string | null, b: string | null): number {
 }
 
 /**
- * Parses a price string like "$0.50/1M tokens" to a number
+ * Parses a price to a number. Accepts either a formatted string like
+ * "$0.50/1M tokens" or a raw numeric value (the API returns numbers for some models).
  */
-function parsePrice(priceStr: string): number | null {
-  const match = priceStr.match(/\$?([\d.]+)/);
+function parsePrice(priceStr: string | number): number | null {
+  const match = String(priceStr).match(/\$?([\d.]+)/);
   if (!match) return null;
   return parseFloat(match[1]);
 }
@@ -197,10 +198,11 @@ function compareThroughput(a: string | null, b: string | null): number {
 }
 
 /**
- * Parses a throughput string like "100 tokens/second" to a number
+ * Parses a throughput to a number. Accepts either a formatted string like
+ * "100 tokens/second" or a raw numeric value (the API returns numbers for some models).
  */
-function parseThroughput(throughputStr: string): number | null {
-  const match = throughputStr.match(/([\d.]+)/);
+function parseThroughput(throughputStr: string | number): number | null {
+  const match = String(throughputStr).match(/([\d.]+)/);
   if (!match) return null;
   return parseFloat(match[1]);
 }

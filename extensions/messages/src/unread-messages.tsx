@@ -1,4 +1,4 @@
-import { MenuBarExtra, Icon, open, openCommandPreferences, launchCommand, LaunchType } from "@raycast/api";
+import { MenuBarExtra, Icon, open, openCommandPreferences, launchCommand, LaunchType, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect } from "react";
 
@@ -9,6 +9,7 @@ export default function Command() {
   const { data: messages, isLoading, error } = useMessages();
 
   const unreadMessages = (messages?.filter((m) => !m.is_read) || []).slice(0, 50);
+  const showLoadingIndicator = Boolean(isLoading && unreadMessages.length === 0);
 
   useEffect(() => {
     if (error && error.message.includes("authorization")) {
@@ -22,7 +23,7 @@ export default function Command() {
     <MenuBarExtra
       icon={Icon.Message}
       title={unreadMessages.length > 0 ? unreadMessages.length.toString() : undefined}
-      isLoading={isLoading}
+      isLoading={showLoadingIndicator}
     >
       {unreadMessages.length > 0 ? (
         unreadMessages.map((message) => {
@@ -46,19 +47,19 @@ export default function Command() {
           title="Open Messages"
           icon={Icon.Message}
           onAction={async () => await open("/System/Applications/Messages.app")}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
         <MenuBarExtra.Item
           title="Send Message"
           icon={Icon.SpeechBubbleActive}
           onAction={async () => await launchCommand({ name: "send-message", type: LaunchType.UserInitiated })}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
         />
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
           onAction={openCommandPreferences}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
       </MenuBarExtra.Section>
     </MenuBarExtra>

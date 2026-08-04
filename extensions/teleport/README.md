@@ -5,6 +5,6 @@ Open a database connection directly in your default database client or connect t
 List your Kubernetes clusters and pods and open your applications in the browser.
 
 ## Requirements
+
 You need to have the `tsh` Teleport CLI installed and configured. See [here](https://goteleport.com/docs/installation/) for instructions.
 To interact with Kubernetes clusters, you need to have the `kubectl` Kubernetes CLI installed and configured. See [here](https://kubernetes.io/docs/tasks/tools/) for instructions.
-

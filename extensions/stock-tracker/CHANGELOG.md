@@ -1,5 +1,10 @@
 # Stock Tracker Changelog
 
+## [Menu Bar Stocks] - 2026-07-23
+
+- Add a new Menu Bar Stocks command that shows live prices for selected stocks in the macOS menu bar, refreshing every minute
+- Add "Add to Menu Bar" / "Remove from Menu Bar" actions (⌘⇧M) to stock list items, with a pin accessory showing which stocks are in the menu bar
+
 ## [Fix] - 2026-06-11
 - Assets denominated in pence are now displayed properly, rather than being taken at face value for pounds.
 

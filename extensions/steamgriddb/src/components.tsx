@@ -5,41 +5,108 @@ import {
   Grid,
   Icon,
   Image,
+  Keyboard,
   showInFinder,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { ImageType, SGDBGame, SGDBImage } from "./types.js";
-import { db, downloadImage, imageTypes, imageTypeSpecs } from "./utils.js";
+import { ImageType, SGDBGame, SGDBImage, imageTypes } from "./types.js";
+import { db, downloadImage, imageTypeSpecs, preferences } from "./utils.js";
 
-const isImageType = (value: string): value is ImageType =>
-  imageTypes.includes(value as ImageType);
+const findImageType = (value: string) =>
+  imageTypes.find((imageType) => imageType.value === value);
 
-export const ImageDetail = ({ image }: { image: SGDBImage }) => {
-  return <Detail markdown={`![](${image.url})`} />;
+export const ImageDetail = ({
+  image,
+  imageType,
+}: {
+  image: SGDBImage;
+  imageType: ImageType;
+}) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const imageTypeSpec = imageTypeSpecs[imageType.value];
+
+  return (
+    <Detail
+      markdown={`![](${image.url})`}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Download Image"
+            icon={Icon.Download}
+            onAction={async () => {
+              if (isDownloading) return;
+              setIsDownloading(true);
+              const toast = await showToast({
+                title: "Downloading Image",
+                style: Toast.Style.Animated,
+              });
+
+              try {
+                const file = await downloadImage(
+                  image.url.toString(),
+                  preferences.downloadPath || "",
+                );
+                toast.title = "Downloaded Image";
+                toast.style = Toast.Style.Success;
+                if (preferences.showInFinderAfterDownload)
+                  await showInFinder(file);
+              } catch {
+                toast.title = "Couldn't Download Image";
+                toast.style = Toast.Style.Failure;
+              } finally {
+                setIsDownloading(false);
+              }
+            }}
+          />
+          <Action.CopyToClipboard
+            icon={Icon.Link}
+            title="Copy URL to Clipboard"
+            content={image.url.toString()}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
+          <Action.OpenInBrowser
+            shortcut={{ modifiers: ["shift"], key: "enter" }}
+            url={`https://www.steamgriddb.com/${imageTypeSpec.websitePathname}/${image.id}`}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 };
 
 export const ImagePreview = ({ game }: { game: SGDBGame }) => {
   const [images, setImages] = useState<SGDBImage[]>([]);
-  const [imageType, setImageType] = useState<ImageType>(ImageType.Grids);
+  const [imageType, setImageType] = useState<ImageType>(imageTypes[0]);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchGrids = async (gameId: number, imageType: ImageType) => {
-    setIsLoading(true);
-    const images = await db[`get${imageType}ById`](gameId).catch(() => []);
-    setImages(images as SGDBImage[]);
-    setIsLoading(false);
-  };
-
   useEffect(() => {
     if (!game.id) return;
-    fetchGrids(game.id, imageType);
+
+    let isCurrentRequest = true;
+
+    const fetchImages = async () => {
+      setIsLoading(true);
+      const images = await db[`get${imageType.value}ById`](game.id).catch(
+        () => [],
+      );
+
+      if (!isCurrentRequest) return;
+
+      setImages(images as SGDBImage[]);
+      setIsLoading(false);
+    };
+
+    void fetchImages();
+
+    return () => {
+      isCurrentRequest = false;
+    };
   }, [game.id, imageType]);
 
-  if (isLoading) return <Grid isLoading />;
-
-  const currentImageType = isImageType(imageType) ? imageType : ImageType.Grids;
-  const imageTypeSpec = imageTypeSpecs[currentImageType];
+  const imageTypeSpec = imageTypeSpecs[imageType.value];
 
   return (
     <Grid
@@ -50,12 +117,18 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Select Grid Type"
+          value={imageType.value}
           onChange={(value) =>
-            setImageType(isImageType(value) ? value : ImageType.Grids)
+            setImageType(findImageType(value) ?? imageTypes[0])
           }
         >
-          {imageTypes.map((t) => (
-            <Grid.Dropdown.Item key={t} value={t} title={t} />
+          {imageTypes.map((type) => (
+            <Grid.Dropdown.Item
+              key={type.value}
+              value={type.value}
+              title={type.title}
+              icon={type.icon}
+            />
           ))}
         </Grid.Dropdown>
       }
@@ -79,24 +152,54 @@ export const ImagePreview = ({ game }: { game: SGDBGame }) => {
           content={image.thumb.toString()}
           actions={
             <ActionPanel>
-              <Action
-                title={
-                  // eslint-disable-next-line @raycast/prefer-title-case
-                  isDownloading ? "Downloading..." : "Download Image"
-                }
+              <Action.Push
+                title="View Image"
                 icon={Icon.Image}
+                target={<ImageDetail image={image} imageType={imageType} />}
+              />
+              <Action
+                title="Download Image"
+                icon={Icon.Download}
                 onAction={async () => {
                   if (isDownloading) return;
                   setIsDownloading(true);
-                  const file = await downloadImage(image.url.toString());
-                  setIsDownloading(false);
-                  await showInFinder(file);
+                  const toast = await showToast({
+                    title: "Downloading Image…",
+                    style: Toast.Style.Animated,
+                  });
+
+                  try {
+                    const file = await downloadImage(
+                      image.url.toString(),
+                      preferences.downloadPath || "",
+                    );
+                    toast.title = "Downloaded Image";
+                    toast.style = Toast.Style.Success;
+                    toast.primaryAction = {
+                      title:
+                        process.platform === "darwin"
+                          ? "Show In Finder"
+                          : "Show In File Explorer",
+                      onAction: async (toast) => {
+                        await showInFinder(file);
+                        toast.hide();
+                      },
+                    };
+                    if (preferences.showInFinderAfterDownload)
+                      await showInFinder(file);
+                  } catch {
+                    toast.title = "Couldn't Download Image";
+                    toast.style = Toast.Style.Failure;
+                  } finally {
+                    setIsDownloading(false);
+                  }
                 }}
               />
               <Action.CopyToClipboard
                 icon={Icon.Link}
                 title="Copy URL to Clipboard"
                 content={image.url.toString()}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <Action.OpenInBrowser
                 shortcut={{ modifiers: ["shift"], key: "enter" }}

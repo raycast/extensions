@@ -39,7 +39,8 @@ function Command() {
 
   const UsageActions = (
     <ActionPanel>
-      <Action.OpenInBrowser title="Manage Paid Premium Requests" url="https://github.com/settings/billing/budgets" />
+      {/* eslint-disable-next-line @raycast/prefer-title-case */}
+      <Action.OpenInBrowser title="Manage paid AI credits" url="https://github.com/settings/billing/budgets" />
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
       {/* eslint-disable-next-line @raycast/prefer-title-case */}
       <Action title="Log Out" icon={Icon.Logout} onAction={reauthorize} />
@@ -93,7 +94,7 @@ function Command() {
               actions={UsageActions}
             />
             <List.Item
-              title="Premium requests"
+              title="AI credits"
               accessories={[
                 {
                   text: formatUsage(usage.premiumRequests.percentageUsed, usage.premiumRequests.limit),
@@ -111,7 +112,7 @@ function Command() {
           {usage.allowanceResetAt && (
             <List.Section title="">
               <List.Item
-                title="Additional paid premium requests enabled."
+                title="Additional paid AI credits enabled."
                 icon={{ source: Icon.Info, tintColor: Color.SecondaryText }}
                 actions={UsageActions}
               />

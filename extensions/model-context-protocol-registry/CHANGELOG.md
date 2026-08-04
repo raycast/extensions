@@ -1,5 +1,53 @@
 # Model Context Protocol Registry Changelog
 
+## [Add JobYap MCP Server] - 2026-08-03
+
+Add JobYap to the official registry: search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server via mcp-remote; no auth required.
+
+## [Add Webhound MCP Server] - 2026-07-29
+
+Add Webhound to the official registry for private, budgeted reports and datasets. The remote Streamable HTTP MCP server uses OAuth so each connection authenticates to that user's own Webhound account.
+
+## [Update UseMyContext description] - 2026-07-28
+
+Remove the hard-coded tool count from the UseMyContext description. The server's tool surface has grown since the original submission (now 13 tools), and a number in the listing goes stale with every addition - the description now names the capabilities without a count.
+
+## [Add UseMyContext MCP Server] - 2026-07-28
+
+Add UseMyContext to the official registry: the personal context layer for AI - one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. 8 tools (profile, file search and reads, cited answers from documents, exact table queries, suggested updates, shared contexts). Remote Streamable HTTP endpoint via mcp-remote with OAuth 2.1 sign-in; free tier, no API key.
+
+## [Add Trends MCP] - 2026-07-26
+
+Add Trends MCP to the official registry: live cross-platform trend data for AI agents across Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more. Remote endpoint via mcp-remote; Bearer API key required (free tier at trendsmcp.ai).
+
+## [Add Glif] - 2026-07-23
+
+Add Glif to the official registry: media-generation agent (images, video, audio, transcription, multi-step workflows). Hosted remote streamable HTTP MCP server with OAuth sign-in via mcp-remote; no API key required.
+
+## [Add Agentcard MCP Server] - 2026-07-15
+
+Add Agentcard to the official registry: prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Remote streamable HTTP MCP server with OAuth 2.0 sign-in via mcp-remote; no API key required.
+
+## [Add Appwrite MCP Server] - 2026-07-13
+
+Add the official Appwrite MCP server to the registry, enabling AI assistants to securely inspect and manage Appwrite projects and resources through Appwrite's API using OAuth authentication.
+
+## [Add Nika MCP Server] - 2026-07-12
+
+Add Nika to the community registry — a workflow language for AI (one file, four verbs, one Rust binary). Its MCP server is a read-only oracle: agents validate .nika.yaml workflows (nika_check, nika_explain) and learn the language (schema, templates, examples, catalogs) without executing anything; execution stays on the CLI, budget-capped and trace-verified. Local binary via Homebrew/cargo-binstall/Nix; no env vars, no API key.
+
+## [Update Circleback MCP Server URL] - 2026-07-10
+
+Update the Circleback MCP server endpoint from app.circleback.ai to circleback.ai to reflect our domain migration.
+
+## [Add plori MCP Server] - 2026-07-06
+
+Add official plori MCP server to registry: give your AI agent its own cloud computer. Create and drive hosted plori agents (persistent disk, real tools, memory that survives between sessions), read their replies, answer human-in-the-loop questions, and schedule deferred runs. Remote endpoint via mcp-remote; OAuth sign-in or API key.
+
+## [Add memo MCP Server] - 2026-07-06
+
+Add memo to the community registry — local-first persistent memory for AI agents: MLX embeddings on Apple Silicon (CPU fallback elsewhere), sqlite-vec + BM25 hybrid search, markdown-on-disk storage compatible with Obsidian. No cloud APIs.
+
 ## [Add Jellypod MCP Server] - 2026-06-19
 
 Add official Jellypod MCP Server to registry for creating, editing, and publishing conversational AI podcasts (podcasts, hosts, sources, episodes, and analytics). Remote endpoint via mcp-remote.

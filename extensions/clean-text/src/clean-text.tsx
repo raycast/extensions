@@ -1,12 +1,10 @@
 import {
   Action,
   ActionPanel,
-  Application,
   Clipboard,
   closeMainWindow,
   Color,
   environment,
-  getFrontmostApplication,
   getPreferenceValues,
   getSelectedText,
   Icon,
@@ -20,6 +18,7 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import React, { useEffect, useState } from "react";
+import { pasteOrCopy } from "./clipboard";
 import { functions, aliases, convert, modifyTextWrapper, ModificationType } from "./modifications";
 
 class NoTextError extends Error {
@@ -94,13 +93,12 @@ export default function Command(props: LaunchProps) {
         const modified = convert(content, applyModification);
 
         if (preferredAction === "paste") {
-          Clipboard.paste(modified);
-          Clipboard.copy(modified);
+          await pasteOrCopy(modified, `Applied ${applyModification}`);
         } else {
-          Clipboard.copy(modified);
+          await Clipboard.copy(modified);
+          await showHUD(`Applied ${applyModification}`);
         }
 
-        showHUD(`Applied ${applyModification}`);
         popToRoot();
       } catch (error) {
         showToast({
@@ -114,7 +112,6 @@ export default function Command(props: LaunchProps) {
   }
 
   const [content, setContent] = useState<string>("");
-  const [frontmostApp, setFrontmostApp] = useState<Application>();
 
   const [pinned, setPinned] = useState<ModificationType[]>([]);
   const [recent, setRecent] = useState<ModificationType[]>([]);
@@ -135,7 +132,6 @@ export default function Command(props: LaunchProps) {
     };
 
     loadFromCache();
-    getFrontmostApplication().then(setFrontmostApp);
   }, []);
 
   useEffect(() => {
@@ -200,17 +196,15 @@ export default function Command(props: LaunchProps) {
     pinned?: boolean;
     recent?: boolean;
   }) => {
-    return frontmostApp ? (
+    return (
       <Action
-        title={`Paste in ${frontmostApp.name}`}
-        icon={{ fileIcon: frontmostApp.path }}
-        onAction={() => {
+        title="Paste to Active App"
+        icon={Icon.Clipboard}
+        onAction={async () => {
           setRecent(
             [props.modification, ...recent.filter((c) => c !== props.modification)].slice(0, 4 + pinned.length),
           );
-          showHUD(`Pasted in ${frontmostApp.name}`);
-          Clipboard.paste(props.modified);
-          Clipboard.copy(props.modified);
+          await pasteOrCopy(props.modified, "Pasted to active app");
           if (preferences.popToRoot) {
             popToRoot();
           } else {
@@ -218,7 +212,7 @@ export default function Command(props: LaunchProps) {
           }
         }}
       />
-    ) : null;
+    );
   };
 
   const ModificationItem = (props: {

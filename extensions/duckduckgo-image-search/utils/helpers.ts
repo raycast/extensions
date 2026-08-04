@@ -4,7 +4,7 @@ import fs from "fs";
 import mime from "mime-types";
 import { tmpdir } from "os";
 import { getCachedImagePath, setCachedImagePath } from "./cache";
-import { DEFAULT_RETRIES, DEFAULT_SLEEP, HEADERS, ImageLayouts, ImageLicenses } from "./consts";
+import { DOWNLOAD_TIMEOUT, HEADERS, ImageLayouts, ImageLicenses, MAX_DOWNLOAD_SIZE } from "./consts";
 import { DuckDuckGoImage, imageNextSearch, imageSearch, ImageSearchResult } from "./search";
 
 import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
@@ -16,14 +16,16 @@ export const emptyResult: ImageSearchResult = {
   results: [],
 };
 
-interface Cursor {
+export interface ImageSearchCursor {
   next: string;
   vqd: string;
+  seenImageTokens: string[];
+  seenPageCursors: string[];
 }
 
 interface SearchImageParams {
   query: string;
-  cursor?: Cursor;
+  cursor?: ImageSearchCursor;
   signal?: AbortSignal;
   layout?: ImageLayouts;
 }
@@ -33,19 +35,11 @@ export async function searchImage({ query, cursor, signal, layout }: SearchImage
     return emptyResult;
   }
 
-  const {
-    moderate,
-    locale,
-    retries: retriesString,
-    sleep: sleepString,
-    license,
-  } = getPreferenceValues<Preferences.SearchImage>();
-  const retries = stringToPositiveNumber(retriesString) || DEFAULT_RETRIES;
-  const sleep = stringToPositiveNumber(sleepString) || DEFAULT_SLEEP;
+  const { moderate, locale, license } = getPreferenceValues<Preferences.SearchImage>();
 
   try {
     if (cursor) {
-      return await imageNextSearch(cursor.next, cursor.vqd, retries, sleep, signal);
+      return await imageNextSearch(cursor.next, cursor.vqd, signal);
     }
     return await imageSearch(
       query,
@@ -54,8 +48,6 @@ export async function searchImage({ query, cursor, signal, layout }: SearchImage
         filters: { layout, license: license as ImageLicenses },
         locale,
       },
-      retries,
-      sleep,
       signal,
     );
   } catch (err: any) {
@@ -78,9 +70,17 @@ export async function downloadImage(
       style: Toast.Style.Animated,
     });
   }
-  const response = await axios.get(image, {
+  const url = new URL(image);
+  if (url.protocol !== "https:" && url.protocol !== "http:") {
+    throw new Error("This image uses an unsupported URL.");
+  }
+
+  const response = await axios.get(url.toString(), {
     headers: HEADERS,
     responseType: "arraybuffer",
+    timeout: DOWNLOAD_TIMEOUT,
+    maxContentLength: MAX_DOWNLOAD_SIZE,
+    maxBodyLength: MAX_DOWNLOAD_SIZE,
   });
 
   if (response.status < 200 || response.status >= 300) {
@@ -96,7 +96,7 @@ export async function downloadImage(
 
   // Get the correct file extension from the response's Content-Type header
   const contentType = response.headers["content-type"];
-  const extension = mime.extension(contentType);
+  const extension = typeof contentType === "string" ? mime.extension(contentType) : false;
 
   filePath = path.join(tmpdir(), image_token + (extension ? `.${extension}` : ""));
 
@@ -126,17 +126,28 @@ export async function copyImageToClipboard(image: DuckDuckGoImage) {
       style: Toast.Style.Failure,
       message: e.message,
     });
-    return;
+    return false;
   }
   await showToast({
     title: "Image Copied!",
     style: Toast.Style.Success,
   });
+  return true;
 }
 
 export async function pasteImage(image: DuckDuckGoImage) {
-  const file = await downloadImage(image);
-  await Clipboard.paste({ file });
+  try {
+    const file = await downloadImage(image);
+    await Clipboard.paste({ file });
+    return true;
+  } catch (error) {
+    await showToast({
+      title: "Failed to Paste Image",
+      message: getErrorMessage(error),
+      style: Toast.Style.Failure,
+    });
+    return false;
+  }
 }
 
 function expandTildePath(filePath: string): string {
@@ -198,17 +209,14 @@ export async function saveImage(image: DuckDuckGoImage) {
       style: Toast.Style.Failure,
       message: e.message,
     });
-    throw e;
   }
 }
 
-export function stringToPositiveNumber(value: string): number | undefined {
-  const parsed = parseInt(value.trim());
-  if (isNaN(parsed)) {
-    return;
+function getErrorMessage(error: unknown) {
+  if (axios.isAxiosError(error)) {
+    if (error.code === "ECONNABORTED" || error.code === "ETIMEDOUT") return "The image server timed out.";
+    if (error.response?.status) return `The image server returned HTTP ${error.response.status}.`;
+    return "Could not connect to the image server.";
   }
-  if (parsed < 1) {
-    return;
-  }
-  return parsed;
+  return error instanceof Error ? error.message : "Unexpected error.";
 }

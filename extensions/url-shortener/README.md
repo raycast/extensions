@@ -16,3 +16,8 @@ A URL shortener unlike anything you've seen before on the Raycast extension stor
 - Choose how Raycast handles the shortened URL
     - Paste to Active Window
     - Or Copy to Clipboard
+
+## Services
+
+- [TinyURL](https://tinyurl.com/)
+- [v.gd](https://v.gd/)

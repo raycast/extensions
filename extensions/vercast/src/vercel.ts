@@ -22,6 +22,22 @@ export const FetchHeaders = Object.entries(headers);
 
 const apiURL = "https://api.vercel.com/";
 
+export async function parseVercelResponse<T>(response: Response): Promise<T> {
+  if (response.ok) {
+    return (await response.json()) as T;
+  }
+
+  let message = response.statusText;
+  try {
+    const body = (await response.json()) as { error?: { message?: string }; message?: string };
+    message = body.error?.message ?? body.message ?? message;
+  } catch {
+    // Keep the HTTP status text when Vercel returns a non-JSON error body.
+  }
+
+  throw new Error(message);
+}
+
 // Fetch the username that belongs to the token given.
 // Use for filtering deployments by user and providing links later on
 export async function fetchUser(): Promise<User> {
@@ -99,20 +115,25 @@ export async function deleteEnvironmentVariableById(
   }
 }
 
-export function getFetchDeploymentsURL(teamId?: string, projectId?: string, limit = 100) {
-  const url = apiURL + `v6/deployments`;
+export function getFetchDeploymentsURL(teamId?: string, projectId?: string, limit = 100, slug?: string) {
+  const params = new URLSearchParams({ limit: limit.toString() });
 
-  let query = `?limit=${limit}&teamId=${teamId ?? ""}`;
+  if (teamId) {
+    params.set("teamId", teamId);
+  }
+  if (slug) {
+    params.set("slug", slug);
+  }
   if (projectId) {
-    query += `&projectId=${projectId}`;
+    params.set("projectId", projectId);
   }
 
-  return url + query;
+  return apiURL + `v6/deployments?${params.toString()}`;
 }
 
-export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 300) {
+export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch = 300, slug?: string) {
   try {
-    const fetchURL = getFetchDeploymentsURL(teamId, undefined, limit);
+    const fetchURL = getFetchDeploymentsURL(teamId, undefined, limit, slug);
     const response = await fetch(fetchURL, {
       method: "get",
       headers: headers,
@@ -143,9 +164,9 @@ export async function fetchDeployments(teamId?: string, limit = 100, maxToFetch 
   }
 }
 
-export async function fetchLatestDeployment(teamId?: string): Promise<Deployment | null> {
+export async function fetchLatestDeployment(teamId?: string, slug?: string): Promise<Deployment | null> {
   try {
-    const fetchURL = getFetchDeploymentsURL(teamId, undefined, 1);
+    const fetchURL = getFetchDeploymentsURL(teamId, undefined, 1, slug);
     const response = await fetch(fetchURL, {
       method: "get",
       headers: headers,

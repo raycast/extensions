@@ -1,5 +1,13 @@
 # Video Downloader Changelog
 
+## [Fix] - 2026-07-09
+
+- Fixed transcript extraction failing with `ENOENT: no such file or directory, mkdir '~/Downloads/.tmp-subtitles'` when the Download Path preference contains a literal `~` (its default value). Node's fs APIs don't expand `~`, so the path is now expanded to the user's home directory before use.
+
+## [Improvement] - 2026-07-09
+
+- The download action and progress toasts now say "audio" instead of "video" when you pick an audio-only format (MP3, M4A, etc.) — the button reads "Download Audio", and toasts read "Downloading Audio", "Formatting Audio", and "Audio Downloaded"
+
 ## [Improvement] - 2026-06-04
 
 - Added a "Use Cookies from Browser" preference to fix X/Twitter "Bad guest token" failures by using your logged-in session (also helps with age-restricted and private posts)

@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useWinSCP } from "./hooks/useWinSCP";
 import { ErrorView } from "./components/ErrorView";
+import { useWinSCP } from "./hooks/useWinSCP";
+import { formatSessionTarget } from "./winscp/parse";
 
 export default function Command() {
-  const { data, error, isLoading, launchSession } = useWinSCP();
+  const { data, error, isLoading, revalidate, launch } = useWinSCP();
 
   if (error) {
     return <ErrorView error={error} />;
@@ -11,16 +12,33 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search sessions...">
+      <List.EmptyView
+        icon={Icon.HardDrive}
+        title="No Sessions Found"
+        description="Save a site in WinSCP and it will show up here."
+      />
       <List.Section title="WinSCP Sessions" subtitle={data.length.toString()}>
         {data.map((session) => (
           <List.Item
-            key={`${session.name}-${session.user}@${session.host}`}
+            key={session.id}
             title={session.name}
-            subtitle={`${session.user}@${session.host}`}
-            icon={Icon.HardDrive}
+            subtitle={formatSessionTarget(session)}
+            icon={session.isWorkspace ? Icon.Window : Icon.HardDrive}
             actions={
               <ActionPanel>
-                <Action title="Launch Session" icon={Icon.Play} onAction={() => launchSession(session)} />
+                <Action title="Launch Session" icon={Icon.Play} onAction={() => launch(session)} />
+                <Action
+                  title="Launch in New Instance"
+                  icon={Icon.PlusCircle}
+                  onAction={() => launch(session, true)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                />
+                <Action
+                  title="Refresh Sessions"
+                  icon={Icon.ArrowClockwise}
+                  onAction={revalidate}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                />
               </ActionPanel>
             }
           />

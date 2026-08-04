@@ -7,14 +7,20 @@ import { useConfig } from "./hooks/useConfig";
 import { useGetAllTags } from "./hooks/useGetAllTags";
 import { useGetTagsBookmarks } from "./hooks/useGetTagsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
+import { connectionGuard } from "./components/ConnectionErrorView";
 import { Tag } from "./types";
 import { runWithToast } from "./utils/toast";
 
 const log = logger.child("[Tags]");
 
 function TagBookmarksView({ tagId, tagName }: { tagId: string; tagName: string }) {
-  const { bookmarks, isLoading, revalidate, pagination } = useGetTagsBookmarks(tagId);
+  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetTagsBookmarks(tagId);
   const { t } = useTranslation();
+
+  // Without this the suppressed default toast leaves NOTHING on screen but
+  // "no bookmarks found" — which reads as an empty tag, not a dead server.
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <BookmarkList
@@ -123,7 +129,7 @@ function RenameTagForm({ tag, onRenamed }: { tag: Tag; onRenamed: () => void }) 
 
 export default function Tags() {
   const { push } = useNavigation();
-  const { isLoading, tags, revalidate } = useGetAllTags();
+  const { isLoading, tags, error, hasLiveData, revalidate } = useGetAllTags();
   const { config } = useConfig();
   const { apiUrl } = config;
   const { t } = useTranslation();
@@ -160,6 +166,9 @@ export default function Tags() {
   };
 
   const sortedTags = [...tags].sort((a, b) => b.numBookmarks - a.numBookmarks);
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <List

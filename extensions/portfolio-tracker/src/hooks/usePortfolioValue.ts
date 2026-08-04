@@ -56,6 +56,7 @@ import {
   isDebtPaidOff,
 } from "../utils/types";
 import { getCachedPrices, getCachedFxRates } from "../services/price-cache";
+import { computePnl } from "../utils/pnl";
 import { getTodayDateKey } from "../utils/formatting";
 import { createPortfolioError } from "../utils/errors";
 import { PropertyPriceChange, getPropertyPriceChange, getPropertyPriceChangeSync } from "../services/property-price";
@@ -443,6 +444,12 @@ export function usePortfolioValue(portfolio: Portfolio | undefined): UsePortfoli
         const change = hasPriceOverride ? 0 : (priceData?.change ?? 0);
         const changePercent = hasPriceOverride ? 0 : (priceData?.changePercent ?? 0);
 
+        // Unrealized P&L (native currency) — only when an average cost is recorded.
+        // computePnl only returns a result when avgCostPrice is a valid positive
+        // number, so the assertion below is safe and centralises the one place
+        // that needs to know this invariant — consumers just check `pnl`.
+        const pnlResult = computePnl(position.units, position.avgCostPrice, currentPrice);
+
         return {
           position,
           currentPrice,
@@ -451,6 +458,7 @@ export function usePortfolioValue(portfolio: Portfolio | undefined): UsePortfoli
           change,
           changePercent,
           fxRate,
+          ...(pnlResult && { pnl: { ...pnlResult, avgCostPrice: position.avgCostPrice! } }),
         };
       });
 
@@ -464,6 +472,19 @@ export function usePortfolioValue(portfolio: Portfolio | undefined): UsePortfoli
     });
 
     const grandTotal = accountValuations.reduce((sum, av) => sum + av.totalBaseValue, 0);
+
+    // Portfolio-level P&L totals (base currency) across positions with cost data
+    let totalCostBasis = 0;
+    let totalPnl = 0;
+    let hasAnyCostData = false;
+    for (const av of accountValuations) {
+      for (const pv of av.positions) {
+        if (pv.pnl === undefined) continue;
+        hasAnyCostData = true;
+        totalCostBasis += pv.pnl.costBasis * pv.fxRate;
+        totalPnl += pv.pnl.pnl * pv.fxRate;
+      }
+    }
 
     // Determine the most recent fetch timestamp across all prices
     let latestFetch = "";
@@ -484,6 +505,7 @@ export function usePortfolioValue(portfolio: Portfolio | undefined): UsePortfoli
       totalValue: grandTotal,
       baseCurrency,
       lastUpdated: latestFetch || new Date().toISOString(),
+      ...(hasAnyCostData && { pnl: { costBasis: totalCostBasis, pnl: totalPnl } }),
     };
   }, [portfolio, prices, fxRates, hpiData, debtSyncResults, baseCurrency]);
 

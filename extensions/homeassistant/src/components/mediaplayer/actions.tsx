@@ -87,7 +87,7 @@ export function MediaPlayerTurnOnAction(props: { state: State }): React.ReactEle
 
   return (
     <Action
-      title="Turn On"
+      title="Turn on"
       onAction={handle}
       shortcut={{ modifiers: ["cmd"], key: "o" }}
       icon={{ source: "power-on.svg", tintColor: Color.PrimaryText }}
@@ -107,7 +107,7 @@ export function MediaPlayerTurnOffAction(props: { state: State }): React.ReactEl
 
   return (
     <Action
-      title="Turn Off"
+      title="Turn off"
       onAction={handle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
       icon={{ source: "power-off.svg", tintColor: Color.PrimaryText }}
@@ -159,7 +159,7 @@ export function MediaPlayerActionPanel(props: { state: State }) {
       </ActionPanel.Section>
       <ActionPanel.Section title="Volume">
         <Action
-          title="Volume Up"
+          title="Volume up"
           shortcut={{ modifiers: ["cmd"], key: "+" }}
           onAction={async () => await ha.volumeUpMedia(entityID)}
           icon={{ source: Icon.SpeakerUp, tintColor: Color.PrimaryText }}

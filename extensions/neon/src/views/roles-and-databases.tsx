@@ -1,7 +1,8 @@
-import { Database, DatabaseUpdateRequest } from "@neondatabase/api-client";
+import { Database, DatabaseUpdateRequest } from "@neon/sdk";
+import { getProjectBranchSchema } from "@neon/sdk/raw";
 import { List, Icon, ActionPanel, Action, useNavigation, showToast, Toast, Form, Color, Detail } from "@raycast/api";
 import { usePromise, MutatePromise, useForm, FormValidation } from "@raycast/utils";
-import { neon } from "../neon";
+import { client, neon } from "../neon";
 import { OpenInNeon } from "../components";
 
 export function RolesAndDatabases({ projectId, branchId }: { projectId: string; branchId: string }) {
@@ -10,12 +11,12 @@ export function RolesAndDatabases({ projectId, branchId }: { projectId: string; 
     data: databases = [],
     mutate: mutateDatabases,
   } = usePromise(async () => {
-    const res = await neon.listProjectBranchDatabases(projectId, branchId);
-    return res.data.databases;
+    const res = await neon.postgres.databases.list(projectId, branchId);
+    return res;
   });
   const { isLoading: isLoadingRoles, data: roles = [] } = usePromise(async () => {
-    const res = await neon.listProjectBranchRoles(projectId, branchId);
-    return res.data.roles;
+    const res = await neon.postgres.roles.list(projectId, branchId);
+    return res;
   });
 
   const isLoading = isLoadingDatabases || isLoadingRoles;
@@ -70,8 +71,12 @@ export function RolesAndDatabases({ projectId, branchId }: { projectId: string; 
 
 function DatabaseSchema({ projectId, database }: { projectId: string; database: Database }) {
   const { isLoading, data: sql } = usePromise(async () => {
-    const res = await neon.getProjectBranchSchema({ projectId, branchId: database.branch_id, db_name: database.name });
-    return res.data.sql;
+    const res = await getProjectBranchSchema({
+      client: neon.client,
+      path: { project_id: projectId, branch_id: database.branch_id },
+      query: { db_name: database.name },
+    });
+    return res.data?.sql;
   });
 
   return (
@@ -102,7 +107,7 @@ function UpdateDatabase({
       const toast = await showToast(Toast.Style.Animated, "Updating database", database.name);
       try {
         await mutate(
-          neon.updateProjectBranchDatabase(projectId, database.branch_id, "database.name", {
+          client.updateProjectBranchDatabase(projectId, database.branch_id, database.name, {
             database: values,
           }),
         );

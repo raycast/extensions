@@ -6,6 +6,9 @@ import {
   FEEDBACK_URL,
   SAVED_CARDS_KEY,
   ScryfallSearchResponse,
+  SCRYFALL_API_BASE,
+  SCRYFALL_HEADERS,
+  parseScryfallResponse,
   Tagging,
   getCardImageUri,
   getTaggerUrl,
@@ -122,9 +125,11 @@ export interface PrintsViewProps {
 export function PrintsView({ card, searchTagTarget }: PrintsViewProps) {
   const printsUrl =
     card.prints_search_uri ??
-    `https://api.scryfall.com/cards/search?q=${encodeURIComponent(`!"${card.name}"`)}&unique=prints&order=released`;
+    `${SCRYFALL_API_BASE}/cards/search?q=${encodeURIComponent(`!"${card.name}"`)}&unique=prints&order=released`;
 
   const { isLoading, data } = useFetch<ScryfallSearchResponse>(printsUrl, {
+    headers: SCRYFALL_HEADERS,
+    parseResponse: parseScryfallResponse,
     onError: (err) => {
       showToast({ style: Toast.Style.Failure, title: "Failed to load prints", message: err.message });
     },

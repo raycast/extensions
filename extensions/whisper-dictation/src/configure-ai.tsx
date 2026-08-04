@@ -19,6 +19,8 @@ import {
 import { useCallback, useState, useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
 import { fetch } from "cross-fetch";
+import fs from "fs/promises";
+import path from "path";
 
 // Keys for LocalStorage to store prompt configs
 const AI_PROMPTS_KEY = "aiPrompts";
@@ -30,6 +32,7 @@ interface AIPrompt {
   id: string;
   name: string;
   prompt: string;
+  shortcut?: string;
 }
 
 // Main component for configuring AI prompts
@@ -107,6 +110,58 @@ export default function ConfigureAI() {
       });
     },
     [setActivePromptId],
+  );
+
+  const handleCreateCommand = useCallback(
+    async (prompt: AIPrompt) => {
+      const scriptCommandsPath = preferences.scriptCommandsPath;
+      if (!scriptCommandsPath) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Script Commands Path Not Set",
+          message: "Please set the path in the extension preferences.",
+        });
+        openExtensionPreferences();
+        return;
+      }
+
+      const commandName = `Dictate - ${prompt.name}`;
+      const fileName = `${commandName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}.sh`;
+      const expandedScriptCommandsPath = scriptCommandsPath.replace(/^~(?=$|\/)/, process.env.HOME || "");
+      const filePath = path.join(expandedScriptCommandsPath, fileName);
+
+      const context = encodeURIComponent(JSON.stringify({ promptId: prompt.id }));
+      const deepLink = `raycast://extensions/finjo/whisper-dictation/dictate?context=${context}`;
+
+      const scriptContent = `#!/bin/bash
+
+# @raycast.title ${commandName}
+# @raycast.author finjo
+# @raycast.authorURL https://github.com/finjo
+# @raycast.description Dictate with the "${prompt.name}" AI prompt.
+# @raycast.mode silent
+# @raycast.icon 🎤
+# @raycast.packageName Whisper Dictation
+
+open "${deepLink}"
+`;
+
+      try {
+        await fs.writeFile(filePath, scriptContent, { mode: 0o755 });
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Command Created Successfully",
+          message: `Saved to ${filePath}`,
+        });
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Create Command",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
+    },
+    [preferences.scriptCommandsPath],
   );
 
   useEffect(() => {
@@ -257,10 +312,28 @@ export default function ConfigureAI() {
                   showToast({ style: Toast.Style.Failure, title: "Name and Prompt cannot be empty" });
                   return;
                 }
+                if (values.shortcut && values.shortcut.length > 1) {
+                  showToast({ style: Toast.Style.Failure, title: "Shortcut must be a single character" });
+                  return;
+                }
+                // check for duplicate shortcuts
+                if (values.shortcut) {
+                  const duplicate = prompts.find((p) => p.shortcut === values.shortcut && p.id !== editingPrompt?.id);
+                  if (duplicate) {
+                    showToast({
+                      style: Toast.Style.Failure,
+                      title: "Shortcut already used",
+                      message: `The shortcut "${values.shortcut}" is already used for "${duplicate.name}".`,
+                    });
+                    return;
+                  }
+                }
+
                 const newPrompt: AIPrompt = {
                   id: editingPrompt ? editingPrompt.id : Date.now().toString(),
                   name: values.name,
                   prompt: values.prompt,
+                  shortcut: values.shortcut,
                 };
                 handleSavePrompt(newPrompt);
               }}
@@ -289,6 +362,12 @@ export default function ConfigureAI() {
           title="Prompt"
           placeholder="Instructions for how AI should refine the transcription..."
           defaultValue={editingPrompt?.prompt}
+        />
+        <Form.TextField
+          id="shortcut"
+          title="Shortcut"
+          placeholder="e.g., m for meeting notes"
+          defaultValue={editingPrompt?.shortcut}
         />
         <Form.Description
           title="Prompt Tips"
@@ -385,13 +464,22 @@ export default function ConfigureAI() {
             }
             title={prompt.name}
             subtitle={prompt.prompt.length > 50 ? `${prompt.prompt.substring(0, 50)}...` : prompt.prompt} // Truncate long prompts
-            accessories={[...(activePromptId === prompt.id ? [{ tag: { value: "Active", color: Color.Green } }] : [])]}
+            accessories={[
+              ...(prompt.shortcut ? [{ tag: { value: prompt.shortcut, color: Color.SecondaryText } }] : []),
+              ...(activePromptId === prompt.id ? [{ tag: { value: "Active", color: Color.Green } }] : []),
+            ]}
             actions={
               <ActionPanel>
                 <Action
                   title="Set as Active Prompt"
                   icon={Icon.Checkmark}
                   onAction={() => handleSetActivePrompt(prompt.id)}
+                />
+                <Action
+                  title="Create Standalone Command"
+                  icon={Icon.Terminal}
+                  onAction={() => handleCreateCommand(prompt)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                 />
                 <Action
                   title="Edit Prompt"

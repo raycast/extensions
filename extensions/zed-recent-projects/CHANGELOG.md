@@ -1,5 +1,13 @@
 # Zed Recent Projects Changelog
 
+## [Fix Nix aware `$PATH` lookup] - 2026-07-21
+
+- Fix an issue where nix-managed language tooling (e.g. LSPs) could never be resolved from `$PATH` due to the missing `$USER` env var
+
+## [Fix Remote Project Launch] - 2026-06-29
+
+- Fix an issue where remote projects fail to launch from "Search Recent Projects" menu.
+
 ## [Fix Stale Project Status in Search Menu] - 2026-06-07
 
 - Fix an issue where a project's "Open" badge and corresponding project actions failed to update when launched via the `Search Recent Projects` menu.

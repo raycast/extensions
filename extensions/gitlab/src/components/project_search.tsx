@@ -1,23 +1,16 @@
-import { List, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import { gitlab } from "../common";
-import { Project } from "../gitlabapi";
-import { getErrorMessage, showErrorToast } from "../utils";
+import { Project, searchData } from "../gitlabapi";
+import { getPreferences } from "../utils";
 import { ProjectListEmptyView, ProjectListItem, ProjectScope } from "./project";
-
-function activeProjects(): boolean {
-  const prefs = getPreferenceValues();
-  return (prefs.active as boolean) || false;
-}
 
 export function ProjectSearchList() {
   const [searchText, setSearchText] = useState<string>();
   const [scope, setScope] = useState<string>(ProjectScope.membership);
-  const { projects, error, isLoading } = useSearch(searchText, scope);
-
-  if (error) {
-    showErrorToast(error, "Cannot search Project");
-  }
+  const { projects, isLoading } = useSearch(searchText, scope);
+  const isMembership = scope === ProjectScope.membership;
 
   return (
     <List
@@ -32,9 +25,12 @@ export function ProjectSearchList() {
         </List.Dropdown>
       }
     >
-      <List.Section title="Projects" subtitle={`${projects?.length}`}>
-        {projects?.map((project) => (
-          <ProjectListItem key={project.id} project={project} />
+      <List.Section
+        title={isMembership && searchText && searchText.length > 0 ? "Search Results" : "Projects"}
+        subtitle={`${projects.length}`}
+      >
+        {projects.map((project) => (
+          <ProjectListItem key={project.id} project={project} showCreateQuickLink={isMembership} />
         ))}
       </List.Section>
       <ProjectListEmptyView />
@@ -46,52 +42,44 @@ export function useSearch(
   query: string | undefined,
   scope: string,
 ): {
-  projects?: Project[];
-  error?: string;
+  projects: Project[];
   isLoading: boolean;
 } {
-  const [projects, setProjects] = useState<Project[]>();
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const active = activeProjects();
+  const active = getPreferences().active ?? false;
+  const isMembership = scope === ProjectScope.membership;
 
-  useEffect(() => {
-    // FIXME In the future version, we don't need didUnmount checking
-    // https://github.com/facebook/react/pull/22114
-    let didUnmount = false;
+  const { data: membershipProjects, isLoading: membershipLoading } = useCachedPromise(
+    async (limitActive: boolean): Promise<Project[]> =>
+      gitlab.getUserProjects({ search: "", ...(limitActive && { active: "true" }) }, true),
+    [active],
+    { initialData: [], execute: isMembership },
+  );
 
-    async function fetchData() {
-      if (query === null || didUnmount) {
-        return;
-      }
+  const { data: allProjects, isLoading: allLoading } = useCachedPromise(
+    async (searchQuery: string, isActive: boolean): Promise<Project[]> =>
+      gitlab.getProjects({
+        searchText: searchQuery,
+        searchIn: "title",
+        membership: "false",
+        active: isActive,
+      }),
+    [query ?? "", active],
+    { initialData: [], execute: !isMembership },
+  );
 
-      setIsLoading(true);
-      setError(undefined);
-
-      try {
-        const membership = scope === ProjectScope.membership ? "true" : "false";
-        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership, active });
-
-        if (!didUnmount) {
-          setProjects(glProjects);
-        }
-      } catch (e) {
-        if (!didUnmount) {
-          setError(getErrorMessage(e));
-        }
-      } finally {
-        if (!didUnmount) {
-          setIsLoading(false);
-        }
-      }
-    }
-
-    fetchData();
-
-    return () => {
-      didUnmount = true;
+  if (isMembership) {
+    return {
+      projects: searchData<Project[]>(membershipProjects, {
+        search: query || "",
+        keys: ["name_with_namespace"],
+        limit: 50,
+      }),
+      isLoading: membershipLoading,
     };
-  }, [query, scope, active]);
+  }
 
-  return { projects, error, isLoading };
+  return {
+    projects: allProjects,
+    isLoading: allLoading,
+  };
 }

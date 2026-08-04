@@ -15,19 +15,8 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "api_version",
-      "required": false,
-      "title": "Shopify API Version",
-      "description": "The version of the Shopify API to search for.",
-      "type": "textfield",
-      "placeholder": "2025-04",
-      "defaultValue": "2025-04"
-    }
-  ],
   "dependencies": {
-    "@raycast/api": "^1.96.1",
+    "@raycast/api": "^1.104.23",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {

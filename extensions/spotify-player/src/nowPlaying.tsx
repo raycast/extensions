@@ -49,7 +49,12 @@ function NowPlayingCommand() {
   const { myDevicesData } = useMyDevices({ options: { execute: hasTrackData } });
   const { myPlaylistsData } = useMyPlaylists({ options: { execute: hasTrackData } });
   const { meData } = useMe({ options: { execute: hasTrackData } });
-  const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
+  const {
+    containsMySavedTracksData,
+    containsMySavedTracksError,
+    containsMySavedTracksIsLoading,
+    containsMySavedTracksRevalidate,
+  } = useContainsMyLikedTracks({
     trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
   });
 
@@ -135,6 +140,27 @@ function NowPlayingCommand() {
         )}
         {artists && artists.length === 1 && <Detail.Metadata.Label title="Artist" text={artistName} />}
         <Detail.Metadata.Label title="Album" text={albumName} />
+        <Detail.Metadata.Label
+          title="Liked"
+          text={
+            containsMySavedTracksError
+              ? "Unknown"
+              : containsMySavedTracksIsLoading
+                ? "Checking…"
+                : trackAlreadyLiked
+                  ? "Yes"
+                  : "No"
+          }
+          icon={
+            containsMySavedTracksError
+              ? { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
+              : containsMySavedTracksIsLoading
+                ? { source: Icon.Clock, tintColor: Color.SecondaryText }
+                : trackAlreadyLiked
+                  ? { source: Icon.Heart, tintColor: Color.Red }
+                  : { source: Icon.HeartDisabled, tintColor: Color.SecondaryText }
+          }
+        />
         {inPlaylists.length > 0 && (
           <Detail.Metadata.TagList title="In Playlists">
             {inPlaylists.map((p) => (

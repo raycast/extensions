@@ -4,6 +4,4 @@
 
 Easily Control Keyboard Brightness on your MacBook
 
-
-![keyboard-brightness-1](metadata/keyboard-brightness-1.png)
-
+![keyboard-brightness-1](media/keyboard-brightness-1.png)

@@ -7,7 +7,7 @@ type HoroscopeActionsProps = {
 export default function HoroscopeActions({ data }: HoroscopeActionsProps) {
   return !data ? undefined : (
     <ActionPanel>
-      <Action.CopyToClipboard title="Copy Horoscope" content={data.data.horoscope_data} />
+      <Action.CopyToClipboard title="Copy Horoscope" content={data.data.horoscope} />
     </ActionPanel>
   );
 }

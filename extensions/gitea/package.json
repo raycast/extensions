@@ -283,7 +283,7 @@
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "@types/js-yaml": "^4.0.9",
-    "js-yaml": "^4.1.1",
+    "js-yaml": "^4.1.2",
     "tsx": "^4.21.0",
     "vitest": "^4.1.6",
     "swagger2openapi": "^7.0.8",

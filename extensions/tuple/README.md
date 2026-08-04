@@ -7,9 +7,10 @@ extension wraps the local `tuple` command-line tool.
 
 - The **Tuple desktop app** must be installed and running. The extension talks to the
   running app through the `tuple` CLI.
-- The **`tuple` CLI** must be installed (it ships with the Tuple app, under Settings →
-  Integrations). The extension expects it at `/usr/local/bin/tuple` by default; if yours
-  lives elsewhere, set the **Tuple CLI Path** preference.
+- The **`tuple` CLI** ships inside the Tuple app. Enabling it under Settings → Integrations
+  symlinks it to `/usr/local/bin/tuple`; the extension also falls back to the copy bundled in
+  `Tuple.app` if you haven't done that. If yours lives elsewhere, set the **Tuple CLI Path**
+  preference.
 - Transcript features (**Search Calls**, **Summarize with AI**, and the AI tools) require
   **Transcription** to be enabled in Tuple (Settings → Transcription). When transcription is
   not yet set up, the extension links you straight to that settings pane.
@@ -51,5 +52,6 @@ active call from the menu bar) to bring a call into any assistant you like.
 ## Preferences
 
 - **Tuple CLI Path** — Path to the `tuple` executable. Leave blank to auto-detect
-  (`/opt/homebrew/bin` then `/usr/local/bin`); set it only if you installed the CLI elsewhere.
+  (`/usr/local/bin/tuple`, then the copy bundled in `Tuple.app`); set it only if your CLI
+  lives elsewhere.
 - **Transcript Export Folder** — Where exported transcripts are saved. Defaults to your Downloads folder.

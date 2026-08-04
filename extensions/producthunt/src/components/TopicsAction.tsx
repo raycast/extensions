@@ -2,6 +2,7 @@ import React from "react";
 import { ActionPanel, Action, open, showToast, Toast, Icon } from "@raycast/api";
 import { Topic } from "../types";
 import { generateTopicUrl } from "../util/topicUtils";
+import { formatCompactCount } from "../util/format";
 
 interface TopicsActionProps {
   topics: Topic[];
@@ -30,7 +31,12 @@ export function TopicsAction({ topics, showAsSubmenu = true }: TopicsActionProps
       <React.Fragment>
         <ActionPanel.Submenu title="View Topics">
           {topics.map((topic) => (
-            <Action key={topic.id} title={topic.name} onAction={() => handleTopicAction(topic)} icon={Icon.Tag} />
+            <Action
+              key={topic.id}
+              title={`${topic.name}${topic.followersCount != null ? ` — ${formatCompactCount(topic.followersCount)} Followers` : ""}`}
+              onAction={() => handleTopicAction(topic)}
+              icon={Icon.Tag}
+            />
           ))}
         </ActionPanel.Submenu>
       </React.Fragment>
@@ -42,7 +48,7 @@ export function TopicsAction({ topics, showAsSubmenu = true }: TopicsActionProps
         {topics.map((topic) => (
           <Action
             key={topic.id}
-            title={`Topic: ${topic.name}`}
+            title={`Topic: ${topic.name}${topic.followersCount != null ? ` — ${formatCompactCount(topic.followersCount)} Followers` : ""}`}
             onAction={() => handleTopicAction(topic)}
             icon={Icon.Tag}
           />

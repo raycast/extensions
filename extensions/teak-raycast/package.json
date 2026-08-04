@@ -1,7 +1,7 @@
 {
   "name": "teak-raycast",
   "title": "Teak",
-  "version": "1.0.30",
+  "version": "1.0.46",
   "private": true,
   "license": "MIT",
   "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
@@ -18,8 +18,8 @@
       "name": "apiKey",
       "title": "API Key",
       "type": "password",
-      "required": true,
-      "description": "Generate in Teak Settings > API Keys, then paste it here."
+      "required": false,
+      "description": "Optional — only if you prefer an API key over browser sign-in. Generate in Teak Settings > Manage API Keys."
     }
   ],
   "commands": [
@@ -133,12 +133,16 @@
     "test": "bun test src/__tests__ --coverage --dots"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.15"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.7"
+  },
+  "overrides": {
+    "esbuild": "0.28.1"
   },
   "devDependencies": {
-    "@types/node": "^25.6.0",
-    "@types/react": "19.2.14",
+    "@types/node": "^25.9.3",
+    "@types/react": "19.2.17",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.1"
+    "typescript-eslint": "^8.61.1"
   }
 }

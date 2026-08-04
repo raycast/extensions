@@ -3,6 +3,7 @@ import { useState } from "react";
 import { trpc } from "@/utils/trpc.util";
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 import { useMe } from "../hooks/use-me.hook";
+import { resolveSpaceIconUrl } from "../utils/space-icon.util";
 
 function Body(props: { spaceId: string }) {
   const { spaceId } = props;
@@ -45,7 +46,12 @@ function Body(props: { spaceId: string }) {
         }}
       >
         {me.data?.associatedSpaces.map((s) => (
-          <Form.Dropdown.Item key={s.id} value={s.id} title={s.name} icon={s.image || Icon.TwoPeople} />
+          <Form.Dropdown.Item
+            key={s.id}
+            value={s.id}
+            title={s.name}
+            icon={resolveSpaceIconUrl(s.image) || Icon.TwoPeople}
+          />
         ))}
       </Form.Dropdown>
 

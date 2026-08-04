@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import type { ReactElement } from "react";
+import { useState, type ReactElement } from "react";
 import { parseExports } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
 import EditExport, { exportConfig } from "./edit-export";
@@ -7,6 +7,8 @@ import { MODERN_COLORS } from "./constants";
 import { ListViewController, type FilterableItem, type ItemWarning } from "./lib/list-view-controller";
 import { deleteItem } from "./lib/delete-item";
 import { SharedActionsSection } from "./lib/shared-actions";
+import { isSecretName, maskValue, searchableValue } from "./utils/secrets";
+import { stripSurroundingQuotes } from "./utils/shell-escape";
 
 /**
  * Export item interface
@@ -14,6 +16,8 @@ import { SharedActionsSection } from "./lib/shared-actions";
 interface ExportItem extends FilterableItem {
   variable: string;
   value: string;
+  /** Empty for secrets so the filter cannot match a masked value */
+  searchableValue?: string;
 }
 
 interface ExportsProps {
@@ -47,6 +51,34 @@ function generateExportWarning(exportItem: ExportItem, allExports: ExportItem[])
  * Exports management command for zshrc content
  */
 export default function Exports({ searchBarAccessory }: ExportsProps) {
+  const [revealedVars, setRevealedVars] = useState<ReadonlySet<string>>(new Set());
+
+  // Reveal state is keyed by identity, not name, so revealing one PATH-like
+  // duplicate does not reveal its namesakes in other sections
+  const revealKey = (exportItem: ExportItem): string => `${exportItem.variable}:${exportItem._sectionOccurrence ?? 0}`;
+
+  const toggleReveal = (key: string) => {
+    setRevealedVars((prev) => {
+      const next = new Set(prev);
+      if (next.has(key)) {
+        next.delete(key);
+      } else {
+        next.add(key);
+      }
+      return next;
+    });
+  };
+
+  // The parser keeps the raw right-hand side verbatim (quotes included);
+  // display, masking and Copy Value want the value itself
+  const realValue = (exportItem: ExportItem): string => stripSurroundingQuotes(exportItem.value);
+
+  // Masking is display-only: copy actions always receive the real value
+  const displayValue = (exportItem: ExportItem): string =>
+    isSecretName(exportItem.variable) && !revealedVars.has(revealKey(exportItem))
+      ? maskValue(realValue(exportItem))
+      : realValue(exportItem);
+
   return (
     <ListViewController<ExportItem>
       commandName="Exports"
@@ -57,7 +89,10 @@ export default function Exports({ searchBarAccessory }: ExportsProps) {
       itemType="export"
       itemTypePlural="exports"
       parser={parseExports}
-      searchFields={["variable", "value", "section"]}
+      searchFields={["variable", "searchableValue", "section"]}
+      postProcessItems={(items) =>
+        items.map((item) => ({ ...item, searchableValue: searchableValue(item.variable, realValue(item)) }))
+      }
       searchBarAccessory={searchBarAccessory}
       warningGenerator={generateExportWarning}
       showWarningFilter={!searchBarAccessory}
@@ -85,7 +120,7 @@ Exports are environment variables that configure your shell environment and are 
 
 ## 📦 Value
 \`\`\`bash
-${exportItem.value}
+${displayValue(exportItem)}
 \`\`\`
 
 ## 📍 Location
@@ -117,12 +152,17 @@ echo $${exportItem.variable}
           />
           <List.Item.Detail.Metadata.Label
             title="Value"
-            text={truncateValueMiddle(exportItem.value, 60)}
+            text={truncateValueMiddle(displayValue(exportItem), 60)}
             icon={{
               source: Icon.Code,
               tintColor: MODERN_COLORS.success,
             }}
           />
+          {isSecretName(exportItem.variable) && (
+            <List.Item.Detail.Metadata.TagList title="Sensitivity">
+              <List.Item.Detail.Metadata.TagList.Item text="Secret" color={Color.Red} icon={Icon.Lock} />
+            </List.Item.Detail.Metadata.TagList>
+          )}
           <List.Item.Detail.Metadata.Label
             title="Section"
             text={exportItem.section}
@@ -154,40 +194,52 @@ echo $${exportItem.variable}
       )}
       generateItemActions={(exportItem, refresh) => (
         <ActionPanel>
-          <Action.Push
-            title="Edit Export"
-            target={
-              <EditExport
-                existingVariable={exportItem.variable}
-                existingValue={exportItem.value}
-                sectionLabel={exportItem.section}
-                onSave={refresh}
-              />
-            }
-            icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "e" }}
-          />
-          <Action
-            title="Delete Export"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["ctrl"], key: "x" }}
-            onAction={async () => {
-              try {
-                await deleteItem(exportItem.variable, exportConfig);
-                refresh();
-              } catch {
-                // Error already shown in deleteItem
-              }
+          <SharedActionsSection
+            onRefresh={refresh}
+            item={{
+              editTitle: "Edit Export",
+              editTarget: (
+                <EditExport
+                  existingVariable={exportItem.variable}
+                  existingValue={exportItem.value}
+                  sectionLabel={exportItem.section}
+                  sectionOccurrence={exportItem._sectionOccurrence}
+                  onSave={refresh}
+                />
+              ),
+              deleteTitle: "Delete Export",
+              onDelete: async () => {
+                try {
+                  await deleteItem(
+                    exportItem.variable,
+                    exportConfig,
+                    false,
+                    exportItem.section,
+                    exportItem._sectionOccurrence,
+                  );
+                  refresh();
+                } catch {
+                  // Error already shown in deleteItem
+                }
+              },
+              copyName: exportItem.variable,
+              copyValue: realValue(exportItem),
+              // Definition copied as written in the file — re-quoting a value
+              // that already carries quotes would change what the line means
+              copyDefinition: `export ${exportItem.variable}=${exportItem.value}`,
+              isSecret: isSecretName(exportItem.variable),
+              revealed: revealedVars.has(revealKey(exportItem)),
+              onToggleReveal: () => toggleReveal(revealKey(exportItem)),
             }}
           />
-          <Action.Push
-            title="Add New Export"
-            target={<EditExport onSave={refresh} />}
-            shortcut={Keyboard.Shortcut.Common.New}
-            icon={Icon.Plus}
-          />
-          <SharedActionsSection onRefresh={refresh} />
+          <ActionPanel.Section>
+            <Action.Push
+              title="Add New Export"
+              target={<EditExport onSave={refresh} />}
+              shortcut={Keyboard.Shortcut.Common.New}
+              icon={Icon.Plus}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       )}
     />

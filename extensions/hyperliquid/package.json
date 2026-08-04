@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hyperliquid",
+  "title": "Hyperliquid",
+  "description": "Browse Hyperliquid perp markets, track your positions and PnL, and pin live prices to your menu bar — all read-only.",
+  "icon": "extension-icon.png",
+  "author": "insuline",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "markets",
+      "title": "Markets",
+      "subtitle": "Hyperliquid",
+      "description": "Browse Hyperliquid perpetual markets with live prices and candlestick charts.",
+      "mode": "view"
+    },
+    {
+      "name": "positions",
+      "title": "My Positions",
+      "subtitle": "Hyperliquid",
+      "description": "View your open Hyperliquid perp positions, PnL and liquidation prices.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-wallets",
+      "title": "Manage Wallets",
+      "subtitle": "Hyperliquid",
+      "description": "Add, label and remove the wallet addresses you want to track.",
+      "mode": "view"
+    },
+    {
+      "name": "prices",
+      "title": "Prices",
+      "subtitle": "Hyperliquid",
+      "description": "Show your favorite tickers and their 24h change in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultInterval",
+      "title": "Default Chart Interval",
+      "description": "Candle interval used when opening a market's detail view.",
+      "type": "dropdown",
+      "required": false,
+      "default": "1h",
+      "data": [
+        {
+          "title": "1 hour",
+          "value": "1h"
+        },
+        {
+          "title": "4 hours",
+          "value": "4h"
+        },
+        {
+          "title": "1 day",
+          "value": "1d"
+        }
+      ]
+    },
+    {
+      "name": "liqAlertDistance",
+      "title": "Liquidation Alert Distance",
+      "description": "Flag a position as at-risk when the mark price is within this percentage of its liquidation price.",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    }
+  ],
+  "dependencies": {
+    "@nktkas/hyperliquid": "^0.33.2",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "ws": "^8.21.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.1",
+    "@types/react": "19.2.17",
+    "@types/ws": "^8.18.1",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

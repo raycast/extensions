@@ -14,7 +14,7 @@ export const SORT_OPTIONS = ["newest", "oldest"] as const;
 export type RaycastCardType = (typeof CARD_TYPES)[number];
 export type RaycastSort = (typeof SORT_OPTIONS)[number];
 
-export type ParsedSearchFilters = {
+export interface ParsedSearchFilters {
   favorited?: boolean;
   hasExplicitFilters: boolean;
   query: string;
@@ -22,7 +22,7 @@ export type ParsedSearchFilters = {
   sort: RaycastSort;
   tag?: string;
   type?: RaycastCardType;
-};
+}
 
 const CARD_TYPE_SET = new Set<string>(CARD_TYPES);
 
@@ -60,9 +60,79 @@ const normalizeFavorited = (value?: string): boolean | undefined => {
   return undefined;
 };
 
+const WHITESPACE = /\s/;
+const NEEDS_QUOTING = /[\s":\\]/;
+
+// Tokenizes the raw search text while keeping double-quoted spans intact so a
+// value such as `tag:"design systems"` survives as a single token. Quotes are
+// stripped from the emitted token and `\"`/`\\` escapes are unwrapped.
+const tokenizeSearchText = (rawQuery: string): string[] => {
+  const tokens: string[] = [];
+  let current = "";
+  let hasContent = false;
+  let inQuotes = false;
+
+  for (let index = 0; index < rawQuery.length; index += 1) {
+    const char = rawQuery[index];
+
+    if (inQuotes) {
+      if (char === "\\" && index + 1 < rawQuery.length) {
+        const next = rawQuery[index + 1];
+        if (next === '"' || next === "\\") {
+          current += next;
+          index += 1;
+          continue;
+        }
+      }
+
+      if (char === '"') {
+        inQuotes = false;
+        continue;
+      }
+
+      current += char;
+      hasContent = true;
+      continue;
+    }
+
+    if (char === '"') {
+      inQuotes = true;
+      hasContent = true;
+      continue;
+    }
+
+    if (WHITESPACE.test(char)) {
+      if (hasContent) {
+        tokens.push(current);
+        current = "";
+        hasContent = false;
+      }
+      continue;
+    }
+
+    current += char;
+    hasContent = true;
+  }
+
+  if (hasContent) {
+    tokens.push(current);
+  }
+
+  return tokens;
+};
+
+const formatFilterValue = (value: string): string => {
+  if (!NEEDS_QUOTING.test(value)) {
+    return value;
+  }
+
+  const escaped = value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return `"${escaped}"`;
+};
+
 export const parseSearchFilters = (rawQuery: string): ParsedSearchFilters => {
   const queryTerms: string[] = [];
-  const tokens = rawQuery.trim().split(/\s+/).filter(Boolean);
+  const tokens = tokenizeSearchText(rawQuery);
 
   let favorited: boolean | undefined;
   let sort: RaycastSort = "newest";
@@ -146,11 +216,11 @@ export const buildSearchText = (filters: {
   }
 
   if (filters.type) {
-    tokens.push(`type:${filters.type}`);
+    tokens.push(`type:${formatFilterValue(filters.type)}`);
   }
 
   if (filters.tag) {
-    tokens.push(`tag:${filters.tag}`);
+    tokens.push(`tag:${formatFilterValue(filters.tag)}`);
   }
 
   if (filters.favorited) {

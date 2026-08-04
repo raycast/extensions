@@ -1,5 +1,4 @@
-import { stripMatchMarkers } from "../lib/call";
-import { searchTranscriptSegments } from "../lib/tuple";
+import { searchTranscriptSegments, stripMatchMarkers } from "../lib/tuple";
 
 type Input = {
   /**

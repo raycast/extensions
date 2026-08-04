@@ -8,7 +8,7 @@ import path, { basename, dirname, join } from "path";
 import type { RenameOperation, RenameResult } from "../types";
 import { getUserFriendlyErrorMessage } from "./errors";
 import { log } from "./logger";
-import { validatePathTraversal, normalizePath, isSamePath } from "./paths";
+import { validatePathTraversal, normalizePath, isSameEntry } from "./paths";
 import { fileExists, renameFile } from "./files";
 
 /**
@@ -20,11 +20,20 @@ export async function checkConflicts(operations: RenameOperation[]): Promise<str
   const conflicts: string[] = [];
   const targetPaths = new Set<string>();
 
-  // Build set of source paths that are being moved to a different name
-  const sourcesBeingMoved = new Set<string>();
+  // Build the source paths that are being moved to a different name, bucketed by
+  // normalized path. The bucket is only a cheap lookup key — a candidate still has
+  // to be confirmed as the same file below, or a case-sensitive volume would treat
+  // a differently-cased source as if it were vacating the target slot.
+  const sourcesBeingMoved = new Map<string, string[]>();
   for (const op of operations) {
-    if (!isSamePath(op.oldPath, op.newPath)) {
-      sourcesBeingMoved.add(normalizePath(op.oldPath));
+    if (!(await isSameEntry(op.oldPath, op.newPath))) {
+      const key = normalizePath(op.oldPath);
+      const bucket = sourcesBeingMoved.get(key);
+      if (bucket) {
+        bucket.push(op.oldPath);
+      } else {
+        sourcesBeingMoved.set(key, [op.oldPath]);
+      }
     }
   }
 
@@ -45,10 +54,20 @@ export async function checkConflicts(operations: RenameOperation[]): Promise<str
     }
     targetPaths.add(normalizedNewPath);
 
-    // Check if target already exists (and isn't the source file itself)
-    if (!isSamePath(op.oldPath, op.newPath) && (await fileExists(op.newPath))) {
+    // Check if target already exists (and isn't the source file itself — decided by
+    // inode identity, so a case-only rename onto a distinct file on a case-sensitive
+    // volume is reported as the conflict it is)
+    if ((await fileExists(op.newPath)) && !(await isSameEntry(op.oldPath, op.newPath))) {
       // Not a conflict if the file at the target is itself being moved away in this batch
-      if (!sourcesBeingMoved.has(normalizedNewPath)) {
+      let vacatedByBatch = false;
+      for (const source of sourcesBeingMoved.get(normalizedNewPath) ?? []) {
+        if (await isSameEntry(source, op.newPath)) {
+          vacatedByBatch = true;
+          break;
+        }
+      }
+
+      if (!vacatedByBatch) {
         conflicts.push(`"${basename(op.newPath)}" already exists`);
       }
     }
@@ -76,18 +95,31 @@ export async function batchRename(
 
   // --- Phase 0: Detect within-batch conflicts ---
   // A source is "blocking" if another operation wants to write to its path.
-  const sourceToIndex = new Map<string, number>();
+  // Sources are bucketed by normalized path and every index in a bucket is kept: on a
+  // case-sensitive volume two sources can differ only in case, and keeping just one
+  // would stage the wrong file and leave the target still occupied.
+  const sourcesByPath = new Map<string, number[]>();
   for (let i = 0; i < operations.length; i++) {
-    sourceToIndex.set(normalizePath(operations[i]!.oldPath), i);
+    const key = normalizePath(operations[i]!.oldPath);
+    const bucket = sourcesByPath.get(key);
+    if (bucket) {
+      bucket.push(i);
+    } else {
+      sourcesByPath.set(key, [i]);
+    }
   }
 
   const needsTemp = new Set<number>();
   for (const op of operations) {
-    if (isSamePath(op.oldPath, op.newPath)) continue;
-    const blockingIdx = sourceToIndex.get(normalizePath(op.newPath));
-    if (blockingIdx !== undefined && !isSamePath(operations[blockingIdx]!.oldPath, op.oldPath)) {
-      // The file at our target is also a source being moved — it needs to go to temp first
-      needsTemp.add(blockingIdx);
+    if (await isSameEntry(op.oldPath, op.newPath)) continue;
+    for (const blockingIdx of sourcesByPath.get(normalizePath(op.newPath)) ?? []) {
+      const blocking = operations[blockingIdx]!.oldPath;
+      // The file at our target is also a source being moved — it needs to go to temp
+      // first. Confirm it really occupies the target rather than merely sharing a
+      // normalized key with it, and that it isn't this operation's own source.
+      if ((await isSameEntry(blocking, op.newPath)) && !(await isSameEntry(blocking, op.oldPath))) {
+        needsTemp.add(blockingIdx);
+      }
     }
   }
 
@@ -170,7 +202,9 @@ export async function batchRename(
 
     // After a successful directory rename, fix up the newPath of
     // already-processed child results so undo history stays correct
-    if (result.success && !isSamePath(op.oldPath, result.newPath)) {
+    // Exact string comparison: the question here is whether the recorded child paths
+    // are now stale, which a case-only directory rename also makes true.
+    if (result.success && op.oldPath !== result.newPath) {
       const oldPrefix = op.oldPath + path.sep;
       for (let j = 0; j < results.length; j++) {
         const r = results[j];

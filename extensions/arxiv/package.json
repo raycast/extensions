@@ -84,5 +84,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
   }
 }

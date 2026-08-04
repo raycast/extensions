@@ -1,7 +1,8 @@
-import { ActionPanel, closeMainWindow, Icon, List, getPreferenceValues, Action, Keyboard } from '@raycast/api';
+import { ActionPanel, closeMainWindow, Icon, List, getPreferenceValues, Action, Keyboard, Color } from '@raycast/api';
 import { formatDate } from './dates';
 import { CalendarEvent } from './types';
 import { executeJxa, useCalendar } from './useCalendar';
+import { formatOffsetLabel } from './timezones';
 
 export default function Command() {
   const { isLoading, results, parse } = useCalendar();
@@ -46,7 +47,12 @@ export default function Command() {
   };
 
   return (
-    <List isLoading={isLoading} onSearchTextChange={parse} searchBarPlaceholder="E.g. Movie at 7pm on Friday" throttle>
+    <List
+      isLoading={isLoading}
+      onSearchTextChange={parse}
+      searchBarPlaceholder="E.g. Movie at 7pm ET on Friday"
+      throttle
+    >
       <List.Section title="Your quick event">
         {results.map((item) => (
           <List.Item
@@ -54,6 +60,15 @@ export default function Command() {
             title={item.eventTitle || 'Untitled event'}
             subtitle={formatDate(item) || 'No date'}
             icon={Icon.Calendar}
+            accessories={
+              item.timezone
+                ? [
+                    {
+                      tag: { value: formatOffsetLabel(item.timezone), color: Color.Blue },
+                    },
+                  ]
+                : []
+            }
             actions={
               <ActionPanel title="Add to a different calendar">
                 {calendars.map((calendar, index) => (
