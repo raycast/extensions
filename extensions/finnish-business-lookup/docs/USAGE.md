@@ -37,9 +37,12 @@ bun run dev
 
 - During active search, the command uses split view:
   - left: compact result list
-  - right: minimal quick summary with dates first (last modified, registration/end date, status, essentials)
+  - right: minimal quick summary with the city shown separately from the address, followed by status and key dates
 - Full details are still available via `View Details`.
+- Company names use the full row width and show the complete name in a tooltip when hovered.
+- Name-history previews show a few names as separate rows and direct larger histories to `View Details`.
 - Press `Command-C` to copy the selected company's Y-tunnus directly from the preview.
+- Press `Command-Shift-C` to copy the selected company's address in a multiline postal format.
 - Press `Command-O` to open the selected company's website when one is available.
 - Press `Command-E` to search the official e-invoice directory using the selected company's Y-tunnus.
 

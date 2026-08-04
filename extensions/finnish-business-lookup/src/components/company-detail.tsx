@@ -10,6 +10,7 @@ import { escapeMarkdownText, formatMarkdownLink } from "../lib/markdown";
 import {
   getEntryLabel,
   getNameTimelineEntries,
+  getPrimaryAddressClipboardText,
   getPrimaryAddressText,
   getRegisteredEntriesGroups,
   hasCriticalDetailData,
@@ -245,6 +246,7 @@ export default function CompanyDetail({ businessId, languageOrder, initialCompan
   }, [displayedCompany]);
 
   const primaryAddress = displayedCompany ? getPrimaryAddressText(displayedCompany) : undefined;
+  const clipboardAddress = displayedCompany ? getPrimaryAddressClipboardText(displayedCompany) : undefined;
   const previousTradeNames = displayedCompany?.previousLegalNames ?? [];
   const previousTradeNamesPreview = previousTradeNames.slice(0, 4);
   const additionalPreviousTradeNameCount =
@@ -320,8 +322,13 @@ export default function CompanyDetail({ businessId, languageOrder, initialCompan
               icon={Icon.CopyClipboard}
             />
           ) : null}
-          {primaryAddress ? (
-            <Action.CopyToClipboard title="Copy Primary Address" content={primaryAddress} icon={Icon.CopyClipboard} />
+          {clipboardAddress ? (
+            <Action.CopyToClipboard
+              title="Copy Primary Address"
+              content={clipboardAddress}
+              icon={Icon.CopyClipboard}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
           ) : null}
           {displayedCompany?.website ? (
             <Action.OpenInBrowser title="Open Website" url={displayedCompany.website} />
