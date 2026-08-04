@@ -1,4 +1,4 @@
-## [Fixes] - 2026-08-04
+## [Fixes] - {PR_MERGE_DATE}
 
 ### Fixed
 
