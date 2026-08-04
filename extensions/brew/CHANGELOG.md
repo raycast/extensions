@@ -1,6 +1,6 @@
 # Brew Changelog
 
-## [Pin visibility, outdated tags, detail pane] - {PR_MERGE_DATE}
+## [Pin visibility, outdated tags, detail pane] - 2026-08-04
 
 - Show Installed: pinned formulae now render in their own "Pinned Formulae" section at the bottom of the list, with the count as the section subtitle, instead of sitting unlabelled among the other formulae
 - Installed packages with an available update now carry an `Outdated` tag — formulae and casks both. The list component is shared, so the tag also appears for installed-and-outdated packages in Search results
