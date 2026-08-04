@@ -148,11 +148,23 @@ export function healthSummaryMarkdown(report: HealthReport): string {
   ].join("\n");
 }
 
+/** A broken-source result tagged with the stats snapshot it was computed for. */
+interface BrokenForStats {
+  forStats: ZshrcStatistics | null;
+  result: BrokenSourceResult;
+}
+
 export function useHealthReport(sections: readonly LogicalSection[]): HealthReport {
-  const [brokenSources, setBrokenSources] = useState<BrokenSourceResult | null>(null);
-  const [isChecking, setIsChecking] = useState(false);
+  const [broken, setBroken] = useState<BrokenForStats | null>(null);
 
   const stats = useMemo(() => (sections.length > 0 ? calculateStatistics(sections) : null), [sections]);
+
+  // Pending is DERIVED from data identity, never from effect timing: a check
+  // is owed whenever there are stats that the stored result was not computed
+  // for. This is true on the very first render and immediately true again
+  // when the sections change — with no window where a stale or absent result
+  // reads as settled.
+  const isChecking = stats !== null && broken?.forStats !== stats;
 
   const duplicateAliases = useMemo(() => {
     if (!stats) return { duplicates: [], totalDuplicates: 0 };
@@ -184,19 +196,15 @@ export function useHealthReport(sections: readonly LogicalSection[]): HealthRepo
     let cancelled = false;
     async function checkBrokenSources() {
       if (!stats || stats.sources.length === 0) {
-        setBrokenSources({ brokenSources: [], totalBroken: 0 });
-        setIsChecking(false);
+        setBroken({ forStats: stats, result: { brokenSources: [], totalBroken: 0 } });
         return;
       }
-      setIsChecking(true);
       try {
         const result = await detectBrokenSources(stats.sources.map((s) => ({ path: s.path })));
-        if (!cancelled) setBrokenSources(result);
+        if (!cancelled) setBroken({ forStats: stats, result });
       } catch (error) {
         console.error("Failed to detect broken sources:", error);
-        if (!cancelled) setBrokenSources({ brokenSources: [], totalBroken: 0 });
-      } finally {
-        if (!cancelled) setIsChecking(false);
+        if (!cancelled) setBroken({ forStats: stats, result: { brokenSources: [], totalBroken: 0 } });
       }
     }
     checkBrokenSources();
@@ -205,10 +213,15 @@ export function useHealthReport(sections: readonly LogicalSection[]): HealthRepo
     };
   }, [stats]);
 
+  // Duplicate detection is synchronous and always current, so it is never
+  // suppressed. Broken-source issues join once the check for THIS stats
+  // snapshot has settled; a stale result from a previous snapshot is not
+  // mixed in.
   const issues = useMemo(() => {
-    if (!brokenSources) return [];
-    return createHealthIssues(duplicateAliases, duplicateExports, brokenSources);
-  }, [duplicateAliases, duplicateExports, brokenSources]);
+    const settledBroken =
+      broken !== null && broken.forStats === stats ? broken.result : { brokenSources: [], totalBroken: 0 };
+    return createHealthIssues(duplicateAliases, duplicateExports, settledBroken);
+  }, [duplicateAliases, duplicateExports, broken, stats]);
 
   const score = useMemo(() => calculateHealthScore(issues), [issues]);
 
