@@ -1,6 +1,6 @@
 # ossinsight Changelog
 
-## [Fix contributor names] - 2026-08-04
+## [Fix contributor names] - {PR_MERGE_DATE}
 
 - Preserve the final character of contributor usernames and ignore empty trailing entries
 
