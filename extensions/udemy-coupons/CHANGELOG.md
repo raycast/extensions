@@ -1,6 +1,6 @@
 # Udemy Coupons Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-08-04
 
 ### Added
 - "Most Enrolled" sort option in the grid.
