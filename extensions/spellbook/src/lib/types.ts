@@ -1,6 +1,6 @@
 export type RunMode = "inline" | "terminal";
 
-export type TerminalApp = "Terminal" | "iTerm";
+export type TerminalApp = Preferences["terminalApp"];
 
 export interface SavedCommand {
   id: string;
@@ -16,9 +16,4 @@ export interface SavedCommand {
 export interface Library {
   version: 1;
   commands: SavedCommand[];
-}
-
-export interface SpellbookPreferences {
-  libraryPath?: string;
-  terminalApp?: TerminalApp;
 }

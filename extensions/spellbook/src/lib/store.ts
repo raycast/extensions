@@ -7,21 +7,11 @@ import {
   removeCommand,
   upsertCommand,
 } from "./library";
-import type {
-  Library,
-  SavedCommand,
-  SpellbookPreferences,
-  TerminalApp,
-} from "./types";
+import type { Library, SavedCommand, TerminalApp } from "./types";
 
 export function libraryPath(): string {
-  const preferences = getPreferenceValues<SpellbookPreferences>();
-  const configured = preferences.libraryPath?.trim();
-  return expandPath(
-    configured === undefined || configured === ""
-      ? DEFAULT_LIBRARY_PATH
-      : configured,
-  );
+  const configured = getPreferenceValues<Preferences>().libraryPath.trim();
+  return expandPath(configured === "" ? DEFAULT_LIBRARY_PATH : configured);
 }
 
 export function readLibrary(): Library {
@@ -37,5 +27,5 @@ export function deleteCommand(id: string): Library {
 }
 
 export function preferredTerminal(): TerminalApp {
-  return getPreferenceValues<SpellbookPreferences>().terminalApp ?? "Terminal";
+  return getPreferenceValues<Preferences>().terminalApp;
 }
