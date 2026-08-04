@@ -334,14 +334,27 @@ export async function getPriorities(): Promise<IssueRef[]> {
   return r.issue_priorities ?? [];
 }
 
+interface Membership {
+  user?: IssueRef;
+  group?: IssueRef;
+}
+
 /**
  * Returns the assignable candidates of the given project: its member users, plus its
- * member groups when the instance has group assignment enabled.
+ * member groups when the instance has group assignment enabled. Paginates through
+ * every membership page so projects with over 100 members aren't truncated.
  */
 export async function getProjectMembers(projectId: number): Promise<IssueRef[]> {
-  const r = await redmineFetchObject<{ memberships?: { user?: IssueRef; group?: IssueRef }[] }>(
-    `/projects/${projectId}/memberships.json`,
-    { limit: "100" },
-  );
-  return (r.memberships ?? []).map((m) => m.user ?? m.group).filter((m): m is IssueRef => Boolean(m));
+  const limit = 100;
+  const memberships: Membership[] = [];
+  for (let offset = 0; ; offset += limit) {
+    const r = await redmineFetchObject<{ memberships?: Membership[]; total_count?: number }>(
+      `/projects/${projectId}/memberships.json`,
+      { limit: String(limit), offset: String(offset) },
+    );
+    const page = r.memberships ?? [];
+    memberships.push(...page);
+    if (page.length < limit || (r.total_count !== undefined && memberships.length >= r.total_count)) break;
+  }
+  return memberships.map((m) => m.user ?? m.group).filter((m): m is IssueRef => Boolean(m));
 }
