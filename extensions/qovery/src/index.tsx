@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, Toast, showToast, Keyboard } from "@raycast/api";
 import { listAllServices, listServiceLinks, supportsLinks } from "./api";
 import { signOut } from "./oauth";
@@ -83,12 +83,16 @@ export default function Command() {
   const [selectedOrganization, setSelectedOrganization] = useState(ALL_ORGANIZATIONS);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
+  const loadGeneration = useRef(0);
 
   const loadServices = useCallback(async () => {
+    const generation = ++loadGeneration.current;
     setIsLoading(true);
     setError(undefined);
     try {
       const result = await listAllServices();
+      if (generation !== loadGeneration.current) return;
+
       setOrganizations(result.organizations);
       setServices(result.services);
 
@@ -100,16 +104,23 @@ export default function Command() {
         });
       }
     } catch (reason) {
+      if (generation !== loadGeneration.current) return;
+
       const message = reason instanceof Error ? reason.message : "Unable to load your Qovery services";
       setError(message);
       await showToast({ style: Toast.Style.Failure, title: "Unable to Load Qovery", message });
     } finally {
-      setIsLoading(false);
+      if (generation === loadGeneration.current) {
+        setIsLoading(false);
+      }
     }
   }, []);
 
   useEffect(() => {
     void loadServices();
+    return () => {
+      loadGeneration.current += 1;
+    };
   }, [loadServices]);
 
   const visibleServices = useMemo(
@@ -121,9 +132,13 @@ export default function Command() {
   );
 
   const logout = useCallback(async () => {
+    loadGeneration.current += 1;
     await signOut();
     setServices([]);
     setOrganizations([]);
+    setSelectedOrganization(ALL_ORGANIZATIONS);
+    setError(undefined);
+    setIsLoading(false);
     await showToast({ style: Toast.Style.Success, title: "Signed Out of Qovery" });
   }, []);
 
