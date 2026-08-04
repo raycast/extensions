@@ -1,6 +1,6 @@
 # ossinsight Changelog
 
-## [Update trending repositories API] - 2026-08-04
+## [Update trending repositories API] - {PR_MERGE_DATE}
 
 - Use the current OSS Insight trends API and add the Past 3 Months period
 
