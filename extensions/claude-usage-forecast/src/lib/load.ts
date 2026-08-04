@@ -42,6 +42,23 @@ export function settings(): Settings {
   };
 }
 
+/** Every limit window on `RateLimits`; a new one must be expired like the rest. */
+const LIMIT_WINDOWS = [
+  "weekly",
+  "fiveHour",
+  "weeklyOpus",
+  "weeklySonnet",
+] as const satisfies ReadonlyArray<keyof RateLimits>;
+
+/** Null out each cached window whose reset has passed. */
+function expireClosedWindows(limits: RateLimits): void {
+  const now = Date.now();
+  for (const key of LIMIT_WINDOWS) {
+    const w = limits[key];
+    if (w?.resetsAt && w.resetsAt < now) limits[key] = null;
+  }
+}
+
 export interface LoadResult {
   limits: RateLimits;
   forecast: Forecast;
@@ -72,17 +89,13 @@ export async function load(): Promise<LoadResult> {
           ? e.message
           : String(e);
     limits = readLastLimits(support);
-    // Discard any cached window that has already closed: presenting last
-    // week's or last 5-hour's percentage as "now" would silently mislead.
-    // The weekly window gates the whole reading (the forecast needs it);
-    // the five-hour window is rendered separately and tolerates null.
+    // Discard every cached window that has already closed: presenting a past
+    // window's percentage as "now" would silently mislead. Each window resets
+    // on its own clock, so they are expired independently. The weekly window
+    // then gates the whole reading (the forecast needs it); the others are
+    // rendered conditionally and tolerate null.
     if (limits) {
-      if (limits.weekly?.resetsAt && limits.weekly.resetsAt < Date.now()) {
-        limits.weekly = null;
-      }
-      if (limits.fiveHour?.resetsAt && limits.fiveHour.resetsAt < Date.now()) {
-        limits.fiveHour = null;
-      }
+      expireClosedWindows(limits);
       if (!limits.weekly) limits = null;
     }
     stale = limits !== null;
