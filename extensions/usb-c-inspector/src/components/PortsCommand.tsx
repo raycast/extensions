@@ -1,10 +1,10 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 
 import { PortListDetail } from "./PortListDetail";
 import { SetupView } from "./SetupView";
-import { portAccessories } from "../lib/format";
+import { portAccessories, portListIcon } from "../lib/format";
 import type { Port } from "../lib/types";
 import { fetchWhatCableOutput, WhatCableError } from "../lib/whatcable";
 
@@ -118,14 +118,12 @@ function PortListItem({
   onRefresh: () => void;
   onForceDownload: () => void;
 }) {
+  const accessories = portAccessories(port);
   return (
     <List.Item
       title={port.name}
-      icon={{
-        source: port.connectionActive ? Icon.Plug : Icon.Circle,
-        tintColor: port.charging?.isWarning ? Color.Orange : port.connectionActive ? Color.Green : Color.SecondaryText,
-      }}
-      accessories={isShowingDetail ? portAccessories(port).filter((a) => a.tag) : portAccessories(port)}
+      icon={portListIcon(port)}
+      accessories={isShowingDetail ? accessories.filter((a) => a.tag) : accessories}
       detail={<PortListDetail port={port} />}
       actions={
         <ActionPanel>

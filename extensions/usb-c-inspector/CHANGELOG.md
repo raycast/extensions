@@ -4,5 +4,5 @@
 
 - Show All USB-C Ports with plain-English headlines from the official WhatCable CLI
 - Check Connected Cables for USB-C and MagSafe ports that currently have something plugged in
-- List-with-details layout for charging, cable e-marker, data-speed, and connected devices
+- List-with-details layout with watt gauge hero and Device / Power / Data sections
 - Automatic download of the notarized WhatCable CLI from GitHub Releases (SHA-256 verified)
