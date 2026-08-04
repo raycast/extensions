@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  blockKindMatchesExpected,
   classifyStopPasswordError,
   cleanCliOutput,
   compactCliOutput,
@@ -57,12 +58,21 @@ test("parses Cold Turkey 4.9 block sections without treating headings as blocks"
   ]);
 });
 
-test("treats unknown block-list headings as sections, not block names", () => {
-  assert.deepEqual(parseBlockList("Website & App Blocks\nDeep Work\nFuture Blocks\nMystery"), [
+test("keeps plural block names instead of treating them as headings", () => {
+  assert.deepEqual(parseBlockList("Website & App Blocks\nDeep Work\nStudy Blocks"), [
     { name: "Deep Work", kind: "website-app" },
-    { name: "Mystery", kind: "unknown" },
+    { name: "Study Blocks", kind: "website-app" },
   ]);
+  assert.deepEqual(parseBlockList("Study Blocks"), [{ name: "Study Blocks", kind: "unknown" }]);
   assert.deepEqual(parseBlockList("Deep Work Block"), [{ name: "Deep Work Block", kind: "unknown" }]);
+});
+
+test("accepts an unknown reported kind when verifying a created block", () => {
+  assert.equal(blockKindMatchesExpected("unknown", "website-app"), true);
+  assert.equal(blockKindMatchesExpected("unknown", "device"), true);
+  assert.equal(blockKindMatchesExpected("website-app", "unknown"), true);
+  assert.equal(blockKindMatchesExpected("website-app", "website-app"), true);
+  assert.equal(blockKindMatchesExpected("device", "website-app"), false);
 });
 
 test("parses names when status is included", () => {

@@ -4,6 +4,7 @@ import { accessSync, constants, existsSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import {
   blockKindLabel,
+  blockKindMatchesExpected,
   decodeCliOutput,
   extractCliError,
   looksLikeCliError,
@@ -313,7 +314,7 @@ export async function waitForBlockPresence(
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     lastBlocks = await listBlocks();
     const found = lastBlocks.find((block) => block.name.toLocaleLowerCase() === normalizedName);
-    if (found && (expectedKind === "unknown" || found.kind === expectedKind)) return found;
+    if (found && blockKindMatchesExpected(found.kind, expectedKind)) return found;
     if (attempt < attempts - 1) await sleep(Math.min(1_000, 120 * 2 ** attempt));
   }
 
@@ -494,7 +495,7 @@ function hasOnlyBlockSectionHeadings(output: string): boolean {
   return (
     meaningful.length > 0 &&
     meaningful.every((line) =>
-      /^(?:website\s*(?:&|and)\s*app\s+blocks?|website\s+blocks?|device\s+blocks?|(?:.+\s+)?blocks)$/i.test(line),
+      /^(?:website\s*(?:&|and)\s*app\s+blocks?|website\s+blocks?|device\s+blocks?)$/i.test(line),
     )
   );
 }

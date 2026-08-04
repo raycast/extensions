@@ -175,6 +175,10 @@ export function blockKindLabel(kind: BlockKind): string {
   }
 }
 
+export function blockKindMatchesExpected(actual: BlockKind, expected: BlockKind): boolean {
+  return actual === "unknown" || expected === "unknown" || actual === expected;
+}
+
 function parseJsonBlockList(output: string): ParsedBlock[] | undefined {
   try {
     const parsed = JSON.parse(output) as unknown;
@@ -211,7 +215,6 @@ function parseSectionHeading(value: string): BlockKind | undefined {
     return "website-app";
   }
   if (/^device\s+blocks?$/i.test(heading)) return "device";
-  if (/^(?:.+\s+)?blocks$/i.test(heading)) return "unknown";
   return undefined;
 }
 
