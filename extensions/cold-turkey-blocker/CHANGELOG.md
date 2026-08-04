@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-04
 
 - Removed the separate **Stop with Password** action from enabled blocks.
 - The normal stop action now attempts `-stop` first and opens the password form only when Cold Turkey reports `Invalid number of parameters to unlock password lock.`
