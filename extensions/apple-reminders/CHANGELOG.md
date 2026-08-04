@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Display due time in menu bar] - 2026-08-03
+## [Display due time in menu bar] - {PR_MERGE_DATE}
 
 - Display scheduled due time before reminder titles in menu bar items.
 
