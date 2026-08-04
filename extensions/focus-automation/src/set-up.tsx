@@ -20,27 +20,6 @@ import { clearSelectedCalendarId, getSelectedCalendarId, setSelectedCalendarId }
 import { CONFIRM_TIMEOUT_SECONDS, FOCUS_CATEGORIES, MIN_DURATION_MINUTES } from "./lib/constants";
 import { LOG_PATH } from "./lib/logger";
 
-// Phase D.5 — first-run onboarding (spec: specs/phase-d5-first-run-onboarding.md).
-//
-// A brand-new store user has no way to connect a calendar otherwise: both shipped
-// commands are background/no-view, and the only interactive-authorize screen was
-// the dev-only spike deleted in E.0. This is the single `view` command that wires
-// the existing interactive `authorize()` (oauth.ts) back in for real users.
-//
-// It touches NONE of the frozen runtime (daemon, confirm-focus, watcher decision
-// logic). It only writes config the watcher already reads: the token to the
-// Raycast keychain (PKCEClient) and the calendar id to LocalStorage. The watcher
-// picks both up on its next tick.
-//
-// Shape (locked, Decision 6 + D5-1/2/3): connect Google → pick one calendar →
-// explainer + login-items reminder → "test it now" (a REAL confirm-focus fire) →
-// status/settings. Each state is a self-contained screen; the root routes to the
-// first incomplete step so a quit-mid-flow user resumes where they left off (F1).
-
-// Fires the exact same path a real watcher trigger does (focus-watcher.tsx
-// fireWinner): same command, same arguments + context shape, our LOG_PATH as the
-// sink. The only differences are the synthetic event id and the fixed 2-min
-// duration. So "test it now" proves the real trigger end-to-end, not a mock (D5-2).
 async function fireTestPrompt(): Promise<void> {
   try {
     await launchCommand({
@@ -69,15 +48,6 @@ async function fireTestPrompt(): Promise<void> {
   }
 }
 
-// Minimal async-data hook. Replaces @raycast/utils' usePromise so this command
-// (the only JSX-rendering one) doesn't import @raycast/utils@1.18, whose types
-// aren't coherent with the much newer @raycast/api that resolves in. Same shape
-// we use: { data, isLoading, revalidate }, with an optional error callback.
-//
-// Contract: `fn` is re-run when any value in `deps` changes (or on revalidate).
-// It captures the render-time closure, so it must only read values you pass in
-// `deps` — a `fn` that closes over component state NOT in `deps` will read a
-// stale value. Current callers pass [] or [token], which is correct.
 function useAsync<T>(
   fn: () => Promise<T>,
   deps: DependencyList,

@@ -99,16 +99,11 @@ export default async function FocusWatcher() {
       await fireWinner(winner, winner.start, now, processed, logState, dryRun, prefs.triggerMode);
     }
 
-    // Forget log markers for events GCal no longer returns, so the map can't
-    // grow forever (mirrors the cleanup in pipeline.schedule_next).
     for (const id of Object.keys(logState)) {
       if (!currentIds.has(id)) delete logState[id];
     }
     await saveLogState(logState);
 
-    // Clear one-shot system flags after a clean poll, so a later auth/calendar
-    // failure logs again instead of being suppressed (mirrors the daemon
-    // resetting _auth_failure_notified on a successful poll).
     await clearSysFlags();
 
     if (!launchedInBackground) {
@@ -134,18 +129,8 @@ export default async function FocusWatcher() {
       await logOnce("error", `[watcher] Poll error (will retry next cycle): ${msg}`);
     }
   } finally {
-    // Unconditional per-tick liveness heartbeat (D.3.a). Runs on every tick that
-    // reaches the try — healthy, early-return (no auth / no calendar), or thrown
-    // — so a silent stretch in liveness.log means "not running", unlike the
-    // transition-logged focus.log (S7). The lock-bail path returns before the
-    // try and so doesn't beat here: that's correct, since it only bails when a
-    // concurrent FRESH tick is mid-run and will beat for that minute (no gap).
-    // logLiveness can't throw, so it never masks the tick's real error above.
     logLiveness(formatLiveness(eventsFetched, liveWinner));
 
-    // Release the write-race lock for the next tick. Only reached on paths that
-    // acquired it (the fresh-lock bail returns before the try), so this never
-    // clears a lock another tick still holds.
     await clearWatcherLock();
   }
 }
@@ -170,7 +155,6 @@ function formatLiveness(eventsFetched: number | null, winner: PolledEvent | null
     // a newline in it could forge an extra heartbeat line and poison the very
     // attribution liveness.log exists to provide for D.3.c. Sanitize here (the
     // liveness sink), not in logEvent — focus.log must stay byte-identical to
-    // the un-sanitizing Python daemon for the dual-run diff. (/ce-review 2026-06-22)
     const safeTitle = winner.title.replace(/[\r\n]+/g, " ").replace(
       // eslint-disable-next-line no-control-regex
       /[\x00-\x1f]/g,
@@ -181,11 +165,6 @@ function formatLiveness(eventsFetched: number | null, winner: PolledEvent | null
   return `heartbeat — fetched=${eventsFetched} ${winnerPart}`;
 }
 
-// C4 fire path. Called on a tick where the selected winner's start has been
-// reached. Mirrors the daemon's pipeline.fire + trigger.py byte-for-byte:
-// mark-processed BEFORE the attempt (decision 2, so a crash or failed launch
-// never re-fires), the modeled session window written at the same moment, and
-// dryRun stopping at the dry label. Every action label matches the daemon's.
 async function fireWinner(
   winner: PolledEvent,
   start: Date,
@@ -195,20 +174,12 @@ async function fireWinner(
   dryRun: boolean,
   triggerMode: "auto" | "confirm",
 ): Promise<void> {
-  // Skip-if-running guard (Phase A 2.5). No Raycast API exposes whether Focus is
-  // running, so the guard tracks our own fire DECISIONS, not Focus processes
-  // (the daemon never detected it either). If a session we modeled is still
-  // inside its window, skip silently — transition-logged once, and NOT marked
-  // processed, so the event retires naturally via the missed grace. Byte-
-  // identical on both sides, which is what makes the Phase D diff line up.
   const active = await loadActiveSession();
   if (active && now.getTime() < Date.parse(active.endIso)) {
     logIfChanged(logState, "SKIPPED_FOCUS_RUNNING", winner);
     return;
   }
 
-  // durationMin is non-null for a qualifier (filterEvents drops all-day/short);
-  // `?? 0` mirrors the daemon's `(parse_duration_minutes(e) or 0)` defensiveness.
   const focusSeconds = focusDurationSeconds(winner.durationMin ?? 0);
 
   // Mark-before-attempt (decision 2). The state label is the SUCCESS label even
@@ -218,13 +189,6 @@ async function fireWinner(
   const label =
     triggerMode === "confirm" ? (dryRun ? "DRY_RUN_WOULD_PROMPT" : "PROMPTED") : dryRun ? "DRY_RUN" : "TRIGGERED";
   await state.markProcessed(processed, winner.id, label, start);
-
-  // The skip-if-running window is written ONLY when a Focus session actually
-  // starts — the auto branch below (after `open`) and, in confirm mode, the
-  // modal on "Start" (confirm-focus.tsx). It is deliberately NOT written here:
-  // writing it before the prompt was the confirm-mode bug where a Skip/timeout
-  // left a stale window that silently suppressed later events. (Daemon parity no
-  // longer applies — the daemon was retired at D.4, 2026-07-01.)
 
   // Dry-run: log the literal dry action and stop before any side effect. The
   // side effects (launchCommand / open) are the ONLY thing dryRun suppresses —
@@ -263,9 +227,6 @@ async function fireWinner(
       logSystem(`[watcher] Failed to launch confirm modal: ${e}`);
     }
   } else {
-    // Auto: stop-then-start, mirroring trigger.py handle_trigger. complete is
-    // best-effort (no-op when idle, must not block the start). Commas in
-    // categories stay literal to match the daemon's quote(..., safe=',').
     const goal = encodeURIComponent(winner.title);
     const categories = FOCUS_CATEGORIES.split(",").map(encodeURIComponent).join(",");
     const startUrl = `raycast://focus/start?goal=${goal}&duration=${focusSeconds}&categories=${categories}`;
@@ -292,10 +253,6 @@ async function fireWinner(
 // last line logged for that event id. Mutates logState in place.
 //
 // Keys on the PARSED start (toISOString, or "null" for all-day), mirroring the
-// daemon's `start_dt.isoformat() if start_dt else None` in pipeline._log_if_changed.
-// Keying on the raw GCal `startIso` string instead would risk a transition guard
-// that fires or suppresses differently than the daemon when GCal returns a
-// non-normalized offset, muddying the Phase D dual-run diff.
 //
 // `guardAction` overrides the action used in the guard key, defaulting to
 // `action`. SCHEDULED passes the bare "SCHEDULED" while logging the full
