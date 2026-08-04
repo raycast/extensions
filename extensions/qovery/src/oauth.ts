@@ -15,6 +15,7 @@ export const oauthClient = new OAuth.PKCEClient({
 
 let authenticationPromise: Promise<string> | undefined;
 let authenticationGeneration = 0;
+let tokenOperationQueue: Promise<void> = Promise.resolve();
 
 class AuthenticationCancelledError extends Error {
   constructor() {
@@ -28,14 +29,21 @@ function assertAuthenticationIsCurrent(generation: number): void {
   }
 }
 
-async function persistTokens(tokens: OAuth.TokenResponse, generation: number): Promise<void> {
-  assertAuthenticationIsCurrent(generation);
-  await oauthClient.setTokens(tokens);
+function runTokenOperation<T>(operation: () => Promise<T>): Promise<T> {
+  const result = tokenOperationQueue.then(operation, operation);
+  tokenOperationQueue = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
+}
 
-  if (generation !== authenticationGeneration) {
-    await oauthClient.removeTokens();
-    throw new AuthenticationCancelledError();
-  }
+async function persistTokens(tokens: OAuth.TokenResponse, generation: number): Promise<void> {
+  await runTokenOperation(async () => {
+    assertAuthenticationIsCurrent(generation);
+    await oauthClient.setTokens(tokens);
+    assertAuthenticationIsCurrent(generation);
+  });
 }
 
 async function exchangeAuthorizationCode(
@@ -83,7 +91,7 @@ async function requestTokens(body: URLSearchParams): Promise<OAuth.TokenResponse
 }
 
 async function authenticate(generation: number): Promise<string> {
-  const tokens = await oauthClient.getTokens();
+  const tokens = await runTokenOperation(() => oauthClient.getTokens());
   assertAuthenticationIsCurrent(generation);
 
   if (tokens?.accessToken && !tokens.isExpired()) {
@@ -96,8 +104,10 @@ async function authenticate(generation: number): Promise<string> {
       await persistTokens(refreshedTokens, generation);
       return refreshedTokens.access_token;
     } catch {
-      assertAuthenticationIsCurrent(generation);
-      await oauthClient.removeTokens();
+      await runTokenOperation(async () => {
+        assertAuthenticationIsCurrent(generation);
+        await oauthClient.removeTokens();
+      });
     }
   }
 
@@ -135,5 +145,5 @@ export function getAccessToken(): Promise<string> {
 export async function signOut(): Promise<void> {
   authenticationGeneration += 1;
   authenticationPromise = undefined;
-  await oauthClient.removeTokens();
+  await runTokenOperation(() => oauthClient.removeTokens());
 }
