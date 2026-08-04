@@ -1,6 +1,6 @@
 # Mule Secure Properties Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-04
 
 - Encrypt and decrypt MuleSoft secure property values from Raycast
 - Set a default password in preferences — it prefills the form, and you can edit it for a single run
