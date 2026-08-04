@@ -56,8 +56,7 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    const { sortMenuBarRemindersByDueDate } = getPreferenceValues<Preferences.MenuBar>();
-    const sortedReminders = sortMenuBarRemindersByDueDate ? reminders.sort(sortByDate) : reminders;
+    const sortedReminders = reminders.sort(sortByDate);
 
     sortedReminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
