@@ -15,6 +15,19 @@ vi.mock("../lib/zsh", () => ({
 }));
 vi.mock("../lib/history", () => ({ saveToHistory: vi.fn().mockResolvedValue(undefined) }));
 import { addAliasesToZshrc, addSingleAliasToZshrc, formatAliasLines } from "../lib/section-writer";
+import { saveToHistory } from "../lib/history";
+
+/**
+ * The history contract every write shares: the snapshot recorded is the
+ * PRE-change content, and it is recorded only after the write happened
+ * (so a failed write leaves no bogus undo point).
+ */
+function expectHistoryRecordedAfterWrite(previousContent: string): void {
+  const history = vi.mocked(saveToHistory);
+  expect(history).toHaveBeenCalledTimes(1);
+  expect(history.mock.calls[0]![1]).toBe(previousContent);
+  expect(mockWrite.mock.invocationCallOrder[0]!).toBeLessThan(history.mock.invocationCallOrder[0]!);
+}
 
 const ALIASES = [
   { name: "g", value: "git", description: "shortcut" },
@@ -41,7 +54,8 @@ describe("section-writer write path", () => {
 
   describe("addAliasesToZshrc", () => {
     it("appends into an existing matching section", async () => {
-      mockReadRaw.mockResolvedValue(["# --- Git --- #", "alias gs='git status'", "", "# --- End --- #"].join("\n"));
+      const previous = ["# --- Git --- #", "alias gs='git status'", "", "# --- End --- #"].join("\n");
+      mockReadRaw.mockResolvedValue(previous);
 
       const result = await addAliasesToZshrc("Git Aliases", ALIASES, "collection");
       expect(result.success).toBe(true);
@@ -50,10 +64,12 @@ describe("section-writer write path", () => {
       const written = mockWrite.mock.calls[0]![0] as string;
       expect(written).toContain("alias g='git'");
       expect(written).toContain("# Added from Git Aliases (collection)");
+      expectHistoryRecordedAfterWrite(previous);
     });
 
     it("creates a new section when nothing matches", async () => {
-      mockReadRaw.mockResolvedValue("alias unrelated='x'\n");
+      const previous = "alias unrelated='x'\n";
+      mockReadRaw.mockResolvedValue(previous);
 
       const result = await addAliasesToZshrc("Kubernetes", ALIASES);
       expect(result.success).toBe(true);
@@ -63,6 +79,7 @@ describe("section-writer write path", () => {
       const written = mockWrite.mock.calls[0]![0] as string;
       expect(written).toContain("Kubernetes");
       expect(written).toContain("alias ga='git add'");
+      expectHistoryRecordedAfterWrite(previous);
     });
 
     it("starts from empty content when the file is unreadable", async () => {
@@ -77,12 +94,14 @@ describe("section-writer write path", () => {
 
   describe("addSingleAliasToZshrc", () => {
     it("writes a single alias", async () => {
-      mockReadRaw.mockResolvedValue("# --- Tools --- #\nalias t='true'\n");
+      const previous = "# --- Tools --- #\nalias t='true'\n";
+      mockReadRaw.mockResolvedValue(previous);
 
       const result = await addSingleAliasToZshrc({ name: "gl", value: "git log" }, "Tools");
       expect(result.success).toBe(true);
       const written = mockWrite.mock.calls[0]![0] as string;
       expect(written).toContain("alias gl='git log'");
+      expectHistoryRecordedAfterWrite(previous);
     });
   });
 });

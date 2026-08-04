@@ -294,6 +294,31 @@ describe("parser unification", () => {
     });
   });
 
+  describe("keybinding forms", () => {
+    // The two most common forms (keymap+quoted-key, basic-quoted) are
+    // exercised by the CORPUS; the remaining four each get a ground-truth
+    // assertion here so a regression in any branch is visible.
+    it("keymap string-replacement: bindkey -M <map> -s '<key>' '<cmd>'", () => {
+      const [k] = extractEntries("bindkey -M viins -s 'jk' 'jj'").keybindings;
+      expect(k).toMatchObject({ key: "jk", command: "jj", widget: "string-replacement", keymap: "viins" });
+    });
+
+    it("keymap unquoted key: bindkey -M <map> <key> <widget>", () => {
+      const [k] = extractEntries("bindkey -M emacs ^R history-search-backward").keybindings;
+      expect(k).toMatchObject({ key: "^R", command: "history-search-backward", keymap: "emacs" });
+    });
+
+    it("string-replacement: bindkey -s '<key>' '<cmd>'", () => {
+      const [k] = extractEntries("bindkey -s 'll' 'ls -la'").keybindings;
+      expect(k).toMatchObject({ key: "ll", command: "ls -la", widget: "string-replacement" });
+    });
+
+    it("basic unquoted key: bindkey <key> <widget>", () => {
+      const [k] = extractEntries("bindkey ^P up-history").keybindings;
+      expect(k).toMatchObject({ key: "^P", command: "up-history" });
+    });
+  });
+
   describe("Other counts lines the registry did not recognize", () => {
     it("a recognized multi-line array contributes nothing to Other", () => {
       const content = ["plugins=(", "  git", "  docker", "  z", ")", "some-unrecognized-command --flag"].join("\n");

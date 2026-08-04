@@ -199,5 +199,18 @@ describe("HistoryView", () => {
     await waitFor(() => {
       expect(historyMocks.clearHistory).toHaveBeenCalled();
     });
+    expect(vi.mocked(confirmAlert)).toHaveBeenCalled();
+  });
+
+  it("declined clear confirmation leaves history untouched", async () => {
+    vi.mocked(confirmAlert).mockResolvedValue(false);
+    render(<HistoryView />);
+    await waitFor(() => expect(screen.getAllByText('Add alias "gl"').length).toBeGreaterThan(0));
+
+    const clear = screen.getAllByText("Clear All History")[0];
+    fireEvent.click(clear!);
+
+    await waitFor(() => expect(vi.mocked(confirmAlert)).toHaveBeenCalled());
+    expect(historyMocks.clearHistory).not.toHaveBeenCalled();
   });
 });
