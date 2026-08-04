@@ -16,6 +16,17 @@ npm run dev
 
 Open Raycast and run **Show All USB-C Ports** or **Check Connected Cables**.
 
+### Store screenshots
+
+Screenshots must be real Raycast Window Captures (not mocked PNGs):
+
+1. Run `npm run dev`.
+2. Open **Show All USB-C Ports**.
+3. Action Panel → **Use Demo Data (Screenshots)** (`⌘⇧D`) — only available in development.
+4. Select the port you want featured, then use Raycast **Window Capture → Save to Metadata**.
+5. Repeat for other ports / for **Check Connected Cables** (demo hides the empty port there).
+6. Action Panel → **Use Live CLI Data** when finished.
+
 ```bash
 npm run lint
 npm run build

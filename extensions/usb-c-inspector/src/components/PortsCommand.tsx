@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Icon, Keyboard, List, open } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, Keyboard, List, LocalStorage, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 
 import { PortListDetail } from "./PortListDetail";
 import { SetupView } from "./SetupView";
+import { DEMO_OUTPUT, DEMO_STORAGE_KEY } from "../lib/demo-ports";
 import { portAccessories, portListIcon } from "../lib/format";
 import type { Port } from "../lib/types";
 import { fetchWhatCableOutput, WhatCableError } from "../lib/whatcable";
@@ -17,12 +18,42 @@ interface PortsCommandProps {
   emptyDescription: string;
 }
 
+type PortsPayload = Awaited<ReturnType<typeof fetchWhatCableOutput>>;
+
+function demoPayload(): PortsPayload {
+  return {
+    cliPath: "demo",
+    output: DEMO_OUTPUT,
+    raw: JSON.stringify(DEMO_OUTPUT, null, 2),
+  };
+}
+
 export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDescription }: PortsCommandProps) {
   const [isShowingDetail, setIsShowingDetail] = useState(true);
+  const [useDemoData, setUseDemoData] = useState(false);
+  const [demoReady, setDemoReady] = useState(!environment.isDevelopment);
 
-  const { isLoading, data, error, revalidate, mutate } = useCachedPromise(async () => fetchWhatCableOutput(), [], {
-    keepPreviousData: true,
-  });
+  useEffect(() => {
+    if (!environment.isDevelopment) {
+      setDemoReady(true);
+      return;
+    }
+    void LocalStorage.getItem<string>(DEMO_STORAGE_KEY).then((value) => {
+      setUseDemoData(value === "1");
+      setDemoReady(true);
+    });
+  }, []);
+
+  const { isLoading, data, error, revalidate, mutate } = useCachedPromise(
+    async (demo: boolean) => {
+      if (environment.isDevelopment && demo) {
+        return demoPayload();
+      }
+      return fetchWhatCableOutput();
+    },
+    [useDemoData],
+    { keepPreviousData: true, execute: demoReady },
+  );
 
   const refresh = useCallback(() => {
     revalidate();
@@ -32,6 +63,16 @@ export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDe
     void mutate(fetchWhatCableOutput({ forceDownload: true }));
   }, [mutate]);
 
+  const enableDemoData = useCallback(() => {
+    void LocalStorage.setItem(DEMO_STORAGE_KEY, "1");
+    setUseDemoData(true);
+  }, []);
+
+  const disableDemoData = useCallback(() => {
+    void LocalStorage.removeItem(DEMO_STORAGE_KEY);
+    setUseDemoData(false);
+  }, []);
+
   const ports = useMemo(() => {
     const all = data?.output.ports ?? [];
     if (filter === "connected") {
@@ -39,6 +80,20 @@ export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDe
     }
     return all;
   }, [data?.output.ports, filter]);
+
+  const demoActions =
+    environment.isDevelopment ? (
+      useDemoData ? (
+        <Action title="Use Live CLI Data" icon={Icon.Terminal} onAction={disableDemoData} />
+      ) : (
+        <Action
+          title="Use Demo Data (Screenshots)"
+          icon={Icon.Image}
+          onAction={enableDemoData}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+        />
+      )
+    ) : null;
 
   if (error && !data) {
     const message =
@@ -59,7 +114,7 @@ export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDe
     );
   }
 
-  if (!data && isLoading) {
+  if ((!data && isLoading) || !demoReady) {
     return (
       <SetupView
         title="USB-C Inspector"
@@ -85,6 +140,7 @@ export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDe
           <ActionPanel>
             <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} />
             <Action title="Re-Download CLI" icon={Icon.Download} onAction={forceRedownload} />
+            {demoActions}
           </ActionPanel>
         }
       />
@@ -95,6 +151,7 @@ export function PortsCommand({ filter, searchBarPlaceholder, emptyTitle, emptyDe
           isShowingDetail={isShowingDetail}
           rawJson={data?.raw ?? ""}
           detailToggleAction={detailToggleAction}
+          demoActions={demoActions}
           onRefresh={refresh}
           onForceDownload={forceRedownload}
         />
@@ -108,6 +165,7 @@ function PortListItem({
   isShowingDetail,
   rawJson,
   detailToggleAction,
+  demoActions,
   onRefresh,
   onForceDownload,
 }: {
@@ -115,6 +173,7 @@ function PortListItem({
   isShowingDetail: boolean;
   rawJson: string;
   detailToggleAction: ReactNode;
+  demoActions: ReactNode;
   onRefresh: () => void;
   onForceDownload: () => void;
 }) {
@@ -134,6 +193,7 @@ function PortListItem({
             onAction={onRefresh}
             shortcut={Keyboard.Shortcut.Common.Refresh}
           />
+          {demoActions}
           <Action.CopyToClipboard
             title="Copy Port JSON"
             content={JSON.stringify(port, null, 2)}
