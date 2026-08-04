@@ -1,6 +1,6 @@
 # Plexus Changelog
 
-## [Choose which browser opens localhost links] - {PR_MERGE_DATE}
+## [Choose which browser opens localhost links] - 2026-08-04
 
 ### Added
 
