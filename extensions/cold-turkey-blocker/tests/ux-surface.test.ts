@@ -70,6 +70,10 @@ test("uses native search instead of a redundant filter menu", () => {
   assert.match(manageBlocksSource, /blockSearchKeywords/);
 });
 
+test("does not show the search placeholder while blocks are loading", () => {
+  assert.match(manageBlocksSource, /const hasNoMatchingBlocks = !isLoading && blocks\.length > 0/);
+});
+
 test("does not duplicate refresh for unknown-status blocks", () => {
   assert.match(manageBlocksSource, /policy\.primaryAction !== "refresh"/);
 });

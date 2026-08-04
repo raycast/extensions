@@ -51,6 +51,7 @@ export default function ManageBlocksCommand() {
   );
 
   const hasNoBlocks = !isLoading && blocks.length === 0;
+  const hasNoMatchingBlocks = !isLoading && blocks.length > 0;
   const emptyTitle = error ? "Could Not Load Cold Turkey Blocks" : "No Cold Turkey Blocks Found";
   const emptyDescription = error
     ? formatCliError(error)
@@ -88,7 +89,7 @@ export default function ManageBlocksCommand() {
             )
           }
         />
-      ) : (
+      ) : hasNoMatchingBlocks ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No Matching Blocks"
@@ -105,7 +106,7 @@ export default function ManageBlocksCommand() {
             </ActionPanel>
           }
         />
-      )}
+      ) : null}
 
       {!hasNoBlocks
         ? sections.map((section) =>
