@@ -4,6 +4,7 @@ import fs from "fs-extra";
 import { createTestDirectory, cleanupTestDirectory } from "./utils/test-helpers";
 import { generateUniqueName } from "../common/finder";
 import { fsAsync } from "../common/fs-async";
+import { parseTextFileName } from "../common/text-file-name";
 
 describe("Create Text File", () => {
   let testDir: string;
@@ -14,6 +15,20 @@ describe("Create Text File", () => {
 
   afterEach(async () => {
     await cleanupTestDirectory(testDir);
+  });
+
+  describe("parseTextFileName", () => {
+    it.each([
+      [undefined, { baseName: "untitled", extension: "txt" }],
+      ["", { baseName: "untitled", extension: "txt" }],
+      ["notes", { baseName: "notes", extension: "txt" }],
+      ["notes.md", { baseName: "notes", extension: "md" }],
+      ["notes.v2.md", { baseName: "notes.v2", extension: "md" }],
+      [".gitignore", { baseName: ".gitignore" }],
+      ["notes.", { baseName: "notes" }],
+    ])("parses %s", (input, expected) => {
+      expect(parseTextFileName(input)).toEqual(expected);
+    });
   });
 
   describe("generateUniqueName with extension", () => {
