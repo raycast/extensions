@@ -24,7 +24,11 @@ vi.mock("../lib/zsh", () => ({
 vi.mock("../lib/cache", () => ({ clearCache: vi.fn() }));
 vi.mock("../lib/history", () => ({ saveToHistory: vi.fn().mockResolvedValue(undefined) }));
 
-// Capture useForm wiring so submits can be driven directly
+// Capture useForm wiring so submits can be driven directly.
+// Known tradeoff: driving capturedOnSubmit couples these tests to useForm
+// as the form-management approach — accepted because Raycast's real Form
+// cannot run outside the app; the delete flow below goes through the
+// rendered Action button instead.
 let capturedOnSubmit: ((values: Record<string, string>) => Promise<void>) | undefined;
 vi.mock("@raycast/utils", () => ({
   useForm: vi.fn((options: { onSubmit: (values: Record<string, string>) => Promise<void> }) => {
@@ -42,6 +46,8 @@ vi.mock("@raycast/utils", () => ({
 }));
 
 import EditItemForm from "../lib/edit-item-form";
+import { saveToHistory } from "../lib/history";
+import { fireEvent, screen } from "@testing-library/react";
 
 const aliasConfig: EditItemConfig = {
   keyLabel: "Alias Name",
@@ -180,6 +186,64 @@ describe("EditItemForm", () => {
     expect(vi.mocked(showToast)).toHaveBeenCalledWith(
       expect.objectContaining({ message: expect.stringContaining("Write verification failed") }),
     );
+  });
+
+  it("history records the PRE-change snapshot after a verified write", async () => {
+    render(<EditItemForm config={aliasConfig} />);
+    await submit({ key: "gl", value: "git log", section: "Tools", newSectionName: "" });
+
+    // The undo target must be the content before this save
+    expect(vi.mocked(saveToHistory)).toHaveBeenCalledWith('Add alias "gl"', FILE);
+    // And history is only recorded after the write happened
+    const writeOrder = mockWrite.mock.invocationCallOrder[0]!;
+    const historyOrder = vi.mocked(saveToHistory).mock.invocationCallOrder[0]!;
+    expect(historyOrder).toBeGreaterThan(writeOrder);
+  });
+
+  it("delete flow (via the rendered action) writes, then records the pre-delete snapshot", async () => {
+    render(
+      <EditItemForm
+        config={aliasConfig}
+        existingKey="gg"
+        existingValue="git grep"
+        sectionLabel="Tools"
+        sectionOccurrence={0}
+      />,
+    );
+    fireEvent.click(screen.getAllByText("Delete Alias")[0]!);
+
+    await waitFor(() => {
+      expect(mockWrite).toHaveBeenCalledTimes(1);
+    });
+    const written = mockWrite.mock.calls[0]![0] as string;
+    expect(written).not.toContain("alias gg=");
+    expect(vi.mocked(saveToHistory)).toHaveBeenCalledWith('Delete alias "gg"', FILE);
+    const writeOrder = mockWrite.mock.invocationCallOrder[0]!;
+    const historyOrder = vi.mocked(saveToHistory).mock.invocationCallOrder[0]!;
+    expect(historyOrder).toBeGreaterThan(writeOrder);
+  });
+
+  it("delete write failure surfaces an error and records no history", async () => {
+    mockWrite.mockImplementation(async () => {
+      mockReadRaw.mockResolvedValue("corrupted");
+    });
+    render(
+      <EditItemForm
+        config={aliasConfig}
+        existingKey="gg"
+        existingValue="git grep"
+        sectionLabel="Tools"
+        sectionOccurrence={0}
+      />,
+    );
+    fireEvent.click(screen.getAllByText("Delete Alias")[0]!);
+
+    await waitFor(() => {
+      expect(vi.mocked(showToast)).toHaveBeenCalledWith(
+        expect.objectContaining({ message: expect.stringContaining("Write verification failed") }),
+      );
+    });
+    expect(vi.mocked(saveToHistory)).not.toHaveBeenCalled();
   });
 
   it("successful save invokes onSave and pops navigation", async () => {

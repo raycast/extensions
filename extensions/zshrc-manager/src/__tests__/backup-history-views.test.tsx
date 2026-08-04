@@ -62,6 +62,10 @@ describe("BackupManager", () => {
     await waitFor(() => {
       expect(screen.getByText("Current Backup")).toBeTruthy();
     });
+    // The metadata itself must render, not just the section header
+    const rendered = document.body.textContent ?? "";
+    expect(rendered).toContain("1.2 KB");
+    expect(rendered).toContain("/t/.zshrc.backup");
   });
 
   it("restore is guarded by confirmation and runs when confirmed", async () => {

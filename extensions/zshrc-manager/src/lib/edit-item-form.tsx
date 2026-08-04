@@ -31,9 +31,16 @@ interface EditItemFormProps {
 
 /**
  * Writes the updated content, invalidates the cache, verifies the write by
- * re-reading, and records history only after verification succeeds.
+ * re-reading, and records history only after verification succeeds. The
+ * history entry stores `previousContent` — the pre-change snapshot — so
+ * undo restores the state before this write.
  */
-async function persistAndVerify(updatedContent: string, historyLabel: string, logContext: string): Promise<void> {
+async function persistAndVerify(
+  updatedContent: string,
+  previousContent: string,
+  historyLabel: string,
+  logContext: string,
+): Promise<void> {
   await writeZshrcFile(updatedContent);
   clearCache(getZshrcPath());
   const verify = await readZshrcFileRaw();
@@ -41,7 +48,7 @@ async function persistAndVerify(updatedContent: string, historyLabel: string, lo
     log.edit.error(`Write verification failed for ${logContext}`);
     throw new Error("Write verification failed: content mismatch after save");
   }
-  await saveToHistory(historyLabel);
+  await saveToHistory(historyLabel, previousContent);
 }
 
 /**
@@ -186,6 +193,7 @@ export default function EditItemForm({
           );
           await persistAndVerify(
             updatedContent,
+            zshrcContent,
             moved
               ? `Update ${config.itemType} "${key}" (move to ${targetSection})`
               : `Update ${config.itemType} "${key}"`,
@@ -202,7 +210,12 @@ export default function EditItemForm({
           });
         } else {
           log.edit.info(`Adding new ${config.itemType} "${key}" to section "${targetSection}"`);
-          await persistAndVerify(updatedContent, `Add ${config.itemType} "${key}"`, `new ${config.itemType} "${key}"`);
+          await persistAndVerify(
+            updatedContent,
+            zshrcContent,
+            `Add ${config.itemType} "${key}"`,
+            `new ${config.itemType} "${key}"`,
+          );
           log.edit.info(`Successfully added ${config.itemType} "${key}"`);
 
           await showToast({
@@ -253,14 +266,12 @@ export default function EditItemForm({
       });
 
       log.edit.info(`Deleting ${config.itemType} "${existingKey}"`);
-      await saveToHistory(`Delete ${config.itemType} "${existingKey}"`);
-      await writeZshrcFile(updatedContent);
-      clearCache(getZshrcPath());
-      const verify = await readZshrcFileRaw();
-      if (verify !== updatedContent) {
-        log.edit.error(`Write verification failed for delete of ${config.itemType} "${existingKey}"`);
-        throw new Error("Write verification failed: content mismatch after delete");
-      }
+      await persistAndVerify(
+        updatedContent,
+        zshrcContent,
+        `Delete ${config.itemType} "${existingKey}"`,
+        `delete of ${config.itemType} "${existingKey}"`,
+      );
       log.edit.info(`Successfully deleted ${config.itemType} "${existingKey}"`);
 
       await showToast({

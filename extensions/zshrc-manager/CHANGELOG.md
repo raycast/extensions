@@ -9,6 +9,7 @@
 - PATH and FPATH declarations in all supported forms (`export`/`typeset -x`/`declare -x`, `+=` string append, array append/set, `$PATH:`-relative, and plain assignment) are recognized consistently across every surface
 - Keybinding counts no longer include bare mode lines like `bindkey -e` that the Keybindings view has nothing to show for
 - Sources with quoted operands or trailing inline comments resolve correctly in the detail pane's `Source Exists` fact; plugin install checks honor `ZSH_CUSTOM`/`ZSH` set as plain (unexported) assignments; `$HOMEBREW_PREFIX`-style variables are no longer mis-expanded as `$HOME`
+- **Undo now actually reverts adds and edits.** History entries for add/edit operations recorded the post-change file as their restore point, so undoing them silently restored the very state you were trying to revert. Every write now records the pre-change snapshot, and only after the write is verified — so a failed write can no longer leave a restore point for a change that never happened
 
 ### Changed
 
