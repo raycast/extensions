@@ -88,11 +88,54 @@ export interface RegistryEntries {
 const P = PARSING_CONSTANTS.PATTERNS;
 
 /**
+ * Index just past the `)` matching the `$(` at `start`, or -1 when the
+ * substitution never closes in `text`. The substitution gets its own
+ * quote context (starting unquoted after `$(`): inner quotes never leak
+ * into the caller's quote state, and a `)` inside inner quotes is
+ * content, not the close. `$(` nests, both bare and inside inner double
+ * quotes.
+ */
+function scanSubstitution(text: string, start: number): number {
+  let depth = 1;
+  let quote: '"' | "'" | null = null;
+  for (let i = start + 2; i < text.length; i += 1) {
+    const ch = text[i]!;
+    if (quote === "'") {
+      if (ch === "'") quote = null;
+      continue;
+    }
+    if (ch === "\\") {
+      i += 1;
+      continue;
+    }
+    if (ch === "$" && text[i + 1] === "(") {
+      depth += 1;
+      i += 1;
+      continue;
+    }
+    if (quote === '"') {
+      if (ch === '"') quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      continue;
+    }
+    if (ch === ")") {
+      depth -= 1;
+      if (depth === 0) return i + 1;
+    }
+  }
+  return -1;
+}
+
+/**
  * Tokenizes zsh array body lines into elements, honoring the pieces of
  * zsh syntax that whitespace-splitting gets wrong: inline comments
  * (`#` at start of word) end the line, quoted elements may contain
  * whitespace, and backslashes escape. Quotes are stripped from the
- * returned elements.
+ * returned elements — except inside `$(…)`, whose text (quotes and all)
+ * is the declaration and is kept verbatim.
  */
 export function tokenizeArrayBody(bodyLines: string[]): string[] {
   const tokens: string[] = [];
@@ -102,7 +145,6 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
     // a word like foo#bar) is content, not a comment.
     let current = "";
     let quote: '"' | "'" | null = null;
-    let substitutionDepth = 0;
     for (let i = 0; i < line.length; i += 1) {
       const ch = line[i]!;
       if (quote === "'") {
@@ -116,11 +158,17 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
       }
       if (ch === "$" && line[i + 1] === "(") {
         // `$(…)` is one word however many spaces the command inside it
-        // has — track depth so whitespace splitting pauses until it
-        // closes. Applies inside double quotes too.
-        substitutionDepth += 1;
-        current += "$(";
-        i += 1;
+        // has, and its text is kept verbatim — inner quotes are part of
+        // the declaration, and never leak into the outer quote state.
+        // Applies inside double quotes too.
+        const end = scanSubstitution(line, i);
+        if (end === -1) {
+          // Unclosed on this line: everything after is inside it.
+          current += line.slice(i);
+          break;
+        }
+        current += line.slice(i, end);
+        i = end - 1;
         continue;
       }
       if (quote === '"') {
@@ -137,7 +185,6 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
         } else if (ch === '"') {
           quote = null;
         } else {
-          if (ch === ")" && substitutionDepth > 0) substitutionDepth -= 1;
           current += ch;
         }
         continue;
@@ -154,16 +201,11 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
         quote = ch;
         continue;
       }
-      if (ch === ")" && substitutionDepth > 0) {
-        substitutionDepth -= 1;
-        current += ch;
-        continue;
-      }
-      if (ch === "#" && current === "" && substitutionDepth === 0) {
+      if (ch === "#" && current === "") {
         // Comment runs to end of line
         break;
       }
-      if (/\s/.test(ch) && substitutionDepth === 0) {
+      if (/\s/.test(ch)) {
         if (current) {
           tokens.push(current);
           current = "";
@@ -189,7 +231,6 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
  */
 function findUnquotedCloseParen(text: string): number {
   let quote: '"' | "'" | null = null;
-  let substitutionDepth = 0;
   for (let i = 0; i < text.length; i += 1) {
     const ch = text[i]!;
     if (quote === "'") {
@@ -203,28 +244,22 @@ function findUnquotedCloseParen(text: string): number {
       continue;
     }
     if (ch === "$" && text[i + 1] === "(") {
-      // `$(…)` nests and may itself contain `$(…)` — both inside and
-      // outside double quotes.
-      substitutionDepth += 1;
-      i += 1;
+      // `$(…)` is skipped as a unit with its own quote context (see
+      // scanSubstitution) — inner quotes and parens are its content.
+      const end = scanSubstitution(text, i);
+      if (end === -1) return -1;
+      i = end - 1;
       continue;
     }
     if (quote === '"') {
       if (ch === '"') quote = null;
-      else if (ch === ")" && substitutionDepth > 0) substitutionDepth -= 1;
       continue;
     }
     if (ch === '"' || ch === "'") {
       quote = ch;
       continue;
     }
-    if (ch === ")") {
-      if (substitutionDepth > 0) {
-        substitutionDepth -= 1;
-        continue;
-      }
-      return i;
-    }
+    if (ch === ")") return i;
   }
   return -1;
 }

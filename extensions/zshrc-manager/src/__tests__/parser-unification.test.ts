@@ -295,6 +295,19 @@ describe("parser unification", () => {
       ]);
     });
 
+    it("quotes inside a command substitution are kept verbatim", () => {
+      const content = `path+=("$(printf '%s' "hello")" /usr/local/bin)`;
+      expect(extractEntries(content).pathEntries.map((p) => p.entry)).toEqual([
+        `$(printf '%s' "hello")`,
+        "/usr/local/bin",
+      ]);
+    });
+
+    it("a quoted close paren inside a substitution is content, not the close", () => {
+      const content = `plugins=($(echo "a)b") git)`;
+      expect(extractEntries(content).plugins.map((p) => p.name)).toEqual([`$(echo "a)b")`, "git"]);
+    });
+
     it("backslashes escape outside quotes but not inside single quotes", () => {
       expect(tokenizeArrayBody(["my\\ plugin docker"])).toEqual(["my plugin", "docker"]);
       expect(tokenizeArrayBody(["'a\\b' next"])).toEqual(["a\\b", "next"]);
