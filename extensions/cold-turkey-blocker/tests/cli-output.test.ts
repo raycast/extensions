@@ -65,6 +65,29 @@ test("keeps plural block names instead of treating them as headings", () => {
   ]);
   assert.deepEqual(parseBlockList("Study Blocks"), [{ name: "Study Blocks", kind: "unknown" }]);
   assert.deepEqual(parseBlockList("Deep Work Block"), [{ name: "Deep Work Block", kind: "unknown" }]);
+  assert.deepEqual(parseBlockList("Deep Work\n\nStudy Blocks"), [
+    { name: "Deep Work", kind: "unknown" },
+    { name: "Study Blocks", kind: "unknown" },
+  ]);
+});
+
+test("skips unknown headings at section boundaries without inheriting the previous kind", () => {
+  const output = [
+    "Website & App Blocks",
+    "Deep Work",
+    "",
+    "Focus Blocks",
+    "Pomodoro",
+    "",
+    "Device Blocks",
+    "Laptop",
+  ].join("\n");
+
+  assert.deepEqual(parseBlockList(output), [
+    { name: "Deep Work", kind: "website-app" },
+    { name: "Pomodoro", kind: "unknown" },
+    { name: "Laptop", kind: "device" },
+  ]);
 });
 
 test("accepts an unknown reported kind when verifying a created block", () => {

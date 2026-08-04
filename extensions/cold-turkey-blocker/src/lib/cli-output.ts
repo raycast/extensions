@@ -96,16 +96,23 @@ export function parseBlockList(value: string): ParsedBlock[] {
   const jsonBlocks = parseJsonBlockList(output);
   if (jsonBlocks) return uniqueBlocks(jsonBlocks);
 
+  const lines = output.split("\n").map((line) => stripDiagnosticPrefix(line).trim());
+  const hasKnownSectionHeading = lines.some((line) => parseSectionHeading(line) !== undefined);
   const blocks: ParsedBlock[] = [];
   let currentKind: BlockKind = "unknown";
 
-  for (const rawLine of output.split("\n")) {
-    let line = stripDiagnosticPrefix(rawLine).trim();
+  for (const [index, rawLine] of lines.entries()) {
+    let line = rawLine;
     if (!line) continue;
 
     const headingKind = parseSectionHeading(line);
     if (headingKind) {
       currentKind = headingKind;
+      continue;
+    }
+
+    if (isUnknownSectionHeading(lines, index, hasKnownSectionHeading)) {
+      currentKind = "unknown";
       continue;
     }
 
@@ -216,6 +223,17 @@ function parseSectionHeading(value: string): BlockKind | undefined {
   }
   if (/^device\s+blocks?$/i.test(heading)) return "device";
   return undefined;
+}
+
+function isUnknownSectionHeading(lines: string[], index: number, hasKnownSectionHeading: boolean): boolean {
+  if (!hasKnownSectionHeading) return false;
+
+  const heading = lines[index].replace(/[:\s]+$/, "").trim();
+  if (!/^.+\s+blocks$/i.test(heading)) return false;
+
+  const isFirstContentLine = lines.slice(0, index).every((line) => !line);
+  const followsSectionBreak = index > 0 && !lines[index - 1];
+  return isFirstContentLine || followsSectionBreak;
 }
 
 function shouldSkipBlockListLine(line: string): boolean {
