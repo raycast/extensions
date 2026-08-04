@@ -278,6 +278,39 @@ test("refuses a manifest whose paths point outside the destination", () => {
   );
 });
 
+test("refuses a manifest that reaches outside through a symlinked folder, and touches nothing", () => {
+  const root = tmp();
+  const dest = path.join(root, "Archive");
+  const src = path.join(root, "Source");
+  const outside = path.join(root, "Outside");
+  fs.mkdirSync(path.join(dest, ".tidy", "runs"), { recursive: true });
+  fs.mkdirSync(src, { recursive: true });
+  fs.mkdirSync(path.join(outside, "leftover"), { recursive: true });
+  fs.writeFileSync(path.join(outside, "secret.txt"), "not part of any tidy run");
+  // A folder inside destDir that really lives somewhere else.
+  fs.symlinkSync(outside, path.join(dest, "ft_Images"));
+
+  fs.writeFileSync(
+    path.join(dest, ".tidy", "runs", "symlinked.json"),
+    JSON.stringify({
+      time: "2026-08-04T12:00:00.000Z",
+      sourceDir: src,
+      // Every path here is lexically inside its tree; only the symlink isn't.
+      moves: [{ from: path.join(src, "secret.txt"), to: path.join(dest, "ft_Images", "secret.txt"), action: "archive" }],
+      createdDirs: [path.join(dest, "ft_Images", "leftover")],
+    }),
+  );
+
+  assert.throws(
+    () => undoLastRun(dest),
+    (err) => err instanceof Error && err.code === "MANIFEST_CORRUPT",
+  );
+  // The point of the check: nothing outside the trees was restored or removed.
+  assert.ok(fs.existsSync(path.join(outside, "secret.txt")));
+  assert.ok(!fs.existsSync(path.join(src, "secret.txt")));
+  assert.ok(fs.existsSync(path.join(outside, "leftover")));
+});
+
 test("does not count a recorded but unperformed move as restored", () => {
   const src = tmp();
   const dest = tmp();

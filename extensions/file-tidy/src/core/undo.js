@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { canonicalPath, isInsideDir } from "./config.js";
 import { moveFile } from "./move.js";
 
 /**
@@ -124,9 +125,20 @@ function readRun(manifestPath, destDir) {
   }
 }
 
+/**
+ * Containment resolved through symlinks, not just spelled out lexically.
+ * `<destDir>/ft_Images/x` passes a purely textual check even when ft_Images is
+ * a symlink pointing out of destDir — and rename, mkdir and rmdir all follow
+ * that link, so undo would restore and delete outside the selected trees.
+ * canonicalPath resolves the deepest existing ancestor, so a path whose tail
+ * doesn't exist yet is still judged by where its parent really lives.
+ *
+ * This closes the check, not the race: a symlink swapped in between this call
+ * and the operation itself would still be followed. Ruling that out needs
+ * openat/O_NOFOLLOW, which node's fs API doesn't expose.
+ */
 function isInside(parent, child) {
-  const rel = path.relative(path.resolve(parent), path.resolve(child));
-  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
+  return isInsideDir(canonicalPath(parent), canonicalPath(child));
 }
 
 /**
