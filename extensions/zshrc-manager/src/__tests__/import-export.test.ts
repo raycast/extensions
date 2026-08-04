@@ -164,7 +164,8 @@ describe("import-export.ts", () => {
 
       expect(count).toBe(2);
       expect(mockWriteZshrcFile).toHaveBeenCalled();
-      expect(mockSaveToHistory).toHaveBeenCalledWith("Import 2 aliases");
+      // History now records the pre-change snapshot explicitly
+      expect(mockSaveToHistory).toHaveBeenCalledWith("Import 2 aliases", expect.any(String));
     });
 
     it("should add section header when specified", async () => {

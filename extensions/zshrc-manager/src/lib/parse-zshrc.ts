@@ -6,7 +6,7 @@
  */
 
 import { FILE_CONSTANTS } from "../constants";
-import { countAllPatterns, extractEntries, type RegistryEntries } from "./pattern-registry";
+import { countAllPatterns, countUnrecognizedLines, extractDetailed, type RegistryEntries } from "./pattern-registry";
 import { detectSectionMarker, updateSectionContext, type SectionContext } from "./section-detector";
 
 import { EntryType } from "../types/enums";
@@ -354,7 +354,8 @@ export function parseZshrc(content: string): ReadonlyArray<ZshEntry> {
 
   // One extraction pass over the whole content — the registry is the
   // single parser; this function only attaches section context.
-  const entriesByLine = buildEntriesByLine(extractEntries(content));
+  const detailed = extractDetailed(content);
+  const entriesByLine = buildEntriesByLine(detailed.entries);
 
   for (let index = 0; index < lines.length; index += 1) {
     const rawLine = lines[index];
@@ -390,8 +391,10 @@ export function parseZshrc(content: string): ReadonlyArray<ZshEntry> {
       for (const build of builders) {
         entries.push(build(baseData));
       }
-    } else {
-      // No registry match — track the line as OTHER
+    } else if (!detailed.matchedLines.has(index + 1)) {
+      // No registry match — track the line as OTHER. Consumed lines of a
+      // multi-line array (body elements, closing paren) are recognized,
+      // not OTHER; their entries live on the declaration's opening line.
       const baseData = createBaseEntryData(index + 1, rawLine, context.currentSection);
       entries.push(entryFactories[EntryType.OTHER](baseData));
     }
@@ -428,24 +431,11 @@ export function toLogicalSections(content: string): ReadonlyArray<LogicalSection
     // Count all entry types using centralized pattern registry
     const counts = countAllPatterns(joined);
 
-    // Count other entries (non-empty lines that don't match any pattern)
-    const allPatternMatches =
-      counts.aliases +
-      counts.exports +
-      counts.evals +
-      counts.setopts +
-      counts.plugins +
-      counts.functions +
-      counts.sources +
-      counts.autoloads +
-      counts.fpaths +
-      counts.paths +
-      counts.themes +
-      counts.completions +
-      counts.history +
-      counts.keybindings;
-    const totalNonEmptyLines = joined.split("\n").filter((line) => line.trim().length > 0).length;
-    const otherCount = Math.max(0, totalNonEmptyLines - allPatternMatches);
+    // "Other" counts LINES the registry did not recognize — not a
+    // subtraction of entry counts from line counts, which mixes units
+    // (a multi-line plugins array is one recognized construct spanning
+    // several lines yielding several entries).
+    const otherCount = countUnrecognizedLines(joined);
 
     sections.push({
       label: label?.trim() || "Unlabeled",

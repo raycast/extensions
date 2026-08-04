@@ -16,7 +16,7 @@
  */
 
 import { describe, it, expect } from "vitest";
-import { extractEntries, countAllPatterns } from "../lib/pattern-registry";
+import { extractEntries, countAllPatterns, countUnrecognizedLines, tokenizeArrayBody } from "../lib/pattern-registry";
 import { parseZshrc, toLogicalSections } from "../lib/parse-zshrc";
 import { calculateStatistics } from "../utils/statistics";
 import { replaceFirstScoped } from "../lib/scoped-replace";
@@ -125,6 +125,29 @@ describe("parser unification", () => {
       }
     });
 
+    it("extracts the corpus's ground-truth entries (independent of any projection)", () => {
+      // Hardcoded expectations: unlike the multiset comparisons above
+      // (which are projections of the same extraction), these fail if the
+      // registry itself drops or invents entries.
+      const wholeFile = extractEntries(CORPUS);
+      expect(wholeFile.aliases.map((a) => a.name).sort()).toEqual(["gs", "ll"]);
+      expect(wholeFile.plugins.map((p) => p.name).sort()).toEqual(["docker", "git"]);
+      expect(wholeFile.sources.map((s) => s.path).sort()).toEqual(['"/opt/with space/file.zsh"', "~/.zshrc.local"]);
+      expect(wholeFile.pathEntries.map((p) => `${p.type}:${p.entry}`).sort()).toEqual([
+        "append:/appended/bin",
+        "append:/array/one",
+        "append:/array/two",
+        "export:/custom/bin:$PATH",
+        "export:/usr/local/bin:$PATH",
+      ]);
+      expect(wholeFile.fpathEntries.map((f) => f.entry)).toEqual(["~/.zsh/functions"]);
+      expect(wholeFile.keybindings.map((k) => k.key).sort()).toEqual(["^R", "jj"]);
+      expect(wholeFile.exports.map((e) => e.variable).sort()).toEqual(["EDITOR", "PATH", "PATH"]);
+      expect(wholeFile.setopts.map((s) => s.option)).toEqual(["HIST_IGNORE_DUPS"]);
+      expect(wholeFile.themes.map((t) => t.name)).toEqual(["robbyrussell"]);
+      expect(wholeFile.autoloads.map((a) => a.function)).toEqual(["compinit"]);
+    });
+
     it("top-level function definitions become sections, not view entries", () => {
       // Deliberate, pre-existing behavior kept by the unification:
       // `my_func() {` at section level is a function-style section marker.
@@ -201,6 +224,50 @@ describe("parser unification", () => {
       expect(counts.paths).toBe(entries.pathEntries.length);
       expect(counts.plugins).toBe(entries.plugins.length);
       expect(counts.keybindings).toBe(entries.keybindings.length);
+    });
+  });
+
+  describe("array body tokenization", () => {
+    it("drops inline comments and honors quoted elements", () => {
+      expect(tokenizeArrayBody(["  git    # version control", "  docker", '  "some plugin"', "  'other one'"])).toEqual(
+        ["git", "docker", "some plugin", "other one"],
+      );
+    });
+
+    it("keeps # inside a word (not a comment start)", () => {
+      expect(tokenizeArrayBody(["foo#bar baz"])).toEqual(["foo#bar", "baz"]);
+    });
+
+    it("multi-line arrays with comments produce no phantom plugin entries", () => {
+      const content = ["plugins=(", "  git    # version control", "  docker  # containers", ")"].join("\n");
+      expect(extractEntries(content).plugins.map((p) => p.name)).toEqual(["git", "docker"]);
+    });
+
+    it("quoted path elements with whitespace stay whole", () => {
+      const content = 'path+=("/opt/my tools/bin" /usr/local/bin)';
+      expect(extractEntries(content).pathEntries.map((p) => p.entry)).toEqual(["/opt/my tools/bin", "/usr/local/bin"]);
+    });
+  });
+
+  describe("Other counts lines the registry did not recognize", () => {
+    it("a recognized multi-line array contributes nothing to Other", () => {
+      const content = ["plugins=(", "  git", "  docker", "  z", ")", "some-unrecognized-command --flag"].join("\n");
+      // 6 non-empty lines: 5 belong to the recognized array, 1 is genuinely other
+      expect(countUnrecognizedLines(content)).toBe(1);
+    });
+
+    it("section Other counts agree with the line-based definition", () => {
+      const sections = toLogicalSections(CORPUS);
+      for (const section of sections) {
+        expect(section.otherCount).toBe(countUnrecognizedLines(section.content));
+      }
+    });
+
+    it("single-line multi-element declarations no longer distort Other", () => {
+      // Old formula: 1 line minus 3 plugin entries clamped to 0 — and
+      // stole 2 from any real Other lines nearby
+      const content = ["plugins=(git docker z)", "mystery-line-one", "mystery-line-two"].join("\n");
+      expect(countUnrecognizedLines(content)).toBe(2);
     });
   });
 

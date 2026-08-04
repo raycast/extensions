@@ -76,10 +76,7 @@ export async function toggleItem(key: string, config: EditItemConfig): Promise<b
     lines[foundIndex] = newLine;
     const updatedContent = lines.join("\n");
 
-    // Save to history before writing
     const action = isCurrentlyCommented ? "Enable" : "Disable";
-    await saveToHistory(`${action} ${config.itemType} "${key}"`);
-
     await writeZshrcFile(updatedContent);
     clearCache(getZshrcPath());
 
@@ -88,6 +85,10 @@ export async function toggleItem(key: string, config: EditItemConfig): Promise<b
     if (verify !== updatedContent) {
       throw new Error("Write verification failed: content mismatch after toggle");
     }
+
+    // Record history after the verified write, with the pre-change
+    // snapshot as the undo target
+    await saveToHistory(`${action} ${config.itemType} "${key}"`, zshrcContent);
 
     const newState = !isCurrentlyCommented;
     await showToast({

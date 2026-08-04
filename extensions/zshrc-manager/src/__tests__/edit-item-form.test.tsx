@@ -8,7 +8,7 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { confirmAlert, showToast, useNavigation } from "@raycast/api";
+import { confirmAlert, showToast, Toast, useNavigation } from "@raycast/api";
 import type { EditItemConfig } from "../lib/edit-item-write";
 
 const mockReadRaw = vi.fn();
@@ -89,7 +89,9 @@ describe("EditItemForm", () => {
     const written = mockWrite.mock.calls[0]![0] as string;
     expect(written).toContain("alias gl='git log'");
     expect(written).toContain("alias gg='git grep'");
-    expect(vi.mocked(showToast)).toHaveBeenCalledWith(expect.objectContaining({ title: "Alias Added" }));
+    expect(vi.mocked(showToast)).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Alias Added", style: Toast.Style.Success }),
+    );
   });
 
   it("edit flow rewrites the existing definition in place", async () => {
@@ -107,7 +109,9 @@ describe("EditItemForm", () => {
     const written = mockWrite.mock.calls[0]![0] as string;
     expect(written).toContain("alias gg='rg'");
     expect(written).not.toContain("git grep");
-    expect(vi.mocked(showToast)).toHaveBeenCalledWith(expect.objectContaining({ title: "Alias Updated" }));
+    expect(vi.mocked(showToast)).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Alias Updated", style: Toast.Style.Success }),
+    );
   });
 
   it("missing key or value fails validation without writing", async () => {
@@ -115,7 +119,9 @@ describe("EditItemForm", () => {
     await submit({ key: "", value: "x", section: "Uncategorized", newSectionName: "" });
 
     expect(mockWrite).not.toHaveBeenCalled();
-    expect(vi.mocked(showToast)).toHaveBeenCalledWith(expect.objectContaining({ title: "Validation Error" }));
+    expect(vi.mocked(showToast)).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Validation Error", style: Toast.Style.Failure }),
+    );
   });
 
   it("structural warnings ask for confirmation and cancel aborts the save", async () => {
@@ -171,7 +177,7 @@ describe("EditItemForm", () => {
 
     expect(mockWrite).not.toHaveBeenCalled();
     expect(vi.mocked(showToast)).toHaveBeenCalledWith(
-      expect.objectContaining({ message: expect.stringContaining("Multiple definitions") }),
+      expect.objectContaining({ message: expect.stringContaining("Multiple definitions"), style: Toast.Style.Failure }),
     );
   });
 

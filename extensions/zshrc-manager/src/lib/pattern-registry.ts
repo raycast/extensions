@@ -88,6 +88,32 @@ export interface RegistryEntries {
 const P = PARSING_CONSTANTS.PATTERNS;
 
 /**
+ * Tokenizes zsh array body lines into elements, honoring the two pieces
+ * of zsh syntax that whitespace-splitting gets wrong: inline comments
+ * (`#` at start of word) end the line, and quoted elements may contain
+ * whitespace. Quotes are stripped from the returned elements.
+ */
+export function tokenizeArrayBody(bodyLines: string[]): string[] {
+  const tokens: string[] = [];
+  for (const raw of bodyLines) {
+    // An inline comment runs to end of line; `#` only starts a comment
+    // at the beginning of a word
+    const commentStart = raw.match(/(^|\s)#/);
+    const line = commentStart?.index !== undefined ? raw.slice(0, commentStart.index) : raw;
+
+    const tokenPattern = /"([^"]*)"|'([^']*)'|(\S+)/g;
+    let match: RegExpExecArray | null;
+    while ((match = tokenPattern.exec(line)) !== null) {
+      const value = match[1] ?? match[2] ?? match[3];
+      if (value && value.trim()) {
+        tokens.push(value.trim());
+      }
+    }
+  }
+  return tokens;
+}
+
+/**
  * PATH/FPATH declaration forms. Each variable ("PATH"/"path",
  * "FPATH"/"fpath") gets the same family of matchers. Order matters:
  * the first matching form wins for a given line.
@@ -95,10 +121,7 @@ const P = PARSING_CONSTANTS.PATTERNS;
 function matchPathLike(line: string, upper: string, lower: string): PathLikeMatch[] | null {
   const out = (entry: string, type: PathLikeMatch["type"]): PathLikeMatch[] => [{ entry, type, line: 0 }];
   const split = (list: string, type: PathLikeMatch["type"]): PathLikeMatch[] =>
-    list
-      .split(/\s+/)
-      .filter((p) => p.trim())
-      .map((p) => ({ entry: p.trim(), type, line: 0 }));
+    tokenizeArrayBody([list]).map((entry) => ({ entry, type, line: 0 }));
 
   let m = line.match(
     new RegExp(
@@ -169,6 +192,17 @@ function matchKeybinding(line: string): KeybindingMatch | null {
 const withLine = <T extends Positioned>(entries: T[] | null, line: number): T[] =>
   (entries ?? []).map((entry) => ({ ...entry, line }));
 
+/** Registry extraction plus which physical lines it consumed. */
+export interface DetailedExtraction {
+  entries: RegistryEntries;
+  /**
+   * 1-based numbers of every non-empty line the registry recognized,
+   * including the opening, body, and closing lines of multi-line arrays.
+   * Lines outside this set are what "Other" counts should count.
+   */
+  matchedLines: Set<number>;
+}
+
 /**
  * Extract every recognized construct from content, with line positions.
  *
@@ -176,7 +210,8 @@ const withLine = <T extends Positioned>(entries: T[] | null, line: number): T[] 
  * `export PATH=…` is both an export and a PATH declaration, matching
  * what the Exports and PATH views have always shown.
  */
-export function extractEntries(content: string): RegistryEntries {
+export function extractDetailed(content: string): DetailedExtraction {
+  const matchedLines = new Set<number>();
   const result: RegistryEntries = {
     aliases: [],
     exports: [],
@@ -220,12 +255,12 @@ export function extractEntries(content: string): RegistryEntries {
         closeIndex += 1;
       }
       if (closeIndex < lines.length) {
-        const elements = parts
-          .join(" ")
-          .split(/\s+/)
-          .filter((p) => p.trim());
+        const elements = tokenizeArrayBody(parts);
         const variable = arrayOpen[2]!;
         const type: PathLikeMatch["type"] = arrayOpen[3] === "+" ? "append" : "set";
+        for (let consumed = index; consumed <= closeIndex; consumed += 1) {
+          matchedLines.add(consumed + 1);
+        }
         for (const element of elements) {
           if (variable === "plugins") {
             result.plugins.push({ name: element.trim(), line });
@@ -278,9 +313,10 @@ export function extractEntries(content: string): RegistryEntries {
 
     m = raw.match(P.PLUGIN);
     if (m?.[1]) {
-      for (const name of m[1].split(/\s+/).filter((p) => p.trim())) {
-        result.plugins.push({ name: name.trim(), line });
+      for (const name of tokenizeArrayBody([m[1]])) {
+        result.plugins.push({ name, line });
       }
+      matchedLines.add(line);
       continue;
     }
 
@@ -328,7 +364,40 @@ export function extractEntries(content: string): RegistryEntries {
     }
   }
 
-  return result;
+  // Every entry's own line is a recognized line; multi-line array
+  // body/close lines were added when they were consumed above.
+  for (const collection of Object.values(result)) {
+    for (const entry of collection) {
+      matchedLines.add(entry.line);
+    }
+  }
+
+  return { entries: result, matchedLines };
+}
+
+/** Extract every recognized construct from content, with line positions. */
+export function extractEntries(content: string): RegistryEntries {
+  return extractDetailed(content).entries;
+}
+
+/**
+ * Counts non-empty lines the registry did not recognize — the "Other"
+ * count. Lines are the unit here (unlike the per-entry type counts), so
+ * a recognized multi-line array contributes nothing to Other, however
+ * many elements or physical lines it spans.
+ */
+export function countUnrecognizedLines(content: string): number {
+  const { matchedLines } = extractDetailed(content);
+  const lines = content.split(/\r?\n/);
+  let unrecognized = 0;
+  for (let index = 0; index < lines.length; index += 1) {
+    const raw = lines[index];
+    if (!raw || raw.trim().length === 0) continue;
+    if (!matchedLines.has(index + 1)) {
+      unrecognized += 1;
+    }
+  }
+  return unrecognized;
 }
 
 /**

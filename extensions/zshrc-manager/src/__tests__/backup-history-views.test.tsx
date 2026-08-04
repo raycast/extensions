@@ -103,6 +103,19 @@ describe("BackupManager", () => {
     await waitFor(() => {
       expect(zshMocks.deleteBackup).toHaveBeenCalled();
     });
+    expect(vi.mocked(confirmAlert)).toHaveBeenCalled();
+  });
+
+  it("cancelled delete never removes the backup", async () => {
+    vi.mocked(confirmAlert).mockResolvedValue(false);
+    render(<BackupManager />);
+    await waitFor(() => expect(screen.getByText("Current Backup")).toBeTruthy());
+
+    const del = screen.getAllByText(/Delete Backup/i)[0];
+    fireEvent.click(del!);
+
+    await waitFor(() => expect(vi.mocked(confirmAlert)).toHaveBeenCalled());
+    expect(zshMocks.deleteBackup).not.toHaveBeenCalled();
   });
 });
 
