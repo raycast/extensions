@@ -1,17 +1,16 @@
 import { closeMainWindow, getPreferenceValues, showHUD } from "@raycast/api";
 import { join } from "path";
-import { isProcessRunning, runFile } from "./lib/process";
+import { isSameProcess, runFile } from "./lib/process";
 import { appendMarker, readMarkers, readState } from "./lib/state";
-import { Preferences } from "./lib/types";
 
 export default async function Command() {
   const state = readState();
-  if (!state || !isProcessRunning(state.pid)) {
+  if (!state || !isSameProcess(state.recorder)) {
     await showHUD("⚠️ No active agent feedback recording");
     return;
   }
 
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.MarkMoment>();
   const display = Math.max(
     1,
     Number.parseInt(preferences.displayNumber, 10) || 1,

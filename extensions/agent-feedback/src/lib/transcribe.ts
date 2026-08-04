@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from "fs";
 import { join } from "path";
 import { defaultModelPath } from "./paths";
 import { runFile } from "./process";
-import { Preferences, RecordingState, TranscriptSegment } from "./types";
+import { RecordingState, TranscriptSegment } from "./types";
 import { buildWhisperArguments } from "./whisper-arguments";
 
 interface WhisperJsonSegment {

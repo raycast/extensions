@@ -1,14 +1,12 @@
-export interface Preferences {
-  whisperModelPath?: string;
-  whisperCliPath?: string;
-  language: string;
-  displayNumber: string;
-  maxFrames: string;
+export interface ProcessIdentity {
+  pid: number;
+  executable: string;
+  startedAt: string;
 }
 
 export interface RecordingState {
-  pid: number;
-  frameCapturePid?: number;
+  recorder: ProcessIdentity;
+  frameCapture: ProcessIdentity;
   domContext?: DomContextBridgeState;
   startedAt: string;
   sessionDir: string;
@@ -18,7 +16,7 @@ export interface RecordingState {
 }
 
 export interface DomContextBridgeState {
-  pid: number;
+  process: ProcessIdentity;
   port: number;
   eventsPath: string;
   statusPath: string;

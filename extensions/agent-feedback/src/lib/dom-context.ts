@@ -2,7 +2,7 @@ import { environment } from "@raycast/api";
 import { randomBytes } from "crypto";
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
-import { isProcessRunning, spawnDetached } from "./process";
+import { isSameProcess, spawnDetached } from "./process";
 import {
   DomContextBridgeState,
   DomContextTarget,
@@ -34,9 +34,9 @@ export async function startDomContextBridge(
   const eventsPath = join(sessionDir, "dom-context.jsonl");
   const statusPath = join(sessionDir, "dom-context-status.json");
   const token = randomBytes(24).toString("hex");
-  let pid: number;
+  let bridgeProcess;
   try {
-    pid = spawnDetached(
+    bridgeProcess = await spawnDetached(
       process.execPath,
       [
         join(environment.assetsPath, "dom-bridge-server.js"),
@@ -54,16 +54,21 @@ export async function startDomContextBridge(
   }
 
   await new Promise((resolve) => setTimeout(resolve, 250));
-  if (!isProcessRunning(pid)) return undefined;
-  return { pid, port: DOM_CONTEXT_PORT, eventsPath, statusPath };
+  if (!isSameProcess(bridgeProcess)) return undefined;
+  return {
+    process: bridgeProcess,
+    port: DOM_CONTEXT_PORT,
+    eventsPath,
+    statusPath,
+  };
 }
 
 export function stopDomContextBridge(
   bridge: DomContextBridgeState | undefined,
 ): void {
-  if (!bridge || !isProcessRunning(bridge.pid)) return;
+  if (!bridge || !isSameProcess(bridge.process)) return;
   try {
-    process.kill(bridge.pid, "SIGTERM");
+    process.kill(bridge.process.pid, "SIGTERM");
   } catch {
     // DOM context is optional and must never prevent the recording from ending.
   }

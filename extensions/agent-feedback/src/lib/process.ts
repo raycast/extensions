@@ -1,5 +1,6 @@
 import { execFile, spawn, spawnSync } from "child_process";
 import { closeSync, openSync } from "fs";
+import type { ProcessIdentity } from "./types";
 
 export function runFile(
   file: string,
@@ -21,11 +22,11 @@ export function runFile(
   });
 }
 
-export function spawnDetached(
+export async function spawnDetached(
   file: string,
   args: string[],
   logPath?: string,
-): number {
+): Promise<ProcessIdentity> {
   const logDescriptor = logPath ? openSync(logPath, "a") : undefined;
   const child = spawn(file, args, {
     detached: true,
@@ -34,10 +35,19 @@ export function spawnDetached(
         ? "ignore"
         : ["ignore", logDescriptor, logDescriptor],
   });
-  child.unref();
   if (logDescriptor !== undefined) closeSync(logDescriptor);
+  await new Promise<void>((resolve, reject) => {
+    child.once("spawn", resolve);
+    child.once("error", reject);
+  });
+  child.unref();
   if (!child.pid) throw new Error(`Could not start ${file}`);
-  return child.pid;
+  const identity = readProcessIdentity(child.pid, file);
+  if (!identity) {
+    child.kill("SIGTERM");
+    throw new Error(`Could not verify ${file} after starting it`);
+  }
+  return identity;
 }
 
 export function isProcessRunning(pid: number): boolean {
@@ -53,13 +63,37 @@ export function isProcessRunning(pid: number): boolean {
   }
 }
 
-export async function waitForProcessExit(
+export function readProcessIdentity(
   pid: number,
+  expectedExecutable?: string,
+): ProcessIdentity | undefined {
+  if (!isProcessRunning(pid)) return undefined;
+  const result = spawnSync(
+    "/bin/ps",
+    ["-p", String(pid), "-o", "lstart=", "-o", "comm="],
+    { encoding: "utf8" },
+  );
+  const output = result.stdout.trim();
+  if (result.status !== 0 || output.length <= 24) return undefined;
+  const startedAt = output.slice(0, 24);
+  const executable = output.slice(24).trim();
+  if (!executable || (expectedExecutable && executable !== expectedExecutable))
+    return undefined;
+  return { pid, executable, startedAt };
+}
+
+export function isSameProcess(identity: ProcessIdentity): boolean {
+  const current = readProcessIdentity(identity.pid, identity.executable);
+  return current?.startedAt === identity.startedAt;
+}
+
+export async function waitForProcessExit(
+  identity: ProcessIdentity,
   timeoutMs = 12_000,
 ): Promise<void> {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
-    if (!isProcessRunning(pid)) return;
+    if (!isSameProcess(identity)) return;
     await new Promise((resolve) => setTimeout(resolve, 200));
   }
   throw new Error("The screen recorder did not stop cleanly");

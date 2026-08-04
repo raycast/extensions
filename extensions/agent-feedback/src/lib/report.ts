@@ -4,12 +4,7 @@ import { AttentionMoment, detectAttentionMoments } from "./attention-cues";
 import { loadDomContextTimeline } from "./dom-context";
 import { runFile } from "./process";
 import { readMarkers } from "./state";
-import {
-  DomContextTarget,
-  Preferences,
-  RecordingState,
-  TranscriptSegment,
-} from "./types";
+import { DomContextTarget, RecordingState, TranscriptSegment } from "./types";
 
 interface ReportMoment {
   timestampMs: number;

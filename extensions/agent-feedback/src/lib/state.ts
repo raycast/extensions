@@ -1,12 +1,38 @@
 import { existsSync, readFileSync, rmSync, writeFileSync } from "fs";
 import { statePath } from "./paths";
-import { FeedbackMarker, RecordingState } from "./types";
+import { FeedbackMarker, ProcessIdentity, RecordingState } from "./types";
+
+function isProcessIdentity(value: unknown): value is ProcessIdentity {
+  if (!value || typeof value !== "object") return false;
+  const identity = value as Partial<ProcessIdentity>;
+  return (
+    typeof identity.pid === "number" &&
+    typeof identity.executable === "string" &&
+    typeof identity.startedAt === "string"
+  );
+}
+
+function isRecordingState(value: unknown): value is RecordingState {
+  if (!value || typeof value !== "object") return false;
+  const state = value as Partial<RecordingState>;
+  return (
+    isProcessIdentity(state.recorder) &&
+    isProcessIdentity(state.frameCapture) &&
+    typeof state.startedAt === "string" &&
+    typeof state.sessionDir === "string" &&
+    typeof state.videoPath === "string" &&
+    (!state.domContext || isProcessIdentity(state.domContext.process))
+  );
+}
 
 export function readState(): RecordingState | undefined {
   if (!existsSync(statePath)) return undefined;
   try {
-    return JSON.parse(readFileSync(statePath, "utf8")) as RecordingState;
+    const state = JSON.parse(readFileSync(statePath, "utf8")) as unknown;
+    if (!isRecordingState(state)) throw new Error("Invalid recording state");
+    return state;
   } catch {
+    rmSync(statePath, { force: true });
     return undefined;
   }
 }

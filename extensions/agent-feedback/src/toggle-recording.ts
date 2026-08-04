@@ -13,7 +13,7 @@ import { join } from "path";
 import { startDomContextBridge, stopDomContextBridge } from "./lib/dom-context";
 import { ensureSupportDirectories, newSessionDirectory } from "./lib/paths";
 import {
-  isProcessRunning,
+  isSameProcess,
   spawnDetached,
   waitForProcessExit,
 } from "./lib/process";
@@ -24,7 +24,7 @@ import {
   resolveWhisperCliPath,
   transcribe,
 } from "./lib/transcribe";
-import { Preferences, RecordingState } from "./lib/types";
+import { RecordingState } from "./lib/types";
 
 async function setRecordingStatus(subtitle: string): Promise<void> {
   try {
@@ -34,7 +34,9 @@ async function setRecordingStatus(subtitle: string): Promise<void> {
   }
 }
 
-async function startRecording(preferences: Preferences): Promise<void> {
+async function startRecording(
+  preferences: Preferences.ToggleRecording,
+): Promise<void> {
   ensureSupportDirectories();
   if (!existsSync(resolveModelPath(preferences))) {
     await showHUD("⚠️ Run “Download Local Whisper Model” first");
@@ -61,25 +63,25 @@ async function startRecording(preferences: Preferences): Promise<void> {
   }
 
   const recorderLogPath = join(sessionDir, "recorder.log");
-  const pid = spawnDetached(
+  const recorder = await spawnDetached(
     "/usr/sbin/screencapture",
     ["-v", "-g", "-k", "-C", `-D${display}`, videoPath],
     recorderLogPath,
   );
-  const domContext = await startDomContextBridge(sessionDir, pid);
-  const frameCapturePid = spawnDetached(
+  const domContext = await startDomContextBridge(sessionDir, recorder.pid);
+  const frameCapture = await spawnDetached(
     "/bin/sh",
     [
       join(environment.assetsPath, "capture-frames.sh"),
-      String(pid),
+      String(recorder.pid),
       join(sessionDir, "automatic"),
       String(display),
     ],
     join(sessionDir, "frame-capture.log"),
   );
   const state: RecordingState = {
-    pid,
-    frameCapturePid,
+    recorder,
+    frameCapture,
     domContext,
     startedAt: new Date().toISOString(),
     sessionDir,
@@ -94,9 +96,9 @@ async function startRecording(preferences: Preferences): Promise<void> {
   );
   await setRecordingStatus("● Recording — Run to Stop");
   await new Promise((resolve) => setTimeout(resolve, 800));
-  if (!isProcessRunning(pid)) {
-    if (isProcessRunning(frameCapturePid)) {
-      process.kill(frameCapturePid, "SIGTERM");
+  if (!isSameProcess(recorder)) {
+    if (isSameProcess(frameCapture)) {
+      process.kill(frameCapture.pid, "SIGTERM");
     }
     stopDomContextBridge(domContext);
     clearState();
@@ -111,7 +113,7 @@ async function startRecording(preferences: Preferences): Promise<void> {
 
 async function stopRecording(
   state: RecordingState,
-  preferences: Preferences,
+  preferences: Preferences.ToggleRecording,
 ): Promise<void> {
   await setRecordingStatus("Stopping Recording…");
   const toast = await showToast({
@@ -119,12 +121,12 @@ async function stopRecording(
     title: "Stopping feedback recording…",
   });
   try {
-    if (isProcessRunning(state.pid)) {
-      process.kill(state.pid, "SIGINT");
-      await waitForProcessExit(state.pid);
+    if (isSameProcess(state.recorder)) {
+      process.kill(state.recorder.pid, "SIGINT");
+      await waitForProcessExit(state.recorder);
     }
-    if (state.frameCapturePid && isProcessRunning(state.frameCapturePid)) {
-      process.kill(state.frameCapturePid, "SIGTERM");
+    if (isSameProcess(state.frameCapture)) {
+      process.kill(state.frameCapture.pid, "SIGTERM");
     }
     stopDomContextBridge(state.domContext);
     clearState();
@@ -151,9 +153,9 @@ async function stopRecording(
 }
 
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.ToggleRecording>();
   const state = readState();
-  if (state && isProcessRunning(state.pid)) {
+  if (state && isSameProcess(state.recorder)) {
     await stopRecording(state, preferences);
     return;
   }
