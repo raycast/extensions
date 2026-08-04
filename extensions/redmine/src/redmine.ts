@@ -270,7 +270,8 @@ export async function getIssue(id: number): Promise<IssueDetail> {
 /** Fields that can be written to an issue via the REST API. */
 export interface IssueUpdate {
   status_id?: number;
-  assigned_to_id?: number;
+  /** A user or group id, or an empty string to clear the assignee. */
+  assigned_to_id?: number | "";
   priority_id?: number;
   notes?: string;
 }
@@ -333,11 +334,14 @@ export async function getPriorities(): Promise<IssueRef[]> {
   return r.issue_priorities ?? [];
 }
 
-/** Returns the users that are members of the given project (assignable candidates). */
+/**
+ * Returns the assignable candidates of the given project: its member users, plus its
+ * member groups when the instance has group assignment enabled.
+ */
 export async function getProjectMembers(projectId: number): Promise<IssueRef[]> {
   const r = await redmineFetchObject<{ memberships?: { user?: IssueRef; group?: IssueRef }[] }>(
     `/projects/${projectId}/memberships.json`,
     { limit: "100" },
   );
-  return (r.memberships ?? []).map((m) => m.user).filter((u): u is IssueRef => Boolean(u));
+  return (r.memberships ?? []).map((m) => m.user ?? m.group).filter((m): m is IssueRef => Boolean(m));
 }

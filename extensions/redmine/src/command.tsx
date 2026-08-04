@@ -29,14 +29,18 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
   }, []);
 
   useEffect(() => {
+    // Requests can overlap while typing, so ignore any response that is no longer
+    // the one for the current query/project, otherwise a slow earlier request wins.
+    let outdated = false;
     setError(undefined);
     setIsLoading(true);
     search(query, projectId)
       .then((resultItems) => {
+        if (outdated) return;
         setItems(resultItems);
-        setIsLoading(false);
       })
       .catch((e) => {
+        if (outdated) return;
         setItems([]);
         console.warn(e);
         if (e instanceof Error) {
@@ -44,8 +48,11 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
         }
       })
       .finally(() => {
-        setIsLoading(false);
+        if (!outdated) setIsLoading(false);
       });
+    return () => {
+      outdated = true;
+    };
   }, [query, projectId]);
 
   useEffect(() => {

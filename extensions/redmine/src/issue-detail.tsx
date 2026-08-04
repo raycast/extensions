@@ -33,7 +33,9 @@ export function IssueDetailView({ issueId }: { issueId: number }) {
       const [prios, membs, allStatuses] = await Promise.all([
         getPriorities().catch(() => []),
         getProjectMembers(fetched.project.id).catch(() => []),
-        fetched.allowed_statuses?.length
+        // An empty `allowed_statuses` means the workflow permits no transition at all,
+        // so only fall back to every status when the instance omits the field (Redmine < 5.0).
+        fetched.allowed_statuses !== undefined
           ? Promise.resolve(fetched.allowed_statuses)
           : getIssueStatuses().catch(() => []),
       ]);
@@ -119,6 +121,11 @@ export function IssueDetailView({ issueId }: { issueId: number }) {
               ))}
             </ActionPanel.Submenu>
             <ActionPanel.Submenu title="Change Assignee" icon={Icon.Person} shortcut={{ modifiers: ["cmd"], key: "a" }}>
+              <Action
+                title="Unassigned"
+                autoFocus={!issue?.assigned_to}
+                onAction={() => applyUpdate({ assigned_to_id: "" }, "Assignee cleared")}
+              />
               {members.map((m) => (
                 <Action
                   key={m.id}
