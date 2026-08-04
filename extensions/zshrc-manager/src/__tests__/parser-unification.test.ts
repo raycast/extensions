@@ -272,6 +272,22 @@ describe("parser unification", () => {
       expect(extractEntries(content).plugins.map((p) => p.name)).toEqual(['my" plugin', "docker"]);
     });
 
+    it("command substitution stays one element and does not terminate the array", () => {
+      const content = "path+=($(brew --prefix)/bin /usr/local/bin)";
+      expect(extractEntries(content).pathEntries.map((p) => p.entry)).toEqual([
+        "$(brew --prefix)/bin",
+        "/usr/local/bin",
+      ]);
+    });
+
+    it("nested and double-quoted command substitutions stay whole", () => {
+      expect(tokenizeArrayBody(['$(dirname $(which node))/lib "$(brew --prefix)/sbin" plain'])).toEqual([
+        "$(dirname $(which node))/lib",
+        "$(brew --prefix)/sbin",
+        "plain",
+      ]);
+    });
+
     it("backslashes escape outside quotes but not inside single quotes", () => {
       expect(tokenizeArrayBody(["my\\ plugin docker"])).toEqual(["my plugin", "docker"]);
       expect(tokenizeArrayBody(["'a\\b' next"])).toEqual(["a\\b", "next"]);

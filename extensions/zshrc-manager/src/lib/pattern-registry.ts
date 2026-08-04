@@ -102,6 +102,7 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
     // a word like foo#bar) is content, not a comment.
     let current = "";
     let quote: '"' | "'" | null = null;
+    let substitutionDepth = 0;
     for (let i = 0; i < line.length; i += 1) {
       const ch = line[i]!;
       if (quote === "'") {
@@ -111,6 +112,15 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
         } else {
           current += ch;
         }
+        continue;
+      }
+      if (ch === "$" && line[i + 1] === "(") {
+        // `$(…)` is one word however many spaces the command inside it
+        // has — track depth so whitespace splitting pauses until it
+        // closes. Applies inside double quotes too.
+        substitutionDepth += 1;
+        current += "$(";
+        i += 1;
         continue;
       }
       if (quote === '"') {
@@ -127,6 +137,7 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
         } else if (ch === '"') {
           quote = null;
         } else {
+          if (ch === ")" && substitutionDepth > 0) substitutionDepth -= 1;
           current += ch;
         }
         continue;
@@ -143,11 +154,16 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
         quote = ch;
         continue;
       }
-      if (ch === "#" && current === "") {
+      if (ch === ")" && substitutionDepth > 0) {
+        substitutionDepth -= 1;
+        current += ch;
+        continue;
+      }
+      if (ch === "#" && current === "" && substitutionDepth === 0) {
         // Comment runs to end of line
         break;
       }
-      if (/\s/.test(ch)) {
+      if (/\s/.test(ch) && substitutionDepth === 0) {
         if (current) {
           tokens.push(current);
           current = "";
@@ -164,13 +180,16 @@ export function tokenizeArrayBody(bodyLines: string[]): string[] {
 }
 
 /**
- * Index of the first `)` that actually closes an array — i.e. is neither
- * inside quotes nor backslash-escaped — or -1. Shares its quote and
- * escape semantics with `tokenizeArrayBody`, so termination and
- * tokenization can never disagree about what a quote covers.
+ * Index of the first `)` that actually closes an array — i.e. is not
+ * inside quotes, not backslash-escaped, and not the close of a `$(…)`
+ * command substitution (`path+=($(brew --prefix)/bin)`) — or -1. Shares
+ * its quote and escape semantics with `tokenizeArrayBody`, so
+ * termination and tokenization can never disagree about what a quote
+ * covers.
  */
 function findUnquotedCloseParen(text: string): number {
   let quote: '"' | "'" | null = null;
+  let substitutionDepth = 0;
   for (let i = 0; i < text.length; i += 1) {
     const ch = text[i]!;
     if (quote === "'") {
@@ -183,15 +202,29 @@ function findUnquotedCloseParen(text: string): number {
       i += 1;
       continue;
     }
+    if (ch === "$" && text[i + 1] === "(") {
+      // `$(…)` nests and may itself contain `$(…)` — both inside and
+      // outside double quotes.
+      substitutionDepth += 1;
+      i += 1;
+      continue;
+    }
     if (quote === '"') {
       if (ch === '"') quote = null;
+      else if (ch === ")" && substitutionDepth > 0) substitutionDepth -= 1;
       continue;
     }
     if (ch === '"' || ch === "'") {
       quote = ch;
       continue;
     }
-    if (ch === ")") return i;
+    if (ch === ")") {
+      if (substitutionDepth > 0) {
+        substitutionDepth -= 1;
+        continue;
+      }
+      return i;
+    }
   }
   return -1;
 }
