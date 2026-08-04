@@ -145,9 +145,13 @@ Form.TextField = ({ children, value, onChange, ...props }: any) => {
   );
 };
 
-Form.Dropdown = ({ children, ...props }: any) => {
+const FormDropdown = ({ children, ...props }: any) => {
   return React.createElement("select", { "data-testid": "form-dropdown", ...props }, children);
 };
+FormDropdown.Item = ({ title, value, ...props }: any) => {
+  return React.createElement("option", { "data-testid": "form-dropdown-item", value, ...props }, title);
+};
+Form.Dropdown = FormDropdown;
 
 Form.TextArea = ({ children, ...props }: any) => {
   return React.createElement("textarea", { "data-testid": "form-textarea", ...props }, children);
@@ -231,6 +235,10 @@ const ListItemDetail = ({ children, markdown, metadata, ...props }: any) => {
   }
   if (children) content.push(children);
   return React.createElement("div", { "data-testid": "list-item-detail-metadata-label", ...props }, content);
+};
+
+(ListItemDetail as any).Metadata.Separator = (props: any) => {
+  return React.createElement("hr", { "data-testid": "metadata-separator", ...props });
 };
 
 (ListItemDetail as any).Metadata.TagList = ({ children, ...props }: any) => {
