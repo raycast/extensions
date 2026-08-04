@@ -13,18 +13,6 @@ Find and open services across every Qovery organization available to your user a
 - Public links for applications, containers, and Helm services
 - Copy actions for service, project, and environment IDs
 
-## OAuth Configuration
-
-The extension uses Qovery's public Auth0 client, the `https://core.qovery.com` audience, and this static Raycast callback:
-
-```text
-https://raycast.com/redirect/extension
-```
-
-That URL must be present in the Auth0 application's **Allowed Callback URLs**. The client must allow the Authorization Code and Refresh Token grant types. For production, a dedicated public/native Auth0 client for the Raycast extension is preferable; update `CLIENT_ID` in `src/oauth.ts` if one is created.
-
-No client secret belongs in the extension. PKCE protects the authorization-code exchange.
-
 ## Usage
 
 1. Run **Find Services** in Raycast.
@@ -32,14 +20,9 @@ No client secret belongs in the extension. PKCE protects the authorization-code 
 3. Search across all your services or use the dropdown to select an organization.
 4. Open the action panel to visit the Console, view links, copy IDs, refresh, or sign out.
 
-## Development
+## Privacy and Security
 
-```bash
-npm install
-npm run dev
-npm run build
-npm run lint
-```
+The extension uses Qovery's secure browser sign-in. It never asks for or stores a Qovery API token.
 
 ## License
 
