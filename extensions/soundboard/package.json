@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "soundboard",
   "title": "Soundboard",
-  "description": "Use Raycast as a soundboard and bind sounds to hotkeys",
+  "description": "Use Raycast as a soundboard and bind sounds to hotkeys.",
   "icon": "command-icon.png",
   "author": "pernielsentikaer",
   "contributors": [
