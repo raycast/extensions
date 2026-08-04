@@ -19,6 +19,10 @@
     "encrypt",
     "decrypt",
     "secure properties",
+    "secure-properties-tool",
+    "cipher",
+    "decrypt config",
+    "props",
     "blowfish",
     "aes"
   ],
@@ -53,7 +57,7 @@
       "type": "textfield",
       "required": false,
       "title": "Secure Properties Tool URL",
-      "description": "HTTPS URL of the Secure Properties Tool JAR. Leave empty to use MuleSoft’s official latest Java 17 attachment.",
+      "description": "HTTPS URL of the Secure Properties Tool JAR. Leave empty to use the pinned official MuleSoft Java 17 attachment.",
       "placeholder": "https://docs.mulesoft.com/mule-runtime/latest/_attachments/secure-properties-tool-j17.jar"
     },
     {
@@ -61,8 +65,9 @@
       "type": "textfield",
       "required": false,
       "title": "Expected JAR SHA-256",
-      "description": "Optional hex digest. When set, downloads that do not match are rejected. Leave empty when using the default latest URL (the file may change over time).",
-      "placeholder": "Optional SHA-256 hex"
+      "description": "Required integrity digest. The default pins MuleSoft's November 22, 2024 JAR; update it when using a custom URL.",
+      "default": "802bb7ead7b5a5811cb69333fb05ec6dd507c615058663553c87c84ae404437c",
+      "placeholder": "Required SHA-256 hex"
     }
   ],
   "dependencies": {

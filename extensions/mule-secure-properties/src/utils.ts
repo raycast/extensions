@@ -3,20 +3,23 @@ import { createHash } from "node:crypto";
 import fs from "node:fs";
 import type { IncomingMessage } from "node:http";
 import https from "node:https";
+import path from "node:path";
 import { pipeline } from "node:stream/promises";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { LocalStorage, openExtensionPreferences, showHUD, showToast, Toast } from "@raycast/api";
 import {
   DEFAULT_JAR_DOWNLOAD_URL,
+  DEFAULT_JAR_SHA256,
   ERROR_MESSAGES,
   ERROR_PATTERNS,
   FIELD_DEFAULTS,
   FORM_SETTINGS_KEY,
-  HOME_DIR,
   JAR_PATH,
   JAR_SOURCE_URL_KEY,
+  JAR_VERIFICATION_CACHE_KEY,
   KEY_LENGTH_HINTS,
   MAIN_CLASS,
+  JAVA_MAX_BUFFER_BYTES,
   SUCCESS_MESSAGES,
 } from "./constants";
 
@@ -175,7 +178,7 @@ export const getUserFriendlyErrorMessage = (errorMessage: string): string => {
 
 export const handleOperationError = async (error: unknown, operation: "Encryption" | "Decryption"): Promise<void> => {
   const errorMessage = getErrorMessage(error);
-  console.error(`${operation} error:`, error);
+  console.error(`${operation} error: ${errorMessage}`);
 
   await showToast({
     style: Toast.Style.Failure,
@@ -203,16 +206,24 @@ export const resolvePassword = async (
 
 export interface JarDownloadConfig {
   url: string;
-  /** When omitted, integrity verification is skipped. */
-  sha256?: string;
+  sha256: string;
 }
 
-export const resolveJarDownloadConfig = (preferences: {
+export interface MuleSecurePropertiesPreferences {
+  defaultPassword: string;
   jarDownloadUrl?: string;
   jarSha256?: string;
-}): JarDownloadConfig => {
+}
+
+export const resolveJarDownloadConfig = (
+  preferences: Pick<MuleSecurePropertiesPreferences, "jarDownloadUrl" | "jarSha256">,
+): JarDownloadConfig => {
   const url = preferences.jarDownloadUrl?.trim() || DEFAULT_JAR_DOWNLOAD_URL;
-  const sha256 = preferences.jarSha256?.trim().toLowerCase() || undefined;
+  const configuredSha256 = preferences.jarSha256?.trim().toLowerCase();
+  const sha256 = configuredSha256 || (url === DEFAULT_JAR_DOWNLOAD_URL ? DEFAULT_JAR_SHA256 : undefined);
+  if (!sha256) {
+    throw new Error(ERROR_MESSAGES.JAR_SHA_REQUIRED);
+  }
   return { url, sha256 };
 };
 
@@ -225,11 +236,7 @@ export const doesJarExist = async (): Promise<boolean> => {
   }
 };
 
-export const verifyJarIntegrity = async (expectedSha256?: string): Promise<boolean> => {
-  if (!expectedSha256) {
-    return true;
-  }
-
+export const verifyJarIntegrity = async (expectedSha256: string): Promise<boolean> => {
   try {
     const data = await fs.promises.readFile(JAR_PATH);
     const digest = createHash("sha256").update(data).digest("hex");
@@ -239,7 +246,57 @@ export const verifyJarIntegrity = async (expectedSha256?: string): Promise<boole
   }
 };
 
+interface JarVerificationCache {
+  url: string;
+  sha256: string;
+  size: number;
+  mtimeMs: number;
+}
+
+const getJarFileMetadata = async (): Promise<Pick<JarVerificationCache, "size" | "mtimeMs">> => {
+  const { size, mtimeMs } = await fs.promises.stat(JAR_PATH);
+  return { size, mtimeMs };
+};
+
+const getJarVerificationCacheKey = (url: string): string => `${JAR_VERIFICATION_CACHE_KEY}:${url}`;
+
+const saveJarVerificationCache = async (config: JarDownloadConfig): Promise<void> => {
+  try {
+    const metadata = await getJarFileMetadata();
+    await LocalStorage.setItem(getJarVerificationCacheKey(config.url), JSON.stringify({ ...config, ...metadata }));
+  } catch {
+    // Integrity is still verified; a cache failure only means the next run will hash again.
+  }
+};
+
+const isJarIntegrityVerified = async (config: JarDownloadConfig): Promise<boolean> => {
+  try {
+    const metadata = await getJarFileMetadata();
+    const rawCache = await LocalStorage.getItem<string>(getJarVerificationCacheKey(config.url));
+    if (rawCache) {
+      const cache = JSON.parse(rawCache) as Partial<JarVerificationCache>;
+      if (
+        cache.url === config.url &&
+        cache.sha256 === config.sha256 &&
+        cache.size === metadata.size &&
+        cache.mtimeMs === metadata.mtimeMs
+      ) {
+        return true;
+      }
+    }
+  } catch {
+    // Missing or invalid cache data falls back to hashing the JAR.
+  }
+
+  const verified = await verifyJarIntegrity(config.sha256);
+  if (verified) {
+    await saveJarVerificationCache(config);
+  }
+  return verified;
+};
+
 export const downloadJar = async ({ url, sha256 }: JarDownloadConfig): Promise<void> => {
+  await fs.promises.mkdir(path.dirname(JAR_PATH), { recursive: true });
   const fileStream = fs.createWriteStream(JAR_PATH);
 
   try {
@@ -259,11 +316,12 @@ export const downloadJar = async ({ url, sha256 }: JarDownloadConfig): Promise<v
 
     await pipeline(response, fileStream);
 
-    if (sha256 && !(await verifyJarIntegrity(sha256))) {
+    if (!(await verifyJarIntegrity(sha256))) {
       throw new Error(ERROR_MESSAGES.JAR_INTEGRITY_FAILED);
     }
 
     await LocalStorage.setItem(JAR_SOURCE_URL_KEY, url);
+    await saveJarVerificationCache({ url, sha256 });
   } catch (error) {
     fileStream.destroy();
     try {
@@ -278,7 +336,7 @@ export const downloadJar = async ({ url, sha256 }: JarDownloadConfig): Promise<v
 export const ensureJarAvailable = async (config: JarDownloadConfig): Promise<void> => {
   const storedUrl = await LocalStorage.getItem<string>(JAR_SOURCE_URL_KEY);
   const exists = await doesJarExist();
-  const integrityOk = await verifyJarIntegrity(config.sha256);
+  const integrityOk = exists && (await isJarIntegrityVerified(config));
   const sourceMatches = !storedUrl || storedUrl === config.url;
 
   if (exists && integrityOk && sourceMatches) {
@@ -341,13 +399,22 @@ const isJavaMissingError = (error: unknown): boolean => {
   return code === "ENOENT" || (message.includes("java") && message.includes("not found"));
 };
 
-const execJava = (args: string[]): Promise<string> =>
+export const getJavaExecutableCandidates = (javaHome = process.env.JAVA_HOME): string[] => {
+  const candidates = [
+    javaHome ? path.join(javaHome, "bin", "java") : undefined,
+    "/usr/bin/java",
+    "/opt/homebrew/opt/openjdk/bin/java",
+    "java",
+  ];
+  return Array.from(new Set(candidates.filter((candidate): candidate is string => Boolean(candidate))));
+};
+
+const execJava = (executable: string, args: string[]): Promise<string> =>
   new Promise((resolve, reject) => {
-    // Users install Java in varied locations; resolve via PATH like the CLI would.
     execFile(
-      "java", // NOSONAR typescript:S4036 -- intentional PATH lookup for the system Java binary
+      executable, // NOSONAR typescript:S4036 -- candidates are fixed paths or the system PATH lookup
       ["-cp", JAR_PATH, MAIN_CLASS, ...args],
-      { cwd: HOME_DIR, maxBuffer: 10 * 1024 * 1024, encoding: "utf8" },
+      { cwd: path.dirname(JAR_PATH), maxBuffer: JAVA_MAX_BUFFER_BYTES, encoding: "utf8" },
       (error, stdout) => {
         if (error) {
           reject(error);
@@ -358,15 +425,27 @@ const execJava = (args: string[]): Promise<string> =>
     );
   });
 
-export const runSecurePropertiesTool = async (args: string[]): Promise<string> => {
-  try {
-    return await execJava(args);
-  } catch (error) {
-    if (isJavaMissingError(error)) {
-      throw new Error(ERROR_MESSAGES.JAVA_MISSING);
+const redactToolError = (error: unknown, args: string[]): Error => {
+  let message = getErrorMessage(error);
+  for (const secret of [args[4], args[5]]) {
+    if (secret) {
+      message = message.replaceAll(secret, "[redacted]");
     }
-    throw error;
   }
+  return new Error(message);
+};
+
+export const runSecurePropertiesTool = async (args: string[]): Promise<string> => {
+  for (const executable of getJavaExecutableCandidates()) {
+    try {
+      return await execJava(executable, args);
+    } catch (error) {
+      if (!isJavaMissingError(error)) {
+        throw redactToolError(error, args);
+      }
+    }
+  }
+  throw new Error(ERROR_MESSAGES.JAVA_MISSING);
 };
 
 export const runSecurePropertiesOperation = async (options: SecurePropertiesOptions): Promise<string> =>

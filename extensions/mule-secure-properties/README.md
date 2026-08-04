@@ -4,10 +4,10 @@ Encrypt and decrypt MuleSoft secure property values from Raycast using the offic
 
 ## Requirements
 
-- [Java](https://www.java.com/) 17 or later available on your `PATH` (`java -version`)
+- [Java](https://www.java.com/) 17 or later available through `JAVA_HOME`, a common macOS install location, or your `PATH` (`java -version`)
 - A secure properties key (password) that matches the one configured in your Mule application
 
-On first encrypt or decrypt, the extension downloads the official Java 17 Secure Properties Tool JAR (MuleSoft docs `latest` by default) into your home directory. You can override the download URL — and optionally require a SHA-256 — in Extension Preferences.
+On first encrypt or decrypt, the extension downloads the official Java 17 Secure Properties Tool JAR into Raycast's managed extension support directory. The bundled default SHA-256 pins the MuleSoft release published on November 22, 2024, and every download is verified before execution. If you override the download URL in Extension Preferences, you must also provide the matching SHA-256.
 
 ## Setup
 
@@ -35,6 +35,12 @@ Decrypt a secure property value. Paste either the raw ciphertext or a value wrap
 - **Wrap as ![...]** on encrypt prepares values for YAML/properties files
 - Use **Copy CLI Command** to copy the equivalent `java -cp ... SecurePropertiesTool` invocation
 - Algorithm/mode options are remembered after a successful encrypt or decrypt
+
+## Security Considerations
+
+MuleSoft's tool accepts the password and value only as command-line arguments; it does not provide a stdin or environment-variable input mode. As a result, another local user may be able to see those values in the process list while Java is running. The extension never logs the arguments or includes encrypted/decrypted values in HUD messages.
+
+**Copy CLI Command** includes the password and value by design. Use it only when you understand that the command will be placed on the clipboard and may be saved in your shell history.
 
 ## Related
 

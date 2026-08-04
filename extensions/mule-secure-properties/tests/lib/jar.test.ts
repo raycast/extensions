@@ -2,6 +2,9 @@ import { EventEmitter } from "node:events";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@raycast/api", () => ({
+  environment: {
+    supportPath: "/tmp/mule-secure-properties",
+  },
   LocalStorage: {
     getItem: vi.fn(),
     setItem: vi.fn(),
@@ -26,6 +29,8 @@ vi.mock("node:fs", async () => {
       ...actual,
       promises: {
         access: vi.fn(),
+        mkdir: vi.fn(),
+        stat: vi.fn(),
         unlink: vi.fn(),
         readFile: vi.fn(),
       },
@@ -34,6 +39,8 @@ vi.mock("node:fs", async () => {
     },
     promises: {
       access: vi.fn(),
+      mkdir: vi.fn(),
+      stat: vi.fn(),
       unlink: vi.fn(),
       readFile: vi.fn(),
     },
@@ -53,7 +60,14 @@ import fs from "node:fs";
 import https from "node:https";
 import { pipeline } from "node:stream/promises";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { DEFAULT_JAR_DOWNLOAD_URL, SUCCESS_MESSAGES } from "../../src/constants";
+import {
+  DEFAULT_JAR_DOWNLOAD_URL,
+  DEFAULT_JAR_SHA256,
+  JAR_PATH,
+  JAR_SOURCE_URL_KEY,
+  JAR_VERIFICATION_CACHE_KEY,
+  SUCCESS_MESSAGES,
+} from "../../src/constants";
 import {
   doesJarExist,
   downloadJar,
@@ -81,11 +95,12 @@ const mockSuccessfulGet = () => {
 };
 
 describe("resolveJarDownloadConfig", () => {
-  it("defaults to the official latest URL with no SHA", () => {
+  it("defaults to the official URL and pinned SHA", () => {
     expect(resolveJarDownloadConfig({})).toEqual({
       url: DEFAULT_JAR_DOWNLOAD_URL,
-      sha256: undefined,
+      sha256: KNOWN_SHA,
     });
+    expect(DEFAULT_JAR_SHA256).toBe(KNOWN_SHA);
   });
 
   it("uses preference URL and normalizes SHA", () => {
@@ -98,6 +113,16 @@ describe("resolveJarDownloadConfig", () => {
       url: "https://example.com/tool.jar",
       sha256: KNOWN_SHA,
     });
+  });
+
+  it("requires a SHA for a custom download URL", () => {
+    expect(() => resolveJarDownloadConfig({ jarDownloadUrl: "https://example.com/tool.jar" })).toThrow("SHA-256");
+  });
+});
+
+describe("JAR_PATH", () => {
+  it("stores the downloaded tool in Raycast's managed support directory", () => {
+    expect(JAR_PATH).toBe("/tmp/mule-secure-properties/secure-properties-tool.jar");
   });
 });
 
@@ -121,11 +146,6 @@ describe("verifyJarIntegrity", () => {
   beforeEach(() => {
     vi.mocked(fs.promises.readFile).mockReset();
     vi.mocked(createHash).mockReset();
-  });
-
-  it("skips hashing when no expected digest is configured", async () => {
-    await expect(verifyJarIntegrity()).resolves.toBe(true);
-    expect(fs.promises.readFile).not.toHaveBeenCalled();
   });
 
   it("returns true when the digest matches", async () => {
@@ -155,11 +175,13 @@ describe("downloadJar", () => {
     vi.mocked(fs.promises.readFile).mockResolvedValue(Buffer.from("jar-bytes"));
   });
 
-  it("writes a successful response without requiring a SHA", async () => {
+  it("verifies a successful response against the required SHA", async () => {
     mockSuccessfulGet();
+    mockDigest(KNOWN_SHA);
 
-    await expect(downloadJar({ url: DEFAULT_JAR_DOWNLOAD_URL })).resolves.toBeUndefined();
+    await expect(downloadJar({ url: DEFAULT_JAR_DOWNLOAD_URL, sha256: KNOWN_SHA })).resolves.toBeUndefined();
     expect(pipeline).toHaveBeenCalled();
+    expect(fs.promises.readFile).toHaveBeenCalled();
     expect(LocalStorage.setItem).toHaveBeenCalled();
   });
 
@@ -170,9 +192,7 @@ describe("downloadJar", () => {
     vi.mocked(fs.promises.unlink).mockResolvedValue(undefined);
     mockSuccessfulGet();
 
-    await expect(downloadJar({ url: DEFAULT_JAR_DOWNLOAD_URL, sha256: KNOWN_SHA })).rejects.toThrow(
-      "SHA-256 check",
-    );
+    await expect(downloadJar({ url: DEFAULT_JAR_DOWNLOAD_URL, sha256: KNOWN_SHA })).rejects.toThrow("SHA-256 check");
     expect(destroy).toHaveBeenCalled();
     expect(fs.promises.unlink).toHaveBeenCalled();
   });
@@ -189,7 +209,7 @@ describe("downloadJar", () => {
       return request as never;
     });
 
-    await expect(downloadJar({ url: DEFAULT_JAR_DOWNLOAD_URL })).rejects.toThrow("Status code: 404");
+    await expect(downloadJar({ url: DEFAULT_JAR_DOWNLOAD_URL, sha256: KNOWN_SHA })).rejects.toThrow("Status code: 404");
     expect(destroy).toHaveBeenCalled();
     expect(fs.promises.unlink).toHaveBeenCalled();
   });
@@ -199,6 +219,7 @@ describe("ensureJarAvailable", () => {
   beforeEach(() => {
     vi.mocked(fs.promises.access).mockReset();
     vi.mocked(fs.promises.readFile).mockReset();
+    vi.mocked(fs.promises.stat).mockReset();
     vi.mocked(showToast).mockReset();
     vi.mocked(https.get).mockReset();
     vi.mocked(pipeline).mockReset();
@@ -213,10 +234,35 @@ describe("ensureJarAvailable", () => {
   it("does nothing when a jar already exists for the same source URL", async () => {
     vi.mocked(fs.promises.access).mockResolvedValue(undefined);
     vi.mocked(LocalStorage.getItem).mockResolvedValue(DEFAULT_JAR_DOWNLOAD_URL);
+    mockDigest(KNOWN_SHA);
 
-    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL });
+    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL, sha256: KNOWN_SHA });
 
     expect(showToast).not.toHaveBeenCalled();
+    expect(https.get).not.toHaveBeenCalled();
+  });
+
+  it("skips re-hashing when the verified file metadata is unchanged", async () => {
+    vi.mocked(fs.promises.access).mockResolvedValue(undefined);
+    vi.mocked(fs.promises.stat).mockResolvedValue({ size: 123, mtimeMs: 456 } as never);
+    vi.mocked(LocalStorage.getItem).mockImplementation(async (key) => {
+      if (key === JAR_SOURCE_URL_KEY) {
+        return DEFAULT_JAR_DOWNLOAD_URL;
+      }
+      if (key === `${JAR_VERIFICATION_CACHE_KEY}:${DEFAULT_JAR_DOWNLOAD_URL}`) {
+        return JSON.stringify({
+          url: DEFAULT_JAR_DOWNLOAD_URL,
+          sha256: KNOWN_SHA,
+          size: 123,
+          mtimeMs: 456,
+        });
+      }
+      return undefined;
+    });
+
+    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL, sha256: KNOWN_SHA });
+
+    expect(fs.promises.readFile).not.toHaveBeenCalled();
     expect(https.get).not.toHaveBeenCalled();
   });
 
@@ -224,8 +270,9 @@ describe("ensureJarAvailable", () => {
     vi.mocked(fs.promises.access).mockRejectedValue(new Error("missing"));
     vi.mocked(LocalStorage.getItem).mockResolvedValue(undefined);
     mockSuccessfulGet();
+    mockDigest(KNOWN_SHA);
 
-    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL });
+    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL, sha256: KNOWN_SHA });
 
     expect(showToast).toHaveBeenCalledWith({
       style: Toast.Style.Success,
@@ -238,8 +285,9 @@ describe("ensureJarAvailable", () => {
     vi.mocked(fs.promises.access).mockResolvedValue(undefined);
     vi.mocked(LocalStorage.getItem).mockResolvedValue("https://example.com/old.jar");
     mockSuccessfulGet();
+    mockDigest(KNOWN_SHA);
 
-    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL });
+    await ensureJarAvailable({ url: DEFAULT_JAR_DOWNLOAD_URL, sha256: KNOWN_SHA });
 
     expect(https.get).toHaveBeenCalled();
     expect(showToast).toHaveBeenCalled();

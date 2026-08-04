@@ -1,16 +1,19 @@
-import os from "node:os";
 import path from "node:path";
+import { environment } from "@raycast/api";
 
-export const HOME_DIR = os.homedir();
-export const JAR_NAME = "secure-properties-tool.jar";
-export const JAR_PATH = path.join(HOME_DIR, JAR_NAME);
+const JAR_NAME = "secure-properties-tool.jar";
+export const JAR_PATH = path.join(environment.supportPath, JAR_NAME);
 export const MAIN_CLASS = "com.mulesoft.tools.SecurePropertiesTool";
-/** Official Java 17 tool from MuleSoft docs (override via Extension Preferences). */
+/** Official Java 17 tool published by MuleSoft on November 22, 2024. */
 export const DEFAULT_JAR_DOWNLOAD_URL =
   "https://docs.mulesoft.com/mule-runtime/latest/_attachments/secure-properties-tool-j17.jar";
+export const DEFAULT_JAR_SHA256 = "802bb7ead7b5a5811cb69333fb05ec6dd507c615058663553c87c84ae404437c";
 
 export const FORM_SETTINGS_KEY = "secure-properties-form";
 export const JAR_SOURCE_URL_KEY = "secure-properties-jar-source-url";
+export const JAR_VERIFICATION_CACHE_KEY = "secure-properties-jar-verification";
+/** Allows verbose Java failures without truncating normal tool output. */
+export const JAVA_MAX_BUFFER_BYTES = 10 * 1024 * 1024;
 
 /** Algorithms supported out of the box by the Secure Properties Tool. */
 export const ALGORITHMS = [
@@ -19,6 +22,7 @@ export const ALGORITHMS = [
   { value: "DES", label: "DES" },
   { value: "DESede", label: "DESede" },
   { value: "RC2", label: "RC2" },
+  // "RCA" is intentional and matches MuleSoft's Secure Properties Tool documentation.
   { value: "RCA", label: "RCA" },
 ] as const;
 
@@ -33,10 +37,11 @@ export const MODES = [
 export const ERROR_MESSAGES = {
   REQUIRED_INPUT: "Enter a value to process.",
   PASSWORD_NOT_SET: "No password set. Enter one below or configure the default in preferences.",
-  JAVA_MISSING: "Java was not found. Install Java 17+ and ensure `java` is on your PATH.",
+  JAVA_MISSING: "Java was not found. Install Java 17+ and configure JAVA_HOME or add `java` to your PATH.",
   JAR_DOWNLOAD_FAILED: "Could not download the Secure Properties Tool JAR.",
+  JAR_SHA_REQUIRED: "A SHA-256 digest is required when using a custom Secure Properties Tool URL.",
   JAR_INTEGRITY_FAILED:
-    "The Secure Properties Tool download failed the SHA-256 check. Confirm the Expected JAR SHA-256 preference or clear it to skip verification.",
+    "The Secure Properties Tool download failed the SHA-256 check. Confirm the Expected JAR SHA-256 preference.",
   HASH_NOT_SUPPORTED: "The Secure Properties Tool does not support the # character in the value.",
 } as const;
 

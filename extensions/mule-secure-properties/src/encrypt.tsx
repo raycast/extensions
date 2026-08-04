@@ -20,6 +20,7 @@ import {
   type FormSettings,
   getPasswordFieldInfo,
   handleOperationError,
+  type MuleSecurePropertiesPreferences,
   resolveJarDownloadConfig,
   resolvePassword,
   runSecurePropertiesOperation,
@@ -39,6 +40,8 @@ interface EncryptionForm {
   wrapOutput: boolean;
 }
 
+const preferences = getPreferenceValues<MuleSecurePropertiesPreferences>();
+
 export default function Command() {
   const { settings, isLoading, persist } = usePersistedFormSettings();
 
@@ -56,7 +59,6 @@ const EncryptForm = ({
   settings: FormSettings;
   persist: (partial: Partial<FormSettings>) => Promise<void>;
 }>) => {
-  const preferences = getPreferenceValues<Preferences>();
   const [isWorking, setIsWorking] = useState(false);
 
   const { handleSubmit, itemProps, values, reset, setValue } = useForm<EncryptionForm>({
@@ -105,7 +107,7 @@ const EncryptForm = ({
 
         const finalOutput = wrapOutput ? wrapEncryptedValue(output) : output;
         await Clipboard.copy(finalOutput);
-        await showHUD(`${SUCCESS_MESSAGES.ENCRYPT_SUCCESS}: ${finalOutput}`);
+        await showHUD(SUCCESS_MESSAGES.ENCRYPT_SUCCESS);
         reset({ password: preferences.defaultPassword, algorithm, mode, useRandomIV: randomIV, wrapOutput });
         await closeMainWindow();
       } catch (error) {

@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@raycast/api", () => ({
+  environment: {
+    supportPath: "/tmp/mule-secure-properties",
+  },
   showToast: vi.fn(),
   Toast: { Style: { Failure: "failure", Success: "success" } },
 }));
@@ -51,7 +54,22 @@ describe("handleOperationError", () => {
       title: "Decryption Error",
       message: expect.stringContaining("Invalid Base64 encoding"),
     });
-    expect(consoleError).toHaveBeenCalledOnce();
+    expect(consoleError).toHaveBeenCalledWith("Decryption error: Base64 decode failed");
+
+    consoleError.mockRestore();
+  });
+
+  it("does not log a raw error object", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const error = Object.assign(new Error("Tool execution failed."), {
+      command: "java password plaintext",
+      stderr: "password plaintext",
+    });
+
+    await handleOperationError(error, "Encryption");
+
+    expect(consoleError).toHaveBeenCalledWith("Encryption error: Tool execution failed.");
+    expect(consoleError).not.toHaveBeenCalledWith(expect.anything(), error);
 
     consoleError.mockRestore();
   });

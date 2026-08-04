@@ -21,6 +21,7 @@ import {
   type FormSettings,
   getPasswordFieldInfo,
   handleOperationError,
+  type MuleSecurePropertiesPreferences,
   resolveJarDownloadConfig,
   resolvePassword,
   runSecurePropertiesOperation,
@@ -37,6 +38,8 @@ interface DecryptionForm {
   useRandomIV: boolean;
   stripWrapper: boolean;
 }
+
+const preferences = getPreferenceValues<MuleSecurePropertiesPreferences>();
 
 export default function Command() {
   const { settings, isLoading, persist } = usePersistedFormSettings();
@@ -55,7 +58,6 @@ const DecryptForm = ({
   settings: FormSettings;
   persist: (partial: Partial<FormSettings>) => Promise<void>;
 }>) => {
-  const preferences = getPreferenceValues<Preferences>();
   const [isWorking, setIsWorking] = useState(false);
 
   const { handleSubmit, itemProps, values, reset, setValue } = useForm<DecryptionForm>({
@@ -98,7 +100,7 @@ const DecryptForm = ({
         await persist({ algorithm, mode, useRandomIV: randomIV, stripWrapper });
 
         await Clipboard.copy(output);
-        await showHUD(`${SUCCESS_MESSAGES.DECRYPT_SUCCESS}: ${output}`);
+        await showHUD(SUCCESS_MESSAGES.DECRYPT_SUCCESS);
         reset({ password: preferences.defaultPassword, algorithm, mode, useRandomIV: randomIV, stripWrapper });
         await closeMainWindow();
       } catch (error) {

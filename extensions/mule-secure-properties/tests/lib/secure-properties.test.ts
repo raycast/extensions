@@ -9,6 +9,7 @@ import { execFile } from "node:child_process";
 import {
   buildSecurePropertiesArgs,
   cleanEncryptedText,
+  getJavaExecutableCandidates,
   runSecurePropertiesOperation,
   runSecurePropertiesTool,
 } from "../../src/utils";
@@ -136,7 +137,7 @@ describe("runSecurePropertiesTool", () => {
     await expect(runSecurePropertiesTool(["string", "encrypt", "AES", "CBC", "key", "secret"])).resolves.toBe("RESULT");
 
     expect(mockedExecFile).toHaveBeenCalledWith(
-      "java",
+      expect.stringMatching(/java$/),
       expect.arrayContaining(["-cp", expect.any(String), "com.mulesoft.tools.SecurePropertiesTool"]),
       expect.objectContaining({ cwd: expect.any(String), encoding: "utf8" }),
       expect.any(Function),
@@ -165,6 +166,25 @@ describe("runSecurePropertiesTool", () => {
     await expect(runSecurePropertiesTool(["string", "encrypt", "AES", "CBC", "key", "secret"])).rejects.toThrow(
       "cipher failure",
     );
+  });
+
+  it("redacts the password and input from tool errors", async () => {
+    mockExecFailure(new Error("Command failed: java string encrypt AES CBC my-password my-plaintext"));
+
+    await expect(
+      runSecurePropertiesTool(["string", "encrypt", "AES", "CBC", "my-password", "my-plaintext"]),
+    ).rejects.not.toThrow(/my-password|my-plaintext/);
+  });
+});
+
+describe("getJavaExecutableCandidates", () => {
+  it("checks JAVA_HOME and common macOS installations before PATH", () => {
+    expect(getJavaExecutableCandidates("/custom/jdk")).toEqual([
+      "/custom/jdk/bin/java",
+      "/usr/bin/java",
+      "/opt/homebrew/opt/openjdk/bin/java",
+      "java",
+    ]);
   });
 });
 

@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@raycast/api", () => ({
+  environment: {
+    supportPath: "/tmp/mule-secure-properties",
+  },
   LocalStorage: {
     getItem: vi.fn(),
     setItem: vi.fn(),
