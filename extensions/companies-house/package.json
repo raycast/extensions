@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "companies-house",
+  "title": "Companies House",
+  "description": "Search the UK Companies House register — companies, officers, filings and charges.",
+  "icon": "extension-icon.png",
+  "author": "aic",
+  "categories": ["Data", "Finance"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "search-companies",
+      "title": "Search Companies",
+      "subtitle": "Companies House",
+      "description": "Search for UK companies by name or number.",
+      "mode": "view",
+      "keywords": ["company", "business", "ltd", "limited", "registration"]
+    },
+    {
+      "name": "search-officers",
+      "title": "Search Officers",
+      "subtitle": "Companies House",
+      "description": "Search for company officers and directors by name.",
+      "mode": "view",
+      "keywords": ["director", "officer", "secretary", "person", "appointment"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Companies House REST API key. Create a free application key in the developer dashboard.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Your Companies House API key",
+      "link": "https://developer.company-information.service.gov.uk/manage-applications"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-companies",
+      "title": "Search Companies",
+      "description": "Search UK companies by name or number."
+    },
+    {
+      "name": "get-company",
+      "title": "Get Company",
+      "description": "Get a company's full Companies House profile by its company number."
+    },
+    {
+      "name": "get-officers",
+      "title": "Get Officers",
+      "description": "List a company's officers (directors, secretaries, members) by company number."
+    },
+    {
+      "name": "search-officers",
+      "title": "Search Officers",
+      "description": "Search for company officers and directors by name."
+    },
+    {
+      "name": "get-officer-appointments",
+      "title": "Get Officer Appointments",
+      "description": "List all appointments for an officer across companies, by officer id."
+    },
+    {
+      "name": "get-filing-history",
+      "title": "Get Filing History",
+      "description": "List a company's recent filings by company number."
+    },
+    {
+      "name": "get-charges",
+      "title": "Get Charges",
+      "description": "List charges registered against a company by company number."
+    },
+    {
+      "name": "get-persons-with-significant-control",
+      "title": "Get Persons with Significant Control",
+      "description": "List a company's persons with significant control (beneficial owners) by company number."
+    }
+  ],
+  "ai": {
+    "instructions": "Use these tools to answer questions about UK companies and their officers using Companies House data. A company number is 8 characters (eight digits, or two letters followed by six digits, e.g. OC394454). To look something up, search by name first, then pass the returned company number or officer id to the detail tools. Only an officer's birth month and year are ever available.",
+    "evals": [
+      {
+        "input": "@companies-house what is the company number for Monzo Bank?",
+        "mocks": {
+          "search-companies": [{ "company_number": "09446231", "name": "MONZO BANK LIMITED", "status": "Active" }]
+        },
+        "expected": [{ "callsTool": "search-companies" }, { "includes": "09446231" }]
+      },
+      {
+        "input": "@companies-house who are the current directors of company 09446231?",
+        "mocks": {
+          "get-officers": [{ "name": "Doe, Jane", "role": "Director", "status": "Active" }]
+        },
+        "expected": [{ "callsTool": "get-officers" }, { "includes": "Jane" }]
+      },
+      {
+        "input": "@companies-house who are the beneficial owners of company OC394454?",
+        "mocks": {
+          "get-persons-with-significant-control": [
+            { "name": "Smith, John", "kind": "Individual", "natures_of_control": ["Ownership of shares – 75% or more"] }
+          ]
+        },
+        "expected": [{ "callsTool": "get-persons-with-significant-control" }, { "includes": "John" }]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}
