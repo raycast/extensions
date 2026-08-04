@@ -86,7 +86,7 @@ export function NetworkListDetail({
 
           <List.Item.Detail.Metadata.Separator />
 
-          <List.Item.Detail.Metadata.Label title="Band" text={network.channel_band || "—"} icon={Icon.Antenna} />
+          <List.Item.Detail.Metadata.Label title="Band" text={network.channel_band || "—"} icon={Icon.Globe} />
           <List.Item.Detail.Metadata.Label title="Channel" text={formatChannel(network)} icon={Icon.Hashtag} />
           <List.Item.Detail.Metadata.Label title="Security" text={network.security || "—"} icon={Icon.Lock} />
           {network.phy_mode ? (

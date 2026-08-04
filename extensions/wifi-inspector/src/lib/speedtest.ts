@@ -50,7 +50,6 @@ async function measureLatencyMs(samples = 5): Promise<number> {
     const started = performance.now();
     const response = await fetch(`${DOWNLOAD_URL}?bytes=0&r=${Date.now()}-${i}`, {
       method: "GET",
-      cache: "no-store",
     });
     if (!response.ok) {
       throw new SpeedTestError(`Latency probe failed (${response.status}).`);
@@ -67,7 +66,6 @@ async function measureDownloadMbps(byteSizes: number[]): Promise<number> {
     const started = performance.now();
     const response = await fetch(`${DOWNLOAD_URL}?bytes=${size}&r=${Date.now()}`, {
       method: "GET",
-      cache: "no-store",
     });
     if (!response.ok) {
       throw new SpeedTestError(`Download test failed (${response.status}).`);
@@ -86,7 +84,6 @@ async function measureUploadMbps(byteSizes: number[]): Promise<number> {
     const started = performance.now();
     const response = await fetch(`${UPLOAD_URL}?r=${Date.now()}`, {
       method: "POST",
-      cache: "no-store",
       headers: { "Content-Type": "application/octet-stream" },
       body,
     });
