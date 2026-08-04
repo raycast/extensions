@@ -1,5 +1,12 @@
 # System Monitor Changelog
 
+## [Disk Tab] - {PR_MERGE_DATE}
+
+- Add a Disk tab with capacity, per-volume breakdown, APFS volume details and live disk I/O rates via `iostat`
+- Show SMART disk health, medium type and physical disk details
+- Distinguish "no throughput sample yet" from "zero throughput" so the first render never claims a fabricated 0 MB/s
+- Poll disk throughput only while the Disk tab is active, like the other tabs
+
 ## [Apple Silicon Fan Monitoring] - 2026-08-04
 
 - Add fan RPM readings to the CPU view via a bundled SMC reader helper (`tools/smc-fan-reader.m`), following the same pattern as the existing temperature reader

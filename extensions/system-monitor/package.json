@@ -143,6 +143,10 @@
           "value": "memory"
         },
         {
+          "title": "Disk",
+          "value": "disk"
+        },
+        {
           "title": "Power",
           "value": "power"
         },

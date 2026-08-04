@@ -155,11 +155,13 @@ export function MetadataLabel({
   text,
   percentMode,
   colorMemoryFromPercent,
+  icon,
 }: {
   title: string;
   text?: string | null;
   percentMode?: PercentDisplayMode;
   colorMemoryFromPercent?: string;
+  icon?: React.ComponentProps<typeof List.Item.Detail.Metadata.Label>["icon"];
 }) {
   let resolved: MetadataText;
 
@@ -173,7 +175,7 @@ export function MetadataLabel({
     resolved = metadataText(text);
   }
 
-  return <List.Item.Detail.Metadata.Label title={title} text={resolved} />;
+  return <List.Item.Detail.Metadata.Label title={title} text={resolved} icon={icon} />;
 }
 
 export function MetadataSection({ title }: { title: string }) {

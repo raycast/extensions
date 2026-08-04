@@ -22,27 +22,54 @@ function readField(output: string, label: string): string {
   return output.match(new RegExp(`^[ \\t]*${label}:[ \\t]*(.+)$`, "m"))?.[1]?.trim() ?? "Unknown";
 }
 
-export async function calculateDiskStorage() {
-  const output = await execf("/bin/df", ["-kP"]);
-  const lines = output.split("\n").slice(1);
+export type DiskStorageEntry = DiskInterface & {
+  /**
+   * The volume lives on a different device than the boot volume — an external
+   * drive or a secondary disk. Derived by comparing `df` device numbers, so
+   * it needs no extra subprocess.
+   */
+  isExternal: boolean;
+};
 
-  return lines
+function deviceNumber(filesystem: string): number | null {
+  const match = filesystem.match(/^\/dev\/disk(\d+)/);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+/** Parse `df -kP` output into the volume list. Exported for tests. */
+export function parseDiskStorage(output: string): DiskStorageEntry[] {
+  const rows = output
+    .split("\n")
+    .slice(1)
     .map((line) => {
       const parts = line.trim().split(/\s+/);
       const mount = parts.slice(5).join(" ");
       const sizeKB = parseInt(parts[1], 10);
       const availKB = parseInt(parts[3], 10);
-      return { mount, sizeKB, availKB };
+      return { device: parts[0], mount, sizeKB, availKB };
     })
     .filter((d) => d.mount === "/" || d.mount.startsWith("/Volumes"))
-    .map((d) => {
-      const diskName = d.mount === "/" ? "Macintosh HD" : d.mount.split("/").pop();
-      const totalSize = (d.sizeKB / 1024 / 1024).toFixed(2);
-      const totalAvailableStorage = (d.availKB / 1024 / 1024).toFixed(2);
-      const usedStorage = (+totalSize - +totalAvailableStorage).toFixed(2);
+    // The mounted Recovery system volume shares the boot container, so its
+    // size and free space duplicate the boot volume's — showing it reads as
+    // the same disk counted twice.
+    .filter((d) => d.mount !== "/Volumes/Recovery");
 
-      return { diskName, totalSize, totalAvailableStorage, usedStorage } as DiskInterface;
-    });
+  const bootDevice = deviceNumber(rows.find((d) => d.mount === "/")?.device ?? "");
+
+  return rows.map((d) => {
+    const diskName = d.mount === "/" ? "Macintosh HD" : d.mount.split("/").pop();
+    const totalSize = (d.sizeKB / 1024 / 1024).toFixed(2);
+    const totalAvailableStorage = (d.availKB / 1024 / 1024).toFixed(2);
+    const usedStorage = (+totalSize - +totalAvailableStorage).toFixed(2);
+    const device = deviceNumber(d.device);
+    const isExternal = bootDevice !== null && device !== null && device !== bootDevice;
+
+    return { diskName, totalSize, totalAvailableStorage, usedStorage, isExternal } as DiskStorageEntry;
+  });
+}
+
+export async function calculateDiskStorage(): Promise<DiskStorageEntry[]> {
+  return parseDiskStorage(await execf("/bin/df", ["-kP"]));
 }
 
 export async function getRootVolumeDetails(): Promise<DiskVolumeDetails> {
