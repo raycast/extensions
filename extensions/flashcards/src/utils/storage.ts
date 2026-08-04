@@ -14,14 +14,20 @@ export async function getAllCards(): Promise<Flashcard[]> {
 }
 
 export async function saveCard(card: Flashcard): Promise<void> {
-  const cards = await getAllCards();
-  const idx = cards.findIndex((c) => c.id === card.id);
-  if (idx >= 0) {
-    cards[idx] = card;
-  } else {
-    cards.push(card);
+  await saveCards([card]);
+}
+
+export async function saveCards(cards: Flashcard[]): Promise<void> {
+  const existingCards = await getAllCards();
+  for (const card of cards) {
+    const idx = existingCards.findIndex((existing) => existing.id === card.id);
+    if (idx >= 0) {
+      existingCards[idx] = card;
+    } else {
+      existingCards.push(card);
+    }
   }
-  await LocalStorage.setItem(CARDS_KEY, JSON.stringify(cards));
+  await LocalStorage.setItem(CARDS_KEY, JSON.stringify(existingCards));
 }
 
 export async function deleteCard(id: string): Promise<void> {
@@ -32,7 +38,7 @@ export async function deleteCard(id: string): Promise<void> {
   );
 }
 
-/** Löscht alle gespeicherten Karteikarten. */
+/** Delete all stored flashcards. */
 export async function deleteAllCards(): Promise<void> {
   await LocalStorage.setItem(CARDS_KEY, JSON.stringify([]));
 }

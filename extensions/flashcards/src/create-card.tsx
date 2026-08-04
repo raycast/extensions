@@ -50,7 +50,7 @@ export default function CreateCard() {
         title: "Flashcard saved successfully",
         message: `"${card.front}"`,
       });
-      // Formular schließen und zurück zur Hauptansicht
+      // Close the form and return to the main view.
       await popToRoot();
     } catch (e) {
       await showToast({
@@ -81,7 +81,7 @@ export default function CreateCard() {
       />
       <Form.Separator />
 
-      {/* ── Standard-Karte: Schritte ── */}
+      {/* ── Standard card: steps ── */}
       <Form.Description
         title="Standard Flashcard Syntax"
         text={[
@@ -104,7 +104,7 @@ export default function CreateCard() {
 
       <Form.Separator />
 
-      {/* ── Multiple-Choice: Schritte ── */}
+      {/* ── Multiple-choice: steps ── */}
       <Form.Description
         title=""
         text={[
@@ -133,7 +133,7 @@ export default function CreateCard() {
 
       <Form.Separator />
 
-      {/* ── Tag-Kategorien ── */}
+      {/* ── Tag categories ── */}
       <Form.Description
         title="Tags & Categories"
         text="To assign tags to a card, write them space-separated at the very bottom of the card starting with a hash symbol (e.g. #tag1 #tag2). Standardize on lowercase alphanumeric characters."

@@ -9,6 +9,7 @@ import {
   Alert,
   confirmAlert,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { Flashcard } from "./types";
@@ -175,11 +176,14 @@ export default function ListCards() {
             }
             actions={
               <ActionPanel>
-                {/* Tags bearbeiten – öffnet dediziertes Formular */}
+                {/* Edit tags in the dedicated form. */}
                 <Action
                   title="Edit Tags"
                   icon={Icon.Tag}
-                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd"], key: "t" },
+                    Windows: { modifiers: ["ctrl"], key: "t" },
+                  }}
                   onAction={() =>
                     push(<EditTags card={card} onSaved={loadCards} />)
                   }
@@ -188,20 +192,22 @@ export default function ListCards() {
                   title="Delete"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => handleDelete(card)}
                 />
-                <Action
-                  title="Delete All"
-                  icon={Icon.XMarkCircle}
-                  style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
-                  onAction={handleDeleteAll}
-                />
+                <ActionPanel.Section title="Danger Zone">
+                  <Action
+                    title="Delete All"
+                    icon={Icon.XMarkCircle}
+                    style={Action.Style.Destructive}
+                    shortcut={Keyboard.Shortcut.Common.RemoveAll}
+                    onAction={handleDeleteAll}
+                  />
+                </ActionPanel.Section>
                 <Action
                   title="Refresh List"
                   icon={Icon.RotateClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                   onAction={loadCards}
                 />
               </ActionPanel>

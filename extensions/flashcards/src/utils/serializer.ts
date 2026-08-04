@@ -1,42 +1,42 @@
 import { Flashcard } from "../types";
 
 /**
- * Konvertiert eine einzelne Karteikarte ins Markdown-Format.
+ * Convert one flashcard to Markdown.
  *
- * Standard:   Frage\n==\nAntwort\n#tags | -
- * MC:         Frage\n==<\n1: Opt\n…\n--\ncorrect: N\n#tags | -
+ * Standard:   Question\n==\nAnswer\n#tags | -
+ * MC:         Question\n==<\n1: Option\n…\n--\ncorrect: N\n#tags | -
  */
 function cardToMarkdown(card: Flashcard): string {
   const lines: string[] = [];
 
-  // Frage / Vorderseite
+  // Question / front side.
   lines.push(card.front);
 
   if (card.type === "multiple-choice") {
-    // MC-Trenner
+    // Multiple-choice separator.
     lines.push("==<");
 
-    // Optionen
+    // Options.
     for (const opt of card.options ?? []) {
       lines.push(`${opt.id}: ${opt.text}`);
     }
 
-    // Trenner zur korrekten Antwort
+    // Separator for the correct answer.
     lines.push("--");
 
-    // Korrekte Antwort - standardmäßig immer englisch "correct" für robuste Round-Trips
+    // Use the English "correct" keyword for reliable round trips.
     if (card.correctOption !== undefined) {
       lines.push(`correct: ${card.correctOption}`);
     }
   } else {
-    // Standard-Trenner
+    // Standard separator.
     lines.push("==");
 
-    // Antwort / Rückseite
+    // Answer / back side.
     lines.push(card.back ?? "");
   }
 
-  // Tags oder Platzhalter
+  // Tags or placeholder.
   if (card.tags.length > 0) {
     lines.push(card.tags.map((t) => `#${t}`).join(" "));
   } else {
@@ -47,8 +47,8 @@ function cardToMarkdown(card: Flashcard): string {
 }
 
 /**
- * Serialisiert ein Array von Karteikarten ins Markdown-Format.
- * Karten werden durch "---" getrennt.
+ * Serialize an array of flashcards to Markdown.
+ * Cards are separated by "---".
  */
 export function cardsToMarkdown(cards: Flashcard[]): string {
   return cards.map((c) => cardToMarkdown(c)).join("\n---\n");

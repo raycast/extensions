@@ -10,9 +10,9 @@ import { useEffect, useState, useCallback } from "react";
 import { Flashcard } from "./types";
 import { getAllCards } from "./utils/storage";
 
-// ── Karten-Detail-Ansicht für einen Tag ──────────────────────────────────────
+// ── Card detail view for a tag ───────────────────────────────────────────────
 
-// Erstellt die Detail-Markdown-Ansicht einer Karte
+// Build the Markdown detail view for a card.
 function cardDetailMarkdown(card: Flashcard): string {
   if (card.type === "standard") {
     return `## Answer\n\n${card.back || "—"}`;
@@ -24,7 +24,7 @@ function cardDetailMarkdown(card: Flashcard): string {
   return `## Options\n\n${lines.join("\n\n")}`;
 }
 
-// Zeigt alle Karten für ein bestimmtes Tag an
+// Show all cards for a specific tag.
 function CardsForTag({ tag, cards }: { tag: string; cards: Flashcard[] }) {
   const filtered = cards.filter((c) => c.tags.includes(tag));
 
@@ -57,9 +57,9 @@ function CardsForTag({ tag, cards }: { tag: string; cards: Flashcard[] }) {
   );
 }
 
-// ── Haupt-Tag-Liste ───────────────────────────────────────────────────────────
+// ── Main tag list ────────────────────────────────────────────────────────────
 
-// Hauptkomponente zur Anzeige aller Tags
+// Main component for displaying all tags.
 export default function Tags() {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -75,7 +75,7 @@ export default function Tags() {
     loadCards();
   }, [loadCards]);
 
-  // Alle Tags mit Kartenanzahl berechnen
+  // Calculate every tag and its card count.
   const tagMap = cards.reduce<Record<string, number>>((acc, card) => {
     card.tags.forEach((tg) => {
       acc[tg] = (acc[tg] ?? 0) + 1;
@@ -85,7 +85,7 @@ export default function Tags() {
 
   const tags = Object.entries(tagMap).sort(([a], [b]) => a.localeCompare(b));
 
-  // Karten ohne Tag
+  // Cards without tags.
   const untagged = cards.filter((c) => c.tags.length === 0);
 
   return (

@@ -6,6 +6,7 @@ import {
   Toast,
   Icon,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Flashcard } from "./types";
@@ -13,33 +14,33 @@ import { saveCard, getAllTags } from "./utils/storage";
 
 interface Props {
   card: Flashcard;
-  /** Wird nach dem Speichern aufgerufen, um die Elternliste zu aktualisieren. */
+  /** Called after saving to refresh the parent list. */
   onSaved?: () => void;
 }
 
 export default function EditTags({ card, onSaved }: Props) {
   const { pop } = useNavigation();
 
-  // Tags mit # vorformatiert als Standardwert anzeigen
+  // Show tags with # prefixes as the default value.
   const [tagInput, setTagInput] = useState(
     card.tags.map((tg) => `#${tg}`).join(" "),
   );
   const [existingTags, setExistingTags] = useState<string[]>([]);
 
-  // Bereits verwendete Tags aus dem Storage laden (als Vorschläge)
+  // Load existing tags from storage as suggestions.
   useEffect(() => {
     getAllTags().then(setExistingTags);
   }, []);
 
-  // Hilfetext: bereits verwendete Tags anzeigen
+  // Show existing tags in the help text.
   const suggestionsText =
     existingTags.length > 0
       ? "Already used tags:\n" + existingTags.map((tg) => `#${tg}`).join("  ")
       : "No tags created yet. Use `#tag1 #tag2` to get started.";
 
   async function handleSubmit(values: { tags: string }) {
-    // Tags aus der Eingabe parsen – Leerzeichen- oder Komma-getrennt, mit oder ohne #
-    // Normalisierung: Kleinschreibung + Duplikate entfernen
+    // Parse tags separated by spaces or commas, with or without # prefixes.
+    // Normalize to lowercase and remove duplicates.
     const raw = values.tags.trim();
     const parsed: string[] =
       raw.length === 0
@@ -89,17 +90,17 @@ export default function EditTags({ card, onSaved }: Props) {
           <Action
             title="Cancel"
             icon={Icon.XMarkCircle}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={Keyboard.Shortcut.Common.Pin}
             onAction={pop}
           />
         </ActionPanel>
       }
     >
-      {/* Karten-Vorschau */}
+      {/* Card preview */}
       <Form.Description title="Flashcard" text={card.front} />
       <Form.Separator />
 
-      {/* Tag-Eingabe */}
+      {/* Tag input */}
       <Form.TextField
         id="tags"
         title="Tags"
@@ -109,12 +110,12 @@ export default function EditTags({ card, onSaved }: Props) {
         info="Separate tags with spaces. Prepend a hash symbol (#) to format them nicely."
       />
 
-      {/* Vorhandene Tags als Hilfe anzeigen */}
+      {/* Show existing tags as help text */}
       <Form.Description title="Existing Tags" text={suggestionsText} />
 
       <Form.Separator />
 
-      {/* Hinweise zur Syntax */}
+      {/* Syntax hints */}
       <Form.Description
         title="Tips"
         text="Standardize on lowercase alphanumeric characters. Spaces and commas are used as separators. Already created tags can be clicked or typed to reuse."

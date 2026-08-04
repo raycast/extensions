@@ -10,7 +10,7 @@ import {
 import { useState } from "react";
 import { Flashcard } from "./types";
 import { parseMultipleCards } from "./utils/parser";
-import { saveCard } from "./utils/storage";
+import { saveCards } from "./utils/storage";
 import { readFileSync } from "fs";
 
 export default function ImportCards() {
@@ -23,16 +23,16 @@ export default function ImportCards() {
     let input = "";
 
     if (mode === "paste") {
-      // Markdown-Text wurde direkt eingefügt
+      // Markdown text was pasted directly.
       input = values.markdown?.trim() ?? "";
     } else {
-      // Datei einlesen
+      // Read the selected file.
       const path = values.filePath?.[0];
       if (!path) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Import Failed",
-          message: "No valid flashcards found to import.",
+          message: "No file selected. Please choose a Markdown file to import.",
         });
         return;
       }
@@ -69,10 +69,11 @@ export default function ImportCards() {
         return;
       }
 
-      // Alle geparsten Karten speichern
+      // Save all parsed cards in one storage operation.
+      const importedCards: Flashcard[] = [];
       let savedCount = 0;
       for (const p of parsed) {
-        // Nur Karten mit Vorderseite speichern
+        // Only save cards with a front side.
         if (!p.front) continue;
 
         const card: Flashcard = {
@@ -81,9 +82,10 @@ export default function ImportCards() {
           progress: "unanswered",
           createdAt: Date.now(),
         };
-        await saveCard(card);
+        importedCards.push(card);
         savedCount++;
       }
+      await saveCards(importedCards);
 
       await showToast({
         style: Toast.Style.Success,
@@ -116,7 +118,7 @@ export default function ImportCards() {
         </ActionPanel>
       }
     >
-      {/* Import-Modus Auswahl */}
+      {/* Import mode selection */}
       <Form.Dropdown
         id="mode"
         title="Import Source"
@@ -156,7 +158,7 @@ export default function ImportCards() {
 
       <Form.Separator />
 
-      {/* Format-Referenz */}
+      {/* Format reference */}
       <Form.Description
         title="Multiple Flashcards Syntax"
         text={[

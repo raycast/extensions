@@ -6,6 +6,7 @@ import {
   Toast,
   Icon,
   Clipboard,
+  Keyboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { Flashcard } from "./types";
@@ -26,16 +27,16 @@ export default function ExportCards() {
     })();
   }, []);
 
-  // Markdown-Export generieren
+  // Generate the Markdown export.
   const markdown = cards.length > 0 ? cardsToMarkdown(cards) : "";
 
-  // Vorschau-Text für die Detail-Ansicht
+  // Build the detail view preview.
   const previewMarkdown =
     cards.length > 0
       ? `## Export Flashcards\n\n**${cards.length === 1 ? "1 flashcard ready for export:" : `${cards.length} flashcards ready for export:`}**\n\n---\n\n\`\`\`markdown\n${markdown}\n\`\`\``
       : `## Export Flashcards\n\nYou don't have any flashcards to export yet. Go create some first!`;
 
-  // Export-Dateiname mit Datum
+  // Add the current date to the export filename.
   const dateStr = new Date().toISOString().slice(0, 10);
   const fileName = `flashcards-${dateStr}.md`;
 
@@ -50,7 +51,7 @@ export default function ExportCards() {
 
   async function handleSaveFile() {
     try {
-      // In den Downloads-Ordner des Benutzers speichern
+      // Save to the user's Downloads folder.
       const home = homedir();
       const downloadsPath = join(home, "Downloads");
       const filePath = join(downloadsPath, fileName);
@@ -60,8 +61,8 @@ export default function ExportCards() {
         title: "Export Successful",
         message: `Saved to: ~/Downloads/${fileName}`,
       });
-    } catch (e) {
-      // Fallback: Desktop
+    } catch {
+      // Fall back to the user's Desktop folder.
       try {
         const home = homedir();
         const desktopPath = join(home, "Desktop");
@@ -97,7 +98,7 @@ export default function ExportCards() {
             <Action
               title="Save to Downloads Folder"
               icon={Icon.Download}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
               onAction={handleSaveFile}
             />
           </ActionPanel>

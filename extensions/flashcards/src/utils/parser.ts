@@ -1,7 +1,7 @@
 import { CardType, Flashcard, Option } from "../types";
 
 /**
- * Parst die Markdown-Eingabe in eine Karteikarte.
+ * Parse Markdown input into a flashcard.
  *
  * Standard-Karte:
  *   Frage
@@ -19,20 +19,20 @@ import { CardType, Flashcard, Option } from "../types";
  *   correct: 2
  *   #tag1 #tag2
  *
- * Leerzeilen zwischen den Abschnitten sind optional.
- * Tags werden automatisch auf Kleinschreibung normalisiert.
+ * Blank lines between sections are optional.
+ * Tags are normalized to lowercase automatically.
  */
 export function parseMarkdown(
   input: string,
 ): Omit<Flashcard, "id" | "progress" | "createdAt"> {
   const lines = input.trim().split("\n");
 
-  // Tags aus der letzten Zeile extrahieren (wenn die Zeile nur aus #tags besteht)
+  // Extract tags from the last line when it contains only #tags.
   let tags: string[] = [];
   let contentLines = lines;
 
   const lastLine = lines[lines.length - 1]?.trim() ?? "";
-  // Unicode-taugliches Regex: erkennt auch Umlaute, Akzente etc. in Tags
+  // Use a Unicode-aware regex so tags can contain accents and other characters.
   if (/^(#[\p{L}\p{N}_]+\s*)+$/u.test(lastLine)) {
     tags = (lastLine.match(/#([\p{L}\p{N}_]+)/gu) ?? []).map((t) =>
       t.slice(1).toLowerCase(),
@@ -42,7 +42,7 @@ export function parseMarkdown(
 
   const content = contentLines.join("\n").trim();
 
-  // Typ erkennen anhand des Trennzeichens
+  // Detect the card type from the separator.
   if (/\n[\t ]*==</.test(content)) {
     return parseMC(content, tags);
   } else {
@@ -54,7 +54,7 @@ function parseStandard(
   content: string,
   tags: string[],
 ): Omit<Flashcard, "id" | "progress" | "createdAt"> {
-  // Teilen an == – mit oder ohne Leerzeilen darum
+  // Split on ==, allowing optional surrounding blank lines.
   const parts = content.split(/\n[\t ]*==[\t ]*\n/);
   const front = parts[0]?.trim() ?? "";
   const back = parts[1]?.trim() ?? "";
@@ -71,14 +71,14 @@ function parseMC(
   content: string,
   tags: string[],
 ): Omit<Flashcard, "id" | "progress" | "createdAt"> {
-  // Teilen an ==< – mit oder ohne Leerzeilen darum
+  // Split on ==<, allowing optional surrounding blank lines.
   const [frontPart, rest] = content.split(/\n[\t ]*==<[\t ]*\n/);
   const front = frontPart?.trim() ?? "";
 
-  // Rest teilen an -- – mit oder ohne Leerzeilen darum
+  // Split the remainder on --, allowing optional surrounding blank lines.
   const [optionsPart, correctPart] = (rest ?? "").split(/\n[\t ]*--[\t ]*\n/);
 
-  // Optionen parsen: "1: Text", "2: Text", "3: Text"
+  // Parse options such as "1: Text", "2: Text", and "3: Text".
   const options: Option[] = (optionsPart ?? "")
     .trim()
     .split("\n")
@@ -90,7 +90,7 @@ function parseMC(
       return acc;
     }, []);
 
-  // Richtige Antwort parsen: Unterstützt sprachenunabhängig verschiedene Schlüsselwörter für Abwärtskompatibilität
+  // Parse the correct answer and accept legacy keywords for compatibility.
   const correctMatch = (correctPart ?? "")
     .trim()
     .match(
@@ -110,39 +110,39 @@ function parseMC(
 }
 
 /**
- * Parst eine Markdown-Datei mit mehreren Karteikarten.
+ * Parse a Markdown file containing multiple flashcards.
  *
- * Karten werden durch eine Zeile mit genau "---" getrennt.
- * Der Platzhalter "-" (= keine Tags) wird vor dem Parsen entfernt.
- * Leere Blöcke werden übersprungen.
+ * Cards are separated by a line containing exactly "---".
+ * The "-" placeholder (no tags) is removed before parsing.
+ * Empty blocks are skipped.
  */
 export function parseMultipleCards(
   input: string,
 ): Omit<Flashcard, "id" | "progress" | "createdAt">[] {
-  // An --- Trennlinien aufteilen (nur wenn --- allein auf einer Zeile steht)
+  // Split on --- separators only when --- occupies its own line.
   const blocks = input.split(/\n[ \t]*---[ \t]*\n/);
 
   const results: Omit<Flashcard, "id" | "progress" | "createdAt">[] = [];
 
   for (const raw of blocks) {
-    // Block bereinigen
+    // Clean up the block.
     let block = raw.trim();
     if (!block) continue;
 
-    // Platzhalter "-" als letzte Zeile entfernen (= "keine Tags")
+    // Remove "-" as the last line, which represents no tags.
     const lines = block.split("\n");
     const lastLine = lines[lines.length - 1]?.trim() ?? "";
     if (lastLine === "-") {
       block = lines.slice(0, -1).join("\n").trim();
     }
 
-    // Leeren Block nach Bereinigung überspringen
+    // Skip empty blocks after cleanup.
     if (!block) continue;
 
     try {
       results.push(parseMarkdown(block));
     } catch {
-      // Fehlerhafte Blöcke überspringen, damit der Rest importiert wird
+      // Skip malformed blocks so the remaining cards can still be imported.
     }
   }
 

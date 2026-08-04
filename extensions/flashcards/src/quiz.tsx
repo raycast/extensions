@@ -13,7 +13,7 @@ import { useEffect, useState, useRef } from "react";
 import { Flashcard } from "./types";
 import { getAllCards, getAllTags, updateProgress } from "./utils/storage";
 
-// ── Hilfsfunktionen ───────────────────────────────────────────────────────────
+// ── Helper functions ─────────────────────────────────────────────────────────
 
 function shuffle<T>(arr: T[]): T[] {
   const a = [...arr];
@@ -24,7 +24,7 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-// ── Standard-Karte Quiz ───────────────────────────────────────────────────────
+// ── Standard card quiz ────────────────────────────────────────────────────────
 
 function StandardCardQuiz({
   card,
@@ -39,7 +39,7 @@ function StandardCardQuiz({
 }) {
   const [revealed, setRevealed] = useState(false);
 
-  // Antwort zurücksetzen, wenn sich die Karte ändert
+  // Reset the answer when the card changes.
   const prevCardId = useRef(card.id);
   useEffect(() => {
     if (prevCardId.current !== card.id) {
@@ -67,13 +67,13 @@ function StandardCardQuiz({
           ) : (
             <>
               <Action
-                title="I Knew It (correct)"
+                title="I Knew It (Correct)"
                 icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
                 shortcut={{ modifiers: [], key: "arrowRight" }}
                 onAction={() => onAnswer(true)}
               />
               <Action
-                title="I Didn't Know It (wrong)"
+                title="I Didn't Know It (Wrong)"
                 icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
                 shortcut={{ modifiers: [], key: "arrowLeft" }}
                 onAction={() => onAnswer(false)}
@@ -86,7 +86,7 @@ function StandardCardQuiz({
   );
 }
 
-// ── Multiple-Choice-Karte Quiz ────────────────────────────────────────────────
+// ── Multiple-choice card quiz ────────────────────────────────────────────────
 
 function MCCardQuiz({
   card,
@@ -184,9 +184,9 @@ function MCCardQuiz({
   );
 }
 
-// ── Quiz-Session ──────────────────────────────────────────────────────────────
+// ── Quiz session ──────────────────────────────────────────────────────────────
 
-// Quiz-Session-Komponente zur Durchführung des Lernmodus
+// Component that runs a quiz session.
 function QuizSession({ cards }: { cards: Flashcard[] }) {
   const [queue] = useState(() => shuffle(cards));
   const [index, setIndex] = useState(0);
@@ -272,9 +272,9 @@ function QuizSession({ cards }: { cards: Flashcard[] }) {
   );
 }
 
-// ── Tag-Auswahl für Quiz ──────────────────────────────────────────────────────
+// ── Tag selection for quiz ───────────────────────────────────────────────────
 
-// Komponente zur Auswahl bestimmter Tags für das Quiz
+// Component for selecting tags for the quiz.
 function TagSelector({
   allCards,
   tags,
@@ -310,7 +310,7 @@ function TagSelector({
     push(<QuizSession cards={filtered} />);
   }
 
-  // Tastenkombinationen für die ersten 9 Tags (⌘1 bis ⌘9)
+  // Add shortcuts for the first nine tags (⌘1 through ⌘9).
   const shortcutKeys = ["1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
 
   return (
@@ -342,19 +342,19 @@ function TagSelector({
               ]}
               actions={
                 <ActionPanel>
-                  {/* Primäre Aktion: Quiz starten (Enter) */}
+                  {/* Primary action: start the quiz (Enter). */}
                   <Action
                     title={`Start Quiz (${selected.size === 0 ? "all" : selected.size + " tags"})`}
                     icon={Icon.Play}
                     onAction={startQuiz}
                   />
-                  {/* Tag an-/abwählen (für fokussiertes Item ohne Shortcut) */}
+                  {/* Toggle the tag for the focused item without a shortcut. */}
                   <Action
                     title={isSelected ? "Deselect Tag" : "Select Tag"}
                     icon={isSelected ? Icon.CheckCircle : Icon.Circle}
                     onAction={() => toggleTag(tag)}
                   />
-                  {/* Alle Tag-Shortcuts (⌘1-⌘9), damit sie von jedem Item aus funktionieren */}
+                  {/* Keep all tag shortcuts (⌘1-⌘9) available from every item. */}
                   {tags.slice(0, shortcutKeys.length).map((tg, j) => (
                     <Action
                       key={tg}
@@ -378,9 +378,9 @@ function TagSelector({
   );
 }
 
-// ── Modus-Auswahl ─────────────────────────────────────────────────────────────
+// ── Mode selection ────────────────────────────────────────────────────────────
 
-// Komponente zur Auswahl des Quiz-Modus
+// Component for selecting the quiz mode.
 function ModeSelector({
   allCards,
   tags,
@@ -431,7 +431,7 @@ function ModeSelector({
     push(<QuizSession cards={allCards} />);
   }
 
-  // Modus-Definitionen mit Tastenkombinationen für schnellen Zugriff
+  // Define modes with shortcuts for quick access.
   const modes = [
     {
       icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
@@ -483,13 +483,13 @@ function ModeSelector({
             accessories={[{ text: `⌘${i + 1}` }]}
             actions={
               <ActionPanel>
-                {/* Primäre Aktion (Enter) für den fokussierten Eintrag */}
+                {/* Primary action (Enter) for the focused item. */}
                 <Action
                   title={mode.actionTitle}
                   icon={mode.actionIcon}
                   onAction={mode.onAction}
                 />
-                {/* Alle anderen Shortcuts, damit ⌘1-⌘4 von jedem Eintrag aus funktionieren */}
+                {/* Keep ⌘1-⌘4 available from every item. */}
                 {modes
                   .filter((_, j) => j !== i)
                   .map((m) => (
@@ -510,9 +510,9 @@ function ModeSelector({
   );
 }
 
-// ── Haupt-Quiz-Screen ─────────────────────────────────────────────────────────
+// ── Main quiz screen ──────────────────────────────────────────────────────────
 
-// Hauptkomponente für die Quiz-Ansicht
+// Main component for the quiz view.
 export default function Quiz() {
   const [allCards, setAllCards] = useState<Flashcard[]>([]);
   const [tags, setTags] = useState<string[]>([]);

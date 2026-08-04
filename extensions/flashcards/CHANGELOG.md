@@ -8,4 +8,3 @@
 - Added **Tags** command to browse cards by tag.
 - Added **Quiz** command with 4 study modes (all, wrong, new, tags) and keyboard controls.
 - Added **Import** and **Export** commands to backup or load cards from Markdown.
-- Added local localization support for 10 languages.

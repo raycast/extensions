@@ -3,13 +3,15 @@
   "name": "flashcards",
   "title": "Flashcards",
   "description": "Create and study flashcards with Markdown syntax",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "Paul12169",
   "platforms": [
     "macOS",
     "Windows"
   ],
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -55,20 +57,87 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "generate-flashcards",
+      "title": "Generate Flashcards",
+      "description": "Create and save one or more flashcards from Markdown notes or a topic."
+    },
+    {
+      "name": "search-flashcards",
+      "title": "Search Flashcards",
+      "description": "Search saved flashcards by question, answer, option text, or tag."
+    },
+    {
+      "name": "study-flashcards",
+      "title": "Study Flashcards",
+      "description": "Find saved flashcards to study, optionally filtered by tag or learning progress."
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@flashcards create cards from these notes: Capital of France equals Paris, tagged geography",
+        "mocks": {
+          "generate-flashcards": {
+            "cards": "Capital of France\n==\nParis\n#geography",
+            "skipped": 0
+          },
+          "study-flashcards": {
+            "count": 1,
+            "cards": "Capital of France\n==\nParis\n#geography"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "generate-flashcards"
+          }
+        ]
+      },
+      {
+        "input": "@flashcards find my cards about geography",
+        "mocks": {
+          "search-flashcards": {
+            "count": 1,
+            "cards": "Capital of France\n==\nParis\n#geography"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "search-flashcards"
+          }
+        ]
+      },
+      {
+        "input": "@flashcards give me 5 unanswered geography cards to study",
+        "mocks": {
+          "study-flashcards": {
+            "count": 1,
+            "cards": "Capital of France\n==\nParis\n#geography"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "study-flashcards"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [],
   "overrides": {
     "minimatch": "^9.0.7"
   },
   "dependencies": {
-    "@raycast/api": "^1.70.0"
+    "@raycast/api": "^1.104.24"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0"
   },
   "scripts": {
     "build": "ray build -e dist",
