@@ -5,7 +5,7 @@
 - Record the selected macOS display with microphone, cursor, and click highlights.
 - Mark exact feedback moments with timestamped screenshots.
 - Capture periodic fallback frames when no moments are marked.
-- Transcribe locally with whisper.cpp and Silero voice-activity detection.
+- Transcribe locally with whisper.cpp.
 - Generate and copy agent-ready Markdown with local artifact paths.
 - Show clear ready, recording, stopping, and processing states in Raycast.
 - Verify downloaded model files with pinned SHA-256 digests.

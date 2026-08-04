@@ -1,8 +1,9 @@
 import { existsSync, readFileSync } from "fs";
 import { join } from "path";
-import { defaultModelPath, defaultVadModelPath } from "./paths";
+import { defaultModelPath } from "./paths";
 import { runFile } from "./process";
 import { Preferences, RecordingState, TranscriptSegment } from "./types";
+import { buildWhisperArguments } from "./whisper-arguments";
 
 interface WhisperJsonSegment {
   text?: string;
@@ -48,7 +49,6 @@ export async function transcribe(
   preferences: Preferences,
 ): Promise<{ segments: TranscriptSegment[]; transcriptPath: string }> {
   const modelPath = resolveModelPath(preferences);
-  const vadModelPath = defaultVadModelPath();
   const whisperCliPath = resolveWhisperCliPath(preferences);
   if (!existsSync(modelPath)) {
     throw new Error(
@@ -59,11 +59,6 @@ export async function transcribe(
     throw new Error(
       "whisper-cli not found. Install it with `brew install whisper-cpp` or set its path in preferences.",
     );
-  if (!existsSync(vadModelPath))
-    throw new Error(
-      "No local voice-activity model found. Run “Download Local Whisper Model” again.",
-    );
-
   const audioPath = join(state.sessionDir, "audio.wav");
   await runFile("/usr/bin/afconvert", [
     "-f",
@@ -77,26 +72,15 @@ export async function transcribe(
   ]);
 
   const outputBase = join(state.sessionDir, "transcript");
-  await runFile(whisperCliPath, [
-    "-m",
-    modelPath,
-    "-f",
-    audioPath,
-    "-l",
-    preferences.language.trim() || "auto",
-    "--vad",
-    "-vm",
-    vadModelPath,
-    "-vsd",
-    "300",
-    "-vp",
-    "100",
-    "-sns",
-    "-ojf",
-    "-of",
-    outputBase,
-    "-np",
-  ]);
+  await runFile(
+    whisperCliPath,
+    buildWhisperArguments({
+      modelPath,
+      audioPath,
+      language: preferences.language.trim() || "auto",
+      outputBase,
+    }),
+  );
 
   const transcriptPath = `${outputBase}.json`;
   const parsed = JSON.parse(

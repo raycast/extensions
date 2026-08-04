@@ -2,21 +2,13 @@ import { Toast, showToast } from "@raycast/api";
 import { createReadStream, existsSync, renameSync, rmSync } from "fs";
 import { createHash } from "crypto";
 import { dirname } from "path";
-import {
-  defaultModelPath,
-  defaultVadModelPath,
-  ensureSupportDirectories,
-} from "./lib/paths";
+import { defaultModelPath, ensureSupportDirectories } from "./lib/paths";
 import { runFile } from "./lib/process";
 
 const MODEL_URL =
   "https://huggingface.co/ggerganov/whisper.cpp/resolve/5359861c739e955e79d9a303bcbc70fb988958b1/ggml-base.bin";
-const VAD_MODEL_URL =
-  "https://huggingface.co/ggml-org/whisper-vad/resolve/9ffd54a1e1ee413ddf265af9913beaf518d1639b/ggml-silero-v6.2.0.bin";
 const MODEL_SHA256 =
   "60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe";
-const VAD_MODEL_SHA256 =
-  "2aa269b785eeb53a82983a20501ddf7c1d9c48e33ab63a41391ac6c9f7fb6987";
 
 function sha256(path: string): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -65,13 +57,11 @@ async function downloadFile(
 export default async function Command() {
   ensureSupportDirectories();
   const modelPath = defaultModelPath();
-  const vadModelPath = defaultVadModelPath();
   const modelIsValid = await isValid(modelPath, MODEL_SHA256);
-  const vadModelIsValid = await isValid(vadModelPath, VAD_MODEL_SHA256);
-  if (modelIsValid && vadModelIsValid) {
+  if (modelIsValid) {
     await showToast({
       style: Toast.Style.Success,
-      title: "Local transcription models are already installed",
+      title: "Local Whisper model is already installed",
       message: dirname(modelPath),
     });
     return;
@@ -79,7 +69,7 @@ export default async function Command() {
 
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: "Downloading local transcription models…",
+    title: "Downloading local Whisper model…",
     message: dirname(modelPath),
   });
   try {
@@ -87,12 +77,8 @@ export default async function Command() {
       rmSync(modelPath, { force: true });
       await downloadFile(MODEL_URL, modelPath, MODEL_SHA256);
     }
-    if (!vadModelIsValid) {
-      rmSync(vadModelPath, { force: true });
-      await downloadFile(VAD_MODEL_URL, vadModelPath, VAD_MODEL_SHA256);
-    }
     toast.style = Toast.Style.Success;
-    toast.title = "Local transcription models installed";
+    toast.title = "Local Whisper model installed";
     toast.message = dirname(modelPath);
   } catch (error) {
     toast.style = Toast.Style.Failure;

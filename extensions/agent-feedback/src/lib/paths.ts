@@ -14,10 +14,6 @@ export function defaultModelPath(): string {
   return join(environment.supportPath, "models", "ggml-base.bin");
 }
 
-export function defaultVadModelPath(): string {
-  return join(environment.supportPath, "models", "ggml-silero-v6.2.0.bin");
-}
-
 export function newSessionDirectory(): string {
   ensureSupportDirectories();
   const stamp = new Date().toISOString().replace(/[:.]/g, "-");

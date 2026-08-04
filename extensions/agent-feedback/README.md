@@ -54,12 +54,9 @@ For exact screenshots at spoken attention cues, install `ffmpeg` (optional):
 brew install ffmpeg
 ```
 
-Then run **Download Local Models** once in Raycast. It downloads:
+Then run **Download Local Whisper Model** once in Raycast. It downloads the Whisper base multilingual model.
 
-- Whisper base multilingual model
-- Silero voice-activity model to prevent hallucinations during silence
-
-Both downloads come from their official Hugging Face repositories and are verified against pinned SHA-256 digests before installation.
+The download comes from the official whisper.cpp Hugging Face repository and is verified against a pinned SHA-256 digest before installation.
 
 On first use, macOS asks for Raycast's **Screen & System Audio Recording** and **Microphone** permissions.
 

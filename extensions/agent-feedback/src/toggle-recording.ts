@@ -11,11 +11,7 @@ import {
 import { existsSync, writeFileSync } from "fs";
 import { join } from "path";
 import { startDomContextBridge, stopDomContextBridge } from "./lib/dom-context";
-import {
-  defaultVadModelPath,
-  ensureSupportDirectories,
-  newSessionDirectory,
-} from "./lib/paths";
+import { ensureSupportDirectories, newSessionDirectory } from "./lib/paths";
 import {
   isProcessRunning,
   spawnDetached,
@@ -40,10 +36,7 @@ async function setRecordingStatus(subtitle: string): Promise<void> {
 
 async function startRecording(preferences: Preferences): Promise<void> {
   ensureSupportDirectories();
-  if (
-    !existsSync(resolveModelPath(preferences)) ||
-    !existsSync(defaultVadModelPath())
-  ) {
+  if (!existsSync(resolveModelPath(preferences))) {
     await showHUD("⚠️ Run “Download Local Whisper Model” first");
     return;
   }
