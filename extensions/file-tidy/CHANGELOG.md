@@ -1,6 +1,6 @@
 # File Tidy Changelog
 
-## [Smart Checks and a Prefixed Archive Structure] - {PR_MERGE_DATE}
+## [Smart Checks and a Prefixed Archive Structure] - 2026-08-04
 
 - Archive folders are now named `ft_Category/[Subcategory]/[date]`. The `ft_` prefix keeps tidy's output apart from folders you made yourself; an existing un-prefixed archive is reused rather than split in two. Subcategories (Screenshots, Ebooks, Invoices, Installers, …) come from configurable name and extension rules.
 - Date depth is per-category: photos and videos by year-month (EXIF capture date when available), documents by year, installers and fonts not by date at all.
