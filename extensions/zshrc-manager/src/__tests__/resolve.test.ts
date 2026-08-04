@@ -50,6 +50,9 @@ describe("resolve.ts", () => {
 
     it("returns null for values it cannot expand without a shell", () => {
       expect(expandUserPath("${XDG_CACHE_HOME:-$HOME/.cache}/file", "/Users/me")).toBeNull();
+      // $HOMEBREW_PREFIX must not be mangled into $HOME + "BREW_PREFIX…"
+      expect(expandUserPath("$HOMEBREW_PREFIX/etc/profile.d/z.sh", "/Users/me")).toBeNull();
+      expect(expandUserPath("$HOMEDIR/file", "/Users/me")).toBeNull();
       expect(expandUserPath("$ZSH/oh-my-zsh.sh", "/Users/me")).toBeNull();
       expect(expandUserPath("$(brew --prefix)/etc/profile", "/Users/me")).toBeNull();
       expect(expandUserPath("`which zsh`", "/Users/me")).toBeNull();
@@ -65,6 +68,12 @@ describe("resolve.ts", () => {
       expect(expandUserPath('"$HOME/file.zsh"', "/Users/me")).toBe("/Users/me/file.zsh");
       expect(expandUserPath("'/opt/plain.zsh'", "/Users/me")).toBe("/opt/plain.zsh");
       expect(expandUserPath('"$cache_file"', "/Users/me")).toBeNull();
+    });
+
+    it("ignores trailing inline comments after the operand", () => {
+      expect(expandUserPath('"/opt/file.zsh" # loads things', "/Users/me")).toBe("/opt/file.zsh");
+      expect(expandUserPath("/opt/file.zsh # loads things", "/Users/me")).toBe("/opt/file.zsh");
+      expect(expandUserPath('"unterminated', "/Users/me")).toBeNull();
     });
   });
 
@@ -165,6 +174,12 @@ describe("resolve.ts", () => {
       expect(sourceFileExists(`"${file}"`, tmpRoot)).toBe("yes");
     });
 
+    it("reports yes when a quoted operand carries a trailing comment", () => {
+      const file = join(tmpRoot, "commented.zsh");
+      writeFileSync(file, "# zsh");
+      expect(sourceFileExists(`"${file}" # syntax highlighting`, tmpRoot)).toBe("yes");
+    });
+
     // Root bypasses permission checks, so the EACCES case cannot be
     // provoked when running as root (e.g. some CI containers) — skip
     // rather than silently pass.
@@ -224,6 +239,16 @@ describe("resolve.ts", () => {
       writeFileSync(mockZshrcPath, `export ZSH_CUSTOM="${custom}"\n`);
 
       expect(pluginInstalled("configplugin", tmpRoot, {})).toBe("yes");
+    });
+
+    it("honors a plain (unexported) ZSH_CUSTOM assignment in the config", () => {
+      const custom = join(tmpRoot, "plain-custom");
+      mkdirSync(join(custom, "plugins", "plainplugin"), { recursive: true });
+      mkdirSync(join(tmpRoot, ".oh-my-zsh", "plugins"), { recursive: true });
+      mockZshrcPath = join(tmpRoot, ".zshrc");
+      writeFileSync(mockZshrcPath, `ZSH_CUSTOM=${custom}\n`);
+
+      expect(pluginInstalled("plainplugin", tmpRoot, {})).toBe("yes");
     });
 
     it("reports unknown, not no, when a declared root cannot be expanded", () => {

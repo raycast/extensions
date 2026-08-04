@@ -15,6 +15,7 @@
  */
 
 import { detectSectionMarker } from "./section-detector";
+import { multilineArrayInteriorLines } from "./pattern-registry";
 
 interface SectionBounds {
   startLine: number;
@@ -48,9 +49,15 @@ function findSectionInstanceBounds(content: string, label: string, n: number): S
     return null;
   };
 
+  // Lines inside a multi-line array are never markers — must mirror
+  // toLogicalSections, or write-target sections would resolve to
+  // different bounds than the sections the items were parsed from.
+  const arrayInterior = multilineArrayInteriorLines(content);
+
   for (let i = 0; i < lines.length; i += 1) {
     const raw = lines[i];
     if (!raw) continue;
+    if (arrayInterior.has(i + 1)) continue;
     const marker = detectSectionMarker(raw, i + 1);
     if (!marker) continue;
 

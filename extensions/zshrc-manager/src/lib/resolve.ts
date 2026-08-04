@@ -14,7 +14,7 @@
 import { readFileSync, statSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { parseExports, parsePathEntries } from "../utils/parsers";
+import { parsePathEntries } from "../utils/parsers";
 import { getZshrcPath } from "./zsh";
 
 /** Three-valued answer for facts that may be undecidable. */
@@ -49,15 +49,31 @@ function getConfigContent(): string | null {
   return configContentCache;
 }
 
-/** The raw value of a variable exported in the config, or undefined. */
-function getConfigExport(variable: string): string | undefined {
+/**
+ * The raw value of a variable assigned in the config, or undefined.
+ *
+ * Accepts every declaration form zsh does — `export VAR=…`,
+ * `typeset/declare [-flags] VAR=…`, and a plain `VAR=…` assignment,
+ * which is how `ZSH_CUSTOM` is commonly set.
+ */
+function getConfigAssignment(variable: string): string | undefined {
   const content = getConfigContent();
   if (content === null) {
     return undefined;
   }
+  const regex = new RegExp(
+    `^\\s*(?:(?:export|typeset(?:\\s+-[A-Za-z]+)*|declare(?:\\s+-[A-Za-z]+)*)\\s+)?${variable}=(.*?)\\s*$`,
+    "gm",
+  );
   // Last assignment wins, as it would in the shell.
-  const matches = parseExports(content).filter((entry) => entry.variable === variable);
-  return matches.at(-1)?.value;
+  let value: string | undefined;
+  let match: RegExpExecArray | null;
+  while ((match = regex.exec(content)) !== null) {
+    if (match[1]) {
+      value = match[1];
+    }
+  }
+  return value;
 }
 
 /**
@@ -70,9 +86,22 @@ function getConfigExport(variable: string): string | undefined {
  */
 export function expandUserPath(raw: string, home: string = homedir()): string | null {
   let trimmed = raw.trim();
-  // Shell operands are often quoted; the quotes are not part of the path.
-  if (trimmed.length >= 2 && (trimmed[0] === '"' || trimmed[0] === "'") && trimmed.endsWith(trimmed[0]!)) {
-    trimmed = trimmed.slice(1, -1);
+  // Shell operands are often quoted; the quotes are not part of the path,
+  // and anything after the closing quote (e.g. an inline comment that a
+  // caller failed to strip) is not either.
+  const quote = trimmed[0];
+  if (quote === '"' || quote === "'") {
+    const close = trimmed.indexOf(quote, 1);
+    if (close === -1) {
+      return null;
+    }
+    trimmed = trimmed.slice(1, close);
+  } else {
+    // For unquoted values, an inline comment is not part of the operand.
+    const hash = trimmed.search(/\s#/);
+    if (hash !== -1) {
+      trimmed = trimmed.slice(0, hash).trimEnd();
+    }
   }
   if (trimmed.length === 0) {
     return null;
@@ -83,7 +112,9 @@ export function expandUserPath(raw: string, home: string = homedir()): string | 
     expanded = home + expanded.slice(1);
   } else if (expanded.startsWith("${HOME}")) {
     expanded = home + expanded.slice("${HOME}".length);
-  } else if (expanded.startsWith("$HOME")) {
+  } else if (/^\$HOME(\/|$)/.test(expanded)) {
+    // The boundary check keeps $HOMEBREW_PREFIX and friends from being
+    // mangled into $HOME + "BREW_PREFIX…".
     expanded = home + expanded.slice("$HOME".length);
   }
 
@@ -233,8 +264,8 @@ export function pluginInstalled(
     return "unknown";
   }
 
-  const zshDecl = env["ZSH"] ?? getConfigExport("ZSH");
-  const customDecl = env["ZSH_CUSTOM"] ?? getConfigExport("ZSH_CUSTOM");
+  const zshDecl = env["ZSH"] ?? getConfigAssignment("ZSH");
+  const customDecl = env["ZSH_CUSTOM"] ?? getConfigAssignment("ZSH_CUSTOM");
 
   const cacheKey = `${name}\0${home}\0${zshDecl ?? ""}\0${customDecl ?? ""}`;
   const cached = pluginCache.get(cacheKey);

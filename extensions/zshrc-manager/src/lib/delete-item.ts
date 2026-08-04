@@ -81,10 +81,6 @@ export async function deleteItem(
 
     log.delete.debug(`Found ${config.itemType} "${key}", proceeding with deletion`);
 
-    // Save to history before writing
-    log.delete.debug("Saving to history before delete");
-    await saveToHistory(`Delete ${config.itemType} "${key}"`);
-
     log.delete.debug("Writing updated content");
     await writeZshrcFile(updatedContent);
     clearCache(getZshrcPath());
@@ -95,6 +91,12 @@ export async function deleteItem(
       log.delete.error("Write verification failed: content mismatch");
       throw new Error("Write verification failed: content mismatch after delete");
     }
+
+    // Record history only after the write is verified, with the pre-delete
+    // snapshot as the undo target — recording earlier risks a restore point
+    // for a delete that never happened
+    log.delete.debug("Saving pre-delete snapshot to history");
+    await saveToHistory(`Delete ${config.itemType} "${key}"`, zshrcContent);
 
     log.delete.info(`Successfully deleted ${config.itemType} "${key}"`);
 
