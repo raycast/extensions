@@ -41,8 +41,18 @@ function okResponse(data: unknown) {
   return {
     ok: true,
     status: 200,
+    headers: new Headers(),
     json: () => Promise.resolve({ ok: true as const, data }),
     text: () => Promise.resolve(JSON.stringify(data)),
+  };
+}
+
+function noContentResponse(status = 204) {
+  return {
+    ok: true,
+    status,
+    headers: new Headers(status === 204 ? undefined : { "content-length": "0" }),
+    json: vi.fn(() => Promise.reject(new SyntaxError("Unexpected end of JSON input"))),
   };
 }
 
@@ -50,6 +60,7 @@ function errorResponse(status: number, message: string) {
   return {
     ok: false,
     status,
+    headers: new Headers(),
     json: () => Promise.resolve({ ok: false as const, error: { code: "ERR", message } }),
     text: () => Promise.resolve(message),
   };
@@ -59,6 +70,7 @@ function apiErrorResponse(message: string) {
   return {
     ok: true,
     status: 200,
+    headers: new Headers(),
     json: () =>
       Promise.resolve({
         ok: false as const,
@@ -191,6 +203,26 @@ describe("deleteTask", () => {
         method: "DELETE",
       }),
     );
+  });
+
+  it("accepts a 204 response without parsing JSON", async () => {
+    const response = noContentResponse();
+    mockFetch.mockResolvedValue(response);
+
+    await expect(deleteTask("t1")).resolves.toBeUndefined();
+
+    expect(response.json).not.toHaveBeenCalled();
+    expect(mockShowToast).not.toHaveBeenCalled();
+  });
+
+  it("accepts an empty response declared by content-length", async () => {
+    const response = noContentResponse(200);
+    mockFetch.mockResolvedValue(response);
+
+    await expect(deleteTask("t1")).resolves.toBeUndefined();
+
+    expect(response.json).not.toHaveBeenCalled();
+    expect(mockShowToast).not.toHaveBeenCalled();
   });
 });
 
