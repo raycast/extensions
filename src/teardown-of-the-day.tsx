@@ -17,9 +17,11 @@ export default function TeardownOfTheDay() {
     <Detail
       isLoading={isLoading}
       markdown={
-        error
-          ? "## Couldn’t load today’s teardown\n\nPlease try again."
-          : "## No teardown available yet\n\nPlease try again later."
+        isLoading
+          ? ""
+          : error
+            ? "## Couldn’t load today’s teardown\n\nPlease try again."
+            : "## No teardown available yet\n\nPlease try again later."
       }
       actions={
         <ActionPanel>
