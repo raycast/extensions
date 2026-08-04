@@ -17,7 +17,7 @@ export interface TidyRun {
   time: string;
   sourceDir: string;
   manifestPath: string;
-  moves: Array<{ from: string; to: string; action?: "archive" | "duplicate" }>;
+  moves: Array<{ from: string; to: string; action?: "archive" | "duplicate" | "review" }>;
   createdDirs: string[];
 }
 export function getLastRun(destDir: string): TidyRun | null;
