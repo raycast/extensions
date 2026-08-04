@@ -16,8 +16,8 @@ export class QoveryApiError extends Error {
   }
 }
 
-async function get<T>(path: string): Promise<T> {
-  const accessToken = await getAccessToken();
+async function get<T>(path: string, allowInteractiveAuthentication = false): Promise<T> {
+  const accessToken = await getAccessToken(allowInteractiveAuthentication);
   const response = await fetch(`${API_URL}${path}`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
@@ -39,8 +39,8 @@ async function get<T>(path: string): Promise<T> {
   return (await response.json()) as T;
 }
 
-export async function listOrganizations(): Promise<Organization[]> {
-  const data = await get<ResultsResponse<Organization>>("/organization");
+export async function listOrganizations(allowInteractiveAuthentication = false): Promise<Organization[]> {
+  const data = await get<ResultsResponse<Organization>>("/organization", allowInteractiveAuthentication);
   return data.results ?? [];
 }
 
@@ -60,7 +60,7 @@ export async function listAllServices(): Promise<{
   services: Service[];
   failedOrganizations: Organization[];
 }> {
-  const organizations = await listOrganizations();
+  const organizations = await listOrganizations(true);
   const results = await Promise.allSettled(organizations.map(listOrganizationServices));
   const services: Service[] = [];
   const failedOrganizations: Organization[] = [];

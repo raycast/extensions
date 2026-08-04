@@ -16,6 +16,8 @@ export const oauthClient = new OAuth.PKCEClient({
 let authenticationPromise: Promise<string> | undefined;
 let authenticationGeneration = 0;
 let tokenOperationQueue: Promise<void> = Promise.resolve();
+let authenticationAllowed = true;
+let isSigningOut = false;
 
 class AuthenticationCancelledError extends Error {
   constructor() {
@@ -127,7 +129,19 @@ async function authenticate(generation: number): Promise<string> {
   return newTokens.access_token;
 }
 
-export function getAccessToken(): Promise<string> {
+export function getAccessToken(allowInteractiveAuthentication = false): Promise<string> {
+  if (isSigningOut) {
+    return Promise.reject(new AuthenticationCancelledError());
+  }
+
+  if (allowInteractiveAuthentication) {
+    authenticationAllowed = true;
+  }
+
+  if (!authenticationAllowed) {
+    return Promise.reject(new AuthenticationCancelledError());
+  }
+
   // React development mode can start the initial data-loading effect twice.
   // A single-use authorization code must only be exchanged once, so every
   // concurrent API request shares the same authentication operation.
@@ -143,7 +157,14 @@ export function getAccessToken(): Promise<string> {
 }
 
 export async function signOut(): Promise<void> {
+  isSigningOut = true;
+  authenticationAllowed = false;
   authenticationGeneration += 1;
-  authenticationPromise = undefined;
-  await runTokenOperation(() => oauthClient.removeTokens());
+
+  try {
+    await runTokenOperation(() => oauthClient.removeTokens());
+  } finally {
+    authenticationPromise = undefined;
+    isSigningOut = false;
+  }
 }
