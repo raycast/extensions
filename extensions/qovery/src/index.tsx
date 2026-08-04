@@ -6,6 +6,10 @@ import type { Organization, Service, ServiceLink } from "./types";
 
 const ALL_ORGANIZATIONS = "all";
 
+function formatServiceName(name: string): string {
+  return name.length === 0 ? name : `${name[0].toUpperCase()}${name.slice(1).toLowerCase()}`;
+}
+
 function serviceConsoleUrl(service: Service): string {
   return `https://console.qovery.com/organization/${service.organization_id}/project/${service.project_id}/environment/${service.environment_id}/service/${service.id}/overview`;
 }
@@ -48,7 +52,7 @@ function LinksView({ service }: { service: Service }) {
   }, [service]);
 
   return (
-    <List isLoading={isLoading} navigationTitle={`${service.name} Links`}>
+    <List isLoading={isLoading} navigationTitle={`${formatServiceName(service.name)} Links`}>
       {!isLoading && links.length === 0 ? (
         <List.EmptyView
           icon={error ? Icon.Warning : Icon.Link}
@@ -127,7 +131,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search services, projects, environments, or organizations"
+      searchBarPlaceholder="Search anything..."
       searchBarAccessory={
         organizations.length > 1 ? (
           <List.Dropdown
@@ -160,7 +164,7 @@ export default function Command() {
         <List.Item
           key={`${service.organization_id}:${service.id}`}
           icon={serviceIcon(service)}
-          title={service.name}
+          title={formatServiceName(service.name)}
           subtitle={`${service.project_name} · ${service.environment_name}`}
           keywords={[service.organization_name, service.project_name, service.environment_name, service.service_type]}
           accessories={[
