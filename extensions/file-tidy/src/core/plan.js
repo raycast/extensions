@@ -149,7 +149,13 @@ function validSegment(segment, label) {
     segment.includes("/") ||
     segment.includes("\\") ||
     path.basename(segment) !== segment ||
-    normalized === ".tidy"
+    normalized === ".tidy" ||
+    // Control and format characters: a NUL makes every fs call throw a raw
+    // TypeError halfway through executing the plan, and a bidi override makes
+    // the folder name render as something other than what it is. Letters,
+    // digits, punctuation and emoji stay allowed — categories may be in any
+    // language.
+    /\p{Cc}|\p{Cf}/u.test(segment)
   ) {
     const e = new Error(`Invalid ${label} name: ${String(segment)}`);
     e.code = "INVALID_SEGMENT";

@@ -1,17 +1,19 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
+import { tidyPath } from "./config.js";
 import { moveFile } from "./move.js";
 
 /**
  * Execute the plan: move every file, resolving name collisions with " (n)"
- * suffixes. The run manifest is rewritten after every move so that undo can
- * restore whatever was moved even if a later step fails. Appends to the
- * Duplicates manifest (formatDupBlock lets adapters localize its text).
+ * suffixes. The run manifest records the whole plan before the first move and
+ * is rewritten whenever a move diverges from it, so undo can restore whatever
+ * was moved even if a later step fails. Appends to the Duplicates manifest
+ * (formatDupBlock lets adapters localize its text).
  * Returns { moved, manifestPath }.
  */
 export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defaultDupBlock }) {
-  const runsDir = path.join(destDir, ".tidy", "runs");
+  const runsDir = tidyPath(destDir, "runs");
   fs.mkdirSync(runsDir, { recursive: true });
   const time = new Date().toISOString();
   // The ISO timestamp alone collides for two runs started in the same
@@ -25,23 +27,16 @@ export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defa
   // Directories this run actually had to create. Undo removes only these, so a
   // folder that already existed before the run survives being emptied.
   const createdDirs = new Set();
+  // The whole plan is recorded up front and rewritten only where reality
+  // diverges from it. Rewriting after every single move made a run quadratic:
+  // at 4000 files that was 4000 full rewrites of a 1.3MB manifest — ~2.5GB
+  // written, and the extension's UI is frozen for all of it.
+  const records = entries.map(({ from, to, action }) => ({ from, to, action }));
   // Write-then-rename so a half-written update (e.g. volume fills up) can
   // never truncate the only undo record — the last good manifest survives.
   const writeManifest = () => {
     const tmp = `${manifestPath}.tmp`;
-    fs.writeFileSync(
-      tmp,
-      JSON.stringify(
-        {
-          time,
-          sourceDir,
-          moves: moved.map(({ from, to, action }) => ({ from, to, action })),
-          createdDirs: [...createdDirs],
-        },
-        null,
-        2,
-      ),
-    );
+    fs.writeFileSync(tmp, JSON.stringify({ time, sourceDir, moves: records, createdDirs: [...createdDirs] }, null, 2));
     fs.renameSync(tmp, manifestPath);
   };
 
@@ -53,15 +48,21 @@ export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defa
   const dupEntries = entries.filter((e) => e.action === "duplicate");
   const dupManifest = dupEntries.length ? path.join(path.dirname(dupEntries[0].to), "manifest.md") : null;
 
-  for (const entry of entries) {
+  writeManifest();
+  for (const [i, entry] of entries.entries()) {
     const finalTo = resolveCollision(entry.to, dupManifest);
     // Collected before the mkdir, while "doesn't exist yet" is still true.
-    for (const dir of missingDirs(path.dirname(finalTo), destDir)) createdDirs.add(dir);
-    // Record the move before performing it, so a move can never happen without
-    // a manifest entry. Undo treats a recorded-but-never-performed move (file
-    // still at `from`, nothing at `to`) as a no-op.
+    const newDirs = missingDirs(path.dirname(finalTo), destDir);
+    // Everything the manifest doesn't already say must reach disk before the
+    // move, so a move can never happen without a matching entry. Undo treats a
+    // recorded-but-never-performed move (file still at `from`, nothing at `to`)
+    // as a no-op, which is what the entries after a failure become.
+    if (finalTo !== entry.to || newDirs.length) {
+      records[i].to = finalTo;
+      for (const dir of newDirs) createdDirs.add(dir);
+      writeManifest();
+    }
     moved.push({ ...entry, to: finalTo });
-    writeManifest();
     fs.mkdirSync(path.dirname(finalTo), { recursive: true });
     moveFile(entry.from, finalTo);
   }

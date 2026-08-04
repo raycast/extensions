@@ -115,6 +115,8 @@ const DEFAULT_CONFIG = {
 /** Folders tidy creates itself (before the prefix is applied). */
 export const DUPLICATES_DIR = "Duplicates";
 export const REVIEW_DIR = "Review";
+/** Bookkeeping folder: run manifests and the perceptual-hash cache. */
+export const TIDY_DIR = ".tidy";
 
 /**
  * Base names introduced together with (or after) the folder prefix — 0.4.0
@@ -242,6 +244,32 @@ export function buildFolderNamer(destDir, config) {
     cache.set(base, name);
     return name;
   };
+}
+
+/**
+ * A path inside destDir's bookkeeping folder, refused if anything along the way
+ * is a symlink leading out of destDir. Manifests and the hash cache are written
+ * and read through here, and undo acts on whatever a manifest says, so a
+ * redirected `.tidy` (or `.tidy/runs`) turns "records for this destination"
+ * into "records someone else planted".
+ *
+ * Every segment must be checked, not just the first: `.tidy` can be a genuine
+ * directory while `runs` inside it is the link. Callers must route through this
+ * rather than joining ".tidy" onto destDir themselves.
+ */
+export function tidyPath(destDir, ...sub) {
+  const target = path.join(destDir, TIDY_DIR, ...sub);
+  // No existsSync guard: canonicalPath resolves the deepest existing ancestor,
+  // so a not-yet-created runs folder is still judged by whether the `.tidy`
+  // above it is a link out of destDir.
+  if (!isInsideDir(canonicalPath(destDir), canonicalPath(target))) {
+    // code + destDir let adapters render this in their own language.
+    const e = new Error(`${TIDY_DIR} in ${destDir} resolves outside it`);
+    e.code = "TIDY_DIR_ESCAPES";
+    e.destDir = destDir;
+    throw e;
+  }
+  return target;
 }
 
 /** existsSync alone would also match a plain file, whose adoption later dies in mkdir with ENOTDIR. */

@@ -9,7 +9,7 @@ import { executePlan } from "../src/core/execute.js";
 import { moveFile } from "../src/core/move.js";
 import { buildPlan } from "../src/core/plan.js";
 import { scanDest, scanSource } from "../src/core/scan.js";
-import { getLastRun, undoLastRun } from "../src/core/undo.js";
+import { getLastRun, undoLastRun, undoRun } from "../src/core/undo.js";
 
 const extIndex = buildExtIndex({ categories: { Images: ["jpg"], Documents: ["txt"] } });
 const now = new Date();
@@ -278,6 +278,68 @@ test("refuses a manifest whose paths point outside the destination", () => {
   );
 });
 
+test("a .tidy folder symlinked out of the destination is refused, not followed", () => {
+  const root = tmp();
+  const dest = path.join(root, "Archive");
+  const src = path.join(root, "Source");
+  const elsewhere = path.join(root, "Elsewhere");
+  fs.mkdirSync(dest, { recursive: true });
+  fs.mkdirSync(src, { recursive: true });
+  fs.mkdirSync(elsewhere, { recursive: true });
+  fs.symlinkSync(elsewhere, path.join(dest, ".tidy"));
+  write(src, "a.txt", "x");
+
+  const entries = [
+    {
+      from: path.join(src, "a.txt"),
+      to: path.join(dest, "Documents", "a.txt"),
+      name: "a.txt",
+      action: "archive",
+      size: 1,
+    },
+  ];
+  const escapes = (err) => err instanceof Error && err.code === "TIDY_DIR_ESCAPES";
+  // Writing the run manifest, reading it back, and undoing all go through it.
+  assert.throws(() => executePlan(entries, { destDir: dest, sourceDir: src }), escapes);
+  assert.throws(() => getLastRun(dest), escapes);
+  assert.equal(fs.existsSync(path.join(elsewhere, "runs")), false);
+});
+
+test("refuses a manifest reached through a symlinked runs folder, leaving the foreign file alone", () => {
+  const root = tmp();
+  const dest = path.join(root, "Archive");
+  const src = path.join(root, "Source");
+  const elsewhere = path.join(root, "Elsewhere");
+  fs.mkdirSync(path.join(dest, ".tidy"), { recursive: true });
+  fs.mkdirSync(src, { recursive: true });
+  fs.mkdirSync(elsewhere, { recursive: true });
+  fs.symlinkSync(elsewhere, path.join(dest, ".tidy", "runs"));
+  write(dest, "Documents/victim.txt", "archived earlier");
+
+  const planted = path.join(elsewhere, "planted.json");
+  fs.writeFileSync(
+    planted,
+    JSON.stringify({
+      time: "2026-08-04T12:00:00.000Z",
+      sourceDir: src,
+      // Inside both trees — only the route to the manifest itself is crooked.
+      moves: [
+        { from: path.join(src, "victim.txt"), to: path.join(dest, "Documents", "victim.txt"), action: "archive" },
+      ],
+      createdDirs: [],
+    }),
+  );
+
+  // Refused loudly rather than silently: a redirected runs folder means the
+  // destination has been tampered with, which the user needs told.
+  assert.throws(
+    () => undoRun(dest, path.join(dest, ".tidy", "runs", "planted.json")),
+    (err) => err instanceof Error && err.code === "TIDY_DIR_ESCAPES",
+  );
+  assert.ok(fs.existsSync(path.join(dest, "Documents", "victim.txt"))); // not moved out
+  assert.ok(fs.existsSync(planted)); // not renamed to *.undone
+});
+
 test("refuses a manifest that reaches outside through a symlinked folder, and touches nothing", () => {
   const root = tmp();
   const dest = path.join(root, "Archive");
@@ -296,7 +358,9 @@ test("refuses a manifest that reaches outside through a symlinked folder, and to
       time: "2026-08-04T12:00:00.000Z",
       sourceDir: src,
       // Every path here is lexically inside its tree; only the symlink isn't.
-      moves: [{ from: path.join(src, "secret.txt"), to: path.join(dest, "ft_Images", "secret.txt"), action: "archive" }],
+      moves: [
+        { from: path.join(src, "secret.txt"), to: path.join(dest, "ft_Images", "secret.txt"), action: "archive" },
+      ],
       createdDirs: [path.join(dest, "ft_Images", "leftover")],
     }),
   );

@@ -3,6 +3,7 @@ import path from "node:path";
 import exifr from "exifr";
 import jpeg from "jpeg-js";
 import { PNG } from "pngjs";
+import { tidyPath } from "./config.js";
 import { pickLargest } from "./similar.js";
 
 /**
@@ -53,7 +54,7 @@ export async function hashImages(files, { onProgress, cache } = {}) {
   return hashes;
 }
 
-const CACHE_REL = [".tidy", "phash-cache.json"];
+const CACHE_NAME = "phash-cache.json";
 
 /**
  * Hash cache persisted under destDir/.tidy — decode cost otherwise grows with
@@ -62,7 +63,7 @@ const CACHE_REL = [".tidy", "phash-cache.json"];
  */
 export function loadHashCache(destDir) {
   try {
-    const raw = JSON.parse(fs.readFileSync(path.join(destDir, ...CACHE_REL), "utf8"));
+    const raw = JSON.parse(fs.readFileSync(tidyPath(destDir, CACHE_NAME), "utf8"));
     return new Map(
       Object.entries(raw.entries ?? {}).map(([p, e]) => [
         p,
@@ -83,7 +84,7 @@ export function saveHashCache(destDir, cache, files) {
       entries[p] = { size: e.size, mtimeMs: e.mtimeMs, hash: e.hash === null ? null : e.hash.toString(16) };
   }
   try {
-    const file = path.join(destDir, ...CACHE_REL);
+    const file = tidyPath(destDir, CACHE_NAME);
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, JSON.stringify({ entries }));
   } catch {

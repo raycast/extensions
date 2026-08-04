@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { canonicalPath, isInsideDir } from "./config.js";
+import { canonicalPath, isInsideDir, tidyPath } from "./config.js";
 import { moveFile } from "./move.js";
 
 /**
@@ -23,7 +23,7 @@ export function undoLastRun(destDir) {
  * if the record is unreadable or malformed.
  */
 export function getLastRun(destDir) {
-  const runsDir = path.join(destDir, ".tidy", "runs");
+  const runsDir = tidyPath(destDir, "runs");
   const runs = fs.existsSync(runsDir)
     ? fs
         .readdirSync(runsDir)
@@ -41,10 +41,15 @@ export function getLastRun(destDir) {
  * the confirmation prompt and the confirmation).
  */
 export function undoRun(destDir, manifestPath) {
-  const runsDir = path.resolve(destDir, ".tidy", "runs");
+  const runsDir = tidyPath(destDir, "runs");
   const resolvedManifestPath = path.resolve(manifestPath);
+  // Canonicalized, like every other containment check here: comparing the
+  // spelling alone accepts <destDir>/.tidy/runs/x.json when runs is a symlink,
+  // and undo would then execute a manifest planted outside destDir and rename
+  // that foreign file to *.undone on its way out.
   if (
-    path.relative(path.dirname(resolvedManifestPath), runsDir) !== "" ||
+    !isInside(runsDir, resolvedManifestPath) ||
+    canonicalPath(path.dirname(resolvedManifestPath)) !== canonicalPath(runsDir) ||
     !path.basename(resolvedManifestPath).endsWith(".json") ||
     !fs.existsSync(resolvedManifestPath)
   ) {

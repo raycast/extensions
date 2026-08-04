@@ -10,6 +10,7 @@ interface CoreError extends Error {
   path?: string;
   label?: string;
   segment?: string;
+  destDir?: string;
 }
 
 export function describeError(err: unknown, fallbackTitle: string): { title: string; message: string } {
@@ -22,6 +23,11 @@ export function describeError(err: unknown, fallbackTitle: string): { title: str
       return {
         title: "Invalid folder name in config",
         message: `The ${e.label} name from your config is not a plain folder name: “${e.segment}”`,
+      };
+    case "TIDY_DIR_ESCAPES":
+      return {
+        title: "Unusable .tidy folder",
+        message: `The .tidy folder in ${e.destDir} is a link pointing outside it, so its records can't be trusted`,
       };
     case "EXDEV_VERIFY":
       return {

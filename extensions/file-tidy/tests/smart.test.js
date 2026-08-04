@@ -9,6 +9,7 @@ import { buildExtIndex, buildFolderNamer, organizedDirNames } from "../src/core/
 import { executePlan } from "../src/core/execute.js";
 import { checkHealth } from "../src/core/health.js";
 import { clusterByHash, hashImages, loadHashCache, saveHashCache } from "../src/core/phash.js";
+import { buildPlan } from "../src/core/plan.js";
 import { buildSubIndex, scanSource, subClassify } from "../src/core/scan.js";
 import { findSimilar } from "../src/core/similar.js";
 
@@ -196,6 +197,37 @@ test("hand-edited config: a value that should be a list is ignored, never iterat
   assert.equal(index.has("j"), false);
   // A non-list rule set used to throw "is not iterable" straight at the user
   assert.equal(buildSubIndex({ Documents: 5, Images: [{ name: "Shots", exts: ["png"] }] }).size, 1);
+});
+
+test("category names carrying a NUL or a bidi override are rejected before anything moves", async () => {
+  const src = tmp();
+  const dest = tmp();
+  write(src, "a.txt", "x");
+  const file = {
+    path: path.join(src, "a.txt"),
+    name: "a.txt",
+    ext: "txt",
+    size: 1,
+    birthtime: new Date(),
+    mtime: new Date(),
+  };
+
+  for (const segment of ["a\0b", "‮gpj.exe"]) {
+    await assert.rejects(
+      buildPlan({
+        sourceFiles: [file],
+        duplicates: new Map(),
+        destDir: dest,
+        extIndex: new Map([["txt", segment]]),
+        fallbackCategory: "Others",
+        folderName: (b) => b,
+      }),
+      // A NUL used to reach executePlan and die there with node's own
+      // TypeError, halfway through moving files and with no code to translate.
+      (err) => err.code === "INVALID_SEGMENT",
+      `expected ${JSON.stringify(segment)} to be refused`,
+    );
+  }
 });
 
 test("hand-edited config: a file holding nothing but null falls back to the defaults", async () => {
