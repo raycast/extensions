@@ -15,11 +15,6 @@ const MAX_BUFFER = 64 * 1024 * 1024;
 
 export const DEFAULT_SEARCH_LIMIT = 25;
 
-type CapdPreferences = {
-  capdPath?: string;
-  searchLimit?: string;
-};
-
 let resolved: string | undefined;
 
 /**
@@ -43,7 +38,7 @@ export async function resolveCapd(): Promise<string> {
 }
 
 async function candidates(): Promise<string[]> {
-  const configured = getPreferenceValues<CapdPreferences>().capdPath?.trim();
+  const configured = getPreferenceValues<Preferences>().capdPath?.trim();
   const bundles = (await getApplications())
     .filter((application) => application.bundleId === BUNDLE_ID)
     .map((application) => join(application.path, BUNDLED_BINARY));
@@ -125,6 +120,6 @@ export async function remove(ids: number[]): Promise<Removal> {
 }
 
 export function searchLimit(): number {
-  const configured = Number.parseInt(getPreferenceValues<CapdPreferences>().searchLimit ?? "", 10);
+  const configured = Number.parseInt(getPreferenceValues<Preferences>().searchLimit ?? "", 10);
   return Number.isFinite(configured) && configured > 0 ? configured : DEFAULT_SEARCH_LIMIT;
 }

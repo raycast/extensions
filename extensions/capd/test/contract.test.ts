@@ -1,19 +1,24 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ExitCode, explain, isAbort, wasAlreadyCaptured } from "../src/contract";
 import { Capture, Hit, headline, tagList } from "../src/types";
 
+/**
+ * The golden fixtures the Swift CLI tests assert against, read from the capd repository
+ * so that changing the CLI's JSON contract fails this suite too. They are absent when the
+ * extension is published on its own, which is why these cases skip rather than fail.
+ */
 const FIXTURES = join(__dirname, "../../Tests/CapdCLITests/Fixtures");
+const hasFixtures = existsSync(FIXTURES);
 
 function fixture<T>(name: string): T {
   return JSON.parse(readFileSync(join(FIXTURES, name), "utf8")) as T;
 }
 
-describe("the search --json contract", () => {
-  const hits = fixture<Hit[]>("search.json");
-
+describe.skipIf(!hasFixtures)("the search --json contract", () => {
   it("parses the golden fixture into the shape the UI reads", () => {
+    const hits = fixture<Hit[]>("search.json");
     expect(hits).toHaveLength(1);
 
     const [hit] = hits;
@@ -26,18 +31,19 @@ describe("the search --json contract", () => {
   });
 
   it("keeps created_at parseable as a date", () => {
-    const created = new Date(hits[0].capture.created_at);
+    const created = new Date(fixture<Hit[]>("search.json")[0].capture.created_at);
     expect(Number.isNaN(created.getTime())).toBe(false);
     expect(created.toISOString()).toBe("2026-03-03T00:00:00.500Z");
   });
 
   it("omits unset fields rather than encoding null", () => {
-    expect("tags" in hits[0].capture).toBe(false);
-    expect("asset_path" in hits[0].capture).toBe(false);
+    const [hit] = fixture<Hit[]>("search.json");
+    expect("tags" in hit.capture).toBe(false);
+    expect("asset_path" in hit.capture).toBe(false);
   });
 });
 
-describe("the list --json contract", () => {
+describe.skipIf(!hasFixtures)("the list --json contract", () => {
   it("parses every capture in the golden fixture", () => {
     const hits = fixture<Hit[]>("list.json");
     expect(hits.length).toBeGreaterThan(0);

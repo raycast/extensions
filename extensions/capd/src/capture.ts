@@ -12,9 +12,7 @@ import { CapdNotInstalled, wasAlreadyCaptured } from "./contract";
 
 const INSTALL_GUIDE = "https://capd.jxd.dev/install";
 
-type Arguments = { input?: string };
-
-export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.Capture }>) {
   const input = await resolveInput(props);
   if (!input) {
     await showToast({
@@ -61,7 +59,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments 
  * Falls back through the ways Raycast can hand over content, so the command works as an
  * argument command, as a fallback command from root search, and as a bare hotkey.
  */
-async function resolveInput(props: LaunchProps<{ arguments: Arguments }>): Promise<string | undefined> {
+async function resolveInput(props: LaunchProps<{ arguments: Arguments.Capture }>): Promise<string | undefined> {
   const sources = [async () => props.arguments?.input, async () => props.fallbackText, selectedText, clipboardText];
 
   for (const source of sources) {
