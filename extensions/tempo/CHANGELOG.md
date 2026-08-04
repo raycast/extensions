@@ -1,5 +1,9 @@
 # Tempo Changelog
 
+## [Prefill Remaining Estimate] - {PR_MERGE_DATE}
+
+- Prefill the editable remaining estimate from the selected Jira issue
+
 ## [Add Remaining Estimate Validation] - 2026-06-22
 
 - Add validation for remaining estimate field based on global configuration
