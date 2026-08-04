@@ -1,6 +1,6 @@
 # Flashcards Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-04
 
 - Initial version code of the Flashcards extension.
 - Added **Create Card** command to create Q&A and Multiple-Choice flashcards using Markdown.
