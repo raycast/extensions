@@ -238,6 +238,11 @@ describe("parser unification", () => {
       expect(tokenizeArrayBody(["foo#bar baz"])).toEqual(["foo#bar", "baz"]);
     });
 
+    it("preserves # inside quoted elements, including after whitespace", () => {
+      expect(tokenizeArrayBody(['"/opt/my #tools/bin" /usr/bin'])).toEqual(["/opt/my #tools/bin", "/usr/bin"]);
+      expect(tokenizeArrayBody(["'plugin #5'  next   # real comment"])).toEqual(["plugin #5", "next"]);
+    });
+
     it("multi-line arrays with comments produce no phantom plugin entries", () => {
       const content = ["plugins=(", "  git    # version control", "  docker  # containers", ")"].join("\n");
       expect(extractEntries(content).plugins.map((p) => p.name)).toEqual(["git", "docker"]);

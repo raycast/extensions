@@ -95,19 +95,41 @@ const P = PARSING_CONSTANTS.PATTERNS;
  */
 export function tokenizeArrayBody(bodyLines: string[]): string[] {
   const tokens: string[] = [];
-  for (const raw of bodyLines) {
-    // An inline comment runs to end of line; `#` only starts a comment
-    // at the beginning of a word
-    const commentStart = raw.match(/(^|\s)#/);
-    const line = commentStart?.index !== undefined ? raw.slice(0, commentStart.index) : raw;
-
-    const tokenPattern = /"([^"]*)"|'([^']*)'|(\S+)/g;
-    let match: RegExpExecArray | null;
-    while ((match = tokenPattern.exec(line)) !== null) {
-      const value = match[1] ?? match[2] ?? match[3];
-      if (value && value.trim()) {
-        tokens.push(value.trim());
+  for (const line of bodyLines) {
+    // Single pass tracking quote state: `#` starts a comment only when it
+    // is outside quotes AND begins a word — a `#` inside quotes (or inside
+    // a word like foo#bar) is content, not a comment.
+    let current = "";
+    let quote: '"' | "'" | null = null;
+    for (let i = 0; i < line.length; i += 1) {
+      const ch = line[i]!;
+      if (quote) {
+        if (ch === quote) {
+          quote = null;
+        } else {
+          current += ch;
+        }
+        continue;
       }
+      if (ch === '"' || ch === "'") {
+        quote = ch;
+        continue;
+      }
+      if (ch === "#" && current === "") {
+        // Comment runs to end of line
+        break;
+      }
+      if (/\s/.test(ch)) {
+        if (current) {
+          tokens.push(current);
+          current = "";
+        }
+        continue;
+      }
+      current += ch;
+    }
+    if (current) {
+      tokens.push(current);
     }
   }
   return tokens;
