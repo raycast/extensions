@@ -1,5 +1,19 @@
 # Changelog
 
+## [One parser for every surface] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Statistics, section counts, and the type views now agree — all of them derive from a single parser (the pattern registry), so the count you see on a section can no longer differ from the list you drill into. Previously two independently written parser systems could disagree about what is in the file
+- Multi-line `plugins=(…)`, `path+=(…)` and `fpath=(…)` array declarations — the standard Oh My Zsh layout — are now parsed everywhere; sections and search previously missed them
+- PATH and FPATH declarations in all supported forms (`export`/`typeset -x`/`declare -x`, `+=` string append, array append/set, `$PATH:`-relative, and plain assignment) are recognized consistently across every surface
+- Keybinding counts no longer include bare mode lines like `bindkey -e` that the Keybindings view has nothing to show for
+- Sources with quoted operands or trailing inline comments resolve correctly in the detail pane's `Source Exists` fact; plugin install checks honor `ZSH_CUSTOM`/`ZSH` set as plain (unexported) assignments; `$HOMEBREW_PREFIX`-style variables are no longer mis-expanded as `$HOME`
+
+### Changed
+
+- Every parsed entry now carries the line it was defined on internally, laying the groundwork for addressing duplicate definitions directly
+
 ## [Resolved facts: shadowed commands, missing sources, missing plugins] - 2026-08-03
 
 ### Added
