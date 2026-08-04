@@ -6,7 +6,13 @@
  */
 
 import { FILE_CONSTANTS } from "../constants";
-import { countAllPatterns, countUnrecognizedLines, extractDetailed, type RegistryEntries } from "./pattern-registry";
+import {
+  countAllPatterns,
+  countUnrecognizedLines,
+  extractDetailed,
+  multilineArrayInteriorLines,
+  type RegistryEntries,
+} from "./pattern-registry";
 import { detectSectionMarker, updateSectionContext, type SectionContext } from "./section-detector";
 
 import { EntryType } from "../types/enums";
@@ -356,6 +362,7 @@ export function parseZshrc(content: string): ReadonlyArray<ZshEntry> {
   // single parser; this function only attaches section context.
   const detailed = extractDetailed(content);
   const entriesByLine = buildEntriesByLine(detailed.entries);
+  const arrayInterior = multilineArrayInteriorLines(content);
 
   for (let index = 0; index < lines.length; index += 1) {
     const rawLine = lines[index];
@@ -378,8 +385,10 @@ export function parseZshrc(content: string): ReadonlyArray<ZshEntry> {
       continue;
     }
 
-    // Check for section markers using enhanced detection
-    const marker = detectSectionMarker(rawLine, index + 1);
+    // Check for section markers using enhanced detection. Lines inside a
+    // multi-line array are never markers — a comment in an array body
+    // that happens to look like a section header must not shift context.
+    const marker = arrayInterior.has(index + 1) ? null : detectSectionMarker(rawLine, index + 1);
     if (marker) {
       context = updateSectionContext(marker, context);
       continue;
@@ -460,12 +469,15 @@ export function toLogicalSections(content: string): ReadonlyArray<LogicalSection
     });
   };
 
+  const arrayInterior = multilineArrayInteriorLines(content);
+
   for (let index = 0; index < lines.length; index += 1) {
     const raw = lines[index];
     if (!raw) continue;
 
-    // Use enhanced section detection
-    const marker = detectSectionMarker(raw, index + 1);
+    // Use enhanced section detection; lines inside a multi-line array
+    // are never markers (see parseZshrc).
+    const marker = arrayInterior.has(index + 1) ? null : detectSectionMarker(raw, index + 1);
     if (marker) {
       // Handle end markers
       if (["custom_end", "dashed_end", "function_end"].includes(marker.type)) {

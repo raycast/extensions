@@ -61,6 +61,15 @@ describe("edit-item-write.ts", () => {
       const result = insertIntoSection(CONTENT, "Misc", "alias new='x'");
       expect(result.endsWith("alias m='make'\nalias new='x'")).toBe(true);
     });
+
+    it("a section-like comment inside an array is not an insertion target", () => {
+      const content = ["# Section: Plugins", "plugins=(", "  git", "  ## extras", "  docker", ")"].join("\n");
+      const result = insertIntoSection(content, "extras", "alias new='x'");
+      // "extras" does not exist as a section — the array must stay intact
+      // and the new section is created at the end of the file.
+      expect(result).toContain("plugins=(\n  git\n  ## extras\n  docker\n)");
+      expect(result.endsWith("# --- extras --- #\nalias new='x'")).toBe(true);
+    });
   });
 
   describe("preservingReplacer", () => {

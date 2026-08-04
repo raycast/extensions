@@ -302,6 +302,88 @@ function matchKeybinding(line: string): KeybindingMatch | null {
 const withLine = <T extends Positioned>(entries: T[] | null, line: number): T[] =>
   (entries ?? []).map((entry) => ({ ...entry, line }));
 
+/** A recognized array declaration and the physical lines it spans. */
+interface ArrayScan {
+  /** "plugins" | "path" | "fpath" */
+  variable: string;
+  /** `+=` (append) vs `=` (set) */
+  append: boolean;
+  /** Raw body text between the parens, one entry per physical line */
+  parts: string[];
+  /** 0-based index of the line holding the closing paren */
+  closeIndex: number;
+}
+
+/**
+ * Matches an array declaration (`plugins=(git docker)`, `path+=(`, …)
+ * opening at `index` — single-line or spanning several lines as is
+ * common in Oh My Zsh configs. Close-paren detection is quote-aware, so
+ * a `)` inside a quoted element does not terminate the array. Returns
+ * null when the line opens no array or the array never closes.
+ */
+function matchArrayAt(lines: readonly string[], index: number): ArrayScan | null {
+  const raw = lines[index] ?? "";
+  const arrayOpen = raw.match(/^(\s*)(plugins|path|fpath)(\+?)=\s*\((.*)$/);
+  if (!arrayOpen) return null;
+
+  const firstBody = arrayOpen[4] ?? "";
+  const parts: string[] = [];
+  let closeIndex = -1;
+
+  const sameLineClose = findUnquotedCloseParen(firstBody);
+  if (sameLineClose !== -1) {
+    // Single line — only when nothing but whitespace or a comment
+    // follows the close.
+    const trailing = firstBody.slice(sameLineClose + 1).trim();
+    if (trailing === "" || trailing.startsWith("#")) {
+      parts.push(firstBody.slice(0, sameLineClose));
+      closeIndex = index;
+    }
+  } else {
+    parts.push(firstBody);
+    let scan = index + 1;
+    while (scan < lines.length) {
+      const bodyLine = lines[scan] ?? "";
+      const closePos = findUnquotedCloseParen(bodyLine);
+      if (closePos !== -1) {
+        parts.push(bodyLine.slice(0, closePos));
+        closeIndex = scan;
+        break;
+      }
+      parts.push(bodyLine);
+      scan += 1;
+    }
+  }
+
+  if (closeIndex === -1) return null;
+  return { variable: arrayOpen[2]!, append: arrayOpen[3] === "+", parts, closeIndex };
+}
+
+/**
+ * 1-based numbers of the body and closing lines of every multi-line
+ * array. Section detection must ignore these lines: a comment inside an
+ * array that happens to match a section-header format must not split
+ * the array, or per-section counts would disagree with what the
+ * registry (and therefore every view) extracts.
+ */
+export function multilineArrayInteriorLines(content: string): Set<number> {
+  const interior = new Set<number>();
+  const lines = content.split(/\r?\n/);
+  for (let index = 0; index < lines.length; index += 1) {
+    const raw = lines[index];
+    if (!raw || raw.trim().length === 0) continue;
+    if (raw.length > FILE_CONSTANTS.MAX_LINE_LENGTH) continue;
+    const scan = matchArrayAt(lines, index);
+    if (scan && scan.closeIndex > index) {
+      for (let consumed = index + 1; consumed <= scan.closeIndex; consumed += 1) {
+        interior.add(consumed + 1);
+      }
+      index = scan.closeIndex;
+    }
+  }
+  return interior;
+}
+
 /** Registry extraction plus which physical lines it consumed. */
 export interface DetailedExtraction {
   entries: RegistryEntries;
@@ -347,61 +429,26 @@ export function extractDetailed(content: string): DetailedExtraction {
     if (raw.length > FILE_CONSTANTS.MAX_LINE_LENGTH) continue;
     const line = index + 1;
 
-    // Array declarations (`plugins=(git docker)`, `path+=(`, …) —
-    // single-line or spanning several lines as is common in Oh My Zsh
-    // configs — are consumed as one declaration attributed to their
-    // opening line. Close-paren detection is quote-aware, so a `)`
-    // inside a quoted element does not terminate the array.
-    const arrayOpen = raw.match(/^(\s*)(plugins|path|fpath)(\+?)=\s*\((.*)$/);
-    if (arrayOpen) {
-      const firstBody = arrayOpen[4] ?? "";
-      const parts: string[] = [];
-      let closeIndex = -1;
-
-      const sameLineClose = findUnquotedCloseParen(firstBody);
-      if (sameLineClose !== -1) {
-        // Single line — only when nothing but whitespace or a comment
-        // follows the close.
-        const trailing = firstBody.slice(sameLineClose + 1).trim();
-        if (trailing === "" || trailing.startsWith("#")) {
-          parts.push(firstBody.slice(0, sameLineClose));
-          closeIndex = index;
-        }
-      } else {
-        parts.push(firstBody);
-        let scan = index + 1;
-        while (scan < lines.length) {
-          const bodyLine = lines[scan] ?? "";
-          const closePos = findUnquotedCloseParen(bodyLine);
-          if (closePos !== -1) {
-            parts.push(bodyLine.slice(0, closePos));
-            closeIndex = scan;
-            break;
-          }
-          parts.push(bodyLine);
-          scan += 1;
+    // Array declarations — consumed as one declaration attributed to
+    // their opening line (see `matchArrayAt`).
+    const arrayScan = matchArrayAt(lines, index);
+    if (arrayScan) {
+      const elements = tokenizeArrayBody(arrayScan.parts);
+      const type: PathLikeMatch["type"] = arrayScan.append ? "append" : "set";
+      for (let consumed = index; consumed <= arrayScan.closeIndex; consumed += 1) {
+        matchedLines.add(consumed + 1);
+      }
+      for (const element of elements) {
+        if (arrayScan.variable === "plugins") {
+          result.plugins.push({ name: element.trim(), line });
+        } else if (arrayScan.variable === "path") {
+          result.pathEntries.push({ entry: element.trim(), type, line });
+        } else {
+          result.fpathEntries.push({ entry: element.trim(), type, line });
         }
       }
-
-      if (closeIndex !== -1) {
-        const elements = tokenizeArrayBody(parts);
-        const variable = arrayOpen[2]!;
-        const type: PathLikeMatch["type"] = arrayOpen[3] === "+" ? "append" : "set";
-        for (let consumed = index; consumed <= closeIndex; consumed += 1) {
-          matchedLines.add(consumed + 1);
-        }
-        for (const element of elements) {
-          if (variable === "plugins") {
-            result.plugins.push({ name: element.trim(), line });
-          } else if (variable === "path") {
-            result.pathEntries.push({ entry: element.trim(), type, line });
-          } else {
-            result.fpathEntries.push({ entry: element.trim(), type, line });
-          }
-        }
-        index = closeIndex;
-        continue;
-      }
+      index = arrayScan.closeIndex;
+      continue;
     }
 
     let m = raw.match(P.ALIAS);

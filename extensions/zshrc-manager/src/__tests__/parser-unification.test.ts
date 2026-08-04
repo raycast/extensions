@@ -326,6 +326,37 @@ describe("parser unification", () => {
     });
   });
 
+  describe("section-like comments inside multi-line arrays", () => {
+    // A comment matching a section-header format (`## tools`,
+    // `# Section: X`) inside an array body must not split the array:
+    // section detection would slice it into two unparseable halves and
+    // per-section counts would disagree with what every view shows.
+    const CONTENT = [
+      "# Section: Plugins",
+      "plugins=(",
+      "  git",
+      "  ## docker things",
+      "  docker",
+      ")",
+      "alias after='still in Plugins'",
+    ].join("\n");
+
+    it("does not split the array or shift section context", () => {
+      const sections = toLogicalSections(CONTENT);
+      expect(sections.map((s) => s.label)).toEqual(["Plugins"]);
+      expect(sections[0]!.pluginCount).toBe(extractEntries(CONTENT).plugins.length);
+      expect(sections[0]!.pluginCount).toBe(2);
+      expect(sections[0]!.aliasCount).toBe(1);
+      expect(sections[0]!.otherCount).toBe(0);
+    });
+
+    it("keeps entries attributed to the enclosing section", () => {
+      const entries = parseZshrc(CONTENT);
+      const after = entries.find((e) => e.originalLine.includes("after"));
+      expect(after?.sectionLabel).toBe("Plugins");
+    });
+  });
+
   describe("Other counts lines the registry did not recognize", () => {
     it("a recognized multi-line array contributes nothing to Other", () => {
       const content = ["plugins=(", "  git", "  docker", "  z", ")", "some-unrecognized-command --flag"].join("\n");
