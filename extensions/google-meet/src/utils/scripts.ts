@@ -1,6 +1,9 @@
 export const supportedBrowsers = [
   "Arc",
-  "Brave",
+  // Brave installs as `Brave Browser.app`, so that is the name reported by both
+  // `getDefaultApplication` and the frontmost-process lookup, and the one
+  // AppleScript needs in `tell application`.
+  "Brave Browser",
   "Firefox",
   "Firefox Developer Edition",
   "Google Chrome",

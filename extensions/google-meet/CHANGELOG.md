@@ -1,5 +1,9 @@
 # Google Meet Changelog
 
+## [Fix Brave Support] - {PR_MERGE_DATE}
+
+- Fix Brave being rejected with "isn't a supported browser". macOS installs Brave as `Brave Browser.app` and reports it under that name, but the supported-browser list held `Brave`, so the exact-match check added in the previous release failed for it.
+
 ## [Reliability Overhaul & PWA Support] - 2026-08-03
 
 - Replace the fixed-delay, unbounded-recursion URL lookup with a single shared `createMeeting` pipeline used by all four commands: it polls for the generated link at a fixed interval with a hard deadline instead of guessing a one-shot sleep, and never casts a missing URL to `string`.
