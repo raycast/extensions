@@ -1,6 +1,6 @@
 # Schwab Portfolio Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-04
 
 - View all your Schwab brokerage accounts with balances, positions, day P/L, and total return
 - Aggregate portfolio performance chart with selectable timeframes
