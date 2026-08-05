@@ -1,4 +1,9 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import {
+  openExtensionPreferences,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { applyStatus, SERVICE_LABELS } from "./lib/api";
 import { defaultServices, getPrefs } from "./lib/preferences";
 import { randomStatus } from "./lib/statuses";
@@ -9,9 +14,15 @@ export default async function Command() {
   const services = defaultServices(prefs);
 
   if (services.length === 0) {
-    await showHUD(
-      "⚠️ No default services enabled — check Status Nerd preferences",
-    );
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No default services enabled",
+      message: "Enable at least one default service in preferences",
+      primaryAction: {
+        title: "Open Extension Preferences",
+        onAction: openExtensionPreferences,
+      },
+    });
     return;
   }
 

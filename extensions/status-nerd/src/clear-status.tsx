@@ -1,4 +1,9 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
+import {
+  openExtensionPreferences,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { clearStatuses, SERVICE_LABELS } from "./lib/api";
 import { configuredServices, getPrefs } from "./lib/preferences";
 
@@ -7,9 +12,15 @@ export default async function Command() {
   const services = configuredServices(prefs);
 
   if (services.length === 0) {
-    await showHUD(
-      "⚠️ No services configured — add a token in Status Nerd preferences",
-    );
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No services configured",
+      message: "Add a token in Status Nerd preferences",
+      primaryAction: {
+        title: "Open Extension Preferences",
+        onAction: openExtensionPreferences,
+      },
+    });
     return;
   }
 

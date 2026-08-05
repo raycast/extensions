@@ -53,8 +53,11 @@ const GITLAB_BUCKETS: { hours: number; value: string }[] = [
   { hours: 720, value: "30_days" },
 ];
 
-export function gitlabClearAfter(key: DurationKey): string | null {
-  const date = expirationDate(key);
+export function gitlabClearAfter(
+  key: DurationKey,
+  expiresAt?: Date | null,
+): string | null {
+  const date = expiresAt ?? expirationDate(key);
   if (!date) return null;
   const hours = Math.max(0.1, (date.getTime() - Date.now()) / 3600_000);
   let best = GITLAB_BUCKETS[0];

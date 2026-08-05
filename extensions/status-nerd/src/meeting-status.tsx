@@ -8,6 +8,7 @@ import {
   popToRoot,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -17,6 +18,7 @@ import { getCurrentOrNextMeeting, Meeting } from "./lib/calendar";
 import { DURATION_OPTIONS, DurationKey } from "./lib/duration";
 import { charFor } from "./lib/emoji";
 import { defaultServices, getPrefs } from "./lib/preferences";
+import { cmdShortcut } from "./lib/shortcuts";
 import { addRecent } from "./lib/storage";
 import { getTone } from "./lib/tone";
 
@@ -187,7 +189,7 @@ function MeetingStatusForm({ prefs }: { prefs: Preferences }) {
             <Action
               title="Shuffle Suggestion"
               icon={Icon.Shuffle}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={shuffle}
             />
           )}
@@ -195,7 +197,7 @@ function MeetingStatusForm({ prefs }: { prefs: Preferences }) {
             <Action
               title="Regenerate"
               icon={Icon.Stars}
-              shortcut={{ modifiers: ["cmd"], key: "g" }}
+              shortcut={cmdShortcut("g")}
               onAction={() => regenerate(meeting)}
             />
           )}

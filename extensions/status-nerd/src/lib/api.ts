@@ -20,6 +20,14 @@ export interface ApplyResult {
 }
 
 const SLACK_FALLBACK_EMOJI = ":speech_balloon:";
+const REQUEST_TIMEOUT_MS = 15_000;
+
+function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+  return fetch(url, {
+    ...init,
+    signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+  });
+}
 
 async function postSlackStatus(
   token: string,
@@ -27,23 +35,26 @@ async function postSlackStatus(
   text: string,
   expiresAt: Date | null = null,
 ): Promise<string | null> {
-  const response = await fetch("https://slack.com/api/users.profile.set", {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json; charset=utf-8",
-    },
-    body: JSON.stringify({
-      profile: {
-        status_text: text,
-        status_emoji: emoji,
-        // 0 = the status never expires (Slack convention)
-        status_expiration: expiresAt
-          ? Math.floor(expiresAt.getTime() / 1000)
-          : 0,
+  const response = await fetchWithTimeout(
+    "https://slack.com/api/users.profile.set",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json; charset=utf-8",
       },
-    }),
-  });
+      body: JSON.stringify({
+        profile: {
+          status_text: text,
+          status_emoji: emoji,
+          // 0 = the status never expires (Slack convention)
+          status_expiration: expiresAt
+            ? Math.floor(expiresAt.getTime() / 1000)
+            : 0,
+        },
+      }),
+    },
+  );
   const data = (await response.json()) as { ok: boolean; error?: string };
   return data.ok ? null : (data.error ?? "unknown Slack error");
 }
@@ -83,7 +94,7 @@ async function setGitlabStatus(
   };
   // Omitting clear_status_after keeps the status until cleared manually.
   if (clearAfter) payload.clear_status_after = clearAfter;
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${baseUrl.replace(/\/$/, "")}/api/v4/user/status`,
     {
       method: "PUT",
@@ -112,7 +123,7 @@ async function setGithubStatus(
       }
     }
   `;
-  const response = await fetch("https://api.github.com/graphql", {
+  const response = await fetchWithTimeout("https://api.github.com/graphql", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -142,7 +153,7 @@ async function clearGitlabStatus(
   baseUrl: string,
   token: string,
 ): Promise<void> {
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `${baseUrl.replace(/\/$/, "")}/api/v4/user/status`,
     {
       method: "PUT",
@@ -161,7 +172,7 @@ async function clearGitlabStatus(
 async function clearGithubStatus(token: string): Promise<void> {
   // Empty input clears the GitHub profile status.
   const query = `mutation { changeUserStatus(input: {}) { status { message } } }`;
-  const response = await fetch("https://api.github.com/graphql", {
+  const response = await fetchWithTimeout("https://api.github.com/graphql", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -193,7 +204,7 @@ export async function applyStatus(
 ): Promise<ApplyResult[]> {
   const key = duration ?? prefs.defaultDuration ?? DEFAULT_DURATION;
   const expiresAt = expirationDate(key);
-  const clearAfter = gitlabClearAfter(key);
+  const clearAfter = gitlabClearAfter(key, expiresAt);
   const tasks = services.map(async (service): Promise<ApplyResult> => {
     try {
       switch (service) {

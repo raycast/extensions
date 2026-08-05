@@ -8,6 +8,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
@@ -58,13 +59,16 @@ export default function Command() {
       title: "Setting status…",
     });
     const results = await applyStatus(services, item.emoji, item.text, prefs);
-    await addRecent(withChar(item));
-    reloadRecent();
 
     const ok = results
       .filter((r) => r.ok)
       .map((r) => SERVICE_LABELS[r.service]);
     const failed = results.filter((r) => !r.ok);
+
+    if (ok.length > 0) {
+      await addRecent(withChar(item));
+      reloadRecent();
+    }
     if (failed.length === 0) {
       toast.style = Toast.Style.Success;
       toast.title = `Status set on ${ok.join(", ")}`;
@@ -97,7 +101,7 @@ export default function Command() {
           <Action
             title="Save to Saved"
             icon={Icon.Star}
-            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            shortcut={Keyboard.Shortcut.Common.Save}
             onAction={async () => {
               await addSaved(withChar(item));
               await showToast({ style: Toast.Style.Success, title: "Saved" });
@@ -110,7 +114,7 @@ export default function Command() {
             title="Remove from Saved"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={async () => {
               await removeSaved(item);
               await showToast({ style: Toast.Style.Success, title: "Removed" });
@@ -122,7 +126,7 @@ export default function Command() {
           <Action
             title="Remove from Recent"
             icon={Icon.XMarkCircle}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={Keyboard.Shortcut.Common.Remove}
             onAction={async () => {
               await removeRecent(item);
               reloadRecent();
@@ -132,7 +136,7 @@ export default function Command() {
         <Action.Push
           title="Create New Status…"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          shortcut={Keyboard.Shortcut.Common.New}
           target={<NewStatusForm onSaved={reloadSaved} />}
         />
       </ActionPanel>

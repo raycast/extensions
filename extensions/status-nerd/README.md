@@ -2,16 +2,12 @@
 
 A native **Raycast extension** that sets a funny work status on **Slack, GitLab and GitHub** at once — pick which services to update, roll a random status, or generate one from your own notes with Raycast AI.
 
-https://github.com/user-attachments/assets/b4afaf99-b64e-446f-bb0e-0408673d68e8
-
-
-
 ## Features
 
 - Set the same status on **Slack, GitLab and GitHub** in one go
 - **Choose services per run** (or set your defaults in preferences)
 - **Notes → AI**: type a few keywords, get status suggestions from Raycast AI, shuffle through them, then set
-- **Meeting Status**: generate a status from your current/next calendar meeting (privacy-guarded — hints at the *kind* of meeting, never the details)
+- **Meeting Status**: generate a status from your current/next calendar meeting (privacy-guarded — hints at the _kind_ of meeting, never the details)
 - **Select Status**: pick from your recent, saved and default statuses; save your own
 - **Random Status**: one command, one click, a random status on your default services
 - **Clear Status**: remove your status everywhere at once
@@ -45,17 +41,18 @@ Open the extension's preferences in Raycast and add the tokens for the services 
 
 - **Slack User Token** — `xoxp-` token with the `users.profile:write` scope. Create at [api.slack.com/apps](https://api.slack.com/apps) → OAuth & Permissions.
 - **GitLab Token** — personal access token with the `api` scope. Create at [GitLab → Access Tokens](https://gitlab.com/-/user_settings/personal_access_tokens).
-- **GitHub Token** — classic PAT with the `user` scope (needed for `changeUserStatus`). Create at [github.com/settings/tokens](https://github.com/settings/tokens). Fine-grained tokens don't reliably support status changes — use a classic token.
+- **GitHub Token** — classic PAT with the `user` scope (needed for `changeUserStatus`). Create at [github.com/settings/tokens](https://github.com/settings/tokens). Fine-grained tokens don't reliably support status changes — use a classic token. Classic PATs are broadly scoped and grant wide access to your GitHub account, so create one deliberately and store it securely.
 
-Then pick your **Default Services** in preferences — these are preselected in *Set Status* and used by *Random Status*.
+Then pick your **Default Services** in preferences — these are preselected in _Set Status_ and used by _Random Status_.
 
 ### Optional: calendar (for Meeting Status)
-Add a **Calendar ICS URL** in preferences to enable *Meeting Status*:
+
+Add a **Calendar ICS URL** in preferences to enable _Meeting Status_:
 
 1. Open [Google Calendar](https://calendar.google.com) in a browser → ⚙️ **Settings**
 2. Under **Settings for my calendars**, click the calendar you want
 3. Scroll to **Integrate calendar**
-4. Copy **Secret address in iCal format** — *not* "Calendar ID" and *not* "Public address"
+4. Copy **Secret address in iCal format** — _not_ "Calendar ID" and _not_ "Public address"
 5. Paste it into the extension's **Calendar ICS URL** preference
 
 The correct URL starts with `https://calendar.google.com/calendar/ical/`, contains `/private-…`, and **ends in `/basic.ics`**. A `404` almost always means the "Public address" was used on a non-public calendar, or part of the URL is missing.
@@ -65,6 +62,7 @@ It grants read access to that calendar, so treat it like a secret — it's store
 ## Usage
 
 ### Set Status
+
 1. Run **Set Status** — on first launch, a short onboarding asks for your **tone** (how AI statuses should sound, e.g. "dry sarcasm, never corporate"). Change it anytime with **⌘T**.
 2. Type a few keywords in **Notes** (e.g. "sprint planning, too many meetings, coffee")
 3. Press **Enter** → Raycast AI turns them into several suggestions, in your tone
@@ -73,15 +71,18 @@ It grants read access to that calendar, so treat it like a secret — it's store
 
 Emoji and text stay editable, so you can tweak any suggestion before setting it. The **Duration** dropdown overrides your default duration for this run.
 
-<img width="608" height="342" alt="status on gitlab" src="https://github.com/user-attachments/assets/688efc6b-f4c4-4946-8dd2-681d7b3bc31f" />
+![Set Status on GitLab](metadata/status-nerd-1.png)
 
 ### Meeting Status
+
 Run **Meeting Status** — it reads your current meeting (or the next one within 24h) from the calendar ICS feed and generates status suggestions from the meeting's title + agenda, in your tone. **⌘R** to shuffle, **⌘G** to regenerate, **Enter** to set. All-day and cancelled events are skipped.
 
-Privacy: the prompt is instructed to never include names, companies, or confidential details — statuses only hint at the *kind* of meeting, so they're safe on a public profile. You review every status before it's set.
+Privacy: the prompt is instructed to never include names, companies, or confidential details — statuses only hint at the _kind_ of meeting, so they're safe on a public profile. You review every status before it's set.
 
 ### Select Status
+
 Run **Select Status** for a searchable list in three sections:
+
 - **Recent** — the statuses you set most recently (tracked automatically)
 - **Saved** — your own statuses
 - **Defaults** — the built-in list
@@ -89,9 +90,11 @@ Run **Select Status** for a searchable list in three sections:
 Enter sets the selected status on your default services. Other actions: **Save to Saved** (⌘S), **Remove** (⌘⌫ for saved/recent), and **Create New Status…** (⌘N) to add your own.
 
 ### Random Status
+
 Run **Random Status** for a one-click random status on your default services (no form).
 
 ### Clear Status
+
 Run **Clear Status** to remove your status on all configured services at once (one click, no form).
 
 ## Notes

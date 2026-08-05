@@ -7,6 +7,7 @@ import {
   popToRoot,
   showToast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
@@ -17,6 +18,7 @@ import { charFor } from "./lib/emoji";
 import { defaultServices, getPrefs } from "./lib/preferences";
 import { randomStatus } from "./lib/statuses";
 import { addRecent, addSaved } from "./lib/storage";
+import { cmdShortcut } from "./lib/shortcuts";
 import { getTone, isOnboarded, setTone } from "./lib/tone";
 
 export default function Command() {
@@ -157,7 +159,7 @@ function SetStatusForm() {
     <Action
       title={suggestions.length > 0 ? "Generate Again" : "Generate from Notes"}
       icon={Icon.Stars}
-      shortcut={{ modifiers: ["cmd"], key: "g" }}
+      shortcut={cmdShortcut("g")}
       onAction={generate}
     />
   );
@@ -167,7 +169,7 @@ function SetStatusForm() {
         suggestions.length > 0 ? "Shuffle Suggestion" : "Shuffle from List"
       }
       icon={Icon.Shuffle}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
       onAction={shuffle}
     />
   );
@@ -178,7 +180,7 @@ function SetStatusForm() {
     <Action
       title="Save to Saved"
       icon={Icon.Star}
-      shortcut={{ modifiers: ["cmd"], key: "s" }}
+      shortcut={Keyboard.Shortcut.Common.Save}
       onAction={async () => {
         if (!text.trim()) {
           await showToast({
@@ -201,7 +203,7 @@ function SetStatusForm() {
     <Action.Push
       title="Change Tone…"
       icon={Icon.Pencil}
-      shortcut={{ modifiers: ["cmd"], key: "t" }}
+      shortcut={cmdShortcut("t")}
       target={<ToneForm />}
     />
   );
