@@ -6,17 +6,16 @@ import { resolveCodexBinary } from "./codex-paths";
 const execFile = promisify(execFileCallback);
 const codexBundleId = "com.openai.codex";
 
-export interface NewTaskTarget {
-  path?: string;
-  originUrl?: string;
-}
+export type NewTaskTarget = { path: string; originUrl?: never } | { path?: never; originUrl: string };
 
 export function threadDeepLink(id: string): string {
   return `codex://threads/${encodeURIComponent(id)}`;
 }
 
 export function newTaskDeepLink(target: NewTaskTarget): string {
-  if (!target.path && !target.originUrl) throw new Error("A path or origin URL is required");
+  if ((!target.path && !target.originUrl) || (target.path && target.originUrl)) {
+    throw new Error("Exactly one path or origin URL is required");
+  }
   const params = new URLSearchParams();
   if (target.path) params.set("path", target.path);
   if (target.originUrl) params.set("originUrl", target.originUrl);
@@ -69,9 +68,9 @@ export async function openThread(id: string): Promise<boolean> {
   return false;
 }
 
-export async function openWorkspace(path: string, originUrl?: string): Promise<boolean> {
+export async function openWorkspace(path: string): Promise<boolean> {
   if (await isCodexDesktopInstalled()) {
-    return openDeepLink(newTaskDeepLink(originUrl ? { path, originUrl } : { path }));
+    return openDeepLink(newTaskDeepLink({ path }));
   }
   return openWorkspaceViaCli(path);
 }

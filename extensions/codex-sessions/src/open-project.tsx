@@ -133,7 +133,6 @@ function useProjectActions(
   visitItem: ((item: ProjectRow) => Promise<void>) | undefined,
   resetRanking: ((item: ProjectRow) => Promise<void>) | undefined,
 ) {
-  const origin = row ? originFor(row) : undefined;
   const markVisited = React.useCallback(
     async (opened: boolean) => {
       if (opened && row && visitItem) await visitItem(row);
@@ -141,9 +140,9 @@ function useProjectActions(
     [row, visitItem],
   );
   const openInDesktop = React.useCallback(async () => {
-    const opened = await openWorkspace(path, origin);
+    const opened = await openWorkspace(path);
     await markVisited(opened);
-  }, [markVisited, origin, path]);
+  }, [markVisited, path]);
   const openInCli = React.useCallback(async () => {
     const opened = await openWorkspaceViaCli(path);
     await markVisited(opened);

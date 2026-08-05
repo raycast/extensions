@@ -1,17 +1,29 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@raycast/api", () => ({
+const mocks = vi.hoisted(() => ({
+  execFile: vi.fn((...args: unknown[]) => {
+    const callback = args.at(-1);
+    if (typeof callback === "function") callback(null, "", "");
+  }),
   getApplications: vi.fn(),
-  getPreferenceValues: vi.fn(() => ({})),
   open: vi.fn(),
+}));
+
+vi.mock("@raycast/api", () => ({
+  getApplications: mocks.getApplications,
+  getPreferenceValues: vi.fn(() => ({})),
+  open: mocks.open,
   showToast: vi.fn(),
   Toast: { Style: { Failure: "failure" } },
 }));
 vi.mock("@raycast/utils", () => ({
   executeSQL: vi.fn(),
 }));
+vi.mock("node:child_process", () => ({
+  execFile: mocks.execFile,
+}));
 
-import { newTaskDeepLink, threadDeepLink } from "../src/lib/open-codex";
+import { newTaskDeepLink, openWorkspace, threadDeepLink, type NewTaskTarget } from "../src/lib/open-codex";
 
 describe("Codex deep links", () => {
   it("encodes spaces and Japanese thread IDs", () => {
@@ -35,15 +47,26 @@ describe("Codex deep links", () => {
     expect(new URL(link).searchParams.get("originUrl")).toBe(originUrl);
   });
 
-  it("includes both path and origin URL when supplied", () => {
-    const link = newTaskDeepLink({ path: "/tmp/project", originUrl: "https://github.com/example/project" });
-    const params = new URL(link).searchParams;
-
-    expect(params.get("path")).toBe("/tmp/project");
-    expect(params.get("originUrl")).toBe("https://github.com/example/project");
+  it("rejects an ambiguous path and origin URL combination", () => {
+    const target = {
+      path: "/tmp/project",
+      originUrl: "https://github.com/example/project",
+    } as unknown as NewTaskTarget;
+    expect(() => newTaskDeepLink(target)).toThrow("Exactly one path or origin URL is required");
   });
 
   it("rejects a target with neither path nor origin URL", () => {
-    expect(() => newTaskDeepLink({})).toThrow("A path or origin URL is required");
+    expect(() => newTaskDeepLink({} as NewTaskTarget)).toThrow("Exactly one path or origin URL is required");
+  });
+
+  it("opens an existing workspace by its exact path only", async () => {
+    mocks.getApplications.mockResolvedValue([{ bundleId: "com.openai.codex" }]);
+
+    await openWorkspace("/tmp/chosen-project");
+
+    const openedUrl = mocks.open.mock.calls.at(-1)?.[0] as string;
+    const params = new URL(openedUrl).searchParams;
+    expect(params.get("path")).toBe("/tmp/chosen-project");
+    expect(params.has("originUrl")).toBe(false);
   });
 });
