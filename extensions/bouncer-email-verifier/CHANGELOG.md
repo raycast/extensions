@@ -1,6 +1,6 @@
 # Bouncer Deliverability Changelog
 
-## [Report What Bouncer Returns, and Fix Four Silent Faults] - {PR_MERGE_DATE}
+## [Report What Bouncer Returns, and Fix Four Silent Faults] - 2026-08-05
 
 - Fixed pressing Enter on a newly typed address opening an older saved result instead of checking it. The new address appeared at the top of the list but the selection stayed where it was, and a stale verdict looks identical to a fresh one, so there was nothing to notice.
 - Fixed verifications overwriting one another in history. Two checks finishing at the same time could each save over the other, losing the earlier result with no error shown.
