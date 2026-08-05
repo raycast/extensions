@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unified home surface] - {PR_MERGE_DATE}
+## [Unified home surface] - 2026-08-05
 
 ### Changed
 
