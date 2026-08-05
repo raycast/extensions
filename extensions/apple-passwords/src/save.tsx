@@ -2,7 +2,7 @@ import { Action, ActionPanel, Clipboard, closeMainWindow, Form, Icon, showHUD, s
 import { useForm, FormValidation } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { randomBytes } from "crypto";
-import { clearCache, execAPWCommand, getActiveURL, PREFERENCES } from "./utils";
+import { execAPWCommand, getActiveURL, PREFERENCES } from "./utils";
 
 interface SaveFormValues {
   url: string;
@@ -263,7 +263,6 @@ export default function Command() {
       try {
         const result = await execAPWCommand(["pw", "save", "--stdin", url, username], password);
         if (result.status === 0) {
-          clearCache();
           await toast.hide();
           await showHUD(
             hasBrowserURL ? `Password saved and ${PREFERENCES.copySecrets ? "copied" : "filled"}` : "Password saved",

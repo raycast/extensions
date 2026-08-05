@@ -1,4 +1,4 @@
-import { getFrontmostApplication, getPreferenceValues, PreferenceValues } from "@raycast/api";
+import { Cache, getFrontmostApplication, getPreferenceValues, PreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { execFile, spawn } from "child_process";
 import { existsSync } from "fs";
@@ -17,6 +17,15 @@ export interface APWEntry {
   highLevelDomain?: string;
 }
 
+export interface APWIndexEntry {
+  domain: string;
+  username: string;
+  title?: string;
+  sites?: string[];
+  hasOtp: boolean;
+  hits?: number;
+}
+
 export interface APWMsg {
   error?: string;
   status: number;
@@ -32,10 +41,70 @@ class BrowserError extends Error {
 export const PREFERENCES = getPreferenceValues<PreferenceValues>();
 const CLI_PATH = PREFERENCES.cliPathAPW || ["/opt/homebrew/bin/apw", "/usr/local/bin/apw"].find(existsSync) || "apw";
 const CACHE_TIMEOUT = 1000 * 60 * parseInt(PREFERENCES.cacheTimeout || "0", 10);
-const passwordCache = new Map<string, { password: string }>();
+const passwordCache = new Map<string, { password: string; expiresAt: number }>();
 
-export function clearCache(): void {
-  passwordCache.clear();
+const indexCache = new Cache({ namespace: "index" });
+const INDEX_KEY = "entries";
+
+function readIndex(): APWIndexEntry[] {
+  try {
+    const raw = indexCache.get(INDEX_KEY);
+    return raw ? (JSON.parse(raw) as APWIndexEntry[]) : [];
+  } catch {
+    return [];
+  }
+}
+
+function relationshipRank(candidate: string, query: string): number {
+  if (candidate === query) return 0;
+  if (candidate.endsWith("." + query)) return 1;
+  if (query.endsWith("." + candidate)) return 2;
+  if (candidate.split(".").some((l) => l.startsWith(query))) return 3;
+  if (candidate.includes(query)) return 4;
+  return 5;
+}
+
+function mergeToIndex(entries: APWIndexEntry[]): void {
+  const byKey = new Map<string, APWIndexEntry>();
+  for (const e of [...readIndex(), ...entries]) {
+    const key = `${(e.username || "").toLowerCase()}\n${(e.domain || "").toLowerCase()}`;
+    const saved = byKey.get(key);
+    if (saved) {
+      saved.sites = [...new Set([...(saved.sites || []), ...(e.sites || [])])];
+      saved.hasOtp = saved.hasOtp || e.hasOtp;
+    } else {
+      byKey.set(key, { ...e });
+    }
+  }
+  indexCache.set(INDEX_KEY, JSON.stringify([...byKey.values()]));
+}
+
+export function incrementHits(domain: string, username: string): void {
+  const key = `${username.toLowerCase()}\n${domain.toLowerCase()}`;
+  const updated = readIndex().map((e) =>
+    `${(e.username || "").toLowerCase()}\n${(e.domain || "").toLowerCase()}` === key
+      ? { ...e, hits: (e.hits || 0) + 1 }
+      : e,
+  );
+  indexCache.set(INDEX_KEY, JSON.stringify(updated));
+}
+
+export function searchIndex(query: string): APWIndexEntry[] {
+  const q = query.toLowerCase();
+  return readIndex()
+    .filter(
+      (e) =>
+        e.domain.toLowerCase().includes(q) ||
+        (e.title || "").toLowerCase().includes(q) ||
+        (e.username || "").toLowerCase().includes(q) ||
+        (e.sites || []).some((s) => s.toLowerCase().includes(q)),
+    )
+    .sort((a, b) => {
+      const rankDiff = relationshipRank(a.domain, q) - relationshipRank(b.domain, q);
+      if (rankDiff !== 0) return rankDiff;
+      const hitsDiff = (b.hits || 0) - (a.hits || 0);
+      return hitsDiff || a.domain.localeCompare(b.domain);
+    });
 }
 const execFileAsync = promisify(execFile);
 
@@ -61,12 +130,15 @@ function execWithStdin(args: string[], input: string): Promise<APWMsg> {
 
 export async function execAPWCommand(args: string[], stdin?: string): Promise<APWMsg> {
   const shouldCache = args[0] === "pw" && args[1] === "get" && args.length === 4 && CACHE_TIMEOUT > 0;
-  const cacheKey = shouldCache ? `${args[2]}\0${args[3]}` : "";
-  const cached = passwordCache.get(cacheKey);
+  const cacheKey = shouldCache ? `pw\0${args[2]}\0${args[3]}` : "";
 
-  if (cached) {
-    console.info("Cache hit: pw get");
-    return { status: 0, results: [{ domain: args[2], username: args[3], password: cached.password }] };
+  if (shouldCache) {
+    const entry = passwordCache.get(cacheKey);
+    if (entry && Date.now() < entry.expiresAt) {
+      console.info("Cache hit: pw get");
+      return { status: 0, results: [{ domain: args[2], username: args[3], password: entry.password }] };
+    }
+    if (entry) passwordCache.delete(cacheKey);
   }
 
   if (stdin !== undefined) return execWithStdin(args, stdin);
@@ -76,11 +148,7 @@ export async function execAPWCommand(args: string[], stdin?: string): Promise<AP
     const data = JSON.parse(stdout.trim()) as APWMsg;
     const password = data.results?.[0]?.password;
     if (data.status === 0 && shouldCache && password !== undefined) {
-      const cached = { password };
-      passwordCache.set(cacheKey, cached);
-      setTimeout(() => {
-        if (passwordCache.get(cacheKey) === cached) passwordCache.delete(cacheKey);
-      }, CACHE_TIMEOUT).unref();
+      passwordCache.set(cacheKey, { password, expiresAt: Date.now() + CACHE_TIMEOUT });
     }
     return data;
   } catch (error) {
@@ -120,9 +188,15 @@ function mergeEntries(passwordList: APWEntry[], otpList: APWEntry[]): APWEntry[]
 }
 
 export async function listAPWEntries(url: string): Promise<APWEntry[]> {
-  const passwordList = await execAPWCommand(["pw", "list", url]);
-  const otpList = await execAPWCommand(["otp", "list", url]);
-  return mergeEntries(passwordList.results ?? [], otpList.results ?? []);
+  const [passwordList, otpList] = await Promise.all([
+    execAPWCommand(["pw", "list", url]),
+    execAPWCommand(["otp", "list", url]),
+  ]);
+  const merged = mergeEntries(passwordList.results ?? [], otpList.results ?? []);
+  mergeToIndex(
+    merged.map((e) => ({ domain: e.domain, username: e.username, title: e.title, sites: e.sites, hasOtp: !!e.hasOtp })),
+  );
+  return merged;
 }
 
 export async function getAPWEntry(url: string, action: "otp" | "pw", username: string): Promise<APWEntry | undefined> {

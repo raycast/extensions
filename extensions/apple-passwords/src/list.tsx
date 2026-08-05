@@ -13,9 +13,9 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import psl from "psl";
-import { APWEntry, getActiveURL, getAPWEntry, listAPWEntries, PREFERENCES } from "./utils";
+import { APWEntry, APWIndexEntry, getActiveURL, getAPWEntry, incrementHits, listAPWEntries, PREFERENCES, searchIndex } from "./utils";
 
 const renderAction = (
   action: "pw" | "otp" | "usr",
@@ -50,6 +50,7 @@ const renderAction = (
           await Clipboard.paste(value);
         }
         showHUD(hudText);
+        incrementHits(domain, username);
       } else {
         showToast({ style: Toast.Style.Failure, title: "No value found" });
       }
@@ -73,7 +74,7 @@ const renderAction = (
   );
 };
 
-const renderItem = (entry: APWEntry, pasteTarget?: string) => {
+const renderItem = (entry: APWEntry, pasteTarget?: string, index = 0) => {
   const accessories = [];
   const actions = [];
   actions.push(renderAction("usr", entry.domain, entry.username, pasteTarget));
@@ -87,7 +88,7 @@ const renderItem = (entry: APWEntry, pasteTarget?: string) => {
   const subtitle = entry.title ? `${entry.username} · ${entry.domain}` : entry.domain;
   return (
     <List.Item
-      key={`${entry.username}-${entry.domain}`}
+      key={`item-${index}`}
       title={title}
       subtitle={subtitle}
       icon={Icon.PersonCircle}
@@ -97,13 +98,14 @@ const renderItem = (entry: APWEntry, pasteTarget?: string) => {
   );
 };
 
-let debounceTimer: NodeJS.Timeout;
-
 export default function Command(props: LaunchProps<{ arguments: Arguments.List }>) {
   const [url, setUrl] = useState<string>(props.arguments.url || "");
   const [searchTxt, setSearchTxt] = useState<string>(props.arguments.url || "");
   const [data, setData] = useState<APWEntry[]>([]);
+  const [indexResults, setIndexResults] = useState<APWIndexEntry[]>([]);
   const [pasteTarget, setPasteTarget] = useState<string | undefined>();
+  const autoDetectDone = useRef(!!props.arguments.url);
+  const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
 
   useEffect(() => {
     if (PREFERENCES.copySecrets) return;
@@ -114,16 +116,22 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.List }
 
   const handleSearchTextChange = (text: string) => {
     const parsed = psl.parse(text);
-    if ("error" in parsed || !parsed.tld) return;
-    if (parsed.domain) {
-      setUrl(parsed.domain);
+    const domain = "error" in parsed ? null : parsed.domain;
+    if (!domain) {
+      if (!text.trim()) return;
+      setUrl("");
+      setData([]);
+      setIndexResults(searchIndex(text.trim()));
+      return;
     }
+    setIndexResults(searchIndex(text.trim()));
+    setUrl(domain);
   };
 
   const handleDebouncedSearchTextChange = (text: string) => {
     setSearchTxt(text);
-    clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
+    clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
       handleSearchTextChange(text);
     }, 300);
   };
@@ -132,13 +140,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.List }
     let active = true;
 
     const loadData = async () => {
-      const targetUrl = url || (await getActiveURL());
-      if (!active || !targetUrl) return;
-      if (!url) setSearchTxt(targetUrl);
+      let targetUrl = url;
+      if (!targetUrl) {
+        if (autoDetectDone.current) return;
+        targetUrl = await getActiveURL();
+        autoDetectDone.current = true;
+        if (!active || !targetUrl) return;
+      }
 
       try {
         const data = await listAPWEntries(targetUrl);
-        if (active) setData(data);
+        if (active) {
+          setSearchTxt(targetUrl);
+          setData(data);
+        }
       } catch (error) {
         if (!active) return;
         if ((error as { apwStatus?: number }).apwStatus === 9) {
@@ -160,7 +175,36 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.List }
   }, [url]);
   return (
     <List searchText={searchTxt} onSearchTextChange={handleDebouncedSearchTextChange} filtering={false}>
-      {data.map((i) => renderItem(i, pasteTarget))}
+      {data.map((entry, i) => renderItem(entry, pasteTarget, i))}
+      {data.length === 0 && indexResults.length > 0 && (
+        <List.Section title="Suggestions">
+          {indexResults.map((e, i) => (
+            <List.Item
+              key={`idx-${i}`}
+              title={e.title ?? e.username}
+              subtitle={e.title ? `${e.username} · ${e.domain}` : e.domain}
+              icon={Icon.MagnifyingGlass}
+              accessories={[
+                ...(e.hasOtp ? [{ tag: { value: "OTP", color: Color.Green } }] : []),
+                { icon: { source: Icon.Key, tintColor: Color.Blue } },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title={`Search ${e.domain}`}
+                    icon={Icon.MagnifyingGlass}
+                    onAction={() => {
+                      setSearchTxt(e.domain);
+                      setIndexResults([]);
+                      setUrl(e.domain);
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }
