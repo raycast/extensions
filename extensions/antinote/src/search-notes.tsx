@@ -27,7 +27,7 @@ SELECT upper(
     substr(hex(ZID), 21, 12)
 ) AS id, ZCONTENT as content, ZCREATED as created, ZLASTMODIFIED as lastModified
   FROM ZNOTE
-  WHERE ZCONTENT IS NOT ''
+  WHERE ZCONTENT IS NOT '' AND ZISSLOTTED = 0
   ORDER BY ZLASTMODIFIED DESC
 `;
 
@@ -61,7 +61,6 @@ async function openInAntinote(noteId: string) {
 }
 
 function resolveDb(version: string | null) {
-  console.log("version", version);
   switch (version) {
     case "setapp":
       return useSQL<Note>(SETAPP_DB_PATH, query);
@@ -78,11 +77,9 @@ export default function Command() {
 
   const { isLoading, data: notes, permissionView } = resolveDb(version);
 
-  console.log(notes);
   useEffect(() => {
     async function checkInstallation() {
       const { installed, version } = await checkAntinoteInstalled();
-      console.log(installed, version);
       setIsInstalled(installed);
       setVersion(version);
     }
