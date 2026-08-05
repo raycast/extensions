@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Fix Brave Support] - {PR_MERGE_DATE}
+## [Fix Brave Support] - 2026-08-05
 
 - Fix Brave being rejected with "isn't a supported browser". macOS installs Brave as `Brave Browser.app` and reports it under that name, but the supported-browser list held `Brave`, so the exact-match check added in the previous release failed for it.
 
