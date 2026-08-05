@@ -24,11 +24,12 @@ function providerSlug(siteUrl: string): string | null {
   }
 
   const segments = url.pathname.split("/").filter(Boolean);
-  if (segments[0] === "providers" && segments[1]) {
+  if (segments.length === 2 && segments[0] === "providers" && segments[1]) {
     return decodeURIComponent(segments[1]);
   }
 
   if (
+    segments.length === 4 &&
     segments[0] === "api" &&
     segments[1] === "v1" &&
     segments[2] === "providers" &&
