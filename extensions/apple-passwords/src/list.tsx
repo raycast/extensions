@@ -15,7 +15,16 @@ import {
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import psl from "psl";
-import { APWEntry, APWIndexEntry, getActiveURL, getAPWEntry, incrementHits, listAPWEntries, PREFERENCES, searchIndex } from "./utils";
+import {
+  APWEntry,
+  APWIndexEntry,
+  getActiveURL,
+  getAPWEntry,
+  incrementHits,
+  listAPWEntries,
+  PREFERENCES,
+  searchIndex,
+} from "./utils";
 
 const renderAction = (
   action: "pw" | "otp" | "usr",
