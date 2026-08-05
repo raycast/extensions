@@ -114,7 +114,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.List }
   const [indexResults, setIndexResults] = useState<APWIndexEntry[]>([]);
   const [pasteTarget, setPasteTarget] = useState<string | undefined>();
   const autoDetectDone = useRef(!!props.arguments.url);
-  const debounceTimer = useRef<ReturnType<typeof setTimeout>>();
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     if (PREFERENCES.copySecrets) return;
