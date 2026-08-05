@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, Icon, Keyboard, Toast, openExtensionPrefer
 import { usePromise } from "@raycast/utils";
 import { useRef } from "react";
 import { BouncerError, verifyDomain, type DomainRecord } from "../lib/bouncer";
-import { formatFlag, getDomainSignalTags, getDomainVerdict } from "../lib/verdict";
+import { getDomainSignals, renderSignalLines } from "../lib/verdict";
 
 const BOUNCER_APP_URL = "https://app.usebouncer.com";
 
@@ -33,6 +33,8 @@ export function DomainDetail({ domain, onChecked }: { domain: string; onChecked?
 
   if (error) {
     const outOfCredits = error instanceof BouncerError && error.outOfCredits;
+    // The toast offers this too, but the view the user is left looking at must also lead somewhere.
+    const unauthorized = error instanceof BouncerError && error.statusCode === 401;
     return (
       <Detail
         navigationTitle={domain}
@@ -48,6 +50,9 @@ export function DomainDetail({ domain, onChecked }: { domain: string; onChecked?
             {outOfCredits ? (
               <Action.OpenInBrowser title="Top up Credits" url={BOUNCER_APP_URL} icon={Icon.Coins} />
             ) : null}
+            {unauthorized ? (
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            ) : null}
             <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
           </ActionPanel>
         }
@@ -62,13 +67,17 @@ export function DomainDetail({ domain, onChecked }: { domain: string; onChecked?
   return <DomainRecordDetail record={data} onRetry={revalidate} />;
 }
 
+/**
+ * A domain response carries no status, score or verdict — only the fields below. They are
+ * reported as returned, with no summary inferred on top of them.
+ */
 export function DomainRecordDetail({ record, onRetry }: { record: DomainRecord; onRetry: () => void }) {
-  const verdict = getDomainVerdict(record);
   const name = record.domain?.name ?? "Unknown domain";
 
-  const markdown = [`# ${name}`, "", `## ${verdict.title}`, "", verdict.detail];
+  const markdown = [`# ${name}`, ""];
+  markdown.push(...renderSignalLines(getDomainSignals(record)));
   if (record.dns?.record) {
-    markdown.push("", "---", "", `**${record.dns.type ?? "DNS"}** \`${record.dns.record}\``);
+    markdown.push("", `**${record.dns.type ?? "DNS"}** \`${record.dns.record}\``);
   }
 
   return (
@@ -77,19 +86,12 @@ export function DomainRecordDetail({ record, onRetry }: { record: DomainRecord; 
       markdown={markdown.join("\n")}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.TagList title="Mail Setup">
-            <Detail.Metadata.TagList.Item text={verdict.title} color={verdict.color} icon={verdict.icon} />
-          </Detail.Metadata.TagList>
           <Detail.Metadata.Label title="Domain" text={name} />
           <Detail.Metadata.Label title="Provider" text={record.provider ?? "Not reported"} />
-
-          <Detail.Metadata.Separator />
-
-          <Detail.Metadata.TagList title="Signals">
-            {getDomainSignalTags(record).map((tag) => (
-              <Detail.Metadata.TagList.Item key={tag.text} text={tag.text} color={tag.color} />
-            ))}
-          </Detail.Metadata.TagList>
+          <Detail.Metadata.Label
+            title={record.dns?.type ? `DNS (${record.dns.type})` : "DNS"}
+            text={record.dns?.record ?? "Not reported"}
+          />
         </Detail.Metadata>
       }
       actions={
@@ -124,13 +126,10 @@ export function DomainRecordDetail({ record, onRetry }: { record: DomainRecord; 
 }
 
 function buildDomainSummary(record: DomainRecord): string {
-  const verdict = getDomainVerdict(record);
-
   return [
-    `${record.domain?.name ?? "n/a"} — ${verdict.title}`,
+    record.domain?.name ?? "n/a",
     `Provider: ${record.provider ?? "n/a"}`,
     `${record.dns?.type ?? "DNS"}: ${record.dns?.record ?? "n/a"}`,
-    `Free ${formatFlag(record.domain?.free)} · Disposable ${formatFlag(record.domain?.disposable)} · Accept-All ${formatFlag(record.domain?.acceptAll)}`,
-    `Toxic: ${formatFlag(record.toxic)}`,
+    ...getDomainSignals(record).map(({ label, value }) => `${label}: ${value}`),
   ].join("\n");
 }

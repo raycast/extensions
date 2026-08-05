@@ -26,20 +26,19 @@ You can also pass it as a command argument to skip the list and go straight to t
 Each result shows:
 
 - **Verdict** — deliverable, risky, undeliverable, or unknown
-- **Recommendation** — whether to send, hold, or suppress, based on Bouncer's [integration guidelines](https://docs.usebouncer.com/integration-guidelines)
 - **Score** out of 100, plus the reason code
 - **Domain signals** — free, disposable, accept-all
 - **Account signals** — role address, disabled, full mailbox
 - **Toxicity**, provider, and the MX record used
 - **Did you mean** suggestions for typo'd addresses, verifiable in one keystroke
 
-Signals are colored by what they mean for that particular verdict. A catch-all domain is the reason a risky result is risky, so it is highlighted there; on a confirmed deliverable address it is shown as plain information.
+Every signal is listed with the value Bouncer reported for it. The extension does not add a send-or-suppress recommendation on top: Bouncer supplies the status and the signals, and what to do with an address depends on your list and your risk tolerance, not on something this extension can decide for you.
 
-Note that the role and free signals are heuristics Bouncer applies to the local part and the domain, and they do misfire — a personal address like `mail@yourdomain.com` is often reported as a shared role mailbox. Neither signal changes the recommendation for that reason.
+Note that the role and free signals are heuristics Bouncer applies to the local part and the domain, and they do misfire — a personal address like `mail@yourdomain.com` is often reported as a shared role mailbox. Read them as observations rather than defects.
 
 ### Checking a domain
 
-Type a bare domain to check its mail setup without needing a specific address. It reports whether the domain publishes a working MX record, whether it is a catch-all, disposable, free, or toxic domain, and which mail provider it runs on. A catch-all result is worth knowing before you verify individual addresses there, because none of them can come back confirmed.
+Type a bare domain to check its mail setup without needing a specific address. Bouncer's domain endpoint returns no status or score, only the mail record it found, the provider, and whether the domain is catch-all, disposable, free, or toxic. Those are shown exactly as returned.
 
 When you type a full address, checking the mailbox is the default and the domain check is one keystroke away on the same row — `⌘⇧D`.
 

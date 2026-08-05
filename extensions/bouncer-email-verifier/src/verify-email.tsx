@@ -14,16 +14,19 @@ import {
   type LaunchProps,
 } from "@raycast/api";
 import { useCachedPromise, useFrecencySorting, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DomainDetail, DomainRecordDetail } from "./components/domain-detail";
 import { RecordDetail, ResultDetail } from "./components/result-detail";
 import { fetchCredits, type BouncerStatus } from "./lib/bouncer";
 import { isValidDomain, normalizeDomain } from "./lib/domain";
 import { extractEmail, isValidEmail, normalizeEmail } from "./lib/email";
 import { formatVerifiedAt, useHistory, type HistoryEntry } from "./lib/history";
-import { getDomainVerdict, getVerdict } from "./lib/verdict";
+import { getVerdict } from "./lib/verdict";
 
 const BOUNCER_APP_URL = "https://app.usebouncer.com";
+
+/** Stable id so the Check row can be selected the moment it appears. */
+const CHECK_ITEM_ID = "check-target";
 
 type Filter = BouncerStatus | "all" | "domains";
 type History = ReturnType<typeof useHistory>;
@@ -72,6 +75,7 @@ export default function VerifyCommand(props: LaunchProps<{ arguments: Arguments.
 function SearchView({ history, initialText }: { history: History; initialText: string }) {
   const [searchText, setSearchText] = useState(initialText);
   const [filter, setFilter] = useState<Filter>("all");
+  const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
   const [seeded, setSeeded] = useState(initialText.length > 0);
 
   // Prefill from whatever the user already has in hand — selection first, then clipboard.
@@ -109,6 +113,12 @@ function SearchView({ history, initialText }: { history: History; initialText: s
   // Partial text still searches, which is how you find something you checked before.
   const isTargeted = target.kind !== "none";
 
+  // A new target appears above the history, but Raycast keeps the selection where it was,
+  // so Enter would reopen a saved result instead of checking what was just typed.
+  useEffect(() => {
+    if (target.kind !== "none") setSelectedId(CHECK_ITEM_ID);
+  }, [target.kind, target.value]);
+
   const visibleEntries = ranked.filter((entry) => {
     const matchesFilter =
       filter === "all" ||
@@ -121,6 +131,8 @@ function SearchView({ history, initialText }: { history: History; initialText: s
       isLoading={history.isLoading}
       searchText={searchText}
       onSearchTextChange={setSearchText}
+      selectedItemId={selectedId}
+      onSelectionChange={(id) => setSelectedId(id ?? undefined)}
       searchBarPlaceholder="Enter an email address or a domain"
       filtering={false}
       searchBarAccessory={
@@ -147,6 +159,7 @@ function SearchView({ history, initialText }: { history: History; initialText: s
           {visibleEntries.map((entry) => (
             <HistoryItem
               key={history.entryKey(entry)}
+              id={history.entryKey(entry)}
               entry={entry}
               history={history}
               onVisit={() => visitItem(entry)}
@@ -247,6 +260,7 @@ function TargetItem({
   if (target.kind === "none") {
     return (
       <List.Item
+        id={CHECK_ITEM_ID}
         title={target.value}
         subtitle="Not a valid email address or domain"
         icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
@@ -268,6 +282,7 @@ function TargetItem({
   if (target.kind === "domain") {
     return (
       <List.Item
+        id={CHECK_ITEM_ID}
         title={target.value}
         subtitle={checkedNote ? `Domain · ${checkedNote}` : "Domain · Press Enter to check its mail setup"}
         icon={{ source: Icon.Globe, tintColor: Color.PrimaryText }}
@@ -298,6 +313,7 @@ function TargetItem({
 
   return (
     <List.Item
+      id={CHECK_ITEM_ID}
       title={target.value}
       subtitle={
         checkedNote
@@ -338,21 +354,40 @@ function TargetItem({
   );
 }
 
-/** Verdict and Recommendation carry the same visuals under different field names. */
+/**
+ * Email rows show Bouncer's status. Domain responses carry no status, so a domain row is
+ * shown neutrally rather than given a verdict the API never returned.
+ */
 function summarize(entry: HistoryEntry) {
   if (entry.kind === "email") {
     const { label, color, icon } = getVerdict(entry.record.status);
     return { label, color, icon, subtitle: entry.record.domain?.name, score: entry.record.score };
   }
-  const { title, color, icon } = getDomainVerdict(entry.record);
-  return { label: title, color, icon, subtitle: entry.record.provider, score: undefined };
+  return {
+    label: "Domain",
+    color: Color.SecondaryText,
+    icon: Icon.Globe,
+    subtitle: entry.record.provider,
+    score: undefined,
+  };
 }
 
-function HistoryItem({ entry, history, onVisit }: { entry: HistoryEntry; history: History; onVisit: () => void }) {
+function HistoryItem({
+  entry,
+  id,
+  history,
+  onVisit,
+}: {
+  entry: HistoryEntry;
+  id: string;
+  history: History;
+  onVisit: () => void;
+}) {
   const { label, color, icon, subtitle, score } = summarize(entry);
 
   return (
     <List.Item
+      id={id}
       title={entry.subject}
       subtitle={subtitle}
       icon={{ source: icon, tintColor: color }}
