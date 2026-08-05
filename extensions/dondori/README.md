@@ -11,15 +11,15 @@ The window commands (Open Todos, Open Notes, Open Calendar, Open Task Pool, Togg
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| **Today's Tasks** | Lists today's tasks grouped by status. Actions: Open in App (⏎), Toggle Done (⌘D), Start/Stop Timer (⌘T). Shows priority, tracked time, and a running-timer indicator. |
-| **Quick Add** | Adds a task from one natural-language string: `Buy milk tomorrow 15:00 #home`. Supports dates, times, #tags, priority, and recurrence. |
-| **Open Todos** | Opens the main todo panel. |
-| **Open Notes** | Opens Floating Notes. |
-| **Open Calendar** | Opens the calendar grid. |
-| **Open Task Pool** | Opens the backlog task pool. |
-| **Toggle Focus Mode** | Toggles focus mode. |
+| Command               | What it does                                                                                                                                                           |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Today's Tasks**     | Lists today's tasks grouped by status. Actions: Open in App (⏎), Toggle Done (⌘D), Start/Stop Timer (⌘T). Shows priority, tracked time, and a running-timer indicator. |
+| **Quick Add**         | Adds a task from one natural-language string: `Buy milk tomorrow 15:00 #home`. Supports dates, times, #tags, priority, and recurrence.                                 |
+| **Open Todos**        | Opens the main todo panel.                                                                                                                                             |
+| **Open Notes**        | Opens Floating Notes.                                                                                                                                                  |
+| **Open Calendar**     | Opens the calendar grid.                                                                                                                                               |
+| **Open Task Pool**    | Opens the backlog task pool.                                                                                                                                           |
+| **Toggle Focus Mode** | Toggles focus mode.                                                                                                                                                    |
 
 ## Troubleshooting
 

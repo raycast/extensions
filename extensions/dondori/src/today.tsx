@@ -194,10 +194,14 @@ export default function Command() {
   }, [revalidate]);
 
   const act = useCallback(
-    async (label: string, fn: () => Promise<void>) => {
+    async (label: string, fn: () => Promise<void>, successTitle: string) => {
       try {
         await fn();
         await revalidate();
+        await showToast({
+          style: Toast.Style.Success,
+          title: successTitle,
+        });
       } catch (err) {
         await showToast({
           style: Toast.Style.Failure,
@@ -260,14 +264,18 @@ export default function Command() {
                       title="Toggle Done"
                       icon={Icon.CheckCircle}
                       shortcut={{ modifiers: ["cmd"], key: "d" }}
-                      onAction={() => act("Toggle", () => toggleTask(task.id))}
+                      onAction={() =>
+                        act("Toggle", () => toggleTask(task.id), "Task updated")
+                      }
                     />
                     {task.timerRunning ? (
                       <Action
                         title="Stop Timer"
                         icon={Icon.Stop}
                         shortcut={{ modifiers: ["cmd"], key: "t" }}
-                        onAction={() => act("Stop timer", () => stopTimer())}
+                        onAction={() =>
+                          act("Stop timer", () => stopTimer(), "Timer stopped")
+                        }
                       />
                     ) : (
                       <Action
@@ -275,7 +283,11 @@ export default function Command() {
                         icon={Icon.Play}
                         shortcut={{ modifiers: ["cmd"], key: "t" }}
                         onAction={() =>
-                          act("Start timer", () => startTimer(task.id))
+                          act(
+                            "Start timer",
+                            () => startTimer(task.id),
+                            "Timer started",
+                          )
                         }
                       />
                     )}

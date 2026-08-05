@@ -17,7 +17,7 @@ export default async function command(
   } catch (err) {
     if (err instanceof SocketUnavailableError) {
       await quickAddDeepLink(text);
-      await showHUD("Task added");
+      await showHUD("Sent to Dondori");
       return;
     }
     await showHUD(

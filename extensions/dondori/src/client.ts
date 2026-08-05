@@ -26,22 +26,12 @@ export interface Task {
   durationMin: number | null;
 }
 
-export interface CurrentTimer {
-  running: boolean;
-  todoId?: string;
-  title?: string;
-  elapsedSec?: number;
-  kind?: string;
-}
-
 type Request =
   | { cmd: "today" }
   | { cmd: "toggle"; id: string }
   | { cmd: "start_timer"; id: string }
   | { cmd: "stop_timer" }
-  | { cmd: "current_timer" }
-  | { cmd: "quick_add"; text: string }
-  | { cmd: "open"; target: OpenTarget };
+  | { cmd: "quick_add"; text: string };
 
 export type OpenTarget = "panel" | "notes" | "calendar" | "pool" | "focus";
 
@@ -171,19 +161,10 @@ export async function stopTimer(): Promise<void> {
   await request({ cmd: "stop_timer" });
 }
 
-export async function currentTimer(): Promise<CurrentTimer> {
-  const res = await request({ cmd: "current_timer" });
-  return res as unknown as CurrentTimer;
-}
-
 export async function quickAdd(text: string): Promise<string> {
   const res = await request({ cmd: "quick_add", text });
   if (typeof res.id !== "string" || res.id.length === 0) {
     throw new AppError("Malformed response: missing task id");
   }
   return res.id;
-}
-
-export async function openInApp(target: OpenTarget): Promise<void> {
-  await request({ cmd: "open", target });
 }
