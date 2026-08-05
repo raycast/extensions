@@ -47,9 +47,14 @@ export async function getCurrentSong(url: string, signal?: AbortSignal): Promise
               settled = true;
               close();
 
-              searchRecording(title, artist).then((recording) =>
-                resolve(recording || <RecordingSummary>{ title, artist }),
-              );
+              const fallback = <RecordingSummary>{ title, artist };
+
+              searchRecording(title, artist, undefined, signal)
+                .then((recording) => resolve(recording || fallback))
+                .catch((error) => {
+                  log.error(`Failed to look up recording: ${error.message}`);
+                  resolve(fallback);
+                });
             } else {
               log.error(`Failed to parse metadata: '${metadata}'`);
               settled = true;
