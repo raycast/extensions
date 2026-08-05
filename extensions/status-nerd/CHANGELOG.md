@@ -1,6 +1,6 @@
 # Status Nerd Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-05
 
 - Set a status on Slack, GitLab and GitHub at once, with per-service selection
 - Turn a few notes into AI-generated status suggestions (requires Raycast Pro), shuffle through them, then set
