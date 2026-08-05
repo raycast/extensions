@@ -50,25 +50,36 @@ async function getCachedPageId(key: string) {
 
 async function searchPageByTitle(title: string) {
   const notion = getNotionClient();
-  const { results } = await notion.search({
-    query: title,
-    filter: { property: "object", value: "page" },
-    page_size: 50,
-  });
+  let cursor: string | undefined;
 
-  const match = results.find((result) => {
-    if (result.object !== "page" || !("properties" in result)) return false;
-    // Pages living in a database aren't valid parents for sub-pages we want to reuse
-    if (result.parent.type === "database_id" || result.parent.type === "data_source_id") return false;
+  // Paginate: a workspace can return the matching page well past the first batch,
+  // and missing it would create a duplicate notes root.
+  do {
+    const { results, has_more, next_cursor } = await notion.search({
+      query: title,
+      filter: { property: "object", value: "page" },
+      start_cursor: cursor,
+      page_size: 100,
+    });
 
-    const titleProperty = Object.values(result.properties).find((property) => property.type === "title");
-    if (!titleProperty || titleProperty.type !== "title") return false;
+    const match = results.find((result) => {
+      if (result.object !== "page" || !("properties" in result)) return false;
+      // Pages living in a database aren't valid parents for sub-pages we want to reuse
+      if (result.parent.type === "database_id" || result.parent.type === "data_source_id") return false;
 
-    const pageTitle = titleProperty.title.map((text) => text.plain_text).join("");
-    return pageTitle.trim().toLowerCase() === title.trim().toLowerCase();
-  });
+      const titleProperty = Object.values(result.properties).find((property) => property.type === "title");
+      if (!titleProperty || titleProperty.type !== "title") return false;
 
-  return match?.id;
+      const pageTitle = titleProperty.title.map((text) => text.plain_text).join("");
+      return pageTitle.trim().toLowerCase() === title.trim().toLowerCase();
+    });
+
+    if (match) return match.id;
+
+    cursor = has_more && next_cursor ? next_cursor : undefined;
+  } while (cursor);
+
+  return undefined;
 }
 
 async function findChildPageByTitle(parentPageId: string, title: string) {
@@ -153,8 +164,21 @@ export async function getOrCreateDatePage(rootPageId: string, dateTitle: string)
   return datePageId;
 }
 
+/** Notion rejects any rich text element longer than this, so long notes are split across elements. */
+const RICH_TEXT_LIMIT = 2000;
+
+function toRichText(note: string) {
+  const chunks: string[] = [];
+
+  for (let index = 0; index < note.length; index += RICH_TEXT_LIMIT) {
+    chunks.push(note.slice(index, index + RICH_TEXT_LIMIT));
+  }
+
+  return chunks.map((content) => ({ type: "text" as const, text: { content } }));
+}
+
 function buildNoteBlock(note: string, style: NoteStyle): BlockObjectRequest {
-  const rich_text = [{ type: "text" as const, text: { content: note } }];
+  const rich_text = toRichText(note);
 
   switch (style) {
     case "todo":
