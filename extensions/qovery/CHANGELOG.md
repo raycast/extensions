@@ -2,6 +2,12 @@
 
 All notable changes to the Qovery Services Raycast Extension will be documented in this file.
 
+## [Update] - 2026-08-05
+
+### Changed
+
+- Updated the extension and action icons to use Qovery's current logo
+
 ## [Update] - 2026-08-04
 
 ### Added
