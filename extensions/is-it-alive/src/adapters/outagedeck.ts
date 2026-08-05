@@ -16,6 +16,7 @@ import { normalizeSiteUrl } from "@/lib/url";
 
 const OUTAGEDECK_ORIGIN = "https://outagedeck.com";
 const OUTAGEDECK_HOSTS = new Set(["outagedeck.com", "www.outagedeck.com"]);
+const PROVIDER_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function providerSlug(siteUrl: string): string | null {
   const url = new URL(normalizeSiteUrl(siteUrl));
@@ -24,21 +25,26 @@ function providerSlug(siteUrl: string): string | null {
   }
 
   const segments = url.pathname.split("/").filter(Boolean);
-  if (segments.length === 2 && segments[0] === "providers" && segments[1]) {
-    return decodeURIComponent(segments[1]);
-  }
+  let encodedSlug: string | undefined;
 
-  if (
+  if (segments.length === 2 && segments[0] === "providers" && segments[1]) {
+    encodedSlug = segments[1];
+  } else if (
     segments.length === 4 &&
     segments[0] === "api" &&
     segments[1] === "v1" &&
     segments[2] === "providers" &&
     segments[3]
   ) {
-    return decodeURIComponent(segments[3]);
+    encodedSlug = segments[3];
   }
 
-  return null;
+  if (!encodedSlug) {
+    return null;
+  }
+
+  const slug = decodeURIComponent(encodedSlug);
+  return PROVIDER_SLUG_PATTERN.test(slug) ? slug : null;
 }
 
 function statusToIndicator(status: string): StatusIndicator {

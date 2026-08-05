@@ -30,6 +30,16 @@ describe("outagedeckAdapter", () => {
       ),
     ).resolves.toBe(false);
     await expect(
+      outagedeckAdapter.detect?.(
+        "https://outagedeck.com/providers/github%2Factions",
+      ),
+    ).resolves.toBe(false);
+    await expect(
+      outagedeckAdapter.detect?.(
+        "https://outagedeck.com/api/v1/providers/github%5Cactions",
+      ),
+    ).resolves.toBe(false);
+    await expect(
       outagedeckAdapter.detect?.("https://status.example.com/providers/github"),
     ).resolves.toBe(false);
   });
