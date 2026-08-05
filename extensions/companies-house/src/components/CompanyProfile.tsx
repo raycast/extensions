@@ -23,6 +23,7 @@ import {
   statusColor,
 } from "../helpers";
 import { recordViewedCompany } from "../recently-viewed";
+import { officerStanding, type OfficerCounts } from "../officer-standing";
 import type {
   CompanyProfile as CompanyProfileData,
   CompanySearchItem,
@@ -95,8 +96,16 @@ export function CompanyProfile({
     markdown += `\n\n> ${statusDetail}`;
   }
 
+  // Not `!resigned_on`: the members of a dissolved company never resigned, so
+  // they carry no resignation date while the register counts them as inactive.
+  // Reading the absence of a date as "in post" lists a dissolved company's
+  // former members as its current ones.
+  const officerCounts: OfficerCounts = {
+    activeCount: officers?.active_count,
+    inactiveCount: officers?.inactive_count,
+  };
   const activeOfficers = (officers?.items ?? []).filter(
-    (officer) => !officer.resigned_on,
+    (officer) => officerStanding(officer, officerCounts) === "active",
   );
   if (activeOfficers.length) {
     const escapeCell = (value: string) => value.replace(/\|/g, "\\|");
