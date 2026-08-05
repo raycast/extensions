@@ -1,6 +1,6 @@
 # Raycast ElevenLabs TTS Changelog
 
-## [Speak Copied Text] - {PR_MERGE_DATE}
+## [Speak Copied Text] - 2026-08-05
 
 ### Added
 
