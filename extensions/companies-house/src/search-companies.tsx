@@ -11,7 +11,7 @@ import { useState } from "react";
 import { searchCompanies } from "./api";
 import { CompanyListItem } from "./components/CompanyListItem";
 import { CompanyProfile } from "./components/CompanyProfile";
-import { PAGE_SIZE } from "./constants";
+import { PAGE_SIZE, SEARCH_INDEX_LIMIT } from "./constants";
 import { companyStatusLabel, companyWebUrl, statusColor } from "./helpers";
 import {
   clearRecentlyViewedCompanies,
@@ -34,7 +34,14 @@ export default function SearchCompanies() {
       const res = await searchCompanies(query.trim(), startIndex);
       const items = res.items ?? [];
       const total = res.total_results ?? items.length;
-      return { data: items, hasMore: startIndex + items.length < total };
+      // Companies House refuses a start_index of 1000 or more with a 416, so
+      // paging to the reported total would end in an error toast rather than
+      // the end of the list.
+      const next = startIndex + items.length;
+      return {
+        data: items,
+        hasMore: next < total && next < SEARCH_INDEX_LIMIT,
+      };
     },
     [searchText],
     { keepPreviousData: true },
@@ -99,6 +106,8 @@ export default function SearchCompanies() {
             />
           ))}
         </List.Section>
+      ) : searchText && isLoading ? (
+        <List.EmptyView icon={Icon.Clock} title="Searching…" />
       ) : searchText ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}

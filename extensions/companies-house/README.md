@@ -43,7 +43,7 @@ This is an AI extension. With Raycast AI you can ask questions in natural langua
 - **A name match is not proof of identity.** The disqualified directors register is searched by name, and different people share names. Check the date of birth and address before drawing a conclusion.
 - **Ceased and resigned entries stay on the register.** Filters distinguish current from former, and counts come from the register's own totals rather than from whatever happened to load.
 - **Rate limit:** the API allows 600 requests per five minutes per key. Searches are throttled and long lists are read a page at a time to stay within it.
-- **Privacy:** only an officer's birth **month and year** are ever shown — Companies House does not publish the day.
+- **Dates of birth.** For company officers, Companies House publishes only the **month and year**, and that is all this extension shows. The disqualified directors register is different: it publishes the **full date**, and the extension shows it, because it is the main way to tell two people of the same name apart.
 
 ## Data
 

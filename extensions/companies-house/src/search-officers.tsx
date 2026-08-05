@@ -10,7 +10,7 @@ import { useState } from "react";
 
 import { searchOfficers } from "./api";
 import { OfficerListItem } from "./components/OfficerListItem";
-import { PAGE_SIZE } from "./constants";
+import { PAGE_SIZE, SEARCH_INDEX_LIMIT } from "./constants";
 
 export default function SearchOfficers() {
   const [searchText, setSearchText] = useState("");
@@ -22,7 +22,14 @@ export default function SearchOfficers() {
       const res = await searchOfficers(query.trim(), startIndex);
       const items = res.items ?? [];
       const total = res.total_results ?? items.length;
-      return { data: items, hasMore: startIndex + items.length < total };
+      // Companies House refuses a start_index of 1000 or more with a 416, so
+      // paging to the reported total would end in an error toast rather than
+      // the end of the list.
+      const next = startIndex + items.length;
+      return {
+        data: items,
+        hasMore: next < total && next < SEARCH_INDEX_LIMIT,
+      };
     },
     [searchText],
     { keepPreviousData: true },
@@ -47,7 +54,7 @@ export default function SearchOfficers() {
       ) : error ? (
         <List.EmptyView
           icon={Icon.Warning}
-          title="Couldn't load officers"
+          title="Couldn't Load Officers"
           description={error.message}
           actions={
             <ActionPanel>
@@ -59,10 +66,12 @@ export default function SearchOfficers() {
             </ActionPanel>
           }
         />
+      ) : searchText && isLoading ? (
+        <List.EmptyView icon={Icon.Clock} title="Searching…" />
       ) : searchText ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
-          title="No officers found"
+          title="No Officers Found"
           description="Try a different name."
         />
       ) : (

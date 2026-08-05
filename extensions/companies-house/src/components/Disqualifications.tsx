@@ -84,16 +84,36 @@ export function Disqualifications({ officerName }: { officerName: string }) {
           ))}
         </List.Section>
       ) : null}
+      {/*
+        The search box arrives pre-filled with the officer's name, so this view
+        is never in the "empty search bar" state that makes Raycast suppress an
+        empty view while loading. Without the isLoading branch, the first thing
+        shown about a named person is "No Disqualification Recorded" — an
+        affirmative negative about an individual, asserted before the register
+        has been asked.
+      */}
       <List.EmptyView
         title={
-          searchText.trim() ? "No Disqualification Recorded" : "Search by Name"
+          !searchText.trim()
+            ? "Search by Name"
+            : isLoading
+              ? "Searching the Register…"
+              : "No Disqualification Recorded"
         }
         description={
-          searchText.trim()
-            ? "The register holds only officers currently subject to a disqualification order or undertaking, so no match is the ordinary result. It is not a confirmation that this person has never been disqualified."
-            : "The register holds officers currently subject to a disqualification order or undertaking. Type a name to search it."
+          !searchText.trim()
+            ? "The register holds officers currently subject to a disqualification order or undertaking. Type a name to search it."
+            : isLoading
+              ? undefined
+              : "The register holds only officers currently subject to a disqualification order or undertaking, so no match is the ordinary result. It is not a confirmation that this person has never been disqualified."
         }
-        icon={searchText.trim() ? Icon.CheckCircle : Icon.MagnifyingGlass}
+        icon={
+          !searchText.trim()
+            ? Icon.MagnifyingGlass
+            : isLoading
+              ? Icon.Clock
+              : Icon.CheckCircle
+        }
       />
     </List>
   );
@@ -174,6 +194,11 @@ function DisqualificationDetail({
     markdown +=
       "\n\nNo disqualification is recorded against this entry. That is not a confirmation that the person has never been disqualified — the register holds only disqualifications currently in force.";
   } else {
+    // The caveat lives on the search screen, which is one screen back by the
+    // time anyone reads a record. It has to travel with the record it
+    // qualifies, because this is the screen someone would act on.
+    markdown +=
+      "\n\n> This entry was reached by searching names. People share names, so check the date of birth and address below before treating this as the same person.";
     for (const entry of disqualifications) {
       markdown += `\n\n## ${disqualificationTypeLabel(entry.disqualification_type) ?? "Disqualification"}`;
       markdown += `\n\n${describe(entry)}`;

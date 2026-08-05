@@ -20,6 +20,22 @@ import type {
 
 type QueryParams = Record<string, string | number | undefined>;
 
+/**
+ * Companies House company numbers are eight characters and the API matches
+ * them exactly: `/company/445790` and `/company/oc394454` both 404, while
+ * `/company/00445790` and `/company/OC394454` both succeed. People type the
+ * short form constantly, and an AI model asked to look up "company 445790"
+ * would otherwise be told the company does not exist.
+ */
+export function normalizeCompanyNumber(companyNumber: string): string {
+  const trimmed = companyNumber.trim().toUpperCase().replace(/\s+/g, "");
+  return /^\d+$/.test(trimmed) ? trimmed.padStart(8, "0") : trimmed;
+}
+
+function companyPath(companyNumber: string, suffix = ""): string {
+  return `/company/${encodeURIComponent(normalizeCompanyNumber(companyNumber))}${suffix}`;
+}
+
 /** Turns an HTTP status into a clear, actionable message. */
 function messageForStatus(status: number): string {
   switch (status) {
@@ -30,6 +46,8 @@ function messageForStatus(status: number): string {
       return "Not found.";
     case 410:
       return "Companies House no longer holds this document.";
+    case 416:
+      return "Companies House does not serve search results beyond the first 1,000. Narrow the search.";
     case 429:
       return "Rate limit reached (600 requests per 5 minutes). Please wait a moment and try again.";
     default:
@@ -120,14 +138,12 @@ export function searchOfficers(query: string, startIndex: number) {
 }
 
 export function getCompany(companyNumber: string) {
-  return request<CompanyProfile>(
-    `/company/${encodeURIComponent(companyNumber)}`,
-  );
+  return request<CompanyProfile>(companyPath(companyNumber));
 }
 
 export function getCompanyOfficers(companyNumber: string, startIndex: number) {
   return request<CompanyOfficersResponse>(
-    `/company/${encodeURIComponent(companyNumber)}/officers`,
+    companyPath(companyNumber, "/officers"),
     {
       items_per_page: PAGE_SIZE,
       start_index: startIndex,
@@ -147,7 +163,7 @@ export function getOfficerAppointments(officerId: string, startIndex: number) {
 
 export function getFilingHistory(companyNumber: string, startIndex: number) {
   return request<FilingHistoryResponse>(
-    `/company/${encodeURIComponent(companyNumber)}/filing-history`,
+    companyPath(companyNumber, "/filing-history"),
     {
       items_per_page: PAGE_SIZE,
       start_index: startIndex,
@@ -161,7 +177,7 @@ export function getFilingHistory(companyNumber: string, startIndex: number) {
  */
 export function getCharges(companyNumber: string, startIndex: number) {
   return requestOptional<ChargesResponse>(
-    `/company/${encodeURIComponent(companyNumber)}/charges`,
+    companyPath(companyNumber, "/charges"),
     {
       items_per_page: PAGE_SIZE,
       start_index: startIndex,
@@ -174,7 +190,7 @@ export function getPersonsWithSignificantControl(
   startIndex: number,
 ) {
   return request<PscResponse>(
-    `/company/${encodeURIComponent(companyNumber)}/persons-with-significant-control`,
+    companyPath(companyNumber, "/persons-with-significant-control"),
     {
       items_per_page: PAGE_SIZE,
       start_index: startIndex,
@@ -188,7 +204,7 @@ export function getPersonsWithSignificantControl(
  */
 export function getPscStatements(companyNumber: string, startIndex: number) {
   return requestOptional<PscStatementsResponse>(
-    `/company/${encodeURIComponent(companyNumber)}/persons-with-significant-control-statements`,
+    companyPath(companyNumber, "/persons-with-significant-control-statements"),
     {
       items_per_page: PAGE_SIZE,
       start_index: startIndex,
@@ -202,7 +218,7 @@ export function getPscStatements(companyNumber: string, startIndex: number) {
  */
 export function getExemptions(companyNumber: string) {
   return requestOptional<ExemptionsResponse>(
-    `/company/${encodeURIComponent(companyNumber)}/exemptions`,
+    companyPath(companyNumber, "/exemptions"),
   );
 }
 
@@ -212,7 +228,7 @@ export function getExemptions(companyNumber: string) {
  */
 export function getInsolvency(companyNumber: string) {
   return requestOptional<InsolvencyResponse>(
-    `/company/${encodeURIComponent(companyNumber)}/insolvency`,
+    companyPath(companyNumber, "/insolvency"),
   );
 }
 

@@ -23,7 +23,6 @@ const PSC_EXEMPTION_KEYS = [
   "psc_exempt_as_trading_on_regulated_market",
   "psc_exempt_as_trading_on_uk_regulated_market",
   "psc_exempt_as_trading_on_eu_regulated_market",
-  "psc_exempt_as_trading_on_us_regulated_market",
   "psc_exempt_as_shares_admitted_on_market",
 ];
 

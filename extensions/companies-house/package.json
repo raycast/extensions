@@ -11,8 +11,7 @@
   ],
   "license": "MIT",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "commands": [
     {
@@ -235,7 +234,7 @@
         ]
       },
       {
-        "input": "@companies-house does company 00445790 have any charges?",
+        "input": "@companies-house does company 09446231 have any charges?",
         "mocks": {
           "get-charges": {
             "total": 0,

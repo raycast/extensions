@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -11,6 +11,13 @@ import {
   officerRoleLabel,
   officerWebUrl,
 } from "../helpers";
+import {
+  officerStanding,
+  standingColor,
+  standingIcon,
+  standingLabel,
+  type OfficerCounts,
+} from "../officer-standing";
 import type { CompanyOfficer } from "../types";
 
 import { Disqualifications } from "./Disqualifications";
@@ -18,7 +25,7 @@ import { OfficerAppointments } from "./OfficerAppointments";
 
 const MAX_PAGES = 10;
 
-type StatusFilter = "all" | "active" | "resigned";
+type StatusFilter = "all" | "active" | "resigned" | "inactive";
 
 export function CompanyOfficers({
   companyNumber,
@@ -40,6 +47,7 @@ export function CompanyOfficers({
       let startIndex = 0;
       let total: number | undefined;
       let activeCount: number | undefined;
+      let inactiveCount: number | undefined;
       let resignedCount: number | undefined;
 
       for (let page = 0; page < MAX_PAGES; page++) {
@@ -48,6 +56,7 @@ export function CompanyOfficers({
         all.push(...items);
         total ??= res.total_results;
         activeCount ??= res.active_count;
+        inactiveCount ??= res.inactive_count;
         resignedCount ??= res.resigned_count;
         startIndex += items.length;
         if (items.length === 0 || all.length >= (total ?? all.length)) break;
@@ -58,6 +67,7 @@ export function CompanyOfficers({
         // The API's own totals, not the length of what we managed to read.
         total: total ?? all.length,
         activeCount,
+        inactiveCount,
         resignedCount,
         complete: all.length >= (total ?? all.length),
       };
@@ -65,10 +75,14 @@ export function CompanyOfficers({
     [companyNumber],
   );
 
+  const counts: OfficerCounts = {
+    activeCount: data?.activeCount,
+    inactiveCount: data?.inactiveCount,
+  };
+
   const officers = (data?.officers ?? []).filter((officer) => {
-    if (status === "active") return !officer.resigned_on;
-    if (status === "resigned") return Boolean(officer.resigned_on);
-    return true;
+    if (status === "all") return true;
+    return status === officerStanding(officer, counts);
   });
 
   const truncated = data ? !data.complete : false;
@@ -108,6 +122,12 @@ export function CompanyOfficers({
             }
             value="resigned"
           />
+          {data?.inactiveCount ? (
+            <List.Dropdown.Item
+              title={`No Longer in Post (${data.inactiveCount})`}
+              value="inactive"
+            />
+          ) : null}
         </List.Dropdown>
       }
     >
@@ -116,12 +136,20 @@ export function CompanyOfficers({
           title={`Showing the first ${officers.length} of ${data?.total} officers`}
         >
           {officers.map((officer, index) => (
-            <OfficerItem key={`${officer.name}-${index}`} officer={officer} />
+            <OfficerItem
+              key={`${officer.name}-${index}`}
+              officer={officer}
+              counts={counts}
+            />
           ))}
         </List.Section>
       ) : (
         officers.map((officer, index) => (
-          <OfficerItem key={`${officer.name}-${index}`} officer={officer} />
+          <OfficerItem
+            key={`${officer.name}-${index}`}
+            officer={officer}
+            counts={counts}
+          />
         ))
       )}
       <List.EmptyView
@@ -137,8 +165,15 @@ export function CompanyOfficers({
   );
 }
 
-function OfficerItem({ officer }: { officer: CompanyOfficer }) {
-  const resigned = Boolean(officer.resigned_on);
+function OfficerItem({
+  officer,
+  counts,
+}: {
+  officer: CompanyOfficer;
+  counts: OfficerCounts;
+}) {
+  const standing = officerStanding(officer, counts);
+  const label = standingLabel(standing);
   const officerId = extractOfficerId(officer.links?.officer?.appointments);
   const dob = formatDateOfBirth(officer.date_of_birth);
   const address = formatAddress(officer.address);
@@ -149,10 +184,11 @@ function OfficerItem({ officer }: { officer: CompanyOfficer }) {
       subtitle={officerRoleLabel(officer.officer_role)}
       accessories={[
         {
-          icon: resigned
-            ? { source: Icon.XMarkCircle, tintColor: Color.SecondaryText }
-            : { source: Icon.CheckCircle, tintColor: Color.Green },
-          tooltip: resigned ? "Resigned" : "Active",
+          icon: {
+            source: standingIcon(standing),
+            tintColor: standingColor(standing),
+          },
+          tooltip: label,
         },
       ]}
       detail={
@@ -171,8 +207,8 @@ function OfficerItem({ officer }: { officer: CompanyOfficer }) {
               ) : null}
               <List.Item.Detail.Metadata.TagList title="Status">
                 <List.Item.Detail.Metadata.TagList.Item
-                  text={resigned ? "Resigned" : "Active"}
-                  color={resigned ? Color.SecondaryText : Color.Green}
+                  text={label}
+                  color={standingColor(standing)}
                 />
               </List.Item.Detail.Metadata.TagList>
               {officer.appointed_on ? (

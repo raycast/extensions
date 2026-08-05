@@ -157,6 +157,13 @@ export interface CompanyOfficersResponse extends PagedResponse {
   items?: CompanyOfficer[];
   active_count?: number;
   resigned_count?: number;
+  /**
+   * Officers who are neither in post nor resigned — the members of a dissolved
+   * company, typically. They carry no `resigned_on` and no per-item flag
+   * distinguishes them, so the only signal that an officer is not in post is
+   * this count being non-zero while `active_count` is zero.
+   */
+  inactive_count?: number;
 }
 
 // --- Officer appointments -------------------------------------------------
