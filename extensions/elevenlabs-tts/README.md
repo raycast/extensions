@@ -9,7 +9,7 @@
 
 ## ✨ Features
 
-- 🚀 Instant text-to-speech conversion with a simple keyboard shortcut
+- 🚀 Speak selected text or text copied to your clipboard with a simple keyboard shortcut
 - 🎭 20+ premium AI voices with unique personalities and accents
 - 🎛️ Fine-tune voice stability and clarity to match your needs
 - 🔊 Real-time streaming playback
@@ -30,16 +30,16 @@
 
 ## Usage
 
-1. Select any text in any application
-2. Press your configured hotkey (e.g., ⌘ + Shift + S)
-3. The selected text will be read aloud
+1. Select text in any application, or copy text to your clipboard
+2. Run "Speak Selected Text" or "Speak Copied Text" using its configured hotkey
+3. The chosen text will be read aloud
 4. Press the same hotkey again to stop playback at any time
 
 💡 **Important**: By default, no hotkey is assigned. You'll need to:
 
 1. Open Raycast Settings (⌘ + ,)
 2. Go to Extensions
-3. Find "Speak Selected Text"
+3. Find "Speak Selected Text" or "Speak Copied Text"
 4. Click "Add Hotkey" to set your preferred keyboard shortcut
 
 ## ⚙️ Advanced Settings
