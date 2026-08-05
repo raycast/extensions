@@ -1,6 +1,6 @@
 # AWX Deploy Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-05
 
 - **Search Templates** command: paginated, filterable browser for workflows and job templates, with launch, launch-with-variables (survey-aware), and view-stages actions.
 - **Running Jobs** command: live, auto-refreshing view of active jobs with open-in-AWX and cancel actions.
