@@ -1,6 +1,6 @@
 # Redmine Changelog
 
-## [Open Issues, AI Extension, Issue Editing and Project Filter] - {PR_MERGE_DATE}
+## [Open Issues, AI Extension, Issue Editing and Project Filter] - 2026-08-05
 
 - Added an **Open Issues** command listing all currently open issues across projects, most recently updated first.
 - Added a **Created by Me** command, scoped to the open issues you created.
