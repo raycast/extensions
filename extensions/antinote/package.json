@@ -26,6 +26,13 @@
       ]
     },
     {
+      "name": "new-note-from-selection",
+      "title": "Create New Note from Selection",
+      "subtitle": "Antinote",
+      "description": "Creates a new note with selected text",
+      "mode": "no-view"
+    },
+    {
       "name": "search-notes",
       "title": "Search Notes",
       "subtitle": "Antinote",
