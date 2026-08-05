@@ -71,8 +71,23 @@ export interface Forecast {
   /** start/end of the current weekly window (epoch ms) */
   windowStart: number;
   windowEnd: number;
-  /** %-per-USD calibration factor; null when there is not enough in-window data */
+  /** %-per-USD calibration factor over the whole window; null when there is not enough in-window data */
   k: number | null;
+  /**
+   * %-per-USD from the *completed* days of this window, used for every day
+   * after today so today's own burn rate cannot rescale the rest of the week.
+   * Falls back to `k` when there is no closed segment or no sample to price it.
+   */
+  kBase: number | null;
+  /**
+   * %-per-USD today has actually been charged at, used for what is left of
+   * today. Falls back to `kBase` until today has moved enough percent to read.
+   */
+  kToday: number | null;
+  /** cost incurred inside the current window before today started */
+  costBeforeToday: number;
+  /** real percentage points today has consumed, null when unmeasurable */
+  pctToday: number | null;
   /** cost incurred inside the current window so far */
   costSoFar: number;
   /** rebuilt actual curve for the window so far */
@@ -89,6 +104,33 @@ export interface Forecast {
   hourProfile: number[];
   /** how many calendar days of history fed the profile */
   profileDays: number;
+  /** the weekday prior for today, before any live correction */
+  todayPrior: number;
+  /** full-day weight now expected for today, after blending the prior with today's pace */
+  todayIntensity: number;
+  /**
+   * Full-day weight today's own pace alone implies, already bounded by `todayCap`.
+   * Null when there was no usable pace signal, in which case `todayIntensity`
+   * is just `todayPrior`.
+   */
+  todayPaced: number | null;
+  /** how strongly today's own pace drove todayIntensity, 0-1 */
+  todayWeight: number;
+  /** cost already incurred today, inside this window */
+  todayActual: number;
+  /** share of today's usual usage mass that has already elapsed, 0-1 */
+  elapsedMass: number;
+  /**
+   * Ceiling actually applied to today: `dayCap`, or what today already spent when
+   * that is higher — a day past the cap is evidence, not noise. Null when unbounded.
+   */
+  todayCap: number | null;
+  /** multiplier applied to the weekday prior for days after today */
+  weekFactor: number;
+  /** completed days inside this window that fed weekFactor */
+  weekDaysDone: number;
+  /** ceiling on any single day's weight, null when history is too thin to bound one */
+  dayCap: number | null;
   /** real observed samples inside this window */
   samples: Sample[];
   warnings: string[];
