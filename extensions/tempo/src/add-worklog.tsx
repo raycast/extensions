@@ -12,7 +12,7 @@ import {
   LaunchType,
 } from "@raycast/api";
 import { showFailureToast, useCachedState } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { fetchFromTempoAPI } from "./services/tempo.service";
 import {
   getAssignedIssues,
@@ -245,6 +245,8 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
   const [selectedDate, setSelectedDate] = useState<string>(formatDateToString(new Date()));
   const [useTimeRange, setUseTimeRange] = useCachedState<boolean>(USE_TIME_RANGE_STORAGE_KEY, false);
   const [isRemainingEstimateRequired, setIsRemainingEstimateRequired] = useState(false);
+  const [remainingEstimate, setRemainingEstimate] = useState("");
+  const hasEditedRemainingEstimate = useRef(false);
 
   // Fetch details of the selected issue
   useEffect(() => {
@@ -252,7 +254,15 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
       setIsLoading(true);
 
       const issuePromise = getIssueByKey(issueKey)
-        .then(setIssue)
+        .then((issue) => {
+          setIssue(issue);
+          const remainingEstimateSeconds = issue?.fields.timetracking?.remainingEstimateSeconds;
+          if (!hasEditedRemainingEstimate.current) {
+            setRemainingEstimate(
+              remainingEstimateSeconds === undefined ? "" : formatDuration(remainingEstimateSeconds),
+            );
+          }
+        })
         .catch((error) => {
           console.error("Failed to load issue:", error);
         });
@@ -480,6 +490,11 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
           title="Remaining Estimate"
           placeholder="Required: 1h, 1h30m, 30m"
           info="Required by your Tempo workspace. Enter the estimated remaining time after this worklog."
+          value={remainingEstimate}
+          onChange={(value) => {
+            hasEditedRemainingEstimate.current = true;
+            setRemainingEstimate(value);
+          }}
         />
       )}
       <Form.Dropdown id="date" title="Date" value={selectedDate} onChange={setSelectedDate}>
