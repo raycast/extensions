@@ -1,6 +1,6 @@
 # Python Changelog
 
-## [Fix Search Query Escaping] - {PR_MERGE_DATE}
+## [Fix Search Query Escaping] - 2026-08-05
 
 - Escape user input before interpolating it into the search query and URL.
 
