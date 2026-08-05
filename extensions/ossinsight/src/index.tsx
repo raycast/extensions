@@ -69,9 +69,10 @@ export default function Command() {
               },
               {
                 icon: Icon.TwoPeople,
-                text: repo.contributor_logins ? repo.contributor_logins.split(",").length + "" : "0",
+                text: repo.contributor_logins ? repo.contributor_logins.split(",").filter(Boolean).length + "" : "0",
                 tooltip:
-                  "Top Contributors" + (repo.contributor_logins ? `: ${repo.contributor_logins.slice(0, -1)}` : ""),
+                  "Top Contributors" +
+                  (repo.contributor_logins ? `: ${repo.contributor_logins.split(",").filter(Boolean).join(",")}` : ""),
               },
             ]}
             actions={
