@@ -63,19 +63,25 @@ function isCurrent(period: { exempt_to?: string }, now: number): boolean {
 /**
  * Reads the exemptions and statements resources for a company. Both 404 when
  * there is nothing to report, which the API layer turns into `undefined`.
+ *
+ * A rejection here is therefore a real failure — a bad key, a rate limit, an
+ * outage — never an absence. It is allowed to propagate so the caller can show
+ * it. Swallowing it would report "nothing has been filed" about a register
+ * nobody managed to read, which is the same error as showing a failure toast
+ * for a genuine absence, just pointing the other way.
  */
 export async function explainAbsentPscs(
   companyNumber: string,
   now: number = Date.now(),
 ): Promise<PscExplanation> {
-  const [exemptionsResult, statementsResult] = await Promise.allSettled([
+  const [exemptionsResponse, statementsResponse] = await Promise.all([
     getExemptions(companyNumber),
     getPscStatements(companyNumber, 0),
   ]);
 
   const exemptions: PscExemption[] = [];
-  if (exemptionsResult.status === "fulfilled" && exemptionsResult.value) {
-    const entries = Object.entries(exemptionsResult.value.exemptions ?? {});
+  if (exemptionsResponse) {
+    const entries = Object.entries(exemptionsResponse.exemptions ?? {});
     for (const [key, value] of entries) {
       if (!PSC_EXEMPTION_KEYS.includes(key)) continue;
       const type = value.exemption_type ?? key.replace(/_/g, "-");
@@ -96,10 +102,7 @@ export async function explainAbsentPscs(
     }
   }
 
-  const statements =
-    statementsResult.status === "fulfilled"
-      ? (statementsResult.value?.items ?? [])
-      : [];
+  const statements = statementsResponse?.items ?? [];
 
   const currentExemptions = exemptions.filter((exemption) => exemption.current);
   const endedExemptions = exemptions.filter((exemption) => !exemption.current);
@@ -116,8 +119,15 @@ export async function explainAbsentPscs(
     endedExemptions,
     activeStatements,
     withdrawnStatements,
+    // True only when the register holds nothing at all that bears on the
+    // absence. A lapsed exemption or a withdrawn statement is still a record,
+    // and claiming "nothing has been filed" directly beneath a list of what
+    // was filed contradicts the very section above it.
     unexplained:
-      currentExemptions.length === 0 && activeStatements.length === 0,
+      currentExemptions.length === 0 &&
+      activeStatements.length === 0 &&
+      endedExemptions.length === 0 &&
+      withdrawnStatements.length === 0,
   };
 }
 

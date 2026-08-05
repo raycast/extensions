@@ -296,10 +296,14 @@ export async function getDocumentMetadata(documentId: string) {
  * arbitrary `Location` would let a misbehaving upstream steer the download at
  * any address it liked and hand the response back as a filed document.
  */
+/**
+ * Each entry is a dotted suffix. The leading dot matters: without it,
+ * `endsWith` would also accept `evils3.eu-west-2.amazonaws.com`. The exact
+ * comparison below covers the apex host itself.
+ */
 const ALLOWED_DOCUMENT_HOSTS = [
   ".company-information.service.gov.uk",
   ".s3.eu-west-2.amazonaws.com",
-  "s3.eu-west-2.amazonaws.com",
 ];
 
 function allowedDocumentUrl(location: string, base: string): URL | undefined {
