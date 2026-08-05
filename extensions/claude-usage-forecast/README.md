@@ -2,6 +2,23 @@
 
 Raycast extension that shows how much of your **weekly Claude Code rate limit** you have burned, and predicts **when you will hit 100%** based on your own weekday rhythm.
 
+## Requirements
+
+- **macOS**, with a **signed-in Claude Code** (`claude`).
+- The extension reads your OAuth token from the Keychain item `Claude Code-credentials`, falling back to `~/.claude/.credentials.json`. Nothing leaves your machine except the request to Anthropic's own usage endpoint.
+
+## Commands
+
+- **Usage Menu Bar** — `87%` in the menu bar, green/orange/red by threshold. Refreshes every 10 minutes; **this background poll is what builds the real observation history**, since the API only ever reports "right now".
+- **Weekly Usage** — SVG graph (actual, forecast, limit, weekend shading, predicted crossing), per-day table for the current window, and your learned weekly pattern.
+- **Forecast Methodology** — a read-only view of how the forecast is built: today's live estimate and what moved it, the day-by-day breakdown, and what was learned per weekday and per hour.
+
+## Screenshots
+
+![Weekly Usage — chart, projection, and reset countdown](media/app.png)
+
+![Forecast Methodology — day-by-day breakdown](media/methodology.png)
+
 ## Why not just use ccusage
 
 `ccusage` counts tokens in your local transcripts. Your weekly limit is a server-side, model-weighted budget — token totals correlate with it but drift, so a token-only forecast disagrees with what `/usage` reports.
@@ -25,75 +42,12 @@ so the absolute accuracy of the local cost model is irrelevant — only the rati
 
 - **Day-of-week profile** — weighted mean cost per weekday over the lookback window, with a 21-day half-life so recent weeks dominate. Days with zero usage count (a quiet Sunday is signal). Each weekday's single largest day is dropped once there are 5+ observations, so one runaway session cannot skew the pattern.
 - **Hour-of-day profile** — normalized share of a day's usage per local hour, so a forecast made at 09:00 knows most of the day is still ahead, and one made at 22:00 knows it is not.
-- **Projection** — walks forward hour by hour to the reset, accumulating `k × dowWeight × hourWeight`, and reports the first hour that crosses 100%.
+- **Live correction, today** — the weekday weight is only a prior. What matters is the *pattern* of a day, not its position in the week: today is re-classified by its own pace (spend so far ÷ share of a usual day elapsed), blended geometrically with the prior. The pace's share of the blend grows as the day goes on, passing half around mid-morning — once 15% of a usual day's usage has elapsed. A quiet Wednesday that turns intensive is forecast as an intensive day within the hour; a normally busy day that stays idle stops predicting a busy day. On a weekday that is normally idle there is no prior to blend against, so the pace is used alone and scaled down instead.
+- **Live correction, rest of week** — the same ratio one level up, from *completed* days in the window only, so today's shift is never counted twice. A week running hot keeps running hot.
+- **Day ceiling** — both corrections are capped at the recency-weighted 90th percentile of your active days plus 15% headroom (or, with fewer than five active days on record, your heaviest single day plus the same headroom), and never below what today already spent. Today can be told it looks like your heaviest kind of day, not like a day you have never had.
+- **Projection** — walks forward hour by hour to the reset, accumulating `k × dayWeight × hourWeight`, and reports the first hour that crosses 100%.
 
-## Commands
-
-- **Claude Usage Menu Bar** — `87%` in the menu bar, green/orange/red by threshold. Refreshes every 10 minutes; **this background poll is what builds the real observation history**, since the API only ever reports "right now".
-- **Claude Weekly Usage** — SVG graph (actual, forecast, limit, weekend shading, predicted crossing), per-day table for the current window, and your learned weekly pattern.
-- **Claude Forecast Methodology** — a read-only view of how the forecast is built: real vs projected split, the day-by-day breakdown, and what was learned per weekday and per hour.
-
-## Screenshots
-
-![Claude Weekly Usage — chart, projection, and reset countdown](assets/app.png)
-
-![Claude Forecast Methodology — day-by-day breakdown](assets/methodology.png)
-
-## Getting started (local development)
-
-### Prerequisites
-
-- **macOS** with the [Raycast](https://raycast.com) app installed and open.
-- **Node.js 22** (this repo is developed on `22.22`). `nvm use 22` if you use nvm.
-- A **signed-in Claude Code** (`claude`) — the extension reads the OAuth token from the Keychain item `Claude Code-credentials`, or `~/.claude/.credentials.json` as a fallback. Nothing is sent anywhere except the usage endpoint.
-
-### Run the dev server
-
-```bash
-git clone <this-repo>
-cd claude-usage-forecast
-npm install      # .npmrc enforces a 3-day min-release-age on packages
-npm run dev      # ray develop — builds, hot-reloads, and registers the extension with Raycast
-```
-
-`npm run dev` runs the Raycast CLI in watch mode: it compiles the extension, injects it into your local Raycast, and recompiles on every save. **Leave it running** while you work — the three commands appear in Raycast search immediately.
-
-Then in Raycast:
-
-1. Search **Claude Usage Menu Bar** and run it once to enable the menu-bar command. This is also the background poll that **builds the real observation history** (the API only ever reports "right now"), so let it tick a few times.
-2. Search **Claude Weekly Usage** for the graph, or **Claude Forecast Methodology** for the breakdown.
-3. Adjust behaviour under **Extensions → Claude Usage Forecast** (see [Preferences](#preferences)).
-
-Stop the dev server with `Ctrl-C`; the extension stays installed in Raycast until you remove it from the Extensions list.
-
-### Scripts
-
-| Script | What it does |
-| --- | --- |
-| `npm run dev` | `ray develop` — hot-reloading dev server (primary workflow) |
-| `npm run build` | `ray build -e dist` — production build into `dist/` |
-| `npm run lint` | `ray lint` — ESLint + Prettier check |
-| `npm run fix-lint` | `ray lint --fix` — auto-fix lint issues |
-
-### Project layout
-
-```
-src/
-  menu-bar.tsx        menu-bar command (background poll + history capture)
-  weekly-usage.tsx    graph view command
-  methodology.tsx     methodology view command
-  lib/
-    usage-api.ts      calls api.anthropic.com/api/oauth/usage, reads the OAuth token
-    load.ts           orchestrates a full read: API + history + forecast
-    history.ts        scans ~/.claude/projects/**/*.jsonl (cached by size + mtime)
-    jsonl.ts          streaming JSONL parser
-    pricing.ts        model / token-kind cost weights
-    forecast.ts       day-of-week + hour-of-day model and projection
-    chart.ts          SVG chart rendering
-    types.ts          shared types
-```
-
-`package.json` declares the three `commands` and all user `preferences`; `raycast-env.d.ts` is generated from it by the Raycast CLI — do not edit it by hand.
+The **Forecast Methodology** command shows all of this against your own current numbers.
 
 ## Preferences
 
@@ -106,7 +60,12 @@ src/
 
 ## Caveats
 
-- The forecast assumes next week looks like recent weeks. A day off or an unusually heavy session moves it.
+- The forecast assumes next week looks like recent weeks, corrected by how this week and today are actually going. The live correction assumes a day's *shape* is normal even when its size is not — a day that is heavy only because you started six hours earlier than usual reads as heavier than it will end up.
 - Only calendar days present in the transcripts feed the pattern; with under 14 days of history the extension says so.
+- Transcripts only cover this machine. Usage from the web app or another device shows in the real percentage but not in the learned pattern.
 - Scoped Opus / Sonnet weekly quotas are shown when the API reports them, but the forecast tracks the overall weekly limit.
 - The first scan reads every transcript touched in the lookback window (a few seconds on a large `~/.claude`). Results are cached per file by size and mtime, so later runs are near-instant.
+
+## Development
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for local setup, scripts, and project layout.
