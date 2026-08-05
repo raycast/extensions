@@ -58,6 +58,20 @@ function keyOf(entry: HistoryEntry): string {
   return `${entry.kind}:${entry.subject}`;
 }
 
+/**
+ * Every mutation is read-modify-write against a single storage key, so two overlapping
+ * ones would both read the same snapshot and the second would discard the first's result.
+ * Queueing them means each read sees the previous write. The chain swallows failures so
+ * one rejected mutation cannot wedge the queue.
+ */
+let mutations: Promise<unknown> = Promise.resolve();
+
+function serialize<T>(mutate: () => Promise<T>): Promise<T> {
+  const result = mutations.then(mutate, mutate);
+  mutations = result.catch(() => undefined);
+  return result;
+}
+
 export function useHistory() {
   const { saveHistory } = getPreferenceValues<Preferences>();
   const { value, setValue, isLoading } = useLocalStorage<HistoryEntry[]>(STORAGE_KEY, []);
@@ -72,9 +86,11 @@ export function useHistory() {
   const save = useCallback(
     async (entry: HistoryEntry) => {
       if (!saveHistory) return;
-      const current = await readStored();
-      const next = [entry, ...current.filter((e) => keyOf(e) !== keyOf(entry))].slice(0, MAX_ENTRIES);
-      await setValue(next);
+      await serialize(async () => {
+        const current = await readStored();
+        const next = [entry, ...current.filter((e) => keyOf(e) !== keyOf(entry))].slice(0, MAX_ENTRIES);
+        await setValue(next);
+      });
     },
     [saveHistory, setValue],
   );
@@ -97,14 +113,17 @@ export function useHistory() {
 
   const remove = useCallback(
     async (entry: HistoryEntry) => {
-      const current = await readStored();
-      await setValue(current.filter((e) => keyOf(e) !== keyOf(entry)));
+      await serialize(async () => {
+        const current = await readStored();
+        await setValue(current.filter((e) => keyOf(e) !== keyOf(entry)));
+      });
     },
     [setValue],
   );
 
+  // Queued alongside the others so a verification landing mid-clear cannot resurrect a row.
   const clear = useCallback(async () => {
-    await setValue([]);
+    await serialize(async () => setValue([]));
   }, [setValue]);
 
   return {

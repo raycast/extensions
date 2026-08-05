@@ -250,15 +250,28 @@ export function getDomainVerdict(record: DomainRecord): Recommendation {
   }
 
   if (record.dns?.type !== "MX") {
-    // Phrased without an article: record types are initialisms, so "a A record" and
-    // "an CNAME record" are both wrong and there is no way to pick one that fits all.
-    // A type of "unknown" is Bouncer saying it found nothing usable, not a record named that.
+    // Record types are initialisms, so neither "a A record" nor "an CNAME record" works;
+    // the wording avoids the article entirely. A type of "unknown" is Bouncer reporting
+    // that it found nothing usable, not a record actually named that.
     const type = record.dns?.type;
     const named = type && type.toLowerCase() !== "unknown";
+
+    // RFC 5321 §5.1 falls back to the A/AAAA record when a domain publishes no MX, so an
+    // address-only domain can still receive mail. Calling that undeliverable would be wrong.
+    const implicitMx = named && ["a", "aaaa"].includes(type.toLowerCase());
+    if (implicitMx) {
+      return {
+        title: "No MX Record",
+        detail: `The domain publishes ${type} records but no MX record. Mail can still reach it through the implicit routing in RFC 5321, though many senders treat a missing MX as a misconfiguration.`,
+        color: Color.Orange,
+        icon: Icon.Warning,
+      };
+    }
+
     return {
-      title: "No MX Record",
+      title: named ? "No MX Record" : "No Mail Records",
       detail: named
-        ? `The domain publishes ${type} records but no MX record, so most senders will fail to deliver here.`
+        ? `The domain publishes ${type} records but no MX record, and ${type} is not a record type mail can be routed to.`
         : "Bouncer found no usable mail records for this domain, so nothing can be delivered to it.",
       color: Color.Red,
       icon: Icon.XMarkCircle,
@@ -275,9 +288,15 @@ export function getDomainVerdict(record: DomainRecord): Recommendation {
     };
   }
 
+  // Only claim the server rejects unknown addresses when Bouncer actually says it does.
+  // acceptAll can come back "unknown", and inferring "not catch-all" from that would
+  // assert behaviour the API never established.
+  const rejectsUnknown = record.domain?.acceptAll === "no";
   return {
     title: "Mail Configured",
-    detail: "The domain publishes a working MX record and rejects addresses that do not exist.",
+    detail: rejectsUnknown
+      ? "The domain publishes a working MX record and rejects addresses that do not exist."
+      : "The domain publishes a working MX record. Bouncer could not determine whether it accepts mail for every address.",
     color: Color.Green,
     icon: Icon.CheckCircle,
   };
