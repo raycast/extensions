@@ -1,6 +1,6 @@
 # Tempo Changelog
 
-## [Prefill Remaining Estimate] - {PR_MERGE_DATE}
+## [Prefill Remaining Estimate] - 2026-08-05
 
 - Prefill the editable remaining estimate from the selected Jira issue
 
