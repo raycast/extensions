@@ -51,10 +51,12 @@ To make the extension work instantly without asking for a password every 5 secon
     *   Upload them to the router.
     *   Configure `~/.ssh/config` with `ControlMaster` optimization (10x faster + ban protection).
 
+**What the wizard does locally:** if `~/.ssh/id_ed25519` doesn't exist, it generates a new Ed25519 key **without a passphrase** (so Raycast can connect without prompting), copies the public key to the router via `ssh-copy-id`, and appends a `Host` block to `~/.ssh/config` with `ControlMaster` settings. Nothing else on your Mac is modified.
+
 ### Step 3. Finalize
 1.  Launch **XKeen Manager**.
 2.  On first run, configure settings (unless you changed them in the wizard):
-    *   **SSH Connection:** `keenetic` (or your custom alias).
+    *   **SSH Connection:** `xkeen` (or your custom alias).
     *   **Paths:** Keep defaults if you have standard Entware (`/opt/etc/xray...`).
 
 ---

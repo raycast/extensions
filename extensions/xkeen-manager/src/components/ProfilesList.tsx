@@ -17,11 +17,31 @@ import { useState } from "react";
 import { runRemote } from "../lib/ssh";
 import { loadProfilesData, applyProfile, writeProfileMeta, validateProfileName, ProfileMeta } from "../lib/profiles";
 import { verifyTrafficPath, formatTrafficVerification } from "../lib/health";
-import { shQuote, getPaths, shortDate, mdCode } from "../lib/utils";
+import { shQuote, getPaths, shortDate, mdCode, parseErrorMessage } from "../lib/utils";
 
 function profileSubtitle(isActive: boolean, meta: ProfileMeta | undefined): string {
   const updated = shortDate(meta?.updatedAt);
   return updated ? `Updated: ${updated}` : "";
+}
+
+function truncate(text: string, max: number): string {
+  return text.length > max ? `${text.slice(0, max)}…` : text;
+}
+
+const SETUP_SSH_INSTRUCTIONS = [
+  "# Setup SSH Connection",
+  "",
+  "XKeen Manager could not reach your router over SSH.",
+  "",
+  "1. Run the **Setup SSH Connection** command from Raycast — it installs a passwordless SSH key for the router.",
+  "2. Check the **SSH Connection** preference for this extension. It should be a host alias from `~/.ssh/config` (default: `xkeen`).",
+  "3. Make sure the router is powered on and reachable on your network.",
+  "",
+  "Once fixed, use **Retry** to reload profiles.",
+].join("\n");
+
+function SetupSshInstructions() {
+  return <Detail markdown={SETUP_SSH_INSTRUCTIONS} />;
 }
 
 function CreateProfileForm(props: { onAfterSave: () => void; sourceProfileName?: string; defaultName?: string }) {
@@ -162,12 +182,13 @@ function RenameProfileForm(props: { oldName: string; onAfterSave: () => void }) 
 
 export function ProfilesList(props: { onSwitched?: () => void }) {
   const { profilesDir } = getPaths();
-  const { data, isLoading, revalidate } = useCachedPromise(loadProfilesData, [], {
+  const { data, isLoading, error, revalidate } = useCachedPromise(loadProfilesData, [], {
     keepPreviousData: true,
   });
   const names = data?.names ?? [];
   const active = data?.active ?? "unknown";
   const metaByName = data?.metaByName ?? {};
+  const hasProfiles = names.length > 0;
 
   async function switchTo(name: string) {
     await showToast({ style: Toast.Style.Animated, title: `Applying ${name}…` });
@@ -223,76 +244,94 @@ export function ProfilesList(props: { onSwitched?: () => void }) {
         />
       </List.Section>
       <List.Section title="Available Servers">
-        {names.length > 0 ? (
-          names.map((name) => {
-            const isActive = name === active;
-            const meta = metaByName[name];
-            const subtitle = profileSubtitle(isActive, meta);
-            return (
-              <List.Item
-                key={name}
-                title={name}
-                subtitle={subtitle}
-                icon={isActive ? Icon.Checkmark : Icon.Circle}
-                accessories={isActive ? [{ tag: { value: "Active", color: Color.Green } }] : undefined}
-                actions={
-                  <ActionPanel>
-                    {!isActive && (
-                      <Action title="Switch to This Server" icon={Icon.Switch} onAction={() => switchTo(name)} />
-                    )}
-                    <Action.Push
-                      title="Duplicate"
-                      icon={Icon.Plus}
-                      target={
-                        <CreateProfileForm
-                          onAfterSave={revalidate}
-                          sourceProfileName={name}
-                          defaultName={`${name}-copy`}
-                        />
-                      }
-                    />
-                    <Action.Push
-                      title="Rename"
-                      icon={Icon.Pencil}
-                      shortcut={{ modifiers: ["cmd"], key: "e" }}
-                      target={<RenameProfileForm oldName={name} onAfterSave={revalidate} />}
-                    />
-                    <Action.Push
-                      title="View Metadata"
-                      target={
-                        <Detail
-                          markdown={mdCode(`${name} metadata`, JSON.stringify(metaByName[name] ?? {}, null, 2))}
-                        />
-                      }
-                    />
-                    {!isActive && (
-                      <Action
-                        title="Delete"
-                        style={Action.Style.Destructive}
-                        icon={Icon.Trash}
-                        shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                        onAction={() => deleteProfile(name)}
-                      />
-                    )}
-                    <Action title="Refresh List" icon={Icon.RotateClockwise} onAction={revalidate} />
-                  </ActionPanel>
-                }
-              />
-            );
-          })
-        ) : (
+        {error && (
           <List.Item
-            title="No profiles yet"
-            subtitle="Use 'Create New Profile' above"
-            icon={Icon.Info}
+            title={hasProfiles ? "Connection error — showing cached data" : "Connection error"}
+            subtitle={truncate(parseErrorMessage(error), 100)}
+            icon={{ source: Icon.Warning, tintColor: Color.Orange }}
             actions={
               <ActionPanel>
-                <Action.Push title="Create" target={<CreateProfileForm onAfterSave={revalidate} />} />
-                <Action title="Refresh List" icon={Icon.RotateClockwise} onAction={revalidate} />
+                <Action title="Retry" icon={Icon.RotateClockwise} onAction={revalidate} />
+                <Action.Push
+                  title="Setup SSH Connection"
+                  icon={Icon.WrenchScrewdriver}
+                  target={<SetupSshInstructions />}
+                />
+                <Action.CopyToClipboard title="Copy Error" content={parseErrorMessage(error)} />
               </ActionPanel>
             }
           />
         )}
+        {hasProfiles
+          ? names.map((name) => {
+              const isActive = name === active;
+              const meta = metaByName[name];
+              const subtitle = profileSubtitle(isActive, meta);
+              return (
+                <List.Item
+                  key={name}
+                  title={name}
+                  subtitle={subtitle}
+                  icon={isActive ? Icon.Checkmark : Icon.Circle}
+                  accessories={isActive ? [{ tag: { value: "Active", color: Color.Green } }] : undefined}
+                  actions={
+                    <ActionPanel>
+                      {!isActive && (
+                        <Action title="Switch to This Server" icon={Icon.Switch} onAction={() => switchTo(name)} />
+                      )}
+                      <Action.Push
+                        title="Duplicate"
+                        icon={Icon.Plus}
+                        target={
+                          <CreateProfileForm
+                            onAfterSave={revalidate}
+                            sourceProfileName={name}
+                            defaultName={`${name}-copy`}
+                          />
+                        }
+                      />
+                      <Action.Push
+                        title="Rename"
+                        icon={Icon.Pencil}
+                        shortcut={{ modifiers: ["cmd"], key: "e" }}
+                        target={<RenameProfileForm oldName={name} onAfterSave={revalidate} />}
+                      />
+                      <Action.Push
+                        title="View Metadata"
+                        target={
+                          <Detail
+                            markdown={mdCode(`${name} metadata`, JSON.stringify(metaByName[name] ?? {}, null, 2))}
+                          />
+                        }
+                      />
+                      {!isActive && (
+                        <Action
+                          title="Delete"
+                          style={Action.Style.Destructive}
+                          icon={Icon.Trash}
+                          shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                          onAction={() => deleteProfile(name)}
+                        />
+                      )}
+                      <Action title="Refresh List" icon={Icon.RotateClockwise} onAction={revalidate} />
+                    </ActionPanel>
+                  }
+                />
+              );
+            })
+          : !error && (
+              <List.Item
+                title="No profiles yet"
+                subtitle="Use 'Create New Profile' above"
+                icon={Icon.Info}
+                actions={
+                  <ActionPanel>
+                    <Action.Push title="Create" target={<CreateProfileForm onAfterSave={revalidate} />} />
+                    <Action title="Refresh List" icon={Icon.RotateClockwise} onAction={revalidate} />
+                  </ActionPanel>
+                }
+              />
+            )}
       </List.Section>
     </List>
   );

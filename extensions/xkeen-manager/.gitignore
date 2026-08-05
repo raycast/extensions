@@ -21,3 +21,8 @@ compiled_raycast_rust
 
 # test coverage
 /coverage
+
+# local helper scripts / scratch
+create_screenshots.py
+*.local.*
+*.json.new

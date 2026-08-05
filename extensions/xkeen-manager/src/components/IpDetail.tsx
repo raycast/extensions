@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { runRemote } from "../lib/ssh";
-import { fetchIp, parseSshJson, mdCode } from "../lib/utils";
+import { fetchIp, parseSshJson, mdCode, parseErrorMessage } from "../lib/utils";
 
 type IpData = { lan: string; wan: string; vpn: string; debugLog: string };
 
@@ -31,40 +31,50 @@ async function loadIpData(): Promise<IpData> {
   };
 }
 
+function isVpnConnectionActive(data: IpData | undefined): boolean {
+  if (!data || !data.vpn || !data.wan) return false;
+  if (data.vpn === data.wan) return false;
+  if (data.vpn.includes("Failed") || data.wan.includes("Failed")) return false;
+  return true;
+}
+
 export function IpDetail() {
-  const { data, isLoading, revalidate } = usePromise(loadIpData);
+  const { data, isLoading, error, revalidate } = usePromise(loadIpData);
 
   const debugLog = data?.debugLog ?? "";
-  const lan = data?.lan || "Loading...";
-  const wan = data?.wan || "Loading...";
-  const vpn = data?.vpn || "Loading...";
+  const lan = data?.lan || "—";
+  const wan = data?.wan || "—";
+  const vpn = data?.vpn || "—";
 
-  const isVpnActive = vpn !== "Loading..." && wan !== "Loading..." && vpn !== wan && !vpn.includes("Failed");
+  const isVpnActive = isVpnConnectionActive(data);
 
-  const md = ["# Network Status", ""].join("\n");
+  const md = error ? mdCode("Network Status", parseErrorMessage(error)) : ["# Network Status", ""].join("\n");
 
   return (
     <Detail
       isLoading={isLoading}
       markdown={md}
       metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Exit IP"
-            text={`${vpn} (${isVpnActive ? "✅ VPN Active" : "⚠️ Direct/Bypass"})`}
-          />
-          <Detail.Metadata.Label title="Direct IP" text={wan} />
-          <Detail.Metadata.Label title="Router LAN" text={lan} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Note"
-            text="Exit IP from 2ip.io (via device). Direct IP from 2ip.ru (via router)."
-          />
-        </Detail.Metadata>
+        error ? undefined : (
+          <Detail.Metadata>
+            <Detail.Metadata.Label
+              title="Exit IP"
+              text={`${vpn} (${isVpnActive ? "✅ VPN Active" : "⚠️ Direct/Bypass"})`}
+            />
+            <Detail.Metadata.Label title="Direct IP" text={wan} />
+            <Detail.Metadata.Label title="Router LAN" text={lan} />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label
+              title="Note"
+              text="Exit IP from 2ip.io (via device). Direct IP from 2ip.ru (via router)."
+            />
+          </Detail.Metadata>
+        )
       }
       actions={
         <ActionPanel>
           <Action title="Refresh" icon={Icon.RotateClockwise} onAction={revalidate} />
+          {error && <Action.CopyToClipboard title="Copy Error" content={parseErrorMessage(error)} />}
           <Action.Push title="Debug Log" target={<Detail markdown={mdCode("SSH Output", debugLog)} />} />
         </ActionPanel>
       }
