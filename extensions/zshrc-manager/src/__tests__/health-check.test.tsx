@@ -125,7 +125,7 @@ describe("HealthCheck", () => {
   });
 
   describe("health score calculation", () => {
-    it("should show excellent score when no issues", async () => {
+    it("should show the all-clear state when no issues", async () => {
       mockUseZshrcLoader.mockReturnValue({
         sections: mockSections,
         isLoading: false,
@@ -137,7 +137,7 @@ describe("HealthCheck", () => {
       render(<HealthCheck />);
 
       await waitFor(() => {
-        expect(screen.getByText("Health Score")).toBeInTheDocument();
+        expect(screen.getByText("Your configuration looks healthy!")).toBeInTheDocument();
       });
     });
 
@@ -512,7 +512,7 @@ describe("HealthCheck", () => {
   });
 
   describe("summary section", () => {
-    it("should display summary with issue counts", async () => {
+    it("does not render a Summary row — the score summary lives on the home surface", async () => {
       mockUseZshrcLoader.mockReturnValue({
         sections: mockSections,
         isLoading: false,
@@ -524,7 +524,8 @@ describe("HealthCheck", () => {
       render(<HealthCheck />);
 
       await waitFor(() => {
-        expect(screen.getByText("Summary")).toBeInTheDocument();
+        expect(screen.queryByText("Summary")).not.toBeInTheDocument();
+        expect(screen.queryByText("Health Score")).not.toBeInTheDocument();
       });
     });
   });

@@ -1,5 +1,28 @@
 # Changelog
 
+## [Unified home surface] - 2026-08-05
+
+### Changed
+
+- **One home surface replaces the sixteen-views-behind-a-dropdown structure.** At rest the command shows an overview — a live health row, Browse (categories with live counts, plus Recently Managed), Discover — roughly 15 rows instead of 77. Typing searches your whole config at once, flat and cross-type, ranked by relevance and frecency
+- **New Zshrc Tools command** gives Health Check, Backup Manager and History their own root-search entry with per-command hotkeys and ranking, each with a detail pane; every tool also stays reachable from the home surface by shortcut and by search
+- **Recently Managed** is a browsable view (under Browse) of every entry ordered by how recently and often you have worked on it in this extension — replacing the small Recent & Frequent shelf that previously sat at the top of home
+- **Categories push into focused views** via real navigation, so `Esc` returns home instead of quitting the command, and the two-search-boxes-at-once layout is gone
+- **The duplicate/warning filter is reachable for the first time.** Focused views spend the freed search-bar slot on the `All / With Warnings / Without Warnings` dropdown that the view-switcher dropdown had been occupying since launch
+- **Discovery is ambient**: searching for something you lack shows matching alias collections inline under "Available to Add", fetched from the real catalogue; the Browse Alias Collections view remains available under Discover
+- **Detail panes are a thin code block showing the value only** (the name is already the row title) plus metadata spent on facts not already on screen. `⌘⇧D` toggles the pane everywhere; row subtitles render only while the pane is hidden, since the narrow column truncates them
+- **Row titles follow one labelling rule** — the shortest unambiguous identifier. Paths reduce to their last segment and lengthen a segment at a time until unique (`/opt/homebrew/bin` and `/usr/local/bin` become `homebrew/bin` and `local/bin`); commands reduce to the program name; nothing is invented to fill a slot
+- Every attribute now appears exactly once: type as row icon, section as header or accessory, issues as a badge, value in the pane — the redundant per-row section text and the meaningless document accessory are gone
+- The Statistics view dissolved into the home counts and the per-category detail panes; the home surface keeps a live health-issue badge on its Health Check row
+- **The health score summary moved to the home surface**: the Health Check row's detail pane now shows the score, status, severity counts and statistics, and the Health Check view shows only the issues — one health report computed once, so the badge, the summary and the issue list always agree
+- The duplicate "Alias Collections" entry inside the Aliases view is gone — the catalogue has one browsable home (the Discover section) and stays one shortcut (`⌘⇧L`) away everywhere
+
+### Fixed
+
+- Brand icons for tool sections (Docker, Python, Node, …) now render on the dark theme: the brand color is baked into the SVG before encoding instead of inheriting `currentColor` (which rendered black). `Node` sections now resolve to the Node.js brand icon instead of a folder
+- Search results now also cover PATH entries, FPATH entries, and keybindings, which cross-type search previously skipped
+- Warning computation no longer reruns on every keystroke: parsed items are memoised so the warning cache actually hits
+
 ## [One parser for every surface] - 2026-08-04
 
 ### Fixed

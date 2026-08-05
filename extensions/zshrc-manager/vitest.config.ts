@@ -16,14 +16,12 @@ export default defineConfig({
       exclude: ["src/**/*.d.ts", "src/__tests__/**", "src/**/*.test.{ts,tsx}", "src/**/*.spec.{ts,tsx}"],
       // Ratchet: set just below current coverage so regressions fail while
       // `npm run validate` stays green. Raise as coverage grows.
-      // Current: ~70 lines/statements. The remaining gap to the aspirational
-      // 75 is the ten type views and the collections code, which the
-      // unified-home redesign deletes — deliberately not gold-plated.
+      // Current: ~81 lines/statements.
       thresholds: {
         branches: 85,
         functions: 80,
-        lines: 69,
-        statements: 69,
+        lines: 75,
+        statements: 75,
       },
     },
   },
