@@ -27,19 +27,32 @@ function request<T>(
   options?: RequestOptions,
 ): Promise<ApiResponse<T>> {
   return new Promise((resolve, reject) => {
-    const isSecure = url.startsWith("https://");
-    const queryParams = params ? `?${new URLSearchParams(params).toString()}` : "";
+    const signal = options?.signal;
 
-    if (options?.signal?.aborted) {
+    if (signal?.aborted) {
       reject(new AbortedError());
 
       return;
     }
 
+    const isSecure = url.startsWith("https://");
+    const queryParams = params ? `?${new URLSearchParams(params).toString()}` : "";
     const requestFn = isSecure ? https.request : http.request;
 
     log.log(`[${method}] request to: ${url}${queryParams}`);
     const httpsOptions = options?.agent ? { agent: options.agent } : {};
+
+    let settled = false;
+
+    const finish = (callback: () => void) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      signal?.removeEventListener("abort", onAbort);
+      callback();
+    };
 
     const req = requestFn(
       `${url}${queryParams}`,
@@ -65,25 +78,34 @@ function request<T>(
               parsedData = responseString;
             }
 
-            resolve({
-              headers: res.headers,
-              data: parsedData as T,
-              ok: res.statusCode === 200,
-              status: res.statusCode || 0,
-            });
+            finish(() =>
+              resolve({
+                headers: res.headers,
+                data: parsedData as T,
+                ok: res.statusCode === 200,
+                status: res.statusCode || 0,
+              }),
+            );
           });
       },
     );
+
+    const onAbort = () => {
+      req.destroy();
+      finish(() => reject(new AbortedError()));
+    };
+
+    signal?.addEventListener("abort", onAbort);
 
     req
       .on("error", (error) => {
         log.log(`Request ${url}${queryParams} failed`);
         console.error(error);
-        reject(error);
+        finish(() => reject(error));
       })
       .on("timeout", () => {
         req.destroy();
-        reject(new Error("Request timeout"));
+        finish(() => reject(new Error("Request timeout")));
       });
 
     req.end();
