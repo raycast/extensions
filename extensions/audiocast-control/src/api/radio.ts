@@ -1,4 +1,5 @@
 import icy from "icy";
+import type { IncomingMessage } from "node:http";
 import { URL, urlToHttpOptions } from "node:url";
 import { createLog } from "../lib/debug";
 import { DEFAULT_TIMEOUT, head } from "./request";
@@ -10,6 +11,43 @@ export async function getCurrentSong(url: string, signal?: AbortSignal): Promise
 
   return new Promise((resolve) => {
     let settled = false;
+    let res: IncomingMessage | undefined;
+    let metadataDeadline: NodeJS.Timeout | undefined;
+
+    const clearMetadataDeadline = () => {
+      if (metadataDeadline !== undefined) {
+        clearTimeout(metadataDeadline);
+        metadataDeadline = undefined;
+      }
+    };
+
+    const close = () => {
+      res?.destroy();
+      req.destroy();
+    };
+
+    const settle = (value: RecordingSummary | null) => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      clearMetadataDeadline();
+      close();
+      resolve(value);
+    };
+
+    metadataDeadline = setTimeout(() => {
+      if (settled) {
+        return;
+      }
+
+      settled = true;
+      clearMetadataDeadline();
+      close();
+      log.error("Failed to fetch current song: Metadata timeout");
+      resolve(null);
+    }, DEFAULT_TIMEOUT);
 
     const req = icy.get(
       {
@@ -17,25 +55,22 @@ export async function getCurrentSong(url: string, signal?: AbortSignal): Promise
         signal,
         timeout: DEFAULT_TIMEOUT,
       },
-      (res) => {
-        const close = () => {
-          res.destroy();
-          req.destroy();
-        };
+      (response) => {
+        res = response;
 
-        res.on("metadata", (metadata) => {
+        response.on("metadata", (metadata) => {
           if (settled) {
             return;
           }
+
+          clearMetadataDeadline();
 
           try {
             const parsed = icy.parse(metadata);
 
             if (parsed) {
               if (!parsed.StreamTitle.includes(" - ")) {
-                settled = true;
-                close();
-                resolve(<RecordingSummary>{ title: parsed.StreamTitle });
+                settle(<RecordingSummary>{ title: parsed.StreamTitle });
 
                 return;
               }
@@ -57,15 +92,11 @@ export async function getCurrentSong(url: string, signal?: AbortSignal): Promise
                 });
             } else {
               log.error(`Failed to parse metadata: '${metadata}'`);
-              settled = true;
-              close();
-              resolve(null);
+              settle(null);
             }
           } catch {
             log.error(`Failed to retrieve metadata: '${metadata}'`);
-            settled = true;
-            close();
-            resolve(null);
+            settle(null);
           }
         });
       },
@@ -77,7 +108,8 @@ export async function getCurrentSong(url: string, signal?: AbortSignal): Promise
       }
 
       settled = true;
-      req.destroy();
+      clearMetadataDeadline();
+      close();
       log.error("Failed to fetch current song: Request timeout");
       resolve(null);
     });
@@ -88,6 +120,8 @@ export async function getCurrentSong(url: string, signal?: AbortSignal): Promise
       }
 
       settled = true;
+      clearMetadataDeadline();
+      close();
       log.error(`Failed to fetch current song: ${error.message}`);
       resolve(null);
     });
