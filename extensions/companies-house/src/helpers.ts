@@ -47,7 +47,7 @@ function enums(): Enumerations {
 // --- Generic text helpers -------------------------------------------------
 
 /** Turns a hyphen/underscore code into a sentence-cased label as a fallback. */
-function humanise(code: string): string {
+function humanize(code: string): string {
   const text = code.replace(/[-_]/g, " ").trim();
   return text ? text.charAt(0).toUpperCase() + text.slice(1) : code;
 }
@@ -132,22 +132,22 @@ export function formatAddress(address?: Address): string | undefined {
 
 export function companyStatusLabel(status?: string): string | undefined {
   if (!status) return undefined;
-  return enums().company_status[status] ?? humanise(status);
+  return enums().company_status[status] ?? humanize(status);
 }
 
 export function companyStatusDetailLabel(detail?: string): string | undefined {
   if (!detail) return undefined;
-  return enums().company_status_detail[detail] ?? humanise(detail);
+  return enums().company_status_detail[detail] ?? humanize(detail);
 }
 
 export function companyTypeLabel(type?: string): string | undefined {
   if (!type) return undefined;
-  return enums().company_type[type] ?? humanise(type);
+  return enums().company_type[type] ?? humanize(type);
 }
 
 export function officerRoleLabel(role?: string): string | undefined {
   if (!role) return undefined;
-  return enums().officer_role[role] ?? humanise(role);
+  return enums().officer_role[role] ?? humanize(role);
 }
 
 /** A concise label for a PSC nature-of-control code, e.g. "Ownership of shares – 75% or more". */
@@ -155,7 +155,7 @@ export function pscNatureLabel(code: string): string {
   return (
     enums().psc_short_descriptions[code] ??
     enums().psc_descriptions[code] ??
-    humanise(code)
+    humanize(code)
   );
 }
 
@@ -165,7 +165,7 @@ export function pscKindLabel(kind?: string): string | undefined {
   const cleaned = kind
     .replace(/-person-with-significant-control$/, "")
     .replace(/-beneficial-owner$/, "");
-  return humanise(cleaned);
+  return humanize(cleaned);
 }
 
 /**
@@ -177,25 +177,25 @@ export function pscKindLabel(kind?: string): string | undefined {
  */
 export function pscStatementLabel(statement?: string): string | undefined {
   if (!statement) return undefined;
-  return enums().psc_statement_descriptions[statement] ?? humanise(statement);
+  return enums().psc_statement_descriptions[statement] ?? humanize(statement);
 }
 
 /** The full text Companies House publishes for a PSC exemption type. */
 export function exemptionLabel(type?: string): string | undefined {
   if (!type) return undefined;
-  return enums().exemption_descriptions[type] ?? humanise(type);
+  return enums().exemption_descriptions[type] ?? humanize(type);
 }
 
 /** A readable name for an insolvency case type, e.g. "Compulsory liquidation". */
 export function insolvencyCaseTypeLabel(type?: string): string | undefined {
   if (!type) return undefined;
-  return enums().insolvency_case_types[type] ?? humanise(type);
+  return enums().insolvency_case_types[type] ?? humanize(type);
 }
 
 /** A readable name for an insolvency case date, e.g. "Commencement of winding up". */
 export function insolvencyDateTypeLabel(type?: string): string | undefined {
   if (!type) return undefined;
-  return enums().insolvency_case_date_types[type] ?? humanise(type);
+  return enums().insolvency_case_date_types[type] ?? humanize(type);
 }
 
 /** The statutory reason for a disqualification, from its `description_identifier`. */
@@ -203,19 +203,19 @@ export function disqualificationReasonLabel(
   identifier?: string,
 ): string | undefined {
   if (!identifier) return undefined;
-  return enums().disqualification_reasons[identifier] ?? humanise(identifier);
+  return enums().disqualification_reasons[identifier] ?? humanize(identifier);
 }
 
 /** The Act a disqualification was made under. */
 export function disqualificationActLabel(act?: string): string | undefined {
   if (!act) return undefined;
-  return enums().disqualification_acts[act] ?? humanise(act);
+  return enums().disqualification_acts[act] ?? humanize(act);
 }
 
 /** How the disqualification arose: a court order, an undertaking, or a sanction. */
 export function disqualificationTypeLabel(type?: string): string | undefined {
   if (!type) return undefined;
-  return enums().disqualification_types[type] ?? humanise(type);
+  return enums().disqualification_types[type] ?? humanize(type);
 }
 
 /** Renders a SIC code with its description, e.g. "62012 — Business and domestic software development". */
@@ -238,10 +238,10 @@ const JURISDICTIONS: Record<string, string> = {
 
 export function jurisdictionLabel(jurisdiction?: string): string | undefined {
   if (!jurisdiction) return undefined;
-  return JURISDICTIONS[jurisdiction] ?? humanise(jurisdiction);
+  return JURISDICTIONS[jurisdiction] ?? humanize(jurisdiction);
 }
 
-/** A colour for a company status tag — green for live, red for closed, orange for distress. */
+/** A color for a company status tag — green for live, red for closed, orange for distress. */
 export function statusColor(status?: string): Color {
   switch (status) {
     case "active":
@@ -297,7 +297,7 @@ function buildFilingDescription(item: FilingItem): string {
   const template = enums().filing_descriptions[code];
   return template
     ? substitute(template, item.description_values)
-    : humanise(code);
+    : humanize(code);
 }
 
 /** Plain-text filing description for list titles (markdown emphasis stripped). */
@@ -312,7 +312,7 @@ export function filingDescriptionMarkdown(item: FilingItem): string {
 
 export function filingCategoryLabel(category?: string): string | undefined {
   if (!category) return undefined;
-  return humanise(category);
+  return humanize(category);
 }
 
 // --- Links ----------------------------------------------------------------

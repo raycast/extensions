@@ -2,12 +2,18 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "companies-house",
   "title": "Companies House",
-  "description": "Search the UK Companies House register — companies, officers, filings and charges.",
+  "description": "Search the UK Companies House register \u2014 companies, officers, filings and charges.",
   "icon": "extension-icon.png",
   "author": "aic",
-  "categories": ["Data", "Finance"],
+  "categories": [
+    "Data",
+    "Finance"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-companies",
@@ -15,7 +21,13 @@
       "subtitle": "Companies House",
       "description": "Search for UK companies by name or number.",
       "mode": "view",
-      "keywords": ["company", "business", "ltd", "limited", "registration"]
+      "keywords": [
+        "company",
+        "business",
+        "ltd",
+        "limited",
+        "registration"
+      ]
     },
     {
       "name": "search-officers",
@@ -23,7 +35,13 @@
       "subtitle": "Companies House",
       "description": "Search for company officers and directors by name.",
       "mode": "view",
-      "keywords": ["director", "officer", "secretary", "person", "appointment"]
+      "keywords": [
+        "director",
+        "officer",
+        "secretary",
+        "person",
+        "appointment"
+      ]
     }
   ],
   "preferences": [
@@ -90,36 +108,249 @@
     }
   ],
   "ai": {
-    "instructions": "Use these tools to answer questions about UK companies and their officers using Companies House data. A company number is 8 characters (eight digits, or two letters followed by six digits, e.g. OC394454). To look something up, search by name first, then pass the returned company number or officer id to the detail tools. Only an officer's birth month and year are ever available.",
+    "instructions": "Use these tools to answer questions about UK companies, their officers and their ownership, using Companies House data. A company number is 8 characters \u2014 eight digits, or two letters followed by six digits, e.g. OC394454. Search by name first, then pass the returned company number or officer id to the detail tools. Companies House does not verify what companies file, so report what the register says and never present it as verification, a credit check or clearance. An officer's date of birth is published as month and year only. Ceased and resigned entries stay on the register, so check the ceased or resigned date before describing anyone as current. An absent record is a fact about the company, not a failure \u2014 say a company has no charges or no insolvency history rather than reporting an error. The disqualified directors register is searched by name and different people share names, so always carry the caveat that a name match is not proof of identity.",
     "evals": [
       {
         "input": "@companies-house what is the company number for Monzo Bank?",
         "mocks": {
-          "search-companies": [{ "company_number": "09446231", "name": "MONZO BANK LIMITED", "status": "Active" }]
+          "search-companies": [
+            {
+              "company_number": "09446231",
+              "name": "MONZO BANK LIMITED",
+              "status": "Active"
+            }
+          ]
         },
-        "expected": [{ "callsTool": "search-companies" }, { "includes": "09446231" }]
+        "expected": [
+          {
+            "callsTool": "search-companies"
+          },
+          {
+            "includes": "09446231"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house is company 09446231 still active?",
+        "mocks": {
+          "get-company": {
+            "company_number": "09446231",
+            "name": "MONZO BANK LIMITED",
+            "status": "Active",
+            "status_detail": null
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-company",
+              "arguments": {
+                "companyNumber": "09446231"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "States the company is active"
+          }
+        ]
       },
       {
         "input": "@companies-house who are the current directors of company 09446231?",
         "mocks": {
-          "get-officers": [{ "name": "Doe, Jane", "role": "Director", "status": "Active" }]
+          "get-officers": [
+            {
+              "name": "Doe, Jane",
+              "role": "Director",
+              "status": "Active"
+            }
+          ]
         },
-        "expected": [{ "callsTool": "get-officers" }, { "includes": "Jane" }]
+        "expected": [
+          {
+            "callsTool": "get-officers"
+          },
+          {
+            "includes": "Jane"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house find the officer id for a director called Jane Doe",
+        "mocks": {
+          "search-officers": [
+            {
+              "title": "DOE, Jane",
+              "officer_id": "i01-NvuSb_IXaHc1mrh6CAmvi48",
+              "appointment_count": 3
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "search-officers"
+          },
+          {
+            "includes": "i01-NvuSb_IXaHc1mrh6CAmvi48"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house what other companies is officer i01-NvuSb_IXaHc1mrh6CAmvi48 involved in?",
+        "mocks": {
+          "get-officer-appointments": [
+            {
+              "company_name": "EXAMPLE TRADING LIMITED",
+              "company_number": "01234567",
+              "role": "Director",
+              "status": "Active"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-officer-appointments"
+          },
+          {
+            "includes": "EXAMPLE TRADING"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house what has company 09446231 filed recently?",
+        "mocks": {
+          "get-filing-history": [
+            {
+              "date": "2 Mar 2026",
+              "description": "Confirmation statement made on 1 March 2026"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "get-filing-history"
+          },
+          {
+            "includes": "Confirmation statement"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house does company 00445790 have any charges?",
+        "mocks": {
+          "get-charges": {
+            "total": 0,
+            "charges": [],
+            "note": "Companies House holds no charge records for this company."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-charges"
+          },
+          {
+            "meetsCriteria": "Says the company has no charges on the register, and does not describe the lookup as having failed"
+          }
+        ]
       },
       {
         "input": "@companies-house who are the beneficial owners of company OC394454?",
         "mocks": {
-          "get-persons-with-significant-control": [
-            { "name": "Smith, John", "kind": "Individual", "natures_of_control": ["Ownership of shares – 75% or more"] }
-          ]
+          "get-persons-with-significant-control": {
+            "active": [
+              {
+                "name": "Smith, John",
+                "kind": "Individual",
+                "natures_of_control": [
+                  "Ownership of shares - 75% or more"
+                ]
+              }
+            ]
+          }
         },
-        "expected": [{ "callsTool": "get-persons-with-significant-control" }, { "includes": "John" }]
+        "expected": [
+          {
+            "callsTool": "get-persons-with-significant-control"
+          },
+          {
+            "includes": "John"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house why does company 00617987 have no people with significant control?",
+        "mocks": {
+          "get-persons-with-significant-control": {
+            "active": [],
+            "register_is_empty_because": "The company is exempt from keeping a PSC register because its shares are admitted to trading on a regulated market.",
+            "exempt_now": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-persons-with-significant-control"
+          },
+          {
+            "meetsCriteria": "Explains the register is empty because the company is exempt, rather than saying it has no owners"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house has company 03782379 ever been in administration?",
+        "mocks": {
+          "get-insolvency": {
+            "cases": [
+              {
+                "type": "Compulsory liquidation",
+                "case_number": "1",
+                "dates": [
+                  {
+                    "type": "Wound up on",
+                    "date": "15 Jan 2018"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-insolvency"
+          },
+          {
+            "meetsCriteria": "Describes the insolvency case on the register"
+          }
+        ]
+      },
+      {
+        "input": "@companies-house is there a disqualified director called Aaron Donald Smith?",
+        "mocks": {
+          "get-disqualifications": {
+            "matches": [
+              {
+                "name": "Aaron Donald SMITH",
+                "date_of_birth": "October 1987",
+                "reason": "Unfit conduct in relation to an insolvent company",
+                "disqualified_from": "1 Feb 2020",
+                "disqualified_until": "1 Feb 2026"
+              }
+            ],
+            "caveat": "A name match is not proof of identity."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-disqualifications"
+          },
+          {
+            "meetsCriteria": "Reports the match and makes clear that a name match is not proof it is the same person"
+          }
+        ]
       }
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
