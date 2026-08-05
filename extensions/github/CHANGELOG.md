@@ -5,6 +5,8 @@
 - Added a "Clone Tool" choice to the "Clone with Options" flow, letting you clone repositories with the GitHub CLI (`gh repo clone`) instead of plain `git clone`, using your existing `gh` authentication and configuration.
 - The Git method remains the default, and the target directory and branch options are preserved when using GitHub CLI.
 - Shows actionable guidance when the GitHub CLI is not installed or not authenticated.
+- Security: clone commands are now spawned without a shell, so branches and paths containing shell characters are handled safely.
+- Fixed `gh` detection for installations in Homebrew or other directories that are missing from Raycast's PATH.
 
 ## [Show README in repository actions] - 2026-08-03
 

@@ -1,4 +1,4 @@
-import { exec } from "child_process";
+import { exec, execFile } from "child_process";
 import path from "path";
 import { promisify } from "util";
 
@@ -13,8 +13,8 @@ import {
   AcceptableCloneProtocol,
   AcceptableCloneTool,
   ACCEPTABLE_CLONE_TOOLS,
-  buildCloneCommand,
-  buildGhCloneCommand,
+  buildCloneCommandArgs,
+  buildGhCloneCommandArgs,
   CLONE_PROTOCOLS_TO_LABELS,
   CLONE_TOOLS_TO_LABELS,
   getGhAvailability,
@@ -62,41 +62,50 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
 
       const branchOption = values.branch ? ["-b", values.branch] : [];
       const execAsync = promisify(exec);
+      const execFileAsync = promisify(execFile);
 
-      let cloneCommand: string;
+      let ghExecutable = "gh";
 
       if (values.cloneTool === "gh") {
         const ghAvailability = await getGhAvailability();
 
-        if (!ghAvailability.available && ghAvailability.reason === "not-installed") {
-          await showFailureToast(undefined, {
-            title: "GitHub CLI is not installed",
-            message: "Install it with `brew install gh` or visit https://cli.github.com, then try again.",
-          });
+        if (!ghAvailability.available) {
+          if (ghAvailability.reason === "not-installed") {
+            await showFailureToast(undefined, {
+              title: "GitHub CLI is not installed",
+              message: "Install it with `brew install gh` or visit https://cli.github.com, then try again.",
+            });
+          } else {
+            await showFailureToast(undefined, {
+              title: "GitHub CLI is not authenticated",
+              message: "Run `gh auth login` in your terminal to authenticate, then try again.",
+            });
+          }
           return;
         }
 
-        if (!ghAvailability.available && ghAvailability.reason === "not-authenticated") {
-          await showFailureToast(undefined, {
-            title: "GitHub CLI is not authenticated",
-            message: "Run `gh auth login` in your terminal to authenticate, then try again.",
-          });
-          return;
-        }
-
-        cloneCommand = buildGhCloneCommand(repository.nameWithOwner, {
-          gitFlags: branchOption,
-          targetDir: targetDir,
-        });
-      } else {
-        cloneCommand = buildCloneCommand(repository.nameWithOwner, values.cloneProtocol, {
-          gitFlags: branchOption,
-          targetDir: targetDir,
-        });
+        ghExecutable = ghAvailability.executable;
       }
 
       try {
-        await execAsync(cloneCommand);
+        if (values.cloneTool === "gh") {
+          await execFileAsync(
+            ghExecutable,
+            buildGhCloneCommandArgs(repository.nameWithOwner, {
+              gitFlags: branchOption,
+              targetDir: targetDir,
+            }),
+          );
+        } else {
+          await execFileAsync(
+            "git",
+            buildCloneCommandArgs(repository.nameWithOwner, values.cloneProtocol, {
+              gitFlags: branchOption,
+              targetDir: targetDir,
+            }),
+          );
+        }
+
         await showToast({
           style: Toast.Style.Success,
           title: "Repository cloned successfully",
