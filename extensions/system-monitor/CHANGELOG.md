@@ -1,6 +1,6 @@
 # System Monitor Changelog
 
-## [Disk Tab] - {PR_MERGE_DATE}
+## [Disk Tab] - 2026-08-05
 
 - Add a Disk tab with capacity, per-volume breakdown, APFS volume details and live disk I/O rates via `iostat`
 - Show SMART disk health, medium type and physical disk details
