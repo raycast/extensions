@@ -20,7 +20,7 @@ import { dirname, join } from "node:path";
 import { costOf, emptyTokens } from "./pricing";
 import { Tokens, UsageHistory } from "./types";
 
-const CACHE_VERSION = 5;
+const CACHE_VERSION = 6;
 
 export function projectsDir(): string {
   const dir =
@@ -46,6 +46,10 @@ function hourStart(ms: number): number {
 interface FileEntry {
   size: number;
   mtimeMs: number;
+  /** cutoff this entry was parsed against; records before it were never added
+   *  to `hours`/`idCosts`, so a cache hit is only valid against an
+   *  equal-or-later cutoff. */
+  cutoff: number;
   /** hourStart epoch ms -> cost USD (already deduped within the file) */
   hours: Record<string, number>;
   /** shortHash(id) -> { hour, cost } of each *unique* record in this file.
@@ -116,7 +120,7 @@ function tokensFrom(u: RawUsage): Tokens {
 function parseFile(
   path: string,
   cutoff: number,
-): Omit<FileEntry, "size" | "mtimeMs"> {
+): Omit<FileEntry, "size" | "mtimeMs" | "cutoff"> {
   const hours: Record<string, number> = {};
   // shortHash(idKey) -> first occurrence, used to collapse intra-file dupes
   // (streaming writes the same msgId+reqId/usage on every delta) and to
@@ -250,11 +254,19 @@ export function scanUsage(
   for (const { p, size, mtimeMs } of paths) {
     const cached = cache.files[p];
     let entry: FileEntry;
-    if (cached && cached.size === size && cached.mtimeMs === mtimeMs) {
+    // A narrower (later) cutoff than the one an unchanged file was parsed
+    // with means some now-in-window records were dropped at parse time and
+    // can't be recovered from `hours`/`idCosts` alone — reparse instead.
+    if (
+      cached &&
+      cached.size === size &&
+      cached.mtimeMs === mtimeMs &&
+      cached.cutoff <= cutoff
+    ) {
       entry = cached;
     } else {
       const parsed = parseFile(p, cutoff);
-      entry = { size, mtimeMs, ...parsed };
+      entry = { size, mtimeMs, cutoff, ...parsed };
       filesScanned++;
     }
     nextFiles[p] = entry;
