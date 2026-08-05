@@ -1,4 +1,5 @@
 import { closeMainWindow, type LaunchProps, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getDeviceUrl } from "./lib/discover";
 import { setVolume } from "./api/player";
 import { cache } from "./lib/cache";
@@ -25,6 +26,6 @@ export default async (props: LaunchProps<{ arguments: Arguments.SetVolume }>) =>
     showHUD(`${cache.deviceName} volume was set to ${newVolume}`);
   } catch (error) {
     log.error(`Failed to set volume: ${(<Error>error).message}`);
-    showHUD(`Failed to set volume: ${(<Error>error).message}`);
+    await showFailureToast(error, { title: "Failed to set volume" });
   }
 };

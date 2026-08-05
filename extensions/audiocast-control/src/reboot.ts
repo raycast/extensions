@@ -1,4 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getDeviceUrl } from "./lib/discover";
 import { reboot } from "./api/player";
 import { cache } from "./lib/cache";
@@ -19,6 +20,6 @@ export default async () => {
     showHUD(`${cache.deviceName} rebooted`);
   } catch (error) {
     log.error(`Failed to reboot device: ${(<Error>error).message}`);
-    showHUD("Failed to reboot device");
+    await showFailureToast(error, { title: "Failed to reboot device" });
   }
 };

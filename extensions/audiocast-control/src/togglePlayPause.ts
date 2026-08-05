@@ -1,4 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getDeviceUrl } from "./lib/discover";
 import { getPlayerStatus, togglePlayPause } from "./api/player";
 import { cache } from "./lib/cache";
@@ -21,6 +22,6 @@ export default async () => {
     showHUD(`${cache.deviceName} is ${isPlaying ? "playing" : "paused"}`);
   } catch (error) {
     log.error(`Failed to toggle play/pause: ${(<Error>error).message}`);
-    showHUD("Failed to toggle play/pause");
+    await showFailureToast(error, { title: "Failed to toggle play/pause" });
   }
 };

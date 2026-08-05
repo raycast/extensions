@@ -1,4 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getDeviceUrl } from "./lib/discover";
 import { volumeUp } from "./api/player";
 import { cache } from "./lib/cache";
@@ -19,6 +20,6 @@ export default async () => {
     showHUD(`${cache.deviceName} volume was upped to ${newVolume}`);
   } catch (error) {
     log.error(`Failed to increase volume: ${(<Error>error).message}`);
-    showHUD("Failed to increase volume");
+    await showFailureToast(error, { title: "Failed to increase volume" });
   }
 };

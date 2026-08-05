@@ -1,4 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getDeviceUrl } from "./lib/discover";
 import { toggleMute } from "./api/player";
 import { cache } from "./lib/cache";
@@ -21,6 +22,6 @@ export default async () => {
     showHUD(`${cache.deviceName} is ${muteStatus}`);
   } catch (error) {
     log.error(`Failed to toggle mute: ${(<Error>error).message}`);
-    showHUD("Failed to toggle mute");
+    await showFailureToast(error, { title: "Failed to toggle mute" });
   }
 };

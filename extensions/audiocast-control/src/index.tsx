@@ -108,7 +108,10 @@ export default function Command() {
                 style={Action.Style.Destructive}
                 icon={Icon.ArrowClockwise}
                 onAction={PlayerCommandActions.Reboot}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "r" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+                }}
               />
             </ActionPanel.Section>
           </ActionPanel>
@@ -122,8 +125,8 @@ function getDetails(playerStatus: UsePromiseReturnType<PlayerStatus>): string {
   return playerStatus.isLoading
     ? "Loading device status…"
     : playerStatus.error
-    ? `## ${playerStatus.error.message}!`
-    : `
+      ? `## ${playerStatus.error.message}!`
+      : `
 ${getHeader(playerStatus)}
 
 ${getCoverArt(playerStatus)}

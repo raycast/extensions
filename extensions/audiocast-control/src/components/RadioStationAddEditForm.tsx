@@ -113,7 +113,10 @@ export function RadioStationAddEditForm({ radio, onSubmitSuccess }: RadioStation
           <Action.SubmitForm title={submitActionTitle} onSubmit={onSubmit} />
           <Action.SubmitForm
             title={submitAndPlayActionTitle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+            }}
             onSubmit={onSubmitAndPlay}
           />
         </ActionPanel>

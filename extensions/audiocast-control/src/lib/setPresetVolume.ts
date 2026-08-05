@@ -1,4 +1,5 @@
 import { closeMainWindow, getPreferenceValues, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getDeviceUrl } from "./discover";
 import { setVolume } from "../api/player";
 import { cache } from "./cache";
@@ -45,6 +46,6 @@ export async function setPresetVolume(preset: Preset): Promise<void> {
     showHUD(`${cache.deviceName} volume was set to ${volume}`);
   } catch (error) {
     log.error(`Failed to set ${preset} volume: ${(<Error>error).message}`);
-    showHUD(`Failed to set ${preset} volume`);
+    await showFailureToast(error, { title: `Failed to set ${preset} volume` });
   }
 }

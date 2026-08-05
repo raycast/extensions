@@ -1,4 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { getDeviceUrl } from "./lib/discover";
 import { stop } from "./api/player";
 import { cache } from "./lib/cache";
@@ -19,6 +20,6 @@ export default async () => {
     showHUD(`${cache.deviceName} is stopped`);
   } catch (error) {
     log.error(`Failed to stop: ${(<Error>error).message}`);
-    showHUD("Failed to stop");
+    await showFailureToast(error, { title: "Failed to stop" });
   }
 };

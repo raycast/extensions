@@ -235,8 +235,6 @@ export async function getPlayerStatus(url: string, signal?: AbortSignal): Promis
   const playerStatus = await command<PlayerStatus>(url, DeviceCommand.GET_PLAYER_STATUS, undefined, { signal });
   const isStopped = playerStatus.status === PlaybackState.Stop || playerStatus.status === PlaybackState.None;
 
-  log.log("Return data:", playerStatus);
-
   const data = {
     title:
       !isStopped && playerStatus.Title
