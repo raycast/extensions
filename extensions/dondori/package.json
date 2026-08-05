@@ -9,6 +9,9 @@
   "categories": [
     "Productivity"
   ],
+  "platforms": [
+    "macOS"
+  ],
   "keywords": [
     "todo",
     "tasks",
