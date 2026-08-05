@@ -65,7 +65,10 @@ export function getRecommendation(record: EmailRecord): Recommendation {
 
   if (record.status === "risky") {
     if (record.account?.fullMailbox === "yes") {
-      return avoid("Suppress", "The mailbox is full, so mail will bounce. Bouncer recommends removing it.");
+      return avoid(
+        "Suppress",
+        "The mailbox is full, so mail to it is likely to bounce. Bouncer recommends removing it.",
+      );
     }
     if (record.domain?.disposable === "yes") {
       return avoid("Suppress", "This is a disposable, throwaway address. It will not stay reachable.");
@@ -84,7 +87,13 @@ export function getRecommendation(record: EmailRecord): Recommendation {
 
   if (record.status === "unknown") {
     if (record.reason === "dns_error") {
-      return avoid("Remove", "The domain has broken or missing DNS records, so mail cannot be routed.");
+      // Bouncer returned "unknown", meaning it could not determine the result, so this
+      // cannot claim delivery is impossible. DNS failures are usually a dead domain but
+      // are sometimes transient, and Bouncer's keep list for unknown excludes this reason.
+      return avoid(
+        "Remove",
+        "Bouncer could not resolve DNS for this domain. That usually means it is dead, though a resolution failure can be temporary — re-check before acting if the address matters.",
+      );
     }
     return {
       title: "Retry Later",
