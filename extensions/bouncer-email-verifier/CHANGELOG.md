@@ -1,6 +1,6 @@
 # Bouncer Deliverability Changelog
 
-## [Domain Checks, AI Tools, and a Rebuilt Result View] - {PR_MERGE_DATE}
+## [Domain Checks, AI Tools, and a Rebuilt Result View] - 2026-08-05
 
 - Check a domain's mail setup from the same command — type a bare domain and Bouncer reports its MX record, catch-all, disposable, free, and toxic status, plus the mail provider.
 - Fixed the mailbox signals, which previously always read "Not reported". Bouncer returns them as `yes`/`no`/`unknown` strings rather than booleans.
