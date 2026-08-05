@@ -2,7 +2,7 @@
 
 All notable changes to the Qovery Services Raycast Extension will be documented in this file.
 
-## [Update] - 2026-08-05
+## [Update] - {PR_MERGE_DATE}
 
 ### Changed
 
