@@ -1,7 +1,0 @@
-<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Bouncer. One solid path: the envelope body with the flap cut out as negative space. -->
-  <rect width="512" height="512" rx="114" fill="#15161A"/>
-  <path d="M116 158h280v196a34 34 0 0 1-34 34H150a34 34 0 0 1-34-34V158Z
-           M116 158h280L268 276a18 18 0 0 1-24 0L116 158Z"
-        fill="#B9FF57" fill-rule="evenodd"/>
-</svg>

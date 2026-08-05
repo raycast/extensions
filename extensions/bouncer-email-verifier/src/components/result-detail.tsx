@@ -2,15 +2,7 @@ import { Action, ActionPanel, Detail, Icon, Keyboard, Toast, openExtensionPrefer
 import { usePromise } from "@raycast/utils";
 import { useRef } from "react";
 import { BouncerError, verifyEmail, type EmailRecord } from "../lib/bouncer";
-import {
-  formatFlag,
-  formatReason,
-  getRecommendation,
-  getSignalTags,
-  getVerdict,
-  scoreColor,
-  toxicityLabel,
-} from "../lib/verdict";
+import { formatReason, getEmailSignals, getVerdict, renderSignalLines, scoreColor } from "../lib/verdict";
 
 const BOUNCER_APP_URL = "https://app.usebouncer.com";
 
@@ -64,7 +56,7 @@ export function RecordDetail({ record, onRetry }: { record: EmailRecord; onRetry
       markdown={buildMarkdown(record)}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.TagList title="Verdict">
+          <Detail.Metadata.TagList title="Status">
             <Detail.Metadata.TagList.Item text={verdict.label} color={verdict.color} icon={verdict.icon} />
             {record.score === undefined ? null : (
               <Detail.Metadata.TagList.Item text={String(record.score)} color={scoreColor(record.score)} />
@@ -76,14 +68,6 @@ export function RecordDetail({ record, onRetry }: { record: EmailRecord; onRetry
 
           <Detail.Metadata.Label title="Domain" text={record.domain?.name ?? "Not reported"} />
           <Detail.Metadata.Label title="Provider" text={record.provider ?? "Not reported"} />
-
-          <Detail.Metadata.Separator />
-
-          <Detail.Metadata.TagList title="Signals">
-            {getSignalTags(record).map((tag) => (
-              <Detail.Metadata.TagList.Item key={tag.text} text={tag.text} color={tag.color} />
-            ))}
-          </Detail.Metadata.TagList>
         </Detail.Metadata>
       }
       actions={
@@ -157,20 +141,19 @@ function ErrorDetail({ email, error, onRetry }: { email: string; error: Error; o
 
 function buildMarkdown(record: EmailRecord): string {
   const verdict = getVerdict(record.status);
-  const recommendation = getRecommendation(record);
-
   const lines = [`# ${verdict.label}`, "", `\`${record.email}\``, ""];
 
   if (record.score !== undefined) {
     lines.push(`\`${buildScoreBar(record.score)}\`  **${record.score}**`, "");
   }
 
-  lines.push(`## ${recommendation.title}`, "", recommendation.detail);
+  // Every signal Bouncer reported, with its reported value. Grouped three to a line:
+  // a row per signal renders as a table that does not fit the default window height,
+  // and markdown wraps rather than truncating, so nothing is lost at narrower widths.
+  lines.push(...renderSignalLines(getEmailSignals(record)));
 
-  // DNS records run long enough to truncate in a metadata label, so they live here
-  // where the full value fits.
   if (record.dns?.record) {
-    lines.push("", "---", "", `**${record.dns.type ?? "DNS"}** \`${record.dns.record}\``);
+    lines.push("", `**${record.dns.type ?? "DNS"}** \`${record.dns.record}\``);
   }
 
   if (record.didYouMean) {
@@ -197,16 +180,11 @@ function buildScoreBar(score: number): string {
 }
 
 function buildSummary(record: EmailRecord): string {
-  const verdict = getVerdict(record.status);
-  const recommendation = getRecommendation(record);
-
   return [
-    `${record.email} — ${verdict.label} (${recommendation.title})`,
+    `${record.email} — ${getVerdict(record.status).label}`,
     `Score: ${record.score ?? "n/a"}`,
     `Reason: ${formatReason(record.reason)}`,
     `Domain: ${record.domain?.name ?? "n/a"} · Provider: ${record.provider ?? "n/a"}`,
-    `Free ${formatFlag(record.domain?.free)} · Disposable ${formatFlag(record.domain?.disposable)} · Accept-All ${formatFlag(record.domain?.acceptAll)}`,
-    `Role ${formatFlag(record.account?.role)} · Disabled ${formatFlag(record.account?.disabled)} · Full Mailbox ${formatFlag(record.account?.fullMailbox)}`,
-    `Toxicity: ${toxicityLabel(record.toxicity)}`,
+    ...getEmailSignals(record).map(({ label, value }) => `${label}: ${value}`),
   ].join("\n");
 }

@@ -1,5 +1,15 @@
 # Bouncer Deliverability Changelog
 
+## [Report What Bouncer Returns, and Fix Four Silent Faults] - {PR_MERGE_DATE}
+
+- Fixed pressing Enter on a newly typed address opening an older saved result instead of checking it. The new address appeared at the top of the list but the selection stayed where it was, and a stale verdict looks identical to a fresh one, so there was nothing to notice.
+- Fixed verifications overwriting one another in history. Two checks finishing at the same time could each save over the other, losing the earlier result with no error shown.
+- Fixed later signals being cut off the bottom of a result. All of them now fit without scrolling.
+- A rejected API key on a domain check now offers to open preferences. Previously the error only offered to try again, which could not resolve it.
+- Removed the synthesized domain verdict. Bouncer's domain endpoint returns no status or score, so the mail record, provider, and catch-all, disposable, free and toxic signals are now shown exactly as returned rather than summarised into a conclusion the API never made.
+- Removed the send, hold and suppress recommendation from email results and from the AI tools. Bouncer supplies the status, the reason and the signals; what to do with an address depends on the list it is going to, which is the sender's call.
+- Every signal is now listed with its reported value, including the ones that came back "unknown", so an undetermined signal can no longer be read as a negative one. Values other than "no" are emphasised so the ones that differ stand out.
+
 ## [Domain Checks, AI Tools, and a Rebuilt Result View] - 2026-08-05
 
 - Check a domain's mail setup from the same command — type a bare domain and Bouncer reports its MX record, catch-all, disposable, free, and toxic status, plus the mail provider.

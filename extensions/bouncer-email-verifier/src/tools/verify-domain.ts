@@ -1,6 +1,6 @@
 import { verifyDomain } from "../lib/bouncer";
 import { isValidDomain, normalizeDomain } from "../lib/domain";
-import { formatFlag, getDomainVerdict } from "../lib/verdict";
+import { formatFlag } from "../lib/verdict";
 
 type Input = {
   /**
@@ -10,6 +10,10 @@ type Input = {
   domain: string;
 };
 
+/**
+ * Bouncer's domain endpoint returns no status, score or verdict, only the fields below.
+ * They are passed through as reported rather than summarised into a conclusion.
+ */
 export default async function verifyDomainTool(input: Input) {
   const domain = normalizeDomain(input.domain);
 
@@ -18,12 +22,9 @@ export default async function verifyDomainTool(input: Input) {
   }
 
   const record = await verifyDomain(domain);
-  const verdict = getDomainVerdict(record);
 
   return {
     domain: record.domain?.name,
-    mailSetup: verdict.title,
-    explanation: verdict.detail,
     provider: record.provider,
     dnsType: record.dns?.type,
     mailRecord: record.dns?.record,

@@ -1,6 +1,6 @@
 import { verifyEmail } from "../lib/bouncer";
 import { isValidEmail, normalizeEmail } from "../lib/email";
-import { formatFlag, formatReason, getRecommendation, getVerdict } from "../lib/verdict";
+import { formatFlag, formatReason, formatToxicity, getVerdict } from "../lib/verdict";
 
 type Input = {
   /**
@@ -11,8 +11,9 @@ type Input = {
 };
 
 /**
- * Returns plain data rather than the UI model: colors and icons mean nothing to a
- * language model, and the flags are stringified so "unknown" is never mistaken for false.
+ * Returns what Bouncer reported and nothing more. Flags are stringified so "unknown" can
+ * never be mistaken for false, and no send-or-suppress judgement is added on top: that is
+ * the caller's to make from the fields below.
  */
 export default async function verifyEmailTool(input: Input) {
   const email = normalizeEmail(input.email);
@@ -22,16 +23,13 @@ export default async function verifyEmailTool(input: Input) {
   }
 
   const record = await verifyEmail(email);
-  const recommendation = getRecommendation(record);
 
   return {
     email: record.email,
-    verdict: getVerdict(record.status).label,
     status: record.status,
-    recommendation: recommendation.title,
-    explanation: recommendation.detail,
-    score: record.score,
+    statusLabel: getVerdict(record.status).label,
     reason: formatReason(record.reason),
+    score: record.score,
     domain: record.domain?.name,
     provider: record.provider,
     mailRecord: record.dns?.record,
@@ -42,8 +40,8 @@ export default async function verifyEmailTool(input: Input) {
       roleAddress: formatFlag(record.account?.role),
       disabled: formatFlag(record.account?.disabled),
       fullMailbox: formatFlag(record.account?.fullMailbox),
+      toxicity: formatToxicity(record.toxicity),
     },
-    toxicity: record.toxicity,
     didYouMean: record.didYouMean,
     creditsSpent: 1,
   };
