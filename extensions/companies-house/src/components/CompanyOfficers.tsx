@@ -13,6 +13,7 @@ import {
 } from "../helpers";
 import type { CompanyOfficer } from "../types";
 
+import { Disqualifications } from "./Disqualifications";
 import { OfficerAppointments } from "./OfficerAppointments";
 
 const MAX_PAGES = 10;
@@ -237,6 +238,11 @@ function OfficerItem({ officer }: { officer: CompanyOfficer }) {
               url={officerWebUrl(officerId)}
             />
           ) : null}
+          <Action.Push
+            title="Search Disqualified Directors Register"
+            icon={Icon.ExclamationMark}
+            target={<Disqualifications officerName={officer.name} />}
+          />
           <Action.CopyToClipboard title="Copy Name" content={officer.name} />
         </ActionPanel>
       }

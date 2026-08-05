@@ -18,6 +18,13 @@ interface Enumerations {
   cessation_label_for_status: Record<string, string>;
   psc_descriptions: Record<string, string>;
   psc_short_descriptions: Record<string, string>;
+  psc_statement_descriptions: Record<string, string>;
+  exemption_descriptions: Record<string, string>;
+  insolvency_case_types: Record<string, string>;
+  insolvency_case_date_types: Record<string, string>;
+  disqualification_reasons: Record<string, string>;
+  disqualification_acts: Record<string, string>;
+  disqualification_types: Record<string, string>;
 }
 
 let cachedEnums: Enumerations | undefined;
@@ -60,10 +67,17 @@ function isIsoDate(value: string): boolean {
  * parses a date-only string as UTC midnight, so formatting it in the local zone
  * shows the previous day to anyone west of UTC. Formatting in UTC keeps the
  * date the register actually recorded.
+ *
+ * A few endpoints send the same calendar date as a timestamp with no offset —
+ * the disqualified-officers search returns "1987-10-18T00:00:00". JavaScript
+ * reads that form as *local* midnight, which then formats in UTC as the day
+ * before for anyone east of UTC. Trimming to the date part first means the two
+ * shapes produce the same day, which is what the register recorded.
  */
 export function formatDate(value?: string): string | undefined {
   if (!value) return undefined;
-  const date = new Date(value);
+  const calendarDate = value.match(/^\d{4}-\d{2}-\d{2}/)?.[0] ?? value;
+  const date = new Date(calendarDate);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString("en-GB", {
     day: "numeric",
@@ -71,6 +85,17 @@ export function formatDate(value?: string): string | undefined {
     year: "numeric",
     timeZone: "UTC",
   });
+}
+
+/**
+ * Formats the end of a disqualification.
+ *
+ * A sanctions disqualification records "9999-12-31", which is the register's
+ * way of saying there is no end date rather than a date in the year 9999.
+ */
+export function disqualificationEndLabel(value?: string): string | undefined {
+  if (!value) return undefined;
+  return value.startsWith("9999") ? "No end date recorded" : formatDate(value);
 }
 
 /** Formats an officer's date of birth as "March 1980" (month and year only). */
@@ -141,6 +166,56 @@ export function pscKindLabel(kind?: string): string | undefined {
     .replace(/-person-with-significant-control$/, "")
     .replace(/-beneficial-owner$/, "");
   return humanise(cleaned);
+}
+
+/**
+ * The full text of a statement filed in place of a PSC entry.
+ *
+ * The register's own identifier for the commonest statement contains a
+ * long-standing spelling mistake ("signficant"), so these are looked up rather
+ * than derived from the code.
+ */
+export function pscStatementLabel(statement?: string): string | undefined {
+  if (!statement) return undefined;
+  return enums().psc_statement_descriptions[statement] ?? humanise(statement);
+}
+
+/** The full text Companies House publishes for a PSC exemption type. */
+export function exemptionLabel(type?: string): string | undefined {
+  if (!type) return undefined;
+  return enums().exemption_descriptions[type] ?? humanise(type);
+}
+
+/** A readable name for an insolvency case type, e.g. "Compulsory liquidation". */
+export function insolvencyCaseTypeLabel(type?: string): string | undefined {
+  if (!type) return undefined;
+  return enums().insolvency_case_types[type] ?? humanise(type);
+}
+
+/** A readable name for an insolvency case date, e.g. "Commencement of winding up". */
+export function insolvencyDateTypeLabel(type?: string): string | undefined {
+  if (!type) return undefined;
+  return enums().insolvency_case_date_types[type] ?? humanise(type);
+}
+
+/** The statutory reason for a disqualification, from its `description_identifier`. */
+export function disqualificationReasonLabel(
+  identifier?: string,
+): string | undefined {
+  if (!identifier) return undefined;
+  return enums().disqualification_reasons[identifier] ?? humanise(identifier);
+}
+
+/** The Act a disqualification was made under. */
+export function disqualificationActLabel(act?: string): string | undefined {
+  if (!act) return undefined;
+  return enums().disqualification_acts[act] ?? humanise(act);
+}
+
+/** How the disqualification arose: a court order, an undertaking, or a sanction. */
+export function disqualificationTypeLabel(type?: string): string | undefined {
+  if (!type) return undefined;
+  return enums().disqualification_types[type] ?? humanise(type);
 }
 
 /** Renders a SIC code with its description, e.g. "62012 — Business and domestic software development". */
@@ -248,6 +323,25 @@ export function companyWebUrl(companyNumber: string): string {
 
 export function officerWebUrl(officerId: string): string {
   return `${WEB_BASE}/officers/${encodeURIComponent(officerId)}/appointments`;
+}
+
+export function disqualifiedOfficerWebUrl(
+  register: "natural" | "corporate",
+  officerId: string,
+): string {
+  return `${WEB_BASE}/disqualified-officers/${register}/${encodeURIComponent(officerId)}`;
+}
+
+/**
+ * The public viewer for a filed document. It needs no API key, which is why it
+ * is the browser action: the Document API's own content URL is authenticated
+ * and would only give a browser a 401.
+ */
+export function filingDocumentWebUrl(
+  companyNumber: string,
+  transactionId: string,
+): string {
+  return `${WEB_BASE}/company/${encodeURIComponent(companyNumber)}/filing-history/${encodeURIComponent(transactionId)}/document?format=pdf&download=0`;
 }
 
 /** Extracts the officer id from a Companies House link such as `/officers/{id}/appointments`. */

@@ -14,6 +14,7 @@ import {
 import type { AppointmentItem, DateOfBirth } from "../types";
 
 import { CompanyProfile } from "./CompanyProfile";
+import { Disqualifications } from "./Disqualifications";
 
 const MAX_PAGES = 10;
 
@@ -58,13 +59,14 @@ export function OfficerAppointments({
   const born = formatDateOfBirth(data?.dateOfBirth);
   const appointments = data?.items ?? [];
   const truncated = data ? !data.complete : false;
+  const name = data?.name ?? officerName;
 
   return (
     <List
       isLoading={isLoading}
       isShowingDetail
       filtering
-      navigationTitle={data?.name ?? officerName ?? "Appointments"}
+      navigationTitle={name ?? "Appointments"}
       searchBarPlaceholder="Filter appointments by company…"
     >
       {truncated ? (
@@ -76,6 +78,7 @@ export function OfficerAppointments({
               key={`${appointment.appointed_to?.company_number ?? index}`}
               appointment={appointment}
               born={born}
+              officerName={name}
             />
           ))}
         </List.Section>
@@ -85,6 +88,7 @@ export function OfficerAppointments({
             key={`${appointment.appointed_to?.company_number ?? index}`}
             appointment={appointment}
             born={born}
+            officerName={name}
           />
         ))
       )}
@@ -100,9 +104,11 @@ export function OfficerAppointments({
 function AppointmentRow({
   appointment,
   born,
+  officerName,
 }: {
   appointment: AppointmentItem;
   born?: string;
+  officerName?: string;
 }) {
   const company = appointment.appointed_to;
   const status = company?.company_status;
@@ -211,6 +217,15 @@ function AppointmentRow({
               title="Copy Company Number"
               content={company.company_number}
             />
+          ) : null}
+          {officerName ? (
+            <ActionPanel.Section title="Officer">
+              <Action.Push
+                title="Search Disqualified Directors Register"
+                icon={Icon.ExclamationMark}
+                target={<Disqualifications officerName={officerName} />}
+              />
+            </ActionPanel.Section>
           ) : null}
         </ActionPanel>
       }

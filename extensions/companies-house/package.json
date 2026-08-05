@@ -76,7 +76,17 @@
     {
       "name": "get-persons-with-significant-control",
       "title": "Get Persons with Significant Control",
-      "description": "List a company's persons with significant control (beneficial owners) by company number."
+      "description": "List a company's persons with significant control (beneficial owners) by company number. Explains an empty register: a market-listing exemption, a filed statement, or a genuine gap."
+    },
+    {
+      "name": "get-insolvency",
+      "title": "Get Insolvency",
+      "description": "Read a company's insolvency record by company number: cases, dates and appointed practitioners. Most companies have none."
+    },
+    {
+      "name": "get-disqualifications",
+      "title": "Get Disqualifications",
+      "description": "Search the register of disqualified directors by name. No match is the ordinary result and means nothing is recorded."
     }
   ],
   "ai": {

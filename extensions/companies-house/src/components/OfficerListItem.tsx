@@ -3,6 +3,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { extractOfficerId, formatDateOfBirth, officerWebUrl } from "../helpers";
 import type { OfficerSearchItem } from "../types";
 
+import { Disqualifications } from "./Disqualifications";
 import { OfficerAppointments } from "./OfficerAppointments";
 
 export function OfficerListItem({ item }: { item: OfficerSearchItem }) {
@@ -46,6 +47,11 @@ export function OfficerListItem({ item }: { item: OfficerSearchItem }) {
               url={officerWebUrl(officerId)}
             />
           ) : null}
+          <Action.Push
+            title="Search Disqualified Directors Register"
+            icon={Icon.ExclamationMark}
+            target={<Disqualifications officerName={item.title} />}
+          />
           <Action.CopyToClipboard title="Copy Name" content={item.title} />
         </ActionPanel>
       }

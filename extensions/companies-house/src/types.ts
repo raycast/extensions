@@ -264,3 +264,135 @@ export interface PscResponse extends PagedResponse {
   active_count?: number;
   ceased_count?: number;
 }
+
+// --- PSC statements -------------------------------------------------------
+
+/**
+ * A statement filed in place of a PSC entry — for example that the company
+ * believes it has no registrable person, or that its enquiries are ongoing.
+ * A statement with a `ceased_on` date has been withdrawn and no longer
+ * explains anything about the register today.
+ */
+export interface PscStatementItem {
+  statement: string;
+  notified_on?: string;
+  ceased_on?: string;
+  kind?: string;
+  links?: { self?: string };
+}
+
+export interface PscStatementsResponse extends PagedResponse {
+  items?: PscStatementItem[];
+  active_count?: number;
+  ceased_count?: number;
+}
+
+// --- Exemptions -----------------------------------------------------------
+
+export interface ExemptionPeriod {
+  exempt_from?: string;
+  /** Absent while the exemption is open-ended. A date in the past means it has ended. */
+  exempt_to?: string;
+}
+
+/**
+ * Keyed by exemption name (underscored, e.g.
+ * `psc_exempt_as_trading_on_uk_regulated_market`), each with the periods the
+ * exemption applied for.
+ */
+export interface ExemptionsResponse {
+  exemptions?: Record<
+    string,
+    { exemption_type?: string; items?: ExemptionPeriod[] }
+  >;
+  kind?: string;
+  links?: { self?: string };
+}
+
+// --- Insolvency -----------------------------------------------------------
+
+export interface InsolvencyPractitioner {
+  name?: string;
+  address?: Address;
+  appointed_on?: string;
+  ceased_to_act_on?: string;
+  role?: string;
+}
+
+export interface InsolvencyCase {
+  /** Companies House sends this as a string, e.g. "1". */
+  number?: string | number;
+  type?: string;
+  dates?: { type?: string; date?: string }[];
+  notes?: string[];
+  practitioners?: InsolvencyPractitioner[];
+  links?: { charge?: string };
+}
+
+export interface InsolvencyResponse {
+  cases?: InsolvencyCase[];
+  /** Overall proceedings in force, e.g. `["liquidation"]`. */
+  status?: string[];
+}
+
+// --- Disqualified officers ------------------------------------------------
+
+export interface DisqualifiedOfficerSearchItem {
+  title: string;
+  description?: string;
+  address_snippet?: string;
+  /** A full ISO timestamp here, unlike the month/year given elsewhere. */
+  date_of_birth?: string;
+  kind?: string;
+  /** `links.self` is `/disqualified-officers/{natural|corporate}/{id}`. */
+  links?: { self?: string };
+}
+
+export interface DisqualifiedOfficerSearchResponse extends PagedResponse {
+  items?: DisqualifiedOfficerSearchItem[];
+}
+
+export interface Disqualification {
+  disqualified_from?: string;
+  /** A sanctions disqualification uses "9999-12-31" to mean no end date. */
+  disqualified_until?: string;
+  disqualification_type?: string;
+  case_identifier?: string;
+  court_name?: string;
+  heard_on?: string;
+  undertaken_on?: string;
+  address?: Address;
+  company_names?: string[];
+  reason?: { act?: string; section?: string; description_identifier?: string };
+}
+
+export interface DisqualifiedOfficer {
+  /** Full ISO date on this resource, not the month/year published elsewhere. */
+  date_of_birth?: string;
+  forename?: string;
+  other_forenames?: string;
+  surname?: string;
+  title?: string;
+  honours?: string;
+  /** Corporate entries carry a single `name` instead of name parts. */
+  name?: string;
+  nationality?: string;
+  kind?: string;
+  disqualifications?: Disqualification[];
+  links?: { self?: string };
+}
+
+// --- Filed documents ------------------------------------------------------
+
+export interface DocumentMetadata {
+  company_number?: string;
+  barcode?: string;
+  category?: string;
+  /** Companies House's own name for the file, e.g. "09446231_tm01_2026-07-30". */
+  filename?: string;
+  created_at?: string;
+  pages?: number;
+  /** Keyed by media type. Only the types listed here can be requested. */
+  resources?: Record<string, { content_length?: number }>;
+  links?: { self?: string; document?: string };
+}

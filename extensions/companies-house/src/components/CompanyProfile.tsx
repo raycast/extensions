@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
 
 import { getCompany, getCompanyOfficers } from "../api";
 import {
@@ -14,6 +15,7 @@ import {
   sicCodeLabel,
   statusColor,
 } from "../helpers";
+import { recordViewedCompany } from "../recently-viewed";
 import type {
   CompanyProfile as CompanyProfileData,
   CompanySearchItem,
@@ -22,6 +24,7 @@ import type {
 import { Charges } from "./Charges";
 import { CompanyOfficers } from "./CompanyOfficers";
 import { FilingHistory } from "./FilingHistory";
+import { Insolvency } from "./Insolvency";
 import { PersonsWithSignificantControl } from "./PersonsWithSignificantControl";
 
 const OFFICERS_IN_SUMMARY = 10;
@@ -62,6 +65,20 @@ export function CompanyProfile({
   ]);
 
   const title = company?.company_name ?? name ?? companyNumber;
+
+  // Recorded once the profile has a name to record. Writing on mount would put
+  // a bare company number into the recent list for anyone who opened a company
+  // straight from a URL or a tool result.
+  const resolvedName = company?.company_name ?? name;
+  const resolvedStatus = company?.company_status;
+  useEffect(() => {
+    if (!resolvedName) return;
+    void recordViewedCompany({
+      companyNumber,
+      name: resolvedName,
+      status: resolvedStatus,
+    });
+  }, [companyNumber, resolvedName, resolvedStatus]);
 
   let markdown = `# ${title}`;
   const statusDetail = companyStatusDetailLabel(company?.company_status_detail);
@@ -107,6 +124,17 @@ export function CompanyProfile({
   // the question a reader is actually asking.
   const hasCharges = Boolean(company?.links?.charges);
   const hasInsolvency = Boolean(company?.links?.insolvency);
+
+  // A company that is exempt from the PSC requirements, or that filed a
+  // statement instead of an entry, has no `persons_with_significant_control`
+  // link at all — HSBC Holdings has only `exemptions`. Gating the drill-down on
+  // that one link hid the ownership view from exactly the companies whose
+  // empty register most needs explaining, so any of the three counts.
+  const hasPscRecord = Boolean(
+    company?.links?.persons_with_significant_control ??
+    company?.links?.persons_with_significant_control_statements ??
+    company?.links?.exemptions,
+  );
 
   return (
     <Detail
@@ -265,7 +293,19 @@ export function CompanyProfile({
                 }
               />
             ) : null}
-            {company?.links?.persons_with_significant_control ? (
+            {hasInsolvency ? (
+              <Action.Push
+                title="View Insolvency"
+                icon={Icon.Hammer}
+                target={
+                  <Insolvency
+                    companyNumber={companyNumber}
+                    companyName={title}
+                  />
+                }
+              />
+            ) : null}
+            {hasPscRecord ? (
               <Action.Push
                 title="View Persons with Significant Control"
                 icon={Icon.PersonCircle}

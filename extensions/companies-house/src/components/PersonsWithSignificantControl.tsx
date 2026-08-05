@@ -10,8 +10,15 @@ import {
   formatDateOfBirth,
   pscKindLabel,
   pscNatureLabel,
+  pscStatementLabel,
 } from "../helpers";
-import type { PscItem } from "../types";
+import {
+  explainAbsentPscs,
+  explanationMarkdown,
+  explanationSummary,
+  type PscExplanation,
+} from "../psc-explanation";
+import type { PscItem, PscStatementItem } from "../types";
 
 const MAX_PAGES = 10;
 
@@ -58,6 +65,19 @@ export function PersonsWithSignificantControl({
     [companyNumber],
   );
 
+  // An empty register is almost never "nothing to see". The usual causes are a
+  // market-listing exemption or a statement filed in place of an entry, and
+  // both live in separate resources, so they are only fetched once the list
+  // comes back empty.
+  const registerIsEmpty = data ? data.people.length === 0 : false;
+  const { data: explanation } = useCachedPromise(
+    explainAbsentPscs,
+    [companyNumber],
+    {
+      execute: registerIsEmpty,
+    },
+  );
+
   // A ceased entry stays on the register forever, so anyone described as a
   // current controller has to be filtered on `ceased_on` first.
   const people = (data?.people ?? []).filter((psc) => {
@@ -69,6 +89,10 @@ export function PersonsWithSignificantControl({
   const truncated = data ? !data.complete : false;
 
   const pscWebUrl = `${WEB_BASE}/company/${encodeURIComponent(companyNumber)}/persons-with-significant-control`;
+  const statements = [
+    ...(explanation?.activeStatements ?? []),
+    ...(explanation?.withdrawnStatements ?? []),
+  ];
 
   return (
     <List
@@ -131,16 +155,122 @@ export function PersonsWithSignificantControl({
           />
         ))
       )}
+      {registerIsEmpty && explanation ? (
+        <List.Section title="Why This Register Is Empty">
+          <ExplanationRow explanation={explanation} pscWebUrl={pscWebUrl} />
+          {statements.map((statement, index) => (
+            <StatementRow
+              key={statement.links?.self ?? index}
+              statement={statement}
+              pscWebUrl={pscWebUrl}
+            />
+          ))}
+        </List.Section>
+      ) : null}
       <List.EmptyView
         title="No Persons with Significant Control"
         description={
           status === "all"
-            ? "Nothing is recorded on this company's PSC register."
+            ? "The PSC register holds the people and entities that own or control a company. Companies House records none for this company."
             : "No entries match this filter."
         }
         icon={Icon.PersonCircle}
       />
     </List>
+  );
+}
+
+function ExplanationRow({
+  explanation,
+  pscWebUrl,
+}: {
+  explanation: PscExplanation;
+  pscWebUrl: string;
+}) {
+  const summary = explanationSummary(explanation);
+  return (
+    <List.Item
+      title={summary}
+      icon={
+        explanation.unexplained
+          ? { source: Icon.QuestionMark, tintColor: Color.Orange }
+          : { source: Icon.Info, tintColor: Color.Blue }
+      }
+      detail={<List.Item.Detail markdown={explanationMarkdown(explanation)} />}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            title="Open on Companies House"
+            url={pscWebUrl}
+          />
+          <Action.CopyToClipboard title="Copy Explanation" content={summary} />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function StatementRow({
+  statement,
+  pscWebUrl,
+}: {
+  statement: PscStatementItem;
+  pscWebUrl: string;
+}) {
+  // A withdrawn statement stays on the register, so it has to be marked as one
+  // rather than read as the company's current position.
+  const withdrawn = Boolean(statement.ceased_on);
+  const text = pscStatementLabel(statement.statement) ?? statement.statement;
+
+  return (
+    <List.Item
+      title={text}
+      icon={Icon.Document}
+      accessories={[
+        {
+          tag: {
+            value: withdrawn ? "Withdrawn" : "Filed",
+            color: withdrawn ? Color.SecondaryText : Color.Green,
+          },
+        },
+      ]}
+      detail={
+        <List.Item.Detail
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label title="Statement" text={text} />
+              <List.Item.Detail.Metadata.TagList title="Status">
+                <List.Item.Detail.Metadata.TagList.Item
+                  text={withdrawn ? "Withdrawn" : "Filed"}
+                  color={withdrawn ? Color.SecondaryText : Color.Green}
+                />
+              </List.Item.Detail.Metadata.TagList>
+              {statement.notified_on ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Notified"
+                  text={formatDate(statement.notified_on)}
+                />
+              ) : null}
+              {statement.ceased_on ? (
+                <List.Item.Detail.Metadata.Label
+                  title="Withdrawn"
+                  text={formatDate(statement.ceased_on)}
+                />
+              ) : null}
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser
+            title="Open on Companies House"
+            url={pscWebUrl}
+          />
+          <Action.CopyToClipboard title="Copy Statement" content={text} />
+        </ActionPanel>
+      }
+    />
   );
 }
 

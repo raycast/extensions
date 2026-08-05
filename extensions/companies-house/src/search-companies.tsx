@@ -10,7 +10,14 @@ import { useState } from "react";
 
 import { searchCompanies } from "./api";
 import { CompanyListItem } from "./components/CompanyListItem";
+import { CompanyProfile } from "./components/CompanyProfile";
 import { PAGE_SIZE } from "./constants";
+import { companyStatusLabel, companyWebUrl, statusColor } from "./helpers";
+import {
+  clearRecentlyViewedCompanies,
+  useRecentlyViewedCompanies,
+  type RecentCompany,
+} from "./recently-viewed";
 
 export default function SearchCompanies() {
   const [searchText, setSearchText] = useState("");
@@ -18,6 +25,7 @@ export default function SearchCompanies() {
     "companies-show-detail",
     false,
   );
+  const { recent, isLoading: isLoadingRecent } = useRecentlyViewedCompanies();
 
   const { isLoading, data, pagination, error } = useCachedPromise(
     (query: string) => async (options: { page: number }) => {
@@ -32,9 +40,14 @@ export default function SearchCompanies() {
     { keepPreviousData: true },
   );
 
+  // The recent list belongs to the blank search box only. Once someone is
+  // searching, showing it alongside results would put companies in front of
+  // them that do not match what they typed.
+  const showRecent = !searchText.trim() && recent.length > 0;
+
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingRecent}
       isShowingDetail={showDetail}
       throttle
       pagination={pagination}
@@ -64,7 +77,7 @@ export default function SearchCompanies() {
       ) : error ? (
         <List.EmptyView
           icon={Icon.Warning}
-          title="Couldn't load companies"
+          title="Couldn't Load Companies"
           description={error.message}
           actions={
             <ActionPanel>
@@ -76,10 +89,20 @@ export default function SearchCompanies() {
             </ActionPanel>
           }
         />
+      ) : showRecent ? (
+        <List.Section title="Recently Viewed">
+          {recent.map((company) => (
+            <RecentCompanyItem
+              key={company.companyNumber}
+              company={company}
+              showingDetail={showDetail}
+            />
+          ))}
+        </List.Section>
       ) : searchText ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
-          title="No companies found"
+          title="No Companies Found"
           description="Try a different name or number."
         />
       ) : (
@@ -90,5 +113,87 @@ export default function SearchCompanies() {
         />
       )}
     </List>
+  );
+}
+
+function RecentCompanyItem({
+  company,
+  showingDetail,
+}: {
+  company: RecentCompany;
+  showingDetail: boolean;
+}) {
+  const title = company.name ?? company.companyNumber;
+  // The status was recorded when the company was viewed, so it is labelled as
+  // "when viewed" rather than presented as the register's position today.
+  const statusLabel = companyStatusLabel(company.status);
+
+  return (
+    <List.Item
+      title={title}
+      subtitle={showingDetail ? undefined : company.companyNumber}
+      icon={Icon.Clock}
+      accessories={
+        showingDetail || !statusLabel
+          ? undefined
+          : [
+              {
+                tag: { value: statusLabel, color: statusColor(company.status) },
+              },
+            ]
+      }
+      detail={
+        <List.Item.Detail
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.Label
+                title="Company Number"
+                text={company.companyNumber}
+              />
+              {statusLabel ? (
+                <List.Item.Detail.Metadata.TagList title="Status When Viewed">
+                  <List.Item.Detail.Metadata.TagList.Item
+                    text={statusLabel}
+                    color={statusColor(company.status)}
+                  />
+                </List.Item.Detail.Metadata.TagList>
+              ) : null}
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="View Company"
+            icon={Icon.Building}
+            target={
+              <CompanyProfile
+                companyNumber={company.companyNumber}
+                name={company.name}
+              />
+            }
+          />
+          <Action.OpenInBrowser
+            title="Open on Companies House"
+            url={companyWebUrl(company.companyNumber)}
+          />
+          <Action.CopyToClipboard
+            title="Copy Company Number"
+            content={company.companyNumber}
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+          />
+          <ActionPanel.Section>
+            <Action
+              title="Clear Recently Viewed"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+              onAction={() => void clearRecentlyViewedCompanies()}
+            />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
+    />
   );
 }
