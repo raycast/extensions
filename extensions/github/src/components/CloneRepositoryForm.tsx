@@ -11,8 +11,13 @@ import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 import {
   ACCEPTABLE_CLONE_PROTOCOLS,
   AcceptableCloneProtocol,
-  CLONE_PROTOCOLS_TO_LABELS,
+  AcceptableCloneTool,
+  ACCEPTABLE_CLONE_TOOLS,
   buildCloneCommand,
+  buildGhCloneCommand,
+  CLONE_PROTOCOLS_TO_LABELS,
+  CLONE_TOOLS_TO_LABELS,
+  getGhAvailability,
 } from "../helpers/repository";
 
 type CloneRepositoryFormProps = {
@@ -35,13 +40,15 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
     [repository],
   );
 
-  const { itemProps, handleSubmit, setValue } = useForm<{
+  const { itemProps, handleSubmit, setValue, values } = useForm<{
     clonePath: string[];
     branch: string;
     cloneProtocol: AcceptableCloneProtocol;
+    cloneTool: AcceptableCloneTool;
   }>({
     initialValues: {
       cloneProtocol: repositoryCloneProtocol,
+      cloneTool: "git",
     },
     async onSubmit(values) {
       const repoName = repository.name;
@@ -54,12 +61,39 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
       });
 
       const branchOption = values.branch ? ["-b", values.branch] : [];
-      const cloneCommand = buildCloneCommand(repository.nameWithOwner, values.cloneProtocol, {
-        gitFlags: branchOption,
-        targetDir: targetDir,
-      });
-
       const execAsync = promisify(exec);
+
+      let cloneCommand: string;
+
+      if (values.cloneTool === "gh") {
+        const ghAvailability = await getGhAvailability();
+
+        if (!ghAvailability.available && ghAvailability.reason === "not-installed") {
+          await showFailureToast(undefined, {
+            title: "GitHub CLI is not installed",
+            message: "Install it with `brew install gh` or visit https://cli.github.com, then try again.",
+          });
+          return;
+        }
+
+        if (!ghAvailability.available && ghAvailability.reason === "not-authenticated") {
+          await showFailureToast(undefined, {
+            title: "GitHub CLI is not authenticated",
+            message: "Run `gh auth login` in your terminal to authenticate, then try again.",
+          });
+          return;
+        }
+
+        cloneCommand = buildGhCloneCommand(repository.nameWithOwner, {
+          gitFlags: branchOption,
+          targetDir: targetDir,
+        });
+      } else {
+        cloneCommand = buildCloneCommand(repository.nameWithOwner, values.cloneProtocol, {
+          gitFlags: branchOption,
+          targetDir: targetDir,
+        });
+      }
 
       try {
         await execAsync(cloneCommand);
@@ -117,6 +151,12 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
         </ActionPanel>
       }
     >
+      {/* @ts-expect-error value always satisfies AcceptableCloneTool but TypeScript doesn't know that */}
+      <Form.Dropdown {...itemProps.cloneTool} title="Clone Tool">
+        {ACCEPTABLE_CLONE_TOOLS.map((tool) => (
+          <Form.Dropdown.Item key={tool} value={tool} title={CLONE_TOOLS_TO_LABELS[tool]} />
+        ))}
+      </Form.Dropdown>
       <Form.FilePicker
         {...itemProps.clonePath}
         title="Clone Path"
@@ -128,12 +168,21 @@ export default function CloneRepositoryForm({ repository }: CloneRepositoryFormP
       <Form.Dropdown {...itemProps.branch} title="Branch Name">
         {branches?.map((b) => <Form.Dropdown.Item key={b} value={b} title={b} />)}
       </Form.Dropdown>
-      {/* @ts-expect-error value always satisfies AcceptableCloneProtocol but TypeScript doesn't know that */}
-      <Form.Dropdown {...itemProps.cloneProtocol} title="Repository Clone Protocol" storeValue>
-        {ACCEPTABLE_CLONE_PROTOCOLS.map((protocol) => (
-          <Form.Dropdown.Item key={protocol} value={protocol} title={CLONE_PROTOCOLS_TO_LABELS[protocol]} />
-        ))}
-      </Form.Dropdown>
+      {values.cloneTool === "gh" ? (
+        <Form.Description
+          title="Authentication"
+          text="Cloning uses your existing GitHub CLI (gh) authentication and git protocol configuration. Run `gh auth login` in your terminal if you are not authenticated."
+        />
+      ) : (
+        <>
+          {/* @ts-expect-error value always satisfies AcceptableCloneProtocol but TypeScript doesn't know that */}
+          <Form.Dropdown {...itemProps.cloneProtocol} title="Repository Clone Protocol" storeValue>
+            {ACCEPTABLE_CLONE_PROTOCOLS.map((protocol) => (
+              <Form.Dropdown.Item key={protocol} value={protocol} title={CLONE_PROTOCOLS_TO_LABELS[protocol]} />
+            ))}
+          </Form.Dropdown>
+        </>
+      )}
     </Form>
   );
 }

@@ -1,6 +1,7 @@
-import { execSync } from "node:child_process";
+import { exec, execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
+import { promisify } from "node:util";
 
 import { Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
@@ -146,6 +147,13 @@ export const CLONE_PROTOCOLS_TO_LABELS = {
   ssh: "SSH",
 } as const satisfies Record<AcceptableCloneProtocol, string>;
 
+export const ACCEPTABLE_CLONE_TOOLS = ["git", "gh"] as const;
+export type AcceptableCloneTool = (typeof ACCEPTABLE_CLONE_TOOLS)[number];
+export const CLONE_TOOLS_TO_LABELS = {
+  git: "Git",
+  gh: "GitHub CLI",
+} as const satisfies Record<AcceptableCloneTool, string>;
+
 /**
  * Format the clone command based on specified protocol.
  * @param repoNameWithOwner {string} Repository name with owner.
@@ -184,6 +192,68 @@ type AdditionalCloneFormatOptions = {
    */
   gitFlags: string[];
 };
+
+/**
+ * Format the clone command using the GitHub CLI.
+ *
+ * The target directory and git flags (e.g. `-b <branch>`) are preserved and
+ * forwarded to `git clone`, while authentication, protocol and any other
+ * configuration come from the user's existing `gh` setup.
+ *
+ * @param repoNameWithOwner {string} Repository name with owner.
+ * @param options {Partial<AdditionalCloneFormatOptions>} Optional target directory and git flags.
+ * @returns {string} Executable clone command
+ */
+export const buildGhCloneCommand = (
+  repoNameWithOwner: string,
+  options?: Partial<AdditionalCloneFormatOptions>,
+): string => {
+  const gitFlags = options?.gitFlags?.join(" ") ?? "";
+  const targetDir = (options?.targetDir ?? "").replace(/"/g, '\\"');
+
+  let cloneCmd = `gh repo clone ${repoNameWithOwner}`;
+
+  if (targetDir) {
+    cloneCmd += ` "${targetDir}"`;
+  }
+
+  if (gitFlags) {
+    cloneCmd += ` -- ${gitFlags}`;
+  }
+
+  return cloneCmd;
+};
+
+/**
+ * Result of checking the availability of the GitHub CLI on the user's machine.
+ */
+export type GhAvailability =
+  | { available: true }
+  | { available: false; reason: "not-installed" }
+  | { available: false; reason: "not-authenticated" };
+
+/**
+ * Check whether the GitHub CLI is installed and authenticated on the user's machine.
+ *
+ * @returns {Promise<GhAvailability>} The availability status of the GitHub CLI.
+ */
+export async function getGhAvailability(): Promise<GhAvailability> {
+  const execAsync = promisify(exec);
+
+  try {
+    await execAsync("gh --version");
+  } catch {
+    return { available: false, reason: "not-installed" };
+  }
+
+  try {
+    await execAsync("gh auth status");
+  } catch {
+    return { available: false, reason: "not-authenticated" };
+  }
+
+  return { available: true };
+}
 
 /**
  * Format the repository URL based on specified protocol.
