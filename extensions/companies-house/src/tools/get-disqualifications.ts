@@ -18,10 +18,11 @@ const MAX_DETAILED_MATCHES = 5;
 type Input = {
   /**
    * The person or company name to look up in the register of disqualified
-   * directors, e.g. "Aaron Donald Smith". This is the only way in: the
+   * directors, e.g. "Aaron Donald Smith". A name is the only way in: the
    * disqualification register uses its own officer ids, which are not the
    * officer ids returned by search-officers or get-officers, and an officer's
-   * company record carries no link to a disqualification.
+   * company record carries no link to a disqualification. Pass the officer's
+   * name, never their officer id.
    */
   name: string;
 };

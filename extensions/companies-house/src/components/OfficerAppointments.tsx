@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { getOfficerAppointments } from "../api";
@@ -216,6 +216,7 @@ function AppointmentRow({
             <Action.CopyToClipboard
               title="Copy Company Number"
               content={company.company_number}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           ) : null}
           {officerName ? (

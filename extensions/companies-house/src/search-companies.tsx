@@ -2,10 +2,15 @@ import {
   Action,
   ActionPanel,
   Icon,
+  Keyboard,
   List,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState } from "@raycast/utils";
+import {
+  showFailureToast,
+  useCachedPromise,
+  useCachedState,
+} from "@raycast/utils";
 import { useState } from "react";
 
 import { searchCompanies } from "./api";
@@ -190,15 +195,23 @@ function RecentCompanyItem({
           <Action.CopyToClipboard
             title="Copy Company Number"
             content={company.companyNumber}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <ActionPanel.Section>
             <Action
               title="Clear Recently Viewed"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
-              onAction={() => void clearRecentlyViewedCompanies()}
+              shortcut={Keyboard.Shortcut.Common.RemoveAll}
+              onAction={async () => {
+                try {
+                  await clearRecentlyViewedCompanies();
+                } catch (error) {
+                  await showFailureToast(error, {
+                    title: "Could Not Clear Recently Viewed",
+                  });
+                }
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

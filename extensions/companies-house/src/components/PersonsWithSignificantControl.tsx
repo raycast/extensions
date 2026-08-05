@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -203,7 +203,11 @@ function ExplanationRow({
             title="Open on Companies House"
             url={pscWebUrl}
           />
-          <Action.CopyToClipboard title="Copy Explanation" content={summary} />
+          <Action.CopyToClipboard
+            title="Copy Explanation"
+            content={summary}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
         </ActionPanel>
       }
     />
@@ -267,7 +271,11 @@ function StatementRow({
             title="Open on Companies House"
             url={pscWebUrl}
           />
-          <Action.CopyToClipboard title="Copy Statement" content={text} />
+          <Action.CopyToClipboard
+            title="Copy Statement"
+            content={text}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
         </ActionPanel>
       }
     />
@@ -375,7 +383,11 @@ function PscRow({ psc, pscWebUrl }: { psc: PscItem; pscWebUrl: string }) {
             title="Open on Companies House"
             url={pscWebUrl}
           />
-          <Action.CopyToClipboard title="Copy Name" content={name} />
+          <Action.CopyToClipboard
+            title="Copy Name"
+            content={name}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
         </ActionPanel>
       }
     />

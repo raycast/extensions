@@ -10,7 +10,15 @@
  * not proof of identity — hence the candidate list rather than a verdict.
  */
 
-import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Keyboard,
+  List,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -158,7 +166,11 @@ function MatchRow({ item }: { item: DisqualifiedOfficerSearchItem }) {
               url={disqualifiedOfficerWebUrl(target.register, target.officerId)}
             />
           ) : null}
-          <Action.CopyToClipboard title="Copy Name" content={item.title} />
+          <Action.CopyToClipboard
+            title="Copy Name"
+            content={item.title}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
         </ActionPanel>
       }
     />
@@ -241,7 +253,11 @@ function DisqualificationDetail({
             title="Open on Companies House"
             url={disqualifiedOfficerWebUrl(register, officerId)}
           />
-          <Action.CopyToClipboard title="Copy Name" content={heading} />
+          <Action.CopyToClipboard
+            title="Copy Name"
+            content={heading}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
         </ActionPanel>
       }
     />

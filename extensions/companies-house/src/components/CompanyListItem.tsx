@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 
 import {
   companyStatusLabel,
@@ -114,7 +114,7 @@ export function CompanyListItem({
           <Action.CopyToClipboard
             title="Copy Company Number"
             content={item.company_number}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         </ActionPanel>
       }

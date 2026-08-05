@@ -2,7 +2,7 @@ import { searchOfficers } from "../api";
 import { extractOfficerId, formatDateOfBirth } from "../helpers";
 
 type Input = {
-  /** The officer or director name to search for. */
+  /** The officer or director name to search for, e.g. "John Smith". A surname on its own works and returns more matches. */
   query: string;
 };
 

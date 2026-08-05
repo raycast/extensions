@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 
 import { extractOfficerId, formatDateOfBirth, officerWebUrl } from "../helpers";
 import type { OfficerSearchItem } from "../types";
@@ -52,7 +52,11 @@ export function OfficerListItem({ item }: { item: OfficerSearchItem }) {
             icon={Icon.ExclamationMark}
             target={<Disqualifications officerName={item.title} />}
           />
-          <Action.CopyToClipboard title="Copy Name" content={item.title} />
+          <Action.CopyToClipboard
+            title="Copy Name"
+            content={item.title}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
         </ActionPanel>
       }
     />

@@ -2,7 +2,12 @@ import { getOfficerAppointments } from "../api";
 import { companyStatusLabel, formatDate, officerRoleLabel } from "../helpers";
 
 type Input = {
-  /** The officer id (obtained from search-officers), used to list all of an officer's appointments. */
+  /**
+   * The officer id, e.g. "i01-NvuSb_IXaHc1mrh6CAmvi48". Both search-officers
+   * and get-officers return one for every officer they list; take it from
+   * there rather than constructing it. It is not the officer's name and not
+   * the company number.
+   */
   officerId: string;
 };
 

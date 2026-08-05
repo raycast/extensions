@@ -10,7 +10,11 @@ import {
 } from "../helpers";
 
 type Input = {
-  /** The Companies House company number, e.g. "09446231" or "OC394454". */
+  /**
+   * The Companies House company number, e.g. "09446231" or "OC394454". Eight
+   * characters: eight digits, or two letters followed by six digits. Call
+   * search-companies first when you only have a company name.
+   */
   companyNumber: string;
 };
 

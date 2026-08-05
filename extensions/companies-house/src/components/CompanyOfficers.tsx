@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -279,7 +279,11 @@ function OfficerItem({
             icon={Icon.ExclamationMark}
             target={<Disqualifications officerName={officer.name} />}
           />
-          <Action.CopyToClipboard title="Copy Name" content={officer.name} />
+          <Action.CopyToClipboard
+            title="Copy Name"
+            content={officer.name}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
+          />
         </ActionPanel>
       }
     />

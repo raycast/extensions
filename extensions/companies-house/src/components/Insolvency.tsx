@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { getInsolvency } from "../api";
@@ -173,6 +173,7 @@ function CaseRow({
             <Action.CopyToClipboard
               title="Copy Case Number"
               content={caseNumber}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           ) : null}
         </ActionPanel>

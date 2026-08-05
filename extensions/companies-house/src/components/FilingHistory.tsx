@@ -2,6 +2,7 @@ import {
   Action,
   ActionPanel,
   Icon,
+  Keyboard,
   List,
   Toast,
   open,
@@ -256,7 +257,11 @@ function FilingRow({
             title="Open Filing History on Companies House"
             url={filingHistoryUrl}
           />
-          <Action.CopyToClipboard title="Copy Description" content={title} />
+          <Action.CopyToClipboard
+            title="Copy Description"
+            content={title}
+            shortcut={Keyboard.Shortcut.Common.Copy}
+          />
         </ActionPanel>
       }
     />

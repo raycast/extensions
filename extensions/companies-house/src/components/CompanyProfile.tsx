@@ -1,5 +1,12 @@
-import { Action, ActionPanel, Color, Detail, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Detail,
+  Icon,
+  Keyboard,
+} from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect } from "react";
 
 import { getCompany, getCompanyOfficers } from "../api";
@@ -73,11 +80,13 @@ export function CompanyProfile({
   const resolvedStatus = company?.company_status;
   useEffect(() => {
     if (!resolvedName) return;
-    void recordViewedCompany({
+    recordViewedCompany({
       companyNumber,
       name: resolvedName,
       status: resolvedStatus,
-    });
+    }).catch((error: unknown) =>
+      showFailureToast(error, { title: "Could Not Record Recently Viewed" }),
+    );
   }, [companyNumber, resolvedName, resolvedStatus]);
 
   let markdown = `# ${title}`;
@@ -322,7 +331,7 @@ export function CompanyProfile({
             <Action.CopyToClipboard
               title="Copy Company Number"
               content={companyNumber}
-              shortcut={{ modifiers: ["cmd"], key: "." }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           </ActionPanel.Section>
         </ActionPanel>
