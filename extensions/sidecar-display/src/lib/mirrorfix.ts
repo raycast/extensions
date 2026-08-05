@@ -8,10 +8,37 @@
 //   only the "should it run this time" gate.
 // =============================================================================
 
-import { getBetterDisplayCliPath, shouldFixMirrorAfterConnect } from "./preferences";
-import { reconnectVirtualScreens } from "./virtualscreens";
+import { getPreferenceValues } from "@raycast/api";
+
+import { usablePath } from "./betterdisplayapp";
+import { hasVirtualScreens, reconnectVirtualScreens } from "./virtualscreens";
 
 import type { ModeOutcome } from "./sidecar";
+
+/**
+ * The path to use for a mirror fix right now, or "" when it must not run.
+ *
+ * @param requireOptIn - Whether the "fix on fresh connect" preference must be on
+ *   (true for the automatic path; false for an explicit user action).
+ * @returns BetterDisplay's executable path when the fix can and should run.
+ *
+ * NOTE: Returns the validated path rather than a boolean so callers do not look
+ *   it up again — the automatic path used to resolve it twice, leaving a window
+ *   in which BetterDisplay could quit between the check and the use and the fix
+ *   would then exec "".
+ * WARN: EVERY mirror-fix path goes through this, so the command, the menu action
+ *   and the automatic opt-in cannot drift apart in what they require.
+ */
+export async function mirrorFixPath(requireOptIn: boolean): Promise<string> {
+  if (requireOptIn && getPreferenceValues<Preferences>().fixMirrorAfterConnect !== true) {
+    return "";
+  }
+  const cliPath = await usablePath();
+  if (cliPath === "") {
+    return "";
+  }
+  return (await hasVirtualScreens(cliPath)) ? cliPath : "";
+}
 
 /**
  * Clears Sidecar's mirror mode after a genuinely fresh connect.
@@ -27,7 +54,11 @@ import type { ModeOutcome } from "./sidecar";
  *   separately from the connect that already succeeded.
  */
 export async function fixMirrorAfterFreshConnect(outcome: ModeOutcome): Promise<void> {
-  if (shouldFixMirrorAfterConnect() && outcome.linkEstablished === true) {
-    await reconnectVirtualScreens(getBetterDisplayCliPath());
+  if (outcome.linkEstablished !== true) {
+    return;
+  }
+  const cliPath = await mirrorFixPath(true);
+  if (cliPath !== "") {
+    await reconnectVirtualScreens(cliPath);
   }
 }

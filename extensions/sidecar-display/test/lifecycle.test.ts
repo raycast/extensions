@@ -1,44 +1,44 @@
 // =============================================================================
-// HARDWARE TEST - CONNECT LIFECYCLE (BetterDisplay engine)
+// HARDWARE TEST - CONNECT LIFECYCLE (native engine)
 // Exercises connect, disconnect, and idempotence on real hardware.
 // -----------------------------------------------------------------------------
-// Context: Requires BetterDisplay running and an iPad paired for Sidecar.
+// Context: Requires `swift build` in swift/ and an iPad paired for Sidecar.
 // WARN: Disconnects and reconnects the iPad. Leaves it connected and extending.
 //   The cases share the link's state and run in file order — they are one
 //   sequence, not independent tests.
 // =============================================================================
 
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import { after, before, describe, it } from "node:test";
 
-import { createBetterDisplayBackend } from "../src/lib/betterdisplay";
 import { connectSidecar, disconnectSidecar, isConnected, resolveIpadName } from "../src/lib/sidecar";
+import { createHelperBackend, mainDisplayId } from "./support/nativeBackend";
 
 import type { SidecarBackend } from "../src/lib/backend";
 import type { SidecarConfig } from "../src/lib/sidecar";
 
-const CLI = process.env.BD_CLI ?? "/opt/homebrew/bin/betterdisplaycli";
-
-/** The main display's UUID, read straight from the CLI as an oracle. */
-function mainUuid(): string {
-  const raw = execFileSync(CLI, ["get", "--displayWithMainStatus", "--identifiers"], {
-    encoding: "utf8",
-  });
-  return raw.match(/"UUID"\s*:\s*"([^"]+)"/)?.[1] ?? "?";
+/**
+ * The main display's CoreGraphics ID, as an oracle.
+ *
+ * NOTE: Read through the Swift helper's public-CoreGraphics export rather than
+ *   through the orchestration under test, so a regression cannot hide behind the
+ *   same code path it is meant to catch.
+ */
+function mainDisplay(): number {
+  return mainDisplayId();
 }
 
 describe("connect lifecycle on real hardware", () => {
   let backend: SidecarBackend;
   let config: SidecarConfig;
   let ipad: string;
-  let mainBefore: string;
+  let mainBefore: number;
 
   before(async () => {
-    backend = createBetterDisplayBackend(CLI);
+    backend = createHelperBackend();
     ipad = await resolveIpadName(backend, "");
     config = { ipadName: ipad, mode: "extend", settleTimeoutMs: 15_000 };
-    mainBefore = mainUuid();
+    mainBefore = mainDisplay();
   });
 
   it("takes the link down and the display with it", async () => {
@@ -68,7 +68,7 @@ describe("connect lifecycle on real hardware", () => {
   after(() => {
     // Not an assertion: macOS itself may move main across a reconnect. The
     // extension never writes main — that is proven by safety + orchestration.
-    const mainAfter = mainUuid();
+    const mainAfter = mainDisplay();
     console.warn(
       mainAfter === mainBefore
         ? "NOTE  main display unchanged across reconnect"

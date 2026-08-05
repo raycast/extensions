@@ -14,7 +14,7 @@
 
 import { SidecarError } from "./backend";
 
-import type { DisplayMode, SidecarBackend } from "./backend";
+import type { DisplayMode, SidecarBackend, SidecarDevice } from "./backend";
 
 const POLL_INTERVAL_MS = 400;
 
@@ -98,6 +98,26 @@ export async function resolveIpadName(backend: SidecarBackend, override: string)
     throw new SidecarError(`Multiple Sidecar devices found (${names}). Set “iPad Name” in preferences.`);
   }
   return only.name;
+}
+
+/**
+ * Decides which remembered device name is still worth using.
+ *
+ * @param remembered - The name stored from a previous run, or "".
+ * @param devices    - The engine's current device list.
+ * @returns The remembered name, or "" to mean "auto-detect instead".
+ *
+ * WARN: Only ONE listed device that differs is unambiguous evidence of staleness.
+ *   An out-of-range iPad leaves the list entirely, so with several paired the
+ *   remembered one may simply be away — discarding it there silently retargeted
+ *   every command at a different iPad and overwrote the user's explicit pick.
+ */
+export function keepRememberedDevice(remembered: string, devices: readonly SidecarDevice[]): string {
+  if (remembered === "") {
+    return "";
+  }
+  const only = devices.length === 1 ? devices[0] : undefined;
+  return only !== undefined && only.name !== remembered ? "" : remembered;
 }
 
 // -----------------------------------------------------------

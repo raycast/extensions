@@ -16,7 +16,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { after, describe, it } from "node:test";
 
-import { reconnectVirtualScreens } from "../src/lib/virtualscreens";
+import { hasVirtualScreens, reconnectVirtualScreens } from "../src/lib/virtualscreens";
 
 const dir = mkdtempSync(join(tmpdir(), "vs-test-"));
 const cliPath = join(dir, "fake-betterdisplaycli");
@@ -28,6 +28,7 @@ const script = `#!/bin/bash
 echo "$@" >> "${logPath}"
 case "$*" in
   *"--displayWithMainStatus"*) printf '%s' "$FAKE_GET_OUTPUT"; exit "\${FAKE_GET_EXIT:-0}" ;;
+  *"--type=VirtualScreen"*"--identifiers"*) printf '%s' "$FAKE_VS_OUTPUT"; exit "\${FAKE_VS_EXIT:-0}" ;;
   *"--connected=off"*) exit "\${FAKE_OFF_EXIT:-0}" ;;
   *"--connected=on"*) exit "\${FAKE_ON_EXIT:-0}" ;;
   *) exit 0 ;;
@@ -90,10 +91,7 @@ describe("reconnectVirtualScreens", () => {
   it("still reconnects when the disconnect is rejected", async () => {
     const { log, threw } = await runCase({ getOutput: VIRTUAL_MAIN, offExit: "1" });
     assert.equal(threw, false, "a rejected disconnect must not surface as an error");
-    assert.ok(
-      log.includes("--UUID=ABC-123 --connected=on"),
-      "the screen must never be left disconnected",
-    );
+    assert.ok(log.includes("--UUID=ABC-123 --connected=on"), "the screen must never be left disconnected");
   });
 
   it("falls back to all virtual screens when main is not one", async () => {
@@ -111,5 +109,30 @@ describe("reconnectVirtualScreens", () => {
   it("surfaces a failed reconnect as an error", async () => {
     const { threw } = await runCase({ getOutput: VIRTUAL_MAIN, onExit: "1" });
     assert.equal(threw, true, "a failed reconnect is the one thing that must not be swallowed");
+  });
+});
+
+describe("hasVirtualScreens", () => {
+  it("reports true when at least one virtual screen is listed", async () => {
+    process.env.FAKE_VS_OUTPUT = '{"UUID":"v1","name":"Virtual","deviceType":"VirtualScreen"}';
+    delete process.env.FAKE_VS_EXIT;
+    assert.equal(await hasVirtualScreens(cliPath), true);
+  });
+
+  it("reports false when there are none, so the fix is skipped rather than failing", async () => {
+    // Without this the --type=VirtualScreen selector matched nothing and the
+    // reconnect write threw — on every connect, for every user with no virtual
+    // screens, since the auto-fix opt-in is on by default.
+    process.env.FAKE_VS_OUTPUT = "";
+    delete process.env.FAKE_VS_EXIT;
+    assert.equal(await hasVirtualScreens(cliPath), false);
+  });
+
+  it("fails closed when the read itself fails", async () => {
+    // Skipping a cosmetic repair beats cycling displays on a guess.
+    process.env.FAKE_VS_OUTPUT = "";
+    process.env.FAKE_VS_EXIT = "1";
+    assert.equal(await hasVirtualScreens(cliPath), false);
+    delete process.env.FAKE_VS_EXIT;
   });
 });

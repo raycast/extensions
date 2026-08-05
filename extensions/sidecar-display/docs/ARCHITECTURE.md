@@ -10,7 +10,7 @@ how to use it, see the [README](../README.md); for the dev runbook, see
 - [Safety: the main display is sacred](#safety-the-main-display-is-sacred)
 - [Fix Mirroring](#fix-mirroring)
 - [Auto-reconnect (keep-alive)](#auto-reconnect-keep-alive)
-- [Two engines, one interface](#two-engines-one-interface)
+- [One engine, and why BetterDisplay is not one](#one-engine-and-why-betterdisplay-is-not-one)
 - [Design decisions](#design-decisions)
 - [Project structure](#project-structure)
 
@@ -40,8 +40,7 @@ extension cannot condition a fix on "is it mirrored?". Instead:
   [Fix Mirroring](#fix-mirroring).
 
 Because the mirror is a side effect of having a BetterDisplay virtual screen,
-that fix inherently requires BetterDisplay, regardless of which engine is driving
-Sidecar.
+that fix inherently requires BetterDisplay — and only matters if you use it.
 
 ## The connect flow: converge and hold
 
@@ -68,7 +67,7 @@ cycle, disconnect, or otherwise touch any other display to force the issue.
 
 ## Safety: the main display is sacred
 
-Two hard invariants, enforced across every code path and every engine:
+Two hard invariants, enforced across every code path:
 
 1. **The extension never writes the main display**, and the
    connect/disconnect/mode path never disconnects or power-cycles any display. Its
@@ -110,6 +109,17 @@ fire it only "when mirrored." Instead:
   iPad mirrors every time it attaches. If yours only sometimes mirrors, turn the
   preference off and use the manual command when you need it.
 
+Everything that reaches BetterDisplay goes through one gate, `mirrorFixPath()`,
+which checks in order: the **opt-in is ticked** (automatic path only), the app is
+**installed and running** (`usablePath()` — an in-process AppKit check, so a
+closed app costs nothing), and a **virtual screen exists** for it to act on. It
+returns the validated path, so no caller looks it up a second time. The middle check matters because the
+opt-in is on by default: without it, a Mac with no virtual screens failed the
+reconnect write on _every_ connect and reported "Connected, but could not fix
+mirroring" each time. The menu-bar item is shown whenever BetterDisplay is running and the iPad is
+connected, and reports the same reason as the command if the fix cannot run —
+rather than paying a CLI call on every render to hide itself.
+
 Its "always reconnect even if the disconnect is rejected" guarantee is covered by
 a unit test (`virtualscreens.test.ts`) so the screen can never be left down.
 
@@ -150,8 +160,11 @@ so it never nags and it does not chase an iPad that has stopped answering:
   real connect when the iPad looks present. An iPad that is out of range costs
   nothing at all, and one that returns is reconnected on the next tick.
 - After _Give Up After (hours)_ of chasing an iPad that looks **present but will
-  not connect**, it stops. That clock only runs while the iPad is detected nearby,
-  so a weekend away never burns the budget. `0` keeps trying forever.
+  not connect**, it stops. The budget accumulates time actually spent trying, so
+  it is _paused_ while the iPad is away, while the Mac is asleep, when the probe
+  cannot answer, and while the transport is excluded — none of those use it up. It
+  is _zeroed_ only by the two things that genuinely end a chase: a settled absence,
+  and the iPad returning. A laptop that sleeps nightly still reaches it. `0` keeps trying forever.
 - **Waking the Mac re-arms it immediately.** There is no on-wake event for
   extensions, so a long gap between background ticks is read as "the Mac slept,"
   and the next tick reconnects at once rather than waiting out a backoff.
@@ -173,21 +186,25 @@ change, and `mediaRouteIdentifier` / `offersAdditionalDisplay` never moved at al
 
 Because it is undocumented, the probe is treated as fallible — and its failure
 mode is the dangerous direction: a false "absent" produces no banners **and no
-reconnect**, silently disabling the feature. Three guards, all covered by
-`test/keepalive.test.ts`:
+reconnect**, silently disabling the feature. Three guards, covered by
+`test/keepalive.test.ts`, `test/presence.test.ts` and above all
+`test/resilience.test.ts`, which runs days of simulated ticks — every one of these
+failures is temporal, and no single-tick test can see them:
 
-1. **Debounce.** Bit 9 was seen dipping for ~10s while the iPad stayed connected,
-   so an absent reading is trusted only after two consecutive ticks.
+1. **Debounce, at two levels.** Bit 9 was seen dipping for ~10s while the iPad
+   stayed connected, so an absent reading is trusted only after **two**
+   consecutive ticks before the tick goes quiet. Declaring the absence **over** is
+   a separate, stricter question — it clears the backoff and the give-up budget —
+   and takes **five**. Collapsing the two let a marginal-range iPad re-arm the
+   fast burst every third tick and out-attempt one that was simply present.
 2. **Sanity attempt.** Even while the probe insists the iPad is absent, one real
    connect attempt still fires once an hour. A misreading probe
    costs one banner an hour, never a permanently dead feature.
-3. **Graceful absence.** Under the BetterDisplay engine, or if the Swift call
-   fails, the probe returns "unknown" and the pre-probe backoff behaviour runs
-   unchanged.
-
-The probe is cross-engine: it always goes through the Swift helper, even when
-BetterDisplay is driving Sidecar, because `betterdisplaycli` exposes no liveness
-signal. That mirrors [Fix Mirroring](#fix-mirroring) going the other way.
+3. **Graceful absence.** If the Swift helper cannot answer — it is unavailable,
+   or macOS has changed the private field it reads — the probe returns "unknown"
+   and the pre-probe behaviour runs unchanged. That means unchanged in both
+   directions: the give-up clock does **not** advance on "unknown" either, since
+   the pre-probe extension never abandoned a wanted link.
 
 Re-validate bit 9 after major macOS releases, alongside the private selectors.
 
@@ -214,7 +231,7 @@ and a HUD fires exactly when you have walked away from the screen.
   A menu-bar command renders only when it runs, so the auto-reconnect tick calls
   `launchCommand(..., LaunchType.Background)` whenever the link or presence
   changed — gated on an actual change, so an idle tick does not respawn the menu
-  command every minute. The command also declares its own `1m` interval; the push
+  command every minute. The command also declares its own `30s` interval; the push
   is what makes the icon track reality promptly, and it degrades quietly when the
   user has disabled the menu-bar command.
 
@@ -279,26 +296,65 @@ on battery anyway, so the fastest setting may not even deliver its interval.
 Presence is tracked on every tick, including while auto-reconnect is switched off
 — otherwise a return could not be spotted for the people who most need telling.
 
-## Two engines, one interface
+### Which transports count
 
-Both engines implement the same `SidecarBackend` interface (`listDevices`,
-`isConnected`, `setConnected`, `readMirror`, `isIpadMain`, `extend`,
-`mirrorToMain`). All the orchestration depends only on that interface, so it is
-engine-agnostic and unit-testable against a mock.
+**Auto-Reconnect When** decides which connections count as "my iPad is here":
+`Always`, `Cable only`, or `Wi-Fi only`. Proximity is a poor proxy for intent —
+"in range" includes being three rooms away — whereas plugging a cable in is a
+deliberate physical act, so `Cable only` reads intent far better than presence can.
 
-- **BetterDisplay** wraps `betterdisplaycli`. Reads tolerate rejection (`Failed.`
-  on stderr, exit 1) and return `null`; writes throw.
-- **Native** calls Swift functions compiled from `swift/`: connect/disconnect via
-  runtime-dispatched `SidecarCore` selectors (loaded with `dlopen`, so the binary
-  links nothing private), and mirror control via public
-  `CGConfigureDisplayMirrorOfDisplay`. It finds the Sidecar display by the AirPlay
-  vendor signature — which, unlike `NSScreen`, still works while the display is in
-  a mirror set.
+The probe reports the transports independently: bit 9 is **wireless** reachability,
+bits 2+24 are the **cable** (both required). Policy is applied separately from
+presence, and that separation is load-bearing:
 
-The native engine relies on a private Apple framework, so a future macOS update
+- `presenceToReachability` is policy-free, so the menu-bar icon answers "is my iPad
+  here?" — which stays true even when the policy says not to act on it.
+- `isTransportAllowed` is the policy, and an excluded transport is treated as a
+  **decision**, not an uncertainty: silent, no attempt, no sanity re-check, and the
+  give-up budget frozen.
+
+Collapsing the two — reporting an excluded transport as "absent" — made the hourly
+sanity attempt fire and _succeed_: 24 unwanted connects a day under `Cable only`
+with a Wi-Fi-present iPad. Letting the budget accrue while excluded was worse
+still: auto-reconnect went permanently dormant after a day and greeted the cable
+going in with "Gave up reconnecting". Both are pinned by tests.
+
+A manual run of **Auto-Reconnect Sidecar** ignores the policy entirely, exactly as
+it ignores the on/off switch — connecting by hand always works.
+
+## One engine, and why BetterDisplay is not one
+
+Sidecar is driven entirely by the bundled Swift helper: connect/disconnect via
+runtime-dispatched `SidecarCore` selectors (loaded with `dlopen`, so the binary
+links nothing private), and mirror control via public
+`CGConfigureDisplayMirrorOfDisplay`. It finds the Sidecar display by the AirPlay
+vendor signature — which, unlike `NSScreen`, still works while the display is in a
+mirror set. Everything runs without a second application present.
+
+**BetterDisplay was never an alternative way to drive Sidecar.** The mirroring
+problem it repairs is _caused_ by running a BetterDisplay virtual screen as the
+main display, and simply does not arise without one — so it is the repair tool for
+a problem only it creates, not a transport. It used to be selectable as an
+"engine", which was a miscategorisation with a real cost: `betterdisplaycli` is a
+one-line wrapper that execs the whole BetterDisplay **app** binary, so every read
+cost a process spawn, and with the app closed each call cold-loaded it and blocked
+~16s before failing. Because engine choice was gated on `existsSync` — installed,
+not running — an installed-but-closed BetterDisplay had the extension polling a
+binary that could never answer. That is not hypothetical; it was observed in the
+wild, marching process IDs and all.
+
+So today: **nothing shells out except the mirror fix**, and every path that does
+goes through `mirrorFixPath()`, which requires the opt-in (on the automatic path),
+BetterDisplay installed _and running_ (`usablePath()`, an in-process AppKit
+lookup), and at least one virtual screen to act on. `SidecarBackend`
+(`listDevices`, `isConnected`, `setConnected`, `readMirror`, `isIpadMain`,
+`extend`, `mirrorToMain`) remains the seam the orchestration depends on, so it
+stays unit-testable against a mock — and the hardware suites drive the real Swift
+helper through it.
+
+The helper relies on a private Apple framework, so a future macOS update
 could change it (validated on macOS 26). If a native command starts failing after
-an OS update, switch to BetterDisplay and the Swift can be patched. Both engines
-honour the same safety guarantees.
+an OS update, the Swift can be patched.
 
 ## Design decisions
 
@@ -322,8 +378,13 @@ A few choices worth recording, since they're the non-obvious ones:
   connect orchestration are pure functions with no `@raycast/api` import, so
   they're unit-tested headlessly with mocks — the safety invariants are proven
   without any hardware.
-- **Menu-bar friendliness.** The status item shows a constant-width icon and does
-  not auto-refresh, to stay friendly with menu-bar managers like Bartender or Ice.
+- **Menu-bar friendliness.** The status item is icon-only by default, keeping a
+  constant width for menu-bar managers like Bartender or Ice; the device name is
+  opt-in and appears only while the iPad is connected or nearby. It _does_ refresh
+  in the background (a `30s` interval plus a push on every change), which an
+  earlier version deliberately avoided — the icon reporting a stale connection
+  state after unlocking turned out to be the more annoying trade-off. Turning
+  Background Refresh off on the command restores the quiet, click-only behaviour.
 
 ## Project structure
 
@@ -337,15 +398,16 @@ sidecar-display/
 │   ├── sidecar-status.tsx          # menu-bar command
 │   └── lib/
 │       ├── backend.ts              # SidecarBackend interface + shared types + SidecarError
-│       ├── betterdisplay.ts        # BetterDisplay engine (betterdisplaycli)
 │       ├── betterdisplaycli.ts     # low-level betterdisplaycli exec + identifier parsing
+│       ├── betterdisplayapp.ts     # is BetterDisplay installed AND running, and where
+│       ├── transport.ts            # pure: presence + policy -> may we chase?
 │       ├── native.ts               # Native engine (calls swift:../../swift)
 │       ├── sidecar.ts              # orchestration: connect / disconnect / converge-and-hold
 │       ├── keepalive.ts            # pure keep-alive decision state machine
-│       ├── reachability.ts         # silent "is the iPad there?" probe (cross-engine)
+│       ├── reachability.ts         # silent "is the iPad there, and how?" probe
 │       ├── virtualscreens.ts       # the mechanism behind Fix Mirroring
 │       ├── mirrorfix.ts            # shared "fix after fresh connect" guard
-│       ├── preferences.ts          # Raycast preferences -> SidecarConfig; engine selection
+│       ├── preferences.ts          # Raycast preferences -> SidecarConfig; mirror-fix gate
 │       ├── state.ts                # the only module touching LocalStorage
 │       ├── messages.ts             # pure HUD text builders (no @raycast/api)
 │       └── feedback.ts             # toast I/O, error reporting, menu-bar refresh
@@ -357,7 +419,9 @@ sidecar-display/
 ├── test/
 │   ├── keepalive.test.ts           # unit: keep-alive state machine (no hardware)
 │   ├── presence.test.ts            # unit: notices + menu-bar refresh matrix
-│   ├── support/keepalive.ts        # shared fixtures for the two suites above
+│   ├── transport.test.ts           # unit: the transport policy matrix
+│   ├── resilience.test.ts          # unit: multi-day ticks + state upgrade path
+│   ├── support/keepalive.ts        # shared fixtures for the three suites above
 │   ├── orchestration.test.ts       # unit: orchestration vs a mock backend (no hardware)
 │   ├── messages.test.ts            # unit: HUD text builders (no hardware)
 │   ├── virtualscreens.test.ts      # unit: Fix Mirroring vs a stub CLI (no hardware)

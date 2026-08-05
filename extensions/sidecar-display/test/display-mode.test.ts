@@ -1,45 +1,45 @@
 // =============================================================================
-// HARDWARE TEST - DISPLAY MODE (BetterDisplay engine)
+// HARDWARE TEST - DISPLAY MODE (native engine)
 // Reproduces the mirroring case and asserts the extension heals it.
 // -----------------------------------------------------------------------------
-// Context: Requires BetterDisplay running and an iPad connected over Sidecar.
-//   Uses betterdisplaycli directly as an independent oracle for the main-display
+// Context: Requires `swift build` in swift/ and an iPad connected over Sidecar.
+//   Uses a CoreGraphics export as an independent oracle for the main-display
 //   check, so a regression cannot hide behind the code path under test.
 // WARN: Briefly mirrors the iPad. Asserts the main display never moves.
 // =============================================================================
 
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import { before, describe, it } from "node:test";
 import { setTimeout as sleep } from "node:timers/promises";
 
-import { createBetterDisplayBackend } from "../src/lib/betterdisplay";
 import { ensureDisplayMode, isConnected, resolveIpadName } from "../src/lib/sidecar";
+import { createHelperBackend, mainDisplayId } from "./support/nativeBackend";
 
 import type { SidecarBackend } from "../src/lib/backend";
 import type { SidecarConfig } from "../src/lib/sidecar";
 
-const CLI = process.env.BD_CLI ?? "/opt/homebrew/bin/betterdisplaycli";
-
-/** The main display's UUID, read straight from the CLI as an oracle. */
-function mainUuid(): string {
-  const raw = execFileSync(CLI, ["get", "--displayWithMainStatus", "--identifiers"], {
-    encoding: "utf8",
-  });
-  return raw.match(/"UUID"\s*:\s*"([^"]+)"/)?.[1] ?? "?";
+/**
+ * The main display's CoreGraphics ID, as an oracle.
+ *
+ * NOTE: Read through the Swift helper's public-CoreGraphics export rather than
+ *   through the orchestration under test, so a regression cannot hide behind the
+ *   same code path it is meant to catch.
+ */
+function mainDisplay(): number {
+  return mainDisplayId();
 }
 
 describe("display mode on real hardware", () => {
   let backend: SidecarBackend;
   let config: SidecarConfig;
   let ipad: string;
-  let mainBefore: string;
+  let mainBefore: number;
 
   before(async () => {
-    backend = createBetterDisplayBackend(CLI);
+    backend = createHelperBackend();
     ipad = await resolveIpadName(backend, "");
     config = { ipadName: ipad, mode: "extend", settleTimeoutMs: 8_000 };
-    mainBefore = mainUuid();
+    mainBefore = mainDisplay();
   });
 
   it("finds a Sidecar device", async () => {
@@ -50,10 +50,6 @@ describe("display mode on real hardware", () => {
   it("starts with the iPad attached and not main", async () => {
     assert.equal(await backend.isIpadMain(ipad), false);
     assert.equal(await isConnected(backend, config), true);
-  });
-
-  it("reports an absent display as null rather than guessing", async () => {
-    assert.equal(await backend.readMirror("No Such"), null);
   });
 
   it("writes nothing when the iPad already extends", async () => {
@@ -75,6 +71,6 @@ describe("display mode on real hardware", () => {
   });
 
   it("leaves the main display exactly where it was", () => {
-    assert.equal(mainUuid(), mainBefore);
+    assert.equal(mainDisplay(), mainBefore);
   });
 });

@@ -19,6 +19,28 @@ import { parseMainDisplay, tryReadCli, writeCli } from "./betterdisplaycli";
 const VIRTUAL_TYPE = "VirtualScreen";
 
 /**
+ * Whether BetterDisplay currently has any virtual screens at all.
+ *
+ * @param cliPath - Path to the `betterdisplaycli` binary.
+ * @returns True when at least one virtual screen exists; false when none do OR
+ *   the read failed.
+ *
+ * NOTE: The mirror this fixes is an artifact of having a BetterDisplay virtual
+ *   screen, so with none there is nothing to reconnect and nothing to repair.
+ *   Without this check the `--type=VirtualScreen` selector matched nothing and
+ *   the reconnect write threw, surfacing as "Connected, but could not fix
+ *   mirroring" on every connect for anyone with no virtual screens — and the
+ *   opt-in is on by default.
+ * NOTE: Failing closed (false on a failed read) silently skips the auto-fix when
+ *   the CLI is flaky. That is the safe direction: skipping a cosmetic repair
+ *   beats cycling displays on a guess.
+ */
+export async function hasVirtualScreens(cliPath: string): Promise<boolean> {
+  const raw = await tryReadCli(cliPath, ["get", `--type=${VIRTUAL_TYPE}`, "--identifiers"]);
+  return raw !== null && raw.trim() !== "";
+}
+
+/**
  * Finds the UUID of the main display when it is a virtual screen.
  *
  * @param cliPath - Path to the `betterdisplaycli` binary.

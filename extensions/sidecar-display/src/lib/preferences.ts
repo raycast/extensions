@@ -8,17 +8,16 @@
 // =============================================================================
 
 import { getPreferenceValues } from "@raycast/api";
-import { existsSync } from "node:fs";
 
-import { createBetterDisplayBackend } from "./betterdisplay";
 import { FIXED_TUNING } from "./keepalive";
 import { createNativeBackend } from "./native";
-import { resolveIpadName } from "./sidecar";
+import { keepRememberedDevice, resolveIpadName } from "./sidecar";
 import { loadSelectedDevice, saveSelectedDevice } from "./state";
 
-import type { DisplayMode, SidecarBackend } from "./backend";
+import type { DisplayMode, SidecarBackend, SidecarDevice } from "./backend";
 import type { KeepAliveTuning } from "./keepalive";
 import type { SidecarConfig } from "./sidecar";
+import type { TransportPolicy } from "./transport";
 
 /** The tuning shared by every command, before a device is chosen. */
 export interface Tuning {
@@ -26,29 +25,11 @@ export interface Tuning {
   readonly settleTimeoutMs: number;
 }
 
-const MIN_TIMEOUT_SECONDS = 2;
-const MAX_TIMEOUT_SECONDS = 60;
-const DEFAULT_TIMEOUT_SECONDS = 6;
-
-/**
- * Parses a seconds preference into clamped milliseconds.
- *
- * @param value - Raw preference text in seconds.
- * @param fallbackSeconds - Value to use when the text is empty or non-numeric.
- * @param minSeconds - Lower bound in seconds.
- * @param maxSeconds - Upper bound in seconds.
- * @returns The clamped duration in milliseconds.
- */
-function parseSecondsMs(
-  value: string | undefined,
-  fallbackSeconds: number,
-  minSeconds: number,
-  maxSeconds: number,
-): number {
-  const parsed = Number.parseFloat((value ?? "").trim());
-  const seconds = Number.isFinite(parsed) ? parsed : fallbackSeconds;
-  return Math.min(Math.max(seconds, minSeconds), maxSeconds) * 1_000;
-}
+// How long to let a display converge on the requested mode before reporting.
+// Generous on purpose: converge-and-hold returns the moment it settles (~1.2s),
+// so a larger budget costs nothing on success and only delays the failure
+// report. Not something a user should have to reason about.
+const SETTLE_TIMEOUT_MS = 10_000;
 
 /**
  * Parses an hours preference into clamped milliseconds.
@@ -88,15 +69,7 @@ export function readKeepAliveTuning(): KeepAliveTuning {
  */
 export function readTuning(): Tuning {
   const prefs = getPreferenceValues<Preferences>();
-  return {
-    mode: prefs.displayMode,
-    settleTimeoutMs: parseSecondsMs(
-      prefs.settleTimeoutSeconds,
-      DEFAULT_TIMEOUT_SECONDS,
-      MIN_TIMEOUT_SECONDS,
-      MAX_TIMEOUT_SECONDS,
-    ),
-  };
+  return { mode: prefs.displayMode, settleTimeoutMs: SETTLE_TIMEOUT_MS };
 }
 
 /**
@@ -111,58 +84,28 @@ export function buildConfig(ipadName: string, overrides: Partial<Tuning> = {}): 
 }
 
 /**
- * The configured path to the `betterdisplaycli` binary.
+ * The engine every command drives Sidecar through.
  *
- * @returns The trimmed CLI path.
+ * @returns The native backend.
  *
- * NOTE: The virtual-screen reconnect uses this regardless of the selected
- *   engine, since virtual screens are a BetterDisplay construct.
- */
-export function getBetterDisplayCliPath(): string {
-  return getPreferenceValues<Preferences>().betterDisplayCliPath.trim();
-}
-
-/**
- * Whether the `betterdisplaycli` binary is present.
- *
- * @returns True when the configured CLI path exists on disk.
- *
- * NOTE: Gates the BetterDisplay engine (under Automatic) and every
- *   virtual-screen reconnect, which cannot work without BetterDisplay.
- */
-export function betterDisplayAvailable(): boolean {
-  const path = getBetterDisplayCliPath();
-  return path !== "" && existsSync(path);
-}
-
-/**
- * Builds the engine selected in preferences.
- *
- * @returns The chosen engine; under Automatic, BetterDisplay when its CLI is
- *   present, otherwise Native.
+ * NOTE: There is no choice to make. BetterDisplay was never an alternative way to
+ *   drive Sidecar — the mirroring problem it fixes is CAUSED by having a
+ *   BetterDisplay virtual screen as the main display, and simply does not arise
+ *   without one. So it is the repair tool for a problem only it creates, reached
+ *   through virtualscreens.ts, and never a transport for connect/disconnect.
  */
 export function getBackend(): SidecarBackend {
-  const prefs = getPreferenceValues<Preferences>();
-  const native = (): SidecarBackend => createNativeBackend();
-  const betterDisplay = (): SidecarBackend => createBetterDisplayBackend(getBetterDisplayCliPath());
-
-  if (prefs.backend === "native") {
-    return native();
-  }
-  if (prefs.backend === "betterdisplay") {
-    return betterDisplay();
-  }
-  // Automatic: prefer BetterDisplay when it is installed.
-  return betterDisplayAvailable() ? betterDisplay() : native();
+  return createNativeBackend();
 }
 
 /**
- * Whether to fix mirroring automatically after a fresh connect.
+ * Which transports auto-reconnect may act on.
  *
- * @returns True only when the option is on and BetterDisplay is available.
+ * @returns The configured policy, defaulting to "any".
  */
-export function shouldFixMirrorAfterConnect(): boolean {
-  return getPreferenceValues<Preferences>().fixMirrorAfterConnect === true && betterDisplayAvailable();
+export function transportPolicy(): TransportPolicy {
+  const raw = getPreferenceValues<Preferences>().autoReconnectTransport;
+  return raw === "cable" || raw === "wireless" ? raw : "any";
 }
 
 /**
@@ -180,25 +123,60 @@ export function autoReconnectPreference(): boolean {
 }
 
 /**
+ * Resolves which device name the caller should act on, before auto-detection.
+ *
+ * @param known - A device list the caller has already fetched. Omit it and the
+ *   remembered name is returned unvalidated — deliberately, because fetching one
+ *   here is a process spawn per tick.
+ * @returns The preference override, else a still-valid remembered device, else
+ *   the empty string to mean "auto-detect".
+ *
+ * NOTE: Shared by the commands and the menu bar so the preference-then-remembered
+ *   ordering cannot drift between them; they previously used different orders, so
+ *   a two-iPad user could act on one from the menu and another from a hotkey. It
+ *   does NOT unify what happens when this returns "": the menu falls back to the
+ *   first listed device, while the commands refuse to guess between several.
+ */
+export async function resolveDeviceOverride(known?: readonly SidecarDevice[]): Promise<string> {
+  // Priority: an explicit preference override, then a device remembered from a
+  // previous run or pinned from the menu bar.
+  const pinned = (getPreferenceValues<Preferences>().ipadName ?? "").trim();
+  if (pinned !== "") {
+    return pinned;
+  }
+
+  const remembered = await loadSelectedDevice();
+  if (remembered === "") {
+    return "";
+  }
+  // Validated ONLY against a list the caller already had. Fetching one here cost
+  // an extra `betterdisplaycli` process spawn on every background tick, forever —
+  // measurably heavy, since each spawn loads the whole BetterDisplay binary. The
+  // menu bar has a list and validates every render, which is soon enough to catch
+  // a renamed iPad; a tick without one keeps the remembered name.
+  return known === undefined ? remembered : keepRememberedDevice(remembered, known);
+}
+
+/**
  * Builds the config every command runs on, auto-detecting the iPad if needed.
  *
  * @param backend - The engine, used to auto-detect the device when unset.
  * @returns Fully resolved configuration.
  */
 export async function loadConfig(backend: SidecarBackend): Promise<SidecarConfig> {
-  // Priority: an explicit preference override, then a device pinned from the
-  // menu bar, then auto-detection.
-  const prefs = getPreferenceValues<Preferences>();
-  const override = (prefs.ipadName ?? "").trim() || (await loadSelectedDevice());
+  const override = await resolveDeviceOverride();
   const ipadName = await resolveIpadName(backend, override);
 
   // An out-of-range iPad drops out of the device list entirely (verified: both
   // SidecarCore and `get --sidecarList` return nothing once it is far enough
   // away), which would make auto-detection throw and take the whole tick with
   // it. Remembering the name the first time it resolves keeps presence tracking
-  // and the menu bar working while the iPad is away. Only reached when exactly
-  // one device is paired — resolveIpadName refuses to guess between several.
-  if (override === "") {
+  // and the menu bar working while the iPad is away.
+  //
+  // Gated on nothing being remembered yet, NOT on `override === ""` — those
+  // differ when a remembered name was just invalidated, and writing then would
+  // silently replace a device the user picked from the menu with a different one.
+  if ((await loadSelectedDevice()) === "") {
     await saveSelectedDevice(ipadName);
   }
 

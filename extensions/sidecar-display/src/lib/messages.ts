@@ -8,8 +8,11 @@
 //   and the command entry points do the actual showHUD/toast I/O.
 // =============================================================================
 
+import { isTransportAllowed } from "./transport";
+
 import type { DisplayMode } from "./backend";
 import type { ModeOutcome, SidecarConfig } from "./sidecar";
+import type { Presence, TransportPolicy } from "./transport";
 
 const GREEN = "🟢";
 const NEUTRAL = "⚪";
@@ -141,23 +144,45 @@ export function gaveUpMessage(name: string): string {
   return `${WARN} ${name} - Gave up reconnecting`;
 }
 
+/** Why a mirror fix cannot run — shared so the command and the menu agree. */
+export function mirrorFixUnavailableMessage(): string {
+  return "Needs the BetterDisplay app running, with at least one virtual screen.";
+}
+
 /**
- * Menu-bar tooltip describing the link and, when down, whether the iPad is there.
+ * Menu-bar tooltip: the link, the transport, and why nothing is happening.
  *
- * @param name      - The Sidecar device.
+ * @param name     - The Sidecar device.
  * @param connected - Whether the link is up.
- * @param nearby    - Presence when disconnected; null when the probe is unavailable.
+ * @param presence  - Per-transport presence; null when the probe could not answer.
+ * @param policy    - Which transports auto-reconnect may act on.
  * @returns The tooltip line.
+ *
+ * NOTE: Naming the transport matters because of `policy`. With "cable only" and
+ *   an iPad nearby on Wi-Fi, the icon shows it present and auto-reconnect stays
+ *   deliberately silent — which reads as broken unless something says why. This
+ *   is the only surface that can say it.
  */
-export function presenceTooltip(name: string, connected: boolean, nearby: boolean | null): string {
+export function presenceTooltip(
+  name: string,
+  connected: boolean,
+  presence: Presence | null,
+  policy: TransportPolicy,
+): string {
   if (connected) {
     return `${name} - Connected`;
   }
-  if (nearby === true) {
-    return `${name} - Nearby, not connected`;
+  if (presence === null) {
+    return `${name} - Disconnected`;
   }
-  if (nearby === false) {
+  if (!presence.wired && !presence.wireless) {
     return `${name} - Away`;
   }
-  return `${name} - Disconnected`;
+
+  const how = presence.wired ? (presence.wireless ? "cable and Wi-Fi" : "cable") : "Wi-Fi";
+  if (!isTransportAllowed(presence, policy)) {
+    const allows = policy === "cable" ? "cable only" : "Wi-Fi only";
+    return `${name} - Nearby over ${how}; auto-reconnect is set to ${allows}`;
+  }
+  return `${name} - Nearby over ${how}, not connected`;
 }

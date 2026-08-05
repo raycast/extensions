@@ -2,10 +2,10 @@
   "extends": "./tsconfig.json",
   "include": [
     "src/lib/backend.ts",
-    "src/lib/betterdisplay.ts",
     "src/lib/betterdisplaycli.ts",
     "src/lib/sidecar.ts",
     "src/lib/keepalive.ts",
+    "src/lib/transport.ts",
     "src/lib/messages.ts",
     "src/lib/virtualscreens.ts",
     "test/**/*.ts"
@@ -14,6 +14,8 @@
     "rootDir": ".",
     "outDir": ".test-build",
     "module": "commonjs",
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   }
 }

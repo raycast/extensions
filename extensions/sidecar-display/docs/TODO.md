@@ -47,6 +47,11 @@ These can only be done once the extension is live on the Store.
       with bit 9 clear, while out-of-range drops it from the list entirely, which
       made auto-detection throw and killed the whole tick. Fixed by remembering
       the auto-detected name (`loadConfig`).
+- [ ] **Explain the 31 Jul bits-2/24 sample.** Those bits track the cable (two
+      clean plug/unplug cycles, 2026-08-05) and now back the "Cable only"
+      option — but one earlier sample had them set with no cable knowingly
+      attached. If something else can set them, "Cable only" will occasionally
+      connect when not plugged in, which is what it exists to prevent.
 - [ ] **Watch the probe across macOS updates and other hardware.** Bit 9 is
       undocumented and confirmed only on macOS 26.6 with one iPad. Two symptoms
       to watch for: banners piling up again (reads present when the iPad is gone)
@@ -63,7 +68,7 @@ These can only be done once the extension is live on the Store.
 - [ ] **Native engine / macOS updates.** `SidecarCore` is a private Apple
       framework reached via `dlopen`. Re-validate the selector set in
       `swift/Sources/Sidecar/SidecarBridge.swift` after each major macOS release;
-      if it breaks, patch the Swift or advise switching Engine to BetterDisplay.
+      if it breaks, patch the Swift — there is no longer a fallback engine.
       Record the last-validated macOS version in the README.
 - [ ] **Keep `@raycast/api` current** — Dependabot opens weekly PRs; staying
       current is a Store requirement, not just hygiene.

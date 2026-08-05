@@ -1,9 +1,9 @@
 // =============================================================================
 // BETTERDISPLAYCLI
-// Low-level `betterdisplaycli` invocation shared by both consumers.
+// Low-level `betterdisplaycli` invocation used only by the mirror fix.
 // -----------------------------------------------------------------------------
-// Context: The BetterDisplay engine (betterdisplay.ts) and the Fix Mirroring
-//   mechanism (virtualscreens.ts) both shell out to the same binary. This holds
+// Context: The Fix Mirroring mechanism (virtualscreens.ts) is the only thing
+//   that shells out to this binary. This holds
 //   the one exec primitive, the reject-vs-break distinction, and the main-display
 //   parser, so neither reinvents them.
 // NOTE: Arguments go through execFile (never a shell string), so display names
@@ -17,7 +17,17 @@ import { SidecarError } from "./backend";
 
 const execFileAsync = promisify(execFile);
 
-const CLI_TIMEOUT_MS = 15_000;
+// A healthy read answers in ~0.13s (measured). Writes can legitimately take a
+// while as macOS rearranges displays, so they keep the generous budget.
+//
+// WARN: These MUST differ. `betterdisplaycli` is a one-line wrapper that execs the
+//   whole BetterDisplay app binary, and when the app is not running the call
+//   blocks until it gives up — measured at 16s. Applying the write budget to
+//   status reads meant a background tick polling every 30s could not finish one
+//   render inside its own interval, so renders piled up and cold-launched the app
+//   binary continuously.
+const READ_TIMEOUT_MS = 3_000;
+const WRITE_TIMEOUT_MS = 15_000;
 const FAILURE_MARKER = "Failed.";
 const GROUP_TYPE = "DisplayGroup";
 
@@ -72,10 +82,11 @@ function isRejection(cause: unknown): boolean {
  *
  * @param cliPath - Absolute path to the `betterdisplaycli` binary.
  * @param args    - Operation and parameters, one array element each.
+ * @param timeout - Milliseconds before the call is abandoned.
  * @returns Trimmed stdout.
  */
-async function exec(cliPath: string, args: readonly string[]): Promise<string> {
-  const { stdout } = await execFileAsync(cliPath, [...args], { timeout: CLI_TIMEOUT_MS });
+async function exec(cliPath: string, args: readonly string[], timeout: number): Promise<string> {
+  const { stdout } = await execFileAsync(cliPath, [...args], { timeout });
   return stdout.trim();
 }
 
@@ -90,7 +101,7 @@ async function exec(cliPath: string, args: readonly string[]): Promise<string> {
  */
 export async function writeCli(cliPath: string, args: readonly string[]): Promise<void> {
   try {
-    await exec(cliPath, args);
+    await exec(cliPath, args, WRITE_TIMEOUT_MS);
   } catch (cause) {
     throw new SidecarError(`betterdisplaycli ${args.join(" ")} failed: ${detailOf(cause)}`);
   }
@@ -105,7 +116,7 @@ export async function writeCli(cliPath: string, args: readonly string[]): Promis
  */
 export async function readCli(cliPath: string, args: readonly string[]): Promise<string | null> {
   try {
-    return await exec(cliPath, args);
+    return await exec(cliPath, args, READ_TIMEOUT_MS);
   } catch (cause) {
     if (isRejection(cause)) {
       return null;
@@ -126,7 +137,7 @@ export async function readCli(cliPath: string, args: readonly string[]): Promise
  */
 export async function tryReadCli(cliPath: string, args: readonly string[]): Promise<string | null> {
   try {
-    return await exec(cliPath, args);
+    return await exec(cliPath, args, READ_TIMEOUT_MS);
   } catch {
     return null;
   }

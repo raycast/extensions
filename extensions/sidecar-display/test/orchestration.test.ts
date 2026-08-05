@@ -15,7 +15,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import { connectSidecar, ensureDisplayMode } from "../src/lib/sidecar";
+import { connectSidecar, ensureDisplayMode, keepRememberedDevice } from "../src/lib/sidecar";
 
 import type { SidecarBackend } from "../src/lib/backend";
 import type { SidecarConfig } from "../src/lib/sidecar";
@@ -154,5 +154,37 @@ describe("connectSidecar", () => {
     const out = await connectSidecar(b, cfg("extend"));
     assert.ok(b.calls.includes("setConnected:true"));
     assert.equal(out.linkEstablished, true);
+  });
+});
+
+describe("keepRememberedDevice", () => {
+  const A = { name: "iPad A", uuid: "a" };
+  const B = { name: "iPad B", uuid: "b" };
+
+  it("keeps a remembered iPad that is merely out of range", () => {
+    // An out-of-range iPad leaves the device list entirely, so an empty list is
+    // "away", never "gone" — dropping the name there would make auto-detection
+    // throw and take the whole background tick with it.
+    assert.equal(keepRememberedDevice("iPad A", []), "iPad A");
+  });
+
+  it("keeps the remembered iPad when it is still listed", () => {
+    assert.equal(keepRememberedDevice("iPad A", [A]), "iPad A");
+  });
+
+  it("drops a remembered iPad only when one other device is the sole listed one", () => {
+    // The single unambiguous case: renamed, or replaced by a different iPad.
+    assert.equal(keepRememberedDevice("iPad A", [B]), "");
+  });
+
+  it("keeps the remembered iPad when several are listed without it", () => {
+    // THE regression: with two paired, a remembered iPad going out of range left
+    // the other one listed. Treating that as stale retargeted every command at
+    // the wrong iPad and destroyed the user's pick.
+    assert.equal(keepRememberedDevice("iPad A", [B, { name: "iPad C", uuid: "c" }]), "iPad A");
+  });
+
+  it("has nothing to keep when nothing is remembered", () => {
+    assert.equal(keepRememberedDevice("", [A, B]), "");
   });
 });

@@ -10,7 +10,7 @@ import { SidecarError } from "./backend";
 const MENU_BAR_COMMAND = "sidecar-status";
 
 /**
- * Surfaces a failure as a toast, keeping BetterDisplay's own wording intact.
+ * Surfaces a failure as a toast, keeping the underlying wording intact.
  *
  * @param error - Whatever was thrown.
  * @param title - Short headline for the toast.

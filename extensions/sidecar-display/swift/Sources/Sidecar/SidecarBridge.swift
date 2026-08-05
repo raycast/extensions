@@ -63,10 +63,28 @@ func deviceName(_ device: NSObject) -> String {
 //   clear read is NOT proof of absence — callers must debounce.
 let reachableStatusBit: UInt64 = 1 << 9
 
-/// Whether the device's status bitfield marks it as currently reachable.
-func deviceIsReachable(_ device: NSObject) -> Bool {
-  guard let status = device.value(forKey: "status") as? UInt64 else { return false }
-  return status & reachableStatusBit != 0
+// Bits 2 and 24 track the CABLE. Established on macOS 26.6 over two full
+// plug/unplug cycles with the iPad in Airplane Mode throughout, so wireless
+// state could not confound it: in 0x1880106 / out 0x880102 / in / out.
+// Sidecar-over-USB raises no NCM interface and does not appear in IOUSB, so this
+// is the only signal that a cable is attached.
+//
+// WARN: Both bits are required. They have only ever been observed moving
+//   together, and demanding both means one flapping bit cannot fake a cable.
+let wiredStatusBits: UInt64 = (1 << 2) | (1 << 24)
+
+/// The device's raw status bitfield, or nil when it cannot be read.
+///
+/// WARN: `value(forKey:)` raises NSUnknownKeyException — uncatchable from Swift,
+///   so it would abort the helper — if macOS ever drops the property. Guarded
+///   with `responds(to:)` first, matching `runWithCompletion` below. Returns nil
+///   rather than a default, so an unreadable field degrades to "unknown" instead
+///   of masquerading as a confident answer.
+func deviceStatus(_ device: NSObject) -> UInt64? {
+  guard device.responds(to: NSSelectorFromString("status")),
+    let status = device.value(forKey: "status") as? UInt64
+  else { return nil }
+  return status
 }
 
 /// Locates a paired device by name, returning it with its manager.

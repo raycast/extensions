@@ -72,8 +72,14 @@ describe("describeModeSwitch", () => {
   });
 
   it("reports an unsettled switch as a failure, not a success", () => {
-    assert.equal(describeModeSwitch(cfg("extend"), { changed: true, settled: false }), "⚠️ Cip’s iPad - Could not extend");
-    assert.equal(describeModeSwitch(cfg("mirror"), { changed: true, settled: false }), "⚠️ Cip’s iPad - Could not mirror");
+    assert.equal(
+      describeModeSwitch(cfg("extend"), { changed: true, settled: false }),
+      "⚠️ Cip’s iPad - Could not extend",
+    );
+    assert.equal(
+      describeModeSwitch(cfg("mirror"), { changed: true, settled: false }),
+      "⚠️ Cip’s iPad - Could not mirror",
+    );
   });
 });
 
@@ -103,15 +109,38 @@ describe("presence messages", () => {
     assert.equal(gaveUpMessage("Cip’s iPad"), "⚠️ Cip’s iPad - Gave up reconnecting");
   });
 
-  it("distinguishes nearby from away in the tooltip, and both from unknown", () => {
-    assert.equal(presenceTooltip("iPad", true, null), "iPad - Connected");
-    assert.equal(presenceTooltip("iPad", false, true), "iPad - Nearby, not connected");
-    assert.equal(presenceTooltip("iPad", false, false), "iPad - Away");
-    // An unavailable probe must not claim the iPad is away.
-    assert.equal(presenceTooltip("iPad", false, null), "iPad - Disconnected");
+  it("names the transport, so 'nearby' is not ambiguous", () => {
+    const wifi = { wireless: true, wired: false };
+    const cable = { wireless: false, wired: true };
+    assert.equal(presenceTooltip("iPad", false, wifi, "any"), "iPad - Nearby over Wi-Fi, not connected");
+    assert.equal(presenceTooltip("iPad", false, cable, "any"), "iPad - Nearby over cable, not connected");
+    assert.equal(
+      presenceTooltip("iPad", false, { wireless: true, wired: true }, "any"),
+      "iPad - Nearby over cable and Wi-Fi, not connected",
+    );
   });
 
-  it("reports connected regardless of what the probe said", () => {
-    assert.equal(presenceTooltip("iPad", true, false), "iPad - Connected");
+  it("explains why nothing is happening when the policy excludes the transport", () => {
+    // Without this the icon shows the iPad present, auto-reconnect stays
+    // deliberately silent, and nothing anywhere says why — which reads as broken.
+    assert.equal(
+      presenceTooltip("iPad", false, { wireless: true, wired: false }, "cable"),
+      "iPad - Nearby over Wi-Fi; auto-reconnect is set to cable only",
+    );
+    assert.equal(
+      presenceTooltip("iPad", false, { wireless: false, wired: true }, "wireless"),
+      "iPad - Nearby over cable; auto-reconnect is set to Wi-Fi only",
+    );
+  });
+
+  it("reports away and unknown without claiming a transport", () => {
+    assert.equal(presenceTooltip("iPad", false, { wireless: false, wired: false }, "any"), "iPad - Away");
+    // An unavailable probe must not claim the iPad is away.
+    assert.equal(presenceTooltip("iPad", false, null, "any"), "iPad - Disconnected");
+  });
+
+  it("reports connected regardless of transport or policy", () => {
+    assert.equal(presenceTooltip("iPad", true, null, "cable"), "iPad - Connected");
+    assert.equal(presenceTooltip("iPad", true, { wireless: true, wired: false }, "cable"), "iPad - Connected");
   });
 });

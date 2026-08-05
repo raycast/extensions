@@ -11,7 +11,7 @@ Conventions and standards for working on Sidecar Display.
 ## TL;DR
 
 ```sh
-npm install && npm run dev     # full Xcode required (compiles the Swift engine)
+npm install && npm run dev     # full Xcode required (compiles the Swift helper)
 npm run lint && npm run build && npm run test:unit   # before every commit
 ```
 
@@ -25,10 +25,11 @@ See [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) for the deep version. In shor
   machine** (`src/lib/keepalive.ts`) are pure — no `@raycast/api` import — so
   they're unit-tested headlessly against mocks. Keep testable logic in modules
   without a `@raycast/api` import; those are the ones `build:test` compiles.
-- **Engines** implement the `SidecarBackend` interface (`src/lib/backend.ts`).
-  The orchestration depends only on that interface, never on a concrete engine.
+- **The engine** implements the `SidecarBackend` interface (`src/lib/backend.ts`).
+  The orchestration depends only on that interface, never on the concrete engine,
+  so it stays mockable.
 - **`src/lib/state.ts`** is the only module that touches `LocalStorage`.
-- **The native engine** is Swift in `swift/`, exported to TypeScript with the
+- **The engine** is Swift in `swift/`, exported to TypeScript with the
   `@raycast` macro and imported as `swift:../../swift`.
 
 ### Safety invariants — do not break these
@@ -59,7 +60,7 @@ If you touch `sidecar.ts` or `virtualscreens.ts`, run `test:unit` (and
 
 - **Command entry files** match their Raycast manifest `name` and are
   **kebab-case** (`connect-sidecar.ts`) — this is a Raycast requirement.
-- **Library modules** are **camelCase** (`betterdisplay.ts`, `virtualscreens.ts`).
+- **Library modules** are **camelCase** (`virtualscreens.ts`, `betterdisplaycli.ts`).
 - **Swift** files are `PascalCase` (`SidecarBridge.swift`).
 - **Tests** are `{name}.test.ts` under `test/` — named after the module they cover
   (`keepalive.test.ts`) or the scenario they exercise (`display-mode.test.ts`).
@@ -70,10 +71,9 @@ If you touch `sidecar.ts` or `virtualscreens.ts`, run `test:unit` (and
 
 Two deliberate splits. Both are intentional; keep them straight:
 
-| User-facing                     | In code                                         | Why                                                                                                                                                                            |
-| ------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Engine** (the preference)     | `backend` / `SidecarBackend`                    | "Engine" reads better in a settings pane; `backend` is the code abstraction. The preference _key_ stays `backend` — it is internal and renaming it would orphan stored values. |
-| **Fix Mirroring** (the command) | `virtualscreens.ts` / `reconnectVirtualScreens` | The command is named for the problem it solves; the module is named for the mechanism it uses.                                                                                 |
+| User-facing                     | In code                                         | Why                                                                                            |
+| ------------------------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Fix Mirroring** (the command) | `virtualscreens.ts` / `reconnectVirtualScreens` | The command is named for the problem it solves; the module is named for the mechanism it uses. |
 
 A command's `name` and a preference's `name` are **stable identifiers** — users'
 hotkeys, aliases, and stored values bind to them. They are free to rename before
@@ -139,5 +139,5 @@ stored. When adding a feature:
 
 - **Setup, dev loop, testing matrix, CI, releasing, publishing, troubleshooting**
   → [docs/WORKFLOWS.md](./docs/WORKFLOWS.md)
-- **Adding a command / engine / preference** →
+- **Adding a command / preference** →
   [docs/WORKFLOWS.md](./docs/WORKFLOWS.md#9-common-tasks)

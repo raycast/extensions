@@ -8,10 +8,9 @@ A [Raycast](https://raycast.com) extension that connects your iPad over **Sideca
 
 ![The Sidecar Display commands in Raycast](./media/commands.png)
 
-It ships **two interchangeable engines** and picks the right one automatically:
+It drives Sidecar through a small Swift helper — the private `SidecarCore` framework plus public CoreGraphics — so it needs nothing else installed — no app to keep running, no shell scripting, no UI scraping.
 
-- **BetterDisplay** — drives the `betterdisplaycli` binary. Proven and low-maintenance; needs the [BetterDisplay](https://github.com/waydabber/BetterDisplay) app.
-- **Native** — a small Swift helper using the private `SidecarCore` framework plus public CoreGraphics. No external dependency at runtime.
+**BetterDisplay is optional**, and only for one thing: if you run a BetterDisplay **virtual screen as your main display**, macOS tends to bring the iPad up _mirrored_. That's the problem [Fix Mirroring](#commands) repairs, and it's a problem only that setup creates. Without virtual screens you never need BetterDisplay at all.
 
 No AppleScript, no System Settings window, no UI-tree scraping.
 
@@ -59,8 +58,8 @@ npm run dev
 
 - macOS with Sidecar support, and an iPad signed in to the same Apple ID.
 - Raycast.
-- For the **BetterDisplay** engine: [BetterDisplay](https://github.com/waydabber/BetterDisplay) running with CLI integration enabled (on by default) — `brew install --cask betterdisplay`. Tested against **BetterDisplay 4.3.5** with Pro; non-Pro is unverified.
-- To **build from source** (either engine): a full **Xcode** install — the native engine's Swift is compiled at build time by Raycast's [`extensions-swift-tools`](https://github.com/raycast/extensions-swift-tools). (Store _users_ don't need Xcode; they install the already-compiled extension.)
+- **Only if you use BetterDisplay virtual screens** and want Fix Mirroring: [BetterDisplay](https://github.com/waydabber/BetterDisplay) installed and **running**, with CLI integration enabled (on by default) — `brew install --cask betterdisplay`. Tested against **BetterDisplay 4.3.5** with Pro; non-Pro is unverified. Everything else works without it.
+- To **build from source**: a full **Xcode** install — the native engine's Swift is compiled at build time by Raycast's [`extensions-swift-tools`](https://github.com/raycast/extensions-swift-tools). (Store _users_ don't need Xcode; they install the already-compiled extension.)
 
 ## Commands
 
@@ -69,7 +68,7 @@ npm run dev
 | **Connect Sidecar**        | Attaches the iPad, waits for its display, applies the configured mode (extend by default). Idempotent.                                                                                                                                                                              |
 | **Disconnect Sidecar**     | Detaches the iPad. Idempotent.                                                                                                                                                                                                                                                      |
 | **Auto-Reconnect Sidecar** | Background command that restores a dropped link. Run it by hand to reconnect now. See [keep-alive](./docs/ARCHITECTURE.md#auto-reconnect-keep-alive).                                                                                                                               |
-| **Fix Mirroring**          | Clears macOS Sidecar's own mirror mode when the iPad connects showing a copy of your main screen. Needs BetterDisplay.                                                                                                                                                              |
+| **Fix Mirroring**          | Clears macOS Sidecar's own mirror mode when the iPad connects showing a copy of your main screen. Needs the BetterDisplay app running, with a virtual screen present.                                                                                                               |
 | **Sidecar Status**         | Menu-bar item: device name, connection **and presence** state (connected / nearby / away), connect / disconnect / extend / mirror actions, an Auto-Reconnect toggle, plus a device picker. Refreshes ~2×/min; disable Background Refresh on the command to update only when opened. |
 
 Bind Connect and Disconnect to hotkeys in Raycast, or drive everything from the menu bar:
@@ -80,19 +79,17 @@ Bind Connect and Disconnect to hotkeys in Raycast, or drive everything from the 
 
 ![Sidecar Display preferences](./media/preferences.png)
 
-| Preference | Default | Purpose |
-| --- | --- | --- |
-| Engine | `auto` | Which tool talks to Sidecar. Automatic picks BetterDisplay when its CLI is installed, otherwise the built-in helper. |
-| Show iPad Name | off | _Show the iPad's name beside the menu-bar icon._ Shown while connected or nearby, hidden while away. Off keeps a constant-width icon (friendlier to Bartender/Ice). |
-| Auto-Fix Mirroring | **on** | _Fix mirroring automatically when the iPad connects._ Repairs an iPad that comes up mirroring your main screen. Runs on every fresh connect (the state is undetectable), so it briefly reshuffles the desktop. Requires BetterDisplay. |
-| Display Mode | `extend` | What the iPad does once connected: extend your desktop, or mirror your main display. |
-| iPad Name | _(empty)_ | Leave empty to auto-detect. Set it only to pin one iPad when you have several. |
-| Auto-Reconnect | **on** | _Reconnect automatically after the link drops._ Only chases links that dropped by themselves. This is the default; the menu-bar toggle overrides it once used. Also needs Background Refresh on the Auto-Reconnect Sidecar command. |
-| Give Up After (hours) | `24` | How long to keep trying an iPad that looks present but won't connect, before stopping so macOS stops showing connection-failed notifications. The clock only runs while the iPad is detected nearby, so time genuinely away never counts. `0` tries forever. |
-| BetterDisplay CLI Path | `/opt/homebrew/bin/betterdisplaycli` | Path to the binary (Intel Homebrew: `/usr/local/bin/...`). |
-| Give Display Changes (seconds) | `6` | How long to wait for a display change to take effect before reporting. Clamped to 2–60. |
+| Preference            | Default   | Purpose                                                                                                                                                                                                                                                                               |
+| --------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Show iPad Name        | off       | _Show the iPad's name beside the menu-bar icon._ Shown while connected or nearby, hidden while away. Off keeps a constant-width icon (friendlier to Bartender/Ice).                                                                                                                   |
+| Auto-Fix Mirroring    | **on**    | _Fix mirroring automatically when the iPad connects._ Only relevant if you use BetterDisplay virtual screens — that setup is what makes the iPad come up mirrored. Needs the BetterDisplay app running and a virtual screen present; skipped silently otherwise.                      |
+| Display Mode          | `extend`  | What the iPad does once connected: extend your desktop, or mirror your main display.                                                                                                                                                                                                  |
+| iPad Name             | _(empty)_ | Leave empty to auto-detect. Set it only to pin one iPad when you have several.                                                                                                                                                                                                        |
+| Auto-Reconnect        | **on**    | _Reconnect automatically after the link drops._ Only chases links that dropped by themselves. This is the default; the menu-bar toggle overrides it once used. Also needs Background Refresh on the Auto-Reconnect Sidecar command.                                                   |
+| Auto-Reconnect When   | `any`     | Which connections count as "my iPad is here". **Cable only** reconnects just when it's plugged in — the closest thing to "I'm at my desk", so it won't grab your iPad from across the room. Connecting by hand always works regardless.                                               |
+| Give Up After (hours) | `24`      | How long to keep trying an iPad that looks present but won't connect, before stopping so macOS stops showing connection-failed notifications. Counts time actually spent trying — not while the iPad is away, your Mac sleeps, or the presence check can't answer. `0` tries forever. |
 
-Every auto-reconnect timing knob is configurable. Note that Raycast runs background commands only about **once a minute**, so backoff values under ~60 s effectively mean "every tick" — the sub-minute knobs mostly shape the tail of the fast phase.
+The retry schedule itself is fixed rather than configurable — the presence check now decides _whether_ to attempt, leaving the backoff to govern only an iPad that is present and still refuses to connect. **Give Up After** is the one timing knob left, and Raycast runs background commands only about once a minute, so that is the granularity everything lands on.
 
 ## How it works
 
@@ -136,6 +133,7 @@ Pushing a `v*` git tag cuts a GitHub Release automatically. Full checklist: [doc
 - If the display mode won't settle, the extension reports it rather than forcing it. Fix a stuck arrangement by hand in BetterDisplay or Displays settings.
 - The menu bar and background commands are macOS-only.
 - Sidecar's own mirror mode is invisible to every display API, so the mirror fix is a manual/opt-in action, not an automatic "detect and repair."
+- Presence detection tracks the iPad's **wireless** reachability. Sidecar over USB works normally, but if you also put the iPad in Airplane Mode it reads as "away" while disconnected — the menu bar shows it greyed out, and auto-reconnect waits for its hourly recheck instead of reconnecting promptly. Connecting by hand always works.
 - Presence detection reads an **undocumented** macOS field, so it may change with a future release. It is treated as fallible: a real connection is still attempted periodically even while the iPad reads as away, so a wrong reading cannot silently stop reconnects.
 
 ## Documentation

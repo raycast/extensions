@@ -6,8 +6,8 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
 
 import { reportError } from "./lib/feedback";
-import { mirroringFixedMessage } from "./lib/messages";
-import { betterDisplayAvailable, getBetterDisplayCliPath } from "./lib/preferences";
+import { mirrorFixUnavailableMessage, mirroringFixedMessage } from "./lib/messages";
+import { mirrorFixPath } from "./lib/mirrorfix";
 import { reconnectVirtualScreens } from "./lib/virtualscreens";
 
 /**
@@ -19,18 +19,19 @@ import { reconnectVirtualScreens } from "./lib/virtualscreens";
  *   iPad lands extended. Requires BetterDisplay.
  */
 export default async function command(): Promise<void> {
-  if (!betterDisplayAvailable()) {
+  const cliPath = await mirrorFixPath(false);
+  if (cliPath === "") {
     await showToast({
       style: Toast.Style.Failure,
-      title: "BetterDisplay required",
-      message: "This fix needs BetterDisplay and betterdisplaycli installed.",
+      title: "Cannot fix mirroring",
+      message: mirrorFixUnavailableMessage(),
     });
     return;
   }
 
   try {
-    await showToast({ style: Toast.Style.Animated, title: "Fixing mirroring…" });
-    await reconnectVirtualScreens(getBetterDisplayCliPath());
+    await showToast({ style: Toast.Style.Animated, title: "Reconnecting virtual screens…" });
+    await reconnectVirtualScreens(cliPath);
     await showHUD(mirroringFixedMessage());
   } catch (error) {
     await reportError(error, "Could not fix mirroring");

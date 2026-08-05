@@ -11,22 +11,22 @@ rather than a public issue. I'll acknowledge within a few days.
 Being explicit, since it touches your displays and uses a private Apple
 framework:
 
-- **It uses a private Apple framework.** The Native engine loads
+- **It uses a private Apple framework.** The Swift helper loads
   `SidecarCore.framework` at runtime with `dlopen` and dispatches selectors
   (`connectToDevice:`, `disconnectFromDevice:`) reflectively — the same approach
   as other Sidecar tools. Nothing private is linked at build time. This is
   undocumented API: a macOS update can change or remove it, in which case the
-  affected command fails with a clear error and you can switch to the
-  BetterDisplay engine. Display mirroring itself uses **public** CoreGraphics.
-- **It runs local binaries.** The BetterDisplay engine executes
-  `betterdisplaycli` at the path you configure (default
-  `/opt/homebrew/bin/betterdisplaycli`). Arguments are passed via `execFile` as
-  an argv array — never interpolated into a shell — so a device name cannot
-  become a command.
+  affected command fails with a clear error. Display mirroring itself uses
+  **public** CoreGraphics, and the presence check reads a device property only.
+- **It runs a local binary, for one feature.** Fixing mirroring executes
+  BetterDisplay's binary, located via `NSWorkspace` by bundle identifier rather
+  than a configured path, and only when that app is already running. Arguments
+  are passed via `execFile` as an argv array — never interpolated into a shell —
+  so a device name cannot become a command. Nothing else shells out.
 - **It changes display configuration.** It connects/disconnects the Sidecar link
   and adds/removes the iPad from a mirror set. It never writes the main display.
   The one operation that power-cycles anything is the opt-in **Fix Mirroring**,
-  which only ever cycles *virtual* screens and always reconnects them. See the
+  which only ever cycles _virtual_ screens and always reconnects them. See the
   invariants in [CLAUDE.md](./CLAUDE.md#invariants--never-break-these).
 
 ## What it does not do

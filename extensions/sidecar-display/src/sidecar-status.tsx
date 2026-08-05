@@ -13,6 +13,8 @@
 import { Color, getPreferenceValues, Icon, MenuBarExtra, openExtensionPreferences, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 
+import { SidecarError } from "./lib/backend";
+import { usablePath } from "./lib/betterdisplayapp";
 import { refreshMenuBar, reportError } from "./lib/feedback";
 import { effectiveAutoReconnect } from "./lib/keepalive";
 import {
@@ -21,29 +23,25 @@ import {
   connectedMessage,
   describeModeSwitch,
   disconnectedMessage,
+  mirrorFixUnavailableMessage,
   mirroringFixedMessage,
   presenceTooltip,
 } from "./lib/messages";
-import { fixMirrorAfterFreshConnect } from "./lib/mirrorfix";
+import { fixMirrorAfterFreshConnect, mirrorFixPath } from "./lib/mirrorfix";
 import {
   autoReconnectPreference,
-  betterDisplayAvailable,
   buildConfig,
   getBackend,
-  getBetterDisplayCliPath,
+  resolveDeviceOverride,
+  transportPolicy,
 } from "./lib/preferences";
-import { probeReachability } from "./lib/reachability";
+import { probePresence } from "./lib/reachability";
 import { connectSidecar, disconnectSidecar, ensureDisplayMode, isConnected } from "./lib/sidecar";
-import {
-  loadAutoReconnectOverride,
-  loadSelectedDevice,
-  recordIntent,
-  saveAutoReconnectOverride,
-  saveSelectedDevice,
-} from "./lib/state";
+import { loadAutoReconnectOverride, recordIntent, saveAutoReconnectOverride, saveSelectedDevice } from "./lib/state";
 import { reconnectVirtualScreens } from "./lib/virtualscreens";
 
 import type { DisplayMode, SidecarDevice } from "./lib/backend";
+import type { Presence, TransportPolicy } from "./lib/transport";
 
 /** Everything the menu needs to render one refresh. */
 interface StatusModel {
@@ -52,19 +50,34 @@ interface StatusModel {
   readonly connected: boolean;
   readonly canReconnectVirtual: boolean;
   readonly autoReconnectOn: boolean;
-  /** Presence while disconnected; null when the probe could not answer. */
-  readonly nearby: boolean | null;
+  /** Per-transport presence while disconnected; null when the probe could not answer. */
+  readonly presence: Presence | null;
+  /** Which transports auto-reconnect may act on, for the tooltip. */
+  readonly policy: TransportPolicy;
+  /** Why the status read failed, when it did; absent on success. */
+  readonly failure?: string;
 }
 
-/** What the menu falls back to when the status read fails outright. */
-const EMPTY_MODEL: StatusModel = {
-  devices: [],
-  selected: "",
-  connected: false,
-  nearby: null,
-  canReconnectVirtual: false,
-  autoReconnectOn: false,
-};
+/**
+ * What the menu falls back to when the status read fails outright.
+ *
+ * @param error - Whatever was thrown.
+ * @returns A model carrying the failure, so the menu can say what went wrong
+ *   rather than claiming no iPad is paired — a bad CLI path and an unloadable
+ *   SidecarCore both used to present as "No Sidecar devices found".
+ */
+function failedModel(error: unknown): StatusModel {
+  return {
+    devices: [],
+    selected: "",
+    connected: false,
+    presence: null,
+    policy: "any",
+    canReconnectVirtual: false,
+    autoReconnectOn: false,
+    failure: error instanceof Error ? error.message : String(error),
+  };
+}
 
 /**
  * Gathers the current Sidecar picture for the menu.
@@ -75,12 +88,18 @@ const EMPTY_MODEL: StatusModel = {
  *
  * NOTE: The presence probe runs only while disconnected — a live link already
  *   proves the iPad is there. It is a silent read, so it costs no error banner.
+ * NOTE: The Fix Mirroring item is shown whenever BetterDisplay is running, WITHOUT
+ *   also checking that a virtual screen exists — that check is a CLI call, and
+ *   paying it on every render to hide one menu item is a bad trade. The command
+ *   itself reports "No virtual screens" if there is nothing to act on.
  */
 async function loadStatus(): Promise<StatusModel> {
   const backend = getBackend();
   const devices = await backend.listDevices();
-  const pinned = await loadSelectedDevice();
-  const selected = pinned !== "" ? pinned : (devices[0]?.name ?? "");
+  // Same resolution order as every command, so the menu can never act on a
+  // different iPad than a hotkey would.
+  const override = await resolveDeviceOverride(devices);
+  const selected = override !== "" ? override : (devices[0]?.name ?? "");
   // An out-of-range iPad is absent from the device list entirely, and a device
   // that is not listed cannot be connected — so an empty list answers the
   // connection question for free, skipping the second CLI call. This is the
@@ -89,20 +108,19 @@ async function loadStatus(): Promise<StatusModel> {
   const connectable = selected !== "" && devices.length > 0;
   const connected = connectable && (await isConnected(backend, buildConfig(selected)));
   const autoReconnectOn = effectiveAutoReconnect(await loadAutoReconnectOverride(), autoReconnectPreference());
-  const nearby = connected || selected === "" ? null : await probeNearby(selected);
-  return { devices, selected, connected, nearby, canReconnectVirtual: betterDisplayAvailable(), autoReconnectOn };
-}
-
-/**
- * Resolves the presence probe into a tri-state for the menu.
- *
- * @param name - The Sidecar device to probe.
- * @returns True/false when the probe answers, null when it cannot — so an
- *   unavailable probe reads as "unknown" rather than as "away".
- */
-async function probeNearby(name: string): Promise<boolean | null> {
-  const reading = await probeReachability(name);
-  return reading === "unknown" ? null : reading === "reachable";
+  // The ICON shows presence on any transport — it answers "is my iPad here?",
+  // which stays true even when the policy tells auto-reconnect to ignore it.
+  // The tooltip is where the policy gets explained.
+  const presence = connected || selected === "" ? null : await probePresence(selected);
+  return {
+    devices,
+    selected,
+    connected,
+    presence,
+    policy: transportPolicy(),
+    canReconnectVirtual: connected && (await usablePath()) !== "",
+    autoReconnectOn,
+  };
 }
 
 /**
@@ -114,7 +132,13 @@ async function connectDevice(name: string): Promise<void> {
   await saveSelectedDevice(name);
   await recordIntent("connected");
   const outcome = await connectSidecar(getBackend(), buildConfig(name));
-  await fixMirrorAfterFreshConnect(outcome);
+  // Same rule as connect-sidecar.ts: the link is up, so a failing cosmetic repair
+  // must not be reported as "Could not connect" over a visibly attached iPad.
+  try {
+    await fixMirrorAfterFreshConnect(outcome);
+  } catch (fixError) {
+    await reportError(fixError, `Connected ${name}, but could not fix mirroring`);
+  }
 }
 
 /**
@@ -139,6 +163,26 @@ async function setMode(name: string, mode: DisplayMode): Promise<string> {
   const config = buildConfig(name, { mode });
   const outcome = await ensureDisplayMode(getBackend(), config);
   return describeModeSwitch(config, outcome);
+}
+
+/**
+ * Runs the mirror fix from the menu, refusing for the same reasons the command does.
+ *
+ * @throws SidecarError when BetterDisplay cannot perform the fix.
+ *
+ * NOTE: Shares `mirrorFixPath` with the Fix Mirroring command so the menu cannot
+ *   offer a repair the command would refuse. It previously passed the path
+ *   straight through, so with no virtual screen it surfaced a raw execFile error.
+ */
+async function runMirrorFix(): Promise<void> {
+  // Same gate as the Fix Mirroring command, so the menu cannot offer a repair the
+  // command would refuse. Previously this passed usablePath() straight through,
+  // so with no virtual screen it surfaced a raw execFile error as a toast.
+  const cliPath = await mirrorFixPath(false);
+  if (cliPath === "") {
+    throw new SidecarError(mirrorFixUnavailableMessage());
+  }
+  await reconnectVirtualScreens(cliPath);
 }
 
 /**
@@ -193,24 +237,41 @@ async function runAction(action: () => Promise<string | void>, errorTitle: strin
 // -----------------------------------------------------------
 
 /**
+ * The Connect item's label, warning when the iPad looks out of reach.
+ *
+ * @param presence - Per-transport presence; null when the probe could not answer.
+ * @returns The menu label.
+ *
+ * NOTE: The item stays ENABLED either way — the probe reads an undocumented
+ *   field, so it must never be the thing that stops you trying.
+ */
+function connectLabel(presence: Presence | null): string {
+  const away = presence !== null && !presence.wired && !presence.wireless;
+  return away ? "Connect (iPad appears to be away)" : "Connect";
+}
+
+/**
  * The actions for the selected device: extend/mirror/disconnect, or connect.
  *
  * @param props.selected  - The device the actions act on.
  * @param props.connected - Whether that device is currently attached.
- * @param props.nearby    - Presence while disconnected; null when unknown.
+ * @param props.presence  - Per-transport presence; null when unknown.
+ * @param props.policy    - Which transports auto-reconnect may act on.
  * @returns The device section.
  */
 function DeviceSection({
   selected,
   connected,
-  nearby,
+  presence,
+  policy,
 }: {
   selected: string;
   connected: boolean;
-  nearby: boolean | null;
+  presence: Presence | null;
+  policy: TransportPolicy;
 }): React.JSX.Element {
   return (
-    <MenuBarExtra.Section title={presenceTooltip(selected, connected, nearby)}>
+    <MenuBarExtra.Section title={presenceTooltip(selected, connected, presence, policy)}>
       {connected ? (
         <>
           <MenuBarExtra.Item
@@ -237,7 +298,12 @@ function DeviceSection({
         </>
       ) : (
         <MenuBarExtra.Item
-          title="Connect"
+          // Still enabled when away: the probe is undocumented and may be wrong,
+          // so it must never be the thing that stops you trying. The title says
+          // what to expect, since an out-of-range iPad leaves the device list
+          // and the engine's own error ("No Sidecar device named …") reads like
+          // a configuration mistake rather than "it isn't here".
+          title={connectLabel(presence)}
           icon={Icon.Monitor}
           onAction={() =>
             runAction(() => connectDevice(selected), `Could not connect ${selected}`, connectedMessage(selected))
@@ -294,13 +360,7 @@ function FixMirroringSection(): React.JSX.Element {
         title="Fix Mirroring"
         icon={Icon.ArrowClockwise}
         tooltip="Fix an iPad that is mirroring your main screen (Sidecar's own mirror mode)"
-        onAction={() =>
-          runAction(
-            () => reconnectVirtualScreens(getBetterDisplayCliPath()),
-            "Could not fix mirroring",
-            mirroringFixedMessage(),
-          )
-        }
+        onAction={() => runAction(() => runMirrorFix(), "Could not fix mirroring", mirroringFixedMessage())}
       />
     </MenuBarExtra.Section>
   );
@@ -340,7 +400,9 @@ export default function Command(): React.JSX.Element {
   const [model, setModel] = useState<StatusModel | null>(null);
 
   useEffect(() => {
-    loadStatus().then(setModel).catch(setModel.bind(null, EMPTY_MODEL));
+    loadStatus()
+      .then(setModel)
+      .catch((error: unknown) => setModel(failedModel(error)));
   }, []);
 
   const connected = model?.connected ?? false;
@@ -348,9 +410,10 @@ export default function Command(): React.JSX.Element {
   // Default is icon-only (constant width, friendly to menu-bar managers like
   // Bartender). The optional title shows the device name when connected.
   const showName = getPreferenceValues<Preferences>().showDeviceName === true;
-  const nearby = model?.nearby ?? null;
+  const presence = model?.presence ?? null;
+  const nearby = presence === null ? null : presence.wired || presence.wireless;
   const icon = statusIcon(connected, nearby);
-  const tooltip = presenceTooltip(device, connected, nearby);
+  const tooltip = presenceTooltip(device, connected, presence, model?.policy ?? "any");
   // Named whenever the iPad is actually there — attached or merely within reach —
   // since that is when knowing WHICH iPad is useful. Stays anonymous when it is
   // away, so the item does not carry a name for something you cannot connect to.
@@ -358,15 +421,19 @@ export default function Command(): React.JSX.Element {
 
   return (
     <MenuBarExtra icon={icon} title={title} tooltip={tooltip} isLoading={model === null}>
+      {model?.failure !== undefined && (
+        <MenuBarExtra.Item title="Could not read Sidecar status" subtitle={model.failure} icon={Icon.Warning} />
+      )}
+
       {/* Only when nothing is known at all. An out-of-range iPad drops off the
           device list, so an empty list plus a remembered device means "away",
           not "you have no iPad". */}
-      {model !== null && model.devices.length === 0 && model.selected === "" && (
+      {model !== null && model.failure === undefined && model.devices.length === 0 && model.selected === "" && (
         <MenuBarExtra.Item title="No Sidecar devices found" />
       )}
 
       {model !== null && model.selected !== "" && (
-        <DeviceSection selected={model.selected} connected={connected} nearby={model.nearby} />
+        <DeviceSection selected={model.selected} connected={connected} presence={presence} policy={model.policy} />
       )}
 
       {model !== null && model.devices.length > 1 && (
@@ -376,7 +443,7 @@ export default function Command(): React.JSX.Element {
       {model !== null && connected && model.canReconnectVirtual && <FixMirroringSection />}
 
       <MenuBarExtra.Section>
-        {model !== null && (
+        {model !== null && model.failure === undefined && (
           <MenuBarExtra.Item
             title={autoReconnectLabel(model.autoReconnectOn)}
             icon={model.autoReconnectOn ? { source: Icon.Circle, tintColor: Color.Green } : Icon.Circle}

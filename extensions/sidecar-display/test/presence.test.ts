@@ -18,7 +18,7 @@ import type { KeepAliveState, Reachability } from "../src/lib/keepalive";
 
 describe("presence notices", () => {
   it("announces a return only when nothing is going to act on it", () => {
-    const away = connectedState({ absentReads: 4 });
+    const away = connectedState({ absentReads: 5 });
 
     const off = decide({ isConnected: false, state: away, reachability: "reachable", enabled: false });
     assert.equal(off.notice, "nearby");
@@ -33,7 +33,7 @@ describe("presence notices", () => {
   });
 
   it("stays quiet about a return while auto-reconnect is chasing, since the reconnect is the feedback", () => {
-    const away = connectedState({ absentReads: 4, lastAttemptAtMs: NOW - HOUR });
+    const away = connectedState({ absentReads: 5, lastAttemptAtMs: NOW - HOUR });
     const d = decide({ isConnected: false, state: away, reachability: "reachable" });
     assert.equal(d.action, "reconnect");
     assert.equal(d.notice, "none");
@@ -51,7 +51,7 @@ describe("presence notices", () => {
   });
 
   it("announces giving up exactly once per chase", () => {
-    const spent = connectedState({ chasingSinceMs: NOW - 25 * HOUR, lastAttemptAtMs: NOW - HOUR });
+    const spent = connectedState({ chasedMs: 25 * HOUR, lastAttemptAtMs: NOW - HOUR });
     const first = decide({ isConnected: false, state: spent, reachability: "reachable" });
     assert.equal(first.notice, "gaveUp");
     assert.equal(first.action, "none");
@@ -61,14 +61,22 @@ describe("presence notices", () => {
   });
 
   it("re-arms the give-up announcement for a genuinely new chase", () => {
-    const announced = connectedState({ chasingSinceMs: NOW - 25 * HOUR, announcedGiveUp: true });
-    // The iPad leaving ends the chase; the next one deserves its own notice.
+    // The iPad genuinely leaving ends the chase; the next one deserves its own
+    // notice. "Genuinely" means a SETTLED absence — several consecutive reads,
+    // not one flicker and not the two that merely buy silence.
+    const announced = connectedState({ chasedMs: 25 * HOUR, announcedGiveUp: true, absentReads: 4 });
     const away = decide({ isConnected: false, state: announced, reachability: "absent" });
     assert.equal(away.nextState.announcedGiveUp, false);
   });
 
+  it("does not re-arm the give-up announcement on a single flickering read", () => {
+    const announced = connectedState({ chasedMs: 25 * HOUR, announcedGiveUp: true });
+    const flicker = decide({ isConnected: false, state: announced, reachability: "absent" });
+    assert.equal(flicker.nextState.announcedGiveUp, true, "one bad read must not restart the chase");
+  });
+
   it("clears the give-up flag once the link is back", () => {
-    const announced = connectedState({ chasingSinceMs: NOW - 25 * HOUR, announcedGiveUp: true });
+    const announced = connectedState({ chasedMs: 25 * HOUR, announcedGiveUp: true });
     assert.equal(decide({ isConnected: true, state: announced }).nextState.announcedGiveUp, false);
   });
 });
@@ -115,7 +123,7 @@ describe("menu-bar refresh", () => {
     },
     {
       name: "away -> nearby",
-      before: { lastLinkUp: false, lastReachability: "absent", absentReads: 3 },
+      before: { lastLinkUp: false, lastReachability: "absent", absentReads: 5 },
       link: false,
       probe: "reachable",
       enabled: false,
@@ -123,7 +131,7 @@ describe("menu-bar refresh", () => {
     },
     {
       name: "away -> probe unavailable",
-      before: { lastLinkUp: false, lastReachability: "absent", absentReads: 3 },
+      before: { lastLinkUp: false, lastReachability: "absent", absentReads: 5 },
       link: false,
       probe: "unknown",
       enabled: false,
@@ -197,7 +205,7 @@ describe("menu-bar refresh", () => {
   });
 
   it("refreshes when a notice fires, so the HUD and the icon never disagree", () => {
-    const away = connectedState({ absentReads: 4, lastReachability: "absent", intent: "disconnected" });
+    const away = connectedState({ absentReads: 5, lastReachability: "absent", intent: "disconnected" });
     const d = decide({ isConnected: false, state: away, reachability: "reachable" });
     assert.equal(d.notice, "nearby");
     assert.equal(shouldRefreshMenuBar(away, d), true);
@@ -206,7 +214,7 @@ describe("menu-bar refresh", () => {
   it("keeps correcting itself when a refresh rendered before the reading settled", () => {
     // The old counter-based test only fired on the first absent read, so one
     // mistimed render left the icon wrong forever. Raw readings self-correct.
-    const stale = connectedState({ intent: "disconnected", lastReachability: "reachable", absentReads: 9 });
+    const stale = connectedState({ intent: "disconnected", lastReachability: "reachable", absentReads: 5 });
     const d = decide({ isConnected: false, state: stale, reachability: "absent" });
     assert.equal(shouldRefreshMenuBar(stale, d), true);
   });

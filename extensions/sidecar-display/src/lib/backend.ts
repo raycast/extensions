@@ -2,7 +2,7 @@
 // SIDECAR BACKEND
 // The engine interface the orchestration talks to, plus shared types.
 // -----------------------------------------------------------------------------
-// Context: Two engines implement this — BetterDisplay (the `betterdisplaycli`
+// Context: The Swift helper implements this (SidecarCore + CoreGraphics). The
 //   wrapper) and Native (a bundled SidecarCore + CoreGraphics helper). The
 //   orchestration depends only on this interface, so it is engine-agnostic and
 //   can be unit-tested against a mock.
