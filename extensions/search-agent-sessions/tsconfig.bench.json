@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/lib/**/*", "scripts/**/*"],
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": ".bench",
+    "noEmit": false
+  }
+}
