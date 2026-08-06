@@ -1,6 +1,6 @@
 # Search npm Changelog
 
-## [Add search results provider] - {PR_MERGE_DATE}
+## [Add search results provider] - 2026-08-06
 
 - Add an npmx.dev option for external package search results
 
