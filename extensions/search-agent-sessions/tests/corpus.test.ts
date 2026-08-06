@@ -1,6 +1,15 @@
 import assert from "node:assert/strict";
+import { mkdtempSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
-import { CHUNK_OVERLAP, MAX_LINE_CHARS, chunkMessage } from "../src/lib/corpus";
+import {
+  CHUNK_OVERLAP,
+  MAX_LINE_CHARS,
+  chunkMessage,
+  reconcileCorpus,
+} from "../src/lib/corpus";
+import { corpusPath, setSupportPath } from "../src/lib/paths";
 
 /** Distinct space-separated words, so overlaps are visible in the output. */
 function words(count: number): string {
@@ -121,4 +130,52 @@ test("long messages stay free of tabs and newlines", () => {
   const lines = chunkMessage(raw);
   assert.ok(lines.length > 1);
   for (const line of lines) assertClean(line);
+});
+
+const SUPPORT = mkdtempSync(join(tmpdir(), "corpus-"));
+setSupportPath(SUPPORT);
+
+/** Writes a corpus of `lines` whole lines and returns what it holds. */
+function seedCorpus(lines: number): string {
+  const text = Array.from({ length: lines }, (_, i) => `k${i}\t${i}\tline ${i}`)
+    .map((l) => `${l}\n`)
+    .join("");
+  writeFileSync(corpusPath(), text);
+  return text;
+}
+
+test("a corpus longer than the manifest recorded loses the extra tail", () => {
+  // What a kill between the two writes leaves behind: lines whose offsets the
+  // manifest never got to record, which the sessions they came from emit again.
+  const text = seedCorpus(6);
+  const committed = Buffer.byteLength(text.slice(0, text.indexOf("k4")));
+  assert.equal(reconcileCorpus(committed), committed);
+  assert.equal(statSync(corpusPath()).size, committed);
+  // Truncated on a line boundary, so what survives is still parseable.
+  const kept = readFileSync(corpusPath(), "utf8");
+  assert.ok(kept.endsWith("line 3\n"));
+  assert.ok(!kept.includes("line 4"));
+});
+
+test("a corpus of exactly the recorded length is left alone", () => {
+  const text = seedCorpus(6);
+  const bytes = Buffer.byteLength(text);
+  assert.equal(reconcileCorpus(bytes), bytes);
+  assert.equal(readFileSync(corpusPath(), "utf8"), text);
+});
+
+test("a corpus shorter than the manifest recorded demands a rebuild", () => {
+  // Nothing appends the missing lines back: the sessions that produced them are
+  // recorded as fully indexed.
+  const text = seedCorpus(6);
+  assert.equal(reconcileCorpus(Buffer.byteLength(text) + 1), null);
+});
+
+test("a missing corpus demands a rebuild", () => {
+  setSupportPath(mkdtempSync(join(tmpdir(), "corpus-empty-")));
+  try {
+    assert.equal(reconcileCorpus(0), null);
+  } finally {
+    setSupportPath(SUPPORT);
+  }
 });

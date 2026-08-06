@@ -6,6 +6,8 @@ Design notes for anyone working on this extension. The user-facing description i
 
 The raw transcripts are too big to search per keystroke: 3.2GB of `~/.claude/projects/**/*.jsonl` plus 711MB of `~/.codex/sessions/**/*.jsonl`, which `rg` takes ~550ms to sweep. User and assistant text is only ~1.7% of those bytes, so the command derives a flat text corpus in the extension's Raycast support directory (`sessionKey \t seq \t text` per line, plus a `sessions.json` manifest) and searches that instead. That directory arrives by injection — `src/search-agent-sessions.tsx` calls `setSupportPath` at module scope — because nothing under `src/lib` may import `@raycast/api` without taking the whole library out of the unit suite's reach. `paths.ts` therefore exposes `corpusPath()` and friends as functions rather than constants, so none of them can read the default before the command has replaced it. Messages over 1400 characters are split across several lines with overlap, all sharing one `seq`, so a line is snippet-sized rather than strictly one per message.
 
+The corpus and the manifest are two files, so the order they are written in is what makes a killed refresh recoverable: lines are appended first, the manifest saved after, recording in `bytes` how long the corpus was when the offsets beside it were taken. A later run finding a longer corpus truncates back to `bytes`, because the excess is the tail of an interrupted pass and the sessions that produced it emit it again; leaving it would have every query rescanning a duplicate range. A shorter corpus has lost indexed content, which only a rebuild repairs, and a rebuild saves its empty manifest before clearing the corpus, so a kill mid-rebuild lands the next run in a rebuild too.
+
 Measured here on a quiet machine: a full cold re-index is ~2.8s for the 2.5GB it actually reads, producing 68MB; an incremental refresh is ~10ms; and a three-word query plus `dir:` reaches its first row after ~19ms of index work. The last two are the indexing and search path only, measured in plain Node — neither includes React rendering or the Raycast bridge, so what you see on screen is slower.
 
 ## What sweeps the corpus
@@ -119,6 +121,6 @@ npm run bench      # wipe the cache, time a cold index, report time-to-first-row
 
 ## Store metadata
 
-`assets/icon.png` is 512×512, rendered from the hand-authored `assets/icon.svg`. Screenshots live in `metadata/` at 2000×1250.
+`assets/icon.png` is 512×512, rendered from the hand-authored `design/icon.svg`. The source sits outside `assets/` because the store asks that everything in there be loaded by the extension at run time, and the SVG never is. Screenshots live in `metadata/` at 2000×1250.
 
 Capture them with a plain region grab (⌘⇧4 dragged around the window), then crop with `scripts/crop-shot.py <capture.png> metadata/search-agent-sessions-N.png`. It finds the window, scales it to the frame width the existing shots use, and centres it the same way, so every shot in the gallery lands on identical pixels. Don't use macOS window capture (⌃⌘⇧4 then space) or Raycast's "Window Capture": both re-render the window off-screen, which washes out its fill and leaves rectangular artifacts wherever a popover or dropdown is open, since those are separate windows whose backdrop has nothing to sample.

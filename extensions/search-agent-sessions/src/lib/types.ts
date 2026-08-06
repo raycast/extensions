@@ -29,6 +29,12 @@ export interface SessionMeta {
 export interface Manifest {
   version: number;
   sessions: SessionMeta[];
+  /**
+   * How long corpus.txt was when this manifest was written, and so how much of
+   * it the session offsets here account for. `reconcileCorpus` is what squares
+   * the two on a later run.
+   */
+  bytes: number;
 }
 
 /** The best line found in a session for the current query. */

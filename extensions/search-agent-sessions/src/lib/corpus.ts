@@ -7,6 +7,7 @@ import {
   readFileSync,
   readSync,
   statSync,
+  truncateSync,
 } from "node:fs";
 import { appendFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
@@ -25,8 +26,9 @@ import type { Agent, Manifest, SessionMeta } from "./types";
  * the shape of anything stored in the manifest: cwds are now spelled with the
  * platform separator, and a cache holding the old mixed spellings would be half
  * migrated forever, since a session is only re-read when its transcript grows.
+ * 6 adds `bytes`, which a manifest written by 5 cannot supply.
  */
-const CORPUS_VERSION = 5;
+const CORPUS_VERSION = 6;
 
 /**
  * One read buffer for the whole module, not one per file. Line reassembly no
@@ -567,7 +569,37 @@ function uniqueKey(file: string, used: Set<string>): string {
 }
 
 function emptyManifest(): Manifest {
-  return { version: CORPUS_VERSION, sessions: [] };
+  return { version: CORPUS_VERSION, sessions: [], bytes: 0 };
+}
+
+/**
+ * Squares corpus.txt with the length the manifest `recorded`, returning the
+ * bytes still accounted for, or null when only a rebuild can repair it.
+ *
+ * The corpus and the manifest are two files, and a kill can land between them:
+ * lines are appended continuously, the manifest saved at a far coarser cadence
+ * and always after the lines it describes are on disk. A corpus longer than the
+ * manifest recorded is therefore the tail of an interrupted refresh — bytes
+ * whose offsets were never committed, which the sessions they came from emit
+ * again on the next pass, leaving a duplicate range that every query rescans
+ * until something forces a rebuild. Truncating back to the recorded length is
+ * exact, because incremental indexing only appends: everything below that
+ * offset is content the manifest still vouches for, and the cut lands where a
+ * completed write ended.
+ *
+ * A shorter corpus has lost lines the manifest claims are indexed, and nothing
+ * will emit them again, so the whole cache goes.
+ */
+export function reconcileCorpus(recorded: number): number | null {
+  let size: number;
+  try {
+    size = statSync(corpusPath()).size;
+  } catch {
+    return null;
+  }
+  if (size < recorded) return null;
+  if (size > recorded) truncateSync(corpusPath(), recorded);
+  return recorded;
 }
 
 /**
@@ -579,7 +611,11 @@ function emptyManifest(): Manifest {
 function readManifest(): Manifest | null {
   try {
     const parsed = JSON.parse(readFileSync(manifestPath(), "utf8")) as Manifest;
-    if (parsed.version !== CORPUS_VERSION || !Array.isArray(parsed.sessions))
+    if (
+      parsed.version !== CORPUS_VERSION ||
+      !Array.isArray(parsed.sessions) ||
+      typeof parsed.bytes !== "number"
+    )
       return null;
     return parsed;
   } catch {
@@ -677,10 +713,26 @@ export async function refresh(
     if (gone / manifest.sessions.length > STALE_REBUILD_RATIO) rebuilt = true;
   }
 
+  // How much of corpus.txt the manifest vouches for, and so where this pass
+  // appends from. Dropping whatever sits past it is what keeps the tail of an
+  // interrupted refresh from being indexed a second time.
+  let corpusBytes = 0;
+  if (!rebuilt) {
+    const usable = reconcileCorpus(manifest.bytes);
+    if (usable === null) rebuilt = true;
+    else corpusBytes = usable;
+  }
+
   let state: Manifest;
   if (rebuilt) {
-    writeFileSync(corpusPath(), "");
+    // The empty manifest is saved before the corpus is cleared, so a rebuild
+    // killed partway cannot leave one describing content that no longer exists:
+    // a manifest naming no sessions sends the next run straight back into a
+    // rebuild, whatever is in corpus.txt by then.
     state = emptyManifest();
+    saveManifest(state);
+    writeFileSync(corpusPath(), "");
+    corpusBytes = 0;
     byFile.clear();
   } else {
     state = {
@@ -711,13 +763,15 @@ export async function refresh(
       buffered += line.length + 1;
     },
   };
-  let appended = 0;
   const flush = () => {
     if (!buffer.length) return;
     const batch = buffer.splice(0, buffer.length);
-    appended += buffered;
     buffered = 0;
-    appendFileSync(corpusPath(), `${batch.join("\n")}\n`);
+    const chunk = `${batch.join("\n")}\n`;
+    appendFileSync(corpusPath(), chunk);
+    // Bytes, not the characters `buffered` counts: this names a position in the
+    // file for a later run to truncate back to.
+    corpusBytes += Buffer.byteLength(chunk);
     options.onLines?.(batch);
   };
 
@@ -725,7 +779,15 @@ export async function refresh(
   let bytesRead = 0;
   let filesIndexed = 0;
   let savedAt = started;
-  let savedBytes = 0;
+  let savedBytes = corpusBytes;
+  // The length saved here is what `reconcileCorpus` measures the next run's
+  // corpus against, so it is taken with the offsets it belongs to.
+  const checkpoint = () => {
+    state.bytes = corpusBytes;
+    saveManifest(state);
+    savedAt = Date.now();
+    savedBytes = corpusBytes;
+  };
   for (const source of pending) {
     if (options.cancelled?.()) break;
     const known = byFile.get(source.file);
@@ -794,15 +856,11 @@ export async function refresh(
       // Checkpointing is decoupled from the flush cadence, but never runs
       // before one: a manifest describing lines still sitting in `buffer` would
       // survive a kill claiming corpus content that was never written.
-      const now = Date.now();
       if (
-        now - savedAt > CHECKPOINT_MS ||
-        appended - savedBytes > CHECKPOINT_BYTES
-      ) {
-        saveManifest(state);
-        savedAt = now;
-        savedBytes = appended;
-      }
+        Date.now() - savedAt > CHECKPOINT_MS ||
+        corpusBytes - savedBytes > CHECKPOINT_BYTES
+      )
+        checkpoint();
     }
     await breathe();
   }
@@ -816,7 +874,7 @@ export async function refresh(
     !rebuilt &&
     filesIndexed === 0 &&
     state.sessions.length === manifest.sessions.length;
-  if (!unchanged) saveManifest(state);
+  if (!unchanged) checkpoint();
   return {
     rebuilt,
     filesIndexed,
