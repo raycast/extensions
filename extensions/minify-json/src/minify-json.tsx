@@ -6,31 +6,21 @@ export default function Command() {
   const [json, setJson] = useState("");
   const [pretty, setPretty] = useState(false);
   const [result, setResult] = useState("");
-  const [clipboardLoaded, setClipboardLoaded] = useState(false);
-  const resultTextArea = useRef<Form.TextArea | null>(null);
+  const userEdited = useRef(false);
 
   useEffect(() => {
-    if (clipboardLoaded) {
-      return;
-    }
-    setClipboardLoaded(true);
     Clipboard.readText().then((text) => {
-      if (text?.trim()) {
-        try {
-          JSON.parse(text);
-          setJson(text);
-        } catch {
-          return;
-        }
+      if (userEdited.current || !text?.trim()) {
+        return;
+      }
+      try {
+        JSON.parse(text);
+        setJson(text);
+      } catch {
+        return;
       }
     });
-  }, [clipboardLoaded]);
-
-  useEffect(() => {
-    if (result) {
-      resultTextArea.current?.focus();
-    }
-  }, [result]);
+  }, []);
 
   const handleSubmit = async (values: { json: string }) => {
     try {
@@ -92,7 +82,17 @@ export default function Command() {
         }}
       />
       {result ? (
-        <Form.TextArea id="result" title="Result" value={result} ref={resultTextArea} onChange={() => {}} />
+        <Form.TextArea
+          id="result"
+          title="Result"
+          value={result}
+          onChange={() => {}}
+          ref={(el) => {
+            if (el) {
+              el.focus();
+            }
+          }}
+        />
       ) : null}
     </Form>
   );
