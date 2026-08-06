@@ -225,7 +225,7 @@ describe("loadSitemapPages", () => {
 
   it("decompresses gzip sitemaps without a content-encoding header", async () => {
     const xml = "<urlset><url><loc>https://example.com/</loc></url></urlset>";
-    const fetch: Fetch = async () => new Response(await gzip(xml), { status: 200 });
+    const fetch: Fetch = async () => new Response(new Uint8Array(await gzip(xml)), { status: 200 });
 
     await expect(fetchSitemap("https://example.com/sitemap.xml.gz", fetch)).resolves.toBe(xml);
   });
