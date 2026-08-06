@@ -1,4 +1,4 @@
-## \[Add Search Sitemap Command\] - {PR_MERGE_DATE}
+## [Add Search Sitemap Command] - {PR_MERGE_DATE}
 
 - Show page metadata (last modified, changefreq, priority) directly in the search list as accessories
 - Remove the separate page detail view and the unused `fetch-page-title` helper
