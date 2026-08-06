@@ -17,9 +17,15 @@ export default function PackageList() {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [history, setHistory] = useCachedState<HistoryItem[]>("history", []);
   const [favorites, fetchFavorites] = useFavorites();
-  const { historyCount, showLinkToSearchResultsInListView, size } = getPreferenceValues<Preferences.Index>();
+  const { historyCount, searchResultsProvider, showLinkToSearchResultsInListView, size } =
+    getPreferenceValues<Preferences.Index>();
   const [total, setTotal] = useState(0);
   const pageSize = Math.max(1, Number.parseInt(size, 10) || 20);
+  const searchResultsProviderName = searchResultsProvider === "npmx" ? "npmx.dev" : "npmjs.com";
+  const searchResultsUrl =
+    searchResultsProvider === "npmx"
+      ? `https://npmx.dev/search?${new URLSearchParams({ q: searchTerm })}`
+      : `https://www.npmjs.com/search?${new URLSearchParams({ q: searchTerm })}`;
 
   // If the search term is empty or only 1 character - the request will always result in 'Bad Request' error, so there's no reason to make it
   const canSearch = Boolean(debouncedSearchTerm) && debouncedSearchTerm.length > 1;
@@ -112,13 +118,13 @@ export default function PackageList() {
             <>
               {showLinkToSearchResultsInListView ? (
                 <List.Item
-                  title={`View search results for "${searchTerm}" on npmjs.com`}
+                  title={`View search results for "${searchTerm}" on ${searchResultsProviderName}`}
                   icon={{ source: Icon.MagnifyingGlass, tintColor: Color.SecondaryText }}
                   actions={
                     <ActionPanel>
                       <Action.OpenInBrowser
-                        url={`https://www.npmjs.com/search?q=${searchTerm}`}
-                        title="View npm Search Results"
+                        url={searchResultsUrl}
+                        title={`View ${searchResultsProviderName} Search Results`}
                       />
                     </ActionPanel>
                   }

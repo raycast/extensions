@@ -13,7 +13,8 @@
     "geekyed",
     "dangkhoipro",
     "0xdhrv",
-    "peduarte"
+    "peduarte",
+    "oguma0923"
   ],
   "categories": [
     "Productivity",
@@ -49,6 +50,15 @@
       "mode": "view",
       "subtitle": "Google Calendar",
       "preferences": [
+        {
+          "name": "showLocation",
+          "type": "checkbox",
+          "title": "Display",
+          "label": "Show location",
+          "description": "Show the event's location as an accessory in the list",
+          "default": false,
+          "required": false
+        },
         {
           "name": "openCommandJoinsMeeting",
           "type": "checkbox",

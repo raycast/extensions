@@ -5,6 +5,7 @@ import CpuMonitor from "./Cpu/CpuMonitor";
 import MemoryMonitor from "./Memory/MemoryMonitor";
 import NetworkMonitor from "./Network/NetworkMonitor";
 import PowerMonitor from "./Power/PowerMonitor";
+import DiskMonitor from "./Disk/DiskMonitor";
 
 const { defaultView } = getPreferenceValues<ExtensionPreferences>();
 
@@ -21,6 +22,7 @@ export default function SystemMonitor() {
       <SystemInfo />
       <CpuMonitor isActive={selectedItemId === "cpu"} />
       <MemoryMonitor isActive={selectedItemId === "memory"} />
+      <DiskMonitor isActive={selectedItemId === "disk"} />
       <PowerMonitor isActive={selectedItemId === "power"} />
       <NetworkMonitor isActive={selectedItemId === "network"} />
     </List>

@@ -76,34 +76,7 @@ Source commands load additional configuration files into your shell session. The
 ## ⚠️ Performance Note
 Too many source commands can slow down shell startup. Consider using conditional sourcing or lazy loading.
       `}
-      generateItemMarkdown={(source) => `
-# Source: \`${source.path}\`
-
-## 📄 Source Command
-\`\`\`zsh
-source ${source.path}
-\`\`\`
-
-## 📍 Location
-- **Section**: ${source.section}
-- **File**: ~/.zshrc
-- **Section Start**: Line ${source.sectionStartLine}
-
-## 💡 Source Types
-- **Theme Files**: Zsh theme configurations
-- **Completion Scripts**: Tab completion enhancements
-- **External Scripts**: Custom zsh configurations
-- **Plugin Files**: Plugin-specific configurations
-- **Utility Scripts**: Helper functions and aliases
-
-## 🔍 File Analysis
-- **Path**: ${source.path}
-- **Type**: ${source.path.includes("theme") ? "Theme" : source.path.includes("completion") ? "Completion" : "Configuration"}
-- **Framework**: ${source.path.includes("oh-my-zsh") ? "Oh My Zsh" : "Custom"}
-
-## ⚠️ Note
-Source commands load external files. Make sure the referenced files exist and are accessible.
-      `}
+      omitValueMarkdown={true}
       generateMetadata={(source) => {
         const exists = sourceFileExists(source.path);
         return (
@@ -111,10 +84,7 @@ Source commands load external files. Make sure the referenced files exist and ar
             <List.Item.Detail.Metadata.Label
               title="Source Path"
               text={truncateValueMiddle(source.path, 60)}
-              icon={{
-                source: Icon.Document,
-                tintColor: MODERN_COLORS.primary,
-              }}
+              icon={{ source: Icon.Document, tintColor: MODERN_COLORS.primary }}
             />
             <List.Item.Detail.Metadata.Label
               title="Source Exists"
@@ -135,14 +105,8 @@ Source commands load external files. Make sure the referenced files exist and ar
                 tintColor: MODERN_COLORS.neutral,
               }}
             />
-            <List.Item.Detail.Metadata.Label
-              title="File"
-              text="~/.zshrc"
-              icon={{
-                source: Icon.Document,
-                tintColor: MODERN_COLORS.neutral,
-              }}
-            />
+            <List.Item.Detail.Metadata.Label title="Section Starts" text={`Line ${source.sectionStartLine}`} />
+            <List.Item.Detail.Metadata.Label title="File" text="~/.zshrc" icon={Icon.Document} />
             <List.Item.Detail.Metadata.Label
               title="Type"
               text={
@@ -152,10 +116,7 @@ Source commands load external files. Make sure the referenced files exist and ar
                     ? "Completion"
                     : "Configuration"
               }
-              icon={{
-                source: Icon.Gear,
-                tintColor: MODERN_COLORS.warning,
-              }}
+              icon={{ source: Icon.Gear, tintColor: MODERN_COLORS.warning }}
             />
           </List.Item.Detail.Metadata>
         );

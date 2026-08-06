@@ -14,8 +14,35 @@ import { Action, ActionPanel, Icon, showToast, Toast, confirmAlert, Alert, Clipb
 import { undoLastChange, getHistory, getUndoCount } from "./history";
 import { restoreFromBackup, getZshrcPath, getBackupPath } from "./zsh";
 import { clearCache } from "./cache";
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import HistoryView from "../history-view";
+
+/**
+ * Detail pane toggle state provided by list surfaces (home, focused
+ * views). When present, every action panel built from
+ * SharedActionsSection gains a "Show/Hide Detail" action (⌘⇧D) without
+ * each view having to thread the state through its action generators.
+ */
+export const DetailToggleContext = createContext<{ shown: boolean; toggle: () => void } | null>(null);
+
+/**
+ * Show/Hide Detail action (⌘⇧D), rendered when a surface provides
+ * DetailToggleContext
+ */
+function ToggleDetailAction() {
+  const detailToggle = useContext(DetailToggleContext);
+  if (!detailToggle) {
+    return null;
+  }
+  return (
+    <Action
+      title={detailToggle.shown ? "Hide Detail" : "Show Detail"}
+      icon={Icon.Sidebar}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      onAction={detailToggle.toggle}
+    />
+  );
+}
 
 /**
  * Item-level actions carried by SharedActionsSection.
@@ -56,6 +83,8 @@ interface SharedActionsProps {
   showUndo?: boolean;
   /** Whether to show backup restore action */
   showBackupRestore?: boolean;
+  /** Whether to show the view-history action (home surfaces it as a Tool) */
+  showHistory?: boolean;
   /** Item-level actions rendered ahead of the tools section */
   item?: ItemActions;
 }
@@ -285,6 +314,7 @@ export function SharedActionsSection({
   onRefresh,
   showUndo = true,
   showBackupRestore = true,
+  showHistory = true,
   item,
 }: SharedActionsProps) {
   return (
@@ -346,9 +376,10 @@ export function SharedActionsSection({
             onAction={onRefresh}
           />
         )}
+        <ToggleDetailAction />
         {showUndo && onRefresh && <UndoAction onRefresh={onRefresh} />}
         {showBackupRestore && onRefresh && <BackupRestoreAction onRefresh={onRefresh} />}
-        <ViewHistoryAction onRefresh={onRefresh} />
+        {showHistory && <ViewHistoryAction onRefresh={onRefresh} />}
         <SourceConfigAction />
       </ActionPanel.Section>
     </>

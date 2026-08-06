@@ -1,6 +1,7 @@
-import { execSync } from "node:child_process";
+import { execFile, execFileSync, execSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { homedir } from "node:os";
+import { promisify } from "node:util";
 
 import { Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
@@ -67,10 +68,10 @@ export async function cloneAndOpen(repository: ExtendedRepositoryFieldsFragment)
   });
 
   if (!existsSync(clonePath.replace("~", homedir()))) {
-    const cloneCommand = buildCloneCommand(repository.nameWithOwner, repositoryCloneProtocol);
-
     try {
-      execSync(cloneCommand, { cwd: baseClonePath });
+      execFileSync("git", buildCloneCommandArgs(repository.nameWithOwner, repositoryCloneProtocol), {
+        cwd: baseClonePath,
+      });
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = "Error while cloning the repository";
@@ -146,6 +147,13 @@ export const CLONE_PROTOCOLS_TO_LABELS = {
   ssh: "SSH",
 } as const satisfies Record<AcceptableCloneProtocol, string>;
 
+export const ACCEPTABLE_CLONE_TOOLS = ["git", "gh"] as const;
+export type AcceptableCloneTool = (typeof ACCEPTABLE_CLONE_TOOLS)[number];
+export const CLONE_TOOLS_TO_LABELS = {
+  git: "Git",
+  gh: "GitHub CLI",
+} as const satisfies Record<AcceptableCloneTool, string>;
+
 /**
  * Format the clone command based on specified protocol.
  * @param repoNameWithOwner {string} Repository name with owner.
@@ -170,6 +178,34 @@ export const buildCloneCommand = (
   return cloneCmd;
 };
 
+/**
+ * Build the argument list for a `git clone` execution.
+ *
+ * The command and its arguments are returned separately so they can be spawned
+ * without a shell, preventing user-controlled values (branch, target directory)
+ * from being interpreted as shell syntax.
+ *
+ * @param repoNameWithOwner {string} Repository name with owner.
+ * @param cloneProtocol {AcceptableCloneProtocol} Clone protocol
+ * @param options {Partial<AdditionalCloneFormatOptions>} Optional target directory and git flags.
+ * @returns {string[]} Arguments for `git clone` (without the executable).
+ */
+export const buildCloneCommandArgs = (
+  repoNameWithOwner: string,
+  cloneProtocol: AcceptableCloneProtocol,
+  options?: Partial<AdditionalCloneFormatOptions>,
+): string[] => {
+  const gitFlags = options?.gitFlags ?? [];
+  const targetDir = options?.targetDir ?? "";
+
+  const cloneArgs = ["clone", ...gitFlags, formatRepositoryUrl(repoNameWithOwner, cloneProtocol)];
+  if (targetDir) {
+    cloneArgs.push(targetDir);
+  }
+
+  return cloneArgs;
+};
+
 type AdditionalCloneFormatOptions = {
   /**
    * Target directory for the cloned repository.
@@ -184,6 +220,141 @@ type AdditionalCloneFormatOptions = {
    */
   gitFlags: string[];
 };
+
+/**
+ * Build the argument list for a `gh repo clone` execution.
+ *
+ * The target directory and git flags (e.g. `-b <branch>`) are preserved and
+ * forwarded to `git clone`, while authentication, protocol and any other
+ * configuration come from the user's existing `gh` setup.
+ *
+ * The command and its arguments are returned separately so they can be spawned
+ * without a shell, preventing user-controlled values (branch, target directory)
+ * from being interpreted as shell syntax.
+ *
+ * @param repoNameWithOwner {string} Repository name with owner.
+ * @param options {Partial<AdditionalCloneFormatOptions>} Optional target directory and git flags.
+ * @returns {string[]} Arguments for `gh repo clone` (without the executable).
+ */
+export const buildGhCloneCommandArgs = (
+  repoNameWithOwner: string,
+  options?: Partial<AdditionalCloneFormatOptions>,
+): string[] => {
+  const gitFlags = options?.gitFlags ?? [];
+  const targetDir = options?.targetDir ?? "";
+
+  const cloneArgs = ["repo", "clone", repoNameWithOwner];
+  if (targetDir) {
+    cloneArgs.push(targetDir);
+  }
+  if (gitFlags.length > 0) {
+    cloneArgs.push("--", ...gitFlags);
+  }
+
+  return cloneArgs;
+};
+
+/**
+ * Result of checking the availability of the GitHub CLI on the user's machine.
+ */
+export type GhAvailability =
+  | { available: true; executable: string }
+  | { available: false; reason: "not-installed" | "not-authenticated" };
+
+const execFileAsync = promisify(execFile);
+
+const GH_EXECUTABLE_SUFFIXES = ["/gh", "\\gh", "/gh.exe", "\\gh.exe"];
+
+// Patterns matching terminal escape sequences (e.g. iTerm shell integration).
+// Built from character codes so no control characters appear in the source.
+const ESC = String.fromCharCode(27);
+const BEL = String.fromCharCode(7);
+const TERMINAL_OSC_PATTERN = new RegExp(`${ESC}][^${BEL}${ESC}]*(?:${BEL}|${ESC}\\\\)`, "g");
+const TERMINAL_CSI_PATTERN = new RegExp(`${ESC}\\[[0-9;?]*[A-Za-z]`, "g");
+const TERMINAL_CHARSET_PATTERN = new RegExp(`${ESC}\\([0-9A-Za-z]`, "g");
+
+/**
+ * Extract the path to the `gh` executable from a shell `command -v` invocation.
+ *
+ * Terminal escape sequences (e.g. iTerm shell integration) and shell-declared
+ * aliases/functions are filtered out so only a real filesystem path is returned.
+ *
+ * @param output {string} Raw stdout of a `command -v gh` invocation.
+ * @returns {string | undefined} The resolved `gh` path, if any.
+ */
+function extractGhExecutablePath(output: string): string | undefined {
+  const sanitized = output
+    .replace(TERMINAL_OSC_PATTERN, "")
+    .replace(TERMINAL_CSI_PATTERN, "")
+    .replace(TERMINAL_CHARSET_PATTERN, "");
+
+  for (const rawLine of sanitized.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || /^(alias|builtin|function)\s/i.test(line)) {
+      continue;
+    }
+    if (GH_EXECUTABLE_SUFFIXES.some((suffix) => line.endsWith(suffix))) {
+      return line;
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Resolve the path to the `gh` executable.
+ *
+ * Raycast's inherited `PATH` omits directories such as Homebrew's
+ * `/opt/homebrew/bin`, so the executable is resolved through the user's shell
+ * (sourcing their profile and rc files) before falling back to a plain `PATH`
+ * lookup.
+ *
+ * @returns {Promise<string>} Absolute path to `gh`, or `"gh"` to rely on `PATH`.
+ */
+async function resolveGhExecutable(): Promise<string> {
+  const shell = process.env.SHELL;
+  if (shell) {
+    for (const flag of ["-l", "-i"]) {
+      try {
+        const { stdout } = await execFileAsync(shell, [flag, "-c", "command -v gh"], {
+          timeout: 5000,
+          maxBuffer: 1024 * 1024,
+        });
+        const resolved = extractGhExecutablePath(stdout.toString());
+        if (resolved) {
+          return resolved;
+        }
+      } catch {
+        // Fall through to the next resolution strategy.
+      }
+    }
+  }
+
+  return "gh";
+}
+
+/**
+ * Check whether the GitHub CLI is installed and authenticated on the user's machine.
+ *
+ * @returns {Promise<GhAvailability>} The availability status of the GitHub CLI.
+ */
+export async function getGhAvailability(): Promise<GhAvailability> {
+  const executable = await resolveGhExecutable();
+
+  try {
+    await execFileAsync(executable, ["--version"]);
+  } catch {
+    return { available: false, reason: "not-installed" };
+  }
+
+  try {
+    await execFileAsync(executable, ["auth", "status"]);
+  } catch {
+    return { available: false, reason: "not-authenticated" };
+  }
+
+  return { available: true, executable };
+}
 
 /**
  * Format the repository URL based on specified protocol.

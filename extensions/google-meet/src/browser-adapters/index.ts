@@ -19,7 +19,7 @@ export function getAdapterForBrowser(browserName: SupportedBrowsers): MeetingUrl
     case "Zen":
       return createFirefoxFamilyAdapter(browserName);
     case "Google Chrome":
-    case "Brave":
+    case "Brave Browser":
     case "Microsoft Edge":
     case "Opera":
     case "QQ":

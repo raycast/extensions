@@ -119,7 +119,7 @@
     "validate": "npm run lint && npm run test && npm run build",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "prebuild": "clang -Wall -O2 -fobjc-arc -arch arm64 -arch x86_64 tools/temp-reader.m -framework IOKit -framework Foundation -o assets/temperature-reader"
+    "prebuild": "clang -Wall -O2 -fobjc-arc -arch arm64 -arch x86_64 tools/temp-reader.m -framework IOKit -framework Foundation -o assets/temperature-reader && clang -Wall -O2 -fobjc-arc -arch arm64 -arch x86_64 tools/smc-fan-reader.m -framework IOKit -framework Foundation -o assets/smc-fan-reader"
   },
   "preferences": [
     {
@@ -141,6 +141,10 @@
         {
           "title": "Memory",
           "value": "memory"
+        },
+        {
+          "title": "Disk",
+          "value": "disk"
         },
         {
           "title": "Power",

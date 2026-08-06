@@ -1,5 +1,13 @@
 # GitHub Changelog
 
+## [Clone with GitHub CLI] - 2026-08-06
+
+- Added a "Clone Tool" choice to the "Clone with Options" flow, letting you clone repositories with the GitHub CLI (`gh repo clone`) instead of plain `git clone`, using your existing `gh` authentication and configuration.
+- The Git method remains the default, and the target directory and branch options are preserved when using GitHub CLI.
+- Shows actionable guidance when the GitHub CLI is not installed or not authenticated.
+- Security: clone commands are now spawned without a shell, so branches and paths containing shell characters are handled safely.
+- Fixed `gh` detection for installations in Homebrew or other directories that are missing from Raycast's PATH.
+
 ## [Show README in repository actions] - 2026-08-03
 
 - Added a "Show Readme" action to the Search Repositories, My Latest Repositories, and My Starred Repositories commands that renders the repository's README inside Raycast, with relative links and images resolved to absolute URLs.
@@ -37,6 +45,7 @@
 - Added an `API` section showing the current GitHub API rate limit (remaining / total, with reset time tooltip).
 - Added a `Refresh Frequency` preference (15 minutes / 30 minutes / 1 hour / 2 hours, default 30 minutes) so users can balance freshness against GitHub API quota usage.
 - Each organization is now a submenu with quick access to **Open Profile**, **Repositories**, **People** and **Projects** instead of just opening the organization homepage.
+- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the _Stats_ menu bar enabled — the dedicated _My Pull Requests Menu Bar_ and _My Issues Menu Bar_ commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
 - `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the *Stats* menu bar enabled — the dedicated *My Pull Requests Menu Bar* and *My Issues Menu Bar* commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
 
 ## [Download Repository Command] - 2026-04-28

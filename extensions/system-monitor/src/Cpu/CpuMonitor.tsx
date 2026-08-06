@@ -7,6 +7,7 @@ import { usePromise } from "@raycast/utils";
 
 import { Actions } from "../components/Actions";
 import { MetadataLabel, MetadataSection, coloredAccessoryText } from "../components/MetadataLabel";
+import { getFanData, getFanStatusLabel } from "../Fan/FanUtils";
 import { ProcessInfo } from "../Interfaces";
 import { getPerCoreCpuUsage } from "../lib/cpu-stats";
 import { resetCpuTabBaselines } from "../lib/tab-baseline-reset";
@@ -152,6 +153,18 @@ function CpuMonitorDetail({
     }
   }, 3000);
 
+  const {
+    data: fanData,
+    revalidate: revalidateFanData,
+    isLoading: isLoadingFanData,
+  } = usePromise(getFanData, [], { execute: isActive });
+
+  useInterval(() => {
+    if (isActive) {
+      revalidateFanData();
+    }
+  }, 3000);
+
   return (
     <List.Item.Detail
       isLoading={
@@ -160,7 +173,8 @@ function CpuMonitorDetail({
         (isLoadingAvgLoad && !avgLoad) ||
         (isLoadingTopProcess && !topProcess) ||
         (isLoadingUptimes && !uptime) ||
-        (isLoadingTemperature && !temperature)
+        (isLoadingTemperature && !temperature) ||
+        (isLoadingFanData && !fanData)
       }
       metadata={
         <List.Item.Detail.Metadata>
@@ -197,6 +211,24 @@ function CpuMonitorDetail({
               <MetadataSection title="Temperature" />
               <MetadataLabel title="Average" text={formatTemperature(temperature.cpuAverage)} />
               <MetadataLabel title="Maximum" text={formatTemperature(temperature.cpuMax)} />
+              <List.Item.Detail.Metadata.Separator />
+            </>
+          )}
+          {fanData?.available ? (
+            <>
+              <MetadataSection title="Fans" />
+              {fanData.fans.map((fan) => (
+                <MetadataLabel
+                  key={fan.index}
+                  title={`Fan ${fan.index + 1}`}
+                  text={`${fan.actualRpm} RPM (${fan.minRpm}-${fan.maxRpm})`}
+                />
+              ))}
+              <List.Item.Detail.Metadata.Separator />
+            </>
+          ) : (
+            <>
+              <MetadataLabel title="Fans" text={fanData ? getFanStatusLabel(fanData.status) : "Loading…"} />
               <List.Item.Detail.Metadata.Separator />
             </>
           )}
