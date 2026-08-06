@@ -14,9 +14,17 @@
  * - upgrade: retried once WITH --force when a modified portable package
  *   refuses removal (winget's own printed remedy; an upgrade replaces the
  *   package either way)
+ * - install/upgrade/uninstall/repair: when every unelevated attempt fails
+ *   with the requires-administrator class, winget itself is relaunched
+ *   elevated (the UAC prompt is the user's confirmation)
+ * - install/upgrade/uninstall/repair: installer exit code 1618 (Windows
+ *   Installer mutex busy — an earlier install still finishing in the
+ *   background) is retried once after a wait
  * - download/import: + --accept-package-agreements, no --silent
  * - Every targeted operation: --exact --id <id> --source <source>
  */
+
+import { closeSync, fstatSync, openSync, readSync } from "node:fs";
 
 import {
   CancelledError,
@@ -37,8 +45,9 @@ import {
   type TableParseResult,
 } from "./parser";
 import { WingetProgressDetector } from "./progress";
-import { runWinget, withQuerySlot } from "./spawn";
+import { runWinget, runWingetElevated, UAC_DECLINED_EXIT_CODE, withQuerySlot } from "./spawn";
 import {
+  type ExecutorResult,
   type WingetExecutorOptions,
   type WingetInstalledPackage,
   type WingetOperationResult,
@@ -104,6 +113,40 @@ async function resolveErrorDescriptionViaCli(errorCode: string, signal?: AbortSi
   }
 }
 
+/**
+ * Silent-mode markers of "the app is open" aborts. Inno Setup suppresses its
+ * "close all instances" prompt under /SILENT, auto-answers Cancel, and exits
+ * with a generic code — the real cause is only in the installer log.
+ */
+const APP_RUNNING_LOG_MARKERS = [/is currently running/i, /close all instances/i];
+
+/**
+ * Bounded read of an installer log's tail. MSI logs are UTF-16LE (BOM at the
+ * start of the file, checked separately from the tail read); Inno logs are
+ * plain text.
+ */
+function readInstallerLogTail(filePath: string, maxBytes = 256 * 1024): string | null {
+  try {
+    const fd = openSync(filePath, "r");
+    try {
+      const bom = Buffer.alloc(2);
+      const utf16 = readSync(fd, bom, 0, 2, 0) === 2 && bom[0] === 0xff && bom[1] === 0xfe;
+      const size = fstatSync(fd).size;
+      let length = Math.min(size, maxBytes);
+      if (utf16 && (size - length) % 2 !== 0) {
+        length -= 1; // keep the read aligned to whole UTF-16 code units
+      }
+      const buffer = Buffer.alloc(length);
+      readSync(fd, buffer, 0, length, size - length);
+      return buffer.toString(utf16 ? "utf16le" : "utf8");
+    } finally {
+      closeSync(fd);
+    }
+  } catch {
+    return null;
+  }
+}
+
 /** Append installer-log location and a CLI-resolved description where useful. */
 async function enrichFailureMessage(
   result: WingetOperationResult,
@@ -119,6 +162,14 @@ async function enrichFailureMessage(
       message = description;
     }
   }
+  // A generic installer exit code with a log: check the log for the
+  // app-is-open abort, which silent mode reports no other way.
+  if (result.installerLogPath && message && /^Installer failed with exit code/.test(message)) {
+    const tail = readInstallerLogTail(result.installerLogPath);
+    if (tail && APP_RUNNING_LOG_MARKERS.some((marker) => marker.test(tail))) {
+      message = "App in use, close it first";
+    }
+  }
   if (message && result.installerLogPath) {
     message = `${message}. Installer log: ${result.installerLogPath}`;
   }
@@ -128,6 +179,38 @@ async function enrichFailureMessage(
 // ---------------------------------------------------------------------------
 // Core executors
 // ---------------------------------------------------------------------------
+
+/**
+ * Elevated execution: no output crosses the elevation boundary, so the result
+ * comes from the exit code alone (locale-independent, same interpretation
+ * table as normal runs). Failure enrichment still applies — `winget error`
+ * runs unelevated.
+ */
+async function executeElevatedOperation(
+  args: string[],
+  options: WingetExecutorOptions,
+): Promise<WingetOperationResult> {
+  options.onElevated?.();
+  try {
+    const execResult = await runWingetElevated(args, { onSpawn: options.onSpawn });
+    if (execResult.exitCode === UAC_DECLINED_EXIT_CODE) {
+      // The same failure class as INSTALL_CANCELLED_BY_USER — a decline is a
+      // per-package failure, not a caller cancellation.
+      return {
+        success: false,
+        message: "Cancelled in the UAC prompt",
+        exitCode: execResult.exitCode,
+      };
+    }
+    const result = interpretOperationResult(execResult.exitCode, "");
+    return enrichFailureMessage(result, options.signal);
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
 
 async function executeOperation(args: string[], options: WingetExecutorOptions = {}): Promise<WingetOperationResult> {
   const detector = new WingetProgressDetector((state) => options.onProgress?.(state));
@@ -173,6 +256,29 @@ async function isWingetAvailable(): Promise<boolean> {
 }
 
 /**
+ * A zero-row parse plus a nonzero exit means the query itself failed (source
+ * update error, cache corruption) — not that the table was empty. Throw so
+ * callers keep their previous data instead of caching the failure as absence;
+ * same contract as the showPackage* transient-failure guards.
+ * NO_APPLICATIONS_FOUND is winget's own "nothing matched" answer, the one
+ * legitimate empty-table exit (empty `pin list` and no-upgrades exit 0).
+ */
+function ensureTableQuerySucceeded<T>(
+  result: ExecutorResult,
+  parsed: TableParseResult<T>,
+  fallbackMessage: string,
+): TableParseResult<T> {
+  if (
+    parsed.items.length === 0 &&
+    result.exitCode !== 0 &&
+    toUnsignedHResult(result.exitCode) !== NO_APPLICATIONS_FOUND
+  ) {
+    throw new Error(getExitCodeMessage(result.exitCode) ?? fallbackMessage);
+  }
+  return parsed;
+}
+
+/**
  * The full catalog. Requires an explicit empty query — winget lists the whole
  * source only for `search -q ""` (and cmd.exe would drop the empty arg, which
  * is one reason we spawn winget directly).
@@ -183,7 +289,7 @@ async function searchAllPackages(signal?: AbortSignal): Promise<TableParseResult
       timeout: CATALOG_TIMEOUT_MS,
       signal,
     });
-    return parseSearchResults(result.stdout);
+    return ensureTableQuerySucceeded(result, parseSearchResults(result.stdout), "Failed to load the package catalog");
   });
 }
 
@@ -193,7 +299,11 @@ async function listInstalledPackages(signal?: AbortSignal): Promise<TableParseRe
       timeout: QUERY_TIMEOUT_MS,
       signal,
     });
-    return parseInstalledPackages(result.stdout);
+    return ensureTableQuerySucceeded(
+      result,
+      parseInstalledPackages(result.stdout),
+      "Failed to list installed packages",
+    );
   });
 }
 
@@ -203,7 +313,7 @@ async function listUpgradePackages(signal?: AbortSignal): Promise<TableParseResu
       timeout: QUERY_TIMEOUT_MS,
       signal,
     });
-    return parseUpgradePackages(result.stdout);
+    return ensureTableQuerySucceeded(result, parseUpgradePackages(result.stdout), "Failed to list available updates");
   });
 }
 
@@ -213,7 +323,7 @@ async function listPinnedPackages(signal?: AbortSignal): Promise<TableParseResul
       timeout: QUERY_TIMEOUT_MS,
       signal,
     });
-    return parsePinnedPackages(result.stdout);
+    return ensureTableQuerySucceeded(result, parsePinnedPackages(result.stdout), "Failed to list pinned packages");
   });
 }
 
@@ -293,38 +403,195 @@ async function showPackageVersions(
 // ---------------------------------------------------------------------------
 
 /**
+ * Windows deployment error ERROR_PACKAGED_SERVICE_REQUIRES_ADMIN_PRIVILEGES:
+ * a machine-scope MSIX package can only be installed by an elevated winget.
+ * winget relays it as the installer's exit code, so it appears both as a
+ * process exit code and inside "Installer failed with exit code" messages.
+ */
+const PACKAGED_SERVICE_REQUIRES_ADMIN = 0x80073d28;
+
+/**
  * The requires-administrator failure class: winget's silent mode blocks the
  * installer's UAC prompt for some packages (the root cause behind upgrade's
- * no---silent policy). Anchored to locale-independent signals: the winget
- * exit code, the curated message from the failure-pattern catalog (matched as
- * a prefix — enrichment appends the installer-log path), or installer exit
- * code 740 (ERROR_ELEVATION_REQUIRED). A free-text scan would over-trigger on
- * enriched content such as log paths under C:\Users\Administrator.
+ * no---silent policy), and machine-scope MSIX packages need winget itself
+ * elevated. Anchored to locale-independent signals: the winget exit code, the
+ * curated message from the failure-pattern catalog (matched as a prefix —
+ * enrichment appends the installer-log path), or installer exit codes 740
+ * (ERROR_ELEVATION_REQUIRED) and 0x80073D28. A free-text scan would
+ * over-trigger on enriched content such as log paths under
+ * C:\Users\Administrator.
  */
 function isElevationFailure(result: WingetOperationResult): boolean {
   if (result.success || result.cancelled) return false;
-  if (result.exitCode !== undefined && toUnsignedHResult(result.exitCode) === COMMAND_REQUIRES_ADMIN) {
-    return true;
+  if (result.exitCode !== undefined) {
+    const code = toUnsignedHResult(result.exitCode);
+    if (code === COMMAND_REQUIRES_ADMIN || code === PACKAGED_SERVICE_REQUIRES_ADMIN) {
+      return true;
+    }
   }
   const message = result.message ?? "";
-  return message.startsWith("Requires administrator") || /exit code:?\s*740\b/i.test(message);
+  return (
+    message.startsWith("Requires administrator") ||
+    /exit code:?\s*740\b/i.test(message) ||
+    /0x80073d28\b/i.test(message)
+  );
 }
 
 /**
- * Run an install/repair invocation silent-first; when it fails with the
- * requires-administrator class, retry once without --silent so the installer
- * can raise its UAC prompt.
+ * ERROR_INSTALL_ALREADY_RUNNING: the Windows Installer mutex was held by
+ * another installation when this one started. Common mid-bulk — an earlier
+ * package's installer can leave a background msiexec finishing after winget
+ * already reported success.
  */
-async function executeWithElevationRetry(
-  argsFor: (flags: string[]) => string[],
-  silentFlags: string[],
+const INSTALLER_BUSY_EXIT_CODE = "1618";
+const INSTALLER_BUSY_RETRY_DELAY_MS = 30_000;
+
+function isInstallerBusyFailure(result: WingetOperationResult): boolean {
+  return !result.success && !result.cancelled && result.errorCode === INSTALLER_BUSY_EXIT_CODE;
+}
+
+/** Resolves "elapsed" after `ms`, or "aborted" as soon as the signal fires. */
+function delay(ms: number, signal?: AbortSignal): Promise<"elapsed" | "aborted"> {
+  return new Promise((resolve) => {
+    if (signal?.aborted) {
+      resolve("aborted");
+      return;
+    }
+    const finish = (outcome: "elapsed" | "aborted") => {
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+      resolve(outcome);
+    };
+    const onAbort = () => finish("aborted");
+    const timer = setTimeout(() => finish("elapsed"), ms);
+    signal?.addEventListener("abort", onAbort);
+  });
+}
+
+/** One winget invocation: argv, plus whether winget itself runs elevated. */
+interface Attempt {
+  args: string[];
+  elevated?: boolean;
+}
+
+/**
+ * One failure class and its remedy. Rules are consulted in order after every
+ * failed attempt; the first unspent match yields the next attempt, and each
+ * rule fires at most once per operation. `disclose` annotates the eventual
+ * success so overrides (e.g. --force) stay visible to the user.
+ */
+interface RecoveryRule {
+  matches(result: WingetOperationResult): boolean;
+  /** Wait before retrying (cancellable; a cancelled wait keeps the failure). */
+  waitMs?: number;
+  next(current: Attempt): Attempt;
+  disclose?: string;
+}
+
+/**
+ * The recovery engine: execute, and while the failure matches an unspent
+ * rule, escalate to the rule's next attempt. Attempt state threads through
+ * rules, so a later retry keeps what an earlier rule established — flags
+ * (an elevated retry after --force keeps --force) and PRIVILEGE (a retry
+ * after an elevated attempt stays elevated; the runner suspends cancellation
+ * for the rest of the package once elevation starts, so a demoted attempt
+ * would run uncancellable). Elevated attempts have no observable output —
+ * their result comes from the exit code alone.
+ */
+async function executeWithRecovery(
+  first: Attempt,
+  rules: RecoveryRule[],
   options: WingetExecutorOptions,
 ): Promise<WingetOperationResult> {
-  const result = await executeOperation(argsFor(silentFlags), options);
-  if (!isElevationFailure(result)) {
-    return result;
+  const run = (attempt: Attempt) =>
+    attempt.elevated ? executeElevatedOperation(attempt.args, options) : executeOperation(attempt.args, options);
+
+  const spent = new Set<RecoveryRule>();
+  const disclosures: string[] = [];
+  let attempt = first;
+  let result = await run(attempt);
+  for (;;) {
+    if (result.success) {
+      if (disclosures.length === 0 || result.noop) {
+        return result;
+      }
+      const note = disclosures.join("; ");
+      return {
+        ...result,
+        message: result.message ? `${result.message} (${note})` : note.charAt(0).toUpperCase() + note.slice(1),
+      };
+    }
+    if (result.cancelled) {
+      return result;
+    }
+    const rule = rules.find((r) => !spent.has(r) && r.matches(result));
+    if (!rule) {
+      return result;
+    }
+    spent.add(rule);
+    if (rule.waitMs && (await delay(rule.waitMs, options.signal)) === "aborted") {
+      return result;
+    }
+    if (rule.disclose) {
+      disclosures.push(rule.disclose);
+    }
+    attempt = rule.next(attempt);
+    result = await run(attempt);
   }
-  return executeOperation(argsFor(ELEVATION_RETRY_FLAGS), options);
+}
+
+// The failure classes and their remedies. Adding a class = one classifier
+// predicate + one rule here + the rule's slot in the operations' policies.
+
+/**
+ * ERROR_INSTALL_ALREADY_RUNNING (1618): the Windows Installer mutex was held
+ * by another installation — a transient collision, not a package problem.
+ * Wait it out and retry the same attempt.
+ */
+const installerBusyRule: RecoveryRule = {
+  matches: isInstallerBusyFailure,
+  waitMs: INSTALLER_BUSY_RETRY_DELAY_MS,
+  next: (current) => current,
+};
+
+/**
+ * Silent mode suppressed the installer's own UAC prompt (the root cause
+ * behind upgrade's no---silent policy): retry without --silent.
+ */
+function unsilencedRetryRule(argsFor: (flags: string[]) => string[]): RecoveryRule {
+  return {
+    matches: isElevationFailure,
+    next: (current) => ({ ...current, args: argsFor(ELEVATION_RETRY_FLAGS) }),
+  };
+}
+
+/**
+ * Nothing unelevated can install this package (machine-scope MSIX): relaunch
+ * winget itself elevated — the UAC prompt is the confirmation, and a decline
+ * is a normal per-package failure so bulk runs carry on. `args` overrides the
+ * attempt (install/repair re-elevate their SILENT argv: the installer needs
+ * no prompt of its own once winget is elevated); by default the current
+ * attempt's argv is kept (upgrade's --force retry must survive elevation).
+ */
+function elevatedRetryRule(args?: () => string[]): RecoveryRule {
+  return {
+    matches: isElevationFailure,
+    next: (current) => ({ args: args?.() ?? current.args, elevated: true }),
+  };
+}
+
+/**
+ * A modified portable package refuses removal during upgrade; winget's
+ * printed remedy is --force (an upgrade replaces the package either way).
+ * Uninstall deliberately has no such rule — forced removal deletes the
+ * user's modifications, so it runs only after an explicit confirmation.
+ */
+function forceRetryRule(argsFor: (extra: string[]) => string[]): RecoveryRule {
+  return {
+    matches: isModifiedPortableFailure,
+    next: (current) => ({ ...current, args: argsFor(["--force"]) }),
+    disclose: "modified portable package, used --force",
+  };
 }
 
 async function installPackage(
@@ -332,9 +599,10 @@ async function installPackage(
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
-  return executeWithElevationRetry(
-    (flags) => withSource(["install", ...EXACT_ID_FLAGS, id, ...flags], source),
-    INSTALL_FLAGS,
+  const argsFor = (flags: string[]) => withSource(["install", ...EXACT_ID_FLAGS, id, ...flags], source);
+  return executeWithRecovery(
+    { args: argsFor(INSTALL_FLAGS) },
+    [installerBusyRule, unsilencedRetryRule(argsFor), elevatedRetryRule(() => argsFor(INSTALL_FLAGS))],
     options,
   );
 }
@@ -350,9 +618,11 @@ async function installPackageVersion(
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
-  const result = await executeWithElevationRetry(
-    (flags) => withSource(["install", ...EXACT_ID_FLAGS, id, "--version", version, ...flags], source),
-    INSTALL_FLAGS,
+  const argsFor = (flags: string[]) =>
+    withSource(["install", ...EXACT_ID_FLAGS, id, "--version", version, ...flags], source);
+  const result = await executeWithRecovery(
+    { args: argsFor(INSTALL_FLAGS) },
+    [installerBusyRule, unsilencedRetryRule(argsFor), elevatedRetryRule(() => argsFor(INSTALL_FLAGS))],
     options,
   );
   if (!result.success) {
@@ -380,30 +650,27 @@ async function installPackageVersion(
   return result;
 }
 
-/**
- * Upgrade-specific exit-code remap: with a `--source` filter, winget reports
- * an installed-but-up-to-date package as NO_APPLICATIONS_FOUND ("No installed
- * package found matching input criteria") instead of UPDATE_NOT_APPLICABLE —
- * verified live (winget 1.28: 0x8A15002B without --source, 0x8A150014 with).
- * For an upgrade that is a no-op, not a failure. (For uninstall the same code
- * genuinely means "not installed" and stays a failure.)
- */
-function remapUpgradeNotFound(result: WingetOperationResult): WingetOperationResult {
+/** NO_APPLICATIONS_FOUND as a no-op — the meaning differs per operation. */
+function remapNotFoundAsNoop(result: WingetOperationResult, message: string): WingetOperationResult {
   if (
     !result.success &&
     !result.cancelled &&
     result.exitCode !== undefined &&
     toUnsignedHResult(result.exitCode) === NO_APPLICATIONS_FOUND
   ) {
-    return {
-      ...result,
-      success: true,
-      noop: true,
-      message: "No applicable update",
-      errorCode: undefined,
-    };
+    return { ...result, success: true, noop: true, message, errorCode: undefined };
   }
   return result;
+}
+
+/**
+ * Upgrade-specific: with a `--source` filter, winget reports an
+ * installed-but-up-to-date package as NO_APPLICATIONS_FOUND ("No installed
+ * package found matching input criteria") instead of UPDATE_NOT_APPLICABLE —
+ * verified live (winget 1.28: 0x8A15002B without --source, 0x8A150014 with).
+ */
+function remapUpgradeNotFound(result: WingetOperationResult): WingetOperationResult {
+  return remapNotFoundAsNoop(result, "No applicable update");
 }
 
 /**
@@ -422,45 +689,30 @@ function isModifiedPortableFailure(result: WingetOperationResult): boolean {
   return /portable package/i.test(message) && /modified/i.test(message);
 }
 
-/**
- * Run an upgrade invocation normally; when it fails because a portable
- * package was modified after install, retry once with --force (the remedy
- * winget itself prints — an upgrade replaces the package either way). The
- * success message discloses the override. Uninstall deliberately does NOT
- * auto-force: forced removal deletes the user's modifications, so it runs
- * only after the runner's explicit confirmation prompt.
- */
-async function executeWithForceRetry(
-  argsFor: (extra: string[]) => string[],
-  options: WingetExecutorOptions,
-): Promise<WingetOperationResult> {
-  const result = await executeOperation(argsFor([]), options);
-  if (!isModifiedPortableFailure(result)) {
-    return result;
-  }
-  const retried = await executeOperation(argsFor(["--force"]), options);
-  if (retried.success && !retried.noop) {
-    // Append rather than replace: a successful retry can carry its own
-    // message (e.g. "Restart your PC to finish") that must stay visible.
-    const disclosure = "modified portable package, used --force";
-    return {
-      ...retried,
-      message: retried.message ? `${retried.message} (${disclosure})` : "Modified portable package, used --force",
-    };
-  }
-  return retried;
-}
-
 async function upgradePackage(
   id: string,
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
-  const result = await executeWithForceRetry(
-    (extra) => withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS, ...extra], source),
+  const argsFor = (extra: string[]) =>
+    withSource(["upgrade", ...EXACT_ID_FLAGS, id, ...UPGRADE_FLAGS, ...extra], source);
+  const result = await executeWithRecovery(
+    { args: argsFor([]) },
+    [installerBusyRule, forceRetryRule(argsFor), elevatedRetryRule()],
     options,
   );
   return remapUpgradeNotFound(result);
+}
+
+/**
+ * Uninstall-specific exit-code remap: NO_APPLICATIONS_FOUND means winget has
+ * no such installed package — the index row that offered the uninstall was a
+ * ghost (the package was removed outside this extension, or a prior uninstall
+ * finished without the index catching up). Not a failure: report a no-op so
+ * the optimistic patch drops the row and the index self-heals.
+ */
+function remapUninstallNotFound(result: WingetOperationResult): WingetOperationResult {
+  return remapNotFoundAsNoop(result, "Not installed");
 }
 
 /**
@@ -479,10 +731,12 @@ async function uninstallPackage(
 ): Promise<WingetOperationResult> {
   const versionFlags = version ? ["--version", version] : [];
   const forceFlags = force ? ["--force"] : [];
-  return executeOperation(
-    withSource(["uninstall", ...EXACT_ID_FLAGS, id, ...versionFlags, ...UNINSTALL_FLAGS, ...forceFlags], source),
-    options,
+  const args = withSource(
+    ["uninstall", ...EXACT_ID_FLAGS, id, ...versionFlags, ...UNINSTALL_FLAGS, ...forceFlags],
+    source,
   );
+  const result = await executeWithRecovery({ args }, [installerBusyRule, elevatedRetryRule()], options);
+  return remapUninstallNotFound(result);
 }
 
 async function repairPackage(
@@ -490,9 +744,10 @@ async function repairPackage(
   source: WingetSource,
   options: WingetExecutorOptions = {},
 ): Promise<WingetOperationResult> {
-  return executeWithElevationRetry(
-    (flags) => withSource(["repair", ...EXACT_ID_FLAGS, id, ...flags], source),
-    REPAIR_FLAGS,
+  const argsFor = (flags: string[]) => withSource(["repair", ...EXACT_ID_FLAGS, id, ...flags], source);
+  return executeWithRecovery(
+    { args: argsFor(REPAIR_FLAGS) },
+    [installerBusyRule, unsilencedRetryRule(argsFor), elevatedRetryRule(() => argsFor(REPAIR_FLAGS))],
     options,
   );
 }
@@ -552,8 +807,11 @@ async function importPackages(
 }
 
 export {
+  ensureTableQuerySucceeded,
   isElevationFailure,
+  isInstallerBusyFailure,
   isModifiedPortableFailure,
+  remapUninstallNotFound,
   remapUpgradeNotFound,
   downloadInstaller,
   exportPackages,

@@ -3,11 +3,44 @@
 /** Single blockquote frame at line start: optional 0-3 spaces, `>`, optional single space. */
 export const BLOCKQUOTE_PEEL = /^ {0,3}> ?/;
 
-/** Fenced code-block opener/closer: backtick or tilde, length ≥ 3. */
+/** Fenced code-block opener: backtick or tilde, length ≥ 3, optional info string. */
 export const FENCE_BOUNDARY = /^ {0,3}(`{3,}|~{3,})/;
 
-/** Indented code: 4+ leading spaces with a non-space body. Empty whitespace-only lines do not match. */
-export const INDENTED_CODE = /^ {4,}\S/;
+/**
+ * Fenced code-block CLOSER: the fence run may be followed only by trailing
+ * whitespace (CommonMark §4.5). A line like ```` ```not-a-closer ```` is an info
+ * string, not a closer — treating it as one would end the block early and expose
+ * its code to reflow.
+ */
+export const FENCE_CLOSER = /^ {0,3}(`{3,}|~{3,})\s*$/;
+
+/**
+ * Indented code: an indent worth 4+ columns with a non-space body, where a TAB
+ * advances to the next 4-column stop (CommonMark §2.2). So a single leading tab
+ * qualifies, as does `"  \t"` (2 spaces + tab → column 4) and any run of tabs.
+ * Empty whitespace-only lines do not match.
+ *
+ * Column width is computed by `indentColumns` rather than matched by a regex —
+ * enumerating tab/space combinations missed cases (`"\t\t"` was treated as prose
+ * and its code reflowed).
+ */
+export const INDENT_RUN = /^[ \t]+(?=\S)/;
+
+/** Expanded display width of an indent run, with tabs advancing to 4-column stops. */
+export function indentColumns(indent: string): number {
+  let col = 0;
+  for (const ch of indent) {
+    if (ch === "\t") col += 4 - (col % 4);
+    else col++;
+  }
+  return col;
+}
+
+/** True when a line's leading whitespace reaches column 4+ (i.e. it is indented code). */
+export function isIndentedCode(content: string): boolean {
+  const m = content.match(INDENT_RUN);
+  return m !== null && indentColumns(m[0]) >= 4;
+}
 
 /** ATX heading: 1-6 `#` followed by whitespace or EOL. */
 export const HEADING_ATX = /^ {0,3}#{1,6}(\s|$)/;
@@ -45,16 +78,29 @@ export const TABLE_SEPARATOR = /^\s*\|?(\s*:?-+:?\s*\|)+\s*:?-+:?\s*\|?\s*$/;
 /** Hard break: 2+ trailing spaces. Apply BEFORE any trim. */
 export const HARD_BREAK_SPACES = / {2,}$/;
 
-/** Hard break: trailing backslash. Caller is responsible for distinguishing escaped literal backslashes (e.g. `foo\\` in source ending with two backslashes) from a true hard-break marker. */
-export const HARD_BREAK_BACKSLASH = /\\$/;
+/**
+ * Hard break: a trailing backslash that is NOT itself escaped. Only an ODD
+ * number of trailing backslashes is a hard break — an even run is a sequence of
+ * escaped literal backslashes (`foo\\` renders as `foo\` with no line break).
+ * The leading `[^\\]|^` anchors the count so parity is measured over the whole run.
+ */
+export const HARD_BREAK_BACKSLASH = /(?:^|[^\\])(?:\\\\)*\\$/;
+
+/** U+00AD SOFT HYPHEN at end of a line — an unambiguous soft line-break marker. */
+export const SOFT_HYPHEN_END = /­$/;
 
 /**
- * Soft hyphen at end of a prose line — a run of lowercase letters immediately
- * before the trailing hyphen, with the run NOT preceded by another letter or
- * a hyphen. Excludes:
- *   - hyphens after capital-led words (e.g. "State-")
- *   - mid-compound breaks (e.g. "state-of-the-")
- *   - hyphens after digits (e.g. "123-")
- * Note: NOT \w, because \w includes digits which we don't want.
+ * A line-break hyphen that binds two halves of one word: an ASCII `-` or a
+ * U+00AD soft hyphen at end of line, preceded by a letter.
+ *
+ * `\p{L}` (Unicode letter) rather than `[A-Za-z]` so accented Latin, Cyrillic,
+ * Greek, and CJK all qualify — an ASCII-only class silently failed to rejoin
+ * `Bindestrich-/Wörter`.
  */
-export const HYPHEN_BREAK_END = /(?:^|[^A-Za-z-])[a-z]+-$/;
+export const HYPHEN_BREAK_END = /[\p{L}\p{Nd}][-­]$/u;
+
+/** A Unicode letter at the start of the next line — the other half of a broken word. */
+export const STARTS_WITH_LETTER = /^\p{L}/u;
+
+/** A digit at the start of the next line (numeric ranges: `5-` + `10`). */
+export const STARTS_WITH_DIGIT = /^\p{Nd}/u;

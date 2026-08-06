@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lumen",
+  "title": "Lumen",
+  "description": "Scoped fuzzy file search across your favorite workspaces, with filters and sorting.",
+  "icon": "lumen.png",
+  "author": "kumare_agape",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lumen",
+      "title": "Lumen",
+      "subtitle": "Find Anything",
+      "description": "Open the scoped fuzzy search across your workspaces.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "firstLevelSort",
+          "title": "First-Level Order",
+          "description": "How to order a workspace's top level when you enter it.",
+          "type": "dropdown",
+          "required": false,
+          "default": "modified",
+          "data": [
+            {
+              "title": "Date Modified",
+              "value": "modified"
+            },
+            {
+              "title": "Name",
+              "value": "name"
+            }
+          ]
+        },
+        {
+          "name": "homeExcludeWorkspaces",
+          "title": "Home Search",
+          "label": "Exclude configured workspaces from Home (h)",
+          "description": "Home searches outside your scoped corpus; use a workspace to search inside one.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    },
+    {
+      "name": "manage-workspaces",
+      "title": "Manage Workspaces",
+      "description": "Create, edit, and delete Lumen workspaces.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-tools",
+      "title": "Manage Tools",
+      "description": "Edit Lumen categories and their extensions; restore defaults.",
+      "mode": "view"
+    },
+    {
+      "name": "export-workspaces",
+      "title": "Export Workspaces",
+      "description": "Export workspaces to JSON, or import (replaces all).",
+      "mode": "view"
+    },
+    {
+      "name": "about",
+      "title": "About Lumen",
+      "description": "About Lumen and links to the source and other projects.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "fzf": "^0.5.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

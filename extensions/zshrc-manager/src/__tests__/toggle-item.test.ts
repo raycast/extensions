@@ -45,6 +45,7 @@ describe("toggle-item.ts", () => {
     keyValidationError: "Invalid alias name",
     generateLine: (key: string, value: string) => `alias ${key}='${value}'`,
     generatePattern: (key: string) => new RegExp(`^\\s*(?:#\\s*)?alias\\s+${key}=`),
+    matchesDisplayLine: () => true,
     generateReplacement: (key: string, value: string) => `alias ${key}='${value}'`,
     itemType: "alias",
     itemTypeCapitalized: "Alias",
@@ -59,6 +60,7 @@ describe("toggle-item.ts", () => {
     keyValidationError: "Invalid variable name",
     generateLine: (key: string, value: string) => `export ${key}=${value}`,
     generatePattern: (key: string) => new RegExp(`^\\s*(?:#\\s*)?export\\s+${key}=`),
+    matchesDisplayLine: () => true,
     generateReplacement: (key: string, value: string) => `export ${key}=${value}`,
     itemType: "export",
     itemTypeCapitalized: "Export",
@@ -120,7 +122,7 @@ describe("toggle-item.ts", () => {
       // - Was NOT commented (active) -> returns true after commenting (counter-intuitive)
       expect(result).toBe(true);
       expect(mockWriteZshrcFile).toHaveBeenCalledWith(expectedContent);
-      expect(mockSaveToHistory).toHaveBeenCalledWith('Disable alias "ll"');
+      expect(mockSaveToHistory).toHaveBeenCalledWith('Disable alias "ll"', expect.any(String));
       expect(mockClearCache).toHaveBeenCalledWith(TEST_PATH);
       // Note: Toast shows "Enabled"/"active" when result is true, even though we commented it out
       expect(mockShowToast).toHaveBeenCalledWith({
@@ -143,7 +145,7 @@ describe("toggle-item.ts", () => {
       // - WAS commented (disabled) -> returns false after uncommenting (counter-intuitive)
       expect(result).toBe(false);
       expect(mockWriteZshrcFile).toHaveBeenCalledWith(expectedContent);
-      expect(mockSaveToHistory).toHaveBeenCalledWith('Enable alias "ll"');
+      expect(mockSaveToHistory).toHaveBeenCalledWith('Enable alias "ll"', expect.any(String));
     });
 
     it("should preserve leading whitespace when commenting", async () => {

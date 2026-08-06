@@ -12,7 +12,7 @@ compiled_raycast_rust
 
 # misc
 .DS_Store
+.eslintcache
 
-node_modules
-dist
-.DS_Store
+# output
+/dist

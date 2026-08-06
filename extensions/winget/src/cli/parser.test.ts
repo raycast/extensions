@@ -147,6 +147,65 @@ Git               Git.Git            2.52.0    winget
       },
     ]);
   });
+
+  it("resolves single-space column boundaries in localized headers from the rows", () => {
+    // winget pads each column to max(widest value, header name width) + 1:
+    // when the localized header name is wider than every value beneath it,
+    // adjacent header names are separated by a SINGLE space. Here "Version"
+    // and "Disponible" are wider than their values, so the header reads
+    // "Version Disponible Source" with single spaces (real French layout).
+    const output = `
+Nom               ID                  Version Disponible Source
+---------------------------------------------------------------
+Stardock Curtains Stardock.Curtains   1.2     1.19.1     winget
+Notepad++         Notepad++.Notepad++ 8.5.8   8.6.0      winget
+2 mises à niveau disponibles.
+`;
+
+    const { items } = parseUpgradePackages(output);
+    expect(items).toEqual([
+      {
+        name: "Stardock Curtains",
+        id: "Stardock.Curtains",
+        version: "1.2",
+        available: "1.19.1",
+        source: "winget",
+        truncatedFields: undefined,
+      },
+      {
+        name: "Notepad++",
+        id: "Notepad++.Notepad++",
+        version: "8.5.8",
+        available: "8.6.0",
+        source: "winget",
+        truncatedFields: undefined,
+      },
+    ]);
+  });
+
+  it("rejects partially-English localized headers instead of dropping the localized columns", () => {
+    // German headers contain the English words Name, ID, and Version next to
+    // Verfügbar and Quelle. Trusting the English keywords alone would build a
+    // 3-column table whose rows all fail source validation.
+    const output = `
+Name              ID                  Version    Verfügbar  Quelle
+-------------------------------------------------------------------
+Stardock Curtains Stardock.Curtains   1.2        1.19.1     winget
+2 Aktualisierungen verfügbar.
+`;
+
+    const { items } = parseUpgradePackages(output);
+    expect(items).toEqual([
+      {
+        name: "Stardock Curtains",
+        id: "Stardock.Curtains",
+        version: "1.2",
+        available: "1.19.1",
+        source: "winget",
+        truncatedFields: undefined,
+      },
+    ]);
+  });
 });
 
 describe("parseInstalledPackages", () => {
@@ -313,6 +372,52 @@ Tags:
     expect(result?.name).toContain("115");
     expect(result?.version).toBeTruthy();
   });
+
+  it("parses localized labels (French, space before the colon)", () => {
+    const output = `Trouvé Git [Git.Git]
+Version : 2.52.0
+Publisher : The Git Development Community
+Auteur : Johannes Schindelin
+Page d’accueil : https://gitforwindows.org
+Licence : GPL-2.0
+Date de version : 2025-11-24
+Description : Git for Windows
+Mots-clés :
+    vcs
+`;
+
+    expect(parsePackageDetails(output)).toEqual({
+      id: "Git.Git",
+      name: "Git",
+      version: "2.52.0",
+      publisher: "The Git Development Community",
+      author: "Johannes Schindelin",
+      homepage: "https://gitforwindows.org",
+      license: "GPL-2.0",
+      releaseDate: "2025-11-24",
+      description: "Git for Windows",
+      tags: ["vcs"],
+    });
+  });
+
+  it("parses localized labels (Korean colonless homepage, fullwidth colons)", () => {
+    const output = `찾음 Git [Git.Git]
+버전: 2.52.0
+게시자: The Git Development Community
+홈페이지 https://gitforwindows.org
+标记：
+    vcs
+`;
+
+    expect(parsePackageDetails(output)).toEqual({
+      id: "Git.Git",
+      name: "Git",
+      version: "2.52.0",
+      publisher: "The Git Development Community",
+      homepage: "https://gitforwindows.org",
+      tags: ["vcs"],
+    });
+  });
 });
 
 describe("parseVersionList", () => {
@@ -340,6 +445,22 @@ Version
     const result = parseVersionList(fixture("show-versions.raw.txt"));
     expect(result?.id).toBe("Git.Git");
     expect(result!.versions.length).toBeGreaterThan(3);
+  });
+
+  it("parses a localized identity line (the Found verb is translated)", () => {
+    const output = `
+Trouvé GIMP [GIMP.GIMP.3]
+Version
+-------
+3.0.6.1
+3.0.6.0
+`;
+
+    expect(parseVersionList(output)).toEqual({
+      id: "GIMP.GIMP.3",
+      name: "GIMP",
+      versions: ["3.0.6.1", "3.0.6.0"],
+    });
   });
 });
 
@@ -376,6 +497,24 @@ Git               Git.Git            2.52.0    winget
   it("parses the real pin list format with Pin type column and solid separator", () => {
     const { items } = parsePinnedPackages(fixture("pin-list.raw.txt"));
     expect(items).toEqual([{ id: "jqlang.jq", version: "1.8.1", source: "winget" }]);
+  });
+
+  it("merges multi-word localized headers whose later words overhang the values", () => {
+    // Spanish pin list: single space between Origen and Tipo (equal-width
+    // values), and "anclaje" starts beyond "Pinning"/"Gating" so no row has
+    // content beneath it — it must not open a phantom column.
+    const output = `
+Nombre Id               Versión     Origen Tipo de anclaje
+----------------------------------------------------------
+Git    Git.Git          2.52.0      winget Pinning
+Claude Anthropic.Claude 1.20186.0.0 winget Gating
+`;
+
+    const { items } = parsePinnedPackages(output);
+    expect(items).toEqual([
+      { id: "Git.Git", version: "2.52.0", source: "winget" },
+      { id: "Anthropic.Claude", version: "1.20186.0.0", source: "winget" },
+    ]);
   });
 });
 

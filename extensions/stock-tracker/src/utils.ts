@@ -28,6 +28,14 @@ export function formatMoney(value?: number, currency?: string, marketCap?: boole
   return strValue + suffix;
 }
 
+export function formatChangePercent(changePercent?: number) {
+  if (changePercent === undefined || changePercent === null || Number.isNaN(changePercent)) {
+    return "—";
+  }
+  const sign = changePercent > 0 ? "+" : "";
+  return `${sign}${changePercent.toFixed(2)}%`;
+}
+
 export function formatTime(date: Date) {
   return date.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit", second: "2-digit" });
 }

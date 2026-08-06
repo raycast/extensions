@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "contra",
+  "title": "Contra",
+  "description": "Track Contra finances, create and send invoices, and manage freelance projects — right from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "agusdellaquila",
+  "keywords": [
+    "contra",
+    "freelance",
+    "invoice",
+    "invoices",
+    "finances",
+    "wallet",
+    "projects",
+    "messages"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "finance",
+      "title": "Finance Dashboard",
+      "subtitle": "Contra",
+      "description": "Balance, revenue, and outstanding invoices.",
+      "mode": "view"
+    },
+    {
+      "name": "projects",
+      "title": "Active Projects",
+      "subtitle": "Contra",
+      "description": "Your active projects and clients.",
+      "mode": "view"
+    },
+    {
+      "name": "messages",
+      "title": "Messages",
+      "subtitle": "Contra",
+      "description": "Client conversations and unread messages.",
+      "mode": "view"
+    },
+    {
+      "name": "create-invoice",
+      "title": "Create Invoice",
+      "subtitle": "Contra",
+      "description": "Draft and send a Contra invoice.",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Contra Menu Bar",
+      "description": "Pending balance and next due invoice in your menu bar.",
+      "mode": "menu-bar",
+      "interval": "30m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "@modelcontextprotocol/sdk": "^1.29.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "@types/react": "19.2.17"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

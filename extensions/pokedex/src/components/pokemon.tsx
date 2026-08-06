@@ -210,20 +210,24 @@ export default function PokemonDetail(props: { id: number }) {
             />
             <Detail.Metadata.Separator />
             <WeaknessMetadata type="detail" types={pokemon.pokemontypes} />
-            <Detail.Metadata.Separator />
-            <Detail.Metadata.TagList title="Base Stats">
-              {pokemon.pokemonstats.map((stat, idx) => (
-                <Detail.Metadata.TagList.Item
-                  key={idx}
-                  text={`${getLocalizedName(stat.stat.statnames, stat.stat.name)}: ${stat.base_stat}`}
-                  color={
-                    stat.stat.name.startsWith("special")
-                      ? Color.Green
-                      : Color.Yellow
-                  }
-                />
-              ))}
-            </Detail.Metadata.TagList>
+            {(pokemon.pokemonstats?.length ?? 0) > 0 && (
+              <>
+                <Detail.Metadata.Separator />
+                <Detail.Metadata.TagList title="Base Stats">
+                  {pokemon.pokemonstats.map((stat, idx) => (
+                    <Detail.Metadata.TagList.Item
+                      key={idx}
+                      text={`${getLocalizedName(stat.stat.statnames, stat.stat.name)}: ${stat.base_stat}`}
+                      color={
+                        stat.stat.name.startsWith("special")
+                          ? Color.Green
+                          : Color.Yellow
+                      }
+                    />
+                  ))}
+                </Detail.Metadata.TagList>
+              </>
+            )}
           </Detail.Metadata>
         )
       }

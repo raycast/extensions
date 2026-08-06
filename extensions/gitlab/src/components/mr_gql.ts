@@ -71,16 +71,6 @@ const MERGE_REQUEST_LIST_FIELDS = gql`
         name
       }
     }
-    pipelines(first: 1) {
-      nodes {
-        id
-        status
-        detailedStatus {
-          label
-          name
-        }
-      }
-    }
     userPermissions {
       canMerge
       updateMergeRequest
@@ -88,6 +78,11 @@ const MERGE_REQUEST_LIST_FIELDS = gql`
     approvedBy {
       nodes {
         username
+      }
+    }
+    currentUserTodos(state: pending, first: 1) {
+      nodes {
+        id
       }
     }
     description
@@ -398,9 +393,9 @@ interface GqlMRListNode {
   };
   milestone?: { id: string; title: string } | null;
   headPipeline?: GqlPipelineNode | null;
-  pipelines?: { nodes: GqlPipelineNode[] };
   userPermissions?: { canMerge: boolean; updateMergeRequest: boolean };
   approvedBy?: { nodes: { username: string }[] };
+  currentUserTodos?: { nodes: { id: string }[] } | null;
 }
 
 interface GqlMRConnection {
@@ -490,16 +485,11 @@ function pipelineStatusFromGql(pipeline: GqlPipelineNode | null | undefined): st
   return undefined;
 }
 
-function mergeRequestListPipeline(node: GqlMRListNode): GqlPipelineNode | null | undefined {
-  return node.headPipeline ?? node.pipelines?.nodes?.[0];
-}
-
 export function gqlNodeToMergeRequest(node: GqlMRListNode, currentUsername?: string): MergeRequest {
   const approvedByCurrentUser = currentUsername
     ? (node.approvedBy?.nodes?.some((user) => user.username === currentUsername) ?? false)
     : undefined;
-  const listPipeline = mergeRequestListPipeline(node);
-  const headStatus = pipelineStatusFromGql(listPipeline);
+  const headStatus = pipelineStatusFromGql(node.headPipeline);
   return {
     title: node.title,
     web_url: node.webUrl,
@@ -543,6 +533,7 @@ export function gqlNodeToMergeRequest(node: GqlMRListNode, currentUsername?: str
     resolved_discussions_count: node.resolvedDiscussionsCount ?? undefined,
     resolvable_discussions_count: node.resolvableDiscussionsCount ?? undefined,
     approvals_count: node.approvedBy?.nodes?.length,
+    todo_id: node.currentUserTodos?.nodes[0]?.id ? getIdFromGqlId(node.currentUserTodos.nodes[0].id) : undefined,
     user:
       node.userPermissions || approvedByCurrentUser !== undefined
         ? {
@@ -553,7 +544,7 @@ export function gqlNodeToMergeRequest(node: GqlMRListNode, currentUsername?: str
         : undefined,
     head_pipeline: headStatus
       ? {
-          id: listPipeline?.id ? getIdFromGqlId(listPipeline.id) : 0,
+          id: node.headPipeline?.id ? getIdFromGqlId(node.headPipeline.id) : 0,
           status: headStatus,
         }
       : undefined,

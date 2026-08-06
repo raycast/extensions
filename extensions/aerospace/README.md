@@ -24,6 +24,8 @@ It works with the existing installation of [AeroSpace](https://github.com/nikita
 1. Install [Raycast](https://raycast.com)
 2. Install the extension from the Raycast Store by searching for "Aerospace"
 
+The extension auto-detects the `aerospace` binary in the locations used by Homebrew, Nix, and nix-darwin. If you installed AeroSpace somewhere else (MacPorts, `~/.local/bin`, a custom prefix), set **Aerospace Binary Path** in the extension preferences to the full path of the binary — run `which aerospace` in your terminal to find it.
+
 ## Usage
 
 - Open Raycast and type `Aerospace` to view the available commands

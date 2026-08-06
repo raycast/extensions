@@ -11,7 +11,7 @@ import {
   SimpleGit,
 } from "simple-git";
 import { showToast, Toast, getPreferenceValues, Alert, confirmAlert, environment } from "@raycast/api";
-import { readFileSync, writeFileSync, mkdtempSync, chmodSync, rmSync, existsSync } from "fs";
+import { readFileSync, writeFileSync, mkdtempSync, chmodSync, rmSync, existsSync, statSync } from "fs";
 import { tmpdir } from "os";
 import {
   Branch,
@@ -35,9 +35,11 @@ import {
   StashScope,
   GitLocalConfig,
   GitLocalConfigUpdates,
+  Worktree,
+  WorktreeOrigin,
 } from "../types";
 import { GitConfigScope } from "simple-git";
-import { basename, join } from "path";
+import { basename, dirname, isAbsolute, join, resolve, sep } from "path";
 import { promises as fs } from "fs";
 import { showFailureToast } from "@raycast/utils";
 import { exec, spawn } from "child_process";
@@ -50,9 +52,18 @@ import { shellEnvironmentVariables } from "./environment-utils";
 export class GitManager {
   private git: SimpleGit;
   public readonly repoPath: string;
+  /** Per-worktree git directory (`git rev-parse --git-dir`). */
+  public readonly gitDirPath: string;
+  /** Shared git directory (`git rev-parse --git-common-dir`). */
+  public readonly gitCommonDirPath: string;
 
   constructor(repoPath: string) {
     this.repoPath = repoPath;
+
+    const { gitDirPath, gitCommonDirPath } = GitManager.resolveGitDirectories(repoPath);
+    this.gitDirPath = gitDirPath;
+    this.gitCommonDirPath = gitCommonDirPath;
+
     this.git = simpleGit(repoPath, {
       binary: getPreferenceValues<Preferences>().binaryPath,
       errors: (error, _result) => {
@@ -76,21 +87,84 @@ export class GitManager {
     return basename(this.repoPath) || "Unknown Repository";
   }
 
+  /**
+   * Path to the main worktree directory shared by all linked worktrees.
+   */
+  get repositoryRootPath(): string {
+    return dirname(this.gitCommonDirPath);
+  }
+
   get gitignorePath(): string {
     return join(this.repoPath, ".gitignore");
   }
 
   /**
-   * Gets the path to the git config file.
+   * Gets the path to the git config file shared by all worktrees of the repository.
    */
   get localConfigPath(): string {
-    return join(this.repoPath, ".git", "config");
+    return join(this.gitCommonDirPath, "config");
   }
 
   get globalConfigPath(): string {
     return join(process.env.HOME || process.env.USERPROFILE || "", ".gitconfig");
   }
 
+  /**
+   * Whether the opened working tree is a linked worktree rather than the main one.
+   */
+  get isWorktree(): boolean {
+    return this.gitDirPath !== this.gitCommonDirPath;
+  }
+
+  /**
+   * Repository the opened linked worktree belongs to; undefined for main worktrees.
+   */
+  get worktreeOrigin(): WorktreeOrigin | undefined {
+    if (!this.isWorktree) return undefined;
+
+    const repositoryRootPath = this.repositoryRootPath;
+    const repositoryName = basename(repositoryRootPath);
+
+    return {
+      repositoryRootPath,
+      repositoryName,
+      name: this.repoName,
+      displayName: `${repositoryName}: ${this.repoName}`,
+    };
+  }
+
+  /**
+   * Whether the repository has at least one linked worktree registered.
+   * Allows skipping the `git worktree list` call for repositories without worktrees.
+   */
+  get hasLinkedWorktrees(): boolean {
+    return existsSync(join(this.gitCommonDirPath, "worktrees"));
+  }
+
+  /**
+   * Resolves git directories for a working tree.
+   * In linked worktrees `.git` is a file pointing to `<main repo>/.git/worktrees/<name>`.
+   */
+  private static resolveGitDirectories(repoPath: string): { gitDirPath: string; gitCommonDirPath: string } {
+    const gitEntryPath = join(repoPath, ".git");
+
+    let gitDirPath = gitEntryPath;
+    if (existsSync(gitEntryPath) && statSync(gitEntryPath).isFile()) {
+      const pointer = readFileSync(gitEntryPath, "utf-8")
+        .trim()
+        .replace(/^gitdir:\s*/, "");
+      gitDirPath = isAbsolute(pointer) ? pointer : resolve(repoPath, pointer);
+    }
+
+    const worktreesSegmentIndex = gitDirPath.lastIndexOf(`${sep}worktrees${sep}`);
+    const gitCommonDirPath = worktreesSegmentIndex === -1 ? gitDirPath : gitDirPath.slice(0, worktreesSegmentIndex);
+
+    return { gitDirPath, gitCommonDirPath };
+  }
+
+  /**
+   * Validates that the directory is a Git repository (a regular repository, a submodule or a linked worktree).
+   */
   static validateDirectory(repoPath: string) {
     if (!existsSync(repoPath)) {
       throw new Error(`Directory does not exist: ${repoPath}`);
@@ -107,7 +181,7 @@ export class GitManager {
    */
   private setupGlobalLogging(): void {
     this.git.outputHandler((command, stdout, stderr, args) => {
-      const ignoredCommands = ["ls-files", "ls-remote", "remote"];
+      const ignoredCommands = ["ls-files", "ls-remote", "remote", "worktree"];
       // Skip logging for ls-files command
       if (ignoredCommands.some((command) => args.includes(command))) {
         return;
@@ -153,7 +227,7 @@ export class GitManager {
    * Gets the branches state including current branch, detached HEAD, local and remote branches.
    */
   async getBranches(): Promise<BranchesState> {
-    const summary = await this.git.branch(["--all", "-vv", "--sort=-committerdate"]);
+    const summary = await this.git.branch(["--all", "--verbose", "--verbose", "--sort=-committerdate"]);
 
     const parseBranchInfo = (
       label: string,
@@ -163,33 +237,46 @@ export class GitManager {
       upstream?: { name: string; fullName: string; remote: string };
       isGone?: boolean;
     } => {
-      // Single regex to parse all possible branch info patterns with named groups
-      // Handles: no upstream, [upstream], [upstream: ahead X], [upstream: behind Y], [upstream: ahead X, behind Y], [upstream: gone]
+      // Parse upstream block wherever it appears in the label.
+      // This is required for branches checked out in another worktree where `git branch -vv`
+      // may include worktree-related prefixes before the upstream block.
+      // Supported forms:
+      // [origin/main]
+      // [origin/main: ahead 2]
+      // [origin/main: behind 3]
+      // [origin/main: ahead 2, behind 3]
+      // [origin/main: gone]
       const match = label.match(
-        /(?:\[(?<upstream>.*?)(?:: (?:ahead (?<ahead>\d+))?(?:, )?(?:behind (?<behind>\d+))?(?<gone>gone)?)?\])?/,
+        /\[(?<upstream>[^\]:]+)(?::\s*(?:ahead\s+(?<ahead>\d+))?(?:,\s*)?(?:behind\s+(?<behind>\d+))?(?:,\s*)?(?<gone>gone)?)?\]/,
       );
 
       if (!match?.groups) {
         return { ahead: 0, behind: 0 };
       }
 
+      const upstreamFullName = match.groups.upstream?.trim();
+      const upstreamParts = upstreamFullName?.split("/") ?? [];
+      const upstreamRemote = upstreamParts[0];
+      const upstreamName = upstreamParts.slice(1).join("/");
+
       return {
         ahead: match.groups.ahead ? parseInt(match.groups.ahead, 10) : 0,
         behind: match.groups.behind ? parseInt(match.groups.behind, 10) : 0,
-        upstream: match.groups.upstream
-          ? {
-              name: match.groups.upstream.split("/").slice(1).join("/"),
-              fullName: match.groups.upstream,
-              remote: match.groups.upstream.split("/")[0],
-            }
-          : undefined,
+        upstream:
+          upstreamFullName && upstreamRemote && upstreamName
+            ? {
+                name: upstreamName,
+                fullName: upstreamFullName,
+                remote: upstreamRemote,
+              }
+            : undefined,
         isGone: !!match.groups.gone,
       };
     };
 
     let currentBranchName = summary.current;
     if (summary.current && summary.current.startsWith("(no")) {
-      const headNamePath = join(this.repoPath, ".git", "rebase-merge", "head-name");
+      const headNamePath = join(this.gitDirPath, "rebase-merge", "head-name");
       const headNameContent = await fs.readFile(headNamePath, "utf-8");
       currentBranchName = headNameContent.trim().replace(/^refs\/heads\//, "");
     }
@@ -307,12 +394,12 @@ export class GitManager {
       files.push(...fileEntries);
     }
 
-    const interactiveRebaseMergePath = join(this.repoPath, ".git", "rebase-merge");
-    const nonInteractiveRebaseMergePath = join(this.repoPath, ".git", "rebase-apply");
-    const mergeHeadPath = join(this.repoPath, ".git", "MERGE_HEAD");
-    const squashMessagePath = join(this.repoPath, ".git", "SQUASH_MSG");
-    const cherryPickHeadPath = join(this.repoPath, ".git", "CHERRY_PICK_HEAD");
-    const revertHeadPath = join(this.repoPath, ".git", "REVERT_HEAD");
+    const interactiveRebaseMergePath = join(this.gitDirPath, "rebase-merge");
+    const nonInteractiveRebaseMergePath = join(this.gitDirPath, "rebase-apply");
+    const mergeHeadPath = join(this.gitDirPath, "MERGE_HEAD");
+    const squashMessagePath = join(this.gitDirPath, "SQUASH_MSG");
+    const cherryPickHeadPath = join(this.gitDirPath, "CHERRY_PICK_HEAD");
+    const revertHeadPath = join(this.gitDirPath, "REVERT_HEAD");
 
     let mode: StatusMode;
 
@@ -619,7 +706,7 @@ export class GitManager {
     if (!log.latest) return null;
 
     const commit = log.latest;
-    const changedFiles = this.parseCommitChangedFiles(commit.diff!);
+    const changedFiles = this.parseCommitChangedFiles(commit.diff);
     const parsedRefs = this.parseCommitRefs(commit.refs);
 
     return {
@@ -687,7 +774,7 @@ export class GitManager {
    * Returns the first parent hash of a given commit or null if none (root commit).
    */
   async getFirstParentOfCommit(commitHash: string): Promise<string | null> {
-    const output = await this.git.raw(["rev-list", "--parents", "-n", "1", commitHash]);
+    const output = await this.git.raw(["rev-list", "--parents", "--max-count=1", commitHash]);
     const parts = output.trim().split(/\s+/);
     // Format: <child> <parent1> [parent2 ...]
     if (parts.length >= 2) {
@@ -724,7 +811,7 @@ export class GitManager {
         refs?: string;
         diff?: DiffResult;
       }) => {
-        const changedFiles = this.parseCommitChangedFiles(commit.diff!);
+        const changedFiles = this.parseCommitChangedFiles(commit.diff);
         const parsedRefs = this.parseCommitRefs(commit.refs);
 
         return {
@@ -822,7 +909,7 @@ __REBASE_TODO__
   /**
    * Parses the changed files from git log --name-status diff output.
    */
-  private parseCommitChangedFiles(diff: DiffResult): CommitFileChange[] {
+  private parseCommitChangedFiles(diff: DiffResult | undefined): CommitFileChange[] {
     // Helper function to map DiffNameStatus to typed status names
     function mapDiffNameStatusToTypedStatus(status: DiffNameStatus): CommitFileChange["status"] {
       switch (status) {
@@ -1010,7 +1097,7 @@ __REBASE_TODO__
     if (amend) args.push("--amend");
     if (noVerify) args.push("--no-verify");
 
-    args.push("-m", message);
+    args.push("--message", message);
 
     try {
       await this.git.raw(args);
@@ -1152,7 +1239,7 @@ __REBASE_TODO__
       args.push("--include-untracked");
     }
 
-    args.push("-m", message);
+    args.push("--message", message);
 
     // Handle file-specific stash
     if (typeof scope === "object" && "filePath" in scope) {
@@ -1188,7 +1275,7 @@ __REBASE_TODO__
    */
   async getStashes(): Promise<Stash[]> {
     // Check if stash reference exists before proceeding
-    const stashPath = join(this.repoPath, ".git", "refs", "stash");
+    const stashPath = join(this.gitCommonDirPath, "refs", "stash");
     if (!existsSync(stashPath)) return [];
 
     const stashList = await this.git.raw([
@@ -1234,14 +1321,14 @@ __REBASE_TODO__
     await this.git.stash(["drop", `stash@{${index}}`]);
 
     // Store back with the new message
-    await this.git.stash(["store", "-m", newMessage, stash.hash]);
+    await this.git.stash(["store", "--message", newMessage, stash.hash]);
   }
 
   /**
    * Creates a tag.
    */
   async createTag(tagName: string, commitHash: string, message?: string): Promise<void> {
-    await this.git.raw(["tag", "-a", tagName, "-m", message || "", commitHash]);
+    await this.git.raw(["tag", "--annotate", tagName, "--message", message || "", commitHash]);
   }
 
   /**
@@ -1250,7 +1337,7 @@ __REBASE_TODO__
   async renameTag(oldName: string, newName: string): Promise<void> {
     // Create new tag pointing to the same object as oldName, then delete old tag
     await this.git.raw(["tag", newName, oldName]);
-    await this.git.raw(["tag", "-d", oldName]);
+    await this.git.raw(["tag", "--delete", oldName]);
   }
 
   /**
@@ -1454,7 +1541,7 @@ __REBASE_TODO__
    * Deletes a tag.
    */
   async deleteTag(tagName: string): Promise<void> {
-    await this.git.raw(["tag", "-d", tagName]);
+    await this.git.raw(["tag", "--delete", tagName]);
   }
 
   /**
@@ -1563,9 +1650,88 @@ __REBASE_TODO__
     await this.git.subModule(["deinit", "--force", path]);
     await this.git.raw(["rm", "--force", path]);
 
-    const modulesPath = join(this.repoPath, ".git", "modules", path);
+    const modulesPath = join(this.gitCommonDirPath, "modules", path);
     if (existsSync(modulesPath)) {
       rmSync(modulesPath, { recursive: true, force: true });
+    }
+  }
+
+  /**
+   * Gets all worktrees registered in the repository, the main worktree first.
+   * Parses output of `git worktree list --porcelain` where entries are separated by an empty line.
+   */
+  async getWorktrees(): Promise<Worktree[]> {
+    const raw = await this.git.raw(["worktree", "list", "--porcelain"]);
+
+    const worktrees: Worktree[] = [];
+
+    for (const entry of raw.trim().split(/\n\s*\n/)) {
+      const attributes = entry
+        .split("\n")
+        .map((line) => line.trim())
+        .filter(Boolean);
+
+      const path = attributes.find((line) => line.startsWith("worktree "))?.slice("worktree ".length);
+      if (!path) continue;
+
+      const branchRef = attributes.find((line) => line.startsWith("branch "))?.slice("branch ".length);
+      const lockedAttribute = attributes.find((line) => line === "locked" || line.startsWith("locked "));
+
+      worktrees.push({
+        name: basename(path),
+        path,
+        head: attributes.find((line) => line.startsWith("HEAD "))?.slice("HEAD ".length),
+        branch: branchRef?.replace(/^refs\/heads\//, ""),
+        // The main worktree is always reported first
+        isMain: worktrees.length === 0,
+        isBare: attributes.includes("bare"),
+        isDetached: attributes.includes("detached"),
+        isLocked: lockedAttribute !== undefined,
+        lockReason: lockedAttribute?.slice("locked ".length).trim() || undefined,
+        isPrunable: attributes.some((line) => line === "prunable" || line.startsWith("prunable ")),
+      });
+    }
+
+    return worktrees;
+  }
+
+  /**
+   * Creates a new linked worktree for an existing branch.
+   */
+  async createWorktree(worktreePath: string, branchName: string): Promise<void> {
+    await fs.mkdir(dirname(worktreePath), { recursive: true });
+
+    const args = ["worktree", "add", worktreePath, branchName];
+
+    await this.git.raw(args);
+  }
+
+  /**
+   * Removes a worktree and deletes its directory.
+   * Offers a forced removal when the worktree contains modified or untracked files.
+   */
+  async removeWorktree(worktreePath: string, force = false): Promise<void> {
+    const args = ["worktree", "remove"];
+    if (force) args.push("--force");
+    args.push(worktreePath);
+
+    try {
+      await this.git.raw(args);
+    } catch (error) {
+      if (force) throw error;
+
+      const confirmed = await confirmAlert({
+        title: "Worktree removal failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+        primaryAction: {
+          title: "Force Remove",
+          style: Alert.ActionStyle.Destructive,
+        },
+      });
+
+      if (!confirmed) throw error;
+
+      await this.removeWorktree(worktreePath, true);
     }
   }
 
@@ -1623,7 +1789,7 @@ __REBASE_TODO__
     if (!log.latest) return null;
 
     const commit = log.latest;
-    const changedFiles = this.parseCommitChangedFiles(commit.diff!);
+    const changedFiles = this.parseCommitChangedFiles(commit.diff);
     const parsedRefs = this.parseCommitRefs(commit.refs);
 
     return {
@@ -1658,7 +1824,7 @@ __REBASE_TODO__
    * Renames a local branch. If oldName is not provided, renames the current branch.
    */
   async renameBranch(newName: string, oldName: string, upstream?: { name: string; remote: string }): Promise<void> {
-    await this.git.raw(["branch", "-m", oldName, newName]);
+    await this.git.raw(["branch", "--move", oldName, newName]);
 
     if (upstream) {
       await this.git.push(upstream.remote, undefined, [`${newName}`, `:${upstream.name}`]);
@@ -1796,7 +1962,7 @@ __REBASE_TODO__
         refs?: string;
         diff?: DiffResult;
       }) => {
-        const changedFiles = this.parseCommitChangedFiles(commit.diff!);
+        const changedFiles = this.parseCommitChangedFiles(commit.diff);
         const parsedRefs = this.parseCommitRefs(commit.refs);
 
         return {
@@ -1860,7 +2026,7 @@ __REBASE_TODO__
     }
 
     if (filesToTemporarilyAdd.length > 0) {
-      await this.git.add(["-N", ...filesToTemporarilyAdd]);
+      await this.git.add(["--intent-to-add", ...filesToTemporarilyAdd]);
     }
 
     try {

@@ -85,9 +85,23 @@ export function formatCategoryName(category: string, separator: string = " · ")
   return formatted;
 }
 
+// Raycast is launched by launchd, so extensions inherit launchd's PATH —
+// /usr/bin:/bin:/usr/sbin:/sbin — and never the interactive shell's. Homebrew's
+// bin is not on it, so a bare `espanso` is unresolvable no matter how the user's
+// zsh is set up. Probing absolute locations is the only lookup that works here.
+//
+// The app bundle comes last but matters most: it is what the Homebrew symlink
+// points at, and it is the only path that survives a Homebrew-less install.
+const ESPANSO_CANDIDATES = [
+  "/opt/homebrew/bin/espanso",
+  "/usr/local/bin/espanso",
+  "/Applications/Espanso.app/Contents/MacOS/espanso",
+];
+
 export function getEspansoCmd(): string {
   const { espansoPath } = getPreferenceValues<{ espansoPath?: string }>();
-  return espansoPath && espansoPath.trim() !== "" ? espansoPath : "espanso";
+  if (espansoPath && espansoPath.trim() !== "") return espansoPath.trim();
+  return ESPANSO_CANDIDATES.find((candidate) => fse.existsSync(candidate)) ?? "espanso";
 }
 
 export const execPromise = promisify(exec);

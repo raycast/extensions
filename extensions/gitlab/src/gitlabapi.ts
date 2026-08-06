@@ -517,6 +517,7 @@ export class MergeRequest {
   public resolved_discussions_count?: number;
   public resolvable_discussions_count?: number;
   public approvals_count?: number;
+  public todo_id?: number;
 }
 
 export class Pipeline {
@@ -662,16 +663,22 @@ function gitLabApiErrorDescription(json: GitLabApiErrorBody, statusCode: number)
   return `http status ${statusCode}`;
 }
 
-async function warnGitLabApiErrorResponse(response: Response, url: string): Promise<void> {
+async function warnGitLabApiErrorResponse(response: Response, url: string, method?: string): Promise<void> {
   const statusCode = response.status;
   let description = response.statusText || `http status ${statusCode}`;
+  let body: unknown;
   try {
-    const json = (await response.clone().json()) as GitLabApiErrorBody;
-    description = gitLabApiErrorDescription(json, statusCode);
+    body = await response.clone().json();
+    description = gitLabApiErrorDescription(body as GitLabApiErrorBody, statusCode);
   } catch {
-    // non-JSON error body
+    try {
+      body = await response.clone().text();
+    } catch {
+      // unreadable error body
+    }
   }
-  console.warn(`GitLab API ${statusCode}: ${description} (${url})`);
+  const verb = method?.toUpperCase() || "GET";
+  console.warn(`GitLab API ${verb} ${statusCode}: ${description} (${url})`, body ?? "");
 }
 
 /**
@@ -684,6 +691,17 @@ function isReplayableBody(body: unknown): boolean {
   if (typeof requestBody.pipe === "function" || typeof requestBody.read === "function") return false;
   if (typeof requestBody.getBuffer === "function" && typeof requestBody.getBoundary === "function") return false;
   return true;
+}
+
+function logGitLabApiRequest(url: string, method?: string, body?: unknown): void {
+  const verb = method?.toUpperCase() || "GET";
+  if (body != null && typeof body === "string") {
+    console.log(`GitLab API → ${verb} ${url}`, body);
+  } else if (body != null && isReplayableBody(body)) {
+    console.log(`GitLab API → ${verb} ${url}`, body);
+  } else {
+    console.log(`GitLab API → ${verb} ${url}`);
+  }
 }
 
 async function toJsonOrError(response: Response): Promise<any> {
@@ -741,6 +759,10 @@ export class GitLab {
     return async (...args: Parameters<typeof fetch>) => {
       const [fullUrl, options] = args;
       const agent = getHttpAgent();
+      const requestUrl = typeof fullUrl === "string" ? fullUrl : fullUrl.toString();
+      const requestMethod = typeof options?.method === "string" ? options.method : "GET";
+      logGitLabApiRequest(requestUrl, requestMethod, options?.body);
+
       const send = async (token: string) =>
         fetch(fullUrl, {
           ...options,
@@ -764,19 +786,20 @@ export class GitLab {
       ) {
         try {
           const fresh = await this.resolveToken(true);
+          logGitLabApiRequest(`${requestUrl} (oauth retry)`, requestMethod);
           const retryResponse = await send(fresh);
           if (!retryResponse.ok) {
-            await warnGitLabApiErrorResponse(retryResponse, typeof fullUrl === "string" ? fullUrl : fullUrl.toString());
+            await warnGitLabApiErrorResponse(retryResponse, requestUrl, requestMethod);
           }
           return retryResponse;
         } catch {
-          await warnGitLabApiErrorResponse(response, typeof fullUrl === "string" ? fullUrl : fullUrl.toString());
+          await warnGitLabApiErrorResponse(response, requestUrl, requestMethod);
           return response;
         }
       }
 
       if (!response.ok) {
-        await warnGitLabApiErrorResponse(response, typeof fullUrl === "string" ? fullUrl : fullUrl.toString());
+        await warnGitLabApiErrorResponse(response, requestUrl, requestMethod);
       }
       return response;
     };

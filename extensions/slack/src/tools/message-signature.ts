@@ -1,7 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { KnownBlock } from "@slack/types";
 
-const SECTION_TEXT_MAX_LENGTH = 3000;
+const SECTION_TEXT_MAX_LENGTH = 3_000;
 const MAX_SECTION_BLOCKS = 49;
 
 function splitTextForSectionBlocks(text: string): string[] | undefined {
@@ -38,34 +38,36 @@ function splitTextForSectionBlocks(text: string): string[] | undefined {
   return chunks;
 }
 
-export function getAiMessageBlocks(text: string): KnownBlock[] | undefined {
+export function getAiMessageBlocks(text: string, action: "sent" | "updated" = "sent"): KnownBlock[] | undefined {
   const { showAiMessageSignature } = getPreferenceValues<Preferences>();
 
   if (!showAiMessageSignature) {
     return undefined;
   }
 
-  const textChunks = splitTextForSectionBlocks(text);
-  if (!textChunks) {
+  const contentBlocks: KnownBlock[] =
+    text.length <= SECTION_TEXT_MAX_LENGTH
+      ? [{ type: "markdown", text }]
+      : (splitTextForSectionBlocks(text)?.map((chunk) => ({
+          type: "section" as const,
+          text: {
+            type: "mrkdwn" as const,
+            text: chunk,
+          },
+        })) ?? []);
+
+  if (contentBlocks.length === 0) {
     return undefined;
   }
 
-  const sectionBlocks: KnownBlock[] = textChunks.map((chunk) => ({
-    type: "section",
-    text: {
-      type: "mrkdwn",
-      text: chunk,
-    },
-  }));
-
   return [
-    ...sectionBlocks,
+    ...contentBlocks,
     {
       type: "context",
       elements: [
         {
           type: "mrkdwn",
-          text: "Sent via Raycast",
+          text: action === "updated" ? "Updated via Raycast" : "Sent via Raycast",
         },
       ],
     },

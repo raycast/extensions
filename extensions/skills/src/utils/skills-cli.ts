@@ -41,7 +41,7 @@ function parseSkillsListJson(stdout: string): InstalledSkill[] {
 }
 
 export async function listInstalledSkills(): Promise<InstalledSkill[]> {
-  const stdout = await runSkillsCli(["list", "-g", "--json"]);
+  const stdout = await runSkillsCli(["list", "-g", "--json"], { readOnly: true });
   try {
     return parseSkillsListJson(stdout);
   } catch {

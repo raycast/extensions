@@ -9,6 +9,7 @@ import {
   Alert,
   Toast,
   showToast,
+  Keyboard,
 } from "@raycast/api";
 import { useState } from "react";
 import { IssueTrackerConfig } from "./types";
@@ -68,7 +69,7 @@ function RuleListItem({ config, onDelete }: { config: IssueTrackerConfig; onDele
             <Action.Push
               title="Edit Rule"
               icon={Icon.Pencil}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Keyboard.Shortcut.Common.Edit}
               target={<UrlTrackerEditorForm initialConfig={config} />}
             />
             <Action
@@ -92,7 +93,7 @@ function AddNewRuleAction() {
     <Action.Push
       title="Add New Rule"
       icon={Icon.Plus}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
       target={<UrlTrackerEditorForm />}
     />
   );

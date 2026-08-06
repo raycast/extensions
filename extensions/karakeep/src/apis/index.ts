@@ -1,6 +1,8 @@
 import { logger } from "@chrismessina/raycast-logger";
 import { ApiResponse, Backup, Bookmark, GetBookmarksParams, Highlight, List, Tag, UserStats } from "../types";
 import { getApiConfig } from "../utils/config";
+import { describeConnectionError, getConnectionErrorCode, isConnectionError } from "../utils/connection";
+import { toErrorMessage } from "../utils/toast";
 
 const log = logger.child("[API]");
 
@@ -17,16 +19,35 @@ export async function fetchWithAuth<T = unknown>(path: string, options: FetchOpt
   log.log(`${method} ${path}`);
   const done = log.time(`${method} ${path}`);
 
-  const response = await fetch(url.toString(), {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-      "User-Agent": "Raycast Extension",
-      Authorization: `Bearer ${apiKey}`,
-      ...options.headers,
-    },
-    body: options.body ? JSON.stringify(options.body) : undefined,
-  });
+  let response: Response;
+  try {
+    response = await fetch(url.toString(), {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Raycast Extension",
+        Authorization: `Bearer ${apiKey}`,
+        ...options.headers,
+      },
+      body: options.body ? JSON.stringify(options.body) : undefined,
+    });
+  } catch (error) {
+    // A transport failure rejects with `TypeError: fetch failed`, which carries
+    // no detail and serializes to `{}` — logging it raw loses the cause
+    // entirely. Log the real code and re-throw the ORIGINAL error so callers
+    // can still inspect `error.cause` via isConnectionError().
+    if (isConnectionError(error)) {
+      // NOT `code`: the logger's redaction treats that key as a 2FA code and
+      // masks the value to "******", which is how ECONNREFUSED went missing.
+      log.error(`${method} ${path} could not connect`, {
+        errorCode: getConnectionErrorCode(error) ?? "unknown",
+        detail: describeConnectionError(error, apiUrl),
+      });
+    } else {
+      log.error(`${method} ${path} request failed`, { error: toErrorMessage(error) });
+    }
+    throw error;
+  }
 
   const data = await response.text();
 

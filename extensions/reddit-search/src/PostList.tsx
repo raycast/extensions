@@ -1,40 +1,55 @@
 import { ActionPanel, Action, Icon, List } from "@raycast/api";
 import RedditResultItem from "./RedditApi/RedditResultItem";
 import PostActionPanel from "./PostActionPanel";
-import Sort from "./Sort";
 import PostDetail from "./PostDetail";
+import ToggleDetailAction from "./ToggleDetailAction";
+import RefreshAction from "./RefreshAction";
+import { relativeTime, absoluteTime } from "./util/formatDate";
+import { describeCacheAge } from "./util/searchCache";
 
 export default function PostList({
   posts,
   subreddit = "",
-  sort,
-  doSearch,
   searchRedditUrl,
   showDetail,
-  toggleShowDetail,
+  isShowingDetail,
+  setIsShowingDetail,
+  cachedAt,
+  onRefresh,
+  onNewSearch,
 }: {
   posts: RedditResultItem[];
   subreddit?: string;
-  sort: Sort;
-  doSearch: (sort: Sort, after?: string) => void;
   searchRedditUrl: string;
   showDetail: boolean;
-  toggleShowDetail: () => void;
+  isShowingDetail: boolean;
+  setIsShowingDetail: (value: boolean) => void;
+  cachedAt?: number;
+  onRefresh: () => void;
+  onNewSearch?: () => void;
 }) {
   if (!posts.length) {
     return null;
   }
 
-  const resultsTitle = subreddit ? `Results in ${subreddit.substring(1, subreddit.length - 1)}` : "Results";
+  const baseTitle = subreddit ? `Results in ${subreddit.substring(1, subreddit.length - 1)}` : "Results";
+  // Surfacing the cache age explains why results can appear instantly while rate
+  // limited, and makes "Refresh" a visible remedy rather than a hidden one.
+  const resultsTitle = cachedAt ? `${baseTitle} · cached ${describeCacheAge(cachedAt)}` : baseTitle;
 
   return (
     <>
       <List.Section title={resultsTitle}>
         {posts.map((x) => {
-          let accessoryTitle = "";
-          if (!showDetail) {
-            accessoryTitle = subreddit ? `Posted ${x.created}` : `Posted ${x.created} r/${x.subreddit}`;
-          }
+          const age = relativeTime(x.created);
+          // A relative age ("5m ago") is what a reader actually judges a post by,
+          // and it leaves the row width for the title instead of a full timestamp.
+          const accessories = showDetail
+            ? []
+            : [
+                ...(subreddit ? [] : [{ tag: `r/${x.subreddit}` }]),
+                ...(age ? [{ text: age, tooltip: absoluteTime(x.created) }] : []),
+              ];
           return (
             <List.Item
               key={x.id}
@@ -44,33 +59,45 @@ export default function PostList({
                   : Icon.Text
               }
               title={x.title}
-              accessoryTitle={accessoryTitle}
-              actions={<PostActionPanel data={x} showDetail={showDetail} toggleDetail={toggleShowDetail} />}
+              accessories={accessories}
+              actions={
+                <PostActionPanel
+                  data={x}
+                  isShowingDetail={isShowingDetail}
+                  setIsShowingDetail={setIsShowingDetail}
+                  onRefresh={onRefresh}
+                  onNewSearch={onNewSearch}
+                />
+              }
               detail={<PostDetail data={x} />}
             />
           );
         })}
-        <List.Item
-          id="showMore"
-          key="showMore"
-          icon={Icon.MagnifyingGlass}
-          title="Show more..."
-          actions={
-            <ActionPanel>
-              <Action title="Show more..." onAction={() => doSearch(sort, posts[posts.length - 1].afterId)} />
-            </ActionPanel>
-          }
-        />
       </List.Section>
+      {/*
+        Reddit's Atom feed has no `after` cursor, so there is no next page to fetch —
+        the result count is capped by the `limit` preference. Sending people to Reddit
+        is the honest alternative to a "Show more" that cannot load more.
+      */}
       <List.Section title="Didn't find what you're looking for?">
         <List.Item
           id="searchOnReddit"
           key="searchOnReddit"
           icon={Icon.Globe}
           title="Show all results on Reddit..."
+          // Without a detail this row leaves the pane blank while the rest of the
+          // list fills it, which reads as a rendering failure rather than a row
+          // that simply has nothing to preview.
+          detail={
+            <List.Item.Detail
+              markdown={`# Show All Results on Reddit\n\nRaycast shows a limited number of results per search.\n\nOpen this search on Reddit to browse the full result set, load more pages, and use Reddit's own filters.`}
+            />
+          }
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url={searchRedditUrl} icon={Icon.Globe} />
+              <ToggleDetailAction isShowingDetail={isShowingDetail} setIsShowingDetail={setIsShowingDetail} />
+              <RefreshAction onRefresh={onRefresh} />
             </ActionPanel>
           }
         />

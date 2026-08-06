@@ -11,7 +11,7 @@ export function ShowTodoDetailsAction(props: { todo: Todo }): React.ReactNode | 
     return (
       <Action.Push
         title="Show Details"
-        target={<MRDetail mr={jsonDataToMergeRequest(props.todo.target)} />}
+        target={<MRDetail mr={{ ...jsonDataToMergeRequest(props.todo.target), todo_id: props.todo.id }} />}
         icon={{ source: Icon.ArrowRight, tintColor: Color.PrimaryText }}
       />
     );

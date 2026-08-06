@@ -4,6 +4,9 @@ import { useCachedPromise } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchCreateBackup, fetchDeleteBackup, fetchGetAllBackups, fetchGetBackupDownloadUrl } from "./apis";
 import { useTranslation } from "./hooks/useTranslation";
+import { connectionGuard } from "./components/ConnectionErrorView";
+import { handleFetchError } from "./utils/fetchError";
+import { useLiveData } from "./hooks/useLiveData";
 import { formatBytes } from "./utils/formatting";
 import { runWithToast } from "./utils/toast";
 
@@ -13,13 +16,19 @@ const POLL_INTERVAL_MS = 5000;
 
 export default function Backups() {
   const { t } = useTranslation();
-  const { isLoading, data, revalidate } = useCachedPromise(async () => {
-    log.log("Fetching backups");
-    const result = await fetchGetAllBackups();
-    log.info("Backups fetched", { count: result.backups?.length ?? 0 });
-    return result.backups || [];
-  });
+  const { isLoading, data, error, revalidate } = useCachedPromise(
+    async () => {
+      log.log("Fetching backups");
+      const result = await fetchGetAllBackups();
+      log.info("Backups fetched", { count: result.backups?.length ?? 0 });
+      return result.backups || [];
+    },
+    [],
+    // Suppresses Raycast's built-in "Failed to fetch latest data" toast.
+    { onError: handleFetchError("backups") },
+  );
 
+  const hasLiveData = useLiveData(isLoading, error);
   const backups = data || [];
   const hasPending = backups.some((b) => b.status === "pending");
 
@@ -109,6 +118,9 @@ export default function Backups() {
       shortcut={{ modifiers: ["cmd"], key: "n" }}
     />
   );
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <List

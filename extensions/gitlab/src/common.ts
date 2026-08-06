@@ -68,15 +68,30 @@ function createGitLabGQLClient(): GitLabGQL {
     };
   });
 
+  const requestLogLink = new ApolloLink((operation, forward) => {
+    console.log(
+      `GitLab GraphQL → ${operation.operationName ?? "anonymous"}`,
+      operation.variables && Object.keys(operation.variables).length > 0 ? operation.variables : "",
+    );
+    return forward(operation);
+  });
+
   const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
     if (graphQLErrors) {
       for (const error of graphQLErrors) {
-        console.warn(`GitLab GraphQL: ${error.message}`);
+        console.warn(
+          `GitLab GraphQL ${operation.operationName ?? "anonymous"}: ${error.message}`,
+          error.path ? { path: error.path, extensions: error.extensions } : error.extensions,
+        );
       }
     }
     if (networkError) {
       const statusCode = "statusCode" in networkError ? networkError.statusCode : undefined;
-      console.warn(`GitLab GraphQL network error${statusCode ? ` ${statusCode}` : ""}: ${networkError.message}`);
+      const result = "result" in networkError ? networkError.result : undefined;
+      console.warn(
+        `GitLab GraphQL network error${statusCode ? ` ${statusCode}` : ""} (${operation.operationName ?? "anonymous"}): ${networkError.message}`,
+        result ?? "",
+      );
       if (statusCode === 401 && isOAuthEnabled() && !operation.getContext().gitlabAuthRetried && forward) {
         operation.setContext({ gitlabAuthRetried: true });
         return fromPromise(refreshToken()).flatMap(() => forward(operation));
@@ -85,7 +100,7 @@ function createGitLabGQLClient(): GitLabGQL {
   });
 
   const client = new ApolloClient({
-    link: ApolloLink.from([errorLink, authLink, httpLink]),
+    link: ApolloLink.from([errorLink, requestLogLink, authLink, httpLink]),
     cache: new InMemoryCache(),
     defaultOptions: {
       query: {

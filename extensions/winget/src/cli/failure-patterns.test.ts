@@ -187,6 +187,17 @@ Installer log is available at: C:\\Users\\user\\AppData\\Local\\Packages\\...\\G
     expect(result.installerLogPath).toContain("Git.Git.log");
   });
 
+  it("maps well-known Windows Installer exit codes to their documented meaning", () => {
+    const output = `Starting package install...
+Installer failed with exit code: 1618
+Installer log is available at: C:\\Users\\user\\AppData\\Local\\Packages\\...\\EpicGames.log
+`;
+    const result = interpretOperationResult(1, output);
+    expect(result.success).toBe(false);
+    expect(result.message).toBe("Another installation is already in progress, retry later");
+    expect(result.errorCode).toBe("1618");
+  });
+
   it("extracts winget error code and message", () => {
     const output = `An unexpected error occurred while executing the command:
 0x8a15000f : Data required by the source is missing

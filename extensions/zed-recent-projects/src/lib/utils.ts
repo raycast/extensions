@@ -35,7 +35,7 @@ export function isPosixShell(shellPath: string): boolean {
  */
 function getUserShell(): string {
   try {
-    const username = process.env.USER || userInfo().username;
+    const username = userInfo().username;
     const result = execFileSync("dscl", [".", "-read", `/Users/${username}`, "UserShell"], {
       encoding: "utf8",
     });
@@ -77,7 +77,14 @@ export async function execWithCleanEnv(command: string, args: string[]): Promise
 
   // Use env -i to start with empty environment, then login shell for user's profile
   // -l = login shell (sources profile), -c = execute command
-  await execFilePromise("env", ["-i", `HOME=${process.env.HOME || homedir()}`, posixShell, "-lc", shellCommand]);
+  await execFilePromise("env", [
+    "-i",
+    `HOME=${process.env.HOME || homedir()}`,
+    `USER=${userInfo().username}`,
+    posixShell,
+    "-lc",
+    shellCommand,
+  ]);
 }
 
 export function exists(p: string) {

@@ -6,6 +6,9 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
   PreferenceValues,
+  LaunchProps,
+  LocalStorage,
+  updateCommandMetadata,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execFileSync } from "child_process";
@@ -38,11 +41,34 @@ function isPreferencesConfigured(preferences: PreferenceValues): boolean {
   );
 }
 
-export default async function Command() {
+const STICKY_FOLDER_KEY = "uploadFolder";
+const RESET_FOLDER_TOKENS = new Set(["/", "root"]);
+
+// Resolves the upload folder for this run and keeps the command subtitle / sticky
+// LocalStorage value in sync, so a forgotten folder is always visible before the next upload.
+async function resolveUploadFolder(folderArgument: string | undefined): Promise<string | undefined> {
+  const typedFolder = folderArgument?.trim();
+
+  if (!typedFolder) {
+    const stickyFolder = await LocalStorage.getItem<string>(STICKY_FOLDER_KEY);
+    return stickyFolder || undefined;
+  }
+
+  if (RESET_FOLDER_TOKENS.has(typedFolder.toLowerCase())) {
+    await LocalStorage.removeItem(STICKY_FOLDER_KEY);
+    await updateCommandMetadata({ subtitle: null });
+    return undefined;
+  }
+
+  await LocalStorage.setItem(STICKY_FOLDER_KEY, typedFolder);
+  await updateCommandMetadata({ subtitle: typedFolder });
+  return typedFolder;
+}
+
+export default async function Command(props: LaunchProps<{ arguments: Arguments.R2Uploader }>) {
   try {
     const preferences = getPreferenceValues();
 
-    // 检查是否已配置必要参数
     if (!isPreferencesConfigured(preferences)) {
       await showToast({
         style: Toast.Style.Failure,
@@ -58,7 +84,17 @@ export default async function Command() {
       return;
     }
 
-    const selectedItems = await getSelectedFinderItems();
+    let selectedItems;
+    try {
+      selectedItems = await getSelectedFinderItems();
+    } catch {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Finder is not active",
+        message: "Please select a file in Finder (making it the frontmost app), then try again",
+      });
+      return;
+    }
 
     if (!selectedItems || selectedItems.length === 0) {
       await showToast({ style: Toast.Style.Failure, title: "No file selected" });
@@ -66,12 +102,13 @@ export default async function Command() {
     }
 
     const inputFilePath = selectedItems[0].path;
+    const uploadFolder = await resolveUploadFolder(props.arguments.folder);
 
     const {
       fileNameFormat,
       convertToAvif: shouldConvertToAvif,
       avifencPath: avifencPathPreference,
-      generateMarkdown: generateMarkdown,
+      linkFormat,
     } = preferences;
 
     let customFileName: string | undefined;
@@ -105,19 +142,16 @@ export default async function Command() {
     }
 
     if (fileNameFormat) {
-      customFileName = generateFileName(newFilePath, fileNameFormat);
+      customFileName = await generateFileName(newFilePath, fileNameFormat);
     }
 
-    const { url, markdown } = await uploadToR2(newFilePath, customFileName);
+    const { url, markdown, html, key } = await uploadToR2(newFilePath, customFileName, uploadFolder);
 
-    if (generateMarkdown) {
-      await Clipboard.copy(markdown);
-    } else {
-      await Clipboard.copy(url);
-    }
+    const textToCopy = linkFormat === "markdown" ? markdown : linkFormat === "html" ? html : url;
+    await Clipboard.copy(textToCopy);
     toastUploading.style = Toast.Style.Success;
     toastUploading.title = "Upload completed!";
-    toastUploading.message = "URL copied to clipboard";
+    toastUploading.message = `Copied to clipboard · ${key}`;
   } catch (error) {
     await showFailureToast(error, { title: "Error uploading to R2" });
   }

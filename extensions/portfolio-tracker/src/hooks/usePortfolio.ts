@@ -85,12 +85,20 @@ export interface UsePortfolioReturn {
       units: number;
       currency: string;
       assetType: AssetType;
+      avgCostPrice?: number;
       debtData?: DebtData;
     },
   ) => Promise<Position>;
 
-  /** Updates the units of an existing position */
-  updatePosition: (accountId: string, positionId: string, units: number) => Promise<void>;
+  /**
+   * Updates the units and/or average cost of an existing position.
+   * `avgCostPrice: null` clears the recorded average cost; `undefined` leaves it unchanged.
+   */
+  updatePosition: (
+    accountId: string,
+    positionId: string,
+    updates: { units?: number; avgCostPrice?: number | null },
+  ) => Promise<void>;
 
   /**
    * Updates a property position's mortgage data, asset type, and/or name.
@@ -325,6 +333,7 @@ export function usePortfolio(): UsePortfolioReturn {
         currency: string;
         assetType: AssetType;
         priceOverride?: number;
+        avgCostPrice?: number;
         mortgageData?: MortgageData;
         debtData?: DebtData;
       },
@@ -337,6 +346,7 @@ export function usePortfolio(): UsePortfolioReturn {
         currency: params.currency,
         assetType: params.assetType,
         priceOverride: params.priceOverride,
+        ...(params.avgCostPrice && params.avgCostPrice > 0 && { avgCostPrice: params.avgCostPrice }),
         ...(params.mortgageData && { mortgageData: params.mortgageData }),
         ...(params.debtData && { debtData: params.debtData }),
         addedAt: new Date().toISOString(),
@@ -381,19 +391,31 @@ export function usePortfolio(): UsePortfolioReturn {
   );
 
   const updatePosition = useCallback(
-    async (accountId: string, positionId: string, units: number): Promise<void> => {
+    async (
+      accountId: string,
+      positionId: string,
+      updates: { units?: number; avgCostPrice?: number | null },
+    ): Promise<void> => {
+      const applyUpdates = (pos: Position): Position => {
+        if (pos.id !== positionId) return pos;
+        const next = {
+          ...pos,
+          ...(updates.units !== undefined && { units: updates.units }),
+          ...(typeof updates.avgCostPrice === "number" && { avgCostPrice: updates.avgCostPrice }),
+        };
+        if (updates.avgCostPrice === null) {
+          delete next.avgCostPrice;
+        }
+        return next;
+      };
+
       await mutate(
         (async () => {
           const current = await loadPortfolio();
           const updated: Portfolio = {
             ...current,
             accounts: current.accounts.map((account) =>
-              account.id === accountId
-                ? {
-                    ...account,
-                    positions: account.positions.map((pos) => (pos.id === positionId ? { ...pos, units } : pos)),
-                  }
-                : account,
+              account.id === accountId ? { ...account, positions: account.positions.map(applyUpdates) } : account,
             ),
             updatedAt: new Date().toISOString(),
           };
@@ -406,12 +428,7 @@ export function usePortfolio(): UsePortfolioReturn {
             return {
               ...currentData,
               accounts: currentData.accounts.map((account) =>
-                account.id === accountId
-                  ? {
-                      ...account,
-                      positions: account.positions.map((pos) => (pos.id === positionId ? { ...pos, units } : pos)),
-                    }
-                  : account,
+                account.id === accountId ? { ...account, positions: account.positions.map(applyUpdates) } : account,
               ),
               updatedAt: new Date().toISOString(),
             };
@@ -419,10 +436,14 @@ export function usePortfolio(): UsePortfolioReturn {
         },
       );
 
+      const messageParts: string[] = [];
+      if (updates.units !== undefined) messageParts.push(`Units set to ${updates.units}`);
+      if (updates.avgCostPrice !== undefined) messageParts.push("average buy price updated");
+
       await showToast({
         style: Toast.Style.Success,
         title: "Position Updated",
-        message: `Units set to ${units}`,
+        message: messageParts.join(" and ") || "Position updated",
       });
     },
     [mutate],

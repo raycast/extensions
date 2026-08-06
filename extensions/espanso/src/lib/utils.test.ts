@@ -33,7 +33,9 @@ vi.mock("fs-extra", () => ({
 }));
 
 // Import after mocks are in place
-import { updateMatchInFile } from "./utils";
+import fse from "fs-extra";
+import { getPreferenceValues } from "@raycast/api";
+import { getEspansoCmd, updateMatchInFile } from "./utils";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -328,5 +330,67 @@ describe("updateMatchInFile", () => {
         replace: "bar",
       }),
     ).toThrow(/No 'matches' sequence/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// getEspansoCmd — binary resolution
+// ---------------------------------------------------------------------------
+
+describe("getEspansoCmd", () => {
+  const onlyExisting = (...paths: string[]) =>
+    vi.mocked(fse.existsSync).mockImplementation((p) => paths.includes(String(p)));
+
+  beforeEach(() => {
+    vi.mocked(getPreferenceValues).mockReturnValue({});
+    onlyExisting();
+  });
+
+  it("prefers the configured preference over any installed binary", () => {
+    vi.mocked(getPreferenceValues).mockReturnValue({ espansoPath: "/custom/espanso" });
+    onlyExisting("/opt/homebrew/bin/espanso");
+
+    expect(getEspansoCmd()).toBe("/custom/espanso");
+  });
+
+  it("trims whitespace around the configured preference", () => {
+    vi.mocked(getPreferenceValues).mockReturnValue({ espansoPath: "  /custom/espanso  " });
+
+    expect(getEspansoCmd()).toBe("/custom/espanso");
+  });
+
+  it("ignores a blank preference and probes instead", () => {
+    vi.mocked(getPreferenceValues).mockReturnValue({ espansoPath: "   " });
+    onlyExisting("/opt/homebrew/bin/espanso");
+
+    expect(getEspansoCmd()).toBe("/opt/homebrew/bin/espanso");
+  });
+
+  it("finds the Intel Homebrew location when Apple Silicon's is absent", () => {
+    onlyExisting("/usr/local/bin/espanso");
+
+    expect(getEspansoCmd()).toBe("/usr/local/bin/espanso");
+  });
+
+  it("falls back to the app bundle when Homebrew is not installed at all", () => {
+    onlyExisting("/Applications/Espanso.app/Contents/MacOS/espanso");
+
+    expect(getEspansoCmd()).toBe("/Applications/Espanso.app/Contents/MacOS/espanso");
+  });
+
+  it("prefers Apple Silicon Homebrew when several candidates exist", () => {
+    onlyExisting(
+      "/opt/homebrew/bin/espanso",
+      "/usr/local/bin/espanso",
+      "/Applications/Espanso.app/Contents/MacOS/espanso",
+    );
+
+    expect(getEspansoCmd()).toBe("/opt/homebrew/bin/espanso");
+  });
+
+  // Raycast's PATH cannot resolve a bare name, so this is a last resort that
+  // surfaces a clear error rather than a silent wrong path.
+  it("returns the bare command when nothing is found on disk", () => {
+    expect(getEspansoCmd()).toBe("espanso");
   });
 });

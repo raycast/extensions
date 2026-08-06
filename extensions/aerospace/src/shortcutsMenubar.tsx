@@ -1,53 +1,45 @@
-import { Keyboard, MenuBarExtra } from "@raycast/api";
-import { getConfig, handleConfigError } from "./utils/config";
-import { executeShortcut, extractKeyboardShortcuts, groupShortcutsByMode } from "./utils/shortcuts";
-import { normalizeKey } from "./utils/keys";
+import { MenuBarExtra, open } from "@raycast/api";
+import { useMemo } from "react";
+import { useShortcuts } from "./hooks/useConfig";
+import { parseShortcutKey } from "./utils/keys";
+import { executeShortcutInMode } from "./utils/executeShortcut";
 
 export default function Command() {
-  const { config, error } = getConfig();
-  if (error) {
-    handleConfigError(error);
-  }
-  if (config) {
-    const keyboardShortcuts = extractKeyboardShortcuts(config);
-    const groupedShortcuts = groupShortcutsByMode(keyboardShortcuts);
-    //   console.log(groupedShortcuts);
+  const { shortcuts, isLoading, error } = useShortcuts();
 
-    return (
-      <MenuBarExtra icon={"menubar-icon.png"} tooltip="Your Shortcuts">
-        {Object.entries(groupedShortcuts).map(([key, value]) => {
-          //Iterate over shortcuts
-          return (
-            <MenuBarExtra.Section key={key} title={key.charAt(0).toUpperCase() + key.slice(1)}>
-              {value.map((shortcut) => {
-                const shortcutParts = shortcut.shortcut.split("-");
-                const modifiers = shortcutParts.slice(0, -1); // all parts except last as modifiers
-                // Change alt to opt in modifiers using the normalizeKey function
-                const normalizedModifiers = modifiers.map((modifier) => normalizeKey(modifier));
-                // console.log("Modifiers:", modifiers);
-                const keyPart = normalizeKey(shortcutParts[shortcutParts.length - 1]); // last part as key
-                // console.log("Key:", keyPart);
-                // If the key is esc set it to nothing to avoid conflict with raycast api
+  const grouped = useMemo(() => {
+    const map = new Map<string, typeof shortcuts>();
+    for (const s of shortcuts) {
+      const list = map.get(s.mode) || [];
+      list.push(s);
+      map.set(s.mode, list);
+    }
+    return map;
+  }, [shortcuts]);
 
-                return (
-                  <MenuBarExtra.Item
-                    key={shortcut.shortcut}
-                    title={shortcut.description}
-                    shortcut={{
-                      modifiers: normalizedModifiers.map((modifier) => modifier as Keyboard.KeyModifier),
-                      key: keyPart === "escape" ? "home" : (keyPart as Keyboard.KeyEquivalent),
-                    }}
-                    onAction={() => {
-                      console.log("Activated", shortcut.description);
-                      executeShortcut(shortcut.shortcut);
-                    }}
-                  />
-                );
-              })}
-            </MenuBarExtra.Section>
-          );
-        })}
-      </MenuBarExtra>
-    );
-  }
+  return (
+    <MenuBarExtra icon="menubar-icon.png" tooltip="Your Shortcuts" isLoading={isLoading}>
+      {error && (
+        <MenuBarExtra.Item
+          title={`Error: ${error instanceof Error ? error.message : String(error)}`}
+          onAction={() => open("https://nikitabobko.github.io/AeroSpace/guide#installation")}
+        />
+      )}
+      {[...grouped.entries()].map(([mode, modeShortcuts]) => (
+        <MenuBarExtra.Section key={mode} title={mode.charAt(0).toUpperCase() + mode.slice(1)}>
+          {modeShortcuts.map((shortcut) => {
+            const parsed = parseShortcutKey(shortcut.key);
+            return (
+              <MenuBarExtra.Item
+                key={shortcut.key}
+                title={shortcut.command}
+                shortcut={parsed ?? undefined}
+                onAction={() => executeShortcutInMode(shortcut)}
+              />
+            );
+          })}
+        </MenuBarExtra.Section>
+      ))}
+    </MenuBarExtra>
+  );
 }

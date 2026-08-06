@@ -1,172 +1,152 @@
-import humanizeDuration from "humanize-duration";
-import { withGoogleAPIs, getCalendarClient } from "../lib/google";
-import {
-  addSignature,
-  colorIdToName,
-  parseAttendeeEmails,
-  resolveColorId,
-  toISO8601WithTimezoneOffset,
-} from "../lib/utils";
-import { parseISO, addMinutes } from "date-fns";
+import { calendar_v3 } from "@googleapis/calendar";
 import { getPreferenceValues } from "@raycast/api";
+import { getCalendarClient, withGoogleAPIs } from "../lib/google";
+import {
+  EventLabelVersionParams,
+  getCalendarWithLabels,
+  getEventLabels,
+  requireLabel,
+} from "../lib/calendar-resources";
+import {
+  buildEventResource,
+  describeEventInput,
+  getNotificationLevel,
+  hasAttachmentChanges,
+  hasConferenceChanges,
+  serializeEvent,
+} from "../lib/events";
 
 type Input = {
-  /**
-   * The ID of the event to edit
-   */
+  /** Google Calendar event ID, usually obtained from search-events or get-event. */
   eventId: string;
-  /**
-   * The title of the event
-   */
-  title?: string;
-  /**
-   * The start date of the event in ISO 8601 format with timezone offset
-   * @example "2024-03-20T15:30:00-07:00" or "2024-03-20T15:30:00+02:00"
-   * @remarks For accurate timezone handling, always include the timezone offset (e.g., -07:00, +02:00) rather than using Z (UTC)
-   */
-  startDate?: string;
-  /**
-   * The duration of the event in minutes
-   */
-  duration?: number;
-  /**
-   * Comma-separated email addresses of event attendees
-   */
-  attendees?: string;
-  /**
-   * The conferencing provider of the event
-   */
-  conferencingProvider?: string;
-  /**
-   * The description of the event
-   */
-  description?: string;
-  /**
-   * The ID of the calendar where the event is located
-   * @default "primary"
-   * @remarks If not provided, the event will be updated in the user's primary calendar. The calendar ID can be found using the `list-calendars` tool.
-   */
+  /** Calendar containing the event. Defaults to "primary". */
   calendarId?: string;
+  /** New title. An empty string clears it. */
+  title?: string;
+  /** New description. An empty string intentionally clears it. */
+  description?: string;
+  /** New location. An empty string intentionally clears it. */
+  location?: string;
+  /** New RFC3339 datetime with Z/numeric offset, or YYYY-MM-DD for an all-day event. */
+  startDate?: string;
+  /** New explicit exclusive end datetime/date. */
+  endDate?: string;
+  /** New timed duration in minutes. Moves preserve the existing duration when omitted. */
+  duration?: number;
+  /** New all-day duration in whole days. */
+  durationDays?: number;
+  /** Change between timed and all-day. startDate is required when changing this value. */
+  allDay?: boolean;
+  /** IANA time zone. An empty string clears the custom time zone. */
+  timeZone?: string;
+  /** Comma-separated required guest emails to add. An empty string clears required guests. */
+  requiredAttendees?: string;
+  /** Backwards-compatible alias for requiredAttendees. */
+  attendees?: string;
+  /** Comma-separated optional guest emails to add. An empty string clears optional guests. */
+  optionalAttendees?: string;
+  /** Comma-separated room/resource calendar emails to add. An empty string clears resources. */
+  resourceAttendees?: string;
   /**
-   * The color of the event. Accepts a Google Calendar named color, a raw colorId (1–11), or a hex code.
-   * @example "sage" or "green" for green, "grape" or "purple" for purple, "#FF6363" for a custom hex
-   * @remarks Supported names: lavender (1), sage (2, green), grape (3, purple), flamingo (4, pink), banana (5, yellow), tangerine (6, orange), peacock (7, teal), graphite (8, gray), blueberry (9, blue), basil (10), tomato (11, red). Google Calendar only supports these 11 fixed event colors, so a hex code is snapped to the nearest one. If not provided, the event keeps its current color.
+   * Replacement RFC5545 recurrence rules, one per line. Empty string removes recurrence.
+   * To edit one occurrence, use that occurrence's event ID and do not set recurrence.
    */
+  recurrence?: string;
+  /** New visibility. */
+  visibility?: "default" | "public" | "private" | "confidential";
+  /** New availability: opaque is busy, transparent is free. */
+  transparency?: "opaque" | "transparent";
+  /** New event status. Setting cancelled cancels the event. */
+  status?: "confirmed" | "tentative" | "cancelled";
+  /** New event color. Empty string restores the calendar default. */
   color?: string;
+  /** Custom label ID from manage-calendar-labels. Empty removes it. Supersedes legacy color. */
+  eventLabelId?: string;
+  /** Use calendar defaults. Cannot be combined with custom reminders. */
+  useDefaultReminders?: boolean;
+  /** Replacement comma-separated popup offsets in minutes. Empty clears popup reminders. */
+  popupReminderMinutes?: string;
+  /** Replacement comma-separated email offsets in minutes. Empty clears email reminders. */
+  emailReminderMinutes?: string;
+  /** Whether guests can invite others. */
+  guestsCanInviteOthers?: boolean;
+  /** Whether guests can modify this event. */
+  guestsCanModify?: boolean;
+  /** Whether guests can see other guests. */
+  guestsCanSeeOtherGuests?: boolean;
+  /** Replacement attachment URLs. Empty string removes all attachments. */
+  attachmentUrls?: string;
+  /** Existing immutable event type. Supplying a different type is rejected. */
+  eventType?: "default" | "birthday" | "focusTime" | "outOfOffice" | "workingLocation";
+  /** Focus-time invitation handling. Only applies to focusTime events. */
+  focusTimeAutoDeclineMode?:
+    | "declineNone"
+    | "declineAllConflictingInvitations"
+    | "declineOnlyNewConflictingInvitations";
+  /** Focus-time Chat status. */
+  focusTimeChatStatus?: "available" | "doNotDisturb";
+  /** Focus-time auto-decline message. Empty clears it. */
+  focusTimeDeclineMessage?: string;
+  /** Out-of-office invitation handling. */
+  outOfOfficeAutoDeclineMode?:
+    | "declineNone"
+    | "declineAllConflictingInvitations"
+    | "declineOnlyNewConflictingInvitations";
+  /** Out-of-office auto-decline message. Empty clears it. */
+  outOfOfficeDeclineMessage?: string;
+  /** Working-location kind. */
+  workingLocationType?: "homeOffice" | "officeLocation" | "customLocation";
+  /** Working-location label. Empty clears it. */
+  workingLocationLabel?: string;
+  /** Office building identifier. Empty clears it. */
+  workingLocationBuildingId?: string;
+  /** Office floor identifier. Empty clears it. */
+  workingLocationFloorId?: string;
+  /** Office floor-section identifier. Empty clears it. */
+  workingLocationFloorSectionId?: string;
+  /** Office desk identifier. Empty clears it. */
+  workingLocationDeskId?: string;
+  /** Keep, add, or remove Google Meet. Omit to preserve conferencing exactly. */
+  googleMeetAction?: "keep" | "add" | "remove";
+  /** Guest notification level. Defaults to the extension preference. */
+  notificationLevel?: "all" | "externalOnly" | "none";
 };
 
 export const confirmation = withGoogleAPIs(async (input: Input) => {
-  const calendar = getCalendarClient();
-  const event = await calendar.events.get({
-    calendarId: input.calendarId ?? "primary",
-    eventId: input.eventId,
-  });
-
-  if (!event.data.start?.dateTime || !event.data.end?.dateTime) {
-    throw new Error("Event has invalid start or end time");
-  }
-
-  if (!input.attendees) {
-    return;
-  }
-
-  const changes: { name: string; value: string }[] = [];
-
-  if (input.title) {
-    changes.push({ name: "Title", value: `${event.data.summary || ""} → ${input.title}` });
-  }
-  if (input.startDate) {
-    changes.push({
-      name: "Start",
-      value: `${new Date(event.data.start.dateTime).toLocaleString()} → ${new Date(input.startDate).toLocaleString()}`,
-    });
-  }
-  if (input.duration) {
-    const currentStart = new Date(event.data.start.dateTime);
-    const currentEnd = new Date(event.data.end.dateTime);
-    const currentDuration = currentEnd.getTime() - currentStart.getTime();
-    changes.push({
-      name: "Duration",
-      value: `${humanizeDuration(currentDuration)} → ${humanizeDuration(input.duration * 60 * 1000)}`,
-    });
-  }
-  if (input.attendees) {
-    const currentAttendees = event.data.attendees?.map((a) => a.email || "").join(", ") || "none";
-    changes.push({ name: "Attendees", value: `${currentAttendees} → ${input.attendees}` });
-  }
-  if (input.description !== undefined) {
-    changes.push({
-      name: "Description",
-      value: `${event.data.description || "none"} → ${input.description || "none"}`,
-    });
-  }
-  if (input.color !== undefined) {
-    changes.push({
-      name: "Color",
-      value: `${colorIdToName(event.data.colorId)} → ${colorIdToName(resolveColorId(input.color))}`,
-    });
-  }
-
-  if (changes.length === 0) {
-    return;
-  }
-
-  return {
-    message: "Are you sure you want to update this event with the following changes?",
-    info: changes,
-  };
+  const calendarId = input.calendarId ?? "primary";
+  const current = await getCalendarClient().events.get({ calendarId, eventId: input.eventId });
+  const info = [
+    { name: "Event", value: current.data.summary ?? "Untitled Event" },
+    ...describeEventInput({ ...input, conferenceAction: input.googleMeetAction }),
+  ];
+  return { message: "Apply these changes to the Google Calendar event?", info };
 });
 
 const tool = async (input: Input) => {
   const preferences = getPreferenceValues<Preferences>();
   const calendar = getCalendarClient();
-  const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(input.attendees);
-  if (invalidEntries.length > 0) {
-    throw new Error(`Invalid attendee email: ${invalidEntries.join(", ")}`);
-  }
-
-  const existingEvent = await calendar.events.get({
-    calendarId: input.calendarId ?? "primary",
-    eventId: input.eventId,
+  const calendarId = input.calendarId ?? "primary";
+  const existing = await calendar.events.get({ calendarId, eventId: input.eventId });
+  const labels = input.eventLabelId !== undefined ? getEventLabels(await getCalendarWithLabels(calendarId)) : undefined;
+  if (input.eventLabelId) requireLabel(labels ?? [], input.eventLabelId);
+  const writeInput = { ...input, conferenceAction: input.googleMeetAction };
+  const requestBody = buildEventResource(writeInput, {
+    existing: existing.data,
+    addSignature: Boolean(preferences.addSignature),
   });
+  if (Object.keys(requestBody).length === 0) throw new Error("No event changes were provided.");
 
-  if (!existingEvent.data.start?.dateTime || !existingEvent.data.end?.dateTime) {
-    throw new Error("Event has invalid start or end time");
-  }
-
-  // Calculate the current duration in minutes
-  const currentStart = new Date(existingEvent.data.start.dateTime);
-  const currentEnd = new Date(existingEvent.data.end.dateTime);
-  const currentDurationMinutes = (currentEnd.getTime() - currentStart.getTime()) / (60 * 1000);
-
-  let startDate = currentStart;
-  if (input.startDate) {
-    startDate = parseISO(input.startDate);
-  }
-
-  const endDate = addMinutes(startDate, input.duration ?? currentDurationMinutes);
-
-  const requestBody = {
-    summary: input.title ?? existingEvent.data.summary ?? "",
-    description:
-      input.description !== undefined ? addSignature(input.description) : (existingEvent.data.description ?? ""),
-    start: {
-      dateTime: toISO8601WithTimezoneOffset(startDate),
-    },
-    end: {
-      dateTime: toISO8601WithTimezoneOffset(endDate),
-    },
-    attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : existingEvent.data.attendees,
-    location: input.conferencingProvider ?? existingEvent.data.location ?? "",
-    colorId: input.color !== undefined ? resolveColorId(input.color) : (existingEvent.data.colorId ?? undefined),
-  };
-
-  await calendar.events.update({
-    calendarId: input.calendarId ?? "primary",
+  const requestParams: calendar_v3.Params$Resource$Events$Patch & Partial<EventLabelVersionParams> = {
+    calendarId,
     eventId: input.eventId,
     requestBody,
-    sendUpdates: preferences.sendInvitations as "all" | "externalOnly" | "none",
-  });
+    conferenceDataVersion: hasConferenceChanges(writeInput) ? 1 : undefined,
+    supportsAttachments: hasAttachmentChanges(writeInput) ? true : undefined,
+    sendUpdates: getNotificationLevel(input, preferences.sendInvitations),
+    eventLabelVersion: input.eventLabelId !== undefined ? 1 : undefined,
+  };
+  const response = await calendar.events.patch(requestParams);
+  return serializeEvent(response.data, calendarId, labels);
 };
 
 export default withGoogleAPIs(tool);

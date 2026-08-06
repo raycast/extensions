@@ -107,3 +107,19 @@ export async function runDesktopRenamerScript(scriptContent: string, errorMessag
 export async function runDesktopRenamerCommand(command: string, errorMessage = "Is DesktopRenamer running?") {
   return await runDesktopRenamerScript(`tell application "DesktopRenamer" to ${command}`, errorMessage);
 }
+
+export async function moveSpecificWindowToSpace(args: {
+  windowID: number;
+  pid: number;
+  fromSpaceID: string;
+  targetSpaceID: string;
+}) {
+  const windowID = escapeAppleScriptString(String(args.windowID));
+  const pid = escapeAppleScriptString(String(args.pid));
+  const fromSpaceID = escapeAppleScriptString(args.fromSpaceID);
+  const targetSpaceID = escapeAppleScriptString(args.targetSpaceID);
+
+  await runDesktopRenamerCommand(
+    `move specific window "${windowID}" pid "${pid}" from space "${fromSpaceID}" to space "${targetSpaceID}"`,
+  );
+}

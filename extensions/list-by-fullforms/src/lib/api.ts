@@ -72,6 +72,13 @@ export interface ListRow {
   tags: Tag[];
 }
 
+// Roles that grant write access to a list's entries, matching the
+// server's can_edit_list gate (owner / admin / editor; viewer is
+// read-only). Quick Add Entry filters its list picker to these, and the
+// Search command gates the per-row "Edit Entry" action on them. Shared
+// here so the set can't drift between those two call sites.
+export const WRITABLE_ROLES = new Set(["owner", "admin", "editor"]);
+
 export interface WorkspacesResponse {
   workspaces: Workspace[];
 }

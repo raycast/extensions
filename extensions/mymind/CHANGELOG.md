@@ -1,5 +1,9 @@
 # mymind Changelog
 
+## [Faster Saves from Clipboard] - 2026-07-20
+
+- Updated `Save to mymind` to detect links, notes, images, videos, and other supported files from recent clipboard history, then select the matching type and prepopulate the form
+
 ## [Rebuild Around Official API] - 2026-07-08
 
 - Rebuilt the extension around the official mymind API

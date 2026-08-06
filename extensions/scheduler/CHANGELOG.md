@@ -1,5 +1,9 @@
 # Scheduler Changelog
 
+## [Fix custom cron schedule validation] - 2026-07-19
+
+- Fixed an error that prevented saving scheduled commands with a "Custom" cron schedule.
+
 ## [Fix missed daily schedules] - 2026-06-23
 
 - Fixed "Run Immediately if Missed" for newly created daily schedules when the machine sleeps before the first background refresh checkpoint.

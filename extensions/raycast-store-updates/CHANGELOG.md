@@ -1,5 +1,26 @@
 # Raycast Store Updates Changelog
 
+## [Fix Windows crash, reduce API usage, and improve the menu bar] - 2026-07-31
+
+- Fix a `TypeError: e is not iterable` crash reported on Windows. The GitHub API does not always answer an array-returning endpoint with an array, and on Windows requests traverse a system proxy that can return an HTML error page or an empty body with a 200 status. Responses are now parsed defensively instead of being cast and iterated
+- Handle every non-OK GitHub status, not just 403 and 429, which previously fell through to an unchecked cast
+- Only treat a 403 as a rate limit when GitHub reports the quota is actually exhausted. A 403 from a proxy or VPN carries no rate-limit headers and was starting an hour-long cooldown GitHub never asked for
+- Never invent a cooldown longer than the evidence supports: without a reset header the wait is the ordinary 5 minutes rather than a fabricated hour, and a stored cooldown beyond GitHub's one-hour window now self-heals
+- Reduce GitHub API usage: extension slugs are resolved from the `extension:` label already present in the pull-request response, and the per-pull-request file lookup is now capped per refresh so a single scan can no longer exhaust the hourly budget
+- Only adopt a slug the pull request's own label asserts. A branch name that happens to match another extension could previously produce the wrong store link and changelog
+- Fix duplicate entries when two removal pull requests deleted the same extension
+- Only report an extension as removed on a definitive 404, so a transient server error or rate limit no longer marks a live extension as deleted
+- Keep previously loaded updates on screen when a refresh fails, instead of clearing the list
+- Show the extension's own icon in the menu bar, with rounded corners in both the menu bar and the main list
+- Hold ⌥ on a menu bar item to open that extension's changelog inside Raycast instead of its store page
+- Add a preference for whether the menu bar counts all updates or only updates for extensions you have installed
+- Show recent activity in the menu bar on first run, instead of an empty badge until the next extension ships
+- Fix "Mark All as Seen" marking items seen that were never shown
+- Add an icon to every category tag, matching the Raycast Store's category styling
+- Fix the macOS platform icon being nearly invisible in dark mode
+- Add an experimental, opt-in GraphQL transport for the pull-request list. It requires a GitHub token — GraphQL has no unauthenticated tier — and falls back to REST without one or on any error. REST remains the default
+- Failure toasts now carry a "Copy Error" action
+
 ## [Menu bar, category and author filters, GitHub token, and reliability fixes] - 2026-06-16
 
 - Add an optional menu-bar command with a badge showing the number of new and updated extensions since you last checked, a dropdown of recent items, "Mark All as Seen", and hourly background refresh

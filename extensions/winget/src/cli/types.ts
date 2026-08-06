@@ -100,6 +100,13 @@ interface WingetExecutorOptions {
   signal?: AbortSignal;
   /** Receives the spawned winget PID (lock orphan-detection registers it). */
   onSpawn?: (pid: number) => void;
+  /**
+   * Called when execution falls back to an elevated winget relaunch (UAC
+   * prompt). Output is not observable across the elevation boundary — no
+   * progress, and the child cannot be killed from this unelevated process, so
+   * the caller must stop honouring cancellation for the rest of the run.
+   */
+  onElevated?: () => void;
 }
 
 /** Internal spawn options. */

@@ -115,6 +115,28 @@
       ]
     },
     {
+      "name": "groupByPriority",
+      "type": "dropdown",
+      "required": false,
+      "title": "Group by priority",
+      "description": "Controls if task are grouped by priority",
+      "default": "group_todo_completed",
+      "data": [
+        {
+          "title": "Todo and Completed",
+          "value": "group_todo_completed"
+        },
+        {
+          "title": "Todo",
+          "value": "group_todo"
+        },
+        {
+          "title": "Completed",
+          "value": "group_completed"
+        }
+      ]
+    },
+    {
       "name": "nlpParsing",
       "type": "checkbox",
       "required": false,

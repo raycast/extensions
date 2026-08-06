@@ -436,9 +436,9 @@ export async function createSecret(storeId: string, name: string, secret: string
 }
 
 export async function recreateSecret(storeId: string, name: string, secret: string): Promise<void> {
-  await fastlyFetch(`/resources/stores/secret/${storeId}/secrets/${encodeURIComponent(name)}`, {
-    method: "PUT",
-    body: JSON.stringify({ secret }),
+  await fastlyFetch(`/resources/stores/secret/${storeId}/secrets`, {
+    method: "PATCH",
+    body: JSON.stringify({ name, secret }),
   });
 }
 

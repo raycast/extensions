@@ -1,0 +1,174 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spacetime-tracking",
+  "title": "Spacetime Tracking",
+  "description": "Track how much time you spend in each macOS space, with inactivity detection and CSV export.",
+  "icon": "icon.png",
+  "author": "olivier_bossel",
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "tracker",
+      "title": "Menubar",
+      "subtitle": "Spacetime Tracking",
+      "description": "Menu bar tracker: start/stop a session and record time per macOS space.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "sessions",
+      "title": "Sessions",
+      "subtitle": "Spacetime Tracking",
+      "description": "Browse recorded sessions, view per-space breakdowns and export to CSV.",
+      "mode": "view"
+    },
+    {
+      "name": "spaces",
+      "title": "Spaces",
+      "subtitle": "Spacetime Tracking",
+      "description": "List your macOS spaces: switch to one, or rename it. Names are used everywhere time is shown.",
+      "mode": "view"
+    },
+    {
+      "name": "name-current",
+      "title": "Rename Space",
+      "subtitle": "Spacetime Tracking",
+      "description": "Name the space you're currently on.",
+      "mode": "view"
+    },
+    {
+      "name": "setup",
+      "title": "Setup",
+      "subtitle": "Spacetime Tracking",
+      "description": "Apply the macOS settings and permissions the extension needs to switch spaces.",
+      "mode": "view"
+    },
+    {
+      "name": "start-session",
+      "title": "New Session",
+      "subtitle": "Spacetime Tracking",
+      "description": "Start a new time-tracking session (replacing any current one).",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-session",
+      "title": "Stop Session",
+      "subtitle": "Spacetime Tracking",
+      "description": "Stop the active time-tracking session.",
+      "mode": "no-view"
+    },
+    {
+      "name": "export-last-session",
+      "title": "Export Last Session",
+      "subtitle": "Spacetime Tracking",
+      "description": "Export the most recent session to a CSV file, choosing where to save it.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "inactivityEnabled",
+      "title": "Inactivity Detection",
+      "label": "Pause tracking when idle",
+      "description": "When enabled, tracking pauses automatically after a period of no keyboard/mouse activity.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "inactivityMinutes",
+      "title": "Idle Threshold (minutes)",
+      "description": "How many minutes of inactivity before tracking auto-pauses.",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "keepTrackingWhileMedia",
+      "title": "Media Playback",
+      "label": "Keep tracking while media is playing",
+      "description": "Don't auto-pause when an app is playing video/audio or otherwise keeping the display awake (e.g. watching a video or presenting).",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "splitAtMidnight",
+      "title": "Keep Sessions Within One Day",
+      "label": "Split a session at midnight",
+      "description": "When enabled, a session that crosses midnight is stopped at 00:00 and a new session starts at 00:01 (or at your next activity). When disabled, a session may span multiple days.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "autoDailySession",
+      "title": "Automatic Daily Session",
+      "label": "Record a session automatically every day",
+      "description": "Automatically start a new session once a day (when you first use your computer), with no action.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "autoSaveSessions",
+      "title": "Save Sessions to Disk",
+      "label": "Export each session to CSV when it stops",
+      "description": "When a session is stopped (or replaced by a new one), automatically write it as a CSV file to the folder below.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "autoSaveDirectory",
+      "title": "Sessions Folder",
+      "description": "Folder where stopped sessions are saved as CSV. Defaults to Downloads if left empty.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "autoSaveSubfolders",
+      "title": "Organize by Year/Month",
+      "label": "Save into <year>/<month> subfolders",
+      "description": "Nest saved CSV files under year/month folders, e.g. 2026/07/session-2026-07-06-15h23.csv.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "minSpaceMinutes",
+      "title": "Minimum Space Time (minutes)",
+      "description": "Hide spaces with less than this many minutes from the session breakdown and exported rows. The session total always counts every space. Leave empty to show all spaces.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "generate-icon": "node scripts/generate-icon.js",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

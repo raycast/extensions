@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { isElevationFailure, isModifiedPortableFailure, remapUpgradeNotFound } from "./commands";
+import {
+  ensureTableQuerySucceeded,
+  isElevationFailure,
+  isInstallerBusyFailure,
+  isModifiedPortableFailure,
+  remapUninstallNotFound,
+  remapUpgradeNotFound,
+} from "./commands";
 
 describe("remapUpgradeNotFound", () => {
   it("remaps NO_APPLICATIONS_FOUND to a no-op for upgrades (source-filter quirk)", () => {
@@ -43,6 +50,29 @@ describe("remapUpgradeNotFound", () => {
   });
 });
 
+describe("remapUninstallNotFound", () => {
+  it("remaps NO_APPLICATIONS_FOUND to a no-op (ghost index row self-heals)", () => {
+    const result = remapUninstallNotFound({
+      success: false,
+      message: "Package not found",
+      exitCode: -1978335212, // 0x8A150014 signed
+      errorCode: "0x8A150014",
+    });
+    expect(result).toMatchObject({
+      success: true,
+      noop: true,
+      message: "Not installed",
+    });
+  });
+
+  it("leaves genuine failures and cancellations untouched", () => {
+    const failure = { success: false, message: "Access denied", exitCode: 5 };
+    expect(remapUninstallNotFound(failure)).toBe(failure);
+    const cancelled = { success: false, cancelled: true, exitCode: -1978335212 };
+    expect(remapUninstallNotFound(cancelled)).toBe(cancelled);
+  });
+});
+
 describe("isElevationFailure", () => {
   it("matches the COMMAND_REQUIRES_ADMIN exit code", () => {
     expect(
@@ -80,6 +110,30 @@ describe("isElevationFailure", () => {
     ).toBe(false);
   });
 
+  it("matches the machine-scope MSIX error 0x80073D28 as exit code and in messages", () => {
+    expect(
+      isElevationFailure({
+        success: false,
+        exitCode: -2147009240, // 0x80073D28 signed
+        message: "Localized message on non-English Windows",
+      }),
+    ).toBe(true);
+    expect(
+      isElevationFailure({
+        success: false,
+        exitCode: 1,
+        message: "Installer failed with exit code 0x80073D28",
+      }),
+    ).toBe(true);
+    // Must be the whole code, not a prefix of a longer one.
+    expect(
+      isElevationFailure({
+        success: false,
+        message: "Installer failed with exit code 0x80073D280",
+      }),
+    ).toBe(false);
+  });
+
   it("does not match the run-unelevated failure (opposite direction)", () => {
     expect(
       isElevationFailure({
@@ -109,6 +163,59 @@ describe("isElevationFailure", () => {
       }),
     ).toBe(false);
     expect(isElevationFailure({ success: false, message: "Disk full" })).toBe(false);
+  });
+});
+
+describe("isInstallerBusyFailure", () => {
+  it("matches installer exit code 1618 (ERROR_INSTALL_ALREADY_RUNNING)", () => {
+    expect(
+      isInstallerBusyFailure({
+        success: false,
+        exitCode: 1,
+        errorCode: "1618",
+        message: "Another installation is already in progress, retry later",
+      }),
+    ).toBe(true);
+  });
+
+  it("ignores successes, cancellations, and other codes", () => {
+    expect(isInstallerBusyFailure({ success: true, errorCode: "1618" })).toBe(false);
+    expect(isInstallerBusyFailure({ success: false, cancelled: true, errorCode: "1618" })).toBe(false);
+    expect(isInstallerBusyFailure({ success: false, errorCode: "1603" })).toBe(false);
+    expect(isInstallerBusyFailure({ success: false, message: "Disk full" })).toBe(false);
+  });
+});
+
+describe("ensureTableQuerySucceeded", () => {
+  const emptyParse = { items: [], stats: { droppedTruncatedIds: 0 } };
+  const oneRowParse = { items: [{ id: "Foo.Bar" }], stats: { droppedTruncatedIds: 0 } };
+  const run = (exitCode: number, stdout = "") => ({ stdout, stderr: "", exitCode });
+
+  it("throws on a zero-row parse with a failure exit code", () => {
+    // Observed live: `winget list` crashed with 0x80071130 ("Fast Cache data
+    // not found") after a source package update; the empty output must not
+    // be committed as "nothing installed".
+    expect(() => ensureTableQuerySucceeded(run(-2147020496), emptyParse, "Failed to list installed packages")).toThrow(
+      "Failed to list installed packages",
+    ); // 0x80071130 signed
+  });
+
+  it("uses the curated exit-code message when one exists", () => {
+    expect(() => ensureTableQuerySucceeded(run(-1978335207), emptyParse, "fallback")).toThrow(
+      "Requires administrator, retry from an elevated terminal",
+    );
+  });
+
+  it("accepts an empty table when the query exits 0", () => {
+    expect(ensureTableQuerySucceeded(run(0), emptyParse, "fallback")).toBe(emptyParse);
+  });
+
+  it("accepts NO_APPLICATIONS_FOUND as a genuinely empty table", () => {
+    expect(ensureTableQuerySucceeded(run(-1978335212), emptyParse, "fallback")).toBe(emptyParse); // 0x8A150014 signed
+  });
+
+  it("prefers parsed rows over a failure exit code", () => {
+    expect(ensureTableQuerySucceeded(run(-2147020496), oneRowParse, "fallback")).toBe(oneRowParse);
   });
 });
 

@@ -33,6 +33,8 @@ export default function Evals({ searchBarAccessory }: EvalsProps) {
       searchFields={["command", "section"]}
       searchBarAccessory={searchBarAccessory}
       generateTitle={(evalItem) => truncateValueMiddle(evalItem.command)}
+      getItemName={(evalItem) => evalItem.command}
+      getItemValue={(evalItem) => evalItem.command}
       generateOverviewMarkdown={(_, allEvals, grouped) => `
 # Eval Summary
 
@@ -55,41 +57,13 @@ Eval commands execute code dynamically, typically used to initialize tools or ru
 ## ⚠️ Performance Note
 Each eval command can add overhead to shell startup. Consider lazy loading or conditional initialization.
       `}
-      generateItemMarkdown={(evalItem) => `
-# Eval: \`${truncateValueMiddle(evalItem.command, 80)}\`
-
-## ⚡ Eval Command
-\`\`\`zsh
-eval "${evalItem.command}"
-\`\`\`
-
-## 📍 Location
-- **Section**: ${evalItem.section}
-- **File**: ~/.zshrc
-- **Section Start**: Line ${evalItem.sectionStartLine}
-
-## 💡 Eval Information
-- **Purpose**: Dynamic code execution during shell initialization
-- **Common Uses**: Tool initialization and version management
-
-## 🔍 Common Eval Tools
-- **rbenv**: \`eval "$(rbenv init -)"\`
-- **nvm**: \`eval "$(nvm_command)"\`
-- **pyenv**: \`eval "$(pyenv init -)"\`
-- **direnv**: \`eval "$(direnv hook zsh)"\`
-
-## ⚠️ Performance Impact
-Eval commands execute during shell startup. Multiple evals can increase startup time. Consider lazy loading alternatives.
-      `}
+      omitValueMarkdown={true}
       generateMetadata={(evalItem) => (
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
             title="Command"
             text={truncateValueMiddle(evalItem.command, 60)}
-            icon={{
-              source: Icon.Code,
-              tintColor: MODERN_COLORS.warning,
-            }}
+            icon={{ source: Icon.Code, tintColor: MODERN_COLORS.primary }}
           />
           <List.Item.Detail.Metadata.Label
             title="Section"
@@ -99,14 +73,8 @@ Eval commands execute during shell startup. Multiple evals can increase startup 
               tintColor: MODERN_COLORS.neutral,
             }}
           />
-          <List.Item.Detail.Metadata.Label
-            title="File"
-            text="~/.zshrc"
-            icon={{
-              source: Icon.Document,
-              tintColor: MODERN_COLORS.neutral,
-            }}
-          />
+          <List.Item.Detail.Metadata.Label title="Section Starts" text={`Line ${evalItem.sectionStartLine}`} />
+          <List.Item.Detail.Metadata.Label title="File" text="~/.zshrc" icon={Icon.Document} />
         </List.Item.Detail.Metadata>
       )}
     />

@@ -2,7 +2,7 @@ import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useRef } from "react";
 import { Pipeline } from "../gitlabapi";
-import { fetchMRPipelinesGqlPage, fetchProjectPipelinesGqlPage } from "./pipelines_gql";
+import { fetchMRPipelinesPage, fetchProjectPipelinesGqlPage } from "./pipelines_gql";
 
 export type ListPagination = List.Props["pagination"];
 
@@ -46,8 +46,7 @@ export function usePaginatedProjectPipelines(options: {
 }
 
 export function usePaginatedMRPipelines(options: {
-  cacheKey: string;
-  projectFullPath: string;
+  projectId: number;
   mrIID: number;
   execute?: boolean;
   keepPreviousData?: boolean;
@@ -57,22 +56,16 @@ export function usePaginatedMRPipelines(options: {
   performRefetch: () => void;
   pagination: ListPagination;
 } {
-  const projectFullPathRef = useRef(options.projectFullPath);
-  projectFullPathRef.current = options.projectFullPath;
-  const mrIIDRef = useRef(options.mrIID);
-  mrIIDRef.current = options.mrIID;
-
   const { data, isLoading, revalidate, pagination } = useCachedPromise(
-    (cacheKey: string) => async (paginationOptions: { page: number }) => {
-      const { pipelines, hasMore } = await fetchMRPipelinesGqlPage({
-        cacheKey,
+    (projectId: number, mrIID: number) => async (paginationOptions: { page: number }) => {
+      const { pipelines, hasMore } = await fetchMRPipelinesPage({
         page: paginationOptions.page,
-        projectFullPath: projectFullPathRef.current,
-        mrIID: mrIIDRef.current,
+        projectId,
+        mrIID,
       });
       return { data: pipelines, hasMore };
     },
-    [options.cacheKey],
+    [options.projectId, options.mrIID],
     {
       execute: options.execute,
       keepPreviousData: options.keepPreviousData,

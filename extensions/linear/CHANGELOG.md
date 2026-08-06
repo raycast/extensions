@@ -1,5 +1,14 @@
 # Linear Changelog
 
+## [My Issues Sub Views] - 2026-07-30
+
+- Add a dropdown to the "My Issues" command to switch between the Assigned, Created, and Subscribed sub views, matching the Linear app. Assigned stays the default.
+
+## [Add Copy Shortcuts] - 2026-07-18
+
+- Add `Cmd/Ctrl + Shift + U` shortcut to the "Copy Issue URL" action.
+- Add `Cmd/Ctrl + Shift + T` shortcut to the "Copy Title as Link" action.
+
 ## [AI Comment Attachments] - 2026-07-14
 
 - Add local file attachments to the AI tools for creating and updating comments. Images are embedded in the comment, while other files are added as links.

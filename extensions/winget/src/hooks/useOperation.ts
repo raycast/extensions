@@ -31,7 +31,7 @@ import {
   requestCancel,
   writeOperationRequest,
 } from "../core/operations";
-import { runOperation } from "../core/runner";
+import { runOperation, runOperationWithFollowUp } from "../core/runner";
 
 const TICK_MS = 1_000;
 /** The runner command name (also the user-visible Upgrade All command). */
@@ -115,15 +115,18 @@ function useOperation(): UseOperationResult {
       // The runner never launched, so nothing will consume the request;
       // remove it so it cannot be executed by a later launch.
       discardOperationRequest(request.requestId);
+      if (error instanceof Error && /disabled|no enabled command/i.test(error.message)) {
+        // The runner command is disabled: run the same engine in THIS view's
+        // worker. The operation completes even if the worker dies (winget is
+        // a separate process; the interrupted-op machinery recovers state) —
+        // the user only loses live toast updates after leaving.
+        const state = await runOperationWithFollowUp(request);
+        return state !== null;
+      }
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not start the operation",
-        message:
-          error instanceof Error && /disabled/i.test(error.message)
-            ? "Enable the 'Upgrade All Packages' command in Raycast settings. It runs this extension's operations"
-            : error instanceof Error
-              ? error.message
-              : undefined,
+        message: error instanceof Error ? error.message : undefined,
       });
       return false;
     }

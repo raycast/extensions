@@ -128,20 +128,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.19",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
     "color-hash": "^2.0.2",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/color-hash": "^2.0.0",
-    "@types/node": "22.19.17",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2",
-    "vitest": "^4.1.8"
+    "@types/node": "^26.1.1",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "<6.1.0",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "build": "ray build",

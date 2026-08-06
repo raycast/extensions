@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Form,
   getSelectedFinderItems,
   getPreferenceValues,
@@ -28,7 +29,13 @@ import { getAccessKeyScope, useEffectiveAccessLevel, useWriteAccess } from "./ac
 import { ObjectDetail } from "./components/ObjectActions";
 import { getBatchUploadFailureMessage } from "./error-utils";
 import { getSpaceIcon } from "./helpers";
-import { classifyFilePaths, classifyTextInput, getUnsupportedUploadFiles } from "./save-input";
+import {
+  classifyClipboardContent,
+  classifyFilePaths,
+  classifyTextInput,
+  getUnsupportedUploadFiles,
+  SaveInput,
+} from "./save-input";
 import { isUserTag } from "./tag-utils";
 
 type SaveValues = {
@@ -64,6 +71,38 @@ const EMPTY_INITIAL_STATE: InitialState = {
   url: "",
 };
 
+function getInitialStateFromInput(input: SaveInput): InitialState | undefined {
+  if (input.kind === "files") {
+    return { ...EMPTY_INITIAL_STATE, kind: "file", files: input.value };
+  }
+
+  if (input.kind === "url") {
+    return { ...EMPTY_INITIAL_STATE, kind: "url", url: input.value };
+  }
+
+  if (input.kind === "note") {
+    return { ...EMPTY_INITIAL_STATE, kind: "note", content: input.value };
+  }
+
+  return undefined;
+}
+
+async function getClipboardInitialState(): Promise<InitialState | undefined> {
+  for (let offset = 0; offset <= 5; offset++) {
+    try {
+      const initialState = getInitialStateFromInput(classifyClipboardContent(await Clipboard.read({ offset })));
+
+      if (initialState) {
+        return initialState;
+      }
+    } catch {
+      // Continue through the available clipboard history when an item can't be read.
+    }
+  }
+
+  return undefined;
+}
+
 async function resolveInitialState(fallbackText?: string, launchContext?: SaveLaunchContext): Promise<InitialState> {
   const launchContextFiles = classifyFilePaths([
     ...(Array.isArray(launchContext?.files) ? launchContext.files : []),
@@ -80,6 +119,12 @@ async function resolveInitialState(fallbackText?: string, launchContext?: SaveLa
 
   if (launchContext?.content) {
     return { ...EMPTY_INITIAL_STATE, kind: "note", content: launchContext.content };
+  }
+
+  const clipboardInitialState = await getClipboardInitialState();
+
+  if (clipboardInitialState) {
+    return clipboardInitialState;
   }
 
   try {

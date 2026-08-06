@@ -4,8 +4,9 @@
   "title": "Twos",
   "description": "Capture and organize your lists, to-dos, notes, and reminders in Twos.",
   "icon": "extension-icon.png",
-  "author": "ekafyi",
+  "author": "parker_klein",
   "contributors": [
+    "ekafyi",
     "ridemountainpig"
   ],
   "categories": [

@@ -39,7 +39,6 @@ export const commandConfig: CommandConfig = {
       color: "FF6363",
       labelColor: undefined,
       logoColor: colorsForBackground("#FF6363"),
-      style: "flat-square",
     },
     parameterIds: ["Logo", "Style", "Label", "Message", "Color", "LabelColor"],
     validationFields: ["color", "labelColor", "logoColor"],

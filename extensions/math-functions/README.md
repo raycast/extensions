@@ -9,10 +9,12 @@ Evaluate mathematical expressions with real-time results and intelligent auto-co
 - **Intelligent operator handling** - Handles incomplete operations (e.g., `sum(5*` becomes `sum(5*1)`)
 - **Quick copy** - Press Enter to copy results to clipboard
 - **Function browser** - Browse all available functions when search is empty
+- **Angle modes** - Use trigonometric functions in degrees or radians
 
 ## Supported Functions
 
 ### Arithmetic
+
 - `sum(a, b, c, ...)` - Add multiple numbers
 - `product(a, b, c, ...)` - Multiply multiple numbers
 - `avg(a, b, c, ...)` - Calculate average
@@ -20,11 +22,13 @@ Evaluate mathematical expressions with real-time results and intelligent auto-co
 - `max(a, b, c, ...)` - Find maximum value
 
 ### Number Theory
+
 - `gcd(a, b, c, ...)` - Greatest Common Divisor
 - `lcm(a, b, c, ...)` - Least Common Multiple
 - `factorial(n)` - Calculate factorial
 
 ### Basic Math
+
 - `abs(n)` - Absolute value
 - `sqrt(n)` - Square root
 - `pow(base, exp)` - Power function
@@ -33,15 +37,20 @@ Evaluate mathematical expressions with real-time results and intelligent auto-co
 - `ceil(n)` - Round up
 
 ### Trigonometry
+
 - `sin(x)`, `cos(x)`, `tan(x)` - Basic trig functions
 - `asin(x)`, `acos(x)`, `atan(x)` - Inverse trig functions
 
+The extension defaults to radians. Choose a default under Raycast Settings → Extensions → Math Functions, or run **Toggle Degree/Radian Mode** to switch modes immediately. The active mode is shown as `RAD` or `DEG` beside calculation results.
+
 ### Logarithms & Exponentials
+
 - `log(x)` / `ln(x)` - Natural logarithm
 - `log10(x)` - Base-10 logarithm
 - `exp(x)` - Exponential (e^x)
 
 ### Constants
+
 - `pi` / `PI` - π (3.14159...)
 - `e` / `E` - Euler's number (2.71828...)
 

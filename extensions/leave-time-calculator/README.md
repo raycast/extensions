@@ -12,16 +12,16 @@ A Raycast extension that calculates your leaving time and remaining work hours b
 
 ## 📸 Screenshots
 
-<img width="770" height="507" alt="Image" src="metadata/top.png" />
+<img width="770" height="507" alt="Leave Time Calculator overview" src="metadata/top.png" />
 
-<img width="762" height="495" alt="Image" src="metadata/detail.png" />
+<img width="762" height="495" alt="Leave Time Calculator details" src="metadata/detail.png" />
 
 ## 🚀 How to Use
 
 1. Open the extension in Raycast
 2. Select arrival time from the list (or enter a custom time)
 3. Your leaving time and remaining hours will be displayed in "Today's Schedule" at the top
-4. Automatically resets when the date changes
+4. Automatically resets after the scheduled shift day ends
 
 ## ⚙️ Settings
 

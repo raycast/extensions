@@ -1,0 +1,7 @@
+# Raycast
+node_modules
+.DS_Store
+dist
+*.log
+.eslintcache
+raycast-env.d.ts

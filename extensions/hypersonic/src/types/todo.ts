@@ -16,4 +16,5 @@ export interface Todo {
   date?: Date | null
   dateValue?: string | null
   status?: Status | Partial<Status> | null
+  note?: string
 }

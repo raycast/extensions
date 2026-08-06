@@ -26,7 +26,13 @@
     {
       "name": "index",
       "title": "Zshrc Manager",
-      "description": "View and manage your ~/.zshrc configuration (use dropdown to switch views)",
+      "description": "Search, browse, and manage your ~/.zshrc configuration from one home surface",
+      "mode": "view"
+    },
+    {
+      "name": "tools",
+      "title": "Zshrc Tools",
+      "description": "Health check, backups and change history for your zshrc",
       "mode": "view"
     }
   ],

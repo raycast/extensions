@@ -12,6 +12,7 @@ import {
   currentMutationEpoch,
   isCatalogFresh,
   loadIndex,
+  markUpdateNotApplicable,
   migrateLegacyIndex,
   patchMutable,
   type IndexPaths,
@@ -87,6 +88,48 @@ describe("patchMutable", () => {
 
     expect(outcome).toBe("fenced");
     expect(loadIndex(paths)!.upgradable).toHaveLength(0); // foo not resurrected
+  });
+});
+
+describe("not-applicable markers", () => {
+  it("marks a version and keeps the marker while winget offers the same version", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpdateNotApplicable(paths, env, { id: "zed", source: "winget" }, "2.0");
+    expect(loadIndex(paths)!.notApplicable).toEqual({ "winget|zed": "2.0" });
+
+    // An authoritative refresh that still lists 2.0 keeps the marker.
+    patchMutable(paths, env, { stampMutableAt: true }, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    expect(loadIndex(paths)!.notApplicable).toEqual({ "winget|zed": "2.0" });
+  });
+
+  it("clears the marker when winget offers a different version", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpdateNotApplicable(paths, env, { id: "zed", source: "winget" }, "2.0");
+
+    patchMutable(paths, env, {}, (s) => ({
+      ...s,
+      upgradable: [{ ...upgradable("zed"), available: "2.1" }],
+    }));
+
+    expect(loadIndex(paths)!.notApplicable).toEqual({});
+  });
+
+  it("clears the marker when the row leaves the upgradable list", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpdateNotApplicable(paths, env, { id: "zed", source: "winget" }, "2.0");
+
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [] }));
+
+    expect(loadIndex(paths)!.notApplicable).toEqual({});
+  });
+
+  it("defaults the field when loading an index written before markers existed", () => {
+    commitCatalog(paths, env, catalog(1));
+    const raw = loadIndex(paths)! as unknown as Record<string, unknown>;
+    delete raw.notApplicable;
+    writeFileSync(paths.indexPath, JSON.stringify(raw));
+
+    expect(loadIndex(paths)!.notApplicable).toEqual({});
   });
 });
 

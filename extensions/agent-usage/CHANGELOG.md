@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Support Claude Fable Usage Limits] - {YYYY-MM-DD}
+
+### Improvements
+
+- Support Claude Fable and future model-scoped weekly usage limits from the Claude API structured `limits` array
+
 ## [Antigravity badge] - 2026-07-15
 
 ### Fixed

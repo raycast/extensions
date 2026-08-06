@@ -12,13 +12,13 @@ This extension requires a Typefully API key. Get yours at [typefully.com → Set
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| New Draft | Create a draft for X, LinkedIn, Threads, Bluesky, or Mastodon |
-| View Drafts | Browse your unpublished drafts |
-| View Scheduled | Browse your scheduled drafts |
-| View Published | Browse your published drafts |
-| Search Social Sets | Browse your social sets and set a default |
+| Command            | Description                                                   |
+| ------------------ | ------------------------------------------------------------- |
+| New Draft          | Create a draft for X, LinkedIn, Threads, Bluesky, or Mastodon |
+| View Drafts        | Browse your unpublished drafts                                |
+| View Scheduled     | Browse your scheduled drafts                                  |
+| View Published     | Browse your published drafts                                  |
+| Search Social Sets | Browse your social sets and set a default                     |
 
 ## AI Tools
 

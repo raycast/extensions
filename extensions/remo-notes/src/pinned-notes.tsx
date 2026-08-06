@@ -1,7 +1,6 @@
 import { Icon, MenuBarExtra, open } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { buildAppUrl, buildWebUrl } from "./config";
-import type { Note } from "./types";
 import { remoApi } from "./utils/api";
 import { notePlainText, truncate } from "./utils/noteDisplay";
 import { handleError } from "./utils/errors";
@@ -9,8 +8,8 @@ import { handleError } from "./utils/errors";
 export default function Command() {
   const { isLoading, data } = useCachedPromise(
     async () => {
-      const result = await remoApi.listNotes({ limit: 50 });
-      return result.filter((n: Note) => n.isPinned);
+      const result = await remoApi.infiniteNotes({ view: "pinned", numItems: 50 });
+      return result.page;
     },
     [],
     { onError: (error) => handleError(error, "Failed to fetch pinned notes") },

@@ -1,5 +1,13 @@
 # DeepWiki Changelog
 
+## [Search History and Avatars] - 2026-08-03
+
+- Added recent search history when the search field is empty
+- Show GitHub owner avatars in search results and history
+- Hide star count and description when missing from the API
+- Refresh store screenshots
+- Updated Raycast API and related dependencies
+
 ## [0.2.3] - 2026-03-26
 
 - Make the Open DeepWiki Page and Crawl DeepWiki Docs command arguments optional by falling back to the current browser tab URL via the Raycast Browser Extension.

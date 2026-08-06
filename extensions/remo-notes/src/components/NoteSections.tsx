@@ -8,13 +8,20 @@ interface NoteSectionsProps {
   onRefresh: () => void;
   isShowingDetail: boolean;
   onToggleDetail: () => void;
-  mutate?: MutatePromise<Note[] | undefined>;
+  mutate?: MutatePromise<Note[]> | MutatePromise<Note[] | undefined>;
   folders?: Folder[];
   othersTitle?: string;
+  othersSubtitle?: string;
   groupPinned?: boolean;
 }
 
-export function NoteSections({ notes, othersTitle = "Notes", groupPinned = true, ...itemProps }: NoteSectionsProps) {
+export function NoteSections({
+  notes,
+  othersTitle = "Notes",
+  othersSubtitle,
+  groupPinned = true,
+  ...itemProps
+}: NoteSectionsProps) {
   const renderItem = (note: Note) => <NoteListItem key={note._id} note={note} {...itemProps} />;
 
   if (!groupPinned) {
@@ -32,7 +39,7 @@ export function NoteSections({ notes, othersTitle = "Notes", groupPinned = true,
         </List.Section>
       )}
       {others.length > 0 && (
-        <List.Section title={othersTitle} subtitle={`${others.length}`}>
+        <List.Section title={othersTitle} subtitle={othersSubtitle ?? `${others.length}`}>
           {others.map(renderItem)}
         </List.Section>
       )}

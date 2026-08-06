@@ -83,8 +83,14 @@ If you don't want to log in through OAuth, you can use an access token instead. 
          # Command & AI Tool: Send Message
          - chat:write
 
+         # AI Tool: Upload Files
+         - files:write
+
          # Command: Search Emojis
          - emoji:read
+
+         # AI Tool: Add Reaction
+         - reactions:write
 
          # Command: Set Status
          - users.profile:write

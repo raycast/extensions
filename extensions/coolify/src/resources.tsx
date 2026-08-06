@@ -53,7 +53,7 @@ export default function Resources() {
         resources.map((resource) => (
           <List.Item
             key={resource.uuid}
-            icon={{ source: Icon.CircleFilled, tintColor: getResourceColor(resource) }}
+            icon={{ source: Icon.CircleFilled, tintColor: getResourceColor(resource), tooltip: resource.status }}
             title={resource.name}
             subtitle={resource.type}
             accessories={[
@@ -88,7 +88,7 @@ export default function Resources() {
                     />
                   </>
                 )}
-                {resource.status.startsWith("exited:") && (
+                {resource.status.startsWith("exited") && (
                   <Action
                     icon={{ source: Icon.Play, tintColor: Color.Yellow }}
                     title="Deploy"

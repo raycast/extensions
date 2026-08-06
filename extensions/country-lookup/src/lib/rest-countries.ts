@@ -16,22 +16,40 @@ const cacheOptions = {
 
 // --- List / detail view ---------------------------------------------------
 
-// Fetch every country by paging through the API until `meta.more` is false.
-// The v5 API caps each request at 100 results, so the ~254 countries take 3
-// requests. The whole list is cached for 4 hours and searched locally, so the
-// Search Countries command never hits the API per keystroke.
+const EXPECTED_TOTAL = 300;
+
+// Fetch every country with all page requests fired in parallel. The v5 API
+// caps each request at 100 results, so the ~254 countries take 3 requests.
+// The whole list is cached for 4 hours and searched locally, so the Search
+// Countries command never hits the API per keystroke.
 export const getAllCountries = withCache(
   async (): Promise<{ success: true; countries: Country[] } | { success: false; error: Error }> => {
-    const countries: Country[] = [];
-    let offset = 0;
+    const offsets: number[] = [];
+    for (let offset = 0; offset < EXPECTED_TOTAL; offset += PAGE_SIZE) offsets.push(offset);
 
-    for (;;) {
+    const pages = await Promise.all(offsets.map((offset) => restCountries.getCountries({ limit: PAGE_SIZE, offset })));
+
+    // The first page (offset 0) is always in-bounds, so its `meta.total` is
+    // the authoritative country count.
+    const firstPage = pages[0];
+    if (!firstPage.success) return { success: false, error: firstPage.error };
+    const total = firstPage.meta.total;
+
+    const countries: Country[] = [...firstPage.countries];
+    for (const [i, page] of pages.slice(1).entries()) {
+      // Pages beyond the real total were over-fetched; ignore them (and any
+      // error the API may return for out-of-bounds offsets).
+      if ((i + 1) * PAGE_SIZE >= total) break;
+      if (!page.success) return { success: false, error: page.error };
+      countries.push(...page.countries);
+    }
+
+    // Safety net: if the API someday holds more countries than EXPECTED_TOTAL,
+    // fetch the remaining pages sequentially.
+    for (let offset = offsets.length * PAGE_SIZE; offset < total; offset += PAGE_SIZE) {
       const result = await restCountries.getCountries({ limit: PAGE_SIZE, offset });
       if (!result.success) return { success: false, error: result.error };
-
       countries.push(...result.countries);
-      if (!result.meta.more) break;
-      offset += PAGE_SIZE;
     }
 
     return { success: true, countries };

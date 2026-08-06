@@ -15,10 +15,12 @@ export default function StockListItem({
   quote,
   actions,
   isFavorite,
+  isInMenuBar,
 }: {
   quote: Quote;
   actions: ReactNode;
   isFavorite?: boolean;
+  isInMenuBar?: boolean;
 }) {
   const priceInfo = yahooFinance.currentPriceInfo(quote);
   const icon = changeIcon(priceInfo.change);
@@ -32,6 +34,7 @@ export default function StockListItem({
       title={quote.symbol!}
       subtitle={subtitle}
       accessories={[
+        ...(isInMenuBar ? [{ icon: Icon.Pin, tooltip: "Shown in menu bar" }] : []),
         ...(stateAccessory ? [stateAccessory] : []),
         { text: { value: formatMoney(priceInfo.price, quote.currency), color: icon.tintColor } },
       ]}

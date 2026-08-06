@@ -2,13 +2,15 @@
 
 Browse, search, and copy Wojaks straight into any chat from Raycast.
 
+**Works out of the box** — no configuration, accounts, or API keys. Install it and run the command.
+
 ## Features
 
 - Fast grid browsing with lazy loading
 - Fuzzy search across thousands of Wojaks
 - One-key copy to clipboard for chats and messages
-- Images served from [wojakland.com](https://wojakland.com) (downloaded on copy)
 - Local metadata and image caching for smoother repeat use
+- Works offline against the last synced library once you've opened it before
 
 ## Usage
 
@@ -22,8 +24,14 @@ Open Raycast and run `Search Wojaks`.
 - Use `Cmd+Shift+C` to copy the source image URL
 - Use `Cmd+Shift+O` to open the category page on wojakland.com
 
+## Image hosting
+
+Images and the `wojaks.json` manifest are served from a free public jsDelivr CDN, backed
+by a GitHub asset repository. There is nothing to configure and no third-party account
+involved — the extension is a read-only client over static files.
+
 ## Development Notes
 
-- The extension reads `assets/wojaks.json` for the image index. Regenerate it with `npm run scrape` after updating the scraper or when refreshing the library.
-- Search metadata is cached for 24 hours in Raycast LocalStorage.
+- Search metadata is cached for 24 hours in Raycast LocalStorage, so repeat launches are instant.
 - Copied images are cached locally in Raycast support storage after first download.
+- If the CDN is unreachable, the extension falls back to the last cached manifest.

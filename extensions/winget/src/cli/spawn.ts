@@ -194,6 +194,83 @@ async function runWinget(args: string[], options: SpawnWingetOptions = {}): Prom
   });
 }
 
+/** ERROR_CANCELLED: the user declined the UAC prompt. */
+const UAC_DECLINED_EXIT_CODE = 1223;
+
+/**
+ * Run winget elevated via ShellExecute's RunAs verb (UAC prompt), through a
+ * PowerShell Start-Process wrapper. The elevation boundary makes the child's
+ * stdio unreachable, so there is no output, no progress, and no cancellation —
+ * only the exit code, forwarded by the wrapper. The elevated PID is echoed
+ * before waiting so the lock's orphan detection still covers the child. A
+ * declined UAC prompt exits with UAC_DECLINED_EXIT_CODE.
+ */
+async function runWingetElevated(
+  args: string[],
+  options: { onSpawn?: (pid: number) => void } = {},
+): Promise<ExecutorResult> {
+  // Escape element-wise for PowerShell's single-quoted strings; arguments
+  // with whitespace additionally get embedded double quotes because
+  // Start-Process joins -ArgumentList with plain spaces.
+  const psArgs = args
+    .map((arg) => {
+      const escaped = arg.replace(/'/g, "''");
+      return /\s/.test(arg) ? `'"${escaped}"'` : `'${escaped}'`;
+    })
+    .join(", ");
+  const executable = wingetExecutable().replace(/'/g, "''");
+  const script = [
+    "$ErrorActionPreference = 'Stop'",
+    `try { $p = Start-Process -FilePath '${executable}' -ArgumentList @(${psArgs}) -Verb RunAs -WindowStyle Hidden -PassThru } catch { exit ${UAC_DECLINED_EXIT_CODE} }`,
+    "Write-Output ('ELEVATED_PID=' + $p.Id)",
+    "$p.WaitForExit()",
+    "exit $p.ExitCode",
+  ].join("; ");
+
+  // Absolute path: the worker's PATH cannot be relied on for System32 tools.
+  const env = repairedChildEnv();
+  const powershell = join(env.SystemRoot!, "System32", "WindowsPowerShell", "v1.0", "powershell.exe");
+  const child = spawn(powershell, ["-NoProfile", "-NonInteractive", "-Command", script], {
+    windowsHide: true,
+    env,
+  });
+
+  return new Promise<ExecutorResult>((resolve, reject) => {
+    const stdoutChunks: Buffer[] = [];
+    const stderrChunks: Buffer[] = [];
+    let pidReported = false;
+
+    child.stdout?.on("data", (chunk: Buffer) => {
+      stdoutChunks.push(chunk);
+      if (!pidReported) {
+        const match = Buffer.concat(stdoutChunks)
+          .toString("utf-8")
+          .match(/ELEVATED_PID=(\d+)/);
+        if (match) {
+          pidReported = true;
+          options.onSpawn?.(Number.parseInt(match[1]!, 10));
+        }
+      }
+    });
+    child.stderr?.on("data", (chunk: Buffer) => {
+      stderrChunks.push(chunk);
+    });
+
+    child.on("close", (code) => {
+      // Wrapper stdout is only the PID echo — winget's output never crosses
+      // the elevation boundary, so the interpreter sees an empty transcript.
+      resolve({
+        stdout: "",
+        stderr: Buffer.concat(stderrChunks).toString("utf-8"),
+        exitCode: code ?? 1,
+      });
+    });
+    child.on("error", (error) => {
+      reject(error);
+    });
+  });
+}
+
 /**
  * Filter WinGet loading-animation noise from final output. Every rule here
  * corresponds to a real output artifact:
@@ -261,4 +338,12 @@ function filterLoadingAnimation(output: string): string {
   return filtered.join("\n");
 }
 
-export { configureWingetPath, filterLoadingAnimation, repairedChildEnv, runWinget, withQuerySlot };
+export {
+  configureWingetPath,
+  filterLoadingAnimation,
+  repairedChildEnv,
+  runWinget,
+  runWingetElevated,
+  UAC_DECLINED_EXIT_CODE,
+  withQuerySlot,
+};

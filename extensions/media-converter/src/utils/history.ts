@@ -1,9 +1,18 @@
 import { LocalStorage } from "@raycast/api";
 import { AllOutputExtension, QualitySettings, TrimOptions, MediaType } from "../types/media";
+import {
+  isFiniteNumber,
+  isQualitySettings,
+  isRecord,
+  isStringArray,
+  parseMediaType,
+  parseOutputFormat,
+  parseTrim,
+} from "./storageValidation";
 
 const STORAGE_KEY = "conversion-history";
 const MAX_ENTRIES = 200;
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 export type HistoryEntry = {
   id: string;
@@ -11,7 +20,8 @@ export type HistoryEntry = {
   inputs: string[];
   outputs: string[];
   outputFormat: AllOutputExtension;
-  quality: QualitySettings;
+  operation: "convert" | "merge" | "edit";
+  quality?: QualitySettings;
   mediaType: MediaType | "gif";
   trim?: TrimOptions;
   stripMetadata?: boolean;
@@ -35,13 +45,71 @@ async function readAll(): Promise<StoredShape> {
   if (!raw) return { v: SCHEMA_VERSION, entries: [] };
   try {
     const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed === "object" && Array.isArray(parsed.entries)) {
-      return { v: parsed.v ?? SCHEMA_VERSION, entries: parsed.entries };
+    if (
+      isRecord(parsed) &&
+      (parsed.v === undefined || parsed.v === 1 || parsed.v === SCHEMA_VERSION) &&
+      Array.isArray(parsed.entries)
+    ) {
+      const entries = parsed.entries
+        .map(normaliseHistoryEntry)
+        .filter((entry): entry is HistoryEntry => entry !== null);
+      return { v: SCHEMA_VERSION, entries };
     }
   } catch (err) {
     console.warn("Failed to parse conversion history, resetting:", err);
   }
   return { v: SCHEMA_VERSION, entries: [] };
+}
+
+function normaliseHistoryEntry(value: unknown): HistoryEntry | null {
+  if (!isRecord(value)) return null;
+  const outputFormat = parseOutputFormat(value.outputFormat);
+  const mediaType = parseMediaType(value.mediaType);
+  const trim = parseTrim(value.trim);
+  const operation =
+    value.operation === "merge" || value.operation === "edit"
+      ? value.operation
+      : value.operation === "convert" || value.operation === undefined
+        ? "convert"
+        : null;
+  if (
+    !operation ||
+    !outputFormat ||
+    !mediaType ||
+    trim === null ||
+    typeof value.id !== "string" ||
+    !isFiniteNumber(value.timestampMs) ||
+    !isStringArray(value.inputs) ||
+    !isStringArray(value.outputs) ||
+    !isFiniteNumber(value.durationMs) ||
+    !isFiniteNumber(value.inputBytes) ||
+    !isFiniteNumber(value.outputBytes)
+  ) {
+    return null;
+  }
+  let quality: QualitySettings | undefined;
+  if (operation === "convert") {
+    if (!isQualitySettings(outputFormat, value.quality)) return null;
+    quality = value.quality;
+  }
+  if (value.outputDir !== undefined && typeof value.outputDir !== "string") return null;
+  if (value.stripMetadata !== undefined && typeof value.stripMetadata !== "boolean") return null;
+  return {
+    id: value.id,
+    timestampMs: value.timestampMs,
+    inputs: value.inputs,
+    outputs: value.outputs,
+    outputFormat,
+    quality,
+    operation,
+    mediaType,
+    trim,
+    stripMetadata: value.stripMetadata,
+    outputDir: value.outputDir,
+    durationMs: value.durationMs,
+    inputBytes: value.inputBytes,
+    outputBytes: value.outputBytes,
+  };
 }
 
 async function writeAll(data: StoredShape): Promise<void> {

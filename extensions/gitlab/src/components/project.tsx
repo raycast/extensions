@@ -127,13 +127,21 @@ export function ProjectList() {
   );
 }
 
-export function useMyProjects(): {
+const MY_PROJECTS_PAGE_SIZE = 20;
+
+export function useMyProjects(
+  search = "",
+  execute = true,
+): {
   projects: Project[];
   isLoading?: boolean;
 } {
-  const { data, isLoading } = useCachedPromise(() => gitlab.getUserProjects({ search: "" }, true), [], {
-    initialData: [],
-  });
+  const { data, isLoading } = useCachedPromise(
+    async (query: string): Promise<Project[]> =>
+      gitlab.getUserProjects({ search: query, per_page: `${MY_PROJECTS_PAGE_SIZE}` }, false),
+    [search],
+    { initialData: [], keepPreviousData: true, execute },
+  );
   return {
     projects: data,
     isLoading,
@@ -142,26 +150,50 @@ export function useMyProjects(): {
 
 export function MyProjectsDropdown(props: {
   onChange: (project: Project | undefined) => void;
-  projects?: Project[];
   value?: string;
   storeValue?: boolean;
   includeAllItem?: boolean;
 }): React.ReactNode {
-  const { projects: hookProjects } = useMyProjects();
-  const myprojects = props.projects ?? hookProjects;
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState<Project>();
+  const { projects, isLoading } = useMyProjects(search);
   const includeAllItem = props.includeAllItem !== false;
+  const selectedId = props.value ?? (selected ? `${selected.id}` : undefined);
+  const { data: fetchedSelected } = useCachedPromise(
+    async (id: string): Promise<Project> => gitlab.getProject(Number(id)),
+    [selectedId ?? ""],
+    {
+      execute:
+        !!selectedId &&
+        selectedId !== "-" &&
+        !projects.some((project) => `${project.id}` === selectedId) &&
+        (!selected || `${selected.id}` !== selectedId),
+    },
+  );
+  const pinnedProject = selected && `${selected.id}` === selectedId ? selected : fetchedSelected;
+  const myprojects =
+    pinnedProject && !projects.some((project) => project.id === pinnedProject.id)
+      ? [pinnedProject, ...projects]
+      : projects;
+
   return (
     <List.Dropdown
       tooltip="Select Project"
+      placeholder="Search Projects..."
       value={props.value}
       storeValue={props.storeValue}
+      isLoading={isLoading}
+      throttle={true}
+      onSearchTextChange={setSearch}
       onChange={(newValue) => {
         if (includeAllItem && newValue === "-") {
+          setSelected(undefined);
           props.onChange(undefined);
           return;
         }
-        const selectedProject = myprojects.find((project) => `${project.id}` === newValue);
-        props.onChange(selectedProject);
+        const nextProject = myprojects.find((project) => `${project.id}` === newValue);
+        setSelected(nextProject);
+        props.onChange(nextProject);
       }}
     >
       {includeAllItem && (

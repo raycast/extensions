@@ -51,6 +51,14 @@ interface PackageIndex extends MutableSlices {
   /** When the mutable slices were last refreshed from winget. */
   mutableAt: number | null;
   packages: WingetSearchPackage[];
+  /**
+   * Updates winget lists but refuses to apply ("no applicable upgrade" — the
+   * listed installer does not match this system). Keyed by `source|id`, value
+   * is the available version that was refused; the marker hides the row from
+   * upgradable views until winget offers a DIFFERENT version (reconciled on
+   * every mutable commit).
+   */
+  notApplicable: Record<string, string>;
 }
 
 interface IndexPaths {
@@ -68,7 +76,13 @@ const EMPTY_INDEX: PackageIndex = {
   installed: [],
   upgradable: [],
   pinned: [],
+  notApplicable: {},
 };
+
+/** Canonical `source|id` key for cross-slice and marker lookups. */
+function packageKey(pkg: { id: string; source: string }): string {
+  return `${pkg.source}|${pkg.id}`;
+}
 
 function sleepSync(ms: number): void {
   const buffer = new SharedArrayBuffer(4);
@@ -80,6 +94,8 @@ function loadIndex(paths: IndexPaths): PackageIndex | null {
   if (!data || data.schemaVersion !== SCHEMA_VERSION || !Array.isArray(data.packages)) {
     return null;
   }
+  // Additive field: files written before markers existed lack it.
+  data.notApplicable ??= {};
   return data;
 }
 
@@ -145,6 +161,23 @@ function currentMutationEpoch(paths: IndexPaths): number {
 type CommitOutcome = "committed" | "fenced" | "rejected-shrink";
 
 /**
+ * Drop not-applicable markers the new upgradable slice no longer supports:
+ * the row is gone (upgraded or uninstalled elsewhere) or winget now offers a
+ * different version (which must be re-tried, not silently hidden).
+ */
+function reconcileNotApplicable(
+  markers: Record<string, string>,
+  upgradable: WingetUpgradePackage[],
+): Record<string, string> {
+  const entries = Object.entries(markers);
+  if (entries.length === 0) {
+    return markers;
+  }
+  const availableByKey = new Map(upgradable.map((pkg) => [packageKey(pkg), pkg.available]));
+  return Object.fromEntries(entries.filter(([key, version]) => availableByKey.get(key) === version));
+}
+
+/**
  * Apply a surgical change to the mutable slices (post-operation optimistic
  * patches and authoritative refreshes). Never touches `packages`.
  */
@@ -171,11 +204,28 @@ function patchMutable(
       next: {
         ...current,
         ...slices,
+        notApplicable: reconcileNotApplicable(current.notApplicable, slices.upgradable),
         mutableAt: options.stampMutableAt ? env.now() : current.mutableAt,
       },
       result: "committed" as const,
     };
   });
+}
+
+/** Record that the listed update for a package does not apply to this system. */
+function markUpdateNotApplicable(
+  paths: IndexPaths,
+  env: LockEnvironment,
+  target: { id: string; source: string },
+  availableVersion: string,
+): void {
+  withIndexWrite(paths, env, (current) => ({
+    next: {
+      ...current,
+      notApplicable: { ...current.notApplicable, [packageKey(target)]: availableVersion },
+    },
+    result: undefined,
+  }));
 }
 
 /** Commit only the catalog slice (stage 1 of the staged cold build). */
@@ -238,7 +288,9 @@ export {
   indexMtime,
   isCatalogFresh,
   loadIndex,
+  markUpdateNotApplicable,
   migrateLegacyIndex,
+  packageKey,
   patchMutable,
   SCHEMA_VERSION,
   type CommitOutcome,

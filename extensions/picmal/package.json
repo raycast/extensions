@@ -1,0 +1,192 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "picmal",
+  "title": "Picmal",
+  "description": "Convert and compress images, audio, and video with Picmal — straight from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "albertogalca",
+  "categories": ["Media"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "ai": {
+    "instructions": "Picmal converts and compresses images, audio, and video — and builds PDFs — using the locally installed Picmal app's bundled tools. When the user asks to process files, prefer their current Finder selection or explicit absolute paths. Convert is a pure format change at maximum quality by default — only pass a quality (0–100) to convert-files when the user explicitly wants to also compress the converted file. Use compress-files (not convert) when the goal is to reduce size while keeping the format. Use combine-pdfs to merge two or more PDFs into one (page order = the order of the paths). Use split-pdf to break one PDF into a document per page range ('1-3, 5, 8-'); with no ranges it splits every page into its own PDF. Use images-to-pdf to turn one or more images into a multi-page PDF, one image per page. Use combine-videos to join two or more videos into one (order = the order of the paths). Use app-icon to generate app icons from one image — macOS (.icns), Windows (.ico), and an iOS icon set (.appiconset); it writes a new folder of icons next to the source and is not a size reduction, so don't report savings for it. Convert/compress write new files next to each input (compress adds a '_compressed' suffix); combine-pdfs, images-to-pdf, and combine-videos write a single new file next to the first input; split-pdf writes one PDF per range next to the source. Nothing overwrites existing files unless the user explicitly asks to overwrite. After running, report the output paths; report size savings only for convert and compress (not for the PDF, video, or icon tools, which create new documents)."
+  },
+  "preferences": [
+    {
+      "name": "defaultQuality",
+      "title": "Default Quality",
+      "description": "Quality preselected in the Convert and Compress forms.",
+      "type": "dropdown",
+      "required": false,
+      "default": "",
+      "data": [
+        { "title": "Automatic", "value": "" },
+        { "title": "Maximum (100)", "value": "100" },
+        { "title": "High (90)", "value": "90" },
+        { "title": "Balanced (80)", "value": "80" },
+        { "title": "Small (70)", "value": "70" },
+        { "title": "Smaller (60)", "value": "60" },
+        { "title": "Smallest (50)", "value": "50" }
+      ]
+    },
+    {
+      "name": "stripMetadata",
+      "title": "Defaults",
+      "label": "Strip metadata by default",
+      "description": "Remove EXIF/IPTC/XMP metadata unless changed per run.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "overwrite",
+      "title": "",
+      "label": "Overwrite existing files by default",
+      "description": "Replace existing output files unless changed per run.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert Files",
+      "subtitle": "Picmal",
+      "description": "Convert selected files to another format.",
+      "mode": "view",
+      "keywords": ["picmal", "image", "audio", "video", "webp", "heic", "mp4", "transcode", "ffmpeg", "imagemagick"],
+      "preferences": [
+        {
+          "name": "defaultFormat",
+          "title": "Default Format",
+          "description": "Format preselected in the Convert form (e.g. webp). Ignored if unsupported.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "e.g. webp"
+        },
+        {
+          "name": "compressAfterConverting",
+          "title": "Compression",
+          "label": "Compress after converting by default",
+          "description": "Compress the converted output. When off, Convert keeps maximum quality and only changes the format.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "compress",
+      "title": "Compress Files",
+      "subtitle": "Picmal",
+      "description": "Compress selected files while keeping their format.",
+      "mode": "view",
+      "keywords": ["picmal", "image", "audio", "video", "shrink", "optimize", "reduce", "size", "preset", "ffmpeg", "imagemagick"]
+    },
+    {
+      "name": "combine",
+      "title": "Combine PDFs",
+      "subtitle": "Picmal",
+      "description": "Merge two or more PDFs into a single PDF.",
+      "mode": "view",
+      "keywords": ["picmal", "pdf", "merge", "combine", "join", "concatenate", "document"]
+    },
+    {
+      "name": "merge-audio",
+      "title": "Merge Audio",
+      "subtitle": "Picmal",
+      "description": "Join two or more audio files into one.",
+      "mode": "view",
+      "keywords": ["picmal", "audio", "merge", "join", "concatenate", "combine", "mp3", "wav", "sound"]
+    },
+    {
+      "name": "combine-videos",
+      "title": "Combine Videos",
+      "subtitle": "Picmal",
+      "description": "Join two or more videos into one.",
+      "mode": "view",
+      "keywords": ["picmal", "video", "combine", "merge", "join", "concatenate", "mp4", "mov", "clip"]
+    },
+    {
+      "name": "split-pdf",
+      "title": "Split PDF",
+      "subtitle": "Picmal",
+      "description": "Split a PDF into one document per page range.",
+      "mode": "view",
+      "keywords": ["picmal", "pdf", "split", "extract", "pages", "burst", "separate", "document"]
+    },
+    {
+      "name": "images-to-pdf",
+      "title": "Images to PDF",
+      "subtitle": "Picmal",
+      "description": "Create a multi-page PDF from images, one image per page.",
+      "mode": "view",
+      "keywords": ["picmal", "pdf", "image", "images", "photo", "scan", "document", "convert", "create"]
+    },
+    {
+      "name": "app-icon",
+      "title": "Generate App Icons",
+      "subtitle": "Picmal",
+      "description": "Generate macOS (.icns), Windows (.ico), and iOS app icons from one image.",
+      "mode": "view",
+      "keywords": ["picmal", "icon", "app icon", "icns", "ico", "appiconset", "ios", "macos", "windows"]
+    }
+  ],
+  "tools": [
+    {
+      "name": "convert-files",
+      "title": "Convert Files",
+      "description": "Convert images, audio, or video files to another format using Picmal."
+    },
+    {
+      "name": "compress-files",
+      "title": "Compress Files",
+      "description": "Compress images, audio, or video files while keeping their format using Picmal."
+    },
+    {
+      "name": "combine-pdfs",
+      "title": "Combine PDFs",
+      "description": "Merge two or more PDFs into a single PDF, in the order given, using Picmal."
+    },
+    {
+      "name": "combine-videos",
+      "title": "Combine Videos",
+      "description": "Join two or more videos into a single video, in the order given, using Picmal."
+    },
+    {
+      "name": "split-pdf",
+      "title": "Split PDF",
+      "description": "Split a PDF into one document per page range (or one PDF per page) using Picmal."
+    },
+    {
+      "name": "images-to-pdf",
+      "title": "Images to PDF",
+      "description": "Create a multi-page PDF from images (one image per page) using Picmal."
+    },
+    {
+      "name": "app-icon",
+      "title": "Generate App Icons",
+      "description": "Generate macOS (.icns), Windows (.ico), and iOS app icons from one image using Picmal."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
