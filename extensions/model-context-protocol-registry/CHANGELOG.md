@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Structured MCP Server] - {PR_MERGE_DATE}
+## [Add Structured MCP Server] - 2026-08-06
 
 Add Structured to the official registry, allowing AI assistants to view schedules and inbox tasks and create, update, complete, delete, and manage recurring tasks. The remote Streamable HTTP server uses Structured Cloud OAuth sign-in through an `mcp-remote` bridge with a dedicated public client and email-only scope.
 
