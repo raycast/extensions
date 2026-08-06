@@ -1,0 +1,4 @@
+# src/sections.json is deliberately one section per line, which is far more
+# readable than Prettier's 5-lines-per-section expansion. JSON cannot carry a
+# prettier-ignore comment, so the exemption has to be file-level.
+src/sections.json
