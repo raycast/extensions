@@ -811,6 +811,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.jobyap.com/mcp"],
     },
   },
+  {
+    name: "tendem",
+    title: "Tendem",
+    description:
+      "Delegate tasks to vetted human experts - research, competitive analysis, fact-checking, copywriting, editing, design review, presentation polish, data cleaning and list building. Submit a task in natural language; Tendem's orchestrator scopes it and quotes a transparent price, and after explicit approval a vetted human expert executes it and returns verified results as markdown plus files. Remote Streamable HTTP MCP server with OAuth 2.0 sign-in on first use.",
+    icon: "https://framerusercontent.com/images/EGNlwavPB2tW8etz63vecfpJu0.png",
+    homepage: "https://github.com/Toloka/tendem-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tendem.ai/mcp?utm_hash=66fdb1535f"],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
