@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Fix Browser Launch] - {PR_MERGE_DATE}
+## [Fix Browser Launch] - 2026-08-06
 
 - Fix meetings opening in the wrong application when the chosen browser's name is a substring of another installed app's name. The creation URL was opened by passing the browser's display name to `open()`, which has to match that name back to an application — and `Dia` matches `Obsidian`, so meetings opened in Obsidian, launching it even when it wasn't running. The resolved `Application` is now passed instead, so the exact bundle is opened. The browser's name is still what selects the adapter and addresses the app in AppleScript, which needs the name macOS installs it under.
 
