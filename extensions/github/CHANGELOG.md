@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [View Pull Request Diffs] - {PR_MERGE_DATE}
+## [View Pull Request Diffs] - 2026-08-06
 
 - Added a "View Diff" action to pull requests, showing changed files with per-file patches that load progressively as you scroll.
 - Added a `get-pull-request-diff` AI tool.
