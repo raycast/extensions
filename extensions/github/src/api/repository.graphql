@@ -160,6 +160,7 @@ query dataForRepository($owner: String!, $name: String!) {
       }
     }
     owner {
+      __typename
       ... on Organization {
         projectsV2(first: 50) {
           totalCount
