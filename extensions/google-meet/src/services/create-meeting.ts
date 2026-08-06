@@ -67,8 +67,8 @@ export async function createMeeting(options: CreateMeetingOptions): Promise<Crea
   // browser mode.
   const pwaApp = launchTarget === "pwa" ? await resolvePwaApp() : undefined;
 
-  const browserName = await resolveCreationBrowser();
-  const adapter = getAdapterForBrowser(browserName);
+  const browser = await resolveCreationBrowser();
+  const adapter = getAdapterForBrowser(browser.name);
   const creationUrl = buildCreationUrl(options.profile);
 
   const previousClipboardText = adapter.usesClipboardFallback
@@ -76,7 +76,7 @@ export async function createMeeting(options: CreateMeetingOptions): Promise<Crea
     : undefined;
 
   try {
-    await open(creationUrl, browserName);
+    await open(creationUrl, browser.application);
 
     const rawUrl = await waitForMeetingUrl(() => adapter.getCandidateUrls(), {
       timeoutMs: getPollTimeoutMs(),
