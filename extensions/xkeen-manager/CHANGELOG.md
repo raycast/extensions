@@ -1,6 +1,6 @@
 # XKeen Manager Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-06
 
 - Status, start/stop/restart with health checks and a crash alert
 - Server profiles: create, switch, rename, delete — with automatic backup and rollback on failed switches
