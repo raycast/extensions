@@ -10,6 +10,7 @@ export function isFrontMatter(v: unknown): v is FrontMatter {
     // typeof frontMatter.saved === "string" &&
     typeof frontMatter.read === "boolean" &&
     (frontMatter.publisher == null || typeof frontMatter.publisher === "string") &&
+    (frontMatter.favicon == null || typeof frontMatter.favicon === "string") &&
     isStringArray(frontMatter.tags)
   );
 }
@@ -36,6 +37,11 @@ export function unique(files: File[]): File[] {
 export interface FrontMatter {
   source: string;
   publisher: string | null;
+  /**
+   * Overrides the URL used to look up the bookmark's favicon. Read from the
+   * frontmatter field named by the `faviconField` preference.
+   */
+  favicon?: string | null;
   title: string;
   tags: string[];
   saved: Date;

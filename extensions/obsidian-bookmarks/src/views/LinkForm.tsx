@@ -1,6 +1,7 @@
 import { Form, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import FormActions from "../actions/FormActions";
+import getFaviconIcon, { describeFaviconSource } from "../helpers/get-favicon-icon";
 import { findDuplicateBookmark } from "../helpers/url-sanitizer";
 import useFiles from "../hooks/use-files";
 import useLinkForm from "../hooks/use-link-form";
@@ -15,6 +16,23 @@ export default function LinkForm() {
   const toastRef = useRef<Toast>();
   const [hasShownToast, setHasShownToast] = useState(false);
   const [isDuplicate, setIsDuplicate] = useState(false);
+  const [faviconQuery, setFaviconQuery] = useState("");
+
+  // The favicon dropdown doubles as a text field: whatever is typed in its
+  // search bar becomes a selectable option, so the chosen icon can be shown
+  // inside the field itself. The first option always clears the override.
+  const faviconOptions = useMemo(() => {
+    const values_ = [""];
+    const committed = values.favicon.trim();
+    const typed = faviconQuery.trim();
+    if (committed) values_.push(committed);
+    if (typed && typed !== committed) values_.push(typed);
+
+    return values_.map((value) => {
+      const attributes = { source: values.url, favicon: value || null };
+      return { value, title: describeFaviconSource(attributes), icon: getFaviconIcon(attributes) };
+    });
+  }, [values.url, values.favicon, faviconQuery]);
 
   // Handle URL validation and duplicate checking
   const validateUrl = useCallback(
@@ -84,6 +102,27 @@ export default function LinkForm() {
         error={isDuplicate ? "This URL is already bookmarked" : undefined}
       />
       <Form.TextField id="title" title="Title" value={values.title} onChange={onChange("title")} />
+      <Form.Dropdown
+        id="favicon"
+        title="Favicon"
+        placeholder="Type a website or image URL…"
+        info="Optional. A website URL to borrow the favicon from, or a direct link to an image. Leave on the first option to use the URL above."
+        filtering={false}
+        value={values.favicon}
+        // Typing commits the value, so it isn't lost when the dropdown closes
+        // without an explicit selection. Blank searches are ignored, because
+        // Raycast resets the search text on close — clearing the override is
+        // done by picking the first option instead.
+        onSearchTextChange={(text) => {
+          setFaviconQuery(text);
+          if (text.trim()) onChange("favicon")(text.trim());
+        }}
+        onChange={onChange("favicon")}
+      >
+        {faviconOptions.map((option) => (
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} icon={option.icon} />
+        ))}
+      </Form.Dropdown>
       <Form.TagPicker id="tags" title="Tags" value={values.tags} onChange={onChange("tags")}>
         {tags.map((tag) => (
           <Form.TagPicker.Item title={tag} value={tag} key={tag} />

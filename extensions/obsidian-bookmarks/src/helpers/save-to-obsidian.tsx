@@ -6,6 +6,7 @@ import dedent from "ts-dedent";
 import { LinkFormState } from "../hooks/use-link-form";
 import { File, FrontMatter, Preferences } from "../types";
 
+import getFaviconField from "./favicon-field";
 import { fileExists } from "./file-utils";
 import getPublisher from "./get-publisher";
 import { addToLocalStorageFiles } from "./localstorage-files";
@@ -21,6 +22,23 @@ function formatDate(date: Date): string {
   const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
+}
+
+/**
+ * Builds the frontmatter line holding the favicon override, using the field
+ * name configured in preferences. Returns null when the feature is turned off
+ * or when the bookmark doesn't override its favicon.
+ */
+function faviconLine(favicon: string | null | undefined): string | null {
+  const value = favicon?.trim();
+  if (!value) return null;
+
+  const field = getFaviconField();
+
+  // Field names aren't necessarily valid bare YAML keys, so quote anything
+  // that isn't a plain identifier.
+  const key = /^[\w-]+$/.test(field) ? field : JSON.stringify(field);
+  return `${key}: ${JSON.stringify(value)}`;
 }
 
 async function getFileName(filename: string): Promise<string> {
@@ -43,6 +61,7 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   const attributes: FrontMatter = {
     source: values.url,
     publisher: getPublisher(values.url),
+    favicon: values.favicon.trim() || null,
     title: values.title,
     tags: values.tags.flatMap((t) => tagify(t)),
     saved: midnight,
@@ -55,14 +74,16 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   ${values.description}
   `;
 
-  const frontmatter = dedent`
+  const favicon = faviconLine(attributes.favicon);
+  const frontmatter =
+    dedent`
   title: ${JSON.stringify(attributes.title)}
   saved: ${formatDate(midnight)}
   source: ${JSON.stringify(attributes.source)}
   publisher: ${JSON.stringify(attributes.publisher)}
   read: ${JSON.stringify(attributes.read)}
   tags: ${JSON.stringify(attributes.tags)}
-  `;
+  ` + (favicon ? `\n${favicon}` : "");
 
   const { datePrefix } = getPreferenceValues<Preferences>();
   const prefix = datePrefix ? formatDate(midnight) + "-" : "";
@@ -88,6 +109,9 @@ export default async function saveToObsidian(file: File): Promise<string> {
   const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
   const combinedTags = file.attributes.tags.flatMap((t) => tagify(t)).concat(requiredTags);
 
+  const favicon = faviconLine(file.attributes.favicon);
+  const tagsAndFavicon = `tags: ${JSON.stringify(combinedTags)}${favicon ? `\n${favicon}` : ""}`;
+
   const template = dedent`
     ---
     title: ${JSON.stringify(file.attributes.title)}
@@ -95,7 +119,7 @@ export default async function saveToObsidian(file: File): Promise<string> {
     source: ${JSON.stringify(file.attributes.source)}
     publisher: ${JSON.stringify(file.attributes.publisher)}
     read: ${JSON.stringify(file.attributes.read)}
-    tags: ${JSON.stringify(combinedTags)}
+    ${tagsAndFavicon}
     ---
 
     ${file.body}

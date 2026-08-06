@@ -1,6 +1,7 @@
-import { Icon, List } from "@raycast/api";
+import { List } from "@raycast/api";
 import { Dispatch, SetStateAction } from "react";
 import DetailsActions from "../actions/DetailsActions";
+import getFaviconIcon from "../helpers/get-favicon-icon";
 import { File } from "../types";
 import FileItemDetail from "./FileItemDetail";
 
@@ -17,7 +18,7 @@ export default function FileListItem({ file, loading, showDetail, setShowDetail 
       title={file.attributes.title}
       subtitle={file.attributes.publisher ?? file.attributes.source}
       accessories={(file.attributes.tags || []).map((tag) => ({ text: tag }))}
-      icon={Icon.Link}
+      icon={getFaviconIcon(file.attributes)}
       actions={<DetailsActions file={file} showDetail={showDetail} setShowDetail={setShowDetail} />}
       detail={<FileItemDetail file={file} loading={loading} />}
     />
