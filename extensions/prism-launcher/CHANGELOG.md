@@ -1,6 +1,6 @@
 # Prism Launcher Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-08-06
 
 Fixed broken icon on Windows
 
