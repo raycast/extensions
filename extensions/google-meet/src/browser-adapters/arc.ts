@@ -13,10 +13,14 @@ import type { MeetingUrlSource } from "./types";
  *
  * An unreadable window is therefore recorded, never thrown on: the poll loop
  * that drives this adapter succeeds on a later tick in the overwhelming
- * majority of cases. Only once polling has actually given up is the state
- * reinterpreted as Arc's "Air Traffic Control" having routed the meeting into
- * a Little Arc window, which either isn't enumerated by Arc's own `windows`
- * list at all or errors when its `active tab` is queried.
+ * majority of cases. Only once polling has given up does an unreadable
+ * window become worth reporting, and then only as what was actually
+ * observed — no URL could be read — rather than as a diagnosis. Little Arc
+ * (Arc's "Air Traffic Control" routing a link into a minimal window) is the
+ * usual cause and is offered as such in the error's recovery text, but it
+ * can't be told apart from an ordinary window that never exposed a URL:
+ * Little Arc either isn't enumerated by Arc's `windows` list at all, or is
+ * enumerated and errors on `active tab` exactly like a normal window does.
  */
 export function createArcFamilyAdapter(appName: "Arc" | "Dia"): MeetingUrlSource {
   // Evidence accumulated across every poll, used only to explain an expired
@@ -44,19 +48,21 @@ export function createArcFamilyAdapter(appName: "Arc" | "Dia"): MeetingUrlSource
 
     async describeTimeout() {
       // Arc reported windows for the entire detection window and not one
-      // poll ever read a URL from any of them. That's a window type which
-      // can't be scripted at all, not an ordinary window's transient
-      // unreadability, which any of the other polls would have seen through.
+      // poll ever read a URL from any of them — sustained, unlike the
+      // transient unreadability any of the other polls would have seen
+      // through. Reported as the observation itself, since a Little Arc
+      // window and an ordinary window that never exposed a URL look
+      // identical from here.
       if (sawWindow && !readAnyUrl) {
-        return new MeetError("ARC_LITTLE_ARC_UNSUPPORTED");
+        return new MeetError("ARC_URL_UNREADABLE");
       }
 
       // Otherwise cross-check against System Events, which enumerates real
       // on-screen windows regardless of what Arc's scripting dictionary
-      // exposes, to catch a Little Arc window missing from `windows` entirely.
+      // exposes, to catch a window missing from `windows` entirely.
       const systemEventsWindowCount = await getSystemEventsWindowCount(appName);
       if (systemEventsWindowCount > lastWindowCount) {
-        return new MeetError("ARC_LITTLE_ARC_UNSUPPORTED");
+        return new MeetError("ARC_URL_UNREADABLE");
       }
 
       return undefined;
