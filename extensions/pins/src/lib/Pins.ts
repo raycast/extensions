@@ -395,7 +395,7 @@ export const openPin = async (
           if (target.match(/^[a-zA-Z](?![%])[a-zA-Z0-9+.-]+?:.*/g)) {
             const groupBrowser = targetApplication
               ? undefined
-              : (await getGroups()).find((group) => group.name == pin.group)?.browser;
+              : (await getGroups()).find((group) => group.name == pin.group)?.preferredBrowser;
 
             // Prefer the pin's application, then its group's browser, then the global preferred browser.
             await open(encodeURI(target), targetApplication || groupBrowser || preferences.preferredBrowser);

@@ -12,6 +12,7 @@ export type OpenPinGroupResult = {
 /**
  * Opens all direct member pins of a group.
  * @param groupId The ID of the group to open.
+ * @returns The matched group and number of opened pins.
  */
 export const openPinGroup = async (groupId: string | number): Promise<OpenPinGroupResult> => {
   const [groups, pins] = await Promise.all([getGroups(), getPins()]);

@@ -133,22 +133,22 @@ export default function ViewGroupsCommand() {
                       );
                     }}
                   />
-                  <Action.CreateQuicklink
-                    title="Create Group Quicklink"
-                    icon={Icon.Link}
-                    quicklink={{ name: `Open ${group.name}`, link: deeplink }}
-                  />
-                  <Action.CopyToClipboard title="Copy Group Deeplink" content={deeplink} icon={Icon.Clipboard} />
-                  <Action.Push
-                    title="Import URLs"
-                    icon={Icon.Download}
-                    target={<BulkImportUrlsForm group={group} onImported={revalidatePins} />}
-                  />
                   <Action.Push
                     title="Edit"
                     icon={Icon.Pencil}
                     target={<GroupForm group={group} setGroups={setGroups as (groups: Group[]) => void} />}
                     shortcut={Keyboard.Shortcut.Common.Edit}
+                  />
+                  <Action.CreateQuicklink
+                    title="Create Group Quicklink"
+                    icon={Icon.Link}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
+                    quicklink={{ name: `Open ${group.name}`, link: deeplink }}
+                  />
+                  <Action.Push
+                    title="Import URLs"
+                    icon={Icon.Download}
+                    target={<BulkImportUrlsForm group={group} onImported={revalidatePins} />}
                   />
 
                   <Action
@@ -259,7 +259,7 @@ export default function ViewGroupsCommand() {
                     kind="groups"
                   />
                 ) : null}
-                <CopyGroupActionsSubmenu group={group} groups={groups} pins={pins} />
+                <CopyGroupActionsSubmenu group={group} groups={groups} pins={pins} deeplink={deeplink} />
               </ActionPanel>
             }
           />

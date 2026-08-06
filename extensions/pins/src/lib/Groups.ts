@@ -68,7 +68,7 @@ export type Group = {
   /**
    * The browser identifier to use for URL pins in this group when the pin has no application override.
    */
-  browser?: string;
+  preferredBrowser?: string;
 };
 
 /**
@@ -83,7 +83,7 @@ export const GroupKeys = [
   "iconColor",
   "dateCreated",
   "visibility",
-  "browser",
+  "preferredBrowser",
 ];
 
 /**

@@ -2,6 +2,10 @@ import { LaunchProps, showHUD } from "@raycast/api";
 
 import { openPinGroup } from "./lib/openPinGroup";
 
+/**
+ * Raycast command for opening every direct member pin of a group without showing a view.
+ * @param props The command launch arguments.
+ */
 export default async function OpenPinGroupCommand(props: LaunchProps<{ arguments: Arguments.OpenPinGroup }>) {
   const result = await openPinGroup(props.arguments.groupId);
 

@@ -9,28 +9,47 @@ type BulkImportUrlsFormProps = {
   onImported: () => Promise<void>;
 };
 
+/**
+ * Normalizes a URL while preserving any explicit URL scheme supported by Pins.
+ * @param input The URL to normalize.
+ * @returns The normalized URL, or undefined if the value is invalid.
+ */
 const normalizeUrl = (input: string) => {
   const trimmed = input.trim();
   if (!trimmed) return undefined;
 
-  const candidate = /^[a-zA-Z][a-zA-Z\d+.-]*:\/\//.test(trimmed) ? trimmed : `https://${trimmed}`;
+  const hasExplicitScheme = /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(trimmed);
+  const looksLikeHostWithPort = /^(?:localhost|(?:\d{1,3}\.){3}\d{1,3}|[^/:\s]+\.[^/:\s]+):\d+(?:[/?#]|$)/i.test(
+    trimmed,
+  );
+  const candidate = hasExplicitScheme && !looksLikeHostWithPort ? trimmed : `https://${trimmed}`;
   try {
     const url = new URL(candidate);
-    if (url.protocol != "http:" && url.protocol != "https:") return undefined;
     return url.toString();
   } catch {
     return undefined;
   }
 };
 
+/**
+ * Creates a concise default pin title from a URL.
+ * @param url The normalized URL.
+ * @returns A title of at most 80 characters.
+ */
 const titleFromUrl = (url: string) => {
   const parsed = new URL(url);
   const hostname = parsed.hostname.replace(/^www\./, "");
   const pathname = parsed.pathname.replace(/^\/+|\/+$/g, "");
-  const title = pathname ? `${hostname}/${pathname}` : hostname;
+  const title = hostname ? (pathname ? `${hostname}/${pathname}` : hostname) : `${parsed.protocol}${parsed.pathname}`;
   return title.length > 80 ? `${title.slice(0, 77)}...` : title;
 };
 
+/**
+ * Form for importing newline-separated URLs into a group.
+ * @param props.group The target group.
+ * @param props.onImported The function to call after importing pins.
+ * @returns A form view.
+ */
 export default function BulkImportUrlsForm({ group, onImported }: BulkImportUrlsFormProps) {
   const { pop } = useNavigation();
 
