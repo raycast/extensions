@@ -3,12 +3,8 @@ import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { createTask } from "./api";
 import { logbook } from "./oauth";
 
-interface Arguments {
-	text: string;
-}
-
 /** No-view: type into Raycast's root search, hit Enter, nothing opens. */
-async function AddTask(props: LaunchProps<{ arguments: Arguments }>) {
+async function AddTask(props: LaunchProps<{ arguments: Arguments.AddTask }>) {
 	const text = props.arguments.text.trim();
 
 	if (!text) {

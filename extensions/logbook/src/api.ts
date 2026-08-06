@@ -28,10 +28,12 @@ export function authHeaders(): Record<string, string> {
 	};
 }
 
-export function logsUrl(params: { filter?: LogFilter; search?: string; limit?: number } = {}) {
+export function logsUrl(params: { filter?: LogFilter; search?: string; limit?: number; cursor?: string } = {}) {
 	const query = new URLSearchParams();
 	if (params.filter) query.set("filter", params.filter);
 	if (params.search) query.set("search", params.search);
+	// Omitted on the first page; the API returns the next one as `nextCursor`.
+	if (params.cursor) query.set("cursor", params.cursor);
 	query.set("limit", String(params.limit ?? 50));
 	return `${getUrls().api}/api/logs?${query.toString()}`;
 }

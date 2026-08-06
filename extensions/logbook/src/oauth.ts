@@ -1,11 +1,6 @@
 import { getPreferenceValues, OAuth } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
-interface Preferences {
-	webUrl: string;
-	apiUrl: string;
-}
-
 export function getUrls() {
 	const preferences = getPreferenceValues<Preferences>();
 	return {

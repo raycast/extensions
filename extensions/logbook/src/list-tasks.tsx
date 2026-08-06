@@ -14,23 +14,31 @@ function ListTasks() {
 	const [filter, setFilter] = useState<LogFilter>("pending");
 	const [search, setSearch] = useState("");
 
-	const { isLoading, data, revalidate, mutate } = useFetch<PaginatedLogs>(logsUrl({ filter, search }), {
-		headers: authHeaders(),
-		keepPreviousData: true,
-		failureToastOptions: { title: "Could not load your logbook" },
-	});
+	const { isLoading, data, revalidate, mutate, pagination } = useFetch(
+		(options) => logsUrl({ filter, search, cursor: options.cursor }),
+		{
+			headers: authHeaders(),
+			keepPreviousData: true,
+			failureToastOptions: { title: "Could not load your logbook" },
+			// Feeds <List pagination> so scrolling past the first page keeps loading.
+			mapResult(result: PaginatedLogs) {
+				return {
+					data: result.items,
+					hasMore: Boolean(result.nextCursor),
+					cursor: result.nextCursor ?? undefined,
+				};
+			},
+			initialData: [],
+		},
+	);
 
-	const tasks = data?.items ?? [];
+	const tasks = data ?? [];
 
 	// Actions update optimistically and roll back on failure.
 	const toggleCompleted = async (id: string, completed: boolean) => {
 		try {
 			await mutate(setTaskCompleted(id, completed), {
-				optimisticUpdate: (current) =>
-					current && {
-						...current,
-						items: current.items.map((task) => (task.id === id ? { ...task, completed } : task)),
-					},
+				optimisticUpdate: (current) => current.map((task) => (task.id === id ? { ...task, completed } : task)),
 				shouldRevalidateAfter: true,
 			});
 			await showToast({
@@ -52,11 +60,7 @@ function ListTasks() {
 
 		try {
 			await mutate(deleteTask(id), {
-				optimisticUpdate: (current) =>
-					current && {
-						...current,
-						items: current.items.filter((task) => task.id !== id),
-					},
+				optimisticUpdate: (current) => current.filter((task) => task.id !== id),
 				shouldRevalidateAfter: true,
 			});
 			await showToast({ style: Toast.Style.Success, title: "Deleted" });
@@ -84,8 +88,11 @@ function ListTasks() {
 	return (
 		<List
 			isLoading={isLoading}
+			pagination={pagination}
 			searchText={search}
 			onSearchTextChange={setSearch}
+			// Search runs server-side, so throttle keystrokes into fewer requests.
+			throttle
 			searchBarPlaceholder="Search your logbook, or type a new task…"
 			searchBarAccessory={
 				<List.Dropdown tooltip="Filter" value={filter} onChange={(value) => setFilter(value as LogFilter)}>
