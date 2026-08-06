@@ -7,9 +7,11 @@ import {
   Alert,
   getPreferenceValues,
   Keyboard,
+  LaunchType,
   LocalStorage,
   showToast,
 } from "@raycast/api";
+import { createDeeplink, DeeplinkType } from "@raycast/utils";
 import { setStorage, getStorage } from "./lib/storage";
 import { Direction, StorageKey } from "./lib/constants";
 import { Group, deleteGroup, useGroups } from "./lib/Groups";
@@ -27,6 +29,7 @@ import { useEffect, useState } from "react";
 import CopyGroupActionsSubmenu from "./components/actions/CopyGroupActionsSubmenu";
 import { ExtensionPreferences, ViewGroupsPreferences } from "./lib/preferences";
 import { pluralize } from "./lib/utils";
+import BulkImportUrlsForm from "./components/BulkImportUrlsForm";
 
 /**
  * Action to create a new group. Opens a form view with blank/default fields.
@@ -66,7 +69,7 @@ const moveGroup = async (index: number, dir: Direction, setGroups: React.Dispatc
  */
 export default function ViewGroupsCommand() {
   const { groups, setGroups, revalidateGroups } = useGroups();
-  const { pins } = usePins();
+  const { pins, revalidatePins } = usePins();
   const [examplesInstalled, setExamplesInstalled] = useState<boolean>(true);
   const preferences = getPreferenceValues<ExtensionPreferences & ViewGroupsPreferences>();
 
@@ -96,6 +99,12 @@ export default function ViewGroupsCommand() {
       <List.EmptyView title="No Groups Found" icon="no-view.png" />
       {((groups as Group[]) || []).map((group, index) => {
         const groupPins = pins.filter((pin: Pin) => pin.group == group.name);
+        const deeplink = createDeeplink({
+          type: DeeplinkType.Extension,
+          command: "open-pin-group",
+          launchType: LaunchType.Background,
+          arguments: { groupId: group.id.toString() },
+        });
         const maxID = Math.max(...groups.map((group) => group.id));
         const accessories: List.Item.Accessory[] = [];
         if (preferences.showVisibility) addVisibilityAccessory(group, accessories, true);
@@ -123,6 +132,17 @@ export default function ViewGroupsCommand() {
                         }),
                       );
                     }}
+                  />
+                  <Action.CreateQuicklink
+                    title="Create Group Quicklink"
+                    icon={Icon.Link}
+                    quicklink={{ name: `Open ${group.name}`, link: deeplink }}
+                  />
+                  <Action.CopyToClipboard title="Copy Group Deeplink" content={deeplink} icon={Icon.Clipboard} />
+                  <Action.Push
+                    title="Import URLs"
+                    icon={Icon.Download}
+                    target={<BulkImportUrlsForm group={group} onImported={revalidatePins} />}
                   />
                   <Action.Push
                     title="Edit"

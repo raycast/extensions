@@ -393,8 +393,12 @@ export const openPin = async (
           }
         } else {
           if (target.match(/^[a-zA-Z](?![%])[a-zA-Z0-9+.-]+?:.*/g)) {
-            // Open the URL in the target application (fallback to preferred browser, then default browser)
-            await open(encodeURI(target), targetApplication || preferences.preferredBrowser);
+            const groupBrowser = targetApplication
+              ? undefined
+              : (await getGroups()).find((group) => group.name == pin.group)?.browser;
+
+            // Prefer the pin's application, then its group's browser, then the global preferred browser.
+            await open(encodeURI(target), targetApplication || groupBrowser || preferences.preferredBrowser);
             await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
           } else {
             // Open Terminal command in the default Terminal application
@@ -465,30 +469,46 @@ export const getNextPinID = async () => {
  * @returns The new pin object.
  */
 export const createNewPin = async (attributes: Partial<Pin>) => {
-  // Get the stored pins
+  return (await createNewPins([attributes]))[0];
+};
+
+/**
+ * Creates multiple pins in a single storage update.
+ * @param attributesList The attributes of the new pins.
+ * @returns The newly created pin objects.
+ */
+export const createNewPins = async (attributesList: Partial<Pin>[]) => {
+  if (attributesList.length == 0) return [];
+
   const storedPins = await getPins();
-  const newID = await getNextPinID();
+  const usedIDs = new Set(storedPins.map((pin) => pin.id));
+  let nextID = ((await getStorage(StorageKey.NEXT_PIN_ID))[0] as number) || 1;
 
-  // Add the new pin to the list of stored pins
-  const newData = [...storedPins];
-  const newPin = {
-    ...attributes,
-    name: attributes.name?.toString() || "New Pin",
-    url: attributes.url?.toString() || "",
-    icon: attributes.icon?.toString() || "Favicon / File Icon",
-    group: attributes.group?.toString() || "None",
-    application: attributes.application?.toString() || "None",
-    id: newID,
-    expireDate: attributes.expireDate ? new Date(attributes.expireDate as string).toUTCString() : undefined,
-    dateCreated: new Date().toUTCString(),
-    visibility: attributes.visibility || Visibility.VISIBLE,
-    expirationAction: attributes.expirationAction || PinAction.DELETE,
-  } as Pin;
-  newData.push(newPin);
+  const newPins = attributesList.map((attributes) => {
+    while (usedIDs.has(nextID)) nextID++;
 
-  // Update the stored pins
-  await setStorage(StorageKey.LOCAL_PINS, newData);
-  return newPin;
+    const newPin = {
+      ...attributes,
+      name: attributes.name?.toString() || "New Pin",
+      url: attributes.url?.toString() || "",
+      icon: attributes.icon?.toString() || "Favicon / File Icon",
+      group: attributes.group?.toString() || "None",
+      application: attributes.application?.toString() || "None",
+      id: nextID,
+      expireDate: attributes.expireDate ? new Date(attributes.expireDate as string).toUTCString() : undefined,
+      dateCreated: new Date().toUTCString(),
+      visibility: attributes.visibility || Visibility.VISIBLE,
+      expirationAction: attributes.expirationAction || PinAction.DELETE,
+    } as Pin;
+
+    usedIDs.add(nextID);
+    nextID++;
+    return newPin;
+  });
+
+  await setStorage(StorageKey.NEXT_PIN_ID, [nextID]);
+  await setStorage(StorageKey.LOCAL_PINS, [...storedPins, ...newPins]);
+  return newPins;
 };
 
 /**
