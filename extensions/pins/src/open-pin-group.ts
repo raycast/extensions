@@ -14,8 +14,31 @@ export default async function OpenPinGroupCommand(props: LaunchProps<{ arguments
     return;
   }
 
-  if (result.opened == 0) {
+  if (result.total == 0) {
     await showHUD(`“${result.group.name}” has no pins`);
+    return;
+  }
+
+  if (result.skippedDisabled == result.total) {
+    await showHUD(`All ${result.total} pin${result.total == 1 ? " is" : "s are"} disabled in “${result.group.name}”`);
+    return;
+  }
+
+  if (result.opened == 0) {
+    const details = [
+      result.failed > 0 ? `${result.failed} failed` : undefined,
+      result.skippedDisabled > 0 ? `${result.skippedDisabled} disabled` : undefined,
+    ].filter(Boolean);
+    await showHUD(`No pins opened from “${result.group.name}”${details.length > 0 ? ` (${details.join(", ")})` : ""}`);
+    return;
+  }
+
+  if (result.failed > 0 || result.skippedDisabled > 0) {
+    const details = [
+      result.failed > 0 ? `${result.failed} failed` : undefined,
+      result.skippedDisabled > 0 ? `${result.skippedDisabled} disabled` : undefined,
+    ].filter(Boolean);
+    await showHUD(`Opened ${result.opened}/${result.total} pins from “${result.group.name}” (${details.join(", ")})`);
     return;
   }
 

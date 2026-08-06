@@ -3,6 +3,7 @@ import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from
 import { Group } from "../lib/Groups";
 import { createNewPins, getPins } from "../lib/Pins";
 import { Visibility } from "../lib/constants";
+import { hasURLScheme } from "../lib/utils";
 
 type BulkImportUrlsFormProps = {
   group: Group;
@@ -18,16 +19,32 @@ const normalizeUrl = (input: string) => {
   const trimmed = input.trim();
   if (!trimmed) return undefined;
 
-  const hasExplicitScheme = /^[a-zA-Z][a-zA-Z\d+.-]*:/.test(trimmed);
   const looksLikeHostWithPort = /^(?:localhost|(?:\d{1,3}\.){3}\d{1,3}|[^/:\s]+\.[^/:\s]+):\d+(?:[/?#]|$)/i.test(
     trimmed,
   );
-  const candidate = hasExplicitScheme && !looksLikeHostWithPort ? trimmed : `https://${trimmed}`;
+  const candidate = hasURLScheme(trimmed) && !looksLikeHostWithPort ? trimmed : `https://${trimmed}`;
   try {
-    const url = new URL(candidate);
-    return url.toString();
+    new URL(candidate.replace(/{{[\s\S]*}}/g, "pins-placeholder"));
+    return candidate;
   } catch {
     return undefined;
+  }
+};
+
+/**
+ * Produces a canonical key for URL comparisons without changing the stored URL.
+ * @param url The URL to canonicalize.
+ * @returns A canonical comparison key, or undefined if the URL is invalid.
+ */
+const canonicalizeUrl = (url: string) => {
+  const normalized = normalizeUrl(url);
+  if (!normalized) return undefined;
+  if (normalized.includes("{{")) return `placeholder:${normalized}`;
+
+  try {
+    return new URL(normalized).toString();
+  } catch {
+    return normalized;
   }
 };
 
@@ -37,11 +54,16 @@ const normalizeUrl = (input: string) => {
  * @returns A title of at most 80 characters.
  */
 const titleFromUrl = (url: string) => {
-  const parsed = new URL(url);
-  const hostname = parsed.hostname.replace(/^www\./, "");
-  const pathname = parsed.pathname.replace(/^\/+|\/+$/g, "");
-  const title = hostname ? (pathname ? `${hostname}/${pathname}` : hostname) : `${parsed.protocol}${parsed.pathname}`;
-  return title.length > 80 ? `${title.slice(0, 77)}...` : title;
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname.replace(/^www\./, "");
+    const encodedPathname = parsed.pathname.replace(/^\/+|\/+$/g, "");
+    const pathname = decodeURI(encodedPathname);
+    const title = hostname ? (pathname ? `${hostname}/${pathname}` : hostname) : `${parsed.protocol}${pathname}`;
+    return title.length > 80 ? `${title.slice(0, 77)}...` : title;
+  } catch {
+    return url.length > 80 ? `${url.slice(0, 77)}...` : url;
+  }
 };
 
 /**
@@ -74,14 +96,24 @@ export default function BulkImportUrlsForm({ group, onImported }: BulkImportUrls
 
               const normalized = lines.map(normalizeUrl);
               const invalidCount = normalized.filter((url) => url == undefined).length;
-              const uniqueUrls = [...new Set(normalized.filter((url): url is string => url != undefined))];
+              const uniqueUrls = new Map<string, string>();
+              for (const url of normalized) {
+                if (!url) continue;
+                const canonicalUrl = canonicalizeUrl(url);
+                if (canonicalUrl && !uniqueUrls.has(canonicalUrl)) uniqueUrls.set(canonicalUrl, url);
+              }
+
               const storedPins = await getPins();
               const existingUrls = new Set(
-                storedPins.filter((pin) => pin.group == group.name).map((pin) => normalizeUrl(pin.url) || pin.url),
+                storedPins
+                  .filter((pin) => pin.group == group.name)
+                  .map((pin) => canonicalizeUrl(pin.url))
+                  .filter((url): url is string => url != undefined),
               );
-              const newUrls = uniqueUrls.filter((url) => !existingUrls.has(url));
-              const duplicateCount =
-                uniqueUrls.length - newUrls.length + (normalized.length - invalidCount - uniqueUrls.length);
+              const newUrls = [...uniqueUrls.entries()]
+                .filter(([canonicalUrl]) => !existingUrls.has(canonicalUrl))
+                .map(([, url]) => url);
+              const duplicateCount = normalized.length - invalidCount - newUrls.length;
 
               if (newUrls.length == 0) {
                 await showToast({

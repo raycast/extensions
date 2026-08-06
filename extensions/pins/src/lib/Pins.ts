@@ -25,7 +25,13 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { SORT_FN, StorageKey, SORT_STRATEGY, Visibility, PinAction } from "./constants";
-import { objectFromNonNullableEntriesOfObject, runCommand, runCommandInTerminal } from "./utils";
+import {
+  encodeURIOnce,
+  hasURLScheme,
+  objectFromNonNullableEntriesOfObject,
+  runCommand,
+  runCommandInTerminal,
+} from "./utils";
 import { ExtensionPreferences } from "./preferences";
 import * as fs from "fs";
 import * as os from "os";
@@ -179,6 +185,26 @@ export const PinKeys = [
  */
 export const getPins = async () => {
   return (await getStorage(StorageKey.LOCAL_PINS)) as Pin[];
+};
+
+/**
+ * Checks whether a pin is disabled directly or by a disabled group or ancestor.
+ * @param pin The pin to check.
+ * @param groups The complete list of groups.
+ * @returns Whether the pin is disabled.
+ */
+export const isPinDisabled = (pin: Pin, groups: Group[]) => {
+  if (pin.visibility == Visibility.DISABLED) return true;
+
+  let group = groups.find((candidate) => candidate.name == pin.group);
+  const visitedGroupIDs = new Set<string>();
+  while (group && !visitedGroupIDs.has(group.id.toString())) {
+    if (group.visibility == Visibility.DISABLED) return true;
+    visitedGroupIDs.add(group.id.toString());
+    group = groups.find((candidate) => candidate.id == group?.parent);
+  }
+
+  return false;
 };
 
 /**
@@ -338,19 +364,37 @@ export const usePins = () => {
  * Opens a pin.
  * @param pin The pin to open.
  * @param preferences The extension preferences object.
+ * @param context Values made available to placeholders.
+ * @param groups A previously loaded list of groups.
+ * @returns Whether the pin opened successfully.
  */
 export const openPin = async (
   pin: Pin,
   preferences: { preferredBrowser?: Application },
   context?: { [key: string]: unknown },
+  groups?: Group[],
 ) => {
   const startDate = new Date();
+  let resolvedGroups = groups;
+  const getResolvedGroups = async () => {
+    resolvedGroups = resolvedGroups || (await getGroups());
+    return resolvedGroups;
+  };
+
+  let opened = false;
   try {
+    const disabledByGroup = pin.group && pin.group != "None" ? isPinDisabled(pin, await getResolvedGroups()) : false;
+    if (pin.visibility == Visibility.DISABLED || disabledByGroup) {
+      await showToast({ title: `${pin.name || "Pin"} is disabled`, style: Toast.Style.Failure });
+      return false;
+    }
+
     if (pin.fragment) {
       // Copy the text fragment to the clipboard
       await Clipboard.copy(pin.url);
       await showToast({ title: "Copied To Clipboard" });
       await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
+      opened = true;
     } else {
       // Convert LocalData objects to strings
       const filteredContext = objectFromNonNullableEntriesOfObject(context || {});
@@ -388,18 +432,21 @@ export const openPin = async (
           if (fs.existsSync(target)) {
             await open(path.resolve(target), targetApplication);
             await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
+            opened = true;
           } else {
             throw new Error("File does not exist.");
           }
         } else {
-          if (target.match(/^[a-zA-Z](?![%])[a-zA-Z0-9+.-]+?:.*/g)) {
-            const groupBrowser = targetApplication
-              ? undefined
-              : (await getGroups()).find((group) => group.name == pin.group)?.preferredBrowser;
+          if (hasURLScheme(target)) {
+            const groupBrowser =
+              targetApplication || !pin.group || pin.group == "None"
+                ? undefined
+                : (await getResolvedGroups()).find((group) => group.name == pin.group)?.preferredBrowser;
 
             // Prefer the pin's application, then its group's browser, then the global preferred browser.
-            await open(encodeURI(target), targetApplication || groupBrowser || preferences.preferredBrowser);
+            await open(encodeURIOnce(target), targetApplication || groupBrowser || preferences.preferredBrowser);
             await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
+            opened = true;
           } else {
             // Open Terminal command in the default Terminal application
             await setStorage(StorageKey.LAST_OPENED_PIN, pin.id);
@@ -410,6 +457,7 @@ export const openPin = async (
               // Run the Terminal command in a new Terminal tab
               await runCommandInTerminal(target);
             }
+            opened = true;
           }
         }
       }
@@ -421,7 +469,10 @@ export const openPin = async (
       message: (error as Error).message,
       style: Toast.Style.Failure,
     });
+    return false;
   }
+
+  if (!opened) return false;
 
   const endDate = new Date();
   const timeElapsed = endDate.getTime() - startDate.getTime();
@@ -445,6 +496,7 @@ export const openPin = async (
     },
     false,
   );
+  return true;
 };
 
 /**
@@ -481,8 +533,9 @@ export const createNewPins = async (attributesList: Partial<Pin>[]) => {
   if (attributesList.length == 0) return [];
 
   const storedPins = await getPins();
-  const usedIDs = new Set(storedPins.map((pin) => pin.id));
-  let nextID = ((await getStorage(StorageKey.NEXT_PIN_ID))[0] as number) || 1;
+  const usedIDs = new Set(storedPins.map((pin) => Number(pin.id)).filter((id) => Number.isInteger(id) && id > 0));
+  const storedNextID = Number((await getStorage(StorageKey.NEXT_PIN_ID))[0]);
+  let nextID = Number.isInteger(storedNextID) && storedNextID > 0 ? storedNextID : 1;
 
   const newPins = attributesList.map((attributes) => {
     while (usedIDs.has(nextID)) nextID++;
