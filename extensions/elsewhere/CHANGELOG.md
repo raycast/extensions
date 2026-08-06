@@ -1,6 +1,6 @@
 # Elsewhere Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-06
 
 - Toggle all Elsewhere audio from one contextual command.
 - Switch Spaces and background music tracks from focused lists.
