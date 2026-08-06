@@ -60,8 +60,25 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.TextArea id="json" title="JSON" placeholder="Paste your JSON here" value={json} onChange={setJson} />
-      <Form.Checkbox id="pretty" label="Pretty print" value={pretty} onChange={setPretty} />
+      <Form.TextArea
+        id="json"
+        title="JSON"
+        placeholder="Paste your JSON here"
+        value={json}
+        onChange={(value) => {
+          setJson(value);
+          setResult("");
+        }}
+      />
+      <Form.Checkbox
+        id="pretty"
+        label="Pretty print"
+        value={pretty}
+        onChange={(value) => {
+          setPretty(value);
+          setResult("");
+        }}
+      />
       {result ? <Form.TextArea id="result" title="Result" value={result} onChange={() => {}} /> : null}
     </Form>
   );
