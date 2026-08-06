@@ -270,12 +270,14 @@ export async function getAllOpenPullRequests() {
 
   const perRepo = await mapWithConcurrency(repos, 10, async (repo) => {
     try {
-      return await listOpenPullRequestsForRepo(repo);
+      return { ok: true as const, values: await listOpenPullRequestsForRepo(repo) };
     } catch {
-      return [];
+      return { ok: false as const, values: [] as OpenPullRequest[] };
     }
   });
-  const all = perRepo.flat();
+
+  const failedRepoCount = perRepo.filter((result) => !result.ok).length;
+  const all = perRepo.flatMap((result) => result.values);
 
   all.sort((a, b) => {
     const aTime = a.created_on ? Date.parse(a.created_on) : 0;
@@ -283,5 +285,5 @@ export async function getAllOpenPullRequests() {
     return bTime - aTime;
   });
 
-  return all;
+  return { values: all, failedRepoCount };
 }

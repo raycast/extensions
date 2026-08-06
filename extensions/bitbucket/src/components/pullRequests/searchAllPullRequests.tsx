@@ -15,7 +15,7 @@ export function SearchAllPullRequests() {
   useEffect(() => {
     async function fetchPRs() {
       try {
-        const pullRequests = await getAllOpenPullRequests();
+        const { values: pullRequests, failedRepoCount } = await getAllOpenPullRequests();
 
         const prs =
           pullRequests.map((pr) => ({
@@ -32,6 +32,16 @@ export function SearchAllPullRequests() {
             },
           })) ?? [];
         setState({ pullRequests: prs });
+
+        if (failedRepoCount > 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Some repositories failed to load",
+            message: `Could not fetch pull requests from ${failedRepoCount} ${
+              failedRepoCount === 1 ? "repository" : "repositories"
+            }. Results may be incomplete.`,
+          });
+        }
       } catch (error) {
         setState({ error: error instanceof Error ? error : new Error("Something went wrong") });
       }
