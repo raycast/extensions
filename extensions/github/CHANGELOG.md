@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Clone with GitHub CLI] - {PR_MERGE_DATE}
+## [Clone with GitHub CLI] - 2026-08-06
 
 - Added a "Clone Tool" choice to the "Clone with Options" flow, letting you clone repositories with the GitHub CLI (`gh repo clone`) instead of plain `git clone`, using your existing `gh` authentication and configuration.
 - The Git method remains the default, and the target directory and branch options are preserved when using GitHub CLI.
