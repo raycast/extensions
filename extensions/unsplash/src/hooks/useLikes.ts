@@ -17,11 +17,11 @@ export function useLikes() {
 async function getUserLikes(): Promise<SearchResult[]> {
   let username = await LocalStorage.getItem<string>("username");
   if (!username) {
-    const user = await apiRequest<User>("/me");
+    const user = await apiRequest<User>("/me", { requireUserAuth: true });
     await LocalStorage.setItem("username", user.username);
     username = user.username;
   }
-  return apiRequest<SearchResult[]>(`/users/${username}/likes`);
+  return apiRequest<SearchResult[]>(`/users/${username}/likes`, { requireUserAuth: true });
 }
 
 export default useLikes;
