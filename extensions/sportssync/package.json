@@ -11,6 +11,7 @@
     "News"
   ],
   "license": "MIT",
+  "platforms": ["macOS", "Windows"],
   "commands": [
     {
       "name": "nhl-scores-and-schedule",
