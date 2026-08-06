@@ -1,5 +1,12 @@
 # Google Meet Changelog
 
+## [Fix Arc Detection] - {PR_MERGE_DATE}
+
+- Fix meeting links never being copied in Arc, which failed with "Arc opened this meeting in Little Arc" even when Little Arc was disabled. Arc's `URL of active tab` raises a `-1728` error for perfectly normal, visible windows — right after a tab opens, and whenever the active tab isn't a web page — and returns a URL again milliseconds later. The previous release treated any such error as a Little Arc signature and threw a fatal error, which aborted the entire detection window on the very first poll instead of letting the next one (300ms later) succeed. Arc also enumerates one `window` per space and those entries mirror the same active tab, so a single blip marks every window at once.
+- Report an unreadable Arc window as a transient state and keep polling, and only reinterpret it as Little Arc once the detection deadline has actually expired. Adapters can now refine an expired deadline into a more specific error through a new optional `describeTimeout` hook, so a genuinely unscriptable window still gets its actionable message rather than a bare timeout.
+- Mark an empty or `missing value` active-tab URL the same way as an unreadable window, keeping the number of reported entries equal to the number of windows Arc actually has. The System Events cross-check compares against that count, so silently dropping empty entries had been skewing it toward false positives too.
+- Read only the active tab of each Arc/Dia window, never the full tab list. Enumerating tabs would match a stale `meet.google.com/xxx-xxxx-xxx` tab left open from an earlier meeting and copy that old link instead of the one just created.
+
 ## [Fix Browser Launch] - 2026-08-06
 
 - Fix meetings opening in the wrong application when the chosen browser's name is a substring of another installed app's name. The creation URL was opened by passing the browser's display name to `open()`, which has to match that name back to an application — and `Dia` matches `Obsidian`, so meetings opened in Obsidian, launching it even when it wasn't running. The resolved `Application` is now passed instead, so the exact bundle is opened. The browser's name is still what selects the adapter and addresses the app in AppleScript, which needs the name macOS installs it under.

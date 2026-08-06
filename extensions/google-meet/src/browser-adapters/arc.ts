@@ -5,43 +5,55 @@ import type { MeetingUrlSource } from "./types";
 
 /**
  * Arc and Dia (both built by The Browser Company) share the same nested
- * `tell window i` scripting quirk. This also has to account for Arc's
- * "Air Traffic Control" routing `meet.google.com` into a Little Arc window:
- * Little Arc either isn't enumerated by Arc's own `windows` list at all, or
- * is enumerated but errors when its `active tab` is queried. Both cases are
- * treated as an unsupported-detection condition rather than a generic
- * timeout.
+ * `tell window i` scripting quirk, and both routinely fail to report the
+ * active tab of a window that is otherwise perfectly normal — `URL of active
+ * tab` raises `-1728` while a tab is opening, and for windows whose active
+ * tab isn't a web page. Arc also enumerates one `window` per space, and those
+ * entries mirror each other, so a single blip can mark *every* window at once.
  *
- * This heuristic could not be verified against a live Little Arc window
- * during development (no macOS/Arc environment was available) — see the
- * "Remaining limitations" section of the implementation report.
+ * An unreadable window is therefore recorded, never thrown on: the poll loop
+ * that drives this adapter succeeds on a later tick in the overwhelming
+ * majority of cases. Only once polling has actually given up is the state
+ * reinterpreted as Arc's "Air Traffic Control" having routed the meeting into
+ * a Little Arc window, which either isn't enumerated by Arc's own `windows`
+ * list at all or errors when its `active tab` is queried.
  */
 export function createArcFamilyAdapter(appName: "Arc" | "Dia"): MeetingUrlSource {
+  // State from the most recent poll, used only to explain an expired
+  // deadline. Reading it mid-poll would resurrect the false positive this
+  // adapter exists to avoid.
+  let lastWindowCount = 0;
+  let lastPollHadNoReadableWindow = false;
+
   return {
     usesClipboardFallback: false,
+
     async getCandidateUrls() {
       const rawCandidates = await runCandidateScript(getArcFamilyTabsScript(appName));
       const scriptableUrls = rawCandidates.filter((candidate) => candidate !== UNSCRIPTABLE_WINDOW_MARKER);
 
-      if (scriptableUrls.length > 0) {
-        return scriptableUrls;
+      lastWindowCount = rawCandidates.length;
+      lastPollHadNoReadableWindow = rawCandidates.length > 0 && scriptableUrls.length === 0;
+
+      return scriptableUrls;
+    },
+
+    async describeTimeout() {
+      // Arc reported windows, but not one of them ever yielded a URL — the
+      // clearest signature of a window type that can't be scripted.
+      if (lastPollHadNoReadableWindow) {
+        return new MeetError("ARC_LITTLE_ARC_UNSUPPORTED");
       }
 
-      const hadUnscriptableWindow = rawCandidates.length > scriptableUrls.length;
-      if (hadUnscriptableWindow) {
-        throw new MeetError("ARC_LITTLE_ARC_UNSUPPORTED");
-      }
-
-      // Arc's own dictionary reported zero (or zero readable) windows.
-      // Cross-check against System Events, which enumerates real on-screen
-      // windows regardless of what Arc's scripting dictionary exposes, to
-      // catch a Little Arc window that isn't represented in `windows` at all.
+      // Otherwise cross-check against System Events, which enumerates real
+      // on-screen windows regardless of what Arc's scripting dictionary
+      // exposes, to catch a Little Arc window missing from `windows` entirely.
       const systemEventsWindowCount = await getSystemEventsWindowCount(appName);
-      if (systemEventsWindowCount > rawCandidates.length) {
-        throw new MeetError("ARC_LITTLE_ARC_UNSUPPORTED");
+      if (systemEventsWindowCount > lastWindowCount) {
+        return new MeetError("ARC_LITTLE_ARC_UNSUPPORTED");
       }
 
-      return [];
+      return undefined;
     },
   };
 }

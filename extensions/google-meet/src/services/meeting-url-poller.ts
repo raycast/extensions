@@ -4,6 +4,12 @@ import { selectMeetingUrl } from "../utils/meeting-url";
 export type PollOptions = {
   timeoutMs: number;
   intervalMs: number;
+  /**
+   * Optional hook letting the caller replace the generic timeout with a more
+   * specific {@link MeetError} once the deadline has expired — used by
+   * adapters whose failure modes are only distinguishable in hindsight.
+   */
+  describeTimeout?: () => Promise<MeetError | undefined>;
 };
 
 export function sleep(ms: number): Promise<void> {
@@ -17,7 +23,9 @@ export function sleep(ms: number): Promise<void> {
  * recursive lookup: there's now a delay between attempts, a hard deadline,
  * and no recursion. A `MeetError` thrown by `getCandidates` itself (e.g. a
  * missing permission) is treated as fatal and propagates immediately
- * instead of being retried until the deadline.
+ * instead of being retried until the deadline — so `getCandidates` must only
+ * throw for conditions no later poll could recover from. `options.describeTimeout`
+ * is the escape hatch for the rest: it runs only after the deadline expires.
  */
 export async function waitForMeetingUrl(getCandidates: () => Promise<string[]>, options: PollOptions): Promise<string> {
   const deadline = Date.now() + options.timeoutMs;
@@ -31,7 +39,7 @@ export async function waitForMeetingUrl(getCandidates: () => Promise<string[]>, 
 
     const remainingMs = deadline - Date.now();
     if (remainingMs <= 0) {
-      throw new MeetError("MEETING_URL_TIMEOUT");
+      throw (await options.describeTimeout?.()) ?? new MeetError("MEETING_URL_TIMEOUT");
     }
 
     await sleep(Math.min(options.intervalMs, remainingMs));
