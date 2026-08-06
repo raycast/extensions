@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, Form, Keyboard, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { transformJson } from "./minify";
 
 export default function Command() {
@@ -7,6 +7,7 @@ export default function Command() {
   const [pretty, setPretty] = useState(false);
   const [result, setResult] = useState("");
   const [clipboardLoaded, setClipboardLoaded] = useState(false);
+  const resultTextArea = useRef<Form.TextArea | null>(null);
 
   useEffect(() => {
     if (clipboardLoaded) {
@@ -15,10 +16,21 @@ export default function Command() {
     setClipboardLoaded(true);
     Clipboard.readText().then((text) => {
       if (text?.trim()) {
-        setJson(text);
+        try {
+          JSON.parse(text);
+          setJson(text);
+        } catch {
+          return;
+        }
       }
     });
   }, [clipboardLoaded]);
+
+  useEffect(() => {
+    if (result) {
+      resultTextArea.current?.focus();
+    }
+  }, [result]);
 
   const handleSubmit = async (values: { json: string }) => {
     try {
@@ -79,7 +91,9 @@ export default function Command() {
           setResult("");
         }}
       />
-      {result ? <Form.TextArea id="result" title="Result" value={result} onChange={() => {}} /> : null}
+      {result ? (
+        <Form.TextArea id="result" title="Result" value={result} ref={resultTextArea} onChange={() => {}} />
+      ) : null}
     </Form>
   );
 }
