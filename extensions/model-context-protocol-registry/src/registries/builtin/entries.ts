@@ -823,6 +823,29 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.tendem.ai/mcp?utm_hash=66fdb1535f"],
     },
   },
+  {
+    name: "structured",
+    title: "Structured",
+    description:
+      "Structured is an all-in-one day planner that combines tasks and to-dos in a visual timeline. Its MCP server lets AI assistants view schedules and inbox tasks, and create, update, complete, delete, and manage recurring tasks. Remote Streamable HTTP server with Structured Cloud OAuth sign-in; some features require Structured Pro.",
+    icon: "https://web.structured.app/logo512.png",
+    homepage: "https://mcp.structured.app",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://mcp.structured.app/mcp",
+        "36933",
+        "--transport",
+        "http-only",
+        "--static-oauth-client-info",
+        '{"client_id":"4b33fb93-0eac-489f-974b-1a9fa108f4e9"}',
+        "--static-oauth-client-metadata",
+        '{"scope":"email"}',
+      ],
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
