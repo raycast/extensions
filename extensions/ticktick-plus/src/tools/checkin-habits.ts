@@ -1,7 +1,7 @@
 import { Tool } from "@raycast/api";
 import { checkinHabit } from "../api/habits";
 import { batchConfirmation } from "./lib/confirm";
-import { findHabitByName, loadHabits } from "./lib/data";
+import { loadHabits, resolveHabitRefs } from "./lib/data";
 
 type HabitRef = {
   /** Habit ID from list-habits */
@@ -41,22 +41,10 @@ export default async function tool(input: Input) {
     throw new Error(`Invalid date "${input.date}". Use ISO 8601.`);
   }
 
-  const resolved = [];
-  for (const ref of refs) {
-    let habitId = ref.habitId;
-    let habitName = ref.habitName;
-    if (!habitId && habitName) {
-      const match = findHabitByName(allHabits, habitName);
-      if (!match) throw new Error(`Habit "${habitName}" not found. Call list-habits and retry.`);
-      habitId = match.id;
-      habitName = match.name;
-    }
-    if (!habitId) throw new Error("Each habit requires habitId or habitName.");
-    if (!habitName) {
-      habitName = allHabits.find((h) => h.id === habitId)?.name ?? habitId;
-    }
-    await checkinHabit(habitId, date);
-    resolved.push({ habitId, habitName });
+  const resolved = resolveHabitRefs(refs, allHabits);
+
+  for (const habit of resolved) {
+    await checkinHabit(habit.habitId, date);
   }
 
   return { checkedIn: resolved, count: resolved.length };

@@ -26,6 +26,16 @@ type Input = {
   tasks: TaskInput[];
 };
 
+type PreparedTask = {
+  title: string;
+  projectId: string;
+  priority: 0 | 1 | 3 | 5;
+  dueDate?: string;
+  isAllDay?: boolean;
+  content?: string;
+  tags?: string[];
+};
+
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const tasks = input.tasks ?? [];
   return batchConfirmation(
@@ -46,7 +56,8 @@ export default async function tool(input: Input) {
   }
 
   const sync = await loadSyncData();
-  const created = [];
+  const openProjects = sync.projects.filter((p) => !p.closed);
+  const prepared: PreparedTask[] = [];
 
   for (const item of tasks) {
     const title = item.title?.trim();
@@ -54,10 +65,7 @@ export default async function tool(input: Input) {
 
     let projectId = item.projectId?.trim() || undefined;
     if (!projectId && item.projectName) {
-      const match = findProjectByName(
-        sync.projects.filter((p) => !p.closed),
-        item.projectName,
-      );
+      const match = findProjectByName(openProjects, item.projectName);
       if (!match) {
         throw new Error(`Project "${item.projectName}" not found. Call list-projects and retry with a projectId.`);
       }
@@ -71,7 +79,7 @@ export default async function tool(input: Input) {
     const priority = priorityFromLabel(item.priority) ?? 0;
     const due = item.dueDate ? parseDueDate(item.dueDate) : undefined;
 
-    const task = await createTask({
+    prepared.push({
       title,
       projectId,
       priority,
@@ -79,7 +87,11 @@ export default async function tool(input: Input) {
       ...(item.content?.trim() && { content: item.content.trim() }),
       ...(item.tags && item.tags.length > 0 && { tags: item.tags }),
     });
+  }
 
+  const created = [];
+  for (const item of prepared) {
+    const task = await createTask(item);
     const projectName = sync.projects.find((p) => p.id === task.projectId)?.name;
     created.push(summarizeTask(task, projectName));
   }

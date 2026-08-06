@@ -32,6 +32,17 @@ type Input = {
   tasks: TaskUpdate[];
 };
 
+type PreparedUpdate = {
+  id: string;
+  projectId: string;
+  title?: string;
+  content?: string;
+  dueDate?: string;
+  isAllDay?: boolean;
+  priority?: 0 | 1 | 3 | 5;
+  tags?: string[];
+};
+
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const tasks = input.tasks ?? [];
   return batchConfirmation(
@@ -52,7 +63,8 @@ export default async function tool(input: Input) {
   }
 
   const sync = await loadSyncData();
-  const results = [];
+  const openProjects = sync.projects.filter((p) => !p.closed);
+  const prepared: PreparedUpdate[] = [];
 
   for (const item of updates) {
     if (!item.taskId || !item.projectId) {
@@ -61,10 +73,7 @@ export default async function tool(input: Input) {
 
     let targetProjectId = item.targetProjectId;
     if (!targetProjectId && item.targetProjectName) {
-      const match = findProjectByName(
-        sync.projects.filter((p) => !p.closed),
-        item.targetProjectName,
-      );
+      const match = findProjectByName(openProjects, item.targetProjectName);
       if (!match) {
         throw new Error(`Project "${item.targetProjectName}" not found.`);
       }
@@ -74,7 +83,7 @@ export default async function tool(input: Input) {
     const priority = priorityFromLabel(item.priority);
     const due = item.dueDate ? parseDueDate(item.dueDate) : undefined;
 
-    const task = await updateTask({
+    prepared.push({
       id: item.taskId,
       projectId: targetProjectId ?? item.projectId,
       ...(item.title !== undefined && { title: item.title }),
@@ -84,7 +93,11 @@ export default async function tool(input: Input) {
       ...(priority !== undefined && { priority }),
       ...(item.tags !== undefined && { tags: item.tags }),
     });
+  }
 
+  const results = [];
+  for (const payload of prepared) {
+    const task = await updateTask(payload);
     const projectName = sync.projects.find((p) => p.id === task.projectId)?.name;
     results.push(summarizeTask(task, projectName));
   }

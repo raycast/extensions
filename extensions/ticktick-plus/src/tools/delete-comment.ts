@@ -1,5 +1,5 @@
 import { Action, Tool } from "@raycast/api";
-import { deleteComment } from "../api/ticktick";
+import { deleteComment, getComments } from "../api/ticktick";
 
 type Input = {
   /** Task ID */
@@ -12,11 +12,23 @@ type Input = {
   text?: string;
 };
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => ({
-  style: Action.Style.Destructive,
-  message: "Delete this comment?",
-  info: [{ name: "Comment", value: input.text ?? input.commentId }],
-});
+async function resolveCommentLabel(input: Input): Promise<string> {
+  if (!input.projectId || !input.taskId || !input.commentId) {
+    return input.commentId || "?";
+  }
+  const comments = await getComments(input.projectId, input.taskId);
+  const found = comments.find((c) => c.id === input.commentId);
+  return found?.title ?? input.commentId;
+}
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const label = await resolveCommentLabel(input);
+  return {
+    style: Action.Style.Destructive,
+    message: "Delete this comment?",
+    info: [{ name: "Comment", value: label }],
+  };
+};
 
 /**
  * Delete a comment from a TickTick task. Always asks for confirmation.

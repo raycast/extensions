@@ -53,6 +53,35 @@ export function findHabitByName(habits: Habit[], name: string): Habit | undefine
   return habits.find((h) => h.name.toLowerCase().includes(q));
 }
 
+export type HabitRef = {
+  habitId?: string;
+  habitName?: string;
+};
+
+export function resolveHabitRefs(
+  refs: HabitRef[],
+  habits: Habit[],
+  notFoundHint = "Call list-habits and retry.",
+): Array<{ habitId: string; habitName: string }> {
+  return refs.map((ref) => {
+    let habitId = ref.habitId;
+    let habitName = ref.habitName;
+    if (!habitId && habitName) {
+      const match = findHabitByName(habits, habitName);
+      if (!match) {
+        throw new Error(`Habit "${habitName}" not found.${notFoundHint ? ` ${notFoundHint}` : ""}`);
+      }
+      habitId = match.id;
+      habitName = match.name;
+    }
+    if (!habitId) throw new Error("Each habit requires habitId or habitName.");
+    return {
+      habitId,
+      habitName: habitName ?? habits.find((h) => h.id === habitId)?.name ?? habitId,
+    };
+  });
+}
+
 export async function loadHabits(): Promise<Habit[]> {
   return getHabits();
 }

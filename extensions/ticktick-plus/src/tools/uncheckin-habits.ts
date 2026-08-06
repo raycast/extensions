@@ -1,6 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { uncheckinHabit } from "../api/habits";
-import { findHabitByName, loadHabits } from "./lib/data";
+import { loadHabits, resolveHabitRefs } from "./lib/data";
 
 type HabitRef = {
   /** Habit ID from list-habits */
@@ -40,22 +40,10 @@ export default async function tool(input: Input) {
     throw new Error(`Invalid date "${input.date}". Use ISO 8601.`);
   }
 
-  const resolved = [];
-  for (const ref of refs) {
-    let habitId = ref.habitId;
-    let habitName = ref.habitName;
-    if (!habitId && habitName) {
-      const match = findHabitByName(allHabits, habitName);
-      if (!match) throw new Error(`Habit "${habitName}" not found.`);
-      habitId = match.id;
-      habitName = match.name;
-    }
-    if (!habitId) throw new Error("Each habit requires habitId or habitName.");
-    if (!habitName) {
-      habitName = allHabits.find((h) => h.id === habitId)?.name ?? habitId;
-    }
-    await uncheckinHabit(habitId, date);
-    resolved.push({ habitId, habitName });
+  const resolved = resolveHabitRefs(refs, allHabits, "");
+
+  for (const habit of resolved) {
+    await uncheckinHabit(habit.habitId, date);
   }
 
   return { unchecked: resolved, count: resolved.length };

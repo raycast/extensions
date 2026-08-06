@@ -38,6 +38,9 @@ export default async function tool(input: Input) {
     if (!task.taskId || !task.projectId) {
       throw new Error("Each task requires taskId and projectId.");
     }
+  }
+
+  for (const task of tasks) {
     await completeTask(task.projectId, task.taskId);
   }
 
