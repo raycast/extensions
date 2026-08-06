@@ -1,11 +1,7 @@
-import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, type LaunchProps } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { getUrlOrCurrentTab } from "./get-url-or-current-tab";
 import { discoverSitemapUrl, loadSitemapPages, type Page } from "./parse-sitemap";
-
-type Arguments = {
-  readonly url?: string;
-};
 
 function lastSegment(url: string): string {
   const pathname = new URL(url).pathname;
@@ -34,7 +30,7 @@ function pageAccessories(page: Page) {
   return accessories;
 }
 
-export default function Command(props: { readonly arguments: Arguments }) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchSitemap }>) {
   const {
     isLoading,
     data: pages,

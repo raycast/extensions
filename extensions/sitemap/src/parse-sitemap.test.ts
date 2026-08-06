@@ -1,9 +1,21 @@
 import { describe, expect, it } from "vitest";
-import { discoverSitemapUrl, loadSitemapPages, parseSitemapXml, SitemapError, type Fetch } from "./parse-sitemap";
+import {
+  discoverSitemapUrl,
+  fetchSitemap,
+  loadSitemapPages,
+  parseSitemapXml,
+  SitemapError,
+  type Fetch,
+} from "./parse-sitemap";
 
 const okResponse = (text: string): Response => new Response(text, { status: 200, statusText: "OK" });
 
 const notFoundResponse = (): Response => new Response("Not Found", { status: 404, statusText: "Not Found" });
+
+async function gzip(text: string): Promise<Uint8Array> {
+  const stream = new Blob([text]).stream().pipeThrough(new CompressionStream("gzip"));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
 
 describe("parseSitemapXml", () => {
   it("parses a flat urlset", () => {
@@ -102,6 +114,17 @@ describe("discoverSitemapUrl", () => {
     expect(result).toBe("https://example.com/custom-sitemap.xml");
   });
 
+  it("rejects a robots.txt sitemap hosted on another origin", async () => {
+    const fetch: Fetch = async (url) => {
+      if (url === "https://example.com/robots.txt") {
+        return okResponse("Sitemap: http://127.0.0.1:8080/sitemap.xml");
+      }
+      return notFoundResponse();
+    };
+
+    await expect(discoverSitemapUrl("https://example.com/page", fetch)).rejects.toBeInstanceOf(SitemapError);
+  });
+
   it("throws when no sitemap can be found", async () => {
     const fetch: Fetch = async () => notFoundResponse();
 
@@ -174,5 +197,49 @@ describe("loadSitemapPages", () => {
     const pages = await loadSitemapPages("https://example.com/sitemap.xml", fetch);
 
     expect(pages).toEqual([]);
+  });
+
+  it("does not fetch sitemap index entries on another origin", async () => {
+    const fetch = async (url: string) => {
+      if (url === "https://example.com/sitemap.xml") {
+        return okResponse(
+          `<sitemapindex><sitemap><loc>http://127.0.0.1:8080/sitemap.xml</loc></sitemap></sitemapindex>`,
+        );
+      }
+      throw new Error(`Unexpected request to ${url}`);
+    };
+
+    await expect(loadSitemapPages("https://example.com/sitemap.xml", fetch)).rejects.toBeInstanceOf(SitemapError);
+  });
+
+  it("rejects redirects to another origin before fetching them", async () => {
+    const fetch: Fetch = async (url) => {
+      if (url === "https://example.com/sitemap.xml") {
+        return new Response(null, { status: 302, headers: { location: "http://127.0.0.1:8080/sitemap.xml" } });
+      }
+      throw new Error(`Unexpected request to ${url}`);
+    };
+
+    await expect(fetchSitemap("https://example.com/sitemap.xml", fetch)).rejects.toBeInstanceOf(SitemapError);
+  });
+
+  it("decompresses gzip sitemaps without a content-encoding header", async () => {
+    const xml = "<urlset><url><loc>https://example.com/</loc></url></urlset>";
+    const fetch: Fetch = async () => new Response(await gzip(xml), { status: 200 });
+
+    await expect(fetchSitemap("https://example.com/sitemap.xml.gz", fetch)).resolves.toBe(xml);
+  });
+
+  it("passes a cancellation signal to sitemap requests", async () => {
+    let receivedSignal: AbortSignal | undefined;
+    const controller = new AbortController();
+    const fetch: Fetch = async (_url, init) => {
+      receivedSignal = init?.signal ?? undefined;
+      return okResponse("<urlset />");
+    };
+
+    await loadSitemapPages("https://example.com/sitemap.xml", fetch, new Set(), controller.signal);
+
+    expect(receivedSignal).toBe(controller.signal);
   });
 });
