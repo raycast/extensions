@@ -35,6 +35,33 @@ function resolveEditor(command: string): string {
   return hit ?? command;
 }
 
+// How deep to look for text entries before giving up. Images, files and other
+// non-text history entries read back as undefined and are skipped.
+const MAX_HISTORY_OFFSET = 25;
+
+async function readRecentTexts(count: number): Promise<string[]> {
+  const texts: string[] = [];
+
+  for (
+    let offset = 0;
+    offset < MAX_HISTORY_OFFSET && texts.length < count;
+    offset++
+  ) {
+    let entry: string | undefined;
+    try {
+      entry = await Clipboard.readText({ offset });
+    } catch {
+      // Offsets past the end of the history throw rather than resolve undefined.
+      break;
+    }
+    if (entry) {
+      texts.push(entry);
+    }
+  }
+
+  return texts;
+}
+
 export default async function main() {
   const { editorCommand, fileExtension } =
     getPreferenceValues<Preferences.DiffClipboard>();
@@ -42,10 +69,7 @@ export default async function main() {
   const ext = (fileExtension || "txt").trim().replace(/^\./, "");
 
   try {
-    const [latest, previous] = await Promise.all([
-      Clipboard.readText({ offset: 0 }),
-      Clipboard.readText({ offset: 1 }),
-    ]);
+    const [latest, previous] = await readRecentTexts(2);
 
     if (!latest || !previous) {
       await showFailureToast(
