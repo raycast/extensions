@@ -1,6 +1,6 @@
 # Unsplash Changelog
 
-## [Fix Windows OAuth] - {PR_MERGE_DATE}
+## [Fix Windows OAuth] - 2026-08-06
 
 - Fixed OAuth token exchange failing with "Bad Request" on Windows by pinning a consistent redirect URI, setting explicit `Content-Type` on the token request, and trimming API keys
 - Surfaced Unsplash's real error message when authentication fails instead of a generic "Bad Request"
