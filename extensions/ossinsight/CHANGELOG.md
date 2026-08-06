@@ -1,5 +1,9 @@
 # ossinsight Changelog
 
+## [Update trending repositories API] - 2026-08-06
+
+- Use the current OSS Insight trends API and add the Past 3 Months period
+
 ## [Fix contributor names] - 2026-08-05
 
 - Preserve the final character of contributor usernames and ignore empty trailing entries
