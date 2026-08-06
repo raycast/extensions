@@ -95,17 +95,25 @@ function fullConversion(
   };
 }
 
+function specialBitsFromDigit(digit: number): number {
+  return ((digit & 4) !== 0 ? 0o4000 : 0) | ((digit & 2) !== 0 ? 0o2000 : 0) | ((digit & 1) !== 0 ? 0o1000 : 0);
+}
+
 function convertNumeric(input: string): Conversion | null {
-  // 5-6 digits: full st_mode including the file type (e.g. 040755, 120777)
-  if (input.length >= 5) {
+  // 6 digits: full st_mode including the file type (e.g. 040755, 120777)
+  if (input.length === 6) {
     const mode = parseInt(input, 8);
     const typeBits = mode & 0o170000;
-    let fileType: FileTypeInfo | null = null;
-    if (typeBits !== 0) {
-      fileType = Object.values(FILE_TYPES).find((t) => t.bits === typeBits) ?? null;
-      if (!fileType) return null;
-    }
+    const fileType = Object.values(FILE_TYPES).find((t) => t.bits === typeBits) ?? null;
+    if (!fileType) return null;
     return fullConversion("numeric", input, mode & 0o7777, fileType);
+  }
+
+  // 5 digits: chmod-style special digit + permission (e.g. 40755 = setuid + 0755)
+  if (input.length === 5) {
+    const specialDigit = parseInt(input[0], 8);
+    const permBits = specialBitsFromDigit(specialDigit) | (parseInt(input.slice(1), 8) & 0o777);
+    return fullConversion("numeric", input, permBits, null);
   }
 
   // 3-4 digits: permissions, optionally with a leading special-bits digit

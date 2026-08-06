@@ -68,8 +68,8 @@ function ResultItem({ conversion: c }: { conversion: Conversion }) {
                     icon={fileTypeIcon(c.fileType.char)}
                   />
                 )}
-                {c.triads.map((t, i) => (
-                  <List.Item.Detail.Metadata.Label key={i} title={t.label} text={`${t.symbolic}  (${t.digit})`} />
+                {c.triads.map((t) => (
+                  <List.Item.Detail.Metadata.Label key={t.label} title={t.label} text={`${t.symbolic}  (${t.digit})`} />
                 ))}
                 {hasSpecial && <List.Item.Detail.Metadata.Separator />}
                 {c.setuid && <List.Item.Detail.Metadata.Label title="Setuid" text="Yes (4000)" />}
