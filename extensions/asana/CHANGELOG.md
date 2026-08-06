@@ -1,6 +1,6 @@
 # Asana Changelog
 
-## [Fix apostrophes in task descriptions] - {PR_MERGE_DATE}
+## [Fix apostrophes in task descriptions] - 2026-08-06
 
 - Preserve apostrophes in task and subtask descriptions
 
