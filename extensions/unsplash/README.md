@@ -19,7 +19,7 @@ A [Raycast](https://raycast.com/) extension that lets you communicate with Unspl
   - It should look [like this](https://i.imgur.com/ZV6G9mi.png).
 - Save your settings.
 - Install the Unsplash extension.
-- Enter your access key and secret key in the extension settings.
+- Enter your access key and secret key in the extension settings (avoid trailing spaces).
 - When you run a command for the first time you'll be asked to authorize.
 
 ### FAQ

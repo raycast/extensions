@@ -1,19 +1,17 @@
-import { getPreferenceValues, showToast, Toast, showHUD } from "@raycast/api";
+import { showToast, Toast, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchCreateBookmark } from "./apis";
 import { getBrowserLink } from "./hooks/useBrowserLink";
-import { Language, translations } from "./i18n";
-import { translate } from "./i18n/translate";
-import { Bookmark, Preferences } from "./types";
+import { Bookmark } from "./types";
+import { getTranslator } from "./i18n/standalone";
+import { ensureReachable } from "./utils/submitGuard";
+import { toErrorMessage } from "./utils/toast";
 
 const log = logger.child("[QuickBookmark]");
 
 export default async function QuickBookmark() {
-  const preferences = getPreferenceValues<Preferences>();
-  const language = (preferences.language as Language) || "en";
-  const t = (key: string, params?: Record<string, string | number | undefined>) =>
-    translate(translations[language], key, params);
+  const t = getTranslator();
 
   try {
     log.log("Starting quick bookmark");
@@ -36,6 +34,12 @@ export default async function QuickBookmark() {
     }
 
     log.log("Got browser URL", { url });
+
+    // No UI to fall back on here, so recover inline: start a stopped local
+    // container and wait, rather than failing with a URL the user then has to
+    // go and find again. ensureReachable drives its own toast.
+    if ((await ensureReachable(url, toast)) === "unreachable") return;
+
     toast.title = t("quickBookmark.creatingBookmark");
 
     // Create the bookmark
@@ -60,7 +64,9 @@ export default async function QuickBookmark() {
     log.error("Quick bookmark failed", { error });
     await showFailureToast({
       title: t("quickBookmark.failureToastTitle"),
-      message: String(error),
+      // toErrorMessage unwraps a transport failure's cause; String(error) here
+      // would render the useless "TypeError: fetch failed".
+      message: toErrorMessage(error),
     });
   }
 }

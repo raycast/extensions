@@ -68,6 +68,8 @@ export default function PathEntries({ searchBarAccessory }: PathEntriesProps) {
       searchFields={["entry", "type", "section"]}
       searchBarAccessory={searchBarAccessory}
       generateTitle={(item) => item.entry}
+      getItemName={(item) => item.entry}
+      getItemValue={(item) => item.entry}
       generateOverviewMarkdown={(_, allItems, grouped) => `
 # PATH Summary
 
@@ -88,33 +90,13 @@ The PATH environment variable tells your shell where to look for executable prog
 - **Append** directories for lower priority additions
 - Avoid duplicate entries for cleaner PATH
       `}
-      generateItemMarkdown={(item) => `
-# PATH Entry
-
-## Path
-\`\`\`bash
-${item.entry}
-\`\`\`
-
-## Modification Type
-**${getTypeLabel(item.type)}** - ${item.type === "prepend" ? "Added to the beginning of PATH (higher priority)" : item.type === "append" ? "Added to the end of PATH (lower priority)" : "Sets or exports PATH"}
-
-## Location
-- **Section**: ${item.section}
-- **File**: ~/.zshrc
-
-## Usage
-This path will be searched when looking for executables.
-      `}
+      omitValueMarkdown={true}
       generateMetadata={(item) => (
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
-            title="Path"
+            title="Path Entry"
             text={item.entry}
-            icon={{
-              source: Icon.Folder,
-              tintColor: MODERN_COLORS.info,
-            }}
+            icon={{ source: Icon.Tree, tintColor: MODERN_COLORS.info }}
           />
           <List.Item.Detail.Metadata.Label
             title="Type"
@@ -132,6 +114,8 @@ This path will be searched when looking for executables.
               tintColor: MODERN_COLORS.neutral,
             }}
           />
+          <List.Item.Detail.Metadata.Label title="Section Starts" text={`Line ${item.sectionStartLine}`} />
+          <List.Item.Detail.Metadata.Label title="File" text="~/.zshrc" icon={Icon.Document} />
         </List.Item.Detail.Metadata>
       )}
       generateOverviewActions={(_, refresh) => (
@@ -139,9 +123,9 @@ This path will be searched when looking for executables.
           <SharedActionsSection onRefresh={refresh} />
         </ActionPanel>
       )}
-      generateItemActions={(_, refresh) => (
+      generateItemActions={(item, refresh) => (
         <ActionPanel>
-          <SharedActionsSection onRefresh={refresh} />
+          <SharedActionsSection onRefresh={refresh} item={{ copyName: item.entry, copyValue: item.entry }} />
         </ActionPanel>
       )}
     />

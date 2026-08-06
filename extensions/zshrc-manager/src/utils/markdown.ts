@@ -7,6 +7,16 @@
 
 import type { LogicalSection } from "../lib/parse-zshrc";
 import { parseAliases, parseExports } from "./parsers";
+import { isSecretName, maskValue, maskSecretsInContent } from "./secrets";
+import { stripSurroundingQuotes } from "./shell-escape";
+
+/**
+ * Export value as rendered in markdown: quotes stripped, secrets masked
+ */
+function displayExportValue(exp: { variable: string; value: string }): string {
+  const value = stripSurroundingQuotes(exp.value);
+  return isSecretName(exp.variable) ? maskValue(value) : value;
+}
 
 /**
  * Represents parsed section content with aliases, exports, and other lines
@@ -93,7 +103,7 @@ export function generateRawMarkdown(section: LogicalSection): string {
 ## 📋 Raw Content
 
 \`\`\`zsh
-${section.content}
+${maskSecretsInContent(section.content)}
 \`\`\`
   `;
 }
@@ -135,7 +145,7 @@ ${
   hasExports
     ? `
 ## 📦 Exports
-${content.exports.map((exp) => `\`${exp.variable}\` = \`${exp.value}\``).join(" | ")}
+${content.exports.map((exp) => `\`${exp.variable}\` = \`${displayExportValue(exp)}\``).join(" | ")}
 `
     : ""
 }
@@ -145,7 +155,7 @@ ${
     ? `
 ## ⚙️ Other Configuration
 \`\`\`zsh
-${content.otherLines.join("\n")}
+${maskSecretsInContent(content.otherLines.join("\n"))}
 \`\`\`
 `
     : ""
@@ -192,7 +202,7 @@ ${
     ? `
 ## 📦 Exports
 
-${content.exports.map((exp) => `- **\`${exp.variable}\`** = \`${exp.value}\``).join("\n")}
+${content.exports.map((exp) => `- **\`${exp.variable}\`** = \`${displayExportValue(exp)}\``).join("\n")}
 
 ---`
     : ""
@@ -204,7 +214,7 @@ ${
 ## ⚙️ Other Configuration
 
 \`\`\`zsh
-${content.otherLines.join("\n")}
+${maskSecretsInContent(content.otherLines.join("\n"))}
 \`\`\`
 
 ---`
@@ -214,7 +224,7 @@ ${content.otherLines.join("\n")}
 ## 📋 Raw Content
 
 \`\`\`zsh
-${section.content}
+${maskSecretsInContent(section.content)}
 \`\`\`
   `;
 }

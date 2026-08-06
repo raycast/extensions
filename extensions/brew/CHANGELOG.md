@@ -1,5 +1,17 @@
 # Brew Changelog
 
+## [Pin visibility, outdated tags, detail pane] - 2026-08-04
+
+- Show Installed: pinned formulae now render in their own "Pinned Formulae" section at the bottom of the list, with the count as the section subtitle, instead of sitting unlabelled among the other formulae
+- Installed packages with an available update now carry an `Outdated` tag — formulae and casks both. The list component is shared, so the tag also appears for installed-and-outdated packages in Search results
+- Show Installed: ⌘⇧D toggles a metadata detail pane for the selected package
+- A list of nothing but pinned formulae no longer reports itself as empty
+
+## [Bug fix] - 2026-08-03
+
+- Fixed "Show Installed" listing no packages on every open after the first. The installed-package lookups are `Map`s, which serialise to `{}`, so the cached value was emptied on write and then re-served empty forever. The serialisable form is cached now and the lookups are rebuilt on read; cache entries written by earlier versions are discarded rather than trusted.
+- Fixed Search intermittently failing to mark packages as installed, which had the same cause.
+
 ## [Bug fix] - 2026-07-10
 
 - Search now works instantly against the existing package index while it refreshes in the background, instead of blocking until the refresh completes

@@ -64,10 +64,27 @@ export function kubernetesClustersPodsList(cluster: string) {
   });
 }
 
-export function connectToDatabase(connection: string, username: string, protocol: string, database: string) {
+export function connectToDatabase(
+  connection: string,
+  username: string,
+  protocol: string,
+  database: string,
+  windowMode: string,
+  environmentTag: string,
+  statusColor: string
+) {
   return spawnSync(
     "sh",
-    [`${environment.assetsPath}/scripts/connect-database.sh`, connection, username, protocol, database],
+    [
+      `${environment.assetsPath}/scripts/connect-database.sh`,
+      connection,
+      username,
+      protocol,
+      database,
+      windowMode,
+      environmentTag,
+      statusColor,
+    ],
     { env: env(), timeout: 15000 }
   ).stdout.toString();
 }

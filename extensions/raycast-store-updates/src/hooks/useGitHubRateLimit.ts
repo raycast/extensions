@@ -4,6 +4,8 @@ import { useCallback } from "react";
 const LAST_FETCH_KEY = "github-last-fetch-time";
 const RATE_LIMIT_RESET_KEY = "github-rate-limit-reset";
 const MIN_REFRESH_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+/** GitHub's rate-limit window is 1h, so no honest cooldown exceeds it. */
+const MAX_COOLDOWN_MS = 60 * 60 * 1000;
 
 interface UseGitHubRateLimitResult {
   /** Returns null if refresh is allowed, or a message describing when to retry. */
@@ -57,8 +59,14 @@ export function useGitHubRateLimit(): UseGitHubRateLimitResult {
   }, []);
 
   const recordRateLimit = useCallback(async (resetEpochSeconds?: number): Promise<string> => {
-    // Default: block for 60 minutes if we don't know the reset time
-    const resetMs = resetEpochSeconds ? resetEpochSeconds * 1000 : Date.now() + 60 * 60 * 1000;
+    // Only honor a reset time GitHub actually sent, and only if it is in the future
+    // and within the 1h its limit window can span. Without a usable reset, fall back to
+    // the ordinary 5-minute interval — NOT an invented hour. Guessing long on unknown
+    // evidence turns a transient proxy 403 into a 60-minute lockout.
+    const now = Date.now();
+    const reported = resetEpochSeconds ? resetEpochSeconds * 1000 : null;
+    const isUsable = reported !== null && reported > now && reported <= now + MAX_COOLDOWN_MS;
+    const resetMs = isUsable ? reported : now + MIN_REFRESH_INTERVAL_MS;
     await LocalStorage.setItem(RATE_LIMIT_RESET_KEY, String(resetMs));
     return formatTimeRemaining(resetMs - Date.now());
   }, []);

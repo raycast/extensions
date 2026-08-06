@@ -5,6 +5,7 @@ import { insertNode } from "../lib/api";
 import { insertNodeOptimistically } from "../lib/cache";
 import { listCaptureDestinationOptions, resolveDefaultCaptureDestination } from "../lib/capture-options";
 import { getPreferences } from "../lib/preferences";
+import { platformShortcut } from "../lib/shortcuts";
 import type { CaptureType } from "../lib/nodes";
 
 export function CompactQuickCaptureForm() {
@@ -109,12 +110,12 @@ export function CompactQuickCaptureForm() {
             <Action title={`Capture to ${selectedDestination.title}`} onAction={submitCapture} />
             <Action
               title={`Switch to ${captureType === "todo" ? "Bullet" : "Todo"}`}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
+              shortcut={platformShortcut(["cmd"], "t")}
               onAction={() => setCaptureType((current) => (current === "todo" ? "bullet" : "todo"))}
             />
             <Action.Push
               title="Open Capture Form"
-              shortcut={{ modifiers: ["cmd"], key: "enter" }}
+              shortcut={platformShortcut(["cmd"], "enter")}
               target={
                 <QuickCaptureForm
                   initialText={trimmedText}

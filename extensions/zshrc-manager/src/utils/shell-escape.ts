@@ -46,6 +46,29 @@ export function validateVarName(name: string): boolean {
 }
 
 /**
+ * Escapes a string for literal use inside a regular expression
+ */
+export function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Strips one pair of matching surrounding quotes from a value.
+ *
+ * Parsed export values keep their quotes verbatim from the file; display,
+ * masking and Copy Value want the value itself, not its quoting.
+ */
+export function stripSurroundingQuotes(value: string): string {
+  if (value.length >= 2) {
+    const first = value[0];
+    if ((first === '"' || first === "'") && value.endsWith(first)) {
+      return value.slice(1, -1);
+    }
+  }
+  return value;
+}
+
+/**
  * Escapes a string value for safe use in single-quoted shell strings.
  *
  * In shell, single quotes preserve everything literally except you cannot

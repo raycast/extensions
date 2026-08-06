@@ -3,9 +3,17 @@ import * as fs from "fs-extra";
 import * as async from "modern-async";
 import * as path from "path";
 import nbt from "prismarine-nbt";
+import { pathToFileURL } from "url";
 import type { Instance, Server } from "../types";
 import { getPreferences } from "./preferences";
 import { getShortcutTargetPath } from "./powershell";
+
+/**
+ * Convert a local filesystem path to a `file://` URL that Raycast's `Image.source`
+ */
+function toFileUrl(p: string | undefined): string | undefined {
+  return p ? pathToFileURL(p).href : undefined;
+}
 
 export const isWin = process.platform === "win32";
 export const isMac = process.platform === "darwin";
@@ -97,7 +105,7 @@ export async function loadInstances(favoriteIds: string[], onlyWithServers: bool
     return {
       name: instanceCfg.get("General", "name", instanceId),
       id: instanceId,
-      icon: iconPath,
+      icon: toFileUrl(iconPath),
       favorite: favoriteIds.includes(instanceId),
       ...(onlyWithServers ? { hasServers } : {}),
     };

@@ -10,6 +10,7 @@
  * 3. Fall back to default folder icon
  */
 
+import type { Image } from "@raycast/api";
 import { findBestSimpleIcon, svgToDataUrl } from "./simple-icon-engine";
 import { normalizeSectionName, getSemanticCategory, getFallbackIcon } from "./section-normalizer";
 import type { IconSource } from "./icon-types";
@@ -41,12 +42,32 @@ export function getSectionIcon(sectionName: string): {
   // Step 2: Try to find a matching Simple Icon
   const simpleIconMatch = findBestSimpleIcon(sectionName, normalized);
   if (simpleIconMatch) {
+    const hex = String(simpleIconMatch.icon.hex || "").toUpperCase();
+    // Bake the brand color into the SVG before encoding: simple-icons ship
+    // black paths, and relying on tintColor leaves the icon invisible if
+    // tinting fails
     return {
-      icon: svgToDataUrl(simpleIconMatch.icon.svg),
-      color: String(simpleIconMatch.icon.hex || "").toUpperCase(),
+      icon: svgToDataUrl(simpleIconMatch.icon.svg, hex),
+      color: hex,
     };
   }
 
   // Step 3: Fall back to default icon
   return getFallbackIcon();
+}
+
+/**
+ * Gets a ready-to-render image for a section name.
+ *
+ * Simple Icons arrive as data-URL SVGs with their brand color baked into the
+ * fill, and must NOT be tinted: current Raycast builds render a tinted
+ * data-URL SVG as nothing at all. Raycast built-in icons still need the
+ * tint to get their color.
+ */
+export function getSectionImage(sectionName: string): Image.ImageLike {
+  const { icon, color } = getSectionIcon(sectionName);
+  if (typeof icon === "string" && icon.startsWith("data:")) {
+    return { source: icon };
+  }
+  return { source: icon, tintColor: color };
 }

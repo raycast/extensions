@@ -1,11 +1,17 @@
 import { List, Color, Icon } from "@raycast/api";
 import { StoreItem } from "../types";
-import { createStoreDeeplink, CATEGORY_COLORS, MACOS_TINT_COLOR, WINDOWS_TINT_COLOR } from "../utils";
+import {
+  CATEGORY_COLORS,
+  categoryIcon,
+  createStoreDeeplink,
+  MACOS_TINT_COLOR,
+  platformSupport,
+  WINDOWS_TINT_COLOR,
+} from "../utils";
 
 export function ExtensionItemDetail({ item }: { item: StoreItem }) {
   const storeDeeplink = createStoreDeeplink(item.url);
-  const hasMac = item.platforms?.some((p) => p.toLowerCase() === "macos") ?? true;
-  const hasWindows = item.platforms?.some((p) => p.toLowerCase() === "windows") ?? false;
+  const { hasMac, hasWindows } = platformSupport(item.platforms);
 
   const validCategories = (item.categories ?? []).filter((c) => typeof c === "string" && c.trim().length > 0);
 
@@ -53,6 +59,7 @@ export function ExtensionItemDetail({ item }: { item: StoreItem }) {
                 <List.Item.Detail.Metadata.TagList.Item
                   key={cat}
                   text={cat}
+                  icon={categoryIcon(cat)}
                   color={CATEGORY_COLORS[cat] ?? Color.SecondaryText}
                 />
               ))}

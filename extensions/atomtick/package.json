@@ -1,0 +1,66 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "atomtick",
+  "title": "AtomTick",
+  "description": "NTP-synchronized atomic reference time as a live analog clock face, with a digital readout underneath.",
+  "icon": "icon.png",
+  "author": "IngoJ",
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "keywords": [
+    "ntp",
+    "atomic time",
+    "clock",
+    "sync",
+    "timezone"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "analog-clock",
+      "title": "Analog Clock",
+      "description": "Live analog clock face with a digital readout, rendered from NTP-synchronized atomic time.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-atomic-time",
+      "title": "Copy Atomic Time",
+      "description": "Copy the current NTP-synchronized time to the clipboard as an ISO-8601 timestamp.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timezoneOverride",
+      "type": "textfield",
+      "title": "Timezone Override",
+      "description": "IANA timezone (e.g. Europe/Berlin) to force a specific timezone. Leave empty to automatically follow your Mac's current system timezone.",
+      "placeholder": "System default",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,15 @@
 # Typefully Changelog
 
+## [Enhancements] - 2026-07-28
+
+- Add core-workflow AI evals for create/list/get/schedule/publish, social sets, comments, queue+analytics, LinkedIn mentions, and X Articles
+
+## [AI Skill Parity] - 2026-07-27
+
+- Expand Raycast AI from 4 to 29 Typefully tools covering full draft CRUD, publishing, queue management, tags, media, analytics, LinkedIn mentions, comments, and X Articles
+- Add comprehensive AI instructions for account resolution, one-draft-per-post behavior, platform rules, comment-anchor safety, scheduling, publishing confirmation, and authentication failures
+- Stop silently choosing the first account when multiple social sets exist without a default
+
 ## [Cleanup] - 2026-02-04
 
 - Remove store submission checklist from README
@@ -14,4 +24,3 @@ New Raycast extension for Typefully, built on the Typefully API v2.
 - Browse unpublished, scheduled, and published drafts
 - Manage social sets and set a default for quick access
 - AI tools for Raycast AI Chat: create, list, and schedule drafts conversationally
-

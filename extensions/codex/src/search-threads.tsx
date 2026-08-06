@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Alert,
   Clipboard,
   Color,
   confirmAlert,
@@ -22,46 +21,43 @@ import {
   useForm,
   usePromise,
 } from "@raycast/utils";
-import { basename } from "node:path";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   archiveThread,
-  buildCodexResumeCommand,
-  CODEX_THREAD_LIST_LOOKBACK_DAYS,
-  CODEX_THREAD_LIST_MAX_RESULTS,
-  compactThread,
+  buildResumeCommand,
   type CodexThread,
   type CodexThreadLatestMessages,
   forkThread,
   listThreads,
   readLatestThreadMessages,
+  searchThreads,
   type SetThreadNameResult,
   setThreadName,
+  threadListLookbackDays,
+  threadListMaxResults,
   unarchiveThread,
-} from "./utils/codex-app-server";
+} from "./utils/app-server";
 import {
-  type CodexStatusDescriptor,
   getCodexSourceDescriptor,
   getCodexStatusDescriptor,
-} from "./utils/codex-thread-display";
+} from "./utils/display";
 import {
-  indexMissingThreadSearchRecords,
-  loadCachedThreadSearchRecords,
-  searchCodexThreads,
+  mapNativeThreadSearchResults,
+  mergeThreadSearchResults,
+  searchThreadMetadata,
   type CodexThreadSearchMatch,
-  type CodexThreadSearchRecord,
   type CodexThreadSearchResult,
-} from "./utils/codex-thread-search";
+} from "./utils/search";
 import {
   buildThreadSummaryDocument,
   summarizeCodexThread,
-} from "./utils/codex-thread-summary";
+} from "./utils/summary";
 import {
   areEquivalentThreadNames,
   autoRenameCodexThreads,
   buildAutoRenameReport,
-} from "./utils/codex-thread-rename";
-import { exportThreadToMarkdown } from "./utils/export-thread";
+} from "./utils/rename";
+import { exportThreadToMarkdown } from "./utils/export";
 import {
   formatTimestampSeconds,
   getErrorMessage,
@@ -75,47 +71,47 @@ import {
   type LatestTurn,
   renderLatestTurnsMarkdown,
 } from "./utils/latest-turns";
-import { buildCodexProjectOptions } from "./utils/codex-projects";
+import { buildWorkingDirectoryOptionsFromThreads } from "./utils/projects";
+import { cleanCodexUserMessage } from "./utils/message-cleaning";
+import { removeLegacyThreadSearchCache } from "./utils/legacy-thread-search-cache";
 import { runNoViewCommand } from "./utils/raycast";
-import {
-  openTerminalAtPath,
-  openTerminalAtPathWithCommand,
-} from "./utils/terminal";
+import { openTerminalAtPathWithCommand } from "./utils/terminal";
 
 type ThreadScope = "active" | "archived";
-type ProjectFilter = {
+type WorkingDirectoryFilter = {
   cwd: string | null;
   setCwd: (cwd: string | null) => Promise<void> | void;
 };
 
-type ThreadSearchIndexStatus = {
-  isIndexing: boolean;
-  error: string | null;
+type ThreadSearchResponse = {
+  query: string;
+  results: CodexThreadSearchResult[];
+  transcriptSearchWarning: string | null;
 };
 
-const LATEST_TURN_PRESENTATION = {
+type ThreadResultSection = {
+  title: "Needs Attention" | "Active Threads" | "Archived Threads";
+  results: CodexThreadSearchResult[];
+};
+
+const latestTurnPresentation = {
   user: {
-    detailHeading: "👤 User",
-    clipboardHeading: "User",
+    detailHeading: "User",
     fallback: "No user message found.",
   },
   agent: {
-    detailHeading: "🤖 Agent",
-    clipboardHeading: "Agent",
+    detailHeading: "Codex",
     fallback: "No agent message found.",
   },
 } as const;
 
-const SUBAGENT_COLOR = "#94D2BC";
-const BRANCH_MAIN_COLOR = "#4A78A4";
-const BRANCH_FEATURE_COLOR = "#FF7F7F";
-const AUTO_RENAME_BATCH_SIZES = [5, 10, 25, 50] as const;
-const ALL_PROJECTS_FILTER_VALUE = "__all_projects__";
-const EMPTY_THREADS: CodexThread[] = [];
-const EMPTY_SEARCH_INDEX_STATUS: ThreadSearchIndexStatus = {
-  isIndexing: false,
-  error: null,
-};
+const subagentColor = "#94D2BC";
+const mainBranchColor = "#4A78A4";
+const featureBranchColor = "#FF7F7F";
+const autoRenameBatchSizes = [5, 10, 25, 50] as const;
+const latestTurnPreviewMaxLength = 1500;
+const allProjectsFilterValue = "__all_projects__";
+const emptyThreads: CodexThread[] = [];
 
 export default function CodexThreadsCommand() {
   const [threadScope, setThreadScope] = useCachedState<ThreadScope>(
@@ -130,24 +126,25 @@ export default function CodexThreadsCommand() {
     "codex-threads-show-subagents",
     false,
   );
-  const [projectFilterCwd, setProjectFilterCwd] = useCachedState<string | null>(
-    "codex-threads-project-filter-cwd",
-    null,
-  );
+  const [workingDirectoryFilterPath, setWorkingDirectoryFilterPath] =
+    useCachedState<string | null>("codex-threads-project-filter-cwd", null);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [searchText, setSearchText] = useState("");
+  useEffect(() => {
+    removeLegacyThreadSearchCache();
+  }, []);
   const archived = threadScope === "archived";
-  const projectFilter: ProjectFilter = {
-    cwd: projectFilterCwd,
-    setCwd: setProjectFilterCwd,
+  const projectFilter: WorkingDirectoryFilter = {
+    cwd: workingDirectoryFilterPath,
+    setCwd: setWorkingDirectoryFilterPath,
   };
 
   const threadListArgs = useMemo<Parameters<typeof listThreads>>(
     () => [
       {
         archived,
-        maxResults: CODEX_THREAD_LIST_MAX_RESULTS,
-        windowDays: CODEX_THREAD_LIST_LOOKBACK_DAYS,
+        maxResults: threadListMaxResults,
+        windowDays: threadListLookbackDays,
       },
     ],
     [archived],
@@ -162,13 +159,20 @@ export default function CodexThreadsCommand() {
   });
 
   const threads = useMemo(
-    () => filterThreadsByProject(allThreads ?? EMPTY_THREADS, projectFilterCwd),
-    [allThreads, projectFilterCwd],
+    () =>
+      filterThreadsByWorkingDirectory(
+        allThreads ?? emptyThreads,
+        workingDirectoryFilterPath,
+      ),
+    [allThreads, workingDirectoryFilterPath],
   );
   const projectOptions = useMemo(
     () =>
-      buildCodexProjectOptions(allThreads ?? EMPTY_THREADS, projectFilterCwd),
-    [allThreads, projectFilterCwd],
+      buildWorkingDirectoryOptionsFromThreads(
+        allThreads ?? emptyThreads,
+        workingDirectoryFilterPath,
+      ),
+    [allThreads, workingDirectoryFilterPath],
   );
   const subagentCounts = useMemo(
     () => getDirectSubagentCounts(threads),
@@ -180,18 +184,37 @@ export default function CodexThreadsCommand() {
     [showSubagents, threads],
   );
   const trimmedSearchText = searchText.trim();
+  const searchAbortable = useRef<AbortController>(undefined);
   const {
-    recordsByThreadId: searchRecordsByThreadId,
-    status: searchIndexStatus,
-  } = useThreadSearchIndex(visibleThreads, Boolean(trimmedSearchText));
+    data: searchResponse,
+    error: searchError,
+    isLoading: isSearching,
+  } = usePromise(
+    // Read the signal at call time: usePromise swaps in a fresh controller
+    // right before invoking the function, so a render-time arg would be stale.
+    (threads: CodexThread[], query: string, isArchived: boolean) =>
+      searchVisibleThreads(
+        threads,
+        query,
+        isArchived,
+        searchAbortable.current?.signal,
+      ),
+    [visibleThreads, trimmedSearchText, archived],
+    {
+      execute: Boolean(trimmedSearchText),
+      abortable: searchAbortable,
+      failureToastOptions: { title: "Unable to search Codex threads" },
+    },
+  );
+  const currentSearchResponse =
+    searchResponse?.query === trimmedSearchText ? searchResponse : undefined;
+  const transcriptSearchWarning = trimmedSearchText
+    ? (currentSearchResponse?.transcriptSearchWarning ?? null)
+    : null;
 
   const displayedThreadResults = useMemo<CodexThreadSearchResult[]>(() => {
     if (trimmedSearchText) {
-      return searchCodexThreads(
-        visibleThreads,
-        searchRecordsByThreadId,
-        trimmedSearchText,
-      );
+      return currentSearchResponse?.results ?? [];
     }
 
     return visibleThreads.map((thread) => ({
@@ -199,10 +222,14 @@ export default function CodexThreadsCommand() {
       match: null,
       score: thread.updatedAt,
     }));
-  }, [searchRecordsByThreadId, trimmedSearchText, visibleThreads]);
+  }, [currentSearchResponse, trimmedSearchText, visibleThreads]);
   const displayedThreads = useMemo(
     () => displayedThreadResults.map((result) => result.thread),
     [displayedThreadResults],
+  );
+  const threadResultSections = useMemo(
+    () => buildThreadResultSections(displayedThreadResults, archived),
+    [archived, displayedThreadResults],
   );
   const effectiveSelectedThreadId =
     selectedThreadId &&
@@ -213,9 +240,16 @@ export default function CodexThreadsCommand() {
     data: latestSelectedThreadMessages,
     error: latestSelectedThreadMessagesError,
     isLoading: isLatestSelectedThreadMessagesLoading,
+    revalidate: revalidateLatestSelectedThreadMessages,
   } = usePromise(readLatestThreadMessages, [effectiveSelectedThreadId ?? ""], {
     execute: isShowingDetail && Boolean(effectiveSelectedThreadId),
   });
+  const refreshThreadsAndSelectedMessages = async () => {
+    revalidate();
+    if (isShowingDetail && effectiveSelectedThreadId) {
+      await revalidateLatestSelectedThreadMessages();
+    }
+  };
 
   if (!allThreads?.length && error) {
     return (
@@ -237,104 +271,114 @@ export default function CodexThreadsCommand() {
 
   return (
     <List
-      isLoading={
-        isLoading ||
-        (Boolean(trimmedSearchText) && searchIndexStatus.isIndexing)
-      }
+      isLoading={isLoading || (Boolean(trimmedSearchText) && isSearching)}
       isShowingDetail={isShowingDetail}
       filtering={false}
       onSelectionChange={setSelectedThreadId}
       onSearchTextChange={setSearchText}
       searchText={searchText}
       searchBarPlaceholder={
-        projectFilterCwd
-          ? `Search ${getProjectName(projectFilterCwd)} names, paths, and transcripts`
-          : `Search last ${CODEX_THREAD_LIST_LOOKBACK_DAYS} days by name, path, or transcript`
+        workingDirectoryFilterPath
+          ? `Search ${getProjectName(workingDirectoryFilterPath)} names, paths, and transcripts`
+          : `Search last ${threadListLookbackDays} days by name, path, or transcript`
       }
       searchBarAccessory={
         <List.Dropdown
-          tooltip="Project"
-          value={projectFilterCwd ?? ALL_PROJECTS_FILTER_VALUE}
+          tooltip="Folder"
+          value={workingDirectoryFilterPath ?? allProjectsFilterValue}
           onChange={async (value) => {
             await projectFilter.setCwd(
-              value === ALL_PROJECTS_FILTER_VALUE ? null : value,
+              value === allProjectsFilterValue ? null : value,
             );
           }}
         >
           <List.Dropdown.Item
-            title="All Projects"
-            value={ALL_PROJECTS_FILTER_VALUE}
-            icon={{ source: Icon.Circle, tintColor: Color.SecondaryText }}
+            title="All Folders"
+            value={allProjectsFilterValue}
+            icon={Icon.Folder}
           />
           {projectOptions.map((option) => (
             <List.Dropdown.Item
               key={option.cwd}
               title={option.title}
               value={option.cwd}
-              icon={{ source: Icon.Circle, tintColor: option.color }}
+              icon={{ fileIcon: option.cwd }}
             />
           ))}
         </List.Dropdown>
       }
       throttle
     >
-      {displayedThreadResults.map(({ thread, match }) => {
-        const directSubagentCount = subagentCounts.get(thread.id) ?? 0;
-        const isSelected = thread.id === effectiveSelectedThreadId;
-        const selectedLatestMessages = isSelected
-          ? latestSelectedThreadMessages
-          : undefined;
+      {threadResultSections.map((section) => (
+        <List.Section
+          key={section.title}
+          title={section.title}
+          subtitle={
+            transcriptSearchWarning
+              ? `${section.results.length} (transcript search unavailable)`
+              : String(section.results.length)
+          }
+        >
+          {section.results.map(({ thread, match }) => {
+            const directSubagentCount = subagentCounts.get(thread.id) ?? 0;
+            const isSelected = thread.id === effectiveSelectedThreadId;
+            const selectedLatestMessages = isSelected
+              ? latestSelectedThreadMessages
+              : undefined;
 
-        const displayTitle = getThreadDisplayTitle(thread);
-        return (
-          <List.Item
-            key={thread.id}
-            id={thread.id}
-            title={{ value: displayTitle, tooltip: displayTitle }}
-            subtitle={getThreadSubtitle(thread, match, isShowingDetail)}
-            icon={{
-              value: getThreadIcon(thread),
-              tooltip: getCodexSourceDescriptor(thread.source).tooltip,
-            }}
-            accessories={getThreadAccessories(
-              thread,
-              directSubagentCount,
-              isShowingDetail,
-            )}
-            detail={
-              isShowingDetail && isSelected
-                ? buildThreadDetail(
-                    thread,
-                    directSubagentCount,
-                    selectedLatestMessages,
-                    isLatestSelectedThreadMessagesLoading,
-                    latestSelectedThreadMessagesError,
-                  )
-                : undefined
-            }
-            actions={
-              <ThreadActions
-                archived={archived}
-                isShowingDetail={isShowingDetail}
-                showSubagents={showSubagents}
-                onArchiveFilterChange={setThreadScope}
-                onThreadsChanged={revalidate}
-                onToggleDetail={() => {
-                  setIsShowingDetail(!isShowingDetail);
+            const displayTitle = getThreadDisplayTitle(thread);
+            return (
+              <List.Item
+                key={thread.id}
+                id={thread.id}
+                title={{ value: displayTitle, tooltip: displayTitle }}
+                subtitle={getThreadSubtitle(thread, match, isShowingDetail)}
+                icon={{
+                  value: getThreadIcon(thread),
+                  tooltip: getCodexSourceDescriptor(thread.source).tooltip,
                 }}
-                onToggleShowSubagents={() => {
-                  setShowSubagents(!showSubagents);
-                }}
-                autoRenameCandidates={displayedThreads}
-                latestMessages={selectedLatestMessages}
-                projectFilter={projectFilter}
-                thread={thread}
+                accessories={getThreadAccessories(
+                  thread,
+                  directSubagentCount,
+                  isShowingDetail,
+                )}
+                detail={
+                  isShowingDetail && isSelected
+                    ? buildThreadDetail(
+                        thread,
+                        directSubagentCount,
+                        selectedLatestMessages,
+                        isLatestSelectedThreadMessagesLoading,
+                        latestSelectedThreadMessagesError,
+                      )
+                    : undefined
+                }
+                actions={
+                  <ThreadActions
+                    archived={archived}
+                    isShowingDetail={isShowingDetail}
+                    showSubagents={showSubagents}
+                    onArchiveFilterChange={setThreadScope}
+                    onRefresh={refreshThreadsAndSelectedMessages}
+                    onThreadsChanged={revalidate}
+                    onToggleDetail={() => {
+                      setIsShowingDetail(!isShowingDetail);
+                    }}
+                    onToggleShowSubagents={() => {
+                      setShowSubagents(!showSubagents);
+                    }}
+                    autoRenameCandidates={displayedThreads}
+                    projectFilter={projectFilter}
+                    thread={thread}
+                    latestMessages={selectedLatestMessages}
+                  />
+                }
               />
-            }
-          />
-        );
-      })}
-      {!isLoading && displayedThreadResults.length === 0 ? (
+            );
+          })}
+        </List.Section>
+      ))}
+      {!isLoading && !isSearching && displayedThreadResults.length === 0 ? (
         <List.EmptyView
           title={getEmptyViewTitle(
             archived,
@@ -343,17 +387,17 @@ export default function CodexThreadsCommand() {
           )}
           description={getEmptyViewDescription({
             archived,
-            indexError: searchIndexStatus.error,
-            isIndexing: searchIndexStatus.isIndexing,
-            projectFilterCwd,
+            workingDirectoryFilterPath,
+            searchError,
+            transcriptSearchWarning,
             searchText: trimmedSearchText,
             unfilteredCount: threads.length,
           })}
           actions={
-            projectFilterCwd ? (
+            workingDirectoryFilterPath ? (
               <ActionPanel>
                 <Action
-                  title="Clear Project Filter"
+                  title="Clear Folder Filter"
                   icon={Icon.XMarkCircle}
                   onAction={async () => {
                     await projectFilter.setCwd(null);
@@ -368,82 +412,103 @@ export default function CodexThreadsCommand() {
   );
 }
 
-function useThreadSearchIndex(
-  threads: CodexThread[],
-  isEnabled: boolean,
-): {
-  recordsByThreadId: Map<string, CodexThreadSearchRecord>;
-  status: ThreadSearchIndexStatus;
-} {
-  const [recordsByThreadId, setRecordsByThreadId] = useState<
-    Map<string, CodexThreadSearchRecord>
-  >(() => new Map());
-  const [status, setStatus] = useState<ThreadSearchIndexStatus>(
-    EMPTY_SEARCH_INDEX_STATUS,
+function buildThreadResultSections(
+  results: CodexThreadSearchResult[],
+  archived: boolean,
+): ThreadResultSection[] {
+  if (archived) {
+    return results.length > 0 ? [{ title: "Archived Threads", results }] : [];
+  }
+
+  const needsAttention = results
+    .filter(({ thread }) => getAttentionPriority(thread) > 0)
+    .sort(
+      (left, right) =>
+        getAttentionPriority(right.thread) -
+          getAttentionPriority(left.thread) ||
+        right.thread.updatedAt - left.thread.updatedAt,
+    );
+  const activeThreads = results.filter(
+    ({ thread }) => getAttentionPriority(thread) === 0,
   );
 
-  useEffect(() => {
-    let isCancelled = false;
-
-    async function loadAndUpdateSearchIndex() {
-      if (!isEnabled) {
-        setStatus(EMPTY_SEARCH_INDEX_STATUS);
-        return;
-      }
-
-      if (threads.length === 0) {
-        setRecordsByThreadId(new Map());
-        setStatus(EMPTY_SEARCH_INDEX_STATUS);
-        return;
-      }
-
-      try {
-        const cachedRecords = await loadCachedThreadSearchRecords(threads);
-        if (isCancelled) return;
-
-        const cachedRecordsByThreadId = new Map(
-          cachedRecords.map((record) => [record.threadId, record]),
-        );
-        setRecordsByThreadId(cachedRecordsByThreadId);
-
-        const missingRecordCount = threads.filter(
-          (thread) => !cachedRecordsByThreadId.has(thread.id),
-        ).length;
-        if (missingRecordCount > 0) {
-          setStatus({ isIndexing: true, error: null });
-        }
-
-        const indexedRecords = await indexMissingThreadSearchRecords(
-          threads,
-          cachedRecordsByThreadId,
-        );
-        if (isCancelled) return;
-
-        setRecordsByThreadId((currentRecords) => {
-          const nextRecords = new Map(currentRecords);
-          for (const record of indexedRecords) {
-            nextRecords.set(record.threadId, record);
-          }
-          return nextRecords;
-        });
-        setStatus(EMPTY_SEARCH_INDEX_STATUS);
-      } catch (error) {
-        if (isCancelled) return;
-        setStatus({ isIndexing: false, error: getErrorMessage(error) });
-      }
-    }
-
-    void loadAndUpdateSearchIndex();
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [isEnabled, threads]);
-
-  return { recordsByThreadId, status };
+  return [
+    ...(needsAttention.length > 0
+      ? ([{ title: "Needs Attention", results: needsAttention }] as const)
+      : []),
+    ...(activeThreads.length > 0
+      ? ([{ title: "Active Threads", results: activeThreads }] as const)
+      : []),
+  ];
 }
 
-function filterThreadsByProject(
+function getAttentionPriority(thread: CodexThread): number {
+  if (thread.status.type !== "active") {
+    return 0;
+  }
+
+  if (thread.status.activeFlags.includes("waitingOnApproval")) {
+    return 2;
+  }
+
+  return thread.status.activeFlags.includes("waitingOnUserInput") ? 1 : 0;
+}
+
+async function searchVisibleThreads(
+  threads: CodexThread[],
+  query: string,
+  archived: boolean,
+  signal?: AbortSignal,
+): Promise<ThreadSearchResponse> {
+  const metadataResults = searchThreadMetadata(threads, query);
+  // Skip the transcript search entirely when local matches already cover
+  // every visible thread; there is nothing more it could add.
+  if (threads.length === 0 || metadataResults.length === threads.length) {
+    return { query, results: metadataResults, transcriptSearchWarning: null };
+  }
+
+  try {
+    const hits = await searchThreads(
+      query,
+      {
+        archived,
+        maxResults: threadListMaxResults,
+        windowDays: threadListLookbackDays,
+      },
+      signal,
+    );
+    const nativeResults = mapNativeThreadSearchResults(threads, hits);
+
+    return {
+      query,
+      results: mergeThreadSearchResults(metadataResults, nativeResults),
+      transcriptSearchWarning: null,
+    };
+  } catch (error) {
+    // A superseded search is cancelled, not failed: let usePromise swallow it.
+    if (isAbortError(error)) {
+      throw error;
+    }
+
+    // Transcript search failed, but the local matches are still good.
+    return {
+      query,
+      results: metadataResults,
+      transcriptSearchWarning: getErrorMessage(error),
+    };
+  }
+}
+
+function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "name" in error &&
+    (error as { name: unknown }).name === "AbortError"
+  );
+}
+
+function filterThreadsByWorkingDirectory(
   threads: CodexThread[],
   projectCwd: string | null,
 ): CodexThread[] {
@@ -492,44 +557,46 @@ function getEmptyViewTitle(
 
 function getEmptyViewDescription({
   archived,
-  indexError,
-  isIndexing,
-  projectFilterCwd,
+  workingDirectoryFilterPath,
+  searchError,
+  transcriptSearchWarning,
   searchText,
   unfilteredCount,
 }: {
   archived: boolean;
-  indexError: string | null;
-  isIndexing: boolean;
-  projectFilterCwd: string | null;
+  workingDirectoryFilterPath: string | null;
+  searchError?: Error;
+  transcriptSearchWarning: string | null;
   searchText: string;
   unfilteredCount: number;
 }): string {
   if (searchText) {
-    if (indexError) {
-      return `Transcript indexing failed: ${indexError}. Name, path, and preview search still work.`;
+    if (searchError) {
+      return `Search failed: ${getErrorMessage(searchError)}`;
     }
 
-    return isIndexing
-      ? `Still indexing transcripts for "${searchText}". Transcript matches will appear when indexing finishes.`
-      : `No thread names, paths, previews, or indexed transcripts match "${searchText}".`;
+    if (transcriptSearchWarning) {
+      return `No names or paths match "${searchText}", and transcript search is unavailable: ${transcriptSearchWarning}`;
+    }
+
+    return `No names, paths, previews, or transcripts match "${searchText}".`;
   }
 
-  if (projectFilterCwd) {
+  if (workingDirectoryFilterPath) {
     return `No ${archived ? "archived" : "active"} threads updated in the last ${
-      CODEX_THREAD_LIST_LOOKBACK_DAYS
-    } days were found in ${tildeifyPath(projectFilterCwd)}.`;
+      threadListLookbackDays
+    } days were found in ${tildeifyPath(workingDirectoryFilterPath)}.`;
   }
 
   if (archived) {
-    return `Archived Codex threads updated in the last ${CODEX_THREAD_LIST_LOOKBACK_DAYS} days will appear here.`;
+    return `Archived Codex threads updated in the last ${threadListLookbackDays} days will appear here.`;
   }
 
   if (unfilteredCount > 0) {
     return "Press ⌘⇧S to show subagent threads.";
   }
 
-  return `Start or resume a Codex thread and it will appear here for ${CODEX_THREAD_LIST_LOOKBACK_DAYS} days.`;
+  return `Start or resume a Codex thread and it will appear here for ${threadListLookbackDays} days.`;
 }
 
 function ThreadActions({
@@ -537,25 +604,27 @@ function ThreadActions({
   isShowingDetail,
   showSubagents,
   onArchiveFilterChange,
+  onRefresh,
   onThreadsChanged,
   onToggleDetail,
   onToggleShowSubagents,
   autoRenameCandidates,
-  latestMessages,
   projectFilter,
   thread,
+  latestMessages,
 }: {
   archived: boolean;
   isShowingDetail: boolean;
   showSubagents: boolean;
   onArchiveFilterChange: (scope: ThreadScope) => Promise<void> | void;
+  onRefresh: () => Promise<void>;
   onThreadsChanged: () => Promise<unknown> | void;
   onToggleDetail: () => void;
   onToggleShowSubagents: () => void;
   autoRenameCandidates: CodexThread[];
-  latestMessages?: CodexThreadLatestMessages;
-  projectFilter: ProjectFilter;
+  projectFilter: WorkingDirectoryFilter;
   thread: CodexThread;
+  latestMessages?: CodexThreadLatestMessages;
 }) {
   return (
     <ActionPanel>
@@ -566,195 +635,55 @@ function ThreadActions({
           await openThreadInCodexApp(thread);
         }}
       />
+      <Action.ShowInFinder title="Show Directory in Finder" path={thread.cwd} />
       <Action
         title="Resume in Terminal"
         icon={Icon.Terminal}
-        shortcut={{ modifiers: ["shift"], key: "enter" }}
+        shortcut={{ modifiers: ["opt"], key: "enter" }}
         onAction={async () => {
           await resumeThreadInTerminal(thread);
         }}
       />
-      <Action.Push
-        title="Rename Thread"
-        icon={Icon.Pencil}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-        target={
-          <RenameThreadForm
-            archived={archived}
-            thread={thread}
-            onRenameSuccess={onThreadsChanged}
-          />
-        }
-      />
-      {!archived ? (
-        <Action
-          title="Compact Thread"
-          icon={Icon.ChevronDown}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-          onAction={async () => {
-            const compactedThread = await performThreadMutation({
-              confirm: {
-                title: "Compact Thread?",
-                message:
-                  "This asks Codex to compact the thread context for continued work. It does not revert workspace files.",
-                primaryAction: { title: "Compact" },
-              },
-              loadingTitle: "Compacting Thread",
-              successTitle: "Thread Compacted",
-              failureTitle: "Compact Failed",
-              mutate: async () => {
-                await compactThread(thread.id);
-                return thread;
-              },
-            });
-
-            if (compactedThread) {
-              await onThreadsChanged();
-            }
-          }}
-        />
-      ) : null}
-      {archived ? (
-        <Action
-          title="Unarchive Thread"
-          icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          onAction={async () => {
-            const unarchivedThread = await performThreadMutation({
-              loadingTitle: "Unarchiving Thread",
-              successTitle: "Thread Restored",
-              failureTitle: "Restore Failed",
-              mutate: async () => {
-                await unarchiveThread(thread.id);
-                return thread;
-              },
-            });
-
-            if (unarchivedThread) {
-              await onThreadsChanged();
-              await onArchiveFilterChange("active");
-            }
-          }}
-        />
-      ) : (
-        <Action
-          title="Archive Thread"
-          icon={Icon.Box}
-          style={Action.Style.Destructive}
-          shortcut={{ modifiers: ["ctrl"], key: "x" }}
-          onAction={async () => {
-            const archivedThread = await performThreadMutation({
-              confirm: {
-                title: "Archive Thread?",
-                message: getThreadDisplayTitle(thread),
-                primaryAction: {
-                  title: "Archive",
-                  style: Alert.ActionStyle.Destructive,
-                },
-              },
-              loadingTitle: "Archiving Thread",
-              successTitle: "Thread Archived",
-              failureTitle: "Archive Failed",
-              mutate: async () => {
-                await archiveThread(thread.id);
-                return thread;
-              },
-            });
-
-            if (archivedThread) {
-              await onThreadsChanged();
-            }
-          }}
-        />
-      )}
       <Action
         title={isShowingDetail ? "Hide Details" : "Show Details"}
         icon={isShowingDetail ? Icon.AppWindowList : Icon.AppWindowSidebarRight}
         shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
         onAction={onToggleDetail}
       />
+      <Action
+        title="Refresh Threads"
+        icon={Icon.ArrowClockwise}
+        shortcut={{ modifiers: ["cmd"], key: "r" }}
+        onAction={async () => {
+          try {
+            await onRefresh();
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Threads Refreshed",
+            });
+          } catch (refreshError) {
+            await showFailureToast(refreshError, {
+              title: "Unable to refresh threads",
+            });
+          }
+        }}
+      />
 
-      <ActionPanel.Section title="Manage">
-        <Action
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
-          onAction={async () => {
-            try {
-              await onThreadsChanged();
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Threads Refreshed",
-              });
-            } catch (refreshError) {
-              await showFailureToast(refreshError, {
-                title: "Unable to refresh threads",
-              });
-            }
-          }}
-        />
-        <Action
-          title={archived ? "Show Active Threads" : "Show Archived Threads"}
-          icon={archived ? Icon.AppWindowList : Icon.Box}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-          onAction={async () => {
-            await onArchiveFilterChange(archived ? "active" : "archived");
-          }}
-        />
-        {projectFilter.cwd === thread.cwd ? (
-          <Action
-            title="Clear Project Filter"
-            icon={Icon.XMarkCircle}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-            onAction={async () => {
-              await projectFilter.setCwd(null);
-            }}
-          />
-        ) : (
-          <Action
-            title="Filter to This Project"
-            icon={Icon.Filter}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-            onAction={async () => {
-              await projectFilter.setCwd(thread.cwd);
-            }}
-          />
-        )}
-        <Action
-          title="Export Thread"
-          icon={Icon.Download}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-          onAction={async () => {
-            await exportThreadWithFeedback(thread);
-          }}
-        />
-        <Action
-          title="Fork Thread"
-          icon={Icon.CopyClipboard}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-          onAction={async () => {
-            const forkedThread = await runThreadMutation(
-              "Forking Thread",
-              archived ? "New fork created in active threads" : "Thread Forked",
-              () => forkThread(thread.id),
-              (result) => getThreadToastLabel(result),
-              {
-                failureTitle: "Fork Failed",
-                primaryAction: {
-                  title: "Open Thread",
-                  shortcut: { modifiers: ["cmd"], key: "t" },
-                  onAction: openThreadInCodexApp,
-                },
-              },
-            );
-
-            if (forkedThread) {
-              await onThreadsChanged();
-            }
-          }}
+      <ActionPanel.Section>
+        <Action.Push
+          title="Rename"
+          icon={Icon.Pencil}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+          target={
+            <RenameThreadForm
+              archived={archived}
+              thread={thread}
+              onRenameSuccess={onThreadsChanged}
+            />
+          }
         />
         <Action.Push
-          title="Summarize Thread"
+          title="Summarize"
           icon={Icon.Stars}
           shortcut={{ modifiers: ["cmd", "opt"], key: "s" }}
           target={
@@ -765,12 +694,98 @@ function ThreadActions({
             />
           }
         />
-        <ActionPanel.Submenu
-          title="Auto Rename…"
-          icon={Icon.TextCursor}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
-        >
-          {AUTO_RENAME_BATCH_SIZES.map((batchSize) => (
+        <Action
+          title="Fork"
+          icon={Icon.Duplicate}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "k" }}
+          onAction={async () => {
+            const forkResult = await runThreadMutation(
+              "Forking Thread",
+              archived ? "New fork created in active threads" : "Thread Forked",
+              () =>
+                forkThread(
+                  thread.id,
+                  `${getThreadDisplayTitle(thread)} [Fork]`,
+                ),
+              (result) =>
+                result.renameWarning
+                  ? truncate(`Rename Failed: ${result.renameWarning}`, 110)
+                  : getThreadToastLabel(result.thread),
+              {
+                failureTitle: "Fork Failed",
+                primaryAction: {
+                  title: "Open Thread",
+                  shortcut: { modifiers: ["cmd"], key: "t" },
+                  onAction: (result) => openThreadInCodexApp(result.thread),
+                },
+              },
+            );
+
+            if (forkResult) {
+              try {
+                await onThreadsChanged();
+              } catch (refreshError) {
+                await showFailureToast(refreshError, {
+                  title: "Thread forked, unable to refresh threads",
+                });
+              }
+            }
+          }}
+        />
+        <Action
+          title="Export Markdown"
+          icon={Icon.Download}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "e" }}
+          onAction={async () => {
+            await exportThreadWithFeedback(thread);
+          }}
+        />
+        {archived ? (
+          <Action
+            title="Unarchive"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "a" }}
+            onAction={async () => {
+              const unarchivedThread = await performThreadMutation({
+                loadingTitle: "Unarchiving Thread",
+                successTitle: "Thread Restored",
+                failureTitle: "Restore Failed",
+                mutate: async () => {
+                  await unarchiveThread(thread.id);
+                  return thread;
+                },
+              });
+
+              if (unarchivedThread) {
+                await onThreadsChanged();
+                await onArchiveFilterChange("active");
+              }
+            }}
+          />
+        ) : (
+          <Action
+            title="Archive"
+            icon={Icon.Box}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "a" }}
+            onAction={async () => {
+              const archivedThread = await performThreadMutation({
+                loadingTitle: "Archiving Thread",
+                successTitle: "Thread Archived",
+                failureTitle: "Archive Failed",
+                mutate: async () => {
+                  await archiveThread(thread.id);
+                  return thread;
+                },
+              });
+
+              if (archivedThread) {
+                await onThreadsChanged();
+              }
+            }}
+          />
+        )}
+        <ActionPanel.Submenu title="Bulk Rename" icon={Icon.TextCursor}>
+          {autoRenameBatchSizes.map((batchSize) => (
             <Action
               key={batchSize}
               title={`Rename Latest ${batchSize} Visible Threads`}
@@ -788,64 +803,69 @@ function ThreadActions({
         </ActionPanel.Submenu>
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="Open & Copy">
-        <Action.ShowInFinder
-          title="Open Project in Finder"
-          path={thread.cwd}
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
-        />
-        <ActionPanel.Submenu
-          title="Open with…"
-          icon={Icon.AppWindow}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-        >
-          <Action
-            title="Terminal"
-            icon={Icon.Terminal}
-            shortcut={{ modifiers: ["cmd"], key: "1" }}
-            onAction={async () => {
-              await runNoViewActionWithFailureToast(
-                "Unable to open in Terminal",
-                async () => {
-                  await openTerminalAtPath(thread.cwd);
-                },
-              );
-            }}
-          />
-        </ActionPanel.Submenu>
+      <ActionPanel.Section>
         <Action.CopyToClipboard
-          title="Copy Thread ID"
-          content={thread.id}
+          title="Copy Resume Command"
+          content={buildResumeCommand(thread.id)}
           shortcut={{ modifiers: ["cmd"], key: "c" }}
         />
         <Action.CopyToClipboard
-          title="Copy Resume Command"
-          content={buildCodexResumeCommand(thread.id)}
+          title="Copy Thread Deeplink"
+          content={buildThreadDeeplink(thread)}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
         <Action.CopyToClipboard
-          title="Copy Project Path"
+          title="Copy Working Directory"
           content={thread.cwd}
           shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
         <Action
-          title="Copy Latest Turns"
+          title="Copy Last User Turn"
           icon={Icon.Clipboard}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
           onAction={async () => {
-            await copyLatestTurns(thread, latestMessages);
+            await copyLatestThreadTurn(thread, "user", latestMessages);
           }}
         />
+        <Action
+          title="Copy Last Assistant Turn"
+          icon={Icon.Clipboard}
+          onAction={async () => {
+            await copyLatestThreadTurn(thread, "assistant", latestMessages);
+          }}
+        />
+        <Action.CopyToClipboard title="Copy Thread ID" content={thread.id} />
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="Inspect">
-        {thread.path ? (
-          <Action.ShowInFinder title="Show Rollout File" path={thread.path} />
-        ) : null}
+      <ActionPanel.Section>
         <Action
-          title={
-            showSubagents ? "Hide Subagent Threads" : "Show Subagent Threads"
-          }
+          title={archived ? "Show Active Threads" : "Show Archived Threads"}
+          icon={archived ? Icon.AppWindowList : Icon.Box}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          onAction={async () => {
+            await onArchiveFilterChange(archived ? "active" : "archived");
+          }}
+        />
+        {projectFilter.cwd === thread.cwd ? (
+          <Action
+            title="Clear Folder Filter"
+            icon={Icon.XMarkCircle}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+            onAction={async () => {
+              await projectFilter.setCwd(null);
+            }}
+          />
+        ) : (
+          <Action
+            title="Filter to Folder"
+            icon={Icon.Filter}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+            onAction={async () => {
+              await projectFilter.setCwd(thread.cwd);
+            }}
+          />
+        )}
+        <Action
+          title={showSubagents ? "Hide Subagents" : "Show Subagents"}
           icon={showSubagents ? Icon.EyeDisabled : Icon.Livestream}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
           onAction={onToggleShowSubagents}
@@ -938,7 +958,7 @@ function ThreadSummaryDetail({
     ? summaryDocument
     : error
       ? `# Summary Failed\n\n${error.message}`
-      : "_Summarizing thread with Raycast AI..._";
+      : "_✨ Summarizing Thread… ✨_";
 
   return (
     <Detail
@@ -953,6 +973,11 @@ function ThreadSummaryDetail({
                 title="Copy Summary"
                 icon={Icon.Clipboard}
                 content={summaryDocument ?? ""}
+              />
+              <Action.Paste
+                title="Paste Summary"
+                content={summaryDocument ?? ""}
+                shortcut={{ modifiers: ["cmd"], key: "v" }}
               />
               <Action
                 title="Rename Thread to Suggested Name"
@@ -1081,8 +1106,8 @@ async function autoRenameVisibleThreads(
   const results = await autoRenameCodexThreads({
     archived,
     threads: targets,
-    onProgress: ({ index, title, total }) => {
-      toast.message = `${index + 1}/${total}: ${truncate(title, 54)}`;
+    onProgress: ({ completedCount, title, total }) => {
+      toast.message = `${completedCount}/${total}: ${truncate(title, 54)}`;
     },
   });
 
@@ -1130,20 +1155,10 @@ function getRenameSuccessMessage(
 }
 
 async function exportThreadWithFeedback(thread: CodexThread) {
-  if (!thread.path) {
-    await showFailureToast(
-      new Error(
-        "This thread hasn't been written to disk yet. Try again once the thread has activity.",
-      ),
-      { title: "No rollout file" },
-    );
-    return;
-  }
-
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Exporting thread…",
-    message: "Parsing rollout and writing markdown",
+    message: "Reading structured transcript and writing markdown",
   });
 
   try {
@@ -1174,16 +1189,48 @@ async function openThreadInCodexApp(thread: CodexThread) {
   await runNoViewActionWithFailureToast(
     "Unable to open thread in Codex",
     async () => {
-      await open(`codex://threads/${thread.id}`);
+      await open(buildThreadDeeplink(thread));
     },
   );
+}
+
+function buildThreadDeeplink(thread: CodexThread): string {
+  return `codex://threads/${thread.id}`;
+}
+
+async function copyLatestThreadTurn(
+  thread: CodexThread,
+  role: "user" | "assistant",
+  cachedMessages?: CodexThreadLatestMessages,
+) {
+  await runNoViewActionWithFailureToast("Unable to copy turn", async () => {
+    await showToast({ style: Toast.Style.Animated, title: "Reading Thread" });
+    const messages =
+      cachedMessages ?? (await readLatestThreadMessages(thread.id));
+    const text =
+      role === "user"
+        ? messages.lastUserMessage &&
+          cleanCodexUserMessage(messages.lastUserMessage, "compact")
+        : messages.lastAgentMessage;
+    if (!text) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title:
+          role === "user" ? "No User Turn Found" : "No Assistant Turn Found",
+      });
+      return;
+    }
+
+    await Clipboard.copy(text);
+    await showToast({ style: Toast.Style.Success, title: "Copied" });
+  });
 }
 
 async function resumeThreadInTerminal(thread: CodexThread) {
   await runNoViewActionWithFailureToast("Unable to resume thread", async () => {
     await openTerminalAtPathWithCommand(
       thread.cwd,
-      buildCodexResumeCommand(thread.id),
+      buildResumeCommand(thread.id),
     );
   });
 }
@@ -1250,17 +1297,11 @@ function getThreadToastLabel(thread: CodexThread): string {
 }
 
 async function performThreadMutation(opts: {
-  confirm?: Parameters<typeof confirmAlert>[0];
   loadingTitle: string;
   successTitle: string;
   failureTitle?: string;
   mutate: () => Promise<CodexThread>;
 }): Promise<CodexThread | undefined> {
-  if (opts.confirm) {
-    const confirmed = await confirmAlert(opts.confirm);
-    if (!confirmed) return undefined;
-  }
-
   return runThreadMutation(
     opts.loadingTitle,
     opts.successTitle,
@@ -1279,10 +1320,13 @@ async function performThreadMutation(opts: {
 
 function getThreadIcon(thread: CodexThread) {
   const sourceDescriptor = getCodexSourceDescriptor(thread.source);
+  const statusDescriptor = getCodexStatusDescriptor(thread.status);
 
   return {
     source: sourceDescriptor.icon,
-    tintColor: getCodexStatusDescriptor(thread.status).tintColor,
+    ...(statusDescriptor.label
+      ? { tintColor: statusDescriptor.tintColor }
+      : {}),
   };
 }
 
@@ -1308,7 +1352,7 @@ function getThreadAccessories(
       icon: Icon.Livestream,
       tag: {
         value: formatSubagentCount(directSubagentCount),
-        color: SUBAGENT_COLOR,
+        color: subagentColor,
       },
       tooltip: `${formatSubagentCount(directSubagentCount)} spawned from this thread`,
     });
@@ -1349,24 +1393,21 @@ function buildThreadDetail(
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
-            title="Thread Name"
+            title="Thread"
+            icon={sourceDescriptor.icon}
             text={getThreadDisplayTitle(thread)}
           />
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Thread ID" text={thread.id} />
-          <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.TagList title="Signals">
-            <List.Item.Detail.Metadata.TagList.Item
-              text={getStatusTagText(statusDescriptor)}
-              color={statusDescriptor.tintColor}
-            />
+            {statusDescriptor.label ? (
+              <List.Item.Detail.Metadata.TagList.Item
+                text={statusDescriptor.label}
+                color={statusDescriptor.tintColor}
+              />
+            ) : null}
             <List.Item.Detail.Metadata.TagList.Item
               text={sourceDescriptor.label}
               color={Color.Blue}
-            />
-            <List.Item.Detail.Metadata.TagList.Item
-              text={thread.modelProvider}
-              color={Color.SecondaryText}
             />
             {agentLabel ? (
               <List.Item.Detail.Metadata.TagList.Item
@@ -1377,97 +1418,86 @@ function buildThreadDetail(
             {directSubagentCount > 0 ? (
               <List.Item.Detail.Metadata.TagList.Item
                 text={`🧬 ${formatSubagentCount(directSubagentCount)}`}
-                color={SUBAGENT_COLOR}
+                color={subagentColor}
               />
             ) : null}
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Separator />
-
-          <List.Item.Detail.Metadata.Label
-            title="Project / Directory"
-            text={`${getProjectName(thread.cwd)} • ${tildeifyPath(thread.cwd)}`}
-          />
-          <List.Item.Detail.Metadata.Separator />
-
-          {thread.gitInfo?.branch ? (
-            <>
-              <List.Item.Detail.Metadata.Label
-                title="Branch"
+          <List.Item.Detail.Metadata.TagList title="Working Directory">
+            <List.Item.Detail.Metadata.TagList.Item
+              icon={Icon.Folder}
+              text={tildeifyPath(thread.cwd)}
+              color={Color.Blue}
+              onAction={() => {
+                void showInFinder(thread.cwd);
+              }}
+            />
+            {thread.gitInfo?.branch ? (
+              <List.Item.Detail.Metadata.TagList.Item
+                icon={
+                  thread.gitInfo.branch === "main"
+                    ? Icon.House
+                    : Icon.WrenchScrewdriver
+                }
                 text={thread.gitInfo.branch}
+                color={
+                  thread.gitInfo.branch === "main"
+                    ? mainBranchColor
+                    : featureBranchColor
+                }
+                onAction={() => {
+                  void Clipboard.copy(thread.gitInfo?.branch ?? "");
+                }}
               />
-              <List.Item.Detail.Metadata.Separator />
-            </>
-          ) : null}
-          {thread.gitInfo?.sha ? (
-            <>
-              <List.Item.Detail.Metadata.Label
-                title="SHA"
-                text={thread.gitInfo.sha}
+            ) : null}
+            {thread.gitInfo?.sha ? (
+              <List.Item.Detail.Metadata.TagList.Item
+                icon={Icon.Code}
+                text={thread.gitInfo.sha.slice(0, 8)}
+                color={Color.SecondaryText}
+                onAction={() => {
+                  void Clipboard.copy(thread.gitInfo?.sha ?? "");
+                }}
               />
-              <List.Item.Detail.Metadata.Separator />
-            </>
-          ) : null}
-
-          <List.Item.Detail.Metadata.Label
-            title="Updated"
-            text={formatTimestampSeconds(thread.updatedAt)}
-          />
+            ) : null}
+          </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label
-            title="Created"
-            text={formatTimestampSeconds(thread.createdAt)}
-          />
-          <List.Item.Detail.Metadata.Separator />
-          {latestMessages ? (
-            <>
-              <List.Item.Detail.Metadata.Label
-                title="Turns"
-                text={String(latestMessages.turnCount)}
-              />
-              <List.Item.Detail.Metadata.Separator />
-            </>
-          ) : null}
-
+          <List.Item.Detail.Metadata.TagList title="Activity">
+            <List.Item.Detail.Metadata.TagList.Item
+              icon={Icon.Clock}
+              text={`Updated ${formatActivityTimestamp(thread.updatedAt)}`}
+              color={Color.Green}
+            />
+            <List.Item.Detail.Metadata.TagList.Item
+              icon={Icon.Calendar}
+              text={`Created ${formatActivityTimestamp(thread.createdAt)}`}
+              color={Color.SecondaryText}
+            />
+          </List.Item.Detail.Metadata.TagList>
           {thread.forkedFromId ? (
             <>
+              <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label
                 title="Forked From"
-                text={thread.forkedFromId}
+                icon={Icon.Duplicate}
+                text={thread.forkedFromId.slice(0, 8)}
               />
-              <List.Item.Detail.Metadata.Separator />
             </>
-          ) : null}
-          {thread.status.type === "active" &&
-          thread.status.activeFlags.length > 0 ? (
-            <>
-              <List.Item.Detail.Metadata.TagList title="🚦 Active Flags">
-                {thread.status.activeFlags.map((flag) => (
-                  <List.Item.Detail.Metadata.TagList.Item
-                    key={flag}
-                    color={
-                      flag === "waitingOnApproval" ? Color.Orange : Color.Blue
-                    }
-                    text={
-                      flag === "waitingOnApproval"
-                        ? "Waiting on Approval"
-                        : "Waiting on User Input"
-                    }
-                  />
-                ))}
-              </List.Item.Detail.Metadata.TagList>
-              <List.Item.Detail.Metadata.Separator />
-            </>
-          ) : null}
-          {thread.path ? (
-            <List.Item.Detail.Metadata.Label
-              title="Rollout Thread ID"
-              text={getRolloutThreadId(thread.path)}
-            />
           ) : null}
         </List.Item.Detail.Metadata>
       }
     />
   );
+}
+
+function formatActivityTimestamp(seconds: number): string {
+  return new Date(seconds * 1000).toLocaleString(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function getLatestTurnsMarkdown(
@@ -1492,73 +1522,23 @@ function getOrderedLatestTurns(
 ): LatestTurn[] {
   return [
     {
-      heading: LATEST_TURN_PRESENTATION.user.detailHeading,
-      body:
-        latestMessages.lastUserMessage ??
-        LATEST_TURN_PRESENTATION.user.fallback,
+      heading: latestTurnPresentation.user.detailHeading,
+      body: latestMessages.lastUserMessage
+        ? truncate(
+            cleanCodexUserMessage(latestMessages.lastUserMessage, "compact"),
+            latestTurnPreviewMaxLength,
+          )
+        : latestTurnPresentation.user.fallback,
       order: latestMessages.lastUserMessageOrder ?? Number.POSITIVE_INFINITY,
     },
     {
-      heading: LATEST_TURN_PRESENTATION.agent.detailHeading,
-      body:
-        latestMessages.lastAgentMessage ??
-        LATEST_TURN_PRESENTATION.agent.fallback,
+      heading: latestTurnPresentation.agent.detailHeading,
+      body: latestMessages.lastAgentMessage
+        ? truncate(latestMessages.lastAgentMessage, latestTurnPreviewMaxLength)
+        : latestTurnPresentation.agent.fallback,
       order: latestMessages.lastAgentMessageOrder ?? Number.POSITIVE_INFINITY,
     },
   ].sort((left, right) => right.order - left.order);
-}
-
-async function copyLatestTurns(
-  thread: CodexThread,
-  cachedLatestMessages?: CodexThreadLatestMessages,
-) {
-  const toast = await showToast({
-    style: Toast.Style.Animated,
-    title: "Copying Latest Turns",
-    message: truncate(getThreadDisplayTitle(thread), 80),
-  });
-
-  try {
-    const latestMessages =
-      cachedLatestMessages ?? (await readLatestThreadMessages(thread.id));
-    await Clipboard.copy(buildLatestTurnsClipboardText(thread, latestMessages));
-    toast.style = Toast.Style.Success;
-    toast.title = "Latest Turns Copied";
-    toast.message = `${latestMessages.turnCount} turns`;
-  } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Copy Failed";
-    toast.message = getErrorMessage(error);
-  }
-}
-
-function buildLatestTurnsClipboardText(
-  thread: CodexThread,
-  latestMessages: CodexThreadLatestMessages,
-): string {
-  return [
-    `# ${getThreadDisplayTitle(thread)}`,
-    "",
-    `Thread: ${thread.id}`,
-    `Project: ${thread.cwd}`,
-    `Turns: ${latestMessages.turnCount}`,
-    "",
-    `## ${LATEST_TURN_PRESENTATION.user.clipboardHeading}`,
-    latestMessages.lastUserMessage?.trim() ||
-      LATEST_TURN_PRESENTATION.user.fallback,
-    "",
-    `## ${LATEST_TURN_PRESENTATION.agent.clipboardHeading}`,
-    latestMessages.lastAgentMessage?.trim() ||
-      LATEST_TURN_PRESENTATION.agent.fallback,
-  ].join("\n");
-}
-
-function getStatusTagText(statusDescriptor: CodexStatusDescriptor): string {
-  return statusDescriptor.label ?? statusDescriptor.tooltip;
-}
-
-function getRolloutThreadId(path: string): string {
-  return basename(path, ".jsonl");
 }
 
 function getDirectSubagentCounts(threads: CodexThread[]): Map<string, number> {
@@ -1637,7 +1617,7 @@ function getBranchAccessory(
     icon: branch === "main" ? Icon.House : Icon.WrenchScrewdriver,
     tag: {
       value: branch,
-      color: branch === "main" ? BRANCH_MAIN_COLOR : BRANCH_FEATURE_COLOR,
+      color: branch === "main" ? mainBranchColor : featureBranchColor,
     },
     tooltip: `Git branch: ${branch}`,
   };

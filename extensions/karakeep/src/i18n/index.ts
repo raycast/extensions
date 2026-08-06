@@ -5,6 +5,51 @@ export const translations = {
     // Global
     loading: "Loading",
     pleaseWait: "Please wait...",
+
+    // Connection / offline recovery
+    connection: {
+      start: "Start Karakeep",
+      starting: "Starting Karakeep…",
+      offlineTitle: "Offline",
+      offlineFormHint: "Karakeep isn't running. Press ↵ to start it.",
+      offlineFormHintRemote: "Karakeep isn't responding. Check that it's running.",
+
+      // Recovery screen states
+      checking: "Checking Karakeep…",
+      checkingDescription: "Looking for a local container to start…",
+      startingDescription: "This takes a few seconds.",
+      notRunning: "Karakeep isn't running",
+      notRunningDescription: "Press ↵ to start it.",
+      unreachable: "Can't reach Karakeep",
+      // {{apiUrl}} is interpolated by translate(); a function value would only
+      // receive searchText/count, not an arbitrary parameter.
+      unreachableDescription: "Nothing is responding at {{apiUrl}}. Check that Karakeep is running.",
+
+      // Recovery actions
+      tryAgain: "Try Again",
+      openDocker: "Open Docker",
+      openSettings: "Open Extension Settings",
+      copyError: "Copy Error",
+      copyAgain: "Copy Again",
+
+      // Recovery toasts
+      waiting: "Waiting for Karakeep…",
+      back: "Karakeep is back",
+      startedNoResponse: "Started, but Karakeep didn't respond",
+      startFailed: "Couldn't start Karakeep",
+
+      // Non-connection fetch failures, by scope
+      loadFailed: {
+        bookmarks: "Couldn't load bookmarks",
+        lists: "Couldn't load lists",
+        tags: "Couldn't load tags",
+        highlights: "Couldn't load highlights",
+        backups: "Couldn't load backups",
+        stats: "Couldn't load stats",
+        search: "Couldn't load search results",
+      },
+    },
+
     refreshingBookmarks: "Refreshing bookmarks...",
     bookmarksRefreshed: "Bookmarks refreshed",
     refreshingLists: "Refreshing list...",
@@ -369,10 +414,12 @@ export const translations = {
         viewImage: "View Image",
         openLink: "Open Link",
         copyLink: "Copy Link",
-        installChromeExtension: "Get Chrome Extension",
-        installFirefoxAddon: "Get Firefox Add-on",
-        installSafariExtension: "Get Safari Extension",
-        getBrowserExtension: "Get Browser Extension",
+        addToBrowser: "Add Karakeep to Browser",
+        browsers: {
+          chrome: "Chrome",
+          firefox: "Firefox",
+          safari: "Safari",
+        },
       },
       toast: {
         delete: {
@@ -504,6 +551,49 @@ export const translations = {
     // 全局
     loading: "加载中...",
     pleaseWait: "请稍等...",
+
+    // 连接 / 离线恢复
+    connection: {
+      start: "启动 Karakeep",
+      starting: "正在启动 Karakeep…",
+      offlineTitle: "离线",
+      offlineFormHint: "Karakeep 未运行。按 ↵ 启动。",
+      offlineFormHintRemote: "Karakeep 无响应。请检查它是否正在运行。",
+
+      // 恢复界面状态
+      checking: "正在检查 Karakeep…",
+      checkingDescription: "正在查找可启动的本地容器…",
+      startingDescription: "这需要几秒钟。",
+      notRunning: "Karakeep 未运行",
+      notRunningDescription: "按 ↵ 启动。",
+      unreachable: "无法连接到 Karakeep",
+      unreachableDescription: "{{apiUrl}} 无响应。请检查 Karakeep 是否正在运行。",
+
+      // 恢复操作
+      tryAgain: "重试",
+      openDocker: "打开 Docker",
+      openSettings: "打开扩展设置",
+      copyError: "复制错误信息",
+      copyAgain: "再次复制",
+
+      // 恢复提示
+      waiting: "正在等待 Karakeep…",
+      back: "Karakeep 已恢复",
+      startedNoResponse: "已启动，但 Karakeep 无响应",
+      startFailed: "无法启动 Karakeep",
+
+      // 非连接类请求失败
+      loadFailed: {
+        bookmarks: "无法加载书签",
+        lists: "无法加载列表",
+        tags: "无法加载标签",
+        highlights: "无法加载高亮",
+        backups: "无法加载备份",
+        stats: "无法加载统计",
+        search: "无法加载搜索结果",
+      },
+    },
+
     refreshingBookmarks: "正在刷新书签...",
     bookmarksRefreshed: "书签已刷新",
     refreshingLists: "正在刷新列表...",
@@ -870,10 +960,12 @@ export const translations = {
         viewImage: "查看图片",
         openLink: "打开链接",
         copyLink: "复制链接",
-        installChromeExtension: "得到 Chrome 扩展",
-        installFirefoxAddon: "得到 Firefox 插件",
-        installSafariExtension: "得到 Safari 扩展",
-        getBrowserExtension: "获取浏览器扩展",
+        addToBrowser: "添加到浏览器",
+        browsers: {
+          chrome: "Chrome",
+          firefox: "Firefox",
+          safari: "Safari",
+        },
       },
       toast: {
         delete: {

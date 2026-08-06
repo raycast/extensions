@@ -4,7 +4,8 @@ import assert from "node:assert/strict";
 import {
   BLOCKQUOTE_PEEL,
   FENCE_BOUNDARY,
-  INDENTED_CODE,
+  indentColumns,
+  isIndentedCode,
   HEADING_ATX,
   SETEXT_UNDERLINE,
   HR,
@@ -31,11 +32,17 @@ test("FENCE_BOUNDARY matches both backtick and tilde fences", () => {
   assert.doesNotMatch("    ```", FENCE_BOUNDARY); // 4 spaces = code block, not fence
 });
 
-test("INDENTED_CODE matches 4+ leading spaces", () => {
-  assert.match("    code", INDENTED_CODE);
-  assert.match("        deeper", INDENTED_CODE);
-  assert.doesNotMatch("   not code", INDENTED_CODE); // only 3 spaces
-  assert.doesNotMatch("    ", INDENTED_CODE); // no body
+test("isIndentedCode recognizes an indent reaching column 4, tabs included", () => {
+  assert.ok(isIndentedCode("    code"));
+  assert.ok(isIndentedCode("        deeper"));
+  // A tab advances to the next 4-column stop (CommonMark §2.2).
+  assert.ok(isIndentedCode("\tcode"), "one tab = column 4");
+  assert.ok(isIndentedCode("\t\tcode"), "two tabs = column 8");
+  assert.ok(isIndentedCode("  \tcode"), "2 spaces + tab = column 4");
+  assert.ok(isIndentedCode("   \tcode"), "3 spaces + tab = column 4");
+  assert.ok(isIndentedCode(" \t\tcode"), "space + 2 tabs = column 8");
+  assert.ok(!isIndentedCode("   not code"), "only 3 spaces");
+  assert.ok(!isIndentedCode("    "), "no body"); // whitespace only
 });
 
 test("HEADING_ATX matches ATX headings 1-6", () => {
@@ -121,11 +128,30 @@ test("HARD_BREAK_BACKSLASH matches single trailing backslash", () => {
   assert.doesNotMatch("foo", HARD_BREAK_BACKSLASH);
 });
 
-test("HYPHEN_BREAK_END matches lowercase letter + hyphen at end", () => {
+test("HYPHEN_BREAK_END matches a letter or digit followed by a break hyphen", () => {
   assert.match("inter-", HYPHEN_BREAK_END);
-  assert.doesNotMatch("State-", HYPHEN_BREAK_END); // capital before hyphen
-  assert.doesNotMatch("123-", HYPHEN_BREAK_END);
+  // Case, hyphen chains, and digits all bind to the next line now: the join is
+  // always tight, and only a U+00AD is ever stripped, so none of these need
+  // excluding. Previously they were, which is why "well-known" was mashed.
+  assert.match("State-", HYPHEN_BREAK_END);
+  assert.match("state-of-the-", HYPHEN_BREAK_END);
+  assert.match("123-", HYPHEN_BREAK_END);
+  // Unicode letters qualify (an ASCII-only class failed to rejoin these).
+  assert.match("Wörter-", HYPHEN_BREAK_END);
+  assert.match("Бинде-", HYPHEN_BREAK_END);
+  // A true soft hyphen also counts as a break hyphen.
+  assert.match("hy­", HYPHEN_BREAK_END);
+  // No trailing hyphen, or no letter/digit before it.
   assert.doesNotMatch("inter", HYPHEN_BREAK_END);
-  // Mid-compound break: `the` run is preceded by `-`, so excluded.
-  assert.doesNotMatch("state-of-the-", HYPHEN_BREAK_END);
+  assert.doesNotMatch(" -", HYPHEN_BREAK_END);
+});
+
+test("indentColumns expands tabs to 4-column stops", () => {
+  assert.equal(indentColumns("\t"), 4);
+  assert.equal(indentColumns(" \t"), 4, "a tab advances to the NEXT stop, not by 4");
+  assert.equal(indentColumns("   \t"), 4);
+  assert.equal(indentColumns("\t "), 5);
+  assert.equal(indentColumns("\t\t"), 8);
+  assert.equal(indentColumns("    "), 4);
+  assert.equal(indentColumns("   "), 3);
 });

@@ -10,6 +10,7 @@ import { readZshrcFileRaw, writeZshrcFile, getZshrcPath } from "./zsh";
 import { clearCache } from "./cache";
 import { saveToHistory } from "./history";
 import { validateAliasName, validateVarName, shellQuoteSingle, shellQuoteDouble } from "../utils/shell-escape";
+import { SaveCancelledError } from "../utils/errors";
 
 /**
  * Exported alias format
@@ -114,9 +115,6 @@ export async function importAliasesFromJson(json: string, sectionLabel?: string)
       );
     }
 
-    // Save history before modifying
-    await saveToHistory(`Import ${data.aliases.length} aliases`);
-
     const zshrcContent = await readZshrcFileRaw();
 
     // Generate alias lines with proper escaping
@@ -136,6 +134,10 @@ export async function importAliasesFromJson(json: string, sectionLabel?: string)
     await writeZshrcFile(updatedContent);
     clearCache(getZshrcPath());
 
+    // Record history after the write, with the pre-change snapshot as
+    // the undo target
+    await saveToHistory(`Import ${data.aliases.length} aliases`, zshrcContent);
+
     await showToast({
       style: Toast.Style.Success,
       title: "Aliases Imported",
@@ -144,6 +146,9 @@ export async function importAliasesFromJson(json: string, sectionLabel?: string)
 
     return data.aliases.length;
   } catch (error) {
+    if (error instanceof SaveCancelledError) {
+      throw error;
+    }
     await showToast({
       style: Toast.Style.Failure,
       title: "Import Failed",
@@ -180,9 +185,6 @@ export async function importExportsFromJson(json: string, sectionLabel?: string)
       );
     }
 
-    // Save history before modifying
-    await saveToHistory(`Import ${data.exports.length} exports`);
-
     const zshrcContent = await readZshrcFileRaw();
 
     // Generate export lines with proper escaping
@@ -202,6 +204,10 @@ export async function importExportsFromJson(json: string, sectionLabel?: string)
     await writeZshrcFile(updatedContent);
     clearCache(getZshrcPath());
 
+    // Record history after the write, with the pre-change snapshot as
+    // the undo target
+    await saveToHistory(`Import ${data.exports.length} exports`, zshrcContent);
+
     await showToast({
       style: Toast.Style.Success,
       title: "Exports Imported",
@@ -210,6 +216,9 @@ export async function importExportsFromJson(json: string, sectionLabel?: string)
 
     return data.exports.length;
   } catch (error) {
+    if (error instanceof SaveCancelledError) {
+      throw error;
+    }
     await showToast({
       style: Toast.Style.Failure,
       title: "Import Failed",

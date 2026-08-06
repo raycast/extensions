@@ -65,6 +65,7 @@
     "lint:store": "ray lint && npm run lint:eslint",
     "publish": "npm run package-swift -- release && npm run build && npx @raycast/api@latest publish",
     "sync-native": "scripts/sync-native.sh",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test src/executable.test.ts",
     "verify-native": "scripts/verify-native.sh",
     "typecheck": "tsc --noEmit",
     "package-swift": "scripts/package-swift-binary.sh"

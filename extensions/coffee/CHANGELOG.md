@@ -1,5 +1,11 @@
 # Coffee Changelog
 
+## [AI Extension] - 2026-07-22
+
+- Added AI tools to caffeinate until a specific date and time.
+- Added AI tools to list, pause, resume, and delete recurring caffeination schedules.
+- Expanded AI instructions and evaluations for the new workflows.
+
 ## [Enhancement] - 2026-06-28
 
 - Redesigned the menu bar dropdown: quick-pick durations (10m, 30m, 1h, 2h, 4h, 8h, 12h) and `Indefinitely`, each with a checkmark and live countdown when active.

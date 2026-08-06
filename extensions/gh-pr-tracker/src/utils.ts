@@ -2,6 +2,26 @@ import type { ActivityItem, GHReviewComment, PRWithActivity, SeenState, SeenMap 
 import { prKey } from "./types";
 import type { EventFilters } from "./event-filters";
 
+// ─── Synthetic itemKeys for events with no stable database ID ───────────────
+
+/**
+ * Label and force-push events are the one activity class whose identity does NOT survive the
+ * REST→GraphQL move: GitHub's GraphQL API exposes only an opaque node `id` for `LabeledEvent`,
+ * `UnlabeledEvent`, and `HeadRefForcePushedEvent` — there is no `fullDatabaseId` counterpart to
+ * the REST issue-event id. Deriving the key from stable *content* instead makes it reproducible
+ * from either API, so the eventual cutover is a no-op for stored seen-state.
+ *
+ * See docs/PERFORMANCE-FINDINGS.md §5.1 for the decision and its accepted collision risk
+ * (same actor, same label, identical timestamp — benign: one event reads as already-seen).
+ */
+export function labelEventKey(kind: "added" | "removed", actor: string, createdAt: string, label: string): string {
+  return `label-${kind}-${actor}-${createdAt}-${label}`;
+}
+
+export function forcePushEventKey(actor: string, createdAt: string): string {
+  return `force-push-${actor}-${createdAt}`;
+}
+
 // ─── Build all activity items for a PR (used for seen-tracking) ─────────────
 
 export function getAllActivity(pr: PRWithActivity): ActivityItem[] {
@@ -63,12 +83,15 @@ export function getAllActivity(pr: PRWithActivity): ActivityItem[] {
 
   // Label events
   for (const e of pr.events) {
+    // Actor is nullable on deleted accounts, and itemKeys are content-derived so they match
+    // whatever the GraphQL path produces for the same event.
+    const actor = e.actor ?? { login: "ghost", avatar_url: "" };
     if (e.event === "labeled" && e.label) {
       items.push({
         type: "label_added",
         id: e.id,
-        itemKey: `label-added-${e.id}`,
-        user: e.actor,
+        itemKey: labelEventKey("added", actor.login, e.created_at, e.label.name),
+        user: actor,
         body: e.label.name,
         date: e.created_at,
         htmlUrl: pr.html_url,
@@ -79,8 +102,8 @@ export function getAllActivity(pr: PRWithActivity): ActivityItem[] {
       items.push({
         type: "label_removed",
         id: e.id,
-        itemKey: `label-removed-${e.id}`,
-        user: e.actor,
+        itemKey: labelEventKey("removed", actor.login, e.created_at, e.label.name),
+        user: actor,
         body: e.label.name,
         date: e.created_at,
         htmlUrl: pr.html_url,
@@ -91,8 +114,8 @@ export function getAllActivity(pr: PRWithActivity): ActivityItem[] {
       items.push({
         type: "force_push",
         id: e.id,
-        itemKey: `force-push-${e.id}`,
-        user: e.actor,
+        itemKey: forcePushEventKey(actor.login, e.created_at),
+        user: actor,
         body: "Force pushed to this branch",
         date: e.created_at,
         htmlUrl: pr.html_url,
@@ -136,6 +159,16 @@ export interface PRWithUnseen {
   unseen: ActivityItem[];
 }
 
+/** Maximum number of unread PRs surfaced by the list and menu-bar commands. */
+export const MAX_UNREAD_PRS = 25;
+
+/**
+ * Safety ceiling on how many PRs the fetch will pull sub-resources for while backfilling to
+ * MAX_UNREAD_PRS. Prevents unbounded scanning (slowness / OOM) on very large repos when few PRs
+ * have unread activity; in that rare case fewer than MAX_UNREAD_PRS PRs may be shown.
+ */
+export const MAX_SCAN_PRS = 150;
+
 /**
  * Returns the PRs that have at least one unseen activity item after applying
  * event filters, sorted by most-recent unseen activity first. This is the
@@ -154,6 +187,33 @@ export function computePrsWithUnseen(prs: PRWithActivity[], seenMap: SeenMap, fi
       const bDate = b.unseen[0]?.date ?? "";
       return new Date(bDate).getTime() - new Date(aDate).getTime();
     });
+}
+
+// ─── Lean menu-bar payload (safe to pass via launchCommand context) ─────────
+
+/** Minimal, JSON-serializable projection of an unread PR for the menu-bar command. */
+export interface MenuBarPr {
+  key: string;
+  number: number;
+  title: string;
+  repo: string;
+  unseenCount: number;
+}
+
+/**
+ * Project the full unread list into a compact shape for the menu-bar command.
+ * Kept intentionally small: the view command pushes this through launchCommand
+ * context on every refresh, so it must not carry the heavy PR activity payload
+ * (reviews, diffs, commits) that could exceed the launch-context size budget.
+ */
+export function toMenuBarPrs(list: PRWithUnseen[]): MenuBarPr[] {
+  return list.map(({ pr, unseen }) => ({
+    key: prKey(pr),
+    number: pr.number,
+    title: pr.title,
+    repo: pr.repo,
+    unseenCount: unseen.length,
+  }));
 }
 
 // ─── Build the conversation thread for a review comment ─────────────────────

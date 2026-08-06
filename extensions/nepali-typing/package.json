@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nepali-typing",
+  "title": "Nepali Typing",
+  "description": "Convert romanized Nepali to Devanagari and paste it anywhere.",
+  "icon": "command-icon.png",
+  "author": "viper_x",
+  "categories": ["Productivity"],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Type in Nepali",
+      "description": "Convert romanized Nepali to Devanagari.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "useOnline",
+          "title": "Online Suggestions",
+          "label": "Use Google suggestions when online",
+          "description": "When on, fetch ranked Devanagari candidates from Google Input Tools. When off, use the offline deterministic engine only.",
+          "type": "checkbox",
+          "required": false,
+          "default": true
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.14",
+    "@types/node": "^26.0.1",
+    "@types/react": "^19.2.17",
+    "typescript": "^6.0.3"
+  }
+}

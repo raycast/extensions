@@ -1,5 +1,24 @@
 # Google Meet Changelog
 
+## [Fix Browser Launch] - 2026-08-06
+
+- Fix meetings opening in the wrong application when the chosen browser's name is a substring of another installed app's name. The creation URL was opened by passing the browser's display name to `open()`, which has to match that name back to an application — and `Dia` matches `Obsidian`, so meetings opened in Obsidian, launching it even when it wasn't running. The resolved `Application` is now passed instead, so the exact bundle is opened. The browser's name is still what selects the adapter and addresses the app in AppleScript, which needs the name macOS installs it under.
+
+## [Fix Brave Support] - 2026-08-05
+
+- Fix Brave being rejected with "isn't a supported browser". macOS installs Brave as `Brave Browser.app` and reports it under that name, but the supported-browser list held `Brave`, so the exact-match check added in the previous release failed for it.
+
+## [Reliability Overhaul & PWA Support] - 2026-08-03
+
+- Replace the fixed-delay, unbounded-recursion URL lookup with a single shared `createMeeting` pipeline used by all four commands: it polls for the generated link at a fixed interval with a hard deadline instead of guessing a one-shot sleep, and never casts a missing URL to `string`.
+- Search every window (and every tab, where the browser's scripting dictionary supports it) instead of only the active tab of the front window, so a meeting opened in a background tab or a non-frontmost window is still found. Applies to Safari, Chrome and other Chromium-family browsers, and Arc/Dia.
+- Validate and normalize every candidate URL (`https`, `meet.google.com`, a real generated meeting code) before copying it, rejecting `/new` and unrelated Meet pages instead of trusting anything containing the text `meet.google.com`.
+- Replace the previous "everything is a clipboard error" catch-all with typed, actionable errors (e.g. missing Automation/Accessibility permission, unsupported browser, meeting URL timeout, invalid URL, PWA not installed) shown with recovery instructions; the raw AppleScript error is still logged for development, never shown as the headline message. A failure after the link is already copied (refocus, or opening the PWA) is never reported as if nothing was copied.
+- Add an actionable, specific error for Arc's "Air Traffic Control" routing a meeting into a Little Arc window, instead of a generic timeout or a misleading clipboard failure, since Little Arc doesn't expose its URL through Arc's normal scripting interface.
+- Add an "Open Meetings In" preference to open meetings in the installed Google Meet PWA. The link is still resolved and copied through a real, scriptable browser first (PWA wrapper apps aren't reliably scriptable across Chrome/Edge/Brave), then opened in the PWA as a convenience; failing to open the PWA never prevents the link from being copied.
+- Reinterpret the timeout preference as an overall detection deadline (default raised from 500ms to 8 seconds) rather than a single fixed sleep before one lookup attempt; out-of-range values are clamped instead of silently misbehaving.
+- Preserve the clipboard's previous contents when using Firefox's keyboard-driven fallback, restoring them if meeting creation ultimately fails instead of leaving an intermediate URL behind.
+
 ## [New Command & Bug Fix] - 2026-04-28
 
 - Add "Create Meet and Refocus with Specified Profile" command — creates a meeting using a selected profile, copies the link, and refocuses the previous app

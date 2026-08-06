@@ -6,6 +6,7 @@ import { SaveBookmarkForm } from "./SaveBookmarkForm";
 import { getChildCount } from "../lib/cache";
 import { listChildNodes, setNodeCompleted } from "../lib/api";
 import { getPreferences } from "../lib/preferences";
+import { platformShortcut } from "../lib/shortcuts";
 import { getWorkflowyAppUrl, getWorkflowyWebUrl } from "../lib/urls";
 import { truncate, type WorkflowyApiNode } from "../lib/nodes";
 
@@ -96,10 +97,10 @@ export function ViewWorkflowyList({ location, isRoot = false }: Props) {
         <ActionPanel>
           <Action.Push
             title="Add Item Here"
-            shortcut={{ modifiers: ["cmd"], key: "a" }}
+            shortcut={platformShortcut(["cmd"], "a")}
             target={<QuickCaptureForm fixedDestination={currentDestination} onDidCreate={loadItems} returnToRootOnSuccess={false} />}
           />
-          <Action title="Refresh" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={loadItems} />
+          <Action title="Refresh" shortcut={platformShortcut(["cmd"], "r")} onAction={loadItems} />
         </ActionPanel>
       }
     >
@@ -109,10 +110,10 @@ export function ViewWorkflowyList({ location, isRoot = false }: Props) {
           description={errorMessage}
           actions={
             <ActionPanel>
-              <Action title="Retry" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={loadItems} />
+              <Action title="Retry" shortcut={platformShortcut(["cmd"], "r")} onAction={loadItems} />
               <Action.Push
                 title="Add Item Here"
-                shortcut={{ modifiers: ["cmd"], key: "a" }}
+                shortcut={platformShortcut(["cmd"], "a")}
                 target={<QuickCaptureForm fixedDestination={currentDestination} onDidCreate={loadItems} returnToRootOnSuccess={false} />}
               />
             </ActionPanel>
@@ -126,10 +127,10 @@ export function ViewWorkflowyList({ location, isRoot = false }: Props) {
             <ActionPanel>
               <Action.Push
                 title="Add Item Here"
-                shortcut={{ modifiers: ["cmd"], key: "a" }}
+                shortcut={platformShortcut(["cmd"], "a")}
                 target={<QuickCaptureForm fixedDestination={currentDestination} onDidCreate={loadItems} returnToRootOnSuccess={false} />}
               />
-              <Action title="Refresh" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={loadItems} />
+              <Action title="Refresh" shortcut={platformShortcut(["cmd"], "r")} onAction={loadItems} />
             </ActionPanel>
           }
         />
@@ -163,37 +164,37 @@ export function ViewWorkflowyList({ location, isRoot = false }: Props) {
                     />
                   }
                 />
-                <Action title={node.completedAt ? "Mark Incomplete" : "Mark Complete"} shortcut={{ modifiers: ["cmd"], key: "k" }} onAction={() => toggleComplete(node)} />
+                <Action title={node.completedAt ? "Mark Incomplete" : "Mark Complete"} shortcut={platformShortcut(["cmd"], "k")} onAction={() => toggleComplete(node)} />
                 <Action.Push
                   title="Add Item Here"
-                  shortcut={{ modifiers: ["cmd"], key: "a" }}
+                  shortcut={platformShortcut(["cmd"], "a")}
                   target={<QuickCaptureForm fixedDestination={currentDestination} onDidCreate={loadItems} returnToRootOnSuccess={false} />}
                 />
                 <Action.Push
                   title="Add Child Item"
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+                  shortcut={platformShortcut(["cmd", "shift"], "a")}
                   target={<AppendChildForm parentId={node.id} onDidCreate={loadItems} returnToRootOnSuccess={false} />}
                 />
-                <Action title="Refresh" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={loadItems} />
+                <Action title="Refresh" shortcut={platformShortcut(["cmd"], "r")} onAction={loadItems} />
                 {opensInWeb ? (
                   <Action.OpenInBrowser
                     title="Open in Workflowy"
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
+                    shortcut={platformShortcut(["cmd"], "enter")}
                     url={getWorkflowyWebUrl(node.id)}
                   />
                 ) : (
-                  <Action title="Open in Workflowy" shortcut={{ modifiers: ["cmd"], key: "enter" }} onAction={() => open(getWorkflowyAppUrl(node.id))} />
+                  <Action title="Open in Workflowy" shortcut={platformShortcut(["cmd"], "enter")} onAction={() => open(getWorkflowyAppUrl(node.id))} />
                 )}
                 {opensInWeb ? (
-                  <Action title="Open in Workflowy App" shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }} onAction={() => open(getWorkflowyAppUrl(node.id))} />
+                  <Action title="Open in Workflowy App" shortcut={platformShortcut(["cmd", "shift"], "enter")} onAction={() => open(getWorkflowyAppUrl(node.id))} />
                 ) : (
                   <Action.OpenInBrowser
                     title="Open in Workflowy Web"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                    shortcut={platformShortcut(["cmd", "shift"], "enter")}
                     url={getWorkflowyWebUrl(node.id)}
                   />
                 )}
-                <Action.Push title="Save as Bookmark" shortcut={{ modifiers: ["cmd", "shift"], key: "b" }} target={<SaveBookmarkForm nodeId={node.id} defaultName={node.name || "(Untitled)"} />} />
+                <Action.Push title="Save as Bookmark" shortcut={platformShortcut(["cmd", "shift"], "b")} target={<SaveBookmarkForm nodeId={node.id} defaultName={node.name || "(Untitled)"} />} />
               </ActionPanel>
             }
           />

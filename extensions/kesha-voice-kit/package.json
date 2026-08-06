@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kesha-voice-kit",
+  "title": "Kesha Voice Kit",
+  "description": "Offline microphone dictation powered by the Kesha Voice Kit CLI. Records locally, transcribes locally, and copies text to your clipboard.",
+  "icon": "extension-icon.png",
+  "author": "drakulavich",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "voice",
+    "dictation",
+    "transcription",
+    "stt",
+    "speech-to-text",
+    "kesha",
+    "offline",
+    "parakeet"
+  ],
+  "commands": [
+    {
+      "name": "dictate-to-clipboard",
+      "title": "Dictate to Clipboard",
+      "subtitle": "Kesha Voice Kit",
+      "description": "Record from the default microphone, transcribe locally with Kesha Voice Kit, and copy the transcript to the clipboard.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "keshaBinPath",
+      "title": "Kesha Binary Path",
+      "description": "Absolute path to the `kesha` CLI. Leave blank to auto-detect common global install locations.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "/opt/homebrew/bin/kesha"
+    },
+    {
+      "name": "maxRecordingSeconds",
+      "title": "Max Recording Seconds",
+      "description": "Maximum microphone recording duration before the command stops automatically.",
+      "type": "textfield",
+      "required": false,
+      "default": "300",
+      "placeholder": "300"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "overrides": {
+    "minimatch": ">=9.0.7"
+  }
+}

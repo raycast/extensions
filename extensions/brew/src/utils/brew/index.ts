@@ -34,7 +34,10 @@ export type { BrewPhase, BrewProgress, ProgressCallback } from "./progress";
 // Fetching
 export {
   brewFetchInstalled,
+  brewFetchInstallableResults,
   brewFetchInstalledFast,
+  brewMapInstalled,
+  asInstallableResults,
   brewFetchOutdated,
   brewUpdate,
   brewFetchFormulaInfo,

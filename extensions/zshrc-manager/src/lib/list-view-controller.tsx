@@ -9,11 +9,11 @@ import type React from "react";
 import { useState, useMemo } from "react";
 import { ActionPanel, List, Icon, Color } from "@raycast/api";
 import { useFrecencySorting } from "@raycast/utils";
-import { MODERN_COLORS } from "../constants";
 import { useZshrcLoader } from "../hooks/useZshrcLoader";
 import { useZshrcFilter } from "../hooks/useZshrcFilter";
+import { truncateValueMiddle } from "../utils/formatters";
 import type { LogicalSection } from "./parse-zshrc";
-import { SharedActionsSection } from "./shared-actions";
+import { DetailToggleContext, SharedActionsSection } from "./shared-actions";
 
 /**
  * Warning info for an item
@@ -42,6 +42,8 @@ export interface FilterableItem {
   sectionStartLine: number;
   /** Stable unique ID assigned during parsing (used for React keys) */
   _stableId?: number;
+  /** 0-based instance of the section label (labels are not unique) */
+  _sectionOccurrence?: number;
   [key: string]: unknown;
 }
 
@@ -62,7 +64,7 @@ export type MarkdownGenerator<T extends FilterableItem> = (
 /**
  * Configuration for generating metadata content
  */
-export type MetadataGenerator<T extends FilterableItem> = (item: T) => React.ReactNode;
+export type MetadataGenerator<T extends FilterableItem> = (item: T, displayedValue: string) => React.ReactNode;
 
 /**
  * Configuration for generating actions
@@ -100,16 +102,29 @@ export interface ListViewConfig<T extends FilterableItem> {
   searchFields: string[];
   /** Generate markdown for overview section */
   generateOverviewMarkdown: MarkdownGenerator<T>;
-  /** Generate markdown for item detail */
-  generateItemMarkdown: MarkdownGenerator<T>;
   /** Generate metadata for item detail */
   generateMetadata?: MetadataGenerator<T>;
+  /**
+   * Omit the value code block above the detail metadata — for views whose
+   * metadata already carries the value as a row, so it isn't shown twice.
+   */
+  omitValueMarkdown?: boolean;
   /** Generate actions for items */
   generateItemActions?: ActionsGenerator<T>;
   /** Generate actions for overview item */
   generateOverviewActions?: ActionsGenerator<T>;
   /** Generate title for list item */
   generateTitle: TitleGenerator<T>;
+  /** Copyable name for an item (Copy Name ⌘⇧C); defaults to generateTitle */
+  getItemName?: (item: T) => string;
+  /** Copyable value for an item (Copy Value ⌘C); defaults to generateTitle */
+  getItemValue?: (item: T) => string;
+  /**
+   * Value rendered in the detail pane and the hidden-pane subtitle.
+   * Defaults to getItemValue/generateTitle; exports override it to keep
+   * secrets masked on screen while copy actions receive the real value.
+   */
+  getDisplayValue?: (item: T) => string;
   /** Custom post-processing of items */
   postProcessItems?: (items: T[]) => T[];
   /** Optional search bar accessory (e.g., dropdown) */
@@ -142,25 +157,35 @@ type WarningFilter = "all" | "warnings_only" | "no_warnings";
 export function ListViewController<T extends FilterableItem>(config: ListViewConfig<T>) {
   const { sections, isLoading, refresh } = useZshrcLoader(config.commandName);
   const [warningFilter, setWarningFilter] = useState<WarningFilter>("all");
+  const [showDetail, setShowDetail] = useState(true);
 
-  // Parse items from all sections with stable unique IDs
-  // The _stableId is assigned during initial parsing and remains constant
-  // through frecency sorting, ensuring React keys stay stable across reorders
-  let stableIdCounter = 0;
-  const allItemsRaw = (sections || []).flatMap((section: LogicalSection) =>
-    config.parser(section.content).map(
-      (item) =>
-        ({
-          ...item,
-          section: section.label,
-          sectionStartLine: section.startLine,
-          _stableId: stableIdCounter++,
-        }) as T,
-    ),
-  );
-
-  // Apply post-processing if configured
-  const postProcessedItems = config.postProcessItems ? config.postProcessItems(allItemsRaw) : allItemsRaw;
+  // Parse items from all sections with stable unique IDs, memoised so the
+  // array identity survives unrelated re-renders and the itemWarnings memo
+  // below can actually hit. The _stableId is assigned during initial
+  // parsing and remains constant through frecency sorting, ensuring React
+  // keys stay stable across reorders.
+  const { parser, postProcessItems } = config;
+  const postProcessedItems = useMemo(() => {
+    let stableIdCounter = 0;
+    const labelInstances = new Map<string, number>();
+    const allItemsRaw = (sections || []).flatMap((section: LogicalSection) => {
+      // Labels are not unique: track which same-labeled instance this is so
+      // edit/delete can resolve the exact section the item came from
+      const sectionOccurrence = labelInstances.get(section.label) ?? 0;
+      labelInstances.set(section.label, sectionOccurrence + 1);
+      return parser(section.content).map(
+        (item) =>
+          ({
+            ...item,
+            section: section.label,
+            sectionStartLine: section.startLine,
+            _stableId: stableIdCounter++,
+            _sectionOccurrence: sectionOccurrence,
+          }) as T,
+      );
+    });
+    return postProcessItems ? postProcessItems(allItemsRaw) : allItemsRaw;
+  }, [sections, parser, postProcessItems]);
 
   // Apply frecency sorting if enabled
   const frecencyKey = config.frecencyKey || ((item: T) => config.generateTitle(item));
@@ -227,7 +252,14 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
 
     return (
       <ActionPanel>
-        <SharedActionsSection onRefresh={refresh} />
+        <SharedActionsSection
+          onRefresh={refresh}
+          item={{
+            copyName: (config.getItemName ?? config.generateTitle)(item),
+            copyValue: (config.getItemValue ?? config.generateTitle)(item),
+            onVisit: config.enableFrecency ? () => visitItem(item) : undefined,
+          }}
+        />
       </ActionPanel>
     );
   };
@@ -279,93 +311,89 @@ export function ListViewController<T extends FilterableItem>(config: ListViewCon
     };
   };
 
+  // Value shown in the pane and the hidden-pane subtitle. The pane is a
+  // thin code block holding the value only — the name is already the row
+  // title, and location facts live in the metadata.
+  const displayValue = (item: T): string =>
+    (config.getDisplayValue ?? config.getItemValue ?? config.generateTitle)(item);
+
   return (
-    <List
-      navigationTitle={config.navigationTitle}
-      searchBarPlaceholder={config.searchPlaceholder}
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      searchBarAccessory={getSearchBarAccessory()}
-      isLoading={isLoading}
-      isShowingDetail={true}
-      actions={
-        <ActionPanel>
-          <SharedActionsSection onRefresh={refresh} />
-        </ActionPanel>
-      }
-    >
-      <List.Section title="Overview">
-        <List.Item
-          title={`${config.itemType.charAt(0).toUpperCase() + config.itemType.slice(1)} Summary`}
-          subtitle={`${allItems.length}`}
-          icon={{ source: config.icon, tintColor: config.tintColor }}
-          detail={
-            <List.Item.Detail markdown={config.generateOverviewMarkdown(allItems[0] || ({} as T), allItems, grouped)} />
-          }
-          actions={getOverviewActions()}
-        />
-      </List.Section>
-
-      {typeof config.customHeaderSection === "function"
-        ? config.customHeaderSection(refresh)
-        : config.customHeaderSection}
-
-      {Object.entries(grouped).map(([sectionName, items]) => (
-        <List.Section key={sectionName} title={sectionName}>
-          {items.map((item) => {
-            const warningAccessory = getWarningAccessory(item);
-            const accessories: List.Item.Accessory[] = [];
-
-            // Add warning accessory first if present
-            if (warningAccessory) {
-              accessories.push(warningAccessory);
-            }
-
-            // Add section and document accessories
-            accessories.push({ text: sectionName });
-            accessories.push({
-              icon: {
-                source: Icon.Document,
-                tintColor: Color.SecondaryText,
-              },
-            });
-
-            // Use the stable ID assigned during parsing for React keys
-            // This ensures items are reordered (not remounted) when frecency changes
-            const itemKey = `${sectionName}-${item._stableId}`;
-
-            return (
-              <List.Item
-                key={itemKey}
-                title={config.generateTitle(item)}
-                icon={{ source: config.icon, tintColor: config.tintColor }}
-                accessories={accessories}
-                detail={
-                  <List.Item.Detail
-                    markdown={config.generateItemMarkdown(item, allItems, grouped)}
-                    metadata={config.generateMetadata ? config.generateMetadata(item) : undefined}
-                  />
-                }
-                actions={getItemActions(item)}
-              />
-            );
-          })}
-        </List.Section>
-      ))}
-
-      {Object.keys(grouped).length === 0 && !isLoading && (
-        <List.Section title={`No ${config.itemType.charAt(0).toUpperCase() + config.itemType.slice(1)}s Found`}>
+    <DetailToggleContext.Provider value={{ shown: showDetail, toggle: () => setShowDetail((shown) => !shown) }}>
+      <List
+        navigationTitle={config.navigationTitle}
+        searchBarPlaceholder={config.searchPlaceholder}
+        searchText={searchText}
+        onSearchTextChange={setSearchText}
+        searchBarAccessory={getSearchBarAccessory()}
+        isLoading={isLoading}
+        isShowingDetail={showDetail}
+        actions={
+          <ActionPanel>
+            <SharedActionsSection onRefresh={refresh} />
+          </ActionPanel>
+        }
+      >
+        <List.Section title="Overview">
           <List.Item
-            title={`No ${config.itemTypePlural} match your search`}
-            subtitle="Try adjusting your search terms"
-            icon={{
-              source: Icon.MagnifyingGlass,
-              tintColor: MODERN_COLORS.neutral,
-            }}
-            actions={getEmptyActions()}
+            title={`${config.itemType.charAt(0).toUpperCase() + config.itemType.slice(1)} Summary`}
+            subtitle={`${allItems.length}`}
+            icon={{ source: config.icon, tintColor: config.tintColor }}
+            detail={
+              <List.Item.Detail
+                markdown={config.generateOverviewMarkdown(allItems[0] || ({} as T), allItems, grouped)}
+              />
+            }
+            actions={getOverviewActions()}
           />
         </List.Section>
-      )}
-    </List>
+
+        {typeof config.customHeaderSection === "function"
+          ? config.customHeaderSection(refresh)
+          : config.customHeaderSection}
+
+        {Object.entries(grouped).map(([sectionName, items]) => (
+          <List.Section key={sectionName} title={sectionName}>
+            {items.map((item) => {
+              // Rows already sit under their section header, so the only
+              // accessory is the warning badge; the value renders as the
+              // subtitle only while the pane is hidden, since the narrow
+              // column would truncate it
+              const warningAccessory = getWarningAccessory(item);
+              const accessories: List.Item.Accessory[] = warningAccessory ? [warningAccessory] : [];
+
+              // Use the stable ID assigned during parsing for React keys
+              // This ensures items are reordered (not remounted) when frecency changes
+              const itemKey = `${sectionName}-${item._stableId}`;
+
+              return (
+                <List.Item
+                  key={itemKey}
+                  title={config.generateTitle(item)}
+                  subtitle={showDetail ? "" : truncateValueMiddle(displayValue(item), 60)}
+                  icon={{ source: config.icon, tintColor: config.tintColor }}
+                  accessories={accessories}
+                  detail={
+                    <List.Item.Detail
+                      markdown={config.omitValueMarkdown ? null : `\`\`\`zsh\n${displayValue(item)}\n\`\`\``}
+                      metadata={config.generateMetadata ? config.generateMetadata(item, displayValue(item)) : undefined}
+                    />
+                  }
+                  actions={getItemActions(item)}
+                />
+              );
+            })}
+          </List.Section>
+        ))}
+
+        {Object.keys(grouped).length === 0 && !isLoading && (
+          <List.EmptyView
+            title={`No ${config.itemTypePlural} match your search`}
+            description="Try adjusting your search terms"
+            icon={Icon.MagnifyingGlass}
+            actions={getEmptyActions()}
+          />
+        )}
+      </List>
+    </DetailToggleContext.Provider>
   );
 }

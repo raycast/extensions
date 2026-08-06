@@ -1,5 +1,12 @@
 # WinGet Changelog
 
+## [Stale Data Fixes] - 2026-07-27
+
+### Fixed
+- Upgrade All refreshes stale package data before upgrading
+- Uninstalling a package that is no longer installed corrects the list instead of failing
+- A failed data refresh no longer shows an empty package list; the error toast offers Retry
+
 ## [Locale and Upgrade Fixes] - 2026-07-17
 
 ### Fixed

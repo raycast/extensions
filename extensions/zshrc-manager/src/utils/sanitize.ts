@@ -11,32 +11,6 @@ import { constants } from "node:fs";
 import { FILE_CONSTANTS } from "../constants";
 
 /**
- * Sanitizes markdown content by escaping potentially dangerous characters
- *
- * @param content The markdown content to sanitize
- * @returns Sanitized content with escaped dangerous characters
- */
-export function sanitizeMarkdown(content: string): string {
-  // Escape backticks to prevent code injection
-  return content.replace(/`/g, "\\`").replace(/\$/g, "\\$").replace(/\\/g, "\\\\");
-}
-
-/**
- * Escapes shell content for safe display
- *
- * @param content The shell content to escape
- * @returns Escaped content safe for display
- */
-export function escapeShellContent(content: string): string {
-  return content
-    .replace(/`/g, "\\`")
-    .replace(/\$/g, "\\$")
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/'/g, "\\'");
-}
-
-/**
  * Validates file path to ensure it's safe to access
  *
  * Note: This function expects paths to be already expanded (e.g., ~ should be
@@ -143,21 +117,6 @@ export async function validateFilePathForWrite(filePath: string): Promise<boolea
  */
 export function validateFileSize(fileSize: number): boolean {
   return fileSize >= 0 && fileSize <= FILE_CONSTANTS.MAX_FILE_SIZE;
-}
-
-/**
- * Truncates content to a safe length to prevent memory issues
- *
- * @param content The content to truncate
- * @param maxLength Maximum allowed length (defaults to FILE_CONSTANTS.MAX_CONTENT_LENGTH)
- * @returns Truncated content with ellipsis if truncated
- */
-export function truncateContent(content: string, maxLength: number = FILE_CONSTANTS.MAX_CONTENT_LENGTH): string {
-  if (content.length <= maxLength) {
-    return content;
-  }
-
-  return content.slice(0, maxLength) + "\n... (truncated)";
 }
 
 /**

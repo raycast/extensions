@@ -93,8 +93,29 @@ export function prKey(pr: { repo: string; number: number }): string {
 }
 
 export interface SeenState {
+  /** Last user action that marked any activity on this PR as seen. Kept for compatibility only. */
   lastSeen: string; // ISO timestamp
   seenItemIds: string[]; // individual item IDs like "review-123", "rc-456"
+  /**
+   * A conservative activity watermark. It exists only after a user marks the entire PR as seen,
+   * so activity at or before this time may be skipped by the GraphQL metadata pre-filter.
+   *
+   * Old entries deliberately lack this field: `lastSeen` was also advanced by the single-item
+   * action, and treating it as a complete watermark would hide other still-unread items.
+   */
+  fullySeenAt?: string;
+  /**
+   * Which clock `fullySeenAt` came from, because the prefilter must treat them differently.
+   *
+   *  - `"updated-at"` — the PR's own `updated_at`, recorded by a fetch that found nothing unseen.
+   *    Same clock as the value it is compared against, so no safety margin applies.
+   *  - `"wall-clock"` — `Date.now()` at a mark-as-read action. GitHub's `updated_at` can lag real
+   *    activity by 6–10s, so the prefilter widens the window for these.
+   *
+   * Absent on entries written before this field existed; treated as `"wall-clock"` (the
+   * conservative reading, since that is the one that keeps the safety margin).
+   */
+  watermarkSource?: "updated-at" | "wall-clock";
 }
 
 /** Keyed by "owner/repo#number" to avoid collisions across repos */

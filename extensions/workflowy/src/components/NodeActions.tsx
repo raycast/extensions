@@ -4,6 +4,7 @@ import { SaveBookmarkForm } from "./SaveBookmarkForm";
 import { setNodeCompleted } from "../lib/api";
 import { setNodeCompletedOptimistically } from "../lib/cache";
 import { getPreferences } from "../lib/preferences";
+import { platformShortcut } from "../lib/shortcuts";
 import { getWorkflowyAppUrl, getWorkflowyWebUrl } from "../lib/urls";
 import type { WorkflowyNodeRecord } from "../lib/nodes";
 
@@ -40,14 +41,14 @@ export function NodeActions({ node, onDidMutate, allowBookmark = true, primaryAc
   const toggleAction = (
     <Action
       title={isCompleted ? "Mark Incomplete" : "Mark Complete"}
-      shortcut={primaryAction === "toggleComplete" ? undefined : { modifiers: ["cmd"], key: "k" }}
+      shortcut={primaryAction === "toggleComplete" ? undefined : platformShortcut(["cmd"], "k")}
       icon={isCompleted ? Icon.Circle : Icon.CheckCircle}
       onAction={handleToggleComplete}
     />
   );
 
-  const primaryOpenShortcut: Keyboard.Shortcut | undefined = primaryAction === "toggleComplete" ? { modifiers: ["cmd"], key: "enter" } : undefined;
-  const alternateOpenShortcut: Keyboard.Shortcut | undefined = primaryAction === "toggleComplete" ? { modifiers: ["cmd", "shift"], key: "enter" } : undefined;
+  const primaryOpenShortcut: Keyboard.Shortcut | undefined = primaryAction === "toggleComplete" ? platformShortcut(["cmd"], "enter") : undefined;
+  const alternateOpenShortcut: Keyboard.Shortcut | undefined = primaryAction === "toggleComplete" ? platformShortcut(["cmd", "shift"], "enter") : undefined;
 
   const preferredOpenAction = opensInWeb ? (
     <Action.OpenInBrowser title="Open in Workflowy" shortcut={primaryOpenShortcut} url={getWorkflowyWebUrl(node.id)} />
@@ -72,7 +73,7 @@ export function NodeActions({ node, onDidMutate, allowBookmark = true, primaryAc
       <ActionPanel.Section>
         <Action.Push
           title="Add Child Item"
-          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+          shortcut={platformShortcut(["cmd", "shift"], "a")}
           target={<AppendChildForm parentId={node.id} />}
         />
       </ActionPanel.Section>
@@ -80,14 +81,14 @@ export function NodeActions({ node, onDidMutate, allowBookmark = true, primaryAc
       <ActionPanel.Section>
         <Action
           title="Copy Item Text"
-          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          shortcut={platformShortcut(["cmd"], "c")}
           onAction={() => Clipboard.copy(node.name)}
         />
-        <Action.CopyToClipboard title="Copy Workflowy Link" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} content={getWorkflowyWebUrl(node.id)} />
+        <Action.CopyToClipboard title="Copy Workflowy Link" shortcut={platformShortcut(["cmd", "shift"], "c")} content={getWorkflowyWebUrl(node.id)} />
         {allowBookmark ? (
           <Action.Push
             title="Save as Bookmark"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+            shortcut={platformShortcut(["cmd", "shift"], "b")}
             target={<SaveBookmarkForm nodeId={node.id} defaultName={node.name} />}
           />
         ) : null}

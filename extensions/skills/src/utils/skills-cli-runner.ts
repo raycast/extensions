@@ -14,6 +14,7 @@ let bunxResolutionFailed = false;
 
 type ExecFailure = Error & {
   code?: string | number;
+  stdout?: string | Buffer;
   stderr?: string | Buffer;
 };
 
@@ -50,8 +51,17 @@ function getSkillsCliEnvOverrides(): Record<string, string> {
   return shouldDisableSkillsCliTelemetry() ? { DISABLE_TELEMETRY: "1" } : {};
 }
 
-export async function runSkillsCli(args: string[]): Promise<string> {
-  return enqueueSkillsCliRun(() => runSkillsCliCommand(args));
+export interface RunSkillsCliOptions {
+  /**
+   * Whether the command has no side effects. Only such commands are retried
+   * through npx when bunx dies without a word: a mutating command may already
+   * have changed local state, and re-running it would apply the change twice.
+   */
+  readOnly?: boolean;
+}
+
+export async function runSkillsCli(args: string[], options: RunSkillsCliOptions = {}): Promise<string> {
+  return enqueueSkillsCliRun(() => runSkillsCliCommand(args, options.readOnly ?? false));
 }
 
 async function enqueueSkillsCliRun<T>(run: () => Promise<T>): Promise<T> {
@@ -60,7 +70,7 @@ async function enqueueSkillsCliRun<T>(run: () => Promise<T>): Promise<T> {
   return runAfterPending;
 }
 
-async function runSkillsCliCommand(args: string[]): Promise<string> {
+async function runSkillsCliCommand(args: string[], readOnly: boolean): Promise<string> {
   const customNpxPath = getCustomNpxPath();
   if (customNpxPath) {
     await validateCustomNpxPath(customNpxPath);
@@ -75,10 +85,13 @@ async function runSkillsCliCommand(args: string[]): Promise<string> {
     try {
       return await executeSkillsCli("bunx", args);
     } catch (error) {
-      if (!isNpxCommandResolutionFailure(error, "bunx")) {
+      if (isNpxCommandResolutionFailure(error, "bunx")) {
+        bunxResolutionFailed = true;
+      } else if (!readOnly || hasDiagnosticOutput(error)) {
+        // Either the command may have changed state, or bunx said what went
+        // wrong — in both cases retrying through npx is not the right move.
         throw normalizeCliError(error, "bunx");
       }
-      bunxResolutionFailed = true;
     }
   }
 
@@ -104,6 +117,33 @@ async function executeSkillsCli(runner: PackageRunner, args: string[], executabl
   return stdout.toString();
 }
 
+const MAX_CLI_OUTPUT_CHARS = 500;
+
+// Built from a char code so the escape byte stays out of the regex literal.
+const ANSI_ESCAPE_PATTERN = new RegExp(`${String.fromCharCode(27)}\\[[0-9;?]*[A-Za-z]`, "g");
+
+/**
+ * What the failed run told us. The skills CLI renders everything — including
+ * errors — on stdout, so stderr alone would usually be empty.
+ */
+function extractCliOutput(error: unknown): string {
+  const failure = error as ExecFailure | undefined;
+
+  return [failure?.stdout, failure?.stderr]
+    .map((stream) => stream?.toString().replace(ANSI_ESCAPE_PATTERN, "").trim() ?? "")
+    .filter(Boolean)
+    .join("\n");
+}
+
+/**
+ * `bunx --silent` suppresses bun's own diagnostics, so a failed run can reject
+ * with nothing beyond "Command failed: bunx …" on either stream. Only such a
+ * wordless failure is worth retrying through npx.
+ */
+function hasDiagnosticOutput(error: unknown): boolean {
+  return extractCliOutput(error).length > 0;
+}
+
 function normalizeCliError(error: unknown, npxCommand: string): Error {
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
@@ -112,10 +152,26 @@ function normalizeCliError(error: unknown, npxCommand: string): Error {
   }
 
   if (error instanceof Error) {
-    return error;
+    return withCliOutput(error);
   }
 
   return new Error("Failed to execute the skills CLI command.");
+}
+
+/**
+ * `execFile` folds stderr into the rejection message but drops stdout, which is
+ * where this CLI reports its failures. Without it the user only sees the command
+ * that failed, never the reason.
+ */
+function withCliOutput(error: Error): Error {
+  const output = extractCliOutput(error);
+  if (!output || error.message.includes(output)) return error;
+
+  const truncated = output.length > MAX_CLI_OUTPUT_CHARS ? `…${output.slice(-MAX_CLI_OUTPUT_CHARS)}` : output;
+  const detailedError = new Error(`${error.message.trim()}\n${truncated}`, { cause: error });
+  detailedError.name = error.name;
+  detailedError.stack = error.stack;
+  return detailedError;
 }
 
 async function validateCustomNpxPath(customNpxPath: string): Promise<void> {

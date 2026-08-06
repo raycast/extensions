@@ -1,40 +1,42 @@
 import { getPreferenceValues } from "@raycast/api";
-import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import fs from "fs";
 import path from "path";
 import { getMimeType } from "./mime-types";
-import { generateFileName } from "./generate-fileName";
+import { generateFileName, renderTemplateTokens } from "./generate-fileName";
+import { createR2Client } from "./r2-client";
+import { buildPublicUrl } from "./r2-url";
+import { escapeMarkdownAlt, escapeHtmlAttribute } from "./text-escaping";
+
+function buildObjectKey(fileName: string, pathPrefix: string | undefined, originalFilePath: string): string {
+  if (!pathPrefix) {
+    return fileName;
+  }
+
+  const renderedPrefix = renderTemplateTokens(pathPrefix, originalFilePath)
+    .split("/")
+    .map((segment) => segment.trim())
+    .filter((segment) => segment.length > 0 && segment !== ".." && segment !== ".")
+    .join("/");
+
+  return renderedPrefix ? `${renderedPrefix}/${fileName}` : fileName;
+}
 
 export async function uploadToR2(
   filePath: string,
   customFileName: string | undefined,
-): Promise<{ url: string; markdown: string }> {
-  const preferences = getPreferenceValues();
-  const {
-    r2BucketName: bucketName,
-    r2AccessKeyId: accessKeyId,
-    r2SecretAccessKey: secretAccessKey,
-    r2AccountId: accountId,
-    customDomain,
-    fileNameFormat,
-  } = preferences;
+  pathPrefixOverride?: string,
+): Promise<{ url: string; markdown: string; html: string; key: string }> {
+  const { fileNameFormat, uploadPathPrefix } = getPreferenceValues();
+  const { client, bucketName, endpoint, customDomain } = createR2Client();
 
-  const endpoint = `https://${accountId}.r2.cloudflarestorage.com`;
-
-  const s3Client = new S3Client({
-    region: "auto",
-    endpoint,
-    credentials: {
-      accessKeyId,
-      secretAccessKey,
-    },
-    forcePathStyle: true,
-  });
+  const effectivePathPrefix = pathPrefixOverride !== undefined ? pathPrefixOverride : uploadPathPrefix;
 
   const fileContent = await fs.promises.readFile(filePath);
 
-  const finalFileName = customFileName || generateFileName(filePath, fileNameFormat || "", path.extname(filePath));
-  const key = finalFileName;
+  const finalFileName =
+    customFileName || (await generateFileName(filePath, fileNameFormat || "", path.extname(filePath)));
+  const key = buildObjectKey(finalFileName, effectivePathPrefix, filePath);
 
   const contentType = getMimeType(filePath);
 
@@ -45,17 +47,13 @@ export async function uploadToR2(
     ContentType: contentType,
   });
 
-  await s3Client.send(putObjectCommand);
+  await client.send(putObjectCommand);
 
-  let url: string;
-  if (customDomain) {
-    const cleanDomain = customDomain.replace(/\/$/, "");
-    url = `${cleanDomain}/${key}`;
-  } else {
-    url = `${endpoint}/${bucketName}/${key}`;
-  }
+  const url = buildPublicUrl(key, { endpoint, bucketName, customDomain });
 
-  const markdown = `![${path.basename(key, path.extname(key))}](${url})`;
+  const alt = path.basename(key, path.extname(key));
+  const markdown = `![${escapeMarkdownAlt(alt)}](${url})`;
+  const html = `<img src="${url}" alt="${escapeHtmlAttribute(alt)}" />`;
 
-  return { url, markdown };
+  return { url, markdown, html, key };
 }

@@ -1,5 +1,7 @@
 import { usePromise } from "@raycast/utils";
 import { fetchSearchBookmarks } from "../apis";
+import { handleFetchError } from "../utils/fetchError";
+import { useLiveData } from "./useLiveData";
 
 interface SearchResult {
   [key: string]: {
@@ -27,8 +29,21 @@ export function useSearchBookmarks(searchText: string) {
     [searchText],
     {
       execute: true,
+      // usePromise raises the same built-in "Failed to fetch latest data" toast
+      // as useCachedPromise; suppress it for connection failures so the
+      // recovery UI owns the message.
+      onError: handleFetchError("search"),
     },
   );
 
-  return { isLoading, bookmarks: data?.bookmarks || [], hasMore: data?.hasMore || false, error, revalidate };
+  const hasLiveData = useLiveData(isLoading, error, searchText);
+
+  return {
+    isLoading,
+    bookmarks: data?.bookmarks || [],
+    hasMore: data?.hasMore || false,
+    error,
+    hasLiveData,
+    revalidate,
+  };
 }

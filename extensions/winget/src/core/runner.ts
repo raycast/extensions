@@ -82,7 +82,7 @@ import {
   writeOperationState,
 } from "./operations";
 import { supportPath } from "./paths";
-import { refreshSlicesIncrementally } from "./refresh";
+import { isMutableDataStale, refreshSlicesIncrementally } from "./refresh";
 
 const CANCEL_POLL_MS = 500;
 const STATE_WRITE_THROTTLE_MS = 250;
@@ -143,6 +143,22 @@ function statusFromResult(result: WingetOperationResult): OperationStatus {
   if (result.cancelled) return "cancelled";
   if (!result.success) return "failed";
   return result.noop ? "noop" : "succeeded";
+}
+
+/**
+ * Upgrade All's target list, derived from the index: every upgradable package
+ * that is not pinned and whose offered version is not marked not-applicable —
+ * the same exclusions the upgradable view applies.
+ */
+function upgradableTargets(indexPaths: IndexPaths): PackageTarget[] {
+  const index = loadIndex(indexPaths);
+  if (!index) {
+    return [];
+  }
+  const pinnedKeys = new Set(index.pinned.map((p) => packageKey(p)));
+  return index.upgradable
+    .filter((u) => !pinnedKeys.has(packageKey(u)) && index.notApplicable[packageKey(u)] !== u.available)
+    .map((u) => ({ id: u.id, name: u.name, source: u.source }));
 }
 
 /**
@@ -334,6 +350,31 @@ async function runOperation(request: OperationRequest): Promise<OperationState |
     try {
       switch (request.kind) {
         case "upgrade-all":
+          // View-launched bulk targets are an index snapshot; when the
+          // mutable slices are stale, packages upgraded or removed outside
+          // this extension turn into per-package failures. Refresh under the
+          // held lock (same ownership guard as the post-operation refresh)
+          // and re-derive the targets. The view's Upgrade All has no
+          // confirmation dialog, so a fresher target list breaks no promise.
+          if (isMutableDataStale(loadIndex(indexPaths))) {
+            publish({ stage: "refreshing", message: "Checking for updates…" });
+            try {
+              const refreshed = await refreshSlicesIncrementally(indexPaths, {
+                stillOwned: () => heartbeatLock(lockPath, opId) !== "fenced",
+                // Cancellation must not wait out a slow preflight; the failed
+                // refresh rolls back and the bulk loop exits as cancelled.
+                signal: controller.signal,
+              });
+              if (refreshed.outcome !== "fenced") {
+                request.targets = upgradableTargets(indexPaths);
+              }
+            } catch (error) {
+              // Preflight is an upgrade in accuracy, not a gate: proceed with
+              // the snapshot targets (stale rows fail per-package, honestly).
+              console.error("upgrade-all preflight refresh failed", error);
+            }
+          }
+        // fall through
         case "uninstall-all":
           result = await runBulkOperation(
             request,
@@ -683,12 +724,9 @@ async function runDirectUpgradeAll(): Promise<void> {
       return;
     }
 
-    // Markers were reconciled against this snapshot by the commit above.
-    const notApplicable = loadIndex(indexPaths)?.notApplicable ?? {};
-    const pinnedKeys = new Set(data.pinned.map((p) => packageKey(p)));
-    targets = data.upgradable
-      .filter((u) => !pinnedKeys.has(packageKey(u)) && notApplicable[packageKey(u)] !== u.available)
-      .map((u) => ({ id: u.id, name: u.name, source: u.source }));
+    // The commit above published this snapshot (markers reconciled), so the
+    // index is now the single derivation source for both preflight paths.
+    targets = upgradableTargets(indexPaths);
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could not check for updates";

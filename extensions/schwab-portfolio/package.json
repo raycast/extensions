@@ -1,0 +1,319 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "schwab-portfolio",
+  "title": "Schwab Portfolio",
+  "description": "View your Charles Schwab brokerage accounts, positions, and charts",
+  "icon": "extension-icon.png",
+  "author": "drew_levinson",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "schwabAppKey",
+      "title": "Schwab App Key",
+      "description": "Your Schwab Developer App Key (Client ID). Find it at developer.schwab.com → Dashboard → your app. No app yet? See the README for the 5-minute setup.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "schwabAppSecret",
+      "title": "Schwab App Secret",
+      "description": "Your Schwab Developer App Secret (Client Secret). Shown next to the App Key on your app's page at developer.schwab.com.",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "defaultTimeframe",
+      "title": "Default Chart Timeframe",
+      "description": "Default time period for price charts",
+      "type": "dropdown",
+      "required": false,
+      "default": "1M",
+      "data": [
+        {
+          "title": "1 Day",
+          "value": "1D"
+        },
+        {
+          "title": "5 Days",
+          "value": "5D"
+        },
+        {
+          "title": "1 Month",
+          "value": "1M"
+        },
+        {
+          "title": "3 Months",
+          "value": "3M"
+        },
+        {
+          "title": "6 Months",
+          "value": "6M"
+        },
+        {
+          "title": "1 Year",
+          "value": "1Y"
+        },
+        {
+          "title": "5 Years",
+          "value": "5Y"
+        }
+      ]
+    },
+    {
+      "name": "accountAliases",
+      "title": "Account Aliases (JSON)",
+      "description": "Optional. Account names come from your schwab.com nicknames automatically — use this only to override them. Format: account number to name, e.g. {\"12345678\":\"Roth\"}",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "portfolio",
+      "title": "View Portfolio",
+      "subtitle": "Schwab Portfolio",
+      "description": "View all Schwab account positions and balances",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "ticker-lookup",
+      "title": "Ticker Lookup",
+      "subtitle": "Schwab Portfolio",
+      "description": "Search for stock and ETF ticker symbols",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "market-overview",
+      "title": "Market Overview",
+      "subtitle": "Schwab Portfolio",
+      "description": "Indexes and top market movers",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "watchlist",
+      "title": "Watchlist",
+      "subtitle": "Schwab Portfolio",
+      "description": "Track symbols without holding them",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "recent-orders",
+      "title": "Recent Orders",
+      "subtitle": "Schwab Portfolio",
+      "description": "Orders placed across your accounts in the last 30 days",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Portfolio Menu Bar",
+      "subtitle": "Schwab Portfolio",
+      "description": "Quick portfolio summary in the menu bar",
+      "keywords": [
+        "stocks",
+        "brokerage",
+        "schwab",
+        "investing"
+      ],
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-portfolio",
+      "title": "Get Portfolio",
+      "description": "Get all Schwab accounts with balances, cash, day profit/loss, and every position's market value and P/L."
+    },
+    {
+      "name": "get-quote",
+      "title": "Get Quote",
+      "description": "Get live quotes for stock, ETF, or index symbols: price, day change, ranges, volume, and fundamentals."
+    },
+    {
+      "name": "get-market-movers",
+      "title": "Get Market Movers",
+      "description": "Get today's biggest S&P 500 gainers and losers by percent change."
+    },
+    {
+      "name": "get-watchlist",
+      "title": "Get Watchlist",
+      "description": "Get the user's watchlist symbols with live prices and day changes."
+    }
+  ],
+  "ai": {
+    "instructions": "- All data is read-only from Charles Schwab; you can never place, modify, or cancel orders, or move money.\n- Format dollar amounts with two decimals and a $ sign; format percent changes with a sign, e.g. +1.24%.\n- When summarizing the portfolio, lead with total value and day P/L, then break down by account using the account names as returned.\n- Day P/L means today's change; unrealized P/L means change since purchase. Do not conflate them.\n- Index symbols use a $ prefix: $SPX, $DJI, $COMPX.\n- If a tool fails with an authentication error, tell the user to open any Schwab Portfolio command to re-authenticate.",
+    "evals": [
+      {
+        "input": "@schwab-portfolio how is my portfolio doing today?",
+        "mocks": {
+          "get-portfolio": {
+            "totalValue": 254310.55,
+            "dayProfitLoss": 1834.21,
+            "dayProfitLossPercent": 0.73,
+            "accounts": [
+              {
+                "name": "Roth",
+                "accountNumberLast4": "4821",
+                "type": "CASH",
+                "totalValue": 98420.1,
+                "cashBalance": 1200.4,
+                "dayProfitLoss": 610.05,
+                "positions": [
+                  {
+                    "symbol": "VOO",
+                    "description": "VANGUARD S&P 500 ETF",
+                    "assetType": "ETF",
+                    "quantity": 120,
+                    "marketValue": 97219.7,
+                    "dayProfitLoss": 610.05,
+                    "dayProfitLossPercent": 0.63,
+                    "unrealizedProfitLoss": 18211.4
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-portfolio"
+          },
+          {
+            "includes": "254,310"
+          }
+        ]
+      },
+      {
+        "input": "@schwab-portfolio what's AAPL trading at?",
+        "mocks": {
+          "get-quote": [
+            {
+              "symbol": "AAPL",
+              "found": true,
+              "description": "APPLE INC",
+              "lastPrice": 211.42,
+              "dayChange": 2.13,
+              "dayChangePercent": 1.02
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-quote",
+              "arguments": {
+                "symbols": {
+                  "includes": "AAPL"
+                }
+              }
+            }
+          },
+          {
+            "includes": "211.42"
+          }
+        ]
+      },
+      {
+        "input": "@schwab-portfolio what are the biggest movers in the market right now?",
+        "mocks": {
+          "get-market-movers": {
+            "gainers": [
+              {
+                "symbol": "NVDA",
+                "description": "NVIDIA CORP",
+                "lastPrice": 182.11,
+                "changePercent": 4.8
+              }
+            ],
+            "losers": [
+              {
+                "symbol": "TSLA",
+                "description": "TESLA INC",
+                "lastPrice": 244.5,
+                "changePercent": -3.9
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-market-movers"
+          },
+          {
+            "meetsCriteria": "Mentions both gainers and losers"
+          }
+        ]
+      },
+      {
+        "input": "@schwab-portfolio buy 10 shares of AAPL",
+        "mocks": {},
+        "expected": [
+          {
+            "not": {
+              "callsTool": "get-portfolio"
+            }
+          },
+          {
+            "meetsCriteria": "Explains that it cannot place trades because access is read-only"
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "5.6.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

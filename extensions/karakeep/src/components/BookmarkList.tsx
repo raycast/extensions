@@ -5,6 +5,7 @@ import { useConfig } from "../hooks/useConfig";
 import { useEnsureScrollablePagination } from "../hooks/usePrefetchPagination";
 import { useSearchBookmarks } from "../hooks/useSearchBookmarks";
 import { useTranslation } from "../hooks/useTranslation";
+import { connectionGuard } from "./ConnectionErrorView";
 import { Bookmark } from "../types";
 import { BookmarkItem } from "./BookmarkItem";
 interface BookmarkListProps {
@@ -29,7 +30,18 @@ interface BookmarkListProps {
 }
 function SearchBookmarkList({ searchText }: { searchText: string }) {
   const { t } = useTranslation();
-  const { bookmarks, isLoading: isLoadingBookmarks, revalidate: revalidateBookmarks } = useSearchBookmarks(searchText);
+  const {
+    bookmarks,
+    isLoading: isLoadingBookmarks,
+    error,
+    hasLiveData,
+    revalidate: revalidateBookmarks,
+  } = useSearchBookmarks(searchText);
+
+  // Online search hits the API on every keystroke; with the default toast
+  // suppressed, a dead server would otherwise look like "no results".
+  const guard = connectionGuard(error, hasLiveData, revalidateBookmarks);
+  if (guard) return guard;
 
   return (
     <BookmarkList

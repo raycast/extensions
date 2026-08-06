@@ -24,7 +24,7 @@ runtime APIs.
 
 Generates tiny fixtures with FFmpeg itself (via `testsrc`, `sine`, `color`
 filters — no binary fixtures checked into the repo), then exercises the real
-`convertMedia` and `mergeMedia` code paths end-to-end.
+conversion, inspection, merge, target-size, and editing code paths end-to-end.
 
 ```bash
 npm run test:smoke
@@ -42,6 +42,13 @@ What it covers:
 - Merge two `.mp4` files with `forceReencode` (concat filter with video+audio)
 - Merge two `.wav` files into `.mp3` via concat filter (audio-only path)
 - Video conversion emits at least one progress callback
+- Media inspection parses video/audio streams and dimensions
+- Target-size conversion works across MP4, MKV, WebM, AVI, and MPG outputs
+- Resize, speed change, audio extraction, and loudness normalization
+- Burn external subtitles and remove subtitle streams
+- Paths containing quotes, shell metacharacters, command substitutions, and Unicode are handled literally
+
+Set `FFMPEG_BIN=/absolute/path/to/ffmpeg` to test with a binary outside the standard Homebrew/system locations.
 
 Requires FFmpeg ≥ 6 on PATH (Homebrew’s `/opt/homebrew/bin/ffmpeg` is picked
 up automatically).
@@ -97,6 +104,39 @@ is the surest way to catch regressions the automated layers can't see
 - [ ] Trim 0:01..0:05 produces a 4-second output (probe with `ffmpeg -i`)
 - [ ] "Strip metadata" strips title/comment/creation-time
 - [ ] Progress toast stays responsive (no UI freeze) for a 30s+ input
+- [ ] Target Size appears for supported video outputs and produces a file close to the requested MB value
+- [ ] Target Size accounts for trim duration
+- [ ] Cancel Conversion remains visible while conversion is running and stops FFmpeg
+
+### Inspect Media
+
+- [ ] Opens with files selected in Finder, or presents a picker when nothing is selected
+- [ ] Shows container, duration, total bitrate, streams, and file size
+- [ ] Video details include codec, dimensions, frame rate, and pixel format
+- [ ] Audio details include codec, sample rate, channels, and bitrate
+- [ ] Embedded metadata and subtitle streams appear when present
+
+### Conversion Queue
+
+- [ ] Add to Conversion Queue creates one job per selected input
+- [ ] Pending jobs run sequentially while the queue command is open
+- [ ] Pending jobs can be reordered
+- [ ] The active job can be cancelled with ⌘.
+- [ ] Failed and cancelled jobs can be retried
+- [ ] Completed outputs can be opened or revealed in Finder
+- [ ] Closing Raycast during a job marks it interrupted on the next queue launch; retry works
+- [ ] Pending and completed jobs persist between queue launches
+
+### Edit Media
+
+- [ ] Resize a video with one dimension omitted and preserve its aspect ratio
+- [ ] Crop with width, height, X, and Y values
+- [ ] Change video speed to 0.25× and 4× with synchronized audio
+- [ ] Extract audio as MP3, M4A, WAV, and FLAC
+- [ ] Normalize an audio file to -16 LUFS
+- [ ] Burn an SRT file into a video
+- [ ] Remove embedded subtitle streams
+- [ ] Cancel Edit remains visible during processing and stops FFmpeg
 
 ### Convert Media — presets
 
