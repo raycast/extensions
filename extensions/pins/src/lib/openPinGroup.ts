@@ -21,7 +21,9 @@ export const openPinGroup = async (groupId: string | number): Promise<OpenPinGro
 
   const groupPins = getMemberPins(group, groups, pins);
   const preferences = getPreferenceValues<ExtensionPreferences>();
-  await Promise.all(groupPins.map((pin) => openPin(pin, preferences)));
+  for (const pin of groupPins) {
+    await openPin(pin, preferences);
+  }
 
   return { group, opened: groupPins.length };
 };

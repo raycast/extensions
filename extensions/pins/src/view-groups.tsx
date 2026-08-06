@@ -15,7 +15,7 @@ import { createDeeplink, DeeplinkType } from "@raycast/utils";
 import { setStorage, getStorage } from "./lib/storage";
 import { Direction, StorageKey } from "./lib/constants";
 import { Group, deleteGroup, useGroups } from "./lib/Groups";
-import { Pin, openPin, usePins } from "./lib/Pins";
+import { Pin, usePins } from "./lib/Pins";
 import {
   addIDAccessory,
   addParentGroupAccessory,
@@ -30,6 +30,7 @@ import CopyGroupActionsSubmenu from "./components/actions/CopyGroupActionsSubmen
 import { ExtensionPreferences, ViewGroupsPreferences } from "./lib/preferences";
 import { pluralize } from "./lib/utils";
 import BulkImportUrlsForm from "./components/BulkImportUrlsForm";
+import { openPinGroup } from "./lib/openPinGroup";
 
 /**
  * Action to create a new group. Opens a form view with blank/default fields.
@@ -126,11 +127,7 @@ export default function ViewGroupsCommand() {
                     title={`Open ${groupPins.length} ${pluralize("Pin", groupPins.length)}`}
                     icon={Icon.ChevronRight}
                     onAction={async () => {
-                      await Promise.all(
-                        groupPins.map(async (pin) => {
-                          await openPin(pin, preferences);
-                        }),
-                      );
+                      await openPinGroup(group.id);
                     }}
                   />
                   <Action.Push
