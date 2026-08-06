@@ -268,7 +268,13 @@ export async function getAllOpenPullRequests() {
     (repo): repo is Schema.Repository & { slug: string } => typeof repo.slug === "string",
   );
 
-  const perRepo = await mapWithConcurrency(repos, 10, listOpenPullRequestsForRepo);
+  const perRepo = await mapWithConcurrency(repos, 10, async (repo) => {
+    try {
+      return await listOpenPullRequestsForRepo(repo);
+    } catch {
+      return [];
+    }
+  });
   const all = perRepo.flat();
 
   all.sort((a, b) => {
