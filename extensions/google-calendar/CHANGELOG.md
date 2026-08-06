@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Show Event Location in List Events] - {PR_MERGE_DATE}
+## [Show Event Location in List Events] - 2026-08-06
 
 - Add an opt-in "Show location" preference to the List Events command that shows the event's location as an accessory, with the full location in the tooltip
 
