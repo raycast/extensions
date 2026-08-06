@@ -6,7 +6,7 @@ export const expandHomePath = (inputPath: string) => {
     return homedir();
   }
 
-  if (inputPath.startsWith("~/")) {
+  if (inputPath.startsWith("~/") || inputPath.startsWith("~\\")) {
     return resolve(homedir(), inputPath.slice(2));
   }
 
