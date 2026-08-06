@@ -170,7 +170,10 @@ export function DraftItem(props: DraftItemProps) {
               title={isShowingDetail ? "Hide Preview" : "Show Preview"}
               icon={Icon.Sidebar}
               onAction={onToggleDetail}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+              }}
             />
             <Action.Push
               title="Create Draft"
@@ -181,7 +184,10 @@ export function DraftItem(props: DraftItemProps) {
               title="Delete Draft"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "backspace" },
+                Windows: { modifiers: ["ctrl"], key: "backspace" },
+              }}
               onAction={handleDelete}
             />
           </ActionPanel.Section>
