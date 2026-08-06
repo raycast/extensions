@@ -12,7 +12,8 @@
     "arpitdalal",
     "litomore",
     "AaronMoat",
-    "0xdhrv"
+    "0xdhrv",
+    "siuhinnn"
   ],
   "license": "MIT",
   "commands": [
@@ -28,6 +29,13 @@
       "title": "Search My Open Pull Requests",
       "subtitle": "Bitbucket",
       "description": "Showing open pull requests for the current user",
+      "mode": "view"
+    },
+    {
+      "name": "searchAllPullRequests",
+      "title": "Search All Open Pull Requests",
+      "subtitle": "Bitbucket",
+      "description": "Showing all open pull requests in the workspace",
       "mode": "view"
     }
   ],
