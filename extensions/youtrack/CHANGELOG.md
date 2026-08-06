@@ -1,5 +1,9 @@
 # YouTrack Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add server-side issue search with YouTrack query suggestions
+
 ## [Update] - 2025-08-08
 
 - Bugfixes and improvements
