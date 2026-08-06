@@ -19,11 +19,14 @@ import type { MeetingUrlSource } from "./types";
  * list at all or errors when its `active tab` is queried.
  */
 export function createArcFamilyAdapter(appName: "Arc" | "Dia"): MeetingUrlSource {
-  // State from the most recent poll, used only to explain an expired
-  // deadline. Reading it mid-poll would resurrect the false positive this
-  // adapter exists to avoid.
+  // Evidence accumulated across every poll, used only to explain an expired
+  // deadline. Judging by a single poll — even the last one — would resurrect
+  // the false positive this adapter exists to avoid: an ordinary window
+  // returns no URL on one sample and a URL on the next, so a blip that
+  // happens to land on the poll crossing the deadline proves nothing.
   let lastWindowCount = 0;
-  let lastPollHadNoReadableWindow = false;
+  let sawWindow = false;
+  let readAnyUrl = false;
 
   return {
     usesClipboardFallback: false,
@@ -33,15 +36,18 @@ export function createArcFamilyAdapter(appName: "Arc" | "Dia"): MeetingUrlSource
       const scriptableUrls = rawCandidates.filter((candidate) => candidate !== UNSCRIPTABLE_WINDOW_MARKER);
 
       lastWindowCount = rawCandidates.length;
-      lastPollHadNoReadableWindow = rawCandidates.length > 0 && scriptableUrls.length === 0;
+      sawWindow = sawWindow || rawCandidates.length > 0;
+      readAnyUrl = readAnyUrl || scriptableUrls.length > 0;
 
       return scriptableUrls;
     },
 
     async describeTimeout() {
-      // Arc reported windows, but not one of them ever yielded a URL — the
-      // clearest signature of a window type that can't be scripted.
-      if (lastPollHadNoReadableWindow) {
+      // Arc reported windows for the entire detection window and not one
+      // poll ever read a URL from any of them. That's a window type which
+      // can't be scripted at all, not an ordinary window's transient
+      // unreadability, which any of the other polls would have seen through.
+      if (sawWindow && !readAnyUrl) {
         return new MeetError("ARC_LITTLE_ARC_UNSUPPORTED");
       }
 
