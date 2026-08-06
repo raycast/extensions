@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Tendem MCP Server] - {PR_MERGE_DATE}
+## [Add Tendem MCP Server] - 2026-08-06
 
 Add Tendem to the official registry: delegate tasks to vetted human experts (research, competitive analysis, fact-checking, copywriting, editing, design review, presentation polish, data cleaning and list building). Tendem's orchestrator scopes the task and quotes a transparent price, and the expert's verified results come back as markdown plus files. Remote Streamable HTTP MCP server via mcp-remote with OAuth 2.0 sign-in; an API key alternative is available for headless use.
 
