@@ -1,0 +1,88 @@
+import { Tool } from "@raycast/api";
+import { createTask } from "../api/tasks";
+import { batchConfirmation } from "./lib/confirm";
+import { parseDueDate } from "./lib/dates";
+import { findProjectByName, loadSyncData, priorityFromLabel, summarizeTask } from "./lib/data";
+
+type TaskInput = {
+  /** Task title */
+  title: string;
+  /** Project ID from list-projects. Prefer this over projectName. */
+  projectId?: string;
+  /** Project name to resolve if projectId is unknown. Falls back to Inbox. */
+  projectName?: string;
+  /** Due date in ISO 8601 (YYYY-MM-DD or full datetime) */
+  dueDate?: string;
+  /** Priority: none, low, medium, or high */
+  priority?: string;
+  /** Notes / description */
+  content?: string;
+  /** Tag names */
+  tags?: string[];
+};
+
+type Input = {
+  /** One or more tasks to create. Confirmation is required when creating more than one. */
+  tasks: TaskInput[];
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const tasks = input.tasks ?? [];
+  return batchConfirmation(
+    tasks.length,
+    `Create ${tasks.length} tasks?`,
+    tasks.slice(0, 8).map((t) => ({ name: "Task", value: t.title })),
+  );
+};
+
+/**
+ * Create one or more TickTick tasks. Use list-projects first if the user names a project.
+ * When pasting a daily log with multiple new tasks, pass them all in `tasks` so the user can confirm the batch.
+ */
+export default async function tool(input: Input) {
+  const tasks = input.tasks ?? [];
+  if (tasks.length === 0) {
+    throw new Error("Provide at least one task in `tasks`.");
+  }
+
+  const sync = await loadSyncData();
+  const created = [];
+
+  for (const item of tasks) {
+    const title = item.title?.trim();
+    if (!title) throw new Error("Each task needs a title.");
+
+    let projectId = item.projectId?.trim() || undefined;
+    if (!projectId && item.projectName) {
+      const match = findProjectByName(
+        sync.projects.filter((p) => !p.closed),
+        item.projectName,
+      );
+      if (!match) {
+        throw new Error(`Project "${item.projectName}" not found. Call list-projects and retry with a projectId.`);
+      }
+      projectId = match.id;
+    }
+    projectId = projectId || sync.inboxId;
+    if (!projectId) {
+      throw new Error("Could not resolve Inbox. Ask the user to open the Inbox command once, then retry.");
+    }
+
+    const priority = priorityFromLabel(item.priority) ?? 0;
+    const due = item.dueDate ? parseDueDate(item.dueDate) : undefined;
+
+    const task = await createTask({
+      title,
+      projectId,
+      priority,
+      ...(due && { dueDate: due.dueDate, isAllDay: due.isAllDay }),
+      ...(item.content?.trim() && { content: item.content.trim() }),
+      ...(item.tags && item.tags.length > 0 && { tags: item.tags }),
+    });
+
+    const projectName = sync.projects.find((p) => p.id === task.projectId)?.name;
+    created.push(summarizeTask(task, projectName));
+  }
+
+  return { created, count: created.length };
+}

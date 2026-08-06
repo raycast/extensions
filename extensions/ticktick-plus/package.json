@@ -5,6 +5,9 @@
   "description": "Manage TickTick tasks, projects, habits, and focus sessions from Raycast.",
   "icon": "extension-icon.png",
   "author": "ysrazsingh",
+  "contributors": [
+    "0xdhrv"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -195,6 +198,143 @@
       "description": "Remove stored OAuth tokens and re-authenticate",
       "mode": "no-view",
       "icon": "extension-icon.png"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create one or more TickTick tasks with optional project, due date, priority, tags, and notes"
+    },
+    {
+      "name": "update-task",
+      "title": "Update Task",
+      "description": "Update or reschedule TickTick tasks (title, due date, priority, tags, notes, project)"
+    },
+    {
+      "name": "complete-tasks",
+      "title": "Complete Tasks",
+      "description": "Mark one or more TickTick tasks as complete"
+    },
+    {
+      "name": "uncomplete-tasks",
+      "title": "Uncomplete Tasks",
+      "description": "Reopen completed TickTick tasks"
+    },
+    {
+      "name": "delete-tasks",
+      "title": "Delete Tasks",
+      "description": "Permanently delete TickTick tasks"
+    },
+    {
+      "name": "move-tasks",
+      "title": "Move Tasks",
+      "description": "Move TickTick tasks to another project"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search active TickTick tasks by title, notes, tags, or project"
+    },
+    {
+      "name": "get-task",
+      "title": "Get Task",
+      "description": "Fetch a single TickTick task including subtasks"
+    },
+    {
+      "name": "list-habits",
+      "title": "List Habits",
+      "description": "List TickTick habits and today's check-in status"
+    },
+    {
+      "name": "checkin-habits",
+      "title": "Check in Habits",
+      "description": "Check in one or more TickTick habits"
+    },
+    {
+      "name": "uncheckin-habits",
+      "title": "Uncheck Habits",
+      "description": "Undo TickTick habit check-ins"
+    },
+    {
+      "name": "start-pomodoro",
+      "title": "Start Pomodoro",
+      "description": "Start a Pomodoro focus session, optionally linked to a task"
+    },
+    {
+      "name": "pause-pomodoro",
+      "title": "Pause Pomodoro",
+      "description": "Pause the running Pomodoro timer"
+    },
+    {
+      "name": "resume-pomodoro",
+      "title": "Resume Pomodoro",
+      "description": "Resume a paused Pomodoro timer"
+    },
+    {
+      "name": "reset-pomodoro",
+      "title": "Reset Pomodoro",
+      "description": "Reset the Pomodoro timer and drop the current session"
+    },
+    {
+      "name": "get-pomodoro-status",
+      "title": "Pomodoro Status",
+      "description": "Get the current Pomodoro timer status"
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List TickTick projects and Inbox"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Create a new TickTick project/list"
+    },
+    {
+      "name": "update-project",
+      "title": "Update Project",
+      "description": "Rename a TickTick project or change its color"
+    },
+    {
+      "name": "delete-project",
+      "title": "Delete Project",
+      "description": "Delete a TickTick project"
+    },
+    {
+      "name": "list-tags",
+      "title": "List Tags",
+      "description": "List TickTick tags"
+    },
+    {
+      "name": "list-filters",
+      "title": "List Smart Lists",
+      "description": "List TickTick smart lists / filters"
+    },
+    {
+      "name": "get-filter-tasks",
+      "title": "Get Smart List Tasks",
+      "description": "Get tasks matching a TickTick smart list / filter"
+    },
+    {
+      "name": "list-comments",
+      "title": "List Comments",
+      "description": "List comments on a TickTick task"
+    },
+    {
+      "name": "add-comment",
+      "title": "Add Comment",
+      "description": "Add a comment to a TickTick task"
+    },
+    {
+      "name": "delete-comment",
+      "title": "Delete Comment",
+      "description": "Delete a comment from a TickTick task"
+    },
+    {
+      "name": "get-profile",
+      "title": "Get Profile",
+      "description": "Get TickTick account profile, stats, and workspace overview"
     }
   ],
   "dependencies": {

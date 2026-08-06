@@ -1,0 +1,93 @@
+import { Tool } from "@raycast/api";
+import { updateTask } from "../api/tasks";
+import { batchConfirmation } from "./lib/confirm";
+import { parseDueDate } from "./lib/dates";
+import { findProjectByName, loadSyncData, priorityFromLabel, summarizeTask } from "./lib/data";
+
+type TaskUpdate = {
+  /** Task ID from search-tasks or get-task */
+  taskId: string;
+  /** Project ID the task currently belongs to */
+  projectId: string;
+  /** New title */
+  title?: string;
+  /** New notes / description */
+  content?: string;
+  /** New due date in ISO 8601. Omit to leave unchanged. */
+  dueDate?: string;
+  /** Set true to clear the due date */
+  clearDueDate?: boolean;
+  /** Priority: none, low, medium, or high */
+  priority?: string;
+  /** Replacement tag list */
+  tags?: string[];
+  /** Move to another project by ID */
+  targetProjectId?: string;
+  /** Move to another project by name (resolved via list-projects) */
+  targetProjectName?: string;
+};
+
+type Input = {
+  /** One or more task updates. Confirmation is required when updating more than one. */
+  tasks: TaskUpdate[];
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const tasks = input.tasks ?? [];
+  return batchConfirmation(
+    tasks.length,
+    `Update ${tasks.length} tasks?`,
+    tasks.slice(0, 8).map((t) => ({ name: "Task ID", value: t.taskId })),
+  );
+};
+
+/**
+ * Update or reschedule TickTick tasks (title, due date, priority, tags, notes, project).
+ * Call search-tasks first to obtain taskId and projectId.
+ */
+export default async function tool(input: Input) {
+  const updates = input.tasks ?? [];
+  if (updates.length === 0) {
+    throw new Error("Provide at least one task in `tasks`.");
+  }
+
+  const sync = await loadSyncData();
+  const results = [];
+
+  for (const item of updates) {
+    if (!item.taskId || !item.projectId) {
+      throw new Error("Each update requires taskId and projectId from search-tasks.");
+    }
+
+    let targetProjectId = item.targetProjectId;
+    if (!targetProjectId && item.targetProjectName) {
+      const match = findProjectByName(
+        sync.projects.filter((p) => !p.closed),
+        item.targetProjectName,
+      );
+      if (!match) {
+        throw new Error(`Project "${item.targetProjectName}" not found.`);
+      }
+      targetProjectId = match.id;
+    }
+
+    const priority = priorityFromLabel(item.priority);
+    const due = item.dueDate ? parseDueDate(item.dueDate) : undefined;
+
+    const task = await updateTask({
+      id: item.taskId,
+      projectId: targetProjectId ?? item.projectId,
+      ...(item.title !== undefined && { title: item.title }),
+      ...(item.content !== undefined && { content: item.content }),
+      ...(item.clearDueDate && { dueDate: "" }),
+      ...(due && { dueDate: due.dueDate, isAllDay: due.isAllDay }),
+      ...(priority !== undefined && { priority }),
+      ...(item.tags !== undefined && { tags: item.tags }),
+    });
+
+    const projectName = sync.projects.find((p) => p.id === task.projectId)?.name;
+    results.push(summarizeTask(task, projectName));
+  }
+
+  return { updated: results, count: results.length };
+}
