@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [View Pull Request Diffs] - 2026-08-06
+
+- Added a "View Diff" action to pull requests, showing changed files with per-file patches that load progressively as you scroll.
+- Added a `get-pull-request-diff` AI tool.
+
 ## [Clone with GitHub CLI] - 2026-08-06
 
 - Added a "Clone Tool" choice to the "Clone with Options" flow, letting you clone repositories with the GitHub CLI (`gh repo clone`) instead of plain `git clone`, using your existing `gh` authentication and configuration.

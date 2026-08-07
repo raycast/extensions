@@ -35,6 +35,9 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
   "author": "muhammadrizo",
+  "contributors": [
+    "0xdhrv"
+  ],
   "platforms": [
     "Windows",
     "macOS"
@@ -85,6 +88,15 @@
           "value": "tmdb"
         }
       ]
+    },
+    {
+      "name": "apiBaseUrl",
+      "description": "Base URL for the IMDxAPI used to search titles and fetch episode ratings. Default: https://api.tiffara.com",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.tiffara.com",
+      "title": "IMDxAPI Base URL",
+      "placeholder": "https://api.tiffara.com"
     },
     {
       "name": "tmdbAccessToken",

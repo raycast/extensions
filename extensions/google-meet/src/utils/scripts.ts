@@ -54,13 +54,23 @@ export function getStandardTabsScript(appName: string): string {
 }
 
 /**
- * Arc and Dia reject the flat `active tab of front window` form (a `-1700`
- * coercion error) and require a nested `tell window i` form. Their
- * dictionaries also don't reliably expose a `tabs` list, so only the active
- * tab of each window can be read. Windows that raise an error when queried
- * (observed for Little Arc's minimal window type) are recorded with
- * {@link UNSCRIPTABLE_WINDOW_MARKER} instead of being silently dropped, so
- * callers can distinguish "no meeting yet" from "can't script this window".
+ * Arc and Dia use a nested `tell window i` form to read the active tab of
+ * every window. Only the active tab is read, never `tabs of window`: a user
+ * can easily have a stale `meet.google.com/xxx-xxxx-xxx` tab open from an
+ * earlier call, and enumerating tabs would return that old link instead of
+ * the one just created.
+ *
+ * A window whose active tab can't be read is recorded with
+ * {@link UNSCRIPTABLE_WINDOW_MARKER} rather than silently dropped, so callers
+ * can tell "no meeting yet" apart from "couldn't read this window". Both the
+ * error case and an empty/`missing value` URL use the marker, which keeps the
+ * returned entry count equal to the window count Arc reported.
+ *
+ * This is a routine, transient state — not a Little Arc signature. Observed
+ * live on Arc: `URL of active tab` raises `-1728` for a perfectly normal,
+ * visible window (right after a tab opens, or when the active tab isn't a web
+ * page) and returns a URL again milliseconds later. Callers must keep polling
+ * rather than treating the marker as fatal.
  */
 export function getArcFamilyTabsScript(appName: string): string {
   return `
@@ -72,6 +82,9 @@ export function getArcFamilyTabsScript(appName: string): string {
           tell window i
             set candidateURL to URL of active tab
           end tell
+          if candidateURL is missing value or candidateURL is "" then
+            error "no readable URL"
+          end if
           set end of candidateList to candidateURL
         on error
           set end of candidateList to "${UNSCRIPTABLE_WINDOW_MARKER}"
