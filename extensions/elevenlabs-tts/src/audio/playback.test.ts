@@ -1,4 +1,7 @@
-import { beginSpeechSession, endSpeechSession, isOwnedPlaybackCommand } from "./playback";
+import { promises as fs } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { SpeechSessionLock, isOwnedPlaybackCommand } from "./playback";
 
 describe("isOwnedPlaybackCommand", () => {
   const audioFile = "/tmp/raycast-tts-123.mp3";
@@ -18,26 +21,48 @@ describe("isOwnedPlaybackCommand", () => {
 });
 
 describe("speech sessions", () => {
+  let directory: string;
+  let sessionLock: SpeechSessionLock;
   const sessions: string[] = [];
 
+  beforeEach(async () => {
+    directory = await fs.mkdtemp(join(tmpdir(), "elevenlabs-tts-test-"));
+    sessionLock = new SpeechSessionLock(join(directory, "session"), { stale: 2_000, update: 1_000 });
+  });
+
   afterEach(async () => {
-    await Promise.all(sessions.splice(0).map(endSpeechSession));
+    await Promise.all(sessions.splice(0).map((sessionId) => sessionLock.end(sessionId)));
+    await fs.rm(directory, { recursive: true, force: true });
   });
 
   it("allows only one command to synthesize at a time", async () => {
-    const firstSession = await beginSpeechSession();
+    const firstSession = await sessionLock.begin();
     expect(firstSession).toBeDefined();
     if (!firstSession) throw new Error("Expected to acquire the first speech session");
     sessions.push(firstSession);
 
-    await expect(beginSpeechSession()).resolves.toBeUndefined();
+    const competingLock = new SpeechSessionLock(join(directory, "session"), { stale: 2_000, update: 1_000 });
+    await expect(competingLock.begin()).resolves.toBeUndefined();
 
-    await endSpeechSession(firstSession);
+    await sessionLock.end(firstSession);
     sessions.pop();
 
-    const nextSession = await beginSpeechSession();
+    const nextSession = await sessionLock.begin();
     expect(nextSession).toBeDefined();
     if (!nextSession) throw new Error("Expected to acquire the next speech session");
     sessions.push(nextSession);
+  });
+
+  it("recovers an abandoned session", async () => {
+    const lockDirectory = join(directory, "session.lock");
+    await fs.mkdir(lockDirectory);
+    const staleTime = new Date(Date.now() - 10_000);
+    await fs.utimes(lockDirectory, staleTime, staleTime);
+
+    const session = await sessionLock.begin();
+
+    expect(session).toBeDefined();
+    if (!session) throw new Error("Expected to recover the abandoned session");
+    sessions.push(session);
   });
 });

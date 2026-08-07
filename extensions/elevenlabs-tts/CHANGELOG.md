@@ -1,5 +1,11 @@
 # Raycast ElevenLabs TTS Changelog
 
+## [Fix Stuck Playback Sessions] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Commands getting stuck reporting that audio was already playing after an interrupted session
+
 ## [Speak Copied Text] - 2026-08-05
 
 ### Added

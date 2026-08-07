@@ -3,11 +3,12 @@ import { randomUUID } from "crypto";
 import { promises as fs } from "node:fs";
 import { tmpdir } from "os";
 import { basename, join } from "path";
+import { lock, LockOptions } from "proper-lockfile";
 import { promisify } from "util";
 
-interface SpeechSession {
-  id: string;
-  ownerPid: number;
+interface HeldSession {
+  release: () => Promise<void>;
+  isCompromised: () => boolean;
 }
 
 interface PlaybackRecord {
@@ -16,9 +17,61 @@ interface PlaybackRecord {
   audioFile: string;
 }
 
-const SESSION_FILE = join(tmpdir(), "elevenlabs-tts-session.json");
+const SESSION_LOCK_PATH = join(tmpdir(), "elevenlabs-tts-session-v2");
 const PLAYBACK_FILE = join(tmpdir(), "elevenlabs-tts-playback.json");
 const execFileAsync = promisify(execFile);
+
+export class SpeechSessionLock {
+  private readonly sessions = new Map<string, HeldSession>();
+
+  constructor(
+    private readonly lockPath: string,
+    private readonly options: LockOptions = { stale: 10_000, update: 2_000 },
+  ) {}
+
+  async begin(): Promise<string | undefined> {
+    const sessionId = randomUUID();
+    let compromised = false;
+    let release: () => Promise<void>;
+
+    try {
+      release = await lock(this.lockPath, {
+        ...this.options,
+        realpath: false,
+        retries: 0,
+        onCompromised: () => {
+          compromised = true;
+        },
+      });
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code === "ELOCKED") return undefined;
+      throw error;
+    }
+
+    this.sessions.set(sessionId, { release, isCompromised: () => compromised });
+    return sessionId;
+  }
+
+  async end(sessionId: string): Promise<void> {
+    const heldSession = this.sessions.get(sessionId);
+    if (!heldSession) return;
+
+    this.sessions.delete(sessionId);
+    try {
+      await heldSession.release();
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (code !== "ERELEASED" && code !== "ENOTACQUIRED") throw error;
+    }
+  }
+
+  owns(sessionId: string): boolean {
+    const heldSession = this.sessions.get(sessionId);
+    return Boolean(heldSession && !heldSession.isCompromised());
+  }
+}
+
+const speechSessionLock = new SpeechSessionLock(SESSION_LOCK_PATH);
 
 export function isOwnedPlaybackCommand(command: string, audioFile: string): boolean {
   const normalizedCommand = command.trim();
@@ -27,34 +80,17 @@ export function isOwnedPlaybackCommand(command: string, audioFile: string): bool
 }
 
 export async function beginSpeechSession(): Promise<string | undefined> {
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const session: SpeechSession = { id: randomUUID(), ownerPid: process.pid };
-    try {
-      await fs.writeFile(SESSION_FILE, JSON.stringify(session), { encoding: "utf8", flag: "wx" });
-      return session.id;
-    } catch (error) {
-      if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
-    }
-
-    const activeSession = await readSession();
-    if (!activeSession || isProcessRunning(activeSession.ownerPid)) return undefined;
-
-    await stopPlaybackForSession(activeSession.id);
-    await removeSessionFile(activeSession.id);
-  }
-
-  return undefined;
+  return speechSessionLock.begin();
 }
 
 export async function endSpeechSession(sessionId: string): Promise<void> {
   const playback = await readPlayback();
   if (playback?.sessionId === sessionId) await removePlaybackFile();
-  await removeSessionFile(sessionId);
+  await speechSessionLock.end(sessionId);
 }
 
 export async function registerPlayback(sessionId: string, pid: number, audioFile: string): Promise<void> {
-  const session = await readSession();
-  if (session?.id !== sessionId) throw new Error("Speech session expired");
+  if (!speechSessionLock.owns(sessionId)) throw new Error("Speech session expired");
 
   await fs.writeFile(PLAYBACK_FILE, JSON.stringify({ sessionId, pid, audioFile }), "utf8");
 }
@@ -67,19 +103,10 @@ export async function clearPlayback(sessionId: string, expectedPid: number): Pro
 }
 
 export async function stopActivePlayback(): Promise<boolean> {
-  const session = await readSession();
-  if (!session) return false;
+  const playback = await readPlayback();
+  if (!playback) return false;
 
-  return stopPlaybackForSession(session.id);
-}
-
-function isProcessRunning(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
-    return false;
-  }
+  return stopPlaybackForSession(playback.sessionId);
 }
 
 async function stopPlaybackForSession(sessionId: string): Promise<boolean> {
@@ -104,18 +131,6 @@ async function stopPlaybackForSession(sessionId: string): Promise<boolean> {
   }
 }
 
-async function readSession(): Promise<SpeechSession | undefined> {
-  try {
-    const value = JSON.parse(await fs.readFile(SESSION_FILE, "utf8")) as Partial<SpeechSession>;
-    if (typeof value.id !== "string" || !Number.isInteger(value.ownerPid) || (value.ownerPid as number) <= 0) {
-      return undefined;
-    }
-    return value as SpeechSession;
-  } catch {
-    return undefined;
-  }
-}
-
 async function readPlayback(): Promise<PlaybackRecord | undefined> {
   try {
     const value = JSON.parse(await fs.readFile(PLAYBACK_FILE, "utf8")) as Partial<PlaybackRecord>;
@@ -132,17 +147,6 @@ async function readPlayback(): Promise<PlaybackRecord | undefined> {
   } catch {
     await removePlaybackFile();
     return undefined;
-  }
-}
-
-async function removeSessionFile(expectedId: string): Promise<void> {
-  const session = await readSession();
-  if (session?.id !== expectedId) return;
-
-  try {
-    await fs.unlink(SESSION_FILE);
-  } catch {
-    // Speech session cleanup is best-effort.
   }
 }
 
