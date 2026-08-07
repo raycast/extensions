@@ -37,7 +37,15 @@ export function searchAyahs(query: string, limit = DEFAULT_LIMIT): IndexedAyah[]
   const results: IndexedAyah[] = [];
   for (const ayah of AYAHS) {
     if (results.length >= limit) break;
-    if (terms.every((term) => ayah.normalized_text.includes(term))) results.push(ayah);
+    if (
+      terms.every(
+        (term) =>
+          ayah.normalized_text.includes(term) ||
+          ayah.normalized_surah_name.includes(term) ||
+          ayah.surah_name_en.toLowerCase().includes(term),
+      )
+    )
+      results.push(ayah);
   }
   return results;
 }

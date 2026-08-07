@@ -9,4 +9,5 @@ export interface Ayah {
 
 export interface IndexedAyah extends Ayah {
   normalized_text: string;
+  normalized_surah_name: string;
 }
