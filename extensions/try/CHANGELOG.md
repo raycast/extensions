@@ -1,6 +1,6 @@
 # try Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-08-07
 
 - The "Created" confirmation now clears itself instead of staying on screen after you leave Raycast
 - Renamed "Delete" to "Move to Trash", which is what it always did — directories go to the system Trash and can be restored from there
