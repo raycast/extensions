@@ -1,5 +1,7 @@
-import { Action, Tool } from "@raycast/api";
+import { Tool } from "@raycast/api";
 import { uncheckinHabit } from "../api/habits";
+import { runBatch } from "./lib/batch";
+import { destructiveConfirmation } from "./lib/confirm";
 import { loadHabits, resolveHabitRefs } from "./lib/data";
 
 type HabitRef = {
@@ -17,12 +19,11 @@ type Input = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const habits = input.habits ?? [];
-  return {
-    style: Action.Style.Destructive,
-    message: `Undo check-in for ${habits.length} habit${habits.length === 1 ? "" : "s"}?`,
-    info: habits.slice(0, 8).map((h) => ({ name: "Habit", value: h.habitName ?? h.habitId ?? "?" })),
-  };
+  const resolved = resolveHabitRefs(input.habits ?? [], await loadHabits(), "");
+  return destructiveConfirmation(
+    `Undo check-in for ${resolved.length} habit${resolved.length === 1 ? "" : "s"}?`,
+    resolved.slice(0, 8).map((h) => ({ name: "Habit", value: h.habitName })),
+  );
 };
 
 /**
@@ -42,9 +43,10 @@ export default async function tool(input: Input) {
 
   const resolved = resolveHabitRefs(refs, allHabits, "");
 
-  for (const habit of resolved) {
+  const unchecked = await runBatch(resolved, async (habit) => {
     await uncheckinHabit(habit.habitId, date);
-  }
+    return habit;
+  });
 
-  return { unchecked: resolved, count: resolved.length };
+  return { unchecked, count: unchecked.length };
 }

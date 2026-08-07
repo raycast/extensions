@@ -1,15 +1,14 @@
 import { Tool } from "@raycast/api";
 import { moveTask } from "../api/tasks";
+import { runBatch } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
-import { findProjectByName, loadSyncData } from "./lib/data";
+import { canonicalTaskLabel, findProjectByName, loadSyncData, requireProject } from "./lib/data";
 
 type TaskMove = {
   /** Task ID */
   taskId: string;
   /** Current project ID */
   fromProjectId: string;
-  /** Optional title for confirmation */
-  title?: string;
 };
 
 type Input = {
@@ -21,31 +20,33 @@ type Input = {
   toProjectName?: string;
 };
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const tasks = input.tasks ?? [];
-  return batchConfirmation(
-    tasks.length,
-    `Move ${tasks.length} tasks?`,
-    tasks.slice(0, 8).map((t) => ({ name: "Task", value: t.title ?? t.taskId })),
-  );
-};
+type PreparedMove = { taskId: string; fromProjectId: string; toProjectId: string; title: string };
 
-/**
- * Move tasks to another project. Provide toProjectId or toProjectName.
- */
-export default async function tool(input: Input) {
+/** Validate the whole batch and resolve the destination before any task is moved. */
+async function prepareMoves(input: Input): Promise<{ moves: PreparedMove[]; toProjectName: string }> {
   const tasks = input.tasks ?? [];
   if (tasks.length === 0) {
     throw new Error("Provide at least one task in `tasks`.");
   }
 
+  for (const task of tasks) {
+    if (!task.taskId || !task.fromProjectId) {
+      throw new Error("Each task requires taskId and fromProjectId.");
+    }
+  }
+
+  const sync = await loadSyncData();
+  const openProjects = sync.projects.filter((p) => !p.closed);
+
+  // Validate every source project before the first move, so an unknown ID cannot be
+  // rejected remotely after earlier tasks have already moved.
+  tasks.forEach((task, index) =>
+    requireProject(sync.projects, task.fromProjectId, tasks.length > 1 ? `Task ${index + 1} of ${tasks.length}: ` : ""),
+  );
+
   let toProjectId = input.toProjectId?.trim();
   if (!toProjectId && input.toProjectName) {
-    const sync = await loadSyncData();
-    const match = findProjectByName(
-      sync.projects.filter((p) => !p.closed),
-      input.toProjectName,
-    );
+    const match = findProjectByName(openProjects, input.toProjectName);
     if (!match) throw new Error(`Project "${input.toProjectName}" not found.`);
     toProjectId = match.id;
   }
@@ -53,17 +54,39 @@ export default async function tool(input: Input) {
     throw new Error("Provide toProjectId or toProjectName.");
   }
 
-  for (const task of tasks) {
-    await moveTask(task.fromProjectId, toProjectId, task.taskId);
-  }
+  const destination = requireProject(sync.projects, toProjectId);
 
   return {
-    moved: tasks.map((t) => ({
+    toProjectName: destination.name,
+    moves: tasks.map((t) => ({
       taskId: t.taskId,
       fromProjectId: t.fromProjectId,
-      toProjectId,
-      title: t.title,
+      toProjectId: destination.id,
+      title: canonicalTaskLabel(sync.tasks, { taskId: t.taskId, projectId: t.fromProjectId }),
     })),
-    count: tasks.length,
   };
+}
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const tasks = input.tasks ?? [];
+  if (tasks.length <= 1) return undefined;
+  const { moves, toProjectName } = await prepareMoves(input);
+  return batchConfirmation(moves.length, `Move ${moves.length} tasks to "${toProjectName}"?`, [
+    ...moves.slice(0, 8).map((m) => ({ name: "Task", value: m.title })),
+    { name: "Destination", value: toProjectName },
+  ]);
+};
+
+/**
+ * Move tasks to another project. Provide toProjectId or toProjectName.
+ */
+export default async function tool(input: Input) {
+  const { moves, toProjectName } = await prepareMoves(input);
+
+  const moved = await runBatch(moves, async (move) => {
+    await moveTask(move.fromProjectId, move.toProjectId, move.taskId);
+    return move;
+  });
+
+  return { moved, toProjectName, count: moved.length };
 }

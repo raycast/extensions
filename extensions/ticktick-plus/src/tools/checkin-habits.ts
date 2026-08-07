@@ -1,5 +1,6 @@
 import { Tool } from "@raycast/api";
 import { checkinHabit } from "../api/habits";
+import { runBatch } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
 import { loadHabits, resolveHabitRefs } from "./lib/data";
 
@@ -19,10 +20,12 @@ type Input = {
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const habits = input.habits ?? [];
+  if (habits.length <= 1) return undefined;
+  const resolved = resolveHabitRefs(habits, await loadHabits());
   return batchConfirmation(
-    habits.length,
-    `Check in ${habits.length} habits?`,
-    habits.slice(0, 8).map((h) => ({ name: "Habit", value: h.habitName ?? h.habitId ?? "?" })),
+    resolved.length,
+    `Check in ${resolved.length} habits?`,
+    resolved.slice(0, 8).map((h) => ({ name: "Habit", value: h.habitName })),
   );
 };
 
@@ -43,9 +46,10 @@ export default async function tool(input: Input) {
 
   const resolved = resolveHabitRefs(refs, allHabits);
 
-  for (const habit of resolved) {
+  const checkedIn = await runBatch(resolved, async (habit) => {
     await checkinHabit(habit.habitId, date);
-  }
+    return habit;
+  });
 
-  return { checkedIn: resolved, count: resolved.length };
+  return { checkedIn, count: checkedIn.length };
 }

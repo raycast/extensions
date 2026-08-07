@@ -1,26 +1,20 @@
 import { Tool } from "@raycast/api";
 import { deleteTask } from "../api/tasks";
+import { runBatch } from "./lib/batch";
 import { destructiveConfirmation } from "./lib/confirm";
-import { loadSyncData } from "./lib/data";
+import { canonicalTaskLabel, loadSyncData } from "./lib/data";
 
 type TaskRef = {
   /** Task ID from search-tasks */
   taskId: string;
   /** Project ID from search-tasks */
   projectId: string;
-  /** Optional title shown in confirmation */
-  title?: string;
 };
 
 type Input = {
   /** Tasks to delete permanently */
   tasks: TaskRef[];
 };
-
-function canonicalTaskLabel(tasks: Awaited<ReturnType<typeof loadSyncData>>["tasks"], ref: TaskRef): string {
-  const found = tasks.find((t) => t.id === ref.taskId && t.projectId === ref.projectId);
-  return found?.title ?? ref.taskId;
-}
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const tasks = input.tasks ?? [];
@@ -46,12 +40,17 @@ export default async function tool(input: Input) {
     }
   }
 
-  for (const task of tasks) {
-    await deleteTask(task.projectId, task.taskId);
-  }
+  const sync = await loadSyncData();
+  const prepared = tasks.map((t) => ({
+    taskId: t.taskId,
+    projectId: t.projectId,
+    title: canonicalTaskLabel(sync.tasks, t),
+  }));
 
-  return {
-    deleted: tasks.map((t) => ({ taskId: t.taskId, projectId: t.projectId, title: t.title })),
-    count: tasks.length,
-  };
+  const deleted = await runBatch(prepared, async (task) => {
+    await deleteTask(task.projectId, task.taskId);
+    return task;
+  });
+
+  return { deleted, count: deleted.length };
 }
