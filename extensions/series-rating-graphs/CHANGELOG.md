@@ -1,6 +1,6 @@
 # Series Rating Graphs Changelog
 
-## [Configurable API and improved error handling] - {PR_MERGE_DATE}
+## [Configurable API and improved error handling] - 2026-08-07
 
 - Switch default ratings API to IMDxAPI (https://api.tiffara.com)
 - Add "IMDxAPI Base URL" preference to use a custom API endpoint
