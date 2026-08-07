@@ -6,6 +6,9 @@ node_modules
 # Raycast
 .raycast
 
+# Local backend overrides for development (never submitted to the store)
+assets/local-config.json
+
 # build
 build
 
