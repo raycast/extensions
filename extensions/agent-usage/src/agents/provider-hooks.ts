@@ -10,8 +10,9 @@ import type { AntigravityError, AntigravityUsage } from "../antigravity/types.ts
 import { fetchClaudeUsage, readClaudeCredentials } from "../claude/fetcher.ts";
 import type { ClaudeError, ClaudeUsage } from "../claude/types.ts";
 import { buildClinePassAccountCandidates } from "../clinepass/accounts.ts";
-import { readClineCredential } from "../clinepass/auth.ts";
+import { readClineCredentials } from "../clinepass/auth.ts";
 import { fetchClinePassUsage } from "../clinepass/fetcher.ts";
+import { clearClineLocalCredential, loadClineLocalCredential, saveClineLocalCredential } from "../clinepass/storage.ts";
 import type { ClinePassError, ClinePassUsage } from "../clinepass/types.ts";
 import { buildCodexAccountCandidates } from "../codex/accounts.ts";
 import { listCodexOAuthAccounts } from "../codex/auth.ts";
@@ -248,8 +249,17 @@ export const useClinePassAccounts = createAccountsHook<
   ReturnType<typeof buildClinePassAccountCandidates>[number]
 >({
   agentId: "clinepass",
-  getAccounts: async () => buildClinePassAccountCandidates(readClineCredential(), await loadAccounts("clinepass")),
-  fetcher: fetchClinePassUsage,
+  getAccounts: async () => {
+    const localCredential = await loadClineLocalCredential();
+    const fileCredential = readClineCredentials({ clineHome: localCredential?.clineHome })[0] ?? null;
+    return buildClinePassAccountCandidates(localCredential ?? fileCredential, await loadAccounts("clinepass"));
+  },
+  fetcher: (account) =>
+    fetchClinePassUsage(account, {
+      readFileCredentials: () => readClineCredentials({ clineHome: account.clineHome }),
+      saveLocalCredential: saveClineLocalCredential,
+      clearLocalCredential: clearClineLocalCredential,
+    }),
   resolveAccountAuthKey: (account) =>
     [account.token, account.userId, account.refreshToken ?? "", account.source].join("\n"),
   noAccountsError: {

@@ -1,5 +1,5 @@
 import { httpFetch } from "../agents/http.ts";
-import { ensureFreshClineCredential, formatClineApiToken, recoverClineCredential } from "./auth.ts";
+import { formatClineApiToken, refreshClineCredential } from "./auth.ts";
 import type {
   ClineBalance,
   ClinePassCredential,
@@ -119,8 +119,10 @@ type EndpointResult = Awaited<ReturnType<typeof fetchEndpoint>>;
 
 interface FetchClinePassOptions {
   request?: (credential: ClinePassCredential, url: string, label: string) => Promise<EndpointResult>;
-  ensureCredential?: typeof ensureFreshClineCredential;
-  recoverCredential?: typeof recoverClineCredential;
+  readFileCredentials?: () => ClinePassCredential[] | Promise<ClinePassCredential[]>;
+  refreshCredential?: typeof refreshClineCredential;
+  saveLocalCredential?: (credential: ClinePassCredential) => Promise<void>;
+  clearLocalCredential?: () => Promise<void>;
 }
 
 async function fetchWithCredential(
@@ -147,15 +149,85 @@ export async function fetchClinePassUsage(
     return { usage: null, error: { type: "not_configured", message: credential.validationError } };
   }
 
-  const ensureCredential = options.ensureCredential ?? ensureFreshClineCredential;
-  const recoverCredential = options.recoverCredential ?? recoverClineCredential;
   const request = options.request ?? fetchEndpoint;
-  const ensured = await ensureCredential(credential);
-  if (!ensured.credential) return { usage: null, error: ensured.error };
-
-  const firstResult = await fetchWithCredential(ensured.credential, request);
+  const firstResult = await fetchWithCredential(credential, request);
   if (firstResult.error?.type !== "unauthorized") return firstResult;
-  const recovered = await recoverCredential(ensured.credential);
-  if (!recovered.credential) return { usage: null, error: recovered.error ?? firstResult.error };
-  return fetchWithCredential(recovered.credential, request);
+  if (credential.source === "manual") return firstResult;
+
+  let fileCredentials: ClinePassCredential[];
+  try {
+    fileCredentials = options.readFileCredentials ? await options.readFileCredentials() : [];
+  } catch (error) {
+    return {
+      usage: null,
+      error: {
+        type: "unknown",
+        message: `Unable to reread Cline credentials: ${error instanceof Error ? error.message : String(error)}`,
+      },
+    };
+  }
+
+  const attempted = new Set([`${credential.userId}\n${credential.token}`]);
+  let lastUnauthorized: ClinePassError = firstResult.error;
+  for (const fileCredential of fileCredentials) {
+    const key = `${fileCredential.userId}\n${fileCredential.token}`;
+    if (attempted.has(key)) continue;
+    attempted.add(key);
+    const result = await fetchWithCredential(fileCredential, request);
+    if (!result.error) {
+      if (credential.source === "local" && options.clearLocalCredential) {
+        try {
+          await options.clearLocalCredential();
+        } catch (error) {
+          return {
+            usage: null,
+            error: {
+              type: "unknown",
+              message: `Cline file credentials work, but Agent Usage could not clear its stale locally stored token: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          };
+        }
+      }
+      return result;
+    }
+    if (result.error.type !== "unauthorized") return result;
+    lastUnauthorized = result.error;
+  }
+
+  const refreshCredential = options.refreshCredential ?? refreshClineCredential;
+  const refreshCandidates = [...fileCredentials, credential];
+  const attemptedRefreshTokens = new Set<string>();
+  for (const refreshCandidate of refreshCandidates) {
+    if (!refreshCandidate.refreshToken || attemptedRefreshTokens.has(refreshCandidate.refreshToken)) continue;
+    attemptedRefreshTokens.add(refreshCandidate.refreshToken);
+    const refreshed = await refreshCredential(refreshCandidate);
+    if (!refreshed.credential) {
+      if (refreshed.error) lastUnauthorized = refreshed.error;
+      continue;
+    }
+
+    try {
+      await options.saveLocalCredential?.(refreshed.credential);
+    } catch (error) {
+      return {
+        usage: null,
+        error: {
+          type: "unknown",
+          message: `Cline credentials were refreshed, but Agent Usage could not store them locally: ${error instanceof Error ? error.message : String(error)}`,
+        },
+      };
+    }
+
+    const result = await fetchWithCredential(refreshed.credential, request);
+    if (!result.error) return result;
+    if (result.error.type !== "unauthorized") return result;
+    lastUnauthorized = result.error;
+    try {
+      await options.clearLocalCredential?.();
+    } catch {
+      // Keep the authentication error, which is the actionable failure.
+    }
+  }
+
+  return { usage: null, error: lastUnauthorized };
 }

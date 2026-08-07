@@ -1,4 +1,4 @@
-export type ClinePassCredentialSource = "providers" | "legacy" | "manual";
+export type ClinePassCredentialSource = "providers" | "legacy" | "local" | "manual";
 
 export interface ClinePassCredential {
   id: string;
@@ -9,6 +9,7 @@ export interface ClinePassCredential {
   expiresAt?: number;
   source: ClinePassCredentialSource;
   sourcePath?: string;
+  clineHome?: string;
   validationError?: string | null;
 }
 
