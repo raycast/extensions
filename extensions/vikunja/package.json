@@ -14,6 +14,21 @@
   "license": "MIT",
   "commands": [
     {
+      "name": "quick-add",
+      "title": "Quick Add",
+      "subtitle": "Vikunja",
+      "description": "Create a task from one line using Quick Add Magic (dates, *labels, +project, !priority, repeats)",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Buy milk tomorrow *shopping +Inbox !3",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "create-task",
       "title": "Create Task",
       "subtitle": "Vikunja",
@@ -79,6 +94,66 @@
       "type": "textfield",
       "required": false,
       "placeholder": "all"
+    },
+    {
+      "name": "quickAddMagicMode",
+      "title": "Quick Add Magic",
+      "description": "Which prefix syntax Quick Add uses to detect labels, projects and priorities.",
+      "type": "dropdown",
+      "required": false,
+      "default": "vikunja",
+      "data": [
+        {
+          "title": "Vikunja (*label +project !priority)",
+          "value": "vikunja"
+        },
+        {
+          "title": "Todoist (@label #project !priority)",
+          "value": "todoist"
+        },
+        {
+          "title": "Disabled (no parsing)",
+          "value": "disabled"
+        }
+      ]
+    },
+    {
+      "name": "defaultReminder",
+      "title": "Default Reminder",
+      "description": "Reminder to add automatically, relative to the task's due date. Tasks without a due date get no reminder.",
+      "type": "dropdown",
+      "required": false,
+      "default": "none",
+      "data": [
+        {
+          "title": "No reminder",
+          "value": "none"
+        },
+        {
+          "title": "At the due date",
+          "value": "on-due"
+        },
+        {
+          "title": "2 hours before",
+          "value": "2h-before"
+        },
+        {
+          "title": "1 day before",
+          "value": "1d-before"
+        },
+        {
+          "title": "3 days before",
+          "value": "3d-before"
+        },
+        {
+          "title": "1 week before",
+          "value": "1w-before"
+        },
+        {
+          "title": "30 days before",
+          "value": "30d-before"
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -91,7 +166,8 @@
     "@types/react": "19.2.7",
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.7"
   },
   "scripts": {
     "build": "ray build",
@@ -99,7 +175,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"Error: no publish\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "platforms": [
     "macOS"
