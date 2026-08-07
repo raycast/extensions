@@ -4,6 +4,7 @@ export const DEFAULT_AGENT_ORDER = [
   "amp",
   "antigravity",
   "claude",
+  "clinepass",
   "codex",
   "copilot",
   "cursor",

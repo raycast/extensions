@@ -21,6 +21,7 @@ import {
   useAmpUsage,
   useAntigravityUsage,
   useClaudeUsage,
+  useClinePassAccounts,
   useCodexAccounts,
   useCopilotUsage,
   useCursorUsage,
@@ -43,6 +44,8 @@ import {
 import type { AntigravityError, AntigravityUsage } from "./antigravity/types.ts";
 import { formatClaudeUsageText, getClaudeAccessory, renderClaudeDetail } from "./claude/renderer.tsx";
 import type { ClaudeError, ClaudeUsage } from "./claude/types.ts";
+import { formatClinePassUsageText, getClinePassAccessory, renderClinePassDetail } from "./clinepass/renderer.tsx";
+import type { ClinePassError, ClinePassUsage } from "./clinepass/types.ts";
 import { formatCodexUsageText, getCodexAccessory, renderCodexDetail } from "./codex/renderer.tsx";
 import type { CodexError, CodexUsage } from "./codex/types.ts";
 import { formatCopilotUsageText, getCopilotAccessory, renderCopilotDetail } from "./copilot/renderer.tsx";
@@ -83,11 +86,12 @@ interface AgentRegistryEntry<TUsage, TError extends ErrorLike> extends AgentDefi
 }
 
 /** Providers rendered from account rows — they have no single-usage hook. */
-type MultiAccountAgentId = "codex" | "kimi" | "synthetic" | "zai";
+type MultiAccountAgentId = "clinepass" | "codex" | "kimi" | "synthetic" | "zai";
 
 interface AgentUsageById {
   amp: AmpUsage;
   claude: ClaudeUsage;
+  clinepass: ClinePassUsage;
   codex: CodexUsage;
   copilot: CopilotUsage;
   cursor: CursorUsage;
@@ -105,6 +109,7 @@ interface AgentUsageById {
 interface AgentErrorById {
   amp: AmpError;
   claude: ClaudeError;
+  clinepass: ClinePassError;
   codex: CodexError;
   copilot: CopilotError;
   cursor: CursorError;
@@ -157,7 +162,7 @@ interface AccountedAgentView {
   /** The account id, for use in the manage-accounts form */
   accountId: string;
   /** The provider key, for use in the manage-accounts form */
-  provider: "kimi" | "zai" | "codex" | "synthetic";
+  provider: "clinepass" | "kimi" | "zai" | "codex" | "synthetic";
   /** Whether this provider is supported (always true for accounted views) */
   isSupported: boolean;
   /** The API token for this account (for copying) */
@@ -191,6 +196,17 @@ const AGENT_REGISTRY: AgentRegistry = {
     renderDetail: renderClaudeDetail,
     getAccessory: getClaudeAccessory,
     formatUsageText: formatClaudeUsageText,
+  },
+  clinepass: {
+    id: "clinepass",
+    name: "ClinePass",
+    icon: "clinepass-icon.svg",
+    description: "ClinePass subscription",
+    isSupported: true,
+    settingsUrl: "https://app.cline.bot/dashboard",
+    renderDetail: renderClinePassDetail,
+    getAccessory: getClinePassAccessory,
+    formatUsageText: formatClinePassUsageText,
   },
   codex: {
     id: "codex",
@@ -366,7 +382,7 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
   providerName: string,
   icon: string,
   settingsUrl: string | undefined,
-  provider: "kimi" | "zai" | "codex" | "synthetic",
+  provider: "clinepass" | "kimi" | "zai" | "codex" | "synthetic",
   isVisible: boolean,
   accountStates: AccountUsageState<TUsage, TError>[],
   renderDetail: (usage: TUsage | null, error: TError | null) => React.ReactNode,
@@ -401,14 +417,12 @@ function getAccountedTitle(providerName: string, label: string): string {
   return `${providerName} • ${label}`;
 }
 
-function getCodexAccountedTitle(providerName: string, label: string): string {
-  return getAccountedTitle(providerName, label === "Default" ? label : shortenAccountLabel(label));
-}
-
-function shortenAccountLabel(label: string): string {
-  const atIndex = label.indexOf("@");
-  const readablePart = atIndex > 0 ? label.slice(0, atIndex) : label;
-  return readablePart.length > 12 ? `${readablePart.slice(0, 12)}…` : readablePart;
+function getProviderName(agentId: MultiAccountAgentId): string {
+  if (agentId === "clinepass") return "ClinePass";
+  if (agentId === "codex") return "Codex";
+  if (agentId === "kimi") return "Kimi";
+  if (agentId === "zai") return "z.ai";
+  return "Synthetic";
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandLaunchContext }>) {
@@ -428,12 +442,13 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const opencodegoState = AGENT_REGISTRY["opencode-go"].useUsage(Boolean(prefs.showOpencodeGo));
 
   // Multi-account providers
+  const clinePassState = useClinePassAccounts(Boolean(prefs.showClinePass));
   const codexState = useCodexAccounts(Boolean(prefs.showCodex));
   const kimiState = useKimiAccounts(Boolean(prefs.showKimi));
   const syntheticState = useSyntheticAccounts(Boolean(prefs.showSynthetic));
   const zaiState = useZaiAccounts(Boolean(prefs.showZai));
 
-  const agentViews: Omit<Record<AgentId, AgentView>, "codex" | "kimi" | "synthetic" | "zai"> = {
+  const agentViews: Omit<Record<AgentId, AgentView>, MultiAccountAgentId> = {
     amp: createAgentView(AGENT_REGISTRY.amp, ampState, Boolean(prefs.showAmp)),
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     copilot: createAgentView(AGENT_REGISTRY.copilot, copilotState, Boolean(prefs.showCopilot)),
@@ -445,6 +460,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
     "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
   };
+
+  const clinePassAccountedViews = createAccountedViews(
+    "clinepass",
+    "ClinePass",
+    AGENT_REGISTRY.clinepass.icon,
+    AGENT_REGISTRY.clinepass.settingsUrl,
+    "clinepass",
+    Boolean(prefs.showClinePass),
+    clinePassState.accounts.map((state) => (state.usage ? { ...state, label: state.usage.account } : state)),
+    renderClinePassDetail,
+    getClinePassAccessory,
+    formatClinePassUsageText,
+  );
 
   const kimiAccountedViews = createAccountedViews(
     "kimi",
@@ -479,11 +507,12 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     AGENT_REGISTRY.codex.settingsUrl,
     "codex",
     Boolean(prefs.showCodex),
-    codexState.accounts,
+    codexState.accounts.map((state) =>
+      state.usage?.displayName ? { ...state, label: state.usage.displayName } : state,
+    ),
     renderCodexDetail,
     getCodexAccessory,
     formatCodexUsageText,
-    getCodexAccountedTitle,
   );
 
   const syntheticAccountedViews = createAccountedViews(
@@ -547,6 +576,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const allRows = useMemo<ListRow[]>(
     () =>
       agentOrder.flatMap((agentId): ListRow[] => {
+        if (agentId === "clinepass") {
+          return clinePassAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
+        }
         if (agentId === "codex") {
           return codexAccountedViews.filter((v) => v.isVisible).map((view) => ({ kind: "accounted", view }));
         }
@@ -566,7 +598,15 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
         }
         return [];
       }),
-    [agentOrder, codexAccountedViews, kimiAccountedViews, syntheticAccountedViews, zaiAccountedViews, agentViews],
+    [
+      agentOrder,
+      clinePassAccountedViews,
+      codexAccountedViews,
+      kimiAccountedViews,
+      syntheticAccountedViews,
+      zaiAccountedViews,
+      agentViews,
+    ],
   );
 
   const requestedSelectedAgentId = props.launchContext?.selectedAgentId;
@@ -598,7 +638,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const isLoading =
     allRows.some((row) => row.view.isLoading) ||
-    [codexState, kimiState, syntheticState, zaiState].some((state) => state.isLoading);
+    [clinePassState, codexState, kimiState, syntheticState, zaiState].some((state) => state.isLoading);
 
   const hasPromptedGeminiReauth = useRef(false);
 
@@ -799,15 +839,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                         push(
                           <ManageAccountsForm
                             provider={view.provider}
-                            providerName={
-                              view.agentId === "kimi"
-                                ? "Kimi"
-                                : view.agentId === "zai"
-                                  ? "z.ai"
-                                  : view.agentId === "codex"
-                                    ? "Codex"
-                                    : "Synthetic"
-                            }
+                            providerName={getProviderName(view.agentId as MultiAccountAgentId)}
                             onSave={handleRefresh}
                           />,
                         )
@@ -815,15 +847,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                     />
                     {view.settingsUrl && (
                       <Action.OpenInBrowser
-                        title={`Open ${
-                          view.agentId === "kimi"
-                            ? "Kimi"
-                            : view.agentId === "zai"
-                              ? "z.ai"
-                              : view.agentId === "codex"
-                                ? "Codex"
-                                : "Synthetic"
-                        } Settings`}
+                        title={`Open ${getProviderName(view.agentId as MultiAccountAgentId)} Settings`}
                         url={view.settingsUrl}
                         shortcut={Keyboard.Shortcut.Common.Open}
                       />

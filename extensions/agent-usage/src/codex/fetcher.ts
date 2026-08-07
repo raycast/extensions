@@ -4,6 +4,8 @@ import { parseDate } from "../agents/format.ts";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
 const CODEX_RESET_CREDITS_API = "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits";
+const CODEX_USER_SETTINGS_API = "https://chatgpt.com/backend-api/wham/settings/user";
+const CODEX_PROFILE_API = "https://chatgpt.com/backend-api/calpico/chatgpt/profile";
 
 const CODEX_HEADERS = {
   Accept: "application/json",
@@ -40,8 +42,51 @@ export async function fetchCodexUsage(
   });
   if (error) return { usage: null, error };
 
-  const { resetCredits, error: resetCreditsError } = await fetchCodexResetCredits(token, accountId);
-  return parseCodexApiResponse(data, resetCredits ?? { availableCount: null, expiresAtList: [] }, resetCreditsError);
+  const [{ resetCredits, error: resetCreditsError }, displayName] = await Promise.all([
+    fetchCodexResetCredits(token, accountId),
+    fetchCodexDisplayName(token, accountId),
+  ]);
+  return parseCodexApiResponse(
+    data,
+    resetCredits ?? { availableCount: null, expiresAtList: [] },
+    resetCreditsError,
+    displayName,
+  );
+}
+
+export function parseCodexUserId(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const userId = (data as { user_id?: unknown }).user_id;
+  return typeof userId === "string" && userId.trim() ? userId.trim() : null;
+}
+
+export function parseCodexDisplayName(data: unknown): string | null {
+  if (!data || typeof data !== "object") return null;
+  const displayName = (data as { display_name?: unknown }).display_name;
+  return typeof displayName === "string" && displayName.trim() ? displayName.trim() : null;
+}
+
+export async function fetchCodexDisplayName(
+  token: string,
+  accountId?: string | null,
+  request: typeof httpFetch = httpFetch,
+): Promise<string | null> {
+  const commonOptions = {
+    token,
+    headers: { ...CODEX_HEADERS, ...getCodexAccountHeaders(accountId) },
+    timeoutMs: 2500,
+    unauthorizedMessage: "Authorization token expired or invalid. Run 'codex login' to refresh credentials.",
+  };
+  const userResult = await request({ url: CODEX_USER_SETTINGS_API, ...commonOptions });
+  if (userResult.error) return null;
+  const userId = parseCodexUserId(userResult.data);
+  if (!userId) return null;
+
+  const profileResult = await request({
+    url: `${CODEX_PROFILE_API}/${encodeURIComponent(userId)}`,
+    ...commonOptions,
+  });
+  return profileResult.error ? null : parseCodexDisplayName(profileResult.data);
 }
 
 async function fetchCodexResetCredits(token: string, accountId?: string | null): Promise<CodexResetCreditsResult> {
@@ -112,6 +157,7 @@ function parseCodexApiResponse(
   data: unknown,
   resetCredits: CodexUsage["resetCredits"] | null = null,
   resetCreditsError: CodexError | null = null,
+  displayName: string | null = null,
 ): { usage: CodexUsage | null; error: CodexError | null } {
   try {
     if (!data || typeof data !== "object") {
@@ -158,6 +204,7 @@ function parseCodexApiResponse(
 
     const usage: CodexUsage = {
       account: formatCodexPlanName(response.plan_type),
+      displayName: displayName ?? undefined,
       fiveHourLimit,
       weeklyLimit,
       credits: {

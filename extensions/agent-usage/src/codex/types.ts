@@ -1,5 +1,6 @@
 export interface CodexUsage {
   account: string;
+  displayName?: string;
   fiveHourLimit?: {
     percentageRemaining: number;
     resetsInSeconds: number;

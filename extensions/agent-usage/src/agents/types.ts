@@ -3,6 +3,7 @@ import type { Image } from "@raycast/api";
 export type AgentId =
   | "amp"
   | "claude"
+  | "clinepass"
   | "codex"
   | "copilot"
   | "cursor"
@@ -43,6 +44,7 @@ export interface AgentVisibilityPreferences {
   showAmp: boolean;
   showAntigravity: boolean;
   showClaude: boolean;
+  showClinePass: boolean;
   showCodex: boolean;
   showCopilot: boolean;
   showCursor: boolean;

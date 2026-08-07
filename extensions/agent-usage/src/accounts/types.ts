@@ -10,7 +10,7 @@ export interface AccountEntry {
   label: string;
   /** Raw API token — stored as plaintext in LocalStorage (same as Raycast password prefs) */
   token: string;
-  /** Optional provider-specific account scope, e.g. ChatGPT account ID for Codex */
+  /** Optional provider-specific account scope, e.g. ChatGPT account ID for Codex or Cline user ID */
   accountId?: string;
 }
 
@@ -19,6 +19,7 @@ export const ACCOUNTS_STORAGE_KEYS = {
   kimi: "kimi-accounts",
   zai: "zai-accounts",
   codex: "codex-accounts",
+  clinepass: "clinepass-accounts",
   synthetic: "synthetic-accounts",
 } as const;
 

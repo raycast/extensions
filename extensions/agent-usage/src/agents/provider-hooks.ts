@@ -9,6 +9,10 @@ import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
 import type { AntigravityError, AntigravityUsage } from "../antigravity/types.ts";
 import { fetchClaudeUsage, readClaudeCredentials } from "../claude/fetcher.ts";
 import type { ClaudeError, ClaudeUsage } from "../claude/types.ts";
+import { buildClinePassAccountCandidates } from "../clinepass/accounts.ts";
+import { readClineCredential } from "../clinepass/auth.ts";
+import { fetchClinePassUsage } from "../clinepass/fetcher.ts";
+import type { ClinePassError, ClinePassUsage } from "../clinepass/types.ts";
 import { buildCodexAccountCandidates } from "../codex/accounts.ts";
 import { listCodexOAuthAccounts } from "../codex/auth.ts";
 import { fetchCodexUsage } from "../codex/fetcher.ts";
@@ -235,6 +239,22 @@ export const useCodexAccounts = createAccountsHook<
   noAccountsError: {
     type: "not_configured",
     message: "Codex is not configured. Run 'codex login' to authenticate or add an account via Manage Accounts.",
+  },
+});
+
+export const useClinePassAccounts = createAccountsHook<
+  ClinePassUsage,
+  ClinePassError,
+  ReturnType<typeof buildClinePassAccountCandidates>[number]
+>({
+  agentId: "clinepass",
+  getAccounts: async () => buildClinePassAccountCandidates(readClineCredential(), await loadAccounts("clinepass")),
+  fetcher: fetchClinePassUsage,
+  resolveAccountAuthKey: (account) =>
+    [account.token, account.userId, account.refreshToken ?? "", account.source].join("\n"),
+  noAccountsError: {
+    type: "not_configured",
+    message: "ClinePass is not configured. Sign in to Cline, or add a Cline user ID and API key via Manage Accounts.",
   },
 });
 

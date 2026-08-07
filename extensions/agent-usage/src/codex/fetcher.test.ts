@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseCodexApiResponse } from "./fetcher.ts";
+import { fetchCodexDisplayName, parseCodexApiResponse, parseCodexDisplayName, parseCodexUserId } from "./fetcher.ts";
 
 const PLUS_RESPONSE = {
   plan_type: "plus",
@@ -52,10 +52,11 @@ test("parseCodexApiResponse handles Pro/Team plan (both windows)", () => {
     credits: { has_credits: true, unlimited: false, balance: "100" },
   };
 
-  const result = parseCodexApiResponse(proResponse);
+  const result = parseCodexApiResponse(proResponse, null, null, "Ada Lovelace");
   assert.equal(result.error, null);
   assert.ok(result.usage);
   assert.equal(result.usage!.account, "Pro 20x");
+  assert.equal(result.usage!.displayName, "Ada Lovelace");
   assert.ok(result.usage!.fiveHourLimit, "5h should be present");
   assert.ok(result.usage!.weeklyLimit, "weekly should be present");
   assert.equal(result.usage!.fiveHourLimit!.percentageRemaining, 70);
@@ -147,4 +148,31 @@ test("parseCodexApiResponse returns parse_error on non-object data", () => {
   const result = parseCodexApiResponse(null);
   assert.equal(result.usage, null);
   assert.equal(result.error!.type, "parse_error");
+});
+
+test("Codex profile parsers extract trimmed user and display names", () => {
+  assert.equal(parseCodexUserId({ user_id: "  user-123  " }), "user-123");
+  assert.equal(parseCodexDisplayName({ display_name: "  Ada Lovelace  " }), "Ada Lovelace");
+  assert.equal(parseCodexUserId({ user_id: "" }), null);
+  assert.equal(parseCodexDisplayName({ display_name: 123 }), null);
+});
+
+test("fetchCodexDisplayName follows settings user_id to the Calpico profile with account scope", async () => {
+  const requests: Array<{ url: string; accountId?: string }> = [];
+  const displayName = await fetchCodexDisplayName("token", "acct-work", async (options) => {
+    requests.push({ url: options.url, accountId: options.headers?.["ChatGPT-Account-ID"] });
+    if (options.url.endsWith("/wham/settings/user")) {
+      return { data: { user_id: "user/123" }, error: null };
+    }
+    return { data: { display_name: "Ada Lovelace" }, error: null };
+  });
+
+  assert.equal(displayName, "Ada Lovelace");
+  assert.deepEqual(requests, [
+    { url: "https://chatgpt.com/backend-api/wham/settings/user", accountId: "acct-work" },
+    {
+      url: "https://chatgpt.com/backend-api/calpico/chatgpt/profile/user%2F123",
+      accountId: "acct-work",
+    },
+  ]);
 });

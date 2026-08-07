@@ -18,6 +18,7 @@ import {
   useAmpUsage,
   useAntigravityUsage,
   useClaudeUsage,
+  useClinePassAccounts,
   useCodexAccounts,
   useCopilotUsage,
   useCursorUsage,
@@ -33,6 +34,7 @@ import {
 import { getAmpAccessory } from "./amp/renderer.tsx";
 import { getAntigravityAccessory } from "./antigravity/renderer.tsx";
 import { getClaudeAccessory } from "./claude/renderer.tsx";
+import { getClinePassAccessory } from "./clinepass/renderer.tsx";
 import { getCodexAccessory } from "./codex/renderer.tsx";
 import { getCopilotAccessory } from "./copilot/renderer.tsx";
 import { getCursorAccessory } from "./cursor/renderer.tsx";
@@ -76,6 +78,7 @@ export default function MenuBarCommand() {
 
   const isAmpVisible = Boolean(prefs.showAmp);
   const isClaudeVisible = Boolean(prefs.showClaude);
+  const isClinePassVisible = Boolean(prefs.showClinePass);
   const isCodexVisible = Boolean(prefs.showCodex);
   const isCopilotVisible = Boolean(prefs.showCopilot);
   const isCursorVisible = Boolean(prefs.showCursor);
@@ -91,6 +94,7 @@ export default function MenuBarCommand() {
 
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
+  const clinePassState = useClinePassAccounts(isClinePassVisible);
   const codexState = useCodexAccounts(isCodexVisible);
   const copilotState = useCopilotUsage(isCopilotVisible);
   const cursorState = useCursorUsage(isCursorVisible);
@@ -272,6 +276,33 @@ export default function MenuBarCommand() {
   );
 
   // Multi-account agents - memoized to prevent unnecessary re-renders
+  const clinePassAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isClinePassVisible) return [];
+    if (clinePassState.isLoading) {
+      return [
+        {
+          id: "clinepass" as AgentId,
+          name: "ClinePass",
+          icon: getThemeIcon("clinepass-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getClinePassAccessory(null, null, true),
+          revalidate: clinePassState.revalidate,
+        },
+      ];
+    }
+    return clinePassState.accounts.map((account) => ({
+      id: `clinepass-${account.accountId}` as AgentId,
+      name: account.label === "Default" ? "ClinePass" : `ClinePass • ${account.label}`,
+      icon: getThemeIcon("clinepass-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getClinePassAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isClinePassVisible, clinePassState]);
+
   const codexAgents = useMemo<MenuBarAgent[]>(() => {
     if (!isCodexVisible) return [];
     if (codexState.isLoading) {
@@ -289,7 +320,10 @@ export default function MenuBarCommand() {
     }
     return codexState.accounts.map((account) => ({
       id: `codex-${account.accountId}` as AgentId,
-      name: account.label === "Default" ? "Codex" : `Codex • ${account.label}`,
+      name:
+        account.usage?.displayName || account.label !== "Default"
+          ? `Codex • ${account.usage?.displayName || account.label}`
+          : "Codex",
       icon: getThemeIcon("codex-icon.svg"),
       visible: true,
       isLoading: account.isLoading,
@@ -387,9 +421,11 @@ export default function MenuBarCommand() {
   const visibleAgents = useMemo(
     () =>
       sortByDefaultAgentOrder(
-        [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter((a) => a.visible),
+        [...singleAgents, ...clinePassAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter(
+          (a) => a.visible,
+        ),
       ),
-    [singleAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
+    [singleAgents, clinePassAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 

@@ -196,10 +196,10 @@ test("listCodexOAuthAccounts uses readable OAuth identity claims for labels", as
     assert.deepEqual(
       accounts.map((account) => ({ id: account.id, label: account.label })),
       [
-        { id: "codex-active", label: "user-label@example.com" },
+        { id: "codex-active", label: "Name for user-label" },
         {
           id: `codex-${makeCodexAuthFileName("user-other", accountId).slice(0, -".auth.json".length)}`,
-          label: "user-other@example.com",
+          label: "Name for user-other",
         },
       ],
     );
@@ -272,14 +272,14 @@ test("listCodexOAuthAccounts keeps stored Codex users that share a ChatGPT accou
       [
         {
           id: `codex-${firstFileName.slice(0, -".auth.json".length)}`,
-          label: `${firstUserId}@example.com`,
+          label: `Name for ${firstUserId}`,
           token: "first-token",
           accountId,
           source: "stored",
         },
         {
           id: `codex-${secondFileName.slice(0, -".auth.json".length)}`,
-          label: `${secondUserId}@example.com`,
+          label: `Name for ${secondUserId}`,
           token: "second-token",
           accountId,
           source: "stored",
