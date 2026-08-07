@@ -1,4 +1,4 @@
-import { Color, Detail } from "@raycast/api";
+import { Color, Detail, Icon } from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -6,6 +6,7 @@ import { getGitHubClient } from "../api/githubClient";
 import { PullRequestDetailsFieldsFragment, PullRequestFieldsFragment, UserFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
 import { getPullRequestAuthor, getPullRequestReviewers, getPullRequestStatus } from "../helpers/pull-request";
+import { getCheckStatePresentation } from "../helpers/pull-request-checks";
 import { getGitHubUser } from "../helpers/users";
 import { useMyPullRequests } from "../hooks/useMyPullRequests";
 import { useViewer } from "../hooks/useViewer";
@@ -42,6 +43,7 @@ export default function PullRequestDetail({ initialPullRequest, mutateList }: Pu
   }
 
   const status = getPullRequestStatus(pullRequest);
+  const checks = getCheckStatePresentation(pullRequest.commits.nodes?.[0]?.commit.statusCheckRollup?.state);
   const author = getPullRequestAuthor(pullRequest);
   const reviewers = getPullRequestReviewers(pullRequest);
 
@@ -58,6 +60,8 @@ export default function PullRequestDetail({ initialPullRequest, mutateList }: Pu
             <Detail.Metadata.TagList.Item {...status} />
             {pullRequest.autoMergeRequest && <Detail.Metadata.TagList.Item text="Auto-merge" color={Color.Yellow} />}
           </Detail.Metadata.TagList>
+
+          {checks ? <Detail.Metadata.Label title="Checks" text={checks.text} icon={Icon[checks.icon]} /> : null}
 
           <Detail.Metadata.Label title="From" text={pullRequest.headRef?.name ?? pullRequest.headRefName} />
 

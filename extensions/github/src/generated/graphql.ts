@@ -38630,6 +38630,16 @@ export type PullRequestDetailsFieldsFragment = {
         | null;
     } | null> | null;
   } | null;
+  commits: {
+    __typename?: "PullRequestCommitConnection";
+    nodes?: Array<{
+      __typename?: "PullRequestCommit";
+      commit: {
+        __typename?: "Commit";
+        statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: StatusState } | null;
+      };
+    } | null> | null;
+  };
   assignees: {
     __typename?: "UserConnection";
     totalCount: number;
@@ -38946,6 +38956,16 @@ export type PullRequestDetailsQuery = {
               | null;
           } | null> | null;
         } | null;
+        commits: {
+          __typename?: "PullRequestCommitConnection";
+          nodes?: Array<{
+            __typename?: "PullRequestCommit";
+            commit: {
+              __typename?: "Commit";
+              statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: StatusState } | null;
+            };
+          } | null> | null;
+        };
         assignees: {
           __typename?: "UserConnection";
           totalCount: number;
@@ -40823,6 +40843,15 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
         state
         author {
           ...AuthorFields
+        }
+      }
+    }
+    commits(last: 1) {
+      nodes {
+        commit {
+          statusCheckRollup {
+            state
+          }
         }
       }
     }
