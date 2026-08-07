@@ -29,6 +29,20 @@
   ],
   "commands": [
     {
+      "name": "send-file-to-server",
+      "title": "Send File to Server",
+      "description": "Send files or folders to a server with a picker form (pre-filled from your Finder selection on macOS), or pick a server for clipboard and pull transfers",
+      "keywords": [
+        "upload",
+        "scp",
+        "transfer",
+        "folder",
+        "claude",
+        "codex"
+      ],
+      "mode": "view"
+    },
+    {
       "name": "send-clipboard-image",
       "title": "Send Clipboard Image",
       "description": "Send the clipboard image over SSH and copy the remote path",
@@ -42,20 +56,6 @@
         "opencode"
       ],
       "mode": "no-view"
-    },
-    {
-      "name": "send-file-to-server",
-      "title": "Send File to Server",
-      "description": "Send files or folders to a server with a picker form (pre-filled from your Finder selection on macOS), or pick a server for clipboard and pull transfers",
-      "keywords": [
-        "upload",
-        "scp",
-        "transfer",
-        "folder",
-        "claude",
-        "codex"
-      ],
-      "mode": "view"
     },
     {
       "name": "pull-file",

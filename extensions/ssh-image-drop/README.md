@@ -4,7 +4,7 @@ Send files, folders, and clipboard images to a remote server over SSH with one h
 
 [![SSH Image Drop — intro video](media/intro-thumbnail.jpg)](https://www.youtube.com/watch?v=kU1Xyp2hFhU)
 
-Typical use: hand a screenshot to a Claude Code session running on a remote Mac, or push config files and skill folders to whichever box your agent runs on.
+Typical use: push config files or skill folders to whichever box your agent runs on, or hand a screenshot to a Claude Code session running on a remote Mac.
 
 ## Commands
 

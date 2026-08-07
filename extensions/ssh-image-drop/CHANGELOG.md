@@ -2,7 +2,7 @@
 
 ## [Initial Release] - {PR_MERGE_DATE}
 
-- Send clipboard images, files, and folders to servers over SSH — file sends use a one-screen picker form, pre-filled from your Finder selection on macOS
+- Send files, folders, and clipboard images to servers over SSH — file sends use a one-screen picker form, pre-filled from your Finder selection on macOS
 - Pull a remote file (path taken from the clipboard) back into Finder
 - Windows support: clipboard push/pull, file/folder sends, and server management (password or SSH key) — passwords are stored DPAPI-encrypted; remote servers must run macOS/Linux
 - Animated progress toast on every transfer, with per-item counts (`Sending 2/5…`) for multi-file sends
