@@ -1,6 +1,6 @@
 # TickTick Changelog
 
-## [AI Tools] - {PR_MERGE_DATE}
+## [AI Tools] - 2026-08-07
 
 - Manage TickTick from Raycast AI with tools for tasks, projects, habits, Pomodoro, smart lists, comments, and profile
 - Create, update, complete, reopen, move, search, and delete tasks (including batch operations)
