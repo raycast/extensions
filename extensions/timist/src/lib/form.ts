@@ -26,7 +26,7 @@ export function projectTagParams(values: ProjectTagFormValues): ProjectTagParams
   } else if (values.project) {
     params.project_id = values.project;
   }
-  if (values.tagIds.length > 0) params.tag_ids = values.tagIds;
+  if (values.tagIds?.length) params.tag_ids = values.tagIds;
   const names = (values.newTagNames ?? "")
     .split(",")
     .map((name) => name.trim())

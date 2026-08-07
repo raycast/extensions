@@ -5,7 +5,9 @@
   "description": "Track your time with Timist: start and stop timers and contexts, review today's blocks, and keep an eye on what's running from the menu bar.",
   "icon": "extension-icon.png",
   "author": "benedictbartsch",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {

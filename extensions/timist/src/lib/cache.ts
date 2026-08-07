@@ -12,8 +12,9 @@ const MENUBAR_ERROR_KEY = "menubar-error";
 // The Raycast Cache is per-extension, not per-account. Clearing on API-key
 // change prevents one account's data from painting for another.
 export function ensureCacheOwner(): void {
+  const { apiKey, baseUrl } = preferences();
   const fingerprint = createHash("sha256")
-    .update(preferences().apiKey ?? "")
+    .update(`${apiKey ?? ""}|${baseUrl ?? ""}`)
     .digest("hex")
     .slice(0, 16);
   if (cache.get(FINGERPRINT_KEY) !== fingerprint) {

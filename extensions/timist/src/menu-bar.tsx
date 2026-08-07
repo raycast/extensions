@@ -41,7 +41,7 @@ async function refreshTick(): Promise<void> {
     writeMenuBarError(undefined);
   } catch (error) {
     if (error instanceof ApiError && error.status === 429) {
-      // Skip this tick; the next interval retries naturally.
+      writeMenuBarError("network");
     } else if (error instanceof ApiError && error.status === 401) {
       writeMenuBarError("auth");
     } else {
