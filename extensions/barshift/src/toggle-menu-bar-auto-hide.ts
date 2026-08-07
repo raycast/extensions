@@ -9,16 +9,10 @@ import {
 } from "@raycast/api";
 import {
   failureMessage,
-  MenuBarMode,
   refreshStatusSubtitle,
   toggleMenuBarModes,
   updateStatusSubtitle,
 } from "./menu-bar";
-
-interface Preferences {
-  firstMode: MenuBarMode;
-  secondMode: MenuBarMode;
-}
 
 export default async function command() {
   if (environment.launchType === LaunchType.Background) {
@@ -30,7 +24,8 @@ export default async function command() {
     return;
   }
 
-  const { firstMode, secondMode } = getPreferenceValues<Preferences>();
+  const { firstMode, secondMode } =
+    getPreferenceValues<Preferences.ToggleMenuBarAutoHide>();
 
   if (firstMode === secondMode) {
     await showToast({
