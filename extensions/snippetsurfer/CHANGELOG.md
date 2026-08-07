@@ -1,6 +1,6 @@
 # SnippetSurfer Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-08-07
 - Add "Hide Folder in List" preference to hide the folder path next to each snippet, giving long snippet names more room.
 
 ## [Enhancements] - 2026-04-22
