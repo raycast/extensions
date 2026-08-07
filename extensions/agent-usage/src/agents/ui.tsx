@@ -3,12 +3,17 @@ import { getProgressIcon } from "@raycast/utils";
 import * as fs from "fs";
 import * as path from "path";
 import type { Accessory } from "./types.ts";
-import { invertMonochromeSvg, scaleSvgViewBox } from "./icon-svg.ts";
+import {
+  getDarkListIconAssetName,
+  invertMonochromeSvg,
+  invertSvgColors,
+  scaleSvgViewBox,
+  selectSourceForAppearance,
+  shouldInvertListIcon,
+} from "./icon-svg.ts";
 export { generateAsciiBar } from "./detail-format.ts";
 
 type ErrorLike = { type: string; message: string };
-const LIST_ICON_SCALE = 0.8;
-const listIconCache = new Map<string, Image.ImageLike>();
 const themeIconCache = new Map<string, Image.ImageLike>();
 
 function getProgressColor(percent: number): string {
@@ -23,16 +28,15 @@ export function generatePieIcon(percent: number): Image.ImageLike {
 }
 
 /**
- * List-row icon: scales SVG slightly and auto-pairs a dark variant for monochrome assets.
- * Brand-colored SVGs and non-SVG assets are left unchanged (aside from list scaling for SVG).
+ * List-row icon: selects a packaged inverted asset in dark mode for allowlisted icons.
+ * Packaged asset names are used because Raycast for Windows falls back when given an
+ * absolute path to a generated SVG in the extension support directory.
  */
 export function getListIcon(assetName: string): Image.ImageLike {
-  const cached = listIconCache.get(assetName);
-  if (cached) return cached;
-
-  const icon = resolveAssetIcon(assetName, { scale: LIST_ICON_SCALE, cacheDir: "list-icons" });
-  listIconCache.set(assetName, icon);
-  return icon;
+  if (!shouldInvertListIcon(assetName)) {
+    return assetName;
+  }
+  return selectSourceForAppearance(assetName, getDarkListIconAssetName(assetName), environment.appearance);
 }
 
 /**
@@ -43,12 +47,15 @@ export function getThemeIcon(assetName: string): Image.ImageLike {
   const cached = themeIconCache.get(assetName);
   if (cached) return cached;
 
-  const icon = resolveAssetIcon(assetName, { scale: 1, cacheDir: "theme-icons" });
+  const icon = resolveAssetIcon(assetName, { scale: 1, cacheDir: "theme-icons", darkVariant: "monochrome" });
   themeIconCache.set(assetName, icon);
   return icon;
 }
 
-function resolveAssetIcon(assetName: string, options: { scale: number; cacheDir: string }): Image.ImageLike {
+function resolveAssetIcon(
+  assetName: string,
+  options: { scale: number; cacheDir: string; darkVariant: "none" | "monochrome" | "inverted" },
+): Image.ImageLike {
   if (path.extname(assetName).toLowerCase() !== ".svg") {
     return assetName;
   }
@@ -57,7 +64,12 @@ function resolveAssetIcon(assetName: string, options: { scale: number; cacheDir:
     const assetPath = path.join(environment.assetsPath, assetName);
     const svg = fs.readFileSync(assetPath, "utf-8");
     const needsScale = options.scale !== 1;
-    const inverted = invertMonochromeSvg(svg);
+    const inverted =
+      options.darkVariant === "inverted"
+        ? invertSvgColors(svg)
+        : options.darkVariant === "monochrome"
+          ? invertMonochromeSvg(svg)
+          : null;
 
     // Colored icons without list scaling: use the packaged asset as-is.
     if (!needsScale && !inverted) {
@@ -80,6 +92,13 @@ function resolveAssetIcon(assetName: string, options: { scale: number; cacheDir:
       path.join(cacheRoot, toGeneratedDarkName(assetName)),
       scaleSvgViewBox(inverted, options.scale),
     );
+
+    if (options.darkVariant === "inverted") {
+      return {
+        source: selectSourceForAppearance(lightSource, darkPath, environment.appearance),
+        fallback: assetName,
+      };
+    }
 
     return {
       source: { light: lightSource, dark: darkPath },
