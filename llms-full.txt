@@ -12474,10 +12474,10 @@ export function getLinearClient(): { linearClient: LinearClient; graphQLClient: 
 
 # `getAccessToken`
 
-Utility function designed for retrieving authorization tokens within a component. It ensures that your React components have the necessary authentication state, either through OAuth or a personal access token.
+Synchronous utility function for retrieving the OAuth or personal access token authorized by `withAccessToken`. It can be called from components, event callbacks, and plain helper functions.
 
 {% hint style="info" %}
-`getAccessToken` **must** be used within components that are nested inside a component wrapped with `withAccessToken`. Otherwise, the function will fail with an error.
+The command **must** first be authenticated by `withAccessToken`. Calling `getAccessToken` before authentication finishes throws an error.
 {% endhint %}
 
 ## Signature
@@ -12494,7 +12494,7 @@ function getAccessToken(): {
 The function returns an object containing the following properties:
 
 - `token`: A string representing the access token.
-- `type`: An optional string that indicates the type of token retrieved. It can either be `oauth` for OAuth tokens or `personal` for personal access tokens.
+- `type`: Indicates the type of token retrieved. It is either `oauth` for OAuth tokens or `personal` for personal access tokens.
 
 ## Example
 
@@ -12592,7 +12592,7 @@ function withAccessToken<T = any>(
 Returns the wrapped component if used in a `view` command or the wrapped function if used in a `no-view` command.
 
 {% hint style="info" %}
-Note that the access token isn't injected into the wrapped component props. Instead, it's been set as a global variable that you can get with getAccessToken.
+The access token isn't injected into the wrapped component or function's props. Read it synchronously with getAccessToken, including from helpers and callbacks used by the authenticated command.
 {% endhint %}
 
 ## Example
@@ -12834,6 +12834,7 @@ With a few options:
 Including the useCachedState's options:
 
 - `options.initialData` is the initial value of the state if there aren't any in the Cache yet.
+- `options.cacheWriteDebounce` is a number to set if you want to debounce the cache writes. This can be useful to prevent memory pressure.
 
 Including the usePromise's options:
 
@@ -13200,6 +13201,7 @@ With a few options:
 
 - `initialState` is the initial value of the state if there aren't any in the Cache yet.
 - `config.cacheNamespace` is a string that can be used to namespace the key.
+- `config.cacheWriteDebounce` is a number to set if you want to debounce the cache writes. This can be useful to prevent memory pressure.
 
 ## Example
 
@@ -13254,6 +13256,7 @@ function useExec<T, U>(
     timeout?: number;
     parseOutput?: ParseExecOutputHandler<T>;
     initialData?: U;
+    cacheWriteDebounce?: number;
     keepPreviousData?: boolean;
     execute?: boolean;
     onError?: (error: Error) => void;
@@ -13286,6 +13289,7 @@ function useExec<T, U>(
     timeout?: number;
     parseOutput?: ParseExecOutputHandler<T>;
     initialData?: U;
+    cacheWriteDebounce?: number;
     keepPreviousData?: boolean;
     execute?: boolean;
     onError?: (error: Error) => void;
@@ -13328,6 +13332,7 @@ With a few options:
 
 Including the useCachedPromise's options:
 
+- `options.cacheWriteDebounce` is the debounce time in milliseconds for writing results to the cache.
 - `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See Argument dependent on user input for more information.
 
 Including the useCachedState's options:
@@ -13550,6 +13555,7 @@ export function useFetch<V, U, T = V>(
     parseResponse?: (response: Response) => Promise<V>;
     mapResult?: (result: V) => { data: T };
     initialData?: U;
+    cacheWriteDebounce?: number;
     keepPreviousData?: boolean;
     execute?: boolean;
     onError?: (error: Error) => void;
@@ -13575,6 +13581,7 @@ With a few options:
 
 Including the useCachedPromise's options:
 
+- `options.cacheWriteDebounce` is the debounce time in milliseconds for writing results to the cache.
 - `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering. See Argument dependent on List search text for more information.
 
 Including the useCachedState's options:
@@ -14701,6 +14708,7 @@ export function useStreamJSON<T, U>(
     transform?: (item: any) => T;
     pageSize?: number;
     initialData?: U;
+    cacheWriteDebounce?: number;
     keepPreviousData?: boolean;
     execute?: boolean;
     onError?: (error: Error) => void;
@@ -14727,6 +14735,7 @@ With a few options:
 
 Including the useCachedPromise's options:
 
+- `options.cacheWriteDebounce` is the debounce time in milliseconds for writing results to the cache.
 - `options.keepPreviousData` is a boolean to tell the hook to keep the previous results instead of returning the initial value if there aren't any in the cache for the new arguments. This is particularly useful when used for data for a List to avoid flickering.
 
 Including the useCachedState's options:
