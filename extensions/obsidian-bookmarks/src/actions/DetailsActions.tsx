@@ -18,6 +18,7 @@ import LinkForm from "../views/LinkForm";
 import * as methods from "./methods";
 import { ActionGroup, OrderedActionPanel } from "./order-manager";
 import { clearCache } from "../helpers/clear-cache";
+import { addToFavorites, isFavorite, moveFavorite, removeFromFavorites } from "../helpers/favorites";
 import readBookmarkBody from "../helpers/read-bookmark-body";
 
 const createDetailsActions = (
@@ -104,6 +105,15 @@ const createBrowserActions = (file: File): ActionGroup<DetailActionPreference> =
       },
     ],
     [
+      "openUrlInCurrentWindow",
+      {
+        title: "Open Link in Current Window",
+        icon: Icon.AppWindow,
+        shortcut: { modifiers: ["cmd", "opt"], key: "o" },
+        onAction: () => Promise.allSettled([methods.openUrlInCurrentWindow(file), showHUD("Opening link…")]),
+      },
+    ],
+    [
       "copyUrl",
       {
         title: "Copy Link",
@@ -129,6 +139,42 @@ const createBrowserActions = (file: File): ActionGroup<DetailActionPreference> =
     ],
   ]),
 });
+
+const createFavoriteActions = (
+  file: File,
+  files: File[],
+  applyFavorites: (changed: File[]) => void
+): ActionGroup<DetailActionPreference> => {
+  const actions = new Map<DetailActionPreference, Action.Props>([
+    [
+      "toggleFavorite",
+      {
+        title: isFavorite(file) ? "Remove from Favorites" : "Add to Favorites",
+        icon: isFavorite(file) ? Icon.StarDisabled : Icon.Star,
+        shortcut: { modifiers: ["cmd", "shift"], key: "f" },
+        onAction: () =>
+          applyFavorites(isFavorite(file) ? removeFromFavorites(files, file) : addToFavorites(files, file)),
+      },
+    ],
+  ]);
+
+  if (isFavorite(file)) {
+    actions.set("moveFavoriteUp", {
+      title: "Move Favorite Up",
+      icon: Icon.ArrowUp,
+      shortcut: { modifiers: ["opt", "shift"], key: "arrowUp" },
+      onAction: () => applyFavorites(moveFavorite(files, file, -1)),
+    });
+    actions.set("moveFavoriteDown", {
+      title: "Move Favorite Down",
+      icon: Icon.ArrowDown,
+      shortcut: { modifiers: ["opt", "shift"], key: "arrowDown" },
+      onAction: () => applyFavorites(moveFavorite(files, file, 1)),
+    });
+  }
+
+  return { key: "favorites", useDivider: "unless-first", title: "Favorites", actions };
+};
 
 const createDestructiveActions = (file: File): ActionGroup<DetailActionPreference> => ({
   key: "destructive",
@@ -182,12 +228,14 @@ const createDestructiveActions = (file: File): ActionGroup<DetailActionPreferenc
 
 export type DetailsActionsProps = {
   file: File;
+  files: File[];
   showDetail: boolean;
   setShowDetail: Dispatch<SetStateAction<boolean>>;
   onFileUpdated?: (file: File) => void;
 };
 export default function DetailsActions({
   file,
+  files,
   showDetail,
   setShowDetail,
   onFileUpdated,
@@ -195,6 +243,16 @@ export default function DetailsActions({
   const { value: obsidianFileIcon } = useFileIcon("Obsidian");
   const { value: defaultAction } = usePreference("defaultItemAction");
   const { push } = useNavigation();
+
+  const applyFavorites = useCallback(
+    async (changed: File[]) => {
+      const saved = await methods.saveFavorites(changed);
+      saved.forEach((updated) => {
+        onFileUpdated?.(updated);
+      });
+    },
+    [onFileUpdated]
+  );
 
   const editBookmark = useCallback(async () => {
     let body: string;
@@ -222,10 +280,11 @@ export default function DetailsActions({
     return [
       createDetailsActions(file, showDetail, setShowDetail, editBookmark),
       createBrowserActions(file),
+      createFavoriteActions(file, files, applyFavorites),
       createObsidianActions(file, obsidianFileIcon),
       createDestructiveActions(file),
     ];
-  }, [file, obsidianFileIcon, showDetail, setShowDetail, editBookmark]);
+  }, [file, files, obsidianFileIcon, showDetail, setShowDetail, editBookmark, applyFavorites]);
 
   return <OrderedActionPanel groups={groups} defaultAction={defaultAction} />;
 }

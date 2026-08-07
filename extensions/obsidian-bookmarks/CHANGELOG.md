@@ -1,5 +1,20 @@
 # Obsidian Bookmarks Changelog
 
+## [Fix Notes Gaining a Copy of Their Frontmatter] - {PR_MERGE_DATE}
+
+- Fix saving a bookmark — marking it as read, favoriting it — writing a copy of the note's own frontmatter into its body. The body was cut from the note using `bodyBegin`, which counts lines, as if it were a character offset. Run "Clear Cache" once after updating, as cached bookmarks still hold the broken body.
+
+## [Favorite Bookmarks] - {PR_MERGE_DATE}
+
+- Add any number of bookmarks to a favorites section with <kbd>⌘</kbd>+<kbd>⇧</kbd>+<kbd>F</kbd>. Favorites are pinned above the rest of the search results, in the order you put them in.
+- Reorder favorites with <kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>↑</kbd> and <kbd>⌥</kbd>+<kbd>⇧</kbd>+<kbd>↓</kbd>.
+- Store the position in a `favorite` frontmatter field, so favorites live in the vault rather than in the Raycast cache.
+
+## [Open Links in the Current Browser] - {PR_MERGE_DATE}
+
+- Add an "Open Link in Current Window" action (<kbd>⌘</kbd>+<kbd>⌥</kbd>+<kbd>O</kbd>) that opens a bookmark as a tab of the browser window already in front, instead of letting the system decide — which, in Arc, means a Little Arc window every time. Falls back to the default browser when the frontmost app isn't one.
+- The action is available on search results and on the save form, and can be picked as the default action for either in preferences. "Open Link" keeps its existing behaviour.
+
 ## [Smarter Bookmark Search] - {PR_MERGE_DATE}
 
 - Rank URL matches (ignoring query parameters) ahead of title, tag and note matches when searching bookmarks

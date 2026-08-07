@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import Fuse from "fuse.js";
 import { useEffect, useMemo, useState } from "react";
 import useFiles from "../hooks/use-files";
+import { getFavorites, isFavorite } from "../helpers/favorites";
 import { completeTag, matchesTags, parseSearchQuery } from "../helpers/search-query";
 import { sanitizeUrl } from "../helpers/url-sanitizer";
 import { File } from "../types";
@@ -127,6 +128,10 @@ export default function SearchBookmarks() {
     setFileResult(filteredItems);
   }, [text, searchTags, filter, urlFuse, contentFuse]);
 
+  const actionProps = { showDetail, setShowDetail, onFileUpdated: updateFile };
+  const favoriteResults = getFavorites(fileResult);
+  const otherResults = fileResult.filter((file) => !isFavorite(file));
+
   return (
     <List
       enableFiltering={false}
@@ -187,16 +192,16 @@ export default function SearchBookmarks() {
           ))}
         </List.Section>
       )}
-      <List.Section title={tagSuggestions.length > 0 ? "Bookmarks" : undefined}>
-        {fileResult.map((file) => (
-          <FileListItem
-            file={file}
-            loading={loading}
-            showDetail={showDetail}
-            setShowDetail={setShowDetail}
-            onFileUpdated={updateFile}
-            key={file.fullPath}
-          />
+      {favoriteResults.length > 0 && (
+        <List.Section title="Favorites">
+          {favoriteResults.map((file) => (
+            <FileListItem file={file} files={files} loading={loading} key={file.fullPath} {...actionProps} />
+          ))}
+        </List.Section>
+      )}
+      <List.Section title={tagSuggestions.length > 0 || favoriteResults.length > 0 ? "Bookmarks" : undefined}>
+        {otherResults.map((file) => (
+          <FileListItem file={file} files={files} loading={loading} key={file.fullPath} {...actionProps} />
         ))}
       </List.Section>
     </List>

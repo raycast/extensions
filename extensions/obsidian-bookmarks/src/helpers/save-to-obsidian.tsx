@@ -41,6 +41,18 @@ function faviconLine(favicon: string | null | undefined): string | null {
   return `${key}: ${JSON.stringify(value)}`;
 }
 
+function favoriteLine(favorite: number | null | undefined): string | null {
+  return typeof favorite === "number" ? `favorite: ${favorite}` : null;
+}
+
+/** The optional frontmatter lines that follow `tags`, as a single suffix. */
+function extraLines(attributes: FrontMatter): string {
+  return [faviconLine(attributes.favicon), favoriteLine(attributes.favorite)]
+    .filter((line) => line != null)
+    .map((line) => `\n${line}`)
+    .join("");
+}
+
 async function getFileName(filename: string): Promise<string> {
   const ext = path.extname(filename);
   const base = path.basename(filename, ext);
@@ -74,7 +86,6 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   ${values.description}
   `;
 
-  const favicon = faviconLine(attributes.favicon);
   const frontmatter =
     dedent`
   title: ${JSON.stringify(attributes.title)}
@@ -83,7 +94,7 @@ export async function asFile(values: LinkFormState["values"]): Promise<File> {
   publisher: ${JSON.stringify(attributes.publisher)}
   read: ${JSON.stringify(attributes.read)}
   tags: ${JSON.stringify(attributes.tags)}
-  ` + (favicon ? `\n${favicon}` : "");
+  ` + extraLines(attributes);
 
   const { datePrefix } = getPreferenceValues<Preferences>();
   const prefix = datePrefix ? formatDate(midnight) + "-" : "";
@@ -109,8 +120,7 @@ export default async function saveToObsidian(file: File): Promise<string> {
   const requiredTags = tagify(getPreferenceValues<Preferences>().requiredTags);
   const combinedTags = Array.from(new Set(file.attributes.tags.flatMap((t) => tagify(t)).concat(requiredTags)));
 
-  const favicon = faviconLine(file.attributes.favicon);
-  const tagsAndFavicon = `tags: ${JSON.stringify(combinedTags)}${favicon ? `\n${favicon}` : ""}`;
+  const tagsAndExtras = `tags: ${JSON.stringify(combinedTags)}${extraLines(file.attributes)}`;
 
   const template = dedent`
     ---
@@ -119,7 +129,7 @@ export default async function saveToObsidian(file: File): Promise<string> {
     source: ${JSON.stringify(file.attributes.source)}
     publisher: ${JSON.stringify(file.attributes.publisher)}
     read: ${JSON.stringify(file.attributes.read)}
-    ${tagsAndFavicon}
+    ${tagsAndExtras}
     ---
 
     ${file.body}
@@ -166,7 +176,6 @@ export function asUpdatedFile(values: LinkFormState["values"], original: File): 
     tags: Array.from(new Set(values.tags.flatMap((t) => tagify(t)).concat(requiredTags))),
   };
 
-  const favicon = faviconLine(attributes.favicon);
   const frontmatter =
     dedent`
   title: ${JSON.stringify(attributes.title)}
@@ -175,7 +184,7 @@ export function asUpdatedFile(values: LinkFormState["values"], original: File): 
   publisher: ${JSON.stringify(attributes.publisher)}
   read: ${JSON.stringify(attributes.read)}
   tags: ${JSON.stringify(attributes.tags)}
-  ` + (favicon ? `\n${favicon}` : "");
+  ` + extraLines(attributes);
 
   const { hasHeading } = splitBookmarkBody(original.body);
   const heading = `# [${values.title.replace(/[[\]]/g, "")}](${values.url})`;

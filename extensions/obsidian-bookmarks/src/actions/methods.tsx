@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction } from "react";
 
 import copyUrlToClipboard from "../helpers/copy-url-to-clipboard";
 import openObsidianFileOrig, { createObsidianUri } from "../helpers/open-obsidian-file";
+import openUrlInCurrentWindowHelper from "../helpers/open-in-browser";
 import saveToObsidian from "../helpers/save-to-obsidian";
 import { File } from "../types";
 
@@ -12,6 +13,10 @@ export async function openObsidianFile(file: File) {
 
 export async function openUrl(file: File) {
   return open(file.attributes.source);
+}
+
+export async function openUrlInCurrentWindow(file: File) {
+  return openUrlInCurrentWindowHelper(file.attributes.source);
 }
 
 export async function copyUrl(file: File) {
@@ -57,6 +62,23 @@ export async function saveFile(file: File, isUpdate = false): Promise<File> {
   } else {
     toast.value.hide();
     return file;
+  }
+}
+
+/** Writes back every bookmark whose favorite position changed. */
+export async function saveFavorites(files: File[]): Promise<File[]> {
+  if (files.length === 0) return files;
+
+  try {
+    await Promise.all(files.map((file) => saveToObsidian(file)));
+    return files;
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Couldn't update favorites",
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return [];
   }
 }
 

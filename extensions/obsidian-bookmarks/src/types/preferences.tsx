@@ -3,6 +3,7 @@ export type FormActionPreference =
   | "copyObsidianUrl"
   | "copyObsidianUrlAsMarkdown"
   | "openUrl"
+  | "openUrlInCurrentWindow"
   | "copyUrl"
   | "copyUrlAsMarkdown"
   | "clearCache"
@@ -12,6 +13,9 @@ export type FormActionPreference =
 export type DetailActionPreference =
   | FormActionPreference
   | "showDetails"
+  | "toggleFavorite"
+  | "moveFavoriteUp"
+  | "moveFavoriteDown"
   | "editBookmark"
   | "markAsRead"
   | "deleteFile";

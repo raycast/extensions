@@ -11,6 +11,7 @@ export function isFrontMatter(v: unknown): v is FrontMatter {
     typeof frontMatter.read === "boolean" &&
     (frontMatter.publisher == null || typeof frontMatter.publisher === "string") &&
     (frontMatter.favicon == null || typeof frontMatter.favicon === "string") &&
+    (frontMatter.favorite == null || typeof frontMatter.favorite === "number") &&
     isStringArray(frontMatter.tags)
   );
 }
@@ -42,6 +43,11 @@ export interface FrontMatter {
    * frontmatter field named by the `faviconField` preference.
    */
   favicon?: string | null;
+  /**
+   * Position of the bookmark in the favorites grid, starting at 1. Null when
+   * the bookmark isn't a favorite.
+   */
+  favorite?: number | null;
   title: string;
   tags: string[];
   saved: Date;

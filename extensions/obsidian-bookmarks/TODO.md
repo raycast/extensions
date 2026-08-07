@@ -16,7 +16,7 @@ for handling those use cases.
 
 ---
 
-- [ ] Edit your existing bookmarks.
+- [x] Edit your existing bookmarks.
 
 Today we don't support editing your bookmarks. But we _could_ do this by just opening
 prefilling a form from the frontmatter and notes fields. It wouldn't be perfect, and

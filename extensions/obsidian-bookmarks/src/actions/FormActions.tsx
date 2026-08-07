@@ -136,6 +136,18 @@ const createBrowserActions = (values: LinkFormState["values"]): ActionGroup<Form
       },
     ],
     [
+      "openUrlInCurrentWindow",
+      {
+        title: "Save and Open Link in Current Window",
+        icon: Icon.AppWindow,
+        shortcut: { modifiers: ["cmd", "opt"], key: "o" },
+        onAction: async () => {
+          const file = await saveFile(values);
+          return Promise.allSettled([methods.openUrlInCurrentWindow(file), popAndShowHUD("Opening link…")]);
+        },
+      },
+    ],
+    [
       "copyUrl",
       {
         icon: Icon.Link,

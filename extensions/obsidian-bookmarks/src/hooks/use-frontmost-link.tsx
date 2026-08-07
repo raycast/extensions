@@ -1,6 +1,7 @@
 import { BrowserExtension, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { runJxa } from "run-jxa";
+import { ARC_BROWSERS, CHROMIUM_BROWSERS, SAFARI_BROWSERS } from "../helpers/browsers";
 import { Preferences } from "../types";
 
 export interface Link {
@@ -32,19 +33,9 @@ async function getFrontmostLinkFromExtension(): Promise<Link | null> {
 }
 
 async function getFrontmostLinkFromJxa(): Promise<Link | null> {
-  const result = await runJxa(`
-    const chromium = new Set([
-      "com.google.Chrome",
-      "com.google.Chrome.beta",
-      "com.google.Chrome.canary",
-      "com.vivaldi.Vivaldi",
-      "com.brave.Browser",
-      "com.microsoft.edgemac",
-      "com.operasoftware.Opera",
-      "org.chromium.Chromium"
-    ]);
-    const safari = new Set(["com.apple.Safari", "com.apple.SafariTechPreview"]);
-    const arc = new Set(["company.thebrowser.Browser"]);
+  const result = await runJxa(
+    `
+    const [chromium, safari, arc] = args;
 
     function getFrontmostChromiumLink(bundleId) {
       const tab = Application(bundleId).windows[0].activeTab();
@@ -70,11 +61,11 @@ async function getFrontmostLinkFromJxa(): Promise<Link | null> {
 
     function getFrontmostLink() {
       const app = getFrontmostApp();
-      if (chromium.has(app)) {
+      if (chromium.indexOf(app) !== -1) {
         return getFrontmostChromiumLink(app);
-      } else if (safari.has(app)) {
+      } else if (safari.indexOf(app) !== -1) {
         return getFrontmostSafariLink(app);
-      } else if (arc.has(app)) {
+      } else if (arc.indexOf(app) !== -1) {
         return getFrontmostArcLink(app);
       } else {
         return null;
@@ -82,7 +73,9 @@ async function getFrontmostLinkFromJxa(): Promise<Link | null> {
     }
 
     return getFrontmostLink();
-  `);
+  `,
+    [CHROMIUM_BROWSERS, SAFARI_BROWSERS, ARC_BROWSERS]
+  );
 
   if (result == null) return null;
   if (isLink(result)) return result;

@@ -120,6 +120,10 @@
           "value": "openUrl"
         },
         {
+          "title": "Open Link in Current Window",
+          "value": "openUrlInCurrentWindow"
+        },
+        {
           "title": "Copy Link",
           "value": "copyUrl"
         },
@@ -160,6 +164,10 @@
         {
           "title": "Open Link",
           "value": "openUrl"
+        },
+        {
+          "title": "Open Link in Current Window",
+          "value": "openUrlInCurrentWindow"
         },
         {
           "title": "Copy Link",
