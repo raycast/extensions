@@ -129,7 +129,11 @@ export async function openRecordingsFolder(): Promise<void> {
   await open(directory);
 }
 
-export async function toggleRecording(): Promise<void> {
+export type ToggleAction = "toggle" | "toggle-copy";
+
+export async function toggleRecording(
+  action: ToggleAction = "toggle",
+): Promise<void> {
   if (!isBetterCaptureInstalled()) {
     throw new BetterCaptureError(
       "BetterCapture is not installed. Install it from https://bettercapture.app or run: brew install bettercapture",
@@ -137,7 +141,7 @@ export async function toggleRecording(): Promise<void> {
   }
 
   if (supportsUrlScheme()) {
-    await open("bettercapture://toggle");
+    await open(`bettercapture://${action}`);
     return;
   }
 
