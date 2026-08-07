@@ -1,6 +1,7 @@
 import { Tool } from "@raycast/api";
 import { updateTask } from "../api/tasks";
-import { runBatch } from "./lib/batch";
+import { moveTask } from "../api/tasks";
+import { runBatch, withContext } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
 import { parseDueDate } from "./lib/dates";
 import {
@@ -40,7 +41,7 @@ type Input = {
   tasks: TaskUpdate[];
 };
 
-type PreparedUpdate = {
+type UpdatePayload = {
   id: string;
   projectId: string;
   title?: string;
@@ -49,6 +50,12 @@ type PreparedUpdate = {
   isAllDay?: boolean;
   priority?: 0 | 1 | 3 | 5;
   tags?: string[];
+};
+
+type PreparedUpdate = {
+  /** Set when the task must be relocated before its fields are written. */
+  moveFrom?: string;
+  payload: UpdatePayload;
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
@@ -97,21 +104,30 @@ export default async function tool(input: Input) {
     }
 
     const priority = priorityFromLabel(item.priority);
-    const due = item.dueDate ? parseDueDate(item.dueDate) : undefined;
+    const due = withContext(context, () => (item.dueDate ? parseDueDate(item.dueDate) : undefined));
 
     prepared.push({
-      id: item.taskId,
-      projectId: targetProjectId ?? item.projectId,
-      ...(item.title !== undefined && { title: item.title }),
-      ...(item.content !== undefined && { content: item.content }),
-      ...(item.clearDueDate && { dueDate: "" }),
-      ...(due && { dueDate: due.dueDate, isAllDay: due.isAllDay }),
-      ...(priority !== undefined && { priority }),
-      ...(item.tags !== undefined && { tags: item.tags }),
+      // A cross-project move is applied separately below — the update endpoint cannot
+      // relocate a task, it only writes fields within the project it already lives in.
+      moveFrom: targetProjectId && targetProjectId !== item.projectId ? item.projectId : undefined,
+      payload: {
+        id: item.taskId,
+        projectId: targetProjectId ?? item.projectId,
+        ...(item.title !== undefined && { title: item.title }),
+        ...(item.content !== undefined && { content: item.content }),
+        ...(item.clearDueDate && { dueDate: "" }),
+        ...(due && { dueDate: due.dueDate, isAllDay: due.isAllDay }),
+        ...(priority !== undefined && { priority }),
+        ...(item.tags !== undefined && { tags: item.tags }),
+      },
     });
   }
 
-  const updated = await runBatch(prepared, async (payload) => {
+  const updated = await runBatch(prepared, async ({ moveFrom, payload }) => {
+    // Move first so the update targets the project the task ends up in.
+    if (moveFrom) {
+      await moveTask(moveFrom, payload.projectId, payload.id);
+    }
     const task = await updateTask(payload);
     const projectName = sync.projects.find((p) => p.id === task.projectId)?.name;
     return summarizeTask(task, projectName);

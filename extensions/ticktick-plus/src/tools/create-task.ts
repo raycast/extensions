@@ -1,6 +1,6 @@
 import { Tool } from "@raycast/api";
 import { createTask } from "../api/tasks";
-import { runBatch } from "./lib/batch";
+import { runBatch, withContext } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
 import { parseDueDate } from "./lib/dates";
 import { findProjectByName, loadSyncData, priorityFromLabel, requireProject, summarizeTask } from "./lib/data";
@@ -63,7 +63,7 @@ export default async function tool(input: Input) {
   for (const [index, item] of tasks.entries()) {
     const context = tasks.length > 1 ? `Task ${index + 1} of ${tasks.length}: ` : "";
     const title = item.title?.trim();
-    if (!title) throw new Error(`${context}each task needs a title.`);
+    if (!title) throw new Error(`${context}Each task needs a title.`);
 
     let projectId = item.projectId?.trim() || undefined;
     if (projectId) {
@@ -73,7 +73,7 @@ export default async function tool(input: Input) {
     } else if (item.projectName) {
       const match = findProjectByName(openProjects, item.projectName);
       if (!match) {
-        throw new Error(`${context}project "${item.projectName}" not found. Call list-projects and retry.`);
+        throw new Error(`${context}Project "${item.projectName}" not found. Call list-projects and retry.`);
       }
       projectId = match.id;
     }
@@ -83,7 +83,7 @@ export default async function tool(input: Input) {
     }
 
     const priority = priorityFromLabel(item.priority) ?? 0;
-    const due = item.dueDate ? parseDueDate(item.dueDate) : undefined;
+    const due = withContext(context, () => (item.dueDate ? parseDueDate(item.dueDate) : undefined));
 
     prepared.push({
       title,

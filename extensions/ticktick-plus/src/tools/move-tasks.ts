@@ -2,7 +2,7 @@ import { Tool } from "@raycast/api";
 import { moveTask } from "../api/tasks";
 import { runBatch } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
-import { canonicalTaskLabel, findProjectByName, loadSyncData, requireProject } from "./lib/data";
+import { findProjectByName, loadSyncData, requireProject, resolveTaskRefs } from "./lib/data";
 
 type TaskMove = {
   /** Task ID */
@@ -24,10 +24,18 @@ type PreparedMove = { taskId: string; fromProjectId: string; toProjectId: string
 
 /** Validate the whole batch and resolve the destination before any task is moved. */
 async function prepareMoves(input: Input): Promise<{ moves: PreparedMove[]; toProjectName: string }> {
-  const tasks = input.tasks ?? [];
-  if (tasks.length === 0) {
+  const input_tasks = input.tasks ?? [];
+  if (input_tasks.length === 0) {
     throw new Error("Provide at least one task in `tasks`.");
   }
+
+  // Normalize IDs the same way on both sides: surrounding whitespace is common in
+  // generated tool calls and would otherwise fail lookup on the source but not the
+  // destination.
+  const tasks = input_tasks.map((task) => ({
+    taskId: task.taskId?.trim(),
+    fromProjectId: task.fromProjectId?.trim(),
+  }));
 
   for (const task of tasks) {
     if (!task.taskId || !task.fromProjectId) {
@@ -56,13 +64,18 @@ async function prepareMoves(input: Input): Promise<{ moves: PreparedMove[]; toPr
 
   const destination = requireProject(sync.projects, toProjectId);
 
+  const resolved = await resolveTaskRefs(
+    tasks.map((t) => ({ taskId: t.taskId, projectId: t.fromProjectId })),
+    sync.tasks,
+  );
+
   return {
     toProjectName: destination.name,
-    moves: tasks.map((t) => ({
+    moves: resolved.map((t) => ({
       taskId: t.taskId,
-      fromProjectId: t.fromProjectId,
+      fromProjectId: t.projectId,
       toProjectId: destination.id,
-      title: canonicalTaskLabel(sync.tasks, { taskId: t.taskId, projectId: t.fromProjectId }),
+      title: t.title,
     })),
   };
 }

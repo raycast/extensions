@@ -2,7 +2,7 @@ import { Tool } from "@raycast/api";
 import { completeTask } from "../api/tasks";
 import { runBatch } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
-import { canonicalTaskLabel, loadSyncData } from "./lib/data";
+import { loadSyncData, resolveTaskRefs } from "./lib/data";
 
 type TaskRef = {
   /** Task ID from search-tasks */
@@ -16,21 +16,8 @@ type Input = {
   tasks: TaskRef[];
 };
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const tasks = input.tasks ?? [];
-  if (tasks.length <= 1) return undefined;
-  const sync = await loadSyncData();
-  return batchConfirmation(
-    tasks.length,
-    `Complete ${tasks.length} tasks?`,
-    tasks.slice(0, 8).map((t) => ({ name: "Task", value: canonicalTaskLabel(sync.tasks, t) })),
-  );
-};
-
-/**
- * Mark one or more TickTick tasks as complete. Call search-tasks first to get taskId and projectId.
- */
-export default async function tool(input: Input) {
+/** Validate the whole batch and resolve every reference to a real task before mutating. */
+async function prepareTasks(input: Input) {
   const tasks = input.tasks ?? [];
   if (tasks.length === 0) {
     throw new Error("Provide at least one task in `tasks`.");
@@ -43,11 +30,25 @@ export default async function tool(input: Input) {
   }
 
   const sync = await loadSyncData();
-  const prepared = tasks.map((t) => ({
-    taskId: t.taskId,
-    projectId: t.projectId,
-    title: canonicalTaskLabel(sync.tasks, t),
-  }));
+  return resolveTaskRefs(tasks, sync.tasks);
+}
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const tasks = input.tasks ?? [];
+  if (tasks.length <= 1) return undefined;
+  const prepared = await prepareTasks(input);
+  return batchConfirmation(
+    prepared.length,
+    `Complete ${prepared.length} tasks?`,
+    prepared.slice(0, 8).map((t) => ({ name: "Task", value: t.title })),
+  );
+};
+
+/**
+ * Mark one or more TickTick tasks as complete. Call search-tasks first to get taskId and projectId.
+ */
+export default async function tool(input: Input) {
+  const prepared = await prepareTasks(input);
 
   const completed = await runBatch(prepared, async (task) => {
     await completeTask(task.projectId, task.taskId);

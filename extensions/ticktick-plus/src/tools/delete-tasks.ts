@@ -2,7 +2,7 @@ import { Tool } from "@raycast/api";
 import { deleteTask } from "../api/tasks";
 import { runBatch } from "./lib/batch";
 import { destructiveConfirmation } from "./lib/confirm";
-import { canonicalTaskLabel, loadSyncData } from "./lib/data";
+import { loadSyncData, resolveTaskRefs } from "./lib/data";
 
 type TaskRef = {
   /** Task ID from search-tasks */
@@ -16,19 +16,8 @@ type Input = {
   tasks: TaskRef[];
 };
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const tasks = input.tasks ?? [];
-  const sync = await loadSyncData();
-  return destructiveConfirmation(
-    `Delete ${tasks.length} task${tasks.length === 1 ? "" : "s"}? This cannot be undone.`,
-    tasks.slice(0, 8).map((t) => ({ name: "Task", value: canonicalTaskLabel(sync.tasks, t) })),
-  );
-};
-
-/**
- * Permanently delete TickTick tasks. Always asks for confirmation. Prefer complete-tasks when the user means "done".
- */
-export default async function tool(input: Input) {
+/** Validate the whole batch and resolve every reference to a real task before deleting. */
+async function prepareTasks(input: Input) {
   const tasks = input.tasks ?? [];
   if (tasks.length === 0) {
     throw new Error("Provide at least one task in `tasks`.");
@@ -41,11 +30,25 @@ export default async function tool(input: Input) {
   }
 
   const sync = await loadSyncData();
-  const prepared = tasks.map((t) => ({
-    taskId: t.taskId,
-    projectId: t.projectId,
-    title: canonicalTaskLabel(sync.tasks, t),
-  }));
+  return resolveTaskRefs(tasks, sync.tasks);
+}
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  // Let the tool raise the validation error for an empty batch rather than spending a
+  // sync fetch to confirm nothing.
+  if ((input.tasks ?? []).length === 0) return undefined;
+  const prepared = await prepareTasks(input);
+  return destructiveConfirmation(
+    `Delete ${prepared.length} task${prepared.length === 1 ? "" : "s"}? This cannot be undone.`,
+    prepared.slice(0, 8).map((t) => ({ name: "Task", value: t.title })),
+  );
+};
+
+/**
+ * Permanently delete TickTick tasks. Always asks for confirmation. Prefer complete-tasks when the user means "done".
+ */
+export default async function tool(input: Input) {
+  const prepared = await prepareTasks(input);
 
   const deleted = await runBatch(prepared, async (task) => {
     await deleteTask(task.projectId, task.taskId);

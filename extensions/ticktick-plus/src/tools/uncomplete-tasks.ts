@@ -36,6 +36,9 @@ async function prepareTasks(input: Input): Promise<Task[]> {
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  // Let the tool raise the validation error for an empty batch rather than spending
+  // fetches to confirm nothing.
+  if ((input.tasks ?? []).length === 0) return undefined;
   const tasks = await prepareTasks(input);
   return destructiveConfirmation(
     `Reopen ${tasks.length} task${tasks.length === 1 ? "" : "s"}?`,

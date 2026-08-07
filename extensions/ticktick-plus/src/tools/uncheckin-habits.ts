@@ -19,7 +19,11 @@ type Input = {
 };
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const resolved = resolveHabitRefs(input.habits ?? [], await loadHabits(), "");
+  const habits = input.habits ?? [];
+  // Let the tool raise the validation error for an empty batch rather than spending a
+  // habits fetch to confirm nothing.
+  if (habits.length === 0) return undefined;
+  const resolved = resolveHabitRefs(habits, await loadHabits(), "");
   return destructiveConfirmation(
     `Undo check-in for ${resolved.length} habit${resolved.length === 1 ? "" : "s"}?`,
     resolved.slice(0, 8).map((h) => ({ name: "Habit", value: h.habitName })),
