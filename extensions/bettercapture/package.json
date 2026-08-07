@@ -41,11 +41,11 @@
           "default": "toggle",
           "data": [
             {
-              "title": "Toggle recording",
+              "title": "Toggle Recording",
               "value": "toggle"
             },
             {
-              "title": "Toggle and copy file",
+              "title": "Toggle and Copy File",
               "value": "toggle-copy"
             }
           ]
