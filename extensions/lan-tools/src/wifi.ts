@@ -216,8 +216,15 @@ function localHostname(): string {
   }
 }
 
-/** Best-effort public IP + geolocation. Resolves undefined if offline. */
-async function getPublicIP(): Promise<PublicIPInfo | undefined> {
+/**
+ * Best-effort public IP + geolocation. Resolves undefined if offline. The
+ * geolocation is only fetched when `allowGeolocation` is true (the user's
+ * "Show public IP & location" preference) — otherwise only the raw IP,
+ * which this Mac already reveals by sending any request, is returned.
+ */
+async function getPublicIP(
+  allowGeolocation: boolean,
+): Promise<PublicIPInfo | undefined> {
   try {
     const ip = await run(
       "/usr/bin/curl",
@@ -227,6 +234,7 @@ async function getPublicIP(): Promise<PublicIPInfo | undefined> {
     const trimmed = ip.trim();
     if (!/^\d+\.\d+\.\d+\.\d+$/.test(trimmed)) return undefined;
     const info: PublicIPInfo = { ip: trimmed };
+    if (!allowGeolocation) return info;
     try {
       const geo = await run(
         "/usr/bin/curl",
@@ -330,6 +338,7 @@ export async function getIdentity(): Promise<Partial<WiFiInfo>> {
  */
 export async function getWiFi(
   base: Partial<WiFiInfo>,
+  allowGeolocation = true,
 ): Promise<Partial<WiFiInfo>> {
   const wifiIface = await findWiFiInterface();
   const routeIface = defaultRouteInterface();
@@ -341,7 +350,7 @@ export async function getWiFi(
       ? run("/usr/sbin/ipconfig", ["getsummary", wifiIface])
       : Promise.resolve(""),
     run("/usr/sbin/system_profiler", ["SPAirPortDataType"], 6000),
-    getPublicIP(),
+    getPublicIP(allowGeolocation),
   ]);
   const fromSummary = parseIpconfigSummary(summary);
   const { info: fromProfile, neighbors } = parseAirPort(profile);
@@ -373,7 +382,9 @@ export async function getWiFi(
   };
 }
 
-export async function getWiFiInfo(): Promise<WiFiInfo | undefined> {
+export async function getWiFiInfo(
+  allowGeolocation = true,
+): Promise<WiFiInfo | undefined> {
   const wifiIface = await findWiFiInterface();
   const routeIface = defaultRouteInterface();
   const iface = wifiIface ?? routeIface;
@@ -385,7 +396,7 @@ export async function getWiFiInfo(): Promise<WiFiInfo | undefined> {
       : Promise.resolve(""),
     run("/usr/sbin/system_profiler", ["SPAirPortDataType"], 6000),
     getDNSServers(),
-    getPublicIP(),
+    getPublicIP(allowGeolocation),
   ]);
 
   const fromSummary = parseIpconfigSummary(summary);

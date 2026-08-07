@@ -5,6 +5,7 @@ import {
   Icon,
   List,
   Toast,
+  getPreferenceValues,
   showToast,
   updateCommandMetadata,
 } from "@raycast/api";
@@ -19,6 +20,10 @@ import { getIdentity, getWiFi, type WiFiInfo, type WiFiNeighbor } from "./wifi";
  * shown as "—".
  */
 export default function Command() {
+  const { showPublicLocation } = getPreferenceValues<{
+    showPublicLocation?: boolean;
+  }>();
+  const allowGeo = showPublicLocation !== false;
   const [info, setInfo] = useState<Partial<WiFiInfo>>({});
   const [wave, setWave] = useState<1 | 2>(1);
 
@@ -35,7 +40,7 @@ export default function Command() {
         });
 
         // Wave 2: Wi-Fi RF + neighbors + public IP.
-        const full = await getWiFi(identity);
+        const full = await getWiFi(identity, allowGeo);
         setInfo(full);
         setWave(2);
         const onWifi = !!(full.ssid || full.bssid);
@@ -145,22 +150,26 @@ export default function Command() {
               text={info.publicIp.ip}
               copy={info.publicIp.ip}
             />
-            <List.Item
-              icon={Icon.Map}
-              title="Location"
-              subtitle={
-                [
-                  info.publicIp.city,
-                  info.publicIp.region,
-                  info.publicIp.country,
-                ]
-                  .filter(Boolean)
-                  .join(", ") || "—"
-              }
-              accessories={
-                info.publicIp.org ? [{ text: info.publicIp.org }] : []
-              }
-            />
+            {info.publicIp.city ||
+            info.publicIp.region ||
+            info.publicIp.country ? (
+              <List.Item
+                icon={Icon.Map}
+                title="Location"
+                subtitle={
+                  [
+                    info.publicIp.city,
+                    info.publicIp.region,
+                    info.publicIp.country,
+                  ]
+                    .filter(Boolean)
+                    .join(", ") || "—"
+                }
+                accessories={
+                  info.publicIp.org ? [{ text: info.publicIp.org }] : []
+                }
+              />
+            ) : null}
           </>
         ) : fetching ? (
           <List.Item

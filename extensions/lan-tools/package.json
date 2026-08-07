@@ -13,6 +13,17 @@
     "Productivity"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "showPublicLocation",
+      "title": "Show public IP & location",
+      "description": "Resolve this Mac's public IP to a location via ipinfo.io (city, region, country, ISP). Turn off to keep the lookup local.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show public IP & location"
+    }
+  ],
   "commands": [
     {
       "name": "index",

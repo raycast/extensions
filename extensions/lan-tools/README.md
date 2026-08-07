@@ -22,6 +22,18 @@ The network commands need **Local Network** permission for Raycast. macOS will
 prompt; enable it in **System Settings → Privacy & Security → Local Network**
 if you skipped it.
 
+## Privacy
+
+- **This Mac** reads your public IP from `api.ipify.org`. When the **Show
+  public IP & location** preference is enabled (default), it also resolves the
+  IP's city, region, country, and ISP via `ipinfo.io`. Disable the preference in
+  Raycast → Extensions → LAN Tools → Preferences to keep that lookup off.
+- **Speed Test** talks only to the selected provider's servers (Cloudflare or
+  Yandex) and, like any request on the internet, discloses your public IP to
+  that provider as part of the measurement.
+- Your **LAN inventory and device data never leave your machine** — discovery,
+  vendor lookup, and storage are all local.
+
 ## FAQ
 
 ### I don't see my devices
