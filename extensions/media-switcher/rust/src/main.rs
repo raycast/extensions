@@ -77,7 +77,7 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 // A title-prefix fingerprint helps detect reordering but is best-effort.
 // On switch failure, paused competitors are not restored — the user can replay manually.
 #[raycast]
-fn switch_session(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
+fn switch_session(target_app_id: String, target_index: u32, _target_title_prefix: String) -> Result<(), String> {
     let manager = get_session_manager()?;
     let sessions = manager.GetSessions().map_err(|e| format!("GetSessions failed: {}", e))?;
     let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
@@ -106,9 +106,7 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
 
         if is_target {
             target_session = Some(session);
-        }
-
-        if !is_target {
+        } else {
             if let Ok(info) = session.GetPlaybackInfo() {
                 if let Ok(status) = info.PlaybackStatus() {
                     if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
@@ -553,6 +551,21 @@ fn get_session_manager() -> Result<GlobalSystemMediaTransportControlsSessionMana
 fn format_app_name(app_id: &str) -> String {
     if app_id.is_empty() {
         return "Unknown".to_string();
+    }
+
+    // Adjust Apple User Model IDs to reflect the name the user actually sees.
+    // Some internally-named AUMIDs (e.g. Windows 11 Media Player's legacy
+    // "ZuneMusic" identifier) are confusing when shown verbatim.
+    let overrides: &[(&str, &str)] = &[
+        ("Microsoft.ZuneMusic_", "Media Player"),
+        ("Microsoft.ZuneVideo_", "Movies & TV"),
+        ("Microsoft.WindowsMediaPlayer_", "Windows Media Player"),
+        ("com.spotify.client", "Spotify"),
+    ];
+    for (prefix, name) in overrides {
+        if app_id.starts_with(prefix) {
+            return name.to_string();
+        }
     }
 
     if app_id.contains('!') {
