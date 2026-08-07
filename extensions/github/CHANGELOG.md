@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Show organization projects in My Projects] - {PR_MERGE_DATE}
+
+- The "My Projects" command now lists projects owned by your organizations alongside projects owned by your user account, sorted by last update. Previously only user-owned projects were shown, so the command was empty for people whose projects all live under an organization.
+
 ## [View Pull Request Diffs] - 2026-08-06
 
 - Added a "View Diff" action to pull requests, showing changed files with per-file patches that load progressively as you scroll.

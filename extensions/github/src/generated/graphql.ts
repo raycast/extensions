@@ -40300,9 +40300,17 @@ export type GetViewerQuery = {
       totalCount: number;
       nodes?: Array<{ __typename?: "Organization"; avatarUrl: any; login: string } | null> | null;
     };
+  };
+};
+
+export type GetMyProjectsQueryVariables = Exact<{ [key: string]: never }>;
+
+export type GetMyProjectsQuery = {
+  __typename?: "Query";
+  viewer: {
+    __typename?: "User";
     projectsV2: {
       __typename?: "ProjectV2Connection";
-      totalCount: number;
       nodes?: Array<{
         __typename?: "ProjectV2";
         id: string;
@@ -40329,6 +40337,56 @@ export type GetViewerQuery = {
           __typename?: "ProjectV2ViewConnection";
           totalCount: number;
           nodes?: Array<{ __typename?: "ProjectV2View"; id: string; name: string; number: number } | null> | null;
+        };
+      } | null> | null;
+    };
+    organizations: {
+      __typename?: "OrganizationConnection";
+      nodes?: Array<{
+        __typename?: "Organization";
+        projectsV2: {
+          __typename?: "ProjectV2Connection";
+          nodes?: Array<{
+            __typename?: "ProjectV2";
+            id: string;
+            title: string;
+            public: boolean;
+            number: number;
+            readme?: string | null;
+            closed: boolean;
+            shortDescription?: string | null;
+            url: any;
+            createdAt: any;
+            updatedAt: any;
+            viewerCanClose: boolean;
+            viewerCanUpdate: boolean;
+            viewerCanReopen: boolean;
+            creator?:
+              | { __typename?: "Bot"; id: string; login: string; avatarUrl: any }
+              | {
+                  __typename?: "EnterpriseUserAccount";
+                  id: string;
+                  login: string;
+                  name?: string | null;
+                  avatarUrl: any;
+                }
+              | { __typename?: "Mannequin"; id: string; login: string; avatarUrl: any }
+              | { __typename?: "Organization"; id: string; login: string; name?: string | null; avatarUrl: any }
+              | {
+                  __typename?: "User";
+                  id: string;
+                  avatarUrl: any;
+                  name?: string | null;
+                  login: string;
+                  isViewer: boolean;
+                }
+              | null;
+            views: {
+              __typename?: "ProjectV2ViewConnection";
+              totalCount: number;
+              nodes?: Array<{ __typename?: "ProjectV2View"; id: string; name: string; number: number } | null> | null;
+            };
+          } | null> | null;
         };
       } | null> | null;
     };
@@ -41605,15 +41663,29 @@ export const GetViewerDocument = gql`
           login
         }
       }
-      projectsV2(first: 50) {
-        totalCount
+    }
+  }
+  ${UserFieldsFragmentDoc}
+`;
+export const GetMyProjectsDocument = gql`
+  query getMyProjects {
+    viewer {
+      projectsV2(first: 50, orderBy: { field: UPDATED_AT, direction: DESC }) {
         nodes {
           ...ProjectFields
         }
       }
+      organizations(first: 50) {
+        nodes {
+          projectsV2(first: 50, orderBy: { field: UPDATED_AT, direction: DESC }) {
+            nodes {
+              ...ProjectFields
+            }
+          }
+        }
+      }
     }
   }
-  ${UserFieldsFragmentDoc}
   ${ProjectFieldsFragmentDoc}
 `;
 export const GetViewerStatsDocument = gql`
@@ -42626,6 +42698,24 @@ export function getSdk(client: GraphQLClient, withWrapper: SdkFunctionWrapper = 
             signal,
           }),
         "getViewer",
+        "query",
+        variables,
+      );
+    },
+    getMyProjects(
+      variables?: GetMyProjectsQueryVariables,
+      requestHeaders?: GraphQLClientRequestHeaders,
+      signal?: RequestInit["signal"],
+    ): Promise<GetMyProjectsQuery> {
+      return withWrapper(
+        (wrappedRequestHeaders) =>
+          client.request<GetMyProjectsQuery>({
+            document: GetMyProjectsDocument,
+            variables,
+            requestHeaders: { ...requestHeaders, ...wrappedRequestHeaders },
+            signal,
+          }),
+        "getMyProjects",
         "query",
         variables,
       );

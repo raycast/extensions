@@ -34,3 +34,22 @@ query projectDetails($nodeId: ID!) {
     ...ProjectFields
   }
 }
+
+query getMyProjects {
+  viewer {
+    projectsV2(first: 50, orderBy: { field: UPDATED_AT, direction: DESC }) {
+      nodes {
+        ...ProjectFields
+      }
+    }
+    organizations(first: 50) {
+      nodes {
+        projectsV2(first: 50, orderBy: { field: UPDATED_AT, direction: DESC }) {
+          nodes {
+            ...ProjectFields
+          }
+        }
+      }
+    }
+  }
+}

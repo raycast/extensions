@@ -8,12 +8,21 @@ export function useMyProjects(closed: boolean | null) {
 
   return useCachedPromise(
     async (closed: boolean | null) => {
-      const { viewer } = await github.getViewer();
+      const { viewer } = await github.getMyProjects();
+
+      const userProjects = (viewer?.projectsV2?.nodes ?? []) as ProjectFieldsFragment[];
+      const organizationProjects = (viewer?.organizations?.nodes ?? []).flatMap(
+        (organization) => (organization?.projectsV2?.nodes ?? []) as ProjectFieldsFragment[],
+      );
+
+      const projects = [...userProjects, ...organizationProjects]
+        .filter((p) => p)
+        .sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)));
 
       if (closed === null) {
-        return (viewer?.projectsV2?.nodes ?? []) as ProjectFieldsFragment[];
+        return projects;
       }
-      return (viewer?.projectsV2?.nodes?.filter((p) => p && p.closed === closed) ?? []) as ProjectFieldsFragment[];
+      return projects.filter((p) => p.closed === closed);
     },
     [closed],
   );
