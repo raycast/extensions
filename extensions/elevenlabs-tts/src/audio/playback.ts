@@ -18,6 +18,7 @@ interface PlaybackRecord {
 }
 
 const SESSION_LOCK_PATH = join(tmpdir(), "elevenlabs-tts-session-v2");
+const SESSION_LOCK_OPTIONS: LockOptions = { stale: 10_000, update: 2_000 };
 const PLAYBACK_FILE = join(tmpdir(), "elevenlabs-tts-playback.json");
 const execFileAsync = promisify(execFile);
 
@@ -26,7 +27,8 @@ export class SpeechSessionLock {
 
   constructor(
     private readonly lockPath: string,
-    private readonly options: LockOptions = { stale: 10_000, update: 2_000 },
+    private readonly options: LockOptions = SESSION_LOCK_OPTIONS,
+    private readonly cleanupPreviousSession: () => Promise<unknown> = async () => undefined,
   ) {}
 
   async begin(): Promise<string | undefined> {
@@ -49,6 +51,12 @@ export class SpeechSessionLock {
     }
 
     this.sessions.set(sessionId, { release, isCompromised: () => compromised });
+    try {
+      await this.cleanupPreviousSession();
+    } catch (error) {
+      await this.end(sessionId);
+      throw error;
+    }
     return sessionId;
   }
 
@@ -71,7 +79,7 @@ export class SpeechSessionLock {
   }
 }
 
-const speechSessionLock = new SpeechSessionLock(SESSION_LOCK_PATH);
+const speechSessionLock = new SpeechSessionLock(SESSION_LOCK_PATH, SESSION_LOCK_OPTIONS, stopActivePlayback);
 
 export function isOwnedPlaybackCommand(command: string, audioFile: string): boolean {
   const normalizedCommand = command.trim();

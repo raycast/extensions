@@ -23,11 +23,17 @@ describe("isOwnedPlaybackCommand", () => {
 describe("speech sessions", () => {
   let directory: string;
   let sessionLock: SpeechSessionLock;
+  let cleanupPreviousSession: jest.Mock<Promise<boolean>, []>;
   const sessions: string[] = [];
 
   beforeEach(async () => {
     directory = await fs.mkdtemp(join(tmpdir(), "elevenlabs-tts-test-"));
-    sessionLock = new SpeechSessionLock(join(directory, "session"), { stale: 2_000, update: 1_000 });
+    cleanupPreviousSession = jest.fn().mockResolvedValue(false);
+    sessionLock = new SpeechSessionLock(
+      join(directory, "session"),
+      { stale: 2_000, update: 1_000 },
+      cleanupPreviousSession,
+    );
   });
 
   afterEach(async () => {
@@ -53,7 +59,7 @@ describe("speech sessions", () => {
     sessions.push(nextSession);
   });
 
-  it("recovers an abandoned session", async () => {
+  it("recovers an abandoned session and cleans up its playback", async () => {
     const lockDirectory = join(directory, "session.lock");
     await fs.mkdir(lockDirectory);
     const staleTime = new Date(Date.now() - 10_000);
@@ -62,6 +68,7 @@ describe("speech sessions", () => {
     const session = await sessionLock.begin();
 
     expect(session).toBeDefined();
+    expect(cleanupPreviousSession).toHaveBeenCalledTimes(1);
     if (!session) throw new Error("Expected to recover the abandoned session");
     sessions.push(session);
   });
