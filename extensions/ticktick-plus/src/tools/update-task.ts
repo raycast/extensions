@@ -5,11 +5,11 @@ import { runBatch, withContext } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
 import { parseDueDate } from "./lib/dates";
 import {
-  canonicalTaskLabel,
   findProjectByName,
   loadSyncData,
   priorityFromLabel,
   requireProject,
+  resolveTaskRefs,
   summarizeTask,
 } from "./lib/data";
 
@@ -58,36 +58,38 @@ type PreparedUpdate = {
   payload: UpdatePayload;
 };
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const tasks = input.tasks ?? [];
-  if (tasks.length <= 1) return undefined;
-  const sync = await loadSyncData();
-  return batchConfirmation(
-    tasks.length,
-    `Update ${tasks.length} tasks?`,
-    tasks.slice(0, 8).map((t) => ({ name: "Task", value: canonicalTaskLabel(sync.tasks, t) })),
-  );
-};
-
 /**
- * Update or reschedule TickTick tasks (title, due date, priority, tags, notes, project).
- * Call search-tasks first to obtain taskId and projectId.
+ * Validate the whole batch, resolve every task reference, and build each payload before
+ * the first write. Returns the prepared operations alongside the resolved titles so the
+ * confirmation and the tool describe the same tasks.
  */
-export default async function tool(input: Input) {
+async function prepareUpdates(input: Input): Promise<{ prepared: PreparedUpdate[]; titles: string[] }> {
   const updates = input.tasks ?? [];
   if (updates.length === 0) {
     throw new Error("Provide at least one task in `tasks`.");
   }
 
+  for (const [index, item] of updates.entries()) {
+    if (!item.taskId || !item.projectId) {
+      const context = updates.length > 1 ? `Update ${index + 1} of ${updates.length}: ` : "";
+      throw new Error(`${context}Each update requires taskId and projectId from search-tasks.`);
+    }
+  }
+
   const sync = await loadSyncData();
   const openProjects = sync.projects.filter((p) => !p.closed);
+
+  // Same guarantee as the other batch tools: a stale or cross-project reference is
+  // rejected here rather than by TickTick, once earlier updates have been written.
+  const resolved = await resolveTaskRefs(
+    updates.map((item) => ({ taskId: item.taskId, projectId: item.projectId })),
+    sync.tasks,
+  );
+
   const prepared: PreparedUpdate[] = [];
 
   for (const [index, item] of updates.entries()) {
     const context = updates.length > 1 ? `Update ${index + 1} of ${updates.length}: ` : "";
-    if (!item.taskId || !item.projectId) {
-      throw new Error(`${context}each update requires taskId and projectId from search-tasks.`);
-    }
     requireProject(sync.projects, item.projectId, context);
 
     let targetProjectId = item.targetProjectId?.trim() || undefined;
@@ -98,7 +100,7 @@ export default async function tool(input: Input) {
     } else if (item.targetProjectName) {
       const match = findProjectByName(openProjects, item.targetProjectName);
       if (!match) {
-        throw new Error(`${context}project "${item.targetProjectName}" not found.`);
+        throw new Error(`${context}Project "${item.targetProjectName}" not found.`);
       }
       targetProjectId = match.id;
     }
@@ -122,6 +124,28 @@ export default async function tool(input: Input) {
       },
     });
   }
+
+  return { prepared, titles: resolved.map((r) => r.title) };
+}
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const tasks = input.tasks ?? [];
+  if (tasks.length <= 1) return undefined;
+  const { titles } = await prepareUpdates(input);
+  return batchConfirmation(
+    titles.length,
+    `Update ${titles.length} tasks?`,
+    titles.slice(0, 8).map((title) => ({ name: "Task", value: title })),
+  );
+};
+
+/**
+ * Update or reschedule TickTick tasks (title, due date, priority, tags, notes, project).
+ * Call search-tasks first to obtain taskId and projectId.
+ */
+export default async function tool(input: Input) {
+  const { prepared } = await prepareUpdates(input);
+  const sync = await loadSyncData();
 
   const updated = await runBatch(prepared, async ({ moveFrom, payload }) => {
     // Move first so the update targets the project the task ends up in.

@@ -1,16 +1,4 @@
 /**
- * Run prepared batch operations sequentially.
- *
- * Callers validate and prepare the whole batch before calling this, so a locally
- * detectable problem never leaves earlier items persisted. A *remote* failure midway
- * cannot be prevented, so the error reports what may already be written — otherwise the
- * model sees a plain error and retries the batch, duplicating the applied work.
- *
- * The failing operation itself is reported as *possibly* applied: a lost or timed-out
- * response is indistinguishable from a rejected one, and TickTick has no idempotency key
- * to disambiguate, so a retry of that item can duplicate it.
- */
-/**
  * Prefix a preparation failure with the item's position in the batch. Validation helpers
  * that are shared with single-item paths (date parsing, project lookup) do not know their
  * position, so this keeps every preparation error pointing at the item that caused it.
@@ -25,6 +13,18 @@ export function withContext<T>(context: string, prepare: () => T): T {
   }
 }
 
+/**
+ * Run prepared batch operations sequentially.
+ *
+ * Callers validate and prepare the whole batch before calling this, so a locally
+ * detectable problem never leaves earlier items persisted. A *remote* failure midway
+ * cannot be prevented, so the error reports what may already be written — otherwise the
+ * model sees a plain error and retries the batch, duplicating the applied work.
+ *
+ * The failing operation itself is reported as *possibly* applied: a lost or timed-out
+ * response is indistinguishable from a rejected one, and TickTick has no idempotency key
+ * to disambiguate, so a retry of that item can duplicate it.
+ */
 export async function runBatch<T, R>(items: T[], run: (item: T) => Promise<R>): Promise<R[]> {
   const done: R[] = [];
   for (const item of items) {

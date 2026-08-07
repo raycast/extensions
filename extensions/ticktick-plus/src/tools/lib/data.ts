@@ -1,6 +1,7 @@
 import { batchSync } from "../../api/sync";
 import { getHabits } from "../../api/habits";
 import { getTask } from "../../api/tasks";
+import { isApiStatus } from "../../api/errors";
 import { Filter, Habit, Project, Tag, Task } from "../../types/ticktick";
 
 export interface SyncSnapshot {
@@ -70,9 +71,14 @@ export async function resolveTaskRefs(refs: TaskRef[], tasks: Task[]): Promise<R
       try {
         const task = await getTask(ref.projectId, ref.taskId);
         return { taskId: ref.taskId, projectId: ref.projectId, title: task.title };
-      } catch {
+      } catch (error) {
+        // Only a confirmed 404 means the reference is stale. Auth, rate-limit, network and
+        // server failures must surface as themselves — reporting them as "not found" would
+        // send the caller off correcting IDs that were never wrong.
+        if (!isApiStatus(error, 404)) throw error;
         throw new Error(
           `${context}task "${ref.taskId}" was not found in project "${ref.projectId}". Call search-tasks and retry with current IDs.`,
+          { cause: error },
         );
       }
     }),
