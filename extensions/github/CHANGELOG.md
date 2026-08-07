@@ -1,5 +1,14 @@
 # GitHub Changelog
 
+## [Clarify Clone and Download Actions] - {PR_MERGE_DATE}
+
+- Renamed repository actions and the **Download Repository as ZIP** command so clone (`git clone`) and ZIP download flows are clearly distinct.
+- Renamed the **Clone Path** preference to **Default Clone Path** and clarified that it applies only to clone actions, not ZIP downloads or AI-assisted flows.
+- **Clone with Options** now starts at your Default Clone Path when one is set, with inline guidance on how to override it for a single clone.
+- **Download as ZIP** forms explain that archives do not create a Git repository and do not use the Default Clone Path.
+- README: added a **Cloning and Downloading Repositories** section describing when to use each flow.
+- Normalized action titles to Title Case (`Enable Auto-Merge`, `Re-Run Workflow`, `Sort by`).
+
 ## [View Pull Request Diffs] - 2026-08-06
 
 - Added a "View Diff" action to pull requests, showing changed files with per-file patches that load progressively as you scroll.
@@ -51,7 +60,7 @@
 - Added a `Refresh Frequency` preference (15 minutes / 30 minutes / 1 hour / 2 hours, default 30 minutes) so users can balance freshness against GitHub API quota usage.
 - Each organization is now a submenu with quick access to **Open Profile**, **Repositories**, **People** and **Projects** instead of just opening the organization homepage.
 - `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the _Stats_ menu bar enabled — the dedicated _My Pull Requests Menu Bar_ and _My Issues Menu Bar_ commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
-- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the *Stats* menu bar enabled — the dedicated *My Pull Requests Menu Bar* and *My Issues Menu Bar* commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
+- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the _Stats_ menu bar enabled — the dedicated _My Pull Requests Menu Bar_ and _My Issues Menu Bar_ commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
 
 ## [Download Repository Command] - 2026-04-28
 
