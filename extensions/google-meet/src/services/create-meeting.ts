@@ -81,6 +81,7 @@ export async function createMeeting(options: CreateMeetingOptions): Promise<Crea
     const rawUrl = await waitForMeetingUrl(() => adapter.getCandidateUrls(), {
       timeoutMs: getPollTimeoutMs(),
       intervalMs: POLL_INTERVAL_MS,
+      describeTimeout: () => adapter.describeTimeout?.() ?? Promise.resolve(undefined),
     });
 
     const meetingUrl = normalizeMeetingUrl(rawUrl);
