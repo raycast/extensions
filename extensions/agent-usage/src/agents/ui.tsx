@@ -4,6 +4,7 @@ import * as fs from "fs";
 import * as path from "path";
 import type { Accessory } from "./types.ts";
 import { invertMonochromeSvg, scaleSvgViewBox } from "./icon-svg.ts";
+export { generateAsciiBar } from "./detail-format.ts";
 
 type ErrorLike = { type: string; message: string };
 const LIST_ICON_SCALE = 0.8;
@@ -14,12 +15,6 @@ function getProgressColor(percent: number): string {
   if (percent >= 50) return "#30D158";
   if (percent >= 20) return "#FF9F0A";
   return "#FF453A";
-}
-
-export function generateAsciiBar(percent: number, width = 15): string {
-  const p = Math.max(0, Math.min(100, percent));
-  const filled = Math.round((p / 100) * width);
-  return "▰".repeat(filled) + "▱".repeat(width - filled);
 }
 
 export function generatePieIcon(percent: number): Image.ImageLike {
@@ -124,7 +119,6 @@ export function renderErrorDetail(error: { type: string; message: string }): Rea
       <List.Item.Detail.Metadata.Label title="Status" text="Error" />
       <List.Item.Detail.Metadata.Separator />
       <List.Item.Detail.Metadata.Label title="Error Type" text={error.type} />
-      <List.Item.Detail.Metadata.Label title="Message" text={error.message} />
     </List.Item.Detail.Metadata>
   );
 }

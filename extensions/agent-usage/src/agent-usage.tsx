@@ -16,6 +16,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Accessory, AgentDefinition, AgentId, AgentVisibilityPreferences, UsageState } from "./agents/types.ts";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
 import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId } from "./agents/order.ts";
+import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import {
   useAmpUsage,
   useAntigravityUsage,
@@ -125,6 +126,7 @@ type AgentRegistry = {
 };
 
 interface AgentView extends AgentDefinition {
+  error: ErrorLike | null;
   isVisible: boolean;
   isLoading: boolean;
   revalidate: () => Promise<void>;
@@ -145,6 +147,7 @@ interface AccountedAgentView {
   /** Provider icon */
   icon: string;
   settingsUrl?: string;
+  error: ErrorLike | null;
   isVisible: boolean;
   isLoading: boolean;
   revalidate: () => Promise<void>;
@@ -347,6 +350,7 @@ function createAgentView<TUsage, TError extends ErrorLike>(
     description: config.description,
     isSupported: config.isSupported,
     settingsUrl: config.settingsUrl,
+    error: state.error,
     isVisible,
     isLoading: state.isLoading,
     lastFetchedAt: state.lastFetchedAt,
@@ -376,6 +380,7 @@ function createAccountedViews<TUsage, TError extends { type: string; message: st
     title: formatTitle(providerName, state.label),
     icon,
     settingsUrl,
+    error: state.error,
     isVisible,
     isLoading: state.isLoading,
     lastFetchedAt: state.lastFetchedAt,
@@ -685,6 +690,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
             const agent = row.view;
             const accessory = agent.getAccessory();
             const detail = agent.renderDetail();
+            const errorMarkdown = agent.error ? formatErrorMarkdown(agent.error.message) : undefined;
             const canMoveUp = index > 0;
             const canMoveDown = index < allRows.length - 1;
 
@@ -696,7 +702,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                 title={agent.name}
                 subtitle={agent.isSupported ? undefined : "(Coming Soon)"}
                 accessories={[{ icon: accessory.icon, text: accessory.text, tooltip: accessory.tooltip }]}
-                detail={<List.Item.Detail metadata={detail} />}
+                detail={<List.Item.Detail markdown={errorMarkdown} metadata={detail} />}
                 actions={
                   <ActionPanel>
                     {agent.isSupported && (
@@ -748,6 +754,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
             const view = row.view;
             const accessory = view.getAccessory();
             const detail = view.renderDetail();
+            const errorMarkdown = view.error ? formatErrorMarkdown(view.error.message) : undefined;
             const canMoveUp = index > 0;
             const canMoveDown = index < allRows.length - 1;
 
@@ -768,7 +775,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                     : []),
                   { icon: accessory.icon, text: accessory.text, tooltip: accessory.tooltip },
                 ]}
-                detail={<List.Item.Detail metadata={detail} />}
+                detail={<List.Item.Detail markdown={errorMarkdown} metadata={detail} />}
                 actions={
                   <ActionPanel>
                     <Action title={refreshTitle} icon={Icon.ArrowClockwise} onAction={handleRefresh} />
