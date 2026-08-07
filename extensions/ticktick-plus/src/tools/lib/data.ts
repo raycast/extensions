@@ -46,6 +46,21 @@ export function canonicalTaskLabel(tasks: Task[], ref: { taskId: string; project
   return tasks.find((t) => t.id === ref.taskId && t.projectId === ref.projectId)?.title ?? ref.taskId;
 }
 
+/**
+ * Resolve a caller-supplied project ID against synced projects. A non-empty but unknown
+ * ID would otherwise pass local preparation and only fail once TickTick rejects it,
+ * which in a batch means earlier items are already written.
+ */
+export function requireProject(projects: Project[], projectId: string, context = ""): Project {
+  const found = projects.find((p) => p.id === projectId);
+  if (!found) {
+    throw new Error(
+      `${context}Project "${projectId}" not found. Call list-projects and retry with a current projectId.`,
+    );
+  }
+  return found;
+}
+
 export function findProjectByName(projects: Project[], name: string): Project | undefined {
   const q = name.trim().toLowerCase();
   if (!q) return undefined;

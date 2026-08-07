@@ -3,7 +3,7 @@ import { createTask } from "../api/tasks";
 import { runBatch } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
 import { parseDueDate } from "./lib/dates";
-import { findProjectByName, loadSyncData, priorityFromLabel, summarizeTask } from "./lib/data";
+import { findProjectByName, loadSyncData, priorityFromLabel, requireProject, summarizeTask } from "./lib/data";
 
 type TaskInput = {
   /** Task title */
@@ -60,15 +60,20 @@ export default async function tool(input: Input) {
   const openProjects = sync.projects.filter((p) => !p.closed);
   const prepared: PreparedTask[] = [];
 
-  for (const item of tasks) {
+  for (const [index, item] of tasks.entries()) {
+    const context = tasks.length > 1 ? `Task ${index + 1} of ${tasks.length}: ` : "";
     const title = item.title?.trim();
-    if (!title) throw new Error("Each task needs a title.");
+    if (!title) throw new Error(`${context}each task needs a title.`);
 
     let projectId = item.projectId?.trim() || undefined;
-    if (!projectId && item.projectName) {
+    if (projectId) {
+      // Verify the ID here, not at the API call — an unknown ID rejected mid-batch would
+      // leave the tasks prepared before it already created.
+      projectId = requireProject(sync.projects, projectId, context).id;
+    } else if (item.projectName) {
       const match = findProjectByName(openProjects, item.projectName);
       if (!match) {
-        throw new Error(`Project "${item.projectName}" not found. Call list-projects and retry with a projectId.`);
+        throw new Error(`${context}project "${item.projectName}" not found. Call list-projects and retry.`);
       }
       projectId = match.id;
     }

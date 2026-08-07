@@ -3,7 +3,14 @@ import { updateTask } from "../api/tasks";
 import { runBatch } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
 import { parseDueDate } from "./lib/dates";
-import { canonicalTaskLabel, findProjectByName, loadSyncData, priorityFromLabel, summarizeTask } from "./lib/data";
+import {
+  canonicalTaskLabel,
+  findProjectByName,
+  loadSyncData,
+  priorityFromLabel,
+  requireProject,
+  summarizeTask,
+} from "./lib/data";
 
 type TaskUpdate = {
   /** Task ID from search-tasks or get-task */
@@ -69,16 +76,22 @@ export default async function tool(input: Input) {
   const openProjects = sync.projects.filter((p) => !p.closed);
   const prepared: PreparedUpdate[] = [];
 
-  for (const item of updates) {
+  for (const [index, item] of updates.entries()) {
+    const context = updates.length > 1 ? `Update ${index + 1} of ${updates.length}: ` : "";
     if (!item.taskId || !item.projectId) {
-      throw new Error("Each update requires taskId and projectId from search-tasks.");
+      throw new Error(`${context}each update requires taskId and projectId from search-tasks.`);
     }
+    requireProject(sync.projects, item.projectId, context);
 
-    let targetProjectId = item.targetProjectId;
-    if (!targetProjectId && item.targetProjectName) {
+    let targetProjectId = item.targetProjectId?.trim() || undefined;
+    if (targetProjectId) {
+      // Validate before any update runs, so an unknown destination cannot be rejected
+      // remotely after earlier updates were written.
+      targetProjectId = requireProject(sync.projects, targetProjectId, context).id;
+    } else if (item.targetProjectName) {
       const match = findProjectByName(openProjects, item.targetProjectName);
       if (!match) {
-        throw new Error(`Project "${item.targetProjectName}" not found.`);
+        throw new Error(`${context}project "${item.targetProjectName}" not found.`);
       }
       targetProjectId = match.id;
     }

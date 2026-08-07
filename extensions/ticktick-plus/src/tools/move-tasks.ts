@@ -2,7 +2,7 @@ import { Tool } from "@raycast/api";
 import { moveTask } from "../api/tasks";
 import { runBatch } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
-import { canonicalTaskLabel, findProjectByName, loadSyncData } from "./lib/data";
+import { canonicalTaskLabel, findProjectByName, loadSyncData, requireProject } from "./lib/data";
 
 type TaskMove = {
   /** Task ID */
@@ -38,6 +38,12 @@ async function prepareMoves(input: Input): Promise<{ moves: PreparedMove[]; toPr
   const sync = await loadSyncData();
   const openProjects = sync.projects.filter((p) => !p.closed);
 
+  // Validate every source project before the first move, so an unknown ID cannot be
+  // rejected remotely after earlier tasks have already moved.
+  tasks.forEach((task, index) =>
+    requireProject(sync.projects, task.fromProjectId, tasks.length > 1 ? `Task ${index + 1} of ${tasks.length}: ` : ""),
+  );
+
   let toProjectId = input.toProjectId?.trim();
   if (!toProjectId && input.toProjectName) {
     const match = findProjectByName(openProjects, input.toProjectName);
@@ -48,10 +54,7 @@ async function prepareMoves(input: Input): Promise<{ moves: PreparedMove[]; toPr
     throw new Error("Provide toProjectId or toProjectName.");
   }
 
-  const destination = sync.projects.find((p) => p.id === toProjectId);
-  if (!destination) {
-    throw new Error(`Project "${toProjectId}" not found. Call list-projects and retry with a current projectId.`);
-  }
+  const destination = requireProject(sync.projects, toProjectId);
 
   return {
     toProjectName: destination.name,
