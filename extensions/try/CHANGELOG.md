@@ -1,5 +1,12 @@
 # try Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- The "Created" confirmation now clears itself instead of staying on screen after you leave Raycast
+- Renamed "Delete" to "Move to Trash", which is what it always did — directories go to the system Trash and can be restored from there
+- Removed the confirmation prompt's incorrect "This cannot be undone" warning
+- Moving a directory to the Trash no longer asks for confirmation, and confirms with a HUD once it completes
+
 ## [Improvements] - 2026-06-19
 
 - Clone now runs asynchronously with a live progress toast, so the UI no longer freezes during the clone
