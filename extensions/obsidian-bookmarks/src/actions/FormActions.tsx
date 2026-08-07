@@ -1,10 +1,21 @@
-import { Action, Color, FileIcon, Icon, popToRoot, showHUD, BrowserExtension, showToast, Toast } from "@raycast/api";
-import { useMemo } from "react";
-import { asFile } from "../helpers/save-to-obsidian";
+import {
+  Action,
+  Color,
+  FileIcon,
+  Icon,
+  popToRoot,
+  showHUD,
+  BrowserExtension,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { useCallback, useMemo } from "react";
+import { asFile, asUpdatedFile } from "../helpers/save-to-obsidian";
 import { useFileIcon } from "../hooks/use-applications";
 import { LinkFormState } from "../hooks/use-link-form";
 import { usePreference } from "../hooks/use-preferences";
-import { FormActionPreference } from "../types";
+import { File, FormActionPreference } from "../types";
 import * as methods from "./methods";
 import { ActionGroup, OrderedActionPanel } from "./order-manager";
 import { clearCache } from "../helpers/clear-cache";
@@ -151,6 +162,29 @@ const createBrowserActions = (values: LinkFormState["values"]): ActionGroup<Form
   ]),
 });
 
+const createUpdateActions = (
+  values: LinkFormState["values"],
+  file: File,
+  onUpdated: (saved: File) => void,
+  icon?: FileIcon
+): ActionGroup<FormActionPreference> => ({
+  key: "update",
+  useDivider: "never",
+  icon,
+  actions: new Map<FormActionPreference, Action.Props>([
+    [
+      "saveChanges",
+      {
+        title: "Update Bookmark",
+        onAction: async () => {
+          const saved = await methods.saveFile(asUpdatedFile(values, file), true);
+          onUpdated(saved);
+        },
+      },
+    ],
+  ]),
+});
+
 const createDestructiveActions = (): ActionGroup<FormActionPreference> => ({
   key: "destructive",
   useDivider: "always",
@@ -173,16 +207,38 @@ const createDestructiveActions = (): ActionGroup<FormActionPreference> => ({
 export type FormActionsProps = {
   values: LinkFormState["values"];
   setValues: (values: LinkFormState["values"]) => void;
+  file?: File;
+  onSaved?: (file: File) => void;
 };
 
-export default function FormActions({ values, setValues }: FormActionsProps): JSX.Element {
+export default function FormActions({ values, setValues, file, onSaved }: FormActionsProps): JSX.Element {
   const { value: obsidianIcon } = useFileIcon("Obsidian");
   const { value: defaultAction } = usePreference("defaultFormAction");
+  const { pop } = useNavigation();
+
+  const onUpdated = useCallback(
+    (saved: File) => {
+      onSaved?.(saved);
+      pop();
+      showToast({ style: Toast.Style.Success, title: "Bookmark updated" });
+    },
+    [onSaved, pop]
+  );
 
   const obsidianActions = useMemo(() => createObsidianActions(values, obsidianIcon), [values, obsidianIcon]);
   const browserActions = useMemo(() => createBrowserActions(values), [values]);
   const contentActions = useMemo(() => createContentActions(values, setValues), [values, setValues]);
   const destructiveActions = useMemo(() => createDestructiveActions(), []);
+  const updateActions = useMemo(
+    () => (file ? createUpdateActions(values, file, onUpdated, obsidianIcon) : undefined),
+    [values, file, onUpdated, obsidianIcon]
+  );
+
+  if (updateActions) {
+    return (
+      <OrderedActionPanel groups={[updateActions, contentActions, destructiveActions]} defaultAction="saveChanges" />
+    );
+  }
 
   return (
     <OrderedActionPanel

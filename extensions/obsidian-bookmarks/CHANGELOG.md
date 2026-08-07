@@ -7,6 +7,16 @@
 - Suggest matching tags while typing `#`, completed with Tab or Enter
 - Fix bookmark search not matching titles, tags and URLs: those keys pointed at fields that don't exist on the indexed object, so only note contents were searched
 
+## [Edit Bookmarks] - {PR_MERGE_DATE}
+
+- Add an "Edit Bookmark" action (<kbd>⌘</kbd>+<kbd>E</kbd>) to search results. It reopens the save form, prefilled with the bookmark's URL, title, favicon, tags and notes, and writes the changes back to the same note — its filename, save date and read state are left untouched.
+
+## [Favicons] - {PR_MERGE_DATE}
+
+- Show the favicon of each bookmarked website in search results, instead of a generic link icon. Falls back to the link icon when no favicon can be found.
+- Allow overriding that favicon from a frontmatter field (configurable via the new "Favicon Field" preference; default is `favicon`). The value can be another website URL or a direct image URL.
+- Add an optional "Favicon" dropdown to the save bookmark form. Typing a URL in its search field turns it into a selectable option showing the icon it resolves to, so the resulting icon is visible before saving.
+
 ## [1.0.5] - 2024-11-26
 
 - Search for bookmarks in subfolders below the configured Bookmarks subfolder. This option is configurable via a new preferences checkbox; default is true (enabled subfolder search).

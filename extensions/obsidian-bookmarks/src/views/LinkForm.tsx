@@ -1,27 +1,61 @@
 import { Form, showToast, Toast, getPreferenceValues } from "@raycast/api";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import FormActions from "../actions/FormActions";
+import getFaviconIcon, { describeFaviconSource } from "../helpers/get-favicon-icon";
+import { asFormValues } from "../helpers/save-to-obsidian";
 import { findDuplicateBookmark } from "../helpers/url-sanitizer";
 import useFiles from "../hooks/use-files";
 import useLinkForm from "../hooks/use-link-form";
 import useTags from "../hooks/use-tags";
 import * as methods from "../actions/methods";
-import { Preferences } from "../types";
+import { File, Preferences } from "../types";
 
-export default function LinkForm() {
-  const { values, onChange, setValues, loading: linkLoading } = useLinkForm();
+type Props = {
+  file?: File;
+  onSaved?: (file: File) => void;
+};
+
+export default function LinkForm({ file, onSaved }: Props = {}) {
+  const isEditing = file != null;
+  const initialValues = useMemo(() => (file ? asFormValues(file) : undefined), [file]);
+
+  const {
+    values,
+    onChange,
+    setValues,
+    loading: linkLoading,
+  } = useLinkForm(initialValues, { detectFrontmostLink: !isEditing });
   const { tags, loading: tagsLoading } = useTags();
   const { files, loading: filesLoading } = useFiles();
   const toastRef = useRef<Toast>();
   const [hasShownToast, setHasShownToast] = useState(false);
   const [isDuplicate, setIsDuplicate] = useState(false);
+  const [faviconQuery, setFaviconQuery] = useState("");
+
+  const tagOptions = useMemo(() => Array.from(new Set([...tags, ...(file?.attributes.tags ?? [])])), [tags, file]);
+
+  // The favicon dropdown doubles as a text field: whatever is typed in its
+  // search bar becomes a selectable option, so the chosen icon can be shown
+  // inside the field itself. The first option always clears the override.
+  const faviconOptions = useMemo(() => {
+    const values_ = [""];
+    const committed = values.favicon.trim();
+    const typed = faviconQuery.trim();
+    if (committed) values_.push(committed);
+    if (typed && typed !== committed) values_.push(typed);
+
+    return values_.map((value) => {
+      const attributes = { source: values.url, favicon: value || null };
+      return { value, title: describeFaviconSource(attributes), icon: getFaviconIcon(attributes) };
+    });
+  }, [values.url, values.favicon, faviconQuery]);
 
   // Handle URL validation and duplicate checking
   const validateUrl = useCallback(
     async (url: string) => {
       const { checkDuplicates } = getPreferenceValues<Preferences>();
 
-      if (!url || filesLoading || !checkDuplicates) {
+      if (!url || isEditing || filesLoading || !checkDuplicates) {
         setIsDuplicate(false);
         return;
       }
@@ -42,7 +76,7 @@ export default function LinkForm() {
         setIsDuplicate(false);
       }
     },
-    [files, filesLoading]
+    [files, filesLoading, isEditing]
   );
 
   // Check for duplicates whenever URL changes
@@ -52,6 +86,8 @@ export default function LinkForm() {
 
   // Handle loading toast
   useEffect(() => {
+    if (isEditing) return;
+
     if (linkLoading && !hasShownToast) {
       showToast({
         title: "Fetching link details",
@@ -68,13 +104,13 @@ export default function LinkForm() {
     return () => {
       toastRef.current?.hide();
     };
-  }, [linkLoading, hasShownToast]);
+  }, [linkLoading, hasShownToast, isEditing]);
 
   return (
     <Form
-      navigationTitle="Save Bookmark"
+      navigationTitle={isEditing ? "Edit Bookmark" : "Save Bookmark"}
       isLoading={tagsLoading || linkLoading || filesLoading}
-      actions={<FormActions values={values} setValues={setValues} />}
+      actions={<FormActions values={values} setValues={setValues} file={file} onSaved={onSaved} />}
     >
       <Form.TextField
         id="url"
@@ -84,8 +120,29 @@ export default function LinkForm() {
         error={isDuplicate ? "This URL is already bookmarked" : undefined}
       />
       <Form.TextField id="title" title="Title" value={values.title} onChange={onChange("title")} />
+      <Form.Dropdown
+        id="favicon"
+        title="Favicon"
+        placeholder="Type a website or image URL…"
+        info="Optional. A website URL to borrow the favicon from, or a direct link to an image. Leave on the first option to use the URL above."
+        filtering={false}
+        value={values.favicon}
+        // Typing commits the value, so it isn't lost when the dropdown closes
+        // without an explicit selection. Blank searches are ignored, because
+        // Raycast resets the search text on close — clearing the override is
+        // done by picking the first option instead.
+        onSearchTextChange={(text) => {
+          setFaviconQuery(text);
+          if (text.trim()) onChange("favicon")(text.trim());
+        }}
+        onChange={onChange("favicon")}
+      >
+        {faviconOptions.map((option) => (
+          <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} icon={option.icon} />
+        ))}
+      </Form.Dropdown>
       <Form.TagPicker id="tags" title="Tags" value={values.tags} onChange={onChange("tags")}>
-        {tags.map((tag) => (
+        {tagOptions.map((tag) => (
           <Form.TagPicker.Item title={tag} value={tag} key={tag} />
         ))}
       </Form.TagPicker>

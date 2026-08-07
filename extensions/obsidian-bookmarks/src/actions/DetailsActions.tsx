@@ -1,16 +1,30 @@
-import { Action, Alert, Color, confirmAlert, FileIcon, Icon, showHUD } from "@raycast/api";
-import { Dispatch, SetStateAction, useMemo } from "react";
-import { useFileIcon } from "../hooks/use-applications";
-import { usePreference } from "../hooks/use-preferences";
+import {
+  Action,
+  Alert,
+  Color,
+  confirmAlert,
+  FileIcon,
+  Icon,
+  showHUD,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { Dispatch, SetStateAction, useCallback, useMemo } from "react";
+import { ApplicationsProvider, useFileIcon } from "../hooks/use-applications";
+import { PreferencesProvider, usePreference } from "../hooks/use-preferences";
 import { DetailActionPreference, File } from "../types";
+import LinkForm from "../views/LinkForm";
 import * as methods from "./methods";
 import { ActionGroup, OrderedActionPanel } from "./order-manager";
 import { clearCache } from "../helpers/clear-cache";
+import readBookmarkBody from "../helpers/read-bookmark-body";
 
 const createDetailsActions = (
   file: File,
   showDetail: boolean,
-  setShowDetail: Dispatch<SetStateAction<boolean>>
+  setShowDetail: Dispatch<SetStateAction<boolean>>,
+  editBookmark: () => void
 ): ActionGroup<DetailActionPreference> => ({
   key: "details",
   useDivider: "unless-first",
@@ -22,6 +36,15 @@ const createDetailsActions = (
         icon: showDetail ? Icon.EyeSlash : Icon.Eye,
         shortcut: { modifiers: ["cmd"], key: "i" },
         onAction: () => setShowDetail((detail) => !detail),
+      },
+    ],
+    [
+      "editBookmark",
+      {
+        title: "Edit Bookmark",
+        icon: Icon.Pencil,
+        shortcut: { modifiers: ["cmd"], key: "e" },
+        onAction: editBookmark,
       },
     ],
   ]),
@@ -161,19 +184,48 @@ export type DetailsActionsProps = {
   file: File;
   showDetail: boolean;
   setShowDetail: Dispatch<SetStateAction<boolean>>;
+  onFileUpdated?: (file: File) => void;
 };
-export default function DetailsActions({ file, showDetail, setShowDetail }: DetailsActionsProps): JSX.Element {
+export default function DetailsActions({
+  file,
+  showDetail,
+  setShowDetail,
+  onFileUpdated,
+}: DetailsActionsProps): JSX.Element {
   const { value: obsidianFileIcon } = useFileIcon("Obsidian");
   const { value: defaultAction } = usePreference("defaultItemAction");
+  const { push } = useNavigation();
+
+  const editBookmark = useCallback(async () => {
+    let body: string;
+    try {
+      body = await readBookmarkBody(file.fullPath);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Couldn't read this bookmark",
+        message: error instanceof Error ? error.message : String(error),
+      });
+      return;
+    }
+
+    push(
+      <ApplicationsProvider>
+        <PreferencesProvider>
+          <LinkForm file={{ ...file, body }} onSaved={onFileUpdated} />
+        </PreferencesProvider>
+      </ApplicationsProvider>
+    );
+  }, [push, file, onFileUpdated]);
 
   const groups = useMemo(() => {
     return [
-      createDetailsActions(file, showDetail, setShowDetail),
+      createDetailsActions(file, showDetail, setShowDetail, editBookmark),
       createBrowserActions(file),
       createObsidianActions(file, obsidianFileIcon),
       createDestructiveActions(file),
     ];
-  }, [file, obsidianFileIcon, showDetail, setShowDetail, obsidianFileIcon]);
+  }, [file, obsidianFileIcon, showDetail, setShowDetail, editBookmark]);
 
   return <OrderedActionPanel groups={groups} defaultAction={defaultAction} />;
 }
