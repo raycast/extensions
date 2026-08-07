@@ -1,5 +1,7 @@
 import { batchSync } from "../../api/sync";
 import { getHabits } from "../../api/habits";
+import { getTask } from "../../api/tasks";
+import { isApiStatus } from "../../api/errors";
 import { Filter, Habit, Project, Tag, Task } from "../../types/ticktick";
 
 export interface SyncSnapshot {
@@ -44,6 +46,43 @@ export function summarizeTask(task: Task, projectName?: string) {
  */
 export function canonicalTaskLabel(tasks: Task[], ref: { taskId: string; projectId: string }): string {
   return tasks.find((t) => t.id === ref.taskId && t.projectId === ref.projectId)?.title ?? ref.taskId;
+}
+
+export type TaskRef = { taskId: string; projectId: string };
+export type ResolvedTaskRef = { taskId: string; projectId: string; title: string };
+
+/**
+ * Resolve every task reference in a batch to a real task before anything is mutated.
+ *
+ * A reference that resolves to nothing — a stale ID, or a task paired with the project it
+ * used to live in — would otherwise be labelled with its raw ID and only rejected by
+ * TickTick once earlier items in the batch had already been completed or deleted.
+ *
+ * The active snapshot excludes completed tasks, so an unmatched reference is confirmed
+ * against the API rather than assumed invalid.
+ */
+export async function resolveTaskRefs(refs: TaskRef[], tasks: Task[]): Promise<ResolvedTaskRef[]> {
+  return Promise.all(
+    refs.map(async (ref, index) => {
+      const context = refs.length > 1 ? `Task ${index + 1} of ${refs.length}: ` : "";
+      const known = tasks.find((t) => t.id === ref.taskId && t.projectId === ref.projectId);
+      if (known) return { taskId: ref.taskId, projectId: ref.projectId, title: known.title };
+
+      try {
+        const task = await getTask(ref.projectId, ref.taskId);
+        return { taskId: ref.taskId, projectId: ref.projectId, title: task.title };
+      } catch (error) {
+        // Only a confirmed 404 means the reference is stale. Auth, rate-limit, network and
+        // server failures must surface as themselves — reporting them as "not found" would
+        // send the caller off correcting IDs that were never wrong.
+        if (!isApiStatus(error, 404)) throw error;
+        throw new Error(
+          `${context}task "${ref.taskId}" was not found in project "${ref.projectId}". Call search-tasks and retry with current IDs.`,
+          { cause: error },
+        );
+      }
+    }),
+  );
 }
 
 /**
