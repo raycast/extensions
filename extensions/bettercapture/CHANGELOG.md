@@ -1,6 +1,6 @@
 # BetterCapture Changelog
 
-## [Toggle and Copy Preference] - {PR_MERGE_DATE}
+## [Toggle and Copy Preference] - 2026-08-07
 
 - Added Toggle Action preference to choose whether stopping a recording also copies the file to the clipboard
 
