@@ -1,5 +1,10 @@
 # Typefully Changelog
 
+## [Windows Support] - 2026-08-07
+
+- Add Windows as a supported platform
+- Use platform-specific keyboard shortcuts for Show/Hide Preview and Delete Draft actions
+
 ## [Enhancements] - 2026-07-28
 
 - Add core-workflow AI evals for create/list/get/schedule/publish, social sets, comments, queue+analytics, LinkedIn mentions, and X Articles
