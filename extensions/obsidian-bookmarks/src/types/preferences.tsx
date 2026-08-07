@@ -23,5 +23,4 @@ export interface Preferences {
   useBrowserExtension: boolean;
   searchRecursively: boolean;
   checkDuplicates: boolean;
-  faviconField?: string;
 }

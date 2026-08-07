@@ -4,7 +4,6 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import frontMatter from "front-matter";
 import { File, FrontMatter, Preferences } from "../types";
-import getFaviconField from "./favicon-field";
 import { replaceLocalStorageFiles } from "./localstorage-files";
 import { getOrCreateBookmarksPath, getVaultPath } from "./vault-path";
 import tagify from "../helpers/tagify";
@@ -49,13 +48,6 @@ async function getMarkdownFiles(dir: string, ignorePaths: string[]): Promise<Arr
   return results.flat();
 }
 
-function getFaviconOverride(attributes: Record<string, unknown>): string | null {
-  const value = attributes[getFaviconField()];
-  if (typeof value !== "string" || !value.trim()) return null;
-
-  return value.trim();
-}
-
 function extractFrontMatter(content: string): {
   attributes: FrontMatter;
   frontmatter: string | null;
@@ -67,7 +59,6 @@ function extractFrontMatter(content: string): {
     const attributes: FrontMatter = {
       source: typeof result.attributes.source === "string" ? result.attributes.source : "",
       publisher: typeof result.attributes.publisher === "string" ? result.attributes.publisher : null,
-      favicon: getFaviconOverride(result.attributes),
       title: typeof result.attributes.title === "string" ? result.attributes.title : "",
       tags: Array.isArray(result.attributes.tags)
         ? result.attributes.tags.filter((tag) => typeof tag === "string")
@@ -92,7 +83,6 @@ function extractFrontMatter(content: string): {
       attributes: {
         source: "",
         publisher: null,
-        favicon: null,
         title: "",
         tags: [],
         saved: new Date(),

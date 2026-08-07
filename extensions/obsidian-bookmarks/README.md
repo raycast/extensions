@@ -45,34 +45,6 @@ If unchanged, the default action is "Show Details", which will open a details pa
 
 See [Default Form Action](#default-form-action) for a list of other possible actions to pick from.
 
-### Favicon Field
-
-Search results show the favicon of each bookmarked website, falling back to a generic link icon when none can be found.
-
-This preference names the frontmatter field used to override that favicon (default: `favicon`). Its value can either be another website, whose favicon is then used:
-
-```yaml
----
-title: "Some redirect"
-source: "https://t.co/xxxxxxx"
-favicon: "https://stripe.com"
----
-```
-
-...or a direct link to an image, which is used as-is. A value counts as an image when its path ends in `.png`, `.jpg`, `.jpeg`, `.gif`, `.svg`, `.webp`, `.ico`, `.bmp`, or `.avif`:
-
-```yaml
-favicon: "https://cdn.example.com/logos/acme.png"
-```
-
-The scheme is optional, so `favicon: notion.so` works too. Values that aren't `http(s)` URLs are ignored, and the icon falls back to the one derived from `source`.
-
-Left blank, this preference falls back to `favicon`.
-
-The **Save Bookmark** form exposes this as an optional "Favicon" dropdown. Type a URL into its search field and it becomes a selectable option, showing the icon it resolves to — so you can see the icon the bookmark will get before saving it. The first option always falls back to the bookmark's own URL.
-
-Note that bookmarks are cached, so changing this preference (or an existing `favicon` value) only takes effect once the note is modified — run the **Clear Cache** command to refresh everything at once.
-
 ## Screenshots
 
 ![Save a bookmark to Obsidian](./metadata/screenshot2.png)

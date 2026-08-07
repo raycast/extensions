@@ -7,7 +7,6 @@ export interface LinkFormState {
   values: {
     title: string;
     url: string;
-    favicon: string;
     tags: string[];
     description: string;
   };
@@ -69,7 +68,6 @@ export default function useLinkForm(initialValues: Partial<LinkFormState["values
     hasUpdatedWithLink: false,
     values: {
       description: "",
-      favicon: "",
       tags: [],
       title: "",
       url: "",
