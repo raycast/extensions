@@ -1,8 +1,9 @@
 import { Tool } from "@raycast/api";
 import { updateTask } from "../api/tasks";
+import { runBatch } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
 import { parseDueDate } from "./lib/dates";
-import { findProjectByName, loadSyncData, priorityFromLabel, summarizeTask } from "./lib/data";
+import { canonicalTaskLabel, findProjectByName, loadSyncData, priorityFromLabel, summarizeTask } from "./lib/data";
 
 type TaskUpdate = {
   /** Task ID from search-tasks or get-task */
@@ -45,10 +46,12 @@ type PreparedUpdate = {
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const tasks = input.tasks ?? [];
+  if (tasks.length <= 1) return undefined;
+  const sync = await loadSyncData();
   return batchConfirmation(
     tasks.length,
     `Update ${tasks.length} tasks?`,
-    tasks.slice(0, 8).map((t) => ({ name: "Task ID", value: t.taskId })),
+    tasks.slice(0, 8).map((t) => ({ name: "Task", value: canonicalTaskLabel(sync.tasks, t) })),
   );
 };
 
@@ -95,12 +98,11 @@ export default async function tool(input: Input) {
     });
   }
 
-  const results = [];
-  for (const payload of prepared) {
+  const updated = await runBatch(prepared, async (payload) => {
     const task = await updateTask(payload);
     const projectName = sync.projects.find((p) => p.id === task.projectId)?.name;
-    results.push(summarizeTask(task, projectName));
-  }
+    return summarizeTask(task, projectName);
+  });
 
-  return { updated: results, count: results.length };
+  return { updated, count: updated.length };
 }

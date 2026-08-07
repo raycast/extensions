@@ -18,12 +18,13 @@ type ResolvedProject = {
 async function resolveProject(input: Input): Promise<ResolvedProject> {
   const sync = await loadSyncData();
   if (input.projectId) {
+    // Resolve rather than trust: an ID that is not in the account cannot be described
+    // honestly in the confirmation, so refuse it instead of deleting an unknown project.
     const found = sync.projects.find((p) => p.id === input.projectId);
-    return {
-      sync,
-      projectId: input.projectId,
-      projectName: found?.name ?? input.projectId,
-    };
+    if (!found) {
+      throw new Error(`Project "${input.projectId}" not found. Call list-projects and retry with a current projectId.`);
+    }
+    return { sync, projectId: found.id, projectName: found.name };
   }
   if (input.projectName) {
     const match = findProjectByName(sync.projects, input.projectName);
@@ -34,18 +35,17 @@ async function resolveProject(input: Input): Promise<ResolvedProject> {
 }
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  let label = input.projectId ?? input.projectName ?? "?";
-  try {
-    const resolved = await resolveProject(input);
-    label = resolved.projectName;
-  } catch {
-    // Fall back to ID (never a mismatched supplied name when an ID is present).
-    label = input.projectId ?? input.projectName ?? "?";
+  const { sync, projectId, projectName } = await resolveProject(input);
+  if (projectId === sync.inboxId) {
+    throw new Error("Cannot delete the Inbox.");
   }
   return {
     style: Action.Style.Destructive,
-    message: `Delete project "${label}"? Tasks in the project may be lost.`,
-    info: [{ name: "Project", value: label }],
+    message: `Delete project "${projectName}"? Tasks in the project may be lost.`,
+    info: [
+      { name: "Project", value: projectName },
+      { name: "Project ID", value: projectId },
+    ],
   };
 };
 

@@ -37,6 +37,15 @@ export function summarizeTask(task: Task, projectName?: string) {
   };
 }
 
+/**
+ * Label a task reference using the synced task it points at, falling back to the ID.
+ * Never falls back to caller-supplied text, so a confirmation cannot name one task
+ * while the IDs select another.
+ */
+export function canonicalTaskLabel(tasks: Task[], ref: { taskId: string; projectId: string }): string {
+  return tasks.find((t) => t.id === ref.taskId && t.projectId === ref.projectId)?.title ?? ref.taskId;
+}
+
 export function findProjectByName(projects: Project[], name: string): Project | undefined {
   const q = name.trim().toLowerCase();
   if (!q) return undefined;
@@ -65,20 +74,17 @@ export function resolveHabitRefs(
 ): Array<{ habitId: string; habitName: string }> {
   return refs.map((ref) => {
     let habitId = ref.habitId;
-    let habitName = ref.habitName;
-    if (!habitId && habitName) {
-      const match = findHabitByName(habits, habitName);
+    if (!habitId && ref.habitName) {
+      const match = findHabitByName(habits, ref.habitName);
       if (!match) {
-        throw new Error(`Habit "${habitName}" not found.${notFoundHint ? ` ${notFoundHint}` : ""}`);
+        throw new Error(`Habit "${ref.habitName}" not found.${notFoundHint ? ` ${notFoundHint}` : ""}`);
       }
       habitId = match.id;
-      habitName = match.name;
     }
     if (!habitId) throw new Error("Each habit requires habitId or habitName.");
-    return {
-      habitId,
-      habitName: habitName ?? habits.find((h) => h.id === habitId)?.name ?? habitId,
-    };
+    // Always read the name back from the habit list. A caller-supplied habitName is only
+    // a lookup key, never a label, so it cannot describe a different habit than the ID.
+    return { habitId, habitName: habits.find((h) => h.id === habitId)?.name ?? habitId };
   });
 }
 

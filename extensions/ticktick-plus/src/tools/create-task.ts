@@ -1,5 +1,6 @@
 import { Tool } from "@raycast/api";
 import { createTask } from "../api/tasks";
+import { runBatch } from "./lib/batch";
 import { batchConfirmation } from "./lib/confirm";
 import { parseDueDate } from "./lib/dates";
 import { findProjectByName, loadSyncData, priorityFromLabel, summarizeTask } from "./lib/data";
@@ -89,12 +90,11 @@ export default async function tool(input: Input) {
     });
   }
 
-  const created = [];
-  for (const item of prepared) {
+  const created = await runBatch(prepared, async (item) => {
     const task = await createTask(item);
     const projectName = sync.projects.find((p) => p.id === task.projectId)?.name;
-    created.push(summarizeTask(task, projectName));
-  }
+    return summarizeTask(task, projectName);
+  });
 
   return { created, count: created.length };
 }
