@@ -1,6 +1,6 @@
 # Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-08-07
 
 - Document Copy vs Paste and preferences in the README
 - Clarify the Default Action preference description
