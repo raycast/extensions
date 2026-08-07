@@ -1,6 +1,6 @@
 # Typefully Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-07
 
 - Add Windows as a supported platform
 - Use platform-specific keyboard shortcuts for Show/Hide Preview and Delete Draft actions
