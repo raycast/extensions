@@ -4,6 +4,7 @@
 
 - Stop a dictation session after the idle period as documented. The check for whether anyone is speaking used a level 800x below any real room's noise floor, so every microphone counted as speech and the session always ran to the full maximum duration unless stopped by hand.
 - Show a signal level that matches what you hear: a silent room read about 30% before.
+- Measure the level from the loudest input channel rather than the average of all of them, so a microphone plugged into one input of a multi-channel audio interface is no longer read as 30% quieter than it is and cut off mid-sentence.
 
 ## [Sturdier setup detection] - 2026-08-03
 

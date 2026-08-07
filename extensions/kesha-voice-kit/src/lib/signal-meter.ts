@@ -25,23 +25,22 @@ input.installTap(onBus: 0, bufferSize: 2048, format: format) { buffer, _ in
   let frameCount = Int(buffer.frameLength)
   if channelCount == 0 || frameCount == 0 { return }
 
-  var sum: Float = 0
   var peak: Float = 0
-  var count = 0
+  var channelRms: [Float] = []
 
   for channel in 0..<channelCount {
     let samples = channels[channel]
+    var sum: Float = 0
     for frame in 0..<frameCount {
       let sample = samples[frame]
-      let absolute = abs(sample)
       sum += sample * sample
-      peak = max(peak, absolute)
-      count += 1
+      peak = max(peak, abs(sample))
     }
+    channelRms.append(sqrt(sum / Float(frameCount)))
   }
 
-  let rms = sqrt(sum / Float(max(count, 1)))
-  print("{\\"rms\\":\\(rms),\\"peak\\":\\(peak)}")
+  let levels = channelRms.map { "\\($0)" }.joined(separator: ",")
+  print("{\\"channelRms\\":[\\(levels)],\\"peak\\":\\(peak)}")
   fflush(stdout)
 }
 
@@ -67,10 +66,21 @@ export function percentFromPeak(peak: number): number {
   return Math.max(0, Math.min(100, Math.round(((dbfs + 50) / 50) * 100)));
 }
 
+// The loudest channel, never the pooled average: a multi-input device leaves its
+// unconnected channels digitally silent, and averaging those in divides real
+// speech by sqrt(channelCount) — enough to read 2-channel speech as silence.
+export function loudestChannelRms(levels: unknown): number {
+  if (!Array.isArray(levels)) return 0;
+  return levels.reduce<number>(
+    (loudest, level) => Math.max(loudest, numberValue(level) ?? 0),
+    0,
+  );
+}
+
 export function parseMeterLine(line: string): SignalLevel | null {
   try {
-    const parsed = JSON.parse(line) as Partial<SignalLevel>;
-    const rms = numberValue(parsed.rms) ?? 0;
+    const parsed = JSON.parse(line) as { channelRms?: unknown; peak?: unknown };
+    const rms = loudestChannelRms(parsed.channelRms);
     const peak = numberValue(parsed.peak) ?? 0;
     return {
       rms,
