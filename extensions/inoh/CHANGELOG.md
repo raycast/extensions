@@ -3,7 +3,7 @@
 ## [Apps Section] - {PR_MERGE_DATE}
 
 - New "Apps" section in the actions menu linking to the other Inoh apps
-  (web app and Obsidian plugin, with the iOS app and Chrome extension
+  (web app, Chrome extension, and Obsidian plugin, with the iOS app
   marked coming soon)
 
 ## [New Logo] - {PR_MERGE_DATE}

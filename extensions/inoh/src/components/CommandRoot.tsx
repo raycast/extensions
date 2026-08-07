@@ -8,7 +8,7 @@ import { useUserCardIds } from "../hooks/useUserCardIds";
 import { isProUser } from "../lib/pro-gate";
 import { addCardToDeck, removeCardFromDeck, PLAN_LIMIT_ERROR } from "../lib/card";
 import { pronounceWord } from "../lib/audio";
-import { FREE_CARD_LIMIT, OBSIDIAN_PLUGIN_URL, WEBSITE_URL } from "../constants";
+import { CHROME_EXTENSION_URL, FREE_CARD_LIMIT, OBSIDIAN_PLUGIN_URL, WEBSITE_URL } from "../constants";
 import { EntryDetail } from "./EntryDetail";
 import { RequestCardForm } from "./RequestCardForm";
 import { UpgradeToPro } from "./UpgradeToPro";
@@ -92,9 +92,9 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
   ) : null;
 
   // Cross-promotion links to the other Inoh apps, shown in every ActionPanel.
-  // iOS (App Store listing mid-rebrand) and the Chrome extension (not yet on
-  // the Web Store) have no public page, so they toast instead of linking.
-  // Brand marks are Simple Icons SVGs in assets/, tinted to match the theme.
+  // iOS (App Store listing mid-rebrand) has no public page, so it toasts
+  // instead of linking. Brand marks are Simple Icons SVGs in assets/, tinted
+  // to match the theme.
   const appsActions = (
     <ActionPanel.Section title="Apps">
       {/* eslint-disable @raycast/prefer-title-case -- "iOS" is Apple's casing; the rule also mangles "(Coming Soon)" */}
@@ -103,13 +103,13 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
         icon={{ source: "apple.svg", tintColor: Color.PrimaryText }}
         onAction={() => showComingSoonToast("The iOS app")}
       />
-      <Action.OpenInBrowser title="Web App" icon={Icon.Globe} url={WEBSITE_URL} />
-      <Action
-        title="Chrome Extension (Coming Soon)"
-        icon={{ source: "googlechrome.svg", tintColor: Color.PrimaryText }}
-        onAction={() => showComingSoonToast("The Chrome extension")}
-      />
       {/* eslint-enable @raycast/prefer-title-case */}
+      <Action.OpenInBrowser title="Web App" icon={Icon.Globe} url={WEBSITE_URL} />
+      <Action.OpenInBrowser
+        title="Chrome Extension"
+        icon={{ source: "googlechrome.svg", tintColor: Color.PrimaryText }}
+        url={CHROME_EXTENSION_URL}
+      />
       <Action.OpenInBrowser
         title="Obsidian Plugin"
         icon={{ source: "obsidian.svg", tintColor: Color.PrimaryText }}

@@ -22,9 +22,11 @@ export const WEBSITE_URL = "https://inoh.app";
 
 /**
  * Product pages for the other Inoh ecosystem apps, listed in the Apps action
- * section. The iOS app (mid-rebrand) and Chrome extension (unpublished) have
- * no URL yet and surface as "Coming soon" — add their constants once live.
+ * section. The iOS app (mid-rebrand) has no URL yet and surfaces as
+ * "Coming soon" — add its constant once live.
  */
+export const CHROME_EXTENSION_URL =
+  "https://chromewebstore.google.com/detail/fihdhfkhbocbgmnhdigkljknabnjeoai?utm_source=item-share-cb";
 export const OBSIDIAN_PLUGIN_URL = "https://obsidian.md/plugins?id=inoh";
 export const CHECKOUT_SUCCESS_URL = `${WEBSITE_URL}/checkout-success`;
 export const CHECKOUT_CANCEL_URL = `${WEBSITE_URL}/checkout-cancel`;
