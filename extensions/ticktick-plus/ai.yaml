@@ -1,0 +1,145 @@
+instructions: |
+  TickTick organizes work as projects (lists), tasks, tags, smart lists/filters, habits, and Pomodoro focus sessions.
+  Inbox is the default project when none is specified.
+  Priority values are none, low, medium, high (mapped to TickTick 0/1/3/5).
+  Dates should be ISO 8601. Use YYYY-MM-DD for all-day due dates.
+  Before mutating an existing task, call search-tasks (or get-task) to obtain taskId and projectId.
+  Before using a named project, call list-projects. Before habit names, call list-habits.
+  Prefer complete-tasks over delete-tasks when the user means they finished something.
+  For pasted daily logs: extract completed habits → checkin-habits; extract new todos → create-task with all new tasks in one call; extract reschedules → update-task. Summarize what you will do before calling mutating tools when the intent is ambiguous.
+  Do not invent IDs. If a lookup is ambiguous, ask the user to clarify.
+evals:
+  - input: "@ticktick-plus create a high priority task to review the Q3 budget due tomorrow in Work"
+    mocks:
+      list-projects:
+        projects:
+          - id: proj-work
+            name: Work
+            isInbox: false
+          - id: inbox-1
+            name: Inbox
+            isInbox: true
+        inboxId: inbox-1
+        count: 2
+      list-tags:
+        tags: []
+        count: 0
+      create-task:
+        created:
+          - id: task-1
+            title: Review the Q3 budget
+            projectId: proj-work
+            priority: 5
+        count: 1
+    expected:
+      - callsTool: list-projects
+      - callsTool: create-task
+      - includes: budget
+    usedAsExample: true
+  - input: "@ticktick-plus what habits do I still need to check in today?"
+    mocks:
+      list-habits:
+        habits:
+          - id: h1
+            name: Meditate
+            checkedInToday: true
+          - id: h2
+            name: Read
+            checkedInToday: false
+          - id: h3
+            name: Walk
+            checkedInToday: false
+        count: 3
+    expected:
+      - callsTool: list-habits
+      - includes: Read
+      - includes: Walk
+    usedAsExample: true
+  - input: "@ticktick-plus search for dentist and complete it"
+    mocks:
+      search-tasks:
+        tasks:
+          - id: t-dentist
+            projectId: inbox-1
+            title: Dentist appointment
+            priority: 3
+        count: 1
+        totalMatches: 1
+      complete-tasks:
+        completed:
+          - taskId: t-dentist
+            projectId: inbox-1
+            title: Dentist appointment
+        count: 1
+    expected:
+      - callsTool: search-tasks
+      - callsTool: complete-tasks
+      - includes: dentist
+    usedAsExample: true
+  - input: "@ticktick-plus start a pomodoro on my write docs task"
+    mocks:
+      search-tasks:
+        tasks:
+          - id: t-docs
+            projectId: proj-work
+            title: Write docs
+        count: 1
+        totalMatches: 1
+      start-pomodoro:
+        phase: work
+        isRunning: true
+        remaining: "25:00"
+        linkedTaskId: t-docs
+        linkedTaskTitle: Write docs
+        ticktickSynced: true
+    expected:
+      - callsTool: search-tasks
+      - callsTool:
+          name: start-pomodoro
+          arguments:
+            taskId: t-docs
+    usedAsExample: true
+  - input: |
+      @ticktick-plus Evening log:
+      - Did meditate and stretch
+      - Need to buy groceries tomorrow (high)
+      - Email Sarah about the invoice by Friday
+    mocks:
+      list-projects:
+        projects:
+          - id: inbox-1
+            name: Inbox
+            isInbox: true
+        inboxId: inbox-1
+        count: 1
+      list-tags:
+        tags: []
+        count: 0
+      list-habits:
+        habits:
+          - id: h-med
+            name: Meditate
+            checkedInToday: false
+          - id: h-stretch
+            name: Stretch
+            checkedInToday: false
+        count: 2
+      checkin-habits:
+        checkedIn:
+          - habitId: h-med
+            habitName: Meditate
+          - habitId: h-stretch
+            habitName: Stretch
+        count: 2
+      create-task:
+        created:
+          - id: t1
+            title: Buy groceries
+          - id: t2
+            title: Email Sarah about the invoice
+        count: 2
+    expected:
+      - callsTool: list-habits
+      - callsTool: checkin-habits
+      - callsTool: create-task
+    usedAsExample: true
