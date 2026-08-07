@@ -40,12 +40,18 @@ export function summarizeTask(task: Task, projectName?: string) {
 }
 
 /**
- * Label a task reference using the synced task it points at, falling back to the ID.
- * Never falls back to caller-supplied text, so a confirmation cannot name one task
- * while the IDs select another.
+ * Resolve a caller-supplied task reference against synced tasks. A stale or unknown
+ * taskId would otherwise pass local preparation and only fail once TickTick rejects it,
+ * which in a batch means earlier items are already written (or, for deletes, applied).
  */
-export function canonicalTaskLabel(tasks: Task[], ref: { taskId: string; projectId: string }): string {
-  return tasks.find((t) => t.id === ref.taskId && t.projectId === ref.projectId)?.title ?? ref.taskId;
+export function requireTask(tasks: Task[], ref: { taskId: string; projectId: string }, context = ""): Task {
+  const found = tasks.find((t) => t.id === ref.taskId && t.projectId === ref.projectId);
+  if (!found) {
+    throw new Error(
+      `${context}Task "${ref.taskId}" not found. Call search-tasks and retry with a current taskId and projectId.`,
+    );
+  }
+  return found;
 }
 
 export type TaskRef = { taskId: string; projectId: string };
