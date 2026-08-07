@@ -1,6 +1,6 @@
 # Finder File Actions Changelog
 
-## [Finder-native undo and filename handling] - {PR_MERGE_DATE}
+## [Finder-native undo and filename handling] - 2026-08-07
 
 - Fixed "Create Text File" treating a typed filename as an extension and creating names such as `untitled.notes`
 - Added Finder-native undo for Move to Folder and Copy to Folder
