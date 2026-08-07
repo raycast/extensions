@@ -1,73 +1,55 @@
 # SSH Image Drop
 
-Send clipboard images, files, and folders to remote servers over SSH with per-server hotkeys, and pull files back into Finder (Explorer on Windows).
+Send files, folders, and clipboard images to a remote server over SSH with one hotkey — and pull them back. The **remote path** lands on your clipboard, so there is nothing to type.
 
-## Why it exists
+[![SSH Image Drop — intro video](media/intro-thumbnail.jpg)](https://www.youtube.com/watch?v=kU1Xyp2hFhU)
 
-When you run a **Claude Code session on a remote Mac (over SSH)**, you can't paste a screenshot
-into it — terminals don't accept an image clipboard paste, and the image lives only on your local
-Mac's clipboard where the remote session can't reach it. SSH Image Drop sends the clipboard image
-to that remote machine and copies the **remote path** back, so you paste the path into the session
-and Claude Code reads the image from disk. It's the fastest way to hand a captured screenshot to a
-remote agent, and it works with any terminal — no editor plugin or terminal-specific integration
-required. The same one-hotkey flow moves reference files (configs, skill folders) to whichever
-server your agent runs on.
-
-## Why not Terminal Image Paste?
-
-Terminal Image Paste syncs every image to *all* configured hosts and pastes into the focused app.
-SSH Image Drop is *target-addressed*: one hotkey per server (via Quicklinks), copies the remote path
-to your clipboard, and adds a reverse direction (Pull File from Server). Built for pasting image
-paths into remote CLI tools (e.g. Claude Code over SSH).
+Typical use: hand a screenshot to a Claude Code session running on a remote Mac, or push config files and skill folders to whichever box your agent runs on.
 
 ## Commands
 
-- **Send Clipboard Image** — sends the clipboard image to the server prefilled by a Quicklink, or opens the server picker when launched directly; copies the remote path.
-- **Send File to Server** — one screen: pick files/folders and the target server, hit Enter to send. On macOS the form is pre-filled with your current Finder selection, so sending what's already selected is a hotkey plus Enter. Also the shared server picker the other commands fall back to when no host is set. Folder uploads ask for confirmation; if a folder with the same name already exists on the server, files are copied into it (standard `scp -r` behavior).
-- **Quicklinks** — create per-server hotkeys with Raycast's built-in **Create Quicklink** (available on every server row in the picker), then assign a hotkey in Raycast settings.
-- **Pull File from Server** — reads the remote path from the clipboard (Send Clipboard Image puts it there), downloads the file — or, after a confirmation, an entire folder — and reveals it in the file manager. Paths may start with `/` or `~/`.
-- **Manage Servers** — add, edit, or delete servers. When adding, your password is stored in the OS credential store by default (macOS Keychain / Windows DPAPI, used on each transfer). Optional (checkbox): install an SSH key instead — the password is used **once**, then discarded.
+| Command | What it does |
+| --- | --- |
+| **Send File to Server** | Pick files or folders and a server, hit Enter. Pre-filled from your Finder selection on macOS. |
+| **Send Clipboard Image** | Sends the clipboard image, copies the remote path back. |
+| **Pull File from Server** | Takes a remote path from the clipboard, downloads it, reveals it in Finder / Explorer. |
+| **Manage Servers** | Add, edit, and delete servers. Reads `~/.ssh/config`. |
 
-## Authentication & Security
+Bind a server to a hotkey with Raycast's **Create Quicklink**, available on every row of the server picker. There is no host to type: a Quicklink carries the target, and launching without one opens the picker.
 
-Adding a server offers two ways to authenticate, both keeping your password out of plaintext:
+Folder transfers ask for confirmation. Pulling `/` or your whole home directory is refused.
 
-- **Stored password (default):** the password is kept in the OS credential store — the macOS Keychain, or on Windows a DPAPI-encrypted file (only ciphertext ever touches disk) — and read by an askpass helper on each transfer. Nothing is written to argv, disk in plaintext, LocalStorage, or persistent env.
-- **SSH key (opt-in, checkbox):** a dedicated ed25519 key is installed on the server (`ssh-copy-id` on macOS, an equivalent one-line remote install on Windows); the password is used once — passed via a short-lived FIFO on macOS, or a one-time DPAPI-encrypted temp file on Windows — and then discarded, never stored.
+## Authentication
 
-In both modes the password is never placed on a command line (argv), written to disk in plaintext, saved to LocalStorage, or exported to a persistent environment variable. The stored-password default is chosen for convenience — most servers accept password auth immediately.
+| Mode | How the password is handled |
+| --- | --- |
+| **Stored password** (default) | Kept in the OS credential store — macOS Keychain, or a DPAPI-encrypted file on Windows — and read by an `SSH_ASKPASS` helper on each transfer. |
+| **SSH key** (opt-in) | A dedicated ed25519 key is installed on the server. The password is used once, then discarded. |
 
-### Threat model — the boundary is your OS user account
+In neither mode does the password reach argv, plaintext disk, LocalStorage, or a persistent environment variable.
 
-Anything running **as your macOS or Windows user** can already reach these credentials, by design:
+## Security
 
-- **Keychain passwords (macOS)** are stored with `-T /usr/bin/security` so the askpass helper can read them without a GUI prompt on each transfer. Trade-off: any process running as your user can likewise run `security find-generic-password -s ssh-image-drop -a <alias> -w` to read a stored password without prompting. Standard login-keychain protections (screen lock, separate accounts, FileVault) still apply.
-- **DPAPI passwords (Windows)** are encrypted per-user (`ConvertFrom-SecureString`) and stored as `cred-<alias>.dpapi` files under the extension's support directory (`%LOCALAPPDATA%\Raycast\extensions\ssh-image-drop\credentials\`). Only ciphertext is on disk, but DPAPI is user-scoped: any process running as your Windows user can decrypt it — the same trade-off as the Keychain entry above. Deleting a server also deletes its file.
-- **The SSH key** (`~/.ssh/ssh_image_drop_ed25519`) is generated **without a passphrase** and is **shared across all key-mode servers** so transfers run non-interactively. An unencrypted key file is user-equivalent: anyone able to read it as your user can authenticate to every server it was installed on. If it is ever exposed, remove its public key from each server's `authorized_keys`.
-- **First connection (TOFU):** the first transfer to a new server trusts its host key automatically (`accept-new`). On a password server, a man-in-the-middle on that *first* connection could capture the password. On untrusted networks, connect once in Terminal (`ssh user@host`) to pin the host key before registering.
-- **Clipboard staging:** the clipboard image is written to a private temp directory (`mkdtemp` — mode 0700 on macOS, user-only default ACL on Windows) for the duration of the transfer and deleted immediately afterward — on failure paths too. During that window it is readable by processes running as your user, like any file you own.
+The trust boundary is **your OS user account**: anything running as you can already reach these credentials, by design.
 
-**How transfers are gated.** Access is controlled by the *flow* — who you send to and pull from — rather than by inspecting file contents:
+- **Known hosts only.** Every transfer target, in both directions, must be a server you registered, used recently, or have in `~/.ssh/config`. A crafted `raycast://` deeplink cannot point the extension at an attacker's server, and file lists never come from a deeplink — only from the form you submit.
+- **Credentials are user-scoped.** The Keychain entry is readable by any process running as you, so transfers need no prompt; DPAPI on Windows behaves the same way. The SSH key is passphrase-less and shared across key-mode servers so transfers stay non-interactive.
+- **Injection is blocked.** Remote paths with shell-active characters, control characters, or `..` segments are rejected before reaching `scp`, and the message names the offending character. `scp` runs over SFTP, so no remote shell evaluates your paths.
+- **First connection is TOFU.** A new server's host key is accepted automatically (`accept-new`). On an untrusted network, run `ssh user@host` once beforehand to pin it.
+- **Clipboard staging.** The image is written to a private temp directory for the duration of the transfer and deleted afterward, including on failure paths.
 
-- **Every transfer host, including pulls, must be one you already know** — a server registered in Manage Servers, used recently, listed in `~/.ssh/config`, or added in preferences. Both directions are checked, so a crafted `raycast://` deeplink cannot make the extension talk to an attacker-controlled server. File lists are never accepted from a deeplink; files come only from the picker form you submit — on macOS it is merely pre-filled from your current Finder selection.
-- **Blast radius is limited**, not file types: pulling `/` or your entire home (`~/`) is refused, and folder transfers ask for confirmation (single files stay one-click). There is intentionally no allow/deny list of "sensitive" filenames — such lists are always incomplete (they miss `.aws/credentials`, `.env`, dumps…) and would break the legitimate use of fetching your own config and keys. Since both ends of a pull are your own machines, a downloaded file is not exfiltrated by the transfer itself.
-- **Injection is blocked:** remote paths and filenames containing shell-active characters (`` ` `` `$` `;` `&` `|` `<` `>` `\` `"` `*` `?`), control characters, or `..` segments are rejected before reaching `scp` — the rejection message names the offending character. Common filename punctuation (brackets, parentheses, braces, `!`, `'`) is allowed, with glob characters backslash-escaped so `scp` treats them literally. `scp` uses the SFTP protocol (no remote shell), and remote commands are single-quote escaped.
+Pulled files land in your Download Directory (`~/Downloads` by default) — often indexed by Spotlight and synced to iCloud or Dropbox, which is worth knowing before pulling something sensitive.
 
-**Local exposure after a pull.** A file you pull lands in your Download Directory (default `~/Downloads`). If a crafted deeplink lures you into pulling a sensitive file, it is copied onto *your own* machine — not sent anywhere — but be aware that folders like `~/Downloads` are often indexed by Spotlight and synced by iCloud/Dropbox, which can become a secondary exposure path. Files are written with the standard SFTP client behavior (no `com.apple.quarantine` attribute), so scripts you fetch from your own servers run without Gatekeeper prompts.
+## Requirements
 
-## Migrating from v1
+- macOS 13+, or Windows 11 with the built-in OpenSSH client 9.0+. Transfers force SFTP (`scp -s`) and fail closed on older builds rather than falling back to the legacy protocol.
+- **Remote servers must run macOS or Linux.** Windows is supported as the client only.
+- Default remote directory is `/tmp/ssh-image-drop`. On a shared server, set a private path in preferences.
+- Adds one `Include` line to `~/.ssh/config`, with your consent and after a timestamped backup. Managed servers live only in the included file.
+- Deleting a server removes its config block and stored password, but not the public key already in that server's `authorized_keys`.
+- No telemetry. Nothing leaves your machine except to the server you pick.
+- Not supported: IPv6 literals and interactive password prompts. On Windows, pulling a folder containing names that are illegal there (`NUL`, colons) can fail — pull those files individually.
 
-v2 removes the `host` command argument (host now travels through Raycast launch context) and renames **Send to Server** → **Send File to Server**. **Existing v1 Quicklinks/deeplinks stop working** — recreate them with Raycast's built-in **Create Quicklink** on the relevant command.
+---
 
-## Requirements & notes
-
-- macOS 13+, or Windows with the built-in OpenSSH client 9.0+ (`C:\Windows\System32\OpenSSH` — Windows 11 ships 9.x; older Windows 10 inbox versions are not supported). Transfers force the SFTP protocol (`scp -s`) and fail closed on OpenSSH builds too old to support it — no silent fallback to the legacy protocol that evaluates remote paths in a shell.
-- **Remote servers must run macOS or Linux** (a POSIX shell) — Windows is supported only as the client running this extension.
-- Key-based auth (`BatchMode`) by default; password servers are supported via the stored-password option.
-- Reads `~/.ssh/config` locally to list hosts; nothing is sent anywhere except to the SSH server you pick. No telemetry.
-- Adds one `Include ~/.ssh/ssh_image_drop_config` line to `~/.ssh/config` (with your consent, after a timestamped backup). Managed servers live only in that file.
-- Deleting a server from the picker removes its `Host` block and its saved password (Keychain entry / DPAPI file). This does **not** remove the public key already installed in the server's `authorized_keys`.
-- First registration accepts the server's host key automatically (`accept-new`).
-- Default remote directory is `/tmp/ssh-image-drop` (cleared on reboot). On shared (multi-user) servers, set a private path in preferences.
-- Windows client: when pulling an entire *folder*, files inside it whose names are invalid on Windows (reserved device names like `NUL`, or colons) may fail to save — `scp` writes them directly. Pull such files individually; single-file pulls normalize the name automatically.
-- IPv6 literals and interactive password prompts are not supported.
+Built by [UmiCorp](https://umicorp.kr).
