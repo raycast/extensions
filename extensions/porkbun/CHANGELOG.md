@@ -1,6 +1,6 @@
 # Porkbun Changelog
 
-## [Domain Status as Dot] - {PR_MERGE_DATE}
+## [Domain Status as Dot] - 2026-08-07
 
 - "Retrieve All Domains" command collapses the STATUS as `Dot` to save space and the full domain is also added to `tooltip` (ref: [Issue #27326](https://github.com/raycast/extensions/issues/27326))
 
