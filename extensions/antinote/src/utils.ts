@@ -11,26 +11,25 @@ export function getPreferBetaPreference() {
   return preferBeta === true || preferBeta === "true";
 }
 
-async function isAntinoteInstalled() {
+
+export async function checkAntinoteInstalled() {
   const applications = await getApplications();
+
+  let installation = null;
   const preferBeta = getPreferBetaPreference();
 
   if (applications.some((app) => app.bundleId === "com.chabomakers.Antinote")) {
     if (preferBeta && fs.existsSync(BETA_DB_PATH)) {
-      return { installed: true, version: "beta" };
+      installation = { installed: true, version: "beta" };
+    } else {
+      installation = { installed: true, version: "standalone" };
     }
-    return { installed: true, version: "standalone" };
+  } else if (applications.some((app) => app.bundleId === "com.chabomakers.Antinote-setapp")) {
+    installation = { installed: true, version: "setapp" };
+  } else {
+    installation = { installed: false, version: null };
   }
 
-  if (applications.some((app) => app.bundleId === "com.chabomakers.Antinote-setapp")) {
-    return { installed: true, version: "setapp" };
-  }
-
-  return { installed: false, version: null };
-}
-
-export async function checkAntinoteInstalled() {
-  const installation = await isAntinoteInstalled();
   if (!installation.installed) {
     const options: Toast.Options = {
       style: Toast.Style.Failure,

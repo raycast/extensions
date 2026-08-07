@@ -26,6 +26,13 @@
       ]
     },
     {
+      "name": "timer",
+      "title": "Execute timer command",
+      "subtitle": "Antinote (beta)",
+      "description": "Executes a timer command. This feature is only available in Antinote v2.* (beta)",
+      "mode": "view"
+    },
+    {
       "name": "new-note-from-selection",
       "title": "Create New Note from Selection",
       "subtitle": "Antinote",
@@ -37,6 +44,13 @@
       "title": "Search Notes",
       "subtitle": "Antinote",
       "description": "Search through existing notes",
+      "mode": "view"
+    },
+    {
+      "name": "search-slotted-notes",
+      "title": "Search Slotted Notes",
+      "subtitle": "Antinote (beta)",
+      "description": "Search through existing slotted notes. This feature requires Antinote v2.* (beta)",
       "mode": "view"
     },
     {

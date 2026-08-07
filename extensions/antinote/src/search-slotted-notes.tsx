@@ -9,7 +9,21 @@ type Note = {
   content: string;
   created: string;
   lastModified: string;
+  slot: number;
 };
+
+const iconMap = [ 
+  "",
+  "planets/Mercury.png",
+  "planets/Venus.png",
+  "planets/Earth.png",
+  "planets/Mars.png",
+  "planets/Jupiter.png",
+  "planets/Saturn.png",
+  "planets/Uranus.png",
+  "planets/Neptune.png",
+  "planets/Pluto.png", 
+];
 
 const query = `
   SELECT id, content, created, lastModified
@@ -25,10 +39,10 @@ SELECT upper(
     substr(hex(ZID), 13, 4) || '-' ||
     substr(hex(ZID), 17, 4) || '-' ||
     substr(hex(ZID), 21, 12)
-) AS id, ZCONTENT as content, ZCREATED as created, ZLASTMODIFIED as lastModified
+) AS id, ZCONTENT as content, ZCREATED as created, ZLASTMODIFIED as lastModified, ZSLOTINDEX as slot
   FROM ZNOTE
-  WHERE ZCONTENT IS NOT '' AND ZISSLOTTED = 0 AND ZSOFTDELETED = 0
-  ORDER BY ZLASTMODIFIED DESC
+  WHERE ZCONTENT IS NOT '' AND ZISSLOTTED = 1
+  ORDER BY ZSLOTINDEX ASC
 `;
 
 function getTitle(content: string) {
@@ -95,6 +109,10 @@ export default function Command() {
     return <Detail markdown="Antinote is not installed." />;
   }
 
+  if (version !== "beta") {
+    return <Detail markdown="Slotted notes are only available in Antinote v2.* (beta)" />;
+  }
+
   if (permissionView) {
     return permissionView;
   }
@@ -110,7 +128,7 @@ export default function Command() {
   const ITEMS = notes!.map((note) => {
     return {
       id: note.id,
-      icon: Icon.Paragraph,
+      icon: iconMap[note.slot],
       title: getTitle(note.content),
       subtitle: getSanitizedContent(note.content),
     };
