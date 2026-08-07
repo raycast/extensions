@@ -13,6 +13,7 @@ import { useMemo } from "react";
 import type { AgentId, Accessory, AgentVisibilityPreferences } from "./agents/types.ts";
 import { getThemeIcon } from "./agents/ui.tsx";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
+import { sortByDefaultAgentOrder } from "./agents/order.ts";
 import {
   useAmpUsage,
   useAntigravityUsage,
@@ -384,7 +385,10 @@ export default function MenuBarCommand() {
   }, [isZaiVisible, zaiState]);
 
   const visibleAgents = useMemo(
-    () => [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter((a) => a.visible),
+    () =>
+      sortByDefaultAgentOrder(
+        [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter((a) => a.visible),
+      ),
     [singleAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);

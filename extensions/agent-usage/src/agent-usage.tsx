@@ -15,6 +15,7 @@ import type { LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Accessory, AgentDefinition, AgentId, AgentVisibilityPreferences, UsageState } from "./agents/types.ts";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
+import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId } from "./agents/order.ts";
 import {
   useAmpUsage,
   useAntigravityUsage,
@@ -328,7 +329,7 @@ const AGENT_REGISTRY: AgentRegistry = {
   },
 };
 
-const AGENT_IDS = Object.keys(AGENT_REGISTRY) as AgentId[];
+const AGENT_IDS: AgentId[] = [...DEFAULT_AGENT_ORDER];
 
 function isAgentId(value: string): value is AgentId {
   return value in AGENT_REGISTRY;
@@ -493,7 +494,8 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     formatSyntheticUsageText,
   );
 
-  const [agentOrder, setAgentOrder] = useState<AgentId[]>(AGENT_IDS);
+  const [agentOrder, setAgentOrder] = useState<AgentId[]>(() => [...DEFAULT_AGENT_ORDER]);
+  const [hasStoredAgentOrder, setHasStoredAgentOrder] = useState(false);
   const [orderLoaded, setOrderLoaded] = useState(false);
 
   useEffect(() => {
@@ -503,8 +505,11 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
           const parsed = JSON.parse(stored);
           if (Array.isArray(parsed)) {
             const validOrder = parsed.filter((id): id is AgentId => typeof id === "string" && isAgentId(id));
-            const missingIds = AGENT_IDS.filter((id) => !validOrder.includes(id));
-            setAgentOrder([...validOrder, ...missingIds]);
+            if (validOrder.length > 0) {
+              const missingIds = AGENT_IDS.filter((id) => !validOrder.includes(id));
+              setAgentOrder([...validOrder, ...missingIds]);
+              setHasStoredAgentOrder(true);
+            }
           }
         } catch {
           // keep default order
@@ -516,7 +521,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
 
   const saveOrder = useCallback(async (newOrder: AgentId[]) => {
     setAgentOrder(newOrder);
+    setHasStoredAgentOrder(true);
     await LocalStorage.setItem(AGENT_ORDER_KEY, JSON.stringify(newOrder));
+  }, []);
+
+  const resetAgentOrder = useCallback(async () => {
+    await LocalStorage.removeItem(AGENT_ORDER_KEY);
+    setAgentOrder([...DEFAULT_AGENT_ORDER]);
+    setHasStoredAgentOrder(false);
+    await showToast({
+      title: "Agent Order Reset",
+      message: "Restored the default alphabetical order.",
+      style: Toast.Style.Success,
+    });
   }, []);
 
   // Build a flat list of renderable items — each is either a standard AgentView or an AccountedAgentView
@@ -555,6 +572,8 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   );
 
   useEffect(() => {
+    if (!orderLoaded) return;
+
     if (allRows.length === 0) {
       if (selectedItemId !== undefined) {
         setSelectedItemId(undefined);
@@ -562,10 +581,15 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
       return;
     }
 
-    const allIds = allRows.map((r) => (r.kind === "agent" ? r.view.id : r.view.rowId));
+    const selectableRows = allRows.map((row) =>
+      row.kind === "agent"
+        ? { agentId: row.view.id, rowId: row.view.id }
+        : { agentId: row.view.agentId, rowId: row.view.rowId },
+    );
+    const allIds = selectableRows.map((row) => row.rowId);
     if (selectedItemId && allIds.includes(selectedItemId)) return;
-    setSelectedItemId(allIds[0]);
-  }, [selectedItemId, allRows]);
+    setSelectedItemId(getInitialSelectedRowId(selectableRows, hasStoredAgentOrder ? agentOrder : undefined));
+  }, [selectedItemId, allRows, agentOrder, hasStoredAgentOrder, orderLoaded]);
 
   const isLoading =
     allRows.some((row) => row.view.isLoading) ||
@@ -712,6 +736,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                           onAction={() => moveAgent(agent.id, "down")}
                         />
                       )}
+                      {hasStoredAgentOrder && (
+                        <Action title="Reset Agent Order" icon={Icon.Undo} onAction={resetAgentOrder} />
+                      )}
                     </ActionPanel.Section>
                   </ActionPanel>
                 }
@@ -810,6 +837,9 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                           shortcut={Keyboard.Shortcut.Common.MoveDown}
                           onAction={() => moveAgent(view.agentId, "down")}
                         />
+                      )}
+                      {hasStoredAgentOrder && (
+                        <Action title="Reset Agent Order" icon={Icon.Undo} onAction={resetAgentOrder} />
                       )}
                     </ActionPanel.Section>
                   </ActionPanel>
