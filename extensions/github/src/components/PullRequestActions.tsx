@@ -19,6 +19,7 @@ import { useMyPullRequests } from "../hooks/useMyPullRequests";
 import AddPullRequestReview from "./AddPullRequestReview";
 import CheckoutPullRequestForm from "./CheckoutPullRequestForm";
 import PullRequestCommits from "./PullRequestCommits";
+import PullRequestDiff from "./PullRequestDiff";
 import { SortAction, SortActionProps } from "./SortAction";
 
 export type PullRequest =
@@ -358,6 +359,13 @@ export default function PullRequestActions({
         title="See Commits"
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         target={<PullRequestCommits pullRequest={pullRequest} />}
+      />
+
+      <Action.Push
+        icon={Icon.CodeBlock}
+        title="View Diff"
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "d" }}
+        target={<PullRequestDiff pullRequest={pullRequest} />}
       />
 
       <Action.Push
