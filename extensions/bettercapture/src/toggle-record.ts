@@ -5,9 +5,9 @@ export default async function main() {
   const { toggleAction } = getPreferenceValues<Preferences.ToggleRecord>();
 
   try {
-    await toggleRecording(toggleAction);
+    const executedAction = await toggleRecording(toggleAction);
     await showHUD(
-      toggleAction === "toggle-copy"
+      executedAction === "toggle-copy"
         ? "Sent to BetterCapture (copy on finish)"
         : "Sent to BetterCapture",
     );
