@@ -15,6 +15,8 @@ npm run build            # Build extension for production
 # Code Quality
 npm run lint             # Run ESLint checks
 npm run fix-lint         # Auto-fix ESLint issues
+npm run format           # Run Prettier formatting
+npm run typecheck        # Run TypeScript type checking
 npm test                 # Run Node test suite (*.test.ts via --experimental-strip-types)
 
 # Publishing (official Raycast flow — run from this extension directory)
@@ -38,7 +40,7 @@ npm run publish
 
 - **Framework**: Raycast API + React
 - **Language**: TypeScript (ES2023, strict mode)
-- **Module**: CommonJS
+- **Module**: ES modules
 - **Runtime tests**: Node test runner with `--experimental-strip-types`
 - **Linting**: ESLint with `@raycast/eslint-config`
 - **Formatting**: Prettier (120 char width, double quotes)
@@ -47,7 +49,8 @@ npm run publish
 
 ### Imports
 
-- Use ES6 module syntax with `import`
+- Use ES module syntax with `import`
+- Specify the file extension for imports (e.g., `.ts`, `.tsx`)
 - Order: React/Raycast imports first, then local modules
 - Example: `import { List, Action, Icon } from "@raycast/api";`
 

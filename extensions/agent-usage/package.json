@@ -2,13 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-usage",
   "title": "Agent Usage",
-  "description": "Monitor AI coding agent usage across Amp, Claude, Codex, Copilot, Cursor, Droid, Gemini, Grok, Kimi, Synthetic, Antigravity, z.ai, MiniMax, and OpenCode Go",
+  "description": "Monitor AI coding agent usage across Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, Droid, Gemini, Grok, Kimi, MiniMax, OpenCode Go, Synthetic and z.ai",
   "icon": "extension-icon.png",
   "author": "thuggyduck",
   "contributors": [
     "alexi.build",
     "adrianbonpin",
-    "garrick_zhang"
+    "garrick_zhang",
+    "EDM115"
   ],
   "platforms": [
     "macOS",
@@ -215,25 +216,31 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.3",
-    "@raycast/utils": "^1.17.0",
-    "undici": "^6.27.0"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.5",
+    "undici": "^8.10.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.13.14",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'"
+    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
+    "typecheck": "tsc --noEmit"
+  },
+  "type": "module",
+  "allowScripts": {
+    "esbuild": true
   }
 }

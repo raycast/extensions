@@ -1,4 +1,4 @@
-import type { CodexUsage, CodexError } from "./types";
+import type { CodexUsage, CodexError } from "./types.ts";
 import { httpFetch } from "../agents/http.ts";
 import { parseDate } from "../agents/format.ts";
 

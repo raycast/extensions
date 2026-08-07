@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { getCodingModelRemain, getIntervalPercent, getWeeklyPercent } from "./parser";
-import type { MiniMaxModelRemain } from "./types";
+import { getCodingModelRemain, getIntervalPercent, getWeeklyPercent } from "./parser.ts";
+import type { MiniMaxModelRemain } from "./types.ts";
 
 const NEW_API_RESPONSE: MiniMaxModelRemain[] = [
   {

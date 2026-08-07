@@ -1,8 +1,8 @@
 import { List } from "@raycast/api";
-import { KimiUsage, KimiError } from "./types";
-import type { Accessory } from "../agents/types";
-import { formatResetTime } from "../agents/format";
-import { formatRemainingPercent, formatPercentShort, getRemainingPercent } from "./percentage";
+import type { KimiUsage, KimiError } from "./types.ts";
+import type { Accessory } from "../agents/types.ts";
+import { formatResetTime } from "../agents/format.ts";
+import { formatRemainingPercent, formatPercentShort, getRemainingPercent } from "./percentage.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -10,7 +10,7 @@ import {
   getNoDataAccessory,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
+} from "../agents/ui.tsx";
 
 export function formatKimiUsageText(usage: KimiUsage | null, error: KimiError | null): string {
   const fallback = formatErrorOrNoData("Kimi", usage, error);

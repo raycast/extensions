@@ -1,5 +1,5 @@
-import { MiniMaxUsage, MiniMaxError } from "./types";
-import { httpFetch } from "../agents/http";
+import type { MiniMaxUsage, MiniMaxError } from "./types.ts";
+import { httpFetch } from "../agents/http.ts";
 
 const MINIMAX_USAGE_API = "https://www.minimax.io/v1/api/openplatform/coding_plan/remains";
 

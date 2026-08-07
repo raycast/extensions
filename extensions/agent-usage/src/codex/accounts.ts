@@ -1,5 +1,5 @@
-import type { AccountEntry } from "../accounts/types";
-import type { CodexOAuthAccount } from "./auth";
+import type { AccountEntry } from "../accounts/types.ts";
+import type { CodexOAuthAccount } from "./auth.ts";
 
 export type CodexAccountCandidateSource = "codex-home" | "manual";
 

@@ -1,6 +1,6 @@
 // src/accounts/types.ts
 
-import type { UsageState } from "../agents/types";
+import type { UsageState } from "../agents/types.ts";
 
 /** A single named API account entry stored in LocalStorage. */
 export interface AccountEntry {

@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { parseZaiApiResponse } from "./parser";
+import { parseZaiApiResponse } from "./parser.ts";
 
 function limit(overrides: Record<string, unknown> = {}) {
   return {

@@ -2,7 +2,7 @@ import { execFileSync } from "child_process";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
-import { decodeJwtPayload } from "../agents/jwt";
+import { decodeJwtPayload } from "../agents/jwt.ts";
 
 const DEFAULT_CURSOR_STATE_DB = path.join(
   os.homedir(),

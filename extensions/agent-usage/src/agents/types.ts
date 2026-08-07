@@ -39,6 +39,23 @@ export interface Accessory {
   icon?: Image.ImageLike;
 }
 
+export interface AgentVisibilityPreferences {
+  showAmp: boolean;
+  showAntigravity: boolean;
+  showClaude: boolean;
+  showCodex: boolean;
+  showCopilot: boolean;
+  showCursor: boolean;
+  showDroid: boolean;
+  showGemini: boolean;
+  showGrok: boolean;
+  showKimi: boolean;
+  showMinimax: boolean;
+  showOpencodeGo: boolean;
+  showSynthetic: boolean;
+  showZai: boolean;
+}
+
 /** Extended accessory with OpenCode active indicator */
 export interface AccountAccessory extends Accessory {
   /** True if this account's token matches the one configured in OpenCode */

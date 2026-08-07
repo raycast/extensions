@@ -248,4 +248,4 @@ export function resolveCodexAuthTokens(options: ResolveCodexAuthTokensOptions = 
   };
 }
 
-export { normalizeBearerToken as normalizeCodexAuthorizationHeader } from "../agents/http";
+export { normalizeBearerToken as normalizeCodexAuthorizationHeader } from "../agents/http.ts";

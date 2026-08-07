@@ -13,8 +13,8 @@ import {
 } from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Accessory, AgentDefinition, AgentId, UsageState } from "./agents/types";
-import { formatClock, latestTimestamp } from "./agents/format";
+import type { Accessory, AgentDefinition, AgentId, AgentVisibilityPreferences, UsageState } from "./agents/types.ts";
+import { formatClock, latestTimestamp } from "./agents/format.ts";
 import {
   useAmpUsage,
   useAntigravityUsage,
@@ -30,43 +30,46 @@ import {
   useOpencodegoUsage,
   useSyntheticAccounts,
   useZaiAccounts,
-} from "./agents/provider-hooks";
-import { formatAmpUsageText, getAmpAccessory, renderAmpDetail } from "./amp/renderer";
-import type { AmpError, AmpUsage } from "./amp/types";
-import { formatAntigravityUsageText, getAntigravityAccessory, renderAntigravityDetail } from "./antigravity/renderer";
-import type { AntigravityError, AntigravityUsage } from "./antigravity/types";
-import { formatClaudeUsageText, getClaudeAccessory, renderClaudeDetail } from "./claude/renderer";
-import type { ClaudeError, ClaudeUsage } from "./claude/types";
-import { formatCodexUsageText, getCodexAccessory, renderCodexDetail } from "./codex/renderer";
-import type { CodexError, CodexUsage } from "./codex/types";
-import { formatCopilotUsageText, getCopilotAccessory, renderCopilotDetail } from "./copilot/renderer";
-import type { CopilotError, CopilotUsage } from "./copilot/types";
-import { formatCursorUsageText, getCursorAccessory, renderCursorDetail } from "./cursor/renderer";
-import type { CursorError, CursorUsage } from "./cursor/types";
-import { formatDroidUsageText, getDroidAccessory, renderDroidDetail } from "./droid/renderer";
-import type { DroidError, DroidUsage } from "./droid/types";
-import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth";
-import { formatGeminiUsageText, getGeminiAccessory, renderGeminiDetail } from "./gemini/renderer";
-import type { GeminiError, GeminiUsage } from "./gemini/types";
-import { formatGrokUsageText, getGrokAccessory, renderGrokDetail } from "./grok/renderer";
-import type { GrokError, GrokUsage } from "./grok/types";
-import { formatKimiUsageText, getKimiAccessory, renderKimiDetail } from "./kimi/renderer";
-import type { KimiError, KimiUsage } from "./kimi/types";
-import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail } from "./synthetic/renderer";
-import type { SyntheticError, SyntheticUsage } from "./synthetic/types";
-import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer";
-import type { ZaiError, ZaiUsage } from "./zai/types";
-import { formatMiniMaxUsageText, getMiniMaxAccessory, renderMiniMaxDetail } from "./minimax/renderer";
-import type { MiniMaxError, MiniMaxUsage } from "./minimax/types";
-import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer";
-import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types";
-import { ManageAccountsForm } from "./accounts/ManageAccountsForm";
-import type { AccountUsageState } from "./accounts/types";
-import { getListIcon } from "./agents/ui";
+} from "./agents/provider-hooks.ts";
+import { formatAmpUsageText, getAmpAccessory, renderAmpDetail } from "./amp/renderer.tsx";
+import type { AmpError, AmpUsage } from "./amp/types.ts";
+import {
+  formatAntigravityUsageText,
+  getAntigravityAccessory,
+  renderAntigravityDetail,
+} from "./antigravity/renderer.tsx";
+import type { AntigravityError, AntigravityUsage } from "./antigravity/types.ts";
+import { formatClaudeUsageText, getClaudeAccessory, renderClaudeDetail } from "./claude/renderer.tsx";
+import type { ClaudeError, ClaudeUsage } from "./claude/types.ts";
+import { formatCodexUsageText, getCodexAccessory, renderCodexDetail } from "./codex/renderer.tsx";
+import type { CodexError, CodexUsage } from "./codex/types.ts";
+import { formatCopilotUsageText, getCopilotAccessory, renderCopilotDetail } from "./copilot/renderer.tsx";
+import type { CopilotError, CopilotUsage } from "./copilot/types.ts";
+import { formatCursorUsageText, getCursorAccessory, renderCursorDetail } from "./cursor/renderer.tsx";
+import type { CursorError, CursorUsage } from "./cursor/types.ts";
+import { formatDroidUsageText, getDroidAccessory, renderDroidDetail } from "./droid/renderer.tsx";
+import type { DroidError, DroidUsage } from "./droid/types.ts";
+import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth.ts";
+import { formatGeminiUsageText, getGeminiAccessory, renderGeminiDetail } from "./gemini/renderer.tsx";
+import type { GeminiError, GeminiUsage } from "./gemini/types.ts";
+import { formatGrokUsageText, getGrokAccessory, renderGrokDetail } from "./grok/renderer.tsx";
+import type { GrokError, GrokUsage } from "./grok/types.ts";
+import { formatKimiUsageText, getKimiAccessory, renderKimiDetail } from "./kimi/renderer.tsx";
+import type { KimiError, KimiUsage } from "./kimi/types.ts";
+import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail } from "./synthetic/renderer.tsx";
+import type { SyntheticError, SyntheticUsage } from "./synthetic/types.ts";
+import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer.tsx";
+import type { ZaiError, ZaiUsage } from "./zai/types.ts";
+import { formatMiniMaxUsageText, getMiniMaxAccessory, renderMiniMaxDetail } from "./minimax/renderer.tsx";
+import type { MiniMaxError, MiniMaxUsage } from "./minimax/types.ts";
+import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer.tsx";
+import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types.ts";
+import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
+import type { AccountUsageState } from "./accounts/types.ts";
+import { getListIcon } from "./agents/ui.tsx";
 
 const AGENT_ORDER_KEY = "agent-order";
 
-type Preferences = Preferences.AgentUsage;
 type ErrorLike = { type: string; message: string };
 type CommandLaunchContext = { selectedAgentId?: string };
 
@@ -403,7 +406,7 @@ function shortenAccountLabel(label: string): string {
 }
 
 export default function Command(props: LaunchProps<{ launchContext: CommandLaunchContext }>) {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<AgentVisibilityPreferences>();
   const { push } = useNavigation();
 
   // Hooks must be called unconditionally at top level (React rules)
@@ -678,7 +681,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                         <Action.CopyToClipboard
                           title="Copy Usage Details"
                           content={agent.formatUsageText()}
-                          shortcut={{ modifiers: ["cmd"], key: "c" }}
+                          shortcut={Keyboard.Shortcut.Common.Copy}
                         />
                         {agent.id === "gemini" && geminiState.error?.type === "unauthorized" && (
                           <Action title="Run Gemini Re-Authentication" icon={Icon.Key} onAction={handleGeminiReauth} />
@@ -697,7 +700,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                         <Action
                           title="Move Up" // eslint-disable-line @raycast/prefer-title-case
                           icon={Icon.ArrowUp}
-                          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                          shortcut={Keyboard.Shortcut.Common.MoveUp}
                           onAction={() => moveAgent(agent.id, "up")}
                         />
                       )}
@@ -705,7 +708,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                         <Action
                           title="Move Down"
                           icon={Icon.ArrowDown}
-                          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                          shortcut={Keyboard.Shortcut.Common.MoveDown}
                           onAction={() => moveAgent(agent.id, "down")}
                         />
                       )}
@@ -745,19 +748,19 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                     <Action.CopyToClipboard
                       title="Copy Usage Details"
                       content={view.formatUsageText()}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                     />
                     {view.token && (
                       <Action.CopyToClipboard
                         title="Copy API Key"
                         content={view.token}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                        shortcut={Keyboard.Shortcut.Common.Copy}
                       />
                     )}
                     <Action
                       title="Manage Accounts"
                       icon={Icon.Person}
-                      shortcut={{ modifiers: ["cmd"], key: "m" }}
+                      shortcut={Keyboard.Shortcut.Common.Edit}
                       onAction={() =>
                         push(
                           <ManageAccountsForm
@@ -796,7 +799,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                         <Action
                           title="Move Up" // eslint-disable-line @raycast/prefer-title-case
                           icon={Icon.ArrowUp}
-                          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                          shortcut={Keyboard.Shortcut.Common.MoveUp}
                           onAction={() => moveAgent(view.agentId, "up")}
                         />
                       )}
@@ -804,7 +807,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
                         <Action
                           title="Move Down"
                           icon={Icon.ArrowDown}
-                          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                          shortcut={Keyboard.Shortcut.Common.MoveDown}
                           onAction={() => moveAgent(view.agentId, "down")}
                         />
                       )}

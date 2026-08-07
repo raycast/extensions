@@ -15,7 +15,7 @@ const mockStorage = new Map<string, string>();
 
 // Register module hook BEFORE importing anything else
 // Use absolute path to the loader
-const loaderPath = join(__dirname, "storage-mock-loader.mjs");
+const loaderPath = join(__dirname, "storage-mock-loader.js");
 register(pathToFileURL(loaderPath), {
   parentURL: import.meta.url,
 });
@@ -23,7 +23,7 @@ register(pathToFileURL(loaderPath), {
 // Now import test framework
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { AccountEntry } from "./types";
+import type { AccountEntry } from "./types.ts";
 
 // Replace the import before loading the module
 const originalConsoleError = console.error;
@@ -43,7 +43,7 @@ test.afterEach(() => {
 
 async function loadStorageModule() {
   // Dynamically import after setting up mocks
-  const module = await import("./storage");
+  const module = await import("./storage.ts");
   return module;
 }
 

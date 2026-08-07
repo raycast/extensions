@@ -1,9 +1,9 @@
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useCallback, useRef } from "react";
-import type { UsageState } from "./types";
-import type { AccountsState, AccountUsageState } from "../accounts/types";
-import { isOpenCodeActiveToken } from "./opencode-active";
+import type { UsageState } from "./types.ts";
+import type { AccountsState, AccountUsageState } from "../accounts/types.ts";
+import { isOpenCodeActiveToken } from "./opencode-active.ts";
 import {
   allAccountRowsSucceeded,
   hashAuthKey,
@@ -12,8 +12,8 @@ import {
   parseCachedPayload,
   parseTtlSeconds,
   stripAccountTokens,
-} from "./usage-cache";
-import type { CachedUsagePayload } from "./usage-cache";
+} from "./usage-cache.ts";
+import type { CachedUsagePayload } from "./usage-cache.ts";
 
 // Versioned namespace: bump the suffix whenever the persisted payload shape
 // changes so entries written by older extension versions read as cache misses.

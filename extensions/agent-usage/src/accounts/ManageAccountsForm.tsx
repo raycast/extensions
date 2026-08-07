@@ -12,8 +12,8 @@ import {
   Clipboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import type { AccountEntry, AccountsProvider } from "./types";
-import { loadAccounts, addAccount, updateAccount, deleteAccount } from "./storage";
+import type { AccountEntry, AccountsProvider } from "./types.ts";
+import { loadAccounts, addAccount, updateAccount, deleteAccount } from "./storage.ts";
 
 interface ManageAccountsFormProps {
   provider: AccountsProvider;

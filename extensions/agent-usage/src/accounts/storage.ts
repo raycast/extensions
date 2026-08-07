@@ -1,8 +1,8 @@
 // src/accounts/storage.ts
 import { LocalStorage } from "@raycast/api";
 import { randomUUID } from "crypto";
-import type { AccountEntry, AccountsProvider } from "./types";
-import { ACCOUNTS_STORAGE_KEYS } from "./types";
+import type { AccountEntry, AccountsProvider } from "./types.ts";
+import { ACCOUNTS_STORAGE_KEYS } from "./types.ts";
 
 function storageKey(provider: AccountsProvider): string {
   return ACCOUNTS_STORAGE_KEYS[provider];

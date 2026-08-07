@@ -2,8 +2,8 @@ import { environment, Image, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import * as fs from "fs";
 import * as path from "path";
-import type { Accessory } from "./types";
-import { invertMonochromeSvg, scaleSvgViewBox } from "./icon-svg";
+import type { Accessory } from "./types.ts";
+import { invertMonochromeSvg, scaleSvgViewBox } from "./icon-svg.ts";
 
 type ErrorLike = { type: string; message: string };
 const LIST_ICON_SCALE = 0.8;
