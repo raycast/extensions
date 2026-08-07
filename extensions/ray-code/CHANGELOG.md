@@ -1,6 +1,6 @@
 # Ray Code Changelog
 
-## [Expand Home Directory Paths] - {PR_MERGE_DATE}
+## [Expand Home Directory Paths] - 2026-08-07
 
 - Expand `~` in the configured workspace path before resolving it
 
