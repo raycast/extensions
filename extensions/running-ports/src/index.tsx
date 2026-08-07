@@ -93,6 +93,28 @@ export default function Command() {
     if (!confirmed) return;
 
     try {
+      // Re-verify the PID still belongs to the expected command to avoid killing a reused PID
+      try {
+        const currentCommand = execSync(`ps -p ${entry.pid} -c -o comm=`).toString().trim();
+        if (currentCommand !== entry.command) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Stale Process",
+            message: `PID ${entry.pid} is no longer ${entry.command}. Aborting kill.`,
+          });
+          revalidate();
+          return;
+        }
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Process Not Found",
+          message: `PID ${entry.pid} is no longer running.`,
+        });
+        revalidate();
+        return;
+      }
+
       execSync(`kill -9 ${entry.pid}`);
       await showToast({
         style: Toast.Style.Success,
