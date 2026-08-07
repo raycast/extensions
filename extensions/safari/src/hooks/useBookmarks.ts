@@ -1,8 +1,7 @@
-import bplistParser from "bplist-parser";
 import _ from "lodash";
 import { homedir } from "os";
 import { useCallback, useEffect, useState } from "react";
-import { readFile } from "simple-plist";
+import { bplistParser, readFile } from "simple-plist";
 import { promisify } from "util";
 import { Bookmark, BookmarkPListResult, GeneralBookmark, ReadingListBookmark } from "../types";
 import { getUrlDomain } from "../utils";

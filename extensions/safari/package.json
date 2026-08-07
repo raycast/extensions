@@ -560,7 +560,6 @@
     "@raycast/utils": "^2.2.2",
     "ahooks": "^3.8.1",
     "bplist-creator": "^0.1.1",
-    "bplist-parser": "^0.3.2",
     "fuse.js": "^7.0.0",
     "lodash": "^4.17.21",
     "lru-cache": "^11.0.2",
