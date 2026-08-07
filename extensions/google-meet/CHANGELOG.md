@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [Fix Arc Detection] - {PR_MERGE_DATE}
+## [Fix Arc Detection] - 2026-08-07
 
 - Fix meeting links never being copied in Arc, which failed by asserting the meeting had opened in Little Arc even when Little Arc was disabled. Arc's `URL of active tab` raises a `-1728` error for perfectly normal, visible windows — right after a tab opens, and whenever the active tab isn't a web page — and returns a URL again milliseconds later. The previous release treated any such error as a Little Arc signature and threw a fatal error, which aborted the entire detection window on the very first poll instead of letting the next one (300ms later) succeed. Arc also enumerates one `window` per space and those entries mirror the same active tab, so a single blip marks every window at once.
 - Report an unreadable Arc window as a transient state and keep polling, and surface it only if the detection deadline expires without a single poll ever having read a URL — a lone unreadable sample, even the one crossing the deadline, proves nothing. The error now states what was actually observed ("couldn't read the meeting link from any Arc window") instead of diagnosing Little Arc, which can't be told apart from an ordinary window that never exposed a URL; Little Arc is offered as the likely cause in the recovery text. Adapters refine an expired deadline through a new optional `describeTimeout` hook, so this still beats a bare timeout.
