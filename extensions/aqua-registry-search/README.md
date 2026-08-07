@@ -19,3 +19,7 @@ The extension supports every registry entry shape, including packages identified
 - **Toggle Details** switches between detailed and compact results.
 
 Learn more about adding packages in the [Aqua documentation](https://aquaproj.github.io/docs/tutorial/search-packages/).
+
+## Attribution
+
+The Aqua logo was created by [@vadasambar](https://github.com/vadasambar), sourced from [aquaproj/aqua](https://github.com/aquaproj/aqua/tree/f3bf1f880037979f45d5b66704c9b58d74b7b134/logo), and is licensed under [CC BY-NC-ND 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/). The canonical mark is used unchanged; the surrounding tile and search badge are extension artwork.
