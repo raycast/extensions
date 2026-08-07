@@ -25,7 +25,15 @@ interface RefreshResponse {
 
 interface RefreshOptions {
   requestRefresh?: (refreshToken: string) => Promise<RefreshResponse>;
+  beforePersistCommit?: (filePath: string, attempt: number) => void;
 }
+
+interface JsonSnapshot {
+  contents: string;
+  root: Record<string, unknown>;
+}
+
+const MAX_PERSIST_ATTEMPTS = 3;
 
 function asRecord(value: unknown): Record<string, unknown> | null {
   return typeof value === "object" && value !== null && !Array.isArray(value)
@@ -37,12 +45,18 @@ function nonEmptyString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
-function readJson(filePath: string): Record<string, unknown> | null {
+function readJsonSnapshot(filePath: string): JsonSnapshot | null {
   try {
-    return asRecord(JSON.parse(fs.readFileSync(filePath, "utf8")));
+    const contents = fs.readFileSync(filePath, "utf8");
+    const root = asRecord(JSON.parse(contents));
+    return root ? { contents, root } : null;
   } catch {
     return null;
   }
+}
+
+function readJson(filePath: string): Record<string, unknown> | null {
+  return readJsonSnapshot(filePath)?.root ?? null;
 }
 
 function labelFromUserInfo(userInfo: Record<string, unknown> | null, fallback: string): string {
@@ -54,8 +68,10 @@ function labelFromUserInfo(userInfo: Record<string, unknown> | null, fallback: s
   );
 }
 
-function readProvidersCredential(filePath: string): ClinePassCredential | null {
-  const root = readJson(filePath);
+function providersCredentialFromRoot(
+  root: Record<string, unknown> | null,
+  filePath: string,
+): ClinePassCredential | null {
   const providers = asRecord(root?.providers);
   const cline = asRecord(providers?.cline);
   const settings = asRecord(cline?.settings);
@@ -78,8 +94,11 @@ function readProvidersCredential(filePath: string): ClinePassCredential | null {
   };
 }
 
-function readLegacyCredential(filePath: string): ClinePassCredential | null {
-  const root = readJson(filePath);
+function readProvidersCredential(filePath: string): ClinePassCredential | null {
+  return providersCredentialFromRoot(readJson(filePath), filePath);
+}
+
+function legacyCredentialFromRoot(root: Record<string, unknown> | null, filePath: string): ClinePassCredential | null {
   const encoded = nonEmptyString(root?.["cline:clineAccountId"]);
   if (!encoded) return null;
 
@@ -106,6 +125,10 @@ function readLegacyCredential(filePath: string): ClinePassCredential | null {
     source: "legacy",
     sourcePath: filePath,
   };
+}
+
+function readLegacyCredential(filePath: string): ClinePassCredential | null {
+  return legacyCredentialFromRoot(readJson(filePath), filePath);
 }
 
 export function resolveClineHome(env: NodeJS.ProcessEnv = process.env): string {
@@ -144,11 +167,22 @@ function parseExpiresAt(value: string | number): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function writeJsonAtomic(filePath: string, value: unknown): void {
+function writeJsonAtomicIfUnchanged(
+  filePath: string,
+  expectedContents: string,
+  value: unknown,
+  beforeCommit?: () => void,
+): boolean {
   const temporaryPath = `${filePath}.${process.pid}.${Date.now()}.tmp`;
   try {
     fs.writeFileSync(temporaryPath, `${JSON.stringify(value, null, 2)}\n`, "utf8");
+    beforeCommit?.();
+    if (fs.readFileSync(filePath, "utf8") !== expectedContents) {
+      fs.rmSync(temporaryPath, { force: true });
+      return false;
+    }
     fs.renameSync(temporaryPath, filePath);
+    return true;
   } catch (error) {
     try {
       fs.rmSync(temporaryPath, { force: true });
@@ -167,69 +201,89 @@ function persistProvidersCredential(
   original: ClinePassCredential,
   refreshed: RefreshResponse,
   expiresAt: number,
+  beforePersistCommit?: (filePath: string, attempt: number) => void,
 ): ClinePassCredential {
   const filePath = original.sourcePath as string;
-  const latest = readProvidersCredential(filePath);
-  if (!latest) throw new Error("Cline provider credentials disappeared while they were being refreshed.");
-  if (!credentialsMatch(original, latest)) return latest;
+  for (let attempt = 0; attempt < MAX_PERSIST_ATTEMPTS; attempt += 1) {
+    const snapshot = readJsonSnapshot(filePath);
+    const latest = providersCredentialFromRoot(snapshot?.root ?? null, filePath);
+    if (!snapshot || !latest) {
+      throw new Error("Cline provider credentials disappeared while they were being refreshed.");
+    }
+    if (!credentialsMatch(original, latest)) return latest;
 
-  const root = readJson(filePath);
-  const providers = asRecord(root?.providers);
-  const cline = asRecord(providers?.cline);
-  const settings = asRecord(cline?.settings);
-  const auth = asRecord(settings?.auth);
-  if (!root || !providers || !cline || !settings || !auth) {
-    throw new Error("Cline provider settings changed shape while credentials were being refreshed.");
+    const root = snapshot.root;
+    const providers = asRecord(root.providers);
+    const cline = asRecord(providers?.cline);
+    const settings = asRecord(cline?.settings);
+    const auth = asRecord(settings?.auth);
+    if (!providers || !cline || !settings || !auth) {
+      throw new Error("Cline provider settings changed shape while credentials were being refreshed.");
+    }
+    const oldMetadata = asRecord(auth.metadata) ?? {};
+    const oldUserInfo = asRecord(oldMetadata.userInfo) ?? {};
+    const userInfo = refreshed.userInfo ?? {};
+    const accountId = nonEmptyString(userInfo.clineUserId) ?? original.userId;
+    settings.auth = {
+      ...auth,
+      accessToken: formatClineApiToken(refreshed.accessToken),
+      refreshToken: refreshed.refreshToken ?? original.refreshToken,
+      expiresAt,
+      accountId,
+      metadata: {
+        ...oldMetadata,
+        userInfo: { ...oldUserInfo, ...userInfo },
+      },
+    };
+    cline.updatedAt = Date.now();
+    if (writeJsonAtomicIfUnchanged(filePath, snapshot.contents, root, () => beforePersistCommit?.(filePath, attempt))) {
+      const saved = readProvidersCredential(filePath);
+      if (!saved) throw new Error("Cline provider credentials disappeared after they were refreshed.");
+      return saved;
+    }
   }
-  const oldMetadata = asRecord(auth.metadata) ?? {};
-  const oldUserInfo = asRecord(oldMetadata.userInfo) ?? {};
-  const userInfo = refreshed.userInfo ?? {};
-  const accountId = nonEmptyString(userInfo.clineUserId) ?? original.userId;
-  settings.auth = {
-    ...auth,
-    accessToken: formatClineApiToken(refreshed.accessToken),
-    refreshToken: refreshed.refreshToken ?? original.refreshToken,
-    expiresAt,
-    accountId,
-    metadata: {
-      ...oldMetadata,
-      userInfo: { ...oldUserInfo, ...userInfo },
-    },
-  };
-  cline.updatedAt = Date.now();
-  writeJsonAtomic(filePath, root);
-  return readProvidersCredential(filePath) as ClinePassCredential;
+  throw new Error("Cline provider settings kept changing while credentials were being refreshed.");
 }
 
 function persistLegacyCredential(
   original: ClinePassCredential,
   refreshed: RefreshResponse,
   expiresAt: number,
+  beforePersistCommit?: (filePath: string, attempt: number) => void,
 ): ClinePassCredential {
   const filePath = original.sourcePath as string;
-  const latest = readLegacyCredential(filePath);
-  if (!latest) throw new Error("Legacy Cline credentials disappeared while they were being refreshed.");
-  if (!credentialsMatch(original, latest)) return latest;
+  for (let attempt = 0; attempt < MAX_PERSIST_ATTEMPTS; attempt += 1) {
+    const snapshot = readJsonSnapshot(filePath);
+    const latest = legacyCredentialFromRoot(snapshot?.root ?? null, filePath);
+    if (!snapshot || !latest) {
+      throw new Error("Legacy Cline credentials disappeared while they were being refreshed.");
+    }
+    if (!credentialsMatch(original, latest)) return latest;
 
-  const root = readJson(filePath);
-  const encoded = nonEmptyString(root?.["cline:clineAccountId"]);
-  if (!root || !encoded) throw new Error("Legacy Cline credentials changed shape while they were being refreshed.");
-  const auth = asRecord(JSON.parse(encoded));
-  if (!auth) throw new Error("Legacy Cline credentials are invalid.");
-  const oldUserInfo = asRecord(auth.userInfo) ?? {};
-  const userInfo = refreshed.userInfo ?? {};
-  auth.idToken = stripWorkosPrefix(refreshed.accessToken);
-  auth.refreshToken = refreshed.refreshToken ?? original.refreshToken;
-  auth.expiresAt = Math.floor(expiresAt / 1000);
-  auth.userInfo = {
-    ...oldUserInfo,
-    ...userInfo,
-    id: nonEmptyString(userInfo.clineUserId) ?? original.userId,
-    displayName: nonEmptyString(userInfo.name) ?? nonEmptyString(oldUserInfo.displayName) ?? undefined,
-  };
-  root["cline:clineAccountId"] = JSON.stringify(auth);
-  writeJsonAtomic(filePath, root);
-  return readLegacyCredential(filePath) as ClinePassCredential;
+    const root = snapshot.root;
+    const encoded = nonEmptyString(root["cline:clineAccountId"]);
+    if (!encoded) throw new Error("Legacy Cline credentials changed shape while they were being refreshed.");
+    const auth = asRecord(JSON.parse(encoded));
+    if (!auth) throw new Error("Legacy Cline credentials are invalid.");
+    const oldUserInfo = asRecord(auth.userInfo) ?? {};
+    const userInfo = refreshed.userInfo ?? {};
+    auth.idToken = stripWorkosPrefix(refreshed.accessToken);
+    auth.refreshToken = refreshed.refreshToken ?? original.refreshToken;
+    auth.expiresAt = Math.floor(expiresAt / 1000);
+    auth.userInfo = {
+      ...oldUserInfo,
+      ...userInfo,
+      id: nonEmptyString(userInfo.clineUserId) ?? original.userId,
+      displayName: nonEmptyString(userInfo.name) ?? nonEmptyString(oldUserInfo.displayName) ?? undefined,
+    };
+    root["cline:clineAccountId"] = JSON.stringify(auth);
+    if (writeJsonAtomicIfUnchanged(filePath, snapshot.contents, root, () => beforePersistCommit?.(filePath, attempt))) {
+      const saved = readLegacyCredential(filePath);
+      if (!saved) throw new Error("Legacy Cline credentials disappeared after they were refreshed.");
+      return saved;
+    }
+  }
+  throw new Error("Legacy Cline secrets kept changing while credentials were being refreshed.");
 }
 
 async function requestRefresh(refreshToken: string): Promise<RefreshResponse> {
@@ -276,8 +330,8 @@ export async function refreshClineCredential(
     if (!expiresAt) throw new Error("Cline returned an invalid credential expiration date.");
     const saved =
       credential.source === "providers"
-        ? persistProvidersCredential(credential, refreshed, expiresAt)
-        : persistLegacyCredential(credential, refreshed, expiresAt);
+        ? persistProvidersCredential(credential, refreshed, expiresAt, options.beforePersistCommit)
+        : persistLegacyCredential(credential, refreshed, expiresAt, options.beforePersistCommit);
     return { credential: saved, error: null };
   } catch (error) {
     return {

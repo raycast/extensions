@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add support for ClinePass] - {2026-08-07}
+## [Add support for ClinePass] - {PR_MERGE_DATE}
 
 ### New Features
 
@@ -24,7 +24,7 @@
 - Usage pie charts now display again on Windows
 - First-selected agent when you open the extension is the actual first of the list, not the first alphabetically
 
-## [Support Claude Fable Usage Limits] - {2026-07-22}
+## [Support Claude Fable Usage Limits] - 2026-07-22
 
 ### Improvements
 

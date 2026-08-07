@@ -190,7 +190,6 @@ test("refreshClineCredential does not overwrite a credential Cline changed concu
 
     const result = await refreshClineCredential(original, {
       requestRefresh: async () => {
-        writeCredential("workos:cline-won", "cline-refresh");
         return {
           accessToken: "our-token",
           refreshToken: "our-refresh",
@@ -198,11 +197,72 @@ test("refreshClineCredential does not overwrite a credential Cline changed concu
           userInfo: { clineUserId: "usr-current" },
         };
       },
+      beforePersistCommit: (_filePath, attempt) => {
+        if (attempt === 0) writeCredential("workos:cline-won", "cline-refresh");
+      },
     });
 
     assert.equal(result.error, null);
     assert.equal(result.credential?.token, "workos:cline-won");
     assert.equal(readClineCredential({ clineHome })?.token, "workos:cline-won");
+  } finally {
+    fs.rmSync(clineHome, { recursive: true, force: true });
+  }
+});
+
+test("refreshClineCredential retries a provider write when Cline changes unrelated settings before commit", async () => {
+  const clineHome = makeTempClineHome();
+  const providersPath = path.join(clineHome, "data", "settings", "providers.json");
+  try {
+    writeJson(providersPath, {
+      revision: 1,
+      providers: {
+        cline: {
+          settings: {
+            auth: {
+              accessToken: "workos:old-token",
+              refreshToken: "old-refresh",
+              accountId: "usr-current",
+            },
+          },
+        },
+      },
+    });
+    const original = readClineCredential({ clineHome });
+    assert.ok(original);
+
+    const result = await refreshClineCredential(original, {
+      requestRefresh: async () => ({
+        accessToken: "new-token",
+        refreshToken: "new-refresh",
+        expiresAt: "2030-01-02T03:04:05.000Z",
+        userInfo: { clineUserId: "usr-current" },
+      }),
+      beforePersistCommit: (_filePath, attempt) => {
+        if (attempt !== 0) return;
+        writeJson(providersPath, {
+          revision: 2,
+          providers: {
+            other: { settings: { concurrentlyAdded: true } },
+            cline: {
+              settings: {
+                auth: {
+                  accessToken: "workos:old-token",
+                  refreshToken: "old-refresh",
+                  accountId: "usr-current",
+                },
+              },
+            },
+          },
+        });
+      },
+    });
+
+    assert.equal(result.error, null);
+    assert.equal(result.credential?.token, "workos:new-token");
+    const saved = JSON.parse(fs.readFileSync(providersPath, "utf8"));
+    assert.equal(saved.revision, 2);
+    assert.deepEqual(saved.providers.other, { settings: { concurrentlyAdded: true } });
   } finally {
     fs.rmSync(clineHome, { recursive: true, force: true });
   }
@@ -245,6 +305,47 @@ test("refreshClineCredential updates the legacy encoded secret and preserves unr
     assert.equal(savedAuth.userInfo.keep, true);
     assert.equal(savedAuth.userInfo.email, "new@example.com");
     assert.equal(savedAuth.userInfo.displayName, "New User");
+  } finally {
+    fs.rmSync(clineHome, { recursive: true, force: true });
+  }
+});
+
+test("refreshClineCredential retries a legacy write when Cline changes another secret before commit", async () => {
+  const clineHome = makeTempClineHome();
+  const secretsPath = path.join(clineHome, "data", "secrets.json");
+  try {
+    const encodedAuth = JSON.stringify({
+      idToken: "old-token",
+      refreshToken: "old-refresh",
+      expiresAt: 1,
+      userInfo: { id: "usr-legacy" },
+    });
+    writeJson(secretsPath, { revision: 1, "cline:clineAccountId": encodedAuth });
+    const original = readClineCredential({ clineHome });
+    assert.ok(original);
+
+    const result = await refreshClineCredential(original, {
+      requestRefresh: async () => ({
+        accessToken: "workos:new-token",
+        refreshToken: "new-refresh",
+        expiresAt: "2030-01-02T03:04:05.000Z",
+        userInfo: { clineUserId: "usr-legacy" },
+      }),
+      beforePersistCommit: (_filePath, attempt) => {
+        if (attempt !== 0) return;
+        writeJson(secretsPath, {
+          revision: 2,
+          unrelated: { concurrentlyAdded: true },
+          "cline:clineAccountId": encodedAuth,
+        });
+      },
+    });
+
+    assert.equal(result.error, null);
+    assert.equal(result.credential?.token, "new-token");
+    const saved = JSON.parse(fs.readFileSync(secretsPath, "utf8"));
+    assert.equal(saved.revision, 2);
+    assert.deepEqual(saved.unrelated, { concurrentlyAdded: true });
   } finally {
     fs.rmSync(clineHome, { recursive: true, force: true });
   }
