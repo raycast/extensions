@@ -122,6 +122,19 @@ export function findHabitByName(habits: Habit[], name: string): Habit | undefine
   return habits.find((h) => h.name.toLowerCase().includes(q));
 }
 
+/**
+ * Resolve a caller-supplied habit ID against the loaded habit list. A non-empty but unknown
+ * ID would otherwise pass local preparation and only fail once TickTick rejects it,
+ * which in a batch means earlier check-ins (or undos) are already written.
+ */
+export function requireHabit(habits: Habit[], habitId: string, context = ""): Habit {
+  const found = habits.find((h) => h.id === habitId);
+  if (!found) {
+    throw new Error(`${context}Habit "${habitId}" not found. Call list-habits and retry with a current habitId.`);
+  }
+  return found;
+}
+
 export type HabitRef = {
   habitId?: string;
   habitName?: string;
@@ -132,19 +145,21 @@ export function resolveHabitRefs(
   habits: Habit[],
   notFoundHint = "Call list-habits and retry.",
 ): Array<{ habitId: string; habitName: string }> {
-  return refs.map((ref) => {
+  return refs.map((ref, index) => {
+    const context = refs.length > 1 ? `Habit ${index + 1} of ${refs.length}: ` : "";
     let habitId = ref.habitId;
     if (!habitId && ref.habitName) {
       const match = findHabitByName(habits, ref.habitName);
       if (!match) {
-        throw new Error(`Habit "${ref.habitName}" not found.${notFoundHint ? ` ${notFoundHint}` : ""}`);
+        throw new Error(`${context}Habit "${ref.habitName}" not found.${notFoundHint ? ` ${notFoundHint}` : ""}`);
       }
       habitId = match.id;
     }
-    if (!habitId) throw new Error("Each habit requires habitId or habitName.");
+    if (!habitId) throw new Error(`${context}Each habit requires habitId or habitName.`);
     // Always read the name back from the habit list. A caller-supplied habitName is only
     // a lookup key, never a label, so it cannot describe a different habit than the ID.
-    return { habitId, habitName: habits.find((h) => h.id === habitId)?.name ?? habitId };
+    const habit = requireHabit(habits, habitId, context);
+    return { habitId: habit.id, habitName: habit.name };
   });
 }
 
