@@ -24,7 +24,7 @@ export function TryListItem({ directory, onRefresh }: TryListItemProps) {
             <Action.CopyToClipboard
               title="Copy Path"
               content={directory.path}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>

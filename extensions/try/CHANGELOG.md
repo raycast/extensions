@@ -6,6 +6,7 @@
 - Renamed "Delete" to "Move to Trash", which is what it always did — directories go to the system Trash and can be restored from there
 - Removed the confirmation prompt's incorrect "This cannot be undone" warning
 - Moving a directory to the Trash no longer asks for confirmation, and confirms with a HUD once it completes
+- Copy Path now uses Raycast's standard shortcut for copying a path, ⌘⇧, (was ⌘⇧C)
 
 ## [Improvements] - 2026-06-19
 
