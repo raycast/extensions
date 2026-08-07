@@ -1,6 +1,6 @@
 # Chmod Lookup Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-07
 
 - Convert numeric (octal) modes to symbolic flags and vice versa
 - Support setuid/setgid/sticky bits (`4755` ⇄ `rwsr-xr-x`)
