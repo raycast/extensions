@@ -1,6 +1,6 @@
 # Público Changelog
 
-## [Sections, Topics, and a Lot of Fixes] - {PR_MERGE_DATE}
+## [Sections, Topics, and a Lot of Fixes] - 2026-08-07
 
 ### Added
 
