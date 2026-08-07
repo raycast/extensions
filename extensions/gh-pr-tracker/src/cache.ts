@@ -61,7 +61,13 @@ export async function loadCachedPRs(): Promise<PRWithActivity[] | null> {
         isObjectArray(c.reviewComments) &&
         isObjectArray(c.issueComments) &&
         isObjectArray(c.events) &&
-        isCommitArray(c.commits)
+        isCommitArray(c.commits) &&
+        // Guard metadata fields added in v1.3.0+: matchesPrFilter dereferences these without
+        // checking, so old cache entries lacking them crash the filter matcher.
+        isObjectArray(c.assignees) &&
+        isObjectArray(c.requested_reviewers) &&
+        isObjectArray(c.labels) &&
+        typeof c.draft === "boolean"
       );
     });
     if (valid.length !== parsed.length) {
