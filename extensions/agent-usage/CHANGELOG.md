@@ -19,6 +19,11 @@
 - Reduce the progressbar from 15 to 12 segments to avoid it being clipped on monitors with different resolutions/DPI/scale factors
 - Display error messages in a Markdown box so they're not clipped
 
+### Bug Fixes
+
+- Usage pie charts now display again on Windows
+- First-selected agent when you open the extension is the actual first of the list, not the first alphabetically
+
 ## [Support Claude Fable Usage Limits] - {2026-07-22}
 
 ### Improvements
