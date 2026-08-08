@@ -1,5 +1,13 @@
 # BCUninstaller Changelog
 
+## [Simplify Uninstall Flow and Fix Reliability Issues] - {PR_MERGE_DATE}
+
+- Made the app list easier to use
+- Added a button to close running apps before uninstalling them
+- Fixed quiet uninstall detection
+- Added Ctrl+R to refresh the app list
+- Bring Raycast back after BC Uninstaller is done
+
 ## [Initial Release] - 2026-07-24
 
 - Add a Windows-only Raycast command for browsing installed applications through BCUninstaller
