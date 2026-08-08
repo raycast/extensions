@@ -77,6 +77,83 @@ test("quarantines a byte-identical file under another name and records it in man
   assert.match(fs.readFileSync(path.join(dest, "Duplicates", "manifest.md"), "utf8"), /photo copy\.jpg/);
 });
 
+test("the similar-files report lands in .tidy and names where the files ended up", () => {
+  const src = tmp();
+  const dest = tmp();
+  const a = write(src, "shot.jpg", "AAA");
+  const b = write(src, "shot-2.jpg", "BBB");
+  const toA = path.join(dest, "Images", "shot.jpg");
+  const toB = path.join(dest, "Images", "shot-2.jpg");
+
+  const { similarReportPath } = executePlan(
+    [
+      { from: a, to: toA, name: "shot.jpg", action: "archive", size: 3, perceptual: { peers: [b], best: true } },
+      { from: b, to: toB, name: "shot-2.jpg", action: "archive", size: 3, perceptual: { peers: [a], best: false } },
+    ],
+    { destDir: dest, sourceDir: src },
+  );
+
+  assert.equal(similarReportPath, path.join(dest, ".tidy", "similar.md"));
+  const report = fs.readFileSync(similarReportPath, "utf8");
+  // The peers were recorded before anything moved. Naming them by their source
+  // paths would point the report at files that no longer exist there, which is
+  // the one thing it exists to avoid.
+  assert.ok(report.includes(path.join("Images", "shot.jpg")));
+  assert.ok(report.includes(path.join("Images", "shot-2.jpg")));
+  assert.ok(!report.includes(src));
+  // Written relative to the archive the report sits in, so the file names stay
+  // readable instead of trailing a repeated absolute prefix.
+  assert.ok(!report.includes(dest));
+  assert.match(report, /largest of the set/);
+});
+
+test("a peer already in the destination keeps its path, and a second run appends", () => {
+  const src = tmp();
+  const dest = tmp();
+  // Archived by an earlier run: this one never moves it, so it is already at
+  // its final path and must survive the rewrite untouched.
+  const archived = write(dest, "Images/old.jpg", "OLD");
+  const fresh = write(src, "new.jpg", "NEW");
+  const to = path.join(dest, "Images", "new.jpg");
+
+  const run = () =>
+    executePlan(
+      [
+        {
+          from: fresh,
+          to,
+          name: "new.jpg",
+          action: "archive",
+          size: 3,
+          perceptual: { peers: [archived], best: false },
+        },
+      ],
+      { destDir: dest, sourceDir: src },
+    );
+
+  const { similarReportPath } = run();
+  assert.ok(fs.readFileSync(similarReportPath, "utf8").includes(path.join("Images", "old.jpg")));
+
+  // Put it back so the second run has something to move again.
+  fs.renameSync(to, fresh);
+  run();
+  const blocks = fs.readFileSync(similarReportPath, "utf8").match(/^## /gm);
+  assert.equal(blocks.length, 2, "the second run appends a block instead of replacing the first");
+});
+
+test("a run with nothing flagged writes no similar report", () => {
+  const src = tmp();
+  const dest = tmp();
+  const from = write(src, "plain.txt", "x");
+
+  const { similarReportPath } = executePlan(
+    [{ from, to: path.join(dest, "Documents", "plain.txt"), name: "plain.txt", action: "archive", size: 1 }],
+    { destDir: dest, sourceDir: src },
+  );
+  assert.equal(similarReportPath, null);
+  assert.ok(!fs.existsSync(path.join(dest, ".tidy", "similar.md")));
+});
+
 test("quarantines a new file that duplicates one already archived in the destination", async () => {
   const src = tmp();
   const dest = tmp();

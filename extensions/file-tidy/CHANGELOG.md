@@ -1,5 +1,9 @@
 # File Tidy Changelog
 
+## [Look-Alike Report] - {PR_MERGE_DATE}
+
+- Near-duplicates and similar images are still only flagged and still archived normally — but the grouping no longer disappears when the plan closes. A run that flags anything now writes `.tidy/similar.md` in the destination, listing each group and where its files ended up, so you can work through them later instead of having to act while the plan is open. The success toast offers to open it.
+
 ## [Maintenance] - 2026-08-08
 
 - Internal cleanup with no change to how the commands behave. The ` (n)` suffix used for a name collision is now produced in a single place, so the name shown in the plan and the name written to disk cannot drift apart as the code changes.

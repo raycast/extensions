@@ -9,11 +9,15 @@ import { firstFreeName } from "./plan.js";
  * Execute the plan: move every file, resolving name collisions with " (n)"
  * suffixes. The run manifest records the whole plan before the first move and
  * is rewritten whenever a move diverges from it, so undo can restore whatever
- * was moved even if a later step fails. Appends to the Duplicates manifest
- * (formatDupBlock lets adapters localize its text).
- * Returns { moved, manifestPath }.
+ * was moved even if a later step fails. Appends to the Duplicates manifest and,
+ * when the run flagged any, to the similar-files report (formatDupBlock and
+ * formatSimilarBlock let adapters localize their text).
+ * Returns { moved, manifestPath, similarReportPath }.
  */
-export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defaultDupBlock }) {
+export function executePlan(
+  entries,
+  { destDir, sourceDir, formatDupBlock = defaultDupBlock, formatSimilarBlock = defaultSimilarBlock },
+) {
   const runsDir = tidyPath(destDir, "runs");
   fs.mkdirSync(runsDir, { recursive: true });
   const time = new Date().toISOString();
@@ -68,17 +72,45 @@ export function executePlan(entries, { destDir, sourceDir, formatDupBlock = defa
     moveFile(entry.from, finalTo);
   }
 
+  // Both reports below were built from pre-move paths. Anything this run moved
+  // has to be rewritten to where it actually landed, or the report points at
+  // paths that no longer exist. A path this run never touched — a peer that was
+  // already in the destination — is already final and maps to itself.
+  const finalPath = new Map(moved.map((e) => [e.from, e.to]));
+  const atFinalPath = (p) => finalPath.get(p) ?? p;
+
   const dups = moved.filter((e) => e.action === "duplicate");
   if (dups.length) {
     // The keeper was recorded at its pre-move location; by now it has been
-    // archived. Rewrite it to where it actually landed, otherwise the manifest
-    // points at a path that no longer exists.
-    const finalPath = new Map(moved.map((e) => [e.from, e.to]));
-    const resolved = dups.map((d) => ({ ...d, keeperPath: finalPath.get(d.keeperPath) ?? d.keeperPath }));
+    // archived.
+    const resolved = dups.map((d) => ({ ...d, keeperPath: atFinalPath(d.keeperPath) }));
     fs.mkdirSync(path.dirname(dupManifest), { recursive: true });
     fs.appendFileSync(dupManifest, formatDupBlock(resolved));
   }
-  return { moved, manifestPath };
+
+  // Near-duplicate and similar-image flags never change where a file goes, so
+  // the moment the run ends the grouping becomes invisible: the files sit in
+  // their normal archive folders with nothing tying them together, and the plan
+  // that knew about it is gone. This report is the only record that outlives
+  // the run. It goes beside the run records rather than into the archive tree
+  // — these are heuristics, and a folder of its own would imply a verdict the
+  // pass is not confident enough to make.
+  const flagged = moved.filter((e) => e.similar || e.perceptual);
+  let similarReportPath = null;
+  if (flagged.length) {
+    similarReportPath = tidyPath(destDir, "similar.md");
+    const resolved = flagged.map((e) => ({
+      ...e,
+      similar: e.similar && { ...e.similar, peers: e.similar.peers.map(atFinalPath) },
+      perceptual: e.perceptual && { ...e.perceptual, peers: e.perceptual.peers.map(atFinalPath) },
+    }));
+    fs.mkdirSync(path.dirname(similarReportPath), { recursive: true });
+    // destDir is passed through so adapters can write paths relative to the
+    // archive: the report sits inside it, and a full absolute path repeated on
+    // every line buries the file names the reader is actually scanning for.
+    fs.appendFileSync(similarReportPath, formatSimilarBlock(resolved, { destDir }));
+  }
+  return { moved, manifestPath, similarReportPath };
 }
 
 /** Directories between `dir` and `stopDir` that don't exist yet, deepest first. */
@@ -104,4 +136,30 @@ function defaultDupBlock(dups) {
     );
   }
   return lines.join("\n") + "\n";
+}
+
+function defaultSimilarBlock(flagged, { destDir }) {
+  const lines = [`\n## ${new Date().toISOString()}\n`];
+  const peers = (list) => list.map((p) => `\`${relativeToDest(p, destDir)}\``).join(", ");
+  for (const e of flagged) {
+    const name = relativeToDest(e.to, destDir);
+    if (e.similar) {
+      lines.push(`- \`${name}\` — ${e.similar.reason}, grouped with ${peers(e.similar.peers)}`);
+    }
+    if (e.perceptual) {
+      const best = e.perceptual.best ? " (largest of the set)" : "";
+      lines.push(`- \`${name}\` — looks nearly identical to ${peers(e.perceptual.peers)}${best}`);
+    }
+  }
+  return lines.join("\n") + "\n";
+}
+
+/**
+ * A path shortened against the archive it lives in. Anything that resolves
+ * outside — which a peer never should, but the report must not lie if one does
+ * — keeps its absolute path instead of a chain of "..".
+ */
+export function relativeToDest(p, destDir) {
+  const rel = path.relative(destDir, p);
+  return rel && !rel.startsWith("..") && !path.isAbsolute(rel) ? rel : p;
 }
