@@ -76,6 +76,8 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={handleRefresh}
       pagination={pagination}
       searchBarPlaceholder={t("list.searchInList", { name: listName })}
@@ -98,6 +100,8 @@ function ArchivedBookmarks() {
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("list.searchInArchived")}
@@ -120,6 +124,8 @@ function FavoritedBookmarks() {
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("list.searchInFavorites")}

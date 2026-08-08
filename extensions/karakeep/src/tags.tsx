@@ -26,6 +26,8 @@ function TagBookmarksView({ tagId, tagName }: { tagId: string; tagName: string }
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("tags.bookmarks.searchInTag", { name: tagName })}

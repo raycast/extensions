@@ -1,5 +1,11 @@
 # Karakeep Changelog
 
+## [2.4.1] - 2026-08-08
+
+- Fixed every bookmark appearing twice after going offline and reconnecting. The pagination prefetch ran even when the server was unreachable, which advanced the page counter while the request failed; the next successful fetch was then appended to the cached rows instead of replacing them. The prefetch now waits for a request that has actually succeeded.
+- Updated `@chrismessina/raycast-logger` to 1.3.0, which hardens credential redaction in logs — including credentials embedded in URLs, and values that previously escaped masking by their runtime type.
+- Updated `@raycast/api` to 1.104.24.
+
 ## [2.4.0] - 2026-07-31
 
 ### Offline and Docker recovery
