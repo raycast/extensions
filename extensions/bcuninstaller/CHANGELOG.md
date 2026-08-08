@@ -1,6 +1,6 @@
 # BCUninstaller Changelog
 
-## [Simplify Uninstall Flow and Fix Reliability Issues] - {PR_MERGE_DATE}
+## [Simplify Uninstall Flow and Fix Reliability Issues] - 2026-08-08
 
 - Made the app list easier to use
 - Added a button to close running apps before uninstalling them
