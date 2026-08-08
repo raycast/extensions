@@ -6,7 +6,11 @@ Daily **gold, silver, platinum and palladium** prices **per gram**, broken down 
 
 ## Screenshots
 
-![Metal prices per gram with 1/3/6/12-month averages](metadata/metals-prices-1.png)
+![Gold prices per gram by karat, with 1/3/6/12-month averages](metadata/metals-prices-1.png)
+
+![The metal and purity selector, sectioned by metal](metadata/metals-prices-2.png)
+
+![Loading a longer average, showing the request cost](metadata/metals-prices-3.png)
 
 ## Features
 
