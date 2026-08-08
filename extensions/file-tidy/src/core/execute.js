@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { tidyPath } from "./config.js";
 import { moveFile } from "./move.js";
+import { firstFreeName } from "./plan.js";
 
 /**
  * Execute the plan: move every file, resolving name collisions with " (n)"
@@ -92,14 +93,7 @@ function missingDirs(dir, stopDir) {
 }
 
 function resolveCollision(target, reserved = null) {
-  if (target !== reserved && !fs.existsSync(target)) return target;
-  const dir = path.dirname(target);
-  const ext = path.extname(target);
-  const base = path.basename(target, ext);
-  for (let i = 1; ; i++) {
-    const candidate = path.join(dir, `${base} (${i})${ext}`);
-    if (candidate !== reserved && !fs.existsSync(candidate)) return candidate;
-  }
+  return firstFreeName(target, (candidate) => candidate !== reserved && !fs.existsSync(candidate));
 }
 
 function defaultDupBlock(dups) {

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { test } from "node:test";
+import { after, test } from "node:test";
 import jpeg from "jpeg-js";
 import { analyze } from "../src/core/analyze.js";
 import { buildExtIndex, buildFolderNamer, organizedDirNames } from "../src/core/config.js";
@@ -38,8 +38,15 @@ const now = new Date();
 const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 const yr = String(now.getFullYear());
 
+const tmpDirs = [];
+after(() => {
+  for (const dir of tmpDirs) fs.rmSync(dir, { recursive: true, force: true });
+});
+
 function tmp() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), "tidy-smart-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "tidy-smart-"));
+  tmpDirs.push(dir);
+  return dir;
 }
 function write(dir, rel, content) {
   const p = path.join(dir, rel);

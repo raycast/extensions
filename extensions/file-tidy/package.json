@@ -66,7 +66,7 @@
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/core.test.js tests/smart.test.js",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --test tests/*.test.js",
     "publish": "npx @raycast/api@latest publish"
   }
 }
