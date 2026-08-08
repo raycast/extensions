@@ -4,7 +4,7 @@ All notable changes to the **GitHub Pull Requests** Raycast extension are docume
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.3.0] - {PR_MERGE_DATE}
+## [1.3.0] - 2026-08-08
 
 ### Added
 
