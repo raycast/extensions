@@ -53,6 +53,27 @@ export class ChecksumMismatchError extends Error {
   }
 }
 
+/**
+ * 取不回文件 —— 断网、DNS 失败、超时、代理挡掉、release 资产 404 都归这里。
+ *
+ * 存在的理由是**用户看到什么**：`fetch` 在断网时抛的是 `TypeError("fetch failed")`，
+ * 超时抛 `DOMException("The operation was aborted due to timeout")`。这两句原样冒泡
+ * 到 UI，就成了一个没有任何出口的错误页 —— 而这恰恰是最该给指引的场景（首次使用、
+ * 还没有引擎、多半正在飞机上或公司代理后面）。归一成本类型后，UI 才能把它导向
+ * 引导页：列出找过的位置、给 Retry、给自建命令。
+ */
+export class DownloadFailedError extends Error {
+  constructor(
+    readonly url: string,
+    readonly detail: string,
+    options?: ErrorOptions,
+  ) {
+    // 保留 cause：UI 只展示 detail，原始的 TypeError / DOMException 只剩这一条线索
+    super(`Could not download ${url}: ${detail}`, options);
+    this.name = "DownloadFailedError";
+  }
+}
+
 /** 当前平台对应的资产名。不支持的平台响亮失败，绝不猜一个名字去下载。 */
 export function assetNameFor(platform: string, arch: string): string {
   const key = `${platform}-${arch}`;
@@ -80,14 +101,30 @@ export function sha256(buf: Buffer): string {
 const FETCH_TIMEOUT_MS = 60_000;
 
 async function fetchBuffer(url: string): Promise<Buffer> {
-  const res = await fetch(url, {
-    redirect: "follow",
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!res.ok) {
-    throw new Error(`GET ${url} → HTTP ${res.status}`);
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      redirect: "follow",
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+  } catch (e) {
+    // fetch 只在**网络层**失败时抛（断网、DNS、TLS、超时）；HTTP 错误码不走这里。
+    // cause 常常比 message 有信息量（"fetch failed" vs "getaddrinfo ENOTFOUND"），
+    // 优先取它。
+    const detail =
+      e instanceof Error ? (e.cause instanceof Error ? e.cause.message : e.message) : String(e);
+    throw new DownloadFailedError(url, detail, { cause: e });
   }
-  return Buffer.from(await res.arrayBuffer());
+  if (!res.ok) {
+    // 404/5xx 对用户是同一回事：引擎没取回来。归入同一类型走同一个引导页。
+    throw new DownloadFailedError(url, `HTTP ${res.status}`);
+  }
+  try {
+    return Buffer.from(await res.arrayBuffer());
+  } catch (e) {
+    // 连接中途断掉：响应头已到、body 没读完。
+    throw new DownloadFailedError(url, "the connection dropped mid-download", { cause: e });
+  }
 }
 
 /** 已下载副本的落点（Raycast 给扩展的可写目录）。 */

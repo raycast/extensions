@@ -32,7 +32,9 @@ import {
   CliNotFoundError,
   SchemaMismatchError,
   type Confidence,
+  type Platform,
   type ProcessEntry,
+  type ScanReport,
   kill,
   resolveCliPath,
   scan,
@@ -43,6 +45,7 @@ import {
 } from "./cli";
 import {
   ChecksumMismatchError,
+  DownloadFailedError,
   UnsupportedPlatformError,
   installCli,
   installedCliPath,
@@ -51,8 +54,10 @@ import {
 type State =
   | { kind: "loading" }
   | { kind: "installing"; step: string }
-  | { kind: "ready"; cliPath: string; platform: string; entries: ProcessEntry[] }
-  | { kind: "no-cli"; searched: string[] }
+  | { kind: "ready"; cliPath: string; platform: Platform; entries: ProcessEntry[] }
+  // downloadError：走到引导页的原因是「下载没成功」而不是「哪儿都没找到」。
+  // 两者的用户处境不同（前者该看网络，后者该看安装），引导页据此换措辞。
+  | { kind: "no-cli"; searched: string[]; downloadError?: string }
   | { kind: "error"; message: string };
 
 const CONFIDENCE_COLOR: Record<Confidence, Color> = {
@@ -121,11 +126,33 @@ export default function SearchPorts() {
         cliPath = await install();
         await verifyCli(cliPath, searched);
       }
-      const report = await scan(cliPath);
+      let report: ScanReport;
+      try {
+        report = await scan(cliPath);
+      } catch (e) {
+        // 托管副本能跑但 schema 与本扩展对不上：`verifyCli` 只跑 --version，
+        // 陈旧二进制照样通过，要到 scan 才被拒。此时 Retry 会一次次选中同一份，
+        // 用户视角是死循环。取一份最新的再试 —— 与上面「换掉不可用副本」同一套路。
+        //
+        // 只换**我们自己下载的那份**（用户显式指定的路径不擅自删），且**只换一次**：
+        // 新下的仍对不上，说明扩展与已发布的 CLI 确实不同代，那是真错误，
+        // 必须如实报给用户，绝不无限重下。
+        if (!(e instanceof SchemaMismatchError)) throw e;
+        if (cliPath !== installedCliPath(supportPath)) throw e;
+        setState({ kind: "installing", step: "Updating the engine…" });
+        await rm(cliPath, { force: true });
+        cliPath = await install();
+        await verifyCli(cliPath, searched);
+        report = await scan(cliPath);
+      }
       setState({ kind: "ready", cliPath, platform: report.platform, entries: report.entries });
     } catch (e) {
       if (e instanceof CliNotFoundError) {
         setState({ kind: "no-cli", searched: e.searched });
+      } else if (e instanceof DownloadFailedError) {
+        // 断网 / 代理 / release 404：**必须**落到引导页，不能只甩一句 fetch failed。
+        // 这是首次使用的默认失败路径，用户手里还没有引擎，错误页里得有出口。
+        setState({ kind: "no-cli", searched, downloadError: e.detail });
       } else if (e instanceof UnsupportedPlatformError) {
         setState({
           kind: "error",
@@ -170,7 +197,9 @@ export default function SearchPorts() {
     );
   }
   if (state.kind === "no-cli") {
-    return <NotFoundView searched={state.searched} onRetry={load} />;
+    return (
+      <NotFoundView searched={state.searched} downloadError={state.downloadError} onRetry={load} />
+    );
   }
   if (state.kind === "error") {
     return (
@@ -192,7 +221,7 @@ export default function SearchPorts() {
   const loading = state.kind === "loading";
   const entries = state.kind === "ready" ? state.entries : [];
   const cliPath = state.kind === "ready" ? state.cliPath : "";
-  const platform = state.kind === "ready" ? state.platform : "";
+  const platform: Platform = state.kind === "ready" ? state.platform : "unknown";
 
   // 分组与桌面版一致：疑似 → 收藏 → 其余。引擎已按「疑似优先 + 置信度」排好序，
   // 这里只做分桶，不再二次排序（排序规则属于引擎，前端重排会与桌面版视觉不一致）。
@@ -244,7 +273,7 @@ export default function SearchPorts() {
 type SharedProps = {
   cliPath: string;
   /** ScanReport.platform —— Windows 上动作布局要跟桌面版的产品决定对齐 */
-  platform: string;
+  platform: Platform;
   onChanged: () => void;
   showDetail: boolean;
   onToggleDetail: () => void;
@@ -408,26 +437,34 @@ function Actions({
 
   return (
     <ActionPanel>
-      <ActionPanel.Section>
-        <Action
-          title="Terminate"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={() => doKill(false)}
-        />
-        {/* Windows 只有单个 Terminate：detached 控制台进程没有可靠的温和 kill，
-            引擎两种口径都走 TerminateProcess —— 桌面版的既定产品决定，这里保持
-            一致，不承诺一个不存在的「温和/强制」区别 */}
-        {platform !== "windows" && (
+      {/* 没有身份令牌的行**不提供**终止入口：引擎 fail-closed，doKill 也会拦，
+          但一个点下去只能得到失败提示的破坏性动作本身就是坏体验 —— 何况它长得
+          和能用的那个一模一样。doKill 里的那道检查照旧保留：这里管的是「不呈现」，
+          那里管的是「即便被呈现出来也绝不放行」（比如将来新增别的调用点）。 */}
+      {entry.start_unix != null && (
+        <ActionPanel.Section>
           <Action
-            title="Force Kill"
+            title="Terminate"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
-            onAction={() => doKill(true)}
+            onAction={() => doKill(false)}
           />
-        )}
-      </ActionPanel.Section>
+          {/* Windows 只有单个 Terminate：detached 控制台进程没有可靠的温和 kill，
+              引擎两种口径都走 TerminateProcess —— 桌面版的既定产品决定，这里保持
+              一致，不承诺一个不存在的「温和/强制」区别。
+              判断写成 === "macos" 而非 !== "windows"：Force Kill 是破坏性动作，
+              只在确知平台支持 SIGTERM/SIGKILL 之分时才提供，unknown 一律不给 */}
+          {platform === "macos" && (
+            <Action
+              title="Force Kill"
+              icon={Icon.Trash}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "backspace" }}
+              onAction={() => doKill(true)}
+            />
+          )}
+        </ActionPanel.Section>
+      )}
       <ActionPanel.Section>
         <Action
           title={entry.is_whitelisted ? "Remove Star" : "Star (Exempt from Suspicion)"}
@@ -463,12 +500,41 @@ function Actions({
  * 只有在「自动安装也失败了」之后才会看到这一页 —— 正常路径是静默下载并校验。
  * 到这里说明二进制存在但跑不起来（架构不符 / 被安全策略拦下 / 偏好路径写错）。
  */
-function NotFoundView({ searched, onRetry }: { searched: string[]; onRetry: () => void }) {
+function NotFoundView({
+  searched,
+  downloadError,
+  onRetry,
+}: {
+  searched: string[];
+  downloadError?: string;
+  onRetry: () => void;
+}) {
+  // 两种处境，同一个页面：下载失败该看网络，遍寻不获该看安装。开头几行据此分叉，
+  // 后半段（找过哪儿 / Retry / 自建）两者都用得上。
+  const title = downloadError
+    ? "Could not download portreaper-cli"
+    : "Could not run portreaper-cli";
+  const lead = downloadError
+    ? [
+        "The extension drives the same engine as the Portreaper desktop app, and downloads it",
+        "on first use. That download did not go through:",
+        "",
+        `> ${downloadError}`,
+        "",
+        "This is usually no network connection, a proxy blocking github.com, or a VPN.",
+        "Nothing was installed — retrying once you are back online is safe.",
+      ]
+    : [
+        "The extension drives the same engine as the Portreaper desktop app. It tried the",
+        "locations below, and none of them produced a working binary.",
+      ];
+
   const md = [
-    "# Could not run portreaper-cli",
+    `# ${title}`,
     "",
-    "The extension drives the same engine as the Portreaper desktop app. It tried the",
-    "locations below, and none of them produced a working binary.",
+    ...lead,
+    "",
+    "Looked in:",
     "",
     ...searched.map((s) => `- \`${s}\``),
     "",
@@ -483,8 +549,11 @@ function NotFoundView({ searched, onRetry }: { searched: string[]; onRetry: () =
   return (
     <List isShowingDetail>
       <List.Item
-        icon={{ source: Icon.QuestionMark, tintColor: Color.Orange }}
-        title="Could not run portreaper-cli"
+        icon={{
+          source: downloadError ? Icon.WifiDisabled : Icon.QuestionMark,
+          tintColor: Color.Orange,
+        }}
+        title={title}
         detail={<List.Item.Detail markdown={md} />}
         actions={
           <ActionPanel>

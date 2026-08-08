@@ -30,7 +30,7 @@ The desktop app is optional — this extension works on its own.
 
 The classification logic lives in a small command-line binary, `portreaper-cli`. On first use the extension **downloads it from the project's GitHub release and verifies it against the published SHA-256 checksum**; a binary that fails verification is deleted, never executed. Nothing is installed system-wide — the binary lives in the extension's own support directory.
 
-If you already have it (built from source, or installed via `cargo install`), the extension finds it automatically. To point at a copy in an unusual location, set **portreaper-cli path** in the extension preferences.
+If you already have it (built from source, or installed via `cargo install`), the extension finds it automatically. To point at a copy in an unusual location, set **Portreaper CLI Path** in the extension preferences.
 
 ## Why verdict reasons look like `ppid1_orphan`
 

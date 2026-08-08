@@ -56,10 +56,17 @@ export type ProcessEntry = {
   duplicate_of: number | null;
 };
 
+/**
+ * CLI 的 `platform_name()`（crates/portreaper-cli/src/main.rs）只会产出这三个值。
+ * 收窄成字面量联合，好让「破坏性动作按平台取舍」的判断能被 tsc 兜住 ——
+ * 写成 string 时 `platform !== "windows"` 看着无害，却把 unknown 也放行了。
+ */
+export type Platform = "macos" | "windows" | "unknown";
+
 export type ScanReport = {
   schema_version: number;
   scanned_at: number;
-  platform: string;
+  platform: Platform;
   entries: ProcessEntry[];
 };
 
@@ -170,7 +177,13 @@ export async function scan(cliPath: string, opts: ScanOptions = {}): Promise<Sca
   if (report.schema_version !== EXPECTED_SCHEMA_VERSION) {
     throw new SchemaMismatchError(report.schema_version, EXPECTED_SCHEMA_VERSION);
   }
-  return report;
+  // 认不出的 platform 一律降级为 unknown，由消费端走保守分支：这个字段决定
+  // 破坏性动作的可见性，缺失/陌生值必须失败关闭，而不是被当成「反正不是 windows」。
+  return { ...report, platform: normalizePlatform(report.platform) };
+}
+
+function normalizePlatform(value: unknown): Platform {
+  return value === "macos" || value === "windows" ? value : "unknown";
 }
 
 /**
