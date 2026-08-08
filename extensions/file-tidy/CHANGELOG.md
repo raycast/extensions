@@ -1,6 +1,6 @@
 # File Tidy Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-08-08
 
 - Internal cleanup with no change to how the commands behave. The ` (n)` suffix used for a name collision is now produced in a single place, so the name shown in the plan and the name written to disk cannot drift apart as the code changes.
 
