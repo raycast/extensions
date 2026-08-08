@@ -1,6 +1,6 @@
 # Badges Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-08-08
 
 - Show `labelColor` when `label` is empty
 
