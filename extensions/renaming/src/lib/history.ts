@@ -53,26 +53,34 @@ async function getFileId(filePath: string): Promise<string | undefined> {
   }
 }
 
+/** Verified write attempts before updateHistory reports the change unsaved. */
+const MAX_HISTORY_WRITE_ATTEMPTS = 3;
+
 /**
  * Read-mutate-write the stored history with optimistic verification.
  * LocalStorage has no transactions, so another command instance can write
  * between our read and our write. After writing, re-read: if the stored
  * payload is not the one we wrote, another writer won the race — re-apply the
- * mutator to its state and write once more. Mutators must therefore be
- * idempotent over their own output (re-applying to an array that already
- * contains the change must not duplicate it). One racing writer is recovered
- * exactly; writers that keep racing past the retry keep their own merged view,
- * which is the best a non-atomic store can promise.
+ * mutator to its state and write again. Mutators must therefore be idempotent
+ * over their own output (re-applying to an array that already contains the
+ * change must not duplicate it).
+ *
+ * Returns true only for a write verified as stored. When every attempt loses
+ * its race, returns false — the change may survive inside the winning
+ * writer's merge, but that cannot be proven here, and callers must report
+ * "not saved" rather than acknowledge a write this function watched being
+ * overwritten.
  */
 async function updateHistory(mutate: (fresh: RenameHistoryEntry[]) => RenameHistoryEntry[]): Promise<boolean> {
   try {
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; attempt < MAX_HISTORY_WRITE_ATTEMPTS; attempt++) {
       const payload = JSON.stringify(mutate(await getHistory()));
       await LocalStorage.setItem(STORAGE_KEYS.HISTORY, payload);
       const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.HISTORY);
       if (stored === payload) return true;
     }
-    return true;
+    log.history.error("History write lost every race; reporting the change unsaved");
+    return false;
   } catch (error) {
     log.history.error("Failed to write history", { error });
     return false;

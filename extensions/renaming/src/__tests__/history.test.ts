@@ -912,6 +912,52 @@ describe("write verification", () => {
     const finalStored = JSON.parse(mockStorage.setItem.mock.calls[1][1]);
     expect(finalStored.map((e: { description: string }) => e.description)).toEqual(["mine", "theirs"]);
   });
+
+  it("reports the change unsaved when every write attempt loses its race", async () => {
+    mockStorage.getItem.mockResolvedValue(JSON.stringify([]));
+    // Every write is immediately clobbered by another instance
+    let clobber = 0;
+    mockStorage.setItem.mockImplementation(async () => {
+      clobber++;
+      mockStorage.getItem.mockResolvedValue(
+        JSON.stringify([{ timestamp: clobber, description: "theirs", operations: [] }]),
+      );
+    });
+
+    await expect(saveToHistory("mine", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt" }])).rejects.toThrow(
+      "Failed to write history",
+    );
+    expect(mockStorage.setItem).toHaveBeenCalledTimes(3);
+  });
+
+  it("tells the user the undo finished but history was not updated when all writes lose", async () => {
+    const history = [
+      {
+        timestamp: 1000,
+        description: "op",
+        operations: [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt", fileId: "7:1" }],
+      },
+    ];
+    mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
+    mockFileExists.mockImplementation(async (path: string) => path === "/dir/b.txt");
+    let clobber = 0;
+    mockStorage.setItem.mockImplementation(async () => {
+      clobber++;
+      mockStorage.getItem.mockResolvedValue(
+        JSON.stringify([{ timestamp: 2000 + clobber, description: "theirs", operations: [] }, ...history]),
+      );
+    });
+
+    const result = await undoEntry(1000);
+
+    // The file was restored on disk; the unconfirmed history write must not
+    // be reported as a completed save.
+    expect(result).toBe(true);
+    expect(mockRename).toHaveBeenCalledWith("/dir/b.txt", "/dir/a.txt");
+    expect(mockShowToast).toHaveBeenCalledWith(
+      expect.objectContaining({ title: "Undo Finished, History Not Updated" }),
+    );
+  });
 });
 
 describe("getHistory entry validation", () => {
