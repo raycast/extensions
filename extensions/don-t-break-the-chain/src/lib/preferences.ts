@@ -1,29 +1,23 @@
 import { getPreferenceValues } from "@raycast/api";
-import { WeekStart } from "./month";
 
-/** `drawn` is the pen-and-paper look; `emoji` swaps in ⬜ and ✅. */
-export type CellStyle = "drawn" | "emoji";
+/**
+ * `drawn` is the pen-and-paper look; `emoji` swaps in ⬜ and ✅. Taken from the
+ * generated preference type so the manifest stays the single source of truth.
+ */
+export type CellStyle = Preferences["cellStyle"];
 
-type ChainPreferences = {
-  weekStart: WeekStart;
-  cellStyle: CellStyle;
-  showDayLetters: boolean;
-  name1?: string;
-  name2?: string;
-  name3?: string;
-  name4?: string;
-  name5?: string;
-};
+/** Chain names are separate preferences, so they are looked up by key. */
+const NAME_KEYS = ["name1", "name2", "name3", "name4", "name5"] as const;
 
-export function chainPreferences(): ChainPreferences {
-  return getPreferenceValues<ChainPreferences>();
+export function chainPreferences(): Preferences {
+  return getPreferenceValues<Preferences>();
 }
 
 /** The user's name for a chain, falling back to `Chain N`. */
 export function chainName(index: number): string {
-  const preferences = chainPreferences() as Record<string, unknown>;
-  const custom = preferences[`name${index}`];
-  return typeof custom === "string" && custom.trim() !== "" ? custom.trim() : `Chain ${index}`;
+  const key = NAME_KEYS[index - 1];
+  const custom = key === undefined ? undefined : chainPreferences()[key];
+  return custom !== undefined && custom.trim() !== "" ? custom.trim() : `Chain ${index}`;
 }
 
 /** `chain-3` → `3`. */

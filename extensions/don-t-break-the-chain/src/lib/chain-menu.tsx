@@ -19,7 +19,7 @@ import {
   parseMonthKey,
 } from "./month";
 import { chainIndex, chainName, chainPreferences } from "./preferences";
-import { ChainData, EMPTY_CHAIN, clearMonth, loadChain, saveChain, toggleDay } from "./store";
+import { ChainData, EMPTY_CHAIN, clearMonth, loadChain, saveChain, stampRevision, toggleDay } from "./store";
 import { calendarIcon } from "./svg";
 import { dayGlyph, renderWeekGlyphs } from "./text";
 
@@ -56,8 +56,11 @@ export default function ChainMenuBar() {
   const streak = currentStreak(chain.marks, today);
 
   async function update(next: ChainData) {
-    await mutate(saveChain(id, next), {
-      optimisticUpdate: () => next,
+    // Stamp before saving so the copy held in state carries the new revision,
+    // and the save after it is guaranteed to stamp higher still.
+    const stamped = stampRevision(next);
+    await mutate(saveChain(id, stamped), {
+      optimisticUpdate: () => stamped,
       rollbackOnError: true,
       shouldRevalidateAfter: false,
     });

@@ -7,8 +7,6 @@ import { chainName, chainPreferences } from "./lib/preferences";
 import { CHAIN_IDS, loadChain } from "./lib/store";
 import { renderMonthText } from "./lib/text";
 
-type ExportPreferences = { exportFolder?: string };
-
 export default async function ExportCalendar() {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Exporting…" });
 
@@ -39,10 +37,10 @@ export default async function ExportCalendar() {
       return;
     }
 
-    const header = `Don't Break The Chain — exported ${new Date().toLocaleString()}`;
+    const header = `Don't Break the Chain — exported ${new Date().toLocaleString()}`;
     const contents = [header, "", ...blocks, ""].join("\n\n");
 
-    const { exportFolder } = getPreferenceValues<ExportPreferences>();
+    const { exportFolder } = getPreferenceValues<Preferences.ExportCalendar>();
     const folder = exportFolder?.trim() || path.join(homedir(), "Downloads");
     const file = path.join(folder, `dont-break-the-chain-${fileStamp()}.txt`);
 

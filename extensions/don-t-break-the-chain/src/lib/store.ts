@@ -12,6 +12,12 @@ export interface ChainData {
   marks: Record<MonthKey, number[]>;
   /** The month currently on display. Never advances on its own. */
   viewMonth?: MonthKey;
+  /**
+   * Bumped on every save and written to both stores. If one write fails the
+   * revisions diverge, and the higher one is taken whole on the next read —
+   * merging the older store back in would resurrect whatever it deleted.
+   */
+  revision?: number;
 }
 
 export const EMPTY_CHAIN: ChainData = { marks: {} };
@@ -20,7 +26,8 @@ export const EMPTY_CHAIN: ChainData = { marks: {} };
  * Marks live in two places: a JSON file under the extension's support directory,
  * which survives extension reloads and updates, and LocalStorage, which is read
  * first so the menu bar can draw itself without touching the disk. Both are
- * written together and merged on read, so a wipe of either one is recoverable.
+ * written together and reconciled by revision on read, so a wipe of either one
+ * is recoverable without an interrupted save undoing a deletion.
  */
 function chainFile(id: string): string {
   return path.join(environment.supportPath, `${id}.json`);
@@ -39,7 +46,11 @@ function sanitize(value: unknown): ChainData {
     }
   }
 
-  return { marks, viewMonth: isMonthKey(raw.viewMonth) ? raw.viewMonth : undefined };
+  return {
+    marks,
+    viewMonth: isMonthKey(raw.viewMonth) ? raw.viewMonth : undefined,
+    revision: typeof raw.revision === "number" && Number.isFinite(raw.revision) ? raw.revision : undefined,
+  };
 }
 
 function parse(json: string | undefined): ChainData | undefined {
@@ -55,11 +66,20 @@ function merge(primary: ChainData | undefined, backup: ChainData | undefined): C
   if (!primary) return backup ?? EMPTY_CHAIN;
   if (!backup) return primary;
 
+  // A save stamps both stores with the same revision, so a mismatch means one
+  // of the two writes did not land. The newer store is authoritative.
+  const primaryRevision = primary.revision ?? 0;
+  const backupRevision = backup.revision ?? 0;
+  if (primaryRevision > backupRevision) return primary;
+  if (backupRevision > primaryRevision) return backup;
+
+  // Equal revisions: the same save, or history written before revisions
+  // existed. Union, so a store that was wiped rather than written still heals.
   const marks: Record<MonthKey, number[]> = { ...primary.marks };
   for (const [month, days] of Object.entries(backup.marks)) {
     marks[month] = [...new Set([...(marks[month] ?? []), ...days])].sort((a, b) => a - b);
   }
-  return { marks, viewMonth: primary.viewMonth ?? backup.viewMonth };
+  return { marks, viewMonth: primary.viewMonth ?? backup.viewMonth, revision: primary.revision };
 }
 
 export async function loadChain(id: string): Promise<ChainData> {
@@ -77,15 +97,26 @@ function noneOnError(): undefined {
   return undefined;
 }
 
+/**
+ * Stamp a save with the next revision. Uses the clock so the number is
+ * meaningful, but never goes backwards even if the clock does.
+ */
+export function stampRevision(data: ChainData): ChainData {
+  return { ...data, revision: Math.max(Date.now(), (data.revision ?? 0) + 1) };
+}
+
 export async function saveChain(id: string, data: ChainData): Promise<void> {
   const json = JSON.stringify(data);
-  await LocalStorage.setItem(id, json);
 
+  // The file is the durable copy, so write it first: if it fails, LocalStorage
+  // is left untouched and both stores stay on the previous revision together.
   await fs.mkdir(environment.supportPath, { recursive: true });
   // Write through a temporary file so an interrupted write can't truncate the history.
   const temporary = `${chainFile(id)}.${randomUUID()}.tmp`;
   await fs.writeFile(temporary, json, "utf8");
   await fs.rename(temporary, chainFile(id));
+
+  await LocalStorage.setItem(id, json);
 }
 
 export function toggleDay(data: ChainData, month: MonthKey, day: number): ChainData {
