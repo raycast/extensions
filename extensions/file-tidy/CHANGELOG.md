@@ -1,5 +1,9 @@
 # File Tidy Changelog
 
+## [Maintenance] - 2026-08-08
+
+- Internal cleanup with no change to how the commands behave. The ` (n)` suffix used for a name collision is now produced in a single place, so the name shown in the plan and the name written to disk cannot drift apart as the code changes.
+
 ## [Smart Checks and a Prefixed Archive Structure] - 2026-08-04
 
 - Archive folders are now named `ft_Category/[Subcategory]/[date]`. The `ft_` prefix keeps tidy's output apart from folders you made yourself; an existing un-prefixed archive is reused rather than split in two. Subcategories (Screenshots, Ebooks, Invoices, Installers, …) come from configurable name and extension rules.
