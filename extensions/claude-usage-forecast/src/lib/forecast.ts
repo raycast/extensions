@@ -434,19 +434,23 @@ export function buildForecast(
     const dayWeight = isToday
       ? todayIntensity
       : Math.min(dowProfile[d.getDay()] * weekFactor, cap);
-    let expected = dayWeight * hourProfile[d.getHours()];
-    if (t === firstHour) {
-      // Only the unelapsed part of the current hour is still to come.
-      expected *= 1 - (now - firstHour) / HOUR;
-    }
+    // Only the slice of this hour between now and the reset can still accrue.
+    // Both ends are clipped: the current hour is part-elapsed, and the window
+    // usually ends mid-hour, so charging a full hour there would push the
+    // crossing past a reset that has already wiped the counter.
+    const from = Math.max(t, now);
+    const to = Math.min(t + HOUR, windowEnd);
+    if (to <= from) continue;
+    const expected =
+      dayWeight * hourProfile[d.getHours()] * ((to - from) / HOUR);
     const prev = pct;
     pct += (isToday ? kRestOfToday : kFuture) * expected;
-    const at = Math.min(t + HOUR, windowEnd);
-    projected.push({ t: at, pct });
+    projected.push({ t: to, pct });
     if (hitsLimitAt === null && pct >= 100 && k !== null) {
-      // Interpolate inside the hour for a usable ETA.
+      // Interpolate inside the slice for a usable ETA. Bounded by `to`, so a
+      // limit only "hits" if it is reached strictly before the reset.
       const frac = pct === prev ? 1 : (100 - prev) / (pct - prev);
-      hitsLimitAt = Math.max(now, t + frac * HOUR);
+      hitsLimitAt = Math.max(now, from + frac * (to - from));
     }
   }
 
