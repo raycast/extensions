@@ -80,6 +80,16 @@ describe("speech sessions", () => {
     if (!session) throw new Error("Expected to recover the abandoned session");
     sessions.push(session);
   });
+
+  it("denies takeover when stale playback cleanup leaves an active record", async () => {
+    const playback = { sessionId: "stale-session", pid: 4242, audioFile: "/tmp/raycast-tts-stale.mp3" };
+    await fs.writeFile(PLAYBACK_FILE, JSON.stringify(playback), "utf8");
+    cleanupPreviousSession.mockResolvedValue(false);
+
+    await expect(sessionLock.begin()).resolves.toBeUndefined();
+    expect(cleanupPreviousSession).toHaveBeenCalledTimes(1);
+    await expect(fs.readFile(PLAYBACK_FILE, "utf8")).resolves.toBe(JSON.stringify(playback));
+  });
 });
 
 describe("stopActivePlayback", () => {

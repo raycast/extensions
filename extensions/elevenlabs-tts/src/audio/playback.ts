@@ -53,6 +53,10 @@ export class SpeechSessionLock {
     this.sessions.set(sessionId, { release, isCompromised: () => compromised });
     try {
       await this.cleanupPreviousSession();
+      if (await readPlayback()) {
+        await this.end(sessionId);
+        return undefined;
+      }
     } catch (error) {
       await this.end(sessionId);
       throw error;
