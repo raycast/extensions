@@ -117,7 +117,7 @@ describe("the silent reachability probe", () => {
   });
 
   it("fires a sanity attempt even while absent, so a misreading probe cannot disable reconnect", () => {
-    const stale = trustedAbsent({ absentReads: 5, lastAttemptAtMs: NOW - 2 * HOUR });
+    const stale = trustedAbsent({ absentReads: 5, lastAttemptAtMs: NOW - 2 * HOUR, quietSinceMs: NOW - 2 * HOUR });
     assert.equal(decide({ isConnected: false, state: stale, reachability: "absent" }).action, "reconnect");
   });
 
@@ -249,6 +249,7 @@ describe("an excluded transport", () => {
       state: connectedState(),
       reachability: "reachable",
       transportAllowed: false,
+      wired: false,
     });
     assert.equal(d.nextState.lastReachability, "reachable");
   });
@@ -259,12 +260,14 @@ describe("an excluded transport", () => {
       state: connectedState({ lastAttemptAtMs: NOW - HOUR }),
       reachability: "reachable",
       transportAllowed: false,
+      wired: false,
     });
     const allowed = decide({
       isConnected: false,
       state: excluded.nextState,
       reachability: "reachable",
       transportAllowed: true,
+      wired: false,
     });
     assert.equal(allowed.action, "reconnect");
   });
@@ -284,6 +287,7 @@ describe("the shipped tuning constants", () => {
       nowMs,
       reachability,
       transportAllowed: true,
+      wired: false,
       state,
     });
   }

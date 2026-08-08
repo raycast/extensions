@@ -169,8 +169,8 @@ so it never nags and it does not chase an iPad that has stopped answering:
   extensions, so a long gap between background ticks is read as "the Mac slept,"
   and the next tick reconnects at once rather than waiting out a backoff.
 
-Reconnection lands within roughly one interval (about a minute) of a drop, not
-instantly. Raycast cannot keep a process resident and offers no device-change
+Reconnection lands within roughly one interval (about 30 seconds) of a drop — or
+of the cable going back in — not instantly. Raycast cannot keep a process resident and offers no device-change
 event, so "notice the moment the iPad is back" is necessarily polling — the probe
 is what makes polling free.
 

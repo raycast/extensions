@@ -102,6 +102,7 @@ export default async function command(): Promise<void> {
       nowMs: Date.now(),
       reachability,
       transportAllowed,
+      wired: found?.wired === true,
       state: previous,
     });
 

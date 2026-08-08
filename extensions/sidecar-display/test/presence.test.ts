@@ -2,7 +2,8 @@
 // UNIT TEST - PRESENCE SURFACING
 // Pure logic; no hardware, no Raycast. Runs anywhere.
 // -----------------------------------------------------------------------------
-// Context: Proves what the tick ANNOUNCES and when it re-renders the menu bar,
+// Context: Proves how the tick reacts to presence transitions — a departure, a
+//   cable arriving — and what it ANNOUNCES and when it re-renders the menu bar,
 //   as opposed to what it decides to do. The refresh table is exhaustive over
 //   every link/presence transition the icon can show, including the steady states
 //   that must NOT respawn the menu command.
@@ -217,5 +218,65 @@ describe("menu-bar refresh", () => {
     const stale = connectedState({ intent: "disconnected", lastReachability: "reachable", absentReads: 5 });
     const d = decide({ isConnected: false, state: stale, reachability: "absent" });
     assert.equal(shouldRefreshMenuBar(stale, d), true);
+  });
+});
+
+describe("a corroborated departure", () => {
+  it("stays silent when the link drops and the probe says absent in the same tick", () => {
+    // One absent read is normally untrusted, because the probe bit dips on its
+    // own for ~10s. But a flicker does not take the LINK down with it, so a drop
+    // plus an absent read are two independent signals agreeing, and waiting for a
+    // second read buys one attempt already known to be doomed.
+    const wasUp = connectedState({ lastLinkUp: true, lastAttemptAtMs: NOW - 6 * HOUR });
+    const d = decide({ isConnected: false, state: wasUp, reachability: "absent" });
+    assert.equal(d.action, "none");
+  });
+
+  it("still needs two reads when the link was already down", () => {
+    // Without the corroborating drop, a single absent read proves nothing.
+    const wasDown = connectedState({ lastLinkUp: false, lastAttemptAtMs: NOW - 6 * HOUR });
+    assert.equal(decide({ isConnected: false, state: wasDown, reachability: "absent" }).action, "reconnect");
+  });
+
+  it("measures the periodic recheck from going quiet, not from the last attempt", () => {
+    // After hours connected the last attempt is ancient, so a recheck clock based
+    // on it is already expired the moment the iPad leaves — firing an attempt on
+    // the very first quiet tick, which defeats the point of spacing rechecks an
+    // hour apart.
+    const quiet = connectedState({ absentReads: 2, quietSinceMs: NOW - 60_000, lastAttemptAtMs: NOW - 6 * HOUR });
+    assert.equal(decide({ isConnected: false, state: quiet, reachability: "absent" }).action, "none");
+
+    const overdue = connectedState({ absentReads: 2, quietSinceMs: NOW - 2 * HOUR, lastAttemptAtMs: NOW - 6 * HOUR });
+    assert.equal(decide({ isConnected: false, state: overdue, reachability: "absent" }).action, "reconnect");
+  });
+
+  it("clears the quiet stamp the moment the iPad is seen again", () => {
+    const quiet = connectedState({ absentReads: 2, quietSinceMs: NOW - 60_000 });
+    assert.equal(decide({ isConnected: false, state: quiet, reachability: "reachable" }).nextState.quietSinceMs, 0);
+  });
+});
+
+describe("a cable arriving", () => {
+  it("counts as a return without waiting out the settle threshold", () => {
+    // Bits 2/24 only move when the cable is physically plugged in, so the
+    // anti-flap threshold that guards the wireless bit does not apply. Requiring
+    // it meant an unplug/replug inside five minutes left the fast burst spent,
+    // and the reconnect waited out the five-minute heartbeat.
+    const away = connectedState({ absentReads: 2, failedAttempts: 3, lastWired: false, lastAttemptAtMs: NOW - 60_000 });
+    const d = decide({ isConnected: false, state: away, reachability: "reachable", wired: true });
+    assert.equal(d.action, "reconnect");
+    assert.equal(d.nextState.failedAttempts, 1, "the backoff earned while it was gone is cleared");
+  });
+
+  it("does not re-arm when the cable was already attached", () => {
+    const steady = connectedState({ failedAttempts: 3, lastWired: true, lastAttemptAtMs: NOW - 60_000 });
+    const d = decide({ isConnected: false, state: steady, reachability: "reachable", wired: true });
+    assert.equal(d.nextState.failedAttempts, 3, "a steady cable is not an arrival");
+  });
+
+  it("does not let a wireless flicker claim the same reward", () => {
+    const flicker = connectedState({ absentReads: 2, failedAttempts: 3, lastAttemptAtMs: NOW - 60_000 });
+    const d = decide({ isConnected: false, state: flicker, reachability: "reachable", wired: false });
+    assert.equal(d.nextState.failedAttempts, 3, "wireless needs a settled absence");
   });
 });

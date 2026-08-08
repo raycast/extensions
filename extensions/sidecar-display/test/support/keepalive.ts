@@ -41,6 +41,8 @@ export function connectedState(overrides: Partial<KeepAliveState> = {}): KeepAli
     announcedGiveUp: false,
     lastLinkUp: false,
     lastReachability: "unknown",
+    lastWired: false,
+    quietSinceMs: 0,
     ...overrides,
   };
 }
@@ -60,9 +62,18 @@ export function decide(input: {
   enabled?: boolean;
   reachability?: Reachability;
   transportAllowed?: boolean;
+  wired?: boolean;
   giveUpAfterMs?: number;
   sanityAttemptMs?: number;
 }): KeepAliveDecision {
   const { enabled = true, reachability = "unknown", ...rest } = input;
-  return decideKeepAlive({ ...TUNING, nowMs: NOW, enabled, reachability, transportAllowed: true, ...rest });
+  return decideKeepAlive({
+    ...TUNING,
+    nowMs: NOW,
+    enabled,
+    reachability,
+    transportAllowed: true,
+    wired: false,
+    ...rest,
+  });
 }

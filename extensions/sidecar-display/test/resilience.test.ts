@@ -46,6 +46,7 @@ function runTicks(options: {
       isConnected: false,
       nowMs,
       transportAllowed: true,
+      wired: false,
       reachability: options.reachability,
       state,
     });
@@ -89,6 +90,7 @@ describe("surviving over time", () => {
       isConnected: false,
       nowMs: START + 60 * HOUR,
       transportAllowed: true,
+      wired: false,
       reachability: "reachable",
       state: chasing,
     });
@@ -113,6 +115,7 @@ describe("surviving over time", () => {
       isConnected: false,
       nowMs: chasing.nowMs,
       transportAllowed: true,
+      wired: false,
       reachability: "absent",
       state: chasing.state,
     });
@@ -129,6 +132,7 @@ describe("surviving over time", () => {
       isConnected: false,
       nowMs: START,
       transportAllowed: true,
+      wired: false,
       reachability: "absent",
       state: idle,
     });
@@ -139,6 +143,7 @@ describe("surviving over time", () => {
       isConnected: false,
       nowMs: START + 60_000,
       transportAllowed: true,
+      wired: false,
       reachability: "reachable",
       state: one.nextState,
     });
@@ -163,6 +168,7 @@ describe("surviving over time", () => {
         isConnected: false,
         nowMs,
         transportAllowed: true,
+        wired: false,
         reachability: "reachable",
         state,
       });
@@ -202,6 +208,7 @@ describe("surviving over time", () => {
           isConnected: false,
           nowMs,
           transportAllowed: true,
+          wired: false,
           reachability: pattern[i % pattern.length] ?? "reachable",
           state,
         });
@@ -259,6 +266,7 @@ describe("an excluded transport over time", () => {
         nowMs,
         reachability: "reachable",
         transportAllowed: allowed,
+        wired: false,
         state,
       });
       if (d.action === "reconnect") {
@@ -321,6 +329,8 @@ describe("restoring state written by an older version", () => {
       announcedGiveUp: true,
       lastLinkUp: true,
       lastReachability: "absent",
+      lastWired: false,
+      quietSinceMs: 0,
     };
     assert.deepEqual(normalizeKeepAliveState(JSON.parse(JSON.stringify(stored))), stored);
   });

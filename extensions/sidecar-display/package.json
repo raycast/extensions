@@ -31,9 +31,9 @@
       "name": "auto-reconnect",
       "title": "Auto-Reconnect Sidecar",
       "subtitle": "Sidecar Display",
-      "description": "Restore the Sidecar link after it drops (e.g. waking from sleep). Enable background refresh on this command to keep the iPad connected; run it manually to reconnect now.",
+      "description": "Restore the Sidecar link after it drops (e.g. waking from sleep, or plugging the cable back in). Enable background refresh on this command to keep the iPad connected; run it manually to reconnect now, which works regardless of the auto-reconnect switch or the transport setting.",
       "mode": "no-view",
-      "interval": "1m"
+      "interval": "30s"
     },
     {
       "name": "fix-mirroring",

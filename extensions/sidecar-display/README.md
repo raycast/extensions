@@ -133,6 +133,7 @@ Pushing a `v*` git tag cuts a GitHub Release automatically. Full checklist: [doc
 - If the display mode won't settle, the extension reports it rather than forcing it. Fix a stuck arrangement by hand in BetterDisplay or Displays settings.
 - The menu bar and background commands are macOS-only.
 - Sidecar's own mirror mode is invisible to every display API, so the mirror fix is a manual/opt-in action, not an automatic "detect and repair."
+- Unplugging a USB-connected iPad while it is in Airplane Mode makes **macOS** show "Sidecar can't connect wirelessly…". That is macOS trying to continue the session over Wi-Fi, not this extension — it appears even with auto-reconnect switched off, and no extension can suppress it.
 - Presence detection tracks the iPad's **wireless** reachability. Sidecar over USB works normally, but if you also put the iPad in Airplane Mode it reads as "away" while disconnected — the menu bar shows it greyed out, and auto-reconnect waits for its hourly recheck instead of reconnecting promptly. Connecting by hand always works.
 - Presence detection reads an **undocumented** macOS field, so it may change with a future release. It is treated as fallible: a real connection is still attempted periodically even while the iPad reads as away, so a wrong reading cannot silently stop reconnects.
 

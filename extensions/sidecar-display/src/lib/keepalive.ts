@@ -62,6 +62,10 @@ export interface KeepAliveState {
   readonly lastLinkUp: boolean;
   /** The probe reading this tick observed — what the menu bar reflects. */
   readonly lastReachability: Reachability;
+  /** Whether a cable was attached this tick, so an arrival can be spotted. */
+  readonly lastWired: boolean;
+  /** When the tick went quiet on a trusted absence; 0 while not quiet. */
+  readonly quietSinceMs: number;
 }
 
 /** The configurable timing knobs for keep-alive. */
@@ -85,6 +89,8 @@ export interface KeepAliveInputs extends KeepAliveTuning {
   readonly reachability: Reachability;
   /** False when the iPad is present only on a transport the user excluded. */
   readonly transportAllowed: boolean;
+  /** Whether a cable is attached right now (false whenever the probe cannot say). */
+  readonly wired: boolean;
   readonly state: KeepAliveState;
 }
 
@@ -139,6 +145,8 @@ export const INITIAL_STATE: KeepAliveState = {
   announcedGiveUp: false,
   lastLinkUp: false,
   lastReachability: "unknown",
+  lastWired: false,
+  quietSinceMs: 0,
 };
 
 /**
@@ -185,6 +193,8 @@ export function normalizeKeepAliveState(parsed: unknown): KeepAliveState {
     announcedGiveUp: raw.announcedGiveUp === true,
     lastLinkUp: raw.lastLinkUp === true,
     lastReachability: reachability === "reachable" || reachability === "absent" ? reachability : "unknown",
+    lastWired: raw.lastWired === true,
+    quietSinceMs: storedCount(raw.quietSinceMs),
   };
 }
 
@@ -214,12 +224,38 @@ function waitFor(attempts: number, inputs: KeepAliveInputs): number {
  *   Presence is an observation, not a chase — and tracking it while idle is what
  *   lets a return be announced to someone who has automatic reconnects disabled.
  */
-function trackPresence(ticked: KeepAliveState, inputs: KeepAliveInputs): KeepAliveState {
+function trackPresence(ticked: KeepAliveState, inputs: KeepAliveInputs, linkJustDropped: boolean): KeepAliveState {
   const absent = inputs.reachability === "absent";
   // Clamped: the counter only ever means "trusted yet?", and an iPad left away
   // for a week would otherwise persist a five-figure number to no purpose.
-  const seen = Math.min(ticked.absentReads + 1, ABSENT_READS_BEFORE_SETTLED);
-  return { ...ticked, absentReads: absent ? seen : 0 };
+  let seen = Math.min(ticked.absentReads + 1, ABSENT_READS_BEFORE_SETTLED);
+  // The debounce exists because the probe bit can dip on its own for ~10s. A
+  // flicker does not take the Sidecar link down with it — so a link that just
+  // dropped AND an absent read are two independent signals agreeing, and waiting
+  // for a second read only buys one connect attempt that is already known to be
+  // doomed. Attempts are the scarce resource (each failure can cost a macOS
+  // banner), so skip it. Trust it to TRUSTED only, not SETTLED: going quiet is
+  // cheap, ending an absence is not.
+  //
+  // NOTE: This does NOT suppress the banner macOS itself posts when a cabled
+  //   session drops in Airplane Mode ("…can't connect wirelessly…"). That one
+  //   fires the instant the cable leaves, before any tick runs, and was verified
+  //   to appear with auto-reconnect switched off entirely. It is macOS trying to
+  //   continue the session wirelessly, and nothing an extension can prevent.
+  if (absent && linkJustDropped) {
+    seen = Math.max(seen, ABSENT_READS_BEFORE_TRUSTED);
+  }
+  if (!absent) {
+    return { ...ticked, absentReads: 0, quietSinceMs: 0 };
+  }
+  // Stamped when the tick FIRST goes quiet, so the periodic recheck below is
+  // measured from then rather than from the last attempt. Measuring from the
+  // attempt meant that after hours connected the recheck clock was already
+  // expired, so the very first quiet tick fired one anyway — an attempt against
+  // an iPad we had just decided was absent, which is exactly what the recheck is
+  // meant to space out by an hour.
+  const quiet = seen >= ABSENT_READS_BEFORE_TRUSTED && ticked.quietSinceMs === 0 ? inputs.nowMs : ticked.quietSinceMs;
+  return { ...ticked, absentReads: seen, quietSinceMs: quiet };
 }
 
 /**
@@ -260,7 +296,16 @@ function isSettledAbsence(state: KeepAliveState): boolean {
  * @returns True on the transition from a SETTLED absence back to reachable.
  */
 function justReturned(state: KeepAliveState, inputs: KeepAliveInputs): boolean {
-  return inputs.reachability === "reachable" && isSettledAbsence(state);
+  if (inputs.reachability !== "reachable") {
+    return false;
+  }
+  // A cable appearing is a deliberate physical act — bits 2/24 only move when it
+  // is plugged in — so the anti-flap threshold does not apply to it. Requiring a
+  // SETTLED absence here meant an unplug-and-replug inside five minutes never
+  // counted as a return, so failures accrued while the iPad was GONE were still
+  // charged against it once it was back: the fast burst was already spent and the
+  // reconnect waited out the five-minute heartbeat.
+  return isSettledAbsence(state) || (inputs.wired && !state.lastWired);
 }
 
 /**
@@ -341,7 +386,9 @@ function isSilentlyAbsent(state: KeepAliveState, inputs: KeepAliveInputs): boole
   if (!isTrustedAbsent(state)) {
     return false;
   }
-  return nowMs - state.lastAttemptAtMs < sanityAttemptMs;
+  // From whichever happened later: the last attempt, or the moment we went quiet.
+  const since = Math.max(state.lastAttemptAtMs, state.quietSinceMs);
+  return nowMs - since < sanityAttemptMs;
 }
 
 /**
@@ -384,13 +431,15 @@ export function decideKeepAlive(inputs: KeepAliveInputs): KeepAliveDecision {
   const { enabled, isConnected, nowMs, state, wakeGapMs } = inputs;
   // lastLinkUp is stamped on EVERY path, so a link change is visible to the next
   // tick no matter which branch this one took.
+  const linkJustDropped = state.lastLinkUp && !isConnected;
   const ticked: KeepAliveState = {
     ...state,
     lastTickAtMs: nowMs,
     lastLinkUp: isConnected,
     lastReachability: inputs.reachability,
+    lastWired: inputs.wired,
   };
-  const seen = trackPresence(ticked, inputs);
+  const seen = trackPresence(ticked, inputs, linkJustDropped);
   const returned = justReturned(state, inputs);
 
   if (isConnected) {
