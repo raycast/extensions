@@ -272,9 +272,13 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
       this.setState({
         queue: {},
       });
-      await this.refreshApps({ suppressToast: true });
+      const refreshed = await this.refreshApps({ suppressToast: true });
       toast.style = Toast.Style.Success;
       toast.title = "Batch Uninstall Complete";
+      if (!refreshed) {
+        toast.message =
+          "Refresh failed. Refresh the application list manually.";
+      }
     } catch (caught) {
       const message = getErrorMessage(caught);
       toast.style = Toast.Style.Failure;
