@@ -14,11 +14,15 @@ function seededRandom(seed: number): () => number {
 }
 
 function structure(text: string): string {
-  return text.replace(/\p{L}/gu, "L").replace(/\p{N}/gu, "N");
+  return text
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .replace(/\p{L}/gu, "L")
+    .replace(/\p{N}/gu, "N");
 }
 
 function separators(text: string): string[] {
-  return text.split(/\p{L}+|\p{N}+/gu);
+  return text.normalize("NFD").replace(/\p{M}/gu, "").split(/\p{L}+|\p{N}+/gu);
 }
 
 function caseMask(text: string): string {
@@ -69,16 +73,21 @@ test("maps repeated words consistently within one selection", () => {
 
 test("keeps generated ASCII casing stable for Turkish letter forms", () => {
   const result = scrambleText("Iİıi", { random: seededRandom(31) });
+  const withoutMarks = result.normalize("NFD").replace(/\p{M}/gu, "");
 
-  assert.match(result, /^[A-Z]{2}[a-z]{2}$/);
+  assert.match(withoutMarks, /^[A-Z]{2}[a-z]{2}$/);
 });
 
 test("maps canonically equivalent accented words safely in either order", () => {
   ["é e\u0301", "e\u0301 é"].forEach((source, index) => {
     const result = scrambleText(source, { random: seededRandom(32 + index) });
-    const words = result.split(" ").map((word) => word.normalize("NFD").replace(/\p{M}/gu, ""));
+    const words = result.split(" ");
 
-    assert.equal(words[0], words[1]);
+    assert.equal(words[0].normalize("NFC"), words[1].normalize("NFC"));
+    assert.equal(
+      words[0].normalize("NFD").replace(/\p{M}/gu, ""),
+      words[1].normalize("NFD").replace(/\p{M}/gu, ""),
+    );
     assert.equal(structure(result), structure(source));
     assert.deepEqual(separators(result), separators(source));
   });

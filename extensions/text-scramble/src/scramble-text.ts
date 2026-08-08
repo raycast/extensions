@@ -9,6 +9,7 @@ export interface ScrambleOptions {
 const TOKEN_PATTERN = /(?:\p{L}\p{M}*)+|\p{N}+/gu;
 const LETTER_PATTERN = /^(?:\p{L}\p{M}*)+$/u;
 const LETTER_CHARACTER_PATTERN = /^\p{L}$/u;
+const COMBINING_MARK_PATTERN = /^\p{M}$/u;
 const DECIMAL_DIGIT_PATTERN = /^\p{Nd}$/u;
 const VOWEL_PATTERN = /[aeiou]/;
 const TRIPLE_VOWEL_PATTERN = /[aeiou]{3}/;
@@ -332,6 +333,25 @@ function isUppercaseLetter(char: string): boolean {
   return char !== char.toLowerCase() && char === char.toUpperCase();
 }
 
+interface LetterCluster {
+  character: string;
+  marks: string;
+}
+
+function getLetterClusters(source: string): LetterCluster[] {
+  const clusters: LetterCluster[] = [];
+
+  for (const char of source.normalize("NFD")) {
+    if (LETTER_CHARACTER_PATTERN.test(char)) {
+      clusters.push({ character: char, marks: "" });
+    } else if (COMBINING_MARK_PATTERN.test(char) && clusters.length > 0) {
+      clusters[clusters.length - 1].marks += char;
+    }
+  }
+
+  return clusters;
+}
+
 function applyCasePattern(candidate: string, sourceCharacters: readonly string[]): string {
   return Array.from(candidate)
     .map((char, index) => (isUppercaseLetter(sourceCharacters[index]) ? char.toUpperCase() : char))
@@ -339,12 +359,13 @@ function applyCasePattern(candidate: string, sourceCharacters: readonly string[]
 }
 
 function restoreCombiningMarks(candidate: string, source: string): string {
+  const sourceClusters = getLetterClusters(source);
   const candidateCharacters = Array.from(candidate);
-  let letterIndex = 0;
+  const restored = sourceClusters.map(({ marks }, index) => `${candidateCharacters[index] ?? ""}${marks}`).join("");
 
-  return Array.from(source)
-    .map((char) => (LETTER_CHARACTER_PATTERN.test(char) ? candidateCharacters[letterIndex++] : char))
-    .join("");
+  // Keep each token's original NFC/NFD shape while making equivalent tokens
+  // render the same invented word (e.g. `é` and `e\u0301`).
+  return restored.normalize(source === source.normalize("NFC") ? "NFC" : "NFD");
 }
 
 function glyphWidth(char: string): number {
@@ -467,7 +488,7 @@ export function scrambleText(input: string, options: ScrambleOptions = {}): stri
       return options.scrambleNumbers === false ? token : scrambleDigits(token, random);
     }
 
-    const sourceCharacters = Array.from(token).filter((char) => LETTER_CHARACTER_PATTERN.test(char));
+    const sourceCharacters = getLetterClusters(token).map(({ character }) => character);
     const normalizedToken = token.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
     const cacheKey = `${sourceCharacters.length}:${normalizedToken}`;
     let baseWord = wordMap.get(cacheKey);
