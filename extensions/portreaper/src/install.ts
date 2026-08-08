@@ -1,0 +1,145 @@
+/**
+ * portreaper-cli 的自动获取。
+ *
+ * # 为什么必须自动下载
+ *
+ * Raycast Store 对依赖外部二进制的扩展有明确规定：允许「从可信源下载并校验完整性」，
+ * 但**不允许**把安装工作丢给用户（"Avoid asking users to perform additional downloads
+ * and try to automate as much as possible from the extension"）。所以扩展不能只是
+ * 提示「请先 cargo install」，必须自己把二进制取回来。
+ *
+ * # 为什么不把二进制打进扩展包
+ *
+ * 同一份规则反对 "heavy binary bundling"：三个平台的二进制会让每个用户的扩展下载
+ * 体积翻好几倍，而其中两份他永远用不到。
+ *
+ * # 完整性校验
+ *
+ * 先取 `portreaper-cli-SHA256SUMS`（由 release 流水线在 publish 阶段汇总三条构建腿
+ * 的产物生成），再据它核对下载到的二进制。校验不通过就**删除**文件并报错 ——
+ * 一个来路不明的可执行文件绝不能留在磁盘上，更不能去执行它。
+ */
+
+import { createHash, randomUUID } from "node:crypto";
+import { chmod, mkdir, rename, rm, writeFile } from "node:fs/promises";
+import { join } from "node:path";
+
+/** 稳定资产名 —— 与 `.github/workflows/release.yml` 的 matrix.cli_asset 一一对应。
+ *  改名即 404，由 `scripts/check-release-assets.mjs` 守住两侧一致。 */
+export const CLI_ASSETS = {
+  "darwin-arm64": "portreaper-cli-macos-arm64",
+  "darwin-x64": "portreaper-cli-macos-x64",
+  "win32-x64": "portreaper-cli-windows-x64.exe",
+} as const;
+
+export const CHECKSUM_ASSET = "portreaper-cli-SHA256SUMS";
+
+const RELEASE_BASE = "https://github.com/fanhefeng/portreaper/releases/latest/download";
+
+export class UnsupportedPlatformError extends Error {
+  constructor(key: string) {
+    super(`No portreaper-cli build for ${key}`);
+    this.name = "UnsupportedPlatformError";
+  }
+}
+
+export class ChecksumMismatchError extends Error {
+  constructor(
+    readonly expected: string,
+    readonly actual: string,
+  ) {
+    super("Downloaded binary failed its checksum — refusing to run it.");
+    this.name = "ChecksumMismatchError";
+  }
+}
+
+/** 当前平台对应的资产名。不支持的平台响亮失败，绝不猜一个名字去下载。 */
+export function assetNameFor(platform: string, arch: string): string {
+  const key = `${platform}-${arch}`;
+  const name = (CLI_ASSETS as Record<string, string | undefined>)[key];
+  if (!name) throw new UnsupportedPlatformError(key);
+  return name;
+}
+
+/** 从 `sha256sum` 格式的清单里取出某个文件的期望哈希。 */
+export function parseChecksums(text: string, assetName: string): string | undefined {
+  for (const line of text.split("\n")) {
+    // 格式：`<64 位十六进制>  <文件名>`（sha256sum 用两个空格）
+    const m = line.trim().match(/^([0-9a-f]{64})\s+\*?(.+)$/i);
+    if (m && m[2] === assetName) return m[1].toLowerCase();
+  }
+  return undefined;
+}
+
+export function sha256(buf: Buffer): string {
+  return createHash("sha256").update(buf).digest("hex");
+}
+
+/** 下载超时。与 cli.ts 里 execFileAsync 的超时同源：任何外部调用都必须有上界，
+ *  否则一个挂起的连接会让扩展永远停在「Setting up…」，且没有任何可操作的出口。 */
+const FETCH_TIMEOUT_MS = 60_000;
+
+async function fetchBuffer(url: string): Promise<Buffer> {
+  const res = await fetch(url, {
+    redirect: "follow",
+    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+  });
+  if (!res.ok) {
+    throw new Error(`GET ${url} → HTTP ${res.status}`);
+  }
+  return Buffer.from(await res.arrayBuffer());
+}
+
+/** 已下载副本的落点（Raycast 给扩展的可写目录）。 */
+export function installedCliPath(supportPath: string): string {
+  const exe = process.platform === "win32" ? "portreaper-cli.exe" : "portreaper-cli";
+  return join(supportPath, "bin", exe);
+}
+
+/**
+ * 下载最新 release 的 CLI 到扩展的 supportPath，校验 sha256 后置为可执行。
+ * 返回可执行文件路径。
+ *
+ * 任何一步失败都不会留下半个文件：校验失败会删除已落盘的二进制。
+ */
+export async function installCli(
+  supportPath: string,
+  onProgress?: (step: string) => void,
+): Promise<string> {
+  const assetName = assetNameFor(process.platform, process.arch);
+
+  onProgress?.("Fetching checksums…");
+  const sumsText = (await fetchBuffer(`${RELEASE_BASE}/${CHECKSUM_ASSET}`)).toString("utf8");
+  const expected = parseChecksums(sumsText, assetName);
+  if (!expected) {
+    // 清单里没有这个资产 —— 可能是 release 不完整，也可能是资产改了名。
+    // 无论哪种，都不能跳过校验继续装。
+    throw new Error(`${CHECKSUM_ASSET} has no entry for ${assetName}`);
+  }
+
+  onProgress?.("Downloading portreaper-cli…");
+  const bin = await fetchBuffer(`${RELEASE_BASE}/${assetName}`);
+
+  onProgress?.("Verifying…");
+  const actual = sha256(bin);
+  if (actual !== expected) {
+    throw new ChecksumMismatchError(expected, actual);
+  }
+
+  // 原子落盘：写同目录临时文件 → 置执行位 → rename。直接写 dest 的话，中途失败
+  // （磁盘满、进程被杀）会留下一个半截却已可执行的文件，而它对下一次启动来说
+  // 「存在即视为已安装」—— 校验虽拦得住，但那是白跑一趟下载（评审发现）。
+  // pid 不足以防撞名（同进程重试 / pid 复用），叠一段 UUID 保证临时名唯一
+  const dest = installedCliPath(supportPath);
+  const tmp = `${dest}.${process.pid}.${randomUUID()}.tmp`;
+  await mkdir(join(supportPath, "bin"), { recursive: true });
+  try {
+    await writeFile(tmp, bin);
+    await chmod(tmp, 0o755);
+    await rename(tmp, dest);
+  } catch (e) {
+    await rm(tmp, { force: true });
+    throw e;
+  }
+  return dest;
+}
