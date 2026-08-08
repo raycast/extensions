@@ -27,7 +27,7 @@ export default function FilesView(context: RepositoryContext & NavigationContext
   return (
     <List
       isLoading={isLoading}
-      navigationTitle={context.gitManager.repoName}
+      navigationTitle={context.gitManager.worktreeOrigin?.displayName ?? context.gitManager.repoName}
       searchBarPlaceholder="Search files by name, path..."
       searchBarAccessory={WorkspaceNavigationDropdown(context)}
       onSearchTextChange={setSearchText}

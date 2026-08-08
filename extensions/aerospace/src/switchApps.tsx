@@ -1,84 +1,102 @@
-import { Action, ActionPanel, Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
-import { Windows, focusWindow, getWindows, pullWindowToCurrentWorkspace, setWindowTiling } from "./utils/appSwitcher";
-import { useEffect, useMemo, useState } from "react";
-import { useCachedState } from "@raycast/utils";
+import {
+  Action,
+  ActionPanel,
+  getApplications,
+  getPreferenceValues,
+  Icon,
+  LaunchProps,
+  List,
+  Toast,
+  closeMainWindow,
+  popToRoot,
+  showToast,
+} from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
+import { aerospace, failureToastOptions } from "./utils/aerospace";
 
-interface Preferences {
-  config: string;
-  defaultWorkspace: string;
-}
+type Window = {
+  "app-name": string;
+  "window-title"?: string;
+  "window-id": number;
+  "monitor-name": string;
+  "app-pid": number;
+  workspace: string;
+  "app-bundle-id": string;
+};
 
-interface SwitchAppsContext {
-  searchText?: string;
+type WindowWithPath = Window & { "app-path": string };
+
+async function getWindows(workspace: string): Promise<WindowWithPath[]> {
+  const args = [
+    "list-windows",
+    "--json",
+    ...(workspace === "focused" ? ["--workspace", "focused"] : ["--all"]),
+    "--format",
+    "%{app-name} %{window-title} %{window-id} %{app-pid} %{workspace} %{app-bundle-id} %{monitor-name}",
+  ];
+
+  const [output, apps] = await Promise.all([aerospace(...args), getApplications()]);
+  const pathByBundleId = new Map(apps.map((a) => [a.bundleId, a.path]));
+  const windows: Window[] = JSON.parse(output);
+
+  return windows.map((w) => ({
+    ...w,
+    "app-path": pathByBundleId.get(w["app-bundle-id"]) || "",
+  }));
 }
 
 export default function Command(
-  props: LaunchProps<{
-    arguments: Arguments.SwitchApps;
-    launchContext?: SwitchAppsContext;
-  }>,
+  props: LaunchProps<{ arguments: { workspace?: string }; launchContext?: { searchText?: string } }>,
 ) {
-  const { defaultWorkspace } = getPreferenceValues<Preferences>();
-  const [windows, setWindows] = useCachedState<Windows>("windows", []);
-  const [searchText, setSearchText] = useState(props.launchContext?.searchText);
+  const { defaultWorkspace } = getPreferenceValues<Preferences.SwitchApps>();
+  const workspace = props.arguments.workspace || defaultWorkspace;
+  const [searchText, setSearchText] = useState(props.launchContext?.searchText || "");
 
-  const workspace = props.arguments.workspace ? props.arguments.workspace : defaultWorkspace;
+  const { data: windows = [], isLoading } = usePromise(getWindows, [workspace], {
+    failureToastOptions: failureToastOptions("Failed to load windows"),
+  });
 
-  useEffect(() => {
-    const f = async () => {
-      const updatedWindows = await getWindows(workspace);
-      setWindows(updatedWindows);
-      console.log({ updatedWindows });
-    };
-    f();
-  }, []);
-
-  const groupedByWorkspace = useMemo(() => {
-    const groups: Record<string, { monitor: string; windows: typeof windows }> = {};
-    for (const window of windows) {
-      const key = window.workspace;
-      if (!groups[key]) {
-        groups[key] = { monitor: window["monitor-name"], windows: [] };
-      }
-      groups[key].windows.push(window);
+  const grouped = new Map<string, { monitor: string; windows: WindowWithPath[] }>();
+  for (const w of windows) {
+    const existing = grouped.get(w.workspace);
+    if (existing) {
+      existing.windows.push(w);
+    } else {
+      grouped.set(w.workspace, { monitor: w["monitor-name"], windows: [w] });
     }
-    return groups;
-  }, [windows]);
-
-  const navigationTitle =
-    workspace === "focused" ? `Windows in Workspace ${windows[0]?.workspace || ""}` : "Windows in All Workspaces";
+  }
 
   return (
     <List
-      isLoading={windows.length === 0}
-      navigationTitle={navigationTitle}
+      isLoading={isLoading}
+      navigationTitle={workspace === "focused" ? "Windows in Focused Workspace" : "Windows in All Workspaces"}
       searchBarPlaceholder="Search by app name or window title..."
       searchText={searchText}
       onSearchTextChange={setSearchText}
     >
-      {Object.entries(groupedByWorkspace).map(([workspaceName, group]) => (
+      {[...grouped.entries()].map(([workspaceName, group]) => (
         <List.Section key={workspaceName} title={`Workspace ${workspaceName} - ${group.monitor}`}>
           {group.windows
-            .filter((window) => {
+            .filter((w) => {
               if (!searchText) return true;
-              const search = searchText.toLowerCase();
-              return (
-                window["app-name"].toLowerCase().includes(search) ||
-                (window["window-title"] ?? "").toLowerCase().includes(search)
-              );
+              const s = searchText.toLowerCase();
+              return w["app-name"].toLowerCase().includes(s) || (w["window-title"] ?? "").toLowerCase().includes(s);
             })
-            .map((window) => (
+            .map((w) => (
               <List.Item
-                key={window["window-id"]}
-                title={window["app-name"]}
-                subtitle={window["window-title"]}
-                icon={{ fileIcon: window["app-path"] }}
+                key={w["window-id"]}
+                title={w["app-name"]}
+                subtitle={w["window-title"]}
+                icon={{ fileIcon: w["app-path"] }}
                 actions={
                   <ActionPanel>
                     <Action
                       title="Focus Window"
-                      onAction={() => {
-                        focusWindow(window["window-id"].toString());
+                      onAction={async () => {
+                        await aerospace("focus", "--window-id", String(w["window-id"]));
+                        popToRoot({ clearSearchBar: true });
+                        closeMainWindow({ clearRootSearch: true });
                       }}
                     />
                     <Action
@@ -86,7 +104,15 @@ export default function Command(
                       icon={Icon.ArrowDown}
                       shortcut={{ modifiers: ["shift"], key: "enter" }}
                       onAction={async () => {
-                        await pullWindowToCurrentWorkspace(window["window-id"].toString());
+                        try {
+                          const focused = await aerospace("list-workspaces", "--focused");
+                          await aerospace("move-node-to-workspace", "--window-id", String(w["window-id"]), focused);
+                          await aerospace("focus", "--window-id", String(w["window-id"]));
+                          popToRoot({ clearSearchBar: true });
+                          closeMainWindow({ clearRootSearch: true });
+                        } catch {
+                          await showToast({ style: Toast.Style.Failure, title: "Failed to move window" });
+                        }
                       }}
                     />
                     <Action
@@ -94,7 +120,14 @@ export default function Command(
                       icon={Icon.AppWindowGrid3x3}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
                       onAction={async () => {
-                        await setWindowTiling(window["window-id"].toString());
+                        try {
+                          await aerospace("layout", "tiling", "--window-id", String(w["window-id"]));
+                          await showToast({ style: Toast.Style.Success, title: "Window set to tiling layout" });
+                          popToRoot({ clearSearchBar: true });
+                          closeMainWindow({ clearRootSearch: true });
+                        } catch {
+                          await showToast({ style: Toast.Style.Failure, title: "Failed to set tiling layout" });
+                        }
                       }}
                     />
                   </ActionPanel>

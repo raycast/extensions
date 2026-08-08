@@ -620,6 +620,11 @@
       "name": "run-workflow",
       "title": "Run Workflow",
       "description": "Run Workflow"
+    },
+    {
+      "name": "get-pull-request-diff",
+      "title": "Get Pull Request Diff",
+      "description": "Get the files changed in a pull request along with their patches"
     }
   ],
   "ai": {
@@ -675,6 +680,45 @@
             }
           ]
         }
+      },
+      {
+        "input": "@github show me the diff of PR #123 in raycast/extensions",
+        "mocks": {
+          "get-pull-request-diff": {
+            "files": [
+              {
+                "filename": "extensions/github/src/components/PullRequestDiff.tsx",
+                "status": "added",
+                "additions": 120,
+                "deletions": 0,
+                "patch": "@@ -0,0 +1,3 @@\n+export default function PullRequestDiff() {\n+  return null;\n+}",
+                "patchTruncated": false
+              },
+              {
+                "filename": "extensions/github/CHANGELOG.md",
+                "status": "modified",
+                "additions": 4,
+                "deletions": 0,
+                "patch": "@@ -1,5 +1,9 @@\n # GitHub Changelog\n \n+## [View pull request diffs]\n+",
+                "patchTruncated": false
+              }
+            ],
+            "truncated": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-pull-request-diff",
+              "arguments": {
+                "repository": {
+                  "includes": "raycast/extensions"
+                },
+                "pullRequestNumber": 123
+              }
+            }
+          }
+        ]
       },
       {
         "input": "@github close the eslint issue in frontend repo",

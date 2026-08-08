@@ -634,7 +634,26 @@ export async function fetchServers(
       startedAt: new Date(proc.lstart),
     });
   }
-  return suppressHelperRows(servers, procByPid, settlingCwds);
+  // Rule 3's evidence, gathered only when there is a candidate to judge: the
+  // executables of orphaned ephemeral-port listeners, from the same targeted
+  // `ps -o comm` the reap reads. The full command line cannot answer this
+  // question (a project folder named workerd-demo would satisfy any name
+  // scan), so the rule goes by what the process actually runs, and pays one
+  // extra ps only in the rare poll that has an orphan at all.
+  const orphanPids = servers
+    .filter((s) => {
+      if (parseInt(s.port, 10) < EPHEMERAL_PORT_MIN) return false;
+      const self = procByPid.get(s.pid);
+      return self !== undefined && self.ppid <= 1;
+    })
+    .map((s) => s.pid);
+  const orphanHelperPids = new Set<number>();
+  if (orphanPids.length > 0) {
+    for (const [pid, info] of await listParentInfo(orphanPids)) {
+      if (REAPABLE_HELPERS.has(info.name)) orphanHelperPids.add(pid);
+    }
+  }
+  return suppressHelperRows(servers, procByPid, orphanHelperPids, settlingCwds);
 }
 
 // macOS hands out dynamic ports from this range when a process binds port 0.
@@ -652,7 +671,10 @@ export const EPHEMERAL_PORT_MIN = 49152;
 //   1. Descent. The process is a descendant of another row's process: the
 //      plain "helper the dev server forked with port 0" case.
 //   2. Same project. Some other row on a deliberate port has this cwd.
-//   3. Orphaned. Its parent is init, so whatever launched it is dead.
+//   3. Orphaned helper. Its parent is init AND its executable (by `ps -o
+//      comm`, the same evidence the reap reads) is a known leaky helper
+//      (REAPABLE_HELPERS), so whatever launched it is dead and it is the
+//      kind of process that leaks this way.
 //   4. Mid-start. The caller says a start is in flight for this cwd.
 //
 // Rule 2 exists because rule 1 loses to reparenting. Miniflare's workerd is
@@ -667,8 +689,11 @@ export const EPHEMERAL_PORT_MIN = 49152;
 // died leaves its workerd behind holding an ephemeral port, and that lone
 // orphan was rendering as "Simac, 1 server, localhost:57018" — a project
 // reported as running when nothing of it was, and a row whose Kill did
-// nothing, since orphaned workerd ignores SIGTERM. An ephemeral port plus a
-// dead parent is not a dev server anyone started.
+// nothing, since orphaned workerd ignores SIGTERM. The name gate is what
+// keeps the rule honest: every server this extension starts is spawned
+// detached and so is init-parented within seconds, and without the gate a
+// dev script that deliberately binds a port >= 49152 was permanently
+// invisible on every surface.
 //
 // Rule 4 is the one we cannot see for ourselves. A project mid-start has a
 // window where its helpers are listening and the dev server itself is not, and
@@ -679,12 +704,13 @@ export const EPHEMERAL_PORT_MIN = 49152;
 // once the project settles, and a caller that knows nothing about starts in
 // flight passes nothing and gets the other three rules unchanged.
 //
-// What survives all four is an ephemeral-port listener with a living parent
-// that we are not showing: somebody's own tool, which we have no business
-// hiding.
+// What survives all four is an ephemeral-port listener that no rule can tie
+// to a shown server or to a known leaky helper: somebody's own tool, which
+// we have no business hiding.
 function suppressHelperRows(
   servers: DevServer[],
   procByPid: Map<number, RawProcess>,
+  orphanHelperPids: ReadonlySet<number>,
   settlingCwds?: ReadonlySet<string>,
 ): DevServer[] {
   const shownPids = new Set(servers.map((s) => s.pid));
@@ -700,8 +726,16 @@ function suppressHelperRows(
     if (parseInt(server.port, 10) < EPHEMERAL_PORT_MIN) return true;
     if (anchoredCwds.has(server.cwd)) return false;
     if (settlingCwds?.has(server.cwd)) return false;
+    // Orphaned alone is not enough: every server this extension starts is
+    // spawned detached, so init is its parent the moment the command that
+    // launched it unloads, and a dev script that deliberately picks a port
+    // >= 49152 (vitest --ui defaults to one) would be a running server no
+    // surface could see. Same lesson the reap learned: a victim must be
+    // NAMED, not merely look abandoned. Membership was decided by the
+    // caller from `ps -o comm` (see fetchServers), so being in the set
+    // already means orphaned AND running a known leaky helper.
+    if (orphanHelperPids.has(server.pid)) return false;
     const self = procByPid.get(server.pid);
-    if (self && self.ppid <= 1) return false;
     let cur = self;
     for (let depth = 0; depth < ANCESTOR_SCAN_DEPTH && cur; depth++) {
       cur = procByPid.get(cur.ppid);

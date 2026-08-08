@@ -12,6 +12,7 @@ import DownloadRepositoryForm from "./DownloadRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
+import RepositoryReadme from "./RepositoryReadme";
 import RepositoryReleases from "./RepositoryReleases";
 import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
@@ -158,6 +159,13 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Open in Raycast">
+        <Action.Push
+          title="Show Readme"
+          icon={Icon.Book}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+          target={<RepositoryReadme repository={repository} />}
+          onPush={() => onVisit(repository)}
+        />
         <Action.Push
           title="Show Issues"
           icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}

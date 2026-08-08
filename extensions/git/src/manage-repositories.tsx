@@ -15,6 +15,7 @@ import {
   launchCommand,
   Clipboard,
   Cache,
+  Keyboard,
 } from "@raycast/api";
 import { useCallback, useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
@@ -206,7 +207,7 @@ function RepositoryListItem({
               ]}
             />
             <RepositoryAttachedLinksAction remotes={remotes} />
-            <RepositoryQuickLinkAction repositoryPath={repo.path} />
+            <RepositoryQuickLinkAction currentWorktreePath={repo.path} />
           </ActionPanel.Section>
 
           <ActionPanel.Section>
@@ -221,7 +222,11 @@ function RepositoryListItem({
             <Action.Trash paths={[repo.path]} onTrash={onRemove} />
           </ActionPanel.Section>
 
-          <RepositoryDirectoryActions repositoryPath={repo.path} onOpen={onOpen} />
+          <RepositoryDirectoryActions
+            currentWorktreePath={repo.path}
+            repositoryRootPath={repo.worktree?.repositoryRootPath ?? repo.path}
+            onOpen={onOpen}
+          />
 
           <RepositoriesOrderActionsSection />
 
@@ -245,7 +250,7 @@ function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath:
   }, []);
 
   return (
-    <ActionPanel.Submenu title="Add Repository" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }}>
+    <ActionPanel.Submenu title="Add Repository" icon={Icon.Plus} shortcut={Keyboard.Shortcut.Common.New}>
       <Action.Push
         title="Create New Repository"
         target={<CreateRepositoryForm onAddRepository={onAddRepository} />}
@@ -521,7 +526,7 @@ function CloningRepositoryListItem({
                 title="Retry Clone"
                 icon={Icon.Repeat}
                 onAction={handleRetry}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
               />
               <Action
                 title="Remove from List"
@@ -539,7 +544,11 @@ function CloningRepositoryListItem({
           )}
 
           <Action.CopyToClipboard title="Copy Clone URL" content={repo.cloning!.url} />
-          <RepositoryDirectoryActions repositoryPath={repo.path} onOpen={onOpen} />
+          <RepositoryDirectoryActions
+            currentWorktreePath={repo.path}
+            repositoryRootPath={repo.worktree?.repositoryRootPath ?? repo.path}
+            onOpen={onOpen}
+          />
           <RepositoriesOrderActionsSection />
         </ActionPanel>
       }

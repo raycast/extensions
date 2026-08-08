@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="#-features">Features</a> •
-  <a href="#-commands">Commands</a> •
+  <a href="#-one-command-every-surface">Commands</a> •
   <a href="#-usage">Usage</a> •
   <a href="#️-configuration">Configuration</a> •
   <a href="#-development">Development</a> •
@@ -27,9 +27,9 @@
 
 <table>
   <tr>
-    <td width="50">📊</td>
-    <td><strong>Statistics & Overview</strong></td>
-    <td>Comprehensive statistics of your zshrc configuration with counts of aliases, exports, functions, plugins, and more</td>
+    <td width="50">🏠</td>
+    <td><strong>Unified Home</strong></td>
+    <td>One search-first surface: recents, tools with a live health badge, category counts, and discovery — typing searches your whole config at once</td>
   </tr>
   <tr>
     <td>🖥️</td>
@@ -70,24 +70,18 @@
 
 ---
 
-## 🚀 Commands
+## 🚀 One Command, Every Surface
 
-| Command                 | Description                                 | Shortcut |
-| ----------------------- | ------------------------------------------- | -------- |
-| 📊 **Zshrc Statistics** | Overview of your entire zshrc configuration | —        |
-| 📁 **Sections**         | Browse and manage logical sections          | —        |
-| 🖥️ **Aliases**          | Manage shell aliases                        | —        |
-| 📦 **Exports**          | Manage environment variable exports         | —        |
-| ⚡ **Functions**        | View and manage shell functions             | —        |
-| 🔌 **Plugins**          | Manage zsh plugins                          | —        |
-| 📂 **Sources**          | View source commands                        | —        |
-| 🔄 **Evals**            | Manage eval commands                        | —        |
-| ⚙️ **Setopts**          | View setopt configurations                  | —        |
-| 🛤️ **PATH Entries**     | Manage PATH modifications                   | —        |
-| ⌨️ **Keybindings**      | View bindkey configurations                 | —        |
-| 🔍 **Global Search**    | Search across all content types             | —        |
-| 🏥 **Health Check**     | Diagnose configuration issues               | —        |
-| 💾 **Backup Manager**   | Manage zshrc backups                        | —        |
+The **Zshrc Manager** command opens a single home surface. At rest it shows an overview; press `⏎` on a category to drill into a focused view (`Esc` returns home), or just start typing to search everything at once.
+
+| Surface                 | What it holds                                                       | Reach it by                 |
+| ----------------------- | ------------------------------------------------------------------- | --------------------------- |
+| 🕘 **Recently Managed**  | Every entry you've touched here, ranked by frecency                 | Browse, at rest             |
+| 🏥 **Health Check**      | Duplicates, conflicts and broken sources, with a live issue badge   | Tools row or `⌘⇧H`          |
+| 💾 **Backup Manager**    | Restore or diff a previous version                                  | Tools row or `⌘⇧B`          |
+| ↩️ **History**           | Undo and redo recent changes                                        | Tools row or `⌘⇧Y`          |
+| 📁 **Browse**            | Sections, Aliases, Exports, Functions, Plugins, Sources, Evals, Setopts, PATH, FPATH, Keybindings — each with a count, each a focused view | `⏎` on a category           |
+| 📚 **Discover**          | Curated alias collections you can add                               | Discover row, `⌘⇧L`, or inline under "Available to Add" while searching |
 
 ---
 
@@ -96,14 +90,14 @@
 ### Getting Started
 
 1. Install the extension from the Raycast Store
-2. Open any command to view your zshrc configuration
-3. Use search to find specific entries
-4. Use actions to add, edit, or copy content
+2. Open **Zshrc Manager** — the home surface shows your whole configuration at a glance
+3. Type to search across every entry type (and the catalogue) at once
+4. Use actions to add, edit, or copy content; `⌘⇧D` toggles the detail pane
 
 <details>
 <summary><strong>📝 Adding New Aliases</strong></summary>
 
-1. Open the **Aliases** command
+1. Open **Aliases** from the home Browse section
 2. Press `Cmd+N` or click "Add New Alias"
 3. Enter the alias name and command
 4. Select or create a section
@@ -119,7 +113,7 @@ alias gs='git status'
 <details>
 <summary><strong>📦 Managing Exports</strong></summary>
 
-1. Open the **Exports** command
+1. Open **Exports** from the home Browse section
 2. Press `Cmd+N` to add a new export
 3. Enter the variable name (uppercase recommended) and value
 4. Save to update your zshrc file
@@ -137,7 +131,7 @@ export EDITOR=code
 - Use the search bar in any command
 - Search by name, command, section, or value
 - Results update in real-time as you type
-- Use **Global Search** to search across all entry types at once
+- The landing view searches across all entry types at once — and every result can be edited, deleted, or copied in place
 
 </details>
 

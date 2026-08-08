@@ -1,5 +1,11 @@
 # Raycast ElevenLabs TTS Changelog
 
+## [Speak Copied Text] - 2026-08-05
+
+### Added
+
+- Speak Copied Text command for reading clipboard text aloud
+
 ## [1.2.0] - 2025-11-27
 
 ### Added

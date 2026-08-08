@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "screenlex",
+  "title": "ScreenLex",
+  "description": "Capture, translate, and manage screenshots with ScreenLex.",
+  "icon": "extension-icon.png",
+  "author": "chunkithwang",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "ScreenLex",
+      "description": "Select and capture an area with ScreenLex.",
+      "mode": "no-view",
+      "icon": "capture-area.png"
+    },
+    {
+      "name": "capture-window",
+      "title": "Capture Window",
+      "subtitle": "ScreenLex",
+      "description": "Select and capture a window with ScreenLex.",
+      "mode": "no-view",
+      "icon": "capture-window.png"
+    },
+    {
+      "name": "capture-full-screen",
+      "title": "Capture Full Screen",
+      "subtitle": "ScreenLex",
+      "description": "Capture the current display with ScreenLex.",
+      "mode": "no-view",
+      "icon": "capture-full-screen.png"
+    },
+    {
+      "name": "translate-area",
+      "title": "Translate Area",
+      "subtitle": "ScreenLex",
+      "description": "Select an area and translate its text with ScreenLex.",
+      "mode": "no-view",
+      "icon": "translate-area.png"
+    },
+    {
+      "name": "translate-window",
+      "title": "Translate Window",
+      "subtitle": "ScreenLex",
+      "description": "Select a window and translate its text with ScreenLex.",
+      "mode": "no-view",
+      "icon": "translate-window.png"
+    },
+    {
+      "name": "translate-full-screen",
+      "title": "Translate Full Screen",
+      "subtitle": "ScreenLex",
+      "description": "Capture the current display and translate its text with ScreenLex.",
+      "mode": "no-view",
+      "icon": "translate-full-screen.png"
+    },
+    {
+      "name": "open-screenlex",
+      "title": "Open ScreenLex",
+      "subtitle": "ScreenLex",
+      "description": "Open the ScreenLex main window.",
+      "mode": "no-view",
+      "icon": "open-screenlex.png"
+    },
+    {
+      "name": "open-history",
+      "title": "Open History",
+      "subtitle": "ScreenLex",
+      "description": "Show recent screenshots with ScreenLex.",
+      "mode": "no-view",
+      "icon": "open-history.png"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "ScreenLex",
+      "description": "Open ScreenLex settings.",
+      "mode": "no-view",
+      "icon": "open-settings.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.0.17"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ],
+  "engines": {
+    "node": ">=22.22.2"
+  }
+}

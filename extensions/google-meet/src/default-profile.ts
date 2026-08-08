@@ -1,21 +1,12 @@
-import { showHUD, Clipboard, showToast, Toast } from "@raycast/api";
-import { getMeetTab, openMeetTabDefaultProfile, getTimeout, sleep } from "./helpers";
+import { showHUD } from "@raycast/api";
+import { reportMeetFailure } from "./errors";
+import { createMeeting, formatSuccessMessage } from "./services/create-meeting";
 
 export default async function main() {
   try {
-    await openMeetTabDefaultProfile();
-
-    const timeout = getTimeout();
-    await sleep(timeout);
-
-    const meetTab = await getMeetTab();
-
-    await Clipboard.copy(meetTab);
-    await showHUD("Copied meet link to clipboard");
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Couldn't copy to clipboard",
-    });
+    const result = await createMeeting({});
+    await showHUD(formatSuccessMessage(result));
+  } catch (error) {
+    await reportMeetFailure(error, "Create Meet");
   }
 }

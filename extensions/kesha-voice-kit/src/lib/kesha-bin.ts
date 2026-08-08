@@ -149,34 +149,129 @@ export interface ProbeDeps {
 export interface EnginePreflightResult {
   ok: boolean;
   hint?: string;
+  /**
+   * Why the engine is unavailable — lets the setup view name the right remedy.
+   * `contract` is a CLI/extension version skew, not a broken engine: sending
+   * those users to re-download would fix nothing (#647).
+   */
+  reason?: "missing" | "unusable" | "contract";
 }
 
-function runKesha(spawn: KeshaSpawn, verb: string, deps: ProbeDeps) {
+const MISSING_ENGINE_MARKER = "not installed";
+// Plain `kesha install` only re-trusts a cached binary; `--no-cache` re-downloads, except on a read-only (Nix) dir.
+const REPAIR_HINT =
+  "Run `kesha install --no-cache` to re-download the engine. On a read-only (Nix) install, repair it through your package manager instead.";
+const CONTRACT_HINT =
+  "Update the kesha CLI and this extension to matching versions — `bun add -g @drakulavich/kesha-voice-kit@latest`.";
+
+function runKesha(spawn: KeshaSpawn, args: string[], deps: ProbeDeps) {
   const run = deps.execFile ?? execFileAsync;
-  return run(spawn.command, [...spawn.prefixArgs, verb], {
+  return run(spawn.command, [...spawn.prefixArgs, ...args], {
     timeout: PROBE_TIMEOUT_MS,
   });
 }
 
-// `kesha status` marks a missing engine as "not installed" on stdout and warns
-// on stderr with the exact remaining setup command (`installHint()`). Keying
-// off the stdout marker keeps unrelated stderr (KESHA_DEBUG traces, warnings)
-// from failing a healthy install; a probe that cannot run at all fails open —
-// the CLI's own guards report the real problem with a better message.
+type StatusStdout =
+  | { kind: "payload"; value: Record<string, unknown> }
+  | { kind: "contract" }
+  | { kind: "prose" };
+
+// An older CLI prints human text, never JSON — so a non-object is a broken contract, not a fallback.
+function classifyStatusStdout(stdout: string): StatusStdout {
+  const trimmed = stdout.trim();
+  if (!trimmed) return { kind: "prose" };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed);
+  } catch {
+    return { kind: "prose" };
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { kind: "contract" };
+  }
+  return { kind: "payload", value: parsed as Record<string, unknown> };
+}
+
+// Anchored to the Binary line: "not installed" is the default missing label, so other lines would false-positive.
+function proseSaysEngineMissing(stdout: string): boolean {
+  const binaryLine = stdout
+    .split("\n")
+    .find((line) => line.includes("Binary:"));
+  return binaryLine !== undefined && binaryLine.includes(MISSING_ENGINE_MARKER);
+}
+
+// Re-checked here because the Store extension meets CLI versions predating the CLI-side validation.
+function capabilitiesAreReadable(capabilities: unknown): boolean {
+  return (
+    typeof capabilities === "object" &&
+    capabilities !== null &&
+    !Array.isArray(capabilities) &&
+    Object.keys(capabilities).length > 0
+  );
+}
+
+function readStructuredStatus(
+  payload: Record<string, unknown>,
+): EnginePreflightResult {
+  const contractError: EnginePreflightResult = {
+    ok: false,
+    reason: "contract",
+    hint: CONTRACT_HINT,
+  };
+  const engine = payload.engine;
+  if (!engine || typeof engine !== "object") return contractError;
+  const { installed, capabilities } = engine as Record<string, unknown>;
+  if (typeof installed !== "boolean") return contractError;
+
+  if (!installed) {
+    const hint = typeof payload.hint === "string" ? payload.hint.trim() : "";
+    return { ok: false, reason: "missing", hint: hint || undefined };
+  }
+  // Present is not usable: it would fail during transcription, after the recording is gone (#647).
+  if (!capabilitiesAreReadable(capabilities)) {
+    return { ok: false, reason: "unusable", hint: REPAIR_HINT };
+  }
+  return { ok: true };
+}
+
+/**
+ * Decides whether the engine can run before a session starts.
+ *
+ * Reads `kesha status --json` when the resolved CLI emits it. A CLI too old for
+ * that flag prints human text instead (citty ignores unknown flags), which is
+ * the signal to fall back to the prose marker — so the fallback is chosen by
+ * stdout *kind*, never by parse outcome. Output that is a JSON object but
+ * breaks the contract fails closed: it would also miss the prose marker and be
+ * reported as healthy. A probe that cannot run at all still fails open, letting
+ * the CLI's own guards report the real problem with a better message.
+ */
 export async function probeEngineAvailability(
   spawn: KeshaSpawn,
   deps: ProbeDeps = {},
 ): Promise<EnginePreflightResult> {
   try {
-    const { stdout, stderr } = await runKesha(spawn, "status", deps);
-    if (!stdout.includes("not installed")) return { ok: true };
-    return { ok: false, hint: stderr.trim() || undefined };
+    const { stdout, stderr } = await runKesha(
+      spawn,
+      ["status", "--json"],
+      deps,
+    );
+    const classified = classifyStatusStdout(stdout);
+    if (classified.kind === "payload")
+      return readStructuredStatus(classified.value);
+    if (classified.kind === "contract") {
+      return { ok: false, reason: "contract", hint: CONTRACT_HINT };
+    }
+    if (proseSaysEngineMissing(stdout)) {
+      return { ok: false, reason: "missing", hint: stderr.trim() || undefined };
+    }
+    return { ok: true };
   } catch (err) {
     const stderr =
       err && typeof err === "object" && "stderr" in err
         ? String((err as { stderr?: unknown }).stderr ?? "").trim()
         : "";
-    if (stderr.includes("kesha install")) return { ok: false, hint: stderr };
+    if (stderr.includes("kesha install"))
+      return { ok: false, reason: "missing", hint: stderr };
     return { ok: true };
   }
 }

@@ -5,6 +5,7 @@ import { useConfig } from "../hooks/useConfig";
 import { useEnsureScrollablePagination } from "../hooks/usePrefetchPagination";
 import { useSearchBookmarks } from "../hooks/useSearchBookmarks";
 import { useTranslation } from "../hooks/useTranslation";
+import { connectionGuard } from "./ConnectionErrorView";
 import { Bookmark } from "../types";
 import { BookmarkItem } from "./BookmarkItem";
 interface BookmarkListProps {
@@ -16,6 +17,8 @@ interface BookmarkListProps {
   };
   isLoading: boolean;
   error?: Error;
+  /** Whether the rows came from a request that succeeded this session. */
+  hasLiveData?: boolean;
   onRefresh?: () => void;
   searchBarPlaceholder?: string;
   emptyViewTitle?: string;
@@ -29,12 +32,25 @@ interface BookmarkListProps {
 }
 function SearchBookmarkList({ searchText }: { searchText: string }) {
   const { t } = useTranslation();
-  const { bookmarks, isLoading: isLoadingBookmarks, revalidate: revalidateBookmarks } = useSearchBookmarks(searchText);
+  const {
+    bookmarks,
+    isLoading: isLoadingBookmarks,
+    error,
+    hasLiveData,
+    revalidate: revalidateBookmarks,
+  } = useSearchBookmarks(searchText);
+
+  // Online search hits the API on every keystroke; with the default toast
+  // suppressed, a dead server would otherwise look like "no results".
+  const guard = connectionGuard(error, hasLiveData, revalidateBookmarks);
+  if (guard) return guard;
 
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoadingBookmarks}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidateBookmarks}
       searchBarPlaceholder={t("bookmarkList.searchPlaceholder")}
       emptyViewTitle={t("bookmarkList.emptySearch.title")}
@@ -47,6 +63,8 @@ export function BookmarkList({
   bookmarks,
   pagination,
   isLoading,
+  error,
+  hasLiveData,
   onRefresh,
   searchBarPlaceholder,
   emptyViewTitle,
@@ -112,6 +130,10 @@ export function BookmarkList({
     isLoading,
     itemCount: displayInfo.displayBookmarks.length,
     enabled: searchText.trim().length === 0,
+    // Without these the prefetch fires against a dead server and duplicates
+    // the list on reconnect — see raycast/extensions#30021.
+    error,
+    hasLiveData,
   });
 
   useEffect(() => {

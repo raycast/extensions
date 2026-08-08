@@ -1,9 +1,10 @@
-import { Icon, List } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import type { ReactElement } from "react";
 import { parseSources } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
 import { MODERN_COLORS } from "./constants";
-import { ListViewController, type FilterableItem } from "./lib/list-view-controller";
+import { ListViewController, type FilterableItem, type ItemWarning } from "./lib/list-view-controller";
+import { sourceFileExists } from "./lib/resolve";
 
 /**
  * Source item interface
@@ -14,6 +15,22 @@ interface SourceItem extends FilterableItem {
 
 interface SourcesProps {
   searchBarAccessory?: ReactElement | null;
+}
+
+/**
+ * Warning generator for sources
+ * Flags source lines whose file does not exist (unknown stays silent)
+ */
+export function generateSourceWarning(source: SourceItem): ItemWarning | null {
+  if (sourceFileExists(source.path) === "no") {
+    return {
+      type: "broken",
+      message: "Source file missing",
+      icon: Icon.ExclamationMark,
+      color: Color.Red,
+    };
+  }
+  return null;
 }
 
 /**
@@ -32,7 +49,11 @@ export default function Sources({ searchBarAccessory }: SourcesProps) {
       parser={parseSources}
       searchFields={["path", "section"]}
       searchBarAccessory={searchBarAccessory}
+      warningGenerator={generateSourceWarning}
+      showWarningFilter={!searchBarAccessory}
       generateTitle={(source) => truncateValueMiddle(source.path)}
+      getItemName={(source) => source.path}
+      getItemValue={(source) => source.path}
       generateOverviewMarkdown={(_, allSources, grouped) => `
 # Source Summary
 
@@ -55,76 +76,51 @@ Source commands load additional configuration files into your shell session. The
 ## ⚠️ Performance Note
 Too many source commands can slow down shell startup. Consider using conditional sourcing or lazy loading.
       `}
-      generateItemMarkdown={(source) => `
-# Source: \`${source.path}\`
-
-## 📄 Source Command
-\`\`\`zsh
-source ${source.path}
-\`\`\`
-
-## 📍 Location
-- **Section**: ${source.section}
-- **File**: ~/.zshrc
-- **Section Start**: Line ${source.sectionStartLine}
-
-## 💡 Source Types
-- **Theme Files**: Zsh theme configurations
-- **Completion Scripts**: Tab completion enhancements
-- **External Scripts**: Custom zsh configurations
-- **Plugin Files**: Plugin-specific configurations
-- **Utility Scripts**: Helper functions and aliases
-
-## 🔍 File Analysis
-- **Path**: ${source.path}
-- **Type**: ${source.path.includes("theme") ? "Theme" : source.path.includes("completion") ? "Completion" : "Configuration"}
-- **Framework**: ${source.path.includes("oh-my-zsh") ? "Oh My Zsh" : "Custom"}
-
-## ⚠️ Note
-Source commands load external files. Make sure the referenced files exist and are accessible.
-      `}
-      generateMetadata={(source) => (
-        <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Label
-            title="Source Path"
-            text={truncateValueMiddle(source.path, 60)}
-            icon={{
-              source: Icon.Document,
-              tintColor: MODERN_COLORS.primary,
-            }}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Section"
-            text={source.section}
-            icon={{
-              source: Icon.Folder,
-              tintColor: MODERN_COLORS.neutral,
-            }}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="File"
-            text="~/.zshrc"
-            icon={{
-              source: Icon.Document,
-              tintColor: MODERN_COLORS.neutral,
-            }}
-          />
-          <List.Item.Detail.Metadata.Label
-            title="Type"
-            text={
-              source.path.includes("theme")
-                ? "Theme"
-                : source.path.includes("completion")
-                  ? "Completion"
-                  : "Configuration"
-            }
-            icon={{
-              source: Icon.Gear,
-              tintColor: MODERN_COLORS.warning,
-            }}
-          />
-        </List.Item.Detail.Metadata>
-      )}
+      omitValueMarkdown={true}
+      generateMetadata={(source) => {
+        const exists = sourceFileExists(source.path);
+        return (
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label
+              title="Source Path"
+              text={truncateValueMiddle(source.path, 60)}
+              icon={{ source: Icon.Document, tintColor: MODERN_COLORS.primary }}
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Source Exists"
+              text={exists === "yes" ? "Yes" : exists === "no" ? "Missing" : "Unknown"}
+              icon={
+                exists === "yes"
+                  ? { source: Icon.CheckCircle, tintColor: MODERN_COLORS.success }
+                  : exists === "no"
+                    ? { source: Icon.XMarkCircle, tintColor: MODERN_COLORS.error }
+                    : { source: Icon.QuestionMarkCircle, tintColor: MODERN_COLORS.neutral }
+              }
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Section"
+              text={source.section}
+              icon={{
+                source: Icon.Folder,
+                tintColor: MODERN_COLORS.neutral,
+              }}
+            />
+            <List.Item.Detail.Metadata.Label title="Section Starts" text={`Line ${source.sectionStartLine}`} />
+            <List.Item.Detail.Metadata.Label title="File" text="~/.zshrc" icon={Icon.Document} />
+            <List.Item.Detail.Metadata.Label
+              title="Type"
+              text={
+                source.path.includes("theme")
+                  ? "Theme"
+                  : source.path.includes("completion")
+                    ? "Completion"
+                    : "Configuration"
+              }
+              icon={{ source: Icon.Gear, tintColor: MODERN_COLORS.warning }}
+            />
+          </List.Item.Detail.Metadata>
+        );
+      }}
     />
   );
 }

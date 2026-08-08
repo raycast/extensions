@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import { Action, ActionPanel, List, Icon, showToast, Toast, Clipboard, Color } from "@raycast/api";
 import type { AliasCollection } from "./hooks/useAliasCollections";
 import type { ParsedAlias } from "./lib/parse-alias-file";
-import { getSectionIcon } from "./lib/section-icons";
+import { getSectionImage } from "./lib/section-icons";
 import { readZshrcFile } from "./lib/zsh";
 import { addSingleAliasToZshrc, addAliasesToZshrc } from "./lib/section-writer";
 import { SharedActionsSection } from "./lib/shared-actions";
@@ -27,7 +27,7 @@ export default function CollectionDetail({ collection, onDataChange }: Collectio
   const [isLoadingExisting, setIsLoadingExisting] = useState(true);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const icon = getSectionIcon(collection.icon || collection.id);
+  const icon = getSectionImage(collection.icon || collection.id);
 
   // Load existing aliases from zshrc to check for duplicates
   // Re-runs when refreshKey changes (e.g., after undo)
@@ -182,7 +182,7 @@ ${alias.value}
               key={`${alias.name}-${index}`}
               title={alias.name}
               subtitle={alias.value.length > 40 ? alias.value.substring(0, 40) + "..." : alias.value}
-              icon={{ source: icon.icon, tintColor: icon.color }}
+              icon={icon}
               accessories={
                 alreadyExists
                   ? [{ icon: { source: Icon.Checkmark, tintColor: Color.Green }, tooltip: "Already in your zshrc" }]

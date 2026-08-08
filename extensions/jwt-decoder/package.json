@@ -11,7 +11,8 @@
     "YourMCGeek",
     "pernielsentikaer",
     "ridemountainpig",
-    "0xdhrv"
+    "0xdhrv",
+    "itggood2420"
   ],
   "categories": [
     "Data",
@@ -30,6 +31,12 @@
       "name": "jwt-list",
       "title": "Search Decoded JWT",
       "description": "Search and copy the contents of your JWT",
+      "mode": "view"
+    },
+    {
+      "name": "debug",
+      "title": "JWT Debugger",
+      "description": "Decode, encode, edit, re-sign, and verify a JSON Web Token",
       "mode": "view"
     }
   ],

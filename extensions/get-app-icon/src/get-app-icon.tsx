@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
-import { copyFile, mkdir, stat, unlink } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { copyFile, mkdir, rmdir, stat, unlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -21,7 +22,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { cachedIconPath, invalidateCachedIcon, listCachedApps, pruneIconCache, refreshIconCache } from "./icon-cache";
+import { invalidateCachedIcon, listCachedApps, pruneIconCache, refreshIconCache } from "./icon-cache";
 
 // macOS-only system binaries for image processing and icon extraction.
 // These are guaranteed to exist on every macOS installation.
@@ -44,12 +45,54 @@ function normalizeOutputPath(inputPath: string): string {
   return path.resolve(expanded);
 }
 
+/**
+ * macOS caps a single path component at 255 bytes. Names are truncated by BYTE length,
+ * not character count, so a multi-byte name can't slip past the limit.
+ */
+const MAX_NAME_BYTES = 255;
+
+/**
+ * Shortens text to fit a byte budget, dropping whole characters so truncation can never
+ * split a multi-byte character and leave invalid UTF-8 behind.
+ */
+function truncateToBytes(input: string, maxBytes: number): string {
+  if (Buffer.byteLength(input, "utf8") <= maxBytes) return input;
+  const chars = [...input];
+  while (chars.length > 0 && Buffer.byteLength(chars.join(""), "utf8") > maxBytes) {
+    chars.pop();
+  }
+  return chars.join("").trim();
+}
+
+/**
+ * Turns arbitrary text into a usable single path component.
+ *
+ * Beyond the reserved characters, this strips control characters and clamps the length.
+ * Neither is reachable from any app installed here — a survey of 304 real bundles found
+ * no control characters and a longest version of 38 characters — but both come from a
+ * bundle's own `Info.plist`, and the failure without a guard is an opaque `ENAMETOOLONG`
+ * or `ERR_INVALID_ARG_VALUE` rather than an export that simply works.
+ */
 function sanitizeFolderName(input: string): string {
-  const sanitized = input.replace(/[\\/:*?"<>|]/g, "-").trim();
-  return sanitized || "Untitled";
+  const sanitized = input
+    .replace(/[\\/:*?"<>|]/g, "-")
+    // Control characters are legal in an Info.plist string but produce unusable
+    // folder names (a NUL makes Node reject the path outright).
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim();
+  if (!sanitized) return "Untitled";
+  return truncateToBytes(sanitized, MAX_NAME_BYTES) || "Untitled";
 }
 
 type ExportFormat = "png" | "jpeg" | "icns";
+
+/** Every format the extension can export, in menu order — not just the enabled ones. */
+const ALL_FORMATS = ["png", "jpeg", "icns"] as const satisfies readonly ExportFormat[];
+
+function getFormatLabel(format: ExportFormat): string {
+  return format === "jpeg" ? "JPEG" : format.toUpperCase();
+}
 
 const DEFAULT_SIZE = 512;
 
@@ -75,8 +118,74 @@ function getFormatSubdir(format: ExportFormat): string {
   return format.toUpperCase();
 }
 
-function getAppFolderName(app: Application): string {
-  return sanitizeFolderName(`${app.name} App Icons`);
+/**
+ * The app's marketing version (`CFBundleShortVersionString`), or null when the bundle
+ * doesn't declare one.
+ *
+ * Only the short version is used. `CFBundleVersion` is a build number that changes on
+ * every internal build, which would scatter folders for what a user thinks of as one
+ * release. Every real bundle surveyed carried a short version; the null path is for
+ * malformed bundles with no readable `Info.plist`.
+ */
+async function getAppVersion(appPath: string): Promise<string | null> {
+  try {
+    const { stdout } = await execFileAsync("/usr/bin/plutil", [
+      "-extract",
+      "CFBundleShortVersionString",
+      "raw",
+      "-o",
+      "-",
+      path.join(appPath, "Contents", "Info.plist"),
+    ]);
+    return stdout.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Folder name for an app's export, including its version when one is available.
+ *
+ * Versioning the folder is what keeps a re-export from silently replacing an earlier
+ * one: exports overwrite by path, so "Bleep App Icons" would hand back 3.4.0's icons
+ * under the name the 3.3.1 icons were saved as. Separate versions mean separate folders,
+ * and re-exporting the *same* version still overwrites — which is the intended repair
+ * path for a partial or interrupted export.
+ *
+ * Uniqueness of the *version* is the invariant, so the app NAME absorbs any shortening.
+ * Truncating the assembled label instead cuts the version off the end, collapsing two
+ * versions onto one folder — the silent overwrite this function exists to prevent.
+ *
+ * A version too long to fit even on its own is replaced by a truncated form plus a digest
+ * of the full string. Two releases differing only in their tail (`…aaa` vs `…aab`) would
+ * otherwise share a folder; the digest keeps them apart at the cost of readability, which
+ * is the right trade when the alternative is losing an export.
+ */
+const VERSION_DIGEST_BYTES = 12;
+
+function getAppFolderName(app: Application, version?: string | null): string {
+  const suffix = " App Icons";
+  const sanitizedName = sanitizeFolderName(app.name);
+  if (!version) {
+    const nameOnly = truncateToBytes(sanitizedName, MAX_NAME_BYTES - Buffer.byteLength(suffix, "utf8"));
+    return sanitizeFolderName(`${nameOnly}${suffix}`);
+  }
+
+  // Fixed cost: the suffix plus the single space between name and version.
+  const fixedBytes = Buffer.byteLength(suffix, "utf8") + 1;
+  // Leave at least one byte for the name so the folder never becomes version-only.
+  const versionBudget = MAX_NAME_BYTES - fixedBytes - 1;
+
+  let sanitizedVersion = sanitizeFolderName(version);
+  if (Buffer.byteLength(sanitizedVersion, "utf8") > versionBudget) {
+    const digest = createHash("sha256").update(version).digest("hex").slice(0, VERSION_DIGEST_BYTES);
+    const head = truncateToBytes(sanitizedVersion, Math.max(versionBudget - (VERSION_DIGEST_BYTES + 1), 1));
+    sanitizedVersion = truncateToBytes(`${head}-${digest}`, versionBudget);
+  }
+
+  const nameBudget = MAX_NAME_BYTES - Buffer.byteLength(sanitizedVersion, "utf8") - fixedBytes;
+  const name = truncateToBytes(sanitizedName, Math.max(nameBudget, 1));
+  return sanitizeFolderName(`${name} ${sanitizedVersion}${suffix}`);
 }
 
 function escapeStringLiteral(s: string): string {
@@ -181,20 +290,24 @@ async function exportIconsForFormat(
   format: ExportFormat,
 ): Promise<ExportedIcon[]> {
   const formatDir = path.join(appOutputDir, getFormatSubdir(format));
-  await mkdir(formatDir, { recursive: true });
 
-  // ICNS format: copy the original .icns file if available
+  // ICNS format: copy the original .icns file if available.
+  // The directory is created only once there's a file to put in it — creating it up
+  // front left an empty ICNS/ folder behind for every Asset Catalog app, which reads
+  // as a silent failure in Finder.
   if (format === "icns") {
     const icnsPath = await findIcnsPath(app.path);
     if (!icnsPath) {
       throw new Error(`${app.name} does not have an .icns file (Asset Catalog icons). Try PNG instead.`);
     }
+    await mkdir(formatDir, { recursive: true });
     const filePath = path.join(formatDir, `${sanitizeFolderName(app.name)}.icns`);
     await copyFile(icnsPath, filePath);
     return [{ size: 0, filePath }];
   }
 
   const ext = getFileExtension(format);
+  await mkdir(formatDir, { recursive: true });
 
   // PNG/JPEG: extract icons via NSWorkspace (works for all apps)
   return Promise.all(
@@ -225,8 +338,12 @@ async function exportIcons(
   baseOutputPath: string,
   formats: readonly ExportFormat[],
 ): Promise<ExportResult> {
-  const outputDir = path.join(normalizeOutputPath(baseOutputPath), getAppFolderName(app));
-  await mkdir(outputDir, { recursive: true });
+  const version = await getAppVersion(app.path);
+  const outputDir = path.join(normalizeOutputPath(baseOutputPath), getAppFolderName(app, version));
+  // `mkdir` with `recursive` returns the first directory it created, or undefined when the
+  // path already existed. That distinction is what licenses the cleanup below: we may only
+  // remove a folder this export brought into being.
+  const createdDir = await mkdir(outputDir, { recursive: true });
 
   const allResults: ExportedIcon[] = [];
   const warnings: string[] = [];
@@ -236,10 +353,20 @@ async function exportIcons(
       allResults.push(...results);
     } catch (error) {
       warnings.push(`${format.toUpperCase()}: ${getErrorMessage(error)}`);
+      // A format that failed partway (icon extraction died after its directory was made)
+      // would otherwise leave an empty PNG/ or JPEG/ behind — which also blocks the
+      // whole-folder cleanup below, since `rmdir` refuses a non-empty directory.
+      await rmdir(path.join(outputDir, getFormatSubdir(format))).catch(() => {});
     }
   }
 
   if (allResults.length === 0 && warnings.length > 0) {
+    // Nothing was written, so don't leave a bare folder behind advertising an export that
+    // didn't happen — but only clean up a folder this export created. A folder that was
+    // already there is the user's, even when it's empty, and deleting it would be reaching
+    // outside what an export is allowed to touch. `rmdir` additionally refuses a non-empty
+    // directory, so a previous export's files are never at risk either way.
+    if (createdDir) await rmdir(outputDir).catch(() => {});
     throw new Error(warnings.join("\n"));
   }
 
@@ -268,9 +395,18 @@ async function exportWithToast(
     toast.style = Toast.Style.Success;
     toast.title = `Exported ${countOf(results.length, "icon", { zero: "no icons" })}`;
     toast.message = warnings.length > 0 ? `${outputDir}\n⚠ ${warnings.join("; ")}` : outputDir;
+    // The shortcut is explicit on purpose. `Toast.ActionOptions` accepts one, and without
+    // it the success toast rendered with no visible affordance at all — the action existed
+    // but nothing on screen said so, which reads as "the export gave me nowhere to go".
+    // Every export path funnels through here, so this covers Export Icons, Export Icon
+    // Size…, Export Icons As…, and Export All Sizes in one place.
     toast.primaryAction = {
       title: "Reveal in Finder",
-      onAction: () => showInFinder(outputDir),
+      shortcut: { modifiers: ["cmd"], key: "o" },
+      onAction: (t) => {
+        void showInFinder(outputDir);
+        void t.hide();
+      },
     };
   } catch (error) {
     failToast(toast, error, { title: `Failed to export ${app.name}'s icons` });
@@ -320,6 +456,21 @@ function AppActions({
               title={`${size} x ${size}`}
               icon={Icon.Download}
               onAction={() => exportWithToast(app, [size], preferences.outputPath, sizedFormats)}
+            />
+          ))}
+        </ActionPanel.Submenu>
+        {/* "As" is already correct title case here; the rule flags the short word. */}
+        {/* eslint-disable-next-line @raycast/prefer-title-case */}
+        <ActionPanel.Submenu title="Export Icons As…" icon={Icon.Download}>
+          {ALL_FORMATS.map((format) => (
+            <Action
+              key={format}
+              title={getFormatLabel(format)}
+              icon={Icon.Download}
+              // A one-off format override: exports the same sizes "Export Icons" would,
+              // in just this format, without touching the format preferences. ICNS carries
+              // every size in one file, so the size list it gets doesn't matter.
+              onAction={() => exportWithToast(app, [defaultSize], preferences.outputPath, [format])}
             />
           ))}
         </ActionPanel.Submenu>
@@ -430,13 +581,22 @@ function AppActions({
           shortcut={{ modifiers: ["cmd"], key: "f" }}
           onAction={async () => {
             const outputRoot = normalizeOutputPath(preferences.outputPath);
-            const folderPath = path.join(outputRoot, getAppFolderName(app));
-            try {
-              await stat(folderPath);
-              await showInFinder(folderPath);
-              return;
-            } catch {
-              // No folder for this app yet — fall through to the output folder.
+            // Check the installed version's folder first, then the unversioned name that
+            // exports created before folders carried versions, so an older export is still
+            // reachable from this action rather than looking like it was never made.
+            const version = await getAppVersion(app.path);
+            const candidates = version
+              ? [getAppFolderName(app, version), getAppFolderName(app, null)]
+              : [getAppFolderName(app, null)];
+            for (const candidate of candidates) {
+              const folderPath = path.join(outputRoot, candidate);
+              try {
+                await stat(folderPath);
+                await showInFinder(folderPath);
+                return;
+              } catch {
+                // Not this one — try the next, then fall through to the output folder.
+              }
             }
             // Opening the parent beats a dead end: the user asked to see where icons
             // go, and that place exists even when this app hasn't been exported.
@@ -490,7 +650,10 @@ export default function Command() {
   // Grid tiles render far larger than the 32pt image `fileIcon` resolves to, so they
   // look soft. Extract real 256px icons to a cache and point the tiles at those. Only
   // the grid needs this — list rows are close enough to `fileIcon`'s nominal size.
-  const [cachedApps, setCachedApps] = useState<ReadonlySet<string>>(new Set());
+  // Maps an app to the cache file to render for it. The filename encodes the source state
+  // it was drawn from, so it can only come from a resolver that looked — the grid can no
+  // longer derive it, which is what keeps the tile and the freshness check in agreement.
+  const [cachedApps, setCachedApps] = useState<ReadonlyMap<string, string>>(new Map());
   useEffect(() => {
     if (viewMode !== "grid" || !apps || apps.length === 0) return;
 
@@ -502,14 +665,20 @@ export default function Command() {
 
     (async () => {
       let toast: Toast | undefined;
+      // What the grid last published, so the cleanup below can spare those files.
+      let rendered: ReadonlyMap<string, string> | undefined;
       try {
         // Show whatever is already cached before doing any work, so a warm cache
         // renders sharp immediately.
         const warm = await listCachedApps(appPaths);
         if (cancelled) return;
         setCachedApps(warm);
+        // Pin as soon as it is on screen, not after the refresh. Extraction can abort or
+        // fail in between, and the cleanup below would then see no pinned entries and
+        // happily delete the very files these tiles point at.
+        rendered = warm;
 
-        const extracted = await refreshIconCache(
+        await refreshIconCache(
           appPaths,
           (done, total) => {
             if (cancelled || total === 0) return;
@@ -525,12 +694,15 @@ export default function Command() {
         );
         if (cancelled) return;
 
-        if (extracted > 0) {
-          const refreshed = await listCachedApps(appPaths);
-          if (cancelled) return;
-          setCachedApps(refreshed);
-        }
-        await pruneIconCache(appPaths);
+        // Re-resolve unconditionally, not only when something was extracted. A cache
+        // entry's name encodes the source state it was drawn from, so paths resolved
+        // before extraction can be superseded by an app updating meanwhile — even when
+        // this pass wrote nothing. Rendering a superseded name would show a tile whose
+        // file prune is entitled to collect.
+        const refreshed = await listCachedApps(appPaths);
+        if (cancelled) return;
+        setCachedApps(refreshed);
+        rendered = refreshed;
       } catch (error) {
         // An aborted extraction is a view change, not a failure worth a toast.
         if (!cancelled) {
@@ -542,6 +714,16 @@ export default function Command() {
         // Always retire the progress toast — leaving "Preparing icons…" on screen
         // after the work stops is the UI lying about its state.
         await toast?.hide();
+        // Prune here, not on the success path. Every early return above sits before it, so
+        // abandoning the grid used to skip collection entirely — and because an entry's
+        // name encodes source state, each abandoned visit could strand another superseded
+        // entry for any app that changed meanwhile, with nothing collecting them until a
+        // visit happened to run to completion. Measured: 33 of 327 apps changed within a
+        // day, so a churny session could strand tens of MB.
+        //
+        // Whatever the grid last published is passed as in-use, so this can never delete
+        // the file a rendered tile points at.
+        await pruneIconCache(appPaths, rendered?.values() ?? []).catch(() => {});
       }
     })();
 
@@ -563,18 +745,21 @@ export default function Command() {
             description="No installed applications were detected on this Mac."
           />
         )}
-        {apps?.map((app) => (
-          <Grid.Item
-            key={app.path}
-            // The cached 256px PNG renders sharp. `Image.Fallback` can't hold a
-            // FileIcon, so pick the source directly: apps not yet cached (or that
-            // the extractor couldn't handle) keep the soft-but-present system icon.
-            content={cachedApps.has(app.path) ? { source: cachedIconPath(app.path) } : { fileIcon: app.path }}
-            title={app.name}
-            keywords={app.bundleId ? [app.bundleId] : []}
-            actions={<AppActions app={app} {...actionProps} />}
-          />
-        ))}
+        {apps?.map((app) => {
+          // The cached 256px PNG renders sharp. `Image.Fallback` can't hold a FileIcon, so
+          // pick the source directly: apps not yet cached (or that the extractor couldn't
+          // handle) keep the soft-but-present system icon.
+          const cached = cachedApps.get(app.path);
+          return (
+            <Grid.Item
+              key={app.path}
+              content={cached ? { source: cached } : { fileIcon: app.path }}
+              title={app.name}
+              keywords={app.bundleId ? [app.bundleId] : []}
+              actions={<AppActions app={app} {...actionProps} />}
+            />
+          );
+        })}
       </Grid>
     );
   }

@@ -9,7 +9,14 @@ import type {
   PrhRegisteredEntry,
 } from "../types/prh";
 import type { UiCompany } from "../types/ui";
-import { formatAddress, normalizeWebsiteUrl, selectCity, toEuVatNumber } from "./format";
+import {
+  formatAddress,
+  formatAddressForClipboard,
+  getFormattedAddressParts,
+  normalizeWebsiteUrl,
+  toEuVatNumber,
+} from "./format";
+import type { FormattedAddressParts } from "./format";
 
 export type UiNameTimelineCategory = "current-legal" | "previous-legal" | "alternate";
 
@@ -401,16 +408,25 @@ export function toUiCompany(company: PrhCompany, languageOrder: PrhLanguageCode[
 }
 
 export function getPrimaryCity(company: UiCompany): string | undefined {
-  const preferredAddress = company.primaryAddress ?? selectPrimaryAddress(company.addresses);
-  if (!preferredAddress) {
-    return undefined;
-  }
+  return getPrimaryAddressParts(company)?.city;
+}
 
-  return selectCity(preferredAddress.postOffices ?? [], company.languageOrder);
+export function getPrimaryAddressParts(company: UiCompany): FormattedAddressParts | undefined {
+  return getFormattedAddressParts(
+    company.primaryAddress ?? selectPrimaryAddress(company.addresses),
+    company.languageOrder,
+  );
 }
 
 export function getPrimaryAddressText(company: UiCompany): string | undefined {
   return formatAddress(company.primaryAddress ?? selectPrimaryAddress(company.addresses), company.languageOrder);
+}
+
+export function getPrimaryAddressClipboardText(company: UiCompany): string | undefined {
+  return formatAddressForClipboard(
+    company.primaryAddress ?? selectPrimaryAddress(company.addresses),
+    company.languageOrder,
+  );
 }
 
 export function hasCriticalDetailData(company?: UiCompany): boolean {

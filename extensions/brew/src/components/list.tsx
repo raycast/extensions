@@ -14,6 +14,7 @@ export interface FormulaListProps {
   isLoading: boolean;
   formulae: Formula[];
   casks: Cask[];
+  pinnedFormulae?: Formula[];
   searchBarPlaceholder: string;
   searchBarAccessory?: React.ComponentProps<typeof List>["searchBarAccessory"];
   searchText?: string;
@@ -23,12 +24,14 @@ export interface FormulaListProps {
   filtering?: boolean;
   dataFetched?: boolean;
   showMetadataPanel?: boolean;
+  onToggleDetails?: () => void;
 }
 
 export function FormulaList(props: FormulaListProps) {
   const formulae = props.formulae;
   const casks = props.casks;
-  const hasResults = formulae.length > 0 || casks.length > 0;
+  const pinnedFormulae = props.pinnedFormulae ?? [];
+  const hasResults = formulae.length > 0 || casks.length > 0 || pinnedFormulae.length > 0;
   const showMetadataPanel = props.showMetadataPanel ?? false;
 
   return (
@@ -61,6 +64,7 @@ export function FormulaList(props: FormulaListProps) {
               isInstalled={props.isInstalled}
               onAction={props.onAction}
               showMetadataPanel={showMetadataPanel}
+              onToggleDetails={props.onToggleDetails}
             />
           ))}
           {formulae.isTruncated() && <MoreListItem />}
@@ -75,9 +79,24 @@ export function FormulaList(props: FormulaListProps) {
               isInstalled={props.isInstalled}
               onAction={props.onAction}
               showMetadataPanel={showMetadataPanel}
+              onToggleDetails={props.onToggleDetails}
             />
           ))}
           {casks.isTruncated() && <MoreListItem />}
+        </List.Section>
+      )}
+      {pinnedFormulae.length > 0 && (
+        <List.Section title="Pinned Formulae" subtitle={`${pinnedFormulae.length}`}>
+          {pinnedFormulae.map((formula) => (
+            <FormulaListItem
+              key={`pinned-formula-${formula.name}`}
+              formula={formula}
+              isInstalled={props.isInstalled}
+              onAction={props.onAction}
+              showMetadataPanel={showMetadataPanel}
+              onToggleDetails={props.onToggleDetails}
+            />
+          ))}
         </List.Section>
       )}
     </List>
@@ -89,6 +108,7 @@ export function FormulaListItem(props: {
   isInstalled: (name: string) => boolean;
   onAction: () => void;
   showMetadataPanel?: boolean;
+  onToggleDetails?: () => void;
 }) {
   const formula = props.formula;
   const showMetadataPanel = props.showMetadataPanel ?? false;
@@ -105,12 +125,17 @@ export function FormulaListItem(props: {
   }
 
   const icon = { source: iconMark, tintColor: tintColor };
+  const accessories: List.Item.Accessory[] = [];
+  if (brewIsInstalled(formula) && formula.outdated) {
+    accessories.push({ tag: { value: "Outdated", color: Color.Red } });
+  }
+  accessories.push({ text: version });
 
   return (
     <List.Item
       title={formula.name}
       subtitle={showMetadataPanel ? undefined : formula.desc}
-      accessories={showMetadataPanel ? undefined : [{ text: version }]}
+      accessories={showMetadataPanel ? undefined : accessories}
       icon={tooltip ? { value: icon, tooltip } : icon}
       detail={
         showMetadataPanel ? <FormulaListItemDetail formula={formula} isInstalled={props.isInstalled} /> : undefined
@@ -121,6 +146,7 @@ export function FormulaListItem(props: {
           showDetails={!showMetadataPanel}
           isInstalled={props.isInstalled}
           onAction={props.onAction}
+          onToggleDetails={props.onToggleDetails}
         />
       }
     />
@@ -132,6 +158,7 @@ export function CaskListItem(props: {
   isInstalled: (name: string) => boolean;
   onAction: () => void;
   showMetadataPanel?: boolean;
+  onToggleDetails?: () => void;
 }) {
   const cask = props.cask;
   const showMetadataPanel = props.showMetadataPanel ?? false;
@@ -148,12 +175,17 @@ export function CaskListItem(props: {
   }
 
   const icon = { source: iconMark, tintColor: tintColor };
+  const accessories: List.Item.Accessory[] = [];
+  if (brewIsInstalled(cask) && cask.outdated) {
+    accessories.push({ tag: { value: "Outdated", color: Color.Red } });
+  }
+  accessories.push({ text: version });
 
   return (
     <List.Item
       title={brewName(cask)}
       subtitle={showMetadataPanel ? undefined : cask.desc}
-      accessories={showMetadataPanel ? undefined : [{ text: version }]}
+      accessories={showMetadataPanel ? undefined : accessories}
       icon={tooltip ? { value: icon, tooltip } : icon}
       detail={showMetadataPanel ? <CaskListItemDetail cask={cask} isInstalled={props.isInstalled} /> : undefined}
       actions={
@@ -162,6 +194,7 @@ export function CaskListItem(props: {
           showDetails={!showMetadataPanel}
           isInstalled={props.isInstalled}
           onAction={props.onAction}
+          onToggleDetails={props.onToggleDetails}
         />
       }
     />
