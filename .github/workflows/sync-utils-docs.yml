@@ -18,7 +18,7 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22.22.2
 
@@ -73,13 +73,13 @@ jobs:
           fetch-depth: 2
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22.22.2
 
       - name: Get changed files in the docs folder
         id: changed-files
-        uses: tj-actions/changed-files@v42
+        uses: tj-actions/changed-files@v47
         with:
           files: |
             docs/utils-reference/**
@@ -130,7 +130,7 @@ jobs:
           fi
 
       - name: Open PR on the main repo
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         if: steps.commit.outputs.has_commit == 'true'
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
