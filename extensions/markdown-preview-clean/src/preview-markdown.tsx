@@ -8,8 +8,8 @@ export default function Command() {
   const { push } = useNavigation();
 
   const handleSubmit = (values: { markdown: string }) => {
-    const content = (values.markdown ?? markdown).trim();
-    if (!content) {
+    const content = values.markdown ?? markdown;
+    if (!content.trim()) {
       showToast({ style: Toast.Style.Failure, title: "Nothing to preview", message: "Enter some Markdown first" });
       return;
     }

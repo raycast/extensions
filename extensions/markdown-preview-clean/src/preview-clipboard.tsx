@@ -19,15 +19,18 @@ async function loadFromClipboard(): Promise<Loaded> {
     }
   }
 
-  const text = clip.text?.trim() ?? "";
-  if (!text) {
+  const text = clip.text ?? "";
+  const trimmedText = text.trim();
+  if (!trimmedText) {
     throw new Error("Clipboard is empty");
   }
 
-  // Absolute path pasted as text
-  if (text.startsWith("/") && /\.(md|markdown|mdx|mdown)$/i.test(text.split("\n")[0] ?? "")) {
+  // Use normalized text only while checking for a copied absolute path. If it
+  // is Markdown content, preserve the clipboard value exactly as copied.
+  const firstLine = trimmedText.split("\n")[0] ?? "";
+  if (firstLine.startsWith("/") && /\.(md|markdown|mdx|mdown)$/i.test(firstLine)) {
     try {
-      const source = await readMarkdownFile(text.split("\n")[0] ?? "");
+      const source = await readMarkdownFile(firstLine);
       return { kind: "file", markdown: source.markdown, filePath: source.path, fileName: source.fileName };
     } catch {
       // treat as plain markdown text

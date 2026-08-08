@@ -61,12 +61,11 @@ async function createViewLink(documentId: string, adminKey: string): Promise<str
  * Content is public to anyone with the link. Do not share secrets.
  */
 export async function shareToMdshare(markdown: string): Promise<MdshareResult> {
-  const content = markdown.trim();
-  if (!content) {
+  if (!markdown.trim()) {
     throw new Error("Nothing to share");
   }
 
-  const created = await postMarkdown(content);
+  const created = await postMarkdown(markdown);
   const viewUrl = await createViewLink(created.document_id, created.admin_key);
 
   return {

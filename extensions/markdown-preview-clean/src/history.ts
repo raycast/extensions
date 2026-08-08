@@ -59,7 +59,7 @@ async function setHistory(items: HistoryItem[]): Promise<void> {
  * move it to the top and refresh the timestamp.
  */
 export async function saveToHistory(markdown: string): Promise<HistoryItem> {
-  const content = markdown.trim();
+  const content = markdown;
   const items = await getHistory();
   const existing = items.find((item) => item.markdown === content);
 

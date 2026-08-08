@@ -67,14 +67,8 @@ export async function resolveMarkdownFileSource(): Promise<MarkdownFileSource> {
     if (mdItem) {
       return await readMarkdownFile(mdItem.path);
     }
-    if (items.length > 0) {
-      throw new Error("Finder selection is not a Markdown file");
-    }
-  } catch (error) {
-    // Finder not frontmost / no selection — fall through
-    if (error instanceof Error && error.message.includes("not a Markdown file")) {
-      throw error;
-    }
+  } catch {
+    // Finder not frontmost, inaccessible, or without a usable selection — fall through.
   }
 
   // 2) Clipboard file (when user copied a file in Finder)
