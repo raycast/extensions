@@ -10,12 +10,13 @@ import {
   type UrlPolicy,
 } from "./trusted-http";
 
-const MAX_SITEMAPS = 50;
-const MAX_ENTRIES = 10_000;
-const MAX_SITEMAP_BYTES = 5 * 1024 * 1024;
-const MAX_TOTAL_BYTES = 25 * 1024 * 1024;
+const MAX_SITEMAPS = 4096;
+const MAX_ENTRIES = 1_000_000;
+const MAX_SITEMAP_BYTES = 256 * 1024 * 1024;
+const MAX_TOTAL_BYTES = MAX_SITEMAP_BYTES * 10;
 const MAX_DEPTH = 5;
 const TIMEOUT_MS = 10_000;
+const DOCTYPE_ERROR = "Sitemaps must not contain a DOCTYPE";
 
 export class SitemapError extends Error {
   constructor(message: string) {
@@ -64,7 +65,7 @@ const rootSchema = z.union([
 ]);
 
 export function parseSitemapXml(xml: string, websiteUrl: string): ParsedSitemap {
-  if (/<!DOCTYPE\b/i.test(xml)) throw new SitemapError("Sitemaps must not contain a DOCTYPE");
+  if (/<!DOCTYPE\b/i.test(xml)) throw new SitemapError(DOCTYPE_ERROR);
   if (/<!ENTITY\b/i.test(xml)) throw new SitemapError("Sitemaps must not contain entities");
   if (/&(?!(?:amp|apos|gt|lt|quot);|#(?:\d+|x[\da-f]+);)[a-z][\w.-]*;/i.test(xml)) {
     throw new SitemapError("Sitemaps must not contain undeclared entities");
@@ -261,10 +262,19 @@ async function loadSitemap(
       maxBytes: MAX_SITEMAP_BYTES,
     }));
   state.prefetched.delete(normalizedUrl);
-  if (response.status < 200 || response.status >= 300) throw new SitemapError("A sitemap could not be fetched");
+  if (response.status < 200 || response.status >= 300) {
+    addResponseToBudget(state, response);
+    return [];
+  }
   const body = await decodeSitemapBody(response.body, response.url, response.headers);
   addResponseToBudget(state, response, body.byteLength);
-  const parsed = parseSitemapXml(new TextDecoder().decode(body), [...state.policy.origins][0] ?? normalizedUrl);
+  let parsed: ParsedSitemap;
+  try {
+    parsed = parseSitemapXml(new TextDecoder().decode(body), [...state.policy.origins][0] ?? normalizedUrl);
+  } catch (error) {
+    if (error instanceof SitemapError && error.message === DOCTYPE_ERROR) return [];
+    throw error;
+  }
 
   if (parsed.kind === "entries") {
     state.entryCount += parsed.entries.length;
@@ -319,7 +329,9 @@ async function readDecompressedBytes(stream: ReadableStream<Uint8Array>): Promis
 
 function addToBudget(state: TraversalState, bytes: number): void {
   state.totalBytes += bytes;
-  if (state.totalBytes > MAX_TOTAL_BYTES) throw new SitemapError("Sitemaps cannot exceed 25 MB in total");
+  if (state.totalBytes > MAX_TOTAL_BYTES) {
+    throw new SitemapError(`Sitemaps cannot exceed ${MAX_TOTAL_BYTES / 1024 / 1024} MB in total`);
+  }
 }
 
 function addResponseToBudget(

@@ -19,7 +19,10 @@ export type ResolvedAddress = {
 };
 
 export type UrlPolicy = {
-  readonly hostname: string;
+  readonly websiteUrl: string;
+  readonly domain: string;
+  readonly port: string;
+  readonly protocols: ReadonlySet<string>;
   readonly origins: ReadonlySet<string>;
 };
 
@@ -47,19 +50,25 @@ export function isPublicAddress(address: string): boolean {
 
 export function createUrlPolicy(websiteUrl: string): UrlPolicy {
   const url = parsePublicHttpUrl(websiteUrl, "Website URL");
+  const domain = url.hostname.replace(/^www\./, "");
+  const protocols = new Set([url.protocol]);
   const origins = new Set([url.origin]);
   if (url.protocol === "http:") {
-    const upgraded = new URL(url);
-    upgraded.protocol = "https:";
-    origins.add(upgraded.origin);
+    protocols.add("https:");
+    const secureUrl = new URL(url);
+    secureUrl.protocol = "https:";
+    origins.add(secureUrl.origin);
   }
-  return { hostname: url.hostname, origins };
+  return { websiteUrl: url.toString(), domain, port: url.port, protocols, origins };
 }
 
 export function assertTrustedUrl(value: string, policy: UrlPolicy): URL {
   const url = parsePublicHttpUrl(value, "URL");
-  if (url.hostname !== policy.hostname || !policy.origins.has(url.origin)) {
-    throw new TrustedHttpError("URLs must belong to the same website");
+  const sameDomain =
+    url.hostname === policy.domain ||
+    (!ipaddr.isValid(policy.domain.replace(/^\[|\]$/g, "")) && url.hostname.endsWith(`.${policy.domain}`));
+  if (!sameDomain || url.port !== policy.port || !policy.protocols.has(url.protocol)) {
+    throw new TrustedHttpError(`URLs must belong to the same website: ${policy.websiteUrl} and ${url}`);
   }
   return url;
 }

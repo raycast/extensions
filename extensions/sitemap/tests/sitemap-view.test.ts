@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getSitemapEntryAccessories, getSitemapEntryTitle } from "./sitemap-view";
+import { getSitemapEntryAccessories, getSitemapEntryTitle } from "../src/sitemap-view";
 
 describe("sitemap entry presentation", () => {
   it("uses the final path segment as the title", () => {

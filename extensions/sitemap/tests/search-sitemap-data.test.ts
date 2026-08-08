@@ -2,10 +2,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const { getUrlOrCurrentTab, load } = vi.hoisted(() => ({ getUrlOrCurrentTab: vi.fn(), load: vi.fn() }));
 
-vi.mock("./get-url-or-current-tab", () => ({ getUrlOrCurrentTab }));
-vi.mock("./sitemap", () => ({ sitemapLoader: { load } }));
+vi.mock("../src/get-url-or-current-tab", () => ({ getUrlOrCurrentTab }));
+vi.mock("../src/sitemap", () => ({ sitemapLoader: { load } }));
 
-import { searchSitemap } from "./search-sitemap-data";
+import { searchSitemap } from "../src/search-sitemap-data";
 
 beforeEach(() => {
   getUrlOrCurrentTab.mockReset();

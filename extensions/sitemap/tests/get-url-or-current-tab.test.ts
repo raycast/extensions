@@ -7,7 +7,7 @@ vi.mock("@raycast/api", () => ({
   environment: { canAccess },
 }));
 
-import { getUrlOrCurrentTab } from "./get-url-or-current-tab";
+import { getUrlOrCurrentTab } from "../src/get-url-or-current-tab";
 
 beforeEach(() => {
   getTabs.mockReset();
