@@ -9,6 +9,7 @@ import {
   isUndoable,
   previewUndo,
   describeUndoPreview,
+  getEffectiveOperations,
 } from "./lib/history";
 import { HistoryDetailView } from "./components/HistoryDetailView";
 import type { RenameHistoryEntry } from "./types";
@@ -39,56 +40,44 @@ export default function Command() {
     loadHistory();
   }, [loadHistory]);
 
-  const handleUndoToPoint = async (index: number): Promise<void> => {
-    await undoToPoint(index);
-    // undoToPoint handles its own success/failure toasts;
+  // Every undo below addresses its entry by timestamp — the entry's identity.
+  // An index into this component's state goes stale the moment another command
+  // records a rename (entries unshift to the front) or history is trimmed; the
+  // lib re-resolves the timestamp against a fresh read and toasts when the
+  // entry is gone.
+  const handleUndoEntry = async (timestamp: number): Promise<void> => {
+    await undoEntry(timestamp);
+    // undoEntry handles its own success/failure toasts;
     // always reload history since partial undos may have modified entries
     await loadHistory();
   };
 
-  // The detail view identifies its entry by timestamp, not index: an index
-  // captured when the view was pushed goes stale once a newer rename is
-  // recorded or the history is trimmed.
-  const resolveEntryIndex = async (timestamp: number): Promise<number> => {
-    const entries = await getHistory();
-    return entries.findIndex((e) => e.timestamp === timestamp);
-  };
-
-  const showEntryGoneToast = async (): Promise<void> => {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Entry No Longer in History",
-      message: "It may have been trimmed or cleared since this view was opened",
-    });
-  };
-
-  const handleUndoEntry = async (timestamp: number): Promise<void> => {
-    const index = await resolveEntryIndex(timestamp);
-    if (index >= 0) {
-      await undoEntry(index);
-    } else {
-      await showEntryGoneToast();
-    }
-    await loadHistory();
-  };
-
   const handleUndoFile = async (timestamp: number, opIndex: number): Promise<void> => {
-    const index = await resolveEntryIndex(timestamp);
-    if (index >= 0) {
-      await undoFileOperation(index, opIndex);
-    } else {
-      await showEntryGoneToast();
-    }
+    await undoFileOperation(timestamp, opIndex);
     await loadHistory();
   };
 
-  const handleUndoWithConfirm = async (index: number) => {
+  const handleUndoWithConfirm = async (timestamp: number) => {
+    // Preview against a fresh read, not this component's snapshot: entries
+    // recorded since the list was loaded are part of the range being undone.
+    const entries = await getHistory();
+    const index = entries.findIndex((e) => e.timestamp === timestamp);
+    if (index < 0) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Entry No Longer in History",
+        message: "It may have been trimmed or cleared since this view was opened",
+      });
+      await loadHistory();
+      return;
+    }
+
     const operationsCount = index + 1;
-    const preview = await previewUndo(history.slice(0, index + 1).flatMap((entry) => entry.operations));
+    const preview = await previewUndo(entries.slice(0, index + 1).flatMap(getEffectiveOperations));
     const source =
       index === 0
-        ? `"${history[index]?.description ?? "unknown operation"}"`
-        : `every operation back to and including "${history[index]?.description ?? "unknown operation"}"`;
+        ? `"${entries[index]?.description ?? "unknown operation"}"`
+        : `every operation back to and including "${entries[index]?.description ?? "unknown operation"}"`;
     const confirmed = await confirmAlert({
       title: `Undo ${operationsCount} Operation${operationsCount > 1 ? "s" : ""}?`,
       message: describeUndoPreview(preview, source),
@@ -99,7 +88,8 @@ export default function Command() {
     });
 
     if (confirmed) {
-      await handleUndoToPoint(index);
+      await undoToPoint(timestamp);
+      await loadHistory();
     }
   };
 
@@ -184,7 +174,7 @@ export default function Command() {
                         title={index === 0 ? "Undo This Operation" : `Undo ${index + 1} Operations`}
                         icon={Icon.Undo}
                         shortcut={{ modifiers: ["cmd"], key: "z" }}
-                        onAction={() => handleUndoWithConfirm(index)}
+                        onAction={() => handleUndoWithConfirm(entry.timestamp)}
                       />
                       <Action
                         title="Refresh"

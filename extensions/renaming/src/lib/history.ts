@@ -3,10 +3,11 @@
  */
 
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { rename, stat } from "fs/promises";
-import { basename } from "path";
+import { lstat, rename } from "fs/promises";
+import path, { basename } from "path";
 import type { HistoryOperation, RenameHistoryEntry } from "../types";
 import { fileExists } from "./files";
+import { isSameEntry } from "./paths";
 import { MAX_HISTORY_ENTRIES, STORAGE_KEYS } from "./constants";
 import { getUserFriendlyErrorMessage } from "./errors";
 import { log } from "./logger";
@@ -36,16 +37,45 @@ export async function getHistory(): Promise<RenameHistoryEntry[]> {
 }
 
 /**
- * Filesystem identity of the file at `path`, or undefined when it cannot be
- * read. `dev:ino` survives renames on the same volume — which is the only
- * kind of move `fs.rename` can have performed.
+ * Filesystem identity of the entry at `filePath`, or undefined when it cannot
+ * be read. `dev:ino` survives renames on the same volume — which is the only
+ * kind of move `fs.rename` can have performed. Uses `lstat`, not `stat`:
+ * rename operates on the directory entry, so a symlink's identity is the link
+ * itself, never its target — a dangling link still has an identity to record,
+ * and two links to one target must not pass for each other.
  */
-async function getFileId(path: string): Promise<string | undefined> {
+async function getFileId(filePath: string): Promise<string | undefined> {
   try {
-    const stats = await stat(path);
+    const stats = await lstat(filePath);
     return `${stats.dev}:${stats.ino}`;
   } catch {
     return undefined;
+  }
+}
+
+/**
+ * Read-mutate-write the stored history with optimistic verification.
+ * LocalStorage has no transactions, so another command instance can write
+ * between our read and our write. After writing, re-read: if the stored
+ * payload is not the one we wrote, another writer won the race — re-apply the
+ * mutator to its state and write once more. Mutators must therefore be
+ * idempotent over their own output (re-applying to an array that already
+ * contains the change must not duplicate it). One racing writer is recovered
+ * exactly; writers that keep racing past the retry keep their own merged view,
+ * which is the best a non-atomic store can promise.
+ */
+async function updateHistory(mutate: (fresh: RenameHistoryEntry[]) => RenameHistoryEntry[]): Promise<boolean> {
+  try {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const payload = JSON.stringify(mutate(await getHistory()));
+      await LocalStorage.setItem(STORAGE_KEYS.HISTORY, payload);
+      const stored = await LocalStorage.getItem<string>(STORAGE_KEYS.HISTORY);
+      if (stored === payload) return true;
+    }
+    return true;
+  } catch (error) {
+    log.history.error("Failed to write history", { error });
+    return false;
   }
 }
 
@@ -56,7 +86,7 @@ export async function saveToHistory(description: string, operations: RenameHisto
   log.history.info("Saving to history", { description, operationCount: operations.length });
 
   // Capture each file's identity before touching storage, so the read→write
-  // window below stays as small as possible.
+  // window inside updateHistory stays as small as possible.
   const stamped = await Promise.all(
     operations.map(async (op) => {
       const fileId = await getFileId(op.newPath);
@@ -64,20 +94,23 @@ export async function saveToHistory(description: string, operations: RenameHisto
     }),
   );
 
-  const history = await getHistory();
-
-  history.unshift({
+  const entry: RenameHistoryEntry = {
     timestamp: Date.now(),
     description,
     operations: stamped,
+  };
+
+  const saved = await updateHistory((fresh) => {
+    // Idempotent under retry: our entry may already be in the re-read state.
+    const next = [entry, ...fresh.filter((e) => e.timestamp !== entry.timestamp)];
+    if (next.length > MAX_HISTORY_ENTRIES) {
+      next.length = MAX_HISTORY_ENTRIES;
+    }
+    return next;
   });
-
-  // Trim to max entries
-  if (history.length > MAX_HISTORY_ENTRIES) {
-    history.length = MAX_HISTORY_ENTRIES;
+  if (!saved) {
+    throw new Error("Failed to write history");
   }
-
-  await LocalStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
 }
 
 /** True while the rename is still in effect and can be undone (or retried). */
@@ -86,68 +119,102 @@ export function isUndoable(op: HistoryOperation): boolean {
 }
 
 /**
- * Write history back to storage. Returns false instead of throwing: by the
- * time this runs the files have already been renamed on disk, so a storage
- * failure must not make the undo look like it never happened.
- */
-async function persistHistory(history: ReadonlyArray<RenameHistoryEntry>): Promise<boolean> {
-  try {
-    await LocalStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history));
-    return true;
-  } catch (error) {
-    log.history.error("Failed to persist history after undo", { error });
-    return false;
-  }
-}
-
-/**
- * Verify that the object currently at `op.newPath` is the file the operation
+ * Verify that the object currently at `newPath` is the file the operation
  * recorded. Returns a human-readable failure when it is not — or when that
  * cannot be proven. Identity must be verified, never assumed: an operation
  * recorded without a fileId, or a destination that cannot be statted, refuses
  * to undo rather than risk moving an unrelated file that took the same path.
  */
-async function verifyIdentity(op: HistoryOperation): Promise<string | undefined> {
+async function verifyIdentity(op: HistoryOperation, newPath: string): Promise<string | undefined> {
   if (op.fileId === undefined) {
-    return `${basename(op.newPath)} has no recorded identity to verify`;
+    return `${basename(newPath)} has no recorded identity to verify`;
   }
-  const current = await getFileId(op.newPath);
+  const current = await getFileId(newPath);
   if (current === undefined) {
-    return `${basename(op.newPath)} could not be verified as the renamed file`;
+    return `${basename(newPath)} could not be verified as the renamed file`;
   }
   if (current !== op.fileId) {
-    return `${basename(op.newPath)} was replaced by a different file`;
+    return `${basename(newPath)} was replaced by a different file`;
   }
   return undefined;
 }
 
 /**
- * Try to revert one operation on disk. Returns undefined on success,
- * or a human-readable reason on failure.
+ * Try to revert one operation on disk, with the renamed file currently at
+ * `newPath` (its recorded newPath remapped through any parent-directory
+ * restores). Returns undefined on success, or a human-readable reason on
+ * failure.
  */
-async function revertOperation(op: HistoryOperation): Promise<string | undefined> {
-  if (!(await fileExists(op.newPath))) {
-    return `${basename(op.newPath)} not found`;
+async function revertOperation(op: HistoryOperation, newPath: string = op.newPath): Promise<string | undefined> {
+  if (!(await fileExists(newPath))) {
+    return `${basename(newPath)} not found`;
   }
 
   // Never move a file the rename didn't produce: if something else now sits
   // at the recorded destination — or identity cannot be proven — refuse.
-  const identityFailure = await verifyIdentity(op);
+  const identityFailure = await verifyIdentity(op, newPath);
   if (identityFailure !== undefined) {
     return identityFailure;
   }
 
-  if (await fileExists(op.oldPath)) {
+  // A case-only rename resolves its own old spelling on a case-insensitive
+  // volume — that is the file being restored, not an occupying conflict.
+  if ((await fileExists(op.oldPath)) && !(await isSameEntry(newPath, op.oldPath))) {
     return `${basename(op.oldPath)} already exists`;
   }
 
   try {
-    await rename(op.newPath, op.oldPath);
+    await rename(newPath, op.oldPath);
     return undefined;
   } catch (error) {
-    log.history.error("Undo failed for file", { newPath: op.newPath, oldPath: op.oldPath, error });
+    log.history.error("Undo failed for file", { newPath, oldPath: op.oldPath, error });
     return `Failed to restore ${basename(op.oldPath)}: ${getUserFriendlyErrorMessage(error)}`;
   }
+}
+
+/** Depth of a path, for ordering parents before children. */
+function pathDepth(p: string): number {
+  return path.normalize(p).split(path.sep).length;
+}
+
+/** Rewrite `target` when it sits under `fromPrefix`, moving it under `toPrefix`. */
+function reparent(target: string, fromPrefix: string, toPrefix: string): string {
+  return target.startsWith(fromPrefix + path.sep) ? toPrefix + target.slice(fromPrefix.length) : target;
+}
+
+/**
+ * Where each operation's renamed file actually sits now. A rename batch can
+ * contain a directory and files inside it: undoing the directory carries its
+ * children with it, so a child's recorded newPath goes stale the moment the
+ * parent is restored. Replay every already-undone operation's restore,
+ * shallowest-first, over the recorded paths to get the current locations.
+ */
+function effectiveNewPaths(operations: ReadonlyArray<HistoryOperation>): string[] {
+  const effective = operations.map((op) => op.newPath);
+  const undoneIndexes = operations
+    .map((op, i) => i)
+    .filter((i) => operations[i]!.status === "undone")
+    .sort((a, b) => pathDepth(effective[a]!) - pathDepth(effective[b]!));
+
+  for (const i of undoneIndexes) {
+    const from = effective[i]!;
+    const to = operations[i]!.oldPath;
+    for (let j = 0; j < effective.length; j++) {
+      if (j !== i) effective[j] = reparent(effective[j]!, from, to);
+    }
+    effective[i] = to;
+  }
+  return effective;
+}
+
+/**
+ * An entry's operations with each newPath replaced by the file's current
+ * location (see {@link effectiveNewPaths}) — what previews and single-file
+ * undos must operate on.
+ */
+export function getEffectiveOperations(entry: RenameHistoryEntry): HistoryOperation[] {
+  const effective = effectiveNewPaths(entry.operations);
+  return entry.operations.map((op, i) => ({ ...op, newPath: effective[i]! }));
 }
 
 export interface UndoPreview {
@@ -164,8 +231,10 @@ export interface UndoPreview {
 
 /**
  * Dry-run the undo of a set of operations: same existence and identity checks
- * as the real undo, no renames. A snapshot, not a guarantee — the batch
- * itself can free or occupy paths as it progresses.
+ * as the real undo, no renames. Pass operations from
+ * {@link getEffectiveOperations} so paths reflect parent restores. A snapshot,
+ * not a guarantee — the batch itself can free or occupy paths as it
+ * progresses.
  */
 export async function previewUndo(operations: ReadonlyArray<HistoryOperation>): Promise<UndoPreview> {
   let restorable = 0;
@@ -177,9 +246,9 @@ export async function previewUndo(operations: ReadonlyArray<HistoryOperation>): 
     if (!isUndoable(op)) continue;
     if (!(await fileExists(op.newPath))) {
       missing++;
-    } else if ((await verifyIdentity(op)) !== undefined) {
+    } else if ((await verifyIdentity(op, op.newPath)) !== undefined) {
       replaced++;
-    } else if (await fileExists(op.oldPath)) {
+    } else if ((await fileExists(op.oldPath)) && !(await isSameEntry(op.newPath, op.oldPath))) {
       occupied++;
     } else {
       restorable++;
@@ -223,33 +292,46 @@ interface EntryUndoResult {
 }
 
 /**
- * Revert one entry's operations on disk, newest-first. Operations already
- * undone are skipped, and previously failed ones are retried.
+ * Revert one entry's operations on disk. Operations already undone are
+ * skipped, and previously failed ones are retried.
+ *
+ * Order mirrors batchRename in reverse: the forward pass renames children
+ * before parents, so the undo restores parents before children — shallowest
+ * first, ties in reverse input order. Each successful directory restore
+ * carries its children with it, so the remaining operations' current paths
+ * are remapped as the loop progresses (seeded by effectiveNewPaths with the
+ * restores already-undone operations performed earlier).
  */
 async function undoEntryOperations(entry: RenameHistoryEntry): Promise<EntryUndoResult> {
-  const newOps: HistoryOperation[] = [];
+  const newOps: HistoryOperation[] = [...entry.operations];
+  const effective = effectiveNewPaths(entry.operations);
   const errors: string[] = [];
   let successCount = 0;
   let attemptedCount = 0;
 
-  for (const op of [...entry.operations].reverse()) {
-    if (!isUndoable(op)) {
-      newOps.push(op);
-      continue;
-    }
+  const order = entry.operations
+    .map((op, i) => i)
+    .filter((i) => isUndoable(entry.operations[i]!))
+    .sort((a, b) => pathDepth(effective[a]!) - pathDepth(effective[b]!) || b - a);
 
+  for (const i of order) {
+    const op = entry.operations[i]!;
     attemptedCount++;
-    const failure = await revertOperation(op);
+    const failure = await revertOperation(op, effective[i]!);
     if (failure === undefined) {
       successCount++;
-      newOps.push({ ...op, status: "undone", undoError: undefined });
+      newOps[i] = { ...op, status: "undone", undoError: undefined };
+      for (let j = 0; j < effective.length; j++) {
+        if (j !== i) effective[j] = reparent(effective[j]!, effective[i]!, op.oldPath);
+      }
+      effective[i] = op.oldPath;
     } else {
       errors.push(failure);
-      newOps.push({ ...op, status: "undo-failed", undoError: failure });
+      newOps[i] = { ...op, status: "undo-failed", undoError: failure };
     }
   }
 
-  return { operations: newOps.reverse(), successCount, attemptedCount, errors };
+  return { operations: newOps, successCount, attemptedCount, errors };
 }
 
 /**
@@ -273,18 +355,18 @@ function mergeOperations(
 }
 
 /**
- * Persist undo results by re-reading the latest history and merging in only
- * the operations this undo touched. Filesystem work in an undo can take a
- * while; anything another command instance recorded or undid in the meantime
- * must survive the write instead of being clobbered by our stale snapshot.
- * (The read→write below is not atomic — LocalStorage has no transactions —
- * but merging over the freshest read shrinks the race to one storage
- * round-trip and can no longer revert another instance's completed undo.)
+ * Persist undo results by merging only the operations this undo touched into
+ * the freshest stored history (via updateHistory's verified read-mutate-write).
+ * Filesystem work in an undo can take a while; anything another command
+ * instance recorded or undid in the meantime must survive the write instead
+ * of being clobbered by our stale snapshot. Returns false instead of
+ * throwing: by the time this runs the files have already been restored on
+ * disk, so a storage failure must not make the undo look like it never
+ * happened.
  */
 async function persistUndoResults(updatedEntries: ReadonlyArray<RenameHistoryEntry>): Promise<boolean> {
   const updated = new Map(updatedEntries.map((e) => [e.timestamp, e]));
-  const fresh = await getHistory();
-  return persistHistory(
+  return updateHistory((fresh) =>
     fresh.map((e) => {
       const ours = updated.get(e.timestamp);
       return ours === undefined ? e : { ...e, operations: mergeOperations(e.operations, ours.operations) };
@@ -345,16 +427,36 @@ async function showNothingToUndoToast(): Promise<void> {
   });
 }
 
-/**
- * Undo to a specific point in history: reverses the selected entry and every
- * entry newer than it. Entries stay in history with each operation marked
- * "undone" or "undo-failed"; operations already undone are skipped, and
- * previously failed ones are retried.
- */
-export async function undoToPoint(index: number): Promise<boolean> {
-  const history = await getHistory();
+async function showEntryGoneToast(): Promise<void> {
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Entry No Longer in History",
+    message: "It may have been trimmed or cleared since this view was opened",
+  });
+}
 
-  if (index < 0 || index >= history.length) {
+/**
+ * Find an entry by its timestamp — the entry's identity. Callers hold
+ * snapshots of the list, and an index into a snapshot goes stale the moment
+ * another command records a rename (entries unshift to the front) or history
+ * is trimmed; the timestamp still names the same entry in the fresh read.
+ */
+function findEntryIndex(history: ReadonlyArray<RenameHistoryEntry>, timestamp: number): number {
+  return history.findIndex((e) => e.timestamp === timestamp);
+}
+
+/**
+ * Undo to a specific point in history: reverses the entry with the given
+ * timestamp and every entry newer than it. Entries stay in history with each
+ * operation marked "undone" or "undo-failed"; operations already undone are
+ * skipped, and previously failed ones are retried.
+ */
+export async function undoToPoint(timestamp: number): Promise<boolean> {
+  const history = await getHistory();
+  const index = findEntryIndex(history, timestamp);
+
+  if (index < 0) {
+    await showEntryGoneToast();
     return false;
   }
 
@@ -382,15 +484,16 @@ export async function undoToPoint(index: number): Promise<boolean> {
 }
 
 /**
- * Undo a single entry, leaving newer and older entries untouched. This is the
- * detail view's "undo this operation" — unlike undoToPoint it never reaches
- * beyond the selected entry.
+ * Undo the entry with the given timestamp, leaving newer and older entries
+ * untouched. This is the detail view's "undo this operation" — unlike
+ * undoToPoint it never reaches beyond the selected entry.
  */
-export async function undoEntry(index: number): Promise<boolean> {
+export async function undoEntry(timestamp: number): Promise<boolean> {
   const history = await getHistory();
-  const entry = history[index];
+  const entry = history[findEntryIndex(history, timestamp)];
 
   if (!entry) {
+    await showEntryGoneToast();
     return false;
   }
 
@@ -404,16 +507,17 @@ export async function undoEntry(index: number): Promise<boolean> {
 }
 
 /**
- * Undo the rename of a single file within a history entry. The operation is
- * marked "undone" on success or "undo-failed" with the reason; the entry
- * itself stays in history.
+ * Undo the rename of a single file within the entry with the given timestamp.
+ * The operation is marked "undone" on success or "undo-failed" with the
+ * reason; the entry itself stays in history.
  */
-export async function undoFileOperation(entryIndex: number, opIndex: number): Promise<boolean> {
+export async function undoFileOperation(timestamp: number, opIndex: number): Promise<boolean> {
   const history = await getHistory();
-  const entry = history[entryIndex];
+  const entry = history[findEntryIndex(history, timestamp)];
   const op = entry?.operations[opIndex];
 
   if (!entry || !op) {
+    if (!entry) await showEntryGoneToast();
     return false;
   }
 
@@ -426,7 +530,9 @@ export async function undoFileOperation(entryIndex: number, opIndex: number): Pr
     return false;
   }
 
-  const failure = await revertOperation(op);
+  // The file may have moved with an already-restored parent directory from
+  // the same batch — undo it from where it actually sits now.
+  const failure = await revertOperation(op, effectiveNewPaths(entry.operations)[opIndex]!);
   const newOp: HistoryOperation =
     failure === undefined
       ? { ...op, status: "undone", undoError: undefined }

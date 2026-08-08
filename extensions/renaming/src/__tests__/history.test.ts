@@ -1,19 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LocalStorage, showToast } from "@raycast/api";
 
-const { mockRenameFn, mockFileExistsFn, mockStatFn } = vi.hoisted(() => ({
+const { mockRenameFn, mockFileExistsFn, mockLstatFn, mockIsSameEntryFn } = vi.hoisted(() => ({
   mockRenameFn: vi.fn().mockResolvedValue(undefined),
   mockFileExistsFn: vi.fn().mockResolvedValue(false),
-  mockStatFn: vi.fn().mockRejectedValue(new Error("ENOENT")),
+  mockLstatFn: vi.fn().mockRejectedValue(new Error("ENOENT")),
+  mockIsSameEntryFn: vi.fn().mockResolvedValue(false),
 }));
 
 vi.mock("fs/promises", async (importOriginal) => {
   const actual = await importOriginal<typeof import("fs/promises")>();
   return {
     ...actual,
-    default: { ...actual, rename: mockRenameFn, stat: mockStatFn },
+    default: { ...actual, rename: mockRenameFn, lstat: mockLstatFn },
     rename: mockRenameFn,
-    stat: mockStatFn,
+    lstat: mockLstatFn,
   };
 });
 
@@ -21,6 +22,11 @@ vi.mock("../lib/files", () => ({
   fileExists: mockFileExistsFn,
   batchRename: vi.fn(),
 }));
+
+vi.mock("../lib/paths", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../lib/paths")>();
+  return { ...actual, isSameEntry: mockIsSameEntryFn };
+});
 
 import {
   getHistory,
@@ -32,6 +38,7 @@ import {
   isUndoable,
   previewUndo,
   describeUndoPreview,
+  getEffectiveOperations,
 } from "../lib/history";
 import { MAX_HISTORY_ENTRIES, STORAGE_KEYS } from "../lib/constants";
 
@@ -43,7 +50,8 @@ const mockStorage = LocalStorage as unknown as {
 const mockShowToast = showToast as ReturnType<typeof vi.fn>;
 const mockRename = mockRenameFn;
 const mockFileExists = mockFileExistsFn;
-const mockStat = mockStatFn;
+const mockLstat = mockLstatFn;
+const mockIsSameEntry = mockIsSameEntryFn;
 
 beforeEach(() => {
   // Reset implementations too (not just call history), so a per-test override
@@ -52,9 +60,15 @@ beforeEach(() => {
   vi.resetAllMocks();
   mockRename.mockResolvedValue(undefined);
   mockFileExists.mockResolvedValue(false);
-  mockStat.mockResolvedValue({ dev: 7, ino: 1 });
+  mockLstat.mockResolvedValue({ dev: 7, ino: 1 });
+  mockIsSameEntry.mockResolvedValue(false);
   mockStorage.getItem.mockResolvedValue(null);
-  mockStorage.setItem.mockResolvedValue(undefined);
+  // Stateful storage: a write becomes visible to subsequent reads, so
+  // updateHistory's post-write verification sees its own payload. Reads
+  // queued with mockResolvedValueOnce are still consumed first.
+  mockStorage.setItem.mockImplementation(async (_key: string, value: string) => {
+    mockStorage.getItem.mockResolvedValue(value);
+  });
   mockStorage.removeItem.mockResolvedValue(undefined);
 });
 
@@ -133,23 +147,25 @@ describe("isUndoable", () => {
 });
 
 describe("undoToPoint", () => {
-  it("returns false when index is beyond history length", async () => {
+  it("returns false and toasts when history is empty", async () => {
     mockStorage.getItem.mockResolvedValue(JSON.stringify([]));
 
-    const result = await undoToPoint(0);
+    const result = await undoToPoint(1000);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
     expect(mockStorage.setItem).not.toHaveBeenCalled();
+    expect(mockShowToast).toHaveBeenCalledWith(expect.objectContaining({ title: "Entry No Longer in History" }));
   });
 
-  it("returns false when index equals history length", async () => {
+  it("returns false when no entry has the given timestamp", async () => {
     const history = [{ timestamp: 1000, description: "op1", operations: [{ oldPath: "/a.txt", newPath: "/b.txt" }] }];
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
 
-    const result = await undoToPoint(1);
+    const result = await undoToPoint(9999);
 
     expect(result).toBe(false);
+    expect(mockRename).not.toHaveBeenCalled();
   });
 
   it("undoes multiple entries up to the index and marks their operations undone", async () => {
@@ -174,7 +190,7 @@ describe("undoToPoint", () => {
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/f.txt" || path === "/dir/d.txt");
     mockRename.mockResolvedValue(undefined);
 
-    const result = await undoToPoint(1);
+    const result = await undoToPoint(2000);
 
     expect(result).toBe(true);
     expect(mockRename).toHaveBeenCalledTimes(2);
@@ -197,7 +213,7 @@ describe("undoToPoint", () => {
     );
   });
 
-  it("undoes a single entry at index 0", async () => {
+  it("undoes a single entry when given the newest timestamp", async () => {
     const history = [
       {
         timestamp: 2000,
@@ -214,7 +230,7 @@ describe("undoToPoint", () => {
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/b.txt");
     mockRename.mockResolvedValue(undefined);
 
-    const result = await undoToPoint(0);
+    const result = await undoToPoint(2000);
 
     expect(result).toBe(true);
     expect(mockRename).toHaveBeenCalledTimes(1);
@@ -224,7 +240,7 @@ describe("undoToPoint", () => {
     expect(stored[0].operations[0].status).toBe("undone");
     expect(stored[1].operations[0].status).toBeUndefined();
 
-    // index 0 means "1 operation" (singular)
+    // the newest entry alone means "1 operation" (singular)
     expect(mockShowToast).toHaveBeenCalledWith(
       expect.objectContaining({
         style: "success",
@@ -250,7 +266,7 @@ describe("undoToPoint", () => {
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/b.txt");
     mockRename.mockResolvedValue(undefined);
 
-    const result = await undoToPoint(0);
+    const result = await undoToPoint(2000);
 
     expect(result).toBe(true);
     expect(mockRename).toHaveBeenCalledTimes(1);
@@ -285,7 +301,7 @@ describe("undoToPoint", () => {
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/d.txt");
     mockRename.mockResolvedValue(undefined);
 
-    const result = await undoToPoint(0);
+    const result = await undoToPoint(2000);
 
     expect(result).toBe(true);
     // Only the previously-failed op is attempted; the undone one is never touched
@@ -308,7 +324,7 @@ describe("undoToPoint", () => {
     ];
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
 
-    const result = await undoToPoint(0);
+    const result = await undoToPoint(2000);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -332,7 +348,7 @@ describe("undoToPoint", () => {
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
     mockFileExists.mockResolvedValue(false);
 
-    const result = await undoToPoint(0);
+    const result = await undoToPoint(2000);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -347,7 +363,7 @@ describe("undoToPoint", () => {
 });
 
 describe("undoFileOperation", () => {
-  it("returns false for an out-of-range entry or operation index", async () => {
+  it("returns false for an unknown timestamp or out-of-range operation index", async () => {
     const history = [
       {
         timestamp: 1000,
@@ -357,8 +373,8 @@ describe("undoFileOperation", () => {
     ];
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
 
-    expect(await undoFileOperation(1, 0)).toBe(false);
-    expect(await undoFileOperation(0, 1)).toBe(false);
+    expect(await undoFileOperation(9999, 0)).toBe(false);
+    expect(await undoFileOperation(1000, 1)).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
     expect(mockStorage.setItem).not.toHaveBeenCalled();
   });
@@ -378,7 +394,7 @@ describe("undoFileOperation", () => {
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/d.txt");
     mockRename.mockResolvedValue(undefined);
 
-    const result = await undoFileOperation(0, 1);
+    const result = await undoFileOperation(2000, 1);
 
     expect(result).toBe(true);
     expect(mockRename).toHaveBeenCalledTimes(1);
@@ -408,7 +424,7 @@ describe("undoFileOperation", () => {
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
     mockFileExists.mockResolvedValue(false);
 
-    const result = await undoFileOperation(0, 0);
+    const result = await undoFileOperation(2000, 0);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -432,7 +448,7 @@ describe("undoFileOperation", () => {
     // Both paths exist: b.txt can be reverted but a.txt is occupied
     mockFileExists.mockResolvedValue(true);
 
-    const result = await undoFileOperation(0, 0);
+    const result = await undoFileOperation(2000, 0);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -452,7 +468,7 @@ describe("undoFileOperation", () => {
     ];
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
 
-    const result = await undoFileOperation(0, 0);
+    const result = await undoFileOperation(2000, 0);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -472,7 +488,7 @@ describe("undoFileOperation", () => {
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/b.txt");
     mockRename.mockRejectedValueOnce(new Error("Permission denied"));
 
-    const result = await undoFileOperation(0, 0);
+    const result = await undoFileOperation(2000, 0);
 
     expect(result).toBe(false);
     const stored = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
@@ -542,10 +558,10 @@ describe("describeUndoPreview", () => {
 });
 
 describe("undoEntry", () => {
-  it("returns false for an index with no entry", async () => {
+  it("returns false when no entry has the given timestamp", async () => {
     mockStorage.getItem.mockResolvedValue(JSON.stringify([]));
 
-    const result = await undoEntry(0);
+    const result = await undoEntry(1000);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -574,7 +590,7 @@ describe("undoEntry", () => {
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/d.txt");
     mockRename.mockResolvedValue(undefined);
 
-    const result = await undoEntry(1);
+    const result = await undoEntry(2000);
 
     expect(result).toBe(true);
     expect(mockRename).toHaveBeenCalledTimes(1);
@@ -605,7 +621,7 @@ describe("undoEntry", () => {
     ];
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
 
-    const result = await undoEntry(0);
+    const result = await undoEntry(1000);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -626,7 +642,7 @@ describe("undoEntry", () => {
     mockRename.mockResolvedValue(undefined);
     mockStorage.setItem.mockRejectedValue(new Error("storage full"));
 
-    const result = await undoEntry(0);
+    const result = await undoEntry(1000);
 
     expect(result).toBe(true);
     expect(mockRename).toHaveBeenCalledWith("/dir/b.txt", "/dir/a.txt");
@@ -639,7 +655,7 @@ describe("undoEntry", () => {
 describe("filesystem identity", () => {
   it("saveToHistory stamps each operation with the file's dev:ino identity", async () => {
     mockStorage.getItem.mockResolvedValue(JSON.stringify([]));
-    mockStat.mockResolvedValue({ dev: 7, ino: 4242 });
+    mockLstat.mockResolvedValue({ dev: 7, ino: 4242 });
 
     await saveToHistory("op", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt", fileId: "7:1" }]);
 
@@ -649,7 +665,7 @@ describe("filesystem identity", () => {
 
   it("saveToHistory omits fileId when the file cannot be statted", async () => {
     mockStorage.getItem.mockResolvedValue(JSON.stringify([]));
-    mockStat.mockRejectedValue(new Error("ENOENT"));
+    mockLstat.mockRejectedValue(new Error("ENOENT"));
 
     await saveToHistory("op", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt" }]);
 
@@ -667,9 +683,9 @@ describe("filesystem identity", () => {
     ];
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/b.txt");
-    mockStat.mockResolvedValue({ dev: 7, ino: 2 }); // different inode: replacement file
+    mockLstat.mockResolvedValue({ dev: 7, ino: 2 }); // different inode: replacement file
 
-    const result = await undoEntry(0);
+    const result = await undoEntry(1000);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -685,7 +701,7 @@ describe("filesystem identity", () => {
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
     mockFileExists.mockImplementation(async (path: string) => path === "/legacy/b.txt");
 
-    const result = await undoEntry(0);
+    const result = await undoEntry(1000);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -704,9 +720,9 @@ describe("filesystem identity", () => {
     ];
     mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/b.txt");
-    mockStat.mockRejectedValue(new Error("EACCES"));
+    mockLstat.mockRejectedValue(new Error("EACCES"));
 
-    const result = await undoEntry(0);
+    const result = await undoEntry(1000);
 
     expect(result).toBe(false);
     expect(mockRename).not.toHaveBeenCalled();
@@ -716,7 +732,7 @@ describe("filesystem identity", () => {
 
   it("previewUndo counts a replaced destination separately", async () => {
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/b.txt");
-    mockStat.mockResolvedValue({ dev: 7, ino: 2 });
+    mockLstat.mockResolvedValue({ dev: 7, ino: 2 });
 
     const preview = await previewUndo([{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt", fileId: "7:1" }]);
 
@@ -745,7 +761,7 @@ describe("concurrent history writes", () => {
       .mockResolvedValueOnce(JSON.stringify([concurrent, ...snapshot]));
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/b.txt");
 
-    const result = await undoEntry(0);
+    const result = await undoEntry(1000);
 
     expect(result).toBe(true);
     const stored = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
@@ -777,13 +793,124 @@ describe("same-entry concurrent undo merge", () => {
       .mockResolvedValueOnce(JSON.stringify([concurrentlyUpdated]));
     mockFileExists.mockImplementation(async (path: string) => path === "/dir/d.txt");
 
-    const result = await undoFileOperation(0, 1);
+    const result = await undoFileOperation(1000, 1);
 
     expect(result).toBe(true);
     const stored = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
     // Both undos survive: theirs on file 0, ours on file 1
     expect(stored[0].operations[0].status).toBe("undone");
     expect(stored[0].operations[1].status).toBe("undone");
+  });
+});
+
+describe("case-only rename undo", () => {
+  // On a case-insensitive volume the old spelling resolves to the renamed
+  // file itself — that is the file being restored, not an occupying conflict.
+  it("restores a case-only rename instead of reporting the old name as taken", async () => {
+    const history = [
+      {
+        timestamp: 1000,
+        description: "op",
+        operations: [{ oldPath: "/dir/foo.txt", newPath: "/dir/Foo.txt", fileId: "7:1" }],
+      },
+    ];
+    mockStorage.getItem.mockResolvedValue(JSON.stringify(history));
+    mockFileExists.mockResolvedValue(true); // both spellings resolve
+    mockIsSameEntry.mockResolvedValue(true); // ...to the same entry
+
+    const result = await undoEntry(1000);
+
+    expect(result).toBe(true);
+    expect(mockRename).toHaveBeenCalledWith("/dir/Foo.txt", "/dir/foo.txt");
+    const stored = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
+    expect(stored[0].operations[0].status).toBe("undone");
+  });
+
+  it("previewUndo counts a case-only rename as restorable, not occupied", async () => {
+    mockFileExists.mockResolvedValue(true);
+    mockIsSameEntry.mockResolvedValue(true);
+
+    const preview = await previewUndo([{ oldPath: "/dir/foo.txt", newPath: "/dir/Foo.txt", fileId: "7:1" }]);
+
+    expect(preview).toEqual({ restorable: 1, missing: 0, occupied: 0, replaced: 0, total: 1 });
+  });
+});
+
+describe("directory-and-children batch undo", () => {
+  // Mirrors batchRename in reverse: the forward pass renames children before
+  // parents and rewrites their recorded paths under the renamed parent, so
+  // the undo must restore the parent first and pick each child up from where
+  // the parent's restore carried it.
+  const entry = {
+    timestamp: 1000,
+    description: "Renamed folder and file",
+    operations: [
+      { oldPath: "/dir/a", newPath: "/dir/b", fileId: "7:1" },
+      { oldPath: "/dir/a/f.txt", newPath: "/dir/b/g.txt", fileId: "7:2" },
+    ],
+  };
+
+  it("restores the parent directory first and undoes the child from its carried location", async () => {
+    mockStorage.getItem.mockResolvedValue(JSON.stringify([entry]));
+    mockLstat.mockImplementation(async (p: string) => (p === "/dir/b" ? { dev: 7, ino: 1 } : { dev: 7, ino: 2 }));
+    // The child exists at /dir/a/g.txt — its post-parent-restore location
+    mockFileExists.mockImplementation(async (p: string) => p === "/dir/b" || p === "/dir/a/g.txt");
+
+    const result = await undoEntry(1000);
+
+    expect(result).toBe(true);
+    expect(mockRename.mock.calls).toEqual([
+      ["/dir/b", "/dir/a"],
+      ["/dir/a/g.txt", "/dir/a/f.txt"],
+    ]);
+    const stored = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
+    expect(stored[0].operations[0].status).toBe("undone");
+    expect(stored[0].operations[1].status).toBe("undone");
+  });
+
+  it("undoFileOperation finds a child moved by an already-restored parent", async () => {
+    const partiallyUndone = {
+      ...entry,
+      operations: [
+        { ...entry.operations[0], status: "undone" },
+        { ...entry.operations[1], status: "undo-failed", undoError: "f.txt not found" },
+      ],
+    };
+    mockStorage.getItem.mockResolvedValue(JSON.stringify([partiallyUndone]));
+    mockLstat.mockResolvedValue({ dev: 7, ino: 2 });
+    mockFileExists.mockImplementation(async (p: string) => p === "/dir/a/g.txt");
+
+    const result = await undoFileOperation(1000, 1);
+
+    expect(result).toBe(true);
+    expect(mockRename).toHaveBeenCalledWith("/dir/a/g.txt", "/dir/a/f.txt");
+  });
+
+  it("getEffectiveOperations remaps children of undone parents", () => {
+    const ops = getEffectiveOperations({
+      ...entry,
+      operations: [{ ...entry.operations[0], status: "undone" }, entry.operations[1]],
+    });
+
+    expect(ops[0].newPath).toBe("/dir/a");
+    expect(ops[1].newPath).toBe("/dir/a/g.txt");
+  });
+});
+
+describe("write verification", () => {
+  it("re-merges and rewrites when another write lands between the write and its verification", async () => {
+    mockStorage.getItem.mockResolvedValue(JSON.stringify([]));
+    const concurrent = [{ timestamp: 500, description: "theirs", operations: [] }];
+    // First write is clobbered: the verify read sees another instance's state
+    mockStorage.setItem.mockImplementationOnce(async () => {
+      mockStorage.getItem.mockResolvedValue(JSON.stringify(concurrent));
+    });
+
+    await saveToHistory("mine", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt" }]);
+
+    expect(mockStorage.setItem).toHaveBeenCalledTimes(2);
+    const finalStored = JSON.parse(mockStorage.setItem.mock.calls[1][1]);
+    expect(finalStored.map((e: { description: string }) => e.description)).toEqual(["mine", "theirs"]);
   });
 });
 

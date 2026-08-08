@@ -7,7 +7,7 @@
 import { useState, useCallback } from "react";
 import { List, confirmAlert, Alert } from "@raycast/api";
 import type { HistoryOperation, RenameHistoryEntry } from "../types";
-import { getHistory, isUndoable, previewUndo, describeUndoPreview } from "../lib/history";
+import { getHistory, isUndoable, previewUndo, describeUndoPreview, getEffectiveOperations } from "../lib/history";
 import { HistoryFileItem } from "./HistoryFileItem";
 
 interface HistoryDetailViewProps {
@@ -42,7 +42,7 @@ export function HistoryDetailView({ entry, onUndoEntry, onUndoFile }: HistoryDet
   };
 
   const handleUndoEntry = async () => {
-    const preview = await previewUndo(currentEntry.operations);
+    const preview = await previewUndo(getEffectiveOperations(currentEntry));
     const confirmed = await confirmAlert({
       title: "Undo Entire Operation?",
       message: describeUndoPreview(preview, `"${currentEntry.description}"`),
@@ -72,7 +72,9 @@ export function HistoryDetailView({ entry, onUndoEntry, onUndoFile }: HistoryDet
     { title: "Could Not Undo", ops: [] },
     { title: "Undone", ops: [] },
   ];
-  currentEntry.operations.forEach((op, opIndex) => {
+  // Render with effective paths so a file whose parent directory was already
+  // restored previews, stats, and opens from where it actually sits now.
+  getEffectiveOperations(currentEntry).forEach((op, opIndex) => {
     const section = op.status === "undone" ? sections[2]! : op.status === "undo-failed" ? sections[1]! : sections[0]!;
     section.ops.push({ op, opIndex });
   });
