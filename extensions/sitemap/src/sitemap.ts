@@ -11,9 +11,9 @@ import {
 } from "./trusted-http";
 
 const MAX_SITEMAPS = 4096;
-const MAX_ENTRIES = 1_000_000;
-const MAX_SITEMAP_BYTES = 256 * 1024 * 1024;
-const MAX_TOTAL_BYTES = MAX_SITEMAP_BYTES * 10;
+const MAX_ENTRIES = 10_000;
+const MAX_SITEMAP_BYTES = 1024 * 1024;
+const MAX_TOTAL_BYTES = 5 * 1024 * 1024;
 const MAX_DEPTH = 5;
 const TIMEOUT_MS = 10_000;
 const DOCTYPE_ERROR = "Sitemaps must not contain a DOCTYPE";
@@ -329,9 +329,7 @@ async function readDecompressedBytes(stream: ReadableStream<Uint8Array>): Promis
 
 function addToBudget(state: TraversalState, bytes: number): void {
   state.totalBytes += bytes;
-  if (state.totalBytes > MAX_TOTAL_BYTES) {
-    throw new SitemapError(`Sitemaps cannot exceed ${MAX_TOTAL_BYTES / 1024 / 1024} MB in total`);
-  }
+  if (state.totalBytes > MAX_TOTAL_BYTES) throw new SitemapError("Sitemaps cannot exceed 5 MB in total");
 }
 
 function addResponseToBudget(

@@ -228,34 +228,36 @@ describe("sitemap loading", () => {
     ]);
   });
 
-  it("allows gzip decompression above the previous per-file limit", async () => {
+  it("stops gzip decompression at the per-file limit", async () => {
     const sitemapUrl = "https://example.com/sitemap.xml.gz";
-    const oversizedXml = `<urlset>${" ".repeat(6 * 1024 * 1024)}</urlset>`;
+    const oversizedXml = `<urlset>${" ".repeat(1.1 * 1024 * 1024)}</urlset>`;
     const http = fakeHttp({
       [sitemapUrl]: { ...response(sitemapUrl, ""), body: await gzip(oversizedXml) },
     });
 
-    await expect(createSitemapLoader(http).load(sitemapUrl)).resolves.toEqual([]);
+    await expect(createSitemapLoader(http).load(sitemapUrl)).rejects.toThrow(
+      "Decompressed sitemaps cannot exceed 1 MB",
+    );
   });
 
   it("enforces the traversal-wide byte budget", async () => {
-    const sitemapUrls = Array.from({ length: 11 }, (_, index) => `https://example.com/${index}.xml`);
+    const sitemapUrls = Array.from({ length: 6 }, (_, index) => `https://example.com/${index}.xml`);
     const robots = sitemapUrls.map((url) => `Sitemap: ${url}`).join("\n");
     const responses: Record<string, TrustedResponse> = {
       "https://example.com/sitemap.xml": response("https://example.com/sitemap.xml", "", 404),
       "https://example.com/robots.txt": response("https://example.com/robots.txt", robots),
     };
     for (const sitemapUrl of sitemapUrls) {
-      responses[sitemapUrl] = { ...response(sitemapUrl, "<urlset />"), transferredBytes: 256 * 1024 * 1024 };
+      responses[sitemapUrl] = { ...response(sitemapUrl, "<urlset />"), transferredBytes: 1024 * 1024 };
     }
 
     await expect(createSitemapLoader(fakeHttp(responses)).load("https://example.com/home")).rejects.toThrow(
-      "2560 MB in total",
+      "5 MB in total",
     );
   });
 
   it("includes compressed transfer size in the traversal budget", async () => {
-    const sitemapUrls = Array.from({ length: 11 }, (_, index) => `https://example.com/${index}.xml`);
+    const sitemapUrls = Array.from({ length: 6 }, (_, index) => `https://example.com/${index}.xml`);
     const responses: Record<string, TrustedResponse> = {
       "https://example.com/sitemap.xml": response("https://example.com/sitemap.xml", "", 404),
       "https://example.com/robots.txt": response(
@@ -266,21 +268,21 @@ describe("sitemap loading", () => {
     for (const sitemapUrl of sitemapUrls) {
       responses[sitemapUrl] = {
         ...response(sitemapUrl, "<urlset />", 200, { "content-encoding": "gzip" }),
-        transferredBytes: 256 * 1024 * 1024,
+        transferredBytes: 1024 * 1024,
       };
     }
 
     await expect(createSitemapLoader(fakeHttp(responses)).load("https://example.com/home")).rejects.toThrow(
-      "2560 MB in total",
+      "5 MB in total",
     );
   });
 
   it("charges failed discovery responses to the traversal budget", async () => {
-    const sitemapUrls = Array.from({ length: 10 }, (_, index) => `https://example.com/${index}.xml`);
+    const sitemapUrls = Array.from({ length: 5 }, (_, index) => `https://example.com/${index}.xml`);
     const responses: Record<string, TrustedResponse> = {
       "https://example.com/sitemap.xml": {
         ...response("https://example.com/sitemap.xml", "", 404),
-        transferredBytes: 256 * 1024 * 1024,
+        transferredBytes: 1024 * 1024,
       },
       "https://example.com/robots.txt": response(
         "https://example.com/robots.txt",
@@ -288,16 +290,16 @@ describe("sitemap loading", () => {
       ),
     };
     for (const sitemapUrl of sitemapUrls) {
-      responses[sitemapUrl] = { ...response(sitemapUrl, "<urlset />"), transferredBytes: 256 * 1024 * 1024 };
+      responses[sitemapUrl] = { ...response(sitemapUrl, "<urlset />"), transferredBytes: 1024 * 1024 };
     }
 
     await expect(createSitemapLoader(fakeHttp(responses)).load("https://example.com/home")).rejects.toThrow(
-      "2560 MB in total",
+      "5 MB in total",
     );
   });
 
-  it("allows entries above the previous limit and enforces nesting limits", async () => {
-    const entriesAbovePreviousLimit = Array.from(
+  it("enforces entry and nesting limits", async () => {
+    const tooManyEntries = Array.from(
       { length: 10_001 },
       (_, index) => `<url><loc>https://example.com/${index}</loc></url>`,
     ).join("");
@@ -305,11 +307,11 @@ describe("sitemap loading", () => {
       fakeHttp({
         "https://example.com/sitemap.xml": response(
           "https://example.com/sitemap.xml",
-          `<urlset>${entriesAbovePreviousLimit}</urlset>`,
+          `<urlset>${tooManyEntries}</urlset>`,
         ),
       }),
     );
-    await expect(entryLoader.load("https://example.com/home")).resolves.toHaveLength(10_001);
+    await expect(entryLoader.load("https://example.com/home")).rejects.toThrow("10000 entries");
 
     const responses: Record<string, TrustedResponse> = {};
     for (let depth = 0; depth <= 6; depth++) {
