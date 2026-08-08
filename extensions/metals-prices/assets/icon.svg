@@ -13,10 +13,24 @@
       <stop offset="1" stop-color="#B0730E"/>
     </linearGradient>
 
-    <!-- top face: lighter, catches the light -->
+    <!-- gold top face: lighter, catches the light -->
     <linearGradient id="goldTop" x1="0" y1="0" x2="0.3" y2="1">
       <stop offset="0" stop-color="#FFF6D2"/>
       <stop offset="1" stop-color="#F6CD5A"/>
+    </linearGradient>
+
+    <!-- silver body: the second metal, cool grey so both bars read distinctly -->
+    <linearGradient id="silver" x1="0" y1="0" x2="0.6" y2="1">
+      <stop offset="0" stop-color="#F2F5F8"/>
+      <stop offset="0.45" stop-color="#C7CFD8"/>
+      <stop offset="0.78" stop-color="#9AA5B1"/>
+      <stop offset="1" stop-color="#77828E"/>
+    </linearGradient>
+
+    <!-- silver top face -->
+    <linearGradient id="silverTop" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stop-color="#FBFCFD"/>
+      <stop offset="1" stop-color="#D5DCE3"/>
     </linearGradient>
 
     <!-- soft sheen sweeping across the bar faces -->
@@ -54,19 +68,18 @@
     <path d="M342 108 L384 116 L358 150 Z" fill="#FFF3C0"/>
   </g>
 
-  <!-- gold bars: two bold, clearly separated 3D ingots -->
+  <!-- silver base ingot -->
   <g filter="url(#drop)">
-    <!-- bottom bar -->
-    <path d="M150 384 L362 384 L386 446 L126 446 Z" fill="url(#gold)"/>
-    <path d="M150 384 L362 384 L340 356 L172 356 Z" fill="url(#goldTop)"/>
+    <path d="M150 384 L362 384 L386 446 L126 446 Z" fill="url(#silver)"/>
+    <path d="M150 384 L362 384 L340 356 L172 356 Z" fill="url(#silverTop)"/>
     <path d="M150 384 L362 384 L386 446 L126 446 Z" fill="url(#sheen)"/>
-    <path d="M150 384 L362 384" stroke="#9c6410" stroke-width="2" opacity="0.55"/>
+    <path d="M150 384 L362 384" stroke="#6b7681" stroke-width="2" opacity="0.55"/>
   </g>
 
   <!-- soft contact shadow so the top bar clearly sits above the base -->
-  <ellipse cx="256" cy="358" rx="82" ry="13" fill="#5a3906" opacity="0.4" filter="url(#glow)"/>
+  <ellipse cx="256" cy="358" rx="82" ry="13" fill="#3d4650" opacity="0.45" filter="url(#glow)"/>
 
-  <!-- top bar -->
+  <!-- gold ingot resting on top -->
   <g filter="url(#drop)">
     <path d="M196 300 L316 300 L330 338 L182 338 Z" fill="url(#gold)"/>
     <path d="M196 300 L316 300 L300 276 L212 276 Z" fill="url(#goldTop)"/>
