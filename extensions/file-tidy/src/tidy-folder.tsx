@@ -265,10 +265,14 @@ function PlanView({
       if (!ok) return;
 
       toast = await showToast({ style: Toast.Style.Animated, title: "Tidying…" });
-      const { similarReportPath } = executePlan(entries, { destDir, sourceDir, formatSimilarBlock });
+      const { similarReportPath, reportErrors } = executePlan(entries, { destDir, sourceDir, formatSimilarBlock });
       toast.style = Toast.Style.Success;
       toast.title = `Done: ${counts.archive} archived, ${counts.duplicate} duplicates, ${counts.review} to review`;
-      toast.message = "Use “Undo Last Tidy” to revert";
+      // A record that couldn't be appended rides along on the success toast:
+      // every file moved, so calling this a failure would be a lie about the
+      // archive — and it would hide the undo hint the user may still want.
+      const notWritten = reportErrors.map((e) => describeError(e, "").title).join(", ");
+      toast.message = notWritten ? `${notWritten} — use “Undo Last Tidy” to revert` : "Use “Undo Last Tidy” to revert";
       toast.primaryAction = {
         title: "Open Destination",
         onAction: () => open(destDir),

@@ -11,8 +11,9 @@ import { firstFreeName } from "./plan.js";
  * is rewritten whenever a move diverges from it, so undo can restore whatever
  * was moved even if a later step fails. Appends to the Duplicates manifest and,
  * when the run flagged any, to the similar-files report (formatDupBlock and
- * formatSimilarBlock let adapters localize their text).
- * Returns { moved, manifestPath, similarReportPath }.
+ * formatSimilarBlock let adapters localize their text). Neither append can fail
+ * the run — both happen after the last move, so they come back in reportErrors.
+ * Returns { moved, manifestPath, similarReportPath, reportErrors }.
  */
 export function executePlan(
   entries,
@@ -79,13 +80,33 @@ export function executePlan(
   const finalPath = new Map(moved.map((e) => [e.from, e.to]));
   const atFinalPath = (p) => finalPath.get(p) ?? p;
 
+  // Both records below are appended once every move has already happened, so a
+  // failure here costs a record, not a file. Throwing would report a finished
+  // archive as a failed one and invite a retry against a source that has
+  // already been emptied — they come back as data instead, and the run stays
+  // the success it is.
+  const reportErrors = [];
+  const recordFailure = (report, target, cause) => {
+    // code + report + path let adapters render this in their own language.
+    const e = new Error(`Failed to write the ${report} record: ${target}`);
+    e.code = "REPORT_WRITE";
+    e.report = report;
+    e.path = target;
+    e.cause = cause;
+    reportErrors.push(e);
+  };
+
   const dups = moved.filter((e) => e.action === "duplicate");
   if (dups.length) {
     // The keeper was recorded at its pre-move location; by now it has been
     // archived.
     const resolved = dups.map((d) => ({ ...d, keeperPath: atFinalPath(d.keeperPath) }));
-    fs.mkdirSync(path.dirname(dupManifest), { recursive: true });
-    fs.appendFileSync(dupManifest, formatDupBlock(resolved));
+    try {
+      fs.mkdirSync(path.dirname(dupManifest), { recursive: true });
+      fs.appendFileSync(dupManifest, formatDupBlock(resolved));
+    } catch (err) {
+      recordFailure("duplicates", dupManifest, err);
+    }
   }
 
   // Near-duplicate and similar-image flags never change where a file goes, so
@@ -98,19 +119,28 @@ export function executePlan(
   const flagged = moved.filter((e) => e.similar || e.perceptual);
   let similarReportPath = null;
   if (flagged.length) {
-    similarReportPath = tidyPath(destDir, "similar.md");
+    // Safe outside the try: the same .tidy directory was already resolved for
+    // the run record above, so this can no longer be the call that rejects it.
+    const reportPath = tidyPath(destDir, "similar.md");
     const resolved = flagged.map((e) => ({
       ...e,
       similar: e.similar && { ...e.similar, peers: e.similar.peers.map(atFinalPath) },
       perceptual: e.perceptual && { ...e.perceptual, peers: e.perceptual.peers.map(atFinalPath) },
     }));
-    fs.mkdirSync(path.dirname(similarReportPath), { recursive: true });
-    // destDir is passed through so adapters can write paths relative to the
-    // archive: the report sits inside it, and a full absolute path repeated on
-    // every line buries the file names the reader is actually scanning for.
-    fs.appendFileSync(similarReportPath, formatSimilarBlock(resolved, { destDir }));
+    try {
+      fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+      // destDir is passed through so adapters can write paths relative to the
+      // archive: the report sits inside it, and a full absolute path repeated
+      // on every line buries the file names the reader is actually scanning for.
+      fs.appendFileSync(reportPath, formatSimilarBlock(resolved, { destDir }));
+      // Only reported once it is on disk: adapters offer to open this path, and
+      // a block that never finished writing is not a report worth opening.
+      similarReportPath = reportPath;
+    } catch (err) {
+      recordFailure("similar", reportPath, err);
+    }
   }
-  return { moved, manifestPath, similarReportPath };
+  return { moved, manifestPath, similarReportPath, reportErrors };
 }
 
 /** Directories between `dir` and `stopDir` that don't exist yet, deepest first. */

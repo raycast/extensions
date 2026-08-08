@@ -141,6 +141,45 @@ test("a peer already in the destination keeps its path, and a second run appends
   assert.equal(blocks.length, 2, "the second run appends a block instead of replacing the first");
 });
 
+test("a record that can't be written leaves the run a success", async () => {
+  const src = tmp();
+  const dest = tmp();
+  const a = write(src, "shot.jpg", "AAA");
+  const b = write(src, "shot-2.jpg", "BBB");
+  write(src, "photo.jpg", "SAME");
+  write(src, "photo copy.jpg", "SAME");
+  const entries = await plan(src, dest);
+  for (const e of entries.filter((e) => e.name.startsWith("shot"))) {
+    e.perceptual = { peers: [e.from === a ? b : a], best: e.from === a };
+  }
+  // A directory standing where each record file belongs: appending fails the
+  // way a full or read-only volume would, but only after every move is done.
+  fs.mkdirSync(path.join(dest, ".tidy", "similar.md"), { recursive: true });
+  fs.mkdirSync(path.join(dest, "Duplicates", "manifest.md"), { recursive: true });
+
+  const { moved, manifestPath, similarReportPath, reportErrors } = executePlan(entries, {
+    destDir: dest,
+    sourceDir: src,
+  });
+
+  // The whole point: the files are archived, so nothing about this run failed.
+  assert.equal(moved.length, entries.length);
+  for (const e of moved) assert.ok(fs.existsSync(e.to), `${e.name} was moved`);
+  assert.ok(fs.existsSync(manifestPath), "the run is still undoable");
+  // Never handed out: adapters offer to open this path, and there is no block
+  // in it describing this run.
+  assert.equal(similarReportPath, null);
+  assert.deepEqual(
+    reportErrors.map((e) => e.report).sort(),
+    ["duplicates", "similar"],
+    "both post-move appends are reported",
+  );
+  for (const e of reportErrors) {
+    assert.equal(e.code, "REPORT_WRITE");
+    assert.ok(e.path, "adapters name the file that couldn't be written");
+  }
+});
+
 test("a run with nothing flagged writes no similar report", () => {
   const src = tmp();
   const dest = tmp();
