@@ -1,26 +1,28 @@
 import { BrowserExtension, environment } from "@raycast/api";
-import { z } from "zod";
-
-const urlSchema = z.string().url();
 
 export type UrlSource =
-  | { readonly kind: "argument"; readonly url: string }
-  | { readonly kind: "current-tab"; readonly url: string }
+  | { readonly kind: "argument"; readonly websiteUrl: string }
+  | { readonly kind: "current-tab"; readonly websiteUrl: string }
   | { readonly kind: "missing"; readonly reason: string };
+
+function normalizeWebsiteUrl(value: string): string | undefined {
+  try {
+    const url = new URL(value);
+    if ((url.protocol !== "http:" && url.protocol !== "https:") || url.username || url.password) return undefined;
+    return url.toString();
+  } catch {
+    return undefined;
+  }
+}
 
 export async function getUrlOrCurrentTab(urlArgument: string | undefined): Promise<UrlSource> {
   const trimmed = urlArgument?.trim();
 
   if (trimmed && trimmed.length > 0) {
-    const parsed = urlSchema.safeParse(trimmed);
-    if (parsed.success) {
-      return { kind: "argument", url: parsed.data };
-    }
-
-    return {
-      kind: "missing",
-      reason: `Invalid URL provided: ${trimmed}`,
-    };
+    const websiteUrl = normalizeWebsiteUrl(trimmed);
+    return websiteUrl
+      ? { kind: "argument", websiteUrl }
+      : { kind: "missing", reason: "Enter a valid HTTP(S) URL without credentials." };
   }
 
   if (!environment.canAccess(BrowserExtension)) {
@@ -42,26 +44,19 @@ export async function getUrlOrCurrentTab(urlArgument: string | undefined): Promi
       };
     }
 
-    const parsed = urlSchema.safeParse(activeUrl);
-    if (!parsed.success) {
+    const websiteUrl = normalizeWebsiteUrl(activeUrl);
+    if (!websiteUrl) {
       return {
         kind: "missing",
-        reason: `The current browser tab is not a valid web page URL: ${activeUrl}`,
+        reason: "The active browser tab does not have a valid HTTP(S) URL.",
       };
     }
 
-    return { kind: "current-tab", url: parsed.data };
-  } catch (error) {
-    if (error instanceof Error && error.message) {
-      return {
-        kind: "missing",
-        reason: `Could not read the current browser tab: ${error.message}`,
-      };
-    }
-
+    return { kind: "current-tab", websiteUrl };
+  } catch {
     return {
       kind: "missing",
-      reason: "Could not read the current browser tab. Make sure the Raycast Browser Extension is installed.",
+      reason: "Could not read the active browser tab.",
     };
   }
 }
