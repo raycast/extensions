@@ -379,7 +379,7 @@ class CommandView extends React.Component<Record<string, never>, CommandState> {
               icon={
                 isQueued
                   ? { source: Icon.CheckCircle, tintColor: Color.Blue }
-                  : { source: Icon.AppWindow, tintColor: Color.Yellow }
+                  : { source: Icon.AppWindow, tintColor: Color.Orange }
               }
               keywords={[app.publisher, app.version].filter(Boolean)}
               actions={
