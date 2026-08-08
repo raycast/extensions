@@ -10,10 +10,6 @@ interface Tool {
   description: string;
 }
 
-interface Preferences {
-  miseBinaryPath?: string;
-}
-
 const MISE_BINARY_CANDIDATES = ["/opt/homebrew/bin/mise", "/usr/local/bin/mise", join(homedir(), ".local/bin/mise")];
 
 function getMiseBinary(): string {
