@@ -149,7 +149,9 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Success,
           title: `Renamed ${successCount} file${successCount !== 1 ? "s" : ""}`,
-          message: historySaved ? undefined : "History could not be saved",
+          // An empty batch records no history by design — only warn when
+          // there was something to save and saving failed.
+          message: successCount > 0 && !historySaved ? "History could not be saved" : undefined,
         });
         await openRenameHistory(historySaved);
       } else if (successCount > 0) {

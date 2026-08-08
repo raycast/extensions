@@ -159,6 +159,10 @@ async function revertOperation(op: HistoryOperation, newPath: string = op.newPat
 
   // A case-only rename resolves its own old spelling on a case-insensitive
   // volume — that is the file being restored, not an occupying conflict.
+  // Check-then-rename is not atomic (Node exposes no RENAME_NOREPLACE, and
+  // the hardlink trick cannot cover directories): a file created at oldPath
+  // inside this window is overwritten. The forward rename path accepts the
+  // same residual race.
   if ((await fileExists(op.oldPath)) && !(await isSameEntry(newPath, op.oldPath))) {
     return `${basename(op.oldPath)} already exists`;
   }
@@ -490,7 +494,7 @@ export async function undoToPoint(timestamp: number): Promise<boolean> {
  */
 export async function undoEntry(timestamp: number): Promise<boolean> {
   const history = await getHistory();
-  const entry = history[findEntryIndex(history, timestamp)];
+  const entry: RenameHistoryEntry | undefined = history[findEntryIndex(history, timestamp)];
 
   if (!entry) {
     await showEntryGoneToast();
@@ -513,11 +517,11 @@ export async function undoEntry(timestamp: number): Promise<boolean> {
  */
 export async function undoFileOperation(timestamp: number, opIndex: number): Promise<boolean> {
   const history = await getHistory();
-  const entry = history[findEntryIndex(history, timestamp)];
+  const entry: RenameHistoryEntry | undefined = history[findEntryIndex(history, timestamp)];
   const op = entry?.operations[opIndex];
 
   if (!entry || !op) {
-    if (!entry) await showEntryGoneToast();
+    await showEntryGoneToast();
     return false;
   }
 

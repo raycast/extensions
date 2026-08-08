@@ -1,5 +1,12 @@
 import { defineConfig } from "vitest/config";
-import { resolve } from "path";
+import { dirname, resolve } from "path";
+import { createRequire } from "node:module";
+
+// Resolve React from @raycast/api's own dependency tree so the alias works
+// whether the package manager nests React under @raycast/api or hoists it.
+const require = createRequire(import.meta.url);
+const raycastApiRoot = dirname(require.resolve("@raycast/api/package.json"));
+const reactRoot = dirname(require.resolve("react/package.json", { paths: [raycastApiRoot] }));
 
 export default defineConfig({
   test: {
@@ -39,7 +46,7 @@ export default defineConfig({
       "react/jsx-runtime": resolve(__dirname, "src/__tests__/__mocks__/react/jsx-runtime.ts"),
       "react/jsx-dev-runtime": resolve(__dirname, "src/__tests__/__mocks__/react/jsx-runtime.ts"),
       "@raycast/api": resolve(__dirname, "src/__tests__/__mocks__/@raycast/api.ts"),
-      react: resolve(__dirname, "node_modules/@raycast/api/node_modules/react"),
+      react: reactRoot,
       "@raycast/utils": resolve(__dirname, "src/__tests__/__mocks__/@raycast/utils.ts"),
     },
   },
