@@ -105,6 +105,64 @@ test("parseCodexApiResponse picks code review limit when present", () => {
   assert.equal(result.usage!.codeReviewLimit!.percentageRemaining, 95);
 });
 
+test("parseCodexApiResponse maps named additional rate limits and all their windows", () => {
+  const response = {
+    plan_type: "pro",
+    rate_limit: {
+      primary_window: { used_percent: 21, limit_window_seconds: 604800, reset_after_seconds: 261224 },
+      secondary_window: null,
+    },
+    additional_rate_limits: [
+      {
+        limit_name: "GPT-5.3-Codex-Spark",
+        metered_feature: "codex_bengalfox",
+        rate_limit: {
+          primary_window: {
+            used_percent: 0,
+            limit_window_seconds: 604800,
+            reset_after_seconds: 604800,
+            reset_at: 1786790310,
+          },
+          secondary_window: {
+            used_percent: 25,
+            limit_window_seconds: 18000,
+            reset_after_seconds: 9000,
+          },
+        },
+      },
+    ],
+  };
+
+  const result = parseCodexApiResponse(response);
+
+  assert.equal(result.error, null);
+  assert.deepEqual(result.usage!.additionalRateLimits, [
+    {
+      name: "GPT-5.3-Codex-Spark",
+      meteredFeature: "codex_bengalfox",
+      windows: [
+        { percentageRemaining: 100, resetsInSeconds: 604800, limitWindowSeconds: 604800 },
+        { percentageRemaining: 75, resetsInSeconds: 9000, limitWindowSeconds: 18000 },
+      ],
+    },
+  ]);
+});
+
+test("parseCodexApiResponse ignores malformed additional rate limits without rejecting the main usage", () => {
+  const result = parseCodexApiResponse({
+    ...PLUS_RESPONSE,
+    additional_rate_limits: [
+      null,
+      { limit_name: "", rate_limit: { primary_window: { used_percent: 0, limit_window_seconds: 604800 } } },
+      { limit_name: "Missing Windows", rate_limit: { primary_window: null, secondary_window: null } },
+      { limit_name: "Malformed Window", rate_limit: { primary_window: { used_percent: "zero" } } },
+    ],
+  });
+
+  assert.equal(result.error, null);
+  assert.deepEqual(result.usage!.additionalRateLimits, []);
+});
+
 test("parseCodexApiResponse routes a single short window to fiveHourLimit only", () => {
   const onlyFiveHour = {
     plan_type: "free",

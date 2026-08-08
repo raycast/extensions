@@ -1,4 +1,4 @@
-import type { CodexUsage, CodexError } from "./types.ts";
+import type { CodexUsage, CodexError, CodexAdditionalRateLimit, CodexRateLimitWindow } from "./types.ts";
 import { httpFetch } from "../agents/http.ts";
 import { parseDate } from "../agents/format.ts";
 
@@ -179,6 +179,7 @@ function parseCodexApiResponse(
       code_review_rate_limit?: {
         primary_window?: CodexRateWindow | null;
       } | null;
+      additional_rate_limits?: unknown;
       credits?: {
         has_credits?: boolean;
         unlimited?: boolean;
@@ -207,6 +208,7 @@ function parseCodexApiResponse(
       displayName: displayName ?? undefined,
       fiveHourLimit,
       weeklyLimit,
+      additionalRateLimits: parseAdditionalRateLimits(response.additional_rate_limits),
       credits: {
         hasCredits: response.credits?.has_credits || false,
         unlimited: response.credits?.unlimited || false,
@@ -238,6 +240,62 @@ interface CodexRateWindow {
   limit_window_seconds: number;
   reset_after_seconds?: number;
   reset_at?: number;
+}
+
+function parseAdditionalRateLimits(value: unknown): CodexAdditionalRateLimit[] {
+  if (!Array.isArray(value)) return [];
+
+  const limits: CodexAdditionalRateLimit[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const entry = item as {
+      limit_name?: unknown;
+      metered_feature?: unknown;
+      rate_limit?: {
+        primary_window?: unknown;
+        secondary_window?: unknown;
+      } | null;
+    };
+    const name = typeof entry.limit_name === "string" ? entry.limit_name.trim() : "";
+    if (!name) continue;
+
+    const windows = [entry.rate_limit?.primary_window, entry.rate_limit?.secondary_window]
+      .map(parseRateWindow)
+      .filter((window): window is CodexRateWindow => window !== null)
+      .map((window) => toLimit(window))
+      .filter((window): window is CodexRateLimitWindow => window !== undefined);
+    if (windows.length === 0) continue;
+
+    const meteredFeature =
+      typeof entry.metered_feature === "string" && entry.metered_feature.trim()
+        ? entry.metered_feature.trim()
+        : undefined;
+    limits.push({ name, meteredFeature, windows });
+  }
+  return limits;
+}
+
+function parseRateWindow(value: unknown): CodexRateWindow | null {
+  if (!value || typeof value !== "object") return null;
+  const window = value as Record<string, unknown>;
+  if (
+    typeof window.used_percent !== "number" ||
+    !Number.isFinite(window.used_percent) ||
+    typeof window.limit_window_seconds !== "number" ||
+    !Number.isFinite(window.limit_window_seconds) ||
+    window.limit_window_seconds <= 0
+  ) {
+    return null;
+  }
+  return {
+    used_percent: window.used_percent,
+    limit_window_seconds: window.limit_window_seconds,
+    reset_after_seconds:
+      typeof window.reset_after_seconds === "number" && Number.isFinite(window.reset_after_seconds)
+        ? window.reset_after_seconds
+        : undefined,
+    reset_at: typeof window.reset_at === "number" && Number.isFinite(window.reset_at) ? window.reset_at : undefined,
+  };
 }
 
 function toLimit(window: CodexRateWindow | null): CodexUsage["fiveHourLimit"] {

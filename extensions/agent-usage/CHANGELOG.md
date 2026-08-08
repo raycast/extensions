@@ -11,6 +11,7 @@
   - Reads data from `~/.cline` (install the CLI or IDE extension & login) with support for manual User ID & API Key entry
 - Show the Codex Display Name in the agents list in place of the email when possible (users might need to go on ChatGPT -> Profile to mint a new CloudFlare token as the endpoint is protected)
 - Allow to reset manual Agents order
+- Additional Codex rate-limits like 5.3-Codex-Spark now display
 
 ### Improvements
 

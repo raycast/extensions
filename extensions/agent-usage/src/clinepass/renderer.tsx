@@ -33,8 +33,9 @@ function formatResetDate(resetsAt?: string): string {
   return `${absolute} (${formatResetTime(resetsAt)})`;
 }
 
-function formatLimitText(label: string, limit: ClinePassLimit): string {
-  return `${label}: ${limit.percentageRemaining}% remaining\n${generateAsciiBar(limit.percentageRemaining)}\nResets: ${formatResetDate(limit.resetsAt)}`;
+function formatLimitText(label: string, limit: ClinePassLimit, showReset = true): string {
+  const text = `${label}: ${limit.percentageRemaining}% remaining\n${generateAsciiBar(limit.percentageRemaining)}`;
+  return showReset ? `${text}\nResets: ${formatResetDate(limit.resetsAt)}` : text;
 }
 
 export function formatClinePassUsageText(usage: ClinePassUsage | null, error: ClinePassError | null): string {
@@ -46,7 +47,7 @@ export function formatClinePassUsageText(usage: ClinePassUsage | null, error: Cl
     `Account: ${current.account}`,
     `User ID: ${current.userId}`,
     "",
-    formatLimitText("5h Limit", current.fiveHourLimit),
+    formatLimitText("5h Limit", current.fiveHourLimit, false),
     "",
     formatLimitText("Weekly Limit", current.weeklyLimit),
     "",
@@ -56,14 +57,14 @@ export function formatClinePassUsageText(usage: ClinePassUsage | null, error: Cl
   ].join("\n");
 }
 
-function renderLimit(label: string, limit: ClinePassLimit): React.ReactNode {
+function renderLimit(label: string, limit: ClinePassLimit, showReset = true): React.ReactNode {
   return (
     <>
       <List.Item.Detail.Metadata.Label
         title={label}
         text={`${generateAsciiBar(limit.percentageRemaining)} ${limit.percentageRemaining}% remaining`}
       />
-      <List.Item.Detail.Metadata.Label title="Resets At" text={formatResetDate(limit.resetsAt)} />
+      {showReset && <List.Item.Detail.Metadata.Label title="Resets At" text={formatResetDate(limit.resetsAt)} />}
     </>
   );
 }
@@ -77,7 +78,7 @@ export function renderClinePassDetail(usage: ClinePassUsage | null, error: Cline
       <List.Item.Detail.Metadata.Label title="Account" text={current.account} />
       <List.Item.Detail.Metadata.Label title="User ID" text={current.userId} />
       <List.Item.Detail.Metadata.Separator />
-      {renderLimit("5h Limit", current.fiveHourLimit)}
+      {renderLimit("5h Limit", current.fiveHourLimit, false)}
       <List.Item.Detail.Metadata.Separator />
       {renderLimit("Weekly Limit", current.weeklyLimit)}
       <List.Item.Detail.Metadata.Separator />

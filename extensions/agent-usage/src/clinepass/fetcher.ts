@@ -35,12 +35,12 @@ function parseEnvelope(data: unknown, label: string): { data: unknown; error: Cl
   return { data: envelope.data, error: null };
 }
 
-function toLimit(limits: ClineUsageLimits["limits"], type: string): ClinePassLimit | null {
+function toLimit(limits: ClineUsageLimits["limits"], type: string, includeReset = true): ClinePassLimit | null {
   const limit = limits.find((entry) => entry.type === type);
   if (!limit || typeof limit.percentUsed !== "number" || !Number.isFinite(limit.percentUsed)) return null;
   return {
     percentageRemaining: Math.min(100, Math.max(0, 100 - limit.percentUsed)),
-    ...(typeof limit.resetsAt === "string" && limit.resetsAt ? { resetsAt: limit.resetsAt } : {}),
+    ...(includeReset && typeof limit.resetsAt === "string" && limit.resetsAt ? { resetsAt: limit.resetsAt } : {}),
   };
 }
 
@@ -74,7 +74,7 @@ export function parseClinePassResponses(
     return { usage: null, error: { type: "parse_error", message: "Cline returned invalid usage limits." } };
   }
 
-  const fiveHourLimit = toLimit(limits, "five_hour");
+  const fiveHourLimit = toLimit(limits, "five_hour", false);
   const weeklyLimit = toLimit(limits, "weekly");
   const monthlyLimit = toLimit(limits, "monthly");
   const missing = [

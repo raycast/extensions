@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { fetchClinePassUsage, parseClinePassResponses } from "./fetcher.ts";
 
-test("parseClinePassResponses maps 5h, weekly, monthly, reset dates, and credit millionths", () => {
+test("parseClinePassResponses treats 5h as rolling while mapping weekly and monthly reset dates", () => {
   const result = parseClinePassResponses(
     { id: "usr-example", email: "user@example.com", displayName: "Example" },
     { userId: "usr-example", balance: 1_234_500 },
@@ -20,7 +20,7 @@ test("parseClinePassResponses maps 5h, weekly, monthly, reset dates, and credit 
   assert.deepEqual(result.usage, {
     account: "Example",
     userId: "usr-example",
-    fiveHourLimit: { percentageRemaining: 64.6, resetsAt: "2026-08-07T15:00:00.000Z" },
+    fiveHourLimit: { percentageRemaining: 64.6 },
     weeklyLimit: { percentageRemaining: 0, resetsAt: "2026-08-10T00:00:00.000Z" },
     monthlyLimit: { percentageRemaining: 90, resetsAt: "2026-09-01T00:00:00.000Z" },
     credits: { balance: 1_234_500, balanceUsd: 1.2345 },
