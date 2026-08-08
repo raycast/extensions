@@ -194,3 +194,34 @@ function undoubleConsonant(stem: string): string | undefined {
     ? stem.slice(0, -1)
     : undefined;
 }
+
+const LOCK_KEY = "install:lock";
+/** Longer than the download timeout plus a build, so a real install is never evicted. */
+const LOCK_STALE_MS = 15 * 60_000;
+
+/**
+ * Every command runs in its own process against one database, so two of them can start
+ * an install at the same time — same file, same fixed staging table names. The winner
+ * proceeds; the loser is told rather than left to collide over SQLite locks. A lock left
+ * behind by a crash expires.
+ */
+export function acquireInstallLock(db: DatabaseSync): boolean {
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    const held = Number(getMeta(db, LOCK_KEY) ?? 0);
+    if (held && Date.now() - held < LOCK_STALE_MS) {
+      db.exec("COMMIT");
+      return false;
+    }
+    setMeta(db, LOCK_KEY, String(Date.now()));
+    db.exec("COMMIT");
+    return true;
+  } catch (error) {
+    db.exec("ROLLBACK");
+    throw error;
+  }
+}
+
+export function releaseInstallLock(db: DatabaseSync): void {
+  db.prepare("DELETE FROM meta WHERE key = ?").run(LOCK_KEY);
+}

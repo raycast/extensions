@@ -5,11 +5,13 @@ import { join } from "node:path";
 import test from "node:test";
 import { DatabaseSync } from "node:sqlite";
 import {
+  acquireInstallLock,
   dbPath,
   getMeta,
   insertEntries,
   lookup,
   openDb,
+  releaseInstallLock,
   setMeta,
 } from "./db.ts";
 
@@ -174,4 +176,17 @@ test("meta survives and overwrites", async () => {
   setMeta(db, "syn:source", "https://example.test/a");
   setMeta(db, "syn:source", "https://example.test/b");
   assert.equal(getMeta(db, "syn:source"), "https://example.test/b");
+});
+
+test("only one install holds the lock, and a stale one is taken over", async () => {
+  const db = await freshDb();
+  assert.equal(acquireInstallLock(db), true);
+  assert.equal(acquireInstallLock(db), false, "a second install is refused");
+
+  releaseInstallLock(db);
+  assert.equal(acquireInstallLock(db), true, "released, so free again");
+
+  // a crash mid-install leaves the row behind: it expires rather than blocking forever
+  setMeta(db, "install:lock", String(Date.now() - 16 * 60_000));
+  assert.equal(acquireInstallLock(db), true, "stale lock taken over");
 });

@@ -1,7 +1,15 @@
 import type { DatabaseSync } from "node:sqlite";
 import { existsSync } from "node:fs";
 import { rm } from "node:fs/promises";
-import { dbPath, getMeta, lookup, openDb, SOURCES } from "./db.ts";
+import {
+  acquireInstallLock,
+  dbPath,
+  getMeta,
+  lookup,
+  openDb,
+  releaseInstallLock,
+  SOURCES,
+} from "./db.ts";
 import type { Entry, Source } from "./db.ts";
 import { ingestOewn, OEWN_BYTES, splitDefinition } from "./oewn.ts";
 
@@ -77,7 +85,14 @@ export async function downloadDatasets(
   onBytes?: (bytes: number) => void,
   signal?: AbortSignal,
 ): Promise<{ synonyms: number; antonyms: number; definitions: number }> {
-  return ingestOewn(db(dir), signal, onBytes);
+  const handle = db(dir);
+  if (!acquireInstallLock(handle))
+    throw new Error("A dictionary download is already running");
+  try {
+    return await ingestOewn(handle, signal, onBytes);
+  } finally {
+    releaseInstallLock(handle);
+  }
 }
 
 export async function removeOfflineData(dir: string): Promise<void> {
