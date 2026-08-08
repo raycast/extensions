@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Update extension icon] - {PR_MERGE_DATE}
+## [Update extension icon] - 2026-08-08
 
 - Updated the extension icon with a clear `~/` path mark designed to remain legible at Raycast's UI sizes.
 
