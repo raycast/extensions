@@ -1,4 +1,4 @@
-import { Action, Icon, showToast, Toast, Keyboard, Clipboard } from "@raycast/api";
+import { Action, Icon, showToast, Toast, Keyboard, Clipboard, getPreferenceValues } from "@raycast/api";
 import {
   switch_session,
   pause_session,
@@ -117,15 +117,25 @@ export function ActionReveal({ appId }: { appId: string }) {
   );
 }
 
+const preferences = getPreferenceValues();
+const prevNextTrackShortcuts = preferences.prevNextTrackShortcuts;
+
+const prevTrackShortcut: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd"], key: prevNextTrackShortcuts === "squareBrackets" ? "[" : "arrowLeft" },
+  Windows: { modifiers: ["ctrl"], key: prevNextTrackShortcuts === "squareBrackets" ? "[" : "arrowLeft" },
+};
+
+const nextTrackShortcut: Keyboard.Shortcut = {
+  macOS: { modifiers: ["cmd"], key: prevNextTrackShortcuts === "squareBrackets" ? "]" : "arrowRight" },
+  Windows: { modifiers: ["ctrl"], key: prevNextTrackShortcuts === "squareBrackets" ? "]" : "arrowRight" },
+};
+
 export function ActionPreviousTrack({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Previous Track"
       icon={Icon.Rewind}
-      shortcut={{
-        macOS: { modifiers: ["cmd"], key: "[" },
-        Windows: { modifiers: ["ctrl"], key: "[" },
-      }}
+      shortcut={prevTrackShortcut}
       onAction={() =>
         handleTrackAction("Previous track", () => previous_track(appId, sessionIndex, titlePrefix), revalidate)
       }
@@ -138,10 +148,7 @@ export function ActionNextTrack({ appId, sessionIndex, titlePrefix, revalidate }
     <Action
       title="Next Track"
       icon={Icon.Forward}
-      shortcut={{
-        macOS: { modifiers: ["cmd"], key: "]" },
-        Windows: { modifiers: ["ctrl"], key: "]" },
-      }}
+      shortcut={nextTrackShortcut}
       onAction={() => handleTrackAction("Next track", () => next_track(appId, sessionIndex, titlePrefix), revalidate)}
     />
   );
@@ -201,7 +208,7 @@ export function ActionRefresh({ revalidate }: { revalidate: () => void }) {
   return (
     <Action
       title="Refresh"
-      icon={Icon.RotateClockwise}
+      icon={Icon.ArrowClockwise}
       shortcut={Keyboard.Shortcut.Common.Refresh}
       onAction={revalidate}
     />

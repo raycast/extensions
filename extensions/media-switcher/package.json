@@ -20,21 +20,41 @@
       "title": "Switch Media",
       "subtitle": "Media Switcher",
       "description": "Switch between media sessions",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prevNextTrackShortcuts",
+          "description": "Pick shortcuts for the \"Previous Track\" and \"Next Track\" actions",
+          "type": "dropdown",
+          "required": false,
+          "title": "Previous / Next Track Shortcuts",
+          "data": [
+            {
+              "title": "`⌘` / `Ctrl` + `[` and `]`",
+              "value": "squareBrackets"
+            },
+            {
+              "title": "`⌘` / `Ctrl` + `←` and `→`",
+              "value": "arrowKeys"
+            }
+          ],
+          "default": "squareBrackets"
+        }
+      ]
     }
   ],
   "tools": [],
   "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "22.19.17",
-    "@types/react": "19.0.10",
-    "eslint": "^10.5.0",
-    "prettier": "^3.8.5",
-    "typescript": "^6.0.3"
+    "@types/node": "26.1.2",
+    "@types/react": "19.2.18",
+    "eslint": "^10.8.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0"
   },
   "scripts": {
     "build-rust": "cargo build --manifest-path rust/Cargo.toml --release",
