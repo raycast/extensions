@@ -1,7 +1,15 @@
+import { ChildProcess, execFile } from "child_process";
 import { promises as fs } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { SpeechSessionLock, isOwnedPlaybackCommand } from "./playback";
+import { SpeechSessionLock, isOwnedPlaybackCommand, stopActivePlayback } from "./playback";
+
+jest.mock("child_process", () => ({
+  execFile: jest.fn(),
+}));
+
+const mockedExecFile = execFile as jest.MockedFunction<typeof execFile>;
+const PLAYBACK_FILE = join(tmpdir(), "elevenlabs-tts-playback.json");
 
 describe("isOwnedPlaybackCommand", () => {
   const audioFile = "/tmp/raycast-tts-123.mp3";
@@ -71,5 +79,65 @@ describe("speech sessions", () => {
     expect(cleanupPreviousSession).toHaveBeenCalledTimes(1);
     if (!session) throw new Error("Expected to recover the abandoned session");
     sessions.push(session);
+  });
+});
+
+describe("stopActivePlayback", () => {
+  const sessionId = "stale-session";
+  const pid = 4242;
+  const audioFile = "/tmp/raycast-tts-stale.mp3";
+
+  beforeEach(async () => {
+    mockedExecFile.mockReset();
+    await fs.writeFile(PLAYBACK_FILE, JSON.stringify({ sessionId, pid, audioFile }), "utf8");
+  });
+
+  afterEach(async () => {
+    jest.restoreAllMocks();
+    await fs.unlink(PLAYBACK_FILE).catch(() => undefined);
+  });
+
+  it("preserves playback record when inspection fails and termination is blocked", async () => {
+    mockedExecFile.mockImplementation((_file, _args, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      cb?.(new Error("ps timed out"), "", "");
+      return {} as ChildProcess;
+    });
+
+    const killError = Object.assign(new Error("Operation not permitted"), { code: "EPERM" });
+    jest.spyOn(process, "kill").mockImplementation(() => {
+      throw killError;
+    });
+
+    await expect(stopActivePlayback()).resolves.toBe(false);
+    await expect(fs.readFile(PLAYBACK_FILE, "utf8")).resolves.toBe(JSON.stringify({ sessionId, pid, audioFile }));
+  });
+
+  it("clears playback record when inspection fails but the process is already gone", async () => {
+    mockedExecFile.mockImplementation((_file, _args, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      cb?.(new Error("ps timed out"), "", "");
+      return {} as ChildProcess;
+    });
+
+    jest.spyOn(process, "kill").mockImplementation(() => {
+      throw Object.assign(new Error("No such process"), { code: "ESRCH" });
+    });
+
+    await expect(stopActivePlayback()).resolves.toBe(false);
+    await expect(fs.access(PLAYBACK_FILE)).rejects.toThrow();
+  });
+
+  it("clears playback record when inspection fails but SIGTERM succeeds", async () => {
+    mockedExecFile.mockImplementation((_file, _args, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      cb?.(new Error("ps timed out"), "", "");
+      return {} as ChildProcess;
+    });
+
+    jest.spyOn(process, "kill").mockImplementation(() => true);
+
+    await expect(stopActivePlayback()).resolves.toBe(true);
+    await expect(fs.access(PLAYBACK_FILE)).rejects.toThrow();
   });
 });

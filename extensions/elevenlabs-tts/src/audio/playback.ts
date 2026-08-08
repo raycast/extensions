@@ -134,8 +134,16 @@ async function stopPlaybackForSession(sessionId: string): Promise<boolean> {
     await clearPlayback(sessionId, record.pid);
     return true;
   } catch {
-    await clearPlayback(sessionId, record.pid);
-    return false;
+    try {
+      process.kill(record.pid, "SIGTERM");
+      await clearPlayback(sessionId, record.pid);
+      return true;
+    } catch (killError) {
+      if ((killError as NodeJS.ErrnoException).code === "ESRCH") {
+        await clearPlayback(sessionId, record.pid);
+      }
+      return false;
+    }
   }
 }
 
