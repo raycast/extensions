@@ -125,30 +125,50 @@ async function stopPlaybackForSession(sessionId: string): Promise<boolean> {
   const record = await readPlayback();
   if (record?.sessionId !== sessionId) return false;
 
+  let command: string;
   try {
-    const { stdout } = await execFileAsync("ps", ["-p", String(record.pid), "-o", "command="], {
+    ({ stdout: command } = await execFileAsync("ps", ["-p", String(record.pid), "-o", "command="], {
       timeout: 1000,
-    });
-    if (!isOwnedPlaybackCommand(stdout, record.audioFile)) {
-      await removePlaybackFile();
-      return false;
-    }
-
-    process.kill(record.pid, "SIGTERM");
-    await clearPlayback(sessionId, record.pid);
-    return true;
+    }));
   } catch {
-    try {
-      process.kill(record.pid, "SIGTERM");
-      await clearPlayback(sessionId, record.pid);
-      return true;
-    } catch (killError) {
-      if ((killError as NodeJS.ErrnoException).code === "ESRCH") {
-        await clearPlayback(sessionId, record.pid);
-      }
-      return false;
-    }
+    // ps exits non-zero when the PID is gone; on any other failure the owner is unverified,
+    // so keep the record and let begin() deny takeover rather than signal a possibly reused PID.
+    if (isProcessGone(record.pid)) await clearPlayback(sessionId, record.pid);
+    return false;
   }
+
+  if (!isOwnedPlaybackCommand(command, record.audioFile)) {
+    await removePlaybackFile();
+    return false;
+  }
+
+  try {
+    process.kill(record.pid, "SIGTERM");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== "ESRCH") return false;
+  }
+  if (!(await waitForProcessExit(record.pid, 1_000))) return false;
+
+  await clearPlayback(sessionId, record.pid);
+  return true;
+}
+
+function isProcessGone(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return false;
+  } catch (error) {
+    return (error as NodeJS.ErrnoException).code === "ESRCH";
+  }
+}
+
+async function waitForProcessExit(pid: number, timeoutMs: number): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  do {
+    if (isProcessGone(pid)) return true;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  } while (Date.now() < deadline);
+  return isProcessGone(pid);
 }
 
 async function readPlayback(): Promise<PlaybackRecord | undefined> {
