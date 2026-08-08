@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "markdown-preview-clean",
+  "title": "Markdown Preview Clean",
+  "description": "Preview Markdown in Raycast without the sidebar — full-width, distraction-free.",
+  "icon": "icon.png",
+  "author": "gilbert_yeh",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Documentation"
+  ],
+  "commands": [
+    {
+      "name": "preview-markdown",
+      "title": "Preview Markdown",
+      "description": "Write and preview Markdown with a full-width, clean view",
+      "mode": "view",
+      "keywords": [
+        "md",
+        "markdown",
+        "preview",
+        "pm"
+      ]
+    },
+    {
+      "name": "preview-clipboard",
+      "title": "Preview Clipboard Markdown",
+      "description": "Preview Markdown currently in the clipboard",
+      "mode": "view",
+      "keywords": [
+        "md",
+        "markdown",
+        "clipboard",
+        "paste"
+      ]
+    },
+    {
+      "name": "history-list",
+      "title": "Markdown History",
+      "description": "Browse, search, and re-open previous Markdown previews",
+      "mode": "view",
+      "keywords": [
+        "md",
+        "markdown",
+        "history",
+        "recent"
+      ]
+    },
+    {
+      "name": "preview-file",
+      "title": "Preview Markdown File",
+      "description": "Preview a .md from Finder selection, copied file, or path (relative images work in browser)",
+      "mode": "view",
+      "keywords": [
+        "md",
+        "markdown",
+        "file",
+        "finder",
+        "preview"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.17.0",
+    "marked": "^14.1.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Use 'npm run publish' to publish this extension to the Raycast Store.\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
