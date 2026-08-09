@@ -36,6 +36,7 @@ struct KeepAwakeState {
 struct StoredState {
     pid: u32,
     start_time: u64,
+    start_ticks: u64,
     duration_seconds: Option<u64>,
 }
 
@@ -156,20 +157,12 @@ fn terminate_process(pid: u32) -> bool {
     }
 }
 
-/// Convert a FILETIME (100ns ticks since 1601-01-01) to Unix epoch seconds.
-fn filetime_to_unix_secs(ft: &FILETIME) -> u64 {
-    const EPOCH_OFFSET_SECS: u64 = 11_644_473_600; // seconds between 1601 and 1970
-    let ticks = ((ft.dwHighDateTime as u64) << 32) | (ft.dwLowDateTime as u64);
-    ticks / 10_000_000 - EPOCH_OFFSET_SECS
-}
-
-/// Whether the given PID is still the keep-awake worker that recorded
-/// `expected_start`. Guards `stop_caffeinate` against terminating an unrelated
-/// process whose PID was reused after the worker exited on its own.
-fn pid_matches_worker(pid: u32, expected_start: u64) -> bool {
+/// The creation time of `pid` as raw FILETIME 100ns ticks, or `None` if the
+/// process no longer exists or cannot be queried.
+fn process_creation_ticks(pid: u32) -> Option<u64> {
     let handle = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid) };
     let Ok(handle) = handle else {
-        return false;
+        return None;
     };
     let mut creation = FILETIME::default();
     let mut exit = FILETIME::default();
@@ -178,12 +171,18 @@ fn pid_matches_worker(pid: u32, expected_start: u64) -> bool {
     let ok = unsafe { GetProcessTimes(handle, &mut creation, &mut exit, &mut kernel, &mut user) }.is_ok();
     unsafe { let _ = CloseHandle(handle); }
     if !ok {
-        return false;
+        return None;
     }
-    let created = filetime_to_unix_secs(&creation);
-    // The worker records its start time a beat after it was created, so allow a
-    // small window: the recorded start must be at or just after creation.
-    expected_start >= created && expected_start - created <= 15
+    Some(((creation.dwHighDateTime as u64) << 32) | (creation.dwLowDateTime as u64))
+}
+
+/// Whether the given PID is still the keep-awake worker that recorded
+/// `expected_ticks`. Compares the exact process-creation FILETIME (100ns
+/// granularity), so even a same-second PID reuse is rejected. Guards both the
+/// status queries and `stop_caffeinate` from treating an unrelated process as
+/// the worker.
+fn pid_matches_worker(pid: u32, expected_ticks: u64) -> bool {
+    process_creation_ticks(pid).is_some_and(|ticks| ticks == expected_ticks)
 }
 
 /// Whether the tracked window is still open, on-screen, and owned by the
@@ -253,7 +252,13 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
 
     let pid = std::process::id();
     let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| e.to_string())?.as_secs();
-    write_stored_state(&StoredState { pid, start_time: now, duration_seconds: config.duration_seconds })?;
+    let start_ticks = process_creation_ticks(pid).unwrap_or(0);
+    write_stored_state(&StoredState {
+        pid,
+        start_time: now,
+        start_ticks,
+        duration_seconds: config.duration_seconds,
+    })?;
 
     let mut flags = ES_CONTINUOUS.0 | ES_SYSTEM_REQUIRED.0;
     if config.prevent_display {
@@ -291,7 +296,7 @@ fn stop_caffeinate() -> Result<(), String> {
     if let Some(state) = read_stored_state()? {
         // Only terminate the worker if the recorded PID is still that worker;
         // a reused PID must not be killed.
-        if pid_matches_worker(state.pid, state.start_time) {
+        if pid_matches_worker(state.pid, state.start_ticks) {
             let _ = terminate_process(state.pid);
         }
     }
@@ -303,7 +308,7 @@ fn stop_caffeinate() -> Result<(), String> {
 #[raycast]
 fn is_caffeinate_running() -> Result<KeepAwakeState, String> {
     let running = match read_stored_state()? {
-        Some(state) => process_alive(state.pid),
+        Some(state) => pid_matches_worker(state.pid, state.start_ticks),
         None => false,
     };
     if !running {
@@ -325,7 +330,7 @@ struct CaffeinateStatus {
 #[raycast]
 fn get_caffeinate_state() -> Result<CaffeinateStatus, String> {
     match read_stored_state()? {
-        Some(state) if process_alive(state.pid) => Ok(CaffeinateStatus {
+        Some(state) if pid_matches_worker(state.pid, state.start_ticks) => Ok(CaffeinateStatus {
             running: true,
             start_time: Some(state.start_time),
             duration_seconds: state.duration_seconds,

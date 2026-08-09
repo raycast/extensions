@@ -2,7 +2,7 @@
 
 ## [Windows support] - {PR_MERGE_DATE}
 
-- Add Windows support
+- Add support for Windows platform
 - Implement keep-awake on Windows via a native Rust helper
 - Add app picker support to the "Caffeinate While" command on Windows
 - Stop caffeination when the selected app window closes
