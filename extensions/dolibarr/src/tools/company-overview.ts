@@ -23,7 +23,6 @@ type DocumentEntry = {
   totalTtc: number;
   currency: string;
   status: string;
-  overdue?: boolean;
   url: string;
 };
 
