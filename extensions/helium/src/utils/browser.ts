@@ -1,7 +1,8 @@
 import { BrowserExtension, environment, showToast, Toast, open } from "@raycast/api";
 import { Tab } from "../types";
-import { listHeliumTabs } from "./applescript";
-import { mergeAppleScriptTabsWithFavicons } from "./tab-merge";
+import { listHeliumTabs } from "./browser-control";
+import { isWindows } from "./platform";
+import { browserExtensionTabsToTabs, mergeAppleScriptTabsWithFavicons } from "./tab-merge";
 
 /**
  * Check if Browser Extension is available.
@@ -27,8 +28,17 @@ export function isBrowserExtensionAvailable(): boolean {
  *
  * `Tab.id` is the stable Helium AppleScript `id`, used everywhere we need to
  * refer to a specific tab (React keys, optimistic state, and tab actions).
+ *
+ * On Windows there is no AppleScript, so the Browser Extension is the only tab
+ * source and its own tab id becomes `Tab.id`. It is awaited without a timeout
+ * there, since it is the data itself rather than an enrichment.
  */
 export async function fetchBrowserTabs(): Promise<Tab[]> {
+  if (isWindows) {
+    if (!isBrowserExtensionAvailable()) return [];
+    return browserExtensionTabsToTabs(await BrowserExtension.getTabs());
+  }
+
   const [asTabs, beTabs] = await Promise.all([
     listHeliumTabs(),
     isBrowserExtensionAvailable()

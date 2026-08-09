@@ -15,6 +15,7 @@ import {
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds, sharedPendingCloseIds } from "./utils/pending-close";
+import { isTabControlAvailable } from "./utils/browser-control";
 
 export default function SearchTabs() {
   const [searchText, setSearchText] = useState("");
@@ -42,7 +43,11 @@ export default function SearchTabs() {
         <List.EmptyView
           icon={Icon.Window}
           title="No Tabs Found"
-          description="Make sure your browser is running with open tabs"
+          description={
+            isTabControlAvailable
+              ? "Make sure your browser is running with open tabs"
+              : "On Windows, tabs are read through Raycast's browser extension. Install it in Helium and make sure Helium is running."
+          }
         />
       )}
       {filteredTabs.map((tab) => (

@@ -10,6 +10,29 @@ Navigate open tabs, browsing history, bookmarks, and the web in Helium browser.
 - **Search Bookmarks** - Quick access to saved bookmarks
 - **New Tab/Window** - Open new tabs, windows, or incognito windows
 
+## Platform Support
+
+| Command                                   | macOS | Windows                             |
+| ----------------------------------------- | ----- | ----------------------------------- |
+| Search Web                                | ✅    | ✅                                  |
+| Search History                            | ✅    | ✅                                  |
+| Search Bookmarks                          | ✅    | ✅                                  |
+| Open New Tab / Window / Incognito Window  | ✅    | ✅                                  |
+| Search Tabs                               | ✅    | ⚠️ Read-only (see below)            |
+
+### Windows
+
+Requires [Helium for Windows](https://github.com/imputnet/helium-windows). The extension finds it automatically at
+`%LOCALAPPDATA%\imput\Helium` (and the Program Files equivalents). For portable or custom installs, set **Helium
+Location** in the extension preferences to the full path of Helium's `chrome.exe`.
+
+**Search Tabs is read-only on Windows.** Chromium exposes no scripting interface there, so tabs are read through
+[Raycast's browser extension](https://www.raycast.com/browser-extension) — install it in Helium, otherwise the tab list
+stays empty. Selecting a tab opens its URL in Helium rather than focusing the existing tab, and closing tabs and
+deduplicating tabs are unavailable.
+
+Windows shortcuts use `Ctrl`/`Alt` wherever this document mentions `⌘`/`⌥`.
+
 ### Experimental: macOS Spaces Support
 
 ⚠️ **Optional Feature (Disabled by Default)**
@@ -37,6 +60,7 @@ When submitting changes, add yourself to contributors in `package.json` and upda
 
 ## Planned Features
 
+- Full tab control on Windows if Helium ever exposes a scripting/automation interface
 - Find better workarounds for Space switching
   - Might look into pushing a PR to Helium directly if necessary
 - Tab groups visualization

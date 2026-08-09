@@ -3,7 +3,9 @@ import { useState } from "react";
 import { useSuggestions, getSearchEngineName } from "./utils/suggestions";
 import type { Suggestion } from "./types";
 import { CreateQuicklinkAction } from "./utils/actions";
+import { getHeliumAppTarget } from "./utils/platform";
 import { partitionSearchWebSuggestions } from "./utils/search-web-results";
+import { SHORTCUTS } from "./utils/shortcuts";
 
 export default function SearchWeb(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
@@ -88,18 +90,10 @@ function SuggestionListItem({ suggestion }: { suggestion: Suggestion }) {
           <Action.Open
             title={isUrlType ? "Open URL" : isBangType ? `Open ${providerName}` : "Search"}
             target={suggestion.url}
-            application="net.imput.helium"
+            application={getHeliumAppTarget()}
           />
-          <Action.CopyToClipboard
-            title="Copy URL"
-            content={suggestion.url}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-          <Action.CopyToClipboard
-            title="Copy Query"
-            content={suggestion.query}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          />
+          <Action.CopyToClipboard title="Copy URL" content={suggestion.url} shortcut={SHORTCUTS.copyUrl} />
+          <Action.CopyToClipboard title="Copy Query" content={suggestion.query} shortcut={SHORTCUTS.copyQuery} />
           <CreateQuicklinkAction url={suggestion.url} name={suggestion.query} />
         </ActionPanel>
       }

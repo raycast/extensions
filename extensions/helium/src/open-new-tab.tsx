@@ -1,5 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { openUrlInHelium } from "./utils/applescript";
+import { openUrlInHelium } from "./utils/browser-control";
 
 export default async function Command() {
   try {

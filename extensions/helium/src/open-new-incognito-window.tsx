@@ -1,5 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { createNewIncognitoWindow } from "./utils/applescript";
+import { createNewIncognitoWindow } from "./utils/browser-control";
 
 export default async function Command() {
   try {

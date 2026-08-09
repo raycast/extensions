@@ -1,5 +1,5 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { createNewWindow } from "./utils/applescript";
+import { createNewWindow } from "./utils/browser-control";
 
 export default async function Command() {
   try {

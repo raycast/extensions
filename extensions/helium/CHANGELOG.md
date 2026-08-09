@@ -1,5 +1,12 @@
 # Helium Changelog
 
+## [Windows Support] - {PR_MERGE_DATE}
+
+- Add Windows support: Search Web, Search History, Search Bookmarks, and the new tab/window/incognito commands work against [Helium for Windows](https://github.com/imputnet/helium-windows), detected at `%LOCALAPPDATA%\imput\Helium` or wherever the new "Helium Location" preference points.
+- Read Helium's profile (bookmarks, history, search provider, bangs) from the Windows `User Data` root, and drive new tabs and windows through Helium's command line since Chromium has no scripting interface on Windows.
+- Source Search Tabs from Raycast's browser extension on Windows, where switching to and closing individual tabs isn't possible; those actions are hidden instead of failing.
+- Declare every keyboard shortcut per platform so actions stay reachable with `Ctrl`/`Alt` on Windows, and align Search History's "Copy as Markdown" with the rest of the extension (`⌘⌥C` / `Ctrl+Alt+C`).
+
 ## [Bookmarks Without a Running Browser] - 2026-07-23
 
 - Read bookmarks directly from the Helium profile's `Bookmarks` file instead of AppleScript, so Search Bookmarks works while Helium is closed, loads faster, and includes arbitrarily nested folders as full `Parent/Child` paths.
