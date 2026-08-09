@@ -1,6 +1,6 @@
 # File Tidy Changelog
 
-## [Look-Alike Report] - {PR_MERGE_DATE}
+## [Look-Alike Report] - 2026-08-09
 
 - Near-duplicates and similar images are still only flagged and still archived normally — but the grouping no longer disappears when the plan closes. A run that flags anything now writes `.tidy/similar.md` in the destination, listing each group and where its files ended up, so you can work through them later instead of having to act while the plan is open. The success toast offers to open it.
 
