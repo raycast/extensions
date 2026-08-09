@@ -28,7 +28,7 @@ async function loadFromClipboard(): Promise<Loaded> {
   // Use normalized text only while checking for a copied absolute path. If it
   // is Markdown content, preserve the clipboard value exactly as copied.
   const firstLine = trimmedText.split("\n")[0] ?? "";
-  if (firstLine.startsWith("/") && /\.(md|markdown|mdx|mdown)$/i.test(firstLine)) {
+  if (firstLine.startsWith("/") && /\.(md|markdown|mdx|mdown|mkd)$/i.test(firstLine)) {
     try {
       const source = await readMarkdownFile(firstLine);
       return { kind: "file", markdown: source.markdown, filePath: source.path, fileName: source.fileName };
