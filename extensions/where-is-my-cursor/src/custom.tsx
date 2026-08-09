@@ -96,7 +96,7 @@ async function handleSubmit(values: FormValues) {
       style: Toast.Style.Success,
       title: "Custom Mode Activated",
     });
-    await locatecursor("-c", jsonString, "");
+    locatecursor("-c", jsonString, "");
     await closeMainWindow();
   } catch (error) {
     await showToast({
