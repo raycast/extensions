@@ -1,5 +1,5 @@
 import { runAppleScript } from "@raycast/utils";
-import { list_processes } from "rust:../rust";
+import { windowsListProcesses } from "../windowsApi";
 import { startCaffeinate, deviceName } from "../utils";
 
 type Input = {
@@ -38,7 +38,7 @@ export default async function (input: Input) {
 
 async function getRunningProcesses(): Promise<ProcessEntry[]> {
   if (process.platform === "win32") {
-    const running = await list_processes();
+    const running = await windowsListProcesses();
     return running.map((process) => ({
       id: String(process.pid),
       name: process.name.toLowerCase(),
