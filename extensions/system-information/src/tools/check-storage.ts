@@ -1,4 +1,4 @@
-import { getStorageInfo } from "swift:../../swift";
+import si from "systeminformation";
 
 interface StorageInfo {
   total: string;
@@ -8,17 +8,36 @@ interface StorageInfo {
   summary: string;
 }
 
+const formatStorage = (bytes: number) => `${(bytes / 1e9).toFixed(2)} GB`;
+
 /**
  * Get storage information
  * @returns {Promise<StorageInfo>} Storage information including total, used, and free space
  */
 export default async function Command(): Promise<StorageInfo> {
   try {
-    const info = await getStorageInfo();
-    const totalFormatted = info.total.toFixed(2) + " GB";
-    const usedFormatted = info.used.toFixed(2) + " GB";
-    const freeFormatted = info.free.toFixed(2) + " GB";
-    const percentUsed = ((info.used / info.total) * 100).toFixed(2) + "%";
+    let totalBytes: number;
+    let usedBytes: number;
+    let freeBytes: number;
+
+    if (process.platform === "win32") {
+      const [disks, fs] = await Promise.all([si.diskLayout(), si.fsSize()]);
+      const disk = disks[0];
+      totalBytes = disk ? disk.size : fs.reduce((sum, f) => sum + f.size, 0);
+      freeBytes = fs.reduce((sum, f) => sum + f.available, 0);
+      usedBytes = totalBytes - freeBytes;
+    } else {
+      const fs = await si.fsSize();
+      const root = fs.find((f) => f.mount === "/") || fs[0];
+      totalBytes = root.size;
+      usedBytes = root.used;
+      freeBytes = root.available;
+    }
+
+    const totalFormatted = formatStorage(totalBytes);
+    const usedFormatted = formatStorage(usedBytes);
+    const freeFormatted = formatStorage(freeBytes);
+    const percentUsed = ((usedBytes / totalBytes) * 100).toFixed(2) + "%";
 
     return {
       total: totalFormatted,
@@ -29,7 +48,7 @@ export default async function Command(): Promise<StorageInfo> {
     };
   } catch (error) {
     throw new Error(
-      `Failed to retrieve storage information: ${error instanceof Error ? error.message : String(error)}`
+      `Failed to retrieve storage information: ${error instanceof Error ? error.message : String(error)}`,
     );
   }
 }
