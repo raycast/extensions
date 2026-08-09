@@ -68,5 +68,8 @@
       "description": "Generate from our web-site - https://hidemail.app/user/api-tokens",
       "placeholder": "API Key"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

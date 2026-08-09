@@ -1,6 +1,6 @@
 # HideMail - Email Relay Service Changelog
 
-## [Update Changelog] - {PR_MERGE_DATE}
+## [Update Changelog] - 2026-08-09
 
 - Fix `CHANGELOG` not displaying properly in Store
 
