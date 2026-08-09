@@ -48,6 +48,7 @@
       "title": "API Provider",
       "description": "Select your AI provider",
       "data": [
+        { "title": "Raycast AI", "value": "raycast" },
         { "title": "Gemini", "value": "gemini" },
         { "title": "ChatGPT", "value": "chatgpt" },
         { "title": "Claude", "value": "claude" },
@@ -57,9 +58,9 @@
     {
       "name": "apiKey",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "API Key",
-      "description": "Enter your API key for the selected provider"
+      "description": "Enter your API key for the selected provider (not required for Raycast AI)"
     },
     {
       "name": "customEndpoint",

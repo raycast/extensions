@@ -13,6 +13,7 @@ import {
   Alert,
   open,
   Keyboard,
+  AI,
 } from "@raycast/api";
 import { authorize, getAccessToken, logout } from "./oauth";
 
@@ -24,8 +25,8 @@ type Values = {
 };
 
 type Preferences = {
-  apiProvider: "gemini" | "chatgpt" | "claude" | "custom";
-  apiKey: string;
+  apiProvider: "raycast" | "gemini" | "chatgpt" | "claude" | "custom";
+  apiKey?: string;
   customEndpoint?: string;
   customModel?: string;
   defaultCookingStyle?: "Gourmet" | "Quick & Easy" | "Traditional" | "Experimental";
@@ -199,15 +200,16 @@ export default function Command() {
     addLog(`Cooking Style: ${values.cookingStyle}`);
 
     const validateId = addChecklistItem("Validating configuration...");
-    if (!preferences.apiKey) {
-      setError("API key is required. Please configure it in preferences.");
-      addLog("ERROR: API key is missing");
-      return;
-    }
-
     if (!preferences.apiProvider) {
       setError("API provider is required. Please configure it in preferences.");
       addLog("ERROR: API provider is missing");
+      return;
+    }
+
+    // API key is required for all providers except Raycast AI
+    if (preferences.apiProvider !== "raycast" && !preferences.apiKey) {
+      setError("API key is required for this provider. Please configure it in preferences.");
+      addLog("ERROR: API key is missing");
       return;
     }
 
@@ -255,7 +257,51 @@ export default function Command() {
       let fetchEndpoint = endpoint;
       addLog(`Configuring API request for ${preferences.apiProvider}`);
 
-      if (preferences.apiProvider === "gemini") {
+      let generatedRecipe = "";
+
+      if (preferences.apiProvider === "raycast") {
+        addLog(`Using Raycast AI API`);
+        const prompt = `You are a world-class chef. Generate a detailed recipe in JSON format. Schema: {
+  "title": string,
+  "ingredients": string[],
+  "instructions": string[]
+}. Focus on the style: ${values.cookingStyle}. Be creative and specific with ingredients and cooking techniques.
+
+Recipe Idea: ${values.recipeIdea}
+Dietary Requirements: ${dietaryString}`;
+
+        try {
+          const response = await AI.ask(prompt, {
+            creativity: "medium",
+          });
+          generatedRecipe = response;
+          addLog("Raycast AI response received");
+
+          // Parse Raycast AI response (it returns text, not JSON)
+          const parseId = addChecklistItem("Parsing AI response...");
+          try {
+            const jsonMatch = response.match(/```json\s*([\s\S]*?)\s*```/) || response.match(/\{[\s\S]*\}/);
+            const jsonString = jsonMatch ? jsonMatch[1] || jsonMatch[0] : response;
+            const recipeData = JSON.parse(jsonString);
+            generatedRecipe = `# ${recipeData.title}
+
+## Ingredients
+${recipeData.ingredients.map((ing: string) => `- ${ing}`).join("\n")}
+
+## Instructions
+${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).join("\n")}`;
+            addLog("Successfully parsed recipe JSON");
+          } catch {
+            addLog("JSON parsing failed, using raw text");
+            generatedRecipe = response;
+          }
+          completeChecklistItem(parseId);
+        } catch (error) {
+          addLog(`Raycast AI error: ${error instanceof Error ? error.message : "Unknown error"}`);
+          throw new Error(`Raycast AI request failed: ${error instanceof Error ? error.message : "Unknown error"}`);
+        }
+        completeChecklistItem(configureId);
+      } else if (preferences.apiProvider === "gemini") {
         fetchEndpoint = `${endpoint}?key=${preferences.apiKey}`;
         addLog(`Using Gemini native endpoint with key in URL`);
         requestBody = {
@@ -300,7 +346,7 @@ Dietary Requirements: ${dietaryString}`,
           ],
         };
       } else if (preferences.apiProvider === "claude") {
-        headers["x-api-key"] = preferences.apiKey;
+        headers["x-api-key"] = preferences.apiKey || "";
         headers["anthropic-version"] = "2023-06-01";
         addLog(`Using Claude with x-api-key header`);
         requestBody = {
@@ -374,8 +420,6 @@ Dietary Requirements: ${dietaryString}`,
       const parseId = addChecklistItem("Parsing AI response...");
       const data = (await response.json()) as Record<string, unknown>;
       addLog(`Response data: ${JSON.stringify(data).substring(0, 300)}...`);
-
-      let generatedRecipe = "";
 
       // Parse response based on provider
       let rawText = "";
@@ -491,24 +535,13 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
   }
 
   // Show configuration view if API key or provider is missing
-  if (!preferences.apiKey || !preferences.apiProvider) {
-    const needsCustomEndpoint = preferences.apiProvider === "custom" && !preferences.customEndpoint;
-    const statusText = needsCustomEndpoint
-      ? `- API Provider: ${preferences.apiProvider || "Not set"}\n- API Key: ${preferences.apiKey ? "Set" : "Not set"}\n- Custom Endpoint: ${preferences.customEndpoint || "Not set"}`
-      : `- API Provider: ${preferences.apiProvider || "Not set"}\n- API Key: ${preferences.apiKey ? "Set" : "Not set"}`;
-
+  if (!preferences.apiProvider) {
     return (
       <Detail
-        markdown={`## Configuration Required\n\nTo use the Cookery extension, you need to configure your API provider and API key in the extension preferences.\n\n**Current Status:**\n${statusText}\n\n**Supported Providers:**\n- Gemini (Google)\n- ChatGPT (OpenAI)\n- Claude (Anthropic)\n- Custom (OpenAI-compatible)\n\nClick the button below to open preferences and configure your settings.`}
+        markdown={`## Configuration Required\n\nPlease configure your API provider in preferences to generate recipes.\n\n**Current Status:**\n- API Provider: Not set\n\nPlease configure your settings in preferences.`}
         actions={
           <ActionPanel>
             <Action title="Open Preferences" onAction={openExtensionPreferences} />
-            {preferences.apiProvider === "custom" && (
-              <Action.OpenInBrowser
-                title="Check Custom Provider Support"
-                url="https://cookeryapp.pages.dev/support?jump=customproviders"
-              />
-            )}
           </ActionPanel>
         }
       />
