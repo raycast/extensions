@@ -7,7 +7,7 @@ export default async function main() {
       style: Toast.Style.Success,
       title: "Simple Mode Activated",
     });
-    locatecursor("-p", "simple", "");
+    await locatecursor("-p", "simple", "");
     await closeMainWindow();
   } catch (err) {
     await showToast({

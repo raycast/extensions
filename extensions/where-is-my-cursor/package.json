@@ -2,11 +2,17 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "where-is-my-cursor",
   "title": "Where Is My Cursor?",
-  "description": "Visual aid to find cursor, specially useful when utilizing more than 1 monitor.",
+  "description": "Visual aid to find cursor, especially useful when utilizing more than 1 monitor.",
   "icon": "extension-icon.png",
   "author": "luciodaou",
+  "categories": [
+    "System",
+    "Productivity"
+  ],
   "license": "MIT",
-  "permissions": ["execute"],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "where-is-my-cursor",
@@ -44,9 +50,8 @@
       "mode": "view"
     }
   ],
-
   "dependencies": {
-    "@raycast/api": "^1.102.3",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
@@ -59,9 +64,10 @@
   },
   "scripts": {
     "build": "ray build",
-    "dev": "ray develop",
+    "dev": "node -e \"const fs=require('fs'); const src=fs.existsSync('assets/locatecursor')?'assets/locatecursor':(fs.existsSync('assets/compiled_raycast_swift/locatecursor')?'assets/compiled_raycast_swift/locatecursor':null); if(src){ try{fs.chmodSync(src, 0o755);}catch(e){} fs.mkdirSync('compiled_raycast_swift',{recursive:true}); fs.copyFileSync(src,'compiled_raycast_swift/locatecursor'); try{fs.chmodSync('compiled_raycast_swift/locatecursor', 0o755);}catch(e){} }\" && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "postinstall": "node -e \"const fs=require('fs'); const p1='node_modules/@raycast/api/dist/utils/publish/copy-dir.js'; if(fs.existsSync(p1)){ fs.writeFileSync(p1, fs.readFileSync(p1,'utf8').replace('\\\"compiled_raycast_swift\\\",','')); } const p2='node_modules/@raycast/api/dist/commands/develop/index.js'; if(fs.existsSync(p2)){ let code=fs.readFileSync(p2,'utf8'); if(!code.includes('chmodSync')){ fs.writeFileSync(p2, code.replace('$m.existsSync(\\\"assets\\\")&&$m.cpSync(\\\"assets\\\",Gd.join(u.outputDir,\\\"assets\\\"),{recursive:!0});', '$m.existsSync(\\\"assets\\\")&&$m.cpSync(\\\"assets\\\",Gd.join(u.outputDir,\\\"assets\\\"),{recursive:!0}),$m.rmSync(Gd.join(u.outputDir,\\\"compiled_raycast_swift\\\"),{recursive:!0,force:!0}),$m.existsSync(Gd.join(\\\"assets\\\",\\\"compiled_raycast_swift\\\"))&&$m.cpSync(Gd.join(\\\"assets\\\",\\\"compiled_raycast_swift\\\"),Gd.join(u.outputDir,\\\"compiled_raycast_swift\\\"),{recursive:!0,force:!0});$m.existsSync(Gd.join(\\\"assets\\\",\\\"locatecursor\\\"))&&($m.mkdirSync(Gd.join(u.outputDir,\\\"compiled_raycast_swift\\\"),{recursive:!0}),$m.copyFileSync(Gd.join(\\\"assets\\\",\\\"locatecursor\\\"),Gd.join(u.outputDir,\\\"compiled_raycast_swift\\\",\\\"locatecursor\\\")));try{$m.chmodSync(Gd.join(u.outputDir,\\\"assets\\\",\\\"locatecursor\\\"),0o755)}catch(e){};try{$m.chmodSync(Gd.join(u.outputDir,\\\"assets\\\",\\\"compiled_raycast_swift\\\",\\\"locatecursor\\\"),0o755)}catch(e){};try{$m.chmodSync(Gd.join(u.outputDir,\\\"compiled_raycast_swift\\\",\\\"locatecursor\\\"),0o755)}catch(e){};')); } }\"",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

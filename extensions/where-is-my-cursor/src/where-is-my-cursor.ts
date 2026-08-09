@@ -3,7 +3,7 @@ import { locatecursor } from "swift:../swift/locatecursor";
 
 export default async function main() {
   try {
-    locatecursor("", "", "");
+    await locatecursor("", "", "");
     await closeMainWindow();
   } catch (err) {
     await showToast({
