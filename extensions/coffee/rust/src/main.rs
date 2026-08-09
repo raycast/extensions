@@ -4,12 +4,13 @@ use std::io::Write;
 use std::path::PathBuf;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
-use windows::Win32::Foundation::CloseHandle;
+use windows::Win32::Foundation::{CloseHandle, FILETIME};
 use windows::Win32::System::Power::{
     SetThreadExecutionState, ES_CONTINUOUS, ES_DISPLAY_REQUIRED, ES_SYSTEM_REQUIRED, EXECUTION_STATE,
 };
 use windows::Win32::System::Threading::{
-    GetExitCodeProcess, OpenProcess, TerminateProcess, PROCESS_QUERY_LIMITED_INFORMATION, PROCESS_TERMINATE,
+    GetExitCodeProcess, GetProcessTimes, OpenProcess, TerminateProcess, PROCESS_QUERY_LIMITED_INFORMATION,
+    PROCESS_TERMINATE,
 };
 
 const STILL_ACTIVE: u32 = 259;
@@ -155,6 +156,36 @@ fn terminate_process(pid: u32) -> bool {
     }
 }
 
+/// Convert a FILETIME (100ns ticks since 1601-01-01) to Unix epoch seconds.
+fn filetime_to_unix_secs(ft: &FILETIME) -> u64 {
+    const EPOCH_OFFSET_SECS: u64 = 11_644_473_600; // seconds between 1601 and 1970
+    let ticks = ((ft.dwHighDateTime as u64) << 32) | (ft.dwLowDateTime as u64);
+    ticks / 10_000_000 - EPOCH_OFFSET_SECS
+}
+
+/// Whether the given PID is still the keep-awake worker that recorded
+/// `expected_start`. Guards `stop_caffeinate` against terminating an unrelated
+/// process whose PID was reused after the worker exited on its own.
+fn pid_matches_worker(pid: u32, expected_start: u64) -> bool {
+    let handle = unsafe { OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid) };
+    let Ok(handle) = handle else {
+        return false;
+    };
+    let mut creation = FILETIME::default();
+    let mut exit = FILETIME::default();
+    let mut kernel = FILETIME::default();
+    let mut user = FILETIME::default();
+    let ok = unsafe { GetProcessTimes(handle, &mut creation, &mut exit, &mut kernel, &mut user) }.is_ok();
+    unsafe { let _ = CloseHandle(handle); }
+    if !ok {
+        return false;
+    }
+    let created = filetime_to_unix_secs(&creation);
+    // The worker records its start time a beat after it was created, so allow a
+    // small window: the recorded start must be at or just after creation.
+    expected_start >= created && expected_start - created <= 15
+}
+
 /// Whether the tracked window is still open, on-screen, and owned by the
 /// originating process. Treats a window that was closed or hidden (e.g. an app
 /// minimized to the system tray) as gone so the worker releases the execution
@@ -258,7 +289,11 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
 fn stop_caffeinate() -> Result<(), String> {
     let _ = write_stop_flag();
     if let Some(state) = read_stored_state()? {
-        let _ = terminate_process(state.pid);
+        // Only terminate the worker if the recorded PID is still that worker;
+        // a reused PID must not be killed.
+        if pid_matches_worker(state.pid, state.start_time) {
+            let _ = terminate_process(state.pid);
+        }
     }
     let _ = clear_state();
     Ok(())
@@ -275,6 +310,35 @@ fn is_caffeinate_running() -> Result<KeepAwakeState, String> {
         let _ = clear_state();
     }
     Ok(KeepAwakeState { running })
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct CaffeinateStatus {
+    running: bool,
+    start_time: Option<u64>,
+    duration_seconds: Option<u64>,
+}
+
+/// Bridge: report keep-awake state plus the worker's recorded duration and
+/// start time, used by the menu bar for live countdowns.
+#[raycast]
+fn get_caffeinate_state() -> Result<CaffeinateStatus, String> {
+    match read_stored_state()? {
+        Some(state) if process_alive(state.pid) => Ok(CaffeinateStatus {
+            running: true,
+            start_time: Some(state.start_time),
+            duration_seconds: state.duration_seconds,
+        }),
+        _ => {
+            let _ = clear_state();
+            Ok(CaffeinateStatus {
+                running: false,
+                start_time: None,
+                duration_seconds: None,
+            })
+        }
+    }
 }
 
 #[derive(Serialize)]
