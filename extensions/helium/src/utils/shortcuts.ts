@@ -18,7 +18,7 @@ function crossPlatform(
 ): Keyboard.Shortcut {
   return {
     macOS: { modifiers: macModifiers, key },
-    windows: { modifiers: windowsModifiers, key },
+    Windows: { modifiers: windowsModifiers, key },
   };
 }
 
