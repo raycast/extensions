@@ -1,9 +1,10 @@
 import { MenuBarExtra, showToast, Toast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { isSleepDisabled, refreshMenuBarCommand, refreshSleepStatusCommand, setSleepDisabled } from "./utils/sleep";
 
 export default function MenuBar() {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useCachedState("menu-bar-visible", true);
   const [isDisabled, setIsDisabled] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -28,17 +29,17 @@ export default function MenuBar() {
     };
 
     void updateStatus();
+    const interval = setInterval(() => void updateStatus(), 60_000);
+
     return () => {
       cancelled = true;
+      clearInterval(interval);
     };
   }, [isVisible]);
 
   async function changeSleepState(disabled: boolean) {
     try {
       await setSleepDisabled(disabled);
-      setIsDisabled(await isSleepDisabled());
-      await refreshSleepStatusCommand().catch(() => undefined);
-      await refreshMenuBarCommand().catch(() => undefined);
     } catch {
       await showToast({
         style: Toast.Style.Failure,
@@ -46,6 +47,20 @@ export default function MenuBar() {
       });
       return;
     }
+
+    setIsDisabled(disabled);
+
+    try {
+      setIsDisabled(await isSleepDisabled());
+    } catch {
+      await showToast({
+        title: "Sleep status changed",
+        message: "Could not verify the current status",
+      });
+    }
+
+    await refreshSleepStatusCommand().catch(() => undefined);
+    await refreshMenuBarCommand().catch(() => undefined);
   }
 
   if (!isVisible) {
