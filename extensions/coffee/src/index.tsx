@@ -101,7 +101,7 @@ function useWindowsCaffeinateInfo(execute: boolean) {
         if (disposed) return;
         setData(applyState(info));
       } catch {
-        if (!disposed) return;
+        if (disposed) return;
         setData({ isRunning: false, totalSeconds: null, startTime: null });
       } finally {
         if (!disposed) setIsLoading(false);
