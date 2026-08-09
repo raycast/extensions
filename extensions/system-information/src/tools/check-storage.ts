@@ -22,8 +22,8 @@ export default async function Command(): Promise<StorageInfo> {
 
     if (process.platform === "win32") {
       const [disks, fs] = await Promise.all([si.diskLayout(), si.fsSize()]);
-      const disk = disks[0];
-      totalBytes = disk ? disk.size : fs.reduce((sum, f) => sum + f.size, 0);
+      totalBytes =
+        disks.length > 0 ? disks.reduce((sum, d) => sum + d.size, 0) : fs.reduce((sum, f) => sum + f.size, 0);
       freeBytes = fs.reduce((sum, f) => sum + f.available, 0);
       usedBytes = totalBytes - freeBytes;
     } else {
