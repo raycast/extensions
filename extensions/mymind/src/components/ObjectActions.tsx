@@ -50,7 +50,7 @@ import {
   getMainEntityTypeNames,
   getObjectDetailMarkdown,
 } from "../object-detail";
-import { isUserTag } from "../tag-utils";
+import { isAiTag, isUserTag } from "../tag-utils";
 import { RelatedObjectList } from "./RelatedObjectList";
 import { SimilarObjectList } from "./SimilarObjectList";
 import { SpaceObjectList } from "./SpaceObjectList";
@@ -725,9 +725,13 @@ export function ObjectDetail(props: {
   }, [object, objectUrl]);
 
   // mymind assigns AI tags asynchronously after an object is created, so a freshly saved
-  // item arrives untagged. Re-fetch a few times so the tags show up without a manual reload.
+  // item arrives without them. Re-fetch a few times so they show up without a manual reload.
+  //
+  // The stop condition looks for an AI tag specifically: saving with manually picked tags
+  // means the object already comes back tagged, and checking for any tag at all would end
+  // the polling before the AI ones ever arrive.
   useEffect(() => {
-    if (!props.pollForTags || !object || object.tags.length > 0 || tagPollAttempts >= TAG_POLL_MAX_ATTEMPTS) {
+    if (!props.pollForTags || !object || object.tags.some(isAiTag) || tagPollAttempts >= TAG_POLL_MAX_ATTEMPTS) {
       return;
     }
 
