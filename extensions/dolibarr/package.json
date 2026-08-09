@@ -64,7 +64,7 @@
       "name": "apiKey",
       "type": "password",
       "required": true,
-      "title": "API key",
+      "title": "API Key",
       "description": "Found in Dolibarr on your own user card under the API key tab"
     },
     {

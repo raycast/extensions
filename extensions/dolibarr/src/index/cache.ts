@@ -1,7 +1,8 @@
 import { Cache } from "@raycast/api";
+import { getConfig } from "../preferences";
+import { indexCacheKey } from "./cacheKey";
 import type { SearchIndex } from "./loadIndex";
 
-const CACHE_KEY = "dolibarr-index";
 const SCHEMA_VERSION = 1;
 
 type CachedIndex = {
@@ -12,9 +13,18 @@ type CachedIndex = {
 
 const cache = new Cache();
 
+/**
+ * Read at call time rather than once at module load: preferences can change between two runs of a
+ * command, and a stale key would hand back another instance's index.
+ */
+function currentKey(): string {
+  const { baseUrl, apiKey } = getConfig();
+  return indexCacheKey(baseUrl, apiKey);
+}
+
 /** Thirdparty and Contact hold only strings, numbers and null, so JSON round-trips losslessly. */
 export function readIndex(): SearchIndex | null {
-  const raw = cache.get(CACHE_KEY);
+  const raw = cache.get(currentKey());
   if (!raw) return null;
   try {
     const parsed = JSON.parse(raw) as CachedIndex;
@@ -27,9 +37,5 @@ export function readIndex(): SearchIndex | null {
 
 export function writeIndex(index: SearchIndex): void {
   const payload: CachedIndex = { version: SCHEMA_VERSION, fetchedAt: Date.now(), index };
-  cache.set(CACHE_KEY, JSON.stringify(payload));
-}
-
-export function clearIndex(): void {
-  cache.remove(CACHE_KEY);
+  cache.set(currentKey(), JSON.stringify(payload));
 }
