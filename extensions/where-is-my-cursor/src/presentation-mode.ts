@@ -7,7 +7,7 @@ export default async function main() {
       style: Toast.Style.Success,
       title: "Presentation Mode Activated",
     });
-    await locatecursor("-p", "presentation", "");
+    locatecursor("-p", "presentation", "");
     await closeMainWindow();
   } catch (err) {
     await showToast({
