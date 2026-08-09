@@ -18,6 +18,9 @@ export async function authorize(): Promise<void> {
     const authRequest = await oauthClient.authorizationRequest({
       endpoint: "https://github.com/login/oauth/authorize",
       clientId: "Ov23lixtTVkXJr1vXPP3",
+      // Scopes required for authentication:
+      // - read:user: Read user profile data for authentication
+      // - user:email: Read user email for account identification
       scope: "read:user user:email",
     });
 

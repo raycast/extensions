@@ -240,13 +240,12 @@ export default function Command() {
       };
 
       // Build dietary requirements string
-      let dietaryString = values.dietaryRequirements.join(", ");
+      let dietaryString = values.dietaryRequirements.filter((req) => req !== "None").join(", ");
       if (dietaryString.includes("Custom")) {
         dietaryString = dietaryString.replace("Custom", values.customDietary || "").trim();
       }
-      if (dietaryString.includes("None")) {
-        dietaryString = dietaryString.replace("None", "").trim();
-      }
+      // Clean up any trailing/leading commas and extra whitespace
+      dietaryString = dietaryString.replace(/,\s*,/g, ",").replace(/,\s*$/, "").replace(/^\s*,/, "").trim();
       dietaryString = dietaryString || "None";
       addLog(`Final dietary string: ${dietaryString}`);
       completeChecklistItem(buildId);
@@ -621,10 +620,12 @@ ${recipeData.instructions.map((inst: string, i: number) => `${i + 1}. ${inst}`).
             }}
             shortcut={Keyboard.Shortcut.Common.Duplicate}
           />
-          <Action.OpenInBrowser
-            title="My Account"
-            url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
-          />
+          {isAuthenticated && (
+            <Action.OpenInBrowser
+              title="My Account"
+              url="https://github.com/settings/connections/applications/Ov23lixtTVkXJr1vXPP3"
+            />
+          )}
           {isAuthenticated && <Action title="Sign out" onAction={handleSignout} />}
         </ActionPanel>
       }
