@@ -1,5 +1,16 @@
 # mymind Changelog
 
+## [Context-Aware Saves] - {PR_MERGE_DATE}
+
+- `Save to mymind` now detects the frontmost app's context: selected text is preselected as a Note, a selected URL as a Link, and when nothing is selected in a browser, the active tab's URL is used
+- Read the active tab's URL and title straight from the browser via Apple Events, which needs only the one-time "control <Browser>" Automation permission instead of a browser extension's broader per-site page-content access
+- Support Safari plus every Chromium-based browser — Chrome, Edge, Brave, Opera, Vivaldi, Chromium, Arc, Dia, ChatGPT Atlas, and Comet — and fall back to unlisted browsers by reading their own scripting definition, so new browsers work without a code change
+- Discard a text selection that Safari's Accessibility API carried over from a different tab, falling back to the active tab's URL instead
+- Run context detection once per launch: `getSelectedText` reads the selection through the system clipboard, so concurrent calls interfered and results flipped between the selection, the tab URL and stale clipboard history
+- Never fall back to the Browser Extension's active tab for a scriptable browser — it reports whichever browser it is installed in, which surfaced a Safari URL while Arc was in front
+- Moved clipboard history behind selection and active-tab detection, so a stale copy no longer wins over what you are looking at
+- Keep the form fast by reading tabs and the selection in parallel and skipping the Finder query when a browser is frontmost
+
 ## [Fix Save Form Prefill and Refresh AI Tags] - 2026-08-10
 
 - Fixed `Save to mymind` not prefilling detected content: the form relied on `defaultValue` with a changing `key` to remount, but `defaultValue` is only applied once per component lifecycle, so values resolved after mount (such as clipboard detection) never reached the fields. They are now controlled inputs
