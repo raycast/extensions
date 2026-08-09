@@ -1,5 +1,10 @@
 # Home Assistant Changelog
 
+## [Fix .local resolution picking unbracketed IPv6] - {PR_MERGE_DATE}
+
+- Prefer mDNS A records (IPv4) when resolving `.local` hostnames, falling back to an AAAA record only if no A record arrives before the timeout
+- Wrap IPv6 literals in brackets before substituting them into the instance URL, fixing "Invalid URL: ws://fd6c:…:8123/api/websocket" on IPv6-enabled networks
+
 ## [Update] - 2026-08-03
 
 - Show multiple zones for person entities
