@@ -1,5 +1,15 @@
 # Coffee Changelog
 
+## [Windows support] - {PR_MERGE_DATE}
+
+- Add Windows support
+- Implement keep-awake on Windows via a native Rust helper
+- Add app picker support to the "Caffeinate While" command on Windows
+- Stop caffeination when the selected app window closes
+- Filter out utility and system windows from the app picker
+- Use platform-neutral wording in tools and AI instructions
+- Bump all dependencies to the latest
+
 ## [AI Extension] - 2026-07-22
 
 - Added AI tools to caffeinate until a specific date and time.

@@ -24,7 +24,7 @@ export function ListActionPanel({
       <Action
         title="Set Caffeination Schedule"
         icon={Icon.CopyClipboard}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        shortcut={Keyboard.Shortcut.Common.Save}
         onAction={() => onSetScheduleAction()}
       />
       <Action

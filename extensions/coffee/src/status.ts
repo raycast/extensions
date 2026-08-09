@@ -51,13 +51,13 @@ export async function checkSchedule() {
 }
 
 export default async function Command() {
-  const isCaffeinated = isCaffeinateRunning();
+  const isCaffeinated = await isCaffeinateRunning();
   const isScheduled = await checkSchedule();
 
   let subtitle = "✖ Decaffeinated";
 
   if (isCaffeinated || isScheduled) {
-    subtitle = "✔ Caffeinated";
+    subtitle = "✓ Caffeinated";
   }
 
   updateCommandMetadata({ subtitle });

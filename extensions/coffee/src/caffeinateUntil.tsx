@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Toast, popToRoot, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { startCaffeinate } from "./utils";
+import { startCaffeinate, deviceName } from "./utils";
 
 function parseTypedTime(time: string): Date | null {
   const pattern = /^(\d{1,2})(?::(\d\d))? *(am|pm)?$/i;
@@ -49,7 +49,7 @@ async function caffeinateUntilTarget(target: Date) {
         : `${target.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })} at `;
   await startCaffeinate(
     { menubar: true, status: true },
-    `Caffeinating your Mac until ${dayLabel}${formattedTime}`,
+    `Caffeinating your ${deviceName()} until ${dayLabel}${formattedTime}`,
     `-t ${totalSeconds}`,
   );
 }

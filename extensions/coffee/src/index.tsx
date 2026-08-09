@@ -10,7 +10,7 @@ import {
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { formatDuration, startCaffeinate, stopCaffeinate } from "./utils";
+import { formatDuration, startCaffeinate, stopCaffeinate, deviceName } from "./utils";
 
 function parseEtime(etime: string): number {
   const parts = etime.split(":").reverse();
@@ -125,7 +125,9 @@ export default function Command(props: LaunchProps) {
     setLocalCaffeinateStatus(true);
     const additionalArgs = seconds === null ? undefined : `-t ${seconds}`;
     const hudMessage =
-      seconds === null ? `Caffeinating your Mac ${durationLabel}` : `Caffeinating your Mac for ${durationLabel}`;
+      seconds === null
+        ? `Caffeinating your ${deviceName()} ${durationLabel}`
+        : `Caffeinating your ${deviceName()} for ${durationLabel}`;
     await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs), {
       optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
     });
@@ -137,7 +139,7 @@ export default function Command(props: LaunchProps) {
       optimisticUpdate: () => ({ isRunning: false, totalSeconds: null, startTime: null }),
     });
     if (preferences.hidenWhenDecaffeinated) {
-      showHUD("Your Mac is now decaffeinated");
+      showHUD(`Your ${deviceName()} is now decaffeinated`);
     }
   };
 
