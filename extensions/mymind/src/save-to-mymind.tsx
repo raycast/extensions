@@ -38,13 +38,11 @@ import {
 } from "./save-input";
 import { isUserTag } from "./tag-utils";
 
+/** Only the fields still read from the submitted form; title, URL and body are controlled state. */
 type SaveValues = {
   kind: "url" | "note" | "file";
   existingTags: string[];
   files: string[];
-  title?: string;
-  url: string;
-  content: string;
   spaceId: string;
 };
 
