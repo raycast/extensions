@@ -78,7 +78,16 @@ In any preview: **Share via mdshare** (`Cmd+Shift+S`).
 | Cmd+I         | Show stats (toast)                                     |
 
 Browser preview writes a temp HTML file and opens it in your default browser.
-First load needs network for Mermaid / KaTeX / highlight.js CDNs.
+
+Browser preview also includes:
+
+- Auto / Light / Dark themes with matching syntax colors
+- Copy buttons for code blocks and anchor links for headings
+- Click-to-zoom images, local relative images, and Obsidian `![[image.png]]` embeds
+- GitHub-style task lists
+- Mermaid diagrams, KaTeX math, and syntax highlighting loaded only when needed
+
+The enhanced features use pinned jsDelivr assets, so their first use needs a network connection. If an asset fails to load, the browser toolbar shows a warning.
 
 ### History
 
