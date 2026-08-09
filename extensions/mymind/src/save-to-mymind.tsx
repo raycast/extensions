@@ -157,7 +157,9 @@ export default function SaveToMymindCommand(props: LaunchProps) {
   const accessKeyScope = getAccessKeyScope(accessKeyId, accessKeySecret);
   const launchContext = useMemo(() => (props.launchContext ?? {}) as SaveLaunchContext, [props.launchContext]);
   const [kind, setKind] = useState<SaveValues["kind"]>("note");
-  const [initialState, setInitialState] = useState<InitialState>(EMPTY_INITIAL_STATE);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [url, setUrl] = useState("");
   const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
   const [isInitializing, setIsInitializing] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -181,17 +183,6 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         .filter(Boolean),
     [tags],
   );
-  const formKey = useMemo(
-    () =>
-      JSON.stringify({
-        content: initialState.content,
-        files: initialState.files,
-        kind: initialState.kind,
-        title: initialState.title,
-        url: initialState.url,
-      }),
-    [initialState.content, initialState.files, initialState.kind, initialState.title, initialState.url],
-  );
   const unsupportedSelectedFiles = useMemo(() => getUnsupportedUploadFiles(selectedFiles), [selectedFiles]);
 
   useEffect(() => {
@@ -205,9 +196,11 @@ export default function SaveToMymindCommand(props: LaunchProps) {
           return;
         }
 
-        setInitialState(nextState);
         setKind(nextState.kind);
         setSelectedFiles(nextState.files);
+        setTitle(nextState.title);
+        setContent(nextState.content);
+        setUrl(nextState.url);
       } finally {
         if (!cancelled) {
           setIsInitializing(false);
@@ -248,21 +241,19 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
   async function handleSubmit(values: SaveValues) {
     const existingTags = values.existingTags ?? [];
-    const title = values.title ?? "";
-    const url = values.url ?? "";
-    const content = values.content ?? "";
     const files = values.files ?? selectedFiles;
     const tagNames = Array.from(new Set(existingTags));
     const trimmedTitle = title.trim();
     const trimmedContent = content.trim();
+    const trimmedUrl = url.trim();
     const spaceId = values.spaceId || undefined;
 
-    if (kind === "url" && !url.trim()) {
+    if (kind === "url" && !trimmedUrl) {
       await showToast({ style: Toast.Style.Failure, title: "URL is required" });
       return;
     }
 
-    if (kind === "note" && !content.trim()) {
+    if (kind === "note" && !trimmedContent) {
       await showToast({ style: Toast.Style.Failure, title: "Note content is required" });
       return;
     }
@@ -343,7 +334,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
             : `${createdCount} file${createdCount === 1 ? "" : "s"} uploaded`;
 
         if (supportedFiles.value.length === 1 && firstCreatedObjectId) {
-          push(<ObjectDetail objectId={firstCreatedObjectId} />, () => {
+          push(<ObjectDetail objectId={firstCreatedObjectId} pollForTags={true} />, () => {
             void popToRoot();
           });
         }
@@ -353,7 +344,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
       const result = await createObject({
         title: kind === "note" ? trimmedTitle || undefined : undefined,
-        url: kind === "url" ? url.trim() : undefined,
+        url: kind === "url" ? trimmedUrl : undefined,
         content: kind === "note" ? trimmedContent || undefined : undefined,
         tags: tagNames.length > 0 ? tagNames : undefined,
         spaceId,
@@ -385,7 +376,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
       toast.message = result.object.title?.trim() || "Untitled";
 
       if (result.created) {
-        push(<ObjectDetail objectId={result.object.id} fallbackObject={result.object} />, () => {
+        push(<ObjectDetail objectId={result.object.id} fallbackObject={result.object} pollForTags={true} />, () => {
           void popToRoot();
         });
       }
@@ -400,7 +391,6 @@ export default function SaveToMymindCommand(props: LaunchProps) {
 
   return (
     <Form
-      key={formKey}
       isLoading={isInitializing || isSubmitting}
       actions={
         <ActionPanel>
@@ -414,7 +404,7 @@ export default function SaveToMymindCommand(props: LaunchProps) {
         <Form.Dropdown.Item value="file" title="File" />
       </Form.Dropdown>
       {kind === "note" ? (
-        <Form.TextField id="title" title="Title" placeholder="Optional title" defaultValue={initialState.title} />
+        <Form.TextField id="title" title="Title" placeholder="Optional title" value={title} onChange={setTitle} />
       ) : null}
       {kind === "file" ? (
         <>
@@ -438,21 +428,23 @@ export default function SaveToMymindCommand(props: LaunchProps) {
             id="content"
             title="Note"
             placeholder="Optional note to attach to each uploaded file"
-            defaultValue={initialState.content}
+            value={content}
+            onChange={setContent}
           />
         </>
       ) : null}
       {kind === "url" ? (
         <>
-          <Form.TextField id="url" title="URL" placeholder="https://example.com" defaultValue={initialState.url} />
-          <Form.TextArea id="content" title="Body" placeholder="Optional note" defaultValue={initialState.content} />
+          <Form.TextField id="url" title="URL" placeholder="https://example.com" value={url} onChange={setUrl} />
+          <Form.TextArea id="content" title="Body" placeholder="Optional note" value={content} onChange={setContent} />
         </>
       ) : kind === "note" ? (
         <Form.TextArea
           id="content"
           title="Body"
           placeholder="Write your note here…"
-          defaultValue={initialState.content}
+          value={content}
+          onChange={setContent}
         />
       ) : null}
       <Form.Dropdown id="spaceId" title="Space" storeValue={true}>

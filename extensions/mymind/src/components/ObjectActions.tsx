@@ -654,14 +654,19 @@ export function ObjectActions(props: {
   );
 }
 
+const TAG_POLL_INTERVAL_MS = 3000;
+const TAG_POLL_MAX_ATTEMPTS = 6;
+
 export function ObjectDetail(props: {
   objectId: string;
   fallbackObject?: MyMindObject;
+  pollForTags?: boolean;
   onDeleted?: () => Promise<void> | void;
 }) {
   const { pop, push } = useNavigation();
   const [assets, setAssets] = useState<DetailAssets>(EMPTY_DETAIL_ASSETS);
   const [isAssetsLoading, setIsAssetsLoading] = useState(false);
+  const [tagPollAttempts, setTagPollAttempts] = useState(0);
   const {
     data: object,
     isLoading: isObjectLoading,
@@ -672,6 +677,7 @@ export function ObjectDetail(props: {
       void showFailureToast(error, { title: "Couldn't load item details" });
     },
   });
+
   const { data: spaces = [] } = useCachedPromise(() => listSpaces(), [], { initialData: [] });
 
   const resolvedSpaces = useMemo(() => {
@@ -717,6 +723,21 @@ export function ObjectDetail(props: {
       cancelled = true;
     };
   }, [object, objectUrl]);
+
+  // mymind assigns AI tags asynchronously after an object is created, so a freshly saved
+  // item arrives untagged. Re-fetch a few times so the tags show up without a manual reload.
+  useEffect(() => {
+    if (!props.pollForTags || !object || object.tags.length > 0 || tagPollAttempts >= TAG_POLL_MAX_ATTEMPTS) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setTagPollAttempts((attempts) => attempts + 1);
+      revalidate();
+    }, TAG_POLL_INTERVAL_MS);
+
+    return () => clearTimeout(timer);
+  }, [props.pollForTags, object, tagPollAttempts, revalidate]);
 
   return (
     <Detail
