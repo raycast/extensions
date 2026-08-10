@@ -184,6 +184,7 @@
   "dependencies": {
     "@raycast/api": "1.84.12",
     "@raycast/utils": "1.18.0",
+    "proper-lockfile": "4.1.2",
     "ws": "8.18.0"
   },
   "devDependencies": {
@@ -191,6 +192,7 @@
     "@types/jest": "29.5.0",
     "@types/node": "22.9.0",
     "@types/play-sound": "1.1.2",
+    "@types/proper-lockfile": "4.1.4",
     "@types/react": "18.3.12",
     "@types/ws": "8.5.13",
     "eslint": "8.57.1",
