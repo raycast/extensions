@@ -1,4 +1,21 @@
-import { type PveVm, PveVmStatus, PveVmTypes } from "@/types";
+import { type PveServer, type PveServerResult, type PveVm, PveVmStatus, PveVmTypes } from "@/types";
+
+export const getMockServer = (name: string): PveServer => ({
+  id: name,
+  name,
+  url: `https://${name}.local:8006`,
+  tokenId: "root@pam!raycast",
+  tokenSecret: "mock-secret",
+});
+
+export const getMockPveVmResults = (): PveServerResult<PveVm[]>[] => {
+  const vms = getMockPveVmData();
+
+  return [
+    { server: getMockServer("pve-01"), data: vms.slice(0, 3) },
+    { server: getMockServer("pve-02"), data: vms.slice(3) },
+  ];
+};
 
 export const getMockPveVmData = (): PveVm[] => {
   const baseVmList = [

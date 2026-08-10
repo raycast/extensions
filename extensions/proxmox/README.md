@@ -10,6 +10,14 @@
 2. Token ID: `Follow` instructions in next section
 3. Token Secret: `Follow` instructions in next section
 
+### 🖥️ Multiple Servers
+
+You can manage more than one Proxmox server (e.g. multiple non-clustered nodes) with the **Manage Servers** command:
+
+- The server from the extension preferences (if configured) always shows up as the first server
+- Additional servers can be added, edited and removed in **Manage Servers**
+- The **Manage VMs** and **Manage Storage** commands show the resources of all configured servers, grouped per server
+
 ### 🔐 API
 
 The exact steps may vary based on your Proxmox version. In **8.4.6.**:

@@ -1,15 +1,15 @@
 import { List } from "@raycast/api";
-import type { PveStorageParsed } from "@/types";
+import type { PveStorageParsed, WithServer } from "@/types";
 import { useStorageStatus } from "@/hooks/use-storage-status";
 import { formatNumberAsBoolean, formatStorageSize } from "@/utils/format";
 import { ErrorDetailGuard } from "@/components/ErrorDetailGuard";
 
 type StorageDetailProps = {
-  storage: PveStorageParsed;
+  storage: WithServer<PveStorageParsed>;
 };
 
 export const StorageDetail = ({ storage }: StorageDetailProps) => {
-  const { data, showErrorScreen } = useStorageStatus(storage.node, storage.storage);
+  const { data, showErrorScreen } = useStorageStatus(storage.server, storage.node, storage.storage);
 
   return (
     <ErrorDetailGuard showErrorScreen={showErrorScreen}>
@@ -17,6 +17,7 @@ export const StorageDetail = ({ storage }: StorageDetailProps) => {
         metadata={
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="Name" text={storage.storage} />
+            <List.Item.Detail.Metadata.Label title="Server" text={storage.server.name} />
             <List.Item.Detail.Metadata.Label title="Node" text={storage.node} />
             <List.Item.Detail.Metadata.Label title="Status" text={storage.status} />
             <List.Item.Detail.Metadata.Separator />
