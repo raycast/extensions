@@ -125,12 +125,24 @@ function escapeForPowerShellSingleQuotes(value: string): string {
   return value.replace(/'/g, "''");
 }
 
-async function runHeliumScript(script: string): Promise<string> {
+/**
+ * Run a Helium automation script and report the outcome.
+ *
+ * Each script prints a single status word. Anything other than `ok` is logged
+ * with the stage it stopped at (`not-running`, `no-window`, `no-match`,
+ * `not-focused`), because these paths fall back silently and would otherwise be
+ * undiagnosable from a bug report.
+ */
+async function runHeliumScript(action: string, script: string): Promise<string> {
   try {
-    const result = await runPowerShellScript(script, { timeout: 8000 });
-    return result.trim();
+    const result = (await runPowerShellScript(script, { timeout: 8000 })).trim();
+    const status = result.split(/\r?\n/).pop()?.trim() ?? "";
+    if (status !== "ok") {
+      console.error(`[Helium] ${action} did not complete:`, status || "(no output)", "| raw:", result);
+    }
+    return status;
   } catch (error) {
-    console.error("[Helium] Windows automation failed:", error);
+    console.error(`[Helium] ${action} failed:`, error);
     return "";
   }
 }
@@ -173,21 +185,42 @@ export async function switchToTabByTitle(title: string): Promise<boolean> {
       [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
       [System.Windows.Automation.ControlType]::TabItem)
 
+    # Collect every tab first so matching can relax progressively. The tab
+    # strip's accessible name is usually the document title, but it can carry
+    # state prefixes ("Audio playing - ...") or differ in whitespace from what
+    # the Browser Extension reported, so an exact-only match is too brittle.
+    $candidates = @()
     foreach ($window in [HeliumWindows]::All([uint32[]]$processIds)) {
       $root = [System.Windows.Automation.AutomationElement]::FromHandle($window)
       foreach ($tab in $root.FindAll([System.Windows.Automation.TreeScope]::Descendants, $condition)) {
-        if ($tab.Current.Name -eq $target) {
-          [HeliumWindows]::Focus($window)
-          $tab.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
-          'ok'
-          exit
-        }
+        $candidates += [pscustomobject]@{ Window = $window; Tab = $tab; Name = $tab.Current.Name }
       }
     }
-    'no-match'
+
+    if ($candidates.Count -eq 0) { 'no-window'; exit }
+
+    $normalized = $target.Trim()
+    $match = $candidates | Where-Object { $_.Name -eq $target } | Select-Object -First 1
+    if (-not $match) {
+      $match = $candidates | Where-Object { $_.Name.Trim() -eq $normalized } | Select-Object -First 1
+    }
+    if (-not $match -and $normalized.Length -ge 8) {
+      $match = $candidates | Where-Object { $_.Name -like "*$normalized*" } | Select-Object -First 1
+    }
+
+    if (-not $match) {
+      "wanted: '$target'"
+      foreach ($candidate in $candidates) { "found:  '$($candidate.Name)'" }
+      'no-match'
+      exit
+    }
+
+    [HeliumWindows]::Focus($match.Window)
+    $match.Tab.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+    'ok'
   `;
 
-  return (await runHeliumScript(script)).endsWith("ok");
+  return (await runHeliumScript("Tab switch", script)) === "ok";
 }
 
 /**
@@ -229,7 +262,7 @@ async function tryNewTabViaKeystroke(): Promise<boolean> {
     'ok'
   `;
 
-  return (await runHeliumScript(script)).endsWith("ok");
+  return (await runHeliumScript("New tab keystroke", script)) === "ok";
 }
 
 /** Open a new window on the new tab page. */
