@@ -309,9 +309,10 @@ export async function deliverPath(text: string): Promise<string> {
     await Clipboard.copy(text);
     copied = true;
     const target = pasteTargetApp();
-    // 1차는 macOS 한정 — Windows의 appPicker·getFrontmostApplication·Clipboard.paste 동작 미검증.
-    // preference는 플랫폼별로 숨길 수 없어 노출되므로 여기서 막는다 (설명에도 명시).
-    if (!target || process.platform !== "darwin") return "";
+    // 미설정이면 복사만. 플랫폼 분기는 두지 않는다 — Windows 실기에서 appPicker 렌더링과
+    // getFrontmostApplication·Clipboard.paste 동작을 확인했고, 앱 동일성은 isSameApp이
+    // windowsAppId를 1순위로 비교해 이미 흡수한다.
+    if (!target) return "";
     if (!isPasteSafePath(text)) return " — path copied";
     await closeMainWindow();
     // 지정 앱이 최상위가 아님 — 사용자는 자기가 어느 앱에 있는지 알므로 감지된 앱은 알리지 않는다

@@ -114,7 +114,7 @@
     {
       "name": "pasteTargetApp",
       "title": "Auto-Paste",
-      "description": "macOS only. App that receives the remote path after Send Clipboard Image — pasted only if that app is frontmost when the transfer finishes, into whichever field has focus there. Leave unset to only copy the path. File sends and pulls always copy only",
+      "description": "App that receives the remote path after Send Clipboard Image — pasted only if that app is frontmost when the transfer finishes, into whichever field has focus there. Leave unset to only copy the path. File sends and pulls always copy only",
       "type": "appPicker",
       "required": false
     }
