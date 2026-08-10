@@ -77,7 +77,10 @@ export default function FindLogin() {
                   }}
                 />
 
-                <Action.OpenInBrowser url={`http://bugmenot.com/view/${state.domain}`} title="View on BugMeNot" />
+                <Action.OpenInBrowser
+                  url={`https://bugmenot.com/view/${getDomainFromSearch(searchText)}`}
+                  title="View on BugMeNot"
+                />
 
                 <Action.CopyToClipboard content={result.login} title="Copy Login" />
                 <Action.CopyToClipboard content={result.password} title="Copy Password" />
