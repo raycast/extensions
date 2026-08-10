@@ -84,6 +84,22 @@ function psQuote(value: string): string {
 }
 
 /**
+ * Raycast's MSIX environment can lack fundamental variables, not just a
+ * stale PATH. Without LOCALAPPDATA, for example, VS Code's terminal cannot
+ * find the Store install of pwsh and falls back to Windows PowerShell.
+ * These are the well-known per-user defaults, derived from the profile dir.
+ */
+function essentialEnvDefaults(profile: string): [string, string][] {
+  const local = path.join(profile, "AppData", "Local");
+  return [
+    ["APPDATA", path.join(profile, "AppData", "Roaming")],
+    ["LOCALAPPDATA", local],
+    ["TEMP", path.join(local, "Temp")],
+    ["TMP", path.join(local, "Temp")],
+  ];
+}
+
+/**
  * Splits the free-form claudeArgs preference into argv tokens, honouring
  * double and single quotes so values with spaces survive intact
  * (e.g. --add-dir "C:\My Projects").
@@ -244,13 +260,17 @@ function runInTerminalTab(
   ].join(" ");
   let script: string;
   try {
-    // LANG/LC_ALL cleared for the same reason they are dropped from the
-    // spawn env in launchClaude — the attached tab may inherit them from a
-    // window created before the fix.
+    // LANG/LC_ALL cleared and essential vars restored for the same reason
+    // they are fixed in the spawn env in launchClaude — the attached tab
+    // inherits the hosting window's environment, not the spawn env.
+    const profile = env.USERPROFILE || os.homedir();
     script = writeCmdLaunchScript([
       `set "Path=${pathString}"`,
       'set "LANG="',
       'set "LC_ALL="',
+      ...essentialEnvDefaults(profile).map(
+        ([name, value]) => `if not defined ${name} set "${name}=${value}"`,
+      ),
       claudeCall,
     ]);
   } catch {
@@ -300,6 +320,17 @@ export async function launchClaude(
   // drop them instead of forwarding.
   for (const key of Object.keys(env)) {
     if (key === "LANG" || key.startsWith("LC_")) delete env[key];
+  }
+
+  // Restore essential vars that Raycast's environment may miss entirely or
+  // carry empty. Never overrides an existing non-empty value.
+  const profile = env.USERPROFILE || os.homedir();
+  for (const [name, value] of essentialEnvDefaults(profile)) {
+    const existing = Object.keys(env).find(
+      (k) => k.toUpperCase() === name.toUpperCase(),
+    );
+    if (!existing) env[name] = value;
+    else if (!env[existing]) env[existing] = value;
   }
 
   await closeMainWindow();
