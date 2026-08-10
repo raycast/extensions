@@ -65,7 +65,7 @@
     {
       "name": "preferBeta",
       "type": "dropdown",
-      "title": "Antinote version to use",
+      "title": "Antinote Version to Use",
       "description": "Prefer Beta: If available, the Antinote extension will communicate with the beta version of Antinote. Always use stable version: Regardless of whether the beta is installed or not, only the stable version will be used with the Antinote extension.",
       "default": "true",
       "required": false,
