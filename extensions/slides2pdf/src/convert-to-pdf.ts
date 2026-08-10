@@ -14,7 +14,7 @@ export default async function Command() {
 
   await closeMainWindow().catch(() => {});
 
-  const prefs = getPreferenceValues<{ openAfterConvertSingle: boolean; openAfterConvertBatch: boolean }>();
+  const prefs = getPreferenceValues<Preferences.ConvertToPdf>();
   // detectBackends always includes the bundled text renderer, so there is at least one engine.
   const available = detectBackends();
   const preferred = await loadPreferences();
@@ -29,7 +29,16 @@ export default async function Command() {
 
   for (const [index, item] of selected.entries()) {
     const src = path.resolve(item.path);
-    if (fs.statSync(src).isDirectory()) {
+    // statSync throws on paths that vanished since selection — that must fail this
+    // file only, not abort the whole batch.
+    let isDirectory: boolean;
+    try {
+      isDirectory = fs.statSync(src).isDirectory();
+    } catch {
+      errors.push({ base: path.basename(src), message: "File not found — was it moved or deleted?" });
+      continue;
+    }
+    if (isDirectory) {
       errors.push({ base: path.basename(src), message: "Folders can't be converted" });
       continue;
     }

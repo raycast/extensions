@@ -240,6 +240,7 @@ interface AppScriptSpec {
   docClass: string;
   docExpr: string; // e.g. "front document", "active presentation" — fallback if no name matches
   exportLine: string;
+  unmodified: string; // predicate excluding documents with unsaved edits (iWork: modified, MS: saved)
 }
 
 const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
@@ -247,29 +248,48 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
     docClass: "document",
     docExpr: "front document",
     exportLine: "export theDoc to outFile as PDF with properties {PDF image quality:Best}",
+    unmodified: "modified is false",
   },
-  pages: { docClass: "document", docExpr: "front document", exportLine: "export theDoc to outFile as PDF" },
-  numbers: { docClass: "document", docExpr: "front document", exportLine: "export theDoc to outFile as PDF" },
+  pages: {
+    docClass: "document",
+    docExpr: "front document",
+    exportLine: "export theDoc to outFile as PDF",
+    unmodified: "modified is false",
+  },
+  numbers: {
+    docClass: "document",
+    docExpr: "front document",
+    exportLine: "export theDoc to outFile as PDF",
+    unmodified: "modified is false",
+  },
   powerpoint: {
     docClass: "presentation",
     docExpr: "active presentation",
     exportLine: "save theDoc in outFile as save as PDF",
+    unmodified: "saved is true",
   },
   word: {
     docClass: "document",
     docExpr: "active document",
     exportLine: "save as theDoc file name outFile file format format PDF",
+    unmodified: "saved is true",
   },
   excel: {
     docClass: "workbook",
     docExpr: "active workbook",
     exportLine: "save workbook as theDoc filename outFile file format PDF file format",
+    unmodified: "saved is true",
   },
 };
 
 // Apps report the document name with or without extension depending on Finder settings.
-function docNameMatch(src: string): string {
-  return `name is ${asString(path.basename(src))} or name is ${asString(path.basename(src, path.extname(src)))}`;
+// The unmodified predicate keeps a same-named document with unsaved edits from being bound —
+// exporting it would produce the wrong PDF, and the close/cleanup would discard the user's
+// edits via `saving no`. A freshly opened file is always unmodified/saved.
+function docMatch(src: string, spec: AppScriptSpec): string {
+  const name = asString(path.basename(src));
+  const stem = asString(path.basename(src, path.extname(src)));
+  return `(name is ${name} or name is ${stem}) and ${spec.unmodified}`;
 }
 
 // Shared AppleScript skeleton. All app scripts follow the same shape:
@@ -294,7 +314,7 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
     `      set tries to 0`,
     `      repeat while theDoc is missing value`,
     `        try`,
-    `          set matched to (${countExpr} whose (${docNameMatch(src)}))`,
+    `          set matched to (${countExpr} whose (${docMatch(src, spec)}))`,
     `          if (count of matched) > 0 then set theDoc to item 1 of matched`,
     `        end try`,
     `        if theDoc is missing value and tries > 20 and (count of ${countExpr}) > initialCount then set theDoc to ${docExpr}`,
@@ -322,11 +342,11 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
   ].join("\n");
 }
 
-function closeDocScript(appName: string, docClass: string, src: string): string {
+function closeDocScript(appName: string, src: string, spec: AppScriptSpec): string {
   return [
     `tell application "${appName}"`,
     `  try`,
-    `    close (every ${docClass} whose ${docNameMatch(src)}) saving no`,
+    `    close (every ${spec.docClass} whose (${docMatch(src, spec)})) saving no`,
     `  end try`,
     `end tell`,
   ].join("\n");
@@ -374,7 +394,10 @@ export async function convertFile(backend: Backend, src: string, outputPath: str
     if (!fs.existsSync(outputPath)) throw new Error("Conversion produced no output file");
     fs.rmSync(backupPath, { force: true });
   } catch (e) {
-    if (fs.existsSync(backupPath) && !fs.existsSync(outputPath)) fs.renameSync(backupPath, outputPath);
+    // A failed engine may have written a partial file — remove it so it can't be mistaken
+    // for a valid result (or get backed up by the next fallback engine), then restore.
+    fs.rmSync(outputPath, { force: true });
+    if (fs.existsSync(backupPath)) fs.renameSync(backupPath, outputPath);
     throw e;
   }
 }
@@ -433,7 +456,7 @@ async function runBackend(backend: Backend, src: string, outputPath: string): Pr
     await runAppleScript(
       conversionScript(backend.appName!, src, scriptOut, APP_SPECS[type]),
       type,
-      closeDocScript(backend.appName!, APP_SPECS[type].docClass, src),
+      closeDocScript(backend.appName!, src, APP_SPECS[type]),
     );
   } catch (e) {
     // Keep a PDF that was produced despite a late script error (e.g. quit failing).
