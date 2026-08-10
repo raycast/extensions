@@ -19,6 +19,13 @@ function launchHelium(args: string[]): void {
 }
 
 /**
+ * Helium's new tab page. Chromium accepts it on the command line, so a new
+ * window lands on the real new tab page — with the search box and shortcuts —
+ * rather than a blank document.
+ */
+const NEW_TAB_PAGE = "chrome://new-tab-page/";
+
+/**
  * Open a URL in Helium. Chromium reuses the most recently focused window and
  * appends a new tab, and starts Helium first when it isn't running.
  */
@@ -26,9 +33,9 @@ export async function openUrlInHelium(url: string): Promise<void> {
   launchHelium([url]);
 }
 
-/** Open an empty new window. */
+/** Open a new window on the new tab page. */
 export async function createNewWindow(): Promise<void> {
-  launchHelium(["--new-window", "about:blank"]);
+  launchHelium(["--new-window", NEW_TAB_PAGE]);
 }
 
 /** Open an incognito window. */
