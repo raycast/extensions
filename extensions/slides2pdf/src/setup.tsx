@@ -133,11 +133,20 @@ export default function Command() {
                   actions={
                     <ActionPanel>
                       {found ? (
-                        <Action
-                          title={`Set as Preferred for ${group.prefLabel}`}
-                          icon={isActive ? Icon.Checkmark : Icon.ArrowRight}
-                          onAction={() => setPreferred(group.prefKey, type)}
-                        />
+                        <>
+                          <Action
+                            title={`Set as Preferred for ${group.prefLabel}`}
+                            icon={isActive ? Icon.Checkmark : Icon.ArrowRight}
+                            onAction={() => setPreferred(group.prefKey, type)}
+                          />
+                          {prefs[group.prefKey] !== "auto" && (
+                            <Action
+                              title={`Reset ${group.prefLabel} to Auto`}
+                              icon={Icon.ArrowCounterClockwise}
+                              onAction={() => setPreferred(group.prefKey, "auto")}
+                            />
+                          )}
+                        </>
                       ) : (
                         <>
                           {meta.installUrl && (

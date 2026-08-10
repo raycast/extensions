@@ -172,7 +172,8 @@ function asString(s: string): string {
 }
 
 function runAppleScript(script: string, tag: string, timeoutCleanup?: string): void {
-  console.log(`[slides2pdf:${tag}] script:\n${script}`);
+  // Full script contains local file paths — keep it out of production logs.
+  if (process.env.NODE_ENV === "development") console.log(`[slides2pdf:${tag}] script:\n${script}`);
   try {
     const stdout = execFileSync("osascript", ["-e", script], {
       encoding: "utf8",

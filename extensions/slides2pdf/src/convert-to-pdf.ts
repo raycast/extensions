@@ -36,6 +36,7 @@ export default async function Command() {
   const errors: { base: string; message: string }[] = [];
   const targeted = new Set<string>();
   const total = selected.length;
+  const toast = await showToast(Toast.Style.Animated, "Converting…");
 
   for (const [index, item] of selected.entries()) {
     const src = path.resolve(item.path);
@@ -60,7 +61,7 @@ export default async function Command() {
     let converted = false;
     for (const backend of backends) {
       try {
-        await showToast(Toast.Style.Animated, `Converting ${base} via ${backend.label} — ${index + 1}/${total}`);
+        toast.title = `Converting ${base} via ${backend.label} — ${index + 1}/${total}`;
         console.log(`[slides2pdf] Converting "${base}" via ${backend.label}`);
         convertFile(backend, src, outputPath);
         producedFiles.push(outputPath);
@@ -86,13 +87,16 @@ export default async function Command() {
     }
   }
 
-  if (errors.length > 0 && producedFiles.length === 0) {
-    await showToast(Toast.Style.Failure, `Failed: "${errors[0].base}"`, errors[0].message);
-  } else if (errors.length > 0) {
-    await showToast(Toast.Style.Failure, `${errors.length} file(s) failed`, errors.map((e) => e.base).join(", "));
-  } else if (producedFiles.length === 1) {
-    await showToast(Toast.Style.Success, "Converted", path.basename(producedFiles[0]));
+  const failed = errors.length > 0;
+  toast.style = failed ? Toast.Style.Failure : Toast.Style.Success;
+  if (failed && producedFiles.length === 0) {
+    toast.title = `Failed: "${errors[0].base}"`;
+    toast.message = errors[0].message;
+  } else if (failed) {
+    toast.title = `${errors.length} file(s) failed`;
+    toast.message = errors.map((e) => e.base).join(", ");
   } else {
-    await showToast(Toast.Style.Success, "Converted", `${producedFiles.length} files`);
+    toast.title = "Converted";
+    toast.message = producedFiles.length === 1 ? path.basename(producedFiles[0]) : `${producedFiles.length} files`;
   }
 }
