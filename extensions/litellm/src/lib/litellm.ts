@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { Cache, getPreferenceValues } from "@raycast/api";
 
 export interface DailyMetrics {
@@ -198,12 +197,19 @@ const KEY_INFO_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 /**
  * Scope the cache entry to the active credentials so switching proxy or virtual
- * key never surfaces another key's alias/spend/budget. The key is hashed to keep
- * the raw virtual key out of the on-disk cache.
+ * key never surfaces another key's alias/spend/budget. A small FNV-1a hash keeps
+ * the raw virtual key out of the on-disk cache; collision-resistance isn't needed
+ * here since this only namespaces a best-effort cache.
  */
 function keyInfoCacheKey(): string {
   const { baseUrl, apiKey } = getConfig();
-  return createHash("sha256").update(`${baseUrl}\n${apiKey}`).digest("hex");
+  const input = `${baseUrl}\n${apiKey}`;
+  let hash = 0x811c9dc5;
+  for (let i = 0; i < input.length; i++) {
+    hash ^= input.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+  return (hash >>> 0).toString(16);
 }
 
 /**
