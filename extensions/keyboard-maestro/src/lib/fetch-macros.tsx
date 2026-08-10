@@ -13,7 +13,8 @@ export async function fetchMacros() {
     const data = plist.parse(scriptResult) as TypeMacroGroup[];
 
     // Filtering groups with filter pattern and enabled groups
-    const filterPattern = preferences.filterPattern.trim();
+    // Raycast omits optional text preferences that were never set, so this can be undefined
+    const filterPattern = (preferences.filterPattern ?? "").trim();
     const hasFilter = filterPattern !== "";
     let matchFunction: (groupName: string) => boolean;
 

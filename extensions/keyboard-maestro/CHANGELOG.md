@@ -1,5 +1,9 @@
 # Keyboard Maestro Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix "List Macros" failing with "Unable to list Macros" when the "Filter Macro Groups" preference has never been set
+
 ## [Update] - 2026-05-25
 - Update @raycast/api and @raycast/utils
 

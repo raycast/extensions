@@ -2,7 +2,7 @@ export interface Preferences {
   displayShortcuts: boolean;
   displayTriggers: boolean;
   displayIcon: boolean;
-  filterPattern: string;
+  filterPattern?: string;
   useRegex: boolean;
   showDisabled: boolean;
 }
