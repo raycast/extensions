@@ -1,6 +1,6 @@
 # Google Translate Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-08-10
 
 - Added a "Prioritize cross-language translations" preference to optionally move same-language results to the bottom
 
