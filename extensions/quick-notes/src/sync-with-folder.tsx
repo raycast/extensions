@@ -2,17 +2,17 @@ import { Toast, showToast, trash, openExtensionPreferences } from "@raycast/api"
 import { TAGS_FILE_PATH, TODO_FILE_PATH, preferences } from "./services/config";
 import { exportNotes, getInitialValuesFromFile, getRandomColor, getSyncWithDirectory } from "./utils/utils";
 import { Tag } from "./services/atoms";
-import fs from "fs";
+import fs from "node:fs";
 
 export default async function Command() {
-  const filePath = preferences.fileLocation;
+  const filePath = preferences.autoSaveLocation;
   if (!filePath) {
     await showToast({
       style: Toast.Style.Failure,
       title: "No Auto Save Location Set",
-      message: "Set a folder in the extension settings",
+      message: "Set a folder in the extension preferences",
       primaryAction: {
-        title: "Open Extension Settings",
+        title: "Open Extension Preferences",
         onAction: () => openExtensionPreferences(),
       },
     });
