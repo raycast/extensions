@@ -1,6 +1,7 @@
 import { execFile, spawn } from "child_process";
 import { promisify } from "util";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import {
   closeMainWindow,
@@ -124,6 +125,22 @@ function cmdQuote(value: string): string {
     : cleaned;
 }
 
+/**
+ * A literal % cannot be escaped on the cmd command line: quoting does not
+ * stop %NAME% expansion and %% only escapes inside batch scripts — and here
+ * the command would cross two cmd layers (the outer `cmd /s /c "start ..."`
+ * plus the inner `cmd /k`). Writing the claude call to a batch file, where
+ * %% reliably yields a literal %, keeps the arguments out of both parsers.
+ */
+function writeCmdLaunchScript(claudeCall: string): string {
+  const scriptPath = path.join(os.tmpdir(), "claude-code-projects-launch.cmd");
+  fs.writeFileSync(
+    scriptPath,
+    `@echo off\r\n${claudeCall.replace(/%/g, "%%")}\r\n`,
+  );
+  return scriptPath;
+}
+
 function encodedStartupScript(
   realPathString: string,
   claudeExe: string | null,
@@ -242,7 +259,14 @@ export async function launchClaude(
         claudeExe ? cmdQuote(claudeExe) : "claude",
         ...args.map(cmdQuote),
       ].join(" ");
-      runInNewWindow(`cmd /k ${claudeCall}`, cwd, env, "cmd not found.");
+      let script: string;
+      try {
+        script = writeCmdLaunchScript(claudeCall);
+      } catch {
+        onFail("Could not write the launch script to the temp folder.")();
+        return;
+      }
+      runInNewWindow(`cmd /k "${script}"`, cwd, env, "cmd not found.");
       break;
     }
     case "windowsTerminal":
