@@ -1,19 +1,15 @@
 import { strict as assert } from "node:assert";
 import test from "node:test";
 import {
-  buildTabsAppleScript,
+  buildActiveTabAppleScript,
   detectFlavorFromScriptingDefinition,
   extractBundleIdFromInfoPlist,
   getBrowserScriptFlavor,
   getScriptingBundleId,
   isKnownBrowserBundleId,
   isSafeBundleId,
-  isStaleCrossTabSelection,
-  parseBrowserWindowTabs,
-  TAB_FIELD_SEPARATOR,
+  parseActiveTabUrl,
 } from "./browser-tabs";
-
-const sep = TAB_FIELD_SEPARATOR;
 
 test("getBrowserScriptFlavor maps bundle ids case-insensitively", () => {
   assert.equal(getBrowserScriptFlavor("com.apple.Safari"), "safari");
@@ -95,94 +91,40 @@ test("detectFlavorFromScriptingDefinition ignores tabbed apps that aren't browse
   assert.equal(detectFlavorFromScriptingDefinition(""), undefined);
 });
 
-test("buildTabsAppleScript uses the right dialect per browser", () => {
-  const safariScript = buildTabsAppleScript("com.apple.safari", "safari");
+test("buildActiveTabAppleScript uses the right dialect per browser", () => {
+  const safariScript = buildActiveTabAppleScript("com.apple.safari", "safari");
   assert.match(safariScript, /URL of current tab/);
-  assert.match(safariScript, /name of current tab/);
   assert.match(safariScript, /tell application id "com\.apple\.safari"/);
 
-  const chromiumScript = buildTabsAppleScript("com.google.chrome", "chromium");
+  const chromiumScript = buildActiveTabAppleScript("com.google.chrome", "chromium");
   assert.match(chromiumScript, /URL of active tab/);
-  assert.match(chromiumScript, /title of active tab/);
 });
 
-test("buildTabsAppleScript never requests page contents", () => {
-  const script = buildTabsAppleScript("com.apple.safari", "safari");
-  assert.equal(/do JavaScript|source of|text of document/.test(script), false);
+test("buildActiveTabAppleScript only ever asks for the active tab's URL", () => {
+  // The Automation permission this needs is justified by how little it reads: no page
+  // contents, no titles, and no list of the user's other tabs.
+  for (const flavor of ["safari", "chromium"] as const) {
+    const script = buildActiveTabAppleScript("com.example.browser", flavor);
+
+    assert.equal(/do JavaScript|source of|text of document/.test(script), false, "must not read page contents");
+    assert.equal(/repeat|tabs of|every tab/.test(script), false, "must not enumerate other tabs");
+    assert.equal(/name of|title of/.test(script), false, "must not read titles");
+  }
 });
 
-test("buildTabsAppleScript isolates background-tab enumeration from the front tab read", () => {
-  // Browsers vary in whether `tabs of window` is scriptable; failing to enumerate them
-  // must not discard the active tab's URL, which is the value we actually need.
-  const script = buildTabsAppleScript("company.thebrowser.dia", "chromium");
-  const repeatIndex = script.indexOf("repeat with aTab");
-  const guardIndex = script.lastIndexOf("try", repeatIndex);
-
-  assert.ok(guardIndex > -1 && guardIndex < repeatIndex, "the repeat loop must sit inside a try block");
-  assert.ok(script.indexOf("URL of active tab") < guardIndex, "the front tab is read before the guarded loop");
-});
-
-test("buildTabsAppleScript never dereferences the window into a variable", () => {
+test("buildActiveTabAppleScript never dereferences the window into a variable", () => {
   // Regression: `set theWindow to front window` then `active tab of theWindow` fails on
   // Arc and Dia with "can't convert class …". The tell block keeps the live reference.
   for (const flavor of ["safari", "chromium"] as const) {
-    const script = buildTabsAppleScript("com.example.browser", flavor);
+    const script = buildActiveTabAppleScript("com.example.browser", flavor);
 
     assert.match(script, /tell front window/, `${flavor} must address the window with a tell block`);
     assert.equal(/set \w+ to front window/.test(script), false, `${flavor} must not store the window in a variable`);
   }
 });
 
-test("parseBrowserWindowTabs reads the front tab and background values", () => {
-  const output = [
-    "https://example.com/front",
-    "Front Page",
-    "https://example.com/front",
-    "Front Page",
-    "https://example.com/other",
-    "Other Page",
-  ].join(sep);
-
-  assert.deepEqual(parseBrowserWindowTabs(output), {
-    frontUrl: "https://example.com/front",
-    frontTitle: "Front Page",
-    backgroundValues: ["https://example.com/other", "Other Page"],
-  });
-});
-
-test("parseBrowserWindowTabs handles empty and malformed output", () => {
-  assert.equal(parseBrowserWindowTabs(""), undefined);
-  assert.equal(parseBrowserWindowTabs("https://example.com"), undefined);
-  assert.equal(parseBrowserWindowTabs(`${sep}`), undefined);
-});
-
-test("isStaleCrossTabSelection flags a selection belonging to another tab", () => {
-  const windowTabs = parseBrowserWindowTabs(
-    [
-      "https://example.com/front",
-      "Front Page",
-      "https://example.com/other",
-      "Prompt Engineering: How to Talk to the AIs",
-    ].join(sep),
-  );
-
-  // The exact regression seen in Safari: a leftover selection from a background tab.
-  assert.equal(isStaleCrossTabSelection("Prompt Engineering: How to Talk to the AIs", windowTabs), true);
-  assert.equal(isStaleCrossTabSelection("https://example.com/other", windowTabs), true);
-});
-
-test("isStaleCrossTabSelection keeps genuine selections from the front tab", () => {
-  const windowTabs = parseBrowserWindowTabs(
-    ["https://example.com/front", "Front Page", "https://example.com/other", "Other Page"].join(sep),
-  );
-
-  assert.equal(isStaleCrossTabSelection("Front Page", windowTabs), false);
-  assert.equal(isStaleCrossTabSelection("https://example.com/front", windowTabs), false);
-  // Arbitrary prose selected on the front page must never be discarded.
-  assert.equal(isStaleCrossTabSelection("a paragraph the user highlighted", windowTabs), false);
-});
-
-test("isStaleCrossTabSelection is inert without tab context", () => {
-  assert.equal(isStaleCrossTabSelection("anything", undefined), false);
-  assert.equal(isStaleCrossTabSelection("", parseBrowserWindowTabs(`https://a.test${sep}A`)), false);
+test("parseActiveTabUrl trims the script output and rejects empties", () => {
+  assert.equal(parseActiveTabUrl("https://example.com/front\n"), "https://example.com/front");
+  assert.equal(parseActiveTabUrl("   "), undefined);
+  assert.equal(parseActiveTabUrl(""), undefined);
 });

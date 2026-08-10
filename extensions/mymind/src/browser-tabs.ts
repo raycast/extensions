@@ -70,9 +70,6 @@ export function extractBundleIdFromInfoPlist(infoPlist: string): string | undefi
   return match?.[1]?.trim() || undefined;
 }
 
-/** Unlikely to appear inside a real URL or page title, so it's safe as a field separator. */
-export const TAB_FIELD_SEPARATOR = "|__RC__|";
-
 /**
  * Bundle ids are interpolated into AppleScript source, so anything that isn't a plain
  * reverse-DNS identifier is rejected rather than escaped.
@@ -120,74 +117,22 @@ export function detectFlavorFromScriptingDefinition(scriptingDefinition: string)
   return undefined;
 }
 
-export function buildTabsAppleScript(bundleId: string, flavor: ScriptableBrowserFlavor): string {
+export function buildActiveTabAppleScript(bundleId: string, flavor: ScriptableBrowserFlavor): string {
   const activeTab = flavor === "safari" ? "current tab" : "active tab";
-  const titleProperty = flavor === "safari" ? "name" : "title";
 
   // Everything stays inside `tell front window`: assigning the window to a variable
   // dereferences it in some browsers (Arc and Dia raise "can't convert class …" on the
   // following `active tab of theWindow`), whereas a tell block keeps the live reference.
-  //
-  // The background-tab loop has its own `try` so a browser that exposes an active tab but
-  // can't enumerate `tabs` still yields the front tab's URL.
   return `
-set sep to "${TAB_FIELD_SEPARATOR}"
 tell application id "${bundleId}"
   if (count of windows) is 0 then return ""
   tell front window
-    set out to ((URL of ${activeTab}) as text) & sep & ((${titleProperty} of ${activeTab}) as text)
-    try
-      repeat with aTab in tabs
-        try
-          set out to out & sep & ((URL of aTab) as text) & sep & ((${titleProperty} of aTab) as text)
-        end try
-      end repeat
-    end try
+    return (URL of ${activeTab}) as text
   end tell
-  return out
 end tell`;
 }
 
-export type BrowserWindowTabs = {
-  frontUrl?: string;
-  frontTitle?: string;
-  /** URLs and titles of the front window's other tabs. */
-  backgroundValues: string[];
-};
-
-export function parseBrowserWindowTabs(output: string): BrowserWindowTabs | undefined {
-  const fields = output.split(TAB_FIELD_SEPARATOR).map((field) => field.trim());
-
-  if (fields.length < 2) {
-    return undefined;
-  }
-
-  const [frontUrl, frontTitle, ...rest] = fields;
-
-  if (!frontUrl && !frontTitle) {
-    return undefined;
-  }
-
-  return {
-    frontUrl: frontUrl || undefined,
-    frontTitle: frontTitle || undefined,
-    backgroundValues: rest.filter((value) => value && value !== frontUrl && value !== frontTitle),
-  };
-}
-
-/**
- * Safari's Accessibility API can hand back a selection left behind in a *different* tab.
- * Treat a "selection" that exactly matches another tab's URL or title — and not the front
- * tab's — as stale, so callers can prefer the front tab's URL instead.
- */
-export function isStaleCrossTabSelection(selectedValue: string, windowTabs?: BrowserWindowTabs): boolean {
-  if (!windowTabs?.frontUrl || !selectedValue) {
-    return false;
-  }
-
-  return (
-    selectedValue !== windowTabs.frontUrl &&
-    selectedValue !== windowTabs.frontTitle &&
-    windowTabs.backgroundValues.includes(selectedValue)
-  );
+export function parseActiveTabUrl(output: string): string | undefined {
+  const url = output.trim();
+  return url || undefined;
 }

@@ -44,16 +44,14 @@ import {
 } from "./save-input";
 import { isUserTag } from "./tag-utils";
 import {
-  BrowserWindowTabs,
-  buildTabsAppleScript,
+  buildActiveTabAppleScript,
   detectFlavorFromScriptingDefinition,
   extractBundleIdFromInfoPlist,
   getBrowserScriptFlavor,
   getScriptingBundleId,
   isKnownBrowserBundleId,
   isSafeBundleId,
-  isStaleCrossTabSelection,
-  parseBrowserWindowTabs,
+  parseActiveTabUrl,
   ScriptableBrowserFlavor,
   supportsAppleScript,
 } from "./browser-tabs";
@@ -266,7 +264,7 @@ function resolveFrontmostBrowser(frontmostApplication: {
   return isKnownBrowserBundleId(bundleId) ? {} : undefined;
 }
 
-async function getBrowserWindowTabs(browser: FrontmostBrowser): Promise<BrowserWindowTabs | undefined> {
+async function getActiveTabUrlViaAppleScript(browser: FrontmostBrowser): Promise<string | undefined> {
   const { scriptingBundleId, flavor } = browser;
 
   if (!scriptingBundleId || !flavor) {
@@ -274,11 +272,11 @@ async function getBrowserWindowTabs(browser: FrontmostBrowser): Promise<BrowserW
   }
 
   try {
-    const output = await runAppleScript(buildTabsAppleScript(scriptingBundleId, flavor), {
+    const output = await runAppleScript(buildActiveTabAppleScript(scriptingBundleId, flavor), {
       timeout: APPLESCRIPT_TIMEOUT_MS,
     });
 
-    return parseBrowserWindowTabs(output);
+    return parseActiveTabUrl(output);
   } catch {
     // Automation permission denied, browser not scriptable, or no open window.
     return undefined;
@@ -317,24 +315,18 @@ async function getActiveTabUrlViaBrowserExtension(): Promise<string | undefined>
 async function getBrowserInitialState(browser: FrontmostBrowser): Promise<InitialState | undefined> {
   // Independent reads — running them together keeps the command's open latency close to
   // the slower of the two rather than their sum.
-  const [windowTabs, selectedTextInitialState] = await Promise.all([
-    getBrowserWindowTabs(browser),
+  const [activeTabUrlFromScript, selectedTextInitialState] = await Promise.all([
+    getActiveTabUrlViaAppleScript(browser),
     getSelectedTextInitialState(),
   ]);
 
+  // A selection is an explicit act, so it wins over whatever page happens to be open.
   if (selectedTextInitialState) {
-    const selectedValue =
-      selectedTextInitialState.kind === "url"
-        ? selectedTextInitialState.url.trim()
-        : selectedTextInitialState.content.trim();
-
-    if (!isStaleCrossTabSelection(selectedValue, windowTabs)) {
-      return selectedTextInitialState;
-    }
+    return selectedTextInitialState;
   }
 
-  if (windowTabs?.frontUrl && isProbablyUrl(windowTabs.frontUrl)) {
-    return { ...EMPTY_INITIAL_STATE, kind: "url", url: windowTabs.frontUrl };
+  if (activeTabUrlFromScript && isProbablyUrl(activeTabUrlFromScript)) {
+    return { ...EMPTY_INITIAL_STATE, kind: "url", url: activeTabUrlFromScript };
   }
 
   // The Browser Extension reports whichever browser it's installed in, which isn't
