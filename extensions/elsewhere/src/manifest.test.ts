@@ -25,14 +25,12 @@ test("exposes focused Raycast commands instead of a monolithic control command",
     {
       name: "control-audio",
       title: "Control Audio",
-      description:
-        "Control Elsewhere audio directly in the background: play or pause audio, adjust ambience or music volume, or turn background music on or off. Use this native tool instead of Run Command, shell commands, AppleScript, or accessibility automation.",
+      description: "Control spatial soundscapes, background music, playback, and volume.",
     },
     {
       name: "create-space-from-prompt",
       title: "Create Space from Prompt",
-      description:
-        "Immediately start Glaze AI preview generation from the user's natural-language soundscape description. The user reviews and confirms in Elsewhere before a Space is created.",
+      description: "Create a spatial soundscape preview from a natural-language description to review before saving.",
     },
   ]);
 });

@@ -7,7 +7,7 @@ instructions: |
 
   Use create-space-from-prompt when the user asks to create an Elsewhere Space from a natural-language description.
 
-  Pass the user's description as the prompt, preserving its language and requested ambience, mood, setting, and spatial sound-source details. Raycast asks for confirmation before calling the tool; accepting starts Glaze AI generation and uses Glaze AI credits. Do not claim that a Space was created: Elsewhere generates a preview, then the user reviews and explicitly confirms the final Space there.
+  Pass the user's description as the prompt, preserving its language and requested ambience, mood, setting, and spatial sound-source details. Raycast asks for confirmation before calling the tool; accepting uses Glaze AI credits. Wait for the tool result before reporting success. A successful result means the generated preview is ready and playing, not that the Space has been saved: the user still reviews and explicitly confirms it in Elsewhere.
 evals:
   - input: "@elsewhere increase Elsewhere volume"
     mocks:
@@ -51,22 +51,22 @@ evals:
 
   - input: "@elsewhere create a quiet rainy cabin for deep work with rain on the windows, distant thunder, and a crackling fire"
     mocks:
-      create-space-from-prompt: "Elsewhere started generating a Space preview."
+      create-space-from-prompt: "A generated Space preview is ready and playing in Elsewhere."
     expected:
       - callsTool:
           name: create-space-from-prompt
           arguments:
             prompt:
               includes: "rain on the windows"
-      - meetsCriteria: Explains that Elsewhere started generating a preview and that final Space creation still requires confirmation in Elsewhere
+      - meetsCriteria: Explains that the generated preview is ready and playing and that saving still requires confirmation in Elsewhere
 
   - input: "@elsewhere make me a calm coastal reading space with gentle waves, gulls far away, and wind through dune grass"
     mocks:
-      create-space-from-prompt: "Elsewhere started generating a Space preview."
+      create-space-from-prompt: "A generated Space preview is ready and playing in Elsewhere."
     expected:
       - callsTool:
           name: create-space-from-prompt
           arguments:
             prompt:
               includes: "gentle waves"
-      - meetsCriteria: Explains that Glaze AI generation started without claiming that the Space was already created
+      - meetsCriteria: Explains that the generated preview is ready without claiming that the Space was already saved

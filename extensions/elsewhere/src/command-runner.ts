@@ -4,10 +4,16 @@ import { Toast, showToast } from "@raycast/api";
 import openUrl from "open";
 
 import { buildElsewhereUrl, ElsewhereCommand } from "./control-url";
+import {
+  PreparedSpaceCreateRequest,
+  prepareSpaceCreateRequest,
+  removeSpaceCreateRequest,
+} from "./space-create-request";
 import { ElsewhereCommandResult, ElsewhereSnapshotV1, readElsewhereState } from "./state-reader";
 import { successToastTitle } from "./success-toast";
 
 const CORRELATION_TIMEOUT_MS = 3_000;
+const CREATE_SPACE_CORRELATION_TIMEOUT_MS = 40_000;
 const POLL_INTERVAL_MS = 80;
 
 let commandQueue: Promise<void> = Promise.resolve();
@@ -25,8 +31,11 @@ interface CorrelatedResult {
   snapshot: ElsewhereSnapshotV1;
 }
 
-async function waitForCorrelatedResult(id: string): Promise<CorrelatedResult | null> {
-  const deadline = Date.now() + CORRELATION_TIMEOUT_MS;
+async function waitForCorrelatedResult(
+  id: string,
+  timeoutMilliseconds = CORRELATION_TIMEOUT_MS,
+): Promise<CorrelatedResult | null> {
+  const deadline = Date.now() + timeoutMilliseconds;
   while (Date.now() < deadline) {
     const state = await readElsewhereState();
     if (state.kind === "ready" || state.kind === "stale") {
@@ -125,16 +134,32 @@ export function executeElsewhereCommand(command: ElsewhereCommand, options: Exec
 
 async function sendCommandForAi(command: ElsewhereCommand): Promise<ElsewhereCommandResult> {
   const correlationId = requestId();
+  const isSpaceCreation = command.kind === "space" && command.action === "create";
+  let nonce: string | undefined;
+  let request: PreparedSpaceCreateRequest | undefined;
+  if (command.kind === "space" && command.action === "create") {
+    nonce = randomUUID().replaceAll("-", "");
+    request = await prepareSpaceCreateRequest(correlationId, nonce, command.prompt);
+  }
 
   try {
-    await openUrl(buildElsewhereUrl(command, correlationId), { background: true });
+    await openUrl(buildElsewhereUrl(command, correlationId, nonce), { background: true });
   } catch (error) {
+    if (request) await removeSpaceCreateRequest(request.requestPath);
     throw new Error(
       `Could not reach Elsewhere: ${error instanceof Error ? error.message : "Make sure Elsewhere is installed and has been opened once."}`,
     );
   }
 
-  const correlated = await waitForCorrelatedResult(correlationId);
+  let correlated: CorrelatedResult | null;
+  try {
+    correlated = await waitForCorrelatedResult(
+      correlationId,
+      isSpaceCreation ? CREATE_SPACE_CORRELATION_TIMEOUT_MS : CORRELATION_TIMEOUT_MS,
+    );
+  } finally {
+    if (request) await removeSpaceCreateRequest(request.requestPath);
+  }
   if (!correlated) {
     throw new Error("Elsewhere did not confirm the request in time. Open Elsewhere and try again.");
   }

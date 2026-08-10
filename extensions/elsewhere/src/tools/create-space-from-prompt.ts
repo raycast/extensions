@@ -23,7 +23,7 @@ export default async function createSpaceFromPrompt({ prompt }: Input) {
   }
 
   await executeElsewhereCommandForAi({ kind: "space", action: "create", prompt: normalizedPrompt });
-  return "Elsewhere started generating a Space preview. The Space is created only after the user reviews and confirms it in Elsewhere.";
+  return "A generated Space preview is ready and playing in Elsewhere. It is saved only after the user reviews and confirms it there.";
 }
 
 export const confirmation: Tool.Confirmation<Input> = async ({ prompt }) => ({

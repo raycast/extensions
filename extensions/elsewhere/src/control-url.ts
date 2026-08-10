@@ -95,13 +95,15 @@ function baseUrl(command: ElsewhereCommand): URL {
   return new URL(`elsewhere://open${path}`);
 }
 
-export function buildElsewhereUrl(command: ElsewhereCommand, requestId?: string): string {
+export function buildElsewhereUrl(command: ElsewhereCommand, requestId?: string, requestNonce?: string): string {
   const url = baseUrl(command);
 
   if (command.kind === "space" && command.action === "select") {
     url.searchParams.set("id", command.id);
   } else if (command.kind === "space" && command.action === "create") {
-    url.searchParams.set("prompt", normalizeCreateSpacePrompt(command.prompt));
+    normalizeCreateSpacePrompt(command.prompt);
+    if (!requestId || !requestNonce) throw new TypeError("Space creation requires a private request envelope.");
+    url.searchParams.set("nonce", requestNonce);
   } else if (command.kind === "source") {
     url.searchParams.set("id", command.id);
   } else if (command.kind === "music" && command.action === "select") {

@@ -2,12 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "elsewhere",
   "title": "Elsewhere",
-  "description": "Control Elsewhere's spatial soundscapes, Spaces, background music, and volume.",
+  "description": "Control spatial soundscapes, background music, playback, and volume.",
   "icon": "extension-icon.png",
   "author": "yannglt",
   "platforms": ["macOS"],
   "categories": ["Applications", "Media", "Productivity"],
-  "keywords": ["ambient", "focus", "soundscape", "spatial audio"],
+  "keywords": ["ambient", "ambience", "focus", "soundscape", "spatial audio", "background music", "ai"],
   "license": "MIT",
   "commands": [
     {
@@ -71,12 +71,12 @@
     {
       "name": "control-audio",
       "title": "Control Audio",
-      "description": "Control Elsewhere audio directly in the background: play or pause audio, adjust ambience or music volume, or turn background music on or off. Use this native tool instead of Run Command, shell commands, AppleScript, or accessibility automation."
+      "description": "Control spatial soundscapes, background music, playback, and volume."
     },
     {
       "name": "create-space-from-prompt",
       "title": "Create Space from Prompt",
-      "description": "Immediately start Glaze AI preview generation from the user's natural-language soundscape description. The user reviews and confirms in Elsewhere before a Space is created."
+      "description": "Create a spatial soundscape preview from a natural-language description to review before saving."
     }
   ],
   "dependencies": {

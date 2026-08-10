@@ -19,8 +19,12 @@ test("builds every supported command with correlation", () => {
     `elsewhere://space/select?id=space-123&requestId=${requestId}`,
   );
   assert.equal(
-    buildElsewhereUrl({ kind: "space", action: "create", prompt: "A rainy cabin for deep work" }, requestId),
-    `elsewhere://space/create?prompt=A+rainy+cabin+for+deep+work&requestId=${requestId}`,
+    buildElsewhereUrl(
+      { kind: "space", action: "create", prompt: "A rainy cabin for deep work" },
+      requestId,
+      "abcdefghijklmnopqrstuv",
+    ),
+    `elsewhere://space/create?nonce=abcdefghijklmnopqrstuv&requestId=${requestId}`,
   );
   assert.equal(
     buildElsewhereUrl({ kind: "music", action: "on" }, requestId),
@@ -65,9 +69,9 @@ test("encodes identifiers and clamps volume inputs", () => {
     buildElsewhereUrl({ kind: "space", action: "select", id: "space & focus" }),
     "elsewhere://space/select?id=space+%26+focus",
   );
-  assert.equal(
-    buildElsewhereUrl({ kind: "space", action: "create", prompt: "Rain & thunder / warm lights" }),
-    "elsewhere://space/create?prompt=Rain+%26+thunder+%2F+warm+lights",
+  assert.throws(
+    () => buildElsewhereUrl({ kind: "space", action: "create", prompt: "Rain & thunder / warm lights" }),
+    /private request envelope/,
   );
   assert.equal(
     buildElsewhereUrl({ kind: "volume", target: "ambience", value: 140 }),
@@ -99,7 +103,11 @@ test("keeps absolute and relative volume mutually exclusive", () => {
     /Prompt must be at most 1200 characters/,
   );
   assert.equal(
-    buildElsewhereUrl({ kind: "space", action: "create", prompt: "  Rain and thunder  " }),
-    "elsewhere://space/create?prompt=Rain+and+thunder",
+    buildElsewhereUrl(
+      { kind: "space", action: "create", prompt: "  Rain and thunder  " },
+      "raycast_123",
+      "abcdefghijklmnopqrstuv",
+    ),
+    "elsewhere://space/create?nonce=abcdefghijklmnopqrstuv&requestId=raycast_123",
   );
 });
