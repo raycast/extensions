@@ -19,8 +19,10 @@ const NON_WINANSI = /[^\x20-\x7E\xA0-\xFF€‚ƒ„…†‡ˆ‰Š‹ŒŽ‘�
 // UTF-16 files (common for Windows/PowerShell exports) are text despite their NUL high
 // bytes — decode by BOM before the binary sniff would misclassify them.
 function decodeText(buf: Buffer): string | null {
-  if (buf[0] === 0xff && buf[1] === 0xfe) return buf.subarray(2).toString("utf16le");
-  if (buf[0] === 0xfe && buf[1] === 0xff) return Buffer.from(buf.subarray(2)).swap16().toString("utf16le");
+  // Truncated files can have an odd byte count — swap16/utf16le need pairs, so drop the tail byte.
+  const utf16Body = (buf.length - 2) % 2 ? buf.subarray(2, buf.length - 1) : buf.subarray(2);
+  if (buf[0] === 0xff && buf[1] === 0xfe) return utf16Body.toString("utf16le");
+  if (buf[0] === 0xfe && buf[1] === 0xff) return Buffer.from(utf16Body).swap16().toString("utf16le");
   // NUL byte in the first 8 KB → not text
   if (buf.subarray(0, 8192).includes(0)) return null;
   return buf.toString("utf8").replace(/^\uFEFF/, "");

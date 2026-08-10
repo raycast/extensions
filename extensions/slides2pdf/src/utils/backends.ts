@@ -424,10 +424,27 @@ export async function convertFile(backend: Backend, src: string, outputPath: str
   try {
     await runBackend(backend, src, staging);
     if (!fs.existsSync(staging)) throw new Error("Conversion produced no output file");
-    moveFile(staging, outputPath);
+    publishFile(staging, outputPath);
   } finally {
     fs.rmSync(staging, { force: true });
   }
+}
+
+// Atomic no-overwrite move: link() fails with EEXIST instead of replacing a file someone
+// created at outputPath while the engine was running (rename would silently clobber it).
+// Staging lives next to the output, so cross-device is impossible; the copy fallback only
+// covers filesystems without hard links, where the small check-then-move race is the best we get.
+function publishFile(staging: string, outputPath: string): void {
+  try {
+    fs.linkSync(staging, outputPath);
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code === "EEXIST" || fs.existsSync(outputPath)) {
+      throw new Error(`Output already exists: ${path.basename(outputPath)}`);
+    }
+    moveFile(staging, outputPath);
+    return;
+  }
+  fs.rmSync(staging, { force: true });
 }
 
 async function runBackend(backend: Backend, src: string, outputPath: string): Promise<void> {

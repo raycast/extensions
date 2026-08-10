@@ -5,8 +5,16 @@ import { detectBackends, rankBackendsForFile, convertFile, fileCategory } from "
 import { loadPreferences } from "./utils/preferences";
 
 export default async function Command() {
-  const selected = await getSelectedFinderItems().catch(() => []);
-
+  // The API throws both when nothing is selected and on real failures (e.g. missing
+  // automation permission) — surface its message so the second case isn't misreported.
+  let selected;
+  try {
+    selected = await getSelectedFinderItems();
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    await showToast(Toast.Style.Failure, "No files to convert", message);
+    return;
+  }
   if (selected.length === 0) {
     await showToast(Toast.Style.Failure, "No file selected", "Select a file in Finder and run the command again.");
     return;
