@@ -1,5 +1,11 @@
 # Lucide Icons Changelog
 
+## [Maintenance] - {PR_MERGE_DATE}
+
+- Update keyboard shortcuts and add Windows ones
+- Update navigationTitle to show icon name
+- Bump all dependencies to the latest
+
 ## [Updates] - 2025-12-16
 
 - Add support for Windows
