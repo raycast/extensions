@@ -1,4 +1,5 @@
 import { execFile, spawn } from "child_process";
+import { randomUUID } from "crypto";
 import { promisify } from "util";
 import fs from "fs";
 import os from "os";
@@ -125,15 +126,42 @@ function cmdQuote(value: string): string {
     : cleaned;
 }
 
+const LAUNCH_SCRIPT_PREFIX = "claude-code-projects-launch-";
+
 /**
  * A literal % cannot be escaped on the cmd command line: quoting does not
  * stop %NAME% expansion and %% only escapes inside batch scripts — and here
  * the command would cross two cmd layers (the outer `cmd /s /c "start ..."`
  * plus the inner `cmd /k`). Writing the claude call to a batch file, where
  * %% reliably yields a literal %, keeps the arguments out of both parsers.
+ *
+ * Each launch gets its own file so overlapping launches cannot overwrite one
+ * another before the (asynchronous) inner cmd reads the script. Scripts from
+ * past launches are deleted after a day — long enough that their sessions
+ * have read them, since cmd only re-reads the file after claude exits.
  */
 function writeCmdLaunchScript(claudeCall: string): string {
-  const scriptPath = path.join(os.tmpdir(), "claude-code-projects-launch.cmd");
+  const dir = os.tmpdir();
+  try {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000;
+    for (const name of fs.readdirSync(dir)) {
+      if (!name.startsWith(LAUNCH_SCRIPT_PREFIX) || !name.endsWith(".cmd")) {
+        continue;
+      }
+      const full = path.join(dir, name);
+      try {
+        if (fs.statSync(full).mtimeMs < cutoff) fs.unlinkSync(full);
+      } catch {
+        // already gone or inaccessible — cleanup is best-effort
+      }
+    }
+  } catch {
+    // cleanup is best-effort
+  }
+  const scriptPath = path.join(
+    dir,
+    `${LAUNCH_SCRIPT_PREFIX}${randomUUID()}.cmd`,
+  );
   fs.writeFileSync(
     scriptPath,
     `@echo off\r\n${claudeCall.replace(/%/g, "%%")}\r\n`,
