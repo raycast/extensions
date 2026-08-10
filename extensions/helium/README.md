@@ -22,9 +22,11 @@ Navigate open tabs, browsing history, bookmarks, and the web in Helium browser.
 
 ### Windows
 
-Requires [Helium for Windows](https://github.com/imputnet/helium-windows). The extension finds it automatically at
-`%LOCALAPPDATA%\imput\Helium` (and the Program Files equivalents). For portable or custom installs, set **Helium
-Location** in the extension preferences to the full path of Helium's `chrome.exe`.
+Requires [Helium for Windows](https://github.com/imputnet/helium-windows). The extension finds it automatically:
+first the standard install roots (`%LOCALAPPDATA%\imput\Helium` and the Program Files equivalents), then the path
+Helium's installer registers under `Clients\StartMenuInternet`, which covers installs on other drives or in custom
+folders. Portable zip builds register nothing — for those, set **Helium Location** in the extension preferences to the
+full path of Helium's `chrome.exe`.
 
 **Search Tabs is read-only on Windows.** Chromium exposes no scripting interface there, so tabs are read through
 [Raycast's browser extension](https://www.raycast.com/browser-extension) — install it in Helium, otherwise the tab list

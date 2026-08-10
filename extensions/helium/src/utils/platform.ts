@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 import { dirname, join } from "path";
 
@@ -19,15 +20,22 @@ export const isWindows = process.platform === "win32";
 export const HELIUM_BUNDLE_ID = "net.imput.helium";
 
 /**
- * Helium for Windows keeps the upstream Chromium binary name, so the executable
- * lives at `<install root>\Application\chrome.exe`, not `helium.exe`.
+ * Helium for Windows is built on ungoogled-chromium and currently keeps the
+ * upstream binary name, but ships under its own vendor folder. Probe both
+ * namings so a rebrand doesn't silently break detection.
  */
-const WINDOWS_INSTALL_SUFFIX = join("imput", "Helium");
-const WINDOWS_EXECUTABLE_SUFFIX = join("Application", "chrome.exe");
+const WINDOWS_INSTALL_SUFFIXES = [join("imput", "Helium"), "Helium"];
+const WINDOWS_EXECUTABLE_NAMES = ["chrome.exe", "helium.exe"];
+
+/** Where Chromium browsers record their real install path, whatever it is. */
+const START_MENU_INTERNET_KEYS = [
+  "HKCU\\Software\\Clients\\StartMenuInternet",
+  "HKLM\\Software\\Clients\\StartMenuInternet",
+];
 
 /**
- * User-provided override for unusual installs (portable builds, custom install
- * directories). `undefined` when the user has not set it.
+ * User-provided override for installs we cannot discover — portable zip
+ * builds in particular, which register nothing. `undefined` when unset.
  */
 export function getHeliumPathPreference(): string | undefined {
   const { heliumPath } = getPreferenceValues<{ heliumPath?: string }>();
@@ -36,45 +44,126 @@ export function getHeliumPathPreference(): string | undefined {
 }
 
 /**
- * Windows install roots in probe order: the per-user location the default
- * installer uses first, then the machine-wide ones.
+ * Install roots in probe order: the per-user location the default installer
+ * uses first, then the machine-wide ones.
  */
 export function getWindowsInstallRoots(env: NodeJS.ProcessEnv = process.env): string[] {
-  const roots = [env.LOCALAPPDATA, env.PROGRAMFILES, env["PROGRAMFILES(X86)"]];
-  return roots.filter((root): root is string => !!root).map((root) => join(root, WINDOWS_INSTALL_SUFFIX));
+  const bases = [env.LOCALAPPDATA, env.PROGRAMFILES, env["PROGRAMFILES(X86)"]].filter((base): base is string => !!base);
+  return bases.flatMap((base) => WINDOWS_INSTALL_SUFFIXES.map((suffix) => join(base, suffix)));
+}
+
+/**
+ * Read Helium's registered executable path out of the registry.
+ *
+ * Chromium's Windows installer writes the real path to
+ * `Clients\StartMenuInternet\<AppName>\shell\open\command` regardless of where
+ * the user installed it, which is the only reliable way to find installs
+ * outside the standard roots (a different drive, a machine-wide install, a
+ * renamed folder). Portable archives register nothing and fall back to the
+ * `heliumPath` preference.
+ */
+export function findHeliumExecutableInRegistry(runQuery: (key: string) => string = queryRegistry): string | undefined {
+  for (const key of START_MENU_INTERNET_KEYS) {
+    for (const candidate of parseStartMenuInternetCommands(runQuery(key))) {
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  return undefined;
+}
+
+function queryRegistry(key: string): string {
+  try {
+    return execFileSync("reg", ["query", key, "/s"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+      timeout: 3000,
+    });
+  } catch {
+    // Missing key, no reg.exe, or a timeout — treated as "nothing registered".
+    return "";
+  }
+}
+
+/**
+ * Pull the `(Default)` values of every `…\StartMenuInternet\Helium*\shell\open\command`
+ * key out of `reg query /s` output. Key lines start at column 0; value lines
+ * are indented and shaped `(Default)    REG_SZ    "C:\path\to\app.exe"`.
+ */
+export function parseStartMenuInternetCommands(registryOutput: string): string[] {
+  const commands: string[] = [];
+  let inHeliumCommandKey = false;
+
+  for (const line of registryOutput.split(/\r?\n/)) {
+    if (/^HKEY_/.test(line)) {
+      inHeliumCommandKey = /StartMenuInternet\\Helium/i.test(line) && /\\shell\\open\\command$/i.test(line);
+      continue;
+    }
+
+    if (!inHeliumCommandKey) continue;
+
+    const value = line.split(/REG_SZ\s+/)[1]?.trim();
+    if (!value) continue;
+
+    // The command may carry arguments after the (possibly quoted) executable.
+    const quoted = value.match(/^"([^"]+)"/);
+    commands.push(quoted ? quoted[1] : value.split(/\s+/)[0]);
+  }
+
+  return commands;
 }
 
 interface WindowsPathOptions {
   override?: string;
   env?: NodeJS.ProcessEnv;
+  /** Injectable so tests never touch the real registry. */
+  registryLookup?: () => string | undefined;
 }
 
 /**
- * Locate Helium's executable on Windows: the preference wins when it points at
- * something that exists, then the known install roots. Returns `undefined` when
- * Helium isn't installed.
+ * Locate Helium's executable on Windows, in order of confidence: the user's
+ * override, the standard install roots (cheap, covers the default installer),
+ * then the registry (a subprocess, so it only runs when the guesses miss).
  */
 export function findHeliumExecutable(options: WindowsPathOptions = {}): string | undefined {
   const override = "override" in options ? options.override : getHeliumPathPreference();
   if (override && existsSync(override)) return override;
 
   for (const root of getWindowsInstallRoots(options.env)) {
-    const candidate = join(root, WINDOWS_EXECUTABLE_SUFFIX);
-    if (existsSync(candidate)) return candidate;
+    for (const executableName of WINDOWS_EXECUTABLE_NAMES) {
+      const candidate = join(root, "Application", executableName);
+      if (existsSync(candidate)) return candidate;
+    }
   }
 
-  return undefined;
+  const registryLookup = options.registryLookup ?? (() => findHeliumExecutableInRegistry());
+  return registryLookup();
 }
 
 /**
- * Same as {@link findHeliumExecutable} but throws an actionable message instead
- * of returning `undefined`, so command-level catch blocks surface it in a toast
- * rather than failing silently.
+ * Cached wrapper around {@link findHeliumExecutable}. Resolution can shell out
+ * to `reg.exe`, and the app target is read during render, so the answer is
+ * memoized for the lifetime of the command process.
+ */
+let cachedExecutable: { value: string | undefined } | undefined;
+
+export function findHeliumExecutableCached(): string | undefined {
+  if (!cachedExecutable) cachedExecutable = { value: findHeliumExecutable() };
+  return cachedExecutable.value;
+}
+
+/**
+ * Same as {@link findHeliumExecutableCached} but throws an actionable message
+ * instead of returning `undefined`, so command-level catch blocks surface it in
+ * a toast rather than failing silently.
  */
 export function requireHeliumExecutable(): string {
-  const executable = findHeliumExecutable();
+  const executable = findHeliumExecutableCached();
   if (!executable) {
-    throw new Error("Helium was not found. Install Helium or set its location in the extension preferences.");
+    throw new Error(
+      "Helium was not found. Checked the standard install locations and the Windows registry. " +
+        "If Helium is installed elsewhere (for example a portable build), set its full path to " +
+        "chrome.exe in this extension's preferences.",
+    );
   }
   return executable;
 }
@@ -86,20 +175,27 @@ export function requireHeliumExecutable(): string {
  */
 export function getHeliumAppTarget(): string | undefined {
   if (!isWindows) return getHeliumPathPreference() ?? HELIUM_BUNDLE_ID;
-  return findHeliumExecutable();
+  return findHeliumExecutableCached();
 }
 
 /**
- * The Chromium "User Data" root of a Windows install, derived from the
- * executable at `<root>\Application\chrome.exe` so portable installs pointed at
- * by the preference resolve to their own profile data. Falls back to the
- * default per-user location when Helium isn't installed, which keeps the
- * profile helpers returning a stable (if empty) path.
+ * The Chromium "User Data" root holding `Local State` and the profile folders.
+ *
+ * A per-user install keeps it beside the executable, but a machine-wide install
+ * under Program Files still stores profiles in `%LOCALAPPDATA%`, so the path
+ * cannot simply be derived from the executable — candidates are probed in turn.
  */
 export function getWindowsUserDataPath(options: WindowsPathOptions = {}): string | undefined {
-  const executable = findHeliumExecutable(options);
-  if (executable) return join(dirname(dirname(executable)), "User Data");
+  const env = options.env ?? process.env;
+  const executable =
+    "override" in options || options.env ? findHeliumExecutable(options) : findHeliumExecutableCached();
 
-  const [defaultRoot] = getWindowsInstallRoots(options.env);
-  return defaultRoot ? join(defaultRoot, "User Data") : undefined;
+  const candidates: string[] = [];
+  if (executable) candidates.push(join(dirname(dirname(executable)), "User Data"));
+  for (const root of getWindowsInstallRoots(env)) candidates.push(join(root, "User Data"));
+
+  const existing = candidates.find((candidate) => existsSync(candidate));
+  if (existing) return existing;
+
+  return candidates[0];
 }
