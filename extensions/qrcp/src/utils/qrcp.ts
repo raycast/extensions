@@ -1,6 +1,6 @@
 import { createServer, IncomingMessage } from "http";
 import dgram from "dgram";
-import { homedir } from "os";
+import { homedir, networkInterfaces } from "os";
 import QRCode from "qrcode";
 import path from "path";
 import fs from "fs";
@@ -404,11 +404,11 @@ export async function generateQRCode(url: string): Promise<string> {
 }
 
 export async function getLocalIp(): Promise<string> {
-  return new Promise((resolve) => {
+  const routeAddress = await new Promise<string | null>((resolve) => {
     const socket = dgram.createSocket("udp4");
     let finished = false;
 
-    const finish = (ip: string) => {
+    const finish = (address: string | null) => {
       if (finished) {
         return;
       }
@@ -418,21 +418,36 @@ export async function getLocalIp(): Promise<string> {
       } catch {
         // ignore
       }
-      resolve(ip);
+      resolve(address);
     };
 
-    socket.once("error", () => finish("localhost"));
+    socket.once("error", () => finish(null));
     socket.connect(53, "1.1.1.1", () => {
       const address = socket.address();
       if (typeof address === "object" && address.address) {
         finish(address.address);
       } else {
-        finish("localhost");
+        finish(null);
       }
     });
 
-    setTimeout(() => finish("localhost"), 2000);
+    setTimeout(() => finish(null), 2000);
   });
+
+  if (routeAddress && routeAddress !== "0.0.0.0") {
+    return routeAddress;
+  }
+
+  const nets = networkInterfaces();
+  for (const name of Object.keys(nets)) {
+    for (const net of nets[name]!) {
+      if (net.family === "IPv4" && !net.internal) {
+        return net.address;
+      }
+    }
+  }
+
+  return "localhost";
 }
 
 type ReceiveServerOptions = {
