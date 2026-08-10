@@ -269,9 +269,11 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 //      safe resolution when multiple same-app sessions share a title prefix.
 //   2. Exactly one session matches the title fingerprint — it moved ordinals
 //      (a sibling closed, order changed). Trust the title, not the number.
-//   3. Ordinal match with no title fingerprint — the track skipped, so the title
-//      changed between render and action. Ordinal still points at the clicked
-//      session.
+//   3. Ordinal match with no title fingerprint — the track skipped and the title
+//      changed between render and action. Only trusted when this app exposes a
+//      single session: with no sibling, no other session could have shifted into
+//      the old ordinal. With two or more sessions the old ordinal's current
+//      occupant is indistinguishable from the clicked one, so we refuse to guess.
 //   Otherwise ambiguous (two+ sessions share the prefix) or missing → None.
 //   Guess-free: callers surface a "try refreshing" error rather than controlling
 //   the wrong session (e.g. two browser tabs with identical titles).
@@ -283,11 +285,13 @@ fn resolve_target_index(
 ) -> Option<usize> {
     let mut index_match: Option<usize> = None;
     let mut title_matches: Vec<usize> = Vec::new();
+    let mut app_count = 0u32;
 
     for (i, entry) in entries.iter().enumerate() {
         if entry.app_id != target_app_id {
             continue;
         }
+        app_count += 1;
         let title_ok = !target_title_prefix.is_empty() && entry.title.starts_with(target_title_prefix);
 
         // 1. Exact (ordinal + title) match
@@ -307,8 +311,10 @@ fn resolve_target_index(
         return title_matches[0].into();
     }
 
-    // 3. Ordinal match with no title fingerprint (track-skip case)
-    if title_matches.is_empty() {
+    // 3. Ordinal match with no title fingerprint (track-skip case). Safe only
+    //    for single-session apps: a sibling closing or repositioning can't have
+    //    moved another session onto the clicked ordinal there.
+    if title_matches.is_empty() && app_count == 1 {
         if let Some(i) = index_match {
             return Some(i);
         }
