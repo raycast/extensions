@@ -1,6 +1,6 @@
 # Ten Four Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-10
 
 - Ten Four Shelf command: searchable list of snippets with copy, paste, pin, remove, and clear actions, plus a live-updating detail view.
 - Install Ten Four CLI command: installs the bundled `tenfour` CLI into your PATH so your terminal and Claude Code can push snippets onto the shelf.
