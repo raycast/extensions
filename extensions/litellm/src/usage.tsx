@@ -44,11 +44,12 @@ function formatResetDate(value?: string | null): string | undefined {
   return date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
 }
 
-/** Grey for tiny spend (< $1), green up to $100, orange beyond. */
+/** Grey at $0, green up to $100, orange up to $1000, red beyond. */
 function amountColor(amount: number): Color {
-  if (amount < 1) return Color.SecondaryText;
-  if (amount < 100) return Color.Green;
-  return Color.Orange;
+  if (amount <= 0) return Color.SecondaryText;
+  if (amount <= 100) return Color.Green;
+  if (amount < 1000) return Color.Orange;
+  return Color.Red;
 }
 
 /** Green under 70% of budget, orange under 90%, red at/over 90%. */
