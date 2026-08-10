@@ -1,6 +1,6 @@
 # SSH Image Drop
 
-Send files, folders, and clipboard images to a remote server over SSH with one hotkey — and pull them back. The **remote path** lands on your clipboard, so there is nothing to type.
+Send files, folders, and clipboard images to a remote server over SSH with one hotkey — and pull them back. The **remote path** lands on your clipboard, so there is nothing to type. For clipboard images, pick an **Auto-Paste** app in preferences and the path goes straight into it — not even Cmd+V.
 
 [![SSH Image Drop — intro video](media/intro-thumbnail.jpg)](https://www.youtube.com/watch?v=kU1Xyp2hFhU)
 
@@ -45,6 +45,8 @@ Pulled files land in your Download Directory (`~/Downloads` by default) — ofte
 - macOS 13+, or Windows 11 with the built-in OpenSSH client 9.0+. Transfers force SFTP (`scp -s`) and fail closed on older builds rather than falling back to the legacy protocol.
 - **Remote servers must run macOS or Linux.** Windows is supported as the client only.
 - Default remote directory is `/tmp/ssh-image-drop`. On a shared server, set a private path in preferences.
+- Clipboard images are capped at 20 MB and rejected before the transfer starts, rather than uploading for minutes.
+- Auto-paste is macOS-only, opt-in, and covers Send Clipboard Image only; file sends and pulls always copy. It pastes into whichever field has focus in the app you picked, and only while that app is frontmost as the transfer finishes — anywhere else the path is just copied.
 - Adds one `Include` line to `~/.ssh/config`, with your consent and after a timestamped backup. Managed servers live only in the included file.
 - Deleting a server removes its config block and stored password, but not the public key already in that server's `authorized_keys`.
 - No telemetry. Nothing leaves your machine except to the server you pick.

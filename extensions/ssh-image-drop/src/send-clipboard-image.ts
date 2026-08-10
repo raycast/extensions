@@ -1,5 +1,4 @@
 import {
-  Clipboard,
   LaunchProps,
   LaunchType,
   launchCommand,
@@ -13,6 +12,7 @@ import { platform } from "./runtime/platform";
 import { addRecent, getAuthMode } from "./runtime/store";
 import {
   clipboardHasImage,
+  deliverPath,
   ensureKnownHost,
   prefs,
   runSend,
@@ -77,10 +77,11 @@ export default async function main(props: LaunchProps) {
       await getAuthMode(host),
       prefs().remoteDir,
     );
-    await Clipboard.copy(remotePath);
-    await addRecent(host);
-    await toast.hide();
-    await showHUD(`✅ Sent to ${host}`);
+    // 전송은 끝났다 — 부가 처리 실패가 경로 전달을 막거나 전송 실패로 보고되면 안 된다
+    await addRecent(host).catch(() => undefined);
+    await toast.hide().catch(() => undefined);
+    const delivered = await deliverPath(remotePath);
+    await showHUD(`✅ Sent to ${host}${delivered}`);
   } catch (e) {
     await toast.hide();
     const msg = (e as Error).message;

@@ -1,45 +1,31 @@
 import { describe, expect, it } from "vitest";
-import { mergeHosts, parseAdditionalHosts } from "../src/lib/mergeHosts";
+import { mergeHosts } from "../src/lib/mergeHosts";
 
 describe("mergeHosts", () => {
-  it("orders recent → managed → config → additional, dedup keeps first occurrence", () => {
+  it("orders recent → managed → config, dedup keeps first occurrence", () => {
     const out = mergeHosts(
       ["ect"],
       ["mm", "ect"],
       ["server.example.com", "mm"],
-      ["user@192.0.2.4"],
     );
     expect(out).toEqual([
       { name: "ect", source: "recent" },
       { name: "mm", source: "managed" },
       { name: "server.example.com", source: "config" },
-      { name: "user@192.0.2.4", source: "additional" },
     ]);
   });
   it("drops empty names", () => {
-    expect(mergeHosts([""], [], [], [])).toEqual([]);
+    expect(mergeHosts([""], [], [])).toEqual([]);
   });
   it("filters invalid hosts from every source (spec §7: all ingress paths)", () => {
-    expect(mergeHosts(["-bad"], ["a b"], ["ok", "!neg"], [])).toEqual([
+    expect(mergeHosts(["-bad"], ["a b"], ["ok", "!neg"])).toEqual([
       { name: "ok", source: "config" },
     ]);
   });
   it("excludes hosts not present in any source (F1 whitelist: deeplink to unknown host is rejected)", () => {
-    const known = mergeHosts(["ect"], ["mm"], ["server.example.com"], []);
+    const known = mergeHosts(["ect"], ["mm"], ["server.example.com"]);
     // isKnownHost는 이 목록 멤버십으로 판정 — 조작 딥링크의 임의 host는 여기에 없어 차단된다
     expect(known.some((e) => e.name === "attacker.example.com")).toBe(false);
     expect(known.some((e) => e.name === "mm")).toBe(true);
-  });
-});
-
-describe("parseAdditionalHosts", () => {
-  it("splits by comma, trims, drops empties and invalid hosts", () => {
-    expect(parseAdditionalHosts(" a , user@b ,, -bad , c\nd ")).toEqual([
-      "a",
-      "user@b",
-    ]);
-  });
-  it("returns empty for empty input", () => {
-    expect(parseAdditionalHosts("")).toEqual([]);
   });
 });

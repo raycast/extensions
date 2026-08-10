@@ -92,15 +92,7 @@
       "description": "Directory on the server where uploaded files are stored (cleared on reboot when under /tmp)",
       "type": "textfield",
       "required": false,
-      "default": "/tmp/ssh-image-drop"
-    },
-    {
-      "name": "additionalHosts",
-      "title": "Additional Servers",
-      "description": "Comma-separated servers that already connect with plain 'ssh user@host' — default port 22, key auth set up (e.g. user@192.0.2.10)",
-      "type": "textfield",
-      "required": false,
-      "default": ""
+      "placeholder": "/tmp/ssh-image-drop"
     },
     {
       "name": "downloadDir",
@@ -108,7 +100,7 @@
       "description": "Local directory for pulled files",
       "type": "textfield",
       "required": false,
-      "default": "~/Downloads"
+      "placeholder": "~/Downloads"
     },
     {
       "name": "hideConfigHosts",
@@ -118,6 +110,13 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "pasteTargetApp",
+      "title": "Auto-Paste",
+      "description": "macOS only. App that receives the remote path after Send Clipboard Image — pasted only if that app is frontmost when the transfer finishes, into whichever field has focus there. Leave unset to only copy the path. File sends and pulls always copy only",
+      "type": "appPicker",
+      "required": false
     }
   ],
   "dependencies": {

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
   basenameIssue,
+  CLIPBOARD_IMAGE_MAX_BYTES,
+  clipboardImageSizeIssue,
   expandTilde,
+  isPasteSafePath,
+  isSameApp,
   findUnsafeChar,
   globEscape,
   isSafeBasename,
@@ -286,5 +290,82 @@ describe("sanitizeLocalName (Windows pull 로컬 파일명)", () => {
   it("정규화로 비면 file 폴백, 일반 이름은 불변", () => {
     expect(sanitizeLocalName("...", true)).toBe("file");
     expect(sanitizeLocalName("스크린샷 (1).png", true)).toBe("스크린샷 (1).png");
+  });
+});
+
+describe("clipboardImageSizeIssue", () => {
+  it("상한 이하는 통과 (경계 포함)", () => {
+    expect(clipboardImageSizeIssue(0)).toBeNull();
+    expect(clipboardImageSizeIssue(CLIPBOARD_IMAGE_MAX_BYTES)).toBeNull();
+  });
+  it("상한 초과는 실제 크기와 상한을 문구에 담아 거부", () => {
+    const issue = clipboardImageSizeIssue(CLIPBOARD_IMAGE_MAX_BYTES + 1);
+    expect(issue).toContain("20.0 MB");
+    expect(issue).toContain("the limit is 20 MB");
+  });
+});
+
+describe("isPasteSafePath", () => {
+  it("생성된 원격 경로는 허용", () => {
+    expect(isPasteSafePath("/tmp/ssh-image-drop/20260809-101112.png")).toBe(
+      true,
+    );
+    expect(isPasteSafePath("~/shots/스크린샷 (1).png")).toBe(true);
+  });
+  it("빈 문자열 거부", () => {
+    expect(isPasteSafePath("")).toBe(false);
+  });
+  it("입력 확정으로 해석되는 제어문자 거부 — LF·CR·NUL", () => {
+    expect(isPasteSafePath("/tmp/a.png\n/tmp/b.png")).toBe(false);
+    expect(isPasteSafePath("/tmp/a.png\r")).toBe(false);
+    expect(isPasteSafePath("/tmp/a\0.png")).toBe(false);
+  });
+});
+
+describe("isSameApp", () => {
+  it("bundleId가 같으면 동일", () => {
+    expect(
+      isSameApp(
+        { name: "Warp", bundleId: "dev.warp.Warp-Stable" },
+        { name: "Warp", bundleId: "dev.warp.Warp-Stable" },
+      ),
+    ).toBe(true);
+  });
+  it("양쪽에 bundleId가 있고 다르면 name이 같아도 거부 — 변형 번들 오인 방지", () => {
+    expect(
+      isSameApp(
+        { name: "Code", bundleId: "com.microsoft.VSCode" },
+        { name: "Code", bundleId: "com.microsoft.VSCodeInsiders" },
+      ),
+    ).toBe(false);
+  });
+  it("bundleId가 한쪽에만 있으면 다음 단계(path)로 내려간다", () => {
+    expect(
+      isSameApp(
+        { name: "Warp", path: "/Applications/Warp.app" },
+        {
+          name: "Warp",
+          path: "/Applications/Warp.app",
+          bundleId: "dev.warp.Warp-Stable",
+        },
+      ),
+    ).toBe(true);
+  });
+  it("windowsAppId가 bundleId보다 우선", () => {
+    expect(
+      isSameApp(
+        { windowsAppId: "A", bundleId: "same" },
+        { windowsAppId: "B", bundleId: "same" },
+      ),
+    ).toBe(false);
+  });
+  it("식별자가 name뿐이면 name으로 비교", () => {
+    expect(isSameApp({ name: "Terminal" }, { name: "Terminal" })).toBe(true);
+    expect(isSameApp({ name: "Terminal" }, { name: "Warp" })).toBe(false);
+  });
+  it("한쪽이 없거나 식별자가 전무하면 fail-closed", () => {
+    expect(isSameApp(undefined, { name: "Warp" })).toBe(false);
+    expect(isSameApp({ name: "Warp" }, undefined)).toBe(false);
+    expect(isSameApp({}, {})).toBe(false);
   });
 });

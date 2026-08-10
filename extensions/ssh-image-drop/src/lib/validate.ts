@@ -135,3 +135,51 @@ export function expandTilde(p: string): string {
   if (p.startsWith("~/")) return join(homedir(), p.slice(2));
   return p;
 }
+
+/** 클립보드 이미지 크기 상한 — 초과분은 전송 시작 전에 거부한다 */
+export const CLIPBOARD_IMAGE_MAX_BYTES = 20 * 1024 * 1024;
+
+/** 상한 초과 시 알림 문구, 이하면 null */
+export function clipboardImageSizeIssue(bytes: number): string | null {
+  if (bytes <= CLIPBOARD_IMAGE_MAX_BYTES) return null;
+  const limit = CLIPBOARD_IMAGE_MAX_BYTES / 1024 / 1024;
+  return `Clipboard image is ${(bytes / 1024 / 1024).toFixed(1)} MB — the limit is ${limit} MB`;
+}
+
+/**
+ * 붙여넣어도 안전한 경로인지 — 비었거나 제어문자가 있으면 거부한다. 셸은 개행·CR을 입력
+ * 확정으로 해석하므로 경로가 명령으로 실행될 수 있다. 생성된 원격 경로만 전달되는 현재
+ * 스코프에선 도달 불가하나(remoteDir는 isSafeRemoteDir가 이미 거른다) 방어로 유지한다.
+ */
+export function isPasteSafePath(text: string): boolean {
+  return text !== "" && findUnsafeChar(text) === null;
+}
+
+/**
+ * appPicker preference와 getFrontmostApplication()이 공통으로 갖는 앱 식별자.
+ * 플랫폼·API에 따라 채워지는 필드가 달라 전부 optional이다.
+ */
+export interface AppRef {
+  name?: string;
+  path?: string;
+  bundleId?: string;
+  windowsAppId?: string;
+}
+
+/**
+ * 두 앱이 같은지. 강한 식별자부터 보고, 같은 단계 식별자가 양쪽에 있으면 그 단계에서 판정을
+ * 끝낸다 — 값이 다른데 약한 식별자로 내려가면 서로 다른 앱을 같다고 볼 수 있다
+ * (예: VS Code와 VS Code Insiders는 name이 겹칠 수 있으나 bundleId가 다르다).
+ * 한쪽이라도 없으면 false — 대상을 확인 못 한 채 붙여넣지 않는다(fail-closed).
+ */
+export function isSameApp(
+  a: AppRef | undefined,
+  b: AppRef | undefined,
+): boolean {
+  if (!a || !b) return false;
+  if (a.windowsAppId && b.windowsAppId)
+    return a.windowsAppId === b.windowsAppId;
+  if (a.bundleId && b.bundleId) return a.bundleId === b.bundleId;
+  if (a.path && b.path) return a.path === b.path;
+  return !!a.name && a.name === b.name;
+}

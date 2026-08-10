@@ -18,13 +18,14 @@ import { createDeeplink, useCachedPromise, usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { deleteServerFlow, ServerForm } from "./components/ServerForm";
 import { parseSelectorContext, SelectorContext } from "./lib/launchContext";
-import { HostEntry, mergeHosts, parseAdditionalHosts } from "./lib/mergeHosts";
+import { HostEntry, mergeHosts } from "./lib/mergeHosts";
 import { isValidHost, remoteBasename } from "./lib/validate";
 import { addRecent, getAuthMode, getRecents } from "./runtime/store";
 import { platform } from "./runtime/platform";
 import {
   confirmFolderPull,
   confirmFolderSend,
+  deliverPath,
   ensureKnownHost,
   prefs,
   readAllHosts,
@@ -48,6 +49,13 @@ const TITLES: Record<SelectorContext["payload"], string> = {
 function titleFor(ctx: SelectorContext): string {
   return TITLES[ctx.payload];
 }
+
+/**
+ * 서버가 하나도 없을 때의 안내. "Hide ~/.ssh/config servers"가 기본 켜짐이라 config에 서버를
+ * 가진 사용자도 빈 목록을 보게 된다 — 그 경우를 짚어주지 않으면 확장이 고장난 것처럼 읽힌다.
+ */
+const NO_SERVERS_HINT =
+  'Add one in Manage Servers. If your servers are in ~/.ssh/config, turn off "Hide ~/.ssh/config servers" in preferences.';
 
 /**
  * 서버를 박은 원클릭 Quicklink 정의. host는 딥링크 context로 전달되고
@@ -95,7 +103,6 @@ async function loadHosts(): Promise<{
     managed,
     // 설정 시 ~/.ssh/config 호스트 숨김 — managed·recent만 목록에 (config 파일 자체는 불변)
     p.hideConfigHosts ? [] : config,
-    parseAdditionalHosts(p.additionalHosts),
   );
   // managed는 배열로 반환 — useCachedPromise가 결과를 JSON 직렬화 캐싱하므로 Set은 {}로 깨진다. Set 재구성은 렌더 시점.
   return { entries, managed };
@@ -292,10 +299,7 @@ function SendFilesForm(props: { targetHost?: string; initialFiles: string[] }) {
       }
     >
       {noServers ? (
-        <Form.Description
-          title="No servers yet"
-          text="Add a server first in Manage Servers, then run this again."
-        />
+        <Form.Description title="No servers yet" text={NO_SERVERS_HINT} />
       ) : (
         <>
           {platform.supportsFileSelection ? (
@@ -369,7 +373,6 @@ export default function SendFileToServer(props: LaunchProps) {
   const files = resolved?.files ?? [];
   const needsPicker = resolved?.needsPicker ?? false;
 
-  const [searchText, setSearchText] = useState("");
   const { data, isLoading, revalidate } = useCachedPromise(loadHosts);
   const entries = data?.entries ?? [];
   const managedSet = new Set(data?.managed ?? []);
@@ -393,11 +396,12 @@ export default function SendFileToServer(props: LaunchProps) {
           title: `Sending clipboard to ${host}…`,
         });
         const { remotePath } = await runSend(host, mode, prefs().remoteDir);
-        await Clipboard.copy(remotePath);
-        await addRecent(host);
-        await animated.hide();
+        // 전송은 끝났다 — 부가 처리 실패가 경로 전달을 막거나 전송 실패로 보고되면 안 된다
+        await addRecent(host).catch(() => undefined);
+        await animated.hide().catch(() => undefined);
         animated = undefined;
-        await showHUD(`✅ Sent to ${host}`);
+        const delivered = await deliverPath(remotePath);
+        await showHUD(`✅ Sent to ${host}${delivered}`);
       } else if (ctx.payload === "pull" && ctx.remotePath) {
         // 폴더면 재귀 다운로드 여부를 사용자 확인 — 취소 시 목록으로 복귀
         if (!(await confirmFolderPull(host, mode, ctx.remotePath))) return;
@@ -452,11 +456,18 @@ export default function SendFileToServer(props: LaunchProps) {
   return (
     <List
       isLoading={isLoading}
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
       navigationTitle={titleFor(ctx)}
       searchBarPlaceholder="Search servers…"
     >
+      {/* 서버가 0개일 때만 — 검색으로 걸러진 경우엔 Raycast 기본 문구가 맞다.
+          로딩 중 빈 배열에 반응해 "없음"이 깜빡이지 않도록 !isLoading을 함께 본다 (폼 쪽 noServers와 동일) */}
+      {!isLoading && entries.length === 0 && (
+        <List.EmptyView
+          icon={Icon.HardDrive}
+          title="No servers yet"
+          description={NO_SERVERS_HINT}
+        />
+      )}
       {entries.map((entry) => {
         const isManaged = managedSet.has(entry.name);
         return (
