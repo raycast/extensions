@@ -1,5 +1,8 @@
-import { LocalStorage, updateCommandMetadata } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
 import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning } from "./utils";
+
+const AUTO_CAFFEINATE_LAST_RUN_KEY = "autoCaffeinateLastRun";
+const AUTO_CAFFEINATE_SESSION_GAP_MS = 2 * 60_000;
 
 async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
@@ -50,13 +53,44 @@ export async function checkSchedule() {
   return false;
 }
 
+/**
+ * Starts caffeination (indefinitely) once per Raycast session when the
+ * "Start caffeination when Raycast starts" preference is enabled and the Mac
+ * is not already caffeinated or covered by a schedule. Returns true when
+ * caffeination was started.
+ */
+export async function maybeAutoCaffeinate(isScheduled?: boolean): Promise<boolean> {
+  // The last-run marker is refreshed on every background tick so the gap below
+  // only grows when Raycast is quit (or the Mac is asleep) - i.e. a fresh
+  // Raycast session. It must be updated before the early returns, otherwise it
+  // goes stale while the Mac is caffeinated and the next decaffeination would
+  // look like a fresh session.
+  const now = Date.now();
+  const lastRun = (await LocalStorage.getItem<number>(AUTO_CAFFEINATE_LAST_RUN_KEY)) ?? 0;
+  await LocalStorage.setItem(AUTO_CAFFEINATE_LAST_RUN_KEY, now);
+
+  if (!getPreferenceValues<Preferences>().startCaffeinateOnLaunch) return false;
+  if (isCaffeinateRunning()) return false;
+
+  const scheduled = isScheduled ?? (await checkSchedule());
+  if (scheduled) return false;
+
+  // A gap larger than the session threshold means Raycast was quit (or the Mac
+  // was asleep) since the last background run, i.e. a fresh Raycast session.
+  if (now - lastRun < AUTO_CAFFEINATE_SESSION_GAP_MS) return false;
+
+  await startCaffeinate({ menubar: true, status: true });
+  return true;
+}
+
 export default async function Command() {
   const isCaffeinated = isCaffeinateRunning();
   const isScheduled = await checkSchedule();
+  const autoStarted = await maybeAutoCaffeinate(isScheduled);
 
   let subtitle = "✖ Decaffeinated";
 
-  if (isCaffeinated || isScheduled) {
+  if (isCaffeinated || isScheduled || autoStarted) {
     subtitle = "✔ Caffeinated";
   }
 

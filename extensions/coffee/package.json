@@ -226,6 +226,14 @@
           "value": "paper-cup"
         }
       ]
+    },
+    {
+      "name": "startCaffeinateOnLaunch",
+      "description": "Automatically keep your Mac awake (indefinitely) shortly after Raycast starts",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Start Caffeination When Raycast Starts"
     }
   ],
   "dependencies": {
