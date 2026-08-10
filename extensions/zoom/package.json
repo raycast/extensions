@@ -32,7 +32,17 @@
       "name": "start-meeting",
       "title": "Start Meeting",
       "description": "Start a new Zoom meeting.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "personalMeetingId",
+          "title": "Personal Meeting ID",
+          "description": "Use your Zoom Personal Meeting ID when starting a meeting. Leave empty to create a new instant meeting.",
+          "type": "textfield",
+          "placeholder": "1234567890",
+          "required": false
+        }
+      ]
     },
     {
       "name": "upcoming-meetings",
