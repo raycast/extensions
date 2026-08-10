@@ -526,12 +526,10 @@ async function installCandidates(
 
   if (preferences.trashSourceAfterInstall && installed.length > 0 && failed.length === 0) {
     try {
+      // Only trash a source when every font candidate from it was selected.
+      // Otherwise a zip/folder with mixed types (or a manual deselect) would
+      // permanently delete the fonts the user chose not to install.
       const trashablePaths = prepared.sourcePaths
-        .filter((source) => source.kind === "file" || source.kind === "zip")
-        .map((source) => source.path);
-
-      const folderTrashCandidates = prepared.sourcePaths
-        .filter((source) => source.kind === "folder")
         .map((source) => source.path)
         .filter((sourcePath) => {
           const allCandidates = allBySource.get(sourcePath) ?? [];
@@ -540,11 +538,7 @@ async function installCandidates(
         });
 
       const existingPaths = (
-        await Promise.all(
-          [...trashablePaths, ...folderTrashCandidates].map(
-            async (itemPath) => [itemPath, await pathExists(itemPath)] as const,
-          ),
-        )
+        await Promise.all(trashablePaths.map(async (itemPath) => [itemPath, await pathExists(itemPath)] as const))
       )
         .filter(([, exists]) => exists)
         .map(([itemPath]) => itemPath);
