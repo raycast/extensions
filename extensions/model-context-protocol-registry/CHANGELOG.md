@@ -1,0 +1,183 @@
+# Model Context Protocol Registry Changelog
+
+## [Add Structured MCP Server] - 2026-08-06
+
+Add Structured to the official registry, allowing AI assistants to view schedules and inbox tasks and create, update, complete, delete, and manage recurring tasks. The remote Streamable HTTP server uses Structured Cloud OAuth sign-in through an `mcp-remote` bridge with a dedicated public client and email-only scope.
+
+## [Add Tendem MCP Server] - 2026-08-06
+
+Add Tendem to the official registry: delegate tasks to vetted human experts (research, competitive analysis, fact-checking, copywriting, editing, design review, presentation polish, data cleaning and list building). Tendem's orchestrator scopes the task and quotes a transparent price, and the expert's verified results come back as markdown plus files. Remote Streamable HTTP MCP server via mcp-remote with OAuth 2.0 sign-in; an API key alternative is available for headless use.
+
+## [Add JobYap MCP Server] - 2026-08-03
+
+Add JobYap to the official registry: search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server via mcp-remote; no auth required.
+
+## [Add Webhound MCP Server] - 2026-07-29
+
+Add Webhound to the official registry for private, budgeted reports and datasets. The remote Streamable HTTP MCP server uses OAuth so each connection authenticates to that user's own Webhound account.
+
+## [Update UseMyContext description] - 2026-07-28
+
+Remove the hard-coded tool count from the UseMyContext description. The server's tool surface has grown since the original submission (now 13 tools), and a number in the listing goes stale with every addition - the description now names the capabilities without a count.
+
+## [Add UseMyContext MCP Server] - 2026-07-28
+
+Add UseMyContext to the official registry: the personal context layer for AI - one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. 8 tools (profile, file search and reads, cited answers from documents, exact table queries, suggested updates, shared contexts). Remote Streamable HTTP endpoint via mcp-remote with OAuth 2.1 sign-in; free tier, no API key.
+
+## [Add Trends MCP] - 2026-07-26
+
+Add Trends MCP to the official registry: live cross-platform trend data for AI agents across Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more. Remote endpoint via mcp-remote; Bearer API key required (free tier at trendsmcp.ai).
+
+## [Add Glif] - 2026-07-23
+
+Add Glif to the official registry: media-generation agent (images, video, audio, transcription, multi-step workflows). Hosted remote streamable HTTP MCP server with OAuth sign-in via mcp-remote; no API key required.
+
+## [Add Agentcard MCP Server] - 2026-07-15
+
+Add Agentcard to the official registry: prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Remote streamable HTTP MCP server with OAuth 2.0 sign-in via mcp-remote; no API key required.
+
+## [Add Appwrite MCP Server] - 2026-07-13
+
+Add the official Appwrite MCP server to the registry, enabling AI assistants to securely inspect and manage Appwrite projects and resources through Appwrite's API using OAuth authentication.
+
+## [Add Nika MCP Server] - 2026-07-12
+
+Add Nika to the community registry — a workflow language for AI (one file, four verbs, one Rust binary). Its MCP server is a read-only oracle: agents validate .nika.yaml workflows (nika_check, nika_explain) and learn the language (schema, templates, examples, catalogs) without executing anything; execution stays on the CLI, budget-capped and trace-verified. Local binary via Homebrew/cargo-binstall/Nix; no env vars, no API key.
+
+## [Update Circleback MCP Server URL] - 2026-07-10
+
+Update the Circleback MCP server endpoint from app.circleback.ai to circleback.ai to reflect our domain migration.
+
+## [Add plori MCP Server] - 2026-07-06
+
+Add official plori MCP server to registry: give your AI agent its own cloud computer. Create and drive hosted plori agents (persistent disk, real tools, memory that survives between sessions), read their replies, answer human-in-the-loop questions, and schedule deferred runs. Remote endpoint via mcp-remote; OAuth sign-in or API key.
+
+## [Add memo MCP Server] - 2026-07-06
+
+Add memo to the community registry — local-first persistent memory for AI agents: MLX embeddings on Apple Silicon (CPU fallback elsewhere), sqlite-vec + BM25 hybrid search, markdown-on-disk storage compatible with Obsidian. No cloud APIs.
+
+## [Add Jellypod MCP Server] - 2026-06-19
+
+Add official Jellypod MCP Server to registry for creating, editing, and publishing conversational AI podcasts (podcasts, hosts, sources, episodes, and analytics). Remote endpoint via mcp-remote.
+
+## [Add Olostep MCP Server] - 2026-06-16
+
+Add official Olostep MCP Server to registry for web data access — search, scrape, crawl, batch processing, and cited AI answers.
+
+## [Add OptionsAhoy MCP Server] - 2026-06-16
+
+Add community OptionsAhoy MCP Server to registry for equity-compensation tax optimization (ISO/AMT scheduling, NSO, RSU sell-vs-hold, QSBS eligibility, concentration risk, protective puts/collars) across federal plus 50-state and DC tax code. Remote endpoint via mcp-remote, no API key required.
+
+## [Add VC Deal Flow Signal MCP Server] - 2026-06-03
+
+Add community VC Deal Flow Signal MCP Server to registry for GitHub-derived engineering acceleration signals across ~400 venture-backed startups in 20 sectors (read-only, no API key).
+
+## [Add Alai MCP Server] - 2026-04-30
+
+Add community Alai MCP Server to registry for AI-powered presentation generation (text-to-slides, exports to PDF, PPTX, or shareable link).
+
+## [Add Sanity MCP Server] - 2026-03-07
+
+Add official Sanity MCP Server to registry for direct access to Sanity projects.
+
+## [Add RouteMesh MCP Server] - 2026-03-05
+
+Add official RouteMesh MCP Server to registry for multi-chain EVM RPC access with RouteMesh routing and failover.
+
+## [Add Razuna MCP Server] - 2026-02-03
+
+Add official Razuna MCP Server to registry.
+
+## [Update Anytype MCP Server] - 2026-01-13
+
+Update Anytype MCP Server to use the latest version of the Anytype API.
+
+## [Add Circleback MCP Server] - 2026-01-13
+
+Add official Circleback MCP Server to registry.
+
+## [Add Atono MCP Server] - 2025-12-08
+
+Add official Atono MCP Server to registry to manage projects
+
+## [Update Nuxt MCP Server URL] - 2025-11-17
+
+## [Update Nuxt UI MCP Server URL] - 2025-09-23
+
+## [Add Nuxt UI MCP Server] - 2025-09-10
+
+Add official Nuxt UI MCP Server to registry
+
+## [Add Rube MCP Server] - 2025-08-26
+
+Add official Rube MCP Server to registry to connect AI tools to 500+ apps
+
+## [Add Linear MCP Server] - 2025-08-11
+
+Add official Linear MCP Server to registry to manage projects
+
+## [Updated Apify] - 2025-08-04
+
+Updated Apify MCP server configuration from `APIFY_API_TOKEN` to `APIFY_TOKEN`
+
+## [Update Google Drive Homepage URL] - 2025-07-23
+
+Update Google Drive Homepage URL to the correct one.
+
+## [Add Gen-PDF MCP Server] - 2025-06-19
+
+Add Gen-PDF MCP server to let AI generate beautiful PDF documents.
+
+## [Add Keboola MCP Server] - 2025-06-17
+
+Add official Keboola MCP Server to registry - an open-source bridge between your Keboola project and modern AI tools. It turns Keboola features—like storage access, SQL transformations, and job triggers—into callable tools for Claude, Cursor, CrewAI, LangChain, Amazon Q, and more.
+
+## [Updated Prisma MCP Server URL] - 2025-06-05
+
+The Prisma MCP server URL was updated.
+
+## [Add Kagi Search MCP Server] - 2025-06-05
+
+Add official Kagi Search MCP Server to registry.
+
+## [Add Anytype MCP Server] - 2025-05-30
+
+Add official Anytype MCP Server to registry.
+
+## [Add Thena MCP Server] - 2025-05-28
+
+Add official Thena.ai MCP Server to registry, this allows users and AI agents to interact with Thena's services and manage customer requests coming from Slack, Email, Discord and more.
+
+## [Add Grafana MCP Server] - 2025-05-26
+
+Add the official Grafana MCP server to the Model Context Protocol Registry. Grafana MCP server provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools.
+
+## [Add Paperless MCP Server] - 2025-05-21
+
+Add Community Paperless MCP Server to registry, this allows to manage documents in Paperless.
+
+## [Add Shopify Dev Server] - 2025-05-21
+
+Add Official Shopify Dev MCP Server to registry.
+
+## [Add Prisma MCP Server] - 2025-05-21
+
+Add Official Prisma MCP Server to registry.
+
+## [Add Zeabur MCP Server] - 2025-05-21
+
+Add Official Zeabur MCP Server to registry, this allows to manage and deploy Zeabur projects.
+
+## [Add Apify MCP Server] - 2025-05-16
+
+Add the official Apify MCP server to the Model Context Protocol Registry. Apify MCP server allows AI agents to use 5,000+ ready-made Actors for use cases such as extracting data from websites, social media, search engines, online maps, and more.
+
+## [Add Nuxt MCP Server] - 2025-05-15
+
+Add Official Nuxt MCP Server to registry, this allow docs and modules search.
+
+## [Chore: Fixed broken MCP links] - 2025-05-09
+
+## [Initial Version] - 2025-05-09
+
+Initial version of the Model Context Protocol Registry. It contains two built-in registries. One with official servers and the other with community servers. Additionally, it contains a Smithery registry. The registry makes it easy to find and install MCP servers in Raycast and other apps that support the Model Context Protocol.

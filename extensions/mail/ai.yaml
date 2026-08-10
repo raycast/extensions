@@ -1,0 +1,124 @@
+instructions: |
+  If you can't access the Apple Mail database, tell the user they need to give Raycast the full disk access permission in the system settings. Be detailed about the steps.
+evals:
+  - input: "@mail when is the raycast hackathon?"
+    mocks:
+      search-emails:
+        - id: "1"
+          from: raycast@example.com
+          subject: Raycast Hackathon
+          text: Raycast Hackathon London is starting tomorrow Friday 7 March 15:00 -
+            21:00 GMT
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search: raycast hackathon
+            includeTrash: false
+  - input: "@mail when is my meeting with john smith?"
+    mocks:
+      search-emails:
+    expected:
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: search-emails
+      - callsTool:
+          name: search-emails
+  - input: "@mail tell john i will have that pr done tomorrow"
+    mocks:
+      list-addresses:
+        - address: john@example.com
+          name: John Doe
+        - address: jane@example.com
+          name: Jane Doe
+      send-email: Successfully called "send-email"
+    expected:
+      - callsTool:
+          arguments:
+            query: john
+          name: list-addresses
+      - callsTool:
+          arguments:
+            content:
+              includes: tomorrow
+            subject:
+              includes: PR
+            to:
+              - john@example.com
+          name: send-email
+  - input: "@mail move the email from amazon about shipping to trash"
+    mocks:
+      search-emails:
+        - id: "101"
+          from: shipment-tracking@amazon.com
+          subject: Your package has shipped
+          summary: Your order is on the way and will arrive tomorrow.
+      move-to-trash:
+        message: 1 Email moved to Trash
+        emails:
+          - id: "101"
+            subject: Your package has shipped
+            from: shipment-tracking@amazon.com
+            accountName: iCloud
+            mailboxName: INBOX
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: amazon
+      - callsTool:
+          name: move-to-trash
+          arguments:
+            messageId: "101"
+  - input: "@mail find the security alert email in trash"
+    mocks:
+      search-emails:
+        - id: "6551"
+          from: no-reply@accounts.google.com
+          subject: Security alert
+          summary: A new sign-in on Mac
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: security alert
+            includeTrash: true
+  - input: "@mail move all github notification emails about failed builds to trash"
+    mocks:
+      search-emails:
+        - id: "201"
+          from: notifications@github.com
+          subject: Build failed for raycast/extensions
+          summary: The build failed on main.
+        - id: "202"
+          from: notifications@github.com
+          subject: CI failed for mail extension
+          summary: The workflow completed with failures.
+      move-to-trash:
+        message: 2 Emails moved to Trash
+        emails:
+          - id: "201"
+            subject: Build failed for raycast/extensions
+            from: notifications@github.com
+            accountName: iCloud
+            mailboxName: INBOX
+          - id: "202"
+            subject: CI failed for mail extension
+            from: notifications@github.com
+            accountName: iCloud
+            mailboxName: INBOX
+    expected:
+      - callsTool:
+          name: search-emails
+          arguments:
+            search:
+              includes: github
+      - callsTool:
+          name: move-to-trash
+          arguments:
+            messageIds:
+              - "201"
+              - "202"

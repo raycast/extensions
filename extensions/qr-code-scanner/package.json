@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qr-code-scanner",
+  "title": "QR Code Scanner",
+  "description": "Simple on-screen QR code scanner. (\"Screen recording\" permission is required)",
+  "icon": "command-icon.png",
+  "author": "StevenRCE0",
+  "categories": [
+    "Productivity"
+  ],
+  "contributors": [
+    "MoienTajik",
+    "0xdhrv"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Scan QR Code",
+      "description": "Scans QR code on screen.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "captureMode",
+      "title": "Capture Mode",
+      "description": "Select screen capture mode. Select \"Selection\" for more precise recognition.",
+      "type": "dropdown",
+      "required": false,
+      "default": "area",
+      "data": [
+        {
+          "title": "Selection",
+          "value": "area"
+        },
+        {
+          "title": "Entire Screen",
+          "value": "fullscreen"
+        }
+      ]
+    },
+    {
+      "name": "silence",
+      "title": "Silence Mode",
+      "label": "Do Not Play Sound",
+      "description": "Do not play sound when capturing screen.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "openUrlAfterScan",
+      "title": "Open URL After Scan",
+      "label": "Open URL Automatically",
+      "description": "Open decoded URLs automatically after scanning. Disable to copy or inspect links first.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "jimp": "^1.6.0",
+    "jsqr": "^1.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "@types/screenshot-desktop": "^1.15.0",
+    "@typescript-eslint/eslint-plugin": "^8.57.2",
+    "@typescript-eslint/parser": "^8.57.2",
+    "@raycast/eslint-config": "^2.1.1",
+    "eslint": "^10.1.0",
+    "eslint-config-prettier": "^10.1.8",
+    "file-loader": "^6.2.0",
+    "typescript": "^5.3.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

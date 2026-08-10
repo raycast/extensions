@@ -1,0 +1,34 @@
+# Trovu Changelog
+
+## [1.3.1] - 2026-04-08
+
+- Minor code fixes.
+
+## [1.3.0] - 2026-04-08
+
+- After submit, go directly to target URL, not via process script.
+- On reload, stay in app, show message.
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [1.2.1] - 2025-04-22
+
+- Fix error when loading environment [#508](https://github.com/trovu/trovu/issues/508)
+
+## [1.2.0] - 2024-10-08
+
+- Fix missing escape of RegExp [#456](https://github.com/trovu/trovu/issues/456)
+- Add reload option [#417](https://github.com/trovu/trovu/issues/417)
+
+## [1.1] - 2024-07-28
+
+- Fix: Submission of truncated queries (with removing `throttle`)
+- Add screencast
+- Add icons to special shortcuts
+
+## [Initial Version] - 2024-06-25
+
+- Core functionality: Call shortcuts
+- Allows setting GitHub username for [advanced Trovu settings and personal shortcuts](https://trovu.net/docs/users/advanced/)

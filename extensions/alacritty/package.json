@@ -1,0 +1,75 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "alacritty",
+  "title": "Alacritty",
+  "description": "Adds commands to control the Alacritty terminal emulator.",
+  "icon": "alacritty-term.png",
+  "author": "jose-elias-alvarez",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "edit-file",
+      "title": "Edit File in Alacritty",
+      "description": "Edit the selected Finder file(s) in Alacritty using $EDITOR",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-folder",
+      "title": "Open Folder in Alacritty",
+      "description": "Open an instance of Alacritty at the currently selected Finder folder(s) (or parent folder of the selected file)",
+      "mode": "no-view"
+    },
+    {
+      "name": "run-from-clipboard",
+      "title": "Run Command From Clipboard",
+      "description": "Run the current clipboard content as a shell command in Alacritty. Use at your own risk!",
+      "mode": "no-view"
+    },
+    {
+      "name": "run-from-selection",
+      "title": "Run Command From Selection",
+      "description": "Run the currently selected text as a shell command in Alacritty. Use at your own risk!",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "alacrittyPath",
+      "title": "Alacritty Path",
+      "required": false,
+      "description": "Full path to Alacritty executable",
+      "type": "textfield",
+      "default": "/Applications/Alacritty.app/Contents/MacOS/alacritty"
+    },
+    {
+      "name": "shellPath",
+      "required": false,
+      "title": "Shell Path",
+      "description": "Full path to shell executable used to run commands",
+      "type": "textfield",
+      "default": "/bin/zsh"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-drive",
+  "title": "Google Drive",
+  "description": "Fuzzy search files in the mounted Google Drive",
+  "icon": "command-icon.png",
+  "author": "vishaltelangre",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "contributors": [
+    "nametake",
+    "daniel-stoneuk"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "File Search",
+      "subtitle": "Google Drive",
+      "description": "Fuzzy search files in your locally mounted Google Drive folder",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "googleDriveRootPath",
+      "title": "Google Drive root path",
+      "description": "The absolute path to the root of your Google Drive folder",
+      "type": "textfield",
+      "default": "~/Google Drive",
+      "placeholder": "e.g. ~/Google Drive",
+      "required": true
+    },
+    {
+      "name": "shouldShowHiddenFiles",
+      "description": "Show hidden files in the search results",
+      "type": "checkbox",
+      "default": false,
+      "label": "Show hidden files",
+      "required": false
+    },
+    {
+      "name": "shouldShowDirectories",
+      "description": "Show directories in the search results",
+      "type": "checkbox",
+      "default": false,
+      "label": "Show directories",
+      "required": false
+    },
+    {
+      "name": "excludePaths",
+      "title": "Exclude Paths",
+      "description": "Comma-separated full paths to exclude from search",
+      "type": "textfield",
+      "default": "",
+      "placeholder": "e.g. ~/Google Drive/My Drive/Share, ...",
+      "required": false
+    },
+    {
+      "name": "autoReindexingInterval",
+      "title": "Auto Reindexing Interval",
+      "description": "The recurring interval to reindex the cached files in Google Drive folder",
+      "type": "dropdown",
+      "default": "604800000",
+      "required": false,
+      "data": [
+        {
+          "title": "Every hour",
+          "value": "3600000"
+        },
+        {
+          "title": "Every 2 hours",
+          "value": "7200000"
+        },
+        {
+          "title": "Every 3 hours",
+          "value": "10800000"
+        },
+        {
+          "title": "Every 6 hours",
+          "value": "21600000"
+        },
+        {
+          "title": "Every 12 hours",
+          "value": "43200000"
+        },
+        {
+          "title": "Every day",
+          "value": "86400000"
+        },
+        {
+          "title": "Every 2 days",
+          "value": "172800000"
+        },
+        {
+          "title": "Twice a week",
+          "value": "302400000"
+        },
+        {
+          "title": "Every week",
+          "value": "604800000"
+        },
+        {
+          "title": "Every 15 days",
+          "value": "1296000000"
+        },
+        {
+          "title": "Every month",
+          "value": "2592000000"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.37.0",
+    "fast-glob": "^3.2.11",
+    "fzf": "^0.5.1",
+    "sql.js": "^1.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.0",
+    "@types/react": "^17.0.28",
+    "@types/sql.js": "^1.4.3",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3",
+    "use-debounce": "^7.0.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

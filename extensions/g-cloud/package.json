@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "g-cloud",
+  "title": "Google Cloud CLI",
+  "subtitle": "Manage your Google Cloud resources without opening a browser",
+  "description": "A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.",
+  "icon": "icon.png",
+  "version": "1.1.0",
+  "author": "ojowwalker77",
+  "contributors": [
+    "ben_selleslagh"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Google Cloud",
+      "subtitle": "Unified Google Cloud Management",
+      "description": "Unified Google Cloud management - access Compute, Storage, IAM, Network, and Secrets from one place",
+      "mode": "view",
+      "screenshots": [
+        {
+          "path": "./metadata/g-cloud-1.png",
+          "title": "Google Cloud CLI Overview"
+        },
+        {
+          "path": "./metadata/g-cloud-2.png",
+          "title": "Project Selection"
+        },
+        {
+          "path": "./metadata/g-cloud-3.png",
+          "title": "Resource Management"
+        }
+      ]
+    },
+    {
+      "name": "configurations",
+      "title": "Settings & Configuration",
+      "subtitle": "Manage gcloud configs & extension settings",
+      "description": "List, switch, create, duplicate, and delete named gcloud configurations. Manage extension settings.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gcloudPath",
+      "title": "gcloud CLI Path",
+      "description": "Leave empty to auto-detect, or specify custom path to gcloud executable",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "defaultRegion",
+      "title": "Default Region",
+      "description": "Default GCP region for new resources (e.g., us-central1, europe-west1)",
+      "type": "textfield",
+      "required": false,
+      "default": "us-central1"
+    },
+    {
+      "name": "preferredIDE",
+      "title": "Default IDE",
+      "description": "IDE for opening files (e.g., logs, configs)",
+      "type": "appPicker",
+      "required": false,
+      "default": "com.microsoft.VSCode"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.0.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

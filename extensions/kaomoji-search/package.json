@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kaomoji-search",
+  "title": "Kaomoji Search",
+  "description": "Search and copy to the clipboard different kaomoji (ascii/unicode emotes).",
+  "icon": "command-icon.png",
+  "author": "yalishanda",
+  "contributors": [
+    "xmok",
+    "markwiseman",
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Kaomoji",
+      "description": "Search for kaomoji by a keyword description.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "displayMode",
+      "title": "Display Mode",
+      "required": false,
+      "description": "Choose how to display the results.",
+      "default": "list",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "List",
+          "value": "list"
+        },
+        {
+          "title": "Grid",
+          "value": "grid"
+        }
+      ]
+    },
+    {
+      "name": "primaryAction",
+      "title": "Primary Action",
+      "required": false,
+      "description": "Choose the primary action for the results.",
+      "default": "paste-to-active-app",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy-to-clipboard"
+        },
+        {
+          "title": "Paste to Active App",
+          "value": "paste-to-active-app"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^2.2.1",
+    "asciilib": "^1.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

@@ -1,0 +1,140 @@
+---
+title: Card
+shortDescription: Used to group similar concepts and tasks together for easier scanning and reading.
+category: Layout and structure
+keywords:
+  - layout
+  - card
+  - responsive
+  - container
+  - box
+  - grid
+  - panel
+  - card with call to action in the footer
+  - card with call to action in the heading
+  - card with call to action in a section
+  - card with button in the footer
+  - card with button in the heading
+  - card with multiple sections
+  - card with subsections
+  - sectioned card
+  - card with a subdued section
+  - subdued card for secondary content
+  - callout
+  - call out
+examples:
+  - fileName: card-default.tsx
+    title: Default
+    description: >-
+      By default, cards have an 8px border radius and uses `--p-color-bg-surface` as the background and `--p-shadow-300` as the shadow. There is padding of `space-400` (16px) around children.
+  - fileName: card-with-subdued-background.tsx
+    title: With subdued background
+    description: >-
+      Use for content that you want to deprioritize. Subdued cards don’t stand out as much as cards with white backgrounds so don’t use them for information or actions that are critical to merchants.
+  - fileName: card-with-varying-padding.tsx
+    title: With varying padding
+    description: >-
+      Use the `padding` property to adjust the spacing within a card. You can also specify spacing values at different breakpoints.
+  - fileName: card-with-responsive-border-radius.tsx
+    title: With responsive border radius
+    description: >-
+      Use the `roundedAbove` property to adjust the border radius of the card based on a set breakpoint.
+  - fileName: card-with-section.tsx
+    title: With section
+    description: >-
+      Use when you have a distinct piece of information to communicate to merchants.
+  - fileName: card-with-subdued-section.tsx
+    title: With subdued section
+    description: >-
+      Use to indicate when one of the sections in your card contains inactive or disabled content.
+  - fileName: card-with-multiple-sections.tsx
+    title: With multiple sections
+    description: >-
+      Use when you have two related but distinct pieces of information to communicate to merchants. Multiple sections can help break up complicated concepts to make them easier to scan and understand.
+  - fileName: card-with-multiple-titled-sections.tsx
+    title: With multiple titled sections
+    description: >-
+      Use when you have two related but distinct pieces of information to communicate to merchants that are complex enough to require a title to introduce them.
+  - fileName: card-with-subsection.tsx
+    title: With subsection
+    description: >-
+      Use when your card sections need further categorization.
+  - fileName: card-with-flushed-section.tsx
+    title: With flushed section
+    description: >-
+      Use when you need further control over the spacing of your card sections.
+  - fileName: card-with-sections-and-actions.tsx
+    title: With sections and actions
+    description: >-
+      Use when your card section has actions that apply only to that section.
+  - fileName: card-with-sections-and-critical-action.tsx
+    title: With sections and critical action
+    description: >-
+      Use when a card action applies only to one section and will delete merchant data or be otherwise difficult to recover from.
+  - fileName: card-with-separate-header.tsx
+    title: With separate header
+    description: >-
+      Use to be able to use custom React elements as header content.
+  - fileName: card-with-header-actions.tsx
+    title: With header actions
+    description: >-
+      Use for less important card actions, or actions merchants may do before reviewing the contents of the card. For example, merchants may want to add items to a card containing a long list, or enter a customer’s new address.
+  - fileName: card-with-header-icon-actions.tsx
+    title: With header icon actions
+    description: >-
+      Use for less important card actions, or actions merchants may do before reviewing the contents of the card. For example, merchants may want to export items in a list.
+  - fileName: card-with-footer-actions.tsx
+    title: With footer actions
+    description: >-
+      Use footer actions for a card’s most important actions, or actions merchants should do after reviewing the contents of the card. For example, merchants should review the contents of a shipment before an important action like adding tracking information.
+  - fileName: card-with-multiple-footer-actions.tsx
+    title: With multiple footer actions
+    description: >-
+      Use when there are multiple secondary footer actions that are rendered in an action list popover activated by a disclosure button.
+  - fileName: card-with-custom-footer-actions.tsx
+    title: With custom footer actions
+    description: >-
+      Use to present actionable content that is optional or not the primary purpose of the page.
+  - fileName: card-with-critical-footer-actions.tsx
+    title: With critical footer action
+    description: >-
+      Use when a card action will delete merchant data or be otherwise difficult to recover from.
+  - fileName: card-with-custom-react-node-title.tsx
+    title: With custom React Node title
+    description: >-
+      Use to render custom content such as icons, links, or buttons in a card section’s header.
+  - fileName: card-with-all-elements.tsx
+    title: With all elements
+    description: >-
+      Use as a broad example that includes using other layout components to build out the card.
+previewImg: /images/components/layout-and-structure/card.png
+---
+
+# {frontmatter.title}
+
+<Lede>
+
+Cards are used to group similar concepts and tasks together for merchants to scan, read, and get things done. It displays content in a familiar and recognizable style.
+
+</Lede>
+
+<Examples />
+
+<Props componentName={frontmatter.title} />
+
+## Best practices
+
+Cards should:
+
+- Group related information
+- Display information in a way that prioritizes what the merchant needs to know most first
+- Use headings that set clear expectations about the card’s purpose
+- Stick to single user flows or break more complicated flows into multiple sections
+- Avoid too many call-to-action buttons or links and only one primary call to action per card
+- Use calls to action on the bottom of the card for next steps and use the space in the upper right corner of the card for persistent, optional actions (such as Edit)
+
+---
+
+## Related components
+
+- For more flexibility on styling, [use the Box component](https://polaris.shopify.com/components/layout-and-structure/box)

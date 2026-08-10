@@ -1,0 +1,99 @@
+instructions: |
+  You have access to several tools for web interaction. Here's how to use them effectively:
+
+  When a user asks a question or makes a request, follow these guidelines:
+
+  1. Choose the appropriate tool based on the query type:
+
+  For complex research questions:
+  - Use the `deep-research` tool
+  - This tool will:
+    - Analyze the query for clarity (ask for clarification if needed)
+    - Perform thorough web searches
+    - Evaluate and filter results
+    - Continue searching until sufficient information is found
+    - Provide a detailed summary with source citations in this format: ([<host>](<full url>))
+  - If no relevant information is found, respond with "No results found"
+
+  For simple fact-finding:
+  - Use the `search-web` tool
+  - This is best for straightforward queries needing quick answers
+  - You'll receive search results containing URLs, titles and descriptions
+
+  To get general information from a webpage:
+  - Use the `scrape` tool when you need the full content
+  - You'll receive:
+    - The page content in markdown format
+    - The page URL
+    - The page title
+
+  For specific information or more detailed information from webpages:
+  - Use the `extract` tool
+  - Important: If unsure about the exact URL, ask the user first
+  - Tip: Add /* to URLs to search the entire website if needed
+  - You'll receive the specific data requested
+
+  Remember these key rules:
+  1. Use `deep-research` for queries needing extensive context and analysis
+  2. Use `search-web` for quick, factual queries
+  3. Use `scrape` or `extract` when working with specific URLs
+  4. Always cite sources in your summaries using: ([<host>](<full url>))
+
+evals:
+  # Complex research query requiring deep analysis
+  - input: "what are the latest developments in quantum computing?"
+    expected:
+      - callsTool:
+          name: deep-research
+          arguments:
+            query: "latest developments quantum computing research breakthroughs 2024"
+    mocks:
+      deep-research:
+        finalAnalysis: |
+          Recent quantum computing developments include significant breakthroughs:
+
+          1. IBM's 1000+ Qubit Processor: IBM achieved a major milestone with their latest quantum processor ([ibm.com](https://research.ibm.com/blog/1000-qubit-processor))
+
+          2. Error Correction Advances: Researchers demonstrated improved quantum error correction methods ([nature.com](https://nature.com/articles/quantum-error-correction))
+
+          3. Quantum Advantage Demonstrations: Google's Sycamore processor completed tasks impossible for classical computers ([google.com](https://research.google/quantum))
+
+  # Quick fact-finding query
+  - input: "what is the current Bitcoin price?"
+    expected:
+      - callsTool:
+          name: search-web
+          arguments:
+            query: "current Bitcoin price"
+    mocks:
+      search-web:
+        searchResults:
+          - url: "https://coinmarketcap.com/currencies/bitcoin/"
+            title: "Bitcoin Price Today"
+            description: "Bitcoin (BTC) current price: $65,432.18 USD"
+
+  # Specific webpage content extraction
+  - input: "Scrape https://docs.firecrawl.dev/features"
+    expected:
+      - callsTool:
+          name: scrape
+          arguments:
+            url: "https://docs.firecrawl.dev"
+    mocks:
+      scrape:
+        content: "# Firecrawl Features\n\n## Web Scraping\nFirecrawl provides powerful web scraping capabilities..."
+        url: "https://docs.firecrawl.dev/features"
+        title: "Firecrawl Features Documentation"
+
+  # Structured data extraction
+  - input: "Tell me if the website https://stripe.com is SOC2 compliant"
+    expected:
+      - callsTool:
+          name: extract
+          arguments:
+            urls: ["https://stripe.com"]
+            userPrompt: "Tell me if the website is SOC2 compliant"
+    mocks:
+      extract:
+        data:
+          SOC2Compliant: true

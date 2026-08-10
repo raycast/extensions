@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "humaans",
+  "title": "Humaans",
+  "description": "Interact with the Humaans platform",
+  "icon": "humaans.png",
+  "author": "farisaziz12",
+  "owner": "humaans",
+  "access": "public",
+  "contributors": [
+    "tom_humaans"
+  ],
+  "categories": [
+    "Productivity",
+    "Web",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "holidays",
+      "title": "View Holidays",
+      "subtitle": "Humaans",
+      "description": "Company wide holidays",
+      "mode": "view"
+    },
+    {
+      "name": "people",
+      "title": "View People",
+      "subtitle": "Humaans",
+      "description": "Company employee directory",
+      "mode": "view"
+    },
+    {
+      "name": "book-time",
+      "title": "Book Time Away",
+      "subtitle": "Humaans",
+      "description": "Book time away from work",
+      "mode": "no-view"
+    },
+    {
+      "name": "me-time-away",
+      "title": "Manage Time Away",
+      "subtitle": "Humaans",
+      "description": "Manage upcoming time away and remaining days",
+      "mode": "no-view"
+    },
+    {
+      "name": "clock-in",
+      "title": "Clock In",
+      "subtitle": "Humaans",
+      "description": "Create a new timesheet entry with the current time",
+      "mode": "no-view"
+    },
+    {
+      "name": "clock-out",
+      "title": "Clock Out",
+      "subtitle": "Humaans",
+      "description": "End the timesheet entry that was clocked in earlier",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Humaans API Key",
+      "description": "Humaans API Key with following scopes: public:read, private:write (for clock in/out)",
+      "placeholder": "Enter your Humaans API Key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "@raycast/utils": "^1.4.18",
+    "cross-fetch": "^4.0.0",
+    "lodash": "^4.17.21"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.191",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

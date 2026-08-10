@@ -1,0 +1,12 @@
+{
+  "root": true,
+  "extends": ["@raycast"],
+  "rules": {
+    "@typescript-eslint/no-explicit-any": "off",
+    "no-empty": "warn",
+    "@raycast/prefer-title-case": "error"
+  },
+  "parserOptions": {
+    "project": "./tsconfig.json"
+  }
+}

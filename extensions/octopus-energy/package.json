@@ -1,0 +1,130 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "octopus-energy",
+  "title": "Octopus Energy",
+  "description": "Retrieve up-to-date Agile tariff prices for your region",
+  "icon": "icon.png",
+  "author": "mike182uk",
+  "categories": [
+    "Data",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "get-agile-prices",
+      "title": "Get Agile Prices",
+      "description": "Retrieve up-to-date Agile tariff prices for your region",
+      "mode": "view",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "name": "product_code",
+          "title": "Tariff",
+          "description": "The Agile tariff you are on",
+          "required": true,
+          "data": [
+            {
+              "value": "AGILE-24-04-03",
+              "title": "Agile Octopus April 2024 v1"
+            }
+          ]
+        },
+        {
+          "type": "dropdown",
+          "name": "region",
+          "title": "Region",
+          "description": "The region you are in",
+          "required": true,
+          "data": [
+            {
+              "value": "A",
+              "title": "East England"
+            },
+            {
+              "value": "B",
+              "title": "East Midlands"
+            },
+            {
+              "value": "C",
+              "title": "London"
+            },
+            {
+              "value": "D",
+              "title": "North Wales, Merseyside and Cheshire"
+            },
+            {
+              "value": "E",
+              "title": "West Midlands"
+            },
+            {
+              "value": "F",
+              "title": "North East England"
+            },
+            {
+              "value": "G",
+              "title": "North West England"
+            },
+            {
+              "value": "H",
+              "title": "Southern England"
+            },
+            {
+              "value": "J",
+              "title": "South East England"
+            },
+            {
+              "value": "K",
+              "title": "South Wales"
+            },
+            {
+              "value": "L",
+              "title": "South West England"
+            },
+            {
+              "value": "M",
+              "title": "Yorkshire"
+            },
+            {
+              "value": "N",
+              "title": "South and Central Scotland"
+            },
+            {
+              "value": "P",
+              "title": "North Scotland"
+            }
+          ]
+        },
+        {
+          "type": "checkbox",
+          "name": "show_tags",
+          "title": "Show Tags",
+          "label": "Show tags next to price",
+          "description": "Show tags next to price for cheapest, most expensive etc.",
+          "default": true,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.70.3",
+    "date-fns": "3.6.0",
+    "node-fetch": "3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "8.51.0",
+    "prettier": "3.0.3",
+    "typescript": "5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

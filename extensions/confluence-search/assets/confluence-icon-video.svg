@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 47 (45396) - http://www.bohemiancoding.com/sketch -->
+    <title>dasho/video</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Icons" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="dasho/video">
+            <g id="media_video">
+                <rect id="container" fill="#FF5630" fill-rule="nonzero" x="0" y="0" width="16" height="16" rx="2"></rect>
+                <path d="M8,5.33333333 L4,5.33333333 C3.63181017,5.33333333 3.33333333,5.63181017 3.33333333,6 L3.33333333,10 C3.33333333,10.3681898 3.63181017,10.6666667 4,10.6666667 L8,10.6666667 C8.36818983,10.6666667 8.66666667,10.3681898 8.66666667,10 L8.66666667,6 C8.66666667,5.63181017 8.36818983,5.33333333 8,5.33333333 Z M12.2166667,5.502 L10,6.33333333 L10,9.66666667 L12.2166667,10.498 C12.3189706,10.5362241 12.4335101,10.5219092 12.52326,10.4596826 C12.6130098,10.3974561 12.6665848,10.2952116 12.6666667,10.186 L12.6666667,5.81466667 C12.6668034,5.70533722 12.6133183,5.60289086 12.5235339,5.54050732 C12.4337495,5.47812378 12.319081,5.46373458 12.2166667,5.502 L12.2166667,5.502 Z" id="Shape" fill="#FFFFFF"></path>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,74 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "search-hookmark",
+  "title": "Hookmark Search",
+  "description": "Hookmark Search UI in Raycast",
+  "icon": "command-icon.png",
+  "author": "QIanGua",
+  "version": "2.0.0",
+  "categories": [
+    "Applications",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-hookmark",
+      "title": "Search Hookmark",
+      "description": "Search Hookmark's bookmarks and open visited ones",
+      "mode": "view"
+    },
+    {
+      "name": "copy-hookmark-link",
+      "title": "Copy Hookmark Link",
+      "description": "Copy link of front active window",
+      "mode": "no-view"
+    },
+    {
+      "name": "hook-to-copied-link",
+      "title": "Hook to Copied Link",
+      "description": "Hook the current bookmark to copied item",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-hooked-link",
+      "title": "Show Hooked Link",
+      "description": "Show hooked bookmarks of active window",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.45.0",
+    "@raycast/utils": "^1.4.16",
+    "iconv-lite": "^0.6.3",
+    "is-url": "^1.2.4",
+    "lodash": "^4.17.21",
+    "nanoid": "^4.0.0",
+    "run-applescript": "^6.1.0",
+    "semver": "^7.3.8"
+  },
+  "devDependencies": {
+    "@types/is-url": "^1.2.30",
+    "@types/lodash": "^4.14.191",
+    "@types/nanoid": "^3.0.0",
+    "@types/node": "^18.8.3",
+    "@types/react": "^18.0.17",
+    "@types/semver": "^7.3.13",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.8.8",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

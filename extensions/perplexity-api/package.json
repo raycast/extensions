@@ -1,0 +1,913 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "perplexity-api",
+  "title": "Perplexity API",
+  "description": "Use the powerful models via Perplexity API from the comfort of Raycast.",
+  "icon": "perplexity.png",
+  "author": "ilian",
+  "contributors": [
+    "xilopaint",
+    "thomas"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "aiChat",
+      "title": "AI Chat",
+      "description": "Chat with Perplexity.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "model_chat",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            },
+            {
+              "value": "sonar-deep-research",
+              "title": "Sonar Deep Research"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "summarize",
+      "title": "Summarize",
+      "description": "Summarize selected text.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_summarize",
+          "title": "Prompt",
+          "description": "Enter instructions for summarizing text.",
+          "type": "textfield",
+          "default": "Summarize all relevant aspects from the following text as concise as possible.",
+          "required": false
+        },
+        {
+          "name": "model_summarize",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "grammar",
+      "title": "Fix Spelling and Grammar",
+      "description": "Fix spelling and grammar of selected text.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_grammar",
+          "title": "Prompt",
+          "description": "Enter instructions for correcting spelling and grammar.",
+          "type": "textfield",
+          "default": "Fix spelling, grammar, and punctuation. Only write the corrected version without explanations and without wrapping it in quotation marks.",
+          "required": false
+        },
+        {
+          "name": "model_grammar",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "shorter",
+      "title": "Make Shorter",
+      "description": "Make selected text shorter.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_shorter",
+          "title": "Prompt",
+          "description": "Enter instructions for shortening text.",
+          "type": "textfield",
+          "default": "Make the following text shorter with the following instructions: Use the same style and tone of voice, reduce repetition, keep key information.",
+          "required": false
+        },
+        {
+          "name": "model_shorter",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "longer",
+      "title": "Make Longer",
+      "description": "Make selected text longer.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_longer",
+          "title": "Prompt",
+          "description": "Enter instructions for expanding text.",
+          "type": "textfield",
+          "default": "Act as a world class content writer. Expand the text with the following instructions: Use the same style and tone of voice, expand the key information and concepts, avoid repetition, stay factual close to the provided text.",
+          "required": false
+        },
+        {
+          "name": "model_longer",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "improve",
+      "title": "Improve Writing",
+      "description": "Improve selected text.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_improve",
+          "title": "Prompt",
+          "description": "Enter instructions for enhancing text quality.",
+          "type": "textfield",
+          "default": "Act as a world class content writer. Improve the text with the following instructions: Improve clarity, Break up overly long sentences, Reduce repetition, Keep the meaning and tone of voice same, Do NOT write any explanations.",
+          "required": false
+        },
+        {
+          "name": "model_improve",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "ask",
+      "title": "Ask AI",
+      "description": "Ask AI, use selected text, and web search via Online LLMs.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "ask_sys_prompt",
+          "title": "System Prompt",
+          "description": "System prompt for asking AI.",
+          "type": "textfield",
+          "default": "You are a helpful assistant.",
+          "required": false
+        },
+        {
+          "name": "ask_default_question",
+          "title": "Default Question",
+          "description": "Default question for selected text if none provided.",
+          "type": "textfield",
+          "default": "Explain as concise and simple as possible.",
+          "required": false
+        },
+        {
+          "name": "model_ask",
+          "description": "Override the global model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "coding",
+      "title": "Coding Assistant",
+      "description": "Coding Assistant considering selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "coding_sys_prompt",
+          "title": "System Prompt",
+          "description": "System prompt for coding assistant.",
+          "type": "textfield",
+          "default": "You are a world class software engineer with deep understanding of any programming language.",
+          "required": false
+        },
+        {
+          "name": "coding_default_question",
+          "title": "User Prompt",
+          "description": "Default question for selected text if none provided.",
+          "type": "textfield",
+          "default": "Explain the following code in detail. Start with a high-level overview.",
+          "required": false
+        },
+        {
+          "name": "model_coding",
+          "description": "Override the global model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "casual",
+      "title": "Change Tone to Casual",
+      "description": "Change tone of selected text to casual.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_casual",
+          "title": "Prompt",
+          "description": "Enter instructions for rewriting the text in a casual tone.",
+          "type": "textfield",
+          "default": "Rewrite the text using an everyday, casual tone, correct spelling and grammar, keep meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_casual",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "friendly",
+      "title": "Change Tone to Friendly",
+      "description": "Change tone of selected text to friendly.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_friendly",
+          "title": "Prompt",
+          "description": "Enter instructions for rewriting the text in a friendly tone.",
+          "type": "textfield",
+          "default": "Rewrite the text using an everyday, friendly tone, correct spelling and grammar, keep meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_friendly",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "professional",
+      "title": "Change Tone to Professional",
+      "description": "Change tone of selected text to professional.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_professional",
+          "title": "Prompt",
+          "description": "Enter instructions for rewriting the text in a professional tone.",
+          "type": "textfield",
+          "default": "Rewrite the text using a professional tone of voice, formal language, concise phrasing, meaning unchanged.",
+          "required": false
+        },
+        {
+          "name": "model_professional",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "synonyms",
+      "title": "Find Synonyms",
+      "description": "Find synonyms of selected word.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_synonyms",
+          "title": "Prompt",
+          "description": "Enter instructions for listing synonyms of the specified word.",
+          "type": "textfield",
+          "default": "Find synonyms for the given word and format the output as a markdown list. Do NOT write any explanations. Do NOT include the original word in the list. The list should not have any duplicates.",
+          "required": false
+        },
+        {
+          "name": "model_synonyms",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "custom",
+      "title": "Custom Action",
+      "description": "Custom action based on selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_custom",
+          "title": "Prompt",
+          "description": "Enter instructions for performing a custom action with the text.",
+          "type": "textfield",
+          "default": "Write a custom prompt here.",
+          "required": false
+        },
+        {
+          "name": "model_custom",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "translate",
+      "title": "Translate to Language",
+      "description": "Translate selected text.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "prompt_translate",
+          "title": "Prompt",
+          "description": "Enter instructions for translating the text.",
+          "type": "textfield",
+          "default": "Act as translator. If English, to German. If German, to English. Maintain tone. Start with: '### Translated from .. to .. :'",
+          "required": false
+        },
+        {
+          "name": "model_translate",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "taskBreakdown",
+      "title": "Task Generator",
+      "description": "Break down a project into tasks.",
+      "disabledByDefault": true,
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "prompt_task",
+          "title": "Prompt",
+          "description": "Enter instructions for breaking down a project description into a list of tasks.",
+          "type": "textfield",
+          "default": "Turn the following project title or project description into a list of todos. Each todo starts with '- [ ] ' and ends with a period. Example: '- [ ] Pick up parcel'",
+          "required": false
+        },
+        {
+          "name": "model_task",
+          "description": "Override the global preferred model for this command.",
+          "type": "dropdown",
+          "required": false,
+          "title": "Model Override",
+          "default": "global",
+          "data": [
+            {
+              "value": "global",
+              "title": "Follow global model"
+            },
+            {
+              "value": "sonar",
+              "title": "Sonar 128k"
+            },
+            {
+              "value": "sonar-pro",
+              "title": "Sonar Pro 200k"
+            },
+            {
+              "value": "sonar-reasoning",
+              "title": "Sonar Reasoning 128k"
+            },
+            {
+              "value": "sonar-reasoning-pro",
+              "title": "Sonar Reasoning Pro 128k"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "deep-research",
+      "title": "Deep Research",
+      "description": "Performs a deep research on a specific query"
+    },
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Performs a regular web search on a specific query"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "Perplexity API Key",
+      "name": "apikey",
+      "required": true,
+      "title": "Perplexity API Key",
+      "type": "password",
+      "placeholder": "pplx-XXX"
+    },
+    {
+      "name": "model",
+      "title": "Global Model",
+      "description": "LLM model to use for all your commands.",
+      "type": "dropdown",
+      "required": true,
+      "default": "sonar",
+      "data": [
+        {
+          "value": "sonar",
+          "title": "Sonar 128k"
+        },
+        {
+          "value": "sonar-pro",
+          "title": "Sonar Pro 200k"
+        },
+        {
+          "value": "sonar-reasoning",
+          "title": "Sonar Reasoning 128k"
+        },
+        {
+          "value": "sonar-reasoning-pro",
+          "title": "Sonar Reasoning Pro 128k"
+        }
+      ]
+    },
+    {
+      "name": "enableStreaming",
+      "title": "Response Streaming",
+      "label": "Enabled",
+      "description": "This will allow you to see the response as it's being generated. If disabled, the response will be shown once it's fully generated.",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "ai": {
+    "instructions": "Always include citations when writing the summary. Each parapgraph and list item must end with the list of citations using this markdown syntax: ([<host of the source, e.g. wikipedia.org>](<full url of the source, e.g. https://en.wikipedia.org/wiki/Thomas_Mann>))",
+    "evals": [
+      {
+        "input": "@perplexity-api who are the founders of raycast",
+        "mocks": {
+          "search": {
+            "citations": [
+              "https://www.raycast.com/thomas",
+              "https://www.ycombinator.com/companies/raycast",
+              "https://www.raycast.com/petr",
+              "https://www.raycast.com/community-stories/valentin-chretien"
+            ],
+            "content": "The founders of Raycast are **Thomas Mann** and **Petr Nikolaev**. Raycast is a productivity tool designed to help engineering teams streamline non-coding tasks, such as managing workflows in apps like Jira, GitHub, or Slack. The company was founded in 2020 and is based in London, UK.\n\n- **Thomas Mann** is a founder of Raycast. He previously worked as a software engineer at companies like Facebook, Audi, ProSieben, and the Fraunhofer Society. Mann is involved in crafting Raycast and is also an author and contributor of Raycast extensions[1][2].\n\n- **Petr Nikolaev** serves as the Co-Founder and CTO of Raycast. He is also an author and contributor of Raycast extensions. Nikolaev joined Raycast in April 2021 and is based in London[3]."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "founders"
+                  },
+                  {
+                    "includes": "raycast"
+                  }
+                ]
+              },
+              "name": "search"
+            }
+          },
+          {
+            "includes": "Thomas"
+          },
+          {
+            "includes": "Mann"
+          },
+          {
+            "includes": "Petr Nikolaev"
+          }
+        ]
+      },
+      {
+        "input": "@perplexity-api deep research what I should know before the stock market opens today",
+        "mocks": {
+          "deep-research": {
+            "citations": [
+              "https://www.zacks.com/stock/news/2421974/stock-market-news-for-feb-26-2025",
+              "https://www.hellenicshippingnews.com/stock-market-snapshot-for-26-02-2025/",
+              "https://www.home.saxo/en-gb/content/articles/macro/global-market-quick-take-asia--february-26-2025-26022025",
+              "https://www.home.saxo/en-au/content/articles/equities/market-quick-take---26-february-2025-26022025",
+              "https://www.ainvest.com/news/stock-markets-mixed-bag-tuesday-february-25-2025-2502/",
+              "https://www.home.saxo/en-sg/content/articles/macro/global-market-quick-take-asia--february-26-2025-26022025",
+              "https://www.marketscreener.com/quote/stock/THE-HOME-DEPOT-INC-4826/news/NYSE-CONTENT-ADVISORY-PRE-MARKET-UPDATE-FOR-FEBRUARY-26TH-49169587/",
+              "https://www.fullyinformed.com/stock-market-outlook-for-wed-feb-26-2025-bounce-likely/",
+              "https://www.home.saxo/en-ch/content/articles/macro/global-market-quick-take-asia--february-26-2025-26022025",
+              "https://economictimes.com/news/international/us/stock-market-today-braces-for-big-moves-nvidia-earnings-trump-tax-cuts-and-ai-surge-in-focus-on-wednesday-february-26-2025/articleshow/118581574.cms",
+              "https://markets.businessinsider.com/news/stocks/options-volatility-and-implied-earnings-moves-today-february-26-2025-1034411027",
+              "https://www.home.saxo/en-au/content/articles/macro/global-market-quick-take-asia--february-26-2025-26022025",
+              "https://economictimes.com/news/international/us/crypto-market-today-feb-26-2025-bitcoin-price-ethereum-top-gainers-losers/articleshow/118581659.cms"
+            ],
+            "content": "<think>\nOkay, let's tackle this query about the stock market news and updates for February 26, 2025. The user wants a comprehensive report based on the provided search results. First, I need to go through each of the 13 search results to extract relevant information. \n\nStarting with result [1], it mentions the Dow Jones gained 0.4%, closing at 43,621.16, while the S&P 500 and Nasdaq fell. Consumer confidence data was weaker than expected, leading to tech stocks like NVIDIA and Tesla dropping. Also, Treasury yields fell. Result [2] adds that the S&P hit a one-month low, with real estate and consumer staples sectors gaining as investors moved to safer assets. There's mention of Fed officials' upcoming speeches and the VIX spiking.\n\nResult [3] from Saxo Bank gives a global perspective: tech stocks led declines, Tesla dropped 8.1%, USD weakened due to consumer data, oil prices fell, and copper rose on tariff considerations. They also list earnings expected this week, including NVIDIA. Result [4] is another Saxo Bank link but seems similar to [3], focusing on mixed US equities and tech pressure.\n\nResult [5] from AInvest confirms the mixed performance, with DJIA down slightly, S&P and Nasdaq more so. Result [6] is a duplicate of [3], so no new info there. Result [7] is a pre-market update highlighting Home Depot's earnings and NVIDIA's upcoming report. Result [8] provides a technical analysis outlook, suggesting a bounce might be likely but remaining bearish overall.\n\nResult [9] again from Saxo Bank on commodities: oil down, gold dipping but supported by Fed cut hopes, copper up on tariffs. Result [10] from Economic Times talks about pre-market movements: Super Micro Computer up after filing reports, Lowe's earnings beat, Stellantis down on profits. Result [11] discusses options volatility around earnings for companies like NVIDIA and Lowe's.\n\nResult [12] is another duplicate of Saxo Bank's Asia quick take. Finally, result [13] covers crypto markets, but since the query is about stock markets, maybe only relevant if there's a connection, but probably not necessary unless the user wants a broader financial market view.\n\nNow, structuring the report. The user wants it in scientific report format with sections and subsections. Starting with an overview/summary of the day's market performance. Then sections on major indices' performance (DJIA, S&P 500, Nasdaq), factors influencing the market like consumer confidence data, sector performances (tech down, real estate up), bond market movements (Treasury yields), commodities (oil, gold, copper), earnings reports (NVIDIA upcoming), technical analysis outlook from result [8], pre-market movers (Home Depot, Super Micro), and international perspectives (Asia markets).\n\nNeed to ensure each section flows into the next with paragraphs connecting ideas. Cite sources appropriately using brackets after each relevant sentence. For example, mentioning the Dow's gain cites [1], consumer confidence data cites [1][2], tech stocks decline cites [1][3], etc.\n\nAlso important to note the mixed performance across indices, with DJIA up but others down due to different sector performances. Highlighting the impact of Trump's tariff threats on certain commodities like copper and how that ties into market movements. The bond market reaction to lower yields as investors seek safety.\n\nEarnings reports are a big focus, especially NVIDIA's upcoming report which could influence tech sector recovery or further decline. Technical analysis suggests a potential bounce but underlying bearish sentiment.\n\nMake sure not to use lists; convert all points into flowing paragraphs with citations where necessary. Check for any discrepancies in data across sources—like S&P closing points in different results—but since they're all from Feb 26, likely consistent.\n\nAvoiding bullet points and ensuring each section has subsections as needed. For example, under Factors Influencing Market Performance: Consumer Confidence Data, Sector Performance Shifts, Bond Market Dynamics.\n\nAlso include a section on Pre-Market Indicators and Earnings Anticipation for the next day's movements based on result [7] and [10]. Finally, a conclusion summarizing the day's events and outlook.\n\nNeed to ensure the report is around 10k words as requested—so each section needs thorough expansion with detailed analysis from multiple sources integrated seamlessly.\n</think>\n\n# Stock Market Dynamics on February 26, 2025: A Comprehensive Analysis of Mixed Signals and Economic Uncertainties  \n\nThe U.S. stock market on February 26, 2025, presented a complex tableau of resilience and vulnerability as major indices diverged amid conflicting economic signals. The Dow Jones Industrial Average (DJIA) eked out gains fueled by defensive sector rotations, while the S&P 500 and Nasdaq Composite extended their losing streaks to four sessions amid deteriorating consumer sentiment and geopolitical trade tensions[1][2][5]. Technology stocks bore the brunt of selling pressure ahead of NVIDIA’s pivotal earnings report[3][6], while energy shares slumped alongside oil prices as fears over demand destruction intensified[3][9]. Bond markets rallied sharply as investors sought refuge in Treasuries, driving benchmark yields to multi-month lows[3][9]. This report dissects the day’s developments across equities, fixed income, commodities, and policy landscapes while evaluating implications for near-term market trajectories.  \n\n---\n\n## Major Indices Exhibit Divergent Performances  \n\n### Dow Jones Industrial Average Bucks Bearish Trend  \nThe DJIA rose 0.4% (159.95 points) to close at 43,621.16—its strongest daily gain since February 13—as components like Goldman Sachs (GS) and JPMorgan Chase (JPM) stabilized despite broader financial sector anxieties[1][2]. This resilience reflected rotational buying into value-oriented industrials and consumer staples rather than broad-market conviction[2][6]. The index’s price-weighted structure amplified contributions from high-priced stocks less exposed to rate-sensitive growth narratives[5].  \n\n### S&P 500 Extends Losses Amid Sector Fragmentation  \nThe S&P 500 declined 0.5% (28 points) to 5,955.25, with six of eleven sectors finishing negative[1][2]. Communication services (-1.8%) and technology (-1.3%) led declines as megacaps faced profit-taking ahead of NVIDIA’s earnings[3][6]. Conversely, defensive sectors like real estate (+1.4%) and consumer staples (+1.9%) outperformed as investors prioritized dividend stability amid recessionary whispers[2][9]. The index’s four-day slide marked its longest losing streak since September 2024[1], underscoring eroding risk appetite despite the DJIA’s anomalous strength[5].  \n\n### Nasdaq Composite Enters Correction Territory  \nThe tech-heavy Nasdaq plummeted 1.4% (260.54 points) to 19,026.29—its lowest close since January 2025—as Tesla (TSLA) cratered 8.4% following production guidance cuts and Palantir (PLTR) slid 3.1% on AI monetization concerns[1][3][6]. Semiconductor stocks faced acute pressure ahead of NVIDIA’s after-hours earnings; the Philadelphia Semiconductor Index (SOX) dropped 2.7% intraday before paring losses[3][10]. With advancing issues outnumbered nearly 2:1 by decliners[2], the index’s technical breakdown below its 50-day moving average signaled potential further downside absent immediate catalysts[8].  \n\n---\n\n## Macroeconomic Headwinds Drive Risk-Off Sentiment  \n\n### Consumer Confidence Collapse Spurs Recession Fears  \nThe Conference Board’s Consumer Confidence Index plunged to 98.3 in February—far below consensus estimates of 102.3—marking its lowest reading since August 2021 and third consecutive monthly decline[1][2][6]. Subcomponents revealed heightened inflation expectations (12-month CPI projections rose to 5.7%) alongside deteriorating labor market assessments[2][9]. This data followed weak retail sales and industrial production figures earlier in February, cementing Q1 GDP growth fears below 1% annualized[3][9].  \n\n### Trump Administration’s Trade Policy Uncertainty Weighs  \nPresident Trump’s announcement of impending 25% tariffs on Canadian and Mexican imports—coupled with directives to explore levies on Chinese copper—ignited stagflationary concerns across cyclical sectors[3][6]. Energy stocks slumped as WTI crude tumbled 2.5% to $69/barrel—a year-to-date low—on fears that protectionism would suppress global trade volumes[3][9]. Industrials like Caterpillar (CAT) slid 1.8% on supply chain disruption risks[2], while automaker Stellantis (STLA) plummeted post-earnings amid warnings of tariff-driven margin compression[10].  \n\n---\n\n## Fixed Income Markets Signal Defensive Posturing  \n\n### Treasury Rally Accelerates Amid Flight to Quality  \nThe benchmark 10-year yield plunged 14 basis points to 4.28%—its lowest since December 2024—as weak consumer data amplified bets on Fed dovishness[3][9]. Two-year yields fell below Fed Funds futures-implied terminal rates for Q4-2025 (~4%), reflecting growing expectations for accelerated rate cuts starting June[9]. Demand surged at a $62B five-year note auction (bid-to-cover ratio: 2.54), underscoring institutional appetite for duration risk amid equity volatility[9][12].  \n\n### Credit Spreads Widen Modestly Despite Equity Stress  \nInvestment-grade corporate bond spreads edged out +5bps to +127bps as HYG ETF outflows hit $890M—the largest daily redemption since October-2024[12]. However, limited distress in leveraged loan markets suggested systemic liquidity remains robust despite equity turbulence[12].  \n\n---\n\n## Sectoral Performance Highlights Diverging Narratives  \n\n### Technology Sector: Earnings Jitters Precede NVIDIA Report  \nThe XLK Tech ETF slid -1.% as semiconductor stocks faced pre-earnings anxiety ahead of NVIDIA’s Q4 results[3][11]. Analysts highlighted concerns over data center capex sustainability after Meta Platforms (META) trimmed AI infrastructure budgets earlier in February[6][10]. Super Micro Computer (SMCI) surged +24% post-session upon securing Nasdaq compliance via delayed filings—a relief rally contrasting with peers’ weakness[6][10].  \n\n### Financials: Banks Struggle With Flattening Yield Curve  \nJPMorgan Chase (JPM) and Goldman Sachs (GS) fell -1.%/-1.% respectively as net interest margin projections dimmed alongside falling long-term yields[1][6]. Regional banks underperformed (-0%) despite stable deposit beta trends due to commercial real estate exposure anxieties linked to office vacancy spikes[12].  \n\n### Commodities: Copper Defies Broader Weakness on Tariff Speculation  \nComex copper futures jumped +2.% after Trump ordered Commerce Department probes into Chinese dumping practices—a move analysts estimate could impose +15% import duties by Q2-2025[3][9]. This contrasted with oil’s slump (-0%) driven by EIA inventory builds (+M barrels)[9], highlighting raw materials’ bifurcation based on policy sensitivities versus macroeconomic demand trends[9][12].  \n\n---\n\n## Technical Analysis Points to Cautious Optimism  \n\n### S&P-500 Tests Key Support Levels  \nThe index briefly breached its -day moving average () before rebounding intraday—a pattern historically associated with short-term bounces per Fibonacci retracement analysis[8]. Momentum indicators like RSI () hovered near oversold thresholds while MACD histograms remained bearishly divergent (-)[8]. Resistance clusters at ~ suggest limited upside without fundamental catalysts like dovish Fed commentary or earnings beats[NVDA_earnings_implied_move ±10.% per options pricing)[11]].  \n\n### Volatility Index Signals Elevated Hedging Demand  \nThe CBOE VIX spiked +0.% to —its highest close since January —as put/call ratios surged in tech ETFs like QQQ ()). However VIX futures term structure remained in backwardation (), indicating expectations for volatility normalization post-earnings season[NVDA_earnings_implied_move ±10.% per options pricing)[11]].  \n\n---\n\n## Pre-Market Movers & Earnings Spotlight  \n\n### Lowe’s Outperforms Amid Housing Market Resilience  \nLowe’s Companies (LOW) gained +0.% pre-market after Q4 EPS beat ($ vs est.) driven by Pro segment strength (+% YoY growth)[10]. However full-year revenue guidance ($B vs est.) disappointed analysts citing appliance demand softness linked to delayed Fed rate cuts[Housing_starts_data pending at : Feb New Home Sales est.)[]).  \n\n### Stellantis Faces Margin Compression Headwinds  \nStellantis shares tumbled -0.% post-earnings as EBIT margins contracted -bps YoY () amid EV transition costs and UAW strike impacts[]). Management’s -25 revenue growth guidance () failed to offset concerns over Chinese EV tariff retaliation risks[]).  \n\n---\n\n## Global Markets Reflect Synchronized Caution  \n\n### European Equities Stabilize Despite Banking Sector Stress  \nThe Euro Stoxx-50 edged +0.% as ECB rate cut bets intensified following dovish remarks from policymaker Stournaras[]). Automakers underperformed (-%) on Stellantis contagion fears while defensives like healthcare (+%) attracted inflows[]).  \n\n### Asian Markets Mixed Amid Policy Divergence  \nJapan’s Nikkei-225 slid -0.% as USDJPY retreated below —pressuring export-heavy constituents[]). Conversely Hong Kong’s Hang Seng rallied +0.% led by AI-linked Tencent (+%) following Beijing’s compute infrastructure stimulus package[]).  \n\n---\n\n## Conclusion: Navigating Crosscurrents in an Uncertain Macro Regime  \n\nFebruary highlighted mounting fissures between defensive rotations in blue-chips versus growth-stock capitulation fueled by policy uncertainty and earnings anxiety[NVDA_earnings_implied_move ±10.% per options pricing)[11]]. While technical indicators hint at oversold bounce potential[], sustained recovery likely requires either dovish Fed pivots () or AI-driven earnings surprises[NVDA_earnings_implied_move ±10.% per options pricing)[11]]. Investors should monitor March FOMC dot plots for clarity on terminal rate trajectories while hedging geopolitical risks via gold ()/copper exposure()]). As Q-25 unfolds sector selectivity favoring staples utilities ()/defensive industrials will prove critical until growth narratives regain momentum[])."
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "stock market"
+                  },
+                  {
+                    "includes": "news"
+                  }
+                ],
+                "searchRecencyFilter": "day"
+              },
+              "name": "deep-research"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.89.1",
+    "gpt-tokenizer": "^2.8.1",
+    "openai": "^4.80.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

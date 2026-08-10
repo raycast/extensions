@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phind-search",
+  "title": "Phind Search",
+  "description": "Search anything with Phind",
+  "icon": "command-icon.png",
+  "author": "Chuck",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Phind Search",
+      "description": "Phind search with autosuggestions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "rememberSearchHistory",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Remember Search History",
+      "description": "Enable this checkbox to locally store Phind search history."
+    },
+    {
+      "name": "autoSuggestions",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Auto Suggestions for Search",
+      "description": "Enable this checkbox to show auto suggestions when typing. (The Phind team has currently disabled the API, use the Bing's auto-suggestions now.)"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.58.1",
+    "@raycast/utils": "^1.10.0",
+    "iconv-lite": "^0.6.3",
+    "nanoid": "^4.0.1",
+    "node-fetch": "^3.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "pull": "ray pull-contributions"
+  },
+  "version": "1.1.2"
+}

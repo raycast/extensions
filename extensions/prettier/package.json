@@ -1,0 +1,244 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prettier",
+  "title": "Prettier Code",
+  "description": "Format code with Prettier",
+  "icon": "prettier-logo.png",
+  "author": "lin",
+  "contributors": [
+    "jasonwaters",
+    "xmok"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "formatJavaScript",
+      "title": "Format JavaScript",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "js",
+        "javascript"
+      ]
+    },
+    {
+      "name": "formatTypeScript",
+      "title": "Format TypeScript",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "ts",
+        "typescript"
+      ]
+    },
+    {
+      "name": "formatJSON",
+      "title": "Format JSON",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "json"
+      ]
+    },
+    {
+      "name": "formatCSS",
+      "title": "Format CSS",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "css"
+      ]
+    },
+    {
+      "name": "formatHTML",
+      "title": "Format HTML",
+      "description": "Format Clipboard content with Prettier",
+      "mode": "no-view",
+      "keywords": [
+        "html"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "copyImmediately",
+      "type": "checkbox",
+      "title": "Clipboard",
+      "label": "Copy formatted code to clipboard",
+      "description": "Copies the formatted code to the clipboard immediately.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "pasteImmediately",
+      "type": "checkbox",
+      "label": "Paste formatted code to active window",
+      "description": "Pastes the formatted code to the active window.",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "formatAsMarkdownCodeBlock",
+      "type": "checkbox",
+      "title": "Markdown",
+      "label": "Format as Markdown code block",
+      "description": "Wraps the code so it can be easily pasted as a code block within a Markdown document.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "jsParser",
+      "type": "dropdown",
+      "title": "Select JavaScript parser",
+      "description": "Specify which parser to use for JavaScript.",
+      "data": [
+        {
+          "title": "flow",
+          "value": "flow"
+        },
+        {
+          "title": "babel",
+          "value": "babel"
+        },
+        {
+          "title": "babel-flow",
+          "value": "babel-flow"
+        },
+        {
+          "title": "babel-ts",
+          "value": "babel-ts"
+        },
+        {
+          "title": "typescript",
+          "value": "typescript"
+        }
+      ],
+      "default": "babel",
+      "required": false
+    },
+    {
+      "name": "tsParser",
+      "type": "dropdown",
+      "title": "Select TypeScript parser",
+      "description": "Specify which parser to use for TypeScript.",
+      "data": [
+        {
+          "title": "flow",
+          "value": "flow"
+        },
+        {
+          "title": "babel",
+          "value": "babel"
+        },
+        {
+          "title": "babel-flow",
+          "value": "babel-flow"
+        },
+        {
+          "title": "babel-ts",
+          "value": "babel-ts"
+        },
+        {
+          "title": "typescript",
+          "value": "typescript"
+        }
+      ],
+      "default": "babel-ts",
+      "required": false
+    },
+    {
+      "name": "jsonParser",
+      "type": "dropdown",
+      "title": "Select JSON parser",
+      "description": "Specify which parser to use for JSON.",
+      "data": [
+        {
+          "title": "json",
+          "value": "json"
+        },
+        {
+          "title": "json5",
+          "value": "json5"
+        },
+        {
+          "title": "json-stringify",
+          "value": "json-stringify"
+        }
+      ],
+      "default": "json",
+      "required": false
+    },
+    {
+      "name": "cssParser",
+      "type": "dropdown",
+      "title": "Select CSS parser",
+      "description": "Specify which parser to use for CSS.",
+      "data": [
+        {
+          "title": "css",
+          "value": "css"
+        },
+        {
+          "title": "less",
+          "value": "less"
+        },
+        {
+          "title": "scss",
+          "value": "scss"
+        }
+      ],
+      "default": "css",
+      "required": false
+    },
+    {
+      "name": "htmlParser",
+      "type": "dropdown",
+      "title": "Select HTML parser",
+      "description": "Specify which parser to use for HTML.",
+      "data": [
+        {
+          "title": "html",
+          "value": "html"
+        },
+        {
+          "title": "angular",
+          "value": "angular"
+        },
+        {
+          "title": "vue",
+          "value": "vue"
+        },
+        {
+          "title": "lwc",
+          "value": "lwc"
+        }
+      ],
+      "default": "html",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.10",
+    "@types/prettier": "^2.7.2",
+    "@types/react": "^18.3.3",
+    "@raycast/eslint-config": "^1.0.8",
+    "eslint": "^8.38.0",
+    "eslint-config-prettier": "^8.8.0",
+    "prettier": "^2.8.7",
+    "react": "^18.2.0",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

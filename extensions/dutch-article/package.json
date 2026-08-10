@@ -1,0 +1,42 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dutch-article",
+  "title": "Dutch Article (Het of De)",
+  "description": "Look up whether a Dutch word uses 'het' or 'de' as its article",
+  "icon": "command-icon.png",
+  "author": "ahmeed83",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lookup",
+      "title": "Look up Dutch Article",
+      "description": "Check if a Dutch word uses 'het' or 'de'",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.2.0",
+    "@types/react": "19.2.11",
+    "canvas": "^3.2.1",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

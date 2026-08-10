@@ -1,0 +1,189 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "tidal-controller",
+  "title": "Tidal Controller",
+  "description": "Control your local Tidal client with your keyboard.\nNote: You **must** enable Accessibility permissions for Raycast in order for this extension to work.",
+  "icon": "extension-icon.png",
+  "author": "broc-dev",
+  "contributors": [
+    "srcurran"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "play-pause",
+      "title": "Toggle Play/Pause",
+      "description": "Toggles the play/pause state of your current song on Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "next-song",
+      "title": "Next Track",
+      "description": "Plays the next song in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "prev-song",
+      "title": "Previous Track or Restart Track",
+      "description": "Plays the previous song in Tidal, or restarts the current song if it's already playing.",
+      "mode": "no-view"
+    },
+    {
+      "name": "pause",
+      "title": "Pause Track",
+      "description": "Pauses the current song in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "play",
+      "title": "Play Track",
+      "description": "Plays the current song in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "shuffle",
+      "title": "Toggle Shuffle",
+      "description": "Toggles on shuffle mode in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume Up",
+      "description": "Turns up the volume in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "description": "Turns down the volume in Tidal.",
+      "mode": "no-view"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "description": "Shows the currently playing track as a popup",
+      "mode": "no-view"
+    },
+    {
+      "name": "now-playing-menu-bar",
+      "title": "Now Playing Menubar",
+      "description": "Shows the currently playing track as a menubar item. Note: it is only able to show the song title if the window is open or minimized. If Tidal is playing, but the song name doesn't appear, please ensure you didn't close the Tidal player window.",
+      "mode": "menu-bar",
+      "interval": "5s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showMessages",
+      "label": "Show Messages",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Messages",
+      "description": "Show pop up messages when an action is performed, such as toggling play/pause. Will also show a message if the action fails for some reason. No messages will be shown (even errors) if this is disabled.",
+      "default": true
+    },
+    {
+      "name": "language",
+      "label": "Choose Language",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language",
+      "default": "English",
+      "description": "Choose the language of the menu options.",
+      "data": [
+        {
+          "title": "Bulgarian",
+          "value": "Bulgarian"
+        },
+        {
+          "title": "Danish",
+          "value": "Danish"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "Croatian",
+          "value": "Croatian"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Norwegian",
+          "value": "Norwegian"
+        },
+        {
+          "title": "Polish",
+          "value": "Polish"
+        },
+        {
+          "title": "Portuguese (Brazil)",
+          "value": "PortugueseBrazil"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Slovenian",
+          "value": "Slovenian"
+        },
+        {
+          "title": "Serbian",
+          "value": "Serbian"
+        },
+        {
+          "title": "Swedish",
+          "value": "Swedish"
+        },
+        {
+          "title": "Turkish",
+          "value": "Turkish"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.81",
+    "@raycast/utils": "^1.16.3",
+    "ky": "^1.6.0",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

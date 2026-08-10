@@ -1,0 +1,147 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "amphetamine",
+  "title": "Amphetamine",
+  "version": "1.1.1",
+  "description": "Control Amphetamine sleep sessions from Raycast",
+  "icon": "icon.png",
+  "author": "gstvds",
+  "categories": [
+    "System"
+  ],
+  "contributors": [
+    "mike_dloss",
+    "ceyhuncicek"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "amp-start",
+      "title": "Start New Session",
+      "subtitle": "Amphetamine",
+      "description": "Start a new default session",
+      "mode": "no-view",
+      "keywords": [
+        "start",
+        "amp",
+        "amp start",
+        "amphetamine",
+        "ampstart"
+      ]
+    },
+    {
+      "name": "quick-start",
+      "title": "Quick Start Session",
+      "subtitle": "Amphetamine",
+      "description": "Start a keep-awake session by typing the duration inline; leave all fields empty for a session with no time limit",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "hours",
+          "type": "text",
+          "placeholder": "Hours (empty = no limit)",
+          "required": false
+        },
+        {
+          "name": "minutes",
+          "type": "text",
+          "placeholder": "Minutes",
+          "required": false
+        },
+        {
+          "name": "seconds",
+          "type": "text",
+          "placeholder": "Seconds",
+          "required": false
+        }
+      ],
+      "preferences": [
+        {
+          "name": "displaySleepAllowed",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "Display Sleep",
+          "label": "Allow the display to sleep during the session",
+          "description": "When enabled, the session keeps the Mac awake but lets the display turn off."
+        }
+      ],
+      "keywords": [
+        "quick",
+        "amp",
+        "amp quick",
+        "amphetamine",
+        "start",
+        "duration"
+      ]
+    },
+    {
+      "name": "amp-end",
+      "title": "End Current Session",
+      "subtitle": "Amphetamine",
+      "description": "End the current session",
+      "mode": "no-view",
+      "keywords": [
+        "end",
+        "amp",
+        "amp end",
+        "amphetamine",
+        "ampend"
+      ]
+    },
+    {
+      "name": "remaining",
+      "title": "Get Remaining Time",
+      "subtitle": "Amphetamine",
+      "description": "Get current session remaining time",
+      "mode": "no-view",
+      "keywords": [
+        "remaining",
+        "amp",
+        "amp remaining",
+        "amphetamine"
+      ]
+    },
+    {
+      "name": "amp-duration",
+      "title": "Configure New Session",
+      "subtitle": "Amphetamine",
+      "description": "Start a new session with a duration or until a specific time",
+      "mode": "view",
+      "keywords": [
+        "interval",
+        "amp",
+        "amp interval",
+        "amphetamine",
+        "duration",
+        "time",
+        "until",
+        "amp duration",
+        "amp time",
+        "amp until"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "run-applescript": "^7.1.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

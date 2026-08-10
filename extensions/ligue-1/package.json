@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ligue-1",
+  "title": "Ligue 1",
+  "description": "Staying up-to-date with the latest scores, and fixtures from the French top-flight football league in Raycast.",
+  "icon": "icon.png",
+  "author": "anhthang",
+  "license": "MIT",
+  "contributors": [
+    "loris"
+  ],
+  "categories": [
+    "Data",
+    "Other",
+    "Fun"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "table",
+      "title": "Standings",
+      "description": "Check the latest standings for both Ligue 1 and Ligue 2, as well as access past season data.",
+      "mode": "view"
+    },
+    {
+      "name": "result",
+      "title": "Fixtures & Results",
+      "description": "Find the latest match schedule and results for both Ligue 1 and Ligue 2, including historical data.",
+      "mode": "view"
+    },
+    {
+      "name": "club",
+      "title": "Clubs",
+      "description": "Discover information about all the clubs participating in Ligue 1 and Ligue 2, including player rosters, statistics, and team news.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
+    "axios": "^1.13.2",
+    "date-fns": "^4.1.0",
+    "json2md": "^2.0.3",
+    "lodash.groupby": "^4.6.0",
+    "lodash.sortby": "^4.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/json2md": "^1.5.4",
+    "@types/lodash.groupby": "^4.6.9",
+    "@types/lodash.sortby": "^4.7.9",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

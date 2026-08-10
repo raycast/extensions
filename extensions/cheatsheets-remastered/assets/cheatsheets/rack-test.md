@@ -1,0 +1,27 @@
+---
+title: rack-test
+category: Ruby libraries
+tech: rack-test
+status: active
+lastReviewed: '2025-09-05'
+---
+
+### Methods
+
+```ruby
+get 'url'
+post 'url', 'name' => 'john'
+put
+patch
+delete
+options
+head
+```
+
+```ruby
+authorize 'user', 'pass'
+env 'rack.session', csrf: 'token'
+header 'Content-Type', 'text/html'
+```
+
+See [rack/test.rb](https://github.com/brynary/rack-test/blob/master/lib/rack/test.rb).

@@ -1,0 +1,173 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "yasb",
+  "title": "YASB",
+  "description": "Raycast interface for the yasbc (YASB CLI) application",
+  "icon": "extension-icon.png",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start",
+      "title": "Start",
+      "description": "Starts the YASB application",
+      "mode": "no-view",
+      "subtitle": "YASB"
+    },
+    {
+      "name": "stop",
+      "title": "Stop",
+      "description": "Stops the YASB application",
+      "mode": "no-view",
+      "subtitle": "YASB"
+    },
+    {
+      "name": "reload",
+      "title": "Reload",
+      "description": "Reloads the YASB application",
+      "mode": "no-view",
+      "subtitle": "YASB"
+    },
+    {
+      "name": "update",
+      "title": "Update",
+      "description": "Updates the YASB application to the latest version",
+      "mode": "no-view",
+      "subtitle": "YASB"
+    },
+    {
+      "name": "version",
+      "title": "Version",
+      "description": "Displays the current version of YASB",
+      "mode": "view",
+      "subtitle": "YASB"
+    },
+    {
+      "name": "enable-autostart",
+      "title": "Enable Autostart",
+      "description": "Enables YASB to start automatically on system startup",
+      "mode": "no-view",
+      "subtitle": "YASB"
+    },
+    {
+      "name": "disable-autostart",
+      "title": "Disable Autostart",
+      "description": "Disables YASB from starting automatically on system startup",
+      "mode": "no-view",
+      "subtitle": "YASB"
+    },
+    {
+      "name": "show-bar",
+      "title": "Show Bar",
+      "description": "Displays the YASB status bar",
+      "mode": "no-view",
+      "subtitle": "YASB",
+      "arguments": [
+        {
+          "name": "screen",
+          "type": "text",
+          "placeholder": "Screen Name"
+        }
+      ]
+    },
+    {
+      "name": "hide-bar",
+      "title": "Hide Bar",
+      "description": "Hides the YASB status bar",
+      "mode": "no-view",
+      "subtitle": "YASB",
+      "arguments": [
+        {
+          "name": "screen",
+          "type": "text",
+          "placeholder": "Screen Name"
+        }
+      ]
+    },
+    {
+      "name": "toggle-bar",
+      "title": "Toggle Bar",
+      "description": "Toggles the YASB status bar",
+      "mode": "no-view",
+      "subtitle": "YASB",
+      "arguments": [
+        {
+          "name": "screen",
+          "type": "text",
+          "placeholder": "Screen Name"
+        }
+      ]
+    },
+    {
+      "name": "toggle-widget",
+      "title": "Toggle Widget",
+      "description": "Toggles a specific widget on or off",
+      "mode": "no-view",
+      "subtitle": "YASB",
+      "arguments": [
+        {
+          "name": "widget",
+          "type": "text",
+          "placeholder": "Widget Name",
+          "required": true
+        },
+        {
+          "name": "screen",
+          "type": "text",
+          "placeholder": "Screen Name"
+        }
+      ]
+    },
+    {
+      "name": "monitor-information",
+      "title": "Monitor Information",
+      "subtitle": "YASB",
+      "description": "Displays information about connected monitors",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "display",
+          "type": "dropdown",
+          "placeholder": "How to display output",
+          "data": [
+            {
+              "title": "Text",
+              "value": "text"
+            },
+            {
+              "title": "Table",
+              "value": "table"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "author": "Deviljin112",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Applications",
+    "Productivity"
+  ]
+}

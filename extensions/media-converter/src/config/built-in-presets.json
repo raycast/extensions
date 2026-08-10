@@ -1,0 +1,73 @@
+{
+  "v": 1,
+  "presets": [
+    {
+      "id": "builtin-web-webp",
+      "name": "Web Image (WebP 80)",
+      "mediaType": "image",
+      "outputFormat": ".webp",
+      "quality": { ".webp": 80 },
+      "description": "Great balance of quality and size for websites"
+    },
+    {
+      "id": "builtin-web-jpg",
+      "name": "Web Image (JPG 80)",
+      "mediaType": "image",
+      "outputFormat": ".jpg",
+      "quality": { ".jpg": 80 },
+      "description": "Widely compatible web-friendly JPG"
+    },
+    {
+      "id": "builtin-email-video",
+      "name": "Email-friendly Video (MP4)",
+      "mediaType": "video",
+      "outputFormat": ".mp4",
+      "quality": { ".mp4": { "encodingMode": "crf", "crf": 60, "preset": "medium" } },
+      "stripMetadata": true,
+      "description": "Smaller H.264 MP4, good for email attachments"
+    },
+    {
+      "id": "builtin-whatsapp-video",
+      "name": "WhatsApp Video (MP4)",
+      "mediaType": "video",
+      "outputFormat": ".mp4",
+      "quality": { ".mp4": { "encodingMode": "crf", "crf": 55, "preset": "fast" } },
+      "stripMetadata": true,
+      "description": "Compressed MP4 suitable for WhatsApp"
+    },
+    {
+      "id": "builtin-podcast-mp3",
+      "name": "Podcast (MP3 192 VBR)",
+      "mediaType": "audio",
+      "outputFormat": ".mp3",
+      "quality": { ".mp3": { "bitrate": "192", "vbr": true } },
+      "description": "Standard podcast-quality MP3"
+    },
+    {
+      "id": "builtin-lossless-flac",
+      "name": "Lossless Audio (FLAC)",
+      "mediaType": "audio",
+      "outputFormat": ".flac",
+      "quality": {
+        ".flac": { "compressionLevel": "5", "sampleRate": "48000", "bitDepth": "24" }
+      },
+      "description": "High-quality FLAC archive"
+    },
+    {
+      "id": "builtin-twitter-gif",
+      "name": "Twitter/X GIF (15 fps, 720w)",
+      "mediaType": "gif",
+      "outputFormat": ".gif",
+      "quality": { ".gif": { "fps": "15", "width": "720", "loop": true } },
+      "description": "Small looping GIF for social posts"
+    },
+    {
+      "id": "builtin-voice-memo-m4a",
+      "name": "Voice Memo (M4A 96k)",
+      "mediaType": "audio",
+      "outputFormat": ".m4a",
+      "quality": { ".m4a": { "bitrate": "96", "profile": "aac_low" } },
+      "description": "Tiny M4A for voice recordings"
+    }
+  ]
+}

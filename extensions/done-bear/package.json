@@ -1,0 +1,99 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "done-bear",
+  "private": true,
+  "description": "Search and manage your Done Bear tasks from Raycast",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "mblode",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.5.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.1.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "show-today",
+      "title": "Show Today List",
+      "description": "Search and manage your today tasks",
+      "mode": "view"
+    },
+    {
+      "name": "show-inbox",
+      "title": "Show Inbox List",
+      "description": "Search and manage your inbox tasks",
+      "mode": "view"
+    },
+    {
+      "name": "show-anytime",
+      "title": "Show Anytime List",
+      "description": "Search and manage your anytime tasks",
+      "mode": "view"
+    },
+    {
+      "name": "show-upcoming",
+      "title": "Show Upcoming List",
+      "description": "Search and manage your upcoming tasks",
+      "mode": "view"
+    },
+    {
+      "name": "show-someday",
+      "title": "Show Someday List",
+      "description": "Search and manage your someday tasks",
+      "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search tasks globally across all projects",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a task with all fields",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "description": "Search and manage your projects",
+      "mode": "view"
+    },
+    {
+      "name": "create-project",
+      "title": "Create Project",
+      "description": "Create a new project",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-today",
+      "title": "Show Today in Menu Bar",
+      "description": "See your Today list in the menu bar",
+      "mode": "menu-bar"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [],
+  "title": "Done Bear"
+}

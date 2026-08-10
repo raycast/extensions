@@ -1,0 +1,125 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aerospace",
+  "title": "Aerospace Tiling Window Manager",
+  "description": "Aerospace Tiling Window Manager Extension for Raycast",
+  "icon": "aerospace-icon.png",
+  "author": "limonkufu",
+  "contributors": [
+    "AmmarCodes",
+    "thewinger",
+    "LightQuantum",
+    "Mmehdi06",
+    "abhiy13",
+    "kim-raaschou-nielsen",
+    "zhenpewu"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "showShortcuts",
+      "title": "Show Aerospace Shortcuts",
+      "description": "All of the shortcuts of the aerospace parsed from your config file",
+      "mode": "view"
+    },
+    {
+      "name": "showConfig",
+      "title": "Show Aerospace Config",
+      "description": "Show config of the aerospace",
+      "mode": "view"
+    },
+    {
+      "name": "goToWorkspace",
+      "title": "Go to Workspace",
+      "description": "Switch to an Aerospace workspace",
+      "mode": "view"
+    },
+    {
+      "name": "shortcutsMenubar",
+      "title": "Enable Aerospace Menubar Shortcuts",
+      "description": "See your Aerospace shortcuts at a glance",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "switchApps",
+      "title": "Switch Apps in Workspace",
+      "description": "Switch between the apps opened",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "defaultWorkspace",
+          "title": "Default Search",
+          "description": "Set the default workspace to search: All or focused",
+          "required": true,
+          "type": "dropdown",
+          "default": "focused",
+          "data": [
+            {
+              "title": "Focused",
+              "value": "focused"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ]
+        }
+      ],
+      "arguments": [
+        {
+          "name": "workspace",
+          "placeholder": "Focused or All",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Focused",
+              "value": "focused"
+            },
+            {
+              "title": "All",
+              "value": "all"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "aerospaceBin",
+      "title": "Aerospace Binary Path",
+      "description": "Path to the aerospace binary. Leave empty to auto-detect from common locations.",
+      "required": false,
+      "type": "textfield",
+      "placeholder": "/opt/homebrew/bin/aerospace"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^1.19.1",
+    "smol-toml": "^1.7.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.9.5",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

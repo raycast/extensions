@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dropshare",
+  "title": "Dropshare",
+  "description": "Create screen captures and upload files with Dropshare",
+  "icon": "dropshare_512.png",
+  "author": "tjosten",
+  "categories": [
+    "Productivity",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "shorten-url",
+      "title": "Shorten URL",
+      "subtitle": "Dropshare",
+      "description": "Shorten a URL with Dropshare.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "Dropshare",
+      "description": "Captures a full screen shot and uploads with Dropshare.",
+      "mode": "no-view",
+      "icon": "dropshare.png"
+    },
+    {
+      "name": "capture-selection",
+      "title": "Capture Selection",
+      "subtitle": "Dropshare",
+      "description": "Captures a  selection full screen shot and uploads with Dropshare.",
+      "mode": "no-view",
+      "icon": "dropshare.png"
+    },
+    {
+      "name": "capture-pretty",
+      "title": "Capture Pretty",
+      "subtitle": "Dropshare",
+      "description": "Captures a pretty screen shot and uploads with Dropshare.",
+      "mode": "no-view",
+      "icon": "dropshare.png"
+    },
+    {
+      "name": "capture-recording",
+      "title": "Capture Recording",
+      "subtitle": "Dropshare",
+      "description": "Captures a screen recording and uploads with Dropshare.",
+      "mode": "no-view",
+      "icon": "dropshare.png"
+    },
+    {
+      "name": "upload",
+      "title": "Upload File",
+      "subtitle": "Dropshare",
+      "description": "Uploads file with Dropshare.",
+      "mode": "no-view",
+      "icon": "dropshare.png",
+      "arguments": [
+        {
+          "name": "file",
+          "placeholder": "File Path",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.68.0",
+    "react-dom": "^18.2.0",
+    "react-query": "^3.39.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

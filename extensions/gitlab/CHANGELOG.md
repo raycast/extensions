@@ -1,0 +1,312 @@
+# GitLab Changelog
+
+## [MR todos, project search, and API logging] - 2026-07-17
+
+- Show MR todo state from the list query; add or mark todos done without loading the full todos list
+- Add searchable project dropdown with server-side search and pinned selection in Search MR and project pickers
+- Cache the selected project in Search MR instead of only the project ID
+- Fetch merge request pipeline lists via REST API
+- Log GitLab REST and GraphQL requests and improve API error diagnostics
+
+## [GraphQL merge requests, discussions, and CI] - 2026-07-09
+
+- Migrate merge request, commit, and pipeline lists to GraphQL with cursor pagination (20 items per page)
+- Show pipeline status, approval count, and discussion progress on MR list rows
+- Add MR side panel with metadata toggle, markdown description, and list accessories
+- Add MR approve/revoke action; refresh detail after approve
+- Edit merge requests from list rows and detail view
+- Require project selection in Search MR; add draft filter and GitLab scope/sort filters
+- Add GraphQL-backed MR discussions list with reply, diff context in side panel, and resolve/reopen thread actions
+- Add Create MR form drafts; sort branch dropdowns by latest commit; cached project selection and markdown description
+- Add CI job and pipeline actions: retry, cancel, run pipeline, copy URL, and artifact downloads
+- Show duration on pipeline and job list rows; fetch jobs and artifacts via GraphQL
+- Modernize branches and commits UI with expanded branch actions and commit author avatars
+- Rename `project_view` command to Show Project; cache project quicklink loads
+- Fix relative upload URLs in markdown descriptions and notes
+- Fix branch form navigation, MR menu bar list keys, and Apollo cache errors when MR filters change
+
+## [Reduce MR list detail memory usage] - 2026-06-16
+
+- Reduce extra detail fetching in merge request list previews
+
+## [Add option to hide archived projects in Menu Bar Commands] - 2026-05-25
+
+- Add "Hide Archived Projects" option to Issues Menu Bar settings
+- Add "Hide Archived Projects" option to Merge Requests Menu Bar settings
+
+## [Updates] - 2026-05-20
+
+- Contributor updates
+
+## [OAuth authentication] - 2026-05-18
+
+- Add OAuth (PKCE) authentication as an alternative to Personal Access Tokens.
+  Tokens are stored encrypted by Raycast, refreshed automatically when expired,
+  and the browser flow only runs on first use or when the refresh token is
+  revoked. Recommended for enterprise instances that auto-rotate PATs.
+- Add `Authentication` and `OAuth Application ID` preferences. The existing
+  `API Token` field is unchanged and remains the default.
+- REST and GraphQL clients now share a token resolver and transparently retry
+  once on `401 Unauthorized` after force-refreshing the OAuth access token.
+- Concurrent refresh and authorization calls are coalesced via in-memory locks,
+  so parallel requests during a token expiry trigger a single refresh request
+  and a single browser tab.
+- Add **Sign Out of GitLab** no-view command to clear the locally cached OAuth
+  tokens (useful for switching accounts or after a server-side revocation).
+
+## [Keep cached merge requests interactive] - 2026-05-18
+
+- Keep cached list results actionable while stale data refreshes in the background
+
+## [Pipeline triggers, My Pipelines & Job controls] - 2026-05-18
+
+- Add top-level `My Pipelines` command listing your recent pipelines across projects
+- Add `Trigger New Pipeline` action with branch/tag selection and CI/CD variables
+- Add `Play Job` action for manual jobs and `Cancel Job` action for running jobs
+- Add `Show Log` action to view a job's trace inside Raycast
+
+## [Fix OOM crash in My Projects for large GitLab instances] - 2026-05-16
+
+- Fix out-of-memory crash when fetching thousands of projects by using parallel batch fetching with per-page mapping
+- Replace Fuse.js search with lightweight multi-term substring matching for the project list to reduce memory usage
+- Cap rendered list items to 100 to prevent memory exhaustion from complex ActionPanels
+- Sort projects by last activity date so most relevant projects appear first
+- Add "Search active projects only" preference to My Projects command (consistent with Search Projects)
+- Set background cache refetch interval to 1 day (was 5 minutes)
+
+## [Merged MR icon in todos] - 2026-04-15
+
+- Show purple merged icon for todos on merged merge requests
+
+## [Fix "Mark All as Done" error] - 2026-03-19
+
+- Fix JSON parse error when marking all todos as done (HTTP 204 No Content)
+
+## [Bugfix merge requests] - 2026-02-18
+
+- Update merge request list to show approvals properly
+
+## [Optimize Windows Experience] - 2025-12-05
+
+- Better milestones view
+- Add subtitles to `Recent Activities`
+- Add comments to Merge Requests
+- Add Comments to Issues
+- Add approvers count to Merge Requests
+- Show related branch in the issue list
+
+## [Show Readme] - 2025-12-03
+
+- Add "Show Readme" action to project list
+
+## [Search projects preferences] - 2025-10-23
+
+Add Search projects preference that allows to search only active projects
+
+## [AI Extension] - 2025-09-18
+
+## [Added support for Windows] - 2025-08-07
+
+## [Group milestones in MRs and Issues] - 2025-06-27
+
+- Add group milestones to the issue create form
+- Add group milestones to the MR create form
+
+## [Add label filter on issues menu bar] - 2025-06-19
+
+Add label filter on issues menu bar
+
+## [Fix] - 2025-05-14
+
+Fixed request loops that caused the extension to crash
+
+## [Merge Requests Menu Bar] - 2025-05-13
+
+- Added "My Merge Requests" view
+- Added the ability to filter for labels
+
+## [Fix] - 2024-12-17
+
+- Fix "Ignore SSL Errors" setting not working on some features
+
+## [Add Issues Assignment Filter] - 2024-10-16
+
+- Add "Assigned to Me" filter to "Search Issues"
+
+## [Add Projects Membership Filter] - 2024-09-03
+
+- Add project membership dropdown filter to "Search Projects"
+
+## [Todo Menubar Fix] - 2024-07-23
+
+- [#13612](https://github.com/raycast/extensions/issues/13612): Don't show menubar item when there are no todo(s) present.
+
+## [Fix] - 2024-04-23
+
+- Fix limit of 50 users for user selection during Create Merge Request / Create Issue
+
+## [Standardize Project Actions and List Items] - 2024-02-22
+
+- Standardize project actions between Search Projects and Groups > Show Group views
+- Reuse `<ProjectListItem>` for consistent future behavior
+
+## [Add Issue State Filter] - 2024-02-16
+
+- Add dropdown filter for issue state
+
+## [Add Group Search] - 2024-01-26
+
+- Add `Search Groups` command
+- Update keyboard shortcut for project `Pipelines` command to `cmd`+`shift`+`P` to remove conflict with reserved shortcut for Raycast core
+
+## [Fix] - 2023-10-21
+
+- Fix possible crash in todo commands if the title is empty
+
+## [Fix] - 2023-10-15
+
+- Fix possible crashes in menubar items
+- Fix possible crashes in label lists
+- Catch error if launchCommand fails
+- Fix menubar icon color on dark theme
+
+## [Fixed unicode chars in title] - 2023-09-21
+
+- Fixed an error with unicode chars in titles
+
+## [Fixed menubar colors] - 2023-08-08
+
+- Fixes the dynamic color for the GitLab Menu Bar command icons, specifically the Merge Request one.
+
+## [Optimize Recent Activities] - 2023-07-02
+
+- Add unsupported activity
+- Rename `My Recent Activities` to `Recent Activities`
+- `Recent Activities` got a dropdrown to switch between `My Activities` and `My Projects`
+- Add `Merge Request Menu` command
+- Add `Issues Menu` command
+- Add group filter dropdown for epics
+- `My Groups` only show one level at a time
+
+## [Add Merge Request Template] - 2023-07-04
+
+- Add template choice for merge request creation
+
+## [Search Scope] - 2023-04-27
+
+- Add scope dropdown for `Search Issues` and `Search Merge Requests`
+- Add possibility to search for named parameters in `Search Issues` and `Search Merge Requests`.
+
+## [Remove Branch] - 2023-04-17
+
+- Add checkbox `Delete source branch` for a new MR (default state of project is respected)
+- Milestones are now shown as tags instead of text in a list
+
+## [Improve Starred Project Visibility] - 2023-03-16
+
+- Use default color for non-starred projects so starred projects are more visible
+
+## [Add Retry for Failed Jobs] - 2023-03-15
+
+- Added ability to retry all failed jobs for a pipeline
+- Added ability to retry a single job
+
+## [Add Group and Project Wikis] - 2023-03-14
+
+- Added wikis for groups and projects
+
+## [Add Copy Clone Url] - 2023-02-24
+
+- Added command to copy clone url of a project to clipboard
+
+## [Allow Failure Jobs] - 2023-02-24
+
+- Added indicators for jobs that are allowed to fail
+
+## [Project Create New Issue] - 2023-02-03
+
+- Added command to cerate new issue on a project
+
+## [New Preference] - 2023-01-03
+
+- Added preference to hide annoying bot created todos in the todo command
+
+## [Add Todo Tags] - 2022-12-17
+
+- Upgrade to Raycast 1.45
+- Add Todo Tag to present the todo-reason
+- Add ⚠️ to merge request when there is a kind of conflict
+
+## [Fix crash] - 2022-12-07
+
+- Fix crash which happens when cache is corrupted
+- Add `Clear Local Extension Cache` action to most list items to be able to reset the local cache
+
+## [Todos Menu Bar] - 2022-12-06
+
+- Add Todos menu bar command
+- Add tooltips to most command view
+- Use modern raycast feature to display data
+- Fix some bugs
+
+## [Update] - 2022-10-11
+
+- Add Open in Browser option in project navigation
+
+## [Archive Indicator] - 2022-09-08
+
+- Add an archived status indicator.
+
+## [MR Details] - 2022-08-04
+
+- Add date to list view MR details.
+
+## [MR Details] - 2022-07-28
+
+- Add a new setting to show details in merge request list via a metadata view.
+- Switch `My Reviews` to use `MRListItem` to display merge requests.
+- Upgrade Raycast API and fix resulting compilation errors.
+
+## [Bugfix] - 2022-07-16
+
+- Fixes an issue in the GitLab extension that was preventing fetching all the pages from the API, even though the all parameter was enabled.
+
+## [Markdown Improvements] - 2022-07-08
+
+- Render emojis from GitLab Flavored Markdown.
+- Hide inline HTML tags from GitLab Flavored Markdown.
+
+## [UI Improvements] - 2022-06-29
+
+- Add TagList items to MR details to show assignees and reviewers.
+- Pluralized the TagList.
+- Hide metadata items when they are empty.
+- Add key properties where necessary.
+
+## [Bugfixes] - 2022-06-28
+
+- Fix GraphQL errors related to [deprecated `ID!` type usage](https://gitlab.com/gitlab-org/gitlab/-/issues/352832).
+  e.g. `Could not get Merge Request Details: Type mismatch on variable $id and argument id (ID! / MergeRequestID!)`
+
+## [Custom Certs] - 2022-06-23
+
+- Add support for custom certificates
+- Add support for ignoring SSL errors
+
+## [Projects list] - 2022-05-18
+
+- Display project stars only if there are ([#1728](https://github.com/raycast/extensions/pull/1728))
+
+## [Optimize] - 2022-04-03
+
+- Set minimum Raycast version to `1.31`
+- Increase project cache invalid time to `7` days
+- Most commands use SWR cache to speedup operations
+- Add Primary Action option to settings
+- Add pop to root setting
+- Add more details for issue and merge request
+- Add `My Recent Commits` root command
+- Merge requests and issue view can now be directly opened from `My Recent Activities` root command
+- Fix relative markdown links to display images which get uploaded to GitLab directly
+- Filter `My Merge Request`, `My Todos`, `My Recent Commits`, `My Open Issues`, `My Reviews` per project via CMD + P
+- Most commands show CI Job status now if available

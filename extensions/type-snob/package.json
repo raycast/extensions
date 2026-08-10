@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "type-snob",
+  "title": "Type Snob",
+  "description": "Copy correct typographic characters, like dashes, quote marks, and other special characters.",
+  "icon": "command-icon.png",
+  "author": "sawyerh",
+  "contributors": [
+    "chrismessina",
+    "0xdhrv"
+  ],
+  "categories": [
+    "Data",
+    "Design Tools",
+    "Communication",
+    "Finance",
+    "Web"
+  ],
+  "license": "MIT",
+  "assets": [
+    "src/characters.json"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Copy Character",
+      "description": "Copy correct typographic characters, like dashes, quote marks, and other special characters.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "type-check": "tsc --noEmit"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

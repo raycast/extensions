@@ -1,0 +1,328 @@
+{
+  "id": "slash",
+  "title": "Slash Commands",
+  "description": "Slash commands available in Claude Code",
+  "commands": [
+    {
+      "id": "add-dir",
+      "name": "/add-dir",
+      "description": "Add additional working directories to the current Claude Code session for broader project context.",
+      "usage": "/add-dir",
+      "example": "/add-dir",
+      "category": "slash",
+      "tags": ["directory", "project", "workspace"]
+    },
+    {
+      "id": "bashes",
+      "name": "/bashes",
+      "description": "List and manage background bash shells running in the current session.",
+      "usage": "/bashes",
+      "example": "/bashes",
+      "category": "slash",
+      "tags": ["background", "bash", "manage", "shells"]
+    },
+    {
+      "id": "agents",
+      "name": "/agents",
+      "description": "Manage agent configurations for custom AI subagents and specialized workflows.",
+      "usage": "/agents",
+      "example": "/agents",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["agents", "custom", "manage", "subagents", "workflows"]
+    },
+    {
+      "id": "bug",
+      "name": "/bug",
+      "description": "Initiates a bug report workflow, helping you to capture and submit issues you encounter.",
+      "usage": "/bug",
+      "example": "/bug",
+      "category": "slash",
+      "tags": ["bug", "issue", "report"]
+    },
+    {
+      "id": "clear",
+      "name": "/clear",
+      "description": "Clears the current conversation history from the REPL, providing a fresh start.",
+      "usage": "/clear",
+      "example": "/clear",
+      "category": "slash",
+      "tags": ["clear", "delete", "history"]
+    },
+    {
+      "id": "compact",
+      "name": "/compact",
+      "description": "Compact conversation with optional focus instructions to summarize previous turns and save tokens.",
+      "usage": "/compact [instructions]",
+      "example": "/compact focus on bug fixes",
+      "category": "slash",
+      "tags": ["compact", "compress", "focus", "summarize"]
+    },
+    {
+      "id": "config",
+      "name": "/config",
+      "description": "Open config panel to view and modify local and global configuration settings.",
+      "usage": "/config",
+      "example": "/config",
+      "category": "slash",
+      "tags": ["configuration", "modify", "settings"]
+    },
+    {
+      "id": "cost",
+      "name": "/cost",
+      "description": "Show the total cost and duration of the current session for tracking usage and expenses.",
+      "usage": "/cost",
+      "example": "/cost",
+      "category": "slash",
+      "tags": ["cost", "statistics", "tokens"]
+    },
+    {
+      "id": "doctor",
+      "name": "/doctor",
+      "description": "Checks the health of your Claude Code installation and provides diagnostic information.",
+      "usage": "/doctor",
+      "example": "/doctor",
+      "category": "slash",
+      "tags": ["check", "diagnostics", "doctor", "health"]
+    },
+    {
+      "id": "help",
+      "name": "/help",
+      "description": "Shows a help message with a list of available slash commands and their functions.",
+      "usage": "/help",
+      "example": "/help",
+      "category": "slash",
+      "tags": ["documentation", "help", "support"]
+    },
+    {
+      "id": "hooks",
+      "name": "/hooks",
+      "description": "Manage hook configurations for tool events and workflow automation.",
+      "usage": "/hooks",
+      "example": "/hooks",
+      "category": "slash",
+      "tags": ["automation", "configuration", "events", "hooks", "tools"]
+    },
+    {
+      "id": "ide",
+      "name": "/ide",
+      "description": "Manage IDE integrations and show status of connected development environments.",
+      "usage": "/ide",
+      "example": "/ide",
+      "category": "slash",
+      "tags": ["IDE", "development", "integration", "status"]
+    },
+    {
+      "id": "init",
+      "name": "/init",
+      "description": "Initializes a new `CLAUDE.md` file in your project, documenting the codebase to provide better context to Claude.",
+      "usage": "/init",
+      "example": "/init",
+      "category": "slash",
+      "tags": ["CLAUDE.md", "documentation", "initialize", "project", "start"]
+    },
+    {
+      "id": "install-github-app",
+      "name": "/install-github-app",
+      "description": "Set up Claude GitHub Actions for a repository to enable automated workflows.",
+      "usage": "/install-github-app",
+      "example": "/install-github-app",
+      "category": "slash",
+      "tags": ["Actions", "GitHub", "automation", "repository", "setup"]
+    },
+    {
+      "id": "login",
+      "name": "/login",
+      "description": "Starts the authentication process to sign you in with your Anthropic account.",
+      "usage": "/login",
+      "example": "/login",
+      "category": "slash",
+      "tags": ["account", "authentication", "login", "sign-in", "switch"]
+    },
+    {
+      "id": "logout",
+      "name": "/logout",
+      "description": "Sign out from your Anthropic account and end the current session.",
+      "usage": "/logout",
+      "example": "/logout",
+      "category": "slash",
+      "tags": ["account", "exit", "logout", "sign out"]
+    },
+    {
+      "id": "mcp",
+      "name": "/mcp",
+      "description": "Manage MCP servers for Model Context Protocol integrations and connections.",
+      "usage": "/mcp",
+      "example": "/mcp",
+      "category": "slash",
+      "tags": ["MCP", "connection", "protocol", "server", "status"]
+    },
+    {
+      "id": "memory",
+      "name": "/memory",
+      "description": "Edit Claude memory files to provide contextual information for your project.",
+      "usage": "/memory",
+      "example": "/memory",
+      "category": "slash",
+      "tags": ["CLAUDE.md", "edit", "memory"]
+    },
+    {
+      "id": "migrate-installer",
+      "name": "/migrate-installer",
+      "description": "Migrate from global npm installation to local installation for better management.",
+      "usage": "/migrate-installer",
+      "example": "/migrate-installer",
+      "category": "slash",
+      "tags": ["installation", "local", "migration", "npm"]
+    },
+    {
+      "id": "pr_comments",
+      "name": "/pr_comments",
+      "description": "Get comments from a GitHub pull request to review feedback and discussions.",
+      "usage": "/pr_comments",
+      "example": "/pr_comments",
+      "category": "slash",
+      "tags": ["GitHub", "PR", "comments", "pull request", "review"]
+    },
+    {
+      "id": "permissions",
+      "name": "/permissions",
+      "description": "Manage allow & deny tool permission rules for controlling tool access.",
+      "usage": "/permissions",
+      "example": "/permissions",
+      "category": "slash",
+      "tags": ["access", "allowed-tools", "control", "deny", "permissions", "rules"]
+    },
+    {
+      "id": "review",
+      "name": "/review",
+      "description": "Review a pull request and provide detailed feedback on the proposed changes.",
+      "usage": "/review",
+      "example": "/review",
+      "category": "slash",
+      "tags": ["check", "code", "review"]
+    },
+    {
+      "id": "release-notes",
+      "name": "/release-notes",
+      "description": "View release notes for Claude Code updates, changes, and new features.",
+      "usage": "/release-notes",
+      "example": "/release-notes",
+      "category": "slash",
+      "tags": ["changelog", "notes", "release", "updates", "version"]
+    },
+    {
+      "id": "terminal-setup",
+      "name": "/terminal-setup",
+      "description": "Installs terminal enhancements, such as enabling Shift+Enter for multi-line input without sending.",
+      "usage": "/terminal-setup",
+      "example": "/terminal-setup",
+      "category": "slash",
+      "tags": ["enhancements", "key binding", "keybindings", "setup", "terminal"]
+    },
+    {
+      "id": "upgrade",
+      "name": "/upgrade",
+      "description": "Upgrade to Max for higher rate limits and more Opus access.",
+      "usage": "/upgrade",
+      "example": "/upgrade",
+      "category": "slash",
+      "tags": ["Max", "Opus", "rate limits", "subscription", "upgrade"]
+    },
+    {
+      "id": "vim",
+      "name": "/vim",
+      "description": "Toggle between Vim and Normal editing modes in the interactive REPL.",
+      "usage": "/vim",
+      "example": "/vim",
+      "category": "slash",
+      "tags": ["Vim", "enable", "mode"]
+    },
+    {
+      "id": "model",
+      "name": "/model",
+      "description": "Set the AI model for Claude Code sessions and configure model preferences.",
+      "usage": "/model",
+      "example": "/model",
+      "category": "slash",
+      "tags": ["AI", "change", "configuration", "model"]
+    },
+    {
+      "id": "export",
+      "name": "/export",
+      "description": "Export the current conversation for sharing or archival purposes.",
+      "usage": "/export",
+      "example": "/export",
+      "category": "slash",
+      "tags": ["archival", "export", "save", "sharing"]
+    },
+    {
+      "id": "resume",
+      "name": "/resume",
+      "description": "Resume a conversation from your session history or start a new one.",
+      "usage": "/resume",
+      "example": "/resume",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["conversation", "resume", "session", "switch"]
+    },
+    {
+      "id": "output-style",
+      "name": "/output-style",
+      "description": "Set the output style directly or from a selection menu to customize Claude's response format.",
+      "usage": "/output-style",
+      "example": "/output-style",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["customization", "format", "output", "response", "style"]
+    },
+    {
+      "id": "output-style-new",
+      "name": "/output-style:new",
+      "description": "Create a custom output style to personalize how Claude formats and presents responses.",
+      "usage": "/output-style:new",
+      "example": "/output-style:new",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["create", "custom", "new", "output", "personalize", "style"]
+    },
+    {
+      "id": "statusline",
+      "name": "/statusline",
+      "description": "Set up Claude Code's status line UI with customizable display options and format preferences.",
+      "usage": "/statusline",
+      "example": "/statusline",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["customization", "display", "format", "status", "statusline"]
+    },
+    {
+      "id": "exit",
+      "name": "/exit",
+      "description": "Exits the Claude Code REPL session and returns you to your regular shell prompt.",
+      "usage": "/exit",
+      "example": "/exit",
+      "category": "slash",
+      "tags": ["REPL", "exit", "quit"]
+    },
+    {
+      "id": "security-review",
+      "name": "/security-review",
+      "description": "Complete a security review of the pending changes on the current branch for vulnerability assessment.",
+      "usage": "/security-review",
+      "example": "/security-review",
+      "isNew": true,
+      "category": "slash",
+      "tags": ["assessment", "branch", "review", "security", "vulnerability"]
+    },
+    {
+      "id": "status",
+      "name": "/status",
+      "description": "Show Claude Code status including version, model, account, API connectivity, and tool statuses.",
+      "usage": "/status",
+      "example": "/status",
+      "category": "slash",
+      "tags": ["account", "connectivity", "diagnostics", "status", "system", "version"]
+    }
+  ]
+}

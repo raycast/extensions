@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "endel",
+  "title": "Endel",
+  "description": "Interact with the Endel player.",
+  "icon": "extension-icon.png",
+  "author": "zach",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Media",
+    "Applications"
+  ],
+  "commands": [
+    {
+      "name": "focus",
+      "title": "Focus",
+      "subtitle": "Endel",
+      "description": "Start the Focus soundscape",
+      "mode": "no-view"
+    },
+    {
+      "name": "sleep",
+      "title": "Sleep",
+      "subtitle": "Endel",
+      "description": "Start the Sleep soundscape",
+      "mode": "no-view"
+    },
+    {
+      "name": "relax",
+      "title": "Relax",
+      "subtitle": "Endel",
+      "description": "Start the Relax soundscape",
+      "mode": "no-view"
+    },
+    {
+      "name": "study",
+      "title": "Study",
+      "subtitle": "Endel",
+      "description": "Start the Study soundscape",
+      "mode": "no-view"
+    },
+    {
+      "name": "recovery",
+      "title": "Recovery",
+      "subtitle": "Endel",
+      "description": "Start the Recovery soundscape",
+      "mode": "no-view"
+    },
+    {
+      "name": "colored-noises",
+      "title": "Colored Noises",
+      "subtitle": "Endel",
+      "description": "Start the Colored Noises soundscape",
+      "mode": "no-view"
+    },
+    {
+      "name": "nature-elements",
+      "title": "Nature Elements",
+      "subtitle": "Endel",
+      "description": "Start the Nature Elements soundscape",
+      "mode": "no-view"
+    },
+    {
+      "name": "dynamic-focus",
+      "title": "Dynamic Focus",
+      "subtitle": "Endel",
+      "description": "Start the Dynamic Focus soundscape",
+      "mode": "no-view"
+    },
+    {
+      "name": "hibernation",
+      "title": "Hibernation",
+      "subtitle": "Endel",
+      "description": "Start the Hibernation soundscape",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "browser",
+      "title": "Browser Where Endel Is Opened",
+      "description": "Script will control the Endel tab in this browser",
+      "type": "appPicker",
+      "default": "Safari",
+      "required": true
+    },
+    {
+      "name": "autoplay",
+      "title": "Autoplay",
+      "label": "Autoplay Soundscapes",
+      "description": "Automatically start playing when opening a soundscape",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.3",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

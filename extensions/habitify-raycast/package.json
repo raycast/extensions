@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "habitify-raycast",
+  "title": "Habitify",
+  "description": "Manage Habitify habits from Raycast.",
+  "version": "0.1.0",
+  "icon": "icon.png",
+  "author": "razz13",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "Habitify",
+    "habits",
+    "productivity"
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Habitify API Key",
+      "description": "Create it in Habitify Settings > API. Required for all commands.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "rowColorMode",
+      "title": "Row Color Mode",
+      "description": "Choose how Raycast should tint habit rows.",
+      "type": "dropdown",
+      "required": true,
+      "default": "status",
+      "data": [
+        {
+          "title": "Status Colors",
+          "value": "status"
+        },
+        {
+          "title": "Habit Colors",
+          "value": "habit"
+        },
+        {
+          "title": "Area Colors",
+          "value": "area"
+        },
+        {
+          "title": "Off",
+          "value": "off"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Today Habits",
+      "description": "View and manage today's Habitify habits.",
+      "mode": "view"
+    },
+    {
+      "name": "current-time-of-day",
+      "title": "Current Time of Day",
+      "description": "Show habits scheduled for the current time slot.",
+      "mode": "view"
+    },
+    {
+      "name": "areas",
+      "title": "Habit Areas",
+      "description": "Browse habits grouped by area.",
+      "mode": "view"
+    },
+    {
+      "name": "today-stats",
+      "title": "Today Stats",
+      "description": "View today's overview metrics and streaks.",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "react": "^19.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.0.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.1",
+    "typescript": "^6.0.3"
+  }
+}

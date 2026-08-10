@@ -1,0 +1,1298 @@
+import { execFile, spawn } from "node:child_process";
+import * as fs from "node:fs";
+import * as net from "node:net";
+import * as os from "node:os";
+import * as path from "node:path";
+import { promisify } from "node:util";
+import { fetchAliases } from "./aliases";
+import { DevServer } from "./types";
+
+const execFileAsync = promisify(execFile);
+
+// ---------------------------------------------------------------------------
+// Platform primitives
+// ---------------------------------------------------------------------------
+//
+// Everything below the next section divider is pure TypeScript and runs
+// unchanged on any OS. To port the extension to a new platform (e.g.
+// Windows), swap the helpers in this section, plus fetchAliases in
+// [aliases.ts], for equivalents that return the same shapes. Suggested
+// mapping:
+//   listProcesses  → Get-CimInstance Win32_Process     (or PowerShell)
+//   listListeners  → Get-NetTCPConnection -State Listen
+//   listCwds       → Win32_Process.ExecutablePath / CWD via WMI
+//   fetchAliases   → powershell -c "portless list"     (see aliases.ts)
+//   openInBackground → Start-Process (no direct -g equivalent)
+
+// Open a URL in the default browser without focusing it. Deliberately not
+// Raycast's `open()`: that activates the browser, and Raycast hides its own
+// window the moment it loses focus. For a URL the user asked for that is
+// right, but the auto-open on a server binding its port is something the
+// extension does on its own, and it should not yank the window out from
+// under someone who is still reading it.
+//
+// `open -g` is the only way to get a background activation on macOS; there
+// is no @raycast/api option for it.
+export async function openInBackground(url: string): Promise<void> {
+  await execFileAsync("/usr/bin/open", ["-g", url]);
+}
+
+interface RawProcess {
+  pid: number;
+  ppid: number; // parent PID; lets detection climb from helper binaries to the dev server that spawned them
+  lstart: string; // raw `ps` lstart text, e.g. "Tue May 19 20:02:57 2026"
+  command: string; // full command line (including the executable path)
+}
+
+interface RawListener {
+  pid: number;
+  port: number;
+  // True when the socket is bound beyond loopback (wildcard or a concrete
+  // LAN address), i.e. the server is reachable from other devices on the
+  // network. Drives the "Copy Network URL" action.
+  lanExposed: boolean;
+}
+
+// Capture stdout even when the child exits non-zero (lsof exits 1 if any of
+// the queried PIDs has died between our two queries, but the rest of the
+// output is still useful).
+function stdoutOrThrow(err: unknown): string {
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "stdout" in err &&
+    typeof (err as { stdout: unknown }).stdout === "string"
+  ) {
+    return (err as { stdout: string }).stdout;
+  }
+  throw err;
+}
+
+async function listProcesses(): Promise<RawProcess[]> {
+  // ps -A: all processes. -ww: don't truncate long command lines.
+  // pid= / ppid= / lstart= / command= : suppress headers; output each field
+  // as-is. lstart is fixed-width 24 chars (`Tue May 19 20:02:57 2026`).
+  const { stdout } = await execFileAsync("ps", [
+    "-A",
+    "-ww",
+    "-o",
+    "pid=,ppid=,lstart=,command=",
+  ]);
+  const procs: RawProcess[] = [];
+  for (const line of stdout.split("\n")) {
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(.+)$/);
+    if (!match) continue;
+    const rest = match[3];
+    if (rest.length < 25) continue; // need at least lstart + one char
+    procs.push({
+      pid: parseInt(match[1], 10),
+      ppid: parseInt(match[2], 10),
+      lstart: rest.slice(0, 24),
+      command: rest.slice(24).trimStart(),
+    });
+  }
+  return procs;
+}
+
+async function listListeners(): Promise<RawListener[]> {
+  // -F pn outputs one field per line, prefixed by a type letter:
+  //   p<pid> starts a process group
+  //   f<fd>  marks a file within that group (we ignore these)
+  //   n<addr> is the network address, e.g. "*:3000" or "[::1]:5173"
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync("lsof", [
+      "-iTCP",
+      "-sTCP:LISTEN",
+      "-nP",
+      "-F",
+      "pn",
+    ]));
+  } catch (err) {
+    stdout = stdoutOrThrow(err);
+  }
+  const out: RawListener[] = [];
+  let currentPid = 0;
+  for (const line of stdout.split("\n")) {
+    if (line[0] === "p") {
+      currentPid = parseInt(line.slice(1), 10);
+    } else if (line[0] === "n" && currentPid > 0) {
+      const addr = line.slice(1);
+      const colon = addr.lastIndexOf(":");
+      const port = parseInt(addr.slice(colon + 1), 10);
+      if (port > 0) {
+        const host = addr.slice(0, colon);
+        const lanExposed = !(
+          host === "127.0.0.1" ||
+          host === "[::1]" ||
+          host.startsWith("127.")
+        );
+        out.push({ pid: currentPid, port, lanExposed });
+      }
+    }
+  }
+  return out;
+}
+
+async function listCwds(pids: number[]): Promise<Map<number, string>> {
+  const out = new Map<number, string>();
+  if (pids.length === 0) return out;
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync("lsof", [
+      "-p",
+      pids.join(","),
+      "-a",
+      "-d",
+      "cwd",
+      "-F",
+      "n",
+    ]));
+  } catch (err) {
+    stdout = stdoutOrThrow(err);
+  }
+  let currentPid = 0;
+  for (const line of stdout.split("\n")) {
+    if (line[0] === "p") {
+      currentPid = parseInt(line.slice(1), 10);
+    } else if (line[0] === "n" && currentPid > 0) {
+      out.set(currentPid, line.slice(1));
+    }
+  }
+  return out;
+}
+
+interface ParentInfo {
+  ppid: number;
+  // Basename of the executable, e.g. "workerd" or "node".
+  name: string;
+}
+
+// Parent and executable name for a handful of known PIDs. Same field syntax as
+// listProcesses, but -p asks only about the pids we care about instead of
+// walking the whole table; a pid that died since we learned of it is simply
+// absent from the output (ps exits non-zero when none of them are left).
+//
+// comm is the executable, not the argv line, and on macOS it comes back as an
+// absolute path that may well contain spaces
+// (`/Users/me/Client Work/app/node_modules/.../bin/workerd`). So the two
+// numbers are read off the front of the line and the whole remainder is the
+// path, never split on whitespace.
+async function listParentInfo(
+  pids: number[],
+): Promise<Map<number, ParentInfo>> {
+  const out = new Map<number, ParentInfo>();
+  if (pids.length === 0) return out;
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync("ps", [
+      // -ww like listProcesses: a truncated path would only fail the name
+      // gate closed, but full width costs nothing.
+      "-ww",
+      "-o",
+      "pid=,ppid=,comm=",
+      "-p",
+      pids.join(","),
+    ]));
+  } catch (err) {
+    stdout = stdoutOrThrow(err);
+  }
+  for (const line of stdout.split("\n")) {
+    const match = line.match(/^\s*(\d+)\s+(\d+)\s+(.+)$/);
+    if (!match) continue;
+    out.set(parseInt(match[1], 10), {
+      ppid: parseInt(match[2], 10),
+      name: commandBase(match[3].trim()),
+    });
+  }
+  return out;
+}
+
+interface GitInfo {
+  // Absolute path to the shared .git directory. Same value for every
+  // worktree of the same repo, so it's a stable grouping key.
+  commonDir: string;
+  // Branch name, or empty for detached HEAD / non-git.
+  branch: string;
+}
+
+interface GitProbe {
+  info: GitInfo | undefined;
+  // Absolute path to the HEAD file that defines `branch` (per-worktree for
+  // linked worktrees). Its mtime changes on every checkout, which makes it a
+  // cheap cache-invalidation signal: see getGitInfoCached.
+  headPath?: string;
+}
+
+// Resolve git common-dir, branch, and HEAD path for a cwd. Returns
+// info: undefined when cwd isn't inside a git working tree. One process
+// spawn per call; callers should go through getGitInfoCached.
+async function probeGit(cwd: string): Promise<GitProbe> {
+  try {
+    const { stdout } = await execFileAsync("git", [
+      "-C",
+      cwd,
+      "rev-parse",
+      "--git-common-dir",
+      "--abbrev-ref",
+      "HEAD",
+      "--git-path",
+      "HEAD",
+    ]);
+    // rev-parse prints one line per request, in argument order.
+    const [commonDirRaw, branchRaw, headRaw] = stdout.trim().split("\n");
+    if (!commonDirRaw) return { info: undefined };
+    const commonDir = path.isAbsolute(commonDirRaw)
+      ? commonDirRaw
+      : path.resolve(cwd, commonDirRaw);
+    const branch = branchRaw === "HEAD" ? "" : (branchRaw ?? "");
+    const headPath = headRaw
+      ? path.isAbsolute(headRaw)
+        ? headRaw
+        : path.resolve(cwd, headRaw)
+      : undefined;
+    return { info: { commonDir, branch }, headPath };
+  } catch {
+    return { info: undefined };
+  }
+}
+
+interface GitCacheEntry {
+  probe: GitProbe;
+  headMtimeMs?: number;
+  checkedAt: number;
+}
+
+// Per-cwd git cache. Spawning `git rev-parse` for every project on every
+// poll is the kind of background cost that adds up in a long-lived
+// dashboard session; the data it returns only changes on checkout. The HEAD
+// file's mtime is bumped by every checkout (including in linked worktrees,
+// which each have their own HEAD), so a single statSync per project per poll
+// replaces the spawn. Non-git cwds re-probe on a coarse TTL so a `git init`
+// under a running server is eventually picked up.
+const gitCache = new Map<string, GitCacheEntry>();
+const NON_GIT_RECHECK_MS = 60_000;
+
+async function getGitInfoCached(cwd: string): Promise<GitInfo | undefined> {
+  const entry = gitCache.get(cwd);
+  if (entry) {
+    if (entry.probe.info && entry.probe.headPath) {
+      try {
+        const mtime = fs.statSync(entry.probe.headPath).mtimeMs;
+        if (mtime === entry.headMtimeMs) return entry.probe.info;
+      } catch {
+        // HEAD vanished (repo deleted out from under us); fall through to a
+        // fresh probe.
+      }
+    } else if (Date.now() - entry.checkedAt < NON_GIT_RECHECK_MS) {
+      return entry.probe.info;
+    }
+  }
+  const probe = await probeGit(cwd);
+  let headMtimeMs: number | undefined;
+  if (probe.headPath) {
+    try {
+      headMtimeMs = fs.statSync(probe.headPath).mtimeMs;
+    } catch {
+      // Unreadable HEAD just means we re-probe next poll.
+    }
+  }
+  gitCache.set(cwd, { probe, headMtimeMs, checkedAt: Date.now() });
+  return probe.info;
+}
+
+// ---------------------------------------------------------------------------
+// Pure aggregation (cross-platform)
+// ---------------------------------------------------------------------------
+
+type ShopifyTool = "shopify-theme" | "shopify-app" | "shopify-hydrogen";
+
+function commandBase(token: string): string {
+  return path.basename(token).replace(/\.(?:cmd|exe|ps1)$/i, "");
+}
+
+function shopifyToolFromArgs(
+  tokens: string[],
+  index: number,
+): ShopifyTool | null {
+  const area = tokens[index + 1];
+  const command = tokens[index + 2];
+  if (area === "theme" && command === "dev") return "shopify-theme";
+  if (area === "app" && command === "dev") return "shopify-app";
+  if (area === "hydrogen" && command === "dev") return "shopify-hydrogen";
+  return null;
+}
+
+function detectShopifyTool(command: string): ShopifyTool | null {
+  const tokens = command.trim().split(/\s+/);
+  if (tokens.length < 3) return null;
+
+  if (commandBase(tokens[0]) === "shopify") {
+    return shopifyToolFromArgs(tokens, 0);
+  }
+
+  // Global Shopify CLI installs commonly show up as:
+  //   node /path/to/bin/shopify theme dev
+  // Keep this bounded so wrapper commands like `concurrently ... shopify theme
+  // dev` don't get mislabeled if the wrapper ever owns a listener.
+  if (["node", "nodejs", "bun", "npx"].includes(commandBase(tokens[0]))) {
+    for (let i = 1; i < Math.min(tokens.length - 2, 5); i++) {
+      if (commandBase(tokens[i]) !== "shopify") continue;
+      return shopifyToolFromArgs(tokens, i);
+    }
+  }
+
+  return null;
+}
+
+// A candidate is anything launched from node_modules (broader than .bin/ so
+// we catch `node node_modules/serve/build/main.js` etc.), a bare bun process,
+// OR a Shopify CLI dev process. Over-collection is harmless: only PIDs with a
+// LISTEN socket survive the join below.
+function isCandidate(proc: RawProcess): boolean {
+  if (/node_modules\//.test(proc.command)) return true;
+  if (detectShopifyTool(proc.command)) return true;
+  const exec = proc.command.split(/\s+/, 1)[0];
+  return /(\/|^)bun$/.test(exec);
+}
+
+function detectRuntime(command: string): "node" | "bun" {
+  const exec = command.split(/\s+/, 1)[0];
+  return /(\/|^)bun$/.test(exec) ? "bun" : "node";
+}
+
+// Resolve the owning package name from a path that goes through
+// node_modules. Launchers produce several layouts for the same tool, so this
+// parses path segments instead of pattern-matching text:
+//   node_modules/.bin/vite                    → vite  (plain shim invocation)
+//   node_modules/.bin/../vite/bin/vite.js     → vite  (npm/yarn shims exec
+//     their target through a relative path, so the command line keeps `..`)
+//   node_modules/.bin/../.pnpm/vite@8.1.3_<peers>/node_modules/vite/bin/vite.js
+//                                             → vite  (pnpm virtual store)
+//   node_modules/serve/build/main.js          → serve
+//   node_modules/@scope/pkg/dist/cli.js       → @scope/pkg
+// Returns null when no package name can be derived.
+function packageFromModulesPath(token: string): string | null {
+  // Collapse `..`/`.` first; that alone reduces the shim-self-exec layout to
+  // a plain node_modules/<pkg> path.
+  const segments = path.posix.normalize(token).split("/");
+  // The pnpm virtual store nests a second node_modules
+  // (.pnpm/<pkg>@<version>_<peers>/node_modules/<pkg>/...); the LAST
+  // occurrence is the one adjacent to the real package directory.
+  const idx = segments.lastIndexOf("node_modules");
+  if (idx === -1) return null;
+  const next = segments[idx + 1];
+  if (!next) return null;
+  if (next === ".bin") {
+    const shim = segments[idx + 2];
+    return shim ? commandBase(shim) : null;
+  }
+  if (next === ".pnpm") {
+    // Virtual-store entry with nothing after it but the versioned dir
+    // ("vite@8.1.3_<peers>" or "@sveltejs+kit@2.0.0_<peers>"). Normal pnpm
+    // launches carry an inner node_modules and never reach here.
+    const dir = segments[idx + 2];
+    if (!dir) return null;
+    const at = dir.indexOf("@", dir.startsWith("@") ? 1 : 0);
+    const name = at === -1 ? dir : dir.slice(0, at);
+    return name ? name.replace("+", "/") : null;
+  }
+  if (next.startsWith("@")) {
+    const scoped = segments[idx + 2];
+    return scoped ? `${next}/${scoped}` : null;
+  }
+  return next;
+}
+
+function detectToolFromCommand(command: string, cwd: string): string {
+  const shopifyTool = detectShopifyTool(command);
+  if (shopifyTool) return shopifyTool;
+
+  // The script path is the first token routed through node_modules
+  // (typically argv[1] after the runtime executable).
+  for (const token of command.split(/\s+/)) {
+    if (!token.includes("node_modules/")) continue;
+    const name = packageFromModulesPath(token);
+    if (!name) continue;
+    // SvelteKit runs under vite; promote when svelte.config is present.
+    if (name === "vite" && hasSvelteConfig(cwd)) return "sveltekit";
+    return name;
+  }
+  // Bare bun script (no node_modules anywhere in the command).
+  if (detectRuntime(command) === "bun") return "bun";
+  return "node";
+}
+
+// Native platform-binary packages are npm's convention for shipping
+// per-OS/per-arch compiled executables: `@cloudflare/workerd-darwin-arm64`,
+// `@esbuild/darwin-arm64`, `@rollup/rollup-linux-x64-gnu`,
+// `sass-embedded-darwin-arm64`, … A process running one of these is an
+// implementation detail of whatever tool spawned it, never a tool the user
+// picked — so a name matching this shape is a signal to look at the ancestor
+// process instead, and is only ever shown (suffix-stripped) as a last resort.
+// The shape is `<os>-<arch>` with an optional libc/ABI tail, anchored to the
+// end of the unscoped name.
+const PLATFORM_BINARY_RE =
+  /(?:^|-)(?:darwin|linux|win32|windows|freebsd|openbsd|netbsd|android|sunos|aix)(?:-(?:arm64|aarch64|x64|x86_64|ia32|arm(?:v7l?)?|riscv64|ppc64(?:le)?|s390x|loong64|mips64(?:el)?|wasm32|universal))?(?:-(?:gnu|musl|msvc|eabi|gnueabihf))?$/;
+
+function unscopedName(name: string): string {
+  return name.startsWith("@") ? (name.split("/")[1] ?? name) : name;
+}
+
+function isPlatformBinaryName(name: string): boolean {
+  return PLATFORM_BINARY_RE.test(unscopedName(name));
+}
+
+// "@cloudflare/workerd-darwin-arm64" → "workerd". When the whole unscoped
+// name is the platform triple ("@esbuild/darwin-arm64"), fall back to the
+// scope itself → "esbuild".
+function stripPlatformSuffix(name: string): string {
+  const base = unscopedName(name);
+  const stripped = base.replace(PLATFORM_BINARY_RE, "");
+  if (stripped) return stripped;
+  if (name.startsWith("@")) return name.slice(1).split("/")[0];
+  return base;
+}
+
+// How far to climb the process tree when resolving a helper binary to the
+// dev server that owns it. The chain is usually direct (vite → workerd);
+// the margin covers an intermediate shell or npm exec layer.
+const ANCESTOR_SCAN_DEPTH = 5;
+
+function detectTool(
+  proc: RawProcess,
+  cwd: string,
+  procByPid: Map<number, RawProcess>,
+): string {
+  const own = detectToolFromCommand(proc.command, cwd);
+  if (!isPlatformBinaryName(own)) return own;
+  // This process is a compiled helper (workerd, esbuild service, …). The
+  // tool the user actually chose is the ancestor that spawned it. cwd is the
+  // helper's own, which in practice is the project root the ancestor runs
+  // in — good enough for the svelte-config promotion.
+  let cur = proc;
+  for (let depth = 0; depth < ANCESTOR_SCAN_DEPTH; depth++) {
+    const parent = procByPid.get(cur.ppid);
+    if (!parent) break;
+    if (isCandidate(parent)) {
+      const parentTool = detectToolFromCommand(parent.command, cwd);
+      if (!isPlatformBinaryName(parentTool)) return parentTool;
+    }
+    cur = parent;
+  }
+  return stripPlatformSuffix(own);
+}
+
+function hasSvelteConfig(cwd: string): boolean {
+  return (
+    fs.existsSync(`${cwd}/svelte.config.js`) ||
+    fs.existsSync(`${cwd}/svelte.config.ts`) ||
+    fs.existsSync(`${cwd}/svelte.config.mjs`) ||
+    fs.existsSync(`${cwd}/svelte.config.cjs`)
+  );
+}
+
+// A single dev-server PID often has multiple LISTEN sockets: the main HTTP
+// server plus ephemeral HMR/IPC/prebundling ports. Pick the LOWEST per PID
+// because configured dev ports (3000, 4321, 5173, 8080) are always below
+// ephemeral ports (32768+); without this the displayed port flickers across
+// refreshes.
+//
+// lanExposed is tracked for the CHOSEN port specifically (OR'd across
+// same-port binds, e.g. separate IPv4 and IPv6 sockets), not for any socket
+// of the PID. A loopback-only HTTP server whose HMR socket happens to bind
+// wildcard must not advertise a network URL that can't actually connect.
+function lowestPortPerPid(
+  listeners: RawListener[],
+): Map<number, { port: number; lanExposed: boolean }> {
+  const out = new Map<number, { port: number; lanExposed: boolean }>();
+  for (const { pid, port, lanExposed } of listeners) {
+    const cur = out.get(pid);
+    if (cur === undefined || port < cur.port) {
+      out.set(pid, { port, lanExposed });
+    } else if (port === cur.port && lanExposed) {
+      cur.lanExposed = true;
+    }
+  }
+  return out;
+}
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
+// Per-PID metadata cache. A process's cwd, tool, and runtime are immutable
+// for its lifetime, so we resolve them once per PID and skip the second lsof
+// (cwd lookup) plus the tool-detection regexes on every later poll. Keyed by
+// pid and validated against lstart so a recycled PID can't inherit a dead
+// process's metadata.
+interface PidMeta {
+  lstart: string;
+  cwd: string;
+  tool: string;
+  runtime: "node" | "bun";
+}
+const pidMetaCache = new Map<number, PidMeta>();
+
+// `settlingCwds` names the projects the caller knows to be mid-start, and is
+// the evidence for suppressHelperRows' fourth rule (see there). Omit it, or
+// pass an empty set, and nothing changes.
+export async function fetchServers(
+  settlingCwds?: ReadonlySet<string>,
+): Promise<DevServer[]> {
+  const [procs, listeners, aliasesByPort] = await Promise.all([
+    listProcesses(),
+    listListeners(),
+    fetchAliases(),
+  ]);
+  const candidates = procs.filter(isCandidate);
+  const portByPid = lowestPortPerPid(listeners);
+  const live = candidates.filter((p) => portByPid.has(p.pid));
+  // Full snapshot keyed by pid, for ancestor walks: resolving helper
+  // binaries to the tool that spawned them, and hiding their rows.
+  const procByPid = new Map(procs.map((p) => [p.pid, p]));
+
+  // Resolve cwds only for PIDs we haven't seen before (or whose lstart says
+  // the PID was recycled). On a steady-state poll this list is empty and the
+  // lsof cwd query is skipped entirely.
+  const unseen = live.filter(
+    (p) => pidMetaCache.get(p.pid)?.lstart !== p.lstart,
+  );
+  const cwdByPid = await listCwds(unseen.map((p) => p.pid));
+  for (const proc of unseen) {
+    const cwd = cwdByPid.get(proc.pid);
+    if (!cwd) continue; // shouldn't happen for live processes, but be safe
+    pidMetaCache.set(proc.pid, {
+      lstart: proc.lstart,
+      cwd,
+      tool: detectTool(proc, cwd, procByPid),
+      runtime: detectRuntime(proc.command),
+    });
+  }
+  // Evict entries for processes that are gone so the cache stays bounded.
+  const livePids = new Set(live.map((p) => p.pid));
+  for (const pid of pidMetaCache.keys()) {
+    if (!livePids.has(pid)) pidMetaCache.delete(pid);
+  }
+
+  // Look up git info per unique cwd, in parallel (cached by HEAD mtime, see
+  // getGitInfoCached). Worktrees of the same repo share a git common-dir, so
+  // we use that path as the project key, which collapses sibling worktrees
+  // into one group while still letting us show the branch on each row. The
+  // project's display name is the basename of the common-dir's parent (the
+  // repo root).
+  const uniqueCwds = [
+    ...new Set(
+      live
+        .map((p) => pidMetaCache.get(p.pid)?.cwd)
+        .filter((c): c is string => Boolean(c)),
+    ),
+  ];
+  const gitByCwd = new Map<string, GitInfo | undefined>();
+  await Promise.all(
+    uniqueCwds.map(async (cwd) =>
+      gitByCwd.set(cwd, await getGitInfoCached(cwd)),
+    ),
+  );
+
+  const servers: DevServer[] = [];
+  for (const proc of live) {
+    const meta = pidMetaCache.get(proc.pid);
+    if (!meta) continue;
+    const listener = portByPid.get(proc.pid);
+    if (listener === undefined) continue;
+    const port = listener.port;
+    // Drop the portless proxy daemon itself. It's a node process out of
+    // node_modules/portless/ that binds 80/443/1355, and would otherwise
+    // appear as a phantom "dev server" row. Child processes spawned by
+    // portless run their own framework binary (next, vite, …) so they
+    // resolve to that tool, not "portless".
+    if (meta.tool === "portless") continue;
+    const git = gitByCwd.get(meta.cwd);
+    // For git projects: key is the shared .git dir path (stable across all
+    // worktrees of the repo), name is the basename of its parent (the repo
+    // root). For non-git: both fall back to the worktree itself.
+    const projectName = git
+      ? path.basename(path.dirname(git.commonDir))
+      : path.basename(meta.cwd) || meta.cwd;
+    const projectKey = git ? git.commonDir : meta.cwd;
+    const customUrls = aliasesByPort.get(port);
+    const localUrl = `http://localhost:${port}`;
+    servers.push({
+      pid: proc.pid,
+      port: String(port),
+      url: customUrls?.[0] ?? localUrl,
+      localUrl,
+      customUrls,
+      tool: meta.tool,
+      runtime: meta.runtime,
+      cwd: meta.cwd,
+      projectKey,
+      projectName,
+      branch: git?.branch || undefined,
+      lanExposed: listener.lanExposed,
+      startedAt: new Date(proc.lstart),
+    });
+  }
+  // Rule 3's evidence, gathered only when there is a candidate to judge: the
+  // executables of orphaned ephemeral-port listeners, from the same targeted
+  // `ps -o comm` the reap reads. The full command line cannot answer this
+  // question (a project folder named workerd-demo would satisfy any name
+  // scan), so the rule goes by what the process actually runs, and pays one
+  // extra ps only in the rare poll that has an orphan at all.
+  const orphanPids = servers
+    .filter((s) => {
+      if (parseInt(s.port, 10) < EPHEMERAL_PORT_MIN) return false;
+      const self = procByPid.get(s.pid);
+      return self !== undefined && self.ppid <= 1;
+    })
+    .map((s) => s.pid);
+  const orphanHelperPids = new Set<number>();
+  if (orphanPids.length > 0) {
+    for (const [pid, info] of await listParentInfo(orphanPids)) {
+      if (REAPABLE_HELPERS.has(info.name)) orphanHelperPids.add(pid);
+    }
+  }
+  return suppressHelperRows(servers, procByPid, orphanHelperPids, settlingCwds);
+}
+
+// macOS hands out dynamic ports from this range when a process binds port 0.
+// Exported because the dashboard needs the same notion of "not a port anyone
+// chose" while a project is mid-restart (see resolvingServer there).
+export const EPHEMERAL_PORT_MIN = 49152;
+
+// Drop rows that are internal sockets of an already-listed server, on either
+// of two signals. Both require an OS-assigned port, which is the half that
+// never lies: nobody picks 51759 on purpose, so a process listening there is
+// plumbing. A child bound to a *configured* port stays visible (workerd on
+// 8787 under `wrangler dev`, a Hydrogen storefront under `shopify app dev`),
+// because a deliberate port is a server someone opens.
+//
+//   1. Descent. The process is a descendant of another row's process: the
+//      plain "helper the dev server forked with port 0" case.
+//   2. Same project. Some other row on a deliberate port has this cwd.
+//   3. Orphaned helper. Its parent is init AND its executable (by `ps -o
+//      comm`, the same evidence the reap reads) is a known leaky helper
+//      (REAPABLE_HELPERS), so whatever launched it is dead and it is the
+//      kind of process that leaks this way.
+//   4. Mid-start. The caller says a start is in flight for this cwd.
+//
+// Rule 2 exists because rule 1 loses to reparenting. Miniflare's workerd is
+// launched by an intermediate process that then exits, so workerd is adopted
+// by init and the ancestor walk finds nothing but pid 1. Two of them per
+// `vite dev` then showed up as extra servers of the project, and they were
+// not merely noisy: Restart on one killed workerd and started a second dev
+// server for the same folder, leaving the first running.
+//
+// Rule 3 exists because rule 2 needs a living server to point at, and the
+// nastiest case is the one where there isn't one. A project whose dev server
+// died leaves its workerd behind holding an ephemeral port, and that lone
+// orphan was rendering as "Simac, 1 server, localhost:57018" — a project
+// reported as running when nothing of it was, and a row whose Kill did
+// nothing, since orphaned workerd ignores SIGTERM. The name gate is what
+// keeps the rule honest: every server this extension starts is spawned
+// detached and so is init-parented within seconds, and without the gate a
+// dev script that deliberately binds a port >= 49152 was permanently
+// invisible on every surface.
+//
+// Rule 4 is the one we cannot see for ourselves. A project mid-start has a
+// window where its helpers are listening and the dev server itself is not, and
+// the three rules above all recognise plumbing by a real server they can find:
+// there isn't one yet. A pending start row is the missing evidence, so while
+// the caller says one is up we refuse ephemeral-port rows for that cwd
+// outright. It is bounded by that row's own lifetime, so nothing stays hidden
+// once the project settles, and a caller that knows nothing about starts in
+// flight passes nothing and gets the other three rules unchanged.
+//
+// What survives all four is an ephemeral-port listener that no rule can tie
+// to a shown server or to a known leaky helper: somebody's own tool, which
+// we have no business hiding.
+function suppressHelperRows(
+  servers: DevServer[],
+  procByPid: Map<number, RawProcess>,
+  orphanHelperPids: ReadonlySet<number>,
+  settlingCwds?: ReadonlySet<string>,
+): DevServer[] {
+  const shownPids = new Set(servers.map((s) => s.pid));
+  // Projects that already have a server on a port someone chose. An
+  // ephemeral-port process sharing one of these cwds is that server's
+  // plumbing, whatever became of its parent.
+  const anchoredCwds = new Set(
+    servers
+      .filter((s) => parseInt(s.port, 10) < EPHEMERAL_PORT_MIN)
+      .map((s) => s.cwd),
+  );
+  return servers.filter((server) => {
+    if (parseInt(server.port, 10) < EPHEMERAL_PORT_MIN) return true;
+    if (anchoredCwds.has(server.cwd)) return false;
+    if (settlingCwds?.has(server.cwd)) return false;
+    // Orphaned alone is not enough: every server this extension starts is
+    // spawned detached, so init is its parent the moment the command that
+    // launched it unloads, and a dev script that deliberately picks a port
+    // >= 49152 (vitest --ui defaults to one) would be a running server no
+    // surface could see. Same lesson the reap learned: a victim must be
+    // NAMED, not merely look abandoned. Membership was decided by the
+    // caller from `ps -o comm` (see fetchServers), so being in the set
+    // already means orphaned AND running a known leaky helper.
+    if (orphanHelperPids.has(server.pid)) return false;
+    const self = procByPid.get(server.pid);
+    let cur = self;
+    for (let depth = 0; depth < ANCESTOR_SCAN_DEPTH && cur; depth++) {
+      cur = procByPid.get(cur.ppid);
+      if (cur && shownPids.has(cur.pid)) return false;
+    }
+    return true;
+  });
+}
+
+// Newest first. Shared by the dashboard and the menu bar so the same servers
+// never appear in two different orders on two surfaces.
+//
+// `ps` hands back PID order, which only loosely tracks start time and wraps
+// around, so a server started an hour ago can outrank one started seconds
+// ago. PID breaks ties on purpose: `ps lstart` resolves only to the second, so
+// starting several at once produces identical timestamps, and a comparator
+// returning 0 there would leave those rows free to swap places on every poll.
+// An unparseable lstart yields NaN, which is falsy, so it also falls through
+// to PID rather than ordering at random.
+export function byRecency(a: DevServer, b: DevServer): number {
+  return b.startedAt.getTime() - a.startedAt.getTime() || b.pid - a.pid;
+}
+
+// User-initiated kill: SIGTERM (the default signal), graceful: the
+// dev server gets a chance to flush logs, close connections, etc. Use
+// this from the dashboard's Kill / Kill All flows. Pair with `killServer`
+// below when you need an *immediate* port release (e.g. restart).
+//
+// Async-shaped so callers can pass the returned promise to Raycast's
+// `mutate(fn, { optimisticUpdate })` flow. `process.kill` itself is sync.
+export async function killProcess(pid: number): Promise<void> {
+  process.kill(pid);
+}
+
+export type PackageManager = "bun" | "pnpm" | "yarn" | "npm";
+
+// Detect package manager from lockfile presence. First match wins; order is
+// bun → pnpm → yarn → npm because bun/pnpm/yarn projects often retain a
+// stale package-lock.json from before a migration.
+export function detectPackageManager(cwd: string): PackageManager {
+  if (fs.existsSync(`${cwd}/bun.lockb`) || fs.existsSync(`${cwd}/bun.lock`))
+    return "bun";
+  if (fs.existsSync(`${cwd}/pnpm-lock.yaml`)) return "pnpm";
+  if (fs.existsSync(`${cwd}/yarn.lock`)) return "yarn";
+  return "npm";
+}
+
+// All managers honor `<pm> run <script>`. Explicit `run` works for arbitrary
+// script names (including ones with colons like `dev:web`) and removes the
+// ambiguity of the bare-shorthand form.
+const PM_RUN: Record<PackageManager, [string, string[]]> = {
+  bun: ["bun", ["run"]],
+  pnpm: ["pnpm", ["run"]],
+  yarn: ["yarn", ["run"]],
+  npm: ["npm", ["run"]],
+};
+
+// Heuristic tokens for the script-value fallback in pickDevScript. We match
+// the binary names that frameworks actually invoke in dev mode, with negative
+// lookaheads on the common production subcommands so we don't accidentally
+// pick a `build` or `preview` script. Ordering doesn't matter; first hit
+// wins inside any given script value.
+const DEV_SCRIPT_TOKENS: RegExp[] = [
+  /\bvite\b(?!\s+(?:build|preview|optimize))/,
+  /\bnext\s+dev\b/,
+  /\bastro\s+dev\b/,
+  /\bnuxt\s+dev\b/,
+  /\bwebpack-dev-server\b/,
+  /\bwebpack\s+serve\b/,
+  /\bparcel\b(?!\s+build)/,
+  /\bgatsby\s+develop\b/,
+  /\bremix\s+(?:dev|vite:dev)\b/,
+  /\bturbo\s+(?:run\s+)?dev\b/,
+  /\bbun\s+(?:--watch|--hot|run\s+dev)\b/,
+  /\bnodemon\b/,
+  /\btsx\s+watch\b/,
+  /\bts-node-dev\b/,
+  /\bserve\b/,
+  /\bhttp-server\b/,
+  /\blive-server\b/,
+];
+
+// Pick the most likely dev-server script in a project. First tries the
+// canonical key chain (`dev` → `start` → `develop`), then falls back to a
+// value-side heuristic so monorepo conventions like `dev:web` or
+// `start:dev` still resolve. Returns the script key (not the command), or
+// null when nothing in package.json looks like a dev server.
+export function pickDevScript(cwd: string): string | null {
+  let pkg: { scripts?: Record<string, unknown> };
+  try {
+    pkg = JSON.parse(
+      fs.readFileSync(path.join(cwd, "package.json"), "utf8"),
+    ) as { scripts?: Record<string, unknown> };
+  } catch {
+    return null;
+  }
+  const scripts = pkg.scripts ?? {};
+  for (const name of ["dev", "start", "develop"]) {
+    if (typeof scripts[name] === "string") return name;
+  }
+  // Iterate in declared order (Node preserves JSON insertion order), so the
+  // pick is deterministic for a given package.json.
+  for (const [name, value] of Object.entries(scripts)) {
+    if (typeof value !== "string") continue;
+    if (DEV_SCRIPT_TOKENS.some((re) => re.test(value))) return name;
+  }
+  return null;
+}
+
+// Canonicalize a path so two equivalent forms (alias / symlink / `/tmp` vs
+// `/private/tmp`) compare equal. Critical for the "is this project already
+// running?" check: lsof reports realpath for a process's cwd, so anything
+// we compare against it must also be realpath. Returns the input on
+// failure so callers don't have to handle a missing path twice.
+export function canonicalCwd(p: string): string {
+  try {
+    return fs.realpathSync(p);
+  } catch {
+    return p;
+  }
+}
+
+// True when the path exists and is a directory. Used to prune recents whose
+// project folder was deleted (e.g. a removed git worktree) from both the Start
+// picker and the menu bar, so a stale entry doesn't linger in either list.
+export function directoryExists(dir: string): boolean {
+  try {
+    return fs.statSync(dir).isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+// A Shopify theme root. Shopify CLI requires only `layout/theme.liquid` to
+// treat a directory as a theme ("Only a layout directory containing a
+// theme.liquid file is required"), so that's the canonical marker.
+// `shopify.theme.toml` (the CLI's optional environments file) is accepted as
+// a secondary signal for repos that keep one at the root.
+export function isShopifyThemeRoot(dir: string): boolean {
+  return (
+    fs.existsSync(path.join(dir, "layout", "theme.liquid")) ||
+    fs.existsSync(path.join(dir, "shopify.theme.toml"))
+  );
+}
+
+// A Shopify app root. Per Shopify's app-structure docs, shopify.app.toml
+// "represents the root of the app".
+export function isShopifyAppRoot(dir: string): boolean {
+  return fs.existsSync(path.join(dir, "shopify.app.toml"));
+}
+
+function isProjectRoot(dir: string): boolean {
+  return (
+    fs.existsSync(path.join(dir, "package.json")) ||
+    isShopifyThemeRoot(dir) ||
+    isShopifyAppRoot(dir)
+  );
+}
+
+// Walk up from a filesystem path to the nearest directory that looks like a
+// startable project: one containing a package.json, or a Shopify theme/app
+// root (themes have no package.json at all). Used to resolve a Finder
+// selection (which may be a file, a subfolder, or the project root itself)
+// to a project root we can spawn in. The returned path is canonicalized so
+// it round-trips through process inspection without symlink-induced
+// mismatches. Returns null when the path isn't inside any known project.
+export function findProjectRoot(startPath: string): string | null {
+  let cur: string;
+  try {
+    const st = fs.statSync(startPath);
+    cur = st.isDirectory() ? startPath : path.dirname(startPath);
+  } catch {
+    return null;
+  }
+  for (;;) {
+    if (isProjectRoot(cur)) return canonicalCwd(cur);
+    const parent = path.dirname(cur);
+    if (parent === cur) return null;
+    cur = parent;
+  }
+}
+
+// Slugify cwd for use in a temp-dir log filename.
+function cwdSlug(cwd: string): string {
+  return cwd.replace(/[^a-zA-Z0-9]+/g, "_").replace(/^_+|_+$/g, "") || "root";
+}
+
+// Decide what command starts this project's dev server.
+//
+// 1. A package.json dev script always wins: it's the project's explicit
+//    intent, and scaffolded Shopify apps and Hydrogen storefronts already
+//    ship `dev: shopify app dev` / `shopify hydrogen dev` there, so they
+//    resolve through this branch like any other Node project. Explicit
+//    scripts also cover themes that wrap `shopify theme dev` in
+//    concurrently-style tooling.
+// 2. With no usable script, fall back to the Shopify CLI for theme and app
+//    roots. Themes are the important case: they have no package.json, so
+//    nothing else could ever start (or restart) them.
+//
+// First-run caveat for the Shopify fallbacks: `shopify theme dev` / `app
+// dev` prompt for login and store selection when the CLI has no remembered
+// state. A detached spawn can't answer prompts, so the 15s watchdog fires
+// and the startup log shows the prompt text. After a one-time
+// `shopify theme dev --store <store>` in a terminal, the CLI remembers the
+// store and starts cleanly from here.
+function planSpawn(cwd: string): { cmd: string; args: string[] } | null {
+  const script = pickDevScript(cwd);
+  if (script) {
+    const pm = detectPackageManager(cwd);
+    const [cmd, baseArgs] = PM_RUN[pm];
+    return { cmd, args: [...baseArgs, script] };
+  }
+  if (isShopifyThemeRoot(cwd))
+    return { cmd: "shopify", args: ["theme", "dev"] };
+  if (isShopifyAppRoot(cwd)) return { cmd: "shopify", args: ["app", "dev"] };
+  return null;
+}
+
+// ---------------------------------------------------------------------------
+// Shopify theme port fallback
+// ---------------------------------------------------------------------------
+//
+// `shopify theme dev` binds 127.0.0.1:9292 and, unlike Vite/Next-style dev
+// servers, has no next-free-port fallback: when the port is taken it dies
+// with a raw EADDRINUSE (Shopify/cli#5554). That kills the obvious two-copies
+// case — e.g. a git worktree of a theme whose main checkout is already
+// serving. The CLI honors SHOPIFY_FLAG_PORT (the env twin of --port), and an
+// env var survives any script wrapping (`npm run dev` → concurrently →
+// `shopify theme dev`), so pre-picking a free port and exporting it fixes
+// both the bare-CLI fallback spawn and wrapped dev scripts in one move. An
+// explicit --port in the user's own script still wins: the CLI gives argv
+// flags precedence over env.
+
+const SHOPIFY_THEME_DEFAULT_PORT = 9292;
+const PORT_SCAN_LIMIT = 20;
+
+// Ports handed to still-booting spawns. A multi-target start (two theme
+// worktrees selected in Finder) spawns in parallel; without this both probes
+// would see the same port free and one server would crash. OS-level port
+// exclusion does NOT make this map redundant: each probe closes its test
+// socket immediately (see canBind), so the port reads as free again until
+// the CLI itself binds it seconds later. Entries expire after 15s — the
+// spawn watchdog's window — by which point the CLI has either bound the
+// port (the probe now sees it busy) or died.
+const recentlyPickedPorts = new Map<number, number>();
+const PORT_RESERVATION_MS = 15_000;
+
+function isReservedPort(port: number): boolean {
+  const pickedAt = recentlyPickedPorts.get(port);
+  if (pickedAt === undefined) return false;
+  if (Date.now() - pickedAt > PORT_RESERVATION_MS) {
+    recentlyPickedPorts.delete(port);
+    return false;
+  }
+  return true;
+}
+
+// Probe by attempting the same bind the CLI makes (127.0.0.1). A wildcard
+// listener on the port fails this bind too, matching how the CLI itself
+// would fail.
+function canBind(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const probe = net.createServer();
+    probe.unref();
+    probe.once("error", () => resolve(false));
+    probe.listen({ port, host: "127.0.0.1" }, () => {
+      probe.close(() => resolve(true));
+    });
+  });
+}
+
+// Pick the port a theme spawn should use. Returns null in the two cases
+// where the spawn should stay untouched: the CLI default is free (the
+// common single-server case — we still reserve it so a parallel sibling
+// spawn skips it), or nothing in the scanned range is free (let the CLI
+// fail; the startup log explains).
+async function pickShopifyThemePort(): Promise<number | null> {
+  for (let i = 0; i <= PORT_SCAN_LIMIT; i++) {
+    const port = SHOPIFY_THEME_DEFAULT_PORT + i;
+    if (isReservedPort(port)) continue;
+    if (!(await canBind(port))) continue;
+    recentlyPickedPorts.set(port, Date.now());
+    return i === 0 ? null : port;
+  }
+  return null;
+}
+
+// Spawn a dev server for a project. Shared by the Start Dev Server flow
+// in the dashboard and by `restartServer` below.
+//
+// Implementation notes:
+// - We launch via `/bin/zsh -ilc` so the user's PATH is loaded. `-l` reads
+//   `~/.zprofile`; `-i` reads `~/.zshrc`. Most users put their PATH additions
+//   for nvm/bun/pnpm in `~/.zshrc`, so both flags are required. Raycast's
+//   GUI-app PATH is otherwise too minimal to find these tools.
+// - `cwd` is passed as a spawn option (NOT shell-concatenated) so the path
+//   never goes through the shell, removing one injection surface.
+// - The package manager, `run`, and the script name are passed as positional
+//   args (`$0`/`$@`) rather than interpolated into the command string. zsh
+//   re-quotes them, so a script key containing spaces or shell metacharacters
+//   can't break or inject; it's just run verbatim.
+// - `detached: true` + `unref()` lets the spawned process outlive the
+//   extension command's lifetime.
+// - The log filename is keyed by a slug of cwd so it stays meaningful after
+//   the PID has been replaced by the new server. Use `spawnLogPath(cwd)`
+//   to reach it from error toasts.
+//
+// Throws if planSpawn can't find a runnable command.
+export async function startDevServer(cwd: string): Promise<void> {
+  // Clear anything the project's last run left behind before adding to it.
+  // Helpers outlive the server that spawned them, so a project killed hours
+  // ago can still be holding ports, and this is the only moment we can be
+  // sure they are stale. Backs out on its own if a real server for this cwd
+  // is still listening, so starting a second server beside a running one
+  // disturbs nothing.
+  await reapProjectHelpers(cwd);
+  const plan = planSpawn(cwd);
+  if (!plan) {
+    throw new Error(
+      "No way to start this project. Expected a package.json with a dev/start/develop script (or one invoking a known dev-server tool), or a Shopify theme/app root.",
+    );
+  }
+  const { cmd, args } = plan;
+  // Theme spawns export a pre-picked port when the CLI default is taken;
+  // see the port-fallback section above. Applies to bare theme roots and to
+  // themes wrapping `shopify theme dev` in a dev script alike.
+  const env = { ...process.env };
+  if (isShopifyThemeRoot(cwd)) {
+    const port = await pickShopifyThemePort();
+    if (port !== null) env.SHOPIFY_FLAG_PORT = String(port);
+  }
+  const out = fs.openSync(spawnLogPath(cwd), "a");
+  const child = spawn("/bin/zsh", ["-ilc", 'exec "$0" "$@"', cmd, ...args], {
+    cwd,
+    env,
+    detached: true,
+    stdio: ["ignore", out, out],
+  });
+  // Close our copy of the log fd once the child owns its own dup, so repeated
+  // starts/restarts in a long-lived dashboard session don't leak descriptors.
+  // We wait for the 'spawn' event rather than closing immediately because
+  // libuv dups the fd into the child asynchronously; closing too early could
+  // truncate the child's stdio. The 'error' listener covers the spawn-failed
+  // path and also keeps a spawn error from throwing as an unhandled event.
+  const closeLog = () => {
+    try {
+      fs.closeSync(out);
+    } catch {
+      // Already closed / invalid fd; nothing to do.
+    }
+  };
+  child.once("spawn", closeLog);
+  child.once("error", closeLog);
+  child.unref();
+}
+
+// Path of the spawn log for a given cwd. Useful for error toasts that point
+// the user at the right file when a spawn appears to fail.
+export function spawnLogPath(cwd: string): string {
+  return path.join(os.tmpdir(), `dev-servers-spawn-${cwdSlug(cwd)}.log`);
+}
+
+// Restart pre-spawn kill: SIGKILL + wait-for-exit. Unlike `killProcess`
+// above, this is *not* graceful: the spawn flow needs the listener to
+// release its port immediately so the new server can bind it without
+// racing. Polling `process.kill(pid, 0)` until ESRCH (max 500ms)
+// confirms exit before we return.
+//
+// Best-effort: any error along the way is swallowed. If the kernel
+// refuses to signal the process or it dies between snapshots, the next
+// spawn will either succeed cleanly or fail to bind the port, and both
+// surface their own errors at the right layer.
+//
+// Cross-platform: both SIGKILL and signal-0 map cleanly to Windows'
+// TerminateProcess / OpenProcess, so this stays portable.
+export async function killServer(pid: number): Promise<void> {
+  try {
+    process.kill(pid, "SIGKILL");
+  } catch {
+    return;
+  }
+  const deadline = Date.now() + 500;
+  while (Date.now() < deadline) {
+    try {
+      process.kill(pid, 0);
+      await new Promise((r) => setTimeout(r, 20));
+    } catch {
+      return;
+    }
+  }
+}
+
+// Who is listening, and out of which folder. One pair of lsof calls, taken
+// once and handed to every cwd a reap looks at, so waiting on four projects
+// costs the same sweep as waiting on one.
+interface ListenerSnapshot {
+  listeners: RawListener[];
+  cwdByPid: Map<number, string>;
+}
+
+async function snapshotListeners(): Promise<ListenerSnapshot> {
+  const listeners = await listListeners();
+  // listCwds skips its own lsof on an empty pid list, so no guard needed here.
+  const cwdByPid = await listCwds([...new Set(listeners.map((l) => l.pid))]);
+  return { listeners, cwdByPid };
+}
+
+// Executable names the reap may kill, matched against the basename of the
+// victim's own executable. One entry, because workerd is the only helper ever
+// seen leaking a port-holding orphan; a future one that leaks the same way gets
+// its name added here. See reapHelpersFromSnapshot for why the name matters.
+const REAPABLE_HELPERS = new Set(["workerd"]);
+
+// Kill the ephemeral-port helpers a dead dev server left behind, judging the
+// project by a snapshot the caller took. Returns false, having touched
+// nothing, when the project is still up; see below.
+//
+// Killing the dev server does not take them with it. Miniflare's workerd is
+// launched by an intermediate process that then exits, so workerd is adopted
+// by init: it is nobody's child by the time we signal anything, and it holds
+// its port until the machine restarts. Restarting a project therefore piled
+// up two more every time, and they were not merely idle. They are only hidden
+// from the list while a real server for that project is listening (see
+// suppressHelperRows), which is exactly what a restart briefly takes away, so
+// the whole accumulated pile surfaced in the gap between the old server dying
+// and the new one binding. Reaping is what stops the pile existing.
+//
+// Only with the project down. If anything is still serving this cwd on a
+// deliberate port, we touch nothing: that server owns helpers we have no way
+// of telling apart from these. That is what the false return says, and a
+// caller that has just killed the project reads it as "not down yet, ask
+// again".
+//
+// And only orphans die. Sharing a cwd is not enough to make a process ours:
+// a standalone `vitest --ui` or a throwaway `http.createServer(0)` script,
+// started from the project folder and still parented by the shell that ran
+// it, is somebody's own tool, and killing it on the way to a spawn the user
+// asked for would be indefensible. That is the same judgment
+// suppressHelperRows makes about what it declines to hide. It costs us
+// nothing: every helper we exist to remove is by definition an orphan, since
+// unix reparents to init the instant a parent exits, including the parent we
+// killed a few milliseconds ago.
+//
+// And only these executables. The full victim test is cwd, plus an OS-assigned
+// port, plus orphaned, plus a name in REAPABLE_HELPERS, because the first three
+// are coincidences a tool of the user's own can hit together: anything nohup'd
+// or daemonized from the project folder is init-parented too, and an
+// OS-assigned port is what any script that binds 0 gets. The reap exists for
+// workerd, and nothing else has ever been observed leaking an init-orphan that
+// holds a port, so we go by the name rather than by a guess at intent.
+async function reapHelpersFromSnapshot(
+  cwd: string,
+  { listeners, cwdByPid }: ListenerSnapshot,
+): Promise<boolean> {
+  const mine = listeners.filter((l) => cwdByPid.get(l.pid) === cwd);
+  if (mine.some((l) => l.port < EPHEMERAL_PORT_MIN)) return false;
+  const candidates = [...new Set(mine.map((l) => l.pid))];
+  // Nothing to signal, so skip the ps call and the SIGTERM grace wait below.
+  // This is the common case: most projects have no helpers, and every spawn
+  // reaps first.
+  if (candidates.length === 0) return true;
+  // Keep only the named helpers that nothing is parenting. A pid that has gone
+  // away since the lsof is absent here and drops out with them, which is right:
+  // there is nothing left to signal.
+  const infoByPid = await listParentInfo(candidates);
+  const pids = candidates.filter((pid) => {
+    const info = infoByPid.get(pid);
+    return (
+      info !== undefined && info.ppid <= 1 && REAPABLE_HELPERS.has(info.name)
+    );
+  });
+  if (pids.length === 0) return true;
+  // Ask politely first: a helper that still has its wits about it should
+  // get to close its sockets.
+  for (const pid of pids) {
+    try {
+      process.kill(pid, "SIGTERM");
+    } catch {
+      // Already gone, or not ours to signal. Either way, nothing to do.
+    }
+  }
+  // Then insist. An orphaned workerd ignores SIGTERM outright: its shutdown
+  // path wants the supervisor that launched it, and that process is exactly
+  // what died to orphan it. Verified on a live one, which sat through
+  // SIGTERM and went down on SIGKILL. Without this the reap silently no-ops
+  // against the very processes it exists to remove, and worse, it does so
+  // only sometimes: a helper orphaned seconds ago still answers.
+  await new Promise((r) => setTimeout(r, 300));
+  for (const pid of pids) {
+    try {
+      process.kill(pid, 0);
+      process.kill(pid, "SIGKILL");
+    } catch {
+      // Signal 0 threw, so it is already gone. Nothing to escalate to.
+    }
+  }
+  return true;
+}
+
+// Reap a project's helpers right now, or not at all. For the pre-spawn path,
+// where the project is expected to be down already and any waiting would be
+// dead latency on every start: if a server is still listening for this cwd we
+// simply leave its plumbing alone, which is also what makes starting a second
+// server beside a running one safe.
+export async function reapProjectHelpers(cwd: string): Promise<void> {
+  try {
+    await reapHelpersFromSnapshot(cwd, await snapshotListeners());
+  } catch {
+    // Reaping is hygiene layered on top of the kill or spawn the user asked
+    // for. A failure here must never surface as a failed kill or restart.
+  }
+}
+
+// Up to ~1.5s of waiting, in rounds this far apart. A SIGTERMed Vite or
+// wrangler releases its port in well under a second; anything slower than the
+// whole budget is a server we are better off not reaping under.
+const REAP_WAIT_ROUNDS = 6;
+const REAP_WAIT_INTERVAL_MS = 300;
+
+// Reap several projects' helpers once each project is actually down.
+//
+// For the kill paths. The dashboard's Kill is a bare SIGTERM that returns the
+// instant the signal is delivered, so the dev server is still holding its port
+// when we get control back, and a reap taken at that moment sees a live server
+// and declines. Polling is what closes that gap: each round takes one snapshot
+// for all the folders still waiting, reaps the ones that have gone quiet, and
+// leaves the rest for the next round. A cwd still on a deliberate port when
+// the budget runs out is left alone, exactly as a single immediate attempt
+// would have left it.
+export async function reapProjectHelpersWhenDown(
+  cwds: string[],
+): Promise<void> {
+  const pending = new Set(cwds);
+  if (pending.size === 0) return;
+  try {
+    for (let round = 0; round < REAP_WAIT_ROUNDS && pending.size > 0; round++) {
+      if (round > 0) {
+        await new Promise((r) => setTimeout(r, REAP_WAIT_INTERVAL_MS));
+      }
+      const snapshot = await snapshotListeners();
+      const done = await Promise.all(
+        [...pending].map(async (cwd) =>
+          (await reapHelpersFromSnapshot(cwd, snapshot)) ? cwd : null,
+        ),
+      );
+      for (const cwd of done) if (cwd !== null) pending.delete(cwd);
+    }
+  } catch {
+    // Same contract as reapProjectHelpers: hygiene, never a failed kill.
+  }
+}
+
+// Restart a dev server: force-kill the old listener, then spawn a
+// replacement. The helpers it left behind are reaped by startDevServer, which
+// now does that for every spawn path; the kill has to come first for that
+// reap to see the project as down.
+export async function restartServer(server: DevServer): Promise<void> {
+  await killServer(server.pid);
+  await startDevServer(server.cwd);
+}

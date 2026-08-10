@@ -1,0 +1,51 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "palette-picker",
+  "title": "Color Palette Picker",
+  "description": "A simple color picker for Tailwind CSS and Radix UI color palettes.",
+  "icon": "icon.png",
+  "author": "juliusmarminge",
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pick-tailwind",
+      "title": "Pick Tailwind Color",
+      "description": "Pick a color and get the nearest Tailwind CSS color",
+      "mode": "no-view"
+    },
+    {
+      "name": "pick-radix",
+      "title": "Pick Radix Color",
+      "description": "Pick a color and get the nearest Radix UI color",
+      "mode": "no-view"
+    }
+  ],
+  "workspaces": [
+    "native"
+  ],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.47.3",
+    "execa": "^6.1.0"
+  },
+  "devDependencies": {
+    "@types/eslint": "^8.21.0",
+    "@types/node": "18.8.3",
+    "@typescript-eslint/eslint-plugin": "^5.51.0",
+    "@typescript-eslint/parser": "^5.51.0",
+    "eslint": "^8.33.0",
+    "eslint-config-prettier": "^8.5.0",
+    "prettier": "^2.8.4",
+    "turbo": "^1.7.4",
+    "typescript": "^4.9.5"
+  }
+}

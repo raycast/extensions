@@ -1,0 +1,15 @@
+export type ResultViewProps = {
+  sys_prompt: string;
+  selected_text?: string; // If defined, uses this as selected text
+  user_extra_msg?: string; // Textfield in Form -> If not empty, appends this to the user message
+  model_override: string;
+  toast_title: string;
+  temperature?: number;
+};
+
+export interface Metrics {
+  promptTokens: number;
+  responseTokens: number;
+  model: string;
+  temp: number;
+}

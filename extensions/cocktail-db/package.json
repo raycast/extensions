@@ -1,0 +1,71 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cocktail-db",
+  "title": "Cocktail DB",
+  "description": "Search Drinks by Name or Ingredient via TheCocktailDB",
+  "icon": "cocktail-db.png",
+  "author": "xmok",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "type": "password",
+      "required": false,
+      "description": "Optional API Key from Patreon"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-cocktail-by-name",
+      "title": "Search Cocktail by Name",
+      "description": "Get up to 25 drinks by name",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Name",
+          "required": false,
+          "type": "text"
+        }
+      ]
+    },
+    {
+      "name": "search-cocktail-by-ingredient",
+      "title": "Search Cocktail by Ingredient",
+      "description": "Get up to 25 drinks by ingredient",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "ingredient",
+          "placeholder": "Ingredient",
+          "required": true,
+          "type": "text"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "convert-typescript-to-javascript",
+  "title": "Convert TypeScript to JavaScript",
+  "description": "Remove type information from TypeScript code to make it compatible with JavaScript REPLs and other applications",
+  "icon": "icon.png",
+  "author": "bengry",
+  "access": "public",
+  "keywords": [
+    "typescript",
+    "javascript",
+    "ts",
+    "js",
+    "clipboard"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paste-from-clipboard",
+      "title": "Convert & Paste as JavaScript",
+      "description": "Retrieve clipboard content, transform it to JavaScript, and paste it",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-to-clipboard",
+      "title": "Copy TypeScript as JavaScript",
+      "description": "Get selected text from the active application, transform it to JavaScript, and keep it in the clipboard",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@babel/core": "^7.22.5",
+    "@babel/preset-typescript": "^7.22.5",
+    "@raycast/api": "^1.54.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.6",
+    "@tsconfig/node18": "^18.2.0",
+    "@tsconfig/recommended": "^1.0.2",
+    "@types/babel__core": "^7.20.1",
+    "@types/node": "^20.3.3",
+    "@types/react": "18.2.14",
+    "eslint": "^8.44.0",
+    "prettier": "^2.8.8",
+    "typescript": "^5.1.6"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

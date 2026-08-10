@@ -1,0 +1,173 @@
+{
+  "af": {
+    "ui.dialogs.voice_command.how_can_i_help": "Hoe kan ek help?"
+  },
+  "ar": {
+    "ui.dialogs.voice_command.how_can_i_help": "كيف يمكنني المساعدة؟"
+  },
+  "bg": {
+    "ui.dialogs.voice_command.how_can_i_help": "Как мога да съдействам?"
+  },
+  "bn": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "bs": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "ca": {
+    "ui.dialogs.voice_command.how_can_i_help": "Com puc ajudar-te?"
+  },
+  "cs": {
+    "ui.dialogs.voice_command.how_can_i_help": "Jak vám mohu pomoci?"
+  },
+  "cy": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "da": {
+    "ui.dialogs.voice_command.how_can_i_help": "Hvordan kan jeg hjælpe?"
+  },
+  "de": {
+    "ui.dialogs.voice_command.how_can_i_help": "Wie kann ich behilflich sein?"
+  },
+  "el": {
+    "ui.dialogs.voice_command.how_can_i_help": "Πώς μπορώ να βοηθήσω;"
+  },
+  "en": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "eo": {
+    "ui.dialogs.voice_command.how_can_i_help": "Kiel mi povas helpi?"
+  },
+  "es": {
+    "ui.dialogs.voice_command.how_can_i_help": "¿Cómo puedo ayudar?"
+  },
+  "et": {
+    "ui.dialogs.voice_command.how_can_i_help": "Kuidas saan aidata?"
+  },
+  "eu": {
+    "ui.dialogs.voice_command.how_can_i_help": "Nola lagundu dezaket?"
+  },
+  "fa": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "fi": {
+    "ui.dialogs.voice_command.how_can_i_help": "Miten voin auttaa?"
+  },
+  "fr": {
+    "ui.dialogs.voice_command.how_can_i_help": "Comment puis-je vous aider ?"
+  },
+  "fy": {
+    "ui.dialogs.voice_command.how_can_i_help": "Hoe kin ik dy helpe?"
+  },
+  "gl": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "gsw": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "he": {
+    "ui.dialogs.voice_command.how_can_i_help": "כיצד אוכל לסייע?"
+  },
+  "hi": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "hr": {
+    "ui.dialogs.voice_command.how_can_i_help": "Kako mogu pomoći?"
+  },
+  "hu": {
+    "ui.dialogs.voice_command.how_can_i_help": "Miben segíthetek?"
+  },
+  "hy": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "id": {
+    "ui.dialogs.voice_command.how_can_i_help": "Apa yang bisa saya bantu?"
+  },
+  "is": {
+    "ui.dialogs.voice_command.how_can_i_help": "Hvernig get ég aðstoðað?"
+  },
+  "it": {
+    "ui.dialogs.voice_command.how_can_i_help": "Come posso aiutare?"
+  },
+  "ja": {
+    "ui.dialogs.voice_command.how_can_i_help": "どのようなご用でしょう？"
+  },
+  "ka": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "ko": {
+    "ui.dialogs.voice_command.how_can_i_help": "어떻게 도와드릴까요?"
+  },
+  "lb": {
+    "ui.dialogs.voice_command.how_can_i_help": "Wéi kann ech hëllefen?"
+  },
+  "lt": {
+    "ui.dialogs.voice_command.how_can_i_help": "Kuo galiu padėti?"
+  },
+  "lv": {
+    "ui.dialogs.voice_command.how_can_i_help": "Kā varu palīdzēt?"
+  },
+  "ml": {
+    "ui.dialogs.voice_command.how_can_i_help": "എനിക്ക് എങ്ങനെ സഹായിക്കാനാകും?"
+  },
+  "nb": {
+    "ui.dialogs.voice_command.how_can_i_help": "Hvordan kan jeg hjelpe?"
+  },
+  "nl": {
+    "ui.dialogs.voice_command.how_can_i_help": "Hoe kan ik helpen?"
+  },
+  "nn": {
+    "ui.dialogs.voice_command.how_can_i_help": "Korleis kan eg hjelpe?"
+  },
+  "no": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "pl": {
+    "ui.dialogs.voice_command.how_can_i_help": "Jak mogę pomóc?"
+  },
+  "pt": {
+    "ui.dialogs.voice_command.how_can_i_help": "Como posso ajudar?"
+  },
+  "ro": {
+    "ui.dialogs.voice_command.how_can_i_help": "Cu ce pot ajuta?"
+  },
+  "ru": {
+    "ui.dialogs.voice_command.how_can_i_help": "Чем могу помочь?"
+  },
+  "sk": {
+    "ui.dialogs.voice_command.how_can_i_help": "Ako môžem pomôcť?"
+  },
+  "sl": {
+    "ui.dialogs.voice_command.how_can_i_help": "Kako lahko pomagam?"
+  },
+  "sr": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "sv": {
+    "ui.dialogs.voice_command.how_can_i_help": "Hur kan jag hjälpa till?"
+  },
+  "ta": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "te": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "th": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "tr": {
+    "ui.dialogs.voice_command.how_can_i_help": "Nasıl yardımcı olabilirim?"
+  },
+  "uk": {
+    "ui.dialogs.voice_command.how_can_i_help": "Як я можу допомогти?"
+  },
+  "ur": {
+    "ui.dialogs.voice_command.how_can_i_help": "How can I assist?"
+  },
+  "vi": {
+    "ui.dialogs.voice_command.how_can_i_help": "Tôi có thể giúp gì nào?"
+  },
+  "zh": {
+    "ui.dialogs.voice_command.how_can_i_help": "请问需要什么帮助？"
+  }
+}

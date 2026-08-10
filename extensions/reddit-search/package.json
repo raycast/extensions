@@ -1,0 +1,96 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reddit-search",
+  "title": "Reddit Search",
+  "description": "Search Reddit, Subreddits, or within Subreddits and list the results in Raycast.",
+  "icon": "reddit_icon_512.png",
+  "author": "ewlcheng",
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Reddit",
+      "description": "Search Reddit posts and list the results with the option to sort or open them on Reddit.",
+      "mode": "view"
+    },
+    {
+      "name": "search-subreddits",
+      "title": "Search Subreddits",
+      "description": "Search for subreddits, then browse or favorite them.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-search-subreddit",
+      "title": "Quick Search Subreddit",
+      "subtitle": "Reddit",
+      "description": "Search within a subreddit and open the results on Reddit.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "subreddit",
+          "placeholder": "subreddit (e.g. macapps)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "query",
+          "placeholder": "Search terms (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "resultLimit",
+      "description": "How many results to fetch per search (1–100). A larger fetch costs the same single request and is cached, so you can filter over more results.",
+      "type": "textfield",
+      "required": false,
+      "title": "Number of results to fetch (1–100)",
+      "default": "50"
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "type": "checkbox",
+      "required": false,
+      "description": "Show detailed logs in the console for debugging.",
+      "label": "Enable extra diagnostics in the console",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-logger": "^1.2.4",
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7",
+    "fast-xml-parser": "^5.10.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.12",
+    "eslint": "^9.22.0",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "contributors": [
+    "chrismessina"
+  ],
+  "categories": [
+    "Fun",
+    "News",
+    "Web"
+  ]
+}

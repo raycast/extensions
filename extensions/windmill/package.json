@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "windmill",
+  "title": "Windmill",
+  "description": "Windmill Extension to run workflows directly from Raycast",
+  "icon": "windmill-logo.png",
+  "author": "emiliobool",
+  "contributors": [
+    "xmok"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/emiliobool/windmill_raycast_extension.git"
+  },
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "viewFlows",
+      "title": "View Flows",
+      "description": "List Windmill Flows for the added workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "viewScripts",
+      "title": "View Scripts",
+      "description": "List Windmill Scripts for the added workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "viewApps",
+      "title": "View Apps",
+      "description": "List Windmill Apps for the added workspaces",
+      "mode": "view"
+    },
+    {
+      "name": "manageWorkspaces",
+      "title": "Manage Workspaces",
+      "description": "Manage your windmill workspaces",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.1",
+    "node-fetch": "^3.3.2",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "@types/uuid": "^9.0.2",
+    "eslint": "^7.32.0",
+    "prettier": "^2.5.1",
+    "react": "^18.2.0",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

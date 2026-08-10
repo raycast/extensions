@@ -1,0 +1,180 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "doccheck",
+  "title": "DocCheck",
+  "description": "Search DocCheck Flexikon with Raycast",
+  "icon": "doccheck.png",
+  "author": "spacedog",
+  "contributors": [
+    "H16nning"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "refreshInterval",
+      "title": "Refresh Interval",
+      "description": "Specify how often you want to reload the home page.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "always",
+          "value": "0"
+        },
+        {
+          "title": "every 1 minute",
+          "value": "60000"
+        },
+        {
+          "title": "every 5 minutes",
+          "value": "300000"
+        },
+        {
+          "title": "every 10 minutes",
+          "value": "600000"
+        },
+        {
+          "title": "every 15 minutes",
+          "value": "900000"
+        },
+        {
+          "title": "every 30 minutes",
+          "value": "1800000"
+        },
+        {
+          "title": "hourly",
+          "value": "3600000"
+        },
+        {
+          "title": "every 3 hours",
+          "value": "10800000"
+        },
+        {
+          "title": "every 12 hours",
+          "value": "43200000"
+        },
+        {
+          "title": "daily",
+          "value": "86400000"
+        }
+      ],
+      "default": "3600000",
+      "required": false
+    },
+    {
+      "name": "historyItemsNumber",
+      "title": "Number of history items on the home page",
+      "description": "Choose how many history items you want to see.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "history turned off",
+          "value": "0"
+        },
+        {
+          "title": "3",
+          "value": "3"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "10",
+          "value": "10"
+        },
+        {
+          "title": "15",
+          "value": "15"
+        },
+        {
+          "title": "20",
+          "value": "20"
+        },
+        {
+          "title": "25",
+          "value": "25"
+        }
+      ],
+      "default": "3",
+      "required": false
+    },
+    {
+      "name": "openIn",
+      "title": "Navigate in",
+      "description": "Select where to open a subsequent DocCheck article from the initial one.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Browser",
+          "value": "browser"
+        },
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        }
+      ],
+      "default": "raycast",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "doccheck-flexikon",
+      "title": "Search Flexikon",
+      "description": "Search through DocCheck Flexikon for medical terms and definitions",
+      "mode": "view"
+    },
+    {
+      "name": "open-page",
+      "title": "Open Article",
+      "subtitle": "DocCheck",
+      "description": "Open DocCheck page in Raycast",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "Article URL",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "navigationItems",
+          "placeholder": "JSON with last visited URLs when browsing back and forth",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "query",
+          "placeholder": "Search query",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.48.9",
+    "@raycast/utils": "^1.5.2",
+    "axios": "^1.8.4",
+    "cheerio": "^1.0.0-rc.12",
+    "node-html-markdown": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.5",
+    "@types/node": "18.8.3",
+    "@types/react": "18.0.9",
+    "eslint": "^7.32.0",
+    "prettier": "^2.8.7",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

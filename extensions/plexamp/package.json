@@ -1,0 +1,153 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "plexamp",
+  "title": "Plexamp",
+  "description": "Browse Plex music libraries and control Plexamp playback from Raycast.",
+  "icon": "plexamp-icon.png",
+  "author": "kendaniels",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "browse-media",
+      "title": "Browse Library",
+      "subtitle": "Plexamp",
+      "description": "Browse Plex music libraries and queue tracks in Plexamp.",
+      "mode": "view"
+    },
+    {
+      "name": "player-controls",
+      "title": "Now Playing",
+      "subtitle": "Plexamp",
+      "description": "Play, pause, skip, and inspect the current Plexamp queue.",
+      "mode": "view"
+    },
+    {
+      "name": "now-playing-menubar",
+      "title": "Now Playing Menubar",
+      "subtitle": "Plexamp",
+      "description": "Show the current Plexamp track in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10s"
+    },
+    {
+      "name": "plexamp-status",
+      "title": "Plexamp Status",
+      "subtitle": "Plexamp",
+      "description": "Inspect Plexamp client details and the connected Plex music library.",
+      "mode": "view"
+    },
+    {
+      "name": "disconnect-from-plex",
+      "title": "Disconnect from Plex",
+      "subtitle": "Plexamp",
+      "description": "Remove the saved Plex sign-in, server, and library selection.",
+      "mode": "view"
+    },
+    {
+      "name": "change-plex-library",
+      "title": "Choose Plex Library",
+      "subtitle": "Plexamp",
+      "description": "Choose a Plex music library from the available servers.",
+      "mode": "view"
+    },
+    {
+      "name": "search-tracks",
+      "title": "Search Library",
+      "subtitle": "Plexamp",
+      "description": "Search songs, albums, and artists in the selected Plex music library.",
+      "mode": "view"
+    },
+    {
+      "name": "recently-played",
+      "title": "Recently Played",
+      "subtitle": "Plexamp",
+      "description": "Browse recently played tracks from the selected Plex music library.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "plexampUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Plexamp URL Override",
+      "default": "http://127.0.0.1:32500",
+      "placeholder": "http://127.0.0.1:32500",
+      "description": "Optional. Override the Plexamp player endpoint used for playback control."
+    },
+    {
+      "name": "trackRatings",
+      "type": "dropdown",
+      "required": false,
+      "title": "Track Ratings",
+      "default": "fiveStars",
+      "description": "How track ratings should be displayed in Raycast.",
+      "data": [
+        {
+          "title": "5 Stars",
+          "value": "fiveStars"
+        },
+        {
+          "title": "5 Stars (Half Stars)",
+          "value": "fiveStarsHalf"
+        },
+        {
+          "title": "1 Star",
+          "value": "oneStar"
+        }
+      ]
+    },
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Album View Grid Columns",
+      "default": "4",
+      "description": "Number of columns in album grid view.",
+      "data": [
+        { "title": "3", "value": "3" },
+        { "title": "4", "value": "4" },
+        { "title": "5", "value": "5" },
+        { "title": "6", "value": "6" }
+      ]
+    },
+    {
+      "name": "menuBarFormat",
+      "type": "textfield",
+      "required": false,
+      "title": "Menubar Format",
+      "default": "{track} - {artist}",
+      "placeholder": "{track} - {artist}",
+      "description": "Customize the menu bar text with {track}, {album}, and {artist}."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.3",
+    "fast-xml-parser": "^5.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.2.2"
+  },
+  "overrides": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

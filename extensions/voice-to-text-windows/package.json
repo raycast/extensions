@@ -1,0 +1,367 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "voice-to-text-windows",
+  "title": "Voice-to-Text for Windows",
+  "description": "Record speech from your microphone, transcribe it with OpenAI Whisper, and clean it up with AI",
+  "icon": "extension-icon.png",
+  "author": "rennesis",
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "platforms": [
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "speech-to-text",
+      "title": "Dictate",
+      "description": "Record speech and convert to clean text",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Dictation History",
+      "description": "Browse and search past dictations",
+      "mode": "view"
+    },
+    {
+      "name": "select-mode",
+      "title": "Select Mode",
+      "description": "Quickly switch the AI cleanup mode",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openaiApiKey",
+      "title": "OpenAI API Key",
+      "description": "Your OpenAI API key for Whisper speech-to-text transcription",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Detect automatically, or select from 50+ available languages",
+      "type": "dropdown",
+      "required": false,
+      "default": "en",
+      "data": [
+        {
+          "title": "Auto-detect",
+          "value": ""
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Afrikaans",
+          "value": "af"
+        },
+        {
+          "title": "Arabic",
+          "value": "ar"
+        },
+        {
+          "title": "Armenian",
+          "value": "hy"
+        },
+        {
+          "title": "Azerbaijani",
+          "value": "az"
+        },
+        {
+          "title": "Belarusian",
+          "value": "be"
+        },
+        {
+          "title": "Bosnian",
+          "value": "bs"
+        },
+        {
+          "title": "Bulgarian",
+          "value": "bg"
+        },
+        {
+          "title": "Catalan",
+          "value": "ca"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "Croatian",
+          "value": "hr"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        },
+        {
+          "title": "Danish",
+          "value": "da"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Estonian",
+          "value": "et"
+        },
+        {
+          "title": "Finnish",
+          "value": "fi"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Galician",
+          "value": "gl"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Greek",
+          "value": "el"
+        },
+        {
+          "title": "Hebrew",
+          "value": "he"
+        },
+        {
+          "title": "Hindi",
+          "value": "hi"
+        },
+        {
+          "title": "Hungarian",
+          "value": "hu"
+        },
+        {
+          "title": "Icelandic",
+          "value": "is"
+        },
+        {
+          "title": "Indonesian",
+          "value": "id"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Kannada",
+          "value": "kn"
+        },
+        {
+          "title": "Kazakh",
+          "value": "kk"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Latvian",
+          "value": "lv"
+        },
+        {
+          "title": "Lithuanian",
+          "value": "lt"
+        },
+        {
+          "title": "Macedonian",
+          "value": "mk"
+        },
+        {
+          "title": "Malay",
+          "value": "ms"
+        },
+        {
+          "title": "Marathi",
+          "value": "mr"
+        },
+        {
+          "title": "Maori",
+          "value": "mi"
+        },
+        {
+          "title": "Nepali",
+          "value": "ne"
+        },
+        {
+          "title": "Norwegian",
+          "value": "no"
+        },
+        {
+          "title": "Persian",
+          "value": "fa"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Romanian",
+          "value": "ro"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Serbian",
+          "value": "sr"
+        },
+        {
+          "title": "Slovak",
+          "value": "sk"
+        },
+        {
+          "title": "Slovenian",
+          "value": "sl"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Swahili",
+          "value": "sw"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Tagalog",
+          "value": "tl"
+        },
+        {
+          "title": "Tamil",
+          "value": "ta"
+        },
+        {
+          "title": "Thai",
+          "value": "th"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Urdu",
+          "value": "ur"
+        },
+        {
+          "title": "Vietnamese",
+          "value": "vi"
+        },
+        {
+          "title": "Welsh",
+          "value": "cy"
+        }
+      ]
+    },
+    {
+      "name": "transcriptionModel",
+      "title": "Transcription Model",
+      "description": "OpenAI model for speech-to-text. GPT-4o Transcribe is most accurate, Mini is cheapest.",
+      "type": "dropdown",
+      "required": false,
+      "default": "gpt-4o-mini-transcribe",
+      "data": [
+        {
+          "title": "GPT-4o Transcribe (Best quality, $0.006/min)",
+          "value": "gpt-4o-transcribe"
+        },
+        {
+          "title": "GPT-4o Mini Transcribe (Good quality, $0.003/min)",
+          "value": "gpt-4o-mini-transcribe"
+        },
+        {
+          "title": "Whisper v2 (Legacy, $0.006/min)",
+          "value": "whisper-1"
+        }
+      ]
+    },
+    {
+      "name": "promptMode",
+      "title": "Prompt Mode",
+      "description": "How the AI should clean up your transcription",
+      "type": "dropdown",
+      "required": false,
+      "default": "general",
+      "data": [
+        {
+          "title": "General",
+          "value": "general"
+        },
+        {
+          "title": "Email",
+          "value": "email"
+        },
+        {
+          "title": "Slack / Chat",
+          "value": "slack"
+        },
+        {
+          "title": "Notes",
+          "value": "notes"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "name": "customPrompt",
+      "title": "Custom Prompt",
+      "description": "Your own AI cleanup instructions (used when Prompt Mode is 'Custom')",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.5.2",
+    "@types/react": "19.2.14",
+    "eslint": "^10.2.0",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

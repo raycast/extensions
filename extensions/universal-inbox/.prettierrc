@@ -1,0 +1,5 @@
+{
+  "printWidth": 120,
+  "singleQuote": false,
+  "plugins": ["./node_modules/prettier-plugin-sort-imports/dist/index.js"]
+}

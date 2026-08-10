@@ -1,0 +1,384 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "svgl",
+  "title": "Svgl",
+  "description": "Search SVG logos via svgl",
+  "icon": "command-icon.png",
+  "author": "1weiho",
+  "contributors": [
+    "ridemountainpig",
+    "0xdhrv"
+  ],
+  "categories": [
+    "Design Tools",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search SVG Logos",
+      "description": "Search SVG logos via svgl",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "svgDefaultAction",
+          "title": "SVG default Action",
+          "description": "Default action for the SVG",
+          "required": false,
+          "type": "dropdown",
+          "defaultValue": "copySvg",
+          "data": [
+            {
+              "value": "copySvg",
+              "title": "Copy SVG"
+            },
+            {
+              "value": "copySvgFile",
+              "title": "Copy SVG File"
+            },
+            {
+              "value": "copySvgWordmark",
+              "title": "Copy SVG Wordmark"
+            },
+            {
+              "value": "copyShadcnRegistry",
+              "title": "Copy shadcn/ui Registry"
+            },
+            {
+              "value": "copyReactComponent",
+              "title": "Copy React Component"
+            },
+            {
+              "value": "copyVueComponent",
+              "title": "Copy Vue Component"
+            },
+            {
+              "value": "copySvelteComponent",
+              "title": "Copy Svelte Component"
+            },
+            {
+              "value": "copyAngularComponent",
+              "title": "Copy Angular Component"
+            },
+            {
+              "value": "copySvgUrl",
+              "title": "Copy SVG URL"
+            },
+            {
+              "value": "copySvgWordmarkUrl",
+              "title": "Copy SVG Wordmark URL"
+            },
+            {
+              "value": "copyAstroComponent",
+              "title": "Copy Astro Component"
+            },
+            {
+              "value": "operation",
+              "title": "Operation"
+            },
+            {
+              "value": "svgInfo",
+              "title": "SVG Info"
+            }
+          ]
+        },
+        {
+          "name": "showWordmark",
+          "title": "Show Wordmark",
+          "description": "Show wordmark SVG copy actions in the action panel",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Show wordmark actions"
+        },
+        {
+          "name": "defaultPackageManager",
+          "title": "Default Package Manager",
+          "description": "Default package manager",
+          "type": "dropdown",
+          "required": false,
+          "data": [
+            {
+              "value": "pnpm",
+              "title": "pnpm"
+            },
+            {
+              "value": "npm",
+              "title": "npm"
+            },
+            {
+              "value": "yarn",
+              "title": "yarn"
+            },
+            {
+              "value": "bun",
+              "title": "bun"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "request",
+      "title": "Request SVG Logo",
+      "description": "Request SVG logo to the svgl repository",
+      "mode": "view"
+    },
+    {
+      "name": "setup-shadcn-registry",
+      "title": "Setup shadcn/ui Registry",
+      "description": "Copy svgl registry JSON to clipboard",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-svg-logo",
+      "title": "Get SVG Logo",
+      "description": "Get SVG logo"
+    },
+    {
+      "name": "get-svg-component",
+      "title": "Get SVG Component",
+      "description": "Get SVG component"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@svgl Get Raycast SVG Logo",
+        "mocks": {
+          "get-svg-logo": [
+            {
+              "name": "Raycast"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "Raycast"
+              },
+              "name": "get-svg-logo"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@svgl Get Raycast wordmark SVG Logo",
+        "mocks": {
+          "get-svg-logo": [
+            {
+              "name": "Raycast",
+              "wordmark": true
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "Raycast",
+                "wordmark": true
+              },
+              "name": "get-svg-logo"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@svgl Get Zen Browser light SVG Logo",
+        "mocks": {
+          "get-svg-logo": [
+            {
+              "name": "Zen Browser",
+              "color": "light"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "Zen Browser",
+                "color": "light"
+              },
+              "name": "get-svg-logo"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@svgl Get React light wordmark SVG Logo",
+        "mocks": {
+          "get-svg-logo": [
+            {
+              "name": "React",
+              "wordmark": true,
+              "color": "light"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "React",
+                "wordmark": true,
+                "color": "light"
+              },
+              "name": "get-svg-logo"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@svgl Get Raycast SVG React jsx component",
+        "mocks": {
+          "get-svg-component": [
+            {
+              "name": "Raycast",
+              "framework": "React",
+              "lang": "jsx"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "Raycast",
+                "framework": "React",
+                "lang": "jsx"
+              },
+              "name": "get-svg-component"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@svgl Get Zen Browser dark SVG React tsx component",
+        "mocks": {
+          "get-svg-component": [
+            {
+              "name": "Zen Browser",
+              "color": "dark",
+              "framework": "React",
+              "lang": "tsx"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "Zen Browser",
+                "color": "dark",
+                "framework": "React",
+                "lang": "tsx"
+              },
+              "name": "get-svg-component"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@svgl Get Raycast SVG Angular component",
+        "mocks": {
+          "get-svg-component": [
+            {
+              "name": "Raycast",
+              "framework": "Angular"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "Raycast",
+                "framework": "Angular"
+              },
+              "name": "get-svg-component"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@svgl Get Raycast SVG Vue ts component",
+        "mocks": {
+          "get-svg-component": [
+            {
+              "name": "Raycast",
+              "framework": "Vue",
+              "lang": "ts"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "Raycast",
+                "framework": "Vue",
+                "lang": "ts"
+              },
+              "name": "get-svg-component"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@svgl Get Raycast SVG Svelte js component",
+        "mocks": {
+          "get-svg-component": [
+            {
+              "name": "Raycast",
+              "framework": "Svelte",
+              "lang": "js"
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "Raycast",
+                "framework": "Svelte",
+                "lang": "js"
+              },
+              "name": "get-svg-component"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7",
+    "dedent": "^1.7.2",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.1.0",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

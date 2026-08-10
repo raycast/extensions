@@ -1,0 +1,203 @@
+# Slack Changelog
+
+## [Broadcast Slack thread replies to channels] - 2026-07-21
+
+- Add an optional `replyBroadcast` flag to the `reply-thread` AI tool to also send important thread replies to the channel.
+
+## [Add Slack reaction AI tool] - 2026-07-21
+
+- Add an `add-reaction` AI tool that adds an emoji reaction to a Slack message and returns its permalink.
+- Request Slack's `reactions:write` OAuth scope for adding reactions.
+
+## [Add Slack group DM AI tool] - 2026-07-21
+
+- Add an `open-group-dm` AI tool that opens or resumes a group DM with 2 to 8 users and returns its conversation ID for messaging or file uploads.
+
+## [Add Slack Huddle link AI tool] - 2026-07-21
+
+- Add a `get-huddle-link` AI tool that returns a Huddle join link for a channel, DM, group DM, or user.
+
+## [Fix AI signatures on file uploads] - 2026-07-21
+
+- Show the “Sent via Raycast” signature on Slack messages that include uploaded files.
+- Prompt existing OAuth users to reauthorize Slack when file-upload permission is missing.
+- Add the required `files:write` scope to the manual access-token setup instructions.
+
+## [Add Slack file upload AI tool] - 2026-07-18
+
+- Add an `upload-files` AI tool that uploads one or more local files to Slack channels, DMs, group DMs, or threads, optionally with an accompanying message.
+- Request Slack's `files:write` OAuth scope for file uploads.
+
+## [Render AI messages with standard Markdown] - 2026-07-18
+
+- Render messages sent, updated, or replied to by AI tools with Slack's Markdown block so lists, headings, tables, code blocks, links, and mentions appear with native formatting.
+
+## [Add AI signature to updated Slack messages] - 2026-07-17
+
+- Replace the “Sent via Raycast” signature with “Updated via Raycast” when the `update-message` AI tool edits a message.
+
+## [Add Slack update message AI tool] - 2026-07-16
+
+- Add an `update-message` AI tool that edits messages posted by the authenticated Slack user and returns a permalink to the updated message.
+
+## [Add optional AI message signature] - 2026-07-15
+
+- Add an enabled-by-default extension preference that shows a subtle “Sent via Raycast” Block Kit context below messages sent by the `send-message` and `reply-thread` AI tools. Messages sent with the Send Message command are unchanged.
+
+## [Add Slack send message AI tool] - 2026-07-14
+
+- Add a `send-message` AI tool that sends messages to channels, group DMs, existing DMs, or users. User IDs are resolved to a direct-message conversation before posting.
+- Return the sent message permalink so AI can link directly to it.
+- Use the existing `chat:write` and `im:write` OAuth scopes required to post messages and open DMs.
+
+## [Add Slack thread reply AI tool] - 2026-07-14
+
+- Add a `reply-thread` AI tool that posts a message to an existing Slack thread using its channel ID and parent message timestamp.
+
+## [Fix YAML codeblock in README] - 2026-07-09
+
+## [Add Slack thread reader AI tool, fix missing webhook author] - 2026-06-17
+
+- Add a paginated `read-thread` AI tool to fetch a bounded page of messages in a Slack thread using the channel ID and parent message timestamp. The tool returns `hasMore` and `nextCursor` when additional messages are available.
+- Fix the `read-thread` AI tool omitting author identity on incoming webhook messages. Such messages lack a `user` ID or `bot_profile`, but Slack sets `username` on them.
+
+## [Fix Set Status deep link with raw emoji] - 2026-06-13
+
+- Fix the **Set Status** command erroring with `profile_status_set_failed_not_valid_emoji` when the `emoji` argument is a raw emoji (e.g. 👈) inserted by Raycast's emoji picker. Raw emoji are now mapped back to their Slack `:name:` code.
+
+## [Add deep link arguments to Set Status] - 2026-06-09
+
+- The **Set Status** command now accepts optional `statusText` and `emoji` arguments, so a deep link or Quicklink can set your status in one step (e.g. `raycast://extensions/mommertf/slack/set-status?arguments=%7B%22statusText%22%3A%22Lunch%22%2C%22emoji%22%3A%22%3Ahamburger%3A%22%7D`).
+
+## [Fix AI Tool for Channel History Failing] - 2026-06-03
+
+- Add fallback to attachment text for the Channel History AI tool.
+
+## [Fix Windows deep links] - 2026-05-27
+
+- "Open in Slack" and "Open Channel"/"Open Chat" Quicklinks now open the requested channel or user on Windows. Previously the `application="Slack"` hint caused Raycast to launch Slack.exe without forwarding the `slack://` URI; the hint is now macOS-only so Windows routes the URI through the registered protocol handler.
+
+## [Accent-insensitive search] - 2026-05-07
+
+- "Open Channel" and "Send Message" now match channel and user names regardless of diacritics, so typing `Angeles` finds `Ángeles` (and the same for any accented characters).
+
+## [Add Direct command for setting slack status] - 2026-02-23
+
+- Merged slack-status Extension into the main Slack extension, enabling users to view, set, update, AI-generate, and clear their status in one place.
+- Added full support for custom workspace emojis (beyond default emojis).
+
+## [Add proxy support for corporate networks] - 2026-02-13
+
+- Add optional "Proxy URL" preference for routing Slack API requests through a corporate proxy
+- Proxy is resolved from the Raycast preference, `HTTPS_PROXY`, or `HTTP_PROXY` environment variables
+- Note: proxy applies to Slack API calls only; OAuth login uses Raycast's built-in networking
+
+## [Multi-word search support] - 2026-01-20
+
+- Improved search in "Open Channel" and "Send Message" commands to support multi-word queries
+- Now you can search for "sre time" to find channel "sre-free-time"
+
+## [Add action for copying IDs of users or channels] - 2025-11-20
+
+- Added "Copy ID to Clipboard" action to the "Open Channel" command so we can easily copy the user or channel's ID straight from the list for both MacOS and Windows
+
+## [Fix Send Message Missing Scope Error] - 2025-08-25
+
+- Add missing `chat:write` scope to fix “missing_scope” error when using the **Send Message** command.
+
+## [Channel, Channel History bug fixes and "Search Message" to Tools] - 2025-07-10
+
+- Added the `search.message` slack api to enable AI to use the tool (search for full messages)
+- Fixed failure to find channelId when using get-channel-history with AI
+- Fixed issue that prevented importing all slack channels
+
+## [Fix YAML manifest errors in README] - 2025-06-25
+
+## [Fix search messages from specific user] - 2025-06-23
+
+- Fix search messages from specific user (using `from:<@${user.id}>` instead of `from:${user.name}`)
+
+## [Fix Emoji Search Missing Scope Error] - 2025-05-28
+
+- Add missing `emoji:read` scope to fix "missing_scope" error when using Search Emojis command
+
+## [AI-Powered Emoji Search] - 2025-04-24
+
+- Enhanced the `Search Emojis` command with AI-powered search: If you can't find an emoji by name, describe what you're looking for and AI will suggest the most relevant Slack emojis.
+
+## [New Emoji Features and Improvements] - 2025-04-12
+
+- Add new `Search Emojis` command to browse and copy Slack emojis
+- Add `get-emojis` tool to fetch emojis with AI
+- Improve getting channel history with AI
+- Update tool titles and improve overall functionality
+
+## [New "Send Message" command] - 2025-04-10
+
+- Add a new command to send a message to a channel or user in Slack. Can send the message immediately or schedule it to arrive at a certain date or time. In order for this to work, you will need to add `chat:write` scope to the manifest, and re-install the application in your Slack space.
+- Updated README with updated scopes instructions.
+
+## [Moved contributor] - 2025-03-31
+
+## [Update README with improved manifest.yaml] - 2025-03-05
+
+## [Added new scope] - 2025-02-26
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [New "Copy Message URL" action] - 2025-02-10
+
+- Add `Copy Message URL` action to copy the URL of a message to the clipboard from the `Search Messages` command
+
+## [New "Copy Huddle Link" action] - 2025-01-13
+
+- Add `Copy Huddle Link` action to copy the huddle link of a chat to the clipboard
+
+## [Adds Optional Metadata to Open Channel Command] - 2024-07-30
+
+- Now includes job title, timezone, current time, and Slack status in the list returned by the Open Channel command.
+- Adds user preferences to display this new metadata.
+
+## [Search Messages command] - 2024-07-08
+
+- Add a new command to search through your Slack's workspace messages.
+- ⚠️ The previous `Search` command is renamed as `Open Channel` to differentiate from `Search Messages`
+- Add `Save as Quicklink` action in `Open Channel` command
+
+## [OAuth + Many Improvements] - 2024-06-18
+
+- **Added OAuth Support:** Users can now log in using OAuth, making it a more secure and streamlined authentication process.
+- **Improved Search Functionality:** Recently opened channels now appear at the top of search results, making it easier to find what you need quickly.
+- **Enhanced Icons:** The `Set Presence` and `Set Snooze` icons have been improved, along with their performance.
+- **Emojis for Unread Messages:** Emojis are now displayed when viewing unread messages.
+- **Better Error Handling:** The scopes error screen has been removed in favor of failure toasts, providing clearer error messages.
+
+## [Improvements and Fixes] - 2024-06-14
+
+- Adds action to open in browser apart from slack app
+- Only show Open in Slack option in case Slack app is installed on the system
+- Fixed channelId when users are selected for unread messages
+
+## [Performance improvements] - 2024-06-08
+
+- Improve performance when fetching users and channels in large workspace
+
+## [Improve Search command UX] - 2023-04-16
+
+- Automatically close Slack right sidebar after navigating to a user chat
+
+## [Fix] - 2022-11-01
+
+- Fix fetching of conversations and users when hitting the Slack API limit of 1k
+- Enable accessibility of channels shared via Slack Connect
+
+## [New Command] - 2022-05-04
+
+- Add `Unread Messages` command and update required permission scopes accordingly
+
+## [Initial Version] - 2022-03-27
+
+- Add `Search` command
+- Add `Set Presence` command
+- Add `Set Snooze` command
+- Add `Open Unread Messages` command

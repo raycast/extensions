@@ -1,0 +1,382 @@
+[
+  {
+    "title": "Overview",
+    "items": [
+      {
+        "title": "Getting started",
+        "documentation": "https://www.radix-ui.com/themes/docs/overview/getting-started",
+        "description": "Install Radix Themes and start building in minutes."
+      },
+      {
+        "title": "Styling",
+        "documentation": "https://www.radix-ui.com/themes/docs/overview/styling",
+        "description": "How to approach styling with Radix Themes."
+      },
+      {
+        "title": "Layout",
+        "documentation": "https://www.radix-ui.com/themes/docs/overview/layout",
+        "description": "Get the layout concerns right."
+      },
+      {
+        "title": "Releases",
+        "documentation": "https://www.radix-ui.com/themes/docs/overview/releases",
+        "description": "Radix Themes releases and their changelogs."
+      },
+      {
+        "title": "Resources",
+        "documentation": "https://www.radix-ui.com/themes/docs/overview/resources",
+        "description": "Community assets and resources related to Radix Themes."
+      }
+    ]
+  },
+  {
+    "title": "Theme",
+    "items": [
+      {
+        "title": "Overview",
+        "documentation": "https://www.radix-ui.com/themes/docs/theme/overview",
+        "description": "Use the Theme component to change the look and feel of your UI."
+      },
+      {
+        "title": "Color",
+        "documentation": "https://www.radix-ui.com/themes/docs/theme/color",
+        "description": "Understanding the color system and its application in your theme."
+      },
+      {
+        "title": "Dark mode",
+        "documentation": "https://www.radix-ui.com/themes/docs/theme/dark-mode",
+        "description": "Using appearance to manage and integrate dark mode."
+      },
+      {
+        "title": "Typography",
+        "documentation": "https://www.radix-ui.com/themes/docs/theme/typography",
+        "description": "Guidance for using and tuning typography."
+      },
+      {
+        "title": "Spacing",
+        "documentation": "https://www.radix-ui.com/themes/docs/theme/spacing",
+        "description": "Overview of the space scale and scaling options."
+      },
+      {
+        "title": "Breakpoints",
+        "documentation": "https://www.radix-ui.com/themes/docs/theme/breakpoints",
+        "description": "Built-in breakpoints allow you to easily build adaptive layouts."
+      },
+      {
+        "title": "Radius",
+        "documentation": "https://www.radix-ui.com/themes/docs/theme/radius",
+        "description": "Choosing the right radius setting in your theme."
+      },
+      {
+        "title": "Shadows",
+        "documentation": "https://www.radix-ui.com/themes/docs/theme/shadows",
+        "description": "Understanding the shadow styles used in your theme."
+      },
+      {
+        "title": "Cursors",
+        "documentation": "https://www.radix-ui.com/themes/docs/theme/cursors",
+        "description": "Customizing cursors used for interactive elements."
+      }
+    ]
+  },
+  {
+    "title": "Layout",
+    "items": [
+      {
+        "title": "Box",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/box",
+        "description": "Fundamental layout building block."
+      },
+      {
+        "title": "Flex",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/flex",
+        "description": "Component for creating flex layouts."
+      },
+      {
+        "title": "Grid",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/grid",
+        "description": "Component for creating grid layouts."
+      },
+      {
+        "title": "Container",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/container",
+        "description": "Constrains the maximum width of page content."
+      },
+      {
+        "title": "Section",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/section",
+        "description": "Denotes a section of page content."
+      }
+    ]
+  },
+  {
+    "title": "Typography",
+    "items": [
+      {
+        "title": "Text",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/text",
+        "description": "Foundational text primitive."
+      },
+      {
+        "title": "Heading",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/heading",
+        "description": "Semantic heading element."
+      },
+      {
+        "title": "Blockquote",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/blockquote",
+        "description": "Block-level quotation from another source."
+      },
+      {
+        "title": "Code",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/code",
+        "description": "Marks text to signify a short fragment of computer code."
+      },
+      {
+        "title": "Em",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/em",
+        "description": "Marks text to stress emphasis."
+      },
+      {
+        "title": "Kbd",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/kbd",
+        "description": "Represents keyboard input or a hotkey."
+      },
+      {
+        "title": "Link",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/link",
+        "description": "Semantic element for navigation between pages."
+      },
+      {
+        "title": "Quote",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/quote",
+        "description": "Short inline quotation."
+      },
+      {
+        "title": "Strong",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/strong",
+        "description": "Marks text to signify strong importance."
+      }
+    ]
+  },
+  {
+    "title": "Components",
+    "items": [
+      {
+        "title": "Alert Dialog",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/alert-dialog",
+        "description": "Modal confirmation dialog that interrupts the user and expects a response."
+      },
+      {
+        "title": "Aspect Ratio",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/aspect-ratio",
+        "description": "Displays content within a desired ratio."
+      },
+      {
+        "title": "Avatar",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/avatar",
+        "description": "Profile picture, user initials or fallback icon."
+      },
+      {
+        "title": "Badge",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/badge",
+        "description": "Stylized badge element."
+      },
+      {
+        "title": "Button",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/button",
+        "description": "Trigger an action or event, such as submitting a form or displaying a dialog."
+      },
+      {
+        "title": "Callout",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/callout",
+        "description": "Short message to attract user’s attention."
+      },
+      {
+        "title": "Card",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/card",
+        "description": "Container that groups related content and actions."
+      },
+      {
+        "title": "Checkbox",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/checkbox",
+        "description": "Base input element to toggle an option on and off."
+      },
+      {
+        "title": "Checkbox Group",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/checkbox-group",
+        "description": "Set of interactive buttons where multiple options can be selected at a time."
+      },
+      {
+        "title": "Checkbox Cards",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/checkbox-cards",
+        "description": "Set of interactive cards where multiple options can be selected at a time."
+      },
+      {
+        "title": "Context Menu",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/context-menu",
+        "description": "Menu representing a set of actions, displayed at the point of right click or long press."
+      },
+      {
+        "title": "Data List",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/data-list",
+        "description": "Displays metadata as a list of key-value pairs."
+      },
+      {
+        "title": "Dialog",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/dialog",
+        "description": "Modal dialog window displayed above the page."
+      },
+      {
+        "title": "Dropdown Menu",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/dropdown-menu",
+        "description": "Menu representing a set of actions, triggered by a button."
+      },
+      {
+        "title": "Hover Card",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/hover-card",
+        "description": "For sighted users to preview content available behind a link."
+      },
+      {
+        "title": "Icon Button",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/icon-button",
+        "description": "Button designed specifically for usage with a single icon."
+      },
+      {
+        "title": "Inset",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/inset",
+        "description": "Applies a negative margin to allow content to bleed into the surrounding container."
+      },
+      {
+        "title": "Popover",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/popover",
+        "description": "Floating element for displaying rich content, triggered by a button."
+      },
+      {
+        "title": "Progress",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/progress",
+        "description": "Displays a progress bar related to a task."
+      },
+      {
+        "title": "Radio",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/radio",
+        "description": "Standalone radio button that can be used in any layout."
+      },
+      {
+        "title": "Radio Group",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/radio-group",
+        "description": "Set of interactive radio buttons where only one can be selected at a time."
+      },
+      {
+        "title": "Radio Cards",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/radio-cards",
+        "description": "Set of interactive cards where only one can be selected at a time."
+      },
+      {
+        "title": "Scroll Area",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/scroll-area",
+        "description": "Custom-styled scrollable area using native functionality."
+      },
+      {
+        "title": "Segmented Control",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/segmented-control",
+        "description": "Toggle buttons for switching between different values or views."
+      },
+      {
+        "title": "Select",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/select",
+        "description": "Displays a list of options for the user to pick from—triggered by a button."
+      },
+      {
+        "title": "Separator",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/separator",
+        "description": "Visually or semantically separates content."
+      },
+      {
+        "title": "Skeleton",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/skeleton",
+        "description": "Replaces content with same shape placeholder that indicates a loading state."
+      },
+      {
+        "title": "Slider",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/slider",
+        "description": "Provides user selection from a range of values."
+      },
+      {
+        "title": "Spinner",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/spinner",
+        "description": "Displays an animated loading indicator."
+      },
+      {
+        "title": "Switch",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/switch",
+        "description": "Toggle switch alternative to the checkbox."
+      },
+      {
+        "title": "Table",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/table",
+        "description": "Semantic table element for presenting data."
+      },
+      {
+        "title": "Tabs",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/tabs",
+        "description": "Set of content sections to be displayed one at a time."
+      },
+      {
+        "title": "Tab Nav",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/tab-nav",
+        "description": "Navigation menu with links styled as tabs."
+      },
+      {
+        "title": "Text Area",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/text-area",
+        "description": "Captures multi-line user input."
+      },
+      {
+        "title": "Text Field",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/text-field",
+        "description": "Captures user input with an optional slot for buttons and icons."
+      },
+      {
+        "title": "Tooltip",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/tooltip",
+        "description": "Floating element that provides a control with contextual information via pointer or focus."
+      }
+    ]
+  },
+  {
+    "title": "Utilities",
+    "items": [
+      {
+        "title": "Accessible Icon",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/accessible-icon",
+        "description": "Makes icons accessible by adding a label."
+      },
+      {
+        "title": "Portal",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/portal",
+        "description": "Renders a React subtree in a different part of the DOM."
+      },
+      {
+        "title": "Reset",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/reset",
+        "description": "Removes default browser styles from any component."
+      },
+      {
+        "title": "Slot",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/slot",
+        "description": "Merges its props onto its immediate child."
+      },
+      {
+        "title": "Theme",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/theme",
+        "description": "Wraps all or part of a React tree to provide theme configuration."
+      },
+      {
+        "title": "Visually Hidden",
+        "documentation": "https://www.radix-ui.com/themes/docs/components/visually-hidden",
+        "description": "Hides content from the screen in an accessible way."
+      }
+    ]
+  }
+]

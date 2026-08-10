@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "do-not-disturb",
+  "title": "Do Not Disturb",
+  "description": "Disable notifications on your Apple devices",
+  "icon": "dnd-icon.png",
+  "author": "yakitrak",
+  "contributors": [
+    "leyang",
+    "mikikiv",
+    "litomore"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "on",
+      "title": "Turn On",
+      "subtitle": "Do Not Disturb",
+      "description": "Turn on Do Not Disturb mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "off",
+      "title": "Turn Off",
+      "subtitle": "Do Not Disturb",
+      "description": "Turn off Do Not Disturb mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle",
+      "title": "Toggle",
+      "subtitle": "Do Not Disturb",
+      "description": "Toggle Do Not Disturb mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "status",
+      "title": "Status",
+      "subtitle": "Do Not Disturb",
+      "description": "Display Do Not Disturb status",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.86.0",
+    "child-process": "^1.0.2",
+    "raycast-cross-extension": "^0.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.9.1",
+    "@types/react": "18.3.12",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,159 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wise-lens",
+  "title": "Wise Lens",
+  "description": "A clear overview of your Wise balances in Raycast: spending, combined total and live rates.",
+  "icon": "extension-icon.png",
+  "author": "jorgetoh",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "Wise",
+      "description": "A summary of your account with balances by currency, a combined converted total, spending this month and over the last 30 days, and recent activity.",
+      "mode": "view",
+      "keywords": [
+        "wise",
+        "balance",
+        "bank",
+        "finance"
+      ]
+    },
+    {
+      "name": "transactions",
+      "title": "Transactions",
+      "subtitle": "Wise",
+      "description": "Browse and search your activity grouped by day, with filters for incoming, outgoing, completed and this month.",
+      "mode": "view",
+      "keywords": [
+        "wise",
+        "transactions",
+        "activity",
+        "movements",
+        "tx"
+      ]
+    },
+    {
+      "name": "balance",
+      "title": "Balance",
+      "subtitle": "Wise",
+      "description": "Your balance and spending this month, right in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "10m",
+      "keywords": [
+        "wise",
+        "menubar"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "Wise API Token",
+      "description": "Read-only Personal Token. Create it in Wise: Your account → Connect and manage apps → Developer tools → API tokens. Encrypted in Raycast's local database.",
+      "placeholder": "wise_pt_..."
+    },
+    {
+      "name": "displayCurrency",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Display Currency",
+      "description": "ISO 4217 code (EUR, USD, GBP...). If set, an aggregated total converted to this currency is shown."
+    },
+    {
+      "name": "fxTargetCurrency",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "title": "Secondary Currency (FX)",
+      "description": "Show conversion from displayCurrency to this currency (e.g. THB). Leave empty to disable."
+    },
+    {
+      "name": "numberFormat",
+      "type": "dropdown",
+      "required": false,
+      "default": "en-US",
+      "title": "Number Format",
+      "description": "How monetary amounts are displayed (thousands/decimal separators and symbol position).",
+      "data": [
+        {
+          "title": "1,234.56",
+          "value": "en-US"
+        },
+        {
+          "title": "1.234,56",
+          "value": "de-DE"
+        },
+        {
+          "title": "1 234,56",
+          "value": "fr-FR"
+        },
+        {
+          "title": "1'234.56",
+          "value": "de-CH"
+        }
+      ]
+    },
+    {
+      "name": "hideZeroBalances",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "title": "Empty Accounts",
+      "label": "Hide accounts and jars with zero balance",
+      "description": "When enabled, accounts with a zero balance are not shown in the dashboard or menu bar."
+    },
+    {
+      "name": "hideMenuBarBalance",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Menu Bar Privacy",
+      "label": "Hide balance amount from the menu bar",
+      "description": "Show only the Wise icon in the menu bar. The amount is still visible after clicking it."
+    },
+    {
+      "name": "useSampleData",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Sample Data",
+      "label": "Show sample data instead of calling the Wise API",
+      "description": "Display a built-in anonymised dataset and make zero network calls. Useful for previews and screenshots."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "26.0.0",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "@types/react": "19.0.10"
+  }
+}

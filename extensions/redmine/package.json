@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "redmine",
+  "title": "Redmine",
+  "description": "Integrate with the Redmine issue system (https://www.redmine.org/)",
+  "icon": "command-icon.png",
+  "author": "jwickers",
+  "contributors": [
+    "julesbertolino"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication",
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-issues",
+      "title": "Open Issues",
+      "description": "Shows all currently open issues",
+      "mode": "view"
+    },
+    {
+      "name": "created-by-me",
+      "title": "Created by Me",
+      "description": "Shows the open issues you created",
+      "mode": "view"
+    },
+    {
+      "name": "issue",
+      "title": "My Issues",
+      "description": "Shows the open issues assigned to you",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-issues",
+      "title": "Search Issues",
+      "description": "Search the Redmine issue tracker by keyword (open or closed), or list issues by status and assignee. Returns structured issue data (id, subject, status, priority, project, assignee, url, description)."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "domain",
+      "type": "textfield",
+      "required": true,
+      "title": "Redmine Domain",
+      "description": "Your Redmine domain or base URL path (e.g. 'mycompany.redmine.org' or 'http://mycompany.redmine.org:8080/redmine')",
+      "placeholder": "mycompany.redmine.org"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your API token as described at https://www.redmine.org/boards/2/topics/53956/"
+    },
+    {
+      "name": "redIssues",
+      "type": "textfield",
+      "required": false,
+      "title": "Red Issues Priorities",
+      "description": "A comma separated list of Priority names to mark with a red dot (e.g. 'Critical, Urgent, High')",
+      "default": "Critical,Urgent"
+    },
+    {
+      "name": "orangeIssues",
+      "type": "textfield",
+      "required": false,
+      "title": "Orange Issues Priorities",
+      "description": "A comma separated list of Priority names to mark with an orange dot (e.g. 'Urgent, High')",
+      "default": "High"
+    },
+    {
+      "name": "blueIssues",
+      "type": "textfield",
+      "required": false,
+      "title": "Blue Issues Priorities",
+      "description": "A comma separated list of Priority names to mark with a blue dot (e.g. 'Low')",
+      "default": "Low"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.22"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

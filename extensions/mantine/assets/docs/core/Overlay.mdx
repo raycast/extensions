@@ -1,0 +1,54 @@
+---
+group: "mantine-core"
+package: "@mantine/core"
+title: Overlay
+order: 1
+slug: /core/overlay/
+category: "overlay"
+description: "Overlays given element with div element with any color and opacity"
+props: ["Overlay"]
+import: "import { Overlay } from '@mantine/core';"
+source: "mantine-core/src/components/Overlay/Overlay.tsx"
+docs: "core/Overlay.mdx"
+styles: ["Overlay", "single-node"]
+---
+
+import { OverlayDemos, CardDemos } from "@mantine/demos";
+
+## Usage
+
+Overlay had absolute position and will take 100% of width and height of parent container.
+It is used to build components like [Modal](/core/modal/) and [LoadingOverlay](/core/loading-overlay/).
+
+You can change overlay opacity (from 0 to 1), color (CSS color value, not connected to Mantine theme) and z-index (number).
+
+<Demo data={OverlayDemos.usage} />
+
+## With gradient
+
+<Demo data={OverlayDemos.gradient} />
+
+## With blur
+
+To blur the overlay backdrop, set the `blur` prop with a number. This will set the backdrop blur in px.
+Note that blur [is not supported in Firefox](https://caniuse.com/css-backdrop-filter).
+
+<Demo data={OverlayDemos.blur} />
+
+## Custom component
+
+You can pass custom tag or component that will be used as root element:
+
+```tsx
+import { Overlay } from "@mantine/core";
+import { Link } from "react-router-dom";
+
+function Demo() {
+  return (
+    <>
+      <Overlay<"a"> component="a" href="#" />
+      <Overlay<typeof Link> component={Link} to="/hello" />
+    </>
+  );
+}
+```

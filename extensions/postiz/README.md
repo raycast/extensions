@@ -1,0 +1,47 @@
+<p align="center">
+    <img src="./assets/postiz.png" width="150" height="150" />
+</p>
+
+# Postiz
+
+This is a Raycast extension for [Postiz](https://postiz.com/) - _The All-in-One Social Media Management Tool_. With this extension you can:
+
+- Search Channels
+- Search Posts (**v1**: week, **v2**: day,week,month)
+    - Create (**draft**, **text-only**) Post
+    - Delete Post
+
+## 🚀 Getting Started
+
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/postiz) OR `install` via Raycast Store
+
+    <a title="Install postiz Raycast Extension" href="https://www.raycast.com/xmok/postiz"><img src="https://www.raycast.com/xmok/postiz/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+
+2. **Enter your Postiz URL**:
+
+    - If you are using hosted Postiz, leave the field unchanged as "https://api.postiz.com/" 
+    - If you are self-hosting, `enter` the base url ONLY e.g. "https://postiz.example.com/"
+
+3. **Get your Postiz Public API Key**:
+
+    - `Navigate` to **Settings**
+    - `Click` "Reveal"
+    - `Click` "Copy Key"
+    - `Paste` in **Preferences**
+
+4. **Specify Postiz Version**:
+
+    - Select the appropriate version (if you are using hosted, choose `v2` otherwise it depends on your installation)
+    - If you are unsure, first try `v1`, run `Search Posts` - if you get an error about "startDate", change to `v2` otherwise you are good to go 😀
+
+
+## ➕ More
+
+Looking for more cool OSS? Try the following extensions:
+
+<a title="Install appwrite Raycast Extension" href="https://www.raycast.com/xmok/appwrite"><img src="https://www.raycast.com/xmok/appwrite/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install chatwoot Raycast Extension" href="https://www.raycast.com/xmok/chatwoot"><img src="https://www.raycast.com/xmok/chatwoot/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install coolify Raycast Extension" href="https://www.raycast.com/xmok/coolify"><img src="https://www.raycast.com/xmok/coolify/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install neon Raycast Extension" href="https://www.raycast.com/xmok/neon"><img src="https://www.raycast.com/xmok/neon/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install resend Raycast Extension" href="https://www.raycast.com/xmok/resend"><img src="https://www.raycast.com/xmok/resend/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>
+<a title="Install unkey Raycast Extension" href="https://www.raycast.com/xmok/unkey"><img src="https://www.raycast.com/xmok/unkey/install_button@2x.png?v=1.1" height="64" alt="" style="height: 64px;"></a>

@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jira-search-self-hosted",
+  "title": "Jira Search (Self-Hosted)",
+  "description": "Search for Jira issues (more tolerant and powerful than built-in), projects, and boards on Jira Server instances.",
+  "icon": "command-icon.png",
+  "author": "emanguy",
+  "contributors": [
+    "sven",
+    "koseduhemak",
+    "LunaticMuch",
+    "marinsokol",
+    "limonkufu",
+    "thezaff"
+  ],
+  "pastContributors": [
+    "ryanp",
+    "nick318"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "issue",
+      "title": "Search Issues",
+      "subtitle": "Jira Search (Self-Hosted)",
+      "description": "Search Jira issues by text, type and project",
+      "mode": "view"
+    },
+    {
+      "name": "open-issues",
+      "title": "Open Issues",
+      "subtitle": "Jira Search (Self-Hosted)",
+      "description": "Search Jira issues assinged to current user by text, type and project",
+      "mode": "view"
+    },
+    {
+      "name": "board",
+      "title": "Search Boards",
+      "subtitle": "Jira Search (Self-Hosted)",
+      "description": "Search Jira boards by title",
+      "mode": "view"
+    },
+    {
+      "name": "project",
+      "title": "Search Projects",
+      "subtitle": "Jira Search (Self-Hosted)",
+      "description": "Search Jira projects by title",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "domain",
+      "type": "textfield",
+      "required": true,
+      "title": "Jira Domain",
+      "description": "Your Jira Base URL (e.g. 'my.atlassian.net' or 'your.server.url/baseUrl/jira)",
+      "placeholder": "my.atlassian.net"
+    },
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "Personal Access Token",
+      "description": "Your API token as described at https://confluence.atlassian.com/enterprise/using-personal-access-tokens-1026032365.html"
+    },
+    {
+      "name": "unsafeHTTPS",
+      "type": "checkbox",
+      "required": false,
+      "title": "Unsafe HTTPS",
+      "description": "Enable to use unsafe HTTPS for self-signed certificates.",
+      "default": false,
+      "label": "Enable"
+    },
+    {
+      "name": "defaultIncludeProjects",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Included Projects",
+      "description": "Comma-separated project keys or names to include when no @project filter is typed. Project keys also enable search by issue number.",
+      "placeholder": "DEV, IT"
+    },
+    {
+      "name": "defaultExcludeProjects",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Excluded Projects",
+      "description": "Comma-separated project keys or names to exclude when no @project filter is typed.",
+      "placeholder": "OPS, ARCHIVE"
+    },
+    {
+      "name": "defaultIncludeStatuses",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Included Statuses",
+      "description": "Comma-separated Jira statuses to include when no !status filter is typed.",
+      "placeholder": "In Progress, To Do"
+    },
+    {
+      "name": "defaultExcludeStatuses",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Excluded Statuses",
+      "description": "Comma-separated Jira statuses to exclude when no !status filter is typed.",
+      "placeholder": "Done, Closed"
+    },
+    {
+      "name": "defaultIncludeIssueTypes",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Included Issue Types",
+      "description": "Comma-separated issue types to include when no #issueType filter is typed.",
+      "placeholder": "Bug, Story"
+    },
+    {
+      "name": "defaultExcludeIssueTypes",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Excluded Issue Types",
+      "description": "Comma-separated issue types to exclude when no #issueType filter is typed.",
+      "placeholder": "Epic, Spike"
+    },
+    {
+      "name": "defaultIncludeAssignees",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Included Assignees",
+      "description": "Comma-separated assignee names or emails to include when no %assignee filter is typed in Search Issues.",
+      "placeholder": "dev@example.com, Jane Doe"
+    },
+    {
+      "name": "defaultExcludeAssignees",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Excluded Assignees",
+      "description": "Comma-separated assignee names or emails to exclude when no %assignee filter is typed in Search Issues.",
+      "placeholder": "bot@example.com, Automation User"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.57.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.5.7",
+    "@types/react": "^18.2.21",
+    "@typescript-eslint/eslint-plugin": "^6.5.0",
+    "@typescript-eslint/parser": "^6.5.0",
+    "eslint": "^8.48.0",
+    "eslint-config-prettier": "^9.0.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "test": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types --test src/*.test.mjs",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

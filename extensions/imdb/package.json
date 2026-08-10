@@ -1,0 +1,154 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "imdb",
+  "title": "IMDb Search",
+  "description": "Easily open your favorite film or TV series on IMDb.",
+  "icon": "icon.png",
+  "author": "ryan",
+  "contributors": [
+    "kgrhartlage",
+    "bibixx",
+    "dnsv",
+    "AndersDigital",
+    "xmok"
+  ],
+  "keywords": [
+    "imdb",
+    "film",
+    "movie",
+    "tv",
+    "series"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "combined",
+      "title": "Search IMDb",
+      "subtitle": "IMDb",
+      "description": "Search IMDb database.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "required": false,
+          "description": "Search query",
+          "placeholder": "Search by title..."
+        }
+      ]
+    },
+    {
+      "name": "movies",
+      "title": "Search Movies",
+      "subtitle": "IMDb",
+      "description": "Search movies by title.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "required": false,
+          "description": "Search query",
+          "placeholder": "Search by title..."
+        }
+      ]
+    },
+    {
+      "name": "series",
+      "title": "Search TV Series",
+      "subtitle": "IMDb",
+      "description": "Search TV series by title.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "required": false,
+          "description": "Search query",
+          "placeholder": "Search by title..."
+        }
+      ]
+    },
+    {
+      "name": "games",
+      "title": "Search Games",
+      "subtitle": "IMDb",
+      "description": "Search video games by title.",
+      "mode": "view",
+      "disabledByDefault": true,
+      "arguments": [
+        {
+          "name": "search",
+          "type": "text",
+          "required": false,
+          "description": "Search query",
+          "placeholder": "Search by title..."
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "OMDb API Token",
+      "description": "Register for a free token at www.omdbapi.com",
+      "placeholder": "Enter your API token here"
+    },
+    {
+      "name": "includeGames",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Include Games",
+      "title": "Search Results",
+      "description": "Include video games in search results"
+    },
+    {
+      "name": "openIn",
+      "title": "Open In",
+      "description": "Where to open the IMDB page by default",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Raycast",
+          "value": "raycast"
+        },
+        {
+          "title": "Browser",
+          "value": "browser"
+        }
+      ],
+      "default": "raycast",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

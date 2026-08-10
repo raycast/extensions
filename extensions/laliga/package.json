@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "laliga",
+  "title": "LaLiga",
+  "description": "A comprehensive extension for tracking La Liga matches, standings, and club information.",
+  "icon": "icon.png",
+  "author": "anhthang",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "categories": [
+    "Data",
+    "Other",
+    "Fun"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "standing",
+      "title": "Standings",
+      "description": "Discover the ranking of your favorite team and other LaLiga clubs.",
+      "mode": "view"
+    },
+    {
+      "name": "result",
+      "title": "Fixtures & Results",
+      "description": "Find out the results of the last round of LaLiga and the previous ones.",
+      "mode": "view"
+    },
+    {
+      "name": "other",
+      "title": "Other Competitions",
+      "description": "Discover the results of the last round of other competitions, such as UEFA Champions League and Europa League.",
+      "mode": "view"
+    },
+    {
+      "name": "club",
+      "title": "Clubs",
+      "description": "Explore information about LaLiga clubs and their players.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apikey",
+      "title": "API Key",
+      "description": "Your Ocp-Apim-Subscription-Key for accessing LaLiga data.",
+      "required": false,
+      "type": "textfield",
+      "default": "c13c3a8e2f6b46da9c5c425cf61fab3e"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^2.2.1",
+    "axios": "^1.12.2",
+    "date-fns": "^4.1.0",
+    "json2md": "^2.0.3",
+    "lodash.groupby": "^4.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/json2md": "^1.5.4",
+    "@types/lodash.groupby": "^4.6.9",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

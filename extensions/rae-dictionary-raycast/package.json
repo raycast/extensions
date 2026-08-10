@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rae-dictionary-raycast",
+  "title": "RAE Dictionary",
+  "description": "Query words in the Royal Spanish Academy dictionary directly from Raycast. Get definitions, conjugations, and expressions quickly without opening a browser. Using https://rae-api.com, unofficial API.",
+  "icon": "extension-icon.png",
+  "author": "sonirico",
+  "categories": [
+    "Communication",
+    "Productivity",
+    "Other",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "query-rae-word",
+      "title": "Query Word in RAE",
+      "subtitle": "RAE Dictionary",
+      "description": "Query a word in the RAE dictionary",
+      "mode": "view"
+    },
+    {
+      "name": "query-rae-daily-word",
+      "title": "Query Word of the Day in RAE",
+      "subtitle": "RAE Dictionary",
+      "description": "Query the RAE word of the day",
+      "mode": "view"
+    },
+    {
+      "name": "query-rae-random-word",
+      "title": "Query Random Word in RAE",
+      "subtitle": "RAE Dictionary",
+      "description": "Query a random word from the RAE dictionary",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "overrides": {
+    "minimatch": "^10.2.4",
+    "brace-expansion": "^5.0.5",
+    "picomatch": "^4.0.4",
+    "flatted": "^3.4.2",
+    "js-yaml": "^4.1.1",
+    "diff": "^8.0.4",
+    "babel-plugin-istanbul": "^8.0.2",
+    "test-exclude": "^8.0.0"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-typescript": "^7.28.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.1.1",
+    "eslint": "^10.7.0",
+    "jest": "^30.4.2",
+    "prettier": "^3.9.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest --config jest.config.ts",
+    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch --config jest.config.ts",
+    "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --config jest.config.ts",
+    "test:updateSnapshots": "NODE_OPTIONS=--experimental-vm-modules jest --updateSnapshot --config jest.config.ts"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

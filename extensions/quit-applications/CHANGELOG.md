@@ -1,0 +1,72 @@
+# Quit Applications Changelog
+
+## [Show menu bar apps] - 2026-07-01
+
+- Switched running-app discovery to NSWorkspace so menu bar / accessory (LSUIElement) apps now appear in the list, while system agents and helper processes stay hidden.
+- Fixed the wrong row being removed from the list when quitting an app while another quit was still in progress.
+- Fixed duplicate list entries when two running apps share the same name.
+
+## [Bugfix] - 2026-05-28
+
+- Added timeout handling and fallback app discovery when loading running applications.
+
+## [Bug fix] - 2026-04-04
+
+- Fixed error when a foreground process has no file property (error -1728)
+
+## [Bug fix] - 2025-10-09
+
+- Fixed Apple Events authorization error (-1743) by adding fallback to `ps` command when System Events permission is not granted
+
+## [Bug fix] - 2025-05-27
+
+- Fixed issue where excluded applications still appeared in the list when multiple windows were open
+
+## [Update] - 2025-04-25
+
+- Added `Quit All Applications` to quit all applications at once
+
+## [Update] - 2024-09-03
+
+- Transitions component to from a class component to a function component
+- Fixes issue where quitting an app takes you back to the first element in list
+
+## [Enhancement] - 2024-04-11
+
+- Added clearSearchBar after quitting an app.
+
+## [Enhancement] - 2024-04-05
+
+- Fixed a bug where some of the apps (e.g. Steam) were not quitting
+
+## [Performance Improvements] - 2024-01-19
+
+- Improve icon fetching performance by using the API provided by Raycast
+
+## [Deeplinks Support] - 2023-10-21
+
+- Added Deeplink Support
+- Added Actions for Creating Quicklinks Directly
+
+## [Bug fix - Quit-Applications crashing] - 2023-04-26
+
+- Fix the case where some of the apps (e.g. MasOS Stocks app) were causing the quit applications to crash
+
+## [Add icons] - 2023-02-26
+
+- Add icons to each application you are about to quit
+- Add "Quit" in front of every app name
+
+## [Restart application] - 2023-01-24
+
+- Add the option to restart the application
+
+## [Update] - 2023-01-17
+
+- Use a toast instead of an HUD so that the Raycast remains open.
+
+## [Enhancement] - 2022-12-14
+
+Fixed a glitch when quitting an aplication.
+
+## [Initial Quit Applications implementation] - 2022-10-27

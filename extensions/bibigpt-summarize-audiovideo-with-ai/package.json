@@ -1,0 +1,111 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bibigpt-summarize-audiovideo-with-ai",
+  "title": "BibiGPT AI Summarize Audio and Video",
+  "description": "Simplify media summarization with the BibiGPT-Summarize-AudioVideo-with-AI plugin for Raycast. Effortlessly create summaries via BibiGPT API, enhancing efficiency and understanding of complex media. Ideal for professionals and enthusiasts seeking to optimize time and deepen media comprehension.",
+  "icon": "bibigpt-icon.png",
+  "author": "skyline-123",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "summarizemedia",
+      "title": "Summarize Media",
+      "subtitle": "BibiGPT",
+      "description": "Instantly generate a concise summary for any audio or video content using the BibiGPT API. Streamline your media consumption by understanding the essence quickly.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "apiTokenUrl",
+          "description": "Please enter the API Token URL",
+          "type": "textfield",
+          "required": true,
+          "title": "API Token URL"
+        },
+        {
+          "name": "outputLanguage",
+          "description": "Please slelect the language for the summary",
+          "type": "dropdown",
+          "required": true,
+          "title": "Output Language",
+          "default": "en-US",
+          "data": [
+            {
+              "title": "en-US",
+              "value": "en-US"
+            },
+            {
+              "title": "zh-CN",
+              "value": "zh-CN"
+            },
+            {
+              "title": "zh-TW",
+              "value": "zh-TW"
+            },
+            {
+              "title": "ja-JP",
+              "value": "ja-JP"
+            },
+            {
+              "title": "it-IT",
+              "value": "it-IT"
+            },
+            {
+              "title": "de-DE",
+              "value": "de-DE"
+            },
+            {
+              "title": "es-ES",
+              "value": "es-ES"
+            },
+            {
+              "title": "fr-FR",
+              "value": "fr-FR"
+            },
+            {
+              "title": "nl-NL",
+              "value": "nl-NL"
+            },
+            {
+              "title": "ko-KR",
+              "value": "ko-KR"
+            },
+            {
+              "title": "km-KH",
+              "value": "km-KH"
+            },
+            {
+              "title": "hi-IN",
+              "value": "hi-IN"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.66.2",
+    "@raycast/utils": "^1.12.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

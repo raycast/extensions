@@ -1,0 +1,156 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shottr",
+  "title": "Shottr",
+  "description": "Capture and record your screen using shottr!",
+  "icon": "main-icon.png",
+  "author": "fernando_barrios",
+  "contributors": [
+    "CaffeineCat"
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sstr",
+      "title": "Open Shottr",
+      "description": "Open Shottr App",
+      "mode": "no-view",
+      "icon": "shottr.png"
+    },
+    {
+      "name": "ssst",
+      "title": "Open Shottr Settings",
+      "description": "Open Shottr Settings App",
+      "mode": "no-view",
+      "icon": "settings.png"
+    },
+    {
+      "name": "ssfs",
+      "title": "Capture Fullscreen",
+      "description": "Fullscreen Screenshot",
+      "mode": "no-view",
+      "icon": "grab-fullscreen.png"
+    },
+    {
+      "name": "ssa",
+      "title": "Capture Area",
+      "description": "Area Screenshot",
+      "mode": "no-view",
+      "icon": "grab-area.png"
+    },
+    {
+      "name": "ssw",
+      "title": "Capture Repeat",
+      "description": "Repeat Screenshot",
+      "mode": "no-view",
+      "icon": "grab-append.png"
+    },
+    {
+      "name": "ssrg",
+      "title": "Capture Window",
+      "description": "Window Screenshot",
+      "mode": "no-view",
+      "icon": "grab-window.png"
+    },
+    {
+      "name": "sss",
+      "title": "Capture Scrolling",
+      "description": "Scrolling Screenshot",
+      "mode": "no-view",
+      "icon": "grab-scrolling.png"
+    },
+    {
+      "name": "sssr",
+      "title": "Capture Scrolling Reverse",
+      "description": "Scrolling Reverse Screenshot",
+      "mode": "no-view",
+      "icon": "grab-scrolling-reverse.png"
+    },
+    {
+      "name": "ssds",
+      "title": "Capture Delayed",
+      "description": "Delayed Screenshot",
+      "mode": "no-view",
+      "icon": "grab-delayed.png",
+      "arguments": [
+        {
+          "name": "delay",
+          "placeholder": "Delay (secs)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "ssap",
+      "title": "Capture Append",
+      "description": "Append Screenshot",
+      "mode": "no-view",
+      "icon": "grab-append.png"
+    },
+    {
+      "name": "sso",
+      "title": "OCR",
+      "description": "Optical Character Recognition",
+      "mode": "no-view",
+      "icon": "grab-ocr.png"
+    },
+    {
+      "name": "ssc",
+      "title": "Load Clipboard",
+      "description": "Load from Clipboard",
+      "mode": "no-view",
+      "icon": "load-clipboard.png"
+    },
+    {
+      "name": "ssf",
+      "title": "Load File",
+      "description": "Load from File",
+      "mode": "no-view",
+      "icon": "load-file.png"
+    },
+    {
+      "name": "ssu",
+      "title": "Uploads",
+      "description": "Open Uploads",
+      "mode": "no-view",
+      "icon": "uploads.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "closeMainWindow",
+      "title": "Close Main Window",
+      "description": "If you trigger commands by opening Raycast's main window (instead of keyboard shortcuts), keep this ON to ensure the main window closes before taking a screenshot — otherwise it may appear in the capture. Note: with this ON, you cannot screenshot Raycast's main window itself. If you trigger commands via keyboard shortcuts, set this to OFF — the main window won't open, so there's no need to close it.",
+      "type": "checkbox",
+      "required": true,
+      "default": true,
+      "label": "Close Raycast Main Window before capturing"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

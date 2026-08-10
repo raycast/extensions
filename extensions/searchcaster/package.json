@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "searchcaster",
+  "title": "Searchcaster",
+  "description": "Search for content on Farcaster, a sufficiently decentralized social network.",
+  "categories": [
+    "Applications"
+  ],
+  "keywords": [
+    "Farcaster"
+  ],
+  "icon": "icon.png",
+  "author": "gregskril",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "casts",
+      "title": "Search Casts",
+      "subtitle": "Farcaster",
+      "description": "Search for casts by matching text",
+      "mode": "view"
+    },
+    {
+      "name": "profiles",
+      "title": "Search Profiles",
+      "subtitle": "Farcaster",
+      "description": "Search for profiles by name, username, or bio",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.39.2",
+    "@raycast/utils": "^1.4.8",
+    "@types/linkify-it": "^3.0.2",
+    "@types/node": "^18.7.14",
+    "@types/react": "^18.0.18",
+    "got": "^12.5.3",
+    "linkify-it": "^4.0.1",
+    "tlds": "^1.236.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

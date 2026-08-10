@@ -1,0 +1,5 @@
+[1]Hello everyone, [0.7]this is a demo of the Fake Typing Effect extension.
+[2]It can read scripts from files...
+[1.5]and type them out with realistic delays.
+[0.5]You can use \[brackets\] in your text by escaping them.
+[1]Pretty cool, right?

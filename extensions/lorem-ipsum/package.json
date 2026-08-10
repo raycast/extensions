@@ -1,0 +1,138 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lorem-ipsum",
+  "title": "Lorem Ipsum",
+  "description": "Generate placeholder content",
+  "icon": "paragraph-icon.png",
+  "author": "AntonNiklasson",
+  "contributors": [
+    "GastroGeek",
+    "stelo",
+    "enkia",
+    "j3lte"
+  ],
+  "keywords": [
+    "generator",
+    "paragraphs",
+    "sentences",
+    "words",
+    "text",
+    "lorem",
+    "ipsum"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data",
+    "Design Tools",
+    "Developer Tools",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "paragraphs",
+      "title": "Generate Paragraphs",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate random paragraphs and copy them to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfParagraphs",
+          "type": "text",
+          "required": false,
+          "placeholder": "No. of paragraphs"
+        }
+      ]
+    },
+    {
+      "name": "sentences",
+      "title": "Generate Sentences",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate random sentences and copy them to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfSentences",
+          "type": "text",
+          "required": false,
+          "placeholder": "No. of sentences"
+        }
+      ]
+    },
+    {
+      "name": "words",
+      "title": "Generate Words",
+      "subtitle": "Lorem Ipsum",
+      "description": "Generate random words and copy them to the clipboard",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "numberOfWords",
+          "type": "text",
+          "required": false,
+          "placeholder": "No. of words"
+        }
+      ]
+    },
+    {
+      "name": "ai-generate",
+      "title": "Generate with AI",
+      "subtitle": "Lorem Ipsum",
+      "description": "Use AI to generate some placeholder text",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "topic",
+          "type": "text",
+          "required": false,
+          "placeholder": "any topic"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "action",
+      "type": "dropdown",
+      "title": "Default Action",
+      "description": "What you would like to happen when running the command",
+      "data": [
+        {
+          "value": "clipboard",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "paste",
+          "title": "Paste to Active App"
+        },
+        {
+          "value": "pasteAndCopy",
+          "title": "Paste and Copy to Clipboard"
+        }
+      ],
+      "default": "clipboard",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "lorem-ipsum": "^2.0.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "orion",
+  "title": "Orion",
+  "description": "Manage your Orion Bookmarks, History, Tabs, and Reading list",
+  "icon": "orion-icon.png",
+  "author": "plonq",
+  "contributors": [
+    "erics118",
+    "gianni_sanrochman"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "command-bar",
+      "title": "Command Bar",
+      "subtitle": "Orion",
+      "description": "Search tabs, bookmarks, history, reading list, and the web in one place",
+      "mode": "view"
+    },
+    {
+      "name": "bookmarks",
+      "title": "Search Orion Bookmarks",
+      "description": "Browse your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "reading-list",
+      "title": "Search Orion Reading List",
+      "description": "Browse your reading list",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Search Orion History",
+      "description": "Browse your history",
+      "mode": "view"
+    },
+    {
+      "name": "tabs",
+      "title": "Search Tabs",
+      "subtitle": "Orion",
+      "description": "Browse your open tabs",
+      "mode": "view"
+    },
+    {
+      "name": "profiles",
+      "title": "Search Profiles",
+      "subtitle": "Orion",
+      "description": "Browse your profiles",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "orion-rc",
+      "title": "Orion",
+      "label": "Use Release Candidate",
+      "description": "Looks in '~/Library/Application Support/Orion RC' instead of '~/Library/Application Support/Orion'",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "searchEngine",
+      "title": "Search Engine",
+      "description": "Engine used for the Command Bar's live suggestions and web-search fallback",
+      "type": "dropdown",
+      "required": false,
+      "default": "duckduckgo",
+      "data": [
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "Brave",
+          "value": "brave"
+        },
+        {
+          "title": "Kagi (no autocomplete)",
+          "value": "kagi"
+        }
+      ]
+    },
+    {
+      "name": "autoCloseLauncherTabs",
+      "title": "Command Bar",
+      "label": "Auto-close launcher tabs",
+      "description": "When the Command Bar opens, close leftover blank tabs created when Orion's homepage / new-tab is set to the Command Bar deeplink",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.9",
+    "@raycast/utils": "^2.2.6",
+    "bplist-parser": "^0.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@typescript-eslint/eslint-plugin": "^8.61.1",
+    "@typescript-eslint/parser": "^8.61.1",
+    "eslint": "^10.5.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
