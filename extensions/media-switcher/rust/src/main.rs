@@ -154,9 +154,16 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
         return Err(msg);
     }
 
-    // Phase 2: nothing else can be playing now — start the target.
+    // Phase 2: nothing else can be playing now — start the target. Any failure
+    // (request rejected, immediate TryPlayAsync error, or state never reached)
+    // resumes the paused competitors so the user's previous playback isn't left
+    // interrupted; resume failures are reported alongside the switch error.
     let target_session = entries[target_pos].session.clone();
-    match target_session.TryPlayAsync().map_err(|e| format!("TryPlayAsync failed: {}", e))?.get() {
+    let play_result = match target_session.TryPlayAsync() {
+        Ok(op) => op.get().map(|_| ()).map_err(|e| format!("Play request rejected: {}", e)),
+        Err(e) => Err(format!("TryPlayAsync failed: {}", e)),
+    };
+    let target_failure = match play_result {
         Ok(_) => {
             let mut started = false;
             for _ in 0..50 {
@@ -171,22 +178,21 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
                 std::thread::sleep(std::time::Duration::from_millis(50));
             }
             if !started {
-                let resume_errors = resume_sessions(&entries, &paused_positions);
-                let mut msg = "Target session did not start playing after switch".to_string();
-                if !resume_errors.is_empty() {
-                    msg.push_str(&format!("; resume failures: {}", resume_errors.join("; ")));
-                }
-                return Err(msg);
+                Some("Target session did not start playing after switch".to_string())
+            } else {
+                None
             }
         }
-        Err(e) => {
-            let resume_errors = resume_sessions(&entries, &paused_positions);
-            let mut msg = format!("Failed to play target session: {}", e);
-            if !resume_errors.is_empty() {
-                msg.push_str(&format!("; resume failures: {}", resume_errors.join("; ")));
-            }
-            return Err(msg);
+        Err(e) => Some(format!("Failed to play target session: {}", e)),
+    };
+
+    if let Some(failure) = target_failure {
+        let resume_errors = resume_sessions(&entries, &paused_positions);
+        let mut msg = failure;
+        if !resume_errors.is_empty() {
+            msg.push_str(&format!("; resume failures: {}", resume_errors.join("; ")));
         }
+        return Err(msg);
     }
 
     Ok(())
@@ -195,15 +201,34 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
 // Re-playing a session we just paused restores it — pause is reversible, so a
 // paused SMTC session resumes from where it stopped. Used to undo the pause
 // phase when the target can't be started, so competitors aren't left paused.
+// Each resume is confirmed to actually reach Playing, matching the play path;
+// an accepted request with no state transition is reported as a resume failure
+// so interrupted playback isn't silently treated as restored.
 fn resume_sessions(entries: &[SessionEntry], positions: &[usize]) -> Vec<String> {
     let mut errors = Vec::new();
     for &i in positions {
         let entry = &entries[i];
         let label = format!("{}[{}]", entry.app_id, entry.ordinal);
-        match entry.session.TryPlayAsync() {
-            Ok(op) => {
-                if let Err(e) = op.get() {
-                    errors.push(format!("{}: {}", label, e));
+        let resume = match entry.session.TryPlayAsync() {
+            Ok(op) => op.get().map(|_| ()).map_err(|e| format!("Play request rejected: {}", e)),
+            Err(e) => Err(format!("TryPlayAsync failed: {}", e)),
+        };
+        match resume {
+            Ok(_) => {
+                let mut resumed = false;
+                for _ in 0..50 {
+                    if let Ok(info) = entry.session.GetPlaybackInfo() {
+                        if let Ok(status) = info.PlaybackStatus() {
+                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
+                                resumed = true;
+                                break;
+                            }
+                        }
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                }
+                if !resumed {
+                    errors.push(format!("{} accepted resume but never reached playing state", label));
                 }
             }
             Err(e) => errors.push(format!("{}: {}", label, e)),
