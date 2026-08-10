@@ -1,10 +1,5 @@
+import { createHash } from "node:crypto";
 import { Cache, getPreferenceValues } from "@raycast/api";
-
-interface Preferences {
-  baseUrl: string;
-  apiKey: string;
-  monthlyBudget?: string;
-}
 
 export interface DailyMetrics {
   spend: number;
@@ -76,7 +71,7 @@ export interface UsageTotals {
   apiRequests: number;
 }
 
-function getConfig(): Preferences {
+function getConfig(): { baseUrl: string; apiKey: string } {
   const { baseUrl, apiKey } = getPreferenceValues<Preferences>();
   return { baseUrl: baseUrl.replace(/\/+$/, ""), apiKey };
 }
@@ -202,11 +197,22 @@ const keyInfoCache = new Cache({ namespace: "litellm-key-info" });
 const KEY_INFO_TTL_MS = 60 * 60 * 1000; // 1 hour
 
 /**
+ * Scope the cache entry to the active credentials so switching proxy or virtual
+ * key never surfaces another key's alias/spend/budget. The key is hashed to keep
+ * the raw virtual key out of the on-disk cache.
+ */
+function keyInfoCacheKey(): string {
+  const { baseUrl, apiKey } = getConfig();
+  return createHash("sha256").update(`${baseUrl}\n${apiKey}`).digest("hex");
+}
+
+/**
  * Key info rarely changes, so cache it for an hour (stale-while-revalidate style).
  * Pass `force` (used by the Refresh action) to bypass the TTL and refetch.
  */
 export async function fetchKeyInfoCached(force = false): Promise<KeyInfo | null> {
-  const cached = keyInfoCache.get("keyInfo");
+  const cacheKey = keyInfoCacheKey();
+  const cached = keyInfoCache.get(cacheKey);
   const parsed = cached ? (JSON.parse(cached) as { data: KeyInfo; fetchedAt: number }) : undefined;
 
   if (!force && parsed && Date.now() - parsed.fetchedAt < KEY_INFO_TTL_MS) {
@@ -215,7 +221,7 @@ export async function fetchKeyInfoCached(force = false): Promise<KeyInfo | null>
 
   try {
     const data = await fetchKeyInfo();
-    keyInfoCache.set("keyInfo", JSON.stringify({ data, fetchedAt: Date.now() }));
+    keyInfoCache.set(cacheKey, JSON.stringify({ data, fetchedAt: Date.now() }));
     return data;
   } catch (error) {
     // Best-effort: /key/info isn't exposed on every proxy/permission set.
