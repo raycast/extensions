@@ -2,9 +2,6 @@ import { getApplications, getPreferenceValues, open, showToast, Toast } from "@r
 import fs from "fs";
 import { BETA_DB_PATH } from "./constants";
 
-type Preferences = {
-  preferBeta?: "true" | "false" | boolean;
-};
 
 export function getPreferBetaPreference() {
   const { preferBeta = "true" } = getPreferenceValues<Preferences>();
