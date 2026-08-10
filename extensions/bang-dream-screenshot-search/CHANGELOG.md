@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-10
 
 - Search Traditional Chinese dialogue across MyGO!!!!! and Ave Mujica screenshots.
 - Filter the catalog by series, favorites, and the 30 most recently copied screenshots.
