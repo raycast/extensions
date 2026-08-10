@@ -22,7 +22,7 @@ export class VgridMissingError extends Error {
 
 export function vgridPath(): string {
   if (cached) return cached;
-  const pref = getPreferenceValues<{ vgridPath?: string }>().vgridPath?.trim();
+  const pref = getPreferenceValues<Preferences>().vgridPath?.trim();
   const candidates = pref ? [pref, ...CANDIDATES] : CANDIDATES;
   for (const p of candidates) {
     try {
