@@ -1,6 +1,6 @@
 # Rename Changelog
 
-## [Undo History] - {PR_MERGE_DATE}
+## [Undo History] - 2026-08-10
 
 - Add Rename History command to view and undo recent rename operations
 - Record successful renames from Rename File(s), Replace File(s) Characters, and Advanced Batch Rename
