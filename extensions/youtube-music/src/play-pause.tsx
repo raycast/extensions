@@ -19,6 +19,11 @@ export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(playPause);
 
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
+
     switch (result) {
       case "no-button-found":
         await showHUD("❌ No play/pause button found");

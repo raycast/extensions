@@ -22,6 +22,10 @@ const dislike = `(function() {
 export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(dislike);
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
     switch (result) {
       case "dislike-already-clicked":
         await showHUD("👀 Already disliked");

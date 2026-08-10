@@ -31,6 +31,11 @@ export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(removeLike);
 
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
+
     switch (result) {
       case "ytmusic-removed":
         await showHUD("👍🏻 Removed Like (YT Music)");

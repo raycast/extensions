@@ -22,6 +22,10 @@ export const like = `(function() {
 export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(like);
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
     switch (result) {
       case "like-already-clicked":
         await showHUD("👍 Already liked");

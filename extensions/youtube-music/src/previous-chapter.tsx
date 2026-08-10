@@ -17,6 +17,10 @@ export const goToPreviousChapter = `(function() {
 export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(goToPreviousChapter);
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
     switch (result) {
       case "no-active-chapter":
         await showHUD("❌ No active chapter");

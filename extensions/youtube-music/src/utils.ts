@@ -127,7 +127,7 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | und
     `);
   } catch (error) {
     handleAppleScriptError(error, browser.name);
-    throw error;
+    return undefined;
   }
 
   if (result.includes("Allow JavaScript from Apple Events")) {
@@ -142,7 +142,7 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | und
         title: "🔗 How to enable JavaScript from Apple Events",
       },
     });
-    throw new Error('⚠️ Enable "Allow JavaScript from Apple Events" in your browser\'s Develop menu.');
+    return undefined;
   }
 
   if (result.includes("JS Error")) {
@@ -151,7 +151,7 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | und
       message: result.split("JS Error: ")[1],
       style: Toast.Style.Failure,
     });
-    throw new Error(result.split("JS Error: ")[1]);
+    return undefined;
   }
 
   if (result === "no-matching-tab") {
@@ -160,7 +160,7 @@ export async function runJSInYouTubeMusicTab(code: string): Promise<string | und
       message: "Please open a YouTube or YouTube Music tab in the selected browser",
       style: Toast.Style.Failure,
     });
-    throw new Error("No matching tab found");
+    return undefined;
   }
 
   return result;

@@ -29,6 +29,11 @@ export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(nextTrack);
 
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
+
     switch (result) {
       case "ytmusic-next":
         await showHUD("⏭️ Next Song (YT Music)");

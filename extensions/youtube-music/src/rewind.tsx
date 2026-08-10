@@ -34,6 +34,10 @@ export default async () => {
   const seconds = parseInt(secValue, 10);
   try {
     const result = await runJSInYouTubeMusicTab(rewind(seconds));
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
     switch (result) {
       case "rewind-video-not-found":
         await showHUD("❌ Video not found");

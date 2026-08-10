@@ -31,6 +31,11 @@ export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(previousTrack);
 
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
+
     // Feedback based on result
     switch (result) {
       case "ytmusic-prev":

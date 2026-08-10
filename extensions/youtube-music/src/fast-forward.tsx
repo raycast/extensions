@@ -39,6 +39,10 @@ export default async () => {
   const seconds = parseInt(secValue, 10);
   try {
     const result = await runJSInYouTubeMusicTab(fastForward(seconds));
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
     switch (result) {
       case "fast-forward-video-not-found":
         await showHUD("❌ Video not found");
