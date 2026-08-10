@@ -723,16 +723,7 @@ export type PullRequestDetailsFieldsFragment = {
         | null;
     } | null> | null;
   } | null;
-  commits: {
-    __typename?: "PullRequestCommitConnection";
-    nodes?: Array<{
-      __typename?: "PullRequestCommit";
-      commit: {
-        __typename?: "Commit";
-        statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: StatusState } | null;
-      };
-    } | null> | null;
-  };
+  commits: { nodes: Array<{ commit: { statusCheckRollup: { state: Types.StatusState } | null } } | null> | null };
   assignees: {
     totalCount: number;
     nodes: Array<{ id: string; avatarUrl: any; name: string | null; login: string; isViewer: boolean } | null> | null;
@@ -814,16 +805,7 @@ export type PullRequestDetailsQuery = {
               | null;
           } | null> | null;
         } | null;
-        commits: {
-          __typename?: "PullRequestCommitConnection";
-          nodes?: Array<{
-            __typename?: "PullRequestCommit";
-            commit: {
-              __typename?: "Commit";
-              statusCheckRollup?: { __typename?: "StatusCheckRollup"; state: StatusState } | null;
-            };
-          } | null> | null;
-        };
+        commits: { nodes: Array<{ commit: { statusCheckRollup: { state: Types.StatusState } | null } } | null> | null };
         assignees: {
           totalCount: number;
           nodes: Array<{
