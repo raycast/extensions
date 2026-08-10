@@ -165,6 +165,12 @@ export function selectBackendForFile(preferred: string, available: Backend[], ex
   return rankBackendsForFile(preferred, available, ext)[0] ?? null;
 }
 
+// AppleScript string literal. JSON.stringify is not safe here: it emits \b, \f, and \uXXXX
+// escapes for control characters, which AppleScript does not understand.
+function asString(s: string): string {
+  return `"${s.replace(/[\\"]/g, "\\$&").replace(/\n/g, "\\n").replace(/\r/g, "\\r").replace(/\t/g, "\\t")}"`;
+}
+
 function runAppleScript(script: string, tag: string, timeoutCleanup?: string): void {
   console.log(`[slides2pdf:${tag}] script:\n${script}`);
   try {
@@ -203,8 +209,8 @@ function conversionScript(opts: {
 }): string {
   const { appName, src, outputPath, countExpr, docExpr, exportLine } = opts;
   // Apps report the document name with or without extension depending on Finder settings.
-  const fileName = JSON.stringify(path.basename(src));
-  const baseName = JSON.stringify(path.basename(src, path.extname(src)));
+  const fileName = asString(path.basename(src));
+  const baseName = asString(path.basename(src, path.extname(src)));
   return [
     `set wasRunning to (application "${appName}" is running)`,
     `set errMsg to ""`,
@@ -212,7 +218,7 @@ function conversionScript(opts: {
     `  try`,
     `    with timeout of 600 seconds`,
     `      set initialCount to (count of ${countExpr})`,
-    `      open POSIX file ${JSON.stringify(src)}`,
+    `      open POSIX file ${asString(src)}`,
     `      set theDoc to missing value`,
     `      set tries to 0`,
     `      repeat while theDoc is missing value`,
@@ -227,7 +233,7 @@ function conversionScript(opts: {
     `          if tries > 120 then error "Timed out waiting for ${appName} to open the file"`,
     `        end if`,
     `      end repeat`,
-    `      set outFile to POSIX file ${JSON.stringify(outputPath)}`,
+    `      set outFile to POSIX file ${asString(outputPath)}`,
     `      ${exportLine}`,
     `      close theDoc saving no`,
     `    end timeout`,
@@ -313,9 +319,7 @@ const DOC_CLASS: Record<AppBackendType, string> = {
 };
 
 function closeDocScript(appName: string, docClass: string, src: string): string {
-  const match = `name is ${JSON.stringify(path.basename(src))} or name is ${JSON.stringify(
-    path.basename(src, path.extname(src)),
-  )}`;
+  const match = `name is ${asString(path.basename(src))} or name is ${asString(path.basename(src, path.extname(src)))}`;
   return [
     `tell application "${appName}"`,
     `  try`,
