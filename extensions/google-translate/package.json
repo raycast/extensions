@@ -23,7 +23,8 @@
     "likid",
     "xmok",
     "brucemakes012",
-    "alexi.build"
+    "alexi.build",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -3123,6 +3124,15 @@
           "value": "paste"
         }
       ]
+    },
+    {
+      "name": "prioritizeCrossLanguage",
+      "title": "Result Ordering",
+      "label": "Prioritize cross-language translations",
+      "description": "When the input text is already in one of your target languages, move that same-language result (e.g. English → English) to the bottom. When disabled, results keep your configured target language order.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     },
     {
       "name": "proxy",
