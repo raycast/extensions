@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add support for ClinePass] - {PR_MERGE_DATE}
+## [Add support for ClinePass] - 2026-08-10
 
 ### New Features
 
