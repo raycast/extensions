@@ -24,7 +24,7 @@ export default function Command() {
   } = usePromise(async () => {
     return list_sessions();
   }, []);
-  const prefs = getPreferenceValues<{ volumeStep?: string }>();
+  const prefs = getPreferenceValues();
   const volStep = Math.min(MAX_SAFE_STEP, Math.max(1, parseInt(prefs.volumeStep ?? "5", 10) || 5));
 
   return (

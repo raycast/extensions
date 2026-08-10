@@ -294,7 +294,11 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 // ordering guarantee and sessions expose no stable ID, so identity is a per-app
 // ordinal with a title-prefix fingerprint. Priority:
 //   empty title — Windows supplied no title, so there is no fingerprint to verify.
-//     The click was keyed by (app_id, ordinal); match that directly.
+//     The click was keyed by (app_id, ordinal). Resolved ONLY when this app has a
+//     single session in the snapshot: with no sibling, nothing could have
+//     reassigned the clicked ordinal. If the app has two or more same-app
+//     sessions, the ordinal's new occupant is indistinguishable from the clicked
+//     one and we refuse (guess-free).
 //   1. Exact (ordinal + title) match — the confident happy path, and the only
 //      safe resolution when multiple same-app sessions share a title prefix.
 //   2. Exactly one session matches the title fingerprint — it moved ordinals
@@ -311,11 +315,26 @@ fn resolve_target_index(
     target_index: u32,
     target_title_prefix: &str,
 ) -> Option<usize> {
-    // Empty/untitled session: no fingerprint exists, so the ordinal is all we
-    // have. Without a title there is nothing an ordinal-only match could get
-    // wrong that the user could avoid by refreshing.
     if target_title_prefix.is_empty() {
-        return entries.iter().position(|e| e.app_id == target_app_id && e.ordinal == target_index);
+        let mut ordinal_occupied: Option<usize> = None;
+        let mut app_count = 0u32;
+        for (i, entry) in entries.iter().enumerate() {
+            if entry.app_id != target_app_id {
+                continue;
+            }
+            app_count += 1;
+            if entry.ordinal == target_index {
+                ordinal_occupied = Some(i);
+            }
+        }
+        // Untitled sessions can only be keyed by ordinal. That is safe only when
+        // this app exposes exactly one session — a sibling opening, closing, or
+        // reordering could otherwise move another session onto the clicked
+        // ordinal. Otherwise refuse rather than control the wrong session.
+        if app_count == 1 {
+            return ordinal_occupied;
+        }
+        return None;
     }
 
     let mut title_matches: Vec<usize> = Vec::new();
