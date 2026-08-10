@@ -1,20 +1,10 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  confirmAlert,
-  closeMainWindow,
-  popToRoot,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, confirmAlert } from "@raycast/api";
 import { useState } from "react";
 import { useFileSelection, usePreview } from "./lib/hooks";
 import { RenameRule } from "./lib/rules";
 import AddRuleForm from "./components/AddRuleForm";
 import { batchRename, checkConflicts } from "./lib/batch";
+import { openRenameHistory, recordRenameHistory } from "./lib/history-nav";
 import { getUserFriendlyErrorMessage } from "./lib/errors";
 import type { RenameOperation } from "./types";
 import path from "path";
@@ -83,7 +73,12 @@ export default function AdvancedRenameCommand() {
         }
 
         const results = await batchRename(operations);
-        const successCount = results.filter((r) => r.success).length;
+        const successfulOps = results.filter((r) => r.success).map(({ oldPath, newPath }) => ({ oldPath, newPath }));
+        const historySaved = await recordRenameHistory(
+          `Advanced rename of ${successfulOps.length} ${successfulOps.length === 1 ? "file" : "files"}`,
+          successfulOps,
+        );
+        const successCount = successfulOps.length;
         const errors = results.filter((r) => !r.success).map((r) => `${path.basename(r.oldPath)}: ${r.error}`);
 
         if (errors.length > 0) {
@@ -93,9 +88,14 @@ export default function AdvancedRenameCommand() {
             message: errors[0] + (errors.length > 1 ? ` (and ${errors.length - 1} more)` : ""),
           });
         } else {
-          await showToast({ style: Toast.Style.Success, title: `Successfully renamed ${successCount} files` });
-          await closeMainWindow();
-          await popToRoot();
+          await showToast({
+            style: Toast.Style.Success,
+            title: `Successfully renamed ${successCount} files`,
+            // An empty batch records no history by design — only warn when
+            // there was something to save and saving failed.
+            message: successCount > 0 && !historySaved ? "History could not be saved" : undefined,
+          });
+          await openRenameHistory(historySaved);
         }
       } catch (e) {
         await showToast({
