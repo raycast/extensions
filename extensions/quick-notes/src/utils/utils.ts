@@ -148,11 +148,13 @@ export const getOldRenamedTitles = (oldNotes: Note[], newNotes: Note[]): string[
 };
 
 export const getDeletedNotes = (oldNotes: Note[], newNotes: Note[]): Note[] => {
-  return oldNotes.filter((note) => !newNotes.includes(note));
+  const newNoteDates = new Set(newNotes.map((note) => new Date(note.createdAt).getTime()));
+  return oldNotes.filter((note) => !newNoteDates.has(new Date(note.createdAt).getTime()));
 };
 
 export const getDeletedTags = (oldTags: Tag[], newTags: Tag[]): Tag[] => {
-  return oldTags.filter((tag) => !newTags.includes(tag));
+  const newTagNames = new Set(newTags.map((tag) => tag.name));
+  return oldTags.filter((tag) => !newTagNames.has(tag.name));
 };
 
 export const setNoteSummary = (summary: string, createdAt?: Date) => {

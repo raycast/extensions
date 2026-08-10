@@ -79,15 +79,37 @@ export default function ImportNotes() {
 
               const takenTitles = new Set(notes.map((note) => note.title));
               const takenDates = new Set(notes.map((note) => new Date(note.createdAt).getTime()));
-              const imported = markdownFiles.map((file) => importFile(file, takenTitles, takenDates));
+              const imported: Note[] = [];
+              const failed: string[] = [];
+              for (const file of markdownFiles) {
+                try {
+                  imported.push(importFile(file, takenTitles, takenDates));
+                } catch {
+                  failed.push(path.basename(file));
+                }
+              }
 
               await setNotes([...notes, ...imported]);
 
               const skipped = files.length - markdownFiles.length;
+              if (imported.length === 0) {
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Import Failed",
+                  message: `Could not read ${failed.join(", ")}`,
+                });
+                popToRoot();
+                return;
+              }
+
+              const warnings = [
+                skipped > 0 ? `${skipped} non-markdown file${skipped > 1 ? "s" : ""} skipped` : "",
+                failed.length > 0 ? `${failed.length} file${failed.length > 1 ? "s" : ""} could not be read` : "",
+              ].filter(Boolean);
               showToast({
                 style: Toast.Style.Success,
                 title: `${imported.length} Note${imported.length > 1 ? "s" : ""} Imported`,
-                message: skipped > 0 ? `${skipped} non-markdown file${skipped > 1 ? "s" : ""} skipped` : undefined,
+                message: warnings.join(", ") || undefined,
               });
               popToRoot();
             }}
