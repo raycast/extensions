@@ -1,5 +1,10 @@
 # Raycast Icons Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Add missing keyboard shortcuts
+- Bump all dependencies to the latest
+
 ## [Improvement] - 2025-05-15
 
 - Moved icon names from grid item titles to the navigation title to prevent truncation.
