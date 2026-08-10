@@ -241,6 +241,7 @@ interface AppScriptSpec {
   docExpr: string; // e.g. "front document", "active presentation" — fallback if no name matches
   exportLine: string;
   unmodified: string; // predicate excluding documents with unsaved edits (iWork: modified, MS: saved)
+  pathExpr: (doc: string) => string; // expression yielding a document's on-disk path (may error)
 }
 
 const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
@@ -249,36 +250,42 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
     docExpr: "front document",
     exportLine: "export theDoc to outFile as PDF with properties {PDF image quality:Best}",
     unmodified: "modified is false",
+    pathExpr: (doc) => `POSIX path of ((file of ${doc}) as alias)`,
   },
   pages: {
     docClass: "document",
     docExpr: "front document",
     exportLine: "export theDoc to outFile as PDF",
     unmodified: "modified is false",
+    pathExpr: (doc) => `POSIX path of ((file of ${doc}) as alias)`,
   },
   numbers: {
     docClass: "document",
     docExpr: "front document",
     exportLine: "export theDoc to outFile as PDF",
     unmodified: "modified is false",
+    pathExpr: (doc) => `POSIX path of ((file of ${doc}) as alias)`,
   },
   powerpoint: {
     docClass: "presentation",
     docExpr: "active presentation",
     exportLine: "save theDoc in outFile as save as PDF",
     unmodified: "saved is true",
+    pathExpr: (doc) => `full name of ${doc}`,
   },
   word: {
     docClass: "document",
     docExpr: "active document",
     exportLine: "save as theDoc file name outFile file format format PDF",
     unmodified: "saved is true",
+    pathExpr: (doc) => `full name of ${doc}`,
   },
   excel: {
     docClass: "workbook",
     docExpr: "active workbook",
     exportLine: "save workbook as theDoc filename outFile file format PDF file format",
     unmodified: "saved is true",
+    pathExpr: (doc) => `full name of ${doc}`,
   },
 };
 
@@ -292,16 +299,32 @@ function docMatch(src: string, spec: AppScriptSpec): string {
   return `(name is ${name} or name is ${stem}) and ${spec.unmodified}`;
 }
 
+// A candidate document is accepted only if its on-disk path matches the source file (or its
+// path can't be read — freshly imported non-native formats may have none). Name matching alone
+// would bind a same-named document opened from a different folder: the export would produce the
+// wrong PDF and the close would target the wrong document.
+function verifyCandidateLines(cand: string, src: string, spec: AppScriptSpec, accept: string): string[] {
+  return [
+    `set candPath to ""`,
+    `try`,
+    `  set candPath to ${spec.pathExpr(cand)}`,
+    `  if candPath does not start with "/" then set candPath to POSIX path of candPath`,
+    `end try`,
+    `if candPath is "" or candPath is ${asString(src)} then ${accept}`,
+  ];
+}
+
 // Shared AppleScript skeleton. All app scripts follow the same shape:
 // remember whether the app was running, open the file, wait until the opened document appears and
-// bind it by name (open is asynchronous for non-native formats like .pptx in Keynote, is a no-op
-// for an already-open document, and apps may auto-create a blank startup document — a bare
-// count-based wait mishandles all three), run the export inside try/on error so the error message
-// is captured instead of swallowed, always close the document and quit the app if we launched it,
-// then re-raise the captured error outside the tell block.
+// bind it by name + unmodified state + on-disk path (open is asynchronous for non-native formats
+// like .pptx in Keynote, is a no-op for an already-open document, and apps may auto-create a blank
+// startup document — a bare count-based wait mishandles all three), run the export inside
+// try/on error so the error message is captured instead of swallowed, always close the document
+// and quit the app if we launched it, then re-raise the captured error outside the tell block.
 function conversionScript(appName: string, src: string, outputPath: string, spec: AppScriptSpec): string {
   const { docExpr, exportLine } = spec;
   const countExpr = `${spec.docClass}s`;
+  const indent = (lines: string[], pad: string) => lines.map((l) => pad + l);
   return [
     `set wasRunning to (application "${appName}" is running)`,
     `set errMsg to ""`,
@@ -315,9 +338,15 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
     `      repeat while theDoc is missing value`,
     `        try`,
     `          set matched to (${countExpr} whose (${docMatch(src, spec)}))`,
-    `          if (count of matched) > 0 then set theDoc to item 1 of matched`,
+    `          repeat with cand in matched`,
+    ...indent(verifyCandidateLines("cand", src, spec, "set theDoc to cand"), "            "),
+    `            if theDoc is not missing value then exit repeat`,
+    `          end repeat`,
     `        end try`,
-    `        if theDoc is missing value and tries > 20 and (count of ${countExpr}) > initialCount then set theDoc to ${docExpr}`,
+    `        if theDoc is missing value and tries > 20 and (count of ${countExpr}) > initialCount then`,
+    `          set cand to ${docExpr}`,
+    ...indent(verifyCandidateLines("cand", src, spec, "set theDoc to cand"), "          "),
+    `        end if`,
     `        if theDoc is missing value then`,
     `          delay 0.5`,
     `          set tries to tries + 1`,
@@ -383,22 +412,21 @@ function moveFile(from: string, to: string): void {
   }
 }
 
-// Move an existing target PDF aside before every conversion so a failed run can restore it and a
-// stale file can't pass the output check; AppleScript exports also error on existing files.
+// Engines write to a per-process staging path that is moved into place only on success:
+// outputPath is never partially written, never needs failure cleanup (a file someone else
+// creates there concurrently stays untouched), and a stale file can't pass the output check.
+// The staging name is fresh per run, so AppleScript's export-errors-on-existing-file rule
+// can't fire either.
 export async function convertFile(backend: Backend, src: string, outputPath: string): Promise<void> {
-  const backupPath = `${outputPath}.slides2pdf-backup`;
-  fs.rmSync(backupPath, { force: true });
-  if (fs.existsSync(outputPath)) fs.renameSync(outputPath, backupPath);
+  if (fs.existsSync(outputPath)) throw new Error(`Output already exists: ${path.basename(outputPath)}`);
+  const staging = `${outputPath}.converting-${process.pid}.pdf`;
+  fs.rmSync(staging, { force: true });
   try {
-    await runBackend(backend, src, outputPath);
-    if (!fs.existsSync(outputPath)) throw new Error("Conversion produced no output file");
-    fs.rmSync(backupPath, { force: true });
-  } catch (e) {
-    // A failed engine may have written a partial file — remove it so it can't be mistaken
-    // for a valid result (or get backed up by the next fallback engine), then restore.
-    fs.rmSync(outputPath, { force: true });
-    if (fs.existsSync(backupPath)) fs.renameSync(backupPath, outputPath);
-    throw e;
+    await runBackend(backend, src, staging);
+    if (!fs.existsSync(staging)) throw new Error("Conversion produced no output file");
+    moveFile(staging, outputPath);
+  } finally {
+    fs.rmSync(staging, { force: true });
   }
 }
 
