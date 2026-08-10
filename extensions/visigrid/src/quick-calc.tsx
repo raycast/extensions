@@ -74,8 +74,13 @@ async function evaluate(
   formula: string,
 ): Promise<{ result: string; dataPreview: string }> {
   const clip = (await Clipboard.readText()) ?? "";
+  // Literal formulas like =SUM(1,2,3) need no clipboard data — feed the
+  // engine a single empty row so they evaluate on an empty grid.
   if (!clip.trim()) {
-    throw new Error("Clipboard is empty — copy some CSV data first.");
+    const result = (
+      await runVgrid(["calc", "--from", "csv", formula], "\n")
+    ).trim();
+    return { result, dataPreview: "(no clipboard data)" };
   }
   const { data, format } = normalizeClipboard(clip);
   const result = (
@@ -138,7 +143,7 @@ function ResultView(props: { formula: string }) {
 }
 
 export default function QuickCalc(
-  props: LaunchProps<{ arguments: { formula?: string } }>,
+  props: LaunchProps<{ arguments: Arguments.QuickCalc }>,
 ) {
   const initial = props.arguments.formula?.trim();
   const { push } = useNavigation();
@@ -149,7 +154,7 @@ export default function QuickCalc(
       const rows = (clip ?? "").trim().split("\n").filter(Boolean);
       if (rows.length === 0) {
         setClipInfo(
-          "Clipboard is empty — copy CSV data to reference it as A1, B1, …",
+          "Clipboard is empty — literal formulas like =SUM(1,2,3) still work; copy data to reference A1, B1, …",
         );
       } else {
         const { data, format } = normalizeClipboard(clip ?? "");
