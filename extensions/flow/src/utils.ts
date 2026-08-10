@@ -33,6 +33,10 @@ export async function skipSession() {
   await runAppleScript('tell application "Flow" to skip');
 }
 
+export async function previousSession() {
+  await runAppleScript('tell application "Flow" to previous');
+}
+
 export async function resetTimer() {
   await runAppleScript('tell application "Flow" to reset');
 }

@@ -103,6 +103,18 @@
       "mode": "no-view"
     },
     {
+      "name": "start-previous",
+      "title": "Start Previous Session",
+      "subtitle": "Flow",
+      "description": "Reload and start the previous session",
+      "keywords": [
+        "last",
+        "repeat",
+        "previous"
+      ],
+      "mode": "no-view"
+    },
+    {
       "name": "set-session-title",
       "title": "Set Session Title",
       "description": "Set the session title for Flow",

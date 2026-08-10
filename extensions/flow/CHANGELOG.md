@@ -3,6 +3,7 @@
 ## [Start Timer with a title] - {PR_MERGE_DATE}
 - `Start Timer` now accepts an optional title argument, so a session can be titled and started in one command.
 - Add a `Default Session Title` preference used when starting without typing a title (handy for a recurring project).
+- Add a `Start Previous Session` command to reload and start the last session, useful for repetitive sessions.
 - Escape backslashes as well as quotes when setting a session title.
 
 ## [Set Session Title command] - 2025-02-27
