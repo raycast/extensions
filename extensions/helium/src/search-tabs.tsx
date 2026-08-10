@@ -11,12 +11,12 @@ import {
   CopyTitleAction,
   CreateQuicklinkAction,
   DeduplicateTabsAction,
+  OpenInHeliumAction,
   ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds, sharedPendingCloseIds } from "./utils/pending-close";
 import { isTabControlAvailable } from "./utils/browser-control";
-import { getHeliumAppTarget } from "./utils/platform";
 
 const BROWSER_EXTENSION_URL = "https://www.raycast.com/browser-extension";
 
@@ -55,11 +55,10 @@ export default function SearchTabs() {
             isTabControlAvailable ? undefined : (
               <ActionPanel>
                 {/* Opened in Helium specifically — installing it in another browser would not help. */}
-                <Action.Open
+                <OpenInHeliumAction
                   title="Get Raycast Browser Extension"
                   icon={Icon.Download}
-                  target={BROWSER_EXTENSION_URL}
-                  application={getHeliumAppTarget()}
+                  url={BROWSER_EXTENSION_URL}
                 />
                 <Action.CopyToClipboard title="Copy Link" content={BROWSER_EXTENSION_URL} />
               </ActionPanel>

@@ -45,17 +45,21 @@ export function getHeliumPathPreference(): string | undefined {
 }
 
 /**
- * Install roots in probe order: the per-user location the default installer
+ * Install roots in probe order: the per-user locations the default installer
  * uses first, then the machine-wide ones.
  *
- * `%LOCALAPPDATA%` is derived from the home directory when the variable is
- * missing — Raycast ships as an MSIX package on Windows, and packaged
- * processes do not always inherit the environment you would expect.
+ * Both `%LOCALAPPDATA%` and the home-derived equivalent are probed, and not
+ * only as a fallback: Raycast's extension processes on Windows run with
+ * `LOCALAPPDATA` pointing at `AppData\Local\Temp`, so trusting the variable
+ * alone makes a completely standard install invisible.
  */
 export function getWindowsInstallRoots(env: NodeJS.ProcessEnv = process.env, home = homedir()): string[] {
-  const localAppData = env.LOCALAPPDATA ?? join(home, "AppData", "Local");
-  const bases = [localAppData, env.PROGRAMFILES, env["PROGRAMFILES(X86)"]].filter((base): base is string => !!base);
-  return bases.flatMap((base) => WINDOWS_INSTALL_SUFFIXES.map((suffix) => join(base, suffix)));
+  const bases = [env.LOCALAPPDATA, join(home, "AppData", "Local"), env.PROGRAMFILES, env["PROGRAMFILES(X86)"]].filter(
+    (base): base is string => !!base,
+  );
+
+  const roots = bases.flatMap((base) => WINDOWS_INSTALL_SUFFIXES.map((suffix) => join(base, suffix)));
+  return [...new Set(roots)];
 }
 
 /**
@@ -121,6 +125,8 @@ export function parseStartMenuInternetCommands(registryOutput: string): string[]
 interface WindowsPathOptions {
   override?: string;
   env?: NodeJS.ProcessEnv;
+  /** Injectable so tests never probe the real user's home directory. */
+  home?: string;
   /** Injectable so tests never touch the real registry. */
   registryLookup?: () => string | undefined;
 }
@@ -134,7 +140,7 @@ export function findHeliumExecutable(options: WindowsPathOptions = {}): string |
   const override = "override" in options ? options.override : getHeliumPathPreference();
   if (override && existsSync(override)) return override;
 
-  for (const root of getWindowsInstallRoots(options.env)) {
+  for (const root of getWindowsInstallRoots(options.env, options.home)) {
     for (const executableName of WINDOWS_EXECUTABLE_NAMES) {
       const candidate = join(root, "Application", executableName);
       if (existsSync(candidate)) return candidate;
@@ -207,7 +213,7 @@ export function getWindowsUserDataPath(options: WindowsPathOptions = {}): string
 
   const candidates: string[] = [];
   if (executable) candidates.push(join(dirname(dirname(executable)), "User Data"));
-  for (const root of getWindowsInstallRoots(env)) candidates.push(join(root, "User Data"));
+  for (const root of getWindowsInstallRoots(env, options.home)) candidates.push(join(root, "User Data"));
 
   const existing = candidates.find((candidate) => existsSync(candidate));
   if (existing) return existing;

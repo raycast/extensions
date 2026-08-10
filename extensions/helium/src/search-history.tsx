@@ -2,9 +2,8 @@ import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useState } from "react";
 import type { HistoryEntry } from "./types";
-import { CreateQuicklinkAction, ReloadAction } from "./utils/actions";
+import { CreateQuicklinkAction, OpenInHeliumAction, ReloadAction } from "./utils/actions";
 import { useHistorySearch } from "./utils/history";
-import { getHeliumAppTarget } from "./utils/platform";
 import { SHORTCUTS } from "./utils/shortcuts";
 import { extractDomain, normalizeURL } from "./utils/url";
 
@@ -68,7 +67,7 @@ function HistoryListItem({ entry, revalidate }: { entry: HistoryEntry; revalidat
       accessories={[{ text: new Date(entry.lastVisitedAt).toLocaleDateString() }]}
       actions={
         <ActionPanel>
-          <Action.Open title="Open in Helium" target={normalizeURL(entry.url)} application={getHeliumAppTarget()} />
+          <OpenInHeliumAction title="Open in Helium" url={normalizeURL(entry.url)} />
           <Action.CopyToClipboard title="Copy URL" content={entry.url} shortcut={SHORTCUTS.copyUrl} />
           <Action.CopyToClipboard
             title="Copy as Markdown"

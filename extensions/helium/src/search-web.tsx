@@ -2,8 +2,7 @@ import { List, Action, ActionPanel, Icon, LaunchProps } from "@raycast/api";
 import { useState } from "react";
 import { useSuggestions, getSearchEngineName } from "./utils/suggestions";
 import type { Suggestion } from "./types";
-import { CreateQuicklinkAction } from "./utils/actions";
-import { getHeliumAppTarget } from "./utils/platform";
+import { CreateQuicklinkAction, OpenInHeliumAction } from "./utils/actions";
 import { partitionSearchWebSuggestions } from "./utils/search-web-results";
 import { SHORTCUTS } from "./utils/shortcuts";
 
@@ -87,10 +86,9 @@ function SuggestionListItem({ suggestion }: { suggestion: Suggestion }) {
       icon={isUrlType ? Icon.Link : Icon.MagnifyingGlass}
       actions={
         <ActionPanel>
-          <Action.Open
+          <OpenInHeliumAction
             title={isUrlType ? "Open URL" : isBangType ? `Open ${providerName}` : "Search"}
-            target={suggestion.url}
-            application={getHeliumAppTarget()}
+            url={suggestion.url}
           />
           <Action.CopyToClipboard title="Copy URL" content={suggestion.url} shortcut={SHORTCUTS.copyUrl} />
           <Action.CopyToClipboard title="Copy Query" content={suggestion.query} shortcut={SHORTCUTS.copyQuery} />

@@ -37,26 +37,33 @@ afterEach(() => {
 });
 
 describe("Windows install discovery", () => {
-  it("probes the per-user location before the machine-wide ones", () => {
-    const roots = getWindowsInstallRoots({
-      LOCALAPPDATA: "C:\\local",
-      PROGRAMFILES: "C:\\program",
-    });
+  it("probes the per-user location before the machine-wide ones, without duplicates", () => {
+    const roots = getWindowsInstallRoots(
+      { LOCALAPPDATA: join("C:\\Users\\me", "AppData", "Local"), PROGRAMFILES: "C:\\program" },
+      "C:\\Users\\me",
+    );
 
     expect(roots).toEqual([
-      join("C:\\local", "imput", "Helium"),
-      join("C:\\local", "Helium"),
+      join("C:\\Users\\me", "AppData", "Local", "imput", "Helium"),
+      join("C:\\Users\\me", "AppData", "Local", "Helium"),
       join("C:\\program", "imput", "Helium"),
       join("C:\\program", "Helium"),
     ]);
   });
 
-  it("skips roots whose environment variable is unset", () => {
-    expect(getWindowsInstallRoots({ PROGRAMFILES: "C:\\program" }, "C:\\home")).toEqual([
-      join("C:\\home", "AppData", "Local", "imput", "Helium"),
-      join("C:\\home", "AppData", "Local", "Helium"),
-      join("C:\\program", "imput", "Helium"),
-      join("C:\\program", "Helium"),
+  it("still probes the home-derived root when LOCALAPPDATA points somewhere else", () => {
+    // Raycast's Windows extension processes run with LOCALAPPDATA set to
+    // AppData\Local\Temp, which is why trusting it alone hid a standard install.
+    const roots = getWindowsInstallRoots(
+      { LOCALAPPDATA: join("C:\\Users\\me", "AppData", "Local", "Temp") },
+      "C:\\Users\\me",
+    );
+
+    expect(roots).toEqual([
+      join("C:\\Users\\me", "AppData", "Local", "Temp", "imput", "Helium"),
+      join("C:\\Users\\me", "AppData", "Local", "Temp", "Helium"),
+      join("C:\\Users\\me", "AppData", "Local", "imput", "Helium"),
+      join("C:\\Users\\me", "AppData", "Local", "Helium"),
     ]);
   });
 
@@ -67,10 +74,26 @@ describe("Windows install discovery", () => {
     ]);
   });
 
+  it("finds a standard install even when LOCALAPPDATA is redirected to Temp", () => {
+    const home = makeTempDir();
+    const applicationDir = join(home, "AppData", "Local", "imput", "Helium", "Application");
+    mkdirSync(applicationDir, { recursive: true });
+    writeFileSync(join(applicationDir, "chrome.exe"), "");
+
+    expect(
+      findHeliumExecutable({
+        override: undefined,
+        env: { LOCALAPPDATA: join(home, "AppData", "Local", "Temp") },
+        home,
+        registryLookup: noRegistry,
+      }),
+    ).toBe(join(applicationDir, "chrome.exe"));
+  });
+
   it("finds the Chromium executable under an install root", () => {
     const root = makeInstallRoot();
 
-    expect(findHeliumExecutable({ override: undefined, env: { LOCALAPPDATA: root }, registryLookup: noRegistry })).toBe(
+    expect(findHeliumExecutable({ override: undefined, env: { LOCALAPPDATA: root }, home: root, registryLookup: noRegistry })).toBe(
       join(root, "imput", "Helium", "Application", "chrome.exe"),
     );
   });
@@ -78,7 +101,7 @@ describe("Windows install discovery", () => {
   it("also finds a helium.exe, in case the binary is ever rebranded", () => {
     const root = makeInstallRoot("helium.exe");
 
-    expect(findHeliumExecutable({ override: undefined, env: { LOCALAPPDATA: root }, registryLookup: noRegistry })).toBe(
+    expect(findHeliumExecutable({ override: undefined, env: { LOCALAPPDATA: root }, home: root, registryLookup: noRegistry })).toBe(
       join(root, "imput", "Helium", "Application", "helium.exe"),
     );
   });
@@ -88,7 +111,7 @@ describe("Windows install discovery", () => {
     const portable = join(root, "portable.exe");
     writeFileSync(portable, "");
 
-    expect(findHeliumExecutable({ override: portable, env: { LOCALAPPDATA: root }, registryLookup: noRegistry })).toBe(
+    expect(findHeliumExecutable({ override: portable, env: { LOCALAPPDATA: root }, home: root, registryLookup: noRegistry })).toBe(
       portable,
     );
   });
@@ -100,6 +123,7 @@ describe("Windows install discovery", () => {
       findHeliumExecutable({
         override: join(root, "nope.exe"),
         env: { LOCALAPPDATA: root },
+        home: root,
         registryLookup: noRegistry,
       }),
     ).toBe(join(root, "imput", "Helium", "Application", "chrome.exe"));
@@ -111,7 +135,7 @@ describe("Windows install discovery", () => {
     writeFileSync(registered, "");
 
     expect(
-      findHeliumExecutable({ override: undefined, env: { LOCALAPPDATA: root }, registryLookup: () => registered }),
+      findHeliumExecutable({ override: undefined, env: { LOCALAPPDATA: root }, home: root, registryLookup: () => registered }),
     ).toBe(registered);
   });
 
@@ -119,7 +143,7 @@ describe("Windows install discovery", () => {
     const root = makeTempDir();
 
     expect(
-      findHeliumExecutable({ override: undefined, env: { LOCALAPPDATA: root }, registryLookup: noRegistry }),
+      findHeliumExecutable({ override: undefined, env: { LOCALAPPDATA: root }, home: root, registryLookup: noRegistry }),
     ).toBeUndefined();
   });
 });
@@ -167,7 +191,7 @@ describe("getWindowsUserDataPath", () => {
     mkdirSync(join(root, "imput", "Helium", "User Data"), { recursive: true });
 
     expect(
-      getWindowsUserDataPath({ override: undefined, env: { LOCALAPPDATA: root }, registryLookup: noRegistry }),
+      getWindowsUserDataPath({ override: undefined, env: { LOCALAPPDATA: root }, home: root, registryLookup: noRegistry }),
     ).toBe(join(root, "imput", "Helium", "User Data"));
   });
 
@@ -180,7 +204,7 @@ describe("getWindowsUserDataPath", () => {
     mkdirSync(join(root, "Portable", "User Data"), { recursive: true });
 
     expect(
-      getWindowsUserDataPath({ override: portableExecutable, env: { LOCALAPPDATA: root }, registryLookup: noRegistry }),
+      getWindowsUserDataPath({ override: portableExecutable, env: { LOCALAPPDATA: root }, home: root, registryLookup: noRegistry }),
     ).toBe(join(root, "Portable", "User Data"));
   });
 
@@ -198,6 +222,7 @@ describe("getWindowsUserDataPath", () => {
       getWindowsUserDataPath({
         override: undefined,
         env: { LOCALAPPDATA: localAppData, PROGRAMFILES: programFiles },
+        home: root,
         registryLookup: noRegistry,
       }),
     ).toBe(join(localAppData, "imput", "Helium", "User Data"));
@@ -207,7 +232,7 @@ describe("getWindowsUserDataPath", () => {
     const root = makeTempDir();
 
     expect(
-      getWindowsUserDataPath({ override: undefined, env: { LOCALAPPDATA: root }, registryLookup: noRegistry }),
+      getWindowsUserDataPath({ override: undefined, env: { LOCALAPPDATA: root }, home: root, registryLookup: noRegistry }),
     ).toBe(join(root, "imput", "Helium", "User Data"));
   });
 });

@@ -36,6 +36,11 @@ deduplicating tabs are unavailable.
 Note that Raycast's browser extension reports tabs from every browser it is installed in, and its API does not say which
 browser a tab belongs to. If you also run it in another Chromium browser, those tabs appear in this list as well.
 
+**Open New Tab focuses Helium on Windows.** Chromium's command line can add a tab to an existing window only for
+ordinary web addresses — `chrome://new-tab-page/` always opens a *new window* — so the command brings Helium forward and
+sends `Ctrl+T` to get a real new tab. If Helium isn't running, or its window can't be focused, it falls back to opening
+the new tab page in a new window.
+
 Windows shortcuts use `Ctrl`/`Alt` wherever this document mentions `⌘`/`⌥`.
 
 ### Experimental: macOS Spaces Support

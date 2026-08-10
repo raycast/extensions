@@ -7,6 +7,8 @@
 - Source Search Tabs from Raycast's browser extension on Windows, where switching to and closing individual tabs isn't possible; those actions are hidden instead of failing.
 - Declare every keyboard shortcut per platform so actions stay reachable with `Ctrl`/`Alt` on Windows, and align Search History's "Copy as Markdown" with the rest of the extension (`⌘⌥C` / `Ctrl+Alt+C`).
 - Fix Open New Tab landing on an `ERR_INVALID_URL` page on macOS: Chromium refuses AppleScript-driven navigation to `chrome://` addresses, so the tab is now created without a URL and opens Helium's configured new tab page.
+- Open New Tab now adds a tab to the window you last used on Windows, instead of opening a new window. Chromium's command line cannot express this — `chrome://` addresses always open a new window — so Helium is focused and sent `Ctrl+T`, falling back to the previous behavior whenever Helium isn't running or focus cannot be confirmed.
+- Always open Helium against the real profile on Windows. Raycast's extension processes run with `LOCALAPPDATA` pointing at `AppData\Local\Temp`, and Chromium derives its default profile directory from that variable, so launching Helium started a stray empty profile — new-user onboarding, no history, bookmarks or sessions. Every launch now pins `--user-data-dir` to the profile the extension reads, and Helium detection no longer trusts that variable alone.
 
 ## [Bookmarks Without a Running Browser] - 2026-07-23
 

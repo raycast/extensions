@@ -10,8 +10,52 @@ import {
 } from "./browser-control";
 import { getBrowserTabs } from "./browser";
 import { idsStillPresent } from "./pending-close";
-import { getHeliumAppTarget } from "./platform";
+import { getHeliumAppTarget, isWindows } from "./platform";
 import { SHORTCUTS } from "./shortcuts";
+
+interface OpenInHeliumActionProps {
+  title: string;
+  url: string;
+  icon?: Icon;
+  shortcut?: Keyboard.Shortcut;
+}
+
+/**
+ * Open a URL in Helium.
+ *
+ * macOS hands this to `Action.Open` with the bundle id. Windows must not:
+ * Raycast launches the application with its own environment, in which
+ * `LOCALAPPDATA` points at `AppData\Local\Temp`, so Helium would start against
+ * a stray profile instead of the user's. Going through `openUrlInHelium` pins
+ * the profile explicitly — see `windows-browser.ts`.
+ */
+export function OpenInHeliumAction({ title, url, icon, shortcut }: OpenInHeliumActionProps) {
+  if (!isWindows) {
+    return (
+      <Action.Open title={title} target={url} application={getHeliumAppTarget()} icon={icon} shortcut={shortcut} />
+    );
+  }
+
+  return (
+    <Action
+      title={title}
+      icon={icon ?? Icon.Globe}
+      shortcut={shortcut}
+      onAction={async () => {
+        try {
+          await openUrlInHelium(url);
+          await closeMainWindow();
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to open in Helium",
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }}
+    />
+  );
+}
 
 interface BaseActionProps {
   tab: Tab;
@@ -236,10 +280,9 @@ export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: 
  */
 export function OpenInNewTabAction({ tab }: BaseActionProps) {
   return (
-    <Action.Open
+    <OpenInHeliumAction
       title="Open in New Tab"
-      target={tab.url}
-      application={getHeliumAppTarget()}
+      url={tab.url}
       icon={Icon.PlusCircle}
       shortcut={SHORTCUTS.openInNewTab}
     />
@@ -428,10 +471,9 @@ export function OpenBookmarkAction({ bookmark }: BookmarkActionProps) {
  */
 export function OpenBookmarkInNewTabAction({ bookmark }: BookmarkActionProps) {
   return (
-    <Action.Open
+    <OpenInHeliumAction
       title="Open in New Tab"
-      target={bookmark.url}
-      application={getHeliumAppTarget()}
+      url={bookmark.url}
       icon={Icon.PlusCircle}
       shortcut={SHORTCUTS.openInNewTab}
     />
