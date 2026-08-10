@@ -1,20 +1,30 @@
-import { closeMainWindow, LaunchProps } from "@raycast/api";
+import { closeMainWindow, getSelectedText } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { checkAntinoteInstalled } from "./utils";
 
-export default async function Command(props: LaunchProps<{ arguments: { content: string } }>) {
+export default async function Command() {
   const installation = await checkAntinoteInstalled();
 
   if (!installation.installed) {
     return;
   }
 
+  let content = "";
+  try {
+    content = await getSelectedText();
+  } catch (error) {
+    await showFailureToast(error, { title: "No text selected" });
+    return;
+  }
+
+  const encodedContent = encodeURIComponent(content);
+
   try {
     await runAppleScript(
       `tell application "Antinote"
         activate
         delay 0.3
-        open location "antinote://x-callback-url/createNote?content=${encodeURIComponent(props.arguments.content)}"
+        open location "antinote://x-callback-url/createNote?content=${encodedContent}"
       end tell`,
     );
 
