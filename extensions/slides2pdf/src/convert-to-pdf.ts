@@ -10,7 +10,7 @@ import {
 } from "@raycast/api";
 import path from "path";
 import { detectBackends, rankBackendsForFile, convertFile, fileCategory } from "./utils/backends";
-import { loadPreferences, preferredEngine } from "./utils/preferences";
+import { loadPreferences } from "./utils/preferences";
 
 export default async function Command() {
   const selected = await getSelectedFinderItems().catch(() => []);
@@ -23,7 +23,6 @@ export default async function Command() {
   await closeMainWindow().catch(() => {});
 
   const prefs = getPreferenceValues<{ openAfterConvertSingle: boolean; openAfterConvertBatch: boolean }>();
-  const preferred = await loadPreferences();
   const available = detectBackends();
 
   if (available.length === 0) {
@@ -32,10 +31,10 @@ export default async function Command() {
     return;
   }
 
+  const preferred = await loadPreferences();
   const producedFiles: string[] = [];
   const errors: { base: string; message: string }[] = [];
   const targeted = new Set<string>();
-  const total = selected.length;
   const toast = await showToast(Toast.Style.Animated, "Converting…");
 
   for (const [index, item] of selected.entries()) {
@@ -47,7 +46,7 @@ export default async function Command() {
     if (targeted.has(outputPath)) outputPath = path.join(dir, `${base} (${ext.slice(1)}).pdf`);
     targeted.add(outputPath);
 
-    const backends = rankBackendsForFile(preferredEngine(preferred, fileCategory(ext)), available, ext);
+    const backends = rankBackendsForFile(preferred[fileCategory(ext)], available, ext);
 
     if (backends.length === 0) {
       const msg = `No engine supports ${ext} files — install LibreOffice for full format support.`;
@@ -61,7 +60,7 @@ export default async function Command() {
     let converted = false;
     for (const backend of backends) {
       try {
-        toast.title = `Converting ${base} via ${backend.label} — ${index + 1}/${total}`;
+        toast.title = `Converting ${base} via ${backend.label} — ${index + 1}/${selected.length}`;
         console.log(`[slides2pdf] Converting "${base}" via ${backend.label}`);
         convertFile(backend, src, outputPath);
         producedFiles.push(outputPath);

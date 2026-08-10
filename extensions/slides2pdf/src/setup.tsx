@@ -1,7 +1,13 @@
-import { List, Icon, Color, Action, ActionPanel, Clipboard, LocalStorage } from "@raycast/api";
+import { List, Icon, Color, Action, ActionPanel, Clipboard } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { detectBackends, selectBackendForFile, Backend, BackendType } from "./utils/backends";
-import { loadPreferences } from "./utils/preferences";
+import {
+  DEFAULT_PREFERENCES,
+  loadPreferences,
+  setPreference,
+  Preferences,
+  PreferredCategory,
+} from "./utils/preferences";
 
 interface BackendMeta {
   label: string;
@@ -51,42 +57,46 @@ const BACKEND_META: Record<BackendType, BackendMeta> = {
   },
 };
 
-const GROUPS: { title: string; types: BackendType[]; repExt: string; prefLabel: string; prefKey: string }[] = [
+const GROUPS: {
+  title: string;
+  types: BackendType[];
+  repExt: string;
+  prefLabel: string;
+  category: PreferredCategory;
+}[] = [
   {
     title: "Presentations  ·  .pptx  .ppt  .key  .odp",
     types: ["powerpoint", "keynote", "libreoffice"],
     repExt: ".pptx",
     prefLabel: "Presentations",
-    prefKey: "preferredPresentation",
+    category: "presentation",
   },
   {
     title: "Documents  ·  .docx  .doc  .pages  .odt  .rtf",
     types: ["word", "pages", "libreoffice"],
     repExt: ".docx",
     prefLabel: "Documents",
-    prefKey: "preferredDocument",
+    category: "document",
   },
   {
     title: "Spreadsheets  ·  .xlsx  .xls  .numbers  .ods  .csv",
     types: ["excel", "numbers", "libreoffice"],
     repExt: ".xlsx",
     prefLabel: "Spreadsheets",
-    prefKey: "preferredSpreadsheet",
+    category: "spreadsheet",
   },
   {
     title: "Images  ·  .jpg  .png  .heic  .tiff  .gif",
     types: ["sips", "libreoffice"],
     repExt: ".jpg",
     prefLabel: "Images",
-    prefKey: "preferredImage",
+    category: "image",
   },
 ];
 
-type Prefs = Record<string, string>;
-
 export default function Command() {
   const [available, setAvailable] = useState<Backend[]>([]);
-  const [prefs, setPrefs] = useState<Prefs>({});
+  const [prefs, setPrefs] = useState<Preferences>(DEFAULT_PREFERENCES);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
@@ -97,20 +107,18 @@ export default function Command() {
     })();
   }, []);
 
-  async function setPreferred(key: string, value: string) {
-    await LocalStorage.setItem(key, value);
-    setPrefs((prev) => ({ ...prev, [key]: value }));
+  async function setPreferred(category: PreferredCategory, value: string) {
+    await setPreference(category, value);
+    setPrefs((prev) => ({ ...prev, [category]: value }));
   }
 
   return (
     <List isLoading={!loaded}>
       {GROUPS.map((group) => {
-        const activeBackend = loaded
-          ? selectBackendForFile(prefs[group.prefKey] ?? "auto", available, group.repExt)
-          : null;
+        const activeBackend = loaded ? selectBackendForFile(prefs[group.category], available, group.repExt) : null;
 
         return (
-          <List.Section key={group.prefKey} title={group.title}>
+          <List.Section key={group.category} title={group.title}>
             {group.types.map((type) => {
               const meta = BACKEND_META[type];
               const found = available.find((b) => b.type === type);
@@ -126,7 +134,7 @@ export default function Command() {
 
               return (
                 <List.Item
-                  key={`${group.prefKey}-${type}`}
+                  key={`${group.category}-${type}`}
                   title={meta.label}
                   subtitle={found ? found.path : meta.hint}
                   accessories={accessories}
@@ -137,13 +145,13 @@ export default function Command() {
                           <Action
                             title={`Set as Preferred for ${group.prefLabel}`}
                             icon={isActive ? Icon.Checkmark : Icon.ArrowRight}
-                            onAction={() => setPreferred(group.prefKey, type)}
+                            onAction={() => setPreferred(group.category, type)}
                           />
-                          {prefs[group.prefKey] !== "auto" && (
+                          {prefs[group.category] !== "auto" && (
                             <Action
                               title={`Reset ${group.prefLabel} to Auto`}
                               icon={Icon.ArrowCounterClockwise}
-                              onAction={() => setPreferred(group.prefKey, "auto")}
+                              onAction={() => setPreferred(group.category, "auto")}
                             />
                           )}
                         </>

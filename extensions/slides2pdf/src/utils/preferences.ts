@@ -1,20 +1,32 @@
 import { LocalStorage } from "@raycast/api";
 import { FileCategory } from "./backends";
 
-export const PREFERENCE_KEYS: Partial<Record<FileCategory, string>> = {
+export type PreferredCategory = Exclude<FileCategory, "other">;
+export type Preferences = Record<FileCategory, string>;
+
+const KEYS: Record<PreferredCategory, string> = {
   presentation: "preferredPresentation",
   document: "preferredDocument",
   spreadsheet: "preferredSpreadsheet",
   image: "preferredImage",
 };
 
-export async function loadPreferences(): Promise<Record<string, string>> {
-  const keys = Object.values(PREFERENCE_KEYS) as string[];
-  const values = await Promise.all(keys.map((key) => LocalStorage.getItem<string>(key)));
-  return Object.fromEntries(keys.map((key, i) => [key, values[i] ?? "auto"]));
+export const DEFAULT_PREFERENCES: Preferences = {
+  presentation: "auto",
+  document: "auto",
+  spreadsheet: "auto",
+  image: "auto",
+  other: "auto",
+};
+
+export async function loadPreferences(): Promise<Preferences> {
+  const categories = Object.keys(KEYS) as PreferredCategory[];
+  const values = await Promise.all(categories.map((c) => LocalStorage.getItem<string>(KEYS[c])));
+  const prefs = { ...DEFAULT_PREFERENCES };
+  categories.forEach((c, i) => (prefs[c] = values[i] ?? "auto"));
+  return prefs;
 }
 
-export function preferredEngine(prefs: Record<string, string>, category: FileCategory): string {
-  const key = PREFERENCE_KEYS[category];
-  return (key && prefs[key]) || "auto";
+export async function setPreference(category: PreferredCategory, value: string): Promise<void> {
+  await LocalStorage.setItem(KEYS[category], value);
 }

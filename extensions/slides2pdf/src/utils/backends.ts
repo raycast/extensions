@@ -193,6 +193,46 @@ function runAppleScript(script: string, tag: string, timeoutCleanup?: string): v
   }
 }
 
+// Per-app AppleScript vocabulary. The plural collection and whose-filters derive from docClass;
+// exportLine must reference theDoc and outFile. Excel's dictionary differs from Word's
+// ("save workbook as … filename … file format PDF file format"); only Keynote supports
+// PDF image quality.
+interface AppScriptSpec {
+  docClass: string;
+  docExpr: string; // e.g. "front document", "active presentation" — fallback if no name matches
+  exportLine: string;
+}
+
+const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
+  keynote: {
+    docClass: "document",
+    docExpr: "front document",
+    exportLine: "export theDoc to outFile as PDF with properties {PDF image quality:Best}",
+  },
+  pages: { docClass: "document", docExpr: "front document", exportLine: "export theDoc to outFile as PDF" },
+  numbers: { docClass: "document", docExpr: "front document", exportLine: "export theDoc to outFile as PDF" },
+  powerpoint: {
+    docClass: "presentation",
+    docExpr: "active presentation",
+    exportLine: "save theDoc in outFile as save as PDF",
+  },
+  word: {
+    docClass: "document",
+    docExpr: "active document",
+    exportLine: "save as theDoc file name outFile file format format PDF",
+  },
+  excel: {
+    docClass: "workbook",
+    docExpr: "active workbook",
+    exportLine: "save workbook as theDoc filename outFile file format PDF file format",
+  },
+};
+
+// Apps report the document name with or without extension depending on Finder settings.
+function docNameMatch(src: string): string {
+  return `name is ${asString(path.basename(src))} or name is ${asString(path.basename(src, path.extname(src)))}`;
+}
+
 // Shared AppleScript skeleton. All app scripts follow the same shape:
 // remember whether the app was running, open the file, wait until the opened document appears and
 // bind it by name (open is asynchronous for non-native formats like .pptx in Keynote, is a no-op
@@ -200,18 +240,9 @@ function runAppleScript(script: string, tag: string, timeoutCleanup?: string): v
 // count-based wait mishandles all three), run the export inside try/on error so the error message
 // is captured instead of swallowed, always close the document and quit the app if we launched it,
 // then re-raise the captured error outside the tell block.
-function conversionScript(opts: {
-  appName: string;
-  src: string;
-  outputPath: string;
-  countExpr: string; // e.g. "documents", "presentations", "workbooks"
-  docExpr: string; // e.g. "front document", "active presentation" — fallback if no name matches
-  exportLine: string; // must reference theDoc and outFile
-}): string {
-  const { appName, src, outputPath, countExpr, docExpr, exportLine } = opts;
-  // Apps report the document name with or without extension depending on Finder settings.
-  const fileName = asString(path.basename(src));
-  const baseName = asString(path.basename(src, path.extname(src)));
+function conversionScript(appName: string, src: string, outputPath: string, spec: AppScriptSpec): string {
+  const { docExpr, exportLine } = spec;
+  const countExpr = `${spec.docClass}s`;
   return [
     `set wasRunning to (application "${appName}" is running)`,
     `set errMsg to ""`,
@@ -224,7 +255,7 @@ function conversionScript(opts: {
     `      set tries to 0`,
     `      repeat while theDoc is missing value`,
     `        try`,
-    `          set matched to (${countExpr} whose (name is ${fileName} or name is ${baseName}))`,
+    `          set matched to (${countExpr} whose (${docNameMatch(src)}))`,
     `          if (count of matched) > 0 then set theDoc to item 1 of matched`,
     `        end try`,
     `        if theDoc is missing value and tries > 20 and (count of ${countExpr}) > initialCount then set theDoc to ${docExpr}`,
@@ -252,79 +283,11 @@ function conversionScript(opts: {
   ].join("\n");
 }
 
-// iWork apps: export as PDF. exportProps is app-specific (only Keynote supports PDF image quality).
-function appleAppScript(appName: string, src: string, outputPath: string, exportProps?: string): string {
-  const withProps = exportProps ? ` with properties {${exportProps}}` : "";
-  return conversionScript({
-    appName,
-    src,
-    outputPath,
-    countExpr: "documents",
-    docExpr: "front document",
-    exportLine: `export theDoc to outFile as PDF${withProps}`,
-  });
-}
-
-function powerpointScript(appName: string, src: string, outputPath: string): string {
-  return conversionScript({
-    appName,
-    src,
-    outputPath,
-    countExpr: "presentations",
-    docExpr: "active presentation",
-    exportLine: `save theDoc in outFile as save as PDF`,
-  });
-}
-
-function wordScript(appName: string, src: string, outputPath: string): string {
-  return conversionScript({
-    appName,
-    src,
-    outputPath,
-    countExpr: "documents",
-    docExpr: "active document",
-    exportLine: `save as theDoc file name outFile file format format PDF`,
-  });
-}
-
-// Excel's dictionary differs from Word's: "save workbook as ... filename ... file format PDF file format"
-function excelScript(appName: string, src: string, outputPath: string): string {
-  return conversionScript({
-    appName,
-    src,
-    outputPath,
-    countExpr: "workbooks",
-    docExpr: "active workbook",
-    exportLine: `save workbook as theDoc filename outFile file format PDF file format`,
-  });
-}
-
-type AppleScriptBuilder = (appName: string, src: string, outputPath: string) => string;
-
-const APPLE_SCRIPT_BUILDERS: Record<AppBackendType, AppleScriptBuilder> = {
-  keynote: (app, src, out) => appleAppScript(app, src, out, "PDF image quality:Best"),
-  pages: appleAppScript,
-  numbers: appleAppScript,
-  powerpoint: powerpointScript,
-  word: wordScript,
-  excel: excelScript,
-};
-
-const DOC_CLASS: Record<AppBackendType, string> = {
-  keynote: "document",
-  pages: "document",
-  numbers: "document",
-  word: "document",
-  powerpoint: "presentation",
-  excel: "workbook",
-};
-
 function closeDocScript(appName: string, docClass: string, src: string): string {
-  const match = `name is ${asString(path.basename(src))} or name is ${asString(path.basename(src, path.extname(src)))}`;
   return [
     `tell application "${appName}"`,
     `  try`,
-    `    close (every ${docClass} whose ${match}) saving no`,
+    `    close (every ${docClass} whose ${docNameMatch(src)}) saving no`,
     `  end try`,
     `end tell`,
   ].join("\n");
@@ -332,7 +295,7 @@ function closeDocScript(appName: string, docClass: string, src: string): string 
 
 // Exposed for syntax-checking the generated scripts without running a conversion.
 export function buildAppleScriptForType(type: AppBackendType, appName: string, src: string, outputPath: string) {
-  return APPLE_SCRIPT_BUILDERS[type](appName, src, outputPath);
+  return conversionScript(appName, src, outputPath, APP_SPECS[type]);
 }
 
 // Microsoft Office apps are sandboxed: writing a PDF to an arbitrary folder (Desktop, Documents, …)
@@ -424,9 +387,9 @@ function runBackend(backend: Backend, src: string, outputPath: string): void {
   const scriptOut = tmpOut ?? outputPath;
   try {
     runAppleScript(
-      APPLE_SCRIPT_BUILDERS[type](backend.appName!, src, scriptOut),
+      conversionScript(backend.appName!, src, scriptOut, APP_SPECS[type]),
       type,
-      closeDocScript(backend.appName!, DOC_CLASS[type], src),
+      closeDocScript(backend.appName!, APP_SPECS[type].docClass, src),
     );
   } catch (e) {
     // Keep a PDF that was produced despite a late script error (e.g. quit failing).
