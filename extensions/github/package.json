@@ -568,12 +568,12 @@
     },
     {
       "name": "enable-auto-merge",
-      "title": "Enable Auto-merge",
+      "title": "Enable Auto-Merge",
       "description": "Enable auto-merge on a pull request"
     },
     {
       "name": "disable-auto-merge",
-      "title": "Disable Auto-merge",
+      "title": "Disable Auto-Merge",
       "description": "Disable auto-merge on a pull request"
     },
     {
@@ -608,7 +608,7 @@
     },
     {
       "name": "rerun-workflow-run",
-      "title": "Re-run Workflow",
+      "title": "Re-Run Workflow",
       "description": "Re-run Workflow"
     },
     {
@@ -1157,6 +1157,7 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts",
+    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts",
     "update-schema": "node scripts/update-graphql-schema.mjs"
   },
   "platforms": [

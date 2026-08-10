@@ -723,6 +723,7 @@ export type PullRequestDetailsFieldsFragment = {
         | null;
     } | null> | null;
   } | null;
+  commits: { nodes: Array<{ commit: { statusCheckRollup: { state: Types.StatusState } | null } } | null> | null };
   assignees: {
     totalCount: number;
     nodes: Array<{ id: string; avatarUrl: any; name: string | null; login: string; isViewer: boolean } | null> | null;
@@ -804,6 +805,7 @@ export type PullRequestDetailsQuery = {
               | null;
           } | null> | null;
         } | null;
+        commits: { nodes: Array<{ commit: { statusCheckRollup: { state: Types.StatusState } | null } } | null> | null };
         assignees: {
           totalCount: number;
           nodes: Array<{
@@ -1962,6 +1964,15 @@ export const PullRequestDetailsFieldsFragmentDoc = gql`
         state
         author {
           ...AuthorFields
+        }
+      }
+    }
+    commits(last: 1) {
+      nodes {
+        commit {
+          statusCheckRollup {
+            state
+          }
         }
       }
     }

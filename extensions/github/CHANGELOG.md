@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Show CI status in pull request details] - 2026-08-10
+
+- Added a "Checks" row to pull request details showing successful, failed, or pending CI status.
+
 ## [Improve GraphQL Code Generation] - 2026-08-10
 
 - Make GraphQL type generation deterministic and credential-free by using a checked-in GitHub schema.
@@ -55,7 +59,7 @@
 - Added a `Refresh Frequency` preference (15 minutes / 30 minutes / 1 hour / 2 hours, default 30 minutes) so users can balance freshness against GitHub API quota usage.
 - Each organization is now a submenu with quick access to **Open Profile**, **Repositories**, **People** and **Projects** instead of just opening the organization homepage.
 - `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the _Stats_ menu bar enabled — the dedicated _My Pull Requests Menu Bar_ and _My Issues Menu Bar_ commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
-- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the *Stats* menu bar enabled — the dedicated *My Pull Requests Menu Bar* and *My Issues Menu Bar* commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
+- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the _Stats_ menu bar enabled — the dedicated _My Pull Requests Menu Bar_ and _My Issues Menu Bar_ commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
 
 ## [Download Repository Command] - 2026-04-28
 
