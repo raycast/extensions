@@ -75,6 +75,7 @@
       "type": "textfield",
       "required": false,
       "default": "5",
+      "placeholder": "5",
       "title": "Volume Step"
     }
   ]

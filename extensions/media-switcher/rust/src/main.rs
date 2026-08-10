@@ -293,29 +293,38 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 // Resolve which snapshot entry the user clicked. GetSessions() has no documented
 // ordering guarantee and sessions expose no stable ID, so identity is a per-app
 // ordinal with a title-prefix fingerprint. Priority:
+//   empty title — Windows supplied no title, so there is no fingerprint to verify.
+//     The click was keyed by (app_id, ordinal); match that directly.
 //   1. Exact (ordinal + title) match — the confident happy path, and the only
 //      safe resolution when multiple same-app sessions share a title prefix.
 //   2. Exactly one session matches the title fingerprint — it moved ordinals
 //      (a sibling closed, order changed). Trust the title, not the number.
 //   Otherwise unmatched or ambiguous (two+ sessions share the prefix) → None.
-//   There is deliberately NO ordinal-only fallback: when no session matches the
-//   title, an ordinal match cannot distinguish "the selected session track-skipped"
-//   from "the selected session closed and a sibling now occupies its slot" — both
-//   present identically here — so guessing would risk controlling the wrong
-//   session. Callers surface a "try refreshing" error instead.
+//   There is deliberately NO ordinal-only fallback for non-empty titles: when no
+//   session matches the title, an ordinal match cannot distinguish "the selected
+//   session track-skipped" from "the selected session closed and a sibling now
+//   occupies its slot" — both present identically here — so guessing would risk
+//   controlling the wrong session. Callers surface a "try refreshing" error.
 fn resolve_target_index(
     entries: &[SessionEntry],
     target_app_id: &str,
     target_index: u32,
     target_title_prefix: &str,
 ) -> Option<usize> {
+    // Empty/untitled session: no fingerprint exists, so the ordinal is all we
+    // have. Without a title there is nothing an ordinal-only match could get
+    // wrong that the user could avoid by refreshing.
+    if target_title_prefix.is_empty() {
+        return entries.iter().position(|e| e.app_id == target_app_id && e.ordinal == target_index);
+    }
+
     let mut title_matches: Vec<usize> = Vec::new();
 
     for (i, entry) in entries.iter().enumerate() {
         if entry.app_id != target_app_id {
             continue;
         }
-        let title_ok = !target_title_prefix.is_empty() && entry.title.starts_with(target_title_prefix);
+        let title_ok = entry.title.starts_with(target_title_prefix);
 
         // 1. Exact (ordinal + title) match
         if entry.ordinal == target_index && title_ok {
