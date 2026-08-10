@@ -1,6 +1,6 @@
 # Raycast ElevenLabs TTS Changelog
 
-## [Fix Stuck Playback Sessions] - {PR_MERGE_DATE}
+## [Fix Stuck Playback Sessions] - 2026-08-10
 
 ### Fixed
 
