@@ -1,6 +1,6 @@
 # Helium Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-10
 
 - Add Windows support: Search Web, Search History, Search Bookmarks, and the new tab/window/incognito commands work against [Helium for Windows](https://github.com/imputnet/helium-windows), located via the standard install roots, the path registered by Helium's installer, or the new "Helium Location" preference for portable builds.
 - Read Helium's profile (bookmarks, history, search provider, bangs) from the Windows `User Data` root, and drive new tabs and windows through Helium's command line since Chromium has no scripting interface on Windows.
