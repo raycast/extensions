@@ -115,14 +115,19 @@ export async function multiTranslate(text: string, options: LanguageCodeSet): Pr
 
   const validResults = results.filter(Boolean) as SimpleTranslateResult[];
 
-  // Prioritize actual translations (where langFrom !== langTo) over same-language translations
-  validResults.sort((a, b) => {
-    const aIsSame = isSameLanguage(a.langFrom, a.langTo);
-    const bIsSame = isSameLanguage(b.langFrom, b.langTo);
-    if (aIsSame && !bIsSame) return 1;
-    if (!aIsSame && bIsSame) return -1;
-    return 0;
-  });
+  // By default, preserve the user-configured target language order (results are
+  // already returned in `options.langTo` order). Only when the user opts in via
+  // the "Prioritize cross-language translations" preference do we move
+  // same-language results (e.g. English -> English) to the bottom.
+  if (options.prioritizeCrossLanguage) {
+    validResults.sort((a, b) => {
+      const aIsSame = isSameLanguage(a.langFrom, a.langTo);
+      const bIsSame = isSameLanguage(b.langFrom, b.langTo);
+      if (aIsSame && !bIsSame) return 1;
+      if (!aIsSame && bIsSame) return -1;
+      return 0;
+    });
+  }
 
   return validResults;
 }
