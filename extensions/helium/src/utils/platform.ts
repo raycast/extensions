@@ -1,8 +1,16 @@
 import { getPreferenceValues } from "@raycast/api";
 import { execFileSync } from "child_process";
-import { existsSync } from "fs";
+import { existsSync, statSync } from "fs";
 import { homedir } from "os";
 import { dirname, join } from "path";
+
+function isFile(path: string): boolean {
+  try {
+    return statSync(path).isFile();
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Single source of truth for the platform split.
@@ -54,11 +62,28 @@ export function getHeliumPathPreference(): string | undefined {
  * alone makes a completely standard install invisible.
  */
 export function getWindowsInstallRoots(env: NodeJS.ProcessEnv = process.env, home = homedir()): string[] {
-  const bases = [env.LOCALAPPDATA, join(home, "AppData", "Local"), env.PROGRAMFILES, env["PROGRAMFILES(X86)"]].filter(
-    (base): base is string => !!base,
-  );
+  return toRoots([env.LOCALAPPDATA, join(home, "AppData", "Local"), env.PROGRAMFILES, env["PROGRAMFILES(X86)"]]);
+}
 
-  const roots = bases.flatMap((base) => WINDOWS_INSTALL_SUFFIXES.map((suffix) => join(base, suffix)));
+/**
+ * Roots to search for the *profile*, deliberately ordered differently from
+ * {@link getWindowsInstallRoots}: the home-derived location comes first.
+ *
+ * `%LOCALAPPDATA%` is `AppData\Local\Temp` inside Raycast, which is precisely
+ * where a stray profile gets created when something launches Helium without
+ * pinning `--user-data-dir`. Probing it first would let that leftover win over
+ * the user's real profile — reinstating the bug this ordering exists to avoid —
+ * whenever the profile cannot be derived from the executable, as with a
+ * machine-wide install under Program Files.
+ */
+export function getWindowsProfileRoots(env: NodeJS.ProcessEnv = process.env, home = homedir()): string[] {
+  return toRoots([join(home, "AppData", "Local"), env.LOCALAPPDATA, env.PROGRAMFILES, env["PROGRAMFILES(X86)"]]);
+}
+
+function toRoots(bases: (string | undefined)[]): string[] {
+  const roots = bases
+    .filter((base): base is string => !!base)
+    .flatMap((base) => WINDOWS_INSTALL_SUFFIXES.map((suffix) => join(base, suffix)));
   return [...new Set(roots)];
 }
 
@@ -138,7 +163,10 @@ interface WindowsPathOptions {
  */
 export function findHeliumExecutable(options: WindowsPathOptions = {}): string | undefined {
   const override = "override" in options ? options.override : getHeliumPathPreference();
-  if (override && existsSync(override)) return override;
+  // The preference is free text, so an install folder is an easy mistake. A
+  // directory would otherwise be spawned as a program and have a profile root
+  // derived from it, both of which fail confusingly far from the cause.
+  if (override && isFile(override)) return override;
 
   for (const root of getWindowsInstallRoots(options.env, options.home)) {
     for (const executableName of WINDOWS_EXECUTABLE_NAMES) {
@@ -213,7 +241,7 @@ export function getWindowsUserDataPath(options: WindowsPathOptions = {}): string
 
   const candidates: string[] = [];
   if (executable) candidates.push(join(dirname(dirname(executable)), "User Data"));
-  for (const root of getWindowsInstallRoots(env, options.home)) candidates.push(join(root, "User Data"));
+  for (const root of getWindowsProfileRoots(env, options.home)) candidates.push(join(root, "User Data"));
 
   const existing = candidates.find((candidate) => existsSync(candidate));
   if (existing) return existing;

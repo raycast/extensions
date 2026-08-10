@@ -14,14 +14,31 @@ import { getWindowsUserDataPath, requireHeliumExecutable } from "./platform";
  * Reading tab state still comes from the Browser Extension (see `browser.ts`);
  * closing tabs remains unsupported.
  */
-function launchHelium(args: string[]): void {
+/**
+ * Launch Helium detached, resolving once the process is actually running.
+ *
+ * The `error` event must be handled: it fires asynchronously, and an unhandled
+ * one on a ChildProcess is re-thrown as an uncaught exception that no caller's
+ * try/catch can reach — a stale cached path or a bad `heliumPath` preference
+ * would crash the command instead of showing a toast. Awaiting `spawn` also
+ * means failures surface before `closeMainWindow()` hides them.
+ */
+function launchHelium(args: string[]): Promise<void> {
   const executable = requireHeliumExecutable();
-  const child = spawn(executable, [...getProfileArgs(), ...args], {
-    detached: true,
-    stdio: "ignore",
-    windowsHide: false,
+
+  return new Promise((resolve, reject) => {
+    const child = spawn(executable, [...getProfileArgs(), ...args], {
+      detached: true,
+      stdio: "ignore",
+      windowsHide: false,
+    });
+
+    child.once("error", (error) => reject(new Error(`Could not start Helium at ${executable}: ${error.message}`)));
+    child.once("spawn", () => {
+      child.unref();
+      resolve();
+    });
   });
-  child.unref();
 }
 
 /**
@@ -152,7 +169,7 @@ async function runHeliumScript(action: string, script: string): Promise<string> 
  * focused window, and starts Helium first when it isn't running.
  */
 export async function openUrlInHelium(url: string): Promise<void> {
-  launchHelium([url]);
+  return launchHelium([url]);
 }
 
 /**
@@ -205,7 +222,11 @@ export async function switchToTabByTitle(title: string): Promise<boolean> {
       $match = $candidates | Where-Object { $_.Name.Trim() -eq $normalized } | Select-Object -First 1
     }
     if (-not $match -and $normalized.Length -ge 8) {
-      $match = $candidates | Where-Object { $_.Name -like "*$normalized*" } | Select-Object -First 1
+      # Escape before using -like: page titles routinely contain [ ] * ?, which
+      # would otherwise be read as wildcard syntax and match the wrong tab (or
+      # nothing at all, e.g. an unclosed '[').
+      $escaped = [System.Management.Automation.WildcardPattern]::Escape($normalized)
+      $match = $candidates | Where-Object { $_.Name -like "*$escaped*" } | Select-Object -First 1
     }
 
     if (-not $match) {
@@ -215,9 +236,18 @@ export async function switchToTabByTitle(title: string): Promise<boolean> {
       exit
     }
 
-    [HeliumWindows]::Focus($match.Window)
-    $match.Tab.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
-    'ok'
+    # .NET exceptions are statement-terminating but not script-terminating, so
+    # without this the script would fall through to 'ok' after a failed Select()
+    # and the caller would skip its fallback.
+    try {
+      [HeliumWindows]::Focus($match.Window)
+      $pattern = $match.Tab.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern)
+      $pattern.Select()
+      'ok'
+    } catch {
+      "select-failed: $($_.Exception.Message)"
+      'select-failed'
+    }
   `;
 
   return (await runHeliumScript("Tab switch", script)) === "ok";
@@ -240,7 +270,7 @@ export async function switchToTabByTitle(title: string): Promise<boolean> {
  */
 export async function createNewTab(): Promise<void> {
   if (await tryNewTabViaKeystroke()) return;
-  launchHelium([NEW_TAB_PAGE]);
+  return launchHelium([NEW_TAB_PAGE]);
 }
 
 async function tryNewTabViaKeystroke(): Promise<boolean> {
@@ -267,10 +297,10 @@ async function tryNewTabViaKeystroke(): Promise<boolean> {
 
 /** Open a new window on the new tab page. */
 export async function createNewWindow(): Promise<void> {
-  launchHelium(["--new-window", NEW_TAB_PAGE]);
+  return launchHelium(["--new-window", NEW_TAB_PAGE]);
 }
 
 /** Open an incognito window. */
 export async function createNewIncognitoWindow(): Promise<void> {
-  launchHelium(["--incognito"]);
+  return launchHelium(["--incognito"]);
 }
