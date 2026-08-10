@@ -8,6 +8,7 @@
 - An unreachable server no longer hides the results of the other servers
 - The server configured in the extension preferences keeps working as before
 - VM actions now check the HTTP status of the response, failed actions no longer show a success toast
+- Added mock data for the storage list, used for development and store screenshots
 
 ## [Updates] - 2025-12-12
 

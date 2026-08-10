@@ -1,6 +1,7 @@
 import type { PveServer, PveStorage, PveStorageParsed, WithServer } from "@/types";
 import { useMultiPveFetch } from "@/hooks/use-multi-pve-fetch";
 import { formatStorageSize } from "@/utils/format";
+import { getMockPveStorageResults } from "@/utils/mock";
 
 export type StorageListGroup = {
   server: PveServer;
@@ -19,7 +20,8 @@ export const useStorageList = (mock = false) => {
     timerInterval: 5000,
   });
 
-  const groups: StorageListGroup[] = (data ?? []).map((result) => ({
+  const results = mock ? getMockPveStorageResults() : (data ?? []);
+  const groups: StorageListGroup[] = results.map((result) => ({
     server: result.server,
     error: result.error,
     storages: (result.data ?? [])

@@ -6,10 +6,14 @@ import { ErrorDetailGuard } from "@/components/ErrorDetailGuard";
 
 type StorageDetailProps = {
   storage: WithServer<PveStorageParsed>;
+  /** Set to false to skip fetching the live storage status, e.g. for mock data */
+  live?: boolean;
 };
 
-export const StorageDetail = ({ storage }: StorageDetailProps) => {
-  const { data, showErrorScreen } = useStorageStatus(storage.server, storage.node, storage.storage);
+export const StorageDetail = ({ storage, live = true }: StorageDetailProps) => {
+  const { data, showErrorScreen } = useStorageStatus(storage.server, storage.node, storage.storage, {
+    execute: live,
+  });
 
   return (
     <ErrorDetailGuard showErrorScreen={showErrorScreen}>

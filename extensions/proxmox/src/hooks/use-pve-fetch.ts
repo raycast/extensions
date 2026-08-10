@@ -21,8 +21,9 @@ export const usePveFetch = <T>(server: PveServer, url: string, options?: PveFetc
 
   const result = useFetch<T>(fetchUrl, fetchOptions);
 
+  const execute = rest.execute !== false;
   useEffect(() => {
-    if (timerInterval === null) {
+    if (timerInterval === null || !execute) {
       return;
     }
 
@@ -31,7 +32,7 @@ export const usePveFetch = <T>(server: PveServer, url: string, options?: PveFetc
     }, timerInterval);
 
     return () => clearInterval(handle);
-  }, [result.revalidate, timerInterval]);
+  }, [result.revalidate, timerInterval, execute]);
 
   return result;
 };
