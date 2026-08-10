@@ -1,46 +1,86 @@
-import { useState, useCallback, useRef } from "react";
 import * as cheerio from "cheerio";
+import { useCallback, useRef, useState } from "react";
+import { Clipboard, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { fetchHeadOnlyWithFallback, fetchWithTimeout, fetchTextResource } from "../utils/fetcher";
-import { fetchWaybackMachineData } from "../utils/waybackUtils";
-import { fetchHostMetadata } from "../utils/hostMetaUtils";
-import { useCache } from "./useCache";
-import { LIMITS } from "../utils/config";
 import {
-  DiggerResult,
-  OverviewData,
-  MetadataData,
-  DiscoverabilityData,
-  ContentSignalsData,
-  PaymentSignalsData,
   BotProtectionData,
-  ImageAsset,
-  FontAsset,
-  FetchError,
-  FetchCategory,
+  ContentSignalsData,
+  DiggerResult,
+  DiscoverabilityData,
   ErrorType,
+  FetchCategory,
+  FetchError,
+  FontAsset,
+  ImageAsset,
+  MetadataData,
+  OverviewData,
+  PaymentSignalsData,
 } from "../types";
 import { detectBotProtection } from "../utils/botDetection";
-import { normalizeUrl, getRootResourceUrl } from "../utils/urlUtils";
-import { performDNSLookup, getTLSCertificateInfo, CertificateInfo } from "../utils/dnsUtils";
+import { LIMITS } from "../utils/config";
+import { CertificateInfo, getTLSCertificateInfo, performDNSLookup } from "../utils/dnsUtils";
+import { buildErrorReport, getErrorTitle } from "../utils/errorReport";
+import { fetchHeadOnlyWithFallback, fetchTextResource, fetchWithTimeout } from "../utils/fetcher";
 import {
-  parseFontsFromUrl,
-  extractPreloadFont,
   deduplicateFonts,
-  parseFontFaceFromCSS,
   extractInlineStyles,
+  extractPreloadFont,
+  parseFontFaceFromCSS,
+  parseFontsFromUrl,
 } from "../utils/fontUtils";
+import { fetchHostMetadata } from "../utils/hostMetaUtils";
 import { getLogger } from "../utils/logger";
+import { getRootResourceUrl, normalizeUrl, redactUrlForLog } from "../utils/urlUtils";
+import { fetchWaybackMachineData } from "../utils/waybackUtils";
+import { useCache } from "./useCache";
 
 const log = getLogger("fetch");
 
 /** Classify an error for better user messaging */
+/**
+ * Flattens an error and its `cause` chain, outermost first.
+ *
+ * Node's `fetch` reports every transport failure as the same opaque
+ * `TypeError: fetch failed` and puts the real reason one level down in `cause`:
+ * `getaddrinfo ENOTFOUND example.com`. Reading only `.message`, as this file used
+ * to, means a dead domain matches none of the classifier's keywords and lands in
+ * the "unknown" bucket — which is why a failed dig showed a bare "Fetch Error"
+ * with the two generic suggestions instead of "Connection Failed" and the four
+ * network ones.
+ *
+ * `code` is appended where present because that, not the prose, is what carries
+ * ENOTFOUND / ECONNREFUSED.
+ */
+function errorChain(error: unknown): string[] {
+  const parts: string[] = [];
+  let current: unknown = error;
+  // Bounded: a malformed `cause` cycle must not spin here.
+  for (let depth = 0; current != null && depth < 5; depth++) {
+    if (current instanceof Error) {
+      const code = (current as Error & { code?: string }).code;
+      parts.push(code ? `${current.message} (${code})` : current.message);
+      current = current.cause;
+    } else {
+      parts.push(String(current));
+      break;
+    }
+  }
+  return parts.filter(Boolean);
+}
+
+/** The most specific detail in an error chain — the deepest cause. */
+function errorDetail(error: unknown): string {
+  return errorChain(error).at(-1) ?? String(error);
+}
+
 function classifyError(
   error: unknown,
   statusCode?: number,
 ): { type: ErrorType; message: string; recoverable: boolean } {
-  const errorMessage = error instanceof Error ? error.message : String(error);
-  const lowerMessage = errorMessage.toLowerCase();
+  const chain = errorChain(error);
+  const errorMessage = chain.at(-1) ?? String(error);
+  // Match across the WHOLE chain, not just the outermost message.
+  const lowerMessage = chain.join(" ").toLowerCase();
 
   // Network errors
   if (
@@ -220,7 +260,11 @@ export function useFetchSite(url?: string) {
     const classified = classifyError(error);
     const fetchError: FetchError = {
       category,
-      message: error instanceof Error ? error.message : String(error),
+      // The deepest cause, not the outermost message: this line is the
+      // per-component technical detail in the error card, so "getaddrinfo
+      // ENOTFOUND example.com (ENOTFOUND)" earns its place where a second copy
+      // of "fetch failed" would not.
+      message: errorDetail(error),
       description: getCategoryDescription(category),
       recoverable: recoverable && classified.recoverable,
       timestamp: Date.now(),
@@ -251,9 +295,46 @@ export function useFetchSite(url?: string) {
       setErrorType(null);
       setFetchErrors([]);
       setProgress(initialProgress);
+      // Reset with the rest. The cert handler below only writes when the lookup
+      // SUCCEEDS (`if (certInfo)`), so without clearing here a dig whose TLS
+      // lookup returns null — socket error or timeout — keeps rendering the
+      // PREVIOUS site's certificate as though it were this one's.
+      setCertificateInfo(null);
+
+      // True once a NEWER fetch has taken over. Every state write below is
+      // owned by this fetch, so once it is superseded none of them may land.
+      //
+      // Aborting does not cancel the underlying DNS/TLS/Wayback/host-meta work —
+      // it only resolves the withAbort() wrapper with its fallback. That
+      // resolution still runs the `.then()` handlers ~700 lines down, which
+      // otherwise write `undefined` and progress=1 into the state the NEW fetch
+      // is building. Dig site A, then quickly dig site B, and B's DNS panel
+      // blanks while its progress bar jumps to complete.
+      const isSuperseded = () => abortController.signal.aborted;
+
+      // Whether this fetch still OWNS the view — a strictly different question
+      // from `isSuperseded()`, and the one the error card and the spinner turn on.
+      //
+      // This fetch aborts its own controller after a failure to stop its pending
+      // auxiliary work, which flips the very same `signal.aborted` a newer fetch
+      // flips. Reading the signal alone therefore made a genuine failure look like
+      // a cancellation, and it silently skipped both setError and
+      // setIsLoading(false) — a dead site spun forever with no message.
+      //
+      // The obvious repair, a "did I abort myself?" flag, is wrong in the other
+      // direction: it records our own history and knows nothing about who owns the
+      // view NOW. Between the failure and the `finally` there is an
+      // `await showFailureToast`, and a Retry started during that await would set
+      // its own spinner — which our stale flag would then switch off.
+      //
+      // The ref is the single source of truth for ownership: it points at whichever
+      // fetch is current, so identity against it answers the question directly and
+      // cannot go stale.
+      const ownsView = () => abortControllerRef.current === abortController;
 
       // Helper to update progress for a specific category
       const updateProgress = (category: keyof LoadingProgress, value: number) => {
+        if (isSuperseded()) return;
         setProgress((prev) => ({ ...prev, [category]: value }));
       };
 
@@ -271,6 +352,7 @@ export function useFetchSite(url?: string) {
 
       // Helper to update data progressively
       const updateData = (partial: Partial<DiggerResult>) => {
+        if (isSuperseded()) return;
         setData((prev) => (prev ? { ...prev, ...partial } : (partial as DiggerResult)));
       };
 
@@ -279,6 +361,14 @@ export function useFetchSite(url?: string) {
         log.log("fetch:normalized", { normalizedUrl });
 
         const cached = await getFromCache(normalizedUrl);
+        // A newer fetch can start during the cache read, and a cache hit is the
+        // FASTEST path here — dig a cached site, immediately dig another, and
+        // without this the first one's cached payload lands on top of the second,
+        // with every progress bar forced to complete and the spinner stopped.
+        if (isSuperseded()) {
+          log.log("fetch:superseded", { url: normalizedUrl, at: "cache-read" });
+          return;
+        }
         if (cached) {
           log.log("cache:hit", { url: normalizedUrl });
           setData(cached);
@@ -318,19 +408,66 @@ export function useFetchSite(url?: string) {
         updateProgress("dns", 0.3);
         updateProgress("history", 0.3);
 
-        // Helper to wrap async operations with abort signal support
-        function withAbort<T>(promise: Promise<T>, fallback: T): Promise<T> {
-          if (abortController.signal.aborted) return Promise.resolve(fallback);
+        // Helper to wrap async operations with abort signal support.
+        //
+        // The timer starts HERE, at kickoff, and stops in the reaction attached
+        // to the underlying promise — deliberately not in the `.then()` handlers
+        // ~500 lines below, which are wired up only after the main HTML parse and
+        // would bill that parse to whichever fetch finished first.
+        //
+        // What this measures is end-to-end latency from kickoff to when the
+        // reaction could run, NOT pure network time: the reaction is a microtask,
+        // so a long synchronous parse holding the main thread inflates the
+        // number. Read these as "which of the four was the straggler", which is
+        // the question they exist to answer — not as a network benchmark.
+        function withAbort<T>(label: string, promise: Promise<T>, fallback: T): Promise<T> {
+          const done = log.time(label);
+          // `log.time()` hands back an unguarded closure, and abort can race the
+          // promise settling — without this gate a slow fetch logs two durations.
+          let stopped = false;
+          const stop = (meta?: Record<string, unknown>) => {
+            if (stopped) return;
+            stopped = true;
+            done(meta);
+          };
+
+          if (abortController.signal.aborted) {
+            stop({ skipped: "aborted before start" });
+            return Promise.resolve(fallback);
+          }
           return new Promise((resolve) => {
-            promise.then(resolve).catch(() => resolve(fallback));
-            abortController.signal.addEventListener("abort", () => resolve(fallback), { once: true });
+            const onAbort = () => {
+              stop({ aborted: true });
+              resolve(fallback);
+            };
+            // `{ once: true }` only unregisters the listener if it actually
+            // FIRES. On the normal path — the fetch simply finishes — it never
+            // does, so without the explicit removal below each of these four
+            // wrappers leaves a listener holding `resolve` and the timer closure
+            // alive for as long as the controller does. Bounded, because the next
+            // fetch swaps in a fresh controller, but it means a long-lived view
+            // retains dead per-fetch machinery it can never use.
+            abortController.signal.addEventListener("abort", onAbort, { once: true });
+            const release = () => abortController.signal.removeEventListener("abort", onAbort);
+
+            promise
+              .then((value) => {
+                release();
+                stop();
+                resolve(value);
+              })
+              .catch((error) => {
+                release();
+                stop({ failed: error instanceof Error ? error.message : String(error) });
+                resolve(fallback);
+              });
           });
         }
 
-        const dnsPromise = withAbort(performDNSLookup(hostname), undefined);
-        const certPromise = withAbort(getTLSCertificateInfo(hostname), null);
-        const waybackPromise = withAbort(fetchWaybackMachineData(normalizedUrl), undefined);
-        const hostMetaPromise = withAbort(fetchHostMetadata(normalizedUrl), undefined);
+        const dnsPromise = withAbort("dns", performDNSLookup(hostname), undefined);
+        const certPromise = withAbort("cert", getTLSCertificateInfo(hostname), null);
+        const waybackPromise = withAbort("wayback", fetchWaybackMachineData(normalizedUrl), undefined);
+        const hostMetaPromise = withAbort("hostmeta", fetchHostMetadata(normalizedUrl), undefined);
 
         // Use streaming fetch for main HTML to avoid memory issues on large pages
         // Use getRootResourceUrl to ensure robots.txt, llms.txt and sitemap.xml are fetched from the domain root
@@ -345,11 +482,18 @@ export function useFetchSite(url?: string) {
         ]);
 
         if (htmlResult.status === "rejected") {
-          log.error("fetch:failed", { url: normalizedUrl, error: htmlResult.reason });
-          // Cancel all pending async operations
+          log.error("fetch:failed", { url: redactUrlForLog(normalizedUrl), error: htmlResult.reason });
+          // Cancel all pending async operations. The catch distinguishes this
+          // self-abort from a supersede by ownership, not by a flag.
           abortController.abort();
           log.log("fetch:aborted-async-operations", { reason: "main fetch failed" });
-          throw new Error("Failed to fetch website");
+          // Rethrow the ORIGINAL rejection rather than a synthetic message.
+          // classifyError works by keyword-matching the error chain, so replacing
+          // it with "Failed to fetch website" — a string containing none of those
+          // keywords — guaranteed the "unknown" bucket and the generic card.
+          throw htmlResult.reason instanceof Error
+            ? htmlResult.reason
+            : new Error(`Failed to fetch website: ${String(htmlResult.reason)}`);
         }
 
         const { headHtml: streamedHtml, status, headers, timing, finalUrl, truncated } = htmlResult.value;
@@ -759,7 +903,17 @@ export function useFetchSite(url?: string) {
               }
             }
           } catch (e) {
-            log.log("parse:manifest-error", { url: manifestUrl, error: e instanceof Error ? e.message : "unknown" });
+            // `warn`, not `log`: the manifest was advertised by the page and we
+            // failed to use it, so icons/metadata are silently missing from the
+            // result. That degradation is invisible in the UI, which makes it
+            // exactly the thing a bug report needs to carry.
+            //
+            // Query string stripped because warn is not verbose-gated — see
+            // redactUrlForLog.
+            log.warn("parse:manifest-error", {
+              url: redactUrlForLog(manifestUrl),
+              error: e instanceof Error ? e.message : "unknown",
+            });
           }
         }
 
@@ -891,13 +1045,19 @@ export function useFetchSite(url?: string) {
 
         // Now await the async fetches that were started earlier
         // Handle each one individually so they update as they complete
+        // Each handler bails if a newer fetch has taken over. updateProgress and
+        // updateData are already guarded, but returning here also suppresses the
+        // "*-complete" logs — which would otherwise claim a cancelled fetch
+        // finished — and covers setCertificateInfo/setData, which write directly.
         dnsPromise.then((dnsData) => {
+          if (isSuperseded()) return;
           log.log("fetch:dns-complete", { hasDns: !!dnsData });
           updateProgress("dns", 1);
           updateData({ dns: dnsData });
         });
 
         certPromise.then((certInfo) => {
+          if (isSuperseded()) return;
           log.log("fetch:cert-complete", { hasCert: !!certInfo });
           if (certInfo) {
             setCertificateInfo(certInfo);
@@ -905,6 +1065,7 @@ export function useFetchSite(url?: string) {
         });
 
         waybackPromise.then((waybackData) => {
+          if (isSuperseded()) return;
           log.log("fetch:wayback-complete", { hasWayback: !!waybackData, rateLimited: waybackData?.rateLimited });
           updateProgress("history", 1);
           // Only update if we got good data, or if there's no existing data
@@ -925,6 +1086,7 @@ export function useFetchSite(url?: string) {
         });
 
         hostMetaPromise.then((hostMetadata) => {
+          if (isSuperseded()) return;
           log.log("fetch:hostmeta-complete", { hasHostMeta: !!hostMetadata?.available });
           updateData({ hostMetadata });
         });
@@ -988,27 +1150,75 @@ export function useFetchSite(url?: string) {
         };
 
         // Final update and cache
+        //
+        // Guarded for TWO distinct reasons, and the cache one is the subtle half.
+        // `setData` would paint this fetch's result over the newer one. But
+        // `saveToCache` is worse than useless on a superseded fetch: abort makes
+        // every withAbort() wrapper resolve with its FALLBACK, so `result` here
+        // carries undefined dns/cert/wayback/hostMetadata. Persisting that writes
+        // a hole-ridden entry under this URL's key, and the next dig of this very
+        // URL would score a cache hit and render the gaps as fact.
+        if (isSuperseded()) {
+          log.log("fetch:superseded", { url: normalizedUrl, at: "final-write" });
+          return;
+        }
         setData(result);
-        await saveToCache(normalizedUrl, result);
+        // The predicate is re-checked inside, after eviction — passing the guard
+        // above only proves we were current when the write STARTED.
+        await saveToCache(normalizedUrl, result, isSuperseded);
         log.log("fetch:complete", { url: normalizedUrl });
       } catch (err) {
-        // Check if this was an abort - don't show error for cancelled fetches
-        if (abortController.signal.aborted) {
+        // Say nothing if a newer dig owns the view — whether it cancelled us or we
+        // failed on our own. Ownership, not the abort signal: our own
+        // failure-abort flips that signal too, and reading it here is what used to
+        // swallow genuine errors.
+        if (!ownsView()) {
           log.log("fetch:aborted", { targetUrl });
           return;
         }
 
         const classified = classifyError(err);
         log.error("fetch:error", { error: classified.message, type: classified.type });
-        // Ensure async operations are cancelled on any error
+        // Ensure async operations are cancelled on any error.
         abortController.abort();
         setError(classified.message);
         setErrorType(classified.type);
         addFetchError("main", err, classified.recoverable);
-        await showFailureToast(classified.message, { title: "Fetch Error" });
+        // The toast is where a Raycast user reaches for the error — not the
+        // action panel behind ⌘K — so its Copy Error yields the SAME full report
+        // the empty state's does, not just the summary line. Both call
+        // buildErrorReport, so they cannot drift apart.
+        const report = buildErrorReport({
+          errorType: classified.type,
+          message: classified.message,
+          url: targetUrl,
+          causes: [{ description: getCategoryDescription("main"), message: errorDetail(err) }],
+        });
+        // First argument is the REPORT, not the summary. showFailureToast injects
+        // its own secondary action whenever a primary is supplied, and that
+        // secondary only ever sees this first argument — so passing the summary
+        // here gave the built-in action a single line while ours had the full
+        // detail. `message` below keeps the on-screen text short regardless.
+        await showFailureToast(report, {
+          message: classified.message,
+          // Was hardcoded "Fetch Error" while the card said "Connection Failed" —
+          // the same failure named two different things on one screen.
+          title: getErrorTitle(classified.type),
+          primaryAction: {
+            title: "Copy Error",
+            shortcut: { macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } },
+            onAction: (toast: Toast) => {
+              Clipboard.copy(report);
+              toast.hide();
+            },
+          },
+        });
       } finally {
-        // Only update loading state if this fetch wasn't aborted
-        if (!abortController.signal.aborted) {
+        // Clear the spinner only while we still own it. A Retry started during
+        // the `await showFailureToast` above sets its own spinner, and this
+        // `finally` then runs — so "did I abort myself?" is the wrong question
+        // here; "am I still the current fetch?" is the right one.
+        if (ownsView()) {
           setIsLoading(false);
         }
       }

@@ -1,7 +1,7 @@
-import { List, Icon, Color } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { DiggerResult } from "../types";
 import { Actions } from "../actions";
+import { DiggerResult } from "../types";
 import { CertificateInfo } from "../utils/dnsUtils";
 import { truncateText } from "../utils/formatters";
 
