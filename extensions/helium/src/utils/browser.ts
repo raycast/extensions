@@ -32,6 +32,13 @@ export function isBrowserExtensionAvailable(): boolean {
  * On Windows there is no AppleScript, so the Browser Extension is the only tab
  * source and its own tab id becomes `Tab.id`. It is awaited without a timeout
  * there, since it is the data itself rather than an enrichment.
+ *
+ * Known limitation on Windows: `BrowserExtension.Tab` carries no browser
+ * identity (only `id`, `url`, `title`, `favicon`, `active`), so tabs cannot be
+ * scoped to Helium. If the Raycast browser extension is also installed in
+ * another Chromium browser, its tabs appear here too, and opening one loads the
+ * URL in Helium. There is no API to filter them — the UI and README say so
+ * rather than pretending the list is Helium-only.
  */
 export async function fetchBrowserTabs(): Promise<Tab[]> {
   if (isWindows) {

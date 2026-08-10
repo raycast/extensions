@@ -49,7 +49,7 @@ export default function SearchTabs() {
           description={
             isTabControlAvailable
               ? "Make sure your browser is running with open tabs"
-              : "On Windows, tabs are read through Raycast's browser extension. Install it in Helium and make sure Helium is running."
+              : "On Windows, tabs come from Raycast's browser extension — install it in Helium and make sure Helium is running. It reports tabs from every browser it is installed in, so tabs from other browsers can appear here too."
           }
           actions={
             isTabControlAvailable ? undefined : (

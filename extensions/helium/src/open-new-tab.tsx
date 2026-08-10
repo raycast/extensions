@@ -1,9 +1,9 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
-import { openUrlInHelium } from "./utils/browser-control";
+import { createNewTab } from "./utils/browser-control";
 
 export default async function Command() {
   try {
-    await openUrlInHelium("chrome://new-tab-page/");
+    await createNewTab();
     await closeMainWindow();
   } catch (error) {
     await showHUD("Failed opening a new Helium tab");

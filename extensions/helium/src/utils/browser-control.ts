@@ -28,6 +28,15 @@ export async function openUrlInHelium(url: string): Promise<void> {
   return isWindows ? windows.openUrlInHelium(url) : applescript.openUrlInHelium(url);
 }
 
+/**
+ * Open a new tab on Helium's new tab page. Each platform reaches it
+ * differently — see the implementations — so callers must not hardcode
+ * `chrome://new-tab-page/` themselves.
+ */
+export async function createNewTab(): Promise<void> {
+  return isWindows ? windows.createNewTab() : applescript.createNewTab();
+}
+
 export async function createNewWindow(): Promise<void> {
   return isWindows ? windows.createNewWindow() : applescript.createNewWindow();
 }

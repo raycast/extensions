@@ -39,7 +39,7 @@ const START_MENU_INTERNET_KEYS = [
  * builds in particular, which register nothing. `undefined` when unset.
  */
 export function getHeliumPathPreference(): string | undefined {
-  const { heliumPath } = getPreferenceValues<{ heliumPath?: string }>();
+  const { heliumPath } = getPreferenceValues<Preferences>();
   const trimmed = heliumPath?.trim();
   return trimmed ? trimmed : undefined;
 }

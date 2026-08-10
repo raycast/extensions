@@ -6,6 +6,7 @@
 - Read Helium's profile (bookmarks, history, search provider, bangs) from the Windows `User Data` root, and drive new tabs and windows through Helium's command line since Chromium has no scripting interface on Windows.
 - Source Search Tabs from Raycast's browser extension on Windows, where switching to and closing individual tabs isn't possible; those actions are hidden instead of failing.
 - Declare every keyboard shortcut per platform so actions stay reachable with `Ctrl`/`Alt` on Windows, and align Search History's "Copy as Markdown" with the rest of the extension (`⌘⌥C` / `Ctrl+Alt+C`).
+- Fix Open New Tab landing on an `ERR_INVALID_URL` page on macOS: Chromium refuses AppleScript-driven navigation to `chrome://` addresses, so the tab is now created without a URL and opens Helium's configured new tab page.
 
 ## [Bookmarks Without a Running Browser] - 2026-07-23
 

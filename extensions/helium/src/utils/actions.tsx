@@ -1,7 +1,13 @@
 import { Action, Icon, Keyboard, showToast, Toast, closeMainWindow } from "@raycast/api";
 import type { MutatePromise } from "@raycast/utils";
 import type { Tab, Bookmark } from "../types";
-import { closeHeliumTabById, isTabControlAvailable, openUrlInHelium, switchToHeliumTabById } from "./browser-control";
+import {
+  closeHeliumTabById,
+  createNewTab,
+  isTabControlAvailable,
+  openUrlInHelium,
+  switchToHeliumTabById,
+} from "./browser-control";
 import { getBrowserTabs } from "./browser";
 import { idsStillPresent } from "./pending-close";
 import { getHeliumAppTarget } from "./platform";
@@ -88,7 +94,7 @@ export function OpenNewTabAction() {
       shortcut={SHORTCUTS.newTab}
       onAction={async () => {
         try {
-          await openUrlInHelium("chrome://new-tab-page/");
+          await createNewTab();
           await closeMainWindow();
         } catch (error) {
           await showToast({

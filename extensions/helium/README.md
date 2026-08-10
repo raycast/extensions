@@ -33,6 +33,9 @@ full path of Helium's `chrome.exe`.
 stays empty. Selecting a tab opens its URL in Helium rather than focusing the existing tab, and closing tabs and
 deduplicating tabs are unavailable.
 
+Note that Raycast's browser extension reports tabs from every browser it is installed in, and its API does not say which
+browser a tab belongs to. If you also run it in another Chromium browser, those tabs appear in this list as well.
+
 Windows shortcuts use `Ctrl`/`Alt` wherever this document mentions `⌘`/`⌥`.
 
 ### Experimental: macOS Spaces Support

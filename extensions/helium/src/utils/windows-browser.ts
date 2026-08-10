@@ -33,6 +33,14 @@ export async function openUrlInHelium(url: string): Promise<void> {
   launchHelium([url]);
 }
 
+/**
+ * Open a new tab on the new tab page. Unlike macOS AppleScript, Chromium's
+ * command line accepts `chrome://` addresses, so this navigates correctly.
+ */
+export async function createNewTab(): Promise<void> {
+  launchHelium([NEW_TAB_PAGE]);
+}
+
 /** Open a new window on the new tab page. */
 export async function createNewWindow(): Promise<void> {
   launchHelium(["--new-window", NEW_TAB_PAGE]);
