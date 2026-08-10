@@ -1,7 +1,11 @@
-import { showHUD, Toast } from "@raycast/api";
-import { isFlowInstalled, startTimer } from "./utils";
+import { showHUD, Toast, getPreferenceValues, LaunchProps } from "@raycast/api";
+import { isFlowInstalled, setSessionTitle, startTimer } from "./utils";
 
-export default async function () {
+interface Preferences {
+  defaultTitle?: string;
+}
+
+export default async function (props: LaunchProps<{ arguments: { title?: string } }>) {
   const toast = new Toast({
     title: "Starting timer",
     style: Toast.Style.Animated,
@@ -16,6 +20,14 @@ export default async function () {
     return;
   }
 
+  // Priority: typed argument, then the default title preference, otherwise leave the current title untouched.
+  const { defaultTitle } = getPreferenceValues<Preferences>();
+  const title = (props.arguments.title || defaultTitle || "").trim();
+
+  if (title) {
+    await setSessionTitle(title);
+  }
+
   await startTimer();
-  await showHUD("Timer started");
+  await showHUD(title ? `Timer started · ${title}` : "Timer started");
 }
