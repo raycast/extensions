@@ -56,5 +56,8 @@
     "*.{json,md}": [
       "prettier --write"
     ]
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,16 +1,16 @@
 # Changelog
 
-## [Apps Section] - {PR_MERGE_DATE}
+## [Apps Section] - 2026-08-10
 
 - New "Apps" section in the actions menu linking to the other Inoh apps
   (web app, Chrome extension, and Obsidian plugin, with the iOS app
   marked coming soon)
 
-## [New Logo] - {PR_MERGE_DATE}
+## [New Logo] - 2026-08-10
 
 - Fresh new Inoh logo across the extension and store listing
 
-## [Renamed to Inoh] - {PR_MERGE_DATE}
+## [Renamed to Inoh] - 2026-08-10
 
 - Joey is now **Inoh** — same extension, new name
 - Because the extension identity changed, you will be asked to sign in again
