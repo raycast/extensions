@@ -162,3 +162,7 @@ export function getBoundedPreferenceNumber(params: {
   }
   return max;
 }
+
+export function getSearchPageSize(): number {
+  return Math.min(getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }), 25);
+}

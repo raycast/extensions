@@ -47,7 +47,8 @@
     "wonbywondev",
     "SandeepBaskaran",
     "0xdhrv",
-    "ernest0n"
+    "ernest0n",
+    "raycast_0ukl"
   ],
   "pastContributors": [
     "Lemon",
@@ -1051,8 +1052,8 @@
       "name": "numberOfResults",
       "type": "textfield",
       "required": false,
-      "title": "Number of search results",
-      "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
+      "title": "Search Results per Page",
+      "description": "For repository, issue, discussion, or pull request searches, this is the number of results requested per page. Fewer results per page will load faster.",
       "placeholder": "25"
     },
     {
