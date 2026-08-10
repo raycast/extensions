@@ -11,11 +11,6 @@ import {
 
 const execFileAsync = promisify(execFile);
 
-interface Preferences {
-  terminal: "windowsTerminal" | "pwsh" | "powershell" | "cmd";
-  claudeArgs: string;
-}
-
 /**
  * Raycast may carry a stale PATH (captured when its process started) and child
  * terminals inherit that environment, so claude and shell prompt tools may not
@@ -86,14 +81,58 @@ function psQuote(value: string): string {
   return `'${value.replace(/'/g, "''")}'`;
 }
 
+/**
+ * Splits the free-form claudeArgs preference into argv tokens, honouring
+ * double and single quotes so values with spaces survive intact
+ * (e.g. --add-dir "C:\My Projects").
+ */
+function splitArgs(input: string): string[] {
+  const tokens: string[] = [];
+  let current = "";
+  let quote: '"' | "'" | null = null;
+  let inToken = false;
+  for (const ch of input) {
+    if (quote) {
+      if (ch === quote) quote = null;
+      else current += ch;
+    } else if (ch === '"' || ch === "'") {
+      quote = ch;
+      inToken = true;
+    } else if (/\s/.test(ch)) {
+      if (inToken) tokens.push(current);
+      current = "";
+      inToken = false;
+    } else {
+      current += ch;
+      inToken = true;
+    }
+  }
+  if (inToken) tokens.push(current);
+  return tokens;
+}
+
+/**
+ * Quotes one argument for the cmd branch. Wrapping in double quotes keeps
+ * whitespace and metacharacters (& | ; ...) literal; embedded double quotes
+ * are dropped because they are illegal in Windows paths and cannot be
+ * escaped reliably through cmd's start.
+ */
+function cmdQuote(value: string): string {
+  const cleaned = value.replace(/"/g, "");
+  return cleaned === "" || /[\s&|<>^()%!;=,]/.test(cleaned)
+    ? `"${cleaned}"`
+    : cleaned;
+}
+
 function encodedStartupScript(
   realPathString: string,
   claudeExe: string | null,
   args: string[],
 ): string {
+  const quotedArgs = args.map(psQuote).join(" ");
   const claudeCall = claudeExe
-    ? `& ${psQuote(claudeExe)} ${args.join(" ")}`.trim()
-    : ["claude", ...args].join(" ");
+    ? `& ${psQuote(claudeExe)} ${quotedArgs}`.trim()
+    : `claude ${quotedArgs}`.trim();
   const script = [
     `$env:Path = ${psQuote(realPathString)}`,
     "if (Test-Path $PROFILE) { . $PROFILE }",
@@ -169,11 +208,7 @@ export async function launchClaude(
   if (cwd.includes('"')) return; // invalid Windows path; avoids breaking the shell
 
   const { terminal, claudeArgs } = getPreferenceValues<Preferences>();
-  const extra = (claudeArgs ?? "")
-    .replace(/["'\r\n]/g, "")
-    .split(/\s+/)
-    .filter(Boolean);
-  const args = [...baseArgs, ...extra];
+  const args = [...baseArgs, ...splitArgs(claudeArgs ?? "")];
 
   const pathString = await realPath();
   const claudeExe = findClaude(pathString);
@@ -203,9 +238,10 @@ export async function launchClaude(
       );
       break;
     case "cmd": {
-      const claudeCall = claudeExe
-        ? `"${claudeExe}" ${args.join(" ")}`.trim()
-        : ["claude", ...args].join(" ");
+      const claudeCall = [
+        claudeExe ? cmdQuote(claudeExe) : "claude",
+        ...args.map(cmdQuote),
+      ].join(" ");
       runInNewWindow(`cmd /k ${claudeCall}`, cwd, env, "cmd not found.");
       break;
     }
