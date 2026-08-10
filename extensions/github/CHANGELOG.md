@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Improve GraphQL Code Generation] - {PR_MERGE_DATE}
+## [Improve GraphQL Code Generation] - 2026-08-10
 
 - Make GraphQL type generation deterministic and credential-free by using a checked-in GitHub schema.
 
