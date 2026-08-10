@@ -52,9 +52,18 @@ describe("Windows install discovery", () => {
   });
 
   it("skips roots whose environment variable is unset", () => {
-    expect(getWindowsInstallRoots({ PROGRAMFILES: "C:\\program" })).toEqual([
+    expect(getWindowsInstallRoots({ PROGRAMFILES: "C:\\program" }, "C:\\home")).toEqual([
+      join("C:\\home", "AppData", "Local", "imput", "Helium"),
+      join("C:\\home", "AppData", "Local", "Helium"),
       join("C:\\program", "imput", "Helium"),
       join("C:\\program", "Helium"),
+    ]);
+  });
+
+  it("derives the local app data root from home when the variable is missing", () => {
+    expect(getWindowsInstallRoots({}, "C:\\Users\\me")).toEqual([
+      join("C:\\Users\\me", "AppData", "Local", "imput", "Helium"),
+      join("C:\\Users\\me", "AppData", "Local", "Helium"),
     ]);
   });
 

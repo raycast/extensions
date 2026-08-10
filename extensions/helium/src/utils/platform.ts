@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import { execFileSync } from "child_process";
 import { existsSync } from "fs";
+import { homedir } from "os";
 import { dirname, join } from "path";
 
 /**
@@ -46,9 +47,14 @@ export function getHeliumPathPreference(): string | undefined {
 /**
  * Install roots in probe order: the per-user location the default installer
  * uses first, then the machine-wide ones.
+ *
+ * `%LOCALAPPDATA%` is derived from the home directory when the variable is
+ * missing — Raycast ships as an MSIX package on Windows, and packaged
+ * processes do not always inherit the environment you would expect.
  */
-export function getWindowsInstallRoots(env: NodeJS.ProcessEnv = process.env): string[] {
-  const bases = [env.LOCALAPPDATA, env.PROGRAMFILES, env["PROGRAMFILES(X86)"]].filter((base): base is string => !!base);
+export function getWindowsInstallRoots(env: NodeJS.ProcessEnv = process.env, home = homedir()): string[] {
+  const localAppData = env.LOCALAPPDATA ?? join(home, "AppData", "Local");
+  const bases = [localAppData, env.PROGRAMFILES, env["PROGRAMFILES(X86)"]].filter((base): base is string => !!base);
   return bases.flatMap((base) => WINDOWS_INSTALL_SUFFIXES.map((suffix) => join(base, suffix)));
 }
 
@@ -159,6 +165,15 @@ export function findHeliumExecutableCached(): string | undefined {
 export function requireHeliumExecutable(): string {
   const executable = findHeliumExecutableCached();
   if (!executable) {
+    // Detail belongs in the dev console, not the toast — this is what turns a
+    // "Helium was not found" report into an actual diagnosis.
+    console.error("[Helium] Executable not found. Probed:", {
+      preference: getHeliumPathPreference(),
+      localAppData: process.env.LOCALAPPDATA,
+      roots: getWindowsInstallRoots(),
+      registry: findHeliumExecutableInRegistry(),
+    });
+
     throw new Error(
       "Helium was not found. Checked the standard install locations and the Windows registry. " +
         "If Helium is installed elsewhere (for example a portable build), set its full path to " +
