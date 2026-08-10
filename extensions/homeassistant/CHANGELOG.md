@@ -1,6 +1,6 @@
 # Home Assistant Changelog
 
-## [Add contributor] - {PR_MERGE_DATE}
+## [Add contributor] - 2026-08-10
 
 - Add mattiacolombomc to the contributors list
 
