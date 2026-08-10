@@ -1,6 +1,6 @@
 # mymind Changelog
 
-## [Fix Save Form Prefill and Refresh AI Tags] - {PR_MERGE_DATE}
+## [Fix Save Form Prefill and Refresh AI Tags] - 2026-08-10
 
 - Fixed `Save to mymind` not prefilling detected content: the form relied on `defaultValue` with a changing `key` to remount, but `defaultValue` is only applied once per component lifecycle, so values resolved after mount (such as clipboard detection) never reached the fields. They are now controlled inputs
 - Refresh the item detail view after saving so mymind's automatic AI tags appear without a manual reload
