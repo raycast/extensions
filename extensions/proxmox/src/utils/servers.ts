@@ -37,6 +37,15 @@ async function writeStoredServers(servers: PveServer[]) {
   notifyServersChanged();
 }
 
+// Serializes read-modify-write mutations so overlapping ones cannot lose changes
+let mutationQueue: Promise<unknown> = Promise.resolve();
+
+function enqueueMutation<T>(mutation: () => Promise<T>): Promise<T> {
+  const result = mutationQueue.then(mutation, mutation);
+  mutationQueue = result.catch(() => undefined);
+  return result;
+}
+
 export function isPreferencesServer(server: PveServer): boolean {
   return server.id === PREFERENCES_SERVER_ID;
 }
@@ -82,18 +91,24 @@ export const useServers = () => {
   }, [preferencesServer, storedServers]);
 
   const addServer = useCallback(async (server: Omit<PveServer, "id">) => {
-    const current = await readStoredServers();
-    await writeStoredServers([...current, { ...server, id: randomUUID() }]);
+    await enqueueMutation(async () => {
+      const current = await readStoredServers();
+      await writeStoredServers([...current, { ...server, id: randomUUID() }]);
+    });
   }, []);
 
   const updateServer = useCallback(async (server: PveServer) => {
-    const current = await readStoredServers();
-    await writeStoredServers(current.map((item) => (item.id === server.id ? server : item)));
+    await enqueueMutation(async () => {
+      const current = await readStoredServers();
+      await writeStoredServers(current.map((item) => (item.id === server.id ? server : item)));
+    });
   }, []);
 
   const removeServer = useCallback(async (server: PveServer) => {
-    const current = await readStoredServers();
-    await writeStoredServers(current.filter((item) => item.id !== server.id));
+    await enqueueMutation(async () => {
+      const current = await readStoredServers();
+      await writeStoredServers(current.filter((item) => item.id !== server.id));
+    });
   }, []);
 
   return {
