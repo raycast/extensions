@@ -161,6 +161,15 @@
           "required": false
         },
         {
+          "name": "sortMenuBarRemindersByDueDate",
+          "type": "checkbox",
+          "label": "Sort menu bar reminders by time",
+          "description": "When enabled, the reminders in the menu bar will be sorted by time.",
+          "default": true,
+          "required": false,
+          "title": "Sort"
+        },
+        {
           "name": "displayListTitleForMenuBarReminders",
           "type": "checkbox",
           "label": "Display the name of the list",
