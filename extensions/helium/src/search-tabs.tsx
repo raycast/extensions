@@ -1,4 +1,4 @@
-import { List, ActionPanel, Icon } from "@raycast/api";
+import { List, Action, ActionPanel, Icon } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useEffect, useState, useRef } from "react";
 import { useCachedBrowserTabs } from "./utils/use-cached-browser-tabs";
@@ -16,6 +16,9 @@ import {
 import { filterSearchable } from "./utils/search";
 import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds, sharedPendingCloseIds } from "./utils/pending-close";
 import { isTabControlAvailable } from "./utils/browser-control";
+import { getHeliumAppTarget } from "./utils/platform";
+
+const BROWSER_EXTENSION_URL = "https://www.raycast.com/browser-extension";
 
 export default function SearchTabs() {
   const [searchText, setSearchText] = useState("");
@@ -47,6 +50,20 @@ export default function SearchTabs() {
             isTabControlAvailable
               ? "Make sure your browser is running with open tabs"
               : "On Windows, tabs are read through Raycast's browser extension. Install it in Helium and make sure Helium is running."
+          }
+          actions={
+            isTabControlAvailable ? undefined : (
+              <ActionPanel>
+                {/* Opened in Helium specifically — installing it in another browser would not help. */}
+                <Action.Open
+                  title="Get Raycast Browser Extension"
+                  icon={Icon.Download}
+                  target={BROWSER_EXTENSION_URL}
+                  application={getHeliumAppTarget()}
+                />
+                <Action.CopyToClipboard title="Copy Link" content={BROWSER_EXTENSION_URL} />
+              </ActionPanel>
+            )
           }
         />
       )}
