@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Show CI status in pull request details] - {PR_MERGE_DATE}
+## [Show CI status in pull request details] - 2026-08-10
 
 - Added a "Checks" row to pull request details showing successful, failed, or pending CI status.
 
