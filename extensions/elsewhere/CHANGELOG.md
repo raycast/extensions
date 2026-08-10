@@ -4,6 +4,7 @@
 
 - Create spatial soundscape previews from natural-language prompts through Raycast AI.
 - Control playback, ambience and music volume, and background music with native AI tools.
+- Switch spatial soundscapes and background-music tracks by name with native AI tools.
 - Update the extension metadata and documentation for the new AI capabilities.
 
 ## [Initial Version] - 2026-08-06
