@@ -140,7 +140,7 @@ const LAUNCH_SCRIPT_PREFIX = "claude-code-projects-launch-";
  * past launches are deleted after a day — long enough that their sessions
  * have read them, since cmd only re-reads the file after claude exits.
  */
-function writeCmdLaunchScript(claudeCall: string): string {
+function writeCmdLaunchScript(lines: string[]): string {
   const dir = os.tmpdir();
   try {
     const cutoff = Date.now() - 24 * 60 * 60 * 1000;
@@ -162,10 +162,8 @@ function writeCmdLaunchScript(claudeCall: string): string {
     dir,
     `${LAUNCH_SCRIPT_PREFIX}${randomUUID()}.cmd`,
   );
-  fs.writeFileSync(
-    scriptPath,
-    `@echo off\r\n${claudeCall.replace(/%/g, "%%")}\r\n`,
-  );
+  const body = lines.map((line) => line.replace(/%/g, "%%")).join("\r\n");
+  fs.writeFileSync(scriptPath, `@echo off\r\n${body}\r\n`);
   return scriptPath;
 }
 
@@ -223,19 +221,51 @@ function runInNewWindow(
 
 /**
  * Opens a new Windows Terminal tab (most recent window, or a new one) running
- * claude directly by absolute path — no shell or profile in between, so the
- * inherited PATH and prompt tools like oh-my-posh never come into play.
+ * claude through a small launch script — no user shell profile in between, so
+ * prompt tools like oh-my-posh never come into play.
+ *
+ * The script, not the spawn env, sets the real PATH: `wt -w 0 nt` attaches to
+ * an existing window, and the new tab inherits the environment of that
+ * window's process — which can be Raycast's stale environment if the window
+ * was created by an earlier launch. Fixing PATH inside the script guarantees
+ * claude and everything it spawns (hooks, editors, nested shells) see the
+ * real environment regardless of which window hosts the tab.
  */
 function runInTerminalTab(
   cwd: string,
+  pathString: string,
   claudeExe: string | null,
   args: string[],
+  env: NodeJS.ProcessEnv,
 ): void {
-  const command = [claudeExe ?? "claude", ...args];
-  const child = spawn("wt.exe", ["-w", "0", "nt", "-d", cwd, ...command], {
-    detached: true,
-    stdio: "ignore",
-  });
+  const claudeCall = [
+    claudeExe ? cmdQuote(claudeExe) : "claude",
+    ...args.map(cmdQuote),
+  ].join(" ");
+  let script: string;
+  try {
+    // LANG/LC_ALL cleared for the same reason they are dropped from the
+    // spawn env in launchClaude — the attached tab may inherit them from a
+    // window created before the fix.
+    script = writeCmdLaunchScript([
+      `set "Path=${pathString}"`,
+      'set "LANG="',
+      'set "LC_ALL="',
+      claudeCall,
+    ]);
+  } catch {
+    onFail("Could not write the launch script to the temp folder.")();
+    return;
+  }
+  const child = spawn(
+    "wt.exe",
+    ["-w", "0", "nt", "-d", cwd, "cmd", "/d", "/c", script],
+    {
+      detached: true,
+      stdio: "ignore",
+      env,
+    },
+  );
   child.on(
     "error",
     onFail(
@@ -263,6 +293,15 @@ export async function launchClaude(
   delete env.PATH;
   env.Path = pathString;
 
+  // Raycast's environment can carry a Windows BCP-47 locale tag (e.g.
+  // "pt-BR-u-ca-gregory-...") in LC_ALL/LANG. POSIX tools spawned inside the
+  // session (like Git's bash) reject that format with a warning on every
+  // command, and a terminal opened by the user never defines these vars — so
+  // drop them instead of forwarding.
+  for (const key of Object.keys(env)) {
+    if (key === "LANG" || key.startsWith("LC_")) delete env[key];
+  }
+
   await closeMainWindow();
 
   switch (terminal) {
@@ -289,7 +328,7 @@ export async function launchClaude(
       ].join(" ");
       let script: string;
       try {
-        script = writeCmdLaunchScript(claudeCall);
+        script = writeCmdLaunchScript([claudeCall]);
       } catch {
         onFail("Could not write the launch script to the temp folder.")();
         return;
@@ -299,7 +338,7 @@ export async function launchClaude(
     }
     case "windowsTerminal":
     default:
-      runInTerminalTab(cwd, claudeExe, args);
+      runInTerminalTab(cwd, pathString, claudeExe, args, env);
       break;
   }
 }
