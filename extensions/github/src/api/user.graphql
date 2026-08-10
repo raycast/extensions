@@ -75,11 +75,5 @@ query getViewer {
         login
       }
     }
-    projectsV2(first: 50) {
-      totalCount
-      nodes {
-        ...ProjectFields
-      }
-    }
   }
 }
