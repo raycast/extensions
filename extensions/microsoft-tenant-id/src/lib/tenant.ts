@@ -202,27 +202,28 @@ async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Respon
   return fetch(url, { ...init, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
 }
 
-/** Try each national cloud in turn and return the first that resolves a tenant ID. */
+/** Probe national clouds in parallel; prefer commercial → US Gov → China when several match. */
 async function lookupOpenId(
   domain: string,
 ): Promise<{ cloud: CloudKey; tenantId: string; regionScope?: string } | undefined> {
-  for (const key of CLOUD_ORDER) {
+  const probes = CLOUD_ORDER.map(async (key) => {
     const url = `https://${CLOUDS[key].loginHost}/${encodeURIComponent(domain)}/v2.0/.well-known/openid-configuration`;
-    try {
-      const res = await fetchWithTimeout(url);
-      if (!res.ok) continue;
-      const json = (await res.json()) as {
-        issuer?: string;
-        token_endpoint?: string;
-        tenant_region_scope?: string | null;
-      };
-      const tenantId = (json.issuer ?? json.token_endpoint ?? "").match(GUID_REGEX)?.[0];
-      if (tenantId) {
-        return { cloud: key, tenantId, regionScope: json.tenant_region_scope ?? undefined };
-      }
-    } catch {
-      // Network error or timeout (e.g. China cloud unreachable) — try the next cloud.
-    }
+    const res = await fetchWithTimeout(url);
+    if (!res.ok) return undefined;
+    const json = (await res.json()) as {
+      issuer?: string;
+      token_endpoint?: string;
+      tenant_region_scope?: string | null;
+    };
+    const tenantId = (json.issuer ?? json.token_endpoint ?? "").match(GUID_REGEX)?.[0];
+    if (!tenantId) return undefined;
+    return { cloud: key, tenantId, regionScope: json.tenant_region_scope ?? undefined };
+  });
+
+  const results = await Promise.allSettled(probes);
+  for (let i = 0; i < CLOUD_ORDER.length; i++) {
+    const settled = results[i];
+    if (settled.status === "fulfilled" && settled.value) return settled.value;
   }
   return undefined;
 }

@@ -1,20 +1,26 @@
 /**
  * Microsoft Entra sign-in for the reverse (tenant ID → domain) lookup.
  *
- * Uses the OAuth 2.0 authorization-code flow with PKCE via a *public client*
- * (no client secret). Only the Application (client) ID is needed, which is not
- * a secret. Each user signs into their own tenant and consents to a single,
+ * Uses `@raycast/utils` `OAuthService` (authorization-code + PKCE, public client,
+ * no client secret). Only the Application (client) ID is needed, which is not a
+ * secret. Each user signs into their own tenant and consents to a single,
  * low-privilege delegated scope: `CrossTenantInformation.ReadBasic.All`.
+ *
+ * A built-in multitenant app registration (owned by the extension author) is
+ * used by default so sign-in needs zero setup. Override it via the optional
+ * "Application (client) ID" preference if you prefer your own registration.
  */
 
-import { OAuth } from "@raycast/api";
+import { getPreferenceValues, OAuth } from "@raycast/api";
+import { OAuthService } from "@raycast/utils";
 
 /**
- * Embedded Application (client) ID so end users just click "Sign in with Microsoft"
- * with zero setup. This is a PUBLIC identifier, not a secret — safe to commit.
- * To point the extension at your own Entra app registration, replace the GUID below.
+ * Built-in Application (client) ID — a PUBLIC identifier, not a secret.
+ * Registration: multitenant public client owned by the extension author
+ * (Raycast Store handle `Rediwed`), kept registered for as long as this
+ * extension is published. Override via preferences to use your own app.
  */
-const CLIENT_ID = "45666adf-6a4e-48d0-9801-217cb0e0f6da";
+const DEFAULT_CLIENT_ID = "45666adf-6a4e-48d0-9801-217cb0e0f6da";
 /** `organizations` = multitenant: each user signs into their own tenant. */
 const TENANT = "organizations";
 const REDIRECT_URI = "https://raycast.com/redirect?packageName=Extension";
@@ -30,55 +36,23 @@ export const oauthClient = new OAuth.PKCEClient({
   description: "Sign in with your Microsoft account to look up tenants by ID.",
 });
 
-interface MicrosoftTokenResponse extends OAuth.TokenResponse {
-  error?: string;
-  error_description?: string;
+function getClientId(): string {
+  const { clientId } = getPreferenceValues<Preferences>();
+  const trimmed = clientId?.trim();
+  return trimmed || DEFAULT_CLIENT_ID;
 }
 
-function tokenError(json: MicrosoftTokenResponse, status: number): Error {
-  if (json.error_description?.includes("AADSTS7000218")) {
-    return new Error(
-      "The app registration is configured as a confidential client. In Entra → Authentication, add the platform " +
-        "'Mobile and desktop applications' with redirect URI https://raycast.com/redirect?packageName=Extension and " +
-        "enable 'Allow public client flows'.",
-    );
-  }
-  return new Error(json.error_description || json.error || `Token request failed (${status})`);
-}
-
-async function postToken(params: URLSearchParams): Promise<MicrosoftTokenResponse> {
-  const res = await fetch(TOKEN_URL, {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: params.toString(),
+/** Build a fresh service so preference changes to the client ID take effect. */
+function createOAuthService(): OAuthService {
+  return new OAuthService({
+    client: oauthClient,
+    clientId: getClientId(),
+    scope: SCOPES,
+    authorizeUrl: AUTHORIZE_URL,
+    tokenUrl: TOKEN_URL,
+    bodyEncoding: "url-encoded",
+    extraParameters: { redirect_uri: REDIRECT_URI, response_mode: "query" },
   });
-  const json = (await res.json()) as MicrosoftTokenResponse;
-  if (!res.ok) throw tokenError(json, res.status);
-  return json;
-}
-
-async function exchangeCode(authRequest: OAuth.AuthorizationRequest, code: string) {
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    grant_type: "authorization_code",
-    code,
-    code_verifier: authRequest.codeVerifier,
-    redirect_uri: REDIRECT_URI,
-    scope: SCOPES.join(" "),
-  });
-  return postToken(params);
-}
-
-async function refresh(refreshToken: string) {
-  const params = new URLSearchParams({
-    client_id: CLIENT_ID,
-    grant_type: "refresh_token",
-    refresh_token: refreshToken,
-    scope: SCOPES.join(" "),
-  });
-  const tokens = await postToken(params);
-  tokens.refresh_token = tokens.refresh_token ?? refreshToken;
-  return tokens;
 }
 
 /**
@@ -86,28 +60,15 @@ async function refresh(refreshToken: string) {
  * refreshing silently or launching the interactive sign-in as needed.
  */
 export async function authorize(): Promise<string> {
-  const existing = await oauthClient.getTokens();
-  if (existing?.accessToken && !existing.isExpired()) return existing.accessToken;
-  if (existing?.refreshToken) {
-    try {
-      const refreshed = await refresh(existing.refreshToken);
-      await oauthClient.setTokens(refreshed);
-      if (refreshed.access_token) return refreshed.access_token;
-    } catch {
-      // Refresh failed (e.g. revoked) — fall through to interactive sign-in.
-    }
+  await createOAuthService().authorize();
+  // Re-read from the client so a refresh-failure → re-auth path still returns
+  // the freshly stored access token (OAuthService may otherwise hand back the
+  // previous expired one after it re-runs the interactive flow).
+  const tokens = await oauthClient.getTokens();
+  if (!tokens?.accessToken) {
+    throw new Error("Microsoft sign-in did not return an access token.");
   }
-
-  const authRequest = await oauthClient.authorizationRequest({
-    endpoint: AUTHORIZE_URL,
-    clientId: CLIENT_ID,
-    scope: SCOPES.join(" "),
-    extraParameters: { redirect_uri: REDIRECT_URI, response_mode: "query" },
-  });
-  const { authorizationCode } = await oauthClient.authorize(authRequest);
-  const tokens = await exchangeCode(authRequest, authorizationCode);
-  await oauthClient.setTokens(tokens);
-  return tokens.access_token as string;
+  return tokens.accessToken;
 }
 
 export async function logout(): Promise<void> {

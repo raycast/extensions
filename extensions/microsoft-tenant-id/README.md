@@ -46,13 +46,17 @@ The forward commands need no sign-in. **Reverse lookup is a little different.** 
 
 Paste a tenant GUID and it returns the tenant's **organization display name** and **default domain** (`*.onmicrosoft.com`). Great for turning a tenant ID from a token, log, or sign-in error into a recognizable organization.
 
-> Sign-in uses a **public client + PKCE flow with no client secret**, and the app registration is **built in** — there's nothing to configure. You're only prompted the first time you resolve an **organization** tenant ID; personal-account tenant IDs need no sign-in. Each user signs into their own tenant and consents to a single low-privilege scope, `CrossTenantInformation.ReadBasic.All`. Tokens are stored locally in your Raycast; nothing is hosted or shared. Reverse lookup covers the commercial cloud.
+> Sign-in uses a **public client + PKCE flow with no client secret**, and a multitenant app registration is **built in** — there's nothing to configure. You're only prompted the first time you resolve an **organization** tenant ID; personal-account tenant IDs need no sign-in. Each user signs into their own tenant and consents to a single low-privilege scope, `CrossTenantInformation.ReadBasic.All`. Tokens are stored locally in your Raycast; nothing is hosted or shared. Reverse lookup covers the commercial cloud.
 
 ## Signing in
 
 Nothing to set up. **Personal-account tenant IDs** resolve instantly with no sign-in. The first time you resolve an **organization** tenant ID, Raycast opens a Microsoft sign-in in your browser — approve the one-time consent and you're done. You can **Sign out** anytime from the command's actions.
 
-**Sign-in requires a work or school account.** Personal Microsoft accounts can't be used to sign in — Microsoft Graph's reverse-lookup API doesn't support them as the caller. So if you only have a personal account, you can still use every no-sign-in feature (the forward lookups and personal-account tenant IDs), but resolving an arbitrary *organization* tenant ID needs a work or school account. Don't have one? You can create a free [Microsoft Entra](https://entra.microsoft.com/) directory and sign in with an account from it.
+**Sign-in requires a work or school account.** Personal Microsoft accounts can't be used to sign in — Microsoft Graph's reverse-lookup API doesn't support them as the caller. So if you only have a personal account, you can still use every no-sign-in feature (the forward lookups and personal-account tenant IDs), but resolving an arbitrary _organization_ tenant ID needs a work or school account. Don't have one? You can create a free [Microsoft Entra](https://entra.microsoft.com/) directory and sign in with an account from it.
+
+### Built-in app registration
+
+The default Application (client) ID points at a **multitenant public-client** Entra app registration owned by the extension author (`Rediwed`). It is not a secret (PKCE public client, no client secret). The author keeps that registration registered for as long as this extension is published in the Raycast Store. If you prefer not to use it — or your organization requires its own app — set **Application (Client) ID** in the extension preferences to a registration you control (enable public client flows, redirect URI `https://raycast.com/redirect?packageName=Extension`, delegated permission `CrossTenantInformation.ReadBasic.All`).
 
 ## Copy formats
 
@@ -69,7 +73,7 @@ For bulk results, **Copy All as CSV** and **Copy All Tenant IDs** are available 
 
 ## National clouds
 
-Domains are checked against the commercial cloud first, then **US Gov** (GCC High / DoD) and **China (21Vianet)**. The result shows which cloud a tenant lives in, and the Open actions point at the matching portals.
+Domains are checked in parallel against the commercial, **US Gov** (GCC High / DoD), and **China (21Vianet)** clouds. The result shows which cloud a tenant lives in, and the Open actions point at the matching portals.
 
 ## Notes
 

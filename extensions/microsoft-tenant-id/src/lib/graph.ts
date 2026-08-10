@@ -18,16 +18,28 @@ export interface TenantInfo {
   federationBrandName?: string;
 }
 
+function isTimeoutError(error: unknown): boolean {
+  return error instanceof Error && (error.name === "TimeoutError" || error.name === "AbortError");
+}
+
 /** Look up a tenant's org name + default domain from its GUID. Throws on failure. */
 export async function findTenantById(token: string, tenantId: string): Promise<TenantInfo> {
   const url = `https://graph.microsoft.com/v1.0/tenantRelationships/findTenantInformationByTenantId(tenantId='${encodeURIComponent(
     tenantId,
   )}')`;
 
-  const res = await fetch(url, {
-    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
-    signal: AbortSignal.timeout(GRAPH_TIMEOUT_MS),
-  });
+  let res: Response;
+  try {
+    res = await fetch(url, {
+      headers: { Authorization: `Bearer ${token}`, Accept: "application/json" },
+      signal: AbortSignal.timeout(GRAPH_TIMEOUT_MS),
+    });
+  } catch (error) {
+    if (isTimeoutError(error)) {
+      throw new Error("Request timed out. Check your connection and try again.");
+    }
+    throw error;
+  }
 
   if (res.status === 404) {
     throw new Error("No Microsoft tenant exists with that ID.");

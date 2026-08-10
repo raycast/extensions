@@ -5,9 +5,25 @@
   "description": "Find the Microsoft Entra (Azure AD) tenant ID for a domain, email, or URL — or reverse-look up the organization behind a tenant ID.",
   "icon": "icon.png",
   "author": "Rediwed",
-  "platforms": ["macOS", "Windows"],
-  "categories": ["Developer Tools", "Web"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Web"
+  ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "textfield",
+      "required": false,
+      "title": "Application (Client) ID",
+      "description": "Optional. Leave empty to use the built-in multitenant Entra app registration. Paste your own Application (client) ID to use a registration you control (public client + PKCE, redirect URI https://raycast.com/redirect?packageName=Extension, scope CrossTenantInformation.ReadBasic.All).",
+      "placeholder": "Built-in app (leave empty)"
+    }
+  ],
   "commands": [
     {
       "name": "find-tenant-id",
