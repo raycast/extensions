@@ -18,7 +18,9 @@ Portreaper is not a generic port viewer. Its job is to **decide which listeners 
 
 The engine captures each process's creation time during the scan and **re-checks it immediately before killing**. If it moved, the kill is refused. That closes the window where a PID gets recycled between the moment you look at the list and the moment you press Enter — killing a recycled PID would mean terminating an unrelated process.
 
-Termination always asks for confirmation first.
+Termination always asks for confirmation first, and **"terminated" means the process is actually gone**: after the signal is delivered, Portreaper re-checks until the process disappears. If it hangs on, you are told so and offered Force Kill, instead of getting a green checkmark over a process that never died.
+
+One case this specifically covers: a dev server **suspended** with Ctrl-Z (or stopped by touching the terminal in the background) never processes a terminate signal — it sits in the pending queue while the OS cheerfully reports success. Portreaper labels those rows `stopped` and wakes the process up so it can shut itself down.
 
 ## Shared with the desktop app
 

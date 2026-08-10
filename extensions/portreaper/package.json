@@ -37,7 +37,6 @@
     {
       "name": "search-ports",
       "title": "Search Ports",
-      "subtitle": "Portreaper",
       "description": "List listening processes and orphaned dev processes, then terminate the ones nobody owns.",
       "mode": "view"
     }
