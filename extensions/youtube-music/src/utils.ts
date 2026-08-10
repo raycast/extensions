@@ -1,12 +1,4 @@
-import {
-  Application,
-  getPreferenceValues,
-  open,
-  openExtensionPreferences,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Application, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 
 type SupportedBrowsers = "Safari" | "Chrome" | "YouTube Music" | "Microsoft Edge";
@@ -55,10 +47,7 @@ function getUrlCondition(preference: UrlPreference): string {
  * Handles AppleScript errors by extracting the error message and showing an appropriate toast.
  */
 function handleAppleScriptError(error: unknown, browserName: string): void {
-  const message =
-    (error as { stderr?: string })?.stderr ||
-    (error as { message?: string })?.message ||
-    String(error);
+  const message = (error as { stderr?: string })?.stderr || (error as { message?: string })?.message || String(error);
 
   if (message.includes("Allow JavaScript from Apple Events")) {
     showToast({
@@ -75,7 +64,11 @@ function handleAppleScriptError(error: unknown, browserName: string): void {
     return;
   }
 
-  if (message.includes("not allowed to send") || message.includes("not allowed assistive") || message.includes("privacy")) {
+  if (
+    message.includes("not allowed to send") ||
+    message.includes("not allowed assistive") ||
+    message.includes("privacy")
+  ) {
     showToast({
       title: "Automation Permission Needed",
       message: `macOS blocked the script from controlling ${browserName}. Check System Settings → Privacy & Security → Automation.`,
