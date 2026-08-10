@@ -9,7 +9,7 @@ export function isFullDay(date: string) {
 }
 
 export function formatReminderTime(reminder: Reminder): string {
-  if (!reminder.dueDate) {
+  if (!reminder.dueDate || isFullDay(reminder.dueDate)) {
     return "";
   }
 
