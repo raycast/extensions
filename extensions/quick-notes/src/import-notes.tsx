@@ -66,7 +66,7 @@ export default function ImportNotes() {
             title="Import Notes"
             icon={{ source: Icon.Download, tintColor: getTintColor("green") }}
             onSubmit={async (values: { files: string[] }) => {
-              const files = (values.files ?? []).filter((file) => fs.existsSync(file) && fs.lstatSync(file).isFile());
+              const files = values.files ?? [];
               const markdownFiles = files.filter((file) => file.toLowerCase().endsWith(".md"));
               if (markdownFiles.length === 0) {
                 showToast({
