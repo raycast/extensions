@@ -78,11 +78,13 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 // identity logic find_session_by_index uses, so switching never falls back to a
 // weaker matcher.
 //
-// The target is played and confirmed to reach Playing BEFORE anything else is
-// paused; if the target fails there are no side effects to roll back (playback
-// state like seek position or buffering isn't reliably restorable anyway).
-// Only after success are competing Playing sessions paused, best-effort — a
-// pause failure is collected into a warning, not fatal.
+// Order of operations avoids ever playing two sessions at once:
+//   1. Pause every competing session and confirm each reached Paused.
+//   2. Only then start the target and confirm it reached Playing.
+// If any competitor can't be confirmed paused, the target is never started and
+// the sessions we did pause are resumed (pause is reversible — re-playing puts
+// them back in the state we found them in). If the target fails to start, the
+// already-paused competitors are resumed the same way.
 #[raycast]
 fn switch_session(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
     // One snapshot, used for both resolving the target and pausing competitors —
@@ -91,6 +93,68 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
     let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title_prefix)
         .ok_or_else(|| format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing"))?;
 
+    // Phase 1: pause every competitor, confirming each reached Paused.
+    let mut paused_positions: Vec<usize> = Vec::new();
+    let mut pause_errors: Vec<String> = Vec::new();
+
+    for (i, entry) in entries.iter().enumerate() {
+        if i == target_pos {
+            continue;
+        }
+        let label = format!("{}[{}]", entry.app_id, entry.ordinal);
+
+        // Decide whether this competitor must be paused. An unreadable state is
+        // treated as possibly-playing and still gets a pause attempt rather than
+        // being silently skipped; only an actual pause failure surfaces as an error.
+        let status = entry.session.GetPlaybackInfo().and_then(|info| info.PlaybackStatus());
+        let should_pause = match &status {
+            Ok(s) => *s == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing,
+            Err(_) => true,
+        };
+        if !should_pause {
+            continue;
+        }
+
+        let pause_result = match entry.session.TryPauseAsync() {
+            Ok(op) => op.get().map(|_| ()).map_err(|e| format!("Pause request rejected: {}", e)),
+            Err(e) => Err(format!("TryPauseAsync failed: {}", e)),
+        };
+        match pause_result {
+            Ok(_) => {
+                let mut paused = false;
+                for _ in 0..50 {
+                    if let Ok(info) = entry.session.GetPlaybackInfo() {
+                        if let Ok(status) = info.PlaybackStatus() {
+                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
+                                paused = true;
+                                break;
+                            }
+                        }
+                    }
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                }
+                if paused {
+                    paused_positions.push(i);
+                } else {
+                    pause_errors.push(format!("{} accepted pause but never reached paused state", label));
+                }
+            }
+            Err(e) => pause_errors.push(format!("Failed to pause {}: {}", label, e)),
+        }
+    }
+
+    // Starting the target while a competitor might still be playing would create
+    // simultaneous playback. Undo what we paused and report instead.
+    if !pause_errors.is_empty() {
+        let resume_errors = resume_sessions(&entries, &paused_positions);
+        let mut msg = format!("Could not pause all playing sessions: {}", pause_errors.join("; "));
+        if !resume_errors.is_empty() {
+            msg.push_str(&format!("; resume failures: {}", resume_errors.join("; ")));
+        }
+        return Err(msg);
+    }
+
+    // Phase 2: nothing else can be playing now — start the target.
     let target_session = entries[target_pos].session.clone();
     match target_session.TryPlayAsync().map_err(|e| format!("TryPlayAsync failed: {}", e))?.get() {
         Ok(_) => {
@@ -107,61 +171,45 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
                 std::thread::sleep(std::time::Duration::from_millis(50));
             }
             if !started {
-                return Err("Target session did not start playing after switch".to_string());
+                let resume_errors = resume_sessions(&entries, &paused_positions);
+                let mut msg = "Target session did not start playing after switch".to_string();
+                if !resume_errors.is_empty() {
+                    msg.push_str(&format!("; resume failures: {}", resume_errors.join("; ")));
+                }
+                return Err(msg);
             }
         }
-        Err(e) => return Err(format!("Failed to play target session: {}", e)),
+        Err(e) => {
+            let resume_errors = resume_sessions(&entries, &paused_positions);
+            let mut msg = format!("Failed to play target session: {}", e);
+            if !resume_errors.is_empty() {
+                msg.push_str(&format!("; resume failures: {}", resume_errors.join("; ")));
+            }
+            return Err(msg);
+        }
     }
 
-    let mut pause_errors: Vec<String> = Vec::new();
-    for (i, entry) in entries.iter().enumerate() {
-        if i == target_pos {
-            continue;
-        }
+    Ok(())
+}
+
+// Re-playing a session we just paused restores it — pause is reversible, so a
+// paused SMTC session resumes from where it stopped. Used to undo the pause
+// phase when the target can't be started, so competitors aren't left paused.
+fn resume_sessions(entries: &[SessionEntry], positions: &[usize]) -> Vec<String> {
+    let mut errors = Vec::new();
+    for &i in positions {
+        let entry = &entries[i];
         let label = format!("{}[{}]", entry.app_id, entry.ordinal);
-
-        // Decide whether this competitor needs pausing. Don't silently skip on
-        // inspection failure: an un-inspectable session could still be playing
-        // alongside the target, so record a warning AND still attempt the pause.
-        let status = entry.session.GetPlaybackInfo().and_then(|info| info.PlaybackStatus());
-        let should_pause = match &status {
-            Ok(s) => *s == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing,
-            Err(inspect_err) => {
-                pause_errors.push(format!("{} state unreadable: {}", label, inspect_err));
-                true
-            }
-        };
-        if !should_pause {
-            continue;
-        }
-
-        match entry.session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get() {
-            Ok(_) => {
-                let mut paused = false;
-                for _ in 0..50 {
-                    if let Ok(info) = entry.session.GetPlaybackInfo() {
-                        if let Ok(status) = info.PlaybackStatus() {
-                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
-                                paused = true;
-                                break;
-                            }
-                        }
-                    }
-                    std::thread::sleep(std::time::Duration::from_millis(50));
-                }
-                if !paused {
-                    pause_errors.push(format!("{} accepted pause but never reached paused state", label));
+        match entry.session.TryPlayAsync() {
+            Ok(op) => {
+                if let Err(e) = op.get() {
+                    errors.push(format!("{}: {}", label, e));
                 }
             }
-            Err(e) => pause_errors.push(format!("Failed to pause {}: {}", label, e)),
+            Err(e) => errors.push(format!("{}: {}", label, e)),
         }
     }
-
-    if pause_errors.is_empty() {
-        Ok(())
-    } else {
-        Err(format!("Switched but some sessions could not be paused: {}", pause_errors.join("; ")))
-    }
+    errors
 }
 
 struct SessionEntry {
