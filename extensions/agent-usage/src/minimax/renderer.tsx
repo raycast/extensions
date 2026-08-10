@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
-import { MiniMaxUsage, MiniMaxError } from "./types";
-import type { Accessory } from "../agents/types";
-import { formatDuration } from "../agents/format";
+import type { MiniMaxUsage, MiniMaxError } from "./types.ts";
+import type { Accessory } from "../agents/types.ts";
+import { formatDuration } from "../agents/format.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -9,8 +9,8 @@ import {
   getNoDataAccessory,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
-import { getCodingModelRemain, getIntervalPercent, getWeeklyPercent } from "./parser";
+} from "../agents/ui.tsx";
+import { getCodingModelRemain, getIntervalPercent, getWeeklyPercent } from "./parser.ts";
 
 export function formatMiniMaxUsageText(usage: MiniMaxUsage | null, error: MiniMaxError | null): string {
   const fallback = formatErrorOrNoData("MiniMax", usage, error);

@@ -1,8 +1,9 @@
 import { List } from "@raycast/api";
-import { CodexUsage, CodexError } from "./types";
-import { effectiveRemainingPercent } from "./effective-remaining";
-import type { Accessory } from "../agents/types";
-import { formatDuration, formatResetTime, parseDate } from "../agents/format";
+import { Fragment } from "react";
+import type { CodexUsage, CodexError } from "./types.ts";
+import { effectiveRemainingPercent } from "./effective-remaining.ts";
+import type { Accessory } from "../agents/types.ts";
+import { formatDuration, formatResetTime, parseDate } from "../agents/format.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -10,7 +11,7 @@ import {
   getNoDataAccessory,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
+} from "../agents/ui.tsx";
 
 export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError | null): string {
   const fallback = formatErrorOrNoData("Codex", usage, error);
@@ -32,6 +33,14 @@ export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError
   if (u.codeReviewLimit) {
     text += `\n\nCode Review Limit: ${u.codeReviewLimit.percentageRemaining}% remaining`;
     text += `\nResets In: ${formatDuration(u.codeReviewLimit.resetsInSeconds)}`;
+  }
+
+  for (const additionalLimit of u.additionalRateLimits ?? []) {
+    for (const window of additionalLimit.windows) {
+      text += `\n\n${additionalLimitTitle(additionalLimit.name, window.limitWindowSeconds, additionalLimit.windows.length)}: ${window.percentageRemaining}% remaining`;
+      text += `\n${generateAsciiBar(window.percentageRemaining, 10)}`;
+      text += `\nResets In: ${formatDuration(window.resetsInSeconds)}`;
+    }
   }
 
   text += `\n\nCredits: ${u.credits.unlimited ? "Unlimited" : u.credits.balance}`;
@@ -92,6 +101,25 @@ export function renderCodexDetail(usage: CodexUsage | null, error: CodexError | 
           />
           <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(u.codeReviewLimit.resetsInSeconds)} />
         </>
+      )}
+
+      {(u.additionalRateLimits ?? []).map((additionalLimit) =>
+        additionalLimit.windows.map((window, index) => (
+          <Fragment
+            key={`${additionalLimit.meteredFeature ?? additionalLimit.name}-${window.limitWindowSeconds}-${index}`}
+          >
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Label
+              title={additionalLimitTitle(
+                additionalLimit.name,
+                window.limitWindowSeconds,
+                additionalLimit.windows.length,
+              )}
+              text={`${generateAsciiBar(window.percentageRemaining, 10)} ${window.percentageRemaining}% remaining`}
+            />
+            <List.Item.Detail.Metadata.Label title="Resets In" text={formatDuration(window.resetsInSeconds)} />
+          </Fragment>
+        )),
       )}
 
       <List.Item.Detail.Metadata.Separator />
@@ -174,10 +202,24 @@ export function getCodexAccessory(usage: CodexUsage | null, error: CodexError | 
   if (usage.fiveHourLimit) parts.push(`5h: ${usage.fiveHourLimit.percentageRemaining}%`);
   if (usage.weeklyLimit) parts.push(`Weekly: ${usage.weeklyLimit.percentageRemaining}%`);
   if (usage.codeReviewLimit) parts.push(`Code Review: ${usage.codeReviewLimit.percentageRemaining}%`);
+  for (const additionalLimit of usage.additionalRateLimits ?? []) {
+    const remaining = Math.min(...additionalLimit.windows.map((window) => window.percentageRemaining));
+    parts.push(`${additionalLimit.name}: ${remaining}%`);
+  }
 
   return {
     icon: generatePieIcon(remaining),
     text: `${remaining}%`,
     tooltip: parts.join(" | ") || "Codex",
   };
+}
+
+function additionalLimitTitle(name: string, limitWindowSeconds: number, windowCount: number): string {
+  if (limitWindowSeconds === 5 * 60 * 60) return `${name} — 5h Limit`;
+  if (limitWindowSeconds === 7 * 24 * 60 * 60) return `${name} — Weekly Limit`;
+  if (limitWindowSeconds >= 28 * 24 * 60 * 60 && limitWindowSeconds <= 31 * 24 * 60 * 60) {
+    return `${name} — Monthly Limit`;
+  }
+  if (windowCount === 1) return name;
+  return `${name} — ${formatDuration(limitWindowSeconds)} window`;
 }

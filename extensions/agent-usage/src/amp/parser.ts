@@ -1,4 +1,4 @@
-import { AmpUsage, AmpError } from "./types";
+import type { AmpUsage, AmpError } from "./types.ts";
 
 const NOT_LOGGED_IN_SIGNALS = ["not logged in", "please sign in", "unauthenticated", "login required"];
 

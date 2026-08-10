@@ -1,42 +1,47 @@
 import { getPreferenceValues } from "@raycast/api";
-import { createAccountsHook, createUsageHook } from "./hooks";
-import { readOpencodeAuthToken } from "./opencode-auth";
-import { loadAccounts } from "../accounts/storage";
+import { createAccountsHook, createUsageHook } from "./hooks.ts";
+import { readOpencodeAuthToken } from "./opencode-auth.ts";
+import { loadAccounts } from "../accounts/storage.ts";
 
-import { fetchAmpUsage } from "../amp/fetcher";
-import type { AmpError, AmpUsage } from "../amp/types";
-import { fetchAntigravityUsage } from "../antigravity/fetcher";
-import type { AntigravityError, AntigravityUsage } from "../antigravity/types";
-import { fetchClaudeUsage, readClaudeCredentials } from "../claude/fetcher";
-import type { ClaudeError, ClaudeUsage } from "../claude/types";
-import { buildCodexAccountCandidates } from "../codex/accounts";
-import { listCodexOAuthAccounts } from "../codex/auth";
-import { fetchCodexUsage } from "../codex/fetcher";
-import type { CodexError, CodexUsage } from "../codex/types";
-import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "../copilot/auth";
-import { fetchCopilotUsage } from "../copilot/fetcher";
-import type { CopilotError, CopilotUsage } from "../copilot/types";
-import { fetchCursorUsage, resolveCursorCredential } from "../cursor/fetcher";
-import type { CursorError, CursorUsage } from "../cursor/types";
-import { resolveDroidAuth } from "../droid/auth";
-import { fetchDroidUsage } from "../droid/fetcher";
-import type { DroidError, DroidUsage } from "../droid/types";
-import { fetchGeminiUsage, readGeminiAuthKey } from "../gemini/fetcher";
-import type { GeminiError, GeminiUsage } from "../gemini/types";
-import { fetchGrokUsage } from "../grok/fetcher";
-import type { GrokError, GrokUsage } from "../grok/types";
-import { fetchKimiUsage, KIMI_OPENCODE_KEY } from "../kimi/fetcher";
-import type { KimiError, KimiUsage } from "../kimi/types";
-import { resolveMiniMaxAuthTokens } from "../minimax/auth";
-import { fetchMiniMaxUsage } from "../minimax/fetcher";
-import type { MiniMaxError, MiniMaxUsage } from "../minimax/types";
-import { fetchOpencodegoUsage } from "../opencode-go/fetcher";
-import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types";
-import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher";
-import type { SyntheticError, SyntheticUsage } from "../synthetic/types";
-import { resolveZaiAuthTokens } from "../zai/auth";
-import { fetchZaiUsage, ZAI_OPENCODE_KEY } from "../zai/fetcher";
-import type { ZaiError, ZaiUsage } from "../zai/types";
+import { fetchAmpUsage } from "../amp/fetcher.ts";
+import type { AmpError, AmpUsage } from "../amp/types.ts";
+import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
+import type { AntigravityError, AntigravityUsage } from "../antigravity/types.ts";
+import { fetchClaudeUsage, readClaudeCredentials } from "../claude/fetcher.ts";
+import type { ClaudeError, ClaudeUsage } from "../claude/types.ts";
+import { buildClinePassAccountCandidates } from "../clinepass/accounts.ts";
+import { readClineCredentials } from "../clinepass/auth.ts";
+import { fetchClinePassUsage } from "../clinepass/fetcher.ts";
+import { clearClineLocalCredential, loadClineLocalCredential, saveClineLocalCredential } from "../clinepass/storage.ts";
+import type { ClinePassError, ClinePassUsage } from "../clinepass/types.ts";
+import { buildCodexAccountCandidates } from "../codex/accounts.ts";
+import { listCodexOAuthAccounts } from "../codex/auth.ts";
+import { fetchCodexUsage } from "../codex/fetcher.ts";
+import type { CodexError, CodexUsage } from "../codex/types.ts";
+import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "../copilot/auth.ts";
+import { fetchCopilotUsage } from "../copilot/fetcher.ts";
+import type { CopilotError, CopilotUsage } from "../copilot/types.ts";
+import { fetchCursorUsage, resolveCursorCredential } from "../cursor/fetcher.ts";
+import type { CursorError, CursorUsage } from "../cursor/types.ts";
+import { resolveDroidAuth } from "../droid/auth.ts";
+import { fetchDroidUsage } from "../droid/fetcher.ts";
+import type { DroidError, DroidUsage } from "../droid/types.ts";
+import { fetchGeminiUsage, readGeminiAuthKey } from "../gemini/fetcher.ts";
+import type { GeminiError, GeminiUsage } from "../gemini/types.ts";
+import { fetchGrokUsage } from "../grok/fetcher.ts";
+import type { GrokError, GrokUsage } from "../grok/types.ts";
+import { fetchKimiUsage, KIMI_OPENCODE_KEY } from "../kimi/fetcher.ts";
+import type { KimiError, KimiUsage } from "../kimi/types.ts";
+import { resolveMiniMaxAuthTokens } from "../minimax/auth.ts";
+import { fetchMiniMaxUsage } from "../minimax/fetcher.ts";
+import type { MiniMaxError, MiniMaxUsage } from "../minimax/types.ts";
+import { fetchOpencodegoUsage } from "../opencode-go/fetcher.ts";
+import type { OpencodegoError, OpencodegoUsage } from "../opencode-go/types.ts";
+import { fetchSyntheticUsage, SYNTHETIC_OPENCODE_KEY } from "../synthetic/fetcher.ts";
+import type { SyntheticError, SyntheticUsage } from "../synthetic/types.ts";
+import { resolveZaiAuthTokens } from "../zai/auth.ts";
+import { fetchZaiUsage, ZAI_OPENCODE_KEY } from "../zai/fetcher.ts";
+import type { ZaiError, ZaiUsage } from "../zai/types.ts";
 
 /**
  * Provider hooks are the Raycast adapter layer: they combine Raycast-only
@@ -235,6 +240,31 @@ export const useCodexAccounts = createAccountsHook<
   noAccountsError: {
     type: "not_configured",
     message: "Codex is not configured. Run 'codex login' to authenticate or add an account via Manage Accounts.",
+  },
+});
+
+export const useClinePassAccounts = createAccountsHook<
+  ClinePassUsage,
+  ClinePassError,
+  ReturnType<typeof buildClinePassAccountCandidates>[number]
+>({
+  agentId: "clinepass",
+  getAccounts: async () => {
+    const localCredential = await loadClineLocalCredential();
+    const fileCredential = readClineCredentials({ clineHome: localCredential?.clineHome })[0] ?? null;
+    return buildClinePassAccountCandidates(localCredential ?? fileCredential, await loadAccounts("clinepass"));
+  },
+  fetcher: (account) =>
+    fetchClinePassUsage(account, {
+      readFileCredentials: () => readClineCredentials({ clineHome: account.clineHome }),
+      saveLocalCredential: saveClineLocalCredential,
+      clearLocalCredential: clearClineLocalCredential,
+    }),
+  resolveAccountAuthKey: (account) =>
+    [account.token, account.userId, account.refreshToken ?? "", account.source].join("\n"),
+  noAccountsError: {
+    type: "not_configured",
+    message: "ClinePass is not configured. Sign in to Cline, or add a Cline user ID and API key via Manage Accounts.",
   },
 });
 

@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
-import { formatResetTime } from "../agents/format";
-import type { Accessory } from "../agents/types";
+import { formatResetTime } from "../agents/format.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
   generateAsciiBar,
@@ -8,8 +8,8 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   renderErrorOrNoData,
-} from "../agents/ui";
-import type { GrokError, GrokUsage } from "./types";
+} from "../agents/ui.tsx";
+import type { GrokError, GrokUsage } from "./types.ts";
 
 function formatPercent(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, "");

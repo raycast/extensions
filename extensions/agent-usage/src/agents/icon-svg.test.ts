@@ -1,6 +1,51 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { invertMonochromeSvg, isMonochromeSvg, scaleSvgViewBox } from "./icon-svg.ts";
+import * as fs from "node:fs";
+import {
+  DARK_MODE_INVERTED_LIST_ICONS,
+  getDarkListIconAssetName,
+  invertSvgColors,
+  invertMonochromeSvg,
+  isMonochromeSvg,
+  scaleSvgViewBox,
+  selectSourceForAppearance,
+  shouldInvertListIcon,
+} from "./icon-svg.ts";
+
+test("dark-mode list icon allowlist contains exactly the requested agents", () => {
+  assert.deepEqual(DARK_MODE_INVERTED_LIST_ICONS, [
+    "clinepass-icon.svg",
+    "codex-icon.svg",
+    "copilot-icon.svg",
+    "cursor-icon.svg",
+    "droid-icon.svg",
+    "grok-icon.svg",
+    "opencode-go-icon.svg",
+    "synthetic-icon.svg",
+    "zai-icon.svg",
+  ]);
+
+  for (const assetName of DARK_MODE_INVERTED_LIST_ICONS) {
+    assert.equal(shouldInvertListIcon(assetName), true);
+  }
+  assert.equal(shouldInvertListIcon("claude-icon.svg"), false);
+});
+
+test("selectSourceForAppearance bypasses theme-pair selection", () => {
+  assert.equal(selectSourceForAppearance("light.svg", "dark.svg", "light"), "light.svg");
+  assert.equal(selectSourceForAppearance("light.svg", "dark.svg", "dark"), "dark.svg");
+});
+
+test("packaged dark list icons are exact color inversions of their light assets", () => {
+  for (const assetName of DARK_MODE_INVERTED_LIST_ICONS) {
+    const lightPath = new URL(`../../assets/${assetName}`, import.meta.url);
+    const darkPath = new URL(`../../assets/${getDarkListIconAssetName(assetName)}`, import.meta.url);
+    assert.equal(
+      fs.readFileSync(darkPath, "utf-8").trimEnd(),
+      invertSvgColors(fs.readFileSync(lightPath, "utf-8")).trimEnd(),
+    );
+  }
+});
 
 test("isMonochromeSvg accepts black fill icons", () => {
   const svg = `<svg fill="#000" viewBox="0 0 24 24"><path d="M0 0h24v24H0z"/></svg>`;
@@ -64,6 +109,16 @@ test("invertMonochromeSvg injects white root fill for paint-less icons", () => {
   const svg = `<svg viewBox="0 0 24 24"><path d="M0 0"/></svg>`;
   const inverted = invertMonochromeSvg(svg);
   assert.equal(inverted, `<svg fill="#fff" viewBox="0 0 24 24"><path d="M0 0"/></svg>`);
+});
+
+test("invertSvgColors inverts ClinePass near-black for its dark list variant", () => {
+  const svg = `<svg fill="none"><path fill="#18181B" d="M0 0"/></svg>`;
+  assert.equal(invertSvgColors(svg), `<svg fill="none"><path fill="#e7e7e4" d="M0 0"/></svg>`);
+});
+
+test("invertSvgColors preserves transparent paints and swaps black and white", () => {
+  const svg = `<svg fill="none"><path fill="white" stroke="black" d="M0 0"/></svg>`;
+  assert.equal(invertSvgColors(svg), `<svg fill="none"><path fill="#000" stroke="#fff" d="M0 0"/></svg>`);
 });
 
 test("scaleSvgViewBox expands viewBox to shrink the glyph", () => {

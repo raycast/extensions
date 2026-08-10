@@ -1,7 +1,7 @@
-import { GeminiUsage, GeminiError, GeminiModelQuota } from "./types";
-import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth";
-import { formatResetTime } from "../agents/format";
-import { decodeJwtPayload } from "../agents/jwt";
+import type { GeminiUsage, GeminiError, GeminiModelQuota } from "./types.ts";
+import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth.ts";
+import { formatResetTime } from "../agents/format.ts";
+import { decodeJwtPayload } from "../agents/jwt.ts";
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";

@@ -39,14 +39,14 @@ function makeCodexAuthFileName(userId: string, accountId: string): string {
 }
 
 test("normalizeCodexAuthorizationHeader adds Bearer prefix when missing", async () => {
-  const { normalizeCodexAuthorizationHeader } = await import("./auth");
+  const { normalizeCodexAuthorizationHeader } = await import("./auth.ts");
 
   assert.equal(normalizeCodexAuthorizationHeader("abc-token"), "Bearer abc-token");
   assert.equal(normalizeCodexAuthorizationHeader("Bearer already"), "Bearer already");
 });
 
 test("resolveCodexAuthTokens returns the local login token and account ID", async () => {
-  const { resolveCodexAuthTokens } = await import("./auth");
+  const { resolveCodexAuthTokens } = await import("./auth.ts");
   const { dir, filePath } = makeTempFile(
     JSON.stringify({ tokens: { access_token: "local-token", account_id: "account-id" } }),
   );
@@ -64,7 +64,7 @@ test("resolveCodexAuthTokens returns the local login token and account ID", asyn
 });
 
 test("resolveCodexAuthTokens returns nulls when the local auth file is missing", async () => {
-  const { resolveCodexAuthTokens } = await import("./auth");
+  const { resolveCodexAuthTokens } = await import("./auth.ts");
 
   const tokens = resolveCodexAuthTokens({
     authFilePath: path.join(os.tmpdir(), `missing-${Date.now()}.json`),
@@ -74,7 +74,7 @@ test("resolveCodexAuthTokens returns nulls when the local auth file is missing",
 });
 
 test("resolveCodexHome honors CODEX_HOME when it is an existing directory", async () => {
-  const { resolveCodexHome } = await import("./auth");
+  const { resolveCodexHome } = await import("./auth.ts");
   const dir = makeTempDir();
 
   try {
@@ -85,7 +85,7 @@ test("resolveCodexHome honors CODEX_HOME when it is an existing directory", asyn
 });
 
 test("resolveCodexHome rejects invalid CODEX_HOME without falling back", async () => {
-  const { resolveCodexHome } = await import("./auth");
+  const { resolveCodexHome } = await import("./auth.ts");
   const dir = makeTempDir();
   const invalidOverride = path.join(dir, "missing");
   const homeCodexDir = path.join(dir, ".codex");
@@ -102,7 +102,7 @@ test("resolveCodexHome rejects invalid CODEX_HOME without falling back", async (
 });
 
 test("resolveCodexHome falls back to HOME then USERPROFILE", async () => {
-  const { resolveCodexHome } = await import("./auth");
+  const { resolveCodexHome } = await import("./auth.ts");
   const homeDir = makeTempDir();
   const userProfileDir = makeTempDir();
   fs.mkdirSync(path.join(homeDir, ".codex"));
@@ -124,7 +124,7 @@ test("resolveCodexHome falls back to HOME then USERPROFILE", async () => {
 });
 
 test("listCodexOAuthAccounts reads active and stored OAuth auth files", async () => {
-  const { listCodexOAuthAccounts } = await import("./auth");
+  const { listCodexOAuthAccounts } = await import("./auth.ts");
   const codexHome = makeTempDir();
 
   try {
@@ -174,7 +174,7 @@ test("listCodexOAuthAccounts reads active and stored OAuth auth files", async ()
 });
 
 test("listCodexOAuthAccounts uses readable OAuth identity claims for labels", async () => {
-  const { listCodexOAuthAccounts } = await import("./auth");
+  const { listCodexOAuthAccounts } = await import("./auth.ts");
   const codexHome = makeTempDir();
   const accountId = "acct_labels";
   const userId = "user-label";
@@ -196,10 +196,10 @@ test("listCodexOAuthAccounts uses readable OAuth identity claims for labels", as
     assert.deepEqual(
       accounts.map((account) => ({ id: account.id, label: account.label })),
       [
-        { id: "codex-active", label: "user-label@example.com" },
+        { id: "codex-active", label: "Name for user-label" },
         {
           id: `codex-${makeCodexAuthFileName("user-other", accountId).slice(0, -".auth.json".length)}`,
-          label: "user-other@example.com",
+          label: "Name for user-other",
         },
       ],
     );
@@ -209,7 +209,7 @@ test("listCodexOAuthAccounts uses readable OAuth identity claims for labels", as
 });
 
 test("listCodexOAuthAccounts deduplicates active auth against stored accounts by Codex user identity", async () => {
-  const { listCodexOAuthAccounts } = await import("./auth");
+  const { listCodexOAuthAccounts } = await import("./auth.ts");
   const codexHome = makeTempDir();
   const accountId = "acct_same";
   const userId = "user-same";
@@ -233,7 +233,7 @@ test("listCodexOAuthAccounts deduplicates active auth against stored accounts by
 });
 
 test("listCodexOAuthAccounts keeps stored Codex users that share a ChatGPT account ID", async () => {
-  const { listCodexOAuthAccounts } = await import("./auth");
+  const { listCodexOAuthAccounts } = await import("./auth.ts");
   const codexHome = makeTempDir();
   const accountId = "acct_team";
   const firstUserId = "user-one";
@@ -272,14 +272,14 @@ test("listCodexOAuthAccounts keeps stored Codex users that share a ChatGPT accou
       [
         {
           id: `codex-${firstFileName.slice(0, -".auth.json".length)}`,
-          label: `${firstUserId}@example.com`,
+          label: `Name for ${firstUserId}`,
           token: "first-token",
           accountId,
           source: "stored",
         },
         {
           id: `codex-${secondFileName.slice(0, -".auth.json".length)}`,
-          label: `${secondUserId}@example.com`,
+          label: `Name for ${secondUserId}`,
           token: "second-token",
           accountId,
           source: "stored",

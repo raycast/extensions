@@ -6,16 +6,19 @@ import {
   launchCommand,
   openCommandPreferences,
   showHUD,
+  Keyboard,
 } from "@raycast/api";
 import type { Image } from "@raycast/api";
 import { useMemo } from "react";
-import type { AgentId, Accessory } from "./agents/types";
-import { getThemeIcon } from "./agents/ui";
-import { formatClock, latestTimestamp } from "./agents/format";
+import type { AgentId, Accessory, AgentVisibilityPreferences } from "./agents/types.ts";
+import { getThemeIcon } from "./agents/ui.tsx";
+import { formatClock, latestTimestamp } from "./agents/format.ts";
+import { sortByDefaultAgentOrder } from "./agents/order.ts";
 import {
   useAmpUsage,
   useAntigravityUsage,
   useClaudeUsage,
+  useClinePassAccounts,
   useCodexAccounts,
   useCopilotUsage,
   useCursorUsage,
@@ -27,21 +30,22 @@ import {
   useOpencodegoUsage,
   useSyntheticAccounts,
   useZaiAccounts,
-} from "./agents/provider-hooks";
-import { getAmpAccessory } from "./amp/renderer";
-import { getAntigravityAccessory } from "./antigravity/renderer";
-import { getClaudeAccessory } from "./claude/renderer";
-import { getCodexAccessory } from "./codex/renderer";
-import { getCopilotAccessory } from "./copilot/renderer";
-import { getCursorAccessory } from "./cursor/renderer";
-import { getDroidAccessory } from "./droid/renderer";
-import { getGeminiAccessory } from "./gemini/renderer";
-import { getGrokAccessory } from "./grok/renderer";
-import { getKimiAccessory } from "./kimi/renderer";
-import { getSyntheticAccessory } from "./synthetic/renderer";
-import { getZaiAccessory } from "./zai/renderer";
-import { getMiniMaxAccessory } from "./minimax/renderer";
-import { getOpencodegoAccessory } from "./opencode-go/renderer";
+} from "./agents/provider-hooks.ts";
+import { getAmpAccessory } from "./amp/renderer.tsx";
+import { getAntigravityAccessory } from "./antigravity/renderer.tsx";
+import { getClaudeAccessory } from "./claude/renderer.tsx";
+import { getClinePassAccessory } from "./clinepass/renderer.tsx";
+import { getCodexAccessory } from "./codex/renderer.tsx";
+import { getCopilotAccessory } from "./copilot/renderer.tsx";
+import { getCursorAccessory } from "./cursor/renderer.tsx";
+import { getDroidAccessory } from "./droid/renderer.tsx";
+import { getGeminiAccessory } from "./gemini/renderer.tsx";
+import { getGrokAccessory } from "./grok/renderer.tsx";
+import { getKimiAccessory } from "./kimi/renderer.tsx";
+import { getSyntheticAccessory } from "./synthetic/renderer.tsx";
+import { getZaiAccessory } from "./zai/renderer.tsx";
+import { getMiniMaxAccessory } from "./minimax/renderer.tsx";
+import { getOpencodegoAccessory } from "./opencode-go/renderer.tsx";
 
 interface MenuBarAgent {
   id: AgentId;
@@ -55,8 +59,6 @@ interface MenuBarAgent {
   /** True if this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
 }
-
-type Preferences = Preferences.AgentUsageMenubar;
 
 function getMenuItemTitle(name: string, value: string, isLoading: boolean, isOpenCodeActive?: boolean): string {
   const prefix = isOpenCodeActive ? "⚡ " : "";
@@ -72,10 +74,11 @@ function getMenuItemTooltip(usageTooltip?: string): string {
 }
 
 export default function MenuBarCommand() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<AgentVisibilityPreferences>();
 
   const isAmpVisible = Boolean(prefs.showAmp);
   const isClaudeVisible = Boolean(prefs.showClaude);
+  const isClinePassVisible = Boolean(prefs.showClinePass);
   const isCodexVisible = Boolean(prefs.showCodex);
   const isCopilotVisible = Boolean(prefs.showCopilot);
   const isCursorVisible = Boolean(prefs.showCursor);
@@ -91,6 +94,7 @@ export default function MenuBarCommand() {
 
   const ampState = useAmpUsage(isAmpVisible);
   const claudeState = useClaudeUsage(isClaudeVisible);
+  const clinePassState = useClinePassAccounts(isClinePassVisible);
   const codexState = useCodexAccounts(isCodexVisible);
   const copilotState = useCopilotUsage(isCopilotVisible);
   const cursorState = useCursorUsage(isCursorVisible);
@@ -272,6 +276,33 @@ export default function MenuBarCommand() {
   );
 
   // Multi-account agents - memoized to prevent unnecessary re-renders
+  const clinePassAgents = useMemo<MenuBarAgent[]>(() => {
+    if (!isClinePassVisible) return [];
+    if (clinePassState.isLoading) {
+      return [
+        {
+          id: "clinepass" as AgentId,
+          name: "ClinePass",
+          icon: getThemeIcon("clinepass-icon.svg"),
+          visible: true,
+          isLoading: true,
+          accessory: getClinePassAccessory(null, null, true),
+          revalidate: clinePassState.revalidate,
+        },
+      ];
+    }
+    return clinePassState.accounts.map((account) => ({
+      id: `clinepass-${account.accountId}` as AgentId,
+      name: account.label === "Default" ? "ClinePass" : `ClinePass • ${account.label}`,
+      icon: getThemeIcon("clinepass-icon.svg"),
+      visible: true,
+      isLoading: account.isLoading,
+      accessory: getClinePassAccessory(account.usage, account.error, account.isLoading),
+      revalidate: account.revalidate,
+      lastFetchedAt: account.lastFetchedAt,
+    }));
+  }, [isClinePassVisible, clinePassState]);
+
   const codexAgents = useMemo<MenuBarAgent[]>(() => {
     if (!isCodexVisible) return [];
     if (codexState.isLoading) {
@@ -289,7 +320,10 @@ export default function MenuBarCommand() {
     }
     return codexState.accounts.map((account) => ({
       id: `codex-${account.accountId}` as AgentId,
-      name: account.label === "Default" ? "Codex" : `Codex • ${account.label}`,
+      name:
+        account.usage?.displayName || account.label !== "Default"
+          ? `Codex • ${account.usage?.displayName || account.label}`
+          : "Codex",
       icon: getThemeIcon("codex-icon.svg"),
       visible: true,
       isLoading: account.isLoading,
@@ -385,8 +419,13 @@ export default function MenuBarCommand() {
   }, [isZaiVisible, zaiState]);
 
   const visibleAgents = useMemo(
-    () => [...singleAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter((a) => a.visible),
-    [singleAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
+    () =>
+      sortByDefaultAgentOrder(
+        [...singleAgents, ...clinePassAgents, ...codexAgents, ...kimiAgents, ...syntheticAgents, ...zaiAgents].filter(
+          (a) => a.visible,
+        ),
+      ),
+    [singleAgents, clinePassAgents, codexAgents, kimiAgents, syntheticAgents, zaiAgents],
   );
   const isLoading = visibleAgents.some((agent) => agent.isLoading);
 
@@ -426,21 +465,16 @@ export default function MenuBarCommand() {
         <MenuBarExtra.Item
           title={refreshTitle}
           icon={Icon.ArrowClockwise}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
           onAction={handleRefresh}
         />
         <MenuBarExtra.Item
           title="Open Agent Usage"
           icon={Icon.List}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => launchCommand({ name: "agent-usage", type: LaunchType.UserInitiated })}
         />
-        <MenuBarExtra.Item
-          title="Configure Command"
-          icon={Icon.Gear}
-          shortcut={{ modifiers: ["cmd"], key: "," }}
-          onAction={openCommandPreferences}
-        />
+        <MenuBarExtra.Item title="Configure Command" icon={Icon.Gear} onAction={openCommandPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

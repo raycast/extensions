@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
-import { formatResetTime } from "../agents/format";
-import type { Accessory } from "../agents/types";
+import { formatResetTime } from "../agents/format.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
   generateAsciiBar,
@@ -8,8 +8,8 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   renderErrorOrNoData,
-} from "../agents/ui";
-import type { CopilotError, CopilotUsage } from "./types";
+} from "../agents/ui.tsx";
+import type { CopilotError, CopilotUsage } from "./types.ts";
 
 function formatPercent(value: number | null): string {
   return value === null ? "N/A" : `${value}%`;
