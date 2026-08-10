@@ -6,13 +6,13 @@ import { getWindowsUserDataPath, requireHeliumExecutable } from "./platform";
 /**
  * Windows counterpart to `applescript.ts`.
  *
- * Chromium on Windows has no scripting interface, so everything here goes
- * through the executable's command line. Arguments are passed as an array so
- * URLs never need shell quoting, and the child is detached and unref'd so
- * Helium outlives the Raycast command process.
+ * Chromium on Windows has no scripting interface, so this module reaches Helium
+ * two ways: its command line for launching, and the Windows accessibility tree
+ * for the one thing the command line cannot express — acting on a tab that is
+ * already open.
  *
- * Reading tab state, switching tabs, and closing tabs are not expressible this
- * way — those are handled by the Browser Extension (read-only) in `browser.ts`.
+ * Reading tab state still comes from the Browser Extension (see `browser.ts`);
+ * closing tabs remains unsupported.
  */
 function launchHelium(args: string[]): void {
   const executable = requireHeliumExecutable();
@@ -45,18 +45,149 @@ function getProfileArgs(): string[] {
 }
 
 /**
- * Helium's new tab page. Chromium accepts it on the command line, so a new
- * window lands on the real new tab page — with the search box and shortcuts —
- * rather than a blank document.
+ * Helium's new tab page. Chromium accepts it on the command line, but only ever
+ * in a *new window* — see {@link createNewTab}.
  */
 const NEW_TAB_PAGE = "chrome://new-tab-page/";
 
 /**
- * Open a URL in Helium. Chromium reuses the most recently focused window and
- * appends a new tab, and starts Helium first when it isn't running.
+ * Shared PowerShell preamble: locate Helium's browser windows and raise one.
+ *
+ * Windows are matched by the owning process's executable path rather than by
+ * title, because Chrome, Edge and every other Chromium browser share the
+ * `Chrome_WidgetWin_1` window class and would otherwise match. `EnumWindows`
+ * walks top-level windows in Z-order, so the first hit is the window the user
+ * looked at most recently.
+ *
+ * `AttachThreadInput` is the standard workaround for Windows' foreground lock,
+ * which otherwise refuses focus changes coming from a background process.
+ */
+const WINDOW_HELPER_SOURCE = `
+  Add-Type -TypeDefinition @"
+  using System;
+  using System.Collections.Generic;
+  using System.Runtime.InteropServices;
+  using System.Text;
+  public class HeliumWindows {
+    public delegate bool EnumProc(IntPtr hWnd, IntPtr lParam);
+    [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc cb, IntPtr lParam);
+    [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll", CharSet=CharSet.Unicode)] public static extern int GetClassName(IntPtr hWnd, StringBuilder s, int max);
+    [DllImport("user32.dll")] public static extern int GetWindowTextLength(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
+    [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
+    [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int cmd);
+    [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint from, uint to, bool attach);
+    [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
+
+    public static List<IntPtr> All(uint[] pids) {
+      List<IntPtr> found = new List<IntPtr>();
+      EnumWindows((hWnd, lParam) => {
+        if (!IsWindowVisible(hWnd)) return true;
+        StringBuilder cls = new StringBuilder(64);
+        GetClassName(hWnd, cls, 64);
+        if (cls.ToString() != "Chrome_WidgetWin_1") return true;
+        if (GetWindowTextLength(hWnd) == 0) return true;
+        uint pid;
+        GetWindowThreadProcessId(hWnd, out pid);
+        foreach (uint candidate in pids) {
+          if (candidate == pid) { found.Add(hWnd); break; }
+        }
+        return true;
+      }, IntPtr.Zero);
+      return found;
+    }
+
+    public static void Focus(IntPtr hWnd) {
+      ShowWindow(hWnd, 9); // SW_RESTORE
+      uint foregroundPid;
+      uint foregroundThread = GetWindowThreadProcessId(GetForegroundWindow(), out foregroundPid);
+      uint self = GetCurrentThreadId();
+      AttachThreadInput(self, foregroundThread, true);
+      SetForegroundWindow(hWnd);
+      AttachThreadInput(self, foregroundThread, false);
+    }
+  }
+"@
+`;
+
+/** PowerShell that resolves Helium's process ids into `$processIds`. */
+function heliumProcessLookup(executable: string): string {
+  return `
+    $executable = '${escapeForPowerShellSingleQuotes(executable)}'
+    $processIds = @(Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $executable } | ForEach-Object { [uint32]$_.Id })
+    if ($processIds.Count -eq 0) { 'not-running'; exit }
+  `;
+}
+
+function escapeForPowerShellSingleQuotes(value: string): string {
+  return value.replace(/'/g, "''");
+}
+
+async function runHeliumScript(script: string): Promise<string> {
+  try {
+    const result = await runPowerShellScript(script, { timeout: 8000 });
+    return result.trim();
+  } catch (error) {
+    console.error("[Helium] Windows automation failed:", error);
+    return "";
+  }
+}
+
+/**
+ * Open a URL in Helium. Chromium appends it as a tab to the most recently
+ * focused window, and starts Helium first when it isn't running.
  */
 export async function openUrlInHelium(url: string): Promise<void> {
   launchHelium([url]);
+}
+
+/**
+ * Switch to an already open tab, identified by its title.
+ *
+ * Chromium exposes its tab strip through UI Automation, where each tab is a
+ * `TabItem` supporting `SelectionItemPattern` — selecting one activates it
+ * exactly like clicking it. This is what makes Search Tabs able to *switch*
+ * rather than reopen a duplicate of the URL.
+ *
+ * Titles are the only identifier the accessibility tree exposes; there is no
+ * URL. Duplicate titles are therefore ambiguous, but tabs sharing a title are
+ * almost always the same page, so activating the first is the right guess.
+ * Returns false when nothing matches — for example when the page's title
+ * changed since the tab list was read — and the caller falls back to opening
+ * the URL.
+ */
+export async function switchToTabByTitle(title: string): Promise<boolean> {
+  if (!title.trim()) return false;
+
+  const executable = requireHeliumExecutable();
+  const script = `
+    Add-Type -AssemblyName UIAutomationClient
+    Add-Type -AssemblyName UIAutomationTypes
+    ${WINDOW_HELPER_SOURCE}
+    ${heliumProcessLookup(executable)}
+
+    $target = '${escapeForPowerShellSingleQuotes(title)}'
+    $condition = New-Object System.Windows.Automation.PropertyCondition(
+      [System.Windows.Automation.AutomationElement]::ControlTypeProperty,
+      [System.Windows.Automation.ControlType]::TabItem)
+
+    foreach ($window in [HeliumWindows]::All([uint32[]]$processIds)) {
+      $root = [System.Windows.Automation.AutomationElement]::FromHandle($window)
+      foreach ($tab in $root.FindAll([System.Windows.Automation.TreeScope]::Descendants, $condition)) {
+        if ($tab.Current.Name -eq $target) {
+          [HeliumWindows]::Focus($window)
+          $tab.GetCurrentPattern([System.Windows.Automation.SelectionItemPattern]::Pattern).Select()
+          'ok'
+          exit
+        }
+      }
+    }
+    'no-match'
+  `;
+
+  return (await runHeliumScript(script)).endsWith("ok");
 }
 
 /**
@@ -66,90 +197,30 @@ export async function openUrlInHelium(url: string): Promise<void> {
  * Helium: ordinary web URLs and `about:blank` are appended as a tab to the
  * last-used window, but `chrome://` addresses, an unrecognised `--new-tab`, and
  * a bare launch all open a *new window* instead. So the command line offers
- * either the right placement (a tab, with a blank page) or the right content
+ * either the right placement (a tab, showing a blank page) or the right content
  * (the new tab page, in a new window) — never both.
  *
- * Focusing Helium and sending Ctrl+T gets both, at the cost of depending on
- * window focus. Every step is checked, and anything unexpected — Helium not
- * running, no browser window, focus refused — falls back to the command line
- * rather than firing a keystroke at whatever happens to be focused.
+ * Focusing Helium and sending Ctrl+T gets both. Every step is checked, and
+ * anything unexpected — Helium not running, no browser window, focus refused —
+ * falls back to the command line rather than firing a keystroke at whatever
+ * happens to be focused.
  */
 export async function createNewTab(): Promise<void> {
   if (await tryNewTabViaKeystroke()) return;
   launchHelium([NEW_TAB_PAGE]);
 }
 
-/**
- * Returns true only if Helium was genuinely focused and the keystroke sent.
- *
- * Window lookup matches on the owning process's executable path rather than the
- * window title: Chrome, Edge and every other Chromium browser share the
- * `Chrome_WidgetWin_1` window class, so class alone would target the wrong
- * browser. `AttachThreadInput` is the standard workaround for Windows'
- * foreground lock, which otherwise refuses focus changes from a background
- * process, and the result is verified before any input is synthesised.
- */
 async function tryNewTabViaKeystroke(): Promise<boolean> {
   const executable = requireHeliumExecutable();
-
   const script = `
     Add-Type -AssemblyName System.Windows.Forms
-    Add-Type -TypeDefinition @"
-    using System;
-    using System.Runtime.InteropServices;
-    using System.Text;
-    public class HeliumWindows {
-      public delegate bool EnumProc(IntPtr hWnd, IntPtr lParam);
-      [DllImport("user32.dll")] public static extern bool EnumWindows(EnumProc cb, IntPtr lParam);
-      [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
-      [DllImport("user32.dll", CharSet=CharSet.Unicode)] public static extern int GetClassName(IntPtr hWnd, StringBuilder s, int max);
-      [DllImport("user32.dll")] public static extern int GetWindowTextLength(IntPtr hWnd);
-      [DllImport("user32.dll")] public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint pid);
-      [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
-      [DllImport("user32.dll")] public static extern IntPtr GetForegroundWindow();
-      [DllImport("user32.dll")] public static extern bool ShowWindow(IntPtr hWnd, int cmd);
-      [DllImport("user32.dll")] public static extern bool AttachThreadInput(uint from, uint to, bool attach);
-      [DllImport("kernel32.dll")] public static extern uint GetCurrentThreadId();
+    ${WINDOW_HELPER_SOURCE}
+    ${heliumProcessLookup(executable)}
 
-      // EnumWindows walks top-level windows in Z-order, so the first match is
-      // the browser window the user looked at most recently.
-      public static IntPtr FindTopWindow(uint[] pids) {
-        IntPtr result = IntPtr.Zero;
-        EnumWindows((hWnd, lParam) => {
-          if (!IsWindowVisible(hWnd)) return true;
-          StringBuilder cls = new StringBuilder(64);
-          GetClassName(hWnd, cls, 64);
-          if (cls.ToString() != "Chrome_WidgetWin_1") return true;
-          if (GetWindowTextLength(hWnd) == 0) return true;
-          uint pid;
-          GetWindowThreadProcessId(hWnd, out pid);
-          foreach (uint candidate in pids) {
-            if (candidate == pid) { result = hWnd; return false; }
-          }
-          return true;
-        }, IntPtr.Zero);
-        return result;
-      }
+    $windows = [HeliumWindows]::All([uint32[]]$processIds)
+    if ($windows.Count -eq 0) { 'no-window'; exit }
 
-      public static void Focus(IntPtr hWnd) {
-        ShowWindow(hWnd, 9); // SW_RESTORE
-        uint foregroundPid;
-        uint foregroundThread = GetWindowThreadProcessId(GetForegroundWindow(), out foregroundPid);
-        uint self = GetCurrentThreadId();
-        AttachThreadInput(self, foregroundThread, true);
-        SetForegroundWindow(hWnd);
-        AttachThreadInput(self, foregroundThread, false);
-      }
-    }
-"@
-
-    $executable = '${escapeForPowerShellSingleQuotes(executable)}'
-    $processIds = @(Get-Process -ErrorAction SilentlyContinue | Where-Object { $_.Path -eq $executable } | ForEach-Object { [uint32]$_.Id })
-    if ($processIds.Count -eq 0) { 'not-running'; exit }
-
-    $window = [HeliumWindows]::FindTopWindow([uint32[]]$processIds)
-    if ($window -eq [IntPtr]::Zero) { 'no-window'; exit }
-
+    $window = $windows[0]
     [HeliumWindows]::Focus($window)
     Start-Sleep -Milliseconds 150
     if ([HeliumWindows]::GetForegroundWindow() -ne $window) { 'not-focused'; exit }
@@ -158,17 +229,7 @@ async function tryNewTabViaKeystroke(): Promise<boolean> {
     'ok'
   `;
 
-  try {
-    const result = await runPowerShellScript(script, { timeout: 5000 });
-    return result.trim().endsWith("ok");
-  } catch (error) {
-    console.error("[Helium] New tab keystroke failed, falling back to command line:", error);
-    return false;
-  }
-}
-
-function escapeForPowerShellSingleQuotes(value: string): string {
-  return value.replace(/'/g, "''");
+  return (await runHeliumScript(script)).endsWith("ok");
 }
 
 /** Open a new window on the new tab page. */

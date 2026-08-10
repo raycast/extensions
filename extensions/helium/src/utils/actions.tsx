@@ -1,13 +1,7 @@
 import { Action, Icon, Keyboard, showToast, Toast, closeMainWindow } from "@raycast/api";
 import type { MutatePromise } from "@raycast/utils";
 import type { Tab, Bookmark } from "../types";
-import {
-  closeHeliumTabById,
-  createNewTab,
-  isTabControlAvailable,
-  openUrlInHelium,
-  switchToHeliumTabById,
-} from "./browser-control";
+import { closeHeliumTabById, createNewTab, isTabCloseAvailable, openUrlInHelium, switchToTab } from "./browser-control";
 import { getBrowserTabs } from "./browser";
 import { idsStillPresent } from "./pending-close";
 import { getHeliumAppTarget, isWindows } from "./platform";
@@ -68,53 +62,41 @@ interface MutationActionProps extends BaseActionProps {
 }
 
 /**
- * Action to switch to an existing tab using AppleScript.
+ * Action to focus an already open tab.
  *
- * Uses the stable Helium AppleScript `id` bridged at fetch time (see
- * {@link getBrowserTabs}) so we always target the exact tab the user picked,
- * even when several tabs share the same URL.
- *
- * Windows has no way to focus a specific tab, so the action degrades to opening
- * the tab's URL in Helium and is labelled accordingly.
+ * macOS uses the stable Helium AppleScript `id` bridged at fetch time (see
+ * {@link getBrowserTabs}), so it always targets the exact tab the user picked,
+ * even when several tabs share the same URL. Windows has no such handle and
+ * matches on the tab title through the accessibility tree, falling back to
+ * opening the URL when nothing matches.
  */
 export function SwitchToTabAction({ tab }: BaseActionProps) {
-  if (!isTabControlAvailable) {
-    return (
-      <Action
-        title="Open Tab in Helium"
-        icon={Icon.ArrowRight}
-        onAction={async () => {
-          try {
-            await openUrlInHelium(tab.url);
-            await closeMainWindow();
-          } catch (error) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Failed to open tab",
-              message: error instanceof Error ? error.message : String(error),
-            });
-          }
-        }}
-      />
-    );
-  }
-
   return (
     <Action
       title="Switch to Tab"
       icon={Icon.ArrowRight}
       onAction={async () => {
         try {
-          const switched = await switchToHeliumTabById(tab.id);
-          if (switched) {
+          if (await switchToTab(tab)) {
             await closeMainWindow();
-          } else {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Tab not found",
-              message: "The tab may have been closed",
-            });
+            return;
           }
+
+          // Windows matches tabs by title through the accessibility tree, so a
+          // page that retitled itself since the list was read finds nothing.
+          // Opening the URL is the next best thing; macOS addresses tabs by a
+          // stable id, where a miss really does mean the tab is gone.
+          if (isWindows) {
+            await openUrlInHelium(tab.url);
+            await closeMainWindow();
+            return;
+          }
+
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Tab not found",
+            message: "The tab may have been closed",
+          });
         } catch (error) {
           await showToast({
             style: Toast.Style.Failure,
@@ -205,7 +187,7 @@ export function ReloadAction({ subject = "List", revalidate }: RevalidateActionP
  * browser.
  */
 export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: MutationActionProps) {
-  if (!isTabControlAvailable) return null;
+  if (!isTabCloseAvailable) return null;
 
   return (
     <Action
@@ -344,7 +326,7 @@ export function DeduplicateTabsAction({
   revalidate,
   pendingCloseIdsRef,
 }: DeduplicateTabsActionProps = {}) {
-  if (!isTabControlAvailable) return null;
+  if (!isTabCloseAvailable) return null;
 
   return (
     <Action

@@ -16,7 +16,7 @@ import {
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 import { filterPendingCloseTabs, releaseConfirmedPendingCloseIds, sharedPendingCloseIds } from "./utils/pending-close";
-import { isTabControlAvailable } from "./utils/browser-control";
+import { isTabCloseAvailable } from "./utils/browser-control";
 
 const BROWSER_EXTENSION_URL = "https://www.raycast.com/browser-extension";
 
@@ -47,12 +47,12 @@ export default function SearchTabs() {
           icon={Icon.Window}
           title="No Tabs Found"
           description={
-            isTabControlAvailable
+            isTabCloseAvailable
               ? "Make sure your browser is running with open tabs"
               : "On Windows, tabs come from Raycast's browser extension — install it in Helium and make sure Helium is running. It reports tabs from every browser it is installed in, so tabs from other browsers can appear here too."
           }
           actions={
-            isTabControlAvailable ? undefined : (
+            isTabCloseAvailable ? undefined : (
               <ActionPanel>
                 {/* Opened in Helium specifically — installing it in another browser would not help. */}
                 <OpenInHeliumAction

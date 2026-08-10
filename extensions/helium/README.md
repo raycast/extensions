@@ -28,10 +28,11 @@ Helium's installer registers under `Clients\StartMenuInternet`, which covers ins
 folders. Portable zip builds register nothing — for those, set **Helium Location** in the extension preferences to the
 full path of Helium's `chrome.exe`.
 
-**Search Tabs is read-only on Windows.** Chromium exposes no scripting interface there, so tabs are read through
+**Search Tabs works differently on Windows.** Chromium exposes no scripting interface there, so tabs are read through
 [Raycast's browser extension](https://www.raycast.com/browser-extension) — install it in Helium, otherwise the tab list
-stays empty. Selecting a tab opens its URL in Helium rather than focusing the existing tab, and closing tabs and
-deduplicating tabs are unavailable.
+stays empty. Selecting a tab focuses it through the Windows accessibility tree, matching on the tab's title; if the page
+has retitled itself since the list was read, the URL is opened instead. Closing tabs and deduplicating tabs have no
+Windows equivalent and are hidden.
 
 Note that Raycast's browser extension reports tabs from every browser it is installed in, and its API does not say which
 browser a tab belongs to. If you also run it in another Chromium browser, those tabs appear in this list as well.
