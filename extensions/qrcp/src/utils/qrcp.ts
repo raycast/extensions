@@ -1,5 +1,6 @@
 import { createServer, IncomingMessage } from "http";
-import { networkInterfaces, homedir } from "os";
+import dgram from "dgram";
+import { homedir } from "os";
 import QRCode from "qrcode";
 import path from "path";
 import fs from "fs";
@@ -402,16 +403,36 @@ export async function generateQRCode(url: string): Promise<string> {
   return await QRCode.toDataURL(url);
 }
 
-export function getLocalIp(): string {
-  const nets = networkInterfaces();
-  for (const name of Object.keys(nets)) {
-    for (const net of nets[name]!) {
-      if (net.family === "IPv4" && !net.internal) {
-        return net.address;
+export async function getLocalIp(): Promise<string> {
+  return new Promise((resolve) => {
+    const socket = dgram.createSocket("udp4");
+    let finished = false;
+
+    const finish = (ip: string) => {
+      if (finished) {
+        return;
       }
-    }
-  }
-  return "localhost";
+      finished = true;
+      try {
+        socket.close();
+      } catch {
+        // ignore
+      }
+      resolve(ip);
+    };
+
+    socket.once("error", () => finish("localhost"));
+    socket.connect(53, "1.1.1.1", () => {
+      const address = socket.address();
+      if (typeof address === "object" && address.address) {
+        finish(address.address);
+      } else {
+        finish("localhost");
+      }
+    });
+
+    setTimeout(() => finish("localhost"), 2000);
+  });
 }
 
 type ReceiveServerOptions = {
@@ -419,7 +440,7 @@ type ReceiveServerOptions = {
 };
 
 export async function startReceiveServer(options: ReceiveServerOptions = {}) {
-  const ip = getLocalIp();
+  const ip = await getLocalIp();
   const port = 0;
   let fileReceivedCallback: (fileName: string) => void = () => {};
   let deviceConnectedCallback: (ip: string) => void = () => {};
@@ -483,7 +504,7 @@ export async function startReceiveServer(options: ReceiveServerOptions = {}) {
 }
 
 export async function startSendServer(files: string[]) {
-  const ip = getLocalIp();
+  const ip = await getLocalIp();
   const port = 0;
   let downloadCallback: () => void = () => {};
   const downloadPageHtml = `<!DOCTYPE html>
