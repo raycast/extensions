@@ -27,7 +27,7 @@
     },
     {
       "name": "timer",
-      "title": "Execute timer command",
+      "title": "Execute Timer Command",
       "subtitle": "Antinote (beta)",
       "description": "Executes a timer command. This feature is only available in Antinote v2.* (beta)",
       "mode": "view"

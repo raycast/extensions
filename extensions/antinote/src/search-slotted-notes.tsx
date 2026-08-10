@@ -1,8 +1,8 @@
-import { ActionPanel, Action, Icon, List, Detail, closeMainWindow } from "@raycast/api";
+import { ActionPanel, Action, List, Detail, closeMainWindow } from "@raycast/api";
 import { runAppleScript, showFailureToast, useSQL } from "@raycast/utils";
 import { checkAntinoteInstalled } from "./utils";
 import { useEffect, useState } from "react";
-import { STABLE_DB_PATH, BETA_DB_PATH, SETAPP_DB_PATH } from "./constants";
+import { BETA_DB_PATH } from "./constants";
 
 type Note = {
   id: string;
@@ -12,7 +12,8 @@ type Note = {
   slot: number;
 };
 
-const iconMap = [ 
+// Slot index always goes from 1 to 9, so 0 can be ignored.
+const iconMap = [
   "",
   "planets/Mercury.png",
   "planets/Venus.png",
@@ -22,15 +23,8 @@ const iconMap = [
   "planets/Saturn.png",
   "planets/Uranus.png",
   "planets/Neptune.png",
-  "planets/Pluto.png", 
+  "planets/Pluto.png",
 ];
-
-const query = `
-  SELECT id, content, created, lastModified
-  FROM notes
-  WHERE content IS NOT ''
-  ORDER BY lastModified DESC
-`;
 
 const beta_query = `
 SELECT upper(
@@ -41,7 +35,7 @@ SELECT upper(
     substr(hex(ZID), 21, 12)
 ) AS id, ZCONTENT as content, ZCREATED as created, ZLASTMODIFIED as lastModified, ZSLOTINDEX as slot
   FROM ZNOTE
-  WHERE ZCONTENT IS NOT '' AND ZISSLOTTED = 1
+  WHERE ZCONTENT IS NOT '' AND ZISSLOTTED = 1 AND ZSOFTDELETED = 0
   ORDER BY ZSLOTINDEX ASC
 `;
 
@@ -74,22 +68,15 @@ async function openInAntinote(noteId: string) {
   }
 }
 
-function resolveDb(version: string | null) {
-  switch (version) {
-    case "setapp":
-      return useSQL<Note>(SETAPP_DB_PATH, query);
-    case "beta":
-      return useSQL<Note>(BETA_DB_PATH, beta_query);
-    default:
-      return useSQL<Note>(STABLE_DB_PATH, query);
-  }
+function resolveDb() {
+  return useSQL<Note>(BETA_DB_PATH, beta_query);
 }
 
 export default function Command() {
   const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
   const [version, setVersion] = useState<string | null>(null);
 
-  const { isLoading, data: notes, permissionView } = resolveDb(version);
+  const { isLoading, data: notes, permissionView } = resolveDb();
 
   useEffect(() => {
     async function checkInstallation() {
@@ -147,7 +134,7 @@ export default function Command() {
               <Action
                 title="Find in Antinote"
                 onAction={async () => {
-                  openInAntinote(item.id);
+                  await openInAntinote(item.id);
                 }}
               />
             </ActionPanel>

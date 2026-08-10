@@ -8,9 +8,8 @@ type Preferences = {
 
 export function getPreferBetaPreference() {
   const { preferBeta = "true" } = getPreferenceValues<Preferences>();
-  return preferBeta === true || preferBeta === "true";
+  return preferBeta === "true";
 }
-
 
 export async function checkAntinoteInstalled() {
   const applications = await getApplications();

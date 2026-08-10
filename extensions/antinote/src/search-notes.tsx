@@ -61,14 +61,8 @@ async function openInAntinote(noteId: string) {
 }
 
 function resolveDb(version: string | null) {
-  switch (version) {
-    case "setapp":
-      return useSQL<Note>(SETAPP_DB_PATH, query);
-    case "beta":
-      return useSQL<Note>(BETA_DB_PATH, beta_query);
-    default:
-      return useSQL<Note>(STABLE_DB_PATH, query);
-  }
+  const dbPath = version === "setapp" ? SETAPP_DB_PATH : version === "beta" ? BETA_DB_PATH : STABLE_DB_PATH;
+  return useSQL<Note>(dbPath, version === "beta" ? beta_query : query);
 }
 
 export default function Command() {
@@ -129,7 +123,7 @@ export default function Command() {
               <Action
                 title="Find in Antinote"
                 onAction={async () => {
-                  openInAntinote(item.id);
+                  await openInAntinote(item.id);
                 }}
               />
             </ActionPanel>

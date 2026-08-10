@@ -1,5 +1,5 @@
 import { closeMainWindow, List, Action, ActionPanel, Detail } from "@raycast/api";
-import { runAppleScript, showFailureToast, useCachedPromise } from "@raycast/utils";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { checkAntinoteInstalled } from "./utils";
 import { useState, useEffect } from "react";
 
@@ -17,26 +17,25 @@ const listItems: Item[] = [
   { id: "reset", command: "r", title: "Reset timer" },
   { id: "stop", command: "s", title: "Stop timer" },
   { id: "breathe", command: "breathe", title: "Start breathing session" },
-]
+];
 
 async function execCommand(command: string) {
   try {
-    runAppleScript(
+    await runAppleScript(
       `tell application "Antinote"
         activate
         delay 0.3
-        open location "antinote://x-callback-url/timer?command=${command}"
+        open location "antinote://x-callback-url/timer?command=${encodeURIComponent(command)}"
       end tell`,
     );
 
     await closeMainWindow({ clearRootSearch: true });
   } catch (error) {
-    await showFailureToast(error, { title: "Failed to create new note with timer in Antinote" });
+    await showFailureToast(error, { title: "Failed to execute timer command in Antinote" });
   }
 }
 
 function getLabel(command: string) {
-
   if (command.startsWith("s")) {
     return "Stop timer";
   }
@@ -57,38 +56,37 @@ function getLabel(command: string) {
     return "Start breathing session";
   }
 
-  const timerRe = new RegExp(/^([0-9]+)?(:[0-9]*)?[^\:0-9]*$/);
-  const timerLabelRe = new RegExp(/^([0-9]+)?(:[0-9]*)?[^\:]*(:.+)$/);
+  const timerRe = new RegExp(/^([0-9]+)?(:[0-9]*)?[^:0-9]*$/);
+  const timerLabelRe = new RegExp(/^([0-9]+)?(:[0-9]*)?[^:]*(:.+)$/);
   const pomoRe = new RegExp(/^([0-9]+)?(:[0-9]*)?\s([0-9][0-9]*)(:[0-9]*)?\s?$/);
 
   const matchTimer = timerRe.exec(command);
   if (matchTimer) {
-    let minutes = matchTimer[1] || "0";
-    let seconds = ((matchTimer[2] || "0").replace(":", "") || "0").trim();
+    const minutes = matchTimer[1] || "0";
+    const seconds = ((matchTimer[2] || "0").replace(":", "") || "0").trim();
 
     return `Start timer for ${minutes} minutes and ${seconds} seconds`;
   }
 
   const matchPomo = pomoRe.exec(command);
   if (matchPomo) {
-    let minutes1 = matchPomo[1] || "0";
-    let seconds1 = ((matchPomo[2] || "0").replace(":", "") || "0").trim();
+    const minutes1 = matchPomo[1] || "0";
+    const seconds1 = ((matchPomo[2] || "0").replace(":", "") || "0").trim();
 
-    let minutes2 = matchPomo[3] || "0";
-    let seconds2 = ((matchPomo[4] || "0").replace(":", "") || "0").trim();
+    const minutes2 = matchPomo[3] || "0";
+    const seconds2 = ((matchPomo[4] || "0").replace(":", "") || "0").trim();
 
     return `Start custom ${minutes1} minutes and ${seconds1} seconds / ${minutes2} minutes and ${seconds2} seconds Pomodoro timer`;
   }
 
   const matchTimerLabel = timerLabelRe.exec(command);
   if (matchTimerLabel) {
-    let minutes = matchTimerLabel[1] || "0";
-    let seconds = ((matchTimerLabel[2] || "0").replace(":", "") || "0").trim();
-    let label = (matchTimerLabel[3] || "").replace(":", "").trim();
+    const minutes = matchTimerLabel[1] || "0";
+    const seconds = ((matchTimerLabel[2] || "0").replace(":", "") || "0").trim();
+    const label = (matchTimerLabel[3] || "").replace(":", "").trim();
 
     return `Start timer for ${minutes} minutes and ${seconds} seconds with label "${label}"`;
   }
-
 
   return "Start stopwatch";
 }
@@ -111,18 +109,22 @@ export default function Command() {
 
   useEffect(() => {
     if (searchText === "") {
-      filterList(listItems)
+      filterList(listItems);
     } else {
       filterList([
         {
           id: "custom",
           command: searchText,
           title: searchText,
-          subtitle: getLabel(searchText)
-        }
-      ])
+          subtitle: getLabel(searchText),
+        },
+      ]);
     }
-  }, [searchText])
+  }, [searchText]);
+
+  if (isInstalled === null) {
+    return <List isLoading={true} />;
+  }
 
   if (isInstalled === false) {
     return <Detail markdown="Antinote is not installed." />;
@@ -133,7 +135,8 @@ export default function Command() {
   }
 
   return (
-    <List searchBarPlaceholder="Pick a command or type time to start a timer..."
+    <List
+      searchBarPlaceholder="Pick a command or type time to start a timer..."
       onSearchTextChange={setSearchedText}
       filtering={false}
     >
@@ -145,13 +148,12 @@ export default function Command() {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                 <Action title="Execute command" onAction={() => execCommand(item.command)} />
+                <Action title="Execute Command" onAction={() => execCommand(item.command)} />
               </ActionPanel.Section>
             </ActionPanel>
           }
         />
       ))}
     </List>
-  )
-
+  );
 }

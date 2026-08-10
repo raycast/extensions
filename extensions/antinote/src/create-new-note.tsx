@@ -14,7 +14,7 @@ export default async function Command(props: LaunchProps<{ arguments: { content:
       `tell application "Antinote"
         activate
         delay 0.3
-        open location "antinote://x-callback-url/createNote?content=${props.arguments.content}"
+        open location "antinote://x-callback-url/createNote?content=${encodeURIComponent(props.arguments.content)}"
       end tell`,
     );
 
