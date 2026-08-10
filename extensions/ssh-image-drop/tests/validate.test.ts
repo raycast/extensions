@@ -289,7 +289,9 @@ describe("sanitizeLocalName (Windows pull 로컬 파일명)", () => {
   });
   it("정규화로 비면 file 폴백, 일반 이름은 불변", () => {
     expect(sanitizeLocalName("...", true)).toBe("file");
-    expect(sanitizeLocalName("스크린샷 (1).png", true)).toBe("스크린샷 (1).png");
+    expect(sanitizeLocalName("스크린샷 (1).png", true)).toBe(
+      "스크린샷 (1).png",
+    );
   });
 });
 

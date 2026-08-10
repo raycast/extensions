@@ -26,13 +26,13 @@ import {
   confirmFolderPull,
   confirmFolderSend,
   deliverPath,
+  deliverPulledPath,
   ensureKnownHost,
   prefs,
   readAllHosts,
   runPull,
   runSend,
   runSendFiles,
-  revealInFinder,
 } from "./runtime/system";
 
 /**
@@ -417,12 +417,12 @@ export default function SendFileToServer(props: LaunchProps) {
           ctx.remotePath,
           prefs().downloadDir,
         );
-        await Clipboard.copy(localPath);
-        await addRecent(host);
-        await revealInFinder(localPath);
-        await animated.hide();
+        // 다운로드는 끝났다 — 부가 처리 실패가 pull 실패로 보고되면 안 된다
+        await addRecent(host).catch(() => undefined);
+        await animated.hide().catch(() => undefined);
         animated = undefined;
-        await showHUD(`✅ Pulled from ${host}`);
+        const delivered = await deliverPulledPath(localPath);
+        await showHUD(`✅ Pulled from ${host}${delivered}`);
       }
     } catch (e) {
       if (animated) await animated.hide(); // finder 진행 toast가 떠 있으면 정리 (스코프 누수 방지)

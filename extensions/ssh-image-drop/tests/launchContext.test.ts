@@ -17,9 +17,9 @@ describe("parseSelectorContext", () => {
     expect(parseSelectorContext({ payload: "finder" })).toEqual({
       payload: "none",
     });
-    expect(
-      parseSelectorContext({ payload: "finder", host: "-bad" }),
-    ).toEqual({ payload: "none" });
+    expect(parseSelectorContext({ payload: "finder", host: "-bad" })).toEqual({
+      payload: "none",
+    });
     expect(parseSelectorContext({ payload: "finder", host: 42 })).toEqual({
       payload: "none",
     });

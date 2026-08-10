@@ -1,5 +1,4 @@
 import {
-  Clipboard,
   LaunchProps,
   LaunchType,
   launchCommand,
@@ -16,10 +15,10 @@ import {
 import { addRecent, getAuthMode } from "./runtime/store";
 import {
   confirmFolderPull,
+  deliverPulledPath,
   ensureKnownHost,
   prefs,
   readClipboardText,
-  revealInFinder,
   runPull,
 } from "./runtime/system";
 
@@ -84,18 +83,9 @@ export default async function main(props: LaunchProps) {
     title: `Pulling from ${host}…`,
     message: remoteBasename(remotePath),
   });
+  let localPath: string;
   try {
-    const localPath = await runPull(
-      host,
-      mode,
-      remotePath,
-      prefs().downloadDir,
-    );
-    await Clipboard.copy(localPath);
-    await addRecent(host);
-    await revealInFinder(localPath);
-    await toast.hide();
-    await showHUD(`✅ Pulled from ${host}`);
+    localPath = await runPull(host, mode, remotePath, prefs().downloadDir);
   } catch (e) {
     await toast.hide();
     await showToast({
@@ -103,5 +93,12 @@ export default async function main(props: LaunchProps) {
       title: `Pull from ${host} failed`,
       message: `${remotePath} — ${(e as Error).message}`,
     });
+    return;
   }
+
+  // 다운로드는 끝났다 — 부가 처리 실패가 pull 실패로 보고되면 안 된다
+  await addRecent(host).catch(() => undefined);
+  await toast.hide().catch(() => undefined);
+  const delivered = await deliverPulledPath(localPath);
+  await showHUD(`✅ Pulled from ${host}${delivered}`);
 }

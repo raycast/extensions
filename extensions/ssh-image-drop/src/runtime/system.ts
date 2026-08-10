@@ -331,6 +331,23 @@ export async function deliverPath(text: string): Promise<string> {
   }
 }
 
+/**
+ * pull 성공 후 로컬 경로 전달(클립보드 복사 + 파일 관리자 reveal).
+ * 예외를 전파하지 않는다 — 다운로드는 이미 끝났으므로 호출부 catch가 pull 실패로
+ * 보고하면 안 된다. HUD에 덧붙일 접미사만 반환한다.
+ */
+export async function deliverPulledPath(localPath: string): Promise<string> {
+  let copied = false;
+  try {
+    await Clipboard.copy(localPath);
+    copied = true;
+  } catch {
+    // 복사 실패는 접미사로만 알린다 — 파일은 이미 받아 있다
+  }
+  await revealInFinder(localPath).catch(() => undefined);
+  return copied ? "" : " — couldn't copy the path";
+}
+
 // ---------- credentials / key install ----------
 
 /** alias의 PW를 OS 자격증명 저장소에 저장 (macOS Keychain / Windows DPAPI blob) */

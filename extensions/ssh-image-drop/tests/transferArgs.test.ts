@@ -53,9 +53,7 @@ describe("buildSendArgs", () => {
   it("bare ~ / ~/ remoteDir targets home itself (no literal ~ dir)", () => {
     // trailing slash 제거로 "~/"가 "~"가 되어도 홈으로 확장돼야 함
     const args = buildSendArgs("mm", "~/", "clip-x.png", "key");
-    expect(args[args.length - 1]).toBe(
-      "mkdir -p ~ && cat > ~/'clip-x.png'",
-    );
+    expect(args[args.length - 1]).toBe("mkdir -p ~ && cat > ~/'clip-x.png'");
   });
 });
 
@@ -72,7 +70,12 @@ describe("buildPullArgs", () => {
     expect(args).toContain("BatchMode=yes");
   });
   it("-r 포함 — 파일·폴더 모두 pull 가능", () => {
-    const args = buildPullArgs("mm", "/tmp/dir", "/Users/x/Downloads/dir", "key");
+    const args = buildPullArgs(
+      "mm",
+      "/tmp/dir",
+      "/Users/x/Downloads/dir",
+      "key",
+    );
     expect(args).toContain("-r");
   });
   it("-s 포함 — legacy scp(원격 shell 평가) 다운그레이드 차단, 미지원 바이너리는 fail-closed", () => {

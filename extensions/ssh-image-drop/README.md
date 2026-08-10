@@ -8,12 +8,12 @@ Typical use: push config files or skill folders to whichever box your agent runs
 
 ## Commands
 
-| Command | What it does |
-| --- | --- |
-| **Send File to Server** | Pick files or folders and a server, hit Enter. Pre-filled from your Finder selection on macOS. |
-| **Send Clipboard Image** | Sends the clipboard image, copies the remote path back. |
-| **Pull File from Server** | Takes a remote path from the clipboard, downloads it, reveals it in Finder / Explorer. |
-| **Manage Servers** | Add, edit, and delete servers. Reads `~/.ssh/config`. |
+| Command                   | What it does                                                                                   |
+| ------------------------- | ---------------------------------------------------------------------------------------------- |
+| **Send File to Server**   | Pick files or folders and a server, hit Enter. Pre-filled from your Finder selection on macOS. |
+| **Send Clipboard Image**  | Sends the clipboard image, copies the remote path back.                                        |
+| **Pull File from Server** | Takes a remote path from the clipboard, downloads it, reveals it in Finder / Explorer.         |
+| **Manage Servers**        | Add, edit, and delete servers. Reads `~/.ssh/config`.                                          |
 
 Bind a server to a hotkey with Raycast's **Create Quicklink**, available on every row of the server picker. There is no host to type: a Quicklink carries the target, and launching without one opens the picker.
 
@@ -21,10 +21,10 @@ Folder transfers ask for confirmation. Pulling `/` or your whole home directory 
 
 ## Authentication
 
-| Mode | How the password is handled |
-| --- | --- |
+| Mode                          | How the password is handled                                                                                                                    |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Stored password** (default) | Kept in the OS credential store — macOS Keychain, or a DPAPI-encrypted file on Windows — and read by an `SSH_ASKPASS` helper on each transfer. |
-| **SSH key** (opt-in) | A dedicated ed25519 key is installed on the server. The password is used once, then discarded. |
+| **SSH key** (opt-in)          | A dedicated ed25519 key is installed on the server. The password is used once, then discarded.                                                 |
 
 In neither mode does the password reach argv, plaintext disk, LocalStorage, or a persistent environment variable.
 
