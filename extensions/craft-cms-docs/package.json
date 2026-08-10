@@ -34,7 +34,12 @@
           "description": "Craft CMS docs version",
           "type": "dropdown",
           "required": true,
+          "default": "5.x",
           "data": [
+            {
+              "title": "6.x",
+              "value": "6.x"
+            },
             {
               "title": "5.x",
               "value": "5.x"

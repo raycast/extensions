@@ -1,6 +1,7 @@
 import { Note } from "@/obsidian";
 import { getPreferenceValues, getSelectedText, Icon } from "@raycast/api";
 import fs from "fs";
+import { homedir } from "os";
 import path from "path";
 import {
   AUDIO_FILE_EXTENSIONS,
@@ -58,6 +59,25 @@ export function trimPathToMaxLength(path: string, maxLength: number) {
   } else {
     return path.slice(1);
   }
+}
+
+export function simplifyHomePath(filePath: string) {
+  const userHome = homedir();
+
+  // I'm not sure which symbol Windows users expect for their home directory, so we leave it untouched for now.
+  if (process.platform === "win32") {
+    return filePath;
+  }
+
+  if (filePath === userHome) {
+    return "~";
+  }
+
+  if (filePath.startsWith(`${userHome}${path.sep}`)) {
+    return `~${filePath.slice(userHome.length)}`;
+  }
+
+  return filePath;
 }
 
 /**

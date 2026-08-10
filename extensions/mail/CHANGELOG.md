@@ -1,5 +1,17 @@
 # Mail Changelog
 
+## [Fix] - 2026-06-15
+
+- Fix sending composed messages when the subject or other message fields contain double quotes.
+
+## [Improvement] - 2026-06-10
+
+- Add option to manually set the type of a mailbox (inbox, junk, etc.), useful for non-English mail accounts
+
+## [Add AI Tools] - 2026-06-05
+
+- Add new AI tool `move-to-trash` to move one or more Apple Mail emails to Trash.
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

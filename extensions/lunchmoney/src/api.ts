@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import createClient, { Middleware } from "openapi-fetch";
 import { useMemo } from "react";
 import type { components, paths } from "./lunchmoney-api";
@@ -53,4 +54,23 @@ export function useLunchMoney() {
   }, [token]);
 
   return client;
+}
+
+async function fetchPrimaryCurrency(client: ReturnType<typeof useLunchMoney>): Promise<string> {
+  const { data } = await client.GET("/me");
+  return data?.primary_currency ?? "usd";
+}
+
+/**
+ * The user's primary currency (from account settings), for labeling aggregate totals that
+ * are computed in the primary currency via each object's `to_base`. Defaults to "usd" until
+ * loaded. Lowercase ISO 4217, as returned by the API.
+ *
+ * Uses a module-level fetch function (stable reference) so useCachedPromise shares one cache
+ * entry across every component that calls this hook, rather than one /me request per caller.
+ */
+export function usePrimaryCurrency(): string {
+  const client = useLunchMoney();
+  const { data } = useCachedPromise(fetchPrimaryCurrency, [client]);
+  return data ?? "usd";
 }

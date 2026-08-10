@@ -21,7 +21,8 @@
     "ridemountainpig",
     "msms",
     "0xdhrv",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "haneul486"
   ],
   "pastContributors": [
     "danulqua"
@@ -84,6 +85,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

@@ -22,7 +22,8 @@
     "ridemountainpig",
     "meganpearson",
     "alastair_scheuermann",
-    "dangkhoipro"
+    "dangkhoipro",
+    "cblokkeel"
   ],
   "keywords": [
     "pomodoro",
@@ -249,6 +250,15 @@
       "description": "Hide time on the Menu Bar when the timer is stopped",
       "default": true,
       "label": "Hide the time when stopped"
+    },
+    {
+      "name": "hideMenuBarWhenStopped",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Menu Bar When Stopped",
+      "description": "Hide the entire menu bar item when the timer is stopped",
+      "default": false,
+      "label": "Hide menu bar when stopped"
     },
     {
       "name": "enableFocusWhileFocused",

@@ -1,5 +1,10 @@
 # One-Time Secret Changelog
 
+## [Longer lifetimes and configurable clipboard default] - 2026-05-12
+
+- **Send One-Time Secret** now offers **1 minute** and **30 days** in addition to the existing lifetimes.
+- **Send from Clipboard** exposes a **Default Lifetime** command preference (defaults to **1 hour**, previously fixed at 3 hours) and offers the same full list of lifetimes as the form.
+
 ## [Recent Secrets, region choice, and receipt access] - 2026-03-25
 
 - Choose your **region** (Canada, EU, New Zealand, UK, or US) so you can decide where your data is stored.
@@ -13,10 +18,12 @@
 - **Send One-Time Secret**: after a successful share, Raycast **closes** and draft state is cleared so the form does not stay open with the previous secret, and reopening the command does not restore that secret.
 
 ## [AI Ready + Windows Support] - 2025-12-15
+
 - Adds **Windows** support
 - Adds support to use as an **AI** extension
 
 ## [More Secure and Useable] - 2023-06-28
+
 - Sends secret and metadata in POST body which is encrypted over HTTPS instead of URL parameters
 - Adds support for Drafts, allowing you to come back to a secret you're collating later
 

@@ -7,6 +7,7 @@ import {
   getLunarDayOccurrences,
   getFullDetail,
   getDateDiff,
+  getSolarTerm,
 } from "./utils/date-utils";
 import { SolarDate } from "lunar-date-vn";
 import {
@@ -161,6 +162,18 @@ export default function DayDetailView({ date: initialDate }: Props) {
                       title="Day"
                       text={details.canChi.day}
                     />
+                    <List.Item.Detail.Metadata.Separator />
+
+                    {(() => {
+                      const solarTerm = getSolarTerm(date);
+                      if (!solarTerm) return null;
+                      return (
+                        <List.Item.Detail.Metadata.Label
+                          title="Tiết Khí"
+                          text={`${solarTerm.emoji} ${solarTerm.name} (ngày ${solarTerm.day})`}
+                        />
+                      );
+                    })()}
 
                     {holiday && (
                       <>

@@ -5,6 +5,7 @@
   "description": "Fuzzy-search files by full path to reach the right item instantly.",
   "icon": "extension-icon.png",
   "author": "erykksc",
+  "contributors": ["gilitos92"],
   "categories": [
     "Productivity",
     "System"

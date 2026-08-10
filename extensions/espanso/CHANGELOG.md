@@ -1,5 +1,15 @@
 # Espanso Changelog
 
+## [Fix Espanso binary not being found] - 2026-08-03
+
+### Bug Fixes
+
+- Fixed all commands failing with `Failed to run 'espanso path'` when the Espanso Binary Path preference was left empty. Raycast is launched by launchd and so inherits `PATH=/usr/bin:/bin:/usr/sbin:/sbin`, which contains neither Homebrew prefix — a bare `espanso` could never resolve there. The binary is now located by probing `/opt/homebrew/bin/espanso`, `/usr/local/bin/espanso`, and the `Espanso.app` bundle, so the extension works out of the box on both Apple Silicon and Intel, and with a Homebrew-less install. Setting the preference still overrides the probe, and surrounding whitespace in it is now ignored.
+
+## [Fix Search Matches memory usage] - 2026-05-28
+
+- Reduced Search Matches memory usage by loading replacement previews only for the selected match.
+
 ## [1.1.0] - 2026-04-16
 
 ### What's Changed

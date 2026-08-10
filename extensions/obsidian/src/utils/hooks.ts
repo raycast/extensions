@@ -104,7 +104,7 @@ export function useMedia(vault: ObsidianVault) {
           );
 
           setMedia({ ready: true, media });
-        } catch (error) {
+        } catch {
           showToast({
             title: "The path set in preferences doesn't exist",
             message: "Please set a valid path in preferences",

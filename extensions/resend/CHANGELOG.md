@@ -1,5 +1,9 @@
 # Resend Changelog
 
+## [OAuth Support] - 2026-07-09
+
+- This update brings OAuth support
+
 ## [Use Resend SDK + Add Windows Support] - 2025-11-03
 
 - Add Windows Support

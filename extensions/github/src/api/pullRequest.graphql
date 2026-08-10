@@ -281,6 +281,14 @@ mutation reopenPullRequest($nodeId: ID!) {
   }
 }
 
+mutation markPullRequestReadyForReview($nodeId: ID!) {
+  markPullRequestReadyForReview(input: { pullRequestId: $nodeId }) {
+    pullRequest {
+      id
+    }
+  }
+}
+
 mutation addPullRequestReview($nodeId: ID!, $event: PullRequestReviewEvent, $body: String) {
   addPullRequestReview(input: { pullRequestId: $nodeId, event: $event, body: $body }) {
     pullRequestReview {

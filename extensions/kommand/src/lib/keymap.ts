@@ -226,3 +226,17 @@ export function keywordsForSteps(
   }
   return [...keywords];
 }
+
+/**
+ * Tokenizes a multi-word phrase into search keywords. Raycast matches keywords
+ * as whole tokens, so "Apple Mail" only matches "apple". Splitting on
+ * whitespace lets a search for "mail" find it too. Returns the full phrase
+ * plus each word when there is more than one.
+ */
+export function tokenizeForKeywords(
+  phrase: string | null | undefined,
+): string[] {
+  if (!phrase) return [];
+  const tokens = phrase.split(/\s+/).filter(Boolean);
+  return tokens.length > 1 ? [phrase, ...tokens] : [phrase];
+}

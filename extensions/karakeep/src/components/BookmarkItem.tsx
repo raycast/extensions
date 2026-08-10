@@ -12,13 +12,16 @@ import {
 } from "../constants";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark, Config } from "../types";
+import { markdownImage } from "../utils/markdown";
 import { getScreenshot } from "../utils/screenshot";
+import { markToastFailed } from "../utils/toast";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
 import { NoteEdit } from "./NoteEdit";
 
 const log = logger.child("[BookmarkItem]");
 const { Metadata } = List.Item.Detail;
+
 interface BookmarkItemProps {
   bookmark: Bookmark;
   config: Config;
@@ -118,8 +121,7 @@ function useBookmarkHandlers({
         }
       } catch (error) {
         log.error(`Bookmark action '${action}' failed`, error);
-        toast.style = Toast.Style.Failure;
-        toast.message = String(error);
+        markToastFailed(toast, toast.title, error);
         if (action !== "delete") {
           await fetchLatestBookmark();
         }
@@ -486,22 +488,27 @@ function BookmarkActions({
           />
         )}
       </ActionPanel.Section>
-      <ActionPanel.Section title={t("bookmarkItem.actions.getBrowserExtension")}>
-        <Action.OpenInBrowser
-          title={t("bookmarkItem.actions.installChromeExtension")}
-          url="https://chromewebstore.google.com/detail/karakeep/kgcjekpmcjjogibpjebkhaanilehneje"
-          icon={Icon.Globe}
-        />
-        <Action.OpenInBrowser
-          title={t("bookmarkItem.actions.installFirefoxAddon")}
-          url="https://addons.mozilla.org/en-US/firefox/addon/karakeep/"
-          icon={Icon.Globe}
-        />
-        <Action.OpenInBrowser
-          title={t("bookmarkItem.actions.installSafariExtension")}
-          url="https://apps.apple.com/us/app/karakeeper-bookmarker/id6746722790"
-          icon={Icon.Globe}
-        />
+      <ActionPanel.Section>
+        {/* Submenu rather than three top-level actions: these are one-time
+            setup steps, and flattening them pushed Delete off the visible
+            portion of the panel. */}
+        <ActionPanel.Submenu title={t("bookmarkItem.actions.addToBrowser")} icon={Icon.Globe}>
+          <Action.OpenInBrowser
+            title={t("bookmarkItem.actions.browsers.chrome")}
+            url="https://chromewebstore.google.com/detail/karakeep/kgcjekpmcjjogibpjebkhaanilehneje"
+            icon={Icon.Globe}
+          />
+          <Action.OpenInBrowser
+            title={t("bookmarkItem.actions.browsers.firefox")}
+            url="https://addons.mozilla.org/en-US/firefox/addon/karakeep/"
+            icon={Icon.Globe}
+          />
+          <Action.OpenInBrowser
+            title={t("bookmarkItem.actions.browsers.safari")}
+            url="https://apps.apple.com/us/app/karakeeper-bookmarker/id6746722790"
+            icon={Icon.Globe}
+          />
+        </ActionPanel.Submenu>
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
@@ -534,6 +541,7 @@ export function BookmarkItem({
     Boolean(isSelected) &&
     ((bookmark.content.type === "link" && config.displayBookmarkPreview) ||
       (bookmark.content.type === "asset" && bookmark.content.assetType === "image"));
+
   const images = useBookmarkImages(bookmark, shouldPrewarmPreview);
 
   const handlers = useBookmarkHandlers({
@@ -592,7 +600,7 @@ export function BookmarkItem({
       icon={getIcon()}
       detail={
         <List.Item.Detail
-          markdown={previewImage ? `<img src="${previewImage}" center width="300" />` : ""}
+          markdown={previewImage ? markdownImage(previewImage, getDisplayTitle(), { raycastWidth: 300 }) : ""}
           metadata={<BookmarkMetadata bookmark={bookmark} config={config} t={t} />}
         />
       }

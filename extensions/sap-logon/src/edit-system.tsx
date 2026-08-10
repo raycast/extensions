@@ -2,8 +2,18 @@ import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@ray
 import { useForm, FormValidation, usePromise } from "@raycast/utils";
 import { useCallback, useEffect } from "react";
 import { LanguageDropdown } from "./components";
-import { SAPSystem, SAPSystemFormValues } from "./types";
-import { getPassword, updateSAPSystem, validateClient, validateInstanceNumber } from "./utils";
+import { SAPSystem, SAPSystemFormValues, SystemType } from "./types";
+import {
+  getPassword,
+  SYSTEM_TYPE_LABELS,
+  SYSTEM_TYPES,
+  updateSAPSystem,
+  validateApplicationServer,
+  validateClient,
+  validateInstanceNumber,
+  validatePassword,
+  validateUsername,
+} from "./utils";
 
 interface EditSystemFormProps {
   system: SAPSystem;
@@ -21,12 +31,14 @@ export default function EditSystemForm({ system, onSave }: EditSystemFormProps) 
         await updateSAPSystem(
           system.id,
           {
+            customerName: values.customerName.trim(),
             systemId: values.systemId.trim().toUpperCase(),
+            systemType: values.systemType as SystemType,
             applicationServer: values.applicationServer.trim(),
             instanceNumber: values.instanceNumber.trim(),
             client: values.client.trim(),
             username: values.username.trim(),
-            language: values.language || "EN",
+            language: values.language,
           },
           values.password,
         );
@@ -48,7 +60,9 @@ export default function EditSystemForm({ system, onSave }: EditSystemFormProps) 
       }
     },
     initialValues: {
+      customerName: system.customerName,
       systemId: system.systemId,
+      systemType: system.systemType,
       applicationServer: system.applicationServer,
       instanceNumber: system.instanceNumber,
       client: system.client,
@@ -56,8 +70,12 @@ export default function EditSystemForm({ system, onSave }: EditSystemFormProps) 
       language: system.language,
     },
     validation: {
+      customerName: FormValidation.Required,
       systemId: FormValidation.Required,
-      applicationServer: FormValidation.Required,
+      applicationServer: (value) => {
+        if (!value) return "Application server is required";
+        return validateApplicationServer(value);
+      },
       instanceNumber: (value) => {
         if (!value) return "Instance number is required";
         return validateInstanceNumber(value);
@@ -66,8 +84,14 @@ export default function EditSystemForm({ system, onSave }: EditSystemFormProps) 
         if (!value) return "Client is required";
         return validateClient(value);
       },
-      username: FormValidation.Required,
-      password: FormValidation.Required,
+      username: (value) => {
+        if (!value) return "Username is required";
+        return validateUsername(value);
+      },
+      password: (value) => {
+        if (!value) return "Password is required";
+        return validatePassword(value);
+      },
     },
   });
 
@@ -93,11 +117,24 @@ export default function EditSystemForm({ system, onSave }: EditSystemFormProps) 
       <Form.Description title="Edit SAP System" text="Update the configuration for this SAP system connection." />
 
       <Form.TextField
+        {...itemProps.customerName}
+        title="Customer"
+        placeholder="Acme Corp, Müller GmbH..."
+        info="The customer this system belongs to. Used to group and search systems."
+      />
+
+      <Form.TextField
         {...itemProps.systemId}
         title="System ID"
         placeholder="PRD, DEV, QAS..."
         info="The SAP System ID (SID), typically 3 characters"
       />
+
+      <Form.Dropdown {...itemProps.systemType} title="System Type">
+        {SYSTEM_TYPES.map((type) => (
+          <Form.Dropdown.Item key={type} value={type} title={`${type} – ${SYSTEM_TYPE_LABELS[type]}`} />
+        ))}
+      </Form.Dropdown>
 
       <Form.TextField
         {...itemProps.applicationServer}
@@ -133,7 +170,7 @@ export default function EditSystemForm({ system, onSave }: EditSystemFormProps) 
 
       <Form.Separator />
 
-      <LanguageDropdown {...itemProps.language} title="Language" />
+      <LanguageDropdown {...itemProps.language} title="Language" allowAsk />
 
       <Form.Description title="Last Updated" text={new Date(system.updatedAt).toLocaleString()} />
     </Form>

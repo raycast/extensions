@@ -10,6 +10,8 @@ export interface AccountEntry {
   label: string;
   /** Raw API token — stored as plaintext in LocalStorage (same as Raycast password prefs) */
   token: string;
+  /** Optional provider-specific account scope, e.g. ChatGPT account ID for Codex */
+  accountId?: string;
 }
 
 /** The per-provider storage key constants. */
@@ -30,4 +32,13 @@ export interface AccountUsageState<TUsage, TError> extends UsageState<TUsage, TE
   token: string;
   /** True if this account's token matches the one configured in OpenCode */
   isOpenCodeActive?: boolean;
+}
+
+/** The full state of a multi-account provider hook. */
+export interface AccountsState<TUsage, TError> {
+  /** One entry per account; empty while the initial (uncached) fetch is in flight. */
+  accounts: AccountUsageState<TUsage, TError>[];
+  /** True only when fetching with no accounts to show yet. */
+  isLoading: boolean;
+  revalidate: () => Promise<void>;
 }

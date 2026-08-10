@@ -111,7 +111,7 @@ jobs:
           if [[ $updated_count -gt 0 ]]; then
             changelog_updated=true
           fi
-          echo "changelog_updated=$changelog_updated" >> $GITHUB_OUTPUT
+          echo "changelog_updated=$changelog_updated" >> "$GITHUB_OUTPUT"
 
       - name: Add platforms field to package.json
         id: add_platforms_field
@@ -143,7 +143,7 @@ jobs:
           if [[ $modified_count -gt 0 ]]; then
             platforms_added=true
           fi
-          echo "platforms_added=$platforms_added" >> $GITHUB_OUTPUT
+          echo "platforms_added=$platforms_added" >> "$GITHUB_OUTPUT"
 
       - name: Optimise images
         id: optimise_images
@@ -161,7 +161,7 @@ jobs:
           fi
           count=${#images_array[@]}
           echo "Found images: $count"
-          if [ $count -gt 0 ]; then
+          if [ "$count" -gt 0 ]; then
             brew install oxipng jpegoptim
 
             for image in "${images_array[@]}"; do
@@ -176,24 +176,24 @@ jobs:
 
             images_optimized=true
           fi
-          echo "images_optimized=$images_optimized" >> $GITHUB_OUTPUT
+          echo "images_optimized=$images_optimized" >> "$GITHUB_OUTPUT"
 
       - name: Commit changes
         id: commit_changes
         run: |
           pr_info=$(gh pr view ${{ github.event.inputs.pr_number }} --json headRefName,headRepository,headRepositoryOwner,maintainerCanModify,url)
-          echo $pr_info
+          echo "$pr_info"
 
-          can_modify=$(echo $pr_info | jq -r .maintainerCanModify)
-          pr_branch=$(echo $pr_info | jq -r .headRefName)
-          pr_repo_name=$(echo $pr_info | jq -r .headRepository.name)
-          pr_repo_owner=$(echo $pr_info | jq -r .headRepositoryOwner.login)
+          can_modify=$(echo "$pr_info" | jq -r .maintainerCanModify)
+          pr_branch=$(echo "$pr_info" | jq -r .headRefName)
+          pr_repo_name=$(echo "$pr_info" | jq -r .headRepository.name)
+          pr_repo_owner=$(echo "$pr_info" | jq -r .headRepositoryOwner.login)
 
           if ! [[ -z $(git status -s .) ]] ; then
             if [[ "$can_modify" == "false" ]]; then
               error="Edits from maintainers are disabled."
-              echo $error
-              echo "error=$error" >> $GITHUB_OUTPUT
+              echo "$error"
+              echo "error=$error" >> "$GITHUB_OUTPUT"
               exit 1
             fi
 
@@ -225,12 +225,12 @@ jobs:
             git status .
             git commit --message "$commit_msg"
 
-            git push https://${{ env.GITHUB_TOKEN }}@github.com/$pr_repo_owner/$pr_repo_name.git HEAD:$pr_branch
+            git push https://${{ env.GITHUB_TOKEN }}@github.com/"$pr_repo_owner"/"$pr_repo_name".git HEAD:"$pr_branch"
             echo "Pushed changes."
-            echo "changes_pushed=true" >> $GITHUB_OUTPUT
+            echo "changes_pushed=true" >> "$GITHUB_OUTPUT"
           else
             echo "No changes."
-            echo "changes_pushed=false" >> $GITHUB_OUTPUT
+            echo "changes_pushed=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Sleep for 30 seconds

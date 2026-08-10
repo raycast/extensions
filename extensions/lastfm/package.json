@@ -16,6 +16,67 @@
   ],
   "commands": [
     {
+      "name": "menubar",
+      "title": "Menu Bar Player",
+      "subtitle": "Last.fm",
+      "description": "Shows the currently playing track in the macOS menubar.",
+      "mode": "menu-bar",
+      "interval": "30s",
+      "preferences": [
+        {
+          "type": "dropdown",
+          "title": "Menubar Icon",
+          "name": "menubarIcon",
+          "required": true,
+          "default": "album",
+          "description": "Choose the icon displayed next to the track name in the menubar.",
+          "data": [
+            {
+              "title": "Last.fm Icon",
+              "value": "lastfm"
+            },
+            {
+              "title": "Album Art",
+              "value": "album"
+            }
+          ]
+        },
+        {
+          "type": "textfield",
+          "title": "Now Playing Text Length",
+          "name": "nowPlayingLength",
+          "required": false,
+          "default": "20",
+          "description": "Maximum number of characters to display in the menubar title. Set to 0 for no limit.",
+          "placeholder": "20"
+        },
+        {
+          "type": "checkbox",
+          "title": "Display",
+          "label": "Hide artist's name",
+          "name": "hideArtistName",
+          "required": false,
+          "default": false,
+          "description": "Show only the track name in the menubar, without the artist."
+        },
+        {
+          "type": "checkbox",
+          "label": "Cleanup song title",
+          "name": "cleanupSongTitle",
+          "required": false,
+          "default": false,
+          "description": "Strip common suffixes from track names such as (feat. ...), (Remastered), (Radio Edit), etc."
+        }
+      ]
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "subtitle": "Last.fm",
+      "description": "Shows the currently playing track in a detail view.",
+      "mode": "view"
+    },
+    {
       "name": "combined",
       "title": "Top & Recent Songs",
       "subtitle": "Last.fm",
@@ -58,7 +119,15 @@
       "description": "You can get one from https://www.last.fm/api/accounts",
       "placeholder": "Your Last.fm API key",
       "required": true,
-      "title": "API key"
+      "title": "API Key"
+    },
+    {
+      "type": "password",
+      "name": "apiSecret",
+      "description": "Found alongside your API key at https://www.last.fm/api/accounts. Required for love/unlove.",
+      "placeholder": "Your Last.fm API secret",
+      "required": false,
+      "title": "API Secret"
     },
     {
       "type": "textfield",
@@ -109,25 +178,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.26.3",
-    "node-fetch": "^3.1.0",
-    "swr": "^1.1.2"
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
+    "node-fetch": "^3.3.2",
+    "swr": "^2.4.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~25.9.1",
+    "@types/react": "^19.2.15",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
+    "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

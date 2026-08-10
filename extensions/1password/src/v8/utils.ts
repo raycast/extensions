@@ -165,6 +165,8 @@ export const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (dat
     },
   });
 };
+const itemListFlags = () => (preferences.reduceItemListMemoryUsage ? [] : ["--long"]);
+
 export const usePasswords2 = ({
   account,
   execute = true,
@@ -176,7 +178,7 @@ export const usePasswords2 = ({
 }) =>
   useExec<Item[], ExtensionError>(
     getCliPath(),
-    ["--account", account, "items", "list", "--long", "--format=json", ...flags],
+    ["--account", account, "items", "list", "--format=json", ...itemListFlags(), ...flags],
     {
       env: windowsEnv,
       execute,
@@ -205,7 +207,7 @@ export const usePasswords2 = ({
     },
   );
 export const usePasswords = (flags: string[] = []) =>
-  useOp<Item[], ExtensionError>(["items", "list", "--long", ...flags], (data) =>
+  useOp<Item[], ExtensionError>(["items", "list", ...itemListFlags(), ...flags], (data) =>
     data.sort((a, b) => a.title.localeCompare(b.title)),
   );
 export const useVaults = () =>

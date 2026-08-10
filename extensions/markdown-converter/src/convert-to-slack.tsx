@@ -1,27 +1,24 @@
 /**
  * Raycast command to convert clipboard text to Slack mrkdwn format.
- * Detects format (Markdown, Org-mode, or plain text) and converts to Slack's mrkdwn syntax.
+ * Smart detection: if clipboard has rich text, round-trips through Markdown first.
  */
 import { Clipboard, showHUD } from "@raycast/api";
-import { detectInputFormat, getFormatLabel } from "./core/format-detection.js";
+import { getFormatLabel } from "./core/format-detection.js";
 import { convertMarkdownToSlack } from "./core/md-to-slack.js";
+import { raycastConverter } from "./raycast-converter.js";
 
 export default async function ConvertToSlack() {
   try {
-    const text = await Clipboard.readText();
+    const content = await raycastConverter.getClipboardContent();
 
-    if (!text || !text.trim()) {
+    if (!content) {
       await showHUD("✗ No text found in clipboard");
       return;
     }
 
-    const format = detectInputFormat(text);
-    const formatLabel = getFormatLabel(format);
+    const { text, sourceWasRichText, detectedFormat } = content;
+    const formatLabel = getFormatLabel(detectedFormat);
 
-    // Convert to Slack mrkdwn
-    // Note: For Org-mode, we pass it through as-is since the converter handles
-    // Markdown syntax. A proper Org->Slack path would be better but this gives
-    // reasonable results for now.
     const slack = convertMarkdownToSlack(text);
 
     if (!slack || !slack.trim()) {
@@ -29,10 +26,10 @@ export default async function ConvertToSlack() {
       return;
     }
 
-    // Slack mrkdwn is plain text, not rich HTML
     await Clipboard.copy(slack);
 
-    await showHUD(`✓ Converted ${formatLabel} to Slack mrkdwn`);
+    const via = sourceWasRichText ? "Rich text → Markdown → Slack" : `${formatLabel} → Slack`;
+    await showHUD(`✓ ${via}`);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     await showHUD(`✗ Conversion failed: ${errorMessage}`);

@@ -1,5 +1,10 @@
 # Google Contacts Changelog
 
+## [1.0.2] - 2026-04-28
+
+- Show an actionable error in Raycast when the Google People API is disabled in the user's project, instead of dumping the raw 403 response from Google
+- Add a Troubleshooting section to the README
+
 ## [1.0.1] - 2026-04-13
 
 - Fix `search` operation timing out (600s max) when the AI tool is called without a query — now returns a single page of contacts instead of paginating the entire address book

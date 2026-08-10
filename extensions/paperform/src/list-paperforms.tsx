@@ -528,7 +528,7 @@ function FormActions({
 
 function buildRaycastDeeplink(context: LaunchContext): string {
   // raycast://extensions/<author>/<extension>/<command>?context=<json>
-  const base = "raycast://extensions/parterburn/paperform/list-paperforms";
+  const base = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/parterburn/paperform/list-paperforms`;
   return `${base}?context=${encodeURIComponent(JSON.stringify(context))}`;
 }
 

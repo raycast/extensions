@@ -65,3 +65,14 @@ export const ARCHITECTURES: { value: Architecture; title: string }[] = [
   { value: "arm64", title: "arm64" },
   { value: "amd64", title: "x86_64" },
 ];
+
+export function parseOrbctlVersion(output: string): string | null {
+  const match = output.match(/Version:\s*([\d.]+)/);
+  return match?.[1] ?? null;
+}
+
+/**
+ * Minimum version of orbctl required to support isolated machines.
+ * https://docs.orbstack.dev/release-notes#v2-1-0-apr-19
+ */
+export const ISOLATED_MACHINES_VERSION = "2.1.0";

@@ -14,7 +14,7 @@ export default function MenuBar() {
       <MenuBarExtra.Item
         title="Generate App"
         icon={Icon.Rocket}
-        onAction={() => open("raycast://extensions/andoutenc/leap-new/generate-app")}
+        onAction={() => open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/andoutenc/leap-new/generate-app`)}
       />
       <MenuBarExtra.Section title="Links">
         <MenuBarExtra.Item title="View Documentation" icon={Icon.Book} onAction={() => open("https://docs.leap.new")} />

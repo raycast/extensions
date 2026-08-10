@@ -1,10 +1,12 @@
 # RAE Dictionary
 
 Search words in the Royal Spanish Academy dictionary directly from Raycast. Get definitions, conjugations, and expressions quickly without opening a browser. This extension uses the unofficial API [rae-api.com](https://rae-api.com).
-  
+
 ## Features
 
 - Search words in the RAE dictionary
+- Show grammatical category and gender, usage labels, examples and regional marks
+- Show expressions and idioms (locuciones)
 - Show the word of the day
 - Get random words
 - Quickly copy definitions

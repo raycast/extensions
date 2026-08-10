@@ -1,15 +1,17 @@
 import { Cache } from "@raycast/api";
+import { CACHE_KEY, CACHE_TTL, POSTS_PAGE_SIZE, PUBLICATION_URL } from "../lib/constants";
 import type { SubstackPost } from "../types/post";
-
-const PUBLICATION_URL = "https://raycastweekly.substack.com";
-const CACHE_KEY = "raycast-weekly-posts";
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in ms
 
 const cache = new Cache();
 
 const headers = {
   "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)",
   Accept: "application/json",
+};
+
+type FetchPostsOptions = {
+  limit?: number;
+  offset?: number;
 };
 
 function ensureReadingTime(post: SubstackPost): SubstackPost {
@@ -19,8 +21,11 @@ function ensureReadingTime(post: SubstackPost): SubstackPost {
   };
 }
 
-export async function fetchPosts(): Promise<SubstackPost[]> {
-  const cached = cache.get(CACHE_KEY);
+export async function fetchPosts({ limit = POSTS_PAGE_SIZE, offset = 0 }: FetchPostsOptions = {}): Promise<
+  SubstackPost[]
+> {
+  const cacheKey = `${CACHE_KEY}-${limit}-${offset}`;
+  const cached = cache.get(cacheKey);
   if (cached) {
     const { posts, timestamp } = JSON.parse(cached);
     if (Date.now() - timestamp < CACHE_TTL) {
@@ -28,7 +33,9 @@ export async function fetchPosts(): Promise<SubstackPost[]> {
     }
   }
 
-  const response = await fetch(`${PUBLICATION_URL}/api/v1/posts`, { headers });
+  const response = await fetch(`${PUBLICATION_URL}/api/v1/posts?limit=${limit}&offset=${offset}`, {
+    headers,
+  });
 
   if (!response.ok) {
     throw new Error(`Failed to fetch posts: ${response.statusText}`);
@@ -39,7 +46,7 @@ export async function fetchPosts(): Promise<SubstackPost[]> {
     .map(ensureReadingTime)
     .sort((a, b) => new Date(b.post_date).getTime() - new Date(a.post_date).getTime());
 
-  cache.set(CACHE_KEY, JSON.stringify({ posts: sortedPosts, timestamp: Date.now() }));
+  cache.set(cacheKey, JSON.stringify({ posts: sortedPosts, timestamp: Date.now() }));
 
   return sortedPosts;
 }
@@ -69,6 +76,10 @@ export async function fetchPost(slug: string): Promise<SubstackPost> {
   cache.set(cacheKey, JSON.stringify({ post: transformedPost, timestamp: Date.now() }));
 
   return transformedPost;
+}
+
+export function clearPostsCache() {
+  cache.clear();
 }
 
 export function getPostUrl(slug: string): string {

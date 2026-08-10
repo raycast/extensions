@@ -1,6 +1,7 @@
 import { getPreferenceValues, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { trim } from "lodash";
+import type { JSX } from "react";
 import { useState } from "react";
 
 import { DiscussionListItem } from "./components/DiscussionListItem";

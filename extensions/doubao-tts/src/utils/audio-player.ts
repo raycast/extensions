@@ -11,11 +11,21 @@ export class AudioPlayer {
   private currentProcess: ChildProcess | null = null;
   private tempFiles: string[] = [];
   private stopped = false;
+  private abortController = new AbortController();
+
+  /**
+   * Shared cancellation signal for playback and lookahead synthesis.
+   */
+  get signal(): AbortSignal {
+    return this.abortController.signal;
+  }
 
   /**
    * Play a single base64-encoded audio chunk.
    */
   async playAudio(base64Audio: string): Promise<void> {
+    if (this.stopped) return;
+
     const tempPath = this.saveTempFile(base64Audio);
 
     return new Promise<void>((resolve, reject) => {
@@ -25,10 +35,14 @@ export class AudioPlayer {
 
       writePidFile(myPid);
 
-      proc.on("close", (code) => {
+      proc.on("close", (code, signal) => {
         this.currentProcess = null;
         removePidFileIfMatch(myPid);
         this.cleanupFile(tempPath);
+
+        if (signal) {
+          this.markStopped();
+        }
 
         if (this.stopped || code === 0 || code === null) {
           resolve();
@@ -57,7 +71,7 @@ export class AudioPlayer {
    * Stop the current playback.
    */
   stopPlayback(): void {
-    this.stopped = true;
+    this.markStopped();
     if (this.currentProcess) {
       const proc = this.currentProcess;
       this.currentProcess = null;
@@ -68,6 +82,13 @@ export class AudioPlayer {
       }
     }
     removePidFile();
+  }
+
+  private markStopped(): void {
+    this.stopped = true;
+    if (!this.abortController.signal.aborted) {
+      this.abortController.abort();
+    }
   }
 
   /**

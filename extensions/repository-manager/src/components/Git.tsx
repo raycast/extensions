@@ -1,7 +1,9 @@
 import { Action, ActionPanel, Icon, useNavigation } from '@raycast/api'
 import { Project } from '../project'
+import GitCommitsDetail from './GitCommitsDetail'
 import GitPullDetail from './GitPullDetail'
 import GitStatusDetail from './GitStatusDetail'
+import { GenerateAIRepoBriefAction } from './AIRepoBrief'
 
 type GitProps = {
     project: Project
@@ -17,6 +19,11 @@ export default function Git({ project }: GitProps) {
             shortcut={{ modifiers: ['cmd'], key: 'g' }}
         >
             <Action
+                title="Git Commits"
+                icon={Icon.List}
+                onAction={() => push(<GitCommitsDetail project={project} />)}
+            />
+            <Action
                 title="Git Status"
                 icon={Icon.Code}
                 onAction={() => push(<GitStatusDetail project={project} />)}
@@ -26,6 +33,7 @@ export default function Git({ project }: GitProps) {
                 icon={Icon.Download}
                 onAction={() => push(<GitPullDetail project={project} />)}
             />
+            <GenerateAIRepoBriefAction project={project} />
         </ActionPanel.Submenu>
     )
 }

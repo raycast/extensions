@@ -6,6 +6,26 @@ import { type MoleStatus, formatBytes, formatPercent, formatRate } from "./utils
 import { getHealthIcon, getUsageColor, getBatteryIcon } from "./utils/icons";
 import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
+function listOrEmpty<T>(value: T[] | null | undefined): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizeStatus(status: MoleStatus): MoleStatus {
+  return {
+    ...status,
+    batteries: listOrEmpty(status.batteries),
+    bluetooth: listOrEmpty(status.bluetooth),
+    disks: listOrEmpty(status.disks),
+    gpu: listOrEmpty(status.gpu),
+    network: listOrEmpty(status.network),
+    top_processes: listOrEmpty(status.top_processes),
+    cpu: {
+      ...status.cpu,
+      per_core: listOrEmpty(status.cpu?.per_core),
+    },
+  };
+}
+
 export default function SystemStatus() {
   const molePath = getMolePathSafe();
 
@@ -17,12 +37,15 @@ export default function SystemStatus() {
 }
 
 function StatusView({ molePath }: { molePath: string }) {
-  const { statusRefreshInterval } = getPreferenceValues<Preferences.SystemStatus>();
+  const { statusRefreshInterval } = getPreferenceValues<Preferences.SystemStatus>() ?? {};
   const refreshInterval = parseInt(statusRefreshInterval ?? "5", 10);
 
   const { data, error, isLoading, revalidate } = useExec(molePath, ["status", "--json"], {
-    parseOutput: ({ stdout }) => JSON.parse(stdout) as MoleStatus,
+    parseOutput: ({ stdout }) => normalizeStatus(JSON.parse(stdout) as MoleStatus),
     keepPreviousData: true,
+    failureToastOptions: {
+      title: "Failed to Get System Status",
+    },
   });
 
   useEffect(() => {
@@ -43,6 +66,7 @@ function StatusView({ molePath }: { molePath: string }) {
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
     </ActionPanel>
   );
+  const activeNetwork = data?.network.filter((n) => n.ip) ?? [];
 
   return (
     <List isLoading={isLoading} isShowingDetail>
@@ -115,10 +139,10 @@ function StatusView({ molePath }: { molePath: string }) {
                           />
                         </List.Item.Detail.Metadata.TagList>
                       )}
-                      {data.network.filter((n) => n.ip).length > 0 && (
+                      {activeNetwork.length > 0 && (
                         <List.Item.Detail.Metadata.Label
                           title="Network"
-                          text={`${data.network.filter((n) => n.ip)[0].name} - ${data.network.filter((n) => n.ip)[0].ip}`}
+                          text={`${activeNetwork[0].name} - ${activeNetwork[0].ip}`}
                         />
                       )}
                       <List.Item.Detail.Metadata.Label title="Processes" text={String(data.procs)} />
@@ -327,46 +351,44 @@ function StatusView({ molePath }: { molePath: string }) {
           )}
 
           <List.Section title="Network">
-            {data.network
-              .filter((n) => n.ip)
-              .map((iface) => (
-                <List.Item
-                  key={iface.name}
-                  title={iface.name}
-                  subtitle={iface.ip}
-                  icon={Icon.Globe}
-                  accessories={[
-                    { text: `\u2193 ${formatRate(iface.rx_rate_mbs)}` },
-                    { text: `\u2191 ${formatRate(iface.tx_rate_mbs)}` },
-                  ]}
-                  detail={
-                    <List.Item.Detail
-                      metadata={
-                        <List.Item.Detail.Metadata>
-                          <List.Item.Detail.Metadata.Label title="Interface" text={iface.name} />
-                          <List.Item.Detail.Metadata.Label title="IP Address" text={iface.ip} />
-                          <List.Item.Detail.Metadata.Separator />
-                          <List.Item.Detail.Metadata.Label title="Download" text={formatRate(iface.rx_rate_mbs)} />
-                          <List.Item.Detail.Metadata.Label title="Upload" text={formatRate(iface.tx_rate_mbs)} />
-                          {data.proxy.enabled && (
-                            <>
-                              <List.Item.Detail.Metadata.Separator />
-                              <List.Item.Detail.Metadata.Label title="Proxy Type" text={data.proxy.type} />
-                              <List.Item.Detail.Metadata.Label title="Proxy Host" text={data.proxy.host} />
-                            </>
-                          )}
-                        </List.Item.Detail.Metadata>
-                      }
-                    />
-                  }
-                  actions={
-                    <ActionPanel>
-                      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
-                      <Action.CopyToClipboard title="Copy IP Address" content={iface.ip} />
-                    </ActionPanel>
-                  }
-                />
-              ))}
+            {activeNetwork.map((iface) => (
+              <List.Item
+                key={iface.name}
+                title={iface.name}
+                subtitle={iface.ip}
+                icon={Icon.Globe}
+                accessories={[
+                  { text: `\u2193 ${formatRate(iface.rx_rate_mbs)}` },
+                  { text: `\u2191 ${formatRate(iface.tx_rate_mbs)}` },
+                ]}
+                detail={
+                  <List.Item.Detail
+                    metadata={
+                      <List.Item.Detail.Metadata>
+                        <List.Item.Detail.Metadata.Label title="Interface" text={iface.name} />
+                        <List.Item.Detail.Metadata.Label title="IP Address" text={iface.ip} />
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label title="Download" text={formatRate(iface.rx_rate_mbs)} />
+                        <List.Item.Detail.Metadata.Label title="Upload" text={formatRate(iface.tx_rate_mbs)} />
+                        {data.proxy.enabled && (
+                          <>
+                            <List.Item.Detail.Metadata.Separator />
+                            <List.Item.Detail.Metadata.Label title="Proxy Type" text={data.proxy.type} />
+                            <List.Item.Detail.Metadata.Label title="Proxy Host" text={data.proxy.host} />
+                          </>
+                        )}
+                      </List.Item.Detail.Metadata>
+                    }
+                  />
+                }
+                actions={
+                  <ActionPanel>
+                    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={revalidate} />
+                    <Action.CopyToClipboard title="Copy IP Address" content={iface.ip} />
+                  </ActionPanel>
+                }
+              />
+            ))}
           </List.Section>
 
           <List.Section title="Top Processes">

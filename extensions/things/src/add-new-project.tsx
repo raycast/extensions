@@ -1,4 +1,16 @@
-import { ActionPanel, Form, showToast, Icon, Action, Toast, LaunchProps, Color, AI } from '@raycast/api';
+import {
+  ActionPanel,
+  Form,
+  showToast,
+  Icon,
+  Action,
+  Toast,
+  LaunchProps,
+  Color,
+  AI,
+  environment,
+  Keyboard,
+} from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
 
 import { addProject, getCollections } from './api';
@@ -41,7 +53,7 @@ export function AddNewProject({ draftValues }: AddNewProjectProps) {
 
       await addProject(json);
 
-      showToast({ style: Toast.Style.Success, title: 'Added new project', message: values.title });
+      await showToast({ style: Toast.Style.Success, title: 'Added new project', message: values.title });
       reset({ title: '', notes: '', tags: [], when: '', areaId: '', toDos: '', deadline: null });
       focus('title');
     },
@@ -78,7 +90,7 @@ Here's the project you need to break-down: "${values.title}"
 ${values.notes.length > 0 ? `For additional context, here are the task's notes: "${values.notes}"` : ''}
 
 Tasks:`);
-      toast.hide();
+      await toast.hide();
       setValue('toDos', items.trim());
       focus('toDos');
     } catch (error) {
@@ -100,7 +112,9 @@ Tasks:`);
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Add New Project" onSubmit={handleSubmit} icon={Icon.Plus} />
-          <Action title="Generate To-Dos with AI" icon={Icon.BulletPoints} onAction={generateToDos} />
+          {environment.canAccess(AI) && (
+            <Action title="Generate To-Dos with AI" icon={Icon.BulletPoints} onAction={generateToDos} />
+          )}
           <ActionPanel.Section>
             <Action
               title="Focus Title"
@@ -118,7 +132,7 @@ Tasks:`);
               title="Focus When"
               icon={Icon.TextInput}
               onAction={() => focus('when')}
-              shortcut={{ modifiers: ['cmd'], key: 's' }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
             <Action
               title="Focus List"
@@ -136,7 +150,7 @@ Tasks:`);
               title="Focus Checklist"
               icon={Icon.TextInput}
               onAction={() => focus('toDos')}
-              shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action
               title="Focus Deadline"

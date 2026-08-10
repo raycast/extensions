@@ -1,4 +1,5 @@
 import { Clipboard, LaunchProps, Toast, getPreferenceValues, open, showHUD, showToast } from "@raycast/api";
+import { LOGOS_BUNDLE_ID } from "./logos/constants";
 
 type Preferences = {
   defaultVersion: string;
@@ -127,15 +128,6 @@ export default async function Command(props: LaunchProps<{ arguments: CommandArg
     return;
   }
 
-  if (preferences.openMethod === "logosres scheme") {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "logosres not supported",
-      message: "Switch Open Method to ref.ly URL until a logosres mapping table is available.",
-    });
-    return;
-  }
-
   const versionAliases = parseVersionAliases(preferences.versionAliases);
   const resolution = resolveVersionAndReference(input, versionAliases, defaultVersion);
 
@@ -154,21 +146,54 @@ export default async function Command(props: LaunchProps<{ arguments: CommandArg
     return;
   }
 
-  const url = `https://ref.ly/${encodeURIComponent(reference)};${resolution.version}`;
+  const encodedRef = encodeURIComponent(reference);
+  const version = resolution.version;
+  const versionUpper = version.toUpperCase();
 
-  try {
-    if (preferences.copyUrlToClipboard) {
-      await Clipboard.copy(url);
-    }
-    await open(url);
-    await showHUD("Opening in Logos");
-  } catch {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not open Logos",
-      message: `Try this URL in a browser: ${url}`,
-    });
+  const uris: string[] = [];
+
+  if (preferences.openMethod === "logosres scheme") {
+    // Raycast can only confirm URI handoff, not whether Logos resolves speculative logosres resources.
+    // Try native Logos scheme URIs first; https://ref.ly is a last-resort fallback because open()
+    // always succeeds for https URLs and would short-circuit the native schemes.
+    uris.push(`logosref:Bible.${encodedRef}`);
+    uris.push(`logosref:${encodedRef}`);
+    uris.push(`logosres:Bible;ref=Bible.${encodedRef}`);
+    uris.push(`logosres:${version};ref=Bible.${encodedRef}`);
+    uris.push(`logosres:${versionUpper};ref=Bible.${encodedRef}`);
+    uris.push(`logosres:${version};ref=Bible${versionUpper}.${encodedRef}`);
+    uris.push(`logosres:${versionUpper};ref=Bible${versionUpper}.${encodedRef}`);
+    uris.push(`logosres:${version};ref=${encodedRef}`);
+    uris.push(`logosres:${versionUpper};ref=${encodedRef}`);
+    uris.push(`https://ref.ly/${encodedRef};${version}`);
+  } else {
+    // User explicitly chose the ref.ly URL method; try it first. Native Logos scheme URIs
+    // are only a fallback if the ref.ly open somehow fails.
+    uris.push(`https://ref.ly/${encodedRef};${version}`);
+    uris.push(`logosres:${version};ref=Bible.${encodedRef}`);
+    uris.push(`logosref:Bible.${encodedRef}`);
   }
+
+  let lastError: unknown;
+  for (const uri of uris) {
+    try {
+      const isHttp = uri.startsWith("http://") || uri.startsWith("https://");
+      if (preferences.copyUrlToClipboard) {
+        await Clipboard.copy(uri);
+      }
+      await open(uri, isHttp ? undefined : LOGOS_BUNDLE_ID);
+      await showHUD("Opening in Logos");
+      return;
+    } catch (error) {
+      lastError = error;
+    }
+  }
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title: "Could not open Logos",
+    message: lastError instanceof Error ? lastError.message : String(lastError),
+  });
 }
 
 function parseVersionAliases(raw?: string): AliasMap {

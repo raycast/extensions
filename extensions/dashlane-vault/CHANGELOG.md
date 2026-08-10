@@ -1,5 +1,10 @@
 # Dashlane Vault Changelog
 
+## [Improvements] - 2026-04-21
+
+- Update dependencies
+- Improve error feedback for authentication error
+
 ## [Added windows support] - 2025-12-24
 
 - Refactored dcli to support both windows and mac

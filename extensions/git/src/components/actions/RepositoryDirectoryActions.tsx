@@ -1,11 +1,22 @@
-import { Action, ActionPanel, Icon, getPreferenceValues, getApplications, open, Application } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  getPreferenceValues,
+  getApplications,
+  open,
+  Application,
+  Keyboard,
+} from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { Preferences } from "../../types";
 import { basename } from "path";
 
 interface RepositoryDirectoryActionsProps {
-  /** Path to the repository directory */
-  repositoryPath: string;
+  /** Path to the currently opened worktree directory. */
+  currentWorktreePath: string;
+  /** Shared settings key path (main repository path for linked worktrees). */
+  repositoryRootPath: string;
   /** Callback called when repository is opened via any "Open" action */
   onOpen?: () => void;
 }
@@ -14,16 +25,20 @@ interface RepositoryDirectoryActionsProps {
  * Reusable actions for working with repository as a directory.
  * Includes file system operations and opening in various applications.
  */
-export function RepositoryDirectoryActions({ repositoryPath, onOpen }: RepositoryDirectoryActionsProps) {
+export function RepositoryDirectoryActions({
+  currentWorktreePath,
+  repositoryRootPath,
+  onOpen,
+}: RepositoryDirectoryActionsProps) {
   const preferences = getPreferenceValues<Preferences>();
-  const { data: applications } = usePromise(() => getApplications(repositoryPath));
+  const { data: applications } = usePromise(() => getApplications(currentWorktreePath));
   const [defaultApp, setDefaultApp] = useCachedState<Application | undefined>(
-    `${repositoryPath}:repo-default-app`,
+    `${repositoryRootPath}:repo-default-app`,
     undefined,
   );
 
   async function handleRememberDefaultApp(app: Application) {
-    await open(repositoryPath, app);
+    await open(currentWorktreePath, app);
     onOpen?.();
     setDefaultApp(app);
   }
@@ -33,22 +48,22 @@ export function RepositoryDirectoryActions({ repositoryPath, onOpen }: Repositor
   }
 
   return (
-    <ActionPanel.Section title={basename(repositoryPath)}>
+    <ActionPanel.Section title={basename(currentWorktreePath)}>
       {defaultApp ? (
         <Action.Open
           key={defaultApp.bundleId || defaultApp.path}
           title={`Open Repository in ${defaultApp.name}`}
           icon={{ fileIcon: defaultApp.path }}
           application={defaultApp}
-          target={repositoryPath}
+          target={currentWorktreePath}
           onOpen={() => onOpen?.()}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.OpenWith}
         />
       ) : (
         <ActionPanel.Submenu
           title="Open Repository in Default App"
           icon={Icon.AppWindow}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.OpenWith}
         >
           {applications?.map((app: Application) => (
             <Action
@@ -64,7 +79,7 @@ export function RepositoryDirectoryActions({ repositoryPath, onOpen }: Repositor
       )}
       <Action.Open
         title={`Open Repository in ${preferences.defaultTerminal.name}`}
-        target={repositoryPath}
+        target={currentWorktreePath}
         application={preferences.defaultTerminal}
         icon={{ fileIcon: preferences.defaultTerminal.path }}
         shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
@@ -73,7 +88,7 @@ export function RepositoryDirectoryActions({ repositoryPath, onOpen }: Repositor
       {preferences.externalGitClient && (
         <Action.Open
           title={`Open Repository in ${preferences.externalGitClient.name}`}
-          target={repositoryPath}
+          target={currentWorktreePath}
           application={preferences.externalGitClient}
           icon={{ fileIcon: preferences.externalGitClient.path }}
           shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
@@ -81,7 +96,7 @@ export function RepositoryDirectoryActions({ repositoryPath, onOpen }: Repositor
         />
       )}
       <Action.OpenWith
-        path={repositoryPath}
+        path={currentWorktreePath}
         title="Open Repository with…"
         onOpen={() => onOpen?.()}
         shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "o" }}
@@ -105,13 +120,15 @@ export function RepositoryDirectoryActions({ repositoryPath, onOpen }: Repositor
 /**
  * Action for creating a quicklink for a repository.
  */
-export function RepositoryQuickLinkAction({ repositoryPath }: RepositoryDirectoryActionsProps) {
+export function RepositoryQuickLinkAction({
+  currentWorktreePath,
+}: Pick<RepositoryDirectoryActionsProps, "currentWorktreePath">) {
   return (
     <Action.CreateQuicklink
       title="Create Quicklink"
       quicklink={{
-        link: `raycast://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(JSON.stringify({ path: repositoryPath }))}`,
-        name: `Show ${basename(repositoryPath)} in Git`,
+        link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(JSON.stringify({ path: currentWorktreePath }))}`,
+        name: `Show ${basename(currentWorktreePath)} in Git`,
       }}
     />
   );

@@ -1,6 +1,7 @@
 import { getPreferenceValues, trash } from "@raycast/api";
 import { execFileSync } from "child_process";
 import fse from "fs-extra";
+import path from "path";
 import { DEFAULT_EXPORT_DIR_PATH, getExportFilePath } from "../constants/ente";
 
 const normalizeConfiguredPath = (configuredPath: string): string => {
@@ -10,8 +11,23 @@ const normalizeConfiguredPath = (configuredPath: string): string => {
 		: trimmedPath;
 };
 
-const getCliPath = (): string =>
-	normalizeConfiguredPath(getPreferenceValues<Preferences>().cliPath || "/usr/local/bin/ente");
+const getCliPath = (): string => {
+	const configuredPath = normalizeConfiguredPath(
+		getPreferenceValues<Preferences>().cliPath || "/usr/local/bin/ente"
+	);
+
+	// Tolerate the common mistake of pointing at the containing directory (e.g. "/opt/homebrew/bin")
+	// instead of the binary itself by appending the expected executable name.
+	try {
+		if (fse.existsSync(configuredPath) && fse.statSync(configuredPath).isDirectory()) {
+			return path.join(configuredPath, process.platform === "win32" ? "ente.exe" : "ente");
+		}
+	} catch {
+		// Ignore stat errors and fall back to the configured path as-is.
+	}
+
+	return configuredPath;
+};
 
 const runEnteCommand = (...args: string[]): string =>
 	execFileSync(getCliPath(), args, {

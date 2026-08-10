@@ -1,5 +1,17 @@
 # qBittorrent Changelog
 
+## [Torrent List Improvements] - 2026-07-31
+
+- Added a toggleable details pane for torrent information
+- Added sorting and options for choosing which details appear in the list
+- Added actions to open local or mapped download folders and the qBittorrent Web UI
+- Updated the shortcuts for copying save paths and magnet links
+- Made the username and password optional
+
+## [Update] - 2026-06-18
+
+- Fixes issue #28841 with versions >=5.2.0
+
 ## [Update] - 2026-03-27
 
 - Replaced the torrent file tag picker with a real file picker that supports Finder prefill and manual browsing

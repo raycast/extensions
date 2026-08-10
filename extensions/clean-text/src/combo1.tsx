@@ -8,6 +8,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { pasteOrCopy } from "./clipboard";
 import { convert } from "./modifications";
 
 async function getSelection() {
@@ -96,8 +97,7 @@ export default async function Combo1Command() {
     }
 
     if (preferences.action === "paste") {
-      await Clipboard.paste(result);
-      await showHUD(`Combo 1: Applied ${modificationCount} modifications and pasted`);
+      await pasteOrCopy(result, `Combo 1: Applied ${modificationCount} modifications and pasted`);
     } else {
       await Clipboard.copy(result);
       await showHUD(`Combo 1: Applied ${modificationCount} modifications and copied`);

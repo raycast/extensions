@@ -24,6 +24,12 @@ export class SelectedText {
     return new MarkdownText(this.replace(issueIdStyle, `[$&](${issueDetailsUrl})`));
   }
 
+  public getIssueUrls(issueIdStyle: IssueIdStyle, issueDetailsUrl: string): string[] {
+    const regexp = IssueIdFormat[issueIdStyle];
+    const issueIds = this.text.match(regexp) || [];
+    return issueIds.map((issueId) => issueId.replace(regexp, issueDetailsUrl));
+  }
+
   private replace(issueIdStyle: IssueIdStyle, replaceValue: string): string {
     const regexp = IssueIdFormat[issueIdStyle];
     return this.text.replace(regexp, replaceValue);

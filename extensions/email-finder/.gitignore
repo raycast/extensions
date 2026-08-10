@@ -13,8 +13,6 @@ compiled_raycast_rust
 # misc
 .DS_Store
 
-# Backend (deployed separately to Supabase)
-supabase/
-
 # MCP configuration (contains credentials)
 .mcp.json
+.worker/

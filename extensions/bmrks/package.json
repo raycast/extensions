@@ -59,7 +59,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.1",
     "@raycast/utils": "^2.2.2",
-    "@supabase/supabase-js": "^2.90.1",
+    "@supabase/supabase-js": "^2.110.1",
     "color-string": "^2.1.4"
   },
   "devDependencies": {

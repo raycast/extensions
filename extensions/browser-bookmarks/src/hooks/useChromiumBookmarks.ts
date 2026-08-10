@@ -1,8 +1,10 @@
 import { existsSync, readdirSync, readFile } from "fs";
+import { stat } from "fs/promises";
 import { join } from "path";
 import { promisify } from "util";
 
 import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCallback, useEffect, useRef } from "react";
 
 const read = promisify(readFile);
 
@@ -26,8 +28,10 @@ type BookmarksRoot = {
   roots: {
     bookmark_bar: BookmarkFolder;
     other: BookmarkFolder;
-  };
+  } & Record<string, BookmarkFolder | undefined>;
 };
+
+const CHROMIUM_BOOKMARK_FILE_NAMES = ["Bookmarks", "AccountBookmarks"] as const;
 
 function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   const bookmarks = [];
@@ -50,9 +54,49 @@ function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
   return bookmarks;
 }
 
+function getBookmarkCount(bookmarksRoot: BookmarksRoot) {
+  return Object.values(bookmarksRoot.roots).reduce((count, root) => count + (root ? getBookmarks(root).length : 0), 0);
+}
+
+function hasChromiumBookmarksFile(path: string, profile: string) {
+  return CHROMIUM_BOOKMARK_FILE_NAMES.some((fileName) => existsSync(join(path, profile, fileName)));
+}
+
+async function readChromiumBookmarks(path: string, profile: string) {
+  const accountBookmarksPath = join(path, profile, "AccountBookmarks");
+
+  if (existsSync(accountBookmarksPath)) {
+    try {
+      const accountBookmarks = JSON.parse((await read(accountBookmarksPath)).toString()) as BookmarksRoot;
+      if (getBookmarkCount(accountBookmarks) > 0) {
+        return accountBookmarks;
+      }
+    } catch {
+      // Fall back to the legacy Bookmarks file below.
+    }
+  }
+
+  const bookmarksPath = join(path, profile, "Bookmarks");
+  if (!existsSync(bookmarksPath)) {
+    return;
+  }
+
+  return JSON.parse((await read(bookmarksPath)).toString()) as BookmarksRoot;
+}
+
 type Folder = {
   id: string;
   title: string;
+};
+
+type ChromiumProfile = {
+  path: string;
+  name: string;
+};
+
+type ChromiumProfilesResult = {
+  profiles: ChromiumProfile[];
+  defaultProfile: string;
 };
 
 function getFolders(bookmark: BookmarkFolder | BookmarkItem, hierarchy = ""): Folder[] {
@@ -70,13 +114,13 @@ function getFolders(bookmark: BookmarkFolder | BookmarkItem, hierarchy = ""): Fo
   return folders;
 }
 
-async function getChromiumProfilesFallback(path: string) {
+async function getChromiumProfilesFallback(path: string): Promise<ChromiumProfilesResult> {
   if (!existsSync(path)) return { profiles: [], defaultProfile: "" };
 
   let profiles;
   try {
     profiles = readdirSync(path, { withFileTypes: true })
-      .filter((d) => d.isDirectory() && existsSync(join(path, d.name, "Bookmarks")))
+      .filter((d) => d.isDirectory() && hasChromiumBookmarksFile(path, d.name))
       .map((d) => ({ path: d.name, name: d.name }));
   } catch {
     return { profiles: [], defaultProfile: "" };
@@ -88,7 +132,7 @@ async function getChromiumProfilesFallback(path: string) {
   return { profiles, defaultProfile };
 }
 
-async function getChromiumProfiles(path: string) {
+async function getChromiumProfiles(path: string): Promise<ChromiumProfilesResult> {
   if (!existsSync(`${path}/Local State`)) {
     return { profiles: [], defaultProfile: "" };
   }
@@ -112,11 +156,9 @@ async function getChromiumProfiles(path: string) {
   const profileInfoCache: Record<string, any> = localState.profile.info_cache;
 
   const profiles = Object.entries(profileInfoCache)
-    // Only keep profiles that have bookmarks
     .filter(([profilePath]) => {
       try {
-        const profileDirectory = readdirSync(`${path}/${profilePath}`);
-        return profileDirectory.includes("Bookmarks");
+        return hasChromiumBookmarksFile(path, profilePath);
       } catch {
         return false;
       }
@@ -135,6 +177,26 @@ async function getChromiumProfiles(path: string) {
   return { profiles, defaultProfile };
 }
 
+async function getFileSignature(filePath: string) {
+  try {
+    const fileStat = await stat(filePath);
+    return `${filePath}:${fileStat.size}:${fileStat.mtimeMs}`;
+  } catch {
+    return `${filePath}:missing`;
+  }
+}
+
+async function getChromiumSourceSignature(path: string, profile: string) {
+  const signatures = [await getFileSignature(join(path, "Local State"))];
+
+  if (profile) {
+    signatures.push(await getFileSignature(join(path, profile, "Bookmarks")));
+    signatures.push(await getFileSignature(join(path, profile, "AccountBookmarks")));
+  }
+
+  return signatures.join("|");
+}
+
 type UseChromiumBookmarksParams = {
   path: string;
   browserIcon: string;
@@ -146,43 +208,135 @@ export default function useChromiumBookmarks(
   enabled: boolean,
   { path, browserIcon, browserName, browserBundleId }: UseChromiumBookmarksParams,
 ) {
-  const [currentProfile, setCurrentProfile] = useCachedState(`${browserName}-profile`, "");
+  const [storedCurrentProfile, setCurrentProfile] = useCachedState(`${browserName}-profile`, "");
+  const lastKnownSourceSignatureRef = useRef<string | undefined>(undefined);
+  const isCheckingForChangesRef = useRef(false);
 
-  const { data: profiles } = useCachedPromise(
-    async (enabled, path) => {
-      if (!enabled) {
-        return;
+  const {
+    data: profilesData,
+    isLoading: isLoadingProfiles,
+    mutate: mutateProfiles,
+  } = useCachedPromise(
+    async (isEnabled, currentPath) => {
+      if (!isEnabled) {
+        return { profiles: [], defaultProfile: "" };
       }
 
-      const { profiles, defaultProfile } = await getChromiumProfiles(path);
-
-      // Initially set the current profile when nothing is set in the cache yet
-      if (currentProfile === "") {
-        setCurrentProfile(defaultProfile);
-      }
-
-      return profiles;
+      return getChromiumProfiles(currentPath);
     },
     [enabled, path],
   );
 
-  const { data, isLoading, mutate } = useCachedPromise(
-    async (profile, enabled, path) => {
-      if (!profile || !enabled || !existsSync(`${path}/${profile}/Bookmarks`)) {
+  const profiles = profilesData?.profiles || [];
+  const isStoredProfileValid = profiles.some((profile) => profile.path === storedCurrentProfile);
+  const currentProfile =
+    storedCurrentProfile && isStoredProfileValid ? storedCurrentProfile : profilesData?.defaultProfile || "";
+
+  useEffect(() => {
+    if (!enabled || !profilesData?.defaultProfile) {
+      return;
+    }
+
+    if (storedCurrentProfile === "" || !isStoredProfileValid) {
+      setCurrentProfile(profilesData.defaultProfile);
+    }
+  }, [enabled, isStoredProfileValid, profilesData, setCurrentProfile, storedCurrentProfile]);
+
+  const {
+    data,
+    isLoading: isLoadingBookmarks,
+    mutate: mutateBookmarks,
+  } = useCachedPromise(
+    async (profile, isEnabled, currentPath) => {
+      if (!profile || !isEnabled || !hasChromiumBookmarksFile(currentPath, profile)) {
         return;
       }
 
-      const file = await read(`${path}/${profile}/Bookmarks`);
-      return JSON.parse(file.toString()) as BookmarksRoot;
+      return readChromiumBookmarks(currentPath, profile);
     },
     [currentProfile, enabled, path],
   );
 
-  const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];
-  const toolbarFolders = data ? getFolders(data.roots.bookmark_bar) : [];
+  const mutate = useCallback(async () => {
+    await Promise.all([mutateProfiles(), mutateBookmarks()]);
+  }, [mutateBookmarks, mutateProfiles]);
 
-  const otherBookmarks = data ? getBookmarks(data.roots.other) : [];
-  const otherFolders = data ? getFolders(data.roots.other) : [];
+  const isLoading =
+    isLoadingProfiles || isLoadingBookmarks || (enabled && currentProfile === "" && profiles.length > 0);
+
+  useEffect(() => {
+    if (!enabled) {
+      lastKnownSourceSignatureRef.current = undefined;
+      return;
+    }
+
+    let isActive = true;
+
+    async function primeSignature() {
+      const sourceSignature = await getChromiumSourceSignature(path, currentProfile);
+
+      if (isActive) {
+        lastKnownSourceSignatureRef.current = sourceSignature;
+      }
+    }
+
+    void primeSignature();
+
+    return () => {
+      isActive = false;
+    };
+  }, [currentProfile, enabled, path]);
+
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    let isActive = true;
+
+    async function checkForUpdates() {
+      if (!isActive || isLoading || isCheckingForChangesRef.current) {
+        return;
+      }
+
+      isCheckingForChangesRef.current = true;
+
+      try {
+        const nextSourceSignature = await getChromiumSourceSignature(path, currentProfile);
+        const previousSourceSignature = lastKnownSourceSignatureRef.current;
+
+        if (!previousSourceSignature) {
+          lastKnownSourceSignatureRef.current = nextSourceSignature;
+          return;
+        }
+
+        if (nextSourceSignature !== previousSourceSignature) {
+          lastKnownSourceSignatureRef.current = nextSourceSignature;
+          await mutate();
+        }
+      } finally {
+        isCheckingForChangesRef.current = false;
+      }
+    }
+
+    const timer = setInterval(() => {
+      void checkForUpdates();
+    }, 3000);
+
+    return () => {
+      isActive = false;
+      clearInterval(timer);
+    };
+  }, [currentProfile, enabled, mutate, path]);
+
+  const toolbarRoot = data?.roots.bookmark_bar;
+  const otherRoot = data?.roots.other;
+
+  const toolbarBookmarks = toolbarRoot ? getBookmarks(toolbarRoot) : [];
+  const toolbarFolders = toolbarRoot ? getFolders(toolbarRoot) : [];
+
+  const otherBookmarks = otherRoot ? getBookmarks(otherRoot) : [];
+  const otherFolders = otherRoot ? getFolders(otherRoot) : [];
 
   const bookmarks = [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
     return {

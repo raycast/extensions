@@ -1,10 +1,13 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Cache,
   confirmAlert,
   Detail,
   getPreferenceValues,
+  LocalStorage,
+  showHUD,
   showToast,
   Toast,
   trash,
@@ -20,6 +23,8 @@ import untildify from "untildify";
 
 const cache = new Cache();
 const CACHE_KEY = "customDownloadsFolder";
+const DELETION_BEHAVIOR_KEY = "deletion-behavior";
+const PERMANENT_DELETE_CONFIRMATION_KEY = "permanent-delete-confirmation-choice";
 
 const preferences = getPreferenceValues();
 
@@ -183,38 +188,102 @@ export function hasAccessToDownloadsFolder() {
   }
 }
 
-export async function deleteFileOrFolder(filePath: string) {
-  if (preferences.deletionBehavior === "trash") {
+type DeleteFeedback = "toast" | "hud" | "none";
+export type DeletionBehavior = "trash" | "permaDel";
+
+export function getDeletionBehaviorTitle(deletionBehavior: DeletionBehavior) {
+  return deletionBehavior === "trash" ? "Trash" : "Permanently Delete";
+}
+
+async function showDeleteFeedback(feedback: DeleteFeedback, title: string, style: Toast.Style) {
+  if (feedback === "hud") {
+    await showHUD(title);
+  } else if (feedback === "toast") {
+    await showToast({ style, title });
+  }
+}
+
+export async function deleteFileOrFolder(
+  filePath: string,
+  options: {
+    feedback?: DeleteFeedback;
+    beforeFeedback?: () => Promise<void>;
+    confirmationMessage?: string;
+    skipConfirmation?: boolean;
+    deletionBehavior?: DeletionBehavior;
+  } = {},
+) {
+  const feedback = options.feedback ?? "toast";
+  const deletionBehavior = options.deletionBehavior ?? (await getDeletionBehavior());
+
+  if (deletionBehavior === "trash") {
     try {
       await trash(filePath);
-      await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
     } catch (error) {
       await showFailureToast(error, { title: "Move to Trash Failed" });
+      return;
     }
+    await options.beforeFeedback?.();
+    await showDeleteFeedback(feedback, "Item Moved to Trash", Toast.Style.Success);
     return;
   }
 
-  const shouldDelete = await confirmAlert({
-    title: "Delete Item?",
-    message: `Are you sure you want to permanently delete:\n${filePath}?`,
-    primaryAction: {
-      title: "Delete",
-    },
-  });
+  let shouldDelete = options.skipConfirmation ?? false;
+
+  if (!options.skipConfirmation) {
+    shouldDelete = await confirmAlert({
+      title: "Delete Item?",
+      message:
+        options.confirmationMessage ??
+        `Are you sure you want to permanently delete:\n${filePath}?\nThis action cannot be undone.`,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+      dismissAction: {
+        title: "Cancel",
+        style: Alert.ActionStyle.Cancel,
+      },
+    });
+    await LocalStorage.setItem(PERMANENT_DELETE_CONFIRMATION_KEY, shouldDelete ? "delete" : "cancel");
+  }
 
   if (!shouldDelete) {
-    await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
+    await options.beforeFeedback?.();
+    await showDeleteFeedback(feedback, "Cancelled", Toast.Style.Animated);
     return;
   }
 
   try {
     await rm(filePath, { recursive: true, force: true });
-    await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
+    await options.beforeFeedback?.();
+    await showDeleteFeedback(feedback, "Item Deleted", Toast.Style.Success);
   } catch (error) {
     if (error instanceof Error) {
       await showFailureToast(error, { title: "Deletion Failed" });
     }
   }
+}
+
+export async function getPermanentDeleteConfirmationChoice() {
+  return LocalStorage.getItem<"delete" | "cancel">(PERMANENT_DELETE_CONFIRMATION_KEY);
+}
+
+export async function getDeletionBehavior(): Promise<DeletionBehavior> {
+  const deletionBehavior = await LocalStorage.getItem<DeletionBehavior>(DELETION_BEHAVIOR_KEY);
+
+  if (deletionBehavior) {
+    return deletionBehavior;
+  }
+
+  return preferences.deletionBehavior as DeletionBehavior;
+}
+
+export async function toggleDeletionBehavior() {
+  const currentDeletionBehavior = await getDeletionBehavior();
+  const nextDeletionBehavior = currentDeletionBehavior === "trash" ? "permaDel" : "trash";
+  await LocalStorage.setItem(DELETION_BEHAVIOR_KEY, nextDeletionBehavior);
+  return nextDeletionBehavior;
 }
 
 export const withAccessToDownloadsFolder = <P extends object>(Component: ComponentType<P>) => {

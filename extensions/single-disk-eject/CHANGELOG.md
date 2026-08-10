@@ -1,5 +1,11 @@
 # Single Disk Eject Changelog
 
+## [Windows Ejection Rework] - 2026-04-20
+
+- Replaced deprecated `wmic` command with PowerShell/CIM cmdlets that should work on all modern Windows versions
+- Overhauled the ejection logic to better align with native Windows hardware removal behavior
+- Improved compatibility across a wider range of removable devices, like SD cards and Docks
+
 ## [Dependency update] - 2026-03-08
 
 - Updated dependencies

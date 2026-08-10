@@ -7,6 +7,7 @@ import {
   Clipboard,
   Icon,
   Keyboard,
+  getFrontmostApplication,
 } from "@raycast/api";
 import React, { useState, useEffect, useMemo } from "react";
 import {
@@ -21,6 +22,7 @@ export default function FindModels() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [targetAppName, setTargetAppName] = useState("Active App");
 
   async function loadModels(forceRefresh = false) {
     // If not force refresh, try to load cache first
@@ -35,8 +37,8 @@ export default function FindModels() {
           .then((fetchedModels) => {
             setModels(fetchedModels);
           })
-          .catch((error) => {
-            console.error("Background update failed:", error);
+          .catch(() => {
+            // Ignore silent refresh failures and keep cached data visible.
           });
         return;
       }
@@ -87,7 +89,6 @@ export default function FindModels() {
           onAction: () => loadModels(true),
         },
       });
-      console.error("Error loading models:", error);
 
       // Try to use cache if loading fails
       const cachedModels = getCachedModels();
@@ -106,6 +107,23 @@ export default function FindModels() {
 
   useEffect(() => {
     loadModels();
+  }, []);
+
+  useEffect(() => {
+    async function loadTargetApp() {
+      try {
+        const application = await getFrontmostApplication();
+        if (application.bundleId === "com.raycast.macos") {
+          return;
+        }
+
+        setTargetAppName(application.localizedName || application.name);
+      } catch {
+        // Keep the generic fallback label when the target app name is unavailable.
+      }
+    }
+
+    loadTargetApp();
   }, []);
 
   const fuzzyMatch = (text: string, query: string): boolean => {
@@ -143,13 +161,13 @@ export default function FindModels() {
     return filtered.sort((a, b) => b.created - a.created);
   }, [searchText, models]);
 
-  async function copyToClipboard(modelId: string) {
+  async function copyToClipboard(value: string, label: string) {
     try {
-      await Clipboard.copy(modelId);
+      await Clipboard.copy(value);
       showToast({
         style: Toast.Style.Success,
         title: "Copied to Clipboard",
-        message: `Model ID: ${modelId}`,
+        message: `${label}: ${value}`,
       });
     } catch {
       showToast({
@@ -179,15 +197,21 @@ export default function FindModels() {
           ]}
           actions={
             <ActionPanel>
+              <Action.Paste
+                title={`Paste Model ID in ${targetAppName}`}
+                content={model.id}
+              />
               <Action
                 title="Copy Model ID"
                 icon={Icon.Clipboard}
-                onAction={() => copyToClipboard(model.id)}
+                onAction={() => copyToClipboard(model.id, "Model ID")}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
               />
               <Action
                 title="Copy Model Name"
                 icon={Icon.Text}
-                onAction={() => copyToClipboard(model.name)}
+                onAction={() => copyToClipboard(model.name, "Model Name")}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
               />
               <Action.OpenInBrowser
                 title="View on OpenRouter"

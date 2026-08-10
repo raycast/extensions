@@ -80,3 +80,22 @@ export function formatDuration(seconds: number): string {
   const hours = Math.floor((seconds % 86400) / 3600);
   return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
 }
+
+/**
+ * Formats a fetch timestamp as a local clock time, e.g. "9:30 PM".
+ *
+ * A clock time is a fact about when the last fetch ran — it never needs to
+ * tick or be re-derived, unlike a relative "ago" which goes stale the moment
+ * it's rendered and (on a menu-bar command that can't tick) freezes at a
+ * misleading value. Returns "" when there is no timestamp.
+ */
+export function formatClock(timestamp: number | undefined): string {
+  if (!timestamp) return "";
+  return new Date(timestamp).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+/** The most recent of the given fetch timestamps, or undefined when none exist. */
+export function latestTimestamp(timestamps: (number | undefined)[]): number | undefined {
+  const known = timestamps.filter((value): value is number => typeof value === "number" && value > 0);
+  return known.length > 0 ? Math.max(...known) : undefined;
+}

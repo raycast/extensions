@@ -24,7 +24,7 @@ function EmojiActionMenu({
         {EMOJI_CATEGORIES.map(({ emoji, label }) => (
           <Action key={emoji} title={`${emoji} ${label}`} onAction={() => onUpdateEmoji(entity, emoji)} />
         ))}
-        <Action title="Clear Emoji (use Favicon)" onAction={() => onResetToFavicon(entity)} />
+        <Action title="Clear Emoji (Use Favicon)" onAction={() => onResetToFavicon(entity)} />
         <Action.Push
           title="Custom Emoji…"
           target={<EmojiForm initialEmoji={currentEmoji} onSubmit={(e) => onUpdateEmoji(entity, e)} />}

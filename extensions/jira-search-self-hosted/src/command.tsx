@@ -17,14 +17,17 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<ErrorText>();
   useEffect(() => {
+    let isCurrentQuery = true;
+
     setError(undefined);
     setIsLoading(true);
     search(query)
       .then((resultItems) => {
+        if (!isCurrentQuery) return;
         setItems(resultItems);
-        setIsLoading(false);
       })
       .catch((e) => {
+        if (!isCurrentQuery) return;
         setItems([]);
         console.warn(e);
         if (e instanceof Error) {
@@ -32,8 +35,12 @@ export function SearchCommand(search: SearchFunction, searchBarPlaceholder?: str
         }
       })
       .finally(() => {
-        setIsLoading(false);
+        if (isCurrentQuery) setIsLoading(false);
       });
+
+    return () => {
+      isCurrentQuery = false;
+    };
   }, [query]);
 
   const onSearchChange = (newSearch: string) => setQuery(newSearch);

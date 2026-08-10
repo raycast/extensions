@@ -5,6 +5,7 @@ import {
   Icon,
   List,
   Toast,
+  getPreferenceValues,
   launchCommand,
   LaunchType,
   showToast,
@@ -22,15 +23,21 @@ import { useCarriers } from "./hooks/useCarriers";
  */
 const UNKNOWN_DATE_PLACEHOLDER = "--//--";
 
-/**
- * Supported date formats for parsing delivery dates.
- * American formats (MM.dd.yyyy) are tried before European (dd.MM.yyyy) to handle ambiguous dates correctly.
- */
-const DATE_FORMATS = [
-  "MM.dd.yyyy HH:mm:ss", // American with seconds
-  "MM.dd.yyyy HH:mm", // American without seconds
-  "dd.MM.yyyy HH:mm:ss", // European with seconds
-  "dd.MM.yyyy HH:mm", // European without seconds
+const NUMERIC_DOT_FORMATS_MONTH_FIRST = [
+  "MM.dd.yyyy HH:mm:ss",
+  "MM.dd.yyyy HH:mm",
+  "dd.MM.yyyy HH:mm:ss",
+  "dd.MM.yyyy HH:mm",
+] as const;
+
+const NUMERIC_DOT_FORMATS_DAY_FIRST = [
+  "dd.MM.yyyy HH:mm:ss",
+  "dd.MM.yyyy HH:mm",
+  "MM.dd.yyyy HH:mm:ss",
+  "MM.dd.yyyy HH:mm",
+] as const;
+
+const REST_DATE_FORMATS = [
   "MMMM dd, yyyy HH:mm", // American written format
   "yyyy-MM-dd HH:mm:ss", // ISO 8601
   "EEEE, d MMMM h:mm a", // Day name, date, 12-hour time (e.g. "Saturday, 31 May 5:26 am")
@@ -39,8 +46,54 @@ const DATE_FORMATS = [
   "EEEE d MMMM", // Portuguese format without time (e.g. "domingo 24 agosto")
 ] as const;
 
+/**
+ * Parse carrier/API date strings; ambiguous `dd.MM` vs `MM.dd` follows extension preference `ambiguousDotDateOrder`.
+ */
+function parseDeliveryDate(dateString: string, ambiguousNumericMonthFirst: boolean): Date | null {
+  const dateFormats = [
+    ...(ambiguousNumericMonthFirst ? NUMERIC_DOT_FORMATS_MONTH_FIRST : NUMERIC_DOT_FORMATS_DAY_FIRST),
+    ...REST_DATE_FORMATS,
+  ];
+
+  const dotSeparatedMatch = dateString.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
+  if (dotSeparatedMatch) {
+    const [, first, second, , , , sec] = dotSeparatedMatch;
+    const firstNum = parseInt(first, 10);
+    const secondNum = parseInt(second, 10);
+    const hasSeconds = sec !== undefined;
+
+    if (firstNum > 12) {
+      const fmt = hasSeconds ? `dd.MM.yyyy HH:mm:ss` : `dd.MM.yyyy HH:mm`;
+      const date = parse(dateString, fmt, new Date());
+      if (isValid(date)) return date;
+    } else if (secondNum > 12) {
+      const fmt = hasSeconds ? `MM.dd.yyyy HH:mm:ss` : `MM.dd.yyyy HH:mm`;
+      const date = parse(dateString, fmt, new Date());
+      if (isValid(date)) return date;
+    } else {
+      const americanFmt = hasSeconds ? `MM.dd.yyyy HH:mm:ss` : `MM.dd.yyyy HH:mm`;
+      const europeanFmt = hasSeconds ? `dd.MM.yyyy HH:mm:ss` : `dd.MM.yyyy HH:mm`;
+      const [primaryFmt, secondaryFmt] = ambiguousNumericMonthFirst
+        ? [americanFmt, europeanFmt]
+        : [europeanFmt, americanFmt];
+      const primary = parse(dateString, primaryFmt, new Date());
+      if (isValid(primary)) return primary;
+      const secondary = parse(dateString, secondaryFmt, new Date());
+      if (isValid(secondary)) return secondary;
+    }
+  }
+
+  for (const fmt of dateFormats) {
+    const date = parse(dateString, fmt, new Date());
+    if (isValid(date)) return date;
+  }
+  return null;
+}
+
 export default function Command() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.ACTIVE);
+  const { ambiguousDotDateOrder } = getPreferenceValues<Preferences>();
+  const ambiguousNumericMonthFirst = ambiguousDotDateOrder !== "day_month";
   const { deliveries, isLoading, error } = useDeliveries(filterMode);
   const { carriers } = useCarriers();
 
@@ -63,63 +116,14 @@ export default function Command() {
    */
   const getDaysUntilDelivery = (delivery: Delivery): number | null => {
     if (!delivery.date_expected) return null;
-    const deliveryDate = new Date(delivery.date_expected);
+    const parsed = parseDeliveryDate(delivery.date_expected, ambiguousNumericMonthFirst);
+    if (!parsed) return null;
+    const deliveryDate = parsed;
     const today = new Date();
     deliveryDate.setHours(0, 0, 0, 0);
     today.setHours(0, 0, 0, 0);
     const diffTime = deliveryDate.getTime() - today.getTime();
     return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  };
-
-  /**
-   * Try to parse a date string using a set of known formats.
-   * For ambiguous dot-separated dates (MM.dd.yyyy vs dd.MM.yyyy), tries American format first,
-   * then European format, and picks the one that makes chronological sense.
-   *
-   * @param dateString The date string to parse
-   * @returns Date object if valid, otherwise null
-   */
-  const parseDate = (dateString: string): Date | null => {
-    // Handle ambiguous dot-separated dates (MM.dd.yyyy vs dd.MM.yyyy)
-    const dotSeparatedMatch = dateString.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
-    if (dotSeparatedMatch) {
-      const [, first, second, , , , sec] = dotSeparatedMatch;
-      const firstNum = parseInt(first, 10);
-      const secondNum = parseInt(second, 10);
-      const hasSeconds = sec !== undefined;
-
-      // If first number > 12, it must be European format (dd.MM)
-      if (firstNum > 12) {
-        const fmt = hasSeconds ? `dd.MM.yyyy HH:mm:ss` : `dd.MM.yyyy HH:mm`;
-        const date = parse(dateString, fmt, new Date());
-        if (isValid(date)) return date;
-      }
-      // If second number > 12, it must be American format (MM.dd)
-      else if (secondNum > 12) {
-        const fmt = hasSeconds ? `MM.dd.yyyy HH:mm:ss` : `MM.dd.yyyy HH:mm`;
-        const date = parse(dateString, fmt, new Date());
-        if (isValid(date)) return date;
-      }
-      // Both <= 12, ambiguous - try American first (MM.dd), then European (dd.MM)
-      else {
-        // Try American format first
-        const americanFmt = hasSeconds ? `MM.dd.yyyy HH:mm:ss` : `MM.dd.yyyy HH:mm`;
-        const americanDate = parse(dateString, americanFmt, new Date());
-        if (isValid(americanDate)) return americanDate;
-
-        // Try European format
-        const europeanFmt = hasSeconds ? `dd.MM.yyyy HH:mm:ss` : `dd.MM.yyyy HH:mm`;
-        const europeanDate = parse(dateString, europeanFmt, new Date());
-        if (isValid(europeanDate)) return europeanDate;
-      }
-    }
-
-    // Try all other formats
-    for (const fmt of DATE_FORMATS) {
-      const date = parse(dateString, fmt, new Date());
-      if (isValid(date)) return date;
-    }
-    return null;
   };
 
   /**
@@ -134,7 +138,7 @@ export default function Command() {
     // Check if the original string contains time information
     const hasTimeInfo = /[0-9]{1,2}:[0-9]{2}/.test(dateString) || /[0-9]{1,2}:[0-9]{2} [AP]M/i.test(dateString);
 
-    const date = parseDate(dateString);
+    const date = parseDeliveryDate(dateString, ambiguousNumericMonthFirst);
     if (!date) {
       console.error(`All supported date formats failed for: ${dateString}`);
       return dateString;
@@ -188,8 +192,10 @@ export default function Command() {
    */
   const formatExpectedDelivery = (delivery: Delivery): string => {
     if (!delivery.date_expected) return "Not available";
-    const start = parseDate(delivery.date_expected);
-    const end = delivery.date_expected_end ? parseDate(delivery.date_expected_end) : null;
+    const start = parseDeliveryDate(delivery.date_expected, ambiguousNumericMonthFirst);
+    const end = delivery.date_expected_end
+      ? parseDeliveryDate(delivery.date_expected_end, ambiguousNumericMonthFirst)
+      : null;
     if (!start) return "Not available";
 
     const now = new Date();

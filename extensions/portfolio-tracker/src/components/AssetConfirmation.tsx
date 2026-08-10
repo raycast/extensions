@@ -39,6 +39,7 @@ import { useFxRate } from "../hooks/useFxRate";
 import { useState, useMemo } from "react";
 import { AssetSearchResult, AssetType } from "../utils/types";
 import { useAssetPrice } from "../hooks/useAssetPrice";
+import { useOptionalPrice } from "../hooks/useOptionalPrice";
 import {
   validateUnits,
   parseUnits,
@@ -77,6 +78,7 @@ interface AssetConfirmationProps {
     currency: string;
     assetType: AssetType;
     priceOverride?: number;
+    avgCostPrice?: number;
   }) => Promise<void>;
 }
 
@@ -289,13 +291,26 @@ export function AssetConfirmationForm({
   const [totalValueError, setTotalValueError] = useState<string | undefined>(undefined);
   const [totalValueInput, setTotalValueInput] = useState<string>("");
   const [nameError, setNameError] = useState<string | undefined>(undefined);
+  const [priceOverrideInput, setPriceOverrideInput] = useState<string>("");
   const [priceOverrideError, setPriceOverrideError] = useState<string | undefined>(undefined);
+  const [avgCostInput, setAvgCostInput] = useState<string>("");
+  const [avgCostError, setAvgCostError] = useState<string | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // ── Computed values for total-value mode ──
 
   const effectivePrice = useMemo(() => price?.price ?? 0, [price]);
   const assetCurrency = price?.currency ?? "";
+
+  // When a buy price is entered, total-value mode divides by it instead of the
+  // live price — "amount invested ÷ price paid" recovers the units actually
+  // bought, even when the position is being recorded long after the purchase.
+  const enteredBuyPrice = useOptionalPrice(avgCostInput);
+
+  // A manual price override also affects the value-mode divisor at submit
+  // time (see resolvedPrice in handleSubmit) — mirror that here so the live
+  // preview matches what actually gets saved.
+  const enteredPriceOverride = useOptionalPrice(priceOverrideInput);
 
   const valueCurrencyOptions = useMemo(() => {
     const options: Array<{ value: string; title: string }> = [];
@@ -314,27 +329,48 @@ export function AssetConfirmationForm({
     needsFxConversion ? assetCurrency : undefined,
   );
 
+  // Units in total-value mode are derived from the buy price when entered,
+  // then the price override (matches resolvedPrice in handleSubmit), falling
+  // back to the live price for "buying right now" entries.
+  const valueModeUnitPrice = enteredBuyPrice ?? enteredPriceOverride ?? effectivePrice;
+
   const computedUnitsFromValue = useMemo(() => {
     const trimmed = totalValueInput.trim();
-    if (!trimmed || !effectivePrice) return null;
+    if (!trimmed || !valueModeUnitPrice) return null;
     const parsed = Number(trimmed);
     if (isNaN(parsed) || parsed <= 0) return null;
     const valueInAssetCurrency = needsFxConversion && fxRate ? parsed * fxRate : parsed;
     if (needsFxConversion && !fxRate) return null;
-    return computeUnitsFromTotalValue(valueInAssetCurrency, effectivePrice);
-  }, [totalValueInput, effectivePrice, needsFxConversion, fxRate]);
+    return computeUnitsFromTotalValue(valueInAssetCurrency, valueModeUnitPrice);
+  }, [totalValueInput, valueModeUnitPrice, needsFxConversion, fxRate]);
 
   const computedTotalDisplay = useMemo(() => {
     if (needsFxConversion && !fxRate && totalValueInput.trim()) {
       return "Loading FX rate...";
     }
     if (computedUnitsFromValue === null || !price) return null;
-    const nativeTotal = computedUnitsFromValue * price.price;
+    const priceLabel = enteredBuyPrice
+      ? `${formatCurrency(enteredBuyPrice, price.currency)} buy price`
+      : enteredPriceOverride
+        ? `${formatCurrency(enteredPriceOverride, price.currency)} price override`
+        : formatCurrency(price.price, price.currency);
+    const total = computedUnitsFromValue * valueModeUnitPrice;
     if (needsFxConversion && fxRate) {
-      return `${formatUnits(computedUnitsFromValue)} units × ${formatCurrency(price.price, price.currency)} = ${formatCurrency(nativeTotal, price.currency)} (${formatCurrency(Number(totalValueInput.trim()), valueCurrency)} at ${fxRate.toFixed(4)} ${valueCurrency}/${assetCurrency})`;
+      return `${formatUnits(computedUnitsFromValue)} units × ${priceLabel} = ${formatCurrency(total, price.currency)} (${formatCurrency(Number(totalValueInput.trim()), valueCurrency)} at ${fxRate.toFixed(4)} ${valueCurrency}/${assetCurrency})`;
     }
-    return `${formatUnits(computedUnitsFromValue)} units × ${formatCurrency(price.price, price.currency)} = ${formatCurrency(nativeTotal, price.currency)}`;
-  }, [computedUnitsFromValue, price, needsFxConversion, fxRate, totalValueInput, valueCurrency, assetCurrency]);
+    return `${formatUnits(computedUnitsFromValue)} units × ${priceLabel} = ${formatCurrency(total, price.currency)}`;
+  }, [
+    computedUnitsFromValue,
+    price,
+    enteredBuyPrice,
+    enteredPriceOverride,
+    valueModeUnitPrice,
+    needsFxConversion,
+    fxRate,
+    totalValueInput,
+    valueCurrency,
+    assetCurrency,
+  ]);
 
   // ── Handlers ──
 
@@ -381,9 +417,23 @@ export function AssetConfirmationForm({
     }
   }
 
-  function handlePriceChange() {
+  function handlePriceChange(value: string) {
+    setPriceOverrideInput(value);
     if (priceOverrideError) {
       setPriceOverrideError(undefined);
+    }
+  }
+
+  function handleAvgCostBlur(event: Form.Event<string>) {
+    if (event.target.value && event.target.value.trim().length > 0) {
+      setAvgCostError(validatePrice(event.target.value));
+    }
+  }
+
+  function handleAvgCostChange(value: string) {
+    setAvgCostInput(value);
+    if (avgCostError) {
+      setAvgCostError(undefined);
     }
   }
 
@@ -398,6 +448,7 @@ export function AssetConfirmationForm({
     units?: string;
     totalValue?: string;
     priceOverride?: string;
+    avgCostPrice?: string;
     inputMode: string;
     valueCurrency?: string;
   }) {
@@ -412,6 +463,15 @@ export function AssetConfirmationForm({
       const priceValidation = validatePrice(priceOverrideValue);
       if (priceValidation) {
         setPriceOverrideError(priceValidation);
+        return;
+      }
+    }
+
+    const avgCostValue = values.avgCostPrice?.trim();
+    if (avgCostValue) {
+      const avgCostValidation = validatePrice(avgCostValue);
+      if (avgCostValidation) {
+        setAvgCostError(avgCostValidation);
         return;
       }
     }
@@ -442,7 +502,10 @@ export function AssetConfirmationForm({
 
       const rawTotalValue = parseTotalValue(values.totalValue!);
       const totalValueInAssetCurrency = needsFxConversion && fxRate ? rawTotalValue * fxRate : rawTotalValue;
-      finalUnits = computeUnitsFromTotalValue(totalValueInAssetCurrency, resolvedPrice);
+      // Divide by the buy price when entered ("amount invested ÷ price paid"),
+      // otherwise by the current/override price ("buying at today's price").
+      const buyPrice = avgCostValue ? Number(avgCostValue) : undefined;
+      finalUnits = computeUnitsFromTotalValue(totalValueInAssetCurrency, buyPrice ?? resolvedPrice);
       if (finalUnits <= 0) {
         setTotalValueError("Computed units would be zero — check the price and total value.");
         return;
@@ -466,6 +529,7 @@ export function AssetConfirmationForm({
         currency: price.currency,
         assetType: result.type,
         priceOverride: priceOverrideValue ? parseUnits(priceOverrideValue) : undefined,
+        avgCostPrice: avgCostValue ? Number(avgCostValue) : undefined,
       });
       pop();
     } catch (error) {
@@ -541,6 +605,20 @@ export function AssetConfirmationForm({
         }
       />
 
+      <Form.TextField
+        id="avgCostPrice"
+        title="Average Buy Price"
+        placeholder={price ? `e.g. ${formatCurrency(price.price, price.currency)} (optional)` : "e.g. 72.50 (optional)"}
+        error={avgCostError}
+        onChange={handleAvgCostChange}
+        onBlur={handleAvgCostBlur}
+      />
+
+      <Form.Description
+        title=""
+        text={`Optional. The average price per unit you paid${price ? ` in ${price.currency}` : ""}. Enables profit/loss tracking.`}
+      />
+
       {/* ── Input Mode Toggle ── */}
       <Form.Description title="Account" text={accountName} />
 
@@ -601,10 +679,17 @@ export function AssetConfirmationForm({
               computedTotalDisplay
                 ? `→ ${computedTotalDisplay}`
                 : price
-                  ? needsFxConversion
-                    ? `Enter total amount in ${valueCurrency}. Will be converted to ${assetCurrency} then divided by ${formatCurrency(price.price, price.currency)}/unit.`
-                    : `Enter total amount invested in ${valueCurrency}. Units will be auto-calculated at ${formatCurrency(price.price, price.currency)} per unit.`
-                  : "Enter total amount invested. Units will be calculated from the current price."
+                  ? (() => {
+                      const divisorLabel = enteredBuyPrice
+                        ? `your buy price (${formatCurrency(enteredBuyPrice, price.currency)})`
+                        : enteredPriceOverride
+                          ? `your price override (${formatCurrency(enteredPriceOverride, price.currency)})`
+                          : `${formatCurrency(price.price, price.currency)}/unit`;
+                      return needsFxConversion
+                        ? `Enter total amount in ${valueCurrency}. Will be converted to ${assetCurrency} then divided by ${divisorLabel}.`
+                        : `Enter total amount invested in ${valueCurrency}. Units will be auto-calculated at ${divisorLabel} per unit.`;
+                    })()
+                  : "Enter total amount invested. Units will be calculated from your buy price (if entered), your price override (if entered), or the current price."
             }
           />
         </>

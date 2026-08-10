@@ -67,7 +67,7 @@ interface Preferences {
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
   providerName: "Moneytree",
-  providerIcon: "moneytree-icon.png",
+  providerIcon: "extension-icon.png",
   description: "Connect your Moneytree account to view your financial data",
 });
 
@@ -157,9 +157,9 @@ export async function ensureValidToken(): Promise<string> {
       try {
         const accessToken = await login(preferences.email, preferences.password);
         return accessToken;
-      } catch {
+      } catch (loginError) {
         throw new Error(
-          "Authentication failed. Please check your email and password in extension preferences or update them if they have changed.",
+          `Authentication failed. Please check your email and password in extension preferences or update them if they have changed. ${formatAuthError(loginError)}`,
         );
       }
     }
@@ -209,9 +209,9 @@ export async function ensureValidToken(): Promise<string> {
         try {
           const accessToken = await login(preferences.email, preferences.password);
           return accessToken;
-        } catch {
+        } catch (loginError) {
           throw new Error(
-            "Authentication failed. Please check your email and password in extension preferences or update them if they have changed.",
+            `Authentication failed. Please check your email and password in extension preferences or update them if they have changed. ${formatAuthError(loginError)}`,
           );
         }
       }
@@ -373,6 +373,17 @@ function extractAuthenticityToken(html: string): string | null {
   return null;
 }
 
+function extractPageEntry(html: string): string | null {
+  return html.match(/data-entry="([^"]+)"/)?.[1] ?? null;
+}
+
+function formatAuthError(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return `Details: ${error.message}`;
+  }
+  return "";
+}
+
 /**
  * Parse cookies from Set-Cookie header
  */
@@ -488,8 +499,18 @@ export async function login(email: string, password: string): Promise<string> {
   // Get updated cookies from login response
   const loginCookies = mergeCookies(loginPageCookies, loginResponse.headers.get("set-cookie"));
 
-  // Check if login was successful (should redirect)
-  if (loginResponse.status !== 302 && loginResponse.status !== 200) {
+  // Check if login was successful (should redirect). A 200 AnonymousPage means
+  // Moneytree rendered the login page again, usually due to bad credentials or
+  // an unsupported login challenge.
+  if (loginResponse.status === 200) {
+    const loginResponseHtml = await loginResponse.text();
+    const pageEntry = extractPageEntry(loginResponseHtml);
+    if (pageEntry === "application/AnonymousPage") {
+      throw new Error(
+        "Login form was returned again; credentials may be invalid or Moneytree may require browser login/2FA.",
+      );
+    }
+  } else if (loginResponse.status !== 302) {
     const errorText = await loginResponse.text();
     throw new Error(
       `Login failed: ${loginResponse.status}. Check your email and password. ${errorText.substring(0, 200)}`,
@@ -514,7 +535,11 @@ export async function login(email: string, password: string): Promise<string> {
   // The authorize endpoint should redirect to callback with code
   const location = authorizeResponse.headers.get("location");
   if (!location) {
-    throw new Error("Authorization failed: No redirect location received");
+    const authorizeResponseHtml = await authorizeResponse.text();
+    const pageEntry = extractPageEntry(authorizeResponseHtml);
+    throw new Error(
+      `Authorization failed: No redirect location received${pageEntry ? ` (Moneytree rendered ${pageEntry})` : ""}`,
+    );
   }
 
   // Extract authorization code from redirect URL

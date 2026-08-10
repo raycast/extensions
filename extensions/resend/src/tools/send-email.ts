@@ -1,7 +1,7 @@
 import { Tool, getPreferenceValues } from "@raycast/api";
 import fs from "fs";
 import path from "path";
-import { resend } from "../lib/resend";
+import { getResend, withResend } from "../lib/oauth";
 
 // Get preferences
 const preferences = getPreferenceValues<{
@@ -110,6 +110,7 @@ const tool = async (input: Input) => {
       })
     : undefined;
 
+  const resend = getResend();
   const { data, error } = await resend.emails.send({
     from: sender,
     to: input.to,
@@ -166,4 +167,4 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   };
 };
 
-export default tool;
+export default withResend(tool);

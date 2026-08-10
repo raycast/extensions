@@ -1,30 +1,31 @@
 /**
  * Raycast command to convert clipboard text to Google Docs optimized HTML.
- * Detects format (Markdown, Org-mode, or plain text) and converts to styled HTML.
+ * Smart detection: if clipboard has rich text, round-trips through Markdown first.
  */
 import { Clipboard, showHUD } from "@raycast/api";
-import { detectInputFormat, getFormatLabel } from "./core/format-detection.js";
+import { getFormatLabel } from "./core/format-detection.js";
 import { convertMarkdownToHtml, convertPlainTextToHtml } from "./core/md-to-html.js";
 import { convertOrgToHtml } from "./core/org-to-html.js";
 import { HtmlTarget } from "./core/html-targets.js";
+import { raycastConverter } from "./raycast-converter.js";
 
 const TARGET: HtmlTarget = "google-docs";
 
 export default async function ConvertToGoogleDocs() {
   try {
-    const text = await Clipboard.readText();
+    const content = await raycastConverter.getClipboardContent();
 
-    if (!text || !text.trim()) {
+    if (!content) {
       await showHUD("✗ No text found in clipboard");
       return;
     }
 
-    const format = detectInputFormat(text);
-    const formatLabel = getFormatLabel(format);
+    const { text, sourceWasRichText, detectedFormat } = content;
+    const formatLabel = getFormatLabel(detectedFormat);
 
     let html: string;
 
-    switch (format) {
+    switch (detectedFormat) {
       case "org":
         html = convertOrgToHtml(text, { target: TARGET });
         break;
@@ -47,7 +48,8 @@ export default async function ConvertToGoogleDocs() {
       html: html,
     });
 
-    await showHUD(`✓ Converted ${formatLabel} to Google Docs`);
+    const via = sourceWasRichText ? "Rich text → Markdown → Google Docs" : `${formatLabel} → Google Docs`;
+    await showHUD(`✓ ${via}`);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
     await showHUD(`✗ Conversion failed: ${errorMessage}`);

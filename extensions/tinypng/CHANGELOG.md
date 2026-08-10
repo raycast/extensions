@@ -1,5 +1,9 @@
 # TinyPNG Changelog
 
+## [New Command] - 2026-06-29
+
+- Added `Compress Images Multiple Times` to run TinyPNG compression multiple times in one command.
+
 ## [Updated dependency] - 2025-03-04
 
 - Updated `vitest` version to `^2.1.9`

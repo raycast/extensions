@@ -7,7 +7,8 @@
   "author": "KevinBatdorf",
   "contributors": [
     "litomore",
-    "taken"
+    "taken",
+    "clins1994"
   ],
   "crossExtensions": [
     "litomore/protondb",
@@ -25,15 +26,357 @@
       "subtitle": "Steam",
       "description": "Search the Steam api for game information.",
       "mode": "view"
+    },
+    {
+      "name": "search-users",
+      "title": "Search Users",
+      "subtitle": "Steam",
+      "description": "Search Steam users and view public profile information.",
+      "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-steam-games",
+      "title": "Search Steam Games",
+      "description": "Search Steam games by title and return matching apps with optional public store details."
+    },
+    {
+      "name": "get-steam-game-details",
+      "title": "Get Steam Game Details",
+      "description": "Get public Steam store details for a Steam app by app ID, Steam store URL, or title search."
+    },
+    {
+      "name": "search-steam-users",
+      "title": "Search Steam Users",
+      "description": "Search Steam users by Steam ID, profile URL, vanity URL, or display name and return public profile information."
+    }
+  ],
+  "ai": {
+    "instructions": "Use Search Steam Games for broad Steam game title searches and Get Steam Game Details when the user asks about one game or provides a Steam app ID/store URL. Use Search Steam Users when the user asks about a Steam user or profile. Prefer direct Steam IDs, profile URLs, and vanity URLs when present. Display-name user search can return multiple people, so do not claim an exact identity unless the result came from a Steam ID, profile URL, or vanity URL.",
+    "evals": [
+      {
+        "input": "@steam find Stardew Valley",
+        "mocks": {
+          "search-steam-games": {
+            "query": "Stardew Valley",
+            "results": [
+              {
+                "appid": 413150,
+                "name": "Stardew Valley",
+                "storeUrl": "https://store.steampowered.com/app/413150"
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-steam-games",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "Stardew"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Stardew Valley"
+          },
+          {
+            "includes": "413150"
+          }
+        ]
+      },
+      {
+        "input": "@steam tell me about app 220",
+        "mocks": {
+          "get-steam-game-details": {
+            "query": "220",
+            "match": {
+              "appid": 220,
+              "name": "Half-Life 2",
+              "storeUrl": "https://store.steampowered.com/app/220",
+              "matchType": "appid"
+            },
+            "game": {
+              "appid": 220,
+              "name": "Half-Life 2",
+              "type": "game",
+              "storeUrl": "https://store.steampowered.com/app/220",
+              "releaseDate": "Nov 16, 2004",
+              "isFree": false,
+              "price": "$9.99",
+              "developers": [
+                "Valve"
+              ],
+              "publishers": [
+                "Valve"
+              ],
+              "platforms": [
+                "windows",
+                "mac",
+                "linux"
+              ],
+              "genres": [
+                "Action"
+              ],
+              "categories": [
+                "Single-player"
+              ],
+              "metacriticScore": 96,
+              "shortDescription": "1998. HALF-LIFE sends a shock through the game industry with its combination of pounding action and continuous, immersive storytelling."
+            },
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-steam-game-details"
+          },
+          {
+            "includes": "Half-Life 2"
+          },
+          {
+            "includes": "Valve"
+          }
+        ]
+      },
+      {
+        "input": "@steam what is Balatro on Steam?",
+        "mocks": {
+          "search-steam-games": {
+            "query": "Balatro",
+            "results": [
+              {
+                "appid": 2379780,
+                "name": "Balatro",
+                "storeUrl": "https://store.steampowered.com/app/2379780",
+                "details": {
+                  "appid": 2379780,
+                  "name": "Balatro",
+                  "type": "game",
+                  "storeUrl": "https://store.steampowered.com/app/2379780",
+                  "releaseDate": "Feb 20, 2024",
+                  "isFree": false,
+                  "price": "$14.99",
+                  "developers": [
+                    "LocalThunk"
+                  ],
+                  "publishers": [
+                    "Playstack"
+                  ],
+                  "platforms": [
+                    "windows",
+                    "mac"
+                  ],
+                  "genres": [
+                    "Casual",
+                    "Indie",
+                    "Strategy"
+                  ],
+                  "categories": [
+                    "Single-player"
+                  ],
+                  "shortDescription": "The poker roguelike. Balatro is a hypnotically satisfying deckbuilder where you play illegal poker hands, discover game-changing jokers, and trigger adrenaline-pumping combos."
+                }
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-steam-games",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "Balatro"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Balatro"
+          },
+          {
+            "includes": "LocalThunk"
+          }
+        ]
+      },
+      {
+        "input": "@steam tell me about user gabelogannewell",
+        "mocks": {
+          "search-steam-users": {
+            "query": "gabelogannewell",
+            "totalCommunityMatches": 1,
+            "results": [
+              {
+                "steamId": "76561197960287930",
+                "personaName": "Gabe Newell",
+                "profileUrl": "https://steamcommunity.com/id/gabelogannewell/",
+                "realName": "Gabe Newell",
+                "status": "Offline",
+                "visibility": "Public",
+                "countryCode": "US",
+                "accountCreated": "2003-09-12",
+                "steamLevel": 13,
+                "friendCount": 104,
+                "gameCount": 239,
+                "topPlayedGames": [
+                  {
+                    "name": "Dota 2",
+                    "playtime": "380h"
+                  }
+                ],
+                "bans": {
+                  "communityBanned": false,
+                  "vacBanned": false,
+                  "vacBanCount": 0,
+                  "gameBanCount": 0,
+                  "daysSinceLastBan": 0,
+                  "economyBan": "none"
+                },
+                "matchType": "vanity",
+                "warnings": []
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-steam-users",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "gabelogannewell"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Gabe Newell"
+          },
+          {
+            "includes": "Dota 2"
+          }
+        ]
+      },
+      {
+        "input": "@steam look up https://steamcommunity.com/profiles/76561197960287930",
+        "mocks": {
+          "search-steam-users": {
+            "query": "https://steamcommunity.com/profiles/76561197960287930",
+            "results": [
+              {
+                "steamId": "76561197960287930",
+                "personaName": "Steam User",
+                "profileUrl": "https://steamcommunity.com/profiles/76561197960287930",
+                "status": "Online",
+                "currentlyPlaying": "Half-Life 2",
+                "visibility": "Public",
+                "topPlayedGames": [],
+                "matchType": "steamid",
+                "warnings": []
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-steam-users",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "76561197960287930"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "Half-Life 2"
+          },
+          {
+            "includes": "76561197960287930"
+          }
+        ]
+      },
+      {
+        "input": "@steam search for users named alex",
+        "usedAsExample": false,
+        "mocks": {
+          "search-steam-users": {
+            "query": "alex",
+            "totalCommunityMatches": 42,
+            "results": [
+              {
+                "steamId": "76561198000000001",
+                "personaName": "alex",
+                "profileUrl": "https://steamcommunity.com/profiles/76561198000000001",
+                "status": "Offline",
+                "visibility": "Public",
+                "topPlayedGames": [],
+                "matchType": "community-search",
+                "warnings": []
+              },
+              {
+                "steamId": "76561198000000002",
+                "personaName": "Alex",
+                "profileUrl": "https://steamcommunity.com/profiles/76561198000000002",
+                "status": "Away",
+                "visibility": "Private",
+                "topPlayedGames": [],
+                "matchType": "community-search",
+                "warnings": []
+              }
+            ],
+            "warnings": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-steam-users",
+              "arguments": {
+                "query": [
+                  {
+                    "includes": "alex"
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "includes": "users"
+          },
+          {
+            "includes": "alex"
+          },
+          {
+            "includes": "Alex"
+          }
+        ]
+      }
+    ]
+  },
   "preferences": [
     {
       "name": "token",
       "type": "password",
-      "title": "Steam API Key",
-      "description": "Add your API key",
-      "placeholder": "API Key",
+      "title": "Web API Key",
+      "description": "Add your Steam Web API key",
+      "placeholder": "Web API Key",
       "required": false
     },
     {

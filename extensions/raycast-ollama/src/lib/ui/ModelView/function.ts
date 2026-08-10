@@ -21,7 +21,7 @@ export async function GetServerClassByName(name: string): Promise<Ollama> {
 export async function DeleteServer(
   name: string,
   revalidate: CallableFunction,
-  setSelectedServer: (value: string) => Promise<void>
+  setSelectedServer: (value: string) => Promise<void>,
 ): Promise<void> {
   await DeleteOllamaServers(name)
     .then(async () => {
@@ -72,9 +72,9 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
               modelfile: s[1].OllamaApiShowParseModelfile(show),
               ps: ps && ps.models.filter((ps) => ps.name === v.name)[0],
             };
-          })
+          }),
         );
-      })
+      }),
     )
   ).forEach((v) => (o = o.concat(v)));
   return o;
@@ -89,7 +89,7 @@ export async function GetModels(server: string | undefined): Promise<Types.UiMod
 export async function UpdateModel(
   model: Types.UiModel,
   setDownload: React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
-  revalidate: CallableFunction
+  revalidate: CallableFunction,
 ) {
   const o = await GetServerClassByName(model.server.name);
   await PullModel(o, model.server.name, model.detail.name, setDownload, revalidate);
@@ -126,7 +126,7 @@ export async function PullModel(
   server: string,
   model: string,
   setDownload: React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
-  revalidate: CallableFunction
+  revalidate: CallableFunction,
 ): Promise<void> {
   const e = await ollama.OllamaApiPull(model).catch(async (err): Promise<undefined> => {
     await showToast({ style: Toast.Style.Failure, title: err.message });

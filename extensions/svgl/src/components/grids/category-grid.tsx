@@ -1,6 +1,7 @@
 import { Grid } from "@raycast/api";
 import { useSvglExtension } from "../app-context";
 import SvgAction from "../svg-action";
+import { getSvgRouteSource } from "../../utils/svg-route";
 
 interface CategoryGridProps {
   selectCategory: string;
@@ -15,15 +16,13 @@ const CategoryGrid = ({ selectCategory }: CategoryGridProps) => {
     >
       {svgs
         .filter((svg) => svg.category === selectCategory || svg.category?.includes(selectCategory))
-        .map((svg, index) => (
+        .map((svg) => (
           <Grid.Item
-            key={index}
+            key={`${selectCategory}_${svg.id}`}
+            id={`${selectCategory}_${svg.id}`}
             content={{
               value: {
-                source: {
-                  light: typeof svg.route === "string" ? svg.route : svg.route.light,
-                  dark: typeof svg.route === "string" ? svg.route : svg.route.dark,
-                },
+                source: getSvgRouteSource(svg.route),
               },
               tooltip: svg.title,
             }}

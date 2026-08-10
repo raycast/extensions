@@ -18,11 +18,12 @@ export default async function QuickContinue() {
       await launchClaudeCode({
         projectPath: recentSession.projectPath,
         continueSession: true,
+        permissionMode: recentSession.permissionMode,
       });
       return;
     }
 
-    // Fall back to most recent project
+    // Fall back to most recent project (no session to restore settings from)
     const recentProject = await getMostRecentProject();
 
     if (recentProject && existsSync(recentProject.path)) {

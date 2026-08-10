@@ -3,7 +3,6 @@ import {
   ActionPanel,
   Clipboard,
   closeMainWindow,
-  environment,
   Form,
   Icon,
   List,
@@ -51,7 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [accountSelected, setAccountSelected] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState("");
   const { data, error, isLoading } = useAccounts(!accountSelected);
-  const raycastProtocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+  const raycastProtocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
   const onSubmit = async (values: Form.Values) => {
     const toast = await showToast({
       style: Toast.Style.Animated,

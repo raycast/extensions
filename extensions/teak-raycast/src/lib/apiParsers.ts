@@ -1,38 +1,50 @@
 import { RaycastApiError } from "./apiErrors";
 
-export type RaycastCard = {
-  id: string;
-  type: string;
-  content: string;
-  notes: string | null;
-  url: string | null;
-  tags: string[];
-  aiTags: string[];
+export interface RaycastCard {
   aiSummary: string | null;
-  isFavorited: boolean;
+  aiTags: string[];
+  appUrl: string | null;
+  content: string;
   createdAt: number;
-  updatedAt: number;
   fileUrl: string | null;
-  thumbnailUrl: string | null;
-  screenshotUrl: string | null;
+  id: string;
+  isFavorited: boolean;
   linkPreviewImageUrl: string | null;
-  metadataTitle: string | null;
   metadataDescription: string | null;
-};
+  metadataTitle: string | null;
+  notes: string | null;
+  screenshotUrl: string | null;
+  tags: string[];
+  thumbnailUrl: string | null;
+  type: string;
+  updatedAt: number;
+  url: string | null;
+}
 
-export type CardsResponse = {
+export interface TagSummary {
+  count: number;
+  name: string;
+}
+
+export interface TagsResponse {
+  items: TagSummary[];
+}
+
+export interface CardsResponse {
   items: RaycastCard[];
   total: number;
-};
+}
 
-export type QuickSaveResponse = {
-  status: "created" | "duplicate";
+export interface QuickSaveResponse {
+  appUrl: string | null;
+  card: RaycastCard | null;
   cardId: string;
-};
+  status: "created";
+}
 
 type JsonObject = Record<string, unknown>;
 
-const QUICK_SAVE_STATUSES = ["created", "duplicate"] as const;
+const QUICK_SAVE_STATUSES = ["created"] as const;
 type QuickSaveStatus = (typeof QUICK_SAVE_STATUSES)[number];
 
 const isJsonObject = (value: unknown): value is JsonObject => {
@@ -56,6 +68,7 @@ const isRaycastCard = (value: unknown): value is RaycastCard => {
 
   return (
     typeof value.id === "string" &&
+    isNullableString(value.appUrl) &&
     typeof value.type === "string" &&
     typeof value.content === "string" &&
     isNullableString(value.notes) &&
@@ -111,6 +124,30 @@ export const parseCardsResponse = (payload: unknown): CardsResponse => {
   };
 };
 
+const isTagSummary = (value: unknown): value is TagSummary => {
+  if (!isJsonObject(value)) {
+    return false;
+  }
+
+  return typeof value.name === "string" && typeof value.count === "number";
+};
+
+export const parseTagsResponse = (payload: unknown): TagsResponse => {
+  if (!isJsonObject(payload)) {
+    throw new RaycastApiError("REQUEST_FAILED");
+  }
+
+  const { items } = payload;
+
+  if (!(Array.isArray(items) && items.every((item) => isTagSummary(item)))) {
+    throw new RaycastApiError("REQUEST_FAILED");
+  }
+
+  return {
+    items,
+  };
+};
+
 export const parseQuickSaveResponse = (payload: unknown): QuickSaveResponse => {
   if (!isJsonObject(payload)) {
     throw new RaycastApiError("REQUEST_FAILED");
@@ -121,13 +158,31 @@ export const parseQuickSaveResponse = (payload: unknown): QuickSaveResponse => {
     typeof status === "string" &&
     QUICK_SAVE_STATUSES.includes(status as QuickSaveStatus);
 
-  if (typeof cardId !== "string" || !hasKnownStatus) {
+  const parseNullableCard = (
+    value: unknown,
+  ): RaycastCard | null | undefined => {
+    if (value === undefined || value === null) {
+      return null;
+    }
+    return isRaycastCard(value) ? value : undefined;
+  };
+  const card = parseNullableCard(payload.card);
+  const appUrl = isNullableString(payload.appUrl) ? payload.appUrl : undefined;
+
+  if (
+    typeof cardId !== "string" ||
+    !hasKnownStatus ||
+    card === undefined ||
+    appUrl === undefined
+  ) {
     throw new RaycastApiError("REQUEST_FAILED");
   }
 
   const resolvedStatus = status as QuickSaveStatus;
 
   return {
+    appUrl,
+    card,
     cardId,
     status: resolvedStatus,
   };

@@ -20,6 +20,19 @@ export function getDeploymentId(deployment: { id?: string; uid: string }): strin
   return (deployment as { id?: string }).id ?? deployment.uid;
 }
 
+export function getCommitMessage(deployment: Deployment): string {
+  // TODO: determine others
+  if (deployment.meta.githubCommitMessage) {
+    return deployment.meta.githubCommitMessage;
+  }
+  return "No commit message";
+}
+
+export function getCommitDeploymentBranch(deployment: Deployment): string | null {
+  // TODO: support other providers beside GitHub
+  return deployment.meta.githubCommitRef ?? null;
+}
+
 /** Copy and config for the cancel deployment action and confirm dialog. */
 export const CANCEL_DEPLOYMENT_ACTION = {
   title: "Cancel Deployment",

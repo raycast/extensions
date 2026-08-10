@@ -5,12 +5,16 @@ export type AgentId =
   | "claude"
   | "codex"
   | "copilot"
+  | "cursor"
   | "droid"
   | "gemini"
+  | "grok"
   | "kimi"
   | "synthetic"
   | "antigravity"
-  | "zai";
+  | "zai"
+  | "minimax"
+  | "opencode-go";
 
 export interface AgentDefinition {
   id: AgentId;
@@ -26,6 +30,7 @@ export interface UsageState<TUsage, TError> {
   usage: TUsage | null;
   error: TError | null;
   revalidate: () => Promise<void>;
+  lastFetchedAt?: number;
 }
 
 export interface Accessory {

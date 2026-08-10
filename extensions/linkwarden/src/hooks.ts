@@ -13,10 +13,12 @@ export const useTags = () =>
     headers,
     mapResult(result: ApiResponse<Tag[]>) {
       return {
-        data: result.response,
+        // Fall back to [] if the API returns an unexpected body shape so that
+        // consumers can always safely call `.map` on `data`.
+        data: Array.isArray(result?.response) ? result.response : [],
       };
     },
-    initialData: [],
+    initialData: [] as Tag[],
     keepPreviousData: true,
   });
 
@@ -25,9 +27,11 @@ export const useCollections = () =>
     headers,
     mapResult(result: ApiResponse<Collection[]>) {
       return {
-        data: result.response,
+        // Fall back to [] if the API returns an unexpected body shape so that
+        // consumers can always safely call `.map` on `data`.
+        data: Array.isArray(result?.response) ? result.response : [],
       };
     },
-    initialData: [],
+    initialData: [] as Collection[],
     keepPreviousData: true,
   });

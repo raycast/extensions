@@ -19,6 +19,7 @@ import { useMyPullRequests } from "../hooks/useMyPullRequests";
 import AddPullRequestReview from "./AddPullRequestReview";
 import CheckoutPullRequestForm from "./CheckoutPullRequestForm";
 import PullRequestCommits from "./PullRequestCommits";
+import PullRequestDiff from "./PullRequestDiff";
 import { SortAction, SortActionProps } from "./SortAction";
 
 export type PullRequest =
@@ -74,6 +75,30 @@ export default function PullRequestActions({
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed reopening pull request",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function markReadyForReview() {
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: `Marking pull request #${pullRequest.number} as ready for review`,
+      });
+
+      await github.markPullRequestReadyForReview({ nodeId: pullRequest.id });
+
+      await mutate();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Pull request #${pullRequest.number} is ready for review`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed marking pull request as ready for review",
         message: getErrorMessage(error),
       });
     }
@@ -289,6 +314,13 @@ export default function PullRequestActions({
     pullRequest.mergeStateStatus !== MergeStateStatus.Blocked;
 
   const isOpen = !pullRequest.closed && !pullRequest.merged;
+
+  const isAuthoredByViewer = pullRequest.author
+    ? "isViewer" in pullRequest.author
+      ? pullRequest.author.isViewer
+      : pullRequest.author.login === viewer?.login
+    : false;
+  const canMarkReadyForReview = isOpen && pullRequest.isDraft && isAuthoredByViewer;
   const allowedMergeMethods = [
     pullRequest.repository.mergeCommitAllowed && PullRequestMergeMethod.Merge,
     pullRequest.repository.squashMergeAllowed && PullRequestMergeMethod.Squash,
@@ -330,8 +362,15 @@ export default function PullRequestActions({
       />
 
       <Action.Push
+        icon={Icon.CodeBlock}
+        title="View Diff"
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "d" }}
+        target={<PullRequestDiff pullRequest={pullRequest} />}
+      />
+
+      <Action.Push
         icon={Icon.Download}
-        title="Check out PR"
+        title="Checkout Pull Request"
         shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
         target={<CheckoutPullRequestForm pullRequest={pullRequest} />}
       />
@@ -403,7 +442,7 @@ export default function PullRequestActions({
 
           {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length === 1 && (
             <Action
-              title="Enable Auto-Merge"
+              title="Enable Auto-merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -414,7 +453,7 @@ export default function PullRequestActions({
 
           {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length > 1 && (
             <ActionPanel.Submenu
-              title="Enable Auto-Merge"
+              title="Enable Auto-merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -428,7 +467,7 @@ export default function PullRequestActions({
 
           {isOpen && pullRequest.autoMergeRequest && (
             <Action
-              title="Disable Auto-Merge"
+              title="Disable Auto-merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -461,6 +500,18 @@ export default function PullRequestActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section>
+        {canMarkReadyForReview ? (
+          <Action
+            title="Ready for Review"
+            icon={{
+              source: "pull-request-open.svg",
+              tintColor: Color.PrimaryText,
+            }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            onAction={() => markReadyForReview()}
+          />
+        ) : null}
+
         {pullRequest.closed && !pullRequest.merged ? (
           <Action
             title="Reopen Pull Request"

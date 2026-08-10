@@ -3,11 +3,12 @@
   "name": "0x0",
   "title": "0x0",
   "description": "Upload files to https://0x0.st.",
-  "icon": "0x0.png",
+  "icon": "icon.png",
   "author": "pseudobun",
   "contributors": [
     "pernielsentikaer",
-    "jatindotdev"
+    "jatindotdev",
+    "0xdhrv"
   ],
   "license": "MIT",
   "categories": [
@@ -21,19 +22,37 @@
       "subtitle": "0x0",
       "description": "Select a file and upload it to 0x0.st.",
       "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Upload History",
+      "subtitle": "0x0",
+      "description": "Browse, open, and delete your uploaded files.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "instanceUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Instance URL",
+      "description": "The 0x0 instance to upload to. Use this to point to a self-hosted instance (including localhost).",
+      "default": "https://0x0.st",
+      "placeholder": "https://0x0.st"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.0.3",
-    "@types/react": "19.2.7",
-    "eslint": "^9.39.2",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -43,6 +62,10 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
-  ]
+    "macOS",
+    "Windows"
+  ],
+  "engines": {
+    "node": ">=24"
+  }
 }

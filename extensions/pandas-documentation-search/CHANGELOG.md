@@ -1,5 +1,11 @@
 # Pandas Documentation Search Changelog
 
+## [1.1.0] - 2026-06-23
+
+- Added a documentation source preference for online docs or a downloaded local docs folder.
+- Added automatic fallback to local docs when online inventory or detail loading fails.
+- Added in-command recovery guidance with actions to open preferences, retry online loading, and open the Pandas repository.
+
 ## [1.0.6] - 2026-03-12
 
 - Fixed alias-based search lookups so inputs like `pd.array`, `df.*`, and `s.*` resolve to their corresponding Pandas symbols.

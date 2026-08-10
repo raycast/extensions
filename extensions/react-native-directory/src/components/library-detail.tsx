@@ -182,7 +182,7 @@ const Metadata = ({ library, authorName }: { library: LibraryType; authorName?: 
 };
 
 export const LibraryDetail = ({ library }: { library: LibraryType }) => {
-  const { authorName } = useNpmRegistry(library.npmPkg);
+  const { authorName, isLoadingRegistry } = useNpmRegistry(library.npmPkg);
 
   const markdown = `
 # ${library.github.name}
@@ -192,5 +192,11 @@ ${library.github.description ?? ""}
 ${library.images && library.images.length ? `\n### Images\n${library.images.map((image) => `![Image](${image})`).join("\n")}` : ""}
   `.trim();
 
-  return <List.Item.Detail markdown={markdown} metadata={<Metadata library={library} authorName={authorName} />} />;
+  return (
+    <List.Item.Detail
+      isLoading={isLoadingRegistry}
+      markdown={markdown}
+      metadata={<Metadata library={library} authorName={authorName} />}
+    />
+  );
 };

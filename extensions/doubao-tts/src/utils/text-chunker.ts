@@ -1,4 +1,4 @@
-const MAX_BYTES = 1024;
+const MAX_BYTES = 4096;
 
 /**
  * Split text into chunks that fit within the byte limit.

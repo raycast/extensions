@@ -1,5 +1,11 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  getFrontmostApplication,
+  List,
+} from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import {
   collectGroupKeyCodes,
   serializeKeyCodes,
@@ -16,12 +22,34 @@ import {
   openKommand,
   ShortcutItem,
 } from "./lib/components";
+import { tokenizeForKeywords } from "./lib/keymap";
+
+type Scope = "all" | "global";
+
+function ScopeDropdown(props: { onChange: (value: Scope) => void }) {
+  return (
+    <List.Dropdown
+      tooltip="Filter shortcuts"
+      storeValue={true}
+      onChange={(newValue) => props.onChange(newValue as Scope)}
+    >
+      <List.Dropdown.Item title="All Shortcuts" value="all" />
+      <List.Dropdown.Item title="Global Only" value="global" />
+    </List.Dropdown>
+  );
+}
 
 export default function SearchShortcuts() {
   const hasLibrary = hasKommandLibrary();
+  const [scope, setScope] = useState<Scope>("all");
 
   const { data, isLoading, error } = usePromise(getAllShortcuts, [], {
     execute: hasLibrary,
+  });
+
+  const { data: frontmostBundleId } = usePromise(async () => {
+    const app = await getFrontmostApplication();
+    return app.bundleId ?? "";
   });
 
   const { data: kommandAppPath, isLoading: appLookupLoading } = usePromise(
@@ -62,39 +90,61 @@ export default function SearchShortcuts() {
     );
   }
 
-  if (!isLoading && data && data.length === 0) {
-    return (
-      <List>
-        <List.EmptyView
-          title="No Shortcuts Saved"
-          description="Open Kommand to start adding keyboard shortcuts."
-          actions={
-            <ActionPanel>
-              <Action title="Open Kommand" onAction={openKommand} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+  const filteredGroups =
+    scope === "global"
+      ? (data ?? [])
+          .map((group) => ({
+            ...group,
+            shortcuts: group.shortcuts.filter((s) => s.isGlobal),
+          }))
+          .filter((group) => group.shortcuts.length > 0)
+      : (data ?? []);
+
+  const orderedGroups: {
+    group: (typeof filteredGroups)[number];
+    isCurrent: boolean;
+  }[] = [];
+  for (const group of filteredGroups) {
+    const isCurrent =
+      !!frontmostBundleId && group.bundleId === frontmostBundleId;
+    if (isCurrent) orderedGroups.unshift({ group, isCurrent });
+    else orderedGroups.push({ group, isCurrent });
   }
 
   return (
     <List
       isLoading={isLoading || labelsLoading}
-      searchBarPlaceholder="Search all shortcuts"
+      searchBarPlaceholder="Search shortcuts"
+      searchBarAccessory={<ScopeDropdown onChange={setScope} />}
     >
-      {(data ?? []).map((appGroup) => (
+      <List.EmptyView
+        title={
+          scope === "global" ? "No Global Shortcuts" : "No Shortcuts Saved"
+        }
+        description={
+          scope === "global"
+            ? "Mark shortcuts as global in Kommand to see them here."
+            : "Open Kommand to start adding keyboard shortcuts."
+        }
+        actions={
+          <ActionPanel>
+            <Action title="Open Kommand" onAction={openKommand} />
+          </ActionPanel>
+        }
+      />
+      {orderedGroups.map(({ group, isCurrent }) => (
         <List.Section
-          key={appGroup.bundleId}
-          title={appGroup.appName}
-          subtitle={`${appGroup.shortcuts.length}`}
+          key={group.bundleId}
+          title={isCurrent ? `${group.appName} · Current App` : group.appName}
+          subtitle={`${group.shortcuts.length}`}
         >
-          {appGroup.shortcuts.map((s) => (
+          {group.shortcuts.map((s) => (
             <ShortcutItem
               key={s.id}
               shortcut={s}
               subtitle={s.categoryIsDefault ? undefined : s.categoryName}
               keyLabels={keyLabels}
+              extraKeywords={tokenizeForKeywords(group.appName)}
             />
           ))}
         </List.Section>

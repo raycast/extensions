@@ -2,7 +2,7 @@ import { Action, ActionPanel, Detail, getPreferenceValues, openExtensionPreferen
 
 // * Auth Gate - wraps content and checks if API key is configured
 export function AuthGate({ children }: { children: (signOut: () => Promise<void>) => React.ReactNode }) {
-  const { apiKey } = getPreferenceValues();
+  const { apiKey } = getPreferenceValues<Preferences>();
 
   async function signOut() {
     await openExtensionPreferences();
@@ -14,7 +14,7 @@ export function AuthGate({ children }: { children: (signOut: () => Promise<void>
     return (
       <Detail
         markdown={[
-          "## Email Finder",
+          "## Mail Finder",
           "",
           "To use this extension, add your **API Key** in Raycast preferences for this extension.",
           "",

@@ -54,7 +54,7 @@ export default function useOpenAIImageApi(config: { apiKey: string }) {
           // There's a bug in the openai library where the auth header isn't being set
           // Set it manually here instead
           headers: { Authorization: `Bearer ${config.apiKey}` },
-          signal: cancelRef.current.signal,
+          signal: cancelRef.current.signal as GenericAbortSignal,
         });
 
         setState({ images: data.data });

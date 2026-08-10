@@ -2,11 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claudecast",
   "title": "ClaudeCast",
-  "description": "Claude Code workflows at your fingertips: Quick prompts, session management, and agentic workflows",
+  "description": "Discover, resume, and automate Claude Code sessions: deep full-text search, one-keystroke resume, agentic loops, usage analytics, and quick prompts",
   "icon": "command-icon.png",
   "author": "qazi0",
   "contributors": [
-    "roderickjdunn"
+    "roderickjdunn",
+    "user_675a985a803f8cc8105b"
   ],
   "categories": [
     "Developer Tools",
@@ -67,6 +68,64 @@
         "open",
         "launch",
         "workspace"
+      ],
+      "preferences": [
+        {
+          "name": "permissionMode",
+          "type": "dropdown",
+          "title": "Permission Mode",
+          "description": "Default permission mode for new sessions launched from this command",
+          "default": "default",
+          "required": false,
+          "data": [
+            {
+              "title": "Default (Interactive)",
+              "value": "default"
+            },
+            {
+              "title": "Plan Mode",
+              "value": "plan"
+            },
+            {
+              "title": "Auto Edit",
+              "value": "acceptEdits"
+            },
+            {
+              "title": "Full Auto",
+              "value": "auto"
+            },
+            {
+              "title": "Bypass Permissions",
+              "value": "bypassPermissions"
+            }
+          ]
+        },
+        {
+          "name": "model",
+          "type": "dropdown",
+          "title": "Model Override",
+          "description": "Override the extension's default model for sessions launched from this command",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "Use Extension Default",
+              "value": ""
+            },
+            {
+              "title": "Sonnet (Balanced)",
+              "value": "sonnet"
+            },
+            {
+              "title": "Opus (Most Capable)",
+              "value": "opus"
+            },
+            {
+              "title": "Haiku (Fastest)",
+              "value": "haiku"
+            }
+          ]
+        }
       ]
     },
     {
@@ -140,8 +199,8 @@
           "name": "showCostInMenuBar",
           "type": "checkbox",
           "default": false,
-          "label": "Show Cost in Menu Bar",
-          "description": "Display today's cost next to the menu bar icon",
+          "label": "Show Today's Cost",
+          "description": "Display today's spend (USD) next to the menu bar icon. Updates every 30 seconds.",
           "required": false
         }
       ]
@@ -186,7 +245,7 @@
     {
       "name": "terminalApp",
       "title": "Terminal Application",
-      "description": "The terminal app to use for launching Claude Code sessions",
+      "description": "Choose which terminal opens new Claude Code sessions. Each app uses its native AppleScript or CLI so launches are reliable across macOS updates.",
       "type": "dropdown",
       "default": "Terminal",
       "required": false,
@@ -204,12 +263,34 @@
           "value": "Warp"
         },
         {
-          "title": "Kitty",
+          "title": "kitty",
           "value": "kitty"
         },
         {
           "title": "Ghostty",
           "value": "Ghostty"
+        },
+        {
+          "title": "cmux",
+          "value": "cmux"
+        }
+      ]
+    },
+    {
+      "name": "openIn",
+      "title": "Open In",
+      "description": "Choose whether new Claude Code sessions open in a new terminal window or a new tab in the front window. Per-terminal notes: kitty New Tab requires `allow_remote_control yes` and a `listen_on` socket in `kitty.conf` (otherwise falls back to a new window). Warp always opens a new window regardless of this setting.",
+      "type": "dropdown",
+      "default": "window",
+      "required": false,
+      "data": [
+        {
+          "title": "New Window",
+          "value": "window"
+        },
+        {
+          "title": "New Tab",
+          "value": "tab"
         }
       ]
     },

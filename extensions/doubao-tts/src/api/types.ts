@@ -1,32 +1,3 @@
-/** V3 API request body sent to /api/v3/tts/unidirectional */
-export interface TTSV3Request {
-  user: {
-    uid: string;
-  };
-  req_params: {
-    text: string;
-    speaker: string;
-    audio_params: {
-      format: string;
-      sample_rate: number;
-      speech_rate: number;
-    };
-  };
-}
-
-/** A single JSON line from the V3 streaming response */
-export interface TTSV3ResponseChunk {
-  reqid: string;
-  code: number;
-  message: string;
-  sequence: number;
-  data: string;
-  addition?: {
-    duration?: string;
-    frontend?: string;
-  };
-}
-
 export interface TTSOptions {
   speaker: string;
   speechRate: number;

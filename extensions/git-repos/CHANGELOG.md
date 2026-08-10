@@ -1,5 +1,13 @@
 # Git Repos Changelog
 
+## [Bug Fix] - 2026-05-24
+
+- Reduce memory usage while scanning large directory trees for repositories.
+
+## [Bug Fix] - 2026-05-05
+
+- Fix out-of-memory crash when searching repositories by replacing glob (which uses worker threads) with a native fs traversal.
+
 ## [Enhancement] - 2026-04-10
 
 - Added Windows compatibility

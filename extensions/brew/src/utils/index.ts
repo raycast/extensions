@@ -63,7 +63,7 @@ export {
 } from "./errors";
 
 // Cache
-export { supportPath, bundleIdentifier, cachePath } from "./cache";
+export { supportPath, bundleIdentifier, cachePath, clearCache } from "./cache";
 
 // Toast
 export { showActionToast, showBrewFailureToast } from "./toast";

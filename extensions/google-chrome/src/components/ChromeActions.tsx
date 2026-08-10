@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Keyboard, Icon } from "@raycast/api";
 import { closeActiveTab, openNewTab, reloadTab, setActiveTab, createNewGuestWindowToWebsite } from "../actions";
 import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
@@ -98,6 +98,7 @@ function HistoryItemActions({
             })
           }
           title={"Open in Current Profile"}
+          shortcut={Keyboard.Shortcut.Common.Open}
         />
         <Action
           onAction={() =>
@@ -109,6 +110,7 @@ function HistoryItemActions({
             })
           }
           title={"Open in Original Profile"}
+          shortcut={Keyboard.Shortcut.Common.OpenWith}
         />
       </ActionPanel.Section>
       <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "c" }} />

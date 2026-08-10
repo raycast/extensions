@@ -40,12 +40,14 @@ export function ListActionPanel({
           title="Resume Caffeination Schedule"
           icon={Icon.Play}
           onAction={() => onResumeScheduleAction(schedule)}
+          shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
         />
       ) : (
         <Action
           title="Pause Caffeination Schedule"
           icon={Icon.Pause}
           onAction={() => onPauseScheduleAction(schedule)}
+          shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
         />
       )}
     </ActionPanel>

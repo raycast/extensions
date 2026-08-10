@@ -1,5 +1,13 @@
 # WhatsApp Changelog
 
+## [Fix] - 2026-06-25
+- Prevent phone parsing from crashing when the default country preference is missing.
+
+## [Enhancements] - 2026-05-16
+- Type a phone number in Open Chat to open it without saving (also offers to save the contact)
+- Added a `Default Country` preference so local phone numbers (e.g. `0530572910`) are accepted alongside international format
+- New `Import Chats from Database` command (macOS) to bulk-import individual chats from the local WhatsApp database
+
 ## [AI Extension] - 2025-04-05
 - Added AI tools: `add-new-whatsapp-chat`, `add-whatsapp-group`, and `open-chat`
 - Updated Raycast packages to support AI extensions

@@ -14,18 +14,7 @@ import { executeSQL } from "@raycast/utils";
 import { randomUUID } from "crypto";
 import { getDbPath, dbExists, escapeSQL, writeSQL } from "./db";
 import { DictionaryEntry } from "./types";
-
-function formatDateForWispr(date: Date): string {
-  const pad = (n: number, len = 2) => n.toString().padStart(len, "0");
-  const y = date.getUTCFullYear();
-  const mo = pad(date.getUTCMonth() + 1);
-  const d = pad(date.getUTCDate());
-  const h = pad(date.getUTCHours());
-  const mi = pad(date.getUTCMinutes());
-  const s = pad(date.getUTCSeconds());
-  const ms = pad(date.getUTCMilliseconds(), 3);
-  return `${y}-${mo}-${d} ${h}:${mi}:${s}.${ms} +00:00`;
-}
+import { formatDateForWispr } from "./utils";
 
 export default function Command() {
   const dbPath = getDbPath();
@@ -61,12 +50,18 @@ export default function Command() {
 
     setIsLoading(true);
     try {
-      const existing = await executeSQL<DictionaryEntry>(
+      const [existingEntry] = await executeSQL<
+        Pick<DictionaryEntry, "id" | "isDeleted">
+      >(
         dbPath,
-        `SELECT id FROM Dictionary WHERE phrase = '${escapeSQL(phrase, 255)}' AND isDeleted = 0 LIMIT 1`,
+        `SELECT id, isDeleted
+         FROM Dictionary
+         WHERE phrase = '${escapeSQL(phrase, 255)}'
+         ORDER BY isDeleted ASC, modifiedAt DESC
+         LIMIT 1`,
       );
 
-      if (existing.length > 0) {
+      if (existingEntry?.isDeleted === 0) {
         setPhraseError("This word already exists in your dictionary");
         setIsLoading(false);
         return;
@@ -80,15 +75,32 @@ export default function Command() {
         : "NULL";
       const nullUUID = "00000000-0000-0000-0000-000000000000";
 
-      writeSQL(
-        `INSERT INTO Dictionary (id, phrase, replacement, teamDictionaryId, lastUsed, frequencyUsed, remoteFrequencyUsed, manualEntry, createdAt, modifiedAt, isDeleted, source, isSnippet, observedSource)
-         VALUES ('${id}', '${escapedPhrase}', ${replacementValue}, '${nullUUID}', NULL, 0, 0, 1, '${now}', '${now}', 0, 'manual', 0, NULL)`,
-      );
+      const isRestore = existingEntry?.isDeleted === 1;
+
+      if (isRestore) {
+        await writeSQL(
+          `UPDATE Dictionary
+           SET phrase = '${escapedPhrase}',
+               replacement = ${replacementValue},
+               manualEntry = 1,
+               modifiedAt = '${now}',
+               isDeleted = 0,
+               source = 'manual'
+           WHERE id = '${existingEntry.id}'`,
+        );
+      } else {
+        await writeSQL(
+          `INSERT INTO Dictionary (id, phrase, replacement, teamDictionaryId, lastUsed, frequencyUsed, remoteFrequencyUsed, manualEntry, createdAt, modifiedAt, isDeleted, source, isSnippet, observedSource)
+           VALUES ('${id}', '${escapedPhrase}', ${replacementValue}, '${nullUUID}', NULL, 0, 0, 1, '${now}', '${now}', 0, 'manual', 0, NULL)`,
+        );
+      }
 
       await showToast({
         style: Toast.Style.Success,
-        title: "Word Added",
-        message: `"${phrase}" added to Wispr Flow dictionary`,
+        title: isRestore ? "Word Restored" : "Word Added",
+        message: isRestore
+          ? `"${phrase}" restored in Wispr Flow dictionary`
+          : `"${phrase}" added to Wispr Flow dictionary`,
       });
       await popToRoot();
     } catch (error) {

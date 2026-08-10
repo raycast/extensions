@@ -20,7 +20,7 @@ export function WaybackMachineActions({ url, archiveUrl }: WaybackMachineActions
       });
     } catch {
       // Extension not installed, open store page
-      await open("raycast://extensions/pernielsentikaer/wayback-machine");
+      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/pernielsentikaer/wayback-machine`);
     }
   };
 
@@ -37,7 +37,7 @@ export function WaybackMachineActions({ url, archiveUrl }: WaybackMachineActions
       });
     } catch {
       // Extension not installed, open store page
-      await open("raycast://extensions/pernielsentikaer/wayback-machine");
+      await open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/pernielsentikaer/wayback-machine`);
     }
   };
 

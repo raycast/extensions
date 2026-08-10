@@ -11,7 +11,7 @@ import {
   open,
 } from "@raycast/api";
 import { dirname, join } from "path";
-import { RefData, Preferences, resolveHome } from "./zoteroApi";
+import { RefData, Preferences, resolveHome, MAX_RENDER_RESULTS } from "./zoteroApi";
 import { useVisitedUrls } from "./useVisitedUrls";
 import {
   exportRef,
@@ -63,6 +63,7 @@ const copyTitleShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key:
 const copyAuthorsShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "b" };
 const copyZoteroUrlShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "c" };
 const copyDoiShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "d" };
+const copyPDFPathShortcut: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "," };
 
 function resolveAttachmentPath(item: RefData, zoteroPath: string): string | null {
   if (!item.attachment?.path || !item.attachment?.key) return null;
@@ -240,7 +241,15 @@ export const View = ({
       searchBarAccessory={<CollectionDropdown onSelection={setCollection} collections={collections} />}
     >
       {sectionNames.map((sectionName, sectionIndex) => (
-        <List.Section key={sectionIndex} title={sectionName} subtitle={`${queryResults[sectionIndex].length}`}>
+        <List.Section
+          key={sectionIndex}
+          title={sectionName}
+          subtitle={
+            queryResults[sectionIndex].length >= MAX_RENDER_RESULTS
+              ? `Top ${MAX_RENDER_RESULTS} — refine your search to see more`
+              : `${queryResults[sectionIndex].length}`
+          }
+        >
           {queryResults[sectionIndex]
             .filter((item) => item.collection?.includes(collection) || collection == "All")
             .map((item) => {
@@ -316,6 +325,11 @@ export const View = ({
                         {getItemAuthors(item) !== "" && <AuthorsCopyToClipboardAction authors={getItemAuthors(item)} />}
                         {getItemZotUrl(item) && <ZoteroUrlCopyToClipboard zotUrl={getItemZotUrl(item)} />}
                         {getItemDoi(item) !== "" && <DoiCopyToClipboardAction itemDoi={getItemDoi(item)} />}
+                        {attachmentFilePath && (
+                          <PDFPathCopyToClipboardAction
+                            pdfPath={preferences.quote_pdf_path ? `"${attachmentFilePath}"` : attachmentFilePath}
+                          />
+                        )}
                       </ActionPanel.Section>
                     </ActionPanel>
                   }
@@ -383,6 +397,18 @@ function DoiCopyToClipboardAction({ itemDoi }: { itemDoi: string }) {
       title="Copy DOI to Clipboard"
       shortcut={copyDoiShortcut}
       message="Copied DOI to clipboard"
+    />
+  );
+}
+
+function PDFPathCopyToClipboardAction({ pdfPath }: { pdfPath: string }) {
+  return (
+    <CopyToClipboard
+      content={pdfPath}
+      icon={Icon.Clipboard}
+      title="Copy PDF Path"
+      shortcut={copyPDFPathShortcut}
+      message="Copied PDF path to clipboard"
     />
   );
 }

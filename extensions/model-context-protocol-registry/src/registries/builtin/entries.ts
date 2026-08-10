@@ -68,7 +68,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://circleback.ai",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://app.circleback.ai/api/mcp"],
+      args: ["-y", "mcp-remote", "https://circleback.ai/api/mcp"],
     },
   },
   {
@@ -132,6 +132,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         GITLAB_PERSONAL_ACCESS_TOKEN: "<YOUR_TOKEN>",
         GITLAB_API_URL: "https://gitlab.com/api/v4", // Optional, for self-hosted instances
       },
+    },
+  },
+  {
+    name: "glif",
+    title: "Glif",
+    description:
+      "Glif is a media-generation agent: generate images, video, and audio, transcribe, and chain multi-step media workflows from natural language. Hosted remote server with OAuth sign-in.",
+    icon: "https://glif.app/glif-icon-512.png",
+    homepage: "https://glif.app/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://glif.app/api/mcp"],
     },
   },
   {
@@ -334,6 +346,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "webhound",
+    title: "Webhound",
+    description:
+      "Run private, budgeted reports and datasets with Hound, Webhound's research harness built with DeepSeek V4 Pro and GPT-5.4. The user's dollar budget controls research effort, and each connection authenticates to that user's own Webhound account through OAuth.",
+    icon: "https://www.webhound.ai/favicon.ico",
+    homepage: "https://github.com/WebhoundAI/webhound-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.webhound.ai/api/v2/mcp"],
+    },
+  },
+  {
     name: "sanity",
     title: "Sanity",
     description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
@@ -444,6 +468,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.thena.ai/sse"],
+    },
+  },
+  {
+    name: "trends-mcp",
+    title: "Trends MCP",
+    description:
+      "Live cross-platform trend data for AI agents. Query Google, YouTube, TikTok, Reddit, Amazon, Wikipedia, news, npm, Steam, and more: historical series, growth rates, and live leaderboards in one connection. Free API key at trendsmcp.ai.",
+    icon: "https://www.trendsmcp.ai/static/pages/trendsmcp/assets/trend.svg",
+    homepage: "https://trendsmcp.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.trendsmcp.ai/mcp", "--header", "Authorization: Bearer YOUR_API_KEY"],
     },
   },
   {
@@ -674,6 +710,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "olostep",
+    title: "Olostep",
+    description:
+      "A Model Context Protocol server for Olostep, the web data API for AI. Search the web, scrape any URL into clean Markdown/HTML/JSON, crawl entire sites, batch-process up to 10k URLs, and get cited AI answers — all through one API.",
+    icon: "https://www.olostep.com/images/olostep-logo-cropped.svg",
+    homepage: "https://github.com/olostep/olostep-mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "olostep-mcp"],
+      env: {
+        OLOSTEP_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
     name: "routemesh",
     title: "RouteMesh",
     description:
@@ -686,6 +737,113 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         ROUTEMESH_API_KEY: "YOUR_API_KEY_HERE",
       },
+    },
+  },
+  {
+    name: "jellypod",
+    title: "Jellypod",
+    description:
+      "Jellypod's Model Context Protocol server lets AI assistants create, edit, and publish conversational AI podcasts and video episodes.",
+    icon: "https://www.jellypod.com/assets/app-icon-square.png",
+    homepage: "https://www.jellypod.com/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jellypod.com/mcp"],
+    },
+  },
+  {
+    name: "plori",
+    title: "plori",
+    description:
+      "Give your AI agent its own cloud computer. plori hosts agents on persistent machines with a real disk, tools, and memory that survives between sessions; idle agents scale to zero. This server creates and drives those agents: invoke an agent and read its reply, answer human-in-the-loop questions, and schedule deferred runs. Sign-in happens in the browser on first use (OAuth), or use an API key for headless setups.",
+    icon: "https://plori.ai/icon-512.png",
+    homepage: "https://plori.ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.plori.ai/mcp"],
+    },
+  },
+  {
+    name: "appwrite",
+    title: "Appwrite",
+    description:
+      "The official Appwrite MCP server lets AI assistants securely inspect and manage Appwrite projects and resources through Appwrite's API.",
+    icon: "https://mcp.appwrite.io/favicon.svg",
+    homepage: "https://github.com/appwrite/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.appwrite.io/"],
+    },
+  },
+  {
+    name: "agentcard",
+    title: "Agentcard",
+    description:
+      "Prepaid virtual cards for AI agents. Fund a wallet, set spend caps and human approvals, and your agent mints a one-time virtual card for each purchase that works at any merchant. Connects to the remote Agentcard MCP server over OAuth 2.0.",
+    icon: "https://www.agentcard.sh/logo-icon.png",
+    homepage: "https://agentcard.sh",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.agentcard.sh/mcp"],
+    },
+  },
+  {
+    name: "usemycontext",
+    title: "UseMyContext",
+    description:
+      "The personal context layer for AI: one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. Tools for profile, file search and reads, cited answers from your documents, and exact table queries. Connects to the remote UseMyContext server over OAuth 2.1.",
+    icon: "usemycontext.svg",
+    homepage: "https://usemycontext.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.usemycontext.ai/mcp"],
+    },
+  },
+  {
+    name: "jobyap",
+    title: "JobYap",
+    description:
+      "Search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server; no auth required.",
+    icon: "https://raw.githubusercontent.com/jobyap/agent-skills/main/assets/logo.png",
+    homepage: "https://jobyap.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jobyap.com/mcp"],
+    },
+  },
+  {
+    name: "tendem",
+    title: "Tendem",
+    description:
+      "Delegate tasks to vetted human experts - research, competitive analysis, fact-checking, copywriting, editing, design review, presentation polish, data cleaning and list building. Submit a task in natural language; Tendem's orchestrator scopes it and quotes a transparent price, and after explicit approval a vetted human expert executes it and returns verified results as markdown plus files. Remote Streamable HTTP MCP server with OAuth 2.0 sign-in on first use.",
+    icon: "https://framerusercontent.com/images/EGNlwavPB2tW8etz63vecfpJu0.png",
+    homepage: "https://github.com/Toloka/tendem-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tendem.ai/mcp?utm_hash=66fdb1535f"],
+    },
+  },
+  {
+    name: "structured",
+    title: "Structured",
+    description:
+      "Structured is an all-in-one day planner that combines tasks and to-dos in a visual timeline. Its MCP server lets AI assistants view schedules and inbox tasks, and create, update, complete, delete, and manage recurring tasks. Remote Streamable HTTP server with Structured Cloud OAuth sign-in; some features require Structured Pro.",
+    icon: "https://web.structured.app/logo512.png",
+    homepage: "https://mcp.structured.app",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://mcp.structured.app/mcp",
+        "36933",
+        "--transport",
+        "http-only",
+        "--static-oauth-client-info",
+        '{"client_id":"4b33fb93-0eac-489f-974b-1a9fa108f4e9"}',
+        "--static-oauth-client-metadata",
+        '{"scope":"email"}',
+      ],
     },
   },
 ];
@@ -727,6 +885,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         AIRTABLE_API_KEY: "YOUR_API_KEY_HERE",
       },
+    },
+  },
+  {
+    name: "alai",
+    title: "Alai",
+    description:
+      "Generate, edit, and export high-quality AI presentations to PDF, PPTX, or a shareable link. Supports themes, vibes, and creative slide variants.",
+    icon: "https://storage.getalai.com/Alai%20Logo%20-%20Gradient%20BG.png",
+    homepage: "https://getalai.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://slides-api.getalai.com/mcp/"],
     },
   },
   {
@@ -863,6 +1033,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "memo",
+    title: "memo",
+    description:
+      "Local-first persistent memory for AI agents. MLX embeddings on Apple Silicon (CPU fallback elsewhere), sqlite-vec + BM25 hybrid search, and markdown-on-disk storage compatible with Obsidian. No cloud APIs or accounts required.",
+    icon: "https://raw.githubusercontent.com/jagoff/memo/master/docs/logo-400.png",
+    homepage: "https://github.com/jagoff/memo",
+    configuration: {
+      command: "uvx",
+      args: ["--from", "mlx-memo", "memo-mcp"],
+    },
+  },
+  {
     name: "monday",
     title: "Monday",
     description:
@@ -879,6 +1061,30 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "nika",
+    title: "Nika",
+    description:
+      "Nika is a workflow language for AI — one file, four verbs, one Rust binary. Its MCP server is a read-only oracle: agents validate workflows (nika_check, nika_explain) and learn the language (schema, templates, examples, catalogs) without executing anything. Running stays on the CLI, budget-capped and trace-verified — inspect freely, execute deliberately.",
+    icon: "https://github.com/supernovae-st.png",
+    homepage: "https://github.com/supernovae-st/nika",
+    configuration: {
+      command: "nika",
+      args: ["mcp"],
+    },
+  },
+  {
+    name: "optionsahoy",
+    title: "OptionsAhoy",
+    description:
+      "Equity-compensation tax optimizer. ISO/AMT exercise scheduling, NSO, RSU sell-vs-hold, QSBS eligibility, single-stock concentration risk, and protective puts/collars, computed against federal plus 50-state and DC tax code over multi-year horizons.",
+    icon: "https://raw.githubusercontent.com/AlvisoOculus/optionsahoy-mcp/main/assets/logo-400.png",
+    homepage: "https://optionsahoy.com/for-agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://optionsahoy.com/mcp"],
+    },
+  },
+  {
     name: "paperless-ngx",
     title: "Paperless-NGX",
     description:
@@ -892,6 +1098,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
         PAPERLESS_URL: "http://your-paperless-instance:8000",
         PAPERLESS_API_KEY: "your-api-token",
       },
+    },
+  },
+  {
+    name: "vc-deal-flow-signal",
+    title: "VC Deal Flow Signal",
+    description:
+      "GitHub-derived engineering acceleration signals for ~400 venture-backed startups across 20 sectors. Five read-only tools for VC sourcing — trending startups, sector lookup, individual signal, dataset summary, methodology. No API key required.",
+    icon: "https://signals.gitdealflow.com/icon.png",
+    homepage: "https://github.com/kindrat86/vc-deal-flow-signal",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@gitdealflow/mcp-signal@latest"],
     },
   },
 ];

@@ -1,18 +1,21 @@
 import { Grid } from "@raycast/api";
 import { SearchGridItem } from "./components/search_list_item";
 import { useSearch } from "./hooks/use_search";
+import { useState } from "react";
 
 export default function Command() {
-  const { state, search } = useSearch();
+  const [searchText, setSearchText] = useState("");
+  const state = useSearch(searchText);
 
   return (
     <Grid
-      itemSize={Grid.ItemSize.Small}
+      columns={8}
       inset={Grid.Inset.Small}
       isLoading={state.isLoading}
-      onSearchTextChange={search}
+      onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search by name..."
       throttle
+      pagination={state.pagination}
     >
       {state.results.length === 0 ? (
         <Grid.EmptyView

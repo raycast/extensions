@@ -26,6 +26,7 @@ export declare class UserService {
             name: string;
             updatedAt: Date;
             image: string | null;
+            slackTeamId: string | null;
         }[];
         createdAt: Date;
         name: string;
@@ -57,6 +58,7 @@ export declare class UserService {
         space: Exclude<Awaited<ReturnType<typeof db.space.findUnique>>, null>;
         actorEmail: string;
         emails: string[];
+        role: 'ADMIN' | 'MEMBER' | 'READ';
     }): Promise<void>;
     subscribeTag(p: {
         email: string;
@@ -68,6 +70,13 @@ export declare class UserService {
         spaceId: string;
         tagName: string;
     }): Promise<void>;
+    listSoleOwnerTeamSpaces(email: string): Promise<{
+        id: string;
+        name: string;
+    }[]>;
+    deleteAccount(email: string): Promise<{
+        placeholderEmail: string;
+    }>;
     update(p: {
         email: string;
         name?: string;

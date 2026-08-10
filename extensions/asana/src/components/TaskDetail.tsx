@@ -133,7 +133,10 @@ export default function TaskDetail({ task: originalTask, workspace, mutateList }
             <Action.Push
               title="View Subtasks"
               icon={Icon.CheckList}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+              }}
               target={<SubtasksList parentTask={task} workspace={workspace} />}
             />
           )}

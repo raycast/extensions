@@ -141,7 +141,7 @@ const SingleTodoItem = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
                 editTodoDueDate();
                 push(<TodoDueDateForm />);
               }}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
               title="Edit Due Date"
             />
             <Action

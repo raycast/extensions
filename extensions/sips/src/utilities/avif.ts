@@ -13,6 +13,23 @@ import { LocalStorage, Toast, confirmAlert, showToast } from "@raycast/api";
 import { showErrorToast } from "./utils";
 import { existsSync } from "fs";
 
+export const losslessAvifEncArgs = [
+  "-s",
+  "0",
+  "--min",
+  "0",
+  "--max",
+  "0",
+  "--minalpha",
+  "0",
+  "--maxalpha",
+  "0",
+  "--qcolor",
+  "100",
+  "--qalpha",
+  "100",
+];
+
 /**
  * Attempts to install the AVIF encoder using Homebrew.
  *
@@ -101,15 +118,23 @@ async function verifyInstall() {
  *
  * @returns An promise resolving to an object containing the encoder/decoder paths.
  */
-export async function getAVIFEncPaths() {
-  let encoderPath = await LocalStorage.getItem("avifEncoderPath");
-  let decoderPath = await LocalStorage.getItem("avifDecoderPath");
+export async function getAVIFEncPaths(): Promise<{ encoderPath: string; decoderPath: string }> {
+  let encoderPath = await LocalStorage.getItem<string>("avifEncoderPath");
+  let decoderPath = await LocalStorage.getItem<string>("avifDecoderPath");
 
   if (!encoderPath || !decoderPath) {
     // Get the path to the AVIF encoder
     try {
       encoderPath = execSync(`/bin/zsh -lc 'realpath "$(which avifenc)"'`).toString().trim();
       decoderPath = execSync(`/bin/zsh -lc 'realpath "$(which avifdec)"'`).toString().trim();
+
+      // Cache the discovered paths for future use
+      if (encoderPath) {
+        await LocalStorage.setItem("avifEncoderPath", encoderPath);
+      }
+      if (decoderPath) {
+        await LocalStorage.setItem("avifDecoderPath", decoderPath);
+      }
     } catch (error) {
       // If the AVIF encoder is not found, prompt the user to install it
       if (await installAVIFEnc()) {
@@ -134,6 +159,11 @@ export async function getAVIFEncPaths() {
       }
     }
   }
+
+  if (typeof encoderPath !== "string" || typeof decoderPath !== "string") {
+    throw new Error("AVIF encoder and decoder paths could not be resolved.");
+  }
+
   return {
     encoderPath,
     decoderPath,

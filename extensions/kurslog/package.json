@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kurslog",
+  "title": "Kurslog",
+  "description": "Compare crypto exchange rates from 100+ exchangers in Ukraine and 100+ countries with best rates for USDT, BTC, ETH to fiat, cash, Payoneer, and more.",
+  "icon": "extension-icon.png",
+  "author": "kurslog",
+  "categories": [
+    "Finance"
+  ],
+  "keywords": [
+    "crypto",
+    "exchange",
+    "rates",
+    "USDT",
+    "BTC",
+    "ETH",
+    "currency",
+    "converter",
+    "Ukraine",
+    "aggregator",
+    "kurslog"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "exchange-rates",
+      "title": "Exchange Rates",
+      "subtitle": "Kurslog",
+      "description": "Browse popular directions with best rates aggregated from 100+ exchangers",
+      "mode": "view"
+    },
+    {
+      "name": "check-rate",
+      "title": "Check Rate",
+      "subtitle": "Kurslog",
+      "description": "Pick FROM and TO currencies, compare rates from 100+ exchangers",
+      "mode": "view"
+    },
+    {
+      "name": "exchangers",
+      "title": "Exchangers",
+      "subtitle": "Kurslog",
+      "description": "Browse catalog of 100+ exchangers with trust scores and ratings",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "My Favorites",
+      "subtitle": "Kurslog",
+      "description": "View your saved favorite directions and exchangers",
+      "mode": "view"
+    },
+    {
+      "name": "quick-search",
+      "title": "Quick Search",
+      "subtitle": "Kurslog",
+      "description": "Type currency names to instantly find exchange rates (e.g. usdt trc20 monobank)",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

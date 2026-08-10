@@ -94,7 +94,7 @@
     "@raycast/api": "^1.104.7",
     "@raycast/utils": "^1.19.1",
     "csv-parse": "^5.6.0",
-    "uuid": "^9.0.1"
+    "uuid": "^11.1.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

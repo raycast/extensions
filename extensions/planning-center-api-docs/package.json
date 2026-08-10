@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "planning-center-api-docs",
   "title": "Planning Center API Docs",
-  "description": "Quickly find the docs you need for the Planning Center API.",
+  "description": "Quickly find and copy the docs you need for the Planning Center API.",
   "icon": "pco-logo-blue.png",
   "author": "thomas.harmond",
   "platforms": [
@@ -21,21 +21,6 @@
       "subtitle": "Planning Center (PCO)",
       "description": "Search and open Planning Center (PCO) API documentation pages",
       "mode": "view"
-    },
-    {
-      "name": "search-on-web",
-      "title": "Search API Docs on Web",
-      "subtitle": "Planning Center (PCO)",
-      "description": "Search the Planning Center (PCO) API docs on the web",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "query",
-          "placeholder": "Search query",
-          "type": "text",
-          "required": false
-        }
-      ]
     }
   ],
   "preferences": [
@@ -67,8 +52,12 @@
       "description": "Calendar version",
       "type": "dropdown",
       "required": false,
-      "default": "2022-07-07",
+      "default": "2026-06-22",
       "data": [
+        {
+          "title": "2026-06-22",
+          "value": "2026-06-22"
+        },
         {
           "title": "2022-07-07",
           "value": "2022-07-07"
@@ -122,6 +111,20 @@
       ]
     },
     {
+      "name": "currentVersion",
+      "title": "Current Version",
+      "description": "Current version",
+      "type": "dropdown",
+      "required": false,
+      "default": "2018-08-01",
+      "data": [
+        {
+          "title": "2018-08-01",
+          "value": "2018-08-01"
+        }
+      ]
+    },
+    {
       "name": "givingVersion",
       "title": "Giving Version",
       "description": "Giving version",
@@ -163,8 +166,16 @@
       "description": "People version",
       "type": "dropdown",
       "required": false,
-      "default": "2025-07-17",
+      "default": "2026-06-04",
       "data": [
+        {
+          "title": "2026-06-04",
+          "value": "2026-06-04"
+        },
+        {
+          "title": "2025-11-10",
+          "value": "2025-11-10"
+        },
         {
           "title": "2025-07-17",
           "value": "2025-07-17"
@@ -297,7 +308,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.2",
+    "@raycast/api": "^1.104.23",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {

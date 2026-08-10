@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "doubao-tts",
   "title": "Doubao TTS",
-  "description": "Read selected text aloud using Volcengine Doubao TTS with 90+ Chinese and English voices",
+  "description": "Read selected text aloud using Volcengine Doubao TTS with 160+ Chinese and English voices",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [
@@ -25,7 +25,14 @@
       "name": "read-with-voice",
       "title": "Read with Voice Selection",
       "subtitle": "Doubao TTS",
-      "description": "Browse 90+ voices and read selected text aloud",
+      "description": "Browse 160+ voices and read selected text aloud",
+      "mode": "view"
+    },
+    {
+      "name": "select-voice",
+      "title": "Select Quick Read Voice",
+      "subtitle": "Doubao TTS",
+      "description": "Choose and preview the voice used by Quick Read",
       "mode": "view"
     },
     {
@@ -38,19 +45,27 @@
   ],
   "preferences": [
     {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Volcengine Doubao Speech API Key (preferred, X-Api-Key)",
+      "placeholder": "Enter your API Key"
+    },
+    {
       "name": "appId",
       "type": "textfield",
-      "required": true,
+      "required": false,
       "title": "App ID",
-      "description": "Volcengine TTS App ID (X-Api-App-Id)",
+      "description": "Legacy Volcengine TTS App ID (used only when API Key is empty)",
       "placeholder": "Enter your App ID"
     },
     {
       "name": "accessKey",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Access Key",
-      "description": "Volcengine TTS Access Key (X-Api-Access-Key)",
+      "description": "Legacy Volcengine TTS Access Key (used only when API Key is empty)",
       "placeholder": "Enter your Access Key"
     },
     {
@@ -106,6 +121,26 @@
         {
           "title": "Xiaotian 2.0 (Male, ZH)",
           "value": "zh_male_taocheng_uranus_bigtts"
+        },
+        {
+          "title": "Sweet Taozi 2.0 (Female, ZH)",
+          "value": "zh_female_tianmeitaozi_uranus_bigtts"
+        },
+        {
+          "title": "Warm Mom 2.0 (Female, ZH)",
+          "value": "zh_female_wenroumama_uranus_bigtts"
+        },
+        {
+          "title": "Gentle Xiaoya 2.0 (Female, ZH)",
+          "value": "zh_female_wenrouxiaoya_uranus_bigtts"
+        },
+        {
+          "title": "Erudite Uncle 2.0 (Male, ZH)",
+          "value": "zh_male_yuanboxiaoshu_uranus_bigtts"
+        },
+        {
+          "title": "Late Night Podcast 2.0 (Male, ZH)",
+          "value": "zh_male_shenyeboke_uranus_bigtts"
         },
         {
           "title": "Cancan 1.0 (Female, ZH)",
@@ -170,12 +205,13 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^1.17.0"
+    "ws": "^8.20.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^25.3.0",
     "@types/react": "^19.2.14",
+    "@types/ws": "^8.18.1",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",
     "typescript": "^5.9.3"

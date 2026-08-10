@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { isMac } from "./lib/utils";
+import { Action, ActionPanel, Icon, List, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
+import { isMac, isTahoe, readFnState, setFnState } from "./lib/utils";
 
 interface Duration {
   display: string;
@@ -55,6 +55,35 @@ export default function Command() {
   const [isRunning, setIsRunning] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number | null>(null);
   const [icon, setIcon] = useState<string | null>(null);
+  const savedFnState = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (savedFnState.current !== null) {
+        try {
+          setFnState(savedFnState.current);
+        } catch {
+          // best-effort restore on unmount
+        }
+        savedFnState.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isRunning && savedFnState.current !== null) {
+      try {
+        setFnState(savedFnState.current);
+      } catch {
+        showToast({
+          title: "Could not restore Fn key setting",
+          message: "Go to System Settings > Keyboard to restore manually",
+          style: Toast.Style.Failure,
+        });
+      }
+      savedFnState.current = null;
+    }
+  }, [isRunning]);
 
   const lockAction = async (duration: Duration) => {
     let handler: (duration: number) => void;
@@ -64,6 +93,16 @@ export default function Command() {
     } else {
       const { handler: handlerRust } = await import("rust:../rust/clean-keyboard");
       handler = handlerRust;
+    }
+
+    const { lockFnKeys } = getPreferenceValues<Preferences.CleanKeyboard>();
+    if (lockFnKeys && isTahoe) {
+      try {
+        savedFnState.current = readFnState();
+        setFnState(true);
+      } catch {
+        // keep savedFnState so restore effects can undo any partial defaults write
+      }
     }
 
     setTimeLeft(duration.seconds);

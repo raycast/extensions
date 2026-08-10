@@ -1,6 +1,7 @@
 import { Icon, Image } from "@raycast/api";
 import fetch from "node-fetch";
 import { IconFormat, IconName, ObjectIcon, ObjectLayout, RawType } from "../models";
+import { getApiKey } from "./api";
 import { colorToHex, iconWidth } from "./constant";
 
 /**
@@ -114,7 +115,11 @@ export async function fetchWithTimeout(url: string, timeout: number): Promise<st
   const id = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(url, { signal: controller.signal });
+    const token = await getApiKey();
+    const response = await fetch(url, {
+      signal: controller.signal,
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
     clearTimeout(id);
     if (response.ok) {
       const iconData = await response.arrayBuffer();

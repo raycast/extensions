@@ -1,100 +1,62 @@
-import { Color, List } from "@raycast/api";
-import { useState } from "react";
-import { useWingetInstalled } from "./hooks/useWingetInstalled";
-import { InstalledActionPanel } from "./components/actionPanels";
+/** Show Installed: every WinGet-managed package, with Uninstall All (confirmed). */
 
-export default function InstalledCommand() {
-  const [searchText, setSearchText] = useState("");
-  const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
-  const { data: packages, isLoading, revalidate } = useWingetInstalled();
+import { Icon } from "@raycast/api";
 
-  const pkgList = (packages ?? []).filter((pkg) => !removedIds.has(pkg.id));
+import { PackageListView } from "./components/PackageListView";
+import { applyPreferences } from "./core/prefs";
+import { installedRows } from "./utils/packages";
 
-  // Attach a stable index to each row before filtering so that React keys remain
-  // unique even when winget returns multiple entries with identical (or truncated)
-  // package IDs — e.g. different architectures of the same runtime, or IDs that
-  // winget truncates with "…" in the table output.
-  const indexed = pkgList.map((pkg, i) => ({ pkg, rowKey: i }));
+/** Never bulk-uninstall the tools this extension (and the user's session) runs on. */
+const UNINSTALL_ALL_EXCLUDED = new Set(["Raycast.Raycast", "Microsoft.AppInstaller"]);
 
-  const filtered = searchText.trim()
-    ? indexed.filter(({ pkg }) => {
-        const q = searchText.toLowerCase();
-        return pkg.name.toLowerCase().includes(q) || pkg.id.toLowerCase().includes(q);
-      })
-    : indexed;
-
-  const upgradableCount = pkgList.filter((p) => p.available).length;
-
-  function handleUninstalled(id: string) {
-    setRemovedIds((prev) => new Set(prev).add(id));
-  }
-
-  // Clear optimistic removals once fresh data arrives (IDs are gone for real)
-  function handleRefresh() {
-    setRemovedIds(new Set());
-    return revalidate();
-  }
-
-  const upgradesTitle = upgradableCount > 0 ? `Upgrades Available (${upgradableCount})` : "Upgrades Available";
+export default function ShowInstalled() {
+  applyPreferences();
 
   return (
-    <List
-      isLoading={isLoading}
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
+    <PackageListView
+      viewKind="installed"
       searchBarPlaceholder="Filter installed packages…"
-    >
-      {filtered.length === 0 && !isLoading ? (
-        <List.EmptyView title="No installed packages found" />
-      ) : (
-        <>
-          {filtered.some(({ pkg }) => pkg.available) && (
-            <List.Section title={upgradesTitle}>
-              {filtered
-                .filter(({ pkg }) => pkg.available)
-                .map(({ pkg, rowKey }) => (
-                  <List.Item
-                    key={rowKey}
-                    title={pkg.name}
-                    subtitle={pkg.id || undefined}
-                    accessories={[
-                      { text: pkg.version, tooltip: "Installed" },
-                      { tag: { value: `↑ ${pkg.available}`, color: Color.Yellow } },
-                    ]}
-                    actions={
-                      <InstalledActionPanel
-                        pkg={pkg}
-                        onRefresh={handleRefresh}
-                        onClearSearch={() => setSearchText("")}
-                        onUninstalled={handleUninstalled}
-                      />
-                    }
-                  />
-                ))}
-            </List.Section>
-          )}
-          <List.Section title="Installed">
-            {filtered
-              .filter(({ pkg }) => !pkg.available)
-              .map(({ pkg, rowKey }) => (
-                <List.Item
-                  key={rowKey}
-                  title={pkg.name}
-                  subtitle={pkg.id || undefined}
-                  accessories={[{ text: pkg.version }]}
-                  actions={
-                    <InstalledActionPanel
-                      pkg={pkg}
-                      onRefresh={handleRefresh}
-                      onClearSearch={() => setSearchText("")}
-                      onUninstalled={handleUninstalled}
-                    />
-                  }
-                />
-              ))}
-          </List.Section>
-        </>
-      )}
-    </List>
+      indexOptions={{ needsCatalog: false }}
+      buildSections={(index, lookups, searchText) => {
+        const rows = installedRows(index, lookups).filter(
+          (row) =>
+            !searchText ||
+            row.name.toLowerCase().includes(searchText.toLowerCase()) ||
+            row.id.toLowerCase().includes(searchText.toLowerCase()),
+        );
+        return [
+          {
+            id: "installed",
+            title: "Installed",
+            subtitle: `${rows.length}`,
+            rows,
+          },
+        ];
+      }}
+      emptyState={(hasIndex) =>
+        hasIndex
+          ? {
+              title: "No Installed Packages",
+              description: "No WinGet-managed packages found",
+              icon: Icon.Tray,
+            }
+          : {
+              title: "No Package Index",
+              description: "Press ⏎ to build the package index",
+              icon: Icon.Tray,
+            }
+      }
+      bulkTargets={(index, lookups) => ({
+        uninstallAllTargets: installedRows(index, lookups)
+          .filter((row) => !UNINSTALL_ALL_EXCLUDED.has(row.id))
+          .map((row) => ({
+            id: row.id,
+            name: row.name,
+            source: row.source,
+            // Multi-version rows must each target their own version.
+            version: row.hasSiblingVersions ? row.installedVersion : undefined,
+          })),
+      })}
+    />
   );
 }

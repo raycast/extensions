@@ -1,5 +1,9 @@
 # Plexamp CHANGELOG
 
+## [Play Shortcut] - 2026-05-04
+
+- Added a `Cmd+Enter` shortcut to `Play in Plexamp` on album rows in artist views (list and grid) so an album can be played directly without first drilling into its tracks.
+
 ## [Menubar Flicker Fix] - 2026-04-17
 
 - Fixed the menubar widget blinking "Nothing playing" and losing album art on every background refresh by caching playback state across remounts.

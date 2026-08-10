@@ -1,6 +1,6 @@
 import { Action, Icon, open } from '@raycast/api'
 import { Project, getProjectUrl } from '../project'
-import { openUrl, preferences, resizeEditorWindow } from '../helpers'
+import { markProjectOpened, openUrl, preferences, resizeEditorWindow } from '../helpers'
 
 type StartDevelopmentProps = {
     project: Project
@@ -87,6 +87,7 @@ export default function StartDevelopment({ project }: StartDevelopmentProps) {
             key="start-development"
             icon={Icon.Hammer}
             onAction={() => {
+                markProjectOpened(project)
                 const appsToOpen = getDevelopmentCommandApps(project)
                 const urlsToOpen = getDevelopmentCommandUrls(project)
 

@@ -43,7 +43,7 @@
               "cyanInkLevel": "70",
               "magentaInkLevel": "72",
               "yellowInkLevel": "68",
-              "modelName": "Xerox WorkCentre",
+              "modelName": "Xerox C325",
               "serialNumber": "EXAMPLE123",
               "printerName": "Office Printer",
               "printerStatus": "idle"
@@ -74,6 +74,86 @@
       "title": "SNMP Community String",
       "description": "The SNMP community string for your printer (default: public)",
       "default": "public"
+    },
+    {
+      "name": "totalPagesOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Total Pages",
+      "description": "Printer-MIB prtMarkerLifeCount OID",
+      "default": "1.3.6.1.2.1.43.10.2.1.4.1.1"
+    },
+    {
+      "name": "blackPagesOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Black Pages",
+      "description": "Optional OID for black and white page count",
+      "default": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.20.34"
+    },
+    {
+      "name": "colorPagesOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Color Pages",
+      "description": "Optional OID for color page count",
+      "default": "1.3.6.1.4.1.253.8.53.13.2.1.6.1.20.33"
+    },
+    {
+      "name": "supplyDescriptionBaseOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID Base - Supply Description",
+      "description": "Printer-MIB prtMarkerSuppliesDescription base OID",
+      "default": "1.3.6.1.2.1.43.11.1.1.6"
+    },
+    {
+      "name": "supplyMaxCapacityBaseOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID Base - Supply Max Capacity",
+      "description": "Printer-MIB prtMarkerSuppliesMaxCapacity base OID",
+      "default": "1.3.6.1.2.1.43.11.1.1.8"
+    },
+    {
+      "name": "supplyLevelBaseOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID Base - Supply Level",
+      "description": "Printer-MIB prtMarkerSuppliesLevel base OID",
+      "default": "1.3.6.1.2.1.43.11.1.1.9"
+    },
+    {
+      "name": "modelNameOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Model Name",
+      "description": "System description OID",
+      "default": "1.3.6.1.2.1.1.1.0"
+    },
+    {
+      "name": "serialNumberOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Serial Number",
+      "description": "Printer serial number OID",
+      "default": "1.3.6.1.2.1.43.5.1.1.17.1"
+    },
+    {
+      "name": "printerNameOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Printer Name",
+      "description": "System name OID",
+      "default": "1.3.6.1.2.1.1.5.0"
+    },
+    {
+      "name": "printerStatusOid",
+      "type": "textfield",
+      "required": false,
+      "title": "OID - Printer Status",
+      "description": "Console display text OID",
+      "default": "1.3.6.1.2.1.43.16.5.1.2.1.1"
     }
   ],
   "dependencies": {

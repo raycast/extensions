@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sir-golf",
+  "title": "Sir.golf",
+  "description": "Live golf leaderboards (PGA Tour, LPGA, DP World Tour), the full tour schedule with every major badged and one-tap Add to Calendar, plus season rankings — by sir.golf. Free, no account, no API key.",
+  "icon": "command-icon.png",
+  "author": "julianpaul",
+  "categories": [
+    "Fun",
+    "Web"
+  ],
+  "keywords": [
+    "golf",
+    "pga",
+    "lpga",
+    "leaderboard",
+    "scores",
+    "tournament"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "leaderboard",
+      "title": "Leaderboard",
+      "subtitle": "sir.golf",
+      "description": "Live tournament leaderboard plus season rankings — scoring average, FedEx Cup, wins, money and more — with player details.",
+      "keywords": [
+        "golf",
+        "leaderboard",
+        "scores",
+        "scoring average",
+        "fedex cup",
+        "rankings",
+        "pga",
+        "lpga",
+        "dp world",
+        "tournament"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "golf-season",
+      "title": "Golf Season",
+      "subtitle": "sir.golf",
+      "description": "The tour schedule — this week, upcoming, and any past season with winners and tournament details.",
+      "keywords": [
+        "golf",
+        "schedule",
+        "season",
+        "tournaments",
+        "calendar",
+        "winners",
+        "results",
+        "pga",
+        "lpga"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultTour",
+      "title": "Default Tour",
+      "description": "Which tour to show first.",
+      "type": "dropdown",
+      "required": false,
+      "default": "pga",
+      "data": [
+        {
+          "title": "PGA Tour",
+          "value": "pga"
+        },
+        {
+          "title": "LPGA",
+          "value": "lpga"
+        },
+        {
+          "title": "DP World Tour",
+          "value": "eur"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.7.0",
+    "prettier": "^3.9.6",
+    "typescript": "^6.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

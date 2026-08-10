@@ -20,7 +20,7 @@ export const confirmation: Tool.Confirmation<InputVmGuestTasks> = async (input) 
         return task.vm;
       });
       return info;
-    })
+    }),
   );
 
   /* Get Message to Show */

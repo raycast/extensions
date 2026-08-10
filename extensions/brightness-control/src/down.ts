@@ -1,17 +1,17 @@
-import { showHUD, showToast, Toast } from "@raycast/api";
-import { ensureLunarReady, adjustCursorBrightness } from "./utils/lunar";
+import { showHUD } from "@raycast/api";
+import { adjustBrightness } from "./utils/platform";
 
-export default async function Command() {
-  if (!(await ensureLunarReady())) return;
+export default async () => {
+  const result = await adjustBrightness(-10);
+  if (!result) return;
 
-  try {
-    const { name, brightness } = await adjustCursorBrightness(-10);
-    await showHUD(`${name}: ${brightness}%`);
-  } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to decrease brightness",
-      message: error instanceof Error ? error.message : String(error),
-    });
+  await showHUD(formatBrightnessHUD(result, "Brightness decreased"));
+};
+
+function formatBrightnessHUD(result: { displayName?: string; brightness?: number }, fallback: string): string {
+  if (result.displayName && result.brightness != null) {
+    return `${result.displayName}: ${result.brightness}%`;
   }
+
+  return fallback;
 }

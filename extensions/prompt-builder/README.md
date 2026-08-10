@@ -26,7 +26,9 @@
 - **Update**: Press `⌘ + U` / `Ctrl + U` to update the selected template
 - **Delete**: `⌘ + ⇧ + D` / `Ctrl + Shift + D` current template.
 
-### Keyboard Shortcuts
+### Commands
+
+**Prompt Builder**
 
 - `⌘ + ↵` / `Ctrl + Enter`: Copy to clipboard
 - `⌘ + D` / `Ctrl + D`: Clear form
@@ -37,6 +39,14 @@
 - `⌘ + N` / `Ctrl + N`: New empty template
 - `⌘ + ⇧ + D` / `Ctrl + Shift + D`: Delete current template
 - `⌘ + ⇧ + ⌥ + D` / `Ctrl + Shift + Alt + D`: Delete all templates
+
+**Export Templates**
+
+- Exports all saved templates into a single JSON file in a directory you choose.
+
+**Import Templates**
+
+- Imports templates from a JSON file. The extension validates structure and types before adding them, and automatically avoids duplicate titles.
 
 ### Support
 

@@ -7,6 +7,13 @@ const timeAgo = new TimeAgo("en-US");
 
 export const getSectionTitle = (dateTime: string) => {
   const utcDate = new Date(dateTime + " UTC");
+  // Tables without a sys_updated_on field (or with an unparseable value) yield an
+  // Invalid Date; guard so timeAgo.format() below isn't handed a NaN timestamp,
+  // which throws RangeError: Invalid "number" argument: NaN.
+  if (isNaN(utcDate.getTime())) {
+    return "Unknown date";
+  }
+
   const diffInMinutes = differenceInMinutes(new Date(), utcDate);
 
   if (diffInMinutes < 1) {

@@ -1,5 +1,17 @@
 # Portfolio Tracker
 
+## [Profit & Loss Tracking] - 2026-07-17
+
+### Features
+
+- Record an optional average buy price per position, set when adding an investment or later via Edit Asset, to track unrealized profit/loss (P&L)
+- P&L tag on each position showing gain/loss percentage, with amount shown on hover
+- Cost basis section in the position detail panel with average buy price, total invested, and unrealized P&L
+- Portfolio summary row totals unrealized P&L across all positions with a buy price recorded
+- "Total Value Invested" mode divides by your buy price when entered, falling back to the live price otherwise
+- Adding units with a "Price Paid per Unit" updates the average buy price using a weighted average
+- CSV import/export supports an optional "Average Cost" column, backward compatible with older files
+
 ## [Initial Version] - 2026-04-08
 
 ### Features

@@ -1,14 +1,51 @@
 import { ActionPanel, Action, Form, Icon, closeMainWindow, showToast, Toast, showHUD } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useRef } from "react";
+import { getInitialSpaceId, setStoredSpaceId } from "./helpers/spaces";
 import { API_HEADERS, API_URL, handleAPIError, handleUnexpectedError, useCapacitiesStore } from "./helpers/storage";
 
-interface SaveWeblinkBody {
+interface SaveTaskBody {
   spaceId: string;
   title: string;
   mdText?: string;
   priority?: string;
   date?: Date;
+  deadline?: Date;
+}
+
+const SPACE_STORAGE_KEY = "create-task-space-id";
+
+type DateApiObject =
+  | {
+      dateResolution: "time" | "day";
+      startTime: string;
+    }
+  | undefined;
+
+function toDateApiObject(dateTime: Date | undefined): DateApiObject {
+  if (!dateTime) return undefined;
+
+  if (
+    (dateTime.getMilliseconds() === 0 || dateTime.getMilliseconds() === 1) &&
+    dateTime.getSeconds() === 0 &&
+    dateTime.getMinutes() === 0 &&
+    dateTime.getHours() === 0
+  ) {
+    const newDate = new Date();
+    newDate.setUTCHours(0, 0, 0, 0);
+    newDate.setUTCDate(dateTime.getDate());
+    newDate.setUTCMonth(dateTime.getMonth());
+    newDate.setUTCFullYear(dateTime.getFullYear());
+    return {
+      dateResolution: "day",
+      startTime: newDate.toISOString(),
+    };
+  }
+
+  return {
+    dateResolution: "time",
+    startTime: dateTime.toISOString(),
+  };
 }
 
 export default function Command() {
@@ -20,54 +57,21 @@ export default function Command() {
 
   const spacesDropdown = useRef(null);
 
-  const { handleSubmit, itemProps, setValue } = useForm<SaveWeblinkBody>({
+  const { handleSubmit, itemProps, setValue } = useForm<SaveTaskBody>({
     async onSubmit(values) {
       showToast({
         style: Toast.Style.Animated,
         title: "Saving",
       });
 
-      // date processing
-      const dateTime = values.date;
-      let dateObject:
-        | {
-            dateResolution: "time" | "day";
-            startTime: string;
-          }
-        | undefined = undefined;
-      if (dateTime) {
-        if (
-          (dateTime.getMilliseconds() === 0 || dateTime.getMilliseconds() === 1) &&
-          dateTime.getSeconds() === 0 &&
-          dateTime.getMinutes() === 0 &&
-          dateTime.getHours() === 0
-        ) {
-          const newDate = new Date();
-          newDate.setUTCHours(0, 0, 0, 0);
-          newDate.setUTCDate(dateTime.getDate());
-          newDate.setUTCMonth(dateTime.getMonth());
-          newDate.setUTCFullYear(dateTime.getFullYear());
-          dateObject = {
-            dateResolution: "day",
-            startTime: newDate.toISOString(),
-          };
-        } else {
-          dateObject = {
-            dateResolution: "time",
-            startTime: dateTime.toISOString(),
-          };
-        }
-      }
-
       const body = {
         spaceId: store?.spaces.length === 1 ? store.spaces[0].id : values.spaceId,
         title: values.title,
         mdText: values.mdText?.trim()?.length ? values.mdText.trim() : undefined,
         priority: values.priority === "empty" ? undefined : values.priority,
-        date: dateObject,
+        date: toDateApiObject(values.date),
+        deadline: toDateApiObject(values.deadline),
       };
-
-      console.log(body);
 
       try {
         const response = await fetch(`${API_URL}/save-task`, {
@@ -104,6 +108,26 @@ export default function Command() {
     },
   });
 
+  const spaces = store?.spaces ?? [];
+  const spaceIds = spaces.map((space) => space.id).join(",");
+
+  useEffect(() => {
+    if (!spaces.length || itemProps.spaceId.value) {
+      return;
+    }
+    let cancelled = false;
+
+    getInitialSpaceId(SPACE_STORAGE_KEY, spaces).then((spaceId) => {
+      if (!cancelled && spaceId) {
+        setValue("spaceId", spaceId);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [spaceIds, itemProps.spaceId.value, setValue]);
+
   return (
     <Form
       isLoading={storeIsLoading}
@@ -118,8 +142,10 @@ export default function Command() {
           <Form.Dropdown
             title="Space"
             {...itemProps.spaceId}
-            storeValue
-            onChange={(value) => setValue("spaceId", value)}
+            onChange={(value) => {
+              setValue("spaceId", value);
+              setStoredSpaceId(SPACE_STORAGE_KEY, value);
+            }}
             ref={spacesDropdown}
           >
             {store.spaces &&
@@ -138,6 +164,7 @@ export default function Command() {
         <Form.Dropdown.Item value="high" title="High" icon={Icon.Exclamationmark3} />
       </Form.Dropdown>
       <Form.DatePicker id="date" title="Date" defaultValue={null} />
+      <Form.DatePicker id="deadline" title="Deadline" defaultValue={null} />
       <Form.TextArea title="Notes" {...itemProps.mdText} info="Optional. Notes can be formatted in markdown." />
     </Form>
   );

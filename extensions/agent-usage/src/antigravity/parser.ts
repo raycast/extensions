@@ -1,4 +1,10 @@
-import { AntigravityError, AntigravityModelQuota, AntigravityUsage } from "./types";
+import {
+  AntigravityError,
+  AntigravityModelQuota,
+  AntigravityQuotaBucket,
+  AntigravityQuotaGroup,
+  AntigravityUsage,
+} from "./types";
 import { formatResetTime, parseDate } from "../agents/format";
 
 interface ParseResult {
@@ -6,7 +12,7 @@ interface ParseResult {
   error: AntigravityError | null;
 }
 
-export function parseAntigravityUserStatusResponse(raw: unknown): ParseResult {
+export function parseAntigravityUserStatusResponse(raw: unknown, quotaSummaryRaw?: unknown): ParseResult {
   const body = asRecord(raw);
   if (!body) {
     return parseError("Invalid API response format");
@@ -24,12 +30,14 @@ export function parseAntigravityUserStatusResponse(raw: unknown): ParseResult {
 
   const modelConfigs = getModelConfigsFromUserStatus(userStatus);
   const models = modelConfigs.map(quotaFromConfig).filter((model): model is AntigravityModelQuota => model !== null);
+  const parsedQuotaGroups = quotaSummaryRaw ? parseQuotaGroups(quotaSummaryRaw) : [];
 
-  if (models.length === 0) {
+  if (models.length === 0 && parsedQuotaGroups.length === 0) {
     return parseError("No quota models available");
   }
 
   const ordered = selectDisplayModels(models);
+  const quotaGroups = parsedQuotaGroups.length > 0 ? parsedQuotaGroups : undefined;
 
   const usage: AntigravityUsage = {
     accountEmail: toNullableString(userStatus.email),
@@ -38,6 +46,7 @@ export function parseAntigravityUserStatusResponse(raw: unknown): ParseResult {
     primaryModel: ordered[0] ?? null,
     secondaryModel: ordered[1] ?? null,
     tertiaryModel: ordered[2] ?? null,
+    quotaGroups,
   };
 
   return { usage, error: null };
@@ -79,25 +88,39 @@ export function parseAntigravityCommandModelConfigsResponse(raw: unknown): Parse
 export function selectDisplayModels(models: AntigravityModelQuota[]): AntigravityModelQuota[] {
   const ordered: AntigravityModelQuota[] = [];
 
-  const claudePrimary =
-    models.find((model) => isClaudeOpus(model.label)) ?? models.find((model) => isClaudeSonnet(model.label));
-  if (claudePrimary) ordered.push(claudePrimary);
+  const addIfUnique = (model: AntigravityModelQuota | undefined) => {
+    if (model && !ordered.some((m) => m.modelId === model.modelId)) {
+      ordered.push(model);
+    }
+  };
 
-  const geminiProHigh = models.find((model) => isGeminiProHigh(model.label));
-  if (geminiProHigh && !ordered.some((model) => model.modelId === geminiProHigh.modelId)) {
-    ordered.push(geminiProHigh);
-  }
+  // 1. Google Gemini Pro models
+  const geminiPro =
+    models.find((model) => isGeminiProHigh(model.label)) ?? models.find((model) => isGeminiPro(model.label));
+  addIfUnique(geminiPro);
 
+  // 2. Google Gemini Flash models
   const geminiFlash = models.find((model) => isGeminiFlash(model.label));
-  if (geminiFlash && !ordered.some((model) => model.modelId === geminiFlash.modelId)) {
-    ordered.push(geminiFlash);
+  addIfUnique(geminiFlash);
+
+  // 3. Non-Google / Anthropic Claude models
+  const claudePrimary =
+    models.find((model) => isClaudeOpus(model.label)) ??
+    models.find((model) => isClaudeSonnet(model.label)) ??
+    models.find((model) => isClaudeAny(model.label));
+  addIfUnique(claudePrimary);
+
+  // 4. Fill remaining slots up to 3 with any other models, sorted by percentLeft ascending
+  const remaining = [...models]
+    .filter((model) => !ordered.some((m) => m.modelId === model.modelId))
+    .sort((a, b) => a.percentLeft - b.percentLeft);
+
+  for (const model of remaining) {
+    if (ordered.length >= 3) break;
+    addIfUnique(model);
   }
 
-  if (ordered.length > 0) {
-    return ordered;
-  }
-
-  return [...models].sort((a, b) => a.percentLeft - b.percentLeft);
+  return ordered;
 }
 
 function quotaFromConfig(rawConfig: unknown): AntigravityModelQuota | null {
@@ -169,7 +192,15 @@ function isGeminiFlash(label: string): boolean {
   const lower = label.toLowerCase();
   return lower.includes("gemini") && lower.includes("flash");
 }
+function isClaudeAny(label: string): boolean {
+  const lower = label.toLowerCase();
+  return lower.includes("claude");
+}
 
+function isGeminiPro(label: string): boolean {
+  const lower = label.toLowerCase();
+  return lower.includes("gemini") && lower.includes("pro");
+}
 function codeToError(code: unknown): string | null {
   if (code === null || code === undefined) {
     return null;
@@ -235,5 +266,53 @@ function parseError(message: string): ParseResult {
       type: "parse_error",
       message,
     },
+  };
+}
+
+function parseQuotaGroups(raw: unknown): AntigravityQuotaGroup[] {
+  const body = asRecord(raw);
+  const response = asRecord(body?.response);
+  if (!response) return [];
+
+  const groups = asArray(response.groups);
+  return groups
+    .map((g): AntigravityQuotaGroup | null => {
+      const groupRecord = asRecord(g);
+      if (!groupRecord) return null;
+
+      const displayName = toStringOr(groupRecord?.displayName, "Unknown group");
+      const description = toNullableString(groupRecord?.description) ?? undefined;
+      const buckets = asArray(groupRecord?.buckets)
+        .map(parseQuotaBucket)
+        .filter((bucket): bucket is AntigravityQuotaBucket => bucket !== null);
+
+      if (buckets.length === 0) return null;
+
+      return {
+        displayName,
+        description,
+        buckets,
+      };
+    })
+    .filter((group): group is AntigravityQuotaGroup => group !== null);
+}
+
+function parseQuotaBucket(raw: unknown): AntigravityQuotaBucket | null {
+  const bucketRecord = asRecord(raw);
+  if (!bucketRecord) return null;
+
+  const remainingFraction = toNumber(bucketRecord.remainingFraction);
+  if (remainingFraction === null) return null;
+
+  const resetTimeRaw = toNullableString(bucketRecord.resetTime);
+
+  return {
+    bucketId: toStringOr(bucketRecord.bucketId, "unknown"),
+    displayName: toStringOr(bucketRecord.displayName, "Limit"),
+    description: toNullableString(bucketRecord.description) ?? undefined,
+    window: toStringOr(bucketRecord.window, "unknown"),
+    percentLeft: clamp(Math.round(remainingFraction * 100), 0, 100),
+    resetsIn: formatResetTime(resetTimeRaw),
+    resetAt: parseDate(resetTimeRaw ?? "")?.toISOString() ?? null,
   };
 }

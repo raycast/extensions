@@ -9,18 +9,18 @@
 
 ⚠️ **This extension is not created by Kaneo developers.**
 
-
 <a href="https://www.raycast.com/Baldy/kaneo-for-raycast" title="Install kaneo-for-raycast Raycast Extension"><img src="https://www.raycast.com/Baldy/kaneo-for-raycast/install_button@2x.png?v=1.1" height="64" style="height: 64px;" alt="" /></a>
 
 [![Raycast](https://img.shields.io/raycast/dt/Baldy/kaneo-for-raycast?color=%23FF6363&logo=raycast)](https://www.raycast.com/Baldy/kaneo-for-raycast)
 
-***"All you need. Nothing you don't."***<br>
-***[Kaneo](https://kaneo.app) is project management that stays out of your way.***
+_**"All you need. Nothing you don't."**_<br>
+_**[Kaneo](https://kaneo.app) is project management that stays out of your way.**_
 </div>
 
 ## Features
 
 - **Browse Projects**: View all your Kaneo projects with task counts and completion percentages
+- **My Tasks**: List the tickets assigned to you across all projects, grouped by status (open tasks only)
 - **Create Task**: Create a new task from Raycast
 - **Browse Notifications**: View all your Kaneo notifications
 - **Task Management**: Organize tasks by status columns (Backlog, To Do, In Progress, In Review, Done)
@@ -52,7 +52,7 @@
 Before using the extension, you need to configure the following preferences:
 
 | Preference                                                                    | Description                                   | Required | Default                 |
-|-------------------------------------------------------------------------------|-----------------------------------------------|----------|-------------------------|
+| ----------------------------------------------------------------------------- | --------------------------------------------- | -------- | ----------------------- |
 | **Instance URL**                                                              | Your Kaneo instance API URL                   | Yes      | https://cloud.kaneo.app |
 | **Web Instance URL**                                                          | Your Kaneo instance Client URL                | Yes      | https://cloud.kaneo.app |
 | **Workspace ID**                                                              | Your Kaneo workspace ID                       | Yes      | N/A                     |
@@ -60,14 +60,15 @@ Before using the extension, you need to configure the following preferences:
 | **User ID**                                                                   | Your user ID (for task assignments)           | No       | N/A                     |
 | **Sort**                                                                      | Default sorting method (Priority or Due Date) | Yes      | Priority                |
 
-
 ### Get your Kaneo Instance URL
+
 - For Cloud instance: https://cloud.kaneo.app
 - For Self-Hosting instance:
-   - https://api.your-instance-url (KANEO_API_URL)
-   - https://web.your-instance-url (KANEO_CLIENT_URL)
+  - https://api.your-instance-url (KANEO_API_URL)
+  - https://web.your-instance-url (KANEO_CLIENT_URL)
 
 ### Obtain the API Token for your Kaneo instance
+
 - Go to your Kaneo instance
 - Navigate to Settings (Profile Icon → Settings) → API Keys
 - Create API Key
@@ -85,6 +86,13 @@ Before using the extension, you need to configure the following preferences:
 1. Open Raycast
 2. Search for "List Projects"
 3. Browse your projects with task counts and completion stats
+
+### Viewing Your Assigned Tasks
+
+1. Open Raycast
+2. Search for "My Tasks"
+3. Browse the open tickets assigned to you across all projects, grouped by status
+4. Press **Enter** to view task details, or **⌘⇧S** to change a task's status
 
 ### Managing Tasks
 
@@ -122,5 +130,6 @@ Before using the extension, you need to configure the following preferences:
 - 🟢 **On Track** - Due later than 3 days
 
 ### Requirements
+
 - Raycast app
 - Kaneo instance >=2.1.5 with API access (Cloud instance work)

@@ -11,20 +11,8 @@ Manage your Git repositories from anywhere on your Mac.
 
 - [Supported Git Features](#supported-git-features)
 - [Core Features](#core-features)
-  - [🚦 Control **working tree** status](#-control-working-tree-status)
-  - [🧰 Resolve merge/rebase **conflicts**](#-resolve-mergerebase-conflicts)
-  - [🔎 Search in **commits** and **file history**](#-search-in-commits-and-file-history)
-  - [↪️ Checkout, cherry-pick, rebase, reset, revert, and merge on commit, branch, tag](#️-checkout-cherry-pick-rebase-reset-revert-and-merge-on-commit-branch-tag)
-  - [🌳 Manage **branches**, **tags**, and multiple **remotes**](#-manage-branches-tags-and-multiple-remotes)
-  - [📦 Save and apply **stashes** and **patches**](#-save-and-apply-stashes-and-patches)
-  - [📥 Clone repositories from a URL **in the background**](#-clone-repositories-from-a-url-in-the-background)
 - [Extra Features](#extra-features)
-  - [🔗 Issue Link Detection](#-issue-link-detection)
-  - [✨ Generate **AI commit messages**](#-generate-ai-commit-messages)
-  - [🔄 Interactive rebase editor](#-interactive-rebase-editor)
 - [Tips \& Tricks](#tips--tricks)
-  - [🎛️ Fast Navigation](#️-fast-navigation)
-  - [⚡ Quicklink for a specific repository](#-quicklink-for-a-specific-repository)
 - [⁉️ FAQ](#️-faq)
 - [🧑‍🚀 Future Features](#-future-features)
 - [💸 Support for the development](#-support-for-the-development)
@@ -45,7 +33,7 @@ Manage your Git repositories from anywhere on your Mac.
 | `git fetch` <br> `git pull` <br> `git push`          |     ✅     | + force                                         |
 | `git remote`                                         |     ✅     |                                                 |
 | `git config`                                         |     ✅     |                                                 |
-| `git worktree`                                       |     🚫     |                                                 |
+| `git worktree`                                       |     ✅     |                                                 |
 | `git submodule`                                      |     ✅     |                                                 |
 | `git-lfs`                                            |     ✅     |                                                 |
 | `.gitignore`                                         |     ✅     |                                                 |
@@ -196,10 +184,8 @@ The extension loads:
 - [ ] More fluent commit search
 - [ ] Background fetching
 - [ ] Menu Bar Commands
-- [ ] Submodules support
 - [ ] Windows support
 - [ ] Manage Hooks
-- [ ] Manage Git Config
 
 ## 💸 Support for the development
 

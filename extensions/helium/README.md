@@ -1,11 +1,12 @@
 # Helium
 
-Navigate open tabs, bookmarks, and the web in Helium browser.
+Navigate open tabs, browsing history, bookmarks, and the web in Helium browser.
 
 ## Features
 
 - **Search Tabs** - Find and switch between open tabs
-- **Search Web** - Search using Google, DuckDuckGo, Bing, Yahoo, or Ecosia
+- **Search Web** - Search using Helium's current provider and native bangs
+- **Search History** - Search Helium browsing history
 - **Search Bookmarks** - Quick access to saved bookmarks
 - **New Tab/Window** - Open new tabs, windows, or incognito windows
 
@@ -38,5 +39,4 @@ When submitting changes, add yourself to contributors in `package.json` and upda
 
 - Find better workarounds for Space switching
   - Might look into pushing a PR to Helium directly if necessary
-- !bang integration for search
 - Tab groups visualization

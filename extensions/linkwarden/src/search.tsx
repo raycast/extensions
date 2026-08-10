@@ -36,7 +36,7 @@ export default function Command() {
     headers,
     mapResult(result: ApiResponse<Link[]>) {
       return {
-        data: result.response,
+        data: Array.isArray(result?.response) ? result.response : [],
       };
     },
     initialData: [],
@@ -87,7 +87,7 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown tooltip="Collection" onChange={setCollectionId}>
           <List.Dropdown.Item title="All" value="" />
-          {collections.map((collection) => (
+          {(collections ?? []).map((collection) => (
             <List.Dropdown.Item
               key={collection.id}
               icon={{ source: Icon.Folder, tintColor: collection.color }}
@@ -98,7 +98,7 @@ export default function Command() {
         </List.Dropdown>
       }
     >
-      {!isLoading && !data.length && (
+      {!isLoading && !(data ?? []).length && (
         <>
           {!collectionId ? (
             <EmptyView title="You Haven't Created Any Links Yet" />
@@ -107,7 +107,7 @@ export default function Command() {
           )}
         </>
       )}
-      {data.map((item) => {
+      {(data ?? []).map((item) => {
         return (
           <List.Item
             key={item.id}

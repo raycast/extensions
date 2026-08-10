@@ -1,5 +1,9 @@
 # Gmail Changelog
 
+## [Fix Gmail browser URLs] - 2026-05-19
+
+- Fixed Gmail browser links using an email address in the account selector.
+
 ## [Maintenance] - 2026-01-01
 
 - Add support for Windows platform.

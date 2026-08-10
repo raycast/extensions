@@ -2,6 +2,11 @@
 
 Search and manage your Proton Pass items directly from Raycast.
 
+## Project Notes
+
+- This extension is maintained as an independent `proton-pass` implementation.
+- It uses local `pass-cli` execution, local caching, and command-specific flows implemented in this repository.
+
 ## Setup
 
 This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.

@@ -144,11 +144,8 @@ export function wasScheduleMissed(command: ScheduledCommand, now: Date): boolean
   // Don't run if feature is disabled
   if (!command.runIfMissed) return false;
 
-  // If never executed and never checked for missed, it's not "missed"
-  if (!command.lastExecutedAt && !command.lastMissedCheck) return false;
-
   // Determine the reference time (when we last knew the state)
-  const referenceTime = command.lastMissedCheck || command.lastExecutedAt;
+  const referenceTime = command.lastMissedCheck || command.lastExecutedAt || command.createdAt;
   if (!referenceTime) return false;
 
   const lastKnownTime = new Date(referenceTime);

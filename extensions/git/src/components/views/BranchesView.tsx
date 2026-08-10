@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Color, Image } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Keyboard, Image } from "@raycast/api";
 import {
   BranchCkeckoutAction,
   BranchDeleteAction,
@@ -25,7 +25,7 @@ export function BranchesView(context: RepositoryContext & NavigationContext) {
   return (
     <List
       isLoading={context.branches.isLoading}
-      navigationTitle={context.gitManager.repoName}
+      navigationTitle={context.gitManager.worktreeOrigin?.displayName ?? context.gitManager.repoName}
       searchBarPlaceholder="Search branches by name..."
       searchBarAccessory={WorkspaceNavigationDropdown(context)}
     >
@@ -113,8 +113,11 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
 
   const hasUncommittedChanges = context.branch.type === "current" && context.status.data.files.length !== 0;
 
+  const attachedWorktree =
+    context.branch.type === "remote" ? undefined : context.worktrees.attachedTo(context.branch.name);
+
   const accessories: List.Item.Accessory[] = useMemo(() => {
-    const result = [];
+    const result: List.Item.Accessory[] = [];
 
     // Add conflict warning indicator for current branch
     if (context.branch.type === "current" && hasConflicts) {
@@ -163,8 +166,16 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
       });
     }
 
+    if (attachedWorktree) {
+      result.push({
+        tag: { value: "", color: Color.Blue },
+        icon: Icon.Layers,
+        tooltip: `Checked out in worktree '${attachedWorktree.name}'`,
+      });
+    }
+
     return result;
-  }, [context.branch, hasConflicts, hasUncommittedChanges]);
+  }, [context.branch, hasConflicts, hasUncommittedChanges, attachedWorktree, context.remotes.data]);
 
   // Determine icon based on branch type
   const icon: Image.ImageLike = useMemo(() => {
@@ -175,7 +186,7 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
     } else {
       return { source: Icon.Dot, tintColor: Color.SecondaryText };
     }
-  }, [context.branch.type]);
+  }, [context.branch.type, context.remotes.data, context.branch.remote]);
 
   return (
     <List.Item
@@ -287,11 +298,7 @@ function BranchListItem(context: RepositoryContext & NavigationContext & { branc
 
           <ActionPanel.Section>
             <BranchCreateAction {...context} />
-            <TagCreateAction
-              {...context}
-              ref={context.branch.displayName}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-            />
+            <TagCreateAction {...context} ref={context.branch.displayName} shortcut={Keyboard.Shortcut.Common.New} />
           </ActionPanel.Section>
 
           <ActionPanel.Section title="Branches">
@@ -359,7 +366,7 @@ function RefreshBranchesAction(context: RepositoryContext & NavigationContext) {
       title="Refresh"
       icon={Icon.ArrowClockwise}
       onAction={context.branches.revalidate}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
     />
   );
 }

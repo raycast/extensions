@@ -683,47 +683,6 @@ export default function SyncToGarmin() {
     }
   }
 
-  function CustomDateRangeForm() {
-    return (
-      <Form
-        actions={
-          <ActionPanel>
-            <Action.SubmitForm
-              title="Sync Date Range"
-              onSubmit={handleCustomDateRangeSync}
-              icon={Icon.Upload}
-            />
-            <Action
-              title="Cancel"
-              onAction={() => setShowDateRangeForm(false)}
-              icon={Icon.XMarkCircle}
-            />
-          </ActionPanel>
-        }
-      >
-        <Form.DatePicker
-          id="startDate"
-          title="Start Date"
-          value={customStartDate}
-          onChange={setCustomStartDate}
-          max={new Date()}
-        />
-        <Form.DatePicker
-          id="endDate"
-          title="End Date"
-          value={customEndDate}
-          onChange={setCustomEndDate}
-          max={new Date()}
-          min={customStartDate || undefined}
-        />
-        <Form.Description
-          title="Info"
-          text="Select a date range to sync (max 90 days). All measurements in this range will be synced to Garmin."
-        />
-      </Form>
-    );
-  }
-
   if (!authenticated) {
     return (
       <List isLoading={isLoading}>
@@ -763,7 +722,16 @@ export default function SyncToGarmin() {
 
   // Show custom date range form if requested
   if (showDateRangeForm) {
-    return <CustomDateRangeForm />;
+    return (
+      <CustomDateRangeForm
+        customStartDate={customStartDate}
+        customEndDate={customEndDate}
+        setCustomStartDate={setCustomStartDate}
+        setCustomEndDate={setCustomEndDate}
+        onSubmit={handleCustomDateRangeSync}
+        onCancel={() => setShowDateRangeForm(false)}
+      />
+    );
   }
 
   // Count today's measurements
@@ -1008,6 +976,59 @@ export default function SyncToGarmin() {
         ))}
       </List.Section>
     </List>
+  );
+}
+
+interface CustomDateRangeFormProps {
+  customStartDate: Date | null;
+  customEndDate: Date | null;
+  setCustomStartDate: (date: Date | null) => void;
+  setCustomEndDate: (date: Date | null) => void;
+  onSubmit: () => void;
+  onCancel: () => void;
+}
+
+function CustomDateRangeForm({
+  customStartDate,
+  customEndDate,
+  setCustomStartDate,
+  setCustomEndDate,
+  onSubmit,
+  onCancel,
+}: CustomDateRangeFormProps) {
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm
+            title="Sync Date Range"
+            onSubmit={onSubmit}
+            icon={Icon.Upload}
+          />
+          <Action title="Cancel" onAction={onCancel} icon={Icon.XMarkCircle} />
+        </ActionPanel>
+      }
+    >
+      <Form.DatePicker
+        id="startDate"
+        title="Start Date"
+        value={customStartDate}
+        onChange={setCustomStartDate}
+        max={new Date()}
+      />
+      <Form.DatePicker
+        id="endDate"
+        title="End Date"
+        value={customEndDate}
+        onChange={setCustomEndDate}
+        max={new Date()}
+        min={customStartDate || undefined}
+      />
+      <Form.Description
+        title="Info"
+        text="Select a date range to sync (max 90 days). All measurements in this range will be synced to Garmin."
+      />
+    </Form>
   );
 }
 

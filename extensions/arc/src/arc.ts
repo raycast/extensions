@@ -118,15 +118,12 @@ async function runAppleScriptActionOnTab(tabId: string, action: string, activate
   await ensureArcIsRunning();
   return runAppleScript(`
     tell application "Arc"
-      set tabIndex to 1
-      repeat with aTab in every tab of first window
-        if id of aTab is "${tabId}" then
-          tell tab tabIndex of window 1 to ${action}
-          ${activate ? "activate" : ""}
-          return tabIndex
-        end if
-        set tabIndex to tabIndex + 1
-      end repeat
+      tell first window
+        try
+          tell (first tab whose id is "${tabId}") to ${action}
+        end try
+      end tell
+      ${activate ? "activate" : ""}
     end tell
   `);
 }

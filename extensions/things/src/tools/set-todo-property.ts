@@ -1,10 +1,10 @@
-import { setTodoProperty } from '../api';
+import { setTodoProperty, SettableTodoProperty } from '../api';
 
 type Input = {
   /** The to-do id to update */
   todoId: string;
   /** The key to update */
-  key: string;
+  key: SettableTodoProperty;
   /** The value to update */
   value: string;
 };

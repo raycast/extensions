@@ -1,29 +1,49 @@
-export const OIDS = {
+export interface OidConfig {
+  totalPagesOid: string;
+  blackPagesOid: string;
+  colorPagesOid: string;
+  supplyDescriptionBaseOid: string;
+  supplyMaxCapacityBaseOid: string;
+  supplyLevelBaseOid: string;
+  modelNameOid: string;
+  serialNumberOid: string;
+  printerNameOid: string;
+  printerStatusOid: string;
+}
+
+export const DEFAULT_OIDS: OidConfig = {
   // Page Counts
-  TOTAL_PAGES: "1.3.6.1.4.1.253.8.53.13.2.1.6.1.20.1",
-  BLACK_PAGES: "1.3.6.1.4.1.253.8.53.13.2.1.6.1.20.34",
-  COLOR_PAGES: "1.3.6.1.4.1.253.8.53.13.2.1.6.1.20.33",
+  totalPagesOid: "1.3.6.1.2.1.43.10.2.1.4.1.1",
+  blackPagesOid: "1.3.6.1.4.1.253.8.53.13.2.1.6.1.20.34",
+  colorPagesOid: "1.3.6.1.4.1.253.8.53.13.2.1.6.1.20.33",
 
-  // Ink Levels (Current)
-  INK_BLACK_CURRENT: "1.3.6.1.2.1.43.11.1.1.9.1.1",
-  INK_YELLOW_CURRENT: "1.3.6.1.2.1.43.11.1.1.9.1.2",
-  INK_MAGENTA_CURRENT: "1.3.6.1.2.1.43.11.1.1.9.1.3",
-  INK_CYAN_CURRENT: "1.3.6.1.2.1.43.11.1.1.9.1.4",
-
-  // Ink Levels (Max)
-  INK_BLACK_MAX: "1.3.6.1.2.1.43.11.1.1.8.1.1",
-  INK_YELLOW_MAX: "1.3.6.1.2.1.43.11.1.1.8.1.2",
-  INK_MAGENTA_MAX: "1.3.6.1.2.1.43.11.1.1.8.1.3",
-  INK_CYAN_MAX: "1.3.6.1.2.1.43.11.1.1.8.1.4",
+  // Printer-MIB supply table. Xerox C325 exposes toner cartridges here, but
+  // indexes can vary, so the code discovers entries by their descriptions.
+  supplyDescriptionBaseOid: "1.3.6.1.2.1.43.11.1.1.6",
+  supplyMaxCapacityBaseOid: "1.3.6.1.2.1.43.11.1.1.8",
+  supplyLevelBaseOid: "1.3.6.1.2.1.43.11.1.1.9",
 
   // General Info
-  MODEL_NAME: "1.3.6.1.2.1.1.1.0",
-  SERIAL_NUMBER: "1.3.6.1.2.1.43.5.1.1.17.1",
-  PRINTER_NAME: "1.3.6.1.2.1.1.5.0",
+  modelNameOid: "1.3.6.1.2.1.1.1.0",
+  serialNumberOid: "1.3.6.1.2.1.43.5.1.1.17.1",
+  printerNameOid: "1.3.6.1.2.1.1.5.0",
 
   // Status (Console Display)
-  CONSOLE_DISPLAY: "1.3.6.1.2.1.43.16.5.1.2.1.1",
-} as const;
+  printerStatusOid: "1.3.6.1.2.1.43.16.5.1.2.1.1",
+};
+
+export const getOidConfig = (preferences: Partial<OidConfig>): OidConfig => ({
+  totalPagesOid: preferences.totalPagesOid || DEFAULT_OIDS.totalPagesOid,
+  blackPagesOid: preferences.blackPagesOid || DEFAULT_OIDS.blackPagesOid,
+  colorPagesOid: preferences.colorPagesOid || DEFAULT_OIDS.colorPagesOid,
+  supplyDescriptionBaseOid: preferences.supplyDescriptionBaseOid || DEFAULT_OIDS.supplyDescriptionBaseOid,
+  supplyMaxCapacityBaseOid: preferences.supplyMaxCapacityBaseOid || DEFAULT_OIDS.supplyMaxCapacityBaseOid,
+  supplyLevelBaseOid: preferences.supplyLevelBaseOid || DEFAULT_OIDS.supplyLevelBaseOid,
+  modelNameOid: preferences.modelNameOid || DEFAULT_OIDS.modelNameOid,
+  serialNumberOid: preferences.serialNumberOid || DEFAULT_OIDS.serialNumberOid,
+  printerNameOid: preferences.printerNameOid || DEFAULT_OIDS.printerNameOid,
+  printerStatusOid: preferences.printerStatusOid || DEFAULT_OIDS.printerStatusOid,
+});
 
 export const INK_COLORS = {
   BLACK: "black",

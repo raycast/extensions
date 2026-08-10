@@ -1,5 +1,12 @@
 # Linkwarden Changelog
 
+## [Fix Undefined Data Crash] - 2026-04-22
+
+- Fixed `TypeError: Cannot read properties of undefined (reading 'map')` crash in the "Add Website to Linkwarden" command when the API returns an unexpected body shape
+- Hardened `useTags` and `useCollections` so `data` is always an array, regardless of the API response shape
+- Replaced unchecked `as Collection` cast in the submit handler with a graceful failure toast
+- Guarded the same latent `.map` / `.length` call sites in the "Search Linkwarden" command
+
 ## [Fix Potential Search Errors] - 2026-03-23
 
 - Fixed "Bad Request" error caused by sending empty `collectionId` to the API

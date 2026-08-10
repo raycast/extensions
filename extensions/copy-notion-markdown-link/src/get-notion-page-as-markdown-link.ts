@@ -78,13 +78,18 @@ export default async function main() {
     const linkUrl = parts[1];
 
     // URL validation
-    if (!linkUrl || !linkUrl.includes("notion.so")) {
+    if (!linkUrl || !linkUrl.includes("notion.com")) {
       await showHUD("Failed to copy Notion link. Please try again.");
       if (previousClipboard) {
         await Clipboard.copy(previousClipboard);
       }
       return;
     }
+
+    // Remove tracking query parameter
+    const url = new URL(linkUrl);
+    url.searchParams.delete("source");
+    const cleanedUrl = url.toString();
 
     // Process title - check if empty first, then escape square brackets
     let cleanedTitle: string;
@@ -94,7 +99,7 @@ export default async function main() {
       cleanedTitle = windowTitle.replace(/\[/g, "\\[").replace(/\]/g, "\\]");
     }
 
-    const markdownLink = `[${cleanedTitle}](${linkUrl})`;
+    const markdownLink = `[${cleanedTitle}](${cleanedUrl})`;
 
     await Clipboard.copy(markdownLink);
 

@@ -25,11 +25,46 @@
           "required": true,
           "placeholder": "Input Source",
           "data": [
-            { "title": "HDMI 1", "value": "17" },
-            { "title": "HDMI 2", "value": "18" },
-            { "title": "DisplayPort 1", "value": "15" },
-            { "title": "DisplayPort 2", "value": "16" },
-            { "title": "USB-C", "value": "27" }
+            {
+              "title": "VGA-1",
+              "value": "1"
+            },
+            {
+              "title": "VGA-2",
+              "value": "2"
+            },
+            {
+              "title": "DVI-1",
+              "value": "3"
+            },
+            {
+              "title": "DVI-2",
+              "value": "4"
+            },
+            {
+              "title": "DisplayPort 1",
+              "value": "15"
+            },
+            {
+              "title": "DisplayPort 2",
+              "value": "16"
+            },
+            {
+              "title": "HDMI 1",
+              "value": "17"
+            },
+            {
+              "title": "HDMI 2",
+              "value": "18"
+            },
+            {
+              "title": "HDMI 3 / Alt DP 2",
+              "value": "19"
+            },
+            {
+              "title": "USB-C",
+              "value": "27"
+            }
           ]
         }
       ]
@@ -46,11 +81,46 @@
           "required": true,
           "placeholder": "Input Source",
           "data": [
-            { "title": "HDMI 1", "value": "17" },
-            { "title": "HDMI 2", "value": "18" },
-            { "title": "DisplayPort 1", "value": "15" },
-            { "title": "DisplayPort 2", "value": "16" },
-            { "title": "USB-C", "value": "27" }
+            {
+              "title": "VGA-1",
+              "value": "1"
+            },
+            {
+              "title": "VGA-2",
+              "value": "2"
+            },
+            {
+              "title": "DVI-1",
+              "value": "3"
+            },
+            {
+              "title": "DVI-2",
+              "value": "4"
+            },
+            {
+              "title": "DisplayPort 1",
+              "value": "15"
+            },
+            {
+              "title": "DisplayPort 2",
+              "value": "16"
+            },
+            {
+              "title": "HDMI 1",
+              "value": "17"
+            },
+            {
+              "title": "HDMI 2",
+              "value": "18"
+            },
+            {
+              "title": "HDMI 3 / Alt DP 2",
+              "value": "19"
+            },
+            {
+              "title": "USB-C",
+              "value": "27"
+            }
           ]
         },
         {

@@ -1,5 +1,8 @@
 # Kagi Search Changelog
 
+## [1.2.5] - 2026-04-30
+* Fix crash when corrupted null value in history storage
+
 ## [1.2.4] - 2026-02-06
 
 * Add `Action` to Remove History when API disabled

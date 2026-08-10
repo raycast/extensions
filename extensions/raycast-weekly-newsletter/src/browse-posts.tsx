@@ -1,26 +1,62 @@
-import { Action, ActionPanel, Detail, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Keyboard, List, Toast, showToast } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { fetchPost, fetchPosts, getPostUrl } from "./api/substack";
+import { clearPostsCache, fetchPost, fetchPosts, getPostUrl } from "./api/substack";
+import { POSTS_PAGE_SIZE } from "./lib/constants";
 import type { SubstackPost } from "./types/post";
 import { htmlToMarkdown } from "./utils/html-to-markdown";
 
 export default function Command() {
-  const { data: posts, isLoading } = usePromise(fetchPosts, [], {
-    onError: (error) => {
-      showFailureToast(error, { title: "Failed to fetch posts" });
+  const {
+    data: posts,
+    isLoading,
+    pagination,
+    revalidate,
+  } = usePromise(
+    () => async (options: { page: number }) => {
+      const posts = await fetchPosts({
+        limit: POSTS_PAGE_SIZE,
+        offset: options.page * POSTS_PAGE_SIZE,
+      });
+
+      return { data: posts, hasMore: posts.length === POSTS_PAGE_SIZE };
     },
-  });
+    [],
+    {
+      onError: (error) => {
+        showFailureToast(error, { title: "Failed to fetch posts" });
+      },
+    },
+  );
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search posts...">
+    <List isLoading={isLoading} pagination={pagination} searchBarPlaceholder="Search posts...">
       {posts?.map((post) => (
-        <PostListItem key={post.id} post={post} />
+        <PostListItem
+          key={post.id}
+          post={post}
+          onLoadMore={pagination?.onLoadMore}
+          canLoadMore={pagination?.hasMore}
+          onClearCache={() => {
+            clearPostsCache();
+            revalidate();
+          }}
+        />
       ))}
     </List>
   );
 }
 
-function PostListItem({ post }: { post: SubstackPost }) {
+function PostListItem({
+  post,
+  onLoadMore,
+  canLoadMore,
+  onClearCache,
+}: {
+  post: SubstackPost;
+  onLoadMore?: () => void;
+  canLoadMore?: boolean;
+  onClearCache?: () => void;
+}) {
   const date = new Date(post.post_date).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -53,8 +89,6 @@ function PostListItem({ post }: { post: SubstackPost }) {
           <ActionPanel.Section>
             <Action.Push icon={Icon.Eye} title="Read Post" target={<PostDetail slug={post.slug} />} />
             <Action.OpenInBrowser url={getPostUrl(post.slug)} shortcut={Keyboard.Shortcut.Common.Open} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             <Action.CopyToClipboard
               title="Copy Link"
               content={getPostUrl(post.slug)}
@@ -64,6 +98,25 @@ function PostListItem({ post }: { post: SubstackPost }) {
               title="Copy Share Text"
               content={`${post.title}\n${getPostUrl(post.slug)}`}
               shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {canLoadMore ? (
+              <Action
+                icon={Icon.ArrowDown}
+                title="Load More Old Posts"
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "l" }, Windows: { modifiers: ["ctrl"], key: "l" } }}
+                onAction={onLoadMore}
+              />
+            ) : null}
+            <Action
+              icon={Icon.Trash}
+              title="Clear Cache"
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={async () => {
+                onClearCache?.();
+                await showToast({ style: Toast.Style.Success, title: "Cache cleared" });
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

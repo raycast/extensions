@@ -62,11 +62,11 @@
     "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "typescript": "^5.7.0",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "~22.13.0",
     "@types/react": "^19.0.0",
-    "eslint": "^8.57.0"
+    "eslint": "^8.57.0",
+    "typescript": "^5.7.0"
   },
   "scripts": {
     "build": "ray build",

@@ -102,11 +102,11 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2026.2.0",
+  version: "2026.4.2",
   get sha256() {
-    if (platform === "windows") return "6e7fe65ef0d0401af20bb739cb81469a0c001d9ee249ceea4a86974ae27a4c46";
-    if (process.arch === "arm64") return "63c736b74620280e422ce238bdbcbc267689a0ff831168959ef2124588fcc1e5";
-    return "60cc5109b1cdad560231e02098f1ab2d16efa821d51c6ec089cb5c3cc351b2e5";
+    if (platform === "windows") return "db30a5b7dfb8ab1c657e14c566a77649b1ef66864c1c09c5e5437b5667f9e014";
+    if (process.arch === "arm64") return "885b4b15074452f175ddf03d1315ec1fa8a83912ee3ac9267750a5a038292599";
+    return "1dc091b65494612a2c371e27a4267a6e29f9ebabc7f854f6323fa8f1ac344cb2";
   },
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
@@ -444,7 +444,7 @@ export class Bitwarden {
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to sync vault", execError);
-      const { error } = await this.handleCommonErrors(execError);
+      const { error } = await this.handleCommonErrors(execError, { skipInvalidSessionTokenLogout: true });
       if (!error) throw execError;
       return { error };
     }
@@ -772,13 +772,7 @@ export class Bitwarden {
     }
     if (/Invalid session token/i.test(errorContent)) {
       if (!skipInvalidSessionTokenLogout) {
-        // Avoid running the full logout lifecycle here (which fires logout listeners).
-        // Clear the session token and mark the vault as unauthenticated so callers
-        // can perform an explicit `bitwarden.logout()` when they want the full
-        // logout side-effects (listeners, storage updates, etc.). This prevents
-        // duplicate listener invocations.
-        this.clearSessionToken();
-        await this.saveLastVaultStatus("handleCommonErrors:InvalidSessionToken", "unauthenticated");
+        await this.logout({ reason: "Invalid session token", immediate: true });
       }
       return { error: new InvalidSessionTokenError() };
     }

@@ -22,7 +22,7 @@ export default async function command() {
     console.log(`Recognized text: ${recognizedText}`);
 
     const encodedQueryText = encodeURIComponent(recognizedText);
-    const easyDictUrl = `raycast://extensions/isfeng/easydict/easydict?fallbackText=${encodedQueryText}`;
+    const easyDictUrl = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/isfeng/easydict/easydict?fallbackText=${encodedQueryText}`;
     try {
       await open(easyDictUrl);
     } catch (error) {

@@ -7,6 +7,7 @@ import {
   popToRoot,
   showHUD,
   Color,
+  Image,
   showToast,
   getPreferenceValues,
   launchCommand,
@@ -26,6 +27,7 @@ import { transferMyPlayback } from "./api/transferMyPlayback";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { useMe } from "./hooks/useMe";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
+import { usePlaylistsContainingTrack } from "./hooks/usePlaylistsContainingTrack";
 import { formatMs } from "./helpers/formatMs";
 import { TracksList } from "./components/TracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
@@ -35,6 +37,7 @@ import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
 import { getErrorMessage } from "./helpers/getError";
 import { triggerMenuBarRefresh } from "./helpers/triggerMenuBarRefresh";
+import { ConnectDevice, Dislike, Like, OpenLibrary, OpenSearch, ShowContent } from "./shortcuts/shortcuts";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
@@ -46,9 +49,22 @@ function NowPlayingCommand() {
   const { myDevicesData } = useMyDevices({ options: { execute: hasTrackData } });
   const { myPlaylistsData } = useMyPlaylists({ options: { execute: hasTrackData } });
   const { meData } = useMe({ options: { execute: hasTrackData } });
-  const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
+  const {
+    containsMySavedTracksData,
+    containsMySavedTracksError,
+    containsMySavedTracksIsLoading,
+    containsMySavedTracksRevalidate,
+  } = useContainsMyLikedTracks({
     trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
   });
+
+  const ownedPlaylists = myPlaylistsData?.items?.filter((p) => p.owner?.id === meData?.id) ?? [];
+  const { playlistsContainingTrack } = usePlaylistsContainingTrack({
+    playlists: ownedPlaylists,
+    trackUri: currentlyPlayingData?.item?.uri,
+    options: { execute: hasTrackData && ownedPlaylists.length > 0 },
+  });
+
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
@@ -67,11 +83,13 @@ function NowPlayingCommand() {
                 icon={Icon.Book}
                 title="Your Library"
                 onAction={() => launchCommand({ name: "yourLibrary", type: LaunchType.UserInitiated })}
+                shortcut={OpenLibrary}
               />
               <Action
                 title="Search"
                 icon={Icon.MagnifyingGlass}
                 onAction={() => launchCommand({ name: "search", type: LaunchType.UserInitiated })}
+                shortcut={OpenSearch}
               />
               <Action
                 icon={Icon.Repeat}
@@ -111,6 +129,8 @@ function NowPlayingCommand() {
       albumImage ? `![${name}](${albumImage}?raycast-width=250&raycast-height=250)` : "",
     ].join("\n");
 
+    const inPlaylists = ownedPlaylists.filter((p) => p.id && playlistsContainingTrack.includes(p.id));
+
     metadata = (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Track" text={name} />
@@ -120,6 +140,38 @@ function NowPlayingCommand() {
         )}
         {artists && artists.length === 1 && <Detail.Metadata.Label title="Artist" text={artistName} />}
         <Detail.Metadata.Label title="Album" text={albumName} />
+        <Detail.Metadata.Label
+          title="Liked"
+          text={
+            containsMySavedTracksError
+              ? "Unknown"
+              : containsMySavedTracksIsLoading
+                ? "Checking…"
+                : trackAlreadyLiked
+                  ? "Yes"
+                  : "No"
+          }
+          icon={
+            containsMySavedTracksError
+              ? { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
+              : containsMySavedTracksIsLoading
+                ? { source: Icon.Clock, tintColor: Color.SecondaryText }
+                : trackAlreadyLiked
+                  ? { source: Icon.Heart, tintColor: Color.Red }
+                  : { source: Icon.HeartDisabled, tintColor: Color.SecondaryText }
+          }
+        />
+        {inPlaylists.length > 0 && (
+          <Detail.Metadata.TagList title="In Playlists">
+            {inPlaylists.map((p) => (
+              <Detail.Metadata.TagList.Item
+                key={p.id}
+                text={p.name ?? ""}
+                icon={p.images?.[0]?.url ? { source: p.images[0].url, mask: Image.Mask.RoundedRectangle } : undefined}
+              />
+            ))}
+          </Detail.Metadata.TagList>
+        )}
       </Detail.Metadata>
     );
 
@@ -158,6 +210,7 @@ function NowPlayingCommand() {
                 toast.message = error;
               }
             }}
+            shortcut={Dislike}
           />
         )}
 
@@ -194,6 +247,7 @@ function NowPlayingCommand() {
                 toast.message = error;
               }
             }}
+            shortcut={Like}
           />
         )}
         <Action
@@ -260,6 +314,7 @@ function NowPlayingCommand() {
           icon={Icon.AppWindowGrid3x3}
           title="Go to Album"
           target={<TracksList album={album} showGoToAlbum={false} />}
+          shortcut={ShowContent}
         />
       </>
     );
@@ -300,7 +355,7 @@ function NowPlayingCommand() {
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
           )}
-          <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device">
+          <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device" shortcut={ConnectDevice}>
             {myDevicesData?.devices
               ?.filter((device) => !device.is_restricted)
               .map((device) => (

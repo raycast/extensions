@@ -34,6 +34,12 @@
       "mode": "view"
     },
     {
+      "name": "createTimeEntry",
+      "title": "Quickstart New Timer",
+      "description": "Start a new time entry from a global hotkey.",
+      "mode": "view"
+    },
+    {
       "name": "updateTimeEntry",
       "title": "Update Time Entry",
       "description": "Update the description, project, tags of recent time entries.",

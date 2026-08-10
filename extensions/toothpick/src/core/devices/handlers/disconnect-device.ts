@@ -14,4 +14,6 @@ export async function disconnectDevice(device: Device) {
   } else {
     await showErrorMessage("Failed to disconnect");
   }
+
+  return !!result;
 }

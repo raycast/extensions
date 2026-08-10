@@ -5,6 +5,9 @@
   "description": "Create and manage tasks in your self-hosted Vikunja instance",
   "icon": "command-icon.png",
   "author": "flexorflex",
+  "contributors": [
+    "strikerlulu"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -20,6 +23,12 @@
         {
           "name": "title",
           "placeholder": "Task title",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "projectId",
+          "placeholder": "Project ID (optional)",
           "type": "text",
           "required": false
         }
@@ -62,6 +71,14 @@
       "description": "Vikunja API token for authentication",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "defaultProject",
+      "title": "Default Project",
+      "description": "Default project ID to show in List Tasks. Use \"all\" to show all projects.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "all"
     }
   ],
   "dependencies": {

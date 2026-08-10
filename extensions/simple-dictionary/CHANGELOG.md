@@ -1,5 +1,9 @@
 # Simple Dictionary Changelog
 
+## [Fallback Command Compatibility] - 2026-04-20
+
+- The `Search Word` command can now be used as a fallback command.
+
 ## [Move Word Argument to Front] - 2026-02-12
 
 - With the introduction of the `Default Language` preference, the `language` argument is not required anymore. Therefore, the `word` argument should be moved to the front of the command arguments to increase the user experience.

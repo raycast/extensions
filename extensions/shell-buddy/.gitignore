@@ -1,3 +1,18 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+
+# misc
+.DS_Store
+
 # Created by https://www.toptal.com/developers/gitignore/api/webstorm+all,macos,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=webstorm+all,macos,visualstudiocode
 
@@ -152,3 +167,10 @@ fabric.properties
 
 # dependencies
 /node_modules
+
+# Raycast specific files
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust

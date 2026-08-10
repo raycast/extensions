@@ -1,5 +1,9 @@
 # Send to Kindle Changelog
 
+## [Skills Import and Export] - 2026-05-15
+
+- Added bulk skills import and export, so you can back up or restore all skills at once instead of managing them one by one.
+
 ## [Smarter Skills, Cleaner Previews] - 2026-02-16
 
 - New CSS selector algorithm: smarter ranking now highlights high-confidence selectors first, so you find the right filter faster with fewer trial-and-error steps.

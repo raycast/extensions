@@ -8,16 +8,17 @@
 import { homedir } from "node:os";
 import { readFile, writeFile, stat, rename, lstat, realpath, copyFile } from "node:fs/promises";
 import { dirname } from "node:path";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
 import { FILE_CONSTANTS, ERROR_MESSAGES } from "../constants";
-import { FileNotFoundError, PermissionError, FileTooLargeError, ReadError, WriteError } from "../utils/errors";
 import {
-  validateFilePath,
-  validateFileSize,
-  truncateContent,
-  validateFilePathForWrite,
-  validateZshrcContent,
-} from "../utils/sanitize";
+  FileNotFoundError,
+  PermissionError,
+  FileTooLargeError,
+  ReadError,
+  WriteError,
+  SaveCancelledError,
+} from "../utils/errors";
+import { validateFilePath, validateFileSize, validateFilePathForWrite, validateZshrcContent } from "../utils/sanitize";
 import { access } from "node:fs/promises";
 import { constants } from "node:fs";
 import { log } from "../utils/logger";
@@ -108,12 +109,9 @@ export async function readZshrcFile(): Promise<string> {
     }
 
     const fileContents = await readFile(zshrcPath, { encoding: "utf8" });
+    log.zsh.info(`Successfully read zshrc file (${fileContents.length} chars)`);
 
-    // Truncate content if it's still too large after reading
-    const safeContent = truncateContent(fileContents);
-    log.zsh.info(`Successfully read zshrc file (${safeContent.length} chars)`);
-
-    return safeContent;
+    return fileContents;
   } catch (error) {
     // Re-throw our custom errors as-is
     if (
@@ -411,11 +409,28 @@ export async function writeZshrcFile(content: string): Promise<void> {
       throw new Error("Content must be a string");
     }
 
-    // Validate content for dangerous patterns
+    // Warn about suspicious patterns, but let the user decide. These checks are
+    // heuristics, not a security boundary, and they run against the whole file —
+    // including pre-existing lines the user never touched — so blocking here can
+    // permanently prevent saving.
     const contentValidation = validateZshrcContent(content);
     if (!contentValidation.isValid) {
-      log.zsh.error(`Content validation failed: ${contentValidation.errors.join("; ")}`);
-      throw new WriteError(zshrcPath, new Error(`Content validation failed: ${contentValidation.errors.join("; ")}`));
+      log.zsh.warn(`Content validation warnings: ${contentValidation.errors.join("; ")}`);
+      const confirmed = await confirmAlert({
+        title: "Potential Issues Found",
+        message: contentValidation.errors.join("\n"),
+        primaryAction: {
+          title: "Save Anyway",
+          style: Alert.ActionStyle.Destructive,
+        },
+        dismissAction: {
+          title: "Cancel",
+        },
+      });
+      if (!confirmed) {
+        log.zsh.info("Save cancelled by user after validation warnings");
+        throw new SaveCancelledError(zshrcPath);
+      }
     }
 
     // Resolve symlink: if ~/.zshrc is a symlink, write to its real target
@@ -451,8 +466,11 @@ export async function writeZshrcFile(content: string): Promise<void> {
     await rename(tmpPath, effectivePath);
     log.zsh.info(`Successfully wrote zshrc file: ${effectivePath}`);
   } catch (error) {
+    // Re-throw our custom errors as-is; cancellation is a user decision, not a failure
+    if (error instanceof SaveCancelledError) {
+      throw error;
+    }
     log.zsh.error("Write failed", error);
-    // Re-throw our custom errors as-is
     if (error instanceof PermissionError || error instanceof WriteError) {
       throw error;
     }

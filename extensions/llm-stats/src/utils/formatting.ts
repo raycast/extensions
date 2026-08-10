@@ -35,13 +35,15 @@ export function formatPrice(pricePerMillion: number): string {
 }
 
 /**
- * Formats price from string (e.g., "$0.50/1M tokens" -> "$0.50/1M tokens" with proper formatting)
- * Parses the price value and formats it with toFixed(2)
+ * Formats a price for display (e.g., "$0.50/1M tokens" -> "$0.50/1M").
+ * Accepts either a formatted string or a raw numeric value (the API returns
+ * numbers for some models), so coerce before matching.
  */
-export function formatPriceFromString(priceStr: string): string {
-  const match = priceStr.match(/\$?([\d.]+)/);
+export function formatPriceFromString(priceStr: string | number): string {
+  const str = String(priceStr);
+  const match = str.match(/\$?([\d.]+)/);
   if (!match) {
-    return priceStr; // Return original if parsing fails
+    return str; // Return original if parsing fails
   }
   const price = parseFloat(match[1]);
   return `$${price.toFixed(2)}/1M`;

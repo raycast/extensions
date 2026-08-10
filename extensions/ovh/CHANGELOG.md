@@ -1,5 +1,11 @@
 # OVHcloud Changelog
 
+## [Add Communication Command] - 2026-07-16
+
+- In "Communication"
+1. View "My messages"
+2. View "Contacts"
+
 ## [Improve DNS Records Display] - 2026-02-08
 
 - Improved DNS Records loading so it loads the relevant cached records (previously, dns records for the last domain were shown until updated)
