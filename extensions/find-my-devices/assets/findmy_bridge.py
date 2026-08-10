@@ -144,16 +144,19 @@ def logout(args: argparse.Namespace) -> None:
 
     remote_confirmed = False
     try:
-        api = PyiCloudService(
-            args.apple_account,
-            password=None,
-            cookie_directory=str(session_path),
-            authenticate=False,
-        )
-        status = api.get_auth_status()
-        if status.get("authenticated"):
-            result = api.logout(clear_local_session=True)
-            remote_confirmed = bool(result.get("remote_logout_confirmed"))
+        try:
+            api = PyiCloudService(
+                args.apple_account,
+                password=None,
+                cookie_directory=str(session_path),
+                authenticate=False,
+            )
+            status = api.get_auth_status()
+            if status.get("authenticated"):
+                result = api.logout(clear_local_session=True)
+                remote_confirmed = bool(result.get("remote_logout_confirmed"))
+        except Exception:  # Remote sign-out is best effort. Local removal must still succeed.
+            remote_confirmed = False
     finally:
         shutil.rmtree(session_path, ignore_errors=True)
 

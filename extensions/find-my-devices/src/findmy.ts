@@ -31,13 +31,8 @@ const SETUP_SCRIPT = path.join(
   "setup-find-my.command",
 );
 
-type Preferences = {
-  appleAccount: string;
-  includeFamily: boolean;
-};
-
-function preferences(): Preferences {
-  return getPreferenceValues<Preferences>();
+function preferences(): Preferences.FindMyDevices {
+  return getPreferenceValues<Preferences.FindMyDevices>();
 }
 
 async function exists(filePath: string): Promise<boolean> {
