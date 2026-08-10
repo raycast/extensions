@@ -46,7 +46,7 @@ describe("loadGrokCredentials", () => {
         last_name: "Lovelace",
         team_id: "team-1",
         user_id: "user-1",
-        expires_at: "2026-08-01T00:00:00.000Z",
+        expires_at: "2099-08-01T00:00:00.000Z",
         refresh_token: "refresh",
         oidc_client_id: "client-id",
         oidc_issuer: "https://auth.x.ai",

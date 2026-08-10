@@ -81,6 +81,8 @@ function AllBookmarksView({
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={handleRefresh}
       pagination={pagination}
       searchBarPlaceholder={t("searchBookmarks")}
@@ -118,6 +120,8 @@ function ListBookmarksView({
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("searchBookmarks")}

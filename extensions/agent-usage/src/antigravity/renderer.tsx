@@ -7,10 +7,10 @@ import {
   getNoDataAccessory,
   generatePieIcon,
   generateAsciiBar,
-} from "../agents/ui";
-import { AntigravityError, AntigravityUsage } from "./types";
-import { effectiveAntigravityPercent } from "./effective-remaining";
-import type { Accessory } from "../agents/types";
+} from "../agents/ui.tsx";
+import type { AntigravityError, AntigravityUsage } from "./types.ts";
+import { effectiveAntigravityPercent } from "./effective-remaining.ts";
+import type { Accessory } from "../agents/types.ts";
 
 export function formatAntigravityUsageText(usage: AntigravityUsage | null, error: AntigravityError | null): string {
   const fallback = formatErrorOrNoData("Antigravity", usage, error);

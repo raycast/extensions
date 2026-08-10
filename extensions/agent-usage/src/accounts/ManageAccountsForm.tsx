@@ -12,8 +12,9 @@ import {
   Clipboard,
 } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
-import type { AccountEntry, AccountsProvider } from "./types";
-import { loadAccounts, addAccount, updateAccount, deleteAccount } from "./storage";
+import type { AccountEntry, AccountsProvider } from "./types.ts";
+import { loadAccounts, addAccount, updateAccount, deleteAccount } from "./storage.ts";
+import { validateManualCredential } from "../clinepass/accounts.ts";
 
 interface ManageAccountsFormProps {
   provider: AccountsProvider;
@@ -28,7 +29,8 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
   const [newToken, setNewToken] = useState("");
   const [newAccountId, setNewAccountId] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const supportsAccountId = provider === "codex";
+  const supportsAccountId = provider === "codex" || provider === "clinepass";
+  const isClinePass = provider === "clinepass";
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
@@ -53,6 +55,13 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
     if (!tokenTrimmed) {
       await showToast({ style: Toast.Style.Failure, title: "Token is required" });
       return;
+    }
+    if (isClinePass) {
+      const validationError = validateManualCredential(tokenTrimmed, accountIdTrimmed);
+      if (validationError) {
+        await showToast({ style: Toast.Style.Failure, title: "Invalid ClinePass account", message: validationError });
+        return;
+      }
     }
 
     const exists = accounts.some((a) => a.label.toLowerCase() === labelTrimmed.toLowerCase());
@@ -115,6 +124,10 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
       : undefined;
     if (!newLabelValue) {
       await showToast({ style: Toast.Style.Failure, title: "Label cannot be empty" });
+      return;
+    }
+    if (isClinePass && !newAccountIdValue?.startsWith("usr-")) {
+      await showToast({ style: Toast.Style.Failure, title: "Cline user ID must start with usr-." });
       return;
     }
     if (newLabelValue.toLowerCase() !== account.label.toLowerCase()) {
@@ -186,7 +199,9 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
         title="Add New Account"
         text={
           supportsAccountId
-            ? "Enter a label, API token, and optional ChatGPT account ID for multi-account setups."
+            ? isClinePass
+              ? "Enter a label, Cline user ID, and Cline API key. API keys start with sk_ and user IDs start with usr-."
+              : "Enter a label, API token, and optional ChatGPT account ID for multi-account setups."
             : "Enter a label and paste the API token for the new account."
         }
       />
@@ -199,16 +214,16 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
       />
       <Form.PasswordField
         id="new-token"
-        title="Token"
-        placeholder="Paste API token here"
+        title={isClinePass ? "API Key" : "Token"}
+        placeholder={isClinePass ? "sk_..." : "Paste API token here"}
         value={newToken}
         onChange={setNewToken}
       />
       {supportsAccountId && (
         <Form.TextField
           id="new-account-id"
-          title="ChatGPT Account ID"
-          placeholder="Optional, e.g. acct_..."
+          title={isClinePass ? "Cline User ID" : "ChatGPT Account ID"}
+          placeholder={isClinePass ? "Required, e.g. usr-..." : "Optional, e.g. acct_..."}
           value={newAccountId}
           onChange={setNewAccountId}
         />
@@ -236,8 +251,8 @@ export function ManageAccountsForm({ provider, providerName, onSave }: ManageAcc
           <Form.TextField
             key={`account-id-${account.id}`}
             id={`account-id-${account.id}`}
-            title={`${account.label} Account ID`}
-            placeholder="Optional ChatGPT account ID"
+            title={`${account.label} ${isClinePass ? "User ID" : "Account ID"}`}
+            placeholder={isClinePass ? "Required Cline user ID" : "Optional ChatGPT account ID"}
             defaultValue={account.accountId ?? ""}
             onChange={(val) => setEditingAccountId((prev) => ({ ...prev, [account.id]: val }))}
           />

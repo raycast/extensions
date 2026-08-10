@@ -23,11 +23,12 @@ export interface TidyConfig {
 }
 export const DUPLICATES_DIR: string;
 export const REVIEW_DIR: string;
+export const TIDY_DIR: string;
 export function loadConfig(): TidyConfig;
+export function tidyPath(destDir: string, ...sub: string[]): string;
 export function buildExtIndex(config: TidyConfig): Map<string, string>;
 export function buildFolderNamer(destDir: string, config: TidyConfig): (base: string) => string;
 export function organizedDirNames(config: TidyConfig): Set<string>;
 export function quarantineDirNames(config: TidyConfig): Set<string>;
-export function expandTilde(p: string): string;
 export function canonicalPath(p: string): string;
 export function isInsideDir(parent: string, child: string): boolean;

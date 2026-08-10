@@ -1,6 +1,31 @@
 # Agent Usage Changelog
 
-## [Support Claude Fable Usage Limits] - {YYYY-MM-DD}
+## [Add support for ClinePass] - 2026-08-10
+
+### New Features
+
+- Support the ClinePass subscription
+  - Display the 5h (also in the progress pie), weekly and monthly limits
+  - Also display your regular Cline credits if you have any
+  - Allow to add multiple accounts just like Codex
+  - Reads data from `~/.cline` (install the CLI or IDE extension & login) with support for manual User ID & API Key entry
+- Show the Codex Display Name in the agents list in place of the email when possible (users might need to go on ChatGPT -> Profile to mint a new CloudFlare token as the endpoint is protected)
+- Allow to reset manual Agents order
+- Additional Codex rate-limits like 5.3-Codex-Spark now display
+
+### Improvements
+
+- Agents icons are now legible on dark mode (auto-generated dark variants couldn't be resolved on Windows so they're now bundled)
+- Agents are now sorted by name by default (you might need to reset the order to benefit from it)
+- Reduce the progressbar from 15 to 12 segments to avoid it being clipped on monitors with different resolutions/DPI/scale factors
+- Display error messages in a Markdown box so they're not clipped
+
+### Bug Fixes
+
+- Usage pie charts now display again on Windows
+- First-selected agent when you open the extension is the actual first of the list, not the first alphabetically
+
+## [Support Claude Fable Usage Limits] - 2026-07-22
 
 ### Improvements
 

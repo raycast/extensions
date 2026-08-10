@@ -3,8 +3,8 @@ import { promisify } from "util";
 import * as os from "os";
 import * as path from "path";
 import * as fs from "fs";
-import { AmpUsage, AmpError } from "./types";
-import { parseAmpUsage } from "./parser";
+import type { AmpUsage, AmpError } from "./types.ts";
+import { parseAmpUsage } from "./parser.ts";
 
 const execFileAsync = promisify(execFile);
 let cachedAmpPath: string | null = null;

@@ -1,6 +1,6 @@
 import React from "react";
 import { List } from "@raycast/api";
-import type { Accessory } from "../agents/types";
+import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
   generateAsciiBar,
@@ -8,8 +8,8 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   renderErrorOrNoData,
-} from "../agents/ui";
-import type { ClaudeError, ClaudeUsage } from "./types";
+} from "../agents/ui.tsx";
+import type { ClaudeError, ClaudeUsage } from "./types.ts";
 
 function formatWindow(name: string, percent: number, resetsIn: string | null): string {
   let text = `\n\n${name}: ${generateAsciiBar(percent)} ${percent}% remaining`;

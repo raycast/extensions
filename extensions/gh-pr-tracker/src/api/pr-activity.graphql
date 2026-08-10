@@ -22,6 +22,43 @@ fragment PRActivityFields on PullRequest {
     ...ActorFields
   }
 
+  # Feeds saved PR filters (assignee:/review-requested:/label:/draft: qualifiers — see
+  # src/pr-filter-query.ts). GitHub caps assignees at 10 per PR, so this connection can never
+  # truncate.
+  assignees(first: 10) {
+    totalCount
+    nodes {
+      login
+      avatarUrl(size: 64)
+    }
+  }
+
+  # `RequestedReviewer` is a `User | Team` union (GitHub GraphQL reference, Pull Requests
+  # category). Team-requested reviews are out of scope for the `review-requested:` filter, so
+  # only the `User` branch is selected.
+  reviewRequests(first: 15) {
+    totalCount
+    nodes {
+      requestedReviewer {
+        __typename
+        ... on User {
+          login
+          avatarUrl(size: 64)
+        }
+      }
+    }
+  }
+
+  labels(first: 20) {
+    totalCount
+    nodes {
+      name
+      color
+    }
+  }
+
+  isDraft
+
   # itemKey: ic-<fullDatabaseId>
   comments(last: 20) {
     totalCount

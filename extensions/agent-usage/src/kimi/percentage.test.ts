@@ -2,14 +2,14 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 test("formatRemainingPercent formats valid percentages", async () => {
-  const { formatRemainingPercent } = await import("./percentage");
+  const { formatRemainingPercent } = await import("./percentage.ts");
 
   assert.equal(formatRemainingPercent(5, 10), "50% remaining");
   assert.equal(formatRemainingPercent(2, 3), "67% remaining");
 });
 
 test("formatRemainingPercent returns '--' when limit is zero or invalid", async () => {
-  const { formatRemainingPercent } = await import("./percentage");
+  const { formatRemainingPercent } = await import("./percentage.ts");
 
   assert.equal(formatRemainingPercent(10, 0), "--");
   assert.equal(formatRemainingPercent(10, Number.NaN), "--");

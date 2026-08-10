@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseAmpUsage } from "./parser";
+import { parseAmpUsage } from "./parser.ts";
 
 const SAMPLE_OUTPUT = `Signed in as zvq@live.com (spikezhang)
 Amp Free: 100% remaining today (resets daily) - https://ampcode.com/settings#amp-free

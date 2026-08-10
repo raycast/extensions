@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for Amp, Claude, Codex, Copilot, Cursor, Droid, Gemini, Grok, Kimi, Antigravity, MiniMax, OpenCode Go, Synthetic, and z.ai (GLM)
+- **Multi-Agent Support** - View usage for Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, Droid, Gemini, Grok, Kimi, MiniMax, OpenCode Go, Synthetic, and z.ai (GLM)
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
@@ -23,6 +23,7 @@ Track usage across your AI coding agents in one place.
 | --------------- | --------------------------- | :--------: | :------: | :-----: | :-----------: | ------------------------------------------------------------------------------------------------ |
 | **Amp**         | Local SQLite database       |     —      |    —     |    —    |       —       | Auto-detected from local database                                                                |
 | **Claude**      | Anthropic OAuth Usage API   |     —      |    ✓     |    —    |       —       | Auto-detected after `claude` login                                                               |
+| **ClinePass**   | Cline API                   |     ✓      |    —     |    —    |       ✓       | Auto-detected from the local Cline login, or add a user ID and API key via Manage Accounts       |
 | **Codex**       | OpenAI API                  |     ✓      |    —     |    —    |       ✓       | Run `codex login`, or paste token in preferences                                                 |
 | **Copilot**     | GitHub Copilot internal API |     —      |    —     |    ✓    |       —       | Auto-detected from `GH_TOKEN`/`GITHUB_TOKEN`, or paste token in preferences                      |
 | **Cursor**      | Cursor API                  |     ✓      |    —     |    —    |       —       | Auto-detected from Cursor app login, or paste cookie header in preferences                       |
@@ -42,6 +43,12 @@ Track usage across your AI coding agents in one place.
 - **OpenCode** — Auto-detected from `~/.local/share/opencode/auth.json`
 - **Env Var** — Auto-detected from shell environment variables
 - **Multi-Account** — Support for multiple named accounts via "Manage Accounts" action (⌘M)
+
+### ClinePass Credentials
+
+ClinePass reads the shared Cline login from `~/.cline/data/settings/providers.json`, with `~/.cline/data/secrets.json` supported as a legacy fallback. Expired file-backed sessions are refreshed through Cline and saved atomically to the source file while preserving unrelated settings. If Cline replaces the credential while Agent Usage is fetching, Agent Usage rereads the file and uses Cline's newer value instead of overwriting it.
+
+Additional ClinePass accounts can be added from the in-view **Manage Accounts** action. Each manual account requires a Cline user ID beginning with `usr-` and an API key beginning with `sk_`.
 
 ## OpenCode Active Indicator
 

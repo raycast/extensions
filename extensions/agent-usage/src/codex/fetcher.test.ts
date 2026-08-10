@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { parseCodexApiResponse } from "./fetcher.ts";
+import { fetchCodexDisplayName, parseCodexApiResponse, parseCodexDisplayName, parseCodexUserId } from "./fetcher.ts";
 
 const PLUS_RESPONSE = {
   plan_type: "plus",
@@ -52,10 +52,11 @@ test("parseCodexApiResponse handles Pro/Team plan (both windows)", () => {
     credits: { has_credits: true, unlimited: false, balance: "100" },
   };
 
-  const result = parseCodexApiResponse(proResponse);
+  const result = parseCodexApiResponse(proResponse, null, null, "Ada Lovelace");
   assert.equal(result.error, null);
   assert.ok(result.usage);
   assert.equal(result.usage!.account, "Pro 20x");
+  assert.equal(result.usage!.displayName, "Ada Lovelace");
   assert.ok(result.usage!.fiveHourLimit, "5h should be present");
   assert.ok(result.usage!.weeklyLimit, "weekly should be present");
   assert.equal(result.usage!.fiveHourLimit!.percentageRemaining, 70);
@@ -104,6 +105,64 @@ test("parseCodexApiResponse picks code review limit when present", () => {
   assert.equal(result.usage!.codeReviewLimit!.percentageRemaining, 95);
 });
 
+test("parseCodexApiResponse maps named additional rate limits and all their windows", () => {
+  const response = {
+    plan_type: "pro",
+    rate_limit: {
+      primary_window: { used_percent: 21, limit_window_seconds: 604800, reset_after_seconds: 261224 },
+      secondary_window: null,
+    },
+    additional_rate_limits: [
+      {
+        limit_name: "GPT-5.3-Codex-Spark",
+        metered_feature: "codex_bengalfox",
+        rate_limit: {
+          primary_window: {
+            used_percent: 0,
+            limit_window_seconds: 604800,
+            reset_after_seconds: 604800,
+            reset_at: 1786790310,
+          },
+          secondary_window: {
+            used_percent: 25,
+            limit_window_seconds: 18000,
+            reset_after_seconds: 9000,
+          },
+        },
+      },
+    ],
+  };
+
+  const result = parseCodexApiResponse(response);
+
+  assert.equal(result.error, null);
+  assert.deepEqual(result.usage!.additionalRateLimits, [
+    {
+      name: "GPT-5.3-Codex-Spark",
+      meteredFeature: "codex_bengalfox",
+      windows: [
+        { percentageRemaining: 100, resetsInSeconds: 604800, limitWindowSeconds: 604800 },
+        { percentageRemaining: 75, resetsInSeconds: 9000, limitWindowSeconds: 18000 },
+      ],
+    },
+  ]);
+});
+
+test("parseCodexApiResponse ignores malformed additional rate limits without rejecting the main usage", () => {
+  const result = parseCodexApiResponse({
+    ...PLUS_RESPONSE,
+    additional_rate_limits: [
+      null,
+      { limit_name: "", rate_limit: { primary_window: { used_percent: 0, limit_window_seconds: 604800 } } },
+      { limit_name: "Missing Windows", rate_limit: { primary_window: null, secondary_window: null } },
+      { limit_name: "Malformed Window", rate_limit: { primary_window: { used_percent: "zero" } } },
+    ],
+  });
+
+  assert.equal(result.error, null);
+  assert.deepEqual(result.usage!.additionalRateLimits, []);
+});
+
 test("parseCodexApiResponse routes a single short window to fiveHourLimit only", () => {
   const onlyFiveHour = {
     plan_type: "free",
@@ -147,4 +206,31 @@ test("parseCodexApiResponse returns parse_error on non-object data", () => {
   const result = parseCodexApiResponse(null);
   assert.equal(result.usage, null);
   assert.equal(result.error!.type, "parse_error");
+});
+
+test("Codex profile parsers extract trimmed user and display names", () => {
+  assert.equal(parseCodexUserId({ user_id: "  user-123  " }), "user-123");
+  assert.equal(parseCodexDisplayName({ display_name: "  Ada Lovelace  " }), "Ada Lovelace");
+  assert.equal(parseCodexUserId({ user_id: "" }), null);
+  assert.equal(parseCodexDisplayName({ display_name: 123 }), null);
+});
+
+test("fetchCodexDisplayName follows settings user_id to the Calpico profile with account scope", async () => {
+  const requests: Array<{ url: string; accountId?: string }> = [];
+  const displayName = await fetchCodexDisplayName("token", "acct-work", async (options) => {
+    requests.push({ url: options.url, accountId: options.headers?.["ChatGPT-Account-ID"] });
+    if (options.url.endsWith("/wham/settings/user")) {
+      return { data: { user_id: "user/123" }, error: null };
+    }
+    return { data: { display_name: "Ada Lovelace" }, error: null };
+  });
+
+  assert.equal(displayName, "Ada Lovelace");
+  assert.deepEqual(requests, [
+    { url: "https://chatgpt.com/backend-api/wham/settings/user", accountId: "acct-work" },
+    {
+      url: "https://chatgpt.com/backend-api/calpico/chatgpt/profile/user%2F123",
+      accountId: "acct-work",
+    },
+  ]);
 });

@@ -1,5 +1,5 @@
-import { SyntheticUsage, SyntheticError } from "./types";
-import { httpFetch } from "../agents/http";
+import type { SyntheticUsage, SyntheticError } from "./types.ts";
+import { httpFetch } from "../agents/http.ts";
 
 export const SYNTHETIC_OPENCODE_KEY = "synthetic";
 

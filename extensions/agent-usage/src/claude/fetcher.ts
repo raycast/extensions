@@ -2,7 +2,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { execSync } from "node:child_process";
-import type { ClaudeUsage, ClaudeError } from "./types";
+import type { ClaudeUsage, ClaudeError } from "./types.ts";
 
 const CLAUDE_CONFIG_DIR_ENV = "CLAUDE_CONFIG_DIR";
 const DEFAULT_CLAUDE_CONFIG_DIR = path.join(os.homedir(), ".claude");
@@ -480,7 +480,7 @@ export async function fetchClaudeUsage(
     const sevenDay = data.seven_day;
 
     // Dynamically collect any seven_day_<model> windows (e.g. sonnet, opus, ...)
-    const modelWindows: Record<string, import("./types").ClaudeRateWindow> = {};
+    const modelWindows: Record<string, import("./types.ts").ClaudeRateWindow> = {};
     const KNOWN_NON_MODEL_KEYS = new Set([
       "five_hour",
       "seven_day",
