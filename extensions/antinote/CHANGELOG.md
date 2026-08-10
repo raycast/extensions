@@ -1,6 +1,6 @@
 # Antinote Changelog
 
-## [v2.0.0] - {PR_MERGE_DATE}
+## [v2.0.0] - 2026-08-10
 - Added support for Antinote v2.* (Beta)
 - Added "Search Slotted Notes" command for Antinote v2.* (Beta)
 - Added "Execute Timer Command" command for Anitnote v2.* (Beta) 
