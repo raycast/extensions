@@ -73,18 +73,105 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 }
 
 // The Windows Media Transport Controls API does not expose stable per-session IDs.
-// Session identity uses (app_id + ordinal within app) captured at render time.
-// A title-prefix fingerprint helps detect reordering but is best-effort.
-// On switch failure, paused competitors are not restored — the user can replay manually.
+// Session identity uses (app_id + ordinal within app) captured at render time,
+// resolved against a fresh snapshot via resolve_target_index — the exact same
+// identity logic find_session_by_index uses, so switching never falls back to a
+// weaker matcher.
+//
+// The target is played and confirmed to reach Playing BEFORE anything else is
+// paused; if the target fails there are no side effects to roll back (playback
+// state like seek position or buffering isn't reliably restorable anyway).
+// Only after success are competing Playing sessions paused, best-effort — a
+// pause failure is collected into a warning, not fatal.
 #[raycast]
-fn switch_session(target_app_id: String, target_index: u32, _target_title_prefix: String) -> Result<(), String> {
+fn switch_session(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
+    // One snapshot, used for both resolving the target and pausing competitors —
+    // a second GetSessions() between the two would reintroduce a race window.
+    let entries = snapshot_sessions()?;
+    let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title_prefix)
+        .ok_or_else(|| format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing"))?;
+
+    let target_session = entries[target_pos].session.clone();
+    match target_session.TryPlayAsync().map_err(|e| format!("TryPlayAsync failed: {}", e))?.get() {
+        Ok(_) => {
+            let mut started = false;
+            for _ in 0..50 {
+                if let Ok(info) = target_session.GetPlaybackInfo() {
+                    if let Ok(status) = info.PlaybackStatus() {
+                        if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
+                            started = true;
+                            break;
+                        }
+                    }
+                }
+                std::thread::sleep(std::time::Duration::from_millis(50));
+            }
+            if !started {
+                return Err("Target session did not start playing after switch".to_string());
+            }
+        }
+        Err(e) => return Err(format!("Failed to play target session: {}", e)),
+    }
+
+    let mut pause_errors: Vec<String> = Vec::new();
+    for (i, entry) in entries.iter().enumerate() {
+        if i == target_pos {
+            continue;
+        }
+        let label = format!("{}[{}]", entry.app_id, entry.ordinal);
+        if let Ok(info) = entry.session.GetPlaybackInfo() {
+            if let Ok(status) = info.PlaybackStatus() {
+                if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
+                    match entry.session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get() {
+                        Ok(_) => {
+                            let mut paused = false;
+                            for _ in 0..50 {
+                                if let Ok(info) = entry.session.GetPlaybackInfo() {
+                                    if let Ok(status) = info.PlaybackStatus() {
+                                        if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
+                                            paused = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                                std::thread::sleep(std::time::Duration::from_millis(50));
+                            }
+                            if !paused {
+                                pause_errors.push(format!("{} accepted pause but never reached paused state", label));
+                            }
+                        }
+                        Err(e) => pause_errors.push(format!("Failed to pause {}: {}", label, e)),
+                    }
+                }
+            }
+        }
+    }
+
+    if pause_errors.is_empty() {
+        Ok(())
+    } else {
+        Err(format!("Switched but some sessions could not be paused: {}", pause_errors.join("; ")))
+    }
+}
+
+struct SessionEntry {
+    session: GlobalSystemMediaTransportControlsSession,
+    app_id: String,
+    ordinal: u32,
+    title: String,
+}
+
+// One walk over GetSessions(), computing per-app ordinals the same way
+// list_sessions does and capturing each session's title. Every control action
+// resolves its target from a single snapshot so ordinals can't shift between
+// resolving and acting.
+fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
     let manager = get_session_manager()?;
     let sessions = manager.GetSessions().map_err(|e| format!("GetSessions failed: {}", e))?;
     let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
 
-    let mut target_session: Option<GlobalSystemMediaTransportControlsSession> = None;
-    let mut pause_errors: Vec<String> = Vec::new();
-    let mut app_count: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
+    let mut entries = Vec::new();
+    let mut app_index: std::collections::HashMap<String, u32> = std::collections::HashMap::new();
 
     loop {
         let has_current = iterator.HasCurrent().map_err(|e| format!("HasCurrent failed: {}", e))?;
@@ -98,77 +185,78 @@ fn switch_session(target_app_id: String, target_index: u32, _target_title_prefix
             .map_err(|e| format!("SourceAppUserModelId failed: {}", e))?;
         let app_id = app_id_h.to_string();
 
-        let idx = app_count.entry(app_id.clone()).or_insert(0);
-        let cur_index = *idx;
+        let idx = app_index.entry(app_id.clone()).or_insert(0);
+        let ordinal = *idx;
         *idx += 1;
 
-        let is_target = app_id == target_app_id && cur_index == target_index;
+        let title = get_session_title(&session).unwrap_or_default();
 
-        if is_target {
-            target_session = Some(session);
-        } else {
-            if let Ok(info) = session.GetPlaybackInfo() {
-                if let Ok(status) = info.PlaybackStatus() {
-                    if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
-                        let label = format!("{}[{}]", app_id, cur_index);
-                        match session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get() {
-                            Ok(_) => {
-                                let mut paused = false;
-                                for _ in 0..50 {
-                                    if let Ok(info) = session.GetPlaybackInfo() {
-                                        if let Ok(status) = info.PlaybackStatus() {
-                                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
-                                                paused = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-                                    std::thread::sleep(std::time::Duration::from_millis(50));
-                                }
-                                if !paused {
-                                    pause_errors.push(format!("{} accepted pause but never reached paused state", label));
-                                }
-                            }
-                            Err(e) => pause_errors.push(format!("Failed to pause {}: {}", label, e)),
-                        }
-                    }
-                }
-            }
-        }
+        entries.push(SessionEntry {
+            session,
+            app_id,
+            ordinal,
+            title,
+        });
 
         iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
     }
 
-    if let Some(session) = target_session {
-        match session.TryPlayAsync().map_err(|e| format!("TryPlayAsync failed: {}", e))?.get() {
-            Ok(_) => {
-                let mut started = false;
-                for _ in 0..50 {
-                    if let Ok(info) = session.GetPlaybackInfo() {
-                        if let Ok(status) = info.PlaybackStatus() {
-                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
-                                started = true;
-                                break;
-                            }
-                        }
-                    }
-                    std::thread::sleep(std::time::Duration::from_millis(50));
-                }
-                if !started {
-                    return Err("Target session did not start playing after switch".to_string());
-                }
-            }
-            Err(e) => return Err(format!("Failed to play target session: {}", e)),
-        }
+    Ok(entries)
+}
 
-        if pause_errors.is_empty() {
-            Ok(())
-        } else {
-            Err(format!("Switched but some sessions could not be paused: {}", pause_errors.join("; ")))
+// Resolve which snapshot entry the user clicked. GetSessions() has no documented
+// ordering guarantee and sessions expose no stable ID, so identity is a per-app
+// ordinal with a title-prefix fingerprint. Priority:
+//   1. Exact (ordinal + title) match — the confident happy path, and the only
+//      safe resolution when multiple same-app sessions share a title prefix.
+//   2. Exactly one session matches the title fingerprint — it moved ordinals
+//      (a sibling closed, order changed). Trust the title, not the number.
+//   3. Ordinal match with no title fingerprint — the track skipped, so the title
+//      changed between render and action. Ordinal still points at the clicked
+//      session.
+//   Otherwise ambiguous (two+ sessions share the prefix) or missing → None.
+//   Guess-free: callers surface a "try refreshing" error rather than controlling
+//   the wrong session (e.g. two browser tabs with identical titles).
+fn resolve_target_index(
+    entries: &[SessionEntry],
+    target_app_id: &str,
+    target_index: u32,
+    target_title_prefix: &str,
+) -> Option<usize> {
+    let mut index_match: Option<usize> = None;
+    let mut title_matches: Vec<usize> = Vec::new();
+
+    for (i, entry) in entries.iter().enumerate() {
+        if entry.app_id != target_app_id {
+            continue;
         }
-    } else {
-        Err(format!("Session {target_app_id}[{target_index}] not found"))
+        let title_ok = !target_title_prefix.is_empty() && entry.title.starts_with(target_title_prefix);
+
+        // 1. Exact (ordinal + title) match
+        if entry.ordinal == target_index && title_ok {
+            return Some(i);
+        }
+        if entry.ordinal == target_index {
+            index_match = Some(i);
+        }
+        if title_ok {
+            title_matches.push(i);
+        }
     }
+
+    // 2. Unique title match at a (possibly shifted) ordinal
+    if title_matches.len() == 1 {
+        return title_matches[0].into();
+    }
+
+    // 3. Ordinal match with no title fingerprint (track-skip case)
+    if title_matches.is_empty() {
+        if let Some(i) = index_match {
+            return Some(i);
+        }
+    }
+
+    None
 }
 
 #[raycast]
@@ -269,58 +357,19 @@ fn poll_title_change(session: &GlobalSystemMediaTransportControlsSession, old_ti
     }
 }
 
-// Session lookup strategy (no stable session ID from Windows API):
-// 1. Exact (index + title prefix) match → immediate return (happy path)
-// 2. Title prefix matches at a shifted index → session reordered, return it
-// 3. No title match but index matches → title changed (track skip), return it
-// Duplicate title prefixes across sessions from the same app can theoretically
-// retarget in case 2, but this requires identical titles (rare in practice).
+// Session lookup for play/pause/skip actions. Thin wrapper over the shared
+// snapshot + resolve logic so every control action uses the same identity
+// rules switch_session does — no separate, weaker matcher to drift apart.
 fn find_session_by_index(
     target_app_id: &str,
     target_index: u32,
     target_title_prefix: &str,
 ) -> Result<GlobalSystemMediaTransportControlsSession, String> {
-    let manager = get_session_manager()?;
-    let sessions = manager.GetSessions().map_err(|e| format!("GetSessions failed: {}", e))?;
-    let iterator = sessions.First().map_err(|e| format!("First failed: {}", e))?;
-
-    let mut idx = 0u32;
-    let mut index_match: Option<GlobalSystemMediaTransportControlsSession> = None;
-    let mut title_match: Option<GlobalSystemMediaTransportControlsSession> = None;
-
-    loop {
-        let has_current = iterator.HasCurrent().map_err(|e| format!("HasCurrent failed: {}", e))?;
-        if !has_current {
-            break;
-        }
-        let session = iterator.Current().map_err(|e| format!("Current failed: {}", e))?;
-        let app_id_h = session.SourceAppUserModelId().map_err(|e| format!("SourceAppUserModelId failed: {}", e))?;
-        if app_id_h.to_string() == target_app_id {
-            let title = get_session_title(&session).ok();
-            let title_matches = title
-                .as_ref()
-                .map(|t| t.starts_with(target_title_prefix))
-                .unwrap_or(false);
-
-            if idx == target_index {
-                // Prefer exact index + title match
-                if title_matches || target_title_prefix.is_empty() {
-                    return Ok(session);
-                }
-                index_match = Some(session);
-            } else if title_matches && !target_title_prefix.is_empty() {
-                // Title matches at a shifted index — store as fallback
-                title_match = Some(session);
-            }
-            idx += 1;
-        }
-        iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
-    }
-
-    // Return title-based fallback (session shifted indices), then index match (title changed), else error
-    title_match.or(index_match).ok_or_else(|| {
-        format!("Session {target_app_id}[{target_index}] not found")
-    })
+    let entries = snapshot_sessions()?;
+    let pos = resolve_target_index(&entries, target_app_id, target_index, target_title_prefix).ok_or_else(|| {
+        format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing")
+    })?;
+    Ok(entries[pos].session.clone())
 }
 
 #[raycast]
