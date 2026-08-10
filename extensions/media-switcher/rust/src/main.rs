@@ -119,31 +119,41 @@ fn switch_session(target_app_id: String, target_index: u32, target_title_prefix:
             continue;
         }
         let label = format!("{}[{}]", entry.app_id, entry.ordinal);
-        if let Ok(info) = entry.session.GetPlaybackInfo() {
-            if let Ok(status) = info.PlaybackStatus() {
-                if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing {
-                    match entry.session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get() {
-                        Ok(_) => {
-                            let mut paused = false;
-                            for _ in 0..50 {
-                                if let Ok(info) = entry.session.GetPlaybackInfo() {
-                                    if let Ok(status) = info.PlaybackStatus() {
-                                        if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
-                                            paused = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                std::thread::sleep(std::time::Duration::from_millis(50));
-                            }
-                            if !paused {
-                                pause_errors.push(format!("{} accepted pause but never reached paused state", label));
+
+        // Decide whether this competitor needs pausing. Don't silently skip on
+        // inspection failure: an un-inspectable session could still be playing
+        // alongside the target, so record a warning AND still attempt the pause.
+        let status = entry.session.GetPlaybackInfo().and_then(|info| info.PlaybackStatus());
+        let should_pause = match &status {
+            Ok(s) => *s == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Playing,
+            Err(inspect_err) => {
+                pause_errors.push(format!("{} state unreadable: {}", label, inspect_err));
+                true
+            }
+        };
+        if !should_pause {
+            continue;
+        }
+
+        match entry.session.TryPauseAsync().map_err(|e| format!("TryPauseAsync failed: {}", e))?.get() {
+            Ok(_) => {
+                let mut paused = false;
+                for _ in 0..50 {
+                    if let Ok(info) = entry.session.GetPlaybackInfo() {
+                        if let Ok(status) = info.PlaybackStatus() {
+                            if status == GlobalSystemMediaTransportControlsSessionPlaybackStatus::Paused {
+                                paused = true;
+                                break;
                             }
                         }
-                        Err(e) => pause_errors.push(format!("Failed to pause {}: {}", label, e)),
                     }
+                    std::thread::sleep(std::time::Duration::from_millis(50));
+                }
+                if !paused {
+                    pause_errors.push(format!("{} accepted pause but never reached paused state", label));
                 }
             }
+            Err(e) => pause_errors.push(format!("Failed to pause {}: {}", label, e)),
         }
     }
 
