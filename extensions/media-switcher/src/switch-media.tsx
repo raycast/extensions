@@ -1,4 +1,5 @@
 import { ActionPanel, List, Icon, Color, getPreferenceValues } from "@raycast/api";
+import { useEffect, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import {
   ActionPause,
@@ -24,8 +25,24 @@ export default function Command() {
   } = usePromise(async () => {
     return list_sessions();
   }, []);
-  const prefs = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences.SwitchMedia>();
+  const refreshSeconds = Math.max(0, parseInt(prefs.refreshInterval ?? "0", 10) || 0);
   const volStep = Math.min(MAX_SAFE_STEP, Math.max(1, parseInt(prefs.volumeStep ?? "5", 10) || 5));
+
+  const isLoadingRef = useRef(isLoading);
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (refreshSeconds <= 0) return;
+    const id = setInterval(() => {
+      if (!isLoadingRef.current) {
+        revalidate();
+      }
+    }, refreshSeconds * 1000);
+    return () => clearInterval(id);
+  }, [refreshSeconds, revalidate]);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search media sessions…">

@@ -39,6 +39,24 @@
             }
           ],
           "default": "squareBrackets"
+        },
+        {
+          "name": "refreshInterval",
+          "description": "How often to auto-refresh the media session list. Set to 0 to disable",
+          "type": "textfield",
+          "required": false,
+          "default": "5",
+          "placeholder": "5",
+          "title": "Refresh Interval (seconds)"
+        },
+        {
+          "name": "volumeStep",
+          "description": "How much to increase or decrease the volume by",
+          "type": "textfield",
+          "required": false,
+          "default": "5",
+          "placeholder": "5",
+          "title": "Volume Step"
         }
       ]
     }
@@ -67,16 +85,5 @@
   },
   "allowScripts": {
     "esbuild@0.27.7": true
-  },
-  "preferences": [
-    {
-      "name": "volumeStep",
-      "description": "How much to increase or decrease the volume by",
-      "type": "textfield",
-      "required": false,
-      "default": "5",
-      "placeholder": "5",
-      "title": "Volume Step"
-    }
-  ]
+  }
 }
