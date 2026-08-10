@@ -67,6 +67,18 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "control-audio",
+      "title": "Control Audio",
+      "description": "Control Elsewhere audio directly in the background: play or pause audio, adjust ambience or music volume, or turn background music on or off. Use this native tool instead of Run Command, shell commands, AppleScript, or accessibility automation."
+    },
+    {
+      "name": "create-space-from-prompt",
+      "title": "Create Space from Prompt",
+      "description": "Immediately start Glaze AI preview generation from the user's natural-language soundscape description. The user reviews and confirms in Elsewhere before a Space is created."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.23",
     "open": "^11.0.0"

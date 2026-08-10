@@ -1,0 +1,72 @@
+instructions: |
+  Use control-audio for every request to play, resume, or pause Elsewhere audio; adjust audio, ambience, soundscape, spatial-audio, music, or background-music volume; or turn background music on or off. It is a first-party, reversible control that runs in the background and needs no confirmation. Never use Run Command, shell commands, AppleScript, System Events, or accessibility automation for Elsewhere controls.
+
+  For “increase/decrease Elsewhere volume” without a target, use control-audio with `ambience-louder` or `ambience-quieter`. Use the music controls only when the user explicitly means background music volume.
+
+  Switching Spaces or background-music tracks remains a regular Raycast command because it presents the live snapshot for safe, unambiguous selection. Do not attempt those actions with generic automation.
+
+  Use create-space-from-prompt when the user asks to create an Elsewhere Space from a natural-language description.
+
+  Pass the user's description as the prompt, preserving its language and requested ambience, mood, setting, and spatial sound-source details. Raycast asks for confirmation before calling the tool; accepting starts Glaze AI generation and uses Glaze AI credits. Do not claim that a Space was created: Elsewhere generates a preview, then the user reviews and explicitly confirms the final Space there.
+evals:
+  - input: "@elsewhere increase Elsewhere volume"
+    mocks:
+      control-audio: "Elsewhere ambience volume increased."
+    expected:
+      - callsTool:
+          name: control-audio
+          arguments:
+            control: ambience-louder
+      - meetsCriteria: Confirms the native Elsewhere ambience volume was increased without suggesting Run Command or AppleScript
+
+  - input: "@elsewhere pause the audio"
+    mocks:
+      control-audio: "Elsewhere audio is paused."
+    expected:
+      - callsTool:
+          name: control-audio
+          arguments:
+            control: pause
+      - meetsCriteria: Confirms Elsewhere audio was paused
+
+  - input: "@elsewhere resume my soundscape"
+    mocks:
+      control-audio: "Elsewhere audio is playing."
+    expected:
+      - callsTool:
+          name: control-audio
+          arguments:
+            control: play
+      - meetsCriteria: Uses the native Elsewhere tool and does not suggest generic automation
+
+  - input: "@elsewhere make the background music quieter"
+    mocks:
+      control-audio: "Elsewhere music volume decreased."
+    expected:
+      - callsTool:
+          name: control-audio
+          arguments:
+            control: music-quieter
+      - meetsCriteria: Confirms background music volume was reduced without suggesting Run Command or AppleScript
+
+  - input: "@elsewhere create a quiet rainy cabin for deep work with rain on the windows, distant thunder, and a crackling fire"
+    mocks:
+      create-space-from-prompt: "Elsewhere started generating a Space preview."
+    expected:
+      - callsTool:
+          name: create-space-from-prompt
+          arguments:
+            prompt:
+              includes: "rain on the windows"
+      - meetsCriteria: Explains that Elsewhere started generating a preview and that final Space creation still requires confirmation in Elsewhere
+
+  - input: "@elsewhere make me a calm coastal reading space with gentle waves, gulls far away, and wind through dune grass"
+    mocks:
+      create-space-from-prompt: "Elsewhere started generating a Space preview."
+    expected:
+      - callsTool:
+          name: create-space-from-prompt
+          arguments:
+            prompt:
+              includes: "gentle waves"
+      - meetsCriteria: Explains that Glaze AI generation started without claiming that the Space was already created

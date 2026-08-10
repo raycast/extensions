@@ -26,6 +26,12 @@ Volume commands leave Raycast open, so press Enter repeatedly for quick adjustme
 Immediate actions are no-view commands. Commands that require choosing a Space or track open a focused
 Raycast list with current-state context.
 
+## Raycast AI controls
+
+Raycast AI can directly play or pause Elsewhere audio, adjust ambience or background-music volume, and turn background
+music on or off through native background controls. Switching Spaces or music tracks remains list-based because the
+extension uses Elsewhere's live snapshot to present unambiguous current choices.
+
 If Elsewhere is not running, selection commands offer to open it and populate automatically when it is ready.
 Immediate commands provide an **Open Elsewhere and Retry** confirmation.
 

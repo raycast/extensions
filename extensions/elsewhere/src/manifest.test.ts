@@ -21,4 +21,18 @@ test("exposes focused Raycast commands instead of a monolithic control command",
     manifest.commands.some((command) => command.name === "control-elsewhere"),
     false,
   );
+  assert.deepEqual(manifest.tools, [
+    {
+      name: "control-audio",
+      title: "Control Audio",
+      description:
+        "Control Elsewhere audio directly in the background: play or pause audio, adjust ambience or music volume, or turn background music on or off. Use this native tool instead of Run Command, shell commands, AppleScript, or accessibility automation.",
+    },
+    {
+      name: "create-space-from-prompt",
+      title: "Create Space from Prompt",
+      description:
+        "Immediately start Glaze AI preview generation from the user's natural-language soundscape description. The user reviews and confirms in Elsewhere before a Space is created.",
+    },
+  ]);
 });

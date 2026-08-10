@@ -122,3 +122,39 @@ export function executeElsewhereCommand(command: ElsewhereCommand, options: Exec
   commandQueue = queued.catch(() => undefined);
   return queued;
 }
+
+async function sendCommandForAi(command: ElsewhereCommand): Promise<ElsewhereCommandResult> {
+  const correlationId = requestId();
+
+  try {
+    await openUrl(buildElsewhereUrl(command, correlationId), { background: true });
+  } catch (error) {
+    throw new Error(
+      `Could not reach Elsewhere: ${error instanceof Error ? error.message : "Make sure Elsewhere is installed and has been opened once."}`,
+    );
+  }
+
+  const correlated = await waitForCorrelatedResult(correlationId);
+  if (!correlated) {
+    throw new Error("Elsewhere did not confirm the request in time. Open Elsewhere and try again.");
+  }
+  if (correlated.result.status === "error") {
+    throw new Error(correlated.result.message ?? correlated.result.code ?? "Elsewhere could not complete the request.");
+  }
+  return correlated.result;
+}
+
+/**
+ * Runs an AI-initiated command and requires Elsewhere to publish its correlated result.
+ *
+ * Unlike a regular Raycast command, an AI tool must return a deterministic success or
+ * failure so the conversation can accurately report what Elsewhere did.
+ */
+export function executeElsewhereCommandForAi(command: ElsewhereCommand): Promise<ElsewhereCommandResult> {
+  const queued = commandQueue.then(() => sendCommandForAi(command));
+  commandQueue = queued.then(
+    () => undefined,
+    () => undefined,
+  );
+  return queued;
+}
