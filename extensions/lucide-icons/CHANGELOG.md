@@ -1,6 +1,6 @@
 # Lucide Icons Changelog
 
-## [Maintenance] - {PR_MERGE_DATE}
+## [Maintenance] - 2026-08-11
 
 - Update keyboard shortcuts and add Windows ones
 - Update navigationTitle to show icon name
