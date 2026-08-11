@@ -46,7 +46,10 @@ export async function quitFlow() {
 }
 
 export async function setSessionTitle(title: string) {
-  // escape backslashes first, then double quotes, so the AppleScript string stays valid
-  const safeTitle = title.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  // collapse line breaks (invalid inside the AppleScript literal), then escape backslashes and quotes
+  const safeTitle = title
+    .replace(/[\r\n]+/g, " ")
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"');
   await runAppleScript(`tell application "Flow" to setTitle to "${safeTitle}"`);
 }
