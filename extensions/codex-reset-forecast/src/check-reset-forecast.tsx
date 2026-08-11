@@ -1,7 +1,7 @@
 import { Color, Detail, Icon, List } from "@raycast/api";
 import { ForecastActions, WEBSITE_URL } from "./components/forecast-actions";
 import { ForecastHistoryItem } from "./components/forecast-history-item";
-import { forecastSummary } from "./domain/forecast-copy";
+import { forecastNarrative, forecastSummary } from "./domain/forecast-copy";
 import {
   formatCompactDurationSince,
   formatDateTime,
@@ -33,9 +33,13 @@ export default function Command() {
   const lastSuccessfulRequestAt = data.lastSuccessfulRequestAt;
   const staleAccessories: List.Item.Accessory[] = isStale ? [{ tag: { value: "STALE", color: Color.Yellow } }] : [];
   const summary = forecastSummary(response, lastSuccessfulRequestAt);
+  const narrative = forecastNarrative(response);
   const likelihoodMarkdown = [
-    `# ${formatPercentage(response.forecast.score)} Reset Likelihood`,
-    "The percentage is the website's forecast for a surprise Codex usage-limit reset. It is not your remaining quota or regular reset schedule.",
+    `# ${narrative.title}`,
+    narrative.summary,
+    "## WHAT TO DO",
+    `**${narrative.advice}**`,
+    `Reset likelihood: **${formatPercentage(response.forecast.score)}**`,
     `Last checked: **${formatDateTime(lastSuccessfulRequestAt)}**`,
     isStale ? `> Cached data: ${data.warning ?? "the latest refresh failed"}` : "",
     `[Open Will Codex Reset?](${WEBSITE_URL})`,
@@ -46,7 +50,6 @@ export default function Command() {
     "# Last Confirmed Reset",
     `The latest confirmed reset was **${formatRelativeTime(response.forecast.latestResetAt)}**.`,
     `Recorded at: **${formatDateTime(response.forecast.latestResetAt)}**`,
-    "Confirmed resets are detected from the upstream event label, not inferred from the forecast percentage.",
   ].join("\n\n");
 
   return (

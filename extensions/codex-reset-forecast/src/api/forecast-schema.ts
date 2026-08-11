@@ -29,6 +29,7 @@ export const forecastResponseSchema = z.looseObject({
   forecast: z.looseObject({
     score: z.number(),
     latestResetAt: timestampSchema,
+    resetAnnounced: z.boolean().optional().default(false),
   }),
   history: z.array(forecastHistoryEntrySchema),
 });
