@@ -1,6 +1,6 @@
 # BugMeNot Changelog
 
-## [Modernize + Add CHANGELOG + Caching] - {PR_MERGE_DATE}
+## [Modernize + Add CHANGELOG + Caching] - 2026-08-11
 
 - Modernize to use latest Raycast configuration
 - remove `node-fetch`
