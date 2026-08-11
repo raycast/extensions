@@ -1,6 +1,6 @@
 # Planning Center API Docs Changelog
 
-## [More Complete Markdown Docs & Default Action Setting] - {PR_MERGE_DATE}
+## [More Complete Markdown Docs & Default Action Setting] - 2026-08-11
 
 - "Copy Docs as Markdown" now includes previously missing sections: endpoints for each HTTP method (list, read, create, update, delete) with permission requirements, assignable attributes on create/update, the relationships table, assignable markers on includable associations, the `offset` pagination parameter, and filter options on associations (e.g. `background_checks`, `messages`, `workflow_cards`)
 - Added a "Default Action" setting to choose whether pressing Enter opens the docs in the browser (default) or copies them as Markdown
