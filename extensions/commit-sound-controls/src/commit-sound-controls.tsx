@@ -104,7 +104,6 @@ export default function CommitSoundControls() {
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Commit Sounds"
       searchBarPlaceholder="Search commit sound controls"
     >
       <List.Section title="Status">
@@ -439,7 +438,7 @@ export default function CommitSoundControls() {
           icon={Icon.PersonCircle}
           title={
             authorPlaybackMode === "anyone"
-              ? "Play commits from everyone on this Mac"
+              ? "Play commits from everyone on this computer"
               : "Play commits from selected authors only"
           }
           subtitle={

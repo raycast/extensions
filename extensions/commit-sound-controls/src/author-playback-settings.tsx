@@ -89,7 +89,7 @@ export function AuthorPlaybackSettings({
         </ActionPanel>
       }
     >
-      <Form.Description text="Git runs this hook only for commits made on this Mac. These controls decide which commit author emails can trigger a matching GitHub owner or organization rule." />
+      <Form.Description text="Git runs this hook only for commits made on this computer. These controls decide which commit author emails can trigger a matching GitHub owner or organization rule." />
       <Form.Dropdown
         id="playbackMode"
         title="Play Sounds For"
@@ -98,7 +98,7 @@ export function AuthorPlaybackSettings({
       >
         <Form.Dropdown.Item
           value="anyone"
-          title="Everyone who commits on this Mac"
+          title="Everyone who commits on this computer"
         />
         <Form.Dropdown.Item
           value="selected"

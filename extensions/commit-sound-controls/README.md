@@ -73,7 +73,7 @@ You can add an organization manually with **Add GitHub Owner Rule**—no GitHub 
 
 Open **Commit Sound Controls** → **Commit Authors**.
 
-- **Everyone who commits on this Mac**: any author can trigger a matching GitHub owner or organization rule.
+- **Everyone who commits on this computer**: any author can trigger a matching GitHub owner or organization rule.
 - **Only selected author emails**: restrict playback to the Git emails you enter. Add both a work email and a GitHub noreply address if you use both.
 - **Individual Author Sound**: override the organization sound for one author email.
 - **Minimum Time Between Sounds**: mute rapid follow-up commits for 0, 1, 3, 5, 10, or 30 seconds. Five seconds is the default, so agents can make micro-commits without stacking producer tags.
