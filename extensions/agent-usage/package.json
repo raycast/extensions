@@ -18,7 +18,7 @@
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "format": "oxfmt",
+    "format": "prettier --write .",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
@@ -35,7 +35,7 @@
     "@types/node": "22.20.1",
     "@types/react": "19.0.10",
     "eslint": "^9.39.5",
-    "oxfmt": "^0.63.0",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3"
   },
   "icon": "extension-icon.png",
