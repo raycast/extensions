@@ -1,4 +1,4 @@
-# Mise Raycast Extension
+# Mise Workspace
 
 Commands:
 

@@ -1,9 +1,9 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "mise-raycast",
+  "name": "mise-workspace",
   "private": true,
-  "title": "Mise",
-  "description": "Raycast extension for Mise",
+  "title": "Mise Workspace",
+  "description": "Manage your Mise workspace from Raycast",
   "icon": "mise.png",
   "author": "disinfeqt",
   "categories": [
@@ -36,7 +36,7 @@
     {
       "name": "my-tasks",
       "title": "My Tasks",
-      "subtitle": "Mise",
+      "subtitle": "Mise Workspace",
       "description": "List tasks assigned to me",
       "mode": "view",
       "icon": "list-icon.png"
