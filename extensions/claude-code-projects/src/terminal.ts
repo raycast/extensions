@@ -163,16 +163,45 @@ function splitArgs(input: string): string[] {
 }
 
 /**
- * Quotes one argument for the cmd branch. Wrapping in double quotes keeps
- * whitespace and metacharacters (& | ; ...) literal; embedded double quotes
- * are dropped because they are illegal in Windows paths and cannot be
- * escaped reliably through cmd's start.
+ * Quotes one argument for the cmd branches, where two parsers read the same
+ * text: cmd, which only knows double quotes and the caret escape, and the
+ * launched program, which follows the CommandLineToArgvW rule where \" is a
+ * literal quote.
+ *
+ * So the value is first quoted the CommandLineToArgvW way — always wrapped in
+ * double quotes, embedded quotes turned into \", and backslashes doubled only
+ * where they precede a quote — and then every cmd metacharacter that ends up
+ * outside cmd's own quoting is escaped with a caret. cmd ignores the backslash,
+ * so each \" still toggles its quoting state and leaves the text in between
+ * exposed; the caret pass is what keeps that text literal.
  */
 function cmdQuote(value: string): string {
-  const cleaned = value.replace(/"/g, "");
-  return cleaned === "" || /[\s&|<>^()%!;=,]/.test(cleaned)
-    ? `"${cleaned}"`
-    : cleaned;
+  let quoted = '"';
+  let i = 0;
+  while (i < value.length) {
+    let slashes = 0;
+    while (value[i] === "\\") {
+      slashes++;
+      i++;
+    }
+    if (i === value.length) {
+      quoted += "\\".repeat(slashes * 2);
+      break;
+    }
+    if (value[i] === '"') quoted += "\\".repeat(slashes * 2 + 1) + '"';
+    else quoted += "\\".repeat(slashes) + value[i];
+    i++;
+  }
+  quoted += '"';
+
+  let escaped = "";
+  let inQuotes = false;
+  for (const ch of quoted) {
+    if (ch === '"') inQuotes = !inQuotes;
+    else if (!inQuotes && /[&|<>^()]/.test(ch)) escaped += "^";
+    escaped += ch;
+  }
+  return escaped;
 }
 
 const LAUNCH_SCRIPT_PREFIX = "claude-code-projects-launch-";
