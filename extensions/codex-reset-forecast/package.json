@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codex-reset-forecast",
+  "title": "Codex Reset Forecast",
+  "description": "View the unofficial Codex reset forecast and history from the Will Codex Reset? website. Not affiliated with OpenAI.",
+  "icon": "icon.png",
+  "author": "Astatine-213",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "test": "vitest run",
+    "test:contract": "LIVE_CONTRACT=1 vitest run tests/live-contract.test.ts",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "zod": "^4.4.3"
+  },
+  "overrides": {
+    "esbuild": "^0.28.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.10"
+  },
+  "commands": [
+    {
+      "name": "check-reset-forecast",
+      "title": "Check Reset Forecast",
+      "description": "View the current Codex reset forecast and recent history.",
+      "mode": "view",
+      "keywords": [
+        "codex",
+        "quota",
+        "reset",
+        "forecast",
+        "history"
+      ]
+    },
+    {
+      "name": "toggle-reset-forecast-menu-bar",
+      "title": "Toggle Reset Forecast in Menu Bar",
+      "description": "Show or hide the reset forecast in the macOS menu bar.",
+      "mode": "no-view",
+      "keywords": [
+        "codex",
+        "quota",
+        "reset",
+        "forecast",
+        "menu bar"
+      ]
+    },
+    {
+      "name": "reset-forecast-menu-bar",
+      "title": "Refresh Menu Bar Forecast",
+      "description": "Refresh the reset forecast shown in the macOS menu bar.",
+      "mode": "menu-bar",
+      "interval": "30m",
+      "preferences": [
+        {
+          "name": "menuBarDisplay",
+          "title": "Menu Bar Display",
+          "description": "Choose the reset information shown in the macOS menu bar.",
+          "type": "dropdown",
+          "required": false,
+          "default": "likelihood",
+          "data": [
+            {
+              "title": "Reset Likelihood",
+              "value": "likelihood"
+            },
+            {
+              "title": "Time Since Last Reset",
+              "value": "last-reset"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "fetchedAt": "not-a-date",
+  "forecast": {
+    "score": "64",
+    "latestResetAt": "also-not-a-date",
+    "resetAnnounced": false,
+    "daysSinceReset": 0,
+    "hoursSinceReset": 0,
+    "breakdown": []
+  },
+  "history": []
+}

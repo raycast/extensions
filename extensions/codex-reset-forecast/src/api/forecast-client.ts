@@ -1,0 +1,85 @@
+import { parseForecastResponse, type ForecastResponse } from "./forecast-schema";
+
+export const FORECAST_URL = "https://www.willcodexquotareset.com/api/forecast";
+
+export type ForecastSnapshot = {
+  response: ForecastResponse;
+  etag?: string;
+  lastSuccessfulRequestAt: string;
+};
+
+export interface ForecastStore {
+  read(): ForecastSnapshot | undefined;
+  write(snapshot: ForecastSnapshot): void;
+}
+
+type ForecastLoadResult = {
+  response: ForecastResponse;
+  isStale: boolean;
+  warning?: string;
+};
+
+type FetchForecastOptions = {
+  store: ForecastStore;
+  fetchImpl?: typeof fetch;
+  now?: () => Date;
+  timeoutMilliseconds?: number;
+  url?: string;
+};
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+export async function fetchForecast({
+  store,
+  fetchImpl = fetch,
+  now = () => new Date(),
+  timeoutMilliseconds = 10_000,
+  url = FORECAST_URL,
+}: FetchForecastOptions): Promise<ForecastLoadResult> {
+  const cached = store.read();
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMilliseconds);
+
+  try {
+    const headers = new Headers({ Accept: "application/json" });
+    if (cached?.etag) headers.set("If-None-Match", cached.etag);
+
+    const response = await fetchImpl(url, { headers, signal: controller.signal });
+
+    if (response.status === 304) {
+      if (!cached) throw new Error("Forecast API returned 304 without cached data");
+      return {
+        response: cached.response,
+        isStale: false,
+      };
+    }
+
+    if (!response.ok) throw new Error(`Forecast API returned ${response.status}`);
+
+    const parsed = parseForecastResponse(await response.json());
+    const lastSuccessfulRequestAt = now().toISOString();
+    const snapshot: ForecastSnapshot = {
+      response: parsed,
+      etag: response.headers.get("etag") ?? undefined,
+      lastSuccessfulRequestAt,
+    };
+    store.write(snapshot);
+
+    return {
+      response: parsed,
+      isStale: false,
+    };
+  } catch (error) {
+    if (!cached) throw error;
+
+    return {
+      response: cached.response,
+      isStale: true,
+      warning: errorMessage(error),
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
