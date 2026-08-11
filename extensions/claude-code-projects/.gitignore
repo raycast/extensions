@@ -1,3 +1,7 @@
 node_modules/
 dist/
 raycast-env.d.ts
+
+# Local tooling and stray files, never part of the extension
+.serena/
+NVIDIA Corporation/
