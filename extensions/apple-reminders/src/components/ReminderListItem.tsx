@@ -1,4 +1,4 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format, formatDistanceToNow } from "date-fns";
 
@@ -48,10 +48,27 @@ export default function ReminderListItem({
 
   if (reminder.dueDate) {
     const { dueDate } = reminder;
+    const preferences = getPreferenceValues<Preferences.MyReminders>();
+    const displayDueDateWithTime = preferences.displayDueDateWithTime;
+
+    let valueText = "";
+    if (isFullDay(dueDate)) {
+      valueText = displayDueDate(dueDate);
+    } else if (displayDueDateWithTime) {
+      // Show exact time (e.g. 10:00 AM)
+      const dateObj = new Date(dueDate);
+      valueText = new Intl.DateTimeFormat(undefined, {
+        hour: "2-digit",
+        minute: "2-digit",
+      }).format(dateObj);
+    } else {
+      valueText = formatDistanceToNow(dueDate, { addSuffix: true });
+    }
+
     accessories.push({
       icon: { source: Icon.Calendar, tintColor: !reminder.isCompleted && overdue ? Color.Red : undefined },
       text: {
-        value: isFullDay(dueDate) ? displayDueDate(dueDate) : formatDistanceToNow(dueDate, { addSuffix: true }),
+        value: valueText,
         color: !reminder.isCompleted && overdue ? Color.Red : undefined,
       },
       tooltip: `Due date: ${

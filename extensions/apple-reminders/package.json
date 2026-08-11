@@ -50,6 +50,14 @@
           "label": "Use Time of Day Grouping",
           "description": "When enabled, today's reminders will be grouped by the time of day they are due.",
           "default": false
+        },
+        {
+          "name": "displayDueDateWithTime",
+          "type": "checkbox",
+          "required": false,
+          "label": "Display Exact Due Time",
+          "description": "When enabled, list items show the exact time (e.g. 10:00 AM) instead of relative time (e.g. 'in 2 hours').",
+          "default": false
         }
       ]
     },
