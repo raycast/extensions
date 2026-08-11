@@ -1,6 +1,6 @@
 # Raycast Icons Changelog
 
-## [Improvement] - {PR_MERGE_DATE}
+## [Improvement] - 2026-08-11
 
 - Add missing keyboard shortcuts
 - Bump all dependencies to the latest
