@@ -1,6 +1,6 @@
 # Elsewhere Changelog
 
-## [AI Tools] - {PR_MERGE_DATE}
+## [AI Tools] - 2026-08-11
 
 - Create spatial soundscape previews from natural-language prompts through Raycast AI.
 - Control playback, ambience and music volume, and background music with native AI tools.
