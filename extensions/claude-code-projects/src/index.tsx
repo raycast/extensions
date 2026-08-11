@@ -74,7 +74,7 @@ function ProjectItem({ project }: { project: Project }) {
               />
               <Action.Open
                 title="Open in Explorer"
-                icon={Icon.Finder}
+                icon={Icon.Folder}
                 target={project.cwd}
                 shortcut={Keyboard.Shortcut.Common.Edit}
               />
