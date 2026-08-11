@@ -15,6 +15,7 @@ export interface ForecastStore {
 
 type ForecastLoadResult = {
   response: ForecastResponse;
+  lastSuccessfulRequestAt: string;
   isStale: boolean;
   warning?: string;
 };
@@ -50,8 +51,11 @@ export async function fetchForecast({
 
     if (response.status === 304) {
       if (!cached) throw new Error("Forecast API returned 304 without cached data");
+      const lastSuccessfulRequestAt = now().toISOString();
+      store.write({ ...cached, lastSuccessfulRequestAt });
       return {
         response: cached.response,
+        lastSuccessfulRequestAt,
         isStale: false,
       };
     }
@@ -69,6 +73,7 @@ export async function fetchForecast({
 
     return {
       response: parsed,
+      lastSuccessfulRequestAt,
       isStale: false,
     };
   } catch (error) {
@@ -76,6 +81,7 @@ export async function fetchForecast({
 
     return {
       response: cached.response,
+      lastSuccessfulRequestAt: cached.lastSuccessfulRequestAt,
       isStale: true,
       warning: errorMessage(error),
     };

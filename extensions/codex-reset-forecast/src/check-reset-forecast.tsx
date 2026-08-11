@@ -30,12 +30,13 @@ export default function Command() {
     );
   }
 
+  const lastSuccessfulRequestAt = data.lastSuccessfulRequestAt;
   const staleAccessories: List.Item.Accessory[] = isStale ? [{ tag: { value: "STALE", color: Color.Yellow } }] : [];
-  const summary = forecastSummary(response);
+  const summary = forecastSummary(response, lastSuccessfulRequestAt);
   const likelihoodMarkdown = [
     `# ${formatPercentage(response.forecast.score)} Reset Likelihood`,
     "The percentage is the website's forecast for a surprise Codex usage-limit reset. It is not your remaining quota or regular reset schedule.",
-    `Last checked: **${formatDateTime(response.fetchedAt)}**`,
+    `Last checked: **${formatDateTime(lastSuccessfulRequestAt)}**`,
     isStale ? `> Cached data: ${data.warning ?? "the latest refresh failed"}` : "",
     `[Open Will Codex Reset?](${WEBSITE_URL})`,
   ]
@@ -54,7 +55,7 @@ export default function Command() {
         <List.Item
           icon={{ source: Icon.Gauge, tintColor: Color.Blue }}
           title="Reset Likelihood"
-          subtitle={`Last checked ${formatRelativeTime(response.fetchedAt)}`}
+          subtitle={`Last checked ${formatRelativeTime(lastSuccessfulRequestAt)}`}
           accessories={[...staleAccessories, { text: formatPercentage(response.forecast.score) }]}
           actions={
             <ForecastActions

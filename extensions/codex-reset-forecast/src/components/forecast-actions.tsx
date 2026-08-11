@@ -7,18 +7,18 @@ type ForecastActionsProps = {
   sourceUrl?: string;
   copyContent: string;
   copyTitle?: string;
-  onRefresh: () => void;
+  onRefresh?: () => void;
 };
 
 export function ForecastActions({ detail, sourceUrl, copyContent, copyTitle, onRefresh }: ForecastActionsProps) {
-  const refreshAction = (
+  const refreshAction = onRefresh ? (
     <Action
       title="Refresh"
       icon={Icon.ArrowClockwise}
       shortcut={Keyboard.Shortcut.Common.Refresh}
       onAction={onRefresh}
     />
-  );
+  ) : null;
 
   return (
     <ActionPanel>
@@ -31,7 +31,7 @@ export function ForecastActions({ detail, sourceUrl, copyContent, copyTitle, onR
         <Action.CopyToClipboard title={copyTitle ?? "Copy Forecast Summary"} content={copyContent} />
         {sourceUrl ? <Action.CopyToClipboard title="Copy Source URL" content={sourceUrl} /> : null}
       </ActionPanel.Section>
-      {detail ? <ActionPanel.Section>{refreshAction}</ActionPanel.Section> : null}
+      {detail && refreshAction ? <ActionPanel.Section>{refreshAction}</ActionPanel.Section> : null}
     </ActionPanel>
   );
 }

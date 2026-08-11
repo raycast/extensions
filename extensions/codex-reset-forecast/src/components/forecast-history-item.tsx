@@ -59,14 +59,7 @@ export function ForecastHistoryItem({ entry, isStale, onRefresh }: ForecastHisto
           {source?.url ? <Detail.Metadata.Link title="Source" text="Open Source Post" target={source.url} /> : null}
         </Detail.Metadata>
       }
-      actions={
-        <ForecastActions
-          sourceUrl={source?.url}
-          copyContent={copyContent}
-          copyTitle={copyTitle}
-          onRefresh={onRefresh}
-        />
-      }
+      actions={<ForecastActions sourceUrl={source?.url} copyContent={copyContent} copyTitle={copyTitle} />}
     />
   );
 

@@ -57,7 +57,7 @@ function ForecastMenuBar() {
           />
           <MenuBarExtra.Item
             title={data.isStale ? "Updated (Cached)" : "Updated"}
-            subtitle={formatRelativeTime(response.fetchedAt)}
+            subtitle={formatRelativeTime(data.lastSuccessfulRequestAt)}
             icon={data.isStale ? Icon.Warning : undefined}
           />
         </MenuBarExtra.Section>

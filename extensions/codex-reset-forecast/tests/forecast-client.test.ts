@@ -29,6 +29,7 @@ describe("fetchForecast", () => {
     const result = await fetchForecast({ store, fetchImpl, now });
 
     expect(result.isStale).toBe(false);
+    expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
     expect(store.snapshot?.etag).toBe('W/"forecast-1"');
     expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
   });
@@ -44,12 +45,16 @@ describe("fetchForecast", () => {
     await fetchForecast({ store, fetchImpl: firstFetch, now });
 
     const secondFetch = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 304 }));
-    const result = await fetchForecast({ store, fetchImpl: secondFetch, now });
+    const refreshedNow = () => new Date("2026-08-11T03:00:00.000Z");
+    const result = await fetchForecast({ store, fetchImpl: secondFetch, now: refreshedNow });
 
     const [, request] = secondFetch.mock.calls[0];
     expect(new Headers(request?.headers).get("If-None-Match")).toBe('W/"forecast-1"');
     expect(result.isStale).toBe(false);
     expect(result.response.forecast.score).toBe(64);
+    expect(result.response.fetchedAt).toBe(validFixture.fetchedAt);
+    expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
+    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
   });
 
   it("rejects a 304 response when no cached data exists", async () => {

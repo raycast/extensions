@@ -8,11 +8,15 @@ function escapeMarkdown(value: string): string {
     .replace(/\]/g, "\\]");
 }
 
-export function forecastSummary(response: ForecastResponse, now = new Date()): string {
+export function forecastSummary(
+  response: ForecastResponse,
+  lastSuccessfulRequestAt = response.fetchedAt,
+  now = new Date(),
+): string {
   return [
     `Codex reset likelihood: ${formatPercentage(response.forecast.score)}.`,
     `Last confirmed reset: ${formatRelativeTime(response.forecast.latestResetAt, now)}.`,
-    `Forecast checked: ${formatDateTime(response.fetchedAt)}.`,
+    `Forecast checked: ${formatDateTime(lastSuccessfulRequestAt)}.`,
     "Unofficial and not affiliated with OpenAI.",
   ].join(" ");
 }
