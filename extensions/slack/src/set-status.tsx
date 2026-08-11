@@ -233,10 +233,9 @@ function SlackStatusList(props: LaunchProps<{ arguments: Arguments.SetStatus }>)
 
     if (expirationValue === undefined) {
       didAutoSetStatus.current = true;
-      showFailureToast(
-        new Error(`"${expirationArgument?.trim()}" isn't a number of minutes, "today", or "week".`),
-        { title: "Failed to set status" },
-      );
+      showFailureToast(new Error(`"${expirationArgument?.trim()}" isn't a number of minutes, "today", or "week".`), {
+        title: "Failed to set status",
+      });
       return;
     }
 
