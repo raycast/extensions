@@ -57,7 +57,7 @@ function Command(props: Props) {
   /*   custom hooks   */
   /********************/
 
-  const { currentUser, isAssistantEnabled } = useUser();
+  const { currentUser, isLoading: isLoadingUser, isAssistantEnabled } = useUser();
   const { createTask } = useTaskActions();
   const { createTask: createReclaimTask } = useReclaimTaskActions();
   const { timePolicies, isLoading: isLoadingTimePolicy } = useTimePolicy();
@@ -127,6 +127,14 @@ function Command(props: Props) {
   /********************/
 
   const handleSubmit = useCallbackSafeRef(async (formValues: FormValues) => {
+    // isAssistantEnabled selects the 1.0 vs 2.0 create endpoint, so refuse to
+    // submit until the user is resolved — otherwise an uncached 2.0 user could
+    // be mis-routed to the legacy /tasks endpoint.
+    if (!currentUser) {
+      await showToast(Toast.Style.Failure, "Still loading your account", "Please try again in a moment");
+      return;
+    }
+
     await showToast(Toast.Style.Animated, "Creating Task...");
     const { timeNeeded, durationMin, durationMax, snoozeUntil, due, notes, title, timePolicy, priority, onDeck } =
       formValues;
@@ -212,7 +220,11 @@ function Command(props: Props) {
 
   return (
     <Form
-      isLoading={props.loading || isLoadingTimePolicy}
+      // Also block on the initial user load: isAssistantEnabled decides whether
+      // submit routes to the 1.0 /tasks or 2.0 /reclaim-tasks endpoint, and the
+      // user must be resolved before we can trust it. A cached user is present
+      // synchronously, so this only gates a cold start (no flash when cached).
+      isLoading={props.loading || isLoadingTimePolicy || (!currentUser && isLoadingUser)}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
