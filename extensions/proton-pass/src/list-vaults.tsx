@@ -68,20 +68,29 @@ function VaultItems({ vault, backgroundRefreshEnabled }: { vault: Vault; backgro
                 <Action.CopyToClipboard
                   title="Copy Title"
                   content={item.title}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd"], key: "c" },
+                    Windows: { modifiers: ["ctrl"], key: "c" },
+                  }}
                 />
                 {item.username && (
                   <Action.CopyToClipboard
                     title="Copy Username"
                     content={item.username}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "u" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+                    }}
                   />
                 )}
                 {item.email && (
                   <Action.CopyToClipboard
                     title="Copy Email"
                     content={item.email}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "e" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "e" },
+                    }}
                   />
                 )}
               </ActionPanel>
@@ -227,7 +236,10 @@ export default function Command() {
                 title="View CLI Documentation"
                 url={PROTON_PASS_CLI_DOCS}
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "d" },
+                  Windows: { modifiers: ["ctrl"], key: "d" },
+                }}
               />
             </ActionPanel>
           }
@@ -341,12 +353,18 @@ export default function Command() {
                 <Action.CopyToClipboard
                   title="Copy Vault Name"
                   content={vault.name}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd"], key: "c" },
+                    Windows: { modifiers: ["ctrl"], key: "c" },
+                  }}
                 />
                 <Action.CopyToClipboard
                   title="Copy Share ID"
                   content={vault.shareId}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "i" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "i" },
+                  }}
                 />
               </ActionPanel>
             }

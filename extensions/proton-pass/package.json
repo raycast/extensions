@@ -2,139 +2,109 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "proton-pass",
   "title": "Proton Pass",
-  "description": "Search and manage your Proton Pass items, generate passwords, and get TOTP codes.",
-  "icon": "extension-icon.png",
-  "author": "izyuumi",
-  "contributors": [
-    "FeernandoOFF"
-  ],
+  "description": "Unofficial Proton Pass integration for Raycast on macOS and Windows, powered by the Proton Pass CLI",
+  "icon": "pass-icon.png",
+  "author": "rchrdkvcs",
   "platforms": [
+    "Windows",
     "macOS"
   ],
   "categories": [
+    "Applications",
     "Security",
     "Productivity"
   ],
+  "keywords": [
+    "Proton Pass",
+    "password manager",
+    "passwords",
+    "vaults",
+    "TOTP",
+    "2FA",
+    "authenticator",
+    "aliases",
+    "security"
+  ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "cliPath",
+      "title": "Proton Pass CLI Path",
+      "description": "Optional full path to pass-cli when automatic detection does not find it",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "C:\\Program Files\\ProtonPass\\pass-cli.exe"
+    }
+  ],
   "commands": [
     {
-      "name": "search-items",
-      "title": "Search Items",
-      "subtitle": "Proton Pass",
-      "description": "Search all items across vaults",
+      "name": "search-proton-pass",
+      "title": "Search Proton Pass",
+      "subtitle": "Logins and aliases",
+      "description": "Search Proton Pass logins and aliases",
       "mode": "view"
     },
     {
-      "name": "list-vaults",
-      "title": "List Vaults",
+      "name": "authenticator",
+      "title": "Authenticator",
       "subtitle": "Proton Pass",
-      "description": "View all your Proton Pass vaults",
+      "description": "List and copy Proton Pass TOTP codes",
       "mode": "view"
+    },
+    {
+      "name": "browse-vaults",
+      "title": "Browse Vaults",
+      "subtitle": "Proton Pass",
+      "description": "Browse Proton Pass vaults and their items",
+      "mode": "view"
+    },
+    {
+      "name": "create-item",
+      "title": "Create Login",
+      "subtitle": "Proton Pass",
+      "description": "Create a login item in Proton Pass",
+      "mode": "view"
+    },
+    {
+      "name": "quick-generate-password",
+      "title": "Quick Generate Password",
+      "subtitle": "Proton Pass",
+      "description": "Generate and copy a strong password immediately",
+      "mode": "no-view"
     },
     {
       "name": "generate-password",
       "title": "Generate Password",
       "subtitle": "Proton Pass",
-      "description": "Generate secure passwords or passphrases",
-      "mode": "view"
-    },
-    {
-      "name": "get-totp",
-      "title": "Get TOTP Code",
-      "subtitle": "Proton Pass",
-      "description": "Get TOTP codes for your accounts",
-      "mode": "view"
-    },
-    {
-      "name": "login",
-      "title": "Login to Proton Pass",
-      "subtitle": "Proton Pass",
-      "description": "Check authentication status and login",
+      "description": "Generate and copy a custom password",
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "cliPath",
-      "type": "textfield",
-      "title": "CLI Path",
-      "description": "Path to pass-cli executable",
-      "default": "pass-cli",
-      "required": false
-    },
-    {
-      "name": "defaultPasswordLength",
-      "type": "textfield",
-      "title": "Default Password Length",
-      "description": "Default length for generated passwords",
-      "default": "20",
-      "required": false
-    },
-    {
-      "name": "defaultPasswordType",
-      "type": "dropdown",
-      "title": "Default Password Type",
-      "description": "Type of password to generate by default",
-      "default": "random",
-      "required": false,
-      "data": [
-        {
-          "title": "Random",
-          "value": "random"
-        },
-        {
-          "title": "Passphrase",
-          "value": "passphrase"
-        }
-      ]
-    },
-    {
-      "name": "copyPasswordTransient",
-      "type": "checkbox",
-      "title": "Transient Clipboard",
-      "label": "Clear password from clipboard after paste",
-      "description": "When enabled, passwords will be cleared from clipboard after pasting",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "enableBackgroundRefresh",
-      "type": "checkbox",
-      "title": "Background Refresh",
-      "label": "Automatically refresh cached vault and item data",
-      "description": "When enabled, cached results will refresh in the background",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "enableWebIntegration",
-      "type": "checkbox",
-      "title": "Web Integration",
-      "label": "Match active browser tab URL in Search Items",
-      "description": "When enabled, Search Items auto-selects logins matching the active tab URL (Raycast web extension required)",
-      "default": true,
-      "required": false
-    }
-  ],
+  "tools": [],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "tsx": "^4.23.12",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "test": "rm -rf .test-build && tsc -p tsconfig.test.json && node --test .test-build/src/lib/pass-cli-normalize.test.js",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --import tsx --test tests/*.test.*",
+    "test:coverage": "node --import tsx --experimental-test-coverage --test tests/*.test.*"
+  },
+  "allowScripts": {
+    "esbuild@0.27.7": true
   }
 }

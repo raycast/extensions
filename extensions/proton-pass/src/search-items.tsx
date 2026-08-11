@@ -10,6 +10,7 @@ import {
   Detail,
   BrowserExtension,
   environment,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useRef } from "react";
 import { usePromise } from "@raycast/utils";
@@ -133,7 +134,10 @@ function ItemDetail({ item }: { item: Item }) {
               <Action
                 title="Copy Password"
                 icon={Icon.Key}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "c" },
+                  Windows: { modifiers: ["ctrl"], key: "c" },
+                }}
                 onAction={async () => {
                   await Clipboard.copy(detail.password!, { transient: preferences.copyPasswordTransient ?? true });
                   showToast({ style: Toast.Style.Success, title: "Password Copied" });
@@ -144,7 +148,7 @@ function ItemDetail({ item }: { item: Item }) {
               <Action
                 title="Copy Username"
                 icon={Icon.Person}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
                 onAction={async () => {
                   await Clipboard.copy(detail.username!);
                   showToast({ style: Toast.Style.Success, title: "Username Copied" });
@@ -155,7 +159,7 @@ function ItemDetail({ item }: { item: Item }) {
               <Action
                 title="Copy Email"
                 icon={Icon.Envelope}
-                shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.CopyName}
                 onAction={async () => {
                   await Clipboard.copy(detail.email!);
                   showToast({ style: Toast.Style.Success, title: "Email Copied" });
@@ -166,7 +170,10 @@ function ItemDetail({ item }: { item: Item }) {
               <Action
                 title="Copy First URL"
                 icon={Icon.Link}
-                shortcut={{ modifiers: ["cmd"], key: "u" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "u" },
+                  Windows: { modifiers: ["ctrl"], key: "u" },
+                }}
                 onAction={async () => {
                   await Clipboard.copy(detail.urls![0]);
                   showToast({ style: Toast.Style.Success, title: "URL Copied" });
@@ -177,7 +184,10 @@ function ItemDetail({ item }: { item: Item }) {
               <Action
                 title="Copy TOTP Code"
                 icon={Icon.Clock}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "t" },
+                  Windows: { modifiers: ["ctrl"], key: "t" },
+                }}
                 onAction={async () => {
                   try {
                     const totp = await getTotp(detail.shareId, detail.itemId);
@@ -194,7 +204,7 @@ function ItemDetail({ item }: { item: Item }) {
               <Action
                 title="Copy Note"
                 icon={Icon.Document}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 onAction={async () => {
                   await Clipboard.copy(detail.note!);
                   showToast({ style: Toast.Style.Success, title: "Note Copied" });
@@ -236,7 +246,10 @@ function ItemDetail({ item }: { item: Item }) {
             <Action
               title="Copy Item Debug Info"
               icon={Icon.Bug}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+              }}
               onAction={async () => {
                 await Clipboard.copy(
                   JSON.stringify(
@@ -404,7 +417,10 @@ export default function Command() {
                     title="View Details"
                     icon={Icon.Eye}
                     target={<ItemDetail item={item} />}
-                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "d" },
+                      Windows: { modifiers: ["ctrl"], key: "d" },
+                    }}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section title="Copy">
@@ -412,7 +428,10 @@ export default function Command() {
                     <Action
                       title="Copy Password"
                       icon={Icon.Key}
-                      shortcut={{ modifiers: ["cmd"], key: "c" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "c" },
+                        Windows: { modifiers: ["ctrl"], key: "c" },
+                      }}
                       onAction={async () => {
                         try {
                           const detail = await getItem(item.shareId, item.itemId);
@@ -443,7 +462,7 @@ export default function Command() {
                     <Action
                       title="Copy Username"
                       icon={Icon.Person}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.Copy}
                       onAction={async () => {
                         await Clipboard.copy(item.username!);
                         showToast({ style: Toast.Style.Success, title: "Username Copied" });
@@ -454,7 +473,7 @@ export default function Command() {
                     <Action
                       title="Copy Email"
                       icon={Icon.Envelope}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                      shortcut={Keyboard.Shortcut.Common.CopyName}
                       onAction={async () => {
                         await Clipboard.copy(item.email!);
                         showToast({ style: Toast.Style.Success, title: "Email Copied" });
@@ -465,7 +484,10 @@ export default function Command() {
                     <Action
                       title="Copy TOTP Code"
                       icon={Icon.Clock}
-                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "t" },
+                        Windows: { modifiers: ["ctrl"], key: "t" },
+                      }}
                       onAction={async () => {
                         try {
                           const totp = await getTotp(item.shareId, item.itemId);

@@ -102,13 +102,19 @@ export default function Command() {
                 title="Open Terminal Login (Fallback)"
                 icon={Icon.Terminal}
                 onAction={openTerminalForLogin}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "t" },
+                  Windows: { modifiers: ["ctrl"], key: "t" },
+                }}
               />
               <Action.OpenInBrowser
                 title="View CLI Documentation"
                 url={PROTON_PASS_CLI_DOCS}
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "d" },
+                  Windows: { modifiers: ["ctrl"], key: "d" },
+                }}
               />
             </ActionPanel>
           }
@@ -130,7 +136,10 @@ export default function Command() {
               title="View CLI Documentation"
               url={PROTON_PASS_CLI_DOCS}
               icon={Icon.Globe}
-              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "d" },
+                Windows: { modifiers: ["ctrl"], key: "d" },
+              }}
             />
           </ActionPanel>
         }

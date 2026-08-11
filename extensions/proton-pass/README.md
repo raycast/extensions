@@ -1,81 +1,97 @@
-# Proton Pass
+# Proton Pass for Raycast
 
-Search and manage your Proton Pass items directly from Raycast.
+**Unofficial** extension that lets you use Proton Pass directly from Raycast on macOS and Windows. It relies on the [Proton Pass CLI](https://protonpass.github.io/pass-cli/): the extension does not handle or store Proton account credentials.
 
-## Project Notes
+> This extension is functional, but remains a community project. Always check the destination before pasting sensitive data.
 
-- This extension is maintained as an independent `proton-pass` implementation.
-- It uses local `pass-cli` execution, local caching, and command-specific flows implemented in this repository.
+## Features
 
-## Setup
+- 🔎 Global search across **Login** and **Alias** items
+- 📋 Quick copy for usernames, emails, passwords, aliases, URLs, and TOTP codes
+- 🔐 Item details with masked passwords
+- ⏱️ TOTP code generation and automatic refresh
+- 📌 Pinning and recent-use ranking for important items
+- 🗂️ Vault browsing
+- ➕ Vault and Login item creation
+- ✏️ Vault renaming and deletion
+- 🗑️ Item deletion with confirmation
+- 🎲 Custom and instant password generation
+- 💾 Local summary cache for faster results while data is loading
+- 🪟 CLI detection for macOS and Windows installations
 
-This extension requires the Proton Pass CLI (`pass-cli`) to be authenticated.
+## Requirements
 
-### 1. CLI Installation (Automatic)
+1. [Raycast](https://www.raycast.com/) installed on macOS or Windows.
+2. [Proton Pass CLI](https://protonpass.github.io/pass-cli/get-started/installation/) installed.
+3. An authenticated Proton Pass CLI session.
 
-The extension automatically downloads and installs the Proton Pass CLI on first use. No manual installation required!
+The extension checks the CLI on startup. It automatically searches for `pass-cli` / `pass-cli.exe` in `PATH` and common installation locations. If detection fails, enter the full path in Raycast preferences:
 
-If you prefer to install manually, you can use Homebrew:
+**Raycast → Extensions → Proton Pass → Proton Pass CLI Path**
 
-```bash
-brew install protonmail/proton/pass-cli
-```
+Windows example: `C:\Program Files\ProtonPass\pass-cli.exe`
 
-Or download from [Proton Pass CLI Documentation](https://protonpass.github.io/pass-cli/).
+## Raycast commands
 
-### 2. Authenticate
+| Command | Usage |
+| --- | --- |
+| **Search Proton Pass** | Search logins and aliases, view details, and copy useful fields. |
+| **Authenticator** | List logins with TOTP and copy their current code. |
+| **Browse Vaults** | Browse, create, rename, and delete vaults, then view their items. |
+| **Create Login** | Create a Login item in the selected vault. |
+| **Generate Password** | Generate a password with a configurable length and character options. |
+| **Quick Generate Password** | Immediately generate and copy a strong 20-character password. |
 
-Run the login command in your terminal:
+### Search shortcuts
 
-```bash
-pass-cli login
-```
+Depuis **Search Proton Pass**, les actions principales sont accessibles avec :
 
-This uses web login by default: `pass-cli` prints a URL, you complete authentication in your browser, and the session is saved locally.
+| Shortcut | Action |
+| --- | --- |
+| `⌘/Ctrl + U` | Copy username or alias |
+| `⌘/Ctrl + P` | Copy password |
+| `⌘/Ctrl + T` | Copy TOTP |
+| `⌘/Ctrl + L` | Copy URL |
+| `⌘/Ctrl + F` | Pin or unpin item |
+| `⌘/Ctrl + R` | Refresh data |
 
-Optional: use terminal prompts with interactive login:
+Shortcuts may vary depending on your platform and Raycast settings.
 
-```bash
-pass-cli login --interactive user@proton.me
-```
-
-### 3. Verify
-
-Test that the CLI is working:
-
-```bash
-pass-cli vault list
-```
-
-## Preferences
-
-- **CLI Path**: Path to the `pass-cli` executable (defaults to `pass-cli` in PATH)
-- **Default Password Length**: Length for generated passwords (default: 20)
-- **Default Password Type**: Random characters or memorable passphrase
-- **Transient Clipboard**: Clear password from clipboard after pasting
-- **Background Refresh**: Automatically refresh cached vault and item data
-- **Web Integration**: Auto-select items that match your active browser tab URL (requires Raycast web extension access)
-
-## Troubleshooting
-
-### Keyring Access Issues
-
-If you see keyring-related errors, try:
+## Installation and development
 
 ```bash
-pass-cli logout --force
-export PROTON_PASS_KEY_PROVIDER=fs
-pass-cli login
+npm install
+npm run dev
 ```
 
-### CLI Not Found
+To verify the project:
 
-If the CLI is installed but not detected, set the full path in extension preferences:
-
+```bash
+npm test                 # tests unitaires
+npm run lint             # lint
+npm run build            # build de l’extension
+npm run test:coverage    # tests avec couverture
 ```
-/opt/homebrew/bin/pass-cli
-```
 
-### Re-download CLI
+To install or publish it through the Raycast tools, run `npm run publish` after configuring your publishing environment.
 
-If the auto-installed CLI becomes corrupted or you want to force a re-download, use the "Clear CLI Cache" action available in the error screens.
+## Security and local data
+
+- The extension never asks for Proton credentials.
+- Sensitive operations go through the already authenticated Proton Pass CLI.
+- Search caches **summaries** and useful metadata; secrets are not stored in this cache.
+- Details and secret fields are fetched only after an explicit action, such as viewing an item or copying a password.
+- Pins and last-use timestamps are stored locally in Raycast preferences. They do not modify Proton Pass.
+- Vault and item deletion is permanent and requires confirmation.
+
+For more details, see the [usage guide](docs/usage.md), [troubleshooting guide](docs/troubleshooting.md), and [technical documentation](docs/architecture.md).
+
+## Known limitations
+
+- The extension currently supports **Login** and **Alias** items for search and browsing.
+- The CLI must be installed and accessible from the environment in which Raycast runs; a CLI available in a terminal may not always be visible to Raycast.
+- Features depend on the commands and output format supported by the installed Proton Pass CLI version.
+
+## License
+
+This project is distributed under the [MIT](LICENSE) license. It is not officially affiliated with Proton.

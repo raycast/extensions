@@ -56,13 +56,7 @@ export interface PasswordScore {
 }
 
 export type PassCliErrorType =
-  | "not_installed"
-  | "not_authenticated"
-  | "network_error"
-  | "keyring_error"
-  | "timeout"
-  | "invalid_output"
-  | "unknown";
+  "not_installed" | "not_authenticated" | "network_error" | "keyring_error" | "timeout" | "invalid_output" | "unknown";
 
 export class PassCliError extends Error {
   type: PassCliErrorType;
