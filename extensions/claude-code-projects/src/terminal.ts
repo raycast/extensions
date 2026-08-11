@@ -103,26 +103,59 @@ function essentialEnvDefaults(profile: string): [string, string][] {
  * Splits the free-form claudeArgs preference into argv tokens, honouring
  * double and single quotes so values with spaces survive intact
  * (e.g. --add-dir "C:\My Projects").
+ *
+ * Backslashes follow the Windows CommandLineToArgvW rule, so the preference
+ * behaves like the command line it stands for: a backslash is literal unless
+ * it precedes a double quote, where 2n backslashes give n backslashes plus a
+ * delimiting quote and 2n+1 give n backslashes plus a literal quote. That
+ * keeps --prompt "say \"hello world\"" as a single argument. As on Windows, a
+ * double-quoted value therefore cannot end in a lone backslash: write
+ * "C:\My Projects\\" or drop the trailing separator. Single quotes have no
+ * escape, so backslashes inside them are always literal.
  */
 function splitArgs(input: string): string[] {
   const tokens: string[] = [];
   let current = "";
   let quote: '"' | "'" | null = null;
   let inToken = false;
-  for (const ch of input) {
-    if (quote) {
+  let i = 0;
+  while (i < input.length) {
+    const ch = input[i];
+    if (ch === "\\" && quote !== "'") {
+      let slashes = 0;
+      while (input[i] === "\\") {
+        slashes++;
+        i++;
+      }
+      if (input[i] === '"') {
+        current += "\\".repeat(slashes >> 1);
+        // An odd count consumes the quote as a literal one; an even count
+        // leaves it for the delimiter branches below.
+        if (slashes % 2 === 1) {
+          current += '"';
+          i++;
+        }
+      } else {
+        current += "\\".repeat(slashes);
+      }
+      inToken = true;
+    } else if (quote) {
       if (ch === quote) quote = null;
       else current += ch;
+      i++;
     } else if (ch === '"' || ch === "'") {
       quote = ch;
       inToken = true;
+      i++;
     } else if (/\s/.test(ch)) {
       if (inToken) tokens.push(current);
       current = "";
       inToken = false;
+      i++;
     } else {
       current += ch;
       inToken = true;
+      i++;
     }
   }
   if (inToken) tokens.push(current);
