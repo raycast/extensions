@@ -1,5 +1,6 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
+
 import { fetchCodexDisplayName, parseCodexApiResponse, parseCodexDisplayName, parseCodexUserId } from "./fetcher.ts";
 
 const PLUS_RESPONSE = {

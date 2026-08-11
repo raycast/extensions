@@ -1,8 +1,9 @@
+import assert from "node:assert/strict";
 import { register } from "node:module";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
-import assert from "node:assert/strict";
 import test from "node:test";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
 import type { ClinePassCredential } from "./types.ts";
 
 const mockStorage = new Map<string, string>();

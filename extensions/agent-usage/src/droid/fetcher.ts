@@ -1,5 +1,5 @@
-import type { DroidUsage, DroidUsageTier, DroidError } from "./types.ts";
 import { httpFetch } from "../agents/http.ts";
+import type { DroidUsage, DroidUsageTier, DroidError } from "./types.ts";
 
 const DROID_USAGE_API = "https://api.factory.ai/api/organization/subscription/schedule";
 

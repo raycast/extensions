@@ -13,10 +13,12 @@ import {
 } from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Accessory, AgentDefinition, AgentId, AgentVisibilityPreferences, UsageState } from "./agents/types.ts";
+
+import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
+import type { AccountUsageState } from "./accounts/types.ts";
+import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import { formatClock, latestTimestamp } from "./agents/format.ts";
 import { DEFAULT_AGENT_ORDER, getInitialSelectedRowId } from "./agents/order.ts";
-import { formatErrorMarkdown } from "./agents/detail-format.ts";
 import {
   useAmpUsage,
   useAntigravityUsage,
@@ -34,6 +36,8 @@ import {
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
+import type { Accessory, AgentDefinition, AgentId, AgentVisibilityPreferences, UsageState } from "./agents/types.ts";
+import { getListIcon } from "./agents/ui.tsx";
 import { formatAmpUsageText, getAmpAccessory, renderAmpDetail } from "./amp/renderer.tsx";
 import type { AmpError, AmpUsage } from "./amp/types.ts";
 import {
@@ -61,17 +65,14 @@ import { formatGrokUsageText, getGrokAccessory, renderGrokDetail } from "./grok/
 import type { GrokError, GrokUsage } from "./grok/types.ts";
 import { formatKimiUsageText, getKimiAccessory, renderKimiDetail } from "./kimi/renderer.tsx";
 import type { KimiError, KimiUsage } from "./kimi/types.ts";
-import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail } from "./synthetic/renderer.tsx";
-import type { SyntheticError, SyntheticUsage } from "./synthetic/types.ts";
-import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer.tsx";
-import type { ZaiError, ZaiUsage } from "./zai/types.ts";
 import { formatMiniMaxUsageText, getMiniMaxAccessory, renderMiniMaxDetail } from "./minimax/renderer.tsx";
 import type { MiniMaxError, MiniMaxUsage } from "./minimax/types.ts";
 import { formatOpencodegoUsageText, getOpencodegoAccessory, renderOpencodegoDetail } from "./opencode-go/renderer.tsx";
 import type { OpencodegoError, OpencodegoUsage } from "./opencode-go/types.ts";
-import { ManageAccountsForm } from "./accounts/ManageAccountsForm.tsx";
-import type { AccountUsageState } from "./accounts/types.ts";
-import { getListIcon } from "./agents/ui.tsx";
+import { formatSyntheticUsageText, getSyntheticAccessory, renderSyntheticDetail } from "./synthetic/renderer.tsx";
+import type { SyntheticError, SyntheticUsage } from "./synthetic/types.ts";
+import { formatZaiUsageText, getZaiAccessory, renderZaiDetail } from "./zai/renderer.tsx";
+import type { ZaiError, ZaiUsage } from "./zai/types.ts";
 
 const AGENT_ORDER_KEY = "agent-order";
 

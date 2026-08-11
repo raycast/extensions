@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
-import type { ZaiUsage, ZaiError, ZaiLimitEntry } from "./types.ts";
-import type { Accessory } from "../agents/types.ts";
+
 import { formatResetTime, getRemainingPercent } from "../agents/format.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -10,6 +10,7 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
+import type { ZaiUsage, ZaiError, ZaiLimitEntry } from "./types.ts";
 
 const ZAI_ASCII_BAR_WIDTH = 10;
 

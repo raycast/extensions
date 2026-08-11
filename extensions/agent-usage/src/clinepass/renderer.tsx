@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
+
+import { formatDuration, formatResetTime, parseDate } from "../agents/format.ts";
 import type { Accessory } from "../agents/types.ts";
-import { formatResetTime, parseDate } from "../agents/format.ts";
 import {
   formatErrorOrNoData,
   generateAsciiBar,
@@ -20,10 +21,10 @@ function formatCredits(balanceUsd: number): string {
   }).format(balanceUsd);
 }
 
-function formatResetDate(resetsAt?: string): string {
-  if (!resetsAt) return "Unknown";
+function formatResetDate(resetsAt: string | undefined, maxResetSeconds: number): string {
+  if (!resetsAt) return formatDuration(maxResetSeconds);
   const date = parseDate(resetsAt);
-  if (!date) return "Unknown";
+  if (!date) return formatDuration(maxResetSeconds);
   const absolute = date.toLocaleString([], {
     month: "short",
     day: "numeric",
@@ -33,9 +34,8 @@ function formatResetDate(resetsAt?: string): string {
   return `${absolute} (${formatResetTime(resetsAt)})`;
 }
 
-function formatLimitText(label: string, limit: ClinePassLimit, showReset = true): string {
-  const text = `${label}: ${limit.percentageRemaining}% remaining\n${generateAsciiBar(limit.percentageRemaining)}`;
-  return showReset ? `${text}\nResets: ${formatResetDate(limit.resetsAt)}` : text;
+function formatLimitText(label: string, limit: ClinePassLimit): string {
+  return `${label}: ${limit.percentageRemaining}% remaining\n${generateAsciiBar(limit.percentageRemaining)}\nResets: ${formatResetDate(limit.resetsAt, limit.maxResetSeconds)}`;
 }
 
 export function formatClinePassUsageText(usage: ClinePassUsage | null, error: ClinePassError | null): string {
@@ -47,7 +47,7 @@ export function formatClinePassUsageText(usage: ClinePassUsage | null, error: Cl
     `Account: ${current.account}`,
     `User ID: ${current.userId}`,
     "",
-    formatLimitText("5h Limit", current.fiveHourLimit, false),
+    formatLimitText("5h Limit", current.fiveHourLimit),
     "",
     formatLimitText("Weekly Limit", current.weeklyLimit),
     "",
@@ -57,14 +57,14 @@ export function formatClinePassUsageText(usage: ClinePassUsage | null, error: Cl
   ].join("\n");
 }
 
-function renderLimit(label: string, limit: ClinePassLimit, showReset = true): React.ReactNode {
+function renderLimit(label: string, limit: ClinePassLimit): React.ReactNode {
   return (
     <>
       <List.Item.Detail.Metadata.Label
         title={label}
         text={`${generateAsciiBar(limit.percentageRemaining)} ${limit.percentageRemaining}% remaining`}
       />
-      {showReset && <List.Item.Detail.Metadata.Label title="Resets At" text={formatResetDate(limit.resetsAt)} />}
+      <List.Item.Detail.Metadata.Label title="Resets" text={formatResetDate(limit.resetsAt, limit.maxResetSeconds)} />
     </>
   );
 }
@@ -78,7 +78,7 @@ export function renderClinePassDetail(usage: ClinePassUsage | null, error: Cline
       <List.Item.Detail.Metadata.Label title="Account" text={current.account} />
       <List.Item.Detail.Metadata.Label title="User ID" text={current.userId} />
       <List.Item.Detail.Metadata.Separator />
-      {renderLimit("5h Limit", current.fiveHourLimit, false)}
+      {renderLimit("5h Limit", current.fiveHourLimit)}
       <List.Item.Detail.Metadata.Separator />
       {renderLimit("Weekly Limit", current.weeklyLimit)}
       <List.Item.Detail.Metadata.Separator />

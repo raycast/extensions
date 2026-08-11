@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 test("parseProcessInfoFromPsOutput extracts pid, csrf token and extension port", async () => {
   const { parseProcessInfoFromPsOutput } = await import("./probe.ts");
