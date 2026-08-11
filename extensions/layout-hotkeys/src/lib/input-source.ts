@@ -112,18 +112,17 @@ export async function resolveSlot(slot: Slot) {
   return sources[slot - 1]?.id;
 }
 
+// Typed with the generated Preferences rather than a hand-written shape, so
+// renaming a preference in package.json breaks the build here instead of
+// silently reading undefined.
 export function shouldShowHud() {
-  return getPreferenceValues<{ showHud: boolean }>().showHud;
+  return getPreferenceValues<Preferences>().showHud;
 }
 
 export function shouldSwitchAfterConvert() {
-  return getPreferenceValues<{ switchAfterConvert: boolean }>()
-    .switchAfterConvert;
+  return getPreferenceValues<Preferences>().switchAfterConvert;
 }
 
 export function shouldFallBackToWholeField() {
-  return (
-    getPreferenceValues<{ whenNothingSelected: string }>()
-      .whenNothingSelected !== "nothing"
-  );
+  return getPreferenceValues<Preferences>().whenNothingSelected !== "nothing";
 }

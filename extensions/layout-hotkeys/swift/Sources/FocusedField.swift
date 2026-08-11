@@ -32,14 +32,58 @@ enum FocusedFieldError: LocalizedError {
   }
 }
 
-private func focusedElement() throws -> AXUIElement {
-  guard AXIsProcessTrusted() else { throw FocusedFieldError.notTrusted }
+private func isRaycast(_ app: NSRunningApplication) -> Bool {
+  (app.bundleIdentifier ?? "").hasPrefix(raycastBundlePrefix)
+}
 
-  waitForRaycastToYieldFocus()
+/// The app whose text field the user means: the one in front of everything
+/// except Raycast.
+///
+/// Waiting for Raycast to yield focus is enough for a no-view hotkey, which
+/// dismisses the window a moment after firing, but not for the Convert Selection
+/// picker — that is a view command, and its window stays up for as long as the
+/// list is open, so the wait would always time out and the query would land on
+/// Raycast's own search field. CGWindowListCopyWindowInfo reports on-screen
+/// windows front to back, so the first ordinary window that is not Raycast's
+/// belongs to the app being typed in. Only the owner PID and the window layer
+/// are read, and neither needs Screen Recording permission — window titles
+/// would.
+private func targetApplication() throws -> NSRunningApplication {
+  if let frontmost = NSWorkspace.shared.frontmostApplication, !isRaycast(frontmost) {
+    return frontmost
+  }
 
-  guard let app = NSWorkspace.shared.frontmostApplication else {
+  guard
+    let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly, .excludeDesktopElements], kCGNullWindowID)
+      as? [[String: Any]]
+  else {
     throw FocusedFieldError.noFocusedField
   }
+
+  for window in windows {
+    guard
+      // Layer 0 is the ordinary window level, which skips the Dock, the menu
+      // bar and other floating chrome.
+      window[kCGWindowLayer as String] as? Int == 0,
+      let pid = window[kCGWindowOwnerPID as String] as? Int,
+      let app = NSRunningApplication(processIdentifier: pid_t(pid)),
+      !isRaycast(app)
+    else { continue }
+
+    return app
+  }
+
+  throw FocusedFieldError.noFocusedField
+}
+
+/// The focused element of `targetApplication()`, and the app it belongs to.
+///
+/// Accessibility reads and writes do not need the target app to be active, so
+/// there is nothing to wait for here.
+private func focusedElement() throws -> (element: AXUIElement, app: NSRunningApplication) {
+  guard AXIsProcessTrusted() else { throw FocusedFieldError.notTrusted }
+
+  let app = try targetApplication()
 
   let application = AXUIElementCreateApplication(app.processIdentifier)
   var focused: CFTypeRef?
@@ -53,7 +97,7 @@ private func focusedElement() throws -> AXUIElement {
     throw FocusedFieldError.noFocusedField
   }
 
-  return value as! AXUIElement
+  return (value as! AXUIElement, app)
 }
 
 private func stringValue(of element: AXUIElement) -> String? {
@@ -65,14 +109,13 @@ private func stringValue(of element: AXUIElement) -> String? {
 }
 
 @raycast func readFocusedField() throws -> FocusedField {
-  let element = try focusedElement()
+  let (element, app) = try focusedElement()
 
   guard let text = stringValue(of: element), !text.isEmpty else {
     throw FocusedFieldError.noFocusedField
   }
 
-  let appName = NSWorkspace.shared.frontmostApplication?.localizedName ?? "the frontmost app"
-  return FocusedField(text: text, appName: appName)
+  return FocusedField(text: text, appName: app.localizedName ?? "the frontmost app")
 }
 
 /// Selects everything in the focused field so a subsequent paste replaces it.
@@ -81,7 +124,7 @@ private func stringValue(of element: AXUIElement) -> String? {
 /// replacement still goes through the app's normal text input path, which is
 /// both more widely supported and leaves an undo entry behind.
 @raycast func selectAllInFocusedField() throws {
-  let element = try focusedElement()
+  let (element, _) = try focusedElement()
 
   guard let text = stringValue(of: element) else { throw FocusedFieldError.noFocusedField }
 

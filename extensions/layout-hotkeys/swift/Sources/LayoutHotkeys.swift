@@ -7,7 +7,7 @@ import Carbon
 import RaycastSwiftMacros
 
 // Covers the release build (com.raycast.macos) and the beta (com.raycast-x.macos).
-private let raycastBundlePrefix = "com.raycast"
+let raycastBundlePrefix = "com.raycast"
 
 struct InputSource: Encodable {
   let id: String

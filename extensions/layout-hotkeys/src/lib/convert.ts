@@ -1,6 +1,7 @@
 import {
   Alert,
   Clipboard,
+  closeMainWindow,
   confirmAlert,
   getSelectedText,
   showHUD,
@@ -50,7 +51,11 @@ export async function readSelectionAndConvert(): Promise<
     text = "";
   }
 
-  if (!text.trim()) {
+  // Deliberately untrimmed: a selection of nothing but whitespace is still an
+  // explicit selection, and escalating it to a whole-field rewrite would replace
+  // far more than the user pointed at. It falls through to the "Nothing to
+  // convert" check below instead.
+  if (!text) {
     if (!shouldFallBackToWholeField()) {
       return { ok: false, message: "Select some text first" };
     }
@@ -104,6 +109,11 @@ export async function applyConversion(
 ) {
   if (selection.wholeField) {
     if (!(await confirmWholeFieldRewrite(selection))) return;
+
+    // Hand focus back before selecting the field, so the selection and the paste
+    // that follows it act on the same window. The confirmation above has to come
+    // first — an alert needs the Raycast window it is closing.
+    await closeMainWindow();
 
     try {
       await selectAllInField();
