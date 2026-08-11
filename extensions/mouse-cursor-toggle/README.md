@@ -6,7 +6,7 @@ A macOS-only Raycast extension that hides or shows the mouse cursor with one com
 
 ## Run it locally
 
-1. Install [Raycast](https://www.raycast.com/) and the Xcode Command Line Tools.
+1. Install [Raycast](https://www.raycast.com/) and Xcode 16.3 or newer.
 2. Run `npm install` in this folder.
 3. Run `npm run dev`.
 4. Search Raycast for **Toggle Mouse Cursor**.
@@ -18,7 +18,7 @@ Assign a hotkey in **Raycast Settings → Extensions → Mouse Cursor Toggle** f
 
 ## How it works
 
-Raycast unloads no-view commands after they finish, while macOS requires the process hiding the cursor to remain alive. The command therefore starts a tiny detached native helper when hiding the cursor and stops it when showing the cursor again.
+Raycast unloads no-view commands after they finish, while macOS requires the process hiding the cursor to remain alive. The command imports a Swift module built by Raycast, which starts a tiny detached worker when hiding the cursor and stops it when showing the cursor again.
 
 Global background cursor hiding is not exposed through a public macOS API. The helper uses the undocumented WindowServer `SetsCursorInBackground` connection property before calling Core Graphics. This can change between macOS releases and may affect eligibility for the Raycast Store.
 
@@ -26,10 +26,10 @@ The helper only uses Apple's Core Graphics API. It does not monitor mouse moveme
 
 ## Development
 
-- `npm run build` compiles the native helper and bundles the extension.
+- `npm run build` builds the Swift module and extension through Raycast's standard toolchain.
 - `npm run lint` checks the extension.
 
-The native helper is committed in `assets/` so Raycast includes it in the extension bundle. Its complete Swift source is in `native/CursorHelper.swift`, and `npm run build` rebuilds the universal Apple silicon and Intel binary.
+The reviewed Swift source lives in `swift/cursor-helper/` and is imported directly from TypeScript with Raycast's native module support. No precompiled helper binary is committed to the extension.
 
 If the helper is stopped externally, macOS normally restores the cursor automatically. Running the command again also discards any stale helper state. The Raycast command talks to the helper through a private, token-authenticated control pipe, so it does not need process-list access.
 
