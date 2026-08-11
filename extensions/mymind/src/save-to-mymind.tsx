@@ -380,39 +380,34 @@ async function resolveInitialState(fallbackText?: string, launchContext?: SaveLa
     return { ...EMPTY_INITIAL_STATE, kind: "note", content: launchContext.content };
   }
 
-  let frontmostApplication: Awaited<ReturnType<typeof getFrontmostApplication>> | undefined;
+  // Opt-in: with the preference off, detection stays exactly as it has always been —
+  // clipboard first, then Finder — and the browser is never queried, so macOS never
+  // asks for Automation permission.
+  const { detectContext } = getPreferenceValues<Preferences>();
 
-  try {
-    frontmostApplication = await getFrontmostApplication();
-  } catch {
-    // Frontmost application couldn't be determined; fall through to app-agnostic detection.
-  }
+  if (detectContext) {
+    let frontmostApplication: Awaited<ReturnType<typeof getFrontmostApplication>> | undefined;
 
-  const frontmostBrowser = frontmostApplication ? resolveFrontmostBrowser(frontmostApplication) : undefined;
-
-  if (frontmostBrowser) {
-    const browserInitialState = await getBrowserInitialState(frontmostBrowser);
-
-    if (browserInitialState) {
-      return browserInitialState;
-    }
-  } else {
-    // Querying Finder is pointless (and slow) while a browser is in front.
     try {
-      const finderSelection = await getSelectedFinderItems();
-      const selectedFiles = classifyFilePaths(finderSelection.map((item) => item.path));
-
-      if (selectedFiles.kind === "files") {
-        return { ...EMPTY_INITIAL_STATE, kind: "file", files: selectedFiles.value };
-      }
+      frontmostApplication = await getFrontmostApplication();
     } catch {
-      // Ignore missing Finder context and fall back to other detection.
+      // Frontmost application couldn't be determined; fall through to app-agnostic detection.
     }
 
-    const selectedTextInitialState = await getSelectedTextInitialState();
+    const frontmostBrowser = frontmostApplication ? resolveFrontmostBrowser(frontmostApplication) : undefined;
 
-    if (selectedTextInitialState) {
-      return selectedTextInitialState;
+    if (frontmostBrowser) {
+      const browserInitialState = await getBrowserInitialState(frontmostBrowser);
+
+      if (browserInitialState) {
+        return browserInitialState;
+      }
+    } else {
+      const selectedTextInitialState = await getSelectedTextInitialState();
+
+      if (selectedTextInitialState) {
+        return selectedTextInitialState;
+      }
     }
   }
 
@@ -420,6 +415,17 @@ async function resolveInitialState(fallbackText?: string, launchContext?: SaveLa
 
   if (clipboardInitialState) {
     return clipboardInitialState;
+  }
+
+  try {
+    const finderSelection = await getSelectedFinderItems();
+    const selectedFiles = classifyFilePaths(finderSelection.map((item) => item.path));
+
+    if (selectedFiles.kind === "files") {
+      return { ...EMPTY_INITIAL_STATE, kind: "file", files: selectedFiles.value };
+    }
+  } catch {
+    // Ignore missing Finder context and fall back to text detection.
   }
 
   const fallbackInput = classifyTextInput(fallbackText);

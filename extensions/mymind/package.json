@@ -353,6 +353,15 @@
       ]
     },
     {
+      "name": "detectContext",
+      "type": "checkbox",
+      "required": false,
+      "title": "Context Detection",
+      "label": "Prefill from the active browser tab and selected text",
+      "description": "Off by default. When enabled, Save to mymind prefills from what you are looking at: selected text becomes a note, and the active browser tab's URL becomes a link. Reading the browser tab asks macOS for permission to control that browser the first time. macOS only.",
+      "default": false
+    },
+    {
       "name": "mediaGridColumns",
       "type": "dropdown",
       "required": false,
