@@ -59,18 +59,33 @@ async function statAll(paths: string[]): Promise<SheetFile[]> {
   return out;
 }
 
+/** Widening Spotlight windows: 90 days, 1 year, 3 years. */
+const WINDOWS_SECONDS = [RECENT_SECONDS, 365 * 24 * 3600, 3 * 365 * 24 * 3600];
+
+/** Bound on the final, unwindowed fallback. Reached only when fewer than
+ *  `limit` spreadsheets were modified in the last 3 years — at that point
+ *  exact ordering among ancient files stops mattering, so bounded work
+ *  wins over statting an arbitrarily large collection. */
+const FALLBACK_CAP = 2000;
+
 /** Recently-modified spreadsheet files via Spotlight (mdfind), newest first.
  *
  *  mdfind's output is unordered, so recency must come from stat times — and
  *  truncating before stat would drop arbitrary (possibly newest) files.
- *  Instead, Spotlight itself narrows to a recent window first; only when
- *  that can't fill the list do we stat the full result set. */
+ *  Spotlight itself narrows to a date window instead, widening until the
+ *  list can be filled; every path returned by a window is ranked, so
+ *  ordering is exact for anything modified within the widest window. */
 export function findSpreadsheets(limit = 50): Promise<SheetFile[]> {
   return (async () => {
-    const recentQuery = `(${NAME_QUERY}) && kMDItemFSContentChangeDate >= $time.now(-${RECENT_SECONDS})`;
-    let paths = await mdfindPaths(recentQuery);
+    let paths: string[] = [];
+    for (const seconds of WINDOWS_SECONDS) {
+      paths = await mdfindPaths(
+        `(${NAME_QUERY}) && kMDItemFSContentChangeDate >= $time.now(-${seconds})`,
+      );
+      if (paths.length >= limit) break;
+    }
     if (paths.length < limit) {
-      paths = await mdfindPaths(NAME_QUERY);
+      paths = (await mdfindPaths(NAME_QUERY)).slice(0, FALLBACK_CAP);
     }
     const files = await statAll(paths);
     return files
