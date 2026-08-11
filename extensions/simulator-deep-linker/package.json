@@ -62,10 +62,9 @@
     {
       "name": "target",
       "title": "Target Identifier",
-      "description": "Use booted for iOS Simulator, or enter a simulator UDID, Apple device ID, or ADB serial.",
+      "description": "Optional for iOS Simulator (defaults to booted). Required for physical Apple devices and Android.",
       "type": "textfield",
-      "default": "booted",
-      "required": true
+      "required": false
     },
     {
       "name": "bundleIdentifier",

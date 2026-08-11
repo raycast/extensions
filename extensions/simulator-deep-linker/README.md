@@ -7,7 +7,7 @@ The extension automatically reads the active SimulatorDeepLinker storage and ope
 ## Setup
 
 1. Open SimulatorDeepLinker once so it can publish its integration settings.
-2. Run `./scripts/install_raycast_extension.sh` from the repository root.
+2. Run `npm install && npm run dev` in this extension directory.
 3. Search for **Search Deep Links** in Raycast.
 
 The default target is the booted iOS Simulator. Platform, target, bundle identifier, Android package, and an optional storage override remain available in Raycast preferences.

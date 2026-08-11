@@ -19,15 +19,6 @@ import { useEffect, useMemo, useState } from "react";
 
 const executeFile = promisify(execFile);
 
-type Preferences = {
-  storageFile?: string;
-  defaultEnvironment?: string;
-  platform: "ios" | "ios-device" | "android";
-  target: string;
-  bundleIdentifier?: string;
-  androidPackage?: string;
-};
-
 type IntegrationManifest = {
   schemaVersion: number;
   storagePath: string;
@@ -61,7 +52,7 @@ const builtInEnvironments: LinkEnvironment[] = [
 ];
 
 export default function SearchDeepLinks() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SearchDeepLinks>();
   const [links, setLinks] = useState<DeepLink[]>([]);
   const [environments, setEnvironments] = useState<LinkEnvironment[]>(builtInEnvironments);
   const [selectedEnvironment, setSelectedEnvironment] = useState(preferences.defaultEnvironment || "Development");
@@ -226,15 +217,19 @@ async function resolveStorageConfiguration(storageOverride?: string): Promise<St
   }
 }
 
-async function openURL(urlString: string, preferences: Preferences): Promise<void> {
+async function openURL(urlString: string, preferences: Preferences.SearchDeepLinks): Promise<void> {
   const url = new URL(urlString);
   if (!url.protocol) throw new Error("The deep link must include a URL scheme.");
+  const target = preferences.target?.trim();
 
   switch (preferences.platform) {
     case "ios":
-      await executeFile("/usr/bin/xcrun", ["simctl", "openurl", preferences.target || "booted", urlString]);
+      await executeFile("/usr/bin/xcrun", ["simctl", "openurl", target || "booted", urlString]);
       return;
     case "ios-device":
+      if (!target) {
+        throw new Error("Set a physical Apple device identifier in extension preferences.");
+      }
       if (!preferences.bundleIdentifier) {
         throw new Error("Set the Apple Bundle Identifier in extension preferences.");
       }
@@ -244,17 +239,20 @@ async function openURL(urlString: string, preferences: Preferences): Promise<voi
         "process",
         "launch",
         "--device",
-        preferences.target,
+        target,
         preferences.bundleIdentifier,
         "--payload-url",
         urlString,
       ]);
       return;
     case "android": {
+      if (!target) {
+        throw new Error("Set an ADB device serial in extension preferences.");
+      }
       const adb = await locateADB();
       const argumentsList = [
         "-s",
-        preferences.target,
+        target,
         "shell",
         "am",
         "start",
