@@ -452,11 +452,13 @@ function TaskList() {
 }
 
 function Command() {
-  const { isLoading, isAssistantEnabled } = useUser();
+  const { currentUser, isLoading, isAssistantEnabled } = useUser();
 
-  // Wait for the user to load before choosing a task view — otherwise we'd
-  // flash the 1.0 list for 2.0 users before the flag resolves.
-  if (isLoading) {
+  // We need the user loaded to know which task view to show — otherwise we'd
+  // flash the 1.0 list for 2.0 users before the flag resolves. Only block on
+  // the initial load: a cached user is populated synchronously, so we render
+  // the correct view immediately even while a background refresh runs.
+  if (!currentUser && isLoading) {
     return <List isLoading navigationTitle="Search Tasks" searchBarPlaceholder="Search tasks" />;
   }
 
