@@ -12,7 +12,6 @@ export type PushRecord = {
   viewsRemaining?: number;
   createdAt: string;
   serverUrl: string;
-  apiKey?: string;
 };
 
 const HISTORY_KEY = "pwpush_history";
@@ -22,9 +21,19 @@ export async function loadHistory(): Promise<PushRecord[]> {
   const raw = await LocalStorage.getItem<string>(HISTORY_KEY);
   if (!raw) return [];
   try {
-    const parsed = JSON.parse(raw) as PushRecord[];
+    const parsed = JSON.parse(raw) as Array<PushRecord & { apiKey?: string }>;
     if (!Array.isArray(parsed)) return [];
-    return parsed;
+    return parsed.map(({ url, urlToken, name, note, kind, expiresAt, viewsRemaining, createdAt, serverUrl }) => ({
+      url,
+      urlToken,
+      name,
+      note,
+      kind,
+      expiresAt,
+      viewsRemaining,
+      createdAt,
+      serverUrl,
+    }));
   } catch {
     return [];
   }

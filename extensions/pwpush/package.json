@@ -23,7 +23,7 @@
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
-    "fix": "ray lint --fix",
+    "fix-lint": "ray lint --fix",
     "typecheck": "npx tsc --noEmit",
     "test": "node --test --require tsx test/*.test.ts"
   },
@@ -62,20 +62,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@types/node": "^22.7.5",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "@typescript-eslint/eslint-plugin": "^7.18.0",
-    "@typescript-eslint/parser": "^7.18.0",
-    "eslint": "^8.57.0",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-react-hooks": "^4.6.2",
-    "prettier": "^3.3.3",
-    "tsx": "^4.23.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@typescript-eslint/eslint-plugin": "^8.67.0",
+    "@typescript-eslint/parser": "^8.67.0",
+    "eslint": "^10.8.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.12",
     "typescript": "^5.6.3"
   }
 }

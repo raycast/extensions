@@ -1,24 +1,32 @@
-import { ActionPanel, Action, Clipboard, Icon, List, Toast, open, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { ActionPanel, Action, Clipboard, Icon, List, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { loadHistory, removeFromHistory, type PushRecord } from "./utils/history";
+import { resolveApiKeyForRecord, serverUrlsMatch } from "./utils/credentials";
 import { expirePush } from "./utils/pwpush";
 
 export default function PushHistoryCommand() {
+  const preferences = getPreferenceValues<Preferences>();
   const { data: history, isLoading, revalidate } = useCachedPromise(loadHistory, []);
 
   async function removeAndExpire(record: PushRecord) {
-    try {
-      await expirePush(record.serverUrl, record.apiKey, record.urlToken);
-      await removeFromHistory(record.urlToken, record.serverUrl);
-      await showToast({ style: Toast.Style.Success, title: "Push expired" });
-    } catch (error) {
+    if (!serverUrlsMatch(record.serverUrl, preferences)) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to expire push",
-        message: error instanceof Error ? error.message : "Unknown error",
+        title: "Server URL mismatch",
+        message: "Set the extension Server URL to match this push before expiring it remotely.",
       });
+      return;
     }
-    revalidate();
+
+    try {
+      const apiKey = resolveApiKeyForRecord(record.serverUrl, preferences);
+      await expirePush(record.serverUrl, apiKey, record.urlToken);
+      await removeFromHistory(record.urlToken, record.serverUrl);
+      await showToast({ style: Toast.Style.Success, title: "Push expired" });
+      revalidate();
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to expire push" });
+    }
   }
 
   async function removeOnly(record: PushRecord) {

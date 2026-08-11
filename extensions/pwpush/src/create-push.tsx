@@ -16,6 +16,7 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { addToHistory, removeFromHistory, type PushKind, type PushRecord } from "./utils/history";
+import { resolveApiKeyForRecord, serverUrlsMatch } from "./utils/credentials";
 import {
   DEFAULT_EXPIRE_DURATION,
   DEFAULT_EXPIRE_VIEWS,
@@ -29,7 +30,7 @@ import {
   extractPushUrl,
   fetchWorkspaces,
 } from "./utils/pwpush";
-import { validateDurationIndex, validatePositiveInteger } from "./utils/validation";
+import { validateDurationIndex, validateOptionalUrl, validatePositiveInteger } from "./utils/validation";
 
 const ONBOARDING_KEY = "pwpush_onboarding_seen";
 
@@ -107,6 +108,11 @@ export default function CreatePushCommand() {
       return;
     }
 
+    if (values.kind === "url" && !validateOptionalUrl(payload)) {
+      await showToast({ style: Toast.Style.Failure, title: "Enter a valid URL" });
+      return;
+    }
+
     const duration = validateDurationIndex(values.expireAfterDuration, DEFAULT_EXPIRE_DURATION);
     const views = validatePositiveInteger(values.expireAfterViews, DEFAULT_EXPIRE_VIEWS);
 
@@ -165,7 +171,6 @@ export default function CreatePushCommand() {
         viewsRemaining: result.views_remaining,
         createdAt: result.created_at,
         serverUrl,
-        apiKey: preferences.apiKey,
       };
 
       await addToHistory(record);
@@ -227,7 +232,9 @@ export default function CreatePushCommand() {
         <Form.Dropdown.Item value="file" title="File" icon={Icon.Document} />
       </Form.Dropdown>
 
-      <Form.TextArea id="payload" title="Payload" placeholder="Secret text, URL, or QR code content" />
+      {pushKind !== "file" && (
+        <Form.TextArea id="payload" title="Payload" placeholder="Secret text, URL, or QR code content" />
+      )}
       {pushKind === "file" && <Form.FilePicker id="files" title="Files" allowMultipleSelection={true} />}
 
       <Form.Separator />
@@ -274,14 +281,17 @@ All generated links are copied to the clipboard and stored in the local Push His
 
 function PushResultView({ record }: { record: PushRecord }) {
   const { pop } = useNavigation();
+  const preferences = getPreferenceValues<Preferences>();
   const markdown = `### Push created
 
 The secret link has been copied to your clipboard.
 
-|**Name:** ${record.name || "Unnamed"}
-|**Kind:** ${record.kind}
-|**Views left:** ${record.viewsRemaining ?? "unknown"}
-|**Expires:** ${record.expiresAt ? new Date(record.expiresAt).toLocaleString() : "unknown"}
+| Field | Value |
+| --- | --- |
+| Name | ${record.name || "Unnamed"} |
+| Kind | ${record.kind} |
+| Views left | ${record.viewsRemaining ?? "unknown"} |
+| Expires | ${record.expiresAt ? new Date(record.expiresAt).toLocaleString() : "unknown"} |
 
 \`\`\`
 ${record.url}
@@ -289,8 +299,18 @@ ${record.url}
 `;
 
   async function expire() {
+    if (!serverUrlsMatch(record.serverUrl, preferences)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Server URL mismatch",
+        message: "Set the extension Server URL to match this push before expiring it remotely.",
+      });
+      return;
+    }
+
     try {
-      await expirePush(record.serverUrl, record.apiKey, record.urlToken);
+      const apiKey = resolveApiKeyForRecord(record.serverUrl, preferences);
+      await expirePush(record.serverUrl, apiKey, record.urlToken);
       await removeFromHistory(record.urlToken, record.serverUrl);
       await showToast({ style: Toast.Style.Success, title: "Push expired" });
       pop();
