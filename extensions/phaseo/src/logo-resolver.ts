@@ -75,6 +75,7 @@ normalisedAliasMap.set(normalise("x-ai"), "spacex-ai");
 normalisedAliasMap.set(normalise("xai"), "spacex-ai");
 normalisedAliasMap.set(normalise("longcat"), "meituan");
 normalisedAliasMap.set(normalise("meituan-longcat"), "meituan");
+normalisedAliasMap.set(normalise("thinking-machines-lab"), "thinking-machines");
 
 function normalise(value: string): string {
   return value.toLowerCase().replace(/[^a-z0-9]/g, "");

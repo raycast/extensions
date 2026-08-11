@@ -112,17 +112,18 @@ export function truncate(text: string, maxLength: number): string {
 
 // Model helpers
 export function getModelDisplayName(model: Model): string {
-  return model.name || model.model_id;
+  return model.name || model.id;
 }
 
 export function getModelOrganisationName(model: Model): string {
-  return model.organisation_name || model.organisation_id || "Unknown";
+  return model.organization?.name || model.organization?.id || "Unknown";
 }
 
 export function getModelEndpointsText(model: Model): string {
-  if (!model.endpoints || model.endpoints.length === 0) return "No endpoints";
-  if (model.endpoints.length === 1) return model.endpoints[0];
-  return `${model.endpoints.length} endpoints`;
+  if (model.capabilities.endpoints.length === 0) return "No endpoints";
+  if (model.capabilities.endpoints.length === 1)
+    return model.capabilities.endpoints[0];
+  return `${model.capabilities.endpoints.length} endpoints`;
 }
 
 // Organisation helpers
@@ -150,10 +151,11 @@ export function modelMatchesSearch(model: Model, searchText: string): boolean {
   const searchLower = searchText.toLowerCase();
 
   // Search in model name, ID, organisation
-  if (model.name?.toLowerCase().includes(searchLower)) return true;
-  if (model.model_id.toLowerCase().includes(searchLower)) return true;
-  if (model.organisation_name?.toLowerCase().includes(searchLower)) return true;
-  if (model.organisation_id?.toLowerCase().includes(searchLower)) return true;
+  if (model.name.toLowerCase().includes(searchLower)) return true;
+  if (model.id.toLowerCase().includes(searchLower)) return true;
+  if (model.organization?.name?.toLowerCase().includes(searchLower))
+    return true;
+  if (model.organization?.id.toLowerCase().includes(searchLower)) return true;
 
   // Search in aliases
   if (model.aliases?.some((alias) => alias.toLowerCase().includes(searchLower)))
@@ -161,7 +163,7 @@ export function modelMatchesSearch(model: Model, searchText: string): boolean {
 
   // Search in endpoints
   if (
-    model.endpoints?.some((endpoint) =>
+    model.capabilities.endpoints.some((endpoint) =>
       endpoint.toLowerCase().includes(searchLower),
     )
   )

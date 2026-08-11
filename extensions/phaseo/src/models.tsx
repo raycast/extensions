@@ -55,8 +55,12 @@ export default function Command() {
   const sortedModels = [...filteredModels].sort((a, b) => {
     switch (sortBy) {
       case "release_date": {
-        const aDate = a.release_date ? new Date(a.release_date).getTime() : 0;
-        const bDate = b.release_date ? new Date(b.release_date).getTime() : 0;
+        const aDate = a.lifecycle.released_at
+          ? new Date(a.lifecycle.released_at).getTime()
+          : 0;
+        const bDate = b.lifecycle.released_at
+          ? new Date(b.lifecycle.released_at).getTime()
+          : 0;
         if (aDate !== bDate) return bDate - aDate; // Newest first
         return getModelDisplayName(a).localeCompare(getModelDisplayName(b));
       }
@@ -103,34 +107,36 @@ export default function Command() {
       )}
       {sortedModels.map((model) => (
         <List.Item
-          key={model.model_id}
-          title={getModelDisplayName(model)}
-          subtitle={getModelOrganisationName(model)}
+          key={model.id}
+          title={model.name}
+          subtitle={
+            model.organization?.name ?? model.organization?.id ?? "Unknown"
+          }
           icon={
-            getOrganisationLogo(model.organisation_id) ?? {
+            getOrganisationLogo(model.organization?.id ?? null) ?? {
               source: Icon.Building,
-              tintColor: (model.organisation_colour ??
+              tintColor: (model.organization?.color ??
                 Color.SecondaryText) as Color.ColorLike,
             }
           }
-          accessories={[{ text: formatDate(model.release_date) }]}
+          accessories={[{ text: formatDate(model.lifecycle.released_at) }]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
                 title="Open Model Page"
-                url={getModelURL(model.model_id)}
+                url={getModelURL(model.id)}
                 icon={Icon.Globe}
               />
               <Action.CopyToClipboard
                 title="Copy Model ID"
-                content={model.model_id}
+                content={model.id}
                 icon={Icon.Clipboard}
                 shortcut={Keyboard.Shortcut.Common.Copy}
               />
-              {model.organisation_id && (
+              {model.organization?.id && (
                 <Action.OpenInBrowser
                   title="Open Organisation Page"
-                  url={getOrganisationURL(model.organisation_id)}
+                  url={getOrganisationURL(model.organization.id)}
                   icon={Icon.Building}
                   shortcut={Keyboard.Shortcut.Common.Open}
                 />

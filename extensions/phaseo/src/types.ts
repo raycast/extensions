@@ -11,25 +11,61 @@ export interface APIResponse<T> {
 
 // Model Types
 export interface Model {
-  model_id: string;
-  name: string | null;
-  release_date: string | null;
-  status: string | null;
-  organisation_id: string | null;
-  organisation_name: string | null;
-  organisation_colour: string | null;
+  id: string;
+  name: string;
+  description: string;
+  organization: Organization | null;
   aliases: string[];
-  endpoints: string[];
-  input_types: string[];
-  output_types: string[];
-  providers: ProviderInfo[];
-  pricing?: ModelPricing | null;
-  top_provider?: ModelTopProvider | null;
+  lifecycle: ModelLifecycle;
+  modalities: ModelModalities;
+  limits: ModelLimits;
+  capabilities: ModelCapabilities;
+  availability: ModelAvailability;
+  pricing: Record<string, unknown>;
+  offers: ModelOffer[];
 }
 
-export interface ProviderInfo {
-  api_provider_id: string;
-  params: string[];
+export interface Organization {
+  id: string;
+  name: string | null;
+  color: string | null;
+}
+
+export interface ModelLifecycle {
+  status: string;
+  released_at: string | null;
+  deprecated_at: string | null;
+  retires_at: string | null;
+  replacement_id: string | null;
+  message: string | null;
+}
+
+export interface ModelModalities {
+  input: string[];
+  output: string[];
+}
+
+export interface ModelLimits {
+  input_tokens: number | null;
+  output_tokens: number | null;
+}
+
+export interface ModelCapabilities {
+  endpoints: string[];
+  parameters: string[];
+  parameter_details: Record<string, unknown>;
+}
+
+export interface ModelAvailability {
+  status: string;
+  provider_count: number;
+  active_provider_count: number;
+  coming_soon_provider_count: number;
+  inactive_provider_count: number;
+}
+
+export interface ModelOffer {
+  [key: string]: unknown;
 }
 
 export interface Organisation {
@@ -48,22 +84,11 @@ export interface Provider {
   country_code: string | null;
 }
 
-export interface ModelPricing {
-  prompt?: string | null;
-  completion?: string | null;
-  request?: string | null;
-  image?: string | null;
-}
-
-export interface ModelTopProvider {
-  context_length?: number | null;
-  max_completion_tokens?: number | null;
-}
-
 // Organisation Types
 // API Response Types
 export interface ModelsResponse {
   ok: boolean;
+  availability_mode: string;
   limit: number;
   offset: number;
   total: number;
