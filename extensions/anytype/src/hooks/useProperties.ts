@@ -3,18 +3,18 @@ import { useMemo } from "react";
 import { getProperties } from "../api";
 import { apiLimit } from "../utils/constant";
 
-export function useProperties(spaceId: string, config?: { execute: boolean }) {
+export function useProperties(spaceId: string, searchText?: string, config?: { execute: boolean }) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
-    (spaceId: string) => async (options: { page: number }) => {
+    (spaceId: string, searchText?: string) => async (options: { page: number }) => {
       const offset = options.page * apiLimit;
-      const response = await getProperties(spaceId, { offset, limit: apiLimit });
+      const response = await getProperties(spaceId, { offset, limit: apiLimit, name: searchText });
 
       return {
         data: response.properties,
         hasMore: response.pagination.has_more,
       };
     },
-    [spaceId],
+    [spaceId, searchText],
     {
       keepPreviousData: true,
       execute: !!spaceId && config?.execute !== false,

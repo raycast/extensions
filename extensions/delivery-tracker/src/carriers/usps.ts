@@ -1,5 +1,6 @@
-import { Package, packagesFromOfflineCarrier } from "../package";
-import { Delivery } from "../delivery";
+import { packagesFromOfflineCarrier } from "../package";
+import { Package } from "../types/package";
+import { Delivery } from "../types/delivery";
 
 export function ableToTrackUspsRemotely(): boolean {
   // doesn't support remote tracking yet.

@@ -1,15 +1,5 @@
 import { LocalStorage, updateCommandMetadata } from "@raycast/api";
-import { Schedule, startCaffeinate, getSchedule, stopCaffeinate } from "./utils";
-import { execSync } from "node:child_process";
-
-function isCaffeinateRunning(): boolean {
-  try {
-    execSync("pgrep caffeinate");
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning } from "./utils";
 
 async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
@@ -66,9 +56,7 @@ export default async function Command() {
 
   let subtitle = "✖ Decaffeinated";
 
-  if (isCaffeinated) {
-    subtitle = "✔ Caffeinated";
-  } else if (isScheduled) {
+  if (isCaffeinated || isScheduled) {
     subtitle = "✔ Caffeinated";
   }
 

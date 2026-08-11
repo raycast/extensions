@@ -1,7 +1,6 @@
 import { Action, getPreferenceValues, open, Icon, Keyboard, popToRoot } from "@raycast/api";
 import { environment } from "@raycast/api";
 import path from "path";
-import { Preferences } from "../types";
 import { ACTION_TITLES } from "../constants";
 
 export function OpenConfigFileAction({ shortcut }: { shortcut?: Keyboard.Shortcut }) {

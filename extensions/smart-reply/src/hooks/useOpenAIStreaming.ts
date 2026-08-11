@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import OpenAI from "openai";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -8,11 +8,9 @@ export function useOpenAIStreaming(prompt: string, execute: boolean) {
   const [data, setData] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   const preferences = getPreferenceValues<Preferences>();
-  const openai = new OpenAI({
-    apiKey: preferences.openAIApiKey,
-  });
 
   useEffect(() => {
     let isCancelled = false;
@@ -22,30 +20,33 @@ export function useOpenAIStreaming(prompt: string, execute: boolean) {
     setError(null);
     setData("");
 
+    const openai = new OpenAI({
+      apiKey: preferences.openAIApiKey,
+    });
+
+    abortControllerRef.current = new AbortController();
+
     const fetchStream = async () => {
       try {
-        const chatCompletion = openai.beta.chat.completions.stream({
-          model: OPENAI_MODEL,
-          messages: [{ role: "user", content: prompt }],
-          temperature: 0.1,
-        });
+        const stream = await openai.chat.completions.create(
+          {
+            model: OPENAI_MODEL,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.1,
+            stream: true,
+          },
+          { signal: abortControllerRef.current?.signal },
+        );
 
-        if (isCancelled) {
-          chatCompletion.abort();
-          return;
+        for await (const chunk of stream) {
+          if (isCancelled) break;
+          const content = chunk.choices[0]?.delta?.content || "";
+          if (content) {
+            setData((result) => result + content);
+          }
         }
-
-        chatCompletion.on("content", (delta) => {
-          if (isCancelled) return;
-          setData((result) => {
-            if (!delta) return result;
-            return result + delta;
-          });
-        });
-
-        await chatCompletion.finalChatCompletion();
       } catch (err) {
-        if (!isCancelled) {
+        if (!isCancelled && !(err instanceof Error && err.name === "AbortError")) {
           console.error("OpenAI API Error:", err);
           setError(err instanceof Error ? err : new Error("An error occurred with the OpenAI API: " + err));
         }
@@ -61,6 +62,7 @@ export function useOpenAIStreaming(prompt: string, execute: boolean) {
 
     return () => {
       isCancelled = true;
+      abortControllerRef.current?.abort();
     };
   }, [prompt, execute]);
 

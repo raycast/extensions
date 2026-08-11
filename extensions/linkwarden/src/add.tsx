@@ -110,7 +110,17 @@ export default () => {
 
   const { itemProps, handleSubmit, reset } = useForm<FormValues>({
     async onSubmit(values) {
-      const collection = collections.find((collection) => collection.id === Number(values.collectionId)) as Collection;
+      const collection = (collections ?? []).find((collection) => collection.id === Number(values.collectionId)) as
+        | Collection
+        | undefined;
+      if (!collection) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Collection not found",
+          message: "Please pick a collection before submitting.",
+        });
+        return;
+      }
       await fetchLink(preferences, values, collection);
     },
     initialValues: {
@@ -143,7 +153,7 @@ export default () => {
     >
       <Form.TextField {...itemProps.url} title="URL" placeholder="http://example.com/" />
       <Form.Dropdown title="Collection" {...itemProps.collectionId}>
-        {collections.map((collection) => (
+        {(collections ?? []).map((collection) => (
           <Form.Dropdown.Item
             key={collection.id}
             icon={{ source: Icon.Folder, tintColor: collection.color }}
@@ -154,7 +164,7 @@ export default () => {
       </Form.Dropdown>
       <Form.TextField {...itemProps.name} title="Name" placeholder="Will be auto generated if left empty" autoFocus />
       <Form.TagPicker {...itemProps.tagPicker} title="Tag Picker" placeholder="Select...">
-        {tags.map((tag) => (
+        {(tags ?? []).map((tag) => (
           <Form.TagPicker.Item value={tag.name} title={tag.name} key={tag.id} />
         ))}
       </Form.TagPicker>

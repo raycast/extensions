@@ -65,11 +65,11 @@ async function tool(input: Input) {
   }
 
   try {
-    const response = await createTask(cleanRepository, prompt.trim(), targetBranch);
+    const response = await createTask(cleanRepository, prompt.trim(), targetBranch, null, null);
 
     return {
       success: true,
-      pullRequestUrl: response.pullRequestUrl,
+      taskUrl: response.taskUrl,
       repository: cleanRepository,
       branch: targetBranch,
       prompt: prompt.trim(),

@@ -61,6 +61,12 @@ export const defaultApps: App[] = [
     placeholder: "username",
   },
   {
+    name: "YouTube Brand",
+    value: "youtube-brand",
+    urlTemplate: "https://www.youtube.com/@{profile}",
+    placeholder: "username",
+  },
+  {
     name: "Instagram",
     value: "instagram",
     urlTemplate: "https://www.instagram.com/{profile}",

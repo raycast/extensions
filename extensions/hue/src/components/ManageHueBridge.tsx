@@ -79,6 +79,77 @@ You can remove your saved Hue Bridge by using the ‘Unlink Hue Bridge’ action
  * When the machine is in a state that requires user interaction, it will render a Detail view,
  * otherwise it will return null.
  */
+type StateConfig = {
+  markdown?: string;
+  actions?: (sendHueMessage: SendHueMessage, unlinkSavedBridge: () => Promise<void>) => React.JSX.Element[];
+  toast?: { title?: string; message?: string; show?: boolean; hide?: boolean };
+  returnNull?: boolean;
+};
+
+const STATE_CONFIGS: Record<string, StateConfig> = {
+  loadingPreferences: { returnNull: true },
+  loadingCredentials: { returnNull: true },
+  discoveringUsingPublicApi: { returnNull: true },
+  connected: { returnNull: true },
+  connecting: { returnNull: true, toast: { message: "Connecting to Hue Bridge…", show: true } },
+  failedToLoadPreferences: { markdown: failedToLoadPreferencesMessage },
+  failedToConnect: {
+    markdown: failedToConnectMessage,
+    actions: (sendHueMessage, unlinkSavedBridge) => [
+      <Action key="retryConnect" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
+      <Action
+        key="unlink"
+        title="Unlink Saved Hue Bridge"
+        onAction={unlinkSavedBridge}
+        style={Action.Style.Destructive}
+        icon={Icon.Trash}
+      />,
+    ],
+  },
+  discoveringUsingMdns: {
+    markdown: discoveringMessage,
+    toast: { title: "Discovering Hue Bridges…", show: true },
+  },
+  noBridgeFound: {
+    markdown: noBridgeFoundMessage,
+    actions: (sendHueMessage) => [
+      <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
+    ],
+    toast: { hide: true },
+  },
+  linkWithBridge: {
+    markdown: linkWithBridgeMessage,
+    actions: (sendHueMessage) => [
+      <Action key="link" title="Link with Hue Bridge" onAction={() => sendHueMessage("LINK")} icon={Icon.Plug} />,
+    ],
+    toast: { hide: true },
+  },
+  linking: {
+    markdown: linkWithBridgeMessage,
+    toast: { title: "Linking with Hue Bridge…", show: true },
+  },
+  failedToLink: {
+    markdown: failedToLinkMessage,
+    actions: (sendHueMessage) => [
+      <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
+    ],
+  },
+  linked: {
+    markdown: linkedMessage,
+    actions: (sendHueMessage, unlinkSavedBridge) => [
+      <Action key="done" title="Done" onAction={() => sendHueMessage("DONE")} icon={Icon.Check} />,
+      <Action
+        key="unlink"
+        title="Unlink Saved Hue Bridge"
+        onAction={unlinkSavedBridge}
+        style={Action.Style.Destructive}
+        icon={Icon.Trash}
+      />,
+    ],
+    toast: { hide: true },
+  },
+};
+
 export default function ManageHueBridge(
   hueBridgeState: HueBridgeState,
   sendHueMessage: SendHueMessage,
@@ -90,81 +161,29 @@ export default function ManageHueBridge(
     });
   };
 
-  let contextActions: React.JSX.Element[] = [];
-  let markdown = "";
-  const toast = new Toast({ style: Style.Animated, title: "" });
-
-  switch (hueBridgeState.value) {
-    case "loadingPreferences":
-    case "loadingCredentials":
-    case "discoveringUsingPublicApi":
-    case "connected":
-      return null;
-    case "failedToLoadPreferences":
-      markdown = failedToLoadPreferencesMessage;
-      break;
-    case "connecting":
-      toast.message = "Connecting to Hue Bridge…";
-      toast.show().then();
-      return null;
-    case "failedToConnect":
-      contextActions = [
-        <Action key="retryConnect" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
-        <Action
-          key="unlink"
-          title="Unlink Saved Hue Bridge"
-          onAction={unlinkSavedBridge}
-          style={Action.Style.Destructive}
-          icon={Icon.Trash}
-        />,
-      ];
-      markdown = failedToConnectMessage;
-      break;
-    case "discoveringUsingMdns":
-      markdown = discoveringMessage;
-      toast.title = "Discovering Hue Bridges…";
-      toast.show().then();
-      break;
-    case "noBridgeFound":
-      contextActions = [
-        <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
-      ];
-      markdown = noBridgeFoundMessage;
-      toast.hide().then();
-      break;
-    case "linkWithBridge":
-      contextActions = [
-        <Action key="link" title="Link with Hue Bridge" onAction={() => sendHueMessage("LINK")} icon={Icon.Plug} />,
-      ];
-      markdown = linkWithBridgeMessage;
-      toast.hide().then();
-      break;
-    case "linking":
-      markdown = linkWithBridgeMessage;
-      toast.title = `Linking with Hue Bridge…`;
-      toast.show().then();
-      break;
-    case "failedToLink":
-      contextActions = [
-        <Action key="retryLink" title="Retry" onAction={() => sendHueMessage("RETRY")} icon={Icon.Repeat} />,
-      ];
-      markdown = failedToLinkMessage;
-      break;
-    case "linked":
-      contextActions = [
-        <Action key="done" title="Done" onAction={() => sendHueMessage("DONE")} icon={Icon.Check} />,
-        <Action
-          key="unlink"
-          title="Unlink Saved Hue Bridge"
-          onAction={unlinkSavedBridge}
-          style={Action.Style.Destructive}
-          icon={Icon.Trash}
-        />,
-      ];
-      markdown = linkedMessage;
-      toast.hide().then();
-      break;
+  const config = STATE_CONFIGS[hueBridgeState.value as keyof typeof STATE_CONFIGS];
+  if (!config || config.returnNull) {
+    if (config?.toast) {
+      const toast = new Toast({
+        style: Style.Animated,
+        title: config.toast.title || "",
+        message: config.toast.message,
+      });
+      if (config.toast.show) toast.show().then();
+    }
+    return null;
   }
+
+  const toast = new Toast({ style: Style.Animated, title: "" });
+  if (config.toast) {
+    if (config.toast.title) toast.title = config.toast.title;
+    if (config.toast.message) toast.message = config.toast.message;
+    if (config.toast.show) toast.show().then();
+    if (config.toast.hide) toast.hide().then();
+  }
+
+  const contextActions = config.actions ? config.actions(sendHueMessage, unlinkSavedBridge) : [];
+  const markdown = config.markdown || "";
 
   return (
     <Detail key={`${hueBridgeState.value}`} markdown={markdown} actions={<ActionPanel>{contextActions}</ActionPanel>} />

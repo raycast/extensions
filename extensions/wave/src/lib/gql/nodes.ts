@@ -11,6 +11,9 @@ const Invoice = `
     subhead
     invoiceNumber
     invoiceDate
+    lastSentAt
+    lastSentVia
+    lastViewedAt
     customer {
         name
     }
@@ -29,6 +32,21 @@ const Invoice = `
         }
     }
     taxTotal {
+        value
+        currency {
+            symbol
+        }
+    }
+    subtotal {
+        value
+        currency {
+            symbol
+        }
+    }
+    discounts {
+        name
+    }
+    discountTotal {
         value
         currency {
             symbol
@@ -56,11 +74,12 @@ const Invoice = `
         }
         description
         quantity
-        price
+        unitPrice
         subtotal {
             value
             currency {
-            symbol
+                symbol
+                exponent
             }
         }
         total {

@@ -108,7 +108,7 @@ export default function Main() {
   function getQuickLinkForPath(path: string): string {
     const context = `{"defaultValue":"${path}"}`;
     const encodedContext = encodeURIComponent(context);
-    return `raycast://extensions/3llomi/open-in-android-studio/index?context=${encodedContext}`;
+    return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/3llomi/open-in-android-studio/index?context=${encodedContext}`;
   }
 
   return (

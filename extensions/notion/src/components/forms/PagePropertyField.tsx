@@ -1,5 +1,6 @@
 import { Form, Icon, Image } from "@raycast/api";
 import type { useForm } from "@raycast/utils";
+import { JSX } from "react";
 
 import {
   notionColorToTintColor,
@@ -12,7 +13,7 @@ import {
   FormValueForDatabaseProperty,
 } from "../../utils/notion";
 
-// @ts-expect-error - Overload doesn't match, but is the function signature we want to be visisble.
+// @ts-expect-error - Overload doesn't match, but is the function signature we want to be visible.
 export function PagePropertyField(props: {
   type: ReadablePropertyType;
   databaseProperty: DatabaseProperty;
@@ -56,7 +57,7 @@ export function PagePropertyField({
       if (databaseProperty.type == "multi_select") options = databaseProperty.config.options;
       else if (databaseProperty.type == "people") options = users;
       else if (relationPages && databaseProperty.type == "relation") {
-        const relationId = databaseProperty.config.database_id;
+        const relationId = databaseProperty.config.data_source_id || databaseProperty.config.database_id;
         if (relationId) options = relationPages[relationId];
       }
       return (

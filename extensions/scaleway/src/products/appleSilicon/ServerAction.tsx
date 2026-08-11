@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { AppleSilicon } from '@scaleway/sdk'
+import type { Applesiliconv1alpha1 } from '@scaleway/sdk'
 import { getServerUrl } from './urls'
 
 type ServerActionProps = {
-  server: AppleSilicon.v1alpha1.Server
+  server: Applesiliconv1alpha1.Server
   toggleIsDetailOpen: () => void
 }
 

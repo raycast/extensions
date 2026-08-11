@@ -1,5 +1,72 @@
 # Things Changelog
 
+## [Fix Marking To-Dos Completed] - 2026-07-22
+
+- Restore marking to-dos completed or canceled from list rows and the Today menu bar. The previous release's writable-key allowlist in the property setter rejected `status`, so those actions threw an error.
+
+## [Expanded AI Tools and Optional Database Reading] - 2026-07-10
+
+- Added AI tools: `get-todos` (replaces `get-list-todos`, supports list/project/area filters), `search-todos` (keyword search in title and notes), `get-todo-details`, `get-todos-details` (batch), `get-project-details`, `get-area-details`, and `add-json` (create projects with headings and nested to-dos in one call).
+- Added an optional "Unofficial API" preference that reads lists directly from the Things database instead of using Apple Events. It requires Full Disk Access and is off by default.
+- When the Unofficial API is enabled, recurring tasks now show the correct upcoming deadline instead of a placeholder value, and a `dueDateIsRecurring` field signals when a due date shifts with each recurrence.
+- Fixed `set-todo-property` crashing Things when setting date fields — date values are now passed as JS Date objects instead of plain strings.
+
+## [Bug Fixes] - 2026-06-04
+
+- Restore ⌘↵ to "Mark as Completed" on list rows. The Detail view made "Open in Things" the second action, which Raycast also binds to ⌘↵; "Open in Things" stays reachable via ⌘O.
+
+## [Detail View for To-Dos] - 2026-05-25
+
+- Added a Detail view, accessible from any list command by pressing Enter on a row. Renders the to-do's notes as markdown with a metadata sidebar (Status, Created, Start Date, color-coded Deadline, Tags, Project, Area).
+- "Open in Things" remains the secondary action (⌘O) on list rows and becomes the primary action inside the Detail view.
+- Added the to-do's creation date to the data model so it can be shown in the Detail sidebar.
+- Switched date formatting in list-row accessories to US English per the Raycast extension guidelines.
+
+## [Bug Fixes] - 2026-05-20
+
+- Fix due date accessory not showing for to-dos due in 8–14 days
+- Fix moving a project using the wrong URL scheme parameter (`list-id` instead of `area-id`)
+- Fix "Move To" submenu showing projects when moving a project (only areas should appear)
+- Fix missing `await` on async calls (`showToast`, `toast.hide`, `refreshTodos`, `handleError`)
+- Fix success toast showing no message when adding a to-do via AI in Quick Add
+- Fix duplicate `capitalize` function — now imported from shared `utils`
+- Unify type icons across todo list, Quick Find, and Move To menu
+- Update packages
+
+## [Quick Find] - 2026-03-17
+
+- Added a new command "Quick Find" to search across all areas, projects, and to-dos.
+
+## [Tag Filtering and Grouping] - 2026-02-23
+
+- Added tag filter dropdown to list views (matches Things native behavior)
+- Tag filtering supports full inheritance: todo → project → area tags
+- Tag filtering supports hierarchy: selecting a parent tag matches all descendants
+- Tags display with hierarchy indicator (e.g., "Work › Design")
+- Added "No Tag" filter option for untagged todos
+- Area tags and tag hierarchy are fetched inline with existing JXA calls, deferred until the list renders
+- Added preference to toggle grouping by project or area
+
+## [Reduce JXA Latency for List Fetching] - 2026-02-09
+
+- Todo list views and the menu bar command now fetch tags and lists in a single JXA call instead of two
+- The menu bar command and `get-lists` tool no longer fetch tags unnecessarily
+- The "Add New Project" form fetches tags and areas in a single JXA call instead of two
+- Consolidated collection-fetching functions into a single `getCollections` API
+
+## [JXA Performance Optimization] - 2026-01-12
+
+- Reduced JXA fetch times by ~75% using `properties()` batching to minimize Apple Event overhead
+- Removed nested area tags from todo data (tags on containing areas are no longer fetched)
+
+## [Improved Query String Creation] - 2026-01-08
+
+- Replaced the `⁠qs` package with `⁠query-string` to automatically exclude empty strings and null values when generating Things URLs
+
+## [Timeout increasing in AppleScript] - 2025-10-30
+
+- Increased timeout to 60 seconds in AppleScript
+
 ## [Fix Timeout on macOS Tahoe] - 2025-10-15
 
 - Fixed timeout errors when opening "Add New To-Do" command on macOS Tahoe (26.x)

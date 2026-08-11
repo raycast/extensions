@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Form, Action, ActionPanel, showHUD, popToRoot } from "@raycast/api";
+import { Form, Action, ActionPanel, showHUD, popToRoot, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useForm } from "@raycast/utils";
 
 import { Account, OutgoingMessageAction, OutgoingMessage, OutgoingMessageForm, Message, Mailbox } from "../types";
@@ -8,6 +8,8 @@ import { getAccounts } from "../scripts/accounts";
 import { Validation } from "../utils/validation";
 import { OutgoingMessageIcon } from "../utils/presets";
 import { Cache } from "../utils/cache";
+
+const { autoFillReplySubject } = getPreferenceValues<Preferences>();
 
 export type ComposeMessageProps = {
   account?: Account;
@@ -21,9 +23,23 @@ export type ComposeMessageProps = {
 export const ComposeMessage = (props: ComposeMessageProps) => {
   const { account, message, mailbox, attachments, action, draftValues } = props;
 
+  const { data: accounts, isLoading: isLoadingAccounts } = useCachedPromise(getAccounts);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const defaultAccount = Cache.getDefaultAccount();
+
+  const getInitialSubject = () => {
+    if (draftValues?.subject) return draftValues.subject;
+    if (autoFillReplySubject && message?.subject) {
+      if (action === OutgoingMessageAction.Reply || action === OutgoingMessageAction.ReplyAll) {
+        if (message.subject.toLowerCase().startsWith("re:")) {
+          return message.subject;
+        }
+        return `Re: ${message.subject}`;
+      }
+    }
+    return undefined;
+  };
 
   const { handleSubmit, itemProps, values, setValue } = useForm<OutgoingMessageForm>({
     initialValues: {
@@ -31,7 +47,7 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
       to: draftValues?.to,
       cc: draftValues?.cc,
       bcc: draftValues?.bcc,
-      subject: draftValues?.subject,
+      subject: getInitialSubject(),
       content: draftValues?.content,
       attachments: attachments || draftValues?.attachments,
     },
@@ -47,7 +63,7 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
 
       try {
         const message: OutgoingMessage = {
-          account: values.account,
+          from: values.account,
           to: values.to.split(",").map((recipient: string) => recipient.trim()),
           cc: values.cc.split(",").map((recipient: string) => recipient.trim()),
           bcc: values.bcc.split(",").map((recipient: string) => recipient.trim()),
@@ -66,7 +82,6 @@ export const ComposeMessage = (props: ComposeMessageProps) => {
     },
   });
 
-  const { data: accounts, isLoading: isLoadingAccounts } = useCachedPromise(getAccounts);
   const { data: recipients, isLoading: isLoadingRecipients } = useCachedPromise(
     async () => {
       if (message && mailbox) {

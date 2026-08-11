@@ -42,6 +42,18 @@
                               "value": "global"
                     },
                     {
+                              "title": "GPT-5.4",
+                              "value": "gpt-5.4"
+                    },
+                    {
+                              "title": "GPT-5.4 mini",
+                              "value": "gpt-5.4-mini"
+                    },
+                    {
+                              "title": "GPT-5.4 nano",
+                              "value": "gpt-5.4-nano"
+                    },
+                    {
                               "title": "GPT-4o",
                               "value": "gpt-4o"
                     },
@@ -114,6 +126,18 @@
                     {
                               "title": "Follow global model",
                               "value": "global"
+                    },
+                    {
+                              "title": "GPT-5.4",
+                              "value": "gpt-5.4"
+                    },
+                    {
+                              "title": "GPT-5.4 mini",
+                              "value": "gpt-5.4-mini"
+                    },
+                    {
+                              "title": "GPT-5.4 nano",
+                              "value": "gpt-5.4-nano"
                     },
                     {
                               "title": "GPT-4o",
@@ -190,6 +214,18 @@
                               "value": "global"
                     },
                     {
+                              "title": "GPT-5.4",
+                              "value": "gpt-5.4"
+                    },
+                    {
+                              "title": "GPT-5.4 mini",
+                              "value": "gpt-5.4-mini"
+                    },
+                    {
+                              "title": "GPT-5.4 nano",
+                              "value": "gpt-5.4-nano"
+                    },
+                    {
                               "title": "GPT-4o",
                               "value": "gpt-4o"
                     },
@@ -264,6 +300,18 @@
                               "value": "global"
                     },
                     {
+                              "title": "GPT-5.4",
+                              "value": "gpt-5.4"
+                    },
+                    {
+                              "title": "GPT-5.4 mini",
+                              "value": "gpt-5.4-mini"
+                    },
+                    {
+                              "title": "GPT-5.4 nano",
+                              "value": "gpt-5.4-nano"
+                    },
+                    {
                               "title": "GPT-4o",
                               "value": "gpt-4o"
                     },
@@ -330,6 +378,18 @@
                               "value": "global"
                     },
                     {
+                              "title": "GPT-5.4",
+                              "value": "gpt-5.4"
+                    },
+                    {
+                              "title": "GPT-5.4 mini",
+                              "value": "gpt-5.4-mini"
+                    },
+                    {
+                              "title": "GPT-5.4 nano",
+                              "value": "gpt-5.4-nano"
+                    },
+                    {
                               "title": "GPT-4o",
                               "value": "gpt-4o"
                     },
@@ -394,6 +454,18 @@
                     {
                               "title": "Follow global model",
                               "value": "global"
+                    },
+                    {
+                              "title": "GPT-5.4",
+                              "value": "gpt-5.4"
+                    },
+                    {
+                              "title": "GPT-5.4 mini",
+                              "value": "gpt-5.4-mini"
+                    },
+                    {
+                              "title": "GPT-5.4 nano",
+                              "value": "gpt-5.4-nano"
                     },
                     {
                               "title": "GPT-4o",
@@ -470,6 +542,18 @@
                               "value": "global"
                     },
                     {
+                              "title": "GPT-5.4",
+                              "value": "gpt-5.4"
+                    },
+                    {
+                              "title": "GPT-5.4 mini",
+                              "value": "gpt-5.4-mini"
+                    },
+                    {
+                              "title": "GPT-5.4 nano",
+                              "value": "gpt-5.4-nano"
+                    },
+                    {
                               "title": "GPT-4o",
                               "value": "gpt-4o"
                     },
@@ -544,6 +628,18 @@
                               "value": "global"
                     },
                     {
+                              "title": "GPT-5.4",
+                              "value": "gpt-5.4"
+                    },
+                    {
+                              "title": "GPT-5.4 mini",
+                              "value": "gpt-5.4-mini"
+                    },
+                    {
+                              "title": "GPT-5.4 nano",
+                              "value": "gpt-5.4-nano"
+                    },
+                    {
                               "title": "GPT-4o",
                               "value": "gpt-4o"
                     },
@@ -611,6 +707,18 @@
       "description": "OpenAI LLM to use for your commands",
       "type": "dropdown",
       "data": [
+                {
+                        "title": "GPT-5.4",
+                        "value": "gpt-5.4"
+                },
+                {
+                        "title": "GPT-5.4 mini",
+                        "value": "gpt-5.4-mini"
+                },
+                {
+                        "title": "GPT-5.4 nano",
+                        "value": "gpt-5.4-nano"
+                },
                 {
                         "title": "GPT-4o",
                         "value": "gpt-4o"

@@ -5,6 +5,10 @@
   "description": "Copy correct typographic characters, like dashes, quote marks, and other special characters.",
   "icon": "command-icon.png",
   "author": "sawyerh",
+  "contributors": [
+    "chrismessina",
+    "0xdhrv"
+  ],
   "categories": [
     "Data",
     "Design Tools",
@@ -13,6 +17,9 @@
     "Web"
   ],
   "license": "MIT",
+  "assets": [
+    "src/characters.json"
+  ],
   "commands": [
     {
       "name": "index",
@@ -22,21 +29,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9"
+    "@raycast/api": "^1.103.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "publish": "ray publish",
+    "type-check": "tsc --noEmit"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

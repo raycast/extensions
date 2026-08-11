@@ -61,7 +61,8 @@ export default async function (input: Input): Promise<GitChanges> {
           if (error) {
             reject(stderr.trim() || error.message);
           } else {
-            resolve(stdout.trim());
+            const output = stdout.replace(/\s+$/, "");
+            resolve(output);
           }
         });
       });

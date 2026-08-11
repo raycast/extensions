@@ -17,24 +17,33 @@ export default function JarActions(props: {
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        <Action.OpenInBrowser title="Open Top Up Page" url={sendUrl} />
-        <Action.CopyToClipboard title="Copy Top Up Page URL" icon={Icon.Link} content={sendUrl} />
+        <Action.OpenInBrowser title="Open Top up Page" url={sendUrl} />
+        <Action.CopyToClipboard title="Copy Top up Page URL" icon={Icon.Link} content={sendUrl} />
         <Action.CopyToClipboard
           title="Copy Balance"
           content={jar.balance}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "b" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "b" },
+          }}
         />
         {!!jar.goal && (
           <Action.CopyToClipboard
             title="Copy Goal"
             content={jar.goal}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "g" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "g" },
+            }}
           />
         )}
         <Action
           title="Copy Total"
           icon={Icon.CopyClipboard}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "t" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "t" },
+          }}
           onAction={onCopyTotal}
         />
       </ActionPanel.Section>
@@ -43,22 +52,31 @@ export default function JarActions(props: {
         <Action
           title="Toggle Details"
           icon={Icon.Sidebar}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "d" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+          }}
           onAction={onToggleDetails}
         />
         <Action
           title={!isPinned ? "Pin" : "Unpin"}
           icon={!isPinned ? Icon.Pin : Icon.PinDisabled}
-          shortcut={{ key: "p", modifiers: ["cmd", "shift"] }}
+          shortcut={{
+            macOS: { key: "p", modifiers: ["cmd", "shift"] },
+            Windows: { key: "p", modifiers: ["ctrl", "shift"] },
+          }}
           onAction={() => onPin(jar)}
         />
         {isPinned && onRearrange && (
           <>
             {validRearrangeDirections?.up && (
               <Action
-                title="Move Up in Pinned"
+                title="Move up in Pinned"
                 icon={Icon.ArrowUp}
-                shortcut={{ key: "arrowUp", modifiers: ["cmd", "opt"] }}
+                shortcut={{
+                  macOS: { key: "arrowUp", modifiers: ["cmd", "opt"] },
+                  Windows: { key: "arrowUp", modifiers: ["ctrl", "alt"] },
+                }}
                 onAction={() => onRearrange(jar, "up")}
               />
             )}
@@ -67,7 +85,10 @@ export default function JarActions(props: {
               <Action
                 title="Move Down in Pinned"
                 icon={Icon.ArrowDown}
-                shortcut={{ key: "arrowDown", modifiers: ["cmd", "opt"] }}
+                shortcut={{
+                  macOS: { key: "arrowDown", modifiers: ["cmd", "opt"] },
+                  Windows: { key: "arrowDown", modifiers: ["ctrl", "alt"] },
+                }}
                 onAction={() => onRearrange(jar, "down")}
               />
             )}

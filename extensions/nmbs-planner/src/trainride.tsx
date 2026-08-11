@@ -1,116 +1,121 @@
 import { useEffect, useState } from "react";
-import { Trainrides } from "./types";
-import { getTrainRides } from "./api";
+import { Trainrides, Vias, Via } from "@/types";
+import { getTrainRides } from "@/utils/index";
 import { LaunchProps, List } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface TrainrideArguments {
   from: string;
   to: string;
 }
 
-export default function TrainRide(props: LaunchProps<{ arguments: TrainrideArguments }>) {
-  const { from, to } = props.arguments;
-  const [trainrides, setTrainrides] = useState<Trainrides>();
+const pad2 = (n: number) => n.toString().padStart(2, "0");
 
-  useEffect(() => {
-    // add from and to to the api call
-    getTrainRides(from, to).then((trainrides) => setTrainrides(trainrides));
-  }, []);
+function formatTime(ts: string | number, delay?: string | number) {
+  const date = new Date(Number(ts) * 1000);
+  const delayNum = Number(delay ?? 0);
+  const delayText = delayNum > 0 ? `(+${Math.floor(delayNum / 60)})` : "";
+  return `${pad2(date.getHours())}:${pad2(date.getMinutes())} ${delayText}`.trim();
+}
+
+function formatDuration(duration: string | number) {
+  return new Date(Number(duration) * 1000).toISOString().slice(11, 16);
+}
+
+function renderViaLabels(vias?: Vias) {
+  if (!vias?.via || !Array.isArray(vias.via)) return null;
+
+  const fmt = (ts?: string | number, delay?: string | number) => {
+    const n = Number(ts ?? NaN);
+    if (!Number.isFinite(n)) return "—";
+    return formatTime(n, delay);
+  };
 
   return (
     <>
-      <List isLoading={!trainrides} isShowingDetail>
-        <List.Section title={from + " -> " + to}>
-          {trainrides?.connection?.map((trainride) => (
+      {vias.via.map((via: Via) => (
+        <List.Item.Detail.Metadata.Label
+          key={via.id}
+          title={`${via.station} (${fmt(via.arrival?.time, via.arrival?.delay)} - ${fmt(
+            via.departure?.time,
+            via.departure?.delay,
+          )})`}
+          text={`${via.arrival?.platform ?? "—"} -> ${via.departure?.platform ?? "—"}`}
+        />
+      ))}
+    </>
+  );
+}
+
+export default function TrainRide(props: LaunchProps<{ arguments: TrainrideArguments }>) {
+  const { from, to } = props.arguments;
+  const [trainrides, setTrainrides] = useState<Trainrides>();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTrainRides = async () => {
+      try {
+        setIsLoading(true);
+        const tr = await getTrainRides(from, to);
+        setTrainrides(tr);
+      } catch (error) {
+        await showFailureToast(error, {
+          title: "Failed to fetch train rides",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTrainRides();
+  }, [from, to]);
+
+  return (
+    <List isLoading={isLoading} isShowingDetail>
+      <List.Section title={`${from} -> ${to}`}>
+        {trainrides?.connection?.map((trainride) => {
+          const dep = trainride.departure;
+          const arr = trainride.arrival;
+
+          return (
             <List.Item
               key={trainride.id}
-              title={`${
-                new Date(+trainride.departure.time * 1000).getHours() < 10
-                  ? "0" + new Date(+trainride.departure.time * 1000).getHours()
-                  : new Date(+trainride.departure.time * 1000).getHours()
-              }:${
-                new Date(+trainride.departure.time * 1000).getMinutes() < 10
-                  ? "0" + new Date(+trainride.departure.time * 1000).getMinutes()
-                  : new Date(+trainride.departure.time * 1000).getMinutes()
-              } ${+trainride.departure.delay > 0 ? "(+" + +trainride.departure.delay / 60 + ")" : ""} - ${
-                new Date(+trainride.arrival.time * 1000).getHours() < 10
-                  ? "0" + new Date(+trainride.arrival.time * 1000).getHours()
-                  : new Date(+trainride.arrival.time * 1000).getHours()
-              }:${
-                new Date(+trainride.arrival.time * 1000).getMinutes() < 10
-                  ? "0" + new Date(+trainride.arrival.time * 1000).getMinutes()
-                  : new Date(+trainride.arrival.time * 1000).getMinutes()
-              } ${+trainride.arrival.delay > 0 ? "(+" + +trainride.arrival.delay / 60 + ")" : ""}`}
-              subtitle={`platform: ${trainride.departure.platform}`}
+              title={`${formatTime(dep.time, dep.delay)} - ${formatTime(arr.time, arr.delay)}`}
+              subtitle={`platform: ${dep.platform}`}
               detail={
                 <List.Item.Detail
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label
                         title="Duration"
-                        text={`${new Date(+trainride.duration * 1000).toISOString().slice(11, 16)}`}
+                        text={formatDuration(trainride.duration)}
                         icon="⏳"
                       />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label title="Departure" />
                       <List.Item.Detail.Metadata.Label
                         title="Station"
-                        text={`${trainride.departure.station}, Platform ${trainride.departure.platform}`}
+                        text={`${dep.station}, Platform ${dep.platform}`}
                       />
-                      <List.Item.Detail.Metadata.Label
-                        title="Time"
-                        text={`${
-                          new Date(+trainride.departure.time * 1000).getHours() < 10
-                            ? "0" + new Date(+trainride.departure.time * 1000).getHours()
-                            : new Date(+trainride.departure.time * 1000).getHours()
-                        }:${
-                          new Date(+trainride.departure.time * 1000).getMinutes() < 10
-                            ? "0" + new Date(+trainride.departure.time * 1000).getMinutes()
-                            : new Date(+trainride.departure.time * 1000).getMinutes()
-                        } ${+trainride.departure.delay > 0 ? "(+" + +trainride.departure.delay / 60 + ")" : ""}`}
-                        icon="⏰"
-                      />
+                      <List.Item.Detail.Metadata.Label title="Time" text={formatTime(dep.time, dep.delay)} icon="⏰" />
                       <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label title="Arrival" />
                       <List.Item.Detail.Metadata.Label
                         title="Station"
-                        text={`${trainride.arrival.station}, Platform ${trainride.arrival.platform}`}
+                        text={`${arr.station}, Platform ${arr.platform}`}
                       />
-                      <List.Item.Detail.Metadata.Label
-                        title="Time"
-                        text={`${
-                          new Date(+trainride.arrival.time * 1000).getHours() < 10
-                            ? "0" + new Date(+trainride.arrival.time * 1000).getHours()
-                            : new Date(+trainride.arrival.time * 1000).getHours()
-                        }:${
-                          new Date(+trainride.arrival.time * 1000).getMinutes() < 10
-                            ? "0" + new Date(+trainride.arrival.time * 1000).getMinutes()
-                            : new Date(+trainride.arrival.time * 1000).getMinutes()
-                        } ${+trainride.arrival.delay > 0 ? "(+" + +trainride.arrival.delay / 60 + ")" : ""}`}
-                        icon="⏰"
-                      />
+                      <List.Item.Detail.Metadata.Label title="Time" text={formatTime(arr.time, arr.delay)} icon="⏰" />
                       <List.Item.Detail.Metadata.Separator />
-                      <List.Item.Detail.Metadata.Label
-                        title="Changes"
-                        text={`${trainride.vias?.number ? trainride.vias?.number : "0"}`}
-                      />
-                      {trainride.vias?.via.map((via) => (
-                        <List.Item.Detail.Metadata.Label
-                          key={via.id}
-                          title={`${via.station} (${new Date(+via.arrival.time * 1000)
-                            .toISOString()
-                            .slice(11, 16)} - ${new Date(+via.departure.time * 1000).toISOString().slice(11, 16)}) `}
-                          text={`${via.arrival.platform} -> ${via.departure.platform}`}
-                        />
-                      ))}
+                      <List.Item.Detail.Metadata.Label title="Changes" text={`${trainride.vias?.number ?? 0}`} />
+                      {renderViaLabels(trainride.vias)}
                     </List.Item.Detail.Metadata>
                   }
                 />
               }
             />
-          ))}
-        </List.Section>
-      </List>
-    </>
+          );
+        })}
+      </List.Section>
+    </List>
   );
 }

@@ -1,7 +1,7 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-import { Device } from "./types";
+import { Device } from "./lib/types";
 import {
   getDeviceIcon,
   getDevices,
@@ -11,27 +11,23 @@ import {
   queryDevicesOnLocalNetwork,
   turnDeviceOn,
   turnDeviceOff,
-} from "./devices";
-import { split } from "./utils";
+} from "./lib/devices";
+import { split } from "./lib/utils";
 
 const refreshDevices = async (
   setDevicesFn: (devices: Device[]) => void,
-  setIsLoadingFn: (isLoading: boolean) => void
+  setIsLoadingFn: (isLoading: boolean) => void,
 ): Promise<void> => {
-  let devices;
-
   try {
-    devices = await getDevices();
-  } catch (error) {
+    const devices = await getDevices();
+    const locatedDevices = await locateDevicesOnLocalNetwork(devices);
+    const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
+    setDevicesFn(augmentedLocatedDevices);
+  } catch {
+    // silently ignore errors in the menu bar context
+  } finally {
     setIsLoadingFn(false);
-    return;
   }
-
-  const locatedDevices = await locateDevicesOnLocalNetwork(devices);
-  const augmentedLocatedDevices = await queryDevicesOnLocalNetwork(locatedDevices);
-  setDevicesFn(augmentedLocatedDevices);
-
-  setIsLoadingFn(false);
 };
 
 export default function Command() {
@@ -51,7 +47,7 @@ export default function Command() {
       {availableDevices.map((device) => (
         <MenuBarExtra.Item
           title={`${device.alias} (${getOnStateText(device)})`}
-          key={device.id}
+          key={device.deviceId}
           icon={getDeviceIcon(device)}
           tooltip={device.name}
           onAction={async () => {
@@ -65,7 +61,12 @@ export default function Command() {
       ))}
       {unavailableDevices.length && <MenuBarExtra.Item title="Unavailable" />}
       {unavailableDevices.map((device) => (
-        <MenuBarExtra.Item title={device.alias} key={device.id} icon={getDeviceIcon(device)} tooltip={device.name} />
+        <MenuBarExtra.Item
+          title={device.alias}
+          key={device.deviceId}
+          icon={getDeviceIcon(device)}
+          tooltip={device.name}
+        />
       ))}
     </MenuBarExtra>
   );

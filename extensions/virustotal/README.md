@@ -1,10 +1,11 @@
 # VirusTotal Raycast Extension
 
-A Raycast extension that checks files, hashes, and URLs with VirusTotal API.
+A Raycast extension that checks files, hashes, IP addresses, and URLs with VirusTotal API.
 
 ## Features
 
 - Check file hashes (MD5, SHA1, SHA256) with VirusTotal
+- Check IP addresses (IPv4 and IPv6) with VirusTotal
 - Check URLs with VirusTotal
 - Check selected files directly
 - Check clipboard content automatically if no direct input
@@ -17,9 +18,9 @@ A Raycast extension that checks files, hashes, and URLs with VirusTotal API.
 
 ## Usage
 
-- Use the "Check Hash or URL" command to check a hash or URL
-- You can provide a hash or URL directly as a command argument
-- You can also select text (hash or URL) in any application and run the command
+- Use the "Check File, IP, or URL" command to check a hash, IP address, or URL
+- You can provide a hash, IP address, or URL directly as a command argument
+- You can also select text (hash, IP address, or URL) in any application and run the command
 - Select a file in Finder and run the command to check the file
 - If no argument, selection, or file is provided, the command will check the clipboard content
 

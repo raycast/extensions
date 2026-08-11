@@ -1,54 +1,61 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { useMemo } from "react";
+import { useBookmarksContext } from "../bookmarks-context";
 import { LinkdingBookmark } from "../types/linkding-types";
 
 interface Props {
   bookmark: LinkdingBookmark;
-  preferences: Preferences;
-  onDelete: (id: number) => void;
-  onCopy: () => void;
 }
 
-const SearchListItem = ({ bookmark, preferences, onDelete, onCopy }: Props) => {
-  const subtitle = useMemo(() => {
-    if (!preferences.showDescription) {
-      return "";
-    }
-    if (bookmark.description && bookmark.description.length > 0) {
-      return bookmark.description;
-    }
-    return bookmark.website_description;
-  }, [bookmark, preferences]);
-
-  const tags = useMemo(() => {
-    if (!preferences.showTags) {
-      return [];
-    }
-    return bookmark.tag_names.map((tag) => ({
-      tag: "#" + tag,
-    }));
-  }, [bookmark, preferences]);
+export const SearchListItem = ({ bookmark }: Props) => {
+  const {
+    sortByFrecency,
+    onDeleteBookmark,
+    onArchiveBookmark,
+    onOpenBookmark,
+    onCopyBookmark,
+    onResetBookmark,
+    getBookmarkMetadata,
+  } = useBookmarksContext();
+  const { title, subtitle, tags, editUrl } = useMemo(
+    () => getBookmarkMetadata(bookmark),
+    [getBookmarkMetadata, bookmark],
+  );
 
   return (
     <List.Item
       icon={getFavicon(bookmark.url, { fallback: Icon.Globe })}
-      title={bookmark.title.length > 0 ? bookmark.title : (bookmark.website_title ?? bookmark.url)}
+      title={title}
       subtitle={subtitle}
       accessories={tags}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.OpenInBrowser url={bookmark.url} />
-            <Action.OpenInBrowser
-              title="Edit in Linkding"
-              url={`${preferences.serverUrl}/bookmarks/${bookmark.id}/edit`}
-              shortcut={Keyboard.Shortcut.Common.Edit}
+            <Action.OpenInBrowser url={bookmark.url} onOpen={() => onOpenBookmark(bookmark)} />
+            <Action.OpenInBrowser title="Edit in Linkding" url={editUrl} shortcut={Keyboard.Shortcut.Common.Edit} />
+            <Action.CopyToClipboard
+              content={bookmark.url}
+              onCopy={() => onCopyBookmark(bookmark)}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
-            <Action.CopyToClipboard content={bookmark.url} onCopy={onCopy} shortcut={Keyboard.Shortcut.Common.Copy} />
+            {sortByFrecency && (
+              <Action
+                onAction={() => onResetBookmark(bookmark)}
+                icon={Icon.ArrowCounterClockwise}
+                title="Reset Ranking"
+              />
+            )}
+
             <Action
-              onAction={() => onDelete(bookmark.id)}
-              icon={{ source: Icon.Trash }}
+              onAction={() => onArchiveBookmark(bookmark)}
+              icon={Icon.Document}
+              title="Archive"
+              shortcut={{ modifiers: ["ctrl"], key: "a" }}
+            />
+            <Action
+              onAction={() => onDeleteBookmark(bookmark)}
+              icon={Icon.Trash}
               title="Delete"
               shortcut={Keyboard.Shortcut.Common.Remove}
               style={Action.Style.Destructive}
@@ -59,5 +66,3 @@ const SearchListItem = ({ bookmark, preferences, onDelete, onCopy }: Props) => {
     />
   );
 };
-
-export default SearchListItem;

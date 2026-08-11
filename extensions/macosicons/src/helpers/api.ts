@@ -1,4 +1,5 @@
 import { IconMetadata, IconsResponse, SearchIcon } from "../types.ts";
+import { environment } from "@raycast/api";
 
 export async function search(
   apiKey: string,
@@ -10,6 +11,7 @@ export async function search(
     headers: {
       "Content-Type": "application/json",
       "x-api-key": apiKey,
+      "User-Agent": `Raycast/${environment.raycastVersion} ${environment.extensionName} (${environment.commandName})`,
     },
     body: JSON.stringify({
       query,

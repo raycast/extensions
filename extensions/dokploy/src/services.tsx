@@ -13,10 +13,11 @@ import {
 } from "@raycast/api";
 import { useFetch, useForm, FormValidation } from "@raycast/utils";
 import { useToken } from "./instances";
-import { Project, Server, Service, ErrorResult } from "./interfaces";
-import { getProjectTotalServices } from "./projects";
+import { Server, Service, ErrorResult } from "./interfaces";
+import type { ServiceScope } from "./utils";
+import { getTotalServices } from "./utils";
 
-export default function Services({ project }: { project: Project }) {
+export default function Services({ environment }: { environment: ServiceScope }) {
   const { url, headers } = useToken();
 
   interface GroupedService extends Service {
@@ -25,18 +26,18 @@ export default function Services({ project }: { project: Project }) {
     status: "idle" | "done";
   }
   const services: GroupedService[] = [
-    ...project.applications.map((a) => ({
+    ...environment.applications.map((a) => ({
       ...a,
       type: "application",
       id: a.applicationId,
       status: a.applicationStatus,
     })),
-    ...project.mariadb.map((m) => ({ ...m, type: "mariadb", id: m.mariadbId, status: m.applicationStatus })),
-    ...project.mongo.map((m) => ({ ...m, type: "mongo", id: m.mongoId, status: m.applicationStatus })),
-    ...project.mysql.map((m) => ({ ...m, type: "mysql", id: m.mysqlId, status: m.applicationStatus })),
-    ...project.postgres.map((p) => ({ ...p, type: "postgres", id: p.postgresId, status: p.applicationStatus })),
-    ...project.redis.map((r) => ({ ...r, type: "redis", id: r.redisId, status: r.applicationStatus })),
-    ...project.compose.map((c) => ({ ...c, type: "compose", id: c.composeId, status: c.composeStatus })),
+    ...environment.mariadb.map((m) => ({ ...m, type: "mariadb", id: m.mariadbId, status: m.applicationStatus })),
+    ...environment.mongo.map((m) => ({ ...m, type: "mongo", id: m.mongoId, status: m.applicationStatus })),
+    ...environment.mysql.map((m) => ({ ...m, type: "mysql", id: m.mysqlId, status: m.applicationStatus })),
+    ...environment.postgres.map((p) => ({ ...p, type: "postgres", id: p.postgresId, status: p.applicationStatus })),
+    ...environment.redis.map((r) => ({ ...r, type: "redis", id: r.redisId, status: r.applicationStatus })),
+    ...environment.compose.map((c) => ({ ...c, type: "compose", id: c.composeId, status: c.composeStatus })),
   ];
 
   async function deleteService({ id, name, type }: GroupedService) {
@@ -109,7 +110,7 @@ export default function Services({ project }: { project: Project }) {
     redis: "redis.svg",
   };
 
-  const totalServices = getProjectTotalServices(project);
+  const totalServices = getTotalServices(environment);
 
   return (
     <List navigationTitle="Services" isShowingDetail={totalServices > 0}>
@@ -123,9 +124,13 @@ export default function Services({ project }: { project: Project }) {
                 <Action.Push
                   icon="folder-input.svg"
                   title="Application"
-                  target={<CreateApplication project={project} />}
+                  target={<CreateApplication environment={environment} />}
                 />
-                <Action.Push icon="database.svg" title="Database" target={<CreateDatabase project={project} />} />
+                <Action.Push
+                  icon="database.svg"
+                  title="Database"
+                  target={<CreateDatabase environment={environment} />}
+                />
               </ActionPanel.Submenu>
             </ActionPanel>
           }
@@ -165,9 +170,13 @@ export default function Services({ project }: { project: Project }) {
                   <Action.Push
                     icon="folder-input.svg"
                     title="Application"
-                    target={<CreateApplication project={project} />}
+                    target={<CreateApplication environment={environment} />}
                   />
-                  <Action.Push icon="database.svg" title="Database" target={<CreateDatabase project={project} />} />
+                  <Action.Push
+                    icon="database.svg"
+                    title="Database"
+                    target={<CreateDatabase environment={environment} />}
+                  />
                 </ActionPanel.Submenu>
                 <Action
                   icon={Icon.Trash}
@@ -184,7 +193,7 @@ export default function Services({ project }: { project: Project }) {
   );
 }
 
-function CreateApplication({ project }: { project: Project }) {
+function CreateApplication({ environment }: { environment: ServiceScope }) {
   const { url, headers } = useToken();
 
   interface FormValues {
@@ -207,7 +216,7 @@ function CreateApplication({ project }: { project: Project }) {
         const response = await fetch(url + "application.create", {
           method: "POST",
           headers,
-          body: JSON.stringify({ ...values, projectId: project.projectId }),
+          body: JSON.stringify({ ...values, projectId: environment.projectId }),
         });
         if (!response.ok) {
           const err = (await response.json()) as ErrorResult;
@@ -223,7 +232,7 @@ function CreateApplication({ project }: { project: Project }) {
       }
     },
     initialValues: {
-      appName: project.name.toLowerCase().replaceAll(" ", "-") + "-",
+      appName: environment.name.toLowerCase().replaceAll(" ", "-") + "-",
     },
     validation: {
       name: FormValidation.Required,
@@ -257,7 +266,7 @@ function CreateApplication({ project }: { project: Project }) {
   );
 }
 
-function CreateDatabase({ project }: { project: Project }) {
+function CreateDatabase({ environment }: { environment: ServiceScope }) {
   const { url, headers } = useToken();
   interface FormValues {
     dbType: string;
@@ -305,7 +314,7 @@ function CreateDatabase({ project }: { project: Project }) {
         const response = await fetch(url + `${dbType}.create`, {
           method: "POST",
           headers,
-          body: JSON.stringify({ ...db, projectId: project.projectId }),
+          body: JSON.stringify({ ...db, projectId: environment.projectId }),
         });
         if (!response.ok) {
           const err = (await response.json()) as ErrorResult;
@@ -321,7 +330,7 @@ function CreateDatabase({ project }: { project: Project }) {
       }
     },
     initialValues: {
-      appName: project.name.toLowerCase().replaceAll(" ", "-") + "-",
+      appName: environment.name.toLowerCase().replaceAll(" ", "-") + "-",
     },
     validation: {
       name: FormValidation.Required,

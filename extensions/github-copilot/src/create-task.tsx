@@ -1,22 +1,39 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Keyboard, open, popToRoot, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  Keyboard,
+  launchCommand,
+  LaunchType,
+  open,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { FormValidation, showFailureToast, useForm, withAccessToken } from "@raycast/utils";
 import { useState } from "react";
 
-import { BranchDropdown, RepositoryDropdown } from "./components";
+import { BranchDropdown, RepositoryDropdown, CustomAgentsDropdown, cacheRepository } from "./components";
 import { useViewer } from "./hooks/useViewer";
 import { provider, reauthorize } from "./lib/oauth";
 import { createTask } from "./services/copilot";
+import { ModelDropdown } from "./components/ModelDropdown";
 
 type FormValues = {
   prompt: string;
   repository: string;
   branch: string;
+  model: string;
+  customAgent: string;
 };
 
 function Command() {
   const [isRepositoryLoading, setIsRepositoryLoading] = useState(false);
   const [isBranchLoading, setIsBranchLoading] = useState(false);
+  const [isModelLoading, setIsModelLoading] = useState(false);
   const [isCreatingTaskLoading, setIsCreatingTaskLoading] = useState(false);
+  const [isCustomAgentsLoading, setIsCustomAgentsLoading] = useState(false);
 
   const { itemProps, handleSubmit } = useForm<FormValues>({
     validation: {
@@ -36,31 +53,41 @@ function Command() {
       });
 
       try {
-        const { pullRequestUrl } = await createTask(values.repository, values.prompt, values.branch);
+        const { taskUrl, taskId } = await createTask(
+          values.repository,
+          values.prompt,
+          values.branch,
+          values.model,
+          values.customAgent,
+        );
 
         await showToast({
           style: Toast.Style.Success,
           title: "Created task",
           primaryAction: {
-            title: "Open in Browser",
+            title: "View Task",
             shortcut: Keyboard.Shortcut.Common.Open,
-            onAction: () => {
-              open(pullRequestUrl);
+            onAction: async () => {
+              try {
+                await launchCommand({
+                  name: "view-tasks",
+                  type: LaunchType.UserInitiated,
+                  context: { taskId },
+                });
+              } catch {
+                open(taskUrl);
+              }
             },
           },
           secondaryAction: {
-            title: "Copy URL",
-            shortcut: Keyboard.Shortcut.Common.Copy,
-            onAction: async () => {
-              await Clipboard.copy(pullRequestUrl);
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Copied URL to Clipboard",
-              });
+            title: "Open in Browser",
+            onAction: () => {
+              open(taskUrl);
             },
           },
         });
 
+        cacheRepository(values.repository);
         await popToRoot();
       } catch (error) {
         await showFailureToast(error, { title: "Failed creating task" });
@@ -71,7 +98,13 @@ function Command() {
   const { data, isLoading: isViewerLoading } = useViewer();
 
   // Combine all loading states
-  const isLoading = isViewerLoading || isRepositoryLoading || isBranchLoading || isCreatingTaskLoading;
+  const isLoading =
+    isViewerLoading ||
+    isRepositoryLoading ||
+    isBranchLoading ||
+    isCreatingTaskLoading ||
+    isModelLoading ||
+    isCustomAgentsLoading;
 
   return (
     <Form
@@ -83,7 +116,11 @@ function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.TextArea title="Prompt" placeholder="Describe a coding task to work on" {...itemProps.prompt} />
+      <Form.TextArea
+        title="Prompt"
+        placeholder={"Give Copilot a background task to work on.\nIf you want Copilot to open a PR, just ask."}
+        {...itemProps.prompt}
+      />
       <RepositoryDropdown
         organizations={data?.organizations.nodes.map((org) => org.login)}
         itemProps={itemProps.repository}
@@ -94,6 +131,12 @@ function Command() {
         itemProps={itemProps.branch}
         onLoadingChange={setIsBranchLoading}
       />
+      <CustomAgentsDropdown
+        repository={itemProps.repository.value}
+        itemProps={itemProps.customAgent}
+        onLoadingChange={setIsCustomAgentsLoading}
+      />
+      <ModelDropdown itemProps={itemProps.model} onLoadingChange={setIsModelLoading} />
     </Form>
   );
 }

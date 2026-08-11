@@ -13,7 +13,8 @@
     "dmacdermott",
     "pernielsentikaer",
     "yansq",
-    "amureki"
+    "amureki",
+    "bengt"
   ],
   "license": "MIT",
   "commands": [
@@ -245,6 +246,78 @@
       "subtitle": "Spotify",
       "description": "Toggles Private Session in Spotify.",
       "mode": "no-view"
+    },
+    {
+      "name": "menuBarPlayer",
+      "title": "Menu Bar Player",
+      "subtitle": "Spotify",
+      "description": "See what's currently playing in your Menu Bar. Click for actions such as Play/Pause and Skip. Refreshes every 10 seconds.",
+      "mode": "menu-bar",
+      "interval": "10s",
+      "preferences": [
+        {
+          "name": "hideIconWhenIdle",
+          "type": "checkbox",
+          "label": "Hide icon when idle",
+          "required": false,
+          "description": "Hide the menu bar icon while Spotify is idle.",
+          "default": false
+        },
+        {
+          "name": "hideArtistName",
+          "type": "checkbox",
+          "label": "Hide artist's name",
+          "required": false,
+          "description": "Only show the song title in the menu bar text.",
+          "default": false
+        },
+        {
+          "name": "cleanupSongTitle",
+          "type": "checkbox",
+          "label": "Cleanup song title",
+          "required": false,
+          "description": "Remove common suffixes like Remastered and bracketed metadata.",
+          "default": false
+        },
+        {
+          "name": "nowPlayingTextLength",
+          "type": "textfield",
+          "title": "Now Playing Text Length",
+          "required": false,
+          "description": "Maximum number of characters shown in menu bar text.",
+          "default": "30"
+        },
+        {
+          "name": "menuBarIcon",
+          "type": "dropdown",
+          "title": "Menu Bar Icon",
+          "required": false,
+          "description": "Choose which icon is shown in the menu bar.",
+          "default": "spotify",
+          "data": [
+            {
+              "title": "Spotify Icon",
+              "value": "spotify"
+            },
+            {
+              "title": "Track Icon",
+              "value": "artwork"
+            },
+            {
+              "title": "Music Icon",
+              "value": "music"
+            }
+          ]
+        },
+        {
+          "name": "showTextInMenuBar",
+          "type": "checkbox",
+          "label": "Show track text in menu bar",
+          "required": false,
+          "description": "Show the current track and artist next to the icon in the menu bar.",
+          "default": false
+        }
+      ]
     }
   ],
   "dependencies": {

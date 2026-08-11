@@ -9,7 +9,8 @@ export interface IGif {
   slug: string;
   download_url: string;
   download_name: string;
-  preview_gif_url: string;
+  small_preview_gif_url: string;
+  large_preview_gif_url?: string;
   gif_url: string;
   metadata?: {
     width?: number;
@@ -39,8 +40,8 @@ export interface IGifAPI {
 }
 
 export function renderGifMarkdownDetails(gif: IGif, limitHeight?: boolean) {
-  const height = limitHeight ? DETAIL_WINDOW_HEIGHT : "";
-  return `<img alt="${gif.title}" src="${gif.gif_url}" height="${height}" />`;
+  const height = limitHeight ? ` height="${DETAIL_WINDOW_HEIGHT}"` : "";
+  return `<img alt="${gif.title}" src="${gif.gif_url}"${height} />`;
 }
 
 export function slugify(title: string) {
@@ -50,4 +51,10 @@ export function slugify(title: string) {
     .replace(/[^\w\s-]/g, "")
     .replace(/[\s_-]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+export function createGifLookupUrl(apiBaseUrl: string, ids: string[]) {
+  const reqUrl = new URL(apiBaseUrl);
+  reqUrl.searchParams.set("ids", ids.join(","));
+  return reqUrl;
 }

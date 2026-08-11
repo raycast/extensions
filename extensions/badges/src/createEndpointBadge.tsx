@@ -27,7 +27,7 @@ export default function Command({
   const urlParameters = omitBy(badge, (v, k) => !v || k.startsWith("$"));
   const query = new URLSearchParams(urlParameters as Record<string, string>).toString();
 
-  const badgeUrl = new URL(`https://img.shields.io/badge/endpoint`);
+  const badgeUrl = new URL(`https://img.shields.io/endpoint`);
   badgeUrl.search = query;
 
   const parameterFields = parameterIds.map((id) => fields[id]);
@@ -43,7 +43,7 @@ export default function Command({
           onBadgeChange={setBadge}
         />
       }
-      markdown={`${"# \n\n".repeat(5)}![](${badgeUrl})\n\n${codeBlock("markdown", badgeUrl.toString())}`}
+      markdown={`${"# 　\n\n".repeat(2)}![](${badgeUrl})\n\n${codeBlock("markdown", badgeUrl.toString())}`}
       metadata={
         <Detail.Metadata>
           {parameterFields.map((P, index) => (

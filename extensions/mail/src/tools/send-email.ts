@@ -29,6 +29,15 @@ type Input = {
   bcc: string[];
 
   /**
+   * The email address to send from.
+   *
+   * This must be one of the user's email addresses from their accounts.
+   * You can get available email addresses using the `list-account-emails` tool.
+   * If not provided, the default account's first email address will be used.
+   */
+  from?: string;
+
+  /**
    * The subject of the email.
    *
    * Always include a relevant subject, but don't include any prefixes such as "Re:".
@@ -47,32 +56,52 @@ type Input = {
   attachments?: string[];
 };
 
-export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  // Load the user's mail accounts if this is the first time they're
-  // using the extension.
-  await getAccounts();
-
-  const account = Cache.getDefaultAccount();
-  if (!account) {
+/**
+ * Gets the email address to use for sending.
+ * If `fromEmail` is provided, validates it exists in an account.
+ * Otherwise, uses the default account's first email address.
+ */
+async function getFromEmail(fromEmail?: string): Promise<string> {
+  const accounts = await getAccounts();
+  if (!accounts || accounts.length === 0) {
     throw new Error("No accounts found");
   }
 
+  if (fromEmail) {
+    // Validate that the email address exists in an account
+    const account = accounts.find((acc) => acc.emails.includes(fromEmail));
+    if (!account) {
+      throw new Error(`Email address "${fromEmail}" not found in any account`);
+    }
+    return fromEmail;
+  } else {
+    const defaultAccount = Cache.getDefaultAccount();
+    if (!defaultAccount) {
+      throw new Error("No accounts found");
+    }
+    return defaultAccount.emails[0];
+  }
+}
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const fromEmail = await getFromEmail(input.from);
+
   const infoItems = [
-    { name: "From", value: account.emails[0] },
+    { name: "From", value: fromEmail },
     { name: "To", value: input.to.join(", ") },
     { name: "Subject", value: input.subject },
     { name: "Content", value: input.content },
   ];
 
-  if (input.cc) {
+  if (input.cc && input.cc.length > 0) {
     infoItems.push({ name: "CC", value: input.cc.join(", ") });
   }
 
-  if (input.bcc) {
+  if (input.bcc && input.bcc.length > 0) {
     infoItems.push({ name: "BCC", value: input.bcc.join(", ") });
   }
 
-  if (input.attachments) {
+  if (input.attachments && input.attachments.length > 0) {
     infoItems.push({ name: "Attachments", value: `${input.attachments.length} file(s)` });
   }
 
@@ -83,18 +112,11 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
 };
 
 export default async function (input: Input) {
-  // Load the user's mail accounts if this is the first time they're
-  // using the extension.
-  await getAccounts();
-
-  const account = Cache.getDefaultAccount();
-  if (!account) {
-    throw new Error("No accounts found");
-  }
+  const fromEmail = await getFromEmail(input.from);
 
   try {
     await sendMessage({
-      account: account.id,
+      from: fromEmail,
       to: input.to,
       cc: input.cc,
       bcc: input.bcc,

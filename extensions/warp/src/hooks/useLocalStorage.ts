@@ -1,9 +1,10 @@
 import { LocalStorage } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function useLocalStorage<T>(key: string, initialValue?: T) {
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState(initialValue || ({} as T));
+  const hasLoaded = useRef(false);
 
   useEffect(() => {
     setIsLoading(true);
@@ -18,11 +19,18 @@ export default function useLocalStorage<T>(key: string, initialValue?: T) {
         setData(json as T);
       })
       .finally(() => {
+        hasLoaded.current = true;
         setIsLoading(false);
       });
   }, []);
 
   useEffect(() => {
+    // Don't persist until the stored value has been read, otherwise the initial
+    // value would overwrite a previously saved value on mount.
+    if (!hasLoaded.current) {
+      return;
+    }
+
     setLocalStorageValue(data);
   }, [data]);
 

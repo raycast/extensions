@@ -1,10 +1,4 @@
-import {
-  showToast,
-  Toast,
-  getPreferenceValues,
-  LaunchProps,
-  closeMainWindow,
-} from "@raycast/api";
+import { showToast, Toast, getPreferenceValues, LaunchProps, closeMainWindow } from "@raycast/api";
 import { isLoggedIn, login, getCurrentUser } from "./utils/auth";
 import { saveTabToQstash, isValidUrl } from "./utils/qstash";
 import { plausible } from "./utils/plausible";
@@ -13,9 +7,7 @@ interface Arguments {
   content: string;
 }
 
-export default async function SaveToWebBites(
-  props: LaunchProps<{ arguments: Arguments }>,
-) {
+export default async function SaveToWebBites(props: LaunchProps<{ arguments: Arguments }>) {
   const { content } = props.arguments;
 
   try {
@@ -38,8 +30,7 @@ export default async function SaveToWebBites(
         await showToast({
           style: Toast.Style.Failure,
           title: "Authentication Required",
-          message:
-            "Please configure your WebBites credentials in extension preferences",
+          message: "Please configure your WebBites credentials in extension preferences",
         });
         return;
       }
@@ -63,10 +54,7 @@ export default async function SaveToWebBites(
 
     if (isUrl) {
       // Handle URL saving
-      const url =
-        content.startsWith("http://") || content.startsWith("https://")
-          ? content
-          : `https://${content}`;
+      const url = content.startsWith("http://") || content.startsWith("https://") ? content : `https://${content}`;
       const title = content;
 
       // Prepare data for backend API - URL
@@ -110,9 +98,7 @@ export default async function SaveToWebBites(
     await showToast({
       style: Toast.Style.Success,
       title: isUrl ? "Bookmark saved to WebBites" : "Note saved to WebBites",
-      message: isUrl
-        ? `URL "${content}" has been saved successfully`
-        : `Text note has been saved successfully`,
+      message: isUrl ? `URL "${content}" has been saved successfully` : `Text note has been saved successfully`,
     });
   } catch (error) {
     console.error("Error saving to WebBites:", error);

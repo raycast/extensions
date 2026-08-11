@@ -3,12 +3,11 @@ import { useState, useEffect } from "react";
 import { showFailureToast } from "@raycast/utils";
 import { List, ActionPanel, Action, Icon, useNavigation, showToast, Toast, Color } from "@raycast/api";
 
-import { getExtensionConfig, updateProjectLastUsedAt } from "../utils/config";
-import { generateProjectKeywords } from "../utils/pinyin";
-import { getRepositoryBranch } from "../utils/command";
-import ConfigureProjects from "../configure-projects";
-import ReadmeView from "../readme-view";
-import { ExtensionConfig, Project, ProjectExtraInfo } from "../types";
+import ConfigureProjects from "@/configure-projects";
+import { ReadmeView } from "@/pages";
+import { IS_WINDOWS } from "@/constants";
+import { getExtensionConfig, updateProjectLastUsedAt, generateProjectKeywords, getRepositoryBranch } from "@/utils";
+import type { ExtensionConfig, Project, ProjectExtraInfo } from "@/types";
 
 interface ProjectListProps {
   onProjectAction: (project: Project, config: ExtensionConfig, extraInfo: ProjectExtraInfo) => void;
@@ -46,6 +45,9 @@ export default function ProjectList({
 
   useEffect(() => {
     if (!projects.length) return;
+
+    // TODO: Support Windows
+    if (IS_WINDOWS) return;
 
     async function fetchProjectsBranch() {
       const map: BranchMap = {};

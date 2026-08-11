@@ -27,9 +27,11 @@ To install homebrew, visit [this link](https://brew.sh)
 
 const windowsInstallGuide = (executable: string) => `# 🚨 Error: \`${executable}\` is not installed
 
-Please press **⏎** to have this extension install it for you. Since \`yt-dlp\` is a heavy library, **it can take up to 2 minutes to install**. \`yt-dlp\` includes \`ffmpeg\` and \`ffprobe\` binaries
+Please press **⏎** to have this extension install it for you. Since these are heavy libraries, **it can take up to 2 minutes to install**. 
 
-## Windows Beta Manual Installation Guide
+**Note:** \`yt-dlp\` bundles \`ffmpeg\` and \`ffprobe\` binaries.
+
+## Windows Manual Installation Guide
 
 You can use the built-in Windows package manager, \`winget\`.
 

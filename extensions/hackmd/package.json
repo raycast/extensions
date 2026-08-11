@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "Yukai",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "alexi.build"
   ],
   "categories": [
     "Productivity",
@@ -82,7 +83,7 @@
     },
     {
       "name": "get-recent-notes",
-      "title": "Get recent accessed notes",
+      "title": "Get Recent Accessed Notes",
       "description": "Get recently accessed notes from HackMD"
     },
     {

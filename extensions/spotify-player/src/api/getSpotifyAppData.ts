@@ -1,6 +1,28 @@
 import { runAppleScript } from "@raycast/utils";
 import { checkSpotifyApp } from "../helpers/isSpotifyInstalled";
 
+export async function getSpotifyVolume(): Promise<number | undefined> {
+  const isSpotifyInstalled = await checkSpotifyApp();
+
+  if (isSpotifyInstalled) {
+    try {
+      const script = `
+      if application "Spotify" is not running then
+          return "-1"
+      end if
+      tell application "Spotify"
+          return sound volume as string
+      end tell`;
+      const result = await runAppleScript(script);
+      const volume = parseInt(result, 10);
+      return volume >= 0 ? volume : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
 export async function getSpotifyAppData() {
   const isSpotifyInstalled = await checkSpotifyApp();
 

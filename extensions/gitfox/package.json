@@ -27,6 +27,32 @@
         "vcs"
       ],
       "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Show Repositories",
+      "subtitle": "Gitfox",
+      "description": "Show your Gitfox repositories in the menu bar.",
+      "keywords": [
+        "git",
+        "gitfox",
+        "menu",
+        "menubar"
+      ],
+      "mode": "menu-bar"
+    },
+    {
+      "name": "open-in-gitfox",
+      "title": "Open in Gitfox",
+      "subtitle": "Gitfox",
+      "description": "Open the selected Finder folder in Gitfox.",
+      "keywords": [
+        "git",
+        "gitfox",
+        "open",
+        "finder"
+      ],
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -41,19 +67,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.1",
-    "@raycast/utils": "^1.17.0",
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^2.2.2",
     "bplist-parser": "^0.3.2",
     "node-git-current-branch": "^2.0.1",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.6.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.2.13",
+    "eslint": "^10.0.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -62,5 +88,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,4 +1,5 @@
 import { Arg } from "./datasource";
+import { Clipboard } from "@raycast/api";
 
 export const getArguments = (userInput: string): string[] => {
   const argArray: string[] = [];
@@ -50,13 +51,30 @@ export const getNewArguments = (newArgs: string[], oldArgObjs: Arg[]): Arg[] => 
   return newArgsArray;
 };
 
-export const replaceArgumentPlaceholders = (template: string, argumentValues: Arg[]): string => {
+export const replaceArgumentPlaceholders = async (template: string, argumentValues: Arg[]): Promise<string> => {
   let processedTemplate = template;
+
+  // Check if there is a clipboard argument
+  const hasClipboardArg = argumentValues.some((arg) => arg.name === "clipboard");
+  let clipboardText = "";
+
+  // If there is a clipboard argument, read the clipboard content
+  if (hasClipboardArg) {
+    clipboardText = (await Clipboard.readText()) || "";
+  }
+
   for (const argumentValue of argumentValues) {
-    if (argumentValue.value.length > 0) {
+    let valueToReplace = argumentValue.value;
+
+    // If it's a clipboard argument, use the clipboard content
+    if (argumentValue.name === "clipboard") {
+      valueToReplace = clipboardText;
+    }
+
+    if (valueToReplace.length > 0) {
       const placeholderPattern = `{{\\s*${argumentValue.name}\\s*}}`;
       const placeholderRegex = new RegExp(placeholderPattern, "g");
-      processedTemplate = processedTemplate.replace(placeholderRegex, argumentValue.value);
+      processedTemplate = processedTemplate.replace(placeholderRegex, valueToReplace);
     }
   }
   return processedTemplate;

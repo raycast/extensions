@@ -5,6 +5,9 @@
   "description": "This extension allows you to search through the Statamic docs directly from Raycast.",
   "icon": "command-icon.png",
   "author": "andrebreia",
+  "contributors": [
+    "duncanmcclean"
+  ],
   "categories": [
     "Documentation",
     "Developer Tools"

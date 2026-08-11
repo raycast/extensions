@@ -1,10 +1,13 @@
 import { getPreferenceValues, clearSearchBar, showToast, Toast } from "@raycast/api";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
 import { Chat, ChatHook, Model } from "../type";
 import { chatTransformer } from "../utils";
 import { useAnthropic } from "./useAnthropic";
 import { useHistory } from "./useHistory";
+import { MessageStream } from "@anthropic-ai/sdk/lib/MessageStream";
+
+const STREAM_UPDATE_INTERVAL_MS = 50;
 
 export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
@@ -17,8 +20,27 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   });
   const [streamData, setStreamData] = useState<Chat | undefined>();
 
+  // Ref to track the current stream for cleanup/abort
+  const streamRef = useRef<MessageStream | null>(null);
+  // Ref for throttled updates
+  const updateIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
   const history = useHistory();
   const chatAnthropic = useAnthropic();
+
+  // Cleanup stream on unmount
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.abort();
+        streamRef.current = null;
+      }
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+        updateIntervalRef.current = null;
+      }
+    };
+  }, []);
 
   async function ask(question: string, model: Model) {
     clearSearchBar();
@@ -41,30 +63,67 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     });
 
     if (useStream) {
+      // Abort any existing stream before starting a new one
+      if (streamRef.current) {
+        streamRef.current.abort();
+      }
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current);
+      }
+
       const streamedChat = { ...chat, answer: "" };
-      chatAnthropic.messages
-        .stream({
-          model: model.option,
-          temperature: Number(model.temperature),
-          system: model.prompt,
-          max_tokens: Number(model.max_tokens) || 4096,
-          messages: [...chatTransformer(data), { role: "user", content: question }],
-        })
-        .on("text", (res) => {
-          streamedChat.answer += res;
+      let pendingUpdate = false;
+
+      // Set up throttled UI updates
+      updateIntervalRef.current = setInterval(() => {
+        if (pendingUpdate) {
           setStreamData({ ...streamedChat });
           setData((prev) => prev.map((a) => (a.id === chat.id ? { ...streamedChat } : a)));
+          pendingUpdate = false;
+        }
+      }, STREAM_UPDATE_INTERVAL_MS);
+
+      const stream = chatAnthropic.messages.stream({
+        model: model.option,
+        temperature: Number(model.temperature),
+        system: model.prompt,
+        max_tokens: Number(model.max_tokens) || 4096,
+        messages: [...chatTransformer(data), { role: "user", content: question }],
+      });
+
+      streamRef.current = stream;
+
+      stream
+        .on("text", (res) => {
+          streamedChat.answer += res;
+          pendingUpdate = true;
         })
         .on("end", () => {
-          // Use the final accumulated answer
-          // setData((prev) => prev.map(a => a.id === chat.id ? { ...streamedChat } : a));
+          // Clear the update interval
+          if (updateIntervalRef.current) {
+            clearInterval(updateIntervalRef.current);
+            updateIntervalRef.current = null;
+          }
+          // Flush any pending update to ensure last chunk is rendered
+          if (pendingUpdate) {
+            setStreamData({ ...streamedChat });
+          }
+          // Final update with complete answer
+          setData((prev) => prev.map((a) => (a.id === chat.id ? { ...streamedChat } : a)));
           setStreamData(undefined);
-          history.add({ ...streamedChat }); // Add final version to history
+          streamRef.current = null;
+          history.add({ ...streamedChat });
           setLoading(false);
           toast.title = "Got your answer!";
           toast.style = Toast.Style.Success;
         })
         .on("error", (err) => {
+          // Clear the update interval
+          if (updateIntervalRef.current) {
+            clearInterval(updateIntervalRef.current);
+            updateIntervalRef.current = null;
+          }
+          streamRef.current = null;
           toast.title = "Error";
           toast.message = `Couldn't stream message: ${err}`;
           toast.style = Toast.Style.Failure;
@@ -96,18 +155,20 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           toast.style = Toast.Style.Failure;
           setLoading(false);
         });
-    }
 
-    setData((prev) => {
-      return prev.map((a) => {
-        if (a.id === chat.id) {
-          return chat;
-        }
-        return a;
+      // Update data and history only for non-streaming mode
+      // (streaming mode handles this in the on("end") handler)
+      setData((prev) => {
+        return prev.map((a) => {
+          if (a.id === chat.id) {
+            return chat;
+          }
+          return a;
+        });
       });
-    });
 
-    history.add(chat);
+      history.add(chat);
+    }
   }
 
   const clear = useCallback(async () => {

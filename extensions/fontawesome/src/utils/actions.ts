@@ -22,10 +22,18 @@ export const copyFAUnicodeClipboard = async (icon: SearchItem) => {
 };
 
 export const copyFAClassesToClipboard = async (icon: SearchItem) => {
+  const prefix = icon.svgs[0].familyStyle.prefix;
+
+  // Handle custom kit icons differently
+  if (prefix === "kit") {
+    const faClass = `fa-kit fa-${icon.id}`;
+    await Clipboard.copy(faClass);
+    await showHUD("Copied classes to clipboard!");
+    return;
+  }
+
   // Get first style of icon, or use the default iconStyle
-  const faClass = `fa-${familyStylesByPrefix[icon.svgs[0].familyStyle.prefix].split(", ")[1].toLowerCase()} fa-${
-    icon.id
-  }`;
+  const faClass = `fa-${familyStylesByPrefix[prefix].split(", ")[1].toLowerCase()} fa-${icon.id}`;
   await Clipboard.copy(faClass);
   await showHUD("Copied classes to clipboard!");
 };

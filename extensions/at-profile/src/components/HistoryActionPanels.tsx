@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, Clipboard } from "@raycast/api";
+import { ActionPanel, Action, Icon, Clipboard, Keyboard } from "@raycast/api";
 import { HistoryItem } from "../types";
 import { EditProfileForm } from "./EditProfile";
 import { safeAsyncOperation, showSuccess } from "../utils/errors";
@@ -7,6 +7,8 @@ interface HistoryActionPanelsProps {
   item: HistoryItem;
   onOpenProfile: (profile: string, app: string) => void;
   onDeleteHistoryItem: (profile: string, app: string) => void;
+  onToggleStar: (profile: string, app: string) => void;
+  onClearStarredProfiles: () => void;
   onSetSearchText: (text: string) => void;
   onSetAppFilter: (filter: string) => void;
   onFilterByApp: (app: string) => void;
@@ -18,6 +20,8 @@ export function HistoryActionPanels({
   item,
   onOpenProfile,
   onDeleteHistoryItem,
+  onToggleStar,
+  onClearStarredProfiles,
   onSetSearchText,
   onSetAppFilter,
   onFilterByApp,
@@ -42,17 +46,15 @@ export function HistoryActionPanels({
             onUpdate={onRefreshHistory}
           />
         }
-        shortcut={{ modifiers: ["cmd"], key: "e" }}
+        shortcut={Keyboard.Shortcut.Common.Edit}
       />
       <Action.Push
-        // eslint-disable-next-line @raycast/prefer-title-case
         title={`Open @${item.profile} on…`}
         icon={Icon.Terminal}
         target={<OpenProfileCommand arguments={{ profile: item.profile }} />}
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
       />
       <Action
-        // eslint-disable-next-line @raycast/prefer-title-case
         title={`Copy Profile URL`}
         icon={Icon.Clipboard}
         onAction={async () => {
@@ -66,14 +68,26 @@ export function HistoryActionPanels({
             { toastTitle: "Error" },
           );
         }}
-        shortcut={{ modifiers: ["cmd"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.CopyDeeplink}
+      />
+      <Action
+        title={item.isStarred ? `Unstar Profile on ${item.appName}` : `Star Profile on ${item.appName}`}
+        icon={item.isStarred ? Icon.XMarkCircle : Icon.Star}
+        onAction={() => onToggleStar(item.profile, item.app)}
+        shortcut={Keyboard.Shortcut.Common.Pin}
       />
       <Action
         title="Delete History Item"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
         onAction={() => onDeleteHistoryItem(item.profile, item.app)}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={Keyboard.Shortcut.Common.Remove}
+      />
+      <Action
+        title="Clear Starred Profiles"
+        icon={Icon.Star}
+        style={Action.Style.Destructive}
+        onAction={onClearStarredProfiles}
       />
       <ActionPanel.Section>
         <Action

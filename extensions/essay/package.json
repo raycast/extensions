@@ -48,7 +48,7 @@
     "@raycast/utils": "^1.17.0",
     "axios": "^1.8.4",
     "dayjs": "^1.11.13",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "zustand": "^5.0.3"
   },
   "devDependencies": {

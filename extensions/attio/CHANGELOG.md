@@ -1,5 +1,14 @@
 # Attio Changelog
 
+## [Edit Task] - 2026-01-21
+
+- Edit Tasks
+
+## [Use Attio Logo + Add Task] - 2025-11-03
+
+- Attio Logo is now used with permission
+- Add Tasks
+
 ## [Initial Version] - 2025-10-27
 
 - View Objects

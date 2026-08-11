@@ -1,5 +1,10 @@
 # Search Any Site Changelog
 
+## [Update] - 2025-11-04
+
+- **Windows**: Toggled on windows support
+- **Bug fix**: Fixed issue where it wouldn't open correct url if suggestions were toggled off.
+
 ## [Update] - 2025-10-03
 
 - **Arc-like behavior**: Extension now behaves like Arc's Command+T, allowing both direct website opening and search functionality

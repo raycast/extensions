@@ -40,26 +40,10 @@ export default async function getAllPlaylistItems(playlist: SimplifiedPlaylistOb
   }
 
   try {
-    const playlistUriArr: string[] = [];
-    const limit = 50;
-    let offset = 0;
-
-    let response;
-
-    do {
-      response = await getPlaylistTracks(playlist.id, limit, offset);
-      console.log("calling api");
-      const innerPlaylistArr = response.items;
-
-      if (innerPlaylistArr.length > 0) {
-        playlistUriArr.push(
-          ...innerPlaylistArr
-            .map((trackObject) => trackObject.uri)
-            .filter((uri): uri is string => typeof uri === "string"),
-        );
-        offset += limit;
-      }
-    } while (response.items.length > 0);
+    const response = await getPlaylistTracks(playlist.id, 1000, 0);
+    const playlistUriArr = response.items
+      .map((trackObject) => trackObject.uri)
+      .filter((uri): uri is string => typeof uri === "string");
 
     await Promise.all([
       LocalStorage.setItem(cacheKey, JSON.stringify(playlistUriArr)),

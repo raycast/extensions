@@ -1,7 +1,7 @@
-import { Detail, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { FastlyService, FastlyStats, FastlyServiceDetails } from "../types";
+import { Detail, ActionPanel, Action, Icon, showToast, Toast, Keyboard } from "@raycast/api";
+import { FastlyService } from "../types";
 import { getServiceStats, purgeCache, getServiceDetails } from "../api";
+import { useCachedPromise } from "@raycast/utils";
 
 interface ServiceDetailProps {
   service: FastlyService;
@@ -17,34 +17,32 @@ interface Version {
 }
 
 export function ServiceDetail({ service }: ServiceDetailProps) {
-  const [stats, setStats] = useState<FastlyStats | null>(null);
-  const [details, setDetails] = useState<FastlyServiceDetails | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  async function loadData() {
-    try {
-      setIsLoading(true);
+  const {
+    isLoading,
+    data: { stats, details },
+    revalidate: loadData,
+  } = useCachedPromise(
+    async (service: FastlyService) => {
       const [statsData, detailsData] = await Promise.all([
         getServiceStats(service.id, service.type),
         getServiceDetails(service.id),
       ]);
-      setStats(statsData);
-      setDetails(detailsData);
-    } catch (error) {
-      console.error("Loading error:", error);
-      await showToast({
-        style: Toast.Style.Failure,
+      return {
+        stats: statsData,
+        details: detailsData,
+      };
+    },
+    [service],
+    {
+      initialData: {
+        stats: null,
+        details: null,
+      },
+      failureToastOptions: {
         title: "Failed to load data",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+      },
+    },
+  );
 
   const getDashboardUrl = (service: FastlyService) => {
     const baseUrl = "https://manage.fastly.com";
@@ -200,7 +198,7 @@ ${renderStats()}
                   style: Toast.Style.Success,
                   title: "Cache purged successfully",
                 });
-                await loadData();
+                loadData();
               } catch (error) {
                 await showToast({
                   style: Toast.Style.Failure,
@@ -209,25 +207,35 @@ ${renderStats()}
                 });
               }
             }}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "p" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+            }}
           />
           <Action
             title="Refresh Data"
             icon={Icon.ArrowClockwise}
             onAction={loadData}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
           <Action.OpenInBrowser
+            // eslint-disable-next-line @raycast/prefer-title-case
             title="View Real-time Stats"
             url={`https://manage.fastly.com/observability/dashboard/system/overview/realtime/${service.id}`}
             icon={Icon.BarChart}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "r" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+            }}
           />
           <Action.OpenInBrowser
             title="View Service Logs"
             url={`https://manage.fastly.com/observability/logs/explorer/${service.id}`}
             icon={Icon.Terminal}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "l" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+            }}
           />
         </ActionPanel>
       }

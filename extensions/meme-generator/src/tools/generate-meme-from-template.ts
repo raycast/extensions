@@ -1,4 +1,4 @@
-import { generateMeme } from "../api";
+import { imgflipApi } from "../api";
 
 /**
  * Generates a meme using a specific template ID and text for its boxes.
@@ -25,7 +25,7 @@ async function generateMemeFromTemplate(
 
   try {
     // Pass the extracted data to the API function
-    const result = await generateMeme({ id: templateId, boxes });
+    const result = await imgflipApi.generateMeme({ id: templateId, boxes });
 
     // If generateMeme succeeds, result.success is always true
     // If it fails, it throws an error caught by the catch block

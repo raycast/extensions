@@ -1,8 +1,10 @@
 import { Clipboard } from "@raycast/api";
+import { execFile } from "child_process";
 import fs from "fs/promises";
 import { imageMeta } from "image-meta";
 import path from "path";
 import { runAppleScript } from "run-applescript";
+import util from "node:util";
 
 type ImageMeta = {
   type: string;
@@ -11,6 +13,8 @@ type ImageMeta = {
 };
 
 export type LoadFrom = { data: Buffer; type: ImageMeta };
+
+const execFileAsync = util.promisify(execFile);
 
 const getType = async (data: Buffer, image: string): Promise<ImageMeta> => {
   const meta = await imageMeta(data);
@@ -21,7 +25,7 @@ const getType = async (data: Buffer, image: string): Promise<ImageMeta> => {
 };
 
 export const loadFromFinder = async (): Promise<LoadFrom | undefined> => {
-  const selectedImages = await getFinderSelectedImages();
+  const selectedImages = await getSelectedImages();
   if (!selectedImages?.length) {
     return;
   }
@@ -51,8 +55,15 @@ export const loadFromClipboard = async () => {
   return { data, type };
 };
 
+const getSelectedImages = async (): Promise<string[]> => {
+  if (process.platform === "win32") {
+    return getExplorerSelectedImages();
+  }
+  return getFinderSelectedImages();
+};
+
 /**
- * Gets currently selected images in Finder.
+ * Gets currently selected images in Finder (macOS).
  *
  * @returns A promise resolving to the comma-separated list of images as a string.
  */
@@ -87,4 +98,44 @@ tell application "Finder"
 end tell`,
   );
   return result.split(/,\s+/g).filter((item) => !!item);
+};
+
+/**
+ * Gets currently selected images in Windows Explorer.
+ * Falls back to an empty array if no selection or an error occurs.
+ */
+const getExplorerSelectedImages = async (): Promise<string[]> => {
+  if (process.platform !== "win32") {
+    return [];
+  }
+
+  const psScript = `
+  $shell = New-Object -ComObject Shell.Application
+  $selected = @()
+  foreach ($window in $shell.Windows()) {
+    try {
+      $doc = $window.Document
+      if ($doc -and $doc.SelectedItems()) {
+        foreach ($item in $doc.SelectedItems()) {
+          $selected += $item.Path
+        }
+      }
+    } catch {}
+  }
+  $selected -join [Environment]::NewLine
+  `;
+
+  try {
+    const { stdout } = await execFileAsync("powershell", ["-NoProfile", "-Command", psScript], {
+      windowsHide: true,
+      maxBuffer: 10 * 1024 * 1024,
+    });
+    return stdout
+      .split(/\r?\n/)
+      .map((item) => item.trim())
+      .filter((item) => !!item);
+  } catch (error) {
+    console.error("Failed to read selection from Explorer", error);
+    return [];
+  }
 };

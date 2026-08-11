@@ -1,6 +1,6 @@
 import * as React from "react";
 import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedState, usePromise } from "@raycast/utils";
 import {
   DeleteSettingsCommandChatByIndex,
   GetSettingsCommandChatNames,
@@ -8,18 +8,19 @@ import {
 } from "../../settings/settings";
 import { RaycastChat, RaycastChatMessage } from "../../settings/types";
 import { ChangeChat, ClipboardConversation, NewChat, Run } from "./function";
+import { Shortcut } from "../shortcut";
 import { FormModel } from "./form/Model";
 import { FormRenameChat } from "./form/RenameChat";
 import { GetImage } from "../function";
 import { RaycastImage } from "../../types";
-import { Document } from "langchain/document";
-import { FormAttachFile } from "./form/AttachFile";
+import { OllamaApiChatMessageRole } from "../../ollama/enum";
+import { OllamaApiChatMessageToolCall } from "../../ollama/types";
 
 /**
  * Return JSX element for chat view.
- * @returns {JSX.Element} Raycast Chat View.
+ * @returns {React.JSX.Element} Raycast Chat View.
  */
-export function ChatView(): JSX.Element {
+export function ChatView(): React.JSX.Element {
   const {
     data: ChatNames,
     revalidate: RevalidateChatNames,
@@ -39,12 +40,10 @@ export function ChatView(): JSX.Element {
 
   const [Image, SetImage]: [
     RaycastImage[] | undefined,
-    React.Dispatch<React.SetStateAction<RaycastImage[] | undefined>>
+    React.Dispatch<React.SetStateAction<RaycastImage[] | undefined>>,
   ] = React.useState();
-  const [Document, SetDocument]: [
-    Document<Record<string, any>>[] | undefined,
-    React.Dispatch<React.SetStateAction<Document<Record<string, any>>[] | undefined>>
-  ] = React.useState();
+
+  const [UseToolsOllamaApi, SetUseToolsOllamaApi] = useCachedState("chat-use-tools-ollama-api", true);
 
   // Save Chat To LocalStoarge on Inference Done.
   React.useEffect(() => {
@@ -52,14 +51,14 @@ export function ChatView(): JSX.Element {
       SetQuery("");
       SetIsLoading(false);
       if (Image) SetImage(undefined);
-      if (Document) SetDocument(undefined);
       if (Chat.messages.length === 1 && Chat.name === "New Chat")
         SetChat((prevValue) => {
-          if (prevValue) {
+          if (prevValue && prevValue.messages.length > 0) {
             const name = `${prevValue.messages[0].messages[0].content.substring(0, 25)}...`;
             if (ChatNames) ChatNames[ChatNameIndex] = name;
             return { ...prevValue, name: name };
           }
+          return prevValue;
         });
       SetSettingsCommandChatByIndex(ChatNameIndex, Chat);
     }
@@ -88,16 +87,15 @@ export function ChatView(): JSX.Element {
   // Form: Model
   const [showFormModel, setShowFormModel]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
-  // Form: AttachDocument
-  const [showFormAttachFile, setShowFormAttachFile]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
-    React.useState(false);
 
   /**
    * Action Panel for  Message
    * @param props - Selected Chat Message
    * @returns Action Panel
    */
-  function ActionMessage(props: { message?: RaycastChatMessage }): JSX.Element {
+  function ActionMessage(props: { message?: RaycastChatMessage }): React.JSX.Element {
+    const question = props.message?.messages.find((v) => v.role === OllamaApiChatMessageRole.USER);
+    const answer = props.message?.messages.find((v) => v.role === OllamaApiChatMessageRole.ASSISTANT);
     return (
       <ActionPanel>
         {!IsLoading && Query && Chat && ChatModelsAvailable && (
@@ -105,7 +103,7 @@ export function ChatView(): JSX.Element {
             title="Get Answer"
             icon={Icon.SpeechBubbleActive}
             onAction={() => {
-              Run(Query, Image, Document, Chat, SetChat, SetIsLoading).catch(async (e: Error) => {
+              Run(Query, Image, UseToolsOllamaApi, Chat, SetChat, SetIsLoading).catch(async (e: Error) => {
                 await showToast({ style: Toast.Style.Failure, title: "Error:", message: e.message });
                 SetIsLoading(false);
               });
@@ -120,27 +118,23 @@ export function ChatView(): JSX.Element {
           />
         )}
         <ActionPanel.Section title="Chat">
-          {props.message && (
+          {question && (
             <Action.CopyToClipboard
               title="Copy Question"
-              content={props.message.messages[0].content as string}
-              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              content={question.content as string}
+              shortcut={Shortcut.CopyName}
             />
           )}
-          {props.message && (
-            <Action.CopyToClipboard
-              title="Copy Answer"
-              content={props.message.messages[1].content as string}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
+          {answer && (
+            <Action.CopyToClipboard title="Copy Answer" content={answer.content as string} shortcut={Shortcut.Copy} />
           )}
           {props.message && <Action.CopyToClipboard title="Copy Conversation" content={ClipboardConversation(Chat)} />}
-          {Chat && (
+          {Chat && Chat.name !== "New Chat" && (
             <Action
               title="New Chat"
               icon={Icon.NewDocument}
               onAction={() => NewChat(Chat, SetChatNameIndex, RevalidateChatNames)}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              shortcut={Shortcut.New}
             />
           )}
           {Chat && (
@@ -148,11 +142,11 @@ export function ChatView(): JSX.Element {
               title="Rename Chat"
               icon={Icon.Pencil}
               onAction={() => setShowFormRenameChat(true)}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              shortcut={Shortcut.Edit}
             />
           )}
           {Chat && (
-            <ActionPanel.Submenu title="Delete Chat" icon={Icon.Trash}>
+            <ActionPanel.Submenu title="Delete Chat" icon={Icon.Trash} shortcut={Shortcut.Remove}>
               <Action
                 title={`Yes, Delete "${Chat.name}" Chat`}
                 icon={Icon.Trash}
@@ -172,16 +166,16 @@ export function ChatView(): JSX.Element {
               title="Selection"
               icon={Icon.QuoteBlock}
               onAction={() => SetQuery((prevState) => (prevState += "\n{selection}\n"))}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Shortcut.AttachText}
             />
             <Action
               title="Browser Extention Tab"
               icon={Icon.Globe}
               onAction={() => SetQuery((prevState) => (prevState += "\n{browser-tab}\n"))}
-              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              shortcut={Shortcut.AttachBrowserTab}
             />
             <Action
-              title="Image From Clipboard"
+              title="Image from Clipboard"
               icon={Icon.Image}
               onAction={async () =>
                 GetImage()
@@ -193,30 +187,31 @@ export function ChatView(): JSX.Element {
                     showToast({ style: Toast.Style.Failure, title: "Error: ", message: String(e) });
                   })
               }
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
-            />
-            <Action
-              title="File"
-              icon={Icon.Finder}
-              onAction={() => setShowFormAttachFile(true)}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={Shortcut.AttachImage}
             />
           </ActionPanel.Section>
         )}
+        <ActionPanel.Section title="Tools">
+          <Action
+            title={UseToolsOllamaApi ? "Disable Internet Search" : "Enable Internet Search"}
+            icon={Icon.Globe}
+            onAction={() => SetUseToolsOllamaApi((prevState) => (prevState = !prevState))}
+          />
+        </ActionPanel.Section>
         <ActionPanel.Section title="Settings">
           {Chat && (
             <Action
               title="Change Model"
               icon={Icon.Box}
               onAction={() => setShowFormModel(true)}
-              shortcut={{ modifiers: ["cmd"], key: "m" }}
+              shortcut={Shortcut.ChangeModel}
             />
           )}
           {props.message && (
             <Action
               title={ShowAnswerMetadata ? "Hide Metadata" : "Show Metadata"}
               icon={ShowAnswerMetadata ? Icon.EyeDisabled : Icon.Eye}
-              shortcut={{ modifiers: ["cmd"], key: "y" }}
+              shortcut={Shortcut.ToggleQuickLook}
               onAction={() => SetShowAnswerMetadata((prevState) => !prevState)}
             />
           )}
@@ -226,25 +221,45 @@ export function ChatView(): JSX.Element {
   }
 
   /**
+   * Raycast Markdown.
+   */
+  function MarkdownMessage(item: RaycastChatMessage): string {
+    let markdown = "";
+    for (const msg of item.messages) {
+      if (msg.role === OllamaApiChatMessageRole.ASSISTANT && msg.thinking)
+        markdown += `<details><summary><b>💡 Thinking... (click to expand)</b></summary>\n\n${msg.thinking}\n\n</details>\n\n`;
+      if (msg.role === OllamaApiChatMessageRole.ASSISTANT && msg.content !== "") markdown += msg.content;
+    }
+    return markdown;
+  }
+
+  function AccessoryMessage(message: RaycastChatMessage): List.Item.Accessory[] {
+    const accessory: List.Item.Accessory[] = [];
+
+    const toolUsed = message.messages.filter((v) => v.role === OllamaApiChatMessageRole.TOOL);
+    if (toolUsed.length)
+      accessory.push({ icon: Icon.Hammer, tooltip: toolUsed.map((v) => `${v.tool_name}`).join(", ") });
+
+    return accessory;
+  }
+  /**
    * Raycast Detail Metadata for Ollama Message
    * @param props - Chat Message
    * @returns JSX Element
    */
-  function DetailMetadataMessage(props: { message: RaycastChatMessage }): JSX.Element {
+  function DetailMetadataMessage(props: { message: RaycastChatMessage }): React.JSX.Element {
+    const toolCalls: OllamaApiChatMessageToolCall[] = [];
+    for (const value of props.message.messages.filter((v) => v.tool_calls)) {
+      if (value.tool_calls)
+        for (const tool of value.tool_calls) {
+          toolCalls.push(tool);
+        }
+    }
+
     return (
       <Detail.Metadata>
         <Detail.Metadata.Label title="Model" text={props.message.model} />
         <Detail.Metadata.Separator />
-        {props.message.tools && (
-          <Detail.Metadata.TagList title="Tools">
-            {props.message.tools.map((tool) => (
-              <Detail.Metadata.TagList.Item
-                key={`${tool.server}-${tool.function}`}
-                text={`${tool.server} - ${tool.function}()`}
-              />
-            ))}
-          </Detail.Metadata.TagList>
-        )}
         {props.message.files && props.message.files.length > 0 && (
           <Detail.Metadata.TagList title="Sources">
             {props.message.files.map((source) => (
@@ -280,6 +295,17 @@ export function ChatView(): JSX.Element {
         {props.message.eval_duration && (
           <Detail.Metadata.Label title="Eval Duration" text={`${(props.message.eval_duration / 1e9).toFixed(2)}s`} />
         )}
+        {toolCalls.length > 0 && (
+          <React.Fragment>
+            <Detail.Metadata.Separator />
+            {toolCalls.map((v) => (
+              <Detail.Metadata.Label
+                title={`Tool Call: ${v.function.name}`}
+                text={JSON.stringify(v.function.arguments)}
+              />
+            ))}
+          </React.Fragment>
+        )}
       </Detail.Metadata>
     );
   }
@@ -307,9 +333,6 @@ export function ChatView(): JSX.Element {
       />
     );
 
-  if (showFormAttachFile)
-    return <FormAttachFile SetDocument={SetDocument} SetShow={setShowFormAttachFile} Document={Document} />;
-
   return (
     <List
       isLoading={IsLoading || IsLoadingChatNames}
@@ -319,7 +342,6 @@ export function ChatView(): JSX.Element {
       onSearchTextChange={(t) => {
         if (!IsLoading) SetQuery(t);
       }}
-      actions={!IsLoadingChatNames && <ActionMessage />}
       isShowingDetail={Chat && Chat.messages.length > 0}
       searchBarAccessory={
         !IsLoadingChatNames && ChatNames && !IsLoading ? (
@@ -342,19 +364,24 @@ export function ChatView(): JSX.Element {
             title={item.messages[0].content}
             key={index}
             id={index.toString()}
+            accessories={AccessoryMessage(item)}
             actions={<ActionMessage message={item} />}
             detail={
               <List.Item.Detail
-                markdown={`${item.images ? `${item.images.map((i) => i.html)}\n` : ""}${item.messages[1].content}`}
+                markdown={`${item.images ? `${item.images.map((i) => i.html)}\n` : ""}${MarkdownMessage(item)}`}
                 metadata={item.done && ShowAnswerMetadata && <DetailMetadataMessage message={item} />}
               />
             }
           />
         ))
       ) : ChatModelsAvailable ? (
-        <List.EmptyView icon={Icon.Message} title="Start a Conversation with Ollama" />
+        <List.EmptyView icon={Icon.Message} title="Start a Conversation with Ollama" actions={<ActionMessage />} />
       ) : (
-        <List.EmptyView icon={Icon.Xmark} title="Ollama Server or Selected Model Unavailable." />
+        <List.EmptyView
+          icon={Icon.Xmark}
+          title="Ollama Server or Selected Model Unavailable."
+          actions={<ActionMessage />}
+        />
       )}
     </List>
   );

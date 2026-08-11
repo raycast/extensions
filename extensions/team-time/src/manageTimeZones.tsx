@@ -171,7 +171,7 @@ const EditTeamTime = () => {
                   <ActionPanel.Section title="Reorder">
                     {index > 0 && (
                       <Action
-                        title="Move Up"
+                        title="Move up"
                         icon={Icon.ArrowUp}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
                         onAction={() => handleMoveUp(entry.id)}

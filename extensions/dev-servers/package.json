@@ -1,0 +1,191 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dev-servers",
+  "title": "Dev Servers",
+  "description": "Project-grouped dashboard for every dev server running on your Mac. Start, restart, and kill them without leaving Raycast, with the framework (Next, Svelte, Astro, Vite, Shopify) and package manager (npm, pnpm, yarn, bun) detected for you. Live count and quick actions in your menu bar.",
+  "icon": "extension-icon.png",
+  "author": "tavlean",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "dev server",
+    "localhost",
+    "port",
+    "portless",
+    "kill",
+    "restart",
+    "start",
+    "process",
+    "dashboard",
+    "menubar",
+    "monitor",
+    "shopify"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "autoOpenInBrowser",
+      "title": "After Start",
+      "type": "checkbox",
+      "label": "Open in browser when the port binds",
+      "description": "Once a new dev server starts listening, automatically open its URL in your default browser. Applies whether you start from the Start Dev Server command, the dashboard, or the menu bar.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "type": "appPicker",
+      "description": "Which terminal to open when using \"Open in Terminal\". Defaults to macOS Terminal if unset.",
+      "required": false
+    },
+    {
+      "name": "editorApp",
+      "title": "Editor App",
+      "type": "appPicker",
+      "description": "Which editor to open a project in with \"Open in Editor\" (e.g. VS Code, Cursor, Zed). The action is hidden when unset.",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Dev Servers",
+      "description": "List and manage running dev servers",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "refreshInterval",
+          "title": "Refresh Interval",
+          "type": "dropdown",
+          "description": "How often to refresh the server list",
+          "default": "5",
+          "required": false,
+          "data": [
+            {
+              "title": "2 seconds",
+              "value": "2"
+            },
+            {
+              "title": "5 seconds",
+              "value": "5"
+            },
+            {
+              "title": "10 seconds",
+              "value": "10"
+            },
+            {
+              "title": "30 seconds",
+              "value": "30"
+            }
+          ]
+        },
+        {
+          "name": "showFullPath",
+          "title": "Project Display",
+          "type": "checkbox",
+          "label": "Show full directory path",
+          "description": "Show the full path instead of the project name",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "showUptime",
+          "title": "Row Accessories",
+          "type": "checkbox",
+          "label": "Show uptime",
+          "description": "Show how long each server has been running",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showBranch",
+          "type": "checkbox",
+          "label": "Show git branch",
+          "description": "Show the current git branch next to each server when the project is a git repo",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showTool",
+          "type": "checkbox",
+          "label": "Show framework tag",
+          "description": "Show the framework / tool tag (Vite, SvelteKit, Astro, etc.) on each row",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "showLocalUrl",
+          "type": "checkbox",
+          "label": "Show localhost URL with custom domain",
+          "description": "When a custom domain (e.g. via portless) points at a dev server, also show the localhost:PORT pill alongside it",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "start",
+      "title": "Start Dev Server",
+      "description": "Start a dev server from a Finder selection, a recent project, or any folder you pick",
+      "mode": "view",
+      "keywords": [
+        "spawn",
+        "boot",
+        "launch",
+        "run",
+        "recent"
+      ],
+      "preferences": [
+        {
+          "name": "confirmMultiStart",
+          "title": "Confirmations",
+          "type": "checkbox",
+          "label": "Confirm when starting multiple folders at once",
+          "description": "Show a confirmation alert before spawning more than one dev server from a multi-folder Finder selection",
+          "default": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "menubar",
+      "title": "Dev Servers Menu Bar",
+      "description": "See running dev servers in the menu bar; kill, restart, open, or start one from the dropdown",
+      "mode": "menu-bar",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "showCount",
+          "type": "checkbox",
+          "title": "Menu Bar",
+          "label": "Show running-server count",
+          "description": "Show the number of running dev servers next to the menu bar icon",
+          "default": true,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray dev",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

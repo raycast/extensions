@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { authorizedWithFreeAgent } from "./oauth";
 import { Timeslip } from "./types";
 import { fetchTimeslips } from "./services/freeagent";
-import { parseDate, getProjectDisplayName, getTaskDisplayName, getUserDisplayName } from "./utils/formatting";
+import { formatRelativeDay, getProjectDisplayName, getTaskDisplayName, getUserDisplayName } from "./utils/formatting";
 import { useFreeAgent } from "./hooks/useFreeAgent";
 
 const ListTimeslips = function Command() {
@@ -44,7 +44,7 @@ const ListTimeslips = function Command() {
               icon={Icon.Clock}
               title={taskName}
               subtitle={`${projectName} • ${userName}${timeslip.comment ? ` • ${timeslip.comment}` : ""}`}
-              accessories={[{ text: `${timeslip.hours}h` }, { date: parseDate(timeslip.dated_on) }]}
+              accessories={[{ text: `${timeslip.hours}h` }, { text: formatRelativeDay(timeslip.dated_on) }]}
               actions={
                 <ActionPanel>
                   <Action.CopyToClipboard title="Copy Project Uri" content={projectUrl} />

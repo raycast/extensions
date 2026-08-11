@@ -19,11 +19,35 @@ mkdir -p "$FIXTURES_DIR"
 NEW_DB="$FIXTURES_DIR/zed-db-v${TARGET_VERSION}.sqlite"
 rm -f "$NEW_DB"
 
+# Disable .sqliterc by unsetting HOME temporarily or use a wrapper function
+run_sqlite() {
+  HOME=/dev/null sqlite3 "$@"
+}
+
+# First, create the migrations table
+echo "Creating migrations table"
+run_sqlite "$NEW_DB" "CREATE TABLE IF NOT EXISTS migrations (domain TEXT, step INTEGER, migration TEXT);"
+
+# Copy migrations up to target version
+echo "Copying migrations up to version $TARGET_VERSION"
+run_sqlite "$DB_PATH" ".mode list" ".separator '|'" "SELECT domain, step, migration FROM migrations WHERE step <= $TARGET_VERSION;" > /tmp/migrations_temp.txt
+
+while IFS='|' read -r domain step migration; do
+  if [ -n "$step" ]; then
+    # Escape single quotes in migration SQL
+    escaped_migration=$(echo "$migration" | sed "s/'/''/g")
+    run_sqlite "$NEW_DB" "INSERT INTO migrations (domain, step, migration) VALUES ('$domain', $step, '$escaped_migration');"
+  fi
+done < /tmp/migrations_temp.txt
+
+rm -f /tmp/migrations_temp.txt
+
+# Apply migrations to create the schema
 for i in $(seq 0 $TARGET_VERSION); do
-  MIGRATION=$(sqlite3 "$DB_PATH" "SELECT migration FROM migrations WHERE step=$i;")
+  MIGRATION=$(run_sqlite "$DB_PATH" "SELECT migration FROM migrations WHERE step=$i;")
   if [ -n "$MIGRATION" ]; then
     echo "Applying migration step $i"
-    sqlite3 "$NEW_DB" "$MIGRATION"
+    run_sqlite "$NEW_DB" "$MIGRATION"
   fi
 done
 
@@ -31,7 +55,7 @@ done
 SAMPLE_DATA_FILE="scripts/add-sample-data-${TARGET_VERSION}.sql"
 if [ -f "$SAMPLE_DATA_FILE" ]; then
   echo "Applying sample data from $SAMPLE_DATA_FILE"
-  sqlite3 "$NEW_DB" < "$SAMPLE_DATA_FILE"
+  run_sqlite "$NEW_DB" < "$SAMPLE_DATA_FILE"
 fi
 
 echo "Fixture created: $NEW_DB"

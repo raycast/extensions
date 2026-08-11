@@ -41,7 +41,10 @@
     "nebbles",
     "alanxmay",
     "gdsmith",
-    "tama_harrison"
+    "tama_harrison",
+    "pavelas",
+    "mchoun",
+    "yoann_aubineau"
   ],
   "pastContributors": [
     "pomdtr",
@@ -162,6 +165,13 @@
       "title": "Search Tabs",
       "subtitle": "Arc",
       "description": "Search and select your tabs",
+      "mode": "view"
+    },
+    {
+      "name": "search-space-tabs",
+      "title": "Search Space Tabs",
+      "subtitle": "Arc",
+      "description": "Search and select tabs in your current space",
       "mode": "view"
     },
     {
@@ -473,6 +483,14 @@
       "title": "Open New Easel",
       "subtitle": "Arc",
       "description": "Open a new easel",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "reset-space-tabs",
+      "title": "Reset All Tabs in Current Space",
+      "subtitle": "Arc",
+      "description": "Reset all tabs in the currently active space",
       "mode": "no-view",
       "disabledByDefault": true
     }
@@ -1190,8 +1208,8 @@
     "fuse.js": "^7.0.0",
     "iconv-lite": "^0.6.3",
     "is-url": "^1.2.4",
-    "lodash": "^4.17.21",
-    "nanoid": "^4.0.0",
+    "lodash": "^4.17.23",
+    "nanoid": "^5.1.15",
     "pinyin-pro": "^3.25.0",
     "semver": "^7.3.8"
   },

@@ -11,7 +11,7 @@ export default function GenDigestInBGAction(props: {
   const { data: todaysDigest } = usePromise(getTodaysDigest);
   return (
     <Action
-      title={todaysDigest ? "Regenerate Digest In Background" : "Generate Digest In Background"}
+      title={todaysDigest ? "Regenerate Digest in Background" : "Generate Digest in Background"}
       icon="send-to-back.svg"
       autoFocus={autoFocus}
       onAction={async () => {

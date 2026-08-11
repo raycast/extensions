@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mouse-jiggle",
+  "title": "Mouse Jiggle",
+  "description": "Continuously jiggle the mouse cursor with dramatic zigzag movements to prevent sleep",
+  "icon": "extension-icon.png",
+  "author": "stevefrost",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "start-jiggle",
+      "title": "Start Mouse Jiggle",
+      "description": "Start continuously jiggling the mouse cursor",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-jiggle",
+      "title": "Stop Mouse Jiggle",
+      "description": "Stop the mouse jiggle background process",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "funMode",
+      "type": "checkbox",
+      "title": "Fun Mode",
+      "label": "Draw visible mouse trail",
+      "description": "When enabled, an orange overlay shows the mouse's path as a continuous visible line across the screen",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.8.2"
+  },
+  "version": "1.0.0",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

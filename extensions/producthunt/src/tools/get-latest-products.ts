@@ -1,5 +1,8 @@
-import { getFrontpageProducts } from "../api/scraper";
+import { getFrontpageProducts } from "../api";
 import { Product } from "../types";
+import { logger } from "@chrismessina/raycast-logger";
+
+const log = logger.child("[ProductHuntTool]");
 
 /**
  * Returns the latest products from Product Hunt.
@@ -10,6 +13,7 @@ export default async function (): Promise<
     title: string;
     description: string;
     author: string;
+    submittedBy: string | null;
     link: string;
     votesCount: number;
     commentsCount: number;
@@ -29,14 +33,17 @@ export default async function (): Promise<
     const { products, error } = await getFrontpageProducts();
 
     if (error) {
-      console.error("Error fetching Product Hunt data:", error);
+      log.error("error fetching Product Hunt data", error);
       throw new Error(error);
     }
 
     return products.map((product: Product) => ({
       title: product.name,
       description: product.tagline,
-      author: product.maker?.name || "Unknown",
+      // The submitter (Post.user) is the only verified identity on a public token; makers are
+      // redacted. Report it honestly rather than labeling it a maker.
+      author: product.submittedBy?.name || product.maker?.name || "Unknown",
+      submittedBy: product.submittedBy?.name || null,
       link: product.url,
       votesCount: product.votesCount,
       commentsCount: product.commentsCount,
@@ -54,7 +61,7 @@ export default async function (): Promise<
       createdAt: product.createdAt,
     }));
   } catch (error) {
-    console.error("Error fetching Product Hunt data:", error);
+    log.error("error fetching Product Hunt data", error);
     throw error;
   }
 }

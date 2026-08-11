@@ -1,15 +1,15 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, popToRoot } from "@raycast/api";
+import { openUrl } from "./utils/open";
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { NoPathProvided } from "./components/Notifications/NoPathProvided";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
 import { vaultsWithoutAdvancedURIToast } from "./components/Toasts";
-import { appendTaskPreferences } from "./utils/preferences";
-import { getObsidianTarget, ObsidianTargetType } from "./utils/utils";
-import { useObsidianVaults } from "./utils/hooks";
-import { vaultPluginCheck } from "./api/vault/plugins/plugins.service";
+import { AppendTaskPreferences } from "./utils/preferences";
+import { useObsidianVaults, useVaultPluginCheck } from "./utils/hooks";
 import { clearCache } from "./api/cache/cache.service";
 import { applyTemplates } from "./api/templating/templating.service";
+import { Obsidian, ObsidianTargetType } from "@/obsidian";
 
 interface appendTaskArgs {
   text: string;
@@ -23,9 +23,13 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
   const dateContent = dueDate ? " 📅 " + dueDate : "";
 
   const { appendTemplate, heading, notePath, noteTag, vaultName, silent, creationDate } =
-    getPreferenceValues<appendTaskPreferences>();
-  const [vaultsWithPlugin, vaultsWithoutPlugin] = vaultPluginCheck(vaults, "obsidian-advanced-uri");
+    getPreferenceValues<AppendTaskPreferences>();
+  const { vaultsWithPlugin, vaultsWithoutPlugin } = useVaultPluginCheck({
+    vaults: vaults,
+    communityPlugins: ["obsidian-advanced-uri"],
+  });
   const [content, setContent] = useState<string | null>(null);
+  const [shouldOpenObsidian, setShouldOpenObsidian] = useState(false);
 
   useEffect(() => {
     async function getContent() {
@@ -35,6 +39,48 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
 
     getContent();
   }, [appendTemplate, text]);
+
+  useEffect(() => {
+    if (!shouldOpenObsidian || !ready || content === null || !notePath) {
+      return;
+    }
+
+    const openObsidian = async () => {
+      const selectedVault = vaultName && vaults.find((vault) => vault.name === vaultName);
+      const vaultToUse = selectedVault || vaultsWithPlugin[0];
+      const tag = noteTag ? noteTag + " " : "";
+      const creationDateString = creationDate ? " ➕ " + new Date().toLocaleDateString("en-CA") : "";
+
+      const notePathExpanded = await applyTemplates(notePath);
+      const target = Obsidian.getTarget({
+        type: ObsidianTargetType.AppendTask,
+        path: notePathExpanded,
+        vault: vaultToUse,
+        text: "- [ ] " + tag + content + dateContent + creationDateString,
+        heading: heading,
+        silent: silent,
+      });
+      await openUrl(target, { background: silent });
+      clearCache();
+      popToRoot();
+      closeMainWindow();
+    };
+
+    openObsidian();
+  }, [
+    shouldOpenObsidian,
+    ready,
+    content,
+    vaultName,
+    vaults,
+    vaultsWithPlugin,
+    notePath,
+    noteTag,
+    creationDate,
+    dateContent,
+    heading,
+    silent,
+  ]);
 
   if (!ready || content === null) {
     return <List isLoading={true} />;
@@ -64,38 +110,24 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
     return <NoPathProvided />;
   }
 
-  const tag = noteTag ? noteTag + " " : "";
-
   // en-CA uses the same format as the iso string without the time ex: 2025-09-25
   const creationDateString = creationDate ? " ➕ " + new Date().toLocaleDateString("en-CA") : "";
+  const tag = noteTag ? noteTag + " " : "";
 
   const selectedVault = vaultName && vaults.find((vault) => vault.name === vaultName);
   // If there's a configured vault or only one vault, use that
   if (selectedVault || vaultsWithPlugin.length === 1) {
-    const vaultToUse = selectedVault || vaultsWithPlugin[0];
-    const openObsidian = async () => {
-      const notePathExpanded = await applyTemplates(notePath);
-      const target = getObsidianTarget({
-        type: ObsidianTargetType.AppendTask,
-        path: notePathExpanded,
-        vault: vaultToUse,
-        text: "- [ ] " + tag + content + dateContent + creationDateString,
-        heading: heading,
-        silent: silent,
-      });
-      open(target);
-      clearCache();
-      popToRoot();
-      closeMainWindow();
-    };
-
     // Render a loading state while the user selects a vault
     if (vaults.length > 1 && !selectedVault) {
       return <List isLoading={true} />;
     }
 
-    // Call the function to open Obsidian when ready
-    openObsidian();
+    // Trigger the useEffect to open Obsidian
+    if (!shouldOpenObsidian) {
+      setShouldOpenObsidian(true);
+    }
+
+    return <List isLoading={true} />;
   }
 
   // Otherwise, let the user select a vault
@@ -107,15 +139,22 @@ export default function AppendTask(props: { arguments: appendTaskArgs }) {
           title={vault.name}
           actions={
             <ActionPanel>
-              <Action.Open
+              <Action
                 title="Append Task"
-                target={getObsidianTarget({
-                  type: ObsidianTargetType.AppendTask,
-                  path: notePath,
-                  vault: vault,
-                  text: "- [ ] #task " + content + dateContent + creationDateString,
-                  heading: heading,
-                })}
+                onAction={async () => {
+                  const target = Obsidian.getTarget({
+                    type: ObsidianTargetType.AppendTask,
+                    path: notePath,
+                    vault: vault,
+                    text: "- [ ] " + tag + content + dateContent + creationDateString,
+                    heading: heading,
+                    silent: silent,
+                  });
+                  await openUrl(target, { background: silent });
+                  clearCache();
+                  popToRoot();
+                  closeMainWindow();
+                }}
               />
             </ActionPanel>
           }

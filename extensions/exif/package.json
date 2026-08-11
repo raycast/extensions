@@ -44,18 +44,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
+    "@raycast/api": "^1.103.3",
     "exifreader": "^4.22.1",
-    "node-fetch": "^3.3.2"
+    "stringify-object": "^6.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "20.12.7",
-    "@types/react": "18.2.79",
-    "eslint": "^8.51.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/node": "24.7.0",
+    "@types/react": "19.2.2",
+    "@types/stringify-object": "^4.0.5",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -63,5 +64,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 import { getUserUrl } from './urls'
 
 type UserActionProps = {
-  user: IAM.v1alpha1.User
+  user: Iamv1alpha1.User
   toggleIsDetailOpen: () => void
 }
 

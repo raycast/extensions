@@ -8,6 +8,7 @@ export type Conversation = {
   chats: {
     question: string;
     answer: string;
+    images?: string[];
   }[];
 };
 

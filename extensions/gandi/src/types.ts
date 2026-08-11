@@ -25,34 +25,49 @@ export interface GandiDomain {
   services?: string[];
 }
 
+export interface DomainAvailabilityPrice {
+  duration_unit: string;
+  min_duration: number;
+  max_duration: number;
+  // Gandi returns integer minor units (e.g., cents) in most cases; some responses may be micro-units.
+  // UI should detect scale by comparing typical ranges.
+  price_after_taxes?: number;
+  price_before_taxes?: number;
+  discount?: boolean;
+}
 export interface DomainAvailability {
   // Currency code as returned by the API (may be undefined for some registries)
   currency?: string;
   available: boolean;
-  min_period?: number;
-  max_period?: number;
+  // min_period?: number;
+  // max_period?: number;
   taxes?: Array<{
     type: string;
     rate: number;
   }>;
   products?: Array<{
     action: string;
-    prices: Array<{
-      duration_unit: string;
-      min_duration: number;
-      max_duration: number;
-      // Gandi returns integer minor units (e.g., cents) in most cases; some responses may be micro-units.
-      // UI should detect scale by comparing typical ranges.
-      price_after_taxes?: number;
-      price_before_taxes?: number;
-      discount?: boolean;
-    }>;
-    process: string;
+    prices: DomainAvailabilityPrice[];
     phases?: Array<{
       name: string;
       starts_at?: string;
       ends_at?: string;
     }>;
+    process: string;
+    status:
+      | "available"
+      | "available_reserved"
+      | "available_preorder"
+      | "unavailable"
+      | "unavailable_premium"
+      | "unavailable_restricted"
+      | "error_invalid"
+      | "error_refused"
+      | "error_timeout"
+      | "error_unknown"
+      | "reserved_corporate"
+      | "pending"
+      | "error_eoi";
   }>;
 }
 
@@ -72,14 +87,22 @@ export interface WebsiteMetadata {
   favicon?: string;
 }
 
-export interface GandiError {
-  code: string;
+export type GandiError =
+  | {
+      code: number;
+      message: string;
+      object?: string;
+      cause?: string;
+    }
+  | {
+      status: "error";
+      errors: Array<{
+        location: string;
+        name: string;
+        description: string;
+      }>;
+    };
+
+export interface GandiMessage {
   message: string;
-  object?: string;
-  cause?: string;
-  errors?: Array<{
-    location: string;
-    name: string;
-    description: string;
-  }>;
 }

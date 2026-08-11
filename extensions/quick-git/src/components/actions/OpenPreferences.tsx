@@ -1,5 +1,5 @@
 import { Action, openExtensionPreferences } from "@raycast/api";
 
-export const OpenPreferences = () => {
+export function OpenPreferences() {
   return <Action title="Open Preferences" onAction={openExtensionPreferences} />;
-};
+}

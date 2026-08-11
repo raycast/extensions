@@ -24,29 +24,32 @@ function getAccessories(feature: Feature) {
 }
 
 export default function Command() {
-  const { isLoading, data } = useFetch("https://caniphp.com/features.json");
+  const { isLoading, data: features } = useFetch<Feature[]>("https://caniphp.com/features.json", {
+    keepPreviousData: true,
+    parseResponse: async (response) => response.json() as Promise<Feature[]>,
+    mapResult: (featureList) => ({
+      data: featureList.filter((phpFeature) => featureSupportedInAny(phpFeature, versions)),
+    }),
+  });
 
   return (
     <List isLoading={isLoading}>
-      {Array.isArray(data) &&
-        data
-          .filter((phpFeature) => featureSupportedInAny(phpFeature, versions))
-          .map((phpFeature, index) => (
-            <List.Item
-              key={index}
-              title={phpFeature.name}
-              accessories={getAccessories(phpFeature)}
-              actions={
-                <ActionPanel>
-                  <Action.Push
-                    title="Open Details"
-                    icon={Icon.Binoculars}
-                    target={<FeatureSingle feature={phpFeature} />}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
+      {features?.map((phpFeature: Feature) => (
+        <List.Item
+          key={phpFeature.name}
+          title={phpFeature.name}
+          accessories={getAccessories(phpFeature)}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Open Details"
+                icon={Icon.Binoculars}
+                target={<FeatureSingle feature={phpFeature} />}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
     </List>
   );
 }

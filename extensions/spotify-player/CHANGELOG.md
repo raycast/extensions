@@ -1,5 +1,126 @@
 # Spotify Player Changelog
 
+## [Copy Embed Code Action] - 2026-07-10
+
+- Add a "Copy Embed Code" action to the action panel and the menu bar
+
+## [Fix Find Lyrics] - 2026-07-09
+
+- Fixed the Find Lyrics command by replacing the broken Genius package integration with LRCLIB lyrics lookup.
+
+## [Show Liked Songs Status in Now Playing] - 2026-06-26
+
+- Now Playing detail view shows a "Liked" field indicating whether the current track is in your Liked Songs
+
+## [Upade README] - 2026-06-24
+
+- Update the extension README to include the 💸 emoji next to each command that requires Spotify Premium, as per the Spotify API docs
+
+## [Fix stale seek position in menu bar] - 2026-06-20
+
+- Skip/back 15 seconds in the menu bar now estimates the current playback position using elapsed time since the last API fetch, instead of using the stale cached value.
+
+## [See Which Playlists Contain the Current Song] - 2026-06-16
+
+- All "Add to Playlist" interactions now show a checkmark on playlists that already contain the song
+- Selecting a playlist that already has the song removes it instead of adding a duplicate
+- Now Playing detail view shows an "In Playlists" section with thumbnails of every playlist the song is in
+
+## [Fix Podcast Episode Navigation] - 2026-05-28
+
+- Prevent podcast episode navigation from crashing when Spotify omits show details in search results
+
+## [Add Keyboard Shortcuts] - 2026-05-17
+
+- Added shortcuts for opening Your Library and Search from Now Playing and Add Playing Song to Playlist
+- Added shortcuts for liking, disliking, adding to playlists, connecting devices, and showing related content
+- Added artist action shortcuts for showing albums and popular songs
+
+## [Fix OAuth PKCE invalid_grant] - 2026-04-04
+
+- Clear corrupted tokens on invalid_grant error so the user is prompted to re-authenticate instead of being stuck
+
+## [Reduce API Rate Limiting] - 2026-03-18
+
+- Added tiered API-level caching (short/medium/long TTL) to reduce redundant Spotify API calls
+- Removed cascading background command launches from playback commands (next, previous, like, dislike, skip15, back15)
+- Lazy-load Your Library sections by selected category instead of fetching all upfront
+- Increased menu bar polling interval and added debouncing to prevent refresh bursts
+- Simplified rate limit middleware to a single retry after honouring Retry-After
+
+## [Fix Rate Limiting from Spotify API Changes] - 2026-03-08
+
+- Added 429 Retry-After middleware — all API calls now automatically retry on rate limit with proper backoff
+- Reduced menu bar polling interval from 10s to 30s, current-track from 30s to 1m
+- Consolidated Now Playing to use `is_playing` from currently-playing endpoint, removing a redundant API call
+- Lazy-loaded devices, playlists, and user profile in Now Playing — initial mount fires 1 API call instead of 5
+- Toggle Play/Pause now uses AppleScript first (zero API calls on macOS)
+- Volume Up/Down now reads volume via AppleScript before falling back to API
+- Skip/Back 15s and Replay no longer make a redundant currently-playing API call
+- Batched play + queue into a single `play({ uris })` call instead of N+1 separate calls
+- Debounced menu bar refresh trigger with 5s window to prevent rapid successive refreshes
+- Added `keepPreviousData` to hooks for graceful degradation during rate limiting
+- Fixed duplicate React key warnings in Add to Playlist and menu bar playlist submenus
+- Silenced noisy "No enabled command" console log for disabled commands
+
+## [Fix Menu Bar Unloading Before API Fetch Completes] - 2026-02-17
+
+- Fixed the menu bar icon disappearing permanently when "Hide icon while idle" is enabled and Spotify is restarted
+- Replaced mutable ref-based execution control (`shouldExecute`) with computed reactive values (`isSpotifyActive`, `uriChanged`) so the hook re-evaluates when Spotify state changes
+- Added a loading `MenuBarExtra` to keep the menu bar mounted while data is still being fetched
+
+## [Generate Playlist: AI Tuning and Improved Playback] - 2026-01-23
+
+- Added AI tuning with history/undo
+- Changed argument to optional to access previous generation history
+- Added "Play Playlist" and improved playback reliability (URI arrays, auto-open Spotify, retries)
+- Reduced max songs from 75 to 10 for faster generation and better quality (tuning allows towards shorter playlists)
+- Upgraded AI model (with Sonar for better playlist content), prompt, and Spotify track matching
+- Improved error handling for AI outages, rate limits, and invalid responses
+- Fixed queueing when no active player exists
+
+## [Fix] - 2026-01-14
+
+- Fixed error toast when Menu Bar Player command is disabled (handles "No enabled command" error)
+
+## [Chore] - 2026-01-13
+
+- Remove `dancannon` from contributors
+
+## [Minor Fixes] - 2026-01-06
+
+- Fixed error toast "Menu Bar Player must be activated" when using Next/Previous in Now Playing without the Menu Bar Player command enabled
+
+## [Show Error View in Queue] - 2026-01-01
+
+- Add "queue" to README and mark as premium-only
+- When an error occurs in queue, show the error view
+- When an error occurs in devices, show the error view
+
+## [Generate Playlist Improvements] - 2025-12-05
+
+- Updated AI model from **GPT-4o mini** to **GPT-5 Mini** for higher-quality playlist generation
+- Strengthened prompt to enforce a **hard minimum of 20 songs** and a **maximum of 75 songs**
+- Added strict validation requiring the returned JSON to include a correctly structured `playlist` array
+- Improved cultural and thematic vibe inference when no artists are explicitly listed
+- Tightened rules for subgenre consistency, smooth energy progression, and removal of generic or low-intent tracks
+
+## [Enhancements] - 2025-11-27
+
+- Fixed detecting if Spotify is installed on Windows
+- Fixed error message rendering when adding song to queue
+- Added delay after skipping to next/previous track to ensure the track has actually changed before proceeding
+
+## [Add Windows support] - 2025-11-14
+
+- Added Windows to platforms
+- Added check for not running menu bar commands on Windows
+- Changed all shortcuts to support both macOS and Windows
+
+## [Improvement] - 2025-10-30
+
+- Increase the number of songs you can view in a Playlist when using the `Show All Songs` command. You can view at least 500 songs and this fixes issues with old public playlists that are accessible via Raycast.
+
 ## [Chore: Contributor has become inactive] - 2025-09-01
 
 ## [Fix Add Playing Song to Playlist Command Using Cached Data] - 2025-08-28

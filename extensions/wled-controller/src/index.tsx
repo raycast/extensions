@@ -12,14 +12,15 @@ import {
   useNavigation,
   Detail,
 } from "@raycast/api";
-import React, { useState, useEffect } from "react";
-import { WLEDClient, WLEDDevice, WLEDJson } from "./wled-api";
+import { useState, useEffect } from "react";
+import { WLEDClient, WLEDDevice } from "./wled-api";
 import {
   loadDevices,
   saveDevices as saveDevicesToStorage,
   loadLastCustomColor,
   saveLastCustomColor,
 } from "./device-storage";
+import { CreateSceneForm } from "./create-scene";
 
 /**
  * Add Device Form
@@ -112,166 +113,6 @@ function AddDeviceForm({ onDeviceAdded }: { onDeviceAdded: (device: WLEDDevice) 
       />
       <Form.Checkbox id="testConnection" label="Test Connection" defaultValue={true} />
     </Form>
-  );
-}
-
-/**
- * Device Control Panel
- */
-function DeviceControl({ device, onBack }: { device: WLEDDevice; onBack: () => void }) {
-  const [deviceState, setDeviceState] = useState<WLEDJson | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    loadDeviceState();
-  }, []);
-
-  async function loadDeviceState() {
-    setIsLoading(true);
-    try {
-      const client = new WLEDClient(device);
-      const state = await client.getState();
-      setDeviceState(state);
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to Load Device",
-        message: String(error),
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function togglePower() {
-    if (!deviceState) return;
-    const client = new WLEDClient(device);
-    await client.setPower(!deviceState.state.on);
-    await loadDeviceState();
-  }
-
-  async function setBrightness(brightness: number) {
-    const client = new WLEDClient(device);
-    await client.setBrightness(brightness);
-    await loadDeviceState();
-  }
-
-  if (isLoading || !deviceState) {
-    return <Detail isLoading={true} markdown="Loading device..." />;
-  }
-
-  const isOn = deviceState.state.on;
-  const brightness = deviceState.state.bri;
-  const brightnessPercent = Math.round((brightness / 255) * 100);
-
-  return (
-    <List searchBarPlaceholder="Search options...">
-      <List.Section title={`${device.name} - ${isOn ? "ON" : "OFF"}`}>
-        {/* Power Control */}
-        <List.Item
-          title={isOn ? "Turn Off" : "Turn On"}
-          icon={{ source: Icon.Power, tintColor: isOn ? Color.Green : Color.Red }}
-          accessories={[{ text: isOn ? "Currently On" : "Currently Off" }]}
-          actions={
-            <ActionPanel>
-              <Action title={isOn ? "Turn off" : "Turn on"} icon={Icon.Power} onAction={togglePower} />
-            </ActionPanel>
-          }
-        />
-
-        {/* Brightness Control */}
-        <List.Item
-          title="Adjust Brightness"
-          subtitle={`${brightnessPercent}%`}
-          icon={{ source: Icon.Sun, tintColor: Color.Yellow }}
-          accessories={[{ text: `${brightness}/255` }]}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Set Brightness"
-                icon={Icon.Sun}
-                target={<BrightnessForm device={device} currentBrightness={brightness} onUpdate={loadDeviceState} />}
-              />
-              <Action
-                title="100%"
-                icon={Icon.Sun}
-                shortcut={{ modifiers: ["cmd"], key: "1" }}
-                onAction={() => setBrightness(255)}
-              />
-              <Action
-                title="75%"
-                icon={Icon.Circle}
-                shortcut={{ modifiers: ["cmd"], key: "2" }}
-                onAction={() => setBrightness(191)}
-              />
-              <Action
-                title="50%"
-                icon={Icon.Circle}
-                shortcut={{ modifiers: ["cmd"], key: "3" }}
-                onAction={() => setBrightness(127)}
-              />
-              <Action
-                title="25%"
-                icon={Icon.Circle}
-                shortcut={{ modifiers: ["cmd"], key: "4" }}
-                onAction={() => setBrightness(64)}
-              />
-            </ActionPanel>
-          }
-        />
-
-        {/* Color Control */}
-        <List.Item
-          title="Set Color"
-          icon={{ source: Icon.Brush, tintColor: Color.Purple }}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Choose Color"
-                icon={Icon.Brush}
-                target={<ColorPicker device={device} onUpdate={loadDeviceState} />}
-              />
-            </ActionPanel>
-          }
-        />
-
-        {/* Effects Control */}
-        <List.Item
-          title="Set Effect"
-          icon={{ source: Icon.Stars, tintColor: Color.Magenta }}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Browse Effects"
-                icon={Icon.Stars}
-                target={<EffectPicker device={device} effects={deviceState.effects} onUpdate={loadDeviceState} />}
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-
-      <List.Section title="Actions">
-        <List.Item
-          title="Refresh"
-          icon={{ source: Icon.ArrowClockwise, tintColor: Color.Blue }}
-          actions={
-            <ActionPanel>
-              <Action title="Refresh State" icon={Icon.ArrowClockwise} onAction={loadDeviceState} />
-            </ActionPanel>
-          }
-        />
-        <List.Item
-          title="Back to Device List"
-          icon={{ source: Icon.ArrowLeft, tintColor: Color.SecondaryText }}
-          actions={
-            <ActionPanel>
-              <Action title="Back" icon={Icon.ArrowLeft} onAction={onBack} />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-    </List>
   );
 }
 
@@ -679,12 +520,77 @@ function EffectPicker({ device, effects, onUpdate }: { device: WLEDDevice; effec
 }
 
 /**
+ * Brightness Form Wrapper - loads current brightness before showing form
+ */
+function BrightnessFormWrapper({ device, onUpdate }: { device: WLEDDevice; onUpdate: () => void }) {
+  const [brightness, setBrightness] = useState<number>(127);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadBrightness() {
+      try {
+        const client = new WLEDClient(device);
+        const state = await client.getState();
+        setBrightness(state.state.bri);
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Load Brightness",
+          message: String(error),
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadBrightness();
+  }, []);
+
+  if (isLoading) {
+    return <Detail isLoading={true} markdown="Loading brightness..." />;
+  }
+
+  return <BrightnessForm device={device} currentBrightness={brightness} onUpdate={onUpdate} />;
+}
+
+/**
+ * Effect Picker Wrapper - loads effects before showing picker
+ */
+function EffectPickerWrapper({ device, onUpdate }: { device: WLEDDevice; onUpdate: () => void }) {
+  const [effects, setEffects] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function loadEffects() {
+      try {
+        const client = new WLEDClient(device);
+        const state = await client.getState();
+        setEffects(state.effects);
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to Load Effects",
+          message: String(error),
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadEffects();
+  }, []);
+
+  if (isLoading) {
+    return <Detail isLoading={true} markdown="Loading effects..." />;
+  }
+
+  return <EffectPicker device={device} effects={effects} onUpdate={onUpdate} />;
+}
+
+/**
  * Main Command - Device List
  */
 export default function Command() {
   const [devices, setDevices] = useState<WLEDDevice[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { push } = useNavigation();
 
   useEffect(() => {
     loadDevicesFromStorage();
@@ -736,10 +642,6 @@ export default function Command() {
     }
   }
 
-  function selectDevice(device: WLEDDevice) {
-    push(<DeviceControl device={device} onBack={() => {}} />);
-  }
-
   if (devices.length === 0) {
     return (
       <List isLoading={isLoading}>
@@ -761,6 +663,44 @@ export default function Command() {
     );
   }
 
+  async function togglePowerQuick(device: WLEDDevice) {
+    try {
+      const client = new WLEDClient(device);
+      const state = await client.getState();
+      await client.setPower(!state.state.on);
+      await showToast({
+        style: Toast.Style.Success,
+        title: state.state.on ? "Device Turned Off" : "Device Turned On",
+        message: device.name,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Toggle Power",
+        message: String(error),
+      });
+    }
+  }
+
+  async function setBrightnessQuick(device: WLEDDevice, brightness: number) {
+    try {
+      const client = new WLEDClient(device);
+      await client.setBrightness(brightness);
+      const percent = Math.round((brightness / 255) * 100);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Brightness Set",
+        message: `${device.name} - ${percent}%`,
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to Set Brightness",
+        message: String(error),
+      });
+    }
+  }
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search devices...">
       <List.Section title={`${devices.length} Device${devices.length !== 1 ? "s" : ""}`}>
@@ -772,20 +712,136 @@ export default function Command() {
             icon={{ source: Icon.LightBulb, tintColor: Color.Yellow }}
             actions={
               <ActionPanel>
-                <Action title="Control Device" icon={Icon.Gear} onAction={() => selectDevice(device)} />
-                <Action.Push
-                  title="Add New Device"
-                  icon={Icon.Plus}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
-                  target={<AddDeviceForm onDeviceAdded={handleAddDevice} />}
-                />
-                <Action
-                  title="Delete Device"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                  onAction={() => handleDeleteDevice(device)}
-                />
+                <ActionPanel.Section>
+                  <Action title="Toggle Power" icon={Icon.Power} onAction={() => togglePowerQuick(device)} />
+                  <Action.Push
+                    title="Save as Scene"
+                    icon={Icon.Stars}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "s" },
+                      Windows: { modifiers: ["ctrl"], key: "s" },
+                    }}
+                    target={<CreateSceneForm devices={devices} onUpdate={() => {}} />}
+                  />
+                  <Action.Push
+                    title="Set Color"
+                    icon={Icon.Brush}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "c" },
+                      Windows: { modifiers: ["ctrl"], key: "c" },
+                    }}
+                    target={
+                      <ColorPicker
+                        device={device}
+                        onUpdate={() => {
+                          /* no-op for quick action */
+                        }}
+                      />
+                    }
+                  />
+                  <Action.Push
+                    title="Set Effect"
+                    icon={Icon.Stars}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "f" },
+                      Windows: { modifiers: ["ctrl"], key: "f" },
+                    }}
+                    target={
+                      <EffectPickerWrapper
+                        device={device}
+                        onUpdate={() => {
+                          /* no-op for quick action */
+                        }}
+                      />
+                    }
+                  />
+                </ActionPanel.Section>
+
+                <ActionPanel.Section title="Brightness">
+                  <Action.Push
+                    title="Set Brightness"
+                    icon={Icon.Sun}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "b" },
+                      Windows: { modifiers: ["ctrl"], key: "b" },
+                    }}
+                    target={
+                      <BrightnessFormWrapper
+                        device={device}
+                        onUpdate={() => {
+                          /* no-op for quick action */
+                        }}
+                      />
+                    }
+                  />
+                  <Action
+                    title="100%"
+                    icon={Icon.Sun}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "1" },
+                      Windows: { modifiers: ["ctrl"], key: "1" },
+                    }}
+                    onAction={() => setBrightnessQuick(device, 255)}
+                  />
+                  <Action
+                    title="75%"
+                    icon={Icon.Circle}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "2" },
+                      Windows: { modifiers: ["ctrl"], key: "2" },
+                    }}
+                    onAction={() => setBrightnessQuick(device, 191)}
+                  />
+                  <Action
+                    title="50%"
+                    icon={Icon.Circle}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "3" },
+                      Windows: { modifiers: ["ctrl"], key: "3" },
+                    }}
+                    onAction={() => setBrightnessQuick(device, 127)}
+                  />
+                  <Action
+                    title="25%"
+                    icon={Icon.Circle}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "4" },
+                      Windows: { modifiers: ["ctrl"], key: "4" },
+                    }}
+                    onAction={() => setBrightnessQuick(device, 64)}
+                  />
+                </ActionPanel.Section>
+
+                <ActionPanel.Section>
+                  <Action
+                    title="Refresh"
+                    icon={Icon.ArrowClockwise}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "r" },
+                      Windows: { modifiers: ["ctrl"], key: "r" },
+                    }}
+                    onAction={loadDevicesFromStorage}
+                  />
+                  <Action.Push
+                    title="Add New Device"
+                    icon={Icon.Plus}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "n" },
+                      Windows: { modifiers: ["ctrl"], key: "n" },
+                    }}
+                    target={<AddDeviceForm onDeviceAdded={handleAddDevice} />}
+                  />
+                  <Action
+                    title="Delete Device"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    shortcut={{
+                      macOS: { modifiers: ["ctrl"], key: "x" },
+                      Windows: { modifiers: ["ctrl"], key: "d" },
+                    }}
+                    onAction={() => handleDeleteDevice(device)}
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />

@@ -1,8 +1,13 @@
 import { environment } from "@raycast/api";
 import { OAuthService, getAccessToken } from "@raycast/utils";
-import jwt_decode from "jwt-decode";
 
 let email: string | undefined;
+
+function decodeJWT(token: string): { email?: string } {
+  const payload = token.split(".")[1];
+  const decoded = Buffer.from(payload, "base64").toString("utf-8");
+  return JSON.parse(decoded);
+}
 
 export const google = OAuthService.google({
   // Google Cloud Project: https://ray.so/ci5QOJb
@@ -17,7 +22,7 @@ export const google = OAuthService.google({
   onAuthorize({ idToken }) {
     if (!idToken) return;
 
-    const { email: decodedEmail } = jwt_decode<{ email?: string }>(idToken);
+    const { email: decodedEmail } = decodeJWT(idToken);
     email = decodedEmail;
   },
 });

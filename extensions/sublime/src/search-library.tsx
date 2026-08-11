@@ -13,7 +13,8 @@ function SearchLibrary() {
     const { cards, isLoading, pagination } = useCardsSearch(
         searchQuery,
         restrictToLibrary,
-        (query, restrictToLibrary, page) => searchSublimeCards(query, restrictToLibrary, undefined, undefined, page),
+        (query, restrictToLibrary, cursor) =>
+            searchSublimeCards(query, restrictToLibrary, undefined, undefined, cursor),
     );
 
     return (

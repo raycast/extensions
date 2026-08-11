@@ -10,88 +10,71 @@ import {
   Alert,
   Color,
   Image,
+  Clipboard,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { getFavicon, useCachedState } from "@raycast/utils";
-
-function trim(url: string) {
-  return url.trim();
-}
-
-interface Detail {
-  href: string;
-  protocol: string;
-  hostname: string;
-  port: string;
-  origin: string;
-  hash?: string;
-  path?: string;
-  queries?: Record<string, string | null | undefined>;
-}
-
-function parse(url: string): Detail | undefined {
-  try {
-    const { href, protocol, hostname, port, origin, hash, pathname: path, searchParams: queries } = new URL(url);
-    return {
-      href,
-      protocol,
-      hostname,
-      port,
-      origin,
-      hash,
-      path: decodeURIComponent(path),
-      queries: Object.fromEntries(queries),
-    };
-  } catch {
-    showToast({
-      title: "URL parse failed!",
-      style: Toast.Style.Failure,
-    });
-  }
-}
-
-function toMarkdown(url: Detail) {
-  return [
-    "## URL Details",
-    `- ${url.href.length} characters.`,
-    `\`\`\`json\n${JSON.stringify(url, null, 2)}\n\`\`\``,
-  ].join("\n\n");
-}
-
-function isURLLike(url: string) {
-  const reg = /^[a-zA-Z]+:\/\/.+/gi;
-  return reg.test(url.trim());
-}
+import { Detail } from "./types";
+import { trim, parse, toMarkdown, isURLLike } from "./utils";
 
 export default function Command() {
   const [inputText, setInputText] = useState("");
   const [urls, setUrls] = useCachedState<Detail[]>("urls", []);
   const [filteredUrls, setFilteredUrls] = useState(urls.slice());
 
-  const handleParse = useCallback(() => {
-    const text = trim(inputText);
-    if (!text) {
+  const addUrl = useCallback(
+    (rawText: string, options?: { onEmptyText?: () => void }) => {
+      const text = trim(rawText);
+      if (!text) {
+        if (options?.onEmptyText) {
+          options.onEmptyText();
+        } else {
+          showToast({
+            title: "Please input a url!",
+            style: Toast.Style.Failure,
+          });
+        }
+        return;
+      }
+      if (urls.find((item) => item.href === text)) {
+        return;
+      }
+      const url = parse(text);
+      if (!url) {
+        return;
+      }
+      setUrls([url].concat(...urls));
+      setInputText("");
       showToast({
-        title: "Please input a url!",
+        title: "Success",
+        style: Toast.Style.Success,
+      });
+    },
+    [urls, setUrls, setInputText],
+  );
+
+  const handleParse = useCallback(() => {
+    addUrl(inputText);
+  }, [inputText, addUrl]);
+
+  const handleParseFromClipboard = useCallback(async () => {
+    try {
+      const clipboardText = await Clipboard.readText();
+      if (!clipboardText) {
+        showToast({
+          title: "Clipboard is empty!",
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
+      addUrl(clipboardText);
+    } catch {
+      showToast({
+        title: "Failed to read clipboard",
         style: Toast.Style.Failure,
       });
-      return;
     }
-
-    if (urls.find((item) => item.href === text)) {
-      return;
-    }
-    const url = parse(text);
-    if (!url) {
-      return;
-    }
-    setUrls([url].concat(...urls));
-    setInputText("");
-    showToast({
-      title: "Success",
-      style: Toast.Style.Success,
-    });
-  }, [urls, inputText]);
+  }, [addUrl]);
 
   const handleClear = useCallback(async () => {
     await confirmAlert({
@@ -137,7 +120,7 @@ export default function Command() {
       isShowingDetail
       searchText={inputText}
       onSearchTextChange={(text) => setInputText(text)}
-      searchBarPlaceholder="Input to parse or search"
+      searchBarPlaceholder="Input to parse or search (use paste from clipboard action to parse long URL)"
     >
       <List.EmptyView
         description={inputText ? `Press Enter to parse ${inputText}` : `Input url to parse.`}
@@ -145,6 +128,12 @@ export default function Command() {
           <ActionPanel title="Actions">
             <>
               <Action title="Parse URL" onAction={handleParse} icon={Icon.Globe} />
+              <Action
+                title="Parse URL from Clipboard"
+                onAction={handleParseFromClipboard}
+                icon={Icon.Globe}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              />
               {filteredUrls.length > 0 && CommonActions}
             </>
           </ActionPanel>
@@ -182,6 +171,12 @@ export default function Command() {
                 <Action.Paste title={"Path"} content={url.path ?? ""} icon={Icon.CopyClipboard} />
                 <Action.Paste title={"Queries"} content={JSON.stringify(url.queries)} icon={Icon.CopyClipboard} />
               </ActionPanel.Submenu>
+              <Action
+                title="Parse URL from Clipboard"
+                onAction={handleParseFromClipboard}
+                icon={Icon.Globe}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+              />
               <ActionPanel.Section>
                 <Action
                   title="Delete"

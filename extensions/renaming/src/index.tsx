@@ -1,20 +1,19 @@
+/**
+ * Rename File(s) command — batch rename files with prefix, suffix, and numbering.
+ */
+
 import { useEffect, useState } from "react";
-import { runAppleScript, useCachedState } from "@raycast/utils";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  closeMainWindow,
-  popToRoot,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-} from "@raycast/api";
-import { statSync } from "fs";
-import { basename, extname } from "path";
+import { useCachedState } from "@raycast/utils";
+import { Form, ActionPanel, Action, popToRoot, showToast, Toast, getSelectedFinderItems } from "@raycast/api";
+import { dirname, join } from "path";
+import { getFileInfo } from "./lib/files";
+import { batchRename, checkConflicts } from "./lib/batch";
+import { openRenameHistory, recordRenameHistory } from "./lib/history-nav";
+import { log } from "./lib/logger";
+import type { FileInfo, RenameOperation } from "./types";
 
 export default function Command() {
-  const [files, setFiles] = useState<string[]>([]);
+  const [files, setFiles] = useState<FileInfo[]>([]);
   const [newName, setNewName] = useState<string>("");
   const [prefix, setPrefix] = useState<string>("");
   const [suffix, setSuffix] = useState<string>("");
@@ -25,11 +24,11 @@ export default function Command() {
 
   const getSelectedFiles = async () => {
     try {
-      const files = await getSelectedFinderItems();
-      const fileList = files.map((file) => file.path);
-      console.log("Fetched files:", fileList);
+      const selectedItems = await getSelectedFinderItems();
+      const filePaths = selectedItems.map((file) => file.path);
+      log.rename.debug("Fetched files", filePaths);
 
-      if (fileList.length === 0) {
+      if (filePaths.length === 0) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Please select at least one file or open a Finder window",
@@ -38,9 +37,13 @@ export default function Command() {
         return;
       }
 
-      setFiles(fileList);
+      const fileInfos = await Promise.all(filePaths.map((p) => getFileInfo(p)));
+      if (fileInfos.length === 1) {
+        setPreserveName(false);
+      }
+      setFiles(fileInfos);
     } catch (error) {
-      console.error(error);
+      log.rename.error("Failed to fetch files", error);
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch files",
@@ -77,50 +80,95 @@ export default function Command() {
   }, []);
 
   const generateNewName = (index: number): string => {
-    const selectedFile = files[index];
-    if (!selectedFile) {
-      // Handle the case where files[index] is undefined
+    const fileInfo = files[index];
+    if (!fileInfo) {
       return "";
     }
 
-    const isDirectory = statSync(selectedFile).isDirectory();
+    const prefixWithSeparator = prefix ? `${prefix}${separator}` : "";
+    const suffixWithSeparator = suffix ? `${separator}${suffix}` : "";
 
-    const fullName = basename(selectedFile);
-    const extension = isDirectory ? "" : extname(selectedFile);
-    const baseName = isDirectory ? fullName : basename(selectedFile, extension);
-
-    const prefixWithUnderscore = prefix ? `${prefix}${separator}` : "";
-    const suffixWithUnderscore = suffix ? `${separator}${suffix}` : "";
-
+    const indexSuffix = files.length > 1 && !preserveName ? `${indexSeparator}${index + 1}` : "";
     const newBaseName = preserveName
-      ? `${prefixWithUnderscore}${baseName}${suffixWithUnderscore}`
-      : `${prefixWithUnderscore}${newName}${indexSeparator}${index + 1}${suffixWithUnderscore}`;
+      ? `${prefixWithSeparator}${fileInfo.baseName}${suffixWithSeparator}`
+      : `${prefixWithSeparator}${newName}${indexSuffix}${suffixWithSeparator}`;
 
-    return isDirectory || !extension ? newBaseName : `${newBaseName}${extension}`;
+    return fileInfo.isDirectory || !fileInfo.extension ? newBaseName : `${newBaseName}${fileInfo.extension}`;
   };
 
   const renameFiles = async () => {
     try {
-      for (let i = 0; i < files.length; i++) {
-        const file = files[i];
-        const newNameWithExtension = generateNewName(i);
-        const escapedFilePath = file.replaceAll('"', '\\"');
-        const escapedNewName = newNameWithExtension.replaceAll('"', '\\"');
+      // Build rename operations
+      const operations: RenameOperation[] = files.map((fileInfo, i) => {
+        const newFileName = generateNewName(i);
+        return {
+          oldPath: fileInfo.path,
+          newName: newFileName,
+          newPath: join(dirname(fileInfo.path), newFileName),
+        };
+      });
 
-        await runAppleScript(`
-          tell application "Finder"
-            set theItem to POSIX file "${escapedFilePath}" as alias
-            set name of theItem to "${escapedNewName}"
-          end tell
-        `);
+      // Guard against renames that produce an empty base name
+      const emptyBases = operations.filter((op, i) => {
+        const ext = files[i].extension || "";
+        const base = ext ? op.newName.slice(0, -ext.length) : op.newName;
+        return base === "";
+      });
+      if (emptyBases.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "New name cannot be empty",
+          message: "Please enter a name for the file",
+        });
+        return;
       }
 
-      console.log("Finished renaming files.");
-      setPreserveName(false);
-      await closeMainWindow();
-      await popToRoot();
+      // Check for conflicts before renaming
+      const conflicts = await checkConflicts(operations);
+      if (conflicts.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Rename conflicts detected",
+          message: conflicts[0],
+        });
+        return;
+      }
+
+      // Perform batch rename
+      const results = await batchRename(operations);
+
+      const successfulOps = results.filter((r) => r.success).map(({ oldPath, newPath }) => ({ oldPath, newPath }));
+      const noun = successfulOps.length === 1 ? "file" : "files";
+      const historySaved = await recordRenameHistory(`Renamed ${successfulOps.length} ${noun}`, successfulOps);
+
+      const successCount = successfulOps.length;
+      const failureCount = results.filter((r) => !r.success).length;
+
+      if (failureCount === 0) {
+        setPreserveName(false);
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Renamed ${successCount} file${successCount !== 1 ? "s" : ""}`,
+          // An empty batch records no history by design — only warn when
+          // there was something to save and saving failed.
+          message: successCount > 0 && !historySaved ? "History could not be saved" : undefined,
+        });
+        await openRenameHistory(historySaved);
+      } else if (successCount > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Renamed ${successCount} of ${results.length} files`,
+          message: results.find((r) => !r.success)?.error,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to rename files",
+          message: results.find((r) => !r.success)?.error,
+        });
+      }
     } catch (error) {
-      console.error(error);
+      log.rename.error("Failed to rename files", error);
 
       await showToast({
         style: Toast.Style.Failure,
@@ -143,15 +191,17 @@ export default function Command() {
           </ActionPanel>
         }
       >
-        {files.length > 1 && (
+        {files.length > 0 && (
           <>
-            <Form.Checkbox
-              id="preserveName"
-              label="Preserve base name"
-              value={preserveName}
-              onChange={setPreserveName}
-            />
-            {!preserveName && (
+            {files.length > 1 && (
+              <Form.Checkbox
+                id="preserveName"
+                label="Preserve base name"
+                value={preserveName}
+                onChange={setPreserveName}
+              />
+            )}
+            {(!preserveName || files.length === 1) && (
               <Form.TextField
                 id="newName"
                 title="New Name"
@@ -169,7 +219,7 @@ export default function Command() {
               onChange={(newValue) => handleSeparatorChange("separator", newValue)}
               placeholder="Enter separator"
             />
-            {!preserveName && (
+            {!preserveName && files.length > 1 && (
               <Form.TextField
                 id="indexSeparator"
                 title="Index Separator"

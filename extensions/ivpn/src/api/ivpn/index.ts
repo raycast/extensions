@@ -1,0 +1,1 @@
+export { IVPN } from "./client";

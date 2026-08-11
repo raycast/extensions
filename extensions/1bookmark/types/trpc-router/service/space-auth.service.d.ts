@@ -1,18 +1,12 @@
 export declare class SpaceAuthService {
     listAuthenticatedSpaceIds(params: {
         spaceIds: string[];
-        accessToken: string;
+        jti: string;
     }): Promise<string[]>;
-    getSession(accessToken: string): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        userId: string;
-        createdAt: Date;
-        email: string;
-        updatedAt: Date;
-        expires: Date;
+    getSessionByJti(jti: string): Promise<{
         sessionId: string;
-        deviceName: string | null;
+        email: string;
+        createdAt: Date;
     }>;
     hasValidSpaceAuthByEmailOrEmailPattern(params: {
         memberAuthPolicies: {

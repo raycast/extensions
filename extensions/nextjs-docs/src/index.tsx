@@ -25,7 +25,7 @@ export default function main() {
     },
   );
 
-  const filteredTopics = useMemo(() => topics.filter((topic) => topic.filepath.includes(type)), [type]);
+  const filteredTopics = useMemo(() => topics.filter((topic) => topic.filepath.includes(type)), [type, isLoading]);
 
   return (
     <List
@@ -60,7 +60,7 @@ export default function main() {
 
         return (
           <List.Item
-            key={topic.sha}
+            key={topic.path}
             keywords={topic.filepath.split("/")}
             icon={Icon.Document}
             title={topic.title}

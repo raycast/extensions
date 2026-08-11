@@ -16,7 +16,7 @@ export function MdDefinitionListView({ initialText }: MdDefinitionListViewProps)
   const { savedMdDefinitions, isLoadingSaved, savedMdDefinitionsMap, loadSavedMdDefinitions } = useSavedMdDefinitions();
 
   // Search functionality
-  const { searchText, setSearchText, aiResult, isLoading, handleSearch, clearAiResult } = useMdDefinitionSearch(
+  const { searchText, setSearchText, aiResult, isLoading, error, handleSearch, clearAiResult } = useMdDefinitionSearch(
     savedMdDefinitionsMap,
     isLoadingSaved,
     initialText,
@@ -37,7 +37,24 @@ export function MdDefinitionListView({ initialText }: MdDefinitionListViewProps)
       searchText={searchText}
       isShowingDetail
     >
-      {allMdDefinitions.length === 0 ? (
+      {error ? (
+        <List.Item
+          title="Error"
+          icon={Icon.ExclamationMark}
+          detail={
+            <List.Item.Detail
+              markdown={`# Error
+
+${error}`}
+            />
+          }
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.RotateClockwise} onAction={() => handleSearch(searchText.trim())} />
+            </ActionPanel>
+          }
+        />
+      ) : allMdDefinitions.length === 0 ? (
         isLoading ? (
           <List.EmptyView title="Querying..." icon={Icon.Cloud} description="Please wait while we query the text..." />
         ) : (

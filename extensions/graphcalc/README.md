@@ -62,9 +62,11 @@ A simple Raycast graphing calculator extension.
 
 ## Tech Stack
 
-**Client:** React, [react-vis](https://uber.github.io/react-vis/)
+**Client:** TypeScript, Raycast API
 
-**Server:** Node
+**Math Engine:** [Math.js](https://mathjs.org/)
+
+**Rendering:** Custom SVG generation
 
 
 ## Authors

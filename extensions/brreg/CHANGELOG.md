@@ -1,70 +1,61 @@
-# BRREG Search Changelog
+# Brreg Search Changelog
 
-## [Version 2.0.3 – Updated README] - 2025-09-02
-- Nothing big, just an absent-minded dev
+## [1.0.1] - 2026-04-28
 
-## [Version 2.0.2 – New keyboard shortcuts for financial data] - 2025-08-25
-- Added keyboard shortcuts for copying revenue (⌘⇧R) and net result (⌘⇧N)
-- Refactored all keyboard shortcuts to use centralized constants for better maintainability
+_Quality, Testing & Details Fixes_
 
-## [Version 2.0.1 – Minor updates and typography fixes] - 2025-08-25
-- Updated Welcome message
-- Added Keyboard Shortcuts to the Welcome screen and made it available from all views
-- Companies can now be added (⌘F) or removed (⌘⇧F) from Favorites, including from the Detail view
-- Favorites are hidden while typing; only search results show once you start typing
-- Added a visual metadata tag indicating whether a company is in the Favorites list or not
-- Simplified Favorites empty state copy
-- Added link to GitHub for feedback and feature requests
-- Removed uncessecary settings view
-- Fixed some links not working as intended
+- Added Vitest infrastructure with Raycast API mocks
+- Added smoke tests for core utilities and Brreg API mapping
+- Added TTL cache for API responses to reduce redundant network calls
+- Debounced search input for snappier typing
+- Shortcut help labels derived from shared constants — single source of truth
+- Copy shortcuts normalised to `⌘⇧` combinations for consistency
+- Improved favourites responsiveness and toast feedback
+- Centralised constants and map URL logic in details view
+- Extracted shared VAT copy utility
+- Extracted and tested format helpers (`formatCurrency`, `formatDate`, etc.)
+- Removed dead types and unused settings hook
+- Fixed dependabot security alerts by updating vulnerable transitive deps
+- Upgraded ESLint to v9 with flat config
+- Added DRY search favicon strategy: top-3 hydration, debounced updates, and bounded in-memory cache
+- Added an `Open in Alle.as` action for company results, favourites, and detail views
+- Fixed company details audit metadata so audit opt-out is shown as `Audit Required: No` and `Audited Accounts: No`
+- Added organisation form metadata to company details
 
-## [Version 2.0.0 - Major Refactoring & Enhancement Release] - 2025-08-19
-🚀 **What's New?**
+## [Documentation Update] - 2026-01-22
 
-### ✨ **Enhanced User Experience**
-- **Welcome Messages**: Helpful onboarding for new users with no favorites
-- **User Settings**: Customizable preferences including welcome message display and performance monitoring
-- **Keyboard Shortcuts Help**: Comprehensive guide accessible from the welcome section
-- **Improved Empty States**: Better guidance when no favorites or search results exist
+- Updated README to reflect current functionality
+- Added privacy and networking section
+- Normalised changelog format
 
-### 🏗️ **Architecture Improvements**
-- **Component Extraction**: Broke down monolithic component into focused, reusable pieces
-- **Custom Hooks**: Extracted business logic into specialized hooks for better maintainability
-- **Zero Code Duplication**: Eliminated all redundant action code with shared components
-- **Performance Optimization**: React.memo implementation and optimized data structures
+## [Keyboard Shortcuts for Financial Data] - 2025-08-25
 
-### 🎨 **New Components**
-- **EntityActions**: Common actions for all entities (view, copy, open in browser)
-- **FavoriteActions**: Specialized actions for favorites (emoji, reorder, remove)
-- **SearchResultActions**: Conditional actions for search results
-- **SettingsView**: User preferences management interface
-- **KeyboardShortcutsHelp**: Comprehensive shortcuts reference
-- **ErrorBoundary**: Robust error handling with graceful fallbacks
+- Added keyboard shortcuts for copying revenue (`⌘⇧R`) and net result (`⌘⇧N`)
+- Refactored all shortcuts to use centralised constants
 
-### 🔧 **Technical Enhancements**
-- **Type Safety**: 100% TypeScript coverage with strict typing
-- **Error Handling**: Comprehensive error boundaries and user feedback
-- **Performance Monitoring**: Development tools for component performance tracking
-- **Constants Management**: Centralized configuration for easy maintenance
-- **Dependency Cleanup**: Removed unused Google Static Maps API key requirement
+## [Favourites & UX Polish] - 2025-08-25
 
-## [Version 1.1.0 - Initial Enhancement Release] – 2025-08-19
+- Welcome message and keyboard shortcuts help on all views
+- Add/remove favourites from detail view (`⌘F` / `⌘⇧F`)
+- Favourites hidden while typing
+- Metadata tag for favourite status
+- Removed unnecessary settings view
+- Fixed broken links
 
-♻️ **What's Changed:**
-- Corrected the English name of Brønnøysundregistrene to the official translation (The Brønnøysund Register Centre).
+## [Major Refactoring] - 2025-08-19
 
-⭐ **What's New:**
-- Favorite entities to keep your most-used companies and organisations at your fingertips
-- Basic search functionality for Norwegian companies
-- Company details view with financial information
-- Map integration for company locations
+- Broke monolithic component into focused, reusable pieces
+- Extracted business logic into custom hooks
+- Added React.memo, error boundaries, strict TypeScript throughout
+- Welcome messages, keyboard shortcuts help, improved empty states
 
-## [Version 1.0.0 - Initial Release] - 2025-02-25
+## [Initial Enhancement] - 2025-08-19
 
-🎯 **Core Features:**
-- Search Norwegian companies by name or organization number
-- View company details and financial information
-- Copy company data to clipboard
-- Open companies in Brønnøysundregistrene website
+- Corrected English name of Brønnøysundregistrene
+- Added favourites, company details, financial info, map integration
 
-Made with 🫶 by [kynd](https://www.kynd.no) 
+## [Initial Release] - 2025-02-25
+
+- Search Norwegian companies by name or organisation number
+- Company details and financial information
+- Copy actions and external links

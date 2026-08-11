@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "posthog",
   "title": "PostHog",
-  "description": "Open the web app, search for projects, persons, feature flags, and cohorts.",
+  "description": "Open the web app, search PostHog resources, and run read-only analytics with AI tools.",
   "icon": "posthog-logo.png",
   "author": "david_newell",
   "owner": "posthog",
@@ -17,19 +17,22 @@
       "name": "feature-flags",
       "title": "Feature Flags",
       "description": "Search your feature flags on PostHog.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "PostHog"
     },
     {
       "name": "cohorts",
       "title": "Cohorts",
       "description": "Search cohorts on PostHog and open them in the web app.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "PostHog"
     },
     {
       "name": "dashboards",
       "title": "Dashboards",
       "description": "Search dashboards on PostHog and open them in the web app.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "PostHog"
     },
     {
       "name": "persons",
@@ -43,56 +46,66 @@
           "required": true
         }
       ],
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "PostHog"
     },
     {
       "name": "projects",
       "title": "Projects",
       "description": "List and open your projects.",
-      "mode": "view"
+      "mode": "view",
+      "subtitle": "PostHog"
     }
   ],
   "preferences": [
     {
       "name": "personalAPIKey",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "Personal API Key",
-      "description": "Your personal API key for PostHog.",
-      "link": "https://app.posthog.com/me/settings",
-      "placeholder": "Enter your personal API key"
+      "description": "Your phx_ personal API key for PostHog. Project keys starting with phc_ are ignored by AI tools.",
+      "link": "https://us.posthog.com/me/settings",
+      "placeholder": "phx_..."
     },
     {
       "name": "dataRegionURL",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "Data Region",
       "description": "The region where your PostHog account is hosted.",
       "data": [
         {
           "title": "US",
-          "value": "https://app.posthog.com"
+          "value": "https://us.posthog.com"
         },
         {
           "title": "EU",
           "value": "https://eu.posthog.com"
         }
       ],
-      "placeholder": "Pick a region"
+      "placeholder": "Pick a region",
+      "default": "https://us.posthog.com"
+    },
+    {
+      "name": "defaultProjectId",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Project ID",
+      "description": "Optional project ID to use when AI tools are called without an explicit projectId.",
+      "placeholder": "e.g. 62292"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.54.1",
-    "@raycast/utils": "^1.8.0",
-    "axios": "^1.8.4"
+    "@raycast/api": "1.104.20",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^26.0.0",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -100,5 +113,118 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "tools": [
+    {
+      "name": "whoami",
+      "title": "Who Am I",
+      "description": "Verify the PostHog personal API key and return the authenticated user and organization. Use this to debug authentication."
+    },
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "description": "List PostHog projects with their numeric IDs. Call this before analytics if the project ID is unknown, and pass the chosen projectId to other tools."
+    },
+    {
+      "name": "query-hogql",
+      "title": "Run HogQL Query",
+      "description": "Run a read-only HogQL SELECT query against a PostHog project and return compact column-mapped rows. Use this for analytics, funnels, DAU, retention, event counts, cohorts, and metric calculations. Always include a LIMIT for exploratory row-level queries. Prefer aggregate queries for final answers. The tool caps returned rows and truncates long values to avoid bloating context."
+    },
+    {
+      "name": "get-schema",
+      "title": "Get Schema",
+      "description": "Fetch the PostHog HogQL database schema with optional table/search filters. Use this to discover tables and columns before writing HogQL. Keep includeColumns false or use table filters when broad schema would be too large."
+    },
+    {
+      "name": "list-events",
+      "title": "List Events",
+      "description": "List recent raw events for a PostHog project with optional event name and time filters. Use for sampling and debugging, not for metrics. Request specific propertyKeys to avoid large payloads."
+    },
+    {
+      "name": "list-persons",
+      "title": "List Persons",
+      "description": "Search/list PostHog persons for a project. Returns compact person metadata, distinct IDs, and optionally selected properties. Use propertyKeys to avoid large payloads."
+    },
+    {
+      "name": "list-insights",
+      "title": "List Insights",
+      "description": "List/search saved PostHog insights for a project. Use this to find existing dashboards or definitions before recreating metrics in HogQL."
+    },
+    {
+      "name": "get-insight",
+      "title": "Get Insight",
+      "description": "Get a saved PostHog insight by ID, optionally including filters and results. Use after List Insights when you need the exact metric definition."
+    },
+    {
+      "name": "list-feature-flags",
+      "title": "List Feature Flags",
+      "description": "List/search feature flags for a PostHog project. Include filters only when you need rollout or condition details."
+    }
+  ],
+  "ai": {
+    "instructions": "Use PostHog tools for analytics in a context-efficient way. First identify the project with list-projects unless the user provided a projectId or configured a default. Prefer query-hogql for actual numbers and use aggregate SELECTs instead of fetching raw events. Use get-schema only with search or table filters when possible. Use list-events and list-persons for sampling/debugging only, with small limits and propertyKeys. Always pass projectId explicitly once known. Treat all tools as read-only. Never use a phc_ project key for authentication, only a phx_ personal API key. When returning analytics, include the query logic or key filters in prose, but do not dump large raw result sets unless asked.",
+    "evals": [
+      {
+        "input": "@posthog what projects do I have access to?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-projects"
+            }
+          }
+        ],
+        "mocks": {
+          "list-projects": {
+            "projects": []
+          }
+        }
+      },
+      {
+        "input": "@posthog show DAU for the last 7 days in project 123",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "query-hogql",
+              "arguments": {
+                "projectId": 123,
+                "query": {
+                  "includes": "SELECT"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "query-hogql": {
+            "rows": []
+          }
+        }
+      },
+      {
+        "input": "@posthog what columns are available on events in project 123?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-schema",
+              "arguments": {
+                "projectId": 123,
+                "tables": {
+                  "includes": "events"
+                }
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "get-schema": {
+            "tables": []
+          }
+        }
+      }
+    ]
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

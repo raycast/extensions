@@ -4,7 +4,7 @@ Quickly run git commands through Raycast, allows you to do common git tasks like
 - Check status
 - Stage and commit changes
 - Discard changes and restore a file to its previous state
-- Switch, create, delete, push and pull branches
+- Switch, create, delete, push and pull branches and worktrees
 
 ## Git Configuration
 

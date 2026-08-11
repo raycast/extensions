@@ -1,8 +1,27 @@
-export interface CloudflareResponse<T> {
-  result?: T;
-  success: boolean;
+interface CloudflareResponseSuccess<T> {
+  result: T;
+  success: true;
+  errors: never[];
+}
+interface CloudflareResponseFailure {
+  result?: never;
+  success: false;
   errors: CloudflareResponseInfo[];
 }
+export type CloudflareResponse<T> = CloudflareResponseSuccess<T> | CloudflareResponseFailure;
+
+interface CloudflarePaginatedResponseSuccess<T> {
+  result: T[];
+  success: true;
+  errors: never[];
+  result_info: {
+    count: number;
+    page: number;
+    per_page: number;
+    total_count: number;
+  };
+}
+export type CloudflarePaginatedResponse<T> = CloudflarePaginatedResponseSuccess<T> | CloudflareResponseFailure;
 
 export interface CloudflareResponseInfo {
   code: number;
@@ -33,7 +52,8 @@ export interface AliasRule {
   email: string;
   forwardsToEmail: string;
   enabled: boolean;
-  createdAt: Date;
+  createdAt?: Date;
+  isManaged: boolean;
 }
 
 export interface ApiConfig {
@@ -41,11 +61,14 @@ export interface ApiConfig {
   zoneId: string;
   destinationEmail: string;
   preAllocatePool: boolean;
+  aliasPreface?: string;
+  defaultLabel?: string;
 }
 
 export type EmailRoutingSettings = CloudflareEmailRoutingSettings;
 
 export interface CreateAliasFormData {
+  alias: string;
   label: string;
   description?: string;
 }

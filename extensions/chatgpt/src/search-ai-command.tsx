@@ -68,7 +68,7 @@ function SearchAiCommand() {
         <Action.CreateQuicklink
           quicklink={{
             name: cmd.name,
-            link: `raycast://extensions/${packageJson.author}/${
+            link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${packageJson.author}/${
               packageJson.name
             }/search-ai-command?context=${encodeURIComponent(JSON.stringify({ commandId: cmd.id }))}`,
           }}

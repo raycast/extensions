@@ -1,9 +1,6 @@
-import { showToast, Toast } from "@raycast/api";
+import { showToast, Toast, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { exec } from "child_process";
-import { promisify } from "util";
-
-const execPromise = promisify(exec);
+import { toError } from "./utils/errorUtils";
 
 export default async function Command() {
   try {
@@ -12,13 +9,13 @@ export default async function Command() {
       title: "Opening Granola",
     });
 
-    await execPromise("open 'granola://new-document?creation_source=raycast'");
+    await open("granola://new-document?creation_source=raycast");
 
     await showToast({
       style: Toast.Style.Success,
       title: "Opened new note in Granola",
     });
   } catch (error) {
-    await showFailureToast({ title: "Failed to open Granola", message: String(error) });
+    await showFailureToast(toError(error), { title: "Failed to open Granola" });
   }
 }

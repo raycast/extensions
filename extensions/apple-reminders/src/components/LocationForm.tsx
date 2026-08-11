@@ -2,10 +2,8 @@ import crypto from "crypto";
 
 import { ActionPanel, Action, Form, Icon, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { uniqBy } from "lodash";
-import { useMemo } from "react";
 
-import { Location } from "../hooks/useLocations";
+import { Location, LocationIcon, resolveLocationIcon } from "../hooks/useLocations";
 
 type LocationFormValues = Omit<Location, "id">;
 
@@ -18,14 +16,29 @@ type SetLocationReminderFormProps = {
 export default function LocationForm({ onSubmit, location, isCustomLocation }: SetLocationReminderFormProps) {
   const { pop } = useNavigation();
 
+  const locationIconOptions: { value: LocationIcon; title: string }[] = [
+    { value: "home", title: "Home" },
+    { value: "work", title: "Work" },
+    { value: "gym", title: "Gym" },
+    { value: "store", title: "Store" },
+    { value: "school", title: "School" },
+    { value: "other", title: "Other" },
+  ];
+
+  const defaultIcon: LocationIcon =
+    locationIconOptions.find((option) => option.value === location?.icon)?.value ?? "home";
+
   const { itemProps, values, handleSubmit } = useForm<LocationFormValues>({
     async onSubmit(values) {
-      location ? await onSubmit({ ...location, ...values }) : await onSubmit({ ...values, id: crypto.randomUUID() });
+      const icon = (values.icon as LocationIcon) ?? "home";
+      location
+        ? await onSubmit({ ...location, ...values, icon })
+        : await onSubmit({ ...values, icon, id: crypto.randomUUID() });
       pop();
     },
     initialValues: {
       name: location?.name,
-      icon: location?.icon,
+      icon: defaultIcon,
       address: location?.address,
       proximity: location?.proximity,
       radius: location?.radius,
@@ -42,15 +55,6 @@ export default function LocationForm({ onSubmit, location, isCustomLocation }: S
       },
     },
   });
-
-  // There seems to be a bug in the Icon type, so we need to filter out the duplicates
-  const icons = useMemo(
-    () =>
-      uniqBy(Object.entries(Icon), (value) => {
-        return value[1];
-      }),
-    [],
-  );
 
   let title;
   if (isCustomLocation) {
@@ -74,9 +78,14 @@ export default function LocationForm({ onSubmit, location, isCustomLocation }: S
         <>
           <Form.TextField {...itemProps.name} title="Name" placeholder="Enter a name" />
           <Form.Dropdown {...itemProps.icon} title="Icon">
-            {icons.map(([key, value]) => {
-              return <Form.Dropdown.Item key={key} title={key} value={value} icon={value} />;
-            })}
+            {locationIconOptions.map((option) => (
+              <Form.Dropdown.Item
+                key={option.value}
+                title={option.title}
+                value={option.value}
+                icon={resolveLocationIcon(option.value)}
+              />
+            ))}
           </Form.Dropdown>
         </>
       ) : null}

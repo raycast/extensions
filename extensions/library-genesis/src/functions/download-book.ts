@@ -7,11 +7,11 @@ import { downloadBookToDefaultDirectory, downloadBookToLocation } from "@/utils/
 import Style = Toast.Style;
 
 export const downloadBook = async (book: BookEntry) => {
-  const { downloadGateway, alwaysAskWhereToSave } = getPreferenceValues<LibgenPreferences>();
+  const { alwaysAskWhereToSave } = getPreferenceValues<LibgenPreferences>();
 
   const toast = await showToast(Style.Animated, "Fetching URL...");
   try {
-    const url = await getUrlFromDownloadPage(book.downloadUrl, downloadGateway);
+    const url = await getUrlFromDownloadPage(book.downloadUrl);
     toast.title = "Using default gateway...";
     switch (alwaysAskWhereToSave) {
       case true:

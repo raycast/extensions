@@ -1,5 +1,41 @@
 # Raindrop.io Extension Changelog
 
+## [Fixes] - 2026-05-04
+
+- Add AppleScript fallback support for Arc browser in `src/hooks/useBrowserLink.ts`
+
+## [Fixes] - 2026-03-31
+
+- Fix loading collections in the Save Browser Tab form by building the dropdown options directly from the collections API response.
+
+## [Windows/Linux Compatibility] - 2026-01-07
+
+- Add Windows to the list of supported platforms.
+
+## [Windows/Linux Compatibility] - 2026-01-06
+
+- Add platform check to skip AppleScript fallback on non-macOS systems
+- Show helpful error message directing users to install Raycast Browser Extension
+
+## [Enhancements] - 2026-01-06
+
+- Added support for Dia browser.
+
+## [Quick Add Bookmark] - 2026-01-01
+
+- Added Quick Add Bookmark command for saving URLs instantly without opening a form
+- Automatically fetches page title from URL
+
+## [AI Assistant] - 2025-11-17
+
+- Added Raycast AI tooling so you can mention `@raindrop-io` in Raycast AI to search, inspect, and summarize bookmarks.
+- Added AI support for saving links via natural language, including automatic collection lookups and confirmation prompts.
+- Documented the new functionality in the README.
+
+## [Enhancements] - 2025-11-03
+
+- Add a "Note" field to the bookmark creation and editing forms.
+
 ## [Open in Secondary Browser] - 2025-10-01
 
 - Specify a secondary browser for opening bookmarks (ref: [Issue #21699](https://github.com/raycast/extensions/issues/21699))

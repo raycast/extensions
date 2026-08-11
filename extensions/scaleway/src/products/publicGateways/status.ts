@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { VPCGW } from '@scaleway/sdk'
+import { Vpcgwv1 } from '@scaleway/sdk'
 
-export const GATEWAY_STATUSES = VPCGW.v1.GATEWAY_TRANSIENT_STATUSES.reduce(
+export const GATEWAY_STATUSES = Vpcgwv1.GATEWAY_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -24,4 +24,4 @@ export const GATEWAY_STATUSES = VPCGW.v1.GATEWAY_TRANSIENT_STATUSES.reduce(
   }
 )
 
-export const getGatewayStatusIcon = (gateway: VPCGW.v1.Gateway) => GATEWAY_STATUSES[gateway.status]
+export const getGatewayStatusIcon = (gateway: Vpcgwv1.Gateway) => GATEWAY_STATUSES[gateway.status]

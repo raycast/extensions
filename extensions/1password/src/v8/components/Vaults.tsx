@@ -1,7 +1,8 @@
 import { Color, Icon, List } from "@raycast/api";
 import { useMemo, useState } from "react";
+
 import { Vault } from "../types";
-import { useVaults, useAccount, CommandLineMissingError, ConnectionError, ExtensionError } from "../utils";
+import { CommandLineMissingError, ConnectionError, ExtensionError, useAccount, useVaults } from "../utils";
 import { Error as ErrorGuide } from "./Error";
 import { VaultActionPanel } from "./VaultActionPanel";
 
@@ -22,9 +23,9 @@ export function Items() {
     return (
       <List>
         <List.EmptyView
-          title={(itemsError as ExtensionError)?.title || (accountError as ExtensionError)?.title}
           description={itemsError?.message || accountError?.message}
           icon={Icon.WifiDisabled}
+          title={(itemsError as ExtensionError)?.title || (accountError as ExtensionError)?.title}
         />
       </List>
     );
@@ -33,22 +34,22 @@ export function Items() {
   return (
     <List isLoading={itemsIsLoading || accountIsLoading}>
       <List.EmptyView
-        title="No items found"
-        icon="1password-noview.png"
         description="Any vaults you have added in 1Password app will be listed here."
+        icon="1password-noview.png"
+        title="No items found"
       />
-      <List.Section title="Vaults" subtitle={`${vaults?.length}`}>
+      <List.Section subtitle={`${vaults?.length}`} title="Vaults">
         {vaults?.length &&
           vaults.map((item) => (
             <List.Item
-              key={item.id}
-              id={item.id}
-              icon={{
-                value: { source: Icon.Folder, tintColor: Color.Blue },
-                tooltip: "Vault",
-              }}
-              title={item.name}
               actions={<VaultActionPanel account={account} vault={item} />}
+              icon={{
+                tooltip: "Vault",
+                value: { source: Icon.Folder, tintColor: Color.Blue },
+              }}
+              id={item.id}
+              key={item.id}
+              title={item.name}
             />
           ))}
       </List.Section>

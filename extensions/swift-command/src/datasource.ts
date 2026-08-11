@@ -82,6 +82,34 @@ class FileDataSource implements DataSource {
         lastUsedTime: currentTimestamp,
       },
       {
+        id: "936ed5ea71e576655b26eb9468609560",
+        data: "echo {{clipboard}}",
+        remark: "use the {{clipboard}} placeholder in your command to reference the current clipboard text",
+        args: [
+          {
+            name: "clipboard",
+            value: "",
+          },
+        ],
+        createTime: currentTimestamp,
+        updateTime: currentTimestamp,
+        lastUsedTime: currentTimestamp,
+      },
+      {
+        data: 'Translate the following text into elegant and natural English: "{{clipboard}}"',
+        remark: "prompt: translate the clipboard text into English",
+        args: [
+          {
+            name: "clipboard",
+            value: "",
+          },
+        ],
+        id: "3b720985d8ff57943f87beed91136c8d",
+        createTime: currentTimestamp,
+        updateTime: currentTimestamp,
+        lastUsedTime: currentTimestamp,
+      },
+      {
         id: "c8dec60c50c26c402777c516bb1c91e5",
         data: "Tip: Press ⌘ + N to add a new command. For more actions, press ⌘ + K",
         remark: "",

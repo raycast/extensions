@@ -1,5 +1,18 @@
 # WLED Controller Changelog
 
+## Scenes feature and Windows support - 2025-11-28
+
+### What's new
+
+- Scenes - create scenes that capture the current state of your devices and apply them later with a single command
+- Added "Set WLED Scene" command
+- Added "Create WLED Scene" command
+- Added Windows support
+
+### Other Improvements
+
+- Device controls have been moved to the actions menu, which allows for faster and easier access, including hotkeys
+
 ## [Initial Version] - 2025-10-21
 
 ### Added

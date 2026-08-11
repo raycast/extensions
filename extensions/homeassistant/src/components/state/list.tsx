@@ -28,7 +28,7 @@ import { ha, shouldDisplayEntityID } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getStateTooltip } from "@lib/utils";
 import { ActionPanel, Color, Image, List, Toast, showToast } from "@raycast/api";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useStateSearch } from "./hooks";
 import { getIcon, getStateValue } from "./utils";
 
@@ -40,6 +40,10 @@ export function StatesList(props: {
   const [searchText, setSearchText] = useState<string>();
   const { states: allStates, error, isLoading } = useHAStates();
   const { states } = useStateSearch(searchText, props.domain, props.deviceClass, props.entitiesState ?? allStates);
+  const statesById = useMemo(
+    () => new Map((props.entitiesState ?? allStates ?? []).map((state) => [state.entity_id, state])),
+    [allStates, props.entitiesState],
+  );
 
   if (error) {
     showToast({
@@ -60,14 +64,15 @@ export function StatesList(props: {
           (a.attributes.friendly_name || a.entity_id).localeCompare(b.attributes.friendly_name || b.entity_id),
         )
         .map((state) => (
-          <StateListItem key={state.entity_id} state={state} />
+          <StateListItem key={state.entity_id} state={state} statesById={statesById} />
         ))}
     </List>
   );
 }
 
-export function StateListItem(props: { state: State }): React.ReactElement {
+export function StateListItem(props: { state: State; statesById?: ReadonlyMap<string, State> }): React.ReactElement {
   const state = props.state;
+  const areaName = state.area_name;
 
   let icon: Image.ImageLike | undefined;
   const subtitle = (state: State): string | undefined => {
@@ -89,13 +94,12 @@ export function StateListItem(props: { state: State }): React.ReactElement {
         icon = ha.urlJoin(ep);
       }
     }
-    if (shouldDisplayEntityID()) {
-      return extra;
+    if (!shouldDisplayEntityID()) {
+      const parts = [areaName, extra].filter(Boolean);
+      return parts.length > 0 ? parts.join(" | ") : undefined;
     }
-    if (extra) {
-      return `${state.entity_id} | ${extra}`;
-    }
-    return state.entity_id;
+    const parts = [state.entity_id, areaName, extra].filter(Boolean);
+    return parts.length > 0 ? parts.join(" | ") : undefined;
   };
 
   const firstAccessoryTitle = (state: State): string => {
@@ -150,7 +154,7 @@ export function StateListItem(props: { state: State }): React.ReactElement {
           tooltip: getStateTooltip(state),
         },
         {
-          text: getStateValue(state),
+          text: getStateValue(state, props.statesById),
           icon: secondAccessoryIcon(state),
           tooltip: getStateTooltip(state),
         },

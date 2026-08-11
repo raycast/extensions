@@ -53,6 +53,18 @@ export const sportIcons: { [key: string]: string } = {
   Yoga: "yoga.svg",
 };
 
+export const workoutTypeLabels = {
+  run: {
+    1: "Race",
+    2: "Long Run",
+    3: "Workout",
+  },
+  ride: {
+    11: "Race",
+    12: "Workout",
+  },
+} as const satisfies Record<string, Record<number, string>>;
+
 export const distancePresets = {
   Marathon: { km: "42.195", mi: "26.219" },
   "Half-Marathon": { km: "21.0975", mi: "13.1095" },

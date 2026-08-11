@@ -6,7 +6,7 @@ import { cache, cachePicture, checkCache } from "../utils/common-utils";
 import axios from "axios";
 import { getAppearanceByTitle } from "../utils/appearance-utils";
 import { respectAppearance } from "../types/preferences";
-import { getSystemAppearance } from "../utils/applescript-utils";
+import { getSystemAppearance } from "../utils/platform-utils";
 import Style = Toast.Style;
 
 export const getRaycastWallpaperList = (refresh: number) => {

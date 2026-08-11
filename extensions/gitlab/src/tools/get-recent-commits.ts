@@ -26,18 +26,18 @@ type PushEvent = {
  */
 export default async function ({ projectId, search }: Input) {
   const events = (await gitlab.fetch("events", { action: "pushed" })) as PushEvent[];
-  const pushed = events.filter((e) => e?.action_name === "pushed to" || e?.action_name === "pushed new");
+  const pushed = events.filter((event) => event?.action_name === "pushed to" || event?.action_name === "pushed new");
 
-  const byProject = typeof projectId === "number" ? pushed.filter((e) => e.project_id === projectId) : pushed;
+  const byProject = typeof projectId === "number" ? pushed.filter((event) => event.project_id === projectId) : pushed;
 
   if (search && search.length > 0) {
-    const q = search.toLowerCase();
+    const searchLower = search.toLowerCase();
 
-    return byProject.filter((e) => {
-      const title = String(e?.push_data?.commit_title || "").toLowerCase();
-      const ref = String(e?.push_data?.ref || "").toLowerCase();
-      const sha = String(e?.push_data?.commit_to || "").toLowerCase();
-      return title.includes(q) || ref.includes(q) || sha.includes(q);
+    return byProject.filter((event) => {
+      const title = String(event?.push_data?.commit_title || "").toLowerCase();
+      const ref = String(event?.push_data?.ref || "").toLowerCase();
+      const sha = String(event?.push_data?.commit_to || "").toLowerCase();
+      return title.includes(searchLower) || ref.includes(searchLower) || sha.includes(searchLower);
     });
   }
 

@@ -1,5 +1,17 @@
 # Google Tasks Changelog
 
+## [Fix] - 2026-06-26
+
+- Await task creation before showing success and closing the create task form.
+
+## [Fix] - 2026-03-31
+
+- Fix due date timezone shift for UTC+ users
+
+## [Update] - 2025-12-07
+
+- Add "Create Task" command for quick task creation
+
 ## [Maintenance] - 2025-10-27
 
 - Add support for Windows platform.

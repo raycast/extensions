@@ -13,12 +13,14 @@ export const sortDropdownItems = [
       { value: "relevance", title: "Relevance" },
       { value: "updated", title: "Last Updated" },
       { value: "added", title: "Recently Added" },
-      { value: "recommended", title: "Recommended" },
+      { value: "released", title: "Recently Released" },
       { value: "quality", title: "Quality" },
       { value: "popularity", title: "Popularity Gain" },
       { value: "issues", title: "Issues" },
       { value: "downloads", title: "Downloads" },
       { value: "stars", title: "Stars" },
+      { value: "dependencies", title: "Dependencies" },
+      { value: "size", title: "Package Size" },
     ],
   },
   {
@@ -34,13 +36,23 @@ export const sortDropdownItems = [
     ],
   },
   {
+    title: "Module Type",
+    items: [
+      { value: "expoModule", title: "Expo Module" },
+      { value: "nitroModule", title: "Nitro Module" },
+      { value: "turboModule", title: "Turbo Module" },
+    ],
+  },
+  {
     title: "Status",
     items: [
       { value: "newArchitecture", title: "Supports New Architecture" },
       { value: "hasNativeCode", title: "Uses native code" },
+      { value: "configPlugin", title: "Has Expo config plugin" },
       { value: "hasExample", title: "Has example" },
       { value: "hasImage", title: "Has image preview" },
       { value: "hasTypes", title: "Has TypeScript types" },
+      { value: "nightlyProgram", title: "Tested in Nightly Program" },
       { value: "wasRecentlyUpdated", title: "Recently updated" },
       { value: "isMaintained", title: "Maintained" },
       { value: "isPopular", title: "Popular" },
@@ -51,6 +63,8 @@ export const sortDropdownItems = [
     items: [
       { value: "expoGo", title: "Works with Expo Go" },
       { value: "fireos", title: "Works with Fire OS" },
+      { value: "horizon", title: "Works with Meta Horizon OS" },
+      { value: "vegaos", title: "Works with Vega OS" },
     ],
   },
   {
@@ -79,6 +93,15 @@ export const platformColors: { [key: string]: Color } = {
   macOS: Color.PrimaryText,
   tvOS: Color.PrimaryText,
   visionOS: Color.PrimaryText,
+  VegaOS: Color.Orange,
+  "Horizon OS": Color.Purple,
+};
+
+export const moduleTypeColors: { [key: string]: Color } = {
+  "Expo Module": Color.Purple,
+  "Turbo Module": Color.Orange,
+  "Nitro Module": Color.Red,
+  "Config Plugin": Color.Green,
 };
 
 export const MUL = 1000;

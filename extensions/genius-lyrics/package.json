@@ -7,7 +7,8 @@
   "author": "tkdkid1000",
   "contributors": [
     "johnstclair",
-    "ryanlauderbach"
+    "ryanlauderbach",
+    "jacperegrinedavies"
   ],
   "categories": [
     "Media"
@@ -63,6 +64,7 @@
   },
   "version": "0.1.0",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

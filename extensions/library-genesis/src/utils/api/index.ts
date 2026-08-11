@@ -1,7 +1,7 @@
 import { load } from "cheerio";
 import fetch from "node-fetch";
 
-import type { BookEntry, LibgenDownloadGateway } from "@/types";
+import type { BookEntry } from "@/types";
 import { SearchType } from "@/types";
 
 import { getMirror } from "./mirrors";
@@ -79,21 +79,13 @@ export const getLibgenSearchResults = async (
   }
 };
 
-export const getUrlFromDownloadPage = async (
-  downloadUrl: string,
-  gateWay: LibgenDownloadGateway,
-): Promise<string | undefined> => {
+export const getUrlFromDownloadPage = async (downloadUrl: string): Promise<string | undefined> => {
   const response = await fetch(downloadUrl);
   const data = await response.text();
 
   const $ = load(data);
-  console.log(downloadUrl);
   const pathname = $("#main").find("a").first().attr("href");
   const url = new URL(downloadUrl);
   url.pathname = pathname || "";
-  return url.toString();
-
-  const downloadLinks = $("#download").find("a");
-  const downloadLink = downloadLinks.eq(gateWay).attr("href");
-  return downloadLink;
+  return `${url.origin}/${pathname}`;
 };

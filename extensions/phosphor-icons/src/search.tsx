@@ -11,7 +11,7 @@ import IconsList from "./components/IconsList";
 const allIcons = icons as unknown as IconEntry[];
 
 const SearchIconsCommand = () => {
-  const { view } = getPreferenceValues<{ view: "grid" | "list" }>();
+  const { view } = getPreferenceValues<Preferences>();
   const [weight, setWeight] = useState("regular");
   const [search, setSearch] = useState("");
 

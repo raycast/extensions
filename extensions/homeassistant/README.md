@@ -51,6 +51,7 @@ Manage your smart home with Raycast 🚀
 - Control your covers
 - Show all entities
 - Show all entities with attributes
+- Explore history of sensors
 
 and all in real time 🚀
 

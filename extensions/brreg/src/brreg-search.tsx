@@ -1,42 +1,34 @@
 import { List, ActionPanel, Action } from "@raycast/api";
+import { useEffect } from "react";
 import CompanyDetailsView from "./components/CompanyDetailsView";
 import FavoritesList from "./components/FavoritesList";
 import SearchResults from "./components/SearchResults";
 import WelcomeView from "./components/WelcomeView";
 import KeyboardShortcutsHelp from "./components/KeyboardShortcutsHelp";
+import ChangelogView from "./components/ChangelogView";
 import { useFavorites } from "./hooks/useFavorites";
 import { useSearch } from "./hooks/useSearch";
-import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useCompanyView } from "./hooks/useCompanyView";
 import { useSettings } from "./hooks/useSettings";
+import { useSearchFavicons } from "./hooks/useSearchFavicons";
+import { APP_VERSION, UI_TEXT } from "./constants";
+import { useChangelogVersionGate } from "./hooks/useChangelogVersionGate";
+import type { Enhet } from "./types";
 
 export default function SearchAndCopyCommand() {
   const favoritesResult = useFavorites();
   const searchResult = useSearch();
-  const keyboardResult = useKeyboardShortcuts();
   const companyViewResult = useCompanyView();
   const settingsResult = useSettings();
+  const changelogGate = useChangelogVersionGate();
 
-  // Guard against undefined hook results
-  if (!favoritesResult || !searchResult || !keyboardResult || !companyViewResult || !settingsResult) {
-    return (
-      <List isLoading={true}>
-        <List.Section title="Loading">
-          <List.Item title="Initializing..." subtitle="Please wait..." />
-        </List.Section>
-      </List>
-    );
-  }
-
-  // Now safe to destructure all hooks
   const { entities, isLoading, setSearchText, trimmed } = searchResult;
-  const { showMoveIndicators: keyboardMoveIndicators } = keyboardResult;
   const { currentCompany, isLoadingDetails, isCompanyViewOpen, handleViewDetails, closeCompanyView } =
     companyViewResult;
 
   const { settings } = settingsResult;
+  const { shouldShowChangelog } = changelogGate;
 
-  // Now safe to destructure
   const {
     favorites,
     favoriteIds,
@@ -50,31 +42,48 @@ export default function SearchAndCopyCommand() {
     moveFavoriteUp,
     moveFavoriteDown,
     toggleMoveMode,
+    showMoveIndicators,
   } = favoritesResult;
 
-  // Use the keyboard shortcuts from the hook
-  const showMoveIndicators = keyboardMoveIndicators;
+  const { getSearchFavicon, upsertFromFavorite, upsertFromDetails } = useSearchFavicons(entities, favoriteById);
 
-  if (isCompanyViewOpen) {
-    const orgNumber = currentCompany!.organizationNumber;
+  useEffect(() => {
+    upsertFromDetails(currentCompany);
+  }, [currentCompany, upsertFromDetails]);
+
+  const handleAddFavorite = async (entity: Enhet) => {
+    const added = await addFavorite(entity);
+    upsertFromFavorite(added ?? entity);
+  };
+
+  if (isCompanyViewOpen && currentCompany) {
+    const orgNumber = currentCompany.organizationNumber;
     const isFav = favoriteIds.has(orgNumber);
     const toEnhet = () => ({
-      organisasjonsnummer: currentCompany!.organizationNumber,
-      navn: currentCompany!.name,
-      forretningsadresse: currentCompany!.address
-        ? { adresse: [currentCompany!.address], postnummer: currentCompany!.postalCode, poststed: currentCompany!.city }
+      organisasjonsnummer: currentCompany.organizationNumber,
+      navn: currentCompany.name,
+      organisasjonsform:
+        currentCompany.organizationFormCode || currentCompany.organizationFormDescription
+          ? {
+              kode: currentCompany.organizationFormCode,
+              beskrivelse: currentCompany.organizationFormDescription,
+            }
+          : undefined,
+      forretningsadresse: currentCompany.address
+        ? { adresse: [currentCompany.address], postnummer: currentCompany.postalCode, poststed: currentCompany.city }
         : undefined,
-      website: currentCompany!.website,
+      website: currentCompany.website,
     });
+    const currentEntity = toEnhet();
 
     return (
       <CompanyDetailsView
-        company={currentCompany!}
+        company={currentCompany}
         isLoading={isLoadingDetails}
         onBack={closeCompanyView}
         isFavorite={isFav}
-        onAddFavorite={() => addFavorite(toEnhet())}
-        onRemoveFavorite={() => removeFavorite(toEnhet())}
+        onAddFavorite={() => handleAddFavorite(currentEntity)}
+        onRemoveFavorite={() => removeFavorite(currentEntity)}
       />
     );
   }
@@ -84,12 +93,24 @@ export default function SearchAndCopyCommand() {
       isLoading={isLoading || isLoadingFavorites}
       onSearchTextChange={setSearchText}
       throttle
-      searchBarPlaceholder={
-        showMoveIndicators
-          ? "Move Mode Active - Use ⌘⇧↑↓ to reorder favorites"
-          : "Search for name or organisation number"
-      }
+      searchBarPlaceholder={showMoveIndicators ? UI_TEXT.MOVE_MODE_ACTIVE : UI_TEXT.SEARCH_PLACEHOLDER}
     >
+      {shouldShowChangelog && trimmed.length === 0 && !isLoading && !isLoadingFavorites && (
+        <List.Section title={`What's New in ${APP_VERSION}`}>
+          <List.Item
+            title={`Updated to version ${APP_VERSION}`}
+            subtitle="Review key release highlights"
+            icon="🆕"
+            actions={
+              <ActionPanel>
+                <Action.Push title="Open Changelog" target={<ChangelogView />} />
+                <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+
       {trimmed.length === 0 && (
         <FavoritesList
           favorites={favorites}
@@ -108,10 +129,11 @@ export default function SearchAndCopyCommand() {
       {trimmed.length > 0 && (
         <SearchResults
           entities={entities}
-          favoriteIds={favoriteIds as Set<string>}
+          favoriteIds={favoriteIds}
           favoriteById={favoriteById}
+          getSearchFavicon={getSearchFavicon}
           onViewDetails={handleViewDetails}
-          onAddFavorite={addFavorite}
+          onAddFavorite={handleAddFavorite}
           onRemoveFavorite={removeFavorite}
           onUpdateEmoji={updateFavoriteEmoji}
           onResetToFavicon={resetFavoriteToFavicon}
@@ -134,6 +156,7 @@ export default function SearchAndCopyCommand() {
               actions={
                 <ActionPanel>
                   <Action.Push title="Open" target={<WelcomeView />} />
+                  <Action.Push title="Changelog" target={<ChangelogView />} />
                   <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
                 </ActionPanel>
               }
@@ -145,6 +168,7 @@ export default function SearchAndCopyCommand() {
               actions={
                 <ActionPanel>
                   <Action.Push title="Open" target={<KeyboardShortcutsHelp />} />
+                  <Action.Push title="Changelog" target={<ChangelogView />} />
                 </ActionPanel>
               }
             />

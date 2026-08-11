@@ -46,7 +46,10 @@ export default function StateSubmenu({
     <ActionPanel.Submenu
       icon={Icon.Circle}
       title="Set Status"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "s" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+      }}
       onOpen={() => setLoad(true)}
     >
       {orderedStates.length === 0 && isLoadingStates ? (

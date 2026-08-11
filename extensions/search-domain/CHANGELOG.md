@@ -1,5 +1,13 @@
 # Search Domain Changelog
 
+## [Improvements] - 2025-12-17
+
+- Updated dependencies to the latest versions
+- Added support for Windows
+- Switched to the ICANN RDAP protocol for more accurate domain availability checks
+- Improved UI responsiveness during domain searches
+- Added a history command to view past searches
+
 ## [Initial Release] - 2025-05-09
 
 - Domain name search functionality with automatic TLD completion

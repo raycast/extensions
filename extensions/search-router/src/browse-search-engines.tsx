@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Icon, List, showToast, useNavigation, Alert, confirmAlert, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  confirmAlert,
+  Icon,
+  Keyboard,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
 import { useMemo, useState } from "react";
 import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { getCustomSearchEngines, removeCustomSearchEngine } from "./data/custom-search-engines";
@@ -15,8 +26,6 @@ export default function BrowseSearchEngines() {
   const [customSearchEngines, setCustomSearchEngines] = useState<SearchEngine[]>(getCustomSearchEngines());
   const { push } = useNavigation();
 
-  const allSearchEngines = [...customSearchEngines, ...builtinSearchEngines];
-
   const filteredByType = useMemo(() => {
     switch (filter) {
       case "custom":
@@ -24,30 +33,34 @@ export default function BrowseSearchEngines() {
       case "builtin":
         return builtinSearchEngines;
       default:
-        return allSearchEngines;
+        return [...customSearchEngines, ...builtinSearchEngines];
     }
-  }, [filter, customSearchEngines, builtinSearchEngines, allSearchEngines]);
+  }, [filter, customSearchEngines]);
 
-  const fuse = new Fuse(filteredByType, {
-    keys: [
-      {
-        name: "t",
-        weight: 1,
-      },
-      {
-        name: "s",
-        weight: 0.7,
-      },
-      {
-        name: "ad",
-        weight: 0.5,
-      },
-      {
-        name: "d",
-        weight: 0.3,
-      },
-    ],
-  });
+  const fuse = useMemo(
+    () =>
+      new Fuse(filteredByType, {
+        keys: [
+          {
+            name: "t",
+            weight: 1,
+          },
+          {
+            name: "s",
+            weight: 0.7,
+          },
+          {
+            name: "ad",
+            weight: 0.5,
+          },
+          {
+            name: "d",
+            weight: 0.3,
+          },
+        ],
+      }),
+    [filteredByType],
+  );
 
   const [defaultSearchEngine, setDefaultSearchEngine] = useDefaultSearchEngine();
 
@@ -65,7 +78,7 @@ export default function BrowseSearchEngines() {
 
   const setAsDefault = async (searchEngine: SearchEngine) => {
     setDefaultSearchEngine(searchEngine);
-    showToast({
+    await showToast({
       title: `Default search engine set to ${searchEngine.s}`,
       message: `!${searchEngine.t}`,
     });
@@ -152,6 +165,7 @@ export default function BrowseSearchEngines() {
           subtitle={`!${searchEngine.t}`}
           accessories={[
             { tag: searchEngine.ad || searchEngine.d },
+            { text: searchEngine.urls && searchEngine.urls.length > 1 ? `${searchEngine.urls.length} URLs` : "" },
             { text: searchEngine.isCustom ? "Custom" : "" },
             { text: searchEngine.t === defaultSearchEngine?.t ? "Default" : "" },
             { icon: searchEngine.t === defaultSearchEngine?.t ? Icon.CheckCircle : undefined },
@@ -160,7 +174,19 @@ export default function BrowseSearchEngines() {
             <ActionPanel>
               <ActionPanel.Section>
                 <Action title="Set as Default" icon={Icon.Star} onAction={() => setAsDefault(searchEngine)} />
-                <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
+                {searchEngine.urls && searchEngine.urls.length > 1 ? (
+                  <>
+                    {searchEngine.urls.map((url, index) => (
+                      <Action.OpenInBrowser
+                        key={index}
+                        title={`Test Search - URL ${index + 1}`}
+                        url={url.replace("{{{s}}}", "test")}
+                      />
+                    ))}
+                  </>
+                ) : (
+                  <Action.OpenInBrowser title="Test Search" url={searchEngine.u.replace("{{{s}}}", "test")} />
+                )}
               </ActionPanel.Section>
 
               <ActionPanel.Section>
@@ -168,7 +194,10 @@ export default function BrowseSearchEngines() {
                   title="Add Custom Search Engine"
                   icon={Icon.Plus}
                   onAction={handleAddEngine}
-                  shortcut={{ modifiers: ["cmd"], key: "n" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd"], key: "n" },
+                    Windows: { modifiers: ["ctrl"], key: "n" },
+                  }}
                 />
                 {searchEngine.isCustom && (
                   <>
@@ -176,14 +205,17 @@ export default function BrowseSearchEngines() {
                       title="Edit Custom Search Engine"
                       icon={Icon.Pencil}
                       onAction={() => handleEditEngine(searchEngine)}
-                      shortcut={{ modifiers: ["cmd"], key: "e" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "e" },
+                        Windows: { modifiers: ["ctrl"], key: "e" },
+                      }}
                     />
                     <Action
                       title="Delete Custom Search Engine"
                       icon={Icon.Trash}
                       style={Action.Style.Destructive}
                       onAction={() => handleDeleteEngine(searchEngine.s, searchEngine.t)}
-                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      shortcut={Keyboard.Shortcut.Common.Remove}
                     />
                   </>
                 )}
@@ -193,12 +225,18 @@ export default function BrowseSearchEngines() {
                 <Action.CopyToClipboard
                   title="Copy Search Engine Shortcut"
                   content={`!${searchEngine.t}`}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+                  }}
                 />
                 <Action.CopyToClipboard
                   title="Copy Search Engine Domain"
                   content={searchEngine.ad || searchEngine.d}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "d" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+                  }}
                 />
               </ActionPanel.Section>
             </ActionPanel>

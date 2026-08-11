@@ -1,5 +1,9 @@
 # Easy New File Changelog
 
+## [Update] - 2026-03-17
+
+- Fix incorrect file extension and file content when entering a plain filename with custom content
+
 ## [Default Directory] - 2025-07-16
 
 - Support setting Default Directory for new file command when Finder has no window

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, AI, Color, environment, Grid, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, AI, Color, environment, Grid, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { useIconSearch } from "../hooks/useIconSearch";
 import { formatColorName } from "../utils";
@@ -94,7 +94,7 @@ export function IconGrid() {
                       <Action
                         title="Search with AI"
                         icon={Icon.Stars}
-                        shortcut={{ modifiers: ["cmd"], key: "f" }}
+                        shortcut={{ modifiers: [], key: "tab" }}
                         onAction={() => {
                           setManualAISearch(true);
                           revalidateAI();
@@ -105,6 +105,7 @@ export function IconGrid() {
                       icon={Icon.Brush}
                       title="Create Extension Icon"
                       url={`https://icon.ray.so/?icon=${icon.replace("-16", "")}`}
+                      shortcut={Keyboard.Shortcut.Common.Open}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>

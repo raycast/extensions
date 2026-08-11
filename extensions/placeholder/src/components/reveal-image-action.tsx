@@ -1,5 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
-import { Action, Icon } from "@raycast/api";
+import { Action, Icon, Keyboard } from "@raycast/api";
 import { ImageDetail } from "@/components/image-detail";
 
 export function RevealImageAction(props: {
@@ -21,11 +21,11 @@ export function RevealImageAction(props: {
     <>
       <Action.Push
         icon={Icon.Maximize}
-        shortcut={{ modifiers: ["cmd"], key: "y" }}
+        shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
         title={"Preview Image"}
         target={<ImageDetail imageURL={imageURL} size={size} autoRefresh={autoRefresh} setRefresh={setRefresh} />}
       />
-      <Action.OpenInBrowser shortcut={{ modifiers: ["cmd"], key: "o" }} url={imageURL} />
+      <Action.OpenInBrowser shortcut={Keyboard.Shortcut.Common.Open} url={imageURL} />
     </>
   );
 }

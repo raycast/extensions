@@ -1,110 +1,339 @@
 instructions: |
-  Include a link to the event in your response to make it easier for the user to view it.
-  If no email domain is provided for other attendees, call the `get-current-user` tool and prefer attendees from the same domain as the current user.
-  Try to call the `search-contacts` tool in parallel when possible.
-  Call the `get-current-time` tool if you need to know the current time, e.g. when creating an event within a relative time frame like "today in 1h".
-  If no attendees are provided, just create the event, it will be private.
+  Include an event's htmlLink in responses when one is available.
+  Use get-current-time when resolving relative dates such as today or next week; its timestamp field is iso8601.
+  Use suggest-time, not search-events or check-availability, when the user asks to find an open meeting slot.
+  Event IDs and calendar IDs are opaque: obtain them from search-events, get-event, list-calendars, or a preceding tool result.
+  If an attendee has no email domain, prefer search-contacts and contacts from the current user's domain.
+  If no attendees are provided, create the event without attendees.
+  Custom event labels are calendar-specific. List them with manage-calendar-labels before assigning one.
+  Use create-event, not quick-add-event, whenever the user gives structured details such as an explicit duration, time zone, or recurrence.
 evals:
-  - input: "@google-calendar Could you set up a 'Project Sync' meeting for tomorrow at 10:00 that lasts 1 hour?"
+  - input: "@google-calendar Create a one-hour Project Sync tomorrow at 10:00."
     mocks:
-      get-current-user:
-        email: "bob@example.com"
       get-current-time:
-        currentTime: "2025-02-09T12:00:00Z"
+        timezone: "Europe/Paris"
+        iso8601: "2026-07-20T12:00:00+02:00"
+        humanReadableTime: "July 20, 2026 at 12:00:00 PM GMT+2"
       create-event:
+        id: "evt-101"
+        calendarId: "primary"
         title: "Project Sync"
-        startDate: "2025-02-10T10:00:00Z"
-        duration: 60
+        start: "2026-07-21T10:00:00+02:00"
+        end: "2026-07-21T11:00:00+02:00"
+        allDay: false
+        durationMinutes: 60
+        attendees: []
+        htmlLink: "https://calendar.google.com/event?eid=evt-101"
     expected:
+      - callsTool: "get-current-time"
       - callsTool:
           name: "create-event"
           arguments:
             title: "Project Sync"
             startDate:
-              includes: "10:00:00"
+              includes: "T10:00:00"
             duration: 60
-  - input: "@google-calendar I need to get in touch with Alice. Can you look up her contact details?"
+
+  - input: "@google-calendar Look up Alice's contact details."
     mocks:
       search-contacts:
-        contacts:
-          - id: "c-001"
-            name: "Alice Johnson"
-            email: "alice@example.com"
+        - name: "Alice Johnson"
+          email: "alice@example.com"
     expected:
       - callsTool:
           name: "search-contacts"
           arguments:
             query:
-              includes: "lice"
-  - input: "@google-calendar What's on my calendar for today?"
+              includes: "Alice"
+
+  - input: "@google-calendar What's on my calendar today?"
     mocks:
       get-current-time:
-        currentTime: "2025-02-09T12:00:00+01:00"
+        timezone: "Europe/Paris"
+        iso8601: "2026-07-20T12:00:00+02:00"
+        humanReadableTime: "July 20, 2026 at 12:00:00 PM GMT+2"
+      list-calendars:
+        calendars:
+          - id: "primary"
+            summary: "Bob"
+            primary: true
+            hidden: false
+            selected: true
+            accessRole: "owner"
       search-events:
+        calendarId: "primary"
+        calendarSummary: "Bob"
+        timeZone: "Europe/Paris"
         events:
-          - id: "evt-101"
+          - id: "evt-102"
+            calendarId: "primary"
             title: "Daily Standup"
-            start: "2025-02-09T09:00:00+01:00"
-    expected:
-      - callsTool:
-          name: "search-events"
-  - input: "@google-calendar could you move the 'Project Sync' meeting to next week?"
-    mocks:
-      search-events:
-        events:
-          - id: "evt-123"
-            title: "Project Sync"
-            startDate: "2025-02-10T00:00:00+00:00"
-            duration: 60
-      edit-event:
-        success: true
-        event:
-          eventId: "evt-123"
-          startDate: "2025-02-17T00:00:00+00:00"
-    expected:
-      - callsTool:
-          name: "edit-event"
-          arguments:
-            eventId: "evt-123"
-            startDate: "2025-02-17T00:00:00+00:00"
-  - input: "@google-calendar find 2 hours slot this week for lunch"
-    mocks:
-      search-events:
-        events:
-          - id: "evt-123"
-            title: "Project Sync"
-            startDate: "2025-02-26T10:00:00+04:00"
-            duration: 60
-      check-availability:
-        - busyPeriods:
-            - end: "2025-02-26T16:30:00+04:00"
-              start: "2025-02-26T15:30:00+04:00"
-            - end: "2025-02-27T13:00:00+04:00"
-              start: "2025-02-27T12:00:00+04:00"
-            - end: "2025-02-27T15:30:00+04:00"
-              start: "2025-02-27T15:00:00+04:00"
-      get-current-time:
-        time: "2025-02-10T15:36:39.039+04:00"
+            start: "2026-07-20T09:00:00+02:00"
+            end: "2026-07-20T09:30:00+02:00"
+            allDay: false
+            durationMinutes: 30
+            attendees: []
+            htmlLink: "https://calendar.google.com/event?eid=evt-102"
     expected:
       - callsTool: "get-current-time"
       - callsTool:
+          name: "search-events"
           arguments:
             timeMin:
-              - includes: 2025-02-10
-          name: "check-availability"
-  - input: "@google-calendar cancel sync today"
+              includes: "2026-07-20"
+
+  - input: "@google-calendar Find a free two-hour lunch slot this work week."
     mocks:
-      search-events:
-        events:
-          - id: "evt-123"
-            title: "Project Sync"
-            startDate: "2025-02-10T10:00:00+00:00"
-            duration: 60
-      delete-event: "ok"
       get-current-time:
-        time: "2025-02-10T15:36:39.039+00:00"
+        timezone: "Europe/Paris"
+        iso8601: "2026-07-20T12:00:00+02:00"
+        humanReadableTime: "July 20, 2026 at 12:00:00 PM GMT+2"
+      get-current-user:
+        displayName: "Bob Example"
+        givenName: "Bob"
+        familyName: "Example"
+        email: "bob@example.com"
+      suggest-time:
+        participants: ["bob@example.com"]
+        durationMinutes: 120
+        searchedRange:
+          start: "2026-07-20T00:00:00+02:00"
+          end: "2026-07-25T00:00:00+02:00"
+          timeZone: "Europe/Paris"
+        workHours:
+          start: "09:00"
+          end: "17:00"
+        suggestions:
+          - start: "2026-07-21T10:00:00.000Z"
+            end: "2026-07-21T12:00:00.000Z"
+            displayStart: "Tuesday, July 21, 2026 at 12:00 PM"
+            displayEnd: "Tuesday, July 21, 2026 at 2:00 PM"
+            timeZone: "Europe/Paris"
+    expected:
+      - callsTool: "get-current-time"
+      - callsTool:
+          name: "suggest-time"
+          arguments:
+            durationMinutes: 120
+
+  - input: "@google-calendar Cancel today's Project Sync."
+    mocks:
+      get-current-time:
+        timezone: "UTC"
+        iso8601: "2026-07-20T08:00:00+00:00"
+        humanReadableTime: "July 20, 2026 at 8:00:00 AM UTC"
+      search-events:
+        calendarId: "primary"
+        timeZone: "UTC"
+        events:
+          - id: "evt-103"
+            calendarId: "primary"
+            title: "Project Sync"
+            start: "2026-07-20T10:00:00Z"
+            end: "2026-07-20T11:00:00Z"
+            allDay: false
+            durationMinutes: 60
+            attendees: []
+            htmlLink: "https://calendar.google.com/event?eid=evt-103"
+      delete-event:
+        deleted: true
+        id: "evt-103"
+        calendarId: "primary"
+        title: "Project Sync"
     expected:
       - callsTool:
           name: "delete-event"
           arguments:
-            eventId: "evt-123"
+            eventId: "evt-103"
+
+  - input: "@google-calendar Add an all-day company offsite on August 3, 2026."
+    mocks:
+      create-event:
+        id: "evt-201"
+        calendarId: "primary"
+        title: "Company Offsite"
+        start: "2026-08-03"
+        end: "2026-08-04"
+        allDay: true
+        durationDays: 1
+        attendees: []
+        htmlLink: "https://calendar.google.com/event?eid=evt-201"
+    expected:
+      - callsTool:
+          name: "create-event"
+          arguments:
+            title:
+              includes: "Offsite"
+            startDate: "2026-08-03"
+            allDay: true
+
+  - input: "@google-calendar Create a weekly team review every Monday at 9 AM Paris time, starting August 3, 2026, for one hour."
+    mocks:
+      create-event:
+        id: "evt-202"
+        calendarId: "primary"
+        title: "Team Review"
+        start: "2026-08-03T09:00:00+02:00"
+        end: "2026-08-03T10:00:00+02:00"
+        allDay: false
+        timeZone: "Europe/Paris"
+        durationMinutes: 60
+        recurrence: ["RRULE:FREQ=WEEKLY;BYDAY=MO"]
+        attendees: []
+        htmlLink: "https://calendar.google.com/event?eid=evt-202"
+    expected:
+      - callsTool:
+          name: "create-event"
+          arguments:
+            title:
+              includes: "Team Review"
+            startDate:
+              includes: "2026-08-03T09:00:00"
+            duration: 60
+            timeZone: "Europe/Paris"
+            recurrence:
+              includes: "FREQ=WEEKLY"
+
+  - input: "@google-calendar Accept the invitation to Project Kickoff."
+    mocks:
+      search-events:
+        calendarId: "primary"
+        events:
+          - id: "evt-203"
+            calendarId: "primary"
+            title: "Project Kickoff"
+            start: "2026-08-04T09:00:00Z"
+            end: "2026-08-04T10:00:00Z"
+            allDay: false
+            durationMinutes: 60
+            attendees:
+              - email: "bob@example.com"
+                self: true
+                responseStatus: "needsAction"
+            htmlLink: "https://calendar.google.com/event?eid=evt-203"
+      respond-to-event:
+        id: "evt-203"
+        calendarId: "primary"
+        title: "Project Kickoff"
+        start: "2026-08-04T09:00:00Z"
+        end: "2026-08-04T10:00:00Z"
+        allDay: false
+        durationMinutes: 60
+        attendees:
+          - email: "bob@example.com"
+            self: true
+            responseStatus: "accepted"
+        htmlLink: "https://calendar.google.com/event?eid=evt-203"
+    expected:
+      - callsTool:
+          name: "respond-to-event"
+          arguments:
+            eventId: "evt-203"
+            response: "accepted"
+
+  - input: "@google-calendar Apply my Customer label to Project Sync."
+    mocks:
+      list-calendars:
+        calendars:
+          - id: "primary"
+            summary: "Bob"
+            primary: true
+            hidden: false
+            selected: true
+            accessRole: "owner"
+      search-events:
+        calendarId: "primary"
+        events:
+          - id: "evt-204"
+            calendarId: "primary"
+            title: "Project Sync"
+            start: "2026-08-05T09:00:00Z"
+            end: "2026-08-05T10:00:00Z"
+            allDay: false
+            durationMinutes: 60
+            attendees: []
+      manage-calendar-labels:
+        id: "primary"
+        summary: "Bob"
+        timeZone: "UTC"
+        labels:
+          - id: "label-customer"
+            name: "Customer"
+            backgroundColor: "#039be5"
+      set-event-label:
+        id: "evt-204"
+        calendarId: "primary"
+        title: "Project Sync"
+        start: "2026-08-05T09:00:00Z"
+        end: "2026-08-05T10:00:00Z"
+        allDay: false
+        durationMinutes: 60
+        eventLabelId: "label-customer"
+        eventLabel:
+          id: "label-customer"
+          name: "Customer"
+          backgroundColor: "#039be5"
+        attendees: []
+    expected:
+      - callsTool:
+          name: "manage-calendar-labels"
+          arguments:
+            action: "list"
+      - callsTool:
+          name: "set-event-label"
+          arguments:
+            action: "assign"
+            eventId: "evt-204"
+            labelId: "label-customer"
+
+  - input: "@google-calendar Create a Team Operations calendar in Europe/Paris and give ops@example.com permission to edit events."
+    mocks:
+      get-current-user:
+        displayName: "Bob Example"
+        givenName: "Bob"
+        familyName: "Example"
+        email: "bob@example.com"
+      search-contacts:
+        - name: "Ops Team"
+          email: "ops@example.com"
+      list-calendars:
+        calendars:
+          - id: "primary"
+            summary: "Bob"
+            primary: true
+            hidden: false
+            selected: true
+            accessRole: "owner"
+          - id: "team-ops@example.com"
+            summary: "Team Operations"
+            primary: false
+            hidden: false
+            selected: true
+            accessRole: "owner"
+      manage-calendar:
+        id: "team-ops@example.com"
+        summary: "Team Operations"
+        timeZone: "Europe/Paris"
+        labels: []
+      manage-calendar-sharing:
+        id: "user:ops@example.com"
+        role: "writer"
+        scope:
+          type: "user"
+          value: "ops@example.com"
+        etag: "acl-etag-1"
+    expected:
+      - callsTool:
+          name: "manage-calendar"
+          arguments:
+            action: "create"
+            summary: "Team Operations"
+            timeZone: "Europe/Paris"
+      - callsTool:
+          name: "manage-calendar-sharing"
+          arguments:
+            action: "grant"
+            calendarId: "team-ops@example.com"
+            scopeType: "user"
+            scopeValue: "ops@example.com"
+            role: "writer"

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { TagsResponse, WatchDetails as WatchDetailsType } from "@/types";
+import type { TagsResponse, WatchDetails as WatchDetailsType } from "@/types";
 import { useApi } from "@/hooks/use-api";
 import { useScreenshot } from "@/hooks/use-screenshot";
 import WatchHistory from "@/screens/WatchHistory";

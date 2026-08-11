@@ -6,6 +6,7 @@ import { join } from "path/posix";
 import { WebSocket, Data } from "ws";
 import { StreamConfig, WSMessage, ElevenLabsConfig } from "./types";
 import { validatePlaybackSpeed } from "../voice/settings";
+import { clearPlayback, registerPlayback } from "./playback";
 
 /**
  * Manages the audio streaming and playback process
@@ -24,6 +25,8 @@ export class AudioManager extends EventEmitter {
   private streamState = {
     isPlaying: false,
     chunksReceived: 0,
+    streamComplete: false,
+    playbackComplete: false,
   };
 
   constructor(private readonly config: StreamConfig) {
@@ -55,11 +58,12 @@ export class AudioManager extends EventEmitter {
 
   /**
    * Builds WebSocket URL with appropriate parameters
-   * Uses eleven_monolingual_v1 model for optimal streaming performance
+   * Uses eleven_turbo_v2_5 model which is available on free tier
    */
   private buildWebSocketUrl(voiceId: string): string {
-    // Use monolingual model for better streaming performance
-    const modelId = "eleven_monolingual_v1";
+    // Use turbo v2.5 model - available on free tier and optimized for low latency
+    // This model supports streaming and is the most cost-effective option
+    const modelId = "eleven_turbo_v2_5";
     console.log(`Building WebSocket URL for voice ${voiceId} with model ${modelId}`);
     return `wss://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream-input?model_id=${modelId}`;
   }
@@ -129,11 +133,39 @@ export class AudioManager extends EventEmitter {
   }
 
   /**
+   * Determines optimal chunk schedule based on text length
+   * Ensures short texts can still be processed while maintaining quality for longer texts
+   */
+  private getOptimalChunkSchedule(textLength: number): number[] {
+    // For very short text (< 100 chars), use aggressive chunking to ensure audio generation
+    if (textLength < 100) {
+      return [50]; // Single chunk, minimum allowed value
+    }
+
+    // For short text (100-300 chars), use smaller initial chunks
+    if (textLength < 300) {
+      return [80, 120, 150];
+    }
+
+    // For medium text (300-1000 chars), use balanced chunking
+    if (textLength < 1000) {
+      return [100, 140, 200, 250];
+    }
+
+    // For long text (1000+ chars), use original optimized schedule
+    return [120, 160, 250, 290];
+  }
+
+  /**
    * Sends stream configuration to ElevenLabs API
    * Uses optimized chunk settings for real-time playback
    */
   private sendStreamConfiguration(): void {
     if (!this.ws) return;
+
+    // Determine optimal chunk schedule based on text length
+    const textLength = this.config.text.length;
+    const chunkSchedule = this.getOptimalChunkSchedule(textLength);
 
     // Create configuration with optimized chunk settings
     // For more info, see: https://elevenlabs.io/docs/api-reference/websockets
@@ -151,7 +183,7 @@ export class AudioManager extends EventEmitter {
         // Lower values = faster response but potentially lower quality
         // Higher values = better quality but increased latency
         // Values should be between 50-500 characters
-        chunk_length_schedule: [120, 160, 250, 290],
+        chunk_length_schedule: chunkSchedule,
 
         // stream_chunk_size controls the size of each audio chunk sent back from the server
         // 8KB (8192 bytes) is the recommended size that balances:
@@ -179,23 +211,46 @@ export class AudioManager extends EventEmitter {
    * Processes audio chunks and manages playback state
    */
   private async handleWebSocketMessage(data: Data): Promise<void> {
-    const message = JSON.parse(data.toString()) as WSMessage;
+    try {
+      const message = JSON.parse(data.toString()) as WSMessage;
 
-    if (message.error === "invalid_api_key") {
-      this.emit("error", new Error("Invalid API key - Please check your ElevenLabs API key in Raycast preferences"));
+      // Handle API errors
+      if (message.error) {
+        console.error("Received error from API:", message.error);
+
+        // Mark that we received an error to prevent "No audio received" message
+        this.streamState.chunksReceived = -1;
+
+        if (message.error === "invalid_api_key") {
+          this.emit("error", new Error("Invalid API key"));
+        } else if (message.error === "model_deprecated_free_tier") {
+          this.emit("error", new Error("Model unavailable"));
+        } else if (message.error.includes("quota_exceeded") || message.error.includes("insufficient")) {
+          this.emit("error", new Error("Quota exceeded"));
+        } else {
+          this.emit("error", new Error(`API error: ${message.error}`));
+        }
+
+        // Close the WebSocket after emitting error
+        this.ws?.close();
+        return;
+      }
+
+      // Skip non-audio messages (e.g., acknowledgments)
+      if (!message.audio) {
+        console.log("Received non-audio message:", JSON.stringify(message));
+        return;
+      }
+
+      // Track progress for debugging and user feedback
+      this.streamState.chunksReceived++;
+      console.log(`Processing chunk ${this.streamState.chunksReceived} (${message.audio.length} bytes)`);
+
+      await this.processAudioChunk(message);
+    } catch (error) {
+      console.error("Error handling WebSocket message:", error);
+      this.emit("error", error instanceof Error ? error : new Error("Failed to process audio"));
     }
-
-    // Skip non-audio messages (e.g., acknowledgments)
-    if (!message.audio) {
-      console.log("Received non-audio message, skipping");
-      return;
-    }
-
-    // Track progress for debugging and user feedback
-    this.streamState.chunksReceived++;
-    console.log(`Processing chunk ${this.streamState.chunksReceived} (${message.audio.length} bytes)`);
-
-    await this.processAudioChunk(message);
   }
 
   /**
@@ -206,16 +261,32 @@ export class AudioManager extends EventEmitter {
     // Write chunk to file before attempting playback
     await this.writeAudioChunk(message.audio as string);
 
-    // Start playback only for the first chunk
+    // Start playback only for the first chunk (non-blocking)
     if (!this.streamState.isPlaying) {
       console.log("First chunk received, initiating playback");
-      await this.beginPlayback();
+      // Don't await - start playback in background so more chunks can be written
+      this.beginPlayback().catch((error) => {
+        console.error("Background playback error:", error);
+        this.emit("error", error);
+      });
     }
 
     // Handle stream completion
     if (message.isFinal) {
       console.log(`Stream complete after ${this.streamState.chunksReceived} chunks`);
+      this.streamState.streamComplete = true;
       this.ws?.close();
+      this.checkAndEmitComplete();
+    }
+  }
+
+  /**
+   * Checks if both streaming and playback are complete
+   * Only emits complete event when both are done to ensure proper cleanup timing
+   */
+  private checkAndEmitComplete(): void {
+    if (this.streamState.streamComplete && this.streamState.playbackComplete) {
+      console.log("Both streaming and playback complete, ready for cleanup");
       this.emit("complete");
     }
   }
@@ -242,6 +313,8 @@ export class AudioManager extends EventEmitter {
     try {
       await this.playAudioFile();
       console.log("Audio playback completed successfully");
+      this.streamState.playbackComplete = true;
+      this.checkAndEmitComplete();
     } catch (error) {
       console.error("Playback failed:", error);
       throw error;
@@ -253,21 +326,24 @@ export class AudioManager extends EventEmitter {
    * Uses afplay for macOS compatibility
    */
   private async playAudioFile(): Promise<void> {
-    return new Promise((resolve, reject) => {
-      // Use macOS native audio player for reliable playback
-      // Use -r flag to control playback rate
-      const validatedSpeed = validatePlaybackSpeed(this.config.playbackSpeed);
-      const process = spawn("afplay", ["-r", validatedSpeed, this.tempFile]);
+    const validatedSpeed = validatePlaybackSpeed(this.config.playbackSpeed);
+    const audioProcess = spawn("afplay", ["-r", validatedSpeed, this.tempFile]);
+    const pid = audioProcess.pid;
+    let closed = false;
 
-      // Handle process errors (e.g., afplay not found)
-      process.on("error", (error) => {
+    const completion = new Promise<void>((resolve, reject) => {
+      audioProcess.once("error", async (error) => {
+        closed = true;
+        if (pid) await clearPlayback(this.config.sessionId, pid);
         console.error("Audio player process error:", error);
         reject(error);
       });
 
-      // Monitor process completion
-      process.on("close", (code) => {
-        if (code === 0) {
+      audioProcess.once("close", async (code, signal) => {
+        closed = true;
+        if (pid) await clearPlayback(this.config.sessionId, pid);
+
+        if (code === 0 || signal === "SIGTERM") {
           console.log("Audio player process completed successfully");
           resolve();
         } else {
@@ -276,6 +352,17 @@ export class AudioManager extends EventEmitter {
         }
       });
     });
+
+    if (!pid) throw new Error("Failed to start afplay");
+
+    try {
+      await registerPlayback(this.config.sessionId, pid, this.tempFile);
+    } catch (error) {
+      audioProcess.kill("SIGTERM");
+      throw error;
+    }
+    if (closed) await clearPlayback(this.config.sessionId, pid);
+    return completion;
   }
 
   /**
@@ -305,7 +392,16 @@ export class AudioManager extends EventEmitter {
   private handleWebSocketClose(): void {
     console.log("WebSocket connection closed");
     if (!this.streamState.isPlaying) {
-      this.cleanup().catch(console.error);
+      // If connection closed without receiving any audio chunks, emit error
+      // chunksReceived = -1 means an error was already emitted
+      if (this.streamState.chunksReceived === 0) {
+        console.error("Connection closed without receiving any audio chunks");
+        this.emit("error", new Error("No audio received"));
+      } else if (this.streamState.chunksReceived > 0) {
+        // Stream completed but playback never started - mark as complete
+        this.emit("complete");
+      }
+      // If chunksReceived is -1, error was already emitted, do nothing
     }
   }
 
@@ -315,15 +411,17 @@ export class AudioManager extends EventEmitter {
    */
   private formatErrorMessage(error: Error): string {
     const errorMap = {
-      invalid_api_key: "Invalid API key - Please check your ElevenLabs API key in preferences (⌘,)",
-      ENOTFOUND: "No internet connection - Please check your network and try again",
+      invalid_api_key: "Invalid API key",
+      ENOTFOUND: "No internet",
+      ETIMEDOUT: "Connection timeout",
+      ECONNREFUSED: "Cannot connect",
     };
 
     for (const [key, message] of Object.entries(errorMap)) {
       if (error.message.includes(key)) return message;
     }
 
-    return `ElevenLabs error: ${error.message}`;
+    return error.message;
   }
 
   /**

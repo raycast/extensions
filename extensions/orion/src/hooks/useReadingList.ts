@@ -9,10 +9,15 @@ const useReadingList = (selectedProfileId: string) => {
   const readingListPath = getReadingListPath(selectedProfileId);
 
   useEffect(() => {
-    const bookmarksPlist = parseFileSync(readingListPath) as OrionReadingListPlistResult;
-    const items = bookmarksPlist[0];
-    const readingList = parseReadingList(items);
-    setReadingList(readingList);
+    try {
+      const bookmarksPlist = parseFileSync(readingListPath) as OrionReadingListPlistResult;
+      const items = bookmarksPlist[0];
+      const readingList = parseReadingList(items);
+      setReadingList(readingList);
+    } catch {
+      // No reading list yet (file missing) or unreadable — treat as empty.
+      setReadingList([]);
+    }
   }, [selectedProfileId]);
 
   return { readingList };

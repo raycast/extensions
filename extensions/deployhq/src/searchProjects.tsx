@@ -46,35 +46,72 @@ export default function Command() {
   }, []);
 
   return (
-    <List throttle={true} isLoading={isLoading}>
+    <List throttle={true} isLoading={isLoading} isShowingDetail={true}>
       {projects?.map((item) => (
         <List.Item
           key={item.identifier}
           title={item.name}
-          accessories={[
-            {
-              text: item.last_deployed_at
-                ? `Last Deployed: ${new Date(item.last_deployed_at).toLocaleDateString()}`
-                : "Never Deployed",
-            },
-          ]}
           actions={projectActions(item, preferences)}
+          detail={
+            <List.Item.Detail
+              metadata={
+                <List.Item.Detail.Metadata>
+                  <List.Item.Detail.Metadata.Link
+                    title="Permalink"
+                    target={`https://${preferences.deployHQAccountName}.deployhq.com/projects/${item.permalink}`}
+                    text={`https://${preferences.deployHQAccountName}.deployhq.com/projects/${item.permalink}`}
+                  />
+                  <List.Item.Detail.Metadata.Label
+                    title="Last Deployed"
+                    text={
+                      item.last_deployed_at
+                        ? new Date(item.last_deployed_at).toLocaleDateString(undefined, {
+                            year: "numeric",
+                            month: "long",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "-"
+                    }
+                  />
+                  <List.Item.Detail.Metadata.Label title="Zone" text={item.zone ?? "-"} />
+
+                  {item.repository?.hosting_service && (
+                    <>
+                      <List.Item.Detail.Metadata.Separator></List.Item.Detail.Metadata.Separator>
+                      <List.Item.Detail.Metadata.Label title="Repository" text={item.repository.hosting_service.name} />
+                      <List.Item.Detail.Metadata.Link
+                        title="Repository URL"
+                        target={item.repository.hosting_service.tree_url}
+                        text={item.repository.hosting_service.tree_url}
+                      />
+                      <List.Item.Detail.Metadata.Label title="Repository Branch" text={item.repository.branch} />
+                    </>
+                  )}
+                </List.Item.Detail.Metadata>
+              }
+            />
+          }
         />
       ))}
     </List>
   );
 }
 
-// Memoize project actions to prevent unnecessary re-renders
 const projectActions = (item: Project, preferences: Preferences) => {
   const projectUrl = `https://${preferences.deployHQAccountName}.deployhq.com/projects/${item.permalink}`;
+  const projectAction = <Action.OpenInBrowser title="Open Project in Browser" url={projectUrl} key="project-action" />;
 
-  return (
-    <ActionPanel>
-      <Action.OpenInBrowser title="Open Project in Browser" url={projectUrl} />
-      {item.repository?.hosting_service?.tree_url && (
-        <Action.OpenInBrowser title="Open Repository in Browser" url={item.repository.hosting_service.tree_url} />
-      )}
-    </ActionPanel>
+  const repositoryUrl = item.repository?.hosting_service?.tree_url;
+  const repositoryAction = repositoryUrl && (
+    <Action.OpenInBrowser title="Open Repository in Browser" url={repositoryUrl} key="repository-action" />
   );
+
+  const actions =
+    preferences.defaultAction === "visit-project"
+      ? [projectAction, repositoryAction].filter(Boolean)
+      : [repositoryAction, projectAction].filter(Boolean);
+
+  return <ActionPanel>{actions}</ActionPanel>;
 };

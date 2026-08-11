@@ -7,6 +7,7 @@ import { Copy } from './Copy'
 import Git from './Git'
 import React, { useState } from 'react'
 import Config from './Config'
+import { GenerateAIRepoBriefAction } from './AIRepoBrief'
 
 type ProjectDetailProps = {
     project: Project
@@ -158,6 +159,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                         onAction={() => setIsShowingConfig(!isShowingConfig)}
                     />
                     <Config project={project} />
+                    <GenerateAIRepoBriefAction project={project} />
                     <OpenUrl project={project} />
                     <OpenGitRemotes project={project} />
                     <Copy project={project} />

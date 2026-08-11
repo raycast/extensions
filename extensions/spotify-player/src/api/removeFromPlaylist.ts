@@ -1,3 +1,4 @@
+import { invalidateCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
@@ -15,6 +16,7 @@ export async function removeFromPlaylist({ playlistId, trackUris: tracks }: Remo
     const response = await spotifyClient.deletePlaylistsByPlaylistIdTracks(playlistId, {
       tracks,
     });
+    invalidateCache("api:playlists", "api:user-playlists");
     return response;
   } catch (err) {
     const error = getErrorMessage(err);

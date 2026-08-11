@@ -1,7 +1,6 @@
 import { Icon, Image, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { format, isBefore, parseISO, startOfDay, add as addDate } from "date-fns";
-import { compareAsc } from "date-fns";
+import { compareAsc, format, isBefore, parseISO, startOfDay, add as addDate } from "date-fns";
 import { partition } from "lodash";
 import React, { useMemo } from "react";
 import { getCompletedReminders } from "swift:../../swift/AppleReminders";
@@ -143,7 +142,7 @@ export function groupByDueDates(reminders: Reminder[]) {
   }
 
   const remindersOnDate = useTimeOfDayGrouping
-    ? allDueDates.filter((date) => !isBefore(date, today))
+    ? allDueDates.filter((date) => !isBefore(date, today) && !isToday(date))
     : allDueDates.filter((date) => date);
 
   remindersOnDate.forEach((date) => {

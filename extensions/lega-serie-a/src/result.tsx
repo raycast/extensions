@@ -1,72 +1,47 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { useEffect, useState } from "react";
-import { format } from "date-fns";
-import SeasonDropdown, { seasons } from "./components/season_dropdown";
-import MatchdayView from "./components/matchday";
-import { Match, Matchday } from "./types";
-import { getMatchday, getMatches } from "./api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { formatDate } from "date-fns";
 import groupBy from "lodash.groupby";
+import { useState } from "react";
+import { getMatchday, getMatches } from "./api";
+import MatchdayView from "./components/matchday";
+import SeasonDropdown, { seasons } from "./components/season_dropdown";
+import { Matchday } from "./types";
 
 export default function Fixture() {
-  const [matches, setMatches] = useState<Match[]>();
   const [season, setSeason] = useState<string>(seasons[0]);
-  const [matchdays, setMatchdays] = useState<Matchday[]>([]);
   const [matchday, setMatchday] = useState<Matchday>();
 
-  useEffect(() => {
-    if (season) {
-      setMatchdays([]);
-      setMatchday(undefined);
-      setMatches(undefined);
-
-      getMatchday(season).then((data) => {
-        setMatchdays(data);
-        const currentDay = data.find(
-          (d) =>
-            d.category_status === "LIVE" ||
-            d.category_status === "TO BE PLAYED",
-        );
-        if (currentDay) {
-          setMatchday(currentDay);
-        } else {
-          setMatchday(data[data.length - 1]);
-        }
-      });
-    }
-  }, [season]);
-
-  useEffect(() => {
-    if (matchday) {
-      showToast({
-        title: "Loading...",
-        style: Toast.Style.Animated,
-      });
-      getMatches(season, { match_day_id: matchday.id_category }).then(
-        (data) => {
-          setMatches(data);
-          showToast({
-            title: "Completed",
-            style: Toast.Style.Success,
-          });
-        },
+  const { data: matchdays } = usePromise(getMatchday, [season], {
+    onData: (data) => {
+      const currentDay = data.find(
+        (d) =>
+          d.category_status === "LIVE" || d.category_status === "TO BE PLAYED",
       );
-    }
-  }, [matchday]);
+      if (currentDay) {
+        setMatchday(currentDay);
+      } else {
+        setMatchday(data[data.length - 1]);
+      }
+    },
+  });
+
+  const { data: matches, isLoading } = usePromise(
+    async (matchday) => {
+      return matchday
+        ? getMatches(season, { match_day_id: matchday.id_category })
+        : undefined;
+    },
+    [matchday],
+  );
 
   const categories = groupBy(matches, (m) =>
-    format(new Date(m.date_time), "dd MMM yyyy"),
+    formatDate(m.date_time, "dd MMM yyyy"),
   );
 
   const actionPanel = (
     <ActionPanel.Section title="Matchday">
-      {matchday && Number(matchday.description) > 1 && (
+      {matchdays && matchday && Number(matchday.description) > 1 && (
         <Action
           title={matchdays[Number(matchday.description) - 2].title}
           icon={Icon.ArrowLeftCircle}
@@ -75,7 +50,7 @@ export default function Fixture() {
           }}
         />
       )}
-      {matchday && Number(matchday.description) < 38 && (
+      {matchdays && matchday && Number(matchday.description) < 38 && (
         <Action
           title={matchdays[Number(matchday.description)].title}
           icon={Icon.ArrowRightCircle}
@@ -90,7 +65,7 @@ export default function Fixture() {
   return (
     <List
       throttle
-      isLoading={!matches}
+      isLoading={isLoading}
       navigationTitle={
         matchday
           ? `${matchday.title} | Fixtures & Results`

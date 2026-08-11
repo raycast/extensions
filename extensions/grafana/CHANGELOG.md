@@ -1,5 +1,10 @@
 # Grafana Changelog
 
+## [Fix Explore link URL encoding] - 2026-06-19
+
+- Use `encodeURIComponent` for the JSON `panes` query parameter instead of `encodeURI`, which left `{`, `}`, `"`, and `&` unescaped, producing broken Explore URLs.
+- Fix double `&&` typo in the query string.
+
 ## [New command] - 2025-10-03
 
 - Add a new command Pages to go to the most common pages in Grafana

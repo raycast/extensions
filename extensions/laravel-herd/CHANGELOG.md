@@ -15,4 +15,4 @@
 - Polished README
 
 
-## [Initial Version] - April 8, 2025
+## [Initial Version] - 2025-04-08

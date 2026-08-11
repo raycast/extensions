@@ -22,11 +22,31 @@ tell application "System Events"
 	end repeat
 
 	tell process "System Settings"
-		set popUpButton to pop up button 1 of group 1 of group 2 of splitter group 1 of group 1 of window 1
+  	set popUpButton to missing value
 
-		repeat until exists popUpButton
-			delay 0.1
-		end repeat
+    set loopCount to 0
+    set maxAttempts to 30
+    repeat until popUpButton is not missing value or loopCount >= maxAttempts
+  		try
+        -- Tahoe
+ 			set popUpButton to menu button 1 of group 1 of group 3 of splitter group 1 of group 1 of window 1
+  		on error
+   			try
+            -- Pre-Tahoe
+    				set popUpButton to pop up button 1 of group 1 of group 2 of splitter group 1 of group 1 of window 1
+   			on error
+            -- Not found yet
+    				set popUpButton to missing value
+   			end try
+  		end try
+
+  		delay 0.1
+      set loopCount to loopCount + 1
+    end repeat
+    
+    if popUpButton is missing value then
+      error "Could not find Sidecar button after " & maxAttempts & " attempts"
+    end if
 
 		click popUpButton
 

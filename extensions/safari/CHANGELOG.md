@@ -1,5 +1,26 @@
 # Safari Changelog
 
+## [New Command] - 2026-07-24
+
+- Add `Search Tabs, Bookmarks and History` command to search open tabs, bookmarks and history in one place.
+- Replace `pinyin` with the much lighter `pinyin-pro` to fix commands crashing against the extension memory limit (bundle size reduced from ~28 MB to ~6 MB per command).
+
+## [Bugfix] - 2026-05-22
+
+- Clarify the Full Disk Access requirement when Safari history cannot be opened.
+
+## [Fix] - 2026-05-06
+
+- Fix `Search History` command failing with `no such column: "%...%"` by using single-quoted string literals for search terms in the SQL query.
+
+## [Fix] - 2026-04-28
+
+- Fix `Search History` command failing with `no such column: "unixepoch"` by using single-quoted string literals in the SQL query.
+
+## [Performance] - 2026-01-12
+
+- Significantly improved `Search Tabs` loading speed by replacing JXA with native Swift ScriptingBridge (˜4x faster load). 
+
 ## [Update] - 2025-06-19
 
 - Fixes for `Search Tabs` command:

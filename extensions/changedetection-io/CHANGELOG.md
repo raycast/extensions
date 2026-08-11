@@ -1,5 +1,11 @@
 # changedetection.io Changelog
 
+## [Error handling] - 2025-12-08
+
+- Make the API call only if the instance URL is valid
+- Added an `ErrorGuard` component to handle errors gracefully
+- Updated (dev) dependencies to latest versions, updated typing
+
 ## [Improvements] - 2025-10-14
 
 - Included link to Diff view of snapshot

@@ -11,6 +11,8 @@ export default function Command() {
   const [loading, setLoading] = useState(true);
   const [processes, setProcesses] = useState<Process[]>([]);
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
       const ids = (
         await runAppleScript(
@@ -22,10 +24,17 @@ export default function Command() {
           `tell application "System Events" to get the name of every process whose background only is false`,
         )
       ).split(", ");
+
+      if (!isMounted) return;
+
       const arr: Process[] = names.map((value, index) => ({ [value]: ids[index] }));
       setProcesses(arr);
       setLoading(false);
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (

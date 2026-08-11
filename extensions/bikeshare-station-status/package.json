@@ -1,0 +1,104 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bikeshare-station-status",
+  "title": "Bikeshare Station Status",
+  "description": "Check bike availability at Lyft bikeshare stations, including Citibike (NYC), Bay Wheels (Bay Area), Capital Bikeshare (DC), Biketown (Portland), and Divvy (Chicago).",
+  "icon": "extension-icon.png",
+  "author": "itsmingjie",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "lyft",
+    "bike",
+    "bikeshare",
+    "citibike",
+    "citi bike",
+    "bay wheels",
+    "baywheels",
+    "divvy",
+    "capital bikeshare",
+    "biketown"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "region",
+      "title": "Region",
+      "description": "Select your bike-sharing region",
+      "type": "dropdown",
+      "required": true,
+      "data": [
+        {
+          "title": "Bay Wheels (San Francisco Bay Area)",
+          "value": "BAY"
+        },
+        {
+          "title": "Citi Bike (New York City)",
+          "value": "BKN"
+        },
+        {
+          "title": "Divvy (Chicago)",
+          "value": "CHI"
+        },
+        {
+          "title": "Capital Bikeshare (Washington DC)",
+          "value": "DC"
+        },
+        {
+          "title": "Biketown (Portland)",
+          "value": "PDX"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "station-status",
+      "title": "Check Station Availability",
+      "keywords": [
+        "bike",
+        "bikeshare",
+        "lyft",
+        "citibike",
+        "bay wheels",
+        "divvy",
+        "capital bikeshare",
+        "biketown"
+      ],
+      "mode": "view",
+      "description": "Check for bike availability by station"
+    },
+    {
+      "name": "favorite-stations",
+      "title": "Menu Bar Favorite Stations",
+      "mode": "menu-bar",
+      "description": "Show favorite bike stations in the menu bar",
+      "interval": "10m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.8",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -2,7 +2,7 @@
 
 In addition to the [Raycast API](../api-reference/cache.md) which is bundled as part of the app, we also provide a sibling package that contains a set of utilities to streamline common patterns and operations used in extensions.
 
-![](.gitbook/assets/utils-illustration.jpg)
+![](../.gitbook/assets/utils-illustration.jpg)
 
 ## Installation
 
@@ -15,6 +15,45 @@ npm install --save @raycast/utils
 `@raycast/utils` has a [peer dependency](https://docs.npmjs.com/cli/v8/configuring-npm/package-json#peerdependencies) on `@raycast/api`. This means that a certain version of `utils` will require a version above a certain version of `api`. `npm` will warn you if that is not the case.
 
 ## Changelog
+
+### v2.3.0
+
+- Added `cacheWriteDebounce` to `useCachedState`, `useCachedPromise`, `useFetch`, `useExec`, and `useStreamJSON`
+- Fixed paginated `useFetch` URL factories running during render, repeatedly revalidating when passed inline, and bypassing the hook's error handling when they throw
+- Fixed `usePromise` handling of synchronous errors, asynchronous callbacks, and automatic optimistic-update rollbacks
+- Fixed `useCachedPromise` returning data and pagination state belonging to a previous cache key when `keepPreviousData` is disabled
+- Fixed `useExec` commands waiting forever for stdin, and restored support for disabling its timeout with `timeout: 0`
+- Fixed OAuth token refresh recovery and custom Google and Slack refresh-token URLs
+- Fixed `runAppleScript` and `runPowerShellScript` ignoring `parseOutput` and always returning a string
+- Fixed `useSQL` throwing during render when a database is missing and retaining a stale permission view after subsequent results
+- Fixed stale `useAI` streams overwriting newer results and model changes not triggering a new request
+- Fixed `useStreamJSON` not flattening arrays returned by `transform` before filtering and paginating them
+- Fixed failed `useStreamJSON` downloads replacing valid caches with partial files
+- Fixed SQLite connections leaking when queries fail or are aborted
+- Fixed frecency decay calculations, in-place sorting of caller-owned arrays
+- Fixed `useForm.reset` ignoring explicit falsy values
+- Fixed `getProgressIcon` ignoring `backgroundOpacity: 0`
+- Fixed `runAppleScript` timeout error messages reporting `undefined` instead of the effective timeout
+
+### v2.2.6
+
+- Fixed an issue where refreshing OAuth tokens would fails for providers that return scope as an array instead of a string
+
+### v2.2.5
+
+- Fixed an issue where `useSql` would not properly show the permission priming screen
+
+### v2.2.4
+
+- Fixed an issue where an avatar's initials wouldn't be centered
+
+### v2.2.3
+
+- Fixed an issue with `useSQL` on Windows where the query would refuse to be executed because the database is locked
+
+### v2.2.2
+
+- Fix `useCachedState` to preserve Date objects more precisely.
 
 ### v2.2.1
 

@@ -5,7 +5,7 @@
   "subtitle": "Manage your Google Cloud resources without opening a browser",
   "description": "A lightweight Raycast extension for managing Google Cloud resources efficiently. Access and control your GCP projects, services, IAM, storage, and more—all without leaving Raycast.",
   "icon": "icon.png",
-  "version": "0.1.32",
+  "version": "1.1.0",
   "author": "ojowwalker77",
   "contributors": [
     "ben_selleslagh"
@@ -13,13 +13,17 @@
   "categories": [
     "Developer Tools"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
-      "title": "Manage Your Google Cloud",
-      "subtitle": "Google Cloud CLI",
-      "description": "Manage Your Google Cloud resources",
+      "title": "Google Cloud",
+      "subtitle": "Unified Google Cloud Management",
+      "description": "Unified Google Cloud management - access Compute, Storage, IAM, Network, and Secrets from one place",
       "mode": "view",
       "screenshots": [
         {
@@ -37,38 +41,10 @@
       ]
     },
     {
-      "name": "storage",
-      "title": "Cloud Storage",
-      "subtitle": "Google Cloud CLI",
-      "description": "Manage Google Cloud Storage buckets",
-      "mode": "view"
-    },
-    {
-      "name": "compute",
-      "title": "Compute Engine",
-      "subtitle": "Google Cloud CLI",
-      "description": "Manage Google Cloud Compute instances",
-      "mode": "view"
-    },
-    {
-      "name": "iam",
-      "title": "Iam & Admin",
-      "subtitle": "Google Cloud CLI",
-      "description": "Manage Google Cloud IAM permissions",
-      "mode": "view"
-    },
-    {
-      "name": "network",
-      "title": "Vpc Network",
-      "subtitle": "Google Cloud CLI",
-      "description": "Manage Google Cloud VPC networks",
-      "mode": "view"
-    },
-    {
-      "name": "secrets",
-      "title": "Secret Manager",
-      "subtitle": "Google Cloud CLI",
-      "description": "Manage Google Cloud secrets securely",
+      "name": "configurations",
+      "title": "Settings & Configuration",
+      "subtitle": "Manage gcloud configs & extension settings",
+      "description": "List, switch, create, duplicate, and delete named gcloud configurations. Manage extension settings.",
       "mode": "view"
     }
   ],
@@ -76,24 +52,39 @@
     {
       "name": "gcloudPath",
       "title": "gcloud CLI Path",
-      "description": "Path to the gcloud CLI executable",
+      "description": "Leave empty to auto-detect, or specify custom path to gcloud executable",
       "type": "textfield",
-      "required": true,
-      "default": "gcloud"
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "defaultRegion",
+      "title": "Default Region",
+      "description": "Default GCP region for new resources (e.g., us-central1, europe-west1)",
+      "type": "textfield",
+      "required": false,
+      "default": "us-central1"
+    },
+    {
+      "name": "preferredIDE",
+      "title": "Default IDE",
+      "description": "IDE for opening files (e.g., logs, configs)",
+      "type": "appPicker",
+      "required": false,
+      "default": "com.microsoft.VSCode"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.55.2",
-    "@raycast/utils": "^1.9.0",
-    "dotenv": "^16.4.7"
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^20.5.6",
-    "@types/react": "^18.2.21",
-    "eslint": "^8.48.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
     "prettier": "^3.0.2",
-    "typescript": "^5.2.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

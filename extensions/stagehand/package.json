@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stagehand",
+  "title": "Stagehand",
+  "description": "Control YouTube and other media playing in your browser without switching tabs. Works with Chrome, Arc, Brave, and Safari.",
+  "icon": "icon.png",
+  "author": "tamag0tcha",
+  "license": "MIT",
+  "version": "0.0.1",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Media"
+  ],
+  "keywords": [
+    "youtube",
+    "media",
+    "music",
+    "video",
+    "browser",
+    "play",
+    "pause",
+    "control"
+  ],
+  "commands": [
+    {
+      "name": "play-pause",
+      "title": "Play/Pause Media",
+      "description": "Toggle play/pause for media in your browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "description": "Show what's currently playing in your browser",
+      "mode": "view"
+    },
+    {
+      "name": "skip-forward",
+      "title": "Skip Forward",
+      "description": "Skip forward 10 seconds",
+      "mode": "no-view"
+    },
+    {
+      "name": "skip-backward",
+      "title": "Skip Backward",
+      "description": "Skip backward 10 seconds",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume Up",
+      "description": "Increase volume by 10%",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "description": "Decrease volume by 10%",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-mute",
+      "title": "Toggle Mute",
+      "description": "Mute or unmute the video",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-url",
+      "title": "Copy URL",
+      "description": "Copy the YouTube video URL",
+      "mode": "no-view"
+    },
+    {
+      "name": "copy-url-timestamp",
+      "title": "Copy URL at Current Time",
+      "description": "Copy YouTube URL with current timestamp",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

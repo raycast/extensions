@@ -95,6 +95,14 @@
       "required": false,
       "title": "Indentation",
       "type": "dropdown"
+    },
+    {
+      "default": "10000",
+      "description": "Maximum number of lines to display initially (for large JSON files)",
+      "name": "maxInitialLines",
+      "required": false,
+      "title": "Max Initial Lines",
+      "type": "textfield"
     }
   ],
   "dependencies": {

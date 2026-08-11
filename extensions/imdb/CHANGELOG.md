@@ -1,5 +1,9 @@
 # IMDb Changelog
 
+## [Update] - 2025-11-20
+
+- Add a Windows compatible `Keyboard` shortcut to ActionOpenParentalGuide
+
 ## [Update] - 2024-07-10
 
  - Add an action to open the parental guide

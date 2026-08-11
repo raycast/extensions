@@ -8,6 +8,7 @@ import { SpaceTagsView } from "./SpaceTagsView";
 import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 import { SpaceMemberAuthPoliciesView } from "./SpaceMemberAuthPoliciesView";
 import { SpaceAuthForm } from "./SpaceAuthForm";
+import { resolveSpaceIconUrl } from "../utils/space-icon.util";
 
 const EditAction = (props: { spaceId: string; keyToEdit: KeyToEdit; value: string; refetch: () => void }) => {
   const { spaceId, keyToEdit, value, refetch } = props;
@@ -32,7 +33,7 @@ function Body(props: { spaceId: string }) {
   }
 
   const spaceInMe = me.data?.associatedSpaces.find((s) => s.id === spaceId);
-  const image = data.image ? data.image : data.type === "TEAM" ? Icon.TwoPeople : Icon.Person;
+  const image = resolveSpaceIconUrl(data.image) || (data.type === "TEAM" ? Icon.TwoPeople : Icon.Person);
 
   const refetch = () => {
     refetchSpace();
@@ -68,6 +69,17 @@ function Body(props: { spaceId: string }) {
         actions={
           <ActionPanel>
             <EditAction spaceId={spaceId} keyToEdit="description" value={data.description || ""} refetch={refetch} />
+          </ActionPanel>
+        }
+      />
+      <List.Item
+        title="Slack Team ID"
+        subtitle={data.slackTeamId || ""}
+        accessories={data.slackTeamId ? [] : [{ tag: { value: "Not set", color: Color.SecondaryText } }]}
+        icon={Icon.Hashtag}
+        actions={
+          <ActionPanel>
+            <EditAction spaceId={spaceId} keyToEdit="slackTeamId" value={data.slackTeamId || ""} refetch={refetch} />
           </ActionPanel>
         }
       />

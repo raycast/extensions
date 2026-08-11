@@ -12,7 +12,9 @@
     "sebboer",
     "shkm",
     "constantins2001",
-    "xmok"
+    "xmok",
+    "pcamminadi",
+    "riccardogiorato"
   ],
   "license": "MIT",
   "preferences": [
@@ -63,23 +65,31 @@
       "subtitle": "Clockify",
       "description": "Manage Clockify time entries with Raycast",
       "mode": "view"
+    },
+    {
+      "name": "clockifymenu",
+      "title": "Current Timer",
+      "subtitle": "Clockify",
+      "description": "Show current Clockify timer in menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.19.1",
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4",
     "lodash.isempty": "^4.4.0",
     "lodash.uniqwith": "^4.5.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/lodash.isempty": "^4.4.9",
     "@types/lodash.uniqwith": "^4.5.9",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@types/node": "^25.8.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -88,5 +98,8 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

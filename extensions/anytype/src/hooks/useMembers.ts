@@ -3,18 +3,18 @@ import { useMemo } from "react";
 import { getMembers } from "../api";
 import { apiLimit } from "../utils";
 
-export function useMembers(spaceId: string) {
+export function useMembers(spaceId: string, searchText?: string) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
-    (spaceId: string) => async (options: { page: number }) => {
+    (spaceId: string, searchText?: string) => async (options: { page: number }) => {
       const offset = options.page * apiLimit;
-      const response = await getMembers(spaceId, { offset, limit: apiLimit });
+      const response = await getMembers(spaceId, { offset, limit: apiLimit, name: searchText });
 
       return {
         data: response.members,
         hasMore: response.pagination.has_more,
       };
     },
-    [spaceId],
+    [spaceId, searchText],
     {
       keepPreviousData: true,
       execute: !!spaceId,

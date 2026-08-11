@@ -1,5 +1,5 @@
 import { z } from 'zod';
-export declare const tagRouter: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+export declare const tagRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import(".prisma/client").PrismaClient<{
             log: "error"[];
@@ -11,25 +11,22 @@ export declare const tagRouter: import("@trpc/server/unstable-core-do-not-import
             deviceName: string;
         } | undefined;
         headers: Headers;
-        accessToken: string;
-        refreshToken: string;
-        iat: number;
-        exp: number;
+        jti: string;
     };
     meta: object;
     errorShape: {
         data: {
             zodError: z.typeToFlattenedError<any, string> | null;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+            code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
             httpStatus: number;
             path?: string;
             stack?: string;
         };
         message: string;
-        code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
     };
     transformer: true;
-}, {
+}, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
     get: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             spaceId: string;
@@ -43,6 +40,7 @@ export declare const tagRouter: import("@trpc/server/unstable-core-do-not-import
             updatedAt: Date;
             icon: string | null;
         };
+        meta: object;
     }>;
     list: import("@trpc/server").TRPCQueryProcedure<{
         input: {
@@ -61,6 +59,7 @@ export declare const tagRouter: import("@trpc/server/unstable-core-do-not-import
             updatedAt: Date;
             icon: string | null;
         })[];
+        meta: object;
     }>;
     create: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -75,6 +74,7 @@ export declare const tagRouter: import("@trpc/server/unstable-core-do-not-import
             updatedAt: Date;
             icon: string | null;
         };
+        meta: object;
     }>;
     delete: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -82,5 +82,6 @@ export declare const tagRouter: import("@trpc/server/unstable-core-do-not-import
             tagName: string;
         };
         output: void;
+        meta: object;
     }>;
-}>;
+}>>;

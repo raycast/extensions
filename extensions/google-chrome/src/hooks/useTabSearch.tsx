@@ -5,18 +5,12 @@ import { getPreferenceValues } from "@raycast/api";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";
 import { usePromise } from "@raycast/utils";
+import { parseSearchQuery, matchesQuery } from "../util/search-parser";
 
 /**
  * @name useTabSearch
- * @description Filters chrome tabs where the url and title match all tab-or-space-separated words in search query (case insensitive).  Examples given title "foo bar" with url "example.com":
- * @example Given title "foo bar" with url "example.com":
- * search "foo bar" succeeds
- * search "bar foo" succeeds
- * search "foo example" succeds
- * search "example foo" succeds
- * search "foo" succeeds
- * search "example" succeeds
- * search "asdf" fails
+ * Hook to search Chrome tabs using the search parser.
+ * See parseSearchQuery() in search-parser.ts for detailed search syntax and examples.
  */
 export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullable<Tab[]> } {
   const { useOriginalFavicon } = getPreferenceValues<Preferences>();
@@ -25,15 +19,26 @@ export function useTabSearch(query = ""): SearchResult<Tab> & { data: NonNullabl
   const [isEmpty, setIsEmpty] = useState<boolean>(false);
 
   const { isLoading, data: tabData } = usePromise(
-    (useOriginalFavicon: boolean, query: string) => {
-      return getOpenTabs(useOriginalFavicon).then((tabs) => {
-        const queryParts = query.toLowerCase().split(/\s+/);
-        setErrorView(undefined);
-        setIsEmpty(tabs.length === 0);
-        return tabs
-          .map((tab): [Tab, string] => [tab, `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`])
-          .filter(([, searchable]) => queryParts.reduce((isMatch, part) => isMatch && searchable.includes(part), true))
-          .map(([tab]) => tab);
+    async (useOriginalFavicon: boolean, query: string) => {
+      const tabs = await getOpenTabs(useOriginalFavicon);
+      const parsedQuery = parseSearchQuery(query);
+      setErrorView(undefined);
+      setIsEmpty(tabs.length === 0);
+
+      // Early return if no search query
+      if (parsedQuery.includeTerms.length === 0 && parsedQuery.excludeTerms.length === 0) {
+        return tabs;
+      }
+
+      return tabs.filter((tab) => {
+        try {
+          const searchable = `${tab.title.toLowerCase()} ${tab.urlWithoutScheme().toLowerCase()}`;
+          return matchesQuery(searchable, parsedQuery);
+        } catch {
+          // Handle invalid URLs gracefully
+          const searchable = `${tab.title.toLowerCase()} ${tab.url.toLowerCase()}`;
+          return matchesQuery(searchable, parsedQuery);
+        }
       });
     },
     [useOriginalFavicon, query],

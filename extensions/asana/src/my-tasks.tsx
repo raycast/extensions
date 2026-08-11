@@ -37,7 +37,7 @@ function MyTasks() {
 
   return (
     <List
-      searchBarPlaceholder="Filter by task name, project, section, or custom fields"
+      searchBarPlaceholder="Filter by task name, project, section, tag or custom fields"
       isLoading={isLoadingWorkspaces || isLoadingMyTasks}
       {...(workspaces && workspaces.length > 1
         ? {

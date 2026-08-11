@@ -1,10 +1,10 @@
 import { Icon, List } from '@raycast/api'
-import type { Instance } from '@scaleway/sdk'
+import type { Instancev1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getServerStatusIcon } from './status'
 
 type ServerProps = {
-  server: Instance.v1.Server
+  server: Instancev1.Server
 }
 
 export const ServerDetail = ({ server }: ServerProps) => (

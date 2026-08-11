@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Icon } from '@raycast/api'
-import type { Container } from '@scaleway/sdk'
+import type { Containerv1beta1 } from '@scaleway/sdk'
 import { useAPI } from 'helpers/useAPI'
 import { deployContainer } from './actions'
 // import { ContainerLogs } from './pages'
 import { getContainerUrl } from './urls'
 
 type ContainerActionProps = {
-  container: Container.v1beta1.Container
+  container: Containerv1beta1.Container
   toggleIsDetailOpen: () => void
   reloadContainers: () => Promise<void>
 }

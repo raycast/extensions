@@ -72,7 +72,7 @@ function gotErrorToString(error: unknown) {
 export async function getSelection() {
   try {
     return await getSelectedText();
-  } catch (error) {
+  } catch {
     return "";
   }
 }
@@ -167,7 +167,7 @@ export async function sendTranslateRequest({
     } catch (error) {
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
     }
-  } catch (error) {
+  } catch {
     await showToast(Toast.Style.Failure, "Please select the text to be translated");
   }
 }

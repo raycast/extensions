@@ -2,10 +2,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-gule-sider",
   "title": "Search Gule Sider",
-  "description": "Search Gule Sider for telephone numbers.",
+  "description": "Search Gule Sider for a phone number or person",
   "icon": "extension-icon.png",
   "categories": [
-    "Other"
+    "Web"
   ],
   "author": "marruje",
   "license": "MIT",
@@ -13,29 +13,57 @@
     {
       "name": "gulesider",
       "title": "Search Gule Sider",
-      "description": "Search for phone number or person in Gule Sider",
+      "description": "Search Gule Sider for a phone number or person",
       "mode": "no-view",
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Person / Phonenumber",
+          "placeholder": "Person / Phone Number",
           "required": true,
           "type": "text"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "useGuleSider",
+          "title": "Services",
+          "description": "Search Gule Sider",
+          "type": "checkbox",
+          "label": "Gule Sider",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "use1881",
+          "title": "",
+          "description": "Search 1881",
+          "type": "checkbox",
+          "label": "1881",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "use180",
+          "title": "",
+          "description": "Search 180",
+          "type": "checkbox",
+          "label": "180",
+          "required": false,
+          "default": false
         }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.12"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.2.1 ",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -44,5 +72,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

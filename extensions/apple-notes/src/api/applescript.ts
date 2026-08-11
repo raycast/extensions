@@ -48,31 +48,44 @@ export async function restoreNoteById(id: string) {
     `);
 }
 
+// Default AppleScript timeout (10s) can expire when Notes.app isn't already
+// running because macOS must launch and index the app before responding.
+// 30s accommodates this cold-start delay for read/write operations.
+
 export async function getNoteBody(id: string) {
-  return runAppleScript(`
+  return runAppleScript(
+    `
     tell application "Notes"
       set theNote to note id "${escapeDoubleQuotes(id)}"
       return body of theNote
     end tell
-    `);
+    `,
+    { timeout: 30_000 },
+  );
 }
 
 export async function getNotePlainText(id: string) {
-  return runAppleScript(`
+  return runAppleScript(
+    `
     tell application "Notes"
       set theNote to note id "${escapeDoubleQuotes(id)}"
       return plaintext of theNote
     end tell
-    `);
+    `,
+    { timeout: 30_000 },
+  );
 }
 
 export async function setNoteBody(id: string, body: string) {
-  return runAppleScript(`
+  return runAppleScript(
+    `
     tell application "Notes"
       set theNote to note id "${escapeDoubleQuotes(id)}"
       set body of theNote to "${escapeDoubleQuotes(body)}"
     end tell
-    `);
+    `,
+    { timeout: 30_000 },
+  );
 }
 
 export async function getSelectedNote() {

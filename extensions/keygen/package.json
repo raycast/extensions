@@ -22,6 +22,14 @@
       "type": "password",
       "required": true,
       "description": "Admin Token generated via Keygen API"
+    },
+    {
+      "name": "environment_code",
+      "title": "Environment Code",
+      "placeholder": "sandbox",
+      "type": "textfield",
+      "required": false,
+      "description": "Optional Environment to use for API"
     }
   ],
   "commands": [
@@ -29,8 +37,8 @@
       "name": "api-tokens",
       "title": "View API Tokens",
       "subtitle": "Keygen",
-            "description": "List API Tokens and Create new ones",
-"mode": "view"
+      "description": "List API Tokens",
+      "mode": "view"
     },
     {
       "name": "api-usage",
@@ -38,6 +46,13 @@
       "subtitle": "Keygen",
       "description": "Check current API usage statistics and limits",
       "mode": "no-view"
+    },
+    {
+      "name": "environments",
+      "title": "View Environments",
+      "subtitle": "Keygen",
+      "description": "List Environments and Create new ones",
+      "mode": "view"
     },
     {
       "name": "licenses",
@@ -73,8 +88,8 @@
     "Windows"
   ],
   "dependencies": {
-    "@raycast/api": "^1.102.6",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "dayjs": "^1.11.13"
   },
   "devDependencies": {

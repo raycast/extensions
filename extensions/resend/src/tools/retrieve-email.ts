@@ -1,4 +1,4 @@
-import { resend } from "../lib/resend";
+import { getResend, withResend } from "../lib/oauth";
 
 type Input = {
   /**
@@ -10,6 +10,7 @@ type Input = {
 };
 
 const tool = async (input: Input) => {
+  const resend = getResend();
   const { data, error } = await resend.emails.get(input.emailId);
 
   if (error) {
@@ -19,4 +20,4 @@ const tool = async (input: Input) => {
   return data;
 };
 
-export default tool;
+export default withResend(tool);

@@ -22,6 +22,8 @@ enum VMAction {
   Suspend,
   Resume,
   Stop,
+  ForceStop,
+  Reset,
 }
 
 interface SearchState {

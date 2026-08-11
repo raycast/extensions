@@ -5,6 +5,9 @@
   "description": "AI-powered multilingual translator and response generator with customizable languages and tones.",
   "icon": "icon.png",
   "author": "kawamataryo",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -18,21 +21,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.92.1",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
     "franc-min": "^6.2.0",
-    "openai": "^4.85.3"
+    "openai": "^6.16.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.21.0",
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.1",
-    "globals": "^16.0.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5",
-    "typescript-eslint": "^8.24.1"
+    "@eslint/js": "^9.39.2",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.5",
+    "@types/react": "19.2.8",
+    "eslint": "^9.39.2",
+    "globals": "^17.0.0",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.52.0"
   },
   "scripts": {
     "build": "ray build",
@@ -156,5 +159,9 @@
         }
       ]
     }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ]
 }

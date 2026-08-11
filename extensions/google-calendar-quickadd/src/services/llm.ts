@@ -31,6 +31,8 @@ LOCATION RULES:
    - Also mention the location in the event description for clarity
    - If no location is given, leave the location field empty or undefined
 
+CRITICAL: Return ONLY raw JSON without any markdown formatting, code blocks, or backticks. Do NOT wrap the response in \`\`\`json or \`\`\`.
+
 Return ONLY a valid JSON object with this structure:
 {
   "title": "Event Title",

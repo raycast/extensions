@@ -1,0 +1,87 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hack-club-cdn",
+  "title": "Hack Club CDN",
+  "description": "Upload files to the Hack Club CDN and manage your uploads from Raycast. Requires a Hack Club account (cdn.hackclub.com) and an API token.",
+  "icon": "extension-icon.png",
+  "author": "garyhtou",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Get your API token from cdn.hackclub.com/api_keys after signing in with your Hack Club account.",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "upload-clipboard-file",
+      "title": "Upload Clipboard File",
+      "subtitle": "Hack Club CDN · Paste to Upload",
+      "description": "Uploads whatever's on your clipboard (a copied file, a local path, or a link) to the Hack Club CDN and copies the resulting link.",
+      "mode": "view",
+      "keywords": [
+        "clipboard",
+        "paste",
+        "upload",
+        "cdn",
+        "hack club"
+      ]
+    },
+    {
+      "name": "upload-file",
+      "title": "Upload File",
+      "subtitle": "Hack Club CDN · Browse & Upload",
+      "description": "Pick a file from disk or paste its path to upload it to the Hack Club CDN.",
+      "mode": "view",
+      "keywords": [
+        "browse",
+        "file picker",
+        "upload",
+        "cdn",
+        "hack club"
+      ]
+    },
+    {
+      "name": "recent-uploads",
+      "title": "Recent Uploads",
+      "subtitle": "Hack Club CDN",
+      "description": "Browse, copy links from, and delete files you've uploaded from this Mac.",
+      "mode": "view",
+      "keywords": [
+        "history",
+        "cdn",
+        "hack club"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.9"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  }
+}

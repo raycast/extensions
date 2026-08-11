@@ -1,30 +1,35 @@
-import { Action, ActionPanel, Icon, List, Color, getPreferenceValues, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Color, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { withEnvContext, ListContainer } from "./components";
-import { useStripeDashboard, useEnvContext } from "./hooks";
-import { STRIPE_API_VERSION } from "./enums";
-import SubscriptionList from "./manage-subscriptions";
-import CustomerPaymentsList from "./customer-payments";
-import Stripe from "stripe";
+import { withProfileContext, ListContainer } from "@src/components";
+import { useStripeDashboard, useStripeClient } from "@src/hooks";
+import { SHORTCUTS } from "@src/constants/keyboard-shortcuts";
+import SubscriptionList from "@src/manage-subscriptions";
+import CustomerPaymentsList from "@src/customer-payments";
+import type Stripe from "stripe";
 
-const { stripeTestApiKey, stripeLiveApiKey } = getPreferenceValues();
-
-// Create Stripe clients for both environments
-const stripeTest = stripeTestApiKey ? new Stripe(stripeTestApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-const stripeLive = stripeLiveApiKey ? new Stripe(stripeLiveApiKey, { apiVersion: STRIPE_API_VERSION }) : null;
-
+/**
+ * Customer List View - Search and manage Stripe customers.
+ *
+ * Features:
+ * - Search customers by email
+ * - View customer subscriptions and payments
+ * - Navigate to customer detail in Stripe Dashboard
+ * - Copy customer email and ID
+ * - Shows subscription count badge for each customer
+ *
+ * Uses cursor-based pagination for efficient loading.
+ */
 function CustomerList() {
-  const { environment } = useEnvContext();
   const { dashboardUrl } = useStripeDashboard();
-  const stripe = environment === "test" ? stripeTest : stripeLive;
+  const stripe = useStripeClient();
   const [searchQuery, setSearchQuery] = useState("");
   const { push } = useNavigation();
 
   const { isLoading, data, pagination } = useCachedPromise(
     (query: string) => async (options: { page: number; cursor?: string }) => {
       if (!stripe) {
-        throw new Error(`Stripe ${environment} API key is not configured`);
+        throw new Error("Stripe API key is not configured");
       }
 
       // Use search if query is provided
@@ -139,20 +144,16 @@ function CustomerList() {
                 <Action.OpenInBrowser
                   title="View in Stripe Dashboard"
                   url={`${dashboardUrl}/customers/${customer.id}`}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  shortcut={SHORTCUTS.OPEN_BROWSER}
                 />
                 {customer.email && (
                   <Action.CopyToClipboard
                     title="Copy Email"
                     content={customer.email}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={SHORTCUTS.COPY_SECONDARY}
                   />
                 )}
-                <Action.CopyToClipboard
-                  title="Copy Customer ID"
-                  content={customer.id}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-                />
+                <Action.CopyToClipboard title="Copy Customer ID" content={customer.id} shortcut={SHORTCUTS.COPY_ID} />
               </ActionPanel>
             }
           />
@@ -162,4 +163,4 @@ function CustomerList() {
   );
 }
 
-export default withEnvContext(CustomerList);
+export default withProfileContext(CustomerList);

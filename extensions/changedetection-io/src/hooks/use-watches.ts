@@ -1,11 +1,16 @@
-import { SortBy, UseWatchesResult, WatchWithID, WatchesResponse } from "@/types";
+import type { SortBy, UseWatchesResult, WatchWithID, WatchesResponse } from "@/types";
 import { useApi } from "@/hooks/use-api";
 
 const sortAsc = (a: number, b: number) => a - b;
 const sortDesc = (a: number, b: number) => b - a;
 
-export const useWatches = ({ sortBy }: { sortBy: SortBy }) => {
-  const { data: watchesResponse, ...rest } = useApi<WatchesResponse>("watch");
+type UseWatchesProps = {
+  sortBy: SortBy;
+  execute?: boolean;
+};
+
+export const useWatches = ({ sortBy, execute }: UseWatchesProps) => {
+  const { data: watchesResponse, ...rest } = useApi<WatchesResponse>("watch", execute);
   const watches: UseWatchesResult = Object.entries(watchesResponse ?? {})
     .map(([id, watch]) => {
       // We're fixing an issue here where it doesn't make sense it is not seen as viewed when it has not changed yet

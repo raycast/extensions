@@ -6,17 +6,29 @@ import { useState, useEffect } from "react";
 import { HistoryEntry, SearchResult } from "../interfaces";
 import { getHistoryDbPath } from "../util";
 import { NotInstalledError } from "../components";
+import { parseSearchQuery } from "../util/search-parser";
 
-const whereClauses = (tableTitle: string, terms: string[]) => {
-  return terms.map((t) => `(${tableTitle}.title LIKE '%${t}%' OR ${tableTitle}.url LIKE '%${t}%')`).join(" AND ");
+const whereClauses = (tableTitle: string, includeTerms: string[], excludeTerms: string[]) => {
+  // Escape single quotes to prevent SQL injection
+  const escapeSql = (str: string) => str.replace(/'/g, "''");
+  const includeClauses = includeTerms.map(
+    (t) => `(${tableTitle}.title LIKE '%${escapeSql(t)}%' OR ${tableTitle}.url LIKE '%${escapeSql(t)}%')`,
+  );
+  const excludeClauses = excludeTerms.map(
+    (t) => `NOT (${tableTitle}.title LIKE '%${escapeSql(t)}%' OR ${tableTitle}.url LIKE '%${escapeSql(t)}%')`,
+  );
+
+  const allClauses = [...includeClauses, ...excludeClauses];
+  return allClauses.length > 0 ? allClauses.join(" AND ") : "1=1";
 };
 
 /**
  * Generates a query to search the history for a list of terms.
+ * Supports both include and exclude terms.
  *
  * Using `last_visit_time > 0` to filter out bookmarks.
  */
-const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
+const getHistoryQuery = (table: string, date_field: string, includeTerms: string[], excludeTerms: string[]) =>
   `SELECT id,
             url,
             title,
@@ -26,13 +38,13 @@ const getHistoryQuery = (table: string, date_field: string, terms: string[]) =>
                      'unixepoch',
                      'localtime') as lastVisited
      FROM ${table}
-     WHERE ${whereClauses(table, terms)}
+     WHERE ${whereClauses(table, includeTerms, excludeTerms)}
      AND last_visit_time > 0
      ORDER BY ${date_field} DESC LIMIT 30;`;
 
 const searchHistory = (profile: string, query?: string): SearchResult<HistoryEntry> => {
-  const terms = query ? query.trim().split(" ") : [""];
-  const queries = getHistoryQuery("urls", "last_visit_time", terms);
+  const parsedQuery = parseSearchQuery(query || "");
+  const queries = getHistoryQuery("urls", "last_visit_time", parsedQuery.includeTerms, parsedQuery.excludeTerms);
   const dbPath = getHistoryDbPath(profile);
 
   if (!fs.existsSync(dbPath)) {

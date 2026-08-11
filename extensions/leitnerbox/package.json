@@ -5,12 +5,18 @@
   "description": "This is a simple extension that use the concept of a learning process called leitner box",
   "icon": "leitner-icon.png",
   "author": "gzyannick",
-  "categories": ["Applications", "Fun"],
+  "contributors": [
+    "0xdhrv"
+  ],
+  "categories": [
+    "Applications",
+    "Fun"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "create-a-question",
-      "title": "Create A Question",
+      "title": "Create a Question",
       "subtitle": "LeitnerBox",
       "description": "Create a question for your leitner box",
       "mode": "view"
@@ -30,17 +36,123 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "create-flashcard",
+      "title": "Create Flashcard",
+      "description": "Create a new Leitner flashcard with a question and answer."
+    },
+    {
+      "name": "list-flashcards",
+      "title": "List Flashcards",
+      "description": "List saved Leitner flashcards without changing review progress."
+    },
+    {
+      "name": "list-due-flashcards",
+      "title": "List Due Flashcards",
+      "description": "List Leitner flashcards that are due for review today without updating boxes or review dates."
+    }
+  ],
+  "ai": {
+    "instructions": "Use Leitner Box tools to help users create flashcards and inspect their study queue. Do not claim that a review result has been recorded because these tools are read/create-only and never update card boxes or review dates.",
+    "evals": [
+      {
+        "input": "@leitnerbox Create a flashcard with the question 'What is the Leitner system?' and the answer 'A spaced repetition method that schedules flashcards at increasing intervals based on recall.'",
+        "mocks": {
+          "create-flashcard": {
+            "message": "Created a new Leitner flashcard.",
+            "flashcard": {
+              "id": "mock-card-1",
+              "question": "What is the Leitner system?",
+              "answer": "A spaced repetition method that schedules flashcards at increasing intervals based on recall.",
+              "box": 0,
+              "lastReviewedAt": "2026-06-08T00:00:00.000Z",
+              "daysUntilDue": 1,
+              "due": false
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-flashcard",
+              "arguments": {
+                "question": "What is the Leitner system?",
+                "answer": {
+                  "includes": "spaced repetition"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@leitnerbox Show me my saved Leitner flashcards, including the answers.",
+        "mocks": {
+          "list-flashcards": {
+            "total": 1,
+            "returned": 1,
+            "flashcards": [
+              {
+                "id": "mock-card-1",
+                "question": "What is spaced repetition?",
+                "answer": "A study technique that reviews material at increasing intervals.",
+                "box": 2,
+                "lastReviewedAt": "2026-06-06T00:00:00.000Z",
+                "daysUntilDue": 2,
+                "due": false
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-flashcards",
+              "arguments": {
+                "includeAnswers": true
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@leitnerbox Which flashcards are due for review today?",
+        "mocks": {
+          "list-due-flashcards": {
+            "totalDue": 1,
+            "returned": 1,
+            "flashcards": [
+              {
+                "id": "mock-card-2",
+                "question": "What is active recall?",
+                "box": 1,
+                "lastReviewedAt": "2026-06-06T00:00:00.000Z",
+                "daysUntilDue": 0,
+                "due": true
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-due-flashcards"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.66.0",
-    "@raycast/utils": "^1.12.4"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.2",
+    "@types/react": "19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -48,5 +160,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

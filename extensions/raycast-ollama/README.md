@@ -11,21 +11,37 @@ Use [Ollama](https://ollama.ai) for local llama inference on Raycast. This appli
 
 [Ollama](https://ollama.ai) installed and running on your mac. At least one model need to be installed throw Ollama cli tools or with 'Manage Models' Command. You can find all available model [here](https://ollama.ai/library).
 
+> [!WARNING]
+> On the current Windows (Beta) there are the following limitations:
+>
+> - The commands “Describe Content of Image”, “Get Text from Image”, “Custom Command”, and “Chat with Ollama” support loading images only via image path.
+> - The input source “Selected Text” is not supported; use the "Clipboard" instead.
+
 ## How to Use
+
+### AI Extension: Ollama Search API
+
+Use [Ollama Web Search](https://ollama.com/blog/web-search) on Raycast Quick AI and Chat.
+
+> [!WARNING]
+> For this feature an Ollama API Key is required. Create it from your [Ollama Account](https://ollama.com/settings/keys) and copy it on Extension Setting "Ollama API Key".
 
 ### Command: Manage Models
 
-View, add, and remove models that are installed locally or on a configured remote Ollama Server. To manage and utilize models from the remote server, use the ***Add Server*** action.
+View, add, and remove models that are installed locally or on a configured remote Ollama Server. To manage and utilize models from the remote server, use the **_Add Server_** action.
 
 ### Command: Chat With Ollama
 
 Chat with your preferred model from Raycast, with the following features:
 
-- ***CMD+M***, *Change Model*: change model when you want and use different one for vision or embedding.
-- ***CMD+S***, *Selection*: Add text from selection or clipboard to the prompt.
-- ***CMD+B***, *Browser Selection Tab*: Add content from selected tab to the prompt. Raycast Browser Extension is required.
-- ***CMD+I***, *Image From Clipboard*: Add jpeg or png image to the prompt. A Model with vision capabilities is required.
-- ***CMD+F***, *File*: Add content from files. This feature is still experimental.
+- **_CMD+M (macOS) CTRL+M (Windows)_**, _Change Model_: change model when you want and use different one for vision or embedding.
+- **_CMD+T (macOS) CTRL+T (Windows)_**, _Selection_: Add text from selection or clipboard to the prompt.
+- **_CMD+B (macOS) CTRL+B (Windows)_**, _Browser Selection Tab_: Add content from selected tab to the prompt. Raycast Browser Extension is required.
+- **_CMD+I (macOS) CTRL+I (Windows)_**, _Image From Clipboard_: Add jpeg or png image to the prompt. A Model with vision capabilities is required.
+- _Disable Internet Search/Enable Internet Search_: Disable/Enable Ollama Search API Tools.
+
+> [!WARNING]
+> For Internet Search feature an Ollama API Key is required. Create it from your [Ollama Account](https://ollama.com/settings/keys) and copy it on Extension Setting "Ollama API Key".
 
 From extentions preferences you can chose how many messages use as memory. By default it use the last 20 messages.
 
@@ -35,9 +51,9 @@ All preconfigured commands are crafted for general use. This command allow you t
 
 Prompt use [Raycast Prompt Explorer](https://prompts.ray.so/) format with the following tags supported:
 
-- ***{selection}***: Add text from selection or clipboard to the prompt.
-- ***{browser-tab}***: Add content from selected tab to the prompt. Raycast Browser Extension is required. Page format can be changed between: markdown {browser-tab}, html {browser-tab format="html"}, text {browser-tab format="text"}.
-- ***{image}***: Add jpeg or png image to the prompt. A Model with vision capabilities is required.
+- **_{selection}_**: Add text from selection or clipboard to the prompt.
+- **_{browser-tab}_**: Add content from selected tab to the prompt. Raycast Browser Extension is required. Page format can be changed between: markdown {browser-tab}, html {browser-tab format="html"}, text {browser-tab format="text"}.
+- **_{image}_**: Add jpeg or png image to the prompt. A Model with vision capabilities is required.
 
 ### Command: Manage Mcp Server
 

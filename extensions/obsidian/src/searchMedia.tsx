@@ -6,7 +6,7 @@ import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMess
 import { noVaultPathsToast } from "./components/Toasts";
 import { MediaGrid } from "./components/MediaGrid";
 import { useObsidianVaults } from "./utils/hooks";
-import { Vault } from "./api/vault/vault.types";
+import { ObsidianVault } from "@/obsidian";
 
 export default function Command(props: { arguments: MediaSearchArguments }) {
   const { vaults, ready } = useObsidianVaults();
@@ -19,7 +19,7 @@ export default function Command(props: { arguments: MediaSearchArguments }) {
     return (
       <VaultSelection
         vaults={vaults}
-        target={(vault: Vault) => <MediaGrid vault={vault} searchArguments={props.arguments} />}
+        target={(vault: ObsidianVault) => <MediaGrid vault={vault} searchArguments={props.arguments} />}
       />
     );
   } else if (vaults.length == 1) {

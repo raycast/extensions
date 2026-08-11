@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { EmptyViewObject, ObjectActions, ObjectListItem, ViewType } from "..";
 import { useSearch, useTemplates } from "../../hooks";
 import { Space, SpaceObject } from "../../models";
-import { pluralize, processObject } from "../../utils";
+import { objectMatchesSearch, pluralize, processObject } from "../../utils";
 
 type TemplatesListProps = {
   space: Space;
@@ -18,6 +18,7 @@ export function TemplateList({ space, typeId, isGlobalSearch, isPinned }: Templa
   const { templates, templatesError, isLoadingTemplates, mutateTemplates, templatesPagination } = useTemplates(
     space.id,
     typeId,
+    searchText,
   );
   const { objects, objectsError, isLoadingObjects, mutateObjects, objectsPagination } = useSearch(
     space.id,
@@ -37,12 +38,10 @@ export function TemplateList({ space, typeId, isGlobalSearch, isPinned }: Templa
     }
   }, [objectsError]);
 
-  const filteredTemplates = templates?.filter((template: SpaceObject) =>
-    template.name.toLowerCase().includes(searchText.toLowerCase()),
-  );
+  const filteredTemplates = templates.filter((template) => objectMatchesSearch(template, searchText));
 
   const filteredObjects = objects
-    ?.filter((object) => object.name.toLowerCase().includes(searchText.toLowerCase()))
+    .filter((object) => objectMatchesSearch(object, searchText))
     .map((object) => {
       return processObject(object, false, mutateObjects);
     });

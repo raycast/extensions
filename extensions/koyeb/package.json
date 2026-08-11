@@ -10,7 +10,7 @@
     {
       "name": "api_key",
       "title": "API Key",
-      "placeholder": "pw...xxx",
+      "placeholder": "xx...xxx",
       "type": "password",
       "required": true,
       "description": "Koyeb API Key"

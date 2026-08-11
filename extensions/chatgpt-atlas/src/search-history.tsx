@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Image, Keyboard, Icon } from "@raycast/api";
+import { ActionPanel, Action, List, Image, Keyboard, Icon, Detail } from "@raycast/api";
 import { useSearchHistory } from "./atlas";
 import { useState } from "react";
 import { getFavicon } from "@raycast/utils";
@@ -6,7 +6,11 @@ import { getSubtitle } from "./utils";
 
 export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
-  const { isLoading, data, permissionView } = useSearchHistory(searchText);
+  const { isLoading, data, permissionView, error } = useSearchHistory(searchText);
+
+  if (error) {
+    return <Detail markdown={`# ERROR \n\n ${error} \n\n Are you sure **ChatGPT Atlas** is installed?`} />;
+  }
 
   if (permissionView) {
     return permissionView;

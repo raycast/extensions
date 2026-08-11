@@ -5,6 +5,13 @@
   "description": "Check if a certain function or method is available in different versions of PHP.",
   "icon": "command-icon.png",
   "author": "diana_scharf",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Developer Tools"
   ],
@@ -25,26 +32,6 @@
       "mode": "view"
     }
   ],
-  "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.13.3",
-    "axios": "^1.8.4"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
-    "@types/react": "^18.3.3",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
-  },
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  },
   "preferences": [
     {
       "name": "php_74",
@@ -60,7 +47,7 @@
       "title": "PHP 8.0",
       "description": "Show PHP 8.0 relevant items in Functions and Features command",
       "type": "checkbox",
-      "default": true,
+      "default": false,
       "required": false,
       "label": "Show Features and Functions"
     },
@@ -99,6 +86,34 @@
       "default": true,
       "required": false,
       "label": "Show Features and Functions"
+    },
+    {
+      "name": "php_85",
+      "title": "PHP 8.5",
+      "description": "Show PHP 8.5 relevant items in Functions and Features command",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Show Features and Functions"
     }
-  ]
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }

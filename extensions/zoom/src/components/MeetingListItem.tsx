@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, confirmAlert, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { Meeting, deleteMeeting as zoomDeleteMeeting } from "../api/meetings";
 import { getErrorMessage } from "../helpers/errors";
-import { getMeetingTitle, isRecurringMeetingWithNoFixedTime } from "../helpers/meetings";
+import { getMeetingTitle, isRecurringMeetingWithNoFixedTime, getZoomUrlForPlatform } from "../helpers/meetings";
 import EditMeetingForm from "./EditMeetingForm";
 
 type MeetingListItemProps = {
@@ -97,7 +97,11 @@ function MeetingActionPanel({ meeting, mutate }: MeetingListItemProps) {
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser title="Open Meeting in Zoom" url={meeting.join_url} />
+      <Action
+        title="Open Meeting in Zoom"
+        icon={Icon.Video}
+        onAction={() => open(getZoomUrlForPlatform(meeting.join_url))}
+      />
 
       <ActionPanel.Section>
         {isRecurringMeetingWithNoFixedTime(meeting) ? null : (

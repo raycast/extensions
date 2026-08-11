@@ -88,6 +88,24 @@ const Actions = ({
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>
+
+      <ActionPanel.Section title="Package Analysis">
+        <Action.OpenInBrowser
+          title="Bundlephobia"
+          icon={{ source: Icon.BarChart, tintColor: Color.Blue }}
+          url={`https://bundlephobia.com/package/${library.npmPkg}`}
+        />
+        <Action.OpenInBrowser
+          title="Pkg-Size.dev"
+          icon={{ source: Icon.HardDrive, tintColor: Color.Green }}
+          url={`https://pkg-size.dev/${library.npmPkg}`}
+        />
+        <Action.OpenInBrowser
+          title="Snyk Advisor"
+          icon={{ source: Icon.Shield, tintColor: Color.Purple }}
+          url={`https://snyk.io/advisor/npm-package/${library.npmPkg}`}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 };
@@ -143,7 +161,11 @@ export const LibraryListItem = ({
       }}
       title={library.github.name}
       keywords={library.github.topics}
-      subtitle={{ tooltip: library.github.description }}
+      subtitle={
+        !isShowingDetail && library.github.description
+          ? { value: library.github.description, tooltip: library.github.description }
+          : undefined
+      }
       accessories={accessories}
       detail={<LibraryDetail library={library} />}
       actions={<Actions library={library} isShowingDetail={isShowingDetail} setIsShowingDetail={setIsShowingDetail} />}

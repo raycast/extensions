@@ -46,8 +46,21 @@ export class Ship24ApiClient {
           const errorData = JSON.parse(errorText);
           if (errorData.code === "quota_limit_reached") {
             errorMessage = "Quota limit reached. Please check your Ship24 API plan or try again later.";
+          } else if (errorData.errors && Array.isArray(errorData.errors)) {
+            // Handle specific error codes
+            const noSubscription = errorData.errors.find((e: { code?: string }) => e.code === "no_active_subscription");
+            if (noSubscription) {
+              errorMessage =
+                "No active Ship24 subscription. Please activate a free or paid plan at dashboard.ship24.com/general/subscriptions";
+            } else {
+              errorMessage = errorData.errors
+                .map((e: { message?: string; code?: string }) => e.message || e.code)
+                .join("; ");
+            }
           } else if (errorData.message) {
             errorMessage = errorData.message;
+          } else if (errorText) {
+            errorMessage += ` - ${errorText}`;
           }
         } catch {
           // If parsing fails, use the original error text
@@ -93,8 +106,21 @@ export class Ship24ApiClient {
           const errorData = JSON.parse(errorText);
           if (errorData.code === "quota_limit_reached") {
             errorMessage = "Quota limit reached. Please check your Ship24 API plan or try again later.";
+          } else if (errorData.errors && Array.isArray(errorData.errors)) {
+            // Handle specific error codes
+            const noSubscription = errorData.errors.find((e: { code?: string }) => e.code === "no_active_subscription");
+            if (noSubscription) {
+              errorMessage =
+                "No active Ship24 subscription. Please activate a free or paid plan at dashboard.ship24.com/general/subscriptions";
+            } else {
+              errorMessage = errorData.errors
+                .map((e: { message?: string; code?: string }) => e.message || e.code)
+                .join("; ");
+            }
           } else if (errorData.message) {
             errorMessage = errorData.message;
+          } else if (errorText) {
+            errorMessage += ` - ${errorText}`;
           }
         } catch {
           // If parsing fails, use the original error text

@@ -3,7 +3,7 @@
   "name": "deployhq",
   "title": "DeployHQ",
   "description": "Search and navigate to your DeployHQ projects",
-  "icon": "icon-deployhq.png",
+  "icon": "extension_icon.png",
   "author": "MelvinBrem",
   "contributors": [
     "olafvanmidden"
@@ -60,14 +60,6 @@
           "value": "visit-repository"
         }
       ]
-    },
-    {
-      "name": "logPath",
-      "title": "Log Path",
-      "description": "Path to where Winston will save the logs",
-      "type": "textfield",
-      "required": false,
-      "default": ""
     }
   ],
   "dependencies": {

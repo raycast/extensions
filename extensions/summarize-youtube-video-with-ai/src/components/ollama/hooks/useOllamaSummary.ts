@@ -1,10 +1,10 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import OpenAI from "openai";
 import { useEffect } from "react";
 import { OLLAMA_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
 import type { OllamaPreferences } from "../../../summarizeVideoWithOllama";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
+import { getOpenAIClient } from "../../../utils/sdkClients";
 
 type GetOllamaSummaryProps = {
   transcript?: string;
@@ -13,20 +13,16 @@ type GetOllamaSummaryProps = {
 };
 
 export const useOllamaSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetOllamaSummaryProps) => {
-  const abortController = new AbortController();
   const preferences = getPreferenceValues() as OllamaPreferences;
   const { creativity, language, ollamaEndpoint, ollamaModel } = preferences;
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
 
-    const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
+    const abortController = new AbortController();
 
-    const openai = new OpenAI({
-      baseURL: ollamaEndpoint,
-      apiKey: "ollama", // required but unused by Ollama
-    });
+    const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
+    const openai = getOpenAIClient("ollama", ollamaEndpoint);
 
     setSummaryIsLoading(true);
 

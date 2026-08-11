@@ -16,7 +16,7 @@ This name is used as the subdomain when logged in with your account, e.g. https:
 Your own DeployHQ username.  
 This is usually the e-mail address you use to log in.
 
-**defaultAction** _(currently non-functional)_  
+**defaultAction**
 The default action to perform when selecting an item in the project list.
 
 ## Commands

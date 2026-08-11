@@ -13,7 +13,7 @@ export type Schedule = {
 export interface RaycastCommand {
   deeplink: string;
   type: "user-initiated" | "background";
-  arguments?: Record<string, string> | null;
+  arguments?: Record<string, string>;
 }
 
 export type ScheduledCommand = {

@@ -2,10 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { existsSync } from "fs";
 import { homedir } from "os";
 
-interface SourcetreePreference {
-  bin: string;
-  plist: string;
-
+interface SourcetreePreference extends ExtensionPreferences {
   isBinAvailable(): boolean;
 }
 

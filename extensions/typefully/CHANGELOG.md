@@ -1,47 +1,31 @@
 # Typefully Changelog
 
-## [Fixes and enhancements] - 2023-02-03
+## [Windows Support] - 2026-08-07
 
-- Fixed an issue to open the correct notification and remove the recently tweeted section in the menu bar command. The tweets are part of the activity submenu.
+- Add Windows as a supported platform
+- Use platform-specific keyboard shortcuts for Show/Hide Preview and Delete Draft actions
 
-## [Added Notiifcations to Menu Bar] - 2023-01-29
+## [Enhancements] - 2026-07-28
 
-- Menu bar now shows scheduled drafts, tweeted drafts and activity/inbox notifications
+- Add core-workflow AI evals for create/list/get/schedule/publish, social sets, comments, queue+analytics, LinkedIn mentions, and X Articles
 
-## [Added Menu Bar Sections] - 2022-11-11
+## [AI Skill Parity] - 2026-07-27
 
-- Menu bar now shows headers as a title instead of just disabled text
+- Expand Raycast AI from 4 to 29 Typefully tools covering full draft CRUD, publishing, queue management, tags, media, analytics, LinkedIn mentions, comments, and X Articles
+- Add comprehensive AI instructions for account resolution, one-draft-per-post behavior, platform rules, comment-anchor safety, scheduling, publishing confirmation, and authentication failures
+- Stop silently choosing the first account when multiple social sets exist without a default
 
-## [Fix reported bugs and UX] - 2022-10-08
+## [Cleanup] - 2026-02-04
 
-- Changed draft textarea to clear upon submission
-- Fixed menu bar command bug calculating title length
+- Remove store submission checklist from README
 
-## [Updated Menu Bar Command] - 2022-10-05
+## [Initial Release] - 2026-02-04
 
-- Added light and dark feather icons
-- Added quick links to the menu bar command
-- Added a scheduled posts count to the menu bar command
-- Fixed command bar rendering logic to allow internal caching mechanisms to work
+New Raycast extension for Typefully, built on the Typefully API v2.
 
-## [Added Menu Bar Item] - 2022-10-04
-
-- Add menu bar scheduled post shortcuts
-- Tidied up TypeScript interface usage and imports
-
-## [Added Commands] - 2022-06-27
-
-- Add ability to view scheduled drafts
-- Add ability to view posted drafts
-
-## [Updated Command Functionality] - 2022-06-19
-
-- Updated Open Typefully command to use default browser
-
-## [Initial Version] - 2022-06-19
-
-- Add required preferences
-- Add support for posting drafts
-- Add support for scheduling drafts to allocated time
-- Add support for scheduling drafts to next available slot
-- Add ability to quick open Typefully
+- Create drafts for X, LinkedIn, Threads, Bluesky, and Mastodon
+- Split content into threads using `---` delimiter
+- Schedule drafts or publish immediately
+- Browse unpublished, scheduled, and published drafts
+- Manage social sets and set a default for quick access
+- AI tools for Raycast AI Chat: create, list, and schedule drafts conversationally

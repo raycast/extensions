@@ -4,10 +4,13 @@
   "title": "Google Books",
   "description": "Search Books with Google Books",
   "icon": "google-books.png",
-  "categories": ["Data"],
+  "categories": [
+    "Data"
+  ],
   "author": "aparandeh",
   "contributors": [
-    "xmok"
+    "xmok",
+    "chrismessina"
   ],
   "license": "MIT",
   "commands": [
@@ -19,9 +22,19 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Google Books API Key",
+      "description": "Optional API key for Google Books. Get one free at https://console.cloud.google.com/apis/credentials (enable the Books API). Without a key, requests share a global quota and may be rate-limited.",
+      "type": "password",
+      "required": false,
+      "placeholder": "AIza..."
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.99.2",
-    "@raycast/utils": "^1.19.1"
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -38,5 +51,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

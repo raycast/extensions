@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Preferences } from "../lib/types";
 import { getErrorMessage } from "../lib/utils";
 import { getVideos, searchVideos, useRefresher, Video } from "../lib/youtubeapi";
-import { FilterDropdown } from "./dropdown";
+import { FilterDropdown, normalizeFilterOrder } from "./dropdown";
 import { ListOrGrid, ListOrGridEmptyView, ListOrGridSection } from "./listgrid";
 import { getPinnedLiveVideos, getPinnedVideos, getRecentLiveVideos, getRecentVideos } from "./recent_videos";
 import { VideoItem } from "./video";
@@ -25,22 +25,26 @@ export function SearchVideoList({
   const { griditemsize, showRecentVideos } = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState<string>(searchQuery || "");
   const [order, setOrder] = useCachedState<string>("search-video-order", "relevance");
+  const normalizedOrder = normalizeFilterOrder("video", order);
   const { data, error, isLoading } = useRefresher<Video[] | undefined>(
     async () =>
       searchText
-        ? await searchVideos(searchText, channelId, { order: order, eventType: searchOptions?.eventType })
+        ? await searchVideos(searchText, channelId, { order: normalizedOrder, eventType: searchOptions?.eventType })
         : undefined,
-    [searchText, order],
+    [searchText, normalizedOrder],
   );
-  if (error) {
-    showToast(Toast.Style.Failure, "Could not search videos", getErrorMessage(error));
-  }
   const [loading, setLoading] = useState<boolean>(true);
   const [pinnedVideos, setPinnedVideos] = useState<Video[]>([]);
   const [recentVideos, setRecentVideos] = useState<Video[]>([]);
   const [state, setState] = useState<boolean>(false);
   const refresh = () => setState(!state);
   const hasQuery = (searchText || "").trim().length > 0;
+
+  useEffect(() => {
+    if (error) {
+      showToast(Toast.Style.Failure, "Could not search videos", getErrorMessage(error));
+    }
+  }, [error]);
 
   useEffect(() => {
     (async () => {
@@ -62,8 +66,9 @@ export function SearchVideoList({
       <ListOrGrid
         isLoading={isLoading}
         columns={griditemsize}
-        searchBarAccessory={<FilterDropdown onChange={setOrder} defaultValue={order} />}
+        searchBarAccessory={<FilterDropdown kind="video" onChange={setOrder} value={normalizedOrder} />}
         aspectRatio={"4/3"}
+        searchText={searchText}
         onSearchTextChange={setSearchText}
         throttle={true}
       >
@@ -77,6 +82,7 @@ export function SearchVideoList({
         isLoading={true}
         columns={griditemsize}
         aspectRatio={"4/3"}
+        searchText={searchText}
         onSearchTextChange={setSearchText}
         throttle={true}
       >
@@ -104,6 +110,7 @@ export function SearchVideoList({
       isLoading={false}
       columns={griditemsize}
       aspectRatio={"4/3"}
+      searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle={true}
     >

@@ -12,9 +12,11 @@ An unofficial extension to use Mistral AI from Raycast
 
 ## Features
 
-- Ask questions to Mistral
-- Browse your past conversations
-- Choose between Mistral Small and Mistral Large
+- Ask questions to Mistral with seamless conversation flow
+- Full markdown rendering for rich formatted responses
+- Browse and continue past conversations
+- Model selection: Choose between Mistral Small, Medium, Large, and Codestral
+- Keyboard shortcuts for quick model switching (Cmd+Shift+1-4)
 
 ## Setup API Key
 

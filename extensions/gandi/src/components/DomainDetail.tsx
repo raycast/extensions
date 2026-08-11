@@ -1,31 +1,32 @@
-import { Action, ActionPanel, Detail, Icon, showToast, Toast, confirmAlert, Alert, Color } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { GandiDomain, WebsiteMetadata } from "../types";
+import {
+  Action,
+  ActionPanel,
+  Detail,
+  Icon,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+  Color,
+  Keyboard,
+} from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { GandiDomain } from "../types";
 import * as gandiAPI from "../api";
-import { useEffect, useState } from "react";
 
 interface Props {
   domain: GandiDomain;
 }
 
 export default function DomainDetail({ domain }: Readonly<Props>) {
-  const [meta, setMeta] = useState<WebsiteMetadata | null>(null);
+  const { isLoading, data: meta } = useCachedPromise(
+    async (target: string) => {
+      const res = await gandiAPI.fetchWebsiteMetadata(target);
+      return res;
+    },
+    [domain.fqdn],
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-    const target = domain.fqdn;
-    gandiAPI
-      .fetchWebsiteMetadata(target)
-      .then((m) => {
-        if (!cancelled) setMeta(m || null);
-      })
-      .catch(() => {
-        if (!cancelled) setMeta(null);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [domain.fqdn]);
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
       year: "numeric",
@@ -103,6 +104,7 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
 
   return (
     <Detail
+      isLoading={isLoading}
       markdown={markdown}
       navigationTitle={domain.fqdn}
       metadata={
@@ -216,6 +218,7 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
               icon={Icon.Globe}
             />
             <Action.OpenInBrowser
+              // eslint-disable-next-line @raycast/prefer-title-case
               title="Manage DNS Records"
               url={`https://admin.gandi.net/domain/${domain.fqdn}/dns`}
               icon={Icon.Network}
@@ -231,12 +234,12 @@ export default function DomainDetail({ domain }: Readonly<Props>) {
             <Action.CopyToClipboard
               title="Copy Domain Name"
               content={domain.fqdn}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
             />
             <Action.CopyToClipboard
               title="Copy Nameservers"
               content={domain.nameserver.hosts?.join("\n") || domain.nameserver.current}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
             />
           </ActionPanel.Section>
 

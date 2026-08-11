@@ -5,17 +5,28 @@ import { Workflow } from "./types/types";
 import { useState } from "react";
 import { filterTag } from "./utils/constants";
 import { DetailView } from "./components/detail-view";
-import fetch from "node-fetch";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 
 const { instanceUrl, apiKey, rememberFilter } = getPreferenceValues<Preferences.SearchWorkflowsApi>();
-const API_URL = new URL("api/v1/", instanceUrl);
+let API_URL: URL;
 const API_HEADERS = {
   Accept: "application/json",
   "X-N8N-API-KEY": apiKey,
 };
 
-export default function SearchWorkflows() {
+export default function Command() {
+  try {
+    API_URL = new URL("api/v1/", instanceUrl);
+    return <SearchWorkflows />;
+  } catch {
+    return (
+      <List>
+        <EmptyView title={"Invalid Instance URL"} extensionPreferences={true} />
+      </List>
+    );
+  }
+}
+function SearchWorkflows() {
   const [filter, setFilter] = useState("");
   const [isShowingDetail] = useCachedState("show-workflow-details", false);
 
@@ -92,13 +103,15 @@ function WorkflowActions({ workflow, mutate }: { workflow: Workflow; mutate: Mut
     const toast = await showToast(
       Toast.Style.Animated,
       deactivating ? "Deactivating workflow" : "Activating workflow",
-      workflow.name
+      workflow.name,
     );
     try {
       await mutate(
         fetch(API_URL + `workflows/${workflow.id}/${deactivating ? "deactivate" : "activate"}`, {
           method: "POST",
           headers: API_HEADERS,
+        }).then((response) => {
+          if (!response.ok) throw new Error(response.statusText);
         }),
         {
           optimisticUpdate(data) {
@@ -106,13 +119,14 @@ function WorkflowActions({ workflow, mutate }: { workflow: Workflow; mutate: Mut
             data[index] = { ...workflow, active: !workflow.active };
             return data;
           },
-        }
+        },
       );
       toast.style = Toast.Style.Success;
       toast.title = deactivating ? "Workflow deactivated" : "Workflow activated";
     } catch (error) {
       toast.style = Toast.Style.Failure;
       toast.title = deactivating ? "Deactivating failed" : "Activating failed";
+      toast.message = `${error}`;
     }
   }
   return (

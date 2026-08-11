@@ -29,7 +29,7 @@ This extension does not directly interact with Roblox Client/Studio, so they are
 
 ### Games
 
-- Get Currently Playing Game, Session Time, Server Location & Server Type
+- Get Currently Playing Game, Session Time, Server Location & Server Type (Server Location is powered by [RoValra](https://rovalra.com))
 - Favourite Games and find them easily
 - Search for Games
 - View Games with ID

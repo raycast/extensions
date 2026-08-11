@@ -25,6 +25,9 @@ function mediaTypeToString(media: MediaType | string) {
 
 export default function AnimeDetails({ anime }: { anime: ExtendedAnime }) {
   const startYear = anime.start_date ? new Date(anime.start_date).getFullYear().toString() : "-";
+  const startDate = anime.start_date ?? "-";
+  const endDate = anime.end_date ?? "-";
+  const studios = anime.studios?.map((s) => s.name).join(", ") || "-";
 
   return (
     <List.Item.Detail
@@ -41,6 +44,9 @@ export default function AnimeDetails({ anime }: { anime: ExtendedAnime }) {
           <List.Item.Detail.Metadata.Label title="Ranked" text={anime.rank ? `#${anime.rank?.toString()}` : "-"} />
           <List.Item.Detail.Metadata.Label title="Year" text={startYear} />
           <List.Item.Detail.Metadata.Label title="Status" text={statusToText(anime.status)} />
+          <List.Item.Detail.Metadata.Label title="Aired From" text={startDate} />
+          <List.Item.Detail.Metadata.Label title="Aired To" text={endDate} />
+          <List.Item.Detail.Metadata.Label title="Studios" text={studios} />
           <List.Item.Detail.Metadata.TagList title="Genres">
             {(anime?.genres || []).map((genre) => (
               <List.Item.Detail.Metadata.TagList.Item text={genre.name} color={"#E2E7F4"} key={genre.name} />

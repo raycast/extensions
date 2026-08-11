@@ -1,15 +1,5 @@
 -- Sample data for Zed v28 fixture
 
--- Imitate latest applied migration for v28
-CREATE TABLE migrations (
-    domain TEXT,
-    step INTEGER,
-    migration TEXT
-);
-
-INSERT INTO migrations ("domain", step, migration)
-VALUES('WorkspaceDb', 28, '');
-
 -- Insert sample remote connections
 INSERT INTO remote_connections (id, kind, host, port, user, distro) VALUES (1, 'ssh', 'remote-host', NULL, NULL, NULL);
 

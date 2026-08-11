@@ -9,7 +9,7 @@ export const PNetworks = () => {
   const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
-  const { data: privateNetworks = [], isLoading } = useAllRegionsPrivateNetworksQuery({
+  const { data: privateNetworks, isLoading } = useAllRegionsPrivateNetworksQuery({
     orderBy: 'created_at_asc',
     organizationId: clientSetting.defaultOrganizationId,
   })
@@ -22,7 +22,7 @@ export const PNetworks = () => {
       isShowingDetail={isDetailOpen}
       searchBarPlaceholder="Search Private Networks …"
     >
-      {privateNetworks.map((privateNetwork) => (
+      {privateNetworks?.map((privateNetwork) => (
         <List.Item
           key={privateNetwork.id}
           title={privateNetwork.name}

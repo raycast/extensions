@@ -2,7 +2,7 @@ import { mapSpaces } from "../../mappers/spaces";
 import { PaginatedResponse, Pagination, RawSpace, Space } from "../../models";
 import { apiEndpoints, apiFetch } from "../../utils";
 
-export async function getSpaces(options: { offset: number; limit: number }): Promise<{
+export async function getSpaces(options: { offset: number; limit: number; name?: string }): Promise<{
   spaces: Space[];
   pagination: Pagination;
 }> {

@@ -15,7 +15,6 @@ import {
   VmConsoleTicketsCreateSpec,
   VmConsoleTicketsSummary,
 } from "./types";
-import fetch from "cross-fetch";
 
 export class vCenter {
   private readonly _credential: string;
@@ -91,7 +90,7 @@ export class vCenter {
             throw new ErrorApiGetToken(
               400,
               "VM.FilterSpec.power-states field contains a value that is not supported by the server",
-              ""
+              "",
             );
           case 401:
             this._token = undefined;
@@ -225,7 +224,7 @@ export class vCenter {
             throw new ErrorApiGetToken(
               400,
               "Network.FilterSpec.types field contains a value that is not supported by the server",
-              ""
+              "",
             );
           case 401:
             this._token = undefined;
@@ -238,7 +237,7 @@ export class vCenter {
             throw new ErrorApiGetToken(
               503,
               "the system is unable to communicate with a service to complete the request",
-              ""
+              "",
             );
         }
       })
@@ -277,7 +276,7 @@ export class vCenter {
             throw new ErrorApiGetToken(
               400,
               "Policies.FilterSpec contains a value that is not supported by the server",
-              ""
+              "",
             );
           case 401:
             this._token = undefined;
@@ -290,7 +289,7 @@ export class vCenter {
             throw new ErrorApiGetToken(
               503,
               "the system is unable to communicate with a service to complete the request",
-              ""
+              "",
             );
         }
       })
@@ -336,7 +335,7 @@ export class vCenter {
             throw new ErrorApiGetToken(
               503,
               "the system is unable to communicate with a service to complete the request",
-              ""
+              "",
             );
         }
       })
@@ -488,7 +487,7 @@ export class vCenter {
             throw new ErrorApiGetToken(
               400,
               "Host.FilterSpec.connection-states field contains a value that is not supported by the server",
-              ""
+              "",
             );
           case 401:
             this._token = undefined;
@@ -536,7 +535,7 @@ export class vCenter {
             throw new ErrorApiGetToken(
               400,
               "Network.FilterSpec.types field contains a value that is not supported by the server",
-              ""
+              "",
             );
           case 401:
             this._token = undefined;
@@ -584,7 +583,7 @@ export class vCenter {
             throw new ErrorApiGetToken(
               400,
               "Datastore.FilterSpec.types field contains a value that is not supported by the server",
-              ""
+              "",
             );
           case 401:
             this._token = undefined;
@@ -610,7 +609,7 @@ export class vCenter {
 
   async VMCreateConsoleTickets(
     vm: string,
-    type: VmConsoleTicketsType = VmConsoleTicketsType.VMRC
+    type: VmConsoleTicketsType = VmConsoleTicketsType.VMRC,
   ): Promise<VmConsoleTicketsSummary | undefined> {
     const url = `https://${this._fqdn}/api/vcenter/vm/${vm}/console/tickets`;
     const body: VmConsoleTicketsCreateSpec = {

@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import path from "path";
 import { Clipboard } from "@raycast/api";
 import tempy, { FileOptions } from "tempy";
@@ -36,7 +35,8 @@ export default async function copyFileToClipboard(url: string, name?: string, is
 
   let file: string;
   try {
-    file = await tempy.write(await response.body, tempyOpt);
+    const buffer = Buffer.from(await response.arrayBuffer());
+    file = await tempy.write(buffer, tempyOpt);
     if (isFavorite) {
       await saveGifToCache(file, fileName);
     }

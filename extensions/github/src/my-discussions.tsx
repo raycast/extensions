@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
+import type { JSX } from "react";
 import { useState } from "react";
 
 import { DiscussionListItem } from "./components/DiscussionListItem";

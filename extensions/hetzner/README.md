@@ -2,6 +2,8 @@
 
 Provides different actions via the Hetzner API.
 
+Supports Raycast on macOS and Windows.
+
 ## Configuration
 - Get an access token from Hetzner https://console.hetzner.cloud/
 Please note that the full potential of the extension is only possible with read/write access.

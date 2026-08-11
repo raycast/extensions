@@ -32,7 +32,7 @@ export type DomainDNSGetListResult = {
 };
 export type DomainDNSGetHostsResult = {
   DomainDNSGetHostsResult: {
-    host: ArrOrObj<{
+    host?: ArrOrObj<{
       $: {
         HostId: string;
         Name: string;

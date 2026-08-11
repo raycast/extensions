@@ -37,7 +37,7 @@
     },
     {
       "name": "volume-up",
-      "title": "Volume Up",
+      "title": "Volume up",
       "subtitle": "Increase audio volume",
       "description": "Increase volume",
       "mode": "no-view"
@@ -137,6 +137,52 @@
           "title": "Volume (%)"
         }
       ]
+    },
+    {
+      "name": "set-speed",
+      "title": "Set Playback Speed",
+      "subtitle": "Set playback speed to specific rate",
+      "description": "Set VLC playback speed (0.25-4.0x). 1.0 is normal speed.",
+      "mode": "view",
+      "src": "src/set-speed.tsx",
+      "arguments": [
+        {
+          "name": "speed",
+          "type": "text",
+          "placeholder": "1.0",
+          "required": false,
+          "title": "Speed"
+        }
+      ]
+    },
+    {
+      "name": "speed-up",
+      "title": "Speed up",
+      "subtitle": "Increase playback speed by 0.25x",
+      "description": "Increase playback speed by 0.25x (up to 4.0x).",
+      "mode": "no-view"
+    },
+    {
+      "name": "speed-down",
+      "title": "Speed Down",
+      "subtitle": "Decrease playback speed by 0.25x",
+      "description": "Decrease playback speed by 0.25x (minimum 0.25x).",
+      "mode": "no-view"
+    },
+    {
+      "name": "speed-normal",
+      "title": "Normal Speed",
+      "subtitle": "Reset playback speed to normal",
+      "description": "Reset playback speed to 1.0x (normal).",
+      "mode": "no-view"
+    },
+    {
+      "name": "playlist",
+      "title": "Playlist",
+      "subtitle": "View and play items from VLC playlist",
+      "description": "View VLC playlist history and play items from it.",
+      "mode": "view",
+      "src": "src/playlist.tsx"
     }
   ],
   "preferences": [
@@ -149,16 +195,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.101.1",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "22.13.10",
-    "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.0",
+    "@types/react": "19.2.3",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -167,5 +213,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
