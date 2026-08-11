@@ -1,6 +1,6 @@
 # Digger Changelog
 
-## [Failed digs no longer hang, and shortcuts work on Windows] - {PR_MERGE_DATE}
+## [Failed digs no longer hang, and shortcuts work on Windows] - 2026-08-11
 
 ### Fixed
 
