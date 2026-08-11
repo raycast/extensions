@@ -339,7 +339,9 @@ private final class CursorWorker {
   private var lockDescriptor: Int32 = -1
   private var controlDescriptor: Int32 = -1
   private var ownsLock = false
+  private var isHideInFlight = false
   private var isCursorHidden = false
+  private var pendingExitStatus: Int32?
   private var terminationSource: DispatchSourceSignal?
   private var interruptSource: DispatchSourceSignal?
 
@@ -388,6 +390,8 @@ private final class CursorWorker {
   }
 
   private func hideCursor() {
+    isHideInFlight = true
+
     DispatchQueue.global(qos: .userInitiated).async { [self] in
       let connection = cgsDefaultConnection()
       let backgroundCursorResult = cgsSetConnectionProperty(
@@ -402,6 +406,16 @@ private final class CursorWorker {
         : .failure
 
       DispatchQueue.main.async { [self] in
+        isHideInFlight = false
+
+        if backgroundCursorResult == .success, hideCursorResult == .success {
+          isCursorHidden = true
+        }
+
+        if let pendingExitStatus {
+          cleanUpAndExit(pendingExitStatus)
+        }
+
         guard backgroundCursorResult == .success else {
           failAndExit("WindowServer refused background cursor control.")
         }
@@ -409,7 +423,6 @@ private final class CursorWorker {
           failAndExit("Core Graphics refused to hide the cursor.")
         }
 
-        isCursorHidden = true
         do {
           try writeState(phase: "hidden")
         } catch {
@@ -436,10 +449,10 @@ private final class CursorWorker {
     interruptSource = DispatchSource.makeSignalSource(signal: SIGINT, queue: .main)
 
     terminationSource?.setEventHandler { [self] in
-      cleanUpAndExit(EXIT_SUCCESS)
+      requestExit(EXIT_SUCCESS)
     }
     interruptSource?.setEventHandler { [self] in
-      cleanUpAndExit(EXIT_SUCCESS)
+      requestExit(EXIT_SUCCESS)
     }
 
     terminationSource?.resume()
@@ -458,7 +471,7 @@ private final class CursorWorker {
 
           if messages.contains(where: { $0 == "STOP \(token)" }) {
             DispatchQueue.main.async { [self] in
-              cleanUpAndExit(EXIT_SUCCESS)
+              requestExit(EXIT_SUCCESS)
             }
             return
           }
@@ -476,6 +489,17 @@ private final class CursorWorker {
       encoding: .utf8
     )
     cleanUpAndExit(EXIT_FAILURE)
+  }
+
+  private func requestExit(_ status: Int32) {
+    if isHideInFlight {
+      if pendingExitStatus == nil {
+        pendingExitStatus = status
+      }
+      return
+    }
+
+    cleanUpAndExit(status)
   }
 
   private func cleanUpAndExit(_ status: Int32) -> Never {
