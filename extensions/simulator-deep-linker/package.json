@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "simulator-deep-linker",
+  "title": "SimulatorDeepLinker",
+  "description": "Search and open saved deep links on iOS and Android developer devices.",
+  "icon": "icon.png",
+  "author": "shtefan_boblik",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "type": "module",
+  "commands": [
+    {
+      "name": "search-deep-links",
+      "title": "Search Deep Links",
+      "description": "Search saved links and open them on the configured target",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "storageFile",
+      "title": "Storage Override",
+      "description": "Optional deeplinks.json override. The SimulatorDeepLinker storage is detected automatically.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "defaultEnvironment",
+      "title": "Default Environment",
+      "description": "Used when the configured environment exists, for example Development.",
+      "type": "textfield",
+      "default": "Development",
+      "required": false
+    },
+    {
+      "name": "platform",
+      "title": "Target Platform",
+      "description": "Choose how the CLI should open selected links.",
+      "type": "dropdown",
+      "default": "ios",
+      "required": true,
+      "data": [
+        {
+          "title": "iOS Simulator",
+          "value": "ios"
+        },
+        {
+          "title": "Physical iPhone or iPad",
+          "value": "ios-device"
+        },
+        {
+          "title": "Android",
+          "value": "android"
+        }
+      ]
+    },
+    {
+      "name": "target",
+      "title": "Target Identifier",
+      "description": "Use booted for iOS Simulator, or enter a simulator UDID, Apple device ID, or ADB serial.",
+      "type": "textfield",
+      "default": "booted",
+      "required": true
+    },
+    {
+      "name": "bundleIdentifier",
+      "title": "Apple Bundle Identifier",
+      "description": "Required only for a physical iPhone or iPad.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "androidPackage",
+      "title": "Android Package",
+      "description": "Optional package used to constrain Android link handling.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.17.0",
+    "@types/react": "19.1.9",
+    "eslint": "^9.32.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
