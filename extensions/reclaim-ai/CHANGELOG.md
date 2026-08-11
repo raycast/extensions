@@ -1,5 +1,8 @@
 # reclaim Changelog
 
+## [Update] - {PR_MERGE_DATE}
+- Route the Create Task and Search Tasks commands through the Reclaim 2.0 task API for accounts on Reclaim 2.0
+
 ## [Update] - 2025-06-04
 - Update to the package.json description to include Outlook as a valid calendar provider.
 
