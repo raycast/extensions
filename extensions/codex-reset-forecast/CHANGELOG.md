@@ -1,5 +1,10 @@
 # Codex Reset Forecast Changelog
 
+## [Mirror Website Forecast Copy] - {PR_MERGE_DATE}
+
+- Show the source website's state-specific headline, summary, and advice in forecast details.
+- Remove redundant quota and reset-detection caveats.
+
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - View the current Codex reset likelihood and latest confirmed reset.
