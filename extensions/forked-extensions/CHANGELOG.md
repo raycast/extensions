@@ -1,5 +1,10 @@
 # Raycast Fork Extensions Changelog
 
+## [Repository Cleanup] - {PR_MERGE_DATE}
+
+- Add a "Clean Up Repository" manager action with confirmation and before-and-after pack statistics.
+- Run Git maintenance in the foreground without scheduling background jobs.
+
 ## [Fix Concurrent Git Operations] - 2026-06-02
 
 - Wait for transient Git index locks before running repository commands and show a clear message when another operation is already running.
