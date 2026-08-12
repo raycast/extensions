@@ -81,6 +81,14 @@ export const DownloadListItem = ({ download, apiKey, videoPlayers, onRefresh }: 
       actions={
         <ActionPanel>
           <ActionPanel.Section>
+            {hasMultipleFiles && (
+              <Action.Push
+                title="View Files"
+                icon={Icon.List}
+                shortcut={{ modifiers: ["cmd"], key: "return" }}
+                target={<DownloadFiles download={download} apiKey={apiKey} />}
+              />
+            )}
             {isDownloadReady &&
               isSingleVideoFile &&
               players.map((player) => (
@@ -93,14 +101,6 @@ export const DownloadListItem = ({ download, apiKey, videoPlayers, onRefresh }: 
               ))}
             {isDownloadReady && (
               <Action title="Copy Download Link" icon={Icon.Link} onAction={() => copyDownloadLink(apiKey, download)} />
-            )}
-            {hasMultipleFiles && (
-              <Action.Push
-                title="View Files"
-                icon={Icon.List}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
-                target={<DownloadFiles download={download} apiKey={apiKey} />}
-              />
             )}
           </ActionPanel.Section>
           {isSingleVideoFile && players.length > 1 && (
