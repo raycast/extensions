@@ -36,6 +36,7 @@ test("maps known provider status aliases to one label and icon health", () => {
     "all system operational",
     "All Systems Operational",
     "fully_operational",
+    "No incidents declared",
   ]) {
     assert.deepEqual(providerStatusPresentation({ ...snapshot, health: "unknown", statusText }), {
       label: "All Systems Operational",

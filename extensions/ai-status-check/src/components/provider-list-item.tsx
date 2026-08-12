@@ -15,7 +15,7 @@ interface ProviderListItemProps {
   provider: ProviderDefinition;
   record: ProviderStatusRecord;
   onRefreshAll(): Promise<void>;
-  onRefreshProvider(providerId: string): Promise<ProviderStatusRecord>;
+  onRefreshProvider(providerId: string): Promise<ProviderStatusRecord | undefined>;
 }
 
 export function ProviderListItem({ provider, record, onRefreshAll, onRefreshProvider }: ProviderListItemProps) {

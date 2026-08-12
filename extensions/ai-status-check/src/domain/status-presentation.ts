@@ -15,6 +15,7 @@ const KNOWN_HEALTH: Readonly<Partial<Record<string, Health>>> = {
   all_system_operational: "operational",
   all_systems_operational: "operational",
   fully_operational: "operational",
+  no_incidents_declared: "operational",
   degraded: "degraded",
   degraded_performance: "degraded",
   partial_outage: "partial_outage",

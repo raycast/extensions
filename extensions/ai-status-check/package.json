@@ -190,13 +190,13 @@
   ],
   "scripts": {
     "build": "ray build -e dist",
-    "check:sources": "npm run test:compile && node node_modules/.cache/ai-status-check-tests/.github/scripts/check-status-sources.js",
-    "check:store": "npm run test:compile && node node_modules/.cache/ai-status-check-tests/.github/scripts/check-store-assets.js",
+    "check:sources": "npm run test:compile && node node_modules/.cache/ai-status-check-tests/tests/support/check-status-sources.js",
+    "check:store": "npm run test:compile && node node_modules/.cache/ai-status-check-tests/tests/support/check-store-assets.js",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npm run check:store && npx @raycast/api@latest publish",
-    "test": "npm run test:compile && node node_modules/.cache/ai-status-check-tests/.github/scripts/run-tests.js",
+    "test": "npm run test:compile && node node_modules/.cache/ai-status-check-tests/tests/support/run-tests.js",
     "test:compile": "node -e \"require('node:fs').rmSync('node_modules/.cache/ai-status-check-tests',{recursive:true,force:true})\" && tsc -p tsconfig.test.json",
     "typecheck": "tsc --noEmit"
   },

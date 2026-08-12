@@ -213,7 +213,7 @@ Scoped platform providers intentionally discard the platform-wide overall state 
 
 `services/status-cache.ts` stores versioned, per-provider JSON snapshots through Raycast `Cache`. It performs lightweight runtime validation before returning cached values.
 
-`hooks/use-provider-statuses.ts` coordinates the current provider set, aborts superseded refresh generations, commits bulk refresh results together, and exposes a single list-level loading state. A late older refresh cannot overwrite a newer generation.
+`hooks/use-provider-statuses.ts` coordinates the current provider set, aborts superseded bulk refresh generations, commits bulk refresh results together, and exposes a single list-level loading state. Per-provider request tokens cover bulk, individual, and duplicate refreshes, so a late older response can update neither React state nor the persistent cache.
 
 ## Adding a provider
 

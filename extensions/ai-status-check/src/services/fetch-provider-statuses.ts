@@ -9,6 +9,7 @@ const DEFAULT_CONCURRENCY = 6;
 interface RefreshProviderOptions {
   cache: StatusCache;
   force?: boolean;
+  isCurrent?(providerId: string): boolean;
   now?: () => number;
   signal?: AbortSignal;
   timeoutMs?: number;
@@ -56,7 +57,7 @@ export async function refreshProviderStatus(
 
   try {
     const snapshot = await provider.adapter.fetch(timeoutController.signal);
-    options.cache.setSnapshot(snapshot);
+    if (options.isCurrent?.(provider.id) !== false) options.cache.setSnapshot(snapshot);
 
     return {
       providerId: provider.id,

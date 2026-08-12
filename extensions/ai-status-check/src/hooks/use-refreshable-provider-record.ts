@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { ProviderStatusRecord } from "../domain/types";
 
-export type RefreshProvider = (providerId: string) => Promise<ProviderStatusRecord>;
+export type RefreshProvider = (providerId: string) => Promise<ProviderStatusRecord | undefined>;
 
 export function useRefreshableProviderRecord(
   providerId: string,
@@ -14,7 +14,7 @@ export function useRefreshableProviderRecord(
   const refresh = useCallback(async () => {
     setCurrentRecord((current) => ({ ...current, refreshState: "refreshing", refreshError: undefined }));
     const result = await refreshProvider(providerId);
-    setCurrentRecord(result);
+    if (result) setCurrentRecord(result);
   }, [providerId, refreshProvider]);
 
   return { record: currentRecord, refresh };

@@ -12,6 +12,7 @@ const HEALTH_BY_STATUS: Readonly<Partial<Record<string, Health>>> = {
   all_systems_operational: "operational",
   fully_operational: "operational",
   no_incidents: "operational",
+  no_incidents_declared: "operational",
   maintenance: "maintenance",
   under_maintenance: "maintenance",
   scheduled: "maintenance",

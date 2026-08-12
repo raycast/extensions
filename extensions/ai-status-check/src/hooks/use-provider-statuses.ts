@@ -3,6 +3,7 @@ import { getDataFreshness } from "../domain/freshness";
 import type { ProviderStatusRecord } from "../domain/types";
 import type { ProviderDefinition } from "../providers/types";
 import { recordFromCache, refreshProviderStatuses, refreshProviderStatus } from "../services/fetch-provider-statuses";
+import { ProviderRequestOrder } from "../services/provider-request-order";
 import { RaycastStatusCache, type StatusCache } from "../services/status-cache";
 
 type StatusRecords = Record<string, ProviderStatusRecord>;
@@ -12,7 +13,7 @@ interface ProviderStatuses {
   isRefreshing: boolean;
   isInitialLoading: boolean;
   refreshAll(force?: boolean): Promise<ProviderStatusRecord[]>;
-  refreshProvider(providerId: string): Promise<ProviderStatusRecord>;
+  refreshProvider(providerId: string): Promise<ProviderStatusRecord | undefined>;
 }
 
 export function useProviderStatuses(providers: readonly ProviderDefinition[]): ProviderStatuses {
@@ -26,6 +27,7 @@ export function useProviderStatuses(providers: readonly ProviderDefinition[]): P
   const [isRefreshing, setIsRefreshing] = useState(() => providersNeedRefresh(stableProviders, cache));
   const abortController = useRef<AbortController | undefined>(undefined);
   const generation = useRef(0);
+  const requestOrder = useRef(new ProviderRequestOrder());
 
   const refreshAll = useCallback(
     async (force = true) => {
@@ -33,16 +35,23 @@ export function useProviderStatuses(providers: readonly ProviderDefinition[]): P
       const controller = new AbortController();
       abortController.current = controller;
       const currentGeneration = ++generation.current;
+      const requestTokens = new Map(
+        stableProviders.map((provider) => [provider.id, requestOrder.current.begin(provider.id)]),
+      );
       setIsRefreshing(force || providersNeedRefresh(stableProviders, cache));
 
       try {
         const results = await refreshProviderStatuses(stableProviders, {
           cache,
           force,
+          isCurrent: (providerId) => requestOrder.current.isCurrent(providerId, requestTokens.get(providerId)),
           signal: controller.signal,
         });
         if (generation.current === currentGeneration) {
-          setRecords((current) => mergeResults(current, results));
+          const currentResults = results.filter((result) =>
+            requestOrder.current.isCurrent(result.providerId, requestTokens.get(result.providerId)),
+          );
+          setRecords((current) => mergeResults(current, currentResults));
         }
         return results;
       } finally {
@@ -56,6 +65,7 @@ export function useProviderStatuses(providers: readonly ProviderDefinition[]): P
     async (providerId: string) => {
       const provider = providerById.get(providerId);
       if (!provider) throw new Error(`Unknown provider: ${providerId}`);
+      const requestToken = requestOrder.current.begin(providerId);
 
       setRecords((current) => ({
         ...current,
@@ -66,7 +76,12 @@ export function useProviderStatuses(providers: readonly ProviderDefinition[]): P
         },
       }));
 
-      const result = await refreshProviderStatus(provider, { cache, force: true });
+      const result = await refreshProviderStatus(provider, {
+        cache,
+        force: true,
+        isCurrent: () => requestOrder.current.isCurrent(providerId, requestToken),
+      });
+      if (!requestOrder.current.isCurrent(providerId, requestToken)) return undefined;
       setRecords((current) => ({ ...current, [providerId]: result }));
       return result;
     },
