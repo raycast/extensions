@@ -16,6 +16,13 @@ class SelectionUnavailableError extends Error {
   }
 }
 
+class ClipboardUnavailableError extends Error {
+  constructor(cause: unknown) {
+    super("Clipboard text is unavailable", { cause });
+    Object.setPrototypeOf(this, ClipboardUnavailableError.prototype);
+  }
+}
+
 class ClipboardProtectionError extends Error {
   constructor() {
     super("Clipboard content cannot be restored safely");
@@ -26,8 +33,8 @@ class ClipboardProtectionError extends Error {
 async function readClipboard(): Promise<string> {
   try {
     return (await Clipboard.readText()) ?? "";
-  } catch {
-    return "";
+  } catch (error) {
+    throw new ClipboardUnavailableError(error);
   }
 }
 
@@ -98,6 +105,11 @@ export default async function Command(): Promise<void> {
 
     if (error instanceof SelectionUnavailableError) {
       await showHUD("Can’t read selected text — select text or choose Clipboard");
+      return;
+    }
+
+    if (error instanceof ClipboardUnavailableError) {
+      await showHUD("Can’t read clipboard — copy text or choose Selected Text");
       return;
     }
 
