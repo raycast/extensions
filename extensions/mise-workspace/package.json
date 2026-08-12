@@ -79,5 +79,8 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.22"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
