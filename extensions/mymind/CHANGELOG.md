@@ -1,6 +1,6 @@
 # mymind Changelog
 
-## [Context-Aware Saves] - {PR_MERGE_DATE}
+## [Context-Aware Saves] - 2026-08-12
 
 - Added an opt-in `Context Detection` preference, off by default. With it disabled the command behaves exactly as before — clipboard first, then Finder — and the browser is never queried, so macOS never asks for Automation permission
 - When enabled, `Save to mymind` prefills from the frontmost app: selected text is preselected as a Note, a selected URL as a Link, and when nothing is selected in a browser, the active tab's URL is used
