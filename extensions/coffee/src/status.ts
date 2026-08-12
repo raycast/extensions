@@ -1,8 +1,37 @@
 import { getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
+import { execFileSync } from "node:child_process";
 import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning } from "./utils";
 
-const AUTO_CAFFEINATE_LAST_RUN_KEY = "autoCaffeinateLastRun";
-const AUTO_CAFFEINATE_SESSION_GAP_MS = 2 * 60_000;
+const AUTO_CAFFEINATE_PID_KEY = "autoCaffeinateRaycastPid";
+
+/**
+ * Returns a session identifier for the currently-running Raycast instance.
+ *
+ * Primary: `lsappinfo` queries Raycast's start time via LaunchServices using
+ * the bundle ID — immune to process-table visibility restrictions that cause
+ * `pgrep` to return nothing from within the extension context.
+ *
+ * Fallback: `process.ppid` (the Raycast Helper PID) which is stable within a
+ * session in production builds, though it may vary across commands in dev mode.
+ */
+function getRaycastSessionId(): string {
+  try {
+    const out = execFileSync("/usr/bin/lsappinfo", ["info", "-app", "com.raycast.macos"], { encoding: "utf8" }).trim();
+
+    const pidMatch = out.match(/pid\s*=\s*(\d+)/);
+    if (pidMatch?.[1]) {
+      return `pid:${pidMatch[1]}`;
+    }
+
+    const dateMatch = out.match(/\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}/);
+    if (dateMatch?.[0]) {
+      return `launch:${dateMatch[0]}`;
+    }
+  } catch {
+    // lsappinfo unavailable or Raycast not registered yet — fall through.
+  }
+  return `ppid:${process.ppid}`;
+}
 
 async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
   if (!schedule || Object.keys(schedule).length === 0) {
@@ -58,16 +87,20 @@ export async function checkSchedule() {
  * "Start caffeination when Raycast starts" preference is enabled and the Mac
  * is not already caffeinated or covered by a schedule. Returns true when
  * caffeination was started.
+ *
+ * Session detection is keyed off the Raycast launch time stored in
+ * LocalStorage. The session ID changes only when Raycast actually relaunches, so
+ * sleep/wake cycles (where background intervals simply don't fire but the ID
+ * stays the same) cannot trigger a spurious auto-caffeinate.
  */
 export async function maybeAutoCaffeinate(isScheduled?: boolean): Promise<boolean> {
-  // The last-run marker is refreshed on every background tick so the gap below
-  // only grows when Raycast is quit (or the Mac is asleep) - i.e. a fresh
-  // Raycast session. It must be updated before the early returns, otherwise it
-  // goes stale while the Mac is caffeinated and the next decaffeination would
-  // look like a fresh session.
-  const now = Date.now();
-  const lastRun = (await LocalStorage.getItem<number>(AUTO_CAFFEINATE_LAST_RUN_KEY)) ?? 0;
-  await LocalStorage.setItem(AUTO_CAFFEINATE_LAST_RUN_KEY, now);
+  const currentSessionId = getRaycastSessionId();
+  const storedSessionId = await LocalStorage.getItem<string>(AUTO_CAFFEINATE_PID_KEY);
+
+  // Always refresh the stored session ID so it reflects the running Raycast process.
+  // This must happen before the early returns so that after a manual decaf the
+  // marker stays current and won't look like a new session on the next tick.
+  await LocalStorage.setItem(AUTO_CAFFEINATE_PID_KEY, currentSessionId);
 
   if (!getPreferenceValues<Preferences>().startCaffeinateOnLaunch) return false;
   if (isCaffeinateRunning()) return false;
@@ -75,11 +108,11 @@ export async function maybeAutoCaffeinate(isScheduled?: boolean): Promise<boolea
   const scheduled = isScheduled ?? (await checkSchedule());
   if (scheduled) return false;
 
-  // A gap larger than the session threshold means Raycast was quit (or the Mac
-  // was asleep) since the last background run, i.e. a fresh Raycast session.
-  if (now - lastRun < AUTO_CAFFEINATE_SESSION_GAP_MS) return false;
+  // A different (or absent) session ID means Raycast relaunched — treat as new session.
+  // Sleep/wake does not change the session ID, so it cannot trigger a false positive.
+  if (currentSessionId === storedSessionId) return false;
 
-  await startCaffeinate({ menubar: true, status: true });
+  await startCaffeinate({ menubar: true, status: true }, "Auto-caffeinating your Mac");
   return true;
 }
 
