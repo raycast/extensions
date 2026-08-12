@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-08-12
 
 - Restore fast, complete local tab loading while preserving tabs with empty titles or URLs.
 - Avoid querying iCloud tabs when they are disabled.
