@@ -1,7 +1,11 @@
 import type { Clipboard } from "@raycast/api";
 
-export function canSafelyRestoreClipboard(content: Clipboard.ReadContent): boolean {
-  const hasFile = typeof content.file === "string";
+export function getRestorableClipboardContent(content: Clipboard.ReadContent): string | Clipboard.Content | null {
+  if (typeof content.text !== "string" || typeof content.file === "string") return null;
+  if (typeof content.html === "string") return { html: content.html, text: content.text };
+  return content.text;
+}
 
-  return typeof content.text === "string" && !hasFile;
+export function canSafelyRestoreClipboard(content: Clipboard.ReadContent): boolean {
+  return getRestorableClipboardContent(content) !== null;
 }
