@@ -6,10 +6,10 @@ describe("Clipboard restoration safety", () => {
     expect(canSafelyRestoreClipboard({ text: "reference" })).toBe(true);
     expect(canSafelyRestoreClipboard({ text: "" })).toBe(true);
     expect(canSafelyRestoreClipboard({ text: "reference", html: "<p>reference</p>" })).toBe(true);
-    expect(canSafelyRestoreClipboard({ text: "reference", file: "/tmp/reference.png" })).toBe(true);
   });
 
-  it("rejects combined file and HTML representations", () => {
+  it("rejects file-bearing representations", () => {
+    expect(canSafelyRestoreClipboard({ text: "reference", file: "/tmp/reference.png" })).toBe(false);
     expect(
       canSafelyRestoreClipboard({ text: "reference", file: "/tmp/reference.png", html: "<p>reference</p>" }),
     ).toBe(false);

@@ -2,12 +2,6 @@ import { Clipboard, getPreferenceValues, getSelectedText, showHUD } from "@rayca
 import { canSafelyRestoreClipboard } from "./clipboard-safety";
 import { scrambleText } from "./scramble-text";
 
-type DraftScramblePreferences = {
-  source: "selected" | "clipboard";
-  action: "paste" | "copy";
-  scrambleNumbers: boolean;
-};
-
 class NoTextError extends Error {
   constructor() {
     super("No text available");
@@ -37,7 +31,7 @@ async function readClipboard(): Promise<string> {
   }
 }
 
-async function readText(preferredSource: DraftScramblePreferences["source"]): Promise<string> {
+async function readText(preferredSource: Preferences.ScrambleDraftText["source"]): Promise<string> {
   if (preferredSource === "selected") {
     try {
       const selected = await getSelectedText();
@@ -65,9 +59,7 @@ async function readText(preferredSource: DraftScramblePreferences["source"]): Pr
 }
 
 async function restoreClipboard(content: Clipboard.ReadContent): Promise<void> {
-  if (content.file) {
-    await Clipboard.copy({ file: content.file });
-  } else if (content.html) {
+  if (content.html) {
     await Clipboard.copy({ html: content.html, text: content.text });
   } else {
     await Clipboard.copy(content.text);
@@ -86,7 +78,7 @@ async function pasteWithoutChangingClipboard(text: string): Promise<void> {
 }
 
 export default async function Command(): Promise<void> {
-  const preferences = getPreferenceValues<DraftScramblePreferences>();
+  const preferences = getPreferenceValues<Preferences.ScrambleDraftText>();
 
   try {
     const source = await readText(preferences.source);
