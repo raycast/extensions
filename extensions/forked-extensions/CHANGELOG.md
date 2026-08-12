@@ -1,6 +1,6 @@
 # Raycast Fork Extensions Changelog
 
-## [Repository Cleanup] - {PR_MERGE_DATE}
+## [Repository Cleanup] - 2026-08-12
 
 - Add a "Clean Up Repository" manager action with confirmation and before-and-after pack statistics.
 - Run Git maintenance in the foreground without scheduling background jobs.
