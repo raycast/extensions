@@ -1,6 +1,6 @@
 # reclaim Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-08-12
 - Route the Create Task and Search Tasks commands through the Reclaim 2.0 task API for accounts on Reclaim 2.0
 
 ## [Fixes] - 2026-06-25
