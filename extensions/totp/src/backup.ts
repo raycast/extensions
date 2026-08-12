@@ -41,8 +41,15 @@ export async function importBackup(path: string, password: string): Promise<Acco
   }
 
   try {
-    const decipher = createDecipheriv("aes-256-gcm", deriveKey(password, Buffer.from(backup.salt, "base64")), Buffer.from(backup.iv, "base64"));
-    decipher.setAuthTag(Buffer.from(backup.tag, "base64"));
+    const tag = Buffer.from(backup.tag, "base64");
+    if (tag.length !== 16) throw new Error("Invalid backup authentication tag.");
+    const decipher = createDecipheriv(
+      "aes-256-gcm",
+      deriveKey(password, Buffer.from(backup.salt, "base64")),
+      Buffer.from(backup.iv, "base64"),
+      { authTagLength: 16 },
+    );
+    decipher.setAuthTag(tag);
     const plaintext = Buffer.concat([decipher.update(Buffer.from(backup.ciphertext, "base64")), decipher.final()]);
     return validateAccounts(JSON.parse(plaintext.toString("utf8")));
   } catch {
