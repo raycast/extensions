@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Icon, List, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { type Account, loadAccounts, removeAccount, saveAccount } from "./accounts";
+import { type Account, loadAccounts, removeAccount, saveAccount, updateAccount } from "./accounts";
 import { AddAccountForm } from "./add-account";
 import { BackupForm } from "./backup-form";
 import { generateCode } from "./totp";
@@ -31,6 +31,11 @@ export default function TOTP() {
     await refresh();
   }
 
+  async function edit(account: Account, input: Parameters<typeof saveAccount>[0]) {
+    await updateAccount(account.id, input);
+    await refresh();
+  }
+
   async function copyCode(value: string) {
     await Clipboard.copy(value, { concealed: true });
     await showHUD("OTP copied");
@@ -47,7 +52,14 @@ export default function TOTP() {
     await refresh();
   }
 
-  const addAction = <Action.Push title="Add Account" icon={Icon.Plus} target={<AddAccountForm onAdd={add} />} />;
+  const addAction = (
+    <Action.Push
+      title="Add Account"
+      icon={Icon.Plus}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+      target={<AddAccountForm onAdd={add} />}
+    />
+  );
   const backupActions = <ActionPanel.Section>
     <Action.Push title="Export Encrypted Backup" icon={Icon.Download} target={<BackupForm mode="export" onImported={refresh} />} />
     <Action.Push title="Import Encrypted Backup" icon={Icon.Upload} target={<BackupForm mode="import" onImported={refresh} />} />
@@ -72,6 +84,19 @@ export default function TOTP() {
                     icon={Icon.Clipboard}
                     shortcut={{ modifiers: ["cmd"], key: "return" }}
                     onAction={() => void copyCode(code.value)}
+                  />
+                  <Action.Push
+                    title="Edit Account"
+                    icon={Icon.Pencil}
+                    target={
+                      <AddAccountForm
+                        title="Edit TOTP Account"
+                        initialSecret={account.secret}
+                        initialName={account.name}
+                        initialIssuer={account.issuer}
+                        onAdd={(input) => edit(account, input)}
+                      />
+                    }
                   />
                   <Action.CopyToClipboard
                     title="Copy Secret Key"
