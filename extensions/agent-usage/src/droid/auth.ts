@@ -2,6 +2,7 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+
 import { decodeJwtPayload } from "../agents/jwt.ts";
 
 const AUTH_V2_FILE = path.join(os.homedir(), ".factory", "auth.v2.file");

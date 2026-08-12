@@ -1,9 +1,11 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-usage",
-  "title": "Agent Usage",
   "description": "Monitor AI coding agent usage across Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, Droid, Gemini, Grok, Kimi, MiniMax, OpenCode Go, Synthetic and z.ai",
-  "icon": "extension-icon.png",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
   "author": "thuggyduck",
   "contributors": [
     "alexi.build",
@@ -11,14 +13,56 @@
     "garrick_zhang",
     "EDM115"
   ],
+  "type": "module",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "format": "prettier --write .",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "undici": "^8.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.20.1",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "icon": "extension-icon.png",
+  "allowScripts": {
+    "esbuild": true
+  },
+  "commands": [
+    {
+      "name": "agent-usage",
+      "title": "Agent Usage",
+      "subtitle": "Show Agents Usage",
+      "description": "Show agents usage",
+      "mode": "view"
+    },
+    {
+      "name": "agent-usage-menubar",
+      "title": "Agent Usage Menu Bar",
+      "subtitle": "Agent Usage",
+      "description": "Show agent usage in the menu bar",
+      "mode": "menu-bar",
+      "interval": "1h"
+    }
+  ],
   "platforms": [
     "macOS",
     "Windows"
   ],
-  "categories": [
-    "Productivity"
-  ],
-  "license": "MIT",
   "preferences": [
     {
       "name": "showAmp",
@@ -206,49 +250,5 @@
       "required": false
     }
   ],
-  "commands": [
-    {
-      "name": "agent-usage",
-      "title": "Agent Usage",
-      "subtitle": "Show Agents Usage",
-      "description": "Show agents usage",
-      "mode": "view"
-    },
-    {
-      "name": "agent-usage-menubar",
-      "title": "Agent Usage Menu Bar",
-      "subtitle": "Agent Usage",
-      "description": "Show agent usage in the menu bar",
-      "mode": "menu-bar",
-      "interval": "1h"
-    }
-  ],
-  "dependencies": {
-    "@raycast/api": "^1.104.23",
-    "@raycast/utils": "^2.2.5",
-    "undici": "^8.10.0"
-  },
-  "devDependencies": {
-    "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "22.13.14",
-    "@types/react": "19.0.10",
-    "eslint": "^9.39.5",
-    "prettier": "^3.9.6",
-    "typescript": "^5.9.3"
-  },
-  "scripts": {
-    "build": "ray build",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "format": "prettier --write .",
-    "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish",
-    "test": "node --test --experimental-strip-types 'src/**/*.test.ts'",
-    "typecheck": "tsc --noEmit"
-  },
-  "type": "module",
-  "allowScripts": {
-    "esbuild": true
-  }
+  "title": "Agent Usage"
 }

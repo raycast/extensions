@@ -1,8 +1,8 @@
-import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import test from "node:test";
 
 function makeFakeShell(outputLines: string[]): { dir: string; shellPath: string } {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "zai-auth-test-"));

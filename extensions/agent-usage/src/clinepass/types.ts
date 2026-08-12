@@ -16,6 +16,7 @@ export interface ClinePassCredential {
 export interface ClinePassLimit {
   percentageRemaining: number;
   resetsAt?: string;
+  maxResetSeconds: number;
 }
 
 export interface ClinePassUsage {

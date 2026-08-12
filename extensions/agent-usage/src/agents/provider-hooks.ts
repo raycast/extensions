@@ -1,8 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import { createAccountsHook, createUsageHook } from "./hooks.ts";
-import { readOpencodeAuthToken } from "./opencode-auth.ts";
-import { loadAccounts } from "../accounts/storage.ts";
 
+import { loadAccounts } from "../accounts/storage.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
@@ -42,6 +40,8 @@ import type { SyntheticError, SyntheticUsage } from "../synthetic/types.ts";
 import { resolveZaiAuthTokens } from "../zai/auth.ts";
 import { fetchZaiUsage, ZAI_OPENCODE_KEY } from "../zai/fetcher.ts";
 import type { ZaiError, ZaiUsage } from "../zai/types.ts";
+import { createAccountsHook, createUsageHook } from "./hooks.ts";
+import { readOpencodeAuthToken } from "./opencode-auth.ts";
 
 /**
  * Provider hooks are the Raycast adapter layer: they combine Raycast-only

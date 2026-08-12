@@ -1,4 +1,5 @@
 import { List } from "@raycast/api";
+
 import { formatResetTime } from "../agents/format.ts";
 import type { Accessory } from "../agents/types.ts";
 import {

@@ -1,8 +1,8 @@
 // src/accounts/storage.test.ts
 import { register } from "node:module";
+import { dirname, join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { fileURLToPath } from "node:url";
-import { dirname, join } from "node:path";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -20,9 +20,10 @@ register(pathToFileURL(loaderPath), {
   parentURL: import.meta.url,
 });
 
+import assert from "node:assert/strict";
 // Now import test framework
 import test from "node:test";
-import assert from "node:assert/strict";
+
 import type { AccountEntry } from "./types.ts";
 
 // Replace the import before loading the module

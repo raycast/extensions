@@ -10,8 +10,7 @@ import {
 } from "@raycast/api";
 import type { Image } from "@raycast/api";
 import { useMemo } from "react";
-import type { AgentId, Accessory, AgentVisibilityPreferences } from "./agents/types.ts";
-import { getThemeIcon } from "./agents/ui.tsx";
+
 import { formatClock, latestTimestamp } from "./agents/format.ts";
 import { sortByDefaultAgentOrder } from "./agents/order.ts";
 import {
@@ -31,6 +30,8 @@ import {
   useSyntheticAccounts,
   useZaiAccounts,
 } from "./agents/provider-hooks.ts";
+import type { AgentId, Accessory, AgentVisibilityPreferences } from "./agents/types.ts";
+import { getThemeIcon } from "./agents/ui.tsx";
 import { getAmpAccessory } from "./amp/renderer.tsx";
 import { getAntigravityAccessory } from "./antigravity/renderer.tsx";
 import { getClaudeAccessory } from "./claude/renderer.tsx";
@@ -42,10 +43,10 @@ import { getDroidAccessory } from "./droid/renderer.tsx";
 import { getGeminiAccessory } from "./gemini/renderer.tsx";
 import { getGrokAccessory } from "./grok/renderer.tsx";
 import { getKimiAccessory } from "./kimi/renderer.tsx";
-import { getSyntheticAccessory } from "./synthetic/renderer.tsx";
-import { getZaiAccessory } from "./zai/renderer.tsx";
 import { getMiniMaxAccessory } from "./minimax/renderer.tsx";
 import { getOpencodegoAccessory } from "./opencode-go/renderer.tsx";
+import { getSyntheticAccessory } from "./synthetic/renderer.tsx";
+import { getZaiAccessory } from "./zai/renderer.tsx";
 
 interface MenuBarAgent {
   id: AgentId;

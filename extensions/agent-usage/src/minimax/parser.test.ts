@@ -1,5 +1,6 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
+
 import { getCodingModelRemain, getIntervalPercent, getWeeklyPercent } from "./parser.ts";
 import type { MiniMaxModelRemain } from "./types.ts";
 

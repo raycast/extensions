@@ -1,5 +1,6 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
+
 import { getInitialSelectedRowId, sortByDefaultAgentOrder } from "./order.ts";
 import type { AgentId } from "./types.ts";
 

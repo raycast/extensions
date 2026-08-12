@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Fix ClinePass usage limits windows] - 2026-08-12
+
+### Bug Fixes
+
+- Restore the 5h Limit "Resets At" field, display the full usage limit window when no value have been returned (when the window haven't been consumed yet)
+
 ## [Add support for ClinePass] - 2026-08-10
 
 ### New Features

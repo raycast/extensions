@@ -1,10 +1,11 @@
-import type { GeminiUsage, GeminiError, GeminiModelQuota } from "./types.ts";
-import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth.ts";
+import * as fs from "fs";
+import * as os from "os";
+import * as path from "path";
+
 import { formatResetTime } from "../agents/format.ts";
 import { decodeJwtPayload } from "../agents/jwt.ts";
-import * as fs from "fs";
-import * as path from "path";
-import * as os from "os";
+import { resolveGeminiAuthType, resolveGeminiOAuthClientCredentialsFromLocal } from "./auth.ts";
+import type { GeminiUsage, GeminiError, GeminiModelQuota } from "./types.ts";
 
 const SETTINGS_PATH = path.join(os.homedir(), ".gemini", "settings.json");
 const OAUTH_CREDS_PATH = path.join(os.homedir(), ".gemini", "oauth_creds.json");

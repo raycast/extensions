@@ -1,8 +1,8 @@
-import test from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import test from "node:test";
 
 function makeTempFile(content: string): { dir: string; filePath: string } {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "codex-auth-test-"));
