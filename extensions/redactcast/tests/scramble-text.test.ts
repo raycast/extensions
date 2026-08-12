@@ -41,6 +41,14 @@ describe("Draft text scrambler", () => {
     expect(words[1].toLowerCase()).toBe(words[2].toLowerCase());
   });
 
+  it("treats Unicode titlecase letters as uppercase", () => {
+    const result = scrambleText("ǅuro ǈub", { random: seededRandom(33) });
+    const letters = Array.from(result).filter((char) => /\p{L}/u.test(char));
+
+    expect(letters[0]).toMatch(/^[A-Z]$/);
+    expect(letters[4]).toMatch(/^[A-Z]$/);
+  });
+
   it("handles canonically equivalent accented words safely in either order", () => {
     ["é e\u0301", "e\u0301 é"].forEach((source, index) => {
       const words = scrambleText(source, { random: seededRandom(32 + index) }).split(" ");
