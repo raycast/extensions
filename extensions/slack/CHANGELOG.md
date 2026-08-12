@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Fix Search Emojis crash in large workspaces] - 2026-08-12
+
+- Fix a "Worker terminated due to reaching memory limit: JS heap out of memory" crash in the Search Emojis command by rendering emojis in slices with a "Show More" item instead of rendering every custom emoji at once.
+
 ## [Add expiration argument to Set Status] - 2026-08-12
 
 - The **Set Status** command now accepts an optional `expiration` argument — any number of minutes, or `today` / `week` — so a deep link or Quicklink can set a self-clearing status in one step (e.g. `"expiration":"90"` for an hour and a half).
