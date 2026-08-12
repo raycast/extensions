@@ -1,5 +1,17 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Structured MCP Server] - 2026-08-06
+
+Add Structured to the official registry, allowing AI assistants to view schedules and inbox tasks and create, update, complete, delete, and manage recurring tasks. The remote Streamable HTTP server uses Structured Cloud OAuth sign-in through an `mcp-remote` bridge with a dedicated public client and email-only scope.
+
+## [Add Tendem MCP Server] - 2026-08-06
+
+Add Tendem to the official registry: delegate tasks to vetted human experts (research, competitive analysis, fact-checking, copywriting, editing, design review, presentation polish, data cleaning and list building). Tendem's orchestrator scopes the task and quotes a transparent price, and the expert's verified results come back as markdown plus files. Remote Streamable HTTP MCP server via mcp-remote with OAuth 2.0 sign-in; an API key alternative is available for headless use.
+
+## [Add JobYap MCP Server] - 2026-08-03
+
+Add JobYap to the official registry: search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server via mcp-remote; no auth required.
+
 ## [Add Webhound MCP Server] - 2026-07-29
 
 Add Webhound to the official registry for private, budgeted reports and datasets. The remote Streamable HTTP MCP server uses OAuth so each connection authenticates to that user's own Webhound account.

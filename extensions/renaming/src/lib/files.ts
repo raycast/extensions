@@ -2,14 +2,13 @@
  * Single-file operations: info, existence checks, renaming, unique name generation.
  */
 
-import { rename, stat, access } from "fs/promises";
-import { constants } from "fs";
+import { rename, stat, lstat } from "fs/promises";
 import { basename, dirname, extname, join } from "path";
 import type { FileInfo, RenameResult } from "../types";
 import { validateFilename } from "./validation";
 import { getUserFriendlyErrorMessage } from "./errors";
 import { log } from "./logger";
-import { validatePathTraversal, isSamePath } from "./paths";
+import { validatePathTraversal, isSameEntry } from "./paths";
 
 /**
  * Get detailed file info
@@ -34,11 +33,16 @@ export async function getFileInfo(filePath: string): Promise<FileInfo> {
 }
 
 /**
- * Check if a file exists at the given path
+ * Check whether a directory entry exists at the given path.
+ *
+ * Uses `lstat` rather than `access`, for the same reason {@link isSameFile} does:
+ * rename operates on the directory entry, so a symlink occupies its path even when
+ * the target it points at is missing. `access` follows symlinks and would report a
+ * dangling symlink as absent, letting fs.rename silently destroy it.
  */
 export async function fileExists(filePath: string): Promise<boolean> {
   try {
-    await access(filePath, constants.F_OK);
+    await lstat(filePath);
     return true;
   } catch {
     return false;
@@ -86,9 +90,12 @@ export async function renameFile(oldPath: string, newName: string): Promise<Rena
     };
   }
 
-  // Check if target already exists (safety check)
-  // Use case-insensitive comparison on macOS (case-insensitive FS)
-  if (!isSamePath(oldPath, newPath) && (await fileExists(newPath))) {
+  // Check if target already exists (safety check).
+  // The guard is skipped only when the destination is the very entry being renamed:
+  // a case-only rename resolves to the source itself on a case-insensitive volume,
+  // but on a case-sensitive volume it is a distinct existing file that fs.rename
+  // would silently overwrite.
+  if ((await fileExists(newPath)) && !(await isSameEntry(oldPath, newPath))) {
     log.files.warn("Target already exists", { oldPath, newPath, newName });
     return {
       oldPath,

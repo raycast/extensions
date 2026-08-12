@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Action, ActionPanel, List, showToast, Toast, Icon, openExtensionPreferences } from "@raycast/api";
-import { useExec } from "@raycast/utils";
-import { getDatabaseInfo, buildQuery, parseTranscriptions } from "./lib/database";
+import { Action, ActionPanel, List, Icon, openExtensionPreferences } from "@raycast/api";
+import { useSQL } from "@raycast/utils";
+import { getDatabaseInfo, buildQuery, normalizeTranscriptions } from "./lib/database";
+import type { Transcription } from "./lib/types";
 import { TranscriptionItem } from "./components/TranscriptionItem";
 
 const DISPLAY_LIMIT = 100;
@@ -10,19 +11,20 @@ export default function SearchTranscriptions() {
   const [searchText, setSearchText] = useState("");
   const dbInfo = getDatabaseInfo();
 
-  const query = buildQuery(DISPLAY_LIMIT, searchText || undefined);
+  const query = buildQuery(DISPLAY_LIMIT, searchText || undefined, dbInfo.source);
+  const queryDatabasePath = dbInfo.available ? dbInfo.path : "/dev/null";
 
-  const { isLoading, data } = useExec("sqlite3", ["-json", "-readonly", dbInfo.path, query], {
+  const { isLoading, data, error, permissionView } = useSQL<Transcription>(queryDatabasePath, query, {
     execute: dbInfo.available,
-    parseOutput: ({ stdout }) => parseTranscriptions(stdout),
-    onError: (error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load transcriptions",
-        message: error.message,
-      });
+    permissionPriming: "VoiceInk stores your transcription history in a local database.",
+    failureToastOptions: {
+      title: "Failed to load transcriptions",
     },
   });
+
+  if (permissionView) {
+    return permissionView;
+  }
 
   if (!dbInfo.available) {
     return (
@@ -41,7 +43,7 @@ export default function SearchTranscriptions() {
     );
   }
 
-  const transcriptions = data || [];
+  const transcriptions = normalizeTranscriptions(data || []);
 
   return (
     <List
@@ -51,7 +53,9 @@ export default function SearchTranscriptions() {
       searchBarPlaceholder="Search transcriptions..."
       throttle
     >
-      {transcriptions.length === 0 && !isLoading ? (
+      {error ? (
+        <List.EmptyView icon={Icon.Warning} title="Unable to Read Transcriptions" description={error.message} />
+      ) : transcriptions.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={searchText ? Icon.MagnifyingGlass : Icon.Message}
           title={searchText ? "No Results" : "No Transcriptions"}

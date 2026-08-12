@@ -1,9 +1,9 @@
-import { List, Icon, Color } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { DiggerResult } from "../types";
 import { Actions, DiscoverabilityActions } from "../actions";
+import { DiggerResult } from "../types";
 import { truncateText } from "../utils/formatters";
-import { resolveUrl, getRootResourceUrl } from "../utils/urlUtils";
+import { getRootResourceUrl, resolveUrl } from "../utils/urlUtils";
 
 interface DiscoverabilityProps {
   data: DiggerResult | null;

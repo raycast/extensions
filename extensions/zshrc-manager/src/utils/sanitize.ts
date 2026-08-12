@@ -11,32 +11,6 @@ import { constants } from "node:fs";
 import { FILE_CONSTANTS } from "../constants";
 
 /**
- * Sanitizes markdown content by escaping potentially dangerous characters
- *
- * @param content The markdown content to sanitize
- * @returns Sanitized content with escaped dangerous characters
- */
-export function sanitizeMarkdown(content: string): string {
-  // Escape backticks to prevent code injection
-  return content.replace(/`/g, "\\`").replace(/\$/g, "\\$").replace(/\\/g, "\\\\");
-}
-
-/**
- * Escapes shell content for safe display
- *
- * @param content The shell content to escape
- * @returns Escaped content safe for display
- */
-export function escapeShellContent(content: string): string {
-  return content
-    .replace(/`/g, "\\`")
-    .replace(/\$/g, "\\$")
-    .replace(/\\/g, "\\\\")
-    .replace(/"/g, '\\"')
-    .replace(/'/g, "\\'");
-}
-
-/**
  * Validates file path to ensure it's safe to access
  *
  * Note: This function expects paths to be already expanded (e.g., ~ should be

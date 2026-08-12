@@ -1,19 +1,25 @@
-import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import { ErrorType, FetchError } from "../types";
+import { buildErrorReport, getErrorTitle } from "../utils/errorReport";
 
 interface ErrorDisplayProps {
   error: string;
   errorType: ErrorType | null;
   fetchErrors: FetchError[];
   onRetry: () => void;
-  hasPartialData: boolean;
+  /** The URL that failed. Included in the copied detail — an error report that
+   *  omits what was being dug is most of the way to useless. */
+  url?: string;
 }
 
 /** Get icon and color based on error type */
 function getErrorIcon(errorType: ErrorType | null): { icon: Icon; color: Color } {
   switch (errorType) {
     case "network":
-      return { icon: Icon.Wifi, color: Color.Orange };
+      // WifiDisabled (the slashed glyph), not Wifi. At empty-state size a
+      // full-strength wifi symbol reads as "connected" — the opposite of what
+      // just happened. Same call karakeep's ConnectionErrorView makes.
+      return { icon: Icon.WifiDisabled, color: Color.Orange };
     case "blocked":
       return { icon: Icon.Shield, color: Color.Red };
     case "notFound":
@@ -27,98 +33,36 @@ function getErrorIcon(errorType: ErrorType | null): { icon: Icon; color: Color }
   }
 }
 
-/** Get helpful suggestions based on error type */
-function getErrorSuggestions(errorType: ErrorType | null): string[] {
-  switch (errorType) {
-    case "network":
-      return [
-        "Check your internet connection",
-        "Verify the URL is spelled correctly",
-        "The website may be temporarily down",
-        "Try again in a few moments",
-      ];
-    case "blocked":
-      return [
-        "The site may have bot protection enabled",
-        "You may be rate limited - wait a moment",
-        "Try accessing the site in a browser first",
-        "Some sites block automated requests",
-      ];
-    case "notFound":
-      return [
-        "Double-check the URL for typos",
-        "The page may have been moved or deleted",
-        "Try the site's homepage instead",
-      ];
-    case "serverError":
-      return [
-        "The website is experiencing issues",
-        "Try again in a few minutes",
-        "Check if the site is down for everyone",
-      ];
-    case "invalid":
-      return [
-        "Make sure the URL starts with http:// or https://",
-        "Check for special characters in the URL",
-        "Try copying the URL directly from your browser",
-      ];
-    default:
-      return ["Try again", "Check the URL and try once more"];
-  }
-}
-
-/** Get error title based on type */
-function getErrorTitle(errorType: ErrorType | null): string {
-  switch (errorType) {
-    case "network":
-      return "Connection Failed";
-    case "blocked":
-      return "Access Blocked";
-    case "notFound":
-      return "Page Not Found";
-    case "serverError":
-      return "Server Error";
-    case "invalid":
-      return "Invalid URL";
-    default:
-      return "Fetch Error";
-  }
-}
-
-export function ErrorDisplay({ error, errorType, fetchErrors, onRetry, hasPartialData }: ErrorDisplayProps) {
+/**
+ * Shown in place of the results list when a dig fails outright.
+ *
+ * `List.EmptyView`, not a `List.Item`: a failure is not a RESULT. Rendering it
+ * as a row put a selectable, truncated "Connection Fa… | Unable to con…" entry
+ * in the sidebar, duplicating the detail pane beside it and implying there was a
+ * list of things to pick from. The empty state is the honest shape.
+ *
+ * Modelled on karakeep's ConnectionErrorView. The partial-failure case is
+ * different and stays a row — see PartialErrorBanner below.
+ */
+export function ErrorDisplay({ error, errorType, fetchErrors, onRetry, url }: ErrorDisplayProps) {
   const { icon, color } = getErrorIcon(errorType);
   const title = getErrorTitle(errorType);
-  const suggestions = getErrorSuggestions(errorType);
   const isRecoverable = fetchErrors.length === 0 || fetchErrors.some((e) => e.recoverable);
 
-  const detailMarkdown = `
-# ${title}
-
-${error}
-
-## Suggestions
-
-${suggestions.map((s) => `- ${s}`).join("\n")}
-
-${
-  fetchErrors.length > 0
-    ? `
-## Failed Components
-
-${fetchErrors.map((e) => `- **${e.description}**: ${e.message}`).join("\n")}
-`
-    : ""
-}
-
-${hasPartialData ? "\n---\n*Some data was retrieved successfully. Scroll down to see partial results.*" : ""}
-`;
+  // Built by the shared reporter, so this and the toast's Copy Error yield
+  // byte-identical text. EmptyView collapses blank lines and truncates after
+  // ~3, so the suggestions and the underlying cause cannot render on screen;
+  // a longer description just produces a dangling "…" that reads like a
+  // rendering bug. They live in the copied report instead.
+  // FetchError already carries `description` and `message`, so it satisfies the
+  // cause shape structurally — no mapping needed.
+  const detail = buildErrorReport({ errorType, message: error, url, causes: fetchErrors });
 
   return (
-    <List.Item
-      title={title}
-      subtitle={error}
+    <List.EmptyView
       icon={{ source: icon, tintColor: color }}
-      detail={<List.Item.Detail markdown={detailMarkdown} />}
+      title={title}
+      description={error}
       actions={
         <ActionPanel>
           {isRecoverable && (
@@ -126,13 +70,14 @@ ${hasPartialData ? "\n---\n*Some data was retrieved successfully. Scroll down to
               title="Retry"
               icon={Icon.ArrowClockwise}
               onAction={onRetry}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           )}
           <Action.CopyToClipboard
-            title="Copy Error Message"
-            content={error}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            title="Copy Error Details"
+            content={detail}
+            icon={Icon.Clipboard}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         </ActionPanel>
       }
@@ -149,6 +94,7 @@ export function PartialErrorBanner({ fetchErrors, onRetry }: PartialErrorBannerP
   if (fetchErrors.length === 0) return null;
 
   const failedCategories = fetchErrors.map((e) => e.description).join(", ");
+  const errorDetails = fetchErrors.map((e) => `${e.description}: ${e.message}`).join("\n");
 
   return (
     <List.Item
@@ -162,7 +108,12 @@ export function PartialErrorBanner({ fetchErrors, onRetry }: PartialErrorBannerP
             title="Retry All"
             icon={Icon.ArrowClockwise}
             onAction={onRetry}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+          />
+          <Action.CopyToClipboard
+            title="Copy Error Details"
+            content={errorDetails}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         </ActionPanel>
       }

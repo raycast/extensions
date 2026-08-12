@@ -32,15 +32,21 @@ interface HistoryEntry {
 }
 
 /**
- * Saves the current state to history before making a change
+ * Saves a restore point to history.
  *
- * @param description Description of the upcoming change
+ * The entry's `previousContent` is the undo target. Callers that have
+ * already mutated the file MUST pass the pre-change snapshot explicitly —
+ * reading the file after a write would record the new content and turn
+ * undo into a no-op.
+ *
+ * @param description Description of the change
+ * @param previousContent Pre-change file content; read from disk when omitted
  * @returns Promise resolving to true if history was saved successfully, false otherwise
  */
-export async function saveToHistory(description: string): Promise<boolean> {
+export async function saveToHistory(description: string, previousContent?: string): Promise<boolean> {
   log.history.debug(`Saving to history: "${description}"`);
   try {
-    const currentContent = await readZshrcFileRaw();
+    const currentContent = previousContent ?? (await readZshrcFileRaw());
     const filePath = getZshrcPath();
 
     // Get existing history

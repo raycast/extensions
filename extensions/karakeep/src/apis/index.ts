@@ -37,8 +37,10 @@ export async function fetchWithAuth<T = unknown>(path: string, options: FetchOpt
     // entirely. Log the real code and re-throw the ORIGINAL error so callers
     // can still inspect `error.cause` via isConnectionError().
     if (isConnectionError(error)) {
-      // NOT `code`: the logger's redaction treats that key as a 2FA code and
-      // masks the value to "******", which is how ECONNREFUSED went missing.
+      // `errorCode`, not `code`. raycast-logger 1.2.x masked any key named
+      // `code` as a 2FA code, which is how ECONNREFUSED went missing from the
+      // logs. 1.3.0's head-noun matching no longer does that, but the explicit
+      // name is clearer about what this holds and cannot regress.
       log.error(`${method} ${path} could not connect`, {
         errorCode: getConnectionErrorCode(error) ?? "unknown",
         detail: describeConnectionError(error, apiUrl),

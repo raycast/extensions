@@ -12,3 +12,16 @@ export async function flushPromises() {
   await Promise.resolve();
   await Promise.resolve();
 }
+
+export async function waitFor(assertion: () => void, timeoutMs = 1_000): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  for (;;) {
+    try {
+      assertion();
+      return;
+    } catch (err) {
+      if (Date.now() >= deadline) throw err;
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    }
+  }
+}

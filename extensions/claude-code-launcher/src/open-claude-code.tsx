@@ -12,34 +12,16 @@ import {
   confirmAlert,
   Keyboard,
   Alert,
-  closeMainWindow,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { PROJECT_ICON_NAMES, getIcon } from "./project-icons";
 import { getTerminalAdapter } from "./terminal-adapters";
+import { launchClaudeInTerminal } from "./launch-terminal";
+import { Project, ProjectsState, PROJECTS_STORAGE_KEY, PROJECTS_CURRENT_VERSION } from "./projects";
+import { expandTilde, getDirectoryName } from "./utils";
 import { useState, useEffect, useMemo } from "react";
 import { randomUUID } from "crypto";
-import { homedir } from "os";
-import path from "path";
 import { access, constants } from "fs/promises";
-
-const STORAGE_KEY = "claude-code-projects";
-const CURRENT_VERSION = 1;
-
-interface Project {
-  id: string;
-  path: string;
-  name?: string;
-  icon?: string;
-  addedAt: Date;
-  lastOpened?: Date;
-  openCount: number;
-}
-
-interface ProjectsState {
-  projects: Project[];
-  version: number;
-}
 
 function showSuccessToast(title: string, message?: string) {
   showToast({
@@ -83,40 +65,9 @@ function getRelativeTime(date: Date | undefined): string {
   return `${years} ${years === 1 ? "year" : "years"} ago`;
 }
 
-function expandTilde(filepath: string): string {
-  if (filepath.startsWith("~/")) {
-    return path.join(homedir(), filepath.slice(2));
-  }
-  return filepath;
-}
-
-function getDirectoryName(dirPath: string): string {
-  return path.basename(dirPath) || path.dirname(dirPath);
-}
-
 async function openInTerminal(project: Project, preferences: Preferences, onSuccess: () => void): Promise<void> {
-  const expandedPath = expandTilde(project.path);
-
   try {
-    try {
-      await access(expandedPath, constants.R_OK);
-    } catch {
-      throw new Error(`Cannot access directory: ${expandedPath}. It may have been moved or deleted.`);
-    }
-
-    const adapter = getTerminalAdapter(preferences.terminalApp);
-
-    if (!adapter) {
-      throw new Error(`Unsupported terminal: ${preferences.terminalApp}`);
-    }
-
-    const options = { ghosttyOpenBehavior: preferences.ghosttyOpenBehavior as "window" | "tab" | undefined };
-
-    if (preferences.terminalApp === "Ghostty" && options.ghosttyOpenBehavior === "tab") {
-      await closeMainWindow();
-    }
-
-    await adapter.open(expandedPath, options);
+    await launchClaudeInTerminal(project.path, preferences);
     onSuccess();
     showSuccessToast("Opened in Terminal", project.name || getDirectoryName(project.path));
   } catch (error) {
@@ -365,7 +316,7 @@ export default function Command() {
 
   const loadProjects = async () => {
     try {
-      const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
+      const stored = await LocalStorage.getItem<string>(PROJECTS_STORAGE_KEY);
       if (stored) {
         let state: ProjectsState;
         try {
@@ -376,7 +327,7 @@ export default function Command() {
             title: "Corrupted Data",
             message: "Your projects data was corrupted and has been reset.",
           });
-          await LocalStorage.removeItem(STORAGE_KEY);
+          await LocalStorage.removeItem(PROJECTS_STORAGE_KEY);
           setProjects([]);
           return;
         }
@@ -387,7 +338,7 @@ export default function Command() {
             title: "Invalid Data",
             message: "Your projects data structure was invalid and has been reset.",
           });
-          await LocalStorage.removeItem(STORAGE_KEY);
+          await LocalStorage.removeItem(PROJECTS_STORAGE_KEY);
           setProjects([]);
           return;
         }
@@ -419,9 +370,9 @@ export default function Command() {
     try {
       const state: ProjectsState = {
         projects: newProjects,
-        version: CURRENT_VERSION,
+        version: PROJECTS_CURRENT_VERSION,
       };
-      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      await LocalStorage.setItem(PROJECTS_STORAGE_KEY, JSON.stringify(state));
       setProjects(newProjects);
     } catch (error) {
       console.error("Failed to save projects:", error);

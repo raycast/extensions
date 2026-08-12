@@ -1,36 +1,10 @@
 import { confirmAlert, showHUD } from "@raycast/api";
-import { execSync } from "node:child_process";
+import { execFileSync, execSync } from "node:child_process";
 import { platform } from "node:os";
+import { getMacOSCommandsForVersion } from "./macOSCommands";
+import { runWithPrivileges, type PrivilegedCommand } from "./sudoSupport";
 
-type ShellType = string | undefined;
-
-interface CommandSet {
-  commands: Record<string, string>;
-  shell: ShellType;
-}
-
-const OS_COMMANDS = {
-  darwin: {
-    commands: {
-      dscacheutil: "/usr/bin/dscacheutil -flushcache",
-      mDNSResponder: "/usr/bin/killall -HUP mDNSResponder",
-      mdnsflushcache: "/usr/bin/discoveryutil mdnsflushcache",
-    },
-    shell: "/bin/bash",
-  },
-  win32: {
-    commands: {
-      ipconfig: "ipconfig /flushdns",
-    },
-    shell: undefined, // Uses cmd.exe by default
-  },
-} as const satisfies Record<string, CommandSet>;
-
-type SupportedPlatform = "darwin" | "win32";
-
-interface Win32Commands {
-  ipconfig: string;
-}
+const WINDOWS_COMMAND = "ipconfig /flushdns";
 
 export default async function main() {
   const osPlatform = platform();
@@ -40,88 +14,50 @@ export default async function main() {
     return;
   }
 
-  const osCommandSet = OS_COMMANDS[osPlatform as SupportedPlatform];
-
-  let command: string;
-  let shell: ShellType;
-
-  switch (osPlatform) {
-    case "darwin": {
-      const macResult = await getMacOSCommands(osCommandSet);
-      if (!macResult) return;
-
-      command = macResult.command;
-      shell = macResult.shell;
-      break;
-    }
-
-    case "win32": {
-      const { ipconfig } = osCommandSet.commands as Win32Commands;
-      command = ipconfig;
-      shell = osCommandSet.shell;
-      break;
-    }
-
-    default:
-      await showHUD("🚫 Unsupported OS");
-      return;
-  }
-
-  console.log(`🚀 Executing DNS flush command: ${command} in shell: ${shell}`);
-
   try {
-    execSync(command, { shell, stdio: "ignore" });
+    if (osPlatform === "darwin") {
+      const commands = await getMacOSCommands();
+      if (!commands) return;
+
+      const commandSummary = commands.map((command) => [command.executable, ...command.args].join(" ")).join("; ");
+      console.log(`🚀 Executing privileged DNS flush commands: ${commandSummary}`);
+      await runWithPrivileges(commands);
+    } else {
+      console.log(`🚀 Executing DNS flush command: ${WINDOWS_COMMAND}`);
+      execSync(WINDOWS_COMMAND, { stdio: "ignore" });
+    }
+
     await showHUD("✅ DNS Cache Flushed Successfully");
   } catch (error) {
     await handleExecutionError(error, osPlatform);
   }
 }
 
-async function getMacOSCommands(osCommandSet: CommandSet): Promise<{ command: string; shell: ShellType } | null> {
+async function getMacOSCommands(): Promise<readonly PrivilegedCommand[] | null> {
   try {
-    const osVersion = execSync("sw_vers -productVersion").toString().trim();
+    const osVersion = execFileSync("/usr/bin/sw_vers", ["-productVersion"]).toString().trim();
+    const commands = getMacOSCommandsForVersion(osVersion);
 
-    const [major] = osVersion.split(".").map(Number);
-
-    let runCommands: string[];
-
-    if (Number.isNaN(major)) {
-      throw new Error(`Unparsable macOS version: ${osVersion}`);
+    if (commands) {
+      return commands;
     }
 
-    // macOS 11+ (Big Sur → future)
-    if (major >= 11) {
-      runCommands = ["dscacheutil", "mDNSResponder"];
-    }
-    // macOS 10.4 - 10.15.7
-    else if (major === 10) {
-      const minor = Number(osVersion.split(".")[1]);
+    const confirmed = await confirmAlert({
+      title: `⚠️ OS Version ${osVersion} Not Tested`,
+      message: "Attempt to flush DNS cache anyway?",
+      primaryAction: { title: "Flush DNS" },
+    });
 
-      if (minor >= 10) {
-        runCommands = ["mDNSResponder"];
-      } else if (minor === 6) {
-        runCommands = ["dscacheutil"];
-      } else {
-        runCommands = ["mdnsflushcache"];
-      }
-    } else {
-      const confirmed = await confirmAlert({
-        title: `⚠️ OS Version ${osVersion} Not Tested`,
-        message: "Attempt to flush DNS cache anyway?",
-        primaryAction: { title: "Flush DNS" },
-      });
+    if (!confirmed) return null;
 
-      if (!confirmed) return null;
-      runCommands = ["dscacheutil", "mDNSResponder"];
+    const fallbackCommands = getMacOSCommandsForVersion("11");
+    if (!fallbackCommands) {
+      throw new Error("Unable to select modern macOS DNS flush commands");
     }
 
-    const commandList = runCommands.map((key) => osCommandSet.commands[key]).join("; ");
-    return {
-      command: `osascript -e 'do shell script "${commandList}" with administrator privileges'`,
-      shell: osCommandSet.shell,
-    };
-  } catch (e) {
-    console.error("❌ Error determining macOS version:", e);
+    return fallbackCommands;
+  } catch (error) {
+    console.error("❌ Error determining macOS version:", error);
     await showHUD("Failed to determine macOS version");
     return null;
   }
@@ -131,7 +67,7 @@ async function handleExecutionError(error: unknown, os: string) {
   let errorMessage = "⚠️ Error flushing DNS cache";
 
   if (typeof error === "object" && error !== null && "stderr" in error) {
-    const stderr = (error as { stderr?: Buffer }).stderr?.toString() || "";
+    const stderr = (error as { stderr?: Buffer | string }).stderr?.toString() || "";
     if (stderr) {
       console.error(".Stderr:", stderr);
       if (os === "win32" && stderr.includes("The requested operation requires elevation")) {

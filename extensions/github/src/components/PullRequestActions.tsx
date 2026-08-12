@@ -19,6 +19,7 @@ import { useMyPullRequests } from "../hooks/useMyPullRequests";
 import AddPullRequestReview from "./AddPullRequestReview";
 import CheckoutPullRequestForm from "./CheckoutPullRequestForm";
 import PullRequestCommits from "./PullRequestCommits";
+import PullRequestDiff from "./PullRequestDiff";
 import { SortAction, SortActionProps } from "./SortAction";
 
 export type PullRequest =
@@ -361,6 +362,13 @@ export default function PullRequestActions({
       />
 
       <Action.Push
+        icon={Icon.CodeBlock}
+        title="View Diff"
+        shortcut={{ modifiers: ["ctrl", "shift"], key: "d" }}
+        target={<PullRequestDiff pullRequest={pullRequest} />}
+      />
+
+      <Action.Push
         icon={Icon.Download}
         title="Checkout Pull Request"
         shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
@@ -434,7 +442,7 @@ export default function PullRequestActions({
 
           {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length === 1 && (
             <Action
-              title="Enable Auto-merge"
+              title="Enable Auto-Merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -445,7 +453,7 @@ export default function PullRequestActions({
 
           {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length > 1 && (
             <ActionPanel.Submenu
-              title="Enable Auto-merge"
+              title="Enable Auto-Merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -459,7 +467,7 @@ export default function PullRequestActions({
 
           {isOpen && pullRequest.autoMergeRequest && (
             <Action
-              title="Disable Auto-merge"
+              title="Disable Auto-Merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,

@@ -1,6 +1,7 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { readOpencodeAuthToken } from "../agents/opencode-auth";
+
+import { readOpencodeAuthToken } from "../agents/opencode-auth.ts";
 
 const execFileAsync = promisify(execFile);
 const SHELL_LOOKUP_TIMEOUT_MS = 3000;
