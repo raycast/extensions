@@ -1,6 +1,6 @@
 # Doorstopper Changelog
 
-## [Fix Menu Bar Toast] - {PR_MERGE_DATE}
+## [Fix Menu Bar Toast] - 2026-08-12
 
 - Fixed a misleading failure toast after toggling Doorstopper when the optional menu bar command is disabled.
 
