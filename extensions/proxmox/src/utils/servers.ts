@@ -7,7 +7,17 @@ import type { PveServer } from "@/types";
 /** The server configured through the extension preferences, kept for backwards compatibility */
 export const PREFERENCES_SERVER_ID = "preferences";
 
-const SERVERS_STORAGE_KEY = "pve-servers";
+/**
+ * Every server is stored under its own key, so adding, editing or removing one
+ * never rewrites the entries of the others.
+ */
+const SERVER_KEY_PREFIX = "pve-server:";
+
+/** Servers used to be stored as a single array, migrated on the first read */
+const LEGACY_SERVERS_KEY = "pve-servers";
+
+/** `addedAt` only exists to keep the list in a stable order */
+type StoredServer = PveServer & { addedAt: number };
 
 // Keeps every mounted useServers() instance in sync when one of them writes
 const changeListeners = new Set<() => void>();
@@ -18,32 +28,74 @@ function notifyServersChanged() {
   }
 }
 
-async function readStoredServers(): Promise<PveServer[]> {
-  const raw = await LocalStorage.getItem<string>(SERVERS_STORAGE_KEY);
+function storageKey(id: string): string {
+  return `${SERVER_KEY_PREFIX}${id}`;
+}
+
+async function writeStoredServer(server: StoredServer) {
+  await LocalStorage.setItem(storageKey(server.id), JSON.stringify(server));
+}
+
+async function migrateLegacyServers() {
+  const raw = await LocalStorage.getItem<string>(LEGACY_SERVERS_KEY);
   if (typeof raw !== "string" || raw === "") {
-    return [];
+    return;
   }
 
   try {
-    const servers = JSON.parse(raw);
-    return Array.isArray(servers) ? servers : [];
+    const legacyServers = JSON.parse(raw);
+    if (Array.isArray(legacyServers)) {
+      // The index keeps the order the servers were originally added in
+      await Promise.all(
+        legacyServers
+          .filter((server) => typeof server?.id === "string")
+          .map((server, index) => writeStoredServer({ ...server, addedAt: index })),
+      );
+    }
   } catch {
-    return [];
+    // Drop an unreadable legacy value instead of failing every read
   }
+
+  await LocalStorage.removeItem(LEGACY_SERVERS_KEY);
 }
 
-async function writeStoredServers(servers: PveServer[]) {
-  await LocalStorage.setItem(SERVERS_STORAGE_KEY, JSON.stringify(servers));
-  notifyServersChanged();
+async function readStoredServers(): Promise<PveServer[]> {
+  await migrateLegacyServers();
+
+  const items = await LocalStorage.allItems();
+  const storedServers: StoredServer[] = [];
+
+  for (const [key, value] of Object.entries(items)) {
+    if (!key.startsWith(SERVER_KEY_PREFIX) || typeof value !== "string") {
+      continue;
+    }
+
+    try {
+      const server = JSON.parse(value) as StoredServer;
+      if (typeof server?.id === "string") {
+        storedServers.push(server);
+      }
+    } catch {
+      // Skip a corrupted entry, the other servers still work
+    }
+  }
+
+  return storedServers
+    .sort((a, b) => (a.addedAt ?? 0) - (b.addedAt ?? 0))
+    .map(({ id, name, url, tokenId, tokenSecret }) => ({ id, name, url, tokenId, tokenSecret }));
 }
 
-// Serializes read-modify-write mutations so overlapping ones cannot lose changes
-let mutationQueue: Promise<unknown> = Promise.resolve();
+async function readStoredServer(id: string): Promise<StoredServer | undefined> {
+  const raw = await LocalStorage.getItem<string>(storageKey(id));
+  if (typeof raw !== "string" || raw === "") {
+    return undefined;
+  }
 
-function enqueueMutation<T>(mutation: () => Promise<T>): Promise<T> {
-  const result = mutationQueue.then(mutation, mutation);
-  mutationQueue = result.catch(() => undefined);
-  return result;
+  try {
+    return JSON.parse(raw) as StoredServer;
+  } catch {
+    return undefined;
+  }
 }
 
 export function isPreferencesServer(server: PveServer): boolean {
@@ -91,24 +143,19 @@ export const useServers = () => {
   }, [preferencesServer, storedServers]);
 
   const addServer = useCallback(async (server: Omit<PveServer, "id">) => {
-    await enqueueMutation(async () => {
-      const current = await readStoredServers();
-      await writeStoredServers([...current, { ...server, id: randomUUID() }]);
-    });
+    await writeStoredServer({ ...server, id: randomUUID(), addedAt: Date.now() });
+    notifyServersChanged();
   }, []);
 
   const updateServer = useCallback(async (server: PveServer) => {
-    await enqueueMutation(async () => {
-      const current = await readStoredServers();
-      await writeStoredServers(current.map((item) => (item.id === server.id ? server : item)));
-    });
+    const stored = await readStoredServer(server.id);
+    await writeStoredServer({ ...server, addedAt: stored?.addedAt ?? Date.now() });
+    notifyServersChanged();
   }, []);
 
   const removeServer = useCallback(async (server: PveServer) => {
-    await enqueueMutation(async () => {
-      const current = await readStoredServers();
-      await writeStoredServers(current.filter((item) => item.id !== server.id));
-    });
+    await LocalStorage.removeItem(storageKey(server.id));
+    notifyServersChanged();
   }, []);
 
   return {
