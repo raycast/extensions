@@ -26,15 +26,27 @@ describe("Obsidian match navigation", () => {
     expect(script).toContain("app.workspace.getActiveFile()?.path !== targetPath");
     expect(script).toContain('return "waiting"');
     expect(script).toContain('return "raycast-match-applied"');
+    expect(script).toContain('return "raycast-match-already-applied"');
     expect(script).toContain('{"line":7,"ch":3}');
     expect(script).toContain('{"line":7,"ch":9}');
+    expect(script).toContain('editor.getCursor("anchor")');
+    expect(script).toContain('editor.getCursor("head")');
+    expect(script).toContain("editor.focus()");
     expect(script).toContain("editor.setSelection(from, to)");
     expect(script).toContain("editor.scrollIntoView({ from, to }, true)");
   });
 
   it("retries activation and reapplies the match while Obsidian settles", async () => {
     vi.useFakeTimers();
-    const outputs = ["", "waiting", "raycast-match-applied", "raycast-match-applied", "raycast-match-applied"];
+    const outputs = [
+      "",
+      "waiting",
+      "raycast-layout-ready",
+      "",
+      "waiting",
+      "raycast-match-applied",
+      "raycast-match-already-applied",
+    ];
     vi.mocked(execFile).mockImplementation((_file, _args, _options, callback) => {
       if (callback) callback(null, outputs.shift() ?? "", "");
       return undefined as never;
@@ -48,7 +60,8 @@ describe("Obsidian match navigation", () => {
     await vi.runAllTimersAsync();
     await opening;
 
-    expect(execFile).toHaveBeenCalledTimes(5);
+    expect(execFile).toHaveBeenCalledTimes(7);
     expect(vi.mocked(execFile).mock.calls[0]?.[1]).toEqual(["vault=vault", "open", "path=folder/note.md"]);
+    expect(vi.mocked(execFile).mock.calls[3]?.[1]).toEqual(["vault=vault", "open", "path=folder/note.md"]);
   });
 });

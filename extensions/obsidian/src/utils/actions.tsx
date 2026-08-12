@@ -9,6 +9,7 @@ import {
   Icon,
   Keyboard,
   List,
+  open,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -319,6 +320,7 @@ export function OpenPathInObsidianAction(props: { path: string }) {
 
 export function OpenMatchInObsidianAction(props: { note: Note; vault: ObsidianVault; match: ContentMatch }) {
   const { note, vault, match } = props;
+  const target = Obsidian.getTarget({ type: ObsidianTargetType.OpenPath, path: note.path });
 
   return (
     <Action
@@ -326,7 +328,8 @@ export function OpenMatchInObsidianAction(props: { note: Note; vault: ObsidianVa
       icon={ObsidianIcon}
       onAction={async () => {
         try {
-          await Promise.all([openObsidianAtMatch(note, vault, match), closeMainWindow()]);
+          const openMatch = open(target).then(() => openObsidianAtMatch(note, vault, match));
+          await Promise.all([openMatch, closeMainWindow()]);
         } catch (error) {
           await showToast({
             title: "Could not open the matching line",
