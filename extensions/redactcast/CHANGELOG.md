@@ -1,5 +1,12 @@
 # RedactCast Changelog
 
+## [Layout-Matched Draft Copy] - {PR_MERGE_DATE}
+
+- Add a non-reversible draft-copy scrambler for selected or clipboard text
+- Preserve layout structure, casing, repeated words, numbers, and approximate word width
+- Label the command explicitly as draft greeking, not reversible PII redaction
+- Keep supported rich clipboard content intact when replacing a selection
+
 ## [Initial Release] - 2026-07-15
 
 - Initial release of RedactCast
