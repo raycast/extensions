@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import type { PveServer, PveServerResult } from "@/types";
 import { pveFetch } from "@/api";
@@ -19,26 +19,29 @@ type MultiPveFetchOptions = {
 export const useMultiPveFetch = <T>(url: string, options?: MultiPveFetchOptions) => {
   const { timerInterval = 1000, execute = true } = options ?? {};
   const { servers, isLoading: isLoadingServers } = useServers();
-
-  // Serialized so the promise re-executes exactly when the server list changes
-  const serversKey = JSON.stringify(servers);
+  const abortable = useRef<AbortController>(null);
 
   const result = usePromise(
-    async (key: string): Promise<PveServerResult<T>[]> => {
-      const keyServers = JSON.parse(key) as PveServer[];
-      return Promise.all(
-        keyServers.map(async (server) => {
+    async (servers: PveServer[]): Promise<PveServerResult<T>[]> =>
+      Promise.all(
+        servers.map(async (server) => {
           try {
-            const response = await pveFetch<T>(server, url);
+            const response = await pveFetch<T>(server, url, { signal: abortable.current?.signal });
             return { server, data: response.data };
           } catch (error) {
+            // Let an aborted request reject the whole call, usePromise ignores it.
+            // Keeping it would show a stale request as a connection error.
+            if (error instanceof Error && error.name === "AbortError") {
+              throw error;
+            }
+
             return { server, error: describeFetchError(error) };
           }
         }),
-      );
-    },
-    [serversKey],
+      ),
+    [servers],
     {
+      abortable,
       execute: execute && !isLoadingServers,
     },
   );
