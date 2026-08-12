@@ -1,6 +1,6 @@
 # SSH Image Drop Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-12
 
 - Send files, folders, and clipboard images to servers over SSH — file sends use a one-screen picker form, pre-filled from your Finder selection on macOS
 - Pull a remote file (path taken from the clipboard) back into Finder
