@@ -101,6 +101,9 @@ export const DownloadListItem = ({ download, apiKey, videoPlayers, onRefresh, on
                   }
                 />
               ))}
+            {isDownloadReady && (
+              <Action title="Copy Download Link" icon={Icon.Link} onAction={() => copyDownloadLink(apiKey, download)} />
+            )}
             {hasMultipleFiles && (
               <Action.Push
                 title="View Files"
@@ -109,9 +112,6 @@ export const DownloadListItem = ({ download, apiKey, videoPlayers, onRefresh, on
                 target={<DownloadFiles download={download} apiKey={apiKey} onOpen={onOpen} />}
                 onPush={() => onOpen?.({ downloadId: download.id, type: download.type })}
               />
-            )}
-            {isDownloadReady && (
-              <Action title="Copy Download Link" icon={Icon.Link} onAction={() => copyDownloadLink(apiKey, download)} />
             )}
           </ActionPanel.Section>
           {isSingleVideoFile && players.length > 1 && (

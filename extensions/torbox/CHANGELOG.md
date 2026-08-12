@@ -3,7 +3,6 @@
 ## [Recent downloads and improved file navigation] - {PR_MERGE_DATE}
 
 - Add a Recent section for recently opened downloads, folders, and video files
-- Make View Files the default action for multi-file downloads
 
 ## [Stream video files in external players] - 2026-03-14
 
