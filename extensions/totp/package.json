@@ -11,7 +11,7 @@
     "dev": "ray develop",
     "build": "ray build",
     "lint": "ray lint",
-    "test": "node --experimental-strip-types --experimental-specifier-resolution=node src/totp.test.ts",
+    "test": "node --experimental-strip-types src/totp.test.ts",
     "publish": "npx @raycast/api@latest publish"
   },
   "dependencies": {
