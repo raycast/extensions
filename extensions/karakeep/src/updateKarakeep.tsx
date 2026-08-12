@@ -4,15 +4,15 @@ import { logger } from "@chrismessina/raycast-logger";
 import {
   composePullAndUp,
   DockerContainer,
-  findContainerByPort,
+  findContainersByPort,
   findDockerPath,
   isDockerRunning,
   imagesChanged,
   readProjectImageIds,
   waitForApi,
 } from "./utils/docker";
-import { classifyComposeFailure, summarizeComposeFailure } from "./utils/composeErrors";
-import { isApiReachable, isLocalHost } from "./utils/connection";
+import { classifyComposeFailure, composeCommandLine, summarizeComposeFailure } from "./utils/compose";
+import { isApiReachable, isLocalHost, respondsAsKarakeep } from "./utils/connection";
 import { useConfig } from "./hooks/useConfig";
 import { useTranslation } from "./hooks/useTranslation";
 import { toErrorMessage } from "./utils/toast";
@@ -68,13 +68,41 @@ export default function UpdateKarakeep() {
       }
 
       const port = url.port || (url.protocol === "https:" ? "443" : "80");
-      const found = await findContainerByPort(port);
-      if (!found) {
+      const candidates = await findContainersByPort(port);
+      if (candidates.length === 0) {
         log.info("Update unavailable: no container publishes this port", { port });
         setReason(t("update.unavailable.noContainer", { port }));
         setPhase("unavailable");
         return;
       }
+
+      // Recreating a Compose project is destructive, so a guess is not good
+      // enough. Two containers can declare the same host port — a stopped
+      // leftover and someone else's running app — and picking either one on a
+      // port match alone can update a project the user never asked about.
+      const projects = [...new Set(candidates.map((c) => c.project ?? c.name))];
+      if (projects.length > 1) {
+        log.info("Update unavailable: several projects publish this port", { port, projects });
+        setReason(t("update.unavailable.ambiguous", { port, projects: projects.join(", ") }));
+        setPhase("unavailable");
+        return;
+      }
+
+      const found = candidates.find((c) => c.running) ?? candidates[0];
+
+      // If something is actively serving this port, prove it is Karakeep before
+      // offering to recreate it. A stranger's app holding the port is exactly
+      // the case a port match cannot distinguish.
+      if (found.running && !(await respondsAsKarakeep())) {
+        log.info("Update unavailable: the server on this port did not identify as Karakeep", {
+          port,
+          container: found.name,
+        });
+        setReason(t("update.unavailable.notKarakeep", { apiUrl }));
+        setPhase("unavailable");
+        return;
+      }
+
       if (!found.configFiles?.length) {
         log.info("Update unavailable: container was not created by Compose", { name: found.name });
         setReason(t("update.unavailable.notCompose", { name: found.name }));
@@ -264,10 +292,7 @@ export default function UpdateKarakeep() {
             <Action title={t("update.actions.recheck")} icon={Icon.ArrowClockwise} onAction={detect} />
           )}
           {container?.configFiles?.[0] && (
-            <Action.CopyToClipboard
-              title={t("update.actions.copyCommand")}
-              content={`docker compose -f ${container.configFiles[0]} up --pull always -d`}
-            />
+            <Action.CopyToClipboard title={t("update.actions.copyCommand")} content={composeCommandLine(container)} />
           )}
         </ActionPanel>
       }

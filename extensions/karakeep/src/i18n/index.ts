@@ -242,6 +242,10 @@ export const translations = {
         noContainer: "No Docker container publishes port {{port}}, so there's nothing here to update.",
         notCompose:
           "The container `{{name}}` wasn't created by Docker Compose, so there's no compose file to pull against.",
+        ambiguous:
+          "More than one Docker project publishes port {{port}} ({{projects}}), so there's no safe way to tell which one is Karakeep. Updating the wrong one would recreate an unrelated app.",
+        notKarakeep:
+          "Something is answering at `{{apiUrl}}`, but it didn't identify as Karakeep. Check your API key, or another app may be using this port — either way, updating would recreate whatever is actually there.",
       },
       toast: {
         updating: "Pulling latest images...",
@@ -879,6 +883,10 @@ export const translations = {
         daemonDown: "已安装 Docker，但守护进程无响应。请启动 Docker Desktop 后重试。",
         noContainer: "没有 Docker 容器发布端口 {{port}}，因此没有可更新的内容。",
         notCompose: "容器 `{{name}}` 并非由 Docker Compose 创建，因此没有可用的 compose 文件。",
+        ambiguous:
+          "有多个 Docker 项目发布了端口 {{port}}（{{projects}}），无法安全判断哪个是 Karakeep。更新错误的项目会重建无关的应用。",
+        notKarakeep:
+          "`{{apiUrl}}` 有响应，但未识别为 Karakeep。请检查 API 密钥，或可能有其他应用占用此端口——无论哪种情况，更新都会重建实际运行的内容。",
       },
       toast: {
         updating: "正在拉取最新镜像...",

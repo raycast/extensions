@@ -12,6 +12,7 @@ import { promisify } from "util";
 import { existsSync } from "fs";
 import { logger } from "@chrismessina/raycast-logger";
 import { isApiReachable } from "./connection";
+import { composeArgs } from "./compose";
 
 const execFileAsync = promisify(execFile);
 const log = logger.child("[Docker]");
@@ -41,6 +42,9 @@ const FIELD_SEP = "\u001f";
 /** Ceiling on the buffered compose transcript. Only its tail is ever read. */
 const MAX_TRANSCRIPT_CHARS = 100_000;
 
+/** Ceiling on a single un-terminated line held back waiting for its newline. */
+const MAX_PENDING_CHARS = 8_000;
+
 export interface DockerContainer {
   name: string;
   status: string;
@@ -52,6 +56,9 @@ export interface DockerContainer {
   /** Compose file(s) this project was created from, needed to run compose
    * against it from outside its directory. */
   configFiles?: string[];
+  /** The directory Compose treated as the project root. Relative paths inside
+   * the compose file (`env_file: - .env`) resolve against THIS, not the cwd. */
+  workingDir?: string;
 }
 
 let cachedDockerPath: string | null | undefined;
@@ -92,10 +99,10 @@ export async function isDockerRunning(): Promise<boolean> {
  * care about. Inspecting the declared `HostConfig.PortBindings` is what works
  * when the container is down.
  */
-export async function findContainerByPort(port: string): Promise<DockerContainer | undefined> {
+export async function findContainersByPort(port: string): Promise<DockerContainer[]> {
   try {
     const ids = await docker(["ps", "-aq"]);
-    if (!ids) return undefined;
+    if (!ids) return [];
 
     const format = [
       "{{.Name}}",
@@ -105,13 +112,14 @@ export async function findContainerByPort(port: string): Promise<DockerContainer
       "{{range $p, $b := .HostConfig.PortBindings}}{{range $b}}{{.HostPort}},{{end}}{{end}}",
       "{{.Config.Image}}",
       '{{index .Config.Labels "com.docker.compose.project.config_files"}}',
+      '{{index .Config.Labels "com.docker.compose.project.working_dir"}}',
     ].join(FIELD_SEP);
 
     const output = await docker(["inspect", ...ids.split("\n"), "--format", format]);
 
     const matches: DockerContainer[] = [];
     for (const line of output.split("\n")) {
-      const [name, status, project, service, ports, image, configFiles] = line.split(FIELD_SEP);
+      const [name, status, project, service, ports, image, configFiles, workingDir] = line.split(FIELD_SEP);
       if (!ports) continue;
       if (!ports.split(",").filter(Boolean).includes(port)) continue;
 
@@ -127,32 +135,37 @@ export async function findContainerByPort(port: string): Promise<DockerContainer
         // containing a comma is not representable here — Docker's limitation,
         // not ours.
         configFiles: configFiles ? configFiles.split(",").filter(Boolean) : undefined,
+        workingDir: workingDir || undefined,
       });
     }
 
-    if (matches.length === 0) return undefined;
-
-    // Several containers can DECLARE the same host port while only one holds
-    // it — a stopped leftover from an unrelated project matches the filter just
-    // as well as the live instance. The running one is the one actually serving
-    // the API we were asked about, so it wins; taking the first match risked
-    // pointing recovery and updates at someone else's Compose project.
-    const running = matches.filter((match) => match.running);
-    const chosen = running[0] ?? matches[0];
-
     if (matches.length > 1) {
-      log.info("Several containers declare this port; choosing the running one", {
+      log.info("Several containers declare this port", {
         port,
-        chosen: chosen.name,
         candidates: matches.map((m) => ({ name: m.name, project: m.project, running: m.running })),
       });
     }
 
-    return chosen;
+    return matches;
   } catch (error) {
     log.log("Container lookup failed", { port, error: String(error) });
   }
-  return undefined;
+  return [];
+}
+
+/**
+ * The single container to act on for a NON-destructive caller (offline
+ * recovery). A running candidate wins because it is the one actually holding
+ * the port; a stopped leftover from an unrelated project declares it just as
+ * well.
+ *
+ * Destructive callers must NOT use this — recreating a Compose project is not
+ * something to do on a best guess. Use findContainersByPort and refuse when the
+ * answer is ambiguous.
+ */
+export async function findContainerByPort(port: string): Promise<DockerContainer | undefined> {
+  const matches = await findContainersByPort(port);
+  return matches.find((match) => match.running) ?? matches[0];
 }
 
 /**
@@ -271,7 +284,7 @@ export function composePullAndUp(
     return Promise.reject(new Error("This container was not created by Docker Compose"));
   }
 
-  const args = ["compose", ...container.configFiles.flatMap((file) => ["-f", file]), "up", "--pull", "always", "-d"];
+  const args = composeArgs(container);
   log.info("Running docker compose", { project: container.project, configFiles: container.configFiles, args });
 
   return new Promise((resolve, reject) => {
@@ -300,6 +313,12 @@ export function composePullAndUp(
       pending[stream] += text;
       const lines = pending[stream].split("\n");
       pending[stream] = lines.pop() ?? "";
+      // A stream that never emits a newline would otherwise grow this forever;
+      // the transcript cap above does not cover the pending tail.
+      if (pending[stream].length > MAX_PENDING_CHARS) {
+        onOutput([pending[stream].slice(0, MAX_PENDING_CHARS)]);
+        pending[stream] = "";
+      }
       const complete = lines.map((line) => line.trimEnd()).filter(Boolean);
       if (complete.length) onOutput(complete);
     };
