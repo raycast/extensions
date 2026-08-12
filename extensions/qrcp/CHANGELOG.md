@@ -1,6 +1,6 @@
 # qrcp Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-08-12
 
 - Use outbound socket to detect active local IPv4 address
 - Bump all dependencies to the latest
