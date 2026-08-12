@@ -6,7 +6,7 @@
 - It targets both macOS and Windows. Guard platform-specific APIs and avoid assuming POSIX paths or shells.
 - Provider payloads differ substantially. Keep provider-specific response types and parsing logic strict.
 - Use Raycast Preferences for credentials and Raycast-native APIs for UI, cache, and persistence.
-- Apply the `raycast-extension` skill for Raycast UI, Preferences, command architecture, publishing, or cross-platform work.
+- Apply the `raycast-extension` skill when a task requires Raycast-specific APIs or conventions, including UI, Preferences, command architecture, publishing, or platform compatibility.
 
 Skills are locked in `skills-lock.json` and synchronized with:
 

@@ -1,6 +1,6 @@
 /* Copyright (c) 2022~present by tisfeng, maxchang3, All Rights Reserved. */
 
-import { getSelectedText, Icon, List } from "@raycast/api";
+import { getSelectedText, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 
 import { ListActionPanel } from "@/components/ui/ActionPanel";
@@ -9,8 +9,9 @@ import { getWordAccessories } from "@/components/ui/WordAccessories";
 import { myPreferences } from "@/consts";
 import { config } from "@/core/config";
 import type { LanguageItem } from "@/core/language/types";
-import { useDebouncedQuery, useInstalledEudic, useQueryEngine, useReleasePrompt } from "@/hooks";
-import type { QueryInput } from "@/types/query";
+import { useDebouncedQuery, useFavoriteWords, useInstalledEudic, useQueryEngine, useReleasePrompt } from "@/hooks";
+import { buildFavoriteWord } from "@/types/favorite";
+import type { QueryInput, QueryWordInfo } from "@/types/query";
 import { logError, logTrace } from "@/utils/logger";
 
 interface SearchWordProps {
@@ -23,6 +24,7 @@ export default function SearchWord({ initialQueryText, fallbackText }: SearchWor
 
   const { isShowingReleasePrompt, hideReleasePrompt } = useReleasePrompt();
   const { isInstalledEudic } = useInstalledEudic();
+  const { has, toggle } = useFavoriteWords();
 
   const {
     displaySections,
@@ -37,6 +39,27 @@ export default function SearchWord({ initialQueryText, fallbackText }: SearchWor
   } = useQueryEngine(config.preferredLanguage1, config.preferredLanguage2);
 
   const debouncedQuery = useDebouncedQuery(queryText);
+
+  // Favorites are per-query (one word), not per-item: queryWordInfo is identical
+  // across every section/item of a single lookup, so the first item is representative.
+  const queryWordInfo: QueryWordInfo | undefined = displaySections[0]?.items[0]?.queryWordInfo;
+  const isFavorite = !!queryWordInfo && has(queryWordInfo);
+  // Snapshot only complete results: toggling mid-load would store an incomplete
+  // (translation-less, partial dictionary) snapshot that can't be refreshed offline.
+  const onToggleFavorite = () => {
+    if (!queryWordInfo) return;
+
+    if (isLoading && !isFavorite) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Error adding favorite",
+        message: "Add this word to favorites after all results load.",
+      });
+      return;
+    }
+
+    toggle(buildFavoriteWord(queryWordInfo, displaySections));
+  };
 
   /**
    * Use to display input text.
@@ -181,6 +204,8 @@ export default function SearchWord({ initialQueryText, fallbackText }: SearchWor
                       isShowingReleasePrompt={isShowingReleasePrompt}
                       onHideReleasePrompt={hideReleasePrompt}
                       isInstalledEudic={isInstalledEudic}
+                      isFavorite={isFavorite}
+                      onToggleFavorite={onToggleFavorite}
                       onLanguageUpdate={updateSelectedTargetLanguageItem}
                     />
                   }
