@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Action, ActionPanel, Icon, List, LaunchProps } from "@raycast/api";
 import { randomUUID } from "crypto";
 import { useFetchStoredReminders } from "./hooks/useFetchStoredReminders";
@@ -21,6 +21,7 @@ export default function Command(props: LaunchProps<{ arguments: IndexArguments }
   const [searchText, setSearchText] = useState(props.arguments.reminder ?? "");
   const [reminders, setReminders] = useState<Reminder[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const hasAutoSubmittedRef = useRef(false);
 
   useFetchStoredReminders(setReminders, setIsLoading);
 
@@ -44,7 +45,8 @@ export default function Command(props: LaunchProps<{ arguments: IndexArguments }
   };
 
   useEffect(() => {
-    if (!isLoading && props.arguments.reminder) {
+    if (!isLoading && props.arguments.reminder && !hasAutoSubmittedRef.current) {
+      hasAutoSubmittedRef.current = true;
       void onSetReminderAction(props.arguments.reminder);
     }
   }, [isLoading]);

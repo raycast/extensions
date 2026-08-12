@@ -116,8 +116,7 @@
     "@raycast/api": "^1.73.3",
     "@raycast/utils": "^1.15.0",
     "chrono-node": "^2.6.3",
-    "date-fns": "^3.6.0",
-    "natural": "^6.2.0"
+    "date-fns": "^3.6.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",
