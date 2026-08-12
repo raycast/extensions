@@ -1,64 +1,96 @@
 import { Action, ActionPanel, Clipboard, Form, Keyboard, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { transformJson } from "./minify";
+import { isValidJson, transformJson } from "./minify";
+
+function getErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
+async function copyResult(result: string, successTitle: string): Promise<void> {
+  try {
+    await Clipboard.copy(result);
+    await showToast({ style: Toast.Style.Success, title: successTitle });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Couldn't copy result",
+      message: getErrorMessage(error),
+    });
+  }
+}
+
+function focusTextArea(textArea: Form.TextArea | null): void {
+  textArea?.focus();
+}
 
 export default function Command() {
   const [json, setJson] = useState("");
+  const [jsonError, setJsonError] = useState<string>();
   const [pretty, setPretty] = useState(false);
+  const [prefilledFromClipboard, setPrefilledFromClipboard] = useState(false);
   const [result, setResult] = useState("");
   const userEdited = useRef(false);
+  const jsonTextArea = useRef<Form.TextArea | null>(null);
+
+  const actionTitle = pretty ? "Pretty Print" : "Minify";
 
   useEffect(() => {
-    Clipboard.readText().then((text) => {
-      if (userEdited.current || !text?.trim()) {
-        return;
-      }
-      try {
-        JSON.parse(text);
-        setJson(text);
-      } catch {
-        return;
-      }
-    });
+    let cancelled = false;
+
+    Clipboard.readText()
+      .then((text) => {
+        if (!cancelled && !userEdited.current && text?.trim() && isValidJson(text)) {
+          setJson(text);
+          setPrefilledFromClipboard(true);
+        }
+      })
+      .catch(() => {
+        // Clipboard prefill is optional; leave the input empty if reading fails.
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleSubmit = async (values: { json: string }) => {
+    let minified: string;
+
     try {
-      const minified = transformJson(values.json, pretty);
-      setResult(minified);
-      await Clipboard.copy(minified);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Minified JSON copied to clipboard",
-      });
+      minified = transformJson(values.json, pretty);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid JSON",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      setJsonError(getErrorMessage(error));
+      jsonTextArea.current?.focus();
+      return;
     }
+
+    setJsonError(undefined);
+    setResult(minified);
+    await copyResult(minified, `${pretty ? "Pretty-printed" : "Minified"} JSON copied to clipboard`);
+  };
+
+  const clearInput = () => {
+    userEdited.current = true;
+    setJson("");
+    setJsonError(undefined);
+    setPrefilledFromClipboard(false);
+    setResult("");
+    jsonTextArea.current?.focus();
   };
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Minify" onSubmit={handleSubmit} />
-          <Action
-            title="Copy Result"
-            shortcut={Keyboard.Shortcut.Common.Copy}
-            onAction={async () => {
-              if (!result) {
-                return;
-              }
-              await Clipboard.copy(result);
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Copied to clipboard",
-              });
-            }}
-          />
+          <Action.SubmitForm title={actionTitle} onSubmit={handleSubmit} />
+          {result ? (
+            <Action
+              title="Copy Result"
+              shortcut={Keyboard.Shortcut.Common.Copy}
+              onAction={() => copyResult(result, "Copied to clipboard")}
+            />
+          ) : null}
+          {json ? <Action title="Clear Input" onAction={clearInput} /> : null}
         </ActionPanel>
       }
     >
@@ -67,8 +99,14 @@ export default function Command() {
         title="JSON"
         placeholder="Paste your JSON here"
         value={json}
+        error={jsonError}
+        info={prefilledFromClipboard ? "Prefilled from clipboard" : undefined}
+        ref={jsonTextArea}
         onChange={(value) => {
+          userEdited.current = true;
           setJson(value);
+          setJsonError(undefined);
+          setPrefilledFromClipboard(false);
           setResult("");
         }}
       />
@@ -82,17 +120,7 @@ export default function Command() {
         }}
       />
       {result ? (
-        <Form.TextArea
-          id="result"
-          title="Result"
-          value={result}
-          onChange={() => {}}
-          ref={(el) => {
-            if (el) {
-              el.focus();
-            }
-          }}
-        />
+        <Form.TextArea id="result" title="Result" value={result} onChange={() => {}} ref={focusTextArea} />
       ) : null}
     </Form>
   );

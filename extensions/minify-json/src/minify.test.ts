@@ -1,5 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { transformJson } from "./minify";
+import { isValidJson, transformJson } from "./minify";
+
+describe("isValidJson", () => {
+  it("accepts valid JSON values", () => {
+    expect(isValidJson('{"a":1}')).toBe(true);
+    expect(isValidJson("null")).toBe(true);
+    expect(isValidJson('"text"')).toBe(true);
+  });
+
+  it("rejects invalid or empty input", () => {
+    expect(isValidJson("{")).toBe(false);
+    expect(isValidJson("not json")).toBe(false);
+    expect(isValidJson("")).toBe(false);
+  });
+});
 
 describe("transformJson", () => {
   it("minifies an object onto a single line", () => {
