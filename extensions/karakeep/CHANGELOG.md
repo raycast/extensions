@@ -1,6 +1,6 @@
 # Karakeep Changelog
 
-## [2.4.2] - {PR_MERGE_DATE}
+## [2.4.2] - 2026-08-12
 
 - Added an "Add to List" action to the Bookmarks and Bookmark Detail views, as a submenu you can filter by typing (⌘⇧L)
 - The list icon field takes any single emoji again, and ⌘I opens a searchable grid of all 1,870 emoji. Keycap emoji (1️⃣, #️⃣, *️⃣) are now accepted — the validator was rejecting them
