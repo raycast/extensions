@@ -14,6 +14,33 @@ import { NoteActions, OpenNoteActions } from "../../../utils/actions";
 import { useNoteContent } from "../../../utils/hooks";
 import { useState } from "react";
 import { Note, ObsidianVault, ObsidianUtils } from "@/obsidian";
+import { ContentMatch, NoteSearchResult } from "@/api/search/content-match.service";
+import { normalizeRelativePath } from "@/utils/utils";
+
+function escapeMarkdown(text: string): string {
+  return text.replace(/([\\`*_[\]{}()<>#+.!|-])/g, "\\$1");
+}
+
+function highlightedLine(text: string, line: number, match: ContentMatch): string {
+  if (line < match.line || line > match.endLine) return escapeMarkdown(text);
+
+  const start = line === match.line ? match.column - 1 : 0;
+  const end = line === match.endLine ? match.endColumn - 1 : text.length;
+  return `${escapeMarkdown(text.slice(0, start))}**${escapeMarkdown(text.slice(start, end))}**${escapeMarkdown(
+    text.slice(end)
+  )}`;
+}
+
+function matchPreview(note: Note, vault: ObsidianVault, match: ContentMatch): string {
+  const relativePath = normalizeRelativePath(note.path, vault.path);
+  const context = match.context
+    .map((item) => `> \`${item.line}\` ${highlightedLine(item.text, item.line, match) || " "}`)
+    .join("\n>\n");
+
+  return `# ${escapeMarkdown(note.title)}\n\n${escapeMarkdown(relativePath)}\n\n**Line ${match.line}, Column ${
+    match.column
+  }**\n\n---\n\n${context}`;
+}
 
 interface NoteListItemMetadataProps {
   content: string;
@@ -48,18 +75,18 @@ function NoteListItemMetadata({ content, note, vault }: NoteListItemMetadataProp
 }
 
 export function NoteListItem(props: {
-  note: Note;
+  result: NoteSearchResult;
   vault: ObsidianVault;
-  key: string;
   pref: SearchNotePreferences;
   selectedItemId: string | null;
   onNoteUpdated?: (notePath: string, updates: Partial<Note>) => void;
   onDelete?: (note: Note, vault: ObsidianVault) => void;
 }) {
-  const { note, vault, pref, onNoteUpdated, onDelete } = props;
+  const { result, vault, pref, onNoteUpdated, onDelete } = props;
+  const { note, match } = result;
 
   const [isBookmarked, setIsBookmarked] = useState(note.bookmarked);
-  const isSelected = props.selectedItemId === note.path;
+  const isSelected = props.selectedItemId === result.id;
   const { noteContent, isLoading } = useNoteContent(note, { enabled: isSelected });
 
   const noteHasBeenMoved = !fs.existsSync(note.path);
@@ -75,8 +102,10 @@ export function NoteListItem(props: {
   return (
     <List.Item
       title={updatedNote.title}
-      id={updatedNote.path}
+      subtitle={match?.context.find((item) => item.line === match.line)?.text.trim()}
+      id={result.id}
       accessories={[
+        ...(match ? [{ text: `L${match.line}:${match.column}` }] : []),
         {
           icon: isBookmarked
             ? {
@@ -86,22 +115,26 @@ export function NoteListItem(props: {
         },
       ]}
       detail={
-        noteContent && (
-          <List.Item.Detail
-            isLoading={isLoading}
-            markdown={ObsidianUtils.renderCallouts(filterContent(noteContent))}
-            metadata={
-              noteContent && pref.showMetadata ? (
-                <NoteListItemMetadata note={note} content={noteContent} vault={vault} />
-              ) : null
-            }
-          />
-        )
+        <List.Item.Detail
+          isLoading={isLoading}
+          markdown={
+            match
+              ? matchPreview(note, vault, match)
+              : noteContent
+              ? ObsidianUtils.renderCallouts(filterContent(noteContent))
+              : ""
+          }
+          metadata={
+            noteContent && pref.showMetadata ? (
+              <NoteListItemMetadata note={note} content={noteContent} vault={vault} />
+            ) : null
+          }
+        />
       }
       actions={
         noteContent && (
           <ActionPanel>
-            <OpenNoteActions note={{ content: noteContent, ...updatedNote }} vault={vault} />
+            <OpenNoteActions note={{ content: noteContent, ...updatedNote }} vault={vault} match={match} />
             <NoteActions
               note={{ content: noteContent, ...updatedNote }}
               vault={vault}

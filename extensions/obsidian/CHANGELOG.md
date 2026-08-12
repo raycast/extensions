@@ -1,5 +1,11 @@
 # Obsidian Changelog
 
+## [Exact Content Match Navigation] - {PR_MERGE_DATE}
+
+- Show each exact content occurrence as a separate result with highlighted context and line and column information
+- Open Obsidian at the selected occurrence using the official Obsidian CLI
+- Exclude fuzzy-only candidates without a literal title, path, or content match
+
 ## [Fix Delete Note Shortcut] - 2026-07-18
 
 - Update the Delete Note action to use the common `Keyboard.Shortcut.Common.Remove` shortcut
