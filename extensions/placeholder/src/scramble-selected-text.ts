@@ -1,5 +1,5 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD } from "@raycast/api";
-import { getRestorableClipboardContent } from "./clipboard-safety";
+import { getRestorableClipboardContent, restoreClipboardWithRetry } from "./clipboard-safety";
 import { scrambleText } from "./scramble-text";
 
 class NoTextError extends Error {
@@ -27,6 +27,13 @@ class ClipboardProtectionError extends Error {
   constructor() {
     super("Clipboard content cannot be restored safely");
     Object.setPrototypeOf(this, ClipboardProtectionError.prototype);
+  }
+}
+
+class ClipboardRestoreError extends Error {
+  constructor(cause: unknown) {
+    super("Clipboard content could not be restored", { cause });
+    Object.setPrototypeOf(this, ClipboardRestoreError.prototype);
   }
 }
 
@@ -70,11 +77,22 @@ async function pasteWithoutChangingClipboard(text: string): Promise<void> {
   const restorableClipboard = getRestorableClipboardContent(previousClipboard);
   if (restorableClipboard === null) throw new ClipboardProtectionError();
 
+  let pasteFailed = false;
+  let pasteError: unknown;
   try {
     await Clipboard.paste(text);
-  } finally {
-    await Clipboard.copy(restorableClipboard);
+  } catch (error) {
+    pasteFailed = true;
+    pasteError = error;
   }
+
+  try {
+    await restoreClipboardWithRetry(restorableClipboard, (content) => Clipboard.copy(content));
+  } catch (error) {
+    throw new ClipboardRestoreError(error);
+  }
+
+  if (pasteFailed) throw pasteError;
 }
 
 export default async function Command(): Promise<void> {
@@ -100,6 +118,12 @@ export default async function Command(): Promise<void> {
   } catch (error) {
     if (error instanceof ClipboardProtectionError) {
       await showHUD("Rich clipboard protected — save it, then retry");
+      return;
+    }
+
+    if (error instanceof ClipboardRestoreError) {
+      console.error("Text was replaced, but clipboard restoration failed", error);
+      await showHUD("Text replaced — restore your prior clipboard from Clipboard History");
       return;
     }
 
