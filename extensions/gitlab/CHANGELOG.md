@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Simplified authentication] - {PR_MERGE_DATE}
+## [Simplified authentication] - 2026-08-12
 
 - Remove the `Sign out of GitLab` command. Raycast adds a logout option to the extension preferences once you have signed in with OAuth
 - Remove the `Authentication` preference. The extension uses the `API Token` when one is set and OAuth otherwise
