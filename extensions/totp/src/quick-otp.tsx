@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, showHUD, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AddAccountForm } from "./add-account";
 import { saveAccount } from "./accounts";
@@ -29,8 +29,7 @@ export default function QuickOTP() {
     try {
       const code = generateCode(parseInput(secret, "Quick OTP"));
       await Clipboard.copy(code.value, { concealed: true });
-      await showToast({ style: Toast.Style.Success, title: "OTP copied" });
-      await popToRoot();
+      await showHUD("OTP copied");
     } catch (error) {
       await showToast({ style: Toast.Style.Failure, title: "Could not generate OTP", message: error instanceof Error ? error.message : String(error) });
     } finally {
