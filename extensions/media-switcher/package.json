@@ -75,7 +75,6 @@
     "typescript": "^6.0.0"
   },
   "scripts": {
-    "build-rust": "cargo build --manifest-path rust/Cargo.toml --release",
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
