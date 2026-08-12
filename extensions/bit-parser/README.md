@@ -13,7 +13,7 @@ Inspect individual bits in fault codes, status words, and flags. Bit Parser acce
 
 ## Usage
 
-1. Open the `Parse Bits` command.
+1. Open the `Parse Bits` command. You can also pass a value as an argument or from selected text.
 2. Enter a value such as `33027`, `0x8103`, or `0b1000000100000011`.
 3. Select the number base, bit width, and display order.
 4. Optionally add bit labels.
