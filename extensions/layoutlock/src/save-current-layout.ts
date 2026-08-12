@@ -7,11 +7,7 @@ import {
   layoutLockTarget,
 } from "./layoutlock";
 
-type SaveArguments = {
-  name?: string;
-};
-
-export default async function SaveCurrentLayout(props: LaunchProps<{ arguments: SaveArguments }>) {
+export default async function SaveCurrentLayout(props: LaunchProps<{ arguments: Arguments.SaveCurrentLayout }>) {
   try {
     const applications = await getApplications();
     const target = layoutLockTarget(environment.isDevelopment);
