@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "layout-fixer",
+  "title": "Layout Fixer",
+  "description": "Fix text typed with the wrong keyboard layout, in place — lnpfh becomes مرحبا, and back again.",
+  "icon": "extension-icon.png",
+  "author": "ramysamy",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "fix-layout",
+      "title": "Fix Keyboard Layout",
+      "description": "Convert the selected text — or the whole focused text field — between the Arabic and English keyboard layouts.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "layout",
+      "title": "Arabic Keyboard Layout",
+      "description": "Which Arabic keyboard you type on. The macOS and Windows layouts differ across the entire bottom row, so picking the wrong one produces plausible-looking nonsense.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Match This Computer",
+          "value": "auto"
+        },
+        {
+          "title": "macOS — \"Arabic\"",
+          "value": "mac"
+        },
+        {
+          "title": "Windows — \"Arabic (101)\" or macOS \"Arabic - PC\"",
+          "value": "windows"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
