@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getItermProfiles, ItermProfile } from "./core/get-iterm-profiles";
 import { isPermissionError, PermissionErrorScreen } from "./core/permission-error-screen";
 
-function createScriptForProfile(profileName: string, location: "window" | "tab"): string {
+function createScriptForProfile(profileName: string, location: "window" | "tab" | "split-h" | "split-v"): string {
   const escapedName = profileName.replace(/"/g, '\\"');
 
   if (location === "window") {
@@ -14,19 +14,19 @@ function createScriptForProfile(profileName: string, location: "window" | "tab")
         repeat until application "iTerm" is running
           delay 0.1
         end repeat
-
         create window with profile "${escapedName}"
         activate
       end tell
     `;
-  } else {
+  }
+
+  if (location === "tab") {
     return `
       tell application "iTerm"
         launch
         repeat until application "iTerm" is running
           delay 0.1
         end repeat
-
         if windows of application "iTerm" is {} then
           create window with profile "${escapedName}"
         else
@@ -38,6 +38,25 @@ function createScriptForProfile(profileName: string, location: "window" | "tab")
       end tell
     `;
   }
+
+  const direction = location === "split-h" ? "horizontally" : "vertically";
+  return `
+    on isAppRunning(appName)
+      tell application "System Events" to (name of processes) contains appName
+    end isAppRunning
+
+    if isAppRunning("iTerm2") or isAppRunning("iTerm") then
+      tell application "iTerm"
+        activate
+        tell current session of current window
+          split ${direction} with profile "${escapedName}"
+        end tell
+      end tell
+      return "true"
+    else
+      return "iTerm is not running"
+    end if
+  `;
 }
 
 export default function Command() {
@@ -51,7 +70,7 @@ export default function Command() {
     setIsLoading(false);
   }, []);
 
-  const openProfile = async (profile: ItermProfile, location: "window" | "tab") => {
+  const openProfile = async (profile: ItermProfile, location: "window" | "tab" | "split-h" | "split-v") => {
     try {
       const script = createScriptForProfile(profile.name, location);
       await runAppleScript(script);
@@ -85,8 +104,20 @@ export default function Command() {
           title={profile.name}
           actions={
             <ActionPanel>
-              <Action title="Open in New Window" icon={Icon.Window} onAction={() => openProfile(profile, "window")} />
               <Action title="Open in New Tab" icon={Icon.Plus} onAction={() => openProfile(profile, "tab")} />
+              <Action title="Open in New Window" icon={Icon.Window} onAction={() => openProfile(profile, "window")} />
+              <ActionPanel.Section title="Split Pane">
+                <Action
+                  title="Open in Horizontal Split"
+                  icon={Icon.AppWindowSidebarRight}
+                  onAction={() => openProfile(profile, "split-h")}
+                />
+                <Action
+                  title="Open in Vertical Split"
+                  icon={Icon.AppWindowSidebarLeft}
+                  onAction={() => openProfile(profile, "split-v")}
+                />
+              </ActionPanel.Section>
             </ActionPanel>
           }
         />

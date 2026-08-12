@@ -58,6 +58,10 @@ const ModelDetailView = (props: { model: Model; markdown?: string | null | undef
             text={model.temperature.toLocaleString()}
             icon={icons[Math.min(Math.floor(t / 0.5), 3)]}
           />
+          <List.Item.Detail.Metadata.Label
+            title="Reasoning"
+            text={model.enableReasoningEffortChange ? model.reasoningEffort : "disabled"}
+          />
           <List.Item.Detail.Metadata.Label title="Vision capabilities" text={model.vision ? "Enable" : "Disable"} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="ID" text={model.id} />

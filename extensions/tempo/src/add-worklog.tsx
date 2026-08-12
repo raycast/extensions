@@ -8,10 +8,11 @@ import {
   Icon,
   Color,
   getPreferenceValues,
-  open,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { showFailureToast, useCachedState } from "@raycast/utils";
+import { useState, useEffect, useRef } from "react";
 import { fetchFromTempoAPI } from "./services/tempo.service";
 import {
   getAssignedIssues,
@@ -26,6 +27,7 @@ import { getRecentActivityIssues, JiraIssue as RecentJiraIssue } from "./service
 import { parseDuration, formatDuration } from "./utils/duration";
 import { getCurrentUserAccountId, resetCachedAccountId } from "./services/jira-auth.service";
 import { formatDateToString, getDateLabel } from "./utils/date";
+import { formatTimeWithSeconds, parseTimeRangeToSeconds } from "./utils/time";
 import { TempoWorklogsResponse } from "./types/worklog";
 
 interface Preferences {
@@ -38,6 +40,16 @@ type Values = {
   date: string;
   customDate?: string;
   timeSpent: string;
+  remainingEstimate?: string;
+  useTimeRange?: boolean;
+  startTime?: string;
+  endTime?: string;
+};
+
+const USE_TIME_RANGE_STORAGE_KEY = "add-worklog-use-time-range";
+
+type TempoGlobalConfiguration = {
+  remainingEstimateOptional?: boolean;
 };
 
 function IssueSelector({ onSelect }: { onSelect: (issueKey: string) => void }) {
@@ -231,19 +243,42 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
   const [issue, setIssue] = useState<JiraIssue | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState<string>(formatDateToString(new Date()));
+  const [useTimeRange, setUseTimeRange] = useCachedState<boolean>(USE_TIME_RANGE_STORAGE_KEY, false);
+  const [isRemainingEstimateRequired, setIsRemainingEstimateRequired] = useState(false);
+  const [remainingEstimate, setRemainingEstimate] = useState("");
+  const hasEditedRemainingEstimate = useRef(false);
 
   // Fetch details of the selected issue
   useEffect(() => {
     async function loadIssue() {
-      try {
-        setIsLoading(true);
-        const fetchedIssue = await getIssueByKey(issueKey);
-        setIssue(fetchedIssue);
-      } catch (error) {
-        console.error("Failed to load issue:", error);
-      } finally {
-        setIsLoading(false);
-      }
+      setIsLoading(true);
+
+      const issuePromise = getIssueByKey(issueKey)
+        .then((issue) => {
+          setIssue(issue);
+          const remainingEstimateSeconds = issue?.fields.timetracking?.remainingEstimateSeconds;
+          if (!hasEditedRemainingEstimate.current) {
+            setRemainingEstimate(
+              remainingEstimateSeconds === undefined ? "" : formatDuration(remainingEstimateSeconds),
+            );
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to load issue:", error);
+        });
+
+      const configPromise = fetchFromTempoAPI("/globalconfiguration")
+        .then((config) => {
+          const globalConfiguration = config as TempoGlobalConfiguration;
+          setIsRemainingEstimateRequired(globalConfiguration.remainingEstimateOptional === false);
+        })
+        .catch((error) => {
+          console.error("Failed to load global configuration:", error);
+          setIsRemainingEstimateRequired(false);
+        });
+
+      await Promise.all([issuePromise, configPromise]);
+      setIsLoading(false);
     }
     loadIssue();
   }, [issueKey]);
@@ -284,21 +319,71 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
         dateStr = values.customDate;
       }
 
-      // Get current time (HH:MM:SS) for the start time
-      const now = new Date();
-      const hours = String(now.getHours()).padStart(2, "0");
-      const minutes = String(now.getMinutes()).padStart(2, "0");
-      const seconds = String(now.getSeconds()).padStart(2, "0");
-      const startTime = `${hours}:${minutes}:${seconds}`;
+      let submittedDuration = values.timeSpent;
+      let startTime: string;
+      let timeSpentSeconds: number;
+      let remainingEstimateSeconds: number | undefined;
 
-      // Parse the duration string (supports "1h30m", "1h30", "2h", "45m", etc.)
-      const timeSpentSeconds = parseDuration(values.timeSpent);
+      if (values.useTimeRange) {
+        if (!values.startTime || !values.endTime) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Time range required",
+            message: "Please provide both start and end time in HH:MM format",
+          });
+          return;
+        }
 
-      if (timeSpentSeconds === 0) {
+        const derivedDurationSeconds = parseTimeRangeToSeconds(values.startTime, values.endTime);
+        if (derivedDurationSeconds === null) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid time range",
+            message: "Use 8:00, 08:00, 8h, or 8h30 and make sure the end time is after the start time",
+          });
+          return;
+        }
+
+        // Safe to assert: parseTimeRangeToSeconds succeeded, so normalizeTimeInput(startTime) is non-null
+        const formattedStartTime = formatTimeWithSeconds(values.startTime) as string;
+
+        timeSpentSeconds = derivedDurationSeconds;
+        startTime = formattedStartTime;
+        submittedDuration = formatDuration(timeSpentSeconds);
+      } else {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        const seconds = String(now.getSeconds()).padStart(2, "0");
+        startTime = `${hours}:${minutes}:${seconds}`;
+        timeSpentSeconds = parseDuration(values.timeSpent);
+
+        if (timeSpentSeconds === 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid duration",
+            message: "Please enter a valid duration (e.g., 1h, 1h30m, 30m)",
+          });
+          return;
+        }
+      }
+
+      if (isRemainingEstimateRequired && values.remainingEstimate?.trim()) {
+        remainingEstimateSeconds = parseDuration(values.remainingEstimate);
+
+        if (remainingEstimateSeconds === 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid remaining estimate",
+            message: "Please enter a valid remaining estimate (e.g., 1h, 1h30m, 30m)",
+          });
+          return;
+        }
+      } else if (isRemainingEstimateRequired) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Invalid duration",
-          message: "Please enter a valid duration (e.g., 1h, 1h30m, 30m)",
+          title: "Remaining estimate required",
+          message: "Your Tempo workspace requires an estimated remaining time for new worklogs",
         });
         return;
       }
@@ -325,6 +410,7 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
           startDate: dateStr,
           startTime,
           description: values.description || "",
+          ...(remainingEstimateSeconds !== undefined ? { remainingEstimateSeconds } : {}),
         }),
       });
 
@@ -340,11 +426,11 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
       await showToast({
         style: Toast.Style.Success,
         title: "Worklog added",
-        message: `${values.timeSpent} logged. ${dayLabel}: ${totalDuration}`,
+        message: `${submittedDuration} logged. ${dayLabel}: ${totalDuration}`,
         primaryAction: {
           title: "View Worklogs",
           onAction: async () => {
-            await open("raycast://extensions/darchen_gautier/tempo/list-worklogs");
+            await launchCommand({ name: "list-worklogs", type: LaunchType.UserInitiated });
           },
         },
       });
@@ -366,13 +452,51 @@ function WorklogForm({ issueKey, onSuccess }: { issueKey: string; onSuccess: () 
       }
     >
       <Form.Description text={`Add worklog to ${issueKey}${issue ? `: ${issue.fields.summary}` : ""}`} />
-      <Form.TextField
-        id="timeSpent"
-        title="Time Spent"
-        placeholder="1h, 1h30m, 30m"
-        defaultValue="1h"
-        info="Enter duration in human format: 1h, 1h30m, 2h, 45m, etc."
+      <Form.Checkbox
+        id="useTimeRange"
+        title="Use Start and End Time"
+        label="Derive duration from a time range"
+        value={useTimeRange}
+        onChange={setUseTimeRange}
       />
+      {useTimeRange ? (
+        <>
+          <Form.TextField
+            id="startTime"
+            title="Start Time"
+            placeholder="8:00 or 8h"
+            info="Use 24-hour 8:00, 08:00, 8h, or 8h30 format"
+          />
+          <Form.TextField
+            id="endTime"
+            title="End Time"
+            placeholder="9:00 or 9h"
+            info="Use 24-hour 9:00, 09:00, 9h, or 9h30 format"
+          />
+        </>
+      ) : (
+        <Form.TextField
+          id="timeSpent"
+          title="Time Spent"
+          autoFocus
+          placeholder="1h, 1h30m, 30m"
+          defaultValue="1h"
+          info="Enter duration in human format: 1h, 1h30m, 2h, 45m, etc."
+        />
+      )}
+      {isRemainingEstimateRequired && (
+        <Form.TextField
+          id="remainingEstimate"
+          title="Remaining Estimate"
+          placeholder="Required: 1h, 1h30m, 30m"
+          info="Required by your Tempo workspace. Enter the estimated remaining time after this worklog."
+          value={remainingEstimate}
+          onChange={(value) => {
+            hasEditedRemainingEstimate.current = true;
+            setRemainingEstimate(value);
+          }}
+        />
+      )}
       <Form.Dropdown id="date" title="Date" value={selectedDate} onChange={setSelectedDate}>
         {Array.from({ length: 7 }, (_, i) => {
           const date = new Date();

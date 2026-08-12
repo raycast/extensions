@@ -1,5 +1,10 @@
 # Get SSH Key Changelog
 
+## [Updates] - 2026-03-17
+
+- Add Windows support to the extension.
+- Fix the case of "Ssh".
+
 ## [Open In Finder] - 2025-06-29
 
 - Show number of keys in Section subtitle

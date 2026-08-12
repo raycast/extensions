@@ -8,16 +8,23 @@ import * as os from "os";
  */
 export function getGranolaConfigPath(filename: string): string {
   const homeDirectory = os.homedir();
+  let configPath: string;
 
   if (process.platform === "win32") {
     // Windows: %APPDATA%\Granola\{filename}
-    return path.join(homeDirectory, "AppData", "Roaming", "Granola", filename);
+    configPath = path.join(process.env.APPDATA || path.join(homeDirectory, "AppData", "Roaming"), "Granola", filename);
   } else {
     // macOS: ~/Library/Application Support/Granola/{filename}
-    return path.join(homeDirectory, "Library", "Application Support", "Granola", filename);
+    configPath = path.join(homeDirectory, "Library", "Application Support", "Granola", filename);
   }
+
+  return configPath;
 }
 
 export function getSupabaseConfigPath(): string {
   return getGranolaConfigPath("supabase.json");
+}
+
+export function getStoredAccountsPath(): string {
+  return getGranolaConfigPath("stored-accounts.json");
 }

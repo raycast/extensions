@@ -2,6 +2,8 @@ import { Action } from "@raycast/api";
 
 import type { Package } from "@/types";
 
+import { jsrUrls } from "@/lib/jsrUrls";
+
 type OptionalActionsProps = {
   selectedPackageData?: Package;
   enabled: boolean;
@@ -20,7 +22,7 @@ const OptionalActions = ({ selectedPackageData, enabled }: OptionalActionsProps)
       <Action.OpenInBrowser
         title="Open GitHub Repository"
         icon={{ source: "github.svg" }}
-        url={`https://github.com/${selectedPackageData.githubRepository.owner}/${selectedPackageData.githubRepository.name}`}
+        url={jsrUrls.site.github(selectedPackageData.githubRepository.owner, selectedPackageData.githubRepository.name)}
         shortcut={{ key: "g", modifiers: ["cmd", "shift"] }}
       />
     </>

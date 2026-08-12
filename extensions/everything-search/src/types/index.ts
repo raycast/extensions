@@ -9,8 +9,12 @@ export interface FileInfo {
 
 export interface Preferences {
   esExePath?: string;
+  customCliArgs?: string;
   fileExplorerCommand?: string;
   defaultSort: string;
   openFolderAsDefault?: boolean;
   minCharsToSearch?: string;
+  maxResults?: string;
+  useRegex?: boolean;
+  useSdk?: boolean;
 }

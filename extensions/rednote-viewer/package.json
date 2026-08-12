@@ -2,7 +2,6 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rednote-viewer",
   "title": "RedNote Viewer",
-  "type": "module",
   "description": "Easy to view RedNote post in Raycast",
   "icon": "rednote-viewer-icon.png",
   "author": "orangelckc",
@@ -17,13 +16,6 @@
     "Fun",
     "Productivity"
   ],
-  "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop",
-    "fix-lint": "ray lint --fix",
-    "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  },
   "license": "MIT",
   "commands": [
     {
@@ -82,16 +74,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.2.1",
-    "got": "^14.4.7"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "got": "^14.6.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^24.0.12",
-    "@types/react": "^19.1.8",
-    "eslint": "^9.30.1",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.9",
+    "@types/react": "^19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

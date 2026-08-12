@@ -1,0 +1,151 @@
+---
+description: Cursor API Documentation for usage tracking and billing
+globs: ["src/hooks/*.ts", "src/types.ts"]
+alwaysApply: false
+---
+
+# Cursor API Reference
+
+## Authentication
+
+Cursor uses WorkOS for authentication. The session token is stored in a cookie named `WorkosCursorSessionToken`.
+
+### Token Format
+
+The token is URL-encoded and contains two parts separated by `::`:
+
+- User ID: `user_xxxxx`
+- JWT token: `eyJhbGciOiJ...`
+
+Example: `user_01ABC123%3A%3AeyJhbGciOiJSUzI1NiIs...`
+
+### Required Headers
+
+```typescript
+const headers = {
+  "Content-Type": "application/json",
+  Accept: "*/*",
+  Cookie: `WorkosCursorSessionToken=${decodedToken}`,
+  "User-Agent": "Mozilla/5.0 ...",
+  Origin: "https://cursor.com",
+  Referer: "https://cursor.com/dashboard?tab=usage",
+  "Sec-Fetch-Site": "same-origin",
+  "Sec-Fetch-Mode": "cors",
+  "Sec-Fetch-Dest": "empty",
+};
+```
+
+## API Endpoints
+
+### GET /api/usage-summary
+
+Returns billing cycle info and usage limits.
+
+**Response:**
+
+```typescript
+interface UsageSummary {
+  billingCycleStart: string;  // ISO date
+  billingCycleEnd: string;    // ISO date
+  membershipType: string;     // "pro", "free", etc.
+  limitType: string;
+  isUnlimited: boolean;
+  individualUsage: {
+    plan: {
+      enabled: boolean;
+      used: number;      // cents
+      limit: number;     // cents
+      remaining: number; // cents
+      breakdown: {
+        included: number; // cents
+        bonus: number;    // cents
+        total: number;    // cents
+      };
+    };
+    onDemand: {
+      enabled: boolean;
+      used: number;
+      limit: number | null;
+      remaining: number | null;
+    };
+  };
+  teamUsage: Record<string, unknown>;
+}
+```
+
+### POST /api/dashboard/get-aggregated-usage-events
+
+Returns detailed usage statistics per model.
+
+**Request Body:**
+
+```typescript
+{
+  teamId: -1,           // -1 for individual usage
+  startDate: number,    // Unix timestamp (ms)
+  endDate: number       // Unix timestamp (ms)
+}
+```
+
+**Response:**
+
+```typescript
+interface CursorUsageData {
+  aggregations: Array<{
+    modelIntent: string;        // e.g., "claude-3-5-sonnet"
+    inputTokens?: string;       // String number
+    outputTokens?: string;
+    cacheWriteTokens?: string;
+    cacheReadTokens?: string;
+    totalCents: number | null;
+  }>;
+  totalInputTokens?: string;
+  totalOutputTokens?: string;
+  totalCacheWriteTokens?: string;
+  totalCacheReadTokens?: string;
+  totalCostCents: number | null;
+}
+```
+
+## Error Handling
+
+### HTTP Status Codes
+
+- `401` / `403`: Token expired or invalid
+- `200`: Success
+
+### Token Expiration
+
+Tokens expire periodically. When expired:
+
+1. User must re-login to cursor.com
+2. Copy new `WorkosCursorSessionToken` from cookies
+3. Update in extension preferences
+
+## Important Notes
+
+### Monetary Values
+
+All monetary values are in **cents**, not dollars:
+
+- `1207` = $12.07
+- Divide by 100 to get dollar amount
+
+### Token Values
+
+Token counts are returned as **strings**, not numbers:
+
+- Parse with `parseInt(value, 10)`
+- Handle null/undefined gracefully
+
+### Date Range
+
+For billing cycle statistics:
+
+- Use `billingCycleStart` from usage-summary
+- Use current timestamp for end date
+
+For calendar month:
+
+- Use first day of current month
+- Use current timestamp for end date

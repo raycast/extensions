@@ -88,4 +88,5 @@ export const editingDueDateAtom = atom<
     }
 >(false);
 
-export const selectedTagAtom = atom("All");
+export const ALL_TAG_VALUE = "All";
+export const selectedTagAtom = atom(ALL_TAG_VALUE);

@@ -1,15 +1,10 @@
-import { getPreferenceValues, List, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useMemo } from "react";
-import SearchListItem from "./components/search-list-item";
-import useBookmarks from "./hooks/use-bookmarks";
+import { BookmarksProvider, useBookmarksContext } from "./bookmarks-context";
+import { SearchListItem } from "./components/search-list-item";
 
-export default function searchLinkding() {
-  const preferences = getPreferenceValues<Preferences>();
-  const { isLoading, bookmarks, setFilter, deleteBookmark, archiveBookmark } = useBookmarks();
-
-  const onDeleteItem = (id: number) => deleteBookmark(id);
-  const onArchiveItem = (id: number) => archiveBookmark(id);
-  const onCopyItem = () => showToast({ style: Toast.Style.Success, title: "Success", message: "Copied to clipboard" });
+function SearchBookmarksList() {
+  const { isLoading, bookmarks, onSearchTextChange } = useBookmarksContext();
 
   const subtitle = useMemo(() => {
     if (bookmarks.length > 100) return "100+";
@@ -19,22 +14,23 @@ export default function searchLinkding() {
   return (
     <List
       isLoading={isLoading}
-      onSearchTextChange={setFilter}
+      onSearchTextChange={onSearchTextChange}
       throttle
       searchBarPlaceholder="Search through bookmarks..."
     >
       <List.Section title="Results" subtitle={subtitle}>
         {bookmarks.map((bookmark) => (
-          <SearchListItem
-            key={bookmark.id}
-            bookmark={bookmark}
-            preferences={preferences}
-            onCopy={onCopyItem}
-            onDelete={onDeleteItem}
-            onArchive={onArchiveItem}
-          />
+          <SearchListItem key={bookmark.id} bookmark={bookmark} />
         ))}
       </List.Section>
     </List>
+  );
+}
+
+export default function searchLinkding() {
+  return (
+    <BookmarksProvider>
+      <SearchBookmarksList />
+    </BookmarksProvider>
   );
 }

@@ -7,7 +7,8 @@
   "author": "thomaslombart",
   "contributors": [
     "j3lte",
-    "tofrankie"
+    "tofrankie",
+    "xmok"
   ],
   "license": "MIT",
   "categories": [
@@ -72,29 +73,33 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.1",
+    "@raycast/api": "^1.104.1",
     "browserslist": "^4.23.0",
     "caniuse-api": "^3.0.0",
     "caniuse-lite": "^1.0.30001608"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/browserslist": "^4.15.0",
     "@types/caniuse-api": "^3.0.6",
     "@types/caniuse-lite": "^1.0.5",
-    "prettier": "^3.2.5",
-    "eslint": "^8.53.0",
-    "eslint-plugin-import": "^2.29.0",
-    "typescript": "^5.4.5"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "eslint-plugin-import": "^2.32.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

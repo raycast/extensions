@@ -21,6 +21,9 @@ export interface JiraIssue {
       key: string;
       name: string;
     };
+    timetracking?: {
+      remainingEstimateSeconds?: number;
+    };
   };
 }
 
@@ -139,7 +142,7 @@ export async function getIssueByKey(issueKey: string): Promise<JiraIssue | null>
     const authToken = getJiraAuthToken();
 
     const response = await fetch(
-      `${jiraBaseUrl}/rest/api/3/issue/${issueKey}?fields=summary,status,issuetype,project`,
+      `${jiraBaseUrl}/rest/api/3/issue/${issueKey}?fields=summary,status,issuetype,project,timetracking`,
       {
         headers: {
           Authorization: `Basic ${authToken}`,

@@ -1,5 +1,9 @@
 # Plane Changelog
 
+## [Show State Color in Search Projects > Work Items] - 2026-01-23
+
+- In "Search Projects" > "Work Items", the `Icon` is colored and has `tooltip` of the _state_ name
+
 ## [Add Start Date and Due Date to Work Item Creation and Editing] - 2026-01-17
 
 ## [Update README with correct API Base Path format] - 2025-11-04

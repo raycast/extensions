@@ -68,8 +68,8 @@ export interface Series {
   seasonCount: number;
   status: string;
   overview: string;
-  network: string;
-  airTime: string;
+  network?: string | null;
+  airTime?: string | null;
   images: Image[];
   seasons: Season[];
   year: number;
@@ -83,13 +83,13 @@ export interface Series {
   tvdbId: number;
   tvRageId: number;
   tvMazeId: number;
-  firstAired: string;
+  firstAired?: string | null;
   lastInfoSync: string;
   seriesType: string;
   cleanTitle: string;
-  imdbId: string;
-  titleSlug: string;
-  certification?: string;
+  imdbId?: string | null;
+  titleSlug?: string | null;
+  certification?: string | null;
   genres: string[];
   tags: number[];
   added: string;
@@ -99,7 +99,7 @@ export interface Series {
 }
 
 export interface Image {
-  coverType: CoverType;
+  coverType: string;
   url: string;
   remoteUrl?: string;
 }

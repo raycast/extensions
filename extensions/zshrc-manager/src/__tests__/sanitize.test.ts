@@ -1,74 +1,8 @@
-import {
-  sanitizeMarkdown,
-  escapeShellContent,
-  validateFilePath,
-  validateFilePathForWrite,
-  validateFileSize,
-  truncateContent,
-  validateZshrcContent,
-} from "../utils/sanitize";
+import { validateFilePath, validateFilePathForWrite, validateFileSize, validateZshrcContent } from "../utils/sanitize";
 import { FILE_CONSTANTS } from "../constants";
 import { homedir } from "node:os";
 
 describe("sanitize.ts", () => {
-  describe("sanitizeMarkdown", () => {
-    it("should escape backticks", () => {
-      const content = "This has `backticks` in it";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This has \\\\`backticks\\\\` in it");
-    });
-
-    it("should escape dollar signs", () => {
-      const content = "This has $variables in it";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This has \\\\$variables in it");
-    });
-
-    it("should escape backslashes", () => {
-      const content = "This has \\backslashes in it";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This has \\\\backslashes in it");
-    });
-
-    it("should handle multiple special characters", () => {
-      const content = "This has `backticks`, $variables, and \\backslashes";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This has \\\\`backticks\\\\`, \\\\$variables, and \\\\backslashes");
-    });
-
-    it("should handle empty content", () => {
-      const result = sanitizeMarkdown("");
-      expect(result).toBe("");
-    });
-
-    it("should handle content with no special characters", () => {
-      const content = "This is normal content";
-      const result = sanitizeMarkdown(content);
-      expect(result).toBe("This is normal content");
-    });
-  });
-
-  describe("escapeShellContent", () => {
-    it("should escape all shell special characters", () => {
-      const content = "This has `backticks`, $variables, \\backslashes, \"quotes\", and 'apostrophes'";
-      const result = escapeShellContent(content);
-      expect(result).toBe(
-        "This has \\\\`backticks\\\\`, \\\\$variables, \\\\backslashes, \\\"quotes\\\", and \\'apostrophes\\'",
-      );
-    });
-
-    it("should handle empty content", () => {
-      const result = escapeShellContent("");
-      expect(result).toBe("");
-    });
-
-    it("should handle content with no special characters", () => {
-      const content = "This is normal content";
-      const result = escapeShellContent(content);
-      expect(result).toBe("This is normal content");
-    });
-  });
-
   describe("validateFilePath", () => {
     it("should return true for valid file paths", async () => {
       // Only the exact .zshrc path in home directory should be valid
@@ -78,21 +12,27 @@ describe("sanitize.ts", () => {
       expect(await validateFilePath("zshrc")).toBe(false); // Not the exact path
     });
 
-    it("should return false for path traversal attempts", async () => {
-      expect(await validateFilePath("../zshrc")).toBe(false);
-      expect(await validateFilePath("../../zshrc")).toBe(false);
-      expect(await validateFilePath("/Users/../etc/passwd")).toBe(false);
+    it.each([
+      ["../zshrc", "relative path traversal"],
+      ["../../zshrc", "double path traversal"],
+      ["/Users/../etc/passwd", "absolute path with traversal"],
+    ])("should reject path traversal: %s (%s)", async (path) => {
+      expect(await validateFilePath(path)).toBe(false);
     });
 
-    it("should return false for paths containing ~", async () => {
-      expect(await validateFilePath("~/.zshrc")).toBe(false);
-      expect(await validateFilePath("/Users/test/~/.zshrc")).toBe(false);
+    it.each([
+      ["~/.zshrc", "unexpanded tilde"],
+      ["/Users/test/~/.zshrc", "tilde in middle of path"],
+    ])("should reject paths containing ~: %s (%s)", async (path) => {
+      expect(await validateFilePath(path)).toBe(false);
     });
 
-    it("should return false for absolute paths outside home directory", async () => {
-      expect(await validateFilePath("/etc/passwd")).toBe(false);
-      expect(await validateFilePath("/var/log/system.log")).toBe(false);
-      expect(await validateFilePath("/tmp/file")).toBe(false);
+    it.each([
+      ["/etc/passwd", "system config"],
+      ["/var/log/system.log", "system logs"],
+      ["/tmp/file", "temp directory"],
+    ])("should reject paths outside home directory: %s (%s)", async (path) => {
+      expect(await validateFilePath(path)).toBe(false);
     });
 
     it("should return true for absolute paths in home directory", async () => {
@@ -141,39 +81,9 @@ describe("sanitize.ts", () => {
       expect(validateFileSize(FILE_CONSTANTS.MAX_FILE_SIZE * 2)).toBe(false);
     });
 
-    it("should handle negative file sizes", () => {
-      expect(validateFileSize(-1)).toBe(true); // Negative sizes are considered valid
-    });
-  });
-
-  describe("truncateContent", () => {
-    it("should return content unchanged if within limit", () => {
-      const content = "Short content";
-      const result = truncateContent(content, 100);
-      expect(result).toBe("Short content");
-    });
-
-    it("should truncate content exceeding limit", () => {
-      const content = "A".repeat(1000);
-      const result = truncateContent(content, 100);
-      expect(result).toBe("A".repeat(100) + "\n... (truncated)");
-    });
-
-    it("should use default max length", () => {
-      const content = "A".repeat(20000);
-      const result = truncateContent(content);
-      expect(result).toBe("A".repeat(10000) + "\n... (truncated)");
-    });
-
-    it("should handle empty content", () => {
-      const result = truncateContent("");
-      expect(result).toBe("");
-    });
-
-    it("should handle content exactly at limit", () => {
-      const content = "A".repeat(100);
-      const result = truncateContent(content, 100);
-      expect(result).toBe("A".repeat(100));
+    it("should reject negative file sizes", () => {
+      expect(validateFileSize(-1)).toBe(false);
+      expect(validateFileSize(-100)).toBe(false);
     });
   });
 
@@ -209,7 +119,7 @@ alias ll='ls -la'`;
       const result = validateZshrcContent(content);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain("Suspicious pattern detected: eval with curl");
+      expect(result.errors).toContain("Suspicious pattern: eval with remote code download");
     });
 
     it("should detect dangerous rm -rf / command", () => {
@@ -220,7 +130,7 @@ alias ll='ls -la'`;
       const result = validateZshrcContent(content);
 
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain("Dangerous command detected: rm -rf /");
+      expect(result.errors).toContain("Dangerous command: recursive delete on root filesystem");
     });
 
     it("should detect multiple issues", () => {
@@ -234,8 +144,8 @@ rm -rf /`;
       expect(result.isValid).toBe(false);
       expect(result.errors).toHaveLength(3);
       expect(result.errors).toContain("Line 1 is too long (1001 characters)");
-      expect(result.errors).toContain("Suspicious pattern detected: eval with curl");
-      expect(result.errors).toContain("Dangerous command detected: rm -rf /");
+      expect(result.errors).toContain("Suspicious pattern: eval with remote code download");
+      expect(result.errors).toContain("Dangerous command: recursive delete on root filesystem");
     });
 
     it("should handle empty content", () => {

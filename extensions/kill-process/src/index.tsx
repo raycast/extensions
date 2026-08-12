@@ -5,31 +5,69 @@ import {
   closeMainWindow,
   Color,
   confirmAlert,
+  environment,
   getPreferenceValues,
   Icon,
   Keyboard,
   List,
+  LocalStorage,
   open,
   popToRoot,
   showToast,
   Toast,
 } from "@raycast/api";
-import { exec } from "child_process";
 import prettyBytes from "pretty-bytes";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
-import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
-import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
+import { getFileIcon, getPlatformSpecificErrorHelp, hasRestartLaunchPath, isWindows } from "./utils/platform";
+import { groupRelatedProcesses } from "./utils/process-grouping";
+import { shouldRefreshProcesses } from "./utils/refresh";
+import {
+  fetchProcessPerformance,
+  fetchRunningProcesses,
+  restartProcess as restartSelectedProcess,
+  terminateProcess,
+  terminateProcessTree,
+  terminateProcessesByName,
+} from "./utils/process";
+
+type SortBy = "cpu" | "memory";
+type VisibleProcess = Process & { canRestartProcess: boolean };
+
+const APP_GROUPING_STORAGE_KEY = "kill-process.app-grouping-enabled";
+const SORT_BY_DROPDOWN_ID = "kill-process.sort-by";
+const DEFAULT_SORT_BY: SortBy = "cpu";
+const DEFAULT_APP_GROUPING_ENABLED = true;
+
+const parseBooleanLike = (value: LocalStorage.Value | undefined): boolean | null => {
+  if (value == null) {
+    return null;
+  }
+  if (value === true || value === "true" || value === 1 || value === "1") {
+    return true;
+  }
+  if (value === false || value === "false" || value === 0 || value === "0") {
+    return false;
+  }
+  return null;
+};
+
+const isSortBy = (value: unknown): value is SortBy => {
+  return value === "cpu" || value === "memory";
+};
 
 export default function ProcessList() {
+  const canRefreshProcesses = shouldRefreshProcesses(environment.launchType);
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
-  const [state, setState] = useState<Process[]>([]);
+  const [visibleProcesses, setVisibleProcesses] = useState<VisibleProcess[]>([]);
+  const [fetchError, setFetchError] = useState<string>();
+  const [isLoadingProcesses, setIsLoadingProcesses] = useState(canRefreshProcesses);
   const [query, setQuery] = useState<string>("");
 
   const preferences = getPreferenceValues<Preferences>();
-  const shouldIncludePaths = preferences.shouldSearchInPaths;
-  const shouldIncludePid = preferences.shouldSearchInPid;
+  const shouldSearchInPaths = preferences.shouldSearchInPaths;
+  const shouldSearchInPid = preferences.shouldSearchInPid;
   const shouldPrioritizeAppsWhenFiltering = preferences.shouldPrioritizeAppsWhenFiltering;
   const shouldShowPID = preferences.shouldShowPID;
   const shouldShowPath = preferences.shouldShowPath;
@@ -37,13 +75,46 @@ export default function ProcessList() {
   const closeWindowAfterKill = preferences.closeWindowAfterKill;
   const clearSearchBarAfterKill = preferences.clearSearchBarAfterKill;
   const goToRootAfterKill = preferences.goToRootAfterKill;
-  const [sortBy, setSortBy] = useState<"cpu" | "memory">(preferences.sortByMem ? "memory" : "cpu");
-  const [aggregateApps, setAggregateApps] = useState<boolean>(preferences.aggregateApps);
+  const skipConfirmation = preferences.skipConfirmation;
+  const [sortBy, setSortBy] = useState<SortBy>(DEFAULT_SORT_BY);
+  const [isAppGroupingEnabled, setIsAppGroupingEnabled] = useState<boolean>(DEFAULT_APP_GROUPING_ENABLED);
+  const isFetchingProcesses = useRef(false);
 
   // Cache CPU data from WMI queries (persists across refreshes)
   const [cpuCache, setCpuCache] = useState<Map<number, number>>(new Map());
 
-  const fetchProcesses = () => {
+  useEffect(() => {
+    const loadAppGrouping = async () => {
+      const stored = await LocalStorage.getItem<LocalStorage.Value>(APP_GROUPING_STORAGE_KEY);
+      if (typeof stored === "boolean") {
+        setIsAppGroupingEnabled(stored);
+        return;
+      }
+
+      const parsed = parseBooleanLike(stored);
+      if (parsed == null) {
+        return;
+      }
+
+      setIsAppGroupingEnabled(parsed);
+      await LocalStorage.setItem(APP_GROUPING_STORAGE_KEY, parsed);
+    };
+
+    void loadAppGrouping();
+  }, []);
+
+  const fetchProcesses = (showErrorToast = false) => {
+    if (isFetchingProcesses.current) {
+      if (showErrorToast) {
+        showToast({ title: "Refresh already in progress", style: Toast.Style.Animated });
+      }
+
+      return;
+    }
+
+    isFetchingProcesses.current = true;
+    setIsLoadingProcesses(true);
+    setFetchError(undefined);
     fetchRunningProcesses()
       .then((processes) => {
         // Apply cached CPU values to new process list
@@ -75,20 +146,29 @@ export default function ProcessList() {
       })
       .catch((err) => {
         console.error("Failed to fetch processes:", err);
-        showToast({
-          title: "Failed to fetch processes",
-          style: Toast.Style.Failure,
-          message: err instanceof Error ? err.message : "Unknown error",
-        });
+        const message = err instanceof Error ? err.message : "Unknown error";
+        setFetchError(message);
+        if (showErrorToast) {
+          showToast({
+            title: "Failed to fetch processes",
+            style: Toast.Style.Failure,
+            message,
+          });
+        }
+      })
+      .finally(() => {
+        isFetchingProcesses.current = false;
+        setIsLoadingProcesses(false);
       });
   };
 
-  useInterval(fetchProcesses, refreshDuration);
+  useInterval(fetchProcesses, canRefreshProcesses ? refreshDuration : null);
   useEffect(() => {
-    let processes = fetchResult;
-    if (aggregateApps) {
-      processes = aggregate(processes);
+    let processes = [...fetchResult];
+    if (isAppGroupingEnabled) {
+      processes = groupRelatedProcesses(processes);
     }
+
     processes.sort((a, b) => {
       if (sortBy === "memory") {
         return a.mem > b.mem ? -1 : 1;
@@ -96,174 +176,230 @@ export default function ProcessList() {
         return a.cpu > b.cpu ? -1 : 1;
       }
     });
-    setState(processes);
-  }, [fetchResult, sortBy, aggregateApps]);
+
+    setVisibleProcesses(
+      processes.map((process) => ({
+        ...process,
+        canRestartProcess: hasRestartLaunchPath(process),
+      })),
+    );
+  }, [fetchResult, sortBy, isAppGroupingEnabled]);
 
   const fileIcon = (process: Process) => {
     return getFileIcon(process);
   };
 
+  const handleKillError = (force: boolean) => {
+    const errorHelp = getPlatformSpecificErrorHelp("kill", force);
+    if (force && errorHelp.helpUrl) {
+      confirmAlert({
+        title: errorHelp.title,
+        message: errorHelp.message,
+        primaryAction: {
+          title: "Open Help",
+          onAction: () => open(errorHelp.helpUrl!),
+        },
+      });
+    } else {
+      showToast({
+        title: errorHelp.title,
+        message: errorHelp.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  };
+
+  const handleRestartError = (processName: string, error: unknown) => {
+    showToast({
+      title: `Failed to Restart ${processName}`,
+      message: error instanceof Error ? error.message : "Unknown error",
+      style: Toast.Style.Failure,
+    });
+  };
+
+  const performPostKillActions = () => {
+    if (closeWindowAfterKill) closeMainWindow();
+    if (goToRootAfterKill) popToRoot({ clearSearchBar: clearSearchBarAfterKill });
+    if (clearSearchBarAfterKill) clearSearchBar({ forceScrollToTop: true });
+  };
+
   const killProcess = async (process: Process, force: boolean = false) => {
     const processName = process.processName === "-" ? `process ${process.id}?` : process.processName;
-    if (
-      !(await confirmAlert({
-        title: `${force ? "Force " : ""}Kill ${processName}?`,
-        rememberUserChoice: true,
-      }))
-    ) {
+    if (!skipConfirmation) {
+      if (
+        !(await confirmAlert({
+          title: `${force ? "Force " : ""}Kill ${processName}?`,
+          rememberUserChoice: true,
+        }))
+      ) {
+        showToast({
+          title: `Cancelled Killing ${processName}`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
+    }
+
+    try {
+      if (process.type === "aggregatedApp") {
+        await terminateProcessTree(process.id, force);
+      } else {
+        await terminateProcess(process.id, force);
+      }
       showToast({
-        title: `Cancelled Killing ${processName}`,
+        title: `Killed ${processName}`,
+        style: Toast.Style.Success,
+      });
+
+      const terminatedProcessIds = new Set([process.id, ...(process.childProcessIds ?? [])]);
+      setFetchResult((prev) => prev.filter((p) => !terminatedProcessIds.has(p.id)));
+      performPostKillActions();
+    } catch {
+      handleKillError(force);
+    }
+  };
+
+  const killAllProcesses = async (process: Process, force: boolean = false) => {
+    const processName = process.processName;
+    if (processName === "-") {
+      showToast({
+        title: "Cannot Kill All for unnamed processes",
         style: Toast.Style.Failure,
       });
       return;
     }
 
-    const command = getKillCommand(process.id, force);
-    exec(command, (error) => {
-      if (error) {
-        const errorHelp = getPlatformSpecificErrorHelp(force);
-
-        if (force && errorHelp.helpUrl) {
-          confirmAlert({
-            title: errorHelp.title,
-            message: errorHelp.message,
-            primaryAction: {
-              title: "Open Help",
-              onAction: () => open(errorHelp.helpUrl!),
-            },
-          });
-        } else {
-          showToast({
-            title: errorHelp.title,
-            message: errorHelp.message,
-            style: Toast.Style.Failure,
-          });
-        }
+    if (!skipConfirmation) {
+      if (
+        !(await confirmAlert({
+          title: `${force ? "Force " : ""}Kill all "${processName}" processes?`,
+          rememberUserChoice: true,
+        }))
+      ) {
+        showToast({
+          title: `Cancelled Kill All ${processName}`,
+          style: Toast.Style.Failure,
+        });
         return;
       }
+    }
 
+    try {
+      await terminateProcessesByName(processName, force);
       showToast({
-        title: `Killed ${processName}`,
+        title: `Killed all "${processName}" processes`,
         style: Toast.Style.Success,
       });
-    });
 
-    setFetchResult(state.filter((p) => p.id !== process.id));
-    if (closeWindowAfterKill) {
-      closeMainWindow();
-    }
-    if (goToRootAfterKill) {
-      popToRoot({ clearSearchBar: clearSearchBarAfterKill });
-    }
-    if (clearSearchBarAfterKill) {
-      clearSearchBar({ forceScrollToTop: true });
+      setFetchResult((prev) => prev.filter((p) => p.processName !== processName));
+      performPostKillActions();
+    } catch {
+      handleKillError(force);
     }
   };
 
-  const subtitleString = (process: Process) => {
-    const subtitles = [];
-    if (process.type === "aggregatedApp" && process.appName != undefined) {
-      subtitles.push(process.appName);
+  const restartProcess = async (process: Process, force: boolean = false) => {
+    const processName = process.processName === "-" ? `process ${process.id}` : process.processName;
+    if (!hasRestartLaunchPath(process)) {
+      handleRestartError(processName, new Error("A launchable executable or app bundle path is required."));
+      return;
     }
-    if (shouldShowPID) {
-      subtitles.push(process.id.toString());
-    }
-    if (shouldShowPath) {
-      subtitles.push(process.path);
-    }
-    return subtitles.join(" - ");
-  };
 
-  const aggregate = (processes: Process[]): Process[] => {
-    const result = Array<Process>();
-    type ProcessNode = {
-      process: Process | undefined;
-      childNodes: ProcessNode[];
-    };
-    const appMap = new Map<number, ProcessNode>();
-    appMap.set(1, { process: { id: 1 } as Process, childNodes: [] });
-    const originalAppIds = Array<number>();
-    processes.forEach((process) => {
-      if (process.type === "app") {
-        originalAppIds.push(process.id);
-        let node = appMap.get(process.id);
-        if (node == undefined) {
-          node = { process, childNodes: [] } as ProcessNode;
-          appMap.set(process.id, node);
-        } else {
-          node.process = process;
-        }
-        let knownRootNode = appMap.get(process.pid);
-        if (knownRootNode == undefined) {
-          knownRootNode = {
-            process: undefined,
-            childNodes: [node],
-          } as ProcessNode;
-          appMap.set(process.pid, knownRootNode);
-        } else {
-          if (knownRootNode.process == undefined) {
-            knownRootNode.childNodes.push(node);
-          } else {
-            let nextNode;
-            while (
-              knownRootNode?.process != undefined &&
-              knownRootNode.process.pid !== 1 &&
-              (nextNode = appMap.get(knownRootNode.process.pid)) != undefined
-            ) {
-              knownRootNode = nextNode;
-            }
-            knownRootNode?.childNodes.push(node);
-          }
-        }
-        // move childNodes to parent
-        if (knownRootNode.process?.id !== 1) {
-          knownRootNode.childNodes = knownRootNode.childNodes.concat(node.childNodes);
-          node.childNodes = [];
-        }
-      } else {
-        result.push(process);
-      }
-    });
-    const rootApps = appMap.get(1)?.childNodes;
-    let afterAppIds = Array<number>();
-    rootApps?.forEach((rootApp) => {
-      if (rootApp.process == undefined) {
+    if (!skipConfirmation) {
+      if (
+        !(await confirmAlert({
+          title: `${force ? "Force " : ""}Restart ${processName}?`,
+          rememberUserChoice: true,
+        }))
+      ) {
+        showToast({
+          title: `Cancelled Restarting ${processName}`,
+          style: Toast.Style.Failure,
+        });
         return;
       }
-      afterAppIds.push(rootApp.process.id);
-      const childIds: number[] = rootApp.childNodes
-        .map((node) => node.process?.id)
-        .filter((item): item is number => item != undefined);
-      afterAppIds = afterAppIds.concat(childIds);
-      result.push({
-        id: rootApp.process.id,
-        pid: rootApp.process.pid,
-        cpu:
-          (rootApp.childNodes?.reduce((acc, cur) => {
-            return acc + (cur.process?.cpu ?? 0);
-          }, 0) ?? 0) + rootApp.process.cpu,
-        mem:
-          (rootApp.childNodes?.reduce((acc, cur) => {
-            return acc + (cur.process?.mem ?? 0);
-          }, 0) ?? 0) + rootApp.process.mem,
-        type: "aggregatedApp",
-        path: rootApp.process.path,
-        processName: rootApp.process.processName,
-        appName: rootApp.process.path.match(/(?<=\/)[^/]+(?=\.app\/)/)?.[0],
-      } as Process);
-    });
-    return result;
+    }
+
+    try {
+      await restartSelectedProcess(process, force);
+      showToast({
+        title: `Restarted ${processName}`,
+        style: Toast.Style.Success,
+      });
+      fetchProcesses(true);
+    } catch (error) {
+      handleRestartError(processName, error);
+    }
   };
 
-  const processCount = state.length;
+  const subtitleString = (process: Process): string | undefined => {
+    const subtitles: string[] = [];
+    const title = process.processName?.trim() ?? "";
+    const titleLower = title.toLowerCase();
+
+    const pushSubtitle = (value: string | undefined | null) => {
+      const trimmed = value?.trim();
+      if (!trimmed) {
+        return;
+      }
+
+      // If the subtitle would duplicate the row title, omit it entirely.
+      if (trimmed.toLowerCase() === titleLower) {
+        return;
+      }
+
+      // Prevent duplicates within the subtitle itself.
+      if (subtitles.some((s) => s.toLowerCase() === trimmed.toLowerCase())) {
+        return;
+      }
+
+      subtitles.push(trimmed);
+    };
+
+    if (process.type === "aggregatedApp") {
+      pushSubtitle(process.appName);
+      if (process.childProcessCount != null && process.childProcessCount > 0) {
+        pushSubtitle(`${process.childProcessCount + 1} processes`);
+      }
+    }
+    if (shouldShowPID) {
+      pushSubtitle(process.id.toString());
+    }
+    if (shouldShowPath) {
+      pushSubtitle(process.path);
+    }
+
+    return subtitles.length > 0 ? subtitles.join(" - ") : undefined;
+  };
+
+  const toggleAppGrouping = async () => {
+    const nextValue = !isAppGroupingEnabled;
+    await LocalStorage.setItem(APP_GROUPING_STORAGE_KEY, nextValue);
+    setIsAppGroupingEnabled(nextValue);
+    await showToast({ title: `${nextValue ? "Enabled" : "Disabled"} App Grouping` });
+  };
+
+  const processCount = visibleProcesses.length;
+  const isShowingInitialLoadingState = isLoadingProcesses && visibleProcesses.length === 0;
 
   return (
     <List
-      isLoading={state.length === 0}
+      isLoading={isShowingInitialLoadingState}
       searchBarPlaceholder="Filter by name"
       onSearchTextChange={(query) => setQuery(query)}
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter" storeValue onChange={(newValue) => setSortBy(newValue as "cpu" | "memory")}>
+        <List.Dropdown
+          id={SORT_BY_DROPDOWN_ID}
+          tooltip="Sort"
+          storeValue={true}
+          defaultValue={DEFAULT_SORT_BY}
+          onChange={(newValue) => {
+            if (!isSortBy(newValue)) {
+              return;
+            }
+            setSortBy(newValue);
+          }}
+        >
           <List.Dropdown.Section title="Sort By">
             <List.Dropdown.Item title="CPU Usage" value="cpu" />
             <List.Dropdown.Item title="Memory Usage" value="memory" />
@@ -271,17 +407,21 @@ export default function ProcessList() {
         </List.Dropdown>
       }
     >
+      {fetchError ? <List.EmptyView title="Failed to Fetch Processes" description={fetchError} /> : null}
+      {!fetchError && !isLoadingProcesses && visibleProcesses.length === 0 ? (
+        <List.EmptyView title="No Processes Found" />
+      ) : null}
       <List.Section title="Processes" subtitle={`${processCount} running`}>
-        {state
+        {visibleProcesses
           .filter((process) => {
             if (query === "") {
               return true;
             }
             const nameMatches = process.processName.toLowerCase().includes(query.toLowerCase());
             const pathMatches =
-              shouldIncludePaths &&
+              shouldSearchInPaths &&
               process.path.toLowerCase().match(new RegExp(`.+${query}.*\\.[app|framework|prefpane]`, "ig")) != null;
-            const pidMatches = shouldIncludePid && process.id.toString().includes(query);
+            const pidMatches = shouldSearchInPid && process.id.toString().includes(query);
             const appNameMatches =
               process.type === "aggregatedApp" && process.appName?.toLowerCase().includes(query.toLowerCase());
 
@@ -328,6 +468,34 @@ export default function ProcessList() {
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
                     <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
+                    {process.canRestartProcess ? (
+                      <Action
+                        title="Restart"
+                        icon={Icon.RotateAntiClockwise}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+                        onAction={() => restartProcess(process)}
+                      />
+                    ) : null}
+                    {process.canRestartProcess ? (
+                      <Action
+                        title="Force Restart"
+                        icon={Icon.RotateAntiClockwise}
+                        shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "r" }}
+                        onAction={() => restartProcess(process, true)}
+                      />
+                    ) : null}
+                    <Action
+                      title="Kill All"
+                      icon={Icon.XMarkCircleFilled}
+                      shortcut={{ modifiers: ["opt"], key: "return" }}
+                      onAction={() => killAllProcesses(process)}
+                    />
+                    <Action
+                      title="Force Kill All"
+                      icon={Icon.XMarkCircleFilled}
+                      shortcut={{ modifiers: ["opt", "shift"], key: "return" }}
+                      onAction={() => killAllProcesses(process, true)}
+                    />
                     {process.path == null ? null : (
                       <Action.CopyToClipboard
                         title="Copy Path"
@@ -339,18 +507,13 @@ export default function ProcessList() {
                       title="Reload"
                       icon={Icon.ArrowClockwise}
                       shortcut={Keyboard.Shortcut.Common.Refresh}
-                      onAction={() => fetchProcesses()}
+                      onAction={() => fetchProcesses(true)}
                     />
                     <Action
-                      title={`${aggregateApps ? "Disable" : "Enable"} Aggregating Apps`}
+                      title={`${isAppGroupingEnabled ? "Disable" : "Enable"} App Grouping`}
                       icon={Icon.AppWindow}
                       shortcut={{ modifiers: ["shift"], key: "tab" }}
-                      onAction={() => {
-                        setAggregateApps(!aggregateApps);
-                        showToast({
-                          title: `${aggregateApps ? "Disabled" : "Enabled"} aggregating apps`,
-                        });
-                      }}
+                      onAction={toggleAppGrouping}
                     />
                   </ActionPanel>
                 }

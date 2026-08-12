@@ -1,11 +1,11 @@
 import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { API_KEY, creem } from "./creem";
+import { creem } from "./creem";
 
 export default function ListPayments() {
   const { isLoading, data } = useCachedPromise(
     async () => {
-      const res = await creem.searchTransactions({ xApiKey: API_KEY });
+      const res = await creem.transactions.search();
       return res.items;
     },
     [],

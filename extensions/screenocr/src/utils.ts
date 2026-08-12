@@ -4,6 +4,7 @@ import {
 } from "swift:../swift";
 import { getUserSelectedLanguages } from "./hooks";
 import { showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { showFailureToast as showRaycastFailureToast } from "@raycast/utils";
 
 export const recognizeText = async (isFullScreen = false) => {
   const preference = getPreferenceValues<Preferences>();
@@ -48,21 +49,25 @@ export const detectBarcode = async () => {
 export const showSuccessToast = async (title: string) => {
   const preference = getPreferenceValues<Preferences>();
 
-  if (preference.showToast) {
-    await showToast({
-      style: Toast.Style.Success,
-      title,
-    });
+  if (!preference.showToast) {
+    return;
   }
+
+  await showToast({
+    style: Toast.Style.Success,
+    title,
+  });
 };
 
-export const showFailureToast = async (title: string) => {
+export const showFailureToast = async (
+  error: unknown,
+  options?: { title?: string },
+) => {
   const preference = getPreferenceValues<Preferences>();
 
-  if (preference.showToast) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title,
-    });
+  if (!preference.showToast) {
+    return;
   }
+
+  await showRaycastFailureToast(error, options);
 };

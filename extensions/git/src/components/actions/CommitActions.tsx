@@ -9,6 +9,7 @@ import {
   Clipboard,
   Form,
   Color,
+  Keyboard,
 } from "@raycast/api";
 import { Commit } from "../../types";
 import InteractiveRebaseEditorView from "../views/InteractiveRebaseEditorView";
@@ -176,7 +177,7 @@ export function CommitResetAction(context: RepositoryContext & NavigationContext
         title="Soft Reset (Keep Changes Staged)"
         icon={{ source: Icon.Dot, tintColor: Color.Green }}
         onAction={() => handleReset(ResetMode.SOFT)}
-        shortcut={{ modifiers: ["cmd"], key: "s" }}
+        shortcut={Keyboard.Shortcut.Common.Save}
       />
       <Action
         title="Mixed Reset (Keep Changes Unstaged)"
@@ -240,14 +241,32 @@ export function CommitRebaseAction(context: RepositoryContext & NavigationContex
 
 /**
  * Action to open Interactive Rebase Editor starting from selected commit.
+ * Blocks execution if there are uncommitted changes.
  */
 export function CommitInteractiveRebaseAction(context: RepositoryContext & NavigationContext & { commit: Commit }) {
+  const { push } = useNavigation();
+
+  const handleInteractiveRebase = () => {
+    const hasUncommittedChanges = context.status.data.files.length !== 0;
+
+    if (hasUncommittedChanges) {
+      confirmAlert({
+        title: "Cannot Start Interactive Rebase",
+        message: "You have uncommitted changes. Please commit or stash them before starting an interactive rebase.",
+        primaryAction: { title: "OK", style: Alert.ActionStyle.Default },
+      });
+      return;
+    }
+
+    push(<InteractiveRebaseEditorView startFromCommit={context.commit.hash} {...context} />);
+  };
+
   return (
-    <Action.Push
+    <Action
       title="Interactive Rebase from Here"
       icon={{ source: `arrow-rebase.svg`, tintColor: Color.Blue }}
-      target={<InteractiveRebaseEditorView startFromCommit={context.commit.hash} {...context} />}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      onAction={handleInteractiveRebase}
+      shortcut={Keyboard.Shortcut.Common.Edit}
     />
   );
 }
@@ -260,7 +279,7 @@ export function CommitPatchCreateAction(context: RepositoryContext & NavigationC
     <Action.Push
       title="Save as Patch"
       icon={`patch.svg`}
-      shortcut={{ modifiers: ["cmd"], key: "s" }}
+      shortcut={Keyboard.Shortcut.Common.Save}
       target={PatchCreateForm(context)}
     />
   );

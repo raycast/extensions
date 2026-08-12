@@ -15,5 +15,5 @@ export const getIcon = (item: SearchResult) => {
   }
 };
 
-const preferences = getPreferenceValues();
-export const apiEnabled = preferences["useApiForSearch"] && preferences["apiKey"]?.length > 0;
+const preferences = getPreferenceValues<ExtensionPreferences>();
+export const apiEnabled = preferences["useApiForSearch"] && !!preferences["apiKey"];

@@ -40,20 +40,23 @@ export function getDefaultIconUrl(): string {
 export function mapColorToHex(colorName: string): string {
   const normalized = colorName?.toLowerCase() || "";
 
-  // Direct mapping to hex colors based on the UI color picker
+  // Direct mapping to hex colors based on the Granola UI color picker
   const colorMap: Record<string, string> = {
-    default: "#64748B",
-    violet: "#8B5CF6",
-    blue: "#3B82F6",
-    teal: "#14B8A6",
-    lime: "#65A30D",
-    amber: "#F59E0B",
-    red: "#EF4444",
-    tertiary: "#F1F5F9",
-    slate: "#64748B",
-    black: "#475569",
-    gray: "#868686",
+    // Neutrals
+    default: "#818179", // oats-neutral-500
+    gray: "#818179", // oats-neutral-500
+    slate: "#4E4D4B", // oats-neutral-700
+    black: "#4E4D4B", // oats-neutral-700
+
+    // Chromatics
+    violet: "#A291CE", // oats-purple-300
+    blue: "#4790E2", // oats-blue-300
+    teal: "#788C16", // oats-green-400 (no teal in new palette)
+    lime: "#788C16", // oats-green-400
+    amber: "#EE9212", // oats-yellow-300
+    tertiary: "#B89F56", // oats-gold-300
+    red: "#EA5D3D", // oats-red-300
   };
 
-  return colorMap[normalized] || "#64748B";
+  return colorMap[normalized] || "#818179";
 }

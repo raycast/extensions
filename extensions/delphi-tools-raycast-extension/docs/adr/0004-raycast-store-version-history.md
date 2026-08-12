@@ -1,0 +1,3 @@
+# Raycast Store version history in CHANGELOG.md
+
+We will keep notable release notes in a root `CHANGELOG.md` using Raycast's h2 entry format, including the `{PR_MERGE_DATE}` placeholder for new entries. Raycast Store displays this metadata directly, the merge-date placeholder avoids stale dates when review takes days, and a root changelog is clearer for users and reviewers than deriving release history from commits, pull requests, or `docs/progress.md`. We considered skipping a changelog, using static manual dates, or treating progress docs as release history, but those options are either invisible in the Store, easier to let drift, or too implementation-focused for Version History.

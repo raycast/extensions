@@ -1,5 +1,8 @@
 # Disk Usage Changelog
 
+## [Bug Fix] - 2026-01-21
+- Fix file deletion if they have already been deleted. `Error: ENOENT: no such file or directory, realpath`
+
 ## [Improvements] - 2026-01-04
 
 - Optimized scanning speed using streams and lightweight objects on the heap.

@@ -15,9 +15,12 @@ export const Icon = {
   Terminal: "terminal" as const,
   Code: "code" as const,
   Box: "box" as const,
+  Upload: "upload" as const,
+  Plug: "plug" as const,
   Database: "database" as const,
   Gear: "gear" as const,
   Eye: "eye" as const,
+  EyeDisabled: "eye-disabled" as const,
   Check: "check" as const,
   CheckCircle: "check-circle" as const,
   Text: "text" as const,
@@ -30,12 +33,30 @@ export const Icon = {
   ArrowClockwise: "arrow-clockwise" as const,
   Pencil: "pencil" as const,
   Trash: "trash" as const,
+  Undo: "undo" as const,
+  Clipboard: "clipboard" as const,
+  List: "list" as const,
+  Lock: "lock" as const,
+  MagnifyingGlass: "magnifying-glass" as const,
 };
 
 // Mock ActionPanel component
-export const ActionPanel = ({ children }: { children: React.ReactNode }) => {
+const ActionPanelComponent = ({ children }: { children: React.ReactNode }) => {
   return React.createElement("div", { "data-testid": "action-panel" }, children);
 };
+
+// ActionPanel.Section component
+const ActionPanelSection = ({ children, title }: { children?: React.ReactNode; title?: string }) => {
+  return React.createElement("div", { "data-testid": "action-panel-section" }, [
+    title && React.createElement("div", { key: "title" }, title),
+    children,
+  ]);
+};
+
+// Export ActionPanel with Section sub-component
+export const ActionPanel = Object.assign(ActionPanelComponent, {
+  Section: ActionPanelSection,
+});
 
 // Mock Action components
 const ActionObject = {
@@ -43,8 +64,8 @@ const ActionObject = {
     Destructive: "destructive" as const,
     Regular: "regular" as const,
   },
-  Push: ({ children, ...props }: any) => {
-    return React.createElement("div", { "data-testid": "action-push", ...props }, children);
+  Push: ({ children, title, ...props }: any) => {
+    return React.createElement("div", { "data-testid": "action-push", ...props }, title || children);
   },
   Open: ({ children, ...props }: any) => {
     return React.createElement("div", { "data-testid": "action-open", ...props }, children);
@@ -124,9 +145,13 @@ Form.TextField = ({ children, value, onChange, ...props }: any) => {
   );
 };
 
-Form.Dropdown = ({ children, ...props }: any) => {
+const FormDropdown = ({ children, ...props }: any) => {
   return React.createElement("select", { "data-testid": "form-dropdown", ...props }, children);
 };
+FormDropdown.Item = ({ title, value, ...props }: any) => {
+  return React.createElement("option", { "data-testid": "form-dropdown-item", value, ...props }, title);
+};
+Form.Dropdown = FormDropdown;
 
 Form.TextArea = ({ children, ...props }: any) => {
   return React.createElement("textarea", { "data-testid": "form-textarea", ...props }, children);
@@ -143,6 +168,27 @@ export const List = (props: any) => {
   if (props.navigationTitle) {
     content.push(React.createElement("div", { key: "navigation-title" }, props.navigationTitle));
   }
+  // Render a search input so tests can drive onSearchTextChange
+  if (props.onSearchTextChange) {
+    content.push(
+      React.createElement("input", {
+        key: "search-bar",
+        "data-testid": "search-bar",
+        value: props.searchText ?? "",
+        placeholder: props.searchBarPlaceholder,
+        onChange: (e: any) => props.onSearchTextChange(e.target.value),
+      }),
+    );
+  }
+  if (props.searchBarAccessory) {
+    content.push(
+      React.createElement(
+        "div",
+        { key: "search-bar-accessory", "data-testid": "search-bar-accessory" },
+        props.searchBarAccessory,
+      ),
+    );
+  }
   if (props.children) {
     content.push(props.children);
   }
@@ -150,7 +196,7 @@ export const List = (props: any) => {
   return React.createElement("div", { "data-testid": "list", className: props.className }, content);
 };
 
-List.Item = ({ children, title, subtitle, accessories, detail, ...props }: any) => {
+List.Item = ({ children, title, subtitle, accessories, detail, actions, ...props }: any) => {
   const content = [];
   if (title) content.push(React.createElement("div", { key: "title" }, title));
   if (subtitle) content.push(React.createElement("div", { key: "subtitle" }, subtitle));
@@ -161,6 +207,10 @@ List.Item = ({ children, title, subtitle, accessories, detail, ...props }: any) 
         if (accessory.text) {
           return React.createElement("div", { key: `accessory-text-${index}` }, accessory.text);
         }
+        if (accessory.tag) {
+          const tagValue = typeof accessory.tag === "string" ? accessory.tag : accessory.tag.value;
+          return React.createElement("div", { key: `accessory-tag-${index}` }, tagValue);
+        }
         if (accessory.icon) {
           return React.createElement("div", { key: `accessory-icon-${index}` }, "icon");
         }
@@ -170,6 +220,8 @@ List.Item = ({ children, title, subtitle, accessories, detail, ...props }: any) 
     content.push(React.createElement("div", { key: "accessories" }, accessoryContent));
   }
   if (detail) content.push(React.createElement("div", { key: "detail" }, detail));
+  if (actions)
+    content.push(React.createElement("div", { key: "actions", "data-testid": "list-item-actions" }, actions));
   if (children) content.push(children);
 
   return React.createElement("div", { "data-testid": "list-item", ...props }, content);
@@ -199,6 +251,10 @@ const ListItemDetail = ({ children, markdown, metadata, ...props }: any) => {
   }
   if (children) content.push(children);
   return React.createElement("div", { "data-testid": "list-item-detail-metadata-label", ...props }, content);
+};
+
+(ListItemDetail as any).Metadata.Separator = (props: any) => {
+  return React.createElement("hr", { "data-testid": "metadata-separator", ...props });
 };
 
 (ListItemDetail as any).Metadata.TagList = ({ children, ...props }: any) => {
@@ -235,7 +291,20 @@ ListDropdown.Item = ({ title, value, ...props }: any) => {
   return React.createElement("option", { "data-testid": "list-dropdown-item", value, ...props }, title);
 };
 
+ListDropdown.Section = ({ children, title, ...props }: any) => {
+  return React.createElement("optgroup", { "data-testid": "list-dropdown-section", label: title, ...props }, children);
+};
+
 List.Dropdown = ListDropdown;
+
+// Mock List.EmptyView
+List.EmptyView = ({ children, title, description, ...props }: any) => {
+  return React.createElement("div", { "data-testid": "list-empty-view", ...props }, [
+    title && React.createElement("div", { key: "title" }, title),
+    description && React.createElement("div", { key: "description" }, description),
+    children,
+  ]);
+};
 
 // Mock other components
 export const Color = {
@@ -271,7 +340,13 @@ export const Detail = ({ children, markdown, ...props }: any) => {
 // Mock functions
 export const showToast = vi.fn().mockResolvedValue(undefined);
 export const popToRoot = vi.fn().mockResolvedValue(undefined);
-export const getPreferenceValues = vi.fn(() => ({}));
+export const getPreferenceValues = vi.fn(() => ({
+  enableDefaults: true,
+  enableCustomHeaderPattern: false,
+  enableCustomStartEndPatterns: false,
+  enableCustomZshrcPath: false,
+  configFileType: "zshrc",
+}));
 
 // Mock useNavigation hook
 export const useNavigation = vi.fn(() => ({
@@ -293,4 +368,35 @@ export const Keyboard = {
       New: { key: "n", modifiers: ["cmd"] } as const,
     },
   },
+};
+
+// Mock Alert
+export const Alert = {
+  ActionStyle: {
+    Destructive: "destructive" as const,
+    Default: "default" as const,
+  },
+};
+
+// Mock confirmAlert - returns true by default (confirmed)
+export const confirmAlert = vi.fn().mockResolvedValue(true);
+
+// Mock trash - moves file to trash
+export const trash = vi.fn().mockResolvedValue(undefined);
+
+// Mock Clipboard
+export const Clipboard = {
+  copy: vi.fn().mockResolvedValue(undefined),
+  paste: vi.fn().mockResolvedValue(""),
+  read: vi.fn().mockResolvedValue(""),
+  readText: vi.fn().mockResolvedValue(""),
+};
+
+// Mock LocalStorage
+export const LocalStorage = {
+  getItem: vi.fn().mockResolvedValue(null),
+  setItem: vi.fn().mockResolvedValue(undefined),
+  removeItem: vi.fn().mockResolvedValue(undefined),
+  clear: vi.fn().mockResolvedValue(undefined),
+  allItems: vi.fn().mockResolvedValue({}),
 };

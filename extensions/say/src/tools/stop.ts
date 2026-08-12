@@ -1,4 +1,4 @@
-import { killRunningSay } from "mac-say";
+import { killRunningSay } from "../speech.js";
 
 /**
  * Stop the current running Say.

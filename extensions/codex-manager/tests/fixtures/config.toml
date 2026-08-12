@@ -1,0 +1,8 @@
+model = "gpt-5"
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+
+[mcp_servers.invalid]
+args = ["missing-command"]

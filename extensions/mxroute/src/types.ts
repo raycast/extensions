@@ -1,3 +1,13 @@
+export type DomainVerificationKey = {
+  key: string;
+  record: {
+    type: "TXT";
+    name: string;
+    value: "domain-verified";
+  };
+  description: string;
+};
+
 export enum CatchAllType {
   Reject = "fail",
   DiscardSilently = "blackhole",

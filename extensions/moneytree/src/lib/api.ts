@@ -1,5 +1,12 @@
 import { getAccessToken, ensureValidToken } from "./auth";
-import { DataSnapshot, TransactionsResponse, CredentialWithAccounts } from "./types";
+import {
+  CategoriesResponse,
+  Category,
+  DataSnapshot,
+  Transaction,
+  TransactionsResponse,
+  CredentialWithAccounts,
+} from "./types";
 import { API_BASE_URL, SDK_PLATFORM, SDK_VERSION, CLIENT_ID, API_VERSION, APP_BASE_URL } from "./constants";
 
 /**
@@ -122,13 +129,78 @@ export async function getCredentials(): Promise<CredentialWithAccounts[]> {
 }
 
 /**
+ * Get Moneytree transaction categories.
+ */
+export async function getCategories(): Promise<Category[]> {
+  const response = await apiRequest<CategoriesResponse>("/presenter/categories.json?locale=en", { method: "GET" });
+  return response.categories;
+}
+
+/**
+ * Create a custom Moneytree subcategory.
+ */
+export async function createCategory(options: { parentId: number; name: string; iconKey?: string }): Promise<Category> {
+  const response = await apiRequest<{ category: Category }>("/command/categories.json?locale=en", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+    },
+    body: JSON.stringify({
+      category: {
+        parent_id: String(options.parentId),
+        name: options.name,
+        icon_key: options.iconKey || "uncategorized",
+      },
+    }),
+  });
+
+  return response.category;
+}
+
+/**
+ * Update a custom Moneytree category.
+ */
+export async function updateCategory(options: {
+  categoryId: number;
+  parentId: number;
+  name: string;
+  iconKey?: string;
+}): Promise<Category> {
+  const response = await apiRequest<{ category: Category }>(
+    `/command/categories/${options.categoryId}.json?locale=en`,
+    {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json;charset=UTF-8",
+      },
+      body: JSON.stringify({
+        category: {
+          parent_id: String(options.parentId),
+          name: options.name,
+          icon_key: options.iconKey || "uncategorized",
+        },
+      }),
+    },
+  );
+
+  return response.category;
+}
+
+/**
  * Get transactions for a date range
  */
-export async function getTransactions(
-  startDate: Date,
-  endDate: Date,
-  accountId?: number,
-): Promise<TransactionsResponse> {
+/**
+ * Get a single page of transactions
+ */
+export async function getTransactionPage(options: {
+  startDate: Date;
+  endDate: Date;
+  page?: number;
+  accountId?: number;
+  search?: string;
+}): Promise<TransactionsResponse> {
+  const { startDate, endDate, page = 1, accountId, search } = options;
+
   // Format dates as MM/DD/YYYY
   const formatDate = (date: Date): string => {
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -137,30 +209,76 @@ export async function getTransactions(
     return `${month}/${day}/${year}`;
   };
 
-  const params = new URLSearchParams({
+  const params: Record<string, string> = {
     start_date: formatDate(startDate),
     end_date: formatDate(endDate),
     exclude_corporate: "true",
     locale: "en",
     show_transactions_details: "true",
     transaction: "{}",
-  });
+    page: String(page),
+    per_page: "25",
+  };
 
   if (accountId) {
-    params.append("account_id", String(accountId));
+    params.account_id = String(accountId);
   }
 
-  const dateRange = `${formatDate(startDate)} to ${formatDate(endDate)}`;
+  if (search) {
+    params.search = search;
+  }
+
+  const searchParams = new URLSearchParams(params);
   console.debug(
-    `[API] getTransactions() - Fetching transactions${accountId ? ` for account ${accountId}` : ""} (${dateRange})`,
+    `[API] getTransactionPage() - page=${page}${search ? ` search="${search}"` : ""} (${formatDate(startDate)} to ${formatDate(endDate)})`,
   );
 
-  const response = await apiRequest<TransactionsResponse>(`/web/presenter/transactions.json?${params.toString()}`, {
-    method: "GET",
-  });
+  const response = await apiRequest<TransactionsResponse>(
+    `/web/presenter/transactions.json?${searchParams.toString()}`,
+    { method: "GET" },
+  );
 
   console.debug(
-    `[API] getTransactions() - Received ${response.transactions.length} transactions (total: ${response.transactions_details.transactions_total})`,
+    `[API] getTransactionPage() - Page ${page}: ${response.transactions.length} transactions (total: ${response.transactions_details.transactions_count})`,
   );
   return response;
+}
+
+/**
+ * Update editable transaction fields.
+ */
+export async function updateTransaction(options: {
+  transaction: Transaction;
+  descriptionGuest: string | null;
+  categoryId: number;
+}): Promise<Transaction> {
+  const { transaction, descriptionGuest, categoryId } = options;
+  const response = await apiRequest<{
+    transaction: Transaction & {
+      account?: { id: number };
+      category?: { id: number };
+    };
+  }>(`/command/transactions/${transaction.id}.json?locale=en`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json;charset=UTF-8",
+    },
+    body: JSON.stringify({
+      transaction: {
+        date: transaction.date,
+        amount: transaction.amount,
+        category_id: categoryId,
+        description_guest: descriptionGuest,
+        claim_id: transaction.claim_id,
+        expense_type: transaction.expense_type,
+      },
+      upload_ids: [],
+    }),
+  });
+
+  return {
+    ...response.transaction,
+    account_id: response.transaction.account_id ?? response.transaction.account?.id ?? transaction.account_id,
+    category_id: response.transaction.category_id ?? response.transaction.category?.id ?? categoryId,
+  };
 }

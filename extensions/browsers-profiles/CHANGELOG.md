@@ -1,5 +1,18 @@
 # Raycast Browsers Profiles
 
+## [Copy Deeplink] - 2026-08-11
+
+- Copy a profile as deeplink (ref: [Issue #23606](https://github.com/raycast/extensions/issues/23606))
+- Update `metadata` images
+
+## [Add Vivaldi browser support] - 2026-03-27
+
+- Adding Vivaldi browser to supported browser list
+
+## [Add Arc browser support] - 2026-02-04
+
+- Adding Arc browser to supported browser list
+
 ## [Fix crash when reading Chromium profiles] - 2026-01-16
 
 - Fix ENOENT error when iterating over non-profile directories in browser data folder

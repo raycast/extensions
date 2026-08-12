@@ -94,7 +94,7 @@ export async function GetSettingsCommandAnswer(command: Enum.CommandAnswer): Pro
  */
 export async function SetSettingsCommandAnswer(
   command: Enum.CommandAnswer,
-  settings: Types.SettingsCommandAnswer
+  settings: Types.SettingsCommandAnswer,
 ): Promise<void> {
   await LocalStorage.setItem(`settings_command_${command}`, JSON.stringify(settings));
 }

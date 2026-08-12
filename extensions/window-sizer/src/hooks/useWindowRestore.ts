@@ -3,6 +3,7 @@ import { useWindowInfo } from "./useWindowInfo";
 import { useWindowStateManager } from "./useWindowStateManager";
 import { resizeWindow } from "../swift-app";
 import { log, error as logError } from "../utils/logger";
+import { isTimeoutError, TIMEOUT_ERROR_MESSAGE, TIMEOUT_ERROR_TOAST_TITLE, withTimeout } from "../utils/timeout";
 
 export function useWindowRestore() {
   const { getWindowInfo } = useWindowInfo();
@@ -10,6 +11,8 @@ export function useWindowRestore() {
 
   // Function to restore previous window size
   async function restorePreviousSize() {
+    let didCloseMainWindow = false;
+
     try {
       // Get current window information
       const windowInfo = await getWindowInfo();
@@ -45,6 +48,7 @@ export function useWindowRestore() {
 
       // If we need to restore size, close main window first
       await closeMainWindow();
+      didCloseMainWindow = true;
 
       // Get saved position or fallback to current position if not available
       let posX: number | undefined;
@@ -73,12 +77,9 @@ export function useWindowRestore() {
       log(`Restoring window to: ${savedState.size.width}×${savedState.size.height} at position (${posX}, ${posY})`);
 
       // Apply the saved window state using Swift API
-      const result = await resizeWindow(
-        savedState.size.width,
-        savedState.size.height,
-        posX,
-        posY,
-        savedState.position !== undefined,
+      const result = await withTimeout(
+        resizeWindow(savedState.size.width, savedState.size.height, posX, posY, savedState.position !== undefined),
+        "Restore window size",
       );
 
       // Check if actual size differs from requested size (with small tolerance)
@@ -96,6 +97,15 @@ export function useWindowRestore() {
       });
     } catch (error) {
       logError("Error restoring window size:", error);
+
+      if (isTimeoutError(error)) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: TIMEOUT_ERROR_TOAST_TITLE,
+          message: didCloseMainWindow ? undefined : TIMEOUT_ERROR_MESSAGE,
+        });
+        return;
+      }
 
       // Show appropriate error message
       await showToast({

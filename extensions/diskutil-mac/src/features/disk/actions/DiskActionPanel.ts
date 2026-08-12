@@ -2,17 +2,9 @@ import { Icon, Image, Keyboard } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import type Disk from "../../../models/Disk";
 
-/**
- * Handles the creation of action configurations for disk operations.
- * Separates UI action configuration from action execution logic (DiskActions).
- */
 export class DiskActionPanel {
   constructor(private disk: Disk) {}
 
-  /**
-   * Returns an array of action configurations based on the disk's mount status.
-   * Each action includes title, keyboard shortcut, icon, and callback.
-   */
   getActions(postFunction: (type: "Reload" | "Refresh") => void): {
     title: string;
     shortcut?: Keyboard.Shortcut;
@@ -23,7 +15,7 @@ export class DiskActionPanel {
       title: string,
       shortcut: Keyboard.Shortcut,
       icon: Image.ImageLike,
-      method: "mount" | "unmount" | "eject" | "revealInFinder" | "showDetailCustomTerminal"
+      method: "mount" | "unmount" | "eject" | "revealInFinder" | "showDetailCustomTerminal",
     ) => ({
       title,
       shortcut,
@@ -32,7 +24,7 @@ export class DiskActionPanel {
         this.disk[method]().finally(
           () =>
             (method === "mount" || method === "unmount" || method === "eject") &&
-            postFunction(method === "eject" ? "Reload" : "Refresh")
+            postFunction(method === "eject" ? "Reload" : "Refresh"),
         );
       },
     });

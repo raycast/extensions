@@ -1,9 +1,11 @@
 import { Action, ActionPanel, Icon, List, useNavigation } from "@raycast/api";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useBookmarkFilter } from "../hooks/useBookmarkFilter";
 import { useConfig } from "../hooks/useConfig";
+import { useEnsureScrollablePagination } from "../hooks/usePrefetchPagination";
 import { useSearchBookmarks } from "../hooks/useSearchBookmarks";
 import { useTranslation } from "../hooks/useTranslation";
+import { connectionGuard } from "./ConnectionErrorView";
 import { Bookmark } from "../types";
 import { BookmarkItem } from "./BookmarkItem";
 interface BookmarkListProps {
@@ -15,22 +17,40 @@ interface BookmarkListProps {
   };
   isLoading: boolean;
   error?: Error;
+  /** Whether the rows came from a request that succeeded this session. */
+  hasLiveData?: boolean;
   onRefresh?: () => void;
   searchBarPlaceholder?: string;
   emptyViewTitle?: string;
   emptyViewDescription?: string;
-  filterFn?: (bookmark: Bookmark) => boolean;
   onSearch?: (text: string) => void;
   onBookmarkVisit?: (bookmark: Bookmark) => void;
+  /** Override the item label used in the section title and navigation title (e.g. "Notes" instead of "Bookmarks") */
+  itemLabel?: string;
+  /** Optional accessory element rendered in the search bar (e.g. a List.Dropdown for filtering) */
+  searchBarAccessory?: Parameters<typeof List>[0]["searchBarAccessory"];
 }
 function SearchBookmarkList({ searchText }: { searchText: string }) {
   const { t } = useTranslation();
-  const { bookmarks, isLoading: isLoadingBookmarks, revalidate: revalidateBookmarks } = useSearchBookmarks(searchText);
+  const {
+    bookmarks,
+    isLoading: isLoadingBookmarks,
+    error,
+    hasLiveData,
+    revalidate: revalidateBookmarks,
+  } = useSearchBookmarks(searchText);
+
+  // Online search hits the API on every keystroke; with the default toast
+  // suppressed, a dead server would otherwise look like "no results".
+  const guard = connectionGuard(error, hasLiveData, revalidateBookmarks);
+  if (guard) return guard;
 
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoadingBookmarks}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidateBookmarks}
       searchBarPlaceholder={t("bookmarkList.searchPlaceholder")}
       emptyViewTitle={t("bookmarkList.emptySearch.title")}
@@ -43,17 +63,22 @@ export function BookmarkList({
   bookmarks,
   pagination,
   isLoading,
+  error,
+  hasLiveData,
   onRefresh,
   searchBarPlaceholder,
   emptyViewTitle,
   emptyViewDescription,
   onSearch,
   onBookmarkVisit,
+  itemLabel,
+  searchBarAccessory,
 }: BookmarkListProps) {
   const { t } = useTranslation();
   const { push } = useNavigation();
   const { config } = useConfig();
   const [searchText, setSearchText] = useState("");
+  const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
 
   const defaultValues = useMemo(
     () => ({
@@ -78,15 +103,16 @@ export function BookmarkList({
 
   // Pagination is handled directly by Raycast's List component
 
-  const handleCleanCache = useCallback(() => {}, []);
-
   const searchFilteredBookmarks = useBookmarkFilter(bookmarks || [], searchText);
 
   const displayInfo = useMemo(() => {
     const displayBookmarks = searchFilteredBookmarks || [];
+    const label = itemLabel ?? t("bookmarkList.title", { count: displayBookmarks.length }).replace(/ \(\d+\)$/, "");
     const listTitle = searchText
-      ? t("bookmarkList.filterResults", { searchText, count: displayBookmarks.length })
-      : t("bookmarkList.title", { count: displayBookmarks.length });
+      ? t("bookmarkList.filterResultsLabel", { label, searchText, count: displayBookmarks.length })
+      : itemLabel
+        ? `${itemLabel} (${displayBookmarks.length})`
+        : t("bookmarkList.title", { count: displayBookmarks.length });
     const hasMoreNotice = pagination?.hasMore ? "..." : "";
 
     return {
@@ -94,7 +120,37 @@ export function BookmarkList({
       listTitle,
       hasMoreNotice,
     };
-  }, [searchFilteredBookmarks, searchText, pagination?.hasMore, t]);
+  }, [searchFilteredBookmarks, searchText, pagination?.hasMore, t, itemLabel]);
+
+  // Best-practice fix: avoid a pagination deadlock when reopening a command.
+  // If we render only the cached first page and the list isn't scrollable, Raycast won't trigger `onLoadMore`.
+  // Prefetch one extra page once, but only when not filtering locally.
+  useEnsureScrollablePagination({
+    pagination,
+    isLoading,
+    itemCount: displayInfo.displayBookmarks.length,
+    enabled: searchText.trim().length === 0,
+    // Without these the prefetch fires against a dead server and duplicates
+    // the list on reconnect — see raycast/extensions#30021.
+    error,
+    hasLiveData,
+  });
+
+  useEffect(() => {
+    const firstId = displayInfo.displayBookmarks[0]?.id;
+    if (!firstId) {
+      if (selectedItemId) setSelectedItemId(undefined);
+      return;
+    }
+
+    if (!selectedItemId) {
+      setSelectedItemId(firstId);
+      return;
+    }
+
+    const exists = displayInfo.displayBookmarks.some((b) => b.id === selectedItemId);
+    if (!exists) setSelectedItemId(firstId);
+  }, [displayInfo.displayBookmarks, selectedItemId]);
 
   if (!bookmarks) {
     return (
@@ -113,9 +169,12 @@ export function BookmarkList({
       isLoading={isLoading}
       isShowingDetail={displayInfo.displayBookmarks.length > 0}
       searchBarPlaceholder={searchBarPlaceholder || defaultValues.searchBarPlaceholder}
+      searchBarAccessory={searchBarAccessory}
+      searchText={searchText}
       onSearchTextChange={handleSearchTextChange}
+      onSelectionChange={(id) => setSelectedItemId(id ?? undefined)}
       pagination={pagination}
-      navigationTitle={t("bookmarkList.title", { count: displayInfo.displayBookmarks.length })}
+      navigationTitle={displayInfo.listTitle}
     >
       {searchText && (
         <List.Item
@@ -140,8 +199,8 @@ export function BookmarkList({
             bookmark={bookmark}
             config={config}
             onRefresh={onRefresh || (() => {})}
-            onCleanCache={handleCleanCache}
             onVisit={onBookmarkVisit}
+            isSelected={selectedItemId === bookmark.id}
           />
         ))}
       </List.Section>

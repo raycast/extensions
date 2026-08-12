@@ -1,7 +1,7 @@
 import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { PlaceEventsResponse } from "./types";
-import { formatEventTime, getEventLocation } from "./utils";
+import { formatEventTime, getEventLocation, API_URLS, getEventUrl } from "./utils";
 import EventDetail from "./event-detail";
 
 interface EventsListProps {
@@ -10,9 +10,7 @@ interface EventsListProps {
 }
 
 export default function EventsList({ slug, placeName }: EventsListProps) {
-  const { isLoading, data, error } = useFetch<PlaceEventsResponse>(
-    `https://api2.luma.com/url?url=${encodeURIComponent(slug)}`,
-  );
+  const { isLoading, data, error } = useFetch<PlaceEventsResponse>(API_URLS.PLACE_URL(slug));
 
   const events = data?.data?.events || [];
 
@@ -40,10 +38,10 @@ export default function EventsList({ slug, placeName }: EventsListProps) {
           actions={
             <ActionPanel>
               <Action.Push title="View Details" icon={Icon.Eye} target={<EventDetail entry={entry} />} />
-              <Action.OpenInBrowser title="Open in Browser" url={`https://luma.com/${entry.event.url}`} />
+              <Action.OpenInBrowser title="Open in Browser" url={getEventUrl(entry)} />
               <Action.CopyToClipboard
                 title="Copy Event Link"
-                content={`https://luma.com/${entry.event.url}`}
+                content={getEventUrl(entry)}
                 shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
               />
             </ActionPanel>

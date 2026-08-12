@@ -16,6 +16,6 @@ export default function Command() {
 }
 
 function OpenCamera() {
-  open("raycast://extensions/raycast/system/open-camera");
+  open(`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/raycast/system/open-camera`);
   return null;
 }

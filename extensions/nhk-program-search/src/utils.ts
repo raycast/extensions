@@ -7,3 +7,13 @@ export function getFormattedDate(date = new Date(), format = "YYYY-MM-DD HH:mm")
 
   return format.replace("YYYY", year).replace("MM", month).replace("DD", day).replace("HH", hour).replace("mm", minute);
 }
+
+export function normalizeImageUrl(url: string): string {
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  if (url.startsWith("//")) {
+    return `https:${url}`;
+  }
+  return url;
+}

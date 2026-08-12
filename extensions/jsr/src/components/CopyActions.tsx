@@ -6,7 +6,7 @@ import type { SearchResultDocument } from "@/types";
 const CopyActions = ({ item }: { item: SearchResultDocument }) => {
   return (
     <ActionPanel.Section title="Copy Install Command">
-      {item.runtimeCompat.node ? (
+      {item.runtimeCompat?.node ? (
         <>
           <Action.CopyToClipboard
             title="npm (Node.js)"
@@ -25,10 +25,10 @@ const CopyActions = ({ item }: { item: SearchResultDocument }) => {
           />
         </>
       ) : null}
-      {item.runtimeCompat.deno ? (
+      {item.runtimeCompat?.deno ? (
         <Action.CopyToClipboard title="Deno" content={`deno add ${item.id}`} icon={{ source: "deno.svg" }} />
       ) : null}
-      {item.runtimeCompat.bun ? (
+      {item.runtimeCompat?.bun ? (
         <Action.CopyToClipboard title="Bun" content={`bunx jsr add ${item.id}`} icon={{ source: "bun.svg" }} />
       ) : null}
     </ActionPanel.Section>

@@ -13,12 +13,12 @@ import { ErrorBoundary } from "./components/ErrorBoundary";
 
 function OutdatedContent() {
   const [filter, setFilter] = useState(InstallableFilterType.all);
-  const { isLoading, data, revalidate } = useBrewOutdated();
+  const { isLoading, isRefreshing, data, revalidate } = useBrewOutdated();
 
   return (
     <OutdatedList
       outdated={data}
-      isLoading={isLoading}
+      isLoading={isLoading || isRefreshing}
       filterType={filter}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       onAction={() => revalidate()}
@@ -81,18 +81,6 @@ function OutdatedList(props: OutdatedListProps) {
   const casks = props.filterType != InstallableFilterType.formulae ? (props.outdated?.casks ?? []) : [];
   const hasResults = formulae.length > 0 || casks.length > 0;
 
-  // Determine empty state message based on filter
-  const getEmptyMessage = () => {
-    switch (props.filterType) {
-      case InstallableFilterType.formulae:
-        return "No formulae are outdated";
-      case InstallableFilterType.casks:
-        return "No casks are outdated";
-      default:
-        return "No casks or formulae are outdated";
-    }
-  };
-
   // Determine search bar placeholder based on loading state
   const searchBarPlaceholder = props.isLoading ? "Checking for outdated packages…" : placeholder(props.filterType);
 
@@ -115,8 +103,7 @@ function OutdatedList(props: OutdatedListProps) {
       {!props.isLoading && !hasResults && props.outdated !== undefined && (
         <List.EmptyView
           icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-          title={getEmptyMessage()}
-          description="All your packages are up to date"
+          title="All your packages are up to date"
         />
       )}
 

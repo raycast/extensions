@@ -48,7 +48,7 @@ export const useItermCommand = (opts: ItermCommandOpts): Result => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error>();
   const [success, setSuccess] = useState(false);
-  const script = useMemo(() => makeScript(opts), [opts]);
+  const script = useMemo(() => makeScript(opts), [opts.command, opts.location]);
 
   useEffect(() => {
     runAppleScript(script)

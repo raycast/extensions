@@ -1,5 +1,25 @@
 # Asana Changelog
 
+## [Fix apostrophes in task descriptions] - 2026-08-06
+
+- Preserve apostrophes in task and subtask descriptions
+
+## [Fix pagination error in large workspaces] - 2026-07-01
+
+- Fixed the "Create Task" command failing with a "The result is too large" 400 error in large workspaces by paginating through users and tags
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Add subtasks support and tag management] - 2026-01-23
+
+- Added ability to view subtasks for a task in the detail view
+- Added action to create subtasks under a parent task
+- Added ability to convert tasks to subtasks and subtasks to tasks
+- Added actions to add and remove tags from existing tasks
+- Added ability to rename tasks and subtasks
+
 ## [Add support for Asana sections] - 2025-10-28
 
 - Added option for assigning a section when creating a task. User can select from a list of existing sections.

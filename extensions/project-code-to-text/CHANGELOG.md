@@ -1,5 +1,19 @@
 # Changelog
 
+## [Update] - 2026-01-20
+
+### Fixed
+- Fixed memory leaks when updating file metadata in generated files
+- Improved error handling when reading and writing files to prevent crashes if files become unavailable during processing
+- Fixed timing issue with Finder selection that could cause incorrect file selection
+- Improved handling of files on different drives and symbolic links for better cross-platform compatibility
+
+### Improved
+- Optimized file scanning to reduce duplicate operations and improve processing speed for large directories
+- Enhanced error messages with clearer explanations and actionable recommendations when processing fails
+- Unified error handling across the extension for more consistent behavior and better user feedback
+- Refactored internal code structure for improved maintainability and reliability
+
 ## [Update] - 2025-12-16
 
 ### Fixed

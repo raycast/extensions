@@ -1,6 +1,6 @@
 # Clash Changelog
 
- ## [Update] - 2022-12-05
+## [Update] - 2022-12-05
 
 - Fix traffic unit in Dashboard/Conns
 - Improve: Pin Conns title in list

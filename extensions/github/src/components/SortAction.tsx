@@ -13,7 +13,7 @@ type SortActionDataProps = { data: SortType[] } & SortActionProps;
 
 export const SortAction = ({ sortQuery, setSortQuery, data }: SortActionDataProps) =>
   sortQuery && setSortQuery ? (
-    <ActionPanel.Submenu title={"Sort By"} icon={Icon.ArrowUp} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+    <ActionPanel.Submenu title={"Sort by"} icon={Icon.ArrowUp} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
       {data
         .filter(({ value }) => !value.startsWith("sort:reaction"))
         .map(({ title, value }) => (

@@ -1,13 +1,20 @@
-import { LaunchProps, showToast, Toast } from "@raycast/api";
+import { LaunchProps, open, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { getDefaultSearchEngine } from "./data/cache";
 import { builtinSearchEngines } from "./data/builtin-search-engines";
 import { getCustomSearchEngines } from "./data/custom-search-engines";
-import { isValidUrl, safeOpenUrl } from "./utils";
+import { isValidUrl } from "./utils";
 
-export default async function search(props: LaunchProps<{ arguments: { query: string }; fallbackText?: string }>) {
+async function safeOpenUrl(url: string): Promise<void> {
+  if (!isValidUrl(url)) {
+    throw new Error(`Invalid URL: ${url}`);
+  }
+  return open(url);
+}
+
+export default async function search(props: LaunchProps<{ arguments: Arguments.Search; fallbackText?: string }>) {
   try {
-    const rawQuery = (props.arguments.query ?? props.fallbackText) as string;
+    const rawQuery = (props.arguments.query || props.fallbackText) as string;
 
     const { searchEngine, finalQuery, searchEngineKey } = processQuery(rawQuery);
 
@@ -62,7 +69,7 @@ function findSearchEngine(key?: string) {
 }
 
 function processQuery(rawQuery: string) {
-  let query = rawQuery.trim();
+  let query = rawQuery?.trim() ?? "";
 
   const searchEngineKeyMatch = query.match(/!(\S+)/i);
   const searchEngineKey = searchEngineKeyMatch?.[1]?.toLowerCase();

@@ -1,5 +1,12 @@
 import { List, Icon, Color } from "@raycast/api";
-import { formatTokens, formatCost, getTokenEfficiency, getCostPerMTok } from "../utils/data-formatter";
+import {
+  formatTokens,
+  formatCost,
+  formatCostDelta,
+  formatTokenDelta,
+  getTokenEfficiency,
+  getCostPerMTok,
+} from "../utils/data-formatter";
 import { getCurrentLocalDate } from "../utils/date-formatter";
 import { useDailyUsage } from "../hooks/useDailyUsage";
 import { ErrorMetadata } from "./ErrorMetadata";
@@ -13,7 +20,7 @@ const externalLinks: ExternalLink[] = [
 ];
 
 export function DailyUsage() {
-  const { data: dailyUsage, isLoading, error } = useDailyUsage();
+  const { data: dailyUsage, previousDayData, isLoading, error } = useDailyUsage();
   const currentDate = getCurrentLocalDate();
 
   const efficiency = useMemo(
@@ -29,9 +36,7 @@ export function DailyUsage() {
     ? STANDARD_ACCESSORIES.ERROR
     : dailyUsage === undefined
       ? STANDARD_ACCESSORIES.LOADING
-      : !dailyUsage
-        ? STANDARD_ACCESSORIES.NO_DATA
-        : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
+      : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error || !dailyUsage) {
@@ -47,6 +52,13 @@ export function DailyUsage() {
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Date" text={dailyUsage.date} icon={Icon.Calendar} />
+        {dailyUsage.metadata?.agents && dailyUsage.metadata.agents.length > 1 && (
+          <List.Item.Detail.Metadata.Label
+            title="Agents"
+            text={dailyUsage.metadata.agents.join(", ")}
+            icon={Icon.PersonCircle}
+          />
+        )}
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Token Usage" />
@@ -62,6 +74,29 @@ export function DailyUsage() {
 
         <List.Item.Detail.Metadata.Label title="Efficiency Metrics" />
         <List.Item.Detail.Metadata.Label title="Output/Input Ratio" text={efficiency} />
+
+        {previousDayData && dailyUsage && (
+          <>
+            <List.Item.Detail.Metadata.Separator />
+            <List.Item.Detail.Metadata.Label title="Day-over-Day" text={previousDayData.date} />
+            <List.Item.Detail.Metadata.Label
+              title="Cost Delta"
+              text={formatCostDelta(dailyUsage.totalCost, previousDayData.totalCost)}
+              icon={
+                dailyUsage.totalCost === previousDayData.totalCost
+                  ? undefined
+                  : {
+                      source: dailyUsage.totalCost > previousDayData.totalCost ? Icon.ArrowUp : Icon.ArrowDown,
+                      tintColor: dailyUsage.totalCost > previousDayData.totalCost ? Color.Red : Color.Green,
+                    }
+              }
+            />
+            <List.Item.Detail.Metadata.Label
+              title="Token Delta"
+              text={formatTokenDelta(dailyUsage.totalTokens, previousDayData.totalTokens)}
+            />
+          </>
+        )}
       </List.Item.Detail.Metadata>
     );
   };
@@ -70,7 +105,7 @@ export function DailyUsage() {
     <List.Item
       id="today"
       title="Today"
-      icon={{ source: Icon.Calendar, tintColor: Color.SecondaryText }}
+      icon={Icon.Calendar}
       accessories={accessories}
       detail={<List.Item.Detail isLoading={isLoading} metadata={renderDetailMetadata()} />}
       actions={<StandardActions externalLinks={externalLinks} />}

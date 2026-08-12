@@ -1,5 +1,9 @@
 # Tally Changelog
 
+## [Paginate Submissions] - 2026-07-18
+
+- submissions are now paginated
+
 ## [Update Form + Fix for Untitled Form] - 2025-09-02
 
 - update many settings of a Form

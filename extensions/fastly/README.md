@@ -4,7 +4,7 @@
 
 # Fastly
 
-This extension allows to search your [Fastly](https://www.fastly.com) services and domains, invite team members, create CDN services, get quick access to resources, and more.
+This extension allows to search your [Fastly](https://www.fastly.com) services and data stores, invite team members, create CDN services, get quick access to resources, the audit log, and more.
 
 ## Getting started
 
@@ -34,6 +34,22 @@ When selecting a specific service, you'll see service details such as today's re
 You're able to create new delivery services right from Raycast, just give it a name, domain, and origin server. You'll see a success message and be able to quickly access its details and open it in the Fastly Control Panel.
 
 ![screenshot of the create a service command](./metadata/fastly-4.png)
+
+### Manage Data Stores
+
+Access and manage all your Fastly data stores in one place. Browse KV Stores, Config Stores, and Secret Stores with full CRUD operations. From any store list, you can `⏎` to view entries, `⌘+N` to create new items, and `⌘+K` to access quick actions like export.
+
+![screenshot of the manage data stores command](./metadata/fastly-10.png)
+
+### Manage Access Control Lists
+
+Quickly block IPs and manage access control lists for security response. Search across all ACLs by service or name, then `⏎` to view entries. Use `⌘+N` to rapidly add IPs during security incidents, with support for CIDR blocks and bulk imports. Each entry shows whether it allows or blocks traffic, with `⌘+E` to edit and `⌘+⌫` to remove entries.
+
+![screenshot of the manage access control lists command](./metadata/fastly-8.png)
+
+### View Audit Log
+
+Monitor account activity and investigate changes with comprehensive audit logging. Filter events by time range, user, event type, or service to track purges, configuration changes, ACL modifications, and user actions. From the event list, `⏎` shows full details including before/after state, while `⌘+F` lets you search across descriptions and resources. Export filtered events for compliance reporting or security investigations.
 
 ### Invite Team Member
 

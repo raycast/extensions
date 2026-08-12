@@ -1,4 +1,4 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, open } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, Keyboard, List, open } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { list } from "./api/list";
@@ -21,6 +21,15 @@ function getProgressIcon(readingProgress: number) {
   } else {
     return Icon.CircleProgress75;
   }
+}
+
+// "cmd"/"ctrl" are ambiguous modifiers that Raycast ignores on the other platform,
+// so shortcuts must be defined per-platform to also work on Windows.
+function categoryShortcut(key: Keyboard.KeyEquivalent): Keyboard.Shortcut {
+  return {
+    macOS: { modifiers: ["cmd"], key },
+    Windows: { modifiers: ["ctrl"], key },
+  };
 }
 
 type Preference = {
@@ -105,7 +114,7 @@ ${article.summary}
                       <List.Item.Detail.Metadata.Label title="Website" text={article.site_name} />
                       <List.Item.Detail.Metadata.Label title="Category" text={article.category} />
                       <List.Item.Detail.Metadata.TagList title="Tags">
-                        {Object.values(article.tags).map(({ name }) => (
+                        {Object.values(article.tags ?? {}).map(({ name }) => (
                           <List.Item.Detail.Metadata.TagList.Item text={name} key={name} />
                         ))}
                       </List.Item.Detail.Metadata.TagList>
@@ -122,42 +131,48 @@ ${article.summary}
                     icon={Icon.Globe}
                   />
                   <Action.OpenInBrowser url={article.source_url} title="Open Article in Source Website" />
-                  <ActionPanel.Submenu title="Filter by Category…" shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}>
+                  <ActionPanel.Submenu
+                    title="Filter by Category…"
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+                    }}
+                  >
                     <Action
                       title="All Categories"
                       onAction={() => setCategory(undefined)}
                       icon={Icon.Tag}
-                      shortcut={{ modifiers: ["cmd"], key: "1" }}
+                      shortcut={categoryShortcut("1")}
                     />
                     <Action
                       title="Article"
                       onAction={() => setCategory("article")}
                       icon={Icon.Document}
-                      shortcut={{ modifiers: ["cmd"], key: "2" }}
+                      shortcut={categoryShortcut("2")}
                     />
                     <Action
                       title="Email"
                       onAction={() => setCategory("email")}
                       icon={Icon.Envelope}
-                      shortcut={{ modifiers: ["cmd"], key: "3" }}
+                      shortcut={categoryShortcut("3")}
                     />
                     <Action
                       title="Rss"
                       onAction={() => setCategory("rss")}
                       icon={Icon.Wifi}
-                      shortcut={{ modifiers: ["cmd"], key: "4" }}
+                      shortcut={categoryShortcut("4")}
                     />
                     <Action
                       title="Highlight"
                       onAction={() => setCategory("highlight")}
                       icon={Icon.Highlight}
-                      shortcut={{ modifiers: ["cmd"], key: "5" }}
+                      shortcut={categoryShortcut("5")}
                     />
                     <Action
                       title="Note"
                       onAction={() => setCategory("note")}
                       icon={Icon.Pencil}
-                      shortcut={{ modifiers: ["cmd"], key: "6" }}
+                      shortcut={categoryShortcut("6")}
                     />
                     <Action
                       title="Pdf"
@@ -168,25 +183,25 @@ ${article.summary}
                           dark: "pdf-dark.svg",
                         },
                       }}
-                      shortcut={{ modifiers: ["cmd"], key: "7" }}
+                      shortcut={categoryShortcut("7")}
                     />
                     <Action
                       title="Epub"
                       onAction={() => setCategory("epub")}
                       icon={Icon.Book}
-                      shortcut={{ modifiers: ["cmd"], key: "8" }}
+                      shortcut={categoryShortcut("8")}
                     />
                     <Action
                       title="Tweet"
                       onAction={() => setCategory("tweet")}
                       icon={Icon.Bird}
-                      shortcut={{ modifiers: ["cmd"], key: "9" }}
+                      shortcut={categoryShortcut("9")}
                     />
                     <Action
                       title="Video"
                       onAction={() => setCategory("video")}
                       icon={Icon.Video}
-                      shortcut={{ modifiers: ["cmd"], key: "0" }}
+                      shortcut={categoryShortcut("0")}
                     />
                   </ActionPanel.Submenu>
                 </ActionPanel>

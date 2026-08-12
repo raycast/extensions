@@ -26,8 +26,15 @@
       "mode": "no-view"
     },
     {
+      "name": "previous-song",
+      "title": "Previous Song",
+      "subtitle": "Previous song in queue on the active player.",
+      "description": "Goes back to the previous song on the currently selected menu bar player.",
+      "mode": "no-view"
+    },
+    {
       "name": "play-pause",
-      "title": "Toggle",
+      "title": "Toggle Play",
       "subtitle": "Toggle play/pause on the active player.",
       "description": "Plays or pauses song on the currently selected menu bar player.",
       "mode": "no-view"
@@ -45,6 +52,48 @@
       "title": "Set Volume",
       "subtitle": "Set the volume for the active player.",
       "description": "Set the volume (0-100) on the currently selected player.",
+      "mode": "view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume Up",
+      "subtitle": "Increase volume on the active player.",
+      "description": "Increases the volume on the currently selected player.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "subtitle": "Decrease volume on the active player.",
+      "description": "Decreases the volume on the currently selected player.",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-mute",
+      "title": "Toggle Mute",
+      "subtitle": "Toggle mute on the active player.",
+      "description": "Toggles the mute state on the currently selected player.",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-player-groups",
+      "title": "Manage Player Groups",
+      "subtitle": "Create, modify, and disband player sync groups",
+      "description": "Manage Music Assistant player groups for synchronized playback across multiple speakers.",
+      "mode": "view"
+    },
+    {
+      "name": "current-track",
+      "title": "Current Track",
+      "subtitle": "View current track with album art and quick actions",
+      "description": "Display the now-playing track with large album artwork and quick actions for shuffle, repeat, favorites, and playlists.",
+      "mode": "view"
+    },
+    {
+      "name": "music-library-hub",
+      "title": "Music Library Hub",
+      "subtitle": "Music Assistant",
+      "description": "Unified search, browse, and queue management for Music Assistant library with search, browse artists/albums/playlists, recently played items, and queue manager.",
       "mode": "view"
     }
   ],
@@ -67,10 +116,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^1.17.0",
-    "home-assistant-js-websocket": "^9.5.0",
-    "isomorphic-ws": "^5.0.0",
-    "websocket-ts": "^2.2.1"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",
@@ -97,6 +143,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

@@ -1,5 +1,19 @@
 # I Don't Have Spotify Changelog
 
+## [Self-Hosted Instances & Error Handling] - 2026-08-03
+
+- Add `Self-Hosted Instance URL` preference to point at your own I Don't Have Spotify instance.
+- Show clearer error messages for rate limits, network failures, and service outages.
+- Add error empty view with Retry, Open Website, and Open Extension Preferences actions.
+- Cancel in-flight conversion requests when the search text changes.
+
+## [New Adapters] - 2026-03-01
+
+- Add support for Qobuz, Bandcamp, and Pandora adapters.
+- Add clipboard convert commands for Tidal, Qobuz, Bandcamp, and Pandora.
+- Simplify link validation to accept any URL (API handles full validation).
+- Add fallback for unknown adapter types to prevent crashes.
+
 ## [Fix] - 2025-11-06
 
 - Update hostname

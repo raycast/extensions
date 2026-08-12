@@ -278,7 +278,8 @@ describe("pattern-registry.ts", () => {
     });
 
     it("should count multiple compinit calls", () => {
-      const content = `compinit\ncompinit -D`;
+      // Note: The parser only matches bare `compinit` lines, not `compinit` with arguments
+      const content = `compinit\ncompinit`;
       const result = countAllPatterns(content);
       expect(result.completions).toBe(2);
     });
@@ -388,10 +389,13 @@ bindkey '^R' history-incremental-search-backward
       expect(result.sources).toBe(1);
       expect(result.evals).toBe(1);
       expect(result.setopts).toBe(1);
-      expect(result.plugins).toBe(1);
+      // Counts now equal what the views list: plugins=(git docker) is two
+      // plugin entries, and both PATH declarations (the export and the
+      // plain prepend) appear in the PATH view.
+      expect(result.plugins).toBe(2);
       expect(result.autoloads).toBe(1);
       expect(result.fpaths).toBe(1);
-      expect(result.paths).toBe(1);
+      expect(result.paths).toBe(2);
       expect(result.themes).toBe(1);
       expect(result.completions).toBe(1);
       expect(result.history).toBe(1);

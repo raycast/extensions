@@ -3,6 +3,10 @@ import { Keyboard } from "@raycast/api";
 export const Shortcut = {
   Open: Keyboard.Shortcut.Common.Open,
   Refresh: Keyboard.Shortcut.Common.Refresh,
+  RefreshAll: {
+    macOS: { modifiers: ["cmd", "shift"], key: "r" },
+    Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+  } satisfies Keyboard.Shortcut,
   OpenWith: Keyboard.Shortcut.Common.OpenWith,
   CopyName: Keyboard.Shortcut.Common.CopyName,
   CopyPath: Keyboard.Shortcut.Common.CopyPath,

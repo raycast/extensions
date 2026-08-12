@@ -27,7 +27,7 @@ export default function CustomAppForm({ app, onSave }: CustomAppFormProps) {
       if (!["http:", "https:"].includes(parsedUrl.protocol)) {
         return "URL template must use http:// or https:// protocol";
       }
-    } catch (error) {
+    } catch {
       return "URL template must be a valid URL format (e.g., https://example.com/{profile})";
     }
 

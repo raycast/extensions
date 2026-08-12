@@ -1,10 +1,10 @@
 import { Action } from "@raycast/api";
 
 import { getMessagesUrl } from "../helpers";
-import { Chat } from "../hooks/useChats";
+import type { MessagesTarget } from "../types";
 
 type CreateMessagesQuicklinkProps = {
-  chat: Chat;
+  chat: MessagesTarget & { displayName: string };
 };
 
 export default function CreateMessagesQuicklink({ chat }: CreateMessagesQuicklinkProps) {

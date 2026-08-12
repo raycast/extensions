@@ -1,15 +1,25 @@
-import { Form, ActionPanel, Action, Keyboard } from "@raycast/api";
+import { Form, ActionPanel, Action, Keyboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import cronstrue from "cronstrue";
 import { CronExpressionParser } from "cron-parser";
 import { useEffect, useState } from "react";
 
 const TIMEZONES = ["UTC", ...Intl.supportedValuesOf("timeZone")];
+const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const preferences = getPreferenceValues<Preferences>();
+const defaultTz =
+  preferences.defaultTimezone && TIMEZONES.includes(preferences.defaultTimezone)
+    ? preferences.defaultTimezone
+    : localTimezone;
 
 export default function main() {
-  const localTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  useEffect(() => {
+    if (preferences.defaultTimezone && !TIMEZONES.includes(preferences.defaultTimezone)) {
+      showToast(Toast.Style.Failure, "Invalid default timezone", `Using local timezone: ${localTimezone}`);
+    }
+  }, []);
 
   const [cron, setCron] = useState("* * * * *");
-  const [cronTimezone, setCronTimezone] = useState(localTimezone);
+  const [cronTimezone, setCronTimezone] = useState(defaultTz);
   const [cronError, setCronError] = useState("");
   const [description, setDescription] = useState("");
   const [nextRunCronTz, setNextRunCronTz] = useState("");
@@ -56,7 +66,7 @@ export default function main() {
       setNextRunCronTz("Unable to calculate");
       setNextRunLocalTz("");
     }
-  }, [cron, cronTimezone, localTimezone]);
+  }, [cron, cronTimezone]);
 
   return (
     <Form

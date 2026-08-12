@@ -54,8 +54,23 @@ public class USBEjector {
         PNP_VETO_TYPE vetoType;
         StringBuilder vetoName = new StringBuilder(1024);
 
-        // 3. Request Eject on the Parent
-        result = CM_Request_Device_EjectW(targetDevInst, out vetoType, vetoName, 1024, 0);
+        // 3. Request Eject on the Disk Node directly (Media Eject)
+        // This flawlessly supports multi-LUN card readers and docks without killing sister drives.
+        result = CM_Request_Device_EjectW(diskDevInst, out vetoType, vetoName, 1024, 0);
+
+        if (result == CR_SUCCESS && vetoType == PNP_VETO_TYPE.Ok) {
+            return; // Excellent, the media was safely removed!
+        }
+
+        // 4. Fallback: Request Eject on the Parent
+        // If the leaf node specifically refuses (or is a mechanical external drive that prefers full power-down), 
+        // try safely removing the entire enclosing USB hardware.
+        if (targetDevInst != diskDevInst) {
+            result = CM_Request_Device_EjectW(targetDevInst, out vetoType, vetoName, 1024, 0);
+            if (result == CR_SUCCESS && vetoType == PNP_VETO_TYPE.Ok) {
+                return;
+            }
+        }
 
         if (result != CR_SUCCESS || vetoType != PNP_VETO_TYPE.Ok) {
             // Throw a descriptive error that Raycast can show to the user

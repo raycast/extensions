@@ -6,6 +6,7 @@ import {
   getDefaultApplication,
   getPreferenceValues,
   Icon,
+  Keyboard,
   List,
 } from "@raycast/api";
 import React, { useEffect, useState } from "react";
@@ -18,7 +19,7 @@ import { SearchNotePreferences } from "./preferences";
 import { updateNoteInCache, deleteNoteFromCache } from "../api/cache/cache.service";
 import { Logger } from "../api/logger/logger.service";
 import { Note, NoteWithContent, Obsidian, ObsidianTargetType, ObsidianVault, Vault } from "@/obsidian";
-import { getCodeBlocks } from "./utils";
+import { getCodeBlocks, normalizeRelativePath } from "./utils";
 import { useVaultPluginCheck } from "./hooks";
 import { appendSelectedTextTo } from "@/api/append-note";
 
@@ -139,6 +140,36 @@ export function CopyNotePathAction(props: { note: Note }) {
   );
 }
 
+export function CopyWikilinkAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.CopyToClipboard
+      title="Copy Wikilink"
+      icon={Icon.Link}
+      content={`[[${note.title}]]`}
+      shortcut={{
+        macOS: { modifiers: ["opt"], key: "w" },
+        Windows: { modifiers: ["alt"], key: "w" },
+      }}
+    />
+  );
+}
+
+export function PasteWikilinkAction(props: { note: Note }) {
+  const { note } = props;
+  return (
+    <Action.Paste
+      title="Paste Wikilink"
+      icon={Icon.Link}
+      content={`[[${note.title}]]`}
+      shortcut={{
+        macOS: { modifiers: ["opt", "shift"], key: "w" },
+        Windows: { modifiers: ["alt", "shift"], key: "w" },
+      }}
+    />
+  );
+}
+
 export function PasteNoteAction(props: { note: NoteWithContent }) {
   const { note } = props;
   return <Action.Paste title="Paste Note Content" content={note.content} shortcut={{ modifiers: ["opt"], key: "v" }} />;
@@ -182,7 +213,7 @@ export function DeleteNoteAction(props: {
   return (
     <Action
       title="Delete Note"
-      shortcut={{ modifiers: ["opt"], key: "d" }}
+      shortcut={Keyboard.Shortcut.Common.Remove}
       onAction={async () => {
         const options = {
           title: "Delete Note",
@@ -231,7 +262,14 @@ export function OpenInDefaultAppAction(props: { note: Note; vault: ObsidianVault
   }, [note.path]);
 
   if (!defaultApp) return null;
-  return <Action.Open title={`Open in ${defaultApp}`} target={note.path} icon={Icon.AppWindow} />;
+  return (
+    <Action.Open
+      title={`Open in ${defaultApp}`}
+      target={note.path}
+      icon={Icon.AppWindow}
+      shortcut={Keyboard.Shortcut.Common.OpenWith}
+    />
+  );
 }
 
 export function BookmarkNoteAction(props: { note: Note; vault: ObsidianVault; onBookmark?: () => void }) {
@@ -277,6 +315,8 @@ export function OpenPathInObsidianAction(props: { path: string }) {
 export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: ObsidianVault }) {
   const { note, vault } = props;
 
+  const relativePath = normalizeRelativePath(note.path, vault.path);
+
   return (
     <Action.Open
       title="Open in New Obsidian Tab"
@@ -284,10 +324,11 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Obsi
         "obsidian://advanced-uri?vault=" +
         encodeURIComponent(vault.name) +
         "&filepath=" +
-        encodeURIComponent(note.path.replace(vault.path, "")) +
+        encodeURIComponent(relativePath) +
         "&newpane=true"
       }
       icon={ObsidianIcon}
+      shortcut={Keyboard.Shortcut.Common.Open}
     />
   );
 }
@@ -410,6 +451,8 @@ export function NoteActions(props: {
       <CopyObsidianURIAction note={note} />
       <DeleteNoteAction note={note} vault={vault} onDelete={onDelete} />
       <AppendTaskAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
+      <CopyWikilinkAction note={note} />
+      <PasteWikilinkAction note={note} />
     </>
   );
 }

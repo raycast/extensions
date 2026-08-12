@@ -1,8 +1,8 @@
+import { memo } from "react";
 import { Color, List } from "@raycast/api";
 import type { BranchInfo } from "../../utils/git-status/branch.js";
 import type { StatusInfo } from "../../utils/git-status/porcelain.js";
 import { GitStatusTags } from "./GitStatusTags.js";
-import { useMemo } from "react";
 import { getProgressIcon } from "@raycast/utils";
 
 interface Props {
@@ -11,8 +11,8 @@ interface Props {
   diff: string;
 }
 
-export function GitStatusItemDetail({ branch, status, diff }: Props) {
-  const upstreamData = useMemo(() => {
+export const GitStatusItemDetail = memo(function GitStatusItemDetail({ branch, status, diff }: Props) {
+  const upstreamData = () => {
     if (!branch.upstream) {
       return null;
     }
@@ -24,14 +24,14 @@ export function GitStatusItemDetail({ branch, status, diff }: Props) {
         <List.Item.Detail.Metadata.Label title="Behind" text={`${branch.behind} commits`} />
       </>
     );
-  }, [branch.ahead, branch.behind, branch.upstream]);
+  };
 
-  const renamedFile = useMemo(() => {
+  const renamedFile = () => {
     if (!status.changes.changeScore && !status.origPath) {
       return null;
     }
 
-    const progressIcon = getProgressIcon(status.changes.changeScore ?? 0 / 100, Color.Magenta);
+    const progressIcon = getProgressIcon((status.changes.changeScore ?? 0) / 100, Color.Magenta);
     return (
       <>
         <List.Item.Detail.Metadata.Label title="Original path" text={status.origPath} />
@@ -42,15 +42,9 @@ export function GitStatusItemDetail({ branch, status, diff }: Props) {
         />
       </>
     );
-  }, [status.changes.changeScore, status.origPath]);
+  };
 
-  const diffMarkdown = useMemo(() => {
-    if (!diff) {
-      return null;
-    }
-
-    return "```diff\n" + diff;
-  }, [diff]);
+  const diffMarkdown = diff ? "```diff\n" + diff : null;
 
   return (
     <List.Item.Detail
@@ -58,13 +52,13 @@ export function GitStatusItemDetail({ branch, status, diff }: Props) {
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="File path" text={status.fileName} />
-          {renamedFile}
+          {renamedFile()}
           <GitStatusTags changes={status.changes} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="Branch" text={branch.name} />
-          {upstreamData}
+          {upstreamData()}
         </List.Item.Detail.Metadata>
       }
     />
   );
-}
+});

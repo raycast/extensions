@@ -1,5 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 
+const preferences = getPreferenceValues<Preferences>();
+
 export interface RadarrInstance {
   name: string;
   url: string;
@@ -7,19 +9,7 @@ export interface RadarrInstance {
   isDefault: boolean;
 }
 
-interface Preferences {
-  primaryInstanceName: string;
-  primaryInstanceUrl: string;
-  primaryInstanceApiKey: string;
-  enableSecondaryInstance?: boolean;
-  secondaryInstanceName?: string;
-  secondaryInstanceUrl?: string;
-  secondaryInstanceApiKey?: string;
-  activeInstance?: "primary" | "secondary";
-}
-
 export function getRadarrInstances(): RadarrInstance[] {
-  const preferences = getPreferenceValues<Preferences>();
   const instances: RadarrInstance[] = [];
 
   if (!preferences.primaryInstanceName || !preferences.primaryInstanceUrl || !preferences.primaryInstanceApiKey) {
@@ -51,7 +41,6 @@ export function getRadarrInstances(): RadarrInstance[] {
 }
 
 export function getActiveRadarrInstance(): RadarrInstance {
-  const preferences = getPreferenceValues<Preferences>();
   const instances = getRadarrInstances();
 
   if (preferences.activeInstance === "secondary" && preferences.enableSecondaryInstance && instances.length > 1) {

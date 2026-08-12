@@ -1,10 +1,22 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Contact, Conversation, Inbox, Integration, ListResult, Message, Notification, Portal } from "./types";
+import {
+  CannedResponse,
+  Contact,
+  Conversation,
+  Inbox,
+  Integration,
+  ListResult,
+  Message,
+  Notification,
+  Portal,
+  Team,
+} from "./types";
 
 class Chatwoot {
   private url: string;
   private accessToken: string;
   private accountId: string;
+  public cannedResponses: CannedResponsesService;
   public contacts: ContactsService;
   public conversations: ConversationsService;
   public inboxes: InboxesService;
@@ -12,11 +24,13 @@ class Chatwoot {
   public messages: MessagesService;
   public notifications: NotificationsService;
   public portals: PortalsService;
+  public teams: TeamsService;
 
   constructor(url: string, accessToken: string, accountId: string) {
     this.url = url;
     this.accessToken = accessToken;
     this.accountId = accountId;
+    this.cannedResponses = new CannedResponsesService(this);
     this.contacts = new ContactsService(this);
     this.conversations = new ConversationsService(this);
     this.inboxes = new InboxesService(this);
@@ -24,6 +38,7 @@ class Chatwoot {
     this.messages = new MessagesService(this);
     this.notifications = new NotificationsService(this);
     this.portals = new PortalsService(this);
+    this.teams = new TeamsService(this);
   }
 
   public buildUrl(route: string) {
@@ -50,6 +65,23 @@ class Chatwoot {
   }
 }
 
+class CannedResponsesService {
+  constructor(private client: Chatwoot) {}
+  async create(props: { cannedResponse: Partial<CannedResponse> }) {
+    return this.client["request"]<CannedResponse>("canned_responses", {
+      method: "POST",
+      body: JSON.stringify(props.cannedResponse),
+    });
+  }
+  async delete(props: { cannedResponseId: number }) {
+    return this.client["request"](`canned_responses/${props.cannedResponseId}`, {
+      method: "DELETE",
+    });
+  }
+  async list() {
+    return this.client["request"]<CannedResponse[]>("canned_responses");
+  }
+}
 class ContactsService {
   constructor(private client: Chatwoot) {}
   async create(props: { contact: Partial<Contact> }) {
@@ -124,6 +156,23 @@ class PortalsService {
     return this.client["request"]<{ meta: { current_page: number; portals_count: number }; payload: Portal[] }>(
       "portals",
     );
+  }
+}
+class TeamsService {
+  constructor(private client: Chatwoot) {}
+  async create(props: { team: Partial<Team> }) {
+    return this.client["request"]<Team>("teams", {
+      method: "POST",
+      body: JSON.stringify(props.team),
+    });
+  }
+  async delete(props: { teamId: number }) {
+    return this.client["request"](`teams/${props.teamId}`, {
+      method: "DELETE",
+    });
+  }
+  async list() {
+    return this.client["request"]<Team[]>("teams");
   }
 }
 

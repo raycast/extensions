@@ -1,6 +1,41 @@
 # Home Assistant Changelog
 
+## [Add contributor] - 2026-08-10
+
+- Add mattiacolombomc to the contributors list
+
+## [Fix .local resolution picking unbracketed IPv6] - 2026-08-10
+
+- Prefer mDNS A records (IPv4) when resolving `.local` hostnames, falling back to an AAAA record only if no A record arrives before the timeout
+- Wrap IPv6 literals in brackets before substituting them into the instance URL, fixing "Invalid URL: ws://fd6c:…:8123/api/websocket" on IPv6-enabled networks
+
+## [Update] - 2026-08-03
+
+- Show multiple zones for person entities
+
+## [Update] - 2026-04-20
+
+- Add custom headers on all request
+
+## [Update] - 2026-03-24
+
+- Show entity area/room names as subtitles in entity lists
+ 
+## [Fix] - 2026-03-24
+
+- Fix "Show Entity IDs" preference
+
+## [Fix] - 2026-03-15
+
+- Use translations for services if available
+  - Fallback to service slug when no translation is available
+
+## [Fix] - 2026-02-01
+
+- Improved history chart contrast (axis labels and grid lines) for Raycast light/dark appearance
+
 ## [Update] - 2026-01-09
+
 - Added history chart to sensors inspired by the Home Assistant when viewing attributes of entity
 
 ## [Fix] - 2025-11-14

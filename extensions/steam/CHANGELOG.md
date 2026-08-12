@@ -1,5 +1,11 @@
 # Steam Changelog
 
+## [New Feature] - 2026-06-29
+
+- Add a Search Users command for looking up Steam profiles
+- Add a Steam users AI tool for Raycast AI queries
+- Add reusable AI tools for Steam game search and game details
+
 ## [Update] - 2025-11-08
 
 - Toggled on windows support

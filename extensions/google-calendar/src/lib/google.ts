@@ -7,13 +7,19 @@ import { getClientId } from "./utils";
 let calendar: calendar_v3.Calendar | null = null;
 let people: people_v1.People | null = null;
 
+export const GOOGLE_OAUTH_SCOPES = [
+  "https://www.googleapis.com/auth/calendar",
+  "https://www.googleapis.com/auth/contacts.readonly",
+  "https://www.googleapis.com/auth/contacts.other.readonly",
+  "https://www.googleapis.com/auth/userinfo.email",
+  "https://www.googleapis.com/auth/userinfo.profile",
+  "openid",
+] as const;
+
 const google = OAuthService.google({
   // Google Cloud Project: https://ray.so/6eAXUYf
   clientId: getClientId(),
-  authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenUrl: "https://oauth2.googleapis.com/token",
-  scope:
-    "https://www.googleapis.com/auth/calendar https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile openid",
+  scope: GOOGLE_OAUTH_SCOPES.join(" "),
   onAuthorize({ token }) {
     const oauth = new auth.OAuth2();
     oauth.setCredentials({ access_token: token });

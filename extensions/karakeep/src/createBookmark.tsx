@@ -1,30 +1,62 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchProps, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
-import { fetchAddBookmarkToList, fetchCreateBookmark } from "./apis";
+import { fetchAddBookmarkToList, fetchAttachTagsToBookmark, fetchCreateBookmark } from "./apis";
 import { useGetAllLists } from "./hooks/useGetAllLists";
+import { useGetAllTags } from "./hooks/useGetAllTags";
+import { useTagPicker, TAG_PICKER_NOOP_VALUE } from "./hooks/useTagPicker";
 import { useTranslation } from "./hooks/useTranslation";
 import { useConfig } from "./hooks/useConfig";
 import { getBrowserLink } from "./hooks/useBrowserLink";
-import { Bookmark } from "./types";
 import { validUrl } from "./utils/url";
+import { runWithToast } from "./utils/toast";
+import { ensureReachable } from "./utils/submitGuard";
+import { useApiReachable } from "./hooks/useApiReachable";
+import { OfflineFormNotice, StartKarakeepAction } from "./components/OfflineFormNotice";
+import CreateListView from "./createList";
+
+const log = logger.child("[CreateBookmark]");
 
 interface FormValues {
   url: string;
   list?: string;
 }
 
-export default function CreateBookmarkView() {
-  const { pop } = useNavigation();
-  const { t } = useTranslation();
-  const { lists } = useGetAllLists();
-  const { config } = useConfig();
-  const [isLoadingTab, setIsLoadingTab] = useState(false);
+interface DraftValues extends FormValues {
+  tagIds?: string[];
+  pendingNewTag?: string;
+}
 
-  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
+export default function CreateBookmarkView(props: LaunchProps<{ draftValues: DraftValues }>) {
+  const { pop, push } = useNavigation();
+  const { t } = useTranslation();
+  // Hold the lists/tags fetches until the API is known to be up. Firing them
+  // blind is what produced Raycast's opaque "Failed to fetch latest data /
+  // fetch failed" toast before any of our own handling could run.
+  const { state: reachability, reachable: apiReachable, offline, isRecovering, canStart, start } = useApiReachable();
+  const { lists, revalidate: revalidateLists } = useGetAllLists(apiReachable);
+  const { tags } = useGetAllTags(apiReachable);
+
+  const { config } = useConfig();
+  const { draftValues } = props;
+  const [isLoadingTab, setIsLoadingTab] = useState(false);
+  const [createdListIdToSelect, setCreatedListIdToSelect] = useState<string | null>(null);
+  const initialSelectedTagIds = draftValues?.tagIds ?? [];
+  const {
+    selectedTagIds,
+    newTagItems,
+    pendingInput,
+    onTagIdsChange,
+    onPendingInputChange,
+    commitPendingTag,
+    buildTagsToAttach,
+  } = useTagPicker({ tags, initialTagIds: initialSelectedTagIds });
+
+  const { handleSubmit, itemProps, setValue, values } = useForm<FormValues>({
     initialValues: {
-      url: "",
+      url: draftValues?.url ?? "",
+      list: draftValues?.list ?? "",
     },
     validation: {
       url: (value: string | undefined) => {
@@ -34,34 +66,50 @@ export default function CreateBookmarkView() {
       },
     },
     async onSubmit(values) {
-      const toast = await showToast({
-        title: t("bookmark.creating"),
-        style: Toast.Style.Animated,
-      });
+      log.info("Submitting bookmark", { url: values.url, hasList: Boolean(values.list) });
+
+      // Pre-flight: if the instance is a stopped local container, offer to start
+      // it BEFORE attempting the write. Submitting into a dead server just to
+      // fail is the path that puts the typed-in URL at risk.
+      const recovered = await ensureReachable(values.url);
+      if (recovered === "unreachable") {
+        // The form stays mounted with its values intact, so nothing is lost;
+        // the URL is on the clipboard as a second line of defence.
+        return;
+      }
 
       try {
-        const payload = {
-          type: "link",
-          url: values.url,
-          createdAt: new Date().toISOString(),
-        };
-        const bookmark = (await fetchCreateBookmark(payload)) as Bookmark;
+        const bookmark = await runWithToast({
+          loading: { title: t("bookmark.creating") },
+          success: { title: t("bookmark.createSuccess") },
+          failure: { title: t("bookmark.createFailed") },
+          action: async () => {
+            const payload = {
+              type: "link",
+              url: values.url,
+              createdAt: new Date().toISOString(),
+            };
+            const created = await fetchCreateBookmark(payload);
 
-        if (values.list) {
-          if (bookmark) {
-            await fetchAddBookmarkToList(values.list, bookmark?.id);
-          }
+            if (values.list) {
+              await fetchAddBookmarkToList(values.list, created.id);
+            }
+
+            const tagsToAttach = buildTagsToAttach();
+            if (tagsToAttach.length > 0) {
+              await fetchAttachTagsToBookmark(created.id, tagsToAttach);
+            }
+
+            return created;
+          },
+        });
+
+        if (bookmark) {
+          log.info("Bookmark created", { bookmarkId: bookmark.id });
+          pop();
         }
-
-        pop();
-
-        toast.style = Toast.Style.Success;
-        toast.title = t("bookmark.createSuccess");
       } catch (error) {
-        logger.error("Failed to create bookmark", { url: values.url, error });
-        toast.style = Toast.Style.Failure;
-        toast.title = t("bookmark.createFailed");
-        toast.message = String(error);
+        log.error("Failed to create bookmark", { url: values.url, error });
       }
     },
   });
@@ -69,33 +117,65 @@ export default function CreateBookmarkView() {
   useEffect(() => {
     async function loadBrowserTab() {
       if (!config.prefillUrlFromBrowser) return;
+      if (values.url?.trim()) return;
 
       setIsLoadingTab(true);
       try {
         const url = await getBrowserLink();
         if (url) {
+          log.log("Prefilled URL from browser tab", { url });
           setValue("url", url);
         }
       } catch (error) {
         // Browser extension not available or no permission
-        logger.log("Failed to prefill URL from browser", error);
+        log.log("Failed to prefill URL from browser", error);
       } finally {
         setIsLoadingTab(false);
       }
     }
 
     loadBrowserTab();
-  }, [config.prefillUrlFromBrowser, setValue]);
+  }, [config.prefillUrlFromBrowser, setValue, values.url]);
+
+  useEffect(() => {
+    if (!createdListIdToSelect) return;
+
+    const hasList = lists.some((list) => list.id === createdListIdToSelect);
+    if (hasList) {
+      setValue("list", createdListIdToSelect);
+      setCreatedListIdToSelect(null);
+    }
+  }, [createdListIdToSelect, lists, setValue]);
 
   return (
     <Form
-      isLoading={isLoadingTab}
+      isLoading={isLoadingTab || reachability === "checking"}
+      enableDrafts
       actions={
         <ActionPanel>
+          {/* First = bound to ↵. While offline the form can't submit, so Start
+              takes the primary slot and Submit steps down to second. */}
+          <StartKarakeepAction offline={offline} canStart={canStart} isRecovering={isRecovering} onStart={start} />
           <Action.SubmitForm title={t("bookmark.create")} onSubmit={handleSubmit} />
+          <Action
+            title={t("list.createList")}
+            onAction={() =>
+              push(
+                <CreateListView
+                  showSuccessHUD={false}
+                  onListCreated={async (list) => {
+                    setCreatedListIdToSelect(list.id);
+                    await revalidateLists();
+                  }}
+                />,
+              )
+            }
+          />
         </ActionPanel>
       }
     >
+      <OfflineFormNotice offline={offline} canStart={canStart} />
+
       <Form.TextField {...itemProps.url} title={t("bookmark.url")} placeholder={t("bookmark.urlPlaceholder")} />
 
       <Form.Dropdown title={t("bookmark.list")} {...itemProps.list}>
@@ -104,6 +184,31 @@ export default function CreateBookmarkView() {
           <Form.Dropdown.Item key={list.id} value={list.id} title={list.name} />
         ))}
       </Form.Dropdown>
+
+      <Form.TagPicker
+        id="tagIds"
+        title={t("bookmark.tags")}
+        placeholder={t("bookmark.tagsPlaceholder")}
+        value={selectedTagIds}
+        onChange={onTagIdsChange}
+      >
+        <Form.TagPicker.Item value={TAG_PICKER_NOOP_VALUE} title=" " />
+        {tags.map((tag) => (
+          <Form.TagPicker.Item key={tag.id} value={tag.id} title={tag.name} />
+        ))}
+        {newTagItems.map((item) => (
+          <Form.TagPicker.Item key={item.id} value={item.id} title={item.name} />
+        ))}
+      </Form.TagPicker>
+
+      <Form.TextField
+        id="pendingNewTag"
+        title={t("bookmark.newTags")}
+        placeholder={t("bookmark.newTagsPlaceholder")}
+        value={pendingInput}
+        onChange={onPendingInputChange}
+        onBlur={commitPendingTag}
+      />
     </Form>
   );
 }

@@ -5,9 +5,6 @@
  * used throughout the application.
  */
 
-import { getSectionPrefs, getCustomPatterns } from "./lib/preferences";
-import { SectionMarkerType } from "./types/enums";
-
 /**
  * Display and UI constants
  */
@@ -37,9 +34,6 @@ export const FILE_CONSTANTS = {
 
   /** Default zshrc filename */
   ZSHRC_FILENAME: ".zshrc",
-
-  /** Maximum content length after reading (in characters) */
-  MAX_CONTENT_LENGTH: 10000,
 
   /** Maximum line length to prevent DoS attacks (in characters) */
   MAX_LINE_LENGTH: 1000,
@@ -79,16 +73,14 @@ export const PARSING_CONSTANTS = {
     EXPORT: /^(?:\s*)(?:export|typeset\s+-x)\s+([A-Za-z_][A-Za-z0-9_]*)=(.*?)(?:\s*)$/,
     EVAL: /^(?:\s*)eval\s+(.+?)(?:\s*)$/,
     SETOPT: /^(?:\s*)setopt\s+(.+?)(?:\s*)$/,
-    PLUGIN: /^(?:\s*)plugins\s*=\s*\(([^)]+)\)(?:\s*)$/,
     FUNCTION: /^(?:\s*)([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*\)\s*\{(?:\s*)$/,
-    SOURCE: /^(?:\s*)source\s+(.+?)(?:\s*)$/,
+    // Capture only the operand (quoted string or unquoted token) — an
+    // inline `# comment` after it is not part of the path
+    SOURCE: /^(?:\s*)source\s+("(?:[^"\\]|\\.)*"|'[^']*'|[^\s#]+)/,
     AUTOLOAD: /^(?:\s*)autoload\s+(?:-Uz\s+)?([A-Za-z_][A-Za-z0-9_]*)(?:\s*)$/,
-    FPATH: /^(?:\s*)fpath\s*=\s*\(([^)]+)\)(?:\s*)$/,
-    PATH: /^(?:\s*)PATH\s*=\s*(.+?)(?:\s*)$/,
     THEME: /^(?:\s*)ZSH_THEME\s*=\s*(?:'|")(.*?)(?:'|")(?:\s*)$/,
     COMPLETION: /^(?:\s*)compinit(?:\s*)$/,
     HISTORY: /^(?:\s*)HIST[A-Z_]*\s*=\s*(.+?)(?:\s*)$/,
-    KEYBINDING: /^(?:\s*)bindkey\s+(.+?)(?:\s*)$/,
   },
 
   /** Section detection priorities (higher number = higher priority) */
@@ -143,123 +135,11 @@ export const MODERN_COLORS = {
   warning: "#FF9500",
   error: "#FF3B30",
   neutral: "#8E8E93",
+  purple: "#AF52DE",
+  info: "#5AC8FA",
+  accent: "#AF52DE",
+  secondary: "#8E8E93",
 } as const;
 
-/**
- * Default section formats
- */
-const DEFAULT_SECTION_FORMATS = {
-  LABELED: /^(?:\s*)#\s*section\s*:\s*(.+?)\s*$/i,
-  DASHED_START: /^(?:\s*)#\s*---\s*(?!End\b)(.+?)\s*---\s*#\s*$/i,
-  DASHED_END: /^(?:\s*)#\s*---\s*End\s+.*---\s*#\s*$/i,
-  BRACKETED: /^(?:\s*)#\s*\[\s*(.+?)\s*\]\s*$/i,
-  HASH: /^(?:\s*)#\s*#\s*(.+?)\s*$/i,
-  CUSTOM_START: /^(?:\s*)#\s*@start\s+(.+?)\s*$/i,
-  CUSTOM_END: /^(?:\s*)#\s*@end\s+(.+?)\s*$/i,
-  FUNCTION_START: /^(?:\s*)([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*\)\s*\{\s*$/,
-  FUNCTION_END: /^(?:\s*)\}\s*$/,
-} as const;
-
-/**
- * Section format configuration with type information
- */
-export interface SectionFormatConfig {
-  type: SectionMarkerType;
-  regex: RegExp;
-}
-
-/**
- * Gets section formats in priority order based on user preferences
- *
- * Returns an array of section format configurations ordered by priority.
- * Custom patterns from preferences are included if enabled.
- *
- * @returns Array of section format configurations
- */
-export function getSectionFormatsInOrder(): SectionFormatConfig[] {
-  const prefs = getSectionPrefs();
-  const customPatterns = getCustomPatterns();
-  const formats: SectionFormatConfig[] = [];
-
-  // Add custom start/end patterns first (highest priority) if enabled
-  if (prefs["enableCustomStartEndPatterns"]) {
-    if (customPatterns.startPattern) {
-      formats.push({
-        type: SectionMarkerType.CUSTOM_START,
-        regex: customPatterns.startPattern,
-      });
-    }
-
-    if (customPatterns.endPattern) {
-      formats.push({
-        type: SectionMarkerType.CUSTOM_END,
-        regex: customPatterns.endPattern,
-      });
-    }
-  }
-
-  // Add default patterns if enabled
-  // Skip default CUSTOM_START and CUSTOM_END if custom patterns are enabled
-  // to avoid duplicate types (custom patterns are already checked first)
-  if (prefs["enableDefaults"]) {
-    const defaultPatterns: SectionFormatConfig[] = [
-      {
-        type: SectionMarkerType.DASHED_END,
-        regex: DEFAULT_SECTION_FORMATS.DASHED_END,
-      },
-      {
-        type: SectionMarkerType.DASHED_START,
-        regex: DEFAULT_SECTION_FORMATS.DASHED_START,
-      },
-      {
-        type: SectionMarkerType.BRACKETED,
-        regex: DEFAULT_SECTION_FORMATS.BRACKETED,
-      },
-      {
-        type: SectionMarkerType.HASH,
-        regex: DEFAULT_SECTION_FORMATS.HASH,
-      },
-      {
-        type: SectionMarkerType.FUNCTION_START,
-        regex: DEFAULT_SECTION_FORMATS.FUNCTION_START,
-      },
-      {
-        type: SectionMarkerType.FUNCTION_END,
-        regex: DEFAULT_SECTION_FORMATS.FUNCTION_END,
-      },
-      {
-        type: SectionMarkerType.LABELED,
-        regex: DEFAULT_SECTION_FORMATS.LABELED,
-      },
-    ];
-
-    // Only add default CUSTOM_START/CUSTOM_END if custom patterns are not enabled
-    // or if custom patterns are enabled but no actual patterns were provided
-    const hasCustomPatterns =
-      prefs["enableCustomStartEndPatterns"] && (customPatterns.startPattern || customPatterns.endPattern);
-    if (!hasCustomPatterns) {
-      defaultPatterns.unshift(
-        {
-          type: SectionMarkerType.CUSTOM_START,
-          regex: DEFAULT_SECTION_FORMATS.CUSTOM_START,
-        },
-        {
-          type: SectionMarkerType.CUSTOM_END,
-          regex: DEFAULT_SECTION_FORMATS.CUSTOM_END,
-        },
-      );
-    }
-
-    formats.push(...defaultPatterns);
-  }
-
-  // Add custom header pattern if enabled
-  if (prefs["enableCustomHeaderPattern"] && customPatterns.headerPattern) {
-    formats.push({
-      type: SectionMarkerType.LABELED,
-      regex: customPatterns.headerPattern,
-    });
-  }
-
-  return formats;
-}
+// Re-export getSectionFormatsInOrder from preferences for backward compatibility
+export { getSectionFormatsInOrder, type SectionFormatConfig } from "./lib/preferences";

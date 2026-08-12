@@ -1,5 +1,5 @@
 import { Color, getPreferenceValues, Icon } from "@raycast/api";
-import { State } from "./types";
+import { Identifier, State } from "./types";
 
 const { api_key, postiz_url } = getPreferenceValues<Preferences>();
 
@@ -47,4 +47,10 @@ export const STATE_COLORS: Record<State, Color> = {
   PUBLISHED: Color.Green,
   ERROR: Color.Red,
   DRAFT: Color.Yellow,
+};
+
+export const CHANNEL_MAX_LENGTH: Partial<Record<Identifier, number>> = {
+  [Identifier.Bluesky]: 300,
+  [Identifier.X]: 280,
+  [Identifier.LinkedIn]: 3000,
 };

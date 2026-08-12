@@ -1,188 +1,22 @@
-import React, { useEffect, useState, useRef } from "react";
-import { showToast, Toast, Detail, Icon, ActionPanel, Action, getSelectedText } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Action, ActionPanel, Detail, Icon, environment, getPreferenceValues } from "@raycast/api";
 import { ImagePreview } from "./components/ImagePreview";
-import { generateMermaidDiagram } from "./utils/diagram";
-import { cleanupTempFile, cleanupOldTempFiles } from "./utils/files";
-import { Clipboard, getPreferenceValues } from "@raycast/api";
+import { getManagedBrowserSupportRoot } from "./utils/browser-manager";
+import { useManualMermaidCommand } from "./hooks/use-manual-mermaid-command";
 import { Preferences } from "./types";
 
 export default function Command() {
-  const [imagePath, setImagePath] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const isProcessingRef = useRef(false);
-  const tempFileRef = useRef<string | null>(null);
   const preferences = getPreferenceValues<Preferences>();
-
-  // Extract the clipboard-only generation logic into a reusable function
-  async function generateFromClipboardOnly() {
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      const clipboardText = await Clipboard.readText();
-      if (clipboardText && clipboardText.trim()) {
-        const outputPath = await generateMermaidDiagram(clipboardText, tempFileRef);
-        setImagePath(outputPath);
-
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Diagram generated from clipboard",
-        });
-      } else {
-        throw new Error("Clipboard is empty");
-      }
-    } catch (error) {
-      await showFailureToast(error, {
-        title: "Failed to use clipboard",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
-
-  async function processMermaidCode() {
-    if (isProcessingRef.current) return;
-    isProcessingRef.current = true;
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      let mermaidCode: string | undefined;
-      let sourceType: "selected" | "clipboard" | null = null;
-
-      // Step 1: Try to get selected text first (higher priority)
-      try {
-        const selectedText = await getSelectedText();
-        // More robust check for selected text
-        if (selectedText && selectedText.trim().length > 0) {
-          mermaidCode = selectedText;
-          sourceType = "selected";
-          console.log("Selected text found:", selectedText.substring(0, 100) + "...");
-          console.log("Selected text length:", selectedText.length);
-
-          await showToast({
-            style: Toast.Style.Animated,
-            title: "Using selected text...",
-          });
-        }
-      } catch (error) {
-        // Selected text not available or error occurred
-        console.log("Failed to get selected text:", error);
-      }
-
-      // Step 2: If no selected text, fall back to clipboard content
-      if (!mermaidCode || !sourceType) {
-        try {
-          const clipboardText = await Clipboard.readText();
-          if (clipboardText && clipboardText.trim().length > 0) {
-            mermaidCode = clipboardText;
-            sourceType = "clipboard";
-            console.log("Clipboard content found:", clipboardText.substring(0, 100) + "...");
-            console.log("Clipboard content length:", clipboardText.length);
-
-            await showToast({
-              style: Toast.Style.Animated,
-              title: "Using clipboard content...",
-            });
-          } else {
-            setError("No selected text or clipboard content. Please select Mermaid code or copy it first.");
-            await showFailureToast({
-              title: "No Input Found",
-              message: "Please select text or copy Mermaid diagram code first.",
-            });
-            setIsLoading(false);
-            return;
-          }
-        } catch (error: unknown) {
-          const errorMessage = error instanceof Error ? error.message : String(error);
-          setError("Failed to read input. Please try again.");
-          await showFailureToast(error, {
-            title: "Input Error",
-            message: "Failed to read selected text or clipboard.",
-          });
-          console.error("Clipboard error details:", errorMessage);
-          setIsLoading(false);
-          return;
-        }
-      }
-
-      // Validate that we have mermaid code
-      if (!mermaidCode || mermaidCode.trim().length === 0) {
-        setError("No valid input found. The selected text or clipboard appears to be empty.");
-        await showFailureToast({
-          title: "Empty Input",
-          message: "The selected text or clipboard content is empty.",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Log the source and first part of the code for debugging
-      console.log(`Using ${sourceType} as source`);
-      console.log("Mermaid code preview:", mermaidCode.substring(0, 200));
-      console.log("Mermaid code includes 'sequenceDiagram':", mermaidCode.includes("sequenceDiagram"));
-      console.log("Mermaid code includes 'graph':", mermaidCode.includes("graph"));
-
-      // Update toast to show generation progress
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Generating diagram...",
-        message: `Source: ${sourceType}`,
-      });
-
-      // Generate the diagram
-      const outputPath = await generateMermaidDiagram(mermaidCode, tempFileRef);
-      setImagePath(outputPath);
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Diagram generated successfully",
-        message: `Generated from ${sourceType} text`,
-      });
-    } catch (error) {
-      // Log the full error for debugging but show a simplified version to the user
-      console.error("Error details:", error);
-
-      // Extract a user-friendly message
-      let userMessage = "An unexpected error occurred.";
-      if (error instanceof Error) {
-        userMessage = error.message;
-      } else if (typeof error === "string") {
-        userMessage = error;
-      }
-
-      setError(userMessage);
-
-      // Show failure toast with the user-friendly message
-      await showFailureToast(error, {
-        title: "Diagram Generation Failed",
-        message: userMessage,
-      });
-    } finally {
-      setIsLoading(false);
-      isProcessingRef.current = false;
-    }
-  }
-
-  useEffect(() => {
-    // Clean up old temporary files on component mount (prevents accumulation)
-    cleanupOldTempFiles();
-
-    processMermaidCode(); // Process input on component mount
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      // Cleanup temporary image file
-      cleanupTempFile(imagePath);
-
-      // Cleanup temporary .mmd file
-      cleanupTempFile(tempFileRef.current);
-    };
-  }, [imagePath]);
+  const {
+    state: { isLoading, error, browserSetup, imagePath, imageFormat, engineUsed, svgRasterStrategy, mermaidCode },
+    actions: {
+      runFromSelection,
+      runFromClipboardOnly,
+      retryBrowserSetup,
+      downloadManagedBrowserAndRetry,
+      cancelGeneration,
+      cancelBrowserSetup,
+    },
+  } = useManualMermaidCommand(preferences);
 
   if (isLoading) {
     return (
@@ -191,28 +25,7 @@ export default function Command() {
         isLoading={true}
         actions={
           <ActionPanel>
-            <Action
-              title="Cancel"
-              icon={Icon.XMarkCircle}
-              onAction={() => {
-                // Clean up any temporary files before canceling
-                if (tempFileRef.current) {
-                  cleanupTempFile(tempFileRef.current);
-                  tempFileRef.current = null;
-                }
-
-                isProcessingRef.current = false;
-                setIsLoading(false);
-                setError("Operation cancelled by user.");
-
-                // Show toast to confirm cancellation
-                showToast({
-                  style: Toast.Style.Success,
-                  title: "Operation cancelled",
-                  message: "Temporary files have been cleaned up",
-                });
-              }}
-            />
+            <Action title="Cancel" icon={Icon.XMarkCircle} onAction={cancelGeneration} />
           </ActionPanel>
         }
       />
@@ -247,14 +60,49 @@ ${error}
               title="Try Again"
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={() => processMermaidCode()}
+              onAction={() => runFromSelection()}
             />
             <Action
               title="Use Clipboard Only"
               icon={Icon.Clipboard}
               shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-              onAction={generateFromClipboardOnly}
+              onAction={runFromClipboardOnly}
             />
+            <Action title="Cancel" icon={Icon.XMarkCircle} onAction={cancelBrowserSetup} />
+          </ActionPanel>
+        }
+      />
+    );
+  }
+
+  if (browserSetup) {
+    const managedBrowserPath = getManagedBrowserSupportRoot(environment.supportPath);
+    return (
+      <Detail
+        markdown={`# Browser Setup Required
+
+${browserSetup.reason}
+
+No compatible Chrome/Chromium browser was found in your environment. Mermaid to Image can download a managed browser and store it locally here:
+
+\`${managedBrowserPath}\`
+
+The managed browser is used for compatible rendering and for SVG preview/copy cases that need browser-backed rasterization.`}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Download Browser"
+              icon={Icon.Download}
+              shortcut={{ modifiers: ["cmd"], key: "d" }}
+              onAction={downloadManagedBrowserAndRetry}
+            />
+            <Action
+              title="Try Again"
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              onAction={retryBrowserSetup}
+            />
+            <Action title="Cancel" icon={Icon.XMarkCircle} onAction={cancelBrowserSetup} />
           </ActionPanel>
         }
       />
@@ -262,10 +110,17 @@ ${error}
   }
 
   if (imagePath) {
-    return <ImagePreview imagePath={imagePath} format={preferences.outputFormat} />;
+    return (
+      <ImagePreview
+        imagePath={imagePath}
+        format={imageFormat}
+        engineLabel={engineUsed}
+        svgRasterStrategy={svgRasterStrategy}
+        mermaidCode={mermaidCode}
+      />
+    );
   }
 
-  // Fallback state - initial screen
   return (
     <Detail
       markdown={`# Ready to generate diagram
@@ -295,13 +150,13 @@ graph TD
             title="Generate Diagram"
             icon={Icon.Wand}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={() => processMermaidCode()}
+            onAction={() => runFromSelection()}
           />
           <Action
             title="Generate from Clipboard Only"
             icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-            onAction={generateFromClipboardOnly}
+            onAction={runFromClipboardOnly}
           />
         </ActionPanel>
       }

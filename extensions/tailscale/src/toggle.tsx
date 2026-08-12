@@ -34,7 +34,7 @@ async function isTailscaleConnected(): Promise<boolean> {
   try {
     getStatus(false);
     return true;
-  } catch (err) {
+  } catch {
     return false;
   }
 }

@@ -1,0 +1,92 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vocabulary-builder",
+  "title": "Vocabulary Builder",
+  "description": "Build your vocabulary while learning a new language",
+  "icon": "extension-icon.png",
+  "author": "stefann",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-words",
+      "title": "Search and Manage Words",
+      "description": "View and manage all words",
+      "mode": "view"
+    },
+    {
+      "name": "manage-languages",
+      "title": "Manage Languages",
+      "description": "Add, edit and delete your languages",
+      "mode": "view"
+    },
+    {
+      "name": "statistics-and-overview",
+      "title": "Statistics and Overview",
+      "description": "See statistics for your inputs and overview of all the words per language",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add",
+      "title": "Quick Add",
+      "description": "Add new words quickly",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "defaultLanguage",
+          "type": "textfield",
+          "title": "Default Language",
+          "description": "Set a default language for quick adding words",
+          "placeholder": "Default Language (e.g. es)",
+          "required": false
+        }
+      ],
+      "arguments": [
+        {
+          "name": "word",
+          "type": "text",
+          "placeholder": "Word",
+          "required": true
+        },
+        {
+          "name": "translation",
+          "type": "text",
+          "placeholder": "Translation",
+          "required": true
+        },
+        {
+          "name": "language",
+          "type": "text",
+          "placeholder": "Language (e.g. es)"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

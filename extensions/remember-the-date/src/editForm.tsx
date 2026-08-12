@@ -31,6 +31,12 @@ export function EditForm(props: { item: Item; onEdit: (item: Item) => void }) {
         placeholder="Enter Subtitle (optional)"
       />
       <Form.DatePicker id="date" defaultValue={new Date(item.date)} title="Date" />
+      <Form.Dropdown id="repeat" title="Repeat" defaultValue={item.repeat || "none"}>
+        <Form.Dropdown.Item value="none" title="One-time" />
+        <Form.Dropdown.Item value="weekly" title="Weekly" />
+        <Form.Dropdown.Item value="monthly" title="Monthly" />
+        <Form.Dropdown.Item value="yearly" title="Yearly" />
+      </Form.Dropdown>
       <Form.Dropdown id="icon" title="Icon" defaultValue={item.icon}>
         {Object.entries(Icon).map(([key, value]) => (
           <Form.Dropdown.Item value={value} key={key} title={key} icon={value} />

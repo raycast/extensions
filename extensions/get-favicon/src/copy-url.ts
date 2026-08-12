@@ -1,6 +1,7 @@
 import { Clipboard, closeMainWindow, getPreferenceValues, PopToRootType, showHUD, Toast } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import isUrl from "is-url";
+import type { FaviconResult } from "./types";
 
 export default async function copyFavicon(props: { arguments: Arguments.CopyUrl }) {
   const preferences = await getPreferenceValues();
@@ -25,13 +26,13 @@ export default async function copyFavicon(props: { arguments: Arguments.CopyUrl 
   }
 
   try {
-    const favicon = await getFavicon(url, { size: preferences.defaultIconSize });
+    const favicon = (await getFavicon(url, { size: preferences.defaultIconSize })) as FaviconResult;
 
-    if (!favicon || !(favicon as any).source) {
+    if (!favicon || !favicon.source) {
       throw new Error("Favicon not found");
     }
 
-    const faviconUrl = (favicon as any).source;
+    const faviconUrl = favicon.source;
 
     await Clipboard.copy(faviconUrl);
 

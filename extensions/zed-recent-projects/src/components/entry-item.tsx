@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Color, Icon, List } from "@raycast/api";
-import { Entry } from "../lib/entry";
+import { Entry, getEntryPrimaryPath, isEntryMultiFolder } from "../lib/entry";
 import { getGitBranch } from "../lib/git";
 import { showFailureToast } from "@raycast/utils";
 import { showGitBranch, projectIconStyle, showOpenStatus } from "../lib/preferences";
@@ -48,11 +48,15 @@ function getEntryIcon(entry: Entry): List.Item.Props["icon"] {
   }
 
   // Default: use folder icon
-  return entry.path ? { fileIcon: entry.path } : Icon.Folder;
+  const primaryPath = getEntryPrimaryPath(entry);
+  return primaryPath ? { fileIcon: primaryPath } : Icon.Folder;
 }
 
 export const EntryItem = ({ entry, ...props }: EntryItemProps) => {
-  const branch = entry.type === "local" && entry.path ? useGitBranch(entry.path) : undefined;
+  const primaryPath = getEntryPrimaryPath(entry);
+  // Skip git branch check for multi-folder workspaces (which folder's branch would we show?)
+  const branch =
+    entry.type === "local" && primaryPath && !isEntryMultiFolder(entry) ? useGitBranch(primaryPath) : undefined;
 
   const accessories: List.Item.Accessory[] = [];
 

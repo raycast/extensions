@@ -1,6 +1,7 @@
-import { launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { launchCommand, LaunchType, showHUD, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { execSync } from "node:child_process";
+import { AuthenticationCanceledError, runWithPrivileges } from "./sudoSupport";
 
 type Updates = {
   menubar?: boolean;
@@ -20,21 +21,28 @@ async function tryLaunchCommand(commandName: string, context: { enabled: boolean
   try {
     await launchCommand({ name: commandName, type: LaunchType.Background, context });
   } catch (error) {
-    await showFailureToast(`Failed to launch command ${commandName}`, { message: String(error) });
+    await showFailureToast(error, { title: `Failed to launch command ${commandName}` });
   }
 }
 
 async function execCommand(shellCommand: string, updates: Updates, hudMessage?: string) {
   try {
-    execSync(
-      `osascript -e 'do shell script "${shellCommand}" with prompt "Doorstopper requires admin privileges" with administrator privileges'`,
-    );
+    await runWithPrivileges(shellCommand);
     await update(updates, false);
     if (hudMessage) {
       await showHUD(hudMessage);
     }
   } catch (error) {
-    showFailureToast(`Failed to execute command ${shellCommand}`, { message: String(error) });
+    if (error instanceof AuthenticationCanceledError) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Authentication canceled",
+        message: error.message,
+      });
+      return;
+    }
+
+    await showFailureToast(error, { title: "Failed to update Doorstopper" });
   }
 }
 
@@ -48,9 +56,9 @@ export function isDoorstopperEnabled(): boolean {
 }
 
 export async function startDoorstopper(updates: Updates, hudMessage?: string) {
-  await execCommand("pmset -a disablesleep 1", updates, hudMessage);
+  await execCommand("/usr/bin/pmset -a disablesleep 1", updates, hudMessage);
 }
 
 export async function stopDoorstopper(updates: Updates, hudMessage?: string) {
-  await execCommand("pmset -a disablesleep 0", updates, hudMessage);
+  await execCommand("/usr/bin/pmset -a disablesleep 0", updates, hudMessage);
 }

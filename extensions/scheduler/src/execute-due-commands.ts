@@ -2,7 +2,7 @@ import { showToast, Toast } from "@raycast/api";
 import { ScheduledCommand, ExecutionLog } from "./types";
 import { generateId } from "./utils";
 import { STORAGE_KEYS } from "./utils/constants";
-import { getStoredData, setStoredData } from "./utils/storage";
+import { getStoredData, loadScheduledCommands, setStoredData } from "./utils/storage";
 import { executeRaycastCommand } from "./utils/commandExecution";
 import { isCommandDue, wasScheduleMissed } from "./utils/schedule";
 
@@ -29,6 +29,23 @@ const getErrorMessage = (error: unknown): string => {
   return "Unknown error occurred";
 };
 
+const shouldAutoDisableOnError = (message: string): boolean => {
+  const lower = message.toLowerCase();
+
+  // Proxy errors and Array.prototype.indexOf runtime issues are environmental
+  // (e.g. corporate proxy, polyfill conflicts) — not command-specific, so skip.
+  if (lower.includes("proxy") || lower.includes("indexof")) return false;
+
+  return (
+    // V8: "Cannot read properties of undefined (reading 'settings')" — extension
+    // not installed or missing expected config; varies by quote style across engines.
+    lower.includes("cannot read propert") ||
+    lower.includes("command not found") ||
+    lower.includes("invalid raycast deeplink") ||
+    lower.includes("incomplete extension command data")
+  );
+};
+
 const createExecutionLog = (command: ScheduledCommand): ExecutionLog => ({
   id: generateId(),
   commandId: command.id,
@@ -50,32 +67,17 @@ async function handleExecutionLog(log: ExecutionLog, commandName: string): Promi
   }
 }
 
-async function getCommands(): Promise<ScheduledCommand[]> {
-  return await getStoredData<ScheduledCommand[]>(STORAGE_KEYS.SCHEDULED_COMMANDS, []);
+function applyCommandUpdate(raw: unknown[], indexById: Map<string, number>, updatedCommand: ScheduledCommand): void {
+  const idx = indexById.get(updatedCommand.id);
+  if (idx === undefined) return;
+  raw[idx] = updatedCommand;
 }
 
-async function updateCommand(updatedCommand: ScheduledCommand): Promise<void> {
-  try {
-    const commands = await getCommands();
-    const index = commands.findIndex((cmd) => cmd.id === updatedCommand.id);
-    if (index !== -1) {
-      commands[index] = updatedCommand;
-      await setStoredData(STORAGE_KEYS.SCHEDULED_COMMANDS, commands);
-    }
-  } catch (error) {
-    console.error("Error updating command:", error);
-  }
-}
-
-async function disableCommand(command: ScheduledCommand): Promise<void> {
-  try {
-    const commands = await getCommands();
-    const updatedCommands = commands.map((c) => (c.id === command.id ? { ...c, enabled: false } : c));
-    await setStoredData(STORAGE_KEYS.SCHEDULED_COMMANDS, updatedCommands);
-    console.log(LOG_MESSAGES.DISABLED_ONCE(command.name));
-  } catch (error) {
-    console.error(`Error disabling command "${command.name}":`, error);
-  }
+function applyDisable(raw: unknown[], indexById: Map<string, number>, commandToDisable: ScheduledCommand): void {
+  const idx = indexById.get(commandToDisable.id);
+  if (idx === undefined) return;
+  raw[idx] = { ...commandToDisable, enabled: false, updatedAt: new Date().toISOString() };
+  console.log(LOG_MESSAGES.DISABLED_ONCE(commandToDisable.name));
 }
 
 export default async function ExecuteDueCommands() {
@@ -87,15 +89,22 @@ export default async function ExecuteDueCommands() {
   });
 
   try {
-    const commands = await getCommands();
+    const loaded = await loadScheduledCommands(STORAGE_KEYS.SCHEDULED_COMMANDS);
+    const commands = loaded.commands;
+    const rawToUpdate = [...loaded.raw];
+    const indexById = loaded.indexById;
+
+    let didMutateStorage = loaded.migratedCount > 0;
     if (commands.length === 0) {
       console.log(LOG_MESSAGES.NO_COMMANDS);
+      if (didMutateStorage) {
+        await setStoredData(STORAGE_KEYS.SCHEDULED_COMMANDS, rawToUpdate);
+      }
       return;
     }
 
     const now = new Date();
     let executedCount = 0;
-
     for (const command of commands) {
       if (!command.enabled) {
         console.log(LOG_MESSAGES.SKIPPING_DISABLED(command.name));
@@ -108,26 +117,30 @@ export default async function ExecuteDueCommands() {
       if (isDue) {
         console.log(LOG_MESSAGES.EXECUTING(command.name));
 
-        // Disable "once" commands BEFORE execution in case the launch doesn't return
+        let commandToExecute = command;
         if (command.schedule.type === "once") {
           console.log(LOG_MESSAGES.DISABLING_ONCE(command.name));
-          await disableCommand(command);
+          commandToExecute = { ...command, enabled: false, updatedAt: now.toISOString() };
+          applyDisable(rawToUpdate, indexById, command);
+          didMutateStorage = true;
         }
 
-        await executeCommand(command, now);
+        didMutateStorage = (await executeCommand(rawToUpdate, indexById, commandToExecute, now)) || didMutateStorage;
         executedCount++;
       } else if (isMissed) {
         console.log(LOG_MESSAGES.EXECUTING_MISSED(command.name));
 
-        // Execute the missed command
-        await executeCommand(command, now);
+        didMutateStorage = (await executeCommand(rawToUpdate, indexById, command, now)) || didMutateStorage;
         executedCount++;
       } else {
-        // Update lastMissedCheck even if not due, to track that we checked
         if (command.runIfMissed) {
-          await updateCommandMissedCheck(command, now);
+          didMutateStorage = updateCommandMissedCheck(rawToUpdate, indexById, command, now) || didMutateStorage;
         }
       }
+    }
+
+    if (didMutateStorage) {
+      await setStoredData(STORAGE_KEYS.SCHEDULED_COMMANDS, rawToUpdate);
     }
 
     if (executedCount > 0) {
@@ -140,42 +153,69 @@ export default async function ExecuteDueCommands() {
   }
 }
 
-async function executeCommand(command: ScheduledCommand, now: Date): Promise<void> {
+async function executeCommand(
+  raw: unknown[],
+  indexById: Map<string, number>,
+  command: ScheduledCommand,
+  now: Date,
+): Promise<boolean> {
   const log = createExecutionLog(command);
   const executionTime = now.toISOString();
+  let didMutate = false;
 
   try {
     console.log(LOG_MESSAGES.LAUNCHING(command.command.deeplink));
     await executeRaycastCommand(command.command);
     console.log(LOG_MESSAGES.SUCCESS(command.name));
 
-    // Update the command's lastExecutedAt and lastMissedCheck fields after successful execution
     const updatedCommand = {
       ...command,
       lastExecutedAt: executionTime,
       lastMissedCheck: executionTime,
       updatedAt: executionTime,
     };
-    await updateCommand(updatedCommand);
+    applyCommandUpdate(raw, indexById, updatedCommand);
+    didMutate = true;
   } catch (error) {
     console.error(LOG_MESSAGES.ERROR_EXECUTING(command.name), error);
     log.status = "error";
-    log.errorMessage = getErrorMessage(error);
+
+    const message = getErrorMessage(error);
+    log.errorMessage = message;
+
+    if (shouldAutoDisableOnError(message)) {
+      const disabledCommand: ScheduledCommand = {
+        ...command,
+        enabled: false,
+        updatedAt: executionTime,
+      };
+      applyCommandUpdate(raw, indexById, disabledCommand);
+      didMutate = true;
+      log.errorMessage = `${message} (auto-disabled)`;
+    }
   }
 
   await handleExecutionLog(log, command.name);
+  return didMutate;
 }
 
-async function updateCommandMissedCheck(command: ScheduledCommand, now: Date): Promise<void> {
+function updateCommandMissedCheck(
+  raw: unknown[],
+  indexById: Map<string, number>,
+  command: ScheduledCommand,
+  now: Date,
+): boolean {
   try {
     const updatedCommand = {
       ...command,
       lastMissedCheck: now.toISOString(),
     };
-    await updateCommand(updatedCommand);
+    applyCommandUpdate(raw, indexById, updatedCommand);
     console.log(LOG_MESSAGES.UPDATED_MISSED_CHECK(command.name));
+    return true;
   } catch (error) {
     console.error(`Error updating missed check for command "${command.name}":`, error);
+    return false;
   }
 }
 

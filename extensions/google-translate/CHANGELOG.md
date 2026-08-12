@@ -1,5 +1,29 @@
 # Google Translate Changelog
 
+## [Update] - 2026-08-10
+
+- Added a "Prioritize cross-language translations" preference to optionally move same-language results to the bottom
+
+## [Feature] - 2026-06-18
+
+- Added preferences for "Translate from" (source), "Primary Language" (target), and "Secondary Language" (fallback target)
+- Added automatic swap to the secondary target language if the detected source language matches the primary target language
+- Prioritized cross-language translations over same-language translations in both the Translate and Quick Translate screens
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Add Keyboard Shortcuts] - 2026-05-13
+
+- Added common Raycast keyboard shortcuts for language set management actions
+- Added common Raycast keyboard shortcuts for copy actions
+- Updated Raycast API and utils dependencies
+
+## [Feature] - 2026-04-15
+
+ - Added pronunciation text to quick translate command
+
 ## [Cross Platform Shortcuts + Modernize] - 2025-12-24
 
 - Make `Shortcut`s cross-platform

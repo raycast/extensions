@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 
 import resetCache from "../../reset-cache";
-import { getCliPath, ZSH_PATH } from "../utils";
+import { getCliPath, isWindows, ZSH_PATH } from "../utils";
 
 export function Error() {
   const cliPath = getCliPath();
@@ -21,7 +21,7 @@ ${
 
 
 ${
-  ZSH_PATH
+  ZSH_PATH || isWindows
     ? ""
     : `
 -  Make sure that Zsh is installed by running \`zsh --version\` in your terminal.

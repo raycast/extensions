@@ -1,54 +1,47 @@
 import fs from "fs";
 import { ComponentType, createContext, useContext } from "react";
-import { Application, Detail, LocalStorage } from "@raycast/api";
+import { Application, Detail } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getZedApp, getZedDbPath } from "../lib/zed";
-import { getZedWorkspaceDbVersion } from "../lib/db";
+import { getZedApp, getZedDbPath, getZedCliPath } from "../lib/zed";
+import { getZedWorkspaceDbVersion, MIN_SUPPORTED_DB_VERSION } from "../lib/db";
 
 interface ZedContextType {
   app: Application;
-  isDbSupported: boolean;
   workspaceDbVersion: number;
   dbPath: string;
+  /** Path to Zed CLI executable, or null if not available (macOS only) */
+  cliPath: string | null;
 }
 
 const ZedContext = createContext<ZedContextType | undefined>(undefined);
 
-const defaultDbVersionKey = "defaultDbVersion";
-
 function useZed() {
   const dbPath = getZedDbPath();
+  const cliPath = getZedCliPath();
 
   const { data, isLoading } = usePromise(async () => {
-    const defaultDbVersion = await LocalStorage.getItem<number>(defaultDbVersionKey);
-    const [app, workspaceDbVersion] = await Promise.all([
-      getZedApp(),
-      getZedWorkspaceDbVersion(dbPath, defaultDbVersion),
-    ]);
-
-    if (workspaceDbVersion.supported) {
-      await LocalStorage.setItem(defaultDbVersionKey, workspaceDbVersion.version);
-    }
+    const [app, versionInfo] = await Promise.all([getZedApp(), getZedWorkspaceDbVersion(dbPath)]);
 
     return {
       app,
-      isDbSupported: workspaceDbVersion.supported,
-      workspaceDbVersion: workspaceDbVersion.version,
+      isDbSupported: versionInfo.supported,
+      workspaceDbVersion: versionInfo.version,
     };
   });
 
   return {
-    isLoading: isLoading,
+    isLoading,
     app: data?.app,
     isDbSupported: !!data?.isDbSupported,
     workspaceDbVersion: data?.workspaceDbVersion || 0,
     dbPath,
+    cliPath,
   };
 }
 
 export const withZed = <P extends object>(Component: ComponentType<P>) => {
   return (props: P) => {
-    const { app, isDbSupported, workspaceDbVersion, dbPath, isLoading } = useZed();
+    const { app, isDbSupported, workspaceDbVersion, dbPath, cliPath, isLoading } = useZed();
 
     if (!app) {
       return <Detail isLoading={isLoading} markdown={isLoading ? "" : `No Zed app detected`} />;
@@ -59,16 +52,26 @@ export const withZed = <P extends object>(Component: ComponentType<P>) => {
     }
 
     if (!isDbSupported) {
-      return <Detail markdown="Please update Zed to the latest version" />;
+      return (
+        <Detail
+          markdown={`## Unsupported Zed Version
+
+Your Zed database schema version (${workspaceDbVersion}) is not supported.
+
+This extension requires Zed with database schema version **${MIN_SUPPORTED_DB_VERSION}** or higher.
+
+Please update Zed to the latest version.`}
+        />
+      );
     }
 
     return (
       <ZedContext.Provider
         value={{
           app,
-          isDbSupported,
           workspaceDbVersion,
           dbPath,
+          cliPath,
         }}
       >
         <Component {...props} />

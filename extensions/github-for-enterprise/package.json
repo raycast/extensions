@@ -7,6 +7,7 @@
   "license": "MIT",
   "contributors": [
     "emanguy",
+    "theherk",
     "LunaticMuch",
     "pernielsentikaer",
     "perat"
@@ -45,6 +46,13 @@
       "title": "My Pull Requests",
       "subtitle": "GitHub Enterprise",
       "description": "GitHub actions",
+      "mode": "view"
+    },
+    {
+      "name": "search-repositories",
+      "title": "Search Repositories",
+      "subtitle": "GitHub Enterprise",
+      "description": "Search repositories by name.",
       "mode": "view"
     },
     {

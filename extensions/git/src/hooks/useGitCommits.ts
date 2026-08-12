@@ -32,12 +32,15 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
         } else if (branchesState.currentBranch) {
           if (branchFilter.upstream) {
             if (!branchesState.currentBranch.upstream) return undefined;
-            const upstreamName = branchesState.currentBranch.upstream!.fullName;
+            const upstreamName = branchesState.currentBranch.upstream.fullName;
+            const upstreamBranch = branchesState.remoteBranches[branchesState.currentBranch.upstream.remote]?.find(
+              (branch) => branch.displayName === upstreamName,
+            );
+            if (!upstreamBranch) return undefined;
+
             return {
               kind: "branch",
-              ...branchesState.remoteBranches[branchesState.currentBranch.upstream.remote]?.find(
-                (branch) => branch.displayName === upstreamName,
-              ),
+              ...upstreamBranch,
             } as SelectedBranch;
           } else {
             return {
@@ -52,23 +55,31 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
       case "branch":
         switch (branchFilter.value.type) {
           case "current":
-          case "local":
-            return {
-              kind: "branch",
-              ...branchesState.localBranches.find((branch) => branch.name === branchFilter.value.name),
-            } as SelectedBranch;
-
-          case "remote":
-            if (!branchesState.remoteBranches[branchFilter.value.remote!]) {
-              return undefined;
-            }
+          case "local": {
+            const localBranch = branchesState.localBranches.find((branch) => branch.name === branchFilter.value.name);
+            if (!localBranch) return undefined;
 
             return {
               kind: "branch",
-              ...branchesState.remoteBranches[branchFilter.value.remote!].find(
-                (branch) => branch.name === branchFilter.value.name,
-              ),
+              ...localBranch,
             } as SelectedBranch;
+          }
+
+          case "remote": {
+            const remoteName = branchFilter.value.remote;
+            if (!remoteName) return undefined;
+
+            const remoteBranches = branchesState.remoteBranches[remoteName];
+            if (!remoteBranches) return undefined;
+
+            const remoteBranch = remoteBranches.find((branch) => branch.name === branchFilter.value.name);
+            if (!remoteBranch) return undefined;
+
+            return {
+              kind: "branch",
+              ...remoteBranch,
+            } as SelectedBranch;
+          }
         }
     }
   }, [branchFilter, branchesState]);
@@ -77,12 +88,17 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
     (_repoPath: string, branchFilter: BranchFilter, _selectedBranch?: Branch, _detachedHead?: DetachedHead) =>
       async (options: { page: number }) => {
         const selectedSourceName = evaluateBranchName(branchFilter, branchesState!);
-        const commits = await gitManager.getCommits(selectedSourceName, options.page);
 
-        return {
-          data: commits,
-          hasMore: commits.length > 0,
-        };
+        try {
+          const commits = await gitManager.getCommits(selectedSourceName, options.page);
+
+          return {
+            data: commits,
+            hasMore: commits.length > 0,
+          };
+        } catch {
+          return { data: [], hasMore: false };
+        }
       },
     [gitManager.repoPath, branchFilter, branchesState?.currentBranch, branchesState?.detachedHead], // Include both repository path and branch for proper cache isolation
     {
@@ -109,7 +125,7 @@ function evaluateBranchName(branchFilter: BranchFilter, branchesState: BranchesS
         return branchesState.detachedHead.commitHash;
       } else if (branchesState.currentBranch) {
         if (branchFilter.upstream) {
-          return branchesState.currentBranch.upstream!.fullName;
+          return branchesState.currentBranch.upstream?.fullName;
         } else {
           return branchesState.currentBranch.name;
         }

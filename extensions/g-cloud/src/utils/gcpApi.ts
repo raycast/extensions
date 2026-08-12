@@ -229,16 +229,22 @@ export async function listComputeInstances(
   gcloudPath: string,
   projectId: string,
   zone?: string,
+  options?: { fields?: string; maxResults?: number },
 ): Promise<ComputeInstance[]> {
+  const params = new URLSearchParams();
+  if (options?.fields) params.set("fields", options.fields);
+  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+
   if (zone) {
     // Single zone query
-    const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances`;
+    const url = `${COMPUTE_API}/projects/${projectId}/zones/${zone}/instances${qs}`;
     const response = await gcpFetch<InstanceListResponse>(gcloudPath, url);
     return response.items || [];
   }
 
   // Aggregated query (all zones)
-  const url = `${COMPUTE_API}/projects/${projectId}/aggregated/instances`;
+  const url = `${COMPUTE_API}/projects/${projectId}/aggregated/instances${qs}`;
   const response = await gcpFetch<AggregatedInstancesResponse>(gcloudPath, url);
 
   const instances: ComputeInstance[] = [];
@@ -351,8 +357,15 @@ export interface StorageBucket {
   };
 }
 
-export async function listStorageBuckets(gcloudPath: string, projectId: string): Promise<StorageBucket[]> {
-  const url = `${STORAGE_API}/b?project=${projectId}`;
+export async function listStorageBuckets(
+  gcloudPath: string,
+  projectId: string,
+  options?: { fields?: string; maxResults?: number },
+): Promise<StorageBucket[]> {
+  const params = new URLSearchParams({ project: projectId });
+  if (options?.fields) params.set("fields", options.fields);
+  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+  const url = `${STORAGE_API}/b?${params.toString()}`;
   const response = await gcpFetch<{ items?: StorageBucket[] }>(gcloudPath, url);
   return response.items || [];
 }
@@ -461,8 +474,16 @@ export interface VpcNetwork {
   mtu?: number;
 }
 
-export async function listVpcNetworks(gcloudPath: string, projectId: string): Promise<VpcNetwork[]> {
-  const url = `${COMPUTE_API}/projects/${projectId}/global/networks`;
+export async function listVpcNetworks(
+  gcloudPath: string,
+  projectId: string,
+  options?: { fields?: string; maxResults?: number },
+): Promise<VpcNetwork[]> {
+  const params = new URLSearchParams();
+  if (options?.fields) params.set("fields", options.fields);
+  if (options?.maxResults) params.set("maxResults", options.maxResults.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${COMPUTE_API}/projects/${projectId}/global/networks${qs}`;
   const response = await gcpFetch<{ items?: VpcNetwork[] }>(gcloudPath, url);
   return response.items || [];
 }
@@ -577,8 +598,15 @@ export interface Secret {
   };
 }
 
-export async function listSecrets(gcloudPath: string, projectId: string): Promise<Secret[]> {
-  const url = `${SECRETS_API}/projects/${projectId}/secrets`;
+export async function listSecrets(
+  gcloudPath: string,
+  projectId: string,
+  options?: { pageSize?: number },
+): Promise<Secret[]> {
+  const params = new URLSearchParams();
+  if (options?.pageSize) params.set("pageSize", options.pageSize.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${SECRETS_API}/projects/${projectId}/secrets${qs}`;
   const response = await gcpFetch<{ secrets?: Secret[] }>(gcloudPath, url);
   return response.secrets || [];
 }
@@ -751,9 +779,16 @@ export interface CloudRunRevision {
   service?: string;
 }
 
-export async function listCloudRunServices(gcloudPath: string, projectId: string): Promise<CloudRunService[]> {
+export async function listCloudRunServices(
+  gcloudPath: string,
+  projectId: string,
+  options?: { pageSize?: number },
+): Promise<CloudRunService[]> {
+  const params = new URLSearchParams();
+  if (options?.pageSize) params.set("pageSize", options.pageSize.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
   // Use "-" for location to list from all regions
-  const url = `${CLOUDRUN_API}/projects/${projectId}/locations/-/services`;
+  const url = `${CLOUDRUN_API}/projects/${projectId}/locations/-/services${qs}`;
   const response = await gcpFetch<{ services?: CloudRunService[] }>(gcloudPath, url);
   return response.services || [];
 }
@@ -1118,8 +1153,15 @@ export interface BuildOperation {
   };
 }
 
-export async function listBuildTriggers(gcloudPath: string, projectId: string): Promise<BuildTrigger[]> {
-  const url = `${CLOUDBUILD_API}/projects/${projectId}/triggers`;
+export async function listBuildTriggers(
+  gcloudPath: string,
+  projectId: string,
+  options?: { pageSize?: number },
+): Promise<BuildTrigger[]> {
+  const params = new URLSearchParams();
+  if (options?.pageSize) params.set("pageSize", options.pageSize.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${CLOUDBUILD_API}/projects/${projectId}/triggers${qs}`;
   const response = await gcpFetch<{ triggers?: BuildTrigger[] }>(gcloudPath, url);
   return response.triggers || [];
 }
@@ -1501,9 +1543,13 @@ export async function listCloudFunctions(
   gcloudPath: string,
   projectId: string,
   location?: string,
+  options?: { pageSize?: number },
 ): Promise<CloudFunction[]> {
   const loc = location || "-";
-  const url = `${CLOUDFUNCTIONS_API}/projects/${projectId}/locations/${loc}/functions`;
+  const params = new URLSearchParams();
+  if (options?.pageSize) params.set("pageSize", options.pageSize.toString());
+  const qs = params.toString() ? `?${params.toString()}` : "";
+  const url = `${CLOUDFUNCTIONS_API}/projects/${projectId}/locations/${loc}/functions${qs}`;
   const response = await gcpFetch<{ functions?: CloudFunction[] }>(gcloudPath, url);
   return response.functions || [];
 }

@@ -122,8 +122,6 @@ export class NetworkService {
   private ipCache: Map<string, { data: IPAddress[]; timestamp: number }> = new Map();
   private firewallCache: Map<string, { data: FirewallRule[]; timestamp: number }> = new Map();
 
-  private static regionsCache: string[] | null = null;
-
   private static instance: NetworkService | null = null;
 
   public static getInstance(gcloudPath: string, projectId: string): NetworkService {
@@ -272,23 +270,23 @@ export class NetworkService {
   ): Promise<boolean> {
     try {
       // Keep using gcloud CLI for write operations
-      let command = `compute networks create ${name}`;
+      const commandArgs = ["compute", "networks", "create", name];
 
       if (subnetMode === "auto") {
-        command += " --subnet-mode=auto";
+        commandArgs.push("--subnet-mode=auto");
       } else {
-        command += " --subnet-mode=custom";
+        commandArgs.push("--subnet-mode=custom");
       }
 
       if (description) {
-        command += ` --description="${description}"`;
+        commandArgs.push(`--description=${description}`);
       }
 
       if (mtu) {
-        command += ` --mtu=${mtu}`;
+        commandArgs.push(`--mtu=${mtu}`);
       }
 
-      await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      await executeGcloudCommand(this.gcloudPath, commandArgs, this.projectId);
 
       this.clearVPCCache();
 
@@ -382,41 +380,37 @@ export class NetworkService {
   ): Promise<boolean> {
     try {
       // Keep using gcloud CLI for write operations
-      let command = `compute addresses create ${name}`;
-
-      command += ` --region=${region}`;
+      const commandArgs = ["compute", "addresses", "create", name, `--region=${region}`];
 
       if (addressType === "INTERNAL") {
-        command += " --subnet";
-
         if (addressOptions.subnet) {
-          command += `=${addressOptions.subnet}`;
+          commandArgs.push(`--subnet=${addressOptions.subnet}`);
         } else {
           throw new Error("Subnet is required for internal IP addresses");
         }
       }
 
       if (addressOptions.description) {
-        command += ` --description="${addressOptions.description}"`;
+        commandArgs.push(`--description=${addressOptions.description}`);
       }
 
       if (addressOptions.address) {
-        command += ` --addresses=${addressOptions.address}`;
+        commandArgs.push(`--addresses=${addressOptions.address}`);
       }
 
       if (addressOptions.purpose) {
-        command += ` --purpose=${addressOptions.purpose}`;
+        commandArgs.push(`--purpose=${addressOptions.purpose}`);
       }
 
       if (addressOptions.network) {
-        command += ` --network=${addressOptions.network}`;
+        commandArgs.push(`--network=${addressOptions.network}`);
       }
 
       if (addressOptions.networkTier) {
-        command += ` --network-tier=${addressOptions.networkTier}`;
+        commandArgs.push(`--network-tier=${addressOptions.networkTier}`);
       }
 
-      await executeGcloudCommand(this.gcloudPath, command, this.projectId);
+      await executeGcloudCommand(this.gcloudPath, commandArgs, this.projectId);
 
       this.clearIPCache();
 
@@ -494,7 +488,7 @@ export class NetworkService {
       command.push(`--network=${network}`);
 
       if (ruleOptions.description) {
-        command.push(`--description="${ruleOptions.description}"`);
+        command.push(`--description=${ruleOptions.description}`);
       }
 
       if (ruleOptions.direction) {
@@ -549,10 +543,7 @@ export class NetworkService {
         command.push("--enable-logging");
       }
 
-      command.push(`--project=${this.projectId}`);
-      command.push("--format=json");
-
-      await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, { skipCache: true });
+      await executeGcloudCommand(this.gcloudPath, command, this.projectId, { skipCache: true });
 
       this.firewallCache.delete("firewalls");
 
@@ -608,10 +599,7 @@ export class NetworkService {
         }
       }
 
-      command.push(`--project=${this.projectId}`);
-      command.push("--format=json");
-
-      await executeGcloudCommand(this.gcloudPath, command.join(" "), undefined, {
+      await executeGcloudCommand(this.gcloudPath, command, this.projectId, {
         skipCache: true,
         timeout: EXECUTION_DEFAULTS.TIMEOUT.CREATE,
       });

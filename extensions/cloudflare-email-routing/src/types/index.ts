@@ -52,7 +52,8 @@ export interface AliasRule {
   email: string;
   forwardsToEmail: string;
   enabled: boolean;
-  createdAt: Date;
+  createdAt?: Date;
+  isManaged: boolean;
 }
 
 export interface ApiConfig {
@@ -60,11 +61,14 @@ export interface ApiConfig {
   zoneId: string;
   destinationEmail: string;
   preAllocatePool: boolean;
+  aliasPreface?: string;
+  defaultLabel?: string;
 }
 
 export type EmailRoutingSettings = CloudflareEmailRoutingSettings;
 
 export interface CreateAliasFormData {
+  alias: string;
   label: string;
   description?: string;
 }

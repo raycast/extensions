@@ -73,6 +73,6 @@ export const confirmation = withAccessToken(linear)(async (inputs: Input) => {
 
   return {
     message: `Are you sure you want to update the [issue](${issue.url})?`,
-    info: [formatConfirmation({ name: "issueId", value: issueId }), ...details],
+    info: [{ name: "Issue", value: issue.title }, ...details],
   };
 });

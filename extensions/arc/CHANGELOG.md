@@ -1,5 +1,36 @@
 # Arc Changelog
 
+## [Fix SQL injection in history and download search] - 2026-06-23
+
+- Escape single quotes and LIKE wildcards (`%`, `_`) in search queries to prevent SQL injection
+- Switch LIKE string literals from double quotes to single quotes (correct SQLite syntax)
+- Add missing escaping for the non-hook `getHistory` function
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Performance Improvement] - 2026-04-30
+
+- Replace manual tab iteration loop with AppleScript `whose` filter for direct tab lookup, improving responsiveness with many open tabs
+
+## [New Features] - 2026-04-24
+
+- Added `Reset all tabs in current space` command to reset all tabs in the currently active space (disabled by default).
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Fixed Arc duplicate windows] - 2026-03-04
+
+- Fixed duplicate window creation when launching Arc Browser from a stopped state
+- Improved window management logic for selectTab and selectSpace commands
+
+## [Fixes] - 2026-02-01
+
+- Fixed an issue where selecting a tab would not open it due to a timing issue with closing the Raycast window.
+
 ## [New Features] - 2025-10-27
 
 - Added `Search Space Tabs` command to search and select tabs in the current space only.

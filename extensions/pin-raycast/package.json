@@ -1,0 +1,102 @@
+{
+  "name": "pin",
+  "title": "Pin",
+  "description": "Extension for Pin.app. Pin any window to stay always on top using a mirror overlay.",
+  "icon": "extension-icon.png",
+  "author": "tanb",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "pin-active-window",
+      "title": "Pin Active Window",
+      "subtitle": "Pin",
+      "description": "Pin the currently active window to stay on top",
+      "mode": "no-view",
+      "keywords": [
+        "pin",
+        "active",
+        "window",
+        "top",
+        "always"
+      ]
+    },
+    {
+      "name": "unpin",
+      "title": "Unpin",
+      "subtitle": "Pin",
+      "description": "Unpin the currently pinned window",
+      "mode": "no-view",
+      "keywords": [
+        "unpin",
+        "pin",
+        "remove",
+        "window"
+      ]
+    },
+    {
+      "name": "status",
+      "title": "Pin Status",
+      "subtitle": "Pin",
+      "description": "Show current pin status",
+      "mode": "view",
+      "keywords": [
+        "pin",
+        "status",
+        "always",
+        "top"
+      ]
+    },
+    {
+      "name": "launch-agent",
+      "title": "Launch Pin Agent",
+      "subtitle": "Pin",
+      "description": "Launch the Pin agent application",
+      "mode": "no-view",
+      "keywords": [
+        "launch",
+        "agent",
+        "pin",
+        "start"
+      ]
+    },
+    {
+      "name": "select-window",
+      "title": "Pin Window...",
+      "subtitle": "Pin",
+      "description": "Select a window from list to pin on top",
+      "mode": "view",
+      "keywords": [
+        "pin",
+        "window",
+        "top",
+        "select",
+        "choose"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.0",
+    "run-applescript": "^7.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "20.10.5",
+    "eslint": "^9.39.2",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

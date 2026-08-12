@@ -1,0 +1,44 @@
+# Mole Changelog
+
+## [Stability Improvements] - 2026-04-23
+
+- Fixed System Status crashes when Mole returns null values for optional status arrays
+- Improved Analyze Disk startup flow to avoid scanning the full home directory automatically
+- Added safer Analyze Disk error handling, process cancellation, timeouts, and result limits
+- Reduced Clean System preview memory usage by parsing only relevant scan output
+- Added Clean System timeout and non-zero exit handling for failed previews
+
+## [Health Menu Bar] - 2026-04-12
+
+- Added Health Monitor menu bar command showing health score with color-coded heart icon (green ≥90, yellow ≥70, orange ≥50, red <50)
+- Added dropdown summary with CPU, RAM, disk, and battery metrics on click
+- Added "Open System Status" action in dropdown for quick access to the full dashboard
+- Added configurable refresh interval preference (30s, 1m, 5m, 10m, 30m; default 1m)
+- Menu bar item hides automatically when Mole CLI is unavailable
+
+## [Friendly Install Screen] - 2026-03-23
+
+- Added MoleNotInstalled component with multiple install options when Mole CLI is not found
+- Added install options via Homebrew Raycast extension, Homebrew Terminal, curl script, and GitHub page.
+- Improved Update Mole command to show current version after update check
+- Changed Update Mole from no-view to view mode for better UX
+
+## [Uninstall Residual Cleanup] - 2026-03-20
+
+- Added deep residual file scanning when uninstalling apps (searches ~/Library, /Library, containers, and vendor directories)
+- Shows a confirmation dialog listing all found residuals with sizes before removal
+- Hides removed apps from the list after successful uninstall
+- Migrated error handling to `showFailureToast` from `@raycast/utils`
+- Replaced manual Preferences type with auto-generated `ExtensionPreferences`
+
+## [1.0.0] - 2026-03-18
+
+- Added System Status command with real-time health monitoring
+- Added Clean System command with streaming scan progress
+- Added Optimize System command with dry-run preview
+- Added Uninstall App command with app listing and Trash support
+- Added Analyze Disk command with size-sorted drill-down navigation
+- Added Purge Dev Artifacts command with individual artifact removal
+- Added Clean Installers command for .dmg, .pkg, and .iso cleanup
+- Added Touch ID for Sudo command with status display and Terminal integration
+- Added Update Mole command

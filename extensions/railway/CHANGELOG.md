@@ -1,5 +1,11 @@
 # Railway Changelog
 
+## [Add Template Search] - 2026-05-17
+
+- Added a new `Search Templates` command to browse and search Railway templates
+- List shows template name, creator, image, deployment count, health score, and verified badge
+- Actions: deploy on Railway, view template page, copy URLs
+
 ## [Fix Action Links] - 2024-11-12
 
 - Fixed broken links in the actions, new actions are:

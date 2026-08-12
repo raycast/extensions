@@ -8,12 +8,17 @@
   "contributors": [
     "anwarulislam",
     "xilopaint",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "chrismessina",
+    "huzef_ansari"
   ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "preferences": [
     {
       "name": "primaryLanguage",
@@ -91,8 +96,48 @@
           "value": "ar-SA"
         },
         {
-          "title": "🇸🇦 Arabic, Najdi (Saudi Arabia)",
-          "value": "ars-SA"
+          "title": "🇨🇿 Czech (Czechia)",
+          "value": "cs-CZ"
+        },
+        {
+          "title": "🇩🇰 Danish (Denmark)",
+          "value": "da-DK"
+        },
+        {
+          "title": "🇮🇩 Indonesian (Indonesia)",
+          "value": "id-ID"
+        },
+        {
+          "title": "🇲🇾 Malay (Malaysia)",
+          "value": "ms-MY"
+        },
+        {
+          "title": "🇳🇴 Norwegian Bokmål (Norway)",
+          "value": "nb-NO"
+        },
+        {
+          "title": "🇳🇱 Dutch (Netherlands)",
+          "value": "nl-NL"
+        },
+        {
+          "title": "🇳🇴 Norwegian Nynorsk (Norway)",
+          "value": "nn-NO"
+        },
+        {
+          "title": "🇵🇱 Polish (Poland)",
+          "value": "pl-PL"
+        },
+        {
+          "title": "🇷🇴 Romanian (Romania)",
+          "value": "ro-RO"
+        },
+        {
+          "title": "🇸🇪 Swedish (Sweden)",
+          "value": "sv-SE"
+        },
+        {
+          "title": "🇹🇷 Turkish (Turkey)",
+          "value": "tr-TR"
         }
       ]
     },
@@ -190,16 +235,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.100.3",
-    "@raycast/utils": "^2.2.0"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -207,8 +253,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

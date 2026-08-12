@@ -28,108 +28,99 @@ export default function AppsView() {
     await LocalStorage.setItem(a.name, JSON.stringify(updated));
   };
 
+  const addActions = (
+    <>
+      <Action.Push icon={Icon.Plus} title="Add App" target={<AddForm />} shortcut={{ modifiers: ["cmd"], key: "g" }} />
+      <Action.Push
+        icon={Icon.Link}
+        title="Add App by URL"
+        target={<AddAppByUrlForm />}
+        shortcut={{ modifiers: ["cmd"], key: "u" }}
+      />
+    </>
+  );
+
   return (
-    <List
-      actions={
-        <ActionPanel>
-          <Action.Push
-            icon={Icon.Plus}
-            title="Add App"
-            target={<AddForm />}
-            shortcut={{ modifiers: ["cmd"], key: "g" }}
-          />
-          <Action.Push
-            icon={Icon.Link}
-            title="Add App by URL"
-            target={<AddAppByUrlForm />}
-            shortcut={{ modifiers: ["cmd"], key: "u" }}
-          />
-        </ActionPanel>
-      }
-    >
-      {apps.map((a) => (
-        <List.Item
-          title={a.name}
-          subtitle={a.code}
-          key={a.name}
-          accessories={[
-            {
-              icon: {
-                source:
-                  +a.percent > 75
-                    ? Icon.CircleProgress100
-                    : +a.percent > 50
-                      ? Icon.CircleProgress75
-                      : +a.percent > 25
-                        ? Icon.CircleProgress50
-                        : +a.time > 0
-                          ? Icon.CircleProgress25
-                          : Icon.Circle,
-              },
-              tooltip: a.time,
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <ActionPanel.Section>
-                {defaultAction == "copy" ? (
-                  <>
-                    <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
-                    <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
-                  </>
-                ) : (
-                  <>
-                    <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
-                    <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
-                  </>
-                )}
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action.Push
-                  icon={Icon.Plus}
-                  title="Add App"
-                  target={<AddForm />}
-                  shortcut={{ modifiers: ["cmd"], key: "g" }}
-                />
-                <Action.Push
-                  icon={Icon.Link}
-                  title="Add App by URL"
-                  target={<AddAppByUrlForm />}
-                  shortcut={{ modifiers: ["cmd"], key: "u" }}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <Action
-                  icon={Icon.Trash}
-                  title="Remove App"
-                  onAction={async () => {
-                    if (
-                      await confirmAlert({
-                        title: "Remove App?",
-                        message: "Your key will be lost forever, unless you've performed a backup.",
-                        primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
-                      })
-                    ) {
-                      await LocalStorage.removeItem(a.name);
-                      await updateApps();
-                    }
-                  }}
-                  shortcut={{
-                    modifiers: ["ctrl"],
-                    key: "return",
-                  }}
-                />
-                <Action.Push
-                  icon={Icon.Pencil}
-                  title="Edit App"
-                  target={<EditForm app={a} />}
-                  shortcut={Keyboard.Shortcut.Common.Edit}
-                />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
+    <List actions={<ActionPanel>{addActions}</ActionPanel>}>
+      {apps.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Key}
+          title="No 2FA Codes"
+          description="Add an app to start generating authentication codes"
+          actions={<ActionPanel>{addActions}</ActionPanel>}
         />
-      ))}
+      ) : (
+        apps.map((a) => (
+          <List.Item
+            title={a.name}
+            subtitle={a.code}
+            key={a.name}
+            accessories={[
+              {
+                icon: {
+                  source:
+                    +a.percent > 75
+                      ? Icon.CircleProgress100
+                      : +a.percent > 50
+                        ? Icon.CircleProgress75
+                        : +a.percent > 25
+                          ? Icon.CircleProgress50
+                          : +a.time > 0
+                            ? Icon.CircleProgress25
+                            : Icon.Circle,
+                },
+                tooltip: a.time,
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <ActionPanel.Section>
+                  {defaultAction == "copy" ? (
+                    <>
+                      <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
+                      <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
+                    </>
+                  ) : (
+                    <>
+                      <Action.Paste content={a.code} title="Paste Code" onPaste={() => updateLastTimeUsed(a)} />
+                      <Action.CopyToClipboard content={a.code} title="Copy Code" onCopy={() => updateLastTimeUsed(a)} />
+                    </>
+                  )}
+                </ActionPanel.Section>
+                <ActionPanel.Section>{addActions}</ActionPanel.Section>
+                <ActionPanel.Section>
+                  <Action
+                    icon={Icon.Trash}
+                    title="Remove App"
+                    onAction={async () => {
+                      if (
+                        await confirmAlert({
+                          title: "Remove App?",
+                          message: "Your key will be lost forever, unless you've performed a backup.",
+                          primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+                        })
+                      ) {
+                        await LocalStorage.removeItem(a.name);
+                        await updateApps();
+                      }
+                    }}
+                    shortcut={{
+                      modifiers: ["ctrl"],
+                      key: "return",
+                    }}
+                  />
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    title="Edit App"
+                    target={<EditForm app={a} />}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                  />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }

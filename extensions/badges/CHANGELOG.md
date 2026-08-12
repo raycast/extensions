@@ -1,5 +1,28 @@
 # Badges Changelog
 
+## [Bugfix] - 2026-08-08
+
+- Show `labelColor` when `label` is empty
+
+## [Bugfix] - 2026-08-03
+
+- Fix badge preview positioning issue
+
+## [Maintenance] - 2026-07-20
+
+- Change default social badge style to Flat
+- Use speccial space character to avoid markdown rendering issue
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2026-03-07
+
+- Update endpoint badge base URL
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2026-02-13
+
+- Expose color picker ability to Windows
+
 ## [Enhancement] - 2025-12-25
 
 - Add support for Windows

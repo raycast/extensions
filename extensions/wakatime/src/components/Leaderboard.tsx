@@ -44,7 +44,7 @@ export const LeaderBoardItem: React.FC<LeaderBoardItemProps> = ({
       id={user.id}
       subtitle={`#${rank}`}
       title={user.display_name}
-      icon={user.photo_public ? { source: user.photo, mask: Image.Mask.Circle } : getAvatarIcon(user.display_name)}
+      icon={user.is_photo_public ? { source: user.photo, mask: Image.Mask.Circle } : getAvatarIcon(user.display_name)}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Item">

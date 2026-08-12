@@ -19,7 +19,6 @@ export type {
   InstallableResults,
   OutdatedResults,
   InstalledMap,
-  Remote,
 } from "../types";
 
 // Paths
@@ -35,14 +34,17 @@ export type { BrewPhase, BrewProgress, ProgressCallback } from "./progress";
 // Fetching
 export {
   brewFetchInstalled,
+  brewFetchInstallableResults,
   brewFetchInstalledFast,
+  brewMapInstalled,
+  asInstallableResults,
   brewFetchOutdated,
   brewUpdate,
-  brewFetchFormulae,
-  brewFetchCasks,
   brewFetchFormulaInfo,
   brewFetchCaskInfo,
   hasSearchCache,
+  invalidateChunkedCacheMemory,
+  onIndexRefreshed,
 } from "./fetch";
 
 // Search
@@ -67,6 +69,20 @@ export {
 export { brewUpgradeWithProgress } from "./upgrade";
 export type { UpgradeStep, UpgradeStepStatus, UpgradeProgressCallback, UpgradeResult } from "./upgrade";
 
+// Services
+export {
+  ALL_SERVICES,
+  SERVICE_ACTION_COPY,
+  applyServiceAction,
+  brewFetchServices,
+  brewStartService,
+  brewStopService,
+  brewRestartService,
+  brewServiceIsRunning,
+  runServiceCommand,
+} from "./services";
+export type { Service, ServiceStatus, ServiceAction } from "./services";
+
 // Helpers
 export {
   brewName,
@@ -81,6 +97,3 @@ export {
   brewUninstallCommand,
   brewUpgradeCommand,
 } from "./helpers";
-
-// Internal API (experimental)
-export { getSystemTag, getInternalFormulaUrl, getInternalCaskUrl, logInternalApiConfig } from "./internal-api";

@@ -1,11 +1,11 @@
 import { BrowserExtension, Clipboard, environment, popToRoot, showToast, Toast } from "@raycast/api";
 import { useEffect } from "react";
-import ytdl from "ytdl-core";
 import {
   GETTING_VIDEO_URL,
   GETTING_VIDEO_URL_FROM_BROWSER,
   GETTING_VIDEO_URL_FROM_CLIPBOARD,
 } from "../const/toast_messages";
+import { getYouTubeVideoUrl } from "../utils/youtubeUrl";
 
 export const useGetVideoUrl = ({
   input,
@@ -22,34 +22,37 @@ export const useGetVideoUrl = ({
         message: GETTING_VIDEO_URL.message,
       });
 
-      if (input && ytdl.validateURL(input)) {
-        setVideoURL(input);
+      const inputVideoUrl = getYouTubeVideoUrl(input);
+
+      if (inputVideoUrl) {
+        setVideoURL(inputVideoUrl);
         return;
       }
 
       const clipboardText = await Clipboard.readText();
-      const clipboardIsYTUrl = clipboardText && ytdl.validateURL(clipboardText);
+      const clipboardVideoUrl = getYouTubeVideoUrl(clipboardText);
 
-      if (!input && clipboardIsYTUrl) {
+      if (!input && clipboardVideoUrl) {
         showToast({
           style: Toast.Style.Animated,
           title: GETTING_VIDEO_URL_FROM_CLIPBOARD.title,
           message: GETTING_VIDEO_URL_FROM_CLIPBOARD.message,
         });
-        setVideoURL(clipboardText);
+        setVideoURL(clipboardVideoUrl);
         return;
       }
 
       if (!input && environment.canAccess(BrowserExtension)) {
         const tabs = await BrowserExtension.getTabs();
-        const activeTab = tabs.find((tab) => tab.active && ytdl.validateURL(tab.url));
-        if (activeTab) {
+        const activeTabVideoUrl = tabs.find((tab) => tab.active)?.url;
+        const browserVideoUrl = getYouTubeVideoUrl(activeTabVideoUrl);
+        if (browserVideoUrl) {
           showToast({
             style: Toast.Style.Animated,
             title: GETTING_VIDEO_URL_FROM_BROWSER.title,
             message: GETTING_VIDEO_URL_FROM_BROWSER.message,
           });
-          setVideoURL(activeTab.url);
+          setVideoURL(browserVideoUrl);
           return;
         }
       }

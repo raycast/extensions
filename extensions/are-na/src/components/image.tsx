@@ -3,18 +3,22 @@ import { showFailureToast } from "@raycast/utils";
 import { downloadFile } from "../utils/download";
 import type { Block } from "../api/types";
 import { useMemo } from "react";
+import { isHttpUrl } from "../utils/url";
 
 interface ImageBlockViewProps {
   block: Block;
 }
 
 export function ImageBlockView({ block }: ImageBlockViewProps) {
-  const url = useMemo(() => {
-    return block.source?.url || `https://www.are.na/blocks/${block.id}`;
-  }, [block.source, block.id]);
+  const blockPageUrl = useMemo(() => `https://www.are.na/block/${block.id}`, [block.id]);
+  const sourceUrl = useMemo(() => {
+    const u = block.source?.url;
+    return isHttpUrl(u) ? u.trim() : "";
+  }, [block.source]);
 
-  const imageUrl = useMemo(() => {
-    return block.image?.original?.url || block.image?.display?.url || "";
+  const cdnUrl = useMemo(() => {
+    const raw = block.image?.original?.url || block.image?.display?.url || block.image?.thumb?.url || "";
+    return isHttpUrl(raw) ? raw : "";
   }, [block.image]);
 
   const formatDate = (dateString?: string) => {
@@ -22,11 +26,12 @@ export function ImageBlockView({ block }: ImageBlockViewProps) {
     return new Date(dateString).toLocaleString();
   };
 
-  // Create image markdown for Detail view
+  // Link wraps image so Enter / in-view clicks open the block page, not the CDN asset URL
   const imageMarkdown = useMemo(() => {
-    if (!imageUrl) return "Image not available";
-    return `![${block.title || "Image"}](${imageUrl})`;
-  }, [imageUrl, block.title]);
+    if (!cdnUrl) return "Image not available";
+    const alt = block.title || "Image";
+    return `[![${alt}](${cdnUrl})](${blockPageUrl})`;
+  }, [cdnUrl, block.title, blockPageUrl]);
 
   return (
     <Detail
@@ -41,20 +46,38 @@ export function ImageBlockView({ block }: ImageBlockViewProps) {
       }
       actions={
         <ActionPanel>
-          {(imageUrl || url) && <Action.OpenInBrowser url={imageUrl || url} title="Open Image in Browser" />}
-          <Action.CopyToClipboard content={imageUrl || ""} title="Copy Image URL" />
-          <Action
-            title="Download Image"
-            icon={Icon.SaveDocument}
-            onAction={async () => {
-              try {
-                if (imageUrl) await downloadFile(imageUrl);
-              } catch (error) {
-                showFailureToast(error, { title: "Failed to download image" });
-              }
-            }}
+          <Action.OpenInBrowser
+            icon={Icon.Globe}
+            url={blockPageUrl}
+            title="Open on Are.na"
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
           />
-          <Action.CopyToClipboard content={url} title="Copy Block URL" />
+          <Action.CopyToClipboard
+            icon={Icon.Link}
+            content={blockPageUrl}
+            title="Copy Block URL"
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+          {sourceUrl && sourceUrl !== blockPageUrl ? (
+            <Action.OpenInBrowser icon={Icon.Link} url={sourceUrl} title="Open Source URL" />
+          ) : null}
+          {cdnUrl ? (
+            <Action.CopyToClipboard icon={Icon.Clipboard} content={cdnUrl} title="Copy Image File URL" />
+          ) : null}
+          {cdnUrl ? <Action.OpenInBrowser icon={Icon.Image} url={cdnUrl} title="Open Image File (Cdn)" /> : null}
+          {cdnUrl ? (
+            <Action
+              title="Download Image"
+              icon={Icon.Download}
+              onAction={async () => {
+                try {
+                  await downloadFile(cdnUrl);
+                } catch (error) {
+                  showFailureToast(error, { title: "Failed to download image" });
+                }
+              }}
+            />
+          ) : null}
         </ActionPanel>
       }
     />

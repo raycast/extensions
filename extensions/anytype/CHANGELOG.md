@@ -1,5 +1,24 @@
 # Anytype Changelog
 
+## [Bug Fixes] - 2026-06-15
+
+- Fix channel icons not loading from the local gateway after it started requiring authentication
+- Fix channel type filter and fallback icons in the Browse Channels command for renamed space kinds
+
+## [Dependency Updates] - 2026-04-06
+
+- Update dependencies to latest versions
+- Update metadata images
+
+## [Windows Support] - 2026-02-23
+
+- Add support for Windows platform
+
+## [Bug Fixes & Dependency Updates] - 2026-02-14
+
+- Fix object property dropdowns interfering with each other's search results in create and update forms
+- Update dependencies to latest versions
+
 ## [Terminology Updates & Enhancements] - 2025-12-15
 
 - Update to API version 2025-11-08

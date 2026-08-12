@@ -4,9 +4,11 @@ import * as friendlyTruncate from "friendly-truncate";
 import { is } from "ramda";
 
 const MAX_TEXT_LENGTH = 60;
+const MAX_METADATA_TEXT_LENGTH = 42;
 
 const isString = (value: unknown): value is string => is(String)(value);
 const toId = (value: string) => value.replace(/\s/g, "-");
 const truncate = (text: string) => friendlyTruncate.truncateEnd(text, MAX_TEXT_LENGTH);
+const truncateForMetadata = (text: string) => friendlyTruncate.truncateEnd(text, MAX_METADATA_TEXT_LENGTH);
 
-export { isString, toId, truncate };
+export { isString, toId, truncate, truncateForMetadata };

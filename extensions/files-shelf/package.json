@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "files-shelf",
+  "title": "Files Shelf",
+  "description": "Batch move, copy, or rename files and folders from different directories",
+  "icon": "files-shelf-icon.png",
+  "author": "haythem_gataa",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-to-shelf",
+      "title": "Add to Shelf",
+      "icon": "add.png",
+      "description": "Add selected Finder items to the shelf for batch operations",
+      "mode": "no-view"
+    },
+    {
+      "name": "view-shelf",
+      "title": "View Shelf",
+      "icon": "view.png",
+      "description": "View and manage items on the shelf",
+      "mode": "view"
+    },
+    {
+      "name": "copy-to-selection",
+      "title": "Copy Shelf to Folder",
+      "subtitle": "Selected or Open Finder Folder",
+      "icon": "copy.png",
+      "description": "Copy all shelf items to the open Finder folder or a selected folder",
+      "mode": "view"
+    },
+    {
+      "name": "move-to-selection",
+      "title": "Move Shelf to Folder",
+      "subtitle": "Selected or Open Finder Folder",
+      "icon": "move.png",
+      "description": "Move all shelf items to the open Finder folder or a selected folder",
+      "mode": "view"
+    },
+    {
+      "name": "rename-shelf",
+      "title": "Rename Shelf Items",
+      "icon": "rename.png",
+      "description": "Batch rename shelf items with prefix, suffix, numbering, or find/replace",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "keepShelfAfterCompletion",
+      "type": "checkbox",
+      "required": false,
+      "title": "Keep Shelf After Completion",
+      "label": "Keep shelf items after a successful copy/move/rename",
+      "default": false,
+      "description": "When disabled (default), the shelf is cleared after all items are successfully processed."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

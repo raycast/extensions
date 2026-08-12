@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
-// @ts-nocheck
 /** @module Logger */
 
 /** Logs errors and warnings. */
@@ -7,18 +5,39 @@
 export default class Logger {
   logs: Array<{ level: string; message: string }>;
   logElement: HTMLElement | null;
+  consoleLevels: string[];
 
   /**
    * Set helper variables.
    */
-  constructor(logElementSelector: string) {
+  constructor(logElementSelector: string = "", options: { consoleLevels?: string[] } = {}) {
     this.logs = [];
-    if (!(typeof document === "undefined")) {
-      this.logElement = document.querySelector(logElementSelector);
+    this.logElement = null;
+    this.consoleLevels = options.consoleLevels || ["warning", "error"];
+    if (!(typeof document === "undefined") && logElementSelector) {
+      this.logElement = document.querySelector(logElementSelector) as HTMLElement | null;
     }
   }
 
-  log(level, message) {
+  setConsoleLevels(levels: string[]) {
+    this.consoleLevels = levels;
+  }
+
+  writeToConsole(level: string, message: string) {
+    if (!this.consoleLevels.includes(level)) {
+      return;
+    }
+    const consoleMethodByLevel: Record<string, "info" | "log" | "warn" | "error"> = {
+      info: "info",
+      success: "log",
+      warning: "warn",
+      error: "error",
+    };
+    const consoleMethod = consoleMethodByLevel[level] || "log";
+    console[consoleMethod](message);
+  }
+
+  log(level: string, message: string) {
     // Check if message is already in this.logs
     // if yes, do not log again
     if (this.logs.some((log) => log.level === level && log.message === message)) {
@@ -28,22 +47,22 @@ export default class Logger {
       level: level,
       message: message,
     });
-    console.log(level, message);
+    this.writeToConsole(level, message);
     if (this.logElement) {
       this.logElement.textContent += `${message}\n`;
     }
   }
-  info(message) {
+  info(message: string) {
     this.log("info", message);
   }
-  warning(message) {
+  warning(message: string) {
     this.log("warning", message);
     this.showLog();
   }
-  success(message) {
+  success(message: string) {
     this.log("success", message);
   }
-  error(message) {
+  error(message: string) {
     this.log("error", message);
     this.showLog();
     throw new Error(message);

@@ -42,9 +42,14 @@ export default function Command({
   const [hours, setHours] = useState<string>(formatHours(entry?.hours?.toFixed(2), company));
   const [hoursError, setHoursError] = useState<string | undefined>();
   const [spentDate, setSpentDate] = useState<Date>(viewDate ?? new Date());
-  const { showClient = false, timeFormat = "company" } = getPreferenceValues<{
+  const {
+    showClient = false,
+    timeFormat = "company",
+    showClientInProject = false,
+  } = getPreferenceValues<{
     showClient?: boolean;
     timeFormat?: "company" | "hours_minutes" | "decimal";
+    showClientInProject?: boolean;
   }>();
 
   // Use useLocalStorage for persisting last used project/task
@@ -76,9 +81,11 @@ export default function Command({
   }, [error]);
 
   const groupedProjects = useMemo(() => {
-    // return an array of arrays thats grouped by client to easily group them via a map function
+    // Group by client, then sort clients and projects alphabetically
     const grouped = groupBy(projects, (o) => o.client.id);
-    return Object.values(grouped);
+    return Object.values(grouped)
+      .sort((a, b) => a[0].client.name.localeCompare(b[0].client.name))
+      .map((group) => group.sort((a, b) => a.project.name.localeCompare(b.project.name)));
   }, [projects]);
 
   useEffect(() => {
@@ -109,10 +116,14 @@ export default function Command({
       return;
     }
 
-    formatDuration(hours);
+    const parsedHours = formatDuration(hours);
+    if (hours && !parsedHours) {
+      showToast({ style: Toast.Style.Failure, title: "Invalid Duration" });
+      return;
+    }
     const spentDate = isDate(values.spent_date) ? values.spent_date : viewDate;
 
-    if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !hours)
+    if (!company?.wants_timestamp_timers && !dayjs(spentDate).isToday() && !parsedHours)
       if (
         !(await confirmAlert({
           icon: Icon.ExclamationMark,
@@ -129,6 +140,14 @@ export default function Command({
     await toast.show();
 
     const data = omitBy(values, isEmpty);
+    // Always include notes when editing to allow clearing
+    if (entry?.id && !data.notes) {
+      data.notes = "";
+    }
+    // Use parsed hours instead of raw form value
+    if (parsedHours) {
+      data.hours = parsedHours;
+    }
     const timeEntry = await newTimeEntry(
       {
         ...data,
@@ -163,16 +182,16 @@ export default function Command({
     return project ? project.task_assignments : [];
   }, [projects, projectId]);
 
-  function formatDuration(value?: string) {
+  function formatDuration(value?: string): string | undefined {
     if (!value) {
       setHoursError(undefined);
-      return;
+      return undefined;
     }
 
     const duration = parseDuration(value);
     if (!duration) {
       setHoursError("Invalid duration");
-      return;
+      return undefined;
     }
 
     setHoursError(undefined);
@@ -180,14 +199,16 @@ export default function Command({
     const useHoursMinutes =
       timeFormat === "hours_minutes" || (timeFormat === "company" && company?.time_format === "hours_minutes");
 
+    let formatted: string;
     if (useHoursMinutes) {
       const h = Math.floor(totalMinutes / 60);
       const m = totalMinutes % 60;
-      return setHours(`${h}:${m < 10 ? "0" : ""}${m}`);
+      formatted = `${h}:${m < 10 ? "0" : ""}${m}`;
     } else {
-      // decimal
-      return setHours((totalMinutes / 60).toFixed(2));
+      formatted = (totalMinutes / 60).toFixed(2);
     }
+    setHours(formatted);
+    return formatted;
   }
 
   return (
@@ -226,7 +247,9 @@ export default function Command({
                   <Form.Dropdown.Item
                     keywords={[project.client.name.toLowerCase()]}
                     value={project.project.id.toString()}
-                    title={`${code && code !== "" ? "[" + code + "] " : ""}${project.project.name}`}
+                    title={`${showClientInProject ? client.name + " – " : ""}${
+                      code && code !== "" ? "[" + code + "] " : ""
+                    }${project.project.name}`}
                     key={project.id}
                   />
                 );

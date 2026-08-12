@@ -1,3 +1,4 @@
+import { Prisma } from "@repo/db";
 import type { SpaceType, UserAndSpace } from "@repo/db";
 export declare class SpaceService {
     create(p: {
@@ -6,11 +7,18 @@ export declare class SpaceService {
         name: string;
         image: string;
         description: string;
+        slackTeamId?: string | null;
     }): Promise<string>;
     get(p: {
         email?: string;
         spaceId: string;
     }): Promise<({
+        _count: {
+            tags: number;
+            bookmarks: number;
+            users: number;
+            memberAuthPolicies: number;
+        };
         users: {
             status: import(".prisma/client").$Enums.TeamMemberStatus;
             spaceId: string;
@@ -30,12 +38,6 @@ export declare class SpaceService {
             emailPattern: string;
             authCheckIntervalSec: number;
         }[];
-        _count: {
-            tags: number;
-            bookmarks: number;
-            users: number;
-            memberAuthPolicies: number;
-        };
     } & {
         type: import(".prisma/client").$Enums.SpaceType;
         status: string | null;
@@ -45,8 +47,13 @@ export declare class SpaceService {
         name: string;
         updatedAt: Date;
         image: string | null;
+        slackTeamId: string | null;
     }) | null>;
     leave(p: {
+        email: string;
+        spaceId: string;
+    }): Promise<void>;
+    leaveInTx(tx: Prisma.TransactionClient, p: {
         email: string;
         spaceId: string;
     }): Promise<void>;
@@ -69,12 +76,20 @@ export declare class SpaceService {
         targetUserAndSpace: UserAndSpace;
         actorEmail: string;
     }): Promise<void>;
+    updateMemberRole(p: {
+        actorEmail: string;
+        targetEmail: string;
+        spaceId: string;
+        fromRole: 'OWNER' | 'ADMIN' | 'MEMBER' | 'READ';
+        toRole: 'ADMIN' | 'MEMBER' | 'READ';
+    }): Promise<void>;
     update(p: {
         email: string;
         spaceId: string;
         name?: string;
         image?: string;
         description?: string;
+        slackTeamId?: string | null;
     }): Promise<void>;
     createMemberAuthPolicy(p: {
         email: string;
@@ -93,4 +108,17 @@ export declare class SpaceService {
         emailPattern: string;
         authCheckInterval: string;
     }): Promise<void>;
+    topUsedBookmarks(p: {
+        spaceId: string;
+        limit: number;
+        range: '7d' | '30d' | '1y';
+    }): Promise<{
+        useCount: number;
+        bookmark: {
+            id: string;
+            name: string;
+            url: string;
+            faviconUrl: string | null;
+        };
+    }[]>;
 }

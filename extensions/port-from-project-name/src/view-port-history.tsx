@@ -7,14 +7,12 @@ import {
   Form,
   Icon,
   Keyboard,
-  launchCommand,
-  LaunchType,
   List,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { showFailureToast, useLocalStorage } from "@raycast/utils";
+import { useLocalStorage } from "@raycast/utils";
 import { useState } from "react";
 
 type HistoryEntry = {
@@ -162,29 +160,7 @@ export default function Command() {
 
   if (!isLoading && items.length === 0) {
     return (
-      <List
-        actions={
-          <ActionPanel>
-            <Action
-              title="Generate Port"
-              icon={Icon.Plus}
-              onAction={async () => {
-                try {
-                  await launchCommand({ name: "generate-port", type: LaunchType.UserInitiated });
-                } catch (error) {
-                  await showFailureToast(error, { title: "Failed to launch command" });
-                }
-              }}
-            />
-            <Action
-              title="Clear History"
-              icon={Icon.XMarkCircle}
-              onAction={handleClearAll}
-              style={Action.Style.Destructive}
-            />
-          </ActionPanel>
-        }
-      >
+      <List>
         <List.EmptyView
           title="No Port History Found"
           description="Generate a port to start building your history."

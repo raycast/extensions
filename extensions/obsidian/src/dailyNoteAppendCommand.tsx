@@ -1,4 +1,5 @@
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, open, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, List, popToRoot } from "@raycast/api";
+import { openUrl } from "./utils/open";
 import { useEffect, useState } from "react";
 import AdvancedURIPluginNotInstalled from "./components/Notifications/AdvancedURIPluginNotInstalled";
 import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMessage";
@@ -53,10 +54,13 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
         silent: silent,
       });
 
-      open(target);
-      clearCache();
-      popToRoot();
-      closeMainWindow();
+      const doOpen = async () => {
+        await openUrl(target, { background: silent });
+        clearCache();
+        popToRoot();
+        closeMainWindow();
+      };
+      doOpen();
     }
   }, [ready, content, vaults, vaultsWithPlugin, vaultName]);
 
@@ -83,17 +87,18 @@ export default function DailyNoteAppend(props: { arguments: DailyNoteAppendArgs 
             key={vault.key}
             actions={
               <ActionPanel>
-                <Action.Open
+                <Action
                   title="Append to Daily Note"
-                  target={Obsidian.getTarget({
-                    type: ObsidianTargetType.DailyNoteAppend,
-                    vault: vault,
-                    text: content,
-                    heading: heading,
-                    prepend: prepend,
-                    silent: silent,
-                  })}
-                  onOpen={() => {
+                  onAction={async () => {
+                    const target = Obsidian.getTarget({
+                      type: ObsidianTargetType.DailyNoteAppend,
+                      vault: vault,
+                      text: content,
+                      heading: heading,
+                      prepend: prepend,
+                      silent: silent,
+                    });
+                    await openUrl(target, { background: silent });
                     clearCache();
                     popToRoot();
                     closeMainWindow();

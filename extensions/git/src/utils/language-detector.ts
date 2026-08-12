@@ -7,6 +7,7 @@ const MAIN_LANGUAGE_PERCENTAGE = 70;
 const LANGUAGES_COLORS: Record<string, Image.ImageLike> = {
   JavaScript: "https://api.iconify.design/vscode-icons/file-type-js-official.svg",
   TypeScript: "https://api.iconify.design/vscode-icons/file-type-typescript-official.svg",
+  HTML: "https://api.iconify.design/vscode-icons/file-type-html.svg",
   Python: "https://api.iconify.design/vscode-icons/file-type-python.svg",
   Java: "https://api.iconify.design/skill-icons/java-light.svg",
   "C#": { source: "https://api.iconify.design/teenyicons/c-sharp-solid.svg", tintColor: Color.Purple },
@@ -23,6 +24,7 @@ const LANGUAGES_COLORS: Record<string, Image.ImageLike> = {
 };
 
 const LANGUAGE_EXTENSION: Record<string, string> = {
+  html: "HTML",
   ts: "TypeScript",
   tsx: "TypeScript",
   js: "JavaScript",

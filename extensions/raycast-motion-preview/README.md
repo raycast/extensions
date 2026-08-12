@@ -4,23 +4,22 @@
 
 <h1 align="center">Motion Preview for Raycast</h1>
 <h4 align="center">
+  <a title="Install Motion Preview Extension" href="https://www.raycast.com/ayarse/raycast-motion-preview"><img src="https://www.raycast.com/ayarse/raycast-motion-preview/install_button@2x.png" style="height: 64px;" alt="" height="64"></a>
+
 Motion Preview is a Raycast extension that allows you to quickly preview modern animation formats. It supports both Lottie (JSON and dotLottie) and Rive file formats.
+
 </h4>
 
-<p align="center">
-<a title="Install Motion Preview Raycast Extension" href="https://www.raycast.com/ayarse/motion-preview"><img src="https://www.raycast.com/ayarse/motion-preview/install_button@2x.png" style="height: 64px;" alt="" height="64"></a>
-</p>
-
-<img src="https://github.com/ayarse/raycast-motion-preview/blob/main/assets/screenshot.png?raw=true" style="max-width: 100%" />
+<img src="https://github.com/ayarse/raycast-motion-preview/blob/main/metadata/raycast-motion-preview-2.png?raw=true" style="max-width: 100%" />
 
 ---
 
 ## Features
 
-- Preview Lottie animations (JSON and dotLottie)
-- Preview Rive animations
-- Validates Lottie JSON files
-- Supports Rive State Machines.
+- Preview Rive, Lottie (JSON), and dotLottie animations
+- Switch between state machines
+- Playback and background color controls
+- Browse other animations in the same folder
 
 ## Installation
 
@@ -36,6 +35,20 @@ The easiest way to install this extension is using the Raycast Store. Alternativ
 1. Select a Lottie JSON, dotLottie, or Rive animation file in Finder.
 2. Go to Raycast and run the "Preview Animation" command.
 3. Click anywhere or press `Esc` to close the preview.
+
+## Render runtimes
+
+The preview window renders animations inside a `WKWebView` using the official
+[`@rive-app/canvas`](https://www.npmjs.com/package/@rive-app/canvas) and
+[`@lottiefiles/dotlottie-web`](https://www.npmjs.com/package/@lottiefiles/dotlottie-web)
+runtimes. These `.js`/`.wasm` files are **not** bundled with the extension. On
+first run they are downloaded from version-pinned jsDelivr URLs, verified
+against pinned SHA-256 hashes, and cached under the extension's support
+directory — so nothing untrusted is shipped, and after the first download the
+preview works fully offline.
+
+The pinned versions and hashes live in [`src/runtimes.ts`](src/runtimes.ts). To
+upgrade a runtime, bump its version constant and replace its hashes there.
 
 ## Support
 

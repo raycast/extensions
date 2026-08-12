@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Clipboard, showHUD } from "@raycast/api";
-import { getIconUrl } from "../utils/helpers";
+import { getIconUrl, getRawIconUrl } from "../utils/helpers";
 import { FC } from "react";
 
 type Props = {
@@ -29,6 +29,18 @@ const IconActionPanel: FC<Props> = ({ name, weight, pascalName, weightText, weig
         }}
         onAction={async () => {
           const fileContent = await fetch(getIconUrl(name, weight)).then((res) => res.text());
+          await Clipboard.copy(fileContent);
+          await showHUD("Copied to Clipboard");
+        }}
+      />
+      <Action
+        title="Copy SVG Raw Code"
+        icon={{
+          source: getIconUrl("file-svg", weight),
+          tintColor: { light: "black", dark: "white" },
+        }}
+        onAction={async () => {
+          const fileContent = await fetch(getRawIconUrl(name, weight)).then((res) => res.text());
           await Clipboard.copy(fileContent);
           await showHUD("Copied to Clipboard");
         }}

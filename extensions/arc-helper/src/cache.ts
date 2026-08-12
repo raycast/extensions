@@ -45,5 +45,5 @@ export const CacheKeys = {
   arcs: "arcs",
   quests: (page: number) => `quests:page:${page}`,
   traders: "traders",
-  eventTimers: "event-timers",
+  eventTimers: "events-schedule",
 };

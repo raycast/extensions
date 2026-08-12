@@ -141,6 +141,7 @@ export interface HistoryItem {
   app: string;
   appName: string;
   favicon?: string;
+  isStarred?: boolean;
   timestamp: number;
 }
 
@@ -150,6 +151,7 @@ export interface HistoryItem {
 export interface HistoryItemWithFavicon extends UsageHistoryItem {
   favicon?: Image.ImageLike;
   url?: string;
+  isStarred?: boolean;
 }
 
 // === Import/Export Types ===

@@ -1,5 +1,13 @@
 # cURL Changelog
 
+## [Maintenance] - 2026-03-16
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
+## [Security: Refresh Lockfile to Remove Unused Transitive Dependencies] - 2026-02-13
+
+- Refreshed `package-lock.json` to remove stale transitive entries (including `got`/`electron`) that were no longer part of the installed dependency graph.
+
 ## [Fix: Valid POST Failing] - 2026-01-05
 
 - Fixed an issue where valid POST requests were failing (ref: [Issue #24065](https://github.com/raycast/extensions/issues/24065))

@@ -254,7 +254,7 @@ declare global {
       seek_type: string;
       durl: Durl[];
       support_formats: SupportFormat[];
-      high_format: any;
+      high_format: unknown;
       last_play_time: number;
       last_play_cid: number;
     }
@@ -275,7 +275,7 @@ declare global {
       new_description: string;
       display_desc: string;
       superscript: string;
-      codecs: any;
+      codecs: unknown;
     }
 
     export interface VideoInfoResponse extends Omit<BaseResponse, "data"> {

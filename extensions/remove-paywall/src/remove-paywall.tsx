@@ -1,4 +1,4 @@
-import { Toast, getPreferenceValues, LaunchProps, open, showToast } from "@raycast/api";
+import { getPreferenceValues, LaunchProps, open, showToast, Toast } from "@raycast/api";
 import { DEFAULT_REMOVE_PAYWALL_SERVICE } from "./constants";
 import { getUrl } from "./utils";
 

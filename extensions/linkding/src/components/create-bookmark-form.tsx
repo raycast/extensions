@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Form, getPreferenceValues, popToRoot } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import useBookmarks from "../hooks/use-bookmarks";
-import useUrlMetadata from "../hooks/use-url-metadata";
+import { useCreateBookmark } from "../hooks/use-create-bookmark";
+import { useUrlMetadata } from "../hooks/use-url-metadata";
 import { CreateLinkdingBookmarkFormValues } from "../types/linkding-types";
 import { isValidUrl } from "../util/is-valid-url";
-import parseTags from "../util/parse-tags";
+import { parseTags } from "../util/parse-tags";
 
 interface Props {
   url?: string;
@@ -14,13 +14,13 @@ interface Props {
 
 export const CreateBookmarkForm = ({ url, isLoading }: Props) => {
   const { createBookmarksAsUnread } = getPreferenceValues<Preferences>();
-  const { createBookmark } = useBookmarks();
+  const { onCreateBookmark } = useCreateBookmark();
   const [didSetMetadata, setDidSetMetadata] = useState(false);
 
   const { handleSubmit, itemProps, setValue, values } = useForm<CreateLinkdingBookmarkFormValues>({
     onSubmit: async (values) => {
       const { tags, ...remainingValues } = values;
-      await createBookmark({
+      await onCreateBookmark({
         ...remainingValues,
         tag_names: parseTags(tags),
       });

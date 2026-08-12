@@ -1,6 +1,6 @@
-import { List, ActionPanel, Action, Icon, getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
 import moment from "moment";
-import { refreshCommands, pluralize } from "./utils";
+import { refreshCommands, pluralize, getEffectiveDate, getRepeatLabel } from "./utils";
 import { Item, ListItems, Preferences } from "./types";
 import { EditForm } from "./editForm";
 import { getItems, saveItems } from "./storage";
@@ -60,15 +60,22 @@ function Accessories(item: Item) {
   const preferences = getPreferenceValues<Preferences>();
   const { showDate, showCountdownByDay } = preferences;
   const items = [];
+  const effectiveDate = getEffectiveDate(item);
+
+  if (item.repeat && item.repeat !== "none") {
+    items.push({
+      tag: { value: getRepeatLabel(item.repeat), color: Color.Blue },
+    });
+  }
 
   if (showDate) {
-    items.push({ text: moment(item.date).format("YYYY-MM-DD"), icon: Icon.Calendar });
+    items.push({ text: effectiveDate.format("YYYY-MM-DD"), icon: Icon.Calendar });
   }
 
   if (showCountdownByDay) {
-    items.push({ text: moment(item.date).diff(new Date(), "days") + " days", icon: Icon.Clock });
+    items.push({ text: effectiveDate.diff(moment().startOf("day"), "days") + " days", icon: Icon.Clock });
   } else {
-    items.push({ text: moment(item.date).fromNow(), icon: Icon.Clock });
+    items.push({ text: effectiveDate.fromNow(), icon: Icon.Clock });
   }
 
   return items;
@@ -112,18 +119,34 @@ function Actions({
 
 export async function getFormattedList() {
   const items: Item[] = await getItems();
-  const now = new Date().getTime();
+  const now = moment().startOf("day");
   const dates = [];
 
-  const futureDates = items.filter((item) => Date.parse(item.date) >= now);
-  futureDates.sort(function (a, b) {
-    return a.date > b.date ? 1 : a.date < b.date ? -1 : 0;
+  // Pre-compute effective date once per item to avoid redundant calls during filter/sort
+  const effectiveDateMap = new Map<string, moment.Moment>();
+  for (const item of items) {
+    effectiveDateMap.set(item.id, getEffectiveDate(item));
+  }
+
+  const futureDates = items.filter((item) => {
+    const effective = effectiveDateMap.get(item.id)!;
+    return effective.isSameOrAfter(now);
+  });
+  futureDates.sort((a, b) => {
+    const aDate = effectiveDateMap.get(a.id)!;
+    const bDate = effectiveDateMap.get(b.id)!;
+    return aDate.diff(bDate);
   });
   dates.push({ title: "Upcoming Dates", items: futureDates } as ListItems);
 
-  const pastDates = items.filter((item) => Date.parse(item.date) < now);
-  pastDates.sort(function (a, b) {
-    return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+  const pastDates = items.filter((item) => {
+    const effective = effectiveDateMap.get(item.id)!;
+    return effective.isBefore(now);
+  });
+  pastDates.sort((a, b) => {
+    const aDate = effectiveDateMap.get(a.id)!;
+    const bDate = effectiveDateMap.get(b.id)!;
+    return bDate.diff(aDate);
   });
 
   dates.push({ title: "Past Dates", items: pastDates } as ListItems);

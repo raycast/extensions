@@ -1,219 +1,126 @@
+import React from "react";
+import { render, screen } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { LogicalSection } from "../lib/parse-zshrc";
+import { SectionDetail } from "../section-detail";
+import type { LogicalSection } from "../lib/parse-zshrc";
 
-// Mock dependencies
-const mockParseSectionContent = vi.fn();
-const mockApplyContentFilter = vi.fn();
-const mockGenerateSectionMarkdown = vi.fn();
-const mockTruncateValueMiddle = vi.fn();
-
+// Mock zsh module
 vi.mock("../lib/zsh", () => ({
   getZshrcPath: vi.fn(() => "/test/.zshrc"),
 }));
 
-vi.mock("../edit-alias", () => ({
-  default: vi.fn(),
-}));
-
-vi.mock("../edit-export", () => ({
-  default: vi.fn(),
-}));
-
-vi.mock("../utils/formatters", () => ({
-  truncateValueMiddle: mockTruncateValueMiddle,
-}));
-
-vi.mock("../utils/markdown", () => ({
-  parseSectionContent: mockParseSectionContent,
-  applyContentFilter: mockApplyContentFilter,
-  generateSectionMarkdown: mockGenerateSectionMarkdown,
-}));
-
-vi.mock("@raycast/api", () => ({
-  Detail: vi.fn(),
-  ActionPanel: vi.fn(),
-  Action: vi.fn(),
-  Icon: {
-    Document: "document",
-    Copy: "copy",
-    Trash: "trash",
-    Edit: "edit",
-    Plus: "plus",
-  },
-}));
+// Helper to create mock sections
+const createMockSection = (
+  label: string,
+  startLine: number,
+  endLine: number,
+  content: string,
+  overrides: Partial<LogicalSection> = {},
+): LogicalSection => ({
+  label,
+  startLine,
+  endLine,
+  content,
+  aliasCount: 0,
+  exportCount: 0,
+  evalCount: 0,
+  setoptCount: 0,
+  pluginCount: 0,
+  functionCount: 0,
+  sourceCount: 0,
+  autoloadCount: 0,
+  fpathCount: 0,
+  pathCount: 0,
+  themeCount: 0,
+  completionCount: 0,
+  historyCount: 0,
+  keybindingCount: 0,
+  otherCount: 0,
+  ...overrides,
+});
 
 describe("SectionDetail", () => {
-  const mockSection: LogicalSection = {
-    label: "Test Section",
-    content: "alias ll='ls -la'\nexport PATH=/usr/local/bin:$PATH",
-    startLine: 1,
-    endLine: 2,
-    aliasCount: 1,
-    exportCount: 1,
-    evalCount: 0,
-    setoptCount: 0,
-    pluginCount: 0,
-    functionCount: 0,
-    sourceCount: 0,
-    autoloadCount: 0,
-    fpathCount: 0,
-    pathCount: 0,
-    themeCount: 0,
-    completionCount: 0,
-    historyCount: 0,
-    keybindingCount: 0,
-    otherCount: 0,
-  };
-
-  const mockParsedContent = {
-    aliases: [{ name: "ll", command: "ls -la" }],
-    exports: [{ variable: "PATH", value: "/usr/local/bin:$PATH" }],
-    otherLines: [],
-  };
-
-  const mockMarkdown = "# Test Section\n\n## Aliases\n- ll: ls -la\n\n## Exports\n- PATH: /usr/local/bin:$PATH";
+  const mockSection = createMockSection("Aliases", 1, 10, "alias ll='ls -la'\nalias gs='git status'", {
+    aliasCount: 2,
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Default mock implementations
-    mockParseSectionContent.mockReturnValue(mockParsedContent);
-    mockApplyContentFilter.mockImplementation((content) => content);
-    mockGenerateSectionMarkdown.mockReturnValue(mockMarkdown);
-    mockTruncateValueMiddle.mockImplementation((value) => value);
   });
 
-  it("should export SectionDetail and SectionDetailList components", async () => {
-    const SectionDetail = await import("../section-detail");
-    expect(SectionDetail.SectionDetail).toBeDefined();
-    expect(SectionDetail.SectionDetailList).toBeDefined();
-    expect(typeof SectionDetail.SectionDetail).toBe("function");
-    expect(typeof SectionDetail.SectionDetailList).toBe("function");
-  });
+  describe("component rendering", () => {
+    it("should render SectionDetail component", () => {
+      render(<SectionDetail section={mockSection} />);
+      expect(screen.getAllByText(/Aliases/).length).toBeGreaterThan(0);
+    });
 
-  it("should handle content parsing", () => {
-    // Test that the component can handle content parsing
-    const parsedContent = mockParseSectionContent(mockSection);
+    it("should render with custom actions", () => {
+      const customActions = <div data-testid="custom-actions">Custom Actions</div>;
+      render(<SectionDetail section={mockSection} actions={customActions} />);
 
-    expect(parsedContent).toBeDefined();
-    expect(parsedContent.aliases).toHaveLength(1);
-    expect(parsedContent.exports).toHaveLength(1);
-    expect(mockParseSectionContent).toHaveBeenCalledWith(mockSection);
-  });
-
-  it("should handle markdown generation", () => {
-    // Test that the component can handle markdown generation
-    const markdown = mockGenerateSectionMarkdown(mockSection, "formatted", mockParsedContent);
-
-    expect(markdown).toBeDefined();
-    expect(markdown).toContain("# Test Section");
-    expect(mockGenerateSectionMarkdown).toHaveBeenCalledWith(mockSection, "formatted", mockParsedContent);
-  });
-
-  it("should handle different display modes", () => {
-    // Test that the component can handle different display modes
-    const displayModes = ["formatted", "raw", "compact"];
-
-    displayModes.forEach((mode) => {
-      mockGenerateSectionMarkdown(mockSection, mode, mockParsedContent);
-      expect(mockGenerateSectionMarkdown).toHaveBeenCalledWith(mockSection, mode, mockParsedContent);
+      expect(screen.getAllByText(/Aliases/).length).toBeGreaterThan(0);
     });
   });
 
-  it("should handle different filter types", () => {
-    // Test that the component can handle different filter types
-    const filterTypes = ["all", "aliases", "exports"];
+  describe("display modes", () => {
+    it("should use formatted display mode by default", () => {
+      render(<SectionDetail section={mockSection} />);
+      expect(screen.getAllByText(/Aliases/).length).toBeGreaterThan(0);
+    });
 
-    filterTypes.forEach((filterType) => {
-      mockApplyContentFilter(mockParsedContent, filterType);
-      expect(mockApplyContentFilter).toHaveBeenCalledWith(mockParsedContent, filterType);
+    it("should handle raw display mode", () => {
+      render(<SectionDetail section={mockSection} displayMode="raw" />);
+      expect(screen.getAllByText(/Aliases/).length).toBeGreaterThan(0);
+    });
+
+    it("should handle compact display mode", () => {
+      render(<SectionDetail section={mockSection} displayMode="compact" />);
+      expect(screen.getAllByText(/Aliases/).length).toBeGreaterThan(0);
     });
   });
 
-  it("should parse section content correctly", () => {
-    const parsedContent = mockParseSectionContent(mockSection);
+  describe("secret masking", () => {
+    it("masks secret export values in every display mode", () => {
+      const secretSection = createMockSection("Env", 1, 3, "export MY_TOKEN=abcdefghijklmnop\nexport EDITOR=vim", {
+        exportCount: 2,
+      });
 
-    expect(parsedContent.aliases).toHaveLength(1);
-    expect(parsedContent.exports).toHaveLength(1);
-    expect(parsedContent.aliases[0]?.name).toBe("ll");
-    expect(parsedContent.aliases[0]?.command).toBe("ls -la");
-    expect(parsedContent.exports[0]?.variable).toBe("PATH");
-    expect(parsedContent.exports[0]?.value).toBe("/usr/local/bin:$PATH");
+      for (const displayMode of ["formatted", "raw", "compact"] as const) {
+        const { unmount } = render(<SectionDetail section={secretSection} displayMode={displayMode} />);
+        expect(screen.queryByText(/abcdefghijklmnop/)).not.toBeInTheDocument();
+        expect(screen.getAllByText(/abc•••••nop/).length).toBeGreaterThan(0);
+        // Non-secret values stay visible
+        expect(screen.getAllByText(/vim/).length).toBeGreaterThan(0);
+        unmount();
+      }
+    });
   });
 
-  it("should handle empty section content", () => {
-    // Test that the component can handle empty section content
-    const emptySection: LogicalSection = {
-      label: "Empty Section",
-      content: "",
-      startLine: 1,
-      endLine: 1,
-      aliasCount: 0,
-      exportCount: 0,
-      evalCount: 0,
-      setoptCount: 0,
-      pluginCount: 0,
-      functionCount: 0,
-      sourceCount: 0,
-      autoloadCount: 0,
-      fpathCount: 0,
-      pathCount: 0,
-      themeCount: 0,
-      completionCount: 0,
-      historyCount: 0,
-      keybindingCount: 0,
-      otherCount: 0,
-    };
+  describe("edge cases", () => {
+    it("should handle empty section content", () => {
+      const emptySection = createMockSection("Empty", 1, 1, "");
+      render(<SectionDetail section={emptySection} />);
 
-    const emptyParsedContent = {
-      aliases: [],
-      exports: [],
-      otherLines: [],
-    };
-
-    mockParseSectionContent.mockReturnValue(emptyParsedContent);
-    const parsedContent = mockParseSectionContent(emptySection);
-
-    expect(parsedContent.aliases).toHaveLength(0);
-    expect(parsedContent.exports).toHaveLength(0);
-  });
-
-  it("should apply content filters correctly", () => {
-    const allContent = mockApplyContentFilter(mockParsedContent, "all");
-    const aliasesOnly = mockApplyContentFilter(mockParsedContent, "aliases");
-    const exportsOnly = mockApplyContentFilter(mockParsedContent, "exports");
-
-    expect(mockApplyContentFilter).toHaveBeenCalledTimes(3);
-    expect(allContent).toBeDefined();
-    expect(aliasesOnly).toBeDefined();
-    expect(exportsOnly).toBeDefined();
-  });
-
-  it("should truncate long values properly", () => {
-    const longValue = "A".repeat(1000);
-    const truncatedValue = mockTruncateValueMiddle(longValue);
-
-    expect(mockTruncateValueMiddle).toHaveBeenCalledWith(longValue);
-    expect(truncatedValue).toBeDefined();
-  });
-
-  it("should handle error scenarios gracefully", () => {
-    // Test that the component can handle error scenarios
-    mockParseSectionContent.mockImplementation(() => {
-      throw new Error("Parsing failed");
+      expect(screen.getAllByText(/Empty/).length).toBeGreaterThan(0);
     });
 
-    expect(() => mockParseSectionContent(mockSection)).toThrow("Parsing failed");
-  });
+    it("should handle section with special characters", () => {
+      const specialSection = createMockSection("SpecialSection", 1, 5, "alias test='echo \"hello\"'", {
+        aliasCount: 1,
+      });
+      render(<SectionDetail section={specialSection} />);
 
-  it("should handle markdown generation errors", () => {
-    // Test that the component can handle markdown generation errors
-    mockGenerateSectionMarkdown.mockImplementation(() => {
-      throw new Error("Markdown generation failed");
+      expect(screen.getAllByText(/SpecialSection/).length).toBeGreaterThan(0);
     });
 
-    expect(() => mockGenerateSectionMarkdown(mockSection, "formatted", mockParsedContent)).toThrow(
-      "Markdown generation failed",
-    );
+    it("should handle unicode content", () => {
+      const unicodeSection = createMockSection("UnicodeSection", 1, 5, "alias hello='echo 你好'", {
+        aliasCount: 1,
+      });
+
+      render(<SectionDetail section={unicodeSection} />);
+      expect(screen.getAllByText(/UnicodeSection/).length).toBeGreaterThan(0);
+      expect(screen.getAllByText(/你好/).length).toBeGreaterThan(0);
+    });
   });
 });

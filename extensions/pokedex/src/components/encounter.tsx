@@ -1,26 +1,31 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import groupBy from "lodash.groupby";
 import uniqBy from "lodash.uniqby";
-import { PokemonV2Encounter } from "../types";
+import { PokemonEncounter } from "../types";
+import { getLocalizedName } from "../utils";
 
 export default function PokemonEncounters(props: {
   name: string;
-  encounters: PokemonV2Encounter[];
+  encounters: PokemonEncounter[];
 }) {
   const generations = groupBy(
-    props.encounters,
+    props.encounters.filter((e) => e.version?.versiongroup?.generation),
     (e) =>
-      e.pokemon_v2_version.pokemon_v2_versiongroup.pokemon_v2_generation
-        .pokemon_v2_generationnames[0].name,
+      getLocalizedName(
+        e.version.versiongroup.generation.generationnames,
+        e.version.versiongroup.generation.name,
+      ),
   );
 
   return (
     <List throttle navigationTitle={`${props.name} | Where to find`}>
       {Object.entries(generations).map(([generation, groups]) => {
-        const locations = uniqBy(groups, (l) => l.pokemon_v2_locationarea.name);
-        const versions = groupBy(
-          locations,
-          (l) => l.pokemon_v2_version.pokemon_v2_versionnames[0].name,
+        const locations = uniqBy(
+          groups.filter((l) => l.locationarea),
+          (l) => l.locationarea.name,
+        );
+        const versions = groupBy(locations, (l) =>
+          getLocalizedName(l.version.versionnames, l.version.name),
         );
 
         return (
@@ -33,10 +38,11 @@ export default function PokemonEncounters(props: {
                   accessories={[
                     {
                       text: encounters
-                        .map(
-                          (e) =>
-                            e.pokemon_v2_locationarea
-                              .pokemon_v2_locationareanames[0]?.name || "",
+                        .map((e) =>
+                          getLocalizedName(
+                            e.locationarea.locationareanames,
+                            e.locationarea.name,
+                          ),
                         )
                         .filter((x) => !!x)
                         .join(", "),
@@ -48,6 +54,7 @@ export default function PokemonEncounters(props: {
           </List.Section>
         );
       })}
+      <List.EmptyView icon={Icon.Map} title="No Encounters Found" />
     </List>
   );
 }

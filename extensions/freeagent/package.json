@@ -51,6 +51,13 @@
       "mode": "view"
     },
     {
+      "name": "create-expense",
+      "title": "Create Expense",
+      "subtitle": "FreeAgent",
+      "description": "Create an expense in FreeAgent",
+      "mode": "view"
+    },
+    {
       "name": "list-bank-transactions",
       "title": "List Bank Transactions",
       "subtitle": "FreeAgent",

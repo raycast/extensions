@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "imgbed-uploader",
+  "title": "ImgBed Uploader",
+  "description": "Upload copied screenshots or copied image files to a configurable ImgBed endpoint.",
+  "icon": "extension-icon.png",
+  "author": "andy",
+  "license": "MIT",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "upload-clipboard-image",
+      "title": "Upload Clipboard Image",
+      "subtitle": "ImgBed",
+      "description": "Upload the current clipboard image to ImgBed and copy the returned URL.",
+      "mode": "no-view",
+      "keywords": [
+        "image",
+        "screenshot",
+        "upload",
+        "imgbed",
+        "picture"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "ImgBed Base URL",
+      "description": "Base URL of the ImgBed service.",
+      "placeholder": "https://example.com"
+    },
+    {
+      "name": "authCode",
+      "type": "password",
+      "required": true,
+      "title": "Auth Code",
+      "description": "Value sent with the authCode request header."
+    },
+    {
+      "name": "uploadChannel",
+      "type": "textfield",
+      "required": true,
+      "title": "Upload Channel",
+      "description": "ImgBed uploadChannel query parameter.",
+      "default": "cfr2"
+    },
+    {
+      "name": "autoRetry",
+      "type": "checkbox",
+      "required": false,
+      "title": "Auto Retry",
+      "label": "Enable auto retry",
+      "description": "ImgBed autoRetry query parameter.",
+      "default": false
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.19"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.1",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^6.0.3"
+  }
+}

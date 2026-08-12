@@ -1,8 +1,8 @@
 import { format } from "date-fns";
 
 import { createIssue } from "../api/issues";
-import { getJiraCredentials } from "../api/jiraCredentials";
 import { withJiraCredentials } from "../helpers/withJiraCredentials";
+import { getIssueUrl } from "../helpers/urls";
 
 type Input = {
   /** The ID of the project the issue belongs to */
@@ -46,8 +46,7 @@ export default withJiraCredentials(async function (input: Input) {
     return "The issue was properly created, but couldn't be found.";
   }
 
-  const { siteUrl } = getJiraCredentials();
-  const url = `${siteUrl.startsWith("https://") ? siteUrl : `https://${siteUrl}`}/browse/${issue.key}`;
+  const url = getIssueUrl(issue.key);
 
   return { ...issue, url };
 });

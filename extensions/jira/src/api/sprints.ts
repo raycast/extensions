@@ -5,7 +5,7 @@ type SprintResult = {
   displayName: string;
 };
 
-type DetailedSprint = {
+export type DetailedSprint = {
   id: string;
   name: string;
   state: "active" | "future" | "closed";

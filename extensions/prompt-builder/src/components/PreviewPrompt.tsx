@@ -1,9 +1,8 @@
 import { Action, ActionPanel, Detail, Icon, useNavigation } from "@raycast/api";
 import { PreviewPromptProps } from "../types";
-import PromptForm from "./PromptForm";
 
 const PreviewPrompt = ({ prompt }: PreviewPromptProps) => {
-  const { push } = useNavigation();
+  const { pop } = useNavigation();
 
   return (
     <Detail
@@ -19,7 +18,7 @@ const PreviewPrompt = ({ prompt }: PreviewPromptProps) => {
               macOS: { modifiers: ["cmd"], key: "e" },
               windows: { modifiers: ["ctrl"], key: "e" },
             }}
-            onAction={() => push(<PromptForm />)}
+            onAction={() => pop()}
           />
         </ActionPanel>
       }

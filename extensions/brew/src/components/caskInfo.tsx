@@ -97,6 +97,7 @@ export function CaskInfo({
       navigationTitle={`Cask Info: ${brewName(cask)}`}
       metadata={
         <Detail.Metadata>
+          <Detail.Metadata.Label title="Id" text={cask.token || "Loading..."} />
           {cask.homepage ? (
             <Detail.Metadata.Link title="Homepage" text={cask.homepage} target={cask.homepage} />
           ) : (

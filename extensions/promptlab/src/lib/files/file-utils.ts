@@ -182,7 +182,7 @@ export const getExtensions = async (): Promise<Extension[]> => {
                 }
 
                 if (packageJSON.name && packageJSON.author && entry.name) {
-                  command.deeplink = `raycast://extensions/${packageJSON.author}/${packageJSON.name}/${entry.name}`;
+                  command.deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${packageJSON.author}/${packageJSON.name}/${entry.name}`;
                 }
 
                 extension.commands.push(command);

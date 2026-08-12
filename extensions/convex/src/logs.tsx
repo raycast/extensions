@@ -33,7 +33,8 @@ import {
 } from "./lib/api";
 
 export default function ViewLogsCommand() {
-  const { session, selectedContext } = useConvexAuth();
+  const { session, selectedContext, isDeployKeyMode, deployKeyConfig } =
+    useConvexAuth();
   const [functionFilter, setFunctionFilter] = useState<string | undefined>();
   const [requestFilter, setRequestFilter] = useState<string | undefined>();
   const [searchText, setSearchText] = useState("");
@@ -45,13 +46,22 @@ export default function ViewLogsCommand() {
   const accessToken = session?.accessToken ?? null;
   const deploymentName = selectedContext.deploymentName;
 
-  const { data: teams } = useTeams(accessToken);
-  const { data: projects } = useProjects(accessToken, selectedContext.teamId);
+  // Fetch context data (only in OAuth mode - not available with deploy keys)
+  const { data: teams } = useTeams(isDeployKeyMode ? null : accessToken);
+  const { data: projects } = useProjects(
+    isDeployKeyMode ? null : accessToken,
+    selectedContext.teamId,
+  );
   const { data: deployments } = useDeployments(
-    accessToken,
+    isDeployKeyMode ? null : accessToken,
     selectedContext.projectId,
   );
-  const { data: functions } = useFunctions(accessToken, deploymentName);
+  // Fetch functions (supports both OAuth and deploy key modes)
+  const { data: functions } = useFunctions(
+    accessToken,
+    deploymentName,
+    deployKeyConfig,
+  );
 
   const selectedTeam = teams?.find((t) => t.id === selectedContext.teamId);
   const selectedProject = projects?.find(
@@ -70,6 +80,7 @@ export default function ViewLogsCommand() {
     clearLogs,
   } = useLogs(accessToken, deploymentName, {
     autoRefresh: true,
+    deployKeyConfig,
   });
 
   // Handle authentication
@@ -83,7 +94,7 @@ export default function ViewLogsCommand() {
       <List>
         <List.EmptyView
           title="No Deployment Selected"
-          description="Use 'Switch Convex Project' to select a deployment first"
+          description="Use 'Manage Projects' to select a deployment first"
           icon={Icon.Cloud}
         />
       </List>

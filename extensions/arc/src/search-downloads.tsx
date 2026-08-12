@@ -9,7 +9,7 @@ import { defaultHistoryDatabasePath } from "./history";
 
 function SearchDownloads(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
-  const escapedSearchText = searchText.replace(/"/g, '""');
+  const escapedSearchText = searchText.replace(/\\/g, "\\\\").replace(/'/g, "''").replace(/[%_]/g, "\\$&");
   const { data, isLoading, permissionView } = useSQL<Download>(
     defaultHistoryDatabasePath,
     getDownloadQuery(escapedSearchText),

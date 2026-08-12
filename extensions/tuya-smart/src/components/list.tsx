@@ -142,9 +142,9 @@ export function SwitchListItem(props: {
               return { ...command };
             });
 
-            const statusIndex = props.device.status.findIndex((status) => status.code === command.code);
-            if (statusIndex !== -1) {
-              props.device.status[statusIndex] = command;
+            const statusIndex = props.device.status?.findIndex((status) => status.code === command.code);
+            if (statusIndex !== -1 && statusIndex !== undefined) {
+              props.device.status![statusIndex] = command;
             }
 
             props.onAction({
@@ -239,8 +239,10 @@ export function CommandListItem(props: {
               return { ...command };
             });
 
-            const statusIndex = props.device.status.findIndex((status) => status.code === command.code);
-            props.device.status[statusIndex] = command;
+            const statusIndex = props.device.status?.findIndex((status) => status.code === command.code);
+            if (statusIndex !== -1 && statusIndex !== undefined) {
+              props.device.status![statusIndex] = command;
+            }
 
             props.onAction({
               ...props.device,

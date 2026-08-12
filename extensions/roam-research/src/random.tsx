@@ -1,11 +1,9 @@
-import { List, Detail, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
+import { List, Detail, ActionPanel, Action, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { keys, detailMarkdown, timeformatFromMs } from "./utils";
+import { detailMarkdown, timeformatFromMs, useGraphsConfig } from "./utils";
 import { BLOCK_QUERY, initRoamBackendClient } from "./roamApi";
-
 import * as roamApiSdk from "./roam-api-sdk-copy";
-import { MentioningNotes } from "./detail";
-import { useGraphsConfig } from "./utils";
+import { MentioningNotes, OpenInRoamActions } from "./block-detail";
 
 // TODO: Feature requests/ideas:
 // 1. Ability to pass a filter-like for what sorts of random blocks to get.
@@ -23,7 +21,6 @@ const isValidBlockPulled = (blockPulled: any) => {
 
 export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig }) => {
   // TODO: the first time, this is getting printed quite a number of times which makes me assume I'm not doing it properly
-  // console.log("RandomBlockFromList triggered");
 
   // const api = graphApi(graph.nameField, graph.tokenField);
   const backendClient = initRoamBackendClient(graphConfig.nameField, graphConfig.tokenField);
@@ -34,7 +31,7 @@ export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig 
     error: errorRandomBlocks,
   } = usePromise(
     //useCachedPromise(
-    async (graphConfig) => {
+    async (_graphConfig) => {
       // TODO: maybe try abortable here?
       // const response = await fetch(url, { signal: abortable.current?.signal });
       // const result = await response.text();
@@ -66,7 +63,6 @@ export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig 
         let randomBlock: ReversePullBlock;
         do {
           randomBlock = validCandidateBlocks[rand(validCandidateBlocks.length)];
-          // console.log("selected random block: ", randomBlock);
         } while (!isValidBlockPulled(randomBlock));
         return randomBlock;
       }
@@ -74,17 +70,22 @@ export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig 
     [dataRandomBlocks]
   );
 
-  const preferences = getPreferenceValues<Preferences>();
-
-  // TODO: handle `errorRandomBlocks` and `error`
+  if (!isLoadingRandomBlocks && !isLoading && (errorRandomBlocks || error)) {
+    return (
+      <Detail
+        navigationTitle="Random Note"
+        markdown={`## Error\n\n${
+          (errorRandomBlocks || error)?.message || "An unknown error occurred"
+        }\n\nTry again or check your graph token.`}
+      />
+    );
+  }
 
   const _refs = data?.[":block/_refs"] || [];
 
-  // console.log("random block data:", JSON.stringify(data));
-
   return (
     <Detail
-      navigationTitle={"Random Note Detail "}
+      navigationTitle={"Random Note Detail"}
       isLoading={isLoadingRandomBlocks || isLoading}
       {...(data
         ? {
@@ -92,20 +93,10 @@ export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig 
             actions: (
               <ActionPanel>
                 <Action title="Another random block" onAction={revalidate} />
-                {preferences.openIn === "web" ? (
-                  <Action.OpenInBrowser
-                    title="Open in browser"
-                    url={`https://roamresearch.com/#/app/${graphConfig.nameField}/page/${data[":block/uid"]}`}
-                  />
-                ) : (
-                  <Action.Open
-                    title="Open in app"
-                    target={`roam://#/app/${graphConfig.nameField}/page/${data[":block/uid"]}`}
-                  />
-                )}
+                <OpenInRoamActions graphName={graphConfig.nameField} blockUid={data[":block/uid"]} />
                 {_refs.length ? (
                   <Action.Push
-                    title={`Show Linked References(${data[":block/_refs"].length})`}
+                    title={`Show Linked References (${_refs.length})`}
                     target={<MentioningNotes block={data} graphConfig={graphConfig} />}
                   />
                 ) : null}
@@ -133,12 +124,25 @@ export const RandomBlockFromList = ({ graphConfig }: { graphConfig: GraphConfig 
 
 export default function Random() {
   // TODO: look into Roam's serendipity plugin, random block plugin and if they offer any customizations
-  const { graphsConfig } = useGraphsConfig();
-  // console.log("Random: graphsConfig", "---", graphsConfig);
+  const { graphsConfig, orderedGraphNames } = useGraphsConfig();
+  // Filter to graphs with read capability (undefined = full access for backward compat)
+  const readableGraphNames = orderedGraphNames.filter((name) => graphsConfig[name]?.capabilities?.read !== false);
+
+  if (readableGraphNames.length === 1) {
+    const graphName = readableGraphNames[0] as string;
+    return <RandomBlockFromList graphConfig={graphsConfig[graphName]} />;
+  }
+
   return (
     <List>
-      {graphsConfig &&
-        keys(graphsConfig).map((graphName) => {
+      {readableGraphNames.length === 0 ? (
+        <List.EmptyView
+          icon={Icon.Tray}
+          title="No graphs with read access"
+          description="Add a graph with a read+write token to use Random Notes."
+        />
+      ) : (
+        readableGraphNames.map((graphName) => {
           return (
             <List.Item
               key={graphName}
@@ -155,7 +159,8 @@ export default function Random() {
               }
             />
           );
-        })}
+        })
+      )}
     </List>
   );
 }

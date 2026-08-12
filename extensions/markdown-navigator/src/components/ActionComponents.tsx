@@ -11,8 +11,6 @@ interface CommonActionsProps {
   showTagSearchList: () => void;
 }
 
-// Removed loadMoreFiles from CommonActionsProps since it has its own component
-
 export function CommonActions({
   showCreateFileForm,
   revalidate,
@@ -48,19 +46,6 @@ export function CommonActions({
           onAction={() => setShowColorTags(!showColorTags)}
         />
       </ActionPanel.Section>
-    </ActionPanel>
-  );
-}
-
-// Create a separate interface for LoadMoreAction to avoid dependency on CommonActionsProps
-interface LoadMoreActionProps {
-  loadMoreFiles: () => void;
-}
-
-export function LoadMoreAction({ loadMoreFiles }: LoadMoreActionProps) {
-  return (
-    <ActionPanel>
-      <Action title="Load More Files" icon={Icon.Plus} onAction={loadMoreFiles} />
     </ActionPanel>
   );
 }

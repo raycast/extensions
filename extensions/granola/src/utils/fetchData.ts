@@ -42,10 +42,14 @@ export function fetchGranolaData(route: string) {
     let mounted = true;
     getAccessToken()
       .then((token) => {
-        if (mounted) setAccessToken(token);
+        if (mounted) {
+          setAccessToken(token);
+        }
       })
       .catch((err) => {
-        if (mounted) setError(new Error(`Failed to get access token, ${toErrorMessage(err)}`));
+        if (mounted) {
+          setError(new Error(`Failed to get access token: ${toErrorMessage(err)}`, { cause: err }));
+        }
       });
     return () => {
       mounted = false;
@@ -56,7 +60,12 @@ export function fetchGranolaData(route: string) {
 
   // Use parseResponse to transform data BEFORE useFetch caches it
   // This ensures only stripped data is cached, reducing memory usage
-  const { isLoading, data, revalidate } = useFetch<GetDocumentsResponse<Document | Doc>>(url, {
+  const {
+    isLoading,
+    data,
+    error: fetchError,
+    revalidate,
+  } = useFetch<GetDocumentsResponse<Document | Doc>>(url, {
     headers: accessToken
       ? {
           Authorization: `Bearer ${accessToken}`,
@@ -126,6 +135,10 @@ export function fetchGranolaData(route: string) {
     throw error;
   }
 
+  if (fetchError) {
+    throw toError(fetchError);
+  }
+
   // Return transformed data (or original if transformation not needed)
   // For get-documents, transformedData will have stripped fields
   // For other routes, transformedData === data
@@ -134,9 +147,13 @@ export function fetchGranolaData(route: string) {
 
 const TRANSCRIPT_NOT_FOUND_MESSAGE = "Transcript not available for this note.";
 
-export async function getTranscript(docId: string): Promise<string> {
-  const url = `https://api.granola.ai/v1/get-document-transcript`;
+/**
+ * Fetches raw transcript segments with timestamps for a document.
+ * Use this when you need access to timing information (start/end timestamps).
+ */
+export async function getTranscriptSegments(docId: string): Promise<TranscriptSegment[]> {
   try {
+    const url = `https://api.granola.ai/v1/get-document-transcript`;
     const token = await getAccessToken();
     const requestBody = { document_id: docId };
 
@@ -155,14 +172,29 @@ export async function getTranscript(docId: string): Promise<string> {
         const errorJson = JSON.parse(errorText);
         errorText = errorJson.message || errorText;
       } catch (e) {
+        void e;
         // Use raw text if parsing fails
       }
       throw new Error(`API request failed with status ${response.status}: ${errorText}`);
     }
 
     const transcriptSegments = (await response.json()) as TranscriptSegment[];
+    return transcriptSegments || [];
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+    const normalizedError = toError(error);
+    showFailureToast(normalizedError, { title: "Failed to Fetch Transcript Segments" });
+    throw normalizedError;
+  }
+}
 
-    if (!transcriptSegments || transcriptSegments.length === 0) {
+export async function getTranscript(docId: string): Promise<string> {
+  try {
+    const transcriptSegments = await getTranscriptSegments(docId);
+
+    if (transcriptSegments.length === 0) {
       return TRANSCRIPT_NOT_FOUND_MESSAGE;
     }
 
@@ -187,10 +219,81 @@ export async function getTranscript(docId: string): Promise<string> {
   }
 }
 
-export async function getFolders(signal?: AbortSignal): Promise<FoldersResponse> {
-  const url = `https://api.granola.ai/v1/get-document-lists-metadata`;
+export function formatDurationVerbose(durationMs: number): string {
+  if (durationMs <= 0) return "";
 
+  const totalMinutes = Math.floor(durationMs / 60000);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+
+  if (hours === 0) {
+    return minutes === 1 ? "1 minute" : `${minutes} minutes`;
+  }
+
+  const hourPart = hours === 1 ? "1 hour" : `${hours} hours`;
+  if (minutes === 0) {
+    return hourPart;
+  }
+
+  const minutePart = minutes === 1 ? "1 minute" : `${minutes} minutes`;
+  return `${hourPart} ${minutePart}`;
+}
+
+export function calculateDurationFromSegments(segments: TranscriptSegment[]): number | null {
+  if (segments.length === 0) return null;
+
+  const timestamps = segments
+    .flatMap((seg) => [seg.start_timestamp, seg.end_timestamp])
+    .filter((ts): ts is string => !!ts)
+    .map((ts) => new Date(ts).getTime())
+    .filter((t) => !isNaN(t));
+
+  if (timestamps.length < 2) return null;
+
+  const durationMs = Math.max(...timestamps) - Math.min(...timestamps);
+  return durationMs > 0 ? durationMs : null;
+}
+
+export async function getMeetingDuration(docId: string): Promise<string | null> {
   try {
+    const segments = await getTranscriptSegments(docId);
+    const durationMs = calculateDurationFromSegments(segments);
+    return durationMs ? formatDurationVerbose(durationMs) : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch the creator name for a document (used for shared documents).
+ * Returns null if the creator cannot be determined.
+ */
+export async function getDocumentCreator(docId: string): Promise<string | null> {
+  try {
+    const token = await getAccessToken();
+    const response = await fetch("https://api.granola.ai/v1/get-document-metadata", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ document_id: docId }),
+    });
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const meta = (await response.json()) as { creator?: { name?: string } };
+    return meta.creator?.name || null;
+  } catch {
+    return null;
+  }
+}
+
+export async function getFolders(signal?: AbortSignal): Promise<FoldersResponse> {
+  try {
+    const url = `https://api.granola.ai/v1/get-document-lists-metadata`;
     const token = await getAccessToken();
     const requestBody = {
       include_document_ids: true,
@@ -235,8 +338,8 @@ export async function getFolders(signal?: AbortSignal): Promise<FoldersResponse>
  * Use this in tools and utilities where hooks are not available.
  */
 export async function getDocumentsList(): Promise<Document[]> {
-  const url = `https://api.granola.ai/v2/get-documents`;
   try {
+    const url = `https://api.granola.ai/v2/get-documents`;
     const token = await getAccessToken();
     const response = await fetch(url, {
       headers: {
@@ -257,7 +360,8 @@ export async function getDocumentsList(): Promise<Document[]> {
     }
 
     const result = (await response.json()) as GetDocumentsResponse;
-    return Array.isArray(result?.docs) ? (result.docs as Document[]) : [];
+    const docs = Array.isArray(result?.docs) ? (result.docs as Document[]) : [];
+    return docs;
   } catch (error) {
     if (isAbortError(error)) {
       throw error;
@@ -265,6 +369,126 @@ export async function getDocumentsList(): Promise<Document[]> {
     const normalizedError = toError(error);
     showFailureToast(normalizedError, { title: "Failed to Fetch Documents" });
     throw normalizedError;
+  }
+}
+
+/**
+ * Fetch documents shared with the user (not owned by them).
+ * This includes both individually shared documents and documents from shared folders.
+ */
+export async function getSharedDocuments(): Promise<Doc[]> {
+  const token = await getAccessToken();
+
+  // Fetch individually shared documents and shared folder documents in parallel
+  const [individuallyShared, fromSharedFolders] = await Promise.all([
+    getIndividuallySharedDocuments(token),
+    getDocumentsFromSharedFolders(),
+  ]);
+
+  // Merge and deduplicate by document ID
+  const allSharedDocs = [...individuallyShared, ...fromSharedFolders];
+  const uniqueDocs = new Map<string, Doc>();
+  for (const doc of allSharedDocs) {
+    if (!uniqueDocs.has(doc.id)) {
+      uniqueDocs.set(doc.id, doc);
+    }
+  }
+  return Array.from(uniqueDocs.values());
+}
+
+/**
+ * Fetch documents that were individually shared with the user via the "shared with me" feature.
+ */
+async function getIndividuallySharedDocuments(token: string): Promise<Doc[]> {
+  const url = `https://api.granola.ai/v1/get-document-set`;
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({}),
+    });
+
+    if (!response.ok) {
+      return [];
+    }
+
+    const result = (await response.json()) as {
+      documents: Record<string, { shared?: boolean }>;
+    };
+
+    const sharedIds = Object.entries(result.documents || {})
+      .filter(([, meta]) => meta.shared === true)
+      .map(([id]) => id);
+
+    if (sharedIds.length === 0) {
+      return [];
+    }
+
+    const sharedDocuments = await getDocumentsByIds(sharedIds);
+    return sharedDocuments.map((doc) => ({
+      id: doc.id,
+      title: doc.title,
+      created_at: doc.created_at,
+      creation_source: doc.creation_source,
+      public: doc.public,
+      sharing_link_visibility: doc.sharing_link_visibility,
+      isShared: true,
+    }));
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+    return [];
+  }
+}
+
+/**
+ * Fetch documents from shared folders (folders where is_shared is true).
+ */
+async function getDocumentsFromSharedFolders(): Promise<Doc[]> {
+  try {
+    // Get all folders including shared ones
+    const foldersResponse = await getFolders();
+
+    if (!foldersResponse?.lists) {
+      return [];
+    }
+
+    // Find shared folders and collect their document IDs
+    const sharedFolderDocIds: string[] = [];
+
+    for (const folder of Object.values(foldersResponse.lists)) {
+      if (folder.is_shared && folder.document_ids && folder.document_ids.length > 0) {
+        for (const docId of folder.document_ids) {
+          sharedFolderDocIds.push(docId);
+        }
+      }
+    }
+
+    if (sharedFolderDocIds.length === 0) {
+      return [];
+    }
+
+    // Fetch the documents from shared folders
+    const documents = await getDocumentsByIds(sharedFolderDocIds);
+
+    return documents.map((doc) => ({
+      id: doc.id,
+      title: doc.title,
+      created_at: doc.created_at,
+      creation_source: doc.creation_source,
+      public: doc.public,
+      sharing_link_visibility: doc.sharing_link_visibility,
+      isShared: true,
+    }));
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+    return [];
   }
 }
 
@@ -342,8 +566,8 @@ export async function getDocumentsListStripped(): Promise<Doc[]> {
  * Fetch recipes via API (user, shared, default) and normalize to a list result
  */
 export async function getRecipesFromApi(): Promise<RecipesListResult> {
-  const url = `https://api.granola.ai/v1/get-recipes`;
   try {
+    const url = `https://api.granola.ai/v1/get-recipes`;
     const token = await getAccessToken();
     const response = await fetch(url, {
       method: "POST",
@@ -373,6 +597,10 @@ export async function getRecipesFromApi(): Promise<RecipesListResult> {
     const userRecipes: Recipe[] = Array.isArray(payload.userRecipes) ? payload.userRecipes : [];
     const sharedRecipes: Recipe[] = Array.isArray(payload.sharedRecipes) ? payload.sharedRecipes : [];
     const unlistedRecipes: Recipe[] = Array.isArray(payload.unlistedRecipes) ? payload.unlistedRecipes : [];
+    const recipesUsage =
+      payload.recipesUsage && typeof payload.recipesUsage === "object" && !Array.isArray(payload.recipesUsage)
+        ? payload.recipesUsage
+        : undefined;
 
     let defaultRecipes: DefaultRecipe[] = [];
 
@@ -385,7 +613,8 @@ export async function getRecipesFromApi(): Promise<RecipesListResult> {
       defaultRecipes = payload.defaultRecipes;
     }
 
-    return { featureEnabled: true, userRecipes, defaultRecipes, sharedRecipes, unlistedRecipes };
+    const result = { featureEnabled: true, userRecipes, defaultRecipes, sharedRecipes, unlistedRecipes, recipesUsage };
+    return result;
   } catch (error) {
     if (isAbortError(error)) {
       throw error;

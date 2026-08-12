@@ -12,8 +12,10 @@ import {
 import { showToast, Toast } from "@raycast/api";
 
 interface PageContent {
+  url: string;
   title: string;
   content: string;
+  headings: string[];
   prevUrl: string | null;
   nextUrl: string | null;
 }
@@ -27,8 +29,12 @@ interface PageContent {
  * @param batchSize - Number of items to process concurrently (default: 10)
  * @returns Array of results in the same order as input items
  */
-async function fetchInBatches<T, R>(items: T[], mapper: (item: T) => Promise<R>, batchSize: number = 10): Promise<R[]> {
-  const results: R[] = [];
+async function fetchInBatches(
+  items: string[],
+  mapper: (item: string) => Promise<PageContent>,
+  batchSize: number = 10,
+): Promise<PageContent[]> {
+  const results: PageContent[] = [];
 
   for (let i = 0; i < items.length; i += batchSize) {
     const batch = items.slice(i, i + batchSize);
@@ -68,11 +74,21 @@ export async function fetchPageContent(url: string): Promise<PageContent> {
   resolveRelativeUrls($, url);
 
   const title = stripPilcrows($("h1").first().text().trim()) || "Untitled";
-  const contentHtml = $("#docs-content").html() || $(".body").html() || $("article").html() || "";
+  const contentHtml = $("#docs-content").html() || "";
+
+  // Extract section headings (H2-H4) for better search relevance
+  const headings: string[] = [];
+  $("#docs-content h2, #docs-content h3, #docs-content h4").each((_, element) => {
+    const headingText = stripPilcrows($(element).text().trim());
+    if (headingText) {
+      headings.push(headingText);
+    }
+  });
+
   const turndownService = createTurndownService();
   const markdown = stripPilcrows(turndownService.turndown(contentHtml));
 
-  return { title, content: markdown, prevUrl, nextUrl };
+  return { url, title, content: markdown, headings, prevUrl, nextUrl };
 }
 
 export async function fetchDocEntries(version: DjangoVersion): Promise<DocEntry[]> {
@@ -81,8 +97,8 @@ export async function fetchDocEntries(version: DjangoVersion): Promise<DocEntry[
 
   const rawEntries = await fetchInBatches(filteredUrls, async (url) => {
     try {
-      const { title, content, prevUrl, nextUrl } = await fetchPageContent(url);
-      return { url, title, content, prevUrl, nextUrl };
+      const { title, content, headings, prevUrl, nextUrl } = await fetchPageContent(url);
+      return { url, title, content, headings, prevUrl, nextUrl };
     } catch (error) {
       console.error(`Failed to fetch ${url}:`, error);
       showToast({ style: Toast.Style.Failure, title: `Failed to fetch ${url}` });
@@ -95,6 +111,7 @@ export async function fetchDocEntries(version: DjangoVersion): Promise<DocEntry[
     url: raw.url,
     title: raw.title,
     content: raw.content,
+    headings: raw.headings,
     parent: null,
     previous: null,
     next: null,

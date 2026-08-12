@@ -12,23 +12,24 @@ import DownloadRepositoryForm from "./DownloadRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
+import RepositoryReadme from "./RepositoryReadme";
 import RepositoryReleases from "./RepositoryReleases";
 import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
-type RepositoryActionProps = {
+type RepositoryActionProps<T = ExtendedRepositoryFieldsFragment[] | undefined> = {
   repository: ExtendedRepositoryFieldsFragment;
   onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
-  mutateList: MutatePromise<ExtendedRepositoryFieldsFragment[] | undefined>;
+  mutateList: MutatePromise<T>;
 };
 
-export default function RepositoryActions({
+export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[] | undefined>({
   repository,
   mutateList,
   onVisit,
   setSortQuery,
   sortQuery,
   sortTypesData,
-}: RepositoryActionProps & SortActionProps & SortTypesDataProps) {
+}: RepositoryActionProps<T> & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
   const { baseClonePath, repositoryCloneProtocol, application } = getPreferenceValues<Preferences.SearchRepositories>();
 
@@ -158,6 +159,13 @@ export default function RepositoryActions({
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Open in Raycast">
+        <Action.Push
+          title="Show Readme"
+          icon={Icon.Book}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+          target={<RepositoryReadme repository={repository} />}
+          onPush={() => onVisit(repository)}
+        />
         <Action.Push
           title="Show Issues"
           icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}

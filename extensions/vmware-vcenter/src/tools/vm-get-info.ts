@@ -22,7 +22,7 @@ export default async function tool(input: InputVmIds): Promise<string> {
         console.error(e);
         return vm;
       });
-    })
+    }),
   );
 
   /* Return data in string format */

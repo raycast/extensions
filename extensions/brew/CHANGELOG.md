@@ -1,5 +1,69 @@
 # Brew Changelog
 
+## [Pin visibility, outdated tags, detail pane] - 2026-08-04
+
+- Show Installed: pinned formulae now render in their own "Pinned Formulae" section at the bottom of the list, with the count as the section subtitle, instead of sitting unlabelled among the other formulae
+- Installed packages with an available update now carry an `Outdated` tag — formulae and casks both. The list component is shared, so the tag also appears for installed-and-outdated packages in Search results
+- Show Installed: ⌘⇧D toggles a metadata detail pane for the selected package
+- A list of nothing but pinned formulae no longer reports itself as empty
+
+## [Bug fix] - 2026-08-03
+
+- Fixed "Show Installed" listing no packages on every open after the first. The installed-package lookups are `Map`s, which serialise to `{}`, so the cached value was emptied on write and then re-served empty forever. The serialisable form is cached now and the lookups are rebuilt on read; cache entries written by earlier versions are discarded rather than trusted.
+- Fixed Search intermittently failing to mark packages as installed, which had the same cause.
+
+## [Bug fix] - 2026-07-10
+
+- Search now works instantly against the existing package index while it refreshes in the background, instead of blocking until the refresh completes
+
+## [Manage Services] - 2026-07-09
+
+- Added a "Manage Services" command to list Homebrew services and start, stop, or restart them individually or all at once. Actions update the list optimistically so it reflects the new state immediately.
+- Added a "Services Menu Bar" command to control Homebrew services from the menu bar, with a submenu per service and start/stop/restart all. The menu refreshes on a configurable interval.
+
+## [Bug fix] -  2026-05-21
+
+- Improves reliability of index cache
+- Improves toast error message if fetch fails
+- Adds a "Clear Cache & Retry" action to the error toast if fetch fails
+
+## [Add Keyboard Shortcuts] - 2026-05-12
+
+- Added keyboard shortcuts to common Brew actions, including opening package pages, opening homepages, copying URLs, and running terminal commands.
+- Standardized shortcut usage with Raycast common shortcuts where appropriate.
+
+## [Bug Fix & Launch Argument] - 2026-05-12
+
+- Added launch argument to Search command for pre-filling the search query before opening
+- Fixed search not working while the formulae/cask index is being downloaded on cold start
+
+## [Cask Id] - 2026-03-24
+
+- Add cask id to the cask metadata
+
+## [Improvements] - 2026-02-24
+
+- Remove updating homebrew index toast from outdated command
+
+## [Bug Fix] - 2026-02-24
+
+- Improve install/uninstall/upgrade failure toasts by surfacing concise Homebrew errors instead of full auto-update logs.
+- Keep full `stderr`/`stdout` output available through the toast's `Copy Logs` action for debugging.
+
+## [Improvements] - 2026-02-19
+
+- Improve handling of abort signal when loading search command
+
+## [Improved Memory Usage] - 2026-02-16
+
+- Use chunking to significantly reduce working memory
+
+## [Metadata Detail Panel] - 2026-01-27
+
+- Added optional split-view metadata panel for search results
+- Enable "Show metadata panel in search results" in Search command preferences (default true)
+- Displays package description and metadata alongside the search list
+
 ## [Improvements] - 2026-01-05
 
 - Add a toggle to filter installed packages, allowing users to hide dependencies and show only those explicitly "installed on request".

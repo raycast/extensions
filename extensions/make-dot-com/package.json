@@ -1,0 +1,82 @@
+{
+  "name": "make-dot-com",
+  "title": "Make.com Scenarios",
+  "version": "0.0.1",
+  "description": "Interact with Make.com scenarios from Raycast.",
+  "icon": "icon.png",
+  "author": "dj_z",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "list-scenarios",
+      "title": "List Scenarios",
+      "description": "Browse Make.com scenarios, filter by status, sort by operations, and view details.",
+      "mode": "view",
+      "icon": "command-icon.png"
+    },
+    {
+      "name": "list-favorite-scenarios",
+      "title": "Favorite Scenarios",
+      "description": "Quick access to your favorite Make.com scenarios.",
+      "mode": "view",
+      "icon": "command-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Make Base URL",
+      "description": "Full Make base URL, e.g. https://eu1.make.com",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "title": "Make API Token",
+      "description": "Used as Authorization header (we send: Authorization: Token <token>)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "showUserEmails",
+      "label": "Show User Emails",
+      "description": "Show creator/updater email addresses in scenario details (may be sensitive).",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "allowCopyExecutionPayloads",
+      "label": "Allow Execution Payload Copy",
+      "description": "Allow showing/copying execution outputs and error JSON (may contain secrets/PII).",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.82.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.10.2",
+    "@types/react": "^18.2.45",
+    "eslint": "^8.57.1",
+    "prettier": "^3.5.0",
+    "typescript": "^5.7.2"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

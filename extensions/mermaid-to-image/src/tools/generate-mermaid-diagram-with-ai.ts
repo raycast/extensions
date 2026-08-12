@@ -1,14 +1,14 @@
-import { Clipboard, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { showToast, Toast, open, getPreferenceValues } from "@raycast/api";
 import { generateMermaidDiagram } from "../utils/diagram";
 import { cleanupTempFile } from "../utils/files";
-import { promisify } from "util";
-import { exec } from "child_process";
-import { pathToFileURL } from "url";
-import fs from "fs";
-
-const execPromise = promisify(exec);
-
+import { Preferences } from "../types";
+import { logOperationalError, logOperationalEvent } from "../utils/logger";
+import { showActionFailureToast } from "../utils/notifications";
+import { copyDiagramImage } from "../utils/preview-actions";
+import { resolveSvgCopyAsset } from "../utils/preview-assets";
+import { renderSvgPreviewRasterWithStrategy } from "../utils/svg-preview-raster";
+import { copyRasterImageToClipboard } from "../utils/macos-image-tools";
+import { generateAiDiagramArtifact } from "./ai-diagram-service";
 /**
  * Define the input parameters required by the AI tool
  */
@@ -20,81 +20,90 @@ type MermaidToolInput = {
    */
   mermaidSyntax: string;
 };
-
-/**
- * Copies an image to the clipboard based on the file format
- */
-async function copyImageToClipboard(imagePath: string, format: string): Promise<void> {
-  if (format === "svg") {
-    const svgContent = fs.readFileSync(imagePath, "utf-8");
-    await Clipboard.copy(svgContent);
-  } else {
-    // For PNG format
-    await execPromise(`osascript -e 'set the clipboard to (read (POSIX file "${imagePath}") as TIFF picture)'`);
-  }
-}
-
 /**
  * @raycast AI Tool
  * @name generateMermaidImageTool
- * @description Generates a Mermaid diagram image from the provided syntax and returns **ready-to-display markdown**. The tool outputs markdown that already includes the image reference, so the AI must **output the returned value exactly as-is** without modification. Do NOT call this tool multiple times for the same diagram. The image is automatically copied to the clipboard.
- * @param {MermaidToolInput} input - The object containing the `mermaidSyntax` field.
- * @returns {Promise<string>} - Ready-to-display markdown containing the diagram image (e.g., `![Mermaid Diagram](file://...)`). Output this exactly as returned.
+ * @description Generates a Mermaid diagram and opens in Preview
+ * @param {object} input - Tool input
+ * @param {string} input.mermaidSyntax - Mermaid syntax
+ * @returns {Promise<string>} - Success message with preview link
  */
-export default async function generateMermaidImageTool(input: MermaidToolInput): Promise<string> {
-  const { mermaidSyntax } = input;
+export default async function generateMermaidImageTool(input?: MermaidToolInput): Promise<string> {
+  const mermaidSyntax = input?.mermaidSyntax;
 
-  // Input validation - throw error instead of returning error message
   if (!mermaidSyntax?.trim()) {
-    console.error("AI Tool called with invalid syntax:", mermaidSyntax);
-    throw new Error("Mermaid syntax was not provided or is empty. Cannot generate diagram.");
+    throw new Error("Mermaid syntax was not provided or is empty.");
   }
 
-  console.log("AI Tool 'generateMermaidImageTool' called with syntax:", mermaidSyntax);
   const tempFileRef = { current: null as string | null };
-  let outputImagePath: string | null = null;
 
   try {
-    // Create a single toast that we'll update throughout the process
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Generating diagram...",
     });
 
-    // Generate the diagram (force PNG format for AI chat compatibility)
-    outputImagePath = await generateMermaidDiagram(mermaidSyntax, tempFileRef, "png");
+    // Generate high-quality image
+    const preferences = getPreferenceValues<Preferences>();
+    const rawScale = preferences.scale;
+    const parsedScale = typeof rawScale === "number" ? rawScale : Number(rawScale);
+    const finalScale = Number.isFinite(parsedScale) && parsedScale > 0 ? parsedScale : 4;
 
-    // Update toast to show progress
-    toast.title = "Copying image to clipboard...";
+    const result = await generateAiDiagramArtifact(
+      {
+        mermaidSyntax,
+        tempFileRef,
+        scale: finalScale,
+        width: 2400,
+      },
+      {
+        generateDiagram: generateMermaidDiagram,
+        copyGeneratedImage: async ({ format, imagePath, svgRasterStrategy }) =>
+          copyDiagramImage({
+            format,
+            imagePath,
+            previewRasterPath: null,
+            copyRasterImage: copyRasterImageToClipboard,
+            resolveSvgCopy: ({ svgPath, previewRasterPath }) =>
+              resolveSvgCopyAsset({
+                svgPath,
+                previewRasterPath,
+                baseName: `mermaid-ai-svg-copy-${Date.now()}`,
+                renderSvgPreview: ({ materializedSvgContent, baseName }) =>
+                  renderSvgPreviewRasterWithStrategy({
+                    strategy: svgRasterStrategy ?? "macos",
+                    materializedSvgContent,
+                    baseName,
+                  }),
+              }),
+            cleanupTempPath: cleanupTempFile,
+          }),
+        openInPreview: async (imagePath) => open(imagePath, "com.apple.Preview"),
+      },
+    );
 
-    // Copy to clipboard (PNG format)
-    await copyImageToClipboard(outputImagePath, "png");
-
-    // Update toast to show success
-    toast.style = Toast.Style.Success;
-    toast.title = "Diagram generated and copied";
-
-    // Convert file path to file URL and return ready-to-display markdown
-    const fileUrl = pathToFileURL(outputImagePath).toString();
-    return `![Mermaid Diagram](${fileUrl})`;
-  } catch (error) {
-    console.error("AI tool execution failed:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-
-    await showFailureToast(error, {
-      title: "Failed to generate diagram",
-      message: errorMessage,
+    logOperationalEvent("ai-diagram-generated", {
+      renderer: result.engine,
+      format: result.format,
     });
 
-    // Throw error instead of returning error message string
-    throw new Error(`Diagram generation failed: ${errorMessage}. Please check if the Mermaid syntax is correct.`);
+    toast.style = Toast.Style.Success;
+    toast.title = "Diagram ready!";
+
+    return result.message;
+  } catch (error) {
+    logOperationalError("ai-diagram-generation-failed", error, {
+      renderer: "auto",
+      format: "hybrid",
+    });
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    await showActionFailureToast(error, "Failed to generate diagram", errorMessage);
+
+    throw new Error(`Diagram generation failed: ${errorMessage}`);
   } finally {
-    // Clean up only the temporary .mmd file, keep the generated image
     if (tempFileRef.current) {
       cleanupTempFile(tempFileRef.current);
-      console.log("Cleaned temporary .mmd file:", tempFileRef.current);
     }
-    // Note: outputImagePath is NOT cleaned up - images are kept permanently in
-    // ~/Downloads/MermaidDiagrams/
   }
 }

@@ -1,5 +1,5 @@
 import { getItems, saveItems } from "../storage";
-import { Item } from "../types";
+import { Item, RepeatType } from "../types";
 import { refreshCommands } from "../utils";
 
 type EditDateInput = {
@@ -19,6 +19,12 @@ type EditDateInput = {
    * The new date in YYYY-MM-DD format
    */
   date?: string;
+  /**
+   * The new repeat type: "none", "weekly", "monthly", or "yearly".
+   * To remove recurrence from a recurring date, pass repeat: "none" explicitly.
+   * Omitting this field preserves the existing repeat value.
+   */
+  repeat?: RepeatType;
 };
 
 /**
@@ -41,6 +47,7 @@ export default async function editDate(input: EditDateInput) {
     name: input.name ?? originalItem.name,
     subtitle: input.subtitle ?? originalItem.subtitle,
     date: input.date ?? originalItem.date,
+    repeat: input.repeat ?? originalItem.repeat,
   };
 
   items[itemIndex] = updatedItem;

@@ -1,5 +1,9 @@
 # Hide Files Changelog
 
+## [Bugfix] - 2026-05-27
+
+- Fixed hiding and unhiding files whose paths need shell escaping
+
 ## [New Icon Style] - 2025-07-07
 
 - Optimize extension icons for macOS Tahoe

@@ -1,69 +1,79 @@
-import * as cheerio from "cheerio";
+import { useCallback, useRef } from "react";
 
 import { environment } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, useLocalStorage } from "@raycast/utils";
 
-type SearchAPIData = {
-  apiKey: string;
-  indexId: string;
-};
-type SearchAPIDataResponse = {
-  v: Array<Array<object | SearchAPIData> | Array<never>>;
-};
+import { onErrorCapture } from "@/lib/errors";
+import { jsrUrls } from "@/lib/jsrUrls";
+import { type CachedOramaCreds, ORAMA_CACHE_KEY, isCachedOramaCredsExpired } from "@/lib/oramaCache";
+import { type OramaCreds, parseBootPayload } from "@/lib/parseBootPayload";
+
+const MAX_REFRESHES_PER_SESSION = 3;
+const MIN_REFRESH_INTERVAL_MS = 5_000;
 
 /**
- * This function will download the frontpage of jsr.io and extract the apiKey + indexId from the script tags.
+ * Download the jsr.io frontpage and extract the Orama Cloud `projectId` + `apiKey`.
  *
- * It's a bit of a dirty trick, because we need the API key and indexId to use the Orama search (same as on the website)
- *
- * @returns {SearchAPIData | null} - The apiKey + indexId.
+ * Credentials are cached in LocalStorage for 7 days. On a stale/missing cache,
+ * the hook scrapes the homepage. Consumers can call `refresh()` (e.g. on a
+ * 401 from the search endpoint) to invalidate the cache and re-scrape; this
+ * is rate-limited and capped per session to prevent infinite refresh loops.
  */
 export const useSearchAPIData = () => {
-  return useFetch<SearchAPIData | null>("https://jsr.io", {
+  const {
+    value: cached,
+    setValue,
+    removeValue,
+    isLoading: isCacheLoading,
+  } = useLocalStorage<CachedOramaCreds | null>(ORAMA_CACHE_KEY, null);
+
+  const refreshCountRef = useRef(0);
+  const lastRefreshAtRef = useRef(0);
+
+  const cacheValid = !!cached && !isCachedOramaCredsExpired(cached);
+  const shouldScrape = !isCacheLoading && !cacheValid;
+
+  const {
+    data: scraped,
+    isLoading: isScraping,
+    error,
+    revalidate,
+  } = useFetch<OramaCreds | null>(jsrUrls.site.home(), {
     method: "GET",
     headers: {
       Agent: `Raycast/${environment.raycastVersion} ${environment.extensionName} (https://raycast.com)`,
     },
+    execute: shouldScrape,
     keepPreviousData: true,
     parseResponse: async (response) => {
-      let res: SearchAPIData | null = null;
       const text = await response.text();
-      const $ = cheerio.load(text);
-
-      const scriptElements = $("script");
-
-      scriptElements.each((_index, element) => {
-        const script = $(element).html();
-
-        if (script?.includes(`apiKey`)) {
-          const start = script.indexOf(`"[[`) + 1;
-          const end = script.indexOf(`]"`) + 1;
-          const slice = script.slice(start, end).replace(/\\/g, "");
-          try {
-            const arr = JSON.parse(slice);
-            // find element that is string and starts with 'jsr-'
-            const indexIdPosition = arr.findIndex(
-              (item: unknown) => typeof item === "string" && item.startsWith("jsr-"),
-            );
-            if (indexIdPosition !== -1 && indexIdPosition > 0 && typeof arr[indexIdPosition - 1] === "string") {
-              res = { apiKey: arr[indexIdPosition - 1], indexId: arr[indexIdPosition] };
-            }
-            // eslint-disable-next-line no-empty
-          } catch {}
-        }
-
-        if (script?.includes(`"apiKey"`)) {
-          const json = JSON.parse(script) as SearchAPIDataResponse;
-          const searchAPIData = json.v[0].find((item) => "apiKey" in item && "indexId" in item) as
-            | SearchAPIData
-            | undefined;
-          if (searchAPIData) {
-            res = searchAPIData;
-          }
-        }
-      });
-
-      return res;
+      return parseBootPayload(text);
     },
+    onData: (data) => {
+      if (data) {
+        void setValue({ ...data, cachedAt: Date.now() });
+      }
+    },
+    onError: onErrorCapture,
   });
+
+  const refresh = useCallback(async () => {
+    if (refreshCountRef.current >= MAX_REFRESHES_PER_SESSION) return;
+    if (Date.now() - lastRefreshAtRef.current < MIN_REFRESH_INTERVAL_MS) return;
+    refreshCountRef.current += 1;
+    lastRefreshAtRef.current = Date.now();
+    await removeValue();
+    revalidate();
+  }, [removeValue, revalidate]);
+
+  const data: OramaCreds | null = cacheValid
+    ? { projectId: cached.projectId, apiKey: cached.apiKey }
+    : (scraped ?? null);
+
+  return {
+    data,
+    isLoading: isCacheLoading || (shouldScrape && isScraping),
+    error,
+    refresh,
+  };
 };

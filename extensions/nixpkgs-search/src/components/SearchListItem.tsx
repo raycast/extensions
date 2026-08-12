@@ -4,9 +4,10 @@ import type { SearchResult } from "../types";
 
 interface SearchListItemProps {
   searchResult: SearchResult;
+  channel: string;
 }
 
-export function SearchListItem({ searchResult }: SearchListItemProps) {
+export function SearchListItem({ searchResult, channel }: SearchListItemProps) {
   return (
     <List.Item
       title={searchResult.attrName}
@@ -20,6 +21,10 @@ export function SearchListItem({ searchResult }: SearchListItemProps) {
               {searchResult.homepage[0] && (
                 <Action.OpenInBrowser title="Open Package Homepage" url={searchResult.homepage[0]} />
               )}
+              <Action.OpenInBrowser
+                title="Open Package Details"
+                url={`https://search.nixos.org/packages?channel=${channel}&show=${encodeURIComponent(searchResult.attrName)}&query=${encodeURIComponent(searchResult.attrName)}`}
+              />
             </ActionPanel.Submenu>
 
             <ActionPanel.Submenu icon={Icon.Clipboard} title="Copy…" shortcut={Keyboard.Shortcut.Common.Copy}>
@@ -47,6 +52,9 @@ export function SearchListItem({ searchResult }: SearchListItemProps) {
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Name" text={searchResult.name} />
               <List.Item.Detail.Metadata.Label title="Version" text={searchResult.version} />
+              {searchResult.system && (
+                <List.Item.Detail.Metadata.Label title="Evaluation System" text={searchResult.system} />
+              )}
               {searchResult.homepage.map((url, idx) =>
                 url ? (
                   <List.Item.Detail.Metadata.Link key={url} title="Homepage" target={url} text={new URL(url).host} />

@@ -1,5 +1,17 @@
 # Confluence Changelog
 
+## [Fix README] - 2026-07-22
+
+- Update README to include `Create Whiteboard` command
+
+## [Add Create Whiteboard Command] - 2026-07-22
+
+- Add `Create Whiteboard` command to quickly create a new whiteboard in Confluence
+
+## [Allow Windows to use this Extension] - 2026-02-10
+
+- Add `Windows` to allowed platforms
+
 ## [Improved Search for Whiteboards] - 2026-01-14
 
 - Add `Whiteboards` to global Search results with a distinct icon

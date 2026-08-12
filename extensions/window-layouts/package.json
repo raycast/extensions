@@ -66,7 +66,7 @@
     {
       "name": "vertical-50-50",
       "title": "Vertical 50 / 50",
-      "description": "Two windows - 100% width and 50% heigth.",
+      "description": "Two windows - 100% width and 50% height.",
       "mode": "no-view",
       "icon": "icons/vertical-50-50.png"
     },
@@ -104,6 +104,104 @@
       "description": "Three windows - first 100% width and 50% height, aligned to the bottom. Other two 50% width and 50% height, aligned to the top.",
       "mode": "no-view",
       "icon": "icons/vertical-2-1.png"
+    },
+    {
+      "name": "create-custom-layout",
+      "title": "Create Custom Layout",
+      "description": "Define a custom window layout using a JSON grid.",
+      "mode": "view",
+      "icon": "icons/create-custom-layout.png"
+    },
+    {
+      "name": "custom-layouts",
+      "title": "Custom Layouts",
+      "description": "Browse and apply your custom window layouts.",
+      "mode": "view",
+      "icon": "icons/custom-layouts.png"
+    },
+    {
+      "name": "pick-layout",
+      "title": "Pick Layout",
+      "description": "Choose a layout and reorder windows to decide which window goes in which slot.",
+      "mode": "view",
+      "icon": "icons/pick-layout.png"
+    },
+    {
+      "name": "save-layout",
+      "title": "Save Current Layout",
+      "description": "Save the current window positions so you can restore them later.",
+      "mode": "view",
+      "icon": "icons/save-layout.png"
+    },
+    {
+      "name": "restore-layout",
+      "title": "Restore Saved Layout",
+      "description": "Restore a previously saved window layout.",
+      "mode": "view",
+      "icon": "icons/restore-layout.png"
+    },
+    {
+      "name": "auto-layout",
+      "title": "Auto Layout",
+      "description": "Automatically pick the best layout based on the number of open windows.",
+      "mode": "no-view",
+      "icon": "icons/auto-layout.png"
+    },
+    {
+      "name": "horizontal-75-25",
+      "title": "Horizontal 75 / 25",
+      "description": "Two windows - 75% and 25% width, 100% height.",
+      "mode": "no-view",
+      "icon": "icons/horizontal-75-25.png"
+    },
+    {
+      "name": "horizontal-25-75",
+      "title": "Horizontal 25 / 75",
+      "description": "Two windows - 25% and 75% width, 100% height.",
+      "mode": "no-view",
+      "icon": "icons/horizontal-25-75.png"
+    },
+    {
+      "name": "vertical-75-25",
+      "title": "Vertical 75 / 25",
+      "description": "Two windows - 100% width, 75% and 25% height.",
+      "mode": "no-view",
+      "icon": "icons/vertical-75-25.png"
+    },
+    {
+      "name": "vertical-25-75",
+      "title": "Vertical 25 / 75",
+      "description": "Two windows - 100% width, 25% and 75% height.",
+      "mode": "no-view",
+      "icon": "icons/vertical-25-75.png"
+    },
+    {
+      "name": "grid-6",
+      "title": "Grid of 6",
+      "description": "Even grid of 6 windows - 3 columns and 2 rows.",
+      "mode": "no-view",
+      "icon": "icons/grid-6.png"
+    },
+    {
+      "name": "grid-3x3",
+      "title": "Grid of 9",
+      "description": "Even grid of 9 windows - 3 columns and 3 rows.",
+      "mode": "no-view",
+      "icon": "icons/grid-3x3.png"
+    },
+    {
+      "name": "centered-focus",
+      "title": "Centered Focus",
+      "description": "Three windows - large center (60%), two narrow sidebars (20% each).",
+      "mode": "no-view",
+      "icon": "icons/centered-focus.png"
+    },
+    {
+      "name": "pip",
+      "title": "Picture in Picture",
+      "description": "Main window on top (80%), small PiP in the bottom-right corner. With 3 windows, the bottom-left is also filled.",
+      "mode": "no-view",
+      "icon": "icons/pip.png"
     }
   ],
   "preferences": [
@@ -165,6 +263,14 @@
       "default": false,
       "title": "Keep Raycast open after tiling",
       "description": "By default, Raycast window will close after tiling is complete. This option will disable the behavior."
+    },
+    {
+      "type": "textfield",
+      "name": "excludedApps",
+      "required": false,
+      "title": "Excluded Apps",
+      "description": "Comma-separated list of app names to exclude from tiling (e.g. \"Finder, Spotify\").",
+      "placeholder": "Finder, Spotify"
     }
   ],
   "dependencies": {
@@ -186,5 +292,8 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

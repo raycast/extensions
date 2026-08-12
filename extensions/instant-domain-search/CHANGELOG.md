@@ -1,5 +1,14 @@
 # Instant Domain Search Changelog
 
+## [Updated API URL] - 2026-04-15
+
+- Updated the API endpoint to use the new `api.instantdomainsearch.com` domain
+- Updated extension screenshots
+
+## [Updated Extension Icon] - 2026-04-03
+
+- Updated the extension icon
+
 ## [Price and other fixes] - 2025-12-09
 
 - Fixed price display to show the correct price in USD (not in cents)

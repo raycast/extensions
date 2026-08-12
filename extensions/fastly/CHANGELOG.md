@@ -1,5 +1,21 @@
 # Fastly Changelog
 
+## [Fix Secret Store Operations] - 2026-07-22
+
+- Fixed secret creation and recreation to use correct API endpoints and base64 encoding
+
+## [New Data Stores and Security Features] - 2026-03-11
+
+Added support for Fastly's data stores and audit logging:
+
+- **KV Stores**: Browse, create, update, and delete key-value pairs across all stores
+- **Config Stores**: Manage runtime configuration without service deployments
+- **Secret Stores**: Create and rotate secrets securely with proper obfuscation
+- **Access Control Lists (ACLs)**: Quick IP blocking and ACL entry management for security response
+- **Audit Log**: View and filter account activity for security monitoring and compliance
+
+These additions expand the extension beyond CDN operations to cover the full Fastly platform.
+
 ## [Windows Support + Validate Forms] - 2025-12-19
 
 - Added Windows support

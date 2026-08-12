@@ -1,5 +1,5 @@
-import { ActionPanel, Action, Grid, Icon } from "@raycast/api";
-import React, { useState, useMemo } from "react";
+import { ActionPanel, Action, Grid, Icon, environment } from "@raycast/api";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
 import {
   format,
   startOfMonth,
@@ -14,16 +14,33 @@ import {
   isSameMonth,
   isToday,
   getWeek,
+  getISODay,
 } from "date-fns";
 import { SolarDate } from "lunar-date-vn";
 import { getHoliday, isOfficialHoliday } from "./utils/holidays";
 import DayDetailView from "./view-day-detail";
 
+const isNewRaycast = (() => {
+  const version = environment.raycastVersion;
+  if (!version) return false;
+  const major = parseInt(version.split(".")[0], 10);
+  return major === 0 || major >= 2;
+})();
+
 export default function CalendarGrid() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedId, setSelectedId] = useState<string | undefined>(
-    format(new Date(), "yyyy-MM-dd"),
-  );
+  const [selectedId, setSelectedId] = useState<string | undefined>();
+
+  const delaySetSelectedId = useCallback((val: string | undefined) => {
+    // NOTE: some delay to prevent flash UI
+    setTimeout(() => {
+      setSelectedId(val);
+    }, 200);
+  }, []);
+
+  useEffect(() => {
+    delaySetSelectedId(format(new Date(), "yyyy-MM-dd"));
+  }, [delaySetSelectedId]);
 
   const { days, currentMonthName } = useMemo(() => {
     const monthStart = startOfMonth(currentDate);
@@ -52,7 +69,7 @@ export default function CalendarGrid() {
   const handleGoToToday = () => {
     const today = new Date();
     setCurrentDate(today);
-    setSelectedId(format(today, "yyyy-MM-dd"));
+    delaySetSelectedId(format(today, "yyyy-MM-dd"));
   };
 
   return (
@@ -61,7 +78,6 @@ export default function CalendarGrid() {
       inset={Grid.Inset.Small}
       navigationTitle={`Calendar - ${currentMonthName}`}
       searchBarPlaceholder={`Viewing ${currentMonthName}`}
-      onSearchTextChange={() => {}}
       selectedItemId={selectedId}
       onSelectionChange={(id) => setSelectedId(id || undefined)}
     >
@@ -92,6 +108,7 @@ export default function CalendarGrid() {
           // Solar day
           const isWeekend = day.getDay() === 0 || day.getDay() === 6;
           const dayId = format(day, "yyyy-MM-dd");
+          const dayNum = format(day, "dd");
 
           return (
             <Grid.Item
@@ -107,7 +124,7 @@ export default function CalendarGrid() {
                 holiday,
                 isOfficial,
               )}
-              keywords={[dayId]}
+              keywords={[dayNum, lunarString]}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -188,26 +205,51 @@ function getIconForDay(
     lunarColor = "#FF6363";
   }
 
+  const vietnameseDay = getVietnameseDay(date);
+
   let svgContent = "";
-  if (holiday) {
-    svgContent = `
-        <text x="256" y="80" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="256" fill="${solarColor}">${dayNumber}</text>
-        <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${lunarString}</text>
-        <text x="256" y="290" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="110" fill="#FFD700">${holiday}</text>
-        `;
+  const viewBox = "0 0 512 512";
+
+  if (isNewRaycast) {
+    if (holiday) {
+      svgContent = `
+        <text x="256" y="110" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="180" fill="${solarColor}">${dayNumber}</text>
+        <text x="256" y="450" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="85" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
+        <text x="256" y="295" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="72" fill="#FFD700">${holiday}</text>
+      `;
+    } else {
+      svgContent = `
+        <text x="256" y="110" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="180" fill="${solarColor}">${dayNumber}</text>
+        <text x="256" y="450" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="85" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
+      `;
+    }
   } else {
-    svgContent = `
+    if (holiday) {
+      svgContent = `
         <text x="256" y="80" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="256" fill="${solarColor}">${dayNumber}</text>
-        <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${lunarString}</text>
-        `;
+        <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
+        <text x="256" y="290" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="110" fill="#FFD700">${holiday}</text>
+      `;
+    } else {
+      svgContent = `
+        <text x="256" y="80" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-weight="bold" font-size="256" fill="${solarColor}">${dayNumber}</text>
+        <text x="256" y="500" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="120" fill="${lunarColor}">${vietnameseDay} - ${lunarString}</text>
+      `;
+    }
   }
 
   const svg = `
-  <svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-    <rect width="512" height="512" fill="transparent" />
+  <svg width="${viewBox.split(" ")[2]}" height="${viewBox.split(" ")[3]}" viewBox="${viewBox}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="${viewBox.split(" ")[2]}" height="${viewBox.split(" ")[3]}" fill="none" stroke="#888888" stroke-width="1" stroke-opacity="0.01" />
     ${svgContent}
   </svg>
   `;
 
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`;
+}
+
+const DAY_LABELS = ["", "T2", "T3", "T4", "T5", "T6", "T7", "CN"];
+
+function getVietnameseDay(date: Date) {
+  return DAY_LABELS[getISODay(date)];
 }

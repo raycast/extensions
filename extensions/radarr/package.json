@@ -5,6 +5,9 @@
   "description": "Manage your Radarr movie collection with powerful search, monitoring, and download management capabilities",
   "icon": "radarr.png",
   "author": "xjo_nd",
+  "contributors": [
+    "kendaniels"
+  ],
   "categories": [
     "Media",
     "Other"

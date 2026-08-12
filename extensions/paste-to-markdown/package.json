@@ -5,6 +5,9 @@
   "description": "A Raycast Extension that instantly pastes rich text or HTML content into Markdown.",
   "icon": "extension-icon.png",
   "author": "weicodes",
+  "contributors": [
+    "leksat"
+  ],
   "license": "MIT",
   "commands": [
     {

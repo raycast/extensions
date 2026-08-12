@@ -18,13 +18,13 @@ import { OpenInNeon } from "./components";
 import { formatBytes, formatDate } from "./utils";
 import { ListComputes } from "./views/computes";
 import { RolesAndDatabases } from "./views/roles-and-databases";
-import { ProjectListItem } from "@neondatabase/api-client";
+import { ProjectListItem } from "@neon/sdk";
 
 export default function ListProjects() {
   const { isLoading, data, mutate, revalidate } = useCachedPromise(
     async () => {
-      const res = await neon.listProjects({});
-      return res.data.projects;
+      const res = await neon.projects.list().all();
+      return res.data ?? [];
     },
     [],
     {
@@ -46,7 +46,7 @@ export default function ListProjects() {
     if (await confirmAlert(options)) {
       const toast = await showToast(Toast.Style.Animated, "Deleting", project.name);
       try {
-        await mutate(neon.deleteProject(project.id), {
+        await mutate(neon.projects.delete(project.id), {
           optimisticUpdate(data) {
             return data.filter((p) => p.id !== project.id);
           },
@@ -116,8 +116,8 @@ export default function ListProjects() {
 
 function ProjectBranches({ id }: { id: string }) {
   const { isLoading, data: branches = [] } = usePromise(async () => {
-    const res = await neon.listProjectBranches({ projectId: id });
-    return res.data.branches;
+    const res = await neon.branches.list(id).all();
+    return res.data;
   });
 
   return (
@@ -161,8 +161,8 @@ function ProjectBranches({ id }: { id: string }) {
 
 function ProjectMonitoring({ project }: { project: ProjectListItem }) {
   const { isLoading, data: operations } = usePromise(async () => {
-    const res = await neon.listProjectOperations({ projectId: project.id });
-    return res.data.operations;
+    const res = await neon.operations.list(project.id).all();
+    return res.data;
   });
   return (
     <List isLoading={isLoading}>
@@ -192,12 +192,10 @@ function UpdateProject({ project, mutate }: { project: ProjectListItem; mutate: 
       const toast = await showToast(Toast.Style.Animated, "Updating project", project.name);
       try {
         await mutate(
-          neon.updateProject(project.id, {
-            project: {
-              name: values.name,
-              settings: {
-                enable_logical_replication: values.enable_logical_replication,
-              },
+          neon.projects.update(project.id, {
+            name: values.name,
+            settings: {
+              enable_logical_replication: values.enable_logical_replication,
             },
           }),
         );
@@ -255,8 +253,8 @@ function CreateProject({ onCreate }: { onCreate: () => void }) {
 
   const { isLoading, data: regions } = useCachedPromise(
     async () => {
-      const res = await neon.getActiveRegions();
-      return res.data.regions;
+      const res = await neon.regions.list();
+      return res;
     },
     [],
     {
@@ -272,7 +270,7 @@ function CreateProject({ onCreate }: { onCreate: () => void }) {
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating project", values.name);
       try {
-        await neon.createProject({ project: { ...values, pg_version: +values.pg_version } });
+        await neon.projects.create({ ...values, pg_version: +values.pg_version });
         toast.style = Toast.Style.Success;
         toast.title = "Created project";
         onCreate();

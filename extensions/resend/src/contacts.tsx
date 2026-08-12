@@ -17,11 +17,12 @@ import { isApiError } from "./utils/api";
 import { CreateContactRequestForm, UpdateContactRequestForm } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
 import { onError, useAudiences, useContacts } from "./lib/hooks";
-import { Audience, Contact } from "resend";
-import { resend } from "./lib/resend";
+import { Segment, Contact } from "resend";
+import { getResend, withResend } from "./lib/oauth";
 
-export default function Audiences() {
-  const [audience, setAudience] = useState<Audience | undefined>();
+export default withResend(Audiences);
+function Audiences() {
+  const [audience, setAudience] = useState<Segment | undefined>();
 
   const { isLoading: isLoadingAudience, audiences, error: errorAudiences } = useAudiences();
   const {
@@ -41,6 +42,8 @@ export default function Audiences() {
     ) {
       const toast = await showToast(Toast.Style.Animated, "Deleting Contact", contact.id);
       try {
+        const resend = getResend();
+
         await mutateContacts(
           resend.contacts.remove({ audienceId, id: contact.id }).then(({ error }) => {
             if (error) throw new Error(error.message, { cause: error.name });
@@ -135,7 +138,7 @@ export default function Audiences() {
   );
 }
 
-export function AudienceDropdown(props: { audiences: Audience[]; setAudience: (audience: Audience) => void }) {
+export function AudienceDropdown(props: { audiences: Segment[]; setAudience: (audience: Segment) => void }) {
   const { audiences, setAudience } = props;
 
   const onAudienceChange = (newValue: string) => {
@@ -162,7 +165,7 @@ export function AudienceDropdown(props: { audiences: Audience[]; setAudience: (a
   );
 }
 
-function CreateContact({ audience, onCreated }: { audience: Audience; onCreated: () => void }) {
+function CreateContact({ audience, onCreated }: { audience: Segment; onCreated: () => void }) {
   const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<CreateContactRequestForm>({
     validation: {
@@ -171,6 +174,7 @@ function CreateContact({ audience, onCreated }: { audience: Audience; onCreated:
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Creating Contact", values.email);
       try {
+        const resend = getResend();
         const { error } = await resend.contacts.create({ ...values, audienceId: audience.id });
         if (error) throw new Error(error.message, { cause: error.name });
         toast.style = Toast.Style.Success;
@@ -199,15 +203,20 @@ function CreateContact({ audience, onCreated }: { audience: Audience; onCreated:
   );
 }
 
-function UpdateContact(props: { contact: Contact; audience: Audience; onUpdated: () => void }) {
+function UpdateContact(props: { contact: Contact; audience: Segment; onUpdated: () => void }) {
   const { pop } = useNavigation();
   const { contact, audience, onUpdated } = props;
 
-  const { itemProps, handleSubmit } = useForm<UpdateContactRequestForm>({
+  const { itemProps, handleSubmit } = useForm<
+    UpdateContactRequestForm & {
+      firstName: string | undefined;
+      lastName: string | undefined;
+    }
+  >({
     initialValues: {
       email: contact.email,
-      firstName: contact.first_name,
-      lastName: contact.last_name,
+      firstName: contact.first_name || undefined,
+      lastName: contact.last_name || undefined,
       unsubscribed: contact.unsubscribed,
     },
     validation: {
@@ -216,6 +225,7 @@ function UpdateContact(props: { contact: Contact; audience: Audience; onUpdated:
     async onSubmit(values) {
       const toast = await showToast(Toast.Style.Animated, "Updating Contact", values.email);
       try {
+        const resend = getResend();
         await resend.contacts.update({ ...values, audienceId: audience.id });
         toast.style = Toast.Style.Success;
         toast.title = "Updated Contact";

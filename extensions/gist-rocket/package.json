@@ -1,0 +1,137 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gist-rocket",
+  "title": "Gist Rocket",
+  "description": "Publish HTML or Markdown as a live web page in one keystroke. Powered by GitHub Gists.",
+  "icon": "icon.png",
+  "author": "tgrecojs",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "gist",
+    "github",
+    "html",
+    "markdown",
+    "publish",
+    "hosting",
+    "share",
+    "page"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "publish-page",
+      "title": "Publish Page",
+      "description": "Publish the HTML or Markdown on your clipboard as a live web page.",
+      "mode": "view"
+    },
+    {
+      "name": "publish-from-file",
+      "title": "Publish from File",
+      "description": "Pick an .html / .md file (or a folder with index.html) and publish it as a live web page.",
+      "mode": "view"
+    },
+    {
+      "name": "my-pages",
+      "title": "My Pages",
+      "description": "Browse, open, update, and delete pages you've published.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "hostBaseUrl",
+      "title": "Host Base URL",
+      "description": "Where published pages are served. Leave default to use the public Gisthost service.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://gisthost.github.io/?"
+    },
+    {
+      "name": "defaultVisibility",
+      "title": "Default Visibility",
+      "description": "New pages default to this visibility. Both public and secret render the same; secret is unlisted but not encrypted.",
+      "type": "dropdown",
+      "required": false,
+      "default": "secret",
+      "data": [
+        {
+          "title": "Secret (unlisted)",
+          "value": "secret"
+        },
+        {
+          "title": "Public",
+          "value": "public"
+        }
+      ]
+    },
+    {
+      "name": "defaultMarkdownTheme",
+      "title": "Default Markdown Theme",
+      "description": "Theme applied when rendering Markdown to HTML.",
+      "type": "dropdown",
+      "required": false,
+      "default": "light",
+      "data": [
+        {
+          "title": "Light",
+          "value": "light"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        },
+        {
+          "title": "Auto (system)",
+          "value": "auto"
+        }
+      ]
+    },
+    {
+      "name": "autoOpenAfterPublish",
+      "title": "After Publish",
+      "label": "Open the hosted URL in your browser",
+      "description": "Automatically open the published page in your browser after publishing.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "copyUrlAfterPublish",
+      "title": "After Publish",
+      "label": "Copy the hosted URL to your clipboard",
+      "description": "Automatically copy the published page URL to your clipboard after publishing.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@octokit/rest": "^21.0.2",
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.5",
+    "highlight.js": "^11.11.1",
+    "marked": "^14.1.3",
+    "marked-highlight": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

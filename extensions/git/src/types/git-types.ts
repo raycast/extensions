@@ -16,6 +16,22 @@ export interface Repository {
   languageStats?: LanguageStats[];
   /** Cloning state information if repository is being cloned. */
   cloning?: RepositoryCloningProcess;
+  /** Set when the repository is a linked worktree of another repository. */
+  worktree?: WorktreeOrigin;
+}
+
+/**
+ * Describes the repository a linked worktree belongs to.
+ */
+export interface WorktreeOrigin {
+  /** Absolute path to the main worktree (the repository itself). */
+  repositoryRootPath: string;
+  /** Name of the repository the worktree belongs to. */
+  repositoryName: string;
+  /** Folder name of the worktree directory. */
+  name: string;
+  /** Display name combining repository and worktree names (e.g. "my-repo: feature-branch"). */
+  displayName: string;
 }
 
 /**
@@ -216,7 +232,13 @@ export interface Stash {
 /**
  * Known Git hosting providers.
  */
-export type RemoteProvider = "GitHub" | "GitLab" | "Bitbucket" | "Azure DevOps" | "Gitea" | undefined;
+export enum RemoteProvider {
+  GitHub = "GitHub",
+  GitLab = "GitLab",
+  Bitbucket = "Bitbucket",
+  AzureDevOps = "Azure DevOps",
+  Gitea = "Gitea",
+}
 
 export type RemoteWebPage = Action.OpenInBrowser.Props;
 /**
@@ -230,7 +252,8 @@ export type Remote = {
   organizationName?: string;
   displayName: string;
   repositoryName?: string;
-  provider: RemoteProvider;
+  provider?: RemoteProvider;
+  isOverridedProvider?: boolean;
   avatarUrl?: string;
   webPages: {
     fileRelated: (filePath: string, ref?: string) => RemoteWebPage[];
@@ -240,6 +263,44 @@ export type Remote = {
     other: () => RemoteWebPage[];
   };
 };
+
+/**
+ * Represents a Git submodule.
+ */
+export interface Submodule {
+  /** Submodule path/name (e.g. "libs/foo"). */
+  name: string;
+  /** Relative path from repo root. */
+  relativePath: string;
+  /** Absolute path to the submodule. */
+  fullPath: string;
+}
+
+/**
+ * Represents a Git worktree registered in the repository.
+ */
+export interface Worktree {
+  /** Folder name of the worktree directory. */
+  name: string;
+  /** Absolute path to the worktree directory. */
+  path: string;
+  /** Commit hash the worktree HEAD points to. */
+  head?: string;
+  /** Checked out branch name, undefined when HEAD is detached or the worktree is bare. */
+  branch?: string;
+  /** Whether this is the main worktree (the repository itself). */
+  isMain: boolean;
+  /** Whether the worktree is bare. */
+  isBare: boolean;
+  /** Whether the worktree HEAD is detached. */
+  isDetached: boolean;
+  /** Whether the worktree is locked and cannot be pruned or moved. */
+  isLocked: boolean;
+  /** Reason why the worktree is locked, if provided. */
+  lockReason?: string;
+  /** Whether the worktree directory is missing and can be pruned. */
+  isPrunable: boolean;
+}
 
 /**
  * Represents a Git tag.
@@ -348,3 +409,14 @@ export interface ConflictSegment {
   /** The resolution choice: "current", "incoming", or null if not resolved. */
   resolution: "current" | "incoming" | null;
 }
+
+/**
+ * Local git config as a map of string key to string value.
+ * Git stores all config values as strings (e.g. "true"/"false" for booleans).
+ */
+export type GitLocalConfig = {
+  local: Record<string, string | undefined>;
+  global: Record<string, string | undefined>;
+};
+
+export type GitLocalConfigUpdates = Record<string, string | undefined>;

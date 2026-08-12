@@ -1,10 +1,15 @@
 /**
- * Utility functions for parsing zshrc content
+ * Utility functions for parsing zshrc content.
  *
- * @deprecated Use the centralized pattern registry in src/lib/pattern-registry.ts
- * and the main parser in src/lib/parse-zshrc.ts instead of these individual functions.
- * These functions are kept for backward compatibility but will be removed in a future version.
+ * These are thin projections over the pattern registry
+ * (src/lib/pattern-registry.ts), which is the single parser. Every view,
+ * statistic, and search surface derives from the same extraction, so
+ * counts and lists cannot disagree. The legacy return shapes are
+ * preserved; line positions live on the registry output for callers
+ * that need them.
  */
+
+import { extractEntries } from "../lib/pattern-registry";
 
 /**
  * Parses aliases from zshrc content
@@ -12,15 +17,7 @@
  * @returns Array of alias objects with name and command
  */
 export function parseAliases(content: string): ReadonlyArray<{ name: string; command: string }> {
-  const regex = /^(?:\s*)alias\s+([A-Za-z0-9_.:-]+)=(?:'|")(.*?)(?:'|")(?:\s*)$/gm;
-  const result: Array<{ name: string; command: string }> = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    if (match[1] && match[2]) {
-      result.push({ name: match[1], command: match[2] });
-    }
-  }
-  return result;
+  return extractEntries(content).aliases.map(({ name, command }) => ({ name, command }));
 }
 
 /**
@@ -29,15 +26,7 @@ export function parseAliases(content: string): ReadonlyArray<{ name: string; com
  * @returns Array of export objects with variable and value
  */
 export function parseExports(content: string): ReadonlyArray<{ variable: string; value: string }> {
-  const regex = /^(?:\s*)(?:export|typeset\s+-x)\s+([A-Za-z_][A-Za-z0-9_]*)=(.*?)(?:\s*)$/gm;
-  const result: Array<{ variable: string; value: string }> = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    if (match[1] && match[2]) {
-      result.push({ variable: match[1], value: match[2] });
-    }
-  }
-  return result;
+  return extractEntries(content).exports.map(({ variable, value }) => ({ variable, value }));
 }
 
 /**
@@ -46,15 +35,7 @@ export function parseExports(content: string): ReadonlyArray<{ variable: string;
  * @returns Array of eval objects with command
  */
 export function parseEvals(content: string): ReadonlyArray<{ command: string }> {
-  const regex = /^(?:\s*)eval\s+(.+?)(?:\s*)$/gm;
-  const result: Array<{ command: string }> = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    if (match[1]) {
-      result.push({ command: match[1] });
-    }
-  }
-  return result;
+  return extractEntries(content).evals.map(({ command }) => ({ command }));
 }
 
 /**
@@ -63,15 +44,7 @@ export function parseEvals(content: string): ReadonlyArray<{ command: string }> 
  * @returns Array of setopt objects with option
  */
 export function parseSetopts(content: string): ReadonlyArray<{ option: string }> {
-  const regex = /^(?:\s*)setopt\s+(.+?)(?:\s*)$/gm;
-  const result: Array<{ option: string }> = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    if (match[1]) {
-      result.push({ option: match[1] });
-    }
-  }
-  return result;
+  return extractEntries(content).setopts.map(({ option }) => ({ option }));
 }
 
 /**
@@ -80,18 +53,7 @@ export function parseSetopts(content: string): ReadonlyArray<{ option: string }>
  * @returns Array of plugin names
  */
 export function parsePlugins(content: string): ReadonlyArray<{ name: string }> {
-  const regex = /^(?:\s*)plugins\s*=\s*\(([^)]+)\)(?:\s*)$/gm;
-  const result: Array<{ name: string }> = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    if (match[1]) {
-      const pluginList = match[1].split(/\s+/).filter((p) => p.trim());
-      pluginList.forEach((plugin) => {
-        result.push({ name: plugin.trim() });
-      });
-    }
-  }
-  return result;
+  return extractEntries(content).plugins.map(({ name }) => ({ name }));
 }
 
 /**
@@ -100,15 +62,7 @@ export function parsePlugins(content: string): ReadonlyArray<{ name: string }> {
  * @returns Array of function names
  */
 export function parseFunctions(content: string): ReadonlyArray<{ name: string }> {
-  const regex = /^(?:\s*)([A-Za-z_][A-Za-z0-9_]*)\s*\(\s*\)\s*\{(?:\s*)$/gm;
-  const result: Array<{ name: string }> = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    if (match[1]) {
-      result.push({ name: match[1] });
-    }
-  }
-  return result;
+  return extractEntries(content).functions.map(({ name }) => ({ name }));
 }
 
 /**
@@ -117,13 +71,59 @@ export function parseFunctions(content: string): ReadonlyArray<{ name: string }>
  * @returns Array of source objects with path
  */
 export function parseSources(content: string): ReadonlyArray<{ path: string }> {
-  const regex = /^(?:\s*)source\s+(.+?)(?:\s*)$/gm;
-  const result: Array<{ path: string }> = [];
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(content)) !== null) {
-    if (match[1]) {
-      result.push({ path: match[1] });
-    }
-  }
-  return result;
+  return extractEntries(content).sources.map(({ path }) => ({ path }));
+}
+
+/**
+ * Parses PATH modifications from zshrc content
+ * Matches: export/typeset/declare PATH=..., PATH+=..., path+=(...), path=(...),
+ * PATH="$PATH:...", PATH="...:$PATH", and plain PATH=... assignments
+ * @param content The raw content to parse
+ * @returns Array of PATH objects with entry and type (export, append, prepend, set)
+ */
+export function parsePathEntries(
+  content: string,
+): ReadonlyArray<{ entry: string; type: "export" | "append" | "prepend" | "set" }> {
+  return extractEntries(content).pathEntries.map(({ entry, type }) => ({ entry, type }));
+}
+
+/**
+ * Parses FPATH modifications from zshrc content
+ * @param content The raw content to parse
+ * @returns Array of FPATH objects with entry and type
+ */
+export function parseFpathEntries(
+  content: string,
+): ReadonlyArray<{ entry: string; type: "export" | "append" | "prepend" | "set" }> {
+  return extractEntries(content).fpathEntries.map(({ entry, type }) => ({ entry, type }));
+}
+
+/**
+ * Keybinding result type
+ */
+export interface KeybindingResult {
+  key: string;
+  command: string;
+  widget?: string | undefined;
+  keymap?: string | undefined;
+}
+
+/**
+ * Parses keybindings (bindkey) from zshrc content
+ * Supports:
+ * - Basic: bindkey "key" command
+ * - String replacement: bindkey -s "key" "replacement"
+ * - Keymap-specific: bindkey -M keymap "key" command
+ * - Combined: bindkey -M keymap -s "key" "replacement"
+ *
+ * @param content The raw content to parse
+ * @returns Array of keybinding objects with key, command, optional widget, and optional keymap
+ */
+export function parseKeybindings(content: string): ReadonlyArray<KeybindingResult> {
+  return extractEntries(content).keybindings.map(({ key, command, widget, keymap }) => ({
+    key,
+    command,
+    widget,
+    keymap,
+  }));
 }

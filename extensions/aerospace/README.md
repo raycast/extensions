@@ -24,6 +24,8 @@ It works with the existing installation of [AeroSpace](https://github.com/nikita
 1. Install [Raycast](https://raycast.com)
 2. Install the extension from the Raycast Store by searching for "Aerospace"
 
+The extension auto-detects the `aerospace` binary in the locations used by Homebrew, Nix, and nix-darwin. If you installed AeroSpace somewhere else (MacPorts, `~/.local/bin`, a custom prefix), set **Aerospace Binary Path** in the extension preferences to the full path of the binary — run `which aerospace` in your terminal to find it.
+
 ## Usage
 
 - Open Raycast and type `Aerospace` to view the available commands
@@ -31,6 +33,23 @@ It works with the existing installation of [AeroSpace](https://github.com/nikita
 - Use the `Aerospace Configuration` command to view your Aerospace configuration
 - Use the `Aerospace Menubar Shortcuts` command to enable menubar shortcuts
 - Use the `Aerospace Switch Apps` command to show the app in current workspace
+
+## Integration
+
+The extension supports programmatic access via Raycast deeplinks using `launchContext`. This allows integration with window tile manager tools like SketchyBar, Alfred, Keyboard Maestro, or custom scripts.
+
+### Deeplink Format
+
+```bash
+raycast://extensions/limonkufu/aerospace/switchApps?arguments={\"workspace\":\"all\"}&context={\"searchText\":\"AppName\"}
+```
+
+**Parameters:**
+
+- `arguments` - UI parameters (e.g., workspace selection)
+- `context` - LaunchContext parameters passed without showing UI prompts (e.g., searchText for pre-filtering)
+
+This enables external tools to trigger the app switcher with pre-filtered search without displaying argument input prompts.
 
 ## Contributing
 

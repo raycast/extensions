@@ -1,5 +1,9 @@
 # Open Link in Specific Browser Changelog
 
+## [Hide Specific Browsers] - 2026-05-12
+
+- Add the ability to hide specific browsers from the list and the menu bar
+
 ## [New Command] - 2025-03-08
 
 - Add new command: Open selected text in default browser

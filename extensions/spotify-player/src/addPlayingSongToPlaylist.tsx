@@ -19,12 +19,16 @@ import { useCurrentlyPlaying } from "./hooks/useCurrentlyPlaying";
 import { useMe } from "./hooks/useMe";
 import { ListOrGridSection } from "./components/ListOrGridSection";
 import PlaylistItem from "./components/PlaylistItem";
+import { usePlaylistsContainingTrack } from "./hooks/usePlaylistsContainingTrack";
 import { addToPlaylist } from "./api/addToPlaylist";
+import { removeFromPlaylist } from "./api/removeFromPlaylist";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { getError } from "./helpers/getError";
 import { CreateQuicklink } from "./components/CreateQuicklink";
 import getAllPlaylistItems from "./helpers/getAllPlaylistItems";
 import addTrackToPlaylistCache from "./helpers/addTrackToPlaylistCache";
+import removeTrackFromPlaylistCache from "./helpers/removeTrackFromPlaylistCache";
+import { Like, OpenLibrary, OpenSearch } from "./shortcuts/shortcuts";
 
 type LaunchContextData = {
   playlistId?: string;
@@ -48,6 +52,13 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
   const { myPlaylistsData } = useMyPlaylists();
   const { meData } = useMe();
 
+  const ownedPlaylists = myPlaylistsData?.items?.filter((p) => p.owner?.id === meData?.id) ?? [];
+  const { playlistsContainingTrack } = usePlaylistsContainingTrack({
+    playlists: ownedPlaylists,
+    trackUri: currentlyPlayingData?.item?.uri,
+    options: { execute: ownedPlaylists.length > 0 && !!currentlyPlayingData?.item?.uri },
+  });
+
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
     return (
       <List isLoading={currentlyPlayingIsLoading}>
@@ -60,11 +71,13 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                 icon={Icon.Book}
                 title="Your Library"
                 onAction={() => launchCommand({ name: "yourLibrary", type: LaunchType.UserInitiated })}
+                shortcut={OpenLibrary}
               />
               <Action
                 title="Search"
                 icon={Icon.MagnifyingGlass}
                 onAction={() => launchCommand({ name: "search", type: LaunchType.UserInitiated })}
+                shortcut={OpenSearch}
               />
               <Action
                 icon={Icon.Repeat}
@@ -116,19 +129,20 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
       isLoading={currentlyPlayingIsLoading}
     >
       <ListOrGridSection type="list" title="Playlists">
-        {myPlaylistsData?.items
-          ?.filter((playlist) => playlist.owner?.id === meData?.id)
-          .map((playlist) => (
+        {ownedPlaylists.map((playlist) => {
+          const alreadyAdded = !!playlist.id && playlistsContainingTrack.includes(playlist.id);
+          return (
             <PlaylistItem
               type="list"
               key={playlist.id}
               playlist={playlist}
+              alreadyAdded={alreadyAdded}
               actions={
                 <ActionPanel>
                   <Action
                     key={playlist.id}
-                    icon={Icon.Plus}
-                    title="Add Current Song to Playlist"
+                    icon={alreadyAdded ? Icon.Minus : Icon.Plus}
+                    title={alreadyAdded ? "Remove from Playlist" : "Add Current Song to Playlist"}
                     onAction={async () => {
                       if (currentlyPlayingIsLoading) {
                         showToast({
@@ -139,19 +153,42 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                         return;
                       }
 
-                      if (playlist.id === undefined) {
+                      if (!playlist.id) {
                         showToast({
-                          title: "Error adding song to playlist",
+                          title: "Error",
                           message: "Playlist ID undefined",
                           style: Toast.Style.Failure,
                         });
                         return;
                       }
+
+                      const trackUri = currentlyPlayingData.item?.uri as string;
+
+                      if (alreadyAdded) {
+                        try {
+                          await removeFromPlaylist({
+                            playlistId: playlist.id!,
+                            trackUris: [{ uri: trackUri }],
+                          });
+                          await removeTrackFromPlaylistCache(playlist.id!, trackUri);
+                          await showHUD(`Removed from ${playlist.name}`);
+                          await popToRoot();
+                        } catch (err) {
+                          const error = getError(err);
+                          await showToast({
+                            title: "Error removing song",
+                            message: error.message,
+                            style: Toast.Style.Failure,
+                          });
+                        }
+                        return;
+                      }
+
                       try {
                         const addTrack = async () => {
                           await addToPlaylist({
                             playlistId: playlist.id!,
-                            trackUris: [currentlyPlayingData.item?.uri as string],
+                            trackUris: [trackUri],
                           });
                           await addTrackToPlaylistCache(playlist.id!, currentlyPlayingData.item);
                           await showHUD(`Added to ${playlist.name}`);
@@ -165,14 +202,7 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                           });
 
                           const playlistItems = await getAllPlaylistItems(playlist);
-                          let isInPlaylist = false;
-
-                          for (const uri of playlistItems) {
-                            if (uri === currentlyPlayingData.item?.uri) {
-                              isInPlaylist = true;
-                              break;
-                            }
-                          }
+                          const isInPlaylist = playlistItems.some((uri) => uri === trackUri);
 
                           if (isInPlaylist) {
                             await showToast({
@@ -199,6 +229,7 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                         });
                       }
                     }}
+                    shortcut={Like}
                   />
                   {playlist.id && (
                     <CreateQuicklink
@@ -211,7 +242,8 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                 </ActionPanel>
               }
             />
-          ))}
+          );
+        })}
       </ListOrGridSection>
     </List>
   );

@@ -880,7 +880,7 @@ export default function StorageObjectsView({
               accessories={[{ text: "Go back" }]}
               actions={
                 <ActionPanel>
-                  <Action title="Go Up" icon={Icon.ArrowUp} onAction={pop} />
+                  <Action title="Go up" icon={Icon.ArrowUp} onAction={pop} />
                 </ActionPanel>
               }
             />

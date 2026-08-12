@@ -6,7 +6,9 @@
   "icon": "icon.png",
   "author": "stephendolan",
   "contributors": [
-    "ridemountainpig"
+    "ridemountainpig",
+    "tim_gailey",
+    "secustor"
   ],
   "categories": [
     "Developer Tools",
@@ -21,6 +23,23 @@
       "subtitle": "Claude Code Launcher",
       "description": "Launch Claude Code in project directories.",
       "mode": "view"
+    },
+    {
+      "name": "claude-sessions",
+      "title": "Claude Sessions",
+      "subtitle": "Claude Code Launcher",
+      "description": "List, attach, stop, and delete Claude Code sessions and background agents.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "claudeBinaryPath",
+          "title": "Claude CLI Path",
+          "description": "Absolute path to the claude binary. Leave empty to auto-detect (Homebrew, ~/.claude/local, ~/.local/bin, ~/.bun/bin).",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "/opt/homebrew/bin/claude"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -47,6 +66,28 @@
         {
           "title": "Warp",
           "value": "Warp"
+        },
+        {
+          "title": "iTerm2",
+          "value": "iTerm2"
+        }
+      ]
+    },
+    {
+      "name": "ghosttyOpenBehavior",
+      "title": "Ghostty: Open Behavior",
+      "description": "Only applies when Ghostty is selected. 'New Window' launches a separate Ghostty window. 'New Tab' opens a tab in your current Ghostty window (requires macOS Accessibility permissions).",
+      "type": "dropdown",
+      "required": false,
+      "default": "window",
+      "data": [
+        {
+          "title": "New Window",
+          "value": "window"
+        },
+        {
+          "title": "New Tab",
+          "value": "tab"
         }
       ]
     },
@@ -95,7 +136,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.102.3",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/utils": "^1.17.0",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

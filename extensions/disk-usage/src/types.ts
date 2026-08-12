@@ -33,4 +33,5 @@ export type DiskUsageEvent =
   | { type: "SCAN_PROGRESS"; path: string; heap: string }
   | { type: "SCAN_SUCCESS" }
   | { type: "SCAN_FAILURE"; error: string }
-  | { type: "DELETE_ITEMS"; paths: PathLike[] };
+  | { type: "DELETE_ITEMS"; paths: PathLike[] }
+  | { type: "ITEM_MISSING"; path: string; bytes: number };

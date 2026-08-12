@@ -15,11 +15,11 @@ export default function Command() {
   // Get the selected battery tool once
   const currentTool = getBatteryTool();
 
-  // Check if BATT is selected
+  // Check if batt is selected
   useEffect(() => {
     if (currentTool !== BatteryTool.BATT) {
-      setError("This command is for BATT only. Please use Get Battery Threshold for BCLM.");
-      showHUD("This command is for BATT only. Please use Get Battery Threshold for BCLM.");
+      setError("This command is for batt only. Please use Get Battery Threshold for BCLM.");
+      showHUD("This command is for batt only. Please use Get Battery Threshold for BCLM.");
     }
   }, []);
 
@@ -96,7 +96,8 @@ export default function Command() {
       // Try direct execution
       try {
         console.log("Trying direct execution...");
-        const output = execSync(`${toolCmd} ${command}`, {
+        const redirectStderr = currentTool === BatteryTool.BATT && command === "status" ? " 2>&1" : "";
+        const output = execSync(`${toolCmd} ${command}${redirectStderr}`, {
           encoding: "utf8",
           env: {
             ...process.env,

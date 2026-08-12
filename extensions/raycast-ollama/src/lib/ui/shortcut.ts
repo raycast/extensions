@@ -27,6 +27,10 @@ export const Shortcut = {
     macOS: { modifiers: ["cmd"], key: "u" },
     Windows: { modifiers: ["ctrl"], key: "u" },
   } satisfies Keyboard.Shortcut,
+  LoadUnloadModel: {
+    macOS: { modifiers: ["cmd"], key: "l" },
+    Windows: { modifiers: ["ctrl"], key: "l" },
+  } satisfies Keyboard.Shortcut,
   OpenLibrary: {
     macOS: { modifiers: ["cmd"], key: "l" },
     Windows: { modifiers: ["ctrl"], key: "l" },

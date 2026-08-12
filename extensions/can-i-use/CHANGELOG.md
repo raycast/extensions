@@ -1,5 +1,11 @@
 # Can I Use Changelog
 
+## [Windows Support] - 2026-01-21
+
+- Add Windows support
+- Modernize extension to use latest Raycast config
+- Update `metadata` images to reflect updated UI
+
 ## [Updates] - 2025-11-17
 
 - Update navigation title

@@ -1,15 +1,29 @@
 import { useMemo } from "react";
 import { showFailureToast, useFetch } from "@raycast/utils";
 import { type ArchiveItem, parseArchivePage } from "@/api";
-import { USER_AGENT } from "@/constants";
+import { FILE_TYPES, type FileType, USER_AGENT } from "@/constants";
 
-export const useArchive = (baseURL: string, onErrorPrimaryAction: () => void, queryText?: string) => {
+export type ArchiveFilter = "all" | FileType;
+
+export const isArchiveFilter = (value: string): value is ArchiveFilter =>
+  value === "all" || FILE_TYPES.includes(value as FileType);
+
+export const useArchive = (
+  baseURL: string,
+  onErrorPrimaryAction: () => void,
+  queryText?: string,
+  filter: ArchiveFilter = "all",
+) => {
   const url = useMemo(() => {
     if (queryText && queryText.length > 0) {
-      return `${baseURL}/search?q=${encodeURIComponent(queryText)}`;
+      const params = new URLSearchParams({ q: queryText });
+      if (filter !== "all") {
+        params.set("ext", filter);
+      }
+      return `${baseURL}/search?${params.toString()}`;
     }
     return null;
-  }, [baseURL, queryText]);
+  }, [baseURL, filter, queryText]);
 
   const {
     data: list,

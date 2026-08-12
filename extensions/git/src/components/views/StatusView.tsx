@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List, Icon, Color } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Keyboard } from "@raycast/api";
 import { useGitDiff } from "../../hooks/useGitDiff";
 import { FileManagerActions } from "../actions/FileActions";
 import { FileStatusIcon } from "../icons/StatusIcons";
@@ -27,6 +27,8 @@ import { basename } from "path";
 import { BranchAttachedLinksAction, BranchPushAction, BranchPushForceAction } from "../actions/BranchActions";
 import { RemoteFetchAction, RemotePullAction } from "../actions/RemoteActions";
 import { CopyToClipboardMenuAction } from "../actions/CopyToClipboardMenuAction";
+import { GitIgnoreAction } from "../actions/GitIgnoreAction";
+import { GitLFSAction } from "../actions/GitLFSAction";
 
 export function StatusView(context: RepositoryContext & NavigationContext) {
   const toggleController = useToggleDetail("Status Diff", "Changes", true);
@@ -54,9 +56,9 @@ export function StatusView(context: RepositoryContext & NavigationContext) {
       case "revert":
         return `⚠️ Revert Conflict`;
       case "regular":
-        return context.gitManager.repoName;
+        return context.gitManager.worktreeOrigin?.displayName ?? context.gitManager.repoName;
     }
-  }, [context.status.data.mode.kind]);
+  }, [context.status.data.mode, context.gitManager.repoName, context.gitManager.worktreeOrigin]);
 
   return (
     <List
@@ -80,6 +82,8 @@ export function StatusView(context: RepositoryContext & NavigationContext) {
               </ActionPanel.Section>
 
               <ToggleDetailAction controller={toggleController} />
+              <GitIgnoreAction {...context} />
+              <GitLFSAction {...context} />
               <WorkspaceNavigationActions {...context} />
             </ActionPanel>
           }
@@ -115,6 +119,8 @@ export function StatusView(context: RepositoryContext & NavigationContext) {
                 {context.branches.data.currentBranch && (
                   <BranchAttachedLinksAction {...context} branch={context.branches.data.currentBranch} />
                 )}
+                <GitIgnoreAction {...context} />
+                <GitLFSAction {...context} />
               </ActionPanel.Section>
 
               <WorkspaceNavigationActions {...context} />
@@ -280,6 +286,11 @@ function FileListItem(
             <FileHistoryAction filePath={context.file.absolutePath} {...context} />
           </ActionPanel.Section>
 
+          <ActionPanel.Section title="Tracking">
+            <GitIgnoreAction filePath={context.file.relativePath} {...context} />
+            <GitLFSAction filePath={context.file.relativePath} {...context} />
+          </ActionPanel.Section>
+
           <ActionPanel.Section>
             <CommitChangesAction {...context} />
             <ConflictAbortAction {...context} />
@@ -327,7 +338,7 @@ function RefreshStatusAction(context: RepositoryContext) {
       title="Refresh"
       onAction={context.status.revalidate}
       icon={Icon.ArrowClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
     />
   );
 }

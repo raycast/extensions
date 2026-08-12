@@ -218,3 +218,110 @@ export function getLunarDayOccurrences(
   }
   return dates;
 }
+
+export function getWeekMonthOccurrences(
+  inputDate: Date,
+  startOffset: number = -5,
+  endOffset: number = 5,
+): Date[] {
+  const currentYear = inputDate.getFullYear();
+  const dates: Date[] = [];
+  const targetDayOfWeek = inputDate.getDay(); // 0 (Sun) - 6 (Sat)
+  const targetMonth = inputDate.getMonth();
+
+  // Determine which occurrence of the weekday implementationDate is (e.g., 2nd Sunday)
+  // We iterate from day 1 of month until we hit our date
+  // Actually simpler: ceil(dayOfMonth / 7) ??
+  // No, that gives week of month roughly.
+  // Precise way: count how many times this weekday appeared before or on this date.
+  let occurrence = 0;
+  for (let d = 1; d <= inputDate.getDate(); d++) {
+    const temp = new Date(currentYear, targetMonth, d);
+    if (temp.getDay() === targetDayOfWeek) {
+      occurrence++;
+    }
+  }
+
+  for (let i = startOffset; i <= endOffset; i++) {
+    const y = currentYear + i;
+    // Find the Nth occurrence of targetDayOfWeek in month targetMonth of year y
+    let count = 0;
+    // Maximum days in month is 31
+    for (let d = 1; d <= 31; d++) {
+      const temp = new Date(y, targetMonth, d);
+      // Check if we rolled over to next month (for months with < 31 days)
+      if (temp.getMonth() !== targetMonth) break;
+
+      if (temp.getDay() === targetDayOfWeek) {
+        count++;
+        if (count === occurrence) {
+          dates.push(temp);
+          break;
+        }
+      }
+    }
+  }
+
+  return dates;
+}
+
+const SOLAR_TERM_EMOJIS: Record<string, string> = {
+  "xuân phân": "🌸",
+  "thanh minh": "🌿",
+  "cốc vũ": "🌧️",
+  "lập hạ": "☀️",
+  "tiểu mãn": "🌾",
+  "mang chủng": "🌱",
+  "hạ chí": "🏖️",
+  "tiểu thử": "🌡️",
+  "đại thử": "🔥",
+  "lập thu": "🍂",
+  "xử thử": "🌬️",
+  "bạch lộ": "💧",
+  "thu phân": "🍁",
+  "hàn lộ": "🌫️",
+  "sương giáng": "❄️",
+  "lập đông": "🍃",
+  "tiểu tuyết": "🌨️",
+  "đại tuyết": "❄️",
+  "đông chí": "☃️",
+  "tiểu hàn": "🥶",
+  "đại hàn": "🌬️",
+  "lập xuân": "🌱",
+  "vũ thủy": "🌂",
+  "kinh trập": "🐛",
+};
+
+export function getSolarTerm(
+  date: Date,
+): { name: string; emoji: string; day: number } | null {
+  const s = new SolarDate(date);
+  const l = s.toLunarDate();
+  if (!l) return null;
+  const termName = l.getSolarTerm();
+  if (!termName) return null;
+
+  // Step backward to find the start of this term
+  const temp = new Date(date);
+  temp.setHours(12, 0, 0, 0); // avoid timezone/DST issues
+
+  let days = 0;
+  while (days < 31) {
+    const sTemp = new SolarDate(temp);
+    const lTemp = sTemp.toLunarDate();
+    if (!lTemp || lTemp.getSolarTerm() !== termName) {
+      break;
+    }
+    days++;
+    temp.setDate(temp.getDate() - 1);
+  }
+
+  const formattedName = termName
+    .split(" ")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .join(" ");
+
+  const emoji = SOLAR_TERM_EMOJIS[termName.toLowerCase()] || "📅";
+
+  return { name: formattedName, emoji, day: days };
+}

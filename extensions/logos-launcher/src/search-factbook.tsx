@@ -11,20 +11,18 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import fs from "fs/promises";
-import os from "os";
-import path from "path";
-import { execFile } from "child_process";
-import { promisify } from "util";
-import { expandTilde, pathExists } from "./utils/fs";
 import { extractErrorMessage } from "./utils/errors";
-
-const execFileAsync = promisify(execFile);
+import {
+  type AutoCompleteInfo,
+  buildAutocompleteSearchTerms,
+  escapeSql,
+  normalizeAutocompleteRow,
+  resolveAutoComplete,
+  runSqliteQuery,
+} from "./utils/autocomplete";
 
 const FACTBOOK_REFERENCE_PATTERN = "bk.%";
 const ENGLISH_LANGUAGE = "en";
-const SQLITE_BIN = "/usr/bin/sqlite3";
-const SQLITE_JSON_BUFFER = 16 * 1024 * 1024; // 16 MB buffer for sqlite3 stdout
 const MIN_QUERY_LENGTH = 2;
 const RESULT_LIMIT = 75;
 
@@ -55,11 +53,6 @@ type TopicRow = {
   label: string;
   description?: string | null;
   iconKind?: string | null;
-};
-
-type AutoCompleteInfo = {
-  path: string;
-  mtimeMs: number;
 };
 
 export default function Command() {
@@ -248,47 +241,8 @@ function getEmptyState(params: {
   return { title: "No results", description: "Try a different spelling or topic.", icon: Icon.TextDocument };
 }
 
-async function resolveAutoComplete(preferences: Preferences): Promise<AutoCompleteInfo> {
-  const override = preferences.autocompletePath?.trim();
-  if (override) {
-    const fullPath = expandTilde(override);
-    if (!(await pathExists(fullPath))) {
-      throw new Error(`AutoComplete.db not found at ${fullPath}`);
-    }
-    const stats = await fs.stat(fullPath);
-    return { path: fullPath, mtimeMs: stats.mtimeMs };
-  }
-
-  const baseDir = path.join(os.homedir(), "Library", "Application Support", "Logos4", "Data");
-  if (!(await pathExists(baseDir))) {
-    throw new Error("AutoComplete.db not found. Launch Logos once, then try again.");
-  }
-
-  const entries = await fs.readdir(baseDir, { withFileTypes: true });
-  const candidates: AutoCompleteInfo[] = [];
-
-  for (const entry of entries) {
-    if (!entry.isDirectory()) {
-      continue;
-    }
-
-    const candidate = path.join(baseDir, entry.name, "AutoComplete", "AutoComplete.db");
-    if (await pathExists(candidate)) {
-      const stats = await fs.stat(candidate);
-      candidates.push({ path: candidate, mtimeMs: stats.mtimeMs });
-    }
-  }
-
-  if (candidates.length === 0) {
-    throw new Error("AutoComplete.db not found. Launch Logos once, then try again.");
-  }
-
-  candidates.sort((a, b) => b.mtimeMs - a.mtimeMs);
-  return candidates[0];
-}
-
 async function queryTopics(dbPath: string, rawQuery: string): Promise<TopicRow[]> {
-  const terms = getSearchTerms(rawQuery);
+  const terms = buildAutocompleteSearchTerms(rawQuery);
   if (terms.length === 0) {
     return [];
   }
@@ -325,17 +279,10 @@ LIMIT ${RESULT_LIMIT};
 
   const rows = await runSqliteQuery(dbPath, sql);
   return rows
-    .map((row) => ({
-      reference: typeof row.reference === "string" ? row.reference : "",
-      label: typeof row.label === "string" ? row.label : String(row.reference ?? ""),
-      description: typeof row.description === "string" ? row.description : null,
-      iconKind: typeof row.iconKind === "string" ? row.iconKind : null,
-    }))
-    .filter((row) => row.reference)
+    .map(normalizeAutocompleteRow)
+    .filter((row): row is TopicRow => Boolean(row))
     .sort((a, b) => a.label.localeCompare(b.label));
 }
-
-type SqliteRow = Record<string, unknown>;
 
 function buildFactbookUri(reference: string): string {
   const normalized = normalizeFactbookReference(reference);
@@ -381,59 +328,3 @@ function decodeReference(input: string): string {
     return input;
   }
 }
-
-function getSearchTerms(rawQuery: string): string[] {
-  const trimmed = rawQuery.trim();
-  const seen = new Set<string>();
-  const terms: string[] = [];
-
-  const addTerm = (term: string) => {
-    const normalized = term.toLowerCase();
-    if (!normalized || seen.has(normalized)) {
-      return;
-    }
-    seen.add(normalized);
-    terms.push(term);
-  };
-
-  if (trimmed) {
-    addTerm(trimmed);
-    for (const piece of trimmed.split(/\s+/)) {
-      if (piece.length >= MIN_QUERY_LENGTH) {
-        addTerm(piece);
-      }
-    }
-  }
-
-  if (terms.length === 0 && trimmed) {
-    terms.push(trimmed);
-  }
-
-  return terms;
-}
-
-async function runSqliteQuery(dbPath: string, sql: string): Promise<SqliteRow[]> {
-  try {
-    const { stdout } = await execFileAsync(SQLITE_BIN, ["-readonly", "-json", dbPath, sql], {
-      maxBuffer: SQLITE_JSON_BUFFER,
-    });
-    const trimmed = stdout.trim();
-    if (!trimmed) {
-      return [];
-    }
-    return JSON.parse(trimmed) as SqliteRow[];
-  } catch (error) {
-    const execError = error as NodeJS.ErrnoException & { stderr?: string };
-    if (execError.code === "ENOENT") {
-      throw new Error("sqlite3 binary not found. Install the macOS Command Line Tools.");
-    }
-    const stderr = typeof execError.stderr === "string" ? execError.stderr.trim() : undefined;
-    throw new Error(stderr && stderr.length > 0 ? stderr : extractErrorMessage(error));
-  }
-}
-
-function escapeSql(input: string): string {
-  return input.replace(/'/g, "''");
-}
-
-// Utilities imported from ./utils/fs and ./utils/errors

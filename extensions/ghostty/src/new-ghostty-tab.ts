@@ -1,8 +1,6 @@
-import { runAppleScript } from "run-applescript";
-import { popToRoot } from "@raycast/api";
+import { runGhosttyCommand } from "./utils/command";
 import { openGhosttyTab } from "./utils/scripts";
 
 export default async function Command() {
-  await runAppleScript(openGhosttyTab);
-  await popToRoot();
+  await runGhosttyCommand(openGhosttyTab);
 }

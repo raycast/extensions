@@ -1,4 +1,4 @@
-import { resend } from "../lib/resend";
+import { getResend, withResend } from "../lib/oauth";
 
 type Input = {
   /**
@@ -9,10 +9,11 @@ type Input = {
 };
 
 const tool = async (input: Input) => {
+  const resend = getResend();
   const contacts = await resend.contacts.list({
     audienceId: input.audienceId,
   });
   return contacts;
 };
 
-export default tool;
+export default withResend(tool);

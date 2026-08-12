@@ -7,4 +7,6 @@ export type Process = {
   path: string;
   processName: string;
   appName: string | undefined;
+  childProcessCount?: number;
+  childProcessIds?: number[];
 };

@@ -140,7 +140,11 @@ export default function Command() {
                 <Action.Push
                   title="View Services"
                   icon={Icon.List}
-                  target={<ProjectServices projectID={project._id} environmentID={project.environments[0]._id} />}
+                  target={
+                    project.environments[0] ? (
+                      <ProjectServices projectID={project._id} environmentID={project.environments[0]._id} />
+                    ) : undefined
+                  }
                 />
                 <Action.OpenInBrowser title="Open Project Page" url={`https://zeabur.com/projects/${project._id}`} />
                 <Action

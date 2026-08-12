@@ -1,5 +1,5 @@
 import { Action, ActionPanel, environment, Grid, Icon, Image, Toast } from "@raycast/api";
-import "./helpers/arrayExtensions";
+import { logError } from "./helpers/errors";
 import type { CssColor, Group, Id, Light, PngUriLightIconSet } from "./lib/types";
 import { BRIGHTNESS_MAX, BRIGHTNESS_MIN, BRIGHTNESSES, COLORS, MIRED_MAX, MIRED_MIN } from "./helpers/constants";
 import ManageHueBridge from "./components/ManageHueBridge";
@@ -307,7 +307,7 @@ async function handleToggle(
     toast.title = `Turned ${light?.on?.on ? "off" : "on"} ${light.metadata.name}`;
     await toast.show();
   } catch (error) {
-    console.error(error);
+    logError(error);
     toast.style = Style.Failure;
     toast.title = `Failed turning ${light.on.on ? "off" : "on"} ${light.metadata.name}`;
     toast.message = error instanceof Error ? error.message : undefined;
@@ -344,7 +344,7 @@ async function handleSetBrightness(
     toast.title = `Set brightness of ${light.metadata.name} to ${(brightness / 100).toLocaleString("en", { style: "percent" })}`;
     await toast.show();
   } catch (error) {
-    console.error(error);
+    logError(error);
     toast.style = Style.Failure;
     toast.title = `Failed setting brightness of ${light.metadata.name}`;
     toast.message = error instanceof Error ? error.message : undefined;

@@ -40,6 +40,9 @@ export async function openNewTab(browser: SupportedBrowsers, url: string): Promi
     case SupportedBrowsers.Dia:
       appName = "Dia";
       break;
+    case SupportedBrowsers.Helium:
+      appName = "Helium";
+      break;
     case SupportedBrowsers.Comet:
       appName = "Comet";
       break;

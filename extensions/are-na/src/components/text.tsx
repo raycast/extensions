@@ -6,9 +6,18 @@ interface TextBlockViewProps {
   block: Block;
 }
 
+/** Raycast/CommonMark collapses single newlines; two trailing spaces + newline = hard break. Preserves blank lines between paragraphs. */
+function newlinesToMarkdownHardBreaks(text: string): string {
+  return text
+    .replace(/\r\n/g, "\n")
+    .split(/\n\n+/)
+    .map((paragraph) => paragraph.split("\n").join("  \n"))
+    .join("\n\n");
+}
+
 export function TextBlockView({ block }: TextBlockViewProps) {
   const url = useMemo(() => {
-    return block.source?.url || `https://www.are.na/blocks/${block.id}`;
+    return block.source?.url || `https://www.are.na/block/${block.id}`;
   }, [block.source, block.id]);
 
   const formatDate = (dateString?: string) => {
@@ -25,13 +34,16 @@ export function TextBlockView({ block }: TextBlockViewProps) {
     return formatter.format(date);
   };
 
+  const rawText = typeof block.content === "string" && block.content.trim().length > 0 ? block.content.trimEnd() : "";
+  const markdownForDisplay = rawText ? newlinesToMarkdownHardBreaks(rawText) : "No content available";
+  const title = typeof block.title === "string" && block.title.trim().length > 0 ? block.title : "Untitled";
+
   return (
     <Detail
-      isLoading={!block.content}
-      markdown={block.content ?? "No content available"}
+      markdown={markdownForDisplay}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Title" text={block.title || "Untitled"} />
+          <Detail.Metadata.Label title="Title" text={title} />
           <Detail.Metadata.Label title="User" text={block.user?.full_name || "Unknown"} />
           <Detail.Metadata.Label title="Created At" text={formatDate(block.created_at)} />
         </Detail.Metadata>
@@ -40,7 +52,7 @@ export function TextBlockView({ block }: TextBlockViewProps) {
         <ActionPanel>
           <Action.OpenInBrowser url={url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
           <Action.CopyToClipboard
-            content={block.content || ""}
+            content={rawText || "No content available"}
             title="Copy Text Content"
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />

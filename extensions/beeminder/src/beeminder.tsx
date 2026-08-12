@@ -11,6 +11,7 @@ import {
   Icon,
   Keyboard,
   Color,
+  LocalStorage,
 } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import moment from "moment";
@@ -23,11 +24,18 @@ const cache = new Cache();
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
+  const [pinnedGoals, setPinnedGoals] = useState<Set<string>>(new Set());
 
   const [goals, setGoals] = useState<GoalResponse | undefined>(() => {
     const cachedGoals = cache.get("goals");
     return cachedGoals ? JSON.parse(cachedGoals) : undefined;
   });
+
+  useEffect(() => {
+    LocalStorage.getItem<string>("pinnedGoals").then((stored) => {
+      if (stored) setPinnedGoals(new Set(JSON.parse(stored)));
+    });
+  }, []);
 
   // Fetch goals with an optional delay. A delay is necessary after a datapoint
   // submission because Beeminder takes some time to update the goal with new
@@ -146,7 +154,15 @@ export default function Command() {
     );
   }
 
-  function GoalsList({ goalsData }: { goalsData: GoalResponse }) {
+  function GoalsList({
+    goalsData,
+    pinnedGoals,
+    togglePin,
+  }: {
+    goalsData: GoalResponse;
+    pinnedGoals: Set<string>;
+    togglePin: (slug: string) => void;
+  }) {
     const { beeminderUsername, colorProgression, showDaysAboveLine, sortByDaysAboveLine } =
       getPreferenceValues<Preferences>();
     const goals = Array.isArray(goalsData) ? goalsData : undefined;
@@ -206,6 +222,10 @@ export default function Command() {
     const sortedGoals = useMemo(() => {
       return goals
         ? [...goals].sort((a, b) => {
+            const aPinned = pinnedGoals.has(a.slug);
+            const bPinned = pinnedGoals.has(b.slug);
+            if (aPinned !== bPinned) return aPinned ? -1 : 1;
+
             if (sortByDaysAboveLine) {
               const aDaysAbove = getDaysAboveLine(a);
               const bDaysAbove = getDaysAboveLine(b);
@@ -218,7 +238,7 @@ export default function Command() {
             return 0;
           })
         : goals;
-    }, [goals, sortByDaysAboveLine]);
+    }, [goals, sortByDaysAboveLine, pinnedGoals]);
 
     return (
       <List isLoading={isLoading}>
@@ -247,7 +267,12 @@ export default function Command() {
           const hasDataForToday =
             goal.last_datapoint && goal.last_datapoint.timestamp >= getCurrentDayStart();
 
-          const accessories: List.Item.Accessory[] = [
+          const isPinned = pinnedGoals.has(goal.slug);
+          const accessories: List.Item.Accessory[] = [];
+          if (isPinned) {
+            accessories.push({ icon: Icon.Pin, tooltip: "Pinned" });
+          }
+          accessories.push(
             {
               text: dueText,
             },
@@ -257,7 +282,7 @@ export default function Command() {
                 color: getGoalColor(goal.safebuf),
               },
             },
-          ];
+          );
           if (showDaysAboveLine && Number.isFinite(daysAbove)) {
             accessories.push({
               tag: {
@@ -307,6 +332,12 @@ export default function Command() {
                     icon={Icon.RotateClockwise}
                     onAction={fetchData}
                   />
+                  <Action
+                    title={isPinned ? "Unpin Goal" : "Pin Goal"}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    icon={isPinned ? Icon.PinDisabled : Icon.Pin}
+                    onAction={() => togglePin(goal.slug)}
+                  />
                 </ActionPanel>
               }
             />
@@ -316,5 +347,16 @@ export default function Command() {
     );
   }
 
-  return <GoalsList goalsData={goals} />;
+  async function togglePin(slug: string) {
+    const next = new Set(pinnedGoals);
+    if (next.has(slug)) {
+      next.delete(slug);
+    } else {
+      next.add(slug);
+    }
+    setPinnedGoals(next);
+    await LocalStorage.setItem("pinnedGoals", JSON.stringify([...next]));
+  }
+
+  return <GoalsList goalsData={goals} pinnedGoals={pinnedGoals} togglePin={togglePin} />;
 }

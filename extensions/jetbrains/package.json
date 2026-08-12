@@ -10,7 +10,8 @@
     "dima-m711",
     "dgrzedzielski",
     "perasite",
-    "hemang_kinra"
+    "hemang_kinra",
+    "kubarom"
   ],
   "license": "MIT",
   "commands": [
@@ -63,6 +64,15 @@
       "required": false,
       "title": "Use Frecency sorting for projects",
       "description": "Use Raycast's built in frecency sorting to order the list of projects",
+      "default": true,
+      "label": "Enabled"
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Git Branch",
+      "description": "Show the current git branch next to projects that live in a git repository",
       "default": true,
       "label": "Enabled"
     }

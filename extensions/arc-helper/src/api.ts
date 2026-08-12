@@ -1,5 +1,10 @@
 const BASE_URL = "https://metaforge.app/api/arc-raiders";
 
+export interface GuideLink {
+  url: string;
+  label: string;
+}
+
 export interface Item {
   id: string;
   name: string;
@@ -15,6 +20,13 @@ export interface Item {
   subcategory: string | null;
   loot_area: string | null;
   ammo_type: string | null;
+  shield_type?: string;
+  sources?: unknown[];
+  locations?: unknown[];
+  guide_links?: GuideLink[];
+  game_asset_id?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface QuestReward {
@@ -30,16 +42,28 @@ export interface QuestReward {
   quantity: string;
 }
 
+export interface QuestLocation {
+  id: string;
+  map: string;
+}
+
 export interface Quest {
   id: string;
   name: string;
   objectives: string[];
   xp: number;
   granted_items: string[];
-  locations: string[];
+  locations: QuestLocation[];
   marker_category: string | null;
   required_items: string[];
   rewards: QuestReward[];
+  image?: string;
+  guide_links?: GuideLink[];
+  trader_name?: string;
+  sort_order?: number;
+  position?: { x: number; y: number };
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Arc {
@@ -48,20 +72,8 @@ export interface Arc {
   description: string;
   icon: string;
   image: string;
-}
-
-export interface EventTimeSlot {
-  start: string; // "HH:mm" format
-  end: string; // "HH:mm" format
-}
-
-export interface EventTimerRaw {
-  name: string;
-  map: string;
-  icon: string;
-  description: string;
-  days: string[];
-  times: EventTimeSlot[];
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface EventTimer {
@@ -106,7 +118,7 @@ export const API = {
   items: `${BASE_URL}/items`,
   arcs: `${BASE_URL}/arcs`,
   quests: `${BASE_URL}/quests`,
-  eventTimers: `${BASE_URL}/event-timers`,
+  eventTimers: `${BASE_URL}/events-schedule`,
   traders: `${BASE_URL}/traders`,
 };
 

@@ -13,7 +13,14 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { withGithubClient } from "./api.js";
-import { CreateExtension, Diagnostics, SyncFork, Tags, ValidExtensions } from "./components/index.js";
+import {
+  CreateExtension,
+  Diagnostics,
+  ManageSparseCheckout,
+  SyncFork,
+  Tags,
+  ValidExtensions,
+} from "./components/index.js";
 import { catchError, handleError } from "./errors.js";
 import * as git from "./git.js";
 import operation from "./operation.js";
@@ -148,7 +155,7 @@ function ManageForkedExtensions() {
                         title: "Remove",
                         style: Alert.ActionStyle.Destructive,
                         onAction: catchError(async () => {
-                          await operation.remove(x.folderName);
+                          await operation.remove(`extensions/${x.folderName}`);
                           revalidate();
                         }),
                       },
@@ -157,6 +164,7 @@ function ManageForkedExtensions() {
                 />
               </ActionPanel.Section>
               <ActionPanel.Section>
+                <ManageSparseCheckout onChange={revalidate} />
                 <Action.Push icon={Icon.WrenchScrewdriver} title="Run Diagnostics" target={<Diagnostics />} />
               </ActionPanel.Section>
             </ActionPanel>

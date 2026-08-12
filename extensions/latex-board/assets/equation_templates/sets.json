@@ -1,0 +1,37 @@
+{
+  "Set Relations": {
+    "Element Of": " \\in ",
+    "Contains": " \\ni ",
+    "Not Element Of": " \\notin ",
+    "Subset 1": " \\subset ",
+    "Superset 1": " \\supset ",
+    "Subset or Equal 1": " \\subseteq ",
+    "Superset or Equal 1": " \\supseteq ",
+    "Not Subset": " \\not\\subset "
+  },
+  "Set Operations": {
+    "Union": " \\cup ",
+    "Intersection": " \\cap ",
+    "Set Difference": " \\backslash ",
+    "Complement 1": " A^c ",
+    "Complement 2": " \\overline{A} ",
+    "Empty Set": " \\emptyset "
+  },
+  "De Morgan's Laws": {
+    "De Morgan's Law 1": " \\overline{A \\cup B}=\\overline{A}\\cap\\overline{B} ",
+    "De Morgan's Law 2": " \\overline{A \\cap B}=\\overline{A}\\cup\\overline{B} "
+  },
+  "Special Sets": {
+    "Natural Numbers": " \\mathbb{N} ",
+    "Integers": " \\mathbb{Z} ",
+    "Rational Numbers": " \\mathbb{Q} ",
+    "Real Numbers": " \\mathbb{R} ",
+    "Complex Numbers": " \\mathbb{C} ",
+    "Quaternions": " \\mathbb{H} "
+  },
+  "Infinite Set Cardinality": {
+    "Aleph": " \\aleph ",
+    "Aleph Zero": " \\aleph_0 ",
+    "General Aleph": " \\aleph_{\\alpha} "
+  }
+}
