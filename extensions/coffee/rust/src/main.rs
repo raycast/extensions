@@ -242,7 +242,27 @@ fn start_caffeinate(config: KeepAwakeConfig) -> Result<(), String> {
         // Dropping the Child without calling wait() lets it run detached.
     }
 
-    Ok(())
+    #[cfg(not(windows))]
+    {
+        return Ok(());
+    }
+
+    // Wait for the worker to confirm it is holding the execution state before
+    // reporting success. The worker only persists its state after acquiring
+    // ES_SYSTEM/DISPLAY_REQUIRED, so its absence within the timeout means the
+    // worker failed to start and we must not claim caffeination is active.
+    let deadline = Instant::now() + Duration::from_secs(3);
+    loop {
+        if let Some(state) = read_stored_state()? {
+            if pid_matches_worker(state.pid, state.start_ticks) {
+                return Ok(());
+            }
+        }
+        if Instant::now() >= deadline {
+            return Err("keep-awake worker failed to start".to_string());
+        }
+        std::thread::sleep(Duration::from_millis(50));
+    }
 }
 
 /// Worker entry point spawned by start_caffeinate.
@@ -254,12 +274,6 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
     let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| e.to_string())?.as_secs();
     let start_ticks = process_creation_ticks(pid)
         .ok_or_else(|| "cannot determine keep-awake worker identity".to_string())?;
-    write_stored_state(&StoredState {
-        pid,
-        start_time: now,
-        start_ticks,
-        duration_seconds: config.duration_seconds,
-    })?;
 
     let mut flags = ES_CONTINUOUS.0;
     if config.prevent_display {
@@ -269,9 +283,18 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
         flags |= ES_SYSTEM_REQUIRED.0;
     }
     if unsafe { SetThreadExecutionState(EXECUTION_STATE(flags)) }.0 == 0 {
-        let _ = clear_state();
         return Err("SetThreadExecutionState failed".to_string());
     }
+
+    // Persist the state only after the execution state is actually held. This
+    // write doubles as the "worker is running" signal that start_caffeinate
+    // waits for before reporting success.
+    write_stored_state(&StoredState {
+        pid,
+        start_time: now,
+        start_ticks,
+        duration_seconds: config.duration_seconds,
+    })?;
 
     let started = Instant::now();
     loop {
