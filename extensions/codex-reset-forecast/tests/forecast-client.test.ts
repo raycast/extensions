@@ -4,12 +4,14 @@ import { fetchForecast, type ForecastSnapshot, type ForecastStore } from "../src
 
 class MemoryStore implements ForecastStore {
   snapshot: ForecastSnapshot | undefined;
+  writes: ForecastSnapshot[] = [];
 
   read() {
     return this.snapshot;
   }
 
   write(snapshot: ForecastSnapshot) {
+    this.writes.push(snapshot);
     this.snapshot = snapshot;
   }
 }
@@ -54,7 +56,8 @@ describe("fetchForecast", () => {
     expect(result.response.forecast.score).toBe(64);
     expect(result.response.fetchedAt).toBe(validFixture.fetchedAt);
     expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
-    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
+    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
+    expect(store.writes).toHaveLength(1);
   });
 
   it("does not overwrite a concurrent successful response when a 304 finishes later", async () => {
@@ -96,9 +99,11 @@ describe("fetchForecast", () => {
     const result = await notModifiedRequest;
 
     expect(result.response.forecast.score).toBe(85);
+    expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
     expect(store.snapshot?.response.forecast.score).toBe(85);
     expect(store.snapshot?.etag).toBe('W/"forecast-2"');
-    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T04:00:00.000Z");
+    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
+    expect(store.writes).toHaveLength(1);
   });
 
   it("rejects a 304 response when no cached data exists", async () => {

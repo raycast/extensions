@@ -50,13 +50,16 @@ export async function fetchForecast({
     const response = await fetchImpl(url, { headers, signal: controller.signal });
 
     if (response.status === 304) {
+      if (!cached) throw new Error("Forecast API returned 304 without cached data");
+
+      // A 304 carries no representation and must never rewrite the shared snapshot.
+      // Only a 200 response owns the cached forecast and ETag.
       const latest = store.read() ?? cached;
-      if (!latest) throw new Error("Forecast API returned 304 without cached data");
-      const lastSuccessfulRequestAt = now().toISOString();
-      store.write({ ...latest, lastSuccessfulRequestAt });
+      const requestVersionIsLatest =
+        latest.etag === cached.etag && latest.response.fetchedAt === cached.response.fetchedAt;
       return {
         response: latest.response,
-        lastSuccessfulRequestAt,
+        lastSuccessfulRequestAt: requestVersionIsLatest ? now().toISOString() : latest.lastSuccessfulRequestAt,
         isStale: false,
       };
     }
