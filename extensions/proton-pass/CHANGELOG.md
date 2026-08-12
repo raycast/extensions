@@ -1,5 +1,11 @@
 # proton-pass Changelog
 
+## [Initial Release] - 2026-08-12
+
+- Introduce a new, independent Proton Pass extension powered by the official Proton Pass CLI
+- Search logins and aliases, browse vaults, create login items, and copy TOTP codes
+- Generate passwords and support automatic CLI discovery on macOS and Windows
+
 ## [Improvements] - 2026-05-01
 
 - Fix: Search Items command could show results from only one vault when "All Vaults" was selected (vault share_id now used as fallback during item normalization)
