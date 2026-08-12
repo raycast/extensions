@@ -55,3 +55,5 @@ Pulled files land in your Download Directory (`~/Downloads` by default) — ofte
 ---
 
 Built by [UmiCorp](https://umicorp.kr).
+
+If you find this useful, consider [buying me a coffee](https://buymeacoffee.com/umicorp).
