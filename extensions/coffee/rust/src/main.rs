@@ -260,12 +260,12 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
         duration_seconds: config.duration_seconds,
     })?;
 
-    let mut flags = ES_CONTINUOUS.0 | ES_SYSTEM_REQUIRED.0;
+    let mut flags = ES_CONTINUOUS.0;
     if config.prevent_display {
         flags |= ES_DISPLAY_REQUIRED.0;
     }
     if config.prevent_system {
-        // ES_SYSTEM_REQUIRED is already set above for every caffeination.
+        flags |= ES_SYSTEM_REQUIRED.0;
     }
     if unsafe { SetThreadExecutionState(EXECUTION_STATE(flags)) }.0 == 0 {
         let _ = clear_state();
