@@ -27,7 +27,7 @@ export async function canRecoverLocally(apiUrl: string | undefined): Promise<boo
   if (!(await isDockerRunning())) return false;
 
   const container = await findContainerByPort(port);
-  return Boolean(container && !container.running);
+  return Boolean(container?.startable);
 }
 
 /**
@@ -64,7 +64,7 @@ export async function ensureReachable(
   if (canTryDocker && port && (await isDockerRunning())) {
     const container = await findContainerByPort(port);
 
-    if (container && !container.running) {
+    if (container?.startable) {
       const toast = await presentToast(existingToast, {
         style: Toast.Style.Animated,
         // The Compose project / container name is a Docker implementation

@@ -10,9 +10,10 @@
 import { execFile, spawn } from "child_process";
 import { promisify } from "util";
 import { existsSync } from "fs";
+import { join } from "path";
 import { logger } from "@chrismessina/raycast-logger";
 import { isApiReachable } from "./connection";
-import { composeArgs } from "./compose";
+import { composeArgs, publishesLoopbackPort, STARTABLE_STATES } from "./compose";
 
 const execFileAsync = promisify(execFile);
 const log = logger.child("[Docker]");
@@ -21,13 +22,31 @@ const log = logger.child("[Docker]");
  * Raycast spawns commands without the user's interactive shell PATH, so `docker`
  * is frequently not resolvable by name even when it works fine in Terminal.
  * These are the standard install locations, most common first.
+ *
+ * The manifest declares Windows support, so the Windows locations have to be
+ * here too — a macOS-only list does not fail loudly on Windows, it silently
+ * reports "Docker isn't installed" to everyone running one.
  */
-const DOCKER_PATHS = [
-  "/usr/local/bin/docker",
-  "/opt/homebrew/bin/docker",
-  "/Applications/Docker.app/Contents/Resources/bin/docker",
-  "/usr/bin/docker",
-];
+const DOCKER_PATHS: Record<string, string[]> = {
+  darwin: [
+    "/usr/local/bin/docker",
+    "/opt/homebrew/bin/docker",
+    "/Applications/Docker.app/Contents/Resources/bin/docker",
+    "/usr/bin/docker",
+  ],
+  win32: [
+    "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe",
+    "C:\\ProgramData\\DockerDesktop\\version-bin\\docker.exe",
+  ],
+  linux: ["/usr/bin/docker", "/usr/local/bin/docker", "/snap/bin/docker"],
+};
+
+/** Directories on the inherited PATH, as a fallback for non-standard installs. */
+function pathCandidates(): string[] {
+  const binary = process.platform === "win32" ? "docker.exe" : "docker";
+  const entries = (process.env.PATH ?? "").split(process.platform === "win32" ? ";" : ":");
+  return entries.filter(Boolean).map((dir) => join(dir, binary));
+}
 
 const EXEC_TIMEOUT_MS = 10_000;
 
@@ -51,6 +70,10 @@ export interface DockerContainer {
   project?: string;
   service?: string;
   running: boolean;
+  /** Whether `docker start` can actually act on it. Not the inverse of
+   * `running`: paused needs unpause, restarting is already trying, and
+   * dead/removing cannot be started at all. */
+  startable: boolean;
   /** Image reference as declared, e.g. ghcr.io/karakeep-app/karakeep:release */
   image?: string;
   /** Compose file(s) this project was created from, needed to run compose
@@ -66,7 +89,9 @@ let cachedDockerPath: string | null | undefined;
 /** Absolute path to the docker CLI, or null when it isn't installed. */
 export function findDockerPath(): string | null {
   if (cachedDockerPath !== undefined) return cachedDockerPath;
-  cachedDockerPath = DOCKER_PATHS.find((candidate) => existsSync(candidate)) ?? null;
+  const known = DOCKER_PATHS[process.platform] ?? DOCKER_PATHS.linux;
+  cachedDockerPath = [...known, ...pathCandidates()].find((candidate) => existsSync(candidate)) ?? null;
+  if (!cachedDockerPath) log.log("Docker CLI not found", { platform: process.platform });
   return cachedDockerPath;
 }
 
@@ -109,7 +134,7 @@ export async function findContainersByPort(port: string): Promise<DockerContaine
       "{{.State.Status}}",
       '{{index .Config.Labels "com.docker.compose.project"}}',
       '{{index .Config.Labels "com.docker.compose.service"}}',
-      "{{range $p, $b := .HostConfig.PortBindings}}{{range $b}}{{.HostPort}},{{end}}{{end}}",
+      "{{range $p, $b := .HostConfig.PortBindings}}{{range $b}}{{$p}}@{{.HostIp}}@{{.HostPort}},{{end}}{{end}}",
       "{{.Config.Image}}",
       '{{index .Config.Labels "com.docker.compose.project.config_files"}}',
       '{{index .Config.Labels "com.docker.compose.project.working_dir"}}',
@@ -121,7 +146,7 @@ export async function findContainersByPort(port: string): Promise<DockerContaine
     for (const line of output.split("\n")) {
       const [name, status, project, service, ports, image, configFiles, workingDir] = line.split(FIELD_SEP);
       if (!ports) continue;
-      if (!ports.split(",").filter(Boolean).includes(port)) continue;
+      if (!publishesLoopbackPort(ports, port)) continue;
 
       matches.push({
         // `docker inspect` reports names with a leading slash.
@@ -130,6 +155,7 @@ export async function findContainersByPort(port: string): Promise<DockerContaine
         project: project || undefined,
         service: service || undefined,
         running: status === "running",
+        startable: STARTABLE_STATES.has(status),
         image: image || undefined,
         // Docker stores multiple compose files comma-separated, so a path
         // containing a comma is not representable here — Docker's limitation,
@@ -179,7 +205,23 @@ export async function findContainerByPort(port: string): Promise<DockerContainer
  */
 export async function startContainer(container: DockerContainer): Promise<void> {
   if (container.project) {
-    const siblings = await docker(["ps", "-aq", "--filter", `label=com.docker.compose.project=${container.project}`]);
+    // Only the siblings that need starting AND can be started:
+    //   status=exited/created — a running container is a no-op at best, and
+    //     paused/dead/restarting make `docker start` fail the whole batch
+    //   oneoff=False — `docker compose run` leftovers are not services; they
+    //     are one-shot commands that would re-execute
+    const siblings = await docker([
+      "ps",
+      "-aq",
+      "--filter",
+      `label=com.docker.compose.project=${container.project}`,
+      "--filter",
+      "label=com.docker.compose.oneoff=False",
+      "--filter",
+      "status=exited",
+      "--filter",
+      "status=created",
+    ]);
     const ids = siblings.split("\n").filter(Boolean);
     if (ids.length > 0) {
       log.info("Starting Compose project", { project: container.project, containers: ids.length });
@@ -187,6 +229,14 @@ export async function startContainer(container: DockerContainer): Promise<void> 
       await docker(["start", ...ids], 60_000);
       return;
     }
+    log.log("No startable containers in project; falling back to the one we found", {
+      project: container.project,
+      name: container.name,
+    });
+  }
+
+  if (!container.startable) {
+    throw new Error(`Container ${container.name} is ${container.status} and cannot be started`);
   }
 
   log.info("Starting container", { name: container.name });

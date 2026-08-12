@@ -1,11 +1,44 @@
 /**
- * Pure `docker compose` helpers: building the invocation, and parsing its
- * failure output.
+ * Pure Docker helpers with no Raycast dependency: building a compose
+ * invocation, parsing compose failure output, and reading `docker inspect`
+ * port bindings.
  *
  * Separate from docker.ts so it carries no dependencies — that module reaches
  * for the logger, and therefore @raycast/api, which cannot load outside a
  * Raycast process and made these functions untestable.
  */
+
+/**
+ * States `docker start` can act on. Everything else that merely isn't running
+ * — paused, restarting, dead, removing — would fail or hang, so offering a
+ * Start action for them promises something Docker will not do.
+ */
+export const STARTABLE_STATES = new Set(["created", "exited"]);
+
+/**
+ * Host addresses that serve a loopback URL. Callers are gated to loopback
+ * hosts, so a container published only on a specific non-loopback interface
+ * is not the one answering `http://localhost:<port>`.
+ */
+const LOOPBACK_BINDS = new Set(["", "0.0.0.0", "::", "127.0.0.1", "::1"]);
+/**
+ * Whether a container's PortBindings publish `port` in a way that answers a
+ * loopback URL.
+ *
+ * Matching on the host port alone conflated a UDP binding with the TCP one we
+ * mean, and treated a container bound only to a specific external interface as
+ * though it served localhost.
+ */
+export function publishesLoopbackPort(bindings: string, port: string): boolean {
+  return bindings
+    .split(",")
+    .filter(Boolean)
+    .some((entry) => {
+      const [portProto, hostIp, hostPort] = entry.split("@");
+      const protocol = portProto?.split("/")[1] ?? "tcp";
+      return protocol === "tcp" && hostPort === port && LOOPBACK_BINDS.has(hostIp ?? "");
+    });
+}
 
 /**
  * The argv for updating this project.
