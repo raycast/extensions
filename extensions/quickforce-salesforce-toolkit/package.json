@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "quickforce",
-  "title": "QuickForce",
+  "name": "quickforce-salesforce-toolkit",
+  "title": "QuickForce - Salesforce Toolkit",
   "version": "1.0.0",
   "description": "Keyboard-driven Salesforce toolkit for developers and admins: switch orgs instantly, run SOQL queries, jump to any Setup page, and manage users, all from Raycast.",
   "icon": "quickforce-icon.png",
