@@ -1,52 +1,73 @@
 # Codex
 
-Start, search, and manage Codex threads directly from Raycast.
-
-Codex is a focused Raycast control surface for the Codex macOS app. It uses local Codex app, CLI, and app-server interfaces to start new work quickly, reopen past threads, search across recent thread metadata and transcript text, and run common thread actions without leaving Raycast.
-
-## Features
-
-- Start a new Codex thread, with or without an initial prompt
-- Pick a recent or configured local project when starting a thread with a prompt
-- Start a thread from clipboard text
-- Search recent active or archived threads by name, project, preview, and indexed transcript text
-- Open, resume, rename, summarize, auto-rename, fork, compact, archive, and unarchive threads
-- Filter threads by project and show or hide subagent threads
-- Copy thread IDs, resume commands, project paths, and latest turns
-- Export a Codex thread to Markdown
+Monitor and manage your Codex tasks directly from Raycast.
 
 ## Commands
 
-| Command                   | Description                                                                                  |
-| ------------------------- | -------------------------------------------------------------------------------------------- |
-| Search Threads            | Browse, search, resume, rename, summarize, archive, fork, compact, and export Codex threads. |
-| New Thread                | Start a new Codex thread. Uses the default project directory preference when configured.     |
-| New Thread with Prompt    | Start a new Codex thread with a typed prompt, project picker, and optional custom path.      |
-| New Thread from Clipboard | Start a new Codex thread using clipboard text as the initial prompt.                         |
-| Open Codex                | Open the Codex app.                                                                          |
+### Search Threads
+
+Browse active and archived Codex threads updated in the last 30 days. Search by name, working directory, preview text, or full transcript text.
+
+- Threads waiting on your approval or input are grouped at the top.
+- Each thread shows its working directory, git branch and commit, status, and subagent count.
+- **Resume** in the Codex app, or in your terminal with the `codex resume` command.
+- **Summarize** a thread, then copy or paste the result, or **auto-rename** it with Raycast AI. You can also rename the last 5 to 50 threads in one pass.
+- **Fork**, **archive**, and **unarchive** threads.
+- **Export** a thread to Markdown, saved to your Downloads folder.
+- **Copy** a thread's ID, resume command, working directory, deeplink, or last message.
+
+### New Thread
+
+Start a new thread in your default working directory.
+
+### New Thread with Prompt
+
+Start a thread with a typed prompt and a working-directory picker. The picker lists subfolders from your Working Directory Root, with recent thread counts when available, plus a Choose Folder option with a native folder chooser.
+
+### New Thread from Clipboard
+
+Start a thread using clipboard text as the prompt. It uses the Default Working Directory preference when configured. With no preference configured, it falls back to the app's default.
+
+### Open Codex
+
+Open Codex in the ChatGPT desktop app.
 
 ## Requirements
 
-- Raycast for macOS
-- Codex for macOS, installed and signed in, with a CLI that supports `codex app-server`
-- Codex CLI available from the app bundle, `/opt/homebrew/bin/codex`, `/usr/local/bin/codex`, a login shell, or the **Codex CLI Path** preference
-- Raycast AI access for the **Summarize Thread** and **Auto Rename** actions
+- The ChatGPT desktop app for macOS, with Codex available and signed in.
+- The Codex CLI (detected automatically, see below). Full transcript search requires a version whose `app-server` supports it.
+- Raycast AI (Raycast Pro) for the Summarize and Auto Rename actions.
 
-## Setup
+### Codex CLI in a non-standard location
 
-1. Install and open Codex for macOS at least once.
-2. Leave **Codex CLI Path** empty unless auto-detection cannot find your CLI.
-3. Optionally set **Default Project Directory** to an existing local workspace for one-step new thread commands.
-4. Optionally set **Projects Folder** to a parent folder whose direct child directories should appear in the **New Thread with Prompt** project picker.
+The extension detects the `codex` binary automatically by searching:
+
+1. The **Codex CLI Path** preference, if set
+2. The ChatGPT app bundle (`/Applications/ChatGPT.app/Contents/Resources/codex`)
+3. `/opt/homebrew/bin/codex` (Homebrew on Apple Silicon)
+4. `/usr/local/bin/codex` (Homebrew on Intel)
+5. Your login shell (`command -v codex`)
+
+If none match, set the path manually in the **Codex CLI Path** preference.
 
 ## Preferences
 
-- **Default Project Directory**: optional existing local workspace directory used by one-step new thread commands.
-- **Projects Folder**: optional parent folder used to add local project choices to the prompted new-thread picker.
-- **Codex CLI Path**: optional absolute path to the Codex CLI when auto-detection cannot find it.
+| Preference                    | Description                                                                                        |
+| ----------------------------- | -------------------------------------------------------------------------------------------------- |
+| **Default Working Directory** | Folder new threads start in when you don't pick one. Used by all New Thread commands.              |
+| **Working Directory Root**    | Parent folder whose direct subfolders are offered as Working Directory choices.                    |
+| **Codex CLI Path**            | Path to the Codex CLI. Leave empty to auto-detect.                                                 |
 
-## Notes
+## FAQ
 
-This is an unofficial Raycast extension for Codex and is not affiliated with or endorsed by OpenAI. It uses Codex's local app URL scheme, local CLI, and local app-server interfaces where available. Thread exports are written to your Downloads folder.
+### Can it move a thread into a desktop Project?
 
-Transcript search stores local search-index files in Raycast's extension support folder so repeated searches are fast. The cache stays on your Mac and is refreshed when thread metadata changes.
+No. Resuming a thread keeps its working directory, but Codex manages desktop Project membership itself, and its public interfaces don't let an extension create a Project or assign a thread to one.
+
+### Does the extension store my conversations?
+
+No. Transcript search runs through the local Codex app server, and the extension keeps no separate copy of your transcripts.
+
+---
+
+_Codex is an unofficial extension and is not affiliated with or endorsed by OpenAI._

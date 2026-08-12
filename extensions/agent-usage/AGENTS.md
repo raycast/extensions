@@ -15,6 +15,8 @@ npm run build            # Build extension for production
 # Code Quality
 npm run lint             # Run ESLint checks
 npm run fix-lint         # Auto-fix ESLint issues
+npm run format           # Run Prettier formatting
+npm run typecheck        # Run TypeScript type checking
 npm test                 # Run Node test suite (*.test.ts via --experimental-strip-types)
 
 # Publishing (official Raycast flow — run from this extension directory)
@@ -38,7 +40,7 @@ npm run publish
 
 - **Framework**: Raycast API + React
 - **Language**: TypeScript (ES2023, strict mode)
-- **Module**: CommonJS
+- **Module**: ES modules
 - **Runtime tests**: Node test runner with `--experimental-strip-types`
 - **Linting**: ESLint with `@raycast/eslint-config`
 - **Formatting**: Prettier (120 char width, double quotes)
@@ -47,7 +49,8 @@ npm run publish
 
 ### Imports
 
-- Use ES6 module syntax with `import`
+- Use ES module syntax with `import`
+- Specify the file extension for imports (e.g., `.ts`, `.tsx`)
 - Order: React/Raycast imports first, then local modules
 - Example: `import { List, Action, Icon } from "@raycast/api";`
 
@@ -118,6 +121,7 @@ src/
   amp/                     # Amp provider (fetcher/parser/renderer/types)
   antigravity/             # Antigravity provider
   claude/                  # Claude provider
+  clinepass/               # ClinePass limits, Cline credits, credential discovery/refresh, and account helpers
   codex/                   # Codex provider, including account/auth helpers
   copilot/                 # Copilot provider
   droid/                   # Droid provider
@@ -162,7 +166,8 @@ Key imports from `@raycast/utils`:
 - The menu-bar command (`src/agent-usage-menubar.tsx`) has separate provider wiring. Add providers there too when they should appear in the menu bar.
 - Provider hooks should return a `UsageState<TUsage, TError>` shape for consistency.
 - Each provider should keep its `fetcher`, `renderer`, and `types` responsibilities separate. Add `auth`, `parser`, or small utility modules only when the provider already needs that boundary.
-- Multi-account providers use `src/accounts` storage/types and usually expose an account-aware hook such as `useKimiAccounts`, `useZaiAccounts`, `useCodexAccounts`, or `useSyntheticAccounts`.
+- Multi-account providers use `src/accounts` storage/types and usually expose an account-aware hook such as `useKimiAccounts`, `useZaiAccounts`, `useClinePassAccounts`, `useCodexAccounts`, or `useSyntheticAccounts`.
+- ClinePass auto-detection reads shared auth from `~/.cline/data/settings/providers.json` (`providers.cline.settings.auth`) before the legacy `~/.cline/data/secrets.json` entry. File-backed sessions may be refreshed and must be persisted atomically with an optimistic credential check so concurrent Cline writes and unrelated provider settings are not overwritten. Manual ClinePass accounts require both a `usr-` user ID and an `sk_` API key.
 - Reuse shared UI helpers from `src/agents/ui.tsx` for error/loading/empty states before adding custom UI.
 - Reuse shared formatting, HTTP, JWT, and OpenCode helpers from `src/agents` before adding provider-local duplicates.
 - Provider `fetcher`/`auth`/`parser` modules must not import `@raycast/api` or `src/agents/hooks.ts` (directly or transitively) — the package has no runtime entry outside Raycast, so any such import breaks the Node test runner. Hook wiring, preference reads, and caching live in `src/agents/provider-hooks.ts` and `src/agents/hooks.ts` instead.

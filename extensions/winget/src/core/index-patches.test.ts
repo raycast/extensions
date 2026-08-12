@@ -108,4 +108,12 @@ describe("applyOperationPatch", () => {
     expect(applyOperationPatch("repair", target, undefined, ok, slices())).toBeNull();
     expect(applyOperationPatch("download", target, undefined, ok, slices())).toBeNull();
   });
+
+  it("uninstall no-op: removes the ghost row (winget reported the package not installed)", () => {
+    const notInstalled: WingetOperationResult = { success: true, noop: true, message: "Not installed" };
+    const next = applyOperationPatch("uninstall", target, undefined, notInstalled, slices())!;
+    expect(next).not.toBeNull();
+    expect(next.installed).toHaveLength(0);
+    expect(next.upgradable).toHaveLength(0);
+  });
 });

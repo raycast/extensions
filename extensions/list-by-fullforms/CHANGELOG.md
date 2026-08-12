@@ -1,5 +1,14 @@
 # List by FullForms Changelog
 
+## [Detail Pane Previews, Windows Shortcut Fixes, and Onboarding] - 2026-07-26
+
+- Fixed keyboard shortcuts on Windows: actions such as Open Last Added Entry (Ctrl+O), Open List / View Existing Entry (Ctrl+Shift+O), Edit Entry (Ctrl+E), Star Entry (Ctrl+S), and the note, report, and detail-toggle shortcuts now actually fire; previously their macOS Command bindings were silently ignored on Windows, so the keys did nothing even though the hints looked correct
+- Improved the Quick Add Entry and Suggest Entry empty states: they now link straight to the web app's Create a List page, a brand-new account sees a create-your-first-list prompt instead of a permissions message, and a view-only member gets a shortcut to suggest an entry instead
+- The Search Entries detail pane now previews first-party `> Image:` description callouts as inline images, matching how they render on the web (non-first-party image URLs stay as plain text)
+- The Search Entries detail pane now preserves line breaks in entry descriptions instead of collapsing them into a single paragraph
+- Show the entry's workspace avatar in the Search Entries detail pane metadata, falling back to a person or team glyph when the workspace has no avatar
+- Expanded the list-icon glyph set to match the web's category picker refresh, so lists using the newer category icons show the matching glyph in Raycast instead of the default list icon
+
 ## [Entry Actions, Single Tags Field, and AI Helpers] - 2026-07-12
 
 - The Search Entries "No matches" state now offers an Add Entry action that opens the Quick Add form pre-filled with your search term, so you can create a missing entry without leaving the search

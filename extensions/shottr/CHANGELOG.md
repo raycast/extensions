@@ -1,5 +1,9 @@
 # Shottr Changelog
 
+## [Add Close Main Window preference] - 2026-07-28
+
+- Added a "Close Main Window" preference.
+
 ## [Fix didn't close Raycast main window] - 2026-07-07
 
 - Added `closeMainWindow()` to all commands so the Raycast window closes immediately when triggering a Shottr action.

@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { parseProgressBlock, parseDurationFromStderr, injectGlobalFlags } from "../../src/utils/ffmpegRun";
+import { parseProgressBlock, parseDurationFromStderr } from "../../src/utils/ffmpegRun";
 
 describe("parseProgressBlock", () => {
   const sampleBlock = [
@@ -83,23 +83,5 @@ describe("parseDurationFromStderr", () => {
 
   it("returns null for malformed duration values", () => {
     assert.equal(parseDurationFromStderr("Duration: ab:cd:ef, ..."), null);
-  });
-});
-
-describe("injectGlobalFlags", () => {
-  it("injects after a quoted binary path", () => {
-    const cmd = `"/path/with spaces/ffmpeg" -i "in.mp4" out.mp4`;
-    const out = injectGlobalFlags(cmd, "-progress pipe:1 -nostats");
-    assert.equal(out, `"/path/with spaces/ffmpeg" -progress pipe:1 -nostats -i "in.mp4" out.mp4`);
-  });
-
-  it("injects after an unquoted binary path", () => {
-    const cmd = `ffmpeg -i in.mp4 out.mp4`;
-    const out = injectGlobalFlags(cmd, "-progress pipe:1 -nostats");
-    assert.equal(out, `ffmpeg -progress pipe:1 -nostats -i in.mp4 out.mp4`);
-  });
-
-  it("appends flags when command has no spaces (degenerate case)", () => {
-    assert.equal(injectGlobalFlags("ffmpeg", "-nostats"), "ffmpeg -nostats");
   });
 });

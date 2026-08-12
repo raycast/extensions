@@ -1,5 +1,5 @@
 import { spawn } from "child_process";
-import { execPromise } from "./exec";
+import { runProcess, type ProcessSpec } from "./process";
 
 export type ProgressInfo = {
   percent: number; // 0-100
@@ -12,19 +12,11 @@ export type ProgressInfo = {
 
 /**
  * Spawn an FFmpeg process with `-progress pipe:1 -nostats` and stream progress
- * updates back to the caller. `cmd` must be a full command string that begins
- * with the quoted ffmpeg path and ends with the output target. We append the
- * progress flags just before the final output argument by prepending them to
- * the already-built command (FFmpeg is tolerant of global options anywhere
- * before the next `-i`, but for robustness we wrap the command via `sh -c`).
- *
- * This is intentionally simple: we rely on the shell to parse the command
- * (matching how `execPromise(cmd)` works today), and we just inject the
- * progress flags at the very end, which FFmpeg accepts as per-output options
- * but also honors at the global level.
+ * updates back to the caller. The process is spawned without a shell so paths
+ * and filenames are passed to FFmpeg literally.
  */
 export async function runFFmpegWithProgress(
-  cmd: string,
+  spec: ProcessSpec,
   opts: {
     totalDurationSec?: number;
     onProgress?: (p: ProgressInfo) => void;
@@ -32,14 +24,11 @@ export async function runFFmpegWithProgress(
   } = {},
 ): Promise<{ stdout: string; stderr: string }> {
   const { totalDurationSec, onProgress, signal } = opts;
-  // Insert `-progress pipe:1 -nostats` immediately after the ffmpeg binary path
-  // so they're global options. The command starts with `"<path>" -i ...`.
-  // Find the first space after the (possibly quoted) binary.
-  const injected = injectGlobalFlags(cmd, "-progress pipe:1 -nostats");
+  const args = ["-progress", "pipe:1", "-nostats", ...spec.args];
 
   return new Promise((resolve, reject) => {
-    const child = spawn(injected, {
-      shell: true,
+    const child = spawn(spec.command, args, {
+      shell: false,
       windowsHide: true,
     });
 
@@ -93,6 +82,12 @@ export async function runFFmpegWithProgress(
 
     child.on("close", (code) => {
       if (signal) signal.removeEventListener("abort", abortHandler);
+      if (signal?.aborted) {
+        const error = new Error("Conversion cancelled");
+        error.name = "AbortError";
+        reject(error);
+        return;
+      }
       if (code === 0) {
         if (onProgress && totalDurationSec && totalDurationSec > 0) {
           onProgress({ percent: 100, processedSec: totalDurationSec, totalSec: totalDurationSec });
@@ -103,19 +98,6 @@ export async function runFFmpegWithProgress(
       }
     });
   });
-}
-
-export function injectGlobalFlags(cmd: string, flags: string): string {
-  // Binary path may be quoted with spaces (e.g. `"/path/to/ffmpeg" -i ...`).
-  if (cmd.startsWith('"')) {
-    const closingQuote = cmd.indexOf('"', 1);
-    if (closingQuote !== -1) {
-      return cmd.slice(0, closingQuote + 1) + " " + flags + cmd.slice(closingQuote + 1);
-    }
-  }
-  const firstSpace = cmd.indexOf(" ");
-  if (firstSpace === -1) return cmd + " " + flags;
-  return cmd.slice(0, firstSpace) + " " + flags + cmd.slice(firstSpace);
 }
 
 export function parseProgressBlock(
@@ -186,7 +168,7 @@ function parseFfmpegTimestamp(ts: string): number {
  */
 export async function probeDurationSec(ffmpegPath: string, filePath: string): Promise<number | null> {
   try {
-    await execPromise(`"${ffmpegPath}" -hide_banner -i "${filePath}"`);
+    await runProcess({ command: ffmpegPath, args: ["-hide_banner", "-i", filePath] });
   } catch (err: unknown) {
     // `ffmpeg -i` with no output exits non-zero after printing metadata.
     const stderr =

@@ -111,5 +111,8 @@
     "eslint": "^9.39.2",
     "prettier": "^3.7.4",
     "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8"
   }
 }

@@ -86,7 +86,7 @@ function readCodexIdentityFromIdToken(idToken: string | undefined): {
     const authClaims = getRecordValue(decoded, "https://api.openai.com/auth");
     return {
       userId: trimUnknownStringToNull(authClaims?.user_id) ?? trimUnknownStringToNull(authClaims?.chatgpt_user_id),
-      displayName: trimUnknownStringToNull(decoded.email) ?? trimUnknownStringToNull(decoded.name),
+      displayName: trimUnknownStringToNull(decoded.name) ?? trimUnknownStringToNull(decoded.email),
     };
   } catch {
     return { userId: null, displayName: null };
@@ -248,4 +248,4 @@ export function resolveCodexAuthTokens(options: ResolveCodexAuthTokensOptions = 
   };
 }
 
-export { normalizeBearerToken as normalizeCodexAuthorizationHeader } from "../agents/http";
+export { normalizeBearerToken as normalizeCodexAuthorizationHeader } from "../agents/http.ts";

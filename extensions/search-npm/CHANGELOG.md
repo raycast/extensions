@@ -1,5 +1,13 @@
 # Search npm Changelog
 
+## [Add search results provider] - 2026-08-06
+
+- Add an npmx.dev option for external package search results
+
+## [Update] - 2026-08-03
+
+- Adjusted list icon colors to reduce visual clutter
+
 ## [Improvements] - 2026-07-15
 
 - Add pagination for search results

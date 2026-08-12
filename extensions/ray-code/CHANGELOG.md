@@ -1,5 +1,9 @@
 # Ray Code Changelog
 
+## [Expand Home Directory Paths] - 2026-08-07
+
+- Expand `~` in the configured workspace path before resolving it
+
 ## [Fix the issue with accessing the user shell properly] - 2026-01-02
 
 - `process.env.SHELL` is undefined, use the shell-env package instead

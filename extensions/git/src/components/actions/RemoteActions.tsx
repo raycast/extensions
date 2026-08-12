@@ -10,6 +10,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { RemotesHosts } from "../../hooks/useGitRemotes";
 import { RemoteHostIcon, RemoteHostProviderIcon } from "../icons/RemoteHostIcons";
@@ -110,7 +111,7 @@ export function RemoteAddAction(context: RepositoryContext & NavigationContext) 
     <Action
       title="Add New Remote"
       icon={Icon.Plus}
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={Keyboard.Shortcut.Common.New}
       onAction={async () => {
         let defaultUrl: string | undefined;
 
@@ -132,7 +133,7 @@ export function RemoteEditAction(context: RepositoryContext & { initialRemote: R
       title="Edit Remote"
       icon={Icon.Pencil}
       target={<RemoteEditorForm {...context} />}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      shortcut={Keyboard.Shortcut.Common.Edit}
     />
   );
 }
@@ -267,7 +268,7 @@ export function RemoteOpenInDevAction(context: { remote: Remote }) {
 
   const repoPath = `${remote.organizationName}/${remote.repositoryName.replace(/\.git$/, "")}`;
   return (
-    <ActionPanel.Submenu title="Open in Web IDE" icon={Icon.CodeBlock} shortcut={{ modifiers: ["cmd"], key: "o" }}>
+    <ActionPanel.Submenu title="Open in Web IDE" icon={Icon.CodeBlock} shortcut={Keyboard.Shortcut.Common.Open}>
       <Action.OpenInBrowser title="GitHub Dev" url={`https://github.dev/${repoPath}`} icon={`github.svg`} />
       <Action.OpenInBrowser
         title="VS Code Dev"
@@ -341,7 +342,7 @@ export namespace RemoteWebPageAction {
           title={remote.displayName}
           icon={RemoteHostIcon(remote)}
         >
-          {children(remote)}
+          <>{children(remote)}</>
         </ActionPanel.Submenu>
       ));
     }

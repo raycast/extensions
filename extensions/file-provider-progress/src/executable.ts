@@ -8,7 +8,10 @@ export async function ensureExecutable(filePath: string): Promise<void> {
     throw new Error(`Bundled fp-progress helper is not a regular file: ${filePath}`);
   }
 
-  if ((stats.mode & 0o111) === 0) {
+  try {
+    await access(filePath, constants.X_OK);
+    return;
+  } catch {
     await chmod(filePath, stats.mode | 0o111);
   }
 

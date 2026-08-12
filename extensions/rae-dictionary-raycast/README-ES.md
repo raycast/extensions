@@ -1,10 +1,12 @@
 # Diccionario RAE
 
 Busca palabras en el diccionario de la Real Academia Española directamente desde Raycast. Obtén definiciones, conjugaciones y expresiones de forma rápida y sin abrir el navegador. Uso de [rae-api.com](https://rae-api.com), API de la RAE no oficial.
-  
+
 ## Características
 
 - Busca palabras en el diccionario de la RAE
+- Muestra la categoría gramatical y el género, marcas de uso, ejemplos y marcas regionales
+- Muestra locuciones y expresiones
 - Muestra la palabra del día
 - Obtén palabras aleatorias
 - Copia definiciones rápidamente

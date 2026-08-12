@@ -4,6 +4,9 @@ import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteHighlight, fetchGetAllHighlights, fetchGetSingleBookmark, fetchUpdateHighlight } from "./apis";
 import { BookmarkDetail } from "./components/BookmarkDetail";
 import { useTranslation } from "./hooks/useTranslation";
+import { connectionGuard } from "./components/ConnectionErrorView";
+import { handleFetchError } from "./utils/fetchError";
+import { useLiveData } from "./hooks/useLiveData";
 import { Highlight } from "./types";
 import { runWithToast } from "./utils/toast";
 
@@ -47,14 +50,21 @@ async function deleteHighlight(id: string, t: (key: string) => string, onSuccess
 }
 
 function useGetAllHighlights() {
-  const { isLoading, data, error, revalidate } = useCachedPromise(async () => {
-    log.log("Fetching highlights");
-    const result = await fetchGetAllHighlights();
-    log.info("Highlights fetched", { count: result.highlights?.length ?? 0 });
-    return result.highlights || [];
-  });
+  const { isLoading, data, error, revalidate } = useCachedPromise(
+    async () => {
+      log.log("Fetching highlights");
+      const result = await fetchGetAllHighlights();
+      log.info("Highlights fetched", { count: result.highlights?.length ?? 0 });
+      return result.highlights || [];
+    },
+    [],
+    // Suppresses Raycast's built-in "Failed to fetch latest data" toast.
+    { onError: handleFetchError("highlights") },
+  );
 
-  return { isLoading, highlights: data || [], error, revalidate };
+  const hasLiveData = useLiveData(isLoading, error);
+
+  return { isLoading, highlights: data || [], error, hasLiveData, revalidate };
 }
 
 function EditHighlightForm({ highlight, onUpdated }: { highlight: Highlight; onUpdated: () => void }) {
@@ -200,7 +210,10 @@ function HighlightDetail({ highlight, onRefresh }: { highlight: Highlight; onRef
 export default function Highlights() {
   const { push } = useNavigation();
   const { t } = useTranslation();
-  const { isLoading, highlights, revalidate } = useGetAllHighlights();
+  const { isLoading, highlights, error, hasLiveData, revalidate } = useGetAllHighlights();
+
+  const guard = connectionGuard(error, hasLiveData, revalidate);
+  if (guard) return guard;
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={t("highlights.searchPlaceholder")}>

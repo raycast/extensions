@@ -1,5 +1,20 @@
 # Changelog
 
+## [Update] - 2026-07-30
+
+### Fixed
+- **Diff**: Fix crash when opening the file diff view caused by a missing `strtok3` runtime import from `file-type`
+
+## [Update] - 2026-07-30
+
+### Added
+- **Worktrees**: Add "Worktrees" view listing all worktrees of the repository with actions to open, copy the path and delete a worktree
+- **Branches**: Show an indicator on branches that are checked out in another worktree and open that worktree on checkout
+- **Manage Repositories / Switch Repository**: List linked worktrees of the known repositories as `<repository>: <worktree>` entries
+
+### Fixed
+- **Worktrees**: Read repository state (rebase/merge/cherry-pick progress, stashes, local config) from the correct Git directory when a linked worktree is opened
+
 ## [Update] - 2026-05-25
 
 ### Added

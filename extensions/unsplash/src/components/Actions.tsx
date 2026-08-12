@@ -17,7 +17,7 @@ interface Props {
 async function likeOrDislike(id: number, liked: boolean) {
   const toast = await showToast(Toast.Style.Animated, `${liked ? "Unliking" : "Liking"} photo...`);
   try {
-    await apiRequest(`/photos/${id}/like`, { method: liked ? "DELETE" : "POST" });
+    await apiRequest(`/photos/${id}/like`, { method: liked ? "DELETE" : "POST", requireUserAuth: true });
     toast.style = Toast.Style.Success;
     toast.title = `Photo ${liked ? "unliked" : "liked"}!`;
   } catch {

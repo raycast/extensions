@@ -6,6 +6,7 @@
  */
 
 import { PARSING_CONSTANTS, getSectionFormatsInOrder } from "../constants";
+import { multilineArrayInteriorLines } from "./pattern-registry";
 
 import type { SectionMarkerType } from "../types/enums";
 
@@ -157,9 +158,13 @@ export function analyzeSectionMarkers(content: string): SectionMarker[] {
     functionLevel: 0,
   };
 
+  // Lines inside a multi-line array are never markers — a comment in an
+  // array body that matches a section-header format must not register.
+  const arrayInterior = multilineArrayInteriorLines(content);
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (line) {
+    if (line && !arrayInterior.has(i + 1)) {
       const marker = detectSectionMarker(line, i + 1);
 
       if (marker) {
@@ -206,9 +211,11 @@ export function groupContentIntoSections(content: string): Array<{
     functionLevel: 0,
   };
 
+  const arrayInterior = multilineArrayInteriorLines(content);
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (line) {
+    if (line && !arrayInterior.has(i + 1)) {
       const marker = detectSectionMarker(line, i + 1);
 
       if (marker) {
@@ -319,11 +326,12 @@ export function findSectionBounds(
   const lines = content.split(/\r?\n/);
   let sectionStartLine: number | null = null;
   let sectionEndLine: number | null = null;
+  const arrayInterior = multilineArrayInteriorLines(content);
 
   // Find the section start
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    if (!line) continue;
+    if (!line || arrayInterior.has(i + 1)) continue;
     const marker = detectSectionMarker(line, i + 1);
 
     if (marker && marker.name === sectionLabel) {
@@ -342,7 +350,7 @@ export function findSectionBounds(
   // Find the section end (next section start or end marker)
   for (let i = sectionStartLine; i < lines.length; i++) {
     const line = lines[i];
-    if (!line) continue;
+    if (!line || arrayInterior.has(i + 1)) continue;
     const marker = detectSectionMarker(line, i + 1);
 
     if (marker) {

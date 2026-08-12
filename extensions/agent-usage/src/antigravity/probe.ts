@@ -13,20 +13,15 @@ const GET_UNLEASH_DATA_PATH = "/exa.language_server_pb.LanguageServerService/Get
 const DEFAULT_TIMEOUT_MS = 8000;
 
 export type ProbeErrorCode =
-  | "not_running"
-  | "missing_csrf"
-  | "port_detection_failed"
-  | "api_error"
-  | "network_error"
-  | "parse_error";
+  "not_running" | "missing_csrf" | "port_detection_failed" | "api_error" | "network_error" | "parse_error";
 
 export class AntigravityProbeError extends Error {
-  constructor(
-    public readonly code: ProbeErrorCode,
-    message: string,
-  ) {
+  public readonly code: ProbeErrorCode;
+
+  constructor(code: ProbeErrorCode, message: string) {
     super(message);
     this.name = "AntigravityProbeError";
+    this.code = code;
   }
 }
 

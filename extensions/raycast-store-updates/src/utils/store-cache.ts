@@ -14,7 +14,11 @@ export function getStoredItemsSync(): StoreItem[] {
   const raw = cache.get(ITEMS_KEY);
   if (!raw) return [];
   try {
-    return JSON.parse(raw) as StoreItem[];
+    const parsed: unknown = JSON.parse(raw);
+    // Shape-check, don't cast: a valid-JSON `{}` would otherwise be stored as `items`
+    // and throw on the first .filter() during render.
+    if (!Array.isArray(parsed)) return [];
+    return parsed.filter((i): i is StoreItem => Boolean(i) && typeof i === "object" && typeof i.date === "string");
   } catch {
     return [];
   }

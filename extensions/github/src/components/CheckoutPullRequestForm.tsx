@@ -1,4 +1,4 @@
-import { exec } from "node:child_process";
+import { exec, execFile } from "node:child_process";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -16,7 +16,7 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useForm } from "@raycast/utils";
 
-import { AcceptableCloneProtocol, buildCloneCommand } from "../helpers/repository";
+import { AcceptableCloneProtocol, buildCloneCommandArgs } from "../helpers/repository";
 
 import { PullRequest } from "./PullRequestActions";
 
@@ -45,6 +45,7 @@ export default function CheckoutPullRequestForm({ pullRequest }: CheckoutPullReq
       }
 
       const execAsync = promisify(exec);
+      const execFileAsync = promisify(execFile);
 
       try {
         if (existsSync(targetDir)) {
@@ -72,17 +73,17 @@ export default function CheckoutPullRequestForm({ pullRequest }: CheckoutPullReq
             style: Toast.Style.Animated,
           });
 
-          const branchOption = ["-b", branchName];
-          const cloneCommand = buildCloneCommand(
-            pullRequest.repository.nameWithOwner,
-            repositoryCloneProtocol as AcceptableCloneProtocol,
-            {
-              gitFlags: branchOption,
-              targetDir: targetDir,
-            },
+          await execFileAsync(
+            "git",
+            buildCloneCommandArgs(
+              pullRequest.repository.nameWithOwner,
+              repositoryCloneProtocol as AcceptableCloneProtocol,
+              {
+                gitFlags: ["-b", branchName],
+                targetDir: targetDir,
+              },
+            ),
           );
-
-          await execAsync(cloneCommand);
 
           await showToast({
             style: Toast.Style.Success,

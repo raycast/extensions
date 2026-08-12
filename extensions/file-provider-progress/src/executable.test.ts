@@ -31,6 +31,18 @@ test("leaves an executable bundled helper's mode unchanged", async (context) => 
   assert.equal(helperStats.mode & 0o777, 0o700);
 });
 
+test("repairs a helper when only another permission class has execute access", async (context) => {
+  const directory = await mkdtemp(path.join(tmpdir(), "fp-progress-executable-"));
+  context.after(() => rm(directory, { force: true, recursive: true }));
+  const helperPath = path.join(directory, "fp-progress");
+
+  await writeFile(helperPath, "test helper\n", { mode: 0o645 });
+  await ensureExecutable(helperPath);
+
+  const helperStats = await stat(helperPath);
+  assert.equal(helperStats.mode & 0o777, 0o755);
+});
+
 test("refuses to repair a symlink", async (context) => {
   const directory = await mkdtemp(path.join(tmpdir(), "fp-progress-executable-"));
   context.after(() => rm(directory, { force: true, recursive: true }));

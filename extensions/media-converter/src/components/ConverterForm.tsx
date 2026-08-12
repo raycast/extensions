@@ -8,17 +8,21 @@ import {
   getPreferenceValues,
   Clipboard,
   useNavigation,
+  open,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useMemo, useRef } from "react";
-import fs from "fs";
 import path from "path";
 import { convertMedia } from "../utils/converter";
 import { runConversionBatch } from "../utils/convertBatch";
-import { parseTimeString, formatTimeString } from "../utils/time";
+import { formatTimeString } from "../utils/time";
+import { resolveExistingDirectory, resolveTrim } from "../utils/conversionOptions";
 import { getAllPresets, findPreset } from "../utils/presets";
 import { PresetEditorForm } from "./PresetEditorForm";
-import { execPromise } from "../utils/exec";
+import { enqueueConversionJobs } from "../utils/queue";
+import { resolveTargetSizeQuality, supportsTargetSize } from "../utils/targetSize";
 import {
   OUTPUT_VIDEO_EXTENSIONS,
   OUTPUT_AUDIO_EXTENSIONS,
@@ -111,8 +115,11 @@ export function ConverterForm({
       : ((preferences.defaultOutputLocation as "sameAsInput" | "customFolder") ?? "sameAsInput"),
   );
   const [customOutputFolderOverride, setCustomOutputFolderOverride] = useState<string>(prefill?.outputDir ?? "");
+  const [targetSizeMb, setTargetSizeMb] = useState<string>("");
 
   const [isLoading, setIsLoading] = useState(true);
+  const [isConverting, setIsConverting] = useState(false);
+  const conversionAbortController = useRef<AbortController | null>(null);
   const appliedInitialInputKey = useRef<string | null>(null);
   const hasUserSelectedFiles = useRef(false);
   const { push } = useNavigation();
@@ -180,9 +187,7 @@ export function ConverterForm({
             title: "See supported formats",
             shortcut: { modifiers: ["cmd"], key: "o" },
             onAction: () => {
-              execPromise(
-                "open https://www.raycast.com/leandro.maia/media-converter#:~:text=supported%20input%20formats",
-              );
+              open("https://www.raycast.com/leandro.maia/media-converter#:~:text=supported%20input%20formats");
             },
           },
         });
@@ -285,61 +290,57 @@ export function ConverterForm({
   }, [outputLocationMode, customOutputFolderOverride, preferences.customOutputFolder]);
 
   const parsedTrim = useMemo<TrimOptions | undefined>(() => {
-    const startSec = parseTimeString(trimStart);
-    const endSec = parseTimeString(trimEnd);
-    if (startSec === null && endSec === null) return undefined;
-    return { start: trimStart, end: trimEnd };
+    return resolveTrim(trimStart, trimEnd).trim;
   }, [trimStart, trimEnd]);
 
   const trimValidationHint = useMemo<string>(() => {
     if (!trimStart && !trimEnd) return "";
-    const startOk = trimStart === "" || parseTimeString(trimStart) !== null;
-    const endOk = trimEnd === "" || parseTimeString(trimEnd) !== null;
-    if (!startOk) return "Start time is not a valid HH:MM:SS or seconds value";
-    if (!endOk) return "End time is not a valid HH:MM:SS or seconds value";
-    const s = parseTimeString(trimStart);
-    const e = parseTimeString(trimEnd);
-    if (s !== null && e !== null && s >= e) return "End time must be after start time";
-    if (s !== null && e !== null) return `Will keep ${formatTimeString(e - s)} of video`;
-    if (s !== null) return `Will skip the first ${formatTimeString(s)}`;
-    if (e !== null) return `Will keep only the first ${formatTimeString(e)}`;
+    const resolved = resolveTrim(trimStart, trimEnd);
+    if (resolved.error) return resolved.error;
+    const s = resolved.startSec;
+    const e = resolved.endSec;
+    if (s !== undefined && e !== undefined) return `Will keep ${formatTimeString(e - s)} of video`;
+    if (s !== undefined) return `Will skip the first ${formatTimeString(s)}`;
+    if (e !== undefined) return `Will keep only the first ${formatTimeString(e)}`;
     return "";
   }, [trimStart, trimEnd]);
 
   const handleSubmit = async () => {
-    if (!outputFormat || !currentQualitySetting) return;
+    if (isConverting || !outputFormat || !currentQualitySetting) return;
 
     // Validate trim
-    const startOk = trimStart === "" || parseTimeString(trimStart) !== null;
-    const endOk = trimEnd === "" || parseTimeString(trimEnd) !== null;
-    if (!startOk || !endOk) {
+    const trimResolution = resolveTrim(trimStart, trimEnd);
+    if (trimResolution.error) {
       await showToast({ style: Toast.Style.Failure, title: "Invalid trim values", message: trimValidationHint });
+      return;
+    }
+    const parsedTargetSize =
+      outputFormat && supportsTargetSize(outputFormat) && targetSizeMb.trim() ? Number(targetSizeMb) : undefined;
+    if (parsedTargetSize !== undefined && (!Number.isFinite(parsedTargetSize) || parsedTargetSize <= 0)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Invalid target size",
+        message: "Enter a size above 0 MB.",
+      });
       return;
     }
 
     // Validate output folder if custom
     if (resolvedOutputDir) {
-      try {
-        const stat = fs.statSync(resolvedOutputDir);
-        if (!stat.isDirectory()) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Output folder is not a directory",
-            message: resolvedOutputDir,
-          });
-          return;
-        }
-      } catch {
+      const directory = resolveExistingDirectory(resolvedOutputDir);
+      if (directory.error) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Output folder does not exist",
-          message: resolvedOutputDir,
+          title: "Invalid output folder",
+          message: directory.error,
         });
         return;
       }
     }
 
-    setIsLoading(true);
+    setIsConverting(true);
+    const abortController = new AbortController();
+    conversionAbortController.current = abortController;
     try {
       await runConversionBatch(currentFiles, {
         outputFormat,
@@ -348,9 +349,13 @@ export function ConverterForm({
         stripMetadata,
         trim: parsedTrim,
         showProgress: true,
+        signal: abortController.signal,
+        onCancel: () => abortController.abort(),
+        targetSizeMb: parsedTargetSize,
       });
     } finally {
-      setIsLoading(false);
+      conversionAbortController.current = null;
+      setIsConverting(false);
     }
   };
 
@@ -400,6 +405,48 @@ export function ConverterForm({
     />
   );
 
+  const addToQueueAction = (
+    <Action
+      title="Add to Conversion Queue"
+      icon={Icon.Tray}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+      onAction={async () => {
+        if (!outputFormat || !currentQualitySetting || currentFiles.length === 0) return;
+        const trimResolution = resolveTrim(trimStart, trimEnd);
+        if (trimResolution.error) {
+          await showToast({ style: Toast.Style.Failure, title: "Invalid trim values", message: trimResolution.error });
+          return;
+        }
+        const parsedTargetSize =
+          supportsTargetSize(outputFormat) && targetSizeMb.trim() ? Number(targetSizeMb) : undefined;
+        if (parsedTargetSize !== undefined && (!Number.isFinite(parsedTargetSize) || parsedTargetSize <= 0)) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Invalid target size",
+            message: "Enter a size above 0 MB.",
+          });
+          return;
+        }
+        if (resolvedOutputDir) {
+          const directory = resolveExistingDirectory(resolvedOutputDir);
+          if (directory.error) {
+            await showToast({ style: Toast.Style.Failure, title: "Invalid output folder", message: directory.error });
+            return;
+          }
+        }
+        await enqueueConversionJobs(currentFiles, {
+          outputFormat,
+          quality: currentQualitySetting,
+          outputDir: resolvedOutputDir,
+          stripMetadata,
+          trim: parsedTrim,
+          targetSizeMb: parsedTargetSize,
+        });
+        await launchCommand({ name: "queue", type: LaunchType.UserInitiated });
+      }}
+    />
+  );
+
   return (
     <Form
       isLoading={isLoading}
@@ -407,7 +454,17 @@ export function ConverterForm({
         <ActionPanel>
           {currentFiles && currentFiles.length > 0 && selectedFileType && (
             <>
-              <Action.SubmitForm title="Convert" onSubmit={handleSubmit} icon={Icon.NewDocument} />
+              {isConverting ? (
+                <Action
+                  title="Cancel Conversion"
+                  icon={Icon.XMarkCircle}
+                  shortcut={{ modifiers: ["cmd"], key: "." }}
+                  onAction={() => conversionAbortController.current?.abort()}
+                />
+              ) : (
+                <Action.SubmitForm title="Convert" onSubmit={handleSubmit} icon={Icon.NewDocument} />
+              )}
+              {!isConverting && addToQueueAction}
               {saveAsPresetAction}
               <Action
                 title="Copy FFmpeg Command"
@@ -419,11 +476,29 @@ export function ConverterForm({
                 onAction={async () => {
                   if (!outputFormat || !currentQualitySetting) return;
                   try {
-                    const command = await convertMedia(currentFiles[0], outputFormat, currentQualitySetting, {
+                    const trimResolution = resolveTrim(trimStart, trimEnd);
+                    if (trimResolution.error) throw new Error(trimResolution.error);
+                    if (resolvedOutputDir) {
+                      const directory = resolveExistingDirectory(resolvedOutputDir);
+                      if (directory.error) throw new Error(directory.error);
+                    }
+                    const commandQuality =
+                      supportsTargetSize(outputFormat) && targetSizeMb.trim()
+                        ? (
+                            await resolveTargetSizeQuality(
+                              currentFiles[0],
+                              outputFormat,
+                              currentQualitySetting,
+                              Number(targetSizeMb),
+                              trimResolution.trim,
+                            )
+                          ).quality
+                        : currentQualitySetting;
+                    const command = await convertMedia(currentFiles[0], outputFormat, commandQuality, {
                       returnCommandString: true,
                       outputDir: resolvedOutputDir,
                       stripMetadata,
-                      trim: parsedTrim,
+                      trim: trimResolution.trim,
                     });
                     await Clipboard.copy(command);
                     await showToast({
@@ -561,6 +636,17 @@ export function ConverterForm({
             <Form.Description text={`Trim will be applied to all ${currentFiles.length} files.`} />
           )}
         </>
+      )}
+
+      {selectedFileType === "video" && outputFormat && supportsTargetSize(outputFormat) && (
+        <Form.TextField
+          id="targetSizeMb"
+          title="Target Size"
+          placeholder="Optional size in MB"
+          value={targetSizeMb}
+          onChange={setTargetSizeMb}
+          info="Uses a calculated two-pass bitrate. Final size is approximate because container and audio overhead vary."
+        />
       )}
 
       {/* Output location + metadata */}
