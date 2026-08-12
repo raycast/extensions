@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Clipboard, confirmAlert, Detail, Icon, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import {
@@ -36,6 +36,9 @@ export default function UpdateKarakeep() {
   const [output, setOutput] = useState<string[]>([]);
   const [result, setResult] = useState<string | undefined>();
   const [succeeded, setSucceeded] = useState(false);
+  // Whether we PROVED this container serves Karakeep, as opposed to inferring
+  // it from a port match. Drives a confirmation before anything destructive.
+  const [identityProven, setIdentityProven] = useState(false);
   // A double ↵ can fire onAction twice before `phase` commits, which would run
   // two concurrent pulls against the same project.
   const inFlight = useRef(false);
@@ -93,6 +96,7 @@ export default function UpdateKarakeep() {
       // Proving the API is Karakeep proves the APPLICATION, not the container —
       // the two only coincide when this container is the one serving the port.
       // So the check splits on that:
+      let proven = false;
       if (found.running) {
         // It holds the port, so whatever answers there is this container. Make
         // it prove it is Karakeep before offering to recreate it.
@@ -105,6 +109,7 @@ export default function UpdateKarakeep() {
           setPhase("unavailable");
           return;
         }
+        proven = true;
       } else if (await isApiReachable(apiUrl)) {
         // The candidate is stopped, yet something is answering — so the thing
         // serving your Karakeep URL is NOT this container (a native install, or
@@ -118,10 +123,12 @@ export default function UpdateKarakeep() {
         setPhase("unavailable");
         return;
       }
-      // Nothing is answering and only one project publishes the port: the
-      // stopped candidate is what would serve this URL, so it is the one to
-      // update. Identity cannot be proven with the server down, which is why
-      // the screen names the project before you press Update.
+      // Nothing is answering and only one project publishes the port, so this
+      // stopped candidate is what WOULD serve the URL. That is an inference,
+      // not proof — with the server down there is nothing to ask. `proven`
+      // stays false and the update is gated behind a confirmation naming the
+      // project, because the alternative is recreating a stranger's project on
+      // a single keystroke.
 
       if (!found.configFiles?.length) {
         log.info("Update unavailable: container was not created by Compose", { name: found.name });
@@ -139,6 +146,7 @@ export default function UpdateKarakeep() {
         configFiles: found.configFiles,
       });
       setContainer(found);
+      setIdentityProven(proven);
       setPhase("ready");
     } catch (error) {
       log.error("Detection failed", { error: toErrorMessage(error) });
@@ -153,6 +161,26 @@ export default function UpdateKarakeep() {
 
   const runUpdate = useCallback(async () => {
     if (!container || inFlight.current) return;
+
+    // Identity could not be proven — the container is stopped, so there was
+    // nothing to ask. Everything below RECREATES this project, so the last
+    // check available is the user's own eyes on the name.
+    if (!identityProven) {
+      const confirmed = await confirmAlert({
+        title: t("update.confirm.title"),
+        message: t("update.confirm.message", {
+          project: container.project ?? container.name,
+          image: container.image ?? "—",
+        }),
+        icon: Icon.ExclamationMark,
+        primaryAction: { title: t("update.confirm.proceed"), style: Alert.ActionStyle.Destructive },
+      });
+      if (!confirmed) {
+        log.info("Update cancelled at the unverified-identity confirmation", { project: container.project });
+        return;
+      }
+    }
+
     inFlight.current = true;
     setPhase("updating");
     setOutput([]);
@@ -284,9 +312,9 @@ export default function UpdateKarakeep() {
     } finally {
       inFlight.current = false;
     }
-  }, [container, apiUrl, t]);
+  }, [container, apiUrl, identityProven, t]);
 
-  const markdown = buildMarkdown({ t, phase, container, reason, output, result, apiUrl });
+  const markdown = buildMarkdown({ t, phase, container, reason, output, result, apiUrl, identityProven });
 
   return (
     <Detail
@@ -328,6 +356,7 @@ function buildMarkdown({
   output,
   result,
   apiUrl,
+  identityProven,
 }: {
   t: ReturnType<typeof useTranslation>["t"];
   phase: Phase;
@@ -336,6 +365,7 @@ function buildMarkdown({
   output: string[];
   result?: string;
   apiUrl: string;
+  identityProven: boolean;
 }): string {
   const heading = `# ${t("update.title")}`;
 
@@ -361,5 +391,7 @@ function buildMarkdown({
     `| ${t("update.field.server")} | \`${apiUrl}\` |`,
   ].join("\n");
 
-  return [heading, "", details, "", t("update.ready")].join("\n");
+  const notes = [t("update.ready")];
+  if (!identityProven) notes.push("", t("update.unverified"));
+  return [heading, "", details, "", ...notes].join("\n");
 }

@@ -221,6 +221,14 @@ export const translations = {
       ready:
         "Pulls the latest images and recreates the containers. Existing bookmarks and settings are stored in volumes and are not affected.",
       progress: "Progress",
+      unverified:
+        "Karakeep isn't running, so there's no way to confirm this container is yours rather than another project that happens to use the same port. Check the name above — you'll be asked to confirm.",
+      confirm: {
+        title: "Update this project?",
+        message:
+          "Karakeep isn't running, so this couldn't be verified as your instance. Updating pulls new images and recreates every container in `{{project}}` ({{image}}).",
+        proceed: "Update Anyway",
+      },
       field: {
         container: "Container",
         project: "Compose Project",
@@ -866,6 +874,14 @@ export const translations = {
       checking: "正在查找本地 Karakeep 容器...",
       ready: "拉取最新镜像并重新创建容器。现有书签和设置存储在数据卷中，不会受到影响。",
       progress: "进度",
+      unverified:
+        "Karakeep 未在运行，因此无法确认此容器属于您，而不是恰好使用相同端口的其他项目。请核对上方名称——系统会要求您确认。",
+      confirm: {
+        title: "要更新此项目吗？",
+        message:
+          "Karakeep 未在运行，因此无法验证这是否为您的实例。更新将拉取新镜像并重建 `{{project}}` 中的所有容器（{{image}}）。",
+        proceed: "仍然更新",
+      },
       field: {
         container: "容器",
         project: "Compose 项目",
