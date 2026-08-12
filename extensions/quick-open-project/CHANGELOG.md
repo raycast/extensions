@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix GitLab Nested Group URLs] - {PR_MERGE_DATE}
+## [Fix GitLab Nested Group URLs] - 2026-08-12
 
 - Preserve the complete repository path when opening GitLab projects in nested groups.
 
