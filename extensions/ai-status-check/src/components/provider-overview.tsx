@@ -22,14 +22,8 @@ export function ProviderOverview({
     <List.Section title="System Status">
       <List.Item
         icon={statusIcon(status.health, record.freshness)}
-        title="Overall"
-        accessories={[
-          {
-            text: status.label,
-            tooltip: status.label,
-          },
-          { text: providerUpdatedLabel(snapshot), tooltip: activityTooltip(record) },
-        ]}
+        title={status.label}
+        accessories={[{ text: providerUpdatedLabel(snapshot), tooltip: activityTooltip(record) }]}
         actions={<ProviderSourceActions provider={provider} onRefresh={onRefresh} />}
       />
     </List.Section>
