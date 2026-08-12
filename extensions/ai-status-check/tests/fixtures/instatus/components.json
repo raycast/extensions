@@ -1,0 +1,7 @@
+{
+  "components": [
+    { "id": "api", "name": "API", "status": "UP", "parent": { "name": "Services" } },
+    { "id": "web", "name": "Web", "status": "DEGRADED" },
+    { "id": "computer", "name": "Computer", "status": "OPERATIONAL", "group": null }
+  ]
+}

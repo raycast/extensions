@@ -1,0 +1,221 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-status-check",
+  "version": "0.1.0",
+  "private": true,
+  "title": "AI Status",
+  "description": "Check the operational status, components, and recent incidents of common AI providers.",
+  "icon": "icon.png",
+  "author": "Astatine-213",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-ai-status",
+      "title": "Check AI Status",
+      "description": "Check AI provider health, components, and recent incidents",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "showOpenAI",
+      "type": "checkbox",
+      "title": "Model Providers",
+      "description": "Show OpenAI status, components, and incidents.",
+      "label": "OpenAI",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showClaude",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Claude status, components, and incidents.",
+      "label": "Claude",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showGemini",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Google Gemini API and AI Studio status.",
+      "label": "Google AI Studio and Gemini",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showXAI",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show xAI, Grok, and API status.",
+      "label": "xAI",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showDeepSeek",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show DeepSeek status, components, and incidents.",
+      "label": "DeepSeek",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showMistral",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Mistral AI service and incident status.",
+      "label": "Mistral AI",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showCohere",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Cohere status, components, and incidents.",
+      "label": "Cohere",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showPerplexity",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Perplexity application and API status.",
+      "label": "Perplexity",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showOpenRouter",
+      "type": "checkbox",
+      "title": "Routers & Inference",
+      "description": "Show OpenRouter service and incident status.",
+      "label": "OpenRouter",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showGroq",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show GroqCloud status, components, and incidents.",
+      "label": "Groq",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showTogetherAI",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Together AI service and incident status.",
+      "label": "Together AI",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showFireworksAI",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Fireworks AI status, components, and incidents.",
+      "label": "Fireworks AI",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showCerebras",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Cerebras inference status and incidents.",
+      "label": "Cerebras",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showReplicate",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Replicate status, components, and incidents.",
+      "label": "Replicate",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showHuggingFace",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Hugging Face service and incident status.",
+      "label": "Hugging Face",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showBaseten",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Baseten inference status and incidents.",
+      "label": "Baseten",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showElevenLabs",
+      "type": "checkbox",
+      "title": "Specialized Generation",
+      "description": "Show ElevenLabs voice service status and incidents.",
+      "label": "ElevenLabs",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showStabilityAI",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Stability AI API status and incidents.",
+      "label": "Stability AI",
+      "default": false,
+      "required": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "check:sources": "npm run test:compile && node node_modules/.cache/ai-status-check-tests/.github/scripts/check-status-sources.js",
+    "check:store": "npm run test:compile && node node_modules/.cache/ai-status-check-tests/.github/scripts/check-store-assets.js",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npm run check:store && npx @raycast/api@latest publish",
+    "test": "npm run test:compile && node node_modules/.cache/ai-status-check-tests/.github/scripts/run-tests.js",
+    "test:compile": "node -e \"require('node:fs').rmSync('node_modules/.cache/ai-status-check-tests',{recursive:true,force:true})\" && tsc -p tsconfig.test.json",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "24.13.3",
+    "@types/react": "19.0.10",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=22.22.2"
+  },
+  "packageManager": "npm@11.17.0",
+  "allowScripts": {
+    "esbuild@0.27.7": true
+  }
+}

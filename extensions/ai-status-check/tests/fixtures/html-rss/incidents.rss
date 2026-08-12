@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <item>
+      <title>[API] Elevated error rate</title>
+      <link>https://status.example.com/incidents/incident-1</link>
+      <guid>https://status.example.com/incidents/incident-1</guid>
+      <pubDate>Tue, 11 Aug 2026 15:00:00 GMT</pubDate>
+      <description><![CDATA[Status: INVESTIGATING<br>We are investigating.<ul><li>API</li></ul>]]></description>
+    </item>
+    <item>
+      <title>[API] Elevated error rate</title>
+      <link>https://status.example.com/incidents/incident-1</link>
+      <guid>https://status.example.com/incidents/incident-1</guid>
+      <pubDate>Tue, 11 Aug 2026 15:30:00 GMT</pubDate>
+      <description><![CDATA[Status: RESOLVED<br>The service has recovered.<ul><li>API</li></ul>]]></description>
+    </item>
+  </channel>
+</rss>

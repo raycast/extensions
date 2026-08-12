@@ -1,0 +1,51 @@
+{
+  "summary": {
+    "components": [
+      { "id": "chat", "name": "Chat" },
+      { "id": "embed", "name": "Embed" },
+      { "id": "docs", "name": "Documentation" },
+      { "id": "internal", "name": "Internal", "hidden": true }
+    ],
+    "affected_components": [
+      { "component_id": "embed", "component_status": "degraded_performance" }
+    ],
+    "structure": {
+      "items": [
+        {
+          "group": {
+            "id": "endpoints",
+            "name": "Endpoints",
+            "hidden": false,
+            "components": [
+              { "component_id": "chat", "name": "Chat", "hidden": false }
+            ]
+          }
+        },
+        {
+          "group": {
+            "id": "models",
+            "name": "Models",
+            "hidden": false,
+            "components": [
+              { "component_id": "embed", "name": "Embed", "hidden": false }
+            ]
+          }
+        },
+        {
+          "component": {
+            "component_id": "docs",
+            "name": "Docs",
+            "hidden": false
+          }
+        },
+        {
+          "component": {
+            "component_id": "internal",
+            "name": "Internal",
+            "hidden": true
+          }
+        }
+      ]
+    }
+  }
+}
