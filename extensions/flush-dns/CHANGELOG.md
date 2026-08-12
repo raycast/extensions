@@ -1,6 +1,6 @@
 # Flush DNS Changelog
 
-## [Touch ID Authentication] - {PR_MERGE_DATE}
+## [Touch ID Authentication] - 2026-08-12
 
 - Added Touch ID authentication for macOS DNS flushing while retaining the administrator password fallback ([#13104](https://github.com/raycast/extensions/issues/13104)).
 
