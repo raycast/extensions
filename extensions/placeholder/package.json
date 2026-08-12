@@ -7,7 +7,8 @@
   "author": "koinzhang",
   "contributors": [
     "j3lte",
-    "xmok"
+    "xmok",
+    "kumail_changezi"
   ],
   "platforms": [
     "macOS",
@@ -25,7 +26,10 @@
     "image",
     "photo",
     "design",
-    "media"
+    "media",
+    "text",
+    "scramble",
+    "greeking"
   ],
   "license": "MIT",
   "commands": [
@@ -203,6 +207,60 @@
           "description": "Get the same random image every time based on a seed",
           "required": false,
           "default": true
+        }
+      ]
+    },
+    {
+      "name": "scramble-selected-text",
+      "title": "Scramble Selected Text",
+      "subtitle": "Placeholder",
+      "description": "Replace selected text with shape-matched invented copy",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "source",
+          "type": "dropdown",
+          "title": "Preferred Source",
+          "description": "Read the preferred source first. The other source is used only when the preferred source is empty.",
+          "data": [
+            {
+              "title": "Selected Text",
+              "value": "selected"
+            },
+            {
+              "title": "Clipboard",
+              "value": "clipboard"
+            }
+          ],
+          "default": "selected",
+          "required": false
+        },
+        {
+          "name": "action",
+          "type": "dropdown",
+          "title": "Output Action",
+          "description": "Replace the current selection or copy the scrambled text as plain text.",
+          "data": [
+            {
+              "title": "Replace Selection",
+              "value": "paste"
+            },
+            {
+              "title": "Copy to Clipboard",
+              "value": "copy"
+            }
+          ],
+          "default": "paste",
+          "required": false
+        },
+        {
+          "name": "scrambleNumbers",
+          "type": "checkbox",
+          "title": "Privacy",
+          "description": "Replace every decimal digit while preserving its writing system, position, and count.",
+          "label": "Scramble Numbers",
+          "default": true,
+          "required": false
         }
       ]
     }

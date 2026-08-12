@@ -1,5 +1,11 @@
 # Placeholder Changelog
 
+## [Shape-Matched Text Placeholders] - {PR_MERGE_DATE}
+
+- Add a command that turns selected or clipboard copy into layout-matched invented text
+- Preserve whitespace, punctuation, casing, repeated words, numbers, and approximate word width
+- Keep supported rich clipboard content intact when replacing a selection
+
 ## [Cross-Platform Keyboard Shortcuts] - 2026-02-23
 
 - Make `Keyboard` shortcuts cross-platform
