@@ -59,6 +59,10 @@ export const translations = {
 
     // Common Actions & Messages
     common: {
+      /** Interpolated so the whole sentence is translatable — concatenating an
+       * English " is required" onto a translated field name produced
+       * "名称 is required". */
+      fieldRequired: "{{field}} is required",
       delete: "Delete",
       deleting: "Deleting...",
       deleteSuccess: "Deleted successfully",
@@ -134,6 +138,10 @@ export const translations = {
         copyLink: "Copy Link",
         copyContent: "Copy Content",
         aiSummary: "AI Summary",
+        addToList: "Add to List",
+        addingToList: "Adding to {{name}}...",
+        addedToList: "Added to {{name}}",
+        addToListFailed: "Could not add to list",
         favorite: "Favorite",
         unfavorite: "Unfavorite",
         archive: "Archive",
@@ -192,6 +200,96 @@ export const translations = {
     },
 
     // List Related
+    changelog: {
+      title: "Karakeep Release Notes",
+      loading: "Fetching the release notes from GitHub...",
+      empty: "This release has no notes.",
+      error: "Couldn't fetch the release notes: {{message}}",
+      version: "Version",
+      released: "Released",
+      onGitHub: "GitHub",
+      viewOnline: "Open release",
+      actions: {
+        openRelease: "Open Release on GitHub",
+        allReleases: "View All Releases",
+        copy: "Copy Release Notes",
+      },
+    },
+    update: {
+      title: "Update Karakeep",
+      checking: "Looking for a local Karakeep container...",
+      ready:
+        "Pulls the latest images and recreates the containers. Existing bookmarks and settings are stored in volumes and are not affected.",
+      progress: "Progress",
+      unverified:
+        "Karakeep isn't running, so there's no way to confirm this container is yours rather than another project that happens to use the same port. Check the name above — you'll be asked to confirm.",
+      confirm: {
+        title: "Update this project?",
+        message:
+          "Karakeep isn't running, so this couldn't be verified as your instance. Updating pulls new images and recreates every container in `{{project}}` ({{image}}).",
+        proceed: "Update Anyway",
+      },
+      field: {
+        container: "Container",
+        project: "Compose Project",
+        image: "Image",
+        server: "Server",
+      },
+      actions: {
+        update: "Update Karakeep",
+        recheck: "Check Again",
+        viewChangelog: "View Changelog",
+        copyCommand: "Copy Docker Command",
+      },
+      unavailable: {
+        hint: "This command only manages a Karakeep running in Docker on this machine.",
+        notLocal:
+          "Your server is at {{host}}, which isn't on this machine — updating it has to happen wherever it runs.",
+        noDocker: "The Docker CLI wasn't found in any of the standard install locations.",
+        daemonDown: "Docker is installed but the daemon isn't responding. Start Docker Desktop and try again.",
+        noContainer: "No Docker container publishes port {{port}}, so there's nothing here to update.",
+        notCompose:
+          "The container `{{name}}` wasn't created by Docker Compose, so there's no compose file to pull against.",
+        ambiguous:
+          "More than one Docker project publishes port {{port}} ({{projects}}), so there's no safe way to tell which one is Karakeep. Updating the wrong one would recreate an unrelated app.",
+        notKarakeep:
+          "Couldn't confirm Karakeep at `{{apiUrl}}`. It may still be starting, your API key may be wrong, or another app may be using this port — updating would recreate whatever is actually there.",
+        servedByOther:
+          "`{{name}}` is stopped, but something is already answering on port {{port}} — so whatever serves your Karakeep URL isn't this container. Updating it would recreate something unrelated.",
+      },
+      toast: {
+        updating: "Pulling latest images...",
+        waiting: "Images pulled — waiting for Karakeep to start...",
+        updated: "Karakeep updated",
+        alreadyCurrent: "Already on the latest images",
+        finished: "Update finished",
+        startedButUnreachable: "Updated, but Karakeep isn't answering yet",
+        failed: "Update failed",
+      },
+      failure: {
+        network: "Docker couldn't reach the image registry",
+        auth: "Docker isn't authorized to pull these images",
+        disk: "Not enough disk space to pull the images",
+        conflict: "A port Karakeep needs is already in use",
+        unknown: "Update failed",
+        stillRunning: "Your instance is still running",
+        notRunning: "Your instance isn't responding",
+        stillRunningDetail:
+          "Karakeep is still answering at `{{apiUrl}}`, so you have a working instance. A multi-service update can stop partway, so some services may have been recreated and others not — retrying once the problem clears will bring them all to the same version.",
+        notRunningDetail:
+          "Karakeep isn't answering at `{{apiUrl}}`. Check `docker compose ps` and `docker compose logs` for the project.",
+      },
+      result: {
+        updated: "**Updated.** New images were pulled and the containers recreated.",
+        alreadyCurrent: "**Already current.** No newer images were available.",
+        unknownChange:
+          "**Update finished.** Couldn't read the image IDs before and after, so whether anything actually changed is unknown.",
+        reachable: "Karakeep is answering at `{{apiUrl}}`.",
+        unreachable:
+          "Karakeep still isn't answering at `{{apiUrl}}`. It may need longer, or `docker compose logs` may explain why.",
+        failed: "**Update failed.**",
+      },
+    },
     list: {
       favorites: "Favorites",
       openFavorites: "Open Favorites",
@@ -209,7 +307,19 @@ export const translations = {
       listName: "Name",
       listNamePlaceholder: "Enter list name",
       listIcon: "Icon",
-      listIconPlaceholder: "Enter an emoji. Type ':' to open emoji picker.",
+      listIconPlaceholder: "Any emoji, e.g. 🔖 (⌘I to browse)",
+      listIconInvalid: "Must be a single emoji",
+      iconPicker: {
+        title: "Choose Icon",
+        searchPlaceholder: "Search 1,900+ emoji...",
+        select: "Use This Icon",
+        suggested: "Suggested",
+        results: "Results",
+        empty: {
+          title: "No matching emoji",
+          description: "Try a different word, or type the emoji directly in the Icon field.",
+        },
+      },
       listDescription: "Description",
       listDescriptionPlaceholder: "Optional description",
       listParent: "Parent List",
@@ -446,6 +556,7 @@ export const translations = {
         title: "No bookmarks found",
         description: "No bookmarks in this search",
       },
+      searchResponseInvalid: "The server returned an unexpected search response.",
       onlineSearch: {
         title: (searchText: string) => `Online search: ${searchText}`,
         action: (searchText: string) => `Online search: ${searchText}`,
@@ -603,6 +714,7 @@ export const translations = {
 
     // 通用操作和消息
     common: {
+      fieldRequired: "{{field}}不能为空",
       delete: "删除",
       deleting: "删除中...",
       deleteSuccess: "删除成功",
@@ -680,6 +792,10 @@ export const translations = {
         copyLink: "复制链接",
         copyContent: "复制内容",
         aiSummary: "AI 摘要",
+        addToList: "添加到列表",
+        addingToList: "正在添加到 {{name}}...",
+        addedToList: "已添加到 {{name}}",
+        addToListFailed: "无法添加到列表",
         favorite: "收藏",
         unfavorite: "取消收藏",
         archive: "归档",
@@ -738,6 +854,91 @@ export const translations = {
     },
 
     // 列表相关
+    changelog: {
+      title: "Karakeep 版本说明",
+      loading: "正在从 GitHub 获取版本说明...",
+      empty: "此版本没有说明。",
+      error: "无法获取版本说明：{{message}}",
+      version: "版本",
+      released: "发布时间",
+      onGitHub: "GitHub",
+      viewOnline: "打开版本页面",
+      actions: {
+        openRelease: "在 GitHub 上打开版本",
+        allReleases: "查看所有版本",
+        copy: "复制版本说明",
+      },
+    },
+    update: {
+      title: "更新 Karakeep",
+      checking: "正在查找本地 Karakeep 容器...",
+      ready: "拉取最新镜像并重新创建容器。现有书签和设置存储在数据卷中，不会受到影响。",
+      progress: "进度",
+      unverified:
+        "Karakeep 未在运行，因此无法确认此容器属于您，而不是恰好使用相同端口的其他项目。请核对上方名称——系统会要求您确认。",
+      confirm: {
+        title: "要更新此项目吗？",
+        message:
+          "Karakeep 未在运行，因此无法验证这是否为您的实例。更新将拉取新镜像并重建 `{{project}}` 中的所有容器（{{image}}）。",
+        proceed: "仍然更新",
+      },
+      field: {
+        container: "容器",
+        project: "Compose 项目",
+        image: "镜像",
+        server: "服务器",
+      },
+      actions: {
+        update: "更新 Karakeep",
+        recheck: "重新检查",
+        viewChangelog: "查看更新日志",
+        copyCommand: "复制 Docker 命令",
+      },
+      unavailable: {
+        hint: "此命令仅管理运行在本机 Docker 中的 Karakeep。",
+        notLocal: "您的服务器位于 {{host}}，不在本机上——需要在其运行的位置进行更新。",
+        noDocker: "在任何标准安装位置均未找到 Docker CLI。",
+        daemonDown: "已安装 Docker，但守护进程无响应。请启动 Docker Desktop 后重试。",
+        noContainer: "没有 Docker 容器发布端口 {{port}}，因此没有可更新的内容。",
+        notCompose: "容器 `{{name}}` 并非由 Docker Compose 创建，因此没有可用的 compose 文件。",
+        ambiguous:
+          "有多个 Docker 项目发布了端口 {{port}}（{{projects}}），无法安全判断哪个是 Karakeep。更新错误的项目会重建无关的应用。",
+        notKarakeep:
+          "无法确认 `{{apiUrl}}` 上运行的是 Karakeep。它可能仍在启动，API 密钥可能有误，或有其他应用占用此端口——更新会重建实际运行的内容。",
+        servedByOther:
+          "`{{name}}` 已停止，但端口 {{port}} 上已有响应——因此为您的 Karakeep URL 提供服务的并非此容器。更新它会重建无关的内容。",
+      },
+      toast: {
+        updating: "正在拉取最新镜像...",
+        waiting: "镜像已拉取——正在等待 Karakeep 启动...",
+        updated: "Karakeep 已更新",
+        alreadyCurrent: "已是最新镜像",
+        finished: "更新完成",
+        startedButUnreachable: "已更新，但 Karakeep 尚未响应",
+        failed: "更新失败",
+      },
+      failure: {
+        network: "Docker 无法连接到镜像仓库",
+        auth: "Docker 无权拉取这些镜像",
+        disk: "磁盘空间不足，无法拉取镜像",
+        conflict: "Karakeep 所需的端口已被占用",
+        unknown: "更新失败",
+        stillRunning: "您的实例仍在运行",
+        notRunning: "您的实例无响应",
+        stillRunningDetail:
+          "Karakeep 仍在 `{{apiUrl}}` 响应，因此您有一个可用的实例。多服务更新可能中途停止，部分服务可能已重建而其他未重建——问题解决后重试可使它们版本一致。",
+        notRunningDetail:
+          "Karakeep 未在 `{{apiUrl}}` 响应。请检查该项目的 `docker compose ps` 和 `docker compose logs`。",
+      },
+      result: {
+        updated: "**已更新。** 已拉取新镜像并重新创建容器。",
+        alreadyCurrent: "**已是最新。** 没有可用的新镜像。",
+        unknownChange: "**更新完成。** 无法读取更新前后的镜像 ID，因此无法确定是否有实际变更。",
+        reachable: "Karakeep 正在 `{{apiUrl}}` 响应。",
+        unreachable: "Karakeep 仍未在 `{{apiUrl}}` 响应。可能需要更长时间，或可通过 `docker compose logs` 查看原因。",
+        failed: "**更新失败。**",
+      },
+    },
     list: {
       favorites: "收藏夹",
       openFavorites: "打开收藏夹",
@@ -755,7 +956,19 @@ export const translations = {
       listName: "名称",
       listNamePlaceholder: "输入列表名称",
       listIcon: "图标",
-      listIconPlaceholder: "请输入表情符号。输入“:”即可打开表情符号选择器。",
+      listIconPlaceholder: "任意表情符号，例如 🔖（按 ⌘I 浏览）",
+      listIconInvalid: "必须是单个表情符号",
+      iconPicker: {
+        title: "选择图标",
+        searchPlaceholder: "搜索 1900+ 表情符号...",
+        select: "使用此图标",
+        suggested: "推荐",
+        results: "搜索结果",
+        empty: {
+          title: "未找到匹配的表情符号",
+          description: "请尝试其他关键词，或直接在“图标”字段中输入表情符号。",
+        },
+      },
       listDescription: "描述",
       listDescriptionPlaceholder: "可选描述",
       listParent: "父列表",
@@ -992,6 +1205,7 @@ export const translations = {
         title: "未找到书签",
         description: "请尝试其他关键词",
       },
+      searchResponseInvalid: "服务器返回了意外的搜索响应。",
       onlineSearch: {
         title: (searchText: string) => `在线搜索：${searchText}`,
         action: (searchText: string) => `在线搜索：${searchText}`,

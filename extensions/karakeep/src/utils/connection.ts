@@ -7,6 +7,7 @@
  * Everything here exists to pull that out so callers can distinguish "the server
  * said no" from "there was no server".
  */
+import { getApiConfig } from "./config";
 
 /** Node/undici cause codes that mean the request never reached a server. */
 const CONNECTION_ERROR_CODES = new Set([
@@ -136,5 +137,36 @@ export function getPortFromUrl(apiUrl: string): string | undefined {
     return undefined;
   } catch {
     return undefined;
+  }
+}
+
+/**
+ * Whether the server at the configured URL identifies as Karakeep.
+ *
+ * `isApiReachable` deliberately accepts ANY HTTP response, which is right for
+ * "can I make a request" but useless for "is this actually my instance" — an
+ * unrelated app holding the same port answers just as well.
+ *
+ * This asks the application rather than inspecting the container image, because
+ * users run forks and custom tags: a /karakeep/i match on the image would be a
+ * false negative for them and a false positive for anything else named after
+ * the project.
+ *
+ * A wrong API key produces the same "no" as a stranger's server. That is the
+ * intended trade for a caller about to do something destructive — the message
+ * names both possibilities.
+ */
+export async function respondsAsKarakeep(timeoutMs = 5_000): Promise<boolean> {
+  try {
+    const { apiUrl, apiKey } = await getApiConfig();
+    const response = await fetch(new URL("/api/v1/lists", apiUrl).toString(), {
+      headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    if (!response.ok) return false;
+    const body = await response.json();
+    return Array.isArray((body as { lists?: unknown })?.lists);
+  } catch {
+    return false;
   }
 }
