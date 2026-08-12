@@ -1,28 +1,24 @@
+import parseUrl from "parse-url";
+
 type GitRemote = {
   host: string;
   url: string;
 };
 
 export function parseGitRemote(remoteUrl: string): GitRemote | undefined {
-  const trimmedUrl = remoteUrl.trim();
-  const isWindowsPath = /^[a-zA-Z]:[\\/]/.test(trimmedUrl);
-  const scpLikeMatch =
-    trimmedUrl.includes("://") || isWindowsPath ? undefined : trimmedUrl.match(/^(?:([^@/]+)@)?([^:/]+):(.+)$/);
-  const normalizedUrl = scpLikeMatch
-    ? `ssh://${scpLikeMatch[1] ? `${scpLikeMatch[1]}@` : ""}${scpLikeMatch[2]}/${scpLikeMatch[3]}`
-    : trimmedUrl;
-
   try {
-    const parsedUrl = new URL(normalizedUrl);
-    const repositoryPath = parsedUrl.pathname.replace(/^\/+|\/+$/g, "").replace(/\.git$/, "");
+    const parsedUrl = parseUrl(remoteUrl.trim(), false);
+    const repositoryPath = parsedUrl.pathname.replace(/^\/+|\/+$/g, "").replace(/\.git$/i, "");
 
-    if (!parsedUrl.host || !repositoryPath) {
+    if (!parsedUrl.resource || !repositoryPath) {
       return undefined;
     }
 
+    const host = parsedUrl.port ? `${parsedUrl.resource}:${parsedUrl.port}` : parsedUrl.resource;
+
     return {
-      host: parsedUrl.host,
-      url: `https://${parsedUrl.host}/${repositoryPath}`,
+      host,
+      url: `https://${host}/${repositoryPath}`,
     };
   } catch {
     return undefined;
