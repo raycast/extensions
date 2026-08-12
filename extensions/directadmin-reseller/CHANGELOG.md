@@ -1,6 +1,6 @@
 # DirectAdmin Reseller Changelog
 
-## [Manage Panels (Experimental)] - {PR_MERGE_DATE}
+## [Manage Panels (Experimental)] - 2026-08-12
 
 - Add a new (experimental, **disabled by default**) command to manage multiple DirectAdmin Reseller panels
 
