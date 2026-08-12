@@ -50,9 +50,15 @@ export const normalizeServer = (resource: JsonApiResource<ServerAttributes>, ctx
 
 type SiteCtx = { org_slug: string; server_id?: string };
 
+// The org-level /orgs/{slug}/sites endpoint carries no server relationship or
+// attribute — the server id only appears in the deployment_url path
+// (…/servers/{id}/sites/…). Extract it so those sites can resolve their server.
+const serverIdFromDeploymentUrl = (url?: string): string | undefined => url?.match(/\/servers\/(\d+)/)?.[1];
+
 export const normalizeSite = (resource: JsonApiResource<SiteAttributes>, ctx: SiteCtx): ISite => {
   const a = resource.attributes ?? ({} as SiteAttributes);
-  const serverId = resource.relationships?.server?.data?.id ?? ctx.server_id ?? "";
+  const serverId =
+    resource.relationships?.server?.data?.id ?? ctx.server_id ?? serverIdFromDeploymentUrl(a.deployment_url) ?? "";
   return {
     id: resource.id,
     server_id: serverId,

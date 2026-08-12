@@ -12,7 +12,11 @@ import { useSites } from "../../hooks/useSites";
 
 export const SiteSingle = ({ site, server }: { site: ISite; server: IServer }) => {
   const { sites } = useSites(server);
-  const siteData = sites?.find((s) => s.id === site.id);
+  // Render immediately from the site we were handed; `useSites` writes fresh data
+  // to LocalStorage in the background and only surfaces it on a later revalidation,
+  // so on a first-ever open (e.g. straight from the global sites list) its result
+  // is empty. Falling back to `site` avoids a blank screen until then.
+  const siteData = sites?.find((s) => s.id === site.id) ?? site;
   const { url } = useIsSiteOnline(site);
 
   return (

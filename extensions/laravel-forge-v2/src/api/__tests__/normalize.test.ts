@@ -101,6 +101,21 @@ describe("normalizeSite", () => {
     const site = normalizeSite(resource, { org_slug: "acme", server_id: "42" });
     expect(site.server_id).toBe("42");
   });
+  it("extracts server id from deployment_url when the org-level endpoint omits it elsewhere", () => {
+    // The /orgs/{slug}/sites endpoint carries no server relationship or attribute;
+    // the id only appears in the deployment_url path.
+    const resource: JsonApiResource<SiteAttributes> = {
+      id: "489565",
+      type: "sites",
+      attributes: {
+        name: "staging.example.com",
+        repository: null,
+        deployment_url: "https://forge.laravel.com/servers/184049/sites/489565/deploy/http?token=abc",
+      },
+    };
+    const site = normalizeSite(resource, { org_slug: "acme" });
+    expect(site.server_id).toBe("184049");
+  });
 });
 
 describe("normalizeDeployment", () => {

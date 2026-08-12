@@ -1,9 +1,10 @@
 # Laravel Forge Changelog
 
-## [API v2 Migration] - {PR_MERGE_DATE}
-- Migrated to Laravel Forge API v2 (v1 is deprecated)
+## [API v2 Migration & Global Site Search] - {PR_MERGE_DATE}
+- Migrated to Laravel Forge API v2 (v1 is deprecated); requires a new v2 API token
 - Added organization filtering with a settable default organization
-- Requires a new v2 API token
+- Search sites by domain across every server: new "Search Sites" command, and the "Manage Servers" command now lists and searches sites too — type a domain to open a site directly
+- Removed the background deployment menu-bar command: its constant polling of every org's sites doesn't fit the v2 org-scoped API's rate limits
 
 ## [Fix] - 2023-05-12
 - Fixes bug in displaying the ssh:// protocol string

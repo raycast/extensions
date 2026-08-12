@@ -37,15 +37,25 @@ describe("authHeaders", () => {
 });
 
 describe("fetchAllPages", () => {
-  it("concatenates every page until links.next is null", async () => {
+  it("concatenates every same-origin page until links.next is null", async () => {
+    const next = "https://forge.laravel.com/api/next-2";
     mockedFetch
-      .mockResolvedValueOnce(okResponse(page([{ id: "1" }], "https://next-2")))
+      .mockResolvedValueOnce(okResponse(page([{ id: "1" }], next)))
       .mockResolvedValueOnce(okResponse(page([{ id: "2" }], null)));
 
-    const all = await fetchAllPages("https://start", { method: "get" });
+    const all = await fetchAllPages("https://forge.laravel.com/api/start", { method: "get" });
 
     expect(all.map((r) => (r as { id: string }).id)).toEqual(["1", "2"]);
     expect(mockedFetch).toHaveBeenCalledTimes(2);
-    expect(mockedFetch.mock.calls[1][0]).toBe("https://next-2");
+    expect(mockedFetch.mock.calls[1][0]).toBe(next);
+  });
+
+  it("stops before following a cross-origin links.next (never sends the token off-origin)", async () => {
+    mockedFetch.mockResolvedValueOnce(okResponse(page([{ id: "1" }], "https://evil.example/api/next")));
+
+    const all = await fetchAllPages("https://forge.laravel.com/api/start", { method: "get" });
+
+    expect(all.map((r) => (r as { id: string }).id)).toEqual(["1"]);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
   });
 });

@@ -1,12 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import { sortBy } from "lodash";
 import { FORGE_API_URL } from "../config";
-import { IServer, ISite } from "../types";
+import { IServer } from "../types";
 import { apiFetch, authHeaders, fetchAllPages } from "../lib/api";
 import { ServerAttributes } from "../lib/jsonapi";
 import { normalizeServer } from "./normalize";
 import { Org } from "./Org";
-import { Site } from "./Site";
 
 type Account = { tokenKey: string; token: string; sshUser: string };
 
@@ -62,34 +61,11 @@ const getServersForAccount = async ({ token, tokenKey, sshUser }: Account): Prom
         headers: authHeaders(token),
       });
 
-      // Build keyword search data from this org's sites (fail gracefully — non-critical).
-      let keywordsByServer: Record<string, Set<string>> = {};
-      try {
-        const sites = await Site.getSitesForOrg({ org: org.slug, token });
-        keywordsByServer = getSiteKeywords(sites);
-      } catch (error) {
-        console.error(error);
-      }
-
       return resources
         .map((r) => normalizeServer(r, { org_slug: org.slug, api_token_key: tokenKey, ssh_user: sshUser }))
-        .map((server) => {
-          server.keywords = keywordsByServer[server.id] ? [...keywordsByServer[server.id]] : [];
-          return server;
-        })
         .filter((s) => !s.revoked);
     })
   );
 
   return perOrg.flat();
-};
-
-const getSiteKeywords = (sites: ISite[]): Record<string, Set<string>> => {
-  return sites.reduce((acc, site) => {
-    if (!site?.server_id) return acc;
-    const keywords = [site?.name ?? "", ...(site?.aliases ?? [])];
-    if (!acc[site.server_id]) acc[site.server_id] = new Set<string>();
-    keywords.forEach((keyword) => keyword && acc[site.server_id].add(keyword));
-    return acc;
-  }, {} as Record<string, Set<string>>);
 };

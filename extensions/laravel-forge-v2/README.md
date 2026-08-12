@@ -37,7 +37,5 @@ Forge API v2 scopes everything under an organization. The **Manage Servers** com
 ## Non-Forge API Features
 - Check site connectivity
 - Open command from raycast:// url
-- Background deploy status refresh with menubar display
-- System notification on deploy
 - Open terminal session
 - Copy meta information
