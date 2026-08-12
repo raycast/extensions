@@ -1,6 +1,8 @@
 use raycast_rust_macros::raycast;
 
 #[cfg(windows)]
+use windows::Media::Playback::MediaPlayer;
+#[cfg(windows)]
 use windows::Win32::Foundation::HANDLE;
 
 // Owns the stop event handle and releases it when dropped, so the handle is
@@ -15,6 +17,21 @@ impl Drop for StopEventGuard {
         unsafe {
             let _ = windows::Win32::Foundation::CloseHandle(self.0);
         }
+    }
+}
+
+// Owns the MediaPlayer and tears it down when dropped on every return path:
+// Pause stops the audio immediately and Close releases the player instead of
+// relying on Drop/Release alone, which can otherwise leave audio playing after
+// a Stop.
+#[cfg(windows)]
+struct PlayerGuard(MediaPlayer);
+
+#[cfg(windows)]
+impl Drop for PlayerGuard {
+    fn drop(&mut self) {
+        let _ = self.0.Pause();
+        let _ = self.0.Close();
     }
 }
 
@@ -51,7 +68,6 @@ fn play_windows(path: &str) -> Result<(), String> {
     use windows::core::HSTRING;
     use windows::Foundation::{TypedEventHandler, Uri};
     use windows::Media::Core::MediaSource;
-    use windows::Media::Playback::MediaPlayer;
     use windows::Win32::Foundation::WAIT_OBJECT_0;
     use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
     use windows::Win32::System::Threading::{ResetEvent, WaitForSingleObject};
@@ -73,20 +89,24 @@ fn play_windows(path: &str) -> Result<(), String> {
     let source = MediaSource::CreateFromUri(&uri).map_err(|e| format!("Failed to create media source: {e}"))?;
 
     let player = MediaPlayer::new().map_err(|e| format!("Failed to create MediaPlayer: {e}"))?;
-    player.SetAutoPlay(true).map_err(|e| e.to_string())?;
-    player.SetSource(&source).map_err(|e| e.to_string())?;
+    // The guard Pause + Close()s the player on every return path so audio stops
+    // immediately when a Stop fires or playback ends.
+    let _player_guard = PlayerGuard(player);
+    _player_guard.0.SetAutoPlay(true).map_err(|e| e.to_string())?;
+    _player_guard.0.SetSource(&source).map_err(|e| e.to_string())?;
 
     let (tx, rx) = mpsc::channel::<()>();
-    let ended_token = player
+    let ended_token = _player_guard
+        .0
         .MediaEnded(&TypedEventHandler::new(move |_sender, _args| {
             let _ = tx.send(());
             Ok(())
         }))
         .map_err(|e| e.to_string())?;
 
-    player.Play().map_err(|e| e.to_string())?;
+    _player_guard.0.Play().map_err(|e| e.to_string())?;
 
-    let session = player.PlaybackSession().map_err(|e| e.to_string())?;
+    let session = _player_guard.0.PlaybackSession().map_err(|e| e.to_string())?;
     let duration = session.NaturalDuration().map_err(|e| e.to_string())?.Duration;
     let mut last_position = -1i64;
     let mut stalled_ticks = 0u32;
@@ -117,7 +137,7 @@ fn play_windows(path: &str) -> Result<(), String> {
         }
     }
 
-    let _ = player.RemoveMediaEnded(ended_token);
+    let _ = _player_guard.0.RemoveMediaEnded(ended_token);
     Ok(())
 }
 

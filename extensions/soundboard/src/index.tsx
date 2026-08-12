@@ -17,7 +17,7 @@ import { Item } from "./types";
 import { useState, useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
 import { SoundForm } from "./soundform";
-import { addItem, getLivePlayingPaths, getPlayingPaths, playFile, removeItemEntry, stopFile } from "./utils";
+import { addItem, getLivePlayingPaths, getPlayingPaths, isMacOS, playFile, removeItemEntry, stopFile } from "./utils";
 
 export default function Command() {
   const [connectionsList, setConnectionsList] = useState<Item[]>([]);
@@ -96,14 +96,16 @@ export default function Command() {
     >
       <Grid.EmptyView
         title={connectionsList.length === 0 ? "No Sounds Found" : "No Results"}
-        description={connectionsList.length === 0 ? "Press ⌘+N to add a file" : "Try a different search"}
+        description={
+          connectionsList.length === 0 ? `Press ${isMacOS ? "⌘+N" : "Ctrl+N"} to add a file` : "Try a different search"
+        }
         icon={{ source: "no-view.png" }}
         actions={
           <ActionPanel>
             <Action.Push
               title="Add New Sound"
               shortcut={Keyboard.Shortcut.Common.New}
-              icon={Icon.Document}
+              icon={Icon.PlusCircle}
               target={
                 <SoundForm
                   onEdit={async function (item: Item): Promise<void> {
@@ -120,10 +122,10 @@ export default function Command() {
         <Grid.Item
           key={item.id}
           id={item.id}
-          content={getItemIcon(item)}
+          content={{ source: getItemIcon(item), tooltip: item.title }}
           title={item.title}
           subtitle={item.path.toString()}
-          accessory={getGridAccessory(item)}
+          accessory={getGridAccessory(item, playingPaths.has(item.path[0]))}
           actions={
             <Actions
               item={item}
@@ -145,14 +147,16 @@ export default function Command() {
     <List isLoading={loading} selectedItemId={selectedItemId}>
       <List.EmptyView
         title={connectionsList.length === 0 ? "No Sounds Found" : "No Results"}
-        description={connectionsList.length === 0 ? "Press ⌘+N to add a file" : "Try a different search"}
+        description={
+          connectionsList.length === 0 ? `Press ${isMacOS ? "⌘+N" : "Ctrl+N"} to add a file` : "Try a different search"
+        }
         icon={{ source: "no-view.png" }}
         actions={
           <ActionPanel>
             <Action.Push
               title="Add New Sound"
               shortcut={Keyboard.Shortcut.Common.New}
-              icon={Icon.Document}
+              icon={Icon.PlusCircle}
               target={
                 <SoundForm
                   onEdit={async function (item: Item): Promise<void> {
@@ -172,7 +176,7 @@ export default function Command() {
           icon={getItemIcon(item)}
           title={item.title}
           subtitle={item.path.toString()}
-          accessories={getAccessories(item)}
+          accessories={getListAccessories(item, playingPaths.has(item.path[0]))}
           actions={
             <Actions
               item={item}
@@ -197,7 +201,22 @@ function getItemIcon(item: Item) {
   return item.icon ? (Icon[item.icon as keyof typeof Icon] ?? Icon.Music) : Icon.Music;
 }
 
-function getGridAccessory(item: Item) {
+function getListAccessories(item: Item, isPlaying: boolean) {
+  const accessories: List.Item.Accessory[] = [];
+  if (isPlaying) {
+    accessories.push({ icon: Icon.SpeakerOn, tooltip: "Playing" });
+  }
+  const favoriteNumber = parseInt(item.favourite);
+  if (favoriteNumber > 0) {
+    accessories.push({ text: `Favourite #${favoriteNumber}`, icon: { source: Icon.Star, tintColor: Color.Yellow } });
+  }
+  return accessories;
+}
+
+function getGridAccessory(item: Item, isPlaying: boolean) {
+  if (isPlaying) {
+    return { icon: Icon.SpeakerOn, tooltip: "Playing" };
+  }
   const favoriteNumber = parseInt(item.favourite);
   if (favoriteNumber > 0) {
     return { icon: { source: Icon.Star, tintColor: Color.Yellow }, tooltip: `Favourite #${favoriteNumber}` };
@@ -214,15 +233,6 @@ function ToggleLayoutAction({ layout, onToggleLayout }: { layout: string; onTogg
       onAction={onToggleLayout}
     />
   );
-}
-
-function getAccessories(item: Item) {
-  const favoriteNumber = parseInt(item.favourite);
-  if (favoriteNumber > 0) {
-    return [{ text: `Favourite #${favoriteNumber}`, icon: { source: Icon.Star, tintColor: Color.Yellow } }];
-  }
-
-  return [];
 }
 
 function Actions({
@@ -265,7 +275,7 @@ function Actions({
       <Action.Push
         title="Add New Sound"
         shortcut={Keyboard.Shortcut.Common.New}
-        icon={Icon.Document}
+        icon={Icon.PlusCircle}
         target={<SoundForm onEdit={onEdit} items={items} />}
       />
       <Action.Push

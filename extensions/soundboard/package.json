@@ -95,11 +95,6 @@
       "subtitle": "Soundboard"
     }
   ],
-  "dependencies": {
-    "@raycast/api": "^1.104.24",
-    "@raycast/utils": "^2.2.7",
-    "nanoid": "^6.0.0"
-  },
   "preferences": [
     {
       "name": "closeOnTrigger",
@@ -130,22 +125,25 @@
       ]
     }
   ],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "nanoid": "^6.0.1"
+  },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@types/node": "^26.1.2",
-    "@typescript-eslint/eslint-plugin": "^8.65.0",
-    "@typescript-eslint/parser": "^8.65.0",
-    "eslint": "^10.8.0",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
     "eslint-config-prettier": "^10.1.8",
     "prettier": "^3.9.6",
     "typescript": "^6.0.0"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "build-rust": "cargo build --manifest-path rust/Cargo.toml --release",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "ray publish"
   },
   "platforms": [

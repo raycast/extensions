@@ -12,6 +12,8 @@ import {
   stop_file as stopFileWindows,
 } from "rust:../rust";
 
+export const isMacOS = process.platform === "darwin";
+
 const registryDir = () => join(tmpdir(), "raycast-soundboard");
 
 // Each macOS player is recorded in its own file so that registration and
@@ -252,6 +254,13 @@ export const playFile = async (item: Item) => {
       registerPlayer(audioPath, pid);
     }
     setPlaying(audioPath, true);
+    let notified = false;
+    const notifyFailure = (message: string) => {
+      if (!notified) {
+        notified = true;
+        showToast({ style: Toast.Style.Failure, title: "Failed to play sound", message });
+      }
+    };
     const unregister = () => {
       if (pid !== undefined) {
         unregisterPlayer(audioPath, pid);
@@ -260,8 +269,20 @@ export const playFile = async (item: Item) => {
         setPlaying(audioPath, false);
       }
     };
-    child.on("exit", unregister);
-    child.on("error", unregister);
+    // Spawn failure (e.g. afplay missing).
+    child.on("error", (error) => {
+      unregister();
+      notifyFailure(error.message);
+    });
+    // Non-zero exit means afplay could not play the file (e.g. missing or
+    // unreadable). A signal-killed process (code is null, e.g. our own Stop)
+    // is expected and not reported as a failure.
+    child.on("exit", (code, signal) => {
+      unregister();
+      if (code !== null && code !== 0) {
+        notifyFailure(signal ? `afplay was terminated by ${signal}` : `afplay exited with code ${code}`);
+      }
+    });
   }
 };
 
