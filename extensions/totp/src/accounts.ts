@@ -23,6 +23,14 @@ export async function saveAccount(input: ParsedAccount): Promise<void> {
   await save(accounts);
 }
 
+export async function updateAccount(id: string, input: ParsedAccount): Promise<void> {
+  const accounts = await loadAccounts();
+  const index = accounts.findIndex((account) => account.id === id);
+  if (index < 0) throw new Error("Account not found.");
+  accounts[index] = { id, ...input };
+  await save(accounts);
+}
+
 export async function removeAccount(id: string): Promise<void> {
   await save((await loadAccounts()).filter((account) => account.id !== id));
 }
