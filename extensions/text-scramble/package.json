@@ -37,7 +37,7 @@
       "name": "source",
       "type": "dropdown",
       "title": "Preferred Source",
-      "description": "Read the preferred source first. The other source is used only when the preferred source is empty.",
+      "description": "Read the preferred source first. The other source is used only when the preferred source is readable but empty; access errors stop safely.",
       "data": [
         {
           "title": "Selected Text",
