@@ -1,5 +1,5 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD } from "@raycast/api";
-import { canSafelyRestoreClipboard } from "./clipboard-safety";
+import { getRestorableClipboardContent } from "./clipboard-safety";
 import { scrambleText } from "./scramble-text";
 
 class NoTextError extends Error {
@@ -58,24 +58,15 @@ async function readText(preferredSource: Preferences.ScrambleSelectedText["sourc
   throw new NoTextError();
 }
 
-async function restoreClipboard(content: Clipboard.ReadContent): Promise<void> {
-  if (content.file) {
-    await Clipboard.copy({ file: content.file });
-  } else if (content.html) {
-    await Clipboard.copy({ html: content.html, text: content.text });
-  } else {
-    await Clipboard.copy(content.text);
-  }
-}
-
 async function pasteWithoutChangingClipboard(text: string): Promise<void> {
   const previousClipboard = await Clipboard.read();
-  if (!canSafelyRestoreClipboard(previousClipboard)) throw new ClipboardProtectionError();
+  const restorableClipboard = getRestorableClipboardContent(previousClipboard);
+  if (restorableClipboard === null) throw new ClipboardProtectionError();
 
   try {
     await Clipboard.paste(text);
   } finally {
-    await restoreClipboard(previousClipboard);
+    await Clipboard.copy(restorableClipboard);
   }
 }
 
