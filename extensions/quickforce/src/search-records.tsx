@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, LaunchProps, List } from "@raycast/api";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { searchSalesforce } from "./lib/sfdx";
+import { cmdShortcut } from "./lib/utils";
 import { OrgListDropdown, useDefaultOrgSelection } from "./org-dropdown";
 
 export default function Command(props: LaunchProps<{ arguments: Arguments.SearchRecords }>) {
@@ -95,25 +96,17 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
               actions={
                 <ActionPanel>
                   <Action.OpenInBrowser url={recordUrl} title="Open in Salesforce" />
-                  <Action.CopyToClipboard
-                    title="Copy Record Id"
-                    content={recordId}
-                    shortcut={{ modifiers: ["cmd"], key: "i" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy URL"
-                    content={recordUrl}
-                    shortcut={{ modifiers: ["cmd"], key: "u" }}
-                  />
+                  <Action.CopyToClipboard title="Copy Record ID" content={recordId} shortcut={cmdShortcut("i")} />
+                  <Action.CopyToClipboard title="Copy URL" content={recordUrl} shortcut={cmdShortcut("u")} />
                   <Action.CopyToClipboard
                     title="Copy as JSON"
                     content={JSON.stringify(record, null, 2)}
-                    shortcut={{ modifiers: ["cmd"], key: "j" }}
+                    shortcut={cmdShortcut("j")}
                   />
                   <Action.CreateQuicklink
                     title="Create Quicklink"
                     quicklink={{ link: recordUrl, name: title }}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    shortcut={cmdShortcut("l", ["shift"])}
                   />
                 </ActionPanel>
               }

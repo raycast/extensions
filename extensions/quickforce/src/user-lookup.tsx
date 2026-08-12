@@ -12,6 +12,7 @@ import {
   PopToRootType,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
@@ -25,7 +26,7 @@ import {
   SalesforceUser,
   LoginHistoryEntry,
 } from "./lib/sfdx";
-import { formatDate } from "./lib/utils";
+import { formatDate, cmdShortcut } from "./lib/utils";
 import { OrgListDropdown, useDefaultOrgSelection } from "./org-dropdown";
 
 function getStatusColor(isActive: boolean): Color {
@@ -231,42 +232,38 @@ ${
             title="Open in Salesforce"
             icon={Icon.Globe}
             onAction={() => openUserInSalesforce(user.Id, orgAlias)}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
           {isActive && (
             <Action
               title="Login as User"
               icon={Icon.PersonCircle}
               onAction={() => loginAsUser(user, orgAlias, orgId)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+              shortcut={cmdShortcut("l", ["shift"])}
             />
           )}
           <Action
             title={isFrozen ? "Unfreeze User" : "Freeze User"}
             icon={isFrozen ? Icon.LockUnlocked : Icon.Lock}
             onAction={handleToggleUserFreeze}
-            shortcut={{ modifiers: ["cmd"], key: "f" }}
+            shortcut={cmdShortcut("f")}
           />
           <Action
             title={isActive ? "Deactivate User" : "Activate User"}
             icon={isActive ? Icon.RemovePerson : Icon.AddPerson}
             style={isActive ? Action.Style.Destructive : Action.Style.Regular}
             onAction={handleToggleUserActive}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            shortcut={cmdShortcut("a", ["shift"])}
           />
           <Action
             title="Reset Password"
             icon={Icon.Key}
             onAction={handleResetPassword}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={Keyboard.Shortcut.Common.Refresh}
           />
-          <Action.CopyToClipboard title="Copy User Id" content={user.Id} shortcut={{ modifiers: ["cmd"], key: "i" }} />
-          <Action.CopyToClipboard
-            title="Copy Username"
-            content={user.Username}
-            shortcut={{ modifiers: ["cmd"], key: "u" }}
-          />
-          <Action.CopyToClipboard title="Copy Email" content={user.Email} shortcut={{ modifiers: ["cmd"], key: "e" }} />
+          <Action.CopyToClipboard title="Copy User ID" content={user.Id} shortcut={cmdShortcut("i")} />
+          <Action.CopyToClipboard title="Copy Username" content={user.Username} shortcut={cmdShortcut("u")} />
+          <Action.CopyToClipboard title="Copy Email" content={user.Email} shortcut={Keyboard.Shortcut.Common.Edit} />
         </ActionPanel>
       }
     />
@@ -440,50 +437,38 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.UserLo
               title="Open in Salesforce"
               icon={Icon.Globe}
               onAction={() => openUserInSalesforce(user.Id, selectedOrg)}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
             {user.IsActive && (
               <Action
                 title="Login as User"
                 icon={Icon.PersonCircle}
                 onAction={() => loginAsUser(user, selectedOrg, selectedOrgId)}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                shortcut={cmdShortcut("l", ["shift"])}
               />
             )}
             <Action
               title={user.IsFrozen ? "Unfreeze User" : "Freeze User"}
               icon={user.IsFrozen ? Icon.LockUnlocked : Icon.Lock}
               onAction={() => handleToggleUserFreeze(user)}
-              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              shortcut={cmdShortcut("f")}
             />
             <Action
               title={user.IsActive ? "Deactivate User" : "Activate User"}
               icon={user.IsActive ? Icon.RemovePerson : Icon.AddPerson}
               style={user.IsActive ? Action.Style.Destructive : Action.Style.Regular}
               onAction={() => handleToggleUserActive(user)}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+              shortcut={cmdShortcut("a", ["shift"])}
             />
             <Action
               title="Reset Password"
               icon={Icon.Key}
               onAction={() => handleResetPassword(user)}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
-            <Action.CopyToClipboard
-              title="Copy User Id"
-              content={user.Id}
-              shortcut={{ modifiers: ["cmd"], key: "i" }}
-            />
-            <Action.CopyToClipboard
-              title="Copy Username"
-              content={user.Username}
-              shortcut={{ modifiers: ["cmd"], key: "u" }}
-            />
-            <Action.CopyToClipboard
-              title="Copy Email"
-              content={user.Email}
-              shortcut={{ modifiers: ["cmd"], key: "e" }}
-            />
+            <Action.CopyToClipboard title="Copy User ID" content={user.Id} shortcut={cmdShortcut("i")} />
+            <Action.CopyToClipboard title="Copy Username" content={user.Username} shortcut={cmdShortcut("u")} />
+            <Action.CopyToClipboard title="Copy Email" content={user.Email} shortcut={Keyboard.Shortcut.Common.Edit} />
           </ActionPanel>
         }
       />

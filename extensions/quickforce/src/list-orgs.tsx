@@ -11,6 +11,7 @@ import {
   PopToRootType,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
@@ -31,6 +32,7 @@ import { EditOrgForm } from "./edit-org";
 import AddOrgForm from "./add-org";
 import { OrgDetailsView } from "./org-details";
 import { SoqlForm } from "./run-soql";
+import { cmdShortcut, platformShortcut } from "./lib/utils";
 
 interface EnrichedOrg extends SalesforceOrg {
   metadata?: OrgMetadata;
@@ -310,33 +312,29 @@ export default function Command() {
               <Action
                 title="Open Home"
                 icon={Icon.House}
-                shortcut={{ modifiers: ["cmd"], key: "h" }}
+                shortcut={cmdShortcut("h")}
                 onAction={() => handleOpenOrg(org, "home")}
               />
               <Action
                 title="Open Setup"
                 icon={Icon.Gear}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                shortcut={Keyboard.Shortcut.Common.Save}
                 onAction={() => handleOpenOrg(org, "setup")}
               />
               <Action
                 title="Open Developer Console"
                 icon={Icon.Terminal}
-                shortcut={{ modifiers: ["cmd"], key: "d" }}
+                shortcut={cmdShortcut("d")}
                 onAction={() => handleOpenOrg(org, "developer-console")}
               />
             </ActionPanel.Section>
 
             <ActionPanel.Section title="Copy">
+              <Action.CopyToClipboard title="Copy Username" content={org.username} shortcut={cmdShortcut("c")} />
               <Action.CopyToClipboard
-                title="Copy Username"
-                content={org.username}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
-              />
-              <Action.CopyToClipboard
-                title="Copy Org Id"
+                title="Copy Org ID"
                 content={org.orgId}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <Action.CopyToClipboard
                 title="Copy Instance URL"
@@ -349,7 +347,7 @@ export default function Command() {
               <Action.Push
                 title="View Org Details"
                 icon={Icon.Sidebar}
-                shortcut={{ modifiers: ["cmd"], key: "i" }}
+                shortcut={cmdShortcut("i")}
                 target={<OrgDetailsView username={org.alias || org.username} />}
               />
               <Action.Push
@@ -364,7 +362,7 @@ export default function Command() {
                 <Action
                   title="Set as Default Org"
                   icon={Icon.CheckCircle}
-                  shortcut={{ modifiers: ["ctrl"], key: "d" }}
+                  shortcut={Keyboard.Shortcut.Common.Remove}
                   onAction={() => handleSetDefault(org)}
                 />
               )}
@@ -372,26 +370,26 @@ export default function Command() {
               <Action.Push
                 title="Edit"
                 icon={Icon.Pencil}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
+                shortcut={Keyboard.Shortcut.Common.Edit}
                 target={<EditOrgForm org={org} onSave={handleMetadataRefresh} />}
               />
               <Action.Push
                 title="Add New Org"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+                shortcut={cmdShortcut("n", ["shift"])}
                 target={<AddOrgForm onOrgAdded={() => revalidate()} />}
               />
               <Action
                 title="Refresh List"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={() => revalidate()}
               />
               <Action
                 title="Logout"
                 icon={Icon.XMarkCircle}
                 style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                shortcut={platformShortcut({ modifiers: ["ctrl"], key: "x" }, { modifiers: ["ctrl"], key: "d" })}
                 onAction={() => handleLogout(org)}
               />
             </ActionPanel.Section>
@@ -426,7 +424,7 @@ export default function Command() {
               <Action
                 title="Refresh List"
                 icon={Icon.ArrowClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={() => revalidate()}
               />
             </ActionPanel>

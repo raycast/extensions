@@ -8,6 +8,7 @@ import {
   togglePinSetupPage,
   SalesforceOrg,
 } from "./lib/sfdx";
+import { cmdShortcut } from "./lib/utils";
 import { OrgListDropdown, useDefaultOrgSelection } from "./org-dropdown";
 
 export interface SetupPage {
@@ -400,7 +401,7 @@ export function SetupQuickLinksList({ initialOrg }: { initialOrg?: string } = {}
               onAction={() => handleTogglePin(page.id)}
             />
 
-            <Action.CopyToClipboard title="Copy Path" content={page.path} shortcut={{ modifiers: ["cmd"], key: "c" }} />
+            <Action.CopyToClipboard title="Copy Path" content={page.path} shortcut={cmdShortcut("c")} />
 
             {selectedOrgData && (
               <Action.CreateQuicklink
@@ -409,7 +410,7 @@ export function SetupQuickLinksList({ initialOrg }: { initialOrg?: string } = {}
                   link: `${selectedOrgData.instanceUrl}${page.path}`,
                   name: page.title,
                 }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                shortcut={cmdShortcut("l", ["shift"])}
               />
             )}
           </ActionPanel>

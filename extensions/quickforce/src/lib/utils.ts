@@ -1,3 +1,19 @@
+import { Keyboard } from "@raycast/api";
+
+type KeyBinding = { modifiers: Keyboard.KeyModifier[]; key: Keyboard.KeyEquivalent };
+
+/** Maps cmd on macOS to ctrl on Windows for the same key binding. */
+export function cmdShortcut(key: Keyboard.KeyEquivalent, modifiers: Keyboard.KeyModifier[] = []): Keyboard.Shortcut {
+  return {
+    macOS: { modifiers: ["cmd", ...modifiers], key },
+    Windows: { modifiers: ["ctrl", ...modifiers], key },
+  };
+}
+
+export function platformShortcut(macOS: KeyBinding, Windows: KeyBinding): Keyboard.Shortcut {
+  return { macOS, Windows };
+}
+
 export const ORG_COLOR_PRESETS: { name: string; hex: string }[] = [
   { name: "Blue", hex: "#0000FF" },
   { name: "Red", hex: "#FF3B30" },

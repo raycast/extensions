@@ -7,7 +7,8 @@
   "icon": "quickforce-icon.png",
   "author": "kelant",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Developer Tools",
@@ -76,17 +77,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.20",
-    "@raycast/utils": "^2.2.7",
-    "@salesforce/core": "^8.31.5"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "@salesforce/core": "^9.1.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "^19.0.10",
-    "eslint": "^8.57.1",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.2.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

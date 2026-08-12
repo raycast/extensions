@@ -106,7 +106,7 @@ export default function AddOrgForm({ onOrgAdded }: { onOrgAdded: () => void }) {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Log In" onSubmit={handleSubmit} />
+          <Action.SubmitForm title="Log in" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >

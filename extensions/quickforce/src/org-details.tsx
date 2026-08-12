@@ -1,6 +1,7 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Keyboard } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getEnhancedOrgDetails, getOrgLimits, getInstalledPackages, getCurrentUserInfo } from "./lib/sfdx";
+import { cmdShortcut } from "./lib/utils";
 
 // Helper functions
 function formatLimitName(name: string): string {
@@ -72,12 +73,12 @@ export function OrgDetailsView({ username }: { username: string }) {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Copy Org Id" content={data.orgDetails.id} />
+                  <Action.CopyToClipboard title="Copy Org ID" content={data.orgDetails.id} />
                   <Action.OpenInBrowser url={data.orgDetails.instanceUrl} title="Open Instance URL" />
                   <Action
                     title="Refresh"
                     icon={Icon.ArrowClockwise}
-                    shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    shortcut={Keyboard.Shortcut.Common.Refresh}
                     onAction={() => revalidate()}
                   />
                 </ActionPanel>
@@ -237,11 +238,11 @@ export function OrgDetailsView({ username }: { username: string }) {
                 }
                 actions={
                   <ActionPanel>
-                    <Action.CopyToClipboard title="Copy Package Id" content={pkg.SubscriberPackageId} />
+                    <Action.CopyToClipboard title="Copy Package ID" content={pkg.SubscriberPackageId} />
                     <Action.CopyToClipboard
-                      title="Copy Version Id"
+                      title="Copy Version ID"
                       content={pkg.SubscriberPackageVersionId}
-                      shortcut={{ modifiers: ["cmd"], key: "v" }}
+                      shortcut={cmdShortcut("v")}
                     />
                   </ActionPanel>
                 }

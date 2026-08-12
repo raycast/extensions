@@ -753,7 +753,7 @@ export async function getScratchOrgExpiration(username: string): Promise<Date | 
     const authInfo = await AuthInfo.create({ username });
     const expirationDate = authInfo.getFields().expirationDate;
     return expirationDate ? new Date(expirationDate) : null;
-  } catch (error) {
+  } catch {
     // Not a scratch org or error getting info
     return null;
   }
@@ -796,7 +796,7 @@ export async function setAsDefaultOrg(usernameOrAlias: string): Promise<void> {
   try {
     // Try with the username/alias directly first
     await sfCli(["config", "set", "target-org", usernameOrAlias, "--global"]);
-  } catch (error) {
+  } catch {
     // If that fails, try without --global flag
     try {
       await sfCli(["config", "set", "target-org", usernameOrAlias]);

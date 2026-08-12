@@ -9,6 +9,7 @@ import {
   getPicklistValues,
   CreatedRecord,
 } from "./lib/sfdx";
+import { cmdShortcut } from "./lib/utils";
 import { OrgListDropdown, useDefaultOrgSelection, useOrgOptions } from "./org-dropdown";
 
 interface RecordTypeConfig {
@@ -372,14 +373,8 @@ function RecentRecordsView() {
             actions={
               <ActionPanel>
                 {url && <Action.OpenInBrowser title="Open in Salesforce" url={url} />}
-                <Action.CopyToClipboard
-                  title="Copy Record Id"
-                  content={record.id}
-                  shortcut={{ modifiers: ["cmd"], key: "i" }}
-                />
-                {url && (
-                  <Action.CopyToClipboard title="Copy URL" content={url} shortcut={{ modifiers: ["cmd"], key: "u" }} />
-                )}
+                <Action.CopyToClipboard title="Copy Record ID" content={record.id} shortcut={cmdShortcut("i")} />
+                {url && <Action.CopyToClipboard title="Copy URL" content={url} shortcut={cmdShortcut("u")} />}
               </ActionPanel>
             }
           />

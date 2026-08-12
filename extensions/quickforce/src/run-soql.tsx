@@ -9,6 +9,7 @@ import {
   showToast,
   Toast,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { useCachedPromise } from "@raycast/utils";
@@ -24,7 +25,7 @@ import {
   deleteQueryFromHistory,
   SavedQuery,
 } from "./lib/sfdx";
-import { formatDate, recordsToCsv } from "./lib/utils";
+import { formatDate, recordsToCsv, cmdShortcut } from "./lib/utils";
 import { useDefaultOrgSelection, useOrgOptions } from "./org-dropdown";
 
 async function exportCsvToDownloads(records: Record<string, unknown>[]) {
@@ -89,26 +90,24 @@ function QueryResults({ query, org }: { query: string; org: string }) {
               <ActionPanel>
                 <Action.CopyToClipboard title="Copy JSON" content={JSON.stringify(record, null, 2)} />
                 <Action.CopyToClipboard
-                  title="Copy Record Id"
+                  title="Copy Record ID"
                   content={String(record.Id ?? "")}
-                  shortcut={{ modifiers: ["cmd"], key: "i" }}
+                  shortcut={cmdShortcut("i")}
                 />
                 <Action.Push
                   title="Save Query to Favorites"
                   icon={Icon.Star}
-                  shortcut={{ modifiers: ["cmd"], key: "s" }}
+                  shortcut={Keyboard.Shortcut.Common.Save}
                   target={<AddQueryLabelForm query={query} org={org} onSave={() => {}} />}
                 />
                 <ActionPanel.Section title="Export">
                   <Action
-                    // eslint-disable-next-line @raycast/prefer-title-case
                     title="Export CSV to Downloads"
                     icon={Icon.Download}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
+                    shortcut={cmdShortcut("e", ["shift"])}
                     onAction={() => exportCsvToDownloads(data?.records ?? [])}
                   />
                   <Action
-                    // eslint-disable-next-line @raycast/prefer-title-case
                     title="Copy as CSV"
                     icon={Icon.Clipboard}
                     onAction={async () => {
@@ -131,7 +130,7 @@ function QueryResults({ query, org }: { query: string; org: string }) {
               <Action.Push
                 title="Save Query to Favorites"
                 icon={Icon.Star}
-                shortcut={{ modifiers: ["cmd"], key: "s" }}
+                shortcut={Keyboard.Shortcut.Common.Save}
                 target={<AddQueryLabelForm query={query} org={org} onSave={() => {}} />}
               />
             </ActionPanel>
@@ -364,7 +363,7 @@ export function SoqlForm({ initialOrg }: { initialOrg?: string } = {}) {
               title="Save to Favorites"
               icon={Icon.Star}
               target={<AddQueryLabelForm query={query} org={selectedOrg} onSave={refreshQueries} />}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
             />
           </ActionPanel.Section>
           <ActionPanel.Section title="Manage">
@@ -379,7 +378,7 @@ export function SoqlForm({ initialOrg }: { initialOrg?: string } = {}) {
                   }}
                 />
               }
-              shortcut={{ modifiers: ["cmd"], key: "h" }}
+              shortcut={cmdShortcut("h")}
             />
           </ActionPanel.Section>
         </ActionPanel>
