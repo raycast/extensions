@@ -35,6 +35,11 @@ const DOCKER_PATHS: Record<string, string[]> = {
     "/usr/bin/docker",
   ],
   win32: [
+    // Per-user install is Docker Desktop's default and lands under LOCALAPPDATA,
+    // which is often absent from the PATH Raycast inherits.
+    ...(process.env.LOCALAPPDATA
+      ? [join(process.env.LOCALAPPDATA, "Programs", "DockerDesktop", "resources", "bin", "docker.exe")]
+      : []),
     "C:\\Program Files\\Docker\\Docker\\resources\\bin\\docker.exe",
     "C:\\ProgramData\\DockerDesktop\\version-bin\\docker.exe",
   ],

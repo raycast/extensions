@@ -245,7 +245,9 @@ export const translations = {
         ambiguous:
           "More than one Docker project publishes port {{port}} ({{projects}}), so there's no safe way to tell which one is Karakeep. Updating the wrong one would recreate an unrelated app.",
         notKarakeep:
-          "Something is answering at `{{apiUrl}}`, but it didn't identify as Karakeep. Check your API key, or another app may be using this port — either way, updating would recreate whatever is actually there.",
+          "Couldn't confirm Karakeep at `{{apiUrl}}`. It may still be starting, your API key may be wrong, or another app may be using this port — updating would recreate whatever is actually there.",
+        servedByOther:
+          "`{{name}}` is stopped, but something is already answering on port {{port}} — so whatever serves your Karakeep URL isn't this container. Updating it would recreate something unrelated.",
       },
       toast: {
         updating: "Pulling latest images...",
@@ -886,7 +888,9 @@ export const translations = {
         ambiguous:
           "有多个 Docker 项目发布了端口 {{port}}（{{projects}}），无法安全判断哪个是 Karakeep。更新错误的项目会重建无关的应用。",
         notKarakeep:
-          "`{{apiUrl}}` 有响应，但未识别为 Karakeep。请检查 API 密钥，或可能有其他应用占用此端口——无论哪种情况，更新都会重建实际运行的内容。",
+          "无法确认 `{{apiUrl}}` 上运行的是 Karakeep。它可能仍在启动，API 密钥可能有误，或有其他应用占用此端口——更新会重建实际运行的内容。",
+        servedByOther:
+          "`{{name}}` 已停止，但端口 {{port}} 上已有响应——因此为您的 Karakeep URL 提供服务的并非此容器。更新它会重建无关的内容。",
       },
       toast: {
         updating: "正在拉取最新镜像...",

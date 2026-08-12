@@ -8,7 +8,7 @@
 - Fixed list creation failing with "HTTP 400". The API requires an icon, and the form sent none when the field was left empty
 - Fixed every command with a list dropdown firing one request per list on open. A bookmark count was fetched for each list, which cost 45 requests on a 45-list library and reported the wrong number anyway — it was capped at the page size, so any list with more than 10 bookmarks showed "(10)".
 - Added an "Update Karakeep" command that pulls the latest Docker images and restarts a local instance, with live progress. A failed update names the cause — registry unreachable, not authorized, out of disk, port in use — and says whether your instance is still running
-- The Update command refuses to run when it can't prove which Docker project is Karakeep — if more than one project publishes your port, or if whatever is answering there doesn't identify as Karakeep — rather than recreating an unrelated app
+- The Update command refuses to run when it can't prove which Docker project is Karakeep — if more than one project publishes your port, if what's answering there doesn't identify as Karakeep, or if the container is stopped while something else already holds the port — rather than recreating an unrelated app
 - Docker detection now works on Windows, matches the published port by protocol and bind address rather than number alone, and only offers to start containers Docker can actually start
 - After a successful update, ⌘Y opens the release notes for the version you're running, fetched from GitHub
 - Rewrote the settings labels for Raycast 2.0's preferences UI

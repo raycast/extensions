@@ -90,18 +90,38 @@ export default function UpdateKarakeep() {
 
       const found = candidates.find((c) => c.running) ?? candidates[0];
 
-      // If something is actively serving this port, prove it is Karakeep before
-      // offering to recreate it. A stranger's app holding the port is exactly
-      // the case a port match cannot distinguish.
-      if (found.running && !(await respondsAsKarakeep())) {
-        log.info("Update unavailable: the server on this port did not identify as Karakeep", {
+      // Proving the API is Karakeep proves the APPLICATION, not the container —
+      // the two only coincide when this container is the one serving the port.
+      // So the check splits on that:
+      if (found.running) {
+        // It holds the port, so whatever answers there is this container. Make
+        // it prove it is Karakeep before offering to recreate it.
+        if (!(await respondsAsKarakeep())) {
+          log.info("Update unavailable: the server on this port did not identify as Karakeep", {
+            port,
+            container: found.name,
+          });
+          setReason(t("update.unavailable.notKarakeep", { apiUrl }));
+          setPhase("unavailable");
+          return;
+        }
+      } else if (await isApiReachable(apiUrl)) {
+        // The candidate is stopped, yet something is answering — so the thing
+        // serving your Karakeep URL is NOT this container (a native install, or
+        // another app). Recreating it would update something unrelated while
+        // leaving the real instance alone.
+        log.info("Update unavailable: this port is served by something other than the stopped container", {
           port,
           container: found.name,
         });
-        setReason(t("update.unavailable.notKarakeep", { apiUrl }));
+        setReason(t("update.unavailable.servedByOther", { port, name: found.name }));
         setPhase("unavailable");
         return;
       }
+      // Nothing is answering and only one project publishes the port: the
+      // stopped candidate is what would serve this URL, so it is the one to
+      // update. Identity cannot be proven with the server down, which is why
+      // the screen names the project before you press Update.
 
       if (!found.configFiles?.length) {
         log.info("Update unavailable: container was not created by Compose", { name: found.name });
