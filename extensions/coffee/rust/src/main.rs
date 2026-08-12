@@ -252,7 +252,8 @@ async fn start_caffeinate_worker(config: KeepAwakeConfig) -> Result<(), String> 
 
     let pid = std::process::id();
     let now = SystemTime::now().duration_since(UNIX_EPOCH).map_err(|e| e.to_string())?.as_secs();
-    let start_ticks = process_creation_ticks(pid).unwrap_or(0);
+    let start_ticks = process_creation_ticks(pid)
+        .ok_or_else(|| "cannot determine keep-awake worker identity".to_string())?;
     write_stored_state(&StoredState {
         pid,
         start_time: now,
