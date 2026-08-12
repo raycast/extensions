@@ -1,6 +1,6 @@
 # Browser Tabs Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-12
 
 - Add Windows support: tabs are read from running browsers with UI Automation through a native helper, so no browser extension is needed
 - Firefox and Zen Browser are supported on Windows, where they expose their tabs like any other browser
