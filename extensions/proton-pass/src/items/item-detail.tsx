@@ -49,7 +49,7 @@ export function ItemDetail({
     details.email ? `**Email**\n\n${escapeMarkdown(details.email)}` : "",
     details.password ? "**Password**\n\n`••••••••••••`" : "",
     details.urls.length ? `**URLs**\n\n${details.urls.map((url) => `- ${url}`).join("\n")}` : "",
-    `**TOTP**\n\n${details.hasTotp ? "`" + totp + "`" || "Loading…" : "Not yet configured"}`,
+    `**TOTP**\n\n${details.hasTotp ? (totp ? `\`${totp}\`` : "Loading…") : "Not yet configured"}`,
     details.note ? `**Note**\n\n${escapeMarkdown(details.note)}` : "",
   ]
     .filter(Boolean)
@@ -94,11 +94,19 @@ export function ItemDetail({
                   primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
                 });
                 if (!confirmed) return;
-                await modules.items.remove(item);
-                await modules.activity.remove(item);
-                await onDelete?.();
-                await showToast({ style: Toast.Style.Success, title: "Item deleted" });
-                pop();
+                try {
+                  await modules.items.remove(item);
+                  await modules.activity.remove(item);
+                  await onDelete?.();
+                  await showToast({ style: Toast.Style.Success, title: "Item deleted" });
+                  pop();
+                } catch (error) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Unable to delete item",
+                    message: error instanceof Error ? error.message : String(error),
+                  });
+                }
               }}
             />
           </ActionPanel.Section>

@@ -21,12 +21,11 @@ export class PassCliNotFoundError extends PassCliError {
   }
 }
 
-type CliPreferences = { cliPath?: string };
 let cachedCliExecutable: string | undefined;
 
 async function getCliExecutable() {
   if (cachedCliExecutable) return cachedCliExecutable;
-  const { cliPath } = getPreferenceValues<CliPreferences>();
+  const { cliPath } = getPreferenceValues<Preferences>();
   const candidates = getCliCandidates(process.platform, process.env, undefined, cliPath);
   const executable = await findRunnableCli(candidates, async (candidate) => {
     await execFileAsync(candidate, ["--version"], {

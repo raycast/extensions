@@ -216,9 +216,18 @@ function ItemActions({
               primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
             });
             if (!confirmed) return;
-            await modules.items.remove(item);
-            await modules.activity.remove(item);
-            await onRefresh();
+            try {
+              await modules.items.remove(item);
+              await modules.activity.remove(item);
+              await onRefresh();
+              await showToast({ style: Toast.Style.Success, title: "Item deleted" });
+            } catch (error) {
+              await showToast({
+                style: Toast.Style.Failure,
+                title: "Unable to delete item",
+                message: errorMessage(error),
+              });
+            }
           }}
         />
       </ActionPanel.Section>
