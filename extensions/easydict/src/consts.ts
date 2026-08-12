@@ -13,7 +13,7 @@ export const userAgent =
 
 export const networkTimeout = 15000;
 
-export const EASYDICT_VERSION = "3.0.0";
+export const EASYDICT_VERSION = "3.1.0";
 
 const GITHUB_REPO = "https://github.com/tisfeng/Raycast-Easydict";
 
@@ -26,87 +26,81 @@ export function getReleaseTagUrl(version: string): string {
 export const RELEASE_MARKDOWN = `
 ## [v${EASYDICT_VERSION}]
 
-### ⚠️ 行为变更
+### ✨ New Features
 
-- 移除了内置的系统代理检测与转发机制。如果您依赖操作系统的代理设置，请开启 **Raycast → Settings → Advanced → Use System Proxy Settings**。
-- 将 **Play Text** 重命名为 **Read Text**。快捷键变更为 \`Cmd+R\`，并为 **Read Result Text** 增加了独立的快捷键：\`Cmd+Shift+R\`。
+- Added favorite words: save translation results and browse/manage them in the favorites list.
+  - Thanks for @[TTsWorld](https://github.com/TTsWorld)
 
-### ✨ 新特性
+### 🔧 Maintenance
 
-- 新增 Windows 平台支持，包含原生的 TTS 语音合成与跨平台音频播放能力。
-- 新增繁体中文作为 DeepL 目标语言支持。
-- 新增选项：支持隐藏语言选择和标题中的国家/地区 emoji。
-- 为腾讯和火山翻译的语言检测功能新增了独立的开关选项，以便更好地管理 API 额度。
-
-### 💎 改进
-
-#### 架构与性能
-
-- 全面重构底层架构，提升可维护性、扩展性与长期稳定性。
-- 重构音频系统，统一管理下载、播放与语音合成逻辑。
-- 重组项目结构，通过移除不必要的依赖并使用原生实现替代，进一步减小插件体积。
-
-#### 翻译体验
-
-- 优化 OpenAI 翻译提示词，以更少的 token 消耗提供更好的翻译质量。
-- 改进有道词典的格式化逻辑。
-- 优化 Linguee 的 HTML 解析逻辑。
-- 提升跨翻译提供商的语言处理一致性。
-
-#### 开发者体验
-
-- 改进项目文档和仓库组织。
-- 引入自动文档生成，保持语言支持表格与代码实现的一致性。
-- 改进构建工具链与开发自动化。
-
-### 🐞 修复
-
-- 修复扩展从后台恢复时，搜索文本偶尔会闪现的历史遗留问题。
-- 修复必应翻译在特定边界情况下因递归过深导致的查询失败，并解决并发请求中的竞态问题。
-- 修复部分词典连续播放音频时产生的播放冲突与缓存覆盖问题。
-- 修复 DeepLX 翻译错误
-- 修复格鲁吉亚语虽然能在偏好设置中选择但无法正常翻译的问题，已在内部补全了对该语言的完整支持。
-- 修复了包含单引号的文本发送给 Apple Translate 时被错误转义的问题。
+- Updated dependencies.
 
 ---
 
+<details>
+<summary>Recent Updates [v3.0.0]</summary>
+
 ### ⚠️ Behavioral Changes
 
-- Removed the built-in system proxy detection and forwarding mechanism. If you rely on your operating system's proxy settings, please enable **Raycast → Settings → Advanced → Use System Proxy Settings**.
-- Renamed **Play Text** to **Read Text**. The shortcut is now \`Cmd+R\`, and **Read Result Text** now has its own shortcut: \`Cmd+Shift+R\`.
+- Removed built-in proxy detection; enable Raycast system proxy if needed.
+- **Play Text** renamed to **Read Text** with updated shortcuts (\`Cmd+R\` / \`Cmd+Shift+R\`).
 
 ### ✨ New Features
 
-- Added Windows support, including native TTS voice synthesis and cross-platform audio playback.
-- Added Traditional Chinese as a supported target language for DeepL.
-- Added an option to hide country/region emojis in language selectors and titles.
+- Windows platform support with native TTS and cross-platform audio.
+- DeepL Traditional Chinese, hide language emoji option, independent Tencent/Volcano detection toggles.
 
 ### 💎 Improvements
 
-#### Architecture & Performance
-
-- Rebuilt the underlying architecture to improve maintainability, extensibility, and long-term stability.
-- Refactored the audio system with unified management for downloading, playback, and speech synthesis.
-- Reorganized the project structure and reduced the extension size by removing unnecessary dependencies and replacing them with native implementations where appropriate.
-
-#### Translation Experience
-
-- Optimized OpenAI translation prompts for better translation quality with lower token usage.
-- Improved Youdao dictionary formatting.
-- Optimized the Linguee HTML parsing logic.
-- Improved language handling consistency across translation providers.
-
-#### Developer Experience
-
-- Improved project documentation and repository organization.
-- Introduced automated documentation generation to keep language support tables synchronized with the implementation.
-- Improved build tooling and development automation.
+- Full architecture and audio system refactor; streamlined project structure and dependencies.
+- Optimized OpenAI translation prompts, Youdao dictionary formatting, and Linguee HTML parsing.
+- Improved documentation, auto-generated docs, and build tooling.
 
 ### 🐞 Bug Fixes
 
-- Fixed a longstanding issue where the search text could briefly reappear after the extension resumed from the background.
-- Fixed Bing translation failures caused by excessive recursion in edge cases and resolved race conditions during concurrent requests.
-- Fixed playback conflicts and cache overwrite issues during consecutive audio playback for certain dictionaries.
-- Fixed DeepLX translate is always failed.
-- Fixed an issue where Georgian could be selected in preferences but failed to translate by properly implementing its internal language configuration.
+- Fixed background resume text flash, Bing recursion/race conditions, audio playback conflicts, DeepLX failures, Georgian language support, and Apple Translate single-quote escaping.
+
+</details>
+
+---
+
+## [v${EASYDICT_VERSION}]
+
+### ✨ 新特性
+
+- 新增收藏单词功能，支持保存翻译结果并在收藏列表中查看和管理。
+  - 感谢 @[TTsWorld](https://github.com/TTsWorld)
+
+### 🔧 维护
+
+- 更新项目依赖项。
+
+---
+
+<details>
+<summary>最近更新 [v3.0.0]</summary>
+
+### ⚠️ 行为变更
+
+- 移除内置系统代理检测，如需代理请开启 Raycast 的系统代理设置。
+- **Play Text** 重命名为 **Read Text**，快捷键调整为 \`Cmd+R\` / \`Cmd+Shift+R\`。
+
+### ✨ 新特性
+
+- Windows 平台支持（含原生 TTS 与跨平台音频）。
+- DeepL 繁体中文目标语言、隐藏语言 emoji 选项、腾讯/火山检测独立开关。
+
+### 💎 改进
+
+- 底层架构与音频系统全面重构，项目结构优化，移除冗余依赖。
+- 优化 OpenAI 翻译提示词、有道词典格式、Linguee HTML 解析。
+- 改进文档、自动文档生成与构建工具链。
+
+### 🐞 修复
+
+- 修复后台恢复时搜索文本闪现、必应翻译递归/竞态、音频播放冲突、DeepLX 翻译失败、格鲁吉亚语支持、Apple Translate 单引号转义等问题。
+
+</details>
+
+---
 `;
