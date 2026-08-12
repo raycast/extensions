@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Fix ClinePass usage limits windows] - {PR_MERGE_DATE}
+## [Fix ClinePass usage limits windows] - 2026-08-12
 
 ### Bug Fixes
 
