@@ -57,5 +57,8 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "axios": "^1.18.0"
+  }
 }
