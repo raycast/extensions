@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-12
 
 - Parse decimal, hexadecimal, and binary values with 8, 16, 32, or 64-bit widths.
 - Show all bits set to `1` before the complete bit list.
