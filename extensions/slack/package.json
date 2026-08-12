@@ -113,6 +113,12 @@
           "placeholder": ":rocket:",
           "type": "text",
           "required": false
+        },
+        {
+          "name": "expiration",
+          "placeholder": "Minutes, today, or week",
+          "type": "text",
+          "required": false
         }
       ]
     }
