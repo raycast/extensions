@@ -48,7 +48,7 @@ export function decodeBase32(secret: string): Buffer {
   return decoded;
 }
 
-export function parseInput(input: string, name?: string): ParsedAccount {
+export function parseInput(input: string, name?: string, issuerOverride?: string): ParsedAccount {
   const trimmed = input.trim();
   if (!trimmed) throw new Error("Secret or otpauth URI is required.");
 
@@ -57,7 +57,7 @@ export function parseInput(input: string, name?: string): ParsedAccount {
     if (!accountName) throw new Error("Name is required when entering a Base32 secret.");
     const secret = normalizeSecret(trimmed);
     decodeBase32(secret);
-    return { name: accountName, issuer: "", secret, digits: 6, period: 30, algorithm: "SHA1" };
+    return { name: accountName, issuer: issuerOverride?.trim() ?? "", secret, digits: 6, period: 30, algorithm: "SHA1" };
   }
 
   let url: URL;
@@ -81,7 +81,7 @@ export function parseInput(input: string, name?: string): ParsedAccount {
     throw new Error("The otpauth URI is invalid.");
   }
   const [labelIssuer, ...labelName] = label.split(":");
-  const issuer = parameters.get("issuer") || (labelName.length ? labelIssuer.trim() : "");
+  const issuer = issuerOverride?.trim() || parameters.get("issuer") || (labelName.length ? labelIssuer.trim() : "");
   const uriName = (labelName.length ? labelName.join(":") : label).trim();
   const accountName = name?.trim() || uriName || issuer;
   if (!accountName) throw new Error("The otpauth URI is missing an account name.");
