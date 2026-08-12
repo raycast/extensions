@@ -38,6 +38,14 @@ export default function Command() {
     }
   }
 
+  function removeTask(taskId: string) {
+    setGroups((current) =>
+      current
+        .map((group) => ({ ...group, tasks: group.tasks.filter((task) => task._id !== taskId) }))
+        .filter((group) => group.tasks.length > 0),
+    );
+  }
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Overview">
       {groups.map((g) => (
@@ -78,6 +86,7 @@ export default function Command() {
                         }
                         appHost={getAppHost()}
                         onUpdated={refreshOverview}
+                        onDeleted={removeTask}
                       />
                     }
                   />

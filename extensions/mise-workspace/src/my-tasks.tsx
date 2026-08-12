@@ -40,6 +40,10 @@ export default function Command(
     }
   }
 
+  function removeTask(taskId: string) {
+    setItems((current) => current.filter((task) => task._id !== taskId));
+  }
+
   const appHost = getAppHost();
   const ctxTask = (props.launchContext as any)?.task as TaskLite | undefined;
   const openSubtasks = Boolean((props.launchContext as any)?.openSubtasks);
@@ -78,7 +82,7 @@ export default function Command(
               <Action.Push
                 title="Open Task"
                 icon={Icon.Checkmark}
-                target={<TaskDetail task={t} appHost={appHost} onUpdated={refreshMyTasks} />}
+                target={<TaskDetail task={t} appHost={appHost} onUpdated={refreshMyTasks} onDeleted={removeTask} />}
               />
               {t.hasSubtasks ? (
                 <Action.Push

@@ -21,6 +21,7 @@ export default function TaskDetail(props: {
   appHost: string;
   __openSubtasks?: boolean;
   onUpdated?: (updated?: TaskLite) => void | Promise<void>;
+  onDeleted?: (taskId: string) => void;
 }) {
   const { task } = props;
   const { pop } = useNavigation();
@@ -313,11 +314,7 @@ export default function TaskDetail(props: {
                   style: Toast.Style.Success,
                   title: "Task deleted",
                 });
-                try {
-                  await props.onUpdated?.();
-                } catch {
-                  /* the task was deleted successfully; leave the stale detail view */
-                }
+                props.onDeleted?.(task._id);
                 pop();
               } catch (e) {
                 await showToast({
