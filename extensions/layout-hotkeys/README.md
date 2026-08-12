@@ -6,6 +6,27 @@ macOS only offers "select next input source", so reaching Hebrew from a list of 
 key three times. This extension gives you four commands you can bind independent global hotkeys to, each landing
 directly on the layout you assign it.
 
+## How this differs from Keyboard Layout Switcher
+
+[Keyboard Layout Switcher](https://www.raycast.com/lucaschultz/input-switcher) already covers part of this ground, so
+to be explicit about where the two part ways. It has two commands: a picker listing your layouts, and "Toggle Next
+Layout". This extension exists for the two things that leaves out.
+
+- **A hotkey that lands on one specific layout.** Its only command that switches without further interaction is the
+  toggle, which advances to the next layout; reaching a particular one means opening the picker and choosing from the
+  list. Here, **Switch to Layout 1–4** are four separate commands, so one hotkey goes straight to Hebrew and another
+  straight to Russian, no matter how many layouts you have enabled.
+- **Repairing text typed with the wrong layout active.** The **Convert Selection** commands rewrite `ghbdtn` into
+  `привет` by mapping each character through the physical key that produced it. Keyboard Layout Switcher has no
+  equivalent; it switches layouts and nothing else.
+
+There is also no external dependency here: Keyboard Layout Switcher drives the separately installed
+[keyboardSwitcher](https://github.com/Lutzifer/keyboardSwitcher) binary, while this extension calls Carbon's
+`TISSelectInputSource` from bundled Swift, so there is nothing to install alongside it.
+
+The overlap that remains is deliberate — **Switch Input Source** and **Cycle Input Source** below do roughly what that
+extension's two commands do, so the four hotkeys are not the only way in.
+
 ## Commands
 
 | Command | What it does |
