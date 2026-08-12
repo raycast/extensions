@@ -1,6 +1,6 @@
 # QuickForce Changelog
 
-## [Store Release] - {PR_MERGE_DATE}
+## [Store Release] - 2026-08-12
 
 ### Changed
 
