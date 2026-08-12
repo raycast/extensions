@@ -1,6 +1,6 @@
 # Convex Changelog
 
-## [Endpoint Fixes, Deployment Health & Modernization] - {PR_MERGE_DATE}
+## [Endpoint Fixes, Deployment Health & Modernization] - 2026-08-12
 
 ### Fixes
 
