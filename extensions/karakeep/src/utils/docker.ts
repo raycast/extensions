@@ -7,7 +7,7 @@
  * degrades to "we couldn't help" rather than surfacing as a Karakeep error.
  */
 
-import { execFile } from "child_process";
+import { execFile, spawn } from "child_process";
 import { promisify } from "util";
 import { existsSync } from "fs";
 import { logger } from "@chrismessina/raycast-logger";
@@ -30,12 +30,28 @@ const DOCKER_PATHS = [
 
 const EXEC_TIMEOUT_MS = 10_000;
 
+/**
+ * Field separator for `docker inspect --format`. A pipe seemed safe until you
+ * remember one of the fields is a filesystem path the user chose — a compose
+ * file under `/Users/me/a|b/` would truncate and produce an invalid `-f` path.
+ * U+001F is the ASCII unit separator; it cannot occur in a path or label.
+ */
+const FIELD_SEP = "\u001f";
+
+/** Ceiling on the buffered compose transcript. Only its tail is ever read. */
+const MAX_TRANSCRIPT_CHARS = 100_000;
+
 export interface DockerContainer {
   name: string;
   status: string;
   project?: string;
   service?: string;
   running: boolean;
+  /** Image reference as declared, e.g. ghcr.io/karakeep-app/karakeep:release */
+  image?: string;
+  /** Compose file(s) this project was created from, needed to run compose
+   * against it from outside its directory. */
+  configFiles?: string[];
 }
 
 let cachedDockerPath: string | null | undefined;
@@ -87,24 +103,52 @@ export async function findContainerByPort(port: string): Promise<DockerContainer
       '{{index .Config.Labels "com.docker.compose.project"}}',
       '{{index .Config.Labels "com.docker.compose.service"}}',
       "{{range $p, $b := .HostConfig.PortBindings}}{{range $b}}{{.HostPort}},{{end}}{{end}}",
-    ].join("|");
+      "{{.Config.Image}}",
+      '{{index .Config.Labels "com.docker.compose.project.config_files"}}',
+    ].join(FIELD_SEP);
 
     const output = await docker(["inspect", ...ids.split("\n"), "--format", format]);
 
+    const matches: DockerContainer[] = [];
     for (const line of output.split("\n")) {
-      const [name, status, project, service, ports] = line.split("|");
+      const [name, status, project, service, ports, image, configFiles] = line.split(FIELD_SEP);
       if (!ports) continue;
       if (!ports.split(",").filter(Boolean).includes(port)) continue;
 
-      return {
+      matches.push({
         // `docker inspect` reports names with a leading slash.
         name: name.replace(/^\//, ""),
         status,
         project: project || undefined,
         service: service || undefined,
         running: status === "running",
-      };
+        image: image || undefined,
+        // Docker stores multiple compose files comma-separated, so a path
+        // containing a comma is not representable here — Docker's limitation,
+        // not ours.
+        configFiles: configFiles ? configFiles.split(",").filter(Boolean) : undefined,
+      });
     }
+
+    if (matches.length === 0) return undefined;
+
+    // Several containers can DECLARE the same host port while only one holds
+    // it — a stopped leftover from an unrelated project matches the filter just
+    // as well as the live instance. The running one is the one actually serving
+    // the API we were asked about, so it wins; taking the first match risked
+    // pointing recovery and updates at someone else's Compose project.
+    const running = matches.filter((match) => match.running);
+    const chosen = running[0] ?? matches[0];
+
+    if (matches.length > 1) {
+      log.info("Several containers declare this port; choosing the running one", {
+        port,
+        chosen: chosen.name,
+        candidates: matches.map((m) => ({ name: m.name, project: m.project, running: m.running })),
+      });
+    }
+
+    return chosen;
   } catch (error) {
     log.log("Container lookup failed", { port, error: String(error) });
   }
@@ -153,4 +197,130 @@ export async function waitForApi(apiUrl: string, timeoutMs = 60_000, intervalMs 
   }
 
   return false;
+}
+
+/**
+ * Resolved image IDs for every container in a Compose project, keyed by name.
+ *
+ * Per-PROJECT rather than per-container because Karakeep is three services and
+ * any of them can be the one that moved: comparing only the web container
+ * reported "already current" for an update that had in fact pulled a new
+ * meilisearch or chrome image.
+ *
+ * Returns undefined — rather than an empty map — when the IDs can't be read, so
+ * the caller can tell "nothing changed" apart from "I don't know".
+ */
+export async function readProjectImageIds(container: DockerContainer): Promise<Map<string, string> | undefined> {
+  try {
+    const filter = container.project
+      ? ["ps", "-aq", "--filter", `label=com.docker.compose.project=${container.project}`]
+      : undefined;
+    const ids = filter ? await docker(filter) : container.name;
+    const targets = ids.split("\n").filter(Boolean);
+    if (targets.length === 0) return undefined;
+
+    const output = await docker(["inspect", ...targets, "--format", `{{.Name}}${FIELD_SEP}{{.Image}}`]);
+    const byName = new Map<string, string>();
+    for (const line of output.split("\n")) {
+      const [name, imageId] = line.split(FIELD_SEP);
+      if (name && imageId) byName.set(name.replace(/^\//, ""), imageId);
+    }
+    return byName.size > 0 ? byName : undefined;
+  } catch (error) {
+    log.log("Could not read project image ids", { project: container.project, error: String(error) });
+    return undefined;
+  }
+}
+
+/**
+ * Whether any image in the project changed. `undefined` means unknown — either
+ * snapshot failed to read, so claiming "already current" would be a guess.
+ */
+export function imagesChanged(
+  before: Map<string, string> | undefined,
+  after: Map<string, string> | undefined,
+): boolean | undefined {
+  if (!before || !after) return undefined;
+  for (const [name, id] of after) {
+    const previous = before.get(name);
+    // A container absent beforehand was created by this update, which counts.
+    if (previous === undefined || previous !== id) return true;
+  }
+  return false;
+}
+
+/**
+ * Run `docker compose up --pull always -d` for the container's project.
+ *
+ * Streams output through `onOutput` instead of buffering: a cold pull of the
+ * Karakeep images takes minutes, and a screen that says nothing for that long
+ * reads as a hang.
+ *
+ * Compose is invoked with `-f <config file>` rather than by changing directory,
+ * because Raycast has no meaningful working directory — the compose file path
+ * comes from the label Compose itself wrote when the project was created.
+ */
+export function composePullAndUp(
+  container: DockerContainer,
+  onOutput: (lines: string[]) => void,
+  timeoutMs = 15 * 60_000,
+): Promise<void> {
+  const bin = findDockerPath();
+  if (!bin) return Promise.reject(new Error("Docker CLI not found"));
+  if (!container.configFiles?.length) {
+    return Promise.reject(new Error("This container was not created by Docker Compose"));
+  }
+
+  const args = ["compose", ...container.configFiles.flatMap((file) => ["-f", file]), "up", "--pull", "always", "-d"];
+  log.info("Running docker compose", { project: container.project, configFiles: container.configFiles, args });
+
+  return new Promise((resolve, reject) => {
+    const child = spawn(bin, args, { timeout: timeoutMs });
+    let transcript = "";
+    let transcriptTruncated = false;
+
+    // Chunks land on arbitrary byte boundaries, so a chunk ending mid-line
+    // would otherwise be displayed as its own truncated line and the remainder
+    // as a second one. Hold the tail back until its newline arrives — and keep
+    // ONE buffer PER STREAM, because interleaving a half-line from stdout with
+    // a whole line from stderr would splice them into a word that never
+    // appeared in either.
+    const pending = { stdout: "", stderr: "" };
+
+    // Compose writes its progress to stderr and almost nothing to stdout, so
+    // stderr here is progress, not necessarily an error.
+    const collect = (stream: "stdout" | "stderr") => (chunk: Buffer) => {
+      const text = chunk.toString();
+
+      // A pathological run (a wedged pull retrying forever) would otherwise
+      // grow this without bound; the tail is what names the failure anyway.
+      if (transcript.length < MAX_TRANSCRIPT_CHARS) transcript += text;
+      else transcriptTruncated = true;
+
+      pending[stream] += text;
+      const lines = pending[stream].split("\n");
+      pending[stream] = lines.pop() ?? "";
+      const complete = lines.map((line) => line.trimEnd()).filter(Boolean);
+      if (complete.length) onOutput(complete);
+    };
+    child.stdout.on("data", collect("stdout"));
+    child.stderr.on("data", collect("stderr"));
+
+    child.on("error", (error) => {
+      log.error("Could not spawn docker compose", { error: String(error) });
+      reject(error);
+    });
+    child.on("close", (code) => {
+      // Compose's last line often has no trailing newline.
+      const tail = [pending.stdout.trim(), pending.stderr.trim()].filter(Boolean);
+      if (tail.length) onOutput(tail);
+      if (transcriptTruncated) log.info("Compose output was truncated for logging", { keptChars: transcript.length });
+      log.info("docker compose exited", { code, project: container.project });
+      if (code === 0) resolve();
+      // Reject with the WHOLE output. Slicing the last few lines here threw
+      // away the one line that named the cause and kept "Interrupted" noise;
+      // the caller summarizes for the toast and keeps the rest copyable.
+      else reject(new Error(transcript.trim() || `docker compose exited with ${code}`));
+    });
+  });
 }
