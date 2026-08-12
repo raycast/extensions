@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-08-12
 
 - Handle large Safari bookmark libraries without parser limit errors.
 
