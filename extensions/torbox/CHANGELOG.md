@@ -1,5 +1,10 @@
 # TorBox Changelog
 
+## [Recent downloads and improved file navigation] - 2026-08-12
+
+- Add a Recent section for recently opened downloads, folders, and video files
+- Make View Files the default action for multi-file downloads
+
 ## [Stream video files in external players] - 2026-03-14
 
 - Stream video files directly in VLC, IINA, Infuse, or mpv
