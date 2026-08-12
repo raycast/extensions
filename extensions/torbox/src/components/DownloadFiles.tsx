@@ -5,13 +5,15 @@ import { isVideoFile } from "../utils/video";
 import { openInPlayer } from "../utils/video";
 import { copyDownloadLink } from "../utils/downloads";
 import { useVideoPlayers } from "../hooks/useVideoPlayers";
+import { RecentDownload } from "../hooks/useRecentDownloads";
 
 interface DownloadFilesProps {
   download: Download;
   apiKey: string;
+  onOpen?: (recent: RecentDownload) => void;
 }
 
-export const DownloadFiles = ({ download, apiKey }: DownloadFilesProps) => {
+export const DownloadFiles = ({ download, apiKey, onOpen }: DownloadFilesProps) => {
   const isDownloadReady = download.download_finished || download.progress >= 1;
   const { players, setDefaultPlayer } = useVideoPlayers();
 
@@ -35,7 +37,15 @@ export const DownloadFiles = ({ download, apiKey }: DownloadFilesProps) => {
                         key={player.name}
                         title={`Open in ${player.name}`}
                         icon={Icon.Play}
-                        onAction={() => openInPlayer(apiKey, download, player, file.id)}
+                        onAction={() =>
+                          openInPlayer(apiKey, download, player, file.id, () =>
+                            onOpen?.({
+                              downloadId: download.id,
+                              type: download.type,
+                              fileId: file.id,
+                            }),
+                          )
+                        }
                       />
                     ))}
                   {isDownloadReady && (
