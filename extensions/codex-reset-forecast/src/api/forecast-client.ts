@@ -50,11 +50,12 @@ export async function fetchForecast({
     const response = await fetchImpl(url, { headers, signal: controller.signal });
 
     if (response.status === 304) {
-      if (!cached) throw new Error("Forecast API returned 304 without cached data");
+      const latest = store.read() ?? cached;
+      if (!latest) throw new Error("Forecast API returned 304 without cached data");
       const lastSuccessfulRequestAt = now().toISOString();
-      store.write({ ...cached, lastSuccessfulRequestAt });
+      store.write({ ...latest, lastSuccessfulRequestAt });
       return {
-        response: cached.response,
+        response: latest.response,
         lastSuccessfulRequestAt,
         isStale: false,
       };

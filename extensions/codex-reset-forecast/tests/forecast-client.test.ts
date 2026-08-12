@@ -57,6 +57,50 @@ describe("fetchForecast", () => {
     expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
   });
 
+  it("does not overwrite a concurrent successful response when a 304 finishes later", async () => {
+    const store = new MemoryStore();
+    store.snapshot = {
+      response: validFixture,
+      etag: 'W/"forecast-1"',
+      lastSuccessfulRequestAt: "2026-08-11T02:00:00.000Z",
+    };
+
+    let resolveNotModified!: (response: Response) => void;
+    const delayedNotModified = new Promise<Response>((resolve) => {
+      resolveNotModified = resolve;
+    });
+    const notModifiedFetch = vi.fn<typeof fetch>().mockReturnValue(delayedNotModified);
+    const notModifiedRequest = fetchForecast({
+      store,
+      fetchImpl: notModifiedFetch,
+      now: () => new Date("2026-08-11T04:00:00.000Z"),
+    });
+
+    const newerFixture = {
+      ...validFixture,
+      fetchedAt: "2026-08-11T03:00:00.000Z",
+      forecast: { ...validFixture.forecast, score: 85 },
+    };
+    await fetchForecast({
+      store,
+      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(
+        new Response(JSON.stringify(newerFixture), {
+          status: 200,
+          headers: { etag: 'W/"forecast-2"' },
+        }),
+      ),
+      now: () => new Date("2026-08-11T03:00:00.000Z"),
+    });
+
+    resolveNotModified(new Response(null, { status: 304 }));
+    const result = await notModifiedRequest;
+
+    expect(result.response.forecast.score).toBe(85);
+    expect(store.snapshot?.response.forecast.score).toBe(85);
+    expect(store.snapshot?.etag).toBe('W/"forecast-2"');
+    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T04:00:00.000Z");
+  });
+
   it("rejects a 304 response when no cached data exists", async () => {
     const store = new MemoryStore();
 
