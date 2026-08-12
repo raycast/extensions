@@ -1,6 +1,6 @@
 # Changelog
 
-## [Meeting Deck Overhaul] - {PR_MERGE_DATE}
+## [Meeting Deck Overhaul] - 2026-08-12
 
 Major overhaul, contributed by the MuteDeck team.
 
