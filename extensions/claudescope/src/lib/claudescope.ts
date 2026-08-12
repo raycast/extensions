@@ -14,10 +14,6 @@ const DISCOVERY_TIMEOUT_MS = 5_000;
 const MAX_OUTPUT_BYTES = 4 * 1024 * 1024;
 const MACOS_SYSTEM_PATHS = ["/usr/bin", "/bin", "/usr/sbin", "/sbin"];
 
-interface ExtensionPreferences {
-  executablePath?: string;
-}
-
 export interface SearchHit {
   sessionId: string;
   projectId: string;
@@ -70,7 +66,7 @@ let compatibleExecutableCache: PreferencePromise<string> | undefined;
 let projectDisplayNamesCache: PreferencePromise<ReadonlyMap<string, string>> | undefined;
 
 function executablePreference(): string {
-  return getPreferenceValues<ExtensionPreferences>().executablePath?.trim() ?? "";
+  return getPreferenceValues<Preferences>().executablePath?.trim() ?? "";
 }
 
 function expandHome(path: string): string {
