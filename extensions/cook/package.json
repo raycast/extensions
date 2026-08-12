@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "cook-raycast-extension",
+  "name": "cook",
   "title": "Cook",
   "description": "Browse, view, and generate shopping lists from your Cooklang recipe collection",
   "icon": "icon.png",
