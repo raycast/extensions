@@ -1,4 +1,4 @@
-import { getRemainingPercent } from "../agents/format";
+import { getRemainingPercent } from "../agents/format.ts";
 
 export { getRemainingPercent };
 

@@ -7,9 +7,9 @@ import {
   persistGrokRefreshedTokens,
   refreshGrokAccessToken,
   type GrokCredentials,
-} from "./auth";
-import { grpcWebTrailerFields, parseGrokWebBillingResponse, primaryWindowLabel } from "./parser";
-import type { GrokError, GrokUsage } from "./types";
+} from "./auth.ts";
+import { grpcWebTrailerFields, parseGrokWebBillingResponse, primaryWindowLabel } from "./parser.ts";
+import type { GrokError, GrokUsage } from "./types.ts";
 
 const GROK_BILLING_URL = "https://grok.com/grok_api_v2.GrokBuildBilling/GetGrokCreditsConfig";
 const REQUEST_TIMEOUT_MS = 15000;

@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Add expiration argument to Set Status] - 2026-08-12
+
+- The **Set Status** command now accepts an optional `expiration` argument — any number of minutes, or `today` / `week` — so a deep link or Quicklink can set a self-clearing status in one step (e.g. `"expiration":"90"` for an hour and a half).
+
 ## [Broadcast Slack thread replies to channels] - 2026-07-21
 
 - Add an optional `replyBroadcast` flag to the `reply-thread` AI tool to also send important thread replies to the channel.

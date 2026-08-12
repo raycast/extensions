@@ -3,6 +3,8 @@ import { useEffect, useRef } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchGetAllBookmarks } from "../apis";
 import { GetBookmarksParams } from "../types";
+import { handleFetchError } from "../utils/fetchError";
+import { useLiveData } from "./useLiveData";
 
 const log = logger.child("[GetAllBookmarks]");
 
@@ -36,6 +38,9 @@ export function useGetAllBookmarks({ favourited, archived, type }: GetBookmarksP
       abortable,
       // Helps smooth UX when args change and ensures the list doesn't flicker.
       keepPreviousData: true,
+      // Suppresses Raycast's built-in "Failed to fetch latest data" toast, which
+      // names a symptom and races the recovery screen. See handleFetchError.
+      onError: handleFetchError("bookmarks"),
     },
   );
 
@@ -45,10 +50,15 @@ export function useGetAllBookmarks({ favourited, archived, type }: GetBookmarksP
     }
   }, [error]);
 
+  // NOT `data.length > 0`: useCachedPromise restores the previous run's rows
+  // from disk, so a populated list says nothing about the server being up.
+  const hasLiveData = useLiveData(isLoading, error, `${favourited ?? ""}|${archived ?? ""}|${type ?? ""}`);
+
   return {
     isLoading,
     bookmarks: data || [],
     error,
+    hasLiveData,
     revalidate,
     pagination,
   };

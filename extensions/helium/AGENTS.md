@@ -4,6 +4,7 @@
 - `package.json` is both the npm manifest and Raycast extension manifest. Add new commands there and keep command names aligned with `src/<command-name>.tsx`.
 - `src/*.tsx` contains Raycast command entrypoints such as `search-tabs.tsx`, `search-web.tsx`, `search-history.tsx`, and `open-new-tab.tsx`.
 - `src/utils/` holds shared browser, AppleScript, search, bookmark, history, URL, suggestion, and action helpers. Put reusable logic here.
+- `src/utils/platform.ts` owns the macOS/Windows split (`isWindows`, Helium executable and profile-root discovery); `src/utils/browser-control.ts` dispatches every app-driving call to `applescript.ts` (macOS) or `windows-browser.ts` (Windows). Import browser behavior from `browser-control.ts`, never from `applescript.ts` directly, and check `isTabControlAvailable` instead of testing the platform inline.
 - `tests/utils/` holds Vitest coverage for shared helpers. Keep test files out of `src/` so Raycast command source stays focused.
 - `src/types.ts` defines shared extension models. `assets/` stores the extension icon; `metadata/` stores Raycast Store screenshots.
 
@@ -14,11 +15,13 @@
 - `npm run lint` runs `ray lint` with the Raycast ESLint config.
 - `npm run fix-lint` runs `ray lint --fix` for safe automatic fixes.
 - `npm test` runs Vitest unit tests for pure helpers.
-- `npm run benchmark:tabs` runs a read-only AppleScript tab enumeration benchmark against the live Helium app.
+- `npm run benchmark:tabs` runs a read-only AppleScript tab enumeration benchmark against the live Helium app (macOS only).
 - `npm run publish` publishes through the Raycast API; use only when release-ready.
 
 ## Coding Style & Naming Conventions
 - Use TypeScript, React JSX, strict types, 2-space indentation, semicolons, and double quotes.
+- Declare keyboard shortcuts through `src/utils/shortcuts.ts` (or `Keyboard.Shortcut.Common.*`). A bare `cmd` shortcut is silently ignored on Windows.
+- Keep `@raycast/api` out of the import graph of anything covered by Vitest — it ships types only and has no runtime entry point. `tests/mocks/raycast-api.ts` (wired up in `vitest.config.ts`) stubs it where a tested helper legitimately reads a preference.
 - Use PascalCase for React components and action components, camelCase for functions and variables, and kebab-case for Raycast command filenames.
 - Treat Helium AppleScript tab IDs as the source of truth for tab identity. Keep favicon and Browser Extension data display-only.
 - Use `useCachedBrowserTabs` for tab-list UIs so cached snapshots render immediately while fresh Helium reads update in the background.

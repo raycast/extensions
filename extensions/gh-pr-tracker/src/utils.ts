@@ -1,6 +1,28 @@
 import type { ActivityItem, GHReviewComment, PRWithActivity, SeenState, SeenMap } from "./types";
 import { prKey } from "./types";
 import type { EventFilters } from "./event-filters";
+import type { CompiledPrFilter } from "./pr-filter-query";
+import { matchesPrFilter } from "./pr-filter-query";
+
+// ─── Synthetic itemKeys for events with no stable database ID ───────────────
+
+/**
+ * Label and force-push events are the one activity class whose identity does NOT survive the
+ * REST→GraphQL move: GitHub's GraphQL API exposes only an opaque node `id` for `LabeledEvent`,
+ * `UnlabeledEvent`, and `HeadRefForcePushedEvent` — there is no `fullDatabaseId` counterpart to
+ * the REST issue-event id. Deriving the key from stable *content* instead makes it reproducible
+ * from either API, so the eventual cutover is a no-op for stored seen-state.
+ *
+ * See docs/PERFORMANCE-FINDINGS.md §5.1 for the decision and its accepted collision risk
+ * (same actor, same label, identical timestamp — benign: one event reads as already-seen).
+ */
+export function labelEventKey(kind: "added" | "removed", actor: string, createdAt: string, label: string): string {
+  return `label-${kind}-${actor}-${createdAt}-${label}`;
+}
+
+export function forcePushEventKey(actor: string, createdAt: string): string {
+  return `force-push-${actor}-${createdAt}`;
+}
 
 // ─── Build all activity items for a PR (used for seen-tracking) ─────────────
 
@@ -63,12 +85,15 @@ export function getAllActivity(pr: PRWithActivity): ActivityItem[] {
 
   // Label events
   for (const e of pr.events) {
+    // Actor is nullable on deleted accounts, and itemKeys are content-derived so they match
+    // whatever the GraphQL path produces for the same event.
+    const actor = e.actor ?? { login: "ghost", avatar_url: "" };
     if (e.event === "labeled" && e.label) {
       items.push({
         type: "label_added",
         id: e.id,
-        itemKey: `label-added-${e.id}`,
-        user: e.actor,
+        itemKey: labelEventKey("added", actor.login, e.created_at, e.label.name),
+        user: actor,
         body: e.label.name,
         date: e.created_at,
         htmlUrl: pr.html_url,
@@ -79,8 +104,8 @@ export function getAllActivity(pr: PRWithActivity): ActivityItem[] {
       items.push({
         type: "label_removed",
         id: e.id,
-        itemKey: `label-removed-${e.id}`,
-        user: e.actor,
+        itemKey: labelEventKey("removed", actor.login, e.created_at, e.label.name),
+        user: actor,
         body: e.label.name,
         date: e.created_at,
         htmlUrl: pr.html_url,
@@ -91,8 +116,8 @@ export function getAllActivity(pr: PRWithActivity): ActivityItem[] {
       items.push({
         type: "force_push",
         id: e.id,
-        itemKey: `force-push-${e.id}`,
-        user: e.actor,
+        itemKey: forcePushEventKey(actor.login, e.created_at),
+        user: actor,
         body: "Force pushed to this branch",
         date: e.created_at,
         htmlUrl: pr.html_url,
@@ -147,18 +172,22 @@ export const MAX_UNREAD_PRS = 25;
 export const MAX_SCAN_PRS = 150;
 
 /**
- * Returns the PRs that have at least one unseen activity item after applying
- * event filters, sorted by most-recent unseen activity first. This is the
- * single source of truth for the "unread PR" count shown in both the list
- * command and the menu-bar command.
+ * Returns the PRs that have at least one unseen activity item after applying event filters and
+ * the active PR filter, sorted by most-recent unseen activity first. This is the single source of
+ * truth for the "unread PR" list shown in both the list command and the menu-bar command.
  */
-export function computePrsWithUnseen(prs: PRWithActivity[], seenMap: SeenMap, filters: EventFilters): PRWithUnseen[] {
+export function computePrsWithUnseen(
+  prs: PRWithActivity[],
+  seenMap: SeenMap,
+  filters: EventFilters,
+  prFilter?: CompiledPrFilter,
+): PRWithUnseen[] {
   return prs
     .map((pr) => ({
       pr,
       unseen: getUnseenActivity(pr, seenMap[prKey(pr)]).filter((item) => filters[item.type]),
     }))
-    .filter(({ unseen }) => unseen.length > 0)
+    .filter(({ pr, unseen }) => unseen.length > 0 && (!prFilter || matchesPrFilter(pr, prFilter)))
     .sort((a, b) => {
       const aDate = a.unseen[0]?.date ?? "";
       const bDate = b.unseen[0]?.date ?? "";

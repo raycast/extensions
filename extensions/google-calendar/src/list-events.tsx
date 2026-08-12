@@ -1,4 +1,4 @@
-import { Color, Icon, LaunchProps, List } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, LaunchProps, List } from "@raycast/api";
 import { useEvents, withGoogleAPIs } from "./lib/google";
 import { calendar_v3 } from "@googleapis/calendar";
 import { formatRecurrence } from "./lib/utils";
@@ -7,8 +7,16 @@ import { useState, useMemo } from "react";
 import EventActions from "./components/EventActions";
 import CalendarSelector from "./components/CalendarSelector";
 
-function getAccessories(event: calendar_v3.Schema$Event) {
+function getAccessories(event: calendar_v3.Schema$Event, showLocation: boolean) {
   const accessories = new Array<List.Item.Accessory>();
+
+  if (showLocation && event.location) {
+    accessories.push({
+      text: event.location,
+      icon: Icon.Pin,
+      tooltip: `Location: ${event.location}`,
+    });
+  }
 
   if (event.recurrence || event.recurringEventId) {
     const accessory: List.Item.Accessory = {
@@ -111,6 +119,7 @@ export function getEventSection(date: Date, now = new Date()) {
 
 function Command(props: LaunchProps) {
   const { calendarId } = (props.launchContext ?? {}) as { calendarId?: string };
+  const { showLocation } = getPreferenceValues<Preferences.ListEvents>();
   const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(calendarId ?? null);
   const { data, isLoading, pagination, revalidate } = useEvents(selectedCalendarId);
   const { data: calendars, isLoading: calendarsIsLoading, revalidate: revalidateCalendars } = useCalendars();
@@ -205,7 +214,7 @@ function Command(props: LaunchProps) {
                 icon={getIcon(event)}
                 title={event.summary ?? "Untitled Event"}
                 subtitle={formatEventTime(event, section)}
-                accessories={getAccessories(event)}
+                accessories={getAccessories(event, showLocation)}
                 actions={
                   <EventActions
                     event={event}

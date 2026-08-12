@@ -1,12 +1,25 @@
 import { homedir } from "os";
-import { join } from "path";
+import { isAbsolute, join } from "path";
 
-const HANDY_SUPPORT_DIR = join(
-  homedir(),
-  "Library",
-  "Application Support",
-  "com.pais.handy",
-);
+const HANDY_APP_ID = "com.pais.handy";
+
+export function getHandySupportDir(
+  platform = process.platform,
+  env: NodeJS.ProcessEnv = process.env,
+  home = homedir(),
+): string {
+  if (platform === "darwin") {
+    return join(home, "Library", "Application Support", HANDY_APP_ID);
+  }
+
+  const dataDir =
+    env.XDG_DATA_HOME && isAbsolute(env.XDG_DATA_HOME)
+      ? env.XDG_DATA_HOME
+      : join(home, ".local", "share");
+  return join(dataDir, HANDY_APP_ID);
+}
+
+const HANDY_SUPPORT_DIR = getHandySupportDir();
 
 export const DB_PATH = join(HANDY_SUPPORT_DIR, "history.db");
 export const SETTINGS_PATH = join(HANDY_SUPPORT_DIR, "settings_store.json");

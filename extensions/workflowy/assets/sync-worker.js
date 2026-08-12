@@ -4,11 +4,11 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { DatabaseSync } = require("node:sqlite");
 
-const API_BASE = "https://workflowy.com";
+const API_BASE = process.env.WORKFLOWY_API_BASE || "https://workflowy.com";
 const RATE_LIMIT_MS = 60_000;
 const SYSTEM_TARGETS = ["inbox", "today", "tomorrow", "next_week"];
 
-const SCHEMA_SQL = `
+const BASE_SCHEMA_SQL = `
 CREATE TABLE IF NOT EXISTS nodes (
   id TEXT PRIMARY KEY,
   name TEXT NOT NULL DEFAULT '',
@@ -24,25 +24,6 @@ CREATE INDEX IF NOT EXISTS idx_nodes_parent ON nodes(parent_id);
 CREATE INDEX IF NOT EXISTS idx_nodes_name ON nodes(name);
 CREATE INDEX IF NOT EXISTS idx_nodes_completed ON nodes(completed);
 CREATE INDEX IF NOT EXISTS idx_nodes_updated_at ON nodes(updated_at DESC);
-
-CREATE VIRTUAL TABLE IF NOT EXISTS nodes_fts USING fts5(
-  id UNINDEXED,
-  name,
-  note,
-  content='nodes',
-  content_rowid='rowid'
-);
-
-CREATE TRIGGER IF NOT EXISTS nodes_ai AFTER INSERT ON nodes BEGIN
-  INSERT INTO nodes_fts(rowid, id, name, note) VALUES (new.rowid, new.id, new.name, COALESCE(new.note, ''));
-END;
-CREATE TRIGGER IF NOT EXISTS nodes_ad AFTER DELETE ON nodes BEGIN
-  INSERT INTO nodes_fts(nodes_fts, rowid, id, name, note) VALUES('delete', old.rowid, old.id, old.name, COALESCE(old.note, ''));
-END;
-CREATE TRIGGER IF NOT EXISTS nodes_au AFTER UPDATE ON nodes BEGIN
-  INSERT INTO nodes_fts(nodes_fts, rowid, id, name, note) VALUES('delete', old.rowid, old.id, old.name, COALESCE(old.note, ''));
-  INSERT INTO nodes_fts(rowid, id, name, note) VALUES (new.rowid, new.id, new.name, COALESCE(new.note, ''));
-END;
 
 CREATE TABLE IF NOT EXISTS tags (
   tag TEXT NOT NULL,
@@ -71,6 +52,27 @@ CREATE TABLE IF NOT EXISTS sync_meta (
 );
 `;
 
+const FTS_SCHEMA_SQL = `
+CREATE VIRTUAL TABLE IF NOT EXISTS nodes_fts USING fts5(
+  id UNINDEXED,
+  name,
+  note,
+  content='nodes',
+  content_rowid='rowid'
+);
+
+CREATE TRIGGER IF NOT EXISTS nodes_ai AFTER INSERT ON nodes BEGIN
+  INSERT INTO nodes_fts(rowid, id, name, note) VALUES (new.rowid, new.id, new.name, COALESCE(new.note, ''));
+END;
+CREATE TRIGGER IF NOT EXISTS nodes_ad AFTER DELETE ON nodes BEGIN
+  INSERT INTO nodes_fts(nodes_fts, rowid, id, name, note) VALUES('delete', old.rowid, old.id, old.name, COALESCE(old.note, ''));
+END;
+CREATE TRIGGER IF NOT EXISTS nodes_au AFTER UPDATE ON nodes BEGIN
+  INSERT INTO nodes_fts(nodes_fts, rowid, id, name, note) VALUES('delete', old.rowid, old.id, old.name, COALESCE(old.note, ''));
+  INSERT INTO nodes_fts(rowid, id, name, note) VALUES (new.rowid, new.id, new.name, COALESCE(new.note, ''));
+END;
+`;
+
 function emit(event) {
   process.stdout.write(`${JSON.stringify(event)}\n`);
 }
@@ -95,7 +97,12 @@ function ensureDir(filePath) {
 
 function initializeDatabase(db) {
   db.exec("PRAGMA journal_mode = WAL;");
-  db.exec(SCHEMA_SQL);
+  db.exec(BASE_SCHEMA_SQL);
+  try {
+    db.exec(FTS_SCHEMA_SQL);
+  } catch (error) {
+    if (!String(error).toLowerCase().includes("no such module: fts5")) throw error;
+  }
 }
 
 function withTransaction(db, work) {

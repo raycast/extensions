@@ -126,7 +126,7 @@
     "@visx/shape": "^2.18.0",
     "@visx/text": "^2.3.0",
     "@visx/tooltip": "^2.17.0",
-    "axios": "^1.8.4",
+    "axios": "^1.18.0",
     "d3-time-format": "^4.1.0",
     "react-dom": "^17.0.2"
   },
@@ -149,6 +149,7 @@
   "overrides": {
     "d3-color": "^3.1.0",
     "minimatch": "^10.0.1",
-    "picomatch": "^4.0.4"
+    "picomatch": "^4.0.4",
+    "brace-expansion": "5.0.8"
   }
 }

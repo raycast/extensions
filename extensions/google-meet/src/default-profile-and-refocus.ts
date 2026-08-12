@@ -1,21 +1,12 @@
-import { showHUD, Clipboard } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { getMeetTab, openMeetTabDefaultProfile, getTimeout, sleep, switchToPreviousApp } from "./helpers";
+import { showHUD } from "@raycast/api";
+import { reportMeetFailure } from "./errors";
+import { createMeeting, formatSuccessMessage } from "./services/create-meeting";
 
 export default async function main() {
   try {
-    await openMeetTabDefaultProfile();
-
-    const timeout = getTimeout();
-    await sleep(timeout);
-
-    const meetTab = await getMeetTab();
-
-    await Clipboard.copy(meetTab);
-    await showHUD("Copied meet link to clipboard");
-
-    await switchToPreviousApp();
-  } catch {
-    await showFailureToast("Failed to create meet link. Make sure your browser is supported and try again.");
+    const result = await createMeeting({ refocus: true });
+    await showHUD(formatSuccessMessage(result));
+  } catch (error) {
+    await reportMeetFailure(error, "Create Meet and Refocus");
   }
 }

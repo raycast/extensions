@@ -3,6 +3,7 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { PROBE_TIMEOUT_MS } from "./dictation-config";
 
 const execFileAsync = promisify(execFile);
 
@@ -28,7 +29,15 @@ export interface KeshaSpawn {
   prefixArgs: string[];
 }
 
-async function isExecutable(path: string): Promise<boolean> {
+export interface KeshaBinDeps {
+  candidates?: ReadonlyArray<string>;
+  interpreterCandidates?: ReadonlyArray<string>;
+  isExecutable?: (path: string) => Promise<boolean>;
+  readShebang?: (path: string) => Promise<string | null>;
+  realpath?: (path: string) => Promise<string>;
+}
+
+async function defaultIsExecutable(path: string): Promise<boolean> {
   try {
     await access(path, constants.X_OK);
     return true;
@@ -37,18 +46,22 @@ async function isExecutable(path: string): Promise<boolean> {
   }
 }
 
-async function readShebang(path: string): Promise<string | null> {
+export function parseShebang(head: Buffer): string | null {
+  if (head.length < 2 || head[0] !== 0x23 || head[1] !== 0x21) {
+    return null;
+  }
+  const eol = head.indexOf(0x0a);
+  const end = eol > 0 ? eol : head.length;
+  return head.subarray(2, end).toString("utf8").trim();
+}
+
+async function defaultReadShebang(path: string): Promise<string | null> {
   try {
     const fd = await open(path, "r");
     try {
       const buf = Buffer.alloc(128);
       const { bytesRead } = await fd.read(buf, 0, 128, 0);
-      if (bytesRead < 2 || buf[0] !== 0x23 || buf[1] !== 0x21) {
-        return null;
-      }
-      const eol = buf.indexOf(0x0a, 0);
-      const end = eol > 0 ? eol : bytesRead;
-      return buf.slice(2, end).toString("utf8").trim();
+      return parseShebang(buf.subarray(0, bytesRead));
     } finally {
       await fd.close();
     }
@@ -57,32 +70,49 @@ async function readShebang(path: string): Promise<string | null> {
   }
 }
 
-async function findInterpreter(name: string): Promise<string | null> {
-  for (const path of INTERPRETER_CANDIDATES) {
-    if (path.endsWith(`/${name}`) && (await isExecutable(path))) {
+function withDefaults(deps: KeshaBinDeps): Required<KeshaBinDeps> {
+  return {
+    candidates: FALLBACK_CANDIDATES,
+    interpreterCandidates: INTERPRETER_CANDIDATES,
+    isExecutable: defaultIsExecutable,
+    readShebang: defaultReadShebang,
+    realpath,
+    ...deps,
+  };
+}
+
+async function findInterpreter(
+  name: string,
+  deps: Required<KeshaBinDeps>,
+): Promise<string | null> {
+  for (const path of deps.interpreterCandidates) {
+    if (path.endsWith(`/${name}`) && (await deps.isExecutable(path))) {
       return path;
     }
   }
   return null;
 }
 
-async function buildSpawn(path: string): Promise<KeshaSpawn | null> {
-  if (!(await isExecutable(path))) {
+async function buildSpawn(
+  path: string,
+  deps: Required<KeshaBinDeps>,
+): Promise<KeshaSpawn | null> {
+  if (!(await deps.isExecutable(path))) {
     return null;
   }
   let resolved = path;
   try {
-    resolved = await realpath(path);
+    resolved = await deps.realpath(path);
   } catch {
     // Keep original path if the symlink target cannot be resolved.
   }
-  const shebang = await readShebang(resolved);
+  const shebang = await deps.readShebang(resolved);
   if (!shebang) {
     return { command: path, prefixArgs: [] };
   }
   const envMatch = shebang.match(/^\/usr\/bin\/env\s+([\w.-]+)/);
   if (envMatch) {
-    const interp = await findInterpreter(envMatch[1]);
+    const interp = await findInterpreter(envMatch[1], deps);
     if (interp) {
       return { command: interp, prefixArgs: [resolved] };
     }
@@ -92,13 +122,15 @@ async function buildSpawn(path: string): Promise<KeshaSpawn | null> {
 
 export async function resolveKeshaBin(
   preference: string | undefined,
+  deps: KeshaBinDeps = {},
 ): Promise<KeshaSpawn | null> {
+  const resolved = withDefaults(deps);
   const trimmed = preference?.trim();
   if (trimmed) {
-    return buildSpawn(trimmed);
+    return buildSpawn(trimmed, resolved);
   }
-  for (const candidate of FALLBACK_CANDIDATES) {
-    const spawn = await buildSpawn(candidate);
+  for (const candidate of resolved.candidates) {
+    const spawn = await buildSpawn(candidate, resolved);
     if (spawn) {
       return spawn;
     }
@@ -106,27 +138,149 @@ export async function resolveKeshaBin(
   return null;
 }
 
-export async function probeKeshaVersion(
-  spawn: KeshaSpawn,
-): Promise<string | null> {
+export interface ProbeDeps {
+  execFile?: (
+    command: string,
+    args: string[],
+    options: { timeout: number },
+  ) => Promise<{ stdout: string; stderr: string }>;
+}
+
+export interface EnginePreflightResult {
+  ok: boolean;
+  hint?: string;
+  /**
+   * Why the engine is unavailable — lets the setup view name the right remedy.
+   * `contract` is a CLI/extension version skew, not a broken engine: sending
+   * those users to re-download would fix nothing (#647).
+   */
+  reason?: "missing" | "unusable" | "contract";
+}
+
+const MISSING_ENGINE_MARKER = "not installed";
+// Plain `kesha install` only re-trusts a cached binary; `--no-cache` re-downloads, except on a read-only (Nix) dir.
+const REPAIR_HINT =
+  "Run `kesha install --no-cache` to re-download the engine. On a read-only (Nix) install, repair it through your package manager instead.";
+const CONTRACT_HINT =
+  "Update the kesha CLI and this extension to matching versions — `bun add -g @drakulavich/kesha-voice-kit@latest`.";
+
+function runKesha(spawn: KeshaSpawn, args: string[], deps: ProbeDeps) {
+  const run = deps.execFile ?? execFileAsync;
+  return run(spawn.command, [...spawn.prefixArgs, ...args], {
+    timeout: PROBE_TIMEOUT_MS,
+  });
+}
+
+type StatusStdout =
+  | { kind: "payload"; value: Record<string, unknown> }
+  | { kind: "contract" }
+  | { kind: "prose" };
+
+// An older CLI prints human text, never JSON — so a non-object is a broken contract, not a fallback.
+function classifyStatusStdout(stdout: string): StatusStdout {
+  const trimmed = stdout.trim();
+  if (!trimmed) return { kind: "prose" };
+  let parsed: unknown;
   try {
-    const { stdout } = await execFileAsync(
-      spawn.command,
-      [...spawn.prefixArgs, "--version"],
-      {
-        timeout: 5000,
-      },
-    );
-    return stdout.trim() || null;
+    parsed = JSON.parse(trimmed);
   } catch {
-    return null;
+    return { kind: "prose" };
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    return { kind: "contract" };
+  }
+  return { kind: "payload", value: parsed as Record<string, unknown> };
+}
+
+// Anchored to the Binary line: "not installed" is the default missing label, so other lines would false-positive.
+function proseSaysEngineMissing(stdout: string): boolean {
+  const binaryLine = stdout
+    .split("\n")
+    .find((line) => line.includes("Binary:"));
+  return binaryLine !== undefined && binaryLine.includes(MISSING_ENGINE_MARKER);
+}
+
+// Re-checked here because the Store extension meets CLI versions predating the CLI-side validation.
+function capabilitiesAreReadable(capabilities: unknown): boolean {
+  return (
+    typeof capabilities === "object" &&
+    capabilities !== null &&
+    !Array.isArray(capabilities) &&
+    Object.keys(capabilities).length > 0
+  );
+}
+
+function readStructuredStatus(
+  payload: Record<string, unknown>,
+): EnginePreflightResult {
+  const contractError: EnginePreflightResult = {
+    ok: false,
+    reason: "contract",
+    hint: CONTRACT_HINT,
+  };
+  const engine = payload.engine;
+  if (!engine || typeof engine !== "object") return contractError;
+  const { installed, capabilities } = engine as Record<string, unknown>;
+  if (typeof installed !== "boolean") return contractError;
+
+  if (!installed) {
+    const hint = typeof payload.hint === "string" ? payload.hint.trim() : "";
+    return { ok: false, reason: "missing", hint: hint || undefined };
+  }
+  // Present is not usable: it would fail during transcription, after the recording is gone (#647).
+  if (!capabilitiesAreReadable(capabilities)) {
+    return { ok: false, reason: "unusable", hint: REPAIR_HINT };
+  }
+  return { ok: true };
+}
+
+/**
+ * Decides whether the engine can run before a session starts.
+ *
+ * Reads `kesha status --json` when the resolved CLI emits it. A CLI too old for
+ * that flag prints human text instead (citty ignores unknown flags), which is
+ * the signal to fall back to the prose marker — so the fallback is chosen by
+ * stdout *kind*, never by parse outcome. Output that is a JSON object but
+ * breaks the contract fails closed: it would also miss the prose marker and be
+ * reported as healthy. A probe that cannot run at all still fails open, letting
+ * the CLI's own guards report the real problem with a better message.
+ */
+export async function probeEngineAvailability(
+  spawn: KeshaSpawn,
+  deps: ProbeDeps = {},
+): Promise<EnginePreflightResult> {
+  try {
+    const { stdout, stderr } = await runKesha(
+      spawn,
+      ["status", "--json"],
+      deps,
+    );
+    const classified = classifyStatusStdout(stdout);
+    if (classified.kind === "payload")
+      return readStructuredStatus(classified.value);
+    if (classified.kind === "contract") {
+      return { ok: false, reason: "contract", hint: CONTRACT_HINT };
+    }
+    if (proseSaysEngineMissing(stdout)) {
+      return { ok: false, reason: "missing", hint: stderr.trim() || undefined };
+    }
+    return { ok: true };
+  } catch (err) {
+    const stderr =
+      err && typeof err === "object" && "stderr" in err
+        ? String((err as { stderr?: unknown }).stderr ?? "").trim()
+        : "";
+    if (stderr.includes("kesha install"))
+      return { ok: false, reason: "missing", hint: stderr };
+    return { ok: true };
   }
 }
 
 export function notFoundMessage(): string {
   return [
-    "kesha CLI not found. Set the `kesha` binary path preference to an absolute path,",
-    "or install it with `bun add -g @drakulavich/kesha-voice-kit`.",
-    `Probed: ${FALLBACK_CANDIDATES.join(", ")}`,
-  ].join(" ");
+    "kesha CLI not found. Finish setup:",
+    "1. Install the CLI — `brew install drakulavich/tap/kesha-voice-kit` (or `bun add -g @drakulavich/kesha-voice-kit`).",
+    "2. Run `kesha install` to download the engine and models.",
+    `Already installed? Set the "Kesha Binary Path" preference to an absolute path. Probed: ${FALLBACK_CANDIDATES.join(", ")}`,
+  ].join("\n");
 }

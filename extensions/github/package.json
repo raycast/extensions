@@ -568,12 +568,12 @@
     },
     {
       "name": "enable-auto-merge",
-      "title": "Enable Auto-merge",
+      "title": "Enable Auto-Merge",
       "description": "Enable auto-merge on a pull request"
     },
     {
       "name": "disable-auto-merge",
-      "title": "Disable Auto-merge",
+      "title": "Disable Auto-Merge",
       "description": "Disable auto-merge on a pull request"
     },
     {
@@ -608,7 +608,7 @@
     },
     {
       "name": "rerun-workflow-run",
-      "title": "Re-run Workflow",
+      "title": "Re-Run Workflow",
       "description": "Re-run Workflow"
     },
     {
@@ -620,6 +620,11 @@
       "name": "run-workflow",
       "title": "Run Workflow",
       "description": "Run Workflow"
+    },
+    {
+      "name": "get-pull-request-diff",
+      "title": "Get Pull Request Diff",
+      "description": "Get the files changed in a pull request along with their patches"
     }
   ],
   "ai": {
@@ -675,6 +680,45 @@
             }
           ]
         }
+      },
+      {
+        "input": "@github show me the diff of PR #123 in raycast/extensions",
+        "mocks": {
+          "get-pull-request-diff": {
+            "files": [
+              {
+                "filename": "extensions/github/src/components/PullRequestDiff.tsx",
+                "status": "added",
+                "additions": 120,
+                "deletions": 0,
+                "patch": "@@ -0,0 +1,3 @@\n+export default function PullRequestDiff() {\n+  return null;\n+}",
+                "patchTruncated": false
+              },
+              {
+                "filename": "extensions/github/CHANGELOG.md",
+                "status": "modified",
+                "additions": 4,
+                "deletions": 0,
+                "patch": "@@ -1,5 +1,9 @@\n # GitHub Changelog\n \n+## [View pull request diffs]\n+",
+                "patchTruncated": false
+              }
+            ],
+            "truncated": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-pull-request-diff",
+              "arguments": {
+                "repository": {
+                  "includes": "raycast/extensions"
+                },
+                "pullRequestNumber": 123
+              }
+            }
+          }
+        ]
       },
       {
         "input": "@github close the eslint issue in frontend repo",
@@ -1087,6 +1131,7 @@
     "yauzl": "^3.2.0"
   },
   "devDependencies": {
+    "@graphql-codegen/add": "^7.0.0",
     "@graphql-codegen/cli": "^7.0.0",
     "@graphql-codegen/typescript": "^6.0.1",
     "@graphql-codegen/typescript-graphql-request": "^7.0.1",
@@ -1098,7 +1143,6 @@
     "@types/react": "^19.0.10",
     "@types/yauzl": "^2.10.3",
     "concurrently": "^8.2.2",
-    "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
     "graphql": "^16.8.2",
@@ -1112,7 +1156,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "generate": "graphql-codegen --config codegen.ts"
+    "generate": "graphql-codegen --config codegen.ts",
+    "test": "node --no-warnings --test --experimental-strip-types src/helpers/pull-request-checks.test.ts",
+    "update-schema": "node scripts/update-graphql-schema.mjs"
   },
   "platforms": [
     "macOS",
