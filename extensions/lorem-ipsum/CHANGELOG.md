@@ -1,5 +1,11 @@
 # Lorem Ipsum Changelog
 
+## [Add shape-matched text scrambling] - {PR_MERGE_DATE}
+
+- Add a command that turns selected or clipboard copy into pronounceable invented text.
+- Preserve whitespace, punctuation, line breaks, token lengths, casing, repeated words, and decimal-digit structure.
+- Respect the extension's existing copy/paste output preference while protecting restorable clipboard content.
+
 ## [Updates] - 2025-12-17
 
 - Update (dev) dependencies

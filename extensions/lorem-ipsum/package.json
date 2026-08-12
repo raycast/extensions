@@ -9,7 +9,8 @@
     "GastroGeek",
     "stelo",
     "enkia",
-    "j3lte"
+    "j3lte",
+    "kumail_changezi"
   ],
   "keywords": [
     "generator",
@@ -18,7 +19,10 @@
     "words",
     "text",
     "lorem",
-    "ipsum"
+    "ipsum",
+    "scramble",
+    "anonymize",
+    "greeking"
   ],
   "platforms": [
     "macOS",
@@ -74,6 +78,42 @@
           "type": "text",
           "required": false,
           "placeholder": "No. of words"
+        }
+      ]
+    },
+    {
+      "name": "scramble-selected-text",
+      "title": "Scramble Selected Text",
+      "subtitle": "Lorem Ipsum",
+      "description": "Replace existing copy with shape-matched invented text",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "source",
+          "type": "dropdown",
+          "title": "Preferred Source",
+          "description": "Read the preferred source first. The other source is used only when the preferred source is empty.",
+          "data": [
+            {
+              "title": "Selected Text",
+              "value": "selected"
+            },
+            {
+              "title": "Clipboard",
+              "value": "clipboard"
+            }
+          ],
+          "default": "selected",
+          "required": false
+        },
+        {
+          "name": "scrambleNumbers",
+          "type": "checkbox",
+          "title": "Privacy",
+          "description": "Replace every decimal digit while preserving its writing system, position, and count.",
+          "label": "Scramble Numbers",
+          "default": true,
+          "required": false
         }
       ]
     },
