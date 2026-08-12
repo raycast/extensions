@@ -1,6 +1,6 @@
 # Central Icons Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-12
 
 - Browse and search all Central icons, grouped by category exactly like centralicons.com
 - Style controls in the search bar: fill, stroke width, corner radius, line join, icon size, and raw/masked output
