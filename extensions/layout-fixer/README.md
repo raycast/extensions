@@ -106,11 +106,8 @@ npm run dev
 distribution build. The layout tables in [`src/layouts.ts`](src/layouts.ts) are
 marked `// prettier-ignore` so they stay laid out like a keyboard.
 
-The icon is generated, not checked in by hand:
-
-```bash
-python3 tools/make_icon.py
-```
+The icon is generated rather than drawn by hand; the generator script lives in
+the standalone repo linked below.
 
 ## Layout
 
@@ -119,9 +116,9 @@ src/
   fix-layout.ts   the command: read selection → fix → paste
   keystrokes.ts   cross-platform Select All / collapse selection
   layouts.ts      both layout tables + convert/detect
-tools/
-  make_icon.py    regenerates assets/extension-icon.png
 ```
 
-There's also a [Chrome extension version](https://github.com/ramysami/Layout-fixer)
-that does the same thing in the browser.
+Developed at [ramysami/layout-fixer-raycast](https://github.com/ramysami/layout-fixer-raycast),
+which also carries the icon generator. There's a
+[Chrome extension version](https://github.com/ramysami/Layout-fixer) that does
+the same thing in the browser.
