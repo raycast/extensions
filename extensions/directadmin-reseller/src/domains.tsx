@@ -35,32 +35,36 @@ export default function Domains({ panel }: { panel?: Panel }) {
                 icon={Icon.AtSymbol}
                 target={<GetEmailAccountsComponent domain={domain} panel={panel} />}
               />
-              {!panel && <ActionPanel.Section>
-                <Action.Push
-                  title="Create Domain"
-                  icon={Icon.Plus}
-                  target={<CreateNewDomainComponent onDomainCreated={revalidate} />}
-                />
-              </ActionPanel.Section>}
+              {!panel && (
+                <ActionPanel.Section>
+                  <Action.Push
+                    title="Create Domain"
+                    icon={Icon.Plus}
+                    target={<CreateNewDomainComponent onDomainCreated={revalidate} />}
+                  />
+                </ActionPanel.Section>
+              )}
             </ActionPanel>
           }
         />
       ))}
       {!isLoading && (
         <List.Section title="Actions">
-          <List.Item
-            title="Create Domain"
-            icon={Icon.Plus}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  title="Create Domain"
-                  icon={Icon.Plus}
-                  target={<CreateNewDomainComponent onDomainCreated={revalidate} />}
-                />
-              </ActionPanel>
-            }
-          />
+          {!panel && (
+            <List.Item
+              title="Create Domain"
+              icon={Icon.Plus}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Create Domain"
+                    icon={Icon.Plus}
+                    target={<CreateNewDomainComponent onDomainCreated={revalidate} />}
+                  />
+                </ActionPanel>
+              }
+            />
+          )}
         </List.Section>
       )}
     </List>

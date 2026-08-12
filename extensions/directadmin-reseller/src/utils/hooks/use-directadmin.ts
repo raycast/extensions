@@ -30,7 +30,7 @@ type JsonError = {
 function useDirectAdmin<T>(
   endpoint: string,
   options: UseDirectAdminOptions<T> = { params: {}, animatedToastMessage: "", userToImpersonate: "" },
-  panel?: Panel
+  panel?: Panel,
 ) {
   const API_PARAMS = new URLSearchParams({
     ...options.params,
@@ -79,15 +79,19 @@ function useDirectAdmin<T>(
 export function useLegacyDirectAdmin<T>(
   cmd: string,
   options: UseDirectAdminOptions<T> = { params: {}, animatedToastMessage: "", userToImpersonate: "" },
-  panel?: Panel
+  panel?: Panel,
 ) {
-  return useDirectAdmin<T>(`CMD_API_${cmd}`, {
-    ...options,
-    params: {
-      ...options.params,
-      json: "yes",
+  return useDirectAdmin<T>(
+    `CMD_API_${cmd}`,
+    {
+      ...options,
+      params: {
+        ...options.params,
+        json: "yes",
+      },
     },
-  }, panel);
+    panel,
+  );
 }
 
 export function useJsonDirectAdmin<T>(

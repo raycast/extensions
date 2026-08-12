@@ -14,12 +14,7 @@ import {
 } from "@raycast/api";
 import { FormValidation, useForm, useLocalStorage } from "@raycast/utils";
 import { Panel } from "./types/panel";
-import Logs from "./logs";
-import VirtualServers from "./virtual-servers";
-import Tasks from "./tasks";
 import crypto from "crypto";
-import { handleParseResponse } from "./lib/hooks";
-import { generateApiToken } from "./utils/functions";
 import Domains from "./domains";
 
 export default function ManagePanels() {
@@ -90,10 +85,14 @@ function AddPanel() {
       const toast = await showToast(Toast.Style.Animated, "Adding panel", values.title || values.directadmin_url);
       try {
         const token = btoa(`${values.reseller_username}:${values.reseller_password}`);
-        const headers = { Authorization: `Basic ${token}`, Accept: "application/json", "Content-Type": "application/json" };
+        const headers = {
+          Authorization: `Basic ${token}`,
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        };
         const url = new URL("api/login-history", values.directadmin_url);
         const response = await fetch(url, {
-          headers
+          headers,
         });
         if (!response.ok) throw new Error(response.statusText);
         await setValue([...value, { ...values, id: crypto.randomUUID() }]);

@@ -48,14 +48,16 @@ export function generateApiToken(userToImpersonate = "", panel?: Panel) {
   const token = panel ? btoa(`${panel.reseller_username}:${panel.reseller_password}`) : RESELLER_API_TOKEN;
   return userToImpersonate === ""
     ? token
-    : btoa(`${panel?.reseller_username || RESELLER_USERNAME}|${userToImpersonate}:${panel?.reseller_password || RESELLER_PASSWORD}`);
+    : btoa(
+        `${panel?.reseller_username || RESELLER_USERNAME}|${userToImpersonate}:${panel?.reseller_password || RESELLER_PASSWORD}`,
+      );
 }
 
 export function isInvalidUrl() {
   try {
     new URL(DIRECTADMIN_URL);
     return false;
-  } catch (error) {
+  } catch {
     return true;
   }
 }

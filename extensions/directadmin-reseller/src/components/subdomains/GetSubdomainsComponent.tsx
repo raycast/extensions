@@ -79,31 +79,33 @@ export default function GetSubdomainsComponent({ domain, userToImpersonate = "",
             subtitle={`.${domain}`}
             icon={getFavicon(`https://${subdomain}.${domain}`, { fallback: Icon.Globe })}
             actions={
-              <ActionPanel>
-                <Action
-                  title="Delete Subdomain"
-                  icon={Icon.DeleteDocument}
-                  style={Action.Style.Destructive}
-                  onAction={() => confirmAndDeleteSubdomain(subdomain)}
-                />
-                <ActionPanel.Section>
-                  <Action.Push
-                    title="Create Subdomain"
-                    icon={Icon.Plus}
-                    target={
-                      <CreateSubdomainComponent
-                        domain={domain}
-                        onSubdomainCreated={getFromApi}
-                        userToImpersonate={userToImpersonate}
-                      />
-                    }
+              !panel && (
+                <ActionPanel>
+                  <Action
+                    title="Delete Subdomain"
+                    icon={Icon.DeleteDocument}
+                    style={Action.Style.Destructive}
+                    onAction={() => confirmAndDeleteSubdomain(subdomain)}
                   />
-                </ActionPanel.Section>
-              </ActionPanel>
+                  <ActionPanel.Section>
+                    <Action.Push
+                      title="Create Subdomain"
+                      icon={Icon.Plus}
+                      target={
+                        <CreateSubdomainComponent
+                          domain={domain}
+                          onSubdomainCreated={getFromApi}
+                          userToImpersonate={userToImpersonate}
+                        />
+                      }
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              )
             }
           />
         ))}
-      {!isLoading && (
+      {!isLoading && !panel && (
         <List.Section title="Actions">
           <List.Item
             title="Create Subdomain"

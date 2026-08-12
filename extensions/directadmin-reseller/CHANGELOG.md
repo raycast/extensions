@@ -1,5 +1,9 @@
 # DirectAdmin Reseller Changelog
 
+## [Manage Panels (Experimental)] - {PR_MERGE_DATE}
+
+- Add a new (experimental, **disabled by default**) command to manage multiple DirectAdmin Reseller panels
+
 ## [Migrate More Endpoints + Move URL Check] - 2024-09-22
 
 - Move URL check out of hook to top of components

@@ -19,12 +19,18 @@ import {
   SuspendOrUnsuspendUserRequest,
   ChangeUserTicketingEmailRequest,
 } from "../types";
-import { API_URL, RESELLER_PASSWORD, RESELLER_USERNAME, RESELLER_API_TOKEN } from "./constants";
+import { API_URL } from "./constants";
 import { showFailureToast } from "@raycast/utils";
 import { Panel } from "../types/panel";
 import { generateApiToken } from "./functions";
 
-const callApi = async (endpoint: string, animatedToastMessage = "", body?: BodyRequest, userToImpersonate = "", panel?: Panel) => {
+const callApi = async (
+  endpoint: string,
+  animatedToastMessage = "",
+  body?: BodyRequest,
+  userToImpersonate = "",
+  panel?: Panel,
+) => {
   const token = generateApiToken(userToImpersonate, panel);
   const headers = { Authorization: `Basic ${token}` };
 
@@ -169,8 +175,8 @@ export async function getSession(body: GetSessionRequest) {
 }
 
 // Emails
-export async function getEmailAccounts(body: GetEmailAccountsRequest, userToImpersonate = "") {
-  return await callApi("POP", "Fetching Email Accounts", body, userToImpersonate);
+export async function getEmailAccounts(body: GetEmailAccountsRequest, userToImpersonate = "", panel?: Panel) {
+  return await callApi("POP", "Fetching Email Accounts", body, userToImpersonate, panel);
 }
 export async function changeEmailAccountPassword(body: ChangeEmailAccountPasswordRequest, userToImpersonate = "") {
   return await callApi("CHANGE_EMAIL_PASSWORD", "Changing Email Account Password", body, userToImpersonate);
