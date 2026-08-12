@@ -1,5 +1,11 @@
 # Safari Changelog
 
+## [Fix] - 2026-08-12
+
+- Restore fast, complete local tab loading while preserving tabs with empty titles or URLs.
+- Avoid querying iCloud tabs when they are disabled.
+- Handle `blob:` tab favicons without invalid URL errors.
+
 ## [New Command] - 2026-07-24
 
 - Add `Search Tabs, Bookmarks and History` command to search open tabs, bookmarks and history in one place.
