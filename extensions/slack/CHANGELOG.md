@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Fix Search Emojis crash in large workspaces] - {PR_MERGE_DATE}
+## [Fix Search Emojis crash in large workspaces] - 2026-08-12
 
 - Fix a "Worker terminated due to reaching memory limit: JS heap out of memory" crash in the Search Emojis command by rendering emojis in slices with a "Show More" item instead of rendering every custom emoji at once.
 
