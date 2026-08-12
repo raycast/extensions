@@ -4,9 +4,6 @@
 
 Text Scramble turns selected copy into elegant invented language while protecting its visual footprint. It preserves spaces, punctuation, paragraph breaks, manual line breaks, word lengths, and casing, then chooses pronounceable replacements with a similar estimated width.
 
-[![CI](https://github.com/bomkino/text-scramble/actions/workflows/ci.yml/badge.svg)](https://github.com/bomkino/text-scramble/actions/workflows/ci.yml)
-[![MIT License](https://img.shields.io/badge/license-MIT-111111.svg)](LICENSE)
-
 ## Use
 
 1. In Figma, InDesign, Keynote, or another app, enter text-editing mode and select the actual characters.
@@ -31,11 +28,11 @@ Automatic wrapping remains an approximation. Font metrics, tracking, kerning, Op
 
 | Preference       | Default           | Options                                                    |
 | ---------------- | ----------------- | ---------------------------------------------------------- |
-| Preferred Source | Selected Text     | Selected Text or Clipboard; fallback only when it is empty |
+| Preferred Source | Selected Text     | Selected Text or Clipboard; fallback only when readable and empty |
 | Output Action    | Replace Selection | Replace Selection or Copy to Clipboard                     |
 | Scramble Numbers | On                | Replace decimal digits in place or leave numbers untouched |
 
-**Replace Selection** restores supported text, HTML, and file clipboard contents after pasting. If Raycast cannot safely restore an existing rich clipboard item, Text Scramble stops before changing either the selection or clipboard.
+**Replace Selection** restores supported plain-text and HTML clipboard contents after pasting. If Raycast cannot safely reproduce a file-bearing or unsupported rich clipboard state, Text Scramble stops before changing either the selection or clipboard. Transient restoration failures are retried; a persistent macOS pasteboard failure is reported with a Clipboard History recovery path.
 
 ## Privacy
 
@@ -43,40 +40,12 @@ Everything runs locally. The extension makes no network request, AI call, analyt
 
 Structural anonymity has a deliberate tradeoff: word lengths, punctuation, repetition, and line structure remain visible because preserving them protects the layout. Text Scramble is draft anonymization, not cryptographic redaction.
 
-## Install locally
+If selection or paste access is blocked, allow Raycast under **System Settings → Privacy & Security → Accessibility**.
 
-Raycast and Node.js 22.22.2 or newer are required.
+## Credits
 
-```bash
-git clone https://github.com/bomkino/text-scramble.git
-cd text-scramble
-npm ci
-npm run dev
-```
+Text Scramble’s selected-text and clipboard fallback, plus its paste-or-copy interaction model, was inspired by Eric (`erics118`) and the contributors to Raycast’s open-source [Change Case](https://www.raycast.com/erics118/change-case) extension.
 
-Raycast imports the development extension. After the first import, the command remains available locally. If selection or paste access is blocked, allow Raycast under **System Settings → Privacy & Security → Accessibility**.
+No Change Case source code is bundled or copied. The MIT-licensed interaction pattern was studied and then implemented for Text Scramble’s distinct purpose.
 
-If you already have this repository checked out, run `npm ci` and `npm run dev` from its folder to load the latest version.
-
-## Verify
-
-```bash
-npm test
-npm run lint
-npm run build
-```
-
-For a live paste check, open [tests/manual-smoke-test-source.txt](tests/manual-smoke-test-source.txt), select all, then run **Scramble Selected Text**. The three lines should retain their structure while the words and numerals change.
-
-The extension is being prepared for the Raycast Store. Until it is accepted, the local installation above is the supported route.
-
-## Project
-
-- [Design and algorithm notes](docs/DESIGN.md)
-- [Store submission checklist](docs/STORE_SUBMISSION.md)
-- [Contributing](CONTRIBUTING.md)
-- [Credits](ACKNOWLEDGEMENTS.md)
-- [Security](SECURITY.md)
-- [Changelog](CHANGELOG.md)
-
-Released under the [MIT License](LICENSE).
+Built on the [Raycast API](https://developers.raycast.com/) and its open extension ecosystem. Designed and maintained by [pitch.dog](https://pitch.dog/), with development support from OpenAI Codex.
