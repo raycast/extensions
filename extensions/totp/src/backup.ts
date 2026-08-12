@@ -74,8 +74,10 @@ function validateAccounts(value: unknown): Account[] {
     ) {
       throw new Error("Backup contains invalid accounts.");
     }
+    const digits = item.digits as number;
+    const period = item.period as number;
     decodeBase32(item.secret);
-    if (item.digits < 1 || item.digits > 10 || item.period < 1) throw new Error("Backup contains invalid accounts.");
-    return { id: item.id, name: item.name, issuer: item.issuer, secret: item.secret, digits: item.digits, period: item.period, algorithm: item.algorithm as Algorithm };
+    if (digits < 1 || digits > 10 || period < 1) throw new Error("Backup contains invalid accounts.");
+    return { id: item.id, name: item.name, issuer: item.issuer, secret: item.secret, digits, period, algorithm: item.algorithm as Algorithm };
   });
 }
