@@ -18,7 +18,8 @@
     "degouville",
     "xmok",
     "chrismessina",
-    "alexi.build"
+    "alexi.build",
+    "kumail_changezi"
   ],
   "keywords": [
     "text",
@@ -28,6 +29,9 @@
     "lower",
     "pascal",
     "random",
+    "scramble",
+    "greeking",
+    "anonymize",
     "sentence",
     "title"
   ],
@@ -147,6 +151,13 @@
       "disabledByDefault": true
     },
     {
+      "name": "convert-scramble-text",
+      "title": "Scramble Text",
+      "description": "Replace selected text or clipboard with shape-matched invented copy",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
       "name": "convert-sentence-case",
       "title": "Convert to Sentence case",
       "description": "Convert selected text or clipboard to Sentence case",
@@ -212,6 +223,14 @@
       "default": false,
       "description": "Check this option to preserve punctuation marks in their original positions when changing case. This option is only available for Lower Case and Upper Case.",
       "label": "Preserve Punctuation",
+      "required": false
+    },
+    {
+      "name": "scrambleNumbers",
+      "type": "checkbox",
+      "default": true,
+      "description": "Replace every decimal digit while preserving its writing system, position, and count when using Scramble Text.",
+      "label": "Scramble Numbers",
       "required": false
     },
     {
@@ -403,6 +422,14 @@
       "description": "Enable the \"rAndOm cAsE\" Transformation",
       "label": "Random Case",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "ScrambleText",
+      "type": "checkbox",
+      "description": "Enable shape-matched invented draft copy in the Change Case list",
+      "label": "Scramble Text",
+      "default": false,
       "required": false
     },
     {

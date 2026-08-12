@@ -19,12 +19,19 @@ Included case transformations:
 - `path/case`
 - `AlTeRnAtInG cAsE`
 - `rAndOm cAsE`
+- `Scramble Text` (shape-matched invented draft copy)
 - `Sentence case`
 - `snake_case`
 - `sWAP cASE`
 - `Title Case`
 - `UPPER CASE`
 - `Upper first`
+
+### Scramble Text
+
+Scramble Text replaces the words rather than changing only their case. It creates pronounceable invented copy while preserving whitespace, punctuation, line breaks, token lengths, casing, repeated words, decimal-digit writing systems, and approximate visual width.
+
+Use it for layout-safe draft decks, mockups, and previews where the original copy should not appear. It is non-reversible aesthetic greeking, not security redaction. The transformation and its direct command are disabled by default; enable either in the extension settings if you want them.
 
 ## Advanced Preferences
 

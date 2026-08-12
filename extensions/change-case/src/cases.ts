@@ -14,9 +14,15 @@ import {
   sentenceCase,
 } from "./customCases";
 import { getPreferenceValues } from "@raycast/api";
+import { scrambleText } from "./scramble-text";
 
 export type { CaseFunction };
 export type CaseFunctions = Record<string, CaseFunction>;
+
+const scrambleCase: CaseFunction = (input) => {
+  const preferences = getPreferenceValues<Preferences>();
+  return scrambleText(input, { scrambleNumbers: preferences.scrambleNumbers });
+};
 
 export const functions: CaseFunctions = {
   "Camel Case": changeCase.camelCase,
@@ -33,6 +39,7 @@ export const functions: CaseFunctions = {
   "Pascal Snake Case": changeCase.pascalSnakeCase,
   "Path Case": changeCase.pathCase,
   "Random Case": randomCase,
+  "Scramble Text": scrambleCase,
   "Sentence Case": sentenceCase,
   "Snake Case": changeCase.snakeCase,
   "Alternating Case": alternatingCase,
@@ -50,6 +57,7 @@ export const aliases: Record<CaseType, string[]> = {
   "No Case": ["none"],
   "Kebab Case": ["dash", "slug", "param"],
   "Random Case": ["random"],
+  "Scramble Text": ["scramble", "greeking", "placeholder", "anonymize", "draft"],
   "Swap Case": ["reverse"],
   "Alternating Case": ["alternating", "sponge"],
   "Constant Case": ["macro"],
@@ -60,6 +68,7 @@ const CASES_SKIP_PRELOWERCASE: Set<string> = new Set([
   "Swap Case", // pre-lowercasing would make output all-uppercase
   "Alternating Case", // alternates per character from original positions
   "Random Case", // no point in pre-lowercasing, as output is random anyway
+  "Scramble Text", // original casing is part of the visual layout contract
   "Lower First", // only first letter should be changed
   "Upper First", // only first letter should be changed
 ]);
@@ -84,6 +93,16 @@ export function convert(input: string, c: string) {
 }
 
 export function modifyCasesWrapper(input: string, c: string) {
+  if (c === "Scramble Text") {
+    const modified = convert(input, c);
+    const markdown = modified
+      .split("\n")
+      .map((line) => (line.length === 0 ? "\u200B" : line) + "\n")
+      .join("");
+
+    return { rawText: modified, markdown };
+  }
+
   const modifiedRawArr: string[] = [];
   const modifiedMarkdownArr: string[] = [];
   const lines = input.split("\n");

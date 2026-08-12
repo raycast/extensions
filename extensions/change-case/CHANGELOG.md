@@ -1,5 +1,12 @@
 # Change Case Changelog
 
+## [Shape-Matched Draft Copy] - {PR_MERGE_DATE}
+
+- Add an optional Scramble Text transformation and disabled-by-default direct command
+- Preserve layout structure, casing, repeated words, decimal digits, and approximate word width
+- Keep repeated-word mapping consistent across line breaks
+- Document the feature as non-reversible draft greeking, not security redaction
+
 ## [Add direct conversion commands] - 2026-07-03
 
 - Added 21 no-view commands (one per case type) so users can assign a hotkey to instantly convert selected text or clipboard content without opening any UI
