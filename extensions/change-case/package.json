@@ -501,6 +501,7 @@
     "@types/react": "^19.2.13",
     "eslint": "^9.0.0",
     "prettier": "^3.8.1",
+    "tsx": "^4.23.1",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -509,7 +510,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "tsx --test tests/*.test.ts"
   },
   "platforms": [
     "macOS",
