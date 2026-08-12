@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cook",
+  "title": "Cook",
+  "description": "Browse, view, and generate shopping lists from your Cooklang recipe collection",
+  "icon": "icon.png",
+  "author": "chizitere_david",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-recipes",
+      "title": "View Recipes",
+      "subtitle": "Cook",
+      "description": "Search your recipe collection and view recipes with ingredients, steps, cookware, and metadata",
+      "mode": "view"
+    },
+    {
+      "name": "shopping-list",
+      "title": "Shopping List",
+      "subtitle": "Cook",
+      "description": "Select recipes and generate a combined shopping list with quantities",
+      "mode": "view"
+    },
+    {
+      "name": "pantry",
+      "title": "Pantry",
+      "subtitle": "Cook",
+      "description": "View pantry inventory, find what you can make, and check depleted/expiring items",
+      "mode": "view"
+    },
+    {
+      "name": "start-server",
+      "title": "Start Cook Server",
+      "subtitle": "Cook",
+      "description": "Launch the CookCLI web server to browse recipes in your browser",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "recipePath",
+      "title": "Recipe Directory",
+      "description": "Path to your Cooklang recipe collection",
+      "type": "directory",
+      "required": true,
+      "default": "~/Documents/Recipes"
+    },
+    {
+      "name": "cookCliPath",
+      "title": "CookCLI Binary Path",
+      "description": "Path to the cook CLI executable (install via brew or cargo)",
+      "type": "textfield",
+      "required": true,
+      "default": "/opt/homebrew/bin/cook"
+    },
+    {
+      "name": "serverPort",
+      "title": "Cook Server Port",
+      "description": "Port for launching the cook web server",
+      "type": "textfield",
+      "required": false,
+      "default": "9080"
+    }
+  ],
+  "categories": ["Productivity"],
+  "dependencies": {
+    "@raycast/api": "^1.60.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.3.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
