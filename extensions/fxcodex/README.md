@@ -14,16 +14,18 @@ launching a duplicate.
 - [Raycast](https://www.raycast.com/)
 - The [Codex](https://openai.com/codex) desktop app installed as either `Codex.app` or `ChatGPT.app`
 
-No separate CLI installation is required. The extension includes a universal
-Apple silicon and Intel executable.
+The extension detects an existing `fxcodex` CLI or can install one from a
+verified GitHub release.
 
 ## Getting Started
 
 1. Open **fxCodex** from Raycast.
-2. Select **primary** to open your existing Codex environment.
-3. Press `Command-N` to create an isolated workspace such as `work` or
+2. If no CLI is detected, open **Preferences**, choose **Install
+   fxCodex…**, and select a release and destination.
+3. Select **primary** to open your existing Codex environment.
+4. Press `Command-N` to create an isolated workspace such as `work` or
    `personal`.
-4. Press Return on a workspace to focus or open it and close Raycast.
+5. Press Return on a workspace to focus or open it and close Raycast.
 
 The current workspace is selected automatically whenever the command loads.
 Open the action panel with `Command-K` for the complete set of actions.
@@ -71,23 +73,44 @@ commands run.
 Renaming requires confirmation. Restoring the ChatGPT name automatically
 disables the auto-rename preference.
 
-## Executable Sources
+## Executable Management
 
-The bundled executable is selected by default. It is universal, its checksum
-can be verified from the action panel, and it never updates itself from inside
-the extension.
+The extension does not bundle the CLI. **Preferences** remains
+available even when no executable exists or the selected executable fails, so
+installation and recovery do not depend on a working CLI.
 
-The **Preferences** management screen remains available even when the selected
-CLI cannot run, so you can recover by choosing a different executable. It also
-supports an external `fxcodex` executable. You can:
+The executable manager discovers `fxcodex` in every directory from Raycast's
+`PATH`, plus `~/.local/bin`, `/opt/homebrew/bin`, and `/usr/local/bin`. You can
+also choose an existing executable in Finder. Every discovered or registered
+path appears separately and can be selected, so a Homebrew version used in the
+terminal can coexist with a version pinned for Raycast. Symbolic links are
+marked in the list and expose their resolved original in Finder.
 
-- copy the bundled executable to `~/.local/bin/fxcodex` and use that copy;
-- select an existing executable in Finder;
-- use installations discovered in `~/.local/bin`, `/opt/homebrew/bin`, or
-  `/usr/local/bin`;
-- update or uninstall an external copy managed by the extension.
+The installer loads releases from
+[`CaptureContext/fxcodex`](https://github.com/CaptureContext/fxcodex/releases),
+lets you open each release on GitHub, and verifies the downloaded universal
+executable's SHA-256 checksum, code signature, and reported version.
+The release marked **Tested** is the fallback version exercised with the
+current extension update. It is deliberately updated by the extension author,
+not inferred from the latest GitHub release.
 
-Automatic update preferences apply only to the external executable.
+Installations can target:
+
+- the current user at `~/.local/bin/fxcodex`, with an option to add the
+  directory to the user's shell `PATH`;
+- a versioned directory under Raycast's extension support folder;
+- any custom directory, also with optional `PATH` setup;
+- Homebrew using `brew install capturecontext/tap/fxcodex` for the latest
+  stable formula.
+
+Versioned extension-support directories and custom destinations make it
+possible to retain several releases at once. Extension-managed direct installs
+can be replaced with any available release or uninstalled. Homebrew installs
+can be upgraded independently. Raycast disables CLI self-updates when the
+selected executable is installed in extension support, so a known-compatible
+version stays pinned until it is manually replaced. User and custom
+installations honor the CLI's automatic-update preference, while Homebrew
+controls upgrades for its installation.
 
 ## Status and Diagnostics
 
@@ -113,13 +136,13 @@ Workspace management happens locally and the extension does not require API
 keys or account credentials. Custom workspace icons are copied into Raycast's
 extension support directory.
 
-The bundled executable does not perform automatic update checks. GitHub is
-contacted only when an external executable is explicitly updated or when its
-optional automatic-update policy is enabled.
+GitHub is contacted when the executable installer is opened and when a release
+is installed. Homebrew is invoked only after an explicit install, update, or
+uninstall action.
 
 ## Executable Provenance
 
-The bundled CLI is built from the public
+The downloadable CLI is built from the public
 [`capturecontext/fxcodex`](https://github.com/capturecontext/fxcodex) source.
 Its GitHub Actions release workflow builds native Apple silicon and Intel
 executables, combines the universal binary, signs it with a Developer ID
@@ -139,16 +162,6 @@ newer.
 npm ci
 npm run dev
 ```
-
-To replace the bundled CLI with a specific published release, run:
-
-```sh
-npm run update-cli -- <version>
-```
-
-The target downloads the universal executable and its checksum, then verifies
-the checksum, both CPU architectures, Developer ID signature, Apple
-notarization, and reported version before updating `assets/bin`.
 
 Before submitting changes, run:
 

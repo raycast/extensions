@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { Dashboard } from "../lib/dashboard";
-import { applicationDisplayName, capitalize, filesystemPath } from "../lib/ui";
+import { applicationDisplayName, filesystemPath } from "../lib/ui";
 import { DiagnosticsView } from "./diagnostics";
 import { WorkspaceCopyActions } from "./workspace-copy-actions";
 
@@ -57,7 +57,7 @@ export function StatusView({ dashboard }: { dashboard: Dashboard }) {
 				/>
 				<StatusItem
 					title="Executable"
-					value={`${capitalize(dashboard.source)} · ${dashboard.version ?? "Unknown version"}`}
+					value={dashboard.version ? `fxCodex ${dashboard.version}` : "Unknown version"}
 					icon={Icon.Terminal}
 					finderPath={dashboard.executablePath}
 				/>

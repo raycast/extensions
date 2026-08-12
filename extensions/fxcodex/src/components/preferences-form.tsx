@@ -67,7 +67,7 @@ export function PreferencesForm({ onChange }: { onChange: () => void }) {
 				<Form.Dropdown.Item value="latest" title="Latest Including Prereleases" />
 			</Form.Dropdown>
 			<Form.TextField id="minimumVersion" title="From Version" placeholder="1.2.3" defaultValue={policy?.from} />
-			<Form.Description text="The selected constraint is anchored at this minimum version. Bundled invocations never self-update; this policy applies only to an external executable." />
+			<Form.Description text="User and custom installations honor this policy. Versioned extension-support installations stay pinned until manually replaced; Homebrew controls its own upgrades." />
 		</Form>
 	);
 }

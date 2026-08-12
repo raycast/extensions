@@ -1,4 +1,6 @@
-export type ExecutableSource = "bundled" | "external";
+// Executables are identified by absolute path so several independently versioned
+// installations can coexist and callers keep using the exact selected binary.
+export type ExecutableSource = string;
 
 export interface SemanticVersion {
 	major: number;

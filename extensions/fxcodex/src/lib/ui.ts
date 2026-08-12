@@ -2,7 +2,6 @@ import { Icon, Image, Toast, showToast } from "@raycast/api";
 import { basename } from "node:path";
 import { fileURLToPath } from "node:url";
 import { invoke } from "./client";
-import { verifyBundledChecksum } from "./executable";
 
 export async function mutate(args: string[], title: string, onChange: () => void): Promise<void> {
 	const toast = await showToast({ style: Toast.Style.Animated, title });
@@ -18,14 +17,6 @@ export async function mutate(args: string[], title: string, onChange: () => void
 		toast.message = error instanceof Error ? error.message : String(error);
 		throw error;
 	}
-}
-
-export async function verifyChecksum(): Promise<void> {
-	const valid = await verifyBundledChecksum();
-	await showToast({
-		style: valid ? Toast.Style.Success : Toast.Style.Failure,
-		title: valid ? "Bundled Checksum Is Valid" : "Bundled Checksum Is Invalid",
-	});
 }
 
 export function applicationDisplayName(applicationURL: string | null): string {

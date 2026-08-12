@@ -1,5 +1,5 @@
 import { invoke } from "./client";
-import { bundledExecutablePath, resolveExecutable, selectedExecutableSource } from "./executable";
+import { resolveExecutable, selectedExecutableSource, userExecutablePath } from "./executable";
 import {
 	ApplicationStatus,
 	AutoUpdatePolicy,
@@ -24,7 +24,7 @@ export interface Dashboard {
 
 export async function loadDashboard(): Promise<Dashboard> {
 	const issues: string[] = [];
-	let source: ExecutableSource = "bundled";
+	let source: ExecutableSource = userExecutablePath();
 
 	try {
 		source = await selectedExecutableSource();
@@ -32,7 +32,7 @@ export async function loadDashboard(): Promise<Dashboard> {
 		issues.push(`Executable preference: ${errorMessage(error)}`);
 	}
 
-	let executablePath = bundledExecutablePath();
+	let executablePath = source;
 	try {
 		executablePath = (await resolveExecutable(source)).path;
 	} catch (error) {

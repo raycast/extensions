@@ -3,7 +3,7 @@ import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import { Dashboard } from "../lib/dashboard";
 import { CLIDiagnostics, collectCLIDiagnostics, collectDirectDiagnostics } from "../lib/diagnostics";
-import { verifyChecksum } from "../lib/ui";
+import { ExecutableView } from "./executable-view";
 
 export function DiagnosticsView({ dashboard }: { dashboard?: Dashboard }) {
 	const { data: direct, isLoading } = usePromise(
@@ -19,12 +19,12 @@ export function DiagnosticsView({ dashboard }: { dashboard?: Dashboard }) {
 		"# Diagnostics",
 		"",
 		`- **Dashboard issues:** ${issueCount}`,
-		`- **Selected source:** ${direct?.executables.preferences?.selectedSource ?? dashboard?.source ?? "Unknown"}`,
-		`- **Bundled checksum:** ${direct?.executables.bundledChecksum ?? "Unknown"}`,
+		`- **Selected executable:** ${direct?.executables.selected?.path ?? dashboard?.executablePath ?? "Unknown"}`,
+		`- **Discovered executables:** ${direct?.executables.installations?.length ?? "Unknown"}`,
 		`- **Direct storage inspection:** ${direct?.storage.error ? "Failed" : "Available"}`,
 		`- **CLI status probe:** ${cli?.status ? `Exit ${cli.status.exitCode}` : isLoadingCLI ? "Running…" : "Not run"}`,
 		"",
-		"Diagnostics read extension preferences and fxcodex metadata files directly, then include separate raw CLI probes when possible.",
+		"Diagnostics inspect executable preferences, PATH discovery, and fxcodex metadata files directly, then include separate raw CLI probes when possible.",
 		"",
 		"## Report",
 		"",
@@ -65,7 +65,11 @@ export function DiagnosticsView({ dashboard }: { dashboard?: Dashboard }) {
 									}
 						}
 					/>
-					<Action title="Verify Bundled Executable" onAction={verifyChecksum} />
+					<Action.Push
+						title="Manage or Install Executables…"
+						icon={Icon.Download}
+						target={<ExecutableView onChange={() => undefined} />}
+					/>
 					{direct && storageExists && (
 						<Action.ShowInFinder title="Show Support Folder" path={direct.storage.supportDirectory} />
 					)}

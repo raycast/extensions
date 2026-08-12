@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
-import { selectExecutableSource, setExternalExecutablePath } from "../lib/executable";
+import { setExternalExecutablePath } from "../lib/executable";
 
 export function ExternalExecutableForm({ onChange }: { onChange: () => void }) {
 	const { pop } = useNavigation();
@@ -14,7 +14,6 @@ export function ExternalExecutableForm({ onChange }: { onChange: () => void }) {
 							const path = values.executable[0];
 							if (!path) throw new Error("Choose an executable.");
 							await setExternalExecutablePath(path);
-							await selectExecutableSource("external");
 							onChange();
 							pop();
 						}}

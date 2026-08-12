@@ -33,15 +33,10 @@ export interface RawInvocationResult {
 export async function invoke<T>(args: string[], source?: ExecutableSource): Promise<InvocationResult<T>> {
 	const executable = await resolveExecutable(source);
 	if (!executable.isInstalled) {
-		throw new FXCodexInvocationError(
-			executable.source === "external"
-				? "External fxCodex is not installed."
-				: "The bundled fxCodex executable is missing.",
-			"executable_not_found",
-		);
+		throw new FXCodexInvocationError(`fxCodex is not installed at ${executable.path}.`, "executable_not_found");
 	}
 
-	const result = await execute(executable.path, args, executable.source === "bundled");
+	const result = await execute(executable.path, args, executable.automaticUpdatesDisabled);
 	const warnings = parseJSONObjects(result.stderr)
 		.filter((value): value is MachineWarningResponse => isRecord(value) && isRecord(value.warning))
 		.map((value) => value.warning);
@@ -77,14 +72,11 @@ export async function invokeRaw(args: string[], source?: ExecutableSource): Prom
 			stdout: "",
 			stderr: "",
 			exitCode: 1,
-			error:
-				executable.source === "external"
-					? "External fxCodex is not installed."
-					: "The bundled fxCodex executable is missing.",
+			error: `fxCodex is not installed at ${executable.path}.`,
 		};
 	}
 
-	const result = await execute(executable.path, args, executable.source === "bundled");
+	const result = await execute(executable.path, args, executable.automaticUpdatesDisabled);
 	return {
 		source: executable.source,
 		executablePath: executable.path,
@@ -130,7 +122,7 @@ export async function removeIntegrationAttribute(
 function execute(
 	path: string,
 	args: string[],
-	disableAutomaticUpdate: boolean,
+	disableAutomaticUpdates: boolean,
 ): Promise<{ stdout: string; stderr: string; exitCode: number; error?: string }> {
 	return new Promise((resolve) => {
 		execFile(
@@ -140,7 +132,7 @@ function execute(
 				env: {
 					...process.env,
 					FXCODEX_JSON: "1",
-					...(disableAutomaticUpdate ? { FXCODEX_DISABLE_AUTO_UPDATE: "1" } : {}),
+					...(disableAutomaticUpdates ? { FXCODEX_DISABLE_AUTO_UPDATE: "1" } : {}),
 				},
 				timeout: 60_000,
 			},

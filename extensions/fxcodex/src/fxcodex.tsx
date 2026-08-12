@@ -8,7 +8,7 @@ import { StatusView } from "./components/status";
 import { WorkspaceActions } from "./components/workspace-actions";
 import { Dashboard, loadDashboard } from "./lib/dashboard";
 import { WorkspaceStatus } from "./lib/models";
-import { applicationIcon, capitalize } from "./lib/ui";
+import { applicationIcon } from "./lib/ui";
 import { WorkspaceIcon, workspaceIconImage } from "./lib/workspace-icons";
 
 interface CachedWorkspaceResults {
@@ -30,7 +30,7 @@ export default function FXCodexCommand() {
 	const { data, error, isLoading, revalidate } = usePromise(loadDashboard, []);
 	const dashboard: Dashboard = data ?? {
 		status: {},
-		source: "bundled",
+		source: "",
 		executablePath: "",
 		workspaceIcons: {},
 		issues: error ? [`Extension dashboard: ${error.message}`] : [],
@@ -145,7 +145,6 @@ export default function FXCodexCommand() {
 				<ManagementItem
 					id="preferences"
 					title="Preferences"
-					subtitle={`${capitalize(dashboard.source)} executable · ${dashboard.version ?? "Unknown version"}`}
 					icon={Icon.Gear}
 					target={<ExecutableView onChange={revalidate} />}
 					onRefresh={revalidate}
