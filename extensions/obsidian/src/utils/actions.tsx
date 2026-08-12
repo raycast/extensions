@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  closeMainWindow,
   Color,
   confirmAlert,
   getDefaultApplication,
@@ -8,6 +9,8 @@ import {
   Icon,
   Keyboard,
   List,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import fs from "fs";
@@ -22,6 +25,8 @@ import { Note, NoteWithContent, Obsidian, ObsidianTargetType, ObsidianVault, Vau
 import { getCodeBlocks, normalizeRelativePath } from "./utils";
 import { useVaultPluginCheck } from "./hooks";
 import { appendSelectedTextTo } from "@/api/append-note";
+import { ContentMatch } from "@/api/search/content-match.service";
+import { getObsidianCliErrorMessage, openObsidianAtMatch } from "@/api/open-match/open-match.service";
 
 const logger = new Logger("Actions");
 
@@ -312,6 +317,28 @@ export function OpenPathInObsidianAction(props: { path: string }) {
   return <Action.Open title="Open in Obsidian" target={target} icon={ObsidianIcon} />;
 }
 
+export function OpenMatchInObsidianAction(props: { note: Note; vault: ObsidianVault; match: ContentMatch }) {
+  const { note, vault, match } = props;
+
+  return (
+    <Action
+      title="Open Match in Obsidian"
+      icon={ObsidianIcon}
+      onAction={async () => {
+        try {
+          await Promise.all([openObsidianAtMatch(note, vault, match), closeMainWindow()]);
+        } catch (error) {
+          await showToast({
+            title: "Could not open the matching line",
+            message: getObsidianCliErrorMessage(error),
+            style: Toast.Style.Failure,
+          });
+        }
+      }}
+    />
+  );
+}
+
 export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: ObsidianVault }) {
   const { note, vault } = props;
 
@@ -457,15 +484,24 @@ export function NoteActions(props: {
   );
 }
 
-export function OpenNoteActions(props: { note: NoteWithContent; vault: ObsidianVault; showQuickLook?: boolean }) {
-  const { note, vault, showQuickLook = true } = props;
+export function OpenNoteActions(props: {
+  note: NoteWithContent;
+  vault: ObsidianVault;
+  match?: ContentMatch;
+  showQuickLook?: boolean;
+}) {
+  const { note, vault, match, showQuickLook = true } = props;
   const { primaryAction } = getPreferenceValues<SearchNotePreferences>();
 
   const { vaultsWithPlugin } = useVaultPluginCheck({ vaults: [vault], communityPlugins: ["obsidian-advanced-uri"] });
 
   const quicklook = <QuickLookAction note={note} vault={vault} />;
   const openInDefaultApp = <OpenInDefaultAppAction note={note} vault={vault} />;
-  const obsidian = <OpenPathInObsidianAction path={note.path} />;
+  const obsidian = match ? (
+    <OpenMatchInObsidianAction note={note} vault={vault} match={match} />
+  ) : (
+    <OpenPathInObsidianAction path={note.path} />
+  );
   const obsidianNewPane = vaultsWithPlugin.includes(vault) ? (
     <OpenNoteInObsidianNewPaneAction note={note} vault={vault} />
   ) : null;
