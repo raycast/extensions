@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import OpenAI from "openai";
+import { normalizeDeepSeekModel } from "./models";
 
 /**
  * Get preference values from Raycast API
@@ -21,7 +22,7 @@ export const openai = new OpenAI({
  */
 const customModel = preferences.custom_model;
 const isCustomModelValid = Boolean(customModel && customModel.length > 0);
-const globalModel = isCustomModelValid ? customModel : preferences.model;
+const globalModel = normalizeDeepSeekModel(isCustomModelValid ? customModel : preferences.model);
 
 // Log the selected model for debugging purposes
 console.log(`Using model: ${globalModel}`);
