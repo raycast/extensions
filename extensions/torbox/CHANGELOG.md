@@ -1,6 +1,6 @@
 # TorBox Changelog
 
-## [Recent downloads and improved file navigation] - {PR_MERGE_DATE}
+## [Recent downloads and improved file navigation] - 2026-08-12
 
 - Add a Recent section for recently opened downloads, folders, and video files
 
