@@ -7,16 +7,18 @@ import { failureToast } from "./util/toast";
 const log = logger.child("[QuickSearchSubreddit]");
 
 /**
- * No-view command: takes a query and a subreddit, opens a subreddit-restricted
- * search on Reddit in the browser.
+ * No-view command: takes a subreddit and an optional query, opens the subreddit
+ * search (or the subreddit itself, when no query is given) on Reddit in the browser.
  *
  * A no-view command can't render results, and Reddit's ~1/minute feed limit would
  * make an in-Raycast fetch unreliable anyway — so this always opens the browser,
  * the one path that works every time. The subreddit accepts `r/foo`, `/r/foo`, a
- * pasted URL, etc., normalized to a bare slug.
+ * pasted URL, etc., normalized to a bare slug. `query` is optional so a deeplink
+ * carrying only the subreddit lands on a prefilled form instead of failing on a
+ * missing required argument.
  */
 export default async function QuickSearchSubreddit(props: LaunchProps<{ arguments: Arguments.QuickSearchSubreddit }>) {
-  const query = props.arguments.query.trim();
+  const query = (props.arguments.query ?? "").trim();
   const slug = normalizeSubredditSlug(props.arguments.subreddit);
 
   if (!slug) {

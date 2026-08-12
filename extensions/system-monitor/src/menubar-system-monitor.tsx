@@ -142,9 +142,16 @@ export default function Command() {
     let download = 0;
     if (!isObjectEmpty(prevNetProcess)) {
       for (const key in networkData) {
-        let down = networkData[key][0] - (key in prevNetProcess ? prevNetProcess[key][0] : 0);
+        const prev = prevNetProcess[key];
+        // nettop counters are cumulative over a process's lifetime, so a
+        // process first seen in this sample has no baseline to subtract;
+        // counting it would book its entire history as one interval's traffic.
+        if (prev === undefined) {
+          continue;
+        }
+        let down = networkData[key][0] - prev[0];
         if (down < 0) down = 0;
-        let up = networkData[key][1] - (key in prevNetProcess ? prevNetProcess[key][1] : 0);
+        let up = networkData[key][1] - prev[1];
         if (up < 0) up = 0;
         download += down;
         upload += up;

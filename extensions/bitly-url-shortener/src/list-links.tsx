@@ -1,7 +1,8 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
-import { getFavicon, useFetch } from "@raycast/utils";
+import { Action, ActionPanel, getPreferenceValues, List, openCommandPreferences } from "@raycast/api";
+import { getFavicon, showFailureToast, useFetch } from "@raycast/utils";
 import { Bitlink, ErrorResult } from "./types";
 import { API_HEADERS, API_URL } from "./config";
+import { assertBitlyOk, BitlyAuthError } from "./utils";
 import { useState } from "react";
 
 const { group_guid } = getPreferenceValues<Preferences.ListLinks>();
@@ -11,10 +12,7 @@ export default function ListLinks() {
     headers: API_HEADERS,
     async parseResponse(response) {
       const result = await response.json();
-      if (!response.ok) {
-        const { message, errors } = result as ErrorResult;
-        throw new Error(`Bitly API Error - ${errors ? JSON.stringify(errors) : message}`);
-      }
+      assertBitlyOk(response, result as ErrorResult);
       return result as {
         links: Bitlink[];
       };
@@ -25,6 +23,19 @@ export default function ListLinks() {
       };
     },
     initialData: [],
+    onError(error) {
+      if (error instanceof BitlyAuthError) {
+        showFailureToast(error, {
+          title: "Invalid Access Token",
+          primaryAction: {
+            title: "Open Command Preferences",
+            onAction: () => openCommandPreferences(),
+          },
+        });
+      } else {
+        showFailureToast(error);
+      }
+    },
   });
 
   return (

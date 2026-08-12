@@ -1,109 +1,81 @@
-import { AI, Tool } from "@raycast/api";
-import { createDraft, getSocialSetDetail } from "../lib/api";
-import { PLATFORM_KEYS, THREAD_PLATFORMS, type PlatformKey } from "../lib/constants";
-import { resolveSocialSetId } from "../lib/resolve-social-set";
-import type { DraftCreatePlatforms } from "../lib/types";
-import { buildPostsFromContent } from "../lib/utils";
+import { Tool } from "@raycast/api";
+import { createDraft } from "../lib/api";
+import {
+  applyXPostOptions,
+  buildPlatforms,
+  draftResult,
+  resolveToolPlatforms,
+  resolveToolSocialSetId,
+} from "../lib/tool-helpers";
 
 type Input = {
-  /** The full text you want to post as a social media draft. Use --- on its own line to split a thread. */
-  content?: string;
-  /** Draft prompt or idea. Required if content is omitted. */
-  prompt?: string;
-  /** Platforms to post to. Subset of: x, linkedin, threads, bluesky, mastodon. If omitted, all enabled platforms on the social set are used. */
-  platforms?: string[];
-  /** Optional title for the draft. */
+  /** Exact post text. Use --- on its own line to split a thread. */
+  content: string;
+  /** Optional social set ID. Omit to use the configured default. */
+  social_set_id?: number;
+  /** Platforms for this draft. Omit to use all connected platforms. */
+  platforms?: Array<"x" | "linkedin" | "threads" | "bluesky" | "mastodon">;
+  /** Internal draft title, never published. */
   title?: string;
-  /** Optional ISO 8601 date to schedule the draft. */
-  schedule_date?: string;
-  /** Optional tags to apply to the draft. */
+  /** Internal scratchpad notes, never published. */
+  scratchpad?: string;
+  /** ISO 8601 time, next-free-slot, or now. Use now only when the user explicitly asks to publish immediately. */
+  schedule?: string;
+  /** Existing tag slugs. */
   tags?: string[];
+  /** Existing ready media IDs to attach to the first post. */
+  media_ids?: string[];
+  /** Generate a public share URL. */
+  share?: boolean;
+  /** X post URL to reply to. X only. */
+  reply_to_url?: string;
+  /** X post URL to quote from the first post. X only. */
+  quote_post_url?: string;
+  /** X community ID. X only. */
+  community_id?: string;
+  /** Mark the X post as a paid partnership. */
+  paid_partnership?: boolean;
+  /** Mark the X post as made with AI. */
+  made_with_ai?: boolean;
 };
-
-async function resolveContent(input: Input) {
-  const content = input.content?.trim();
-  if (content) {
-    return content;
-  }
-
-  const prompt = input.prompt?.trim();
-  if (!prompt) {
-    return "";
-  }
-
-  const aiPrompt = [
-    "Write a social media draft for Typefully.",
-    "Return ONLY the draft text. Do not add quotes or commentary.",
-    "If the request is for a thread, separate posts with a line containing only ---.",
-    `User request: ${prompt}`,
-  ].join("\n");
-
-  return (await AI.ask(aiPrompt, { creativity: "medium" })).trim();
-}
 
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
-  const platformLabel = input.platforms?.length ? input.platforms.join(", ") : "all enabled platforms";
-  const content = input.content?.trim();
-  const prompt = input.prompt?.trim();
-  const previewSource = content || prompt || "";
-  const preview = previewSource.length > 80 ? previewSource.slice(0, 80) + "…" : previewSource;
-  const sourceLabel = content ? "content" : prompt ? "prompt" : "content";
-  return {
-    message: `Create draft on ${platformLabel} with ${sourceLabel}: "${preview}"?`,
-  };
+  if (input.schedule !== "now") return undefined;
+  return { message: "Publish this draft immediately? This is public and cannot be undone." };
 };
 
-/**
- * Create a draft on Typefully.
- * IMPORTANT: Provide content (full draft text) or prompt (idea). Do not call without one.
- */
 export default async function tool(input: Input) {
-  const content = await resolveContent(input);
-  if (!content) {
-    throw new Error("Content is required. Provide draft text or a prompt to generate it.");
+  const socialSetId = await resolveToolSocialSetId(input.social_set_id);
+  const platformKeys = await resolveToolPlatforms(socialSetId, input.platforms);
+  if (
+    (input.reply_to_url ||
+      input.quote_post_url ||
+      input.community_id ||
+      input.paid_partnership ||
+      input.made_with_ai) &&
+    !platformKeys.includes("x")
+  ) {
+    throw new Error("Reply, quote, community, and disclosure options require X to be enabled.");
   }
 
-  const scheduleDate = input.schedule_date?.trim();
-
-  const socialSetId = await resolveSocialSetId();
-  const threadPosts = buildPostsFromContent(content, true);
-  const singlePost = buildPostsFromContent(content, false);
-
-  if (threadPosts.length === 0) {
-    throw new Error("Content is empty.");
-  }
-
-  const detail = await getSocialSetDetail(socialSetId);
-  const enabledPlatforms = PLATFORM_KEYS.filter((key) => detail.platforms[key] !== null);
-
-  const platformKeys = input.platforms?.length
-    ? (input.platforms.filter((p) => enabledPlatforms.includes(p as PlatformKey)) as PlatformKey[])
-    : enabledPlatforms;
-
-  if (platformKeys.length === 0) {
-    throw new Error(`Invalid platforms. Choose from: ${PLATFORM_KEYS.join(", ")}`);
-  }
-
-  const platforms: DraftCreatePlatforms = {};
-  for (const platform of platformKeys) {
-    platforms[platform] = {
-      enabled: true,
-      posts: THREAD_PLATFORMS.has(platform) ? threadPosts : singlePost,
-    };
+  const platforms = buildPlatforms(input.content, platformKeys, input.media_ids);
+  if (platforms.x && "posts" in platforms.x) {
+    platforms.x.posts = applyXPostOptions(platforms.x.posts, input);
+    if (input.reply_to_url || input.community_id) {
+      platforms.x.settings = {
+        ...(input.reply_to_url ? { reply_to_url: input.reply_to_url } : {}),
+        ...(input.community_id ? { community_id: input.community_id } : {}),
+      };
+    }
   }
 
   const draft = await createDraft(socialSetId, {
     platforms,
-    draft_title: input.title ?? undefined,
-    tags: input.tags?.length ? input.tags : undefined,
-    publish_at: scheduleDate || undefined,
+    draft_title: input.title,
+    scratchpad_text: input.scratchpad,
+    tags: input.tags,
+    publish_at: input.schedule,
+    share: input.share,
   });
-
-  return {
-    id: draft.id,
-    status: draft.status,
-    url: draft.private_url,
-    share_url: draft.share_url,
-    preview: draft.preview,
-  };
+  return draftResult(draft);
 }

@@ -31,16 +31,16 @@
       "mode": "no-view",
       "arguments": [
         {
-          "name": "query",
-          "placeholder": "Search terms",
-          "type": "text",
-          "required": true
-        },
-        {
           "name": "subreddit",
           "placeholder": "subreddit (e.g. macapps)",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "query",
+          "placeholder": "Search terms (optional)",
+          "type": "text",
+          "required": false
         }
       ]
     }

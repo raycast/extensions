@@ -1,4 +1,4 @@
-import { openNewCodexThreadFromClipboard } from "./utils/codex-launch";
+import { openNewCodexThreadFromClipboard } from "./utils/launch";
 
 export default async function Command() {
   await openNewCodexThreadFromClipboard();

@@ -4,19 +4,11 @@
 
 import { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
-import {
-  Form,
-  ActionPanel,
-  Action,
-  closeMainWindow,
-  popToRoot,
-  showToast,
-  Toast,
-  getSelectedFinderItems,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, popToRoot, showToast, Toast, getSelectedFinderItems } from "@raycast/api";
 import { dirname, join } from "path";
 import { getFileInfo } from "./lib/files";
 import { batchRename, checkConflicts } from "./lib/batch";
+import { openRenameHistory, recordRenameHistory } from "./lib/history-nav";
 import { log } from "./lib/logger";
 import type { FileInfo, RenameOperation } from "./types";
 
@@ -145,13 +137,23 @@ export default function Command() {
       // Perform batch rename
       const results = await batchRename(operations);
 
-      const successCount = results.filter((r) => r.success).length;
+      const successfulOps = results.filter((r) => r.success).map(({ oldPath, newPath }) => ({ oldPath, newPath }));
+      const noun = successfulOps.length === 1 ? "file" : "files";
+      const historySaved = await recordRenameHistory(`Renamed ${successfulOps.length} ${noun}`, successfulOps);
+
+      const successCount = successfulOps.length;
       const failureCount = results.filter((r) => !r.success).length;
 
       if (failureCount === 0) {
         setPreserveName(false);
-        await closeMainWindow();
-        await popToRoot();
+        await showToast({
+          style: Toast.Style.Success,
+          title: `Renamed ${successCount} file${successCount !== 1 ? "s" : ""}`,
+          // An empty batch records no history by design — only warn when
+          // there was something to save and saving failed.
+          message: successCount > 0 && !historySaved ? "History could not be saved" : undefined,
+        });
+        await openRenameHistory(historySaved);
       } else if (successCount > 0) {
         await showToast({
           style: Toast.Style.Failure,

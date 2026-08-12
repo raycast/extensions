@@ -6,12 +6,13 @@ import { YTJ_SEARCH_URL } from "./constants";
 import { buildSplitDetailMetadata } from "./lib/detail-view";
 import { buildEInvoiceDirectoryUrl } from "./lib/e-invoice";
 import { buildMapSearchLinks } from "./lib/maps";
-import { getPrimaryAddressText, getPrimaryCity } from "./lib/selectors";
+import { getPrimaryAddressClipboardText, getPrimaryAddressText } from "./lib/selectors";
 import { buildWhatsNewMarkdown, getLatestWhatsNewLabel } from "./lib/whats-new";
 import type { UiCompany } from "./types/ui";
 
 function CompanyActions({ company, languageOrder }: { company: UiCompany; languageOrder: ("1" | "2" | "3")[] }) {
   const primaryAddress = getPrimaryAddressText(company);
+  const clipboardAddress = getPrimaryAddressClipboardText(company);
   const mapLinks = buildMapSearchLinks(company.displayName, primaryAddress);
 
   return (
@@ -31,8 +32,13 @@ function CompanyActions({ company, languageOrder }: { company: UiCompany; langua
       {company.euVatNumber ? (
         <Action.CopyToClipboard title="Copy EU VAT Number" content={company.euVatNumber} icon={Icon.CopyClipboard} />
       ) : null}
-      {primaryAddress ? (
-        <Action.CopyToClipboard title="Copy Primary Address" content={primaryAddress} icon={Icon.CopyClipboard} />
+      {clipboardAddress ? (
+        <Action.CopyToClipboard
+          title="Copy Primary Address"
+          content={clipboardAddress}
+          icon={Icon.CopyClipboard}
+          shortcut={Keyboard.Shortcut.Common.Copy}
+        />
       ) : null}
       {mapLinks ? <Action.OpenInBrowser title="Open in Google Maps" url={mapLinks.googleMaps} icon={Icon.Map} /> : null}
       {mapLinks ? <Action.OpenInBrowser title="Open in Apple Maps" url={mapLinks.appleMaps} icon={Icon.Map} /> : null}
@@ -130,21 +136,15 @@ export default function Command() {
 
       {isSearchMode ? (
         <List.Section title="Results" subtitle={getResultSectionSubtitle(companies.length, totalResults)}>
-          {companies.map((company) => {
-            const primaryCity = getPrimaryCity(company);
-
-            return (
-              <List.Item
-                key={company.businessId}
-                icon={Icon.Building}
-                title={company.displayName}
-                subtitle={company.businessId}
-                accessories={primaryCity ? [{ text: primaryCity }] : undefined}
-                detail={<List.Item.Detail metadata={buildSplitDetailMetadata(company)} />}
-                actions={<CompanyActions company={company} languageOrder={languageOrder} />}
-              />
-            );
-          })}
+          {companies.map((company) => (
+            <List.Item
+              key={company.businessId}
+              icon={Icon.Building}
+              title={{ value: company.displayName, tooltip: company.displayName }}
+              detail={<List.Item.Detail metadata={buildSplitDetailMetadata(company)} />}
+              actions={<CompanyActions company={company} languageOrder={languageOrder} />}
+            />
+          ))}
 
           {!isLoading && companies.length === 0 ? (
             <List.Item

@@ -27,11 +27,17 @@ const LIST_COLOR_HEX: Record<string, string> = {
 };
 
 // Mirrors ICON_GLYPHS in app/utils/listIconCatalog.js, mapped to
-// the closest match in Raycast's Icon enum. Three glyphs don't
-// have a 1:1 (briefcase / food / sparkle) and use a closest-fit
-// substitute (Building / MugSteam / Stars); the other 17 map
-// directly. Unknown / null glyphs fall back to Icon.List, same
-// fallback the web app's resolveListIcon uses when no glyph is set.
+// the closest match in Raycast's Icon enum, in the same order as the
+// web file: the 20 picker glyphs first (list..chart), then the legacy
+// render-only glyphs the web retired from its picker (2026-07-16/07-17)
+// but still renders for lists that stored them (star..target).
+// Seven glyphs have no 1:1 in Raycast's set and use a closest-fit
+// substitute: briefcase→Building, food→MugSteam (no cutlery icon
+// exists), school→Pencil (no graduation cap), paw→Footprints (no paw),
+// palette→Brush, bank→BankNote (no columned-building icon), and the
+// legacy sparkle→Stars. The other 23 map directly or near-exactly.
+// Unknown / null glyphs fall back to Icon.List, same fallback the web
+// app's resolveListIcon uses when no glyph is set.
 const LIST_GLYPH_ICON: Record<string, Icon> = {
   list: Icon.List,
   clipboard: Icon.Clipboard,
@@ -43,6 +49,18 @@ const LIST_GLYPH_ICON: Record<string, Icon> = {
   leaf: Icon.Leaf,
   music: Icon.Music,
   globe: Icon.Globe,
+  groups: Icon.TwoPeople,
+  memory: Icon.MemoryChip,
+  school: Icon.Pencil,
+  paw: Icon.Footprints,
+  film: Icon.FilmStrip,
+  ball: Icon.SoccerBall,
+  palette: Icon.Brush,
+  plane: Icon.Airplane,
+  bank: Icon.BankNote,
+  chart: Icon.LineChart,
+  // Legacy render-only glyphs (retired from the web picker but kept so
+  // lists that already stored them keep rendering the same in both).
   star: Icon.Star,
   heart: Icon.Heart,
   bolt: Icon.Bolt,

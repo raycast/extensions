@@ -7,7 +7,6 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
-import { execa } from "execa";
 import { join } from "path";
 import {
   deleteEntry,
@@ -66,18 +65,6 @@ export default function SearchTranscripts() {
     }
   }
 
-  async function handleOpenRecording(entry: HistoryEntry) {
-    try {
-      await execa("open", ["-R", join(RECORDINGS_DIR, entry.file_name)]);
-    } catch (err) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Could not open recording",
-        message: err instanceof Error ? err.message : String(err),
-      });
-    }
-  }
-
   return (
     <List
       isLoading={isLoading}
@@ -130,11 +117,11 @@ export default function SearchTranscripts() {
                     shortcut={{ modifiers: ["cmd"], key: "s" }}
                     onAction={() => handleToggleSaved(entry)}
                   />
-                  <Action
-                    title="Open Recording in Finder"
+                  <Action.ShowInFinder
+                    title="Reveal Recording"
                     icon={Icon.Finder}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
-                    onAction={() => handleOpenRecording(entry)}
+                    path={join(RECORDINGS_DIR, entry.file_name)}
                   />
                   <Action
                     title="Delete"

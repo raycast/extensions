@@ -24,7 +24,15 @@ export const createSearchUrl = (subreddit = "", feed = false, query = "", type =
     url = joinUrl(url, subreddit);
   }
 
-  url = joinUrl(url, feed ? "search.rss" : "search");
+  // Browsing a subreddit with no query is the LISTING feed (`/r/<sub>/.rss`), not a
+  // search — an empty-query `/r/<sub>/search.rss` returns nothing. Only build the
+  // search endpoint when there is a query (or a subreddit-type search).
+  const isSearch = !!query || !!type;
+  if (isSearch) {
+    url = joinUrl(url, feed ? "search.rss" : "search");
+  } else if (feed) {
+    url = url + ".rss";
+  }
 
   const params = new URLSearchParams();
 
@@ -33,8 +41,8 @@ export const createSearchUrl = (subreddit = "", feed = false, query = "", type =
   }
 
   // `restrict_sr` keeps a subreddit-scoped search inside that subreddit; without
-  // it Reddit widens the query to all of Reddit.
-  if (subreddit) {
+  // it Reddit widens the query to all of Reddit. Only meaningful for a search.
+  if (subreddit && isSearch) {
     params.append("restrict_sr", "true");
   }
 

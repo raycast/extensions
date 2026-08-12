@@ -21,14 +21,53 @@ import { RateLimit } from "../RedditApi/Api";
 const CACHE_KEY = "redditRateLimitDeadline";
 const cache = new Cache({ namespace: "rate-limit" });
 
-function readDeadline(): number {
-  const raw = cache.get(CACHE_KEY);
-  const value = raw ? Number(raw) : 0;
-  return Number.isFinite(value) ? value : 0;
+/**
+ * How long a provisional request reservation holds the shared slot while a request
+ * is in flight. Matches the ~1 request/minute window: if the response never lands
+ * (crash, killed command), the reservation self-expires rather than wedging the
+ * cooldown forever, and it's the same length a spent-budget response would set.
+ */
+const RESERVATION_MS = 60_000;
+
+/** Disambiguates reservation tokens minted within the same millisecond. */
+let reservationCounter = 0;
+
+/**
+ * The shared cooldown state. `provisional` marks a slot RESERVED for an in-flight
+ * request (releasable by its owner via `token` if the request fails or the budget
+ * turns out to remain); a non-provisional deadline is a CONFIRMED cooldown from a
+ * spent budget / 429, which no one releases early.
+ */
+interface CooldownState {
+  deadline: number;
+  provisional: boolean;
+  token: string;
 }
 
-function writeDeadline(deadline: number): void {
-  cache.set(CACHE_KEY, String(deadline));
+function readState(): CooldownState {
+  const raw = cache.get(CACHE_KEY);
+  if (!raw) {
+    return { deadline: 0, provisional: false, token: "" };
+  }
+  try {
+    const parsed = JSON.parse(raw) as Partial<CooldownState>;
+    const deadline = Number(parsed.deadline);
+    return {
+      deadline: Number.isFinite(deadline) ? deadline : 0,
+      provisional: parsed.provisional === true,
+      token: typeof parsed.token === "string" ? parsed.token : "",
+    };
+  } catch {
+    return { deadline: 0, provisional: false, token: "" };
+  }
+}
+
+function writeState(state: CooldownState): void {
+  cache.set(CACHE_KEY, JSON.stringify(state));
+}
+
+function readDeadline(): number {
+  return readState().deadline;
 }
 
 function secondsUntil(deadline: number): number {
@@ -50,38 +89,73 @@ export default function useRateLimitCooldown() {
   }, []);
 
   // `isCoolingDown` is the POLLED value — correct for display, but up to ~1s stale
-  // relative to another command's write. Do NOT gate an actual request on it.
+  // relative to another command's write. Do NOT gate an actual request on it; use
+  // `reserveRequestSlot` for that.
   const isCoolingDown = secondsRemaining > 0;
 
-  // The authoritative gate: reads the shared deadline SYNCHRONOUSLY at call time, so
-  // there is no polling window for a concurrent command to slip a request through
-  // during an active cooldown. Callers must decide whether to send a network request
-  // with this, not with `isCoolingDown`.
-  const isCoolingDownNow = useCallback(() => secondsUntil(readDeadline()) > 0, []);
-
-  const startCooldown = useCallback((seconds: number) => {
-    // Never shorten an existing cooldown: a later response can report a smaller
-    // reset than one already in flight, and trusting it would re-enable the UI
-    // while Reddit is still refusing requests. Read-modify-write against the shared
-    // cache so concurrent commands compose rather than clobber.
-    const next = Math.max(readDeadline(), Date.now() + seconds * 1000);
-    writeDeadline(next);
-    setSecondsRemaining(secondsUntil(next));
+  const commit = useCallback((state: CooldownState) => {
+    writeState(state);
+    setSecondsRemaining(secondsUntil(state.deadline));
   }, []);
 
-  // Arm the cooldown when a successful response has spent the budget, so the guard
-  // engages *before* the next request 429s rather than after. An UNKNOWN budget
-  // (`remaining === undefined`, i.e. Reddit omitted the header) counts as spent:
-  // at ~1 request/minute a completed request has likely used the window, and
-  // holding is the safe default (cached searches still work during cooldown).
-  const armIfSpent = useCallback(
-    (rateLimit?: RateLimit) => {
-      if (rateLimit && (rateLimit.remaining === undefined || rateLimit.remaining < 1)) {
-        startCooldown(rateLimit.reset);
-      }
+  const startCooldown = useCallback(
+    (seconds: number) => {
+      // A CONFIRMED cooldown (from a 429). Never shorten an existing deadline — a
+      // later response can report a smaller reset than one already in flight.
+      const deadline = Math.max(readDeadline(), Date.now() + seconds * 1000);
+      commit({ deadline, provisional: false, token: "" });
     },
-    [startCooldown],
+    [commit],
   );
 
-  return { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow };
+  // Reserve the single request slot BEFORE sending, so two commands can't both read
+  // "clear" and both send. This is a best-effort claim: on this platform the cache
+  // has no atomic compare-and-set, so two *exactly*-simultaneous callers could still
+  // both win — but it closes the wide, common races (the ~1s poll window; any
+  // non-instantaneous concurrency), leaving only a microsecond-wide residual.
+  // Returns an owner token, or null if the slot was already held; the token lets the
+  // caller release ITS OWN provisional hold (`releaseReservation`) without clobbering
+  // a confirmed cooldown or another command's reservation.
+  const reserveRequestSlot = useCallback((): string | null => {
+    if (secondsUntil(readDeadline()) > 0) {
+      return null; // already reserved or cooling down
+    }
+    const token = `${Date.now()}-${reservationCounter++}`;
+    commit({ deadline: Date.now() + RESERVATION_MS, provisional: true, token });
+    return token;
+  }, [commit]);
+
+  // Release a provisional reservation this command owns — used when its request
+  // FAILED before reaching Reddit (network error), or SUCCEEDED with budget still
+  // remaining, so the window shouldn't be held. Only clears the cache if it still
+  // holds our own provisional token; a confirmed cooldown, or another command's
+  // reservation, is left untouched.
+  const releaseReservation = useCallback(
+    (token: string) => {
+      const state = readState();
+      if (state.provisional && state.token === token) {
+        commit({ deadline: 0, provisional: false, token: "" });
+      }
+    },
+    [commit],
+  );
+
+  // Settle a reservation after its request completes. Budget SPENT or unknown →
+  // promote the hold to a confirmed cooldown for the real reset window. Budget
+  // REMAINED → release our reservation so an allowed follow-up isn't blocked.
+  const settleAfterRequest = useCallback(
+    (token: string, rateLimit?: RateLimit) => {
+      const spent = !rateLimit || rateLimit.remaining === undefined || rateLimit.remaining < 1;
+      if (!spent) {
+        releaseReservation(token);
+        return;
+      }
+      const reset = rateLimit?.reset ?? RESERVATION_MS / 1000;
+      const deadline = Math.max(readDeadline(), Date.now() + reset * 1000);
+      commit({ deadline, provisional: false, token: "" });
+    },
+    [commit, releaseReservation],
+  );
+
+  return { secondsRemaining, startCooldown, settleAfterRequest, releaseReservation, reserveRequestSlot, isCoolingDown };
 }

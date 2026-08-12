@@ -263,12 +263,48 @@ const runDetachedAppleScript = (script: string): boolean => {
 };
 
 /**
+ * An AppleScript `do shell script` line that launches the browser directly
+ * into `profileDirectory`, optionally at `url`.
+ *
+ * Each piece is load-bearing:
+ *
+ * - `/usr/bin/open` rather than the inner binary: `open` returns as soon as
+ *   Launch Services has taken the request, so the detached `osascript` is not
+ *   held open for the browser's entire lifetime, and the browser is properly
+ *   activated.
+ * - `-n`: the browser's singleton lock makes the second process hand its
+ *   command line to the already-running instance and exit, so this opens a
+ *   window in the requested profile instead of starting a second browser.
+ * - `--profile-directory`: on a *cold* start this is the profile the browser
+ *   boots into. A bare `activate` boots it into the last-used profile
+ *   instead, which is what produced a stray window for the previous profile.
+ * - `--new-window`: without it the browser appends a tab to an existing
+ *   window of that profile rather than opening a window.
+ */
+const launchInProfileCommand = (browser: BrowserConfig, profileDirectory: string, url?: string): string => {
+  const parts = [
+    `"/usr/bin/open -n -a " & quoted form of "${escapeAppleScriptString(browser.appPath)}"`,
+    `" --args --profile-directory=" & quoted form of "${escapeAppleScriptString(profileDirectory)}"`,
+    `" --new-window"`,
+  ];
+  if (url) {
+    parts.push(`" " & quoted form of "${escapeAppleScriptString(url)}"`);
+  }
+  return `do shell script ${parts.join(" & ")}`;
+};
+
+/**
  * Run the script that opens Google Chrome.
  *
  * - `ChromeAction.Focus`: focuses the existing profile window (or opens it if not open)
  * - `ChromeAction.NewTab`: focuses the profile window, then opens a new blank tab
  * - `ChromeAction.NewWindow`: opens a new window for the profile
  * - `ChromeAction.openUrl(url)`: focuses the profile window, then opens the URL in a new tab
+ *
+ * When the browser is not running, every action collapses to a single cold
+ * start into the requested profile (see `launchInProfileCommand`) — there is
+ * no window to focus or add a tab to yet, and going through the Profiles menu
+ * would first have to boot the browser into the last-used profile.
  *
  * @param profile The Chrome profile to open
  * @param target The action to perform
@@ -288,16 +324,8 @@ export const openGoogleChrome = async (
   const action = target.action;
   const url = action === "openUrl" ? target.url : undefined;
 
-  const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
-  const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
-
   if (action === "newWindow") {
-    const newWindowScript = `
-      set theAppPath to quoted form of "${escapedBinaryPath}"
-      set theProfile to quoted form of "${escapedProfileDirectory}"
-      do shell script theAppPath & " --profile-directory=" & theProfile & " --new-window"
-    `;
-    if (runDetachedAppleScript(newWindowScript)) {
+    if (runDetachedAppleScript(launchInProfileCommand(browser, profile.directory))) {
       await didSpawn();
     }
     return;
@@ -309,7 +337,13 @@ export const openGoogleChrome = async (
 
   // Use menu bar item 8 for Profiles menu (language-independent position)
   // Chrome menu bar: 1=Apple, 2=Chrome, 3=File, 4=Edit, 5=View, 6=History, 7=Bookmarks, 8=Profiles, 9=Tab, 10=Window, 11=Help
-  const script = `
+  //
+  // The Profiles menu only exists once the browser is up, so this whole path
+  // assumes a running browser. Cold-starting it here is not an option: the
+  // `activate` below would boot it into the *last-used* profile and leave that
+  // window behind next to the one the menu click opens. The `else` branch
+  // below cold-starts into the requested profile in one step instead.
+  const menuScript = `
     tell application "${escapedAppName}" to activate
     tell application "System Events"
       tell process "${escapedAppName}"
@@ -374,6 +408,16 @@ export const openGoogleChrome = async (
     `
         : ""
     }
+  `;
+
+  // `is running` is the one way to ask about an application without launching
+  // it — `tell application ... to activate` would start it as a side effect.
+  const script = `
+    if application "${escapedAppName}" is running then
+      ${menuScript}
+    else
+      ${launchInProfileCommand(browser, profile.directory, url)}
+    end if
   `;
 
   if (runDetachedAppleScript(script)) {

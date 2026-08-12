@@ -74,4 +74,5 @@ pieces-raycast
 saasflow
 globalping
 mymind
+buffer
 nocal

@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Icon, List, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, useNavigation } from "@raycast/api";
 import type { Transcription } from "../lib/types";
+import { copyAndConfirm, pasteToActiveApp } from "../lib/clipboard";
 import { formatRelativeTime, getDisplayText, truncateText } from "../lib/database";
 import { TranscriptionDetail } from "./TranscriptionDetail";
 
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function TranscriptionItem({ transcription }: Props) {
+  const { push } = useNavigation();
   const displayText = getDisplayText(transcription);
   const hasEnhancement = Boolean(transcription.enhancedText && transcription.text !== transcription.enhancedText);
 
@@ -15,30 +17,32 @@ export function TranscriptionItem({ transcription }: Props) {
     <List.Item
       title={truncateText(displayText.replace(/\n/g, " "), 60)}
       subtitle={formatRelativeTime(transcription.timestamp)}
-      icon={transcription.powerModeEmoji || Icon.Message}
+      icon={Icon.Message}
       accessories={buildAccessories(transcription, hasEnhancement)}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.CopyToClipboard title="Copy Text" content={displayText} />
+            <Action title="Copy Text" icon={Icon.Clipboard} onAction={() => copyAndConfirm(displayText)} />
             {hasEnhancement && (
-              <Action.CopyToClipboard
+              <Action
                 title="Copy Original Text"
-                content={transcription.text}
+                icon={Icon.Clipboard}
+                onAction={() => copyAndConfirm(transcription.text)}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
             )}
-            <Action.Paste
+            <Action
               title="Paste Text"
-              content={displayText}
+              icon={Icon.TextCursor}
+              onAction={() => pasteToActiveApp(displayText)}
               shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action.Push
+            <Action
               title="View Details"
               icon={Icon.Eye}
-              target={<TranscriptionDetail transcription={transcription} />}
+              onAction={() => push(<TranscriptionDetail transcription={transcription} />)}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
             />
           </ActionPanel.Section>

@@ -1,53 +1,18 @@
-import {
-  Form,
-  ActionPanel,
-  Action,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-  Detail,
-  confirmAlert,
-  Alert,
-} from "@raycast/api";
+import { Form, ActionPanel, Action, Icon, showToast, Toast, useNavigation, confirmAlert, Alert } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { readZshrcFileRaw, writeZshrcFile, checkZshrcAccess, getZshrcPath, readZshrcFile } from "./zsh";
-import { findSectionBounds } from "./section-detector";
 import { clearCache } from "./cache";
 import { toLogicalSections } from "./parse-zshrc";
 import { saveToHistory } from "./history";
 import { log } from "../utils/logger";
-import { computeDiff } from "../utils/diff";
 import { validateStructure } from "../utils/validation";
+import { SaveCancelledError } from "../utils/errors";
+import { computeDeletedContent, computeUpdatedContent, type EditItemConfig } from "./edit-item-write";
+import { DiffPreviewView } from "./edit-item-preview";
 
-/**
- * Configuration for EditItemForm component
- */
-export interface EditItemConfig {
-  /** Label for the key field (e.g., "Alias Name" or "Variable Name") */
-  keyLabel: string;
-  /** Label for the value field (e.g., "Command" or "Value") */
-  valueLabel: string;
-  /** Placeholder for key field */
-  keyPlaceholder: string;
-  /** Placeholder for value field */
-  valuePlaceholder: string;
-  /** Validation regex for key field */
-  keyPattern: RegExp;
-  /** Validation error message for key field */
-  keyValidationError: string;
-  /** Function to generate the line to insert */
-  generateLine: (key: string, value: string) => string;
-  /** Function to generate regex pattern for finding existing item */
-  generatePattern: (key: string) => RegExp;
-  /** Function to generate replacement line for update */
-  generateReplacement: (key: string, value: string) => string;
-  /** Item type name for messages (e.g., "alias" or "export") */
-  itemType: string;
-  /** Item type capitalized for titles (e.g., "Alias" or "Export") */
-  itemTypeCapitalized: string;
-}
+// Re-exported so existing callers keep importing the config type from here
+export type { EditItemConfig } from "./edit-item-write";
 
 interface EditItemFormProps {
   /** Existing key value (for editing) */
@@ -56,10 +21,34 @@ interface EditItemFormProps {
   existingValue?: string | undefined;
   /** Section where this item belongs */
   sectionLabel?: string | undefined;
+  /** 0-based instance of the section label when the same label appears more than once */
+  sectionOccurrence?: number | undefined;
   /** Callback when item is saved */
   onSave?: (() => void) | undefined;
   /** Configuration for the form */
   config: EditItemConfig;
+}
+
+/**
+ * Writes the updated content, invalidates the cache, verifies the write by
+ * re-reading, and records history only after verification succeeds. The
+ * history entry stores `previousContent` — the pre-change snapshot — so
+ * undo restores the state before this write.
+ */
+async function persistAndVerify(
+  updatedContent: string,
+  previousContent: string,
+  historyLabel: string,
+  logContext: string,
+): Promise<void> {
+  await writeZshrcFile(updatedContent);
+  clearCache(getZshrcPath());
+  const verify = await readZshrcFileRaw();
+  if (verify !== updatedContent) {
+    log.edit.error(`Write verification failed for ${logContext}`);
+    throw new Error("Write verification failed: content mismatch after save");
+  }
+  await saveToHistory(historyLabel, previousContent);
 }
 
 /**
@@ -72,13 +61,23 @@ interface EditItemFormProps {
  * - Atomic file writes with verification
  * - Section creation and item movement
  *
+ * The content each save produces is computed by the pure functions in
+ * `edit-item-write.ts`, shared with the diff preview.
+ *
  * @param existingKey - Existing key value (for editing mode)
  * @param existingValue - Existing value (for editing mode)
  * @param sectionLabel - Section where this item belongs
  * @param onSave - Callback invoked after successful save
  * @param config - Configuration object defining item-specific behavior
  */
-export default function EditItemForm({ existingKey, existingValue, sectionLabel, onSave, config }: EditItemFormProps) {
+export default function EditItemForm({
+  existingKey,
+  existingValue,
+  sectionLabel,
+  sectionOccurrence,
+  onSave,
+  config,
+}: EditItemFormProps) {
   const { pop } = useNavigation();
   const isEditing = !!existingKey;
   // Initialize sections with sectionLabel if it exists to avoid dropdown value mismatch
@@ -174,177 +173,49 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
 
       try {
         const zshrcContent = await readZshrcFileRaw();
+        const updatedContent = computeUpdatedContent(zshrcContent, {
+          config,
+          key,
+          value,
+          targetSection,
+          isEditing,
+          existingKey,
+          originalSection: sectionLabel,
+          sectionOccurrence,
+        });
 
         if (isEditing) {
-          // Check if section changed
-          const sectionChanged = sectionLabel !== targetSection;
+          const moved = sectionLabel !== targetSection;
+          log.edit.info(
+            moved
+              ? `Updating ${config.itemType} "${key}" and moving to section "${targetSection}"`
+              : `Updating ${config.itemType} "${key}" in place`,
+          );
+          await persistAndVerify(
+            updatedContent,
+            zshrcContent,
+            moved
+              ? `Update ${config.itemType} "${key}" (move to ${targetSection})`
+              : `Update ${config.itemType} "${key}"`,
+            `${config.itemType} "${key}"`,
+          );
+          log.edit.info(`Successfully updated ${config.itemType} "${key}"`);
 
-          if (sectionChanged) {
-            // Moving to a different section - remove from old location and add to new
-            const pattern = config.generatePattern(existingKey!);
-            const match = zshrcContent.match(pattern);
-
-            if (!match || match.length === 0) {
-              throw new Error(`${config.itemTypeCapitalized} "${existingKey}" not found in zshrc`);
-            }
-
-            // Create a non-global version to replace only first match
-            const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-            // Remove the old line
-            let updatedContent = zshrcContent.replace(nonGlobalPattern, () => "");
-
-            // Clean up empty lines left behind
-            updatedContent = updatedContent.replace(/\n\n\n+/g, "\n\n");
-
-            // Generate the new line
-            const itemLine = config.generateLine(key, value);
-
-            // Find the target section to add to
-            const targetSectionBounds = findSectionBounds(updatedContent, targetSection);
-
-            if (targetSectionBounds) {
-              // Found target section - add to it
-              const lines = updatedContent.split(/\r?\n/);
-              let insertLineIndex = targetSectionBounds.endLine - 1;
-
-              // Find the last non-empty line in the section
-              for (let i = targetSectionBounds.endLine - 1; i >= targetSectionBounds.startLine - 1; i--) {
-                const line = lines[i];
-                if (line && line.trim().length > 0) {
-                  insertLineIndex = i;
-                  break;
-                }
-              }
-
-              const beforeLines = lines.slice(0, insertLineIndex + 1);
-              const afterLines = lines.slice(insertLineIndex + 1);
-
-              const beforeSection = beforeLines.join("\n");
-              const afterSection = afterLines.join("\n");
-
-              if (afterSection) {
-                updatedContent = `${beforeSection}\n${itemLine}\n${afterSection}`;
-              } else {
-                updatedContent = `${beforeSection}\n${itemLine}`;
-              }
-            } else {
-              // Target section not found - create it at the end
-              updatedContent = `${updatedContent}\n\n# --- ${targetSection} --- #\n${itemLine}`;
-            }
-
-            log.edit.info(`Updating ${config.itemType} "${key}" and moving to section "${targetSection}"`);
-            await writeZshrcFile(updatedContent);
-            clearCache(getZshrcPath());
-            const verify = await readZshrcFileRaw();
-            if (verify !== updatedContent) {
-              log.edit.error(`Write verification failed for ${config.itemType} "${key}"`);
-              throw new Error("Write verification failed: content mismatch after save");
-            }
-            // Save to history only after successful write verification
-            await saveToHistory(`Update ${config.itemType} "${key}" (move to ${targetSection})`);
-            log.edit.info(`Successfully updated ${config.itemType} "${key}"`);
-
-            await showToast({
-              style: Toast.Style.Success,
-              title: `${config.itemTypeCapitalized} Updated`,
-              message: `Updated ${config.itemType} "${key}" and moved to "${targetSection}"`,
-            });
-          } else {
-            // Same section - just update the line in place
-            const pattern = config.generatePattern(existingKey!);
-            const match = zshrcContent.match(pattern);
-
-            if (!match || match.length === 0) {
-              throw new Error(`${config.itemTypeCapitalized} "${existingKey}" not found in zshrc`);
-            }
-
-            // Create a non-global version of the pattern to replace only first match
-            const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-            // Use replace with a function to preserve whitespace
-            const updatedContent = zshrcContent.replace(nonGlobalPattern, (matchedLine) => {
-              // Extract leading whitespace from the original line
-              const leadingWhitespace = matchedLine.match(/^(\s*)/)?.[1] || "";
-              // Generate replacement and preserve whitespace
-              const replacement = config.generateReplacement(key, value);
-              return `${leadingWhitespace}${replacement.trimStart()}`;
-            });
-            log.edit.info(`Updating ${config.itemType} "${key}" in place`);
-            await writeZshrcFile(updatedContent);
-            clearCache(getZshrcPath());
-            // Verify write by re-reading and comparing
-            const verify = await readZshrcFileRaw();
-            if (verify !== updatedContent) {
-              log.edit.error(`Write verification failed for ${config.itemType} "${key}"`);
-              throw new Error("Write verification failed: content mismatch after save");
-            }
-            // Save to history only after successful write verification
-            await saveToHistory(`Update ${config.itemType} "${key}"`);
-            log.edit.info(`Successfully updated ${config.itemType} "${key}"`);
-
-            await showToast({
-              style: Toast.Style.Success,
-              title: `${config.itemTypeCapitalized} Updated`,
-              message: `Updated ${config.itemType} "${key}"`,
-            });
-          }
+          await showToast({
+            style: Toast.Style.Success,
+            title: `${config.itemTypeCapitalized} Updated`,
+            message: moved
+              ? `Updated ${config.itemType} "${key}" and moved to "${targetSection}"`
+              : `Updated ${config.itemType} "${key}"`,
+          });
         } else {
-          // Add new item
-          const itemLine = config.generateLine(key, value);
-
-          // Find the section to add the item to
-          let updatedContent = zshrcContent;
-
-          // Find the section using all supported formats
-          const sectionBounds = findSectionBounds(zshrcContent, targetSection);
-
-          if (sectionBounds) {
-            // Found existing section - add to it
-            // Find the last non-empty line before the section end
-            const lines = zshrcContent.split(/\r?\n/);
-            let insertLineIndex = sectionBounds.endLine - 1;
-
-            // Find the last non-empty line in the section
-            for (let i = sectionBounds.endLine - 1; i >= sectionBounds.startLine - 1; i--) {
-              const line = lines[i];
-              if (line && line.trim().length > 0) {
-                insertLineIndex = i;
-                break;
-              }
-            }
-
-            // Rebuild content with the new item inserted after the last non-empty line
-            const beforeLines = lines.slice(0, insertLineIndex + 1);
-            const afterLines = lines.slice(insertLineIndex + 1);
-
-            // Join with original line endings preserved
-            const beforeSection = beforeLines.join("\n");
-            const afterSection = afterLines.join("\n");
-
-            // Insert the new item with proper spacing
-            if (afterSection) {
-              updatedContent = `${beforeSection}\n${itemLine}\n${afterSection}`;
-            } else {
-              // End of file - add without trailing newline
-              updatedContent = `${beforeSection}\n${itemLine}`;
-            }
-          } else {
-            // Section not found - create a new section at the end of the file
-            // Use a simple format that's commonly supported
-            updatedContent = `${zshrcContent}\n\n# --- ${targetSection} --- #\n${itemLine}`;
-          }
-
           log.edit.info(`Adding new ${config.itemType} "${key}" to section "${targetSection}"`);
-          await writeZshrcFile(updatedContent);
-          clearCache(getZshrcPath());
-          const verify = await readZshrcFileRaw();
-          if (verify !== updatedContent) {
-            log.edit.error(`Write verification failed for new ${config.itemType} "${key}"`);
-            throw new Error("Write verification failed: content mismatch after save");
-          }
-          // Save to history only after successful write verification
-          await saveToHistory(`Add ${config.itemType} "${key}"`);
+          await persistAndVerify(
+            updatedContent,
+            zshrcContent,
+            `Add ${config.itemType} "${key}"`,
+            `new ${config.itemType} "${key}"`,
+          );
           log.edit.info(`Successfully added ${config.itemType} "${key}"`);
 
           await showToast({
@@ -357,6 +228,9 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
         onSave?.();
         pop();
       } catch (error) {
+        if (error instanceof SaveCancelledError) {
+          return; // user cancelled from the validation dialog — stay on the form
+        }
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",
@@ -384,30 +258,20 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
 
     try {
       const zshrcContent = await readZshrcFileRaw();
-      const pattern = config.generatePattern(existingKey);
-      const match = zshrcContent.match(pattern);
-
-      if (!match || match.length === 0) {
-        throw new Error(`${config.itemTypeCapitalized} "${existingKey}" not found in zshrc`);
-      }
-
-      // Create a non-global version to replace only first match
-      const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-      // Replace only the first match with empty string
-      const updatedContent = zshrcContent.replace(nonGlobalPattern, () => {
-        // Remove the line entirely
-        return "";
+      const updatedContent = computeDeletedContent(zshrcContent, {
+        config,
+        existingKey,
+        sectionLabel,
+        sectionOccurrence,
       });
+
       log.edit.info(`Deleting ${config.itemType} "${existingKey}"`);
-      await saveToHistory(`Delete ${config.itemType} "${existingKey}"`);
-      await writeZshrcFile(updatedContent);
-      clearCache(getZshrcPath());
-      const verify = await readZshrcFileRaw();
-      if (verify !== updatedContent) {
-        log.edit.error(`Write verification failed for delete of ${config.itemType} "${existingKey}"`);
-        throw new Error("Write verification failed: content mismatch after delete");
-      }
+      await persistAndVerify(
+        updatedContent,
+        zshrcContent,
+        `Delete ${config.itemType} "${existingKey}"`,
+        `delete of ${config.itemType} "${existingKey}"`,
+      );
       log.edit.info(`Successfully deleted ${config.itemType} "${existingKey}"`);
 
       await showToast({
@@ -419,6 +283,9 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
       onSave?.();
       pop();
     } catch (error) {
+      if (error instanceof SaveCancelledError) {
+        return;
+      }
       log.edit.error(`Failed to delete ${config.itemType}`, error);
       await showToast({
         style: Toast.Style.Failure,
@@ -455,6 +322,7 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
             target={
               <DiffPreviewView
                 existingKey={existingKey}
+                sectionOccurrence={sectionOccurrence}
                 currentKey={itemProps.key.value || ""}
                 currentValue={itemProps.value.value || ""}
                 currentSection={itemProps.section.value || "Uncategorized"}
@@ -497,205 +365,5 @@ export default function EditItemForm({ existingKey, existingValue, sectionLabel,
         <Form.TextField {...itemProps.newSectionName} title="New Section Name" placeholder="e.g., My Custom Section" />
       )}
     </Form>
-  );
-}
-
-/**
- * Props for DiffPreviewView
- */
-interface DiffPreviewViewProps {
-  existingKey?: string | undefined;
-  currentKey: string;
-  currentValue: string;
-  currentSection: string;
-  newSectionName: string;
-  originalSection?: string | undefined;
-  config: EditItemConfig;
-  isEditing: boolean;
-}
-
-/**
- * Diff preview view component
- * Shows the diff between current file and proposed changes
- */
-function DiffPreviewView({
-  existingKey,
-  currentKey,
-  currentValue,
-  currentSection,
-  newSectionName,
-  originalSection,
-  config,
-  isEditing,
-}: DiffPreviewViewProps) {
-  const [diffMarkdown, setDiffMarkdown] = useState<string>("Loading preview...");
-  const [isLoading, setIsLoading] = useState(true);
-
-  const generatePreview = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const key = currentKey.trim();
-      const value = currentValue.trim();
-
-      if (!key || !value) {
-        setDiffMarkdown(`
-# Preview Not Available
-
-Please fill in both the ${config.keyLabel.toLowerCase()} and ${config.valueLabel.toLowerCase()} fields to preview changes.
-        `);
-        return;
-      }
-
-      // Determine target section
-      let targetSection = currentSection;
-      if (currentSection === "New Section") {
-        if (!newSectionName.trim()) {
-          setDiffMarkdown(`
-# Preview Not Available
-
-Please provide a name for the new section to preview changes.
-          `);
-          return;
-        }
-        targetSection = newSectionName.trim();
-      }
-
-      const zshrcContent = await readZshrcFileRaw();
-      let modifiedContent = zshrcContent;
-
-      if (isEditing && existingKey) {
-        // Editing existing item
-        const sectionChanged = originalSection !== targetSection;
-
-        if (sectionChanged) {
-          // Moving to a different section
-          const pattern = config.generatePattern(existingKey);
-          const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-          // Remove the old line
-          modifiedContent = zshrcContent.replace(nonGlobalPattern, () => "");
-          modifiedContent = modifiedContent.replace(/\n\n\n+/g, "\n\n");
-
-          // Generate the new line
-          const itemLine = config.generateLine(key, value);
-
-          // Find the target section
-          const targetSectionBounds = findSectionBounds(modifiedContent, targetSection);
-
-          if (targetSectionBounds) {
-            const lines = modifiedContent.split(/\r?\n/);
-            let insertLineIndex = targetSectionBounds.endLine - 1;
-
-            for (let i = targetSectionBounds.endLine - 1; i >= targetSectionBounds.startLine - 1; i--) {
-              const line = lines[i];
-              if (line && line.trim().length > 0) {
-                insertLineIndex = i;
-                break;
-              }
-            }
-
-            const beforeLines = lines.slice(0, insertLineIndex + 1);
-            const afterLines = lines.slice(insertLineIndex + 1);
-            const beforeSection = beforeLines.join("\n");
-            const afterSection = afterLines.join("\n");
-
-            modifiedContent = afterSection
-              ? `${beforeSection}\n${itemLine}\n${afterSection}`
-              : `${beforeSection}\n${itemLine}`;
-          } else {
-            modifiedContent = `${modifiedContent}\n\n# --- ${targetSection} --- #\n${itemLine}`;
-          }
-        } else {
-          // Same section - update in place
-          const pattern = config.generatePattern(existingKey);
-          const nonGlobalPattern = new RegExp(pattern.source, pattern.flags.replace("g", ""));
-
-          modifiedContent = zshrcContent.replace(nonGlobalPattern, (matchedLine) => {
-            const leadingWhitespace = matchedLine.match(/^(\s*)/)?.[1] || "";
-            const replacement = config.generateReplacement(key, value);
-            return `${leadingWhitespace}${replacement.trimStart()}`;
-          });
-        }
-      } else {
-        // Adding new item
-        const itemLine = config.generateLine(key, value);
-        const sectionBounds = findSectionBounds(zshrcContent, targetSection);
-
-        if (sectionBounds) {
-          const lines = zshrcContent.split(/\r?\n/);
-          let insertLineIndex = sectionBounds.endLine - 1;
-
-          for (let i = sectionBounds.endLine - 1; i >= sectionBounds.startLine - 1; i--) {
-            const line = lines[i];
-            if (line && line.trim().length > 0) {
-              insertLineIndex = i;
-              break;
-            }
-          }
-
-          const beforeLines = lines.slice(0, insertLineIndex + 1);
-          const afterLines = lines.slice(insertLineIndex + 1);
-          const beforeSection = beforeLines.join("\n");
-          const afterSection = afterLines.join("\n");
-
-          modifiedContent = afterSection
-            ? `${beforeSection}\n${itemLine}\n${afterSection}`
-            : `${beforeSection}\n${itemLine}`;
-        } else {
-          modifiedContent = `${zshrcContent}\n\n# --- ${targetSection} --- #\n${itemLine}`;
-        }
-      }
-
-      // Compute the diff
-      const diff = computeDiff(zshrcContent, modifiedContent);
-
-      if (!diff.hasChanges) {
-        setDiffMarkdown(`
-# No Changes
-
-The current values would not change your zshrc file.
-        `);
-      } else {
-        setDiffMarkdown(`
-# Preview: ${isEditing ? `Update ${config.itemTypeCapitalized}` : `Add ${config.itemTypeCapitalized}`}
-
-${diff.markdown}
-
----
-
-*This preview shows what will change when you save. Lines prefixed with \`-\` will be removed, lines with \`+\` will be added.*
-        `);
-      }
-    } catch (error) {
-      setDiffMarkdown(`
-# Error Generating Preview
-
-${error instanceof Error ? error.message : "Unknown error occurred"}
-      `);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [currentKey, currentValue, currentSection, newSectionName, originalSection, existingKey, config, isEditing]);
-
-  useEffect(() => {
-    generatePreview();
-  }, [generatePreview]);
-
-  return (
-    <Detail
-      navigationTitle="Preview Changes"
-      isLoading={isLoading}
-      markdown={diffMarkdown}
-      actions={
-        <ActionPanel>
-          <Action title="Refresh Preview" icon={Icon.ArrowClockwise} onAction={generatePreview} />
-          <Action.CopyToClipboard
-            title="Copy Diff"
-            content={diffMarkdown}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-          />
-        </ActionPanel>
-      }
-    />
   );
 }

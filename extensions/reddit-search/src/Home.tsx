@@ -31,6 +31,10 @@ export default function Home({
   removeFavoriteSubreddit: (subreddit: string) => void;
 }) {
   const abortControllerRef = useRef<AbortController | null>(null);
+  // The reservation token of the in-flight request, released synchronously when a new
+  // search supersedes it (an async catch would run too late — the replacement would
+  // already have been refused by the slot the aborted request still held).
+  const reservationRef = useRef<string | null>(null);
   const [results, setResults] = useState<RedditResultItem[]>([]);
   // The sort is its own persisted state, NOT derived from the last search. It must
   // be settable before any query (so results come back in the wanted order) and
@@ -49,7 +53,8 @@ export default function Home({
   const [hideDetail, setHideDetail] = useState(false);
   const [cachedAt, setCachedAt] = useState<number | undefined>(undefined);
   const [isShowingDetail, setIsShowingDetail] = useCachedState("is-showing-detail", true);
-  const { secondsRemaining, startCooldown, armIfSpent, isCoolingDown, isCoolingDownNow } = useRateLimitCooldown();
+  const { secondsRemaining, startCooldown, settleAfterRequest, releaseReservation, reserveRequestSlot, isCoolingDown } =
+    useRateLimitCooldown();
   const { recentSearches, addRecentSearch, removeRecentSearch, clearRecentSearches } =
     useRecentSearches("recentPostSearches");
 
@@ -67,16 +72,24 @@ export default function Home({
       ? undefined
       : readCache<RedditResult>(cacheKey(["posts", "", query, preferences.resultLimit, sort?.sortValue ?? ""]));
 
-    // Gate on the SYNCHRONOUS cache read, not the polled `isCoolingDown` — otherwise
-    // a concurrent command that armed the cooldown between poll ticks would let this
-    // request through into a 429.
-    if (!cached && isCoolingDownNow()) {
-      return;
-    }
-
     abortControllerRef.current?.abort();
     const controller = new AbortController();
     abortControllerRef.current = controller;
+
+    // RESERVE the shared request slot before sending (not just check it): two commands
+    // can't both read "clear" and both send. A same-command supersede REUSES the hold
+    // we already own (reservationRef) rather than releasing and re-claiming — the
+    // aborted request and its replacement are one command sharing one slot. Cached
+    // reads skip this: they cost no request.
+    let reservation = reservationRef.current;
+    if (!cached && !reservation) {
+      reservation = reserveRequestSlot();
+      if (!reservation) {
+        setSearching(false);
+        return;
+      }
+      reservationRef.current = reservation;
+    }
 
     setSearching(true);
     queryRef.current = query;
@@ -101,17 +114,25 @@ export default function Home({
         setFiltering(true);
         setSearchText("");
       }
-      // Arm the cooldown the moment Reddit's budget is spent (before the next 429).
-      armIfSpent(apiResults.rateLimit);
+      // Settle the reservation: hold if the budget is spent, release if it remained.
+      if (reservation) settleAfterRequest(reservation, apiResults.rateLimit);
+      reservationRef.current = null;
       await addRecentSearch(query);
     } catch (error) {
       if (isAbortError(error)) {
+        // Superseded — leave the reservation in place; the replacement reuses it via
+        // reservationRef, so releasing here would strand the live request.
         return;
       }
 
       if (isRateLimited(error)) {
         startCooldown(error.retryAfterSeconds ?? RATE_LIMIT_COOLDOWN_SECONDS);
+      } else if (reservation) {
+        // Failed before Reddit spent the budget (network error) — release the
+        // provisional hold so a transient blip doesn't lock the user out for 60s.
+        releaseReservation(reservation);
       }
+      reservationRef.current = null;
 
       homeLog.error("Reddit search failed", error);
       await failureToast("Couldn’t search Reddit", error);

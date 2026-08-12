@@ -99,5 +99,8 @@
       "required": false,
       "title": "Token (memo >= 0.22.0)"
     }
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.8"
+  }
 }

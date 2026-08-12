@@ -1,0 +1,126 @@
+#!/usr/bin/env node
+/*
+ * tenfour: "copy that." Push a clean, copyable snippet onto the Ten Four shelf.
+ *
+ * The shelf is a JSON file read by the "Ten Four" Raycast extension. Snippets
+ * travel as data (never as rendered terminal text), so when you copy them out
+ * of Raycast you get the exact bytes, with no wrapping, no stray indentation, no
+ * mangled line breaks.
+ *
+ * Usage:
+ *   tenfour "the text"                 add a snippet (label = first line)
+ *   tenfour --label "Railway URL" "…"  add with an explicit label
+ *   tenfour -l "API key" "…"           short form
+ *   echo "multi\nline" | tenfour -     read the snippet from stdin
+ *   tenfour list                       print the current shelf
+ *   tenfour clear                      empty the shelf
+ *   tenfour --version                  print version
+ *
+ * Store: ~/.ten-four.json  (override with TENFOUR_FILE)
+ */
+
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+
+const VERSION = "1.0.0";
+const STORE =
+  process.env.TENFOUR_FILE || path.join(os.homedir(), ".ten-four.json");
+const MAX_ITEMS = 200;
+
+function load() {
+  try {
+    const data = JSON.parse(fs.readFileSync(STORE, "utf8"));
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function save(items) {
+  fs.mkdirSync(path.dirname(STORE), { recursive: true });
+  fs.writeFileSync(STORE, JSON.stringify(items, null, 2));
+}
+
+function readStdin() {
+  try {
+    return fs.readFileSync(0, "utf8");
+  } catch {
+    return "";
+  }
+}
+
+function makeId() {
+  return `${Date.now().toString(36)}-${process.pid.toString(36)}`;
+}
+
+function firstLine(text, max = 60) {
+  const line = text.replace(/\r/g, "").split("\n").find((l) => l.trim()) || text;
+  const t = line.trim();
+  return t.length > max ? t.slice(0, max - 1) + "…" : t;
+}
+
+function main() {
+  const argv = process.argv.slice(2);
+
+  if (argv[0] === "--version" || argv[0] === "-v" || argv[0] === "version") {
+    return console.log(`tenfour ${VERSION}`);
+  }
+  if (argv[0] === "list") {
+    const items = load();
+    if (!items.length) return console.log("Ten Four shelf is empty.");
+    items.forEach((it, i) =>
+      console.log(`${i + 1}. [${it.label}] ${firstLine(it.text, 80)}`)
+    );
+    return;
+  }
+  if (argv[0] === "clear") {
+    save([]);
+    return console.log("Ten Four shelf cleared.");
+  }
+
+  // parse --label / -l and gather the snippet text
+  let label = null;
+  const textParts = [];
+  for (let i = 0; i < argv.length; i++) {
+    const a = argv[i];
+    if (a === "--label" || a === "-l") {
+      label = argv[++i] ?? null;
+    } else if (a === "-" || a === "--stdin") {
+      textParts.push(readStdin());
+    } else {
+      textParts.push(a);
+    }
+  }
+
+  let text = textParts.join(" ");
+  // allow: tenfour < file — but only when stdin is piped/redirected, never on
+  // an interactive TTY (where readStdin would block forever waiting on input)
+  if (!text.trim() && !process.stdin.isTTY) text = readStdin();
+  text = text.replace(/\n$/, ""); // drop one trailing newline, keep internal ones
+
+  if (!text.trim()) {
+    console.error(
+      'tenfour: nothing to add. Usage: tenfour [--label "X"] "text"  |  echo … | tenfour -'
+    );
+    process.exit(1);
+  }
+
+  const items = load();
+  const item = {
+    id: makeId(),
+    label: label || firstLine(text),
+    text,
+    ts: Date.now(),
+    pinned: false,
+  };
+  items.unshift(item);
+
+  const pinned = items.filter((it) => it.pinned);
+  const rest = items.filter((it) => !it.pinned).slice(0, MAX_ITEMS);
+  save([...pinned, ...rest].slice(0, MAX_ITEMS + pinned.length));
+
+  console.log(`📋 10-4, added to shelf: ${item.label}`);
+}
+
+main();

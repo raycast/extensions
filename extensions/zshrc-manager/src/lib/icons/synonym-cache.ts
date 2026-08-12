@@ -10,6 +10,18 @@ import { LocalStorage } from "@raycast/api";
 const SYNONYMS_CACHE_KEY = "icon-synonyms-cache";
 
 /**
+ * Synonyms available before (and beneath) the manifest: simple-icons has
+ * no `node` slug — the brand icon lives at `nodedotjs` — so a "Node"
+ * section falls back to a folder icon without these. Manifest synonyms
+ * override defaults on key collisions.
+ */
+const DEFAULT_SYNONYMS: Record<string, string> = {
+  node: "nodedotjs",
+  nodejs: "nodedotjs",
+  "node.js": "nodedotjs",
+};
+
+/**
  * In-memory cache of icon synonyms
  */
 let synonymsCache: Record<string, string> = {};
@@ -60,7 +72,7 @@ export async function updateSynonymsCache(synonyms: Record<string, string>): Pro
  * Get the current synonyms (synchronous access to cached data)
  */
 export function getSynonyms(): Record<string, string> {
-  return synonymsCache;
+  return { ...DEFAULT_SYNONYMS, ...synonymsCache };
 }
 
 /**
@@ -68,14 +80,15 @@ export function getSynonyms(): Record<string, string> {
  */
 export function applySynonyms(name: string): string {
   const lower = name.toLowerCase();
+  const synonyms = getSynonyms();
 
   // Check for exact match first
-  if (synonymsCache[lower]) {
-    return synonymsCache[lower];
+  if (synonyms[lower]) {
+    return synonyms[lower];
   }
 
   // Check each synonym for word boundary match
-  for (const [synonym, canonical] of Object.entries(synonymsCache)) {
+  for (const [synonym, canonical] of Object.entries(synonyms)) {
     const regex = new RegExp(`\\b${escapeRegExp(synonym)}\\b`, "i");
     if (regex.test(name)) {
       return name.toLowerCase().replace(regex, canonical);

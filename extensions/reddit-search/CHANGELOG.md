@@ -1,5 +1,11 @@
 # Reddit Search Changelog
 
+## [Fixes] - 2026-07-25
+
+- Opening a favorite subreddit now loads its posts (it was hitting an empty-query search endpoint that returned nothing).
+- The "Search r/…" action no longer fails on a missing argument; it opens a prefilled search form.
+- Fixed a rate-limit race where two open commands could each fire a request in the same instant and one would hit a 429.
+
 ## [Rebuilt on Reddit's Atom feed, new commands, filtering] - 2026-07-24
 
 Reddit blocked anonymous access to its JSON API, which broke the extension. This release rebuilds it on Reddit's public Atom (RSS) feed — the one unauthenticated surface still serving live results — and adds a batch of new features.
