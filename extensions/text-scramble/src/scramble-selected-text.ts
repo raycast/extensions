@@ -1,5 +1,5 @@
 import { Clipboard, getPreferenceValues, getSelectedText, showHUD } from "@raycast/api";
-import { getRestorableClipboardContent } from "./clipboard-safety";
+import { getRestorableClipboardContent, restoreClipboardWithRetry } from "./clipboard-safety";
 import { scrambleText } from "./scramble-text";
 
 class NoTextError extends Error {
@@ -16,6 +16,13 @@ class SelectionUnavailableError extends Error {
   }
 }
 
+class ClipboardUnavailableError extends Error {
+  constructor(cause: unknown) {
+    super("Clipboard text is unavailable", { cause });
+    Object.setPrototypeOf(this, ClipboardUnavailableError.prototype);
+  }
+}
+
 class ClipboardProtectionError extends Error {
   constructor() {
     super("Clipboard content cannot be restored safely");
@@ -23,11 +30,18 @@ class ClipboardProtectionError extends Error {
   }
 }
 
+class ClipboardRestoreError extends Error {
+  constructor(cause: unknown) {
+    super("Clipboard content could not be restored", { cause });
+    Object.setPrototypeOf(this, ClipboardRestoreError.prototype);
+  }
+}
+
 async function readClipboard(): Promise<string> {
   try {
     return (await Clipboard.readText()) ?? "";
-  } catch {
-    return "";
+  } catch (error) {
+    throw new ClipboardUnavailableError(error);
   }
 }
 
@@ -63,11 +77,22 @@ async function pasteWithoutChangingClipboard(text: string): Promise<void> {
   const restorableClipboard = getRestorableClipboardContent(previousClipboard);
   if (restorableClipboard === null) throw new ClipboardProtectionError();
 
+  let pasteFailed = false;
+  let pasteError: unknown;
   try {
     await Clipboard.paste(text);
-  } finally {
-    await Clipboard.copy(restorableClipboard);
+  } catch (error) {
+    pasteFailed = true;
+    pasteError = error;
   }
+
+  try {
+    await restoreClipboardWithRetry(restorableClipboard, (content) => Clipboard.copy(content));
+  } catch (error) {
+    throw new ClipboardRestoreError(error);
+  }
+
+  if (pasteFailed) throw pasteError;
 }
 
 export default async function Command(): Promise<void> {
@@ -96,8 +121,19 @@ export default async function Command(): Promise<void> {
       return;
     }
 
+    if (error instanceof ClipboardRestoreError) {
+      console.error("Text was replaced, but clipboard restoration failed", error);
+      await showHUD("Text replaced — restore your prior clipboard from Clipboard History");
+      return;
+    }
+
     if (error instanceof SelectionUnavailableError) {
       await showHUD("Can’t read selected text — select text or choose Clipboard");
+      return;
+    }
+
+    if (error instanceof ClipboardUnavailableError) {
+      await showHUD("Can’t read clipboard — copy text or choose Selected Text");
       return;
     }
 
