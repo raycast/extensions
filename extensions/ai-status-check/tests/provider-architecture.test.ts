@@ -14,6 +14,8 @@ test("the catalog keeps exactly one provider in each file", async () => {
       const providerExports = source.match(/export const \w+Provider\s*=/g) ?? [];
       assert.equal(providerExports.length, 1, `${file} must declare exactly one provider`);
       assert.match(source, /createProvider\(/, `${file} must use the shared provider factory`);
+      assert.doesNotMatch(source, /parsers\//, `${file} must select an adapter without importing parser details`);
+      assert.doesNotMatch(source, /parse\w+/, `${file} must not configure adapter parsing`);
     }),
   );
 });
@@ -36,7 +38,6 @@ test("every provider adapter extends the shared config and exposes a ProviderAda
         /export function create\w+Adapter\(config: \w+AdapterConfig\): ProviderAdapter\s*{/,
         `${file} must export a ProviderAdapter factory`,
       );
-      assert.doesNotMatch(source, /export function parse\w+\(/, `${file} must keep deterministic parsing in parsers/`);
     }),
   );
 });

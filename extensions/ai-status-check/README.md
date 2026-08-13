@@ -8,9 +8,10 @@ Unlike a general-purpose status-page monitor, there are no URLs to add, detect, 
 
 - Choose from 18 built-in AI providers with no status-page setup.
 - See provider-published health at a glance, with matching severity icons.
-- Open component groups to inspect individual services.
+- Preview each service's published component history and exact uptime when its official source provides them.
+- Open a dedicated component list to inspect individual services; components without published history remain available with their current status and a clear no-history message.
 - Read active incidents and their update timelines inside Raycast.
-- Open any provider's official status page for the original source.
+- Press Enter on a component to open its official source, or open the provider's status page from the action panel.
 - Show cached last-known results immediately while a quiet background refresh runs.
 - Enable only the providers you use from Raycast preferences.
 
@@ -20,8 +21,11 @@ The default list includes OpenAI, Claude, Google AI Studio and Gemini, xAI, Deep
 
 1. Run **Check AI Provider Status**.
 2. Press Enter on a provider to see its components and incidents.
-3. Press Enter on a component group or incident to open its local detail view.
-4. Use the action panel to open the official source, refresh, or configure providers.
+3. Choose **View Components**, then select a component to preview its provider-published history and uptime. Press Enter to open the component's official source.
+4. Press Enter on an incident to open its local detail view.
+5. Use the action panel to open an official source, refresh, or configure providers.
+
+History availability varies by provider and component. The extension shows the source's chart whenever it can reproduce it faithfully, displays uptime only when the source publishes or precisely measures that percentage, and does not manufacture missing history from the current operational state.
 
 Providers are grouped by purpose in preferences. Disabled providers are neither displayed nor fetched.
 

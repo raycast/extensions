@@ -1,7 +1,7 @@
 import { Cache } from "@raycast/api";
 import type { ProviderSnapshot } from "../domain/types";
 
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 const CACHE_PREFIX = `provider-status:v${CACHE_VERSION}:`;
 
 export interface StatusCache {

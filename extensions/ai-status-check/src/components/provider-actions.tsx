@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard, openExtensionPreferences } from "@raycast/api";
 import type { ReactNode } from "react";
-import type { Incident } from "../domain/types";
+import type { ComponentStatus, Incident } from "../domain/types";
 import type { ProviderDefinition } from "../providers/types";
 
 interface ProviderActionsProps {
@@ -45,7 +45,24 @@ export function ProviderSourceActions({ provider, onRefresh }: ProviderActionsPr
   );
 }
 
-export function ComponentGroupActions({ provider, target, onRefresh }: NavigationActionsProps) {
+export function ComponentActions({
+  component,
+  provider,
+  onRefresh,
+}: ProviderActionsProps & { component: ComponentStatus }) {
+  return (
+    <ActionPanel>
+      <Action.OpenInBrowser
+        title={component.url ? "Open Component Status" : "Open Official Status Page"}
+        url={component.url ?? provider.statusPageUrl}
+      />
+      <RefreshProviderAction onRefresh={onRefresh} />
+      {component.url ? <Action.OpenInBrowser title="Open Official Status Page" url={provider.statusPageUrl} /> : null}
+    </ActionPanel>
+  );
+}
+
+export function ComponentListActions({ provider, target, onRefresh }: NavigationActionsProps) {
   return (
     <ActionPanel>
       <Action.Push title="View Components" icon={Icon.Sidebar} target={target} />

@@ -1,6 +1,5 @@
-import { createHtmlRssAdapter } from "../adapters/html-rss";
+import { createOpenRouterAdapter } from "../adapters/openrouter";
 import { createProvider } from "../factories/provider";
-import { parseOnlineOrNotStatusPage } from "../parsers/rendered-status";
 
 export const openRouterProvider = createProvider(
   {
@@ -12,9 +11,5 @@ export const openRouterProvider = createProvider(
     icon: "provider-icons/openrouter.png",
     statusPageUrl: "https://status.openrouter.ai/",
   },
-  createHtmlRssAdapter,
-  {
-    feedUrl: "https://status.openrouter.ai/incidents.rss",
-    parsePage: parseOnlineOrNotStatusPage,
-  },
+  createOpenRouterAdapter,
 );

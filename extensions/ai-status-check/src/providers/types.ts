@@ -1,7 +1,9 @@
-import type { ProviderCategory, ProviderSnapshot } from "../domain/types";
+import type { ComponentHistory, ProviderCategory, ProviderSnapshot } from "../domain/types";
 
 export interface ProviderAdapter {
   fetch(signal: AbortSignal): Promise<ProviderSnapshot>;
+  /** Optional lazy path for providers that expose history only on per-component pages. */
+  fetchComponentHistory?(componentId: string, signal: AbortSignal): Promise<ComponentHistory | undefined>;
 }
 
 export interface ProviderAdapterConfig {

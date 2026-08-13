@@ -8,6 +8,35 @@ export type IncidentState = "investigating" | "identified" | "monitoring" | "res
 
 export type ProviderCategory = "model-providers" | "routers-and-inference" | "specialized";
 
+export type ComponentHistoryLevel =
+  | "operational"
+  | "degraded"
+  | "partial_outage"
+  | "major_outage"
+  | "maintenance"
+  | "informational"
+  | "not_monitored"
+  | "unknown";
+
+export interface ComponentHistoryDay {
+  date: string;
+  level: ComponentHistoryLevel;
+}
+
+export interface ComponentHistory {
+  /** Number of calendar days represented by the provider's published history. */
+  windowDays: number;
+  /** Whether the source publishes availability measurements or an incident calendar. */
+  basis: "availability" | "incidents";
+  days: ComponentHistoryDay[];
+  /** Present only when the provider publishes or precisely measures this value. */
+  uptimePercent?: number;
+  /** Source-faithful percentage text, including provider-specific precision. */
+  uptimeText?: string;
+  /** First date for which the provider says monitoring data is available. */
+  monitoredSince?: string;
+}
+
 export interface IncidentUpdate {
   id: string;
   state: IncidentState;
@@ -37,6 +66,8 @@ export interface ComponentStatus {
   group?: string;
   health: Health;
   statusText?: string;
+  url?: string;
+  history?: ComponentHistory;
 }
 
 export interface ProviderSnapshot {

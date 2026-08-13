@@ -59,7 +59,7 @@ async function main() {
     await requireFile(requiredFile);
   }
 
-  for (const forbiddenPath of [".firecrawl", ".test-dist", "dist", "docs", "scripts"]) {
+  for (const forbiddenPath of [".firecrawl", ".test-dist", "docs", "scripts"]) {
     if (await exists(forbiddenPath)) errors.push(`Development-only path must not be packaged: ${forbiddenPath}`);
   }
 

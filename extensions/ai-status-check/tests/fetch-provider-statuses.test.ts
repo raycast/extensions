@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import type { ProviderSnapshot } from "../src/domain/types";
 import type { ProviderDefinition } from "../src/providers/types";
+import { fetchOptionalEnrichment } from "../src/providers/utils/optional-enrichment";
 import { refreshProviderStatus } from "../src/services/fetch-provider-statuses";
 
 class MemoryCache {
@@ -54,13 +55,33 @@ test("a fresh cache avoids a provider request unless refresh is forced", async (
   assert.equal(result.refreshState, "idle");
 });
 
+test("an optional enrichment timeout does not discard completed core status", async () => {
+  const cache = new MemoryCache();
+  const provider = providerWithFetch(async (signal) => {
+    await fetchOptionalEnrichment(
+      signal,
+      (historySignal) =>
+        new Promise((_resolve, reject) =>
+          historySignal.addEventListener("abort", () => reject(historySignal.reason), { once: true }),
+        ),
+      1_000,
+    );
+    return snapshot("2026-08-11T16:00:00Z");
+  });
+
+  const result = await refreshProviderStatus(provider, { cache, force: true, timeoutMs: 20 });
+
+  assert.equal(result.refreshState, "idle");
+  assert.equal(result.snapshot?.health, "operational");
+});
+
 function failingProvider(): ProviderDefinition {
   return providerWithFetch(async () => {
     throw new Error("source unavailable");
   });
 }
 
-function providerWithFetch(fetchSnapshot: () => Promise<ProviderSnapshot>): ProviderDefinition {
+function providerWithFetch(fetchSnapshot: (signal: AbortSignal) => Promise<ProviderSnapshot>): ProviderDefinition {
   return {
     id: "example",
     name: "Example",

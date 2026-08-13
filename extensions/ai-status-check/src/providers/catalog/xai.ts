@@ -1,6 +1,5 @@
-import { createHtmlRssAdapter } from "../adapters/html-rss";
+import { createXaiAdapter } from "../adapters/xai";
 import { createProvider } from "../factories/provider";
-import { parseXaiStatusPage } from "../parsers/xai";
 
 export const xaiProvider = createProvider(
   {
@@ -12,10 +11,5 @@ export const xaiProvider = createProvider(
     icon: "provider-icons/xai.png",
     statusPageUrl: "https://status.x.ai/",
   },
-  createHtmlRssAdapter,
-  {
-    pageUrl: "https://status.x.ai/index.txt",
-    feedUrl: "https://status.x.ai/feed.xml",
-    parsePage: parseXaiStatusPage,
-  },
+  createXaiAdapter,
 );

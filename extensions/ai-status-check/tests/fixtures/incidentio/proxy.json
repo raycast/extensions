@@ -1,5 +1,7 @@
 {
   "summary": {
+    "display_uptime_mode": "chart_and_percentage",
+    "history_window_days": 3,
     "components": [
       { "id": "chat", "name": "Chat" },
       { "id": "embed", "name": "Embed" },
@@ -17,7 +19,13 @@
             "name": "Endpoints",
             "hidden": false,
             "components": [
-              { "component_id": "chat", "name": "Chat", "hidden": false }
+              {
+                "component_id": "chat",
+                "name": "Chat",
+                "hidden": false,
+                "display_uptime": true,
+                "data_available_since": "2026-08-01T00:00:00Z"
+              }
             ]
           }
         },
@@ -27,7 +35,13 @@
             "name": "Models",
             "hidden": false,
             "components": [
-              { "component_id": "embed", "name": "Embed", "hidden": false }
+              {
+                "component_id": "embed",
+                "name": "Embed",
+                "hidden": false,
+                "display_uptime": true,
+                "data_available_since": "2026-08-01T00:00:00Z"
+              }
             ]
           }
         },
@@ -35,7 +49,8 @@
           "component": {
             "component_id": "docs",
             "name": "Docs",
-            "hidden": false
+            "hidden": false,
+            "display_uptime": false
           }
         },
         {

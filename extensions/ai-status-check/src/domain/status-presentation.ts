@@ -22,6 +22,7 @@ const KNOWN_HEALTH: Readonly<Partial<Record<string, Health>>> = {
   major_outage: "major_outage",
   maintenance: "maintenance",
   under_maintenance: "maintenance",
+  maintenance_scheduled: "maintenance",
 };
 
 const KNOWN_INCIDENT_STATES: Readonly<Partial<Record<string, string>>> = {
@@ -32,6 +33,7 @@ const KNOWN_INCIDENT_STATES: Readonly<Partial<Record<string, string>>> = {
   completed: "Resolved",
   closed: "Resolved",
   scheduled: "Scheduled",
+  maintenance_scheduled: "Scheduled",
 };
 
 const KNOWN_IMPACTS: Readonly<Partial<Record<string, string>>> = {

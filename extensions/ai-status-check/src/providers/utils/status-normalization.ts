@@ -15,6 +15,7 @@ const HEALTH_BY_STATUS: Readonly<Partial<Record<string, Health>>> = {
   no_incidents_declared: "operational",
   maintenance: "maintenance",
   under_maintenance: "maintenance",
+  maintenance_scheduled: "maintenance",
   scheduled: "maintenance",
   degraded: "degraded",
   degraded_performance: "degraded",
@@ -25,6 +26,7 @@ const HEALTH_BY_STATUS: Readonly<Partial<Record<string, Health>>> = {
   partial_outage: "partial_outage",
   medium: "partial_outage",
   down: "major_outage",
+  downtime: "major_outage",
   major: "major_outage",
   major_outage: "major_outage",
   full_outage: "major_outage",
@@ -45,6 +47,7 @@ const INCIDENT_STATE_BY_STATUS: Readonly<Partial<Record<string, IncidentState>>>
   update: "monitoring",
   scheduled: "scheduled",
   maintenance: "scheduled",
+  maintenance_scheduled: "scheduled",
   in_progress: "scheduled",
   investigating: "investigating",
   detected: "investigating",
@@ -57,4 +60,8 @@ export function mapFlexibleHealth(value: string | undefined): Health {
 
 export function mapFlexibleIncidentState(value: string | undefined): IncidentState {
   return INCIDENT_STATE_BY_STATUS[normalizeStatusToken(value ?? "")] ?? "unknown";
+}
+
+export function statusComponentId(name: string): string {
+  return normalizeStatusToken(name).replaceAll("_", "-");
 }

@@ -1,8 +1,12 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createStatuspageAdapter, statuspageEndpoints } from "../src/providers/adapters/statuspage";
-import { parseSummary } from "../src/providers/parsers/statuspage";
+import {
+  createStatuspageAdapter,
+  parseStatuspageUptimeHtml,
+  parseSummary,
+  statuspageEndpoints,
+} from "../src/providers/adapters/statuspage";
 import { mapFlexibleHealth } from "../src/providers/utils/status-normalization";
 
 test("normalizes components and incident history from Statuspage-compatible payloads", async () => {
@@ -10,6 +14,7 @@ test("normalizes components and incident history from Statuspage-compatible payl
   const incidents = await fixture("incidents.json");
   const maintenances = { scheduled_maintenances: [] };
   const requestedUrls: string[] = [];
+  const uptimeHtml = await textFixture("uptime.html");
   const adapter = createStatuspageAdapter({
     providerId: "example",
     statusPageUrl: "https://status.example.com/",
@@ -18,6 +23,7 @@ test("normalizes components and incident history from Statuspage-compatible payl
       if (url.includes("summary")) return summary;
       return url.includes("scheduled-maintenances") ? maintenances : incidents;
     },
+    fetchText: async () => uptimeHtml,
     now: () => new Date("2026-08-11T16:00:00Z"),
   });
 
@@ -41,6 +47,19 @@ test("normalizes components and incident history from Statuspage-compatible payl
   assert.deepEqual(snapshot.incidents[0]?.affectedComponentIds, ["code"]);
   assert.equal(snapshot.incidents[0]?.updates[0]?.body, "We are investigating elevated latency.");
   assert.equal(snapshot.incidents[0]?.updates[0]?.stateText, "investigating");
+  assert.deepEqual(snapshot.components[0]?.history?.days, [
+    { date: "2026-08-10", level: "operational" },
+    { date: "2026-08-11", level: "degraded" },
+  ]);
+  assert.equal(snapshot.components[0]?.history?.uptimePercent, 99.37);
+  assert.equal(snapshot.components[0]?.history?.uptimeText, "99.37%");
+  assert.deepEqual(snapshot.components[1]?.history?.days, [
+    { date: "2026-08-10", level: "not_monitored" },
+    { date: "2026-08-11", level: "operational" },
+  ]);
+  assert.equal(snapshot.components[1]?.history?.uptimePercent, 100);
+  assert.equal(snapshot.components[1]?.history?.uptimeText, "100.0%");
+  assert.equal(snapshot.components[1]?.history?.monitoredSince, "2026-08-11");
 });
 
 test("derives framework endpoints and permits narrow overrides", () => {
@@ -77,6 +96,7 @@ test("keeps an explicitly impact-free active incident separate from operational 
         ],
       };
     },
+    fetchText: async () => "",
   });
 
   const snapshot = await adapter.fetch(new AbortController().signal);
@@ -86,6 +106,29 @@ test("keeps an explicitly impact-free active incident separate from operational 
   assert.equal(snapshot.incidents[0]?.state, "identified");
   assert.equal(snapshot.incidents[0]?.stateText, "identified");
   assert.equal(snapshot.incidents[0]?.impactText, "none");
+});
+
+test("treats rendered uptime as optional without swallowing cancellation", async () => {
+  const summary = await fixture("summary-operational.json");
+  const createAdapter = () =>
+    createStatuspageAdapter({
+      providerId: "example",
+      statusPageUrl: "https://status.example.com/",
+      fetchJson: async (url) => {
+        if (url.includes("summary")) return summary;
+        return url.includes("scheduled-maintenances") ? { scheduled_maintenances: [] } : { incidents: [] };
+      },
+      fetchText: async () => {
+        throw new Error("uptime page unavailable");
+      },
+    });
+
+  const snapshot = await createAdapter().fetch(new AbortController().signal);
+  assert.ok(snapshot.components.every((component) => component.history === undefined));
+
+  const controller = new AbortController();
+  controller.abort();
+  await assert.rejects(createAdapter().fetch(controller.signal), /aborted/i);
 });
 
 test("normalizes operational status", async () => {
@@ -111,6 +154,7 @@ test("filters incidents together with components for shared platform status page
       if (url.includes("summary")) return summary;
       return url.includes("scheduled-maintenances") ? { scheduled_maintenances: [] } : incidents;
     },
+    fetchText: async () => "",
   });
 
   const snapshot = await adapter.fetch(new AbortController().signal);
@@ -128,13 +172,23 @@ test("rejects malformed summaries instead of reporting them operational", () => 
   assert.throws(() => parseSummary({ components: [] }), /Invalid status summary status response/);
 });
 
+test("rejects malformed embedded uptime data without inventing history", () => {
+  assert.deepEqual(parseStatuspageUptimeHtml("window.uptimeData = {not-json};"), {});
+});
+
 test("maps known source states and keeps unfamiliar states unknown", () => {
   assert.equal(mapFlexibleHealth("degraded_performance"), "degraded");
   assert.equal(mapFlexibleHealth("full_outage"), "major_outage");
+  assert.equal(mapFlexibleHealth("downtime"), "major_outage");
+  assert.equal(mapFlexibleHealth("maintenance_scheduled"), "maintenance");
   assert.equal(mapFlexibleHealth("new-provider-state"), "unknown");
 });
 
 async function fixture(name: string): Promise<unknown> {
-  const contents = await readFile(`tests/fixtures/statuspage/${name}`, "utf8");
+  const contents = await textFixture(name);
   return JSON.parse(contents) as unknown;
+}
+
+async function textFixture(name: string): Promise<string> {
+  return readFile(`tests/fixtures/statuspage/${name}`, "utf8");
 }

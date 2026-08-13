@@ -1,6 +1,7 @@
 import { getDataFreshness } from "../domain/freshness";
 import type { ProviderStatusRecord } from "../domain/types";
 import type { ProviderDefinition } from "../providers/types";
+import { RequestTimeoutError } from "../utils/request-timeout";
 import type { StatusCache } from "./status-cache";
 
 const DEFAULT_REQUEST_TIMEOUT_MS = 8_000;
@@ -51,7 +52,7 @@ export async function refreshProviderStatus(
   options.signal?.addEventListener("abort", abortFromParent, { once: true });
   if (options.signal?.aborted) abortFromParent();
   const timeout = setTimeout(
-    () => timeoutController.abort(new Error("Status request timed out")),
+    () => timeoutController.abort(new RequestTimeoutError("Status request timed out")),
     options.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
   );
 

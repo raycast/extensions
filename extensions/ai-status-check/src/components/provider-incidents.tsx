@@ -1,14 +1,8 @@
 import { Detail, Icon, List } from "@raycast/api";
-import {
-  incidentActivityLabel,
-  incidentImpactLabel,
-  incidentStateLabel,
-  incidentUpdateStateLabel,
-} from "../domain/status-presentation";
+import { incidentActivityLabel, incidentStateLabel } from "../domain/status-presentation";
 import type { Incident } from "../domain/types";
 import type { ProviderDefinition } from "../providers/types";
-import { formatDateTime } from "../utils/dates";
-import { escapeMarkdown } from "../utils/markdown";
+import { buildIncidentMarkdown } from "../utils/incident-markdown";
 import { IncidentActions, IncidentDetailActions, ProviderSourceActions } from "./provider-actions";
 import { incidentIcon } from "./status-icon";
 
@@ -39,6 +33,7 @@ export function RecentIncidents({ incidents, provider, onRefresh }: IncidentSect
         ))
       ) : (
         <List.Item
+          id="recent-incidents-empty"
           icon={Icon.CheckCircle}
           title="No Recent Incidents"
           subtitle="No resolved incidents were published in the last 30 days"
@@ -64,6 +59,7 @@ function IncidentItem({
 
   return (
     <List.Item
+      id={`incident:${incident.id}`}
       icon={incidentIcon(incident)}
       title={incident.title}
       accessories={accessories}
@@ -83,39 +79,8 @@ function IncidentDetail({ incident, provider }: { incident: Incident; provider: 
   return (
     <Detail
       navigationTitle={incident.title}
-      markdown={incidentMarkdown(incident)}
+      markdown={buildIncidentMarkdown(incident)}
       actions={<IncidentDetailActions incident={incident} provider={provider} />}
     />
   );
-}
-
-function incidentMarkdown(incident: Incident): string {
-  const lines = [
-    `# ${escapeMarkdown(incident.title)}`,
-    "",
-    `**State:** ${escapeMarkdown(incidentStateLabel(incident))}`,
-  ];
-  const impact = incidentImpactLabel(incident);
-  if (impact) lines.push(`**Impact:** ${escapeMarkdown(impact)}`);
-
-  const startedAt = formatDateTime(incident.startedAt);
-  const updatedAt = formatDateTime(incident.updatedAt);
-  const resolvedAt = formatDateTime(incident.resolvedAt);
-  if (startedAt) lines.push(`**Started:** ${startedAt}`);
-  if (updatedAt) lines.push(`**Updated:** ${updatedAt}`);
-  if (resolvedAt) lines.push(`**Resolved:** ${resolvedAt}`);
-
-  if (incident.updates.length > 0) {
-    lines.push("", "## Updates");
-    for (const update of incident.updates) {
-      lines.push(
-        "",
-        `### ${escapeMarkdown(incidentUpdateStateLabel(update))} · ${formatDateTime(update.createdAt) ?? "Unknown time"}`,
-        "",
-        escapeMarkdown(update.body),
-      );
-    }
-  }
-
-  return lines.join("\n");
 }

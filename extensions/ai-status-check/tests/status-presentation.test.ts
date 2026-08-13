@@ -73,6 +73,10 @@ test("uses component-specific canonical labels for known health aliases", () => 
     label: "Degraded Performance",
     health: "degraded",
   });
+  assert.deepEqual(componentStatusPresentation({ ...component, statusText: "maintenance_scheduled" }), {
+    label: "Maintenance",
+    health: "maintenance",
+  });
 });
 
 test("normalizes known incident states and preserves unfamiliar wording", () => {
@@ -92,6 +96,10 @@ test("normalizes known incident states and preserves unfamiliar wording", () => 
     createdAt: "2026-08-11T15:00:00Z",
   };
   assert.equal(incidentUpdateStateLabel(update), "Watching recovery");
+  assert.equal(
+    incidentStateLabel({ ...incident("scheduled", "2026-08-11T15:00:00Z"), stateText: "maintenance_scheduled" }),
+    "Scheduled",
+  );
 });
 
 test("shows provider timing only as an updated label", () => {

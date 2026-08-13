@@ -1,18 +1,19 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
-import { createIncidentIoAdapter } from "../src/providers/adapters/incidentio";
-import { parseIncidentIoSummary } from "../src/providers/parsers/incidentio";
+import { createIncidentIoAdapter, parseIncidentIoSummary } from "../src/providers/adapters/incidentio";
 
 test("uses the Incident.io proxy structure and affected component states", async () => {
   const proxy = await fixture("proxy.json");
   const incidents = await fixture("incidents.json");
+  const impacts = await fixture("component-impacts.json");
   const requestedUrls: string[] = [];
   const adapter = createIncidentIoAdapter({
     providerId: "example",
     statusPageUrl: "https://status.example.com/",
     fetchJson: async (url) => {
       requestedUrls.push(url);
+      if (url.includes("component_impacts")) return impacts;
       return url.endsWith("/incidents") ? incidents : proxy;
     },
     now: () => new Date("2026-08-11T16:00:00Z"),
@@ -22,6 +23,7 @@ test("uses the Incident.io proxy structure and affected component states", async
 
   assert.deepEqual(requestedUrls.sort(), [
     "https://status.example.com/proxy/status.example.com",
+    "https://status.example.com/proxy/status.example.com/component_impacts?start_at=2026-08-09T00%3A00%3A00.000Z&end_at=2026-08-11T23%3A59%3A59.999Z",
     "https://status.example.com/proxy/status.example.com/incidents",
   ]);
   assert.equal(snapshot.health, "degraded");
@@ -60,32 +62,36 @@ test("uses the Incident.io proxy structure and affected component states", async
     ],
   );
   assert.equal(snapshot.incidents[0]?.id, "active-incident");
+  assert.deepEqual(snapshot.components[1]?.history, {
+    basis: "availability",
+    windowDays: 3,
+    days: [
+      { date: "2026-08-09", level: "operational" },
+      { date: "2026-08-10", level: "degraded" },
+      { date: "2026-08-11", level: "operational" },
+    ],
+    uptimePercent: 99.5,
+    uptimeText: "99.50%",
+    monitoredSince: "2026-08-01",
+  });
+  assert.equal(snapshot.components[2]?.history, undefined);
 });
 
-test("supports framework endpoint and parser overrides without provider-specific branches", async () => {
+test("supports framework endpoint overrides without provider-specific branches", async () => {
+  const proxy = await fixture("proxy.json");
+  const incidents = await fixture("incidents.json");
+  const impacts = await fixture("component-impacts.json");
   const requestedUrls: string[] = [];
-  let parsedSummary = false;
-  let parsedIncidents = false;
   const adapter = createIncidentIoAdapter({
     providerId: "variant",
     statusPageUrl: "https://status.variant.example/",
     proxyUrl: "https://api.variant.example/current",
     incidentsUrl: "https://api.variant.example/history",
+    componentImpactsUrl: "https://api.variant.example/uptime",
     fetchJson: async (url) => {
       requestedUrls.push(url);
-      return {};
-    },
-    parseSummary: () => {
-      parsedSummary = true;
-      return {
-        reportedHealth: "operational",
-        components: [{ id: "api", name: "API", health: "operational" }],
-        incidents: [],
-      };
-    },
-    parseIncidents: () => {
-      parsedIncidents = true;
-      return [];
+      if (url.endsWith("/uptime")) return impacts;
+      return url.endsWith("/history") ? incidents : proxy;
     },
   });
 
@@ -94,13 +100,9 @@ test("supports framework endpoint and parser overrides without provider-specific
   assert.deepEqual(requestedUrls.sort(), [
     "https://api.variant.example/current",
     "https://api.variant.example/history",
+    "https://api.variant.example/uptime",
   ]);
-  assert.equal(parsedSummary, true);
-  assert.equal(parsedIncidents, true);
-  assert.deepEqual(
-    snapshot.components.map((component) => component.id),
-    ["api"],
-  );
+  assert.equal(snapshot.components.length, 3);
 });
 
 test("treats an empty affected component list as Incident.io operational state", async () => {

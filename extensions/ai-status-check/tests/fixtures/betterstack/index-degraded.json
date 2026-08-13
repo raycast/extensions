@@ -16,7 +16,13 @@
       "attributes": {
         "public_name": "Inference API",
         "status": "degraded",
-        "status_page_section_id": "section-1"
+        "status_page_section_id": "section-1",
+        "availability": 0.995,
+        "status_history": [
+          { "day": "2026-08-09", "status": "not_monitored" },
+          { "day": "2026-08-10", "status": "downtime" },
+          { "day": "2026-08-11", "status": "operational" }
+        ]
       }
     },
     {

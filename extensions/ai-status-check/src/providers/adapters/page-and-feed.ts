@@ -1,9 +1,57 @@
-import type { Health, Incident, IncidentUpdate } from "../../domain/types";
+import { deriveProviderHealth } from "../../domain/derive-health";
+import type { ComponentStatus, Health, Incident, IncidentUpdate } from "../../domain/types";
 import { parseTimestamp } from "../../utils/dates";
 import { normalizeStatusToken } from "../../utils/status-token";
-import { parseRssItems, stripHtml, type RssItem } from "./rss";
-import { renderedComponentId } from "./rendered-status";
-import { mapFlexibleIncidentState } from "../utils/status-normalization";
+import type { ProviderAdapter, ProviderAdapterConfig } from "../types";
+import { fetchText, type FetchText } from "../utils/http";
+import { parseRssItems, stripHtml, type RssItem } from "../utils/rss";
+import { mapFlexibleIncidentState, statusComponentId } from "../utils/status-normalization";
+
+export interface ParsedStatusPage {
+  reportedHealth: Health;
+  statusText?: string;
+  components: ComponentStatus[];
+}
+
+export interface PageAndFeedAdapterConfig extends ProviderAdapterConfig {
+  pageUrl?: string;
+  feedUrl: string;
+  parsePage: (html: string, now?: Date) => ParsedStatusPage;
+  parseFeed?: (xml: string) => Incident[];
+  fetchText?: FetchText;
+}
+
+export function createPageAndFeedAdapter(config: PageAndFeedAdapterConfig): ProviderAdapter {
+  const request = config.fetchText ?? fetchText;
+  const now = config.now ?? (() => new Date());
+
+  return {
+    async fetch(signal) {
+      const fetchedAt = now();
+      const [page, feed] = await Promise.all([
+        request(config.pageUrl ?? config.statusPageUrl, signal).then((html) => config.parsePage(html, fetchedAt)),
+        request(config.feedUrl, signal),
+      ]);
+      const incidents = (config.parseFeed ?? parseIncidentRss)(feed);
+      const components = page.components;
+      if (components.length === 0) throw new Error("Status adapter contained no components");
+      const pageHealth = page.reportedHealth;
+      const reportedHealth =
+        pageHealth === "unknown" && incidents.every((incident) => incident.state === "resolved")
+          ? "operational"
+          : pageHealth;
+
+      return {
+        providerId: config.providerId,
+        health: deriveProviderHealth(reportedHealth, components, incidents),
+        statusText: page.statusText,
+        components,
+        incidents,
+        fetchedAt: fetchedAt.toISOString(),
+      };
+    },
+  };
+}
 
 export function parseIncidentRss(xml: string): Incident[] {
   const grouped = new Map<string, RssItem[]>();
@@ -54,7 +102,7 @@ function parseIncidentGroup(id: string, items: RssItem[]): Incident {
     startedAt: updates[0]?.createdAt ?? sorted[0]?.publishedAt,
     updatedAt: updates.at(-1)?.createdAt ?? latest.publishedAt,
     resolvedAt: state === "resolved" ? (updates.at(-1)?.createdAt ?? latest.publishedAt) : undefined,
-    affectedComponentIds: [...affectedNames].map(renderedComponentId),
+    affectedComponentIds: [...affectedNames].map(statusComponentId),
     updates,
     url: latest.link,
   };

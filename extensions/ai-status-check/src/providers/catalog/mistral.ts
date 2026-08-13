@@ -1,6 +1,5 @@
-import { createHtmlRssAdapter } from "../adapters/html-rss";
+import { createMistralAdapter } from "../adapters/mistral";
 import { createProvider } from "../factories/provider";
-import { parseMistralStatusPage } from "../parsers/rendered-status";
 
 export const mistralProvider = createProvider(
   {
@@ -12,9 +11,5 @@ export const mistralProvider = createProvider(
     icon: "provider-icons/mistral.png",
     statusPageUrl: "https://status.mistral.ai/",
   },
-  createHtmlRssAdapter,
-  {
-    feedUrl: "https://status.mistral.ai/feed.rss",
-    parsePage: parseMistralStatusPage,
-  },
+  createMistralAdapter,
 );

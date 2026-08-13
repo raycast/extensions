@@ -1,0 +1,22 @@
+{
+  "component_impacts": [
+    {
+      "component_id": "embed",
+      "start_at": "2026-08-10T10:00:00Z",
+      "end_at": "2026-08-10T11:00:00Z",
+      "status": "degraded_performance"
+    }
+  ],
+  "component_uptimes": [
+    {
+      "component_id": "chat",
+      "data_available_since": "2026-08-01T00:00:00Z",
+      "uptime": "100.00"
+    },
+    {
+      "component_id": "embed",
+      "data_available_since": "2026-08-01T00:00:00Z",
+      "uptime": "99.50"
+    }
+  ]
+}
