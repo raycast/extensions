@@ -2,10 +2,17 @@ import fs from "fs";
 import Fuse from "fuse.js";
 import { Logger } from "../logger/logger.service";
 import { ObsidianUtils, Note } from "../../obsidian";
+import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE } from "../../utils/constants";
 
 const logger = new Logger("ContentSearch");
 
 const MIN_RESULTS = 50; // Stop content search after finding this many matches
+
+// Full-content search must stay well under the ~100 MB extension JS heap.
+// readFile() + toLowerCase() keeps two string copies live; a single oversized
+// Markdown clipping is enough to OOM the worker if we slurp it whole.
+const MAX_CONTENT_SEARCH_BYTES = BYTES_PER_MEGABYTE; // 1 MiB
+const MAX_TAG_SEARCH_BYTES = 64 * BYTES_PER_KILOBYTE;
 
 /**
  * Memory-efficient content search
@@ -63,6 +70,7 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
   // Step 2: Search remaining notes by content (read files one at a time)
   const contentMatches: Note[] = [];
   let filesChecked = 0;
+  let skippedLargeFiles = 0;
 
   // Early exit if we already have enough matches from title/path
   if (titleMatches.length >= MIN_RESULTS) {
@@ -83,11 +91,18 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
     }
 
     try {
-      if (!fs.existsSync(note.path)) {
+      const stat = await fs.promises.stat(note.path);
+      if (!stat.isFile()) {
         continue;
       }
 
       filesChecked++;
+
+      if (stat.size > MAX_CONTENT_SEARCH_BYTES) {
+        skippedLargeFiles++;
+        logger.debug(`Skipping oversized note during content search (${stat.size} bytes): ${note.path}`);
+        continue;
+      }
 
       // Read file content
       const content = await fs.promises.readFile(note.path, "utf-8");
@@ -105,7 +120,7 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
   logger.info(
     `Found ${contentMatches.length} content matches in ${filesChecked} files (total: ${
       titleMatches.length + contentMatches.length
-    })`
+    }, skipped ${skippedLargeFiles} oversized)`
   );
 
   // Combine results: title/path matches first (more relevant), then content matches
@@ -121,6 +136,7 @@ async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]
 
   const matches: Note[] = [];
   let filesChecked = 0;
+  let prefixOnlyFiles = 0;
 
   // Normalize tag query (remove # if present, for comparison)
   const normalizedQuery = tagQuery.startsWith("#") ? tagQuery.slice(1).toLowerCase() : tagQuery.toLowerCase();
@@ -133,14 +149,22 @@ async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]
     }
 
     try {
-      if (!fs.existsSync(note.path)) {
+      const stat = await fs.promises.stat(note.path);
+      if (!stat.isFile()) {
         continue;
       }
 
       filesChecked++;
 
-      // Read file content
-      const content = await fs.promises.readFile(note.path, "utf-8");
+      // Frontmatter lives at the top. Never slurp an oversized clipping just to
+      // look for tags — read a prefix instead.
+      const usePrefixOnly = stat.size > MAX_CONTENT_SEARCH_BYTES;
+      const bytesToRead = usePrefixOnly ? Math.min(stat.size, MAX_TAG_SEARCH_BYTES) : stat.size;
+      if (usePrefixOnly) {
+        prefixOnlyFiles++;
+      }
+
+      const content = await readFilePrefix(note.path, bytesToRead);
 
       // Extract tags from the file (both inline and YAML frontmatter)
       const tags = ObsidianUtils.getAllTags(content);
@@ -156,7 +180,20 @@ async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]
     }
   }
 
-  logger.info(`Found ${matches.length} notes with tag "${tagQuery}" (checked ${filesChecked} files)`);
+  logger.info(
+    `Found ${matches.length} notes with tag "${tagQuery}" (checked ${filesChecked} files, prefix-only ${prefixOnlyFiles})`
+  );
 
   return matches;
+}
+
+async function readFilePrefix(filePath: string, byteCount: number): Promise<string> {
+  const handle = await fs.promises.open(filePath, "r");
+  try {
+    const buffer = Buffer.alloc(byteCount);
+    const { bytesRead } = await handle.read(buffer, 0, byteCount, 0);
+    return buffer.toString("utf8", 0, bytesRead);
+  } finally {
+    await handle.close();
+  }
 }
