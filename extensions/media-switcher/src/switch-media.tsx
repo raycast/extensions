@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Color, getPreferenceValues } from "@raycast/api";
+import { ActionPanel, List, Icon, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import {
@@ -53,76 +53,98 @@ export default function Command() {
           description="Open a media app (Spotify, browser, etc.) to see it here"
         />
       )}
-      {sessions?.map((session) => (
-        <List.Item
-          key={`${session.app_id}-${session.session_index}`}
-          icon={session.is_playing ? { source: Icon.Play, tintColor: Color.Green } : Icon.Pause}
-          title={session.title || "No title"}
-          subtitle={session.artist || session.app_name}
-          accessories={[{ text: session.app_name }]}
-          actions={
-            <ActionPanel>
-              {session.is_playing ? (
-                <ActionPanel.Section>
-                  <ActionPause
-                    appId={session.app_id}
-                    sessionIndex={session.session_index}
-                    titlePrefix={session.title_prefix}
-                    artistPrefix={session.artist.slice(0, 30)}
-                    revalidate={revalidate}
-                  />
-                  <ActionReveal appId={session.app_id} />
-                  <ActionCopyTrackInfo title={session.title} artist={session.artist} />
-                </ActionPanel.Section>
-              ) : (
-                <ActionPanel.Section>
-                  {sessions?.some((s) => s.is_playing) && (
-                    <ActionSwitch
-                      appId={session.app_id}
-                      sessionIndex={session.session_index}
-                      titlePrefix={session.title_prefix}
-                      artistPrefix={session.artist.slice(0, 30)}
-                      revalidate={revalidate}
+      {sessions?.map((session) => {
+        const hasIdentity = Boolean(session.title.trim() || session.artist.trim());
+        return (
+          <List.Item
+            key={`${session.app_id}-${session.session_index}`}
+            icon={session.is_playing ? { source: Icon.Play, tintColor: Color.Green } : Icon.Pause}
+            title={session.title || "No title"}
+            subtitle={session.artist || session.app_name}
+            accessories={[{ text: session.app_name }]}
+            actions={
+              <ActionPanel>
+                {hasIdentity ? (
+                  <>
+                    {session.is_playing ? (
+                      <ActionPanel.Section>
+                        <ActionPause
+                          appId={session.app_id}
+                          sessionIndex={session.session_index}
+                          titlePrefix={session.title_prefix}
+                          artistPrefix={session.artist.slice(0, 30)}
+                          revalidate={revalidate}
+                        />
+                      </ActionPanel.Section>
+                    ) : (
+                      <ActionPanel.Section>
+                        {sessions?.some((s) => s.is_playing) && (
+                          <ActionSwitch
+                            appId={session.app_id}
+                            sessionIndex={session.session_index}
+                            titlePrefix={session.title_prefix}
+                            artistPrefix={session.artist.slice(0, 30)}
+                            revalidate={revalidate}
+                          />
+                        )}
+                        <ActionPlay
+                          appId={session.app_id}
+                          sessionIndex={session.session_index}
+                          titlePrefix={session.title_prefix}
+                          artistPrefix={session.artist.slice(0, 30)}
+                          revalidate={revalidate}
+                        />
+                      </ActionPanel.Section>
+                    )}
+                    <ActionPanel.Section>
+                      <ActionPreviousTrack
+                        appId={session.app_id}
+                        sessionIndex={session.session_index}
+                        titlePrefix={session.title_prefix}
+                        artistPrefix={session.artist.slice(0, 30)}
+                        revalidate={revalidate}
+                      />
+                      <ActionNextTrack
+                        appId={session.app_id}
+                        sessionIndex={session.session_index}
+                        titlePrefix={session.title_prefix}
+                        artistPrefix={session.artist.slice(0, 30)}
+                        revalidate={revalidate}
+                      />
+                    </ActionPanel.Section>
+                  </>
+                ) : (
+                  <ActionPanel.Section>
+                    <Action
+                      title="Playback Unavailable"
+                      icon={Icon.Info}
+                      onAction={async () => {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "No playback control",
+                          message:
+                            "This session reports no title or artist, so it cannot be reliably identified. Refresh and try again.",
+                        });
+                      }}
                     />
-                  )}
-                  <ActionPlay
-                    appId={session.app_id}
-                    sessionIndex={session.session_index}
-                    titlePrefix={session.title_prefix}
-                    artistPrefix={session.artist.slice(0, 30)}
-                    revalidate={revalidate}
-                  />
+                  </ActionPanel.Section>
+                )}
+                <ActionPanel.Section>
                   <ActionReveal appId={session.app_id} />
                   <ActionCopyTrackInfo title={session.title} artist={session.artist} />
                 </ActionPanel.Section>
-              )}
-              <ActionPanel.Section>
-                <ActionPreviousTrack
-                  appId={session.app_id}
-                  sessionIndex={session.session_index}
-                  titlePrefix={session.title_prefix}
-                  artistPrefix={session.artist.slice(0, 30)}
-                  revalidate={revalidate}
-                />
-                <ActionNextTrack
-                  appId={session.app_id}
-                  sessionIndex={session.session_index}
-                  titlePrefix={session.title_prefix}
-                  artistPrefix={session.artist.slice(0, 30)}
-                  revalidate={revalidate}
-                />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <ActionVolumeUp volStep={volStep} />
-                <ActionVolumeDown volStep={volStep} />
-              </ActionPanel.Section>
-              <ActionPanel.Section>
-                <ActionRefresh revalidate={revalidate} />
-              </ActionPanel.Section>
-            </ActionPanel>
-          }
-        />
-      ))}
+                <ActionPanel.Section>
+                  <ActionVolumeUp volStep={volStep} />
+                  <ActionVolumeDown volStep={volStep} />
+                </ActionPanel.Section>
+                <ActionPanel.Section>
+                  <ActionRefresh revalidate={revalidate} />
+                </ActionPanel.Section>
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
