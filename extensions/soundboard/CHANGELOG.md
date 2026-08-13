@@ -1,5 +1,12 @@
 # Soundboard Changelog
 
+## [Enhancement] - 2026-08-13
+
+- Add support for Windows platform using Rust
+- Add Stop action for currently playing sounds
+- Add icons for sound entries
+- Bump all dependencies to the latest
+
 ## [Enhancement] - 2026-01-09
 
 - Added "Close the Raycast window after triggering a sound" option to preferences
