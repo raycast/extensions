@@ -1,5 +1,14 @@
 # GitHub Changelog
 
+## [Clarify Clone and Download Actions] - 2026-08-13
+
+- Renamed repository actions and the **Download Repository as ZIP** command so clone (`git clone`) and ZIP download flows are clearly distinct.
+- Renamed the **Clone Path** preference to **Default Clone Path** and clarified that it applies only to clone actions, not ZIP downloads or AI-assisted flows.
+- **Clone with Options** now starts at your Default Clone Path when one is set, with inline guidance on how to override it for a single clone.
+- **Download as ZIP** forms explain that archives do not create a Git repository and do not use the Default Clone Path.
+- README: added a **Cloning and Downloading Repositories** section describing when to use each flow.
+- Normalized action titles to Title Case (`Enable Auto-Merge`, `Re-Run Workflow`, `Sort by`).
+
 ## [Show CI status in pull request details] - 2026-08-10
 
 - Added a "Checks" row to pull request details showing successful, failed, or pending CI status.

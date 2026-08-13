@@ -122,20 +122,20 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
         {baseClonePath && application && (
           <Action
             icon={Icon.Terminal}
-            title="Clone and Open"
+            title="Clone and Open (Default Path)"
             onAction={() => cloneAndOpen(repository)}
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
         )}
         <Action.Push
           icon={Icon.Terminal}
-          title="Clone with Options"
+          title="Clone with Options (Choose Path)"
           target={<CloneRepositoryForm repository={repository} />}
           shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
         />
         <Action.Push
           icon={Icon.Download}
-          title="Download with Options"
+          title="Download as ZIP"
           target={<DownloadRepositoryForm repository={repository} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
         />

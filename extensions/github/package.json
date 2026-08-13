@@ -45,7 +45,8 @@
     "ryo.",
     "Undolog",
     "wonbywondev",
-    "SandeepBaskaran"
+    "SandeepBaskaran",
+    "0xdhrv"
   ],
   "pastContributors": [
     "Lemon",
@@ -539,9 +540,9 @@
     },
     {
       "name": "download-repository",
-      "title": "Download Repository",
+      "title": "Download Repository as ZIP",
       "subtitle": "GitHub",
-      "description": "Download an entire repo or a specific directory inside a repo",
+      "description": "Download a repository or directory as a ZIP archive (does not create a Git clone)",
       "mode": "view"
     }
   ],
@@ -1049,8 +1050,8 @@
       "name": "baseClonePath",
       "type": "directory",
       "required": false,
-      "title": "Clone Path",
-      "description": "Path in which the repositories will be cloned. If not specified here, you will need to select directory within a form."
+      "title": "Default Clone Path",
+      "description": "Used by the 'Clone and Open' action. 'Clone with Options' starts here but lets you choose a different directory."
     },
     {
       "name": "repositoryCloneProtocol",
