@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, Icon } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, useNavigation, Keyboard } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import dedent from "dedent";
-import { Fragment, useEffect } from "react";
+import { Fragment, useEffect, useState } from "react";
 
 import {
   formatMetadataValue,
@@ -22,17 +22,48 @@ const preferences = getPreferenceValues();
 
 const openInBrowser = preferences.openIn === "browser";
 
+type HistoryEntry = { title: string; language: Locale };
+
 export default function WikipediaPage({ title, language }: { title: string; language: Locale }) {
+  const { pop } = useNavigation();
   const { addToReadArticles } = useRecentArticles();
   const [showMetadata, setShowMetadata] = useCachedState("showMetadata", false);
+  const [history, setHistory] = useState<HistoryEntry[]>([{ title, language }]);
+  const [index, setIndex] = useState(0);
 
-  const { page, content, metadata, links, isLoading } = usePageData(title, language);
+  const current = history[index];
+  const canGoForward = index < history.length - 1;
+
+  const { page, content, metadata, links, isLoading } = usePageData(current.title, current.language);
 
   useEffect(() => {
-    addToReadArticles({ title, language });
-  }, [title, language]);
+    addToReadArticles({ title: current.title, language: current.language });
+  }, [current.title, current.language]);
 
-  const body = content ? renderContent(content, 2, links, language, openInBrowser) : "";
+  function goBack() {
+    if (index > 0) {
+      setIndex(index - 1);
+      return;
+    }
+
+    pop();
+  }
+
+  function goForward() {
+    if (canGoForward) {
+      setIndex(index + 1);
+    }
+  }
+
+  function navigate(nextTitle: string, nextLanguage: Locale) {
+    setHistory((entries: HistoryEntry[]) => [
+      ...entries.slice(0, index + 1),
+      { title: nextTitle, language: nextLanguage },
+    ]);
+    setIndex(index + 1);
+  }
+
+  const body = content ? renderContent(content, 2, links, current.language, openInBrowser) : "";
 
   const markdown = page
     ? dedent`
@@ -40,7 +71,7 @@ export default function WikipediaPage({ title, language }: { title: string; lang
 
   ${page.description ? `>${toSentenceCase(page.description)}\n\n` : ""}
 
-  ${replaceLinks(page.extract, language, links, openInBrowser)}
+  ${replaceLinks(page.extract, current.language, links, openInBrowser)}
 
   ${page.thumbnail?.source ? `![](${page.thumbnail?.source})` : ""}
 
@@ -49,13 +80,9 @@ export default function WikipediaPage({ title, language }: { title: string; lang
   ${body}`
     : "";
 
-  if (!page) {
-    return null;
-  }
-
   return (
     <Detail
-      navigationTitle={title}
+      navigationTitle={current.title}
       isLoading={isLoading}
       markdown={markdown}
       metadata={
@@ -118,43 +145,60 @@ export default function WikipediaPage({ title, language }: { title: string; lang
       }
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={page.content_urls.desktop.page} />
+          {page?.content_urls && <Action.OpenInBrowser url={page.content_urls.desktop.page} />}
           <Action
             icon={Icon.AppWindowSidebarRight}
             title="Toggle Metadata"
             onAction={() => setShowMetadata(!showMetadata)}
           />
-          <ChangeLanguageSubmenu title={title} language={language} />
+          <ChangeLanguageSubmenu title={current.title} language={current.language} onSelect={navigate} />
           <ActionPanel.Section>
-            <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd"], key: "." }}
-              title="Copy URL"
-              content={page.content_urls.desktop.page}
+            <Action icon={Icon.ArrowLeft} title="Back" shortcut={{ modifiers: [], key: "[" }} onAction={goBack} />
+            <Action
+              icon={Icon.ArrowRight}
+              title="Forward"
+              shortcut={{ modifiers: [], key: "]" }}
+              onAction={goForward}
             />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            {page?.content_urls && (
+              <Action.CopyToClipboard
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                title="Copy URL"
+                content={page.content_urls.desktop.page}
+              />
+            )}
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={Keyboard.Shortcut.Common.CopyName}
               title="Copy Title"
-              content={title}
+              content={current.title}
             />
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
               title="Copy Subtitle"
-              content={page.description}
+              content={page?.description ?? ""}
             />
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "." }}
+              shortcut={{
+                macOS: { modifiers: ["ctrl", "shift"], key: "." },
+                Windows: { modifiers: ["ctrl", "shift"], key: "." },
+              }}
               title="Copy Summary"
-              content={page.extract}
+              content={page?.extract ?? ""}
             />
             <Action.CopyToClipboard
-              shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
+              shortcut={{
+                macOS: { modifiers: ["ctrl", "shift"], key: "," },
+                Windows: { modifiers: ["ctrl", "shift"], key: "," },
+              }}
               title="Copy Contents"
               content={body}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <ActionPanel.Submenu
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
               title="Open Link"
               icon={Icon.Window}
               isLoading={isLoading}
@@ -165,13 +209,11 @@ export default function WikipediaPage({ title, language }: { title: string; lang
                     <Action.OpenInBrowser
                       key={link}
                       title={link}
-                      url={`https://${language.split("-").at(0)}.wikipedia.org/wiki/${link}`}
+                      url={`https://${current.language.split("-").at(0)}.wikipedia.org/wiki/${link}`}
                     />
                   );
                 }
-                return (
-                  <Action.Push title={link} key={link} target={<WikipediaPage title={link} language={language} />} />
-                );
+                return <Action title={link} key={link} onAction={() => navigate(link, current.language)} />;
               })}
             </ActionPanel.Submenu>
           </ActionPanel.Section>
