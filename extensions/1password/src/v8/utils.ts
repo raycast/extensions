@@ -136,7 +136,7 @@ function execOpSync(args: string[], options: ExecFileSyncOptions = {}) {
 // Concurrent `op` processes make the connection race above more likely, so run them one at a time.
 let opExecutionChain: Promise<unknown> = Promise.resolve();
 
-function execOp(args: string[]): Promise<string> {
+export function execOp(args: string[]): Promise<string> {
   const run = async () => {
     const cliPath = getCliPath();
     for (let attempt = 1; ; attempt++) {
@@ -168,8 +168,8 @@ function execOp(args: string[]): Promise<string> {
   return result;
 }
 
-export function op(args: string[]) {
-  return execOpSync(args).toString();
+export function op(args: string[], options: ExecFileSyncOptions = {}) {
+  return execOpSync(args, options).toString();
 }
 export const handleErrors = (stderr: string): never => {
   if (stderr.includes("no such host")) {
