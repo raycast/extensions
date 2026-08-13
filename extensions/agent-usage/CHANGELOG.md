@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Fix Antigravity detection on 2.7+] - 2026-08-13
+
+### Bug Fixes
+
+- Detect the suffix-less `language_server` binary shipped by Antigravity 2.7+, which left the Antigravity row stuck on "Not Running" while the app was running
+
 ## [Fix ClinePass usage limits windows] - 2026-08-12
 
 ### Bug Fixes
