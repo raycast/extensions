@@ -1,4 +1,4 @@
-import { Icon, MenuBarExtra, showToast, Toast } from "@raycast/api";
+import { Icon, LaunchType, MenuBarExtra, launchCommand, showToast, Toast } from "@raycast/api";
 import { withAccessToken } from "@raycast/utils";
 
 import { completeTask } from "./api/mutations";
@@ -8,7 +8,7 @@ import { oauthService } from "./oauth";
 
 const MenuBarToday = () => {
   const { workspaceId, allWorkspaceIds, isLoading: isLoadingWorkspace } = useWorkspaces();
-  const { tasks, isLoading: isLoadingTasks, revalidate } = useTasks(workspaceId, "today", allWorkspaceIds);
+  const { tasks, error, isLoading: isLoadingTasks, revalidate } = useTasks(workspaceId, "today", allWorkspaceIds);
 
   const isLoading = isLoadingWorkspace || isLoadingTasks;
   const title = isLoading ? "" : `${tasks.length}`;
@@ -29,19 +29,33 @@ const MenuBarToday = () => {
                 style: Toast.Style.Success,
                 title: "Task completed",
               });
-              revalidate();
-            } catch (error) {
+              await revalidate();
+            } catch {
               await showToast({
-                message: error instanceof Error ? error.message : "Unknown error",
+                message: "Check your connection and try again.",
                 style: Toast.Style.Failure,
-                title: "Failed to complete task",
+                title: "Couldn't complete task",
               });
             }
           };
           return <MenuBarExtra.Item icon={Icon.Circle} key={task.id} onAction={handleAction} title={task.title} />;
         })}
       </MenuBarExtra.Section>
-      {tasks.length === 0 && !isLoading && <MenuBarExtra.Item title="No tasks for today" />}
+      {error && !isLoading && (
+        <MenuBarExtra.Item icon={Icon.Warning} onAction={revalidate} title="Couldn't load Today — Retry" />
+      )}
+      {tasks.length === 0 && !isLoading && !error && <MenuBarExtra.Item title="Today is clear" />}
+      <MenuBarExtra.Separator />
+      <MenuBarExtra.Item
+        icon={Icon.Stars}
+        onAction={() => launchCommand({ name: "quick-add-task", type: LaunchType.UserInitiated })}
+        title="Create Task…"
+      />
+      <MenuBarExtra.Item
+        icon={Icon.List}
+        onAction={() => launchCommand({ name: "show-today", type: LaunchType.UserInitiated })}
+        title="Open Today List"
+      />
     </MenuBarExtra>
   );
 };
