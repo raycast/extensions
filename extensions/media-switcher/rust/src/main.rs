@@ -299,24 +299,27 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 
 // Resolve which snapshot entry the user clicked. GetSessions() has no documented
 // ordering guarantee and sessions expose no stable ID, so identity is a per-app
-// ordinal plus a fingerprint. Priority:
-//   1. Exact (ordinal + title) match — the confident happy path, and the only
-//      safe resolution when multiple same-app sessions share a title prefix.
-//   2. Exactly one session matches the title fingerprint — it moved ordinals
-//      (a sibling closed, order changed). Trust the title, not the number.
-//   Otherwise unmatched or ambiguous (two+ sessions share the prefix) → None.
-//   There is deliberately NO ordinal-only fallback for non-empty titles: when no
-//   session matches the title, an ordinal match cannot distinguish "the selected
-//   session track-skipped" from "the selected session closed and a sibling now
-//   occupies its slot" — both present identically here — so guessing would risk
-//   controlling the wrong session. Callers surface a "try refreshing" error.
+// ordinal plus the media fingerprints captured at render time. A match must
+// reproduce BOTH captured fingerprints: a replacement session must present a
+// title AND artist sharing the same prefixes to be accepted, which in practice
+// means it is the same content the user clicked. This two-signal check is what
+// keeps the stale-session race (the clicked session closing and a same-app
+// replacement opening before the action runs) from redirecting a playback
+// action onto a different session. Priority:
+//   1. Exact (ordinal + title + artist) match — the confident happy path.
+//   2. Exactly one session matches both fingerprints — it moved ordinals
+//      (a sibling closed, order changed). Trust the metadata, not the number.
+//   Otherwise unmatched or ambiguous (two+ sessions reproduce the fingerprints)
+//   → None. Callers surface a "try refreshing" error.
 //
-// Untitled sessions (empty title): Windows often still exposes an artist (radio
-// streams, live "sessions", etc.), so the artist becomes the fingerprint with
-// the same exact + unique priority above. Only when title AND artist are both
-// empty is there no fingerprint at all; the ordinal alone cannot tell "the same
-// session closed" from "a replacement opened onto the clicked ordinal", so we
-// refuse rather than control the wrong session.
+// When the captured title is empty, the artist is the fingerprint and the
+// session must STILL be titleless — a now-populated title (or a titled
+// replacement) is not the entry the user clicked.
+//
+// There is deliberately NO ordinal-only fallback: an ordinal match with no
+// fingerprint match cannot distinguish "the session track-skipped past the
+// prefix" from "the session closed and a sibling occupies its slot", so
+// guessing would risk controlling the wrong session.
 fn resolve_target_index(
     entries: &[SessionEntry],
     target_app_id: &str,
@@ -330,7 +333,7 @@ fn resolve_target_index(
         }
         let mut artist_matches: Vec<usize> = Vec::new();
         for (i, entry) in entries.iter().enumerate() {
-            if entry.app_id != target_app_id {
+            if entry.app_id != target_app_id || !entry.title.is_empty() {
                 continue;
             }
             let artist_ok = entry.artist.starts_with(target_artist_prefix);
@@ -354,17 +357,18 @@ fn resolve_target_index(
             continue;
         }
         let title_ok = entry.title.starts_with(target_title_prefix);
+        let artist_ok = target_artist_prefix.is_empty() || entry.artist.starts_with(target_artist_prefix);
 
-        // 1. Exact (ordinal + title) match
-        if entry.ordinal == target_index && title_ok {
+        // 1. Exact (ordinal + title + artist) match
+        if entry.ordinal == target_index && title_ok && artist_ok {
             return Some(i);
         }
-        if title_ok {
+        if title_ok && artist_ok {
             title_matches.push(i);
         }
     }
 
-    // 2. Unique title match at a (possibly shifted) ordinal
+    // 2. Unique (title + artist) match at a (possibly shifted) ordinal
     if title_matches.len() == 1 {
         return title_matches[0].into();
     }
