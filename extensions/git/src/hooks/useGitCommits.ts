@@ -90,9 +90,9 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
     (
       _repoPath: string,
       branchFilter: BranchFilter,
+      searchText: string,
       _selectedBranch?: Branch,
       _detachedHead?: DetachedHead,
-      searchText: string,
     ) =>
       async (options: { page: number }) => {
         const selectedSourceName = evaluateBranchName(branchFilter, branchesState!);
@@ -108,7 +108,7 @@ export function useGitCommits(gitManager: GitManager, branchesState?: BranchesSt
           return { data: [], hasMore: false };
         }
       },
-    [gitManager.repoPath, branchFilter, branchesState?.currentBranch, branchesState?.detachedHead, searchText],
+    [gitManager.repoPath, branchFilter, searchText, branchesState?.currentBranch, branchesState?.detachedHead],
     {
       execute: branchesState !== undefined,
       initialData: [],
