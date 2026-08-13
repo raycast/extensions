@@ -1,5 +1,9 @@
 # Done Bear Changelog
 
+## [Bug Fixes] - {PR_MERGE_DATE}
+
+- Fixed creating tasks failing with a GraphQL 400 because the teams query typed workspace ID as a String instead of an ID
+
 ## [GraphQL API Migration] - 2026-03-30
 
 - Migrated workspace, task, project, and team fetches from deprecated REST endpoints to GraphQL API
