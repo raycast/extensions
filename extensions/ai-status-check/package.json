@@ -3,8 +3,8 @@
   "name": "ai-status-check",
   "version": "0.1.0",
   "private": true,
-  "title": "AI Status",
-  "description": "Check the operational status, components, and recent incidents of common AI providers.",
+  "title": "AI Provider Status",
+  "description": "Check official service health, components, and recent incidents across popular AI providers.",
   "icon": "icon.png",
   "author": "Astatine-213",
   "platforms": [
@@ -19,8 +19,8 @@
   "commands": [
     {
       "name": "check-ai-status",
-      "title": "Check AI Status",
-      "description": "Check AI provider health, components, and recent incidents",
+      "title": "Check AI Provider Status",
+      "description": "View provider health, component outages, and recent incidents from official sources",
       "mode": "view"
     }
   ],

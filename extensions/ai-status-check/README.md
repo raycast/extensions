@@ -1,9 +1,12 @@
-# AI Status
+# AI Provider Status
 
-Check official AI-provider service health without opening a collection of status pages. AI Status brings each enabled provider's published system status, components, active incidents, and recent incident history into one native Raycast command.
+Check official service health across popular AI providers without opening or maintaining a collection of status-page URLs. AI Provider Status ships with a curated catalog of provider integrations: choose the providers you use in Raycast preferences, then inspect their published system health, components, active incidents, and recent incident updates from one native command.
+
+Unlike a general-purpose status-page monitor, there are no URLs to add, detect, or maintain. Each supported AI provider is integrated with its official public status source, including provider-specific handling when status systems expose different components or incident formats.
 
 ## Features
 
+- Choose from 18 built-in AI providers with no status-page setup.
 - See provider-published health at a glance, with matching severity icons.
 - Open component groups to inspect individual services.
 - Read active incidents and their update timelines inside Raycast.
@@ -15,7 +18,7 @@ The default list includes OpenAI, Claude, Google AI Studio and Gemini, xAI, Deep
 
 ## Usage
 
-1. Run **Check AI Status**.
+1. Run **Check AI Provider Status**.
 2. Press Enter on a provider to see its components and incidents.
 3. Press Enter on a component group or incident to open its local detail view.
 4. Use the action panel to open the official source, refresh, or configure providers.
@@ -24,11 +27,11 @@ Providers are grouped by purpose in preferences. Disabled providers are neither 
 
 ## Privacy
 
-AI Status makes unauthenticated requests only to the enabled providers' public, official status sources. It does not ask for provider credentials, run model prompts, collect analytics, or use an extension-specific backend. Last-successful responses are cached locally by Raycast so the list can remain useful during a temporary source failure.
+AI Provider Status makes unauthenticated requests only to the enabled providers' public, official status sources. It does not ask for provider credentials, run model prompts, collect analytics, or use an extension-specific backend. Last-successful responses are cached locally by Raycast so the list can remain useful during a temporary source failure.
 
 ## Notes
 
-AI Status is an independent project and is not affiliated with the providers it displays. Provider names and marks belong to their respective owners. See [Third-Party Notices](THIRD_PARTY_NOTICES.md) for bundled icon attribution.
+AI Provider Status is an independent project and is not affiliated with the providers it displays. Provider names and marks belong to their respective owners. See [Third-Party Notices](THIRD_PARTY_NOTICES.md) for bundled icon attribution.
 
 ## Development
 
