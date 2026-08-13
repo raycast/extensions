@@ -45,7 +45,7 @@ function SearchIssues() {
       }
 
       const result = await github.searchIssues({
-        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 }),
         query: `is:issue archived:false ${sortTxt} ${searchFilter} ${normalizeIssueSearchText(searchText)}`,
       });
 
