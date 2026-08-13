@@ -371,11 +371,26 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
   ].join("\n");
 }
 
+// Timeout cleanup runs after the conversion script was killed, so the document must be re-found.
+// Each name match is path-verified like in the open loop, so a same-named document opened from a
+// different folder is left alone. The collection is re-queried after every close: whose-list
+// specifiers can be index-based, and closing one document would make the remaining ones stale.
 function closeDocScript(appName: string, src: string, spec: AppScriptSpec): string {
+  const indent = (lines: string[], pad: string) => lines.map((l) => pad + l);
   return [
     `tell application "${appName}"`,
     `  try`,
-    `    close (every ${spec.docClass} whose (${docMatch(src, spec)})) saving no`,
+    `    repeat`,
+    `      set closedOne to false`,
+    `      repeat with cand in (every ${spec.docClass} whose (${docMatch(src, spec)}))`,
+    ...indent(verifyCandidateLines("cand", src, spec, "set closedOne to true"), "        "),
+    `        if closedOne then`,
+    `          close cand saving no`,
+    `          exit repeat`,
+    `        end if`,
+    `      end repeat`,
+    `      if not closedOne then exit repeat`,
+    `    end repeat`,
     `  end try`,
     `end tell`,
   ].join("\n");
