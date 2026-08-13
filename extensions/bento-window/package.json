@@ -7,6 +7,7 @@
   "author": "Popo",
   "categories": ["Productivity", "System"],
   "license": "MIT",
+  "platforms": ["macOS"],
   "commands": [
     {
       "name": "tile",

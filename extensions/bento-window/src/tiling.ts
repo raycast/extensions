@@ -183,6 +183,9 @@ export async function runTile(scope: "app" | "all") {
 
     // Resolve desktop from the target windows so multi-monitor setups pick the correct screen
     const targetDesktopId = targetWindows[0].desktopId;
+    // getWindowsOnActiveDesktop() already scopes to a single desktop (verified on dual-display
+    // setups), so this filter is a no-op today — it just guarantees the invariant at code level.
+    targetWindows = targetWindows.filter((w) => w.desktopId === targetDesktopId);
     const desktop =
       desktops.find((d) => d.id === targetDesktopId) ??
       desktops.find((d) => d.active && windows.some((w) => w.desktopId === d.id)) ??
