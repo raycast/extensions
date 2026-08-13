@@ -28,9 +28,20 @@ function expandEnvRefs(value: string): string {
   );
 }
 
+function system32(exe: string): string {
+  return path.join(process.env.SystemRoot ?? "C:\\Windows", "System32", exe);
+}
+
 async function regPath(key: string): Promise<string> {
   try {
-    const { stdout } = await execFileAsync("reg", ["query", key, "/v", "Path"]);
+    // Absolute path on purpose: resolving "reg" depends on the very PATH this
+    // function exists to repair, and it is missing in Raycast's environment.
+    const { stdout } = await execFileAsync(system32("reg.exe"), [
+      "query",
+      key,
+      "/v",
+      "Path",
+    ]);
     const match = /\bPath\s+REG(?:_EXPAND)?_SZ\s+(.+)/i.exec(stdout);
     return match ? expandEnvRefs(match[1].trim()) : "";
   } catch {
@@ -48,10 +59,14 @@ async function realPath(): Promise<string> {
   const combined =
     [machine, user].filter(Boolean).join(";") || (process.env.PATH ?? "");
 
-  // Safety net in case the registry read fails in the Raycast context:
-  // default install locations of oh-my-posh (winget), claude (native) and npm.
+  // Safety net in case the registry read fails in the Raycast context: System32
+  // (without it not even cmd.exe resolves) plus the default install locations
+  // of oh-my-posh (winget), claude (native), npm and VS Code's CLI.
+  const programs = path.join(process.env.LOCALAPPDATA ?? "", "Programs");
   const wellKnown = [
-    path.join(process.env.LOCALAPPDATA ?? "", "Programs", "oh-my-posh", "bin"),
+    system32(""),
+    path.join(programs, "oh-my-posh", "bin"),
+    path.join(programs, "Microsoft VS Code", "bin"),
     path.join(process.env.USERPROFILE ?? "", ".local", "bin"),
     path.join(process.env.APPDATA ?? "", "npm"),
   ].filter((dir) => dir.length > 3 && fs.existsSync(dir));
@@ -97,6 +112,38 @@ function essentialEnvDefaults(profile: string): [string, string][] {
     ["TEMP", path.join(local, "Temp")],
     ["TMP", path.join(local, "Temp")],
   ];
+}
+
+/**
+ * Environment handed to every process launched from here — terminals and the
+ * editor alike, since VS Code passes it on to its integrated terminal.
+ */
+function launchEnv(pathString: string): NodeJS.ProcessEnv {
+  const env = { ...process.env };
+  delete env.PATH;
+  env.Path = pathString;
+
+  // Raycast's environment can carry a Windows BCP-47 locale tag (e.g.
+  // "pt-BR-u-ca-gregory-...") in LC_ALL/LANG. POSIX tools spawned inside the
+  // session (like Git's bash) reject that format with a warning on every
+  // command, and a terminal opened by the user never defines these vars — so
+  // drop them instead of forwarding.
+  for (const key of Object.keys(env)) {
+    if (key === "LANG" || key.startsWith("LC_")) delete env[key];
+  }
+
+  // Restore essential vars that Raycast's environment may miss entirely or
+  // carry empty. Never overrides an existing non-empty value.
+  const profile = env.USERPROFILE || os.homedir();
+  for (const [name, value] of essentialEnvDefaults(profile)) {
+    const existing = Object.keys(env).find(
+      (k) => k.toUpperCase() === name.toUpperCase(),
+    );
+    if (!existing) env[name] = value;
+    else if (!env[existing]) env[existing] = value;
+  }
+
+  return env;
 }
 
 /**
@@ -262,11 +309,11 @@ function encodedStartupScript(
   return Buffer.from(script, "utf16le").toString("base64");
 }
 
-function onFail(message: string) {
+function onFail(message: string, title = "Failed to open the terminal") {
   return () => {
     showToast({
       style: Toast.Style.Failure,
-      title: "Failed to open the terminal",
+      title,
       message,
     });
   };
@@ -371,29 +418,7 @@ export async function launchClaude(
   const claudeExe = findClaude(pathString);
   const encoded = encodedStartupScript(pathString, claudeExe, args);
 
-  const env = { ...process.env };
-  delete env.PATH;
-  env.Path = pathString;
-
-  // Raycast's environment can carry a Windows BCP-47 locale tag (e.g.
-  // "pt-BR-u-ca-gregory-...") in LC_ALL/LANG. POSIX tools spawned inside the
-  // session (like Git's bash) reject that format with a warning on every
-  // command, and a terminal opened by the user never defines these vars — so
-  // drop them instead of forwarding.
-  for (const key of Object.keys(env)) {
-    if (key === "LANG" || key.startsWith("LC_")) delete env[key];
-  }
-
-  // Restore essential vars that Raycast's environment may miss entirely or
-  // carry empty. Never overrides an existing non-empty value.
-  const profile = env.USERPROFILE || os.homedir();
-  for (const [name, value] of essentialEnvDefaults(profile)) {
-    const existing = Object.keys(env).find(
-      (k) => k.toUpperCase() === name.toUpperCase(),
-    );
-    if (!existing) env[name] = value;
-    else if (!env[existing]) env[existing] = value;
-  }
+  const env = launchEnv(pathString);
 
   await closeMainWindow();
 
@@ -434,4 +459,31 @@ export async function launchClaude(
       runInTerminalTab(cwd, pathString, claudeExe, args, env);
       break;
   }
+}
+
+export async function openInVSCode(cwd: string): Promise<void> {
+  const env = launchEnv(await realPath());
+  const fail = (detail: string) =>
+    onFail(
+      `${detail}. Make sure \`code\` works in a terminal.`,
+      "Failed to open VS Code",
+    )();
+
+  await closeMainWindow();
+
+  // `code` is a .cmd shim, so it needs a shell; the folder never touches the
+  // command line, it is the child's working directory.
+  const child = spawn("code", ["."], {
+    cwd,
+    env,
+    shell: true,
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true,
+  });
+  child.on("error", (error) => fail(error.message));
+  child.on("exit", (code) => {
+    if (code !== 0) fail(`\`code .\` exited with status ${code}`);
+  });
+  child.unref();
 }

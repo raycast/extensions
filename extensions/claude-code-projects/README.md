@@ -8,12 +8,14 @@ Browse your [Claude Code](https://claude.com/claude-code) projects and resume se
 - **Open in Claude** (default action) — opens your terminal in the project folder and runs `claude`, which shows the interactive dialog to continue, compact, or start fresh.
 - **Continue Last Session** — runs `claude --continue` to resume the most recent session without prompts.
 - **Resume Specific Session** (`Ctrl+S`) — lists the project's sessions with a preview of each conversation and resumes the selected one via `claude --resume <id>`.
+- **Open in VS Code** (`Ctrl+O`) — runs `code .` in the project folder.
 - **Open in Explorer** (`Ctrl+E`) and **Copy Path** (`Ctrl+C`).
 
 ## Requirements
 
 - Windows with [Claude Code](https://claude.com/claude-code) installed and available as `claude`.
 - Windows Terminal (recommended, default) or PowerShell 7 / Windows PowerShell / cmd.
+- Optional: VS Code with its `code` CLI on the PATH, for the *Open in VS Code* action.
 
 ## Preferences
 

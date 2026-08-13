@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { loadProjects, Project } from "./projects";
-import { launchClaude } from "./terminal";
+import { launchClaude, openInVSCode } from "./terminal";
 import { Sessions } from "./sessions";
 
 export default function Command() {
@@ -71,6 +71,12 @@ function ProjectItem({ project }: { project: Project }) {
                 icon={Icon.List}
                 shortcut={Keyboard.Shortcut.Common.Save}
                 target={<Sessions project={project} />}
+              />
+              <Action
+                title="Open in VS Code"
+                icon={Icon.Code}
+                shortcut={Keyboard.Shortcut.Common.Open}
+                onAction={() => openInVSCode(project.cwd!)}
               />
               <Action.Open
                 title="Open in Explorer"
