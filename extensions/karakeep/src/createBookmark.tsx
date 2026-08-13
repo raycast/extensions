@@ -17,9 +17,11 @@ import { OfflineFormNotice, StartKarakeepAction } from "./components/OfflineForm
 import CreateListView from "./createList";
 
 const log = logger.child("[CreateBookmark]");
+const MAX_TITLE_LENGTH = 1000;
 
 interface FormValues {
   url: string;
+  title: string;
   list?: string;
 }
 
@@ -56,12 +58,17 @@ export default function CreateBookmarkView(props: LaunchProps<{ draftValues: Dra
   const { handleSubmit, itemProps, setValue, values } = useForm<FormValues>({
     initialValues: {
       url: draftValues?.url ?? "",
+      title: draftValues?.title ?? "",
       list: draftValues?.list ?? "",
     },
     validation: {
       url: (value: string | undefined) => {
         if (!value) return t("bookmark.urlInvalid");
         if (!validUrl(value)) return t("bookmark.urlInvalid");
+        return undefined;
+      },
+      title: (value: string | undefined) => {
+        if (value && value.trim().length > MAX_TITLE_LENGTH) return t("bookmark.titleTooLong");
         return undefined;
       },
     },
@@ -84,10 +91,12 @@ export default function CreateBookmarkView(props: LaunchProps<{ draftValues: Dra
           success: { title: t("bookmark.createSuccess") },
           failure: { title: t("bookmark.createFailed") },
           action: async () => {
+            const title = values.title.trim();
             const payload = {
               type: "link",
               url: values.url,
               createdAt: new Date().toISOString(),
+              ...(title ? { title } : {}),
             };
             const created = await fetchCreateBookmark(payload);
 
@@ -177,6 +186,12 @@ export default function CreateBookmarkView(props: LaunchProps<{ draftValues: Dra
       <OfflineFormNotice offline={offline} canStart={canStart} />
 
       <Form.TextField {...itemProps.url} title={t("bookmark.url")} placeholder={t("bookmark.urlPlaceholder")} />
+
+      <Form.TextField
+        {...itemProps.title}
+        title={t("bookmark.createTitle")}
+        placeholder={t("bookmark.createTitlePlaceholder")}
+      />
 
       <Form.Dropdown title={t("bookmark.list")} {...itemProps.list}>
         <Form.Dropdown.Item value="" title={t("bookmark.defaultListPlaceholder")} />
