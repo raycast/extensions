@@ -19,6 +19,7 @@ import { NightWatchStatus } from "./status";
 
 const OFF_ICON = { source: "coffee-off.png", tintColor: Color.PrimaryText };
 const ON_ICON = { source: "coffee-on.png", tintColor: Color.PrimaryText };
+const LIVE_STATUS_INTERVAL_MS = 2_000;
 
 export default function Command() {
   const [status, setStatus] = useState<NightWatchStatus>();
@@ -34,6 +35,8 @@ export default function Command() {
 
   useEffect(() => {
     void refresh();
+    const interval = setInterval(() => void refresh(), LIVE_STATUS_INTERVAL_MS);
+    return () => clearInterval(interval);
   }, [refresh]);
 
   const run = useCallback(
