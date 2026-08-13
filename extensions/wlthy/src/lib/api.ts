@@ -71,7 +71,10 @@ async function get<T>(path: string): Promise<T> {
     throw new WlthyError("The wlthy URL in preferences isn't a valid URL.");
   }
   const loopback =
-    origin.hostname === "localhost" || origin.hostname === "127.0.0.1";
+    origin.hostname === "localhost" ||
+    origin.hostname === "127.0.0.1" ||
+    origin.hostname === "::1" ||
+    origin.hostname === "[::1]";
   if (origin.protocol !== "https:" && !loopback) {
     throw new WlthyError(
       "For your security the wlthy URL must use https:// — your API key is never sent over an unencrypted connection.",
