@@ -2,7 +2,7 @@
 
 ## [2.4.3] - {PR_MERGE_DATE}
 
-- Added an optional Title field to Create Bookmark. Leave it empty to use the page title detected by Karakeep.
+- Added an optional Title field to Create Bookmark. Leave it empty to use the page title detected by Karakeep. Custom titles are also applied when the submitted URL already exists in Karakeep.
 
 ## [2.4.2] - 2026-08-12
 

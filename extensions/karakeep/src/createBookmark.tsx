@@ -2,7 +2,12 @@ import { Action, ActionPanel, Form, LaunchProps, useNavigation } from "@raycast/
 import { useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
-import { fetchAddBookmarkToList, fetchAttachTagsToBookmark, fetchCreateBookmark } from "./apis";
+import {
+  fetchAddBookmarkToList,
+  fetchAttachTagsToBookmark,
+  fetchCreateBookmarkResult,
+  fetchUpdateBookmark,
+} from "./apis";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useGetAllTags } from "./hooks/useGetAllTags";
 import { useTagPicker, TAG_PICKER_NOOP_VALUE } from "./hooks/useTagPicker";
@@ -98,7 +103,9 @@ export default function CreateBookmarkView(props: LaunchProps<{ draftValues: Dra
               createdAt: new Date().toISOString(),
               ...(title ? { title } : {}),
             };
-            const created = await fetchCreateBookmark(payload);
+            const result = await fetchCreateBookmarkResult(payload);
+            const created =
+              title && !result.wasCreated ? await fetchUpdateBookmark(result.bookmark.id, { title }) : result.bookmark;
 
             if (values.list) {
               await fetchAddBookmarkToList(values.list, created.id);
