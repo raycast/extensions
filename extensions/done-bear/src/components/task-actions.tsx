@@ -3,6 +3,7 @@ import { useCallback } from "react";
 
 import { archiveTask, completeTask, reopenTask, unarchiveTask } from "../api/mutations";
 import type { NavigableView, ProjectRecord, TaskRecord, WorkspaceSummary } from "../api/types";
+import { revalidateAfterMutation } from "../helpers/revalidate";
 import { getTaskState } from "../helpers/task-helpers";
 import { QuickAddAction } from "./quick-add-action";
 import TaskDetail from "./task-detail";
@@ -22,18 +23,20 @@ interface TaskActionCopy {
 }
 
 const withErrorToast = async (copy: TaskActionCopy, fn: () => Promise<void>, revalidate: () => void) => {
+  await showToast({ style: Toast.Style.Animated, title: copy.pending });
   try {
-    await showToast({ style: Toast.Style.Animated, title: copy.pending });
     await fn();
-    await revalidate();
-    await showToast({ style: Toast.Style.Success, title: copy.success });
   } catch {
     await showToast({
       message: "Check your connection and try again.",
       style: Toast.Style.Failure,
       title: copy.failure,
     });
+    return;
   }
+
+  await showToast({ style: Toast.Style.Success, title: copy.success });
+  await revalidateAfterMutation(revalidate);
 };
 
 export const TaskActions = ({ task, projects, revalidate, view, workspaces }: TaskActionsProps) => {

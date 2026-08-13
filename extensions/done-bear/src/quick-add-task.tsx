@@ -8,6 +8,7 @@ import { VIEW_CONFIG } from "./helpers/constants";
 import { dateOnlyEpochFromLocalDate, localDateFromDateOnlyEpoch, tomorrowDateOnlyEpoch } from "./helpers/date-codecs";
 import { interpretQuickAddTask, type InterpretedQuickAddTask } from "./helpers/ai-quick-add";
 import { parseQuickAddTask } from "./helpers/quick-add-parser";
+import { revalidateAfterMutation } from "./helpers/revalidate";
 import { useProjects } from "./hooks/use-projects";
 import { useTeams } from "./hooks/use-teams";
 import { ALL_WORKSPACES_ID, useWorkspaces } from "./hooks/use-workspaces";
@@ -98,28 +99,31 @@ const ReviewQuickAddTask = ({
 
       setIsSubmitting(true);
       try {
-        await createTask(workspaceId, {
-          deadlineAt: values.deadline ? dateOnlyEpochFromLocalDate(values.deadline) : undefined,
-          projectId: values.projectId || undefined,
-          startDate: values.startDate ? dateOnlyEpochFromLocalDate(values.startDate) : undefined,
-          teamId: values.teamId || undefined,
-          title: trimmedTitle,
-          view: values.when as NavigableView,
-        });
-        await onCreated?.();
+        try {
+          await createTask(workspaceId, {
+            deadlineAt: values.deadline ? dateOnlyEpochFromLocalDate(values.deadline) : undefined,
+            projectId: values.projectId || undefined,
+            startDate: values.startDate ? dateOnlyEpochFromLocalDate(values.startDate) : undefined,
+            teamId: values.teamId || undefined,
+            title: trimmedTitle,
+            view: values.when as NavigableView,
+          });
+        } catch {
+          await showToast({
+            message: "Check your connection and try again. Your task is still here.",
+            style: Toast.Style.Failure,
+            title: "Task not created",
+          });
+          return false;
+        }
+
+        await revalidateAfterMutation(onCreated);
         await showToast({
           message: VIEW_CONFIG[values.when as NavigableView].title,
           style: Toast.Style.Success,
           title: "Task created",
         });
         await popToRoot();
-      } catch {
-        await showToast({
-          message: "Check your connection and try again. Your task is still here.",
-          style: Toast.Style.Failure,
-          title: "Task not created",
-        });
-        return false;
       } finally {
         setIsSubmitting(false);
       }

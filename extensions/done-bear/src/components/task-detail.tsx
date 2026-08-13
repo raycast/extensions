@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 
 import { completeTask, reopenTask } from "../api/mutations";
 import type { ProjectRecord, TaskRecord } from "../api/types";
+import { revalidateAfterMutation } from "../helpers/revalidate";
 import { formatDate, getTaskState } from "../helpers/task-helpers";
 import { useChecklistItems } from "../hooks/use-checklist-items";
 
@@ -33,47 +34,51 @@ export default function TaskDetail({ task, projects, revalidate }: TaskDetailPro
   }
 
   const handleComplete = useCallback(async () => {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Completing task...",
+    });
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Completing task...",
-      });
       await completeTask(task.id);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Task completed",
-      });
-      setCurrentTask((value) => ({ ...value, completedAt: new Date().toISOString() }));
-      await revalidate();
     } catch {
       await showToast({
         message: "Check your connection and try again.",
         style: Toast.Style.Failure,
         title: "Couldn't complete task",
       });
+      return;
     }
+
+    setCurrentTask((value) => ({ ...value, completedAt: new Date().toISOString() }));
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Task completed",
+    });
+    await revalidateAfterMutation(revalidate);
   }, [task.id, revalidate]);
 
   const handleReopen = useCallback(async () => {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Reopening task...",
+    });
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Reopening task...",
-      });
       await reopenTask(task.id);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Task reopened",
-      });
-      setCurrentTask((value) => ({ ...value, completedAt: null }));
-      await revalidate();
     } catch {
       await showToast({
         message: "Check your connection and try again.",
         style: Toast.Style.Failure,
         title: "Couldn't reopen task",
       });
+      return;
     }
+
+    setCurrentTask((value) => ({ ...value, completedAt: null }));
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Task reopened",
+    });
+    await revalidateAfterMutation(revalidate);
   }, [task.id, revalidate]);
 
   return (

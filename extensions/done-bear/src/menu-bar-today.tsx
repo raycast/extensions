@@ -2,6 +2,7 @@ import { Icon, LaunchType, MenuBarExtra, launchCommand, showToast, Toast } from 
 import { withAccessToken } from "@raycast/utils";
 
 import { completeTask } from "./api/mutations";
+import { revalidateAfterMutation } from "./helpers/revalidate";
 import { useTasks } from "./hooks/use-tasks";
 import { useWorkspaces } from "./hooks/use-workspaces";
 import { oauthService } from "./oauth";
@@ -19,24 +20,26 @@ const MenuBarToday = () => {
         {tasks.map((task) => {
           // oxlint-disable-next-line jsx-no-new-function-as-prop -- handler in map body
           const handleAction = async () => {
+            await showToast({
+              style: Toast.Style.Animated,
+              title: "Completing task...",
+            });
             try {
-              await showToast({
-                style: Toast.Style.Animated,
-                title: "Completing task...",
-              });
               await completeTask(task.id);
-              await showToast({
-                style: Toast.Style.Success,
-                title: "Task completed",
-              });
-              await revalidate();
             } catch {
               await showToast({
                 message: "Check your connection and try again.",
                 style: Toast.Style.Failure,
                 title: "Couldn't complete task",
               });
+              return;
             }
+
+            await showToast({
+              style: Toast.Style.Success,
+              title: "Task completed",
+            });
+            await revalidateAfterMutation(revalidate);
           };
           return <MenuBarExtra.Item icon={Icon.Circle} key={task.id} onAction={handleAction} title={task.title} />;
         })}
