@@ -23,13 +23,12 @@ import {
   refreshAccess,
   signOut,
 } from "./auth";
-import { IconSearchApiError, formatIconifySet, searchIcons } from "./api";
+import { IconSearchApiError, formatSourceSet, searchIcons } from "./api";
 import {
   API_BASE,
   FAVORITES_KEY,
   MAX_FAVORITE_ICONS,
   MAX_RECENT_ICONS,
-  NAMED_LIBRARIES,
   OUTPUT_FORMAT_LABELS,
   PAGE_SIZE,
   RECENT_KEY,
@@ -55,6 +54,7 @@ import type {
   OutputFormat,
   Preferences,
   SearchStyle,
+  SourceSetOption,
 } from "./types";
 
 type SessionState = {
@@ -119,10 +119,10 @@ const LOCAL_PREVIEW_LIBRARIES = new Set([
   "patternfly-icons",
 ]);
 const STARTER_LIBRARY_ROTATION = [
-  "lucide-icons",
+  "lucide",
   "heroicons",
-  "tabler-icons",
-  "phosphor-icons",
+  "tabler",
+  "ph",
 ] as const;
 const BUILT_IN_STARTER_ICONS: IconSearchIcon[] = [
   createBuiltInStarterIcon({
@@ -257,14 +257,13 @@ export default function Command() {
   const [style, setStyle] = useState<SearchStyle>(
     normalizeSearchStyle(preferences.defaultStyle),
   );
-  const [legalOnly, setLegalOnly] = useState(preferences.legalOnly !== false);
   const [outputFormat, setOutputFormat] = useState<OutputFormat>(defaultFormat);
   const [quickSize, setQuickSize] = useState(DEFAULT_CUSTOMIZATION.size);
   const [quickColor, setQuickColor] = useState(DEFAULT_CUSTOMIZATION.color);
   const [icons, setIcons] = useState<IconSearchIcon[]>([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [iconifySets, setIconifySets] = useState<string[]>([]);
+  const [sourceSets, setSourceSets] = useState<SourceSetOption[]>([]);
   const [recent, setRecent] = useState<IconSearchIcon[]>([]);
   const [favorites, setFavorites] = useState<IconSearchIcon[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -315,7 +314,6 @@ export default function Command() {
     const hasFreshStarterCache =
       token &&
       style === "all" &&
-      legalOnly &&
       cachedStarter.length > 0 &&
       Date.now() - starterCachedAt < STARTER_CACHE_TTL_MS;
     const initialStarterIcons = hasFreshStarterCache
@@ -338,7 +336,16 @@ export default function Command() {
         );
       });
     }
-  }, [legalOnly, style]);
+  }, [
+    setFavorites,
+    setIcons,
+    setIsLoading,
+    setPage,
+    setRecent,
+    setSession,
+    setTotalPages,
+    style,
+  ]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -353,7 +360,7 @@ export default function Command() {
     setIcons([]);
     setTotalPages(0);
     setError("Your IconSearch session expired. Connect again to continue.");
-  }, []);
+  }, [setError, setIcons, setSession, setTotalPages]);
 
   const loadPage = useCallback(
     async (nextPage: number, append: boolean) => {
@@ -380,15 +387,13 @@ export default function Command() {
             ? await searchStarterPopularIcons({
                 token: session.token,
                 style,
-                legalOnly,
                 signal: controller.signal,
               })
             : await searchIcons({
                 token: session.token,
                 query,
-                library,
+                sourceSet: library,
                 style,
-                legalOnly,
                 page: nextPage,
                 signal: controller.signal,
               });
@@ -399,12 +404,11 @@ export default function Command() {
         );
         setPage(result.page);
         setTotalPages(result.totalPages);
-        if (result.iconifySets.length > 0) setIconifySets(result.iconifySets);
+        if (result.sourceSets.length > 0) setSourceSets(result.sourceSets);
         if (
           !append &&
           isStarterPopularQuery(query, library) &&
-          style === "all" &&
-          legalOnly
+          style === "all"
         ) {
           void Promise.all([
             writeJson(STARTER_CACHE_KEY, result.icons),
@@ -435,12 +439,11 @@ export default function Command() {
     },
     [
       clearAuthenticatedState,
-      legalOnly,
       library,
       query,
       session.token,
       setError,
-      setIconifySets,
+      setSourceSets,
       setIcons,
       setIsLoading,
       setIsLoadingMore,
@@ -471,7 +474,7 @@ export default function Command() {
     setSession({ token: "" });
     setIcons([]);
     setTotalPages(0);
-  }, []);
+  }, [setIcons, setSession, setTotalPages]);
 
   const rememberIcon = useCallback(
     async (icon: IconSearchIcon) => {
@@ -551,14 +554,12 @@ export default function Command() {
         <FilterDropdown
           library={library}
           style={style}
-          legalOnly={legalOnly}
           outputFormat={outputFormat}
           size={quickSize}
           color={quickColor}
-          iconifySets={iconifySets}
+          sourceSets={sourceSets}
           onLibraryChange={setLibrary}
           onStyleChange={setStyle}
-          onLegalOnlyChange={setLegalOnly}
           onOutputFormatChange={setOutputFormat}
           onSizeChange={setQuickSize}
           onColorChange={setQuickColor}
@@ -574,9 +575,7 @@ export default function Command() {
               ? "Keep typing"
               : "No icons found"
         }
-        description={
-          error || "Try another icon name, style, library, or safety filter."
-        }
+        description={error || "Try another icon name, style, or icon set."}
         actions={
           <ActionPanel>
             <Action
@@ -652,33 +651,29 @@ function AuthActions({ connect }: { connect: () => Promise<void> }) {
 function FilterDropdown({
   library,
   style,
-  legalOnly,
   outputFormat,
   size,
   color,
-  iconifySets,
+  sourceSets,
   onLibraryChange,
   onStyleChange,
-  onLegalOnlyChange,
   onOutputFormatChange,
   onSizeChange,
   onColorChange,
 }: {
   library: string;
   style: SearchStyle;
-  legalOnly: boolean;
   outputFormat: OutputFormat;
   size: number;
   color: string;
-  iconifySets: string[];
+  sourceSets: SourceSetOption[];
   onLibraryChange: (value: string) => void;
   onStyleChange: (value: SearchStyle) => void;
-  onLegalOnlyChange: (value: boolean) => void;
   onOutputFormatChange: (value: OutputFormat) => void;
   onSizeChange: (value: number) => void;
   onColorChange: (value: string) => void;
 }) {
-  const summaryValue = `summary:${library}:${style}:${legalOnly ? "safe" : "all"}:${outputFormat}:${size}:${color}`;
+  const summaryValue = `summary:${library}:${style}:${outputFormat}:${size}:${color}`;
 
   const handleChange = (value: string) => {
     if (value.startsWith("summary:")) return;
@@ -687,7 +682,6 @@ function FilterDropdown({
 
     if (scope === "library") onLibraryChange(nextValue);
     if (scope === "style") onStyleChange(normalizeSearchStyle(nextValue));
-    if (scope === "legal") onLegalOnlyChange(nextValue === "safe");
     if (scope === "format")
       onOutputFormatChange(normalizeOutputFormat(nextValue));
     if (scope === "size") onSizeChange(normalizeIconSize(nextValue));
@@ -706,39 +700,21 @@ function FilterDropdown({
         icon={Icon.Filter}
       />
 
-      <List.Dropdown.Section title="Library">
+      <List.Dropdown.Section title="Icon Set">
         <List.Dropdown.Item
-          title="All Libraries"
+          title="All 229 Icon Sets"
           value="library:all"
           icon={activeIcon(library === "all")}
         />
-        <List.Dropdown.Item
-          title="All Iconify Collections"
-          value="library:iconify"
-          icon={activeIcon(library === "iconify")}
-        />
-        {NAMED_LIBRARIES.map(([id, label]) => (
+        {sourceSets.map((set) => (
           <List.Dropdown.Item
-            key={id}
-            title={label}
-            value={`library:${id}`}
-            icon={activeIcon(library === id)}
+            key={set.id}
+            title={set.name}
+            value={`library:${set.id}`}
+            icon={activeIcon(library === set.id)}
           />
         ))}
       </List.Dropdown.Section>
-
-      {iconifySets.length > 0 ? (
-        <List.Dropdown.Section title="Iconify Collections">
-          {iconifySets.slice(0, 80).map((set) => (
-            <List.Dropdown.Item
-              key={set}
-              title={formatIconifySet(set)}
-              value={`library:iconify:${set}`}
-              icon={activeIcon(library === `iconify:${set}`)}
-            />
-          ))}
-        </List.Dropdown.Section>
-      ) : null}
 
       <List.Dropdown.Section title="Style">
         {Object.entries(SEARCH_STYLE_LABELS).map(([value, label]) => (
@@ -749,19 +725,6 @@ function FilterDropdown({
             icon={activeIcon(style === value)}
           />
         ))}
-      </List.Dropdown.Section>
-
-      <List.Dropdown.Section title="Safety">
-        <List.Dropdown.Item
-          title="Legal-Safe Only"
-          value="legal:safe"
-          icon={activeIcon(legalOnly)}
-        />
-        <List.Dropdown.Item
-          title="All Licenses"
-          value="legal:all"
-          icon={activeIcon(!legalOnly)}
-        />
       </List.Dropdown.Section>
 
       <List.Dropdown.Section title="Output">
@@ -859,7 +822,19 @@ function IconItem({
               ) : null}
               <List.Item.Detail.Metadata.Label
                 title="Commercial Use"
-                text={icon.legalSafe ? "Legal-safe" : "Verify license"}
+                text={
+                  icon.commercialUseAllowed
+                    ? "Allowed under license terms"
+                    : "Non-commercial only"
+                }
+              />
+              <List.Item.Detail.Metadata.Label
+                title="Output"
+                text={
+                  icon.exportAllowed
+                    ? "Includes license notice"
+                    : "Preview only"
+                }
               />
               <List.Item.Detail.Metadata.Label
                 title="Size"
@@ -931,34 +906,38 @@ function IconActions({
             />
           }
         />
-        <Action
-          title={`Copy ${defaultLabel}`}
-          icon={Icon.Clipboard}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "copy",
-              icon,
-              format: outputFormat,
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-        <Action
-          title={`Paste ${defaultLabel} into Frontmost App`}
-          icon={Icon.TextCursor}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "paste",
-              icon,
-              format: outputFormat,
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
+        {icon.exportAllowed ? (
+          <>
+            <Action
+              title={`Copy ${defaultLabel}`}
+              icon={Icon.Clipboard}
+              onAction={() =>
+                void runSnippetAction({
+                  mode: "copy",
+                  icon,
+                  format: outputFormat,
+                  classes,
+                  customization,
+                  rememberIcon,
+                })
+              }
+            />
+            <Action
+              title={`Paste ${defaultLabel} into Frontmost App`}
+              icon={Icon.TextCursor}
+              onAction={() =>
+                void runSnippetAction({
+                  mode: "paste",
+                  icon,
+                  format: outputFormat,
+                  classes,
+                  customization,
+                  rememberIcon,
+                })
+              }
+            />
+          </>
+        ) : null}
         {showPreviewAction ? (
           <Action.Push
             title="Open Larger Preview"
@@ -997,171 +976,184 @@ function IconActions({
         />
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="File">
-        <Action
-          title="Copy SVG File"
-          icon={Icon.Document}
-          onAction={() =>
-            void runSvgFileAction({
-              mode: "copy",
-              icon,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-        <Action
-          title="Paste SVG File into Frontmost App"
-          icon={Icon.Download}
-          onAction={() =>
-            void runSvgFileAction({
-              mode: "paste",
-              icon,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-        <Action
-          title="Export SVG for Drag and Drop"
-          icon={Icon.Folder}
-          onAction={() =>
-            void exportSvgForDrag({
-              icon,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-      </ActionPanel.Section>
+      {icon.exportAllowed ? (
+        <ActionPanel.Section title="File">
+          <Action
+            title="Copy SVG File"
+            icon={Icon.Document}
+            onAction={() =>
+              void runSvgFileAction({
+                mode: "copy",
+                icon,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+          <Action
+            title="Paste SVG File into Frontmost App"
+            icon={Icon.Download}
+            onAction={() =>
+              void runSvgFileAction({
+                mode: "paste",
+                icon,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+          <Action
+            title="Export SVG for Drag and Drop"
+            icon={Icon.Folder}
+            onAction={() =>
+              void exportSvgForDrag({
+                icon,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+        </ActionPanel.Section>
+      ) : null}
 
-      <ActionPanel.Section title="Copy As">
-        <Action
-          title="Copy React"
-          icon={Icon.Code}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "copy",
-              icon,
-              format: "react",
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-        <Action
-          title="Copy Raw SVG"
-          icon={Icon.Document}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "copy",
-              icon,
-              format: "svg",
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-        <Action
-          title="Copy Tailwind Mask"
-          icon={Icon.Swatch}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "copy",
-              icon,
-              format: "tailwind",
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-        <Action
-          title="Copy Vue"
-          icon={Icon.Code}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "copy",
-              icon,
-              format: "vue",
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-        <Action
-          title="Copy Svelte"
-          icon={Icon.Code}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "copy",
-              icon,
-              format: "svelte",
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-      </ActionPanel.Section>
+      {icon.exportAllowed ? (
+        <ActionPanel.Section title="Copy As">
+          <Action
+            title="Copy React"
+            icon={Icon.Code}
+            onAction={() =>
+              void runSnippetAction({
+                mode: "copy",
+                icon,
+                format: "react",
+                classes,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+          <Action
+            title="Copy Raw SVG"
+            icon={Icon.Document}
+            onAction={() =>
+              void runSnippetAction({
+                mode: "copy",
+                icon,
+                format: "svg",
+                classes,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+          <Action
+            title="Copy Tailwind Mask"
+            icon={Icon.Swatch}
+            onAction={() =>
+              void runSnippetAction({
+                mode: "copy",
+                icon,
+                format: "tailwind",
+                classes,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+          <Action
+            title="Copy Vue"
+            icon={Icon.Code}
+            onAction={() =>
+              void runSnippetAction({
+                mode: "copy",
+                icon,
+                format: "vue",
+                classes,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+          <Action
+            title="Copy Svelte"
+            icon={Icon.Code}
+            onAction={() =>
+              void runSnippetAction({
+                mode: "copy",
+                icon,
+                format: "svelte",
+                classes,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+        </ActionPanel.Section>
+      ) : null}
 
-      <ActionPanel.Section title="Paste As">
-        <Action
-          title="Paste React"
-          icon={Icon.TextCursor}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "paste",
-              icon,
-              format: "react",
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-        <Action
-          title="Paste Raw SVG"
-          icon={Icon.TextCursor}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "paste",
-              icon,
-              format: "svg",
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-        <Action
-          title="Paste Tailwind Mask"
-          icon={Icon.TextCursor}
-          onAction={() =>
-            void runSnippetAction({
-              mode: "paste",
-              icon,
-              format: "tailwind",
-              classes,
-              customization,
-              rememberIcon,
-            })
-          }
-        />
-      </ActionPanel.Section>
+      {icon.exportAllowed ? (
+        <ActionPanel.Section title="Paste As">
+          <Action
+            title="Paste React"
+            icon={Icon.TextCursor}
+            onAction={() =>
+              void runSnippetAction({
+                mode: "paste",
+                icon,
+                format: "react",
+                classes,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+          <Action
+            title="Paste Raw SVG"
+            icon={Icon.TextCursor}
+            onAction={() =>
+              void runSnippetAction({
+                mode: "paste",
+                icon,
+                format: "svg",
+                classes,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+          <Action
+            title="Paste Tailwind Mask"
+            icon={Icon.TextCursor}
+            onAction={() =>
+              void runSnippetAction({
+                mode: "paste",
+                icon,
+                format: "tailwind",
+                classes,
+                customization,
+                rememberIcon,
+              })
+            }
+          />
+        </ActionPanel.Section>
+      ) : null}
 
       <ActionPanel.Section title="Links">
+        {icon.exportAllowed ? (
+          <Action.CopyToClipboard
+            title="Copy SVG URL"
+            icon={Icon.Link}
+            content={`${getBestPreviewUrl(icon)}\n\nLicense notice: ${icon.licenseNotice}`}
+            onCopy={() => void rememberIcon(icon)}
+          />
+        ) : null}
         <Action.CopyToClipboard
-          title="Copy SVG URL"
-          icon={Icon.Link}
-          content={getBestPreviewUrl(icon)}
-          onCopy={() => void rememberIcon(icon)}
+          title="Copy License Notice"
+          icon={Icon.Document}
+          content={icon.licenseNotice}
         />
         <Action.OpenInBrowser
-          title="Open SVG Source"
+          title="Open Upstream Source"
           url={icon.sourceUrl || getBestPreviewUrl(icon)}
         />
         {icon.licenseUrl ? (
@@ -1188,6 +1180,14 @@ async function runSnippetAction({
   customization: IconCustomization;
   rememberIcon: (icon: IconSearchIcon) => Promise<void>;
 }) {
+  if (!icon.exportAllowed) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Output unavailable for this icon set",
+      message: icon.usageRequirements,
+    });
+    return;
+  }
   const formatLabel = OUTPUT_FORMAT_LABELS[format];
   const toast = await showToast({
     style: Toast.Style.Animated,
@@ -1224,6 +1224,14 @@ async function runSvgFileAction({
   customization: IconCustomization;
   rememberIcon: (icon: IconSearchIcon) => Promise<void>;
 }) {
+  if (!icon.exportAllowed) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "SVG export unavailable for this icon set",
+      message: icon.usageRequirements,
+    });
+    return;
+  }
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: mode === "copy" ? "Copying SVG file" : "Pasting SVG file",
@@ -1258,6 +1266,14 @@ async function exportSvgForDrag({
   customization: IconCustomization;
   rememberIcon: (icon: IconSearchIcon) => Promise<void>;
 }) {
+  if (!icon.exportAllowed) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "SVG export unavailable for this icon set",
+      message: icon.usageRequirements,
+    });
+    return;
+  }
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Exporting SVG",
@@ -1350,38 +1366,42 @@ function IconCustomizer({
       navigationTitle={`Customize ${icon.displayName}`}
       actions={
         <ActionPanel>
-          <Action
-            title={`Copy Customized ${OUTPUT_FORMAT_LABELS[format]}`}
-            icon={Icon.Clipboard}
-            onAction={() =>
-              runWhenValid(() => {
-                void runSnippetAction({
-                  mode: "copy",
-                  icon,
-                  format,
-                  classes,
-                  customization,
-                  rememberIcon,
-                });
-              })
-            }
-          />
-          <Action
-            title={`Paste Customized ${OUTPUT_FORMAT_LABELS[format]} into Frontmost App`}
-            icon={Icon.TextCursor}
-            onAction={() =>
-              runWhenValid(() => {
-                void runSnippetAction({
-                  mode: "paste",
-                  icon,
-                  format,
-                  classes,
-                  customization,
-                  rememberIcon,
-                });
-              })
-            }
-          />
+          {icon.exportAllowed ? (
+            <>
+              <Action
+                title={`Copy Customized ${OUTPUT_FORMAT_LABELS[format]}`}
+                icon={Icon.Clipboard}
+                onAction={() =>
+                  runWhenValid(() => {
+                    void runSnippetAction({
+                      mode: "copy",
+                      icon,
+                      format,
+                      classes,
+                      customization,
+                      rememberIcon,
+                    });
+                  })
+                }
+              />
+              <Action
+                title={`Paste Customized ${OUTPUT_FORMAT_LABELS[format]} into Frontmost App`}
+                icon={Icon.TextCursor}
+                onAction={() =>
+                  runWhenValid(() => {
+                    void runSnippetAction({
+                      mode: "paste",
+                      icon,
+                      format,
+                      classes,
+                      customization,
+                      rememberIcon,
+                    });
+                  })
+                }
+              />
+            </>
+          ) : null}
           <Action.Push
             title="Preview Customized Icon"
             icon={Icon.Eye}
@@ -1398,35 +1418,37 @@ function IconCustomizer({
               />
             }
           />
-          <ActionPanel.Section title="SVG File">
-            <Action
-              title="Copy Customized SVG File"
-              icon={Icon.Document}
-              onAction={() =>
-                runWhenValid(() => {
-                  void runSvgFileAction({
-                    mode: "copy",
-                    icon,
-                    customization,
-                    rememberIcon,
-                  });
-                })
-              }
-            />
-            <Action
-              title="Export Customized SVG for Drag and Drop"
-              icon={Icon.Folder}
-              onAction={() =>
-                runWhenValid(() => {
-                  void exportSvgForDrag({
-                    icon,
-                    customization,
-                    rememberIcon,
-                  });
-                })
-              }
-            />
-          </ActionPanel.Section>
+          {icon.exportAllowed ? (
+            <ActionPanel.Section title="SVG File">
+              <Action
+                title="Copy Customized SVG File"
+                icon={Icon.Document}
+                onAction={() =>
+                  runWhenValid(() => {
+                    void runSvgFileAction({
+                      mode: "copy",
+                      icon,
+                      customization,
+                      rememberIcon,
+                    });
+                  })
+                }
+              />
+              <Action
+                title="Export Customized SVG for Drag and Drop"
+                icon={Icon.Folder}
+                onAction={() =>
+                  runWhenValid(() => {
+                    void exportSvgForDrag({
+                      icon,
+                      customization,
+                      rememberIcon,
+                    });
+                  })
+                }
+              />
+            </ActionPanel.Section>
+          ) : null}
           <Action
             title={favorite ? "Remove Favorite" : "Save Favorite"}
             icon={favorite ? Icon.StarDisabled : Icon.Star}
@@ -1437,8 +1459,14 @@ function IconCustomizer({
     >
       <Form.Description
         title={icon.displayName}
-        text={`${icon.libraryName} - ${icon.legalSafe ? "Legal-safe" : "Verify license"}`}
+        text={`${icon.libraryName} - ${icon.usageRequirements}`}
       />
+      {!icon.exportAllowed ? (
+        <Form.Description
+          title="Preview only"
+          text="The upstream license prohibits redistributing original or modified icons, so copy and export actions are unavailable for this set."
+        />
+      ) : null}
       <Form.Dropdown
         id="size"
         title="Size"
@@ -1542,9 +1570,22 @@ function IconPreview({
             <Detail.Metadata.Label title="License" text={icon.license} />
           ) : null}
           <Detail.Metadata.Label
-            title="Commercial Safety"
-            text={icon.legalSafe ? "Legal-safe" : "Verify license"}
+            title="Commercial Use"
+            text={
+              icon.commercialUseAllowed
+                ? "Allowed under license terms"
+                : "Non-commercial only"
+            }
           />
+          <Detail.Metadata.Label
+            title="Output"
+            text={
+              icon.exportAllowed ? "Includes license notice" : "Preview only"
+            }
+          />
+          {icon.authorName ? (
+            <Detail.Metadata.Label title="Author" text={icon.authorName} />
+          ) : null}
           <Detail.Metadata.Label
             title="Selected Output"
             text={OUTPUT_FORMAT_LABELS[outputFormat]}
@@ -1558,8 +1599,8 @@ function IconPreview({
             text={formatColorLabel(customization.color)}
           />
           <Detail.Metadata.Link
-            title="SVG"
-            text="Open source SVG"
+            title="Source"
+            text="Open upstream source"
             target={icon.sourceUrl || getBestPreviewUrl(icon)}
           />
           {icon.licenseUrl ? (
@@ -1626,7 +1667,42 @@ function createBuiltInStarterIcon({
   reactImport: string;
   reactUsage: string;
 }): IconSearchIcon {
-  const svgUrl = `https://api.iconify.design/${encodeURIComponent(prefix)}/${encodeURIComponent(name)}.svg`;
+  const svgUrl = `${API_BASE}/api/svg/${encodeURIComponent(library)}/${encodeURIComponent(name)}`;
+  const source = {
+    lucide: {
+      author: "Lucide Contributors",
+      url: "https://github.com/lucide-icons/lucide",
+      license: "ISC",
+      licenseUrl: "https://github.com/lucide-icons/lucide/blob/main/LICENSE",
+    },
+    heroicons: {
+      author: "Tailwind Labs",
+      url: "https://github.com/tailwindlabs/heroicons",
+      license: "MIT",
+      licenseUrl:
+        "https://github.com/tailwindlabs/heroicons/blob/master/LICENSE",
+    },
+    tabler: {
+      author: "Pawel Kuna",
+      url: "https://github.com/tabler/tabler-icons",
+      license: "MIT",
+      licenseUrl: "https://github.com/tabler/tabler-icons/blob/main/LICENSE",
+    },
+    ph: {
+      author: "Phosphor Icons",
+      url: "https://github.com/phosphor-icons/core",
+      license: "MIT",
+      licenseUrl: "https://github.com/phosphor-icons/core/blob/main/LICENSE",
+    },
+  }[prefix] || {
+    author: `${libraryName} contributors`,
+    url: API_BASE,
+    license: "Unknown",
+    licenseUrl: `${API_BASE}/licenses`,
+  };
+  const usageRequirements =
+    "Keep the upstream copyright and license notice with redistributed copies.";
+  const licenseNotice = `${libraryName} by ${source.author}. License: ${source.license}. ${usageRequirements} Source: ${source.url} License terms: ${source.licenseUrl}`;
 
   return {
     id: `starter:${library}:${name}`,
@@ -1635,9 +1711,16 @@ function createBuiltInStarterIcon({
     library,
     libraryName,
     npmPackage: packageName,
-    license: "MIT",
-    legalSafe: true,
-    sourceUrl: svgUrl,
+    license: source.license,
+    licenseUrl: source.licenseUrl,
+    sourceSetId: prefix,
+    authorName: source.author,
+    authorUrl: source.url,
+    licenseNotice,
+    usageRequirements,
+    commercialUseAllowed: true,
+    exportAllowed: true,
+    sourceUrl: source.url,
     svgUrl,
     previewUrls: [svgUrl],
     reactImport,
@@ -1649,12 +1732,10 @@ function createBuiltInStarterIcon({
 async function searchStarterPopularIcons({
   token,
   style,
-  legalOnly,
   signal,
 }: {
   token: string;
   style: SearchStyle;
-  legalOnly: boolean;
   signal: AbortSignal;
 }) {
   const settled = await Promise.allSettled(
@@ -1663,9 +1744,8 @@ async function searchStarterPopularIcons({
         searchIcons({
           token,
           query: "",
-          library,
+          sourceSet: library,
           style,
-          legalOnly,
           page: 1,
           limit: 6,
           signal,
@@ -1693,7 +1773,7 @@ async function searchStarterPopularIcons({
     total: icons.length,
     page: 1,
     totalPages: 1,
-    iconifySets: [],
+    sourceSets: [],
   };
 }
 
@@ -1768,7 +1848,7 @@ function getPreviewMarkdown(
     "",
     `\`${escapeBackticks(icon.name)}\``,
     "",
-    `${escapeMarkdown(icon.libraryName)} - ${icon.legalSafe ? "legal-safe" : "verify license before commercial use"}`,
+    `${escapeMarkdown(icon.libraryName)} - ${escapeMarkdown(icon.usageRequirements)}`,
   ];
 
   if (icon.reactUsage) {
@@ -1811,16 +1891,13 @@ function getCustomizedPreviewUrl(
   icon: IconSearchIcon,
   customization: IconCustomization,
 ): string {
-  const iconifyUrl = icon.previewUrls.find((url) =>
-    url.includes("api.iconify.design"),
-  );
   const color =
     customization.color === "currentColor"
       ? environment.appearance === "dark"
         ? "#F4F4F5"
         : "#111827"
       : customization.color;
-  return getCustomizedSvgUrl(iconifyUrl || getBestPreviewUrl(icon), {
+  return getCustomizedSvgUrl(getBestPreviewUrl(icon), {
     ...customization,
     color,
   });
@@ -1852,12 +1929,7 @@ function formatToolbarSummary(
 
 function formatCompactLibrary(library: string): string {
   if (library === "all") return "All";
-  if (library === "iconify") return "Iconify";
-  if (library.startsWith("iconify:"))
-    return formatIconifySet(library.slice("iconify:".length));
-  return (
-    NAMED_LIBRARIES.find(([id]) => id === library)?.[1] || library
-  ).replace(/\s+Icons$/, "");
+  return formatSourceSet(library).replace(/\s+Icons$/, "");
 }
 
 function formatColorLabel(color: string): string {

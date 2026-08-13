@@ -5,14 +5,17 @@ Search the live IconSearch catalog from Raycast, then copy or paste production-r
 ## Features
 
 - Secure IconSearch account connection through a browser approval link.
-- Live search across 355,702 online icons from named libraries and Iconify collections.
+- Live search across 355,702 online icons from 229 upstream icon sets.
 - Raycast-native list UI with inline detail previews, recents, favorites, and a dedicated larger preview page.
-- Filter by library, Iconify collection, style, commercial-safety status, and preferred output format.
+- Filter by icon set and style, then choose a preferred output format.
 - Apply common size and color presets directly from the main search toolbar.
 - Customize icon size from 8 to 512 pixels and choose a preset or custom hex color.
 - Copy or paste React, raw SVG, Vue, Svelte, Tailwind mask snippets, or the SVG URL.
 - Copy or paste a customized SVG file into design tools that accept file clipboard data.
 - Export and reveal a customized SVG in File Explorer or Finder for drag and drop.
+- View the exact upstream author, source, license, and usage requirements for every icon.
+- Preserve the upstream license notice in copied snippets and exported SVG files.
+- Keep redistribution-restricted sets searchable while disabling copy and export actions for those sets.
 - Uses the authenticated production endpoint at `https://iconsearch.info/api/extension/icon-search`.
 
 ## Local Development

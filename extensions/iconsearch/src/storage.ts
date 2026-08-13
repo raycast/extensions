@@ -29,17 +29,37 @@ function normalizeStoredIcon(value: unknown): IconSearchIcon | undefined {
   if (!value || typeof value !== "object") return undefined;
   const item = value as Partial<IconSearchIcon>;
   if (!item.id || !item.name || !item.library || !item.svgUrl) return undefined;
+  if (
+    !item.sourceSetId ||
+    !item.licenseNotice ||
+    typeof item.exportAllowed !== "boolean"
+  ) {
+    return undefined;
+  }
+  const library = String(item.library);
 
   return {
     id: String(item.id),
     name: String(item.name),
     displayName: String(item.displayName || item.name),
-    library: String(item.library),
+    library,
     libraryName: String(item.libraryName || item.library),
     npmPackage: item.npmPackage ? String(item.npmPackage) : undefined,
     license: item.license ? String(item.license) : undefined,
     licenseUrl: item.licenseUrl ? String(item.licenseUrl) : undefined,
-    legalSafe: item.legalSafe === true,
+    sourceSetId: String(item.sourceSetId || library),
+    authorName: item.authorName ? String(item.authorName) : undefined,
+    authorUrl: item.authorUrl ? String(item.authorUrl) : undefined,
+    licenseNotice: String(
+      item.licenseNotice ||
+        `${item.libraryName || library}. Review the upstream license before use.`,
+    ),
+    usageRequirements: String(
+      item.usageRequirements || "Review the upstream license before use.",
+    ),
+    commercialUseAllowed: item.commercialUseAllowed === true,
+    exportAllowed:
+      library !== "untitled-ui-icons" && item.exportAllowed !== false,
     sourceUrl: item.sourceUrl ? String(item.sourceUrl) : undefined,
     svgUrl: String(item.svgUrl),
     previewUrls: Array.isArray(item.previewUrls)

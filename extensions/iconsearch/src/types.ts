@@ -11,8 +11,12 @@ export type IconCustomization = {
 export type Preferences = {
   defaultFormat: OutputFormat;
   tailwindClasses?: string;
-  legalOnly?: boolean;
   defaultStyle: SearchStyle;
+};
+
+export type SourceSetOption = {
+  id: string;
+  name: string;
 };
 
 export type ExtensionAccess = {
@@ -32,7 +36,13 @@ export type IconSearchIcon = {
   npmPackage?: string;
   license?: string;
   licenseUrl?: string;
-  legalSafe: boolean;
+  sourceSetId: string;
+  authorName?: string;
+  authorUrl?: string;
+  licenseNotice: string;
+  usageRequirements: string;
+  commercialUseAllowed: boolean;
+  exportAllowed: boolean;
   sourceUrl?: string;
   svgUrl: string;
   previewUrls: string[];
@@ -46,5 +56,5 @@ export type SearchResult = {
   total: number;
   page: number;
   totalPages: number;
-  iconifySets: string[];
+  sourceSets: SourceSetOption[];
 };

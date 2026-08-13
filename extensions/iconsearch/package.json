@@ -1,7 +1,7 @@
 {
   "name": "iconsearch",
   "title": "IconSearch SVG Icons",
-  "description": "Search and use 350,000+ free SVG icons. Requires a free IconSearch account.",
+  "description": "Search 350,000+ SVG icons from 229 icon sets. Requires a free IconSearch account.",
   "icon": "icon.png",
   "author": "iconsearch",
   "license": "MIT",
@@ -20,7 +20,6 @@
     "svg",
     "react",
     "tailwind",
-    "iconify",
     "design"
   ],
   "homepage": "https://iconsearch.info",
@@ -43,8 +42,7 @@
         "paste",
         "svg",
         "react",
-        "tailwind",
-        "iconify"
+        "tailwind"
       ]
     }
   ],
@@ -90,15 +88,6 @@
       "type": "textfield",
       "required": false,
       "default": "w-5 h-5"
-    },
-    {
-      "name": "legalOnly",
-      "title": "Legal-Safe Results",
-      "description": "Only show icons marked legal-safe by IconSearch.",
-      "type": "checkbox",
-      "required": false,
-      "default": true,
-      "label": "Filter to legal-safe icons"
     },
     {
       "name": "defaultStyle",

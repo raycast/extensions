@@ -47,9 +47,20 @@ export async function createSnippet(
   classes: string,
   customization: IconCustomization,
 ): Promise<string> {
-  if (format === "url") return getCustomizedSvgUrl(icon.svgUrl, customization);
-  if (format === "react")
-    return createReactSnippet(icon, classes, customization);
+  if (format === "url") {
+    return `${getCustomizedSvgUrl(icon.svgUrl, customization)}\n\nLicense notice: ${icon.licenseNotice}`;
+  }
+  if (format === "react") {
+    if (icon.reactImport && icon.reactUsage) {
+      return createReactSnippet(icon, classes, customization);
+    }
+    const svg = customizeSvgMarkup(
+      applySvgClass(await fetchSvgMarkup(icon), classes),
+      icon,
+      customization,
+    );
+    return createInlineReactSnippet(icon, svg);
+  }
   if (format === "svg")
     return customizeSvgMarkup(
       applySvgClass(await fetchSvgMarkup(icon), classes),
@@ -105,7 +116,25 @@ function createReactSnippet(
     `"${escapeAttribute(normalizeIconColor(customization.color))}"`,
   );
   const importText = normalizeReactImport(icon.reactImport);
-  return importText ? `${importText}\n\n${usage}` : usage;
+  const snippet = importText ? `${importText}\n\n${usage}` : usage;
+  return `${createCodeLicenseComment(icon)}\n${snippet}`;
+}
+
+function createInlineReactSnippet(icon: IconSearchIcon, svg: string): string {
+  const componentName = `${toPascalCase(icon.name)}Icon`;
+  const jsx = svg
+    .replace(/<!--(?:[\s\S]*?)-->/g, "")
+    .replace(/\sclass=/g, " className=")
+    .replace(/\sxmlns:xlink=/g, " xmlnsXlink=")
+    .replace(/\sxlink:href=/g, " xlinkHref=")
+    .replace(/\s([a-z][a-z0-9]*-[a-z0-9:-]+)=/gi, (attribute, name: string) => {
+      if (name.startsWith("aria-") || name.startsWith("data-"))
+        return attribute;
+      return ` ${name.replace(/-([a-z0-9])/g, (_, character: string) => character.toUpperCase())}=`;
+    })
+    .replace(/^<svg\b/i, "<svg {...props}");
+
+  return `${createCodeLicenseComment(icon)}\nimport type { SVGProps } from "react";\n\nexport function ${componentName}(props: SVGProps<SVGSVGElement>) {\n  return (\n    ${jsx}\n  );\n}`;
 }
 
 function createUrlSnippet(
@@ -124,14 +153,14 @@ function createUrlSnippet(
   const style = `display: inline-block; width: ${size}px; height: ${size}px; background-color: ${color}; mask: url('${safeUrl}') center / contain no-repeat; -webkit-mask: url('${safeUrl}') center / contain no-repeat;`;
 
   if (format === "tailwind") {
-    return `<span class="${safeClasses}" style="${style}" role="img" aria-label="${safeName}"></span>`;
+    return `${createMarkupLicenseComment(icon)}\n<span class="${safeClasses}" style="${style}" role="img" aria-label="${safeName}"></span>`;
   }
 
   if (format === "vue") {
-    return `<template>\n  <span class="${safeClasses}" style="${style}" role="img" aria-label="${safeName}"></span>\n</template>`;
+    return `${createMarkupLicenseComment(icon)}\n<template>\n  <span class="${safeClasses}" style="${style}" role="img" aria-label="${safeName}"></span>\n</template>`;
   }
 
-  return `<span class="${safeClasses}" style="${style}" role="img" aria-label="${safeName}"></span>`;
+  return `${createMarkupLicenseComment(icon)}\n<span class="${safeClasses}" style="${style}" role="img" aria-label="${safeName}"></span>`;
 }
 
 export function customizeSvgMarkup(
@@ -145,24 +174,37 @@ export function customizeSvgMarkup(
   customized = setSvgRootAttribute(customized, "height", String(size));
   customized = setSvgRootAttribute(customized, "color", color);
 
-  if (color === "currentColor") return customized;
-
-  customized = customized.replace(/currentColor/gi, color);
-  if (!MONOCHROME_LIBRARIES.has(icon.library)) return customized;
+  if (color !== "currentColor") {
+    customized = customized.replace(/currentColor/gi, color);
+    if (MONOCHROME_LIBRARIES.has(icon.library)) {
+      customized = customized.replace(
+        /\s(fill|stroke)\s*=\s*(["'])(.*?)\2/gi,
+        (match, attribute: string, quote: string, value: string) => {
+          const normalizedValue = value.trim().toLowerCase();
+          if (
+            normalizedValue === "none" ||
+            normalizedValue === "transparent" ||
+            normalizedValue.startsWith("url(")
+          )
+            return match;
+          return ` ${attribute}=${quote}${color}${quote}`;
+        },
+      );
+    }
+  }
 
   return customized.replace(
-    /\s(fill|stroke)\s*=\s*(["'])(.*?)\2/gi,
-    (match, attribute: string, quote: string, value: string) => {
-      const normalizedValue = value.trim().toLowerCase();
-      if (
-        normalizedValue === "none" ||
-        normalizedValue === "transparent" ||
-        normalizedValue.startsWith("url(")
-      )
-        return match;
-      return ` ${attribute}=${quote}${color}${quote}`;
-    },
+    /<svg\b[^>]*>/i,
+    (openingTag) => `${openingTag}\n  ${createMarkupLicenseComment(icon)}`,
   );
+}
+
+function createMarkupLicenseComment(icon: IconSearchIcon): string {
+  return `<!-- ${icon.licenseNotice.replace(/--/g, "-")} -->`;
+}
+
+function createCodeLicenseComment(icon: IconSearchIcon): string {
+  return `/* ${icon.licenseNotice.replace(/\*\//g, "* /")} */`;
 }
 
 export function getCustomizedSvgUrl(
@@ -171,7 +213,7 @@ export function getCustomizedSvgUrl(
 ): string {
   try {
     const url = new URL(value);
-    if (url.hostname !== "api.iconify.design") return value;
+    if (!url.pathname.startsWith("/api/svg/")) return value;
 
     const size = normalizeIconSize(customization.size);
     const color = normalizeIconColor(customization.color);
