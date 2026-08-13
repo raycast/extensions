@@ -144,7 +144,7 @@ function WorktreeListItem(context: RepositoryContext & NavigationContext & { wor
       actions={
         <ActionPanel>
           <ActionPanel.Section title={context.worktree.name}>
-            {!isOpened && <WorktreeOpenAction worktree={context.worktree} switchTo={context.switchTo} />}
+            {!isOpened && <WorktreeOpenAction {...context} />}
           </ActionPanel.Section>
 
           <ActionPanel.Section>
