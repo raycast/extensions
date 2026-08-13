@@ -40,7 +40,8 @@ async function isExecutable(path: string): Promise<boolean> {
 }
 
 export async function resolveHerdrBinary(): Promise<string> {
-  const configured = getHerdrPreferences().herdrPath?.trim();
+  const preference = getHerdrPreferences().herdrPath?.trim();
+  const configured = preference?.startsWith("~/") ? join(homedir(), preference.slice(2)) : preference;
   if (configured) {
     if (await isExecutable(configured)) return configured;
     throw new HerdrError(
