@@ -5,6 +5,7 @@ switch in the Raycast menu bar.
 
 - Empty cup: normal closed-lid sleep.
 - Steaming cup: Agent Night Watch is active.
+- Click the cup once to toggle directly during normal operation.
 - Enabling asks for macOS administrator authorization every time.
 - Disabling an owned session does not ask again.
 - The display can still turn off according to macOS settings.
@@ -14,10 +15,10 @@ closed-lid `SleepDisabled` setting and reads it back before reporting success.
 
 ## Setup
 
-1. Enable **Night Watch Menu Bar** to keep the coffee cup visible.
+1. Run **Night Watch Menu Bar** once to keep the coffee cup visible.
 2. Optionally assign `⌥S` to **Toggle Night Watch** in Raycast Settings.
-3. Click **Enable Agent Night Watch** and approve the macOS dialog.
-4. Click **Disable Agent Night Watch** when the job finishes.
+3. Click the coffee cup and approve the macOS dialog to enable it.
+4. Click the coffee cup again to disable it when the job finishes.
 
 ## Safety
 
@@ -26,8 +27,8 @@ ventilated surface. This extension does not add a timer or battery cutoff, so
 you remain responsible for turning it off.
 
 If sleep was disabled by another tool, Agent Night Watch will not claim that
-session. The menu offers a separately confirmed, administrator-authorized
-recovery action.
+session. In that exceptional state, clicking the cup opens a separately
+confirmed, administrator-authorized recovery menu instead of toggling directly.
 
 No password is stored. No privileged helper, sudoers rule, analytics, or
 network request is used.
