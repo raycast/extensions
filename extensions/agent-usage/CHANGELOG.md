@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Fix Antigravity detection on 2.7+] - {PR_MERGE_DATE}
+## [Fix Antigravity detection on 2.7+] - 2026-08-13
 
 ### Bug Fixes
 
