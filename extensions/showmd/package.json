@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "showmd",
+  "title": "ShowMD",
+  "description": "Read and edit markdown in your browser, straight from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "l0kyurue1",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "showmdPath",
+      "title": "ShowMD Path",
+      "description": "Path to the showmd binary. Leave empty to auto-detect it on PATH.",
+      "type": "file",
+      "required": false
+    },
+    {
+      "name": "port",
+      "title": "Port",
+      "description": "Preferred port to check first for ShowMD. ShowMD running on other ports is also found.",
+      "type": "textfield",
+      "required": false,
+      "default": "4321"
+    },
+    {
+      "name": "reuseServer",
+      "title": "Open in Running ShowMD",
+      "description": "Open files in the ShowMD that's already running instead of starting another.",
+      "type": "checkbox",
+      "label": "Open in running ShowMD",
+      "required": false,
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "open",
+      "title": "Open",
+      "description": "Open a recently viewed markdown file, or browse for a folder or file, in ShowMD",
+      "mode": "view"
+    },
+    {
+      "name": "manage-server",
+      "title": "Manage ShowMD",
+      "description": "View ShowMD's status, start, restart, or stop it",
+      "mode": "view"
+    },
+    {
+      "name": "edit-settings",
+      "title": "Edit Settings",
+      "description": "Edit ShowMD's settings",
+      "mode": "view"
+    },
+    {
+      "name": "browse-skills",
+      "title": "Browse Agent Skills",
+      "description": "Browse your installed agent skills in ShowMD",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-selected",
+      "title": "Open Selected",
+      "description": "Open the markdown file or folder selected in Finder or Explorer",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "description": "Show ShowMD's status in the menu bar, with recents and quick controls (macOS only)",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "open-document",
+      "title": "Open Document",
+      "description": "Open a markdown file or folder by path in ShowMD."
+    },
+    {
+      "name": "list-recents",
+      "title": "List Recents",
+      "description": "List the markdown files and folders recently viewed in ShowMD."
+    },
+    {
+      "name": "server-status",
+      "title": "ShowMD Status",
+      "description": "Report whether ShowMD is running, summarize the primary ShowMD, and count how many are running."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^2.2.7",
+    "cross-spawn": "^7.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/cross-spawn": "^6.0.6",
+    "@types/node": "^22.13.1",
+    "eslint": "^9.19.0",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test test/*.test.mjs"
+  }
+}
