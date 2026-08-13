@@ -490,6 +490,22 @@ export async function findServer(
   return { running: false, port: fallbackPort };
 }
 
+async function findServerOnPort(
+  port: number,
+  prefs: ShowmdPrefs,
+  deps: Deps = {},
+): Promise<ServerStatus> {
+  const servers = await listServers(prefs, deps);
+  const s = servers.find((server) => server.port === port);
+  if (!s) return { running: false, port };
+  return {
+    running: true,
+    port: s.port,
+    version: s.version,
+    launcher: s.roots.length === 0,
+  };
+}
+
 // POST /api/roots registers target as a new root (or joins an existing
 // ancestor/descendant one) on a live server and hands back the route to
 // navigate to — the server is the authority on that URL, so it is used
@@ -969,6 +985,7 @@ export interface WaitForServerOptions {
   deps?: Deps;
   timeoutMs?: number;
   want?: "running" | "stopped";
+  requirePort?: number;
 }
 
 // Polls findServer() until it reports the wanted state or timeoutMs elapses.
@@ -979,12 +996,19 @@ export async function waitForServer(
   prefs: ShowmdPrefs,
   options: WaitForServerOptions = {},
 ): Promise<ServerStatus> {
-  const { deps = {}, timeoutMs = 10000, want = "running" } = options;
+  const {
+    deps = {},
+    timeoutMs = 10000,
+    want = "running",
+    requirePort,
+  } = options;
   const resolved = resolveDeps(deps);
   const pollMs = 500;
   const deadline = Date.now() + timeoutMs;
   for (;;) {
-    const status = await findServer(prefs, deps);
+    const status = requirePort
+      ? await findServerOnPort(requirePort, prefs, deps)
+      : await findServer(prefs, deps);
     if (want === "running" ? status.running : !status.running) return status;
     if (Date.now() >= deadline) return status;
     await resolved.sleepImpl(pollMs);
@@ -1001,7 +1025,11 @@ export async function targetUrlAfterSpawn(
   const waitPrefs = result.port
     ? { ...prefs, port: String(result.port) }
     : prefs;
-  const status = await waitForServer(waitPrefs, { deps, timeoutMs });
+  const status = await waitForServer(waitPrefs, {
+    deps,
+    timeoutMs,
+    requirePort: result.port,
+  });
   if (!status.running) return { running: false };
   const url = await addTargetUrl(target, status.port, deps);
   return url ? { running: true, url } : { running: true };

@@ -1,6 +1,6 @@
 # ShowMD Changelog
 
-## Initial Version
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Open files and folders with a native picker, or return to recent documents.
   Open a recent document's containing folder, reveal it in Finder, copy its

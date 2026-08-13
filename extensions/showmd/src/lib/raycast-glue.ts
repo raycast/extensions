@@ -33,11 +33,7 @@ import {
 import { resolveOpenTarget, type TargetKind } from "./target-resolution";
 
 export function getShowmdPrefs(): ShowmdPrefs {
-  const prefs = getPreferenceValues<{
-    showmdPath?: string;
-    port?: string;
-    reuseServer?: boolean;
-  }>();
+  const prefs = getPreferenceValues<Preferences>();
   return {
     showmdPath: prefs.showmdPath,
     port: prefs.port,

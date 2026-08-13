@@ -497,6 +497,41 @@ test("targetUrlAfterSpawn: opens the requested document instead of ShowMD Home",
   assert.deepEqual(posted, [{ path: "/notes/example.md" }]);
 });
 
+test("targetUrlAfterSpawn: waits for the spawned port, not an older server", async () => {
+  const posted = [];
+  let newPortLive = false;
+  const deps = fakeDeps({
+    readDir: async () => [],
+    sleepImpl: async () => {
+      newPortLive = true;
+    },
+    fetchImpl: async (url, opts) => {
+      const forNewPort = url.includes(":51999/");
+      if (forNewPort && !newPortLive) throw new Error("ECONNREFUSED");
+      if (url.endsWith("/api/version")) return versionResponse("shared");
+      if (opts?.method === "POST" && url.endsWith("/api/roots")) {
+        posted.push({ port: forNewPort ? 51999 : 4321 });
+        return { ok: true, json: async () => ({ url: "/r/abc/example.md" }) };
+      }
+      if (url.endsWith("/api/roots")) return rootsResponse([]);
+      throw new Error(`unexpected ${url}`);
+    },
+  });
+
+  const result = await targetUrlAfterSpawn(
+    "/notes/example.md",
+    {},
+    { ok: true, port: 51999 },
+    deps,
+  );
+
+  assert.deepEqual(result, {
+    running: true,
+    url: "http://127.0.0.1:51999/r/abc/example.md",
+  });
+  assert.deepEqual(posted, [{ port: 51999 }]);
+});
+
 test("resolveBinary: preference path comes first, npx is the last rung", () => {
   const ladder = resolveBinary({ showmdPath: "/custom/showmd" }, fakeDeps());
   assert.equal(ladder[0].command, "/custom/showmd");
