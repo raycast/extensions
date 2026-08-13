@@ -60,9 +60,6 @@ export function getWorkspaceTerminalChoices(): TerminalChoice[] {
   return isMacPlatform() ? WORKSPACE_TERMINAL_CHOICES_MAC : WORKSPACE_TERMINAL_CHOICES_WINDOWS;
 }
 
-/** @deprecated Prefer getWorkspaceTerminalChoices(); kept for Windows-oriented callers/tests. */
-export const WORKSPACE_TERMINAL_CHOICES: TerminalChoice[] = WORKSPACE_TERMINAL_CHOICES_WINDOWS;
-
 export const TERMINAL_APPLICATION_CHOICES_WINDOWS: TerminalChoice[] = [
   { id: "system", title: "Let Windows choose" },
   { id: "wt", title: "Windows Terminal" },
@@ -79,9 +76,6 @@ export const TERMINAL_APPLICATION_CHOICES_MAC: TerminalChoice[] = [
 export function getTerminalApplicationChoices(): TerminalChoice[] {
   return isMacPlatform() ? TERMINAL_APPLICATION_CHOICES_MAC : TERMINAL_APPLICATION_CHOICES_WINDOWS;
 }
-
-/** @deprecated Prefer getTerminalApplicationChoices(). */
-export const TERMINAL_APPLICATION_CHOICES: TerminalChoice[] = TERMINAL_APPLICATION_CHOICES_WINDOWS;
 
 const CONHOST_PROFILE_CHOICES: TerminalChoice[] = [
   { id: "__default__", title: "Default profile for this app" },

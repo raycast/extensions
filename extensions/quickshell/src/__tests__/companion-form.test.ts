@@ -4,7 +4,7 @@ import {
   COMPANION_CHOICE_TITLE_NONE,
   COMPANION_PRESET_CUSTOM,
   COMPANION_PRESET_NONE,
-  COMPANION_PRESETS,
+  getCompanionPresets,
   inferCompanionPresetFromPath,
   listCompanionFormChoices,
   normalizeCompanionPresetForForm,
@@ -31,10 +31,9 @@ afterEach(() => {
 
 describe("companion-catalog", () => {
   it("lists presets with stable ids and default arguments", () => {
-    expect(COMPANION_PRESETS.length).toBeGreaterThan(5);
-    expect(COMPANION_PRESETS.every((preset) => preset.id && preset.title && preset.candidatePaths.length > 0)).toBe(
-      true,
-    );
+    const presets = getCompanionPresets();
+    expect(presets.length).toBeGreaterThan(5);
+    expect(presets.every((preset) => preset.id && preset.title && preset.candidatePaths.length > 0)).toBe(true);
     expect(resolveCompanionPreset("missing-preset")).toBeNull();
   });
 

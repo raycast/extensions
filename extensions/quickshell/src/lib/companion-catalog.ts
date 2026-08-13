@@ -199,9 +199,6 @@ export function getCompanionPresets(): CompanionPreset[] {
   return isMacPlatform() ? MAC_COMPANION_PRESETS : WINDOWS_COMPANION_PRESETS;
 }
 
-/** @deprecated Prefer getCompanionPresets(); Windows catalog for tests that do not stub platform. */
-export const COMPANION_PRESETS: CompanionPreset[] = WINDOWS_COMPANION_PRESETS;
-
 let cachedCompanionChoices: CompanionFormChoice[] | null = null;
 
 export function resolveCompanionPreset(presetId: string): { path: string; arguments: string } | null {

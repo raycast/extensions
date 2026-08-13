@@ -4,12 +4,11 @@ import {
   discoverWorkspaceTerminalChoices,
   invalidateTerminalCatalogCache,
   parseJsoncForTests,
-  resetTerminalCatalogCacheForTests,
 } from "../lib/terminal-catalog";
 
 describe("terminal-catalog", () => {
   it("returns workspace terminal choices on non-windows platforms", () => {
-    resetTerminalCatalogCacheForTests();
+    invalidateTerminalCatalogCache();
     const choices = discoverWorkspaceTerminalChoices();
     expect(choices.some((choice) => choice.id === "default")).toBe(true);
     expect(choices.some((choice) => choice.id === "same-as-previous")).toBe(true);

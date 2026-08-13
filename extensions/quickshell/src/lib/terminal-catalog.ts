@@ -191,11 +191,6 @@ export function invalidateTerminalCatalogCache(): void {
   executableExistsCache.clear();
 }
 
-/** @deprecated Prefer invalidateTerminalCatalogCache in production code. */
-export function resetTerminalCatalogCacheForTests(): void {
-  invalidateTerminalCatalogCache();
-}
-
 export function discoverDefaultProfileChoices(terminalApplication: string): TerminalChoice[] {
   if (terminalApplication === "wt" || terminalApplication === "it" || terminalApplication === "system") {
     const profiles = readWindowsTerminalProfiles();
