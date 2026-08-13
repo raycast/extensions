@@ -7,6 +7,7 @@
 - Unread Notifications: Paginate the GitHub inbox so the menu bar count and repository filters include all unread threads, not just the first page.
 - Clone in VS Code: Add an extension preference to choose VS Code or Cursor, defaulting to VS Code from every repository command.
 - Open in Web IDE: Add **DeepWiki** to open AI-generated repository docs at deepwiki.com.
+- Search Issues: Look up a specific issue by number (`#123`, `owner/repo#123`, or `repo:owner/name 123`) via the GitHub API instead of full-text search.
 
 ## [Clarify Clone and Download Actions] - 2026-08-13
 

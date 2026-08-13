@@ -10,7 +10,7 @@ import { getBoundedPreferenceNumber } from "./components/Menu";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
 import { IssueFieldsFragment } from "./generated/graphql";
 import { pluralize } from "./helpers";
-import { ISSUE_DEFAULT_SORT_QUERY } from "./helpers/issue";
+import { ISSUE_DEFAULT_SORT_QUERY, normalizeIssueSearchText, parseIssueNumberLookup } from "./helpers/issue";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useViewer } from "./hooks/useViewer";
 
@@ -32,9 +32,21 @@ function SearchIssues() {
     mutate: mutateList,
   } = useCachedPromise(
     async (searchText, searchFilter, sortTxt) => {
+      const lookup = parseIssueNumberLookup(`${searchFilter ?? ""} ${searchText}`);
+      if (lookup) {
+        try {
+          const exact = await github.issueByNumber(lookup);
+          if (exact.repository?.issue) {
+            return [exact.repository.issue as IssueFieldsFragment];
+          }
+        } catch {
+          // Fall back to search when the repository is inaccessible.
+        }
+      }
+
       const result = await github.searchIssues({
         numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
-        query: `is:issue archived:false ${sortTxt} ${searchFilter} ${searchText}`,
+        query: `is:issue archived:false ${sortTxt} ${searchFilter} ${normalizeIssueSearchText(searchText)}`,
       });
 
       return result.search.nodes?.map((node) => node as IssueFieldsFragment);
@@ -46,7 +58,7 @@ function SearchIssues() {
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Globally search issues across repositories"
+      searchBarPlaceholder="Search issues, or owner/repo#123"
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
       searchText={searchText}
       onSearchTextChange={setSearchText}
