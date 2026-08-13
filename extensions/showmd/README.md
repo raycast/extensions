@@ -3,23 +3,33 @@
 Read and edit markdown in your browser, straight from Raycast.
 
 Open files and folders, return to recent documents, browse your installed agent
-skills, and manage running ShowMD windows and Spaces. ShowMD runs entirely on
+skills, and manage running ShowMD sessions and their open folders. ShowMD runs entirely on
 localhost, so your files never leave your machine.
+
+## How it differs from other markdown extensions
+
+ShowMD is not a note, task, or web-clipping app inside Raycast, and it does
+not prescribe a vault, frontmatter, or publishing workflow. It is a companion
+to [ShowMD](https://github.com/l0kyurue1/showmd), which runs on your machine:
+Raycast finds, launches, and manages ShowMD, while reading and editing happen
+in your browser with a rendered Read Mode, a CodeMirror editor, and built-in
+offline version history. It opens your existing folders and `.md` or
+`.markdown` files in place, and needs no account or sign-in.
 
 ## Commands
 
 - **Open**: browse ShowMD's recent files, or choose a folder or markdown file
   with a native dialog. A folder must contain a markdown file within 3 levels
-  of subdirectories. ShowMD adds the target as a Space to a running window when
+  of subdirectories. ShowMD adds the target to a running session when
   possible, or starts a new one.
-- **Manage ShowMD**: see every running ShowMD window and its Spaces. Open,
-  restart, or stop a window; stop them all; or start ShowMD when it is not
-  running.
+- **Manage ShowMD**: see every running ShowMD session and its open folders.
+  Open, restart, or stop a session; stop them all; or start ShowMD when it is
+  not running.
 - **Edit Settings**: edit ShowMD's settings (color mode, open mode, font family and size, browser, port, update check) from a form.
 - **Browse Agent Skills**: open ShowMD's Skills page, starting `showmd skills`
   if needed.
 - **Open Selected**: open the markdown file or folder currently selected in Finder or Explorer.
-- **Menu Bar** (macOS only): see running ShowMD windows and Spaces, open recent
+- **Menu Bar** (macOS only): see running ShowMD sessions and their open folders, open recent
   documents, and start or stop ShowMD from the menu bar.
 
 Every command with a Raycast view (Open, Manage ShowMD, Edit Settings) carries
@@ -33,7 +43,7 @@ Bug, Request Feature, and Star on GitHub.
 This extension exposes three tools an AI assistant can call directly:
 `open-document` (open a file or folder by path), `list-recents` (list
 recently viewed files), and `server-status` (report whether ShowMD is
-running, what its first window is showing, and count how many are running).
+running, what its first session is showing, and count how many are running).
 
 ## Requirements
 
