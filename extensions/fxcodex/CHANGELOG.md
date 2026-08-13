@@ -1,6 +1,6 @@
 # fxCodex Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-13
 
 - Manage multiple Codex workspaces and switch between them from Raycast.
 - Create, rename, delete, open, and inspect workspaces.
