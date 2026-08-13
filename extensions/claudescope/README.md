@@ -5,6 +5,18 @@ extension works with Claude Code, Codex, Copilot CLI, Junie, pi, opencode,
 Antigravity, and Grok sessions already indexed by
 [ClaudeScope](https://github.com/vladar107/claudescope).
 
+## How ClaudeScope Differs
+
+ClaudeScope is the Raycast companion to a full local transcript browser and
+persistent multi-agent index. Search results open the exact matched message in
+the complete threaded transcript, where ClaudeScope also exposes tool calls,
+file changes, subagents, token usage, cost, and analytics. Recent Sessions uses
+the same normalized project and agent metadata across every supported source.
+
+Unlike Claude Code-specific launchers and automation tools, ClaudeScope is
+strictly read-only and works across multiple coding agents. It never resumes,
+runs, modifies, or deletes agent sessions.
+
 ## Requirements
 
 - macOS with Raycast
