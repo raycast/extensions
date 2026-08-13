@@ -3,6 +3,7 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import { promisify } from "util";
+import { PDFDocument } from "pdf-lib";
 import { renderTextFilePdf } from "./textpdf";
 
 const execFileAsync = promisify(execFile);
@@ -44,7 +45,10 @@ const BACKEND_EXTS: Record<Exclude<BackendType, "builtin">, Set<string>> = {
   keynote: new Set([".key", ".pptx", ".ppt"]),
   powerpoint: new Set([".pptx", ".ppt", ".pps", ".ppsx", ".odp"]),
   pages: new Set([".pages", ".docx", ".doc", ".rtf", ".txt"]),
-  word: new Set([".docx", ".doc", ".odt", ".rtf", ".txt"]),
+  // Word can't be driven for .txt: it imports plain text into an unsaved scratch document named
+  // ~WRD0000 in its own Temp folder, so the file it opened cannot be identified and every
+  // conversion stalls until the wait loop gives up. Other formats keep their real name and path.
+  word: new Set([".docx", ".doc", ".odt", ".rtf"]),
   numbers: new Set([".numbers", ".xlsx", ".xls", ".csv"]),
   excel: new Set([".xlsx", ".xls", ".ods", ".csv"]),
   libreoffice: new Set(
@@ -91,6 +95,9 @@ const EXT_PRIORITY: Record<string, BackendType[]> = {
   ".doc": ["word", "pages", "libreoffice"],
   ".pages": ["pages"],
   ".odt": ["libreoffice", "word"],
+  // Plain text has no formatting to preserve, so the bundled renderer is both exact and instant —
+  // no reason to launch a word processor for it.
+  ".txt": ["builtin", "pages", "libreoffice"],
   ".xlsx": ["excel", "numbers", "libreoffice"],
   ".xls": ["excel", "numbers", "libreoffice"],
   ".numbers": ["numbers"],
@@ -232,10 +239,10 @@ async function runAppleScript(script: string, tag: string, timeoutCleanup?: stri
   }
 }
 
-// Per-app AppleScript vocabulary. The plural collection and whose-filters derive from docClass;
-// exportLine must reference theDoc and outFile. Excel's dictionary differs from Word's
-// ("save workbook as … filename … file format PDF file format"); only Keynote supports
-// PDF image quality.
+// Per-app AppleScript vocabulary. docClass names the document class and its plural collection;
+// every other entry is a function of the document expression the script currently addresses.
+// Excel's dictionary differs from Word's ("save workbook as … filename … file format PDF file
+// format"); only Keynote supports PDF image quality.
 interface AppScriptSpec {
   docClass: string;
   exportLine: (doc: string) => string; // export statement for a document expression, writing to outFile
@@ -498,20 +505,17 @@ function publishFile(staging: string, outputPath: string): void {
   }
 }
 
-// A PDF whose %%EOF trailer never got written is a truncated export, not a finished document.
-// Readers tolerate bytes after the trailer, so the last kilobyte is scanned, not only the end.
-function isCompletePdf(p: string): boolean {
-  let fd: number | undefined;
+// Whether a file left behind by a failed export is a usable PDF. Parsing it is the only honest
+// check: a %%EOF trailer says nothing about the body, and an export that died halfway can leave a
+// file that still ends in one. Encrypted output counts as usable — it opens fine in a reader, so
+// discarding it would lose a good conversion. Only reached on the error path, so the parse costs
+// nothing in the normal case.
+async function isReadablePdf(p: string): Promise<boolean> {
   try {
-    fd = fs.openSync(p, "r");
-    const size = fs.fstatSync(fd).size;
-    const tail = Buffer.alloc(Math.min(1024, size));
-    fs.readSync(fd, tail, 0, tail.length, size - tail.length);
-    return tail.includes("%%EOF");
+    const doc = await PDFDocument.load(fs.readFileSync(p), { ignoreEncryption: true });
+    return doc.getPageCount() > 0;
   } catch {
     return false;
-  } finally {
-    if (fd !== undefined) fs.closeSync(fd);
   }
 }
 
@@ -566,15 +570,21 @@ async function runBackend(backend: Backend, src: string, outputPath: string): Pr
   const tmpOut = sandboxSafeOutputPath(type);
   const scriptOut = tmpOut ?? outputPath;
   try {
-    await runAppleScript(
-      conversionScript(backend.appName!, src, scriptOut, APP_SPECS[type]),
-      type,
-      closeDocScript(backend.appName!, src, APP_SPECS[type]),
-    );
-  } catch (e) {
-    // Keep a PDF that was produced despite a late script error (e.g. quit failing) — but only
-    // a complete one: an error during the export itself can leave a truncated file behind.
-    if (!isCompletePdf(scriptOut)) throw e;
+    try {
+      await runAppleScript(
+        conversionScript(backend.appName!, src, scriptOut, APP_SPECS[type]),
+        type,
+        closeDocScript(backend.appName!, src, APP_SPECS[type]),
+      );
+    } catch (e) {
+      // Keep a PDF that was produced despite a late script error (the close failing after a good
+      // export) — but only a readable one, so a half-written file falls through to the next engine.
+      if (!(await isReadablePdf(scriptOut))) throw e;
+    }
+    if (tmpOut && fs.existsSync(tmpOut)) moveFile(tmpOut, outputPath);
+  } finally {
+    // A failed export can leave a partial file inside the app's container, where nothing else
+    // would ever clean it up. moveFile already removed it on the success path.
+    if (tmpOut) fs.rmSync(tmpOut, { force: true });
   }
-  if (tmpOut && fs.existsSync(tmpOut)) moveFile(tmpOut, outputPath);
 }
