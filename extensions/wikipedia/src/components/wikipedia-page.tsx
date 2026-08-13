@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, Icon, useNavigation, Keyboard } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import dedent from "dedent";
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 
 import {
   formatMetadataValue,
@@ -24,15 +24,48 @@ const openInBrowser = preferences.openIn === "browser";
 
 type HistoryEntry = { title: string; language: Locale };
 
+type HistoryState = {
+  entries: HistoryEntry[];
+  index: number;
+};
+
+type HistoryAction = { type: "back" } | { type: "forward" } | { type: "navigate"; title: string; language: Locale };
+
+function reduceHistory(state: HistoryState, action: HistoryAction): HistoryState {
+  switch (action.type) {
+    case "back":
+      if (state.index === 0) {
+        return state;
+      }
+      return { ...state, index: state.index - 1 };
+    case "forward":
+      if (state.index >= state.entries.length - 1) {
+        return state;
+      }
+      return { ...state, index: state.index + 1 };
+    case "navigate":
+      return {
+        entries: [...state.entries.slice(0, state.index + 1), { title: action.title, language: action.language }],
+        index: state.index + 1,
+      };
+    default: {
+      const _exhaustive: never = action;
+      return _exhaustive;
+    }
+  }
+}
+
 export default function WikipediaPage({ title, language }: { title: string; language: Locale }) {
   const { pop } = useNavigation();
   const { addToReadArticles } = useRecentArticles();
   const [showMetadata, setShowMetadata] = useCachedState("showMetadata", false);
-  const [history, setHistory] = useState<HistoryEntry[]>([{ title, language }]);
-  const [index, setIndex] = useState(0);
+  const [history, setHistory] = useState<HistoryState>({
+    entries: [{ title, language }],
+    index: 0,
+  });
+  const historyRef = useRef(history);
 
-  const current = history[index];
-  const canGoForward = index < history.length - 1;
+  const current = history.entries[history.index];
 
   const { page, content, metadata, links, isLoading } = usePageData(current.title, current.language);
 
@@ -40,27 +73,28 @@ export default function WikipediaPage({ title, language }: { title: string; lang
     addToReadArticles({ title: current.title, language: current.language });
   }, [current.title, current.language]);
 
+  function applyHistory(action: HistoryAction) {
+    // Apply against the pending snapshot so rapid actions don't use a stale render-time index.
+    const next = reduceHistory(historyRef.current, action);
+    historyRef.current = next;
+    setHistory(next);
+  }
+
   function goBack() {
-    if (index > 0) {
-      setIndex(index - 1);
+    if (historyRef.current.index === 0) {
+      pop();
       return;
     }
 
-    pop();
+    applyHistory({ type: "back" });
   }
 
   function goForward() {
-    if (canGoForward) {
-      setIndex(index + 1);
-    }
+    applyHistory({ type: "forward" });
   }
 
   function navigate(nextTitle: string, nextLanguage: Locale) {
-    setHistory((entries: HistoryEntry[]) => [
-      ...entries.slice(0, index + 1),
-      { title: nextTitle, language: nextLanguage },
-    ]);
-    setIndex(index + 1);
+    applyHistory({ type: "navigate", title: nextTitle, language: nextLanguage });
   }
 
   const body = content ? renderContent(content, 2, links, current.language, openInBrowser) : "";
