@@ -72,9 +72,9 @@ npm run dev
 
 Run `npm run build` before submitting Store changes. Do not add a `version` field to `package.json`; Store versioning uses `CHANGELOG.md`.
 
-On Windows, `scripts/deploy-all.ps1`, and `scripts/build-raycast-extension.ps1` all publish `QuickShell.Suggest.exe` into Raycast `assets/` (gitignored; generated at build/publish time). The CLI needs the .NET 10 Desktop Runtime. macOS continues to use local folder heuristics.
+The Windows suggestion CLI (`QuickShell.Suggest.exe`) is not bundled in this Store build; `fetchSuggestionPills` falls back to local folder heuristics when `assets/QuickShell.Suggest.exe` is absent, which it always is here. macOS also uses local heuristics.
 
-**Distribution:** publish via the [Raycast Store](https://www.raycast.com/store) only. GitHub Releases and WinGet do not ship Raycast sideload packages. `scripts/build-raycast-extension.ps1` is for local/dev packaging.
+**Distribution:** publish via the [Raycast Store](https://www.raycast.com/store) only.
 
 ## Store checklist
 
