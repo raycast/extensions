@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-08-13
 
 ### Added
 - **Manage Repositories**: Open a repository automatically after adding or creating a single one
