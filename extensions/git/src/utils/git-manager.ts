@@ -1065,7 +1065,11 @@ __REBASE_TODO__
         try {
           await this.popStash(0);
         } catch {
-          // Restore failed; the auto-stash remains in the stash list
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Stashed changes were not restored",
+            message: "They remain in the Stashes view.",
+          });
         }
         throw retryError;
       }
