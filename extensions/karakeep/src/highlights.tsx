@@ -4,9 +4,6 @@ import { logger } from "@chrismessina/raycast-logger";
 import { fetchDeleteHighlight, fetchGetAllHighlights, fetchGetSingleBookmark, fetchUpdateHighlight } from "./apis";
 import { BookmarkDetail } from "./components/BookmarkDetail";
 import { useTranslation } from "./hooks/useTranslation";
-import { connectionGuard } from "./components/ConnectionErrorView";
-import { handleFetchError } from "./utils/fetchError";
-import { useLiveData } from "./hooks/useLiveData";
 import { Highlight } from "./types";
 import { runWithToast } from "./utils/toast";
 
@@ -50,21 +47,14 @@ async function deleteHighlight(id: string, t: (key: string) => string, onSuccess
 }
 
 function useGetAllHighlights() {
-  const { isLoading, data, error, revalidate } = useCachedPromise(
-    async () => {
-      log.log("Fetching highlights");
-      const result = await fetchGetAllHighlights();
-      log.info("Highlights fetched", { count: result.highlights?.length ?? 0 });
-      return result.highlights || [];
-    },
-    [],
-    // Suppresses Raycast's built-in "Failed to fetch latest data" toast.
-    { onError: handleFetchError("highlights") },
-  );
+  const { isLoading, data, error, revalidate } = useCachedPromise(async () => {
+    log.log("Fetching highlights");
+    const result = await fetchGetAllHighlights();
+    log.info("Highlights fetched", { count: result.highlights?.length ?? 0 });
+    return result.highlights || [];
+  });
 
-  const hasLiveData = useLiveData(isLoading, error);
-
-  return { isLoading, highlights: data || [], error, hasLiveData, revalidate };
+  return { isLoading, highlights: data || [], error, revalidate };
 }
 
 function EditHighlightForm({ highlight, onUpdated }: { highlight: Highlight; onUpdated: () => void }) {
@@ -76,7 +66,7 @@ function EditHighlightForm({ highlight, onUpdated }: { highlight: Highlight; onU
   >({
     initialValues: { text: highlight.text, note: highlight.note || "", color: highlight.color || "" },
     validation: {
-      text: (v) => (!v?.trim() ? t("common.fieldRequired", { field: t("highlights.highlightText") }) : undefined),
+      text: (v) => (!v?.trim() ? t("highlights.highlightText") + " is required" : undefined),
     },
     async onSubmit(values) {
       log.info("Updating highlight", { highlightId: highlight.id });
@@ -210,10 +200,7 @@ function HighlightDetail({ highlight, onRefresh }: { highlight: Highlight; onRef
 export default function Highlights() {
   const { push } = useNavigation();
   const { t } = useTranslation();
-  const { isLoading, highlights, error, hasLiveData, revalidate } = useGetAllHighlights();
-
-  const guard = connectionGuard(error, hasLiveData, revalidate);
-  if (guard) return guard;
+  const { isLoading, highlights, revalidate } = useGetAllHighlights();
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder={t("highlights.searchPlaceholder")}>

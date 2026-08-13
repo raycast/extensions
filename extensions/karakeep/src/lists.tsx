@@ -10,15 +10,12 @@ import { useGetAllBookmarks } from "./hooks/useGetAllBookmarks";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useGetListsBookmarks } from "./hooks/useGetListsBookmarks";
 import { useTranslation } from "./hooks/useTranslation";
-import { connectionGuard } from "./components/ConnectionErrorView";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
-import { ChooseIconAction, DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
 import { runWithToast } from "./utils/toast";
-import { labelLists } from "./utils/listLabels";
 
 const log = logger.child("[Lists]");
 
-interface ListNode {
+interface ListWithCount {
   id: string;
   name: string;
   icon: string;
@@ -26,12 +23,13 @@ interface ListNode {
   type?: "manual" | "smart";
   description?: string;
   query?: string;
-  children?: ListNode[];
+  count: number;
+  children?: ListWithCount[];
 }
 
-function buildHierarchy(lists: ListNode[]): ListNode[] {
-  const listMap = new Map(lists.map((list) => [list.id, { ...list, children: [] as ListNode[] }]));
-  const rootLists: ListNode[] = [];
+function buildHierarchy(lists: ListWithCount[]): ListWithCount[] {
+  const listMap = new Map(lists.map((list) => [list.id, { ...list, children: [] as ListWithCount[] }]));
+  const rootLists: ListWithCount[] = [];
 
   lists.forEach((list) => {
     if (list.parentId === null) {
@@ -49,7 +47,7 @@ function buildHierarchy(lists: ListNode[]): ListNode[] {
 }
 
 function ListBookmarksView({ listId, listName }: { listId: string; listName: string }) {
-  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetListsBookmarks(listId);
+  const { bookmarks, isLoading, revalidate, pagination } = useGetListsBookmarks(listId);
   const { t } = useTranslation();
 
   const handleRefresh = async () => {
@@ -70,15 +68,10 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
     });
   };
 
-  const guard = connectionGuard(error, hasLiveData, revalidate);
-  if (guard) return guard;
-
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
-      error={error}
-      hasLiveData={hasLiveData}
       onRefresh={handleRefresh}
       pagination={pagination}
       searchBarPlaceholder={t("list.searchInList", { name: listName })}
@@ -89,20 +82,15 @@ function ListBookmarksView({ listId, listName }: { listId: string; listName: str
 }
 
 function ArchivedBookmarks() {
-  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetAllBookmarks({
+  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
     archived: true,
   });
   const { t } = useTranslation();
-
-  const guard = connectionGuard(error, hasLiveData, revalidate);
-  if (guard) return guard;
 
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
-      error={error}
-      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("list.searchInArchived")}
@@ -113,20 +101,14 @@ function ArchivedBookmarks() {
 }
 
 function FavoritedBookmarks() {
-  const { bookmarks, isLoading, error, hasLiveData, revalidate, pagination } = useGetAllBookmarks({
+  const { bookmarks, isLoading, revalidate, pagination } = useGetAllBookmarks({
     favourited: true,
   });
   const { t } = useTranslation();
-
-  const guard = connectionGuard(error, hasLiveData, revalidate);
-  if (guard) return guard;
-
   return (
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
-      error={error}
-      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("list.searchInFavorites")}
@@ -145,15 +127,15 @@ interface ListFormValues {
   query: string;
 }
 
-function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: () => void }) {
+function CreateListForm({ lists, onCreated }: { lists: ListWithCount[]; onCreated: () => void }) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
 
   const { handleSubmit, itemProps, setValue, values } = useForm<ListFormValues>({
-    initialValues: { name: "", icon: DEFAULT_LIST_ICON, description: "", parentId: "", type: "manual", query: "" },
+    initialValues: { name: "", icon: "", description: "", parentId: "", type: "manual", query: "" },
     validation: {
-      name: (value) => (!value?.trim() ? t("common.fieldRequired", { field: t("list.listName") }) : undefined),
-      icon: (value) => (!isEmoji(value || "") ? t("list.listIconInvalid") : undefined),
+      name: (value) => (!value?.trim() ? t("list.listName") + " is required" : undefined),
+      icon: (value) => (!isEmoji(value || "") ? "Must be a valid emoji" : undefined),
       query: makeSmartQueryValidator(t),
     },
     async onSubmit(values) {
@@ -165,7 +147,7 @@ function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: ()
         action: async () => {
           const payload = {
             name: values.name.trim(),
-            icon: values.icon.trim() || DEFAULT_LIST_ICON,
+            icon: values.icon.trim() || undefined,
             description: values.description.trim() || undefined,
             parentId: values.parentId || undefined,
             type: values.type as "manual" | "smart",
@@ -187,7 +169,6 @@ function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: ()
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("list.createList")} onSubmit={handleSubmit} icon={Icon.Plus} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
@@ -200,7 +181,7 @@ function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: ()
         placeholder={t("list.listNamePlaceholder")}
         autoFocus
       />
-      <ListIconField {...itemProps.icon} />
+      <Form.TextField {...itemProps.icon} title={t("list.listIcon")} placeholder={t("list.listIconPlaceholder")} />
       <Form.TextField
         {...itemProps.description}
         title={t("list.listDescription")}
@@ -208,8 +189,8 @@ function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: ()
       />
       <Form.Dropdown {...itemProps.parentId} title={t("list.listParent")}>
         <Form.Dropdown.Item value="" title={t("list.listParentNone")} />
-        {labelLists(lists).map(({ list: l, label }) => (
-          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${label}` : label} />
+        {lists.map((l) => (
+          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${l.name}` : l.name} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown {...itemProps.type} title={t("list.listType")}>
@@ -228,22 +209,30 @@ function CreateListForm({ lists, onCreated }: { lists: ListNode[]; onCreated: ()
   );
 }
 
-function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListNode[]; onUpdated: () => void }) {
+function EditListForm({
+  list,
+  lists,
+  onUpdated,
+}: {
+  list: ListWithCount;
+  lists: ListWithCount[];
+  onUpdated: () => void;
+}) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
 
   const { handleSubmit, itemProps, setValue, values } = useForm<ListFormValues>({
     initialValues: {
       name: list.name,
-      icon: list.icon || DEFAULT_LIST_ICON,
+      icon: list.icon || "",
       description: list.description || "",
       parentId: list.parentId || "",
       type: list.type || "manual",
       query: list.query || "",
     },
     validation: {
-      name: (value) => (!value?.trim() ? t("common.fieldRequired", { field: t("list.listName") }) : undefined),
-      icon: (value) => (!isEmoji(value || "") ? t("list.listIconInvalid") : undefined),
+      name: (value) => (!value?.trim() ? t("list.listName") + " is required" : undefined),
+      icon: (value) => (!isEmoji(value || "") ? "Must be a valid emoji" : undefined),
       query: makeSmartQueryValidator(t),
     },
     async onSubmit(values) {
@@ -255,7 +244,7 @@ function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListN
         action: async () => {
           const payload = {
             name: values.name.trim(),
-            icon: values.icon.trim() || DEFAULT_LIST_ICON,
+            icon: values.icon.trim() || undefined,
             description: values.description.trim() || undefined,
             parentId: values.parentId || null,
             type: values.type as "manual" | "smart",
@@ -280,7 +269,6 @@ function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListN
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("list.editList")} onSubmit={handleSubmit} icon={Icon.Pencil} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
@@ -293,7 +281,7 @@ function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListN
         placeholder={t("list.listNamePlaceholder")}
         autoFocus
       />
-      <ListIconField {...itemProps.icon} />
+      <Form.TextField {...itemProps.icon} title={t("list.listIcon")} placeholder={t("list.listIconPlaceholder")} />
       <Form.TextField
         {...itemProps.description}
         title={t("list.listDescription")}
@@ -301,8 +289,8 @@ function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListN
       />
       <Form.Dropdown {...itemProps.parentId} title={t("list.listParent")}>
         <Form.Dropdown.Item value="" title={t("list.listParentNone")} />
-        {labelLists(parentOptions).map(({ list: l, label }) => (
-          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${label}` : label} />
+        {parentOptions.map((l) => (
+          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${l.name}` : l.name} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown {...itemProps.type} title={t("list.listType")}>
@@ -324,25 +312,23 @@ function EditListForm({ list, lists, onUpdated }: { list: ListNode; lists: ListN
 const getDashboardListsPage = (apiUrl: string, listId: string) => `${apiUrl}/dashboard/lists/${listId}`;
 
 interface ListItemProps {
-  list: ListNode;
-  /** Disambiguated name — see labelLists. Falls back to list.name. */
-  label: string;
+  list: ListWithCount;
   level: number;
   apiUrl: string;
-  onOpen: (list: ListNode) => void;
-  onEdit: (list: ListNode) => void;
+  onOpen: (list: ListWithCount) => void;
+  onEdit: (list: ListWithCount) => void;
   onCreate: () => void;
   onDelete: (id: string) => void;
   t: (key: string) => string;
 }
 
-function ListItem({ list, label, level, apiUrl, onOpen, onEdit, onCreate, onDelete, t }: ListItemProps) {
+function ListItem({ list, level, apiUrl, onOpen, onEdit, onCreate, onDelete, t }: ListItemProps) {
   const icon = list.icon || (list.type === "smart" ? "✨" : undefined);
   return (
     <List.Item
       key={list.id}
       icon={icon}
-      title={`${"  ".repeat(level)}${label}`}
+      title={`${"  ".repeat(level)}${list.name} (${list.count})`}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -389,7 +375,7 @@ function ListItem({ list, label, level, apiUrl, onOpen, onEdit, onCreate, onDele
 }
 
 export default function Lists() {
-  const { isLoading, lists, error, hasLiveData, revalidate } = useGetAllLists();
+  const { isLoading, lists, revalidate } = useGetAllLists();
   const { push } = useNavigation();
   const { config } = useConfig();
   const { t } = useTranslation();
@@ -441,35 +427,28 @@ export default function Lists() {
   }, [push]);
 
   const handleCreateList = useCallback(() => {
-    push(<CreateListForm lists={(lists as ListNode[]) || []} onCreated={revalidate} />);
+    push(<CreateListForm lists={(lists as ListWithCount[]) || []} onCreated={revalidate} />);
   }, [push, revalidate, lists]);
 
   const hierarchicalLists = useMemo(() => {
     if (!lists) return [];
-    const sorted = [...lists].sort((a, b) => a.name.localeCompare(b.name)) as ListNode[];
+    const sorted = [...lists].sort((a, b) => a.name.localeCompare(b.name)) as ListWithCount[];
     return buildHierarchy(sorted);
   }, [lists]);
 
-  // Indentation shows the hierarchy while browsing, but Raycast's filtering
-  // hides the parent rows — so a search for "hunt" leaves two identically
-  // titled entries with the nesting that distinguished them off screen.
-  const listLabels = useMemo(
-    () => new Map(labelLists(lists ?? []).map(({ list, label }) => [list.id, label])),
-    [lists],
-  );
-
   const renderListItems = useCallback(
-    (items: ListNode[], level = 0) => {
+    (items: ListWithCount[], level = 0) => {
       return items.flatMap((list) => {
         const result = [
           <ListItem
             key={list.id}
             list={list}
-            label={listLabels.get(list.id) ?? list.name}
             level={level}
             apiUrl={apiUrl}
             onOpen={(l) => push(<ListBookmarksView listId={l.id} listName={l.name} />)}
-            onEdit={(l) => push(<EditListForm list={l} lists={(lists as ListNode[]) || []} onUpdated={revalidate} />)}
+            onEdit={(l) =>
+              push(<EditListForm list={l} lists={(lists as ListWithCount[]) || []} onUpdated={revalidate} />)
+            }
             onCreate={handleCreateList}
             onDelete={handleDeleteList}
             t={t}
@@ -481,11 +460,8 @@ export default function Lists() {
         return result;
       });
     },
-    [apiUrl, push, revalidate, handleCreateList, handleDeleteList, t, lists, listLabels],
+    [apiUrl, push, revalidate, handleCreateList, handleDeleteList, t, lists],
   );
-
-  const guard = connectionGuard(error, hasLiveData, revalidate);
-  if (guard) return guard;
 
   return (
     <List

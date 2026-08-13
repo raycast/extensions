@@ -6,9 +6,6 @@ import { fetchGetUserStats } from "./apis";
 import { useTranslation } from "./hooks/useTranslation";
 import { formatBytes } from "./utils/formatting";
 import { horizontalBarChart } from "./utils/svgChart";
-import { handleFetchError } from "./utils/fetchError";
-import { connectionGuard } from "./components/ConnectionErrorView";
-import { useLiveData } from "./hooks/useLiveData";
 
 const log = logger.child("[Stats]");
 
@@ -31,19 +28,12 @@ export default function Stats() {
     data: stats,
     error,
     revalidate,
-  } = useCachedPromise(
-    async () => {
-      log.log("Fetching user stats");
-      const result = await fetchGetUserStats();
-      log.info("User stats fetched");
-      return result;
-    },
-    [],
-    // Suppresses Raycast's built-in "Failed to fetch latest data" toast.
-    { onError: handleFetchError("stats") },
-  );
-
-  const hasLiveData = useLiveData(isLoading, error);
+  } = useCachedPromise(async () => {
+    log.log("Fetching user stats");
+    const result = await fetchGetUserStats();
+    log.info("User stats fetched");
+    return result;
+  });
 
   const appearance = environment.appearance;
 
@@ -108,24 +98,11 @@ export default function Stats() {
     </ActionPanel>
   );
 
-  // Checked BEFORE isLoading: a failed request can still report isLoading, and
-  // a spinner over a server that is definitively down never resolves.
-  //
-  // Returns a List, not a Detail. `mode: "view"` doesn't lock a command to one
-  // component type — each branch may return a different root — so Stats uses
-  // the same centered recovery screen as every other command instead of a
-  // left-aligned markdown page that looks like a different feature.
-  const guard = connectionGuard(error, hasLiveData, revalidate);
-  if (guard) return guard;
-
   if (isLoading) {
     return <Detail isLoading navigationTitle={t("stats.title")} markdown="" actions={actions} />;
   }
 
-  // `!stats` only — NOT `error ||`. With hasLiveData true we already have good
-  // data on screen, and a transient failure must not replace a populated
-  // dashboard with "no stats yet". A connection failure was handled above.
-  if (!stats) {
+  if (error || !stats) {
     return (
       <Detail
         navigationTitle={t("stats.title")}

@@ -13,22 +13,17 @@ import {
   TAG_HUMAN_COLOR,
 } from "../constants";
 import { useConfig } from "../hooks/useConfig";
-import { useGetAllLists } from "../hooks/useGetAllLists";
-import { List as BookmarkListType } from "../types";
-import { AddToListSubmenu } from "./AddToListSubmenu";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
 import { markdownImage } from "../utils/markdown";
 import { getScreenshot } from "../utils/screenshot";
-import { runWithToast, toErrorMessage } from "../utils/toast";
+import { runWithToast } from "../utils/toast";
 import { BookmarkEdit } from "./BookmarkEdit";
 import { NoteEdit } from "./NoteEdit";
 
 interface BookmarkDetailProps {
   bookmark: Bookmark;
   onRefresh?: () => void;
-  /** Supplied by the pushing list view, which has already fetched them. */
-  lists?: BookmarkListType[];
 }
 
 function useBookmarkImages(bookmark: Bookmark) {
@@ -51,7 +46,7 @@ function useBookmarkImages(bookmark: Bookmark) {
         try {
           newImages.screenshot = await getScreenshot(screenshot.id);
         } catch (error) {
-          log.error("Failed to get screenshot", { screenshotId: screenshot.id, error: toErrorMessage(error) });
+          log.error("Failed to get screenshot", { screenshotId: screenshot.id, error });
         }
       }
 
@@ -59,7 +54,7 @@ function useBookmarkImages(bookmark: Bookmark) {
         try {
           newImages.asset = await getScreenshot(bookmark.content.assetId);
         } catch (error) {
-          log.error("Failed to get asset image", { assetId: bookmark.content.assetId, error: toErrorMessage(error) });
+          log.error("Failed to get asset image", { assetId: bookmark.content.assetId, error });
         }
       }
 
@@ -102,14 +97,9 @@ function useToastHandler() {
   };
 }
 
-export function BookmarkDetail({ bookmark: initialBookmark, onRefresh, lists: providedLists }: BookmarkDetailProps) {
+export function BookmarkDetail({ bookmark: initialBookmark, onRefresh }: BookmarkDetailProps) {
   const { pop, push } = useNavigation();
   const { config } = useConfig();
-  // `execute` off when the caller already has them: BookmarkDetail is pushed
-  // from a list view that has just fetched lists, and a second request here is
-  // both wasted and — against an unreachable server — doomed.
-  const { lists: fetchedLists, isLoading: isLoadingLists } = useGetAllLists(!providedLists);
-  const lists = providedLists ?? fetchedLists;
   const [bookmark, setBookmark] = useState<Bookmark>(initialBookmark);
   const { t } = useTranslation();
   const handleToast = useToastHandler();
@@ -285,7 +275,6 @@ export function BookmarkDetail({ bookmark: initialBookmark, onRefresh, lists: pr
               shortcut={{ modifiers: ["ctrl"], key: "s" }}
             />
           )}
-          {lists.length > 0 && <AddToListSubmenu bookmarkId={bookmark.id} lists={lists} isLoading={isLoadingLists} />}
           <Action
             title={bookmark.favourited ? t("bookmark.actions.unfavorite") : t("bookmark.actions.favorite")}
             onAction={() => handleUpdate({ favourited: !bookmark.favourited })}

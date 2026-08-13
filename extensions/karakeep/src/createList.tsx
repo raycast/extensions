@@ -7,12 +7,7 @@ import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useTranslation } from "./hooks/useTranslation";
 import { List } from "./types";
 import { isEmoji, makeSmartQueryValidator } from "./utils/formatting";
-import { ChooseIconAction, DEFAULT_LIST_ICON, ListIconField } from "./components/ListIconField";
 import { runWithToast } from "./utils/toast";
-import { labelLists } from "./utils/listLabels";
-import { ensureReachable } from "./utils/submitGuard";
-import { useApiReachable } from "./hooks/useApiReachable";
-import { OfflineFormNotice, StartKarakeepAction } from "./components/OfflineFormNotice";
 
 const log = logger.child("[CreateList]");
 
@@ -33,26 +28,21 @@ interface CreateListViewProps {
 export default function CreateListView({ onListCreated, showSuccessHUD = true }: CreateListViewProps = {}) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
-  const { state: reachability, reachable, offline, isRecovering, canStart, start } = useApiReachable();
-  const { lists } = useGetAllLists(reachable);
+  const { lists } = useGetAllLists();
 
   const { handleSubmit, itemProps, setValue, values } = useForm<ListFormValues>({
-    initialValues: { name: "", icon: DEFAULT_LIST_ICON, description: "", parentId: "", type: "manual", query: "" },
+    initialValues: { name: "", icon: "", description: "", parentId: "", type: "manual", query: "" },
     validation: {
-      name: (value) => (!value?.trim() ? t("common.fieldRequired", { field: t("list.listName") }) : undefined),
-      icon: (value) => (!isEmoji(value || "") ? t("list.listIconInvalid") : undefined),
+      name: (value) => (!value?.trim() ? t("list.listName") + " is required" : undefined),
+      icon: (value) => (!isEmoji(value || "") ? "Must be a valid emoji" : undefined),
       query: makeSmartQueryValidator(t),
     },
     async onSubmit(values) {
       log.info("Creating list", { name: values.name, type: values.type, query: values.query || undefined });
 
-      // Same pre-flight as the other create forms — don't write into a dead
-      // server and lose the filled-in list definition.
-      if ((await ensureReachable(values.name)) === "unreachable") return;
-
       const payload = {
         name: values.name.trim(),
-        icon: values.icon.trim() || DEFAULT_LIST_ICON,
+        icon: values.icon.trim() || undefined,
         description: values.description.trim() || undefined,
         parentId: values.parentId || undefined,
         type: values.type as "manual" | "smart",
@@ -84,28 +74,22 @@ export default function CreateListView({ onListCreated, showSuccessHUD = true }:
   return (
     <Form
       navigationTitle={t("list.createList")}
-      isLoading={reachability === "checking"}
       actions={
         <ActionPanel>
-          {/* First = bound to ↵ while offline; see OfflineFormNotice. */}
-          <StartKarakeepAction offline={offline} canStart={canStart} isRecovering={isRecovering} onStart={start} />
           <Action.SubmitForm title={t("list.createList")} onSubmit={handleSubmit} icon={Icon.Plus} />
-          <ChooseIconAction onPick={(emoji) => setValue("icon", emoji)} />
           {values.type === "smart" && (
             <QueryBuilderActions query={values.query} onInsert={(q) => setValue("query", q)} />
           )}
         </ActionPanel>
       }
     >
-      <OfflineFormNotice offline={offline} canStart={canStart} />
-
       <Form.TextField
         {...itemProps.name}
         title={t("list.listName")}
         placeholder={t("list.listNamePlaceholder")}
         autoFocus
       />
-      <ListIconField {...itemProps.icon} />
+      <Form.TextField {...itemProps.icon} title={t("list.listIcon")} placeholder={t("list.listIconPlaceholder")} />
       <Form.TextField
         {...itemProps.description}
         title={t("list.listDescription")}
@@ -113,8 +97,8 @@ export default function CreateListView({ onListCreated, showSuccessHUD = true }:
       />
       <Form.Dropdown {...itemProps.parentId} title={t("list.listParent")}>
         <Form.Dropdown.Item value="" title={t("list.listParentNone")} />
-        {labelLists(lists || []).map(({ list: l, label }) => (
-          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${label}` : label} />
+        {(lists || []).map((l) => (
+          <Form.Dropdown.Item key={l.id} value={l.id} title={l.icon ? `${l.icon} ${l.name}` : l.name} />
         ))}
       </Form.Dropdown>
       <Form.Dropdown {...itemProps.type} title={t("list.listType")}>

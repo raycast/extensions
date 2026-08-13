@@ -2,8 +2,6 @@ import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchGetSingleTagBookmarks } from "../apis";
-import { handleFetchError } from "../utils/fetchError";
-import { useLiveData } from "./useLiveData";
 
 const log = logger.child("[TagsBookmarks]");
 
@@ -28,7 +26,6 @@ export function useGetTagsBookmarks(tagId: string) {
     {
       initialData: [],
       abortable,
-      onError: handleFetchError("bookmarks"),
     },
   );
 
@@ -38,13 +35,10 @@ export function useGetTagsBookmarks(tagId: string) {
     }
   }, [error]);
 
-  const hasLiveData = useLiveData(isLoading, error, tagId);
-
   return {
     isLoading,
     bookmarks: data || [],
     error,
-    hasLiveData,
     revalidate,
     pagination,
   };
