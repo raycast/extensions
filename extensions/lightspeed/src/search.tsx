@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { getFileIndex } from "./file-index";
-import type { Preferences, SearchResult, SearchScope } from "./types";
+import type { SearchResult, SearchScope } from "./types";
 
 const SEARCH_DELAY_MS = 35;
 
@@ -54,7 +54,7 @@ function ResultActions({ result, rebuild }: { result: SearchResult; rebuild: () 
 }
 
 export default function SearchCommand() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.Search>();
   const index = useMemo(
     () => getFileIndex(preferences.indexRoots, preferences.excludedPaths, environment.supportPath),
     [preferences.excludedPaths, preferences.indexRoots],

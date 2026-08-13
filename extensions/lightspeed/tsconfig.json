@@ -13,5 +13,5 @@
     "jsx": "react-jsx",
     "noEmit": true
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"]
+  "include": ["raycast-env.d.ts", "src/**/*.ts", "src/**/*.tsx", "tests/**/*.ts"]
 }

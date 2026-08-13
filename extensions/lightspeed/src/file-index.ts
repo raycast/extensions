@@ -76,6 +76,8 @@ export class FileIndex {
   private pendingChanges = new Set<string>();
   private changeTimer?: NodeJS.Timeout;
   private applyingChanges = false;
+  private disposed = false;
+  private scanTask?: Promise<void>;
   private database?: DatabaseSync;
   private upsertStatement?: StatementSync;
   private readonly databasePath: string;
@@ -86,6 +88,7 @@ export class FileIndex {
     private readonly rootPreference = "",
     private readonly excludedPreference = "",
     supportPath = join(homedir(), ".lightspeed"),
+    private readonly activationBarrier: Promise<void> = Promise.resolve(),
   ) {
     this.databasePath = join(supportPath, DATABASE_NAME);
   }
@@ -98,6 +101,8 @@ export class FileIndex {
   async start(): Promise<void> {
     if (this.started) return;
     this.started = true;
+    await this.activationBarrier;
+    if (this.disposed) return;
     await this.openDatabase();
     const roots = await this.roots();
     const exclusions = this.exclusions();
@@ -114,16 +119,45 @@ export class FileIndex {
   }
 
   async rebuild(): Promise<void> {
+    await this.activationBarrier;
+    if (this.disposed) return;
+    if (this.scanTask) {
+      this.scanController?.abort();
+      await this.scanTask;
+    }
+    if (this.disposed) return;
     await this.openDatabase();
-    this.scanController?.abort();
     this.stopWatchers();
     const controller = new AbortController();
     this.scanController = controller;
-    await this.scan(controller.signal);
+    const task = this.scan(controller.signal);
+    this.scanTask = task;
+    try {
+      await task;
+    } finally {
+      if (this.scanTask === task) this.scanTask = undefined;
+    }
+  }
+
+  async dispose(): Promise<void> {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.scanController?.abort();
+    this.stopWatchers();
+    if (this.changeTimer) clearTimeout(this.changeTimer);
+    this.changeTimer = undefined;
+    this.pendingChanges.clear();
+    this.listeners.clear();
+    await this.activationBarrier;
+    await this.scanTask;
+    while (this.applyingChanges) await new Promise((resolveWait) => setTimeout(resolveWait, 10));
+    this.upsertStatement = undefined;
+    this.database?.close();
+    this.database = undefined;
   }
 
   search(query: string, scope: SearchScope, limit: number): SearchResult[] {
-    if (!this.database) return [];
+    if (this.disposed || !this.database) return [];
     const compiled = compileSearchQuery(query, scope, limit, this.status.phase !== "indexing");
     const rows = this.database.prepare(compiled.sql).all(...compiled.parameters) as unknown as DatabaseRow[];
     return rows.map((row) => ({
@@ -371,6 +405,7 @@ export class FileIndex {
 
   private startWatchers(roots: string[], exclusions: string[]): void {
     this.stopWatchers();
+    if (this.disposed) return;
     for (const root of roots) {
       try {
         const watcher = watch(root, { recursive: true }, (_event, filename) => {
@@ -390,7 +425,7 @@ export class FileIndex {
   }
 
   private async applyPendingChanges(): Promise<void> {
-    if (!this.database) return;
+    if (this.disposed || !this.database) return;
     if (this.applyingChanges) {
       if (this.changeTimer) clearTimeout(this.changeTimer);
       this.changeTimer = setTimeout(() => void this.applyPendingChanges(), WATCH_DEBOUNCE_MS);
@@ -446,7 +481,8 @@ let singletonKey = "";
 export function getFileIndex(rootPreference = "", excludedPreference = "", supportPath?: string): FileIndex {
   const key = `${rootPreference}\0${excludedPreference}\0${supportPath ?? ""}`;
   if (!singleton || singletonKey !== key) {
-    singleton = new FileIndex(rootPreference, excludedPreference, supportPath);
+    const activationBarrier = singleton?.dispose() ?? Promise.resolve();
+    singleton = new FileIndex(rootPreference, excludedPreference, supportPath, activationBarrier);
     singletonKey = key;
   }
   return singleton;

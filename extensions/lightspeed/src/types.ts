@@ -8,9 +8,3 @@ export interface SearchResult {
   modifiedAt?: Date;
   isDirectory: boolean;
 }
-
-export interface Preferences {
-  indexRoots?: string;
-  excludedPaths?: string;
-  maxResults: string;
-}
