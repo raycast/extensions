@@ -254,8 +254,7 @@ export async function fetchSuggestionPills(
   if (!executable || !existsSync(executable)) {
     if (isWindowsPlatform()) {
       console.warn(
-        "[quickshell] Suggest CLI not found (QuickShell.Suggest.exe). " +
-          "Run `npm run build` or `npm run publish` so assets/QuickShell.Suggest.exe is published.",
+        "[quickshell] Suggest CLI not found (assets/QuickShell.Suggest.exe missing from the extension package).",
       );
     }
     return null;
