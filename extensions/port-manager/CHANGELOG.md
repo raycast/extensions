@@ -1,6 +1,6 @@
 # Port Manager Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-13
 
 - Added Windows support for listing and killing processes listening on TCP ports
 - The menu bar command remains macOS-only
