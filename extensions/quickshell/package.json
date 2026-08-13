@@ -154,16 +154,12 @@
     "vitest": "^3.0.8"
   },
   "scripts": {
-    "predev": "node scripts/sync-workspace-trust-features.js && node scripts/verify-raycast-cli.js && node scripts/ensure-suggest-asset.js --if-missing",
-    "prebuild": "node scripts/sync-workspace-trust-features.js && node scripts/verify-raycast-cli.js && node scripts/ensure-suggest-asset.js",
-    "prelint": "node scripts/sync-workspace-trust-features.js && node scripts/verify-raycast-cli.js",
-    "pretest": "node scripts/sync-workspace-trust-features.js",
     "build": "ray build",
     "dev": "ray develop",
     "lint": "ray lint",
     "test": "vitest run",
     "test:watch": "vitest",
-    "publish": "node scripts/ensure-suggest-asset.js && npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish"
   },
   "allowScripts": {
     "esbuild@0.28.1": true

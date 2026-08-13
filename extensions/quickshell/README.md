@@ -2,6 +2,16 @@
 
 Raycast-native workspace launcher for Quick Shell on **Windows** and **macOS**.
 
+## Why Quick Shell?
+
+Quick Shell provides a unique feature set tailored for cross-platform developers and complex project setups:
+
+- **Cross-Platform Support**: Quick Shell offers first-class support for both Windows and macOS, including Windows Terminal and WSL natively.
+- **Advanced Git Integration**: Quick Shell goes beyond standard directory opening by offering git repository discovery and "Git Branch Gates" (blocking launches if a target branch has uncommitted changes).
+- **Companion Apps**: Launch secondary servers, scripts, or apps right alongside your primary workspace terminals.
+- **Workspace Trust & Portability**: Export and import workspaces as JSON with robust validation and security metadata, making it easy to share setups across machines.
+- **Comprehensive Launch Management**: Manage entire multi-app project workspaces with multi-command tabs, diagnostics, and launch gates rather than just local terminal profiles or single directory paths.
+
 ## Commands
 
 - **Quick Shell** — search, launch, create, discover git repos, edit, favorite, duplicate, import/export, undo/redo, preferences
@@ -62,7 +72,7 @@ npm run dev
 
 Run `npm run build` before submitting Store changes. Do not add a `version` field to `package.json`; Store versioning uses `CHANGELOG.md`.
 
-On Windows, `npm run build`, `npm run publish` (runs `ensure-suggest-asset.js` before the Raycast publish CLI), `npm run dev` (if the asset is missing), `scripts/deploy-all.ps1`, and `scripts/build-raycast-extension.ps1` all publish `QuickShell.Suggest.exe` into Raycast `assets/` (gitignored; generated at build/publish time). The CLI needs the .NET 10 Desktop Runtime. macOS continues to use local folder heuristics.
+On Windows, `scripts/deploy-all.ps1`, and `scripts/build-raycast-extension.ps1` all publish `QuickShell.Suggest.exe` into Raycast `assets/` (gitignored; generated at build/publish time). The CLI needs the .NET 10 Desktop Runtime. macOS continues to use local folder heuristics.
 
 **Distribution:** publish via the [Raycast Store](https://www.raycast.com/store) only. GitHub Releases and WinGet do not ship Raycast sideload packages. `scripts/build-raycast-extension.ps1` is for local/dev packaging.
 
