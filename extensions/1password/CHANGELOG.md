@@ -1,6 +1,6 @@
 # 1Password Changelog
 
-## [Windows Desktop-App Integration Fixes] - {PR_MERGE_DATE}
+## [Windows Desktop-App Integration Fixes] - 2026-08-13
 
 - Fixed constant "cannot connect to 1Password app" failures on Windows. The 1Password app briefly has no CLI pipe listener right after a previous `op` process disconnects; back-to-back `op` invocations are now serialized and connection failures are retried instead of surfacing immediately.
 - Fixed the "Authentication Required" screen appearing on Windows even though the 1Password desktop-app integration works. `op whoami` reports "account is not signed in" without an `op signin` session, so the sign-in check and account resolution now fall back to `op account get`, which uses the app's delegated sessions.
