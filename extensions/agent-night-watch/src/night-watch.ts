@@ -1,5 +1,6 @@
 import { environment } from "@raycast/api";
 import { execFile, spawn } from "node:child_process";
+import { randomUUID } from "node:crypto";
 import { homedir } from "node:os";
 import path from "node:path";
 import {
@@ -23,6 +24,12 @@ import {
   isAuthorizationCanceled,
   statusMessage,
 } from "./status";
+import {
+  LOCK_STALE_AFTER_MS,
+  lockLeaseExpired,
+  parseLockOwnerToken,
+  serializeLockOwner,
+} from "./toggle-lock";
 
 const execFileAsync = promisify(execFile);
 const CACHE_DIR = path.join(
@@ -211,16 +218,35 @@ export async function getNightWatchStatus(): Promise<NightWatchStatus> {
 
 async function acquireLock(): Promise<() => void> {
   ensureCacheDirectory();
-  for (let attempt = 0; attempt < 50; attempt += 1) {
+  const token = randomUUID();
+  const ownerPath = path.join(LOCK_DIR, "owner");
+  for (let attempt = 0; attempt < 70; attempt += 1) {
     try {
       mkdirSync(LOCK_DIR, { mode: 0o700 });
-      writeFileSync(path.join(LOCK_DIR, "owner"), `${process.pid}\n`, {
-        mode: 0o600,
-      });
-      return () => rmSync(LOCK_DIR, { recursive: true, force: true });
+      writeFileSync(
+        ownerPath,
+        serializeLockOwner({
+          version: 1,
+          pid: process.pid,
+          token,
+          acquiredAt: new Date().toISOString(),
+        }),
+        { mode: 0o600 },
+      );
+      return () => {
+        try {
+          if (parseLockOwnerToken(readFileSync(ownerPath, "utf8")) === token)
+            rmSync(LOCK_DIR, { recursive: true, force: true });
+        } catch {
+          // A newer operation may already own the lock.
+        }
+      };
     } catch {
       try {
-        if (Date.now() - statSync(LOCK_DIR).mtimeMs > 180_000) {
+        const lockModifiedAt = existsSync(ownerPath)
+          ? statSync(ownerPath).mtimeMs
+          : statSync(LOCK_DIR).mtimeMs;
+        if (lockLeaseExpired(lockModifiedAt)) {
           rmSync(LOCK_DIR, { recursive: true, force: true });
           continue;
         }
@@ -231,7 +257,7 @@ async function acquireLock(): Promise<() => void> {
     }
   }
   throw new NightWatchError(
-    "Another Night Watch toggle is still running. Try again shortly.",
+    `Another Night Watch toggle is still running. Try again in ${Math.ceil(LOCK_STALE_AFTER_MS / 1000)} seconds.`,
   );
 }
 
