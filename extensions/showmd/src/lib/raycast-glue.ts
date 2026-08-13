@@ -116,6 +116,12 @@ function withSpawnedPort(prefs: ShowmdPrefs, result: SpawnResult): ShowmdPrefs {
   return { ...prefs, port: String(result.port) };
 }
 
+function waitForSpawned(prefs: ShowmdPrefs, result: SpawnResult) {
+  return waitForServer(withSpawnedPort(prefs, result), {
+    requirePort: result.port,
+  });
+}
+
 export async function loadRecents(): Promise<RecentEntry[]> {
   const prefs = getShowmdPrefs();
   return readRecents(prefs);
@@ -174,8 +180,7 @@ export async function startShowmdServer(): Promise<boolean> {
       return { ok: spawned.ok, error: spawned.error, value: spawned };
     },
     failTitle: "Could not start ShowMD",
-    confirm: async (spawned) =>
-      (await waitForServer(withSpawnedPort(prefs, spawned))).running,
+    confirm: async (spawned) => (await waitForSpawned(prefs, spawned)).running,
     successTitle: "ShowMD started",
     timeoutTitle: "ShowMD did not start in time",
   });
@@ -183,11 +188,15 @@ export async function startShowmdServer(): Promise<boolean> {
 
 export async function restartShowmdServer(): Promise<boolean> {
   const prefs = getShowmdPrefs();
-  return runToastFlow({
+  return runToastFlow<number | undefined>({
     animatedTitle: "Restarting ShowMD…",
-    action: async () => ({ ok: await restartServer(prefs) }),
+    action: async () => {
+      const restarted = await restartServer(prefs);
+      return { ok: restarted.ok, value: restarted.port };
+    },
     failTitle: "Could not restart ShowMD",
-    confirm: async () => (await waitForServer(prefs)).running,
+    confirm: async (port) =>
+      (await waitForServer(prefs, { requirePort: port })).running,
     successTitle: "ShowMD restarted",
     timeoutTitle: "ShowMD did not come back up in time",
   });
@@ -272,7 +281,7 @@ export async function startServerForSettings(): Promise<boolean> {
   const prefs = getShowmdPrefs();
   const spawned = await spawnShowmdLauncher(prefs);
   if (!spawned.ok) return false;
-  const status = await waitForServer(withSpawnedPort(prefs, spawned));
+  const status = await waitForSpawned(prefs, spawned);
   return status.running;
 }
 
@@ -299,7 +308,7 @@ export async function openSkillsBrowser(): Promise<void> {
     return;
   }
 
-  const found = await waitForServer(withSpawnedPort(prefs, spawned));
+  const found = await waitForSpawned(prefs, spawned);
   if (!found.running) {
     toast.style = Toast.Style.Failure;
     toast.title = "ShowMD did not start in time";

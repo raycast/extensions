@@ -1122,11 +1122,12 @@ async function postServerAction(
 export async function restartServer(
   prefs: ShowmdPrefs,
   deps: Deps = {},
-): Promise<boolean> {
+): Promise<{ ok: boolean; port?: number }> {
   const resolved = resolveDeps(deps);
   const server = await findServer(prefs, deps);
-  if (!server.running) return false;
-  return postServerAction(resolved.fetchImpl, server.port, "restart");
+  if (!server.running) return { ok: false };
+  const ok = await postServerAction(resolved.fetchImpl, server.port, "restart");
+  return { ok, port: server.port };
 }
 
 export async function stopServer(

@@ -17,6 +17,7 @@ import {
   getManageStatus,
   waitForServer,
   targetUrlAfterSpawn,
+  restartServer,
   diffSettings,
   pickSelectionTarget,
   describeStatus,
@@ -530,6 +531,25 @@ test("targetUrlAfterSpawn: waits for the spawned port, not an older server", asy
     url: "http://127.0.0.1:51999/r/abc/example.md",
   });
   assert.deepEqual(posted, [{ port: 51999 }]);
+});
+
+test("restartServer: reports the port it restarted, so the caller can wait for that one", async () => {
+  const deps = fakeDeps({
+    readDir: async () => [],
+    fetchImpl: async (url, opts) => {
+      if (url.startsWith("http://127.0.0.1:4321/api/version"))
+        return versionResponse("shared");
+      if (url.startsWith("http://127.0.0.1:4321/api/roots"))
+        return rootsResponse([]);
+      if (opts?.method === "POST" && url.endsWith("/api/restart"))
+        return { ok: true, json: async () => ({}) };
+      throw new Error(`unexpected ${url}`);
+    },
+  });
+
+  const result = await restartServer({}, deps);
+
+  assert.deepEqual(result, { ok: true, port: 4321 });
 });
 
 test("resolveBinary: preference path comes first, npx is the last rung", () => {
