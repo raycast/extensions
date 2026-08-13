@@ -41,9 +41,6 @@ describe("classifyNightWatchStatus", () => {
     sleepDisabled: false,
     statePresent: false,
     processMatches: false,
-    ready: false,
-    stopped: false,
-    stopRequested: false,
   };
 
   it("treats pmset as authoritative without an owned session", () => {
@@ -60,7 +57,6 @@ describe("classifyNightWatchStatus", () => {
         sleepDisabled: true,
         statePresent: true,
         processMatches: true,
-        ready: true,
         phase: "running",
       }),
     ).toBe("on-owned");
@@ -81,8 +77,6 @@ describe("classifyNightWatchStatus", () => {
         sleepDisabled: true,
         statePresent: true,
         processMatches: true,
-        ready: true,
-        stopRequested: true,
         phase: "stopping",
       }),
     ).toBe("stopping");
@@ -95,23 +89,21 @@ describe("classifyNightWatchStatus", () => {
         sleepDisabled: true,
         statePresent: true,
         processMatches: true,
-        ready: true,
         phase: "stopping",
       }),
     ).toBe("stopping");
   });
 
-  it("does not claim ownership before the privileged guard is ready", () => {
+  it("uses pmset truth to recognize the privileged guard after authorization", () => {
     expect(
       classifyNightWatchStatus({
         ...base,
         sleepDisabled: true,
         statePresent: true,
         processMatches: true,
-        ready: false,
         phase: "starting",
       }),
-    ).toBe("starting");
+    ).toBe("on-owned");
   });
 
   it("does not trust a stale PID or stale cache", () => {
@@ -120,7 +112,6 @@ describe("classifyNightWatchStatus", () => {
         ...base,
         sleepDisabled: true,
         statePresent: true,
-        ready: true,
         phase: "running",
       }),
     ).toBe("on-external");
@@ -128,7 +119,6 @@ describe("classifyNightWatchStatus", () => {
       classifyNightWatchStatus({
         ...base,
         statePresent: true,
-        ready: true,
         phase: "running",
       }),
     ).toBe("off");

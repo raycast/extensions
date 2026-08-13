@@ -12,9 +12,6 @@ export interface StatusSnapshot {
   sleepDisabled: boolean;
   statePresent: boolean;
   processMatches: boolean;
-  ready: boolean;
-  stopped: boolean;
-  stopRequested: boolean;
   phase?: SessionPhase;
 }
 
@@ -28,25 +25,13 @@ export function classifyNightWatchStatus(snapshot: StatusSnapshot): StatusKind {
   }
 
   if (!snapshot.sleepDisabled) {
-    return snapshot.phase === "starting" &&
-      snapshot.processMatches &&
-      !snapshot.stopped
+    return snapshot.phase === "starting" && snapshot.processMatches
       ? "starting"
       : "off";
   }
 
-  if (snapshot.processMatches && snapshot.ready) {
-    return snapshot.phase === "stopping" || snapshot.stopRequested
-      ? "stopping"
-      : "on-owned";
-  }
-
-  if (
-    snapshot.processMatches &&
-    snapshot.phase === "starting" &&
-    !snapshot.stopped
-  ) {
-    return "starting";
+  if (snapshot.processMatches) {
+    return snapshot.phase === "stopping" ? "stopping" : "on-owned";
   }
   return "on-external";
 }

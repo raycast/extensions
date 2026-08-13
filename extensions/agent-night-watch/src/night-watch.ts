@@ -1,11 +1,9 @@
-import { environment } from "@raycast/api";
 import { execFile, spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { homedir } from "node:os";
 import path from "node:path";
 import {
   closeSync,
-  copyFileSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -24,6 +22,11 @@ import {
   isAuthorizationCanceled,
   statusMessage,
 } from "./status";
+import {
+  appleScriptQuote,
+  buildAdministratorAppleScript,
+  buildPrivilegedGuardCommand,
+} from "./privileged-command";
 import {
   LOCK_STALE_AFTER_MS,
   lockLeaseExpired,
@@ -46,7 +49,7 @@ const START_TIMEOUT_MS = 120_000;
 const STOP_TIMEOUT_MS = 8_000;
 
 interface SessionState {
-  version: 2;
+  version: 3;
   launcherPid: number;
   sessionDir: string;
   startedAt: string;
@@ -62,21 +65,6 @@ export class NightWatchError extends Error {
 
 function delay(milliseconds: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
-}
-
-function shellQuote(value: string): string {
-  return `'${value.replaceAll("'", `'\\''`)}'`;
-}
-
-function appleScriptQuote(value: string): string {
-  return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
-}
-
-function installGuardScript(sessionDir: string): string {
-  const source = path.join(environment.assetsPath, "night-watch-guard.sh");
-  const target = path.join(sessionDir, "night-watch-guard.sh");
-  copyFileSync(source, target);
-  return target;
 }
 
 function ensureCacheDirectory(): void {
@@ -103,7 +91,7 @@ function readSessionState(): SessionState | undefined {
       readFileSync(STATE_FILE, "utf8"),
     ) as Partial<SessionState>;
     if (
-      state.version !== 2 ||
+      state.version !== 3 ||
       !Number.isInteger(state.launcherPid) ||
       (state.launcherPid ?? 0) <= 1 ||
       typeof state.sessionDir !== "string" ||
@@ -185,25 +173,15 @@ export async function getNightWatchStatus(): Promise<NightWatchStatus> {
       sleepDisabled: disabled,
       statePresent: false,
       processMatches: false,
-      ready: false,
-      stopped: false,
-      stopRequested: false,
     });
     return { kind, sleepDisabled: disabled, message: statusMessage(kind) };
   }
 
   const processMatches = await processMatchesSession(state);
-  const ready = existsSync(path.join(state.sessionDir, "ready"));
-  const stopped = existsSync(path.join(state.sessionDir, "stopped"));
-  const stopRequested = existsSync(path.join(state.sessionDir, "stop"));
-
   const kind = classifyNightWatchStatus({
     sleepDisabled: disabled,
     statePresent: true,
     processMatches,
-    ready,
-    stopped,
-    stopRequested,
     phase: state.phase,
   });
 
@@ -279,6 +257,16 @@ function readLogTail(logPath: string): string {
   }
 }
 
+function requestStop(sessionDir: string): void {
+  const stopPath = path.join(sessionDir, "stop");
+  try {
+    const stopFd = openSync(stopPath, "wx", 0o600);
+    closeSync(stopFd);
+  } catch (error) {
+    if (!existsSync(stopPath)) throw error;
+  }
+}
+
 async function startNightWatchUnlocked(): Promise<void> {
   const current = await getNightWatchStatus();
   if (current.kind === "on-owned") return;
@@ -295,10 +283,9 @@ async function startNightWatchUnlocked(): Promise<void> {
 
   const sessionDir = mkdtempSync(SESSION_PREFIX);
   const logPath = path.join(sessionDir, "guard.log");
-  const logFd = openSync(logPath, "a", 0o600);
-  const guardPath = installGuardScript(sessionDir);
-  const rootCommand = `/bin/sh ${shellQuote(guardPath)} ${shellQuote(sessionDir)}`;
-  const script = `with timeout of 2147483647 seconds\n  do shell script "${appleScriptQuote(rootCommand)}" with administrator privileges\nend timeout`;
+  const logFd = openSync(logPath, "wx", 0o600);
+  const rootCommand = buildPrivilegedGuardCommand(sessionDir);
+  const script = buildAdministratorAppleScript(rootCommand);
   const child = spawn("/usr/bin/osascript", ["-e", script], {
     detached: true,
     stdio: ["ignore", logFd, logFd],
@@ -314,7 +301,7 @@ async function startNightWatchUnlocked(): Promise<void> {
   child.unref();
 
   const state: SessionState = {
-    version: 2,
+    version: 3,
     launcherPid: child.pid,
     sessionDir,
     startedAt: new Date().toISOString(),
@@ -324,16 +311,17 @@ async function startNightWatchUnlocked(): Promise<void> {
 
   const startedAt = Date.now();
   while (Date.now() - startedAt < START_TIMEOUT_MS) {
-    if (
-      existsSync(path.join(sessionDir, "ready")) &&
-      (await sleepIsDisabled())
-    ) {
+    if ((await sleepIsDisabled()) && isProcessAlive(child.pid)) {
       writeSessionState({ ...state, phase: "running" });
       return;
     }
     if (!isProcessAlive(child.pid)) break;
     await delay(100);
   }
+
+  requestStop(sessionDir);
+  for (let attempt = 0; attempt < 50 && (await sleepIsDisabled()); attempt += 1)
+    await delay(100);
 
   if (isProcessAlive(child.pid)) {
     try {
@@ -342,8 +330,6 @@ async function startNightWatchUnlocked(): Promise<void> {
       // The authorization process may have exited between checks.
     }
   }
-  for (let attempt = 0; attempt < 50 && (await sleepIsDisabled()); attempt += 1)
-    await delay(100);
 
   const errorTail = readLogTail(logPath);
   if (!(await sleepIsDisabled())) removeSessionFiles(sessionDir);
@@ -379,15 +365,12 @@ async function stopNightWatchUnlocked(): Promise<void> {
       "The owned Night Watch session was not found. System state was not changed.",
     );
   writeSessionState({ ...state, phase: "stopping" });
-  writeFileSync(path.join(state.sessionDir, "reason"), "manual\n", {
-    mode: 0o600,
-  });
-  writeFileSync(path.join(state.sessionDir, "stop"), "\n", { mode: 0o600 });
+  requestStop(state.sessionDir);
 
   const startedAt = Date.now();
   while (Date.now() - startedAt < STOP_TIMEOUT_MS) {
     const disabled = await sleepIsDisabled();
-    if (!disabled && existsSync(path.join(state.sessionDir, "stopped"))) {
+    if (!disabled) {
       removeSessionFiles(state.sessionDir);
       return;
     }

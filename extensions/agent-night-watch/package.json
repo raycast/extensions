@@ -13,7 +13,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "test": "vitest run && /bin/sh -n assets/night-watch-guard.sh"
+    "test": "vitest run"
   },
   "platforms": ["macOS"],
   "categories": ["System"],

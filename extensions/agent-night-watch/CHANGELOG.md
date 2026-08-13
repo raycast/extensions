@@ -1,5 +1,15 @@
 # Changelog
 
+## [Hardened Privileged Guard] - {PR_MERGE_DATE}
+
+- Embed the fixed guard program into the authorization command before showing
+  the password dialog instead of executing a user-writable script pathname.
+- Make the privileged process read-only toward user session paths and restrict
+  its executable allowlist to absolute `pmset`, `grep`, and `sleep` paths.
+- Use `pmset -g` and verified launcher identity for readiness and ownership.
+- Add adversarial regression coverage for path replacement, symlink writes,
+  shell injection, and privileged command allowlisting.
+
 ## [Direct Coffee-Cup Toggle] - {PR_MERGE_DATE}
 
 - Click the coffee cup once to toggle Night Watch directly in normal states.

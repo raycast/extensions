@@ -31,4 +31,5 @@ session. In that exceptional state, clicking the cup opens a separately
 confirmed, administrator-authorized recovery menu instead of toggling directly.
 
 No password is stored. No privileged helper, sudoers rule, analytics, or
-network request is used.
+network request is used. The fixed privileged guard is embedded before the
+authorization dialog and never executes or writes a user-controlled path.
