@@ -1,9 +1,14 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
 import { ProcessInfo } from "../models/interfaces";
+import { platformShortcut } from "../utilities/platform";
 
 export default function CopyInfoActionsMenu(props: { process: ProcessInfo }) {
   return (
-    <ActionPanel.Submenu title="Copy Info" icon={Icon.Clipboard} shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}>
+    <ActionPanel.Submenu
+      title="Copy Info…"
+      icon={Icon.Clipboard}
+      shortcut={platformShortcut({ modifiers: ["cmd", "opt"], key: "i" }, { modifiers: ["ctrl", "opt"], key: "i" })}
+    >
       <Action.CopyToClipboard content={props.process.pid} title="PID" />
       {props.process.path !== undefined && <Action.CopyToClipboard content={props.process.path} title="Path" />}
       {props.process.name ? <Action.CopyToClipboard content={props.process.name} title="Name" /> : null}
