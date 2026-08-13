@@ -2,6 +2,10 @@
 
 Save and restore macOS window layouts from Raycast. This extension is a request-only bridge to the LayoutLock app; LayoutLock handles Accessibility permission, progress, Free/Pro limits, completion, and errors.
 
+## How it differs
+
+LayoutLock restores previously saved workspaces through the LayoutLock app, including display-aware window placement, app relaunching, and optional browser restoration. Unlike window-tiling extensions, it does not arrange currently open windows directly inside Raycast.
+
 ## Requirements
 
 - macOS 14 or later
