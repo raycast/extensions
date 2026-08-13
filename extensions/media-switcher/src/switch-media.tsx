@@ -71,8 +71,8 @@ export default function Command() {
                         <ActionPause
                           appId={session.app_id}
                           sessionIndex={session.session_index}
-                          titlePrefix={session.title_prefix}
-                          artistPrefix={session.artist.slice(0, 30)}
+                          titlePrefix={session.title}
+                          artistPrefix={session.artist}
                           revalidate={revalidate}
                         />
                       </ActionPanel.Section>
@@ -82,16 +82,16 @@ export default function Command() {
                           <ActionSwitch
                             appId={session.app_id}
                             sessionIndex={session.session_index}
-                            titlePrefix={session.title_prefix}
-                            artistPrefix={session.artist.slice(0, 30)}
+                            titlePrefix={session.title}
+                            artistPrefix={session.artist}
                             revalidate={revalidate}
                           />
                         )}
                         <ActionPlay
                           appId={session.app_id}
                           sessionIndex={session.session_index}
-                          titlePrefix={session.title_prefix}
-                          artistPrefix={session.artist.slice(0, 30)}
+                          titlePrefix={session.title}
+                          artistPrefix={session.artist}
                           revalidate={revalidate}
                         />
                       </ActionPanel.Section>
@@ -100,15 +100,15 @@ export default function Command() {
                       <ActionPreviousTrack
                         appId={session.app_id}
                         sessionIndex={session.session_index}
-                        titlePrefix={session.title_prefix}
-                        artistPrefix={session.artist.slice(0, 30)}
+                        titlePrefix={session.title}
+                        artistPrefix={session.artist}
                         revalidate={revalidate}
                       />
                       <ActionNextTrack
                         appId={session.app_id}
                         sessionIndex={session.session_index}
-                        titlePrefix={session.title_prefix}
-                        artistPrefix={session.artist.slice(0, 30)}
+                        titlePrefix={session.title}
+                        artistPrefix={session.artist}
                         revalidate={revalidate}
                       />
                     </ActionPanel.Section>

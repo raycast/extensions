@@ -10,7 +10,6 @@ use windows::Win32::Foundation::HWND;
 pub struct MediaSessionInfo {
     pub app_id: String,
     pub session_index: u32,
-    pub title_prefix: String,
     pub app_name: String,
     pub title: String,
     pub artist: String,
@@ -50,7 +49,6 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 
         let title = props.Title().map_err(|e| format!("Title failed: {}", e))?.to_string();
         let artist = props.Artist().map_err(|e| format!("Artist failed: {}", e))?.to_string();
-        let title_prefix = title.chars().take(30).collect::<String>();
 
         let info = session.GetPlaybackInfo().map_err(|e| format!("GetPlaybackInfo failed: {}", e))?;
         let status = info.PlaybackStatus().map_err(|e| format!("PlaybackStatus failed: {}", e))?;
@@ -59,7 +57,6 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
         result.push(MediaSessionInfo {
             app_id: app_id.clone(),
             session_index,
-            title_prefix,
             app_name: format_app_name(&app_id),
             title,
             artist,
@@ -89,13 +86,13 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 fn switch_session(
     target_app_id: String,
     target_index: u32,
-    target_title_prefix: String,
-    target_artist_prefix: String,
+    target_title: String,
+    target_artist: String,
 ) -> Result<(), String> {
     // One snapshot, used for both resolving the target and pausing competitors —
     // a second GetSessions() between the two would reintroduce a race window.
     let entries = snapshot_sessions()?;
-    let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title_prefix, &target_artist_prefix)
+    let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title, &target_artist)
         .ok_or_else(|| format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing"))?;
 
     // Phase 1: pause every competitor. Track every session whose pause request was
@@ -299,36 +296,40 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 
 // Resolve which snapshot entry the user clicked. GetSessions() has no documented
 // ordering guarantee and sessions expose no stable ID, so identity is a per-app
-// ordinal plus the media fingerprints captured at render time. A match must
-// reproduce BOTH captured fingerprints: a replacement session must present a
-// title AND artist sharing the same prefixes to be accepted, which in practice
-// means it is the same content the user clicked. This two-signal check is what
-// keeps the stale-session race (the clicked session closing and a same-app
-// replacement opening before the action runs) from redirecting a playback
-// action onto a different session. Priority:
+// ordinal plus the exact media metadata the user clicked: a session is accepted
+// only when its title AND artist are byte-identical to what was captured at
+// render time. Any drift — a track skip, a metadata refresh, or a replacement
+// that merely shares a prefix or substring — is refused rather than risking
+// control of a different session. The list auto-refreshes, so the user re-clicks
+// the current metadata and the action proceeds. Priority:
 //   1. Exact (ordinal + title + artist) match — the confident happy path.
-//   2. Exactly one session matches both fingerprints — it moved ordinals
-//      (a sibling closed, order changed). Trust the metadata, not the number.
-//   Otherwise unmatched or ambiguous (two+ sessions reproduce the fingerprints)
-//   → None. Callers surface a "try refreshing" error.
+//   2. Exactly one session matches both — it moved ordinals (a sibling closed,
+//      order changed). Trust the metadata, not the number.
+//   Otherwise unmatched or ambiguous (two+ sessions reproduce the metadata) →
+//   None. Callers surface a "try refreshing" error.
 //
 // When the captured title is empty, the artist is the fingerprint and the
-// session must STILL be titleless — a now-populated title (or a titled
-// replacement) is not the entry the user clicked.
+// session must STILL be titleless with an identical artist — a now-populated
+// title or changed artist is not the entry the user clicked.
 //
-// There is deliberately NO ordinal-only fallback: an ordinal match with no
-// fingerprint match cannot distinguish "the session track-skipped past the
-// prefix" from "the session closed and a sibling occupies its slot", so
+// There is deliberately NO ordinal-only fallback and NO prefix tolerance: an
+// ordinal or prefix match cannot distinguish "the selected session track-
+// skipped" from "it closed and a sibling or replacement occupies its slot", so
 // guessing would risk controlling the wrong session.
+//
+// Only limit: two genuinely different sessions presenting byte-identical title
+// and artist (e.g. two same-app tabs playing the same stream) are
+// indistinguishable by any metadata-based API; SMTC exposes no session ID, so
+// exact metadata equality is the strongest identity available.
 fn resolve_target_index(
     entries: &[SessionEntry],
     target_app_id: &str,
     target_index: u32,
-    target_title_prefix: &str,
-    target_artist_prefix: &str,
+    target_title: &str,
+    target_artist: &str,
 ) -> Option<usize> {
-    if target_title_prefix.is_empty() {
-        if target_artist_prefix.is_empty() {
+    if target_title.is_empty() {
+        if target_artist.is_empty() {
             return None;
         }
         let mut artist_matches: Vec<usize> = Vec::new();
@@ -336,7 +337,7 @@ fn resolve_target_index(
             if entry.app_id != target_app_id || !entry.title.is_empty() {
                 continue;
             }
-            let artist_ok = entry.artist.starts_with(target_artist_prefix);
+            let artist_ok = entry.artist == target_artist;
             if entry.ordinal == target_index && artist_ok {
                 return Some(i);
             }
@@ -356,8 +357,8 @@ fn resolve_target_index(
         if entry.app_id != target_app_id {
             continue;
         }
-        let title_ok = entry.title.starts_with(target_title_prefix);
-        let artist_ok = target_artist_prefix.is_empty() || entry.artist.starts_with(target_artist_prefix);
+        let title_ok = entry.title == target_title;
+        let artist_ok = target_artist.is_empty() || entry.artist == target_artist;
 
         // 1. Exact (ordinal + title + artist) match
         if entry.ordinal == target_index && title_ok && artist_ok {
@@ -380,10 +381,10 @@ fn resolve_target_index(
 fn pause_session(
     target_app_id: String,
     target_index: u32,
-    target_title_prefix: String,
-    target_artist_prefix: String,
+    target_title: String,
+    target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix, &target_artist_prefix)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
     session.TryPauseAsync()
         .map_err(|e| format!("TryPauseAsync failed: {}", e))?
         .get()
@@ -411,10 +412,10 @@ fn pause_session(
 fn play_session(
     target_app_id: String,
     target_index: u32,
-    target_title_prefix: String,
-    target_artist_prefix: String,
+    target_title: String,
+    target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix, &target_artist_prefix)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
     session.TryPlayAsync()
         .map_err(|e| format!("TryPlayAsync failed: {}", e))?
         .get()
@@ -442,10 +443,10 @@ fn play_session(
 fn previous_track(
     target_app_id: String,
     target_index: u32,
-    target_title_prefix: String,
-    target_artist_prefix: String,
+    target_title: String,
+    target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix, &target_artist_prefix)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipPreviousAsync()
         .map_err(|e| format!("TrySkipPreviousAsync failed: {}", e))?
@@ -459,10 +460,10 @@ fn previous_track(
 fn next_track(
     target_app_id: String,
     target_index: u32,
-    target_title_prefix: String,
-    target_artist_prefix: String,
+    target_title: String,
+    target_artist: String,
 ) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix, &target_artist_prefix)?;
+    let session = find_session_by_index(&target_app_id, target_index, &target_title, &target_artist)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipNextAsync()
         .map_err(|e| format!("TrySkipNextAsync failed: {}", e))?
@@ -506,11 +507,11 @@ fn poll_title_change(session: &GlobalSystemMediaTransportControlsSession, old_ti
 fn find_session_by_index(
     target_app_id: &str,
     target_index: u32,
-    target_title_prefix: &str,
-    target_artist_prefix: &str,
+    target_title: &str,
+    target_artist: &str,
 ) -> Result<GlobalSystemMediaTransportControlsSession, String> {
     let entries = snapshot_sessions()?;
-    let pos = resolve_target_index(&entries, target_app_id, target_index, target_title_prefix, target_artist_prefix)
+    let pos = resolve_target_index(&entries, target_app_id, target_index, target_title, target_artist)
         .ok_or_else(|| {
         format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing")
     })?;
