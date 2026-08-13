@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoho-mail",
   "title": "Zoho Mail",
-  "description": "",
-  "icon": "extension-icon.png",
+  "description": "Manage Zoho Mail",
+  "icon": "zoho-mail.png",
   "author": "xmok",
   "platforms": [
     "macOS",
@@ -17,13 +17,14 @@
     {
       "name": "accounts",
       "title": "Accounts",
-      "description": "",
+      "description": "View Accounts, Emails and Content",
       "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.104.5",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/utils": "^2.2.2",
+    "node-html-markdown": "^2.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.0.4",

@@ -1,25 +1,26 @@
 interface EmailAddress {
-  "isAlias": boolean
-  "isPrimary": boolean
-  "mailId": string
-  "isConfirmed": boolean
+  isAlias: boolean;
+  isPrimary: boolean;
+  mailId: string;
+  isConfirmed: boolean;
 }
 export interface Account {
-  emailAddress: EmailAddress[]
-  accountId: number
-  displayName: string
+  emailAddress: EmailAddress[];
+  accountId: number;
+  displayName: string;
 }
 export interface EmailMessage {
-  subject: string
-  messageId: string
-  fromAddress: string
-  status: "0" | "1"
+  subject: string;
+  messageId: number;
+  fromAddress: string;
+  folderId: number;
+  status: "0" | "1";
 }
 
 export interface Result<T> {
-  "status": {
-    "code": number
-    "description": string
-  }
+  status: {
+    code: number;
+    description: string;
+  };
   data: T;
 }
