@@ -1,6 +1,6 @@
 # Wikipedia Changelog
 
-## [Article navigation] - {PR_MERGE_DATE}
+## [Article navigation] - 2026-08-13
 
 - Add back and forward navigation between opened articles with `[` and `]` shortcuts
 - Preserve article history when following in-page links or changing page language
