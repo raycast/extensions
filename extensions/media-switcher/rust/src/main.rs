@@ -310,7 +310,9 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 //
 // When the captured title is empty, the artist is the fingerprint and the
 // session must STILL be titleless with an identical artist — a now-populated
-// title or changed artist is not the entry the user clicked.
+// title or changed artist is not the entry the user clicked. Symmetrically, a
+// captured-empty artist must still be artist-less: a session whose artist
+// populated between render and action is not the entry the user clicked.
 //
 // There is deliberately NO ordinal-only fallback and NO prefix tolerance: an
 // ordinal or prefix match cannot distinguish "the selected session track-
@@ -358,7 +360,7 @@ fn resolve_target_index(
             continue;
         }
         let title_ok = entry.title == target_title;
-        let artist_ok = target_artist.is_empty() || entry.artist == target_artist;
+        let artist_ok = entry.artist == target_artist;
 
         // 1. Exact (ordinal + title + artist) match
         if entry.ordinal == target_index && title_ok && artist_ok {
