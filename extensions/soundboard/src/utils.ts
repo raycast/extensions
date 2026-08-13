@@ -1,5 +1,5 @@
 import { execFileSync, spawn } from "node:child_process";
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -16,15 +16,16 @@ export const isMacOS = process.platform === "darwin";
 
 const registryDir = () => join(tmpdir(), "raycast-soundboard");
 
-// Each macOS player is recorded in its own file so that registration and
+// Each playback instance is recorded in its own file so that registration and
 // cleanup are atomic per player: `registerPlayer` creates one file and
 // `unregisterPlayer` removes that same file. Because no two players share a
 // file, concurrent operations never produce a lost update that could erase
-// another live player's record.
+// another live player's record. The token is the macOS child's pid or, on
+// Windows, a uuid naming the player instance's dedicated stop event.
 const playersDir = (audioPath: string) =>
   join(registryDir(), "players", createHash("sha256").update(audioPath).digest("hex").slice(0, 16));
 
-const playerFile = (audioPath: string, pid: number) => join(playersDir(audioPath), String(pid));
+const playerFile = (audioPath: string, token: string) => join(playersDir(audioPath), token);
 
 const playingRegistryFile = () => join(registryDir(), "playing.json");
 
@@ -54,34 +55,28 @@ const setPlaying = (audioPath: string, playing: boolean) => {
   }
 };
 
-const isPlayerAlive = async (audioPath: string): Promise<boolean> => {
-  if (process.platform === "win32") {
-    try {
-      return await isPlayingWindows(audioPath);
-    } catch {
-      return false;
-    }
-  }
-  return readRegisteredPlayers(audioPath).some((record) => isPlayerRunning(record, audioPath));
-};
-
 export const getLivePlayingPaths = async (): Promise<string[]> => {
   const live: string[] = [];
   for (const audioPath of getPlayingPaths()) {
-    if (process.platform !== "win32") {
-      pruneRegisteredPlayers(audioPath);
-    }
-    if (await isPlayerAlive(audioPath)) {
+    const liveRecords = await getLivePlayers(audioPath);
+    if (liveRecords.length > 0) {
       live.push(audioPath);
-    } else {
-      setPlaying(audioPath, false);
+      continue;
     }
+    // No live player remains: drop any stale records and clear the path.
+    for (const record of readRegisteredPlayers(audioPath)) {
+      unregisterPlayer(audioPath, record.token);
+    }
+    setPlaying(audioPath, false);
   }
   return live;
 };
 
 interface PlayerRecord {
-  pid: number;
+  // The player instance's identity: on macOS the afplay child's pid (recorded
+  // alongside its start time), on Windows a uuid naming that instance's stop
+  // event. The token is also the registry file name.
+  token: string;
   startTime: string;
 }
 
@@ -121,7 +116,11 @@ const getProcessCommand = (pid: number): string | null => {
 // `ps` probe fails the player is treated as not running and playback continues
 // without Stop.
 const isPlayerRunning = (record: PlayerRecord, audioPath: string): boolean => {
-  if (getProcessStartTime(record.pid) !== record.startTime) {
+  const pid = Number(record.token);
+  if (Number.isNaN(pid)) {
+    return false;
+  }
+  if (getProcessStartTime(pid) !== record.startTime) {
     return false;
   }
   const command = getProcessCommand(record.pid);
@@ -137,6 +136,20 @@ const isPlayerRunning = (record: PlayerRecord, audioPath: string): boolean => {
   return executable === "afplay" && tokens.slice(1).join(" ") === audioPath;
 };
 
+// On Windows a player is alive while its dedicated stop event exists, i.e. the
+// player process still holds the event handle; on macOS liveness is verified
+// against the afplay process identity recorded at spawn.
+const isInstanceAlive = async (audioPath: string, record: PlayerRecord): Promise<boolean> => {
+  if (process.platform === "win32") {
+    try {
+      return await isPlayingWindows(audioPath, record.token);
+    } catch {
+      return false;
+    }
+  }
+  return isPlayerRunning(record, audioPath);
+};
+
 const readRegisteredPlayers = (audioPath: string): PlayerRecord[] => {
   try {
     const dir = playersDir(audioPath);
@@ -144,18 +157,14 @@ const readRegisteredPlayers = (audioPath: string): PlayerRecord[] => {
       return [];
     }
     return readdirSync(dir)
-      .map((name) => {
-        const pid = Number(name);
-        if (Number.isNaN(pid)) {
-          return null;
-        }
+      .map((token) => {
         let startTime = "";
         try {
-          startTime = readFileSync(join(dir, name), "utf8").trim();
+          startTime = readFileSync(join(dir, token), "utf8").trim();
         } catch {
           return null;
         }
-        return startTime === "" ? null : { pid, startTime };
+        return startTime === "" && process.platform !== "win32" ? null : { token, startTime };
       })
       .filter((record): record is PlayerRecord => record !== null);
   } catch {
@@ -163,38 +172,63 @@ const readRegisteredPlayers = (audioPath: string): PlayerRecord[] => {
   }
 };
 
-const registerPlayer = (audioPath: string, pid: number) => {
+const registerPlayer = (audioPath: string, record: PlayerRecord) => {
   try {
-    const startTime = getProcessStartTime(pid);
-    if (startTime === null) {
-      return;
-    }
     mkdirSync(playersDir(audioPath), { recursive: true });
-    writeFileSync(playerFile(audioPath, pid), startTime, { flag: "w" });
+    writeFileSync(playerFile(audioPath, record.token), record.startTime, { flag: "w" });
   } catch {
     // Best effort only, playback still works.
   }
 };
 
-const unregisterPlayer = (audioPath: string, pid: number) => {
+const unregisterPlayer = (audioPath: string, token: string) => {
   try {
-    rmSync(playerFile(audioPath, pid), { force: true });
+    rmSync(playerFile(audioPath, token), { force: true });
   } catch {
     // Best effort only.
   }
 };
 
-const pruneRegisteredPlayers = (audioPath: string) => {
+const getLivePlayers = async (audioPath: string): Promise<PlayerRecord[]> => {
+  const live: PlayerRecord[] = [];
   for (const record of readRegisteredPlayers(audioPath)) {
-    if (!isPlayerRunning(record, audioPath)) {
-      unregisterPlayer(audioPath, record.pid);
+    if (await isInstanceAlive(audioPath, record)) {
+      live.push(record);
     }
+  }
+  return live;
+};
+
+// Best-effort removal of the per-sound directory only once it is empty. It is
+// non-recursive on purpose: if a player registered during a stop the removal
+// fails and that new registration is preserved.
+const removePlayersDir = (audioPath: string) => {
+  try {
+    rmSync(playersDir(audioPath), { force: true });
+  } catch {
+    // Best effort only.
   }
 };
 
+const stopWindowsPlayers = (audioPath: string) => {
+  for (const record of readRegisteredPlayers(audioPath)) {
+    stopFileWindows(audioPath, record.token).catch((error) => {
+      showToast({ style: Toast.Style.Failure, title: "Failed to stop sound", message: String(error) });
+    });
+    // Unregister only the player we just stopped. A same-path playback that is
+    // registered concurrently keeps its own file, so it retains liveness
+    // tracking and a working Stop action.
+    unregisterPlayer(audioPath, record.token);
+  }
+  removePlayersDir(audioPath);
+};
+
 const stopMacOSPlayers = (audioPath: string) => {
-  const players = readRegisteredPlayers(audioPath).filter((record) => isPlayerRunning(record, audioPath));
-  for (const { pid } of players) {
+  for (const record of readRegisteredPlayers(audioPath)) {
+    if (!isPlayerRunning(record, audioPath)) {
+      continue;
+    }
+    const pid = Number(record.token);
     try {
       process.kill(pid);
     } catch {
@@ -203,16 +237,9 @@ const stopMacOSPlayers = (audioPath: string) => {
     // Unregister only the players we just stopped. A same-path playback that is
     // registered concurrently keeps its own file, so it retains liveness
     // tracking and a working Stop action.
-    unregisterPlayer(audioPath, pid);
+    unregisterPlayer(audioPath, record.token);
   }
-  // Best-effort removal of the per-sound directory only once it is empty. It is
-  // non-recursive on purpose: if a player registered during this stop the
-  // removal fails and that new registration is preserved.
-  try {
-    rmSync(playersDir(audioPath), { force: true });
-  } catch {
-    // Best effort only.
-  }
+  removePlayersDir(audioPath);
 };
 
 export const playSoundFromIndex = async (index: number) => {
@@ -236,22 +263,32 @@ export const playSoundFromIndex = async (index: number) => {
 export const playFile = async (item: Item) => {
   const audioPath = item.path[0];
   if (process.platform === "win32") {
+    // Each playback owns a dedicated token-named stop event, so a stop aimed
+    // at a still-running player of the same sound can never be swallowed (or
+    // inherited) by a new playback, and the new one always starts fresh.
+    const token = randomUUID();
+    registerPlayer(audioPath, { token, startTime: "" });
     setPlaying(audioPath, true);
-    playFileWindows(audioPath)
-      .then(async () => {
-        if (!(await isPlayerAlive(audioPath))) {
-          setPlaying(audioPath, false);
-        }
-      })
+    playFileWindows(audioPath, token)
       .catch((error) => {
+        unregisterPlayer(audioPath, token);
         setPlaying(audioPath, false);
         showToast({ style: Toast.Style.Failure, title: "Failed to play sound", message: String(error) });
+      })
+      .then(async () => {
+        unregisterPlayer(audioPath, token);
+        if ((await getLivePlayers(audioPath)).length === 0) {
+          setPlaying(audioPath, false);
+        }
       });
   } else {
     const child = spawn("afplay", [audioPath]);
     const pid = child.pid;
     if (pid !== undefined) {
-      registerPlayer(audioPath, pid);
+      const startTime = getProcessStartTime(pid);
+      if (startTime !== null) {
+        registerPlayer(audioPath, { token: String(pid), startTime });
+      }
     }
     setPlaying(audioPath, true);
     let notified = false;
@@ -263,7 +300,7 @@ export const playFile = async (item: Item) => {
     };
     const unregister = () => {
       if (pid !== undefined) {
-        unregisterPlayer(audioPath, pid);
+        unregisterPlayer(audioPath, String(pid));
       }
       if (readRegisteredPlayers(audioPath).length === 0) {
         setPlaying(audioPath, false);
@@ -290,9 +327,7 @@ export const stopFile = async (item: Item) => {
   const audioPath = item.path[0];
   setPlaying(audioPath, false);
   if (process.platform === "win32") {
-    stopFileWindows(audioPath).catch((error) => {
-      showToast({ style: Toast.Style.Failure, title: "Failed to stop sound", message: String(error) });
-    });
+    stopWindowsPlayers(audioPath);
   } else {
     stopMacOSPlayers(audioPath);
   }

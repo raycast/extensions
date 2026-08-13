@@ -36,10 +36,10 @@ impl Drop for PlayerGuard {
 }
 
 #[raycast]
-fn play_file(path: String) -> Result<(), String> {
+fn play_file(path: String, token: String) -> Result<(), String> {
     #[cfg(windows)]
     {
-        play_windows(&path)
+        play_windows(&path, &token)
     }
 
     #[cfg(not(windows))]
@@ -49,10 +49,10 @@ fn play_file(path: String) -> Result<(), String> {
 }
 
 #[raycast]
-fn stop_file(path: String) -> Result<(), String> {
+fn stop_file(path: String, token: String) -> Result<(), String> {
     #[cfg(windows)]
     {
-        stop_windows(&path)
+        stop_windows(&path, &token)
     }
 
     #[cfg(not(windows))]
@@ -62,36 +62,40 @@ fn stop_file(path: String) -> Result<(), String> {
 }
 
 #[cfg(windows)]
-fn play_windows(path: &str) -> Result<(), String> {
+fn play_windows(path: &str, token: &str) -> Result<(), String> {
     use std::sync::mpsc;
     use std::time::Duration;
     use windows::core::HSTRING;
-    use windows::Foundation::{TypedEventHandler, Uri};
+    use windows::Foundation::TypedEventHandler;
     use windows::Media::Core::MediaSource;
     use windows::Win32::Foundation::WAIT_OBJECT_0;
     use windows::Win32::System::Com::{CoInitializeEx, COINIT_MULTITHREADED};
-    use windows::Win32::System::Threading::{ResetEvent, WaitForSingleObject};
+    use windows::Win32::System::Threading::WaitForSingleObject;
 
     unsafe {
         let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
     }
 
-    // Clear any stale stop signal so a fresh play is not immediately
-    // cancelled. Only reset while the event is unsignaled: a signaled event
-    // means a Stop is already pending for this file, and wiping it would let a
-    // still-running player keep producing audio. The guard releases the handle
-    // on every return path, so a setup error below never leaks the event as an
-    // active-playback signal.
-    let stop_event = create_stop_event(&stop_event_name(path))?;
+    // Every playback instance owns a dedicated, token-named stop event, so a
+    // new play of the same file can never inherit or erase a Stop that was
+    // signalled for an older player (and the older player can never cancel the
+    // new play). The guard releases the handle on every return path, so a setup
+    // error below never leaks the event as an active-playback signal.
+    let stop_event = create_stop_event(&stop_event_name(path, token))?;
     let _stop_event_guard = StopEventGuard(stop_event);
-    if unsafe { WaitForSingleObject(stop_event, 0) } != WAIT_OBJECT_0 {
-        unsafe {
-            let _ = ResetEvent(stop_event);
-        }
-    }
 
-    let uri = Uri::CreateUri(&HSTRING::from(path)).map_err(|e| format!("Failed to parse file path: {e}"))?;
-    let source = MediaSource::CreateFromUri(&uri).map_err(|e| format!("Failed to create media source: {e}"))?;
+    // Open the file through StorageFile instead of a raw URI: MF refuses a
+    // byte-stream handler for the `file:///` scheme on desktop with
+    // MF_E_UNSUPPORTED_BYTESTREAM_TYPE, whereas the storage-backed source
+    // resolves reliably and still handles paths containing spaces.
+    let file = windows::Storage::StorageFile::GetFileFromPathAsync(&HSTRING::from(path))
+        .map_err(|e| format!("Failed to open file: {e}"))?
+        .get()
+        .map_err(|e| format!("Failed to open file: {e}"))?;
+    use windows::core::Interface;
+    let file: windows::Storage::IStorageFile = file.cast().map_err(|e| format!("Failed to open file: {e}"))?;
+    let source = windows::Media::Core::MediaSource::CreateFromStorageFile(&file)
+        .map_err(|e| format!("Failed to create media source: {e}"))?;
 
     let player = MediaPlayer::new().map_err(|e| format!("Failed to create MediaPlayer: {e}"))?;
     // The guard Pause + Close()s the player on every return path so audio stops
@@ -147,10 +151,10 @@ fn play_windows(path: &str) -> Result<(), String> {
 }
 
 #[raycast]
-fn is_playing(path: String) -> Result<bool, String> {
+fn is_playing(path: String, token: String) -> Result<bool, String> {
     #[cfg(windows)]
     {
-        Ok(is_playing_windows(&path))
+        Ok(is_playing_windows(&path, &token))
     }
 
     #[cfg(not(windows))]
@@ -160,12 +164,12 @@ fn is_playing(path: String) -> Result<bool, String> {
 }
 
 #[cfg(windows)]
-fn stop_windows(path: &str) -> Result<(), String> {
+fn stop_windows(path: &str, token: &str) -> Result<(), String> {
     use windows::core::HSTRING;
     use windows::Win32::Foundation::CloseHandle;
     use windows::Win32::System::Threading::{OpenEventW, SetEvent, EVENT_MODIFY_STATE};
 
-    let event_name = stop_event_name(path);
+    let event_name = stop_event_name(path, token);
     let event = unsafe { OpenEventW(EVENT_MODIFY_STATE, false, &HSTRING::from(&event_name)) };
     let Ok(event) = event else {
         // No player is currently running for this file.
@@ -180,12 +184,12 @@ fn stop_windows(path: &str) -> Result<(), String> {
 }
 
 #[cfg(windows)]
-fn is_playing_windows(path: &str) -> bool {
+fn is_playing_windows(path: &str, token: &str) -> bool {
     use windows::core::HSTRING;
     use windows::Win32::Foundation::CloseHandle;
     use windows::Win32::System::Threading::{OpenEventW, EVENT_MODIFY_STATE};
 
-    let event_name = stop_event_name(path);
+    let event_name = stop_event_name(path, token);
     let event = unsafe { OpenEventW(EVENT_MODIFY_STATE, false, &HSTRING::from(&event_name)) };
     let Ok(event) = event else {
         // No player process is currently running for this file.
@@ -199,12 +203,13 @@ fn is_playing_windows(path: &str) -> bool {
 }
 
 #[cfg(windows)]
-fn stop_event_name(path: &str) -> String {
+fn stop_event_name(path: &str, token: &str) -> String {
     use std::collections::hash_map::DefaultHasher;
     use std::hash::{Hash, Hasher};
 
     let mut hasher = DefaultHasher::new();
     path.hash(&mut hasher);
+    token.hash(&mut hasher);
     format!("Local\\RaycastSoundboard_{:016x}", hasher.finish())
 }
 

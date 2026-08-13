@@ -19,6 +19,7 @@ windows = { version = "0.58.0", features = [
     "Foundation",
     "Media_Core",
     "Media_Playback",
+    "Storage",
     "Win32_Foundation",
     "Win32_Security",
     "Win32_System_Com",
