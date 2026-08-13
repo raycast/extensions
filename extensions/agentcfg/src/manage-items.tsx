@@ -1,7 +1,9 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
+  confirmAlert,
   Icon,
   Keyboard,
   List,
@@ -153,6 +155,17 @@ export default function ManageItems() {
     }
   }
 
+  async function uninstall(group: ItemGroup) {
+    const scopeLabel = target === "all" ? "all targets" : target;
+    const confirmed = await confirmAlert({
+      title: `Uninstall ${group.name}?`,
+      message: `This removes ${group.name} from ${scopeLabel}.`,
+      primaryAction: { title: "Uninstall", style: Alert.ActionStyle.Destructive },
+    });
+    if (!confirmed) return;
+    await act(`Uninstalling ${group.name}…`, ["uninstall", group.name, ...scope]);
+  }
+
   const scope = target === "all" ? [] : ["-t", target];
   const visible = groups.filter((g) => target === "all" || g.entries.some((e) => e.target === target));
   const kinds = KIND_ORDER.filter((k) => visible.some((g) => g.kind === k));
@@ -274,7 +287,7 @@ export default function ManageItems() {
                           icon={Icon.Trash}
                           title={target === "all" ? "Uninstall" : `Uninstall from ${target}`}
                           shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-                          onAction={() => act(`Uninstalling ${group.name}…`, ["uninstall", group.name, ...scope])}
+                          onAction={() => uninstall(group)}
                         />
                         <Action
                           icon={Icon.ArrowClockwise}
