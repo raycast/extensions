@@ -1,4 +1,4 @@
-import { readOpencodeAuthToken } from "../agents/opencode-auth";
+import { readOpencodeAuthToken } from "../agents/opencode-auth.ts";
 
 /**
  * Resolves the Synthetic API token.

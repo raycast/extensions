@@ -76,7 +76,7 @@ function EditHighlightForm({ highlight, onUpdated }: { highlight: Highlight; onU
   >({
     initialValues: { text: highlight.text, note: highlight.note || "", color: highlight.color || "" },
     validation: {
-      text: (v) => (!v?.trim() ? t("highlights.highlightText") + " is required" : undefined),
+      text: (v) => (!v?.trim() ? t("common.fieldRequired", { field: t("highlights.highlightText") }) : undefined),
     },
     async onSubmit(values) {
       log.info("Updating highlight", { highlightId: highlight.id });

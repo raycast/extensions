@@ -95,7 +95,7 @@
     "@raycast/api": "^1.87.4",
     "@raycast/utils": "^1.17.0",
     "@types/turndown": "^5.0.4",
-    "axios": "^1.8.4",
+    "axios": "^1.18.0",
     "glob": "^10.0.0",
     "rimraf": "^5.0.0",
     "rss-parser": "^3.13.0",

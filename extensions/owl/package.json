@@ -66,5 +66,9 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.8",
+    "ws": "^8.21.0"
+  }
 }

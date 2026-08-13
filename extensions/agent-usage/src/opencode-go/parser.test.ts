@@ -1,6 +1,7 @@
-import test from "node:test";
 import assert from "node:assert/strict";
-import { parseOpencodegoHtml } from "./parser.js";
+import test from "node:test";
+
+import { parseOpencodegoHtml } from "./parser.ts";
 
 // Sample Solid.js hydration HTML from OpenCode Go
 test("parseOpencodegoHtml extracts usage from Solid.js hydration", () => {

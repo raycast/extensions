@@ -1,6 +1,6 @@
 # Elsewhere
 
-Control Elsewhere from focused Raycast commands without leaving your current context.
+Create and control immersive spatial soundscapes without leaving your current context.
 
 Elsewhere for macOS is required.
 
@@ -26,12 +26,14 @@ Volume commands leave Raycast open, so press Enter repeatedly for quick adjustme
 Immediate actions are no-view commands. Commands that require choosing a Space or track open a focused
 Raycast list with current-state context.
 
+## Raycast AI
+
+Raycast AI can directly play or pause Elsewhere audio, adjust ambience or background-music volume, and turn background
+music on or off through native background controls. Switching Spaces or music tracks remains list-based because the
+extension uses Elsewhere's live snapshot to present unambiguous current choices.
+
+Describe a place, mood, or moment to generate a Space preview in Elsewhere. The preview opens automatically for review
+before you save it. This feature uses Glaze AI credits and requires Elsewhere v13.0.0 or later.
+
 If Elsewhere is not running, selection commands offer to open it and populate automatically when it is ready.
 Immediate commands provide an **Open Elsewhere and Retry** confirmation.
-
-## State snapshot contract
-
-Elsewhere publishes the versioned `elsewhere-control-v1.json` snapshot in its macOS user-data directory. The extension
-discovers that file below `~/Library/Application Support` using the app-family identifier
-`app.glaze.macos.27b0yt1l*`, validates schema version 1 at runtime, and never reads Elsewhere's editable Space
-documents directly.

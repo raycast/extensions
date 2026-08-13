@@ -41,6 +41,14 @@
       "required": false,
       "default": "http://127.0.0.1:3876",
       "placeholder": "http://127.0.0.1:3876"
+    },
+    {
+      "name": "accessToken",
+      "title": "Access Token",
+      "description": "Access Token for the Super Productivity Local REST API",
+      "type": "password",
+      "required": true,
+      "placeholder": "xXX...XXX"
     }
   ],
   "commands": [
@@ -183,6 +191,7 @@
   ],
   "title": "Super Productivity",
   "author": "pvnkmnk",
+  "contributors": ["xmok"],
   "platforms": [
     "macOS",
     "Windows"

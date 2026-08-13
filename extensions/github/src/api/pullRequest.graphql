@@ -159,6 +159,15 @@ fragment PullRequestDetailsFields on PullRequest {
       }
     }
   }
+  commits(last: 1) {
+    nodes {
+      commit {
+        statusCheckRollup {
+          state
+        }
+      }
+    }
+  }
   assignees(first: 50) {
     totalCount
     nodes {

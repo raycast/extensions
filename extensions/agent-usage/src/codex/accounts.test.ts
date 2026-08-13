@@ -1,8 +1,9 @@
-import test from "node:test";
 import assert from "node:assert/strict";
-import { buildCodexAccountCandidates } from "./accounts";
-import type { CodexOAuthAccount } from "./auth";
-import type { AccountEntry } from "../accounts/types";
+import test from "node:test";
+
+import type { AccountEntry } from "../accounts/types.ts";
+import { buildCodexAccountCandidates } from "./accounts.ts";
+import type { CodexOAuthAccount } from "./auth.ts";
 
 const discoveredAccount: CodexOAuthAccount = {
   id: "codex-active",

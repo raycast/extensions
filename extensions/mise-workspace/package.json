@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mise-workspace",
+  "private": true,
+  "title": "Mise Workspace",
+  "description": "Manage your Mise workspace from Raycast",
+  "icon": "mise.png",
+  "author": "disinfeqt",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "icons": "node scripts/generate-icons.mjs",
+    "lint": "eslint . --fix",
+    "format": "prettier --write .",
+    "publish": "npm run lint && npm run format && ray publish"
+  },
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a new task",
+      "mode": "view",
+      "icon": "create-icon.png"
+    },
+    {
+      "name": "overview",
+      "title": "Overview",
+      "description": "View tasks grouped by assignee",
+      "mode": "view",
+      "icon": "overview-icon.png"
+    },
+    {
+      "name": "my-tasks",
+      "title": "My Tasks",
+      "subtitle": "Mise Workspace",
+      "description": "List tasks assigned to me",
+      "mode": "view",
+      "icon": "list-icon.png"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Show in Menu Bar",
+      "description": "Show in the macOS menu bar",
+      "mode": "menu-bar",
+      "icon": "list-icon.png",
+      "interval": "15m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "token",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Personal access token for the Mise API"
+    },
+    {
+      "name": "baseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API Base URL (Optional)",
+      "description": "Base URL of your Mise API",
+      "placeholder": "https://api.mise.work"
+    }
+  ],
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.1",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.7.0",
+    "lucide-static": "^1.24.0",
+    "prettier": "^3.9.5",
+    "sharp": "^0.35.3",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.22"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

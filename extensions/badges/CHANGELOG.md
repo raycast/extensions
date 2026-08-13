@@ -1,5 +1,9 @@
 # Badges Changelog
 
+## [Bugfix] - 2026-08-08
+
+- Show `labelColor` when `label` is empty
+
 ## [Bugfix] - 2026-08-03
 
 - Fix badge preview positioning issue

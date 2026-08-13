@@ -1,11 +1,11 @@
-import { List, Icon, Color, ActionPanel } from "@raycast/api";
+import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { DiggerResult } from "../types";
 import { BrowserActions } from "../actions/BrowserActions";
-import { CopyActions } from "../actions/CopyActions";
 import { CacheActions } from "../actions/CacheActions";
+import { CopyActions } from "../actions/CopyActions";
 import { WaybackMachineActions } from "../actions/WaybackMachineActions";
-import { formatDate, formatCompactNumber } from "../utils/formatters";
+import { DiggerResult } from "../types";
+import { formatCompactNumber, formatDate } from "../utils/formatters";
 
 interface WaybackMachineProps {
   data: DiggerResult | null;

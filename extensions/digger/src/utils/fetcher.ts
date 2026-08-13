@@ -1,5 +1,6 @@
+import { LIMITS, TIMEOUTS } from "./config";
 import { getLogger } from "./logger";
-import { TIMEOUTS, LIMITS } from "./config";
+import { redactUrlForLog } from "./urlUtils";
 
 const log = getLogger("fetcher");
 
@@ -168,9 +169,35 @@ export async function fetchHeadOnlyWithFallback(
   try {
     return await fetchHeadOnly(url, timeout, signal);
   } catch (httpsError) {
-    // Try HTTP as fallback
+    // A CANCELLED request is not a failed one — bail before warning or retrying.
+    //
+    // `fetchHeadOnly` throws a plain Error("Fetch aborted") when the caller's
+    // signal fires, which arrives here indistinguishably from a genuine TLS or
+    // network failure. Without this guard, every time the user retypes a URL the
+    // in-flight request lands in this catch and emits an unconditional
+    // "downgrade" warning for a downgrade that never happened — noise on the
+    // most ordinary control-flow path there is. The HTTP retry below is equally
+    // pointless: it fails instantly against the same aborted signal.
+    if (signal?.aborted || (httpsError instanceof Error && httpsError.message === "Fetch aborted")) {
+      throw httpsError;
+    }
+
+    // Try HTTP as fallback.
+    //
+    // `warn`, not `log`: this is a protocol DOWNGRADE. Everything below is read
+    // over plaintext, and for a tool that reports on a site's security posture
+    // that is worth surfacing even when the user has not opted into verbose
+    // diagnostics — `log` would hide it from the bug report that needs it most.
+    //
+    // The URL is stripped of its query string first: warn is not verbose-gated,
+    // so it emits for every user, and the logger's redactor does not scrub
+    // arbitrary query values. See redactUrlForLog.
     const httpUrl = url.replace(/^https:\/\//i, "http://");
-    log.log("fetchHeadOnlyWithFallback:https-failed-trying-http", { url, httpUrl });
+    log.warn("fetchHeadOnlyWithFallback:https-failed-trying-http", {
+      url: redactUrlForLog(url),
+      httpUrl: redactUrlForLog(httpUrl),
+      reason: httpsError instanceof Error ? httpsError.message : String(httpsError),
+    });
 
     try {
       return await fetchHeadOnly(httpUrl, timeout, signal);

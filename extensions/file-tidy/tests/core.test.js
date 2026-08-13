@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { test } from "node:test";
+import { after, test } from "node:test";
 import { buildExtIndex, canonicalPath, isInsideDir } from "../src/core/config.js";
 import { findDuplicates } from "../src/core/dedup.js";
 import { executePlan } from "../src/core/execute.js";
@@ -15,8 +15,15 @@ const extIndex = buildExtIndex({ categories: { Images: ["jpg"], Documents: ["txt
 const now = new Date();
 const ym = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
 
+const tmpDirs = [];
+after(() => {
+  for (const dir of tmpDirs) fs.rmSync(dir, { recursive: true, force: true });
+});
+
 function tmp() {
-  return fs.mkdtempSync(path.join(os.tmpdir(), "tidy-test-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "tidy-test-"));
+  tmpDirs.push(dir);
+  return dir;
 }
 
 function write(dir, rel, content) {
@@ -68,6 +75,122 @@ test("quarantines a byte-identical file under another name and records it in man
   assert.ok(fs.existsSync(path.join(dest, "Images", ym, "photo.jpg")));
   assert.ok(fs.existsSync(path.join(dest, "Duplicates", "photo copy.jpg")));
   assert.match(fs.readFileSync(path.join(dest, "Duplicates", "manifest.md"), "utf8"), /photo copy\.jpg/);
+});
+
+test("the similar-files report lands in .tidy and names where the files ended up", () => {
+  const src = tmp();
+  const dest = tmp();
+  const a = write(src, "shot.jpg", "AAA");
+  const b = write(src, "shot-2.jpg", "BBB");
+  const toA = path.join(dest, "Images", "shot.jpg");
+  const toB = path.join(dest, "Images", "shot-2.jpg");
+
+  const { similarReportPath } = executePlan(
+    [
+      { from: a, to: toA, name: "shot.jpg", action: "archive", size: 3, perceptual: { peers: [b], best: true } },
+      { from: b, to: toB, name: "shot-2.jpg", action: "archive", size: 3, perceptual: { peers: [a], best: false } },
+    ],
+    { destDir: dest, sourceDir: src },
+  );
+
+  assert.equal(similarReportPath, path.join(dest, ".tidy", "similar.md"));
+  const report = fs.readFileSync(similarReportPath, "utf8");
+  // The peers were recorded before anything moved. Naming them by their source
+  // paths would point the report at files that no longer exist there, which is
+  // the one thing it exists to avoid.
+  assert.ok(report.includes(path.join("Images", "shot.jpg")));
+  assert.ok(report.includes(path.join("Images", "shot-2.jpg")));
+  assert.ok(!report.includes(src));
+  // Written relative to the archive the report sits in, so the file names stay
+  // readable instead of trailing a repeated absolute prefix.
+  assert.ok(!report.includes(dest));
+  assert.match(report, /largest of the set/);
+});
+
+test("a peer already in the destination keeps its path, and a second run appends", () => {
+  const src = tmp();
+  const dest = tmp();
+  // Archived by an earlier run: this one never moves it, so it is already at
+  // its final path and must survive the rewrite untouched.
+  const archived = write(dest, "Images/old.jpg", "OLD");
+  const fresh = write(src, "new.jpg", "NEW");
+  const to = path.join(dest, "Images", "new.jpg");
+
+  const run = () =>
+    executePlan(
+      [
+        {
+          from: fresh,
+          to,
+          name: "new.jpg",
+          action: "archive",
+          size: 3,
+          perceptual: { peers: [archived], best: false },
+        },
+      ],
+      { destDir: dest, sourceDir: src },
+    );
+
+  const { similarReportPath } = run();
+  assert.ok(fs.readFileSync(similarReportPath, "utf8").includes(path.join("Images", "old.jpg")));
+
+  // Put it back so the second run has something to move again.
+  fs.renameSync(to, fresh);
+  run();
+  const blocks = fs.readFileSync(similarReportPath, "utf8").match(/^## /gm);
+  assert.equal(blocks.length, 2, "the second run appends a block instead of replacing the first");
+});
+
+test("a record that can't be written leaves the run a success", async () => {
+  const src = tmp();
+  const dest = tmp();
+  const a = write(src, "shot.jpg", "AAA");
+  const b = write(src, "shot-2.jpg", "BBB");
+  write(src, "photo.jpg", "SAME");
+  write(src, "photo copy.jpg", "SAME");
+  const entries = await plan(src, dest);
+  for (const e of entries.filter((e) => e.name.startsWith("shot"))) {
+    e.perceptual = { peers: [e.from === a ? b : a], best: e.from === a };
+  }
+  // A directory standing where each record file belongs: appending fails the
+  // way a full or read-only volume would, but only after every move is done.
+  fs.mkdirSync(path.join(dest, ".tidy", "similar.md"), { recursive: true });
+  fs.mkdirSync(path.join(dest, "Duplicates", "manifest.md"), { recursive: true });
+
+  const { moved, manifestPath, similarReportPath, reportErrors } = executePlan(entries, {
+    destDir: dest,
+    sourceDir: src,
+  });
+
+  // The whole point: the files are archived, so nothing about this run failed.
+  assert.equal(moved.length, entries.length);
+  for (const e of moved) assert.ok(fs.existsSync(e.to), `${e.name} was moved`);
+  assert.ok(fs.existsSync(manifestPath), "the run is still undoable");
+  // Never handed out: adapters offer to open this path, and there is no block
+  // in it describing this run.
+  assert.equal(similarReportPath, null);
+  assert.deepEqual(
+    reportErrors.map((e) => e.report).sort(),
+    ["duplicates", "similar"],
+    "both post-move appends are reported",
+  );
+  for (const e of reportErrors) {
+    assert.equal(e.code, "REPORT_WRITE");
+    assert.ok(e.path, "adapters name the file that couldn't be written");
+  }
+});
+
+test("a run with nothing flagged writes no similar report", () => {
+  const src = tmp();
+  const dest = tmp();
+  const from = write(src, "plain.txt", "x");
+
+  const { similarReportPath } = executePlan(
+    [{ from, to: path.join(dest, "Documents", "plain.txt"), name: "plain.txt", action: "archive", size: 1 }],
+    { destDir: dest, sourceDir: src },
+  );
+  assert.equal(similarReportPath, null);
+  assert.ok(!fs.existsSync(path.join(dest, ".tidy", "similar.md")));
 });
 
 test("quarantines a new file that duplicates one already archived in the destination", async () => {

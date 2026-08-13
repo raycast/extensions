@@ -11,13 +11,14 @@ import {
   TAG_HUMAN_COLOR,
 } from "../constants";
 import { useTranslation } from "../hooks/useTranslation";
-import { Bookmark, Config } from "../types";
+import { Bookmark, Config, List as BookmarkListType } from "../types";
 import { markdownImage } from "../utils/markdown";
 import { getScreenshot } from "../utils/screenshot";
-import { markToastFailed } from "../utils/toast";
+import { markToastFailed, toErrorMessage } from "../utils/toast";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
 import { NoteEdit } from "./NoteEdit";
+import { AddToListSubmenu } from "./AddToListSubmenu";
 
 const log = logger.child("[BookmarkItem]");
 const { Metadata } = List.Item.Detail;
@@ -29,6 +30,9 @@ interface BookmarkItemProps {
   onCleanCache?: () => void;
   onVisit?: (bookmark: Bookmark) => void;
   isSelected?: boolean;
+  /** Supplied by BookmarkList so the Add to List submenu costs one request per view, not per row. */
+  lists?: BookmarkListType[];
+  isLoadingLists?: boolean;
 }
 
 function getPreviewAssetIds(bookmark: Bookmark): { screenshotId?: string; imageAssetId?: string } {
@@ -62,7 +66,7 @@ function useAuthenticatedAssetUrl(assetId: string | undefined, enabled: boolean)
           setUrl(imageUrl);
         }
       } catch (error) {
-        log.error("Failed to get authenticated image", { assetId, error });
+        log.error("Failed to get authenticated image", { assetId, error: toErrorMessage(error) });
       }
     })();
 
@@ -295,6 +299,8 @@ function BookmarkActions({
   images,
   t,
   onVisit,
+  lists,
+  isLoadingLists,
 }: {
   bookmark: Bookmark;
   config: Config;
@@ -304,6 +310,8 @@ function BookmarkActions({
   images: ReturnType<typeof useBookmarkImages>;
   t: (key: string) => string;
   onVisit?: (bookmark: Bookmark) => void;
+  lists?: BookmarkListType[];
+  isLoadingLists?: boolean;
 }) {
   const isNote = bookmark.content.type === "text";
   const editTitle = isNote ? t("notes.actions.edit") : t("bookmark.actions.edit");
@@ -315,7 +323,7 @@ function BookmarkActions({
     const pushDetailAction = (
       <Action.Push
         icon={Icon.Sidebar}
-        target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} />}
+        target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} lists={lists} />}
         title={viewDetailTitle}
       />
     );
@@ -405,7 +413,7 @@ function BookmarkActions({
         {mainAction.props.title !== viewDetailTitle && (
           <Action.Push
             icon={Icon.Sidebar}
-            target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} />}
+            target={<BookmarkDetail bookmark={bookmark} onRefresh={onRefresh} lists={lists} />}
             title={viewDetailTitle}
           />
         )}
@@ -460,6 +468,9 @@ function BookmarkActions({
               shortcut={{ modifiers: ["ctrl"], key: "s" }}
             />
           </>
+        )}
+        {lists && lists.length > 0 && (
+          <AddToListSubmenu bookmarkId={bookmark.id} lists={lists} isLoading={isLoadingLists} />
         )}
         <Action
           title={bookmark.favourited ? t("bookmark.actions.unfavorite") : t("bookmark.actions.favorite")}
@@ -530,6 +541,8 @@ export function BookmarkItem({
   onCleanCache,
   onVisit,
   isSelected,
+  lists,
+  isLoadingLists,
 }: BookmarkItemProps) {
   const { t } = useTranslation();
   const [bookmark, setBookmark] = useState<Bookmark>(initialBookmark);
@@ -614,6 +627,8 @@ export function BookmarkItem({
           images={images}
           t={t}
           onVisit={onVisit}
+          lists={lists}
+          isLoadingLists={isLoadingLists}
         />
       }
     />

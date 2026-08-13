@@ -26,6 +26,8 @@ function TagBookmarksView({ tagId, tagName }: { tagId: string; tagName: string }
     <BookmarkList
       bookmarks={bookmarks}
       isLoading={isLoading}
+      error={error}
+      hasLiveData={hasLiveData}
       onRefresh={revalidate}
       pagination={pagination}
       searchBarPlaceholder={t("tags.bookmarks.searchInTag", { name: tagName })}
@@ -46,7 +48,7 @@ function CreateTagForm({ onCreated }: { onCreated: () => void }) {
   const { handleSubmit, itemProps } = useForm<TagFormValues>({
     initialValues: { name: "" },
     validation: {
-      name: (value) => (!value?.trim() ? t("tags.tagName") + " is required" : undefined),
+      name: (value) => (!value?.trim() ? t("common.fieldRequired", { field: t("tags.tagName") }) : undefined),
     },
     async onSubmit(values) {
       log.info("Creating tag", { name: values.name });
@@ -90,7 +92,7 @@ function RenameTagForm({ tag, onRenamed }: { tag: Tag; onRenamed: () => void }) 
   const { handleSubmit, itemProps } = useForm<TagFormValues>({
     initialValues: { name: tag.name },
     validation: {
-      name: (value) => (!value?.trim() ? t("tags.tagName") + " is required" : undefined),
+      name: (value) => (!value?.trim() ? t("common.fieldRequired", { field: t("tags.tagName") }) : undefined),
     },
     async onSubmit(values) {
       log.info("Renaming tag", { tagId: tag.id, name: values.name });

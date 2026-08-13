@@ -1,4 +1,4 @@
-import { buildExtIndex, buildFolderNamer, organizedDirNames, quarantineDirNames } from "./config.js";
+import { TIDY_DIR, buildExtIndex, buildFolderNamer, organizedDirNames, quarantineDirNames } from "./config.js";
 import { findDuplicates } from "./dedup.js";
 import { checkHealth } from "./health.js";
 import { clusterByHash, hashImages, isHashableImage, loadHashCache, saveHashCache } from "./phash.js";
@@ -48,7 +48,7 @@ export async function analyze({ sourceDir, destDir, config, recursive = false, i
   // were created under.
   const destFiles = scanDest(destDir, {
     onlyDirs: inPlace ? organizedDirs : undefined,
-    skipDirs: new Set([".tidy", ...quarantineDirNames(config)]),
+    skipDirs: new Set([TIDY_DIR, ...quarantineDirNames(config)]),
   });
 
   onPhase("dedup", { files: sound.length });

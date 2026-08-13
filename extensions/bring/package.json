@@ -50,7 +50,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.17",
     "@raycast/utils": "^2.2.4",
-    "axios": "^1.16.1"
+    "axios": "^1.18.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -66,5 +66,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.8"
   }
 }

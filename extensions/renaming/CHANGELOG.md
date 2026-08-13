@@ -1,5 +1,15 @@
 # Rename Changelog
 
+## [Undo History] - 2026-08-10
+
+- Add Rename History command to view and undo recent rename operations
+- Record successful renames from Rename File(s), Replace File(s) Characters, and Advanced Batch Rename
+- Undo a whole operation, roll back multiple operations to a point in time, or undo a single file from an operation's details
+- Track each file's undo status (renamed, undone, could not undo) with per-file conflict handling and retry
+- Preview conflicts before undoing: the confirmation says how many files can be restored and why the rest cannot
+- Show a preview and file metadata (status, directory, size, modified date) in the operation detail side panel: images render inline, text files show their first lines
+- Open Rename History after a successful rename from any command, so the completed batch is immediately reviewable and undoable
+
 ## [Fix] - 2026-08-03
 
 - Fix a case-only rename silently overwriting a different file on case-sensitive volumes
