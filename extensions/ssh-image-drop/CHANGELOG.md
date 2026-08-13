@@ -1,6 +1,6 @@
 # SSH Image Drop Changelog
 
-## [Store Listing Update] - {PR_MERGE_DATE}
+## [Store Listing Update] - 2026-08-13
 
 - Redrawn extension icon — the arrow fills more of the canvas, so it stays legible at store list size
 - README now links a donation page
