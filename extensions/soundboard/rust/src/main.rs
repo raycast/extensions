@@ -76,13 +76,18 @@ fn play_windows(path: &str) -> Result<(), String> {
         let _ = CoInitializeEx(None, COINIT_MULTITHREADED);
     }
 
-    // Reset the stop signal so a fresh play is not immediately cancelled. The
-    // guard releases the handle on every return path, so a setup error below
-    // never leaks the event as an active-playback signal.
+    // Clear any stale stop signal so a fresh play is not immediately
+    // cancelled. Only reset while the event is unsignaled: a signaled event
+    // means a Stop is already pending for this file, and wiping it would let a
+    // still-running player keep producing audio. The guard releases the handle
+    // on every return path, so a setup error below never leaks the event as an
+    // active-playback signal.
     let stop_event = create_stop_event(&stop_event_name(path))?;
     let _stop_event_guard = StopEventGuard(stop_event);
-    unsafe {
-        let _ = ResetEvent(stop_event);
+    if unsafe { WaitForSingleObject(stop_event, 0) } != WAIT_OBJECT_0 {
+        unsafe {
+            let _ = ResetEvent(stop_event);
+        }
     }
 
     let uri = Uri::CreateUri(&HSTRING::from(path)).map_err(|e| format!("Failed to parse file path: {e}"))?;
