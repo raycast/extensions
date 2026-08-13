@@ -43,7 +43,7 @@ import {
   Color,
   useNavigation,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { dirname } from "path";
 import {
   getPreferences,
@@ -224,18 +224,26 @@ function RecipeDetail({ filePath }: { filePath: string }) {
   const [md, setMd] = useState("*Loading…*");
   const [loading, setLoading] = useState(true);
   const [scale, setScale] = useState(1);
+  // Generation counter guards against stale CLI responses: if the user clicks
+  // Scale 2X then Scale 4X before the first runCook returns, only the latest
+  // request may update the view — otherwise the displayed markdown can show a
+  // different scale than `scale` (which Cooking Mode would then use).
+  const genRef = useRef(0);
 
   async function loadRecipe(s: number) {
+    const gen = ++genRef.current;
     setLoading(true);
     setScale(s);
     try {
       const recipePath = s === 1 ? filePath : `${filePath}:${s}`;
       const json = await runCook(["recipe", recipePath, "-f", "json"]);
+      if (gen !== genRef.current) return; // stale response — ignore
       setMd(recipeToMarkdown(JSON.parse(json), filePath));
     } catch {
+      if (gen !== genRef.current) return; // stale response — ignore
       setMd(`# Error\n\nCould not parse recipe at ${filePath}`);
     } finally {
-      setLoading(false);
+      if (gen === genRef.current) setLoading(false);
     }
   }
 
