@@ -1,5 +1,13 @@
 # GitHub Changelog
 
+## [Search Pagination and Repository List Improvements] - {PR_MERGE_DATE}
+
+- Search Repositories: Add pagination and a **Relevance** sort option (now the default).
+- Search Pull Requests and Notifications: Add pagination so more results can be loaded beyond the initial page.
+- Unread Notifications: Paginate the GitHub inbox so the menu bar count and repository filters include all unread threads, not just the first page.
+- Clone in VS Code: Add an extension preference to choose VS Code or Cursor, defaulting to VS Code from every repository command.
+- Open in Web IDE: Add **DeepWiki** to open AI-generated repository docs at deepwiki.com.
+
 ## [Clarify Clone and Download Actions] - 2026-08-13
 
 - Renamed repository actions and the **Download Repository as ZIP** command so clone (`git clone`) and ZIP download flows are clearly distinct.

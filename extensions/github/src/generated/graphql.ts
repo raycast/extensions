@@ -589,6 +589,7 @@ export type PullRequestFieldsFragment = {
 export type SearchPullRequestsQueryVariables = Exact<{
   query: string;
   numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchPullRequestsQuery = {
@@ -652,6 +653,7 @@ export type SearchPullRequestsQuery = {
         | Record<PropertyKey, never>
         | null;
     } | null> | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
 };
 
@@ -1117,6 +1119,7 @@ export type ExtendedRepositoryFieldsFragment = {
 export type SearchRepositoriesQueryVariables = Exact<{
   query: string;
   numberOfItems: number;
+  after?: string | null | undefined;
 }>;
 
 export type SearchRepositoriesQuery = {
@@ -1149,6 +1152,7 @@ export type SearchRepositoriesQuery = {
       | Record<PropertyKey, never>
       | null
     > | null;
+    pageInfo: { endCursor: string | null; hasNextPage: boolean };
   };
 };
 
@@ -2278,12 +2282,16 @@ export const ProjectDetailsDocument = gql`
   ${ProjectFieldsFragmentDoc}
 `;
 export const SearchPullRequestsDocument = gql`
-  query searchPullRequests($query: String!, $numberOfItems: Int!) {
-    search(query: $query, type: ISSUE, first: $numberOfItems) {
+  query searchPullRequests($query: String!, $numberOfItems: Int!, $after: String) {
+    search(query: $query, type: ISSUE, first: $numberOfItems, after: $after) {
       edges {
         node {
           ...PullRequestFields
         }
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }
@@ -2517,10 +2525,14 @@ export const InitPullRequestDocument = gql`
   ${PullRequestFieldsFragmentDoc}
 `;
 export const SearchRepositoriesDocument = gql`
-  query searchRepositories($query: String!, $numberOfItems: Int!) {
-    search(query: $query, first: $numberOfItems, type: REPOSITORY) {
+  query searchRepositories($query: String!, $numberOfItems: Int!, $after: String) {
+    search(query: $query, first: $numberOfItems, after: $after, type: REPOSITORY) {
       nodes {
         ...ExtendedRepositoryFields
+      }
+      pageInfo {
+        endCursor
+        hasNextPage
       }
     }
   }

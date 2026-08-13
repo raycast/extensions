@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, Preferences, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  getPreferenceValues,
+  Icon,
+  Preferences,
+  showToast,
+  Toast,
+  Keyboard,
+} from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -30,7 +40,10 @@ export type PullRequest =
 type PullRequestActionsProps = {
   pullRequest: PullRequest;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
+  mutateList?:
+    | MutatePromise<PullRequestFieldsFragment[] | undefined>
+    | MutatePromise<PullRequestFieldsFragment[]>
+    | ReturnType<typeof useMyPullRequests>["mutate"];
   mutateDetail?: MutatePromise<PullRequest>;
   children?: React.ReactNode;
 };
@@ -357,21 +370,21 @@ export default function PullRequestActions({
       <Action.Push
         icon={{ source: "commit.svg", tintColor: Color.PrimaryText }}
         title="See Commits"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        shortcut={Keyboard.Shortcut.Common.Copy}
         target={<PullRequestCommits pullRequest={pullRequest} />}
       />
 
       <Action.Push
         icon={Icon.CodeBlock}
         title="View Diff"
-        shortcut={{ modifiers: ["ctrl", "shift"], key: "d" }}
+        shortcut={Keyboard.Shortcut.Common.RemoveAll}
         target={<PullRequestDiff pullRequest={pullRequest} />}
       />
 
       <Action.Push
         icon={Icon.Download}
         title="Checkout Pull Request"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+        shortcut={Keyboard.Shortcut.Common.OpenWith}
         target={<CheckoutPullRequestForm pullRequest={pullRequest} />}
       />
 
@@ -573,7 +586,7 @@ export default function PullRequestActions({
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutate}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
     </ActionPanel>

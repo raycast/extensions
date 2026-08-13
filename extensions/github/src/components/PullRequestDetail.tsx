@@ -16,7 +16,10 @@ import PullRequestActions from "./PullRequestActions";
 type PullRequestDetailProps = {
   initialPullRequest: PullRequestFieldsFragment;
   viewer?: UserFieldsFragment;
-  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
+  mutateList?:
+    | MutatePromise<PullRequestFieldsFragment[] | undefined>
+    | MutatePromise<PullRequestFieldsFragment[]>
+    | ReturnType<typeof useMyPullRequests>["mutate"];
 };
 
 export default function PullRequestDetail({ initialPullRequest, mutateList }: PullRequestDetailProps) {
