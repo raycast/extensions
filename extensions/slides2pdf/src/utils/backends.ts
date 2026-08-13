@@ -242,6 +242,7 @@ interface AppScriptSpec {
   exportLine: string;
   unmodified: string; // predicate excluding documents with unsaved edits (iWork: modified, MS: saved)
   pathExpr: (doc: string) => string; // expression yielding a document's on-disk path (may error)
+  docKey: string; // property identifying a document across the open call ("id" for iWork; MS Office documents have no id, so "name")
 }
 
 const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
@@ -251,6 +252,7 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
     exportLine: "export theDoc to outFile as PDF with properties {PDF image quality:Best}",
     unmodified: "modified is false",
     pathExpr: (doc) => `POSIX path of ((file of ${doc}) as alias)`,
+    docKey: "id",
   },
   pages: {
     docClass: "document",
@@ -258,6 +260,7 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
     exportLine: "export theDoc to outFile as PDF",
     unmodified: "modified is false",
     pathExpr: (doc) => `POSIX path of ((file of ${doc}) as alias)`,
+    docKey: "id",
   },
   numbers: {
     docClass: "document",
@@ -265,6 +268,7 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
     exportLine: "export theDoc to outFile as PDF",
     unmodified: "modified is false",
     pathExpr: (doc) => `POSIX path of ((file of ${doc}) as alias)`,
+    docKey: "id",
   },
   powerpoint: {
     docClass: "presentation",
@@ -272,6 +276,7 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
     exportLine: "save theDoc in outFile as save as PDF",
     unmodified: "saved is true",
     pathExpr: (doc) => `full name of ${doc}`,
+    docKey: "name",
   },
   word: {
     docClass: "document",
@@ -279,6 +284,7 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
     exportLine: "save as theDoc file name outFile file format format PDF",
     unmodified: "saved is true",
     pathExpr: (doc) => `full name of ${doc}`,
+    docKey: "name",
   },
   excel: {
     docClass: "workbook",
@@ -286,6 +292,7 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
     exportLine: "save workbook as theDoc filename outFile file format PDF file format",
     unmodified: "saved is true",
     pathExpr: (doc) => `full name of ${doc}`,
+    docKey: "name",
   },
 };
 
@@ -299,24 +306,38 @@ function docMatch(src: string, spec: AppScriptSpec): string {
   return `(name is ${name} or name is ${stem}) and ${spec.unmodified}`;
 }
 
-// A candidate document is accepted only if its on-disk path matches the source file (or its
-// path can't be read — freshly imported non-native formats may have none). Name matching alone
-// would bind a same-named document opened from a different folder: the export would produce the
-// wrong PDF and the close would target the wrong document.
-function verifyCandidateLines(cand: string, src: string, spec: AppScriptSpec, accept: string): string[] {
+// A candidate document is accepted only if its on-disk path matches the source file, or its
+// path can't be read — freshly imported non-native formats may have none. A pathless candidate
+// is ambiguous: it may be our import, or a pre-existing untitled/imported document that happens
+// to share the name. When preKeysVar names a pre-open snapshot of document keys, a pathless
+// candidate is accepted only if it appeared after the open call. The timeout cleanup runs in a
+// separate process with no snapshot; there every pathless match must stay closable so the
+// imported document doesn't keep the file locked (closing a same-named unmodified document
+// discards nothing).
+function verifyCandidateLines(
+  cand: string,
+  src: string,
+  spec: AppScriptSpec,
+  accept: string,
+  preKeysVar?: string,
+): string[] {
+  const pathlessOk = preKeysVar
+    ? `(candPath is "" and (${spec.docKey} of ${cand}) is not in ${preKeysVar})`
+    : `candPath is ""`;
   return [
     `set candPath to ""`,
     `try`,
     `  set candPath to ${spec.pathExpr(cand)}`,
     `  if candPath does not start with "/" then set candPath to POSIX path of candPath`,
     `end try`,
-    `if candPath is "" or candPath is ${asString(src)} then ${accept}`,
+    `if ${pathlessOk} or candPath is ${asString(src)} then ${accept}`,
   ];
 }
 
 // Shared AppleScript skeleton. All app scripts follow the same shape:
 // remember whether the app was running, open the file, wait until the opened document appears and
-// bind it by name + unmodified state + on-disk path (open is asynchronous for non-native formats
+// bind it by name + unmodified state + on-disk path — or, for pathless imports, by not having
+// existed before the open call (open is asynchronous for non-native formats
 // like .pptx in Keynote, is a no-op for an already-open document, and apps may auto-create a blank
 // startup document — a bare count-based wait mishandles all three), run the export inside
 // try/on error so the error message is captured instead of swallowed, always close the document
@@ -332,6 +353,10 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
     `  try`,
     `    with timeout of 600 seconds`,
     `      set initialCount to (count of ${countExpr})`,
+    `      set preKeys to {}`,
+    `      try`,
+    `        set preKeys to ${spec.docKey} of every ${spec.docClass}`,
+    `      end try`,
     `      open POSIX file ${asString(src)}`,
     `      set theDoc to missing value`,
     `      set tries to 0`,
@@ -339,13 +364,13 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
     `        try`,
     `          set matched to (${countExpr} whose (${docMatch(src, spec)}))`,
     `          repeat with cand in matched`,
-    ...indent(verifyCandidateLines("cand", src, spec, "set theDoc to cand"), "            "),
+    ...indent(verifyCandidateLines("cand", src, spec, "set theDoc to cand", "preKeys"), "            "),
     `            if theDoc is not missing value then exit repeat`,
     `          end repeat`,
     `        end try`,
     `        if theDoc is missing value and tries > 20 and (count of ${countExpr}) > initialCount then`,
     `          set cand to ${docExpr}`,
-    ...indent(verifyCandidateLines("cand", src, spec, "set theDoc to cand"), "          "),
+    ...indent(verifyCandidateLines("cand", src, spec, "set theDoc to cand", "preKeys"), "          "),
     `        end if`,
     `        if theDoc is missing value then`,
     `          delay 0.5`,
