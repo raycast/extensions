@@ -3,7 +3,7 @@
   <h1 align="center">Media Switcher</h1>
 </p>
 
-A [Raycast](https://raycast.com) extension to quickly switch media sessions.
+A keyboard-driven [Raycast](https://raycast.com) extension for managing all of your active media sessions from one place — no more hunting through open apps and browser tabs to switch from a YouTube video to a Spotify song.
 
 ## Commands
 
@@ -18,11 +18,11 @@ A [Raycast](https://raycast.com) extension to quickly switch media sessions.
 | Switch to This Session | `⏎` | Pause all other sessions and switch to this session |
 | Play / Pause | `⏎` or  `⌘+⏎` / `Ctrl+⏎` | Play / pause this session |
 | Reveal Application | `⇧+⏎` | Bring the active media application to the foreground |
-| Previous Track | `⌘+[` / `Ctrl+[` | Skip to the beginning of the current or previous track |
-| Next Track | `⌘+]` / `Ctrl+]` | Skip to the next track |
-| Turn Volume Up | `⌘+=` / `Ctrl+=` | Raise the media volume level |
-| Turn Volume Down | `⌘+-` / `Ctrl+-` | Lower the media volume level |
-| Refresh | `⌘+R` / `Ctrl+R` | Refresh the media session details |
+| Previous Track | `⌘+[` / `Ctrl+[` or `⌘+←` / `Ctrl+←` | Skip to the beginning of the current or previous track |
+| Next Track | `⌘+]` / `Ctrl+]` or `⌘+→` / `Ctrl+→` | Skip to the next track |
+| Turn Volume Up | `⌘+=` / `Ctrl+=` | Raise the system volume level |
+| Turn Volume Down | `⌘+-` / `Ctrl+-` | Lower the system volume level |
+| Refresh | `⌘+R` / `Ctrl+R` | Refresh the media session list |
 
 ## Preferences
 
@@ -32,7 +32,7 @@ A [Raycast](https://raycast.com) extension to quickly switch media sessions.
 
 ## Notes
 
-macOS support is intended but not yet implemented because I don't have a Mac to test on. Contributions adding macOS support via PRs are very welcome.
+macOS support is intended but not yet implemented because I don't have a Mac to test on. Contributions adding macOS support via PRs are very welcome :)
 
 ## Issues
 
