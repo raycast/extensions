@@ -1,6 +1,6 @@
 # OpenCodex Usage Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-13
 
 - Provider Usage command listing every connected provider with quota rings, reset times, adapter details and request/token/cost stats.
 - Usage Stats command with summary totals, a per-day request sparkline, and per-provider, per-model and per-day breakdowns.
