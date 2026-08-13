@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Clarify Clone and Download Actions] - {PR_MERGE_DATE}
+## [Clarify Clone and Download Actions] - 2026-08-13
 
 - Renamed repository actions and the **Download Repository as ZIP** command so clone (`git clone`) and ZIP download flows are clearly distinct.
 - Renamed the **Clone Path** preference to **Default Clone Path** and clarified that it applies only to clone actions, not ZIP downloads or AI-assisted flows.
