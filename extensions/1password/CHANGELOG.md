@@ -1,5 +1,11 @@
 # 1Password Changelog
 
+## [Windows Desktop-App Integration Fixes] - 2026-08-13
+
+- Fixed constant "cannot connect to 1Password app" failures on Windows. The 1Password app briefly has no CLI pipe listener right after a previous `op` process disconnects; back-to-back `op` invocations are now serialized and connection failures are retried instead of surfacing immediately.
+- Fixed the "Authentication Required" screen appearing on Windows even though the 1Password desktop-app integration works. `op whoami` reports "account is not signed in" without an `op signin` session, so the sign-in check and account resolution now fall back to `op account get`, which uses the app's delegated sessions.
+- Item actions (copy/paste credentials, share, open in browser, password generation) now run through the same guarded execution path instead of spawning `op` directly, so they benefit from the same connection-failure handling.
+
 ## [Bug Fix] - 2026-06-15
 
 - Reduce memory usage when loading large item lists by avoiding the full item payload until it is needed. Opt in via **Reduce item list memory usage** in extension preferences.
