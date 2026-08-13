@@ -7,5 +7,7 @@
 - Text-based files (code, JSON, Markdown, logs, …) are rendered by a bundled text renderer — no apps required
 - Format-native engine is tried first, with automatic fallback to the next capable engine
 - Existing files are never overwritten — name collisions get an extension tag or numeric suffix
+- Everything runs on-device — no cloud service, no upload, no account
 - Live progress in the toast during batch conversions (current file and x/y counter)
+- Stop Conversion command ends a batch after the file it is working on
 - Setup command shows detected engines and lets you pick a preferred engine per file type

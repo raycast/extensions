@@ -183,7 +183,7 @@ export function detectBackends(): Backend[] {
   return found;
 }
 
-export function supportsExtension(type: BackendType, ext: string): boolean {
+function supportsExtension(type: BackendType, ext: string): boolean {
   const e = ext.toLowerCase();
   if (type === "builtin") return BUILTIN_TEXT_EXTS.has(e) || !BUILTIN_EXCLUDED_EXTS.has(e);
   return BACKEND_EXTS[type].has(e);
@@ -249,7 +249,11 @@ interface AppScriptSpec {
   exportLine: (doc: string) => string; // export statement for a document expression, writing to outFile
   unmodified: (doc: string) => string; // predicate excluding documents with unsaved edits (iWork: modified, MS: saved)
   pathExpr: (doc: string) => string; // expression yielding a document's on-disk path (errors when there is none)
-  docKey: string; // property identifying a document across the open call ("id" for iWork; MS Office documents have no id, so "name")
+  // Property identifying a document across the open call. It must be unique per document, or a
+  // document that opens without a file of its own can be mistaken for one that was already there:
+  // iWork has a real id, Office documents have none, so their full path stands in — plain `name`
+  // is shared by two same-named files from different folders.
+  docKey: string;
 }
 
 const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
@@ -279,21 +283,21 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
     exportLine: (d) => `save ${d} in outFile as save as PDF`,
     unmodified: (d) => `saved of ${d} is true`,
     pathExpr: (doc) => `full name of ${doc}`,
-    docKey: "name",
+    docKey: "full name",
   },
   word: {
     docClass: "document",
     exportLine: (d) => `save as ${d} file name outFile file format format PDF`,
     unmodified: (d) => `saved of ${d} is true`,
     pathExpr: (doc) => `full name of ${doc}`,
-    docKey: "name",
+    docKey: "full name",
   },
   excel: {
     docClass: "workbook",
     exportLine: (d) => `save workbook as ${d} filename outFile file format PDF file format`,
     unmodified: (d) => `saved of ${d} is true`,
     pathExpr: (doc) => `full name of ${doc}`,
-    docKey: "name",
+    docKey: "full name",
   },
 };
 

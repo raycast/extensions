@@ -39,6 +39,13 @@
       "mode": "no-view"
     },
     {
+      "name": "stop-conversion",
+      "title": "Stop Conversion",
+      "subtitle": "Slides2PDF",
+      "description": "Stop a running batch conversion after the file it is currently working on. Assign a hotkey to this command to stop from anywhere.",
+      "mode": "no-view"
+    },
+    {
       "name": "setup",
       "title": "Setup Conversion Engines",
       "subtitle": "Slides2PDF",

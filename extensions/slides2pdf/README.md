@@ -14,6 +14,12 @@ Unlike converters built on cloud APIs, Slides2PDF never uploads your files anywh
 
 For every file, the extension picks the app that renders the format most faithfully (e.g. PowerPoint for `.pptx`, Keynote for `.key`, Word for `.docx`) and automatically falls back to the next capable engine if the first one fails.
 
+### Stopping a Batch
+
+Picked far more files than you meant to? Run **Stop Conversion**. The file being converted right now finishes, everything after it is skipped, and the toast reports how many were converted and how many were skipped. Give the command a hotkey in Raycast's settings to stop without opening the launcher first.
+
+Closing the progress toast does not stop anything — it only hides the toast, and the conversion keeps running.
+
 ## Setup
 
 At least one conversion engine must be installed. Run **Setup Conversion Engines** to see which engines were detected, pick a preferred engine per file type, and get install help.
