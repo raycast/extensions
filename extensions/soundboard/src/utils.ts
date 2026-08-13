@@ -212,13 +212,20 @@ const removePlayersDir = (audioPath: string) => {
 
 const stopWindowsPlayers = (audioPath: string) => {
   for (const record of readRegisteredPlayers(audioPath)) {
-    stopFileWindows(audioPath, record.token).catch((error) => {
-      showToast({ style: Toast.Style.Failure, title: "Failed to stop sound", message: String(error) });
-    });
-    // Unregister only the player we just stopped. A same-path playback that is
-    // registered concurrently keeps its own file, so it retains liveness
-    // tracking and a working Stop action.
-    unregisterPlayer(audioPath, record.token);
+    stopFileWindows(audioPath, record.token)
+      .then(() => {
+        // The player received the stop signal, so its registration is no
+        // longer needed. A same-path playback that is registered concurrently
+        // keeps its own file, so it retains liveness tracking and a working
+        // Stop action.
+        unregisterPlayer(audioPath, record.token);
+      })
+      .catch((error) => {
+        showToast({ style: Toast.Style.Failure, title: "Failed to stop sound", message: String(error) });
+        // Keep the registration on a failed stop: the player may still be
+        // running, and the liveness check restores the playing state so the
+        // user can retry.
+      });
   }
   removePlayersDir(audioPath);
 };
@@ -271,8 +278,11 @@ export const playFile = async (item: Item) => {
     setPlaying(audioPath, true);
     playFileWindows(audioPath, token)
       .catch((error) => {
+        // This instance failed. The shared `.then` below runs on both success
+        // and failure, so the playing state is only cleared once no other live
+        // player of this sound remains (a concurrent same-sound playback keeps
+        // its own registration and must not be hidden by this failure).
         unregisterPlayer(audioPath, token);
-        setPlaying(audioPath, false);
         showToast({ style: Toast.Style.Failure, title: "Failed to play sound", message: String(error) });
       })
       .then(async () => {
