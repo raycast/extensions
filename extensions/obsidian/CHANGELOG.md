@@ -1,9 +1,9 @@
 # Obsidian Changelog
 
-## [Fix AI searchNote OOM on oversized Markdown] - 2026-08-13
+## [Fix AI searchNote OOM on oversized Markdown] - {PR_MERGE_DATE}
 
 - Skip Markdown files larger than 1 MiB during full-content search instead of reading them into the 100 MB extension heap
-- Limit tag search on oversized files to a 64 KiB prefix so frontmatter tags still match
+- Limit tag search on oversized files to a growing prefix (64 KiB steps, 1 MiB cap) so YAML tags still match when frontmatter crosses the first chunk
 - Default the AI `searchNote` `searchContent` parameter to `false`, matching the UI Search Note command
 
 ## [Fix Delete Note Shortcut] - 2026-07-18

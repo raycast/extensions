@@ -73,6 +73,32 @@ describe("content search large files", () => {
     expect(results[0].title).toBe("Tagged Large");
   });
 
+  it("still finds YAML tags when frontmatter crosses the 64 KiB prefix", async () => {
+    const largePath = path.join(tempDir, "tagged-wide-frontmatter.md");
+    const padding = "x".repeat(70 * 1024);
+    fs.writeFileSync(largePath, `---\ndescription: |\n  ${padding}\ntags:\n  - widetags\n---\n${"z".repeat(1024 * 1024 + 64)}`);
+
+    const notes = [noteFor(tempDir, "tagged-wide-frontmatter.md", "Wide Frontmatter")];
+    const results = await searchNotesWithContent(notes, "tag:widetags");
+
+    expect(results.length).toBe(1);
+    expect(results[0].title).toBe("Wide Frontmatter");
+  });
+
+  it("recovers YAML tags when the closer is past the 1 MiB tag-search cap", async () => {
+    const largePath = path.join(tempDir, "tagged-unclosed-frontmatter.md");
+    fs.writeFileSync(
+      largePath,
+      `---\ntags:\n  - unclosedclip\ndescription: |\n  ${"y".repeat(1024 * 1024 + 64)}\n---\nbody`
+    );
+
+    const notes = [noteFor(tempDir, "tagged-unclosed-frontmatter.md", "Unclosed Frontmatter")];
+    const results = await searchNotesWithContent(notes, "tag:unclosedclip");
+
+    expect(results.length).toBe(1);
+    expect(results[0].title).toBe("Unclosed Frontmatter");
+  });
+
   it("does not require reading an oversized file to match its title", async () => {
     const largePath = path.join(tempDir, "raycast-hotkeys.md");
     fs.writeFileSync(largePath, "x".repeat(1024 * 1024 + 64));

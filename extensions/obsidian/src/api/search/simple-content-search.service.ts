@@ -157,14 +157,13 @@ async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]
       filesChecked++;
 
       // Frontmatter lives at the top. Never slurp an oversized clipping just to
-      // look for tags — read a prefix instead.
+      // look for tags — read a prefix, then grow only until the closing ---.
       const usePrefixOnly = stat.size > MAX_CONTENT_SEARCH_BYTES;
-      const bytesToRead = usePrefixOnly ? Math.min(stat.size, MAX_TAG_SEARCH_BYTES) : stat.size;
       if (usePrefixOnly) {
         prefixOnlyFiles++;
       }
 
-      const content = await readFilePrefix(note.path, bytesToRead);
+      const content = await readTagSearchContent(note.path, stat.size);
 
       // Extract tags from the file (both inline and YAML frontmatter)
       const tags = ObsidianUtils.getAllTags(content);
@@ -196,4 +195,42 @@ async function readFilePrefix(filePath: string, byteCount: number): Promise<stri
   } finally {
     await handle.close();
   }
+}
+
+const OPENS_WITH_FRONTMATTER = /^---\s*\r?\n/;
+const CLOSED_FRONTMATTER = /^---\s*\r?\n[\s\S]*?\r?\n---(?:\r?\n|$)/;
+
+function hasClosedFrontmatter(content: string): boolean {
+  return CLOSED_FRONTMATTER.test(content);
+}
+
+/**
+ * Tag search only needs YAML + nearby inline tags. Small files are read whole.
+ * Oversized files start at 64 KiB and grow in 64 KiB steps until the frontmatter
+ * closer is found or the 1 MiB content-search cap is hit. If the closer is still
+ * missing, append one so the existing regex parser can recover tags already read.
+ */
+async function readTagSearchContent(filePath: string, fileSize: number): Promise<string> {
+  if (fileSize <= MAX_CONTENT_SEARCH_BYTES) {
+    return readFilePrefix(filePath, fileSize);
+  }
+
+  let bytesToRead = Math.min(fileSize, MAX_TAG_SEARCH_BYTES);
+  let content = await readFilePrefix(filePath, bytesToRead);
+  const startsWithFrontmatter = OPENS_WITH_FRONTMATTER.test(content);
+
+  while (
+    startsWithFrontmatter &&
+    !hasClosedFrontmatter(content) &&
+    bytesToRead < Math.min(fileSize, MAX_CONTENT_SEARCH_BYTES)
+  ) {
+    bytesToRead = Math.min(fileSize, MAX_CONTENT_SEARCH_BYTES, bytesToRead + MAX_TAG_SEARCH_BYTES);
+    content = await readFilePrefix(filePath, bytesToRead);
+  }
+
+  if (startsWithFrontmatter && !hasClosedFrontmatter(content)) {
+    content = `${content.replace(/\s*$/, "")}\n---\n`;
+  }
+
+  return content;
 }
