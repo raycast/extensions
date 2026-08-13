@@ -1,6 +1,10 @@
 # Slides2PDF
 
-Convert slides, documents, spreadsheets, images, and text or code files selected in Finder to PDF — using apps you already have. The extension drives locally installed apps (Keynote, PowerPoint, Pages, Word, Numbers, Excel, LibreOffice, or macOS's built-in `sips`) as conversion engines; text-based files are rendered by a bundled text renderer, so they work with no extra apps at all.
+Convert slides, documents, spreadsheets, images, and text or code files selected in Finder to PDF — entirely on your device, using apps you already have. The extension drives locally installed apps (Keynote, PowerPoint, Pages, Word, Numbers, Excel, LibreOffice, or macOS's built-in `sips`) as conversion engines; text-based files are rendered by a bundled text renderer, so they work with no extra apps at all.
+
+## Privacy: Everything Happens On-Device
+
+Unlike converters built on cloud APIs, Slides2PDF never uploads your files anywhere. Every conversion runs locally on your Mac — no cloud service, no third-party API, no account, and no network connection required. Your documents never leave your machine.
 
 ## Usage
 

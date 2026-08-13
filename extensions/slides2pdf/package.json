@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "slides2pdf",
   "title": "Slides2PDF",
-  "description": "Convert slides, documents, spreadsheets, images, and text or code files selected in Finder to PDF using apps you already have.",
+  "description": "On-device conversion of slides, documents, spreadsheets, images, and more to PDF.",
   "version": "0.1.0",
   "repository": {
     "type": "git",
