@@ -1,6 +1,6 @@
 # Soundboard Changelog
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-08-13
 
 - Add support for Windows platform using Rust
 - Add Stop action for currently playing sounds
