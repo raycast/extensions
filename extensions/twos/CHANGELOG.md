@@ -1,6 +1,6 @@
 # Twos Changelog
 
-## [Open results in the desktop app] - 2026-08-13
+## [Open results in the desktop app] - {PR_MERGE_DATE}
 
 - **Search Things** now opens results in the NewTwos desktop app when it's
   installed, instead of always going to the browser. Opening a thing lands on
