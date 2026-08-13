@@ -1,11 +1,13 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "wlthy",
-  "title": "wlthy",
+  "title": "Wlthy",
   "description": "See your net worth, day and month change, and allocation from your wlthy wealth account — read-only, without leaving your keyboard.",
   "icon": "wlthy-icon.png",
   "author": "alirbaba",
-  "categories": ["Finance"],
+  "categories": [
+    "Finance"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -64,15 +66,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.83.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.19.17",
-    "@types/react": "19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.0",
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "26.2.0",
+    "@types/react": "19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
     "typescript": "^5.5.0"
   },
   "scripts": {
@@ -81,5 +83,9 @@
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
