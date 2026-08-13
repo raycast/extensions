@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 import { existsSync } from "fs";
 import { readFile } from "fs/promises";
 import { homedir } from "os";
@@ -32,7 +32,7 @@ async function readCatalog(): Promise<AndroidApp[]> {
 }
 
 export default function Command() {
-  const { data, isLoading } = useCachedPromise(readCatalog, [], { initialData: [] });
+  const { data = [], isLoading } = usePromise(readCatalog, []);
 
   return (
     <List isLoading={isLoading}>
