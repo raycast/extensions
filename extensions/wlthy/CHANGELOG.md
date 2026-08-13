@@ -1,6 +1,6 @@
 # wlthy Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-13
 
 - Net Worth: total net worth with day / month change and asset & debt totals.
 - Allocation: breakdown by asset class, currency, geography or sector.
