@@ -11,7 +11,7 @@ const client = new OAuth.PKCEClient({
 export const provider = new OAuthService({
   client,
   clientId: "1000.THQS4GQYCRT24CBM70XZGD9Q0BHN6G",
-  scope: "ZohoMail.accounts.READ ZohoMail.messages.READ",
+  scope: "ZohoMail.accounts.READ ZohoMail.messages.READ ZohoMail.folders.READ",
   authorizeUrl:
     "https://oauth.raycast.com/v1/authorize/QyDrUGb3ZrzvGpG5XH3rvT0Y4--N8go--_6wsvTDbWaQJlfMw9_OOmqLV42rToFgDWTg5ovvqOvzx5iVovOhCh4QBRveM5D40epSRw9FNJN01tu6Yudnka4KV6ce4uDWeacd5Jd5Py3fLPPYZupF",
   tokenUrl:

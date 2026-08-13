@@ -24,6 +24,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.5",
     "@raycast/utils": "^2.2.2",
+    "filesize": "^11.0.22",
     "node-html-markdown": "^2.0.0"
   },
   "devDependencies": {

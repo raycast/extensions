@@ -1,11 +1,22 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
 import { provider } from "./oauth";
-import { Account, EmailMessage, Result } from "./types";
+import { Account, EmailMessage, Folder, Result } from "./types";
 import { NodeHtmlMarkdown } from "node-html-markdown";
+import { useState } from "react";
+import { filesize } from "filesize";
 
 export default withAccessToken(provider)(Accounts);
 
+const PAGE_LIMIT = 20;
+const getZohoHeaders = () => {
+  const { token } = getAccessToken();
+  return {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    Authorization: `Zoho-oauthtoken ${token}`,
+  };
+};
 const parseZohoResponse = async <T,>(response: Response) => {
   const result = (await response.json()) as
     | Result<T>
@@ -21,14 +32,6 @@ const parseZohoResponse = async <T,>(response: Response) => {
   if (Array.isArray(result)) throw new Error(result[1].errorCode);
   if (!response.ok) throw new Error(result.status.description);
   return result.data;
-};
-const getZohoHeaders = () => {
-  const { token } = getAccessToken();
-  return {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-    Authorization: `Zoho-oauthtoken ${token}`,
-  };
 };
 
 function Accounts() {
@@ -62,15 +65,38 @@ function Accounts() {
 }
 
 function Emails({ account }: { account: Account }) {
+  const [selectedFolderId, setSelectedFolderId] = useState("");
+
+  const { isLoading: isLoadingFolders, data: folders } = useFetch(
+    `https://mail.zoho.com/api/accounts/${account.accountId}/folders`,
+    {
+      headers: getZohoHeaders(),
+      parseResponse: parseZohoResponse<Folder[]>,
+      initialData: [],
+    },
+  );
+
   const {
     isLoading,
     data: emails,
+    pagination,
     mutate,
-  } = useFetch(`https://mail.zoho.com/api/accounts/${account.accountId}/messages/view`, {
-    headers: getZohoHeaders(),
-    parseResponse: parseZohoResponse<EmailMessage[]>,
-    initialData: [],
-  });
+  } = useFetch(
+    (options: { page: number }) =>
+      `https://mail.zoho.com/api/accounts/${account.accountId}/messages/view?folderId=${selectedFolderId}&limit=${PAGE_LIMIT}&start=${options.page * PAGE_LIMIT + 1}`,
+    {
+      headers: getZohoHeaders(),
+      parseResponse: parseZohoResponse<EmailMessage[]>,
+      mapResult(result) {
+        return {
+          data: result,
+          hasMore: result.length === PAGE_LIMIT,
+        };
+      },
+      initialData: [],
+      execute: !!selectedFolderId,
+    },
+  );
 
   async function updateEmailReadStatus(messageId: number, mode: "markAsRead" | "markAsUnread") {
     const toast = await showToast(Toast.Style.Animated, "Updating", messageId.toString());
@@ -102,12 +128,32 @@ function Emails({ account }: { account: Account }) {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List
+      isLoading={isLoading || isLoadingFolders}
+      pagination={pagination}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Folder" onChange={setSelectedFolderId}>
+          {folders.map((folder) => (
+            <List.Dropdown.Item
+              key={folder.folderId}
+              icon="zoho-mail.png"
+              title={folder.folderName}
+              value={folder.folderId}
+            />
+          ))}
+        </List.Dropdown>
+      }
+    >
       {emails.map((email) => (
         <List.Item
           key={email.messageId}
           icon={{ source: Icon.Envelope, tintColor: email.status === "0" ? Color.Blue : undefined }}
-          title={email.subject}
+          title={email.fromAddress}
+          subtitle={email.subject}
+          accessories={[
+            { text: filesize(email.size, { standard: "jedec" }) },
+            { date: new Date(+email.receivedTime), tooltip: new Date(+email.receivedTime).toString() },
+          ]}
           actions={
             <ActionPanel>
               <Action.Push

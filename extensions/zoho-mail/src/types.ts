@@ -9,11 +9,17 @@ export interface Account {
   accountId: number;
   displayName: string;
 }
+export interface Folder {
+  folderName: string;
+  folderId: string;
+}
 export interface EmailMessage {
   subject: string;
   messageId: number;
-  fromAddress: string;
   folderId: number;
+  size: string;
+  receivedTime: string;
+  fromAddress: string;
   status: "0" | "1";
 }
 
