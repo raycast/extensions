@@ -2,6 +2,16 @@
 
 Browse your [Claude Code](https://claude.com/claude-code) projects and resume sessions in your favorite Windows terminal, straight from Raycast.
 
+## How this differs from the other Claude Code extensions
+
+The Store already has several Claude Code extensions — Claude Code Launcher, ClaudeCast, Vibelet Search, Claude Session Bookmarks, Claude Code Cheatsheet. Every one of them ships for macOS, so none of them appears in Raycast for Windows. This extension declares `"platforms": ["Windows"]` and exists for that gap: on macOS those extensions cover this ground well.
+
+Launching a terminal on Windows is a different problem, and the extension is built around it:
+
+- **Windows terminals** — a new tab in Windows Terminal, or a standalone PowerShell 7 / Windows PowerShell / cmd window that still loads your shell profile (oh-my-posh and friends). No AppleScript, no Accessibility permissions.
+- **A repaired environment** — Raycast for Windows runs inside an MSIX container whose environment can be stale or missing variables entirely, to the point where `claude` does not resolve. The extension reads the machine and user PATH from the registry, locates the executable itself, and hands the launched shell a fixed PATH (plus sane `APPDATA`/`LOCALAPPDATA`/`TEMP`, and no invalid BCP-47 locale that would break POSIX tools).
+- **Deliberately one command** — list projects, preview sessions, resume one. No usage dashboards, prompt libraries, menu-bar monitors, or session bookmarking.
+
 ## Features
 
 - **Project list** — every project found in `~/.claude/projects`, sorted by most recent activity, with session count and last-used date. The real project path is extracted from the session files, so it works even for paths containing dashes.
