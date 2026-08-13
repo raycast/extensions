@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
+  "name": "agent-night-watch",
+  "title": "Agent Night Watch",
+  "description": "Manually control closed-lid sleep from the Raycast menu bar",
+  "icon": "coffee-on.png",
+  "author": "yhu575361",
+  "license": "MIT",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run && /bin/sh -n assets/night-watch-guard.sh"
+  },
+  "platforms": ["macOS"],
+  "categories": ["System"],
+  "keywords": ["agent", "awake", "closed lid", "clamshell", "coffee", "sleep"],
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^22.18.0",
+    "@types/react": "^19.1.0",
+    "eslint": "^9.34.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  },
+  "commands": [
+    {
+      "name": "toggle-night-watch",
+      "title": "Toggle Night Watch",
+      "subtitle": "Agent Night Watch",
+      "description": "Manually enable or disable closed-lid awake mode",
+      "icon": "coffee-on.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "night-watch-menu",
+      "title": "Night Watch Menu Bar",
+      "subtitle": "Agent Night Watch",
+      "description": "Show and control closed-lid awake status in the menu bar",
+      "icon": "coffee-off.png",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ]
+}
