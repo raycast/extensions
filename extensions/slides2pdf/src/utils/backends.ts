@@ -238,59 +238,52 @@ async function runAppleScript(script: string, tag: string, timeoutCleanup?: stri
 // PDF image quality.
 interface AppScriptSpec {
   docClass: string;
-  docExpr: string; // e.g. "front document", "active presentation" — fallback if no name matches
-  exportLine: string;
-  unmodified: string; // predicate excluding documents with unsaved edits (iWork: modified, MS: saved)
-  pathExpr: (doc: string) => string; // expression yielding a document's on-disk path (may error)
+  exportLine: (doc: string) => string; // export statement for a document expression, writing to outFile
+  unmodified: (doc: string) => string; // predicate excluding documents with unsaved edits (iWork: modified, MS: saved)
+  pathExpr: (doc: string) => string; // expression yielding a document's on-disk path (errors when there is none)
   docKey: string; // property identifying a document across the open call ("id" for iWork; MS Office documents have no id, so "name")
 }
 
 const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
   keynote: {
     docClass: "document",
-    docExpr: "front document",
-    exportLine: "export theDoc to outFile as PDF with properties {PDF image quality:Best}",
-    unmodified: "modified is false",
+    exportLine: (d) => `export ${d} to outFile as PDF with properties {PDF image quality:Best}`,
+    unmodified: (d) => `modified of ${d} is false`,
     pathExpr: (doc) => `POSIX path of ((file of ${doc}) as alias)`,
     docKey: "id",
   },
   pages: {
     docClass: "document",
-    docExpr: "front document",
-    exportLine: "export theDoc to outFile as PDF",
-    unmodified: "modified is false",
+    exportLine: (d) => `export ${d} to outFile as PDF`,
+    unmodified: (d) => `modified of ${d} is false`,
     pathExpr: (doc) => `POSIX path of ((file of ${doc}) as alias)`,
     docKey: "id",
   },
   numbers: {
     docClass: "document",
-    docExpr: "front document",
-    exportLine: "export theDoc to outFile as PDF",
-    unmodified: "modified is false",
+    exportLine: (d) => `export ${d} to outFile as PDF`,
+    unmodified: (d) => `modified of ${d} is false`,
     pathExpr: (doc) => `POSIX path of ((file of ${doc}) as alias)`,
     docKey: "id",
   },
   powerpoint: {
     docClass: "presentation",
-    docExpr: "active presentation",
-    exportLine: "save theDoc in outFile as save as PDF",
-    unmodified: "saved is true",
+    exportLine: (d) => `save ${d} in outFile as save as PDF`,
+    unmodified: (d) => `saved of ${d} is true`,
     pathExpr: (doc) => `full name of ${doc}`,
     docKey: "name",
   },
   word: {
     docClass: "document",
-    docExpr: "active document",
-    exportLine: "save as theDoc file name outFile file format format PDF",
-    unmodified: "saved is true",
+    exportLine: (d) => `save as ${d} file name outFile file format format PDF`,
+    unmodified: (d) => `saved of ${d} is true`,
     pathExpr: (doc) => `full name of ${doc}`,
     docKey: "name",
   },
   excel: {
     docClass: "workbook",
-    docExpr: "active workbook",
-    exportLine: "save workbook as theDoc filename outFile file format PDF file format",
-    unmodified: "saved is true",
+    exportLine: (d) => `save workbook as ${d} filename outFile file format PDF file format`,
+    unmodified: (d) => `saved of ${d} is true`,
     pathExpr: (doc) => `full name of ${doc}`,
     docKey: "name",
   },
@@ -300,92 +293,113 @@ const APP_SPECS: Record<AppBackendType, AppScriptSpec> = {
 // The unmodified predicate keeps a same-named document with unsaved edits from being bound —
 // exporting it would produce the wrong PDF, and the close/cleanup would discard the user's
 // edits via `saving no`. A freshly opened file is always unmodified/saved.
-function docMatch(src: string, spec: AppScriptSpec): string {
+function docMatch(cand: string, src: string, spec: AppScriptSpec): string {
   const name = asString(path.basename(src));
   const stem = asString(path.basename(src, path.extname(src)));
-  return `(name is ${name} or name is ${stem}) and ${spec.unmodified}`;
+  return `(name of ${cand} is ${name} or name of ${cand} is ${stem}) and ${spec.unmodified(cand)}`;
 }
 
-// A candidate document is accepted only if its on-disk path matches the source file, or its
-// path can't be read — freshly imported non-native formats may have none. A pathless candidate
-// is ambiguous: it may be our import, or a pre-existing untitled/imported document that happens
-// to share the name. When preKeysVar names a pre-open snapshot of document keys, a pathless
-// candidate is accepted only if it appeared after the open call. The timeout cleanup runs in a
-// separate process with no snapshot; there every pathless match must stay closable so the
-// imported document doesn't keep the file locked (closing a same-named unmodified document
-// discards nothing).
-function verifyCandidateLines(
-  cand: string,
-  src: string,
-  spec: AppScriptSpec,
-  accept: string,
-  preKeysVar?: string,
-): string[] {
-  const pathlessOk = preKeysVar
-    ? `(candPath is "" and (${spec.docKey} of ${cand}) is not in ${preKeysVar})`
-    : `candPath is ""`;
+// AppleScript handler shared by both generated scripts. Returns the POSIX path of the document at
+// the given index, "" when there is no file behind it (a freshly imported non-native format like
+// .pptx in Keynote), or "?" while the app has not filled the property in yet — Word reports
+// `missing value` for a document it has only just started opening, and that must not be mistaken
+// for a pathless import.
+//
+// The handler takes an index, not a document: Word resolves a document reference passed out of a
+// tell block by name, so with two same-named documents open it answers for the frontmost one and
+// every path check silently compares the wrong document.
+function docPathHandler(appName: string, spec: AppScriptSpec): string {
   return [
-    `set candPath to ""`,
-    `try`,
-    `  set candPath to ${spec.pathExpr(cand)}`,
-    `  if candPath does not start with "/" then set candPath to POSIX path of candPath`,
-    `end try`,
-    `if ${pathlessOk} or candPath is ${asString(src)} then ${accept}`,
-  ];
+    `on docPath(i)`,
+    `  tell application "${appName}"`,
+    `    set p to missing value`,
+    `    try`,
+    `      set p to ${spec.pathExpr(`${spec.docClass} i`)}`,
+    `    on error`,
+    `      return ""`,
+    `    end try`,
+    `  end tell`,
+    `  if p is missing value then return "?"`,
+    `  if p does not start with "/" then set p to POSIX path of p`,
+    `  return p`,
+    `end docPath`,
+  ].join("\n");
 }
 
-// Shared AppleScript skeleton. All app scripts follow the same shape:
-// remember whether the app was running, open the file, wait until the opened document appears and
-// bind it by name + unmodified state + on-disk path — or, for pathless imports, by not having
-// existed before the open call (open is asynchronous for non-native formats
-// like .pptx in Keynote, is a no-op for an already-open document, and apps may auto-create a blank
-// startup document — a bare count-based wait mishandles all three), run the export inside
-// try/on error so the error message is captured instead of swallowed, always close the document
-// and quit the app if we launched it, then re-raise the captured error outside the tell block.
+// Conversion script. `open` returns no handle on the document it opened, so the document has to be
+// found afterwards: it is a name match (see docMatch) whose path is the source file, or — for a
+// pathless import — one that did not exist before the open call.
+//
+// Every document is addressed by index and never held in a variable. Word resolves a stored
+// document reference by name, so with two same-named documents open, `set d to document 2` and a
+// later `export d`/`close d` act on the frontmost one instead: the wrong file gets exported and
+// the wrong window closed. Word also rejects `repeat with d in (every document whose …)` outright.
+//
+// The wait loop covers open being
+// asynchronous for non-native formats, a no-op for an already-open document, and apps that
+// auto-create a blank startup document. The export runs inside try/on error so the message is
+// captured instead of swallowed; the document is always closed, the app quits if we launched it,
+// and the captured error is re-raised outside the tell block.
 function conversionScript(appName: string, src: string, outputPath: string, spec: AppScriptSpec): string {
-  const { docExpr, exportLine } = spec;
-  const countExpr = `${spec.docClass}s`;
-  const indent = (lines: string[], pad: string) => lines.map((l) => pad + l);
+  const docs = `${spec.docClass}s`;
+  const doc = (i: string) => `${spec.docClass} ${i}`;
+  const isNew = `(${spec.docKey} of ${doc("i")}) is not in preKeys`;
   return [
+    docPathHandler(appName, spec),
     `set wasRunning to (application "${appName}" is running)`,
     `set errMsg to ""`,
+    `set docIndex to 0`,
     `tell application "${appName}"`,
     `  try`,
     `    with timeout of 600 seconds`,
-    `      set initialCount to (count of ${countExpr})`,
+    `      set initialCount to (count of ${docs})`,
     `      set preKeys to {}`,
-    `      try`,
-    `        set preKeys to ${spec.docKey} of every ${spec.docClass}`,
-    `      end try`,
+    `      repeat with i from 1 to initialCount`,
+    `        set end of preKeys to (${spec.docKey} of ${doc("i")})`,
+    `      end repeat`,
     `      open POSIX file ${asString(src)}`,
-    `      set theDoc to missing value`,
     `      set tries to 0`,
-    `      repeat while theDoc is missing value`,
+    `      repeat while docIndex is 0`,
     `        try`,
-    `          set matched to (${countExpr} whose (${docMatch(src, spec)}))`,
-    `          repeat with cand in matched`,
-    ...indent(verifyCandidateLines("cand", src, spec, "set theDoc to cand", "preKeys"), "            "),
-    `            if theDoc is not missing value then exit repeat`,
+    `          repeat with i from 1 to (count of ${docs})`,
+    `            if ${docMatch(doc("i"), src, spec)} then`,
+    `              set candPath to my docPath(i)`,
+    `              if candPath is ${asString(src)} or (candPath is "" and ${isNew}) then`,
+    `                set docIndex to i`,
+    `                exit repeat`,
+    `              end if`,
+    `            end if`,
     `          end repeat`,
     `        end try`,
-    `        if theDoc is missing value and tries > 20 and (count of ${countExpr}) > initialCount then`,
-    `          set cand to ${docExpr}`,
-    ...indent(verifyCandidateLines("cand", src, spec, "set theDoc to cand", "preKeys"), "          "),
+    // Last resort for an app that names the imported document unlike the file: something did
+    // open, so accept a document that appeared after the open call and fits the source.
+    `        if docIndex is 0 and tries > 20 and (count of ${docs}) > initialCount then`,
+    `          try`,
+    `            repeat with i from 1 to (count of ${docs})`,
+    `              if ${isNew} then`,
+    `                set candPath to my docPath(i)`,
+    `                if candPath is ${asString(src)} or candPath is "" then`,
+    `                  set docIndex to i`,
+    `                  exit repeat`,
+    `                end if`,
+    `              end if`,
+    `            end repeat`,
+    `          end try`,
     `        end if`,
-    `        if theDoc is missing value then`,
+    `        if docIndex is 0 then`,
     `          delay 0.5`,
     `          set tries to tries + 1`,
     `          if tries > 120 then error "Timed out waiting for ${appName} to open the file"`,
     `        end if`,
     `      end repeat`,
     `      set outFile to POSIX file ${asString(outputPath)}`,
-    `      ${exportLine}`,
-    `      close theDoc saving no`,
+    `      ${spec.exportLine(doc("docIndex"))}`,
+    `      close ${doc("docIndex")} saving no`,
     `    end timeout`,
     `  on error eMsg`,
     `    set errMsg to eMsg`,
     `    try`,
-    `      close theDoc saving no`,
+    `      if docIndex > 0 then close ${doc("docIndex")} saving no`,
     `    end try`,
     `  end try`,
     `  try`,
@@ -396,25 +410,21 @@ function conversionScript(appName: string, src: string, outputPath: string, spec
   ].join("\n");
 }
 
-// Timeout cleanup runs after the conversion script was killed, so the document must be re-found.
-// Each name match is path-verified like in the open loop, so a same-named document opened from a
-// different folder is left alone. The collection is re-queried after every close: whose-list
-// specifiers can be index-based, and closing one document would make the remaining ones stale.
+// Timeout cleanup: the conversion process was killed before it could close anything, so the
+// document is found again and closed — otherwise Office keeps a lock on the source file and the
+// fallback engine fails too. This runs without the pre-open snapshot, so only an exact path match
+// counts; a pathless import is left open rather than risking an unrelated document. At most one
+// document can have the source's path, so the first match ends the loop.
 function closeDocScript(appName: string, src: string, spec: AppScriptSpec): string {
-  const indent = (lines: string[], pad: string) => lines.map((l) => pad + l);
   return [
+    docPathHandler(appName, spec),
     `tell application "${appName}"`,
     `  try`,
-    `    repeat`,
-    `      set closedOne to false`,
-    `      repeat with cand in (every ${spec.docClass} whose (${docMatch(src, spec)}))`,
-    ...indent(verifyCandidateLines("cand", src, spec, "set closedOne to true"), "        "),
-    `        if closedOne then`,
-    `          close cand saving no`,
-    `          exit repeat`,
-    `        end if`,
-    `      end repeat`,
-    `      if not closedOne then exit repeat`,
+    `    repeat with i from 1 to (count of ${spec.docClass}s)`,
+    `      if ${docMatch(`${spec.docClass} i`, src, spec)} and my docPath(i) is ${asString(src)} then`,
+    `        close ${spec.docClass} i saving no`,
+    `        exit repeat`,
+    `      end if`,
     `    end repeat`,
     `  end try`,
     `end tell`,
@@ -470,21 +480,39 @@ export async function convertFile(backend: Backend, src: string, outputPath: str
   }
 }
 
-// Atomic no-overwrite move: link() fails with EEXIST instead of replacing a file someone
-// created at outputPath while the engine was running (rename would silently clobber it).
-// Staging lives next to the output, so cross-device is impossible; the copy fallback only
-// covers filesystems without hard links, where the small check-then-move race is the best we get.
+// Never replace a file that appeared at outputPath while the engine was running (rename would
+// silently clobber it): link() and an exclusive copy both fail with EEXIST instead. Staging lives
+// next to the output, so cross-device is impossible; the copy only covers filesystems without
+// hard links. convertFile removes the staging file either way.
 function publishFile(staging: string, outputPath: string): void {
   try {
-    fs.linkSync(staging, outputPath);
-  } catch (e) {
-    if ((e as NodeJS.ErrnoException).code === "EEXIST" || fs.existsSync(outputPath)) {
-      throw new Error(`Output already exists: ${path.basename(outputPath)}`);
+    try {
+      fs.linkSync(staging, outputPath);
+    } catch (e) {
+      if ((e as NodeJS.ErrnoException).code === "EEXIST") throw e;
+      fs.copyFileSync(staging, outputPath, fs.constants.COPYFILE_EXCL);
     }
-    moveFile(staging, outputPath);
-    return;
+  } catch (e) {
+    if ((e as NodeJS.ErrnoException).code !== "EEXIST") throw e;
+    throw new Error(`Output already exists: ${path.basename(outputPath)}`);
   }
-  fs.rmSync(staging, { force: true });
+}
+
+// A PDF whose %%EOF trailer never got written is a truncated export, not a finished document.
+// Readers tolerate bytes after the trailer, so the last kilobyte is scanned, not only the end.
+function isCompletePdf(p: string): boolean {
+  let fd: number | undefined;
+  try {
+    fd = fs.openSync(p, "r");
+    const size = fs.fstatSync(fd).size;
+    const tail = Buffer.alloc(Math.min(1024, size));
+    fs.readSync(fd, tail, 0, tail.length, size - tail.length);
+    return tail.includes("%%EOF");
+  } catch {
+    return false;
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd);
+  }
 }
 
 async function runBackend(backend: Backend, src: string, outputPath: string): Promise<void> {
@@ -544,8 +572,9 @@ async function runBackend(backend: Backend, src: string, outputPath: string): Pr
       closeDocScript(backend.appName!, src, APP_SPECS[type]),
     );
   } catch (e) {
-    // Keep a PDF that was produced despite a late script error (e.g. quit failing).
-    if (!fs.existsSync(scriptOut)) throw e;
+    // Keep a PDF that was produced despite a late script error (e.g. quit failing) — but only
+    // a complete one: an error during the export itself can leave a truncated file behind.
+    if (!isCompletePdf(scriptOut)) throw e;
   }
   if (tmpOut && fs.existsSync(tmpOut)) moveFile(tmpOut, outputPath);
 }
