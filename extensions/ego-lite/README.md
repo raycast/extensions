@@ -1,6 +1,16 @@
 # Ego Lite for Raycast
 
-A local-first Raycast extension for [Ego Lite](https://lite.ego.app/) on macOS.
+A local-first Raycast extension for [Ego Lite](https://lite.ego.app/zh-cn), the macOS Chromium browser designed for people and AI agents to work in parallel. Ego Lite keeps agent work in separate Spaces while sharing the browser profiles, bookmarks, and signed-in browsing context you already use. Learn more on the [Ego Lite website](https://lite.ego.app/zh-cn) or in the [open-source repository](https://github.com/citrolabs/ego-lite).
+
+## Why a dedicated Ego Lite extension?
+
+Raycast Store has extensions with similar commands for browsers such as Brave, Vivaldi, and Firefox. This extension is intentionally specific to Ego Lite:
+
+- It discovers and reads only Ego Lite's Chromium profile data, including Ego Lite's bookmark and history locations.
+- It opens new tabs and selected results with Ego Lite's URL handler, so results return to Ego Lite rather than another installed browser.
+- It complements Ego Lite's agent-browser workflow: the extension gives Raycast access to the same local browsing data, but it does not automate web pages, access account credentials, or control Ego Lite AI Task Spaces.
+
+It is therefore not a generic Chromium extension and does not attempt to support Brave, Vivaldi, Firefox, or other browsers.
 
 ## Commands
 
@@ -14,7 +24,7 @@ Bookmark and history results also support copying the URL, title, or Markdown li
 
 - macOS 12 or newer
 - [Raycast](https://www.raycast.com/)
-- [Ego Lite](https://lite.ego.app/)
+- [Ego Lite](https://lite.ego.app/zh-cn)
 
 The extension is tested with Ego Lite 0.4.5.8.
 
@@ -69,7 +79,7 @@ All access is read-only. The extension never creates, copies, edits, repairs, or
 
 ### Ego Lite is not installed
 
-Install Ego Lite from [lite.ego.app](https://lite.ego.app/), launch it once, and retry the command.
+Install Ego Lite from [lite.ego.app](https://lite.ego.app/zh-cn), launch it once, and retry the command.
 
 ### New Tab or Open in Ego Lite fails
 
@@ -97,7 +107,7 @@ The tests use fixtures and temporary files; they do not read the user's real boo
 
 ## Store Screenshots
 
-The Store screenshots use the same blurred background and intentionally show only safe, non-sensitive extension states.
+The Store screenshots use the same blurred background and show only public, non-sensitive results from the extension. They do not include desktop content, other applications, internal sites, account identifiers, or private browsing data.
 
 ### Search Bookmarks
 
