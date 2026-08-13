@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Clone repositories in GitHub Desktop] - {PR_MERGE_DATE}
+
+- Added a "Clone in GitHub Desktop" action to repository actions, with a `Cmd+Shift+G` shortcut.
+
 ## [Show CI status in pull request details] - 2026-08-10
 
 - Added a "Checks" row to pull request details showing successful, failed, or pending CI status.

@@ -145,6 +145,13 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
           url={`vscode://vscode.git/clone?url=${repository.url}`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
+        <Action.OpenInBrowser
+          icon={{ source: "github.svg", tintColor: Color.PrimaryText }}
+          title="Clone in GitHub Desktop"
+          url={`x-github-client://openRepo/${repository.url}`}
+          onOpen={() => onVisit(repository)}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+        />
 
         {repository.viewerHasStarred ? (
           <Action
