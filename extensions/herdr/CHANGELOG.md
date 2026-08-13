@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Tilde Paths] - {PR_MERGE_DATE}
+## [Fix Tilde Paths] - 2026-08-13
 
 - Expand `~` in the configured Herdr binary path.
 
