@@ -116,7 +116,7 @@ export default function ListDocumentsCommand() {
         category ? ` (${titlecase(category)})` : ""
       } · ${sortLabel(sortBy, sortDirection)}`}
     >
-      {displayData.length === 0 && category !== undefined ? (
+      {data?.length === 0 && category !== undefined ? (
         <List.EmptyView
           title="No documents found"
           description={`No documents found in the "${titlecase(category)}" category.`}
