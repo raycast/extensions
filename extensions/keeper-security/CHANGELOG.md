@@ -1,6 +1,6 @@
 # Keeper Security Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-13
 
 - Added Windows as a supported platform alongside macOS
 
