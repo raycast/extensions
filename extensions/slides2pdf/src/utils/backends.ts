@@ -117,16 +117,17 @@ const APP_SEARCH_DIRS = [
   process.env.HOME ? path.join(process.env.HOME, "Applications") : "",
 ].filter(Boolean);
 
-// Each backend lists every bundle name it might appear under.
-// "Creator Studio" variants are App Store editions sold under a different bundle name.
+// Each backend lists every bundle name it might appear under, most specific first: the "Creator
+// Studio" editions are separate App Store builds that live beside a plain install, so they are
+// matched first and the plain name is the fallback.
 export type AppBackendType = "keynote" | "powerpoint" | "pages" | "word" | "numbers" | "excel";
 const APP_CANDIDATES: Record<AppBackendType, string[]> = {
-  keynote: ["Keynote", "Keynote Creator Studio"],
-  powerpoint: ["Microsoft PowerPoint", "Microsoft PowerPoint Creator Studio"],
-  pages: ["Pages", "Pages Creator Studio"],
-  word: ["Microsoft Word", "Microsoft Word Creator Studio"],
-  numbers: ["Numbers", "Numbers Creator Studio"],
-  excel: ["Microsoft Excel", "Microsoft Excel Creator Studio"],
+  keynote: ["Keynote Creator Studio", "Keynote"],
+  powerpoint: ["Microsoft PowerPoint Creator Studio", "Microsoft PowerPoint"],
+  pages: ["Pages Creator Studio", "Pages"],
+  word: ["Microsoft Word Creator Studio", "Microsoft Word"],
+  numbers: ["Numbers Creator Studio", "Numbers"],
+  excel: ["Microsoft Excel Creator Studio", "Microsoft Excel"],
 };
 
 function findApp(candidates: string[]): { path: string; name: string } | null {

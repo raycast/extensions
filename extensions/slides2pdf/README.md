@@ -31,10 +31,10 @@ Images convert out of the box via `sips`, which ships with macOS.
 | Category      | Extensions                                                         |
 | ------------- | ------------------------------------------------------------------ |
 | Presentations | `.pptx` `.ppt` `.pps` `.ppsx` `.key` `.odp`                        |
-| Documents     | `.docx` `.doc` `.pages` `.odt` `.rtf` `.txt`                       |
+| Documents     | `.docx` `.doc` `.pages` `.odt` `.rtf`                              |
 | Spreadsheets  | `.xlsx` `.xls` `.numbers` `.ods` `.csv`                            |
 | Images        | `.jpg` `.jpeg` `.png` `.gif` `.tiff` `.tif` `.bmp` `.heic` `.webp` |
-| Text & Code   | `.json` `.md` `.xml` `.log` `.yaml` and any other plain-text file  |
+| Text & Code   | `.txt` `.json` `.md` `.xml` `.log` `.yaml` and any plain-text file |
 
 iWork formats (`.key`, `.pages`, `.numbers`) require their own app — no other engine can open them. Text and code files are rendered by the built-in text renderer (monospaced, paginated) and need no installed apps.
 
