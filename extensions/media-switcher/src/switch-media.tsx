@@ -1,4 +1,4 @@
-import { ActionPanel, List, Icon, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Icon, Color, getPreferenceValues, showToast, Toast, Action } from "@raycast/api";
 import { useEffect, useRef } from "react";
 import { usePromise } from "@raycast/utils";
 import {
