@@ -63,7 +63,9 @@ export function IndexMoreActions({ id, title }: { id: string; title: string }) {
   return (
     <>
       <Action.Push title="Prices" target={<PriceView type="index" id={id} title={title} />} />
-      <Action.Push title="News" target={<RelatedNewsList type="index" id={id} title={title} />} />
+      {hasApiKey() ? (
+        <Action.Push title="News" target={<RelatedNewsList type="index" id={id} title={title} />} />
+      ) : null}
       <Action.OpenInBrowser title="Adjacent" url={site.index(id)} />
       <IdAndPrefs id={id} />
     </>
@@ -74,7 +76,9 @@ export function RateMoreActions({ id, title }: { id: string; title: string }) {
   return (
     <>
       <Action.Push title="Prices" target={<PriceView type="rate" id={id} title={title} />} />
-      <Action.Push title="News" target={<RelatedNewsList type="rate" id={id} title={title} />} />
+      {hasApiKey() ? (
+        <Action.Push title="News" target={<RelatedNewsList type="rate" id={id} title={title} />} />
+      ) : null}
       <IdAndPrefs id={id} />
     </>
   );

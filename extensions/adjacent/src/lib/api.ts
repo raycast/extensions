@@ -37,11 +37,12 @@ export class AdjacentError extends Error {
 }
 
 const AUTH_ONLY = /\/(candles|similar|trades|quotes)(\/|$)/;
+const NEWS_PATH = /(^|\/)news(\/|$)/;
 
 function resolvePath(path: string): string {
   const p = path.startsWith('/') ? path : `/${path}`;
   if (hasApiKey() || p.startsWith('/public/')) return p;
-  if (p.startsWith('/news') || p.startsWith('/export') || AUTH_ONLY.test(p)) {
+  if (NEWS_PATH.test(p) || p.startsWith('/export') || AUTH_ONLY.test(p)) {
     throw new AdjacentError(
       'This surface needs an Adjacent API key. Add one in Raycast → Extensions → Adjacent.',
       401,
