@@ -1,5 +1,6 @@
 import { Clipboard, LaunchProps, Toast, getPreferenceValues, getSelectedText, showHUD, showToast } from "@raycast/api";
-import { U2L, U2LApiError } from "@u2l/sdk";
+import { U2L } from "@u2l/sdk";
+import { showApiFailureToast } from "./errors";
 
 /** Accept only absolute http(s) URLs; everything else is noise from the clipboard. */
 function asUrl(text: string | undefined): string | null {
@@ -45,10 +46,10 @@ export default async function shorten(props: LaunchProps<{ arguments: Arguments.
     const link = await client.links.create({ url });
     const shortLink = link.shortLink || `https://${link.domain}/${link.slug}`;
     await Clipboard.copy(shortLink);
+    await toast.hide();
     await showHUD(`Copied ${shortLink}`);
   } catch (error) {
-    toast.style = Toast.Style.Failure;
-    toast.title = "Could not shorten";
-    toast.message = error instanceof U2LApiError ? error.message : String(error);
+    await toast.hide();
+    await showApiFailureToast(error, "Could not shorten");
   }
 }
