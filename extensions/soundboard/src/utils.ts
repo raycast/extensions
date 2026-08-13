@@ -123,7 +123,7 @@ const isPlayerRunning = (record: PlayerRecord, audioPath: string): boolean => {
   if (getProcessStartTime(pid) !== record.startTime) {
     return false;
   }
-  const command = getProcessCommand(record.pid);
+  const command = getProcessCommand(pid);
   if (command === null) {
     return false;
   }
