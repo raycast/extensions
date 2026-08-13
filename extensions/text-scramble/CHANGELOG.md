@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-13
 
 - Added shape-matched, pronounceable invented-word scrambling.
 - Preserved whitespace, punctuation, token length, casing, and line breaks.
