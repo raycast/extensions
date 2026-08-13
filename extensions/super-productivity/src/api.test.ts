@@ -91,6 +91,24 @@ beforeEach(() => {
   mockShowHUD.mockReset();
 });
 
+describe("request authentication", () => {
+  it("sends Authorization Bearer header with the access token", async () => {
+    mockFetch.mockResolvedValue(okResponse({ server: "SP", rendererReady: true }));
+
+    await checkHealth();
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "http://test:3876/health",
+      expect.objectContaining({
+        headers: {
+          Authorization: `Bearer ${mockPreferences.accessToken}`,
+          "Content-Type": "application/json",
+        },
+      }),
+    );
+  });
+});
+
 describe("checkHealth", () => {
   it("returns health data on success", async () => {
     mockFetch.mockResolvedValue(okResponse({ server: "SP", rendererReady: true }));
