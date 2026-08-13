@@ -14,11 +14,14 @@
     "quota",
     "rate limit",
     "tokens",
-    "llm"
+    "llm",
+    "claude",
+    "codex",
+    "gemini",
+    "proxy"
   ],
   "categories": [
-    "Developer Tools",
-    "Productivity"
+    "Developer Tools"
   ],
   "license": "MIT",
   "commands": [

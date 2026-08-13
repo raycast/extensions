@@ -154,7 +154,7 @@ export default function UsageStatsCommand() {
           description={
             reported || unauthorised
               ? `${error.message}\n\nReported by ${baseUrl}.`
-              : `${error.message}\n\nChecked ${baseUrl}.`
+              : `${error.message}\n\nChecked ${baseUrl}. Make sure the proxy is running.`
           }
           actions={actions}
         />

@@ -239,8 +239,38 @@ export function getMenuBarPreferences(): MenuBarPreferences {
   };
 }
 
-/** The proxy is local, so anything slower than this is a hang rather than a slow network. */
-const REQUEST_TIMEOUT_MS = 10_000;
+/** Remote proxies may be a hop away; loopback either answers immediately or isn't running. */
+const REMOTE_REQUEST_TIMEOUT_MS = 10_000;
+const LOOPBACK_REQUEST_TIMEOUT_MS = 2_000;
+
+function requestTimeoutMs(baseUrl: string): number {
+  return isLoopbackUrl(baseUrl) ? LOOPBACK_REQUEST_TIMEOUT_MS : REMOTE_REQUEST_TIMEOUT_MS;
+}
+
+/** Node's fetch wraps TCP failures as `TypeError: fetch failed` with the errno on `cause`. */
+function connectionErrorCode(cause: unknown): string | undefined {
+  if (
+    !(cause instanceof Error) ||
+    cause.cause === undefined ||
+    typeof cause.cause !== "object" ||
+    cause.cause === null
+  ) {
+    return undefined;
+  }
+  if (!("code" in cause.cause)) return undefined;
+  const code = cause.cause.code;
+  return typeof code === "string" ? code : undefined;
+}
+
+function isUnreachableProxy(code: string | undefined): boolean {
+  return (
+    code === "ECONNREFUSED" ||
+    code === "ENOTFOUND" ||
+    code === "EHOSTUNREACH" ||
+    code === "ENETUNREACH" ||
+    code === "ECONNRESET"
+  );
+}
 
 /** The proxy answered, but refused the management call because the admin token is missing/wrong. */
 export class AdminTokenError extends Error {
@@ -257,7 +287,8 @@ interface Endpoint {
 
 async function getJson<T>(endpoint: Endpoint, path: string, isValid: Guard<T>, signal?: AbortSignal): Promise<T> {
   const { baseUrl, adminToken } = endpoint;
-  const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
+  const timeoutMs = requestTimeoutMs(baseUrl);
+  const timeout = AbortSignal.timeout(timeoutMs);
   // Callers may cancel on unmount; the timeout guards against a proxy that accepts the
   // connection but never answers.
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
@@ -274,7 +305,12 @@ async function getJson<T>(endpoint: Endpoint, path: string, isValid: Guard<T>, s
     });
   } catch (cause) {
     if (timeout.aborted) {
-      throw new Error(`${baseUrl} did not respond within ${REQUEST_TIMEOUT_MS / 1000}s.`);
+      throw new Error(
+        `${baseUrl} did not respond within ${timeoutMs / 1000}s. Make sure the OpenCodex proxy is running.`,
+      );
+    }
+    if (isUnreachableProxy(connectionErrorCode(cause))) {
+      throw new Error(`Cannot connect to ${baseUrl}. Make sure the OpenCodex proxy is running.`);
     }
     throw cause;
   }
