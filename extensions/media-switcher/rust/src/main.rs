@@ -86,11 +86,16 @@ fn list_sessions() -> Result<Vec<MediaSessionInfo>, String> {
 // them back in the state we found them in). If the target fails to start, the
 // already-paused competitors are resumed the same way.
 #[raycast]
-fn switch_session(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
+fn switch_session(
+    target_app_id: String,
+    target_index: u32,
+    target_title_prefix: String,
+    target_artist_prefix: String,
+) -> Result<(), String> {
     // One snapshot, used for both resolving the target and pausing competitors —
     // a second GetSessions() between the two would reintroduce a race window.
     let entries = snapshot_sessions()?;
-    let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title_prefix)
+    let target_pos = resolve_target_index(&entries, &target_app_id, target_index, &target_title_prefix, &target_artist_prefix)
         .ok_or_else(|| format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing"))?;
 
     // Phase 1: pause every competitor. Track every session whose pause request was
@@ -245,12 +250,13 @@ struct SessionEntry {
     app_id: String,
     ordinal: u32,
     title: String,
+    artist: String,
 }
 
 // One walk over GetSessions(), computing per-app ordinals the same way
-// list_sessions does and capturing each session's title. Every control action
-// resolves its target from a single snapshot so ordinals can't shift between
-// resolving and acting.
+// list_sessions does and capturing each session's title and artist. Every
+// control action resolves its target from a single snapshot so ordinals can't
+// shift between resolving and acting.
 fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
     let manager = get_session_manager()?;
     let sessions = manager.GetSessions().map_err(|e| format!("GetSessions failed: {}", e))?;
@@ -275,13 +281,14 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
         let ordinal = *idx;
         *idx += 1;
 
-        let title = get_session_title(&session).unwrap_or_default();
+        let (title, artist) = get_session_title_artist(&session).unwrap_or_default();
 
         entries.push(SessionEntry {
             session,
             app_id,
             ordinal,
             title,
+            artist,
         });
 
         iterator.MoveNext().map_err(|e| format!("MoveNext failed: {}", e))?;
@@ -292,13 +299,7 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 
 // Resolve which snapshot entry the user clicked. GetSessions() has no documented
 // ordering guarantee and sessions expose no stable ID, so identity is a per-app
-// ordinal with a title-prefix fingerprint. Priority:
-//   empty title — Windows supplied no title, so there is no fingerprint to verify.
-//     The click was keyed by (app_id, ordinal). Resolved ONLY when this app has a
-//     single session in the snapshot: with no sibling, nothing could have
-//     reassigned the clicked ordinal. If the app has two or more same-app
-//     sessions, the ordinal's new occupant is indistinguishable from the clicked
-//     one and we refuse (guess-free).
+// ordinal plus a fingerprint. Priority:
 //   1. Exact (ordinal + title) match — the confident happy path, and the only
 //      safe resolution when multiple same-app sessions share a title prefix.
 //   2. Exactly one session matches the title fingerprint — it moved ordinals
@@ -309,30 +310,39 @@ fn snapshot_sessions() -> Result<Vec<SessionEntry>, String> {
 //   session track-skipped" from "the selected session closed and a sibling now
 //   occupies its slot" — both present identically here — so guessing would risk
 //   controlling the wrong session. Callers surface a "try refreshing" error.
+//
+// Untitled sessions (empty title): Windows often still exposes an artist (radio
+// streams, live "sessions", etc.), so the artist becomes the fingerprint with
+// the same exact + unique priority above. Only when title AND artist are both
+// empty is there no fingerprint at all; the ordinal alone cannot tell "the same
+// session closed" from "a replacement opened onto the clicked ordinal", so we
+// refuse rather than control the wrong session.
 fn resolve_target_index(
     entries: &[SessionEntry],
     target_app_id: &str,
     target_index: u32,
     target_title_prefix: &str,
+    target_artist_prefix: &str,
 ) -> Option<usize> {
     if target_title_prefix.is_empty() {
-        let mut ordinal_occupied: Option<usize> = None;
-        let mut app_count = 0u32;
+        if target_artist_prefix.is_empty() {
+            return None;
+        }
+        let mut artist_matches: Vec<usize> = Vec::new();
         for (i, entry) in entries.iter().enumerate() {
             if entry.app_id != target_app_id {
                 continue;
             }
-            app_count += 1;
-            if entry.ordinal == target_index {
-                ordinal_occupied = Some(i);
+            let artist_ok = entry.artist.starts_with(target_artist_prefix);
+            if entry.ordinal == target_index && artist_ok {
+                return Some(i);
+            }
+            if artist_ok {
+                artist_matches.push(i);
             }
         }
-        // Untitled sessions can only be keyed by ordinal. That is safe only when
-        // this app exposes exactly one session — a sibling opening, closing, or
-        // reordering could otherwise move another session onto the clicked
-        // ordinal. Otherwise refuse rather than control the wrong session.
-        if app_count == 1 {
-            return ordinal_occupied;
+        if artist_matches.len() == 1 {
+            return artist_matches[0].into();
         }
         return None;
     }
@@ -363,8 +373,13 @@ fn resolve_target_index(
 }
 
 #[raycast]
-fn pause_session(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix)?;
+fn pause_session(
+    target_app_id: String,
+    target_index: u32,
+    target_title_prefix: String,
+    target_artist_prefix: String,
+) -> Result<(), String> {
+    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix, &target_artist_prefix)?;
     session.TryPauseAsync()
         .map_err(|e| format!("TryPauseAsync failed: {}", e))?
         .get()
@@ -389,8 +404,13 @@ fn pause_session(target_app_id: String, target_index: u32, target_title_prefix: 
 }
 
 #[raycast]
-fn play_session(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix)?;
+fn play_session(
+    target_app_id: String,
+    target_index: u32,
+    target_title_prefix: String,
+    target_artist_prefix: String,
+) -> Result<(), String> {
+    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix, &target_artist_prefix)?;
     session.TryPlayAsync()
         .map_err(|e| format!("TryPlayAsync failed: {}", e))?
         .get()
@@ -415,8 +435,13 @@ fn play_session(target_app_id: String, target_index: u32, target_title_prefix: S
 }
 
 #[raycast]
-fn previous_track(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix)?;
+fn previous_track(
+    target_app_id: String,
+    target_index: u32,
+    target_title_prefix: String,
+    target_artist_prefix: String,
+) -> Result<(), String> {
+    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix, &target_artist_prefix)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipPreviousAsync()
         .map_err(|e| format!("TrySkipPreviousAsync failed: {}", e))?
@@ -427,8 +452,13 @@ fn previous_track(target_app_id: String, target_index: u32, target_title_prefix:
 }
 
 #[raycast]
-fn next_track(target_app_id: String, target_index: u32, target_title_prefix: String) -> Result<(), String> {
-    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix)?;
+fn next_track(
+    target_app_id: String,
+    target_index: u32,
+    target_title_prefix: String,
+    target_artist_prefix: String,
+) -> Result<(), String> {
+    let session = find_session_by_index(&target_app_id, target_index, &target_title_prefix, &target_artist_prefix)?;
     let old_title = get_session_title(&session)?;
     session.TrySkipNextAsync()
         .map_err(|e| format!("TrySkipNextAsync failed: {}", e))?
@@ -438,13 +468,19 @@ fn next_track(target_app_id: String, target_index: u32, target_title_prefix: Str
     Ok(())
 }
 
-fn get_session_title(session: &GlobalSystemMediaTransportControlsSession) -> Result<String, String> {
+fn get_session_title_artist(session: &GlobalSystemMediaTransportControlsSession) -> Result<(String, String), String> {
     let props = session
         .TryGetMediaPropertiesAsync()
         .map_err(|e| format!("TryGetMediaPropertiesAsync failed: {}", e))?
         .get()
         .map_err(|e| format!("Get media properties failed: {}", e))?;
-    Ok(props.Title().map_err(|e| format!("Title failed: {}", e))?.to_string())
+    let title = props.Title().map_err(|e| format!("Title failed: {}", e))?.to_string();
+    let artist = props.Artist().map_err(|e| format!("Artist failed: {}", e))?.to_string();
+    Ok((title, artist))
+}
+
+fn get_session_title(session: &GlobalSystemMediaTransportControlsSession) -> Result<String, String> {
+    Ok(get_session_title_artist(session)?.0)
 }
 
 fn poll_title_change(session: &GlobalSystemMediaTransportControlsSession, old_title: &str) {
@@ -467,9 +503,11 @@ fn find_session_by_index(
     target_app_id: &str,
     target_index: u32,
     target_title_prefix: &str,
+    target_artist_prefix: &str,
 ) -> Result<GlobalSystemMediaTransportControlsSession, String> {
     let entries = snapshot_sessions()?;
-    let pos = resolve_target_index(&entries, target_app_id, target_index, target_title_prefix).ok_or_else(|| {
+    let pos = resolve_target_index(&entries, target_app_id, target_index, target_title_prefix, target_artist_prefix)
+        .ok_or_else(|| {
         format!("Session {target_app_id}[{target_index}] not found or ambiguous — try refreshing")
     })?;
     Ok(entries[pos].session.clone())

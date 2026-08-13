@@ -19,10 +19,16 @@ async function handleTrackAction(label: string, action: () => Promise<void>, rev
   }
 }
 
-async function handlePause(appId: string, sessionIndex: number, titlePrefix: string, revalidate: () => void) {
+async function handlePause(
+  appId: string,
+  sessionIndex: number,
+  titlePrefix: string,
+  artistPrefix: string,
+  revalidate: () => void,
+) {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Pausing media session..." });
   try {
-    await pause_session(appId, sessionIndex, titlePrefix);
+    await pause_session(appId, sessionIndex, titlePrefix, artistPrefix);
     toast.style = Toast.Style.Success;
     toast.title = "Session paused";
     revalidate();
@@ -33,10 +39,16 @@ async function handlePause(appId: string, sessionIndex: number, titlePrefix: str
   }
 }
 
-async function handlePlay(appId: string, sessionIndex: number, titlePrefix: string, revalidate: () => void) {
+async function handlePlay(
+  appId: string,
+  sessionIndex: number,
+  titlePrefix: string,
+  artistPrefix: string,
+  revalidate: () => void,
+) {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Playing media session..." });
   try {
-    await play_session(appId, sessionIndex, titlePrefix);
+    await play_session(appId, sessionIndex, titlePrefix, artistPrefix);
     toast.style = Toast.Style.Success;
     toast.title = "Session playing";
     revalidate();
@@ -47,10 +59,16 @@ async function handlePlay(appId: string, sessionIndex: number, titlePrefix: stri
   }
 }
 
-async function handleSwitch(appId: string, sessionIndex: number, titlePrefix: string, revalidate: () => void) {
+async function handleSwitch(
+  appId: string,
+  sessionIndex: number,
+  titlePrefix: string,
+  artistPrefix: string,
+  revalidate: () => void,
+) {
   const toast = await showToast({ style: Toast.Style.Animated, title: "Switching media session..." });
   try {
-    await switch_session(appId, sessionIndex, titlePrefix);
+    await switch_session(appId, sessionIndex, titlePrefix, artistPrefix);
     toast.style = Toast.Style.Success;
     toast.title = "Switched media session";
     revalidate();
@@ -65,6 +83,7 @@ interface SessionProps {
   appId: string;
   sessionIndex: number;
   titlePrefix: string;
+  artistPrefix: string;
   revalidate: () => void;
 }
 
@@ -77,28 +96,32 @@ interface TrackInfoProps {
   artist: string;
 }
 
-export function ActionPause({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
+export function ActionPause({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Pause"
       icon={Icon.Pause}
-      onAction={() => handlePause(appId, sessionIndex, titlePrefix, revalidate)}
+      onAction={() => handlePause(appId, sessionIndex, titlePrefix, artistPrefix, revalidate)}
     />
   );
 }
 
-export function ActionPlay({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
+export function ActionPlay({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
-    <Action title="Play" icon={Icon.Play} onAction={() => handlePlay(appId, sessionIndex, titlePrefix, revalidate)} />
+    <Action
+      title="Play"
+      icon={Icon.Play}
+      onAction={() => handlePlay(appId, sessionIndex, titlePrefix, artistPrefix, revalidate)}
+    />
   );
 }
 
-export function ActionSwitch({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
+export function ActionSwitch({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Switch to This Session"
       icon={Icon.Switch}
-      onAction={() => handleSwitch(appId, sessionIndex, titlePrefix, revalidate)}
+      onAction={() => handleSwitch(appId, sessionIndex, titlePrefix, artistPrefix, revalidate)}
     />
   );
 }
@@ -130,26 +153,32 @@ const nextTrackShortcut: Keyboard.Shortcut = {
   Windows: { modifiers: ["ctrl"], key: prevNextTrackShortcuts === "squareBrackets" ? "]" : "arrowRight" },
 };
 
-export function ActionPreviousTrack({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
+export function ActionPreviousTrack({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Previous Track"
       icon={Icon.Rewind}
       shortcut={prevTrackShortcut}
       onAction={() =>
-        handleTrackAction("Previous track", () => previous_track(appId, sessionIndex, titlePrefix), revalidate)
+        handleTrackAction(
+          "Previous track",
+          () => previous_track(appId, sessionIndex, titlePrefix, artistPrefix),
+          revalidate,
+        )
       }
     />
   );
 }
 
-export function ActionNextTrack({ appId, sessionIndex, titlePrefix, revalidate }: SessionProps) {
+export function ActionNextTrack({ appId, sessionIndex, titlePrefix, artistPrefix, revalidate }: SessionProps) {
   return (
     <Action
       title="Next Track"
       icon={Icon.Forward}
       shortcut={nextTrackShortcut}
-      onAction={() => handleTrackAction("Next track", () => next_track(appId, sessionIndex, titlePrefix), revalidate)}
+      onAction={() =>
+        handleTrackAction("Next track", () => next_track(appId, sessionIndex, titlePrefix, artistPrefix), revalidate)
+      }
     />
   );
 }

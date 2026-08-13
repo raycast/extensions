@@ -68,6 +68,7 @@ export default function Command() {
                     appId={session.app_id}
                     sessionIndex={session.session_index}
                     titlePrefix={session.title_prefix}
+                    artistPrefix={session.artist.slice(0, 30)}
                     revalidate={revalidate}
                   />
                   <ActionReveal appId={session.app_id} />
@@ -80,6 +81,7 @@ export default function Command() {
                       appId={session.app_id}
                       sessionIndex={session.session_index}
                       titlePrefix={session.title_prefix}
+                      artistPrefix={session.artist.slice(0, 30)}
                       revalidate={revalidate}
                     />
                   )}
@@ -87,6 +89,7 @@ export default function Command() {
                     appId={session.app_id}
                     sessionIndex={session.session_index}
                     titlePrefix={session.title_prefix}
+                    artistPrefix={session.artist.slice(0, 30)}
                     revalidate={revalidate}
                   />
                   <ActionReveal appId={session.app_id} />
@@ -98,12 +101,14 @@ export default function Command() {
                   appId={session.app_id}
                   sessionIndex={session.session_index}
                   titlePrefix={session.title_prefix}
+                  artistPrefix={session.artist.slice(0, 30)}
                   revalidate={revalidate}
                 />
                 <ActionNextTrack
                   appId={session.app_id}
                   sessionIndex={session.session_index}
                   titlePrefix={session.title_prefix}
+                  artistPrefix={session.artist.slice(0, 30)}
                   revalidate={revalidate}
                 />
               </ActionPanel.Section>
