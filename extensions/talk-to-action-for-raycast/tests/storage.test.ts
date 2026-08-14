@@ -1,0 +1,229 @@
+import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
+import { afterEach, describe, expect, test } from "vitest";
+import {
+  buildUpdatedContent,
+  formatDailyNoteFileName,
+  formatInputLines,
+  saveInput,
+  type Route,
+} from "../src/lib/storage";
+
+const temporaryDirectories: string[] = [];
+
+afterEach(async () => {
+  await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
+});
+
+const baseRoute: Route = {
+  destination: "existing-file",
+  filePath: "Tasks.md",
+  position: "append",
+  section: "none",
+  heading: "",
+  lineFormat: "task",
+  addCurrentTime: false,
+};
+
+async function makeVault(): Promise<string> {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "talk-to-action-raycast-"));
+  temporaryDirectories.push(directory);
+  return directory;
+}
+
+describe("formatting", () => {
+  test("formats bullet, task, plain, and multiline input", () => {
+    expect(formatInputLines(" buy milk \n call mom ", "bullet", false)).toEqual(["- buy milk", "- call mom"]);
+    expect(formatInputLines("buy milk", "task", false)).toEqual(["- [ ] buy milk"]);
+    expect(formatInputLines("buy milk", "plain", false)).toEqual(["buy milk"]);
+  });
+
+  test("adds a localized short time after the line marker", () => {
+    const lines = formatInputLines("buy milk", "task", true, new Date(2026, 7, 14, 9, 30));
+    expect(lines[0]).toMatch(/^- \[ \] .+ buy milk$/);
+  });
+
+  test("rejects empty input", () => {
+    expect(() => formatInputLines(" \n ", "plain", false)).toThrow("Input is empty");
+  });
+
+  test("creates a date-based Markdown file name", () => {
+    expect(formatDailyNoteFileName("YYYY-MM-DD", new Date(2026, 7, 14))).toBe("2026-08-14.md");
+    expect(formatDailyNoteFileName("YYYY-MM-DD.md", new Date(2026, 7, 14))).toBe("2026-08-14.md");
+  });
+});
+
+describe("content insertion", () => {
+  test("appends and prepends while leaving one final newline", () => {
+    expect(buildUpdatedContent("old\n", ["- new"], { ...baseRoute, position: "append" })).toBe("old\n- new\n");
+    expect(buildUpdatedContent("old\n", ["- new"], { ...baseRoute, position: "prepend" })).toBe("- new\nold\n");
+    expect(buildUpdatedContent("old\r\n", ["- new"], { ...baseRoute, position: "append" })).toBe("old\r\n- new\r\n");
+  });
+
+  test("inserts after the first matching heading", () => {
+    const route = { ...baseRoute, section: "after-heading" as const, heading: "Inbox" };
+    expect(buildUpdatedContent("# Today\n\n## Inbox\nold\n## Later\n", ["- new"], route)).toBe(
+      "# Today\n\n## Inbox\n- new\nold\n## Later\n",
+    );
+  });
+
+  test("inserts at the end of the section before the next same-level heading", () => {
+    const route = { ...baseRoute, section: "section-end" as const, heading: "Inbox" };
+    expect(buildUpdatedContent("## Inbox\none\n### Child\ntwo\n\n## Later\n", ["- new"], route)).toBe(
+      "## Inbox\none\n### Child\ntwo\n- new\n\n## Later\n",
+    );
+  });
+
+  test("rejects a missing heading", () => {
+    const route = { ...baseRoute, section: "section-end" as const, heading: "Missing" };
+    expect(() => buildUpdatedContent("## Inbox\none\n", ["- new"], route)).toThrow('Heading "Missing" was not found');
+  });
+});
+
+describe("Vault writes", () => {
+  test("creates a Daily Note and appends a To Do without a plugin", async () => {
+    const vault = await makeVault();
+    const result = await saveInput({
+      vaultPath: vault,
+      dailyNoteFolder: "Daily Note",
+      dailyNoteFileFormat: "YYYY-MM-DD",
+      route: {
+        ...baseRoute,
+        destination: "daily-note",
+        filePath: "",
+        position: "append",
+      },
+      input: "Call the bank",
+      now: new Date(2026, 7, 14),
+    });
+
+    expect(result.relativePath).toBe("Daily Note/2026-08-14.md");
+    expect(await readFile(path.join(vault, result.relativePath), "utf8")).toBe("- [ ] Call the bank\n");
+  });
+
+  test("prepends Shopping to an existing Markdown file", async () => {
+    const vault = await makeVault();
+    await writeFile(path.join(vault, "Shopping.md"), "- [ ] Existing\n");
+
+    await saveInput({
+      vaultPath: vault,
+      dailyNoteFolder: "Daily Note",
+      dailyNoteFileFormat: "YYYY-MM-DD",
+      route: {
+        ...baseRoute,
+        destination: "existing-file",
+        filePath: "Shopping.md",
+        position: "prepend",
+      },
+      input: "Milk",
+    });
+
+    expect(await readFile(path.join(vault, "Shopping.md"), "utf8")).toBe("- [ ] Milk\n- [ ] Existing\n");
+  });
+
+  test("does not create an Existing File target", async () => {
+    const vault = await makeVault();
+    await expect(
+      saveInput({
+        vaultPath: vault,
+        dailyNoteFolder: "",
+        dailyNoteFileFormat: "YYYY-MM-DD",
+        route: baseRoute,
+        input: "New",
+      }),
+    ).rejects.toThrow("Existing file was not found");
+  });
+
+  test("rejects Vault escape paths and non-Markdown files", async () => {
+    const vault = await makeVault();
+    await expect(
+      saveInput({
+        vaultPath: vault,
+        dailyNoteFolder: "",
+        dailyNoteFileFormat: "YYYY-MM-DD",
+        route: { ...baseRoute, filePath: "../outside.md" },
+        input: "Blocked",
+      }),
+    ).rejects.toThrow("Vault");
+
+    await expect(
+      saveInput({
+        vaultPath: vault,
+        dailyNoteFolder: "",
+        dailyNoteFileFormat: "YYYY-MM-DD",
+        route: { ...baseRoute, filePath: "notes.txt" },
+        input: "Blocked",
+      }),
+    ).rejects.toThrow("Markdown");
+  });
+
+  test("rejects a symlink that points outside the Vault", async () => {
+    const vault = await makeVault();
+    const outside = await mkdtemp(path.join(os.tmpdir(), "talk-to-action-raycast-outside-"));
+    temporaryDirectories.push(outside);
+    await symlink(outside, path.join(vault, "linked"));
+
+    await expect(
+      saveInput({
+        vaultPath: vault,
+        dailyNoteFolder: "",
+        dailyNoteFileFormat: "YYYY-MM-DD",
+        route: { ...baseRoute, filePath: "linked/escape.md" },
+        input: "Blocked",
+      }),
+    ).rejects.toThrow("Vault");
+  });
+});
+
+describe("additional route behavior", () => {
+  test("creates a New File and appends to it on the next save", async () => {
+    const vault = await makeVault();
+    const route = {
+      ...baseRoute,
+      destination: "new-file" as const,
+      filePath: "Notes/Capture",
+    };
+
+    const first = await saveInput({
+      vaultPath: vault,
+      dailyNoteFolder: "",
+      dailyNoteFileFormat: "YYYY-MM-DD",
+      route,
+      input: "First",
+    });
+    const second = await saveInput({
+      vaultPath: vault,
+      dailyNoteFolder: "",
+      dailyNoteFileFormat: "YYYY-MM-DD",
+      route,
+      input: "Second",
+    });
+
+    expect(first.created).toBe(true);
+    expect(second.created).toBe(false);
+    expect(await readFile(path.join(vault, "Notes/Capture.md"), "utf8")).toBe("- [ ] First\n- [ ] Second\n");
+  });
+
+  test("does not modify a file when its requested heading is missing", async () => {
+    const vault = await makeVault();
+    const filePath = path.join(vault, "Tasks.md");
+    await writeFile(filePath, "## Existing\n- [ ] Keep this\n");
+
+    await expect(
+      saveInput({
+        vaultPath: vault,
+        dailyNoteFolder: "",
+        dailyNoteFileFormat: "YYYY-MM-DD",
+        route: {
+          ...baseRoute,
+          section: "section-end",
+          heading: "Missing",
+        },
+        input: "Blocked",
+      }),
+    ).rejects.toThrow('Heading "Missing" was not found');
+
+    expect(await readFile(filePath, "utf8")).toBe("## Existing\n- [ ] Keep this\n");
+  });
+});

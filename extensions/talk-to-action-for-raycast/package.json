@@ -1,0 +1,420 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "talk-to-action-for-raycast",
+  "title": "Talk to Action for Raycast",
+  "description": "Save quick text input directly to Markdown files in an Obsidian Vault.",
+  "icon": "extension-icon.png",
+  "author": "kuraki",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "mode": "view",
+      "name": "daily-input",
+      "title": "Talk to Action for Raycast",
+      "description": "Save text to a configured Obsidian route",
+      "subtitle": "Direct Markdown save"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "type": "directory",
+      "required": true,
+      "title": "Obsidian Vault",
+      "description": "Choose the root folder of the Vault. Files are never written outside it."
+    },
+    {
+      "name": "dailyNoteFolder",
+      "type": "textfield",
+      "required": false,
+      "title": "Daily Note - Folder",
+      "description": "Vault-relative folder. Leave blank to use the Vault root.",
+      "default": "Daily Note",
+      "placeholder": "Daily Note"
+    },
+    {
+      "name": "dailyNoteFileFormat",
+      "type": "textfield",
+      "required": true,
+      "title": "Daily Note - File Format",
+      "description": "File name format using YYYY, MM, and DD.",
+      "default": "YYYY-MM-DD",
+      "placeholder": "YYYY-MM-DD"
+    },
+    {
+      "name": "openObsidianAfterSave",
+      "type": "checkbox",
+      "required": false,
+      "title": "Open Obsidian After Save",
+      "description": "Open the saved Markdown file in Obsidian after a successful save.",
+      "default": false,
+      "label": "Open saved note"
+    },
+    {
+      "name": "noteDestination",
+      "type": "dropdown",
+      "required": false,
+      "title": "Daily Note - Destination",
+      "description": "Where Daily Note input is saved.",
+      "default": "daily-note",
+      "data": [
+        {
+          "title": "Daily Note",
+          "value": "daily-note"
+        },
+        {
+          "title": "Existing File",
+          "value": "existing-file"
+        },
+        {
+          "title": "New File",
+          "value": "new-file"
+        }
+      ]
+    },
+    {
+      "name": "noteFilePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Daily Note - File Path",
+      "description": "Vault-relative Markdown path for Existing File or New File.",
+      "default": "",
+      "placeholder": "Notes/Inbox.md"
+    },
+    {
+      "name": "notePosition",
+      "type": "dropdown",
+      "required": false,
+      "title": "Daily Note - Position",
+      "description": "Append to the end or prepend to the beginning when no section is selected.",
+      "default": "append",
+      "data": [
+        {
+          "title": "Append",
+          "value": "append"
+        },
+        {
+          "title": "Prepend",
+          "value": "prepend"
+        }
+      ]
+    },
+    {
+      "name": "noteSection",
+      "type": "dropdown",
+      "required": false,
+      "title": "Daily Note - Section",
+      "description": "Insert at a heading instead of using the file position.",
+      "default": "none",
+      "data": [
+        {
+          "title": "No Section",
+          "value": "none"
+        },
+        {
+          "title": "After Heading",
+          "value": "after-heading"
+        },
+        {
+          "title": "Section End",
+          "value": "section-end"
+        }
+      ]
+    },
+    {
+      "name": "noteHeading",
+      "type": "textfield",
+      "required": false,
+      "title": "Daily Note - Heading",
+      "description": "Heading name without the # characters.",
+      "default": "",
+      "placeholder": "Inbox"
+    },
+    {
+      "name": "noteLineFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Daily Note - Line Format",
+      "description": "How each saved line starts.",
+      "default": "bullet",
+      "data": [
+        {
+          "title": "Bullet",
+          "value": "bullet"
+        },
+        {
+          "title": "Task",
+          "value": "task"
+        },
+        {
+          "title": "Plain",
+          "value": "plain"
+        }
+      ]
+    },
+    {
+      "name": "noteAddCurrentTime",
+      "type": "checkbox",
+      "required": false,
+      "title": "Daily Note - Add Current Time",
+      "description": "Add the current short time after the line marker.",
+      "default": false,
+      "label": "Add time"
+    },
+    {
+      "name": "taskDestination",
+      "type": "dropdown",
+      "required": false,
+      "title": "To Do - Destination",
+      "description": "Where To Do input is saved.",
+      "default": "daily-note",
+      "data": [
+        {
+          "title": "Daily Note",
+          "value": "daily-note"
+        },
+        {
+          "title": "Existing File",
+          "value": "existing-file"
+        },
+        {
+          "title": "New File",
+          "value": "new-file"
+        }
+      ]
+    },
+    {
+      "name": "taskFilePath",
+      "type": "textfield",
+      "required": false,
+      "title": "To Do - File Path",
+      "description": "Vault-relative Markdown path for Existing File or New File.",
+      "default": "",
+      "placeholder": "Task.md"
+    },
+    {
+      "name": "taskPosition",
+      "type": "dropdown",
+      "required": false,
+      "title": "To Do - Position",
+      "description": "Append to the end or prepend to the beginning when no section is selected.",
+      "default": "append",
+      "data": [
+        {
+          "title": "Append",
+          "value": "append"
+        },
+        {
+          "title": "Prepend",
+          "value": "prepend"
+        }
+      ]
+    },
+    {
+      "name": "taskSection",
+      "type": "dropdown",
+      "required": false,
+      "title": "To Do - Section",
+      "description": "Insert at a heading instead of using the file position.",
+      "default": "none",
+      "data": [
+        {
+          "title": "No Section",
+          "value": "none"
+        },
+        {
+          "title": "After Heading",
+          "value": "after-heading"
+        },
+        {
+          "title": "Section End",
+          "value": "section-end"
+        }
+      ]
+    },
+    {
+      "name": "taskHeading",
+      "type": "textfield",
+      "required": false,
+      "title": "To Do - Heading",
+      "description": "Heading name without the # characters.",
+      "default": "",
+      "placeholder": "Inbox"
+    },
+    {
+      "name": "taskLineFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "To Do - Line Format",
+      "description": "How each saved line starts.",
+      "default": "task",
+      "data": [
+        {
+          "title": "Bullet",
+          "value": "bullet"
+        },
+        {
+          "title": "Task",
+          "value": "task"
+        },
+        {
+          "title": "Plain",
+          "value": "plain"
+        }
+      ]
+    },
+    {
+      "name": "taskAddCurrentTime",
+      "type": "checkbox",
+      "required": false,
+      "title": "To Do - Add Current Time",
+      "description": "Add the current short time after the task marker.",
+      "default": false,
+      "label": "Add time"
+    },
+    {
+      "name": "shoppingDestination",
+      "type": "dropdown",
+      "required": false,
+      "title": "Shopping - Destination",
+      "description": "Where Shopping input is saved.",
+      "default": "existing-file",
+      "data": [
+        {
+          "title": "Daily Note",
+          "value": "daily-note"
+        },
+        {
+          "title": "Existing File",
+          "value": "existing-file"
+        },
+        {
+          "title": "New File",
+          "value": "new-file"
+        }
+      ]
+    },
+    {
+      "name": "shoppingFilePath",
+      "type": "textfield",
+      "required": false,
+      "title": "Shopping - File Path",
+      "description": "Vault-relative Markdown path. Required for the default Existing File route.",
+      "default": "",
+      "placeholder": "Shopping.md"
+    },
+    {
+      "name": "shoppingPosition",
+      "type": "dropdown",
+      "required": false,
+      "title": "Shopping - Position",
+      "description": "Append to the end or prepend to the beginning when no section is selected.",
+      "default": "prepend",
+      "data": [
+        {
+          "title": "Append",
+          "value": "append"
+        },
+        {
+          "title": "Prepend",
+          "value": "prepend"
+        }
+      ]
+    },
+    {
+      "name": "shoppingSection",
+      "type": "dropdown",
+      "required": false,
+      "title": "Shopping - Section",
+      "description": "Insert at a heading instead of using the file position.",
+      "default": "none",
+      "data": [
+        {
+          "title": "No Section",
+          "value": "none"
+        },
+        {
+          "title": "After Heading",
+          "value": "after-heading"
+        },
+        {
+          "title": "Section End",
+          "value": "section-end"
+        }
+      ]
+    },
+    {
+      "name": "shoppingHeading",
+      "type": "textfield",
+      "required": false,
+      "title": "Shopping - Heading",
+      "description": "Heading name without the # characters.",
+      "default": "",
+      "placeholder": "Shopping"
+    },
+    {
+      "name": "shoppingLineFormat",
+      "type": "dropdown",
+      "required": false,
+      "title": "Shopping - Line Format",
+      "description": "How each saved line starts.",
+      "default": "task",
+      "data": [
+        {
+          "title": "Bullet",
+          "value": "bullet"
+        },
+        {
+          "title": "Task",
+          "value": "task"
+        },
+        {
+          "title": "Plain",
+          "value": "plain"
+        }
+      ]
+    },
+    {
+      "name": "shoppingAddCurrentTime",
+      "type": "checkbox",
+      "required": false,
+      "title": "Shopping - Add Current Time",
+      "description": "Add the current short time after the task marker.",
+      "default": false,
+      "label": "Add time"
+    }
+  ],
+  "tools": [],
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "eslint src --max-warnings=0 && prettier --check \"src/**/*.{ts,tsx}\" \"tests/**/*.ts\" package.json README.md REFERENCES.md tsconfig.tests.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"This package is a Raycast Extension. Use npm run publish for the Raycast Store.\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "lint:raycast": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.23.12",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.10"
+  }
+}
