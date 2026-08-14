@@ -20,7 +20,10 @@ This is a Raycast extension for [Zoho Mail](https://www.zoho.com/mail/). It allo
 
     d. `Enjoy` the extension!
 
-## 🗒️ NOTES
+## 🗒️ NOTE
+
+This extension is tested using an account with "Super Administrator" role.
+
 ---
 
 ### Looking for more email extensions? Try these:

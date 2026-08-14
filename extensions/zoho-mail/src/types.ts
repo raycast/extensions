@@ -7,6 +7,7 @@ interface EmailAddress {
 export interface Account {
   emailAddress: EmailAddress[];
   accountId: number;
+  role: string;
   displayName: string;
 }
 export interface Folder {
@@ -24,14 +25,13 @@ export interface EmailMessage {
 }
 
 export interface Organization {
-  zoid: number
+  zoid: number;
 }
 export interface DomainVO {
-  verificationStatus: boolean
-  domainId: string
-  domainName: string
-  createdTime: number
-
+  verificationStatus: boolean;
+  domainId: string;
+  domainName: string;
+  createdTime: number;
 }
 
 export interface Result<T> {
