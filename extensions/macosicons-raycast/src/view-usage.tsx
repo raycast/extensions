@@ -3,10 +3,11 @@ import {
   ActionPanel,
   Action,
   Icon,
-  showToast,
-  Toast,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
-import { useEffect, useState, useCallback } from "react";
+import { useState } from "react";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   getApiKey,
   authorizeWithOAuth,
@@ -31,7 +32,11 @@ function maskKey(apiKey: string): string {
     : "••••••••";
 }
 
-function buildSignedInMarkdown(apiKey: string, usage: ApiUsage | null): string {
+function buildSignedInMarkdown(
+  apiKey: string,
+  usage: ApiUsage | undefined,
+  usageError: Error | undefined,
+): string {
   let md = `# macOSicons API\n\n**API Key**\n\n\`\`\`\n${maskKey(apiKey)}\n\`\`\`\n`;
 
   if (usage) {
@@ -46,6 +51,8 @@ function buildSignedInMarkdown(apiKey: string, usage: ApiUsage | null): string {
     if (remaining === 0) {
       md += `\n> ⚠️ You've hit this month's limit. Requests will resume next month, or upgrade for a higher limit.\n`;
     }
+  } else if (usageError) {
+    md += `\n---\n\n## Usage\n\nCould not load usage data. ${usageError.message}\n`;
   }
 
   md += `\n---\n\n## About the free tier\n\n`;
@@ -68,84 +75,75 @@ function buildSignedOutMarkdown(): string {
 }
 
 export default function ViewApiKeyCommand() {
-  const [apiKey, setApiKey] = useState<string | undefined | null>(null); // null = loading
-  const [usage, setUsage] = useState<ApiUsage | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const usingPreferenceKey = isUsingPreferenceKey();
 
-  const loadUsage = useCallback(async (key: string) => {
-    try {
-      setUsage(await getApiUsage(key));
-    } catch {
-      // No usage data available — silently skip.
-    }
-  }, []);
+  const {
+    data: apiKey,
+    isLoading: isLoadingKey,
+    revalidate: revalidateApiKey,
+  } = useCachedPromise(getApiKey);
 
-  const load = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const key = await getApiKey();
-      setApiKey(key ?? undefined);
-      if (key) await loadUsage(key);
-    } catch {
-      setApiKey(undefined);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [loadUsage]);
-
-  useEffect(() => {
-    load();
-  }, [load]);
+  const {
+    data: usage,
+    isLoading: isLoadingUsage,
+    error: usageError,
+    revalidate: revalidateUsage,
+  } = useCachedPromise((key: string) => getApiUsage(key), [apiKey ?? ""], {
+    execute: typeof apiKey === "string",
+    keepPreviousData: true,
+  });
 
   async function handleSignIn() {
-    setIsLoading(true);
+    setIsSigningIn(true);
     try {
-      const key = await authorizeWithOAuth();
-      setApiKey(key);
-      await loadUsage(key);
+      await authorizeWithOAuth();
+      await revalidateApiKey();
     } catch (error) {
-      setApiKey(undefined);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Sign in failed",
-        message: error instanceof Error ? error.message : "Please try again.",
-      });
+      await showFailureToast(error, { title: "Sign In Failed" });
     } finally {
-      setIsLoading(false);
+      setIsSigningIn(false);
     }
   }
 
   async function handleSignOut() {
-    setIsLoading(true);
+    const confirmed = await confirmAlert({
+      title: "Sign Out of macOSicons?",
+      message: "You'll need to sign in again to search and apply icons.",
+      primaryAction: {
+        title: "Sign out",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
     try {
       await signOut();
     } catch (error) {
-      // Local credentials are cleared either way, but the remote session may
-      // still be live — say so rather than claiming a clean sign-out.
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Signed out on this device only",
-        message:
-          error instanceof Error
-            ? error.message
-            : "The session may still be active on macosicons.com.",
+      await showFailureToast(error, {
+        title: "Signed Out on This Device Only",
       });
     } finally {
-      setApiKey(undefined);
-      setUsage(null);
-      setIsLoading(false);
+      await revalidateApiKey();
     }
   }
 
   const signedIn = typeof apiKey === "string";
   const markdown = signedIn
-    ? buildSignedInMarkdown(apiKey, usage)
+    ? buildSignedInMarkdown(
+        apiKey,
+        usage,
+        usageError instanceof Error ? usageError : undefined,
+      )
     : buildSignedOutMarkdown();
 
   return (
     <Detail
-      isLoading={isLoading}
+      isLoading={
+        isSigningIn ||
+        isLoadingKey ||
+        (signedIn && isLoadingUsage && usage === undefined)
+      }
       markdown={markdown}
       actions={
         <ActionPanel>
@@ -158,13 +156,17 @@ export default function ViewApiKeyCommand() {
           )}
           {!signedIn && !usingPreferenceKey && (
             <Action
-              title="Sign in with Macosicons.com"
-              icon={Icon.Globe}
+              title="Sign in with MacOSicons.com"
+              icon={Icon.Person}
               onAction={handleSignIn}
             />
           )}
           {signedIn && (
-            <Action icon={Icon.Repeat} title="Refresh Usage" onAction={load} />
+            <Action
+              icon={Icon.Repeat}
+              title="Refresh Usage"
+              onAction={revalidateUsage}
+            />
           )}
           <Action.OpenInBrowser
             title="Upgrade & Learn More"

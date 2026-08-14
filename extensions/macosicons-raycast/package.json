@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "macosicons-raycast",
-  "title": "MacOSicons.com",
-  "description": "Change the app icon of thousands of macOS apps directly from Raycast, browse all the icons from macOSicons.com.",
+  "title": "MacOSicons",
+  "description": "Browse and apply thousands of macOS app icons from macOSicons.com.",
   "icon": "extension-logo.png",
   "author": "elias_ruiz_monserrat",
   "platforms": [
@@ -12,17 +12,27 @@
     "Applications",
     "Design Tools"
   ],
+  "keywords": [
+    "macos",
+    "icons",
+    "app icons",
+    "custom icons",
+    "icns",
+    "icon pack"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "macosicons",
-      "title": "Search MacOSicons",
+      "title": "Search Icons",
+      "subtitle": "MacOSicons",
       "description": "Search and browse app icons from macOSicons.com.",
       "mode": "view"
     },
     {
       "name": "view-usage",
       "title": "View API Usage",
+      "subtitle": "MacOSicons",
       "description": "View your macOSicons API usage.",
       "mode": "view"
     }

@@ -1,9 +1,7 @@
 import { LocalStorage, OAuth, getPreferenceValues } from "@raycast/api";
 
-// const FRONT_BASE_URL = "http://localhost:3010";
 const FRONT_BASE_URL = "https://macosicons.com";
 const BASE_URL = "https://api.macosicons.com";
-// const BASE_URL = "http://localhost:3000";
 
 const API_KEY_KEY = "api-key";
 
@@ -28,9 +26,9 @@ function getPreferenceApiKey(): string | undefined {
 // OAuth PKCE client
 export const oauthClient = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
-  providerName: "macOS Icons",
+  providerName: "macOSicons",
   providerIcon: "extension-logo.png",
-  description: "Connect your macOS Icons account to search and apply icons.",
+  description: "Connect your macOSicons account to search and apply icons.",
 });
 
 // API key management
@@ -143,13 +141,6 @@ export async function signOut(): Promise<void> {
       `Could not revoke the session on macosicons.com: ${detail}. Sign out from the website to end it.`,
     );
   }
-}
-
-// Ensures an API key is available, triggering OAuth if needed
-export async function ensureApiKey(): Promise<string | undefined> {
-  const existing = await getApiKey();
-  if (existing) return existing;
-  return await authorizeWithOAuth();
 }
 
 // Auth API

@@ -1,4 +1,4 @@
-# macOSicons.com
+# macOSicons
 
 Browse and apply thousands of beautiful macOS app icons directly from Raycast — no browser required.
 
@@ -12,9 +12,9 @@ Browse and apply thousands of beautiful macOS app icons directly from Raycast �
 
 ## Screenshots
 
-| Search | Grid View | Apply Icon |
-|---|---|---|
-| ![Search VS Code](media/search-vscode.jpeg) | ![Grid View](media/grid-view.jpeg) | ![Apply Icon](media/apply-icon.jpeg) |
+| Search                                     | Grid View                         | Apply Icon                          |
+| ------------------------------------------ | --------------------------------- | ----------------------------------- |
+| ![Search VS Code](media/search-vscode.png) | ![Grid View](media/grid-view.png) | ![Apply Icon](media/apply-icon.png) |
 
 ## Setup
 
@@ -22,13 +22,13 @@ The extension needs an API key to talk to macOSicons.com. You can get one in two
 
 ### Option 1: Sign in with your macOSicons.com account (recommended)
 
-Open the **Search MacOSicons** command. If you're not signed in, you'll see a **Sign in with macOSicons.com** action — run it and a browser window opens to authorize Raycast. Once you approve, the extension generates and stores a free API key for you automatically. No copy-pasting required.
+Open the **Search Icons** command. If you're not signed in, you'll see a **Sign in with MacOSicons.com** action — run it and a browser window opens to authorize Raycast. Once you approve, the extension generates and stores a free API key for you automatically. No copy-pasting required.
 
 Don't have an account yet? Create a free one at [macosicons.com](https://macosicons.com) first.
 
 ### Option 2: Paste an API key (power users)
 
-If you'd rather manage the key yourself, open **Raycast → Extensions → macOSicons.com** and paste your key into the **API Key** preference. When set, this key takes priority over browser sign-in, and the Sign in / Sign out actions are hidden.
+If you'd rather manage the key yourself, open **Raycast → Extensions → MacOSicons** and paste your key into the **API Key** preference. When set, this key takes priority over browser sign-in, and the Sign in / Sign out actions are hidden.
 
 ## API limits
 
@@ -41,6 +41,6 @@ You can check your current usage any time with the **View API Usage** command. I
 
 ## Preferences
 
-| Preference | Description |
-|---|---|
+| Preference  | Description                                                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | **API Key** | Optional. Paste an API key from your macOSicons.com account to skip browser sign-in. If set, it takes priority over signing in. |

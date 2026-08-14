@@ -222,6 +222,15 @@ export default function ChangeAppIcon({
       onSearchTextChange={setSearchText}
       filtering={false}
     >
+      <List.EmptyView
+        icon={Icon.AppWindowGrid2x2}
+        title={apps.length === 0 ? "No Apps Found" : "No Matching Apps"}
+        description={
+          apps.length === 0
+            ? "No applications were found in /Applications or ~/Applications."
+            : `No installed apps match "${searchText}"`
+        }
+      />
       {filteredApps.map((app) => (
         <List.Item
           key={app.path}

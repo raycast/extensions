@@ -1,4 +1,4 @@
-# macOSicons.com Changelog
+# macOSicons Changelog
 
 ## [Initial Version] - {PR_MERGE_DATE}
 

@@ -1,19 +1,17 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useRef, useState } from "react";
 import {
   ActionPanel,
   Action,
   Grid,
-  showToast,
-  Toast,
   Icon,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import {
   searchIcons,
   getApiKey,
   authorizeWithOAuth,
-  IconHit,
-  ApiUsage,
   getApiUsage,
   signOut,
   isUsingPreferenceKey,
@@ -29,29 +27,24 @@ function formatDownloads(count: number): string {
 export default function Command() {
   const [columns, setColumns] = useState(8);
   const [searchText, setSearchText] = useState("");
-  // null = loading, undefined = not signed in, string = signed in
-  const [apiKey, setApiKey] = useState<string | undefined | null>(null);
-  const [apiUsage, setApiUsage] = useState<ApiUsage | null>(null);
+  const [isSigningIn, setIsSigningIn] = useState(false);
   const searchAbortController = useRef<AbortController | undefined>(undefined);
   const usingPreferenceKey = isUsingPreferenceKey();
 
-  const loadUsage = useCallback(async (key: string) => {
-    try {
-      setApiUsage(await getApiUsage(key));
-    } catch {
-      // Usage is a nice-to-have; ignore failures.
-    }
-  }, []);
+  const {
+    data: apiKey,
+    isLoading: isLoadingKey,
+    revalidate: revalidateApiKey,
+  } = useCachedPromise(getApiKey);
 
-  useEffect(() => {
-    // Only read an existing key on mount — never auto-open the browser.
-    getApiKey()
-      .then((key) => {
-        setApiKey(key ?? undefined);
-        if (key) loadUsage(key);
-      })
-      .catch(() => setApiKey(undefined));
-  }, [loadUsage]);
+  const { data: apiUsage } = useCachedPromise(
+    (key: string) => getApiUsage(key),
+    [apiKey ?? ""],
+    {
+      execute: typeof apiKey === "string",
+      keepPreviousData: true,
+    },
+  );
 
   const {
     data: icons,
@@ -77,69 +70,64 @@ export default function Command() {
       abortable: searchAbortController,
       keepPreviousData: true,
       onError: async (error) => {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Search Failed",
-          message: error.message,
-        });
+        await showFailureToast(error, { title: "Search Failed" });
       },
     },
   );
 
   async function handleSignIn() {
-    setApiKey(null);
+    setIsSigningIn(true);
     try {
-      const key = await authorizeWithOAuth();
-      setApiKey(key);
-      loadUsage(key);
+      await authorizeWithOAuth();
+      await revalidateApiKey();
     } catch (error) {
-      setApiKey(undefined);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Sign in failed",
-        message: error instanceof Error ? error.message : "Please try again.",
-      });
+      await showFailureToast(error, { title: "Sign In Failed" });
+    } finally {
+      setIsSigningIn(false);
     }
   }
 
   async function handleSignOut() {
+    const confirmed = await confirmAlert({
+      title: "Sign Out of macOSicons?",
+      message: "You'll need to sign in again to search and apply icons.",
+      primaryAction: {
+        title: "Sign out",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
     try {
       await signOut();
-      await showToast({ style: Toast.Style.Success, title: "Signed out" });
     } catch (error) {
-      // Local credentials are cleared either way, but the remote session may
-      // still be live — say so rather than claiming a clean sign-out.
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Signed out on this device only",
-        message:
-          error instanceof Error
-            ? error.message
-            : "The session may still be active on macosicons.com.",
+      await showFailureToast(error, {
+        title: "Signed Out on This Device Only",
       });
     } finally {
-      setApiKey(undefined);
-      setApiUsage(null);
+      await revalidateApiKey();
     }
   }
 
-  // Signed-out state: prompt the user to connect their account.
-  if (apiKey === undefined) {
+  const signedOut = !isLoadingKey && !isSigningIn && !apiKey;
+
+  if (signedOut) {
     return (
       <Grid columns={2} inset={Grid.Inset.Large}>
         <Grid.EmptyView
           icon={Icon.Person}
-          title="Sign in to macOSicons.com"
+          title="Sign In to macOSicons.com"
           description="Connect your account to search and apply thousands of macOS icons. It's free — 50 requests/month."
           actions={
             <ActionPanel>
               <Action
-                title="Sign in with Macosicons.com"
-                icon={Icon.Globe}
+                title="Sign in with MacOSicons.com"
+                icon={Icon.Person}
                 onAction={handleSignIn}
               />
               <Action.OpenInBrowser
                 title="Create a Free Account"
+                icon={Icon.Plus}
                 url="https://macosicons.com"
               />
             </ActionPanel>
@@ -156,7 +144,9 @@ export default function Command() {
       // useCachedPromise persists the first page between command runs. Keep
       // cached icons interactive while the latest results refresh in the
       // background instead of covering them with a loading indicator.
-      isLoading={icons === undefined && (apiKey === null || isLoading)}
+      isLoading={
+        isSigningIn || isLoadingKey || (icons === undefined && isLoading)
+      }
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search macOS icons..."
       throttle
@@ -165,13 +155,14 @@ export default function Command() {
         <Grid.Dropdown
           tooltip="Grid Item Size"
           storeValue
+          defaultValue="8"
           onChange={(newValue) => {
-            setColumns(parseInt(newValue));
+            setColumns(parseInt(newValue, 10));
           }}
         >
           <Grid.Dropdown.Section
             title={
-              apiUsage !== null
+              apiUsage !== undefined
                 ? `This month: ${apiUsage.currentMonthlyUsage.toLocaleString()}/${apiUsage.apiCallLimit.toLocaleString()} requests`
                 : "Grid Size"
             }
@@ -183,13 +174,17 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {apiKey && icons?.length === 0 && !isLoading && searchText.trim() && (
+      {typeof apiKey === "string" && icons?.length === 0 && !isLoading && (
         <Grid.EmptyView
-          title="No Icons Found"
-          description={`No results for "${searchText}"`}
+          title={searchText.trim() ? "No Icons Found" : "Search macOSicons"}
+          description={
+            searchText.trim()
+              ? `No results for "${searchText}"`
+              : "Type an app name to browse thousands of macOS icons."
+          }
         />
       )}
-      {(icons as IconHit[] | undefined)?.map((icon, idx) => (
+      {icons?.map((icon, idx) => (
         <Grid.Item
           key={`${icon.objectID}-${idx}`}
           content={{
@@ -222,20 +217,24 @@ export default function Command() {
               )}
               <Action.OpenInBrowser
                 title="Open in Browser"
+                icon={Icon.Globe}
                 url={`https://macosicons.com/?icon=${icon.objectID}`}
               />
               {icon.lowResPngUrl && (
                 <Action.CopyToClipboard
                   title="Copy Image URL"
+                  icon={Icon.Clipboard}
                   content={icon.lowResPngUrl}
                 />
               )}
               <Action.OpenInBrowser
                 title="View User Icons"
+                icon={Icon.Person}
                 url={`https://macosicons.com/u/${icon.usersName}`}
               />
               <Action.CopyToClipboard
                 title="Copy App Name"
+                icon={Icon.Text}
                 content={icon.appName}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               />
