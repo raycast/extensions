@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { isArray, isPlainObject, isString } from "lodash";
 
 export type Station = {
@@ -25,12 +26,14 @@ type DepartureEstimatesResponse = {
   station: unknown[];
 };
 
+type Preferences = {
+  apiKey?: string;
+};
+
 const API_BASE_URL = "https://api.bart.gov/api/";
 const REQUEST_TIMEOUT_MS = 10_000;
-// This is a public API token that is easy to rotate. Feel free to use it if you want or apply for your own at
-// https://www.bart.gov/schedules/developers/api
-// Keep the repository value empty; a maintainer may set a local token here without exposing it in source control.
-const BART_API_KEY = "ZJAY-5AUJ-9IWT-DWEI";
+// Public BART API token used as the default. Users can override it in extension preferences.
+const DEFAULT_BART_API_KEY = "ZJAY-5AUJ-9IWT-DWEI";
 
 export class BARTApiError extends Error {
   constructor(message: string) {
@@ -122,13 +125,14 @@ const getDepartureEstimates = async (stationAbbr: string): Promise<DepartureEsti
   return { station };
 };
 
-const requestBART = async (endpoint: string, parameters: Record<string, string>): Promise<JsonRecord> => {
-  if (!BART_API_KEY) {
-    throw new BARTApiError("BART API access is not configured.");
-  }
+const getApiKey = (): string => {
+  const apiKey = getPreferenceValues<Preferences>().apiKey?.trim();
+  return apiKey || DEFAULT_BART_API_KEY;
+};
 
+const requestBART = async (endpoint: string, parameters: Record<string, string>): Promise<JsonRecord> => {
   const url = new URL(endpoint, API_BASE_URL);
-  url.search = new URLSearchParams({ ...parameters, key: BART_API_KEY, json: "y" }).toString();
+  url.search = new URLSearchParams({ ...parameters, key: getApiKey(), json: "y" }).toString();
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);

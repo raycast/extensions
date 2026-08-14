@@ -8,4 +8,4 @@
 - Added filtering, manual departure refresh, and a Change Station action.
 - Remember the last selected station between launches with Raycast LocalStorage.
 - Added loading, empty-state, and retry experiences for unavailable data or failed BART API requests.
-- Added BART API response validation, request timeouts, and user-friendly error messages.
+- Added optional **BART API Key** preference to override the shared default API key.

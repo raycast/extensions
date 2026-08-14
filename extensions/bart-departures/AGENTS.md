@@ -9,8 +9,9 @@ The Raycast extension lives at this repository root. It was scaffolded from Rayc
 - This is a personal, local extension that uses the BART Legacy API with native `fetch`.
 - Use BART's JSON station-list endpoint to populate station selection: <https://api.bart.gov/docs/stn/stns.aspx>.
 - Use BART's JSON real-time ETD endpoint for departure estimates: <https://api.bart.gov/docs/etd/etd.aspx>.
-- Configure the local key as the required `BART API Key` Raycast password preference. Never commit, log, display, or embed a real key.
+- The extension uses a shared default BART API key. Users can optionally override it via the `BART API Key` Raycast password preference. Never commit, log, or display a personal key.
 - Keep dependencies minimal. Use native `fetch` for HTTP; do not add Axios or another HTTP client. Lodash is approved for established collection, string, and type-guard utilities when it avoids reimplementing them.
+- Use Raycast's Navigation API (`useNavigation` with `push`/`pop`) for station selection from the departures view; do not swap root views with custom screen state.
 
 ## Raycast UI
 
@@ -27,4 +28,3 @@ The Raycast extension lives at this repository root. It was scaffolded from Rayc
 
 - Install dependencies with `npm install` at the repository root.
 - Use `npm run dev` for Raycast development, then run `npm run lint` and `npm run build` before handoff.
-- Keep this local-only while its client-side BART API key is in use. A published version needs a different credential design.

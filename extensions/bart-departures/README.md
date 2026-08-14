@@ -6,13 +6,13 @@ View real-time BART departures for a selected station in Raycast.
 
 https://www.raycast.com/unknowndate/bart-departures
 
-## Local setup
+## Setup
+
+No setup is required — the extension uses a shared default BART API key out of the box.
+
+To use your own key, request a free one from the [BART developer API page](https://www.bart.gov/schedules/developers/api), then open Raycast → **Manage Extensions** → **BART Departures** → **Preferences** and enter it in **BART API Key**.
+
+## Local development
 
 1. Run `npm install`.
 2. Run `npm run dev` and open **BART Departures** in Raycast.
-
-## API key
-
-The extension includes a public BART API token, so no Raycast preference or user setup is required. The token is intentionally easy to rotate.
-
-If you are maintaining a fork and want to use a different token, change the `BART_API_KEY` constant in `src/bart-api.ts`. You can request a key from the [BART developer API page](https://www.bart.gov/schedules/developers/api).

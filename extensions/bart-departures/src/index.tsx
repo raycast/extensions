@@ -1,14 +1,10 @@
-import { Action, ActionPanel, Color, Icon, List, LocalStorage } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage, useNavigation } from "@raycast/api";
 import { capitalize, compact, isPlainObject, isString } from "lodash";
 import { useCallback, useEffect, useState } from "react";
 import { getDepartures, getStations } from "./bart-api";
 import type { Station, Departure } from "./bart-api";
 
 const LAST_STATION_KEY = "last-selected-station";
-const SCREEN = {
-  DEPARTURES: "departures",
-  STATIONS: "stations",
-} as const;
 const BART_LINE_COLORS: Record<string, Color> = {
   blue: Color.Blue,
   green: Color.Green,
@@ -17,82 +13,80 @@ const BART_LINE_COLORS: Record<string, Color> = {
   yellow: Color.Yellow,
 };
 
-type Screen = { name: typeof SCREEN.DEPARTURES; station: Station } | { name: typeof SCREEN.STATIONS };
-
 const BARTDepartures = () => {
-  const [screen, setScreen] = useState<Screen>();
-  const [searchText, setSearchText] = useState("");
-
-  const restoreLastStation = useCallback(async () => {
-    let station: Station | undefined;
-
-    try {
-      station = parseStation(await LocalStorage.getItem<string>(LAST_STATION_KEY));
-    } catch (_err) {
-      // Fall back to the station picker if the saved station cannot be read.
-    } finally {
-      setScreen(station ? { name: SCREEN.DEPARTURES, station } : { name: SCREEN.STATIONS });
-    }
-  }, []);
+  const [station, setStation] = useState<Station | undefined>();
+  const [isRestoring, setIsRestoring] = useState(true);
 
   useEffect(() => {
-    void restoreLastStation();
-  }, [restoreLastStation]);
+    let isCurrent = true;
 
-  const selectStation = useCallback(async (station: Station) => {
-    setSearchText("");
+    void (async () => {
+      try {
+        const savedStation = parseStation(await LocalStorage.getItem<string>(LAST_STATION_KEY));
+        if (isCurrent && savedStation) setStation(savedStation);
+      } catch {
+        // Fall back to the station picker if the saved station cannot be read.
+      } finally {
+        if (isCurrent) setIsRestoring(false);
+      }
+    })();
 
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
+
+  const selectStation = useCallback(async (selectedStation: Station) => {
     try {
-      await LocalStorage.setItem(LAST_STATION_KEY, JSON.stringify(station));
-    } catch (_err) {
-      // Swallowing this little error
+      await LocalStorage.setItem(LAST_STATION_KEY, JSON.stringify(selectedStation));
+    } catch {
+      // Continue even if the station cannot be saved locally.
     }
 
-    setScreen({ name: SCREEN.DEPARTURES, station });
+    setStation(selectedStation);
   }, []);
 
-  const changeStation = useCallback(() => {
-    setSearchText("");
-    setScreen({ name: SCREEN.STATIONS });
-  }, []);
-
-  if (!screen) {
+  if (isRestoring) {
     return <List isLoading searchBarPlaceholder="Loading BART Departures" />;
   }
 
-  if (screen.name === SCREEN.STATIONS) {
-    return <StationPicker onSelect={selectStation} searchText={searchText} onSearchTextChange={setSearchText} />;
+  if (!station) {
+    return <StationPicker onSelect={selectStation} />;
   }
 
-  return (
-    <DeparturesList
-      station={screen.station}
-      searchText={searchText}
-      onSearchTextChange={setSearchText}
-      onChangeStation={changeStation}
-    />
-  );
+  return <DeparturesList station={station} onStationChange={selectStation} />;
 };
 
 const StationPicker = ({
   onSelect,
-  searchText,
-  onSearchTextChange,
+  navigationTitle,
+  popOnSelect = false,
 }: {
   onSelect: (station: Station) => Promise<void>;
-  searchText: string;
-  onSearchTextChange: (text: string) => void;
+  navigationTitle?: string;
+  popOnSelect?: boolean;
 }) => {
+  const { pop } = useNavigation();
+  const [searchText, setSearchText] = useState("");
   const loadStations = useCallback(() => getStations(), []);
   const { data: stations, error, isLoading, reload } = useResource(loadStations);
+
+  const handleSelect = useCallback(
+    async (selectedStation: Station) => {
+      await onSelect(selectedStation);
+      if (popOnSelect) pop();
+    },
+    [onSelect, pop, popOnSelect],
+  );
 
   return (
     <List
       isLoading={isLoading}
       filtering
+      navigationTitle={navigationTitle}
       searchText={searchText}
       searchBarPlaceholder="Search BART stations"
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={setSearchText}
     >
       {error ? (
         <List.EmptyView
@@ -114,7 +108,7 @@ const StationPicker = ({
             subtitle={compact([station.abbr, station.city]).join(" · ")}
             actions={
               <ActionPanel>
-                <Action title="Show Departures" icon={Icon.Train} onAction={() => onSelect(station)} />
+                <Action title="Show Departures" icon={Icon.Train} onAction={() => handleSelect(station)} />
               </ActionPanel>
             }
           />
@@ -126,18 +120,21 @@ const StationPicker = ({
 
 const DeparturesList = ({
   station,
-  searchText,
-  onSearchTextChange,
-  onChangeStation,
+  onStationChange,
 }: {
   station: Station;
-  searchText: string;
-  onSearchTextChange: (text: string) => void;
-  onChangeStation: () => void;
+  onStationChange: (station: Station) => Promise<void>;
 }) => {
+  const { push } = useNavigation();
+  const [searchText, setSearchText] = useState("");
   const loadDepartures = useCallback(() => getDepartures(station.abbr), [station.abbr]);
   const { data: departures, error, isLoading, reload } = useResource(loadDepartures);
-  const actions = <DepartureActions onRefresh={reload} onChangeStation={onChangeStation} />;
+
+  const changeStation = useCallback(() => {
+    push(<StationPicker onSelect={onStationChange} navigationTitle="Select Station" popOnSelect />);
+  }, [push, onStationChange]);
+
+  const actions = <DepartureActions onRefresh={reload} onChangeStation={changeStation} />;
 
   return (
     <List
@@ -145,7 +142,7 @@ const DeparturesList = ({
       filtering
       searchText={searchText}
       searchBarPlaceholder={`Filter departures from ${station.name}`}
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={setSearchText}
     >
       {error ? (
         <List.EmptyView
