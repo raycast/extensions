@@ -18,6 +18,14 @@ A Raycast extension that tiles your windows into a bento-box grid with one keyst
 
 Two commands, one keystroke each: **Auto Tile** tiles **a single app's windows** (great for the **vibe coding** workflow where you spin up several terminals — Ghostty, Terminal, iTerm2… — and want them snapped into place without dragging each one into a quarter), and **Auto Tile All** tiles every window on the active desktop instead.
 
+<p align="center">
+  <img src="media/hero.png" alt="Before and after: scattered windows tiled into a bento grid" width="800" />
+</p>
+
+<p align="center">
+  <img src="media/tiled.png" alt="Three windows tiled into an adaptive layout" width="800" />
+</p>
+
 ## Acknowledgment
 
 Bento Window is inspired by [Window Layouts](https://www.raycast.com/teemu_suvinen/window-layouts) by [@teemusuvinen](https://github.com/teemusuvinen). Window Layouts is a mature, full-featured window tiling extension — if you need fine-grained layout control across all your windows, go check it out.
