@@ -4,6 +4,16 @@ Raycastから入力したテキストを、選択したObsidian Vault内のMarkd
 
 専用のObsidianプラグイン、カスタムURI、同期サービスは必要ありません。
 
+## この拡張の役割
+
+これは汎用メモ作成やObsidian全体の操作ではなく、日常で繰り返す3種類の入力を、既存のVault運用へすばやく記録するための拡張です。
+
+- Daily Note：その日のメモをDaily Noteへ直接追加
+- To Do：タスク形式でDaily Noteや指定Markdownへ追加
+- Shopping：買い物リスト用の既存Markdownの先頭または末尾へ追加
+
+各入力先、行形式、追加位置、見出しはRaycast Preferencesで設定できます。新しいノートを増やすのではなく、すでに使っているMarkdownファイルと構成を保ったまま、キャプチャだけを短縮したい人向けです。
+
 ## できること
 
 - Daily Note・To Do・Shoppingを⌘1 / ⌘2 / ⌘3で切り替え
