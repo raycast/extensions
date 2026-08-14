@@ -1,41 +1,16 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { getAccessToken, useFetch, withAccessToken } from "@raycast/utils";
+import { useFetch, withAccessToken } from "@raycast/utils";
 import { provider } from "./oauth";
-import { Account, EmailMessage, Folder, Result } from "./types";
+import { Account, EmailMessage, Folder } from "./types";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import { useState } from "react";
 import { filesize } from "filesize";
+import { API_URL, getZohoHeaders, PAGE_LIMIT, parseZohoResponse } from "./zoho";
 
 export default withAccessToken(provider)(Accounts);
 
-const PAGE_LIMIT = 20;
-const getZohoHeaders = () => {
-  const { token } = getAccessToken();
-  return {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-    Authorization: `Zoho-oauthtoken ${token}`,
-  };
-};
-const parseZohoResponse = async <T,>(response: Response) => {
-  const result = (await response.json()) as
-    | Result<T>
-    | [
-        number,
-        {
-          msg: string;
-          errorCode: string;
-          authFail: string;
-          status: string;
-        },
-      ];
-  if (Array.isArray(result)) throw new Error(result[1].errorCode);
-  if (!response.ok) throw new Error(result.status.description);
-  return result.data;
-};
-
 function Accounts() {
-  const { isLoading, data: accounts } = useFetch("https://mail.zoho.com/api/accounts", {
+  const { isLoading, data: accounts } = useFetch(API_URL + "/accounts", {
     headers: getZohoHeaders(),
     parseResponse: parseZohoResponse<Account[]>,
     initialData: [],
@@ -68,7 +43,7 @@ function Emails({ account }: { account: Account }) {
   const [selectedFolderId, setSelectedFolderId] = useState("");
 
   const { isLoading: isLoadingFolders, data: folders } = useFetch(
-    `https://mail.zoho.com/api/accounts/${account.accountId}/folders`,
+    `${API_URL}/accounts/${account.accountId}/folders`,
     {
       headers: getZohoHeaders(),
       parseResponse: parseZohoResponse<Folder[]>,
@@ -83,7 +58,7 @@ function Emails({ account }: { account: Account }) {
     mutate,
   } = useFetch(
     (options: { page: number }) =>
-      `https://mail.zoho.com/api/accounts/${account.accountId}/messages/view?folderId=${selectedFolderId}&limit=${PAGE_LIMIT}&start=${options.page * PAGE_LIMIT + 1}`,
+      `${API_URL}/accounts/${account.accountId}/messages/view?folderId=${selectedFolderId}&limit=${PAGE_LIMIT}&start=${options.page * PAGE_LIMIT + 1}`,
     {
       headers: getZohoHeaders(),
       parseResponse: parseZohoResponse<EmailMessage[]>,
@@ -102,7 +77,7 @@ function Emails({ account }: { account: Account }) {
     const toast = await showToast(Toast.Style.Animated, "Updating", messageId.toString());
     try {
       await mutate(
-        fetch(`https://mail.zoho.com/api/accounts/${account.accountId}/updatemessage`, {
+        fetch(`${API_URL}/accounts/${account.accountId}/updatemessage`, {
           method: "PUT",
           headers: getZohoHeaders(),
           body: JSON.stringify({
@@ -184,7 +159,7 @@ function Emails({ account }: { account: Account }) {
 
 function EmailContent({ accountId, email }: { accountId: number; email: EmailMessage }) {
   const { isLoading, data } = useFetch(
-    `https://mail.zoho.com/api/accounts/${accountId}/folders/${email.folderId}/messages/${email.messageId}/content`,
+    `${API_URL}/accounts/${accountId}/folders/${email.folderId}/messages/${email.messageId}/content`,
     {
       headers: getZohoHeaders(),
       parseResponse: parseZohoResponse<{ content: string }>,

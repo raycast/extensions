@@ -19,6 +19,12 @@
       "title": "Accounts",
       "description": "View Accounts, Emails and Content",
       "mode": "view"
+    },
+    {
+      "name": "domains",
+      "title": "Domains",
+      "description": "View Organization Domains",
+      "mode": "view"
     }
   ],
   "dependencies": {

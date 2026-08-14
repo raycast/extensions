@@ -23,6 +23,17 @@ export interface EmailMessage {
   status: "0" | "1";
 }
 
+export interface Organization {
+  zoid: number
+}
+export interface DomainVO {
+  verificationStatus: boolean
+  domainId: string
+  domainName: string
+  createdTime: number
+
+}
+
 export interface Result<T> {
   status: {
     code: number;
