@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [Create All-Day Events] - {PR_MERGE_DATE}
+## [Create All-Day Events] - 2026-08-14
 
 - Add all-day event creation to Create Event and Create Quick Event, including natural-language date-only phrases and “all day”
 - Create all-day events using Google Calendar's date fields and correct exclusive end-date semantics
