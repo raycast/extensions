@@ -1,7 +1,5 @@
 import { useState } from "react";
 import { writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import {
   Action,
   ActionPanel,
@@ -13,7 +11,7 @@ import {
   open,
   showToast,
 } from "@raycast/api";
-import { client, errorMessage, safeName } from "./openqr";
+import { client, errorMessage, qrTempPath, safeName } from "./openqr";
 
 interface FormValues {
   data: string;
@@ -58,16 +56,19 @@ export default function Command() {
         dark: values.dark.trim() || undefined,
         light: values.light.trim() || undefined,
       };
+      // Key the filename on every option, not just the payload stem: "a b" and "a-b" normalise
+      // to the same stem, and the same text at a different size or colour is a different image.
+      // Sharing one path would show a QR encoding the other result.
       const name = safeName(values.data);
       let path: string;
       let svg: string | undefined;
       if (values.format === "svg") {
         svg = await qr.generate({ ...opts, format: "svg" });
-        path = join(tmpdir(), `openqr-${name}.svg`);
+        path = qrTempPath(name, "svg", opts);
         writeFileSync(path, svg, "utf8");
       } else {
         const bytes = await qr.generate({ ...opts, format: "png" });
-        path = join(tmpdir(), `openqr-${name}.png`);
+        path = qrTempPath(name, "png", opts);
         writeFileSync(path, bytes);
       }
       setResult({ data: values.data.trim(), format: values.format, path, svg });

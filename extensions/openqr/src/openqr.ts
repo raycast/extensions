@@ -5,10 +5,6 @@ import { join } from "node:path";
 import { getPreferenceValues } from "@raycast/api";
 import { OpenQR, OpenQRError } from "@open-qr/sdk";
 
-interface Preferences {
-  apiKey: string;
-}
-
 /** A single SDK client built from the Raycast `apiKey` preference. */
 export function client(): OpenQR {
   const { apiKey } = getPreferenceValues<Preferences>();
@@ -37,6 +33,21 @@ export function safeName(data: string): string {
 }
 
 /**
+ * Deterministic temp path keyed by every input that affects the pixels.
+ *
+ * `safeName` alone is not enough: two different payloads can normalise to the same stem
+ * ("a b" and "a-b"), and the same payload at a different size or colour is a different image.
+ * Either case would overwrite the other's file and display a QR encoding the wrong thing.
+ */
+export function qrTempPath(stem: string, ext: string, key: unknown): string {
+  const hash = createHash("sha1")
+    .update(JSON.stringify(key))
+    .digest("hex")
+    .slice(0, 10);
+  return join(tmpdir(), `openqr-${stem}-${hash}.${ext}`);
+}
+
+/**
  * Render `data` as a PNG into a temp file and return the absolute path.
  *
  * Shared by the generator and the dynamic-code commands: a dynamic code exists to be printed,
@@ -47,18 +58,13 @@ export async function renderQrPng(
   opts: { size?: number; theme?: string; name?: string } = {},
 ): Promise<string> {
   const size = opts.size ?? 512;
-  // Cache on disk, keyed by every input that affects the pixels. Browsing a list of codes
-  // re-selects the same ones constantly and a QR for a given short URL never changes, so
-  // re-rendering would be pure API traffic. Hashing the options (not just the name) is what
-  // stops a re-render with a different size or theme silently returning the previous image.
-  const key = createHash("sha1")
-    .update(JSON.stringify({ data, size, theme: opts.theme ?? null }))
-    .digest("hex")
-    .slice(0, 10);
-  const path = join(
-    tmpdir(),
-    `openqr-${opts.name ?? safeName(data)}-${key}.png`,
-  );
+  // Cached on disk: browsing a list re-selects the same codes constantly, and a QR for a given
+  // short URL never changes, so re-rendering would be pure API traffic.
+  const path = qrTempPath(opts.name ?? safeName(data), "png", {
+    data,
+    size,
+    theme: opts.theme ?? null,
+  });
   if (existsSync(path)) return path;
 
   const bytes = await client().generate({
