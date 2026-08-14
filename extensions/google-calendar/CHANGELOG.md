@@ -1,5 +1,10 @@
 # Google Calendar Changelog
 
+## [Create All-Day Events] - {PR_MERGE_DATE}
+
+- Add an All-day option to Create Event with date-only start and inclusive end-date selection
+- Create all-day events using Google Calendar's date fields and correct exclusive end-date semantics
+
 ## [Show Event Location in List Events] - 2026-08-06
 
 - Add an opt-in "Show location" preference to the List Events command that shows the event's location as an accessory, with the full location in the tooltip
