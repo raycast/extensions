@@ -234,31 +234,44 @@ final class PreviewWindow: NSWindow {
     updateLabel()
   }
 
-  /// Switches to the camera at `i`, keeping the current one if that camera cannot be opened.
+  /// Shows the camera at `start`, or the next one that opens when walking the list by `step`.
   ///
   /// A camera can disappear between being listed and being selected — an unplugged webcam, or an
-  /// iPhone that stopped offering Continuity Camera. Opening the replacement before dropping the
-  /// working input keeps such a failure from leaving the session with no input at all.
-  func setDevice(_ i: Int) {
+  /// iPhone that stopped offering Continuity Camera. Skipping over those keeps the arrow keys
+  /// moving instead of getting stuck on a camera that will never open. If none of them can be
+  /// opened, whatever is already on screen keeps playing.
+  func selectDevice(from start: Int, step: Int) {
     guard !devices.isEmpty else { return }
-    let newIndex = (i + devices.count) % devices.count
-    guard let input = try? AVCaptureDeviceInput(device: devices[newIndex]) else { return }
+    var candidate = (start + devices.count) % devices.count
+    for _ in devices.indices {
+      if activate(devices[candidate]) {
+        index = candidate
+        updateLabel()
+        return
+      }
+      candidate = (candidate + step + devices.count) % devices.count
+    }
+  }
+
+  /// Makes `device` the session's input. Restores the previous input if the swap fails, so a
+  /// failed switch never leaves the session without an input and the preview black.
+  private func activate(_ device: AVCaptureDevice) -> Bool {
+    guard let input = try? AVCaptureDeviceInput(device: device) else { return false }
 
     session.beginConfiguration()
     let previousInputs = session.inputs
     for existing in previousInputs { session.removeInput(existing) }
-    if session.canAddInput(input) {
-      session.addInput(input)
-      index = newIndex
-    } else {
-      // Restore what was playing; the label keeps naming the camera still on screen.
+    guard session.canAddInput(input) else {
       for existing in previousInputs where session.canAddInput(existing) {
         session.addInput(existing)
       }
+      session.commitConfiguration()
+      return false
     }
+    session.addInput(input)
     session.commitConfiguration()
     applyMirror()
-    updateLabel()
+    return true
   }
 
   func updateLabel() {
@@ -329,8 +342,8 @@ final class PreviewWindow: NSWindow {
       guard let self else { return }
       switch code {
       case KeyCode.escape, KeyCode.q: NSApp.terminate(nil)
-      case KeyCode.leftArrow: self.setDevice(self.index - 1)
-      case KeyCode.rightArrow, KeyCode.space: self.setDevice(self.index + 1)
+      case KeyCode.leftArrow: self.selectDevice(from: self.index - 1, step: -1)
+      case KeyCode.rightArrow, KeyCode.space: self.selectDevice(from: self.index + 1, step: 1)
       case KeyCode.upArrow: self.applySize(self.size.larger)
       case KeyCode.downArrow: self.applySize(self.size.smaller)
       case KeyCode.m: self.toggleMirror()
@@ -346,7 +359,7 @@ final class PreviewWindow: NSWindow {
     session.beginConfiguration()
     session.sessionPreset = .high
     session.commitConfiguration()
-    setDevice(index)
+    selectDevice(from: index, step: 1)
     session.startRunning()
 
     window.makeKeyAndOrderFront(nil)
