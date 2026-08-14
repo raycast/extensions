@@ -13,12 +13,14 @@
     "xilopaint",
     "ridemountainpig",
     "zakj",
-    "Visual-Studio-Coder",
     "Katsuba",
     "alexi.build",
     "mbuvarp",
     "frederik_obe",
     "bsradcliffe"
+  ],
+  "pastContributors", [
+    "Visual-Studio-Coder"
   ],
   "platforms": [
     "macOS"
