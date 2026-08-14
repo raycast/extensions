@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add DeepSeek Usage] - {PR_MERGE_DATE}
+## [Add DeepSeek Usage] - 2026-08-14
 
 - Add DeepSeek balance monitoring to the main list and menu bar
 - Show total, topped-up, and granted balances
