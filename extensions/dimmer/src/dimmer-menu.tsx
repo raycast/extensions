@@ -1,4 +1,5 @@
 import { Icon, MenuBarExtra } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import {
   describeState,
@@ -39,6 +40,8 @@ export default function Command() {
     setIsLoading(true);
     try {
       setState(await action());
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not update Dimmer" });
     } finally {
       setIsLoading(false);
     }

@@ -200,7 +200,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23"
+    "@raycast/api": "^1.104.23",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
@@ -211,9 +212,9 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build",
+    "build": "npm run build:native && ray build",
     "build:native": "./scripts/build-native.sh",
-    "dev": "ray develop",
+    "dev": "npm run build:native && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"Use npm run publish to publish Dimmer to the Raycast Store.\" && exit 1",

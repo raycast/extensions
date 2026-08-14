@@ -157,7 +157,11 @@ async function ensureHelperIsRunning(): Promise<void> {
   }
 
   const helperPath = path.join(environment.assetsPath, HELPER_FILENAME);
-  await chmod(helperPath, 0o755);
+  try {
+    await chmod(helperPath, 0o755);
+  } catch (error) {
+    throw new Error("The Dimmer helper is missing. Rebuild or reinstall the extension.", { cause: error });
+  }
 
   const child = spawn(helperPath, ["--state", getStatePath()], {
     detached: true,
