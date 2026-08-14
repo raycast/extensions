@@ -23,7 +23,7 @@ interface TwoFASService {
     account?: string;
     digits: number;
     period: number;
-    algorithm: string;
+    algorithm?: string;
     tokenType: string;
   };
   order?: { position: number };
@@ -105,7 +105,7 @@ function mapService(svc: TwoFASService): VaultService | null {
     issuer,
     account,
     secret: svc.secret,
-    algorithm: normalizeAlgorithm(svc.otp.algorithm),
+    algorithm: normalizeAlgorithm(svc.otp.algorithm ?? ""),
     digits: svc.otp.digits || 6,
     period: svc.otp.period || 30,
   };
