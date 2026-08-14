@@ -239,18 +239,20 @@ final class PreviewWindow: NSWindow {
   /// A camera can disappear between being listed and being selected — an unplugged webcam, or an
   /// iPhone that stopped offering Continuity Camera. Skipping over those keeps the arrow keys
   /// moving instead of getting stuck on a camera that will never open. If none of them can be
-  /// opened, whatever is already on screen keeps playing.
-  func selectDevice(from start: Int, step: Int) {
-    guard !devices.isEmpty else { return }
+  /// opened, whatever is already on screen keeps playing and this returns `false`.
+  @discardableResult
+  func selectDevice(from start: Int, step: Int) -> Bool {
+    guard !devices.isEmpty else { return false }
     var candidate = (start + devices.count) % devices.count
     for _ in devices.indices {
       if activate(devices[candidate]) {
         index = candidate
         updateLabel()
-        return
+        return true
       }
       candidate = (candidate + step + devices.count) % devices.count
     }
+    return false
   }
 
   /// Makes `device` the session's input. Restores the previous input if the swap fails, so a
@@ -359,7 +361,9 @@ final class PreviewWindow: NSWindow {
     session.beginConfiguration()
     session.sessionPreset = .high
     session.commitConfiguration()
-    selectDevice(from: index, step: 1)
+    // Every camera was listed but none of them opens — showing an empty window would just be a
+    // black rectangle, so quit before it reaches the screen.
+    guard selectDevice(from: index, step: 1) else { exit(EXIT_FAILURE) }
     session.startRunning()
 
     window.makeKeyAndOrderFront(nil)
