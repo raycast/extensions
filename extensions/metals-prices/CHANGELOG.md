@@ -8,3 +8,4 @@
 - Selectable display currency (SAR, AED, KWD, QAR, BHD, OMR, USD, EUR, GBP), with precision that adapts to the value so low-priced metals stay readable.
 - On-demand history: opening loads only the recent ~30 days (1-month average ready instantly); the 3M / 6M / 1Y averages load only when pressed, each showing how many API requests it will use first.
 - Local caching to stay within the metals.dev free tier — one request covers every metal, so switching metals never costs extra.
+- metals.dev API key is entered via a required password preference on first run.

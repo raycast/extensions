@@ -73,7 +73,7 @@ export const METALS: Metal[] = [
     label: "Platinum",
     purities: [
       { id: "999", label: "999", note: "Fine platinum", fineness: 0.999 },
-      { id: "950", label: "950", note: "Jewellery standard", fineness: 0.95 },
+      { id: "950", label: "950", note: "Jewelry standard", fineness: 0.95 },
       { id: "900", label: "900", note: "900 platinum", fineness: 0.9 },
       { id: "850", label: "850", note: "850 platinum", fineness: 0.85 },
     ],
@@ -83,7 +83,7 @@ export const METALS: Metal[] = [
     label: "Palladium",
     purities: [
       { id: "999", label: "999", note: "Fine palladium", fineness: 0.999 },
-      { id: "950", label: "950", note: "Jewellery standard", fineness: 0.95 },
+      { id: "950", label: "950", note: "Jewelry standard", fineness: 0.95 },
       { id: "500", label: "500", note: "500 palladium", fineness: 0.5 },
     ],
   },

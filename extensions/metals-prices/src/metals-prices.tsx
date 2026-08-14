@@ -2,7 +2,6 @@ import {
   Action,
   ActionPanel,
   Color,
-  Form,
   Icon,
   Keyboard,
   List,
@@ -12,9 +11,8 @@ import {
   showToast,
 } from "@raycast/api";
 import { useLocalStorage, usePromise } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { ensureHistoryWindow, loadMetalsData } from "./lib/data";
-import { resolveApiKey, saveApiKey } from "./lib/apiKey";
 import {
   DEFAULT_SELECTION_ID,
   METALS,
@@ -34,7 +32,9 @@ const WINDOW_LABEL: Record<number, string> = {
   365: "1 Year",
 };
 
-/** Tint each metal roughly the colour it actually is, so rows read at a glance. */
+const SEARCH_PLACEHOLDER = "Filter by purity or average";
+
+/** Tint each metal roughly the color it actually is, so rows read at a glance. */
 const METAL_COLOR: Record<MetalKey, Color> = {
   gold: Color.Yellow,
   silver: Color.SecondaryText,
@@ -44,6 +44,29 @@ const METAL_COLOR: Record<MetalKey, Color> = {
 
 /** Where the last metal + purity choice is remembered between launches. */
 const SELECTION_STORAGE_KEY = "metals-prices-selection";
+
+type ChangeDirection = "up" | "down" | "flat";
+
+function changePresentation(direction: ChangeDirection): { icon: Icon; color: Color } {
+  switch (direction) {
+    case "up":
+      return { icon: Icon.ArrowUp, color: Color.Green };
+    case "down":
+      return { icon: Icon.ArrowDown, color: Color.Red };
+    case "flat":
+      return { icon: Icon.Minus, color: Color.SecondaryText };
+    default: {
+      const _exhaustive: never = direction;
+      return _exhaustive;
+    }
+  }
+}
+
+function changeDirectionFor(roundedChange: number): ChangeDirection {
+  if (roundedChange > 0) return "up";
+  if (roundedChange < 0) return "down";
+  return "flat";
+}
 
 /** "1 request" / "3 requests" — for surfacing API-key spend to the user. */
 function reqLabel(count: number): string {
@@ -74,28 +97,25 @@ function formatAsOf(iso: string): string {
 }
 
 function MetalsPriceList({
-  apiKey,
   selectionValue,
   onSelectionChange,
-  onEditKey,
 }: {
-  apiKey: string;
   selectionValue: string;
   onSelectionChange: (value: string) => void;
-  onEditKey: () => void;
 }) {
-  const currency = getPreferenceValues<Preferences>().currency || DEFAULT_CURRENCY;
+  const { apiKey, currency: currencyPref } = getPreferenceValues<Preferences>();
+  const currency = currencyPref || DEFAULT_CURRENCY;
   const { metal, purity } = parseSelection(selectionValue);
 
   // A hard refresh sets this flag so the next load bypasses the caches/TTLs.
   const forceRef = useRef(false);
   const { data, isLoading, error, revalidate } = usePromise(
-    async (selectedCurrency: string) => {
+    async (selectedCurrency: string, key: string) => {
       const force = forceRef.current;
       forceRef.current = false;
-      return loadMetalsData(apiKey, selectedCurrency, force);
+      return loadMetalsData(key, selectedCurrency, force);
     },
-    [currency],
+    [currency, apiKey],
     { failureToastOptions: { title: "Could not load metal prices" } },
   );
 
@@ -134,6 +154,8 @@ function MetalsPriceList({
 
   // The change is shown beside the pure-metal per-gram row, so compute it per
   // gram — not per troy ounce, which would overstate the daily move ~31x.
+  // Round before picking up/down so a sub-display-precision wobble doesn't show
+  // as a red −0.00 move.
   const previousClose = metalData?.previousClosePerTroyOunce ?? null;
   const change =
     spot !== null && previousClose
@@ -141,11 +163,11 @@ function MetalsPriceList({
       : null;
   const changePct =
     change !== null && previousClose ? (change / pricePerGramForPurity(previousClose, metal.purities[0])) * 100 : null;
-  const changeIcon = change === null ? undefined : change >= 0 ? Icon.ArrowUp : Icon.ArrowDown;
-  const changeColor = change === null ? undefined : change >= 0 ? Color.Green : Color.Red;
+  const roundedChange = change === null ? null : Number(change.toFixed(digits));
+  const roundedPct = changePct === null ? null : Number(changePct.toFixed(2));
+  const direction = roundedChange === null ? null : changeDirectionFor(roundedChange);
+  const presentation = direction === null ? undefined : changePresentation(direction);
 
-  // The refresh / preferences actions shared by every item. Two hard-refresh
-  // entries register both ⌘R and ⌘↵ for the same live-fetch action.
   const refreshActions = (
     <>
       <Action
@@ -154,20 +176,8 @@ function MetalsPriceList({
         onAction={hardRefresh}
         shortcut={Keyboard.Shortcut.Common.Refresh}
       />
-      <Action
-        title="Hard Refresh (Live)"
-        icon={Icon.ArrowClockwise}
-        onAction={hardRefresh}
-        shortcut={{ modifiers: ["cmd"], key: "return" }}
-      />
-      <Action
-        title="Set API Key"
-        icon={Icon.Key}
-        onAction={onEditKey}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
-      />
       <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
-      <Action.OpenInBrowser title="Get / Manage API Key" url="https://metals.dev/pricing" />
+      <Action.OpenInBrowser title="Get API Key" url="https://metals.dev/pricing" />
     </>
   );
 
@@ -182,7 +192,7 @@ function MetalsPriceList({
 
   if (error) {
     return (
-      <List>
+      <List searchBarPlaceholder={SEARCH_PLACEHOLDER}>
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Could not load metal prices"
@@ -196,9 +206,11 @@ function MetalsPriceList({
   return (
     <List
       isLoading={isLoading}
+      searchBarPlaceholder={SEARCH_PLACEHOLDER}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Metal and purity"
+          placeholder="Select metal and purity"
           value={selectionId(metal, purity)}
           onChange={onSelectionChange}
           storeValue={false}
@@ -213,6 +225,11 @@ function MetalsPriceList({
         </List.Dropdown>
       }
     >
+      <List.EmptyView
+        icon={Icon.MagnifyingGlass}
+        title="No Matching Rows"
+        description="Try a different search, or pick another metal in the dropdown."
+      />
       <List.Section
         title={`${metal.label} · per gram (${currency})`}
         subtitle={data ? `As of ${formatAsOf(data.asOf)}` : undefined}
@@ -232,12 +249,12 @@ function MetalsPriceList({
             const accessories: List.Item.Accessory[] = [
               { tag: { value: formatCurrency(perGram, currency, digits), color: METAL_COLOR[metal.key] } },
             ];
-            if (index === 0 && change !== null && changePct !== null) {
+            if (index === 0 && roundedChange !== null && roundedPct !== null && presentation) {
               accessories.unshift({
-                icon: changeIcon ? { source: changeIcon, tintColor: changeColor } : undefined,
+                icon: { source: presentation.icon, tintColor: presentation.color },
                 text: {
-                  value: `${change >= 0 ? "+" : ""}${formatCurrency(change, currency, digits)} (${changePct >= 0 ? "+" : ""}${changePct.toFixed(2)}%)`,
-                  color: changeColor,
+                  value: `${roundedChange > 0 ? "+" : ""}${formatCurrency(roundedChange, currency, digits)} (${roundedPct > 0 ? "+" : ""}${roundedPct.toFixed(2)}%)`,
+                  color: presentation.color,
                 },
                 tooltip: `Change vs. previous close (${p.label})`,
               });
@@ -315,50 +332,7 @@ function MetalsPriceList({
   );
 }
 
-/**
- * In-app onboarding / re-entry form. Needed because the API key is an optional
- * preference (see `lib/apiKey.ts`): Raycast won't force the preference prompt,
- * so on first run — or after the Keychain-backed preference is lost — the user
- * enters the key here and we persist it to LocalStorage.
- */
-function ApiKeyForm({ initialValue, onSaved }: { initialValue: string; onSaved: (key: string) => void }) {
-  const [error, setError] = useState<string | undefined>();
-
-  async function handleSubmit(values: { apiKey: string }) {
-    const key = values.apiKey.trim();
-    if (!key) {
-      setError("API key is required");
-      return;
-    }
-    await saveApiKey(key);
-    onSaved(key);
-  }
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm title="Save API Key" icon={Icon.Check} onSubmit={handleSubmit} />
-          <Action.OpenInBrowser title="Get an API Key" url="https://metals.dev/pricing" />
-        </ActionPanel>
-      }
-    >
-      <Form.Description text="Enter your free metals.dev API key. It's stored securely on this device and reused automatically." />
-      <Form.PasswordField
-        id="apiKey"
-        title="metals.dev API Key"
-        placeholder="Paste your API key"
-        defaultValue={initialValue}
-        error={error}
-        onChange={() => error && setError(undefined)}
-      />
-    </Form>
-  );
-}
-
 export default function Command() {
-  // `undefined` = still resolving; `null` = no key found anywhere (show form).
-  const [apiKey, setApiKey] = useState<string | null | undefined>(undefined);
   // The remembered metal + purity. Rendering the dropdown before this resolves
   // would make Raycast select the first item and immediately overwrite the
   // stored choice, so the list waits for it.
@@ -368,22 +342,11 @@ export default function Command() {
     isLoading: isSelectionLoading,
   } = useLocalStorage<string>(SELECTION_STORAGE_KEY, DEFAULT_SELECTION_ID);
 
-  useEffect(() => {
-    resolveApiKey().then(setApiKey);
-  }, []);
+  if (isSelectionLoading) {
+    return <List isLoading searchBarPlaceholder={SEARCH_PLACEHOLDER} />;
+  }
 
-  if (apiKey === undefined || isSelectionLoading) {
-    return <List isLoading />;
-  }
-  if (apiKey === null) {
-    return <ApiKeyForm initialValue="" onSaved={setApiKey} />;
-  }
   return (
-    <MetalsPriceList
-      apiKey={apiKey}
-      selectionValue={storedSelection ?? DEFAULT_SELECTION_ID}
-      onSelectionChange={setStoredSelection}
-      onEditKey={() => setApiKey(null)}
-    />
+    <MetalsPriceList selectionValue={storedSelection ?? DEFAULT_SELECTION_ID} onSelectionChange={setStoredSelection} />
   );
 }

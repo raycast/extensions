@@ -29,7 +29,7 @@ Daily **gold, silver, platinum and palladium** prices **per gram**, broken down 
 This extension uses the [metals.dev](https://metals.dev) API.
 
 1. Create a free account at **https://metals.dev/pricing** and copy your API key (the free tier allows 100 requests/month — plenty, thanks to caching).
-2. Open the command in Raycast; when prompted, paste your key into **metals.dev API Key** in the extension preferences.
+2. Open **Show Metals Prices**. Raycast will prompt for **metals.dev API Key** before the command runs — paste the key there. You can change it later from the Action Panel → **Open Extension Preferences**.
 
 ## How the data works
 
