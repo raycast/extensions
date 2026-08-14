@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { lstat, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { lstat, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -22,7 +22,6 @@ if (workerIndex >= 0) {
     },
     {
       retryMilliseconds: 5,
-      staleMilliseconds: 2_000,
       timeoutMilliseconds: 5_000,
     },
   );
@@ -32,11 +31,18 @@ if (workerIndex >= 0) {
 if (holderIndex >= 0) {
   const lockPath = process.argv[holderIndex + 1];
   const holdMilliseconds = Number.parseInt(process.argv[holderIndex + 2], 10);
-  await withFileLock(lockPath, () => new Promise((resolve) => setTimeout(resolve, holdMilliseconds)), {
-    retryMilliseconds: 5,
-    staleMilliseconds: 0,
-    timeoutMilliseconds: 1_000,
-  });
+  const readyPath = process.argv[holderIndex + 3];
+  await withFileLock(
+    lockPath,
+    async () => {
+      await writeFile(readyPath, "ready\n", "utf8");
+      await new Promise((resolve) => setTimeout(resolve, holdMilliseconds));
+    },
+    {
+      retryMilliseconds: 5,
+      timeoutMilliseconds: 1_000,
+    },
+  );
   process.exit(0);
 }
 
@@ -57,49 +63,52 @@ try {
   await Promise.all(workers);
   assert.equal(Number.parseInt(await readFile(statePath, "utf8"), 10), workers.length);
 
-  const liveHolder = runHolder(scriptPath, lockPath, 250);
-  await waitForPath(lockPath);
+  const liveHolder = runHolder(scriptPath, lockPath, 250, path.join(testDirectory, "live-holder.ready"));
+  await waitForPath(liveHolder.readyPath);
   await assert.rejects(
     withFileLock(lockPath, async () => assert.fail("A live lock must not be stolen"), {
       retryMilliseconds: 5,
-      staleMilliseconds: 0,
       timeoutMilliseconds: 50,
     }),
     /Timed out while waiting for a file lock/,
   );
   await liveHolder.exited;
 
-  const crashedHolder = runHolder(scriptPath, lockPath, 10_000);
-  await waitForPath(lockPath);
+  const crashedHolder = runHolder(scriptPath, lockPath, 10_000, path.join(testDirectory, "crashed-holder.ready"));
+  await waitForPath(crashedHolder.readyPath);
   crashedHolder.child.kill("SIGKILL");
   await crashedHolder.exited;
-  await withFileLock(lockPath, async () => writeFile(statePath, "recovered\n", "utf8"), {
-    retryMilliseconds: 5,
-    staleMilliseconds: 0,
-    timeoutMilliseconds: 1_000,
-  });
-  assert.equal(await readFile(statePath, "utf8"), "recovered\n");
 
-  const reusedPIDOwner = Buffer.from(
-    JSON.stringify({ pid: process.pid, startedAt: "different process start" }),
-    "utf8",
-  ).toString("base64url");
-  await symlink(`${reusedPIDOwner}.pid-reuse-test`, lockPath);
-  await withFileLock(lockPath, async () => writeFile(statePath, "pid-reuse-recovered\n", "utf8"), {
-    retryMilliseconds: 5,
-    staleMilliseconds: 0,
-    timeoutMilliseconds: 1_000,
-  });
-  assert.equal(await readFile(statePath, "utf8"), "pid-reuse-recovered\n");
+  await writeFile(statePath, "0\n", "utf8");
+  const crashRecoveryWorkers = Array.from({ length: 20 }, () => runWorker(scriptPath, statePath, lockPath));
+  await Promise.all(crashRecoveryWorkers);
+  assert.equal(Number.parseInt(await readFile(statePath, "utf8"), 10), crashRecoveryWorkers.length);
+
+  let sameProcessOperations = 0;
+  let maximumSameProcessOperations = 0;
+  const sameProcessWorkers = Array.from({ length: 10 }, () =>
+    withFileLock(
+      lockPath,
+      async () => {
+        sameProcessOperations += 1;
+        maximumSameProcessOperations = Math.max(maximumSameProcessOperations, sameProcessOperations);
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        sameProcessOperations -= 1;
+      },
+      { retryMilliseconds: 5, timeoutMilliseconds: 1_000 },
+    ),
+  );
+  await Promise.all(sameProcessWorkers);
+  assert.equal(maximumSameProcessOperations, 1);
 
   console.log(
-    "HUD mapping, cross-process serialization, live-lock protection, crash recovery, and PID-reuse checks passed",
+    "HUD mapping, cross-process serialization, live-lock protection, concurrent crash recovery, and same-process serialization checks passed",
   );
 } finally {
   await rm(testDirectory, { recursive: true, force: true });
 }
 
-function runHolder(script, lock, holdMilliseconds) {
+function runHolder(script, lock, holdMilliseconds, readyPath) {
   const child = spawn(
     process.execPath,
     [
@@ -109,6 +118,7 @@ function runHolder(script, lock, holdMilliseconds) {
       "--holder",
       lock,
       String(holdMilliseconds),
+      readyPath,
     ],
     { stdio: "inherit" },
   );
@@ -122,7 +132,7 @@ function runHolder(script, lock, holdMilliseconds) {
       }
     });
   });
-  return { child, exited };
+  return { child, exited, readyPath };
 }
 
 async function waitForPath(targetPath) {

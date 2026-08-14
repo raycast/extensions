@@ -17,7 +17,6 @@ const STATE_FILENAME = "state.json";
 const STATE_LOCK_FILENAME = "state-update.lock";
 const HELPER_FILENAME = "dimmer-helper";
 const LOCK_RETRY_MS = 25;
-const LOCK_STALE_MS = 2_000;
 const LOCK_TIMEOUT_MS = 2_500;
 const HELPER_START_DEBOUNCE_MS = 1_000;
 
@@ -146,7 +145,6 @@ async function withStateLock<T>(operation: () => Promise<T>): Promise<T> {
   const lockPath = path.join(environment.supportPath, STATE_LOCK_FILENAME);
   return withFileLock(lockPath, operation, {
     retryMilliseconds: LOCK_RETRY_MS,
-    staleMilliseconds: LOCK_STALE_MS,
     timeoutMilliseconds: LOCK_TIMEOUT_MS,
   });
 }
