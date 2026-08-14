@@ -4,8 +4,11 @@
   "title": "MuteDeck",
   "description": "Control your meetings from Raycast: toggle mute, camera, screen share and recording via MuteDeck, with a live Meeting Deck grid.",
   "icon": "icon.png",
-  "author": "chad_walters",
+  "author": "smitmartijn",
+  "owner": "mutedeck",
+  "access": "public",
   "contributors": ["smitmartijn"],
+  "pastContributors": ["chad_walters"],
   "categories": ["Applications", "Communication", "Productivity"],
   "license": "MIT",
   "commands": [
