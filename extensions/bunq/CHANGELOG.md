@@ -2,7 +2,7 @@
 
 ## [Security: Address dependabot alert] - {PR_MERGE_DATE}
 
-- Updated `jsdom` to latest version `30.0.1` to fix https://github.com/raycast/extensions/security/dependabot/74310
+- Updated `jsdom` to version `28.0.0` to fix https://github.com/raycast/extensions/security/dependabot/74310
 
 ## [Security: Refresh Lockfile] - 2026-03-27
 
