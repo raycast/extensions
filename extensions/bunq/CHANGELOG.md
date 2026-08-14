@@ -1,6 +1,6 @@
 # Changelog
 
-## [Security: Address dependabot alert] - 2026-08-14
+## [Security: Address dependabot alert] - {PR_MERGE_DATE}
 
 - Updated `jsdom` to latest version `30.0.1` to fix https://github.com/raycast/extensions/security/dependabot/74310
 
