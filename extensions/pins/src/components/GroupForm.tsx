@@ -1,8 +1,10 @@
 import {
   Action,
   ActionPanel,
+  Application,
   Color,
   Form,
+  getApplications,
   Icon,
   LaunchType,
   environment,
@@ -18,7 +20,7 @@ import {
   modifyGroup,
   useGroups,
 } from "../lib/Groups";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getIcon } from "../lib/icons";
 import { SORT_STRATEGY, Visibility } from "../lib/constants";
 import { usePins } from "../lib/Pins";
@@ -38,6 +40,7 @@ export default function GroupForm(props: { group?: Group; groups?: Group[]; setG
   const [nameError, setNameError] = useState<string | undefined>();
   const [parentID, setParentID] = useState<number | undefined>(group?.parent);
   const [parentError, setParentError] = useState<string | undefined>();
+  const [browsers, setBrowsers] = useState<Application[]>([]);
   const { groups } = useGroups();
   const { pop } = useNavigation();
 
@@ -53,6 +56,12 @@ export default function GroupForm(props: { group?: Group; groups?: Group[]; setG
       : group;
 
   const parent = group?.parent ? groups.find((g) => g.id == group.parent) : undefined;
+
+  useEffect(() => {
+    getApplications("https://example.com")
+      .then(setBrowsers)
+      .catch(() => setBrowsers([]));
+  }, []);
 
   return (
     <Form
@@ -78,6 +87,7 @@ export default function GroupForm(props: { group?: Group; groups?: Group[]; setG
                   iconColor: values.iconColorField,
                   visibility: values.visibilityField,
                   menubarDisplay: values.menubarDisplayField,
+                  preferredBrowser: values.preferredBrowserField == "None" ? undefined : values.preferredBrowserField,
                 });
                 await launchCommand({
                   name: "view-groups",
@@ -97,6 +107,7 @@ export default function GroupForm(props: { group?: Group; groups?: Group[]; setG
                     iconColor: values.iconColorField,
                     visibility: values.visibilityField,
                     menubarDisplay: values.menubarDisplayField,
+                    preferredBrowser: values.preferredBrowserField == "None" ? undefined : values.preferredBrowserField,
                   },
                   setGroups as (groups: Group[]) => void,
                   pop,
@@ -151,6 +162,32 @@ export default function GroupForm(props: { group?: Group; groups?: Group[]; setG
             />
           );
         })}
+      </Form.Dropdown>
+
+      <Form.Dropdown
+        id="preferredBrowserField"
+        title="Preferred Browser"
+        info="The browser used for URL pins in this group when a pin does not have its own Open With setting."
+        defaultValue={targetGroup.preferredBrowser || "None"}
+      >
+        <Form.Dropdown.Item key="None" title="Use Global Preferred Browser" value="None" icon={Icon.Globe} />
+        {targetGroup.preferredBrowser &&
+        !browsers.some((browser) => (browser.bundleId || browser.path) == targetGroup.preferredBrowser) ? (
+          <Form.Dropdown.Item
+            key={targetGroup.preferredBrowser}
+            title={`Previously Selected (${targetGroup.preferredBrowser})`}
+            value={targetGroup.preferredBrowser}
+            icon={Icon.Globe}
+          />
+        ) : null}
+        {browsers.map((browser) => (
+          <Form.Dropdown.Item
+            key={browser.bundleId || browser.path}
+            title={browser.name}
+            value={browser.bundleId || browser.path}
+            icon={{ fileIcon: browser.path }}
+          />
+        ))}
       </Form.Dropdown>
 
       <Form.Dropdown
