@@ -2,6 +2,7 @@ import fs from "fs";
 import Fuse from "fuse.js";
 import { Logger } from "../logger/logger.service";
 import { ObsidianUtils, Note } from "../../obsidian";
+import { parsedYAMLFrontmatter } from "../../obsidian/internal/yaml";
 import { BYTES_PER_KILOBYTE, BYTES_PER_MEGABYTE } from "../../utils/constants";
 
 const logger = new Logger("ContentSearch");
@@ -208,7 +209,7 @@ function hasClosedFrontmatter(content: string): boolean {
  * Tag search only needs YAML + nearby inline tags. Small files are read whole.
  * Oversized files start at 64 KiB and grow in 64 KiB steps until the frontmatter
  * closer is found or the 1 MiB content-search cap is hit. If the closer is still
- * missing, append one so the existing regex parser can recover tags already read.
+ * missing, synthesize a parseable block so tags already read are not discarded.
  */
 async function readTagSearchContent(filePath: string, fileSize: number): Promise<string> {
   if (fileSize <= MAX_CONTENT_SEARCH_BYTES) {
@@ -229,8 +230,32 @@ async function readTagSearchContent(filePath: string, fileSize: number): Promise
   }
 
   if (startsWithFrontmatter && !hasClosedFrontmatter(content)) {
-    content = `${content.replace(/\s*$/, "")}\n---\n`;
+    content = withSyntheticFrontmatterCloser(content);
   }
 
   return content;
+}
+
+/**
+ * A bare `\\n---\\n` closer is enough for block scalars, but a 1 MiB cut inside a
+ * quoted YAML scalar leaves the document invalid and YAML.parse drops every tag
+ * already read. Try cheap repairs until the existing frontmatter parser accepts
+ * the prefix.
+ */
+function withSyntheticFrontmatterCloser(content: string): string {
+  const trimmed = content.replace(/\s*$/, "");
+  const candidates = [`${trimmed}\n---\n`, `${trimmed}"\n---\n`, `${trimmed}'\n---\n`];
+
+  const lastNewline = trimmed.lastIndexOf("\n");
+  if (lastNewline > 0) {
+    candidates.push(`${trimmed.slice(0, lastNewline)}\n---\n`);
+  }
+
+  for (const candidate of candidates) {
+    if (parsedYAMLFrontmatter(candidate) !== undefined) {
+      return candidate;
+    }
+  }
+
+  return candidates[0];
 }

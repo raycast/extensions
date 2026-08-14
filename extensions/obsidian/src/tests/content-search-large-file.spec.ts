@@ -88,6 +88,20 @@ describe("content search large files", () => {
     expect(results[0].title).toBe("Wide Frontmatter");
   });
 
+  it("still finds YAML tags when a quoted scalar stays open past the 1 MiB cap", async () => {
+    const largePath = path.join(tempDir, "tagged-quoted-open-scalar.md");
+    fs.writeFileSync(
+      largePath,
+      `---\ntags:\n  - quotedclip\ndescription: "${"x".repeat(1024 * 1024 + 64)}"\n---\nbody`
+    );
+
+    const notes = [noteFor(tempDir, "tagged-quoted-open-scalar.md", "Quoted Open Scalar")];
+    const results = await searchNotesWithContent(notes, "tag:quotedclip");
+
+    expect(results.length).toBe(1);
+    expect(results[0].title).toBe("Quoted Open Scalar");
+  });
+
   it("recovers YAML tags when the closer is past the 1 MiB tag-search cap", async () => {
     const largePath = path.join(tempDir, "tagged-unclosed-frontmatter.md");
     fs.writeFileSync(
