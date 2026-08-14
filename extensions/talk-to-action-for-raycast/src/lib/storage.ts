@@ -332,26 +332,18 @@ async function withFilesystemLock<T>(target: ResolvedTarget, operation: () => Pr
   let acquired = false;
 
   while (!acquired) {
-    let handle: FileHandle | undefined;
     try {
-      handle = await fs.open(
-        lockPath,
-        constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW,
-        0o600,
-      );
-      await handle.writeFile(JSON.stringify(owner), "utf8");
-      acquired = true;
+      acquired = await createFilesystemLock(lockPath, owner);
     } catch (error) {
-      if (!isErrorCode(error, "EEXIST")) {
-        throw toStorageError(error, target.relativePath);
-      }
+      throw toStorageError(error, target.relativePath);
+    }
+
+    if (!acquired) {
       await removeAbandonedLock(lockPath);
       if (Date.now() >= deadline) {
         throw new StorageError("Another save is still in progress. Please submit again.");
       }
       await wait(LOCK_WAIT_MS);
-    } finally {
-      await handle?.close();
     }
   }
 
@@ -369,10 +361,39 @@ async function getLockPath(target: ResolvedTarget): Promise<string> {
   return path.join(lockDirectory, key + ".lock");
 }
 
+async function createFilesystemLock(lockPath: string, owner: LockOwner): Promise<boolean> {
+  const pendingPath = lockPath + "." + owner.token + ".pending";
+  let handle: FileHandle | undefined;
+  try {
+    handle = await fs.open(
+      pendingPath,
+      constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW,
+      0o600,
+    );
+    await handle.writeFile(JSON.stringify(owner), "utf8");
+    await handle.close();
+    handle = undefined;
+    try {
+      await fs.link(pendingPath, lockPath);
+      return true;
+    } catch (error) {
+      if (isErrorCode(error, "EEXIST")) {
+        return false;
+      }
+      throw error;
+    }
+  } finally {
+    await handle?.close();
+    await fs.unlink(pendingPath).catch(() => undefined);
+  }
+}
+
 async function removeAbandonedLock(lockPath: string): Promise<void> {
   try {
     const owner = await readLockOwner(lockPath);
-    if (owner && !isProcessRunning(owner.pid)) {
+    if (!owner) {
+      await fs.unlink(lockPath);
+    } else if (!isProcessRunning(owner.pid)) {
       const abandonedPath = lockPath + "." + randomUUID() + ".abandoned";
       await fs.rename(lockPath, abandonedPath);
       await fs.unlink(abandonedPath);
@@ -437,8 +458,10 @@ function wait(duration: number): Promise<void> {
 async function openVerifiedTarget(target: ResolvedTarget, create: boolean): Promise<FileHandle> {
   const flags = constants.O_RDWR | constants.O_NOFOLLOW | (create ? constants.O_CREAT | constants.O_EXCL : 0);
   let handle: FileHandle | undefined;
+  let created = false;
   try {
     handle = await fs.open(target.absolutePath, flags, 0o600);
+    created = create;
     await resolveInsideVault(target.vaultPath, target.relativePath);
 
     const [handleStats, targetStats, targetLinkStats] = await Promise.all([
@@ -457,8 +480,30 @@ async function openVerifiedTarget(target: ResolvedTarget, create: boolean): Prom
     }
     return handle;
   } catch (error) {
+    if (created && handle) {
+      await removeCreatedTarget(target, handle);
+    }
     await handle?.close();
     throw error;
+  }
+}
+
+async function removeCreatedTarget(target: ResolvedTarget, handle: FileHandle): Promise<void> {
+  try {
+    const [handleStats, targetStats, targetLinkStats] = await Promise.all([
+      handle.stat(),
+      fs.stat(target.absolutePath),
+      fs.lstat(target.absolutePath),
+    ]);
+    if (
+      !targetLinkStats.isSymbolicLink() &&
+      handleStats.dev === targetStats.dev &&
+      handleStats.ino === targetStats.ino
+    ) {
+      await fs.unlink(target.absolutePath);
+    }
+  } catch {
+    // Preserve the original validation error when cleanup cannot be verified.
   }
 }
 

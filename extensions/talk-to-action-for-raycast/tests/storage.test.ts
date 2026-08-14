@@ -216,6 +216,26 @@ describe("Vault writes", () => {
     expect(await readFile(filePath, "utf8")).toBe("# Tasks\n- [ ] Recovered task\n");
   });
 
+  test("reclaims an incomplete lock from a previous command", async () => {
+    const vault = await makeVault();
+    const filePath = path.join(vault, "Tasks.md");
+    const lockDirectory = path.join(os.tmpdir(), "talk-to-action-for-raycast-locks");
+    const lockName = createHash("sha256").update(vault).update("\0").update("Tasks.md").digest("hex") + ".lock";
+    await writeFile(filePath, "# Tasks\n");
+    await mkdir(lockDirectory, { recursive: true });
+    await writeFile(path.join(lockDirectory, lockName), "");
+
+    await saveInput({
+      vaultPath: vault,
+      dailyNoteFolder: "",
+      dailyNoteFileFormat: "YYYY-MM-DD",
+      route: baseRoute,
+      input: "Recovered incomplete lock",
+    });
+
+    expect(await readFile(filePath, "utf8")).toBe("# Tasks\n- [ ] Recovered incomplete lock\n");
+  });
+
   test("does not create an Existing File target", async () => {
     const vault = await makeVault();
     await expect(
