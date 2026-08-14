@@ -1,5 +1,6 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
@@ -193,6 +194,26 @@ describe("Vault writes", () => {
     for (const input of inputs) {
       expect(content).toContain("- [ ] " + input);
     }
+  });
+
+  test("reclaims a lock only after its owner process has exited", async () => {
+    const vault = await makeVault();
+    const filePath = path.join(vault, "Tasks.md");
+    const lockDirectory = path.join(os.tmpdir(), "talk-to-action-for-raycast-locks");
+    const lockName = createHash("sha256").update(vault).update("\0").update("Tasks.md").digest("hex") + ".lock";
+    await writeFile(filePath, "# Tasks\n");
+    await mkdir(lockDirectory, { recursive: true });
+    await writeFile(path.join(lockDirectory, lockName), JSON.stringify({ pid: 999_999_999, token: "abandoned" }));
+
+    await saveInput({
+      vaultPath: vault,
+      dailyNoteFolder: "",
+      dailyNoteFileFormat: "YYYY-MM-DD",
+      route: baseRoute,
+      input: "Recovered task",
+    });
+
+    expect(await readFile(filePath, "utf8")).toBe("# Tasks\n- [ ] Recovered task\n");
   });
 
   test("does not create an Existing File target", async () => {

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { constants, promises as fs } from "node:fs";
 import type { FileHandle } from "node:fs/promises";
 import os from "node:os";
@@ -55,6 +55,11 @@ interface HeadingMatch {
   text: string;
 }
 
+interface LockOwner {
+  pid: number;
+  token: string;
+}
+
 const DESTINATIONS: Destination[] = ["daily-note", "existing-file", "new-file"];
 const POSITIONS: Position[] = ["append", "prepend"];
 const SECTIONS: Section[] = ["none", "after-heading", "section-end"];
@@ -62,7 +67,6 @@ const LINE_FORMATS: LineFormat[] = ["bullet", "task", "plain"];
 const targetLocks = new Map<string, Promise<void>>();
 const LOCK_WAIT_MS = 25;
 const LOCK_TIMEOUT_MS = 5_000;
-const STALE_LOCK_MS = 30_000;
 
 export async function saveInput(options: SaveInputOptions): Promise<SaveResult> {
   const inputLines = formatInputLines(
@@ -324,33 +328,37 @@ async function withTargetLock<T>(key: string, operation: () => Promise<T>): Prom
 async function withFilesystemLock<T>(target: ResolvedTarget, operation: () => Promise<T>): Promise<T> {
   const lockPath = await getLockPath(target);
   const deadline = Date.now() + LOCK_TIMEOUT_MS;
+  const owner: LockOwner = { pid: process.pid, token: randomUUID() };
   let acquired = false;
 
   while (!acquired) {
+    let handle: FileHandle | undefined;
     try {
-      const handle = await fs.open(
+      handle = await fs.open(
         lockPath,
         constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW,
         0o600,
       );
-      await handle.close();
+      await handle.writeFile(JSON.stringify(owner), "utf8");
       acquired = true;
     } catch (error) {
       if (!isErrorCode(error, "EEXIST")) {
         throw toStorageError(error, target.relativePath);
       }
-      await removeStaleLock(lockPath);
+      await removeAbandonedLock(lockPath);
       if (Date.now() >= deadline) {
         throw new StorageError("Another save is still in progress. Please submit again.");
       }
       await wait(LOCK_WAIT_MS);
+    } finally {
+      await handle?.close();
     }
   }
 
   try {
     return await operation();
   } finally {
-    await fs.unlink(lockPath).catch(() => undefined);
+    await releaseFilesystemLock(lockPath, owner);
   }
 }
 
@@ -361,16 +369,64 @@ async function getLockPath(target: ResolvedTarget): Promise<string> {
   return path.join(lockDirectory, key + ".lock");
 }
 
-async function removeStaleLock(lockPath: string): Promise<void> {
+async function removeAbandonedLock(lockPath: string): Promise<void> {
   try {
-    const stats = await fs.lstat(lockPath);
-    if (stats.isSymbolicLink() || Date.now() - stats.mtimeMs >= STALE_LOCK_MS) {
+    const owner = await readLockOwner(lockPath);
+    if (owner && !isProcessRunning(owner.pid)) {
+      const abandonedPath = lockPath + "." + randomUUID() + ".abandoned";
+      await fs.rename(lockPath, abandonedPath);
+      await fs.unlink(abandonedPath);
+    }
+  } catch (error) {
+    if (!isErrorCode(error, "ENOENT")) {
+      throw error;
+    }
+  }
+}
+
+async function releaseFilesystemLock(lockPath: string, owner: LockOwner): Promise<void> {
+  try {
+    const currentOwner = await readLockOwner(lockPath);
+    if (currentOwner?.token === owner.token) {
       await fs.unlink(lockPath);
     }
   } catch (error) {
     if (!isErrorCode(error, "ENOENT")) {
       throw error;
     }
+  }
+}
+
+async function readLockOwner(lockPath: string): Promise<LockOwner | null> {
+  try {
+    const value = JSON.parse(await fs.readFile(lockPath, "utf8")) as unknown;
+    if (
+      typeof value === "object" &&
+      value !== null &&
+      "pid" in value &&
+      "token" in value &&
+      typeof value.pid === "number" &&
+      Number.isInteger(value.pid) &&
+      value.pid > 0 &&
+      typeof value.token === "string"
+    ) {
+      return { pid: value.pid, token: value.token };
+    }
+    return null;
+  } catch (error) {
+    if (isErrorCode(error, "ENOENT") || error instanceof SyntaxError) {
+      return null;
+    }
+    throw error;
+  }
+}
+
+function isProcessRunning(pid: number): boolean {
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (error) {
+    return !isErrorCode(error, "ESRCH");
   }
 }
 
