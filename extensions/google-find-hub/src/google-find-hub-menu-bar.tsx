@@ -8,10 +8,24 @@ const SETUP_GUIDE_URL = "https://support.google.com/android/answer/3265955?hl=en
 
 const HELP_URL = "https://support.google.com/accounts/answer/6160491?hl=en-GB";
 
+async function openLink(url: string, errorMessage: string) {
+  try {
+    await open(url);
+  } catch (error) {
+    console.error(error);
+    await showHUD(errorMessage);
+  }
+}
+
 export default function Command() {
   async function copyFindHubLink() {
-    await Clipboard.copy(FIND_HUB_URL);
-    await showHUD("Find Hub link copied");
+    try {
+      await Clipboard.copy(FIND_HUB_URL);
+      await showHUD("Find Hub link copied");
+    } catch (error) {
+      console.error(error);
+      await showHUD("Could not copy Find Hub link");
+    }
   }
 
   return (
@@ -21,15 +35,18 @@ export default function Command() {
           title="Open Find Hub"
           subtitle="Locate, ring, secure or erase a device"
           icon="find-hub.png"
-          shortcut={{ modifiers: ["cmd"], key: "f" }}
-          onAction={() => open(FIND_HUB_URL)}
+          shortcut={{
+            macOS: { modifiers: ["cmd"], key: "f" },
+            Windows: { modifiers: ["ctrl"], key: "f" },
+          }}
+          onAction={() => openLink(FIND_HUB_URL, "Could not open Google Find Hub")}
         />
 
         <MenuBarExtra.Item
           title="Your Google Devices"
           subtitle="Review devices signed into your account"
           icon={Icon.ComputerChip}
-          onAction={() => open(GOOGLE_DEVICES_URL)}
+          onAction={() => openLink(GOOGLE_DEVICES_URL, "Could not open Google Devices")}
         />
       </MenuBarExtra.Section>
 
@@ -38,14 +55,14 @@ export default function Command() {
           title="Check Find Hub Setup"
           subtitle="Make sure your device can be found"
           icon={Icon.CheckCircle}
-          onAction={() => open(SETUP_GUIDE_URL)}
+          onAction={() => openLink(SETUP_GUIDE_URL, "Could not open setup guide")}
         />
 
         <MenuBarExtra.Item
           title="Find Hub Help"
           subtitle="Instructions for lost Android devices"
           icon={Icon.Book}
-          onAction={() => open(HELP_URL)}
+          onAction={() => openLink(HELP_URL, "Could not open Find Hub help")}
         />
       </MenuBarExtra.Section>
 

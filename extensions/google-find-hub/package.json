@@ -15,14 +15,14 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "find-my-phone-menu-bar",
-      "title": "Find My Phone Menu Bar",
+      "name": "google-find-hub-menu-bar",
+      "title": "Google Find Hub Menu Bar",
       "description": "Access Google Find Hub from the macOS menu bar",
       "mode": "menu-bar"
     },
     {
-      "name": "find-my-phone",
-      "title": "Find My Phone",
+      "name": "open-google-find-hub",
+      "title": "Open Google Find Hub",
       "description": "Open Google Find Hub to locate or ring an Android device",
       "mode": "no-view",
       "keywords": [
