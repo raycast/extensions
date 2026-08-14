@@ -15,6 +15,10 @@ export const provider = new OAuthService({
   tokenUrl: "https://oauth.raycast.com/v1/token/IzJ2IgubKiVDyntspLduHwp2fbqLnidriix9jaZCAzZbj2wdsPWfJpv3TUtpQCRyopHNO1YPx0HgWOiQlaIaDiJu8zCrnvxFsp9beqRPVE1w5acImQsJ3BHoVq36OD3mAS6BV0FlkgzkPWjcqjMvzg",
   refreshTokenUrl: "https://oauth.raycast.com/v1/refresh-token/PkgYXNFbQinA8SK-3Wvcl8xdP7Hq-kaX6ur_sct3_qk_ATrFgb8uneFkkpkwlACWOjsnG_TIvW75N7SdQ9Afd-ZfeKxtqdHj2yYEfg5Y0oueBi8zBwGoRWc-sglHUgecZaF2PQfuzqKZ0JoXL2JP4w",
   scope: "ZohoMail.accounts.READ ZohoMail.folders.READ ZohoMail.messages.READ ZohoMail.messages.UPDATE ZohoMail.organization.domains.READ ZohoMail.partner.organization.READ",
+  extraParameters: {
+    access_type: "offline"
+  },
+  bodyEncoding: "url-encoded"
 });
 // export const provider = new OAuthService({
 //   client,
