@@ -1,6 +1,6 @@
 # Google Find Hub Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-14
 
 - Open Google Find Hub directly from Raycast
 - Access Find Hub links from the macOS menu bar
