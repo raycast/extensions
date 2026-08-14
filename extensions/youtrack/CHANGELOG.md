@@ -1,6 +1,6 @@
 # YouTrack Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-08-14
 
 - Add server-side issue search with YouTrack query suggestions
 
