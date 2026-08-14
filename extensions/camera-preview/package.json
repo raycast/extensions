@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "camera-preview",
+  "title": "Camera Preview",
+  "description": "Preview your webcam feed in a full-screen window to check how you look before a call",
+  "icon": "extension-icon.png",
+  "author": "vaaaaanquish",
+  "categories": ["Media", "Productivity"],
+  "keywords": [
+    "webcam",
+    "camera",
+    "webcam test",
+    "camera check",
+    "mirror",
+    "selfie",
+    "video call",
+    "meeting",
+    "face"
+  ],
+  "platforms": ["macOS"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "preview-camera",
+      "title": "Preview Camera",
+      "subtitle": "Camera Preview",
+      "description": "Open a smooth live preview of your webcam",
+      "keywords": ["webcam", "mirror", "selfie", "webcam test", "camera check", "video call"],
+      "mode": "no-view"
+    },
+    {
+      "name": "select-camera",
+      "title": "Select Default Camera",
+      "subtitle": "Camera Preview",
+      "description": "Choose which of your connected cameras the preview starts with",
+      "keywords": ["webcam", "default camera", "camera list", "switch camera"],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cameraType",
+      "type": "dropdown",
+      "required": false,
+      "title": "Camera",
+      "description": "Which camera to start with. Keep \"Selected Camera\" to use the one picked with the Select Default Camera command, which is the only way to choose between cameras of the same kind",
+      "default": "selected",
+      "data": [
+        { "title": "Selected Camera", "value": "selected" },
+        { "title": "Built-in Camera", "value": "builtIn" },
+        { "title": "External Camera", "value": "external" },
+        { "title": "iPhone (Continuity Camera)", "value": "continuity" }
+      ]
+    },
+    {
+      "name": "windowSize",
+      "type": "dropdown",
+      "required": false,
+      "title": "Window Size",
+      "description": "Size of the preview window. Anything smaller than full screen floats above other windows and can be dragged around",
+      "default": "fullScreen",
+      "data": [
+        { "title": "Full Screen", "value": "fullScreen" },
+        { "title": "Large", "value": "large" },
+        { "title": "Medium", "value": "medium" },
+        { "title": "Small", "value": "small" }
+      ]
+    },
+    {
+      "name": "mirror",
+      "type": "checkbox",
+      "required": false,
+      "title": "Display",
+      "label": "Mirror the image horizontally",
+      "description": "Shows the feed mirrored, which looks natural for a selfie-style preview. Press M while the preview is open to flip it",
+      "default": true
+    },
+    {
+      "name": "fill",
+      "type": "checkbox",
+      "required": false,
+      "title": "Sizing",
+      "label": "Fill the screen (crops the edges)",
+      "description": "When off, the whole frame is fitted on screen with black bars",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
