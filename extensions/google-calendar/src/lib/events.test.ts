@@ -18,6 +18,13 @@ describe("buildAllDayDateRange", () => {
     });
   });
 
+  it("rejects an end date before the start date", () => {
+    assert.throws(
+      () => buildAllDayDateRange(new Date(2026, 6, 22), new Date(2026, 6, 20)),
+      /cannot be before the start date/,
+    );
+  });
+
   it("does not affect timed event payloads", () => {
     const event = buildEventResource(
       { title: "Sync", startDate: "2026-07-20T10:00:00+02:00", duration: 45 },

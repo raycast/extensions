@@ -2,7 +2,7 @@
 
 ## [Create All-Day Events] - {PR_MERGE_DATE}
 
-- Add an All-day option to Create Event with date-only start and inclusive end-date selection
+- Add all-day event creation to Create Event and Create Quick Event, including natural-language date-only phrases and “all day”
 - Create all-day events using Google Calendar's date fields and correct exclusive end-date semantics
 
 ## [Show Event Location in List Events] - 2026-08-06

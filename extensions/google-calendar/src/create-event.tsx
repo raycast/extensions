@@ -145,34 +145,6 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         return;
       }
 
-      const schedule = values.allDay
-        ? buildAllDayDateRange(startDate, values.endDate ?? undefined)
-        : {
-            start: { dateTime: startDate.toISOString() },
-            end: { dateTime: new Date(startDate.getTime() + parsedMilliseconds!).toISOString() },
-          };
-      const requestBody: calendar_v3.Schema$Event = {
-        summary: values.title,
-        description: addSignature(values.description),
-        ...schedule,
-        attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : undefined,
-        location:
-          values.conferencingProvider === "none" || values.conferencingProvider === "hangoutsMeet"
-            ? undefined
-            : values.conferencingProvider,
-        conferenceData:
-          values.conferencingProvider === "hangoutsMeet"
-            ? {
-                createRequest: {
-                  conferenceSolutionKey: {
-                    type: "hangoutsMeet",
-                  },
-                  requestId: randomUUID(),
-                },
-              }
-            : undefined,
-      };
-
       const resetForm = () => {
         focus("title");
         reset();
@@ -181,6 +153,33 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
       setLastConferencingProvider(values.conferencingProvider ?? "none");
 
       try {
+        const schedule = values.allDay
+          ? buildAllDayDateRange(startDate, values.endDate ?? undefined)
+          : {
+              start: { dateTime: startDate.toISOString() },
+              end: { dateTime: new Date(startDate.getTime() + parsedMilliseconds!).toISOString() },
+            };
+        const requestBody: calendar_v3.Schema$Event = {
+          summary: values.title,
+          description: addSignature(values.description),
+          ...schedule,
+          attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : undefined,
+          location:
+            values.conferencingProvider === "none" || values.conferencingProvider === "hangoutsMeet"
+              ? undefined
+              : values.conferencingProvider,
+          conferenceData:
+            values.conferencingProvider === "hangoutsMeet"
+              ? {
+                  createRequest: {
+                    conferenceSolutionKey: {
+                      type: "hangoutsMeet",
+                    },
+                    requestId: randomUUID(),
+                  },
+                }
+              : undefined,
+        };
         const event = await calendar.events.insert({
           calendarId,
           requestBody,
