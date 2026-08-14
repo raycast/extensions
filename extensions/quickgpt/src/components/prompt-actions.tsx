@@ -23,7 +23,7 @@ import path from "path";
 import configurationManager from "../managers/configuration-manager";
 import { runPromptActionWithTracking } from "../utils/prompt-usage-utils";
 import { writeContentToFile } from "../utils/file-clipboard-utils";
-import { runAppleScriptDetached } from "../utils/applescript-runner";
+import { runAppleScriptDetached, runAppleScriptFile, runAppleScriptFileDetached } from "../utils/applescript-runner";
 
 type ActionWithPossibleProps = React.ReactElement<Action.Props & { shortcut?: string; onAction?: () => void }> &
   React.ReactNode;
@@ -122,12 +122,23 @@ export function generatePromptActions(
           try {
             const finalContent = await getFinalContent();
             await Clipboard.copy(finalContent);
-            const scriptContent = fs.readFileSync(scriptPath, "utf8");
             const args = scriptName.endsWith("ChatGPT") ? [finalContent] : [];
-            if (scriptName === "Notion Chat") {
+            const isCompiledScript = path.extname(scriptPath).toLowerCase() === ".scpt";
+
+            if (scriptName === "Notion Chat" && isCompiledScript) {
+              await runAppleScriptFileDetached(scriptPath, args);
+              await closeMainWindow({ clearRootSearch: true });
+            } else if (scriptName === "Notion Chat") {
+              const scriptContent = fs.readFileSync(scriptPath, "utf8");
               await runAppleScriptDetached(scriptContent, args);
               await closeMainWindow({ clearRootSearch: true });
+            } else if (isCompiledScript) {
+              await runAppleScriptFile(scriptPath, args);
+              if (!scriptName.includes("Raycast")) {
+                await closeMainWindow({ clearRootSearch: true });
+              }
             } else {
+              const scriptContent = fs.readFileSync(scriptPath, "utf8");
               await runAppleScript(scriptContent, args);
               if (!scriptName.includes("Raycast")) {
                 await closeMainWindow({ clearRootSearch: true });

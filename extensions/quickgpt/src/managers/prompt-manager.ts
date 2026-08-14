@@ -9,6 +9,16 @@ import { startupElapsedMs, startupLog, startupNowMs, startupWarn } from "../util
 import { createNamespacedCache } from "../utils/extension-cache";
 import { assignPromptLineNumbers } from "../utils/prompt-line-locator";
 
+export function isPathInsideDirectory(filePath: string, directoryPath: string): boolean {
+  const relativePath = path.relative(directoryPath, filePath);
+  return (
+    relativePath !== "" &&
+    relativePath !== ".." &&
+    !relativePath.startsWith(`..${path.sep}`) &&
+    !path.isAbsolute(relativePath)
+  );
+}
+
 export type PromptProps = {
   identifier: string;
   title: string;
@@ -219,17 +229,8 @@ class PromptManager {
         })
         .filter((p) => typeof p.title === "string" && p.title.length > 0) as PromptProps[];
 
-      const isTemporarySource = this.temporaryDirectoryPaths.some((tempDir) => filePath.startsWith(tempDir));
-
-      let tempDirSource = "";
-      if (isTemporarySource) {
-        for (const tempDir of this.temporaryDirectoryPaths) {
-          if (filePath.startsWith(tempDir)) {
-            tempDirSource = tempDir;
-            break;
-          }
-        }
-      }
+      const tempDirSource = this.temporaryDirectoryPaths.find((tempDir) => isPathInsideDirectory(filePath, tempDir));
+      const isTemporarySource = tempDirSource !== undefined;
 
       return prompts.map((prompt: PromptProps) => {
         if (typeof (prompt as PromptProps & { actions?: string | string[] }).actions === "string") {

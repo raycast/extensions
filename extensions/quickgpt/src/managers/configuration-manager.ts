@@ -2,27 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 export type DirectoryPreferenceType = "prompts" | "scripts";
 
-interface BasePreferences {
-  primaryAction?: string;
-  customEditor?: string;
-}
-
-interface PromptsPreferences extends BasePreferences {
-  customPromptsDirectory?: string;
-  customPromptsDirectory1?: string;
-  customPromptsDirectory2?: string;
-  customPromptsDirectory3?: string;
-  customPromptsDirectory4?: string;
-}
-
-interface ScriptsPreferences extends BasePreferences {
-  scriptsDirectory?: string;
-  scriptsDirectory1?: string;
-  scriptsDirectory2?: string;
-}
-
-interface CompletePreferences extends PromptsPreferences, ScriptsPreferences {}
-
 class ConfigurationManager {
   private static instance: ConfigurationManager;
   private cache: Map<string, string[]> = new Map();
@@ -61,7 +40,7 @@ class ConfigurationManager {
   }
 
   private getPromptDirectories(): string[] {
-    const preferences = getPreferenceValues<PromptsPreferences>();
+    const preferences = getPreferenceValues<Preferences.PromptLab>();
     return [
       preferences.customPromptsDirectory,
       preferences.customPromptsDirectory1,
@@ -72,19 +51,19 @@ class ConfigurationManager {
   }
 
   private getScriptDirectories(): string[] {
-    const preferences = getPreferenceValues<ScriptsPreferences>();
+    const preferences = getPreferenceValues<Preferences.PromptLab>();
     return [preferences.scriptsDirectory, preferences.scriptsDirectory1, preferences.scriptsDirectory2].filter(
       Boolean,
     ) as string[];
   }
 
-  getPreference<K extends keyof CompletePreferences>(key: K): CompletePreferences[K] {
-    const preferences = getPreferenceValues<CompletePreferences>();
+  getPreference<K extends keyof Preferences.PromptLab>(key: K): Preferences.PromptLab[K] {
+    const preferences = getPreferenceValues<Preferences.PromptLab>();
     return preferences[key];
   }
 
-  getAllPreferences(): CompletePreferences {
-    return getPreferenceValues<CompletePreferences>();
+  getAllPreferences(): Preferences.PromptLab {
+    return getPreferenceValues<Preferences.PromptLab>();
   }
 
   clearCache(): void {
@@ -99,5 +78,3 @@ class ConfigurationManager {
 
 const configurationManager = ConfigurationManager.getInstance();
 export default configurationManager;
-
-export type { PromptsPreferences, ScriptsPreferences, CompletePreferences };

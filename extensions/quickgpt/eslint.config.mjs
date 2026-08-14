@@ -1,10 +1,11 @@
+import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
 import typescript from "typescript-eslint";
 import prettier from "eslint-config-prettier/flat";
 import raycastPlugin from "@raycast/eslint-plugin";
 import globals from "globals";
 
-export default [
+export default defineConfig([
   js.configs.recommended,
   ...typescript.configs.recommended,
   {
@@ -20,4 +21,4 @@ export default [
   {
     ignores: ["dist/**", "node_modules/**", "*.config.*"],
   },
-];
+]);

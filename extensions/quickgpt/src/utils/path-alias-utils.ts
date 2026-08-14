@@ -1,10 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { homedir } from "os";
 
-interface Preferences {
-  pathAliases?: string;
-}
-
 const CURRENT_FLINK_PREFIX = "📁 ";
 const FLINK_PREFIXES = ["fk:", "flink:", "📁:", CURRENT_FLINK_PREFIX, "📁\u00A0", "📁\u3000"];
 function escapeRegExp(string: string): string {
@@ -14,7 +10,7 @@ const FLINK_PREFIX_REGEX = new RegExp(`(${FLINK_PREFIXES.map(escapeRegExp).join(
 
 export function getPathAliases(): Record<string, string> {
   try {
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences.PromptLab>();
     const aliases = JSON.parse(preferences.pathAliases || "{}");
     const home = homedir();
     const expandedAliases: Record<string, string> = {};
