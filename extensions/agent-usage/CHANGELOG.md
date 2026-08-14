@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Add DeepSeek Usage] - 2026-08-14
+
+- Add DeepSeek balance monitoring to the main list and menu bar
+- Show total, topped-up, and granted balances
+- Automatically detect API keys from OpenCode or environment variables, with manual setup available in Preferences
+
 ## [Fix Antigravity detection on 2.7+] - 2026-08-13
 
 ### Bug Fixes

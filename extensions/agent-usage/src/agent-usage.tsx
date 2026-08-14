@@ -27,6 +27,7 @@ import {
   useCodexAccounts,
   useCopilotUsage,
   useCursorUsage,
+  useDeepSeekUsage,
   useDroidUsage,
   useGeminiUsage,
   useGrokUsage,
@@ -56,6 +57,8 @@ import { formatCopilotUsageText, getCopilotAccessory, renderCopilotDetail } from
 import type { CopilotError, CopilotUsage } from "./copilot/types.ts";
 import { formatCursorUsageText, getCursorAccessory, renderCursorDetail } from "./cursor/renderer.tsx";
 import type { CursorError, CursorUsage } from "./cursor/types.ts";
+import { formatDeepSeekUsageText, getDeepSeekAccessory, renderDeepSeekDetail } from "./deepseek/renderer.tsx";
+import type { DeepSeekError, DeepSeekUsage } from "./deepseek/types.ts";
 import { formatDroidUsageText, getDroidAccessory, renderDroidDetail } from "./droid/renderer.tsx";
 import type { DroidError, DroidUsage } from "./droid/types.ts";
 import { launchGeminiReauth, shouldPromptGeminiReauth } from "./gemini/reauth.ts";
@@ -96,6 +99,7 @@ interface AgentUsageById {
   codex: CodexUsage;
   copilot: CopilotUsage;
   cursor: CursorUsage;
+  deepseek: DeepSeekUsage;
   droid: DroidUsage;
   gemini: GeminiUsage;
   grok: GrokUsage;
@@ -114,6 +118,7 @@ interface AgentErrorById {
   codex: CodexError;
   copilot: CopilotError;
   cursor: CursorError;
+  deepseek: DeepSeekError;
   droid: DroidError;
   gemini: GeminiError;
   grok: GrokError;
@@ -243,6 +248,18 @@ const AGENT_REGISTRY: AgentRegistry = {
     renderDetail: renderCursorDetail,
     getAccessory: getCursorAccessory,
     formatUsageText: formatCursorUsageText,
+  },
+  deepseek: {
+    id: "deepseek",
+    name: "DeepSeek",
+    icon: "deepseek.svg",
+    description: "DeepSeek API Balance",
+    isSupported: true,
+    settingsUrl: "https://platform.deepseek.com/usage",
+    useUsage: useDeepSeekUsage,
+    renderDetail: renderDeepSeekDetail,
+    getAccessory: getDeepSeekAccessory,
+    formatUsageText: formatDeepSeekUsageText,
   },
   droid: {
     id: "droid",
@@ -435,6 +452,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
   const claudeState = AGENT_REGISTRY.claude.useUsage(Boolean(prefs.showClaude));
   const copilotState = AGENT_REGISTRY.copilot.useUsage(Boolean(prefs.showCopilot));
   const cursorState = AGENT_REGISTRY.cursor.useUsage(Boolean(prefs.showCursor));
+  const deepseekState = AGENT_REGISTRY.deepseek.useUsage(Boolean(prefs.showDeepSeek));
   const droidState = AGENT_REGISTRY.droid.useUsage(Boolean(prefs.showDroid));
   const geminiState = AGENT_REGISTRY.gemini.useUsage(Boolean(prefs.showGemini));
   const grokState = AGENT_REGISTRY.grok.useUsage(Boolean(prefs.showGrok));
@@ -454,6 +472,7 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     claude: createAgentView(AGENT_REGISTRY.claude, claudeState, Boolean(prefs.showClaude)),
     copilot: createAgentView(AGENT_REGISTRY.copilot, copilotState, Boolean(prefs.showCopilot)),
     cursor: createAgentView(AGENT_REGISTRY.cursor, cursorState, Boolean(prefs.showCursor)),
+    deepseek: createAgentView(AGENT_REGISTRY.deepseek, deepseekState, Boolean(prefs.showDeepSeek)),
     droid: createAgentView(AGENT_REGISTRY.droid, droidState, Boolean(prefs.showDroid)),
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
     grok: createAgentView(AGENT_REGISTRY.grok, grokState, Boolean(prefs.showGrok)),
