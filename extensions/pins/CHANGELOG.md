@@ -1,6 +1,6 @@
 # Pins Changelog
 
-## [1.10.0 - Group Quicklinks and URL Workflows] - {PR_MERGE_DATE}
+## [1.10.0 - Group Quicklinks and URL Workflows] - 2026-08-14
 
 - Added a no-view command for opening all pins in a group.
 - Added actions to create a Quicklink or copy a deeplink for a group.
