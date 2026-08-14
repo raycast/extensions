@@ -234,6 +234,24 @@ final class PreviewWindow: NSWindow {
     updateLabel()
   }
 
+  /// Moves `step` positions through the camera list, re-reading it first.
+  ///
+  /// The list is captured at launch, so a camera plugged in afterwards — or one that went away —
+  /// would otherwise stay invisible until the preview is reopened.
+  func stepDevice(by step: Int) {
+    refreshDevices()
+    selectDevice(from: index + step, step: step)
+  }
+
+  /// Re-reads the connected cameras, keeping the one on screen selected if it is still there.
+  private func refreshDevices() {
+    let currentId = devices.indices.contains(index) ? devices[index].uniqueID : nil
+    let latest = discoverDevices()
+    guard !latest.isEmpty else { return }
+    devices = latest
+    index = currentId.flatMap { id in latest.firstIndex { $0.uniqueID == id } } ?? 0
+  }
+
   /// Shows the camera at `start`, or the next one that opens when walking the list by `step`.
   ///
   /// A camera can disappear between being listed and being selected — an unplugged webcam, or an
@@ -344,8 +362,8 @@ final class PreviewWindow: NSWindow {
       guard let self else { return }
       switch code {
       case KeyCode.escape, KeyCode.q: NSApp.terminate(nil)
-      case KeyCode.leftArrow: self.selectDevice(from: self.index - 1, step: -1)
-      case KeyCode.rightArrow, KeyCode.space: self.selectDevice(from: self.index + 1, step: 1)
+      case KeyCode.leftArrow: self.stepDevice(by: -1)
+      case KeyCode.rightArrow, KeyCode.space: self.stepDevice(by: 1)
       case KeyCode.upArrow: self.applySize(self.size.larger)
       case KeyCode.downArrow: self.applySize(self.size.smaller)
       case KeyCode.m: self.toggleMirror()
