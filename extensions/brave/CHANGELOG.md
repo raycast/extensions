@@ -1,6 +1,6 @@
 # Brave Changelog
 
-## [Fix Missing History Database] - 2026-08-14
+## [Fix Missing History Database] - {PR_MERGE_DATE}
 
 - Fixed New Brave Tab crashing when the selected Brave profile has not created a History database yet.
 - Fixed profile discovery for Brave Beta and Brave Nightly.
