@@ -1,4 +1,4 @@
-import { Clipboard, getApplications, open, showToast, Toast } from "@raycast/api";
+import { captureException, Clipboard, getApplications, open, showToast, Toast } from "@raycast/api";
 import { exec } from "node:child_process";
 import { promisify } from "node:util";
 
@@ -9,8 +9,19 @@ const BUNDLE_ID = "app.oneko.oneko";
 
 /// All control goes through the app's oneko:// URL scheme; `open` also
 /// launches the app when it isn't running yet.
-export function send(command: string) {
-  return open(`oneko://${command}`);
+export async function send(command: string): Promise<boolean> {
+  try {
+    await open(`oneko://${command}`);
+    return true;
+  } catch (error) {
+    captureException(error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not control Oneko",
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return false;
+  }
 }
 
 export async function onekoInstalled(): Promise<boolean> {

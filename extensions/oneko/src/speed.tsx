@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, List, showHUD } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { readSetting, requireOneko, send } from "./oneko";
 
 // Mirrors AppDelegate.speeds; the URL takes the lowercased name.
@@ -10,21 +10,20 @@ const SPEEDS = [
 ];
 
 export default function Command() {
-  const [current, setCurrent] = useState<string>();
-
-  useEffect(() => {
-    // catSpeed is stored as a float; absent means the Normal default.
-    readSetting("catSpeed").then((value) => setCurrent(value ? String(parseFloat(value)) : "10"));
-  }, []);
+  const { data: current } = useCachedPromise(async () => {
+    const value = await readSetting("catSpeed");
+    return value ? String(parseFloat(value)) : "10";
+  });
 
   async function choose(speed: { name: string; value: string }) {
     if (!(await requireOneko())) return;
-    await send(`speed/${speed.name.toLowerCase()}`);
+    if (!(await send(`speed/${speed.name.toLowerCase()}`))) return;
     await showHUD(`Speed: ${speed.name}`);
   }
 
   return (
-    <List>
+    <List searchBarPlaceholder="Search speeds…">
+      <List.EmptyView icon={Icon.Gauge} title="No Matching Speeds" description="Try Slow, Normal, or Fast." />
       {SPEEDS.map((speed) => (
         <List.Item
           key={speed.value}
@@ -32,7 +31,7 @@ export default function Command() {
           icon={speed.value === current ? Icon.CheckCircle : Icon.Circle}
           actions={
             <ActionPanel>
-              <Action title="Set Speed" onAction={() => choose(speed)} />
+              <Action icon={Icon.Gauge} title="Set Speed" onAction={() => choose(speed)} />
             </ActionPanel>
           }
         />

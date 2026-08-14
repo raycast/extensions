@@ -1,23 +1,20 @@
-import { Action, ActionPanel, Grid, showHUD } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Action, ActionPanel, Grid, Icon, showHUD } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import { readSetting, requireOneko, send } from "./oneko";
 import { SKIN_GROUPS, Skin } from "./skins";
 
 export default function Command() {
-  const [current, setCurrent] = useState<string>();
-
-  useEffect(() => {
-    readSetting("spriteVariant").then((value) => setCurrent(value ?? "cat"));
-  }, []);
+  const { data: current } = useCachedPromise(async () => (await readSetting("spriteVariant")) ?? "cat");
 
   async function choose(skin: Skin) {
     if (!(await requireOneko())) return;
-    await send(`skin/${skin.value}`);
+    if (!(await send(`skin/${skin.value}`))) return;
     await showHUD(`Skin: ${skin.title}`);
   }
 
   return (
-    <Grid inset={Grid.Inset.Medium} columns={7}>
+    <Grid searchBarPlaceholder="Search skins…" inset={Grid.Inset.Medium} columns={7}>
+      <Grid.EmptyView icon={Icon.Image} title="No Matching Skins" description="Try a different name." />
       {SKIN_GROUPS.map((group) => (
         <Grid.Section key={group.name} title={group.name}>
           {group.skins.map((skin) => (
@@ -25,10 +22,11 @@ export default function Command() {
               key={skin.value}
               content={`skins/${skin.value}.png`}
               title={skin.title}
+              keywords={[skin.value]}
               subtitle={skin.value === current ? "Current" : undefined}
               actions={
                 <ActionPanel>
-                  <Action title="Use Skin" onAction={() => choose(skin)} />
+                  <Action icon={Icon.Checkmark} title="Use Skin" onAction={() => choose(skin)} />
                 </ActionPanel>
               }
             />

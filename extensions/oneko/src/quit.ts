@@ -7,6 +7,6 @@ export default async function command() {
     await showHUD("Oneko is not running");
     return;
   }
-  await send("quit");
+  if (!(await send("quit"))) return;
   await showHUD("Oneko quit");
 }
