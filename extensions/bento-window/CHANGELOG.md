@@ -1,5 +1,11 @@
 # Bento Window Changelog
 
+## [Toggle, Stable Order & Excluded Apps] - 2026-08-14
+
+- Toggle: running the same command again restores every window to its original position. If you have dragged windows out of the grid, the same press snaps them back into place instead — and one more press still returns to the original layout
+- Windows are now sorted by creation order before grid placement, so the same set of windows always lands in the same slots across repeated invocations
+- New Excluded App Names preference — listed apps are never tiled, even by Auto Tile All
+
 ## [Initial Release] - 2026-08-13
 
 - Tile multiple windows of the same app into bento‑box grids

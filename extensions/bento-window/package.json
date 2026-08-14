@@ -32,6 +32,14 @@
       "default": "Ghostty, Terminal, iTerm2, Alacritty, WezTerm"
     },
     {
+      "name": "excludeApps",
+      "title": "Excluded App Names (Comma-Separated)",
+      "description": "Apps that are never tiled, even by Auto Tile All. Example: Music, Photos.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
       "name": "gap",
       "title": "Window Gap (px)",
       "description": "Spacing between tiles and screen edges. 0 means flush tiles (default).",
