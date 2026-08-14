@@ -55,7 +55,17 @@ export const getCliPath = () => {
   return cliPath;
 };
 export const ZSH_PATH = isWindows ? undefined : [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
-export const errorRegex = new RegExp(/\[\w+\]\s+\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+(.*)$/m);
+const OP_LOG_PREFIX = /\[\w+\]\s+\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+/;
+const OP_LOG_PREFIX_GLOBAL = new RegExp(OP_LOG_PREFIX, "g");
+
+// `op` puts the cause on its first log line and the steps to fix it on the ones after, so keep
+// everything from that line onwards instead of just the first match.
+export const extractOpErrorMessage = (message: string): string => {
+  const start = message.search(OP_LOG_PREFIX);
+  const body = start === -1 ? message : message.slice(start);
+
+  return body.replace(OP_LOG_PREFIX_GLOBAL, "").trim();
+};
 export function actionsForItem(item: Item): ActionID[] {
   // all actions in the default order
   const defaultActions: ActionID[] = [
