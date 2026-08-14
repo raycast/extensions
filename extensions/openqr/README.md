@@ -21,7 +21,7 @@ The extension talks to the OpenQR REST API via the official
 
 ### Generate Static QR Code (`generate-static-qr`)
 Encode any text or URL as a QR code via `POST /v1/qr`. Choose **PNG** or **SVG**,
-set the pixel size, and optionally pick foreground/background hex colours. The
+set the pixel size, and optionally pick foreground/background hex colors. The
 rendered file is written to a temp dir; from the result view you can open it,
 reveal it in Finder, copy the file (or SVG markup) to the clipboard, or generate
 another.

@@ -159,12 +159,12 @@ export default function Command() {
       />
       <Form.TextField
         id="dark"
-        title="Foreground colour"
+        title="Foreground color"
         placeholder="232E3A (hex, optional)"
       />
       <Form.TextField
         id="light"
-        title="Background colour"
+        title="Background color"
         placeholder="FFFFFF (hex, optional)"
       />
     </Form>
