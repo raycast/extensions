@@ -55,7 +55,17 @@ export const getCliPath = () => {
   return cliPath;
 };
 export const ZSH_PATH = isWindows ? undefined : [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
-export const errorRegex = new RegExp(/\[\w+\]\s+\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+(.*)$/m);
+const OP_LOG_PREFIX = /\[\w+\]\s+\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+/;
+const OP_LOG_PREFIX_GLOBAL = new RegExp(OP_LOG_PREFIX, "g");
+
+// `op` puts the cause on its first log line and the steps to fix it on the ones after, so keep
+// everything from that line onwards instead of just the first match.
+export const extractOpErrorMessage = (message: string): string => {
+  const start = message.search(OP_LOG_PREFIX);
+  const body = start === -1 ? message : message.slice(start);
+
+  return body.replace(OP_LOG_PREFIX_GLOBAL, "").trim();
+};
 export function actionsForItem(item: Item): ActionID[] {
   // all actions in the default order
   const defaultActions: ActionID[] = [
@@ -202,6 +212,8 @@ export const signIn = (account?: string) => {
     execSync(`${getCliPath()} signin ${account ? account : ""}`, { shell: ZSH_PATH });
   }
 };
+const SIGN_IN_STATUS_TIMEOUT_MS = 30000;
+
 export const getSignInStatus = () => {
   try {
     if (isWindows) {
@@ -211,14 +223,14 @@ export const getSignInStatus = () => {
     }
     return true;
   } catch {
-    if (!isWindows) {
-      return false;
-    }
     // With the 1Password app integration and no `op signin` session, `whoami` reports
     // "account is not signed in" even though delegated sessions work. Probe the app
-    // directly before asking the user to sign in.
+    // directly before asking the user to sign in. This is not a read-only probe: it
+    // establishes the delegated session, which is what later lets `useAccount` resolve
+    // through `whoami`. It took 6.1s on macOS when it had to set one up, so the timeout
+    // here is only a guard against the app waiting forever on a prompt nobody answers.
     try {
-      execOpSync(["account", "get"]);
+      execOpSync(["account", "get"], { timeout: SIGN_IN_STATUS_TIMEOUT_MS });
       return true;
     } catch {
       return false;

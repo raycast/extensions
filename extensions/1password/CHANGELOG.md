@@ -1,5 +1,13 @@
 # 1Password Changelog
 
+## [Fix Repeated Re-Authentication] - 2026-08-14
+
+- Fixed the "Authentication Required" screen appearing on macOS even though the 1Password desktop-app integration works. The `op account get` fallback added in the previous release only ran on Windows, so macOS still trusted `op whoami`, which reports "account is not signed in" without an `op signin` session.
+- Because the same check gates **Auto Renew Authorization**, that command starts renewing on macOS for people who sign in through the desktop app. Its guard always failed for them before, so it never renewed anything.
+- Failures while loading accounts or items now show the error with **Retry** and **Copy Error Details** instead of the "No items found" empty state.
+- Authentication errors from the 1Password CLI keep their full output, including the steps the CLI suggests, instead of only the first line.
+- Documented the desktop app integration, the available commands and preferences, and how to enable Auto Renew Authorization in the README.
+
 ## [Windows Desktop-App Integration Fixes] - 2026-08-13
 
 - Fixed constant "cannot connect to 1Password app" failures on Windows. The 1Password app briefly has no CLI pipe listener right after a previous `op` process disconnects; back-to-back `op` invocations are now serialized and connection failures are retried instead of surfacing immediately.
