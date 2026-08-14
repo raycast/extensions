@@ -6,6 +6,8 @@
 
 This is a Raycast extension for [Zoho Mail](https://www.zoho.com/mail/). It allows you to view your accounts, emails and their content, and toggle email read status.
 
+⚠️ At the moment the extension only supports default Zoho accounts using `https://mail.zoho.com` - support for accounts hosted in other data centers will come in the future.
+
 ## 🚀 Getting Started
 
 1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/zoho-mail) OR `install` via Raycast Store
