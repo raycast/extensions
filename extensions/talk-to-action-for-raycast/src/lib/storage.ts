@@ -1,5 +1,7 @@
+import { createHash } from "node:crypto";
 import { constants, promises as fs } from "node:fs";
 import type { FileHandle } from "node:fs/promises";
+import os from "node:os";
 import path from "node:path";
 
 export type InputMode = "note" | "task" | "shopping";
@@ -58,6 +60,9 @@ const POSITIONS: Position[] = ["append", "prepend"];
 const SECTIONS: Section[] = ["none", "after-heading", "section-end"];
 const LINE_FORMATS: LineFormat[] = ["bullet", "task", "plain"];
 const targetLocks = new Map<string, Promise<void>>();
+const LOCK_WAIT_MS = 25;
+const LOCK_TIMEOUT_MS = 5_000;
+const STALE_LOCK_MS = 30_000;
 
 export async function saveInput(options: SaveInputOptions): Promise<SaveResult> {
   const inputLines = formatInputLines(
@@ -230,68 +235,70 @@ async function resolveTarget(options: SaveInputOptions): Promise<ResolvedTarget>
 }
 
 async function writeToTarget(target: ResolvedTarget, newLines: string[], route: Route): Promise<SaveResult> {
-  return withTargetLock(target.absolutePath, async () => {
-    await fs.mkdir(path.dirname(target.absolutePath), { recursive: true });
+  return withTargetLock(target.absolutePath, () =>
+    withFilesystemLock(target, async () => {
+      await fs.mkdir(path.dirname(target.absolutePath), { recursive: true });
 
-    for (let attempt = 0; attempt < 2; attempt += 1) {
-      const existingContent = await readTextIfExists(target.absolutePath);
+      for (let attempt = 0; attempt < 2; attempt += 1) {
+        const existingContent = await readTextIfExists(target.absolutePath);
 
-      if (existingContent === null) {
-        if (!target.allowCreate) {
-          throw new StorageError("Existing file was not found: " + target.relativePath);
+        if (existingContent === null) {
+          if (!target.allowCreate) {
+            throw new StorageError("Existing file was not found: " + target.relativePath);
+          }
+
+          const content = buildUpdatedContent("", newLines, route);
+          try {
+            const handle = await openVerifiedTarget(target, true);
+            try {
+              await writeAll(handle, content);
+            } finally {
+              await handle.close();
+            }
+            return {
+              absolutePath: target.absolutePath,
+              relativePath: target.relativePath,
+              created: true,
+              lineCount: newLines.length,
+            };
+          } catch (error) {
+            if (isErrorCode(error, "EEXIST") && attempt === 0) {
+              continue;
+            }
+            throw toStorageError(error, target.relativePath);
+          }
         }
 
-        const content = buildUpdatedContent("", newLines, route);
+        const content = buildUpdatedContent(existingContent, newLines, route);
+        let handle: FileHandle | undefined;
         try {
-          const handle = await openVerifiedTarget(target, true);
-          try {
-            await writeAll(handle, content);
-          } finally {
-            await handle.close();
+          handle = await openVerifiedTarget(target, false);
+          const contentBeforeWrite = await handle.readFile({ encoding: "utf8" });
+          if (contentBeforeWrite !== existingContent) {
+            if (attempt === 0) {
+              continue;
+            }
+            throw new StorageError("The file changed while saving. Please submit again.");
           }
+
+          await handle.truncate(0);
+          await writeAll(handle, content);
           return {
             absolutePath: target.absolutePath,
             relativePath: target.relativePath,
-            created: true,
+            created: false,
             lineCount: newLines.length,
           };
         } catch (error) {
-          if (isErrorCode(error, "EEXIST") && attempt === 0) {
-            continue;
-          }
           throw toStorageError(error, target.relativePath);
+        } finally {
+          await handle?.close();
         }
       }
 
-      const content = buildUpdatedContent(existingContent, newLines, route);
-      let handle: FileHandle | undefined;
-      try {
-        handle = await openVerifiedTarget(target, false);
-        const contentBeforeWrite = await handle.readFile({ encoding: "utf8" });
-        if (contentBeforeWrite !== existingContent) {
-          if (attempt === 0) {
-            continue;
-          }
-          throw new StorageError("The file changed while saving. Please submit again.");
-        }
-
-        await handle.truncate(0);
-        await writeAll(handle, content);
-        return {
-          absolutePath: target.absolutePath,
-          relativePath: target.relativePath,
-          created: false,
-          lineCount: newLines.length,
-        };
-      } catch (error) {
-        throw toStorageError(error, target.relativePath);
-      } finally {
-        await handle?.close();
-      }
-    }
-
-    throw new StorageError("The file changed while saving. Please submit again.");
-  });
+      throw new StorageError("The file changed while saving. Please submit again.");
+    }),
+  );
 }
 
 async function withTargetLock<T>(key: string, operation: () => Promise<T>): Promise<T> {
@@ -314,6 +321,63 @@ async function withTargetLock<T>(key: string, operation: () => Promise<T>): Prom
   }
 }
 
+async function withFilesystemLock<T>(target: ResolvedTarget, operation: () => Promise<T>): Promise<T> {
+  const lockPath = await getLockPath(target);
+  const deadline = Date.now() + LOCK_TIMEOUT_MS;
+  let acquired = false;
+
+  while (!acquired) {
+    try {
+      const handle = await fs.open(
+        lockPath,
+        constants.O_WRONLY | constants.O_CREAT | constants.O_EXCL | constants.O_NOFOLLOW,
+        0o600,
+      );
+      await handle.close();
+      acquired = true;
+    } catch (error) {
+      if (!isErrorCode(error, "EEXIST")) {
+        throw toStorageError(error, target.relativePath);
+      }
+      await removeStaleLock(lockPath);
+      if (Date.now() >= deadline) {
+        throw new StorageError("Another save is still in progress. Please submit again.");
+      }
+      await wait(LOCK_WAIT_MS);
+    }
+  }
+
+  try {
+    return await operation();
+  } finally {
+    await fs.unlink(lockPath).catch(() => undefined);
+  }
+}
+
+async function getLockPath(target: ResolvedTarget): Promise<string> {
+  const lockDirectory = path.join(os.tmpdir(), "talk-to-action-for-raycast-locks");
+  await fs.mkdir(lockDirectory, { recursive: true, mode: 0o700 });
+  const key = createHash("sha256").update(target.vaultPath).update("\0").update(target.relativePath).digest("hex");
+  return path.join(lockDirectory, key + ".lock");
+}
+
+async function removeStaleLock(lockPath: string): Promise<void> {
+  try {
+    const stats = await fs.lstat(lockPath);
+    if (stats.isSymbolicLink() || Date.now() - stats.mtimeMs >= STALE_LOCK_MS) {
+      await fs.unlink(lockPath);
+    }
+  } catch (error) {
+    if (!isErrorCode(error, "ENOENT")) {
+      throw error;
+    }
+  }
+}
+
+function wait(duration: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, duration));
+}
+
 async function openVerifiedTarget(target: ResolvedTarget, create: boolean): Promise<FileHandle> {
   const flags = constants.O_RDWR | constants.O_NOFOLLOW | (create ? constants.O_CREAT | constants.O_EXCL : 0);
   let handle: FileHandle | undefined;
@@ -328,6 +392,8 @@ async function openVerifiedTarget(target: ResolvedTarget, create: boolean): Prom
     ]);
     if (
       targetLinkStats.isSymbolicLink() ||
+      !handleStats.isFile() ||
+      handleStats.nlink !== 1 ||
       handleStats.dev !== targetStats.dev ||
       handleStats.ino !== targetStats.ino
     ) {

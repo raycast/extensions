@@ -1,6 +1,8 @@
+import { execFile } from "node:child_process";
 import { mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { promisify } from "node:util";
 import { afterEach, describe, expect, test } from "vitest";
 import {
   buildUpdatedContent,
@@ -11,6 +13,25 @@ import {
 } from "../src/lib/storage";
 
 const temporaryDirectories: string[] = [];
+const execFileAsync = promisify(execFile);
+const workerScript = `
+  import { saveInput } from "./src/lib/storage.ts";
+  await saveInput({
+    vaultPath: process.env.TALK_TO_ACTION_VAULT_PATH,
+    dailyNoteFolder: "",
+    dailyNoteFileFormat: "YYYY-MM-DD",
+    route: {
+      destination: "existing-file",
+      filePath: "Tasks.md",
+      position: "append",
+      section: "none",
+      heading: "",
+      lineFormat: "task",
+      addCurrentTime: false,
+    },
+    input: process.env.TALK_TO_ACTION_INPUT,
+  });
+`;
 
 afterEach(async () => {
   await Promise.all(temporaryDirectories.splice(0).map((directory) => rm(directory, { recursive: true, force: true })));
@@ -30,6 +51,17 @@ async function makeVault(): Promise<string> {
   const directory = await mkdtemp(path.join(os.tmpdir(), "talk-to-action-raycast-"));
   temporaryDirectories.push(directory);
   return directory;
+}
+
+async function saveFromAnotherProcess(vaultPath: string, input: string): Promise<void> {
+  await execFileAsync(process.execPath, ["--import", "tsx", "--input-type=module", "--eval", workerScript], {
+    cwd: process.cwd(),
+    env: {
+      ...process.env,
+      TALK_TO_ACTION_VAULT_PATH: vaultPath,
+      TALK_TO_ACTION_INPUT: input,
+    },
+  });
 }
 
 describe("formatting", () => {
@@ -147,6 +179,20 @@ describe("Vault writes", () => {
     expect(await readFile(filePath, "utf8")).toBe(
       "# Tasks\n- [ ] First concurrent task\n- [ ] Second concurrent task\n",
     );
+  });
+
+  test("keeps every entry when separate Raycast processes save concurrently", async () => {
+    const vault = await makeVault();
+    const filePath = path.join(vault, "Tasks.md");
+    const inputs = Array.from({ length: 8 }, (_, index) => "Cross-process task " + (index + 1));
+    await writeFile(filePath, "# Tasks\n");
+
+    await Promise.all(inputs.map((input) => saveFromAnotherProcess(vault, input)));
+
+    const content = await readFile(filePath, "utf8");
+    for (const input of inputs) {
+      expect(content).toContain("- [ ] " + input);
+    }
   });
 
   test("does not create an Existing File target", async () => {
