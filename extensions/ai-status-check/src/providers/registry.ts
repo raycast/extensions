@@ -9,7 +9,9 @@ import { fireworksProvider } from "./catalog/fireworks";
 import { geminiProvider } from "./catalog/gemini";
 import { groqProvider } from "./catalog/groq";
 import { huggingFaceProvider } from "./catalog/hugging-face";
+import { minimaxProvider } from "./catalog/minimax";
 import { mistralProvider } from "./catalog/mistral";
+import { moonshotProvider } from "./catalog/moonshot";
 import { openaiProvider } from "./catalog/openai";
 import { openRouterProvider } from "./catalog/openrouter";
 import { perplexityProvider } from "./catalog/perplexity";
@@ -24,6 +26,8 @@ export const PROVIDERS = [
   geminiProvider,
   xaiProvider,
   deepseekProvider,
+  moonshotProvider,
+  minimaxProvider,
   mistralProvider,
   cohereProvider,
   perplexityProvider,

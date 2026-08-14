@@ -23,3 +23,11 @@ The Claude mark was rendered from Simple Icons, which is distributed under the C
 ## OpenAI
 
 The OpenAI mark was obtained from the asset used by the official OpenAI status page. OpenAI and its marks are trademarks of OpenAI, L.L.C.
+
+## Moonshot AI
+
+The Moonshot AI mark was obtained from the asset used by the official Moonshot AI status page. Moonshot AI and its marks belong to their respective owner.
+
+## MiniMax
+
+The MiniMax mark was obtained from the asset used by the official MiniMax status page. MiniMax and its marks belong to their respective owner.

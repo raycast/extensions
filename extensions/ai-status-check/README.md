@@ -6,7 +6,7 @@ Unlike a general-purpose status-page monitor, there are no URLs to add, detect, 
 
 ## Features
 
-- Choose from 18 built-in AI providers with no status-page setup.
+- Choose from 20 built-in AI providers with no status-page setup.
 - See provider-published health at a glance, with matching severity icons.
 - Preview each service's published component history and exact uptime when its official source provides them.
 - Open a dedicated component list to inspect individual services; components without published history remain available with their current status and a clear no-history message.
@@ -15,7 +15,7 @@ Unlike a general-purpose status-page monitor, there are no URLs to add, detect, 
 - Show cached last-known results immediately while a quiet background refresh runs.
 - Enable only the providers you use from Raycast preferences.
 
-The default list includes OpenAI, Claude, Google AI Studio and Gemini, xAI, DeepSeek, and OpenRouter. The full catalog also covers Mistral AI, Cohere, Perplexity, Groq, Together AI, Fireworks AI, Cerebras, Replicate, Hugging Face, Baseten, ElevenLabs, and Stability AI.
+The default list includes OpenAI, Claude, Google AI Studio and Gemini, xAI, DeepSeek, and OpenRouter. The full catalog also covers Moonshot AI, MiniMax, Mistral AI, Cohere, Perplexity, Groq, Together AI, Fireworks AI, Cerebras, Replicate, Hugging Face, Baseten, ElevenLabs, and Stability AI.
 
 ## Usage
 

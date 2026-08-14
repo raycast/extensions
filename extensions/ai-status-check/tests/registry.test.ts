@@ -16,6 +16,8 @@ const expectedProviderIds = [
   "gemini-api",
   "xai",
   "deepseek",
+  "moonshot-ai",
+  "minimax",
   "mistral-ai",
   "cohere",
   "perplexity",

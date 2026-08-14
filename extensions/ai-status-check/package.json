@@ -71,6 +71,24 @@
       "required": false
     },
     {
+      "name": "showMoonshotAI",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show Moonshot AI and Kimi status, components, and incidents.",
+      "label": "Moonshot AI",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showMiniMax",
+      "type": "checkbox",
+      "title": "",
+      "description": "Show MiniMax model and generation service status.",
+      "label": "MiniMax",
+      "default": false,
+      "required": false
+    },
+    {
       "name": "showMistral",
       "type": "checkbox",
       "title": "",

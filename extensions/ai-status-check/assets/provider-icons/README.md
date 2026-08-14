@@ -1,6 +1,8 @@
 # Provider Icon Sources
 
 - `openai.png`: OpenAI mark downloaded from the asset referenced by the official OpenAI status page.
+- `moonshot.png`: Moonshot AI mark downloaded from the logo referenced by the official Moonshot AI status page.
+- `minimax.png`: MiniMax mark downloaded from the logo referenced by the official MiniMax status page.
 - `claude.png`: Rendered from the Claude mark distributed by Simple Icons. Claude is a trademark of Anthropic PBC.
 - All other PNG files: provider marks from `@lobehub/icons-static-svg` 1.94.0, rendered locally with a shared icon treatment.
 
