@@ -234,14 +234,27 @@ final class PreviewWindow: NSWindow {
     updateLabel()
   }
 
+  /// Switches to the camera at `i`, keeping the current one if that camera cannot be opened.
+  ///
+  /// A camera can disappear between being listed and being selected — an unplugged webcam, or an
+  /// iPhone that stopped offering Continuity Camera. Opening the replacement before dropping the
+  /// working input keeps such a failure from leaving the session with no input at all.
   func setDevice(_ i: Int) {
     guard !devices.isEmpty else { return }
-    index = (i + devices.count) % devices.count
-    let device = devices[index]
+    let newIndex = (i + devices.count) % devices.count
+    guard let input = try? AVCaptureDeviceInput(device: devices[newIndex]) else { return }
+
     session.beginConfiguration()
-    for input in session.inputs { session.removeInput(input) }
-    if let input = try? AVCaptureDeviceInput(device: device), session.canAddInput(input) {
+    let previousInputs = session.inputs
+    for existing in previousInputs { session.removeInput(existing) }
+    if session.canAddInput(input) {
       session.addInput(input)
+      index = newIndex
+    } else {
+      // Restore what was playing; the label keeps naming the camera still on screen.
+      for existing in previousInputs where session.canAddInput(existing) {
+        session.addInput(existing)
+      }
     }
     session.commitConfiguration()
     applyMirror()
