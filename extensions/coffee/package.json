@@ -13,12 +13,14 @@
     "xilopaint",
     "ridemountainpig",
     "zakj",
-    "Visual-Studio-Coder",
     "Katsuba",
     "alexi.build",
     "mbuvarp",
     "frederik_obe",
     "bsradcliffe"
+  ],
+  "pastContributors": [
+    "Visual-Studio-Coder"
   ],
   "platforms": [
     "macOS"
@@ -226,6 +228,15 @@
           "value": "paper-cup"
         }
       ]
+    },
+    {
+      "name": "startCaffeinateOnLaunch",
+      "description": "Automatically keep your Mac awake (indefinitely) when Raycast starts. Requires the Caffeinate Status command (15 s interval) or the Caffeinate Status Menu Bar command (1 m interval) to be enabled.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Launch",
+      "label": "Start caffeination when Raycast starts"
     }
   ],
   "dependencies": {
