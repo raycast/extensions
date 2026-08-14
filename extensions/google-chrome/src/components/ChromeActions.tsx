@@ -1,7 +1,14 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Keyboard, Icon } from "@raycast/api";
-import { closeActiveTab, openNewTab, reloadTab, setActiveTab, createNewGuestWindowToWebsite } from "../actions";
-import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import {
+  closeActiveTab,
+  openNewTab,
+  reloadTab,
+  setActiveTab,
+  createNewGuestWindowToWebsite,
+  setActiveWindow,
+} from "../actions";
+import { Preferences, SettingsProfileOpenBehaviour, Tab, ChromeWindow } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "../constants";
 
@@ -9,6 +16,7 @@ export class ChromeActions {
   public static NewTab = NewTabActions;
   public static TabList = TabListItemActions;
   public static TabHistory = HistoryItemActions;
+  public static WindowList = WindowListActions;
 }
 
 function NewTabActions({ query, url }: { query?: string; url?: string }): ReactElement {
@@ -173,5 +181,20 @@ function ReloadTab(props: { tab: Tab }) {
       onAction={handleAction}
       shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
     />
+  );
+}
+
+function WindowListActions({ window }: { window: ChromeWindow }): ReactElement {
+  return (
+    <ActionPanel title={window.title}>
+      <Action
+        title="Focus Window"
+        icon={{ source: Icon.Window }}
+        onAction={async () => {
+          await setActiveWindow(window.id);
+          await closeMainWindow();
+        }}
+      />
+    </ActionPanel>
   );
 }

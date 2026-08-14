@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Add Search Windows Command] - {PR_MERGE_DATE}
+
+- Add a new Search Windows command to search and select open Google Chrome windows.
+
 ## [Bugfix] - 2026-05-28
 
 - Reset stale cached profile selections so history search does not show Chrome as missing.

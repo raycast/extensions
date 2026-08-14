@@ -1,6 +1,6 @@
 import { runAppleScript } from "run-applescript";
 import { LocalStorage, popToRoot } from "@raycast/api";
-import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
+import { SettingsProfileOpenBehaviour, Tab, ChromeWindow } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
@@ -269,4 +269,47 @@ export async function getActiveTabURL(): Promise<string> {
   `);
 
   return url;
+}
+
+export async function getOpenWindows(): Promise<ChromeWindow[]> {
+  await checkAppInstalled();
+  try {
+    const openWindows = await runAppleScript(`
+      set _output to ""
+      tell application "Google Chrome"
+        repeat with w in windows
+          set _w_id to get id of w
+          set _title to get title of w
+          set _active_tab_url to ""
+          try
+            set _active_tab_url to URL of active tab of w
+          end try
+          set _output to (_output & _w_id & "${ChromeWindow.WINDOW_CONTENTS_SEPARATOR}" & _title & "${ChromeWindow.WINDOW_CONTENTS_SEPARATOR}" & _active_tab_url & "\\n")
+        end repeat
+      end tell
+      return _output
+    `);
+
+    return openWindows
+      .split("\n")
+      .filter((line) => line.length !== 0)
+      .map((line) => ChromeWindow.parse(line));
+  } catch (err) {
+    if ((err as Error).message.includes('Can\'t get application "Google Chrome"')) {
+      LocalStorage.removeItem("is-installed");
+    }
+    await checkAppInstalled();
+    return [];
+  }
+}
+
+export async function setActiveWindow(windowId: number): Promise<void> {
+  await runAppleScript(`
+    tell application "Google Chrome"
+      set _wnd to first window where id is ${windowId}
+      set index of _wnd to 1
+      activate
+    end tell
+    return true
+  `);
 }

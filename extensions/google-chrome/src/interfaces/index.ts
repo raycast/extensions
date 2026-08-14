@@ -113,3 +113,18 @@ export interface ChromeProfile {
   readonly name: string;
   readonly id: string;
 }
+
+export class ChromeWindow {
+  static readonly WINDOW_CONTENTS_SEPARATOR: string = "~~~";
+
+  constructor(
+    public readonly id: number,
+    public readonly title: string,
+    public readonly activeTabUrl: string,
+  ) {}
+
+  static parse(line: string): ChromeWindow {
+    const parts = line.split(this.WINDOW_CONTENTS_SEPARATOR);
+    return new ChromeWindow(+parts[0], parts[1], parts[2] || "");
+  }
+}
