@@ -202,6 +202,8 @@ export const signIn = (account?: string) => {
     execSync(`${getCliPath()} signin ${account ? account : ""}`, { shell: ZSH_PATH });
   }
 };
+const SIGN_IN_STATUS_TIMEOUT_MS = 30000;
+
 export const getSignInStatus = () => {
   try {
     if (isWindows) {
@@ -211,14 +213,14 @@ export const getSignInStatus = () => {
     }
     return true;
   } catch {
-    if (!isWindows) {
-      return false;
-    }
     // With the 1Password app integration and no `op signin` session, `whoami` reports
     // "account is not signed in" even though delegated sessions work. Probe the app
-    // directly before asking the user to sign in.
+    // directly before asking the user to sign in. This is not a read-only probe: it
+    // establishes the delegated session, which is what later lets `useAccount` resolve
+    // through `whoami`. It took 6.1s on macOS when it had to set one up, so the timeout
+    // here is only a guard against the app waiting forever on a prompt nobody answers.
     try {
-      execOpSync(["account", "get"]);
+      execOpSync(["account", "get"], { timeout: SIGN_IN_STATUS_TIMEOUT_MS });
       return true;
     } catch {
       return false;
