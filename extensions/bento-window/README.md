@@ -108,7 +108,7 @@ Then in Raycast:
 
 1. Open a few windows of your target app (Ghostty, Terminal, etc.)
 2. Run **Auto Tile** (or **Auto Tile All** to tile every window on the desktop)
-3. Run it **again** to restore every window to its original position (as long as the window set hasn't changed)
+3. Run it **again**: if the grid is untouched, every window returns to its original position; if you dragged windows around, they snap back into the grid first
 4. Optional: assign a global hotkey per command (Raycast Settings → Extensions → Bento Window → record hotkey)
 
 ## Configuration

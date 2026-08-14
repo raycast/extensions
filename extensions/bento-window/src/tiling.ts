@@ -8,11 +8,37 @@ const SNAPSHOT_TTL = 12 * 60 * 60 * 1000;
 const cache = new Cache();
 
 // Original bounds captured right before tiling, so the same hotkey can
-// toggle back: press once to tile, press again to restore.
+// toggle back: press once to tile, press again to restore. `tiled` records
+// where the grid actually placed each window — if a window has been dragged
+// away from its slot, the next press re-tiles instead of restoring.
+interface WindowBounds {
+  id: string;
+  desktopId: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 interface Snapshot {
   savedAt: number;
   ids: string[];
-  windows: { id: string; desktopId: string; x: number; y: number; width: number; height: number }[];
+  windows: WindowBounds[];
+  tiled: WindowBounds[];
+}
+
+// Terminals snap their size to character-cell multiples, so achieved bounds
+// can drift from the requested frame by a couple of cells.
+const TILED_TOLERANCE = 30;
+
+function isNearTiledSlot(w: WindowManagement.Window, slot: WindowBounds): boolean {
+  if (typeof w.bounds === "string") return false;
+  return (
+    Math.abs(w.bounds.position.x - slot.x) <= TILED_TOLERANCE &&
+    Math.abs(w.bounds.position.y - slot.y) <= TILED_TOLERANCE &&
+    Math.abs(w.bounds.size.width - slot.width) <= TILED_TOLERANCE &&
+    Math.abs(w.bounds.size.height - slot.height) <= TILED_TOLERANCE
+  );
 }
 
 function layoutFor(count: number): LayoutGrid {
@@ -211,13 +237,16 @@ export async function runTile(scope: "app" | "all") {
       }
     }
 
-    // Toggle: if the previous invocation tiled exactly this window set, restore
-    // the saved original bounds instead of tiling again.
+    // Toggle: if the previous invocation tiled exactly this window set AND the
+    // grid is still intact, restore the saved original bounds. If a window has
+    // been dragged away from its slot, re-tile instead and keep the earliest
+    // original layout so a later press can still return to it.
     const cacheKey = `original-bounds:${scope}`;
     const currentIds = targetWindows
       .map((w) => w.id)
       .sort()
       .join(",");
+    let preservedOriginals: WindowBounds[] | undefined;
     const rawSnapshot = cache.get(cacheKey);
     if (rawSnapshot) {
       let snapshot: Snapshot | undefined;
@@ -228,28 +257,40 @@ export async function runTile(scope: "app" | "all") {
       }
       cache.remove(cacheKey);
       if (snapshot && Date.now() - snapshot.savedAt < SNAPSHOT_TTL && snapshot.ids.join(",") === currentIds) {
-        const results = await Promise.allSettled(
-          snapshot.windows.map((s) =>
-            WindowManagement.setWindowBounds({
-              id: s.id,
-              desktopId: s.desktopId,
-              bounds: {
-                position: { x: s.x, y: s.y },
-                size: { width: s.width, height: s.height },
-              },
-            }),
-          ),
-        );
-        const failed = results.filter((r) => r.status === "rejected").length;
-        if (failed === snapshot.windows.length) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Failed to restore windows";
-        } else {
-          const restored = snapshot.windows.length - failed;
-          toast.style = Toast.Style.Success;
-          toast.title = `Restored ${restored} window${restored === 1 ? "" : "s"}`;
+        const tiledById = new Map((snapshot.tiled ?? []).map((s) => [s.id, s]));
+        const gridIntact =
+          tiledById.size > 0 &&
+          targetWindows.every((w) => {
+            const slot = tiledById.get(w.id);
+            return slot !== undefined && isNearTiledSlot(w, slot);
+          });
+
+        if (gridIntact) {
+          const results = await Promise.allSettled(
+            snapshot.windows.map((s) =>
+              WindowManagement.setWindowBounds({
+                id: s.id,
+                desktopId: s.desktopId,
+                bounds: {
+                  position: { x: s.x, y: s.y },
+                  size: { width: s.width, height: s.height },
+                },
+              }),
+            ),
+          );
+          const failed = results.filter((r) => r.status === "rejected").length;
+          if (failed === snapshot.windows.length) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Failed to restore windows";
+          } else {
+            const restored = snapshot.windows.length - failed;
+            toast.style = Toast.Style.Success;
+            toast.title = `Restored ${restored} window${restored === 1 ? "" : "s"}`;
+          }
+          return;
         }
-        return;
+        // Grid disturbed — re-tile below, carrying the original layout forward.
+        preservedOriginals = snapshot.windows;
       }
       // Snapshot expired or the window set changed — fall through to tile and re-save.
     }
@@ -281,24 +322,19 @@ export async function runTile(scope: "app" | "all") {
     }
 
     const moved = frames.map((f) => targetWindows[f.windowIndex]);
-    const snapshot: Snapshot = {
-      savedAt: Date.now(),
-      ids: currentIds.split(","),
-      windows: moved
-        .filter((w) => typeof w.bounds !== "string")
-        .map((w) => {
-          const b = w.bounds as { position: { x: number; y: number }; size: { width: number; height: number } };
-          return {
-            id: w.id,
-            desktopId: w.desktopId,
-            x: b.position.x,
-            y: b.position.y,
-            width: b.size.width,
-            height: b.size.height,
-          };
-        }),
-    };
-    cache.set(cacheKey, JSON.stringify(snapshot));
+    const originals: WindowBounds[] = moved
+      .filter((w) => typeof w.bounds !== "string")
+      .map((w) => {
+        const b = w.bounds as { position: { x: number; y: number }; size: { width: number; height: number } };
+        return {
+          id: w.id,
+          desktopId: w.desktopId,
+          x: b.position.x,
+          y: b.position.y,
+          width: b.size.width,
+          height: b.size.height,
+        };
+      });
 
     const results = await Promise.allSettled(
       frames.map((f) => {
@@ -319,6 +355,35 @@ export async function runTile(scope: "app" | "all") {
       toast.style = Toast.Style.Failure;
       toast.title = "Failed to move any window";
     } else {
+      // Snapshot after tiling: record the achieved bounds (apps may snap sizes,
+      // e.g. terminals round to character cells) so the next press can tell an
+      // intact grid from a disturbed one.
+      try {
+        const after = await WindowManagement.getWindowsOnActiveDesktop();
+        const movedIds = new Set(moved.map((w) => w.id));
+        const tiled: WindowBounds[] = after
+          .filter((w) => movedIds.has(w.id) && typeof w.bounds !== "string")
+          .map((w) => {
+            const b = w.bounds as { position: { x: number; y: number }; size: { width: number; height: number } };
+            return {
+              id: w.id,
+              desktopId: w.desktopId,
+              x: b.position.x,
+              y: b.position.y,
+              width: b.size.width,
+              height: b.size.height,
+            };
+          });
+        const snapshot: Snapshot = {
+          savedAt: Date.now(),
+          ids: currentIds.split(","),
+          windows: preservedOriginals ?? originals,
+          tiled,
+        };
+        cache.set(cacheKey, JSON.stringify(snapshot));
+      } catch {
+        /* snapshot is best-effort — tiling already succeeded */
+      }
       const succeeded = frames.length - failed;
       toast.style = Toast.Style.Success;
       toast.title = `Tiled ${succeeded} ${targetAppName ? `${targetAppName} ` : ""}window${succeeded === 1 ? "" : "s"}`;
