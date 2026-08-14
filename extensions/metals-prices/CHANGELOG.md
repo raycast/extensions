@@ -1,6 +1,6 @@
 # Metals Prices Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-14
 
 - Live per-gram prices for gold, silver, platinum and palladium, each broken down by the purity grades it's traded in (gold 24K/22K/21K/18K; the white metals by fineness).
 - Daily change vs. previous close on the pure-metal row.
