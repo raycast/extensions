@@ -11,6 +11,17 @@ BarShift is a Raycast extension for switching macOS **Automatically hide and sho
 - Pick up manual System Settings changes with a read-only background refresh.
 - Avoid controlling System Settings through UI automation.
 
+## Compared to Toggle Menu Bar
+
+The Store already has [Toggle Menu Bar](https://www.raycast.com/iamyeizi/toggle-menu-bar), which also switches between two of the four macOS options. BarShift differs in how it applies the change and in what it adds around it:
+
+- **Mechanism.** Toggle Menu Bar drives the System Settings UI with a System Events AppleScript, so Raycast needs the Automation permission. BarShift writes the underlying preferences and posts the matching WindowServer and AppKit notifications, so no Automation permission is involved.
+- **Already-fullscreen spaces.** BarShift also pulses through the four modes so an AppKit fullscreen space that is already open picks up the new setting. This is best-effort; see [Limitations](#limitations).
+- **Direct mode selection.** Alongside the two-mode toggle, BarShift adds a second command with a searchable list of all four modes.
+- **Status display.** BarShift shows the current mode in Raycast root search and refreshes it after changes made manually in System Settings.
+
+If a two-mode toggle is all that is needed, either extension covers it.
+
 ## Modes
 
 Both **First Mode** and **Second Mode** are command preferences and offer all four macOS choices:
