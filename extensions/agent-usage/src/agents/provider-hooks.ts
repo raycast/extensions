@@ -21,6 +21,9 @@ import { fetchCopilotUsage } from "../copilot/fetcher.ts";
 import type { CopilotError, CopilotUsage } from "../copilot/types.ts";
 import { fetchCursorUsage, resolveCursorCredential } from "../cursor/fetcher.ts";
 import type { CursorError, CursorUsage } from "../cursor/types.ts";
+import { resolveDeepSeekApiKey } from "../deepseek/auth.ts";
+import { fetchDeepSeekUsage } from "../deepseek/fetcher.ts";
+import type { DeepSeekError, DeepSeekUsage } from "../deepseek/types.ts";
 import { resolveDroidAuth } from "../droid/auth.ts";
 import { fetchDroidUsage } from "../droid/fetcher.ts";
 import type { DroidError, DroidUsage } from "../droid/types.ts";
@@ -55,6 +58,7 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
 type SharedPrefs = {
   copilotAuthToken?: string;
   cursorCookieHeader?: string;
+  deepseekApiKey?: string;
   kimiAuthToken?: string;
   syntheticApiToken?: string;
   zaiApiToken?: string;
@@ -123,6 +127,25 @@ export const useCursorUsage = createUsageHook<CursorUsage, CursorError>({
   agentId: "cursor",
   resolveAuthKey: async () => resolveCursorCredential(prefValue("cursorCookieHeader"))?.cookieHeader ?? "",
   fetcher: () => fetchCursorUsage(prefValue("cursorCookieHeader")),
+});
+
+export const useDeepSeekUsage = createUsageHook<DeepSeekUsage, DeepSeekError>({
+  agentId: "deepseek",
+  resolveAuthKey: async () => (await resolveDeepSeekApiKey(prefValue("deepseekApiKey"))) ?? "",
+  fetcher: async () => {
+    const apiKey = await resolveDeepSeekApiKey(prefValue("deepseekApiKey"));
+    if (!apiKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "DeepSeek API key not configured. Add it in extension settings (Cmd+,), log in through OpenCode, or set DEEPSEEK_API_KEY in your shell.",
+        },
+      };
+    }
+    return fetchDeepSeekUsage(apiKey);
+  },
 });
 
 export const useDroidUsage = createUsageHook<DroidUsage, DroidError>({

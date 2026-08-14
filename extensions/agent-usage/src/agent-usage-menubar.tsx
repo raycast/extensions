@@ -21,6 +21,7 @@ import {
   useCodexAccounts,
   useCopilotUsage,
   useCursorUsage,
+  useDeepSeekUsage,
   useDroidUsage,
   useGeminiUsage,
   useGrokUsage,
@@ -39,6 +40,7 @@ import { getClinePassAccessory } from "./clinepass/renderer.tsx";
 import { getCodexAccessory } from "./codex/renderer.tsx";
 import { getCopilotAccessory } from "./copilot/renderer.tsx";
 import { getCursorAccessory } from "./cursor/renderer.tsx";
+import { getDeepSeekAccessory } from "./deepseek/renderer.tsx";
 import { getDroidAccessory } from "./droid/renderer.tsx";
 import { getGeminiAccessory } from "./gemini/renderer.tsx";
 import { getGrokAccessory } from "./grok/renderer.tsx";
@@ -83,6 +85,7 @@ export default function MenuBarCommand() {
   const isCodexVisible = Boolean(prefs.showCodex);
   const isCopilotVisible = Boolean(prefs.showCopilot);
   const isCursorVisible = Boolean(prefs.showCursor);
+  const isDeepSeekVisible = Boolean(prefs.showDeepSeek);
   const isDroidVisible = Boolean(prefs.showDroid);
   const isGeminiVisible = Boolean(prefs.showGemini);
   const isGrokVisible = Boolean(prefs.showGrok);
@@ -99,6 +102,7 @@ export default function MenuBarCommand() {
   const codexState = useCodexAccounts(isCodexVisible);
   const copilotState = useCopilotUsage(isCopilotVisible);
   const cursorState = useCursorUsage(isCursorVisible);
+  const deepseekState = useDeepSeekUsage(isDeepSeekVisible);
   const droidState = useDroidUsage(isDroidVisible);
   const geminiState = useGeminiUsage(isGeminiVisible);
   const grokState = useGrokUsage(isGrokVisible);
@@ -151,6 +155,16 @@ export default function MenuBarCommand() {
         accessory: getCursorAccessory(cursorState.usage, cursorState.error, cursorState.isLoading),
         revalidate: cursorState.revalidate,
         lastFetchedAt: cursorState.lastFetchedAt,
+      },
+      {
+        id: "deepseek",
+        name: "DeepSeek",
+        icon: getThemeIcon("deepseek.svg"),
+        visible: isDeepSeekVisible,
+        isLoading: deepseekState.isLoading,
+        accessory: getDeepSeekAccessory(deepseekState.usage, deepseekState.error, deepseekState.isLoading),
+        revalidate: deepseekState.revalidate,
+        lastFetchedAt: deepseekState.lastFetchedAt,
       },
       {
         id: "droid",
@@ -218,6 +232,7 @@ export default function MenuBarCommand() {
       isClaudeVisible,
       isCopilotVisible,
       isCursorVisible,
+      isDeepSeekVisible,
       isDroidVisible,
       isGeminiVisible,
       isGrokVisible,
@@ -242,6 +257,11 @@ export default function MenuBarCommand() {
       cursorState.error,
       cursorState.revalidate,
       cursorState.lastFetchedAt,
+      deepseekState.isLoading,
+      deepseekState.usage,
+      deepseekState.error,
+      deepseekState.revalidate,
+      deepseekState.lastFetchedAt,
       droidState.isLoading,
       droidState.usage,
       droidState.error,

@@ -8,6 +8,7 @@ export const DEFAULT_AGENT_ORDER = [
   "codex",
   "copilot",
   "cursor",
+  "deepseek",
   "droid",
   "gemini",
   "grok",

@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "agent-usage",
-  "description": "Monitor AI coding agent usage across Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, Droid, Gemini, Grok, Kimi, MiniMax, OpenCode Go, Synthetic and z.ai",
+  "description": "Monitor AI coding agent usage across Amp, Antigravity, Claude, ClinePass, Codex, Copilot, Cursor, DeepSeek, Droid, Gemini, Grok, Kimi, MiniMax, OpenCode Go, Synthetic and z.ai",
   "categories": [
     "Productivity"
   ],
@@ -133,6 +133,21 @@
       "type": "password",
       "title": "Cursor Cookie Header (Optional)",
       "description": "Optional fallback Cookie header from cursor.com. Usually auto-detected from your local Cursor.app login.",
+      "required": false
+    },
+    {
+      "name": "showDeepSeek",
+      "type": "checkbox",
+      "label": "Show DeepSeek",
+      "description": "Show DeepSeek balance in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "deepseekApiKey",
+      "type": "password",
+      "title": "DeepSeek API Key (Optional)",
+      "description": "Auto-detected from OpenCode login (deepseek) or DEEPSEEK_API_KEY/DEEPSEEK_KEY. Fallback: paste an API key from https://platform.deepseek.com/api_keys.",
       "required": false
     },
     {
