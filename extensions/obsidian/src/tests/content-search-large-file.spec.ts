@@ -76,7 +76,10 @@ describe("content search large files", () => {
   it("still finds YAML tags when frontmatter crosses the 64 KiB prefix", async () => {
     const largePath = path.join(tempDir, "tagged-wide-frontmatter.md");
     const padding = "x".repeat(70 * 1024);
-    fs.writeFileSync(largePath, `---\ndescription: |\n  ${padding}\ntags:\n  - widetags\n---\n${"z".repeat(1024 * 1024 + 64)}`);
+    fs.writeFileSync(
+      largePath,
+      `---\ndescription: |\n  ${padding}\ntags:\n  - widetags\n---\n${"z".repeat(1024 * 1024 + 64)}`
+    );
 
     const notes = [noteFor(tempDir, "tagged-wide-frontmatter.md", "Wide Frontmatter")];
     const results = await searchNotesWithContent(notes, "tag:widetags");
