@@ -1,6 +1,6 @@
 # BART Departures Change Log
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-14
 
 - Added the **BART Departures** Raycast command for viewing real-time departure estimates at a selected BART station.
 - Added searchable station selection sourced from BART's station-list API.
