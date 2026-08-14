@@ -1,113 +1,137 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Detail,
-  Icon,
-  LaunchProps,
-  Toast,
-  getPreferenceValues,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, LocalStorage } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { translate } from "./deepl";
+import { LanguageSetup } from "./language-setup";
+import { languageName } from "./languages";
+import { AppPreferences, getConfiguredPreferences } from "./preferences";
+import {
+  CompletedTranslation,
+  TranslationLaunchContext,
+  getTranslationStorageKey,
+  isCompletedTranslation,
+  isTranslationStorageKey,
+} from "./translation-payload";
 
-type CompletedTranslation = {
-  sourceText: string;
-  translatedText: string;
-  sourceLang?: string;
-  targetLang: "EN" | "RU";
-  rule: string;
-};
+type TranslateTextProps = LaunchProps<{
+  arguments: Arguments.TranslateText;
+  launchContext?: TranslationLaunchContext;
+}>;
 
 type TranslationState =
+  | { status: "idle"; draft: string }
   | { status: "loading"; sourceText: string }
-  | {
-      status: "success";
-      sourceText: string;
-      translatedText: string;
-      sourceLang?: string;
-      targetLang: "EN" | "RU";
-      rule: string;
-    }
-  | { status: "error"; sourceText: string; message: string };
+  | ({ status: "success" } & CompletedTranslation)
+  | { status: "error"; message: string; sourceText: string };
 
-function markdownForState(state: TranslationState) {
+function markdownForState(state: Exclude<TranslationState, { status: "idle" }>) {
   if (state.status === "loading") {
-    return `Translating...\n\n${state.sourceText}`;
+    return "# Translating\n\nSending your text securely to DeepL…";
   }
 
   if (state.status === "error") {
-    return `# Translation failed\n\n${state.message}\n\n## Source\n\n${state.sourceText}`;
+    return `# Translation failed\n\n${state.message}`;
   }
 
   return [`# Translation`, state.translatedText, "", "## Source", state.sourceText].join("\n\n");
 }
 
-export default function Command(
-  props: LaunchProps<{ arguments: Arguments.TranslateText; launchContext?: CompletedTranslation }>,
-) {
-  const preferences = getPreferenceValues<Preferences>();
-  const completedTranslation = props.launchContext;
-  const sourceText = (completedTranslation?.sourceText || props.fallbackText || props.arguments.text).trim();
+function TranslateTextCommand({ props, preferences }: { props: TranslateTextProps; preferences: AppPreferences }) {
+  const completedTranslation = isCompletedTranslation(props.launchContext) ? props.launchContext : undefined;
+  const argumentText = (props.arguments as Partial<Arguments.TranslateText> | undefined)?.text?.trim() || "";
+  const storageKey =
+    getTranslationStorageKey(props.launchContext) || (isTranslationStorageKey(argumentText) ? argumentText : undefined);
   const [state, setState] = useState<TranslationState>(
     completedTranslation
       ? { status: "success", ...completedTranslation }
-      : {
-          status: "loading",
-          sourceText,
-        },
+      : storageKey || argumentText
+        ? { status: "loading", sourceText: argumentText }
+        : { status: "idle", draft: "" },
   );
 
-  async function translateText() {
-    if (!sourceText) {
-      setState({ status: "error", sourceText, message: "Text is empty" });
-      await showToast({ style: Toast.Style.Failure, title: "Text is empty" });
+  const performTranslation = useCallback(async (sourceText: string) => {
+    const trimmedText = sourceText.trim();
+    if (!trimmedText) {
+      setState({ status: "idle", draft: "" });
       return;
     }
 
-    setState({ status: "loading", sourceText });
+    setState({ status: "loading", sourceText: trimmedText });
     try {
-      const result = await translate(sourceText, preferences);
-      setState({
-        status: "success",
-        sourceText,
-        translatedText: result.translatedText,
-        sourceLang: result.sourceLang,
-        targetLang: result.targetLang,
-        rule: result.rule,
-      });
-
-      if (preferences.copyResult ?? true) {
-        await Clipboard.copy(result.translatedText);
-      }
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Translated",
-        message: (preferences.copyResult ?? true) ? "Copied to clipboard" : undefined,
-      });
+      const result = await translate(trimmedText, preferences);
+      setState({ status: "success", sourceText: trimmedText, ...result });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      setState({ status: "error", sourceText, message });
+      setState({ status: "error", message, sourceText: trimmedText });
       await showFailureToast(error, { title: "Couldn't translate text" });
     }
-  }
+  }, []);
 
   useEffect(() => {
-    if (completedTranslation) {
+    if (completedTranslation) return;
+
+    if (!storageKey) {
+      if (argumentText) void performTranslation(argumentText);
       return;
     }
 
-    translateText();
-  }, []);
+    async function loadStoredTranslation() {
+      try {
+        const serializedTranslation = await LocalStorage.getItem<string>(storageKey as string);
+        await LocalStorage.removeItem(storageKey as string);
+
+        if (!serializedTranslation) {
+          throw new Error("Stored translation was not found");
+        }
+
+        const storedTranslation = JSON.parse(serializedTranslation) as CompletedTranslation;
+        setState({ status: "success", ...storedTranslation });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        setState({ status: "error", message, sourceText: "" });
+        await showFailureToast(error, { title: "Couldn't open translation" });
+      }
+    }
+
+    void loadStoredTranslation();
+  }, [argumentText, completedTranslation, performTranslation, storageKey]);
+
+  if (state.status === "idle") {
+    return (
+      <Form
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Translate"
+              icon={Icon.Stars}
+              onSubmit={(values: { text: string }) => performTranslation(values.text)}
+            />
+          </ActionPanel>
+        }
+      >
+        <Form.TextArea
+          id="text"
+          title="Text"
+          placeholder={`Type or paste text in ${languageName(preferences.primaryLanguage)} or ${languageName(preferences.secondaryLanguage)}`}
+          defaultValue={state.draft}
+          autoFocus
+        />
+        <Form.Description
+          title="Direction"
+          text={`${languageName(preferences.primaryLanguage)} ↔ ${languageName(preferences.secondaryLanguage)}`}
+        />
+      </Form>
+    );
+  }
 
   const metadata =
     state.status === "success" ? (
       <Detail.Metadata>
-        <Detail.Metadata.Label title="Direction" text={`${state.sourceLang || "AUTO"} -> ${state.targetLang}`} />
-        <Detail.Metadata.Label title="Rule" text={state.rule} />
+        <Detail.Metadata.Label
+          title="Direction"
+          text={`${languageName(state.sourceLang || "AUTO")} → ${languageName(state.targetLang)}`}
+        />
+        <Detail.Metadata.Label title="Routing" text={state.rule} />
         <Detail.Metadata.Label title="Characters" text={String(state.sourceText.length)} />
       </Detail.Metadata>
     ) : undefined;
@@ -119,16 +143,59 @@ export default function Command(
       metadata={metadata}
       actions={
         <ActionPanel>
-          <Action title="Translate Again" icon={Icon.ArrowClockwise} onAction={translateText} />
           {state.status === "success" ? (
             <>
-              <Action.CopyToClipboard title="Copy Translation" content={state.translatedText} />
+              <Action.CopyToClipboard title="Copy Translation" icon={Icon.Clipboard} content={state.translatedText} />
               <Action.Paste title="Paste Translation" content={state.translatedText} />
+              <Action
+                title="Translate Something Else"
+                icon={Icon.Pencil}
+                onAction={() => setState({ status: "idle", draft: "" })}
+              />
               <Action.CopyToClipboard title="Copy Source" content={state.sourceText} />
+            </>
+          ) : null}
+          {state.status === "error" ? (
+            <>
+              <Action
+                title="Try Again"
+                icon={Icon.RotateClockwise}
+                onAction={() => performTranslation(state.sourceText)}
+              />
+              <Action
+                title="Edit Text"
+                icon={Icon.Pencil}
+                onAction={() => setState({ status: "idle", draft: state.sourceText })}
+              />
             </>
           ) : null}
         </ActionPanel>
       }
     />
   );
+}
+
+export default function Command(props: TranslateTextProps) {
+  const [preferences, setPreferences] = useState<AppPreferences | null>();
+
+  useEffect(() => {
+    void getConfiguredPreferences().then((value) => setPreferences(value || null));
+  }, []);
+
+  if (preferences === undefined) {
+    return <Detail isLoading markdown="# Loading DeepL Tools…" />;
+  }
+
+  if (preferences === null) {
+    return (
+      <LanguageSetup
+        onSaved={async () => {
+          const configuredPreferences = await getConfiguredPreferences();
+          setPreferences(configuredPreferences || null);
+        }}
+      />
+    );
+  }
+
+  return <TranslateTextCommand props={props} preferences={preferences} />;
 }
