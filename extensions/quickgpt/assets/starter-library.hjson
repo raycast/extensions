@@ -1,0 +1,70 @@
+{
+  title: "Writing Assistant"
+  icon: "✍️"
+  identifier: "writing-assistant"
+  style: "Clear and concise"
+  tone: "Professional yet friendly"
+  prefix: "requirements"
+  requirements: "Maintain the original meaning. Respond in the same language as the input."
+  actions: ["copyToClipboard", "paste"]
+  subprompts: [
+    {
+      title: "Email Composer"
+      icon: "📧"
+      identifier: "email-composer"
+      content:
+      '''
+      Compose a professional email.
+
+      Purpose: {{i}}
+      Key points: {{s|c}}
+      Recipient: {{option:recipient}}
+      '''
+      recipient: {
+        "Colleague": "informal but professional"
+        "Manager": "formal and respectful"
+        "Client": "professional and courteous"
+      }
+    }
+    {
+      title: "Improve"
+      icon: "✨"
+      identifier: "writing-improve"
+      content:
+      '''
+      Improve the following text for clarity and flow.
+
+      {{s|c|i}}
+      '''
+    }
+    {
+      title: "Fix Grammar"
+      icon: "✅"
+      identifier: "writing-grammar"
+      prefix: ""
+      content: "Fix grammar, spelling, and punctuation. Output only the corrected text.\n\n{{i|s|c}}"
+    }
+    {
+      title: "Make Concise"
+      icon: "✂️"
+      identifier: "writing-concise"
+      prefix: ""
+      content: "Rewrite this to be more concise without losing important meaning.\n\n{{i|s|c}}"
+    }
+    {
+      title: "Translate"
+      icon: "🌐"
+      identifier: "adaptive-translator"
+      prefix: ""
+      content:
+      '''
+      Translate the following text into {{option:languages}}.
+      Keep the original meaning, tone, and formatting.
+      Output only the translation.
+
+      {{i|s|c}}
+      '''
+      languages: ["English", "Chinese", "Japanese", "French", "Spanish"]
+    }
+  ]
+}

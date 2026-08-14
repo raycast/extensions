@@ -1,0 +1,182 @@
+[
+  {
+    title: Ask
+    icon: 💡
+    identifier: ask
+    subprompts: [
+      {
+        icon: 🖥️
+        title: "/"
+        identifier: ask-quick
+        content: "{{i|s|c}}"
+      }
+      {
+        icon: 📎
+        title: Ask with Context
+        identifier: ask-with-context
+        content:
+        '''
+        Answer the following question. Respond in the same language as the user's input.
+
+        Question:
+        {{i}}
+
+        Context:
+        {{s|c}}
+        '''
+      }
+    ]
+  }
+  {
+    icon: 🌐
+    title: Translate
+    identifier: translate
+    content:
+    '''
+    Translate the following text into {{option:targetLanguage}}.
+    Keep the original meaning, tone, and formatting.
+    Output only the translation.
+
+    {{s|c|i}}
+    '''
+    targetLanguage: [
+      "English"
+      "Chinese"
+      "Japanese"
+      "Korean"
+      "Spanish"
+      "French"
+      "German"
+    ]
+  }
+  {
+    title: Writing
+    icon: ✍️
+    identifier: writing
+    subprompts: [
+      {
+        icon: ✨
+        title: Improve
+        identifier: writing-improve
+        content:
+        '''
+        Improve the following text for clarity and flow.
+        Preserve the original meaning and respond in the same language as the input.
+
+        {{s|c|i}}
+        '''
+      }
+      {
+        icon: ✅
+        title: Fix Grammar
+        identifier: writing-grammar
+        content:
+        '''
+        Fix grammar, spelling, and punctuation.
+        Keep the original meaning and language.
+        Output only the corrected text.
+
+        {{s|c|i}}
+        '''
+      }
+      {
+        icon: ✂️
+        title: Make Concise
+        identifier: writing-concise
+        content:
+        '''
+        Rewrite the following text to be more concise without losing important meaning.
+        Respond in the same language as the input.
+
+        {{s|c|i}}
+        '''
+      }
+    ]
+  }
+  {
+    title: Summarize
+    icon: 🧾
+    identifier: summarize
+    subprompts: [
+      {
+        icon: ⚡️
+        title: TL;DR
+        identifier: summarize-tldr
+        content:
+        '''
+        Write a short TL;DR of the following text.
+        Respond in the same language as the input.
+
+        {{s|c|i}}
+        '''
+      }
+      {
+        icon: 📌
+        title: Key Points
+        identifier: summarize-key-points
+        content:
+        '''
+        Extract the key points from the following text as a bullet list.
+        Respond in the same language as the input.
+
+        {{s|c|i}}
+        '''
+      }
+    ]
+  }
+  {
+    title: Code
+    icon: 💻
+    identifier: code
+    subprompts: [
+      {
+        icon: 🔍
+        title: Explain Code
+        identifier: code-explain
+        content:
+        '''
+        Explain the following code clearly.
+        Respond in the same language as any user input or surrounding comments.
+
+        {{s|c|i}}
+        '''
+      }
+      {
+        icon: 🛡️
+        title: Review Code
+        identifier: code-review
+        content:
+        '''
+        Review the following code.
+        List bugs, risks, and concrete improvements.
+        Respond in the same language as any user input.
+
+        {{s|c|i}}
+        '''
+      }
+      {
+        icon: 📝
+        title: Commit Message
+        identifier: code-commit-message
+        content:
+        '''
+        Write a concise git commit message for the following diff.
+        Use conventional commits when it fits.
+        Respond in English unless the diff comments are clearly in another language.
+
+        {{diff|s|c}}
+        '''
+      }
+    ]
+  }
+  {
+    icon: ⭕️
+    title: What is this
+    identifier: explain-what-is-this
+    content:
+    '''
+    What is "{{i|s|c}}"?
+    Explain it clearly in the same language as the input.
+    '''
+  }
+]
