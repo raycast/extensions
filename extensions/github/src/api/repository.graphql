@@ -52,10 +52,14 @@ fragment ExtendedRepositoryFields on Repository {
   }
 }
 
-query searchRepositories($query: String!, $numberOfItems: Int!) {
-  search(query: $query, first: $numberOfItems, type: REPOSITORY) {
+query searchRepositories($query: String!, $numberOfItems: Int!, $after: String) {
+  search(query: $query, first: $numberOfItems, after: $after, type: REPOSITORY) {
     nodes {
       ...ExtendedRepositoryFields
+    }
+    pageInfo {
+      endCursor
+      hasNextPage
     }
   }
 }

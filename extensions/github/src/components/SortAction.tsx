@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, MenuBarExtra } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, MenuBarExtra, Keyboard } from "@raycast/api";
 
 type SortType = { title: string; value: string };
 
@@ -13,7 +13,7 @@ type SortActionDataProps = { data: SortType[] } & SortActionProps;
 
 export const SortAction = ({ sortQuery, setSortQuery, data }: SortActionDataProps) =>
   sortQuery && setSortQuery ? (
-    <ActionPanel.Submenu title={"Sort by"} icon={Icon.ArrowUp} shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}>
+    <ActionPanel.Submenu title={"Sort by"} icon={Icon.ArrowUp} shortcut={Keyboard.Shortcut.Common.Duplicate}>
       {data
         .filter(({ value }) => !value.startsWith("sort:reaction"))
         .map(({ title, value }) => (

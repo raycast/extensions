@@ -3,14 +3,19 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { promisify } from "node:util";
 
-import { Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Color, getPreferenceValues, Keyboard, showToast, Toast } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import { ExtendedRepositoryFieldsFragment } from "../generated/graphql";
 
 import { getErrorMessage } from "./errors";
 
-export const WEB_IDES = [
+export const WEB_IDES: {
+  title: string;
+  baseUrl: string;
+  icon?: { source: string; tintColor?: Color };
+  shortcut?: Keyboard.Shortcut;
+}[] = [
   {
     title: "github.dev",
     baseUrl: "https://github.dev/",
@@ -45,6 +50,12 @@ export const WEB_IDES = [
     title: "Sourcegraph",
     baseUrl: `https://sourcegraph.com/github.com/`,
     icon: { source: "sourcegraph.svg", tintColor: Color.PrimaryText },
+  },
+  {
+    title: "DeepWiki",
+    baseUrl: "https://deepwiki.com/",
+    icon: { source: "deepwiki.png" },
+    shortcut: { modifiers: ["cmd"], key: "d" },
   },
   {
     title: "VS Code Remote Repositories",
@@ -122,6 +133,7 @@ export function useHistory(searchText: string | undefined, searchFilter: string 
 }
 
 export const REPO_SORT_TYPES_TO_QUERIES = [
+  { title: "Relevance", value: "" },
   { title: "Last Update", value: "sort:updated-desc" },
   { title: "Name", value: "sort:name-asc" },
   { title: "Stars", value: "sort:stars-desc" },

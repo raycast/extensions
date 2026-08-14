@@ -46,7 +46,8 @@
     "Undolog",
     "wonbywondev",
     "SandeepBaskaran",
-    "0xdhrv"
+    "0xdhrv",
+    "ernest0n"
   ],
   "pastContributors": [
     "Lemon",
@@ -1044,7 +1045,7 @@
       "required": false,
       "title": "Number of search results",
       "description": "For searching repositories, issues, discussions or pull requests, this is the number of results to request. Less will be faster.",
-      "placeholder": "50"
+      "placeholder": "25"
     },
     {
       "name": "baseClonePath",
@@ -1052,6 +1053,24 @@
       "required": false,
       "title": "Default Clone Path",
       "description": "Used by the 'Clone and Open' action. 'Clone with Options' starts here but lets you choose a different directory."
+    },
+    {
+      "name": "vscodeBuild",
+      "type": "dropdown",
+      "required": false,
+      "title": "VS Code Build",
+      "description": "Which editor to use for the Clone in VS Code action. Applies to Search Repositories, My Latest Repositories, and My Starred Repositories.",
+      "default": "vscode",
+      "data": [
+        {
+          "title": "VS Code",
+          "value": "vscode"
+        },
+        {
+          "title": "Cursor",
+          "value": "cursor"
+        }
+      ]
     },
     {
       "name": "repositoryCloneProtocol",

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { getFavicon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -32,6 +32,8 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
 }: RepositoryActionProps<T> & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
   const { baseClonePath, repositoryCloneProtocol, application } = getPreferenceValues<Preferences.SearchRepositories>();
+  const { vscodeBuild } = getPreferenceValues<Preferences>();
+  const editorScheme = vscodeBuild || "vscode";
 
   const updatedAt = new Date(repository.updatedAt);
 
@@ -114,6 +116,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
               icon={ide.icon || getFavicon(ide.baseUrl)}
               key={ide.title}
               url={ide.baseUrl + repository.nameWithOwner}
+              shortcut={ide.shortcut}
               onOpen={() => onVisit(repository)}
             />
           ))}
@@ -124,7 +127,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
             icon={Icon.Terminal}
             title="Clone and Open (Default Path)"
             onAction={() => cloneAndOpen(repository)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
           />
         )}
         <Action.Push
@@ -142,8 +145,8 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
         <Action.OpenInBrowser
           icon={{ source: "vscode.svg", tintColor: Color.PrimaryText }}
           title="Clone in VS Code"
-          url={`vscode://vscode.git/clone?url=${repository.url}`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          url={`${editorScheme}://vscode.git/clone?url=${repository.url}`}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
 
         {repository.viewerHasStarred ? (
