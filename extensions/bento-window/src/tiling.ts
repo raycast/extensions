@@ -63,6 +63,13 @@ function isRaycastWindow(w: WindowManagement.Window): boolean {
   return name === "raycast" || name === "raycast beta";
 }
 
+// Sort by window id (creation order) so the same window always lands in the same
+// grid slot across repeated invocations. Titles are too volatile for this —
+// terminal titles change with the working directory.
+function byWindowId(a: WindowManagement.Window, b: WindowManagement.Window): number {
+  return String(a.id).localeCompare(String(b.id), undefined, { numeric: true });
+}
+
 interface Frame {
   windowIndex: number;
   x: number;
@@ -135,7 +142,10 @@ export async function runTile(scope: "app" | "all") {
     let targetWindows: WindowManagement.Window[];
 
     if (scope === "all") {
-      targetWindows = windows.filter((w) => isTileable(w) && !isRaycastWindow(w)).slice(0, MAX_WINDOWS);
+      targetWindows = windows
+        .filter((w) => isTileable(w) && !isRaycastWindow(w))
+        .sort(byWindowId)
+        .slice(0, MAX_WINDOWS);
 
       if (targetWindows.length === 0) {
         toast.style = Toast.Style.Failure;
@@ -172,6 +182,7 @@ export async function runTile(scope: "app" | "all") {
       const targetLower = targetAppName.toLowerCase();
       targetWindows = windows
         .filter((w) => w.application?.name?.toLowerCase() === targetLower && isTileable(w))
+        .sort(byWindowId)
         .slice(0, MAX_WINDOWS);
 
       if (targetWindows.length === 0) {

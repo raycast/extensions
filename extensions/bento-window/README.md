@@ -7,7 +7,7 @@
 <p align="center">A Raycast extension that tiles your windows into a bento-box grid — one app's windows, or every window on the desktop.</p>
 
 <p align="center">
-  <a href="https://github.com/raycast/extensions/pull/27877"><img src="https://img.shields.io/badge/Raycast_Store-pending_review-yellow?style=flat-square" alt="Raycast Store: pending review" /></a>
+  <a href="https://www.raycast.com/Popo/bento-window"><img src="https://img.shields.io/badge/Raycast-Store-red?style=flat-square" alt="Raycast Store" /></a>
   <a href="https://github.com/ipopo/bento-window/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-blue?style=flat-square" alt="MIT" /></a>
   <img src="https://img.shields.io/badge/platform-macOS-lightgrey?style=flat-square" alt="macOS" />
 </p>
@@ -77,9 +77,12 @@ The grid the extension picks based on the number of windows of the target app:
 └────┴────┴────┘
 ```
 
-## Install (manual, before Store release)
+## Install
 
-This extension is not yet on the Raycast Store. To run it locally:
+Install from the [Raycast Store](https://www.raycast.com/Popo/bento-window), or search **Bento Window** in Raycast's Store command.
+
+<details>
+<summary>Install from source (for development)</summary>
 
 ```bash
 git clone https://github.com/ipopo/bento-window.git
@@ -89,6 +92,8 @@ npm run dev
 ```
 
 `npm run dev` registers the extension with Raycast and watches for code changes. You can `Ctrl+C` it once the extension shows up — the registration persists.
+
+</details>
 
 Then in Raycast:
 

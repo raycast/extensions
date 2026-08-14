@@ -1,5 +1,9 @@
 # Bento Window Changelog
 
+## [Stable Window Order] - {PR_MERGE_DATE}
+
+- Windows are now sorted by creation order before grid placement, so the same set of windows always lands in the same slots across repeated invocations — move a window away, press the hotkey again, and it returns to its slot
+
 ## [Initial Release] - 2026-08-13
 
 - Tile multiple windows of the same app into bento‑box grids
