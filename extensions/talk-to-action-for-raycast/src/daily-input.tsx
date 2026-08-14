@@ -23,35 +23,6 @@ import {
 
 type PreferenceValue = string | boolean | undefined;
 
-type Preferences = {
-  [key: string]: PreferenceValue;
-  vaultPath?: string;
-  dailyNoteFolder?: string;
-  dailyNoteFileFormat?: string;
-  openObsidianAfterSave?: boolean;
-  noteDestination?: string;
-  noteFilePath?: string;
-  notePosition?: string;
-  noteSection?: string;
-  noteHeading?: string;
-  noteLineFormat?: string;
-  noteAddCurrentTime?: boolean;
-  taskDestination?: string;
-  taskFilePath?: string;
-  taskPosition?: string;
-  taskSection?: string;
-  taskHeading?: string;
-  taskLineFormat?: string;
-  taskAddCurrentTime?: boolean;
-  shoppingDestination?: string;
-  shoppingFilePath?: string;
-  shoppingPosition?: string;
-  shoppingSection?: string;
-  shoppingHeading?: string;
-  shoppingLineFormat?: string;
-  shoppingAddCurrentTime?: boolean;
-};
-
 const MODE_LABELS: Record<InputMode, string> = {
   note: "Daily Note",
   task: "To Do",
@@ -89,7 +60,7 @@ const DEFAULT_ROUTES: Record<InputMode, Route> = {
 };
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.DailyInput>();
   const [mode, setMode] = useState<InputMode>("note");
   const [text, setText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -190,18 +161,19 @@ export default function Command() {
   );
 }
 
-function readRoute(preferences: Preferences, mode: InputMode): Route {
+function readRoute(preferences: Preferences.DailyInput, mode: InputMode): Route {
   const defaults = DEFAULT_ROUTES[mode];
   const prefix = mode === "note" ? "note" : mode;
+  const values = preferences as Record<string, PreferenceValue>;
 
   return {
-    destination: enumPreference<Destination>(preferences[prefix + "Destination"], defaults.destination),
-    filePath: stringPreference(preferences[prefix + "FilePath"], defaults.filePath),
-    position: enumPreference<Position>(preferences[prefix + "Position"], defaults.position),
-    section: enumPreference<Section>(preferences[prefix + "Section"], defaults.section),
-    heading: stringPreference(preferences[prefix + "Heading"], defaults.heading),
-    lineFormat: enumPreference<LineFormat>(preferences[prefix + "LineFormat"], defaults.lineFormat),
-    addCurrentTime: booleanPreference(preferences[prefix + "AddCurrentTime"], defaults.addCurrentTime),
+    destination: enumPreference<Destination>(values[prefix + "Destination"], defaults.destination),
+    filePath: stringPreference(values[prefix + "FilePath"], defaults.filePath),
+    position: enumPreference<Position>(values[prefix + "Position"], defaults.position),
+    section: enumPreference<Section>(values[prefix + "Section"], defaults.section),
+    heading: stringPreference(values[prefix + "Heading"], defaults.heading),
+    lineFormat: enumPreference<LineFormat>(values[prefix + "LineFormat"], defaults.lineFormat),
+    addCurrentTime: booleanPreference(values[prefix + "AddCurrentTime"], defaults.addCurrentTime),
   };
 }
 

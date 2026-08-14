@@ -122,6 +122,33 @@ describe("Vault writes", () => {
     expect(await readFile(path.join(vault, "Shopping.md"), "utf8")).toBe("- [ ] Milk\n- [ ] Existing\n");
   });
 
+  test("keeps both entries when two saves target the same file concurrently", async () => {
+    const vault = await makeVault();
+    const filePath = path.join(vault, "Tasks.md");
+    await writeFile(filePath, "# Tasks\n");
+
+    await Promise.all([
+      saveInput({
+        vaultPath: vault,
+        dailyNoteFolder: "",
+        dailyNoteFileFormat: "YYYY-MM-DD",
+        route: baseRoute,
+        input: "First concurrent task",
+      }),
+      saveInput({
+        vaultPath: vault,
+        dailyNoteFolder: "",
+        dailyNoteFileFormat: "YYYY-MM-DD",
+        route: baseRoute,
+        input: "Second concurrent task",
+      }),
+    ]);
+
+    expect(await readFile(filePath, "utf8")).toBe(
+      "# Tasks\n- [ ] First concurrent task\n- [ ] Second concurrent task\n",
+    );
+  });
+
   test("does not create an Existing File target", async () => {
     const vault = await makeVault();
     await expect(

@@ -1,4 +1,5 @@
-import { promises as fs } from "node:fs";
+import { constants, promises as fs } from "node:fs";
+import type { FileHandle } from "node:fs/promises";
 import path from "node:path";
 
 export type InputMode = "note" | "task" | "shopping";
@@ -56,6 +57,7 @@ const DESTINATIONS: Destination[] = ["daily-note", "existing-file", "new-file"];
 const POSITIONS: Position[] = ["append", "prepend"];
 const SECTIONS: Section[] = ["none", "after-heading", "section-end"];
 const LINE_FORMATS: LineFormat[] = ["bullet", "task", "plain"];
+const targetLocks = new Map<string, Promise<void>>();
 
 export async function saveInput(options: SaveInputOptions): Promise<SaveResult> {
   const inputLines = formatInputLines(
@@ -228,56 +230,123 @@ async function resolveTarget(options: SaveInputOptions): Promise<ResolvedTarget>
 }
 
 async function writeToTarget(target: ResolvedTarget, newLines: string[], route: Route): Promise<SaveResult> {
-  await fs.mkdir(path.dirname(target.absolutePath), { recursive: true });
+  return withTargetLock(target.absolutePath, async () => {
+    await fs.mkdir(path.dirname(target.absolutePath), { recursive: true });
 
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const existingContent = await readTextIfExists(target.absolutePath);
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      const existingContent = await readTextIfExists(target.absolutePath);
 
-    if (existingContent === null) {
-      if (!target.allowCreate) {
-        throw new StorageError("Existing file was not found: " + target.relativePath);
+      if (existingContent === null) {
+        if (!target.allowCreate) {
+          throw new StorageError("Existing file was not found: " + target.relativePath);
+        }
+
+        const content = buildUpdatedContent("", newLines, route);
+        try {
+          const handle = await openVerifiedTarget(target, true);
+          try {
+            await writeAll(handle, content);
+          } finally {
+            await handle.close();
+          }
+          return {
+            absolutePath: target.absolutePath,
+            relativePath: target.relativePath,
+            created: true,
+            lineCount: newLines.length,
+          };
+        } catch (error) {
+          if (isErrorCode(error, "EEXIST") && attempt === 0) {
+            continue;
+          }
+          throw toStorageError(error, target.relativePath);
+        }
       }
 
-      const content = buildUpdatedContent("", newLines, route);
+      const content = buildUpdatedContent(existingContent, newLines, route);
+      let handle: FileHandle | undefined;
       try {
-        await fs.writeFile(target.absolutePath, content, { encoding: "utf8", flag: "wx" });
+        handle = await openVerifiedTarget(target, false);
+        const contentBeforeWrite = await handle.readFile({ encoding: "utf8" });
+        if (contentBeforeWrite !== existingContent) {
+          if (attempt === 0) {
+            continue;
+          }
+          throw new StorageError("The file changed while saving. Please submit again.");
+        }
+
+        await handle.truncate(0);
+        await writeAll(handle, content);
         return {
           absolutePath: target.absolutePath,
           relativePath: target.relativePath,
-          created: true,
+          created: false,
           lineCount: newLines.length,
         };
       } catch (error) {
-        if (isErrorCode(error, "EEXIST") && attempt === 0) {
-          continue;
-        }
         throw toStorageError(error, target.relativePath);
+      } finally {
+        await handle?.close();
       }
     }
 
-    const content = buildUpdatedContent(existingContent, newLines, route);
-    const contentBeforeWrite = await readTextIfExists(target.absolutePath);
-    if (contentBeforeWrite !== existingContent) {
-      if (attempt === 0) {
-        continue;
-      }
-      throw new StorageError("The file changed while saving. Please submit again.");
-    }
+    throw new StorageError("The file changed while saving. Please submit again.");
+  });
+}
 
-    try {
-      await fs.writeFile(target.absolutePath, content, { encoding: "utf8" });
-      return {
-        absolutePath: target.absolutePath,
-        relativePath: target.relativePath,
-        created: false,
-        lineCount: newLines.length,
-      };
-    } catch (error) {
-      throw toStorageError(error, target.relativePath);
+async function withTargetLock<T>(key: string, operation: () => Promise<T>): Promise<T> {
+  const previous = targetLocks.get(key) ?? Promise.resolve();
+  let release: () => void;
+  const current = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const queued = previous.then(() => current);
+  targetLocks.set(key, queued);
+
+  await previous;
+  try {
+    return await operation();
+  } finally {
+    release!();
+    if (targetLocks.get(key) === queued) {
+      targetLocks.delete(key);
     }
   }
+}
 
-  throw new StorageError("The file changed while saving. Please submit again.");
+async function openVerifiedTarget(target: ResolvedTarget, create: boolean): Promise<FileHandle> {
+  const flags = constants.O_RDWR | constants.O_NOFOLLOW | (create ? constants.O_CREAT | constants.O_EXCL : 0);
+  let handle: FileHandle | undefined;
+  try {
+    handle = await fs.open(target.absolutePath, flags, 0o600);
+    await resolveInsideVault(target.vaultPath, target.relativePath);
+
+    const [handleStats, targetStats, targetLinkStats] = await Promise.all([
+      handle.stat(),
+      fs.stat(target.absolutePath),
+      fs.lstat(target.absolutePath),
+    ]);
+    if (
+      targetLinkStats.isSymbolicLink() ||
+      handleStats.dev !== targetStats.dev ||
+      handleStats.ino !== targetStats.ino
+    ) {
+      throw new StorageError("The path must stay inside the selected Vault.");
+    }
+    return handle;
+  } catch (error) {
+    await handle?.close();
+    throw error;
+  }
+}
+
+async function writeAll(handle: FileHandle, content: string): Promise<void> {
+  const buffer = Buffer.from(content, "utf8");
+  let written = 0;
+  while (written < buffer.length) {
+    const result = await handle.write(buffer, written, buffer.length - written, written);
+    written += result.bytesWritten;
+  }
 }
 
 async function resolveVaultPath(value: string): Promise<string> {
