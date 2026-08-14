@@ -1,5 +1,9 @@
 # Soundboard Changelog
 
+## [Fix] - 2026-08-14
+
+- Fixed "ReferenceError: crypto is not defined" when saving a sound by replacing `nanoid` with `randomUUID` from `node:crypto`
+
 ## [Enhancement] - 2026-08-13
 
 - Add support for Windows platform using Rust

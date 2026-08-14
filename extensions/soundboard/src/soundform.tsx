@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, Icon, useNavigation } from "@raycast/api";
 import { Item } from "./types";
 import { useForm, FormValidation } from "@raycast/utils";
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 import { useEffect, useState } from "react";
 
 interface SignUpFormValues {
@@ -23,7 +23,7 @@ export function SoundForm(props: { item?: Item; items?: Item[]; onEdit: (item: I
       props.onEdit(
         props?.item
           ? { ...values, id: props.item.id, last_favourite: props.item.favourite }
-          : { ...values, id: nanoid() },
+          : { ...values, id: randomUUID() },
       );
       pop();
     },
