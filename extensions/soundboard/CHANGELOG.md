@@ -1,6 +1,6 @@
 # Soundboard Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-08-14
 
 - Fixed "ReferenceError: crypto is not defined" when saving a sound by replacing `nanoid` with `randomUUID` from `node:crypto`
 
