@@ -1,11 +1,13 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   Icon,
   Keyboard,
   List,
   Toast,
+  confirmAlert,
   getPreferenceValues,
   openExtensionPreferences,
   showToast,
@@ -16,28 +18,15 @@ import os from "node:os";
 import path from "node:path";
 import { promisify } from "node:util";
 import { useEffect, useMemo, useState } from "react";
+import {
+  DeepLink,
+  StorageConfiguration,
+  deleteDeepLink,
+  readDeepLinks,
+  resolveStorageConfiguration,
+} from "./storage.js";
 
 const executeFile = promisify(execFile);
-
-type IntegrationManifest = {
-  schemaVersion: number;
-  storagePath: string;
-  environmentsPath: string;
-};
-
-type StorageConfiguration = {
-  storagePath: string;
-  environmentsPath: string;
-};
-
-type DeepLink = {
-  id: string;
-  title: string;
-  urlString: string;
-  group?: string;
-  tags?: string[];
-  isFavorite?: boolean;
-};
 
 type LinkEnvironment = {
   id: string;
@@ -65,8 +54,7 @@ export default function SearchDeepLinks() {
     setError(undefined);
     try {
       const configuration = await resolveStorageConfiguration(preferences.storageFile);
-      const linkData = await readFile(configuration.storagePath, "utf8");
-      const decodedLinks = JSON.parse(linkData) as DeepLink[];
+      const decodedLinks = await readDeepLinks(configuration.storagePath);
       const decodedEnvironments = await readFile(configuration.environmentsPath, "utf8")
         .then((value) => JSON.parse(value) as LinkEnvironment[])
         .catch(() => builtInEnvironments);
@@ -106,6 +94,33 @@ export default function SearchDeepLinks() {
       toast.style = Toast.Style.Failure;
       toast.title = "Could Not Open Deep Link";
       toast.message = commandError(openError);
+    }
+  }
+
+  async function deleteLink(link: DeepLink) {
+    if (!storageConfiguration) return;
+    const confirmed = await confirmAlert({
+      title: `Delete “${link.title}”?`,
+      message: "This removes the deep link from the shared SimulatorDeepLinker storage and cannot be undone.",
+      primaryAction: {
+        title: "Delete Deep Link",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+    if (!confirmed) return;
+
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Deleting Deep Link" });
+    try {
+      await deleteDeepLink(storageConfiguration, link.id);
+      setLinks((currentLinks) => currentLinks.filter((candidate) => candidate.id !== link.id));
+      toast.style = Toast.Style.Success;
+      toast.title = "Deep Link Deleted";
+      toast.message = link.title;
+    } catch (deleteError) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could Not Delete Deep Link";
+      toast.message = deleteError instanceof Error ? deleteError.message : String(deleteError);
+      await load();
     }
   }
 
@@ -163,6 +178,14 @@ export default function SearchDeepLinks() {
                     shortcut={Keyboard.Shortcut.Common.Refresh}
                   />
                   {storageConfiguration ? <Action.ShowInFinder path={storageConfiguration.storagePath} /> : null}
+                  {storageConfiguration ? (
+                    <Action
+                      title="Delete Deep Link"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      onAction={() => deleteLink(link)}
+                    />
+                  ) : null}
                 </ActionPanel>
               }
             />
@@ -171,50 +194,6 @@ export default function SearchDeepLinks() {
       )}
     </List>
   );
-}
-
-async function resolveStorageConfiguration(storageOverride?: string): Promise<StorageConfiguration> {
-  if (storageOverride) {
-    await access(storageOverride);
-    return {
-      storagePath: storageOverride,
-      environmentsPath: path.join(path.dirname(storageOverride), "environments.json"),
-    };
-  }
-
-  const applicationSupport = path.join(
-    os.homedir(),
-    "Library",
-    "Application Support",
-    "com.stefan.SimulatorDeepLinker",
-  );
-  const manifestPath = path.join(applicationSupport, "integration.json");
-
-  try {
-    const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as IntegrationManifest;
-    if (manifest.schemaVersion !== 1 || !manifest.storagePath) {
-      throw new Error("Unsupported SimulatorDeepLinker integration manifest.");
-    }
-    await access(manifest.storagePath);
-    return {
-      storagePath: manifest.storagePath,
-      environmentsPath: manifest.environmentsPath || path.join(path.dirname(manifest.storagePath), "environments.json"),
-    };
-  } catch (manifestError) {
-    const defaultStoragePath = path.join(applicationSupport, "deeplinks.json");
-    try {
-      await access(defaultStoragePath);
-      return {
-        storagePath: defaultStoragePath,
-        environmentsPath: path.join(applicationSupport, "environments.json"),
-      };
-    } catch {
-      const reason = manifestError instanceof Error ? manifestError.message : String(manifestError);
-      throw new Error(
-        `Open SimulatorDeepLinker once to configure automatic storage, or select a Storage Override. ${reason}`,
-      );
-    }
-  }
 }
 
 async function openURL(urlString: string, preferences: Preferences.SearchDeepLinks): Promise<void> {

@@ -19,6 +19,12 @@
       "title": "Search Deep Links",
       "description": "Search saved links and open them on the configured target",
       "mode": "view"
+    },
+    {
+      "name": "add-deep-link",
+      "title": "Add Deep Link",
+      "description": "Add a link to the shared SimulatorDeepLinker storage",
+      "mode": "view"
     }
   ],
   "preferences": [
