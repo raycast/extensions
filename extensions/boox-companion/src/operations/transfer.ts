@@ -22,7 +22,7 @@ export async function transferFiles(options: {
   if (!uniquePaths.length) throw new Error("Choose at least one file");
   if (uniquePaths.length > MAX_FILE_COUNT) throw new Error("BOOXDrop accepts at most 500 files at a time");
 
-  const files: Array<{ path: string; name: string }> = [];
+  const files: Array<{ path: string; name: string; size: number }> = [];
   const names = new Set<string>();
   for (const filePath of uniquePaths) {
     const fileStat = await stat(filePath);
@@ -36,7 +36,7 @@ export async function transferFiles(options: {
     if (options.mode === "library" && !isLibraryDocument(name)) {
       throw new Error(`${name} is not accepted by the BOOX Library uploader`);
     }
-    files.push({ path: filePath, name });
+    files.push({ path: filePath, name, size: fileStat.size });
   }
 
   const destination = normalizeRemotePath(options.destination || "/Download");
@@ -52,7 +52,7 @@ export async function transferFiles(options: {
   let completed = 0;
   for (const file of files) {
     if (duplicates.has(file.name) && (options.conflictPolicy === "skip" || options.mode === "library")) {
-      items.push({ ...file, status: "skipped" });
+      items.push({ path: file.path, name: file.name, status: "skipped" });
       completed += 1;
       await options.onProgress?.(completed, files.length, file.name);
       continue;
@@ -68,7 +68,7 @@ export async function transferFiles(options: {
           const existing = page.list.find((entry) => entry.name === file.name);
           if (existing?.dir) throw new Error(`${file.name} is an existing folder and cannot be replaced`);
           if (existing) {
-            await replaceStorageFile(options.client, file.path, destination, existing);
+            await replaceStorageFile(options.client, file.path, file.size, destination, existing);
             replaced = true;
           }
         }
@@ -82,9 +82,9 @@ export async function transferFiles(options: {
           indexed = false;
         }
       }
-      items.push({ ...file, status: "uploaded", indexed });
+      items.push({ path: file.path, name: file.name, status: "uploaded", indexed });
     } catch (error) {
-      items.push({ ...file, status: "failed", error: describeBooxError(error) });
+      items.push({ path: file.path, name: file.name, status: "failed", error: describeBooxError(error) });
     }
     completed += 1;
     await options.onProgress?.(completed, files.length, file.name);
@@ -101,6 +101,7 @@ export async function transferFiles(options: {
 async function replaceStorageFile(
   client: BooxClient,
   localPath: string,
+  localSize: number,
   destination: string,
   existing: StorageEntry
 ): Promise<void> {
@@ -115,8 +116,24 @@ async function replaceStorageFile(
   try {
     await client.uploadStorage(localPath, destination);
   } catch (uploadError) {
+    let observedReplacement: StorageEntry | undefined;
+    let inspectionSucceeded = false;
     try {
-      await restoreStorageBackup(client, backup, existing.name, destination);
+      const page = await client.listStorage(destination, 0, 10_000);
+      observedReplacement = page.list.find((entry) => entry.name === existing.name && entry.path !== backup.path);
+      inspectionSucceeded = true;
+    } catch {
+      // A failed inspection leaves the original backup untouched unless its name can be restored directly.
+    }
+
+    if (observedReplacement && !observedReplacement.dir && observedReplacement.size === localSize) {
+      await removeStorageBackup(client, backup);
+      return;
+    }
+
+    try {
+      if (observedReplacement && !observedReplacement.dir) await client.deleteStorage(observedReplacement);
+      if (inspectionSucceeded || !observedReplacement) await client.renameStorage(backup, existing.name);
     } catch (restoreError) {
       throw new Error(
         `${describeBooxError(uploadError)}. The original remains as ${backupName}, but automatic restoration failed: ${describeBooxError(restoreError)}`
@@ -125,29 +142,16 @@ async function replaceStorageFile(
     throw uploadError;
   }
 
+  await removeStorageBackup(client, backup);
+}
+
+async function removeStorageBackup(client: BooxClient, backup: StorageEntry): Promise<void> {
   try {
     await client.deleteStorage(backup);
   } catch (cleanupError) {
     throw new Error(
-      `Replacement uploaded, but the preserved backup ${backupName} could not be removed: ${describeBooxError(cleanupError)}`
+      `Replacement uploaded, but the preserved backup ${backup.name} could not be removed: ${describeBooxError(cleanupError)}`
     );
-  }
-}
-
-async function restoreStorageBackup(
-  client: BooxClient,
-  backup: StorageEntry,
-  originalName: string,
-  destination: string
-): Promise<void> {
-  try {
-    await client.renameStorage(backup, originalName);
-    return;
-  } catch {
-    const page = await client.listStorage(destination, 0, 10_000);
-    const ambiguousUpload = page.list.find((entry) => entry.name === originalName && entry.path !== backup.path);
-    if (ambiguousUpload) await client.deleteStorage(ambiguousUpload);
-    await client.renameStorage(backup, originalName);
   }
 }
 

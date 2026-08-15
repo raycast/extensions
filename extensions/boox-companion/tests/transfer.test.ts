@@ -76,6 +76,9 @@ describe("file transfers", () => {
     const file = await createFile("book.epub", "new");
     const existing = storageFile("book.epub");
     const client = mockClient({ duplicates: ["book.epub"], entries: [existing] });
+    vi.mocked(client.listStorage)
+      .mockResolvedValueOnce(storagePage([existing]))
+      .mockResolvedValueOnce(storagePage([]));
     vi.mocked(client.uploadStorage).mockRejectedValue(new Error("connection reset"));
 
     const result = await transferFiles({
@@ -105,10 +108,6 @@ describe("file transfers", () => {
       .mockResolvedValueOnce(storagePage([existing]))
       .mockResolvedValueOnce(storagePage([partial]));
     vi.mocked(client.uploadStorage).mockRejectedValue(new Error("response lost"));
-    vi.mocked(client.renameStorage)
-      .mockResolvedValueOnce(undefined)
-      .mockRejectedValueOnce(new Error("name conflict"))
-      .mockResolvedValueOnce(undefined);
 
     const result = await transferFiles({
       client,
@@ -120,18 +119,47 @@ describe("file transfers", () => {
 
     expect(result.failed).toBe(1);
     expect(client.deleteStorage).toHaveBeenCalledWith(partial);
-    expect(client.renameStorage).toHaveBeenCalledTimes(3);
-    expect(vi.mocked(client.renameStorage).mock.calls[2][1]).toBe("book.epub");
+    expect(client.renameStorage).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(client.renameStorage).mock.calls[1][1]).toBe("book.epub");
+  });
+
+  it("keeps a completed replacement when only the upload response was lost", async () => {
+    const file = await createFile("book.epub", "new");
+    const existing = storageFile("book.epub");
+    const committed = { ...existing, size: 3 };
+    const client = mockClient({ duplicates: ["book.epub"], entries: [existing] });
+    vi.mocked(client.listStorage)
+      .mockResolvedValueOnce(storagePage([existing]))
+      .mockResolvedValueOnce(storagePage([committed]));
+    vi.mocked(client.uploadStorage).mockRejectedValue(new Error("response lost"));
+
+    const result = await transferFiles({
+      client,
+      paths: [file],
+      mode: "storage",
+      destination: "/Books",
+      conflictPolicy: "replace",
+    });
+
+    const backupName = vi.mocked(client.renameStorage).mock.calls[0][1];
+    expect(result).toMatchObject({ uploaded: 1, skipped: 0, failed: 0 });
+    expect(client.deleteStorage).toHaveBeenCalledWith(
+      expect.objectContaining({ name: backupName, path: `/storage/emulated/0/Books/${backupName}` })
+    );
+    expect(client.deleteStorage).not.toHaveBeenCalledWith(committed);
+    expect(client.renameStorage).toHaveBeenCalledTimes(1);
   });
 
   it("reports a preserved backup when automatic restoration cannot finish", async () => {
     const file = await createFile("book.epub", "new");
     const existing = storageFile("book.epub");
     const client = mockClient({ duplicates: ["book.epub"], entries: [existing] });
+    vi.mocked(client.listStorage)
+      .mockResolvedValueOnce(storagePage([existing]))
+      .mockResolvedValueOnce(storagePage([]));
     vi.mocked(client.uploadStorage).mockRejectedValue(new Error("disk full"));
     vi.mocked(client.renameStorage)
       .mockResolvedValueOnce(undefined)
-      .mockRejectedValueOnce(new Error("offline"))
       .mockRejectedValueOnce(new Error("offline"));
 
     const result = await transferFiles({
