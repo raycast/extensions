@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Fix AI searchNote OOM on oversized Markdown] - {PR_MERGE_DATE}
+## [Fix AI searchNote OOM on oversized Markdown] - 2026-08-15
 
 - Skip Markdown files larger than 1 MiB during full-content search instead of reading them into the 100 MB extension heap
 - Limit tag search on oversized files to a growing prefix (64 KiB steps, 1 MiB cap) so YAML tags still match when frontmatter crosses the first chunk
