@@ -29,6 +29,11 @@ export default async () => {
   try {
     const result = await runJSInYouTubeMusicTab(nextTrack);
 
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
+
     switch (result) {
       case "ytmusic-next":
         await showHUD("⏭️ Next Song (YT Music)");
@@ -48,6 +53,6 @@ export default async () => {
 
     await closeMainWindow();
   } catch (error) {
-    // do nothing if error is thrown because it will be handled by the toast
+    await showHUD(`❌ Command failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 };
