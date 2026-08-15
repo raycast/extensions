@@ -1,5 +1,12 @@
 # Agent Usage Changelog
 
+## [Show Cursor Auto and API percentages] - 2026-08-15
+
+### Improvements
+
+- Show Auto and API remaining percentages together on the Cursor list and menu bar when both windows are available
+- Color the Cursor usage pie from the tighter of the two windows
+
 ## [Add support for multiple CODEX_HOME] - 2026-08-15
 
 - Support additional CODEX_HOME in preferences, letting users read from multiple active codex account
