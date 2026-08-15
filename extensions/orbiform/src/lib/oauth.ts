@@ -48,6 +48,14 @@ interface TokenResponse {
  * Client Registration endpoint, using the exact redirect URI Raycast
  * itself computed for this extension. Result is cached after the first
  * successful call.
+ *
+ * Note: two commands launched for the very first time within the same
+ * instant can both observe an empty cache and both register a client here
+ * — LocalStorage has no compare-and-swap, so a true lock isn't available.
+ * That race is made harmless by `authorize()` re-pinning CLIENT_ID_KEY to
+ * whichever client_id it actually used right before it stores that flow's
+ * tokens, so the last-written client_id always matches the last-written
+ * tokens. See the comment there.
  */
 async function getOrRegisterClientId(redirectUri: string): Promise<string> {
   const cached = await LocalStorage.getItem<string>(CLIENT_ID_KEY);
@@ -118,13 +126,25 @@ export async function authorize(): Promise<string> {
     if (existing.refreshToken && existing.isExpired()) {
       const clientId = await LocalStorage.getItem<string>(CLIENT_ID_KEY);
       if (!clientId) throw new Error("Orbiform client_id not found — please reconnect.");
-      const refreshed = await refreshTokens(existing.refreshToken, clientId);
-      await client.setTokens({
-        accessToken: refreshed.access_token,
-        refreshToken: refreshed.refresh_token,
-        scope: refreshed.scope,
-      });
-      return refreshed.access_token;
+      try {
+        const refreshed = await refreshTokens(existing.refreshToken, clientId);
+        await client.setTokens({
+          accessToken: refreshed.access_token,
+          refreshToken: refreshed.refresh_token,
+          scope: refreshed.scope,
+          expiresIn: refreshed.expires_in,
+        });
+        return refreshed.access_token;
+      } catch (refreshError) {
+        // A stored refresh_token that no longer matches the stored
+        // client_id (e.g. from the concurrent-first-run race described
+        // above) fails here every time otherwise. Clear both so the next
+        // call runs a full fresh authorize() instead of looping on a
+        // refresh that can never succeed.
+        await LocalStorage.removeItem(CLIENT_ID_KEY);
+        await client.removeTokens();
+        throw refreshError;
+      }
     }
     return existing.accessToken;
   }
@@ -146,10 +166,17 @@ export async function authorize(): Promise<string> {
   });
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await fetchTokens(authRequest, authorizationCode, clientId);
+
+  // Re-pin the client_id this flow actually used right before storing its
+  // tokens, so if a concurrent first-run raced us on registration, the
+  // last write here still leaves CLIENT_ID_KEY matching the tokens we're
+  // about to store (not some other flow's client_id).
+  await LocalStorage.setItem(CLIENT_ID_KEY, clientId);
   await client.setTokens({
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token,
     scope: tokens.scope,
+    expiresIn: tokens.expires_in,
   });
   return tokens.access_token;
 }
