@@ -60,7 +60,8 @@ enum WindowSize: String {
   fill: Bool,
   cameraId: String,
   cameraType: CameraType,
-  windowSize: String
+  windowSize: String,
+  saveDirectory: String
 ) -> Never {
   let devices = discoverDevices()
   guard !devices.isEmpty else { exit(EXIT_FAILURE) }
@@ -83,7 +84,8 @@ enum WindowSize: String {
     startIndex: startIndex,
     mirror: mirror,
     fill: fill,
-    size: WindowSize(preference: windowSize)
+    size: WindowSize(preference: windowSize),
+    destination: CaptureDestination(preference: saveDirectory)
   )
   app.delegate = controller
   app.run()
@@ -94,6 +96,13 @@ enum WindowSize: String {
 final class CameraView: NSView {
   let previewLayer: AVCaptureVideoPreviewLayer
   let label: NSTextField
+  /// Recording state and capture messages, pinned to the top-left corner.
+  ///
+  /// The text sits in its own view rather than drawing its own background: a single-line
+  /// `NSTextField` positions its text on the baseline, so padding added to the field itself would
+  /// push the text off centre.
+  let badgeBackground: NSView
+  let badge: NSTextField
   var onKey: ((UInt16) -> Void)?
   var onClick: (() -> Void)?
 
@@ -125,6 +134,8 @@ final class CameraView: NSView {
   init(previewLayer: AVCaptureVideoPreviewLayer, isCompact: Bool) {
     self.previewLayer = previewLayer
     self.label = NSTextField(labelWithString: "")
+    self.badgeBackground = NSView()
+    self.badge = NSTextField(labelWithString: "")
     self.isCompact = isCompact
     super.init(frame: .zero)
     wantsLayer = true
@@ -140,6 +151,48 @@ final class CameraView: NSView {
     label.alignment = .center
     label.font = .systemFont(ofSize: Self.labelFontSize(isCompact: isCompact), weight: .medium)
     addSubview(label)
+
+    badgeBackground.wantsLayer = true
+    badgeBackground.layer?.backgroundColor = NSColor.black.withAlphaComponent(0.65).cgColor
+    badgeBackground.layer?.cornerRadius = 6
+    badgeBackground.isHidden = true
+    addSubview(badgeBackground)
+
+    badge.drawsBackground = false
+    badge.isBezeled = false
+    badge.isEditable = false
+    badge.isSelectable = false
+    badge.alignment = .center
+    badgeBackground.addSubview(badge)
+  }
+
+  /// Shows the recording state and capture messages in the top-left corner, where they are hard to
+  /// miss — unlike the bottom bar, which is a long line of key hints.
+  func setBadge(recording: Bool, message: String?) {
+    let text = NSMutableAttributedString()
+    let font = NSFont.systemFont(ofSize: isCompact ? 11 : 15, weight: .semibold)
+    if recording {
+      text.append(
+        NSAttributedString(
+          string: "● ", attributes: [.foregroundColor: NSColor.systemRed, .font: font]))
+      text.append(
+        NSAttributedString(
+          string: "REC", attributes: [.foregroundColor: NSColor.white, .font: font])
+      )
+    }
+    if let message {
+      if recording {
+        text.append(
+          NSAttributedString(string: "   ", attributes: [.font: font]))
+      }
+      text.append(
+        NSAttributedString(
+          string: message, attributes: [.foregroundColor: NSColor.white, .font: font]))
+    }
+    badge.attributedStringValue = text
+    badge.invalidateIntrinsicContentSize()
+    badgeBackground.isHidden = text.length == 0
+    needsLayout = true
   }
 
   required init?(coder: NSCoder) { fatalError("init(coder:) is not supported") }
@@ -162,6 +215,23 @@ final class CameraView: NSView {
     let labelHeight: CGFloat = isCompact ? 20 : 30
     let bottomInset: CGFloat = isCompact ? 8 : 36
     label.frame = CGRect(x: 0, y: bottomInset, width: bounds.width, height: labelHeight)
+
+    let inset: CGFloat = isCompact ? 10 : 20
+    let paddingX: CGFloat = isCompact ? 8 : 12
+    let paddingY: CGFloat = isCompact ? 4 : 7
+    // Asking the field itself: `NSAttributedString.size()` reports less than the field lays out,
+    // which cut the text off inside the badge.
+    let fitting = badge.fittingSize
+    let textWidth = min(ceil(fitting.width), bounds.width - inset * 2 - paddingX * 2)
+    let textHeight = ceil(fitting.height)
+    badgeBackground.frame = CGRect(
+      x: inset,
+      y: bounds.height - inset - textHeight - paddingY * 2,
+      width: textWidth + paddingX * 2,
+      height: textHeight + paddingY * 2
+    )
+    // Centred inside its background, rather than sitting on the field's own baseline.
+    badge.frame = CGRect(x: paddingX, y: paddingY, width: textWidth, height: textHeight)
   }
 }
 
@@ -169,6 +239,8 @@ enum KeyCode {
   static let escape: UInt16 = 53
   static let q: UInt16 = 12
   static let m: UInt16 = 46
+  static let s: UInt16 = 1
+  static let r: UInt16 = 15
   static let space: UInt16 = 49
   static let leftArrow: UInt16 = 123
   static let rightArrow: UInt16 = 124
@@ -199,15 +271,133 @@ final class PreviewWindow: NSWindow {
   var window: PreviewWindow!
   var cameraView: CameraView!
 
-  init(devices: [AVCaptureDevice], startIndex: Int, mirror: Bool, fill: Bool, size: WindowSize) {
+  let videoOutput = AVCaptureVideoDataOutput()
+  let destination: CaptureDestination
+  private let frameGrabber = FrameGrabber()
+  private let frameQueue = DispatchQueue(label: "camera-preview.frames")
+  /// Shown in the label for a moment after a file is written, or fails to be.
+  private var status: String?
+  /// `AVCaptureMovieFileOutput.isRecording` only flips once recording actually begins, so the
+  /// label would miss the first moments. Track the intent instead.
+  private var isRecording = false
+  /// Clears the current message; invalidated when a newer one takes its place.
+  private var statusTimer: Timer?
+  private var canCapturePhoto = false
+  private var canRecord = false
+
+  init(
+    devices: [AVCaptureDevice],
+    startIndex: Int,
+    mirror: Bool,
+    fill: Bool,
+    size: WindowSize,
+    destination: CaptureDestination
+  ) {
     self.devices = devices
     self.index = startIndex
     self.mirror = mirror
     self.fill = fill
     self.size = size
+    self.destination = destination
     self.previewLayer = AVCaptureVideoPreviewLayer(session: session)
     super.init()
     previewLayer.videoGravity = fill ? .resizeAspectFill : .resizeAspect
+  }
+
+  /// Writes the next frame as a JPEG.
+  func takeSnapshot() {
+    guard canCapturePhoto, videoOutput.connection(with: .video) != nil else {
+      show(status: "Snapshot unavailable")
+      return
+    }
+    guard destination.prepare() else {
+      show(status: "Cannot write to save folder")
+      return
+    }
+    // Say something before the shutter, so the key press is never silent.
+    show(status: "Saving photo…")
+    frameGrabber.savePhoto(to: destination.url(extension: "jpg")) { [weak self] saved in
+      // Success needs no announcement: the badge going away is the signal that it finished.
+      if saved {
+        self?.clearStatus()
+      } else {
+        self?.show(status: "Could not save photo")
+      }
+    }
+  }
+
+  /// Starts recording, or stops the recording in progress.
+  func toggleRecording() {
+    if isRecording {
+      isRecording = false
+      frameGrabber.stopRecording()
+      show(status: "Saving recording…")
+      return
+    }
+    guard canRecord, videoOutput.connection(with: .video) != nil else {
+      show(status: "Recording unavailable")
+      return
+    }
+    guard destination.prepare() else {
+      show(status: "Cannot write to save folder")
+      return
+    }
+    let started = frameGrabber.startRecording(to: destination.url(extension: "mov")) {
+      [weak self] saved in
+      if saved {
+        self?.clearStatus()
+      } else {
+        self?.show(status: "Could not save recording")
+      }
+    }
+    guard started else {
+      show(status: "Recording unavailable")
+      return
+    }
+    isRecording = true
+    updateBadge()
+  }
+
+  /// Puts a short message in the top-left badge and clears it again after a few seconds.
+  ///
+  /// A run-loop timer rather than `asyncAfter`, for the same reason the capture callbacks use the
+  /// run loop: `NSApplication.run()` owns the main thread for the life of the preview.
+  private func show(status message: String) {
+    status = message
+    updateBadge()
+    statusTimer?.invalidate()
+    let timer = Timer(timeInterval: 2.5, repeats: false) { [weak self] _ in
+      MainActor.assumeIsolated {
+        self?.status = nil
+        self?.updateBadge()
+      }
+    }
+    RunLoop.main.add(timer, forMode: .common)
+    statusTimer = timer
+  }
+
+  /// Drops the current message immediately, cancelling the timer that would have cleared it.
+  private func clearStatus() {
+    statusTimer?.invalidate()
+    statusTimer = nil
+    status = nil
+    updateBadge()
+  }
+
+  private func updateBadge() {
+    cameraView?.setBadge(recording: isRecording, message: status)
+  }
+
+  /// Finishes an in-flight recording before the app goes away. Terminating mid-write would leave
+  /// a movie without its metadata — a file that exists but cannot be played.
+  func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+    guard isRecording else { return .terminateNow }
+    isRecording = false
+    show(status: "Saving recording…")
+    frameGrabber.stopRecording {
+      onMainThread { sender.reply(toApplicationShouldTerminate: true) }
+    }
+    return .terminateLater
   }
 
   /// Mirroring is done with the preview layer's transform rather than
@@ -219,6 +409,12 @@ final class PreviewWindow: NSWindow {
       connection.isVideoMirrored = false
     }
     cameraView?.isMirrored = mirror
+    syncLook()
+  }
+
+  /// Captures are written with the same mirroring and zoom the preview is showing.
+  private func syncLook() {
+    frameGrabber.update(look: CaptureLook(mirror: mirror, zoom: zoom))
   }
 
   func toggleMirror() {
@@ -231,6 +427,7 @@ final class PreviewWindow: NSWindow {
   func setZoom(_ value: CGFloat) {
     zoom = min(max(value, 1), 3)
     cameraView?.zoom = zoom
+    syncLook()
     updateLabel()
   }
 
@@ -298,9 +495,12 @@ final class PreviewWindow: NSWindow {
     let name = devices.isEmpty ? "No camera" : devices[index].localizedName
     let zoomText = zoom > 1 ? String(format: "  %.2g×", zoom) : ""
     let mirrorText = mirror ? "  mirrored" : ""
+    // Recording state and capture messages live in the top-left badge, so the bottom bar stays a
+    // stable line of hints.
     let switchHint = devices.count > 1 ? "   ←/→ Camera" : ""
-    let hints = "\(switchHint)   ↑/↓ Size   +/− Zoom   M Mirror   Esc Close"
-    cameraView?.label.stringValue = "\(name)\(zoomText)\(mirrorText)\(hints)"
+    cameraView?.label.stringValue =
+      "\(name)\(zoomText)\(mirrorText)\(switchHint)"
+      + "   ↑/↓ Size   +/− Zoom   M Mirror   S Photo   R Rec   Esc Close"
   }
 
   /// Swaps the window between full screen and a floating window, in place.
@@ -367,6 +567,8 @@ final class PreviewWindow: NSWindow {
       case KeyCode.upArrow: self.applySize(self.size.larger)
       case KeyCode.downArrow: self.applySize(self.size.smaller)
       case KeyCode.m: self.toggleMirror()
+      case KeyCode.s: self.takeSnapshot()
+      case KeyCode.r: self.toggleRecording()
       case KeyCode.equal, KeyCode.keypadPlus: self.setZoom(self.zoom + 0.25)
       case KeyCode.minus, KeyCode.keypadMinus: self.setZoom(self.zoom - 0.25)
       case KeyCode.zero: self.setZoom(1)
@@ -378,6 +580,13 @@ final class PreviewWindow: NSWindow {
 
     session.beginConfiguration()
     session.sessionPreset = .high
+    // Remember what the session accepted, so S and R can say why nothing happened.
+    videoOutput.alwaysDiscardsLateVideoFrames = true
+    videoOutput.setSampleBufferDelegate(frameGrabber, queue: frameQueue)
+    canCapturePhoto = session.canAddOutput(videoOutput)
+    if canCapturePhoto { session.addOutput(videoOutput) }
+    // Stills and recordings are both written from the same stream of frames.
+    canRecord = canCapturePhoto
     session.commitConfiguration()
     // Every camera was listed but none of them opens — showing an empty window would just be a
     // black rectangle, so quit before it reaches the screen.

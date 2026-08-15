@@ -16,6 +16,7 @@ export default async function Command() {
       cameraId,
       preferences.cameraType,
       preferences.windowSize,
+      preferences.saveDirectory ?? "",
     );
   } catch (error) {
     await showHUD(error instanceof Error ? error.message : "Could not open the camera preview");

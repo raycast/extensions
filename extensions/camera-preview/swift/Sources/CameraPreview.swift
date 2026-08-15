@@ -36,7 +36,8 @@ struct CameraInfo: Encodable {
   fill: Bool,
   cameraId: String,
   cameraType: String,
-  windowSize: String
+  windowSize: String,
+  saveDirectory: String
 ) async throws {
   if ProcessInfo.processInfo.environment[childProcessMarker] != nil {
     // Detach from Raycast's process group so the window survives the command finishing.
@@ -47,7 +48,8 @@ struct CameraInfo: Encodable {
       fill: fill,
       cameraId: cameraId,
       cameraType: CameraType(preference: cameraType),
-      windowSize: windowSize
+      windowSize: windowSize,
+      saveDirectory: saveDirectory
     )
   }
 
@@ -85,20 +87,16 @@ enum CameraType: String {
     case .builtIn:
       device.deviceType == .builtInWideAngleCamera
     case .external:
-      if #available(macOS 14.0, *) { device.deviceType == .external } else { false }
+      device.deviceType == .external
     case .continuity:
-      if #available(macOS 14.0, *) { device.deviceType == .continuityCamera } else { false }
+      device.deviceType == .continuityCamera
     }
   }
 }
 
 func discoverDevices() -> [AVCaptureDevice] {
-  var deviceTypes: [AVCaptureDevice.DeviceType] = [.builtInWideAngleCamera]
-  if #available(macOS 14.0, *) {
-    deviceTypes.append(contentsOf: [.external, .continuityCamera])
-  }
-  return AVCaptureDevice.DiscoverySession(
-    deviceTypes: deviceTypes,
+  AVCaptureDevice.DiscoverySession(
+    deviceTypes: [.builtInWideAngleCamera, .external, .continuityCamera],
     mediaType: .video,
     position: .unspecified
   ).devices

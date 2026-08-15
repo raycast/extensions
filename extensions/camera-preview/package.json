@@ -67,6 +67,14 @@
       ]
     },
     {
+      "name": "saveDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Save Location",
+      "description": "Where snapshots and recordings are written. Defaults to your Downloads folder",
+      "default": ""
+    },
+    {
       "name": "mirror",
       "type": "checkbox",
       "required": false,

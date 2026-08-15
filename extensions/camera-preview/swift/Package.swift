@@ -5,7 +5,7 @@ import PackageDescription
 let package = Package(
     name: "CameraPreview",
     platforms: [
-      .macOS(.v13)
+      .macOS(.v14)
     ],
     dependencies: [
       .package(url: "https://github.com/raycast/extensions-swift-tools", from: "1.1.0")
