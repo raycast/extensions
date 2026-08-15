@@ -1,6 +1,5 @@
 import { environment, getPreferenceValues, launchCommand, LaunchType } from "@raycast/api";
-import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
-import { spawn } from "node:child_process";
+import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { withFileLock } from "./file-lock";
 import { formatLevelBar, normalizeLevel } from "./level";
@@ -15,7 +14,6 @@ export type DimState = {
 
 const STATE_FILENAME = "state.json";
 const STATE_LOCK_FILENAME = "state-update.lock";
-const HELPER_FILENAME = "dimmer-helper";
 const LOCK_RETRY_MS = 25;
 const LOCK_TIMEOUT_MS = 2_500;
 const HELPER_START_DEBOUNCE_MS = 1_000;
@@ -154,31 +152,8 @@ async function ensureHelperIsRunning(): Promise<void> {
     return;
   }
 
-  const helperPath = path.join(environment.assetsPath, HELPER_FILENAME);
-  try {
-    await chmod(helperPath, 0o755);
-  } catch (error) {
-    throw new Error("The Dimmer helper is missing. Rebuild or reinstall the extension.", { cause: error });
-  }
-
-  const child = spawn(helperPath, ["--state", getStatePath()], {
-    detached: true,
-    stdio: "ignore",
-  });
-  await new Promise<void>((resolve, reject) => {
-    const handleError = (error: Error) => {
-      reject(new Error(`Unable to start the Dimmer helper: ${error.message}`, { cause: error }));
-    };
-    child.once("error", handleError);
-    child.once("spawn", () => {
-      child.off("error", handleError);
-      child.on("error", () => {
-        // The helper is detached; startup errors are handled above.
-      });
-      resolve();
-    });
-  });
-  child.unref();
+  const { startDimmer } = await import("swift:../swift/dimmer-helper");
+  await startDimmer(getStatePath());
   helperLastStartedAt = Date.now();
 }
 

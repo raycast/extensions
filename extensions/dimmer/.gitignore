@@ -10,9 +10,6 @@ raycast-env.d.ts
 compiled_raycast_swift
 compiled_raycast_rust
 
-# native build artifacts
-assets/dimmer-helper
-
 # misc
 .DS_Store
 dist

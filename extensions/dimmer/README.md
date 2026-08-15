@@ -27,13 +27,9 @@ The overlay is limited to 90%, ignores mouse input, and disappears if the helper
 
 ## How It Works
 
-The Raycast commands write a small state file in the extension support directory. A bundled universal Swift helper watches that file and manages one transparent AppKit window per display.
+The Raycast commands write a small state file in the extension support directory. A Swift helper watches that file and manages one transparent AppKit window per display.
 
-The helper source is available at [`native/DimmerHelper.swift`](native/DimmerHelper.swift) and can be rebuilt with:
-
-```sh
-npm run build:native
-```
+The helper source is available at [`swift/dimmer-helper/Sources/DimmerHelper.swift`](swift/dimmer-helper/Sources/DimmerHelper.swift). Raycast's built-in Swift compiler builds and bundles it with the extension.
 
 Dimmer supports macOS 13 and newer on both Apple Silicon and Intel Macs.
 

@@ -19,9 +19,6 @@
     "night"
   ],
   "license": "MIT",
-  "permissions": [
-    "execute"
-  ],
   "preferences": [
     {
       "name": "defaultLevel",
@@ -212,14 +209,13 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "npm run build:native && ray build",
-    "build:native": "./scripts/build-native.sh",
-    "dev": "npm run build:native && ray develop",
+    "build": "ray build",
+    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"Use npm run publish to publish Dimmer to the Raycast Store.\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "test:review": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types tests/file-lock.test.mjs",
-    "verify": "npm run build:native && npm run lint && npm run build"
+    "verify": "npm run test:review && npm run lint && npm run build"
   }
 }

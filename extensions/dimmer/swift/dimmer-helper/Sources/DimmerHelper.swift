@@ -1,10 +1,19 @@
 import AppKit
 import Darwin
 import Foundation
+import RaycastSwiftMacros
 
 private struct DimState: Decodable {
     let enabled: Bool
     let level: Int
+}
+
+private enum DimmerError: LocalizedError {
+    case invalidStatePath
+
+    var errorDescription: String? {
+        "Unable to encode the Dimmer state path."
+    }
 }
 
 @MainActor
@@ -166,22 +175,27 @@ private final class DimmerController: NSObject, NSApplicationDelegate {
     }
 }
 
-@main
-private enum DimmerHelper {
-    @MainActor
-    static func main() {
-        guard
-            let stateIndex = CommandLine.arguments.firstIndex(of: "--state"),
-            CommandLine.arguments.indices.contains(stateIndex + 1)
-        else {
-            FileHandle.standardError.write(Data("Usage: dimmer-helper --state <path>\n".utf8))
-            exit(64)
-        }
+@raycast
+func startDimmer(statePath: String) throws {
+    let data = try JSONEncoder().encode(statePath)
+    guard let encodedStatePath = String(data: data, encoding: .utf8) else {
+        throw DimmerError.invalidStatePath
+    }
 
+    let worker = Process()
+    worker.executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
+    worker.arguments = ["runDimmerWorker", encodedStatePath]
+    worker.standardInput = FileHandle.nullDevice
+    worker.standardOutput = FileHandle.nullDevice
+    worker.standardError = FileHandle.nullDevice
+    try worker.run()
+}
+
+@raycast
+func runDimmerWorker(statePath: String) async {
+    await MainActor.run {
         let application = NSApplication.shared
-        let controller = DimmerController(
-            stateURL: URL(fileURLWithPath: CommandLine.arguments[stateIndex + 1])
-        )
+        let controller = DimmerController(stateURL: URL(fileURLWithPath: statePath))
         application.delegate = controller
         application.run()
     }
