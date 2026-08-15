@@ -1,22 +1,17 @@
-import { getPreferenceValues, Icon, List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import React, { useState } from "react";
-import { getBirthDay, getHourLeftThisDay, isBirthDay } from "./utils/life-progress-utils";
+import { getHourLeftThisDay, isBirthDay } from "./utils/life-progress-utils";
 import { LifeProgressListItem } from "./components/life-progress-list-item";
-import { Preferences } from "./types/preferences";
-import { WordOfTheDayItem } from "./components/word-of-the-day-item";
 import { LifeProgressCanvasItem } from "./components/life-progress-canvas-item";
-import { BirthdayItem } from "./components/birthday-item";
 import { tagsTimeLeftFirst, tagsTimeLeftLast, timeLeftFirstList, timeLeftLastList } from "./utils/constants";
-import { getLifeProgressInfo, getWordOfTheDay } from "./hooks/hooks";
+import { getLifeProgressInfo } from "./hooks/hooks";
+import { countdownDateFirst, showProgressBar } from "./types/preferences";
 
 export default function LifeProgress() {
-  const { showDailyWord, showProgressBar, countdownDateFirst } = getPreferenceValues<Preferences>();
   const [tag, setTag] = useState<string>("All");
-  const [isEnglishWord, setIsEnglishWord] = useState<boolean>(true);
   const [refresh, setRefresh] = useState<number>(0);
 
-  const { wordOfTheDay } = getWordOfTheDay();
-  const { lifeProgresses, countDownDates, cakeIndex, loading } = getLifeProgressInfo(refresh);
+  const { lifeProgresses, countDownDates, loading } = getLifeProgressInfo(refresh);
 
   const sectionList = countdownDateFirst ? timeLeftFirstList : timeLeftLastList;
   const tagList = countdownDateFirst ? tagsTimeLeftFirst : tagsTimeLeftLast;
@@ -41,24 +36,7 @@ export default function LifeProgress() {
         description={"Everything is gone, but time is always on"}
       />
 
-      {getBirthDay().isValid && isBirthDay() && (
-        <BirthdayItem countdownDates={countDownDates} setRefresh={setRefresh} />
-      )}
-
-      {!isBirthDay() && (
-        <>
-          {showDailyWord && (
-            <WordOfTheDayItem
-              wordOfTheDay={wordOfTheDay}
-              isEnglishWord={isEnglishWord}
-              setIsEnglishWord={setIsEnglishWord}
-              countdownDates={countDownDates}
-              setRefresh={setRefresh}
-            />
-          )}
-          {showProgressBar && <LifeProgressCanvasItem countdownDates={countDownDates} setRefresh={setRefresh} />}
-        </>
-      )}
+      {showProgressBar && <LifeProgressCanvasItem countdownDates={countDownDates} setRefresh={setRefresh} />}
 
       {(tag === tagList[0] || tag === tagList[1]) && (
         <List.Section title={sectionList[0]}>
@@ -69,7 +47,6 @@ export default function LifeProgress() {
                   key={index}
                   index={index}
                   lifeProgressesLength={lifeProgresses.length}
-                  cakeIndex={cakeIndex}
                   lifeProgress={lifeProgress}
                   countdownDates={countDownDates}
                   setRefresh={setRefresh}
@@ -88,7 +65,6 @@ export default function LifeProgress() {
                   key={index}
                   index={index}
                   lifeProgressesLength={lifeProgresses.length}
-                  cakeIndex={cakeIndex}
                   lifeProgress={lifeProgress}
                   countdownDates={countDownDates}
                   setRefresh={setRefresh}
@@ -107,7 +83,6 @@ export default function LifeProgress() {
                   key={index}
                   index={index}
                   lifeProgressesLength={lifeProgresses.length}
-                  cakeIndex={cakeIndex}
                   lifeProgress={lifeProgress}
                   countdownDates={countDownDates}
                   setRefresh={setRefresh}

@@ -22,20 +22,22 @@ import {
   setDueDate as setReminderDueDate,
 } from "swift:../swift/AppleReminders";
 
-import { getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
+import { getAttachedUrls, getPriorityIcon, isOverdue, isToday, isTomorrow, truncate } from "./helpers";
 import { Priority, Reminder, useData } from "./hooks/useData";
+import { sortByDate } from "./hooks/useViewReminders";
 
 const REMINDERS_FILE_ICON = "/System/Applications/Reminders.app";
 
 export default function Command() {
-  const { titleType, hideMenuBarCountWhenEmpty, view, countType } = getPreferenceValues<Preferences.MenuBar>();
+  const { titleType, hideMenuBarCountWhenEmpty, displayListTitleForMenuBarReminders, view, countType } =
+    getPreferenceValues<Preferences.MenuBar>();
 
   const { data, isLoading, mutate } = useData();
   const [listId, setListId] = useCachedState<string>("menu-bar-list");
   const list = data?.lists.find((l) => l.id === listId);
 
   const reminders = useMemo(() => {
-    if (!data) return [];
+    if (!data || !data.reminders || !Array.isArray(data.reminders)) return [];
     return listId ? data.reminders.filter((reminder: Reminder) => reminder.list?.id === listId) : data.reminders;
   }, [data, listId]);
 
@@ -46,7 +48,10 @@ export default function Command() {
     const upcoming: Reminder[] = [];
     const other: Reminder[] = [];
 
-    reminders?.forEach((reminder: Reminder) => {
+    const { sortMenuBarRemindersByDueDate } = getPreferenceValues<Preferences.MenuBar>();
+    const sortedReminders = sortMenuBarRemindersByDueDate ? reminders.sort(sortByDate) : reminders;
+
+    sortedReminders?.forEach((reminder: Reminder) => {
       if (reminder.isCompleted) return;
 
       if (!reminder.dueDate) {
@@ -159,6 +164,10 @@ export default function Command() {
     }
   }
 
+  function addListTitle(title: string, listName?: string) {
+    return listName ? `${title} [${listName}]` : title;
+  }
+
   async function handleListChange(listId?: string) {
     setListId(listId);
     await mutate();
@@ -204,17 +213,51 @@ export default function Command() {
       {sections.map((section) => (
         <MenuBarExtra.Section key={section.title} title={section.title}>
           {section.items.map((reminder) => {
+            const attachedUrls = getAttachedUrls(reminder);
+
             return (
               <MenuBarExtra.Submenu
                 icon={reminder.isCompleted ? { source: Icon.CheckCircle, tintColor: Color.Green } : Icon.Circle}
                 key={reminder.id}
-                title={truncate(addPriorityToTitle(reminder.title, reminder.priority))}
+                title={truncate(
+                  addPriorityToTitle(
+                    displayListTitleForMenuBarReminders
+                      ? addListTitle(reminder.title, reminder.list?.title)
+                      : reminder.title,
+                    reminder.priority,
+                  ),
+                )}
               >
                 <MenuBarExtra.Item
                   title="Open Reminder"
                   onAction={() => open(reminder.openUrl, "com.apple.reminders")}
                   icon={{ fileIcon: REMINDERS_FILE_ICON }}
                 />
+                {attachedUrls.length ? (
+                  <MenuBarExtra.Item
+                    title={`Open Attached URL${attachedUrls.length > 1 ? "s" : ""}`}
+                    icon={Icon.Link}
+                    onAction={async () => {
+                      let failedCount = 0;
+                      for (const url of attachedUrls) {
+                        try {
+                          await open(url);
+                        } catch (error) {
+                          console.error("Failed to open URL", url, error);
+                          failedCount++;
+                        }
+                      }
+
+                      if (failedCount > 0) {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: `Unable to open ${failedCount} URL${failedCount > 1 ? "s" : ""}`,
+                          message: `${attachedUrls.length - failedCount} of ${attachedUrls.length} URLs opened successfully`,
+                        });
+                      }
+                    }}
+                  />
+                ) : null}
 
                 <MenuBarExtra.Item
                   title={reminder.isCompleted ? "Mark as Incomplete" : "Mark as Complete"}

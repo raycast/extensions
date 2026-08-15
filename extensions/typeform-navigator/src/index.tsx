@@ -1,43 +1,15 @@
-import { Action, ActionPanel, getPreferenceValues, Icon, List, Detail, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { createJsonHttpClient } from "./infra/http-client";
-import { FormDefinition, FormOverview, FormsResponse, InsightsResponse, Workspace, WorkspacesResponse } from "./dto";
+import { Action, ActionPanel, Icon, List, Detail } from "@raycast/api";
+import { FormOverview, Workspace } from "./dto";
 import { adminUrl } from "./utils";
-import got from "got";
 import isAfter from "date-fns/isAfter";
+import { useGetForm, useGetFormInsights, useGetFormResponses, useGetForms, useGetWorkspaces } from "./hooks";
+import { format } from "date-fns";
 
 const ADMIN_FORM_BASE_URL = "https://admin.typeform.com/form/";
 const IN3_DATE = Date.UTC(2021, 6, 22);
 
-interface Preferences {
-  personalToken: string;
-}
-
 export default function Command() {
-  const { personalToken } = getPreferenceValues<Preferences>();
-  const jsonHttpClient = createJsonHttpClient(personalToken);
-
-  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (workspaces.length > 0 || error) {
-      return;
-    }
-    jsonHttpClient
-      .get<WorkspacesResponse>("workspaces")
-      .then((response) => {
-        setWorkspaces(response.body.items);
-      })
-      .catch((e) => {
-        console.error(e);
-        const errorMessage = "Workspace load failed. Try later.";
-        setError(errorMessage);
-        return showErrorToast(errorMessage);
-      });
-  }, [workspaces]);
-
-  const isLoading = workspaces.length === 0 && error === null;
+  const { isLoading, data: workspaces } = useGetWorkspaces();
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Type to filter">
@@ -48,6 +20,7 @@ export default function Command() {
         return (
           <List.Item
             key={idx}
+            icon={Icon.AppWindowGrid2x2}
             title={workspace.name}
             accessories={[sharedAccessory]}
             actions={
@@ -55,7 +28,7 @@ export default function Command() {
                 <Action.Push
                   title={`List Forms (${workspace.forms?.count ?? 0})`}
                   icon={Icon.List}
-                  target={<Forms workspace={workspace} clientHttp={jsonHttpClient} />}
+                  target={<Forms workspace={workspace} />}
                 />
                 <OpenWorkspaceInAdminAction link={workspace.self.href} />
               </ActionPanel>
@@ -67,58 +40,39 @@ export default function Command() {
   );
 }
 
-function Forms({ workspace, clientHttp }: { workspace: Workspace; clientHttp: typeof got }) {
-  const [forms, setForms] = useState<FormOverview[] | null>(null);
-  const [error, setError] = useState<string | null>(null);
+function Forms({ workspace }: { workspace: Workspace }) {
+  const { isLoading, data: forms } = useGetForms(workspace.id);
 
-  useEffect(() => {
-    if (forms !== null || error) {
-      return;
-    }
-    clientHttp
-      .get<FormsResponse>("forms", {
-        searchParams: {
-          workspace_id: workspace.id,
-        },
-      })
-      .then((response) => {
-        setForms(response.body.items);
-      })
-      .catch((e) => {
-        console.error(e);
-        const errorMessage = "Forms load failed. Try later.";
-        setError(errorMessage);
-        return showErrorToast(errorMessage);
-      });
-  }, [forms, error]);
-
-  const isLoading = forms === null && error === null;
   return (
     <List isLoading={isLoading} navigationTitle={`Forms of ${workspace.name}`} searchBarPlaceholder="Type to filter">
-      {forms &&
-        forms.length > 0 &&
-        forms.map((form, idx) => {
-          const isInsights3 = isAfter(new Date(form.created_at), IN3_DATE);
-          return (
-            <List.Item
-              key={idx}
-              title={form.title}
-              accessories={[{ icon: form.settings.is_public ? Icon.Eye : Icon.EyeSlash }]}
-              actions={
-                <ActionPanel>
-                  {isInsights3 && (
-                    <Action.Push
-                      title="Show Details"
-                      icon={Icon.Sidebar}
-                      target={<FormInsights form={form} clientHttp={clientHttp} />}
-                    />
-                  )}
-                  <FormActions form={form} />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
+      {forms.map((form, idx) => {
+        const isInsights3 = isAfter(new Date(form.created_at), IN3_DATE);
+        return (
+          <List.Item
+            key={idx}
+            icon={Icon.SquareEllipsis}
+            title={form.title}
+            accessories={[
+              form.settings.is_public
+                ? { icon: Icon.Eye, tooltip: "Public" }
+                : { icon: Icon.EyeDisabled, tooltip: "Private" },
+              {
+                date: new Date(form.last_updated_at),
+                tooltip: `Updated: ${new Date(form.last_updated_at).toLocaleDateString()}`,
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                {isInsights3 && (
+                  <Action.Push title="Show Details" icon={Icon.Sidebar} target={<FormInsights form={form} />} />
+                )}
+                <Action.Push icon={Icon.Coin} title="Show Responses" target={<FormResponses form={form} />} />
+                <FormActions form={form} />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
       {forms && forms.length === 0 && (
         <List.EmptyView
           icon={{
@@ -137,33 +91,11 @@ function Forms({ workspace, clientHttp }: { workspace: Workspace; clientHttp: ty
   );
 }
 
-function FormInsights({ form, clientHttp }: { form: FormOverview; clientHttp: typeof got }) {
-  const [insights, setInsights] = useState<InsightsResponse | null>(null);
-  const [formDefinition, setFormDefinition] = useState<FormDefinition | null>(null);
-  const [error, setError] = useState<string | null>(null);
+function FormInsights({ form }: { form: FormOverview }) {
+  const { isLoading: isLoadingInsights, data: insights } = useGetFormInsights(form.id);
+  const { isLoading: isLoadingForm, data: formDefinition } = useGetForm(form.id);
 
-  useEffect(() => {
-    if (insights || formDefinition || error) {
-      return;
-    }
-    Promise.all([
-      clientHttp.get<InsightsResponse>(`forms/${form.id}/insights/metrics`),
-      clientHttp.get<FormDefinition>(`forms/${form.id}`),
-    ])
-
-      .then(([insightsResponse, formDefinitionResponse]) => {
-        setInsights(insightsResponse.body);
-        setFormDefinition(formDefinitionResponse.body);
-      })
-      .catch((e) => {
-        console.error(e);
-        const errorMessage = "Fetch data failed. Try later.";
-        setError(errorMessage);
-        return showErrorToast(errorMessage);
-      });
-  }, [insights, formDefinition, error]);
-
-  const isLoading = insights === null && formDefinition === null && error === null;
+  const isLoading = isLoadingInsights || isLoadingForm;
 
   if (insights === null || formDefinition === null) {
     return <Detail navigationTitle={form.title} markdown={``} />;
@@ -179,24 +111,31 @@ function FormInsights({ form, clientHttp }: { form: FormOverview; clientHttp: ty
         </ActionPanel>
       }
       metadata={
-        <Detail.Metadata>
-          <Detail.Metadata.Label title="Views" text={`${insights.Metrics.totals.segmented_views.open}`} />
-          <Detail.Metadata.Label title="Starts" text={`${insights.Metrics.totals.submission_starts}`} />
-          <Detail.Metadata.Label title="Submissions" text={`${insights.Metrics.totals.submissions}`} />
-          <Detail.Metadata.Label title="Completion Rate" text={`${insights.Metrics.totals.completion_rate}%`} />
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.TagList title="Other data">
-            <Detail.Metadata.TagList.Item text={`lang: ${formDefinition.settings.language}`} color="#0487af" />
-            <Detail.Metadata.TagList.Item
-              text={`public: ${form.settings.is_public ? "true" : "false"}`}
-              color={form.settings.is_public ? "#0de60d" : "#e61f0d"}
+        insights &&
+        formDefinition && (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="Views" text={`${insights.Metrics.totals.segmented_views.open}`} />
+            <Detail.Metadata.Label title="Starts" text={`${insights.Metrics.totals.submission_starts}`} />
+            <Detail.Metadata.Label title="Submissions" text={`${insights.Metrics.totals.submissions}`} />
+            <Detail.Metadata.Label title="Completion Rate" text={`${insights.Metrics.totals.completion_rate}%`} />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.TagList title="Other data">
+              <Detail.Metadata.TagList.Item text={`lang: ${formDefinition.settings.language}`} color="#0487af" />
+              <Detail.Metadata.TagList.Item
+                text={`public: ${form.settings.is_public ? "true" : "false"}`}
+                color={form.settings.is_public ? "#0de60d" : "#e61f0d"}
+              />
+            </Detail.Metadata.TagList>
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Link title="Open" target={form._links.display} text="Fill it" />
+            <Detail.Metadata.Link title="Edit" target={`${ADMIN_FORM_BASE_URL}${form.id}/create`} text="Open admin" />
+            <Detail.Metadata.Link
+              title="Results"
+              target={`${ADMIN_FORM_BASE_URL}${form.id}/results`}
+              text="Open admin"
             />
-          </Detail.Metadata.TagList>
-          <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="Open" target={form._links.display} text="Fill it" />
-          <Detail.Metadata.Link title="Edit" target={`${ADMIN_FORM_BASE_URL}${form.id}/create`} text="Open admin" />
-          <Detail.Metadata.Link title="Results" target={`${ADMIN_FORM_BASE_URL}${form.id}/results`} text="Open admin" />
-        </Detail.Metadata>
+          </Detail.Metadata>
+        )
       }
       markdown={`
 # ${form.title}
@@ -226,6 +165,7 @@ function FormActions({ form }: { form: FormOverview }) {
         }}
       />
       <Action.CopyToClipboard
+        // eslint-disable-next-line @raycast/prefer-title-case
         title="Copy Form ID"
         content={form.id}
         shortcut={{
@@ -246,13 +186,43 @@ function FormActions({ form }: { form: FormOverview }) {
 }
 
 function OpenWorkspaceInAdminAction({ link }: { link: string }) {
-  return <Action.OpenInBrowser title="Open in Typeform" url={adminUrl(link)} />;
+  return <OpenInTypeform url={adminUrl(link)} />;
 }
 
-async function showErrorToast(errorMessage: string) {
-  const options: Toast.Options = {
-    style: Toast.Style.Failure,
-    title: errorMessage,
-  };
-  await showToast(options);
+function FormResponses({ form }: { form: FormOverview }) {
+  const { isLoading, data: responses } = useGetFormResponses(form.id);
+  return (
+    <List isLoading={isLoading} isShowingDetail>
+      {responses.map((response) => (
+        <List.Item
+          key={response.response_id}
+          icon={response.response_type === "completed" ? Icon.Check : Icon.Ellipsis}
+          title={format(new Date(response.submitted_at), "d MMM yyyy")}
+          subtitle={format(new Date(response.submitted_at), "hh:mm")}
+          detail={
+            <List.Item.Detail
+              markdown={response.answers
+                .map((answer) => {
+                  const key = Object.keys(answer).find((k) => k !== "field" && k !== "type") as keyof typeof answer;
+                  return `- ${JSON.stringify(answer[key])}`;
+                })
+                .join(`\n`)}
+            />
+          }
+          actions={
+            <ActionPanel>
+              <OpenInTypeform
+                title="View Responses in Typeform"
+                url={`${ADMIN_FORM_BASE_URL}form/${form.id}/results#responses`}
+              />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
+}
+
+function OpenInTypeform(props: { title?: string; url: string }) {
+  return <Action.OpenInBrowser icon="tf.png" title={props.title || "Open in Typeform"} url={props.url} />;
 }

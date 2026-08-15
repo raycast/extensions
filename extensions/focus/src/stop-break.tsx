@@ -1,16 +1,16 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, showToast, showHUD } from "@raycast/api";
 import { getProfileNames, stopBreak, stopBreakWithProfile } from "./utils";
 import { ensureFocusIsRunning } from "./helpers";
 
 export default async function Command() {
+  if (!(await ensureFocusIsRunning())) {
+    return;
+  }
+
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Stopping break...",
   });
-
-  if (!(await ensureFocusIsRunning())) {
-    return;
-  }
 
   const profiles = await getProfileNames();
   const firstProfile = profiles[0];
@@ -22,10 +22,7 @@ export default async function Command() {
       await stopBreakWithProfile(firstProfile);
     }
     await toast.hide();
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Break stopped",
-    });
+    await showHUD("Break stopped");
   } catch (error) {
     await toast.hide();
     await showToast({

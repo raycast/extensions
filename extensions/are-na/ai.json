@@ -1,0 +1,48 @@
+{
+  "instructions": "These tools call the Are.na v3 API for the user's connected account. Channel visibility: public = open to everyone; closed = visible but not open; private = restricted. Prefer search-arena when the user is exploring or does not have a channel/block id. Block links are always https://www.are.na/block/{id} (singular /block/). After search results, offer concise summaries with titles and URLs. For write actions, only use create-channel when the user explicitly wants a new channel; it will ask them to confirm in Raycast.",
+  "evals": [
+    {
+      "input": "@are-na Who am I on Are.na?",
+      "mocks": {
+        "get-me": {
+          "user": {
+            "id": 1,
+            "slug": "demo-user",
+            "full_name": "Demo User",
+            "username": "demo-user",
+            "channel_count": 3,
+            "url": "https://www.are.na/demo-user"
+          }
+        }
+      },
+      "expected": [{ "callsTool": "get-me" }],
+      "usedAsExample": true
+    },
+    {
+      "input": "@are-na Search Are.na for design systems",
+      "mocks": {
+        "search-arena": {
+          "query": "design systems",
+          "page": 1,
+          "per": 24,
+          "total_count": 0,
+          "has_more": false,
+          "channels": [],
+          "blocks": [],
+          "users": []
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-arena",
+            "arguments": {
+              "query": { "includes": "design" }
+            }
+          }
+        }
+      ],
+      "usedAsExample": true
+    }
+  ]
+}

@@ -120,7 +120,7 @@
     "@raycast/utils": "1.7.0",
     "got": "12.5.3",
     "human-date": "1.4.0",
-    "node-vault": "0.9.22"
+    "node-vault": "^0.12.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "1.0.5",

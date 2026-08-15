@@ -17,7 +17,7 @@ export async function updateChat(chat: Chat, newData: Chat) {
     const oldChatFile = `${chatsDir}/${chat.name}.txt`;
     const newChatFile = `${chatsDir}/${newData.name}.txt`;
     fs.renameSync(oldChatFile, newChatFile);
-    await LocalStorage.removeItem(`--chat-${name}`);
+    await LocalStorage.removeItem(`--chat-${chat.name}`);
   }
   await LocalStorage.setItem(`--chat-${newData.name}`, JSON.stringify(newData));
 }

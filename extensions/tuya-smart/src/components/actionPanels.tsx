@@ -34,6 +34,8 @@ export function CommandActionPanel(props: {
   command: FunctionItem;
   newName?: string;
   onAction: (props: { result: boolean; command: FunctionItem }) => void;
+  onTogglePinSwitch?: (deviceId: string, commandCode: string) => void;
+  isPinned?: boolean;
 }): JSX.Element {
   const deviceId = props.device.id;
   const commandValue = props.command.value;
@@ -49,6 +51,14 @@ export function CommandActionPanel(props: {
             command={props.command}
             value={commandValue}
             onAction={props.onAction}
+          />
+        )}
+        {props.onTogglePinSwitch && props.isPinned !== undefined && (
+          <Actions.SwitchPinAction
+            deviceId={deviceId}
+            commandCode={props.command.code}
+            isPinned={props.isPinned}
+            onTogglePin={props.onTogglePinSwitch}
           />
         )}
         <Action.Push

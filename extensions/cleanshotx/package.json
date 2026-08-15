@@ -6,11 +6,14 @@
   "icon": "command-icon.png",
   "author": "Aayush9029",
   "contributors": [
-    "thomaslombart",
     "lukaszmtw",
     "erics118",
     "mlnchk",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "0xdhrv"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "license": "MIT",
   "commands": [
@@ -410,18 +413,35 @@
       "icon": "capture-area-ai-chat.png",
       "mode": "no-view",
       "subtitle": "CleanShot X"
+    },
+    {
+      "name": "record-screen-preset",
+      "title": "Record Screen at Preset",
+      "subtitle": "CleanShot X",
+      "description": "Start a screen recording at a chosen preset resolution",
+      "icon": "record-screen.png",
+      "mode": "view"
+    },
+    {
+      "name": "manage-recording-presets",
+      "title": "Manage Recording Presets",
+      "subtitle": "CleanShot X",
+      "description": "Add, edit, and delete custom recording resolution presets",
+      "icon": "open-settings.png",
+      "mode": "view"
     }
   ],
   "categories": [
     "Applications"
   ],
   "dependencies": {
-    "@raycast/api": "^1.73.3"
+    "@raycast/api": "^1.73.3",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "20.12.12",
-    "@types/react": "18.3.2",
+    "@types/react": "^19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.2.5",
     "typescript": "^5.2.2"
@@ -432,5 +452,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

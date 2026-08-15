@@ -28,8 +28,17 @@ const headers = {
   "Content-Type": "application/json",
 };
 
-const callApi = async <T>(endpoint: string, method: APIMethod, body?: BodyRequest) => {
-  await showToast(Toast.Style.Animated, "Processing...");
+export type ApiToastVerbosity = "verbose" | "error";
+
+const callApi = async <T>(
+  endpoint: string,
+  method: APIMethod,
+  body?: BodyRequest,
+  verbosity: ApiToastVerbosity = "verbose",
+) => {
+  if (verbosity === "verbose") {
+    await showToast(Toast.Style.Animated, "Processing...");
+  }
   try {
     const apiResponse = await fetch(API_URL + endpoint, {
       method,
@@ -52,7 +61,9 @@ const callApi = async <T>(endpoint: string, method: APIMethod, body?: BodyReques
     }
 
     const response = await apiResponse.json();
-    await showToast(Toast.Style.Success, `Success`);
+    if (verbosity === "verbose") {
+      await showToast(Toast.Style.Success, `Success`);
+    }
     return response as T;
   } catch (err) {
     const error = "Failed to execute request. Please try again later.";
@@ -62,8 +73,8 @@ const callApi = async <T>(endpoint: string, method: APIMethod, body?: BodyReques
 };
 
 // Mailboxes
-export async function getMailboxes(domain: string) {
-  return await callApi<{ mailboxes: Mailbox[] }>(`domains/${domain}/mailboxes`, "GET");
+export async function getMailboxes(domain: string, verbosity: ApiToastVerbosity = "verbose") {
+  return await callApi<{ mailboxes: Mailbox[] }>(`domains/${domain}/mailboxes`, "GET", undefined, verbosity);
 }
 export async function createMailbox(domain: string, newMailbox: MailboxCreate) {
   return await callApi<Mailbox>(`domains/${domain}/mailboxes`, "POST", newMailbox);

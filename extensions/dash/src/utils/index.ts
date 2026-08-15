@@ -6,7 +6,7 @@ export const getFilteredDocsets = (docsets: Docset[], searchText: string) =>
   docsets.filter(
     (docset) =>
       docset.docsetName.toLowerCase().includes(searchText.toLowerCase()) ||
-      docset.docsetKeyword.toLowerCase().includes(searchText.toLowerCase())
+      docset.docsetKeyword.toLowerCase().includes(searchText.toLowerCase()),
   );
 
 export const getDocsetByKeyword = (docsets: Docset[], keyword: string) => {
@@ -15,13 +15,13 @@ export const getDocsetByKeyword = (docsets: Docset[], keyword: string) => {
 };
 
 export const createDeeplinkForDocset = (docset: string) => {
-  let deeplink = `raycast://extensions/${pkg.author}/dash/docset`;
+  let deeplink = `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/${pkg.author}/dash/docset`;
   const url = new URL(deeplink);
   url.searchParams.set(
     "arguments",
     JSON.stringify({
       docset,
-    })
+    }),
   );
   deeplink = url.toString();
   return deeplink;

@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mutedeck",
+  "title": "MuteDeck",
+  "description": "Control your meetings from Raycast: toggle mute, camera, screen share and recording via MuteDeck, with a live Meeting Deck grid.",
+  "icon": "icon.png",
+  "author": "chad_walters",
+  "contributors": ["smitmartijn"],
+  "categories": ["Applications", "Communication", "Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-status",
+      "title": "Meeting Deck",
+      "subtitle": "MuteDeck",
+      "description": "A live Stream Deck-style grid of your meeting controls.",
+      "mode": "view",
+      "icon": "deck.png"
+    },
+    {
+      "name": "toggle-microphone",
+      "title": "Toggle Microphone",
+      "subtitle": "MuteDeck",
+      "description": "Mute or unmute your microphone.",
+      "mode": "no-view",
+      "icon": "microphone.png"
+    },
+    {
+      "name": "toggle-video",
+      "title": "Toggle Camera",
+      "subtitle": "MuteDeck",
+      "description": "Turn your camera on or off.",
+      "mode": "no-view",
+      "icon": "camera.png"
+    },
+    {
+      "name": "toggle-share",
+      "title": "Toggle Screen Share",
+      "subtitle": "MuteDeck",
+      "description": "Start or stop sharing your screen.",
+      "mode": "no-view",
+      "icon": "share.png"
+    },
+    {
+      "name": "toggle-record",
+      "title": "Toggle Recording",
+      "subtitle": "MuteDeck",
+      "description": "Start or stop the meeting recording.",
+      "mode": "no-view",
+      "icon": "record.png"
+    },
+    {
+      "name": "leave-meeting",
+      "title": "Leave Meeting",
+      "subtitle": "MuteDeck",
+      "description": "Leave the current meeting.",
+      "mode": "no-view",
+      "icon": "door.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiEndpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "API Endpoint",
+      "description": "Base URL of the MuteDeck HTTP API.",
+      "default": "http://localhost:3491",
+      "placeholder": "http://localhost:3491"
+    },
+    {
+      "name": "wsEndpoint",
+      "type": "textfield",
+      "required": false,
+      "title": "WebSocket Endpoint",
+      "description": "MuteDeck WebSocket URL, used for Bring to Front.",
+      "default": "ws://localhost:3492",
+      "placeholder": "ws://localhost:3492"
+    },
+    {
+      "name": "confirmMuteInPresentation",
+      "type": "checkbox",
+      "required": false,
+      "title": "Confirm Mute While Presenting",
+      "description": "Ask before toggling the microphone while sharing or recording.",
+      "default": true,
+      "label": "Show confirmation dialog"
+    },
+    {
+      "name": "confirmVideoInPresentation",
+      "type": "checkbox",
+      "required": false,
+      "title": "Confirm Video While Presenting",
+      "description": "Ask before toggling the camera while sharing or recording.",
+      "default": true,
+      "label": "Show confirmation dialog"
+    },
+    {
+      "name": "confirmLeave",
+      "type": "checkbox",
+      "required": false,
+      "title": "Confirm Leave Meeting",
+      "description": "Ask before leaving a meeting.",
+      "default": true,
+      "label": "Show confirmation dialog"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.100.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "8.57.1",
+    "prettier": "3.5.1",
+    "typescript": "5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

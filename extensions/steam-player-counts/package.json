@@ -1,0 +1,38 @@
+{
+  "name": "steam-player-counts",
+  "title": "Steam Player Counts",
+  "description": "Check active player counts for the top popular Steam games",
+  "icon": "extension-icon.png",
+  "author": "okgloor",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "steamPlayerCounts",
+      "title": "Show Steam Player Counts",
+      "description": "Display current player counts for the top popular Steam games",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.94.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "^19.1.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "format": "prettier --write 'src/**/*.{js,jsx,ts,tsx,json,css,md}'",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

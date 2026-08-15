@@ -89,3 +89,29 @@ export type Internationalization = {
 export type SiteIndexItem = { title: string; link: string };
 
 export type SiteIndex = Record<string, SiteIndexItem[]>;
+
+export type RssResponse = {
+  rss: {
+    version: string;
+    channel: RssChannel;
+  };
+};
+
+type RssChannel = {
+  title: string;
+  link: string;
+  description: string;
+  language?: string;
+  lastBuildDate?: string;
+  pubDate?: string;
+  item: RssItem[];
+};
+
+export type RssItem = {
+  title: string;
+  link: string;
+  description: string;
+  author?: string;
+  guid?: string;
+  pubDate?: string;
+};

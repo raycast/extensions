@@ -1,10 +1,33 @@
 # Convert Changelog
 
+## [Update] - 2026-06-26
+
+- Added support for alpha as percentage in hsl()
+- Fixed HEXA alpha
+- Extract hsl regex matching function and add unit tests
+- Bump `@raycast/eslint-config` and move it to devDependencies
+
+## [Update] - 2026-06-25
+
+- Added support for modern space-separated hsl() color syntax
+
+## [Update] - 2026-01-13
+
+- Added OKLCH color conversion
+
+## [Feat: Windows Support] - 2025-10-05
+
+- Introduced Windows platform compatibility
+- Upgraded dependencies to latest versions
+- Migrated ESLint configuration to flat config format
+
 ## [Update] - 2023-06-14
+
 - Updated colors from `v3.2.4` to `v3.3.2`
 - Added conversion to Tailwind Spacing or to Tailwind Arbitrary Value (https://github.com/raycast/extensions/issues/4274)
 
 ## [Update & bugfix] - 2022-12-21
+
 - Updated packages to latest versions
 - Added "show closest Tailwind CSS color"
 - Fixed [bug](https://github.com/raycast/extensions/issues/3914) where non whole pixels breaks the rem calculation

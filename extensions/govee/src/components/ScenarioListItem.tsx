@@ -15,7 +15,7 @@ export type ScenarioListItemProps = {
 function getQuickLinkForApp(scenarioId: string): string {
   const context = JSON.stringify({ scenario: scenarioId });
   const encodedContext = encodeURIComponent(context);
-  return `raycast://extensions/j3lte/govee/control-govee-lights?context=${encodedContext}`;
+  return `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/j3lte/govee/control-govee-lights?context=${encodedContext}`;
 }
 
 const ScenarioListItem = ({ scenario, scenariosHook, availableDeviceNames, execute }: ScenarioListItemProps) => {

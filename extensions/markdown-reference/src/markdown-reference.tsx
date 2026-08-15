@@ -39,7 +39,7 @@ const MarkdownReference = () => {
                         description={result.description}
                         examples={result.examples}
                         additional_examples={result.additional_examples}
-                      />
+                      />,
                     )
                   }
                 />

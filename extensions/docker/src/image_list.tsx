@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from '@raycast/api';
+import { Action, ActionPanel, Color, Icon, Keyboard, List } from '@raycast/api';
 import { useDocker } from './docker';
 import { useDockerode } from './docker/dockerode';
 import { formatBytes, imageTitle } from './docker/image';
@@ -33,15 +33,20 @@ export default function ImageList() {
               <Action.Push
                 title="Inspect"
                 icon={{ source: Icon.Binoculars }}
-                shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                shortcut={{
+                  macOS: { modifiers: ['cmd'], key: 'i' },
+                  windows: { modifiers: ['ctrl'], key: 'i' },
+                }}
                 target={<ImageDetail imageId={image.Id} />}
               />
               <Action
                 title="Remove Image"
-                icon={{ source: Icon.Trash, tintColor: Color.Red }}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'x' }}
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
                 onAction={withToast({
                   action: () => removeImage(image),
+                  onStart: () => `Removing image ${imageTitle(image)}`,
                   onSuccess: () => `Image ${imageTitle(image)} removed`,
                   onFailure: ({ message }) => message,
                 })}
@@ -50,7 +55,10 @@ export default function ImageList() {
                 target={<CrateContainer imageId={image.Id} />}
                 title="Create Container"
                 icon={{ source: Icon.Plus }}
-                shortcut={{ modifiers: ['cmd', 'shift'], key: 'c' }}
+                shortcut={{
+                  macOS: { modifiers: ['cmd', 'shift'], key: 'c' },
+                  windows: { modifiers: ['ctrl', 'shift'], key: 'c' },
+                }}
               />
             </ActionPanel>
           }

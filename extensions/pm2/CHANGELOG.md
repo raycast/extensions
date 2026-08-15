@@ -1,5 +1,40 @@
 # Raycast PM2
 
+## [Enhancement] - 2026-05-04
+
+- Use PM2's programmatic API directly instead of the bundled wrapper
+- Upgrade PM2 to 7.0
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2026-03-16
+
+- Update transitive `systeminformation` dependency to 5.31.4 to address command injection CVEs
+
+## [Routine Maintenance] - 2026-02-16
+
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-03-24
+
+- Upgrade pm2 to 6.0.5
+- Bump all dependencies to the latest
+
+## [Chore & Fixes] - 2024-11-21
+
+- Hide example button while loading
+- Bump all dependencies to the latest
+
+## [Chore & Fixes] - 2024-10-11
+
+- Use `nano-spawn` instead of `execa`
+- Fix child-process executors
+- Bump all dependencies to the latest
+
+## [Enhancement] - 2024-10-04
+
+- Optimize extension file size
+- Bump dependencies to the latest
+
 ## [Enhancement] - 2024-07-16
 
 - Bump dependencies

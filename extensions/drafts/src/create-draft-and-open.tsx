@@ -2,7 +2,7 @@ import { Action, ActionPanel, closeMainWindow, Form, popToRoot, showToast, Toast
 import { useState } from "react";
 import Style = Toast.Style;
 import { CallbackUrl } from "./utils/CallbackUrlUtils";
-import { CallbackBasUrls, StorageDefines } from "./utils/Defines";
+import { CallbackBaseUrls, StorageDefines } from "./utils/Defines";
 import { LocalStorage } from "@raycast/api";
 import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 
@@ -66,7 +66,7 @@ export default function Command() {
       return;
     }
 
-    const callbackUrl = new CallbackUrl(CallbackBasUrls.CREATE_DRAFT);
+    const callbackUrl = new CallbackUrl(CallbackBaseUrls.CREATE_DRAFT);
     if (values.tags != "") {
       const tags = values.tags.split(",");
       addTagsToRecentTags(tags);

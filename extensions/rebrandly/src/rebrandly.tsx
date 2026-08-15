@@ -1,101 +1,271 @@
-import { useEffect, useMemo } from "react";
-
-import { getLinks } from "./data";
-import { useStore } from "./store";
-
 import {
   ActionPanel,
-  CopyToClipboardAction,
   Icon,
   List,
-  OpenInBrowserAction,
-  popToRoot,
+  Action,
+  Form,
+  Keyboard,
+  useNavigation,
+  Alert,
+  Color,
+  confirmAlert,
   showToast,
-  ToastStyle,
+  Toast,
 } from "@raycast/api";
+import { parseResponse, useGetLinks } from "./hooks";
+import { getFavicon, showFailureToast, useFetch, useForm } from "@raycast/utils";
+import { useState } from "react";
+import { API_HEADERS, API_URL } from "./config";
+import { BrandedLink } from "./interfaces";
 
 export default function Rebrandly() {
-  const { isLoading, links, pushLinks } = useStore();
+  const [filter, setFilter] = useState("");
+  const { isLoading, data: links, pagination, revalidate, mutate } = useGetLinks();
+  const filteredLinks = !filter
+    ? links
+    : links.filter((link) => {
+        if (filter === "starred") return link.favourite;
+        if (filter === "notStarred") return !link.favourite;
+        return link;
+      });
 
-  const lastId = useMemo(() => links[links.length - 1]?.id, [links]);
+  async function confirmAndDelete(link: BrandedLink) {
+    const options: Alert.Options = {
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+      title: `Delete '${link.title}'?`,
+      message: link.shortUrl,
+      primaryAction: {
+        title: "Delete",
+        style: Alert.ActionStyle.Destructive,
+      },
+    };
 
-  // fetch more links on last item selection or manual action
-  async function handleSelectionChange(selectedId = lastId) {
-    if (links.length > 0 && selectedId == lastId) {
-      const toast = await showToast(ToastStyle.Animated, "Fetching more links");
-      const next = await getLinks(lastId);
-      if (next.length > 0) {
-        pushLinks(...next);
+    if (await confirmAlert(options)) {
+      const toast = await showToast(Toast.Style.Animated, "Deleting link", link.title);
+      try {
+        await mutate(
+          fetch(API_URL + `links/${link.id}`, {
+            method: "DELETE",
+            headers: API_HEADERS,
+          }).then((res) => parseResponse(res)),
+          {
+            optimisticUpdate(data) {
+              return data.filter((l) => l.id !== link.id);
+            },
+            shouldRevalidateAfter: false,
+          },
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted link";
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `${error}`;
       }
-      await toast.hide();
     }
   }
-
-  // initial callback fetching first 25 shortlinks
-  useEffect(() => {
-    async function initial() {
-      try {
-        useStore.setState({ links: await getLinks() });
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-          await showToast(ToastStyle.Failure, "Failed fetching links", error.message);
-          await popToRoot({ clearSearchBar: true });
-        }
-      }
-      useStore.setState({ isLoading: false });
-    }
-
-    void initial();
-  }, []);
 
   return (
     <List
       isLoading={isLoading}
-      navigationTitle="Browse shortlinks"
       searchBarPlaceholder="Search by title or slashtag"
       throttle
+      pagination={pagination}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter" onChange={setFilter}>
+          <List.Dropdown.Item icon={Icon.Link} title="All" value="" />
+          <List.Dropdown.Section>
+            <List.Dropdown.Item icon={Icon.Star} title="Starred" value="starred" />
+            <List.Dropdown.Item icon={Icon.StarDisabled} title="Not Starred" value="notStarred" />
+          </List.Dropdown.Section>
+        </List.Dropdown>
+      }
     >
-      <List.Section title="Links">
-        {links.map((link) => (
-          <List.Item
-            key={link.id}
-            accessoryTitle={link.shortUrl}
-            actions={
-              <ActionPanel>
-                <OpenInBrowserAction url={`${link.https ? "https" : "http"}://${link.shortUrl}`} />
-                <CopyToClipboardAction content={`${link.https ? "https" : "http"}://${link.shortUrl}`} />
-                <ActionPanel.Item
-                  icon={{ source: Icon.ChevronDown }}
-                  onAction={() => handleSelectionChange()}
-                  title="Fetch more links"
-                />
-              </ActionPanel>
-            }
-            icon={{ source: Icon.Link }}
-            id={link.id}
-            keywords={[link.title, link.shortUrl, link.slashtag]}
-            title={link.title.length > 48 ? `${link.title.substr(0, 48)}...` : link.title}
-          />
-        ))}
-      </List.Section>
-
-      <List.Section title="More Actions">
-        {!isLoading && (
-          <List.Item
-            actions={
-              <ActionPanel>
-                <ActionPanel.Item
-                  icon={{ source: Icon.ChevronDown }}
-                  onAction={() => handleSelectionChange()}
-                  title="Fetch more links"
-                />
-              </ActionPanel>
-            }
-            icon={{ source: Icon.ChevronDown }}
-            title="Fetch more links"
-          />
-        )}
+      <List.Section title={`${links.length} Links`}>
+        {filteredLinks.map((link) => {
+          const icon = getFavicon(link.destination, { fallback: Icon.Globe });
+          const url = `${link.https ? "https" : "http"}://${link.shortUrl}`;
+          return (
+            <List.Item
+              key={link.id}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser icon={icon} url={url} />
+                  <Action.CopyToClipboard content={url} />
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    title="Update Link"
+                    target={<UpdateLink link={link} onUpdate={revalidate} />}
+                    shortcut={Keyboard.Shortcut.Common.Edit}
+                  />
+                  <Action.Push
+                    icon={Icon.Plus}
+                    title="Create New Link"
+                    target={<CreateNewLink onCreate={revalidate} />}
+                    shortcut={Keyboard.Shortcut.Common.New}
+                  />
+                  <Action
+                    icon={Icon.Trash}
+                    title="Delete Link"
+                    onAction={() => confirmAndDelete(link)}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    style={Action.Style.Destructive}
+                  />
+                </ActionPanel>
+              }
+              icon={icon}
+              id={link.id}
+              keywords={[link.shortUrl, link.slashtag]}
+              title={link.title.length > 48 ? `${link.title.substr(0, 48)}...` : link.title}
+              subtitle={link.shortUrl}
+              accessories={[
+                link.favourite ? { icon: Icon.Star } : {},
+                { text: `${link.clicks} clicks` },
+                { date: new Date(link.createdAt), tooltip: link.createdAt },
+              ]}
+            />
+          );
+        })}
       </List.Section>
     </List>
+  );
+}
+
+function CreateNewLink({ onCreate }: { onCreate: () => void }) {
+  const { pop } = useNavigation();
+  const [execute, setExecute] = useState(false);
+  interface FormValues {
+    destination: string;
+    slashtag: string;
+    title: string;
+  }
+  const { itemProps, handleSubmit, values } = useForm<FormValues>({
+    onSubmit() {
+      setExecute(true);
+    },
+    validation: {
+      destination(value) {
+        if (!value) return "The item is required";
+        try {
+          new URL(value);
+        } catch {
+          return "Must be a valid URL";
+        }
+      },
+    },
+  });
+  const { isLoading } = useFetch(API_URL + "links", {
+    method: "POST",
+    headers: API_HEADERS,
+    body: JSON.stringify(values),
+    execute,
+    parseResponse,
+    onData() {
+      onCreate();
+      pop();
+    },
+    async onError(error) {
+      await showFailureToast(error);
+      setExecute(false);
+    },
+  });
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Plus} title="New Link" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField
+        title="Destination URL"
+        placeholder="Type or paste a link (URL)"
+        info="Destination URL is the long link you want to shorten and rebrand"
+        {...itemProps.destination}
+      />
+      <Form.Separator />
+      <Form.Description text="OPTIONAL" />
+      <Form.TextField
+        title="Signature slug"
+        placeholder="Signature slug (eg. card)"
+        info="The keyword portion of your branded short link. A random one (as short as possible according to the branded domain you use) will be auto-generated if you do not specify one"
+        {...itemProps.slashtag}
+      />
+      <Form.TextField
+        title="Link title"
+        placeholder="A random title will be assigned"
+        info="A title you assign to the branded short link in order to remember what's behind it."
+        {...itemProps.title}
+      />
+    </Form>
+  );
+}
+
+function UpdateLink({ link, onUpdate }: { link: BrandedLink; onUpdate: () => void }) {
+  const { pop } = useNavigation();
+  const [execute, setExecute] = useState(false);
+  interface FormValues {
+    destination: string;
+    title: string;
+  }
+  const { itemProps, handleSubmit, values } = useForm<FormValues>({
+    onSubmit() {
+      setExecute(true);
+    },
+    initialValues: {
+      destination: link.destination,
+      title: link.title,
+    },
+    validation: {
+      destination(value) {
+        if (!value) return "The item is required";
+        try {
+          new URL(value);
+        } catch {
+          return "Must be a valid URL";
+        }
+      },
+    },
+  });
+  const { isLoading } = useFetch(API_URL + "links/" + link.id, {
+    method: "POST",
+    headers: API_HEADERS,
+    body: JSON.stringify(values),
+    execute,
+    parseResponse,
+    onData() {
+      onUpdate();
+      pop();
+    },
+    async onError(error) {
+      await showFailureToast(error);
+      setExecute(false);
+    },
+  });
+  return (
+    <Form
+      isLoading={isLoading}
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Pencil} title="Update Link" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.Description title="ID" text={link.id} />
+      <Form.TextField
+        title="Destination URL"
+        placeholder="Type or paste a link (URL)"
+        info="Destination URL is the long link you want to shorten and rebrand"
+        {...itemProps.destination}
+      />
+      <Form.Separator />
+      <Form.Description text="OPTIONAL" />
+      <Form.TextField
+        title="Link title"
+        placeholder="A random title will be assigned"
+        info="A title you assign to the branded short link in order to remember what's behind it."
+        {...itemProps.title}
+      />
+    </Form>
   );
 }

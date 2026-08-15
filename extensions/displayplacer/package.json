@@ -5,6 +5,9 @@
   "description": "Manage favorite display configurations",
   "icon": "displayplacer.png",
   "author": "eluce2",
+  "contributors": [
+    "LBBO"
+  ],
   "license": "MIT",
   "preferences": [
     {
@@ -79,11 +82,13 @@
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

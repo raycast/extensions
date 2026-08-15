@@ -1,35 +1,39 @@
 import { ActionPanel, Detail } from '@raycast/api';
 import { OpenInYnabAction } from '@components/actions';
 import { BudgetDetailSummary } from '@srcTypes';
-import { formatToReadablePrice, getCurrentMonth } from '@lib/utils';
+import { formatToReadableAmount, getCurrentMonth } from '@lib/utils';
 
 export function BudgetDetails({ budget }: { budget: BudgetDetailSummary | undefined }) {
-  const currentMonthBudget = budget?.months?.at(0);
+  const now = new Date();
+  const currentMonthBudget = budget?.months?.find(
+    (month) => month.month === `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`,
+  );
   const currency = budget?.currency_format;
 
   if (!currentMonthBudget) return null;
 
   const markdown = `
-  # ${getCurrentMonth()}
+# ${getCurrentMonth()}
 
-  - **Budgeted**: ${formatToReadablePrice({
+- **Budgeted**: ${formatToReadableAmount({
     amount: currentMonthBudget?.budgeted ?? 0,
     currency,
   })}
-  - **Activity this month**: ${formatToReadablePrice({
+- **Activity this month**: ${formatToReadableAmount({
     amount: currentMonthBudget.activity,
     currency,
   })}
-  - **Age of Money**: ${currentMonthBudget.age_of_money ?? 0} days
-  - **To be Budgeted**: ${formatToReadablePrice({
+- **Age of Money**: ${currentMonthBudget.age_of_money ?? 0} days
+- **To be Budgeted**: ${formatToReadableAmount({
     amount: currentMonthBudget.to_be_budgeted,
     currency,
   })}
-  - **Income**: ${formatToReadablePrice({
+- **Income**: ${formatToReadableAmount({
     amount: currentMonthBudget.income,
     currency,
   })}
-  `;
+`;
+
   return (
     <Detail
       navigationTitle={`${getCurrentMonth()} Budget`}

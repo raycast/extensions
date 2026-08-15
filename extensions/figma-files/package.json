@@ -9,15 +9,20 @@
     "pernielsentikaer",
     "GLaDO8"
   ],
-  "version": "1.5.0",
+  "version": "1.6.2",
   "license": "MIT",
+  "keywords": [
+    "figma",
+    "search",
+    "design"
+  ],
   "preferences": [
     {
       "name": "PERSONAL_ACCESS_TOKEN",
       "type": "password",
       "required": false,
       "title": "Personal Access Token",
-      "description": "You can optionally use a personal access token to login, otherwise you will be prompted to login via the browser."
+      "description": "[Deprecated] You can optionally use a personal access token to login, otherwise you will be prompted to login via the browser."
     },
     {
       "name": "TEAM_ID",
@@ -42,26 +47,37 @@
       "description": "See your Figma most recent files at a glance",
       "mode": "menu-bar",
       "interval": "2h"
+    },
+    {
+      "name": "open-file-url-from-clipboard",
+      "title": "Open File URL from Clipboard",
+      "subtitle": "Figma",
+      "description": "Opens the Figma file URL currently in the clipboard.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.3",
-    "@raycast/utils": "^1.14.0",
-    "node-fetch": "^3.2.10"
+    "@raycast/api": "^1.104.19",
+    "@raycast/utils": "^2.2.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.3",
+    "@types/react": "^19.2.17",
+    "eslint": "^10.4.1",
+    "prettier": "^3.8.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

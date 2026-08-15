@@ -45,22 +45,21 @@ const ListProjects: React.FC = () => {
           actions={
             <ActionPanel>
               <ActionPanel.Section>
-                <Action.OpenInBrowser title="Project Settings" url={projectUrl(p.id, "settings")} />
-                <Action.OpenInBrowser title="Project Deployments" url={projectUrl(p.id, "deployments")} />
+                <Action.OpenInBrowser title="Project Architecture" url={projectUrl(p.id)} />
                 <Action.OpenInBrowser
-                  title="Latest Deployment"
-                  url={projectUrl(p.id, "deployments?open=true")}
+                  title="Project Settings"
+                  url={projectUrl(p.id, "settings")}
+                  shortcut={{ modifiers: ["cmd"], key: "s" }}
+                />
+                <Action.OpenInBrowser
+                  title="Project Observability"
+                  url={projectUrl(p.id, "observability")}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                />
+                <Action.OpenInBrowser
+                  title="Project Logs"
+                  url={projectUrl(p.id, "logs")}
                   shortcut={{ modifiers: ["cmd"], key: "l" }}
-                />
-                <Action.OpenInBrowser
-                  title="Project Variables"
-                  url={projectUrl(p.id, "variables")}
-                  shortcut={{ modifiers: ["cmd"], key: "v" }}
-                />
-                <Action.OpenInBrowser
-                  title="Project Metrics"
-                  url={projectUrl(p.id, "metrics")}
-                  shortcut={{ modifiers: ["cmd"], key: "m" }}
                 />
               </ActionPanel.Section>
 

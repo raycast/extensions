@@ -5,7 +5,17 @@
   "description": "Quickly check why GitHub is down today",
   "icon": "command-icon.png",
   "author": "FezVrasta",
+  "contributors": [
+    "j3lte"
+  ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
   "keywords": [
     "Productivity"
   ],
@@ -18,21 +28,591 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "get-github-status",
+      "title": "Get GitHub Status",
+      "description": "Fetches the current GitHub service status, incidents, and scheduled maintenances"
+    }
+  ],
+  "ai": {
+    "instructions": "Use the get-github-status tool to answer questions about GitHub's current service health. Component statuses are: 'operational' (working normally), 'partial_outage' (degraded), 'major_outage' (down). When reporting, lead with the overall status, then highlight any affected components or active incidents.",
+    "evals": [
+      {
+        "input": "@github-status Is GitHub down?",
+        "mocks": {
+          "get-github-status": {
+            "components": [
+              {
+                "name": "Git Operations",
+                "status": "operational"
+              },
+              {
+                "name": "Webhooks",
+                "status": "major_outage"
+              },
+              {
+                "name": "API Requests",
+                "status": "operational"
+              },
+              {
+                "name": "Issues",
+                "status": "operational"
+              },
+              {
+                "name": "Pull Requests",
+                "status": "operational"
+              },
+              {
+                "name": "Actions",
+                "status": "major_outage"
+              },
+              {
+                "name": "Packages",
+                "status": "operational"
+              },
+              {
+                "name": "Pages",
+                "status": "operational"
+              },
+              {
+                "name": "Codespaces",
+                "status": "operational"
+              },
+              {
+                "name": "Copilot",
+                "status": "operational"
+              }
+            ],
+            "description": "Partial System Outage",
+            "incidents": [
+              {
+                "components": [
+                  {
+                    "created_at": "2019-11-13T18:00:24.256Z",
+                    "description": "Real time HTTP callbacks of user-generated and system events",
+                    "group": false,
+                    "group_id": null,
+                    "id": "4230lsnqdsld",
+                    "name": "Webhooks",
+                    "only_show_if_degraded": false,
+                    "page_id": "kctbh9vrtdwd",
+                    "position": 2,
+                    "showcase": true,
+                    "start_date": null,
+                    "status": "major_outage",
+                    "updated_at": "2026-03-05T16:47:11.178Z"
+                  },
+                  {
+                    "created_at": "2019-11-13T18:02:19.432Z",
+                    "description": "Workflows, Compute and Orchestration for GitHub Actions",
+                    "group": false,
+                    "group_id": null,
+                    "id": "br0l2tvcx85d",
+                    "name": "Actions",
+                    "only_show_if_degraded": false,
+                    "page_id": "kctbh9vrtdwd",
+                    "position": 7,
+                    "showcase": true,
+                    "start_date": null,
+                    "status": "major_outage",
+                    "updated_at": "2026-03-05T16:41:14.494Z"
+                  }
+                ],
+                "created_at": "2026-03-05T16:35:32.421Z",
+                "id": "g5gnt5l5hf56",
+                "impact": "major",
+                "incident_updates": [
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "The queue of requested Actions jobs continues to make progress.  Job delays are now approximately 6 minutes and continuing to decrease.",
+                    "created_at": "2026-03-05T18:15:56.106Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T18:15:56.106Z",
+                    "id": "9ssq2qhjp03z",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T18:15:56.106Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "We are back to queueing Actions workflow runs at nominal rates and we are monitoring the clearing of queued runs during the incident.",
+                    "created_at": "2026-03-05T17:48:26.220Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T17:48:26.220Z",
+                    "id": "l2nb5s89szjq",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T17:48:26.220Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "We have applied mitigations for connection failures across backend resources and we are observing a recovery in queueing Actions workflow runs.",
+                    "created_at": "2026-03-05T17:25:59.051Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T17:25:59.051Z",
+                    "id": "fhkxgtt8n7tg",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T17:25:59.051Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "We are observing delays in queuing Actions workflow runs. We’re still investigating the causes of these delays.",
+                    "created_at": "2026-03-05T16:52:53.577Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T16:52:53.577Z",
+                    "id": "mqn0fdt8jdyb",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T16:52:53.577Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "operational"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "Webhooks is experiencing degraded availability. We are continuing to investigate.",
+                    "created_at": "2026-03-05T16:47:11.219Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T16:47:11.219Z",
+                    "id": "9jk41dj9sln9",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T16:47:11.219Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "partial_outage"
+                      }
+                    ],
+                    "body": "Actions is experiencing degraded availability. We are continuing to investigate.",
+                    "created_at": "2026-03-05T16:41:14.533Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T16:41:14.533Z",
+                    "id": "jkb98vdg4xg1",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T16:41:14.533Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "partial_outage",
+                        "old_status": "operational"
+                      }
+                    ],
+                    "body": "We are investigating reports of degraded performance for Actions",
+                    "created_at": "2026-03-05T16:35:32.528Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T16:35:32.528Z",
+                    "id": "z0d8b3263bcm",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T16:35:32.528Z"
+                  }
+                ],
+                "monitoring_at": null,
+                "name": "Multiple services are affected, service degradation",
+                "page_id": "kctbh9vrtdwd",
+                "reminder_intervals": null,
+                "resolved_at": null,
+                "shortlink": "https://stspg.io/7b52c82jrq42",
+                "started_at": "2026-03-05T16:35:32.412Z",
+                "status": "investigating",
+                "updated_at": "2026-03-05T18:15:56.108Z"
+              }
+            ],
+            "indicator": "major",
+            "scheduled_maintenances": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-github-status"
+            }
+          }
+        ],
+        "usedAsExample": true
+      },
+      {
+        "input": "@github-status What is the status of GitHub Actions?",
+        "mocks": {
+          "get-github-status": {
+            "components": [
+              {
+                "name": "Git Operations",
+                "status": "operational"
+              },
+              {
+                "name": "Webhooks",
+                "status": "major_outage"
+              },
+              {
+                "name": "API Requests",
+                "status": "operational"
+              },
+              {
+                "name": "Issues",
+                "status": "operational"
+              },
+              {
+                "name": "Pull Requests",
+                "status": "operational"
+              },
+              {
+                "name": "Actions",
+                "status": "major_outage"
+              },
+              {
+                "name": "Packages",
+                "status": "operational"
+              },
+              {
+                "name": "Pages",
+                "status": "operational"
+              },
+              {
+                "name": "Codespaces",
+                "status": "operational"
+              },
+              {
+                "name": "Copilot",
+                "status": "operational"
+              }
+            ],
+            "description": "Partial System Outage",
+            "incidents": [
+              {
+                "components": [
+                  {
+                    "created_at": "2019-11-13T18:00:24.256Z",
+                    "description": "Real time HTTP callbacks of user-generated and system events",
+                    "group": false,
+                    "group_id": null,
+                    "id": "4230lsnqdsld",
+                    "name": "Webhooks",
+                    "only_show_if_degraded": false,
+                    "page_id": "kctbh9vrtdwd",
+                    "position": 2,
+                    "showcase": true,
+                    "start_date": null,
+                    "status": "major_outage",
+                    "updated_at": "2026-03-05T16:47:11.178Z"
+                  },
+                  {
+                    "created_at": "2019-11-13T18:02:19.432Z",
+                    "description": "Workflows, Compute and Orchestration for GitHub Actions",
+                    "group": false,
+                    "group_id": null,
+                    "id": "br0l2tvcx85d",
+                    "name": "Actions",
+                    "only_show_if_degraded": false,
+                    "page_id": "kctbh9vrtdwd",
+                    "position": 7,
+                    "showcase": true,
+                    "start_date": null,
+                    "status": "major_outage",
+                    "updated_at": "2026-03-05T16:41:14.494Z"
+                  }
+                ],
+                "created_at": "2026-03-05T16:35:32.421Z",
+                "id": "g5gnt5l5hf56",
+                "impact": "major",
+                "incident_updates": [
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "The queue of requested Actions jobs continues to make progress.  Job delays are now approximately 6 minutes and continuing to decrease.",
+                    "created_at": "2026-03-05T18:15:56.106Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T18:15:56.106Z",
+                    "id": "9ssq2qhjp03z",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T18:15:56.106Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "We are back to queueing Actions workflow runs at nominal rates and we are monitoring the clearing of queued runs during the incident.",
+                    "created_at": "2026-03-05T17:48:26.220Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T17:48:26.220Z",
+                    "id": "l2nb5s89szjq",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T17:48:26.220Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "We have applied mitigations for connection failures across backend resources and we are observing a recovery in queueing Actions workflow runs.",
+                    "created_at": "2026-03-05T17:25:59.051Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T17:25:59.051Z",
+                    "id": "fhkxgtt8n7tg",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T17:25:59.051Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "We are observing delays in queuing Actions workflow runs. We’re still investigating the causes of these delays.",
+                    "created_at": "2026-03-05T16:52:53.577Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T16:52:53.577Z",
+                    "id": "mqn0fdt8jdyb",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T16:52:53.577Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "4230lsnqdsld",
+                        "name": "Webhooks",
+                        "new_status": "major_outage",
+                        "old_status": "operational"
+                      },
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "major_outage"
+                      }
+                    ],
+                    "body": "Webhooks is experiencing degraded availability. We are continuing to investigate.",
+                    "created_at": "2026-03-05T16:47:11.219Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T16:47:11.219Z",
+                    "id": "9jk41dj9sln9",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T16:47:11.219Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "major_outage",
+                        "old_status": "partial_outage"
+                      }
+                    ],
+                    "body": "Actions is experiencing degraded availability. We are continuing to investigate.",
+                    "created_at": "2026-03-05T16:41:14.533Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T16:41:14.533Z",
+                    "id": "jkb98vdg4xg1",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T16:41:14.533Z"
+                  },
+                  {
+                    "affected_components": [
+                      {
+                        "code": "br0l2tvcx85d",
+                        "name": "Actions",
+                        "new_status": "partial_outage",
+                        "old_status": "operational"
+                      }
+                    ],
+                    "body": "We are investigating reports of degraded performance for Actions",
+                    "created_at": "2026-03-05T16:35:32.528Z",
+                    "custom_tweet": null,
+                    "deliver_notifications": true,
+                    "display_at": "2026-03-05T16:35:32.528Z",
+                    "id": "z0d8b3263bcm",
+                    "incident_id": "g5gnt5l5hf56",
+                    "status": "investigating",
+                    "tweet_id": null,
+                    "updated_at": "2026-03-05T16:35:32.528Z"
+                  }
+                ],
+                "monitoring_at": null,
+                "name": "Multiple services are affected, service degradation",
+                "page_id": "kctbh9vrtdwd",
+                "reminder_intervals": null,
+                "resolved_at": null,
+                "shortlink": "https://stspg.io/7b52c82jrq42",
+                "started_at": "2026-03-05T16:35:32.412Z",
+                "status": "investigating",
+                "updated_at": "2026-03-05T18:15:56.108Z"
+              }
+            ],
+            "indicator": "major",
+            "scheduled_maintenances": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-github-status"
+            }
+          }
+        ],
+        "usedAsExample": true
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.31.0",
-    "node-fetch": "^3.2.3",
-    "react-use": "^17.3.2"
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^10.0.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

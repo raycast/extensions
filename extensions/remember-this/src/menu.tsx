@@ -93,7 +93,7 @@ export default function Command() {
     }
     if (sizeValue === "normal") {
       return (
-        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+        <MenuBarExtra icon={Icon.Stars} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
           <MenuBarExtra.Item
             icon={Icon.CircleProgress100}
@@ -142,7 +142,7 @@ export default function Command() {
     }
     if (sizeValue === "normal") {
       return (
-        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+        <MenuBarExtra icon={Icon.Stars} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
           <MenuBarExtra.Item
             icon={Icon.CircleProgress100}
@@ -187,7 +187,7 @@ export default function Command() {
     }
     if (sizeValue === "normal") {
       return (
-        <MenuBarExtra icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} tooltip="Enjoy the rest of the day off">
+        <MenuBarExtra icon={Icon.Stars} tooltip="Enjoy the rest of the day off">
           <MenuBarExtra.Item icon={Icon.Stars} title={`Woohoo! You got nothing todo!`} />
           <MenuBarExtra.Item
             icon={Icon.CircleProgress100}

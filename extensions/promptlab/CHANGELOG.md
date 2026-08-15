@@ -1,5 +1,10 @@
 # PromptLab Changelog
 
+## [Maintenance] - 2025-06-18
+
+- Use the npm official registry
+- Bump all dependencies to the latest
+
 ## [PromptLab 1.2.3] - 2024-01-16
 
 - Added option to record previous runs of a command.

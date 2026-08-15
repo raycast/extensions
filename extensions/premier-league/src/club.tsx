@@ -1,12 +1,15 @@
 import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
 import { useState } from "react";
-import { useClubs, useSeasons } from "./hooks";
-import Player from "./player";
-import { TeamTeam } from "./types";
+import { getClubMetadata, getClubs } from "./api";
+import SearchBarSeason from "./components/searchbar_season";
+import ClubSquad from "./components/squad";
+import { Club } from "./types";
+import { getClubLogo } from "./utils";
 
-function ClubProfile(props: TeamTeam) {
-  const { metadata } = props;
+function ClubProfile(props: Club) {
+  const { data: metadata } = usePromise(getClubMetadata, [props.id]);
   return (
     <Detail
       navigationTitle={`${props.name} | Club`}
@@ -14,45 +17,48 @@ function ClubProfile(props: TeamTeam) {
         { h1: props.name },
         {
           img: {
-            source: `https://resources.premierleague.com/premierleague/badges/${props.altIds.opta}.png`,
+            source: getClubLogo(props.id),
           },
         },
       ])}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Stadium" text={props.grounds[0].name} />
+          <Detail.Metadata.Label title="Stadium" text={props.stadium.name} />
           <Detail.Metadata.Label
             title="Capacity"
-            text={props.grounds[0].capacity?.toString()}
+            text={props.stadium.capacity.toString()}
           />
-
+          <Detail.Metadata.Label
+            title="Established"
+            text={metadata?.club_established.toString()}
+          />
           <Detail.Metadata.Separator />
-          {metadata.communities_twitter && (
+          {metadata?.club_website && (
             <Detail.Metadata.Link
-              title="Twitter"
-              text={metadata.communities_twitter}
-              target={metadata.communities_twitter}
+              title="Website"
+              text={metadata.club_website}
+              target={metadata.club_website}
             />
           )}
-          {metadata.communities_facebook && (
-            <Detail.Metadata.Link
-              title="Facebook"
-              text={metadata.communities_facebook}
-              target={metadata.communities_facebook}
-            />
-          )}
-          {metadata.communities_instagram && (
+          {metadata?.club_instagram_handle && (
             <Detail.Metadata.Link
               title="Instagram"
-              text={metadata.communities_instagram}
-              target={metadata.communities_instagram}
+              text={metadata.club_instagram_handle}
+              target={metadata.club_instagram_handle}
             />
           )}
-          {metadata.communities_youtube && (
+          {metadata?.club_tiktok_handle && (
             <Detail.Metadata.Link
-              title="YouTube"
-              text={metadata.communities_youtube}
-              target={metadata.communities_youtube}
+              title="TikTok"
+              text={metadata.club_tiktok_handle}
+              target={metadata.club_tiktok_handle}
+            />
+          )}
+          {metadata?.club_x_handle && (
+            <Detail.Metadata.Link
+              title="X (Twitter)"
+              text={metadata.club_x_handle}
+              target={metadata.club_x_handle}
             />
           )}
         </Detail.Metadata>
@@ -61,13 +67,11 @@ function ClubProfile(props: TeamTeam) {
         <ActionPanel>
           <Action.Push
             title="Squad"
-            icon={Icon.Person}
-            target={<Player club={props.club} />}
+            icon={Icon.TwoPeople}
+            target={<ClubSquad {...props} />}
           />
           <Action.OpenInBrowser
-            url={`https://www.premierleague.com/clubs/${
-              props.id
-            }/${props.name.replace(/ /g, "-")}/overview`}
+            url={`https://www.premierleague.com/en/clubs/${props.id}/${props.name.replace(/ /g, "-")}/overview`}
           />
         </ActionPanel>
       }
@@ -75,36 +79,22 @@ function ClubProfile(props: TeamTeam) {
   );
 }
 
-export default function Club() {
-  const seasons = useSeasons();
-  const [selectedSeason, setSeason] = useState<string>(
-    seasons[0]?.id.toString(),
+export default function EPLClub() {
+  const [seasonId, setSeasonId] = useState<string>();
+
+  const { data: clubs, isLoading } = usePromise(
+    async (season) => (season ? await getClubs(season) : undefined),
+    [seasonId],
   );
-  const clubs = useClubs(selectedSeason);
 
   return (
     <Grid
       throttle
-      isLoading={!clubs}
-      inset={Grid.Inset.Medium}
+      columns={4}
+      isLoading={isLoading}
+      inset={Grid.Inset.Small}
       searchBarAccessory={
-        <Grid.Dropdown
-          tooltip="Filter by Season"
-          value={selectedSeason}
-          onChange={setSeason}
-        >
-          <Grid.Dropdown.Section>
-            {seasons.map((season) => {
-              return (
-                <Grid.Dropdown.Item
-                  key={season.id}
-                  value={season.id.toString()}
-                  title={season.label}
-                />
-              );
-            })}
-          </Grid.Dropdown.Section>
-        </Grid.Dropdown>
+        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
       }
     >
       {clubs?.map((team) => {
@@ -112,9 +102,9 @@ export default function Club() {
           <Grid.Item
             key={team.id}
             title={team.name}
-            subtitle={team.grounds[0].name}
+            subtitle={team.stadium.name}
             content={{
-              source: `https://resources.premierleague.com/premierleague/badges/${team.altIds.opta}.png`,
+              source: getClubLogo(team.id),
               fallback: "default.png",
             }}
             actions={

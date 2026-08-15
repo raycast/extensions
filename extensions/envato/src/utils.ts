@@ -1,7 +1,7 @@
 import { getPreferenceValues, showToast, Toast, Cache } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { envatoErrors } from "./types";
-import Envato = require("envato");
+import * as Envato from "envato";
 const token = getPreferenceValues<Preferences>().token;
 import { GetData } from "./types";
 const cache = new Cache();
@@ -12,6 +12,9 @@ const day = date.getDate();
 const month = date.getMonth() + 1;
 const year = date.getFullYear();
 export const fullDate = `${day}, ${month}, ${year}`;
+
+// ENVATO
+export const envato = new Envato.Client(token);
 
 /*-----------------------------------*/
 /*------ FETCH
@@ -30,10 +33,10 @@ export const useFetch = () => {
       const accountInfo = client !== undefined ? await client.private.getAccountDetails() : undefined;
       const badges = client !== undefined ? await client.user.getBadges(username) : [];
       const portfolio = client !== undefined ? await client.catalog.searchItems({ username: username }) : undefined;
-      const email = client !== undefined ? await client.private.getEmail() : "";
+      // const email = client !== undefined ? await client.private.getEmail() : "";
       const salesInfo = client !== undefined ? await client.private.getSales() : [];
       const statement = client !== undefined ? await client.private.getStatement({}) : { count: 0, results: [] };
-      const salesEmpty: any = salesInfo.length === 0 ? { empty: true } : [];
+      const salesEmpty: envatoErrors = salesInfo.length === 0 ? { empty: true } : { empty: false };
 
       setState((oldState) => ({
         ...oldState,
@@ -43,21 +46,21 @@ export const useFetch = () => {
         badges,
         account: accountInfo,
         portfolio,
-        errors: salesEmpty as envatoErrors,
+        errors: salesEmpty,
         isLoading: false,
       }));
-    } catch (error: any) {
+    } catch (error) {
       // ERRORS
       let reason = "Error";
       let description = "An unknown error has occurred.";
-      if (error.response !== undefined) {
-        reason = error.response.reason ?? reason;
-        description = error.response.error ?? description;
+      if (error instanceof Envato.HttpError && error.response !== undefined) {
+        reason = error.response.code ?? reason;
+        description = `${error.response.error ?? description}`;
       }
-      const out: { [key: string]: any } = { reason, description };
+      const out: envatoErrors = { reason, description };
       setState((oldState) => ({
         ...oldState,
-        errors: out as envatoErrors,
+        errors: out,
         isLoading: false,
       }));
       await showToast({

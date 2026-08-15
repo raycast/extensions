@@ -2,9 +2,7 @@ import { Action, ActionPanel } from "@raycast/api";
 import { useState } from "react";
 
 import { getLastCreatedIssues, IssueResult } from "../../api/getIssues";
-
 import { getStatusIcon } from "../../helpers/states";
-
 import useIssues from "../../hooks/useIssues";
 
 import { UpdateIssueParams } from "./IssueActions";
@@ -56,7 +54,7 @@ export default function ParentIssueSubmenus({
         onOpen={() => setLoad(true)}
       >
         {!issues && isLoadingIssues ? (
-          <Action title="Loading..." />
+          <Action title="Loading…" />
         ) : (
           (issues || []).map((issue) => {
             return (
@@ -77,7 +75,10 @@ export default function ParentIssueSubmenus({
         <Action
           title="Remove Parent Issue"
           icon={{ source: { light: "light/parent-issue.svg", dark: "dark/parent-issue.svg" } }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "k" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "k" },
+          }}
           onAction={() => setParentIssue(null)}
         />
       ) : null}

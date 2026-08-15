@@ -8,24 +8,25 @@ import {
   Toast,
   LaunchProps,
   Color,
-  Detail,
   environment,
   AI,
+  Keyboard,
 } from '@raycast/api';
 import { FormValidation, useCachedPromise, useForm } from '@raycast/utils';
-import qs from 'qs';
 
-import { CommandListName, getLists, getTags, silentlyOpenThingsURL, thingsNotRunningError } from './api';
+import { addTodo, getCollections } from './api';
 import TodoList from './components/TodoList';
+import ErrorView from './components/ErrorView';
 import { getChecklistItemsWithAI, listItems } from './helpers';
 import { getDateString } from './utils';
+import { CommandListName } from './types';
 
 type FormValues = {
   title: string;
   notes: string;
   tags: string[];
   listId: string;
-  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday';
+  // Possible values for when: 'today' | 'evening' | 'upcoming' | 'tomorrow' | 'anytime' | 'someday' | 'logbook' | 'trash';
   when: string;
   date: Date | null;
   'checklist-items': string;
@@ -40,8 +41,9 @@ type AddNewTodoProps = {
 
 export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoProps) {
   const { push } = useNavigation();
-  const { data: tags, isLoading: isLoadingTags } = useCachedPromise(getTags);
-  const { data: lists, isLoading: isLoadingLists } = useCachedPromise(getLists);
+  const { data, isLoading, error } = useCachedPromise(() => getCollections('tags', 'lists'));
+  const tags = data?.tags;
+  const lists = data?.lists;
   const { handleSubmit, itemProps, values, reset, focus, setValue } = useForm<FormValues>({
     async onSubmit() {
       const json = {
@@ -54,7 +56,7 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
         'checklist-items': values['checklist-items'],
       };
 
-      await silentlyOpenThingsURL(`things:///add?${qs.stringify(json)}`);
+      await addTodo(json);
 
       await showToast({
         style: Toast.Style.Success,
@@ -119,13 +121,14 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
       focus('checklist-items');
       await toast.hide();
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate check-list' });
+      const errorMessage = typeof error === 'string' ? error : error instanceof Error ? error.message : String(error);
+      await showToast({ style: Toast.Style.Failure, title: 'Failed to generate check-list', message: errorMessage });
     }
   }
 
-  const isLoading = isLoadingTags || isLoadingLists;
-
-  if (!tags && !isLoading) return <Detail markdown={thingsNotRunningError} />;
+  if (error) {
+    return <ErrorView error={error} />;
+  }
 
   const now = new Date();
 
@@ -138,6 +141,50 @@ export function AddNewTodo({ title, commandListName, draftValues }: AddNewTodoPr
           {environment.canAccess(AI) && (
             <Action title="Generate Checklist with AI" icon={Icon.BulletPoints} onAction={generateChecklist} />
           )}
+          <ActionPanel.Section>
+            <Action
+              title="Focus Title"
+              icon={Icon.TextInput}
+              onAction={() => focus('title')}
+              shortcut={{ modifiers: ['cmd'], key: '1' }}
+            />
+            <Action
+              title="Focus Notes"
+              icon={Icon.TextInput}
+              onAction={() => focus('notes')}
+              shortcut={{ modifiers: ['cmd'], key: '2' }}
+            />
+            <Action
+              title="Focus When"
+              icon={Icon.TextInput}
+              onAction={() => focus('when')}
+              shortcut={Keyboard.Shortcut.Common.Save}
+            />
+            <Action
+              title="Focus List"
+              icon={Icon.TextInput}
+              onAction={() => focus('listId')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
+            />
+            <Action
+              title="Focus Tags"
+              icon={Icon.TextInput}
+              onAction={() => focus('tags')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 't' }}
+            />
+            <Action
+              title="Focus Checklist"
+              icon={Icon.TextInput}
+              onAction={() => focus('checklist-items')}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
+            <Action
+              title="Focus Deadline"
+              icon={Icon.TextInput}
+              onAction={() => focus('deadline')}
+              shortcut={{ modifiers: ['cmd', 'shift'], key: 'd' }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
       // Don't enable drafts if coming from another list or an empty view

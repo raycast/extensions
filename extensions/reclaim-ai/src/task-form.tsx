@@ -1,13 +1,18 @@
+import "./initSentry";
+
 import { Action, ActionPanel, Clipboard, Form, Toast, popToRoot, showHUD, showToast } from "@raycast/api";
 import { addDays, addMinutes, setHours, setMilliseconds, setMinutes, setSeconds } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
 import { useTaskActions } from "./hooks/useTask";
+import { useReclaimTaskActions } from "./hooks/useReclaimTask";
+import { toReclaimTaskPriority } from "./types/reclaim-task";
 import { useTimePolicy } from "./hooks/useTimePolicy";
 import { useUser } from "./hooks/useUser";
 import { TaskPlanDetails } from "./types/plan";
 import { makeOrderedListComparator } from "./utils/arrays";
 import { TIME_BLOCK_IN_MINUTES, formatDuration, parseDurationToMinutes } from "./utils/dates";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 
 export const timeSchemeTitleComparator = makeOrderedListComparator<string>(["Working Hours", "Personal Hours"]);
 
@@ -45,15 +50,16 @@ const getDefaultDueDate = (defaultDueDatePreference: number | undefined) => {
   return null;
 };
 
-export default (props: Props) => {
+function Command(props: Props) {
   const { timeNeeded: userTimeNeeded, title: userTitle, interpreter } = props;
 
   /********************/
   /*   custom hooks   */
   /********************/
 
-  const { currentUser } = useUser();
+  const { currentUser, isLoading: isLoadingUser, isAssistantEnabled } = useUser();
   const { createTask } = useTaskActions();
+  const { createTask: createReclaimTask } = useReclaimTaskActions();
   const { timePolicies, isLoading: isLoadingTimePolicy } = useTimePolicy();
 
   /********************/
@@ -121,9 +127,43 @@ export default (props: Props) => {
   /********************/
 
   const handleSubmit = useCallbackSafeRef(async (formValues: FormValues) => {
+    // isAssistantEnabled selects the 1.0 vs 2.0 create endpoint, so refuse to
+    // submit until the user is resolved — otherwise an uncached 2.0 user could
+    // be mis-routed to the legacy /tasks endpoint.
+    if (!currentUser) {
+      await showToast(Toast.Style.Failure, "Still loading your account", "Please try again in a moment");
+      return;
+    }
+
     await showToast(Toast.Style.Animated, "Creating Task...");
     const { timeNeeded, durationMin, durationMax, snoozeUntil, due, notes, title, timePolicy, priority, onDeck } =
       formValues;
+
+    // Reclaim 2.0 ("Assistant"): tasks live in the leaner /reclaim-tasks pool,
+    // which has no time-policy / chunk model. Map the shared form fields and
+    // skip the 1.0-only concepts.
+    if (isAssistantEnabled) {
+      const created = await createReclaimTask({
+        title,
+        description: notes || undefined,
+        dueDate: due ? new Date(due).toISOString() : undefined,
+        startDate: snoozeUntil ? new Date(snoozeUntil).toISOString() : undefined,
+        estimateMinutes: parseDurationToMinutes(timeNeeded) || undefined,
+        priority: toReclaimTaskPriority(priority),
+      });
+
+      if (created) {
+        await showToast(Toast.Style.Success, "Task created", `Task ${title} created successfully`);
+        if (created.link?.url) {
+          await Clipboard.copy(created.link.url);
+          await showHUD("Task URL copied to clipboard");
+        }
+        await popToRoot();
+      } else {
+        await showToast(Toast.Style.Failure, "Something went wrong", `Task ${title} not created`);
+      }
+      return;
+    }
 
     const _timeNeeded = parseDurationToMinutes(timeNeeded) / TIME_BLOCK_IN_MINUTES;
     const _durationMin = parseDurationToMinutes(durationMin) / TIME_BLOCK_IN_MINUTES;
@@ -180,7 +220,11 @@ export default (props: Props) => {
 
   return (
     <Form
-      isLoading={props.loading || isLoadingTimePolicy}
+      // Also block on the initial user load: isAssistantEnabled decides whether
+      // submit routes to the 1.0 /tasks or 2.0 /reclaim-tasks endpoint, and the
+      // user must be resolved before we can trust it. A cached user is present
+      // synchronously, so this only gates a cold start (no flash when cached).
+      isLoading={props.loading || isLoadingTimePolicy || (!currentUser && isLoadingUser)}
       actions={
         <ActionPanel>
           <Action.SubmitForm onSubmit={handleSubmit} />
@@ -189,7 +233,7 @@ export default (props: Props) => {
     >
       <Form.TextField id="title" title="Title" defaultValue={userTitle} />
       <Form.Separator />
-      {defaults.schedulerVersion > 14 && (
+      {(isAssistantEnabled || defaults.schedulerVersion > 14) && (
         <Form.Dropdown id="priority" title="Priority" defaultValue="P2">
           <Form.Dropdown.Item title="Critical" value="P1" />
           <Form.Dropdown.Item title="High Priority" value="P2" />
@@ -214,46 +258,52 @@ export default (props: Props) => {
         }}
         title="Time needed"
       />
-      <Form.TextField
-        id="durationMin"
-        title="Duration min"
-        value={durationMin}
-        error={durationMinError}
-        onChange={(value) => {
-          setDurationMin(value);
-          if (Number(parseDurationToMinutes(formatDuration(value))) % TIME_BLOCK_IN_MINUTES !== 0) {
-            setDurationMinError("Time must be in a interval of 15 minutes. (15/30/45/60...)");
-          } else {
-            setDurationMinError(undefined);
-          }
-        }}
-        onBlur={(e) => {
-          setDurationMin(formatDuration(e.target.value));
-        }}
-      />
-      <Form.TextField
-        id="durationMax"
-        title="Duration max"
-        value={durationMax}
-        error={durationMaxError}
-        onChange={(value) => {
-          setDurationMax(value);
-          if (Number(parseDurationToMinutes(formatDuration(value))) % TIME_BLOCK_IN_MINUTES !== 0) {
-            setDurationMaxError("Time must be in a interval of 15 minutes. (15/30/45/60...)");
-          } else {
-            setDurationMaxError(undefined);
-          }
-        }}
-        onBlur={(e) => {
-          setDurationMax(formatDuration(e.target.value));
-        }}
-      />
+      {/* Duration min/max and time policy ("Hours") are 1.0-only concepts —
+          the 2.0 /reclaim-tasks model has no chunk or time-policy fields. */}
+      {!isAssistantEnabled && (
+        <>
+          <Form.TextField
+            id="durationMin"
+            title="Duration min"
+            value={durationMin}
+            error={durationMinError}
+            onChange={(value) => {
+              setDurationMin(value);
+              if (Number(parseDurationToMinutes(formatDuration(value))) % TIME_BLOCK_IN_MINUTES !== 0) {
+                setDurationMinError("Time must be in a interval of 15 minutes. (15/30/45/60...)");
+              } else {
+                setDurationMinError(undefined);
+              }
+            }}
+            onBlur={(e) => {
+              setDurationMin(formatDuration(e.target.value));
+            }}
+          />
+          <Form.TextField
+            id="durationMax"
+            title="Duration max"
+            value={durationMax}
+            error={durationMaxError}
+            onChange={(value) => {
+              setDurationMax(value);
+              if (Number(parseDurationToMinutes(formatDuration(value))) % TIME_BLOCK_IN_MINUTES !== 0) {
+                setDurationMaxError("Time must be in a interval of 15 minutes. (15/30/45/60...)");
+              } else {
+                setDurationMaxError(undefined);
+              }
+            }}
+            onBlur={(e) => {
+              setDurationMax(formatDuration(e.target.value));
+            }}
+          />
 
-      <Form.Dropdown id="timePolicy" title="Hours" value={timePolicyId} onChange={setTimePolicyId}>
-        {filteredPolicies?.map((policy) => (
-          <Form.Dropdown.Item key={policy.id} title={policy.title} value={policy.id} />
-        ))}
-      </Form.Dropdown>
+          <Form.Dropdown id="timePolicy" title="Hours" value={timePolicyId} onChange={setTimePolicyId}>
+            {filteredPolicies?.map((policy) => (
+              <Form.Dropdown.Item key={policy.id} title={policy.title} value={policy.id} />
+            ))}
+          </Form.Dropdown>
+        </>
+      )}
       <Form.DatePicker
         value={snooze}
         onChange={setSnooze}
@@ -263,9 +313,11 @@ export default (props: Props) => {
       />
       <Form.DatePicker value={due} onChange={setDue} type={Form.DatePicker.Type.DateTime} id="due" title="Due" />
       <Form.TextArea id="notes" title="Notes" />
-      {defaults.schedulerVersion > 14 && (
+      {!isAssistantEnabled && defaults.schedulerVersion > 14 && (
         <Form.Checkbox id="onDeck" title="Send to Up Next" label="" defaultValue={defaults.onDeck} />
       )}
     </Form>
   );
-};
+}
+
+export default withRAIErrorBoundary(Command);

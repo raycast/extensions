@@ -1,5 +1,27 @@
 # Porkbun Changelog
 
+## [Domain Status as Dot] - 2026-08-07
+
+- "Retrieve All Domains" command collapses the STATUS as `Dot` to save space and the full domain is also added to `tooltip` (ref: [Issue #27326](https://github.com/raycast/extensions/issues/27326))
+
+## [Retrieve Account Balance] - 2026-06-04
+
+- Add new command to check account credit balance
+
+## [Mention "Opt In All Domains"] - 2026-01-23
+
+- Inform user they can use "Opt In All Domains" setting
+
+## [Domain Pricing Enhancements] - 2025-03-24
+
+- `Domain Pricing` command would sometimes return invalid JSON and crash (ref: [Issue #18072](https://github.com/raycast/extensions/issues/18072))
+- `Domain Pricing` now shows "specialType" of domain (if exists)
+- Modernize extension: `chore` and more
+
+## [Fix Domain Pricing Crashing] - 2024-09-03
+
+- `Domain Pricing` command would crash if user tried to reload too many times. The "Reload Domain Pricing" action is now hidden if already fetching.
+
 ## [Labels in Domains + Update API hostname] - 2024-07-25
 
 - Labels applied in Porkbun dashboard to domains will now be fetched

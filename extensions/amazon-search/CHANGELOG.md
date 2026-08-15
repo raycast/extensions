@@ -1,5 +1,15 @@
 # Amazon Search Changelog
 
+## [Fixes and Enhancements] - 2026-03-10
+
+- Added support for the Ireland, South Africa, and United Arab Emirates marketplaces.
+- Fixed autocomplete suggestions not loading for the India marketplace by using the correct endpoint (`amazon.{tld}/suggestions`), which also works for all other marketplaces.
+
+## [Enhancements] - 2024-12-20
+
+- Added the ability for the user-entered term to always appear as the first suggestion, regardless of API results.
+- Changed the empty state message.
+
 ## [Enhancements] - 2024-03-19
 
 - Improved behavior of the Recent Searches list.

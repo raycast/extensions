@@ -2,12 +2,12 @@
 
 ## Features
 
-* Support 161 currencies, see list: https://www.exchangerate-api.com/docs/supported-currencies
-* Support calculate expression e.g `1+2/3*4`
-* Support find target currency by filter, format: `${expression} in ${filter key word}`
-* Support pin your favorite currencies
-* Remember the source currency
-* Support find historical currency by date, format: `${expression} at ${yyyy/mm/dd}` or use Action 'Set Currency Date' [*Attention]
+- Support 161 currencies, see list: https://www.exchangerate-api.com/docs/supported-currencies
+- Support calculate expression e.g `1+2/3*4`
+- Support find target currency by filter, format: `${expression} in ${filter key word}`
+- Support pin your favorite currencies
+- Remember the source currency
+- Support find historical currency by date, format: `${expression} at ${yyyy/mm/dd}` or use Action 'Set Currency Date' [*Attention]
 
 \* use historical currency needs Pro/Business/Volume Plan subscription, Free version does not allow query historical currency API.
 See detail:
@@ -28,8 +28,18 @@ exchange with historical currency
 
 ## How to get API Keys
 
-* Go to https://www.exchangerate-api.com/ and register a account, it is free
-* Go to https://app.exchangerate-api.com/keys to find your API Key
+The extension supports two providers; pick one in the **Rate Provider** preference and supply that provider's key.
+
+### ExchangeRate-API (default)
+
+- Go to https://www.exchangerate-api.com/ and register a account, it is free
+- Go to https://app.exchangerate-api.com/keys to find your API Key
+
+### UniRateAPI
+
+- Go to https://unirateapi.com/ and register, it is free
+- Copy your key from https://unirateapi.com/dashboard
+- Free tier covers latest rates; historical rates require a Pro plan
 
 currency rate will be queried every 24 hours to reduce API usage.
 
@@ -37,9 +47,9 @@ currency rate will be queried every 24 hours to reduce API usage.
 
 There's a currency exchange function out of box in Raycast's Calculator.
 
-* You can type like `12 usd in gbp` to show the currency exchange result.
+- You can type like `12 usd in gbp` to show the currency exchange result.
 
-* You can type like `12 usd in gbp at 2022/9/25` to show the historical currency exchange result. (Need API Pro/Business/Volume Plan subscription)
+- You can type like `12 usd in gbp at 2022/9/25` to show the historical currency exchange result. (Need API Pro/Business/Volume Plan subscription)
 
 In some case, when you exactly know the currency code, it works fine, but it still has some challenges:
 

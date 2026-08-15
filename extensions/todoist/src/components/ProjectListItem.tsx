@@ -9,20 +9,20 @@ import {
   Color,
   getPreferenceValues,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import {
   Project as TProject,
   updateProject,
   deleteProject as apiDeleteProject,
   archiveProject as apiArchiveProject,
-  handleError,
   SyncData,
 } from "../api";
 import ProjectForm from "../components/ProjectForm";
 import RefreshAction from "../components/RefreshAction";
-import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { getProjectAppUrl, getProjectIcon, getProjectUrl } from "../helpers/projects";
 
+import OpenInTodoist from "./OpenInTodoist";
 import Project from "./Project";
 
 type ProjectListItemProps = {
@@ -46,10 +46,7 @@ export default function ProjectListItem({ project, data, setData }: ProjectListI
         title: project.is_favorite ? "Removed from favorites" : "Added to favorites",
       });
     } catch (error) {
-      handleError({
-        error,
-        title: project.is_favorite ? "Unable to remove from favorites" : "Unable to add to favorites",
-      });
+      await showFailureToast(error, { title: "Unable to update project" });
     }
   }
 
@@ -61,7 +58,7 @@ export default function ProjectListItem({ project, data, setData }: ProjectListI
 
       await showToast({ style: Toast.Style.Success, title: "Project archived" });
     } catch (error) {
-      handleError({ error, title: "Unable to archive project" });
+      await showFailureToast(error, { title: "Unable to archive project" });
     }
   }
 
@@ -80,7 +77,7 @@ export default function ProjectListItem({ project, data, setData }: ProjectListI
 
         await showToast({ style: Toast.Style.Success, title: "Project deleted" });
       } catch (error) {
-        handleError({ error, title: "Unable to delete project" });
+        await showFailureToast(error, { title: "Unable to delete project" });
       }
     }
   }
@@ -112,20 +109,7 @@ export default function ProjectListItem({ project, data, setData }: ProjectListI
       actions={
         <ActionPanel title={project.name}>
           <Action.Push icon={Icon.Sidebar} title="Show Tasks" target={<Project projectId={project.id} />} />
-          {isTodoistInstalled ? (
-            <Action.Open
-              title="Open Project in Todoist"
-              target={getProjectAppUrl(project.id)}
-              icon="todoist.png"
-              application="Todoist"
-            />
-          ) : (
-            <Action.OpenInBrowser
-              title="Open Task in Browser"
-              url={getProjectUrl(project.id)}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
-            />
-          )}
+          <OpenInTodoist appUrl={getProjectAppUrl(project.id)} webUrl={getProjectUrl(project.id)} />
           {!project.inbox_project ? (
             <ActionPanel.Section>
               <Action.Push
@@ -136,7 +120,7 @@ export default function ProjectListItem({ project, data, setData }: ProjectListI
               />
 
               <Action
-                title={project.is_favorite ? "Remove From Favorites" : "Add to Favorites"}
+                title={project.is_favorite ? "Remove from Favorites" : "Add to Favorites"}
                 icon={Icon.Star}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                 onAction={() => toggleFavorite(project)}

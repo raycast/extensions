@@ -1,15 +1,22 @@
 # OpenVPN Changelog
 
+## [Bug Fixes] - 2026-02-05
+
+- Fixed AppleScript failures when OpenVPN Connect is still launching or its menu bar menu is not available yet.
+- Added fallback handling for menu bar index changes to keep connect/disconnect actions stable.
+
+## [Updated README] - 2025-05-09
+
 ## [Handle multiple profiles] - 2024-08-01
 
 ### ✨ New
 
 - The extension can now handle multiple profiles!
-- A couple of new command make it easy to conenct/disconnect from one of you profile, or connect/disconnect from the last used profile
+- A couple of new command make it easy to connect/disconnect from one of your profiles, or connect/disconnect from the last used profile
 
 ### 💎 Improvements
 
-- The apple scripts have been revamped, to avoir explicit clicking and navigation slowing down the process, and instead target directly the correct entry and click it (which then happen in the background without visible action)
+- The apple scripts have been revamped, to avoid explicit clicking and navigation slowing down the process, and instead target directly the correct entry and click it (which then happen in the background without visible action)
 
 ### 🐞 Fixes
 

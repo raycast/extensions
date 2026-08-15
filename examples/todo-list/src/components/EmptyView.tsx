@@ -1,8 +1,13 @@
 import { ActionPanel, List } from "@raycast/api";
 import { Filter, Todo } from "../types";
-import CreateTodoAction from "./CreateTodoAction";
+import { CreateTodoAction } from "./CreateTodoAction";
 
-function EmptyView(props: { todos: Todo[]; filter: Filter; searchText: string; onCreate: (title: string) => void }) {
+export function EmptyView(props: {
+  todos: Todo[];
+  filter: Filter;
+  searchText: string;
+  onCreate: (title: string) => void;
+}) {
   if (props.todos.length > 0) {
     return (
       <List.EmptyView
@@ -58,4 +63,3 @@ function EmptyView(props: { todos: Todo[]; filter: Filter; searchText: string; o
     }
   }
 }
-export default EmptyView;

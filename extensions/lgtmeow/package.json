@@ -1,0 +1,39 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lgtmeow",
+  "title": "LGTMeow",
+  "description": "Selecting and pasting LGTM images from LGTMeow in Markdown format.",
+  "icon": "lgtmeow-icon.png",
+  "author": "snaka",
+  "categories": [
+    "Developer Tools",
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "choose-lgtm-image",
+      "title": "Search LGTMeow Images",
+      "description": "Display a list of cat images from LGTMeow and copy the URL of the selected image to the clipboard in Markdown format.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}

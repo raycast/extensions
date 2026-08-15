@@ -1,30 +1,48 @@
-import { Grid, Toast, showToast } from "@raycast/api";
+import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { setMaxListeners } from "node:events";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { getEpisodes } from "../api/shows";
-import { useEpisodeMutations } from "../hooks/useEpisodeMutations";
+import { useCallback, useRef, useState } from "react";
+import { useActionRunner } from "../lib/action-runner";
+import { initTraktClient } from "../lib/client";
 import { APP_MAX_LISTENERS } from "../lib/constants";
-import { EpisodeGridItem } from "./episode-grid-item";
+import { createEpisodeMarkdown, createEpisodeMetadata } from "../lib/detail-helpers";
+import { getScreenshotUrl } from "../lib/helper";
+import { TraktEpisodeListItem, TraktShowBaseItem } from "../lib/schema";
+import { EpisodeActionPanel, episodeTraktUrl } from "./episode-actions";
+import { GenericGrid } from "./generic-grid";
 
 export const EpisodeGrid = ({
   showId,
-  tmdbId,
   seasonNumber,
   slug,
 }: {
   showId: number;
-  tmdbId: number;
   seasonNumber: number;
-  slug: string;
+  slug?: string;
 }) => {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
+  const traktClient = initTraktClient();
   const [actionLoading, setActionLoading] = useState(false);
   const { isLoading, data: episodes } = useCachedPromise(
     async (showId: number, seasonNumber: number) => {
       abortable.current = new AbortController();
       setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
-      return await getEpisodes(showId, seasonNumber, abortable.current?.signal);
+
+      const response = await traktClient.shows.getEpisodes({
+        query: {
+          extended: "full,cloud9",
+        },
+        params: {
+          showid: showId,
+          seasonNumber: seasonNumber,
+        },
+        fetchOptions: {
+          signal: abortable.current.signal,
+        },
+      });
+
+      if (response.status !== 200) return [];
+      return response.body;
     },
     [showId, seasonNumber],
     {
@@ -39,57 +57,87 @@ export const EpisodeGrid = ({
       },
     },
   );
-  const { checkInEpisodeMutation, error, success } = useEpisodeMutations(abortable);
 
-  const handleAction = useCallback(
-    async (episode: TraktEpisodeListItem, action: (episode: TraktEpisodeListItem) => Promise<void>) => {
-      setActionLoading(true);
-      try {
-        await action(episode);
-      } finally {
-        setActionLoading(false);
-      }
-    },
-    [],
+  const addEpisodeToHistory = useCallback(async (episode: TraktEpisodeListItem) => {
+    await traktClient.shows.addEpisodeToHistory({
+      body: {
+        episodes: [
+          {
+            ids: {
+              trakt: episode.ids.trakt,
+            },
+            watched_at: new Date().toISOString(),
+          },
+        ],
+      },
+    });
+  }, []);
+
+  const checkInEpisode = useCallback(async (episode: TraktEpisodeListItem) => {
+    await traktClient.shows.checkInEpisode({
+      body: {
+        episodes: [
+          {
+            ids: {
+              trakt: episode.ids.trakt,
+            },
+            watched_at: new Date().toISOString(),
+          },
+        ],
+      },
+    });
+  }, []);
+
+  const handleAction = useActionRunner<TraktEpisodeListItem>({ setActionLoading });
+
+  const episodeMarkdown = useCallback(
+    (episode: TraktEpisodeListItem) =>
+      createEpisodeMarkdown(episode, { ids: { slug: slug ?? "" }, title: slug ?? "Unknown Show" } as TraktShowBaseItem),
+    [slug],
   );
 
-  useEffect(() => {
-    if (success) {
-      showToast({
-        title: success,
-        style: Toast.Style.Success,
-      });
-    }
-  }, [success]);
-
-  useEffect(() => {
-    if (error) {
-      showToast({
-        title: error.message,
-        style: Toast.Style.Failure,
-      });
-    }
-  }, [error]);
+  const episodeMetadata = useCallback(
+    (episode: TraktEpisodeListItem) =>
+      createEpisodeMetadata(episode, { ids: { slug: slug ?? "" }, title: slug ?? "Unknown Show" } as TraktShowBaseItem),
+    [slug],
+  );
 
   return (
-    <Grid
+    <GenericGrid
       isLoading={isLoading || actionLoading}
-      columns={3}
       aspectRatio="16/9"
       fit={Grid.Fit.Fill}
+      columns={3}
       searchBarPlaceholder="Search for episodes"
-    >
-      {episodes &&
-        episodes.map((episode) => (
-          <EpisodeGridItem
-            key={episode.ids.trakt}
-            episode={episode}
-            tmdbId={tmdbId}
-            seasonNumber={seasonNumber}
-            slug={slug}
-            checkInEpisodeMutation={() => handleAction(episode, checkInEpisodeMutation)}
-          />
-        ))}
-    </Grid>
+      items={episodes}
+      title={(item) => item.title}
+      subtitle={(item) => `Episode ${item.number}`}
+      poster={(item) => getScreenshotUrl(item.images, "episode.png")}
+      keyFn={(item, index) => `${item.ids.trakt}-${index}`}
+      actions={(item) => (
+        <EpisodeActionPanel
+          item={item}
+          markdown={episodeMarkdown}
+          metadata={episodeMetadata}
+          navigationTitle={(episode) => `${episode.title} • S${episode.season}E${episode.number}`}
+          traktUrl={(episode) => episodeTraktUrl(slug, episode.season, episode.number)}
+          imdbId={(episode) => episode.ids.imdb}
+          actions={[
+            {
+              title: "Check-In",
+              icon: Icon.Checkmark,
+              shortcut: Keyboard.Shortcut.Common.Edit,
+              onAction: (episode) => handleAction(episode, checkInEpisode, "Episode checked-in"),
+            },
+            {
+              title: "Add to History",
+              icon: Icon.Clock,
+              shortcut: Keyboard.Shortcut.Common.Duplicate,
+              onAction: (episode) => handleAction(episode, addEpisodeToHistory, "Episode added to history"),
+            },
+          ]}
+        />
+      )}
+    />
   );
 };

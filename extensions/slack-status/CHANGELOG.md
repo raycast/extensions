@@ -1,5 +1,9 @@
 # Slack Status Change
 
+## [Support pausing notifications] - 2024-12-17
+
+- Presets can now pause notifications for the duration of that status. You will be asked to reconnect your Slack account to get the right permissions.
+
 ## [Improve AI prompt] - 2024-06-18
 
 - Adjusted the AI prompt to improve chance of valid JSON response

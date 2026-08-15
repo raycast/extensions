@@ -1,10 +1,18 @@
 import { Action, ActionPanel, clearSearchBar, Color, Icon, showToast, Toast } from "@raycast/api";
 import { useAtom } from "jotai";
 import _ from "lodash";
-import { editingAtom, newTodoTextAtom, searchBarTextAtom, searchModeAtom, todoAtom } from "./atoms";
+import {
+  ALL_TAG_VALUE,
+  editingAtom,
+  newTodoTextAtom,
+  searchBarTextAtom,
+  searchModeAtom,
+  selectedTagAtom,
+  todoAtom,
+} from "./atoms";
 import DeleteAllAction from "./delete_all";
 import SearchModeAction from "./search_mode_action";
-import { compare, insertIntoSection } from "./utils";
+import { compare, insertIntoSection, parseTodoItem } from "./utils";
 
 const ListActions = () => {
   const [searchMode] = useAtom(searchModeAtom);
@@ -12,24 +20,21 @@ const ListActions = () => {
   const [todoSections, setTodoSections] = useAtom(todoAtom);
   const [, setSearchBarText] = useAtom(searchBarTextAtom);
   const [editing, setEditing] = useAtom(editingAtom);
+  const [selectedTag] = useAtom(selectedTagAtom);
 
   const addTodo = async () => {
     if (newTodoText.length === 0) {
       await showToast(Toast.Style.Failure, "Empty todo", "Todo items cannot be empty.");
       return;
     }
-    todoSections.todo = [
-      ...insertIntoSection(
-        todoSections.todo,
-        {
-          title: newTodoText,
-          completed: false,
-          timeAdded: Date.now(),
-        },
-        compare
-      ),
-    ];
+    const newItem = parseTodoItem(newTodoText);
+    // If the list is filtered by a tag, default new todos to that tag (unless user explicitly provided one).
+    if (selectedTag !== ALL_TAG_VALUE && (!newItem.tag || newItem.tag.trim().length === 0)) {
+      newItem.tag = selectedTag;
+    }
+    todoSections.todo = [...insertIntoSection(todoSections.todo, newItem, compare)];
     await clearSearchBar();
+    setSearchBarText("");
     setTodoSections(_.cloneDeep(todoSections));
   };
   const editTodo = async () => {

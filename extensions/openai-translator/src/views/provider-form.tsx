@@ -58,6 +58,16 @@ function nextValidName(config: IConfig, hook: ProvidersHook): string {
   return name;
 }
 
+function isValidUrl(url: string) {
+  try {
+    const parsedUrl = new URL(url);
+    // Check if the protocol is http or https
+    return parsedUrl.protocol === "http:" || parsedUrl.protocol === "https:";
+  } catch (e) {
+    return false; // Invalid URL
+  }
+}
+
 export const ProviderForm = (props: ProviderFormProps) => {
   const { record, hook, onCancel, onDone } = props;
   const providerProps = record?.props;
@@ -65,13 +75,18 @@ export const ProviderForm = (props: ProviderFormProps) => {
     providers[record ? providers.findIndex((p) => p.value === record.type) : 0].config,
   );
 
-  const [models, setModels] = useState<IModel[]>([]);
-  const [model, setModel] = useState<string | undefined>("");
+  const [modelList, setModelList] = useState<IModel[]>([]);
+  const [modelId, setModelId] = useState<string | undefined>(undefined);
+
+  const [entrypoint, setEntrypoint] = useState<string>(
+    providerProps ? providerProps.entrypoint : config.defaultEntrypoint,
+  );
+  const [entrypointError, setEntrypointError] = useState<string | undefined>();
+
   const [isModelLoading, setIsModelLoading] = useState(false);
+  const [modelValue, setModelValue] = useState<string | undefined>("");
 
-  const customModel = { id: "custom", name: "Custom..." };
-
-  const isCustomModel = model == customModel.id;
+  const isCustomModel = modelId == "custom";
   const [customModelError, setCustomModelError] = useState<string | undefined>();
 
   const [apikey, setAPIKey] = useState(providerProps ? providerProps.apikey : "");
@@ -81,18 +96,28 @@ export const ProviderForm = (props: ProviderFormProps) => {
   const [nameError, setNameError] = useState<string | undefined>();
 
   useEffect(() => {
-    setModel(providerProps ? providerProps.apiModel : config.defaultModel?.id);
     fetchModels();
   }, [config]);
 
   const fetchModels = async () => {
     try {
       setIsModelLoading(true);
-      const models = await config.listModels(apikey);
-      if (config.supportCustomModel) {
-        models.push(customModel);
+      let _model = providerProps ? providerProps.apiModel : config.defaultModel?.id;
+      if (modelId == undefined) {
+        setModelId(_model);
+        setModelValue(_model);
+      } else {
+        _model = modelId;
       }
-      setModels(models);
+      const models = await config.listModels(apikey, entrypoint);
+      if (config.supportCustomModel) {
+        models.push({ id: "custom", name: "Custom" });
+        const isCustomModel = !models.find((m) => m.id === _model);
+        if (isCustomModel) {
+          setModelId("custom");
+        }
+      }
+      setModelList(models);
       setIsModelLoading(false);
     } catch (error) {
       console.error("Error fetching models:", error);
@@ -100,9 +125,15 @@ export const ProviderForm = (props: ProviderFormProps) => {
   };
 
   function handleModelChange(modelId: string) {
-    const selectedModel = models.find((m) => m.id === modelId);
+    const selectedModel = modelList.find((m) => m.id === modelId);
     if (selectedModel) {
-      setModel(selectedModel.id);
+      const id = selectedModel.id;
+      setModelId(id);
+      if (id == "custom") {
+        setModelValue("");
+      } else {
+        setModelValue(id);
+      }
     }
   }
 
@@ -111,11 +142,19 @@ export const ProviderForm = (props: ProviderFormProps) => {
     if (customModelError && customModelError.length > 0) {
       setCustomModelError(undefined);
     }
+    setModelValue(value);
   }
 
   function handleAPIKeyChange(value: string) {
     setAPIKey(value);
     if (apiKeyError && apiKeyError.length > 0) {
+      //reset error
+      setAPIKeyError(undefined);
+    }
+  }
+  function handleEntrypointChange(value: string) {
+    setEntrypoint(value);
+    if (entrypointError && entrypointError.length > 0) {
       //reset error
       setAPIKeyError(undefined);
     }
@@ -236,7 +275,16 @@ export const ProviderForm = (props: ProviderFormProps) => {
           id="entrypoint"
           title="Entrypoint"
           placeholder="Enter custom entrypoint"
-          defaultValue={providerProps ? providerProps.entrypoint : config.defaultEntrypoint}
+          onChange={handleEntrypointChange}
+          defaultValue={entrypoint}
+          error={entrypointError}
+          onBlur={(event) => {
+            console.log("onBlur", event.target.value);
+            const value = event.target.value;
+            if (!value || value.length == 0 || !isValidUrl(value)) {
+              setEntrypointError("Must be a valid URL");
+            }
+          }}
         />
       )}
       {config.hasApiKey && (
@@ -258,10 +306,10 @@ export const ProviderForm = (props: ProviderFormProps) => {
         id="model"
         title="Model"
         isLoading={isModelLoading}
-        defaultValue={models.length ? model : ""}
+        defaultValue={modelList.length ? modelId : ""}
         onChange={handleModelChange}
       >
-        {models.map((model) => (
+        {modelList.map((model) => (
           <Form.Dropdown.Item key={model.id} value={model.id} title={model.name} />
         ))}
       </Form.Dropdown>
@@ -270,6 +318,7 @@ export const ProviderForm = (props: ProviderFormProps) => {
           id="customModel"
           title="Custom Model"
           placeholder="Enter custom model"
+          value={modelValue}
           error={customModelError}
           onChange={handleCustomModelChange}
           onBlur={(event) => {

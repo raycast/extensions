@@ -91,7 +91,7 @@ export default function PullRequestCommits({ pullRequest }: PullRequestCommitsPr
                   />
 
                   <Action.CopyToClipboard
-                    content={pullRequest.title}
+                    content={commit.treeUrl}
                     title="Copy Commit Tree URL"
                     shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
                   />

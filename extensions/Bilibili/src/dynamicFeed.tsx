@@ -1,13 +1,15 @@
+import { formatUrl } from "./utils";
 import { useDynamicFeed } from "./hooks";
-import { checkLogin, formatUrl, getVideoInfo, postHeartbeat } from "./utils";
-import { NoLoginView, Post, Video } from "./components";
-import { List, showToast, Toast } from "@raycast/api";
+import { getVideoInfo, postHeartbeat } from "./apis";
+import { CheckLogin, Post, Video } from "./components";
+
 import { useState } from "react";
 import { useCachedState } from "@raycast/utils";
+import { List, showToast, Toast } from "@raycast/api";
 
 type KindType = { id: string; name: string };
 
-function DrinkDropdown(props: { kindTypes: KindType[]; onKindTypeChange: (newValue: string) => void }) {
+function FilterDropdown(props: { kindTypes: KindType[]; onKindTypeChange: (newValue: string) => void }) {
   const { kindTypes, onKindTypeChange } = props;
   return (
     <List.Dropdown
@@ -27,8 +29,6 @@ function DrinkDropdown(props: { kindTypes: KindType[]; onKindTypeChange: (newVal
 }
 
 export default function Command() {
-  if (!checkLogin()) return <NoLoginView />;
-
   const [filterType, setFilterType] = useState("");
   const { dynamicItems, isLoading, refetch } = useDynamicFeed();
   const [watchedList, setWatchedList] = useCachedState<Array<string>>("watchedList", []);
@@ -43,7 +43,7 @@ export default function Command() {
   ];
 
   const filterMap = {
-    "0": (_item: Bilibili.DynamicItem) => true,
+    "0": (item: Bilibili.DynamicItem) => !!item,
     "1": (item: Bilibili.DynamicItem) =>
       item.type === "DYNAMIC_TYPE_AV" ? item.modules.module_dynamic.major.archive.last_play_time === 0 : false,
     "2": (item: Bilibili.DynamicItem) =>
@@ -57,12 +57,17 @@ export default function Command() {
   const dynamicComponentSelector = (item: Bilibili.DynamicItem) => {
     const { pub_ts, mid, name, face } = item.modules.module_author;
 
+    const isPost = (item: Bilibili.DynamicItem): item is Bilibili.DynamicPost => {
+      return ["DYNAMIC_TYPE_FORWARD", "DYNAMIC_TYPE_WORD", "DYNAMIC_TYPE_DRAW"].includes(item.type);
+    };
+
     if (item.type === "DYNAMIC_TYPE_AV") {
       const { aid, title, cover, jump_url, bvid, duration_text, badge, stat, last_play_time } =
         item.modules.module_dynamic.major.archive;
 
       return (
         <Video
+          key={bvid}
           title={title}
           cover={cover}
           url={jump_url}
@@ -107,12 +112,13 @@ export default function Command() {
           }
         />
       );
-    } else if (["DYNAMIC_TYPE_FORWARD", "DYNAMIC_TYPE_WORD", "DYNAMIC_TYPE_DRAW"].includes(item.type)) {
-      const { text } = (item as Bilibili.DynamicPost).modules.module_dynamic.desc;
+    } else if (isPost(item)) {
+      const { text = `${item.modules.module_author.name}'s Post` } = item.modules.module_dynamic.desc || {};
       const { like, forward, comment } = item.modules.module_stat;
 
       return (
         <Post
+          key={item.id_str}
           desc={text}
           pubdate={pub_ts}
           url={`https://www.bilibili.com/opus/${item.id_str}`}
@@ -135,6 +141,7 @@ export default function Command() {
 
       return (
         <Post
+          key={item.id_str}
           title={major.music.title}
           desc={desc.text}
           pubdate={pub_ts}
@@ -158,6 +165,7 @@ export default function Command() {
 
       return (
         <Post
+          key={item.id_str}
           title={liveDate.live_play_info.title}
           desc={liveDate.live_play_info.title}
           pubdate={pub_ts}
@@ -180,15 +188,17 @@ export default function Command() {
   };
 
   return (
-    <List
-      filtering={false}
-      isLoading={isLoading}
-      isShowingDetail={true}
-      searchBarAccessory={<DrinkDropdown kindTypes={kindTypes} onKindTypeChange={onKindTypeChange} />}
-    >
-      {dynamicItems
-        ?.filter((item: Bilibili.DynamicItem) => filterMap[filterType as keyof typeof filterMap](item))
-        .map(dynamicComponentSelector)}
-    </List>
+    <CheckLogin>
+      <List
+        filtering={false}
+        isLoading={isLoading}
+        isShowingDetail={true}
+        searchBarAccessory={<FilterDropdown kindTypes={kindTypes} onKindTypeChange={onKindTypeChange} />}
+      >
+        {dynamicItems
+          ?.filter((item: Bilibili.DynamicItem) => filterMap[filterType as keyof typeof filterMap](item))
+          .map(dynamicComponentSelector)}
+      </List>
+    </CheckLogin>
   );
 }

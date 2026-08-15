@@ -1,5 +1,34 @@
 # Terminal Finder Changelog
 
+## [Bugfix] - 2026-05-27
+
+- Show a helpful recovery message when cmux reports a broken automation socket.
+
+## [Update] - 2026-03-27
+
+- Added support for `cmux`
+- Switched `cmux` integration to the bundled CLI for reliable workspace creation and working-directory lookup
+
+## [Better "Finder" Errors] - 2026-01-12
+
+- Show a better error message when no **Finder** window open or when trying to pass non-filesystem folder (e.g. **Recents**) (ref: [Issue #24386](https://github.com/raycast/extensions/issues/24386))
+
+## [Fix Kitty Casing] - 2026-01-12
+
+- Fix "Kitty" terminal not working due to different casing (ref: [Issue #24377](https://github.com/raycast/extensions/issues/24377))
+
+## [Enhancements] - 2026-01-05
+
+- A new quick command to jump from X to Y
+- Added README.md
+- Added support for Kitty
+- Updated `command` `description`s to be more precise
+- Added error handling in existing `runAppleScript`
+
+## [Update] - 2024-12-29
+
+- Added support for Ghostty
+
 ## [Update] - 2024-02-05
 
 - Added support for WezTerm

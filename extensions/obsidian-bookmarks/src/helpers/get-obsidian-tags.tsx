@@ -1,8 +1,8 @@
 import getObsidianFiles from "./get-obsidian-files";
-import { isStringArray } from "../types";
+import { File, isStringArray } from "../types";
 import tagify from "./tagify";
 
-function getTags(value: unknown): string[] {
+export function getTags(value: unknown): string[] {
   if (value == null || typeof value !== "object") return [];
 
   const { tags } = value as Record<string, unknown>;
@@ -19,7 +19,7 @@ function getTags(value: unknown): string[] {
   return [];
 }
 
-export default async function getObsidianTags(): Promise<Set<string>> {
-  const results = await getObsidianFiles().then((files) => files.map((file) => getTags(file.attributes)));
+export default async function getObsidianTags(cachedFiles: File[]): Promise<Set<string>> {
+  const results = await getObsidianFiles(cachedFiles).then((files) => files.map((file) => getTags(file.attributes)));
   return new Set(results.flatMap((p) => p));
 }

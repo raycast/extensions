@@ -10,16 +10,16 @@ const useNewspapers = () => {
 
   useEffect(() => {
     const currentDate = new Date();
-    const dayMonth = `${currentDate.getDate()}-${currentDate.getMonth()}`;
+    const dayMonthYear = `${currentDate.getDate()}-${currentDate.getMonth()}-${currentDate.getFullYear()}`;
 
-    const cachedData = cache.get(`newspapers-${dayMonth}`);
+    const cachedData = cache.get(`newspapers-${dayMonthYear}`);
     if (cachedData) {
       const cachedNewspapers = JSON.parse(cachedData);
       setNewspapers(cachedNewspapers);
     } else {
       getNewspapers().then((data) => {
         setNewspapers(data);
-        cache.set(`newspapers-${dayMonth}`, JSON.stringify(data));
+        cache.set(`newspapers-${dayMonthYear}`, JSON.stringify(data));
       });
     }
   }, []);

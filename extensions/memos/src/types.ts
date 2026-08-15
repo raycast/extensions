@@ -28,49 +28,50 @@ export interface PostMemoParams {
   resourceIdList: number[];
 }
 
-export interface ResourceObj {
-  uid: string;
+export interface AttachmentObj {
   name: string;
   createTime: string;
   filename: string;
   externalLink: string;
   type: string;
   size: string;
-  linkedMemoAmount: number;
   content?: string;
+  memo?: string;
 }
 
 export interface MemoInfoResponse {
-  uid: string;
   name: string;
-  rowStatus: string;
+  state: string;
   creator: string;
   createTime: string;
   updateTime: string;
   displayTime: string;
   content: string;
+  markdown?: string;
   visibility: string;
   pinned: boolean;
   displayTs: number;
-  resources: ResourceObj[];
+  attachments: AttachmentObj[];
+  tags: string[];
+  property: {
+    hasLink: boolean;
+    hasTaskList: boolean;
+    hasCode: boolean;
+    hasIncompleteTasks: boolean;
+  };
 }
 
-export type TagResponse = {
-  tagAmounts: {
-    [tag: string]: number;
-  };
-};
-
 export interface MeResponse {
-  id: number;
-  name: string;
-  rowStatus: "ACTIVE";
-  createdTime: number;
-  updatedTime: number;
-  username: string;
-  role: ROLE;
-  email: string;
-  nickname: string;
+  user: {
+    name: string;
+    rowStatus: "ACTIVE";
+    createdTime: number;
+    updatedTime: number;
+    username: string;
+    role: ROLE;
+    email: string;
+    displayName: string;
+  };
 }
 
 export interface PostFileResponse {

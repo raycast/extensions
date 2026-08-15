@@ -17,9 +17,10 @@ import { useCallback, useEffect, useState } from "react";
 import * as fs from "node:fs";
 import { homedir } from "os";
 import { showFailureToast, useCachedState, useForm } from "@raycast/utils";
-import { initWasm, Resvg } from "../lib/resvg";
 import path from "node:path";
 import debounce from "lodash.debounce";
+import wasm from "@resvg/resvg-wasm/index_bg.wasm";
+import { initWasm, Resvg } from "@resvg/resvg-wasm";
 import Shortcut = Keyboard.Shortcut;
 
 const DOWNLOADS_DIR = `${homedir()}/Downloads`;
@@ -54,8 +55,8 @@ function Command() {
   }, [backgroundColor, hairColor, size]);
 
   const download = async (filename: string, suffix?: number): Promise<void> => {
+    const toast = await showToast(Toast.Style.Animated, "Downloading image", "Please wait...");
     try {
-      await showToast(Toast.Style.Animated, "Downloading image", "Please wait...");
       const data = fs.readFileSync(environment.supportPath + `/${filename}`);
 
       const ext = path.extname(filename);
@@ -67,9 +68,13 @@ function Command() {
       }
 
       fs.writeFileSync(savePath, data);
-      await showToast(Toast.Style.Success, "Image Downloaded!", DOWNLOADS_DIR);
+      toast.style = Toast.Style.Success;
+      toast.title = "Image Downloaded!";
+      toast.message = DOWNLOADS_DIR;
     } catch (error) {
-      await showFailureToast(error, { title: "Failed to download image" });
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed to download image";
+      toast.message = String(error);
     }
   };
 
@@ -130,12 +135,12 @@ function Command() {
             }
           />
           <Action.CopyToClipboard
-            title={"Copy PNG"}
+            title={"Copy Png"}
             content={{ file: environment.supportPath + "/face.png" }}
             shortcut={Shortcut.Common.Copy}
           />
           <Action
-            title={"Download PNG"}
+            title={"Download Png"}
             icon={Icon.Download}
             onAction={() => download("face.png")}
             shortcut={{
@@ -214,8 +219,9 @@ const SizeForm = ({
   );
 };
 
-initWasm(fs.readFileSync(path.join(environment.assetsPath, "index_bg.wasm")))
-  .then(() => {
+export default function () {
+  (async () => {
+    await initWasm(wasm);
     render(<Command />);
-  })
-  .catch((e) => showFailureToast(e));
+  })().catch((e) => showFailureToast(e));
+}

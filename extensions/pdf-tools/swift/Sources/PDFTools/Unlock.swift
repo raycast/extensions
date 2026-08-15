@@ -3,10 +3,16 @@ import PDFKit
 import RaycastSwiftMacros
 
 @raycast
-func isPDFDocumentLocked(filePath: String) async throws -> Bool {
-    let pdfURL = URL(fileURLWithPath: filePath)
-    guard let pdfDocument = PDFDocument(url: pdfURL) else {
-        throw "Failed to load PDF document"
-    }
-    return pdfDocument.isLocked
+func unlock(filePath: String, password: String) async throws {
+  let pdfURL = URL(fileURLWithPath: filePath)
+  let pdfDocument = PDFDocument(url: pdfURL)!
+
+  if pdfDocument.unlock(withPassword: password) {
+    pdfDocument.write(
+      to: pdfURL,
+      withOptions: [.ownerPasswordOption: "", .userPasswordOption: ""]
+    )
+  } else {
+    throw "Failed to unlock PDF file"
+  }
 }

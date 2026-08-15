@@ -1,5 +1,59 @@
 # United Nations Extension
 
+## [Enhancement] - 2026-04-12
+
+- Rebuild `UN Documents` around `documents.un.org` instead of the legacy RSS feeds
+- Add the current advanced search form fields from `documents.un.org`
+- Add live search results with document opening actions for public PDF and DOC files
+
+## [Maintenance] - 2026-02-01
+
+- Resolve CVE-2026-25128
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-11-19
+
+- Fix issue when access values from undefined
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-10-08
+
+- Add support for Windows platform (Text-to-Speech disabled)
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-08-22
+
+- Bump mac-say to handle SIGTERM signal to gracefully
+- Bump all dependencies to the latest
+
+## [Maintenance] - 2025-06-04
+
+- Drop unexpected LaTeX content
+- Bump all dependencies to the latest
+
+## [Bugfix] - 2025-06-03
+
+- Replace broken UN documents GA RSS feed source
+- Add SC, HRC and ESC feeds
+
+## [Maintenance] - 2025-02-28
+
+- Bump `fast-xml-parser` to v5 for named-exports
+- Bump all other dependencies to the latest
+
+## [Enhancement] - 2024-12-19
+
+- Add Pinyin search support for Chinese
+- Add text contains search support for Arabic, Russian, Hindi, and Urdu
+- Add RTL display support for Urdu
+- Show UN site URLs on UN Site Index results
+- Bump all dependencies to the latest
+
+## [Chore] - 2024-10-03
+
+- Optimize extension file size
+- Bump all dependencies to the latest
+
 ## [Bugfix] - 2024-07-24
 
 - Handle possibly undefined parameter on UN News

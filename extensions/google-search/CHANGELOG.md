@@ -1,5 +1,30 @@
 # Google Search Changelog
 
+## [Update] - 2026-07-13
+
+- Update Google G icon
+
+## [Add Keyboard Shortcuts] - 2026-07-10
+
+- Add common keyboard shortcuts to Copy Suggestion, Remove from History, and Clear All History actions
+- Fix Remove from History shortcut to use the standard Remove shortcut instead of Duplicate
+
+## [Update] - 2026-01-26
+
+- Fix issue with search text containing special characters
+
+## [Windows] - 2025-11-06
+
+- Release extension for Windows
+
+## [Update] - 2025-02-22
+
+- Add clipboard fallback preference for selected text searches
+
+## [Update] - 2024-11-21
+
+- Add a command to search Google with the selected text
+
 ## [Update] - 2024-08-06
 
 - Add an action for setting result as search text

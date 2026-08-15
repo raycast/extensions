@@ -2,7 +2,7 @@ import { LocalStorage } from "node-localstorage";
 import { showToast, Toast } from "@raycast/api";
 import { SearchResult } from "../types/coinType";
 
-const localStorage = new LocalStorage("/tmp/raycast-scratch");
+export const localStorage = new LocalStorage("/tmp/raycast-scratch");
 
 export const getFavorites = (key: string): SearchResult[] => {
   const savedFavorites = localStorage.getItem(key);

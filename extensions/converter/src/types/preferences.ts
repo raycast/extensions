@@ -1,9 +1,9 @@
 import { getPreferenceValues } from "@raycast/api";
 
 interface Preferences {
-  autoDetect: boolean;
-  priorityDetection: string;
+  autoPaste: boolean;
+  asciiCommaSeparated: boolean;
   advanceView: boolean;
   advanceViewLocation: string;
 }
-export const { autoDetect, priorityDetection, advanceView, advanceViewLocation } = getPreferenceValues<Preferences>();
+export const { autoPaste, asciiCommaSeparated, advanceView, advanceViewLocation } = getPreferenceValues<Preferences>();

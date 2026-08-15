@@ -777,6 +777,18 @@ export const commandGroups: CommandGroups<RectangleProAction> = {
         icon: "window-positions/rightHalfTemplate.png",
         description: "Resize the application to the right half of the screen",
       },
+      {
+        name: "cascade-app",
+        title: "Cascade App",
+        icon: "window-positions/cascadeAppTemplate.png",
+        description: "Cascade application windows",
+      },
+      {
+        name: "cascade-all",
+        title: "Cascade All",
+        icon: "window-positions/cascadeAllTemplate.png",
+        description: "Cascade all windows",
+      },
     ],
   },
 };
@@ -844,18 +856,6 @@ export const actionsWithMissingIcons: CommandGroups<RectangleProAction> = {
         title: "Tile 2x3",
         icon: "",
         description: "Tile windows in a 2x3 grid",
-      },
-      {
-        name: "cascade-all",
-        title: "Cascade All",
-        icon: "",
-        description: "Cascade all windows",
-      },
-      {
-        name: "cascade-app",
-        title: "Cascade App",
-        icon: "",
-        description: "Cascade application windows",
       },
     ],
   },

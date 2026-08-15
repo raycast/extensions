@@ -1,12 +1,12 @@
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 import { useDataLoader } from '@scaleway/use-dataloader'
 import { useAPI } from 'helpers/useAPI'
 
 type DataLoaderOption<T> = Parameters<typeof useDataLoader<T>>[2]
 
 export const usePoliciesQuery = (
-  params: IAM.v1alpha1.ListPoliciesRequest,
-  dataloaderOptions?: DataLoaderOption<IAM.v1alpha1.ListPoliciesResponse>
+  params: Iamv1alpha1.ListPoliciesRequest,
+  dataloaderOptions?: DataLoaderOption<Iamv1alpha1.ListPoliciesResponse>
 ) => {
   const { iamV1alpha1 } = useAPI()
   const key = ['iam', 'policies', Object.entries(params).sort()].flat(3)
@@ -15,8 +15,8 @@ export const usePoliciesQuery = (
 }
 
 export const useAllPoliciesQuery = (
-  params: IAM.v1alpha1.ListPoliciesRequest,
-  dataloaderOptions?: DataLoaderOption<IAM.v1alpha1.ListPoliciesResponse['policies']>
+  params: Iamv1alpha1.ListPoliciesRequest,
+  dataloaderOptions?: DataLoaderOption<Iamv1alpha1.ListPoliciesResponse['policies']>
 ) => {
   const { iamV1alpha1 } = useAPI()
   const key = ['iam', 'policies', 'all', Object.entries(params).sort()].flat(3)

@@ -9,27 +9,28 @@ interface State {
   error?: Error;
 }
 
-export function SearchMyPullRequests(): JSX.Element {
+export function SearchMyPullRequests() {
   const [state, setState] = useState<State>({});
 
   useEffect(() => {
     async function fetchPRs() {
       try {
-        const { data } = await getMyOpenPullRequests();
+        const pullRequests = await getMyOpenPullRequests();
 
-        const prs = data.values.map((pr: any) => ({
-          id: pr.id as number,
-          title: pr.title as string,
-          repo: {
-            name: pr.destination.repository.name as string,
-            fullName: pr.destination.repository.full_name as string,
-          },
-          commentCount: pr.comment_count as number,
-          author: {
-            url: pr.author.links.avatar.href as string,
-            nickname: pr.author.nickname as string,
-          },
-        }));
+        const prs =
+          pullRequests.map((pr) => ({
+            id: pr.id,
+            title: pr.title,
+            repo: {
+              name: pr.destination?.repository?.name,
+              fullName: pr.destination?.repository?.full_name,
+            },
+            commentCount: pr.comment_count,
+            author: {
+              url: pr.author?.links?.avatar?.href,
+              nickname: pr.author?.nickname,
+            },
+          })) ?? [];
         setState({ pullRequests: prs });
       } catch (error) {
         setState({ error: error instanceof Error ? error : new Error("Something went wrong") });

@@ -1,5 +1,20 @@
 # Beeminder Changelog
 
+## [Pin goals to the top of the list] - 2026-03-09
+
+- Adds the ability to pin goals to the top of the list via a new "Pin Goal" action (⌘⇧P).
+- Pinned goals persist across sessions using local storage.
+- Pinned goals display a pin icon accessory for easy identification.
+
+## [Show how many days goals are above the red line] - 2025-02-18
+
+- Adds a preference to show how many days goals are above the red line.
+- Adds a preference to sort and color goals by how many days they are above the red line.
+
+## [A better placeholder when entering data] - 2024-09-25
+
+The data entry field will now show the most recent data point as its placeholder value.
+
 ## [Better synchronization after submitting data] - 2024-08-23
 
 Fixes an issue where the data would not be fully refreshed after submitting a data point.

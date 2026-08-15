@@ -11,11 +11,15 @@ export function LifeProgressCanvasItem(props: {
   setRefresh: Dispatch<SetStateAction<number>>;
 }) {
   const { countdownDates, setRefresh } = props;
+  const { canvas, text } = getLiftProgressCanvas(getSpendDays(), getLeftNights(), 40);
   return (
     <List.Item
       icon={"🎞"}
-      title={getLiftProgressCanvas(getSpendDays(), getLeftNights(), 40, true).canvas}
-      subtitle={getLiftProgressCanvas(getSpendDays(), getLeftNights(), 40, true).text}
+      title={{
+        value: canvas,
+        tooltip: `You're ${text} through your life.`,
+      }}
+      subtitle={`You're ${text} through your life.`}
       actions={
         <ActionPanel>
           <ActionAddCountdownDate countdownDates={countdownDates} setRefresh={setRefresh} />

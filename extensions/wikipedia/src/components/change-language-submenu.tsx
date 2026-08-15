@@ -1,31 +1,40 @@
 import { Action, ActionPanel } from "@raycast/api";
 
-import { languages, useLanguage } from "../utils/language";
+import { languages, Locale } from "../utils/language";
 
-import { useAvalableLanguages } from "@/hooks/usePageData";
+import { useAvailableLanguages } from "@/hooks/usePageData";
 
-export function ChangeLanguageSubmenu({ title }: { title: string }) {
-  const [language, setLanguage] = useLanguage();
-  const { data: availableLanguages, isLoading } = useAvalableLanguages(title, language);
+export function ChangeLanguageSubmenu({
+  title,
+  language,
+  onSelect,
+}: {
+  title: string;
+  language: string;
+  onSelect: (title: string, language: Locale) => void;
+}) {
+  const { data: availableLanguages, isLoading } = useAvailableLanguages(title, language);
 
   return (
     <ActionPanel.Submenu
-      shortcut={{ modifiers: ["cmd"], key: "p" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "l" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+      }}
       title="Change Language"
       icon={languages.find((l) => l.value === language)?.icon}
       isLoading={isLoading}
     >
       {languages
         .filter(({ value }) => value !== language)
-        .filter(({ value }) => availableLanguages?.includes(value))
-        .map((language) => (
-          <Action
-            key={language.value}
-            icon={language.icon}
-            title={language.title}
-            onAction={() => setLanguage(language.value)}
-          />
-        ))}
+        .map(({ value, icon, title }) => {
+          const translatedTitle = availableLanguages?.find(({ lang }) => lang === value)?.title;
+          if (!translatedTitle) {
+            return null;
+          }
+
+          return <Action key={value} icon={icon} title={title} onAction={() => onSelect(translatedTitle, value)} />;
+        })}
     </ActionPanel.Submenu>
   );
 }

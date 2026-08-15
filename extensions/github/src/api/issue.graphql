@@ -155,6 +155,14 @@ query searchIssues($query: String!, $numberOfItems: Int!) {
   }
 }
 
+query issueByNumber($owner: String!, $name: String!, $issueNumber: Int!) {
+  repository(owner: $owner, name: $name) {
+    issue(number: $issueNumber) {
+      ...IssueFields
+    }
+  }
+}
+
 mutation closeIssue($nodeId: ID!, $stateReason: IssueClosedStateReason!) {
   closeIssue(input: { issueId: $nodeId, stateReason: $stateReason }) {
     issue {
@@ -196,6 +204,7 @@ mutation createIssue(
   $assigneeIds: [ID!]!
   $labelIds: [ID!]!
   $milestoneId: ID
+  $issueTypeId: ID
 ) {
   createIssue(
     input: {
@@ -205,6 +214,7 @@ mutation createIssue(
       assigneeIds: $assigneeIds
       labelIds: $labelIds
       milestoneId: $milestoneId
+      issueTypeId: $issueTypeId
     }
   ) {
     issue {

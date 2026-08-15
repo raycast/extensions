@@ -3,22 +3,34 @@ import { setTimeout } from "node:timers/promises";
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Detail,
   Grid,
   Icon,
   LaunchProps,
   Toast,
-  getPreferenceValues,
-  showHUD,
+  confirmAlert,
+  open,
   showToast,
 } from "@raycast/api";
-import { Searcher } from "fast-fuzzy";
+import { showFailureToast } from "@raycast/utils";
 import debounce from "lodash/debounce.js";
-import { titleToSlug } from "simple-icons/sdk";
-import { LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
-import { cacheAssetPack, getAliases, loadCachedJson, useVersion } from "./utils.js";
+import { getIconSlug } from "./vender/simple-icons-sdk.js";
+import { CopyFontEntities, LaunchCommand, Supports, actions, defaultActionsOrder } from "./actions.js";
+import {
+  cacheAssetPack,
+  copyOrPaste,
+  defaultDetailAction,
+  displaySimpleIconsFontFeatures,
+  enableAiSearch,
+  getAliases,
+  getRelativeFileLink,
+  loadCachedJson,
+  shuffleOnStart,
+  useSearch,
+  useVersion,
+} from "./utils.js";
 import { IconData, LaunchContext } from "./types.js";
+import { arrayToShuffled } from "array-shuffle";
 
 const itemDisplayColumns = {
   small: 8,
@@ -30,74 +42,53 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
   const [itemSize, setItemSize] = useState<keyof typeof itemDisplayColumns>("small");
   const [isLoading, setIsLoading] = useState(true);
   const [icons, setIcons] = useState<IconData[]>([]);
-  const [searchString, setSearchString] = useState("");
+  const { aiIsLoading, searchResult, setSearchString } = useSearch({ icons });
   const version = useVersion({ launchContext });
 
-  const fetchIcons = async (version: string) => {
-    setIsLoading(true);
-    setIcons([]);
-
-    await showToast({
-      style: Toast.Style.Animated,
-      title: "",
-      message: "Loading Icons",
-    });
-
-    await cacheAssetPack(version).catch(async () => {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "",
-        message: "Failed to download icons asset",
-      });
-      await setTimeout(1200);
-    });
-    const json = await loadCachedJson(version).catch(() => {
-      return { icons: [] };
-    });
-    const icons = json.icons.map((icon) => ({
-      ...icon,
-      slug: icon.slug || titleToSlug(icon.title),
-    }));
-
-    setIcons(icons);
-    setIsLoading(false);
-
-    if (icons.length > 0) {
-      await showToast({
-        style: Toast.Style.Success,
-        title: "",
-        message: `${icons.length} icons loaded`,
-      });
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "",
-        message: "Unable to load icons",
-      });
-    }
-  };
-
   useEffect(() => {
+    const fetchIcons = async (version: string) => {
+      setIsLoading(true);
+      setIcons([]);
+
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Loading Icons",
+      });
+
+      await cacheAssetPack(version).catch(async (error) => {
+        await showFailureToast(error, { title: "Failed to cache asset pack" });
+        await setTimeout(1200);
+      });
+      const json = await loadCachedJson(version).catch(() => {
+        return [];
+      });
+      const icons = json.map((icon) => ({
+        ...icon,
+        slug: getIconSlug(icon),
+      }));
+
+      setIcons(shuffleOnStart ? arrayToShuffled(icons) : icons);
+      setIsLoading(false);
+
+      if (icons.length > 0) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: `${icons.length} icons loaded`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Unable to load icons",
+        });
+      }
+    };
     if (version) {
-      fetchIcons(version);
+      fetchIcons(version).catch((error) => {
+        showFailureToast(error, { title: "Failed to fetch icons" });
+      });
     }
   }, [version]);
 
-  const searcher = new Searcher(icons, {
-    keySelector: (icon) =>
-      [
-        icon.title,
-        icon.slug,
-        icon.aliases?.aka,
-        icon.aliases?.dup?.map((duplicate) => duplicate.title),
-        Object.values(icon.aliases?.loc ?? {}),
-      ]
-        .flat()
-        .filter(Boolean) as string[],
-  });
-  const searchResults = searchString ? searcher.search(searchString) : icons;
-
-  const { defaultDetailAction = "OpenWith" } = getPreferenceValues<ExtensionPreferences>();
   const DefaultAction = actions[defaultDetailAction];
 
   const restActions = defaultActionsOrder
@@ -106,6 +97,14 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       return actions[actionId];
     });
 
+  if (aiIsLoading && searchResult.length === 0) {
+    return (
+      <Grid isLoading={aiIsLoading} onSearchTextChange={setSearchString}>
+        <Grid.EmptyView icon={Icon.Stars} title="Searching through AI..." />
+      </Grid>
+    );
+  }
+
   return (
     <Grid
       navigationTitle={
@@ -113,7 +112,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
       }
       columns={itemDisplayColumns[itemSize]}
       inset={Grid.Inset.Small}
-      isLoading={isLoading}
+      isLoading={isLoading || aiIsLoading}
       searchBarAccessory={
         <Grid.Dropdown
           tooltip="Grid Item Size"
@@ -128,12 +127,30 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
         </Grid.Dropdown>
       }
       onSearchTextChange={debounce(setSearchString, 300)}
+      actions={
+        enableAiSearch && icons.length > 0 && searchResult.length === 0 ? (
+          <ActionPanel>
+            <Action
+              icon={Icon.Stars}
+              title="Try AI Search"
+              onAction={async () => {
+                const confirmed = await confirmAlert({
+                  title: "Pro Feature Required",
+                  message:
+                    "This feature requires Raycast Pro subscription. Do you want to open Raycast Pro page? (You can hide this Pro feature in preferences)",
+                });
+                if (confirmed) open("https://raycast.com/pro?via=litomore");
+              }}
+            />
+          </ActionPanel>
+        ) : undefined
+      }
     >
-      {(!isLoading || !version) &&
-        searchResults.slice(0, 500).map((icon) => {
-          const slug = icon.slug || titleToSlug(icon.title);
-
-          const fileLink = `pack/simple-icons-${version}/icons/${slug}.svg`;
+      {(!isLoading || !aiIsLoading || !version) &&
+        // Limit to 500 icons to avoid performance issues
+        searchResult.slice(0, 500).map((icon) => {
+          const slug = getIconSlug(icon);
+          const fileLink = getRelativeFileLink(slug, version);
           const aliases = getAliases(icon);
 
           return (
@@ -155,21 +172,23 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                       title="See Detail"
                       target={
                         <Detail
-                          markdown={`<img src="${fileLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${icon.hex}" />`}
+                          markdown={`<img src="${fileLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${encodeURIComponent(`#${icon.hex}`)}" />`}
                           navigationTitle={icon.title}
                           metadata={
                             <Detail.Metadata>
-                              <Detail.Metadata.Label title="Title" text={icon.title} />
+                              <Detail.Metadata.TagList title="Title">
+                                <Detail.Metadata.TagList.Item
+                                  text={icon.title}
+                                  onAction={() => copyOrPaste(icon.title)}
+                                />
+                              </Detail.Metadata.TagList>
                               {aliases.length > 0 && (
                                 <Detail.Metadata.TagList title="Aliases">
                                   {aliases.map((alias) => (
                                     <Detail.Metadata.TagList.Item
                                       key={alias}
                                       text={alias}
-                                      onAction={async () => {
-                                        Clipboard.copy(alias);
-                                        await showHUD("Copied to Clipboard");
-                                      }}
+                                      onAction={() => copyOrPaste(alias)}
                                     />
                                   ))}
                                 </Detail.Metadata.TagList>
@@ -177,20 +196,14 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                               <Detail.Metadata.TagList title="Slug">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.slug}
-                                  onAction={async () => {
-                                    Clipboard.copy(icon.slug);
-                                    await showHUD("Copied to Clipboard");
-                                  }}
+                                  onAction={() => copyOrPaste(icon.slug)}
                                 />
                               </Detail.Metadata.TagList>
                               <Detail.Metadata.TagList title="Brand color">
                                 <Detail.Metadata.TagList.Item
                                   text={icon.hex}
                                   color={`#${icon.hex}`}
-                                  onAction={async () => {
-                                    Clipboard.copy(icon.hex);
-                                    await showHUD("Copied to Clipboard");
-                                  }}
+                                  onAction={() => copyOrPaste(icon.hex)}
                                 />
                               </Detail.Metadata.TagList>
                               <Detail.Metadata.Separator />
@@ -217,7 +230,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                                 <ActionPanel.Section>
                                   <LaunchCommand
                                     callbackLaunchOptions={launchContext.callbackLaunchOptions}
-                                    icon={{ ...icon, slug: icon.slug || titleToSlug(icon.title) }}
+                                    icon={{ ...icon, slug: getIconSlug(icon) }}
                                     version={version}
                                   />
                                 </ActionPanel.Section>
@@ -233,6 +246,11 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                                     ))}
                                   </ActionPanel.Section>
                                 </>
+                              )}
+                              {displaySimpleIconsFontFeatures && (
+                                <ActionPanel.Section>
+                                  <CopyFontEntities icon={icon} version={version} />
+                                </ActionPanel.Section>
                               )}
                               <ActionPanel.Section>
                                 <Supports />

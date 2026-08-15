@@ -37,16 +37,16 @@ const actionablePullRequests = () => {
           }
 
           const approvedPulls = pulls.filter(
-            ({ reviewDecision, user }) => reviewDecision === ReviewDecision.APPROVED && user?.login === login
+            ({ reviewDecision, user }) => reviewDecision === ReviewDecision.APPROVED && user?.login === login,
           );
           const changeRequestedPulls = pulls.filter(
-            ({ reviewDecision, user }) => reviewDecision === ReviewDecision.CHANGES_REQUESTED && user?.login === login
+            ({ reviewDecision, user }) => reviewDecision === ReviewDecision.CHANGES_REQUESTED && user?.login === login,
           );
           // NOTE: both the `REVIEW_REQUIRED` and `null` statuses indicate that the PR is waiting for a review.
           // Refer to: https://github.com/orgs/community/discussions/24375
           const pendingReviewPulls = pulls.filter(
             ({ reviewDecision, user }) =>
-              (reviewDecision === ReviewDecision.REVIEW_REQUIRED || reviewDecision === null) && user?.login === login
+              (reviewDecision === ReviewDecision.REVIEW_REQUIRED || reviewDecision === null) && user?.login === login,
           );
           const reviewRequestedPulls = pulls.filter(({ user }) => user?.login !== login);
 

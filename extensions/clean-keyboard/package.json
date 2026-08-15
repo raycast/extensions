@@ -2,11 +2,20 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "clean-keyboard",
   "title": "Clean Keyboard",
-  "description": "Lock your keyboard to clean it easily.",
+  "description": "Lock your keyboard to clean it easily",
   "icon": "extension_icon.png",
   "author": "ike-gg",
   "contributors": [
-    "AndersDigital"
+    "AndersDigital",
+    "xilopaint",
+    "ridemountainpig",
+    "litomore",
+    "yusifaliyevpro",
+    "shivraj-roy"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity",
@@ -17,9 +26,8 @@
   "commands": [
     {
       "name": "clean-keyboard",
-      "title": "Clean Keyboard",
-      "subtitle": "Lock keyboard to clean it easily",
-      "description": "Lock keyboard to clean it easily",
+      "title": "Lock Keyboard",
+      "description": "Lock your keyboard to clean it easily",
       "mode": "view",
       "keywords": [
         "keyboard",
@@ -27,22 +35,33 @@
         "lock",
         "freeze",
         "dirty"
+      ],
+      "preferences": [
+        {
+          "name": "lockFnKeys",
+          "title": "Lock Function Row Keys",
+          "description": "Also block function row keys while cleaning. Original setting is restored on unlock. macOS Tahoe (26+) only.",
+          "type": "checkbox",
+          "label": "Lock Fn / function row keys (macOS Tahoe only)",
+          "default": false,
+          "required": false
+        }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1"
+    "@raycast/api": "^1.104.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

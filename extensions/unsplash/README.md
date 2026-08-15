@@ -11,9 +11,7 @@ A [Raycast](https://raycast.com/) extension that lets you communicate with Unspl
 
 ### Installation
 
-You will need some additional steps to install this plugin.
-
-- Create an app on [Unsplash developers page](https://unsplash.com/developers).
+- Create an app on the [Unsplash developers page](https://unsplash.com/developers).
 - Copy your access key and secret key.
 - Scroll down to the "Redirect URI & Permissions" section:
   - Set the "Redirect URI" field to: `https://raycast.com/redirect`
@@ -21,7 +19,7 @@ You will need some additional steps to install this plugin.
   - It should look [like this](https://i.imgur.com/ZV6G9mi.png).
 - Save your settings.
 - Install the Unsplash extension.
-- Enter your access key and secret key in the extension settings.
+- Enter your access key and secret key in the extension settings (avoid trailing spaces).
 - When you run a command for the first time you'll be asked to authorize.
 
 ### FAQ
@@ -55,6 +53,12 @@ You will need some additional steps to install this plugin.
 **Q:** Why do we need to authorize?
 
 **A:** This enables us to get a bearer token with permissions that'll let us access more features of the Unsplash API (e.g. like, dislike, get current user).
+
+---
+
+**Q:** Why am I running out of API calls so quick?
+
+**A:** The extension implements pagination so each "page" counts as another API call. To minimize your use of requests, try a different search query if the first couple of pages do not meet your needs.
 
 ---
 

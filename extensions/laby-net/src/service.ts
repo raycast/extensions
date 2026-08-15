@@ -3,15 +3,15 @@ import { Cache, LocalStorage } from "@raycast/api";
 
 interface Profile {
   uuid: string;
-  username: string;
-  username_history: NameHistoryEntry[];
+  name: string;
+  name_history: NameHistoryEntry[];
   textures: Textures;
 }
 
 interface ProfileItem {
   uuid: string;
-  username: string;
-  username_history: NameHistoryEntryItem[];
+  name: string;
+  name_history: NameHistoryEntryItem[];
   textures: TexturesItem;
 }
 
@@ -23,7 +23,7 @@ interface NameHistoryEntry {
 }
 
 interface NameHistoryEntryItem {
-  username: string;
+  name: string;
   changed_at: string;
   accurate: boolean | null;
   last_seen_at: string;
@@ -75,24 +75,12 @@ interface SearchResultEntry {
 
 interface SearchResultEntryItem {
   uuid: string;
-  user_name: string;
+  name: string;
 }
 
 interface Views {
   views: number;
 }
-
-interface AccountType {
-  type: string;
-}
-
-const accountTypes: { [key: string]: string } = {
-  LEGACY: "Legacy",
-  MOJANG: "Mojang",
-  MSA: "Microsoft",
-  MIGRATED_MSA: "Migrated to Microsoft",
-  UNKNOWN: "Unknown",
-};
 
 interface SocialMediaEntry {
   name: string;
@@ -141,7 +129,7 @@ interface TextureSearchResult {
 }
 
 interface TextureSearchResultItem {
-  textures: TextureSearchTextureItem[];
+  results: TextureSearchTextureItem[];
 }
 
 class Service {
@@ -183,12 +171,21 @@ class Service {
     return;
   }
 
+  async removeSearch(uuid: string): Promise<void> {
+    let searches = await this.getLatestSearches();
+    searches = searches.filter((entry) => entry.uuid !== uuid);
+
+    await LocalStorage.setItem("searches", JSON.stringify(searches));
+
+    return;
+  }
+
   async getProfile(uuid: string): Promise<Profile> {
     const response = await this.client.get<ProfileItem>("v3/user/" + uuid + "/profile");
     return {
       uuid: response.data.uuid,
-      username: response.data.username,
-      username_history: response.data.username_history.map((entry) => {
+      name: response.data.name,
+      name_history: response.data.name_history.map((entry) => {
         let changedAt: Date | string | null = null;
         if (entry.changed_at !== null) {
           if (entry.changed_at.length === 4) {
@@ -198,7 +195,7 @@ class Service {
           }
         }
         return {
-          name: entry.username,
+          name: entry.name,
           changedAt: changedAt,
           accurate: entry.accurate,
           lastSeenAt: new Date(entry.last_seen_at),
@@ -246,7 +243,7 @@ class Service {
     const result: SearchResultEntry[] = response.data.results.map((entry) => {
       return {
         uuid: entry.uuid,
-        userName: entry.user_name,
+        userName: entry.name,
       };
     });
 
@@ -287,19 +284,19 @@ class Service {
   }
 
   async searchTextures(type: string, input: string): Promise<TextureSearchResult> {
-    const params: any = {
-      type: type,
+    const params: Record<string, string> = {
+      order: "most_used",
     };
 
     if (input !== "") {
       params["input"] = input;
     }
 
-    const response = await this.client.get<TextureSearchResultItem>("texture/search", {
+    const response = await this.client.get<TextureSearchResultItem>(`v3/search/textures/${type.toLowerCase()}`, {
       params: params,
     });
     return {
-      textures: response.data.textures.map((texture) => {
+      textures: response.data.results.map((texture) => {
         return {
           name: texture.name,
           imageHash: texture.image_hash,

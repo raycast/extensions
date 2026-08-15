@@ -1,0 +1,113 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "nordic-energy-prices",
+  "title": "Nordic Energy Prices",
+  "description": "Get today's energy prices in the Nordic countries (Denmark, Sweden, Norway, Finland)",
+  "icon": "command-icon-energy.png",
+  "author": "mSarheed",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Data",
+    "Finance",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "today",
+      "title": "Show Today's Energy Price",
+      "description": "Shows the energy prices for today in the selected region",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "priceRegion",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Denmark - DK1 (Vest for Storebælt)",
+          "value": "DK1"
+        },
+        {
+          "title": "Denmark - DK2 (Øst for Storebælt)",
+          "value": "DK2"
+        },
+        {
+          "title": "Norway - NO1 (Oslo / Øst-Norge)",
+          "value": "NO1"
+        },
+        {
+          "title": "Norway - NO2 (Kristiansand / Sør-Norge)",
+          "value": "NO2"
+        },
+        {
+          "title": "Norway - NO3 (Trondheim / Midt-Norge)",
+          "value": "NO3"
+        },
+        {
+          "title": "Norway - NO4 (Tromsø / Nord-Norge)",
+          "value": "NO4"
+        },
+        {
+          "title": "Norway - NO5 (Bergen / Vest-Norge)",
+          "value": "NO5"
+        },
+        {
+          "title": "Sweden - SE1 (Luleå / Norra Sverige)",
+          "value": "SE1"
+        },
+        {
+          "title": "Sweden - SE2 (Sundsvall / Norra Mellansverige)",
+          "value": "SE2"
+        },
+        {
+          "title": "Sweden - SE3 (Stockholm / Södra Mellansverige)",
+          "value": "SE3"
+        },
+        {
+          "title": "Sweden - SE4 (Malmö / Södra Sverige)",
+          "value": "SE4"
+        },
+        {
+          "title": "Finland",
+          "value": "FI"
+        }
+      ],
+      "defaultValue": "DK",
+      "title": "Select region",
+      "description": "Select the region to get the energy prices",
+      "required": true
+    },
+    {
+      "name": "vat",
+      "description": "Include VAT in the price?",
+      "type": "checkbox",
+      "defaultValue": true,
+      "required": true,
+      "label": "Include VAT"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.16.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

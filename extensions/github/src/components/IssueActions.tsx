@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Clipboard, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  Icon,
+  Toast,
+  confirmAlert,
+  showToast,
+  Keyboard,
+} from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -318,6 +329,12 @@ export default function IssueActions({
           shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
         />
 
+        <Action.CopyToClipboard
+          content={`[${issue.title}](${issue.url})`}
+          title="Copy Markdown URL"
+          shortcut={{ modifiers: ["cmd", "shift"], key: ";" }}
+        />
+
         {linkedBranch?.ref?.name ? (
           <Action.CopyToClipboard
             content={linkedBranch.ref?.name}
@@ -333,7 +350,7 @@ export default function IssueActions({
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutate}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
     </ActionPanel>

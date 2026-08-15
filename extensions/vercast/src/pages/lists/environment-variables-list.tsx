@@ -1,5 +1,5 @@
 import { ActionPanel, confirmAlert, Icon, List, showToast, useNavigation, Action, Toast } from "@raycast/api";
-import { ReactElement, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { CreateEnvironment, Environment, Project } from "../../types";
 import {
   createEnvironmentVariable,
@@ -152,7 +152,8 @@ const EnvironmentVariableItem = ({
   icon?: string;
   envVar: Environment;
   type: Environment["type"];
-  actions: ReactElement<typeof ActionPanel>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  actions: any;
 }) => {
   const getIcon = (type: string) => {
     switch (type) {

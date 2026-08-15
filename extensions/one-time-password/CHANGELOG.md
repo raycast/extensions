@@ -1,5 +1,33 @@
 # One Time Password Changelog
 
+## [Paste Recent OTP] - 2026-08-03
+
+### Added
+
+- Added "Paste Recent OTP" no-view command that pastes the OTP from the most recently used account into the active app
+
+## [Windows Support] - 2025-08-27
+
+- Added Windows support.
+
+## 2025-05-07
+
+- Added Primary Action switch between Copy to Clipboard and Paste to Active App.
+
+## 2025-02-11
+
+- Provided additional error information when a QR code scan fails.
+
+## 2024-12-04
+
+- Icons will now be displayed black or white depending on the system appearance.
+
+## 2024-11-07
+
+### Added
+
+- Added service provider icons for each account.
+
 ## 2024-07-25
 
 ### Added

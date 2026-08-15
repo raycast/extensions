@@ -5,5 +5,5 @@ import { UUID } from "../../types/tim";
 export const OpenInTimAction: React.FC<{ id: UUID }> = ({ id }) => {
   const handleAction = async () => openInTim(id);
 
-  return <Action title="Open In Tim" icon="tim-icon.png" onAction={handleAction} />;
+  return <Action title="Open in Tim" icon="tim-icon.png" onAction={handleAction} />;
 };

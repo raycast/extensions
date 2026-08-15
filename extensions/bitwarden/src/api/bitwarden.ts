@@ -1,16 +1,16 @@
-import { Cache, environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
-import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue, execaSync } from "execa";
+import { environment, getPreferenceValues, LocalStorage, open, showToast, Toast } from "@raycast/api";
+import { execa, ExecaChildProcess, ExecaError, ExecaReturnValue } from "execa";
 import { existsSync, unlinkSync, writeFileSync, accessSync, constants, chmodSync } from "fs";
-import { dirname } from "path/posix";
-import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL } from "~/constants/general";
+import { LOCAL_STORAGE_KEY, DEFAULT_SERVER_URL, CACHE_KEYS } from "~/constants/general";
 import { VaultState, VaultStatus } from "~/types/general";
 import { PasswordGeneratorOptions } from "~/types/passwords";
-import { Folder, Item } from "~/types/vault";
+import { Folder, Item, ItemType, Login } from "~/types/vault";
 import { getPasswordGeneratingArgs } from "~/utils/passwords";
 import { getServerUrlPreference } from "~/utils/preferences";
 import {
   EnsureCliBinError,
   InstalledCLINotFoundError,
+  InvalidSessionTokenError,
   ManuallyThrownError,
   NotLoggedInError,
   PremiumFeatureError,
@@ -19,14 +19,15 @@ import {
   tryExec,
   VaultIsLockedError,
 } from "~/utils/errors";
-import { join } from "path";
+import { join, dirname } from "path";
 import { chmod, rename, rm } from "fs/promises";
 import { decompressFile, removeFilesThatStartWith, unlinkAllSync, waitForFileAvailable } from "~/utils/fs";
-import { getFileSha256 } from "~/utils/crypto";
 import { download } from "~/utils/network";
 import { captureException } from "~/utils/development";
 import { ReceivedSend, Send, SendCreatePayload, SendType } from "~/types/send";
 import { prepareSendPayload } from "~/api/bitwarden.helpers";
+import { Cache } from "~/utils/cache";
+import { platform } from "~/utils/platform";
 
 type Env = {
   BITWARDENCLI_APPDATA_DIR: string;
@@ -53,6 +54,7 @@ type ExecProps = {
   resetVaultTimeout: boolean;
   abortController?: AbortController;
   input?: string;
+  env?: Record<string, string>;
 };
 
 type LockOptions = {
@@ -75,9 +77,17 @@ type ReceiveSendOptions = {
   password?: string;
 };
 
+type CreateLoginItemOptions = {
+  name: string;
+  username?: string;
+  password: string;
+  folderId: string | null;
+  uri?: string;
+};
+
 const { supportPath } = environment;
 
-const Δ = "2"; // changing this forces a new bin download for people that had a failed one
+const Δ = "5"; // changing this forces a new bin download for people that had a failed one
 const BinDownloadLogger = (() => {
   /* The idea of this logger is to write a log file when the bin download fails, so that we can let the extension crash,
    but fallback to the local cli path in the next launch. This allows the error to be reported in the issues dashboard. It uses files to keep it synchronous, as it's needed in the constructor.
@@ -92,49 +102,40 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2024.2.0",
-  sha256: "fd80ffefd4686e677d7c8720258b3c92559b65b890519b1327cd4bb45887dde8",
+  version: "2026.4.2",
+  get sha256() {
+    if (platform === "windows") return "db30a5b7dfb8ab1c657e14c566a77649b1ef66864c1c09c5e5437b5667f9e014";
+    if (process.arch === "arm64") return "885b4b15074452f175ddf03d1315ec1fa8a83912ee3ac9267750a5a038292599";
+    return "1dc091b65494612a2c371e27a4267a6e29f9ebabc7f854f6323fa8f1ac344cb2";
+  },
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
-    arm64: "/opt/homebrew/bin/bw",
-    x64: "/usr/local/bin/bw",
     get downloadedBin() {
-      return join(supportPath, cliInfo.binFilename);
+      return join(supportPath, cliInfo.binFilenameVersioned);
     },
     get installedBin() {
-      return process.arch === "arm64" ? this.arm64 : this.x64;
+      // We assume that it was installed using Chocolatey, if not, it's hard to make a good guess.
+      if (platform === "windows") return "C:\\ProgramData\\chocolatey\\bin\\bw.exe";
+      return process.arch === "arm64" ? "/opt/homebrew/bin/bw" : "/usr/local/bin/bw";
     },
     get bin() {
-      // TODO: Remove this when the issue is resolved
-      // CLI bin download is off for arm64 until bitwarden releases arm binaries
-      // https://github.com/bitwarden/clients/pull/2976
-      // https://github.com/bitwarden/clients/pull/7338
-      if (process.arch === "arm64") {
-        const cache = new Cache();
-        try {
-          if (!existsSync(this.downloadedBin)) throw new Error("No downloaded bin");
-          if (cache.get("downloadedBinWorks") === "true") return this.downloadedBin;
-
-          execaSync(this.downloadedBin, ["--version"]);
-          cache.set("downloadedBinWorks", "true");
-          return this.downloadedBin;
-        } catch {
-          cache.set("downloadedBinWorks", "false");
-          return this.installedBin;
-        }
-      }
-
       return !BinDownloadLogger.hasError() ? this.downloadedBin : this.installedBin;
     },
   },
   get binFilename() {
-    return `bw-${this.version}`;
+    return platform === "windows" ? "bw.exe" : "bw";
+  },
+  get binFilenameVersioned() {
+    const name = `bw-${this.version}`;
+    return platform === "windows" ? `${name}.exe` : `${name}`;
   },
   get downloadUrl() {
-    return `${this.downloadPage}/download/cli-v${this.version}/bw-macos-${this.version}.zip`;
-  },
-  checkHashMatchesFile: function (filePath: string) {
-    return getFileSha256(filePath) === this.sha256;
+    let archSuffix = "";
+    if (platform === "macos") {
+      archSuffix = process.arch === "arm64" ? "-arm64" : "";
+    }
+
+    return `${this.downloadPage}/download/cli-v${this.version}/bw-${platform}${archSuffix}-${this.version}.zip`;
   },
 } as const;
 
@@ -164,6 +165,7 @@ export class Bitwarden {
 
     this.initPromise = (async (): Promise<void> => {
       await this.ensureCliBinary();
+      void this.retrieveAndCacheCliVersion();
       await this.checkServerUrl(serverUrl);
     })();
   }
@@ -188,21 +190,36 @@ export class Bitwarden {
     try {
       try {
         toast.message = "Downloading...";
-        await download(cliInfo.downloadUrl, zipPath, (percent) => (toast.message = `Downloading ${percent}%`));
-        if (!cliInfo.checkHashMatchesFile(zipPath)) throw new EnsureCliBinError("Binary hash does not match");
+        await download(cliInfo.downloadUrl, zipPath, {
+          onProgress: (percent) => (toast.message = `Downloading ${percent}%`),
+          sha256: cliInfo.sha256,
+        });
       } catch (downloadError) {
         toast.title = "Failed to download Bitwarden CLI";
         throw downloadError;
       }
+
       try {
         toast.message = "Extracting...";
         await decompressFile(zipPath, supportPath);
-        const decompressedBinPath = join(supportPath, "bw");
-        await waitForFileAvailable(decompressedBinPath);
-        await rename(decompressedBinPath, this.cliPath);
+        const decompressedBinPath = join(supportPath, cliInfo.binFilename);
+
+        // For some reason this rename started throwing an error after succeeding, so for now we're just
+        // catching it and checking if the file exists ¯\_(ツ)_/¯
+        await rename(decompressedBinPath, this.cliPath).catch(() => null);
+        await waitForFileAvailable(this.cliPath);
+
         await chmod(this.cliPath, "755");
         await rm(zipPath, { force: true });
+
+        Cache.set(CACHE_KEYS.CLI_VERSION, cliInfo.version);
         this.wasCliUpdated = true;
+
+        // clear the data.json file to avoid issues with the new binary
+        const dataJsonPath = join(supportPath, "data.json");
+        tryExec(() => unlinkSync(dataJsonPath));
+        // clear stored server URL so checkServerUrl() re-configures the CLI
+        await LocalStorage.removeItem(LOCAL_STORAGE_KEY.SERVER_URL);
       } catch (extractError) {
         toast.title = "Failed to extract Bitwarden CLI";
         throw extractError;
@@ -211,13 +228,23 @@ export class Bitwarden {
     } catch (error) {
       toast.message = error instanceof EnsureCliBinError ? error.message : "Please try again";
       toast.style = Toast.Style.Failure;
-      unlinkAllSync(zipPath, this.cliPath);
-      BinDownloadLogger.logError(error);
 
-      if (error instanceof Error) throw new EnsureCliBinError(`${error.name}: ${error.message}`, error.stack);
+      unlinkAllSync(zipPath, this.cliPath);
+
+      if (!environment.isDevelopment) BinDownloadLogger.logError(error);
+      if (error instanceof Error) throw new EnsureCliBinError(error.message, error.stack);
       throw error;
     } finally {
       await toast.restore();
+    }
+  }
+
+  private async retrieveAndCacheCliVersion(): Promise<void> {
+    try {
+      const { error, result } = await this.getVersion();
+      if (!error) Cache.set(CACHE_KEYS.CLI_VERSION, result);
+    } catch (error) {
+      captureException("Failed to retrieve and cache cli version", error, { captureToRaycast: true });
     }
   }
 
@@ -253,10 +280,11 @@ export class Bitwarden {
     return this;
   }
 
-  async checkServerUrl(serverUrl: string): Promise<void> {
+  async checkServerUrl(serverUrl: string | undefined): Promise<void> {
     // Check the CLI has been configured to use the preference Url
-    const cliServer = (await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL)) || "";
-    if (cliServer === serverUrl) return;
+    const storedServer = await LocalStorage.getItem<string>(LOCAL_STORAGE_KEY.SERVER_URL);
+    if (!serverUrl && !storedServer) return;
+    if (storedServer === serverUrl) return;
 
     // Update the server Url
     const toast = await this.showToast({
@@ -272,7 +300,11 @@ export class Bitwarden {
       }
       // If URL is empty, set it to the default
       await this.exec(["config", "server", serverUrl || DEFAULT_SERVER_URL], { resetVaultTimeout: false });
-      await LocalStorage.setItem(LOCAL_STORAGE_KEY.SERVER_URL, serverUrl);
+      if (serverUrl) {
+        await LocalStorage.setItem(LOCAL_STORAGE_KEY.SERVER_URL, serverUrl);
+      } else {
+        await LocalStorage.removeItem(LOCAL_STORAGE_KEY.SERVER_URL);
+      }
 
       toast.style = Toast.Style.Success;
       toast.title = "Success";
@@ -291,13 +323,14 @@ export class Bitwarden {
   }
 
   private async exec(args: string[], options: ExecProps): Promise<ExecaChildProcess> {
-    const { abortController, input = "", resetVaultTimeout } = options ?? {};
+    const { abortController, input = "", resetVaultTimeout, env: envOverrides } = options ?? {};
 
     let env = this.env;
     if (this.tempSessionToken) {
       env = { ...env, BW_SESSION: this.tempSessionToken };
       this.tempSessionToken = undefined;
     }
+    if (envOverrides) env = { ...env, ...envOverrides };
 
     const result = await execa(this.cliPath, args, { input, env, signal: abortController?.signal });
 
@@ -315,10 +348,22 @@ export class Bitwarden {
     return result;
   }
 
+  async getVersion(): Promise<MaybeError<string>> {
+    try {
+      const { stdout: result } = await this.exec(["--version"], { resetVaultTimeout: false });
+      return { result };
+    } catch (execError) {
+      captureException("Failed to get cli version", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
   async login(): Promise<MaybeError> {
     try {
       await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
-      await this.saveLastVaultStatus("login", "unlocked");
+      await this.saveLastVaultStatus("login", "locked");
       await this.callActionListeners("login");
       return { result: undefined };
     } catch (execError) {
@@ -340,7 +385,7 @@ export class Bitwarden {
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to logout", execError);
-      const { error } = await this.handleCommonErrors(execError);
+      const { error } = await this.handleCommonErrors(execError, { skipInvalidSessionTokenLogout: true });
       if (!error) throw execError;
       return { error };
     }
@@ -357,6 +402,7 @@ export class Bitwarden {
       }
 
       await this.exec(["lock"], { resetVaultTimeout: false });
+      this.clearSessionToken();
       await this.saveLastVaultStatus("lock", "locked");
       if (!immediate) await this.callActionListeners("lock", reason);
       return { result: undefined };
@@ -370,10 +416,19 @@ export class Bitwarden {
 
   async unlock(password: string): Promise<MaybeError<string>> {
     try {
-      const { stdout: sessionToken } = await this.exec(["unlock", password, "--raw"], { resetVaultTimeout: true });
+      this.clearSessionToken();
+      const result = await this.exec(["unlock", "--passwordenv", "BW_PASSWORD", "--raw"], {
+        resetVaultTimeout: true,
+        env: { BW_PASSWORD: password },
+      });
+
+      const sessionToken = result.stdout;
+      if (!sessionToken.trim()) throw new InvalidSessionTokenError();
+
       this.setSessionToken(sessionToken);
       await this.saveLastVaultStatus("unlock", "unlocked");
       await this.callActionListeners("unlock", password, sessionToken);
+
       return { result: sessionToken };
     } catch (execError) {
       captureException("Failed to unlock vault", execError);
@@ -389,7 +444,7 @@ export class Bitwarden {
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to sync vault", execError);
-      const { error } = await this.handleCommonErrors(execError);
+      const { error } = await this.handleCommonErrors(execError, { skipInvalidSessionTokenLogout: true });
       if (!error) throw execError;
       return { error };
     }
@@ -415,6 +470,42 @@ export class Bitwarden {
       return { result: items.filter((item: Item) => !!item.name) };
     } catch (execError) {
       captureException("Failed to list items", execError);
+      const { error } = await this.handleCommonErrors(execError);
+      if (!error) throw execError;
+      return { error };
+    }
+  }
+
+  async createLoginItem(options: CreateLoginItemOptions): Promise<MaybeError<Item>> {
+    try {
+      const { error: itemTemplateError, result: itemTemplate } = await this.getTemplate<Item>("item");
+      if (itemTemplateError) throw itemTemplateError;
+
+      const { error: loginTemplateError, result: loginTemplate } = await this.getTemplate<Login>("item.login");
+      if (loginTemplateError) throw loginTemplateError;
+
+      itemTemplate.name = options.name;
+      itemTemplate.type = ItemType.LOGIN;
+      itemTemplate.folderId = options.folderId || null;
+      itemTemplate.login = loginTemplate;
+      itemTemplate.notes = null;
+
+      loginTemplate.username = options.username || null;
+      loginTemplate.password = options.password;
+      loginTemplate.totp = null;
+      loginTemplate.fido2Credentials = undefined;
+
+      if (options.uri) {
+        loginTemplate.uris = [{ match: null, uri: options.uri }];
+      }
+
+      const { result: encodedItem, error: encodeError } = await this.encode(JSON.stringify(itemTemplate));
+      if (encodeError) throw encodeError;
+
+      const { stdout } = await this.exec(["create", "item", encodedItem], { resetVaultTimeout: true });
+      return { result: JSON.parse<Item>(stdout) };
+    } catch (execError) {
+      captureException("Failed to create login item", execError);
       const { error } = await this.handleCommonErrors(execError);
       if (!error) throw execError;
       return { error };
@@ -658,16 +749,32 @@ export class Bitwarden {
     await this.callActionListeners("logout", reason);
   }
 
-  private async handleCommonErrors(error: any): Promise<{ error?: ManuallyThrownError }> {
-    const errorMessage = (error as ExecaError).stderr;
-    if (!errorMessage) return {};
+  private async handleCommonErrors(
+    error: any,
+    options?: { skipInvalidSessionTokenLogout?: boolean }
+  ): Promise<{ error?: ManuallyThrownError }> {
+    if (!(error instanceof Error)) return {};
 
-    if (/not logged in/i.test(errorMessage)) {
-      await this.handlePostLogout();
+    const stderr = (error as ExecaError).stderr;
+    const message = error.message;
+    if (!stderr && !message) return {};
+
+    const errorContent = [stderr, message].filter(Boolean).join(",");
+
+    const { skipInvalidSessionTokenLogout = false } = options ?? {};
+
+    if (/not logged in/i.test(errorContent)) {
+      await this.handlePostLogout("Not logged in");
       return { error: new NotLoggedInError("Not logged in") };
     }
-    if (/Premium status/i.test(errorMessage)) {
+    if (/Premium status/i.test(errorContent)) {
       return { error: new PremiumFeatureError() };
+    }
+    if (/Invalid session token/i.test(errorContent)) {
+      if (!skipInvalidSessionTokenLogout) {
+        await this.logout({ reason: "Invalid session token", immediate: true });
+      }
+      return { error: new InvalidSessionTokenError() };
     }
     return {};
   }
@@ -701,6 +808,7 @@ export class Bitwarden {
           await (listener as any)?.(...args);
         } catch (error) {
           captureException(`Error calling bitwarden action listener for ${action}`, error);
+          if (action === "unlock") throw error;
         }
       }
     }

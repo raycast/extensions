@@ -7,7 +7,9 @@
   "author": "Quentin23Soleil",
   "contributors": [
     "iamyeizi",
-    "aliaksandr_zhebit"
+    "aliaksandr_zhebit",
+    "thewinger",
+    "esershnr"
   ],
   "pastContributors": [
     "danulqua"
@@ -59,20 +61,44 @@
       "title": "Toggle Mute Audio Input",
       "description": "Mute/unmute audio input (microphone)",
       "mode": "no-view"
+    },
+    {
+      "name": "set-level",
+      "title": "Set Level of Audio Input",
+      "description": "Set level of audio input (microphone)",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "default-level",
+          "title": "Default Input level",
+          "description": "Default level of audio input",
+          "type": "textfield",
+          "placeholder": "Must be a number from 0 to 100",
+          "default": "100",
+          "required": true
+        }
+      ],
+      "arguments": [
+        {
+          "name": "level",
+          "placeholder": "0 - 100 or empty for default.",
+          "type": "text"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.2",
-    "@raycast/utils": "^1.8.0",
-    "run-applescript": "^6.1.0"
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2",
+    "run-applescript": "^7.1.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "25.0.10",
+    "@types/react": "19.2.9",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -83,5 +109,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -39,7 +39,6 @@ export default function getDraftMetadata(
             key={el.url}
             text={el.url}
             onAction={() => open(el.url)}
-            color={"#0000EE"}
           />
         ))}
       </Detail.Metadata.TagList>,

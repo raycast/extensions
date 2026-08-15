@@ -15,6 +15,7 @@ import { createTodo } from '@/services/notion/operations/create-todo'
 import { completeTodo } from '@/services/notion/operations/complete-todo'
 import { updateTodoTag } from '@/services/notion/operations/update-todo-tag'
 import { updateTodoDate } from '@/services/notion/operations/update-todo-date'
+import { updateTodoTitle } from '@/services/notion/operations/update-todo-title'
 import { deleteTodo } from '@/services/notion/operations/delete-todo'
 import { useTodos } from '@/services/notion/hooks/use-todos'
 import { useProjects } from '@/services/notion/hooks/use-projects'
@@ -107,12 +108,16 @@ export function useTodoList() {
     }
   }
 
-  const handleCreate = async (action?: 'SHARE' | 'OPEN') => {
+  const handleCreate = async (
+    action?: 'SHARE' | 'OPEN',
+    overrides?: Partial<Todo>
+  ): Promise<boolean> => {
     try {
-      if (!newTodo) return null
+      if (!newTodo) return false
 
       const optimisticTodo = {
         ...newTodo,
+        ...overrides,
         id: `fake-id-${Math.random() * 1000}`,
       }
 
@@ -168,8 +173,11 @@ export function useTodoList() {
           await openBrowser(createdTodo.shareUrl)
         }
       }
+
+      return true
     } catch (e: any) {
       showToast(Toast.Style.Failure, e?.message)
+      return false
     }
   }
 
@@ -289,6 +297,45 @@ export function useTodoList() {
       } catch (e: any) {
         showToast(Toast.Style.Failure, e?.message)
       }
+    }
+  }
+
+  const handleUpdateTitle = async (todo: Todo, newTitle: string) => {
+    if (!newTitle.trim()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: 'Title cannot be empty',
+      })
+      return
+    }
+    if (newTitle === todo.title) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: 'Title is unchanged',
+      })
+      return
+    }
+    try {
+      await showToast(Toast.Style.Animated, 'Updating title...')
+      await mutate(updateTodoTitle(todo.id, newTitle), {
+        optimisticUpdate(data) {
+          if (!data) return data
+          const todos = data.map((t) =>
+            t.id === todo.id
+              ? {
+                  ...t,
+                  title: newTitle,
+                }
+              : t
+          )
+          return todos
+        },
+        shouldRevalidateAfter: true,
+      })
+
+      await showToast(Toast.Style.Success, 'Title updated')
+    } catch (e: any) {
+      await showToast(Toast.Style.Failure, e?.message)
     }
   }
 
@@ -467,10 +514,12 @@ export function useTodoList() {
     hasAssigneeProperty: !!preferences?.properties?.assignee,
     hasProjectProperty: !!preferences?.properties?.project,
     hasTagProperty: !!preferences?.properties?.tag,
+    hasUrlProperty: !!preferences?.properties?.url,
     loading: isLoading,
     handleCreate,
     handleComplete,
     handleSetStatus,
+    handleUpdateTitle,
     handleSetTag,
     handleSetDate,
     handleDelete,

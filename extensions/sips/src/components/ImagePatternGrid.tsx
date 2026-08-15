@@ -8,9 +8,11 @@
  * Last modified  : 2024-06-26 21:37:46
  */
 
-import { useEffect, useRef, useState } from "react";
+import os from "os";
+import path from "path";
 
 import { Grid, Toast, getPreferenceValues, showInFinder, showToast } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
 
 import {
   generatePreview,
@@ -25,11 +27,9 @@ import {
   getSunbeamsOptions,
 } from "../utilities/generators";
 import { GeneratorOptions } from "../utilities/types";
-import ImageGeneratorActionPanel from "./ImageGeneratorActionPanel";
 import { cleanup, getDestinationPaths, moveImageResultsToFinalDestination, showErrorToast } from "../utilities/utils";
-import os from "os";
-import path from "path";
-import { CreateImagePreferences } from "../utilities/preferences";
+
+import ImageGeneratorActionPanel from "./ImageGeneratorActionPanel";
 
 /**
  * A grid of image patterns used to generate full-size renders.
@@ -59,7 +59,7 @@ export default function ImagePatternGrid(props: {
   const [lenticularHaloItem, setLenticularHaloItem] = useState<[string, GeneratorOptions]>(["", {}]);
   const [sunbeamsItem, setSunbeamsItem] = useState<[string, GeneratorOptions]>(["", {}]);
   const [currentColors, setCurrentColors] = useState<string[]>();
-  const preferences = getPreferenceValues<CreateImagePreferences>();
+  const preferences = getPreferenceValues<Preferences.CreateImage>();
 
   /**
    * Regenerates the colors used in the image patterns.
@@ -247,7 +247,10 @@ export default function ImagePatternGrid(props: {
     <Grid.Item
       title={`Stripes ${index + 1}`}
       key={`Stripes ${index + 1}`}
-      content={{ source: preview == "" ? generators.Stripes.thumbnail : preview, tintColor: currentColors?.[index] }}
+      content={{
+        source: preview == "" ? generators.Stripes.thumbnail : preview,
+        tintColor: currentColors?.[index],
+      }}
       actions={
         <ImageGeneratorActionPanel
           objectType="Stripes"
@@ -267,7 +270,9 @@ export default function ImagePatternGrid(props: {
       <Grid.Item
         title={title}
         key={`Solid Color ${index + 1}`}
-        content={{ source: preview == "" ? generators.Checkerboard.thumbnail : preview }}
+        content={{
+          source: preview == "" ? generators.Checkerboard.thumbnail : preview,
+        }}
         actions={
           <ImageGeneratorActionPanel
             objectType={title}
@@ -331,7 +336,9 @@ export default function ImagePatternGrid(props: {
     <Grid.Item
       title="Random"
       key="Random"
-      content={{ source: randomItem == "" ? generators.Random.thumbnail : randomItem }}
+      content={{
+        source: randomItem == "" ? generators.Random.thumbnail : randomItem,
+      }}
       actions={
         <ImageGeneratorActionPanel
           objectType="Random"
@@ -350,7 +357,9 @@ export default function ImagePatternGrid(props: {
     <Grid.Item
       title="Star Shine"
       key="Star Shine"
-      content={{ source: starShineItem[0] == "" ? generators.StarShine.thumbnail : starShineItem[0] }}
+      content={{
+        source: starShineItem[0] == "" ? generators.StarShine.thumbnail : starShineItem[0],
+      }}
       actions={
         <ImageGeneratorActionPanel
           objectType="Star Shine"
@@ -369,7 +378,9 @@ export default function ImagePatternGrid(props: {
     <Grid.Item
       title="Lenticular Halo"
       key="Lenticular Halo"
-      content={{ source: lenticularHaloItem[0] == "" ? generators.LenticularHalo.thumbnail : lenticularHaloItem[0] }}
+      content={{
+        source: lenticularHaloItem[0] == "" ? generators.LenticularHalo.thumbnail : lenticularHaloItem[0],
+      }}
       actions={
         <ImageGeneratorActionPanel
           objectType="Lenticular Halo"
@@ -388,7 +399,9 @@ export default function ImagePatternGrid(props: {
     <Grid.Item
       title="Sunbeams"
       key="Sunbeams"
-      content={{ source: sunbeamsItem[0] == "" ? generators.Sunbeams.thumbnail : sunbeamsItem[0] }}
+      content={{
+        source: sunbeamsItem[0] == "" ? generators.Sunbeams.thumbnail : sunbeamsItem[0],
+      }}
       actions={
         <ImageGeneratorActionPanel
           objectType="Sunbeams"
@@ -431,7 +444,10 @@ export default function ImagePatternGrid(props: {
       Promise.resolve(
         getDestinationPaths([path.join(os.tmpdir(), `${pattern.name.replaceAll(" ", "_").toLowerCase()}.png`)], true),
       ).then(async (destinations) => {
-        const toast = await showToast({ title: `Creating ${pattern.name}...`, style: Toast.Style.Animated });
+        const toast = await showToast({
+          title: `Creating ${pattern.name}...`,
+          style: Toast.Style.Animated,
+        });
         try {
           await generator.applyMethod(destinations[0], generator.CIFilterName, width, height, options);
           await moveImageResultsToFinalDestination(destinations);

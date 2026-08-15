@@ -1,4 +1,4 @@
-import { getSelectedText, Clipboard } from "@raycast/api";
+import { Clipboard, getSelectedText } from "@raycast/api";
 import { isEmpty } from "./utils";
 
 export const fetchItemInput = async () => {

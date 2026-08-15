@@ -1,12 +1,41 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, showHUD } from "@raycast/api";
 import { runJSInYouTubeMusicTab } from "./utils";
 
+export const playPause = `(function() {
+  const button =
+    document.querySelector('#play-pause-button') ||
+    document.querySelector('.ytp-play-button');
+
+  if (!button) {
+    return "no-button-found";
+  }
+
+  // Click the button and report success
+  button.click();
+  return "play-pause-toggled";
+})();`;
+
 export default async () => {
-  if (
-    await runJSInYouTubeMusicTab(
-      "(document.querySelector('#play-pause-button') || document.querySelector('.ytp-play-button')).click();"
-    )
-  ) {
-    return await closeMainWindow();
+  try {
+    const result = await runJSInYouTubeMusicTab(playPause);
+
+    if (result === undefined) {
+      await closeMainWindow();
+      return;
+    }
+
+    switch (result) {
+      case "no-button-found":
+        await showHUD("❌ No play/pause button found");
+        break;
+      case "play-pause-toggled":
+        await showHUD("⏯️ Play/Pause toggled");
+        break;
+      default:
+        await showHUD(`❌ Unknown Error: ${result}`);
+    }
+    await closeMainWindow();
+  } catch (error) {
+    await showHUD(`❌ Command failed: ${error instanceof Error ? error.message : "Unknown error"}`);
   }
 };

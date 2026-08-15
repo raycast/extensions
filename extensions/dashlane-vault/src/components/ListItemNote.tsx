@@ -11,7 +11,8 @@ type Props = {
 
 export const ListItemNote = ({ note }: Props) => {
   const { isInitialLoaded } = useNotesContext();
-  const hasAttachments = note.attachments.length > 0;
+  const { attachments = [] } = note;
+  const hasAttachments = attachments.length > 0;
   const markdown = isInitialLoaded ? note.content : undefined;
   const accessories = hasAttachments
     ? [

@@ -72,21 +72,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.69.3",
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
     "globby": "^14.0.1",
     "jsonschema": "^1.4.1",
     "run-applescript": "^7.0.0",
     "untildify": "^5.0.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^18.8.3",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.56.1",
+    "@typescript-eslint/parser": "^8.56.1",
+    "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.28.4",
-    "typescript": "^4.4.3",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "typescript": "^5.9.3",
     "typescript-json-schema": "^0.62.0"
   },
   "scripts": {
@@ -94,5 +99,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

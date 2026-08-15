@@ -2,17 +2,30 @@ import { checkIsFile, isDeeplink, searchUrlBuilder, showHud, urlBuilder } from "
 import { Alert, confirmAlert, Icon, open, openCommandPreferences, showInFinder } from "@raycast/api";
 import { checkShortcut, runShortcut } from "./shell-utils";
 import { SHORTCUT_PEEK_IN_SAFARI_NAME, SHORTCUT_PEEK_IN_SAFARI_URL } from "./constants";
-import { preferredTerminal, searchEngine, urlAction } from "../types/preference";
+import { fileAction, folderAction, preferredTerminal, searchEngine, urlAction } from "../types/preference";
 import validator from "validator";
 
-export const filePathAction = async (path: string, fileOperation: string) => {
-  const icon = checkIsFile(path) ? "📄" : "📂";
-  if (fileOperation === "showInFinder") {
-    await showInFinder(path);
-    await showHud(icon, "Show: " + path);
+export const filePathAction = async (path: string) => {
+  const isFile = checkIsFile(path);
+  const icon = isFile ? "📄" : "📂";
+  if (isFile) {
+    if (fileAction === "showInFinder") {
+      await showInFinder(path);
+      await showHud(icon, "Show: " + path);
+    } else {
+      await open(path);
+      await showHud(icon, "Open: " + path);
+    }
+  } else if (!isFile) {
+    if (folderAction === "showInFinder") {
+      await showInFinder(path);
+      await showHud(icon, "Show: " + path);
+    } else {
+      await open(path);
+      await showHud(icon, "Open: " + path);
+    }
   } else {
-    await open(path);
-    await showHud(icon, "Open: " + path);
+    await showHud("🚨", "Error Path: " + path);
   }
 };
 
@@ -56,7 +69,10 @@ export const urlPathAction = async (path: string) => {
         await open(finalPath);
       }
     } else if (isDeeplink(path)) {
-      if (!path.startsWith("raycast://")) {
+      if (
+        !path.startsWith(`${process.env.RAYCAST_SCHEME ?? "raycast"}://`) &&
+        !path.startsWith("raycast://")
+      ) {
         await showHud("🔗", "Open Deeplink: " + path);
       }
       await open(path);

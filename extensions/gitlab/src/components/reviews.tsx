@@ -1,46 +1,50 @@
-import { Color, List } from "@raycast/api";
+import { ActionPanel, Color, List } from "@raycast/api";
 import { MergeRequest, Project } from "../gitlabapi";
-import { getListDetailsPreference, gitlab } from "../common";
-import { daysInSeconds, showErrorToast } from "../utils";
-import { useCache } from "../cache";
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { MyProjectsDropdown } from "./project";
-import { MRListItem } from "./mr";
-import { useCachedState } from "@raycast/utils";
+import {
+  MRListDetailsToggleAction,
+  MRListMetadataToggleAction,
+  MRListItem,
+  MRScope,
+  MRState,
+  useMRListDetails,
+} from "./mr";
 import { GitLabIcons } from "../icons";
+import { ListPagination, usePaginatedMergeRequests } from "./mr_data";
 
-function ReviewListEmptyView(): JSX.Element {
+function ReviewListEmptyView() {
   return <List.EmptyView title="No Reviews" icon={{ source: GitLabIcons.review, tintColor: Color.PrimaryText }} />;
 }
 
-export function ReviewList(): JSX.Element {
+export function ReviewList() {
   const [project, setProject] = useState<Project>();
-  const { mrs, error, isLoading, performRefetch } = useMyReviews(project);
-
-  if (error) {
-    showErrorToast(error, "Cannot search Reviews");
-  }
-
-  if (isLoading === undefined) {
-    return <List isLoading={true} searchBarPlaceholder="" />;
-  }
-
-  const [expandDetails, setExpandDetails] = useCachedState("expand-details", true);
+  const { mrs, isLoading, performRefetch, pagination } = useMyReviews(project);
+  const { isShowingDetail, toggleListDetails } = useMRListDetails();
 
   return (
     <List
       searchBarPlaceholder="Filter Reviews by name..."
       isLoading={isLoading}
-      searchBarAccessory={<MyProjectsDropdown onChange={setProject} />}
-      isShowingDetail={getListDetailsPreference()}
+      pagination={pagination}
+      searchBarAccessory={<MyProjectsDropdown onChange={setProject} storeValue={true} />}
+      isShowingDetail={isShowingDetail}
+      actions={
+        <ActionPanel>
+          <ActionPanel.Section>
+            <MRListDetailsToggleAction isShowingDetail={isShowingDetail} onToggle={toggleListDetails} />
+            <MRListMetadataToggleAction isShowingDetail={isShowingDetail} />
+          </ActionPanel.Section>
+        </ActionPanel>
+      }
     >
-      {mrs?.map((mr) => (
+      {mrs.map((mergeRequest) => (
         <MRListItem
-          key={mr.id}
-          mr={mr}
+          key={mergeRequest.id}
+          mr={mergeRequest}
           refreshData={performRefetch}
-          expandDetails={expandDetails}
-          onToggleDetails={() => setExpandDetails(!expandDetails)}
+          isShowingDetail={isShowingDetail}
+          onToggleListDetails={toggleListDetails}
         />
       ))}
       <ReviewListEmptyView />
@@ -48,34 +52,41 @@ export function ReviewList(): JSX.Element {
   );
 }
 
-export function useMyReviews(project?: Project | undefined): {
-  mrs: MergeRequest[] | undefined;
+export function useMyReviews(
+  project?: Project | undefined,
+  labels: string[] | undefined = undefined,
+  hideArchived = false,
+): {
+  mrs: MergeRequest[];
   isLoading: boolean;
   error: string | undefined;
   performRefetch: () => void;
+  pagination: ListPagination;
 } {
-  const [mrs, setMrs] = useState<MergeRequest[]>();
-  const { data, isLoading, error, performRefetch } = useCache<MergeRequest[] | undefined>(
-    `myreviews`,
-    async (): Promise<MergeRequest[] | undefined> => {
-      const user = await gitlab.getMyself();
-      const glMRs = await gitlab.getMergeRequests({
-        state: "opened",
-        reviewer_id: user.id,
-        in: "title",
-        scope: "all",
-      });
-      return glMRs;
-    },
-    {
-      deps: [],
-      secondsToRefetch: 1,
-      secondsToInvalid: daysInSeconds(7),
-    }
+  const {
+    mrs: raw,
+    isLoading,
+    error,
+    performRefetch,
+    pagination,
+  } = usePaginatedMergeRequests({
+    cacheKey: `reviews_${project?.id ?? "all"}_${labels ? labels.join(",") : "[]"}_${hideArchived}`,
+    buildParams: () => ({
+      state: MRState.opened,
+      scope: MRScope.reviews_for_me,
+      ...(labels && { labels }),
+      ...(hideArchived && { non_archived: true }),
+    }),
+  });
+  const mrs = useMemo(
+    () => (project ? raw.filter((mergeRequest) => mergeRequest.project_id === project.id) : raw),
+    [project, raw],
   );
-  useEffect(() => {
-    const filtered = project ? data?.filter((m) => m.project_id === project?.id) : data;
-    setMrs(filtered || []);
-  }, [data, project]);
-  return { mrs, isLoading, error, performRefetch };
+  return {
+    mrs,
+    isLoading,
+    error,
+    performRefetch,
+    pagination,
+  };
 }

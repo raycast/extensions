@@ -1,5 +1,6 @@
 import { environment } from "@raycast/api";
 import { getErrorString } from "~/utils/errors";
+import { captureException as captureExceptionRaycast } from "@raycast/api";
 
 type Log = {
   message: string;
@@ -26,11 +27,23 @@ const _exceptions = {
 
 export const capturedExceptions = Object.freeze(_exceptions);
 
-export const captureException = (description: string | Falsy | (string | Falsy)[], error: any) => {
+type CaptureExceptionOptions = {
+  captureToRaycast?: boolean;
+};
+
+export const captureException = (
+  description: string | Falsy | (string | Falsy)[],
+  error: any,
+  options?: CaptureExceptionOptions
+) => {
+  const { captureToRaycast = false } = options ?? {};
   const desc = Array.isArray(description) ? description.filter(Boolean).join(" ") : description || "Captured exception";
   capturedExceptions.set(desc, error);
-  if (!environment.isDevelopment) return;
-  console.error(desc, error);
+  if (environment.isDevelopment) {
+    console.error(desc, error);
+  } else if (captureToRaycast) {
+    captureExceptionRaycast(error);
+  }
 };
 
 export const debugLog = (...args: any[]) => {

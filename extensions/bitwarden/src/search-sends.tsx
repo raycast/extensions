@@ -1,11 +1,22 @@
-import { Action, ActionPanel, Color, Icon, Keyboard, List, Toast, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  getPreferenceValues,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { useCachedState, usePromise } from "@raycast/utils";
 import { useRef } from "react";
 import { Bitwarden } from "~/api/bitwarden";
+import { DebuggingBugReportingActionSection } from "~/components/actions";
 import { ListLoadingView } from "~/components/ListLoadingView";
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { CACHE_KEYS } from "~/constants/general";
-import { MODIFIER_TO_LABEL } from "~/constants/labels";
 import { SendTypeOptions } from "~/constants/send";
 import { BitwardenProvider, useBitwarden } from "~/context/bitwarden";
 import { SessionProvider } from "~/context/session";
@@ -15,9 +26,12 @@ import { getFormattedDate } from "~/utils/dates";
 import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { useInterval } from "~/utils/hooks/useInterval";
+import { platform } from "./utils/platform";
 
 const searchBarPlaceholder = "Search sends";
 const LoadingFallback = () => <List searchBarPlaceholder={searchBarPlaceholder} isLoading />;
+
+const { syncOnLaunch } = getPreferenceValues<AllPreferences>();
 
 const SearchSendsCommand = () => (
   <RootErrorBoundary>
@@ -99,7 +113,7 @@ type Operation = { id: string; execute: () => Promise<any> };
 
 const useOperationQueue = () => {
   const operationQueueRef = useRef<Operation[]>([]);
-  const currentOperationTimeoutRef = useRef<NodeJS.Timeout>();
+  const currentOperationTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const processOperations = () => {
     const [operation] = operationQueueRef.current;
@@ -170,19 +184,12 @@ const useListSends = (bitwarden: Bitwarden) => {
   };
 };
 
-const syncSendsAction = {
-  title: "Sync Sends",
-  get shortcut(): Keyboard.Shortcut {
-    return { key: "r", modifiers: ["opt"] };
-  },
-  get modifierToLabelMap(): Record<Keyboard.KeyModifier, string> {
-    return { cmd: "⌘", shift: "⇧", opt: "⌥", ctrl: "⌃" };
-  },
-  get shortcutLabel(): string {
-    return (
-      this.shortcut.modifiers.map((mod) => MODIFIER_TO_LABEL[mod] ?? "").join("") + this.shortcut.key.toUpperCase()
-    );
-  },
+const syncAction = {
+  title: "Sync Vault",
+  shortcut: (platform === "windows"
+    ? { key: "r", modifiers: ["alt"] }
+    : { key: "r", modifiers: ["opt"] }) satisfies Keyboard.Shortcut,
+  shortcutLabel: platform === "windows" ? "Alt+R" : "⌥+R",
 };
 
 function SearchSendsCommandContent() {
@@ -192,15 +199,15 @@ function SearchSendsCommandContent() {
   const { sends, isFirstLoading, called, refresh: refreshSends, filterByType } = useListSends(bitwarden);
 
   const pasteActionTitle = usePasteActionTitle();
-  const selectedItemIdRef = useRef<string>();
+  const selectedItemIdRef = useRef<string | undefined>(undefined);
 
-  useInterval(() => onSync(true), { skip: !called });
+  useInterval(() => onSync(true), { skip: !called || !syncOnLaunch });
 
   function onSync(isPeriodic: boolean) {
     return queueOperation("sync", async () => {
       const toast = await showToast({
-        title: "Syncing Sends...",
-        message: isPeriodic ? "Background Task" : undefined,
+        title: "Syncing vault...",
+        message: isPeriodic ? "Background task" : undefined,
         style: Toast.Style.Animated,
       });
       try {
@@ -211,12 +218,12 @@ function SearchSendsCommandContent() {
           await toast?.hide();
         } else {
           toast.style = Toast.Style.Success;
-          toast.title = "Sends synced";
+          toast.title = "Vault synced";
         }
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Failed to sync Sends";
-        captureException(["Failed to sync Sends", isPeriodic && "periodically"], error);
+        toast.title = "Failed to sync vault";
+        captureException(["Failed to sync vault", isPeriodic && "periodically"], error);
       }
     });
   }
@@ -272,8 +279,8 @@ function SearchSendsCommandContent() {
           shouldRevalidateAfter: true,
         });
       } catch (error) {
-        await showToast({ title: "Failed to sync Sends", style: Toast.Style.Failure });
-        captureException("Failed to sync Sends", error);
+        await showToast({ title: "Failed to refresh Sends", style: Toast.Style.Failure });
+        captureException("Failed to refresh Sends", error);
       }
     });
   };
@@ -332,13 +339,13 @@ function SearchSendsCommandContent() {
         title="Create New Send"
         target={<CreateSendCommand onSuccess={onCreateSuccess} />}
         icon={Icon.NewDocument}
-        shortcut={{ key: "n", modifiers: ["opt"] }}
+        shortcut={{ macOS: { key: "n", modifiers: ["opt"] }, Windows: { key: "n", modifiers: ["alt"] } }}
       />
       <Action
-        title={syncSendsAction.title}
+        title={syncAction.title}
         onAction={() => onSync(false)}
         icon={Icon.ArrowClockwise}
-        shortcut={syncSendsAction.shortcut}
+        shortcut={syncAction.shortcut}
       />
     </ActionPanel.Section>
   );
@@ -349,8 +356,13 @@ function SearchSendsCommandContent() {
         <List.EmptyView
           title="There are no items to list."
           icon="sends-empty-list.svg"
-          actions={<ActionPanel>{sendManagementActionSection}</ActionPanel>}
-          description={`Try syncing your sends with the ${syncSendsAction.title} (${syncSendsAction.shortcutLabel}) action.`}
+          actions={
+            <ActionPanel>
+              {sendManagementActionSection}
+              <DebuggingBugReportingActionSection />
+            </ActionPanel>
+          }
+          description={`Try syncing your vault with the ${syncAction.title} (${syncAction.shortcutLabel}) action.`}
         />
       </List>
     );
@@ -378,23 +390,24 @@ function SearchSendsCommandContent() {
                   title="Remove Password"
                   onAction={() => onRemovePassword(send.id)}
                   icon={Icon.LockUnlocked}
-                  shortcut={{ key: "p", modifiers: ["opt"] }}
+                  shortcut={{ macOS: { key: "p", modifiers: ["opt"] }, Windows: { key: "p", modifiers: ["alt"] } }}
                 />
               )}
               <Action.Push
                 title="Edit Send"
                 target={<CreateSendCommand send={send} onSuccess={onEditSuccess} />}
                 icon={Icon.Pencil}
-                shortcut={{ key: "e", modifiers: ["opt"] }}
+                shortcut={{ macOS: { key: "e", modifiers: ["opt"] }, Windows: { key: "e", modifiers: ["alt"] } }}
               />
               <Action
                 title="Delete Send"
                 style={Action.Style.Destructive}
                 onAction={() => onDelete(send.id)}
                 icon={Icon.Trash}
-                shortcut={{ key: "d", modifiers: ["opt"] }}
+                shortcut={{ macOS: { key: "d", modifiers: ["opt"] }, Windows: { key: "d", modifiers: ["alt"] } }}
               />
               {sendManagementActionSection}
+              <DebuggingBugReportingActionSection />
             </ActionPanel>
           }
         />

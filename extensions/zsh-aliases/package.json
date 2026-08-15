@@ -1,0 +1,132 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zsh-aliases",
+  "title": "Zsh Aliases",
+  "description": "Manage zsh aliases",
+  "icon": "extension-icon.png",
+  "author": "espenbye",
+  "contributors": [
+    "pernielsentikaer"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "manage-aliases",
+      "title": "Manage Aliases",
+      "description": "View, add, edit, and remove zsh aliases",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "add-alias",
+      "title": "Add Alias",
+      "description": "Add a new zsh alias"
+    },
+    {
+      "name": "remove-alias",
+      "title": "Remove Alias",
+      "description": "Remove an existing zsh alias"
+    },
+    {
+      "name": "update-alias",
+      "title": "Update Alias",
+      "description": "Update an existing zsh alias"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@zsh-aliases Add new alias \"dev\" that runs npm run dev ",
+        "mocks": {
+          "add-alias": {
+            "aliasName": "dev",
+            "configFile": ".zshrc",
+            "message": "Alias 'dev' added successfully to .zshrc",
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "command": "npm run dev",
+                "name": "dev"
+              },
+              "name": "add-alias"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zsh-aliases Update alias dev to ls -lah",
+        "mocks": {
+          "update-alias": {
+            "configFile": ".zshrc",
+            "message": "Alias 'dev' updated successfully in .zshrc",
+            "newName": "dev",
+            "oldName": "dev",
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "currentName": "dev",
+                "newCommand": "ls -lah",
+                "newName": "dev"
+              },
+              "name": "update-alias"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@zsh-aliases Remove the alias dev",
+        "mocks": {
+          "remove-alias": {
+            "aliasName": "dev",
+            "configFile": ".zshrc",
+            "message": "Alias 'dev' removed successfully from .zshrc",
+            "success": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "name": "dev"
+              },
+              "name": "remove-alias"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.102.4",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

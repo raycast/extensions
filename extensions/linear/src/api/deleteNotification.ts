@@ -1,4 +1,5 @@
 import { Notification } from "@linear/sdk";
+
 import { getLinearClient } from "../api/linearClient";
 
 export async function deleteNotification(id: Notification["id"]) {

@@ -1,7 +1,11 @@
 # Video Call Reactions Changelog
 
-# [1.2.3] - 2024-06-15
-## Changed
+## [1.2.4] - 2024-12-18
+### Changed
+- Updated compatibility for macOS Sequoia 15.0.
+
+## [1.2.3] - 2024-06-15
+### Changed
 - Improved photos in Readme to local media folder
 - Changing my Raycast account to correct one
 

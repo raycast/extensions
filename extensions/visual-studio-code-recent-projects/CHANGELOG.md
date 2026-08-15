@@ -1,4 +1,148 @@
-# Visual Studio Code Search Recent Projects Changelog
+# Visual Studio Code Changelog
+
+## [Fixes] - 2026-08-03
+
+- Fix `saveEntries` failing on Windows with `spawn sqlite3 ENOENT` by writing to the VS Code state database through `node:sqlite`, with a fallback to the `sqlite3` CLI
+- Fix VSCodium - Insiders extensions folder and URL handler resolution
+- Fix `Open With VSCode` on network shares (UNC paths) and local drives
+- Fix the `Commands` command hanging on mid-write reads; now polls with a timeout and retries
+- Add `Copy Error` primary action to failure toasts.
+- Add icons to the recent projects entry type dropdown.
+- Bump all dependencies to the latest
+
+## [Revert: Windows project opening] - 2026-06-21
+
+- `getSelectedFinderItems` works on Windows; reverted.
+- Using the URL handler causes previous VS Code windows to close; reverted.
+- Bumped dependency versions
+
+## [Update] - 2026-06-17
+
+- Added support for Devin Desktop.
+
+## [Fix: Windows project opening] - 2026-06-17
+
+- Fixed Windows project opening so recent projects are launched through the selected editor URL handler instead of Explorer.
+
+## [Fix: macOS user Applications path] - 2026-06-05
+
+- Fixed `product.json` resolution when Visual Studio Code is installed in `~/Applications`.
+
+## [Update] - 2026-06-02
+
+- Added support for IBM Bob.
+
+## [Fix: Search Recent Projects empty on macOS] - 2026-06-02
+
+- Fixed `Search Recent Projects` showing no results on macOS with VS Code 1.118+. The shared storage database (`.vscode-shared/sharedStorage/state.vscdb`) is placed in the home directory on all platforms, not inside `~/Library/Application Support`. Also removed a spurious `User/` path segment from the Windows shared storage path. Fixes [#28311](https://github.com/raycast/extensions/issues/28311).
+
+## [Fix: Recent Projects on Windows] - 2026-05-25
+
+- Fixed `Search Recent Projects` on Windows by reading the current VS Code state key `recently.opened` while keeping compatibility with the older `history.recentlyOpenedPathsList` key used by older VS Code internals.
+- Added support for VS Code shared storage and extended the `storage.json` fallback added in the 2026-05-04 fix by merging `backupWorkspaces` and `profileAssociations`, so local and remote recent entries still appear when the primary list is incomplete.
+- Improved `Remove` and `Remove All` so DB-backed entries are cleared while storage-backed duplicates are hidden for the current Raycast session.
+- Fixed Windows remote workspace opening to pass encoded `vscode-remote://` URIs through the VS Code CLI unchanged.
+- Added shared shortcut definitions based on Raycast common shortcuts where possible, with explicit Windows mappings for custom bindings.
+- Improved VS Code CLI path detection for both user and system installs on Windows.
+
+## [Fix: Recent projects on Windows] - 2026-05-17
+
+- Fixed shared storage lookup for recent projects on Windows.
+
+## [Fix: Windows app path resolution] - 2026-05-11
+
+- Fixed `product.json` resolution for Windows builds that use VS Code's versioned resources layout.
+
+## [Fix: Shared Storage Support] - 2026-05-07
+
+- Added Shared Storage support for new version of VS Code
+
+## [Fix] - 2026-05-25
+
+- Fixed `Search Recent Projects` returning no results for VS Code Insiders users. Recent Insiders builds no longer write `history.recentlyOpenedPathsList` to `state.vscdb`; the extension now falls back to reading recent folders from `storage.json` (`lastKnownMenubarData`) when the DB key is absent. Stable VS Code builds are unaffected. (Fixes [#27440](https://github.com/raycast/extensions/issues/27440), originally shipped 2026-05-04)
+
+## [Update] - 2026-04-07
+
+- Added support for Qoder.
+
+## [Update] - 2026-03-30
+
+- Added support for Lingma.
+
+## [Fix: Windows Support] - 2026-01-08
+
+- Resolved `setLocale` warnings in bash by clearing environment variables.
+- "Commands" command now supports Windows.
+- "Open With VSCode" command now works on Windows.
+- "Open New VSCode" command now supports Windows.
+- Updated Dependencies
+
+## [Update] - 2025-12-12
+
+- Added Windows support
+
+## [Update] - 2025-11-25
+
+- Added support for Antigravity.
+
+## [Enhancements] - 2025-11-19
+
+- Improved `Search Recent Projects` for remote workspaces by fuzzy matching remote authorities.
+
+## [Update] - 2025-08-04
+
+- Added support for Kiro.
+
+## [Update] - 2025-03-05
+
+- Added support for Trae CN.
+
+## [Update] - 2025-03-03
+
+- Fixed support for VSCodium - Insiders.
+- Sorted the list of builds in alphabetical order within the extension settings.
+
+## [Update] - 2025-03-02
+
+- Adds support for Positron as an option in the extension settings.
+
+## [Performance] - 2025-03-02
+
+- Fixed performance issue in ⁠Search Recent Projects command by implementing caching for application data retrieval. This significantly improves responsiveness when displaying many recent projects and eliminates rendering loop warnings.
+
+## [Improvements] - 2025-02-27
+
+- Improved UI by showing the actual editor name and icon (Windsurf, VSCodium, Cursor, etc.) in both `Search Recent Projects` and `Show Installed Extensions` commands.
+- Improved the `Uninstall Extension` action by adopting a destructive style, adding a shortcut, and enhancing the user experience by displaying the extension name in the confirmation dialog.
+- Added support for VSCodium - Insiders.
+
+## [Update] - 2025-02-22
+
+- Adds support for Trae as an option in the extension settings.
+
+## [Fix] - 2025-01-02
+
+- Fix the issue where users cannot open a new window when using a language pack.
+
+## [Update] - 2024-12-04
+
+- Adds support to customize the color for git branch tag (default is green). Inspired by [#15693](https://github.com/raycast/extensions/issues/15693).
+
+## [Fix] - 2024-12-05
+
+- Improved error handling for ambiguous git HEAD argument.
+
+## [Update] - 2024-12-02
+
+- Adds support to see Git branch in `Search Recent Projects`. Inspired by [#15626](https://github.com/raycast/extensions/issues/15626).
+
+## [Update] - 2024-11-17
+
+- Adds support for Windsurf as an option in the extension settings.
+
+## [Chore] - 2024-09-02
+
+- Added missing contributor
 
 ## [Update] - 2024-05-31
 

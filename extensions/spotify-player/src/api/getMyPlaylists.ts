@@ -1,13 +1,28 @@
+import { withCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
-type GetMySavedAlbumsProps = { limit?: number };
+type GetUserPlaylistsProps = { limit?: number };
 
-export async function getMyPlaylists({ limit = 50 }: GetMySavedAlbumsProps = {}) {
+async function _getMyPlaylists({ limit = 50 }: GetUserPlaylistsProps = {}) {
   const { spotifyClient } = getSpotifyClient();
+  let response = null;
+  let nextUrl = null;
 
   try {
-    const response = await spotifyClient.getMePlaylists({ limit });
+    response = await spotifyClient.getMePlaylists({ limit });
+    nextUrl = response?.next;
+
+    while (nextUrl) {
+      const nextResponse = await spotifyClient.getNext(nextUrl);
+      response = {
+        ...response,
+        ...nextResponse,
+        items: [...(response?.items ?? []), ...(nextResponse.items ?? [])],
+      };
+      nextUrl = nextResponse?.next;
+    }
+
     return response;
   } catch (err) {
     const error = getErrorMessage(err);
@@ -15,3 +30,5 @@ export async function getMyPlaylists({ limit = 50 }: GetMySavedAlbumsProps = {})
     throw new Error(error);
   }
 }
+
+export const getMyPlaylists = withCache("api:playlists", 300000, _getMyPlaylists);

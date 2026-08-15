@@ -1,6 +1,7 @@
 import { WorkflowState } from "@linear/sdk";
 import { Image } from "@raycast/api";
 import { groupBy } from "lodash";
+
 import { IssueState } from "../api/getIssues";
 
 type IconAsset = {

@@ -1,3 +1,4 @@
+/* eslint-disable @raycast/prefer-title-case */
 import { Action, ActionPanel } from "@raycast/api";
 
 import type { SearchResultDocument } from "@/types";
@@ -5,10 +6,9 @@ import type { SearchResultDocument } from "@/types";
 const CopyActions = ({ item }: { item: SearchResultDocument }) => {
   return (
     <ActionPanel.Section title="Copy Install Command">
-      {item.runtimeCompat.node ? (
+      {item.runtimeCompat?.node ? (
         <>
           <Action.CopyToClipboard
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="npm (Node.js)"
             content={`npx jsr add ${item.id}`}
             icon={{ source: "npm.svg" }}
@@ -19,17 +19,16 @@ const CopyActions = ({ item }: { item: SearchResultDocument }) => {
             icon={{ source: "yarn.svg" }}
           />
           <Action.CopyToClipboard
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="pnpm (Node.js)"
             content={`pnpm dlx jsr add ${item.id}`}
             icon={{ source: "pnpm.svg" }}
           />
         </>
       ) : null}
-      {item.runtimeCompat.deno ? (
+      {item.runtimeCompat?.deno ? (
         <Action.CopyToClipboard title="Deno" content={`deno add ${item.id}`} icon={{ source: "deno.svg" }} />
       ) : null}
-      {item.runtimeCompat.bun ? (
+      {item.runtimeCompat?.bun ? (
         <Action.CopyToClipboard title="Bun" content={`bunx jsr add ${item.id}`} icon={{ source: "bun.svg" }} />
       ) : null}
     </ActionPanel.Section>

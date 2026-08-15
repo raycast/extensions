@@ -11,7 +11,8 @@
   "contributors": [
     "lin",
     "chrismessina",
-    "klaussner"
+    "klaussner",
+    "krsntn"
   ],
   "keywords": [
     "directions",
@@ -19,6 +20,10 @@
     "navigation"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "travelHome",
@@ -92,6 +97,28 @@
         {
           "title": "Cycling",
           "value": "bicycling"
+        }
+      ]
+    },
+    {
+      "name": "preferredOrigin",
+      "title": "Preferred Starting Location",
+      "description": "Select your preferred starting location.",
+      "type": "dropdown",
+      "required": true,
+      "default": "curloc",
+      "data": [
+        {
+          "title": "Current Location",
+          "value": "curloc"
+        },
+        {
+          "title": "Home",
+          "value": "home"
+        },
+        {
+          "title": "Custom",
+          "value": "custom"
         }
       ]
     },

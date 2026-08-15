@@ -39,9 +39,13 @@ export function getTimestamp(date: Date): number {
 }
 
 export function getDate(timestamp: number): Date {
-  const multiplier = getMultiplier();
-  const date = new Date(timestamp * multiplier);
-  return date;
+  const isMilliseconds = String(timestamp).length >= 13;
+
+  if (isMilliseconds) {
+    return new Date(timestamp);
+  } else {
+    return new Date(timestamp * 1000);
+  }
 }
 
 export function toDateString(date: Date): string {

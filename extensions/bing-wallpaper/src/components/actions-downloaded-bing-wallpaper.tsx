@@ -4,6 +4,7 @@ import { BingImage, DownloadedBingImage } from "../types/types";
 import { ActionOpenExtensionPreferences } from "./action-open-extension-preferences";
 import { setLocalWallpaper } from "../utils/common-utils";
 import PreviewBingWallpaper from "../preview-bing-wallpaper";
+import { downloadDirectory } from "../types/preferences";
 
 export function ActionsDownloadedBingWallpaper(props: {
   index: number;
@@ -35,6 +36,14 @@ export function ActionsDownloadedBingWallpaper(props: {
             downloadedImage={downloadedImages}
           />
         }
+      />
+      <Action
+        icon={Icon.Finder}
+        title={"Open Wallpaper Folder"}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "enter" }}
+        onAction={async () => {
+          await open(downloadDirectory);
+        }}
       />
       <ActionPanel.Section>
         <Action

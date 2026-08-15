@@ -15,6 +15,8 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useCachedState, useForm } from "@raycast/utils";
+import { uniqueNamesGenerator } from "unique-names-generator";
+import { UNIQUE_NAME_GENERATOR_CONFIG } from "../utils/constants";
 
 export function IdentitiesIndex({ mailbox }: { mailbox: Mailbox }) {
   const { push } = useNavigation();
@@ -55,7 +57,7 @@ export function IdentitiesIndex({ mailbox }: { mailbox: Mailbox }) {
         {identities.map((identity) => (
           <List.Item
             key={identity.address}
-            title={identity.address}
+            title={`${identity.name} (${identity.address})`}
             icon={Icon.Fingerprint}
             actions={
               <ActionPanel>
@@ -176,7 +178,7 @@ function IdentitiesCreate({ mailbox, onIdentityCreated }: IdentitiesCreateProps)
   const domain = mailbox.domain_name;
   const mailboxLocalPart = mailbox.local_part;
 
-  const { handleSubmit, itemProps } = useForm<IdentityCreate>({
+  const { handleSubmit, itemProps, setValue } = useForm<IdentityCreate>({
     async onSubmit(values) {
       setIsLoading(true);
 
@@ -221,6 +223,11 @@ function IdentitiesCreate({ mailbox, onIdentityCreated }: IdentitiesCreateProps)
       footer_html_body: mailbox.footer_html_body,
     },
   });
+
+  const generateLocalPart = () => {
+    setValue("local_part", uniqueNamesGenerator(UNIQUE_NAME_GENERATOR_CONFIG));
+  };
+
   return (
     <Form
       isLoading={isLoading}
@@ -228,6 +235,15 @@ function IdentitiesCreate({ mailbox, onIdentityCreated }: IdentitiesCreateProps)
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Check} onSubmit={handleSubmit} />
+          <Action
+            title="Generate Random Address"
+            icon={Icon.RotateClockwise}
+            shortcut={{
+              modifiers: ["ctrl"],
+              key: "r",
+            }}
+            onAction={generateLocalPart}
+          />
         </ActionPanel>
       }
     >

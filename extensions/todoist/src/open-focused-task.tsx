@@ -1,4 +1,4 @@
-import { Cache, launchCommand, LaunchType, showHUD } from "@raycast/api";
+import { Cache, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
 
 const cache = new Cache();
 
@@ -14,7 +14,7 @@ const command = async () => {
         context: { view: `task_${focusedTask.id}` },
       });
     } else {
-      await showHUD("No focused task.");
+      await showToast({ style: Toast.Style.Failure, title: "No focused task" });
 
       await launchCommand({
         name: "home",
@@ -22,7 +22,7 @@ const command = async () => {
         context: { view: "inbox" },
       });
     }
-  } catch (error) {
+  } catch {
     /* empty */
   }
 };

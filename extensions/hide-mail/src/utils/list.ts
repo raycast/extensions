@@ -1,6 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
 import { getApiKey } from "./key";
-import fetch from "node-fetch";
 import { API_URL, getHeaders } from "../config";
 
 export interface emailObject {
@@ -30,12 +28,7 @@ export const listAllAliases = async () => {
     });
 
     if (res.status === 401) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Error listing",
-        message: "❌ HideMail API credentials are invalid.",
-      });
-      return [];
+      throw new Error("❌ HideMail API credentials are invalid.");
     }
 
     const data = (await res.json()) as listResponse;

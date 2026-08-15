@@ -11,6 +11,7 @@ import TaskListItem from "./TaskListItem";
 type TaskListProps = {
   sections: SectionWithTasks[];
   mode?: ViewMode;
+  showProjectAccessory?: boolean;
   viewProps?: ViewProps;
   quickLinkView?: QuickLinkView;
 };
@@ -18,9 +19,10 @@ type TaskListProps = {
 export default function TaskListSections({
   sections,
   mode = ViewMode.date,
+  showProjectAccessory,
   viewProps,
   quickLinkView,
-}: TaskListProps): JSX.Element {
+}: TaskListProps) {
   const [data, setData] = useCachedData();
 
   return (
@@ -36,6 +38,7 @@ export default function TaskListSections({
                   key={task.id}
                   task={task}
                   mode={mode}
+                  showProjectAccessory={showProjectAccessory}
                   viewProps={viewProps}
                   data={data}
                   setData={setData}

@@ -1,7 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from "crypto";
 import { useMemo } from "react";
-import { Preferences } from "~/types/preferences";
 
 const ALGORITHM = "aes-256-cbc";
 

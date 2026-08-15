@@ -13,7 +13,7 @@ export function getFFmpegPath() {
       /opt/homebrew/bin
       /usr/local/Cellar
   )
-  
+
   for location in "\${locations[@]}"
   do
       if [ -f "$location/ffmpeg" ]
@@ -22,7 +22,7 @@ export function getFFmpegPath() {
           exit 0
       fi
   done
-  
+
   echo ""
 `)
     .toString()
@@ -41,28 +41,28 @@ export function isFFmpegInstalled() {
 export function getFFprobePath() {
   return (
     execSync(`
-    locations=(
-        /usr/local/bin
-        /usr/bin
-        /bin
-        /usr/sbin
-        /sbin
-        /opt/X11/bin
-        /opt/homebrew/bin
-        /usr/local/Cellar
-    )
-    
-    for location in "\${locations[@]}"
-    do
-        if [ -f "$location/ffprobe" ]
-        then
-            echo "$location"
-            exit 0
-        fi
-    done
-    
-    echo ""
-  `)
+  locations=(
+      /usr/local/bin
+      /usr/bin
+      /bin
+      /usr/sbin
+      /sbin
+      /opt/X11/bin
+      /opt/homebrew/bin
+      /usr/local/Cellar
+  )
+
+  for location in "\${locations[@]}"
+  do
+      if [ -f "$location/ffprobe" ]
+      then
+          echo "$location"
+          exit 0
+      fi
+  done
+
+  echo ""
+`)
       .toString()
       .trim()
       .replace(/\n/gi, "") + "/ffprobe"
@@ -83,7 +83,7 @@ export function executeFFmpegCommandAsync({
 }: {
   command: string;
   onContent?: (content: string) => void;
-}) {
+}): Promise<number | null> {
   return new Promise((resolve) => {
     const child = spawn(`${getFFmpegPath()} ${command}`, { shell: true });
     if (onContent) {
@@ -109,7 +109,7 @@ export function executeFFprobeCommandAsync({
 }: {
   command: string;
   onContent: (content: string) => void;
-}) {
+}): Promise<number | null> {
   return new Promise((resolve) => {
     const child = spawn(`${getFFprobePath()} ${command}`, { shell: true });
     child.stdout.on("data", (data) => {

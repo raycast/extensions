@@ -1,5 +1,30 @@
 # Trello Changelog
 
+## [Open in Trello Desktop on Windows + default-target preference] - 2026-06-15
+
+- Open boards and cards directly in the Trello desktop app on Windows via the `trello://` URL scheme (previously only worked on macOS).
+- New `Default Open Target` preference to choose whether pressing Enter opens links on Trello Web or in the Trello desktop app.
+
+## [Bug Fix] - 2026-05-18
+
+- Prevent the Create a Card form from crashing when board members cannot be loaded as a list.
+
+## [Update] - 2026-03-25
+
+- Rebuilt extension with Trello REST client
+- Added commands: Fetch Board filtered Cards
+- Card detail views show descriptions, attachments, checklists, and members
+- Forms use list-scoped search for move/delete to avoid mismatches
+- Rename "Todo" to "Card"
+
+## [Update] - 2025-10-01
+
+Update dependencies and allow for multiple card assignees.
+
+## [Update] - 2025-05-30
+
+Update dependencies and allow for card assignee to be empty.
+
 ## [Update] - 2024-06-20
 
 Update dependencies and case of read me to show up in Raycast store.
@@ -15,6 +40,7 @@ Fix scope in auth URL and update dependencies
 ## [Update] - 2024-03-15
 
 Update dependencies and make it more obvious to add preferences.
+
 ## [Update] - 2023-12-12
 
 Added support to open cards in Trello desktop. Thanks to the Trello support team 🥳!

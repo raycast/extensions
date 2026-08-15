@@ -2,8 +2,18 @@ import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import type { Data } from "@/types/company";
 import { useAuthHeaders } from "./useAuthHeaders";
+import { getPreferenceValues } from "@raycast/api";
 
 export function useCompanies({ search = "" }: { search?: string }) {
+  const preferences = getPreferenceValues();
+  const customProperties = preferences.customCompanyProperties
+    ? preferences.customCompanyProperties.split(",").map((prop: string) => prop.trim())
+    : [];
+
+  const defaultProperties = ["name", "createdate", "domain", "lastmodifieddate", "description", "industry"];
+
+  const properties = [...defaultProperties, ...customProperties];
+
   // This hook is used to fetch companies by search query (this searches through website, phone, name, domain)
   const usedSearchByName = useFetch<Data>(`https://api.hubapi.com/crm/v3/objects/companies/search`, {
     method: "post",
@@ -11,7 +21,7 @@ export function useCompanies({ search = "" }: { search?: string }) {
     body: JSON.stringify({
       query: search,
       limit: 20,
-      properties: ["name", "createdate", "domain", "lastmodifieddate", "description", "industry"],
+      properties,
     }),
     keepPreviousData: true,
   });
@@ -23,7 +33,7 @@ export function useCompanies({ search = "" }: { search?: string }) {
     headers: useAuthHeaders(),
     body: JSON.stringify({
       limit: 20,
-      properties: ["name", "createdate", "domain", "lastmodifieddate", "description", "industry"],
+      properties,
       filterGroups: [
         {
           filters: [

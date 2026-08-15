@@ -1,8 +1,13 @@
 # Quick LaTeX Changelog
 
+## [Improve preview sizing] - 2026-06-24
+
+- Automatically scale LaTeX previews to fit within the Raycast window
+- Keep previews centered without borders or vertical scrolling
+
 ## [Support for background color] - 2024-06-04
 
- - Add support for background color change
+- Add support for background color change
 
 ## [Support for more formats] - 2023-09-14
 

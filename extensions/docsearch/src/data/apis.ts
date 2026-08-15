@@ -9,7 +9,9 @@ export enum DocID {
   Remix, Slidev, Taro, Supabase,
   TailwindCSS, Tauri, Unidata, Vite,
   Vitest, Vue_Router, Vue, VueUse,
-  Vuepress, ElementPlus, Vuetify,
+  Vuepress, ElementPlus, Neovim, Less,
+  Sass, Deno, TypeScript, NextJS,
+  MassTransit, Pinia,
 }
 
 type Base = {
@@ -30,9 +32,10 @@ export type Meilisearch = Base & {
   type: "meilisearch";
 };
 
+type DocsTypes = "Manual" | "Modules" | "App" | "Pages";
 type Languages = "en-US" | "zh-CN" | "fr-FR" | "ko-KR" | "it-IT";
 type Versions = "V0" | "V1" | "V2" | "V3" | "V4" | "V9";
-export type Tags = `${Versions} ${Languages}` | `${Languages}`;
+export type Tags = `${Versions} ${Languages}` | `${Languages} ${DocsTypes}` | `${Languages}`;
 
 export type API = Algolia | Meilisearch;
 export type Data = {
@@ -42,6 +45,57 @@ export type Data = {
 };
 
 export const data: Data = {
+  [DocID.Deno]: {
+    "en-US Manual": {
+      icon: "../assets/logo/deno.png",
+      apiKey: "2ed789b2981acd210267b27f03ab47da",
+      appId: "QFPCRZC6WX",
+      indexName: "manual",
+      type: "algolia",
+      homepage: "https://deno.com/",
+      searchParameters: {
+        filters: "kind:paragraph",
+      },
+    },
+    "en-US Modules": {
+      icon: "../assets/logo/deno.png",
+      apiKey: "2ed789b2981acd210267b27f03ab47da",
+      appId: "QFPCRZC6WX",
+      indexName: "modules",
+      type: "algolia",
+      homepage: "https://deno.land/x/",
+    },
+  },
+  [DocID.Sass]: {
+    "en-US": {
+      icon: "../assets/logo/sass.png",
+      apiKey: "2ebc7881b79986f58dc2f424769bf3fc",
+      appId: "Q9MULQONSV",
+      indexName: "sass-lang",
+      type: "algolia",
+      homepage: "https://sass-lang.com/",
+    },
+  },
+  [DocID.Less]: {
+    "en-US": {
+      icon: "../assets/logo/less.png",
+      apiKey: "ad081396555d043318b6a9af4f27a9ec",
+      appId: "LELS6COOLE",
+      indexName: "lesscss",
+      type: "algolia",
+      homepage: "https://lesscss.org/",
+    },
+  },
+  [DocID.Neovim]: {
+    "en-US": {
+      icon: "../assets/logo/nvim.png",
+      apiKey: "b5e6b2f9c636b2b471303205e59832ed",
+      appId: "X185E15FPG",
+      indexName: "nvim",
+      type: "algolia",
+      homepage: "https://neovim.io/",
+    },
+  },
   [DocID.ElementPlus]: {
     "en-US": {
       icon: "../assets/logo/element.png",
@@ -126,7 +180,7 @@ export const data: Data = {
   },
   [DocID.Arthas]: {
     "en-US": {
-      icon: "../assets/logo/arthas.ico",
+      icon: "../assets/logo/arthas.png",
       apiKey: "03fb4b6577b57b5dafc792d9ddf66508",
       appId: "UX8WBNVHHR",
       indexName: "arthas",
@@ -160,7 +214,7 @@ export const data: Data = {
   },
   [DocID.Bootstrap]: {
     "en-US": {
-      icon: "../assets/logo/bootstrap.ico",
+      icon: "../assets/logo/bootstrap.png",
       apiKey: "3151f502c7b9e9dafd5e6372b691a24e",
       appId: "AK7KMZKZHQ",
       indexName: "bootstrap",
@@ -374,7 +428,7 @@ export const data: Data = {
   },
   [DocID.React]: {
     "en-US": {
-      icon: "../assets/logo/react.ico",
+      icon: "../assets/logo/react.png",
       apiKey: "36221914cce388c46d0420343e0bb32e",
       appId: "BH4D9OD16A",
       indexName: "react",
@@ -382,7 +436,7 @@ export const data: Data = {
       homepage: "https://reactjs.org/",
     },
     "zh-CN": {
-      icon: "../assets/logo/react.ico",
+      icon: "../assets/logo/react.png",
       apiKey: "72499aaa151dba0828babe727c7b86ee",
       appId: "BH4D9OD16A",
       indexName: "reactjs_zh-hans",
@@ -402,7 +456,7 @@ export const data: Data = {
   },
   [DocID.React_Native]: {
     "en-US": {
-      icon: "../assets/logo/react.ico",
+      icon: "../assets/logo/react.png",
       apiKey: "83cd239c72f9f8b0ed270a04b1185288",
       appId: "8TDSE0OHGQ",
       indexName: "react-native-v2",
@@ -466,13 +520,47 @@ export const data: Data = {
     },
   },
   [DocID.TailwindCSS]: {
-    "V3 en-US": {
+    "V4 en-US": {
       icon: "../assets/logo/tailwindcss.png",
       apiKey: "5fc87cef58bb80203d2207578309fab6",
       appId: "KNPXZI5B0M",
       indexName: "tailwindcss",
       type: "algolia",
       homepage: "https://tailwindcss.com/",
+      searchParameters: {
+        facetFilters: [["version:v4", "version:plus"]],
+        attributesToRetrieve: [
+          "hierarchy.lvl0",
+          "hierarchy.lvl1",
+          "hierarchy.lvl2",
+          "hierarchy.lvl3",
+          "hierarchy.lvl4",
+          "hierarchy.lvl5",
+          "hierarchy.lvl6",
+          "content",
+          "type",
+          "url",
+          "product",
+          "product_category",
+        ],
+        attributesToSnippet: [
+          "hierarchy.lvl1:5",
+          "hierarchy.lvl2:5",
+          "hierarchy.lvl3:5",
+          "hierarchy.lvl4:5",
+          "hierarchy.lvl5:5",
+          "hierarchy.lvl6:5",
+          "content:5",
+        ],
+      },
+    },
+    "V3 en-US": {
+      icon: "../assets/logo/tailwindcss.png",
+      apiKey: "5fc87cef58bb80203d2207578309fab6",
+      appId: "KNPXZI5B0M",
+      indexName: "tailwindcss",
+      type: "algolia",
+      homepage: "https://v3.tailwindcss.com/",
       searchParameters: {
         facetFilters: ["version:v3"],
       },
@@ -775,16 +863,6 @@ export const data: Data = {
       homepage: "https://vueuse.org/",
     },
   },
-  [DocID.Vuetify]: {
-    "en-US": {
-      icon: "../assets/logo/vuetify.png",
-      apiKey: "ffa344297924c76b0f4155384aff7ef2",
-      appId: "NHT6C0IV19",
-      indexName: "vuetifyjs-v3",
-      type: "algolia",
-      homepage: "https://vuetifyjs.com/",
-    },
-  },
   [DocID.Vuepress]: {
     "V2 en-US": {
       icon: "../assets/logo/vuepress.png",
@@ -848,6 +926,116 @@ export const data: Data = {
       homepage: "https://vuepress.vuejs.org/zh/",
       searchParameters: {
         facetFilters: ["lang:zh-CN", "tags:v1"],
+      },
+    },
+  },
+  [DocID.TypeScript]: {
+    "en-US": {
+      icon: "../assets/logo/typescript.png",
+      apiKey: "37ee06fa68db6aef451a490df6df7c60",
+      appId: "BGCDYOIYZ5",
+      indexName: "typescriptlang",
+      type: "algolia",
+      homepage: "https://www.typescriptlang.org",
+    },
+    "zh-CN": {
+      icon: "../assets/logo/typescript.png",
+      apiKey: "feff649032d8034cf2a636ef55d96054",
+      appId: "43GX903BPS",
+      indexName: "ts-yayujs",
+      type: "algolia",
+      homepage: "https://yayujs.com/",
+    },
+  },
+  [DocID.NextJS]: {
+    "en-US App": {
+      icon: "../assets/logo/nextjs.png",
+      apiKey: "948b42d1edd177a55c6d6ae8dab24621",
+      appId: "NNTAHQI9C5",
+      indexName: "nextjs_docs_canary",
+      type: "algolia",
+      homepage: "https://nextjs.org/docs",
+      searchParameters: {
+        filters: "isApp:true",
+      },
+    },
+    "en-US Pages": {
+      icon: "../assets/logo/nextjs.png",
+      apiKey: "948b42d1edd177a55c6d6ae8dab24621",
+      appId: "NNTAHQI9C5",
+      indexName: "nextjs_docs_canary",
+      type: "algolia",
+      homepage: "https://nextjs.org/docs",
+      searchParameters: {
+        filters: "isPages:true",
+      },
+    },
+  },
+  [DocID.MassTransit]: {
+    "en-US": {
+      icon: "../assets/logo/masstransit.png",
+      apiKey: "c1b63b1b97fd65692eaf194862ce532b",
+      appId: "TGRVKMJDRV",
+      indexName: "masstransit_io",
+      type: "algolia",
+      homepage: "https://masstransit.io/",
+      searchParameters: {
+        facetFilters: ["lang:en"],
+        attributesToRetrieve: [
+          "hierarchy.lvl0",
+          "hierarchy.lvl1",
+          "hierarchy.lvl2",
+          "hierarchy.lvl3",
+          "hierarchy.lvl4",
+          "hierarchy.lvl5",
+          "hierarchy.lvl6",
+          "content",
+          "type",
+          "url",
+        ],
+        attributesToSnippet: [
+          "hierarchy.lvl1:5",
+          "hierarchy.lvl2:5",
+          "hierarchy.lvl3:5",
+          "hierarchy.lvl4:5",
+          "hierarchy.lvl5:5",
+          "hierarchy.lvl6:5",
+          "content:5",
+        ],
+      },
+    },
+  },
+  [DocID.Pinia]: {
+    "en-US": {
+      icon: "../assets/logo/pinia.png",
+      apiKey: "45441f4b65a2f80329fd45c7cb371fea",
+      appId: "69Y3N7LHI2",
+      indexName: "pinia",
+      type: "algolia",
+      homepage: "https://pinia.vuejs.org/",
+      searchParameters: {
+        facetFilters: ["lang:en-US"],
+        attributesToRetrieve: [
+          "hierarchy.lvl0",
+          "hierarchy.lvl1",
+          "hierarchy.lvl2",
+          "hierarchy.lvl3",
+          "hierarchy.lvl4",
+          "hierarchy.lvl5",
+          "hierarchy.lvl6",
+          "content",
+          "type",
+          "url",
+        ],
+        attributesToSnippet: [
+          "hierarchy.lvl1:5",
+          "hierarchy.lvl2:5",
+          "hierarchy.lvl3:5",
+          "hierarchy.lvl4:5",
+          "hierarchy.lvl5:5",
+          "hierarchy.lvl6:5",
+          "content:5",
+        ],
       },
     },
   },

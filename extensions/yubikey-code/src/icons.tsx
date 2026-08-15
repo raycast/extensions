@@ -3,6 +3,7 @@ import fs from "node:fs";
 import { cache, handleError, isCopyPrimary, preferences } from "./index";
 import { Action, ActionPanel, Color, Icon, Image, LocalStorage } from "@raycast/api";
 import { Account } from "./accounts";
+import Values = LocalStorage.Values;
 
 export interface IconPack {
   icons: IconInfo[];
@@ -14,6 +15,8 @@ interface IconInfo {
 }
 
 type IconOverrides = Map<string, string>;
+
+const overrideKey = "iconOverride-";
 
 export function IconSubmenu(props: {
   accountKey: string;
@@ -104,8 +107,15 @@ export function getIconOverrides(overrides: number): IconOverrides | undefined {
   const [iconOverrides, setIconOverrides] = useState<IconOverrides>();
 
   async function fetchIconOverrides() {
-    const allItems = await LocalStorage.allItems<IconOverrides>();
-    const iconMap = new Map<string, string>(Object.entries(allItems));
+    const allItems = await LocalStorage.allItems<Values>();
+
+    const iconMap = new Map<string, string>();
+    for (const [key, value] of Object.entries(allItems)) {
+      if (key.startsWith(overrideKey)) {
+        iconMap.set(key, value);
+      }
+    }
+
     setIconOverrides(iconMap);
   }
 
@@ -153,5 +163,5 @@ export function getIconPath(filename: string) {
 }
 
 export function getOverrideKey(accountKey: string): string {
-  return "iconOverride-" + accountKey;
+  return overrideKey + accountKey;
 }

@@ -161,6 +161,40 @@ export function util_stopbackup(): Promise<string> {
   });
 }
 
+export function util_getStatus(): Promise<StatusInfo> {
+  const tmutilStatusCommand = "/usr/bin/tmutil status -X";
+  const getLastBackupCommand =
+    '/usr/libexec/PlistBuddy -x -c "Print Destinations" /Library/Preferences/com.apple.TimeMachine.plist';
+  return new Promise((resolve, reject) => {
+    exec(tmutilStatusCommand, (error, stdout, stderr) => {
+      if (error) {
+        reject({});
+        console.error(stderr);
+      }
+      parseStatusXmlString(stdout)
+        .then((statusInfo) => {
+          exec(getLastBackupCommand, (error, stdout, stderr) => {
+            if (error) {
+              console.error(stderr);
+              resolve(statusInfo);
+            }
+            parseLastBackupXmlString(stdout)
+              .then((lastBackupInfo) => {
+                statusInfo.LastBackup = lastBackupInfo;
+                resolve(statusInfo);
+              })
+              .catch(() => {
+                resolve(statusInfo);
+              });
+          });
+        })
+        .catch(() => {
+          reject({});
+        });
+    });
+  });
+}
+
 // Get timestamp location on the machine
 export function util_getTimestampLocation(timestamp: string, desitination: Destination): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -278,3 +312,56 @@ export function util_listBackupContent(path: string): Promise<BackupContent[]> {
     });
   });
 }
+
+export type StatusInfo = {
+  BackupPhase: BackupPhaseEnum; // The current phase of the backup operation.
+  DestinationMountPoint: string; // The path in the file system at which the backup destination is mounted.
+  Running: boolean; // True if a backup operation is currently in progress.
+  Progress: number; // A number between 0 and 1 representing the progress of the current backup operation.
+  LastBackup: LastBackupInfo | undefined; // Information about the last successful backup.
+};
+
+export enum BackupPhaseEnum {
+  "Starting" = "Starting",
+  "PreparingSourceVolumes" = "Preparing source volumes",
+  "MountingBackupVolume" = "Mounting backup volume",
+  "FindingChanges" = "Finding changes",
+  "Copying" = "Copying files",
+  "ThinningPostBackup" = "Cleaning up",
+  "Finishing" = "Finishing",
+  "Stopping" = "Stopping",
+}
+
+// parse XML string output of `tmutil status -X` into structured object
+const parseStatusXmlString = async (xml: string): Promise<StatusInfo> => {
+  const parser = new xml2js.Parser({ explicitArray: false });
+  const result = await parser.parseStringPromise(xml);
+  const dict = result.plist.dict;
+
+  const statusInfo: StatusInfo = {
+    BackupPhase: (dict.string[0] || "Unknown") as BackupPhaseEnum,
+    DestinationMountPoint: dict.string[3] || "",
+    Running: dict.true !== undefined,
+    Progress: dict?.dict?.real[0] ? parseFloat(dict?.dict?.real[0]) : 0,
+    LastBackup: undefined,
+  };
+
+  return statusInfo;
+};
+
+export type LastBackupInfo = {
+  Date: Date;
+  Location: string;
+};
+const parseLastBackupXmlString = async (xml: string): Promise<LastBackupInfo> => {
+  const parser = new xml2js.Parser({ explicitArray: true });
+  const result = await parser.parseStringPromise(xml);
+  const dict = result.plist.array[0].dict[0];
+  const volumeName = dict.string[dict.string.length - 1];
+  const snapshotDates = dict.array[2].date;
+
+  return {
+    Date: new Date(snapshotDates[snapshotDates.length - 1]) || undefined,
+    Location: volumeName || "",
+  };
+};

@@ -6,9 +6,7 @@ interface Arguments {
   attachment?: string;
 }
 
-export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
-) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
   const { text, attachment } = props.arguments;
 
   const url = constructPostIntent({ text, attachment });

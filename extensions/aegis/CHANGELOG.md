@@ -1,5 +1,22 @@
 # Aegis Extension Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Aegis Windows Support] - 2026-01-28
+
+- Update `@raycast/api` and `@raycast/utils` to support Windows
+- Add Windows to supported platforms
+
+## [Aegis Search Enhance] - 2025-01-12
+
+- Improves the seacher performance with React's `useMemo`
+
+## [Aegis Search Enhance] - 2025-01-02
+
+- Improves the search functionality to allow substring matching anywhere in both name and issuer
+
 ## [Aegis Backup Integration] - 2024-08-14
 
 - Fix missing preference for fallback icon colour

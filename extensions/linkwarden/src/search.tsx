@@ -1,59 +1,62 @@
-import {
-  Action,
-  ActionPanel,
-  List,
-  Icon,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  launchCommand,
-  LaunchType,
-  Keyboard,
-} from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { useState } from "react";
+import { Action, ActionPanel, Icon, Keyboard, launchCommand, LaunchType, List, showToast, Toast } from "@raycast/api";
+import { getFavicon, useFetch } from "@raycast/utils";
 import axios from "axios";
-
-// Define the type for your JSON data
-interface Link {
-  id: number;
-  name: string;
-  type: string;
-  description: string;
-  url: string;
-  // Add other properties as needed
-}
-
-interface ApiResponse {
-  response: Link[];
-}
+import { useEffect, useState } from "react";
+import { baseUrl, headers, useCollections } from "./hooks";
+import { ApiResponse, Link } from "./interfaces";
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
+  const [collectionId, setCollectionId] = useState("");
 
-  const { isLoading, data, revalidate } = useFetch(
-    `${preferences.LinkwardenUrl}/api/v1/links?sort=0&searchQueryString=${searchText}&searchByName=true&searchByUrl=true&searchByDescription=true&searchByTags=true&searchByTextContent=true`,
-    {
-      headers: {
-        Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
-      },
-      mapResult(result: ApiResponse) {
-        return {
-          data: result.response,
-        };
-      },
-      initialData: [],
-      keepPreviousData: true,
+  const { isLoading: isLoadingCollections, data: collections } = useCollections();
+
+  // NOTE: GET /api/v1/links is deprecated per Linkwarden API docs.
+  // Migrate to GET /api/v1/search when feasible.
+  // See: https://docs.linkwarden.app/api/retrieve-a-list-of-links
+  const searchParams = new URLSearchParams({
+    sort: "0",
+    searchQueryString: searchText,
+    searchByName: "true",
+    searchByUrl: "true",
+    searchByDescription: "true",
+    searchByTags: "true",
+    searchByTextContent: "true",
+  });
+  if (collectionId) {
+    searchParams.set("collectionId", collectionId);
+  }
+
+  const {
+    isLoading: isLoadingLinks,
+    data,
+    error: linksError,
+    revalidate,
+  } = useFetch(`${baseUrl}links?${searchParams.toString()}`, {
+    headers,
+    mapResult(result: ApiResponse<Link[]>) {
+      return {
+        data: Array.isArray(result?.response) ? result.response : [],
+      };
     },
-  );
+    initialData: [],
+    keepPreviousData: true,
+  });
+
+  useEffect(() => {
+    if (linksError) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch links",
+        message: linksError.message,
+      });
+    }
+  }, [linksError]);
 
   const deleteLink = async (id: number) => {
     try {
-      await axios.delete(`${preferences.LinkwardenUrl}/api/v1/links/${id}`, {
-        headers: {
-          Authorization: `Bearer ${preferences.LinkwardenApiKey}`,
-        },
+      await axios.delete(`${baseUrl}links/${id}`, {
+        headers,
       });
 
       showToast({
@@ -73,34 +76,51 @@ export default function Command() {
     }
   };
 
+  const isLoading = isLoadingLinks || isLoadingCollections;
   return (
-    <List isLoading={isLoading} searchText={searchText} onSearchTextChange={setSearchText} throttle>
-      {!isLoading && !data.length && (
-        <List.EmptyView
-          icon={Icon.Rocket}
-          title="You Haven't Created Any Links Yet"
-          description="Start your journey by creating a new Link!"
-          actions={
-            <ActionPanel>
-              <Action
-                icon={Icon.Plus}
-                title="Create New Link"
-                onAction={async () => await launchCommand({ name: "add", type: LaunchType.UserInitiated })}
-              />
-            </ActionPanel>
-          }
-        />
+    <List
+      isLoading={isLoading}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      throttle
+      searchBarPlaceholder="Search for Links"
+      searchBarAccessory={
+        <List.Dropdown tooltip="Collection" onChange={setCollectionId}>
+          <List.Dropdown.Item title="All" value="" />
+          {(collections ?? []).map((collection) => (
+            <List.Dropdown.Item
+              key={collection.id}
+              icon={{ source: Icon.Folder, tintColor: collection.color }}
+              title={`${collection.name} (${collection._count.links}) [${collection.parent?.name ? `${collection.parent.name} > ` : ""}${collection.name}]`}
+              value={collection.id.toString()}
+            />
+          ))}
+        </List.Dropdown>
+      }
+    >
+      {!isLoading && !(data ?? []).length && (
+        <>
+          {!collectionId ? (
+            <EmptyView title="You Haven't Created Any Links Yet" />
+          ) : (
+            <EmptyView title="You Haven't Created Any Links Here" />
+          )}
+        </>
       )}
-      {data.map((item) => {
+      {(data ?? []).map((item) => {
         return (
           <List.Item
             key={item.id}
             title={item.name}
             subtitle={item.description}
-            icon={`https://www.google.com/s2/favicons?sz=32&domain_url=${item.url}`}
+            icon={getFavicon(item.url)}
+            accessories={[
+              { tag: item.collection.name, icon: { source: Icon.Folder, tintColor: item.collection.color } },
+              { date: new Date(item.updatedAt), icon: Icon.Calendar },
+            ]}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser title="Open in Browser" url={item.url} />
+                <Action.OpenInBrowser icon={getFavicon(item.url)} title="Open in Browser" url={item.url} />
                 <Action.CopyToClipboard title="Copy URL" content={item.url} />
                 <Action
                   title="Delete Link"
@@ -121,5 +141,24 @@ export default function Command() {
         );
       })}
     </List>
+  );
+}
+
+function EmptyView({ title }: { title: string }) {
+  return (
+    <List.EmptyView
+      icon={Icon.Rocket}
+      title={title}
+      description="Start your journey by creating a new Link!"
+      actions={
+        <ActionPanel>
+          <Action
+            icon={Icon.Plus}
+            title="Create New Link"
+            onAction={async () => await launchCommand({ name: "add", type: LaunchType.UserInitiated })}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }

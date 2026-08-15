@@ -1,8 +1,8 @@
 import { getPreferenceValues } from "@raycast/api";
 
 export function useAuthHeaders() {
-  const preferences = getPreferenceValues();
-  const accessToken = preferences?.accessToken;
+  const preferences = getPreferenceValues<Preferences>();
+  const accessToken = preferences.accessToken;
 
   return {
     Authorization: `Bearer ${accessToken}`,

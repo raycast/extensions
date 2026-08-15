@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import type { LaunchProps } from "@raycast/api";
-import { Action, List } from "@raycast/api";
+import { Action, Icon, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 
 import type { SearchType, Word } from "@/types";
 import { Vocabulary } from "@/types";
 
+import useHistory from "@/hooks/use-history";
 import useOptionalSelection from "@/hooks/use-optional-selection";
 import useSearchWords from "@/hooks/use-searchwords";
 
@@ -43,12 +45,23 @@ export default function SearchResults(
   { helperTitle, helperDescription, useVocabulary }: extraOptions = {},
 ) {
   const [search, setSearch] = useState<string>("");
-  const [showDetails, setShowDetails] = useState<boolean>(false);
+  const [showDetails, setShowDetails] = useCachedState<boolean>("showDetails", false);
   const [vocabulary, setVocabulary] = useState<Vocabulary>(Vocabulary.English);
 
   useOptionalSelection(setSearch, typeof launchProps.fallbackText !== "undefined" && launchProps.fallbackText !== "");
 
   const { data, isLoading } = useSearchWords(search, type, useVocabulary ? vocabulary : undefined);
+  const { history, remove } = useHistory();
+  const historyData = useMemo(() => {
+    if (!search) {
+      return history;
+    }
+    const normalizedSearch = search.trim().toLowerCase();
+    if (!normalizedSearch) {
+      return history;
+    }
+    return history.filter((word) => word.word.toLowerCase().includes(normalizedSearch));
+  }, [history, search]);
 
   return (
     <List
@@ -60,31 +73,66 @@ export default function SearchResults(
       searchBarAccessory={useVocabulary ? <VocabularySwitch onChange={setVocabulary} /> : null}
       searchText={search}
     >
-      {!data || data.length === 0 ? (
+      {(!data || data.length === 0) && historyData.length === 0 ? (
         <List.EmptyView
           icon={"command-icon.png"}
           title={helperTitle ?? placeholder}
           description={search !== "" ? (isLoading ? "Searching..." : "No Results Found") : helperDescription}
         />
       ) : (
-        data.map((word) => (
-          <List.Item
-            icon={"command-icon.png"}
-            key={word.word}
-            title={word.word}
-            subtitle={word.defs !== undefined ? word.defs[0] : ""}
-            actions={
-              <Actions word={word}>
-                <Action
-                  title="Toggle Details"
-                  onAction={() => setShowDetails((d) => !d)}
-                  shortcut={{ key: "d", modifiers: ["cmd"] }}
+        <>
+          {historyData.length > 0 && (
+            <List.Section title="History">
+              {historyData.map((word) => (
+                <List.Item
+                  icon={"command-icon.png"}
+                  key={word.word + "history"}
+                  title={word.word}
+                  subtitle={word.defs !== undefined ? word.defs[0] : ""}
+                  actions={
+                    <Actions word={word}>
+                      <Action
+                        title="Toggle Details"
+                        onAction={() => setShowDetails((d) => !d)}
+                        shortcut={{ key: "d", modifiers: ["cmd"] }}
+                      />
+                      <Action
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        title="Remove from History"
+                        shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                        onAction={() => remove(word)}
+                      />
+                    </Actions>
+                  }
+                  detail={<List.Item.Detail markdown={getWordMarkdown(word)} />}
                 />
-              </Actions>
-            }
-            detail={<List.Item.Detail markdown={getWordMarkdown(word)} />}
-          />
-        ))
+              ))}
+            </List.Section>
+          )}
+          {data && data.length > 0 && (
+            <List.Section title="Results">
+              {data.map((word) => (
+                <List.Item
+                  icon={"command-icon.png"}
+                  key={word.word}
+                  title={word.word}
+                  subtitle={word.defs !== undefined ? word.defs[0] : ""}
+                  actions={
+                    <Actions word={word}>
+                      <Action
+                        title="Toggle Details"
+                        onAction={() => setShowDetails((d) => !d)}
+                        shortcut={{ key: "d", modifiers: ["cmd"] }}
+                      />
+                    </Actions>
+                  }
+                  detail={<List.Item.Detail markdown={getWordMarkdown(word)} />}
+                />
+              ))}
+            </List.Section>
+          )}
+        </>
       )}
     </List>
   );

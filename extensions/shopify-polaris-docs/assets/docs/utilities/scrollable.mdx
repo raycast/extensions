@@ -1,0 +1,59 @@
+---
+title: Scrollable
+shortDescription: Used in components with too much content for the available vertical space. Embeds long-form content in components like modals and popovers.
+category: Utilities
+keywords:
+  - long form
+  - text container
+  - terms of service
+  - long form container
+  - scrolling
+  - independently scrollable
+  - modal scrolling
+  - pane scrolling
+  - scrolling in panes
+  - below the fold
+  - above the fold
+examples:
+  - fileName: scrollable-default.tsx
+    title: Default
+    description: Use when you need to make a region within the page independently scrollable. It’s often used in modals and other panes where it’s helpful to provide an extra visual cue that content exists below or above the fold.
+  - fileName: scrollable-with-gutter.tsx
+    title: Thin with scrollbar gutter
+    description: Use to prevent content shift when container becomes scrollable.
+  - fileName: scrollable-to-child-component.tsx
+    title: To child component
+    description: Use when you need to programmatically scroll a child component into view in the scrollable container.
+previewImg: /images/components/utilities/scrollable.png
+---
+
+# {frontmatter.title}
+
+<Lede>
+
+The scrollable component is a container for long form content, such as terms of service, that allows for scrolling so merchants can expose more text as they read.
+
+</Lede>
+
+<Examples />
+
+<Props componentName={frontmatter.title} />
+
+## Best practices
+
+Scrollable containers should:
+
+- Be used when it’s helpful to provide an extra visual cue to let merchants know that content exists below or above the fold
+- Only be used for length text such as terms of service or other legal disclaimers and never for instructional or action-oriented text
+
+---
+
+## Content guidelines
+
+Scrollable containers are cards with scrolling functionality, and should follow the [content guidelines](https://polaris.shopify.com/components/layout-and-structure/legacy-card#content-guidelines) for cards.
+
+---
+
+## Related components
+
+- To put long sections of information under a block that merchants can expand or collapse, [use the collapsible component](https://polaris.shopify.com/components/collapsible)

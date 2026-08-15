@@ -1,4 +1,14 @@
-# Upload to Cloudinary Changelog
+# Cloudinary Changelog
+
+## [Cache Enhancements] - 2025-01-15
+
+- View more than 30 results at a time in "Search" via `Pagination`
+- `Cache` "Search" through `useCachedPromise`
+- `Cache` "View Item" through `useCachedPromise`
+- Add placeholders to `Preferences`
+- _cloudinaryApiSecret_ is now of type `password`
+- Various `type` and `argument` refactor
+- Use Raycast Hooks where possible
 
 ## [Update] - 2023-11-14
 

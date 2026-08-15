@@ -1,44 +1,34 @@
+import { InputsFocusRef } from "../hooks/use-base-converter";
+
 export const buildBases = () => {
-  const bases: { title: string; value: string }[] = [];
+  const bases: string[] = [];
   for (let i = 2; i <= 36; i++) {
-    bases.push({ title: i + "", value: i + "" });
+    bases.push(i.toString());
   }
   return bases;
 };
 
-export const baseToBaseBigInt = (input: string, fromBase: string, toBase: string): string => {
-  const fromBaseNum = parseInt(fromBase);
-  const toBaseNum = parseInt(toBase);
-  if (
-    isNaN(fromBaseNum) ||
-    fromBaseNum < 2 ||
-    fromBaseNum > 36 ||
-    isNaN(toBaseNum) ||
-    toBaseNum < 2 ||
-    toBaseNum > 36
-  ) {
-    return "";
+export const setConverterAuto = (
+  setter: (base: keyof InputsFocusRef, value: string, allowedPrefix?: string, id?: number) => void,
+  n: string,
+): void => {
+  n = n.trim();
+  if (n.startsWith("0x")) {
+    return setter(16, n, "0x");
   }
-
-  try {
-    let bigIntValue = BigInt("0");
-    for (const char of input.trim()) {
-      bigIntValue = bigIntValue * BigInt(fromBaseNum) + BigInt(parseInt(char, fromBaseNum));
-      if (isNaN(Number(bigIntValue))) {
-        throw new Error("Invalid input number");
-      }
+  if (n.startsWith("0b")) {
+    return setter(2, n, "0b");
+  }
+  if (n.startsWith("0o")) {
+    return setter(8, n, "0o");
+  }
+  if (n.match(/[a-zA-Z]/)) {
+    if (n.match(/^[0-9a-vA-V]+$/)) {
+      return setter(32, n);
     }
-
-    return bigIntValue.toString(toBaseNum);
-  } catch (error) {
-    return "";
+    if (n.match(/^[0-9a-zA-Z]+$/)) {
+      return setter(36, n);
+    }
   }
+  return setter(10, n);
 };
-
-export function safeBigIntConverter(baseString: string) {
-  try {
-    return BigInt(baseString);
-  } catch (error) {
-    return BigInt(0);
-  }
-}

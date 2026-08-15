@@ -1,12 +1,11 @@
 import { Action, ActionPanel, Grid, Icon, Toast, useNavigation } from "@raycast/api";
-import { Group, Id, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
+import type { Group, Id, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";
 import HueClient from "./lib/HueClient";
 import useGradients from "./hooks/useGradientUris";
 import React, { useMemo, useState } from "react";
-import "./helpers/arrayExtensions";
 import { getColorsFromScene } from "./helpers/hueResources";
 
 import { getTransitionTimeInMs } from "./helpers/raycast";

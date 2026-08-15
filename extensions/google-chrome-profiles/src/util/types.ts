@@ -1,3 +1,5 @@
+import { getPreferenceValues } from "@raycast/api";
+
 export type GoogleChromeLocalState = {
   profile: { info_cache: GoogleChromeInfoCache };
 };
@@ -59,7 +61,7 @@ type GoogleChromeBookmark = GoogleChromeBookmarkFolder | GoogleChromeBookmarkURL
 
 export interface GoogleChromeBookmarkURL extends GoogleChromeBookmarkBase {
   type: "url";
-  url: string;
+  url?: string; // url can be null (cf. bookmarklet)
 }
 
 export interface GoogleChromeBookmarkFolder extends GoogleChromeBookmarkBase {
@@ -79,3 +81,32 @@ export type GoogleChromeBookmarkFile = {
     synced: GoogleChromeBookmarkFolder;
   };
 };
+
+export interface BrowserConfig {
+  readonly appName: string;
+  readonly dataPath: string;
+  /**
+   * The `.app` bundle, passed to `open -a`. Not the inner Mach-O binary:
+   * `open` resolves the bundle through Launch Services, which is what makes
+   * the browser come to the front and the command return immediately.
+   */
+  readonly appPath: string;
+}
+
+export const BROWSERS: Record<string, BrowserConfig> = {
+  chrome: {
+    appName: "Google Chrome",
+    dataPath: "Library/Application Support/Google/Chrome",
+    appPath: "/Applications/Google Chrome.app",
+  },
+  "chrome-canary": {
+    appName: "Google Chrome Canary",
+    dataPath: "Library/Application Support/Google/Chrome Canary",
+    appPath: "/Applications/Google Chrome Canary.app",
+  },
+};
+
+export function getSelectedBrowser(): BrowserConfig {
+  const { browser } = getPreferenceValues<ExtensionPreferences>();
+  return BROWSERS[browser] ?? BROWSERS["chrome"];
+}

@@ -31,12 +31,12 @@ export default {
       url: "https://axios-http.com/docs/res_schema",
     },
     {
-      title: "Interceptors",
-      url: "https://axios-http.com/docs/interceptors",
-    },
-    {
       title: "Config Defaults",
       url: "https://axios-http.com/docs/config_defaults",
+    },
+    {
+      title: "Interceptors",
+      url: "https://axios-http.com/docs/interceptors",
     },
     {
       title: "Handling Errors",
@@ -47,8 +47,12 @@ export default {
       url: "https://axios-http.com/docs/cancellation",
     },
     {
-      title: "URL-Encoding Bodies",
+      title: "🆕 URL-Encoding Bodies",
       url: "https://axios-http.com/docs/urlencoded",
+    },
+    {
+      title: "🆕 Multipart Bodies",
+      url: "https://axios-http.com/docs/multipart",
     },
   ],
   Other: [

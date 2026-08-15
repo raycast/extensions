@@ -3,6 +3,7 @@ export const STRINGS = {
   searchPeoplePlaceholder: "Search people",
   showDetails: "Show details",
   copyUrl: "Copy URL",
+  copyCoverUrl: "Copy Cover URL",
   copyTitle: "Copy title",
   authorLabel: "Author",
   formatLabel: "Format",
@@ -18,4 +19,8 @@ export const STRINGS = {
   website: "Website",
   twitter: "Twitter",
   rating: "Rating",
+  searchResults: "Search Results",
+  recentBooks: "Recent Books",
+  removeFromRecent: "Remove from Recent",
+  clearAllRecent: "Clear all Recent Views",
 };

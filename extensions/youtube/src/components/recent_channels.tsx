@@ -2,9 +2,9 @@ import {
   Action,
   ActionPanel,
   Alert,
-  Cache,
   Color,
   Icon,
+  LocalStorage,
   Toast,
   confirmAlert,
   getPreferenceValues,
@@ -15,40 +15,38 @@ import { ChannelActionProps } from "./actions";
 
 const { griditemsize } = getPreferenceValues<Preferences>();
 
-const cache = new Cache();
+export const getRecentChannels = () => getLocalStorageChannels("recent-channels");
+export const getPinnedChannels = () => getLocalStorageChannels("pinned-channels");
 
-export const getRecentChannels = () => getCachedChannels("recent-channels");
-export const getPinnedChannels = () => getCachedChannels("pinned-channels");
-
-const getCachedChannels = (key: string): string[] => {
-  const channels = cache.get(key);
+const getLocalStorageChannels = async (key: string): Promise<string[]> => {
+  const channels = (await LocalStorage.getItem(key)) as string;
   return channels ? JSON.parse(channels) : [];
 };
 
-export const addRecentChannel = (channelId: string) => {
-  removePinnedChannel(channelId);
-  const recent = getRecentChannels().filter((id) => id !== channelId);
-  recent.unshift(channelId);
-  recent.splice(griditemsize * 2);
-  cache.set("recent-channels", JSON.stringify(recent));
+export const addRecentChannel = async (channelId: string) => {
+  const recent = await getRecentChannels();
+  const filterRecent = recent.filter((id) => id !== channelId);
+  filterRecent.unshift(channelId);
+  filterRecent.splice(griditemsize * 2);
+  await LocalStorage.setItem("recent-channels", JSON.stringify(filterRecent));
 };
 
-const addPinnedChannel = (channelId: string) => {
-  removeRecentChannel(channelId);
-  const pinned = getPinnedChannels().filter((id) => id !== channelId);
-  pinned.unshift(channelId);
-  cache.set("pinned-channels", JSON.stringify(pinned));
+const addPinnedChannel = async (channelId: string) => {
+  const pinned = await getPinnedChannels();
+  const filteredPinned = pinned.filter((id) => id !== channelId);
+  filteredPinned.unshift(channelId);
+  await LocalStorage.setItem("pinned-channels", JSON.stringify(filteredPinned));
 };
 
-const removeChannel = (key: string, id: string) => {
-  const channels = getCachedChannels(key);
-  cache.set(key, JSON.stringify(channels.filter((c) => c !== id)));
+const removeChannel = async (key: string, id: string) => {
+  const channels = await getLocalStorageChannels(key);
+  await LocalStorage.setItem(key, JSON.stringify(channels.filter((c) => c !== id)));
 };
 
 const removePinnedChannel = (id: string) => removeChannel("pinned-channels", id);
-const clearPinnedChannels = () => cache.remove("pinned-channels");
+const clearPinnedChannels = async () => await LocalStorage.removeItem("pinned-channels");
 const removeRecentChannel = (id: string) => removeChannel("recent-channels", id);
-const clearRecentChannels = () => cache.remove("recent-channels");
+const clearRecentChannels = async () => await LocalStorage.removeItem("recent-channels");
 
 const handleClearRecentChannels = async (refresh?: () => void) => {
   const confirmed = await confirmAlert({
@@ -63,12 +61,12 @@ const handleClearRecentChannels = async (refresh?: () => void) => {
 
   if (confirmed) {
     clearRecentChannels();
-    showToast(Toast.Style.Success, "Cleared All Recent Channels");
+    showToast(Toast.Style.Success, "Cleared all Recent Channels");
     if (refresh) refresh();
   }
 };
 
-export const PinChannel = ({ channelId, refresh }: ChannelActionProps): JSX.Element => {
+export const PinChannel = ({ channelId, refresh }: ChannelActionProps) => {
   return (
     <Action
       title="Pin Channel"
@@ -76,7 +74,7 @@ export const PinChannel = ({ channelId, refresh }: ChannelActionProps): JSX.Elem
       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       onAction={() => {
         addPinnedChannel(channelId);
-        showToast(Toast.Style.Success, "Pinned Channel");
+        showToast(Toast.Style.Success, "Pinned channel");
         if (refresh) refresh();
       }}
     />
@@ -92,7 +90,7 @@ export const PinnedChannelActions = ({ channelId, refresh }: ChannelActionProps)
         showToast(Toast.Style.Success, "Removed from Pinned Channels");
         if (refresh) refresh();
       }}
-      icon={Icon.XMarkCircle}
+      icon={Icon.PinDisabled}
       style={Action.Style.Destructive}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
     />
@@ -100,7 +98,7 @@ export const PinnedChannelActions = ({ channelId, refresh }: ChannelActionProps)
       title="Clear All Pinned Channels"
       onAction={() => {
         clearPinnedChannels();
-        showToast(Toast.Style.Success, "Cleared All Pinned Channels");
+        showToast(Toast.Style.Success, "Cleared all Pinned Channels");
         if (refresh) refresh();
       }}
       icon={Icon.Trash}

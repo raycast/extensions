@@ -1,5 +1,110 @@
 # System Monitor Changelog
 
+## [Disk Tab] - 2026-08-05
+
+- Add a Disk tab with capacity, per-volume breakdown, APFS volume details and live disk I/O rates via `iostat`
+- Show SMART disk health, medium type and physical disk details
+- Distinguish "no throughput sample yet" from "zero throughput" so the first render never claims a fabricated 0 MB/s
+- Poll disk throughput only while the Disk tab is active, like the other tabs
+
+## [Apple Silicon Fan Monitoring] - 2026-08-04
+
+- Add fan RPM readings to the CPU view via a bundled SMC reader helper (`tools/smc-fan-reader.m`), following the same pattern as the existing temperature reader
+- Report fanless Macs as "Not available on this Mac" instead of showing an error or empty state
+
+## [Improvements] - 2026-08-03
+
+- Extract parsing and stat derivation into a tested `src/lib/` layer with a vitest harness
+- Poll only the active tab; inactive monitors stop shelling out to system tools
+- Reset rate baselines on tab switch so the first reading after switching back is a real measurement
+- Add per-core CPU usage and CPU hardware context (chip and core count) to the CPU view
+- Add GPU / unified memory reporting and model year to System Info
+- Expand Memory view with active, inactive, wired, compressed, purgeable, swap, and memory pressure stats
+- Add Copy System Report, Open System Settings, and Open System Information actions
+- Add semantic color highlighting for percentages and unavailable values across detail views
+- Fix process rows with narrow PIDs being dropped from top-process lists
+- Document what the extension reads and what the system report contains in a README privacy section
+
+## [Eliminate Zombie Processes] - 2026-03-20
+
+- Replace all `exec()` calls with `execFile()` to avoid spawning shell processes
+- Remove `systeminformation` and `os-utils` dependencies (both spawn child processes internally)
+- Rearchitect menubar command to align with Raycast's menu-bar lifecycle (load → render → unload)
+- Cache menubar data to disk via Raycast Cache API to prevent flicker between interval restarts
+- Cache `system_profiler` results for battery condition/capacity (rarely changes, slow to fetch)
+- Poll for live updates only while the menu is open (2s interval via `useInterval`)
+- Parallelize system data fetches with `Promise.all` for faster command execution
+- Fix `pmset -g log` buffer overflow in Power Monitor view
+
+## [Fix Zombie Process Accumulation] - 2026-03-20
+
+- Add revalidation guards to prevent overlapping child process spawns in the menubar command
+- Increase polling intervals (1s → 3s for stats, 3s → 5s for temperature) to reduce process spawn rate
+
+## [Fix Stale Menubar Readings] - 2026-03-16
+
+- Enable background refresh for the menubar command so pinned stats stay up to date
+
+## [Fix Temperature Polling] - 2026-03-16
+
+- Moved temperature sensor polling to a dedicated 3s interval to prevent stale readings
+
+## [Added Menubar Pin-to-Display] - 2026-03-04
+
+- Click any stat in the menubar dropdown to pin it as persistent text next to the icon
+- Supports CPU, temperature, memory, battery, network, and storage
+- Click again to unpin
+
+## [Added Temperature Monitoring] - 2026-02-19
+
+- Added temperature view under CPU section
+- CPU temperature displayed in menu bar dropdown
+
+## [New Additions & Chore] - 2026-02-02
+- Added customisable tags for menubar entries
+    - Universal tags
+        - `<BR>` for line breaks
+        - `<MODE>` for display mode(toggles between "Free" and "Used")
+    - Module specific tags can be seen by hovering over the preferences text box
+- Made Loading tags use `…` consistently instead of `...`
+- Updated free and used preference to be per-module for cpu, memory, disk and battery usage
+- Removed displaymode field from menubar
+
+
+## [Toggle Display Mode + Modernize + Add README] - 2026-01-19
+
+- Add a preference to toggle between free and used display modes for CPU, Memory and more (ref: [Issue #24612](https://github.com/raycast/extensions/issues/24612)).
+- Modernize extension to use latest Raycast configuration.
+- Add README.md.
+
+## [New Additions] - 2025-08-05
+
+- Add a new preference option for the `Menubar System Monitor` command to customize the menu bar icon.
+
+## [Improvements] - 2025-06-04
+
+- Improve the script to ensure it waits for the Activity Monitor to open before clicking the radio button
+
+## [Improvements] - 2025-03-17
+
+- Improve the `onAction()` so it can open the Activity Monitor directly without selecting a tab
+
+## [New Additions] - 2025-03-11
+
+- Add a new menubar feature to display system monitor information in the menubar
+
+## [Update] - 2025-03-03
+
+- Update the action to open the corresponding tab in the System Monitor
+
+## [Fix] - 2025-01-02
+
+- Fix issue when showing battery level on Intel-based Macs
+
+## [Chore] - 2024-11-24
+
+- Fixed wording in description
+
 ## [Fix] - 2024-08-12
 
 - Fix issue when showing processes that consume more than 9Gb of RAM

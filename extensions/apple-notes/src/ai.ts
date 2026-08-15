@@ -1,7 +1,7 @@
 import { AI, closeMainWindow, LaunchProps, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
-import { createNote } from "./api";
+import { createNote } from "./api/applescript";
 
 export default async (props: LaunchProps<{ arguments: Arguments.Ai }>) => {
   await closeMainWindow();
@@ -24,10 +24,9 @@ Follow these instructions:
 - Use the same language as the original text.
 ${instructions ? `- ${instructions}` : ""}
 `,
-      { model: AI.Model.OpenAI_GPT4o },
     );
     await createNote(result);
   } catch (error) {
-    showFailureToast(error, { title: "Could not create a new note." });
+    await showFailureToast(error, { title: "Could not create a new note." });
   }
 };

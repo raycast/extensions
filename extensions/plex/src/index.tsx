@@ -1,6 +1,5 @@
 import { ActionPanel, List, Action, Icon } from "@raycast/api";
-import { useFetch, Response } from "@raycast/utils";
-import React from "react";
+import { useFetch } from "@raycast/utils";
 import { ENDPOINTS, SECTION_ICONS, plex_token } from "../utils/constants";
 import { SectionsApiResponse } from "../types/types";
 import { GetSectionItems } from "./sectionItems";
@@ -43,6 +42,7 @@ function PlexLibrarySection({ plexLibrary }: { plexLibrary: SectionsApiResponse[
       actions={
         <ActionPanel>
           <Action.Push
+            icon={Icon.AppWindowGrid3x3}
             title="View Library Items"
             target={<GetSectionItems sectionId={plexLibrary.key} sectionName={plexLibrary.title} />}
           />

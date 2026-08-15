@@ -19,3 +19,4 @@
 - Notifications:
 	- 只推送视频更新提醒，默认为 关闭
 	- 使用 terminal-notifier 进行推送, 通过 `brew install terminal-notifier` 下载 `terminal-notifier` 后通过 `which terminal-notifier` 获取地址填入
+  - 在 Windows 上使用 BurnToast 进行通知推送。你需要先安装 BurnToast 模块。在 PowerShell 中运行 `Install-Module -Name BurnToast -Scope CurrentUser -Force` 来安装。

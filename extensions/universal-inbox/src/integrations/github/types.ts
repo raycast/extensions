@@ -1,3 +1,60 @@
+import { match, P } from "ts-pattern";
+
+export interface GithubNotification {
+  id: string;
+  repository: GithubRepositorySummary;
+  subject: GithubNotificationSubject;
+  reason: string;
+  unread: boolean;
+  updated_at: Date;
+  last_read_at?: Date;
+  url: string;
+  subscription_url: string;
+  item?: GithubNotificationItem;
+}
+
+export function getGithubNotificationHtmlUrl(notification: GithubNotification): string {
+  return match(notification.item)
+    .with({ type: "GithubPullRequest", content: P.select() }, (pr) => pr.url)
+    .with({ type: "GithubDiscussion", content: P.select() }, (discussion) => discussion.url)
+    .otherwise(() => getHtmlUrlFromApiUrl(notification.subject.url) ?? getHtmlUrlFromMetadata(notification));
+}
+
+function getHtmlUrlFromApiUrl(apiUrl: string | undefined): string | undefined {
+  if (!apiUrl) {
+    return undefined;
+  }
+  const url = new URL(apiUrl);
+  if (url.host === "api.github.com" && url.pathname.startsWith("/repos")) {
+    const result = new URL(apiUrl);
+    result.host = "github.com";
+    result.pathname = url.pathname.replace("/repos", "").replace("/pulls/", "/pull/");
+    return result.toString();
+  }
+  return undefined;
+}
+
+function getHtmlUrlFromMetadata(notification: GithubNotification): string {
+  return match(notification.subject.type)
+    .with("CheckSuite", () => {
+      const result = new URL(notification.repository.url);
+      result.pathname = `${result.pathname}/actions`;
+      return result.toString();
+    })
+    .otherwise(() => notification.repository.url);
+}
+
+export interface GithubNotificationSubject {
+  title: string;
+  url?: string;
+  latest_comment_url?: string;
+  type: string;
+}
+
+export type GithubNotificationItem =
+  | { type: "GithubPullRequest"; content: GithubPullRequest }
+  | { type: "GithubDiscussion"; content: GithubDiscussion };
+
 export interface GithubPullRequest {
   id: string;
   number: number;

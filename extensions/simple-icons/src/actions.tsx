@@ -1,9 +1,19 @@
+/* eslint @raycast/prefer-title-case: off */
+import process from "node:process";
 import { useEffect, useState } from "react";
 import { Action, Icon } from "@raycast/api";
-import { titleToSlug } from "simple-icons/sdk";
-import { copySvg, makeCopyToDownload } from "./utils.js";
-import { IconData, LaunchContext } from "./types.js";
 import { callbackLaunchCommand } from "raycast-cross-extension";
+import { getIconSlug } from "./vender/simple-icons-sdk.js";
+import { IconData, LaunchContext } from "./types.js";
+import { copySvg, getAbsoluteFileLink, launchSocialBadge, makeCopyToDownload, usePasteInsteadOfCopy } from "./utils.js";
+import Releases from "./views/releases.js";
+
+const CopyOrPaste = ({ title, content }: { title: string; content: string }) =>
+  usePasteInsteadOfCopy ? (
+    <Action.Paste title={`Paste ${title}`} content={content} />
+  ) : (
+    <Action.CopyToClipboard title={`Copy ${title}`} content={content} />
+  );
 
 type ActionProps = {
   icon: IconData;
@@ -14,67 +24,100 @@ export const OpenWith = ({ icon, version }: ActionProps) => {
   const [destinationPath, setDestinationPath] = useState<string>("");
   useEffect(() => {
     (async () => {
-      const path = await makeCopyToDownload({ version, icon, slug: icon.slug || titleToSlug(icon.title) });
-      setDestinationPath(path);
+      const path = await makeCopyToDownload({ version, icon, slug: getIconSlug(icon) });
+      if (path) setDestinationPath(path);
     })();
   }, []);
   return destinationPath ? <Action.OpenWith path={destinationPath} /> : null;
 };
 
+export const MakeBadge = ({ icon, version }: ActionProps) =>
+  // [TODO] The Badge extension cannot work properly on Windows yet.
+  process.platform === "darwin" ? (
+    <Action icon="shieldsdotio.svg" title="Make Badge" onAction={() => launchSocialBadge(icon, version)} />
+  ) : null;
+
 export const CopySvg = ({ icon, version }: ActionProps) => {
-  return <Action title="Copy SVG" onAction={() => copySvg({ version, icon })} icon={Icon.Clipboard} />;
+  return (
+    <Action
+      title={`${usePasteInsteadOfCopy ? "Paste" : "Copy"} SVG`}
+      onAction={() => copySvg({ version, icon })}
+      icon={Icon.Clipboard}
+    />
+  );
 };
 
-export const CopyColor = ({ icon }: ActionProps) => <Action.CopyToClipboard title="Copy Color" content={icon.hex} />;
+export const CopyColor = ({ icon }: ActionProps) => <CopyOrPaste title="Color" content={icon.hex} />;
 
-export const CopySlug = ({ icon }: ActionProps) => (
-  <Action.CopyToClipboard title="Copy Slug" content={icon.slug || titleToSlug(icon.title)} />
+export const CopyTitle = ({ icon }: ActionProps) => <CopyOrPaste title="Title" content={icon.title} />;
+
+export const CopySlug = ({ icon }: ActionProps) => <CopyOrPaste title="Slug" content={getIconSlug(icon)} />;
+
+export const CopyPath = ({ icon, version }: ActionProps) => (
+  <Action
+    title={`${usePasteInsteadOfCopy ? "Paste" : "Copy"} Path`}
+    onAction={() => copySvg({ version, icon, pathOnly: true })}
+    icon={Icon.Clipboard}
+  />
 );
 
 export const CopyCdn = ({ icon }: ActionProps) => {
-  const simpleIconsCdnLink = `https://cdn.simpleicons.org/${icon.slug || titleToSlug(icon.title)}`;
-  return <Action.CopyToClipboard title="Copy CDN Link" content={simpleIconsCdnLink} />;
+  const simpleIconsCdnLink = `https://cdn.simpleicons.org/${getIconSlug(icon)}`;
+  return <CopyOrPaste title="CDN Link" content={simpleIconsCdnLink} />;
 };
 
 export const CopyJsdelivr = ({ icon, version }: ActionProps) => {
-  const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/simple-icons@${version}/icons/${icon.slug || titleToSlug(icon.title)}.svg`;
-  return <Action.CopyToClipboard title="Copy jsDelivr CDN Link" content={jsdelivrCdnLink} />;
+  const jsdelivrCdnLink = `https://cdn.jsdelivr.net/npm/${version}/icons/${getIconSlug(icon)}.svg`;
+  return <CopyOrPaste title="jsDelivr CDN Link" content={jsdelivrCdnLink} />;
 };
 
 export const CopyUnpkg = ({ icon, version }: ActionProps) => {
-  const unpkgCdnLink = `https://unpkg.com/simple-icons@${version}/icons/${icon.slug || titleToSlug(icon.title)}.svg`;
-  // eslint-disable-next-line @raycast/prefer-title-case
-  return <Action.CopyToClipboard title="Copy unpkg CDN Link" content={unpkgCdnLink} />;
+  const unpkgCdnLink = `https://unpkg.com/${version}/icons/${getIconSlug(icon)}.svg`;
+  return <CopyOrPaste title="unpkg CDN Link" content={unpkgCdnLink} />;
 };
+
+export const CopyFontEntities = ({ icon }: ActionProps) => (
+  <>
+    <CopyOrPaste title="Character" content={String.fromCodePoint(icon.code)} />
+    <CopyOrPaste title="HTML Code" content={`&#${icon.code.toString()};`} />
+    <CopyOrPaste title="UTF Code" content={`\\u{${icon.code.toString(16).toUpperCase()}}`} />
+  </>
+);
 
 export const Supports = () => (
   <>
+    <Action.Push icon={Icon.Paragraph} title="View Release Notes" target={<Releases />} />
     <Action.OpenInBrowser
       title="Request a New Icon"
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=new+icon&template=icon_request.yml"
     />
     <Action.OpenInBrowser
-      title="Report an Oudated Icon"
+      title="Report an Outdated Icon"
       url="https://github.com/simple-icons/simple-icons/issues/new?labels=update+icon%2Fdata&template=icon_update.yml"
     />
   </>
 );
 
-export const LaunchCommand = ({ callbackLaunchOptions, icon }: LaunchContext & ActionProps) => (
+export const LaunchCommand = ({ callbackLaunchOptions, icon, version }: LaunchContext & ActionProps) => (
   <Action
     title="Use This Icon"
     icon={Icon.Checkmark}
     onAction={async () => {
-      callbackLaunchCommand(callbackLaunchOptions, { icon });
+      callbackLaunchCommand(callbackLaunchOptions, {
+        icon: { ...icon, file: getAbsoluteFileLink(icon.slug, version) },
+      });
     }}
   />
 );
 
 export const actions = {
   OpenWith,
+  MakeBadge,
   CopySvg,
   CopyColor,
+  CopyTitle,
   CopySlug,
+  CopyPath,
   CopyCdn,
   CopyJsdelivr,
   CopyUnpkg,
@@ -84,9 +127,12 @@ export type ActionType = keyof typeof actions;
 
 export const defaultActionsOrder: ActionType[] = [
   "OpenWith",
+  "MakeBadge",
   "CopySvg",
   "CopyColor",
+  "CopyTitle",
   "CopySlug",
+  "CopyPath",
   "CopyCdn",
   "CopyJsdelivr",
   "CopyUnpkg",

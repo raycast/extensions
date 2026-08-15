@@ -1,4 +1,3 @@
-import React from "react";
 import { Action, ActionPanel, Icon, openCommandPreferences } from "@raycast/api";
 
 export function ActionOpenPreferences() {

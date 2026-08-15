@@ -1,16 +1,17 @@
 import { ActionPanel, Action, Icon, List, confirmAlert, Color, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useMemo } from "react";
 
-import { Filter as TFilter, updateFilter, deleteFilter as apiDeleteFilter, handleError } from "./api";
+import { Filter as TFilter, updateFilter, deleteFilter as apiDeleteFilter } from "./api";
 import Filter from "./components/Filter";
-import View from "./components/View";
+import OpenInTodoist from "./components/OpenInTodoist";
 import { getColorByKey } from "./helpers/colors";
 import { getFilterAppUrl, getFilterUrl } from "./helpers/filters";
-import { isTodoistInstalled } from "./helpers/isTodoistInstalled";
-import useCachedData from "./hooks/useCachedData";
+import { withTodoistApi } from "./helpers/withTodoistApi";
+import useSyncData from "./hooks/useSyncData";
 
 function Filters() {
-  const [data, setData] = useCachedData();
+  const { data, setData, isLoading } = useSyncData();
 
   const filters = useMemo(() => {
     return data?.filters.sort((a, b) => a.item_order - b.item_order) ?? [];
@@ -30,10 +31,7 @@ function Filters() {
         title: filter.is_favorite ? "Removed from favorites" : "Added to favorites",
       });
     } catch (error) {
-      handleError({
-        error,
-        title: filter.is_favorite ? "Unable to remove from favorites" : "Unable to add to favorites",
-      });
+      await showFailureToast(error, { title: "Unable to update filter" });
     }
   }
 
@@ -52,13 +50,13 @@ function Filters() {
 
         await showToast({ style: Toast.Style.Success, title: "Filter deleted" });
       } catch (error) {
-        handleError({ error, title: "Unable to delete filter" });
+        await showFailureToast(error, { title: "Unable to delete filter" });
       }
     }
   }
 
   return (
-    <List searchBarPlaceholder="Filter filters by name">
+    <List searchBarPlaceholder="Filter filters by name" isLoading={isLoading}>
       {filters.map((filter) => {
         return (
           <List.Item
@@ -74,24 +72,10 @@ function Filters() {
             actions={
               <ActionPanel>
                 <Action.Push icon={Icon.Sidebar} title="Show Tasks" target={<Filter name={filter.name} />} />
-                {isTodoistInstalled ? (
-                  <Action.Open
-                    title="Open Filter in Todoist"
-                    target={getFilterAppUrl(filter.id)}
-                    icon="todoist.png"
-                    application="Todoist"
-                  />
-                ) : (
-                  <Action.OpenInBrowser
-                    title="Open Filter in Browser"
-                    url={getFilterUrl(filter.id)}
-                    shortcut={{ modifiers: ["cmd"], key: "o" }}
-                  />
-                )}
-
+                <OpenInTodoist appUrl={getFilterAppUrl(filter.id)} webUrl={getFilterUrl(filter.id)} />
                 <ActionPanel.Section>
                   <Action
-                    title={filter.is_favorite ? "Remove From Favorites" : "Add to Favorites"}
+                    title={filter.is_favorite ? "Remove from Favorites" : "Add to Favorites"}
                     icon={Icon.Star}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     onAction={() => toggleFavorite(filter)}
@@ -130,10 +114,4 @@ function Filters() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <Filters />
-    </View>
-  );
-}
+export default withTodoistApi(Filters);

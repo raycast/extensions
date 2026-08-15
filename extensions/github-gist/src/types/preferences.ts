@@ -5,6 +5,7 @@ interface Preferences {
   perPage: string;
   "remember-tag": boolean;
   detail: boolean;
+  defaultGistTag: string;
   primaryAction: string;
 }
 export const {
@@ -12,5 +13,6 @@ export const {
   perPage,
   "remember-tag": rememberTag,
   detail: showDetail,
+  defaultGistTag: defaultGistTag,
   primaryAction,
 } = getPreferenceValues<Preferences>();

@@ -1,90 +1,52 @@
 import { closeMainWindow, getPreferenceValues, popToRoot } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { exec } from "child_process";
+import { promisify } from "util";
 import { Preferences, Tab } from "../interfaces";
-import { NOT_INSTALLED_MESSAGE, SEARCH_ENGINE } from "../constants";
+import { SEARCH_ENGINE } from "../constants";
+
+const execAsync = promisify(exec);
 
 export async function openNewTab(queryText: string | null | undefined): Promise<boolean | string> {
   popToRoot();
   closeMainWindow({ clearRootSearch: true });
 
-  const script = `
-    tell application "Firefox"
-      activate
-      repeat while not frontmost
-        delay 0.1
-      end repeat
-      tell application "System Events"
-        keystroke "t" using {command down}
-        ${
-          queryText
-            ? `keystroke "l" using {command down}
-           keystroke "a" using {command down}
-           key code 51
-           keystroke "${SEARCH_ENGINE[getPreferenceValues<Preferences>().searchEngine.toLowerCase()]}${queryText}"
-           key code 36`
-            : ""
-        }
-      end tell
-    end tell
-  `;
-  await checkAppInstalled();
+  const preferences = getPreferenceValues<Preferences>();
+  const browserApp = preferences.browserApp || "Firefox";
 
-  return await runAppleScript(script);
+  if (queryText) {
+    const searchEngine = preferences.searchEngine?.toLowerCase() || "google";
+    const searchUrl = SEARCH_ENGINE[searchEngine] || SEARCH_ENGINE["google"];
+    const fullUrl = `${searchUrl}${encodeURIComponent(queryText)}`;
+    const command = `open -a "${browserApp}" "${fullUrl}"`;
+
+    const { stdout } = await execAsync(command);
+    return stdout || "success";
+  } else {
+    const command = `open -a "${browserApp}" "about:newtab"`;
+
+    const { stdout } = await execAsync(command);
+    return stdout || "success";
+  }
 }
 
 export async function openHistoryTab(url: string): Promise<boolean | string> {
   popToRoot();
   closeMainWindow({ clearRootSearch: true });
 
-  const script = `
-    tell application "Firefox"
-      activate
-      repeat while not frontmost
-        delay 0.1
-      end repeat
-      tell application "System Events"
-        keystroke "t" using {command down}
-        keystroke "l" using {command down}
-        keystroke "a" using {command down}
-        key code 51
-        keystroke "${url}"
-        key code 36
-      end tell
-    end tell
-  `;
+  const preferences = getPreferenceValues<Preferences>();
+  const browserApp = preferences.browserApp || "Firefox";
+  const command = `open -a "${browserApp}" "${url}"`;
 
-  return await runAppleScript(script);
+  const { stdout } = await execAsync(command);
+  return stdout || "success";
 }
 
 export async function setActiveTab(tab: Tab): Promise<void> {
-  await runAppleScript(`
-    tell application "Firefox"
-      activate
-      repeat with w from 1 to count of windows
-        set startTab to name of window 1
-        repeat
-            if name of window 1 contains "${tab.title}" then 
-              exit repeat
-            else
-              tell application "System Events" to key code 48 using control down
-            end if
-            if name of window 1 is startTab then exit repeat
-        end repeat
-      end repeat
-    end tell
-  `);
+  const preferences = getPreferenceValues<Preferences>();
+  const browserApp = preferences.browserApp || "Firefox";
+
+  // Instead of trying to find and activate the existing tab,
+  // just open the URL which is more reliable and simpler
+  const command = `open -a "${browserApp}" "${tab.url}"`;
+  await execAsync(command);
 }
-
-const checkAppInstalled = async () => {
-  const appInstalled = await runAppleScript(`
-set isInstalled to false
-try
-    do shell script "osascript -e 'exists application \\"Firefox\\"'"
-    set isInstalled to true
-end try
-
-return isInstalled`);
-  if (appInstalled === "false") {
-    throw new Error(NOT_INSTALLED_MESSAGE);
-  }
-};

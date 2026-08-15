@@ -1,0 +1,20 @@
+{
+  "Brackets": {
+    "(x)": " (x) ",
+    "[x]": " [x] ",
+    "{a}": " \\{ a \\} ",
+    "<x>": " \\langle x \\rangle ",
+    "Floor": " \\lfloor x \\rfloor ",
+    "Ceiling": " \\lceil x \\rceil ",
+    "|x|": " \\left| x \\right| ",
+    "||x||": " \\|x\\| ",
+    "Small Brackets": " (\\frac{1}{2}) ",
+    "Large Brackets": " \\left( \\frac{1}{2} \\right) "
+  },
+  "Overbraces and Underbraces": {
+    "Overbrace": " \\overbrace{a + b + c} ",
+    "Underbrace": " \\underbrace{a + b + c} ",
+    "Overbrace with Label": " \\overbrace{a_1 + a_2 + \\cdots + a_n}^{n個} ",
+    "Underbrace with Label": " \\underbrace{a_1 + a_2 + \\cdots + a_n}_{n個} "
+  }
+}

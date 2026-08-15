@@ -3,11 +3,22 @@ import { execSync } from "node:child_process";
 
 export const MULLVAD_DEVICE_TAG = "tag:mullvad-exit-node";
 
+export type Location = {
+  Country: string;
+  CountryCode: string;
+  City: string;
+  CityCode: string;
+  Latitude: number;
+  Longitude: number;
+  Priority: number;
+};
+
 export interface Device {
   self: boolean;
   key: string;
   name: string;
   userid: string;
+  loginName?: string;
   dns: string;
   ipv4: string;
   ipv6: string;
@@ -16,7 +27,9 @@ export interface Device {
   lastseen: Date;
   exitnode: boolean;
   exitnodeoption: boolean;
+  ssh?: boolean;
   tags?: string[];
+  location?: Location;
 }
 
 export class InvalidPathError extends Error {}
@@ -26,18 +39,45 @@ export class ENOBUFSError extends Error {}
 export class MaxBufferNaNError extends Error {}
 
 export type StatusDevice = {
-  Active: boolean;
   ID: string;
+  PublicKey: string;
+  HostName: string;
   DNSName: string;
+  OS: string;
+  UserID: number;
+  TailscaleIPs: string[];
+  AllowedIPs: string[];
+  Addrs: string[] | null;
+  CurAddr: string;
+  Relay: string;
+  PeerRelay: string;
+  RxBytes: number;
+  TxBytes: number;
+  Created: string;
+  LastWrite: string;
+  LastSeen: string;
+  LastHandshake: string;
+  Online: boolean;
   ExitNode: boolean;
   ExitNodeOption: boolean;
-  Online: boolean;
-  OS: string;
-  TailscaleIPs: string[];
-  LastSeen: string;
-  UserID: number;
-  HostName: string;
+  Active: boolean;
+  PeerAPIURL: string[] | null;
+  TaildropTarget: number;
+  NoFileSharingReason: string;
+  InNetworkMap: boolean;
+  InMagicSock: boolean;
+  InEngine: boolean;
+  /** Only present when the key has expired. */
+  Expired?: boolean;
+  KeyExpiry?: string;
+  /** Present when the device advertises Tailscale SSH (sshHostKeys in status --json). */
+  sshHostKeys?: string[];
   Tags?: string[];
+  /** Only present on Self. */
+  Capabilities?: string[];
+  /** Only present on Self. */
+  CapMap?: Record<string, null | string[]>;
+  Location?: Location;
 };
 
 /**
@@ -45,9 +85,19 @@ export type StatusDevice = {
  */
 export type StatusResponse = {
   Version: string;
+  BackendState: string;
+  HaveNodeKey: boolean;
+  AuthURL: string;
   TailscaleIPs: string[];
   Self: StatusDevice;
+  Health: string[];
   MagicDNSSuffix: string;
+  CurrentTailnet: {
+    Name: string;
+    MagicDNSSuffix: string;
+    MagicDNSEnabled: boolean;
+  };
+  CertDomains: string[] | null;
   Peer: Record<string, StatusDevice>;
   User: Record<
     string,
@@ -55,13 +105,72 @@ export type StatusResponse = {
       ID: number;
       DisplayName: string;
       LoginName: string;
-      ProfilePictureURL: string;
+      ProfilePicURL?: string;
     }
   >;
+  ClientVersion: null | unknown;
 };
 
-export function getStatus() {
-  const resp = tailscale(`status --json`);
+/**
+ * NetcheckResponse are the fields returned by `tailscale netcheck --format json`.
+ * These are mentioned to not be stable and may change in the future. Doubtful, but possible.
+ */
+export type NetcheckResponse = {
+  Now: string;
+  UDP: boolean;
+  IPv6: boolean;
+  IPv4: boolean;
+  IPv6CanSend: boolean;
+  IPv4CanSend: boolean;
+  OSHasIPv6: boolean;
+  ICMPv4: boolean;
+  MappingVariesByDestIP: boolean;
+  UPnP: boolean;
+  PMP: boolean;
+  PCP: boolean;
+  PreferredDERP: number;
+  RegionLatency: Record<string, number>;
+  RegionV4Latency: Record<string, number>;
+  RegionV6Latency: Record<string, number>;
+  GlobalV4Counters: Record<string, number>;
+  GlobalV6Counters: Record<string, number> | null;
+  GlobalV4: string;
+  GlobalV6: string;
+  CaptivePortal: boolean;
+};
+
+export type DerpRegion = {
+  RegionID: number;
+  RegionCode: string;
+  RegionName: string;
+  Latitude: number;
+  Longitude: number;
+  Nodes: DerpNode[];
+};
+
+type DerpNode = {
+  Name: string;
+  RegionID: number;
+  HostName: string;
+  IPv4: string;
+  IPv6: string;
+  CanPort80: boolean;
+};
+
+export type Derp = {
+  id: string;
+  code: string;
+  name: string;
+  latency: string | undefined;
+  latencies: {
+    v4: string | undefined;
+    v6: string | undefined;
+  };
+  nodes: DerpNode[];
+};
+
+export function getStatus(peers = true) {
+  const resp = tailscale(`status --json --peers=${peers}`);
   const data = JSON.parse(resp) as StatusResponse;
   if (!data || !data.Self.Online) {
     throw new NotConnectedError();
@@ -69,15 +178,30 @@ export function getStatus() {
   return data;
 }
 
+export function getNetcheck() {
+  const resp = tailscale("netcheck --format json");
+  return JSON.parse(resp);
+}
+
+/**
+ * This function relies on a debug command, so it may not be stable on the returned value.
+ */
+export function getDerpMap() {
+  const resp = tailscale("debug netmap");
+  return JSON.parse(resp).DERPMap.Regions as Record<string, DerpRegion>;
+}
+
 export function getDevices(status: StatusResponse) {
   const devices: Device[] = [];
   const self = status.Self;
 
+  const selfUser = status.User?.[self.UserID.toString()];
   const me = {
     self: true,
     key: self.ID,
     name: self.DNSName.split(".")[0],
     userid: self.UserID.toString(),
+    loginName: selfUser?.LoginName,
     dns: self.DNSName,
     ipv4: self.TailscaleIPs[0],
     ipv6: self.TailscaleIPs[1],
@@ -86,17 +210,20 @@ export function getDevices(status: StatusResponse) {
     lastseen: new Date(self.LastSeen),
     exitnode: self.ExitNode,
     exitnodeoption: self.ExitNodeOption,
+    ssh: (self.sshHostKeys?.length ?? 0) > 0,
     tags: self.Tags,
   };
 
   devices.push(me);
 
   for (const [, peer] of Object.entries(status.Peer)) {
+    const peerUser = status.User?.[peer.UserID.toString()];
     const device = {
       self: false,
       key: peer.ID,
       name: peer.DNSName.split(".")[0],
       userid: peer.UserID.toString(),
+      loginName: peerUser?.LoginName,
       dns: peer.DNSName,
       ipv4: peer.TailscaleIPs[0],
       ipv6: peer.TailscaleIPs[1],
@@ -105,7 +232,9 @@ export function getDevices(status: StatusResponse) {
       lastseen: new Date(peer.LastSeen),
       exitnode: peer.ExitNode,
       exitnodeoption: peer.ExitNodeOption,
+      ssh: (peer.sshHostKeys?.length ?? 0) > 0,
       tags: peer.Tags,
+      location: peer.Location,
     };
     devices.push(device);
   }
@@ -207,4 +336,8 @@ export function getErrorDetails(err: unknown, fallbackMessage: string): ErrorDet
     title: "Something went wrong",
     description: fallbackMessage,
   };
+}
+
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

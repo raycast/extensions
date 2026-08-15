@@ -1,6 +1,5 @@
-import fetch, { HeadersInit } from "node-fetch";
-import fs from "fs";
-import { FormData, File } from "node-fetch";
+import fs from "node:fs";
+import fetch, { HeadersInit, FormData, File } from "node-fetch";
 import { OAuth, getPreferenceValues } from "@raycast/api";
 import {
   Credentials,

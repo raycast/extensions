@@ -7,8 +7,6 @@ export default function ShowStandings() {
   const [leagueId, setLeagueId] = useCachedState("leagueId", "98767991302996019");
   const { rankings, isLoading } = useRankings(leagueId);
 
-  console.log(rankings);
-
   return (
     <List
       isLoading={isLoading}

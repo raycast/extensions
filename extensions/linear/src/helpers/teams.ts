@@ -1,5 +1,7 @@
 import { Icon } from "@raycast/api";
+
 import { OrganizationResult, TeamResult } from "../api/getTeams";
+
 import { getIcon } from "./icons";
 
 export function getTeamIcon(team: TeamResult, organization?: OrganizationResult) {

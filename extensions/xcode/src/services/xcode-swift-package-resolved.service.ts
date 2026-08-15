@@ -1,4 +1,3 @@
-import { XcodeProject } from "../models/xcode-project/xcode-project.model";
 import { existsAsync, readDirectoryAsync, readFileAsync } from "../shared/fs-async";
 import Path from "path";
 import { XcodeSwiftPackageResolved } from "../models/swift-package-resolved/xcode-swift-package-resolved.model";
@@ -11,12 +10,12 @@ import { execAsync } from "../shared/exec-async";
 export class XcodeSwiftPackageResolvedService {
   /**
    * Retrieve Xcode Swift Package Resolved (Package.resolved) for a given Xcode Project
-   * @param xcodeProject The Xcode Project
+   * @param xcodeProjectDirectoryPath The Xcode Project directory path
    */
-  static async getPackageResolved(xcodeProject: XcodeProject): Promise<XcodeSwiftPackageResolved> {
+  static async getPackageResolved(xcodeProjectDirectoryPath: string): Promise<XcodeSwiftPackageResolved> {
     // Find the path to a package resolved file
     const packageResolvedPath = await XcodeSwiftPackageResolvedService.findPackageResolvedPath(
-      xcodeProject.directoryPath
+      xcodeProjectDirectoryPath
     );
     // Retrieve the contents of the package resolved and parse it as JSON
     const packageResolved = JSON.parse(await readFileAsync(packageResolvedPath, "utf-8"));

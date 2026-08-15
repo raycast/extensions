@@ -1,5 +1,11 @@
 # Radicle Changelog
 
+## [Remove dependency on `radicle-httpd`] - 2025-06-30
+
+- Remove the need for users to run `radicle-httpd` locally, by querying the Radicle storage directly.
+- Update dependencies.
+- Remove unused preferences.
+
 ## [Fix delegate schema, add project threshold] - 2024-05-03
 
 - With the latest rc.8 the delegates are being served with their aliases, so we don't need to fetch additionally the remotes.

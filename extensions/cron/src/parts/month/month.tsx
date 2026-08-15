@@ -1,16 +1,15 @@
 import React, { useContext } from "react";
 import { Grid } from "@raycast/api";
 import { Context } from "u/context";
-import { getTitle } from "@/month/getTitle";
+import { getMonthName } from "u/getName";
 import { getWeekNumber } from "u/getDate";
 import { Calendar } from "calendar";
 import { v4 as AHD } from "uuid";
 import { Day } from "@/days/days";
-import { weekDays } from "u/options";
-import getWeather from "u/weather";
+import { monthName } from "u/options";
 
 export default function Month() {
-  const { currentDay, currentYear, currentMonth, weekFormat, enableWeek } = useContext(Context);
+  const { currentDay, currentYear, currentMonth, weekFormat, enableWeek, isDayNames } = useContext(Context);
 
   let cal;
 
@@ -26,14 +25,19 @@ export default function Month() {
       ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
       : ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const weather = getWeather();
-
   return (
     <React.Fragment>
-      <Grid.Section title={getTitle()} subtitle={weather || ""} key={"Section Days"}>
-        {weekDays && (
+      <Grid.Section key={"Section Days"}>
+        {isDayNames && (
           <React.Fragment key={AHD()}>
-            {enableWeek && <Day key={AHD()} type="name" day={parseInt("Wk")} name="Week" />}
+            {enableWeek && (
+              <Day
+                key={AHD()}
+                type="name"
+                day={parseInt("Wk")}
+                name={monthName ? getMonthName(currentMonth) : "Week"}
+              />
+            )}
             {weekdays.map((weekday) => (
               <Day key={AHD()} type="name" day={1} name={weekday} />
             ))}

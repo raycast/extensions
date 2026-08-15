@@ -1,7 +1,16 @@
-import { getPreferenceValues, environment, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, environment, showToast, Toast, Color } from "@raycast/api";
 import { ActivityType, SportType } from "./api/types";
+import { workoutTypeLabels } from "./constants";
 import { createWriteStream } from "fs";
-import path from "path";
+import path, { resolve } from "path";
+import { homedir } from "os";
+
+const METERS_PER_MILE = 1609.344;
+const FEET_PER_METER = 3.28084;
+const KM_PER_MILE = 1.60934;
+const MS_TO_KMH = 3.6; // (3600 s/hr) / (1000 m/km)
+const MS_TO_MPH = 2.23694;
+const MS_TO_KM_PER_MIN = 0.06; // (1/1000) * 60
 
 export const formatDuration = (duration: number) => {
   return new Date(duration * 1000).toISOString().substring(11, 19);
@@ -10,19 +19,17 @@ export const formatDuration = (duration: number) => {
 export const formatElevationGain = (elevationGain: number) => {
   const preferences = getPreferenceValues<Preferences>();
   if (preferences.distance_unit === "mi") {
-    return `${(elevationGain * 3.28084).toFixed(0)}ft`;
+    return `${(elevationGain * FEET_PER_METER).toFixed(0)} ft`;
   }
-  return `${Math.round(elevationGain)}m`;
+  return `${Math.round(elevationGain)} m`;
 };
 
 export const formatDistance = (distance: number) => {
-  const preferences = getPreferenceValues<Preferences>();
-
-  if (preferences.distance_unit === "km") {
+  const { distance_unit } = getPreferenceValues<Preferences>();
+  if (distance_unit === "km") {
     return `${(distance / 1000).toFixed(1)} km`;
-  } else {
-    return `${(distance / 1609.34).toFixed(2)} mi`;
   }
+  return `${(distance / METERS_PER_MILE).toFixed(2)} mi`;
 };
 export const formatSpeedForSportType = (sportType: ActivityType, speed: number) => {
   const preferences = getPreferenceValues<Preferences>();
@@ -33,13 +40,13 @@ export const formatSpeedForSportType = (sportType: ActivityType, speed: number) 
 
   switch (sportType) {
     case "Run": {
-      const pace = 1 / (speed * 0.06);
+      const pace = 1 / (speed * MS_TO_KM_PER_MIN);
       if (preferences.distance_unit === "km") {
         return `${Math.floor(pace)}:${Math.floor((pace % 1) * 60)
           .toString()
           .padStart(2, "0")}min/km`;
       } else {
-        const paceMiles = pace * 1.60934;
+        const paceMiles = pace * KM_PER_MILE;
         return `${Math.floor(paceMiles)}’${Math.floor((paceMiles % 1) * 60)
           .toString()
           .padStart(2, "0")}” min/mile`;
@@ -47,9 +54,9 @@ export const formatSpeedForSportType = (sportType: ActivityType, speed: number) 
     }
     default:
       if (preferences.distance_unit === "km") {
-        return `${(speed * 3.6).toFixed(1)} km/h`;
+        return `${(speed * MS_TO_KMH).toFixed(1)} km/h`;
       } else {
-        return `${(speed * 2.23694).toFixed(1)} mph`;
+        return `${(speed * MS_TO_MPH).toFixed(1)} mph`;
       }
   }
 };
@@ -79,19 +86,19 @@ export function getStartOfWeekUnix() {
   return Math.floor(weekStart.getTime() / 1000);
 }
 
-export function getSportTypesFromActivityTypes(
-  activityTypes: ActivityType[],
-  localized_sport_type: string,
-): SportType[] {
+export function getSportTypesFromActivityTypes(activityTypes: SportType[], localized_sport_type: string): SportType[] {
   const sportTypes: SportType[] = [];
-  if (activityTypes.includes(ActivityType.Ride)) {
+  if (activityTypes.includes(SportType.Ride)) {
     sportTypes.push(SportType.Ride);
     sportTypes.push(SportType.EBikeRide);
     sportTypes.push(SportType.EMountainBikeRide);
     sportTypes.push(SportType.VirtualRide);
     sportTypes.push(SportType.GravelRide);
+    sportTypes.push(SportType.Handcycle);
+    sportTypes.push(SportType.Wheelchair);
+    sportTypes.push(SportType.Velomobile);
   }
-  if (activityTypes.includes(ActivityType.Run)) {
+  if (activityTypes.includes(SportType.Run)) {
     sportTypes.push(SportType.Run);
     sportTypes.push(SportType.VirtualRun);
     sportTypes.push(SportType.TrailRun);
@@ -106,6 +113,60 @@ export function getSportTypesFromActivityTypes(
     });
   }
   return sportTypes;
+}
+
+// Strava's start_date_local includes a trailing Z despite representing local time.
+// Strip it so JS constructs the Date in the system timezone.
+export function parseLocalDate(dateString: string): Date {
+  const [datePart, timePart] = dateString.split("T");
+  const [year, month, day] = datePart.split("-").map(Number);
+  if (!timePart) return new Date(year, month - 1, day);
+  const [hours, minutes, seconds] = timePart.replace("Z", "").split(":").map(Number);
+  return new Date(year, month - 1, day, hours, minutes, seconds);
+}
+
+export function formatAccessoryDate(date: Date): string {
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const startOfDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  const diffDays = Math.round((startOfToday.getTime() - startOfDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays >= 0 && diffDays <= 1) {
+    const rtf = new Intl.RelativeTimeFormat("en-US", { numeric: "auto" });
+    const label = rtf.format(-diffDays, "day");
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  }
+  if (diffDays >= 2 && diffDays < 7) return date.toLocaleDateString("en-US", { weekday: "long" });
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+}
+
+export function getWorkoutTypeLabel(sportType: SportType, workoutType?: number): string | undefined {
+  if (workoutType == null) return undefined;
+
+  const typeName = sportType.toLowerCase();
+  let family: string | undefined;
+  if (typeName.includes("run")) {
+    family = "run";
+  } else if (typeName.includes("ride") || typeName === "velomobile" || typeName === "handcycle") {
+    family = "ride";
+  }
+
+  if (!family) return undefined;
+  const familyLabels = workoutTypeLabels[family as keyof typeof workoutTypeLabels];
+  return familyLabels?.[workoutType as keyof typeof familyLabels];
+}
+
+export function getWorkoutTypeColor(label: string): Color {
+  switch (label) {
+    case "Race":
+      return Color.Red;
+    case "Long Run":
+      return Color.Blue;
+    case "Workout":
+      return Color.Orange;
+    default:
+      return Color.SecondaryText;
+  }
 }
 
 export function formatSportTypesText(input: string): string {
@@ -148,7 +209,7 @@ export function convertDistanceToMeters(distance: string, unit: string) {
     case "km":
       return value * 1000;
     case "mi":
-      return value * 1609.344;
+      return value * METERS_PER_MILE;
     default:
       throw new Error("Unsupported unit");
   }
@@ -167,7 +228,7 @@ export const saveFileToDesktop = (
   fileStream: NodeJS.ReadableStream | null,
 ) => {
   if (fileStream) {
-    const desktopDir = process.env.HOME + "/Desktop";
+    const desktopDir = resolve(homedir(), "Desktop");
     const downloadPath = path.join(desktopDir, `${fileName}.${fileType}`);
     const writeStream = createWriteStream(downloadPath);
     fileStream.pipe(writeStream);
@@ -193,3 +254,68 @@ export const saveFileToDesktop = (
     });
   }
 };
+
+export function parseFlexibleTime(timeStr: string): string | null {
+  // Remove any whitespace
+  timeStr = timeStr.trim().toLowerCase();
+
+  // Handle HH:MM:SS format
+  if (isDurationValid(timeStr)) {
+    return timeStr;
+  }
+
+  // Handle HH:MM or MM:SS format
+  const timePartMatch = timeStr.match(/^(\d{1,2}):(\d{1,2})$/);
+  if (timePartMatch) {
+    const [, part1, part2] = timePartMatch;
+    const num1 = parseInt(part1, 10);
+    const num2 = parseInt(part2, 10);
+
+    // If second number is >= 60, treat as HH:MM
+    if (num2 >= 60) {
+      return `${String(num1).padStart(2, "0")}:${String(num2).padStart(2, "0")}:00`;
+    }
+
+    // If first number >= 24, treat as MM:SS
+    if (num1 >= 24) {
+      const hours = Math.floor(num1 / 60);
+      const minutes = num1 % 60;
+      return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(num2).padStart(2, "0")}`;
+    }
+
+    // Default to HH:MM
+    return `${String(num1).padStart(2, "0")}:${String(num2).padStart(2, "0")}:00`;
+  }
+
+  // Initialize time components
+  let hours = 0;
+  let minutes = 0;
+  let seconds = 0;
+
+  // Handle formats like "5h4m23s", "25min", "25m", etc.
+  const hourMatch = timeStr.match(/(\d+)\s*h/);
+  const minMatch = timeStr.match(/(\d+)\s*m(?:in)?(?!\s*s)/);
+  const secMatch = timeStr.match(/(\d+)\s*s/);
+
+  if (hourMatch) hours = parseInt(hourMatch[1]);
+  if (minMatch) minutes = parseInt(minMatch[1]);
+  if (secMatch) seconds = parseInt(secMatch[1]);
+
+  // If no matches found, try parsing as pure minutes
+  if (!hourMatch && !minMatch && !secMatch) {
+    const numericValue = parseFloat(timeStr);
+    if (!isNaN(numericValue)) {
+      minutes = numericValue;
+    } else {
+      return null;
+    }
+  }
+
+  // Convert to total seconds and format
+  const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = Math.floor(totalSeconds % 60);
+
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}

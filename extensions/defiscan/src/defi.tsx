@@ -6,7 +6,7 @@ const baseUrl = "https://defiscan.live/";
 
 export default function Command() {
   const [valueText, setValueText] = useState("");
-  const { status, statsSummaryMarkdown } = useStats();
+  const { isLoading, statsSummaryMarkdown } = useStats();
 
   const items = (
     <List.Section title="Search">
@@ -22,9 +22,9 @@ export default function Command() {
 
   return (
     <List
-      isLoading={status === "loading"}
+      isLoading={isLoading}
       isShowingDetail
-      enableFiltering={false}
+      filtering={false}
       searchBarPlaceholder="Search by block id/hash, address, trx id or vault id"
       onSearchTextChange={setValueText}
       searchText={valueText}

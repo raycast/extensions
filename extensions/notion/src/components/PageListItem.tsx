@@ -1,4 +1,3 @@
-import { FormulaPropertyItemObjectResponse } from "@notionhq/client/build/src/api-endpoints";
 import {
   Action,
   ActionPanel,
@@ -10,8 +9,10 @@ import {
   open,
   Image,
   List,
+  Keyboard,
 } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
+import { JSX } from "react";
 
 import {
   DatabaseProperty,
@@ -23,7 +24,7 @@ import {
   PageProperty,
   User,
 } from "../utils/notion";
-import { handleOnOpenPage } from "../utils/openPage";
+import { handleOnOpenPage, isNotionApp } from "../utils/openPage";
 import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
@@ -43,6 +44,9 @@ type PageListItemProps = {
   users?: User[];
   icon?: Image.ImageLike;
   customActions?: JSX.Element[];
+  isPinned?: boolean;
+  setPinnedPage?: (page: Page) => Promise<void>;
+  removePinnedPage?: (id: string) => Promise<void>;
 };
 
 export function PageListItem({
@@ -56,6 +60,9 @@ export function PageListItem({
   icon = getPageIcon(page),
   users,
   mutate,
+  isPinned,
+  setPinnedPage,
+  removePinnedPage,
 }: PageListItemProps) {
   const accessories: List.Item.Accessory[] = [];
 
@@ -122,31 +129,35 @@ export function PageListItem({
   const OpenInAppAction = (
     <Action title={`Open in App`} icon={"notion-logo.png"} onAction={() => handleOnOpenPage(page, setRecentPage)} />
   );
+  const { primaryAction, open_in } = getPreferenceValues<Preferences.SearchPage>();
+
   const OpenInBrowserAction = (
     <Action
       title={`Open in Browser`}
       icon={Icon.Globe}
       onAction={async () => {
         if (!page.url) return;
-        if (open_in?.name === "Notion") {
-          open(page.url);
-        } else open(page.url, open_in);
+        // When the preferred app is Notion, "Open in Browser" should still
+        // open in the default browser — not hand the HTTPS URL to the Notion
+        // app (which just activates it without navigating).
+        if (isNotionApp(open_in)) {
+          await open(page.url);
+        } else {
+          await open(page.url, open_in);
+        }
         await setRecentPage(page);
-        closeMainWindow();
+        await closeMainWindow();
       }}
     />
   );
 
-  const { primaryAction, open_in } = getPreferenceValues<Preferences.SearchPage>();
-
-  const OpenPageActions =
-    open_in?.name == "Notion" // Default app is Notion
-      ? primaryAction == "notion"
-        ? [OpenInAppAction, OpenInRaycastAction, OpenInBrowserAction]
-        : [OpenInRaycastAction, OpenInAppAction, OpenInBrowserAction]
-      : primaryAction == "notion"
-        ? [OpenInBrowserAction, OpenInRaycastAction]
-        : [OpenInRaycastAction, OpenInBrowserAction];
+  const OpenPageActions = isNotionApp(open_in) // Default app is Notion
+    ? primaryAction == "notion"
+      ? [OpenInAppAction, OpenInRaycastAction, OpenInBrowserAction]
+      : [OpenInRaycastAction, OpenInAppAction, OpenInBrowserAction]
+    : primaryAction == "notion"
+      ? [OpenInBrowserAction, OpenInRaycastAction]
+      : [OpenInRaycastAction, OpenInBrowserAction];
 
   const pageWord = page.object.charAt(0).toUpperCase() + page.object.slice(1);
 
@@ -163,7 +174,10 @@ export function PageListItem({
               <ActionPanel.Submenu
                 title="Edit Property"
                 icon={Icon.BulletPoints}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "p" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+                }}
               >
                 {quickEditProperties?.map((dp: DatabaseProperty) => (
                   <ActionEditPageProperty
@@ -183,15 +197,35 @@ export function PageListItem({
               <Action.Push
                 title="Append Content to Page"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<AppendToPageForm page={page} />}
               />
             ) : (
               <Action.Push
                 title="Create New Page"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<CreatePageForm defaults={{ database: page.id }} mutate={mutate} />}
+              />
+            )}
+
+            {isPinned ? (
+              <Action
+                title="Unpin Page"
+                icon={Icon.PinDisabled}
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={async () => {
+                  await removePinnedPage?.(page.id);
+                }}
+              />
+            ) : (
+              <Action
+                title="Pin Page"
+                icon={Icon.Pin}
+                shortcut={Keyboard.Shortcut.Common.Pin}
+                onAction={async () => {
+                  await setPinnedPage?.(page);
+                }}
               />
             )}
 
@@ -201,7 +235,7 @@ export function PageListItem({
               title={`Delete ${pageWord}`}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={async () => {
                 if (
                   await confirmAlert({
@@ -228,7 +262,10 @@ export function PageListItem({
                 <Action.Push
                   title="Set View Type"
                   icon={databaseView?.type ? `./icon/view_${databaseView.type}.png` : "./icon/view_list.png"}
-                  shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "v" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "opt", "shift"], key: "v" },
+                    Windows: { modifiers: ["ctrl", "opt", "shift"], key: "v" },
+                  }}
                   target={
                     <DatabaseViewForm
                       databaseId={page.parent_database_id}
@@ -265,7 +302,7 @@ export function PageListItem({
               <Action.CopyToClipboard
                 title={`Copy ${pageWord} URL`}
                 content={page.url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <Action.CopyToClipboard
                 title="Copy Formatted URL"
@@ -273,17 +310,20 @@ export function PageListItem({
                   html: `<a href="${page.url}" title="${title}">${title}</a>`,
                   text: title,
                 }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                shortcut={Keyboard.Shortcut.Common.CopyName}
               />
               <Action.Paste
                 title={`Paste ${pageWord} URL`}
                 content={page.url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "v" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "v" },
+                }}
               />
               <Action.CopyToClipboard
                 title={`Copy ${pageWord} Title`}
                 content={title}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                shortcut={Keyboard.Shortcut.Common.CopyPath}
               />
             </ActionPanel.Section>
           ) : null}
@@ -295,47 +335,42 @@ export function PageListItem({
 }
 
 function getPropertyAccessory(
-  property: PageProperty | FormulaPropertyItemObjectResponse["formula"],
+  property: PageProperty | Extract<PageProperty, { type: "formula" }>["value"],
   title: string,
   users?: User[],
 ): List.Item.Accessory | List.Item.Accessory[] | undefined {
+  if (property.value === null) return;
   switch (property.type) {
     case "boolean":
-      return {
-        icon: property.boolean ? Icon.CheckCircle : Icon.Circle,
-        tooltip: `${title}: ${property.boolean ? "Checked" : "Unchecked"}`,
-      };
     case "checkbox":
       return {
-        icon: property.checkbox ? Icon.CheckCircle : Icon.Circle,
-        tooltip: `${title}: ${property.checkbox ? "Checked" : "Unchecked"}`,
+        icon: property.value ? Icon.CheckCircle : Icon.Circle,
+        tooltip: `${title}: ${property.value ? "Checked" : "Unchecked"}`,
       };
     case "date": {
-      if (!property.date) return;
-      const start = new Date(property.date.start);
+      const start = new Date(property.value.start);
       return {
         text: formatDistanceToNow(start, { addSuffix: true }),
         tooltip: `${title}: ${format(start, "EEE d MMM yyyy")}`,
       };
     }
     case "email":
-      if (!property.email) return;
-      return { text: property.email, tooltip: `${title}: ${property.email}` };
+    case "phone_number":
+    case "url":
+      return { text: property.value, tooltip: `${title}: ${property.value}` };
     case "formula":
-      if (!property.formula) return;
-      return getPropertyAccessory(property.formula, title);
+      return getPropertyAccessory(property.value, title);
     case "multi_select":
-      return property.multi_select.map((option) => {
+      return property.value.map((option) => {
         return {
           tag: { value: option.name, color: notionColorToTintColor(option.color) },
           tooltip: `${title}: ${option.name}`,
         };
       });
     case "number":
-      if (!property.number) return;
-      return { text: property.number.toString(), tooltip: `${title}: ${property.number}` };
+      return { text: property.value.toString(), tooltip: `${title}: ${property.value}` };
     case "people":
-      return property.people.map((person) => {
+      return property.value.map((person) => {
         const user = users?.find((u) => u.id === person.id);
         return {
           text: user?.name ?? "Unknown",
@@ -343,32 +378,17 @@ function getPropertyAccessory(
           tooltip: `${title}: ${user?.name ?? "Unknown"}`,
         };
       });
-    case "phone_number":
-      if (!property.phone_number) return;
-      return { text: property.phone_number, tooltip: `${title}: ${property.phone_number}` };
-    case "rich_text": {
-      const text = property.rich_text[0]?.plain_text;
-      if (!property.rich_text[0]) return;
-      return { text, tooltip: `${title}: ${text}` };
-    }
+    case "rich_text":
     case "title": {
-      const text = property.title[0]?.plain_text ?? "Untitled";
+      if (property.value.length == 0 && property.type == "rich_text") return;
+      const text = property.value[0]?.plain_text ?? "Untitled";
       return { text, tooltip: `${title}: ${text}` };
     }
-    case "url":
-      if (!property.url) return;
-      return { text: property.url, tooltip: `${title}: ${property.url}` };
     case "select":
-      if (!property.select) return;
-      return {
-        tag: { value: property.select.name, color: notionColorToTintColor(property.select.color) },
-        tooltip: `${title}: ${property.select.name}`,
-      };
     case "status":
-      if (!property.status) return;
       return {
-        tag: { value: property.status.name, color: notionColorToTintColor(property.status.color) },
-        tooltip: `${title}: ${property.status.name}`,
+        tag: { value: property.value.name, color: notionColorToTintColor(property.value.color) },
+        tooltip: `${title}: ${property.value.name}`,
       };
   }
 }

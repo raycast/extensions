@@ -10,12 +10,16 @@ enum CalendarError: Error {
 
 struct CalendarEvent: Codable {
     let title: String
+    let notes: String
+    let url: String
     let openUrl: String
     let startDate: CLongLong
     let endDate: CLongLong
     let isAllDay: Bool
     let status: String
     let color: String
+    let calendarTitle: String
+    let hasRecurrenceRules: Bool
 }
 
 func stringFromEventStatus(status: EKEventStatus) -> String {
@@ -32,8 +36,10 @@ func stringFromEventStatus(status: EKEventStatus) -> String {
 }
 
 struct KCalendar: Codable {
+    let id: String
     let title: String
     let color: String
+    let source: String
 }
 
 
@@ -46,7 +52,7 @@ func generateEventURL(for event: EKEvent) -> String {
     let formatter = DateFormatter()
     formatter.dateFormat = "yyyyMMdd'T'HHmmss'Z'"
     formatter.timeZone = TimeZone.current
-    
+
     var dateComponent = ""
     if event.hasRecurrenceRules {
         if let startDate = event.startDate {
@@ -65,7 +71,13 @@ func generateEventURL(for event: EKEvent) -> String {
 @raycast func getCalendarEvents(days: Double) async throws -> [CalendarData]
 {
     let eventStore = EKEventStore()
-    let granted = try await eventStore.requestAccess(to: .event)
+
+    let granted: Bool
+    if #available(macOS 14.0, *) {
+        granted = try await eventStore.requestFullAccessToEvents()
+    } else {
+        granted = try await eventStore.requestAccess(to: .event)
+    }
     guard granted else {
         throw CalendarError.accessDenied
     }
@@ -73,27 +85,32 @@ func generateEventURL(for event: EKEvent) -> String {
     let endDate = Date().addingTimeInterval(3600 * 24 * days)
     let calendars = eventStore.calendars(for: .event)
     let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: calendars)
-    
+
     var calendarDataList = [CalendarData]()
-    
+
     for calendar in calendars {
         let predicate = eventStore.predicateForEvents(withStart: startDate, end: endDate, calendars: [calendar])
         let events = eventStore.events(matching: predicate)
-        
-        
+
+
         let color = calendar.cgColor?.components
         let hexColor = color != nil ? rgbaToHex(color![0], color![1], color![2]) : "#000000"
-        let calendarModel = KCalendar(title: calendar.title, color: hexColor)
-        
+        let calendarModel = KCalendar(
+            id:calendar.calendarIdentifier,title: calendar.title, color: hexColor ,source: calendar.source.title)
+
         let calendarEventsModel = events.map {
             CalendarEvent(
                 title: $0.title ?? "New Event",
+                notes: $0.notes ?? "",
+                url: $0.url?.absoluteString ?? "",
                 openUrl: generateEventURL(for: $0) ,
                 startDate: CLongLong(round($0.startDate.timeIntervalSince1970*1000)),
                 endDate: CLongLong(round($0.endDate.timeIntervalSince1970*1000)),
                 isAllDay: $0.isAllDay,
                 status: stringFromEventStatus(status: $0.status),
-                color: hexColor
+                color: hexColor,
+                calendarTitle: calendar.title,
+                hasRecurrenceRules: $0.hasRecurrenceRules
             )
         }
         if !calendarEventsModel.isEmpty {
@@ -101,6 +118,34 @@ func generateEventURL(for event: EKEvent) -> String {
             calendarDataList.append(calendarData)
         }
     }
-    
+
     return calendarDataList
 }
+
+@raycast func getCalendarList() async throws -> [KCalendar]
+{
+    let eventStore = EKEventStore()
+
+    let granted: Bool
+    if #available(macOS 14.0, *) {
+        granted = try await eventStore.requestFullAccessToEvents()
+    } else {
+        granted = try await eventStore.requestAccess(to: .event)
+    }
+    guard granted else {
+        throw CalendarError.accessDenied
+    }
+
+    let calendars = eventStore.calendars(for: .event)
+    return calendars.map { calendar in
+        let color = calendar.cgColor?.components
+        let hexColor = color != nil ? rgbaToHex(color![0], color![1], color![2]) : "#000000"
+        return KCalendar(
+            id:calendar.calendarIdentifier,
+            title: calendar.title,
+            color: hexColor,
+            source: calendar.source.title
+        )
+    }
+}
+

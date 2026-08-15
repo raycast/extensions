@@ -1,55 +1,33 @@
-import { ActionPanel, Form, Action, useNavigation, getPreferenceValues, Keyboard } from "@raycast/api";
-
-import NoteCreator from "../utils/data/creator";
-import { FormValue, Vault } from "../utils/interfaces";
-import { renewCache } from "../utils/data/cache";
+import { ObsidianVault } from "@/obsidian";
+import { Action, ActionPanel, closeMainWindow, Form, getPreferenceValues, Keyboard, popToRoot } from "@raycast/api";
+import { invalidateNotesCache } from "../api/cache/cache.service";
+import { createNote, CreateNoteParams } from "../api/create-note";
+import { parseFolderActionsPreferences, parseTagsPreferences } from "../api/preferences/preferences.service";
 import { NoteFormPreferences } from "../utils/preferences";
 
-export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
+export function CreateNoteForm(props: { vault: ObsidianVault; showTitle: boolean }) {
   const { vault, showTitle } = props;
-  const { pop } = useNavigation();
 
   const pref = getPreferenceValues<NoteFormPreferences>();
-  const { folderActions, tags, prefTag, prefPath } = pref;
+  const { prefTag, prefPath } = pref;
 
-  function parseFolderActions() {
-    if (folderActions) {
-      const folders = folderActions
-        .split(",")
-        .filter((folder) => !!folder)
-        .map((folder: string) => folder.trim());
-      return folders;
-    }
-    return [];
+  const folderActions = parseFolderActionsPreferences(pref.folderActions);
+  const tags = parseTagsPreferences(pref.tags);
+  if (prefTag) {
+    tags.push(prefTag);
   }
 
-  function parseTags() {
-    if (!tags) {
-      if (prefTag) {
-        return [{ name: prefTag, key: prefTag }];
-      }
-      return [];
+  async function createNewNote(params: CreateNoteParams, path?: string) {
+    if (path) {
+      params.path = path;
     }
-    const parsedTags = tags
-      .split(",")
-      .map((tag) => ({ name: tag.trim(), key: tag.trim() }))
-      .filter((tag) => !!tag);
-    if (prefTag) {
-      parsedTags.push({ name: prefTag, key: prefTag });
+    const saved = await createNote(vault, params);
+    if (saved) {
+      // Invalidate cache so new note appears in lists
+      invalidateNotesCache(vault.path);
     }
-    return parsedTags;
-  }
-
-  async function createNewNote(noteProps: FormValue, path: string | undefined = undefined) {
-    if (path !== undefined) {
-      noteProps.path = path;
-    }
-    const nc = new NoteCreator(noteProps, vault, pref);
-    const saved = nc.createNote();
-    if (await saved) {
-      renewCache(vault);
-    }
-    pop();
+    popToRoot();
+    closeMainWindow();
   }
 
   return (
@@ -58,10 +36,10 @@ export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create" onSubmit={createNewNote} />
-          {parseFolderActions()?.map((folder, index) => (
+          {folderActions.map((folder, index) => (
             <Action.SubmitForm
               title={"Create in " + folder}
-              onSubmit={(props: FormValue) => createNewNote(props, folder)}
+              onSubmit={(props: CreateNoteParams) => createNewNote(props, folder)}
               key={index}
               shortcut={{ modifiers: ["shift", "cmd"], key: index.toString() as Keyboard.KeyEquivalent }}
             ></Action.SubmitForm>
@@ -82,8 +60,8 @@ export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
         placeholder="path/to/note (optional)"
       />
       <Form.TagPicker id="tags" title="Tags" defaultValue={prefTag ? [prefTag] : []}>
-        {parseTags()?.map((tag) => (
-          <Form.TagPicker.Item value={tag.name.toLowerCase()} title={tag.name} key={tag.key} />
+        {tags.map((tag, index) => (
+          <Form.TagPicker.Item value={tag} title={tag} key={index} />
         ))}
       </Form.TagPicker>
       <Form.TextArea
@@ -91,6 +69,7 @@ export function CreateNoteForm(props: { vault: Vault; showTitle: boolean }) {
         id="content"
         placeholder={"Text"}
         defaultValue={pref.fillFormWithDefaults ? pref.prefNoteContent ?? "" : ""}
+        autoFocus={pref.focusContentArea}
       />
     </Form>
   );

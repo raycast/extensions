@@ -1,8 +1,6 @@
 import { withGmailClient } from "../lib/withGmailClient";
+import { ReactElement } from "react";
 
-/**
- * Makes sure that we have a authenticated gmail client available in the children
- */
-export default function View({ children }: { children: JSX.Element }) {
+export default function View({ children }: { children: ReactElement }) {
   return withGmailClient(children);
 }

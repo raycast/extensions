@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none">
+  <!-- Rounded lightning bolt, horizontally squished -->
+  <path d="M9 2C9 2 8.5 2 8.2 2.5L5.5 7C5.2 7.5 5.5 8 6 8H8L7 14C7 14 7.5 14 7.8 13.5L10.5 9C10.8 8.5 10.5 8 10 8H8L9 2Z" fill="currentColor" stroke="currentColor" stroke-width="0.5" stroke-linejoin="round" stroke-linecap="round"/>
+</svg>

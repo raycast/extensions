@@ -3,7 +3,6 @@ import { OAuthService, withAccessToken } from "@raycast/utils";
 import axios, { AxiosInstance } from "axios";
 
 let todoistApi: AxiosInstance | null = null;
-let todoistRestApi: AxiosInstance | null = null;
 
 const client = new OAuth.PKCEClient({
   redirectMethod: OAuth.RedirectMethod.Web,
@@ -24,11 +23,7 @@ export const todoist = new OAuthService({
   personalAccessToken: token || undefined,
   onAuthorize({ token }) {
     todoistApi = axios.create({
-      baseURL: "https://api.todoist.com/sync/v9",
-      headers: { authorization: `Bearer ${token}` },
-    });
-    todoistRestApi = axios.create({
-      baseURL: "https://api.todoist.com/rest/v2",
+      baseURL: "https://api.todoist.com/api/v1",
       headers: { authorization: `Bearer ${token}` },
     });
   },
@@ -42,12 +37,4 @@ export function getTodoistApi() {
   }
 
   return todoistApi;
-}
-
-export function getTodoistRestApi() {
-  if (!todoistRestApi) {
-    throw new Error("getTodoistApi must be used when authenticated");
-  }
-
-  return todoistRestApi;
 }

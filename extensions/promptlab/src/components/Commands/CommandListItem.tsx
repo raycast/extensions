@@ -72,7 +72,7 @@ export default function CommandListItem(props: CommandListItemProps) {
           <ShareCommandAction command={command} settings={settings} />
 
           <ActionPanel.Submenu
-            title="Copy Command Data..."
+            title="Copy Command Data…"
             icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           >

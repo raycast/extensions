@@ -1,4 +1,16 @@
-import { ActionPanel, Action, Icon, Clipboard, showToast, Toast, environment, AI } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  Clipboard,
+  showToast,
+  Toast,
+  environment,
+  open,
+  openExtensionPreferences,
+  AI,
+} from "@raycast/api";
+import { preferences } from "../services/config";
 import CreateEditNoteForm from "./createEditNoteForm";
 import CreateTag from "./createTag";
 import DeleteNoteAction from "./deleteNoteAction";
@@ -8,6 +20,9 @@ import { useAtom } from "jotai";
 import DeleteTags from "./deleteTags";
 import { useCachedState } from "@raycast/utils";
 import { useResetAtom } from "jotai/utils";
+import slugify from "slugify";
+import path from "path";
+import fs from "fs";
 
 const Actions = ({
   noNotes,
@@ -59,10 +74,7 @@ const Actions = ({
           <>
             <Action.Push
               title="Edit Note"
-              icon={{
-                source: Icon.Pencil,
-                tintColor: getTintColor("sky"),
-              }}
+              icon={{ source: Icon.Pencil, tintColor: getTintColor("sky") }}
               target={
                 <CreateEditNoteForm isDraft={isDraft} title={title} note={note} tags={tags} createdAt={createdAt} />
               }
@@ -77,14 +89,54 @@ const Actions = ({
                 });
               }}
             />
+            <Action
+              title="Open Note Externally"
+              icon={{ source: Icon.Folder, tintColor: getTintColor("turquoise") }}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onAction={async () => {
+                const openPreferencesAction = {
+                  title: "Open Extension Settings",
+                  onAction: () => openExtensionPreferences(),
+                };
+                if (!preferences.fileLocation) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "No Auto Save Location Set",
+                    message: "Set a folder in the extension settings",
+                    primaryAction: openPreferencesAction,
+                  });
+                  return;
+                }
+                if (!fs.existsSync(preferences.fileLocation)) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Auto Save Location Not Found",
+                    message: "The folder no longer exists — update it in the extension settings",
+                    primaryAction: openPreferencesAction,
+                  });
+                  return;
+                }
+                const notePath = path.join(preferences.fileLocation, `${slugify(`${title}`)}.md`);
+                if (!fs.existsSync(notePath)) {
+                  await showToast({
+                    style: Toast.Style.Failure,
+                    title: "Note File Not Found",
+                    message: "Save the note or run Sync with Folder to export it first",
+                  });
+                  return;
+                }
+                try {
+                  await open(notePath);
+                } catch {
+                  await showToast({ style: Toast.Style.Failure, title: "Failed to Open Note", message: notePath });
+                }
+              }}
+            />
           </>
         )}
         <Action.Push
           title="New Note"
-          icon={{
-            source: Icon.PlusSquare,
-            tintColor: getTintColor("green"),
-          }}
+          icon={{ source: Icon.PlusSquare, tintColor: getTintColor("green") }}
           target={<CreateEditNoteForm isDraft={true} />}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
         />
@@ -94,19 +146,13 @@ const Actions = ({
         <ActionPanel.Section>
           <Action
             title="Summarize with AI"
-            icon={{
-              source: Icon.SpeechBubbleActive,
-              tintColor: getTintColor("sky"),
-            }}
+            icon={{ source: Icon.SpeechBubbleActive, tintColor: getTintColor("sky") }}
             onAction={async () => await askAI()}
             shortcut={{ modifiers: ["cmd"], key: "i" }}
           />
           <Action
             title="Clear AI Summary"
-            icon={{
-              source: Icon.MinusCircle,
-              tintColor: getTintColor("sky"),
-            }}
+            icon={{ source: Icon.MinusCircle, tintColor: getTintColor("sky") }}
             onAction={() => {
               clearNoteSummary(createdAt);
               resetNotes();
@@ -119,19 +165,13 @@ const Actions = ({
         {allTags && allTags.length > 0 ? (
           <ActionPanel.Submenu
             title="Apply / Remove Tag"
-            icon={{
-              source: Icon.Tag,
-              tintColor: getTintColor("turquoise"),
-            }}
+            icon={{ source: Icon.Tag, tintColor: getTintColor("turquoise") }}
             shortcut={{ modifiers: ["cmd"], key: "t" }}
           >
             {allTags.map((tag, i) => (
               <Action
                 key={i}
-                icon={{
-                  source: "dot.png",
-                  tintColor: getTintColor(tag.color) ?? "blue",
-                }}
+                icon={{ source: "dot.png", tintColor: getTintColor(tag.color) ?? "blue" }}
                 title={tag.name}
                 onAction={() => {
                   onApplyTag(tag.name, note);
@@ -142,19 +182,13 @@ const Actions = ({
         ) : undefined}
         <Action.Push
           title="New Tag"
-          icon={{
-            source: Icon.PlusSquare,
-            tintColor: getTintColor("turquoise"),
-          }}
+          icon={{ source: Icon.PlusSquare, tintColor: getTintColor("turquoise") }}
           target={<CreateTag />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
         />
         <ActionPanel.Submenu
           title="Filter Tag"
-          icon={{
-            source: Icon.Filter,
-            tintColor: getTintColor("turquoise"),
-          }}
+          icon={{ source: Icon.Filter, tintColor: getTintColor("turquoise") }}
           shortcut={{ modifiers: ["cmd"], key: "f" }}
         >
           {allTags &&
@@ -162,10 +196,7 @@ const Actions = ({
             allTags.map((tag, i) => (
               <Action
                 key={i}
-                icon={{
-                  source: "dot.png",
-                  tintColor: getTintColor(tag.color) ?? "blue",
-                }}
+                icon={{ source: "dot.png", tintColor: getTintColor(tag.color) ?? "blue" }}
                 title={tag.name}
                 onAction={() => {
                   onTagFilter(tag.name);
@@ -174,20 +205,14 @@ const Actions = ({
             ))}
           <Action
             title="All Notes"
-            icon={{
-              source: Icon.BulletPoints,
-              tintColor: getTintColor("turquoise"),
-            }}
+            icon={{ source: Icon.BulletPoints, tintColor: getTintColor("turquoise") }}
             onAction={() => onTagFilter("")}
           />
           <Action.Push title="Create" icon={Icon.Plus} target={<CreateTag />} />
         </ActionPanel.Submenu>
         <Action.Push
           title="Delete Tags"
-          icon={{
-            source: Icon.Trash,
-            tintColor: getTintColor("red"),
-          }}
+          icon={{ source: Icon.Trash, tintColor: getTintColor("red") }}
           target={<DeleteTags />}
           shortcut={{ modifiers: ["ctrl", "shift"], key: "t" }}
         />
@@ -195,32 +220,19 @@ const Actions = ({
       <ActionPanel.Section>
         <Action
           title="Toggle Menu"
-          icon={{
-            source: Icon.AppWindowSidebarRight,
-            tintColor: getTintColor("indigo"),
-          }}
+          icon={{ source: Icon.AppWindowSidebarRight, tintColor: getTintColor("indigo") }}
           onAction={() => setMenu((prev) => !prev)}
           shortcut={{ modifiers: ["cmd"], key: "m" }}
         />
         <ActionPanel.Submenu
           title="Sort"
-          icon={{
-            source: Icon.Filter,
-            tintColor: getTintColor("indigo"),
-          }}
+          icon={{ source: Icon.Filter, tintColor: getTintColor("indigo") }}
           shortcut={{ modifiers: ["cmd"], key: "s" }}
         >
           {sortArr.map((s, i) => (
             <Action
               key={i}
-              icon={
-                s === sort
-                  ? {
-                      source: Icon.ArrowRightCircle,
-                      tintColor: "teal",
-                    }
-                  : undefined
-              }
+              icon={s === sort ? { source: Icon.ArrowRightCircle, tintColor: "teal" } : undefined}
               title={getSortHumanReadable(s)}
               onAction={() => setSort(s)}
             />

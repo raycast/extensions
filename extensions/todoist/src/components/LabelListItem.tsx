@@ -1,10 +1,12 @@
 import { ActionPanel, Action, Icon, List, confirmAlert, Color, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
-import { Label as TLabel, updateLabel, deleteLabel as apiDeleteLabel, handleError, SyncData } from "../api";
+import { Label as TLabel, updateLabel, deleteLabel as apiDeleteLabel, SyncData } from "../api";
 import Label from "../components/Label";
 import { getColorByKey } from "../helpers/colors";
-import { isTodoistInstalled } from "../helpers/isTodoistInstalled";
 import { getLabelAppUrl, getLabelUrl } from "../helpers/labels";
+
+import OpenInTodoist from "./OpenInTodoist";
 
 type LabelListItemProps = {
   label: TLabel;
@@ -27,10 +29,7 @@ export default function LabelListItem({ label, data, setData }: LabelListItemPro
         title: label.is_favorite ? "Removed from favorites" : "Added to favorites",
       });
     } catch (error) {
-      handleError({
-        error,
-        title: label.is_favorite ? "Unable to remove from favorites" : "Unable to add to favorites",
-      });
+      await showFailureToast(error, { title: "Unable to update label" });
     }
   }
 
@@ -49,7 +48,7 @@ export default function LabelListItem({ label, data, setData }: LabelListItemPro
 
         await showToast({ style: Toast.Style.Success, title: "Label deleted" });
       } catch (error) {
-        handleError({ error, title: "Unable to delete label" });
+        await showFailureToast(error, { title: "Unable to delete label" });
       }
     }
   }
@@ -68,24 +67,11 @@ export default function LabelListItem({ label, data, setData }: LabelListItemPro
       actions={
         <ActionPanel>
           <Action.Push icon={Icon.Sidebar} title="Show Tasks" target={<Label name={label.name} />} />
-          {isTodoistInstalled ? (
-            <Action.Open
-              title="Open Label in Todoist"
-              target={getLabelAppUrl(label.name)}
-              icon="todoist.png"
-              application="Todoist"
-            />
-          ) : (
-            <Action.OpenInBrowser
-              title="Open Label in Browser"
-              url={getLabelUrl(label.id)}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
-            />
-          )}
+          <OpenInTodoist appUrl={getLabelAppUrl(label.name)} webUrl={getLabelUrl(label.id)} />
 
           <ActionPanel.Section>
             <Action
-              title={label.is_favorite ? "Remove From Favorites" : "Add to Favorites"}
+              title={label.is_favorite ? "Remove from Favorites" : "Add to Favorites"}
               icon={Icon.Star}
               shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
               onAction={() => toggleFavorite(label)}

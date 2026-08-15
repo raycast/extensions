@@ -1,5 +1,30 @@
 # Lucide Icons Changelog
 
+## [Maintenance] - 2026-08-11
+
+- Update keyboard shortcuts and add Windows ones
+- Update navigationTitle to show icon name
+- Bump all dependencies to the latest
+
+## [Updates] - 2025-12-16
+
+- Add support for Windows
+- Update (dev) dependencies
+
+## [Update] - 2025-06-12
+
+- Added the preference to select the primary action to use.
+- Added the action to paste SVG.
+
+## [Update] - 2025-04-15
+
+- Add the preference to copy icon name in Pascal Case.
+
+## [Update] - 2024-10-07
+
+- Introduced AI-based icon search.
+- Removed the `Change Size` action and converted the `Change Color` action into a dropdown menu.
+
 ## [Update] - 2024-01-14
 
 - Removed stroke red color to mantain the icons as unchanged as possible

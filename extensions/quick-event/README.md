@@ -52,6 +52,30 @@ Optional Preferences:
 - Bake a cake tomorrow.
 - Use Tabule today!
 
+## Timezone Support
+
+Specify a timezone in your query and the event time will be converted to your local timezone automatically. The original timezone time is shown in the subtitle for reference.
+
+### Supported Timezone Abbreviations
+
+**US:** ET, EST, EDT, CT, CST, CDT, MT, MST, MDT, PT, PST, PDT, AKST, AKDT, HST, HDT
+
+**Europe:** GMT, UTC, BST, CET, CEST, EET, EEST, WET, WEST, MSK, TRT
+
+**Asia/Pacific:** IST, JST, KST, SGT, HKT, PHT, ICT, WIB, GST, PKT, AEST, AEDT, ACST, ACDT, AWST, NZST, NZDT
+
+**Explicit Offsets:** GMT-1, GMT+5, UTC-3, UTC+5:30, etc.
+
+### Timezone Examples
+
+- Meeting at 3pm ET
+- Call at 10am CT tomorrow
+- Sync at 9am PT on Friday
+- Lunch at noon GMT-1
+- Standup at 8am GMT+5:30
+- Review at 2pm JST next Monday
+- Demo at 4pm CET
+
 ## Author
 
 **Matthew Blode** (mblode)

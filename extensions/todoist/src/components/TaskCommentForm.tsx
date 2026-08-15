@@ -1,7 +1,7 @@
 import { ActionPanel, Action, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import { FormValidation, useForm } from "@raycast/utils";
+import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 
-import { Task, Comment, updateComment, addComment, handleError, uploadFile } from "../api";
+import { Task, Comment, updateComment, addComment, uploadFile } from "../api";
 import useCachedData from "../hooks/useCachedData";
 
 type TaskCommentFormProps = {
@@ -9,7 +9,7 @@ type TaskCommentFormProps = {
   task: Task;
 };
 
-export default function TaskEdit({ comment, task }: TaskCommentFormProps) {
+export default function TaskCommentForm({ comment, task }: TaskCommentFormProps) {
   const { pop } = useNavigation();
 
   const [data, setData] = useCachedData();
@@ -34,7 +34,7 @@ export default function TaskEdit({ comment, task }: TaskCommentFormProps) {
 
         pop();
       } catch (error) {
-        handleError({ error, title: `Unable to ${comment ? "update" : "add"} comment` });
+        await showFailureToast(error, { title: comment ? "Unable to update comment" : "Unable to add comment" });
       }
     },
     initialValues: {

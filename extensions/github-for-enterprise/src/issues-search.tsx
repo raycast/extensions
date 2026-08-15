@@ -37,7 +37,7 @@ export default function Command() {
       popToRoot();
       showToast({
         style: Toast.Style.Failure,
-        title: "Could not get pull requests",
+        title: "Could not get issues",
         message: err.message,
       });
     } finally {

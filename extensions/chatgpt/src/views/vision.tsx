@@ -20,6 +20,8 @@ const VISION_MODEL: Model = {
   prompt: "You are a helpful vision assistant.",
   option: visionModelName,
   temperature: "1",
+  enableReasoningEffortChange: false,
+  reasoningEffort: "medium",
   pinned: false,
   vision: true,
 };
@@ -106,7 +108,7 @@ export function VisionView(props: AskImageProps) {
       await showToast({ style: Toast.Style.Failure, title: "Error" });
       setLoading(false);
       setResponse(
-        "## ⚠️ Issue when accessing the API. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``
+        "## ⚠️ Issue when accessing the API. \n\n" + `Error Message: \n\n \`\`\`${(error as Error).message}\`\`\``,
       );
       return;
     }
@@ -152,7 +154,7 @@ export function VisionView(props: AskImageProps) {
       setCumulativeCost(
         cumulative_cost +
           estimatePrice(prompt_token_count, response_token_count, VISION_MODEL.option) +
-          estimateImagePrice(image_prompt_token_count)
+          estimateImagePrice(image_prompt_token_count),
       );
     }
   }, [loading]);

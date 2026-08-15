@@ -29,15 +29,25 @@ function SearchPullRequests() {
   const {
     data,
     isLoading,
+    error,
     mutate: mutateList,
+    pagination,
   } = useCachedPromise(
-    async (searchText, searchFilter, sortTxt) => {
+    (searchText, searchFilter, sortTxt) => async (options: { page: number; cursor?: string }) => {
       const result = await github.searchPullRequests({
-        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 }),
         query: `is:pr archived:false ${sortTxt} ${searchFilter} ${searchText}`,
+        after: options.page > 0 ? options.cursor : undefined,
       });
 
-      return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
+      return {
+        data:
+          result.search.edges
+            ?.map((edge) => edge?.node as PullRequestFieldsFragment | null | undefined)
+            .filter((node): node is PullRequestFieldsFragment => node != null) ?? [],
+        hasMore: result.search.pageInfo.hasNextPage,
+        cursor: result.search.pageInfo.endCursor ?? undefined,
+      };
     },
     [searchText, searchFilter, sortQuery],
     { keepPreviousData: true },
@@ -51,6 +61,7 @@ function SearchPullRequests() {
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
+      pagination={pagination}
     >
       {data ? (
         <List.Section
@@ -61,6 +72,7 @@ function SearchPullRequests() {
             return (
               <PullRequestListItem
                 key={pullRequest.id}
+                showAuthor
                 {...{ pullRequest, viewer, mutateList, sortQuery, setSortQuery }}
               />
             );
@@ -68,7 +80,7 @@ function SearchPullRequests() {
         </List.Section>
       ) : null}
 
-      <PullRequestListEmptyView />
+      <PullRequestListEmptyView error={error} />
     </List>
   );
 }

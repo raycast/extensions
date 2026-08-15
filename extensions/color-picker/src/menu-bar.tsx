@@ -8,9 +8,9 @@ import {
   openCommandPreferences,
   showHUD,
 } from "@raycast/api";
-import { useHistory } from "./history";
-import { getFormattedColor, getIcon, getPreviewColor, getShortcut } from "./utils";
 import { showFailureToast } from "@raycast/utils";
+import { useHistory } from "./lib/history";
+import { getFormattedColor, getIcon, getPreviewColor, getShortcut } from "./lib/utils";
 
 export default function Command() {
   const { history, remove, clear } = useHistory();

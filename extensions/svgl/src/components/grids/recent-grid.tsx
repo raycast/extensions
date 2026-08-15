@@ -1,6 +1,7 @@
 import { Grid } from "@raycast/api";
 import { useSvglExtension } from "../app-context";
 import SvgAction from "../svg-action";
+import { getSvgRouteSource } from "../../utils/svg-route";
 
 const RecentGrid = () => {
   const { svgs, recentSvgIds, pinnedSvgIds } = useSvglExtension();
@@ -13,15 +14,13 @@ const RecentGrid = () => {
         .filter((svg) => recentSvgIds.includes(svg.id) && !pinnedSvgIds.includes(svg.id))
         .sort((a, b) => recentSvgIds.indexOf(a.id) - recentSvgIds.indexOf(b.id))
         .slice(0, 12)
-        .map((svg, index) => (
+        .map((svg) => (
           <Grid.Item
-            key={index}
+            key={`recent_${svg.id}`}
+            id={`recent_${svg.id}`}
             content={{
               value: {
-                source: {
-                  light: typeof svg.route === "string" ? svg.route : svg.route.light,
-                  dark: typeof svg.route === "string" ? svg.route : svg.route.dark,
-                },
+                source: getSvgRouteSource(svg.route),
               },
               tooltip: svg.title,
             }}

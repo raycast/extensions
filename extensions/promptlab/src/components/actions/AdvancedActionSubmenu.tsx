@@ -15,7 +15,7 @@ export const AdvancedActionSubmenu = (props: { settings: typeof defaultAdvancedS
   const { settings } = props;
   return (
     <ActionPanel.Submenu
-      title="Advanced..."
+      title="Advanced…"
       icon={Icon.CommandSymbol}
       shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
     >

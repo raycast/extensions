@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Icon, MenuBarExtra, getPreferenceValues, showToast, Toast, environment, LaunchType } from "@raycast/api";
+import { environment, getPreferenceValues, Icon, LaunchType, MenuBarExtra, showToast, Toast } from "@raycast/api";
 import * as Exec from "./exec";
 import * as Binary from "./binary";
 import { Preferences } from "./preferences";
@@ -37,9 +37,9 @@ export default function Command() {
           });
         }
       } else {
-        const cmd = `${preferences.binaryPath} get ${preferences.preset} ${preferences.protocol}`;
+        const cmd = `${preferences.binaryPath} timer get ${preferences.preset} ${preferences.protocol}`;
         console.debug(`cmd: ${cmd}`);
-        const { stdout, stderr } = await Exec.run(cmd, { env: { PATH: Exec.PATH } });
+        const { stdout, stderr } = await Exec.run(cmd, { env: {} });
 
         if (stdout) {
           setState((previous: State) => ({
@@ -74,13 +74,17 @@ export default function Command() {
     })();
   }, []);
 
-  if (state.isLoading) {
-    return <MenuBarExtra icon={Icon.Clock} isLoading={state.isLoading} title="Loading"></MenuBarExtra>;
-  } else if (!state.isLoading && state.binary) {
-    const status: string = state.status === null ? "-" : state.status;
+  let status: string = "Unknown";
 
-    return <MenuBarExtra icon={Icon.Clock} isLoading={state.isLoading} title={status}></MenuBarExtra>;
-  } else {
-    return null;
+  if (state.isLoading) {
+    status = "Loading";
+  } else if (!state.isLoading && state.binary) {
+    status = state.status === null ? "-" : state.status;
   }
+
+  return (
+    <MenuBarExtra icon={Icon.Clock} isLoading={state.isLoading} title={status}>
+      <MenuBarExtra.Item title={status} />
+    </MenuBarExtra>
+  );
 }

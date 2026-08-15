@@ -1,5 +1,5 @@
 import { getPreferenceValues, Cache, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { useFetch, usePromise } from "@raycast/utils";
 import parse from "url-parse";
 import FormData from "form-data";
 import fs from "fs";
@@ -7,19 +7,45 @@ import path from "path";
 import mime from "mime";
 import axios, { AxiosRequestConfig } from "axios";
 
-import { Preferences, ResponseData, ROW_STATUS, ResourceObj } from "./types";
-import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse, TagResponse } from "./types";
+import { Preferences, ResponseData, ROW_STATUS, AttachmentObj } from "./types";
+import { MeResponse, PostFileResponse, PostMemoParams, MemoInfoResponse } from "./types";
 
 const cache = new Cache();
+const CURRENT_USER_PATH = "/api/v1/auth/me";
+const LEGACY_CURRENT_USER_PATH = "/api/v1/auth/sessions/current";
 
-const parseResponse = async (response: Response) => {
+const buildMemoListUrl = ({
+  creatorName,
+  state,
+  pageSize,
+}: {
+  creatorName?: string;
+  state?: ROW_STATUS;
+  pageSize: number;
+}) => {
+  const params = new URLSearchParams({
+    pageSize: String(pageSize),
+  });
+
+  if (state) {
+    params.set("state", state);
+  }
+
+  if (creatorName) {
+    params.set("parent", creatorName);
+  }
+
+  return getRequestUrl(`/api/v1/memos?${params.toString()}`);
+};
+
+const parseResponse = async <T>(response: Response): Promise<T> => {
   const cookie = response.headers.get("Set-Cookie");
 
   if (cookie) {
     cache.set("cookie", cookie);
   }
   const data = await response.json();
-  return data;
+  return data as T;
 };
 
 const getHost = () => {
@@ -77,18 +103,6 @@ const getOpenId = () => {
   }
 };
 
-const getUseFetch = <T>(url: string, options: Record<string, unknown>) => {
-  return useFetch<T, T>(url, {
-    headers: {
-      "Content-Type": "application/json",
-      // Cookie: getCookie(),
-      Authorization: `Bearer ${getToken()}`,
-    },
-    parseResponse,
-    ...options,
-  });
-};
-
 const getFetch = <T>(options: AxiosRequestConfig) => {
   return axios<T>({
     headers: {
@@ -109,10 +123,26 @@ const getFetch = <T>(options: AxiosRequestConfig) => {
   });
 };
 
+const getCurrentUserRequest = async () => {
+  try {
+    return await getFetch<MeResponse>({
+      url: getRequestUrl(CURRENT_USER_PATH),
+      method: "GET",
+    });
+  } catch (error) {
+    if (!axios.isAxiosError(error) || error.response?.status !== 404) {
+      throw error;
+    }
+
+    return getFetch<MeResponse>({
+      url: getRequestUrl(LEGACY_CURRENT_USER_PATH),
+      method: "GET",
+    });
+  }
+};
+
 export const getMe = () => {
-  return getUseFetch<MeResponse>(getRequestUrl(`/api/v1/auth/status`), {
-    method: "POST",
-  });
+  return usePromise(getCurrentUserRequest, []);
 };
 
 export const sendMemo = (data: PostMemoParams) => {
@@ -125,15 +155,32 @@ export const sendMemo = (data: PostMemoParams) => {
   });
 };
 
-export const getTags = () => {
-  const url = getRequestUrl(`/api/v1/memos/-/tags`);
+export const getRecentTags = async (): Promise<string[]> => {
+  const { user: me } = await getCurrentUserRequest();
 
-  return getUseFetch<TagResponse>(url, {
-    keepPreviousData: true,
-    initialData: {
-      tagAmounts: {},
-    },
+  const memos = await getFetch<{
+    memos: MemoInfoResponse[];
+  }>({
+    url: buildMemoListUrl({
+      creatorName: me.name,
+      pageSize: 50,
+    }),
+    method: "GET",
   });
+
+  const recentTags: string[] = [];
+
+  memos.memos.forEach((memo) => {
+    const tags = memo.tags || [];
+
+    tags.forEach((tag) => {
+      if (!recentTags.includes(tag)) {
+        recentTags.push(tag);
+      }
+    });
+  });
+
+  return recentTags;
 };
 
 export const postFile = (filePath: string, filename: string) => {
@@ -142,40 +189,38 @@ export const postFile = (filePath: string, filename: string) => {
   const formData = new FormData();
   formData.append("file", readFile, {
     filename: path.basename(filePath),
-    contentType: mime.getType(filePath) || undefined,
+    contentType: mime.getType(filePath) || "application/octet-stream",
   });
 
   return getFetch<PostFileResponse>({
-    url: getRequestUrl(`/api/v1/resources`),
+    url: getRequestUrl(`/api/v1/attachments`),
     method: "POST",
     data: {
       content: readFile.toString("base64"),
       filename,
-      type: mime.getType(filePath) || undefined,
+      type: mime.getType(filePath) || "application/octet-stream",
     },
   });
 };
 
-export const postMemoResources = (memoName: string, resources: Partial<ResourceObj>[]) => {
-  const url = getRequestUrl(`/api/v1/${memoName}/resources`);
+export const postMemoAttachments = (memoName: string, attachments: Partial<AttachmentObj>[]) => {
+  const url = getRequestUrl(`/api/v1/${memoName}/attachments`);
 
   return getFetch<object>({
     url,
     method: "PATCH",
     data: {
-      resources,
+      attachments,
     },
   });
 };
 
-export const getAllMemos = (currentUserId?: number) => {
-  let filter = encodeURIComponent(`creator=='users/${currentUserId}'`);
-
-  if (!currentUserId) {
-    filter = "";
-  }
-
-  const url = getRequestUrl(`/api/v1/memos?filter=${filter}&pageSize=20`);
+export const getAllMemos = (currentUserName?: string, { state = ROW_STATUS.NORMAL } = {}) => {
+  const url = buildMemoListUrl({
+    creatorName: currentUserName,
+    state,
+    pageSize: 20,
+  });
 
   const { isLoading, data, revalidate, pagination } = useFetch<
     {
@@ -184,58 +229,53 @@ export const getAllMemos = (currentUserId?: number) => {
     },
     MemoInfoResponse[],
     MemoInfoResponse[]
-  >(
-    (options) => {
-      return `${url}&pageToken=${options?.cursor || ""}`;
+  >(url, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${getToken()}`,
     },
-    {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${getToken()}`,
-      },
-      parseResponse,
-      mapResult(result) {
-        return {
-          data: result?.memos || [],
-          cursor: result?.nextPageToken || "",
-          hasMore: !!result.nextPageToken || false,
-        };
-      },
-      keepPreviousData: true,
-      initialData: [],
+    execute: Boolean(currentUserName),
+    parseResponse,
+    mapResult(result) {
+      return {
+        data: result?.memos || [],
+        cursor: result?.nextPageToken || "",
+        hasMore: !!result.nextPageToken || false,
+      };
     },
-  );
+    keepPreviousData: true,
+    initialData: [],
+  });
 
-  return { isLoading, data: currentUserId ? data : [], revalidate, pagination };
+  return { isLoading, data: currentUserName ? data : [], revalidate, pagination };
 };
 
-export const patchMemo = (memoId: string, { rowStatus = ROW_STATUS.NORMAL } = {}) => {
-  const url = getRequestUrl(`/api/v1/memo/${memoId}`);
+export const patchMemo = (memoName: string, { state = ROW_STATUS.NORMAL } = {}) => {
+  const url = getRequestUrl(`/api/v1/${memoName}`);
 
   return getFetch<ResponseData<MemoInfoResponse>>({
     url,
     method: "PATCH",
     data: {
-      id: memoId,
-      rowStatus,
+      state,
     },
   });
 };
 
-export const archiveMemo = (memoId: string) => {
-  return patchMemo(memoId, {
-    rowStatus: ROW_STATUS.ARCHIVED,
+export const archiveMemo = (memoName: string) => {
+  return patchMemo(memoName, {
+    state: ROW_STATUS.ARCHIVED,
   });
 };
 
-export const restoreMemo = (memoId: string) => {
-  return patchMemo(memoId, {
-    rowStatus: ROW_STATUS.NORMAL,
+export const restoreMemo = (memoName: string) => {
+  return patchMemo(memoName, {
+    state: ROW_STATUS.NORMAL,
   });
 };
 
-export const deleteMemo = (memoId: string) => {
-  const url = getRequestUrl(`/api/v1/memo/${memoId}?openId=${getOpenId()}`);
+export const deleteMemo = (memoName: string) => {
+  const url = getRequestUrl(`/api/v1/${memoName}?openId=${getOpenId()}`);
 
   return getFetch<ResponseData<MemoInfoResponse>>({
     url,
@@ -243,12 +283,28 @@ export const deleteMemo = (memoId: string) => {
   });
 };
 
-export const getResourceBin = (resourceName: string, resourceFilename: string) => {
-  const url = getRequestUrl(`/file/${resourceName}/${resourceFilename}`);
+export const getAttachmentBinToBase64 = async (attachmentName: string, attachmentFilename: string) => {
+  const url = getRequestUrl(`/file/${attachmentName}/${attachmentFilename}?thumbnail=1`);
 
-  return getFetch<BinaryData>({
+  const blob = await getFetch<ArrayBuffer>({
     url,
     method: "GET",
-    responseType: "blob",
+    responseType: "arraybuffer",
+  });
+
+  const base64 = Buffer.from(blob).toString("base64");
+
+  const mimeType = mime.getType(attachmentFilename) || "image/jpeg";
+  const fullBase64 = `data:${mimeType};base64,${base64}`;
+
+  return fullBase64;
+};
+
+export const getMemoByName = (memoName: string) => {
+  const url = getRequestUrl(`/api/v1/${memoName}`);
+
+  return getFetch<MemoInfoResponse>({
+    url,
+    method: "GET",
   });
 };

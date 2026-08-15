@@ -1,8 +1,12 @@
-import { getSelectedFinderItems, showToast, Toast, open, getFrontmostApplication } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { newTab } from "./uri";
+import { execFile } from "node:child_process";
+import { getSelectedFinderItems, showToast, Toast, open, getFrontmostApplication } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
+import { getNewTabUri } from "./uri";
+import { getAppName } from "./constants";
+
+const isWindows = process.platform === "win32";
 
 const getSelectedPathFinderItems = async () => {
   const script = `
@@ -34,12 +38,55 @@ const fallback = async (): Promise<boolean> => {
     return false;
   }
 
-  await open(newTab(currentDirectory));
+  await open(getNewTabUri(currentDirectory));
 
   return true;
 };
 
-export default async function Command() {
+function getActiveExplorerPath(): Promise<string | null> {
+  return new Promise((resolve) => {
+    execFile(
+      "powershell",
+      [
+        "-NoProfile",
+        "-Command",
+        `(New-Object -ComObject Shell.Application).Windows() | ForEach-Object { $_.Document.Folder.Self.Path } | Select-Object -First 1`,
+      ],
+      { timeout: 5000 },
+      (error, stdout) => {
+        const p = stdout?.trim();
+        resolve(!error && p ? p : null);
+      }
+    );
+  });
+}
+
+async function windowsCommand() {
+  try {
+    const explorerPath = await getActiveExplorerPath();
+
+    if (explorerPath) {
+      const info = await fs.stat(explorerPath);
+      const dirPath = info.isDirectory() ? explorerPath : path.dirname(explorerPath);
+      await open(getNewTabUri(dirPath));
+      return;
+    }
+
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No directory found",
+      message: `Please open a folder in File Explorer to open in ${getAppName()}`,
+    });
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: `Cannot open selected item in ${getAppName()}`,
+      message: String(error),
+    });
+  }
+}
+
+async function macOSCommand() {
   try {
     let selectedItems: { path: string }[] = [];
 
@@ -59,7 +106,7 @@ export default async function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "No directory selected",
-          message: "Please select a directory in Finder or Path Finder first",
+          message: `Please select a directory in Finder or Path Finder to open in ${getAppName()}`,
         });
       }
 
@@ -71,12 +118,19 @@ export default async function Command() {
     results
       .map((result) => (result.info.isDirectory() ? result.item.path : path.dirname(result.item.path)))
       .filter((value, index, self) => self.indexOf(value) === index)
-      .forEach((toOpen) => open(newTab(toOpen)));
+      .forEach((toOpen) => open(getNewTabUri(toOpen)));
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Cannot open selected item",
+      title: `Cannot open selected item in ${getAppName()}`,
       message: String(error),
     });
   }
+}
+
+export default async function Command() {
+  if (isWindows) {
+    return windowsCommand();
+  }
+  return macOSCommand();
 }

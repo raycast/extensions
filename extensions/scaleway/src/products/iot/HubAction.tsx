@@ -1,9 +1,9 @@
 import { Action, ActionPanel } from '@raycast/api'
-import type { IOT } from '@scaleway/sdk'
+import type { Iotv1 } from '@scaleway/sdk'
 import { getHubUrl } from './urls'
 
 type HubActionProps = {
-  hub: IOT.v1.Hub
+  hub: Iotv1.Hub
   toggleIsDetailOpen: () => void
 }
 

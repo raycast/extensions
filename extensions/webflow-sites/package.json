@@ -6,7 +6,8 @@
   "icon": "webflow-logo.png",
   "author": "peeks",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "xmok"
   ],
   "keywords": [
     "webflow",
@@ -36,22 +37,25 @@
       "title": "Webflow API Token",
       "description": "Generate at: https://www.peeks.co/raycast",
       "type": "password",
-      "required": true,
+      "required": false,
       "placeholder": "Paste Webflow API Token"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "@raycast/utils": "^1.4.11"
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0",
+    "cross-fetch": "^4.0.0",
+    "webflow-api": "^3.0.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "@types/request": "^2.48.8",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "^18.2.0",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",

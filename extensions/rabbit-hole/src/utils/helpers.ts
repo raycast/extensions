@@ -98,7 +98,7 @@ export function timeAgo(timestamp: Date): string {
 
   const monthsPast = daysPast / 30;
   if (monthsPast < 12) {
-    return `${Math.floor(monthsPast)}m ago`;
+    return `${Math.floor(monthsPast)}mo ago`;
   }
 
   const yearsPast = monthsPast / 12;

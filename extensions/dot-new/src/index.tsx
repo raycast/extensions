@@ -1,7 +1,8 @@
-import { useState } from "react";
 import { Action, ActionPanel, environment, Icon, List } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import fs from "fs";
 import Fuse from "fuse.js";
+import { useState } from "react";
 
 type DataSet = { text: string; url: string; provider: string }[];
 const dataset = JSON.parse(fs.readFileSync(`${environment.assetsPath}/dataset.json`, "utf-8")) as DataSet;
@@ -11,17 +12,6 @@ const fuse = new Fuse(dataset, { keys: ["title", "url", "provider"] });
 export function getFilteredDataset(query?: string): DataSet {
   return !query ? dataset : fuse.search(query, { limit: 10 }).map((result) => result.item);
 }
-
-export const getFaviconUrl = (domain: string | undefined) => {
-  if (!domain) {
-    return Icon.Globe;
-  }
-
-  return {
-    source: `https://www.google.com/s2/favicons?sz=64&domain=${encodeURI(domain)}`,
-    fallback: Icon.Globe,
-  };
-};
 
 export default function main() {
   const [prepDataSet, setPrepDataSet] = useState(getFilteredDataset());
@@ -41,7 +31,7 @@ export default function main() {
           key={index}
           title={url}
           subtitle={text}
-          icon={getFaviconUrl(url)}
+          icon={getFavicon("https://" + url, { fallback: Icon.Globe })}
           accessories={[{ text: provider }]}
           actions={
             <ActionPanel>

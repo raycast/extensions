@@ -11,7 +11,11 @@
     "lachero",
     "alexs",
     "stelo",
-    "duranbe"
+    "duranbe",
+    "nigelang",
+    "cl1107",
+    "andy_fase",
+    "kricsleo"
   ],
   "categories": [
     "Data",
@@ -32,6 +36,12 @@
       "mode": "no-view"
     },
     {
+      "name": "formatSelectionAndShow",
+      "title": "Format Selected JSON and Show",
+      "description": "Formats a JSON/JS Object string selected in the foremost editor and shows it in the viewer",
+      "mode": "view"
+    },
+    {
       "name": "index",
       "title": "Format JSON",
       "description": "Formats a JSON/JS Object",
@@ -41,6 +51,12 @@
       "name": "formatJsonLines",
       "title": "Format Array of JSON to JSONLines",
       "description": "Formats an array of JSON/JS Object to JSONLines",
+      "mode": "view"
+    },
+    {
+      "name": "formatToJsonValue",
+      "title": "Format Text into Valid JSON Value",
+      "description": "Formats text into a valid JSON value with double quotes and escapes",
       "mode": "view"
     }
   ],
@@ -79,6 +95,14 @@
       "required": false,
       "title": "Indentation",
       "type": "dropdown"
+    },
+    {
+      "default": "10000",
+      "description": "Maximum number of lines to display initially (for large JSON files)",
+      "name": "maxInitialLines",
+      "required": false,
+      "title": "Max Initial Lines",
+      "type": "textfield"
     }
   ],
   "dependencies": {
@@ -98,7 +122,12 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "publish": "npx @raycast/api@latest publish",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -22,7 +22,7 @@ export function useSearch(query: string): SearchResult {
               "X-API-KEY": preferences.token.value as string,
               "Content-Type": "application/json",
             },
-          }
+          },
         )
           .then((res) => {
             if (res.ok) {

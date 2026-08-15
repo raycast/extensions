@@ -1,16 +1,20 @@
-import { ActionPanel, Form, Action, useNavigation, showToast, Toast, getPreferenceValues } from "@raycast/api";
+import { Note, ObsidianVault } from "@/obsidian";
+import { Action, ActionPanel, Form, getPreferenceValues, showToast, Toast, useNavigation } from "@raycast/api";
 import fs from "fs";
-import { NoteReducerAction, NoteReducerActionType } from "../utils/data/reducers";
-import { Note, Vault } from "../utils/interfaces";
+import { updateNoteInCache } from "../api/cache/cache.service";
+import { applyTemplates } from "../api/templating/templating.service";
 import { SearchNotePreferences } from "../utils/preferences";
-import { applyTemplates } from "../utils/utils";
 
 interface FormValue {
   content: string;
 }
 
-export function AppendNoteForm(props: { note: Note; vault: Vault; dispatch: (action: NoteReducerAction) => void }) {
-  const { note, vault, dispatch } = props;
+export function AppendNoteForm(props: {
+  note: Note;
+  vault: ObsidianVault;
+  onNoteUpdated?: (notePath: string, updates: Partial<Note>) => void;
+}) {
+  const { note, vault, onNoteUpdated } = props;
   const { pop } = useNavigation();
 
   const { appendTemplate } = getPreferenceValues<SearchNotePreferences>();
@@ -18,8 +22,14 @@ export function AppendNoteForm(props: { note: Note; vault: Vault; dispatch: (act
   async function addTextToNote(text: FormValue) {
     const content = await applyTemplates(text.content);
     fs.appendFileSync(note.path, "\n" + content);
+
+    // Update cache and notify parent
+    const stats = fs.statSync(note.path);
+    const updates = { lastModified: stats.mtime };
+    updateNoteInCache(vault.path, note.path, updates);
+    onNoteUpdated?.(note.path, updates);
+
     showToast({ title: "Added text to note", style: Toast.Style.Success });
-    dispatch({ type: NoteReducerActionType.Update, payload: { note: note, vault: vault } });
     pop();
   }
 

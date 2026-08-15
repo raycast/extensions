@@ -1,0 +1,609 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dtf",
+  "title": "DTF",
+  "description": "Browse posts, news, topics, and top blogs from DTF.ru with AI-powered features",
+  "icon": "extension_icon.png",
+  "author": "shadeov",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "News",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "latest-posts",
+      "title": "Show Latest Posts",
+      "subtitle": "DTF",
+      "description": "Browse latest posts from DTF feed",
+      "mode": "view"
+    },
+    {
+      "name": "popular-posts",
+      "title": "Show Popular Posts",
+      "subtitle": "DTF",
+      "description": "Popular posts on DTF",
+      "mode": "view"
+    },
+    {
+      "name": "fresh-posts",
+      "title": "Show Fresh Posts",
+      "subtitle": "DTF",
+      "description": "Fresh posts on DTF with rating filters",
+      "mode": "view"
+    },
+    {
+      "name": "news",
+      "title": "Show News",
+      "subtitle": "DTF",
+      "description": "News from DTF editorial team",
+      "mode": "view"
+    },
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "subtitle": "DTF",
+      "description": "Search posts on DTF",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Search on DTF...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "browse-subsites",
+      "title": "Browse Topics",
+      "subtitle": "DTF",
+      "description": "Browse posts by DTF topics (categories)",
+      "mode": "view"
+    },
+    {
+      "name": "top-blogs",
+      "title": "Browse Top Blogs",
+      "subtitle": "DTF",
+      "description": "Rating of popular blogs on DTF",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Menu Bar",
+      "subtitle": "DTF",
+      "description": "DTF posts in your menu bar (macOS only)",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "menuBarDisplayMode",
+          "type": "dropdown",
+          "required": false,
+          "title": "Menu Bar Display",
+          "description": "What to show in the menu bar next to the icon",
+          "default": "title",
+          "data": [
+            {
+              "title": "Icon only",
+              "value": "icon"
+            },
+            {
+              "title": "Post count",
+              "value": "count"
+            },
+            {
+              "title": "Latest post title",
+              "value": "title"
+            },
+            {
+              "title": "Top post stats",
+              "value": "stats"
+            }
+          ]
+        },
+        {
+          "name": "menuBarTitleSource",
+          "type": "dropdown",
+          "required": false,
+          "title": "Title/Stats Source",
+          "description": "Source for menu bar title or stats display",
+          "default": "news",
+          "data": [
+            {
+              "title": "News",
+              "value": "news"
+            },
+            {
+              "title": "Popular",
+              "value": "popular"
+            },
+            {
+              "title": "Latest",
+              "value": "latest"
+            }
+          ]
+        },
+        {
+          "name": "menuBarTitleMaxLength",
+          "type": "dropdown",
+          "required": false,
+          "title": "Menu Bar Title Length",
+          "description": "Maximum characters for menu bar title",
+          "default": "25",
+          "data": [
+            {
+              "title": "15 chars",
+              "value": "15"
+            },
+            {
+              "title": "25 chars",
+              "value": "25"
+            },
+            {
+              "title": "35 chars",
+              "value": "35"
+            },
+            {
+              "title": "50 chars",
+              "value": "50"
+            }
+          ]
+        },
+        {
+          "name": "statsTextFormat",
+          "type": "dropdown",
+          "required": false,
+          "title": "Stats Text Format",
+          "description": "How to display views/comments in menu bar",
+          "default": "short",
+          "data": [
+            {
+              "title": "Shortest (5Kv · 12c)",
+              "value": "shortest"
+            },
+            {
+              "title": "Short (5K views · 12 comms)",
+              "value": "short"
+            },
+            {
+              "title": "Full (5K views · 12 comments)",
+              "value": "full"
+            }
+          ]
+        },
+        {
+          "name": "titleRotationInterval",
+          "type": "dropdown",
+          "required": false,
+          "title": "Title Rotation",
+          "description": "Rotate menu bar title between posts (requires title or stats mode)",
+          "default": "0",
+          "data": [
+            {
+              "title": "Off",
+              "value": "0"
+            },
+            {
+              "title": "Every 5 min",
+              "value": "5"
+            },
+            {
+              "title": "Every 10 min",
+              "value": "10"
+            },
+            {
+              "title": "Every 15 min",
+              "value": "15"
+            },
+            {
+              "title": "Every 30 min",
+              "value": "30"
+            }
+          ]
+        },
+        {
+          "name": "showNewsSection",
+          "type": "checkbox",
+          "required": false,
+          "title": "Sections",
+          "label": "Show News",
+          "description": "Show News section in dropdown",
+          "default": true
+        },
+        {
+          "name": "showPopularSection",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Popular",
+          "description": "Show Popular section in dropdown",
+          "default": true
+        },
+        {
+          "name": "showFreshSection",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Fresh",
+          "description": "Show Fresh section in dropdown",
+          "default": false
+        },
+        {
+          "name": "showLatestSection",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Latest",
+          "description": "Show Latest posts section in dropdown",
+          "default": false
+        },
+        {
+          "name": "showTopicsSection",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Topics",
+          "description": "Show Topics submenu in dropdown",
+          "default": false
+        },
+        {
+          "name": "showTopBlogsSection",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Top Blogs",
+          "description": "Show Top Blogs submenu in dropdown",
+          "default": false
+        },
+        {
+          "name": "showMoreSection",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show 'More' Section",
+          "description": "Show navigation to other commands (Popular, News, Topics, Top Blogs)",
+          "default": false
+        },
+        {
+          "name": "newsPostsCount",
+          "type": "dropdown",
+          "required": false,
+          "title": "News Posts Count",
+          "description": "Number of News posts to show (fetches multiple pages if needed)",
+          "default": "8",
+          "data": [
+            {
+              "title": "4 posts",
+              "value": "4"
+            },
+            {
+              "title": "8 posts",
+              "value": "8"
+            },
+            {
+              "title": "12 posts",
+              "value": "12"
+            }
+          ]
+        },
+        {
+          "name": "popularPostsCount",
+          "type": "dropdown",
+          "required": false,
+          "title": "Popular Posts Count",
+          "description": "Number of Popular posts to show",
+          "default": "5",
+          "data": [
+            {
+              "title": "3 posts",
+              "value": "3"
+            },
+            {
+              "title": "5 posts",
+              "value": "5"
+            },
+            {
+              "title": "7 posts",
+              "value": "7"
+            },
+            {
+              "title": "10 posts",
+              "value": "10"
+            }
+          ]
+        },
+        {
+          "name": "freshPostsCount",
+          "type": "dropdown",
+          "required": false,
+          "title": "Fresh Posts Count",
+          "description": "Number of Fresh posts to show",
+          "default": "5",
+          "data": [
+            {
+              "title": "3 posts",
+              "value": "3"
+            },
+            {
+              "title": "5 posts",
+              "value": "5"
+            },
+            {
+              "title": "7 posts",
+              "value": "7"
+            },
+            {
+              "title": "10 posts",
+              "value": "10"
+            }
+          ]
+        },
+        {
+          "name": "latestPostsCount",
+          "type": "dropdown",
+          "required": false,
+          "title": "Latest Posts Count",
+          "description": "Number of Latest posts to show",
+          "default": "5",
+          "data": [
+            {
+              "title": "3 posts",
+              "value": "3"
+            },
+            {
+              "title": "5 posts",
+              "value": "5"
+            },
+            {
+              "title": "7 posts",
+              "value": "7"
+            },
+            {
+              "title": "10 posts",
+              "value": "10"
+            }
+          ]
+        },
+        {
+          "name": "topicsPostsCount",
+          "type": "dropdown",
+          "required": false,
+          "title": "Topics Posts Count",
+          "description": "Number of posts per topic",
+          "default": "3",
+          "data": [
+            {
+              "title": "1 post",
+              "value": "1"
+            },
+            {
+              "title": "2 posts",
+              "value": "2"
+            },
+            {
+              "title": "3 posts",
+              "value": "3"
+            },
+            {
+              "title": "5 posts",
+              "value": "5"
+            }
+          ]
+        },
+        {
+          "name": "topBlogsPostsCount",
+          "type": "dropdown",
+          "required": false,
+          "title": "Top Blogs Posts Count",
+          "description": "Number of posts per blog",
+          "default": "3",
+          "data": [
+            {
+              "title": "1 post",
+              "value": "1"
+            },
+            {
+              "title": "2 posts",
+              "value": "2"
+            },
+            {
+              "title": "3 posts",
+              "value": "3"
+            },
+            {
+              "title": "5 posts",
+              "value": "5"
+            }
+          ]
+        },
+        {
+          "name": "showPostCategory",
+          "type": "checkbox",
+          "required": false,
+          "title": "Display Options",
+          "label": "Show Category",
+          "description": "Show category/subsite name in post items",
+          "default": false
+        },
+        {
+          "name": "showPostAuthors",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Authors",
+          "description": "Show author name in post items",
+          "default": false
+        },
+        {
+          "name": "showPostViews",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Views",
+          "description": "Show view count in post items",
+          "default": true
+        },
+        {
+          "name": "showPostComments",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Comments",
+          "description": "Show comment count in post items",
+          "default": true
+        },
+        {
+          "name": "showPostTime",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show Time",
+          "description": "Show publication time in post items",
+          "default": true
+        },
+        {
+          "name": "compactTitles",
+          "type": "checkbox",
+          "required": false,
+          "label": "Compact Titles",
+          "description": "Truncate long post titles",
+          "default": true
+        },
+        {
+          "name": "titleMaxLength",
+          "type": "dropdown",
+          "required": false,
+          "title": "Post Title Length",
+          "description": "Maximum characters for post titles in menu",
+          "default": "50",
+          "data": [
+            {
+              "title": "30 chars",
+              "value": "30"
+            },
+            {
+              "title": "50 chars",
+              "value": "50"
+            },
+            {
+              "title": "70 chars",
+              "value": "70"
+            },
+            {
+              "title": "100 chars",
+              "value": "100"
+            }
+          ]
+        },
+        {
+          "name": "primaryAction",
+          "type": "dropdown",
+          "required": false,
+          "title": "Primary Action",
+          "description": "What to do when clicking on a post",
+          "default": "browser",
+          "data": [
+            {
+              "title": "Open in Browser",
+              "value": "browser"
+            },
+            {
+              "title": "Copy URL",
+              "value": "copy"
+            }
+          ]
+        },
+        {
+          "name": "showOpenDTFAction",
+          "type": "checkbox",
+          "title": "Menu Actions",
+          "required": false,
+          "label": "Show 'Open DTF'",
+          "description": "Show 'Open DTF' action at the bottom",
+          "default": true
+        },
+        {
+          "name": "showRefreshAction",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show 'Refresh'",
+          "description": "Show 'Refresh' action at the bottom",
+          "default": true
+        },
+        {
+          "name": "showSearchAction",
+          "type": "checkbox",
+          "required": false,
+          "label": "Show 'Search'",
+          "description": "Show 'Search Posts' action at the bottom",
+          "default": true
+        },
+        {
+          "name": "showPostIcons",
+          "type": "checkbox",
+          "required": false,
+          "title": "Post Icons",
+          "label": "Show Post Icons",
+          "description": "Show subsite/author avatars next to posts",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-news",
+      "title": "Get News",
+      "description": "Fetches latest news from DTF editorial team"
+    },
+    {
+      "name": "get-popular-posts",
+      "title": "Get Popular Posts",
+      "description": "Fetches popular and trending posts from DTF for a given time period"
+    },
+    {
+      "name": "get-fresh-posts",
+      "title": "Get Fresh Posts",
+      "description": "Fetches fresh/new posts from DTF with optional rating filters"
+    },
+    {
+      "name": "search-posts",
+      "title": "Search Posts",
+      "description": "Searches posts on DTF by keyword"
+    },
+    {
+      "name": "get-topics",
+      "title": "Get Topics",
+      "description": "Returns list of available topics and categories on DTF"
+    },
+    {
+      "name": "get-topic-posts",
+      "title": "Get Topic Posts",
+      "description": "Fetches posts from a specific DTF topic or category"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.1",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3",
+    "typescript": "^5.9.3"
+  },
+  "version": "0.1.1",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "bugs": {
+    "url": "https://github.com/shadeov/dtf-raycast/issues"
+  },
+  "homepage": "https://github.com/shadeov/dtf-raycast",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shadeov/dtf-raycast.git"
+  }
+}

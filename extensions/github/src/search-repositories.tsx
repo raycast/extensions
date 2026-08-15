@@ -35,27 +35,39 @@ function SearchRepositories() {
   const {
     data,
     isLoading,
+    error,
     mutate: mutateList,
+    pagination,
   } = useCachedPromise(
-    async (query) => {
+    (query: string) => async (options: { page: number; cursor?: string }) => {
       const result = await github.searchRepositories({
         query,
-        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 50 }),
+        numberOfItems: getBoundedPreferenceNumber({ name: "numberOfResults", default: 25 }),
+        after: options.page > 0 ? options.cursor : undefined,
       });
-
-      return result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment);
+      return {
+        data: result.search.nodes?.map((node) => node as ExtendedRepositoryFieldsFragment) ?? [],
+        hasMore: result.search.pageInfo.hasNextPage,
+        cursor: result.search.pageInfo.endCursor ?? undefined,
+      };
     },
     [query],
     { keepPreviousData: true },
   );
 
-  useEffect(() => {
-    history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r)));
-  }, [data, history, visitRepository]);
+  useEffect(
+    () => history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))),
+    [data],
+  );
+
+  const validHistory = useMemo(
+    () => history.filter((repository) => data?.find((r) => r.id === repository.id)),
+    [data, history],
+  );
 
   const foundRepositories = useMemo(
-    () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
-    [data, history],
+    () => data?.filter((repository) => !validHistory.find((r) => r.id === repository.id)),
+    [data, validHistory],
   );
 
   return (
@@ -65,9 +77,10 @@ function SearchRepositories() {
       onSearchTextChange={setSearchText}
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
       throttle
+      pagination={pagination}
     >
-      <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
-        {history.map((repository) => (
+      <List.Section title="Visited Repositories" subtitle={validHistory ? String(validHistory.length) : undefined}>
+        {validHistory.map((repository) => (
           <RepositoryListItem
             key={repository.id}
             repository={repository}
@@ -99,7 +112,7 @@ function SearchRepositories() {
         </List.Section>
       ) : null}
 
-      <RepositoryListEmptyView searchText={searchText} isLoading={isLoading} />
+      <RepositoryListEmptyView searchText={searchText} isLoading={isLoading} error={error} />
     </List>
   );
 }

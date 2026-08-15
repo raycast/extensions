@@ -54,7 +54,7 @@ const options: { title: string; list: Option[] }[] = [
         execute: fileManager.copy.fileInfo,
         pop: true,
         descriptionMarkdown: () => `## Copy file info to clipboard.
-    
+
 Example:
 \`\`\`
 ${fileManager.getFileInfoMarkdown()}
@@ -68,7 +68,7 @@ ${fileManager.getFileInfoMarkdown()}
         execute: fileManager.copy.filePath,
         pop: true,
         descriptionMarkdown: () => `## Copy file path to clipboard.
-    
+
 Example:
 \`\`\`
 ${fileState$.selectedFilePath.get()}
@@ -172,6 +172,7 @@ export function RunAction() {
                   title={item.title}
                   id={item.key}
                   key={item.key}
+                  // @ts-expect-error - detail is not correctly typed but works
                   detail={$detail}
                   actions={
                     <ActionPanel title="FFmpeg Action">

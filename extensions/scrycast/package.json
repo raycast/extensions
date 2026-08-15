@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scrycast",
+  "title": "Scrycast",
+  "description": "Search for Magic: The Gathering cards on Scryfall or your collection",
+  "icon": "scrycast.png",
+  "author": "aayushpi",
+  "categories": [
+    "Fun",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Cards",
+      "subtitle": "Search cards on Scryfall",
+      "description": "Search cards on Scryfall",
+      "mode": "view"
+    },
+    {
+      "name": "saved-cards",
+      "title": "Bookmarked Cards",
+      "subtitle": "View your bookmarked cards",
+      "description": "View your bookmarked cards",
+      "mode": "view"
+    },
+    {
+      "name": "my-collection",
+      "title": "Search My Collection",
+      "subtitle": "Import and search your personal collection",
+      "description": "Import and browse your ManaBox card collection",
+      "mode": "view"
+    },
+    {
+      "name": "browse-sets",
+      "title": "Browse by Set",
+      "subtitle": "Browse cards organized by set",
+      "description": "Browse Magic sets and explore the top EDHRec card from each set",
+      "mode": "view"
+    },
+    {
+      "name": "browse-decks",
+      "title": "Browse Decks",
+      "subtitle": "Browse your saved decks",
+      "description": "Browse preconstructed decks from Moxfield or Archidekt",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "overrides": {
+    "@types/react": "^19.2.14"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use the \\`npm run publish\\` command.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

@@ -1,5 +1,28 @@
 # Changelog
 
+## [Fixes and Updates] - 2026-01-28
+
+- Fix: Improve performance for large JSON rendering to prevent CPU freeze
+- Add configurable "Max Initial Lines" preference (default: 10000) to limit initial rendering
+- Add "Load All Lines" action (⌘+L) for viewing truncated content
+- Show loading state instead of error during JSON parsing
+
+## [Adds formatToJsonValue] - 2025-01-10
+
+- Add a new command to format text into a valid JSON value with double quotes and escapes
+
+## [Fix un-escaping JSON values] - 2025-01-09
+
+- Adds a check to determine if the full payload is escaped before attemptiong to un-escape the entire payload
+
+## [Adds formatSelectionAndShow] - 2024-12-06
+
+- Add a new command to format JSON selected in the foremost editor and show it in the viewer
+
+## [Adds support for escaped JSON strings] - 2024-10-02
+
+- Correctly validate a JSON string that has been escaped
+
 ## [Improvements and fixes] - 2024-08-29
 
 - Format JSON Lines: Make actions in sync with Format JSON command, i.e. copies the output to clipboard for "Format" action.

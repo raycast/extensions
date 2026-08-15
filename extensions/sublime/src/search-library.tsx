@@ -6,8 +6,6 @@ import { List } from "@raycast/api";
 import { useCardsSearch } from "./hooks/search";
 import { useState } from "react";
 
-const useSmartSearch = true;
-
 function SearchLibrary() {
     const [searchQuery, setSearchQuery] = useState("");
     const [restrictToLibrary, setRestrictToLibrary] = useState(false);
@@ -15,8 +13,8 @@ function SearchLibrary() {
     const { cards, isLoading, pagination } = useCardsSearch(
         searchQuery,
         restrictToLibrary,
-        (query, restrictToLibrary, page) =>
-            searchSublimeCards(query, useSmartSearch, restrictToLibrary, undefined, undefined, page),
+        (query, restrictToLibrary, cursor) =>
+            searchSublimeCards(query, restrictToLibrary, undefined, undefined, cursor),
     );
 
     return (

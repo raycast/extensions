@@ -12,14 +12,11 @@ const preferences = getPreferenceValues<Preferences>();
 const shortcutKey = preferences.modifierKey ?? "ctrl";
 
 interface spaceData {
-  isLoading: boolean;
-  data: {
-    spaces: space[];
-  };
+  spaces: space[];
 }
 
 export default function Command() {
-  const data = sbData("spaces") as spaceData;
+  const data = sbData<spaceData>("spaces");
 
   if (data.isLoading) {
     return <Detail isLoading={data.isLoading} markdown={`Loading your Storyblok spaces...`} />;

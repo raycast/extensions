@@ -121,6 +121,7 @@ export default function getBase(
           <LangDropdown
             type={query.langType}
             selectedStandardLang={query.langType == "To" ? query.to : query.from}
+            history={history}
             onLangChange={query.langType == "To" ? query.updateTo : query.updateFrom}
           />
         }

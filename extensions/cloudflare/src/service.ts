@@ -40,6 +40,10 @@ interface ZoneItem {
   type: string;
   development_mode: number;
   name_servers: string[];
+  modified_on: string;
+  created_on: string;
+  activated_on: string;
+  permissions: string[];
 }
 
 interface Zone {
@@ -50,12 +54,15 @@ interface Zone {
 }
 
 interface DnsRecordItem {
+  id: string;
   name: string;
   type: string;
   content: string;
+  ttl: number;
 }
 
 interface DnsRecord {
+  id: string;
   name: string;
   type: string;
   content: string;
@@ -91,7 +98,7 @@ interface PageItem {
   subdomain: string;
   domains: string;
   source?: SourceItem;
-  latest_deployment: DeploymentItem;
+  latest_deployment: DeploymentItem | null;
 }
 
 interface Source {
@@ -110,14 +117,14 @@ interface Page {
   status: DeploymentStatus;
 }
 
-type DeploymentStatus = 'active' | 'success' | 'failure';
+type DeploymentStatus = 'active' | 'success' | 'failure' | 'unknown';
 
 interface DeploymentItem {
   id: string;
   url: string;
   latest_stage: {
     status: DeploymentStatus;
-  };
+  } | null;
   deployment_trigger: {
     metadata: {
       commit_hash: string;
@@ -161,6 +168,43 @@ interface Member {
   email: string;
   status: MemberStatus;
   role: string;
+}
+
+interface WorkerItem {
+  id: string;
+  compatibility_date?: string;
+  compatibility_flags?: string[];
+  etag: string;
+  created_on: string;
+  handlers?: string[];
+  modified_on: string;
+  logpush?: boolean;
+  placement?: {
+    mode?: string;
+    last_analyzed_at?: string;
+    status?: string;
+  };
+  usage_model?: string;
+  has_assets?: boolean;
+  has_modules?: boolean;
+}
+
+interface Worker {
+  id: string;
+  compatibilityDate?: string;
+  compatibilityFlags: string[];
+  createdOn: string;
+  handlers: string[];
+  modifiedOn: string;
+  logpush: boolean;
+  placement?: {
+    mode?: string;
+    lastAnalyzedAt?: string;
+    status?: string;
+  };
+  usageModel?: string;
+  hasAssets: boolean;
+  hasModules: boolean;
 }
 
 class Service {
@@ -209,7 +253,7 @@ class Service {
       try {
         result = JSON.parse(this.cache.get(`zones-${id}`)!) as ZoneItem[];
         return result.map((item) => formatZone(item));
-      } catch (e) {
+      } catch {
         // Whenever the cache can't be parsed, clear it and fetch from API
         this.cache.remove(`zones-${id}`);
       }
@@ -232,9 +276,9 @@ class Service {
     return result.map((item) => formatZone(item));
   }
 
-  async getZone(id: string): Promise<Zone> {
+  async getZone(id: string): Promise<ZoneItem> {
     const response = await this.client.get<Response<ZoneItem>>(`zones/${id}`);
-    return formatZone(response.data.result);
+    return response.data.result;
   }
 
   async listDnsRecords(zoneId: string): Promise<DnsRecord[]> {
@@ -242,9 +286,30 @@ class Service {
       `zones/${zoneId}/dns_records`,
     );
     return response.data.result.map((item) => {
-      const { name, type, content } = item;
-      return { name, type, content };
+      const { id, name, type, content } = item;
+      return { id, name, type, content };
     });
+  }
+
+  async createDnsRecord(
+    zoneId: string,
+    record: Omit<DnsRecordItem, 'id'>,
+  ): Promise<DnsRecordItem> {
+    const response = await this.client.post<Response<DnsRecordItem>>(
+      `zones/${zoneId}/dns_records`,
+      record,
+    );
+    return response.data.result;
+  }
+
+  async deleteDnsRecord(
+    zoneId: string,
+    recordId: string,
+  ): Promise<{ id: string }> {
+    const response = await this.client.delete<Response<{ id: string }>>(
+      `zones/${zoneId}/dns_records/${recordId}`,
+    );
+    return response.data.result;
   }
 
   async purgeFilesbyURL(
@@ -255,6 +320,45 @@ class Service {
       `zones/${zoneId}/purge_cache`,
       {
         files: urls,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeByHostnames(
+    zoneId: string,
+    hosts: string[],
+  ): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        hosts,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeByTags(zoneId: string, tags: string[]): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        tags,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeByPrefixes(
+    zoneId: string,
+    prefixes: string[],
+  ): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        prefixes,
       },
     );
     const { success, errors, messages, result } = response.data;
@@ -333,6 +437,13 @@ class Service {
       };
     });
   }
+
+  async listWorkers(accountId: string): Promise<Worker[]> {
+    const response = await this.client.get<Response<WorkerItem[]>>(
+      `accounts/${accountId}/workers/scripts`,
+    );
+    return response.data.result.map((item) => formatWorker(item));
+  }
 }
 
 function formatZone(item: ZoneItem): Zone {
@@ -355,7 +466,7 @@ function formatPage(item: PageItem): Page {
           },
         }
       : undefined,
-    status: latest_deployment.latest_stage.status,
+    status: latest_deployment?.latest_stage?.status ?? 'unknown',
   };
 }
 
@@ -368,7 +479,7 @@ function formatDeployment(item: DeploymentItem): Deployment {
       hash: deployment_trigger.metadata.commit_hash,
       message: deployment_trigger.metadata.commit_message,
     },
-    status: latest_stage.status,
+    status: latest_stage?.status ?? 'unknown',
     source: {
       type: source.type,
       config: {
@@ -380,9 +491,45 @@ function formatDeployment(item: DeploymentItem): Deployment {
   };
 }
 
+function formatWorker(item: WorkerItem): Worker {
+  const {
+    id,
+    compatibility_date,
+    compatibility_flags,
+    created_on,
+    handlers,
+    modified_on,
+    logpush,
+    placement,
+    usage_model,
+    has_assets,
+    has_modules,
+  } = item;
+  return {
+    id,
+    compatibilityDate: compatibility_date,
+    compatibilityFlags: compatibility_flags ?? [],
+    createdOn: created_on,
+    handlers: handlers ?? [],
+    modifiedOn: modified_on,
+    logpush: logpush ?? false,
+    placement: placement
+      ? {
+          mode: placement.mode,
+          lastAnalyzedAt: placement.last_analyzed_at,
+          status: placement.status,
+        }
+      : undefined,
+    usageModel: usage_model,
+    hasAssets: has_assets ?? false,
+    hasModules: has_modules ?? false,
+  };
+}
+
 export default Service;
 export type {
   Account,
+  CachePurgeResult,
   Deployment,
   DeploymentStatus,
   DnsRecord,
@@ -392,6 +539,7 @@ export type {
   MemberStatus,
   Page,
   Source,
+  Worker,
   Zone,
   ZoneStatus,
 };

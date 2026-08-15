@@ -2,10 +2,11 @@ import { Color } from "@raycast/api";
 import { FormValidation } from "@raycast/utils";
 import { format } from "date-fns";
 import { groupBy, partition } from "lodash";
-import markdownToAdf from "md-to-adf";
+import { markdownToAdf } from "marklassian";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 import { Issue, IssueDetail, IssueTypeWithCustomFields, StatusCategoryKey } from "../api/issues";
+import { slugify } from "../helpers/string";
 
 export function formatDate(dateString: string) {
   const date = new Date(dateString);
@@ -131,10 +132,15 @@ export function getCustomFieldsForDetail(issue?: IssueDetail | null) {
     return { customMarkdownFields: [], customMetadataFields: [] };
   }
 
-  const customFieldsKeys = Object.keys(issue?.fields).filter((field) => field.startsWith("customfield_"));
+  // List/search issues used as `initialData` in IssueDetail only have `fields`, not `schema` / `names` / `renderedFields`.
+  if (!issue.fields || !issue.schema || !issue.names || !issue.renderedFields) {
+    return { customMarkdownFields: [], customMetadataFields: [] };
+  }
+
+  const customFieldsKeys = Object.keys(issue.fields).filter((field) => field.startsWith("customfield_"));
   const supportedCustomFields = Object.values(CustomFieldSchema);
 
-  const customFieldsWithValueKeys = customFieldsKeys.filter((key) => !!issue.fields[key]);
+  const customFieldsWithValueKeys = customFieldsKeys.filter((key) => !!issue.fields[key] && issue.schema[key] != null);
 
   // Jira's textareas are shown in the markdown field of the Detail screen
   const [markdownFieldsKeys, metadataFieldsKeys] = partition(
@@ -314,4 +320,22 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
     default:
       return null;
   }
+}
+
+export function generateBranchName(issue: Issue | IssueDetail, nameFormat?: string): string {
+  const issueKey = issue.key;
+  const issueSummary = issue.fields.summary.toLowerCase();
+  const issueSummaryShort = issueSummary.split(" ").slice(0, 5).join(" ");
+
+  if (!nameFormat) {
+    nameFormat = "{issueKey}-{issueSummary}";
+  }
+
+  // Supported fields in the Jira UI: issue key, issue summary, issue summary short, issue type, project key
+  return nameFormat
+    .replace("{issueKey}", issueKey)
+    .replace("{issueSummary}", slugify(issueSummary))
+    .replace("{issueSummaryShort}", slugify(issueSummaryShort))
+    .replace("{issueType}", issue.fields.issuetype.name)
+    .replace("{projectKey}", issue.fields.project?.key || "");
 }

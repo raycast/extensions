@@ -66,7 +66,7 @@ export async function getEmulators(): Promise<Emulator[]> {
     const emulators = avdsResponse
       .split("\n")
       .map((item) => item.trim())
-      .filter((item) => item.length > 0)
+      .filter((item) => !item.startsWith("INFO    |") && item.length > 0)
       .map((item) => {
         const runningEmulator = runningEmulators.find(
           (runningEmulator) => runningEmulator.name === item
@@ -95,7 +95,9 @@ export async function getEmulators(): Promise<Emulator[]> {
 export async function startEmulator(
   emulatorName: string,
   output: ((out: string) => void) | undefined,
-  error: ((error: string) => void) | undefined
+  error: ((error: string) => void) | undefined,
+  extraArgs?: string[]
 ) {
-  runCommand(`${emulatorPath} @${emulatorName}`, output, error);
+  const args = extraArgs ? ` ${extraArgs.join(" ")}` : "";
+  runCommand(`${emulatorPath} @${emulatorName}${args}`, output, error);
 }

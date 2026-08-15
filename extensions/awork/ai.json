@@ -1,0 +1,441 @@
+{
+  "instructions": "- Do not show IDs. Use the names instead\\n- When there is no exact match of task titles with the provided name, analyze the input and titles of existing objects and use such objects only if the meaning is the same. Do not use objects that are not related to the input\\n- Do not set any fields when time boking if the user didn't specify any. For example, if the user didn't specify a start time, do not set it.\\n- A synonym for task is ticket",
+  "evals": [
+    {
+      "input": "@awork Show me all my tasks not marked as done",
+      "mocks": {
+        "get-tasks": {
+          "data": [
+            {
+              "id": "10001",
+              "name": "Launch raycast for windows",
+              "projectId": "10000",
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "todo",
+                "icon": "remove_red_eye"
+              }
+            },
+            {
+              "id": "20001",
+              "name": "Create blog post",
+              "projectId": "10000",
+              "project": {
+                "id": "20000",
+                "name": "Hypercode Website",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "progress",
+                "icon": "arrow_forward"
+              }
+            },
+            {
+              "id": "10003",
+              "name": "Create logo concept",
+              "projectId": "10000",
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "done",
+                "icon": "done"
+              }
+            },
+            {
+              "id": "10004",
+              "name": "Launch windows beta",
+              "projectId": "10000",
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "review",
+                "icon": "review"
+              }
+            }
+          ],
+          "hasMore": true
+        },
+        "get-projects": {
+          "data": [
+            {
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              }
+            },
+            {
+              "project": {
+                "id": "20000",
+                "name": "Hypercode Website",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": false
+              }
+            }
+          ],
+          "hasMore": false
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-tasks",
+            "arguments": {
+              "taskName": {
+                "eq": ""
+              }
+            }
+          }
+        },
+        {
+          "meetsCriteria": "Shows unfinished tasks"
+        }
+      ]
+    },
+    {
+      "input": "@awork Show me all my projects",
+      "mocks": {
+        "get-projects": {
+          "data": [
+            {
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              }
+            },
+            {
+              "project": {
+                "id": "20000",
+                "name": "Hypercode Website",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": false
+              }
+            }
+          ],
+          "hasMore": false
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-projects"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@awork Show me all tasks for raycast",
+      "mocks": {
+        "get-tasks": {
+          "data": [
+            {
+              "id": "10001",
+              "name": "Launch raycast for windows",
+              "projectId": "10000",
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "todo",
+                "icon": "remove_red_eye"
+              }
+            },
+            {
+              "id": "20001",
+              "name": "Create blog post",
+              "projectId": "10000",
+              "project": {
+                "id": "20000",
+                "name": "Hypercode Website",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "progress",
+                "icon": "arrow_forward"
+              }
+            },
+            {
+              "id": "10003",
+              "name": "Create logo concept",
+              "projectId": "10000",
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "done",
+                "icon": "done"
+              }
+            },
+            {
+              "id": "10004",
+              "name": "Launch windows beta",
+              "projectId": "10000",
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "review",
+                "icon": "review"
+              }
+            }
+          ],
+          "hasMore": true
+        },
+        "get-projects": {
+          "data": [
+            {
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              }
+            },
+            {
+              "project": {
+                "id": "20000",
+                "name": "Hypercode Website",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": false
+              }
+            }
+          ],
+          "hasMore": false
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "get-tasks"
+          }
+        }
+      ]
+    },
+    {
+      "input": "@awork Book 90 minutes on the task 'Launch windows beta' as 'Send invites to waitlist'",
+      "mocks": {
+        "get-tasks": {
+          "data": [
+            {
+              "id": "10001",
+              "name": "Launch raycast for windows",
+              "projectId": "10000",
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "todo",
+                "icon": "remove_red_eye"
+              }
+            },
+            {
+              "id": "20001",
+              "name": "Create blog post",
+              "projectId": "10000",
+              "project": {
+                "id": "20000",
+                "name": "Hypercode Website",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "progress",
+                "icon": "arrow_forward"
+              }
+            },
+            {
+              "id": "10003",
+              "name": "Create logo concept",
+              "projectId": "10000",
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "done",
+                "icon": "done"
+              }
+            },
+            {
+              "id": "10004",
+              "name": "Launch windows beta",
+              "projectId": "10000",
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              },
+              "typeOfWorkId": "123e4567-e89b-12d3-a456-426614174000",
+              "taskStatus": {
+                "type": "review",
+                "icon": "review"
+              }
+            }
+          ],
+          "hasMore": true
+        },
+        "get-projects": {
+          "data": [
+            {
+              "project": {
+                "id": "10000",
+                "name": "Raycast",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": true
+              }
+            },
+            {
+              "project": {
+                "id": "20000",
+                "name": "Hypercode Website",
+                "projectStatus": {
+                  "name": "In progress",
+                  "type": "progress"
+                },
+                "isBillableByDefault": false
+              }
+            }
+          ],
+          "hasMore": false
+        },
+        "get-types-of-work": [
+          {
+            "id": "1001",
+            "name": "development"
+          },
+          {
+            "id": "1002",
+            "name": "organization"
+          }
+        ],
+        "log-time": true
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "log-time",
+            "arguments": {
+              "note": "Send invites to waitlist",
+              "projectId": "10000",
+              "taskId": "10004",
+              "typeOfWorkId": {
+                "or": [
+                  "1001",
+                  "1002"
+                ]
+              },
+              "duration": {
+                "or": [
+                  "1h 30m",
+                  "1,5h",
+                  "1:30"
+                ]
+              }
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,5 +1,84 @@
 # Google Translate Changelog
 
+## [Update] - 2026-08-10
+
+- Added a "Prioritize cross-language translations" preference to optionally move same-language results to the bottom
+
+## [Feature] - 2026-06-18
+
+- Added preferences for "Translate from" (source), "Primary Language" (target), and "Secondary Language" (fallback target)
+- Added automatic swap to the secondary target language if the detected source language matches the primary target language
+- Prioritized cross-language translations over same-language translations in both the Translate and Quick Translate screens
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Add Keyboard Shortcuts] - 2026-05-13
+
+- Added common Raycast keyboard shortcuts for language set management actions
+- Added common Raycast keyboard shortcuts for copy actions
+- Updated Raycast API and utils dependencies
+
+## [Feature] - 2026-04-15
+
+ - Added pronunciation text to quick translate command
+
+## [Cross Platform Shortcuts + Modernize] - 2025-12-24
+
+- Make `Shortcut`s cross-platform
+- Modernize to latest Raycast configuration with updated `React` (ref: [Issue #23410](https://github.com/raycast/extensions/issues/23410))
+- Fix "Javanese" language code
+- Add README.md
+
+## [Feature] - 2025-10-02
+
+ - Added hotkey to switch between language sets quickly with `CMD+SHIFT+↑` and `CMD+SHIFT+↓`
+
+## [Feature] - 2025-07-01
+
+- Added instant translate commands for selected text translation
+- Added "Instant Translate View" command to display translation in HUD
+- Added "Instant Translate Copy" command to copy translation to clipboard
+- Added "Instant Translate Paste" command to paste translation directly
+- Implemented smart HUD duration that adjusts based on text length for better readability
+- Added reusable base instant translate function for consistent translation logic
+
+## [Feature] - 2025-06-25
+
+- Show Auto-Detected language in Quick Translate
+
+## [Feature] - 2025-06-24
+
+- Auto-focus on Text input after changing source or target language
+- Add shortcuts for quick focus on Source(`CMD + SHIFT + F`) and Target(`CMD + SHIFT + T`) language fields
+- Use auto-detected language when switching languages
+- Fix quick translate with Chinese auto detected language
+- Fix translate compatibility with old Country Codes format for people who had Chinese saved for example and some more languages
+- Fixed proxy for doubleWayTranslate
+- Add proxy for TTS
+
+## [Fix] - 2025-06-23
+
+- Fix uppercase ISO language codes (fix Chinese and some other languages)
+
+## [Maintenance] - 2025-06-19
+
+- Remove country flags from languages
+- Add all the languages from Google Translate website
+
+## [Feature] - 2025-03-31
+
+- Add ability to set proxy
+
+## [Feature] - 2025-01-09
+
+- Add ability to set multiple target languages to translate
+
+## [Fix] - 2024-12-25
+
+- Fixed a typo for Traditional Chinese
+
 ## [Fix] - 2024-07-05
 
 - Keep language names consistent with `translate.google.com`

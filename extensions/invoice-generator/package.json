@@ -821,7 +821,7 @@
   "dependencies": {
     "@raycast/api": "^1.75.2",
     "@raycast/utils": "^1.15.0",
-    "axios": "^1.7.2",
+    "axios": "^1.8.4",
     "fs": "^0.0.1-security",
     "moment": "^2.30.1",
     "os": "^0.1.2",

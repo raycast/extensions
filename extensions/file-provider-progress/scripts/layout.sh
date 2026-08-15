@@ -1,0 +1,20 @@
+#!/bin/sh
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+EXTENSION_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+WORKSPACE_DIR="$(cd "$EXTENSION_DIR/.." && pwd)"
+
+STANDALONE_NATIVE_DIR="$WORKSPACE_DIR/native"
+BUNDLED_NATIVE_DIR="$EXTENSION_DIR/native"
+
+if [ -f "$STANDALONE_NATIVE_DIR/Package.swift" ]; then
+  SOURCE_NATIVE_DIR="$STANDALONE_NATIVE_DIR"
+else
+  SOURCE_NATIVE_DIR="$BUNDLED_NATIVE_DIR"
+fi
+
+SWIFT_PACKAGE_DIR="$BUNDLED_NATIVE_DIR"
+SCRATCH_DIR="$EXTENSION_DIR/.raycast-swift-build"
+OUTPUT_DIR="$EXTENSION_DIR/assets/bin"
+OUTPUT_BIN="$OUTPUT_DIR/fp-progress"
+SIGNATURE_FILE="$EXTENSION_DIR/fp-progress.source.sha256"

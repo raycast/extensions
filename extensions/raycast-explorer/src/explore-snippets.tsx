@@ -87,7 +87,7 @@ export default function ExploreSnippets(props: Props) {
       .flatMap((category) => category.snippets)
       .filter((snippet) => selectedIds.includes(snippet.id));
 
-    const protocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
 
     const queryString = snippets
       .map((snippet) => {
@@ -105,8 +105,8 @@ export default function ExploreSnippets(props: Props) {
       .flatMap((category) => category.snippets)
       .filter((snippet) => selectedIds.includes(snippet.id));
 
-    const { extensionName, commandName, raycastVersion } = environment;
-    const protocol = raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
+    const { extensionName, commandName } = environment;
+    const protocol = `${process.env.RAYCAST_SCHEME ?? "raycast"}://`;
     const baseLink = `${protocol}extensions/thomaslombart/${extensionName}/${commandName}`;
 
     return `${baseLink}?launchContext=${encodeURIComponent(JSON.stringify(snippets.map((snippet) => snippet.id)))}`;

@@ -1,4 +1,53 @@
-# Changelog
+# Cloudflare Changelog
+
+## [Fix] - 2026-06-25
+
+- Prevent View Pages from crashing when a Pages project has no latest deployment.
+
+## [Improve View Workers Command] - 2026-05-25
+
+- Improve `View Workers` command to show more fields in the detail view
+
+## [Custom Cache Purge & Favorite Sites] - 2026-04-27
+
+- Added support for purging cache by Hostname, Cache-Tag, and Prefix in addition to URL
+- New "Purge By" dropdown in the cache purge form with contextual hints and input validation (up to 100 tags)
+- Remembers the last selected purge type and the last entered values per type and per site, with a "Purge Last Saved Values" action (`⌘⇧R`) for quick repeat purges
+- Purge history now tracks the purge type for each entry and lets you re-run previous purges
+- Added the ability to mark sites (zones) as favorites; favorites appear in a dedicated section at the top of the sites list (`⌘F` to toggle)
+
+## [View Workers Command] - 2026-01-24
+
+- Added new "View Workers" command to list Cloudflare Workers across all accounts
+- Workers list with configurable sorting (by modified date, created date, or name)
+- Detail view showing worker metadata (usage model, placement mode, modules, assets, logpush)
+- Actions to open on Cloudflare dashboard, copy worker name, and copy dashboard URL
+
+## [Update] - 2025-11-06
+
+- Toggled on windows support
+
+## [DNS Record Enhancements] - 2025-06-03
+
+- Add DNS Records:
+  - A
+  - AAAA
+  - TXT
+- Delete any DNS Record
+- Improve error handling function so it shows the proper error message
+- Modernize extension to use latest Raycast config
+
+## [Cache Enhancements] - 2024-12-06
+
+- `Action` to `openExtensionPreferences` on invalid token error
+- `EmptyView` when no **Pages** or **Sites**
+- `Cache` **DNS Records** through `useCachedPromise`
+- `Cache` **Sites** through `useCachedPromise`
+- `Cache` **Zone Details** through `useCachedPromise` & show more
+- `Cache` **Members** through `useCachedPromise`
+- `Cache` **Pages** through `useCachedPromise`
+- Changed status icons to be `...Cirle` for consistency
+- Added `metadata` images
 
 ## [Add copy actions] - 2024-02-28
 

@@ -1,5 +1,25 @@
 # Wayback Machine Changelog
 
+## [Add] - 2026-06-28
+
+- Add `Search Pages` command
+
+## [Update dependencies & add Default View preference] - 2026-01-01
+
+- Added preference to set default view to open on Wayback Machine
+- Added preference to check for snapshots before opening
+- Updated README
+- Improved URL detection logic
+- Migrated failure toasts to use showFailureToast
+- Updated dependencies and ESLint migration
+- Tidied codebase
+- Refreshed icon
+
+## [Preferences update] - 2024-12-19
+
+- Add a preference to open the overview page on Wayback, instead of the latest snapshot
+- Dependency updates
+
 ## [Add Browser Extension launch] - 2024-04-29
 
 - Add command that will get the url from the current open tab in your browser and open the `Open in Wayback Machine` command with this url

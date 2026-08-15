@@ -1,7 +1,7 @@
-import { ActionPanel, Action, List, showToast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { CREATE_ERROR_TOAST_OPTIONS, SHADCN_URL } from "./constants";
-import fetch, { type Response } from "node-fetch";
+import { ActionPanel, Action, List } from "@raycast/api";
+import { useCachedPromise, useFetch } from "@raycast/utils";
+import { useEffect, useState } from "react";
+import { SHADCN_URL } from "./constants";
 import yaml from "js-yaml";
 
 /**
@@ -26,48 +26,68 @@ export const parseComponentName = (componentName: string) => {
 |________/|__/|_______/    \___/
 */
 
-async function parseFetchResponse(response: Response) {
-  const json = (await response.json()) as
-    | {
-        name: string;
-      }[]
-    | { code: string; message: string };
-
-  if (!response.ok || "message" in json) {
-    throw new Error("message" in json ? json.message : response.statusText);
+/**
+ * Fetch the list of components directly from the shadcn/ui GitHub repo
+ */
+async function getComponentsFromGitHub(): Promise<SearchResult[]> {
+  // GitHub API for directory listing
+  const res = await fetch("https://api.github.com/repos/shadcn-ui/ui/contents/apps/v4/content/docs/components/radix");
+  if (!res.ok) {
+    throw new Error(res.statusText);
   }
-
-  console.log(json);
-
-  return json.map((result) => {
-    return {
-      name: parseComponentName(result.name),
-      component: result.name,
-      url: `${SHADCN_URL.DOCS_COMPONENTS}/${result.name}`,
-    } as SearchResult;
-  });
+  const files = (await res.json()) as Array<{ name: string; type: string }>;
+  return files
+    .filter((file) => file.type === "file" && file.name.endsWith(".mdx"))
+    .map((file) => {
+      const component = file.name.replace(/\.mdx$/, "");
+      return {
+        name: parseComponentName(component),
+        component,
+        url: `${SHADCN_URL.DOCS_COMPONENTS}/${component}`,
+      } as SearchResult;
+    });
 }
 
 export default function SearchComponents() {
-  const { isLoading, data } = useCachedPromise(
-    async (url: string) => {
-      const response = await fetch(url);
+  const [selectedItemId, setSelectedItemId] = useState<string>();
+  const { isLoading, data } = useCachedPromise(getComponentsFromGitHub, [], {
+    keepPreviousData: true,
+    failureToastOptions: { title: "Failed to load components" },
+  });
 
-      return await parseFetchResponse(response);
-    },
-    [SHADCN_URL.API_COMPONENTS],
+  const selectedComponent = selectedItemId ?? data?.[0]?.component;
+
+  const { isLoading: isDetailLoading, data: detailData } = useFetch(
+    selectedComponent ? `${SHADCN_URL.RAW_GITHUB_COMPONENTS}/${selectedComponent}.mdx` : "",
     {
+      parseResponse: parseFetchDetailResponse,
       keepPreviousData: true,
-      onError: async (e) => {
-        await showToast(CREATE_ERROR_TOAST_OPTIONS(e));
-      },
-    }
+      execute: !!selectedComponent,
+      failureToastOptions: { title: "Failed to load component details" },
+    },
   );
 
+  useEffect(() => {
+    if (!selectedItemId && data?.[0]?.component) {
+      setSelectedItemId(data[0].component);
+    }
+  }, [data, selectedItemId]);
+
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search components..." isShowingDetail>
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search components..."
+      isShowingDetail
+      selectedItemId={selectedItemId}
+      onSelectionChange={(itemId) => setSelectedItemId(itemId ?? undefined)}
+    >
       {data?.map((searchResult) => (
-        <SearchListItem key={searchResult.name} searchResult={searchResult} />
+        <SearchListItem
+          key={searchResult.component}
+          searchResult={searchResult}
+          detailData={selectedComponent === searchResult.component ? detailData : undefined}
+          isDetailLoading={selectedComponent === searchResult.component ? isDetailLoading : false}
+        />
       ))}
     </List>
   );
@@ -90,39 +110,34 @@ interface SearchResult {
   url: string;
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  const { isLoading, data: detailData } = useCachedPromise(
-    async (url: string) => {
-      const response = await fetch(url);
-      return await parseFetchDetailResponse(response);
-    },
-    [`${SHADCN_URL.RAW_GITHUB_COMPONENTS}/${searchResult.component}.mdx`],
-    {
-      keepPreviousData: true,
-      onError: async (e) => {
-        await showToast(CREATE_ERROR_TOAST_OPTIONS(e));
-      },
-    }
-  );
-
+function SearchListItem({
+  searchResult,
+  detailData,
+  isDetailLoading,
+}: {
+  searchResult: SearchResult;
+  detailData?: FrontMatter;
+  isDetailLoading: boolean;
+}) {
   return (
     <List.Item
+      id={searchResult.component}
       title={searchResult.name}
       detail={
         <List.Item.Detail
-          isLoading={isLoading}
+          isLoading={isDetailLoading}
           markdown={!detailData ? "# NA" : `# ${detailData.title}\n## ${detailData.description}`}
           metadata={
-            !!detailData?.radix && (
+            !!detailData?.links && (
               <List.Item.Detail.Metadata>
-                {detailData.radix.link && (
-                  <List.Item.Detail.Metadata.Link title="Radix UI" target={detailData.radix.link} text="Radix UI" />
+                {detailData.links.doc && (
+                  <List.Item.Detail.Metadata.Link title="Radix UI" target={detailData.links.doc} text="Radix UI" />
                 )}
                 <List.Item.Detail.Metadata.Separator />
-                {detailData.radix.api && (
+                {detailData.links.api && (
                   <List.Item.Detail.Metadata.Link
                     title="API Reference"
-                    target={detailData.radix.api}
+                    target={detailData.links.api}
                     text="Radix API Reference"
                   />
                 )}
@@ -139,27 +154,30 @@ function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
           <ActionPanel.Section>
             <Action.CopyToClipboard
               icon="npm-icon.png"
-              title="Copy Add Component [Npm]"
-              content={`npx shadcn-ui@latest add ${searchResult.component}`}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              title="Copy Add Component [npm]"
+              content={`npx shadcn@latest add ${searchResult.component}`}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
             />
             <Action.CopyToClipboard
               icon="yarn-icon.png"
               title="Copy Add Component [Yarn]"
-              content={`npx shadcn-ui@latest add ${searchResult.component}`}
-              shortcut={{ modifiers: ["cmd"], key: "y" }}
+              content={`yarn shadcn@latest add ${searchResult.component}`}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "y" }, Windows: { modifiers: ["ctrl"], key: "y" } }}
             />
             <Action.CopyToClipboard
               icon="pnpm-icon.png"
               title="Copy Add Component [Pnpm]"
-              content={`pnpm dlx shadcn-ui@latest add ${searchResult.component}`}
-              shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
+              content={`pnpm dlx shadcn@latest add ${searchResult.component}`}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "ctrl"], key: "p" },
+                Windows: { modifiers: ["ctrl", "alt"], key: "p" },
+              }}
             />
             <Action.CopyToClipboard
               icon="bun-icon.png"
               title="Copy Add Component [Bun]"
-              content={`bunx --bun shadcn-ui@latest add ${searchResult.component}`}
-              shortcut={{ modifiers: ["cmd"], key: "b" }}
+              content={`bunx --bun shadcn@latest add ${searchResult.component}`}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "b" }, Windows: { modifiers: ["ctrl"], key: "b" } }}
             />
           </ActionPanel.Section>
         </ActionPanel>
@@ -172,8 +190,8 @@ interface FrontMatter {
   title: string;
   description: string;
   component: boolean;
-  radix: {
-    link: string;
+  links: {
+    doc: string;
     api: string;
   };
 }

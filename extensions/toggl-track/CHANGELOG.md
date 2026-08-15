@@ -1,12 +1,85 @@
 # Toggl Track Changelog
 
+## [Show total duration of current project] - 2026-06-18
+
+- In the menu bar, show the total time of all time entries of the current project in addition to the total time of all entries.
+
+## [Quickstart New Timer] - 2026-06-17
+
+- Add a "Quickstart New Timer" command that opens the new time entry form directly, skipping the recent-entries list — assign it a global hotkey to start a timer from anywhere with one keystroke. On submit, Raycast closes immediately.
+
+## [Bug Fixes] - 2026-05-15
+
+- Fixed "Resume Time Entry" on recent entries: use `Action` with `onAction` instead of `Action.SubmitForm`, which is for form submission and was incorrect in the list action panel
+
+## [Fix] - 2026-04-17
+
+- Clarified Low Data Mode documentation in README — activation takes effect on next command launch, and framed sync behavior as a user contract (up to 1 hour delay) rather than implementation details
+
+## [New Feature] - 2026-04-16
+
+- Add Low Data Mode for free-tier users: serves reads from local cache with hourly auto-sync (3 requests/hour), leaving 27 requests/hour for active use
+- Add manual sync action (Cmd+Shift+R) to force-refresh cached data on demand
+
+## [Bug Fixes] - 2026-04-15
+
+- Consolidated 5 parallel resource API calls into a single `/me?with_related_data=true` bootstrap request, reducing API usage from 5 calls to 1 when opening time entry forms
+- Reduced Menu Bar background refresh interval from 3 minutes to 10 minutes to further reduce API consumption for free-tier users (30 calls/hour limit)
+- Added optimistic caching for the running time entry after start/stop actions, eliminating a redundant API call per timer interaction
+
+## [New Feature] - 2026-03-10
+
+- Add optional Script Triggers preferences to run local shell scripts when a timer starts, stops, or is fetched, enabling integration with tools like Sketchybar or Hammerspoon without independent API polling
+
+## [Bug Fixes] - 2026-02-23
+
+- Reduced Menu Bar background refresh interval from 10 seconds to 3 minutes to prevent API rate limit exhaustion (240 calls/hour limit)
+- Changed default cache TTL from 0 to 30 seconds to reduce redundant API calls for project/client/tag data
+
+## [Bug Fixes] - 2026-01-05
+
+- Fixed `Toast` causing error when MenuBar refreshed (ref: [Issue #23821](https://github.com/raycast/extensions/issues/23821))
+- Modernized extension to use latest Raycast API
+
+## [Enhancements] - 2025-11-24
+
+- Add Windows support
+- Fixed stopping running time entry shortcut issue
+- Add ability to cache API responses to support users on free tier that have lower rate limits
+
+## [Enhancements] - 2025-04-23
+
+- Add preferences to select the history lookback window
+
+## [Enhancements] - 2025-03-17
+
+- Add preferences to show/hide clients, projects, tasks, and tags in the time entry form
+
+## [New Feature] - 2025-02-05
+
+- Add ability to update time entry start and stop date
+- Add ability to change the start time for a running time entry
+
+## [New Feature] - 2025-12-12
+
+- Add shortcut to "Create Similar Time Entry"
+
+## [New Feature] - 2024-12-09
+
+- Add "Update Time Entry" command to update time entries
+- Add ability to update time entry action from the list
+
+## [New Feature] - 2024-10-07
+
+- Add ability to create task for time entry form
+
 ## [Bug Fixes] - 2024-08-20
 
 - Remove seconds from optional timer in the Menu Bar, as it only updates every 10 seconds.
 
 ## [Bug Fixes] - 2024-08-02
 
-- Resolve issue when stopping a running time entry doesn't work
+- Resolve issue when stopping a running time entry doesn't work.
 
 ## [Bug Fixes] - 2024-07-31
 

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, List, PopToRootType, Toast, showHUD, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { VirtualNetwork, getVirtualNetworks, switchVirtualNetwork } from "./lib";
+import { getVirtualNetworks, switchVirtualNetwork } from "./lib";
+import { VirtualNetwork } from "./types";
 
 const ListItem = ({
   virtualNetwork,
@@ -22,7 +23,7 @@ const ListItem = ({
       key={virtualNetwork.id}
       id={virtualNetwork.id}
       title={virtualNetwork.name}
-      subtitle={virtualNetwork.comment}
+      subtitle={virtualNetwork.description}
       actions={
         <ActionPanel title="Actions">
           <Action onAction={() => onSwitchVirtualNetwork(virtualNetwork.id)} title="Switch" />
@@ -31,6 +32,19 @@ const ListItem = ({
       accessories={accessories}
     />
   );
+};
+
+const onSwitchVirtualNetwork = async (id: string) => {
+  const result = await switchVirtualNetwork(id);
+  await (result
+    ? showHUD("Switched Virtual Network", {
+        clearRootSearch: true,
+        popToRootType: PopToRootType.Immediate,
+      })
+    : showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to switch Virtual Network",
+      }));
 };
 
 export default () => {
@@ -44,20 +58,6 @@ export default () => {
       .then(() => setIsLoading(false));
   }, []);
 
-  const onSwitchVirtualNetwork = async (id: string) => {
-    const result = await switchVirtualNetwork(id);
-    if (result) {
-      await showHUD("Switched Virtual Network", {
-        clearRootSearch: true,
-        popToRootType: PopToRootType.Immediate,
-      });
-    } else {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to switch Virtual Network",
-      });
-    }
-  };
   if (!isLoading && items.length === 0) {
     return (
       <List searchBarPlaceholder="Search Virtual Networks" isLoading={isLoading}>

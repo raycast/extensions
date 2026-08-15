@@ -2,7 +2,7 @@ import { List, Icon, getPreferenceValues, Color } from "@raycast/api";
 import { format } from "date-fns";
 
 import { NoteTitle } from "..";
-import { NoteItem, useNotes } from "../useNotes";
+import { NoteItem, useNotes } from "../hooks/useNotes";
 
 import NoteActions from "./NoteActions";
 

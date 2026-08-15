@@ -43,29 +43,27 @@ export default function ListView(props: { listId: string }) {
   }, [google, state.filter]);
 
   const handleCreate = useCallback(
-    (listId: string, taskToCreate: TaskForm) => {
-      (async () => {
-        try {
-          setState((previous) => ({ ...previous, isLoading: true }));
-          await createTask(props.listId, taskToCreate);
-          const refreshedList = await fetchList(props.listId);
-          setState((previous) => ({
-            ...previous,
-            tasks: refreshedList,
-            isLoading: false,
-          }));
-        } catch (error) {
-          console.error(error);
-          setState((previous) => ({
-            ...previous,
-            tasks: [],
-            isLoading: false,
-          }));
-          showToast({ style: Toast.Style.Failure, title: String(error) });
-        }
-      })();
+    async (listId: string, taskToCreate: TaskForm) => {
+      try {
+        setState((previous) => ({ ...previous, isLoading: true }));
+        await createTask(listId, taskToCreate);
+        const refreshedList = await fetchList(listId);
+        setState((previous) => ({
+          ...previous,
+          tasks: refreshedList,
+          isLoading: false,
+        }));
+      } catch (error) {
+        console.error(error);
+        setState((previous) => ({
+          ...previous,
+          tasks: [],
+          isLoading: false,
+        }));
+        throw error;
+      }
     },
-    [state.tasks, setState]
+    [setState],
   );
   const handleEdit = useCallback(
     (listId: string, taskToEdit: Task) => {
@@ -90,7 +88,7 @@ export default function ListView(props: { listId: string }) {
         }
       })();
     },
-    [state.tasks, setState]
+    [state.tasks, setState],
   );
 
   const handleToggle = useCallback(
@@ -116,7 +114,7 @@ export default function ListView(props: { listId: string }) {
         }
       })();
     },
-    [state.tasks, setState]
+    [state.tasks, setState],
   );
 
   const handleDelete = useCallback(
@@ -142,7 +140,7 @@ export default function ListView(props: { listId: string }) {
         }
       })();
     },
-    [state.tasks, setState]
+    [state.tasks, setState],
   );
 
   const filterTasks = useCallback(() => {

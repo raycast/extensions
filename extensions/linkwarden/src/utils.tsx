@@ -20,6 +20,7 @@ export const chromiumBrowserNames = [
   "Arc",
   "Yandex",
   "SigmaOS",
+  "Helium",
 ];
 
 // webkit browser

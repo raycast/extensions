@@ -1,5 +1,9 @@
-import { getApplications, getPreferenceValues, getSelectedFinderItems, open, showToast, Toast } from "@raycast/api";
+import { getApplications, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import { exec } from "child_process";
+import { promisify } from "util";
+import { stat } from "fs/promises";
+
+const execPromise = promisify(exec);
 
 /**
  * Gets the selected Finder window.
@@ -32,7 +36,6 @@ const getSelectedFinderWindow = (): Promise<string> => {
 
 export default async () => {
   const applications = await getApplications();
-  // const sublimeTextApplication = applications.find((app) => app.bundleId === "com.sublimetext");
   const sublimeTextApplication = applications.find((app) => app.bundleId === "com.sublimetext.4");
 
   if (!sublimeTextApplication) {
@@ -47,16 +50,30 @@ export default async () => {
     return;
   }
 
+  const sublPath = `${sublimeTextApplication.path}/Contents/SharedSupport/bin/subl`;
+
   try {
     const selectedFinderItems = await getSelectedFinderItems();
     if (selectedFinderItems.length) {
       for (const finderItem of selectedFinderItems) {
-        await open(finderItem.path, sublimeTextApplication);
+        const stats = await stat(finderItem.path);
+        if (stats.isDirectory()) {
+          // Open the directory in a new window
+          await execPromise(`"${sublPath}" -n "${finderItem.path}"`);
+        } else {
+          // Open the file in a new tab
+          await execPromise(`"${sublPath}" -a "${finderItem.path}"`);
+        }
       }
       return;
     }
     const selectedFinderWindow = await getSelectedFinderWindow();
-    await open(selectedFinderWindow, sublimeTextApplication);
+    const stats = await stat(selectedFinderWindow);
+    if (stats.isDirectory()) {
+      await execPromise(`"${sublPath}" -n "${selectedFinderWindow}"`);
+    } else {
+      await execPromise(`"${sublPath}" -a "${selectedFinderWindow}"`);
+    }
     return;
   } catch (error: any) {
     await showToast({

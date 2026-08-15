@@ -1,5 +1,21 @@
 # Pick Your Wallpaper Changelog
 
+## [AI Features] - 2026-03-30
+
+- Added AI-powered image descriptions generated from actual pixel color data using `sips` and zlib decompression
+- Added Raycast AI Chat tools: `search-wallpapers`, `suggest-wallpaper`, and `set-wallpaper`
+- Unified search bar now scores across filename, AI description, and tags — no separate AI Search dropdown needed
+- Set-wallpaper confirmation dialog now shows a thumbnail preview of the selected wallpaper
+
+## [1.0.7] - 2025-08-11
+
+- Added "Open Wallpaper Folder" action to easily open the configured wallpaper folder in Finder
+- Fixed thumbnail creation issues with file paths containing spaces and special characters
+
+## [1.0.6] - 2025-01-12
+
+- Create small thumbnails for faster loading times when using high resolution wallpaper images.
+
 ## [1.0.5] - 2024-05-20
 
 - Improved search by making it non-case sensitive.

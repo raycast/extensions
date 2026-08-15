@@ -3,7 +3,6 @@ import { Grid } from "@raycast/api";
 import Actions from "@/actions/actions";
 import { v4 as AHD } from "uuid";
 import { getIcon } from "u/getIcon";
-import { getDayName } from "u/getName";
 import { Context } from "u/context";
 
 interface DayProps {
@@ -44,14 +43,7 @@ export function Day({ type, day, hasEvents, name }: DayProps) {
                 }
               : undefined,
         },
-        tooltip:
-          type === "name" && day === undefined
-            ? name !== undefined
-              ? name
-              : "" // Use dayName for type "name"
-            : type !== "week" && type !== "empty" && type !== "name"
-              ? `${getDayName(day)} ${day}, ${currentMonth} ${currentYear}`
-              : "",
+        tooltip: "",
       }}
       actions={<Actions global={type !== "week" && type !== "empty" && type !== "name" ? false : true} day={day} />}
     />

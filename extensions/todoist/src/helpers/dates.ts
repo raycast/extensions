@@ -1,9 +1,15 @@
-import { addDays, format, formatISO, isThisYear, isBefore, isSameDay, parseISO } from "date-fns";
+import { addDays, format, formatDistanceStrict, formatISO, isThisYear, isBefore, isSameDay, parseISO } from "date-fns";
 
 import { Task } from "../api";
 
 export function isRecurring(task: Task) {
   return task.due?.is_recurring || false;
+}
+
+/** Sentence-case of `due.string` for recurring tasks (detail metadata). */
+export function displayRecurrence(task: Task): string | null {
+  const s = task.due?.is_recurring ? task.due.string?.trim() : "";
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : null;
 }
 
 export function isExactTimeTask(task: Task) {
@@ -34,8 +40,8 @@ export function isOverdue(date: string) {
   return isBefore(day, today) && !isSameDay(day, today);
 }
 
-export function displayDueDate(dateString: string) {
-  const date = new Date(dateString);
+export function displayDate(dateString: string) {
+  const date = parseISO(dateString);
   if (isOverdue(dateString)) {
     return isThisYear(date) ? format(date, "dd MMMM") : format(date, "dd MMMM yyy");
   }
@@ -63,9 +69,33 @@ export function displayDueDate(dateString: string) {
   return format(date, "dd MMMM yyy");
 }
 
-export function displayDueDateTime(dateString: string) {
-  const date = displayDueDate(dateString);
-  return `${date} ${format(new Date(dateString), "HH:mm")}`;
+export function displayIncomingDate(dateString: string) {
+  const date = parseDay(dateString);
+  const today = getToday();
+
+  if (isOverdue(dateString)) {
+    return displayDate(dateString);
+  }
+
+  if (isSameDay(date, today)) {
+    return "Today";
+  }
+
+  if (isSameDay(date, addDays(today, 1))) {
+    return "Tomorrow";
+  }
+
+  return formatDistanceStrict(date, today, { addSuffix: true, unit: "day" });
+}
+
+export function displayDateTime(dateString: string, use12HourFormat: boolean) {
+  const date = parseISO(dateString);
+  return `${displayDate(dateString)} ${format(date, use12HourFormat ? "h:mm a" : "HH:mm")}`;
+}
+
+export function displayTime(dateString: string, use12HourFormat: boolean) {
+  const date = parseISO(dateString);
+  return format(date, use12HourFormat ? "h:mm a" : "HH:mm");
 }
 
 export function getAPIDate(date: Date): string {

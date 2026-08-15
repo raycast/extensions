@@ -102,7 +102,7 @@ declare global {
       modules: {
         module_author: DynamicModuleAuthor;
         module_dynamic: {
-          desc: {
+          desc?: {
             text: string;
           };
         };
@@ -155,6 +155,28 @@ declare global {
       data: {
         list: Video[];
         no_more: boolean;
+      };
+    }
+
+    export type SearchVideoResult = Omit<Video, "uri"> & {
+      arcurl: string;
+      like: number;
+      danmaku: number;
+      play: number;
+      duration: string;
+      mid: number;
+      author: string;
+      upic: string;
+    };
+
+    export type SearchResult = {
+      data: Array<SearchVideoResult>;
+      result_type: "video";
+    };
+
+    export interface SearchVideosResponse extends Omit<BaseResponse, "data"> {
+      data: {
+        result: Array<SearchResult>;
       };
     }
 
@@ -232,7 +254,7 @@ declare global {
       seek_type: string;
       durl: Durl[];
       support_formats: SupportFormat[];
-      high_format: any;
+      high_format: unknown;
       last_play_time: number;
       last_play_cid: number;
     }
@@ -253,7 +275,7 @@ declare global {
       new_description: string;
       display_desc: string;
       superscript: string;
-      codecs: any;
+      codecs: unknown;
     }
 
     export interface VideoInfoResponse extends Omit<BaseResponse, "data"> {
@@ -283,6 +305,7 @@ declare global {
       like_num: number;
       model_result: ModelResult;
     }
+
     export interface VideoConclusionResponse extends Omit<BaseResponse, "data"> {
       data: VideoConclusionResponseData;
     }

@@ -41,7 +41,19 @@ export const useHistoryState = createStore<HistoryState>({
       });
     },
   }),
-  migrate: (persistedState: any) => {
+  migrate: (persistedState: any, version: number) => {
+    switch (version) {
+      case 2: // Migrate from v2 to v3, add tokens to history items
+        persistedState.history = persistedState.history.map((history: History) => ({
+          ...history,
+          tokens: {
+            input: 0,
+            output: 0,
+            total: 0,
+          },
+        }));
+    }
+
     return persistedState;
   },
 });

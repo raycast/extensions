@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "farcaster",
   "title": "Farcaster",
-  "description": "Most comprehensive extension for Forecaster. Search for casts, profiles and more.",
+  "description": "Most comprehensive extension for Farcaster. Search for casts, profiles and explore details.",
   "icon": "command-icon.png",
   "author": "artivilla",
   "categories": [
@@ -33,29 +33,7 @@
       "required": true,
       "title": "Neynar API Key",
       "placeholder": "Enter your API key",
-      "link": "https://dev.neynar.com"
-    },
-    {
-      "name": "farcasterClient",
-      "description": "Select Farcaster client to use",
-      "type": "dropdown",
-      "required": true,
-      "title": "Farcaster Client",
-      "default": "warpcast",
-      "data": [
-        {
-          "title": "Warpcast",
-          "value": "warpcast"
-        },
-        {
-          "title": "Supercast",
-          "value": "supercast"
-        },
-        {
-          "title": "Nook",
-          "value": "nook"
-        }
-      ]
+      "link": "https://neynar.com/"
     },
     {
       "name": "walletAddressClient",
@@ -77,21 +55,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.72.1",
+    "@raycast/api": "^1.94.0",
     "@raycast/utils": "^1.15.0",
-    "dedupe": "^4.0.3",
     "linkify-it": "^5.0.0",
-    "tlds": "^1.252.0",
-    "use-debounce": "^10.0.0"
+    "tlds": "^1.252.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
     "@types/linkify-it": "^5.0.0",
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.12.8",
-    "@types/react": "18.3.1",
-    "eslint": "^8.57.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.4.5"
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

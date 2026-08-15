@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { getLinksFromNewLines } from "../helpers/links";
+
 import { attachLinkUrl, createAttachment } from "../api/attachments";
-import { getErrorMessage } from "../helpers/errors";
 import { IssueResult } from "../api/getIssues";
+import { getErrorMessage } from "../helpers/errors";
+import { getLinksFromNewLines } from "../helpers/links";
 
 type IssueAttachmentValues = {
   attachments: string[];

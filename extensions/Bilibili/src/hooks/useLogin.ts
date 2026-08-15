@@ -1,4 +1,4 @@
-import { checkLogin, checkQRCode, gennerateQRCode } from "../utils";
+import { checkLogin, checkQRCode, gennerateQRCode } from "../apis";
 
 import { useState, useEffect } from "react";
 import { Cache, showToast, Toast } from "@raycast/api";

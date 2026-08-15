@@ -18,7 +18,7 @@ const heroStatsSchema = z.array(
 		move_speed: z.number(),
 		cm_enabled: z.boolean(),
 		legs: z.number().int(),
-	})
+	}),
 )
 
 const heroAbilitiesSchema = z.record(
@@ -28,9 +28,9 @@ const heroAbilitiesSchema = z.record(
 			z.object({
 				name: z.string(),
 				level: z.number(),
-			})
+			}),
 		),
-	})
+	}),
 )
 
 const abilitiesSchema = z.record(
@@ -38,15 +38,15 @@ const abilitiesSchema = z.record(
 		dname: z.string().optional(),
 		dmg_type: z.preprocess(
 			(v) => (typeof v === "string" ? v : undefined),
-			z.string().optional()
+			z.string().optional(),
 		),
 		img: z.string().optional(),
 		bkbpierce: z.preprocess((v) => v === "Yes", z.boolean()),
 		mc: z.preprocess(
 			(value) => (typeof value === "string" ? [value] : value),
-			z.array(z.string()).default(() => [])
+			z.array(z.string()).default(() => []),
 		),
-	})
+	}),
 )
 
 export const fetchHeroes = async (): Promise<Hero[]> => {
@@ -77,7 +77,7 @@ export const fetchHeroes = async (): Promise<Hero[]> => {
 								image: `https://api.opendota.com${ability.img}`,
 							},
 						}
-					}
+					},
 				),
 				captainsModeEnabled: hero.cm_enabled,
 				images: {
@@ -94,7 +94,7 @@ export const fetchHeroes = async (): Promise<Hero[]> => {
 					opendota: `https://www.opendota.com/heroes/${hero.id}`,
 					wiki: `https://dota2.fandom.com/wiki/${hero.localized_name.replace(
 						/ /g,
-						"_"
+						"_",
 					)}`,
 				},
 				stats: {
@@ -104,7 +104,7 @@ export const fetchHeroes = async (): Promise<Hero[]> => {
 					movementSpeed: hero.move_speed,
 					roles: hero.roles,
 				},
-			})
+			}),
 		)
 		.sort((a, b) => a.name.localeCompare(b.name))
 }

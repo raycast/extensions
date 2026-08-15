@@ -1,17 +1,19 @@
-import { Icon, LaunchType, MenuBarExtra, launchCommand, open } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
-import { File, getStarredFilesURL } from "./api/getFiles";
+import { Icon, LaunchType, MenuBarExtra, launchCommand, open, getPreferenceValues } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { getStarredFiles } from "./api/getFiles";
 import { withGoogleAuth } from "./components/withGoogleAuth";
-import { getFileIconLink } from "./helpers/files";
 import { createDocFromUrl } from "./helpers/docs";
-import { getOAuthToken } from "./api/googleAuth";
+import { getFileIconLink } from "./helpers/files";
 
 function StarredFiles() {
-  const { data, isLoading } = useFetch<{ files: File[] }>(getStarredFilesURL(), {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${getOAuthToken()}`,
-    },
+  const { preferredBrowser } = getPreferenceValues<Preferences>();
+  const { data, isLoading } = useCachedPromise(async () => {
+    try {
+      return await getStarredFiles();
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
   });
 
   const MAX_ITEMS = 40;
@@ -26,13 +28,13 @@ function StarredFiles() {
             <MenuBarExtra.Item
               title="Open Starred Files in Google Drive"
               icon="google-drive.png"
-              onAction={() => open("https://drive.google.com/drive/starred", "com.google.Chrome")}
+              onAction={() => open("https://drive.google.com/drive/starred", preferredBrowser || undefined)}
               shortcut={{ modifiers: ["cmd"], key: "o" }}
               alternate={
                 <MenuBarExtra.Item
                   title="Open Starred Files in Raycast"
                   icon={Icon.RaycastLogoPos}
-                  onAction={() => launchCommand({ name: "starred-google-drive-files", type: LaunchType.UserInitiated })}
+                  onAction={() => launchCommand({ name: "search-google-drive-files", type: LaunchType.UserInitiated })}
                 />
               }
             />
@@ -46,7 +48,7 @@ function StarredFiles() {
                 icon={getFileIconLink(file.mimeType)}
                 onAction={() => {
                   console.log(file);
-                  open(file.webViewLink);
+                  open(file.webViewLink, preferredBrowser || undefined);
                 }}
               />
             ))}

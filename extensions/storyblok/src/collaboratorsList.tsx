@@ -4,17 +4,11 @@ import { space, spaceRole } from "./utils/types";
 import { matchRole, capitalize } from "./utils/helpers";
 
 type collaboratorsData = {
-  isLoading: boolean;
-  data: {
-    space: space;
-  };
+  space: space;
 };
 
 type rolesData = {
-  isLoading: boolean;
-  data: {
-    space_roles: spaceRole[];
-  };
+  space_roles: spaceRole[];
 };
 
 const assignRoleColor = (role: string) => {
@@ -39,8 +33,8 @@ const userAvatar = (avatar: string | null) => {
 };
 
 export default function collaborators(props: { spaceId: number }) {
-  const data = sbData(`spaces/${props.spaceId}`) as collaboratorsData;
-  const rolesData = sbData(`spaces/${props.spaceId}/space_roles`) as rolesData;
+  const data = sbData<collaboratorsData>(`spaces/${props.spaceId}`);
+  const rolesData = sbData<rolesData>(`spaces/${props.spaceId}/space_roles`);
 
   if ((data.isLoading && rolesData.isLoading) || (rolesData.isLoading === false && rolesData.data === undefined)) {
     return <Detail isLoading={data.isLoading} markdown={`Loading...`} />;
@@ -55,7 +49,7 @@ export default function collaborators(props: { spaceId: number }) {
 
   const spaceName = data.data.space.name;
   let roles = [] as spaceRole[];
-  if (rolesData.data.space_roles.length > 0) {
+  if (rolesData.data && rolesData.data.space_roles.length > 0) {
     roles = rolesData.data.space_roles ?? [];
   }
   return (

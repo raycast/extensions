@@ -12,3 +12,13 @@ export const NAMESILO_LINKS = {
   search: "https://www.namesilo.com/domain/search-domains",
 };
 export const NAMESILO_IMAGE = "namesilo.png";
+
+export const DNS_RECORD_TYPES = {
+  A: "IPV4 Address",
+  AAAA: "IPV6 Address",
+  CNAME: "Target Hostname",
+  MX: "Target Hostname",
+  TXT: "Text",
+  SRV: "X:Y:Z format, where X - weight, Y - port and Z - target",
+  CAA: "X:Y:Z format, where X - flag, Y - tag and Z - value",
+};

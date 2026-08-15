@@ -55,3 +55,9 @@ export interface LibgenPreferences {
   preferredLanguages: string;
   preferredFormats: string;
 }
+
+export enum SearchType {
+  "All" = -1,
+  "Fiction" = 0,
+  "NonFiction" = 1,
+}

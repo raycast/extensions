@@ -9,20 +9,22 @@
  */
 
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { parser } from "mathjs";
 
 import rotate from "./operations/rotateOperation";
-import { getSelectedImages } from "./utilities/utils";
-import { RotatePreferences } from "./utilities/preferences";
-import { parser } from "mathjs";
 import runOperation from "./operations/runOperation";
+import { getSelectedImages } from "./utilities/utils";
 
 export default async function Command(props: { arguments: { angle: string } }) {
   const { angle } = props.arguments;
-  const preferences = getPreferenceValues<RotatePreferences>();
+  const preferences = getPreferenceValues<Preferences.Rotate>();
 
   let angleNumber = parseFloat(parser().evaluate(angle).toString());
   if (isNaN(angleNumber)) {
-    await showToast({ title: "Angle must be a number", style: Toast.Style.Failure });
+    await showToast({
+      title: "Angle must be a number",
+      style: Toast.Style.Failure,
+    });
     return;
   }
 

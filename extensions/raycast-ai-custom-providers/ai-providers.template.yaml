@@ -1,0 +1,91 @@
+providers:
+  - id: perplexity
+    name: Perplexity
+    base_url: https://api.perplexity.ai
+    api_keys:
+      perplexity: PERPLEXITY_KEY
+    additional_parameters:
+      return_images: true
+      web_search_options:
+        search_context_size: medium
+    models:
+      - id: sonar
+        name: Sonar
+        provider: perplexity
+        description: Perplexity AI model for general-purpose queries
+        context: 128000
+        abilities:
+          temperature:
+            supported: true
+          vision:
+            supported: true
+          system_message:
+            supported: true
+          tools:
+            supported: false
+          reasoning_effort:
+            supported: false
+      - id: sonar-pro
+        name: Sonar Pro
+        description: Perplexity AI model for complex queries
+        context: 200000
+        abilities:
+          temperature:
+            supported: true
+          vision:
+            supported: true
+          system_message:
+            supported: true
+          tools:
+            supported: false
+          reasoning_effort:
+            supported: false
+  - id: my_provider
+    name: My Provider
+    base_url: http://localhost:4000
+    api_keys:
+      openai: OPENAI_KEY
+      anthropic: ANTHROPIC_KEY
+    models:
+      - id: gpt-4o
+        name: GPT-4o
+        context: 200000
+        provider: openai
+        abilities:
+          temperature:
+            supported: true
+          vision:
+            supported: true
+          system_message:
+            supported: true
+          tools:
+            supported: true
+      - id: claude-sonnet-4
+        name: Claude Sonnet 4
+        context: 200000
+        provider: anthropic
+        abilities:
+          temperature:
+            supported: true
+          vision:
+            supported: true
+          system_message:
+            supported: true
+          tools:
+            supported: true
+  - id: litellm
+    name: LiteLLM
+    base_url: http://localhost:4000
+    models:
+      - id: anthropic/claude-sonnet-4-20250514
+        name: Claude Sonnet 4
+        context: 200000
+        abilities:
+          temperature:
+            supported: true
+          vision:
+            supported: true
+          system_message:
+            supported: true
+          tools:
+            supported: true

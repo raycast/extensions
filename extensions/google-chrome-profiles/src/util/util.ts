@@ -1,13 +1,41 @@
 import { URL } from "url";
+import { writeFileSync, unlinkSync } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
+import { spawn } from "child_process";
+import { randomUUID } from "crypto";
+import { showToast, Toast } from "@raycast/api";
+import { BrowserConfig } from "./types";
+
+export type ChromeTarget =
+  | { action: "focus" }
+  | { action: "newTab" }
+  | { action: "newWindow" }
+  | { action: "openUrl"; url: string };
+
+export const ChromeAction = {
+  Focus: { action: "focus" } as ChromeTarget,
+  NewTab: { action: "newTab" } as ChromeTarget,
+  NewWindow: { action: "newWindow" } as ChromeTarget,
+  openUrl: (url: string): ChromeTarget => ({ action: "openUrl", url }),
+};
 
 export const createBookmarkListItem = (url: string, name?: string) => {
-  const urlOrigin = new URL(url).origin;
   const urlToDisplay = url.replace(/(^\w+:|^)\/\//, "");
+  let iconURL: string | undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      iconURL = parsed.origin;
+    }
+  } catch {
+    // opaque or invalid URL; fall through to globe icon
+  }
   return {
     url: url,
     title: name ? name : urlToDisplay,
     subtitle: name ? urlToDisplay : undefined,
-    iconURL: `${urlOrigin}/favicon.ico`,
+    iconURL,
   };
 };
 
@@ -61,23 +89,338 @@ const hasMatch = (search: string[], words: string[]) => {
 };
 
 /**
- * Uses `URL` API.
- * @param urlString
- * @returns `true` if the `URL` constructor succeeds to create the URL. Note that `raycast.com` returns `false` because the protocol ("http" / "https") is missing).
+ * Determines whether a string is a valid, launchable URL for a Chrome profile launcher.
+ *
+ * This validator is intentionally *opinionated* and aligned with how Chrome users
+ * expect URLs to behave, rather than with generic RFC or WHATWG URL validity.
+ *
+ * The function:
+ * - Accepts only explicit, absolute URLs (no implicit scheme repair).
+ * - Allows Chrome-navigable schemes that users commonly open in a tab.
+ * - Explicitly blocks execution-oriented schemes (bookmarklets).
+ *
+ * ✅ Allowed schemes:
+ *   - http://
+ *   - https://
+ *   - chrome://
+ *   - chrome-extension://
+ *   - about:
+ *   - view-source:
+ *
+ * 🚫 Explicitly rejected schemes:
+ *   - javascript:
+ *   - data:
+ *   - vbscript:
+ *
+ * ❌ Rejected inputs include:
+ *   - URLs requiring parser repair (e.g. "http:/example.com", "http:example.com")
+ *   - Relative paths ("/settings", "../index.html")
+ *   - Bare hostnames ("example.com")
+ *   - Bookmarklets or executable payloads
+ *
+ * The function does NOT:
+ * - Check reachability or network availability
+ * - Validate host existence or DNS
+ * - Guarantee that Chrome will successfully open the URL (some chrome:// pages are restricted)
+ *
+ * This behavior is intentional and optimized for safe, predictable profile launching.
  */
-export const isValidUrl = (urlString: string) => {
-  try {
-    new URL(urlString);
-    return true;
-  } catch (err) {
+export function isValidUrl(str: string): boolean {
+  if (typeof str !== "string") return false;
+
+  const trimmed = str.trim();
+
+  // Explicit deny list (execution vectors)
+  if (/^(javascript|data|vbscript):/i.test(trimmed)) {
     return false;
   }
-};
+
+  try {
+    const url = new URL(trimmed);
+
+    // Allowlist of schemes Chrome users expect
+    switch (url.protocol) {
+      case "http:":
+      case "https:":
+      case "chrome:":
+      case "chrome-extension:":
+      case "about:":
+        return true;
+
+      case "view-source:":
+        // view-source: can wrap another URL; require something after it
+        return trimmed.length > "view-source:".length;
+
+      default:
+        return false;
+    }
+  } catch {
+    return false;
+  }
+}
 
 export const formatAsUrl = (str: string) => {
   if (str.startsWith("http://") || str.startsWith("https://")) {
     return str;
   } else {
     return `https://${str}`;
+  }
+};
+
+/**
+ * Escapes a string for safe use in AppleScript string literals.
+ * Prevents injection attacks by escaping special characters.
+ *
+ * @param str The string to escape
+ * @returns A safely escaped string for AppleScript interpolation
+ */
+export const escapeAppleScriptString = (str: string): string => {
+  return str
+    .replace(/\\/g, "\\\\") // Escape backslashes first (must be first!)
+    .replace(/"/g, '\\"') // Escape double quotes
+    .replace(/\n/g, "\\n") // Escape newlines
+    .replace(/\r/g, "\\r") // Escape carriage returns
+    .replace(/\t/g, "\\t"); // Escape tabs
+};
+
+/**
+ * Run an AppleScript in a detached `osascript` subprocess that survives the
+ * extension's view-teardown.
+ *
+ * Raycast tears down the extension's Node process roughly 40ms after the
+ * action handler returns control to React, regardless of whether `onAction`
+ * awaits the Promise. `@raycast/utils`'s `runAppleScript` spawns `osascript`
+ * as a regular child of Node (no `detached: true`), so the osascript
+ * subprocess inherits Node's process group and gets killed mid-flight. This
+ * also means any asynchronous TCC permission prompt that macOS tries to
+ * render (e.g. "Raycast.app wants access to control System Events.app" on
+ * first run) is cancelled before the user can see it, leaving the extension
+ * in a silent-failure loop where first-time grant of the permission is
+ * impossible from within the extension itself.
+ *
+ * Spawning `osascript` with `detached: true` + `stdio: "ignore"` and
+ * `child.unref()` puts it in its own process group and detaches it from
+ * Node's event loop. The subprocess survives the parent's teardown, the TCC
+ * prompt renders, and the AppleScript runs to completion.
+ *
+ * The temp script file is removed on the child's `exit` event when the
+ * parent is still alive; if the parent dies first, macOS cleans `/tmp`
+ * during normal maintenance.
+ *
+ * @returns `true` when the subprocess was spawned, `false` otherwise
+ *   (a failure toast has already been shown).
+ */
+const runDetachedAppleScript = (script: string): boolean => {
+  const scriptPath = join(tmpdir(), `raycast-google-chrome-profiles-${randomUUID()}.applescript`);
+  try {
+    writeFileSync(scriptPath, script);
+  } catch (writeError) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not write script file",
+      message: String(writeError),
+    });
+    return false;
+  }
+
+  let child;
+  try {
+    child = spawn("/usr/bin/osascript", [scriptPath], {
+      detached: true,
+      stdio: "ignore",
+    });
+  } catch (spawnError) {
+    try {
+      unlinkSync(scriptPath);
+    } catch {
+      // ignore
+    }
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not start osascript",
+      message: String(spawnError),
+    });
+    return false;
+  }
+
+  child.on("exit", () => {
+    try {
+      unlinkSync(scriptPath);
+    } catch {
+      // ignore
+    }
+  });
+  child.on("error", (err) => {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "osascript failed",
+      message: err.message,
+    });
+  });
+
+  child.unref();
+  return true;
+};
+
+/**
+ * An AppleScript `do shell script` line that launches the browser directly
+ * into `profileDirectory`, optionally at `url`.
+ *
+ * Each piece is load-bearing:
+ *
+ * - `/usr/bin/open` rather than the inner binary: `open` returns as soon as
+ *   Launch Services has taken the request, so the detached `osascript` is not
+ *   held open for the browser's entire lifetime, and the browser is properly
+ *   activated.
+ * - `-n`: the browser's singleton lock makes the second process hand its
+ *   command line to the already-running instance and exit, so this opens a
+ *   window in the requested profile instead of starting a second browser.
+ * - `--profile-directory`: on a *cold* start this is the profile the browser
+ *   boots into. A bare `activate` boots it into the last-used profile
+ *   instead, which is what produced a stray window for the previous profile.
+ * - `--new-window`: without it the browser appends a tab to an existing
+ *   window of that profile rather than opening a window.
+ */
+const launchInProfileCommand = (browser: BrowserConfig, profileDirectory: string, url?: string): string => {
+  const parts = [
+    `"/usr/bin/open -n -a " & quoted form of "${escapeAppleScriptString(browser.appPath)}"`,
+    `" --args --profile-directory=" & quoted form of "${escapeAppleScriptString(profileDirectory)}"`,
+    `" --new-window"`,
+  ];
+  if (url) {
+    parts.push(`" " & quoted form of "${escapeAppleScriptString(url)}"`);
+  }
+  return `do shell script ${parts.join(" & ")}`;
+};
+
+/**
+ * Run the script that opens Google Chrome.
+ *
+ * - `ChromeAction.Focus`: focuses the existing profile window (or opens it if not open)
+ * - `ChromeAction.NewTab`: focuses the profile window, then opens a new blank tab
+ * - `ChromeAction.NewWindow`: opens a new window for the profile
+ * - `ChromeAction.openUrl(url)`: focuses the profile window, then opens the URL in a new tab
+ *
+ * When the browser is not running, every action collapses to a single cold
+ * start into the requested profile (see `launchInProfileCommand`) — there is
+ * no window to focus or add a tab to yet, and going through the Profiles menu
+ * would first have to boot the browser into the last-used profile.
+ *
+ * @param profile The Chrome profile to open
+ * @param target The action to perform
+ * @param didSpawn Function to run after the detached osascript has been
+ *   spawned (e.g. `showHUD`). It must run *after* the spawn: `showHUD`
+ *   closes the main window, which starts the extension process teardown,
+ *   and in the store build the process can be killed before a later
+ *   `spawn` call ever runs — the HUD shows but nothing happens. Not called
+ *   when the spawn failed, so the failure toast stays visible.
+ */
+export const openGoogleChrome = async (
+  profile: { name: string; directory: string },
+  target: ChromeTarget,
+  didSpawn: () => Promise<void>,
+  browser: BrowserConfig,
+) => {
+  const action = target.action;
+  const url = action === "openUrl" ? target.url : undefined;
+
+  if (action === "newWindow") {
+    if (runDetachedAppleScript(launchInProfileCommand(browser, profile.directory))) {
+      await didSpawn();
+    }
+    return;
+  }
+
+  const escapedProfileName = escapeAppleScriptString(profile.name);
+  const escapedUrl = url ? escapeAppleScriptString(url) : undefined;
+  const escapedAppName = escapeAppleScriptString(browser.appName);
+
+  // Use menu bar item 8 for Profiles menu (language-independent position)
+  // Chrome menu bar: 1=Apple, 2=Chrome, 3=File, 4=Edit, 5=View, 6=History, 7=Bookmarks, 8=Profiles, 9=Tab, 10=Window, 11=Help
+  //
+  // The Profiles menu only exists once the browser is up, so this whole path
+  // assumes a running browser. Cold-starting it here is not an option: the
+  // `activate` below would boot it into the *last-used* profile and leave that
+  // window behind next to the one the menu click opens. The `else` branch
+  // below cold-starts into the requested profile in one step instead.
+  const menuScript = `
+    tell application "${escapedAppName}" to activate
+    tell application "System Events"
+      tell process "${escapedAppName}"
+        set profileMenu to menu 1 of menu bar item 8 of menu bar 1
+        set menuItems to name of menu items of profileMenu
+
+        if "${escapedProfileName}" is in menuItems then
+          click menu item "${escapedProfileName}" of profileMenu
+        else
+          set foundMatch to false
+          repeat with menuItemName in menuItems
+            if menuItemName is not missing value then
+              if menuItemName contains "${escapedProfileName}" then
+                click menu item menuItemName of profileMenu
+                set foundMatch to true
+                exit repeat
+              end if
+            end if
+          end repeat
+
+          if foundMatch is false then
+            error "Profile not found in menu"
+          end if
+        end if
+      end tell
+    end tell
+
+    delay 0.3
+
+    ${
+      action === "newTab"
+        ? `
+    tell application "${escapedAppName}"
+      set currentURL to URL of active tab of front window
+      if currentURL is not "chrome://newtab/" then
+        make new tab at end of tabs of front window
+      end if
+    end tell
+    `
+        : ""
+    }
+
+    ${
+      escapedUrl
+        ? `
+    tell application "${escapedAppName}"
+      set targetURL to "${escapedUrl}"
+      set tabCount to count of tabs of front window
+      set foundTab to false
+      repeat with t from 1 to tabCount
+        if URL of tab t of front window is targetURL then
+          set active tab index of front window to t
+          set foundTab to true
+          exit repeat
+        end if
+      end repeat
+
+      if foundTab is false then
+        open location targetURL
+      end if
+    end tell
+    `
+        : ""
+    }
+  `;
+
+  // `is running` is the one way to ask about an application without launching
+  // it — `tell application ... to activate` would start it as a side effect.
+  const script = `
+    if application "${escapedAppName}" is running then
+      ${menuScript}
+    else
+      ${launchInProfileCommand(browser, profile.directory, url)}
+    end if
+  `;
+
+  if (runDetachedAppleScript(script)) {
+    await didSpawn();
   }
 };

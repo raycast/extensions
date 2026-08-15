@@ -1,15 +1,15 @@
 import AddCardAction from './actions/AddCardAction';
 import ViewCardMedia from './actions/ViewCardMedia';
-import cardActions from './api/cardActions';
 import guiActions from './api/guiActions';
 import noteActions from './api/noteActions';
 import useTurndown from './hooks/useTurndown';
 import { Action, ActionPanel, confirmAlert, Detail, List, showToast, Toast } from '@raycast/api';
 import { Card, FieldMediaMap, ShortcutDictionary } from './types';
-import { getCardType, parseMediaFiles } from './util';
+import { delay, getCardType, parseMediaFiles } from './util';
 import { useCachedPromise } from '@raycast/utils';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import useErrorHandling from './hooks/useErrorHandling';
+import { ankiReq } from './api/ankiClient';
 
 interface Props {
   deckName?: string;
@@ -32,9 +32,40 @@ export default function BrowseCards({ deckName }: Props) {
   const [selectedCardID, setSelectedCardID] = useState<string | null>(null);
   const [cardMedia, setCardMedia] = useState<FieldMediaMap>();
 
-  const { data, isLoading, error, revalidate } = useCachedPromise(cardActions.findCardsInfo, [
-    query,
-  ]);
+  const { data, isLoading, error, pagination, revalidate } = useCachedPromise(
+    (query: string) =>
+      async (options: { page: number }): Promise<{ data: Card[]; hasMore: boolean }> => {
+        const defaultQuery = 'deck:_*';
+        const pageSize = 40;
+
+        await delay(2);
+
+        if (!query || !query.trim()) {
+          query = defaultQuery;
+        }
+
+        const cardIDs: number[] = await ankiReq('findCards', {
+          query: query,
+        });
+
+        await delay(2);
+
+        const start = options.page * pageSize;
+        const end = start + pageSize;
+        const pageCardIDs = cardIDs.slice(start, end);
+
+        const cardsInfo: Card[] = await ankiReq('cardsInfo', {
+          cards: pageCardIDs,
+        });
+
+        return {
+          data: cardsInfo,
+          hasMore: end < cardIDs.length,
+        };
+      },
+    [query],
+    { keepPreviousData: true }
+  );
 
   useEffect(() => {
     if (!error) return;
@@ -207,6 +238,7 @@ export default function BrowseCards({ deckName }: Props) {
           searchText={query}
           onSelectionChange={handleSelectionChange}
           onSearchTextChange={handleUpdateQuery}
+          pagination={pagination}
         >
           {data?.map(handleMapListItems)}
         </List>

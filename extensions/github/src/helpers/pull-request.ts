@@ -1,14 +1,32 @@
-import { Color, Icon, List } from "@raycast/api";
+import { RestEndpointMethodTypes } from "@octokit/rest";
+import { Color, Icon, Image, List } from "@raycast/api";
 import { uniqBy } from "lodash";
 
 import {
   PullRequestDetailsFieldsFragment,
   PullRequestFieldsFragment,
+  PullRequestMergeMethod,
   PullRequestReviewDecision,
   StatusState,
 } from "../generated/graphql";
 
+import { getCheckStatePresentation } from "./pull-request-checks";
 import { getGitHubUser } from "./users";
+
+export function getMergeMethodTitle(method: PullRequestMergeMethod): string {
+  switch (method) {
+    case PullRequestMergeMethod.Merge:
+      return "Create Merge Commit";
+    case PullRequestMergeMethod.Squash:
+      return "Squash and Merge";
+    case PullRequestMergeMethod.Rebase:
+      return "Rebase and Merge";
+    default: {
+      const _exhaustive: never = method;
+      throw new Error(`Unknown merge method: ${_exhaustive}`);
+    }
+  }
+}
 
 export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | PullRequestDetailsFieldsFragment) {
   if (pullRequest.merged) {
@@ -32,6 +50,14 @@ export function getPullRequestStatus(pullRequest: PullRequestFieldsFragment | Pu
       icon: { source: "pull-request-draft.svg", tintColor: Color.SecondaryText },
       text: "Draft",
       color: Color.SecondaryText,
+    };
+  }
+
+  if (pullRequest.isInMergeQueue) {
+    return {
+      icon: { source: "pull-request-merge-queue.svg", tintColor: Color.Orange },
+      text: "In Merge Queue",
+      color: Color.Orange,
     };
   }
 
@@ -104,29 +130,55 @@ export function getNumberOfComments(pullRequest: PullRequestFieldsFragment) {
 }
 
 export function getCheckStateAccessory(commitStatusCheckRollupState: StatusState): List.Item.Accessory | null {
-  switch (commitStatusCheckRollupState) {
-    case "SUCCESS":
-      return { icon: Icon.Check, tooltip: "Checks: Success" };
-    case "ERROR":
-    case "FAILURE":
-      return { icon: Icon.Xmark, tooltip: "Checks: Failure" };
-    case "PENDING":
-      return { icon: Icon.Clock, tooltip: "Checks: Pending" };
-    default:
-      return null;
+  const presentation = getCheckStatePresentation(commitStatusCheckRollupState);
+  if (!presentation) {
+    return null;
   }
+
+  return { icon: Icon[presentation.icon], tooltip: `Checks: ${presentation.text}` };
+}
+
+export type PullRequestFile = RestEndpointMethodTypes["pulls"]["listFiles"]["response"]["data"][0];
+
+export function getFileStatusAccessory(status: PullRequestFile["status"]): { icon: Image.ImageLike; tooltip: string } {
+  switch (status) {
+    case "added":
+      return { icon: { source: Icon.PlusCircle, tintColor: Color.Green }, tooltip: "Added" };
+    case "removed":
+      return { icon: { source: Icon.MinusCircle, tintColor: Color.Red }, tooltip: "Removed" };
+    case "renamed":
+      return { icon: { source: Icon.ArrowRight, tintColor: Color.SecondaryText }, tooltip: "Renamed" };
+    case "copied":
+      return { icon: { source: Icon.CopyClipboard, tintColor: Color.SecondaryText }, tooltip: "Copied" };
+    case "unchanged":
+      return { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, tooltip: "Unchanged" };
+    case "changed":
+      return { icon: { source: Icon.Pencil, tintColor: Color.Orange }, tooltip: "Changed" };
+    default:
+      return { icon: { source: Icon.Pencil, tintColor: Color.Orange }, tooltip: "Modified" };
+  }
+}
+
+export const PATCH_LINE_LIMIT = 400;
+
+export function truncatePatch(patch: string): { patch: string; remainingLines: number } {
+  const lines = patch.split("\n");
+
+  if (lines.length <= PATCH_LINE_LIMIT) {
+    return { patch, remainingLines: 0 };
+  }
+
+  return { patch: lines.slice(0, PATCH_LINE_LIMIT).join("\n"), remainingLines: lines.length - PATCH_LINE_LIMIT };
 }
 
 export function getReviewDecision(reviewDecision?: PullRequestReviewDecision | null): List.Item.Accessory | null {
   switch (reviewDecision) {
     case "REVIEW_REQUIRED":
-      return { tag: { value: "Review required" } };
+      return { icon: { source: Icon.Eye, tintColor: Color.Yellow }, tooltip: "Review required" };
     case "CHANGES_REQUESTED":
-      return { tag: { value: "Changes requested" } };
+      return { icon: { source: Icon.Pencil, tintColor: Color.Orange }, tooltip: "Changes requested" };
     case "APPROVED":
-      return {
-        tag: { value: "Approved" },
-      };
+      return { icon: { source: Icon.CheckCircle, tintColor: Color.Green }, tooltip: "Approved" };
     default:
       return null;
   }

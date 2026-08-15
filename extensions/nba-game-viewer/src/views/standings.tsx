@@ -1,11 +1,13 @@
 import { getPreferenceValues, List } from "@raycast/api";
+import { useLeague } from "../contexts/leagueContext";
 import useStandings from "../hooks/useStandings";
 import TeamComponent from "../components/Team";
 import { useState } from "react";
 import { Team } from "../types/standings.types";
 
 const Standings = () => {
-  const { league, conference, useLastValue } = getPreferenceValues<Preferences>();
+  const { conference } = getPreferenceValues<Preferences>();
+  const { value: league, setValue: setLeague, useLastValue } = useLeague();
   const [selectedLeagueConference, setSelectedLeagueConference] = useState<string>(`${league}_${conference}`);
 
   const selectedLeague = selectedLeagueConference.split("_")[0];
@@ -25,7 +27,12 @@ const Standings = () => {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select League and Conference"
-          onChange={setSelectedLeagueConference}
+          onChange={(newValue) => {
+            const [newLeague] = newValue.split("_");
+
+            setLeague(newLeague);
+            setSelectedLeagueConference(newValue);
+          }}
           {...(useLastValue ? { storeValue: true } : { defaultValue: `${league}_${conference}` })}
         >
           <List.Dropdown.Section title="NBA">
@@ -42,7 +49,9 @@ const Standings = () => {
       }
     >
       <List.Section title={sectionTitle}>
-        {conferenceData?.map((team: Team) => <TeamComponent key={team.id} team={team} league={selectedLeague} />)}
+        {conferenceData
+          ?.sort((a, b) => (a.seed ?? -1) - (b.seed ?? -1))
+          ?.map((team: Team) => <TeamComponent key={team.id} team={team} league={selectedLeague} />)}
       </List.Section>
     </List>
   );

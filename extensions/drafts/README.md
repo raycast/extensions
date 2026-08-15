@@ -5,9 +5,13 @@ Created by [@FlohGro](https://social.lol/@flohgro) ([Website](https://flohgro.co
 
 It supports the following features as commands:
 
-## Create Draft
+## Create Draft in Background / Create and Open Draft
 
-create drafts in a Raycast form with tags.
+Create drafts in a Raycast form with tags (either with opening it afterwards or in the background).
+
+## Capture Draft
+
+Quickly capture content from command argument into a new draft in the background.
 
 ## Append/Prepend to Draft
 

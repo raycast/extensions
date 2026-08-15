@@ -1,18 +1,13 @@
 import { DefichainStats } from "../models/defichainStats";
 
-export function getStatsSummary(stats: DefichainStats | null): string {
-  if (stats === null) {
-    return `### Ocean API not available right now...
-    Try again later`;
-  }
-
+export function getStatsSummary(stats: DefichainStats): string {
   return `# DefiChain Stats  
   
 Block **${stats.blockHeight}**
 
 DFI **${stats.dfiPrice.toFixed(2)} USD**
 
-${stats.amountAuctions} Auctions, ${stats.amountVaults} Vaults
+${stats.amountAuctions} Auctions, ${stats.amountVaults} Vaults, Difficulty ${stats.difficulty} G
 
 ---
 

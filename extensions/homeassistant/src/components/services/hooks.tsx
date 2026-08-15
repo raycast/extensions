@@ -1,9 +1,9 @@
-import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { getHomeAssistantServices, HAServiceField, HAServiceMeta } from "./utils";
-import { parse } from "path";
-import { useState, useEffect, useRef } from "react";
 import { getHAWSConnection } from "@lib/common";
-import { Connection, subscribeServices, servicesColl, HassServices } from "home-assistant-js-websocket";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { Connection, HassServices, servicesColl, subscribeServices } from "home-assistant-js-websocket";
+import { parse } from "path";
+import { useEffect, useRef, useState } from "react";
+import { getHomeAssistantServices, HAServiceField, HAServiceMeta } from "./utils";
 
 export interface HAServiceCall {
   domain: string;
@@ -11,6 +11,10 @@ export interface HAServiceCall {
   name: string | undefined;
   description: string | undefined;
   meta: HAServiceMeta;
+}
+
+interface HATranslation {
+  resources: Record<string, string>;
 }
 
 export function useServiceCallsViaRest() {
@@ -37,9 +41,9 @@ export function useServiceCalls(): {
   isLoading: boolean;
 } {
   const [data, setData] = useCachedState<HAServiceCall[]>("servicescalls");
-  const [error, setError] = useState<Error>();
+  const [error, setError] = useState<Error | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const hawsRef = useRef<Connection>();
+  const hawsRef = useRef<Connection | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -49,17 +53,24 @@ export function useServiceCalls(): {
       try {
         if (!hawsRef.current) {
           const con = await getHAWSConnection();
+          const translation = await con.sendMessagePromise<HATranslation>({
+            type: "frontend/get_translations",
+            language: "en",
+            category: "services",
+          });
 
           subscribeServices(con, (services: HassServices) => {
             const result: HAServiceCall[] = [];
             for (const [domain, domainValue] of Object.entries(services)) {
               for (const [serviceName, serviceData] of Object.entries(domainValue)) {
                 const meta = serviceData as HAServiceMeta | undefined;
+                const serviceTranslation = translation.resources[`component.${domain}.services.${serviceName}.name`];
+
                 if (meta) {
                   result.push({
                     domain: domain,
                     service: serviceName,
-                    name: meta.name,
+                    name: meta.name ?? serviceTranslation ?? serviceName,
                     description: meta.name,
                     meta: meta,
                   });
@@ -89,7 +100,6 @@ export function useServiceCalls(): {
 }
 
 export interface FieldState {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   id: string;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   value?: any;
@@ -101,7 +111,7 @@ export interface FieldState {
   fromYaml: (text: string) => any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   validator: (userValue: any) => string | undefined;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   //selector: any
 }
 
@@ -205,7 +215,10 @@ export function useHAServiceCallFormData(serviceCall: HAServiceCall | undefined)
                   if (userValue && userValue.trim().length > 0) {
                     try {
                       parse(userValue);
-                    } catch (error) {
+                    } catch (
+                      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                      error
+                    ) {
                       return "No valid yaml";
                     }
                   }

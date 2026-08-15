@@ -1,14 +1,18 @@
-import { Action, ActionPanel, Detail } from '@raycast/api';
+import { Detail, getPreferenceValues } from '@raycast/api';
 import { useFetch } from '@raycast/utils';
-import { useState } from 'react';
+import { useMemo } from 'react';
 import { dailyChallengeQuery, endpoint } from './api';
 import { DailyChallenge, DailyChallengeResponse } from './types';
 import { formatProblemMarkdown } from './utils';
+import { useProblemTemplateActions } from './useProblemTemplateActions';
+import { useProblemRatings } from './ratings';
 
-export default function Command(): JSX.Element {
-  const [dailyChallenge, setDailyChallenge] = useState<DailyChallenge | undefined>(undefined);
-
-  const { isLoading } = useFetch<DailyChallengeResponse>(endpoint, {
+export default function Command() {
+  const { isLoading: isDailyChallengeLoading, data: dailyChallenge } = useFetch<
+    DailyChallengeResponse,
+    undefined,
+    DailyChallenge
+  >(endpoint, {
     method: 'POST',
     body: JSON.stringify({
       query: dailyChallengeQuery,
@@ -17,24 +21,31 @@ export default function Command(): JSX.Element {
     headers: {
       'Content-Type': 'application/json',
     },
-    onData: (data) => {
-      setDailyChallenge(data.data.dailyChallenge);
+    mapResult(result: DailyChallengeResponse) {
+      return {
+        data: result.data.dailyChallenge,
+      };
     },
   });
 
+  const { showProblemRatings } = getPreferenceValues<Preferences>();
+  const { ratings, isRatingsLoading } = useProblemRatings(showProblemRatings);
+  const ratingsLoaded = showProblemRatings && ratings != null;
+  const rating = ratingsLoaded ? ratings[dailyChallenge?.problem.titleSlug ?? ''] : undefined;
+
+  const problemMarkdown = useMemo(
+    () => formatProblemMarkdown(dailyChallenge?.problem, dailyChallenge?.date, rating, ratingsLoaded),
+    [dailyChallenge, rating, ratingsLoaded],
+  );
+
+  const actions = useProblemTemplateActions({
+    codeSnippets: dailyChallenge?.problem.codeSnippets,
+    problemMarkdown,
+    isPaidOnly: dailyChallenge?.problem.isPaidOnly,
+    linkUrl: `https://leetcode.com${dailyChallenge?.link}`,
+  });
+
   return (
-    <Detail
-      isLoading={isLoading}
-      markdown={formatProblemMarkdown(dailyChallenge?.problem, dailyChallenge?.date)}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser title="Open in Browser" url={`https://leetcode.com${dailyChallenge?.link}`} />
-          <Action.CopyToClipboard
-            title="Copy Link to Clipboard"
-            content={`https://leetcode.com${dailyChallenge?.link}`}
-          />
-        </ActionPanel>
-      }
-    ></Detail>
+    <Detail isLoading={isDailyChallengeLoading || isRatingsLoading} markdown={problemMarkdown} actions={actions} />
   );
 }

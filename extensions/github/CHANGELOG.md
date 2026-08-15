@@ -1,5 +1,257 @@
 # GitHub Changelog
 
+## [Search Pagination and Repository List Improvements] - 2026-08-14
+
+- Search Repositories: Add pagination and a **Relevance** sort option (now the default).
+- Search Pull Requests and Notifications: Add pagination so more results can be loaded beyond the initial page.
+- Repository lists: Show language and compact update date in accessories; use ★/☆ to reflect whether you starred the repository.
+- Preferences: Lower the default number of search results to 25 for faster initial loads.
+- Unread Notifications: Paginate the GitHub inbox so the menu bar count and repository filters include all unread threads, not just the first page.
+- Clone in VS Code: Add an extension preference to choose VS Code or Cursor, defaulting to VS Code from every repository command.
+- Open in Web IDE: Add **DeepWiki** to open AI-generated repository docs at deepwiki.com.
+- Search Issues: Look up a specific issue by number (`#123`, `owner/repo#123`, or `repo:owner/name 123`) via the GitHub API instead of full-text search.
+
+## [Clarify Clone and Download Actions] - 2026-08-13
+
+- Renamed repository actions and the **Download Repository as ZIP** command so clone (`git clone`) and ZIP download flows are clearly distinct.
+- Renamed the **Clone Path** preference to **Default Clone Path** and clarified that it applies only to clone actions, not ZIP downloads or AI-assisted flows.
+- **Clone with Options** now starts at your Default Clone Path when one is set, with inline guidance on how to override it for a single clone.
+- **Download as ZIP** forms explain that archives do not create a Git repository and do not use the Default Clone Path.
+- README: added a **Cloning and Downloading Repositories** section describing when to use each flow.
+- Normalized action titles to Title Case (`Enable Auto-Merge`, `Re-Run Workflow`, `Sort by`).
+
+## [Show CI status in pull request details] - 2026-08-10
+
+- Added a "Checks" row to pull request details showing successful, failed, or pending CI status.
+
+## [Improve GraphQL Code Generation] - 2026-08-10
+
+- Make GraphQL type generation deterministic and credential-free by using a checked-in GitHub schema.
+
+## [View Pull Request Diffs] - 2026-08-06
+
+- Added a "View Diff" action to pull requests, showing changed files with per-file patches that load progressively as you scroll.
+- Added a `get-pull-request-diff` AI tool.
+
+## [Clone with GitHub CLI] - 2026-08-06
+
+- Added a "Clone Tool" choice to the "Clone with Options" flow, letting you clone repositories with the GitHub CLI (`gh repo clone`) instead of plain `git clone`, using your existing `gh` authentication and configuration.
+- The Git method remains the default, and the target directory and branch options are preserved when using GitHub CLI.
+- Shows actionable guidance when the GitHub CLI is not installed or not authenticated.
+- Security: clone commands are now spawned without a shell, so branches and paths containing shell characters are handled safely.
+- Fixed `gh` detection for installations in Homebrew or other directories that are missing from Raycast's PATH.
+
+## [Show README in repository actions] - 2026-08-03
+
+- Added a "Show Readme" action to the Search Repositories, My Latest Repositories, and My Starred Repositories commands that renders the repository's README inside Raycast, with relative links and images resolved to absolute URLs.
+
+## [Mark draft pull requests as ready for review] - 2026-07-09
+
+- Added a "Ready for Review" action to pull request lists, shown for your own draft pull requests.
+
+## [Fix opening GitHub URLs on Windows] - 2026-05-28
+
+- Updated the extension runtime dependencies so GitHub URLs open correctly in the default browser on Windows.
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Fix starred repositories loading] - 2026-05-20
+
+- Load starred repositories in smaller GitHub GraphQL batches to avoid 502 errors with larger result preferences.
+
+## [Fix repository search for many organizations] - 2026-05-18
+
+- Split My Repositories loading into smaller owner-specific searches to avoid GitHub 502 errors for users in many organizations.
+
+## [Fix null pull request nodes crash] - 2026-05-15
+
+- Fixed `TypeError: Cannot read properties of null (reading 'id')` in **My Pull Requests** when the GitHub search API returns edges with a null `node` (e.g. PRs from repositories the user can no longer access).
+- Applied the same defensive null-filtering to **Search Pull Requests** and the per-repository pull request list to prevent the same crash from surfacing there.
+
+## [My Stats Menu Bar Enhancements] - 2026-05-12
+
+- Added a `What's New` section to the **My GitHub Stats Menu Bar** that surfaces repositories which received new stars since the last visit.
+- The menu bar title shows a `★+N` badge when there are unseen new stars, replacing the configured metric until the user marks them as seen.
+- Added a `Notify on new stars` preference (default on) to opt out of the notification.
+- Added an `API` section showing the current GitHub API rate limit (remaining / total, with reset time tooltip).
+- Added a `Refresh Frequency` preference (15 minutes / 30 minutes / 1 hour / 2 hours, default 30 minutes) so users can balance freshness against GitHub API quota usage.
+- Each organization is now a submenu with quick access to **Open Profile**, **Repositories**, **People** and **Projects** instead of just opening the organization homepage.
+- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the _Stats_ menu bar enabled — the dedicated _My Pull Requests Menu Bar_ and _My Issues Menu Bar_ commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
+- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the _Stats_ menu bar enabled — the dedicated _My Pull Requests Menu Bar_ and _My Issues Menu Bar_ commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
+
+## [Download Repository Command] - 2026-04-28
+
+- Added "Download Repository" command to download an entire repository, a specific sub-directory, or a single file from a GitHub URL.
+- Reuses existing GitHub authentication for private repository access.
+- Streams the archive to disk and extracts only the requested directory for memory efficiency.
+
+## [Updated contributors list] - 2026-04-24
+
+- Added new contributor to the GitHub extension
+
+## [Add My GitHub Stats Menu Bar] - 2026-04-23
+
+- Added a new `My GitHub Stats Menu Bar` command that surfaces profile stats (Followers, Following, Stars Received, Forks Received, PRs Authored/Merged/Open, Issues Authored/Open, Commits in the last year, Public Repos, Organizations) directly in the macOS menu bar
+- Added a `Menu Bar Title` preference to choose which metric is shown next to the icon: Followers (default), Stars Received, Open PRs, Open Issues, or Icon only
+- Each item opens the relevant GitHub page (profile tabs, search queries, organizations) on click
+
+## [Fix PR List Accessories Alignment] - 2026-04-13
+
+- Pull Requests: Always show comment count (zero shown as dimmed) to prevent accessories from shifting
+- Pull Requests: Replace variable-length relative date with fixed `MMM dd` format (e.g. "Mar 30")
+- Pull Requests: Replace review decision text badges with compact icons to prevent truncation on long titles
+- Pull Requests: Add placeholder icon for rows without a review decision to keep CI check column aligned
+- Pull Requests: Add `showAuthor` prop to show author icon in Search and Repository views
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Improve Auto-Merge Support] - 2026-03-05
+
+- Pull Requests: Fix auto-merge actions not appearing due to inverted condition
+- Pull Requests: Add merge method selection when enabling auto-merge
+- Pull Requests: Show "Auto-merge" tag in list and detail views
+- Create Pull Request: Add auto-merge option with merge method picker
+- Added AI tools to enable and disable auto-merge on pull requests
+
+## [Add Pagination Support to My Starred Repositories] - 2026-01-24
+
+- My Starred Repositories: Migrated from REST API to GraphQL API for better pagination support
+- My Starred Repositories: Added pagination to load all starred repositories beyond initial fetch limit
+- My Starred Repositories: Improved loading states with skeleton items during pagination
+- Enhanced type safety across repository components with generic types
+
+## [Fix "Clone and Open" action when repository doesn't exist] - 2025-12-17
+
+- Fix the clone command to append the target directory only when it exists
+- Always show the "Clone with Options" action instead of conditionally
+
+## [Moved Contributor] - 2025-12-10
+
+## [Fix filter visited repositories] - 2025-12-09
+
+- Add validation to filter history for only repositories that exist in current data
+- Refactor repository filtering to handle undefined searchText and searchFilter explicitly
+
+## [Use distinct status icons for PR states] - 2025-12-08
+
+- My Pull Requests Menu Bar: Added dedicated icons for merged, closed, draft, and merge queue PR states
+
+## [Add option to filter draft pull requests] - 2025-12-07
+
+- My Pull Requests: Added "Drafts" preference to show or hide draft pull requests
+- My Pull Requests Menu Bar: Added "Drafts" preference to show or hide draft pull requests
+
+## [Fix Create Pull Request branch selection] - 2025-11-27
+
+- Create Pull Request: Fixed issue where the default branch wasn't appearing in the "From" dropdown options
+- Create Pull Request: Fixed validation errors when searching for branches while a branch is already selected
+- Create Pull Request: Prevented selecting the same branch for both "From" and "Into" fields
+
+## [Show organization projects when creating issues] - 2025-12-07
+
+- Include organization-level Projects in the Create Issue project picker
+
+## [Add Download Repository command and copy markdown URL actions] - 2025-11-19
+
+- Search Repositories: Added "Download Repository" action to download a repository as a zip file
+- Added "Copy Markdown URL" actions to copy an issue's markdown URL
+
+## [Checkout PR project action] - 2025-10-24
+
+- My Pull Requests: Added "Check Out PR" action to clone repository and switch to PR branch locally
+
+## [Unified handle notification icon retrieval error] - 2025-10-02
+
+- Notifications Command and Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
+## [Fix clone with options action] - 2025-09-08
+
+- Fix the clone action by adding the quote to the command to prevent issues with spaces in the path
+
+## [Add My Starred Repositories command] - 2025-08-25
+
+- Add new "My Starred Repositories" command to view starred repositories
+- Displays starred repositories with support for sorting and visiting history
+- Integrated with existing repository list components for consistent experience
+
+## [Issue type specification] - 2025-08-22
+
+- Adds the ability to specify the issue type when creating a new issue.
+
+## [Fix repository filtering] - 2025-06-26
+
+- Correct the repository filtering for exclude mode
+
+## [Add repository filtering] - 2025-06-05
+
+- my-issues, my-pull-requests and menu counterparts can now specify repositories to include / exclude
+
+## [Filter recently closed PRs by last update date] - 2025-04-16
+
+- Fixed a bug where active pull requests could be hidden: the `updated` filter is now only applied to closed PRs, so all active PRs are always shown in `My Pull Requests`.
+
+## [Add support for merge queues and auto-merge] - 2025-04-15
+
+- Adds PR actions for repositories that use merge queues
+- Adds the ability to enable auto-merge
+- Fix codegen lint hook
+
+## [Add the ability to search for collaborators in the pull request actions] - 2025-03-19
+
+- Add the ability to search for collaborators in the pull request actions, instead of just showing the first 25.
+
+## [Add repository filtering for menu bar commands] - 2025-03-11
+
+- Add the ability to include or exclude specific repositories from the results for the `My Pull Requests` and `Unread Notifications` Menu Bar commands.
+
+## [Chore] - 2025-03-10
+
+- Fix typo in setting label
+
+## [✨ AI Enhancements] - 2025-02-21
+
+## [Fix base clone path] - 2025-01-19
+
+- Move `baseClonePath` to extension root level
+- Fix `Clone and Open` path
+
+## [Mark notification as done] - 2025-01-09
+
+- Add a new action to mark a notification as done.
+
+## [Change menu bar unread style] - 2024-12-17
+
+- Use a new icon with indicator for unread state
+
+## [Support specifying Git clone protocol] - 2024-12-12
+
+- Added support to specify the Git clone protocol (SSH or HTTPS) in extension preferences.
+- `Copy Clone Command` and `Clone And Open` now respect the clone protocol from the preferences.
+
+## [Update GraphQL generated types] - 2024-12-09
+
+- Updated auto-generated GraphQL codes with the latest schema.
+
+## [Handle notification icon retrieval error] - 2024-11-08
+
+- Unread Notifications Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
+## [Improved options for My Issues] - 2024-11-04
+
+- My Issues Command + Menu Bar: Add a preference that allows showing or hiding issues opened by the user from searches. On by default.
+
+## [Fix crash when searching visited repositories] - 2024-10-04
+
+The issue causing a crash during the "Search Repositories" feature, when two or more repositories had been visited, has been resolved. This problem originated from changes in [this pull request](https://github.com/raycast/extensions/pull/13684).
+
+## [Fix copy commit tree URL action] - 2024-09-13
+
+- Fix the "Copy Commit Tree URL" action to ensure it correctly copies the commit Tree URL as intended.
+
 ## [Clone Repo Fixes] - 2024-08-20
 
 - [#13872](https://github.com/raycast/extensions/issues/13872): Brought back the feature for Raycast to act as a fast brower to open cloned repo.

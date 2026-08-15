@@ -69,7 +69,7 @@ export const ExportChatAction = (props: {
           const statsJSON = JSON.stringify(chats.calculateStats(chat.name));
           try {
             fs.writeFileSync(path.resolve(dirPath, chat.name + "-stats.json"), statsJSON);
-          } catch (err) {
+          } catch {
             failedExports.push("Stats");
           }
 

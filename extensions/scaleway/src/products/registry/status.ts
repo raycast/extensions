@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { Registry } from '@scaleway/sdk'
+import { Registryv1 } from '@scaleway/sdk'
 
-export const NAMESPACES_STATUSES = Registry.v1.NAMESPACE_TRANSIENT_STATUSES.reduce(
+export const NAMESPACES_STATUSES = Registryv1.NAMESPACE_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -22,7 +22,7 @@ export const NAMESPACES_STATUSES = Registry.v1.NAMESPACE_TRANSIENT_STATUSES.redu
   }
 )
 
-export const IMAGES_STATUS = Registry.v1.IMAGE_TRANSIENT_STATUSES.reduce(
+export const IMAGES_STATUS = Registryv1.IMAGE_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -43,13 +43,13 @@ export const IMAGES_STATUS = Registry.v1.IMAGE_TRANSIENT_STATUSES.reduce(
   }
 )
 
-export const getNamespaceStatusIcon = (namespace: Registry.v1.Namespace) =>
+export const getNamespaceStatusIcon = (namespace: Registryv1.Namespace) =>
   NAMESPACES_STATUSES[namespace.status]
 
-export const getImageStatusIcon = (image: Registry.v1.Image) => IMAGES_STATUS[image.status]
+export const getImageStatusIcon = (image: Registryv1.Image) => IMAGES_STATUS[image.status]
 
-export const isNamespaceTransient = (namespace?: Registry.v1.Namespace) =>
-  namespace ? Registry.v1.NAMESPACE_TRANSIENT_STATUSES.includes(namespace.status) : false
+export const isNamespaceTransient = (namespace?: Registryv1.Namespace) =>
+  namespace ? Registryv1.NAMESPACE_TRANSIENT_STATUSES.includes(namespace.status) : false
 
-export const isImageTransient = (image?: Registry.v1.Image) =>
-  image ? Registry.v1.IMAGE_TRANSIENT_STATUSES.includes(image.status) : false
+export const isImageTransient = (image?: Registryv1.Image) =>
+  image ? Registryv1.IMAGE_TRANSIENT_STATUSES.includes(image.status) : false

@@ -14,6 +14,7 @@ export const getFinderPath = async () => {
   try {
     return await runAppleScript(scriptFinderPath);
   } catch (e) {
+    console.error("Error getting Finder path:", e);
     return "Finder not running";
   }
 };

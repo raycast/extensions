@@ -1,3 +1,4 @@
+import type { GenericAbortSignal } from "axios";
 import client, { Product } from "./client";
 import {
   GraphqlData,
@@ -382,7 +383,7 @@ export async function login(data: { email: string; password: string }, signal?: 
       headers: {
         "Content-Type": "application/json",
       },
-      signal,
+      signal: signal as GenericAbortSignal,
     });
     return Promise.resolve(resp.data as LoginResult);
   } catch (err) {

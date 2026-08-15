@@ -10,24 +10,26 @@ import {
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { ProwlarrApi, ReleaseResource } from "../prowlarrApi";
+import { prowlarrApi, ReleaseResource } from "../prowlarrApi";
 import { searchResultAccessories } from "./SearchResultAccessories";
 import { SearchResultActionPanel } from "./SearchResultActionPanel";
 import { SearchResultDetails } from "./SearchResultDetails";
 import { SearchFormValues } from "./types";
-import { getSearchResultSortPredicate } from "./utils";
+import { getSearchResultSortPredicate } from "./utils/getSearchResultSortPredicate";
 
 const preference = getPreferenceValues<Preferences.Search>();
 const _maxSearchResultsCount = Number.parseInt(preference.maxSearchResultsCount);
 const maxSearchResultsCount = Number.isNaN(_maxSearchResultsCount) ? 100 : _maxSearchResultsCount;
 
-const { api } = new ProwlarrApi({
-  baseUrl: `${preference.protocol}://${preference.host}:${preference.port}${preference.urlBase}`,
-  baseApiParams: { headers: { "X-Api-Key": preference.apiKey } },
-});
-
 export function SearchResultsList({ values }: { values: SearchFormValues }) {
-  const [url, params] = api.v1SearchList({ query: values.search });
+  const [url, params] = prowlarrApi.v1SearchList({
+    query: values.search,
+    indexerIds:
+      values.allIndexers || values.indexerIds.length === 0
+        ? undefined
+        : values.indexerIds.map((id) => Number.parseInt(id)),
+    categories: values.categoryIds.length === 0 ? undefined : values.categoryIds.map((id) => Number.parseInt(id)),
+  });
 
   const { isLoading, data, error } = useFetch(url, {
     ...params,
@@ -51,14 +53,19 @@ export function SearchResultsList({ values }: { values: SearchFormValues }) {
 
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
-  const addToDownloadClient = ({ guid, indexerId }: Pick<ReleaseResource, "guid" | "indexerId">) => {
-    const [url, queryParams] = api.v1SearchCreate({ guid, indexerId });
-    fetch(url, queryParams).then(() =>
+  const addToDownloadClient = async ({ guid, indexerId }: Pick<ReleaseResource, "guid" | "indexerId">) => {
+    try {
+      await fetch(...prowlarrApi.v1SearchCreate({ guid, indexerId }));
       showToast({
         style: Toast.Style.Success,
         title: "Success!",
-      }),
-    );
+      });
+    } catch (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong.",
+      });
+    }
   };
 
   const handleAction: Parameters<typeof SearchResultActionPanel>[0]["onAction"] = (params) => {

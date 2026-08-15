@@ -1,26 +1,28 @@
 # Bundesliga Changelog
 
-## [Improvements] - 2023-02-09
+## [API Updates & UI Refinements] - 2024-09-24
+- Updated the API URL to ensure accurate retrieval of broadcast information.
+- Improved the layout and presentation of club profile information for better readability and navigation.
+- Enhanced code maintainability and efficiency by utilizing the `usePromise` hook for asynchronous operations.
 
-- Add fixture planned kickoff
-- Buy Ticket action for pre-match
-- Update extension icon
+## [Preferences & Refinements] - 2023-02-20
+- Enhanced the accuracy and presentation of fixture and result data.
+- Improved user experience by allowing users to manage their API keys in the extension's preferences.
 
-## [Fixes] - 2023-01-31
+## [Matchday Essentials] - 2023-02-09
+- Provided users with the estimated kickoff time for upcoming fixtures.
+- Enabled users to directly purchase tickets for pre-match events.
+- Refreshed the visual appearance of the extension's icon.
 
-- Fixing state element id
-- Add more information in Standings
+## [Standings Enhancements] - 2023-01-31
+- Corrected an issue related to the identification of state elements.
+- Provided users with additional details in the standings view.
 
-## [Improvements] - 2022-06-14
+## [Modernize] - 2022-06-14
+- Implemented a modern grid layout for certain commands, enhancing visual appeal and readability.
+- Employed new metadata for list item details, improving data organization and presentation.
 
-- Using new Grid layout for some commands
-- Using new list item detail metadata
-
-## [Improvements] - 2022-04-05
-
-- Added Standings
-- Added Fixtures & Results
-
-## [Initial Version] - 2022-04-01
-
-- Added Clubs
+## [Initial Release] - 2022-04-01
+- Launched the extension with basic features, including information about Bundesliga clubs.
+- Added a feature to display the current standings of Bundesliga teams.
+- Incorporated functionality to show upcoming fixtures and past results.

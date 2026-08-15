@@ -15,6 +15,7 @@ import { Action, ActionPanel, Icon, showInFinder, showToast, Toast } from "@rayc
 
 import { Generator } from "../utilities/types";
 import { cleanup, getDestinationPaths, moveImageResultsToFinalDestination, showErrorToast } from "../utilities/utils";
+
 import SettingsActionPanelSection from "./SettingsActionPanelSection";
 
 /**
@@ -49,7 +50,10 @@ export default function ImageGeneratorActionPanel(props: {
             [path.join(os.tmpdir(), `${objectType.replaceAll(" ", "_").toLowerCase()}.png`)],
             true,
           );
-          const toast = await showToast({ title: `Creating ${objectType}...`, style: Toast.Style.Animated });
+          const toast = await showToast({
+            title: `Creating ${objectType}...`,
+            style: Toast.Style.Animated,
+          });
           try {
             await generator.applyMethod(destinations[0], generator.CIFilterName, width, height, options);
             await moveImageResultsToFinalDestination(destinations);
@@ -74,7 +78,7 @@ export default function ImageGeneratorActionPanel(props: {
         shortcut={{ modifiers: ["cmd"], key: "l" }}
         quicklink={{
           name: `Create ${width}x${height} ${objectType} Image`,
-          link: `raycast://extensions/HelloImSteven/sips/create-image?context=${encodeURIComponent(
+          link: `${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/HelloImSteven/sips/create-image?context=${encodeURIComponent(
             JSON.stringify({
               imageWidth: width,
               imageHeight: height,
@@ -89,7 +93,7 @@ export default function ImageGeneratorActionPanel(props: {
 
       <ActionPanel.Section title="Clipboard Actions">
         <Action.Paste
-          title="Paste Preview In Active App"
+          title="Paste Preview in Active App"
           shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           content={{ html: `<img src="${preview}" />` }}
         />

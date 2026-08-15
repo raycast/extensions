@@ -1,9 +1,30 @@
 # Oura Changelog
 
+## [Added Menu Bar Command] - 2026-03-16
+
+- Added Oura Menu Bar command: see Readiness, Sleep, and Activity scores at a glance in the menu bar
+- Added actions to open Readiness, Sleep, and Activity detail views from the menu bar
+- Added preference to toggle score display in the menu bar title
+
+## [2.0.0] - 2026-02-03
+
+- Migrated authentication to Oura OAuth2 (client ID/secret + PKCE) as Personal Access Tokens are now deprecated.
+- Update API requests to use OAuth2 tokens
+- Refresh tokens automatically when expired
+- Update setup instructions and unauthorized messaging for OAuth2
+
+## [1.1.0] - 2024-11-13
+
+- Added Oura Stress command: Get the last two week's resilience and contributing factors.
+- Added Oura Resilience command: Get the last two week's stress data: stress high, recovery high, and day summary.
+- Updated typo in `minutedFormatted()` function to `minutesFormatted()`
+- Changed the `today()` command to `getDate(offset: number)`. Removed the `tomorrow()` function in favor of `getDate(1)`
+
 ## [1.0.1] - 2024-02-26
+
 - Added in Actions in the "Get Oura Personal Info" command to change preferences for weight and height between Metric and Imperial.
 - Added in checks in the Summary command to show "N/A" if data isn't ready from Oura. This can happen if you check first thing in the morning before your ring has synced, or if you check just after midnight before data has been sent.
 - Fixed typo in README that some users were running into when they were unauthenticated with Oura on the Web.
-- Adding in missing types for Preferences 
+- Adding in missing types for Preferences
 
 ## [Initial Version] - 2024-01-20

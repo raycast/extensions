@@ -25,14 +25,14 @@ export default function main() {
     },
   );
 
-  const filteredTopics = useMemo(() => topics.filter((topic) => topic.filepath.includes(type)), [type]);
+  const filteredTopics = useMemo(() => topics.filter((topic) => topic.filepath.includes(type)), [type, isLoading]);
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search documentation"
       searchBarAccessory={
-        <List.Dropdown tooltip="Filter" onChange={setType}>
+        <List.Dropdown tooltip="Filter" onChange={setType} storeValue={true}>
           <List.Dropdown.Item icon="command-icon.png" title="All" value="" />
           <List.Dropdown.Section>
             <List.Dropdown.Item
@@ -60,7 +60,7 @@ export default function main() {
 
         return (
           <List.Item
-            key={topic.sha}
+            key={topic.path}
             keywords={topic.filepath.split("/")}
             icon={Icon.Document}
             title={topic.title}

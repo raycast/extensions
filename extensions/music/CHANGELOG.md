@@ -1,8 +1,70 @@
 # Apple Music Changelog
 
+## [Fix Library Album Search] - 2026-06-15
+
+- Fixed `Play Library Album` so searching by artist name shows matching albums from the library.
+
+## [Just Play Command] - 2026-04-04
+
+- Added a new "Just Play" no-view command that takes a text query and immediately plays the best matching track from your library, with HUD feedback.
+
+## [Menu Bar Energy Optimization] - 2026-03-12
+
+- Consolidated menu bar polling into a single AppleScript snapshot that checks whether Music is running, reads player state, and fetches current track metadata in one call — reducing subprocess count from 3 to 1 per refresh.
+- Cached the macOS version lookup so favorite-property detection no longer spawns `sw_vers` on every menu bar refresh.
+- Switched to `useCachedPromise` with `keepPreviousData` so the menu bar retains the last known state between refreshes instead of flickering.
+
+## [Menu Bar & Favorite Command Improvements] - 2026-02-21
+
+- `Favorite Track` and `Favorite and Add to Library` commands now close Raycast immediately, showing HUD only after Apple Music confirms the state change.
+- Menu bar favorite status is now fetched in the same AppleScript call as the track, eliminating flicker when opening the dropdown.
+- Added scrolling marquee for long track names inside the menu bar dropdown.
+- Moved "Open Music" to the top of the menu bar dropdown.
+
+## [Favorite Flow Improvements] - 2026-02-19
+
+- Added a `Favorite Track` / `Unfavorite Track` action to the menu bar command with state-aware title and icon.
+- Updated favorite actions to wait for Apple Music to confirm the favorite state change before showing success HUD.
+- Added confirmation polling with timeout for favorite/unfavorite operations to avoid premature success messages.
+- Improved confirmation resilience by retrying status checks when temporary read errors occur.
+
+## [New Menu Bar Command] - 2026-01-08
+
+- Added a new menu bar command to see currently playing track (inspired by **Spotify**) (ref: [Issue #24042](https://github.com/raycast/extensions/issues/24042))
+- Fix "Play Library" command always loading when there is no current track
+- Modernized to use latest Raycast configuration
+
+## [New Command] - 2025-08-04
+
+- Added a new command that removes the currently playing track from the Library.
+
+## [New Config] - 2025-06-30
+
+- Added a new configuration option to disable HUDs
+
+## [Update Rate Track] - 2025-03-10
+
+- Added the track name to the `Rate Track` command.
+
+## [New Command] - 2025-03-04
+
+- Added new "Toggle Repeat" command.
+
+## [AI Enhancements] - 2025-02-21
+
+- Added AI extensions to the Music extension.
+
+## [Update Currently Playing] - 2024-12-13
+
+- Fixed a bug where `Currently Playing` command would open the Music app if it was not running.
+
+## [Update Currently Playing] - 2024-12-06
+
+- Update `Currently Playing` command to show the currently playing track in the subtitle instead of the toast.
+
 ## [New Command] - 2024-02-10
 
-- Added a new command that removes the currently playing track from the current playlist and skips to the next track. 
+- Added a new command that removes the currently playing track from the current playlist and skips to the next track.
 
 ## [Update] - 2023-10-12
 

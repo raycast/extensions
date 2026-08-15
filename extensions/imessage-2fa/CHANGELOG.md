@@ -1,5 +1,43 @@
 # Messages 2FA Changelog
 
+## [Fix invalid verification links] - 2026-05-28
+
+- Ignore unsupported verification link URLs before rendering them in the list.
+
+## [Fix Time Sensitive iMessage codes] - 2026-05-27
+
+- Fixed iMessage code detection when macOS stores notification labels separately from the message body.
+
+## [Update] - 2025-12-17
+
+- Add support for extracting text from binary data in iMessage messages
+
+## [Update] - 2025-11-08
+
+- Add support for Epos Card 2FA (Japanese Credit Card)
+
+## [Update] - 2025-04-29
+
+- Resolves issue with code extraction for iMessage
+
+## [Update] - 2025-04-28
+
+- Add the functionality for directly opening verification/ sign-in links that were received via Email (Apple Mail / Gmail)
+
+## [Update] - 2025-02-17
+
+- Add ability to type the 2FA code instead of pasting it
+
+## [Update] - 2025-02-13
+
+- Add support for Email 2FA codes alongside iMessage
+- Add ability to switch between iMessage, Email, or both sources
+- Add source filtering dropdown in the UI
+
+## [Update] - 2024-09-25
+
+- Add support for Portuguese auth/code references
+
 ## [Update] - 2024-05-28
 
 - Add support for Chase 2FA code pattern

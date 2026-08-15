@@ -1,3 +1,5 @@
+import { adjectives, animals, colors, Config } from "unique-names-generator";
+
 export const MAILBOX_SPAM_ACTIONS = [
   { selected: false, value: "none", title: "No action, keep in Inbox" },
   { selected: false, value: "subject", title: "Prefix subject with SPAM, keep in Inbox" },
@@ -14,3 +16,8 @@ export const MAILBOX_SPAM_AGGRESSIVENESS = [
   { selected: false, value: "stricter", title: "Stricter" },
   { selected: false, value: "strictest", title: "Strictest" },
 ];
+
+export const UNIQUE_NAME_GENERATOR_CONFIG: Config = {
+  dictionaries: [adjectives, colors, animals],
+  separator: "-",
+};

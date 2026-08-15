@@ -1,5 +1,9 @@
 # Logseq Changelog
 
+## [Windows support] - 2025-10-02
+
+- Added Windows support
+
 ## [Add command for adding tasks] 2024-06-03
 
 - Add tasks using the new "Add task" command

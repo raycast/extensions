@@ -10,7 +10,7 @@ export default function TaskItem(props: {
   task: Task;
   onToggle: () => void;
   onDelete: () => void;
-  onCreate: (listId: string, task: TaskForm) => void;
+  onCreate: (listId: string, task: TaskForm) => Promise<void>;
   onEdit: (listId: string, task: Task) => void;
 }) {
   return (
@@ -61,7 +61,7 @@ export default function TaskItem(props: {
           <Action.Push
             title="Edit Task"
             icon={Icon.Pencil}
-            shortcut={{ modifiers: ["cmd"], key: "i" }}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
             target={<EditTaskForm listId={props.listId} task={props.task} onEdit={props.onEdit} />}
           />
         </ActionPanel>

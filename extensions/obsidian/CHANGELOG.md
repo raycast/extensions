@@ -1,23 +1,138 @@
 # Obsidian Changelog
 
+## [Fix AI searchNote OOM on oversized Markdown] - 2026-08-15
+
+- Skip Markdown files larger than 1 MiB during full-content search instead of reading them into the 100 MB extension heap
+- Limit tag search on oversized files to a growing prefix (64 KiB steps, 1 MiB cap) so YAML tags still match when frontmatter crosses the first chunk
+- Default the AI `searchNote` `searchContent` parameter to `false`, matching the UI Search Note command
+
+## [Fix Delete Note Shortcut] - 2026-07-18
+
+- Update the Delete Note action to use the common `Keyboard.Shortcut.Common.Remove` shortcut
+- Drop the previous custom `opt+d` shortcut from the Delete Note action
+
+## [Add Open Action Shortcuts] - 2026-07-18
+
+- Add keyboard shortcut to the "Open in Default App" action
+- Assign the common Open shortcut to the "Open in New Obsidian Tab" action
+
+## [Add] - 2026-06-28
+
+- Added vault path display to the Open Vault command
+
+## [Fix] - 2026-05-05
+
+- Fix vault auto-discovery on Windows and Linux by reading `obsidian.json` from the per-platform Obsidian config dir
+
+## [Fix] - 2026-04-10
+
+- Fix Open in New Obsidian Tab failing on Windows due to path separator handling
+
+## [Wikilink Actions] - 2026-04-07
+
+- New: Copy Wikilink — copies `[[Note Title]]` to clipboard (⌥W)
+- New: Paste Wikilink — pastes `[[Note Title]]` into the focused app (⌥⇧W)
+
+## [Silent Mode No Longer Activates Obsidian] - 2026-03-31
+
+- Fix: Append to Daily Note, Append Task, and custom actions with silent mode enabled no longer bring Obsidian to the foreground
+- Fix: Multi-vault Append Task was missing the silent flag, causing Obsidian to always activate on vault selection
+- Uses macOS `open -g` (background flag) instead of Raycast `open()` when silent mode is on
+
+## [Bugfix] - 2026-03-18
+
+- Fixes a bug where the extension was failing after initial install
+
+## [AI Search Tool Content Search Parameter] - 2026-02-16
+
+- Add searchContent parameter to searchNote AI tool for controlling search mode
+- Enable content and tag search capabilities in AI tools
+- Default searchContent to true for comprehensive search including file content and tag filtering
+
+## [Custom Append Actions] - 2026-02-02
+
+- Added "Run Custom Action" command to create reusable append templates
+- Added support for dynamic date variables (e.g. `{year}`, `{date}`) in file paths
+- Added Import/Export functionality for sharing custom actions
+- Added support for "Pre-fill" or "Capture" modes in custom actions
+
+## [New Open Workspace command, Callout Support, Copy Files Action] - 2025-12-25
+
+- Adds new Open Workspace command that shows a list of all workspaces in your vault. Requires advanced URI plugin and workspaces core plugin to be enabled
+- Adds callout support by rendering them as quotes with emojis
+- Adds "Copy File Path" action (opt + shift + c) to notes, vaults, and media items
+- Fixes bookmarked notes not shown in the menubar
+- Fixes Create Note AI tool prepending "undefined" to all notes
+- Improved test coverage to 83%
+
+## [Welcoming AI, Sort Notes, Better Tag Search, Code Improvements] - 2025-12-16
+
+- Adds new syntax to search for tagged notes: "tag:someTag". This can be used in combination with a normal search. For example "tag:someTag some text", this searches for notes with the tag "someTag" and then filters those notes with "some text"
+- Adds new sorting orders: Relevance, File name (A to Z), File name (Z to A), Modified time (new to old), Modified time (old to new), Created time (new to old), Created time (old to new)
+- Adds AI commands/tools for appending to notes, creating notes, opening notes, reading notes, searching notes, updating notes and finding vaults
+- Adds Obsidian Canvas files
+- Adds the option to auto-focus the content field in the Create Note command
+- Improves memory usage during search by doing two-fold search, first on note metadata then on note content in a more memory efficient way
+- Introduces a proper interface for the Obsidian app, many more tests and DOCUMENTATION.md, CONTRIBUTING.md, REFERENCE.md to help contributors
+- Fixes a bug where templates would load selected text even when the template was not used
+- Fixes several internal bugs
+- REFERENCE.md was used to manually check the current state of the extension
+
+## [Bug fixes] - 2025-06-10
+
+- Fixes a bug, which create a tagged note a wrong way. Changes an order of properties block and note text
+
+## [Chore: Fixing typos in the README] - 2025-05-14
+
+## [Spring Cleaning] - 2025-04-05
+
+- Closes Raycast after creating a note with the Create Note command
+- Adds `{selection}` and `{selected}` templates to Create Note command which both get replaced by the currently selected text
+- Fixes bug where a tag dropdown selection would reset after the Quick Look action
+- Fixes bug where Obsidian bookmark groups would get overriden by the extension
+- Change extension author
+
+## [Prepend to Daily Note] - 2025-02-01
+
+- Adds prepend option to Append to Daily Note
+
+## [Bug fixes] - 2025-01-28
+
+- Fixes locale bug on Append Task command
+- Fixes issue where tags were being converted to lowercase
+
+## [Task Creation Date] - 2024-12-03
+
+- Tasks added now log the creation date.
+
+## [Support for Fuzzy Search] - 2024-09-05
+
+- Add option to use Fuzzy Search on notes search. Disabled by default in note search config.
+
 ## [Bugfix for nested bookmarks] - 2024-02-06
+
 - Fixes a bug where nested bookmarks would not be displayed correctly in search
 
 ## [Support luxon formats in templates] - 2024-01-30
+
 - Support luxon date and time format (e.g. dd, MM, YYYY,...) in templates
 
 ## [Fix Search Media HotKey bug] - 2024-01-26
+
 - Checks for defined `searchArgument` in MediaGrid value before filtering
 
 ## [Copy Note Title action] - 2024-01-17
+
 - Add `Copy Note Title` action
 
 ## [Bugfixes and cache behavior tweak] - 2023-11-19
+
 - Will now skip the cache if the value is an empty array
 - Fixes a bug where no default application crashes the extension
 - Fixes a bug where deleting the vault config path can't find the notes
 
 ## [New features and bugfixes] - 2023-10-12
+
 - Adds extension setting to open note in default application
 - Adds quick actions to the Random Note command
 - Adds support for using {content} in templates
@@ -32,12 +147,15 @@
 - Filter out vault paths that don't actually exist.
 
 ## [Menubar cache bug fixes] - 2023-09-15
+
 - Fixes a bug where the cache fallback would crash the extension
 
 ## [Apply templates on task file name] - 2023-08-5
+
 - The Append Task command will now apply template placeholders to file name for dynamic file names
 
 ## [Bug fixes] - 2023-07-20
+
 - Fixes and issue where tags as objects would crash the plugin
 
 ## [Add week placeholder] - 2023-07-14

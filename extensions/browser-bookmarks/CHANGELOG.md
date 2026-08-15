@@ -1,5 +1,94 @@
 # Browser Bookmarks Changelog
 
+## [Chrome Account Bookmarks] - 2026-05-20
+
+- Added support for Chrome account-synced bookmarks stored in `AccountBookmarks`
+
+## [Bug Fix] - 2026-05-19
+
+- Increased the Safari bookmark plist parser limit so large bookmark libraries no longer fail with `maxObjectCount exceeded`
+
+## [Windows Support for Chromium Browsers] - 2026-04-30
+
+- Added Windows support for Chrome, Edge, and Brave bookmarks
+- Automatically refresh Chromium bookmarks when the selected profile changes on disk
+
+## [Support for Perplexity Comet Browser] - 2026-03-04
+
+- Added support for `Perplexity Comet` browser
+
+## [Improvements] - 2026-03-03
+
+- Improved browser handling and opening bookmarks
+- Added profile support for Vivaldi Snapshot
+- Fixed inconsistent icon usage for Brave and Edge variants
+- Updated dependencies to latest versions
+- Fixed formatting and code style issues
+
+## [Bug Fix] - 2026-02-18
+
+- Updated bundled `sql-wasm.wasm` to match upgraded `sql.js` v1.13.0, fixing `TypeError: a is not a function` crash in Firefox, LibreWolf, and Zen bookmark hooks
+
+## [Support for Vivaldi Snapshot Browser] - 2026-02-17
+
+- Added support for `Vivaldi Snapshot` browser.
+
+## [Bug Fixes] - 2026-02-12
+
+- Fixed permission errors (EPERM) when accessing Chrome and Arc browser Local State files ([#16481](https://github.com/raycast/extensions/issues/16481))
+- Improved error handling for file access operations to gracefully handle permission restrictions
+- Fixed dependency conflicts by downgrading ESLint to version 9 for compatibility with existing plugins
+- Fixed linting issues by removing unused catch variables and invalid ESLint rule references
+
+## [Support for Helium Browser] - 2025-12-08
+
+- Added support for `Helium` browser.
+
+## [Support for libreWolf] - 2025-12-07
+
+- Added support for `LibreWolf` browser.
+
+## [Bug Fixes] - 2025-11-10
+
+- Improved error handling for directory reading.
+
+## [Support for ChatGPT Atlas Browser] - 2025-10-23
+
+- Added support for `ChatGPT Atlas` browser.
+
+## [Fix Zen Support] - 2025-08-19
+
+- Fix Bundle ID for Zen Browser.
+
+## [Add Quicklinks Support] - 2025-07-07
+
+- Added action to create `Quicklink` from bookmark.
+
+## [Support for Dia and Ghost Browser] - 2025-06-26
+
+- Added support for `Dia` browser.
+- Added support for `Ghost Browser`.
+
+## [Support Island Browser] - 2025-01-30
+
+- Added support for `Island` browser.
+
+## [Support Whale Browser] - 2024-12-14
+
+- Added support for `Whale` Browser Desktop.
+
+## [Update Logo] - 2024-12-11
+
+- Updated to latest logo since rebrand.
+
+## [Support Zen Browser] - 2024-11-26
+
+- Added support for Zen Browser Desktop.
+
+## [Support for Prisma Access] - 2024-11-24
+
+- Add support for `Prisma Access` browser.
+
 ## [Support for Chrome Beta] - 2024-01-12
 
 - Add support for `Chrome Beta` browser.

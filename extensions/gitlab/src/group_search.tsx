@@ -1,5 +1,5 @@
 import { GroupSearchList } from "./components/group_search";
 
-export default function GroupSearchRoot(): JSX.Element {
+export default function GroupSearchRoot() {
   return <GroupSearchList />;
 }

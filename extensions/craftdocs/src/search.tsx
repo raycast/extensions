@@ -1,101 +1,164 @@
-import { useEffect, useState } from "react";
-import useSearch from "./hooks/useSearch";
+import { useState } from "react";
+import { Action, ActionPanel, List, openExtensionPreferences } from "@raycast/api";
+import { CraftConfig } from "./Config";
+import ListSpaceDropdown from "./components/ListSpaceDropdown";
+import { CraftEnvironmentList, DatabaseIssueList } from "./components/CraftCommandState";
 import ListBlocks from "./components/ListBlocks";
-import useAppExists, { UseAppExists } from "./hooks/useAppExists";
-import useConfig, { UseConfig } from "./hooks/useConfig";
-import useDB, { UseDB } from "./hooks/useDB";
-import {
-  Action,
-  ActionPanel,
-  getPreferenceValues,
-  List,
-  showToast,
-  Toast,
-  openExtensionPreferences,
-} from "@raycast/api";
-import useDocumentSearch from "./hooks/useDocumentSearch";
 import ListDocBlocks from "./components/ListDocBlocks";
-import Style = Toast.Style;
+import { APP_CONSTANTS, CACHE_KEYS } from "./constants";
+import useCraftCommandContext from "./hooks/useCraftCommandContext";
+import useDocumentSearch from "./hooks/useDocumentSearch";
+import usePersistedSpaceSelection from "./hooks/usePersistedSpaceSelection";
+import useSearch from "./hooks/useSearch";
+import { filterDatabasesBySpaceId, resolveCreateDocumentSpaceId } from "./lib/search";
+import { getSearchPreferences } from "./preferences";
 
-const { useDetailedView } = getPreferenceValues();
+const { useDetailedView } = getSearchPreferences();
 
 // noinspection JSUnusedGlobalSymbols
 export default function search() {
-  const appExists = useAppExists();
-  const config = useConfig(appExists);
-  const db = useDB(config);
-
+  const command = useCraftCommandContext({ includeDatabases: true });
   const [query, setQuery] = useState("");
-  const params = { appExists, db, query, setQuery, config };
 
-  useEffect(() => {
-    if (appExists.appExistsLoading) return;
-    if (appExists.appExists) return;
+  const availableSpaceIDs = new Set(command.db.databases.map((database) => database.spaceID));
+  const spaces =
+    command.config.config?.enabledSpaces
+      .filter((space) => availableSpaceIDs.has(space.spaceID))
+      .map((space) => ({
+        id: space.spaceID,
+        title: command.config.config?.getSpaceDisplayName(space.spaceID) || space.spaceID,
+      })) || [];
 
-    showToast(Style.Failure, "Error", "Craft app is not installed");
-  }, [appExists.appExistsLoading]);
+  const { selectedSpaceId, setSelectedSpaceId } = usePersistedSpaceSelection({
+    cacheKey: CACHE_KEYS.SEARCH_SPACE_ID,
+    validSelections: spaces.map((space) => space.id),
+    fallbackSelection: APP_CONSTANTS.DEFAULT_SPACE_FILTER,
+    alwaysAllowedSelections: [APP_CONSTANTS.DEFAULT_SPACE_FILTER],
+  });
 
-  return useDetailedView ? handleDetailedView(params) : handleListView(params);
+  if (command.loading) {
+    return <List isLoading={true} />;
+  }
+
+  if (!command.environment.environment || command.environment.environment.status !== "ready") {
+    return <CraftEnvironmentList environment={command.environment.environment} />;
+  }
+
+  if (command.db.fatalIssue) {
+    return <DatabaseIssueList issue={command.db.fatalIssue} />;
+  }
+
+  if (!command.config.config || command.config.config.enabledSpaces.length === 0) {
+    return <NoSpaces />;
+  }
+
+  return useDetailedView ? (
+    <DetailedResultsView
+      config={command.config.config}
+      databases={filterDatabasesBySpaceId(command.db.databases, selectedSpaceId)}
+      query={query}
+      selectedSpaceId={selectedSpaceId}
+      setQuery={setQuery}
+      setSelectedSpaceId={setSelectedSpaceId}
+      spaces={spaces}
+    />
+  ) : (
+    <BlockResultsView
+      config={command.config.config}
+      databases={filterDatabasesBySpaceId(command.db.databases, selectedSpaceId)}
+      query={query}
+      selectedSpaceId={selectedSpaceId}
+      setQuery={setQuery}
+      setSelectedSpaceId={setSelectedSpaceId}
+      spaces={spaces}
+    />
+  );
 }
 
-type ViewParams = {
-  appExists: UseAppExists;
-  db: UseDB;
+type SearchViewProps = {
+  config: CraftConfig;
+  databases: ReturnType<typeof filterDatabasesBySpaceId>;
   query: string;
+  selectedSpaceId: string;
   setQuery: (query: string) => void;
-  config: UseConfig;
+  setSelectedSpaceId: (spaceId: string) => void;
+  spaces: Array<{ id: string; title: string }>;
 };
 
-const handleListView = ({ appExists, db, query, setQuery, config }: ViewParams) => {
-  const { resultsLoading, results } = useSearch(db, query);
+const BlockResultsView = ({
+  config,
+  databases,
+  query,
+  selectedSpaceId,
+  setQuery,
+  setSelectedSpaceId,
+  spaces,
+}: SearchViewProps) => {
+  const searchState = useSearch({ databases, databasesLoading: false, fatalIssue: null, issues: [] }, query);
 
-  const listBlocks = (
+  return (
     <ListBlocks
-      isLoading={resultsLoading}
+      isLoading={searchState.resultsLoading}
       onSearchTextChange={setQuery}
-      blocks={results}
+      blocks={searchState.results}
       query={query}
-      config={config.config}
-    />
-  );
-
-  const listOrInfo = appExists.appExists ? listBlocks : <NoResults />;
-
-  return appExists.appExistsLoading ? listBlocks : listOrInfo;
-};
-
-const handleDetailedView = ({ appExists, db, query, setQuery, config }: ViewParams) => {
-  const { resultsLoading, results } = useDocumentSearch(db, query);
-
-  const listDocuments = (
-    <ListDocBlocks
-      resultsLoading={resultsLoading}
-      setQuery={setQuery}
-      results={results}
-      query={query}
-      config={config.config}
-    />
-  );
-
-  const listOrInfo = appExists.appExists ? listDocuments : <NoResults />;
-
-  return appExists.appExistsLoading ? listDocuments : listOrInfo;
-};
-
-const NoResults = () => (
-  <>
-    <List
-      actions={
-        <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        </ActionPanel>
+      config={config}
+      createDocumentSpaceId={resolveCreateDocumentSpaceId({
+        selectedSpaceId,
+        primarySpaceId: config.primarySpace?.spaceID,
+      })}
+      searchBarAccessory={
+        spaces.length > 1 ? (
+          <ListSpaceDropdown spaces={spaces} onChange={setSelectedSpaceId} value={selectedSpaceId} includeAll={true} />
+        ) : undefined
       }
-    >
-      <List.EmptyView
-        title="No results"
-        description="Selecting Craft application in preferences might help"
-        icon={"command-icon-small.png"}
-      />
-    </List>
-  </>
+    />
+  );
+};
+
+const DetailedResultsView = ({
+  config,
+  databases,
+  query,
+  selectedSpaceId,
+  setQuery,
+  setSelectedSpaceId,
+  spaces,
+}: SearchViewProps) => {
+  const searchState = useDocumentSearch({ databases, databasesLoading: false, fatalIssue: null, issues: [] }, query);
+
+  return (
+    <ListDocBlocks
+      resultsLoading={searchState.resultsLoading}
+      setQuery={setQuery}
+      results={searchState.results}
+      query={query}
+      config={config}
+      createDocumentSpaceId={resolveCreateDocumentSpaceId({
+        selectedSpaceId,
+        primarySpaceId: config.primarySpace?.spaceID,
+      })}
+      searchBarAccessory={
+        spaces.length > 1 ? (
+          <ListSpaceDropdown spaces={spaces} onChange={setSelectedSpaceId} value={selectedSpaceId} includeAll={true} />
+        ) : undefined
+      }
+    />
+  );
+};
+
+const NoSpaces = () => (
+  <List
+    actions={
+      <ActionPanel>
+        <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+      </ActionPanel>
+    }
+  >
+    <List.EmptyView
+      title="No Spaces found"
+      description="Open Craft and let it finish syncing before searching."
+      icon="command-icon-small.png"
+    />
+  </List>
 );

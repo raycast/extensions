@@ -20,7 +20,7 @@ export function getListFromFile(callback: (err: NodeJS.ErrnoException | null, da
   return fs.readFile(CRYPTO_LIST_PATH, "utf8", callback);
 }
 
-export function refreshExistingCache(callback: (err: NodeJS.ErrnoException | null, list: CryptoCurrency[]) => any) {
+export function refreshExistingCache(callback: (err: NodeJS.ErrnoException | null, list: CryptoCurrency[]) => void) {
   fetchAllCrypto({ limit: 10000, start: 1 })
     .then(({ data: resultData }) => {
       const { data, status } = resultData;
@@ -38,7 +38,7 @@ export function refreshExistingCache(callback: (err: NodeJS.ErrnoException | nul
         },
         (writeFileError) => {
           callback(writeFileError, cryptoList);
-        }
+        },
       );
     })
     .catch((error) => {

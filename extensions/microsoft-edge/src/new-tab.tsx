@@ -51,13 +51,15 @@ export default function Command() {
           <EdgeListItems.TabList key={tab.key()} tab={tab} />
         ))}
       </List.Section>
-      {orderByLastVisited(profile, profileHistories).map((p) => (
-        <List.Section key={p.profile.id} title={`History - ${p.profile.name}`}>
-          {p.data?.map((e) => (
-            <EdgeListItems.TabHistory key={`${p.profile.id}-${e.id}`} entry={e} profile={p.profile.id} />
-          ))}
-        </List.Section>
-      ))}
+      {orderByLastVisited(profile, profileHistories)
+        .filter((p) => !!p)
+        .map((p) => (
+          <List.Section key={p.profile.id} title={`History - ${p.profile.name}`}>
+            {p.data?.map((e) => (
+              <EdgeListItems.TabHistory key={`${p.profile.id}-${e.id}`} entry={e} profile={p.profile.id} />
+            ))}
+          </List.Section>
+        ))}
     </List>
   );
 }

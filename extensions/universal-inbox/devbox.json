@@ -1,6 +1,6 @@
 {
   "packages": [
-    "nodejs@latest",
+    "nodejs@24",
     "nodePackages.prettier@latest",
     "pre-commit@latest",
     "just@latest"

@@ -16,7 +16,7 @@ import {
 } from "@raycast/api";
 import { checkIfSayIsRunning, killRunningSay } from "mac-say";
 import { fetchUnNewsDetail, fetchUnPressDetail } from "./api.js";
-import { textToSpeech, useVoice } from "./utils.js";
+import { isWindows, textToSpeech, useVoice } from "./utils.js";
 import { LanguageCode, UnNews, UnPress } from "./types.js";
 
 export const PlayTextToSpeech = ({
@@ -29,7 +29,7 @@ export const PlayTextToSpeech = ({
   textContent?: string;
 }) => {
   const voice = useVoice(languageCode);
-  if (!languageCode) return null;
+  if (isWindows || !languageCode) return null;
 
   const isProEnhanced = environment.canAccess(AI);
   const { hideUnsupportedProFeatures, newsSummerizeLength } = getPreferenceValues<Preferences>();
@@ -85,6 +85,7 @@ export const StopTextToSpeech = () => {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const checkRunning = async () => {
+    if (isWindows) return;
     const isRunning = await checkIfSayIsRunning();
     setIsPlaying(Boolean(isRunning));
     await setTimeout(1000);
@@ -95,7 +96,7 @@ export const StopTextToSpeech = () => {
     checkRunning();
   }, []);
 
-  if (!isPlaying) return null;
+  if (isWindows || !isPlaying) return null;
   return (
     <Action icon={Icon.Stop} style={Action.Style.Destructive} title="Stop Text-to-Speech" onAction={killRunningSay} />
   );

@@ -1,36 +1,32 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
-import { Content } from "../types";
-import { convertToLocalTime } from "../utils";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Fixture } from "../types";
+import { convertISOToLocalTime, getMatchStatusIcon } from "../utils";
+import MatchCommentary from "./commentary";
+import MatchLineups from "./lineup";
+import MatchReports from "./report";
+import { JSX } from "react";
 
 interface PropsType {
   matchday: string;
-  matches: Content[];
-  page: number;
-  lastPage: boolean;
-  onChangePage: React.Dispatch<React.SetStateAction<number>>;
+  matches: Fixture[];
+  actions: JSX.Element;
 }
 
 export default function Matchday(props: PropsType) {
-  const { matchday, matches, page, lastPage, onChangePage } = props;
+  const { matchday, matches } = props;
 
   return (
     <List.Section key={matchday} title={matchday}>
       {matches.map((match) => {
-        const time = convertToLocalTime(match.kickoff.label, "HH:mm");
-
-        let icon: Image.ImageLike;
-        if (!match.kickoff.label) {
-          icon = { source: Icon.Clock };
-        } else if (match.status === "L") {
-          icon = { source: Icon.Livestream, tintColor: Color.Red };
-        } else if (match.status === "C") {
-          icon = { source: Icon.CheckCircle, tintColor: Color.Green };
-        } else {
-          icon = Icon.Calendar;
-        }
+        const time = convertISOToLocalTime(
+          match.kickoff,
+          match.kickoffTimezone,
+          "HH:mm",
+        );
+        const icon = getMatchStatusIcon(match);
 
         const accessories: List.Item.Accessory[] = [
-          { text: `${match.ground.name}, ${match.ground.city}` },
+          { text: match.ground },
           {
             icon: {
               source: "stadium.svg",
@@ -39,49 +35,62 @@ export default function Matchday(props: PropsType) {
           },
         ];
 
-        if (match.status === "L") {
+        if (match.period === "L") {
           accessories.unshift({
             tag: {
-              value: match.clock?.label,
+              value: match.clock,
               color: Color.Red,
             },
           });
         }
 
-        const keywords = match.teams
-          .map((t) => {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { id, ...rest } = t.team.club;
-            return Object.values(rest);
-          })
-          .flat();
+        const keywords = [
+          match.homeTeam.name,
+          match.homeTeam.shortName,
+          match.homeTeam.abbr,
+          match.awayTeam.name,
+          match.awayTeam.shortName,
+          match.awayTeam.abbr,
+        ];
+
+        const subtitle =
+          match.period === "PreMatch"
+            ? `${match.homeTeam.name} - ${match.awayTeam.name}`
+            : `${match.homeTeam.name} ${match.homeTeam.score} - ${match.awayTeam.score} ${match.awayTeam.name}`;
 
         return (
           <List.Item
-            key={match.id}
+            key={match.matchId}
             title={time || "TBC"}
-            subtitle={
-              match.status === "U"
-                ? `${match.teams[0].team.name} - ${match.teams[1].team.name}`
-                : `${match.teams[0].team.name} ${match.teams[0].score} - ${match.teams[1].score} ${match.teams[1].team.name}`
-            }
+            subtitle={subtitle}
             icon={icon}
             accessories={accessories}
             keywords={keywords}
             actions={
               <ActionPanel>
-                <Action.OpenInBrowser
-                  url={`https://www.premierleague.com/match/${match.id}`}
-                />
-                {!lastPage && (
-                  <Action
-                    title="Load More"
-                    icon={Icon.MagnifyingGlass}
-                    onAction={() => {
-                      onChangePage(page + 1);
-                    }}
+                <ActionPanel.Section title="Information">
+                  {match.period === "FullTime" && (
+                    <Action.Push
+                      title="Match Reports"
+                      icon={Icon.Highlight}
+                      target={<MatchReports match={match} title={subtitle} />}
+                    />
+                  )}
+                  <Action.Push
+                    title="Match Commentary"
+                    icon={Icon.Message}
+                    target={<MatchCommentary match={match} title={subtitle} />}
                   />
-                )}
+                  <Action.Push
+                    title="Match Lineups"
+                    icon={Icon.TwoPeople}
+                    target={<MatchLineups match={match} title={subtitle} />}
+                  />
+                  <Action.OpenInBrowser
+                    url={`https://www.premierleague.com/en/match/${match.matchId}`}
+                  />
+                </ActionPanel.Section>
+                {props.actions}
               </ActionPanel>
             }
           />

@@ -1,70 +1,25 @@
-import { SearchArguments } from "../../utils/interfaces";
-import { List } from "@raycast/api";
-import React from "react";
+import { List, Icon } from "@raycast/api";
+import { SortOrder } from "../../utils/sorting";
 
-import { NoteReducerActionType } from "../../utils/data/reducers";
-import { useNotesContext, useNotesDispatchContext } from "../../utils/hooks";
+export function NoteListDropdown(props: { sortOrder: SortOrder; setSortOrder: (o: SortOrder) => void }) {
+  const { sortOrder, setSortOrder } = props;
 
-export function NoteListDropdown(props: { tags: string[]; searchArguments: SearchArguments }) {
-  const allNotes = useNotesContext();
-  const dispatch = useNotesDispatchContext();
-
-  const { tags, searchArguments } = props;
-
-  function defaultTagValue() {
-    if (searchArguments.tagArgument) {
-      if (searchArguments.tagArgument.startsWith("#")) {
-        return searchArguments.tagArgument;
-      } else {
-        return "#" + searchArguments.tagArgument;
-      }
-    }
-  }
-
-  function handleChange(value: string) {
-    if (allNotes) {
-      if (value != "all") {
-        dispatch({ type: NoteReducerActionType.Set, payload: allNotes.filter((note) => note.tags.includes(value)) });
-      }
-    }
-  }
-
-  function dropdownContent() {
-    return (
-      <React.Fragment>
-        <List.Dropdown.Item title="All" value="all" />
-        <List.Dropdown.Section title="Tags" />
-        {tags.map((tag: string) => (
-          <List.Dropdown.Item title={tag} value={tag} key={tag} />
-        ))}
-      </React.Fragment>
-    );
-  }
-
-  function dropdownWithDefault() {
-    return (
-      <List.Dropdown tooltip="Search For" defaultValue={defaultTagValue() ?? ""} onChange={handleChange}>
-        {dropdownContent()}
-      </List.Dropdown>
-    );
-  }
-
-  function dropdownWithoutDefault() {
-    return (
-      <List.Dropdown tooltip="Search For" defaultValue="all" onChange={handleChange}>
-        {dropdownContent()}
-      </List.Dropdown>
-    );
-  }
-
-  function DropDownList() {
-    const defaultValue = defaultTagValue();
-    if (defaultValue) {
-      return dropdownWithDefault();
-    } else {
-      return dropdownWithoutDefault();
-    }
-  }
-
-  return <DropDownList />;
+  return (
+    <List.Dropdown
+      tooltip="Sort Notes"
+      value={sortOrder}
+      onChange={(v) => setSortOrder(v as SortOrder)}
+      storeValue={false}
+    >
+      <List.Dropdown.Section title="Sort Notes">
+        <List.Dropdown.Item value="relevance" title="Relevance" icon={Icon.Stars} />
+        <List.Dropdown.Item value="alphabetical-asc" title="File name (A to Z)" icon={Icon.ArrowDown} />
+        <List.Dropdown.Item value="alphabetical-desc" title="File name (Z to A)" icon={Icon.ArrowUp} />
+        <List.Dropdown.Item value="modified-desc" title="Modified time (new to old)" icon={Icon.Clock} />
+        <List.Dropdown.Item value="modified-asc" title="Modified time (old to new)" icon={Icon.Clock} />
+        <List.Dropdown.Item value="created-desc" title="Created time (new to old)" icon={Icon.Calendar} />
+        <List.Dropdown.Item value="created-asc" title="Created time (old to new)" icon={Icon.Calendar} />
+      </List.Dropdown.Section>
+    </List.Dropdown>
+  );
 }

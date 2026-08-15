@@ -1,8 +1,20 @@
 # Bilibili Changelog
 
-## [New Feature] - 2024-05-10
+## [Windows support] -2026-01-23
 
-- Removed the commands `Popular Videos` and `Weekly Popular Series`.
+- Support Windows platform
+
+## [Fix Bug] - 2025-09-20
+
+- Fix the issue where the app would crash when opening dynamic post with the description is null.
+
+## [Fix Bug] - 2024-10-10
+
+- Add HUD tips to notifications when user is not logged in.
+
+## [New Feature] - 2024-09-10
+
+- Support search videos
 
 ## [New Feature] - 2023-12-30
 

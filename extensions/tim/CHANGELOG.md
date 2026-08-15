@@ -1,5 +1,10 @@
 # Tim Changelog
 
+## [Update] - 2024-10-30
+
+- Update dependencies
+- Mute expected errors
+
 ## [Improvements] - 2024-06-09
 
 - Add a new command "Daily Overview" to view all tasks for each day

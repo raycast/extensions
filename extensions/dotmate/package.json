@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dotmate",
+  "title": "Dotmate",
+  "description": "Dotfile Manager for Raycast",
+  "icon": "dotmate.png",
+  "author": "knealking",
+  "contributors": [
+    "csaper"
+  ],
+  "type": "module",
+  "publish": "npx @raycast/api@latest publish",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "repoPath",
+      "type": "directory",
+      "title": "Dotfile Repository Path",
+      "description": "Enter the relative path to your dotfile repository. This is the path where your dotfiles are stored.",
+      "placeholder": "/path/to/your/dotfiles",
+      "required": true,
+      "default": ""
+    }
+  ],
+  "commands": [
+    {
+      "name": "show-commands",
+      "title": "Dotmate",
+      "subtitle": "List and Run Available Commands",
+      "description": "Displays all available commands that can be run",
+      "mode": "view"
+    },
+    {
+      "name": "backup-configs",
+      "title": "Backup Configs",
+      "subtitle": "Backup Config Files in Repo",
+      "description": "Backup local config files to repo",
+      "mode": "no-view"
+    },
+    {
+      "name": "restore-configs",
+      "title": "Restore Configs",
+      "subtitle": "Restore Config Files to Local",
+      "description": "Restore repo config to local machine",
+      "mode": "no-view"
+    },
+    {
+      "name": "show-diffs",
+      "title": "Show Diffs",
+      "subtitle": "Displays Diffs Among Config",
+      "description": "Displays diffs between local and repo paths",
+      "mode": "view"
+    },
+    {
+      "name": "show-status",
+      "title": "Show Status",
+      "subtitle": "Displays Status Between Configs",
+      "description": "Shows similar or different files between local and repo",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

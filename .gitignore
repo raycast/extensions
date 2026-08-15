@@ -149,6 +149,8 @@ dist
 ## Extension archives
 examples/**/*.zip
 extensions/**/*.zip
+examples/**/.github
+extensions/**/.github
 
 # IntelliJ / WebStorm
 .idea/
@@ -160,11 +162,23 @@ raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
+compiled_raycast_rust
 
 # VSCode
 .vscode
 
-# Root lockfiles
+# Root unused files
+/package.json
 /package-lock.json
-/pnpm-lock.yaml
-/yarn.lock
+
+# Non-npm lockfiles
+pnpm-lock.yaml
+yarn.lock
+deno.lock
+bun.lockb
+bun.lock
+
+scripts/internal/**
+.claude**
+.cursor/**
+extensions/vim-leader-key/docs/UI-KEYBOARD-LAYOUT.md

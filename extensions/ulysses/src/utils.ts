@@ -4,7 +4,7 @@ import open from "open";
 async function isUlyssesInstalled() {
   const applications = await getApplications();
   return applications.some(
-    ({ bundleId }) => bundleId === "com.ulyssesapp.mac" || bundleId === "com.soulmen.ulysses-setapp"
+    ({ bundleId }) => bundleId === "com.ulyssesapp.mac" || bundleId === "com.soulmen.ulysses-setapp",
   );
 }
 

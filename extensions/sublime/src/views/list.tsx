@@ -24,7 +24,7 @@ export default function CardsList({
             isShowingDetail={cards && cards.length > 0}
             searchBarPlaceholder={searchBarPlaceholder}
             isLoading={isLoading}
-            filtering={!!onSearchTextChange || undefined}
+            filtering={!onSearchTextChange}
             throttle={!!onSearchTextChange}
             pagination={pagination}
             onSearchTextChange={onSearchTextChange}
@@ -38,18 +38,20 @@ export default function CardsList({
             {cards?.map((item) => (
                 <List.Item
                     key={item.uuid}
-                    title={item.name || item.text || item.description || item.smart_title?.[0] || ""}
+                    title={
+                        item.info?.content || item.name || item.text || item.description || item.smart_title?.[0] || ""
+                    }
                     // subtitle={item.text || item.description}
                     accessories={[{ tag: getCardType(item.entity_type) }]}
                     icon={getEntityIcon(item)}
                     detail={
                         <List.Item.Detail
                             markdown={
-                                item.thumbnail
-                                    ? `<img alt="Card image" src="${item.thumbnail}" />`
-                                    : (item.name ? `# ${item.name}\n` : "") + item.markdown
-
-                                // `> ${JSON.stringify(item, null, 2)}`
+                                (item.name ? `# ${item.name}\n` : "") +
+                                item.markdown +
+                                // Show thumbnail after text to avoid layout change
+                                (item.thumbnail ? `<img alt="Card image" src="${item.thumbnail}" />` : "")
+                                // `\n\n> ${JSON.stringify(item, null, 2)}`
                             }
                             metadata={
                                 <List.Item.Detail.Metadata>
@@ -84,20 +86,22 @@ export default function CardsList({
                                         />
                                     )}
 
-                                    {(item.source || item.domain) && (
+                                    {(item.source?.name || item.source?.domain || item.domain) && (
                                         <List.Item.Detail.Metadata.Label
                                             title="Source"
                                             text={
-                                                item.source
-                                                    ? `${item.source.name} (${item.source.domain})`
-                                                    : item.domain
+                                                item.source?.name
+                                                    ? item.source?.domain
+                                                        ? `${item.source.name} (${item.source.domain})`
+                                                        : item.source.name
+                                                    : item.source?.domain || item.domain || ""
                                             }
                                         />
                                     )}
-                                    {item.authors[0] && (
+                                    {item.authors?.[0] && (
                                         <List.Item.Detail.Metadata.Label title="Author" text={item.authors[0]} />
                                     )}
-                                    {item.curated_by?.first && (
+                                    {item.curated_by?.first?.name && (
                                         <List.Item.Detail.Metadata.Label
                                             title={item.number_of_cards ? "By" : "Added by"}
                                             text={
@@ -140,8 +144,8 @@ export default function CardsList({
                     actions={
                         <ActionPanel>
                             <Action.OpenInBrowser title="Open Card" url={getCardUrl(item)} />
-                            {(item.urls[0] || item.source?.url) && (
-                                <Action.OpenInBrowser title="Open Source" url={item.urls[0] || item.source!.url} />
+                            {(item.urls?.[0] || item.source?.url) && (
+                                <Action.OpenInBrowser title="Open Source" url={item.urls?.[0] || item.source!.url} />
                             )}
                         </ActionPanel>
                     }

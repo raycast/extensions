@@ -6,6 +6,7 @@ import { getCanIUseLink } from "../utils";
 
 interface FeatureDetailProps {
   feature: string;
+  featureTitle: string;
   showReleaseDate: boolean;
   showPartialSupport: boolean;
   briefMode: boolean;
@@ -18,7 +19,13 @@ export enum Support {
   Supported = "Supported",
 }
 
-export default function FeatureDetail({ feature, showReleaseDate, showPartialSupport, briefMode }: FeatureDetailProps) {
+export default function FeatureDetail({
+  feature,
+  featureTitle,
+  showReleaseDate,
+  showPartialSupport,
+  briefMode,
+}: FeatureDetailProps) {
   const supportTable = caniuse.getSupport(feature);
   const formatter = new Intl.DateTimeFormat("en-US", {
     year: "numeric",
@@ -28,7 +35,7 @@ export default function FeatureDetail({ feature, showReleaseDate, showPartialSup
   const formatDate = (date: number) => ` (${briefMode ? "" : "Released "}${formatter.format(date * 1e3)})`;
 
   return (
-    <List searchBarPlaceholder="Search browsers...">
+    <List searchBarPlaceholder="Search browsers..." navigationTitle={featureTitle}>
       {Object.entries(agents).map(([agentName, agentInfos]) => {
         // No data is available for op_mini (Opera Mini)
         if (!agentInfos || !supportTable[agentName] || agentName === "op_mini") {

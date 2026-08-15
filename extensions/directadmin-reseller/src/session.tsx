@@ -3,8 +3,12 @@ import { useEffect, useState } from "react";
 import { getSession } from "./utils/api";
 import { ErrorResponse, GetSessionResponse } from "./types";
 import ErrorComponent from "./components/ErrorComponent";
+import InvalidUrlComponent from "./components/InvalidUrlComponent";
+import { isInvalidUrl } from "./utils/functions";
 
 export default function GetSession(props: LaunchProps<{ arguments: Arguments.Session }>) {
+  if (isInvalidUrl()) return <InvalidUrlComponent />;
+
   const { ip, session_id } = props.arguments;
 
   const [isLoading, setIsLoading] = useState(true);

@@ -7,7 +7,16 @@
   "author": "pernielsentikaer",
   "contributors": [
     "erics118",
-    "tonka3000"
+    "tonka3000",
+    "litomore",
+    "ridemountainpig",
+    "xmok",
+    "Undolog",
+    "tofrankie"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Fun"
@@ -20,6 +29,24 @@
       "description": "List your current installed Raycast extensions",
       "mode": "view",
       "preferences": [
+        {
+          "name": "sortBy",
+          "description": "Choose how the list is sorted",
+          "type": "dropdown",
+          "required": false,
+          "default": "title",
+          "title": "Sort By",
+          "data": [
+            {
+              "title": "Title (A–Z)",
+              "value": "title"
+            },
+            {
+              "title": "Recently Updated",
+              "value": "updated"
+            }
+          ]
+        },
         {
           "name": "separator",
           "description": "Select output format",
@@ -59,22 +86,23 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.0",
-    "@raycast/utils": "^1.10.0"
+    "@raycast/api": "^1.104.22",
+    "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^20.8.10",
-    "@types/react": "18.2.33",
-    "eslint": "^8.52.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -7,18 +7,41 @@
   "author": "thomaslombart",
   "contributors": [
     "Spacedolphin",
-    "tuzemec"
+    "tuzemec",
+    "xmok",
+    "abcd_ca",
+    "nulltrope"
   ],
   "owner": "raycast",
   "access": "public",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "create-task",
       "title": "Create Task",
       "description": "Create and assign new tasks.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "showStartDate",
+          "type": "checkbox",
+          "label": "Show the \"Start Date\" field",
+          "description": "When enabled, the \"Start Date\" field will be shown in the \"Create Task\" command.",
+          "required": false,
+          "default": true
+        },
+        {
+          "name": "shouldCloseMainWindow",
+          "type": "checkbox",
+          "label": "Close window immediately",
+          "description": "When enabled, the Raycast window is closed immediately, allowing you to carry on with other work.",
+          "required": false,
+          "default": false
+        }
+      ]
     },
     {
       "name": "my-tasks",
@@ -38,26 +61,35 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.53.4",
-    "@raycast/utils": "^1.12.3",
-    "axios": "^0.27.2",
-    "date-fns": "^2.29.1",
-    "lodash": "^4.17.21",
-    "node-html-markdown": "^1.2.0"
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7",
+    "axios": "^1.18.1",
+    "date-fns": "^4.4.0",
+    "lodash": "^4.18.1",
+    "node-html-markdown": "^2.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.5",
-    "@types/lodash": "^4.14.182",
-    "@types/node": "^18.8.3",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/lodash": "^4.17.24",
+    "@types/node": "26.0.1",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.8"
   }
 }

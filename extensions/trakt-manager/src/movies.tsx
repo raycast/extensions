@@ -1,35 +1,29 @@
-import { Icon, Keyboard, Toast, showToast } from "@raycast/api";
+import { Grid, Icon, Keyboard, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { PaginationOptions } from "@raycast/utils/dist/types";
-import { setMaxListeners } from "node:events";
-import { setTimeout } from "node:timers/promises";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { searchMovies } from "./api/movies";
-import { MovieGrid } from "./components/movie-grid";
-import { useMovieMutations } from "./hooks/useMovieMutations";
-import { APP_MAX_LISTENERS } from "./lib/constants";
+import { useCallback, useRef, useState } from "react";
+import { GenericGrid } from "./components/generic-grid";
+import { MovieActionPanel } from "./components/media-actions";
+import { useActionRunner } from "./lib/action-runner";
+import { initTraktClient } from "./lib/client";
+import { getPosterUrl } from "./lib/helper";
+import { addMovieToHistory, addMovieToWatchlist } from "./lib/media-mutations";
+import { TraktMovieListItem } from "./lib/schema";
+import { abortSearch, createSearchFetcher } from "./lib/search";
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const [searchText, setSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
-  const { addMovieToWatchlistMutation, checkInMovieMutation, addMovieToHistoryMutation, error, success } =
-    useMovieMutations(abortable);
+  const traktClient = initTraktClient();
   const {
     isLoading,
     data: movies,
     pagination,
   } = useCachedPromise(
-    (searchText: string) => async (options: PaginationOptions) => {
-      if (!searchText) {
-        return { data: [], hasMore: false };
-      }
-      await setTimeout(200);
-      abortable.current = new AbortController();
-      setMaxListeners(APP_MAX_LISTENERS, abortable.current?.signal);
-      const pagedMovies = await searchMovies(searchText, options.page + 1, abortable.current?.signal);
-      return { data: pagedMovies, hasMore: options.page < pagedMovies.total_pages };
-    },
+    createSearchFetcher({
+      abortable,
+      search: traktClient.movies.searchMovies,
+    }),
     [searchText],
     {
       initialData: undefined,
@@ -44,63 +38,57 @@ export default function Command() {
     },
   );
 
-  const handleSearchTextChange = useCallback((text: string): void => {
-    abortable.current?.abort();
-    abortable.current = new AbortController();
-    setSearchText(text);
-  }, []);
-
-  const handleAction = useCallback(
-    async (movie: TraktMovieListItem, action: (movie: TraktMovieListItem) => Promise<void>) => {
-      setActionLoading(true);
-      try {
-        await action(movie);
-      } finally {
-        setActionLoading(false);
-      }
+  const addMovieToWatchlistAction = useCallback(
+    async (movie: TraktMovieListItem) => {
+      await addMovieToWatchlist(traktClient, movie, { signal: abortable.current?.signal });
     },
-    [],
+    [traktClient],
   );
 
-  useEffect(() => {
-    if (error) {
-      showToast({
-        title: error.message,
-        style: Toast.Style.Failure,
-      });
-    }
-  }, [error]);
+  const addMovieToHistoryAction = useCallback(
+    async (movie: TraktMovieListItem) => {
+      await addMovieToHistory(traktClient, movie, { signal: abortable.current?.signal });
+    },
+    [traktClient],
+  );
 
-  useEffect(() => {
-    if (success) {
-      showToast({
-        title: success,
-        style: Toast.Style.Success,
-      });
-    }
-  }, [success]);
+  const handleSearchTextChange = useCallback(abortSearch(abortable, setSearchText), []);
+
+  const runMovieAction = useActionRunner<TraktMovieListItem>({ setActionLoading });
 
   return (
-    <MovieGrid
+    <GenericGrid
       isLoading={isLoading || actionLoading}
       emptyViewTitle="Search for movies"
       searchBarPlaceholder="Search for movies"
       onSearchTextChange={handleSearchTextChange}
       throttle={true}
       pagination={pagination}
-      movies={movies as TraktMovieList}
-      primaryActionTitle="Add to Watchlist"
-      primaryActionIcon={Icon.Bookmark}
-      primaryActionShortcut={Keyboard.Shortcut.Common.Edit}
-      primaryAction={(movie) => handleAction(movie, addMovieToWatchlistMutation)}
-      secondaryActionTitle="Check-in Movie"
-      secondaryActionIcon={Icon.Checkmark}
-      secondaryActionShortcut={Keyboard.Shortcut.Common.Duplicate}
-      secondaryAction={(movie) => handleAction(movie, checkInMovieMutation)}
-      tertiaryActionTitle="Add to History"
-      tertiaryActionIcon={Icon.Clock}
-      tertiaryActionShortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
-      tertiaryAction={(movie) => handleAction(movie, addMovieToHistoryMutation)}
+      items={movies}
+      aspectRatio="9/16"
+      fit={Grid.Fit.Fill}
+      title={(item) => item.movie.title}
+      poster={(item) => getPosterUrl(item.movie.images, "poster.png")}
+      keyFn={(item, index) => `${item.movie.ids.trakt}-${index}`}
+      actions={(item) => (
+        <MovieActionPanel
+          item={item}
+          actions={[
+            {
+              title: "Add to Watchlist",
+              icon: Icon.Bookmark,
+              shortcut: Keyboard.Shortcut.Common.Edit,
+              onAction: (movie) => runMovieAction(movie, addMovieToWatchlistAction, "Movie added to watchlist"),
+            },
+            {
+              title: "Add to History",
+              icon: Icon.Clock,
+              shortcut: Keyboard.Shortcut.Common.Duplicate,
+              onAction: (movie) => runMovieAction(movie, addMovieToHistoryAction, "Movie added to history"),
+            },
+          ]}
+        />
+      )}
     />
   );
 }

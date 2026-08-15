@@ -1,5 +1,4 @@
 import { OAuth } from "@raycast/api";
-import fetch from "node-fetch";
 
 // Create an OAuth app via https://www.dropbox.com/developers/apps
 // As redirect URL add: https://raycast.com/redirect?packageName=Extension
@@ -37,7 +36,7 @@ export async function authorize(): Promise<void> {
 
 export async function fetchTokens(
   authRequest: OAuth.AuthorizationRequest,
-  authCode: string
+  authCode: string,
 ): Promise<OAuth.TokenResponse> {
   const params = new URLSearchParams();
   params.append("client_id", clientId);

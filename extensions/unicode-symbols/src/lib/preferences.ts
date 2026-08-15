@@ -1,12 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  searchResultLimitStr: string;
-  viewType: "list" | "grid";
-  gridItemSize: "small" | "medium" | "large";
-}
-
-const raycastPreferences: Preferences = getPreferenceValues();
+const raycastPreferences = getPreferenceValues<Preferences>();
 
 const defaultSearchResultLimit = 100;
 const maxSearchResultLimit = 1000;
@@ -31,3 +25,7 @@ export const gridColumnNumber = (): number => {
       return 5;
   }
 };
+
+export const dataSetName = raycastPreferences.dataSet === "full" && viewType === "grid" ? "full-dataset" : "dataset";
+
+export const primaryAction: "copy" | "paste" = raycastPreferences.primaryAction || "paste";

@@ -5,6 +5,10 @@
   "description": "Remove background from image with the Mac Vision API",
   "icon": "extension_icon.png",
   "author": "xmorse",
+  "contributors": [
+    "ridemountainpig",
+    "andreaselia"
+  ],
   "categories": [
     "System",
     "Media"
@@ -19,12 +23,12 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.3"
+    "@raycast/api": "^1.79.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/react": "^18.3.3",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"

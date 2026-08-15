@@ -5,6 +5,9 @@
   "description": "Grant and revoke admin permission with SAP Privileges (https://github.com/SAP/macOS-enterprise-privileges). Not affiliated with SAP.",
   "icon": "privileges.png",
   "author": "ph00lt0",
+  "contributors": [
+    "riesinger"
+  ],
   "categories": [
     "Security"
   ],
@@ -24,7 +27,7 @@
     },
     {
       "name": "temp",
-      "title": "Grant Admin Privileges For 1 Minute",
+      "title": "Grant Admin Privileges for 1 Minute",
       "description": "Grant admin permission with SAP Privileges for 1 minute",
       "mode": "no-view"
     }

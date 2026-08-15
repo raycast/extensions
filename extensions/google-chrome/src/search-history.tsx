@@ -45,7 +45,7 @@ export default function Command(): ReactElement {
       {groups?.map((group) => (
         <List.Section title={group} key={group}>
           {groupedEntries?.get(group)?.map((e) => (
-            <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} />
+            <ChromeListItems.TabHistory key={e.id} entry={e} profile={profile} type="History" />
           ))}
         </List.Section>
       ))}

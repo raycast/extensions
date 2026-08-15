@@ -17,7 +17,7 @@ export const RandomGamesList = () => {
   return (
     <List
       navigationTitle="Random Games"
-      enableFiltering={false}
+      filtering={false}
       isLoading={isLoading}
       searchBarPlaceholder=""
       onSelectionChange={(id) => setHovered(Number(id ?? 0))}

@@ -4,7 +4,8 @@ export default function Command() {
   return (
     <MenuBarExtra icon={Icon.Shield} tooltip="Checksum Tools">
       <MenuBarExtra.Item
-        title="Checksum of a file"
+        title="Verify File Checksum"
+        icon={Icon.CheckCircle}
         onAction={async () => {
           try {
             await launchCommand({ name: "checksum", type: LaunchType.UserInitiated });
@@ -13,21 +14,24 @@ export default function Command() {
           }
         }}
       />
+      <MenuBarExtra.Separator />
       <MenuBarExtra.Item
-        title="Get Hash of Text"
+        title="Calculate File Hash"
+        icon={Icon.Document}
         onAction={async () => {
           try {
-            await launchCommand({ name: "hashtext", type: LaunchType.UserInitiated });
+            await launchCommand({ name: "hashfile", type: LaunchType.UserInitiated });
           } catch (error) {
             console.error(error);
           }
         }}
       />
       <MenuBarExtra.Item
-        title="Get Hash of File"
+        title="Calculate Text Hash"
+        icon={Icon.Text}
         onAction={async () => {
           try {
-            await launchCommand({ name: "hashfile", type: LaunchType.UserInitiated });
+            await launchCommand({ name: "hashtext", type: LaunchType.UserInitiated });
           } catch (error) {
             console.error(error);
           }

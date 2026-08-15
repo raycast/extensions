@@ -9,8 +9,8 @@ function useTurndown() {
   const turndown = useMemo((): TurndownService | undefined => {
     if (isLoading || error || !ankiMediaPath) return;
 
+    TurndownService.prototype.escape = (text: string) => text;
     const td = new TurndownService();
-
     td.addRule('image', {
       filter: 'img',
       replacement: (_, node) => {

@@ -1,5 +1,6 @@
 import { addHours, addMinutes, differenceInCalendarDays, format, roundToNearestMinutes } from 'date-fns';
 import { CalendarEvent } from './types';
+import { formatOffsetLabel, unadjustDateForTimezone } from './timezones';
 
 export const getHumanDateFormat = 'MMM dd, yyyy';
 export const getHumanTimeFormat = 'h:mm aa';
@@ -42,9 +43,36 @@ export const formatDate = (item: CalendarEvent): string => {
   if (item.isAllDay) {
     return `${formatRelativeDay(item.startDate, new Date())} all-day`;
   } else {
-    return `${formatRelativeDay(item.startDate, new Date())} from ${format(
+    const base = `${formatRelativeDay(item.startDate, new Date())} from ${format(
       item.startDate,
-      getHumanTimeFormat
+      getHumanTimeFormat,
     )} to ${format(item.endDate, getHumanTimeFormat)}`;
+
+    if (item.timezone) {
+      const originalStart = unadjustDateForTimezone(item.startDate, item.timezone);
+      const originalEnd = unadjustDateForTimezone(item.endDate, item.timezone);
+      const tzLabel = formatOffsetLabel(item.timezone);
+      const originalTimes = `${format(originalStart, getHumanTimeFormat)}–${format(originalEnd, getHumanTimeFormat)} ${tzLabel}`;
+      return `${base} (${originalTimes})`;
+    }
+
+    return base;
   }
+};
+
+export const preprocessQuery = (query: string): string => {
+  // Match patterns like 14u, 14h, 14u40, etc.
+  const timePattern = /\b(\d{1,2})([uUhH])(\d{2})?\b/g;
+  query = query.replace(timePattern, (match, hour, _, minutes) => {
+    hour = parseInt(hour, 10);
+    minutes = minutes ? parseInt(minutes, 10) : 0;
+
+    const date = new Date();
+    date.setHours(hour, minutes, 0, 0);
+
+    // Format the time correctly as "h:mm aa" (e.g., "2:00 PM" or "2:30 PM")
+    return format(date, 'h:mm aa');
+  });
+
+  return query;
 };

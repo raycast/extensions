@@ -3,7 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 
 export default async function main() {
   const res = await runAppleScript(
-    `
+    ` 
   on getBackgroundSounds()
     try
       set currentSetting to do shell script "defaults read com.apple.ComfortSounds comfortSoundsEnabled"
@@ -21,13 +21,13 @@ export default async function main() {
   
   on setBackgroundSounds(showRecents)
     if showRecents then
-      do shell script "defaults write com.apple.ComfortSounds comfortSoundsEnabled -bool true"
+      do shell script "defaults write com.apple.ComfortSounds comfortSoundsEnabled -bool true; defaults write com.apple.ComfortSounds lastEnablementTimestamp $(date +%s)"
       log "Background sounds turned on"
     else
       do shell script "defaults write com.apple.ComfortSounds comfortSoundsEnabled -bool false"
       log "Background sounds turned off"
     end if
-    do shell script "killall heard"
+    do shell script "killall -HUP heard"
     getBackgroundSounds()
   end setBackgroundSounds
   
@@ -42,5 +42,7 @@ export default async function main() {
 
   if (res) {
     await showHUD("Background sound toggled");
+  } else {
+    await showHUD("Something went wrong. Please try again.");
   }
 }

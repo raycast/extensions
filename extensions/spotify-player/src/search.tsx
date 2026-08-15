@@ -1,3 +1,4 @@
+import React from "react";
 import { useState, useEffect, ComponentProps, Fragment } from "react";
 import {
   Action,
@@ -141,7 +142,7 @@ function SearchCommand({ initialSearchText }: { initialSearchText?: string }) {
     );
   }
 
-  const sections: { key: FilterValue; component: JSX.Element }[] = [
+  const sections: { key: FilterValue; component: React.JSX.Element }[] = [
     { key: "artists", component: <ArtistsSection type="list" limit={3} artists={searchData?.artists?.items} /> },
     { key: "tracks", component: <TracksSection limit={4} tracks={searchData?.tracks?.items} /> },
     { key: "albums", component: <AlbumsSection type="list" limit={6} albums={searchData?.albums?.items} /> },

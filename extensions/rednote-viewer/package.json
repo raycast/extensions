@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rednote-viewer",
+  "title": "RedNote Viewer",
+  "description": "Easy to view RedNote post in Raycast",
+  "icon": "rednote-viewer-icon.png",
+  "author": "orangelckc",
+  "contributors": [
+    "litomore"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view",
+      "title": "View RedNote Post",
+      "description": "Easy to view RedNote post",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "cookies",
+      "title": "RedNote Cookies",
+      "type": "password",
+      "required": true,
+      "description": "Please copy your cookie from browser"
+    },
+    {
+      "name": "columnsOfGrid",
+      "title": "Columns of Grid",
+      "type": "dropdown",
+      "required": true,
+      "default": "4",
+      "description": "Number of columns in the grid view",
+      "data": [
+        {
+          "title": "4 columns",
+          "value": "4"
+        },
+        {
+          "title": "5 columns",
+          "value": "5"
+        },
+        {
+          "title": "6 columns",
+          "value": "6"
+        },
+        {
+          "title": "7 columns",
+          "value": "7"
+        },
+        {
+          "title": "8 columns",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "name": "translateToEnglish",
+      "title": "Translate to English (require Raycast Pro)",
+      "label": "Enable",
+      "type": "checkbox",
+      "default": false,
+      "required": true,
+      "description": "Translate posts to English"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "got": "^14.6.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.9",
+    "@types/react": "^19.2.8",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.0",
+    "typescript": "^5.9.3"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

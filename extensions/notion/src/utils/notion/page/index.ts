@@ -3,7 +3,8 @@ import { showToast, Toast, Image, Icon } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { NotionToMarkdown } from "notion-to-md";
 
-import { getDateMention } from "../block";
+import { isMarkdownPageContent, PageContent } from "..";
+import { prependDateDivider } from "../block";
 import { handleError, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 
@@ -61,19 +62,23 @@ export async function patchPage(pageId: string, properties: UpdatePageParameters
   }
 }
 
-export async function search(query?: string, nextCursor?: string) {
+export async function search(query?: string, nextCursor?: string, pageSize: number = 25) {
   const notion = getNotionClient();
   const database = await notion.search({
     sort: {
       direction: "descending",
       timestamp: "last_edited_time",
     },
-    page_size: 25,
+    page_size: pageSize,
     query,
     ...(nextCursor && { start_cursor: nextCursor }),
   });
 
-  return { pages: database.results.map(pageMapper), hasMore: database.has_more, nextCursor: database.next_cursor };
+  return {
+    pages: database.results.map(pageMapper),
+    hasMore: database.has_more,
+    nextCursor: database.next_cursor,
+  };
 }
 
 export async function fetchPageContent(pageId: string) {
@@ -122,7 +127,7 @@ export async function appendBlockToPage({
   try {
     const notion = getNotionClient();
 
-    const childrenToInsert = addDateDivider ? [{ divider: {} }, getDateMention(), ...children] : children;
+    const childrenToInsert = addDateDivider ? prependDateDivider(children) : children;
     const insertAfter = prepend ? await fetchPageFirstBlockId(pageId) : undefined;
 
     const { results } = await notion.blocks.children.append({
@@ -137,16 +142,20 @@ export async function appendBlockToPage({
   }
 }
 
-export async function appendToPage(pageId: string, params: { content: string }) {
+export async function appendToPage(pageId: string, params: { content: PageContent; addDateDivider?: boolean }) {
   try {
     const notion = getNotionClient();
+    const { content, addDateDivider = false } = params;
 
-    const arg: Parameters<typeof notion.blocks.children.append>[0] = {
+    const children = isMarkdownPageContent(content)
+      ? // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
+        (markdownToBlocks(content) as BlockObjectRequest[])
+      : content;
+
+    const { results } = await notion.blocks.children.append({
       block_id: pageId,
-      children: markdownToBlocks(params.content) as BlockObjectRequest[],
-    };
-
-    const { results } = await notion.blocks.children.append(arg);
+      children: addDateDivider ? prependDateDivider(children) : children,
+    });
 
     const n2m = new NotionToMarkdown({ notionClient: notion });
 
@@ -154,7 +163,9 @@ export async function appendToPage(pageId: string, params: { content: string }) 
       markdown: results.length === 0 ? "" : "\n\n" + n2m.toMarkdownString(await n2m.blocksToMarkdown(results)),
     };
   } catch (err) {
-    return handleError(err, "Failed to add content to the page", { markdown: "" });
+    return handleError(err, "Failed to add content to the page", {
+      markdown: "",
+    });
   }
 }
 
@@ -187,8 +198,4 @@ export interface Page {
   icon_external: string | null;
   url?: string;
   properties: Record<string, PageProperty>;
-}
-
-export interface PageContent {
-  markdown: string | undefined;
 }

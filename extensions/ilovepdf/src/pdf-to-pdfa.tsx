@@ -10,11 +10,12 @@ import {
 import ILovePDFApi from "@ilovepdf/ilovepdf-nodejs";
 import PdfaTask from "@ilovepdf/ilovepdf-js-core/tasks/PdfaTask";
 import ILovePDFFile from "@ilovepdf/ilovepdf-nodejs/ILovePDFFile";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import fs from "fs";
 import path from "path";
 import { chooseDownloadLocation, getFilePath, handleOpenNow } from "./common/utils";
 import { Status } from "./common/types";
+import { useFetchSelectedFinderItems } from "./hook/use-fetch-selected-finder-items";
 
 type Values = {
   files: string[];
@@ -25,6 +26,7 @@ const {
   APISecretKey: secretKey,
   OpenNow: openNow,
   AskBeforeDownload: askBeforeDownload,
+  SelectFileInFinder: selectFileInFinder,
 } = getPreferenceValues<Preferences>();
 
 const getConformanceLevelDescription = (conformance: string): string => {
@@ -122,64 +124,82 @@ export default function Command() {
   const [destinationFilePath, setDestinationFilePath] = useState<string>("");
   const [conformance, setConformance] = useState<string>("pdfa-2b");
   const [allowDowngrade, setAllowDowngrade] = useState<boolean>(true);
+  const [selectedFiles, setSelectedFiles] = useState<string[]>([]);
+
+  const {
+    isLoading: isFinderLoading,
+    selectedFiles: finderSelectedFiles,
+    status: fetchStatus,
+  } = useFetchSelectedFinderItems(selectFileInFinder);
+
+  useEffect(() => {
+    setIsLoading(isFinderLoading);
+    setSelectedFiles(finderSelectedFiles);
+    setStatus(fetchStatus);
+  }, [isFinderLoading, finderSelectedFiles, fetchStatus]);
+
   async function handleSubmit(values: Values) {
     setIsLoading(true);
-    if (!values.files.length) {
+    if (!selectFileInFinder && !values.files.length) {
       await showToast(Toast.Style.Failure, "You must select a single file.", "Please select a file.");
       setStatus("failure");
       setIsLoading(false);
       return;
+    } else {
+      values.files = selectedFiles;
     }
 
     const toast = await showToast(Toast.Style.Animated, "Processing", "Converting to PDF/A...");
 
-    const file: string = values.files[0];
-    const fileExtension = path.extname(file);
-    const fileName = path.basename(file, fileExtension);
-    const directory = path.dirname(file);
-    let destinationFile = getFilePath(directory, `${fileName}_pdfa.pdf`);
+    for (const valueFile of values.files) {
+      const file: string = valueFile;
+      const fileExtension = path.extname(file);
+      const fileName = path.basename(file, fileExtension);
+      const directory = path.dirname(file);
+      let destinationFile = getFilePath(directory, `${fileName}_pdfa.pdf`);
 
-    if (askBeforeDownload) {
-      const finalName = await chooseDownloadLocation(
-        destinationFile,
-        "Save The PDF As",
-        setIsLoading,
-        setStatus,
-        toast,
-      );
-      if (finalName == undefined) {
-        return;
+      if (askBeforeDownload) {
+        const finalName = await chooseDownloadLocation(
+          destinationFile,
+          "Save The PDF As",
+          setIsLoading,
+          setStatus,
+          toast,
+        );
+        if (finalName == undefined) {
+          return;
+        }
+        destinationFile = finalName;
       }
-      destinationFile = finalName;
+
+      setDestinationFilePath(destinationFile);
+      const instance = new ILovePDFApi(publicKey, secretKey);
+      const task = instance.newTask("pdfa") as PdfaTask;
+
+      try {
+        await task.start();
+        const iLovePdfFile = new ILovePDFFile(file);
+        await task.addFile(iLovePdfFile);
+        await task.process({ conformance: conformance as ConfromanceLevel, allow_downgrade: allowDowngrade });
+        const data = await task.download();
+        fs.writeFileSync(destinationFile, data);
+        toast.style = Toast.Style.Success;
+        toast.title = "success";
+        toast.message = "File converted successfully.";
+        setStatus("success");
+        setIsLoading(false);
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "failure";
+        toast.message = `Error happened during converting the ${fileName} file. Reason ${error}`;
+        setStatus("failure");
+        setIsLoading(false);
+        console.log(error);
+        break;
+      }
+
+      await handleOpenNow(openNow, destinationFile, toast);
     }
-
-    setDestinationFilePath(destinationFile);
-    const instance = new ILovePDFApi(publicKey, secretKey);
-    const task = instance.newTask("pdfa") as PdfaTask;
-
-    try {
-      await task.start();
-      const iLovePdfFile = new ILovePDFFile(file);
-      await task.addFile(iLovePdfFile);
-      await task.process({ conformance: conformance as ConfromanceLevel, allow_downgrade: allowDowngrade });
-      const data = await task.download();
-      fs.writeFileSync(destinationFile, data);
-      toast.style = Toast.Style.Success;
-      toast.title = "success";
-      toast.message = "File converted successfully.";
-      setStatus("success");
-      setIsLoading(false);
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "failure";
-      toast.message = `Error happened during converting the file. Reason ${error}`;
-      setStatus("failure");
-      setIsLoading(false);
-      console.log(error);
-      return;
-    }
-
-    await handleOpenNow(openNow, destinationFile, toast);
   }
 
   return (
@@ -199,7 +219,11 @@ export default function Command() {
       }
       isLoading={isLoading}
     >
-      <Form.FilePicker id="files" title="Choose a PDF" allowMultipleSelection={false} />
+      {selectFileInFinder ? (
+        <Form.Description title="Finder Selected File" text={selectedFiles.join("\n")} />
+      ) : (
+        <Form.FilePicker id="files" title="Choose a PDF" allowMultipleSelection={false} />
+      )}
       <Form.Checkbox
         id="allow_downgrade"
         label=""

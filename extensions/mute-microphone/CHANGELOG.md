@@ -1,5 +1,21 @@
 # Mute microphone Changelog
 
+## [Windows Support] - 2026-01-27
+
+- Added support for Windows using PowerShell scripts
+- Implemented platform detection to switch between macOS (AppleScript) and Windows (PowerShell)
+- Added 'Set Level' support for Windows
+- Improved TypeScript type safety and removed 'any' usage
+
+## [Bugfix] - 2024-10-16
+
+- Fix overlapping toast messages
+- Improve system messages
+
+## [Improvements] - 2024-10-15
+
+- Option to set input level to specific value
+
 ## [Improvements] - 2024-06-23
 
 - Option to choose muted icon color for menubar

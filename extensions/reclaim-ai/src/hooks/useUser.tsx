@@ -1,16 +1,13 @@
 import { Cache } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { User } from "../types/user";
-import { axiosPromiseData } from "../utils/axiosPromise";
-import reclaimApi from "./useApi";
+import { fetchPromise } from "../utils/fetcher";
 import { useCallbackSafeRef } from "./useCallbackSafeRef";
 import { ApiResponseUser } from "./useUser.types";
 
 const cache = new Cache();
 
 const useUser = () => {
-  const { fetcher } = reclaimApi();
-
   const cachedUserObj = cache.get("user");
   const cachedUserDate = cache.get("userDate");
 
@@ -29,7 +26,7 @@ const useUser = () => {
       }
       setIsLoading(true);
 
-      const [user, error] = await axiosPromiseData<ApiResponseUser>(fetcher("/users/current"));
+      const [user, error] = await fetchPromise<ApiResponseUser>("/users/current");
 
       if (!user || error) throw error;
 
@@ -52,6 +49,9 @@ const useUser = () => {
   return {
     currentUser,
     isLoading,
+    // Reclaim 2.0 ("Assistant") is on when this flag is set. Commands branch on
+    // this to choose between the 1.0 /tasks and 2.0 /reclaim-tasks endpoints.
+    isAssistantEnabled: !!currentUser?.features.assistant?.enabled,
   };
 };
 

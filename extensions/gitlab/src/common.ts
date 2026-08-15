@@ -1,18 +1,33 @@
-import { ApolloClient, ApolloLink, HttpLink, InMemoryCache, concat, NormalizedCacheObject } from "@apollo/client";
-import fetch from "cross-fetch";
+import { ApolloClient, ApolloLink, fromPromise, HttpLink, InMemoryCache, NormalizedCacheObject } from "@apollo/client";
+import { setContext } from "@apollo/client/link/context";
+import { onError } from "@apollo/client/link/error";
+import fetch from "node-fetch";
 
-import { getPreferenceValues } from "@raycast/api";
-import { getHttpAgent, GitLab } from "./gitlabapi";
+import os from "os";
+import path from "path";
+import { Credential, getHttpAgent, GitLab } from "./gitlabapi";
+import { authorize, refreshToken } from "./oauth";
+import { getInstance, getPersonalAccessToken, getPreferences, parseCommaSeparatedPreference } from "./utils";
 
-export function createGitLabClient(): GitLab {
-  const preferences = getPreferenceValues();
-  const instance = (preferences.instance as string) || "https://gitlab.com";
-  const token = preferences.token as string;
-  const gitlab = new GitLab(instance, token);
-  return gitlab;
+let gitlabClient: GitLab | undefined;
+
+export async function resolveCredential(): Promise<Credential> {
+  const token = getPersonalAccessToken();
+  return token === undefined ? { authType: "oauth", token: await authorize() } : { authType: "pat", token };
 }
 
-export class GitLabGQL {
+function createGitLabClient(): GitLab {
+  return new GitLab(getInstance(), { resolve: resolveCredential, refresh: refreshToken });
+}
+
+function getGitLabClient(): GitLab {
+  if (!gitlabClient) {
+    gitlabClient = createGitLabClient();
+  }
+  return gitlabClient;
+}
+
+class GitLabGQL {
   public url: string;
   public client: ApolloClient<NormalizedCacheObject>;
   constructor(url: string, client: ApolloClient<NormalizedCacheObject>) {
@@ -24,33 +39,83 @@ export class GitLabGQL {
   }
 }
 
-export function createGitLabGQLClient(): GitLabGQL {
-  const preferences = getPreferenceValues();
-  const instance = (preferences.instance as string) || "https://gitlab.com";
-  const token = preferences.token as string;
-  const graphqlEndpoint = `${instance}/api/graphql`;
-  const httpLink = new HttpLink({ uri: graphqlEndpoint, fetch, fetchOptions: { agent: getHttpAgent() } });
+function createGitLabGQLClient(): GitLabGQL {
+  const instance = getInstance();
+  const httpLink = new HttpLink({
+    uri: `${instance}/api/graphql`,
+    fetch: fetch as unknown as typeof globalThis.fetch,
+    fetchOptions: { agent: getHttpAgent() },
+  });
 
-  const authMiddleware = new ApolloLink((operation, forward) => {
-    operation.setContext(({ headers = {} }) => ({
+  const authLink = setContext(async (_, prevContext) => {
+    const credential = await resolveCredential();
+    return {
+      // Carried so the 401 retry below gates on the credential this request
+      // actually sent rather than re-reading preferences that may have changed.
+      gitlabAuthType: credential.authType,
       headers: {
-        ...headers,
-        authorization: token ? `Bearer ${token}` : "",
+        ...(prevContext.headers ?? {}),
+        authorization: `Bearer ${credential.token}`,
       },
-    }));
+    };
+  });
+
+  const requestLogLink = new ApolloLink((operation, forward) => {
+    console.log(
+      `GitLab GraphQL → ${operation.operationName ?? "anonymous"}`,
+      operation.variables && Object.keys(operation.variables).length > 0 ? operation.variables : "",
+    );
     return forward(operation);
   });
 
+  const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
+    if (graphQLErrors) {
+      for (const error of graphQLErrors) {
+        console.warn(
+          `GitLab GraphQL ${operation.operationName ?? "anonymous"}: ${error.message}`,
+          error.path ? { path: error.path, extensions: error.extensions } : error.extensions,
+        );
+      }
+    }
+    if (networkError) {
+      const statusCode = "statusCode" in networkError ? networkError.statusCode : undefined;
+      const result = "result" in networkError ? networkError.result : undefined;
+      console.warn(
+        `GitLab GraphQL network error${statusCode ? ` ${statusCode}` : ""} (${operation.operationName ?? "anonymous"}): ${networkError.message}`,
+        result ?? "",
+      );
+      const context = operation.getContext();
+      if (statusCode === 401 && context.gitlabAuthType === "oauth" && !context.gitlabAuthRetried && forward) {
+        operation.setContext({ gitlabAuthRetried: true });
+        return fromPromise(refreshToken()).flatMap(() => forward(operation));
+      }
+    }
+  });
+
   const client = new ApolloClient({
-    link: concat(authMiddleware, httpLink),
+    link: ApolloLink.from([errorLink, requestLogLink, authLink, httpLink]),
     cache: new InMemoryCache(),
+    defaultOptions: {
+      query: {
+        // Raycast hooks own caching; Apollo normalized cache merge fails when list
+        // filter variables change (e.g. project.mergeRequests with different state).
+        fetchPolicy: "no-cache",
+      },
+    },
   });
   return new GitLabGQL(instance, client);
 }
 
-export const gitlab = createGitLabClient();
-
-const defaultRefreshInterval = 10 * 1000;
+export const gitlab: GitLab = new Proxy({} as GitLab, {
+  get(_target, prop) {
+    const client = getGitLabClient();
+    const value = Reflect.get(client, prop, client) as unknown;
+    if (typeof value === "function") {
+      return (value as (...args: unknown[]) => unknown).bind(client);
+    }
+    return value;
+  },
+});
 
 let gitlabgql: GitLabGQL | undefined;
 
@@ -61,58 +126,34 @@ export function getGitLabGQL(): GitLabGQL {
   return gitlabgql;
 }
 
-export function getCIRefreshInterval(): number | null {
-  const preferences = getPreferenceValues();
-  const userValue = preferences.cirefreshinterval as string;
-  if (!userValue || userValue.length <= 0) {
-    return defaultRefreshInterval;
-  }
-  const sec = parseFloat(userValue);
-  if (Number.isNaN(sec)) {
-    console.log(`invalid value ${userValue}, fallback to null`);
-    return null;
-  }
-  if (sec < 1) {
-    return null;
-  } else {
-    return sec * 1000; // ms
-  }
-}
-
 export enum PrimaryAction {
   Detail = "detail",
   Browser = "browser",
 }
 
 export function getPrimaryActionPreference(): PrimaryAction {
-  const pref = getPreferenceValues();
-  const val = (pref.primaryaction as string) || undefined;
-  if (val !== PrimaryAction.Detail && val !== PrimaryAction.Browser) {
-    return PrimaryAction.Browser;
+  const { primaryaction } = getPreferences();
+  if (primaryaction === PrimaryAction.Detail) {
+    return PrimaryAction.Detail;
   }
-  const result: PrimaryAction = val;
-  return result;
+  return PrimaryAction.Browser;
 }
 
 export function getPreferPopToRootPreference(): boolean {
-  const pref = getPreferenceValues();
-  const val = (pref.poptoroot as boolean) || false;
-  if (val === true) {
-    return true;
-  }
-  return false;
-}
-
-export function getListDetailsPreference(): boolean {
-  const pref = getPreferenceValues();
-  const val = (pref.listdetails as boolean) || false;
-  if (val === true) {
-    return true;
-  }
-  return false;
+  return getPreferences().poptoroot;
 }
 
 export function getExcludeTodoAuthorUsernamesPreference(): string[] {
-  const pref = getPreferenceValues();
-  return pref.excludeTodoAuthorUsernames?.split(",").map((u: string) => u.trim()) || [];
+  return parseCommaSeparatedPreference(getPreferences().excludeTodoAuthorUsernames);
+}
+
+export function getArtifactDownloadDirectoryPreference(): string {
+  const directory = (getPreferences().artifactDownloadDirectory ?? "").trim();
+  if (!directory) {
+    return path.join(os.homedir(), "Downloads");
+  }
+  if (directory.startsWith("~/")) {
+    return path.join(os.homedir(), directory.slice(2));
+  }
+  return directory;
 }

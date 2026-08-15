@@ -69,14 +69,14 @@ export const TokenDetailView: FC<ITokenDetailViewProps> = ({ token, cluster }) =
                   tokenCoingeckoData.market_data.price_change_24h_in_currency.usd === 0
                     ? Icon.CircleFilled
                     : tokenCoingeckoData.market_data.price_change_24h_in_currency.usd > 0
-                    ? Icon.ArrowUpCircleFilled
-                    : Icon.ArrowDownCircleFilled,
+                      ? Icon.ArrowUpCircleFilled
+                      : Icon.ArrowDownCircleFilled,
                 tintColor:
                   tokenCoingeckoData.market_data.price_change_24h_in_currency.usd === 0
                     ? Color.Blue
                     : tokenCoingeckoData.market_data.price_change_24h_in_currency.usd > 0
-                    ? Color.Green
-                    : Color.Red,
+                      ? Color.Green
+                      : Color.Red,
               }}
             />
           )}

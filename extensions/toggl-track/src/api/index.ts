@@ -1,4 +1,4 @@
-export { getMe, type Me } from "@/api/me";
+export { getMe, liteModeSync, isLiteModeColdStart, isLiteModeSyncDue, type Me } from "@/api/me";
 export { getMyOrganizations, type Organization } from "@/api/organizations";
 export { getMyWorkspaces, type Workspace } from "@/api/workspaces";
 export {
@@ -19,12 +19,15 @@ export {
   type Client,
 } from "@/api/clients";
 export { getMyTags, createTag, updateTag, deleteTag, type Tag } from "@/api/tags";
-export { getMyTasks, type Task } from "@/api/tasks";
+export { getMyTasks, createTask, type Task } from "@/api/tasks";
 export {
   getMyTimeEntries,
   createTimeEntry,
   stopTimeEntry,
   getRunningTimeEntry,
+  updateTimeEntry,
+  removeTimeEntry,
   type TimeEntry,
   type TimeEntryMetaData,
+  type UpdateTimeEntryParams,
 } from "@/api/timeEntries";

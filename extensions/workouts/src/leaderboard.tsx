@@ -39,7 +39,7 @@ function withClubs(Component: React.FC<{ clubs: StravaSummaryClub[] }>) {
   };
 }
 
-type AthleteActivities = {
+export type AthleteActivities = {
   [key: string]: {
     name: string;
     elapsed_time: number;

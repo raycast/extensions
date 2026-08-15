@@ -8,13 +8,7 @@ export enum Status {
   ACTIVE = 2,
 }
 
-export enum Visibility {
-  INVISIBLE = -1,
-  VISIBLE = 0,
-  PRIORITY = 1,
-}
-
-export const SUPERNOTES_APP_LINK_URL = "supernotes://";
-export const SUPERNOTES_API_URL = environment.isDevelopment
-  ? "http://127.0.0.1:5000/v1"
-  : "https://api.supernotes.app/v1";
+export const SUPERNOTES_APP_CUSTOM_SCHEME = "supernotes:/";
+export const SUPERNOTES_API_ROOT = environment.isDevelopment
+  ? "http://127.0.0.1:5000"
+  : "https://api.supernotes.app";

@@ -35,8 +35,9 @@ export function getIcon(activityType: string) {
     case "shared":
       source = Icon.Link;
       break;
-    default:
-      console.log("Unrecognized icon type:", activityType);
+    case "group_settings":
+      source = Icon.TwoPeople;
+      break;
   }
   return { source, tintColor };
 }

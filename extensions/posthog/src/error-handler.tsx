@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
-import { useEffect } from "react";
+import { ReactNode, useEffect } from "react";
 
-const ErrorHandler = ({ error, children }: { error?: Error; children: JSX.Element }): JSX.Element => {
+const ErrorHandler = ({ error, children }: { error?: Error; children: ReactNode }) => {
   useEffect(() => {
     if (error) {
       showToast({

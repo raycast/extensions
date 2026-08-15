@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { formatDistanceToNow, parseISO } from "date-fns";
-import { getPreferences } from "../../preferences";
-import { Card, useStacks } from "../hooks";
+import { type Card, useStacks } from "../hooks";
+import { BASE_URL } from "../../config";
 
 export function Stacks({ boardId, boardName }: { boardId: number; boardName: string }) {
   const { stacks, isLoading } = useStacks(boardId);
@@ -20,8 +20,7 @@ export function Stacks({ boardId, boardName }: { boardId: number; boardName: str
 }
 
 function Card({ card, boardId }: { card: Card; boardId: number }) {
-  const { hostname } = getPreferences();
-  const cardUrl = `https://${hostname}/apps/deck/#/board/${boardId}/card/${card.id}`;
+  const cardUrl = `${BASE_URL}/apps/deck/#/board/${boardId}/card/${card.id}`;
 
   const overdue = card.overdue > 0;
   const dueDate = card.duedate
@@ -42,7 +41,7 @@ function Card({ card, boardId }: { card: Card; boardId: number }) {
       title={card.title}
       subtitle={card.description + labels}
       icon={{ source: Icon.Circle, tintColor: overdue ? Color.Red : undefined }}
-      accessoryTitle={dueDate}
+      accessories={[{ text: dueDate }]}
       actions={
         <ActionPanel title={card.title}>
           <ActionPanel.Section>

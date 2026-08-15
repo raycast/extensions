@@ -1,13 +1,18 @@
-import { getPreferenceValues, LocalStorage, Clipboard, Toast, showToast, getSelectedText } from "@raycast/api";
+import { Clipboard, getPreferenceValues, getSelectedText, showToast, Toast } from "@raycast/api";
 
 import fs from "fs";
-import fsPath from "path";
-import path from "path";
 import { readFile } from "fs/promises";
+import fetch from "node-fetch";
+import { NodeHtmlMarkdown } from "node-html-markdown";
+import { parse } from "node-html-parser";
 import { homedir } from "os";
+import { default as fsPath, default as path } from "path";
 import { createContext, useEffect, useMemo, useState } from "react";
 
-import { Note, ObsidianJSON, ObsidianVaultsState, Vault, MediaState, Media, CodeBlock } from "../utils/interfaces";
+// @ts-expect-error url and input are mismatched
+global.fetch = fetch;
+
+import { CodeBlock, Media, MediaState, Note, ObsidianJSON, ObsidianVaultsState, Vault } from "../utils/interfaces";
 
 import {
   BYTES_PER_KILOBYTE,
@@ -536,6 +541,97 @@ export function useMedia(vault: Vault) {
   }, []);
 
   return media;
+}
+
+export async function urlToMarkdown(url: string) {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error("Unable to fetch URL");
+  }
+  const data = await res.text();
+  if (!data) {
+    throw new Error("Unable to fetch URL contents");
+  }
+
+  const document = parse(data);
+
+  // This doesn't catch everything but it's a good start
+  const content =
+    // Common article selectors
+    document.querySelector("article") ||
+    document.querySelector("main") ||
+    document.querySelector(".post-content") ||
+    document.querySelector(".article-body") ||
+    document.querySelector(".article-content") ||
+    document.querySelector(".entry-content") ||
+    document.querySelector(".post") ||
+    document.querySelector(".blog-post") ||
+    // Content-specific classes
+    document.querySelector(".content-area") ||
+    document.querySelector(".content-body") ||
+    document.querySelector(".main-content") ||
+    document.querySelector(".page-content") ||
+    document.querySelector(".single-content") ||
+    document.querySelector(".markdown") ||
+    document.querySelector(".markdown-body") ||
+    // Medium-style selectors
+    document.querySelector(".story-body") ||
+    document.querySelector(".story-content") ||
+    // WordPress common selectors
+    document.querySelector(".entry") ||
+    document.querySelector(".post-entry") ||
+    document.querySelector(".wordpress-content") ||
+    // Generic content containers
+    document.querySelector("#content") ||
+    document.querySelector("#main") ||
+    document.querySelector("#post") ||
+    document.querySelector("#article") ||
+    // ARIA roles
+    document.querySelector('[role="main"]') ||
+    document.querySelector('[role="article"]') ||
+    // Common content wrappers
+    document.querySelector(".container .content") ||
+    document.querySelector(".wrapper .content") ||
+    // Blog platforms
+    document.querySelector(".ghost-content") ||
+    document.querySelector(".substack-content") ||
+    // Documentation sites
+    document.querySelector(".docs-content") ||
+    document.querySelector(".documentation") ||
+    // News sites
+    document.querySelector(".article__body") ||
+    document.querySelector(".article__content") ||
+    document.querySelector(".story__content");
+
+  if (!content) {
+    throw new Error("Unable to parse article content");
+  }
+
+  // Remove unwanted elements
+  const elementsToRemove = [
+    "nav",
+    "header",
+    "footer",
+    ".navigation",
+    ".social-share",
+    ".author-bio",
+    ".related-posts",
+    ".comments",
+    "script",
+    "style",
+  ];
+
+  elementsToRemove.forEach((selector) => {
+    const elements = content.querySelectorAll(selector);
+    elements?.forEach((element) => element.remove());
+  });
+
+  const markdown = NodeHtmlMarkdown.translate(content.toString());
+
+  // Clean up the markdown
+  const cleanMarkdown = markdown.replace(/\n{3,}/g, "\n\n").trim();
+
+  return cleanMarkdown;
 }
 
 export const NotesContext = createContext([] as Note[]);

@@ -3,7 +3,13 @@ import StyledSystem from "./documentation/styledSystemDocs";
 
 export default function SearchDocumentation() {
   return (
-    <List>
+    <List
+      searchBarAccessory={
+        <List.Dropdown tooltip="Version">
+          <List.Dropdown.Item icon="chakra.png" title="v2" value="v2" />
+        </List.Dropdown>
+      }
+    >
       {Object.entries(StyledSystem).map(([section, items]) => (
         <List.Section title={section} key={section}>
           {items.map((item) => (

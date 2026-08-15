@@ -1,5 +1,9 @@
 # IPA Tramslator Changelog
 
+## [Maintenance] - 2025-08-12
+
+- Replace all `\r\n` with `\n` in the codebase to ensure consistent line endings across all files.
+
 ## [Enhancement / Bugfix] - 2024-05-27
 
 - Improved performance by removing duplicates in dictionary files.

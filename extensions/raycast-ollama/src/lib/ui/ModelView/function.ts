@@ -5,19 +5,6 @@ import { showToast, Toast } from "@raycast/api";
 import { GetServerClass } from "../function";
 
 /**
- * Get Ollama Server Array.
- * @returns Servers Names Array.
- */
-export async function GetServerArray(): Promise<string[]> {
-  const s = await GetOllamaServers();
-  const a = [...s.keys()].sort();
-  const al = a.filter((v) => v === "Local");
-  const ao = a.filter((v) => v !== "Local");
-  if (a.length > 1) return ["All", ...al, ...ao];
-  return [...al, ...ao];
-}
-
-/**
  * Get Ollama Server Class.
  * @returns Server Map.
  */
@@ -34,7 +21,7 @@ export async function GetServerClassByName(name: string): Promise<Ollama> {
 export async function DeleteServer(
   name: string,
   revalidate: CallableFunction,
-  setSelectedServer: React.Dispatch<React.SetStateAction<string>>
+  setSelectedServer: (value: string) => Promise<void>,
 ): Promise<void> {
   await DeleteOllamaServers(name)
     .then(async () => {
@@ -52,8 +39,11 @@ export async function DeleteServer(
  * @param server - Ollama Server Name.
  * @returns Array of Available Models.
  */
-export async function GetModels(server: string): Promise<Types.UiModel[]> {
+export async function GetModels(server: string | undefined): Promise<Types.UiModel[]> {
   let o: Types.UiModel[] = [];
+
+  if (server === undefined) return o;
+
   let s = await GetServerClass();
   if (server !== "All" && !s.has(server)) return [];
   if (server !== "All") s = new Map([[server, s.get(server) as Ollama]]);
@@ -61,6 +51,10 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
     await Promise.all(
       [...s.entries()].map(async (s): Promise<Types.UiModel[]> => {
         const tag = await s[1].OllamaApiTags().catch(async (e: Error) => {
+          await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
+          return undefined;
+        });
+        const ps = await s[1].OllamaApiPs().catch(async (e: Error) => {
           await showToast({ style: Toast.Style.Failure, title: `'${s[0]}' Server`, message: e.message });
           return undefined;
         });
@@ -76,13 +70,29 @@ export async function GetModels(server: string): Promise<Types.UiModel[]> {
               detail: v,
               show: show,
               modelfile: s[1].OllamaApiShowParseModelfile(show),
+              ps: ps && ps.models.filter((ps) => ps.name === v.name)[0],
             };
-          })
+          }),
         );
-      })
+      }),
     )
   ).forEach((v) => (o = o.concat(v)));
   return o;
+}
+
+/**
+ * Update model pulling from the registry the latest version
+ * @param model.
+ * @param setDownload - setDownload Function.
+ * @param revalidate - RevalidateModel Function.
+ */
+export async function UpdateModel(
+  model: Types.UiModel,
+  setDownload: React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
+  revalidate: CallableFunction,
+) {
+  const o = await GetServerClassByName(model.server.name);
+  await PullModel(o, model.server.name, model.detail.name, setDownload, revalidate);
 }
 
 /**
@@ -116,7 +126,7 @@ export async function PullModel(
   server: string,
   model: string,
   setDownload: React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
-  revalidate: CallableFunction
+  revalidate: CallableFunction,
 ): Promise<void> {
   const e = await ollama.OllamaApiPull(model).catch(async (err): Promise<undefined> => {
     await showToast({ style: Toast.Style.Failure, title: err.message });
@@ -158,4 +168,56 @@ export async function PullModel(
       await showToast({ style: Toast.Style.Failure, title: data });
     });
   }
+}
+
+/**
+ * Load Model on Memory.
+ * @param model.
+ * @param revalidate - revalidate function for reload all models.
+ */
+export async function LoadModel(model: Types.UiModel, revalidate: CallableFunction): Promise<void> {
+  await showToast({
+    style: Toast.Style.Animated,
+    title: `Loading Model '${model.detail.name}' on '${model.server.name}' Memory`,
+  });
+  await model.server.ollama
+    .OllamaApiGenerateNoStream({
+      model: model.detail.name,
+      keep_alive: -1,
+    })
+    .then(async () => {
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Model '${model.detail.name}' on '${model.server.name}' Loaded on Memory`,
+      });
+      revalidate();
+    })
+    .catch(async (e) => await showToast({ style: Toast.Style.Failure, title: "Error", message: e }));
+}
+
+/**
+ * unload Model from Memory.
+ * @param model.
+ * @param revalidate - revalidate function for reload all models.
+ */
+export async function UnloadModel(model: Types.UiModel, revalidate: CallableFunction): Promise<void> {
+  await showToast({
+    style: Toast.Style.Animated,
+    title: `Unloading Model '${model.detail.name}' on '${model.server.name}' Memory`,
+  });
+  await model.server.ollama
+    .OllamaApiGenerateNoStream({
+      model: model.detail.name,
+      keep_alive: 0,
+    })
+    .then(async () => {
+      /* '/api/ps' do not update immidiatly after unloading the model so a delay of 500ms is necessary */
+      await new Promise<void>((res) => setTimeout(res, 500));
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Model '${model.detail.name}' on '${model.server.name}' Unloaded from Memory`,
+      });
+      revalidate();
+    })
+    .catch(async (e) => await showToast({ style: Toast.Style.Failure, title: "Error", message: e }));
 }

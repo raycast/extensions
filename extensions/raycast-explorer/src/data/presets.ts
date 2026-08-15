@@ -15,6 +15,10 @@ export type Preset = {
     name: string;
     link?: string;
   };
+  tools?: {
+    name: string;
+    id: string;
+  }[];
 };
 
 export type PresetCategory = {

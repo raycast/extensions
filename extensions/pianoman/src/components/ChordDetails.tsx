@@ -1,9 +1,8 @@
 import { Detail } from "@raycast/api";
-import ChordKeyboard, { ChordKeyboardOptions } from "../components/ChordKeyboard";
+import { renderChordKeyboardSvg, ChordKeyboardOptions } from "../components/ChordKeyboard";
 import { urlDecodeKey, urlEncodeChord, trimLines, getSvgBase64 } from "../libs/helper";
 import { Chord } from "../libs/chord";
 import constants from "../libs/constants";
-import { renderToString } from "react-dom/server";
 
 export function getChordImageUrl({
   chord,
@@ -12,7 +11,7 @@ export function getChordImageUrl({
   chord: Chord;
   options?: ChordKeyboardOptions;
 }) {
-  return getSvgBase64(renderToString(<ChordKeyboard chord={chord} options={options} />));
+  return getSvgBase64(renderChordKeyboardSvg({ chord, options }));
 }
 
 export function getInversionsContent({
@@ -23,7 +22,7 @@ export function getInversionsContent({
   options?: ChordKeyboardOptions;
 }) {
   const inversionsMd = trimLines(
-    chord.inversions.map((inversion, _index) => {
+    chord.inversions.map((inversion) => {
       const inversionName = inversion.fullName.length > 0 ? inversion.fullName : inversion.alias[0];
       return `
       ### Inversion: ${inversionName}

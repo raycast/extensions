@@ -1,5 +1,38 @@
 # Password Generator Changelog
 
+## [Add Copy Random Password command] - 2026-06-27
+
+- Added `Copy Random Password` no-view command that generates a password and copies it directly to the clipboard, with command preferences for number of characters, using numbers, and using special characters.
+
+## [Remember numbers and characters] - 2026-01-08
+
+- Added `README.md`
+- Added `Preference` to remember the last used settings for "Use numbers?" and "Use special characters?" in `Generate Random Password` (ref: [Issue #24199](https://github.com/raycast/extensions/issues/24199))
+
+## [Windows Support & Dependency Updates] - 2025-09-02
+
+- Added support for Raycast on Windows.
+- Updated dependencies to their latest versions:
+  - `@raycast/api`
+  - `@raycast/eslint-config`
+  - `@types/react`
+  - `prettier`
+  - `react`
+  - `typescript`
+
+## [Guarantee presence of special characters] - 2025-08-20
+
+If "Use numbers?" and/or "Use special characters?" are selected, the password is guaranteed to have at least one of each of those characters.
+
+## [Generate memorable passwords] - 2024-09-23
+
+There's now a command called "Generate Memorable Password". It will create an easier-to-type-and-remember password and can be fully customized.
+
+## [Update] - 2024-09-05
+
+Updated dependencies
+Updated screenshots
+
 ## [Enhancements] - 2024-06-06
 
 Add preference to store last used password length

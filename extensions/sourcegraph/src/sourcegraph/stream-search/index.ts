@@ -2,6 +2,8 @@ import EventSource from "eventsource";
 
 import { getMatchUrl, SearchEvent, SearchMatch, AlertKind, LATEST_VERSION } from "./stream";
 import { LinkBuilder, Sourcegraph } from "..";
+import { getAPIHeaders } from "../api";
+import { getProxiedAgent } from "../gql/fetchProxy";
 
 export interface SearchResult {
   url: string;
@@ -35,16 +37,26 @@ export interface SearchHandlers {
   onSuggestions: (suggestions: Suggestion[], top: boolean) => void;
   onAlert: (alert: Alert) => void;
   onProgress: (progress: Progress) => void;
+  onDone: () => void;
 }
 
-export type PatternType = "literal" | "regexp" | "structural" | "lucky";
+// Copied by hand from https://sourcegraph.sourcegraph.com/search?q=repo:%5Egithub%5C.com/sourcegraph/sourcegraph%24+f:graphql+%22enum+SearchPatternType+%7B%22&patternType=keyword&case=yes&sm=0
+export type PatternType =
+  | "standard"
+  | "literal"
+  | "regexp"
+  | "structural"
+  | "lucky"
+  | "keyword"
+  | "codycontext"
+  | "nls";
 
 export async function performSearch(
-  abort: AbortSignal,
+  abort: AbortController,
   src: Sourcegraph,
   query: string,
   patternType: PatternType,
-  handlers: SearchHandlers
+  handlers: SearchHandlers,
 ): Promise<void> {
   if (query.length === 0) {
     return;
@@ -56,28 +68,29 @@ export async function performSearch(
     ["q", query],
     ["v", LATEST_VERSION],
     ["t", patternType],
-    ["display", "200"],
+    ["display", "1500"],
   ]);
   const requestURL = link.new(src, "/.api/search/stream", parameters);
-  const headers: { [key: string]: string } = {
-    "X-Requested-With": "Raycast-Sourcegraph",
-  };
-  if (src.token) {
-    headers["Authorization"] = `token ${src.token}`;
-  }
+  const headers = getAPIHeaders(src);
 
-  const stream = new EventSource(requestURL, { headers });
+  // There's a bit of TypeScript trickery here, as we've added the agent
+  // override with a patch to the eventsource package.
+  const stream = new EventSource(requestURL, {
+    headers,
+    agent: getProxiedAgent(src.proxy),
+  } as unknown as EventSource.EventSourceInitDict);
   return new Promise((resolve) => {
     /**
      * All events that indicate the end of the request should use this to resolve.
      */
     const resolveStream = () => {
       stream.close();
+      abort.abort();
       resolve();
     };
 
     // signal cancelling
-    abort.addEventListener("abort", resolveStream);
+    abort.signal.addEventListener("abort", resolveStream);
 
     // matches from the Sourcegraph API
     stream.addEventListener("matches", (message) => {
@@ -106,7 +119,7 @@ export async function performSearch(
               });
           }
           return { url: matchURL, match };
-        })
+        }),
       );
     });
 
@@ -126,7 +139,7 @@ export async function performSearch(
               query: { addition: f.value },
             };
           }),
-        false
+        false,
       );
     });
 
@@ -175,7 +188,7 @@ export async function performSearch(
               query: p.query,
             };
           }),
-          true
+          true,
         );
       } else if (event.data.description) {
         // Alert description often contains a suggestion, hopefully it's useful if no
@@ -186,7 +199,7 @@ export async function performSearch(
               title: event.data.description,
             },
           ],
-          true
+          true,
         );
       }
     });
@@ -210,6 +223,9 @@ export async function performSearch(
     });
 
     // done indicator
-    stream.addEventListener("done", resolveStream);
+    stream.addEventListener("done", () => {
+      handlers.onDone();
+      resolveStream();
+    });
   });
 }

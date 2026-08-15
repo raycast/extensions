@@ -5,6 +5,10 @@ export async function getSelectedTextOfFrontmostApplication(): Promise<SelectedT
   return getSelectedText().then(SelectedText.from);
 }
 
+export const replaceSelectedText = (text: HtmlText | MarkdownText): Promise<void> => {
+  return Clipboard.paste(text.toClipboardContent());
+};
+
 export class SelectedText {
   private constructor(private text: string) {}
 
@@ -20,8 +24,14 @@ export class SelectedText {
     return new MarkdownText(this.replace(issueIdStyle, `[$&](${issueDetailsUrl})`));
   }
 
+  public getIssueUrls(issueIdStyle: IssueIdStyle, issueDetailsUrl: string): string[] {
+    const regexp = IssueIdFormat[issueIdStyle];
+    const issueIds = this.text.match(regexp) || [];
+    return issueIds.map((issueId) => issueId.replace(regexp, issueDetailsUrl));
+  }
+
   private replace(issueIdStyle: IssueIdStyle, replaceValue: string): string {
-    const regexp = new RegExp(IssueIdFormat[issueIdStyle], "gm");
+    const regexp = IssueIdFormat[issueIdStyle];
     return this.text.replace(regexp, replaceValue);
   }
 }
@@ -30,7 +40,7 @@ export class HtmlText {
   constructor(private text: string) {}
 
   public toClipboardContent(): Clipboard.Content {
-    return { html: this.text };
+    return { html: this.text.replace(/\r?\n/g, "<br />") };
   }
 }
 

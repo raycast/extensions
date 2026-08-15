@@ -4,6 +4,12 @@
   "description": "Manage SABnzbd locally",
   "icon": "sabnzbdplus.png",
   "author": "jns",
+  "contributors": [
+    "xmok"
+  ],
+  "keywords": [
+    "Applications"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -53,6 +59,35 @@
       "title": "Change Complete Action",
       "subtitle": "SABnzbd",
       "description": "Set an end-of-queue action",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "action",
+          "placeholder": "ACTION",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Hibernate PC",
+              "value": "hibernate_pc"
+            },
+            {
+              "title": "Standby PC",
+              "value": "standby_pc"
+            },
+            {
+              "title": "Shutdown Program",
+              "value": "shutdown_program"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "show-warnings",
+      "title": "Show Warnings",
+      "subtitle": "SABnzbd",
+      "description": "Show all warnings",
       "mode": "view"
     }
   ],
@@ -75,22 +110,25 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.25.1",
-    "moment": "^2.29.1",
-    "sabnzbd-api": "^1.3.2"
+    "@raycast/api": "^1.94.0",
+    "@raycast/utils": "^1.19.1",
+    "dayjs": "^1.11.13",
+    "sabnzbd-api": "^1.5.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
-    "dev": "ray develop"
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

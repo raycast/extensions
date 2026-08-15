@@ -1,16 +1,16 @@
-import { array, object, string, union, undefined_ } from "valibot";
-import type { Input } from "valibot";
-export const response_schema = union([
-  object({
-    blocks: array(
-      object({
-        breadcrumbs: array(string()),
-        href: string(),
-        content: string(),
+import * as v from "valibot";
+
+export const response_schema = v.union([
+  v.object({
+    blocks: v.array(
+      v.object({
+        breadcrumbs: v.array(v.string()),
+        href: v.string(),
+        content: v.string(),
       }),
     ),
   }),
-  undefined_(),
+  v.undefined_(),
 ]);
 
-export type ResponseType = Input<typeof response_schema>;
+export type ResponseType = v.InferInput<typeof response_schema>;

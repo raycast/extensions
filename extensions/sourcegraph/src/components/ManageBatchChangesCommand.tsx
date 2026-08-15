@@ -1,6 +1,6 @@
 import { ActionPanel, List, Action, Icon, useNavigation, Toast, Image, Color, showToast, Form } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { useState, Fragment, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { DateTime } from "luxon";
 import { nanoid } from "nanoid";
 
@@ -20,6 +20,7 @@ import ExpandableToast from "./ExpandableToast";
 import { propsToKeywords } from "./keywords";
 
 import { sentenceCase } from "../text";
+import { useTelemetry } from "../hooks/telemetry";
 
 const link = new LinkBuilder("batch-changes");
 
@@ -27,6 +28,9 @@ const link = new LinkBuilder("batch-changes");
  * ManageBatchChanges is the shared batch changes command implementation.
  */
 export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
+  const { recorder } = useTelemetry(src);
+  useEffect(() => recorder.recordEvent("manageBatchChanges", "start"), []);
+
   const srcName = instanceName(src);
 
   /**
@@ -44,19 +48,19 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
 
   const { push } = useNavigation();
   if (error) {
-    ExpandableToast(push, "Unexpected error", "Get batch changes failed", error.message).show();
+    ExpandableToast(push, "Unexpected error", "Get Batch Changes failed", error.message).show();
   }
 
   const showSuggestions = !loading && searchText === "";
   return (
     <List
       isLoading={loading}
-      searchBarPlaceholder={`Manage batch changes on ${srcName}`}
+      searchBarPlaceholder={`Manage Batch Changes on ${srcName}`}
       onSearchTextChange={setSearchText}
-      enableFiltering={true}
+      filtering={true}
       selectedItemId={showSuggestions ? "first-result" : undefined}
     >
-      {showSuggestions ? (
+      {showSuggestions && (
         <List.Section title={"Suggestions"}>
           <List.Item
             title="Create a batch change"
@@ -68,11 +72,9 @@ export default function ManageBatchChanges({ src }: { src: Sourcegraph }) {
             }
           />
         </List.Section>
-      ) : (
-        <Fragment />
       )}
 
-      <List.Section title={"Batch changes"}>
+      <List.Section title={"Batch Changes"}>
         {batchChanges.map((b, i) => (
           <BatchChangeItem
             id={i === 0 ? "first-result" : undefined}

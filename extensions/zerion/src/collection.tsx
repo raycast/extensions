@@ -1,4 +1,5 @@
-import { LaunchProps, open } from "@raycast/api";
+import { open } from "@raycast/api";
+import type { LaunchProps } from "@raycast/api";
 
 export default function Overview(props: LaunchProps<{ arguments: Arguments.Collection }>) {
   const collection = props.arguments.collection

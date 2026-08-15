@@ -43,7 +43,12 @@ export const checkApi = async () => {
     .get();
 };
 
-export const getCourses = async (json: any, config?: any): Promise<course[]> => {
+interface getCoursesConfig {
+  noAssignments?: boolean;
+  noAnnouncements?: boolean;
+}
+
+export const getCourses = async (json, config?: getCoursesConfig): Promise<course[]> => {
   const favorites = await api.users.self.favorites.courses
     .searchParams({
       state: "available",
@@ -62,9 +67,7 @@ export const getCourses = async (json: any, config?: any): Promise<course[]> => 
   if (!config?.noAssignments) {
     const promises = courses.map((course: course, i: number): assignment[] => {
       return api.courses[course.id].assignments
-        .searchParams({
-          order_by: "due_at",
-        })
+        .searchParams({ order_by: "due_at" })
         .get()
         .then((json) => {
           return json
@@ -73,7 +76,7 @@ export const getCourses = async (json: any, config?: any): Promise<course[]> => 
               name: assignment.name,
               id: assignment.id,
               description: `# ${assignment.name}\n\n${convertHTMLToMD(assignment.description)}`,
-              pretty_date: getFormattedDate(assignment.due_at),
+              pretty_date: "Due by " + getFormattedTime(assignment.due_at),
               date: new Date(assignment.due_at),
               course: course.name,
               course_id: course.id,
@@ -87,69 +90,47 @@ export const getCourses = async (json: any, config?: any): Promise<course[]> => 
       course.assignments = assignments[index];
     });
   }
+  if (!config?.noAnnouncements) {
+    const promises = courses.map((course: course, i: number): announcement[] => {
+      return api.announcements
+        .searchParams({ context_codes: ["course_" + course.id] })
+        .get()
+        .then((json) => {
+          return json.map((announcement) => ({
+            title: announcement.title,
+            course_id: course.id,
+            color: Colors[i % Colors.length],
+            course: course.name,
+            id: announcement.id,
+            markdown: `# ${announcement.title}\n\n${convertHTMLToMD(announcement.message)}`,
+            pretty_date: getFormattedDate(announcement.created_at),
+            date: new Date(announcement.created_at),
+          }));
+        });
+    });
+    const announcements = await Promise.all(promises);
+    courses.forEach((course: course, index: number) => {
+      course.announcements = announcements[index];
+    });
+  }
   return courses;
 };
 
-export const getAnnouncements = async (courses: course[]): Promise<announcement[]> => {
-  const query = "announcements?" + courses.map((a) => "context_codes[]=course_" + a.id).join("&");
-  const json = await api[query].get();
-  return json.map((announcement: any): announcement => {
-    const course = courses.filter((course: any) => course.id == announcement.context_code.substring(7))[0];
-    return {
-      title: announcement.title,
-      course_id: announcement.context_code.substring(7),
-      color: Colors[courses.indexOf(course) % Colors.length],
-      course: course.name,
-      id: announcement.id,
-      markdown: `# ${announcement.title}\n\n${convertHTMLToMD(announcement.message)}`,
-      pretty_date: getFormattedDate(announcement.created_at),
-      date: new Date(announcement.created_at),
-    };
-  });
-};
-
 export const getModules = async (course_id: number): Promise<modulesection[]> => {
-  const json = await api.courses[course_id].modules
-    .searchParams({
-      include: "items",
-    })
-    .get();
+  const json = await api.courses[course_id].modules.searchParams({ include: "items" }).get();
   const modules: modulesection[] = json.map((module) => {
-    const items: moduleitem[] = module.items
-      .filter((i) => i.type !== "SubHeader")
-      .map((i) => ({
-        id: i.id,
-        name: formatModuleItemTitle(i.title),
-        type: i.type,
-        url: i.html_url,
-        passcode: formatModuleItemPasscode(i.title),
-        content_id: i.content_id,
-      }));
+    const items: moduleitem[] = module.items.map((i) => ({
+      id: i.id,
+      name: formatModuleItemTitle(i.title),
+      type: i.type,
+      url: i.html_url,
+      passcode: formatModuleItemPasscode(i.title),
+      content_id: i.content_id,
+    }));
     return {
       name: module.name,
       items: items,
     };
-  });
-  const promises = [];
-  modules.map((module: modulesection) => {
-    module.items
-      .filter((item: moduleitem) => item.type === "File" && item.content_id)
-      .map((item: moduleitem) => {
-        promises.push(
-          api.courses[course_id].files[item.content_id].get().then((json) => {
-            return json.url;
-          })
-        );
-      });
-  });
-  const urls = await Promise.all(promises);
-  let i = 0;
-  modules.map((module: modulesection) => {
-    module.items.map((item: moduleitem) => {
-      if (item.type === "File" && item.content_id) {
-        item.download = urls[i++];
-      }
-    });
   });
   return modules;
 };
@@ -244,7 +225,7 @@ export const getDatedFeed = async (courses: course[]): Promise<datefeed[]> => {
       items: dates[date].items.sort(
         (a, b) =>
           a?.custom_object?.course?.localeCompare(b?.custom_object?.course) ||
-          a?.custom_object?.date - b?.custom_object?.date
+          a?.custom_object?.date - b?.custom_object?.date,
       ),
       pretty_date: getFormattedFriendlyDate(dates[date].date),
     });

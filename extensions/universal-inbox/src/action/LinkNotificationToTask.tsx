@@ -22,7 +22,7 @@ export function LinkNotificationToTask({ notification, mutate }: LinkNotificatio
   const [searchText, setSearchText] = useState("");
 
   const { isLoading, data: tasks } = useFetch<Array<Task>>(
-    `${preferences.universalInboxBaseUrl}/api/tasks/search?matches=${searchText}`,
+    `${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/tasks/search?matches=${searchText}`,
     {
       keepPreviousData: true,
       headers: {
@@ -78,7 +78,7 @@ async function linkNotificationToTask(
   try {
     await mutate(
       handleErrors(
-        fetch(`${preferences.universalInboxBaseUrl}/api/notifications/${notification.id}`, {
+        fetch(`${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/notifications/${notification.id}`, {
           method: "PATCH",
           body: JSON.stringify({ status: TaskStatus.Deleted, task_id: taskId }),
           headers: {

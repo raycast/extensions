@@ -1,16 +1,23 @@
+import fs from "fs";
 import type { FC, ReactNode } from "react";
 import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
-
-// import { clearSearchBar } from "@raycast/api";
-import type { Character } from "@/lib/dataset-manager";
+import { environment } from "@raycast/api";
+import type { Character, CharacterSection } from "@/types";
 import { getFilteredDataset } from "@/lib/dataset-manager";
-import { useRecentlyUsedItems } from "@/lib/use-recently-used-items";
-import type { CharacterSet } from "@/utils/list";
-import { buildList } from "@/utils/list";
+import { buildList } from "@/lib/list";
+import { useItemList } from "@/hooks/use-item-list";
+
+const html = JSON.parse(fs.readFileSync(`${environment.assetsPath}/html.json`, "utf-8")) as {
+  html_entities: { code: number; value: string }[];
+};
+
+// Create a Map for O(1) lookup instead of O(n) find operations
+const htmlEntitiesMap = new Map(html.html_entities.map((entity) => [entity.code, entity.value]));
 
 interface IListContext {
-  list: CharacterSet[];
+  list: CharacterSection[];
   loading: boolean;
+  filter: string | null;
   addToRecentlyUsedItems: (item: Character) => void;
   onSearchTextChange: (text: string) => void;
   clearRecentlyUsedItems: () => void;
@@ -18,6 +25,12 @@ interface IListContext {
   isRecentlyUsed: (item: Character) => boolean;
   availableSets: string[];
   setDatasetFilterAnd: (filter: string | null) => void;
+  findHtmlEntity: (code: number) => string | null;
+  // Favorites functionality
+  addToFavorites: (item: Character) => void;
+  removeFromFavorites: (item: Character) => void;
+  clearFavorites: () => void;
+  isFavorite: (item: Character) => boolean;
 }
 
 export const ListContext = createContext<IListContext>(null as unknown as IListContext);
@@ -41,31 +54,51 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
   }
 
   const {
-    recentlyUsedItems,
-    addToRecentlyUsedItems,
-    areRecentlyUsedItemsLoaded,
-    clearRecentlyUsedItems,
-    removeFromRecentlyUsedItems,
-  } = useRecentlyUsedItems<Character>({
-    key: "recently-used",
-    comparator: "code",
+    items: recentlyUsedItems,
+    addItem: addToRecentlyUsedItems,
+    areItemsLoaded: areRecentlyUsedItemsLoaded,
+    clearItems: clearRecentlyUsedItems,
+    removeItem: removeFromRecentlyUsedItems,
+  } = useItemList<Character>({
+    key: "recently-used-v2",
+    comparator: "c",
+    limit: 10,
+  });
+
+  const {
+    items: favorites,
+    addItem: addToFavorites,
+    removeItem: removeFromFavorites,
+    clearItems: clearFavorites,
+    isInList: isFavorite,
+    areItemsLoaded: areFavoritesLoaded,
+  } = useItemList<Character>({
+    key: "favorites-v1",
+    comparator: "c",
+    limit: 50,
   });
 
   const isRecentlyUsed = useCallback(
-    (item: Character) => recentlyUsedItems.some((i) => i.code === item.code),
+    (item: Character) => recentlyUsedItems.some((i) => i.c === item.c),
     [recentlyUsedItems],
   );
 
+  const findHtmlEntity = useCallback((code: number) => {
+    return htmlEntitiesMap.get(code) || null;
+  }, []);
+
   const list = useMemo(
     () =>
-      !areRecentlyUsedItemsLoaded ? [] : buildList(dataset, recentlyUsedItems, !searchTextRef.current, datasetFilter),
-    [dataset, recentlyUsedItems, areRecentlyUsedItemsLoaded, datasetFilter],
+      !areRecentlyUsedItemsLoaded || !areFavoritesLoaded
+        ? []
+        : buildList(dataset, recentlyUsedItems, !searchTextRef.current, datasetFilter, favorites),
+    [dataset, recentlyUsedItems, areRecentlyUsedItemsLoaded, areFavoritesLoaded, datasetFilter, favorites],
   );
   const loading = !addToRecentlyUsedItems || !list.length;
   const availableSets = useMemo(
     () =>
-      list
-        .map((set) => set.sectionTitle)
+      dataset.blocks
+        .map((block) => block.blockName)
         .filter((s) => s !== "Recently Used")
         .sort((a, b) => a.localeCompare(b)),
     [list],
@@ -76,6 +109,7 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
       value={{
         list,
         loading,
+        filter: datasetFilter,
         addToRecentlyUsedItems,
         onSearchTextChange,
         clearRecentlyUsedItems,
@@ -83,6 +117,11 @@ export const ListContextProvider: FC<{ children: ReactNode }> = ({ children }) =
         removeFromRecentlyUsedItems,
         availableSets,
         setDatasetFilterAnd,
+        findHtmlEntity,
+        addToFavorites,
+        removeFromFavorites,
+        clearFavorites,
+        isFavorite,
       }}
     >
       {children}

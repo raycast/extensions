@@ -1,148 +1,168 @@
-import { ActionPanel, Action, Icon, List, LocalStorage, Color, showToast, Keyboard } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
-import { PingJob, WakeData } from "./types";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast } from "@raycast/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { WakeData, NetworkInfo } from "./types";
 import { wake } from "./lib/wol";
-import CreateWakeDataForm from "./components/CreateWakeDataForm";
-import { exec } from "child_process";
+import WakeDataForm from "./components/WakeDataForm";
+import { enhancedPing } from "./lib/enhanced-ping";
+import { useLocalStorage } from "@raycast/utils";
 
-type State = {
-  wakeDatasets: WakeData[];
-  liveDatasets: boolean[];
-  isLoading: boolean;
-};
+const Shortcut = Keyboard.Shortcut;
+
+// Ping interval in milliseconds (default: 8 seconds)
+// You can adjust this value to ping more/less frequently
+const PING_INTERVAL = 8000;
 
 export default function Command() {
-  const [state, setState] = useState<State>({
-    wakeDatasets: [],
-    liveDatasets: [],
-    isLoading: true,
-  });
+  const {
+    value: devices = [],
+    setValue: setDevices,
+    isLoading: isLoadingDevices,
+  } = useLocalStorage<WakeData[]>("wakeDatasets", []);
+  const [networkInfoMap, setNetworkInfoMap] = useState<Map<string, NetworkInfo>>(new Map());
+  const [isInitialPingComplete, setIsInitialPingComplete] = useState(false);
+  const [isPinging, setIsPinging] = useState(false);
+  const networkInfoMapRef = useRef<Map<string, NetworkInfo>>(new Map());
+  const isPingingRef = useRef(false);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
+  // Keep ref in sync with state
+  networkInfoMapRef.current = networkInfoMap;
+
+  // Combined loading state: loading devices OR doing any ping operation
+  const isLoading = isLoadingDevices || (!isInitialPingComplete && devices.length > 0) || isPinging;
+
+  const ping = useCallback((devicesData: WakeData[]) => {
+    // Prevent overlapping ping operations
+    if (isPingingRef.current) {
+      return;
+    }
+
+    isPingingRef.current = true;
+    setIsPinging(true);
+
     (async () => {
-      const storeWakeDatasets = await LocalStorage.getItem<string>("wakeDatasets");
-      if (!storeWakeDatasets) {
-        setState((previous) => ({ ...previous, isLoading: false }));
-        return;
+      const map = new Map<string, NetworkInfo>();
+      for (const device of devicesData) {
+        // Get previous lastSeen to preserve for offline devices
+        const previousInfo = networkInfoMapRef.current.get(device.ip);
+        const networkInfo = await enhancedPing(device.ip, device.mac, previousInfo?.lastSeen);
+        map.set(device.ip, networkInfo);
       }
-
-      try {
-        const wakeDatasets: WakeData[] = JSON.parse(storeWakeDatasets);
-        setState((previous) => ({ ...previous, wakeDatasets, isLoading: false }));
-      } catch (e) {
-        setState((previous) => ({ ...previous, wakeDatasets: [], isLoading: false }));
-      }
+      setNetworkInfoMap(map);
+      isPingingRef.current = false;
+      setIsPinging(false);
+      // Mark initial ping as complete
+      setIsInitialPingComplete(true);
     })();
   }, []);
 
-  const [jobs, setJobs] = useState<PingJob[]>([]);
-
+  // Initial ping and setup periodic pinging
   useEffect(() => {
-    const task = jobs.shift();
-    // final execute means the task is done
-    const final = () => setJobs([...jobs]);
-    if (task) {
-      // console.debug("pinging", task.ip, "index", task.index, "previousSameIpIndex", task.previousSameIpIndex)
-      if (task.previousSameIpIndex !== undefined) {
-        setState((previous) => {
-          // prevent duplicate ip request more than once
-          const liveDatasets = previous.liveDatasets;
-          liveDatasets[task.index] = liveDatasets[task.previousSameIpIndex!];
-          return { ...previous, liveDatasets: [...liveDatasets] };
-        });
-        final();
-        return;
+    if (!devices || devices.length === 0) {
+      // Clear interval if no devices
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
-      // https://serverfault.com/questions/200468/how-can-i-set-a-short-timeout-with-the-ping-command
-      exec(`/sbin/ping -t 1 -c 1 ${task.ip}`, function (err, stdout) {
-        if (err) {
-          // console.debug(task.index, err)
-          final();
-          return;
-        }
-        setState((previous) => {
-          const liveDatasets = previous.liveDatasets;
-          liveDatasets[task.index] = stdout.includes("1 packets received");
-          return { ...previous, liveDatasets: [...liveDatasets] };
-        });
-        final();
-      });
+      setIsInitialPingComplete(true); // No devices to ping
+      return;
     }
-  }, [jobs, setJobs]);
 
+    // Reset initial ping completion when devices change
+    setIsInitialPingComplete(false);
+
+    // Initial ping
+    ping(devices);
+
+    // Setup periodic pinging
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
+    intervalRef.current = setInterval(() => {
+      ping(devices);
+    }, PING_INTERVAL);
+
+    // Cleanup function
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
+  }, [devices]);
+
+  // Cleanup on unmount
   useEffect(() => {
-    LocalStorage.setItem("wakeDatasets", JSON.stringify(state.wakeDatasets));
-
-    const pingJobs: PingJob[] = [];
-    state.wakeDatasets.forEach(async (wakeData, index) => {
-      const liveDatasets = state.liveDatasets;
-      if (!wakeData.ip) {
-        liveDatasets[index] = false;
-        setState((previous) => ({ ...previous, liveDatasets: [...liveDatasets] }));
-        return;
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
-      for (let i = 0; i < index; i++) {
-        if (state.wakeDatasets[i].ip === wakeData.ip) {
-          pingJobs.push({ ip: wakeData.ip, index, previousSameIpIndex: i });
-          return;
-        }
-      }
-      pingJobs.push({ ip: wakeData.ip, index });
-    });
-    setJobs(pingJobs);
-  }, [state.wakeDatasets]);
-
-  const handleCreate = useCallback(
-    (values: WakeData) => {
-      const newWakeDatasets = [...state.wakeDatasets, { ...values }];
-      setState((previous) => ({ ...previous, wakeDatasets: newWakeDatasets }));
-    },
-    [state.wakeDatasets, setState],
-  );
+    };
+  }, []);
 
   const handleDelete = useCallback(
     (index: number) => {
-      const newWakeDatasets = [...state.wakeDatasets];
-      newWakeDatasets.splice(index, 1);
-      setState((previous) => ({ ...previous, wakeDatasets: newWakeDatasets }));
+      if (devices) {
+        devices.splice(index, 1);
+        setDevices([...devices]);
+      }
     },
-    [state.wakeDatasets, setState],
+    [devices],
   );
 
-  function CreateWakeAction(props: { onCreate: (values: WakeData) => void }) {
-    return (
-      <Action.Push
-        title="Add Wake Data"
-        icon={Icon.Plus}
-        shortcut={{ modifiers: ["cmd"], key: "n" }}
-        target={<CreateWakeDataForm onCreate={props.onCreate} />}
-      />
-    );
-  }
+  const handleUpdate = useCallback(
+    (index: number, value: WakeData) => {
+      devices[index] = value;
+      setDevices([...devices]);
+    },
+    [devices],
+  );
+
+  const handleCreate = useCallback(
+    (value: WakeData) => {
+      setDevices([...devices, value]);
+    },
+    [devices],
+  );
+
+  // Manual refresh function
+  const handleManualRefresh = useCallback(() => {
+    if (!devices || devices.length === 0) return;
+    ping(devices);
+  }, [devices]);
 
   return (
-    <List isLoading={state.isLoading} isShowingDetail={state.wakeDatasets.length > 0}>
+    <List isLoading={isLoading} isShowingDetail={devices.length > 0} searchBarPlaceholder="Search devices...">
       <List.EmptyView
-        title="No data found"
+        title="Add a new device"
         actions={
           <ActionPanel>
-            <CreateWakeAction onCreate={handleCreate} />
+            <Action.Push
+              title="Add Device"
+              icon={Icon.Plus}
+              shortcut={Shortcut.Common.New}
+              target={<WakeDataForm upsert={handleCreate} />}
+            />
           </ActionPanel>
         }
       />
-      {state.wakeDatasets.map((item, index) => (
+      {devices.map((item, index) => (
         <List.Item
-          key={item.name}
+          key={index}
           icon={Icon.ComputerChip}
           title={item.name}
           keywords={[item.mac, item.name]}
           accessories={[
-            {
-              tag: {
-                value: `status: ${(state.liveDatasets[index] && "online") || "offline"}`,
-                color: state.liveDatasets[index] ? Color.Green : Color.Yellow,
-              },
-            },
+            networkInfoMap.has(item.ip)
+              ? {
+                  tag: {
+                    value: `${(networkInfoMap.get(item.ip)?.isOnline && "Online") || "Offline"}`,
+                    color: networkInfoMap.get(item.ip)?.isOnline ? Color.Green : Color.Yellow,
+                  },
+                }
+              : { tag: { value: "Checking..", color: Color.Orange } },
           ]}
           actions={
             <ActionPanel>
@@ -151,15 +171,39 @@ export default function Command() {
                 icon={Icon.Play}
                 onAction={async () => {
                   wake(item.mac, { port: parseInt(item.port) });
-                  await showToast({ title: "Order acknowledged", message: "For the Swarm" });
+                  await showToast({ title: "Order acknowledged!", message: "For the Swarm" });
                 }}
               />
-              <Action.CopyToClipboard title="Copy Mac Address" content={item.mac} />
-              <CreateWakeAction onCreate={handleCreate} />
+              <Action.CopyToClipboard title="Copy Mac Address" content={item.mac} shortcut={Shortcut.Common.Copy} />
               <Action
-                title="Remove Wake Data"
+                title="Refresh Status"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+                onAction={handleManualRefresh}
+              />
+              <Action.Push
+                title="Add Device"
+                icon={Icon.Plus}
+                shortcut={Shortcut.Common.New}
+                target={<WakeDataForm upsert={handleCreate} />}
+              />
+              <Action.Push
+                title="Modify Device"
+                icon={Icon.CircleEllipsis}
+                shortcut={Shortcut.Common.Edit}
+                target={
+                  <WakeDataForm
+                    upsert={(v) => {
+                      handleUpdate(index, v);
+                    }}
+                    initial={item}
+                  />
+                }
+              />
+              <Action
+                title="Remove Device"
                 style={Action.Style.Destructive}
-                shortcut={Keyboard.Shortcut.Common.Remove}
+                shortcut={Shortcut.Common.Remove}
                 icon={{ source: Icon.Trash, tintColor: Color.Red }}
                 onAction={() => handleDelete(index)}
               />
@@ -167,15 +211,68 @@ export default function Command() {
           }
           detail={
             <List.Item.Detail
-              metadata={
-                <List.Item.Detail.Metadata>
-                  <List.Item.Detail.Metadata.Label title="Name" text={item.name} />
-                  <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label title="MAC" text={item.mac} />
-                  <List.Item.Detail.Metadata.Label title="IP" text={item.ip} />
-                  <List.Item.Detail.Metadata.Label title="WOL Port" text={item.port} />
-                </List.Item.Detail.Metadata>
-              }
+              metadata={(() => {
+                const networkInfo = networkInfoMap.get(item.ip);
+
+                // Check if sections have content
+                const hasHardwareInfo = networkInfo?.detectedOS || networkInfo?.ttl;
+
+                return (
+                  <List.Item.Detail.Metadata>
+                    {/* Basic Device Info */}
+                    <List.Item.Detail.Metadata.Label title="Device Name" text={item.name} />
+                    <List.Item.Detail.Metadata.Separator />
+
+                    {/* Network Identification */}
+                    <List.Item.Detail.Metadata.Label title="MAC Address" text={item.mac} />
+                    <List.Item.Detail.Metadata.Label title="IP Address" text={item.ip} />
+                    {networkInfo?.hostname && (
+                      <List.Item.Detail.Metadata.Label title="Hostname" text={networkInfo.hostname} />
+                    )}
+                    <List.Item.Detail.Metadata.Label title="WOL Port" text={item.port} />
+
+                    {/* Hardware Info - Only show separator if there's content */}
+                    {hasHardwareInfo && <List.Item.Detail.Metadata.Separator />}
+                    {networkInfo?.detectedOS && (
+                      <List.Item.Detail.Metadata.Label title="Detected OS" text={networkInfo.detectedOS} />
+                    )}
+                    {networkInfo?.ttl && (
+                      <List.Item.Detail.Metadata.Label title="TTL" text={networkInfo.ttl.toString()} />
+                    )}
+
+                    {/* Connection Status - Always show separator since status is always present */}
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Status"
+                      text={networkInfo?.isOnline ? "🟢 Online" : "🔴 Offline"}
+                    />
+                    {networkInfo?.latency && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Response Time"
+                        text={`${networkInfo.latency.toFixed(1)}ms`}
+                      />
+                    )}
+                    {networkInfo?.quality && (
+                      <List.Item.Detail.Metadata.Label
+                        title="Connection Quality"
+                        text={
+                          networkInfo.quality === "excellent"
+                            ? "🟢 Excellent"
+                            : networkInfo.quality === "good"
+                              ? "🟡 Good"
+                              : "🔴 Poor"
+                        }
+                      />
+                    )}
+                    {networkInfo?.packetLoss !== undefined && (
+                      <List.Item.Detail.Metadata.Label title="Packet Loss" text={`${networkInfo.packetLoss}%`} />
+                    )}
+                    {networkInfo?.lastSeen && (
+                      <List.Item.Detail.Metadata.Label title="Last Seen" text={networkInfo.lastSeen.toLocaleString()} />
+                    )}
+                  </List.Item.Detail.Metadata>
+                );
+              })()}
             />
           }
         />

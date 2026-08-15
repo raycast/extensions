@@ -3,8 +3,8 @@ import { useForm, FormValidation } from "@raycast/utils";
 
 import { getLinearClient } from "../api/linearClient";
 import { getErrorMessage } from "../helpers/errors";
-import useProjects from "../hooks/useProjects";
 import { getProjectIcon } from "../helpers/projects";
+import useProjects from "../hooks/useProjects";
 
 export type CreateMilestoneValues = {
   projectId: string;

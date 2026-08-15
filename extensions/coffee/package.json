@@ -11,7 +11,19 @@
     "pernielsentikaer",
     "oasaleh",
     "xilopaint",
-    "ridemountainpig"
+    "ridemountainpig",
+    "zakj",
+    "Katsuba",
+    "alexi.build",
+    "mbuvarp",
+    "frederik_obe",
+    "bsradcliffe"
+  ],
+  "pastContributors": [
+    "Visual-Studio-Coder"
+  ],
+  "platforms": [
+    "macOS"
   ],
   "license": "MIT",
   "commands": [
@@ -33,7 +45,7 @@
       "name": "caffeinateWhile",
       "title": "Caffeinate While",
       "subtitle": "Coffee",
-      "description": "Prevent your Mac from sleeping while an certain app is running",
+      "description": "Prevent your Mac from sleeping while a certain app is running",
       "mode": "view"
     },
     {
@@ -64,7 +76,7 @@
     },
     {
       "name": "caffeinateFor",
-      "title": "Caffeinate For",
+      "title": "Caffeinate for ...",
       "subtitle": "Coffee",
       "description": "Prevent your Mac from sleeping for a certain time",
       "mode": "no-view",
@@ -90,11 +102,79 @@
       ]
     },
     {
+      "name": "caffeinateUntil",
+      "title": "Caffeinate Until",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping until a certain time. Type one like 5pm, or leave the field empty to pick a date and time.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "time",
+          "placeholder": "Time (e.g. 5pm)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "addSchedule",
+      "title": "Schedule Caffeination",
+      "description": "Schedule caffeination",
+      "mode": "view"
+    },
+    {
       "name": "status",
       "title": "Caffeinate Status",
       "description": "Show the current caffeination status",
       "mode": "no-view",
-      "interval": "1m"
+      "interval": "15s"
+    }
+  ],
+  "tools": [
+    {
+      "name": "caffeinate-for",
+      "title": "Caffeinate for Duration",
+      "description": "Keeps your Mac awake for a specified duration"
+    },
+    {
+      "name": "caffeinate",
+      "title": "Caffeinate",
+      "description": "Keep Mac awake for unspecified duration."
+    },
+    {
+      "name": "check-caffeination-status",
+      "title": "Check Caffeination Status",
+      "description": "Check if your Mac is currently caffeinated or not."
+    },
+    {
+      "name": "decaffeinate",
+      "title": "Decaffeinate",
+      "description": "Turn off your Mac's sleep prevention."
+    },
+    {
+      "name": "schedule-caffeination",
+      "title": "Schedule Caffeination",
+      "description": "Add a schedule for your caffeination using AI."
+    },
+    {
+      "name": "caffeinate-while-app-is-running",
+      "title": "Caffeinate While App Is Running",
+      "description": "While an app is running, turn on caffeination."
+    },
+    {
+      "name": "caffeinate-until",
+      "title": "Caffeinate Until",
+      "description": "Keep the Mac awake until a specific future date and time."
+    },
+    {
+      "name": "list-caffeination-schedules",
+      "title": "List Caffeination Schedules",
+      "description": "List the recurring caffeination schedules configured for the week."
+    },
+    {
+      "name": "manage-caffeination-schedule",
+      "title": "Manage Caffeination Schedule",
+      "description": "Pause, resume, or delete a recurring caffeination schedule for a day."
     }
   ],
   "preferences": [
@@ -148,19 +228,28 @@
           "value": "paper-cup"
         }
       ]
+    },
+    {
+      "name": "startCaffeinateOnLaunch",
+      "description": "Automatically keep your Mac awake (indefinitely) when Raycast starts. Requires the Caffeinate Status command (15 s interval) or the Caffeinate Status Menu Bar command (1 m interval) to be enabled.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Launch",
+      "label": "Start caffeination when Raycast starts"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
-    "@raycast/utils": "^1.12.5"
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.11.19",
-    "@types/react": "18.2.57",
-    "eslint": "^8.56.0",
-    "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

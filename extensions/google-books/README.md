@@ -1,20 +1,33 @@
-# Search Google Books from Raycast
+# Google Books Search for Raycast
 
-Extension for Raycast to search [Google Books](https://books.google.co.uk/).
+Extension for Raycast to search [Google Books](https://books.google.com).
 
+## Features
 
-## Installing
+- **Search** Google Books by keywords with debounced queries and result caching
+- **Detail Sidebar** — toggleable metadata panel in List view showing type, author, publisher, published date, pages, rating, language, maturity, price, eBook status, ISBN, categories, and links
+- **Multiple Views** — switch between List and Book Covers
+- **Category Filter** — filter results by category
+- **View Book Cover** — full-page cover image with actions to download, copy image, or copy URL
 
-Make sure Raycast is installed and go to https://github.com/Ali-Parandeh/raycast-google-books-extension
+## Setup (Optional)
 
-## Running locally
+This extension works out of the box, but without an API key requests share a global quota and may be rate-limited. To avoid this, you can provide your own **free** Google Books API key.
 
-```sh
-# nvm install (use node >=16.x)
-nvm --lts --latest-npm
-# make sure you have Raycast and Yarn / NPM installed
-npm i
-# Start local server
-npm run dev
-# Now open raycast. The dev tool should be the top item!
-```
+### Getting a Google Books API Key
+
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project (or select an existing one)
+3. Navigate to **APIs & Services → Library**, search for **Books API**, and click **Enable**
+4. Go to **APIs & Services → Credentials** and click **Create Credentials**
+5. Under **Credential Type**:
+   - Set **Select an API** to **Books API**
+   - Select **Public data**
+   - Click **Next**
+6. Copy the generated API key
+
+### Adding the Key to Raycast
+
+1. Open Raycast and search for **Google Books**
+2. Press `⌘ ,` to open the extension preferences (or right-click → **Configure Extension**)
+3. Paste your API key into the **Google Books API Key** field

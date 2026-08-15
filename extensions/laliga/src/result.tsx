@@ -1,46 +1,33 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { format } from "date-fns";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { formatDate } from "date-fns";
 import groupBy from "lodash.groupby";
-import CompetitionDropdown from "./components/competition_dropdown";
-import { Match } from "./types";
+import { useState } from "react";
 import { getCurrentGameWeek, getMatches } from "./api";
+import CompetitionDropdown from "./components/competition_dropdown";
 import Matchday from "./components/matchday";
+import { Gameweek } from "./types";
 
 export default function Fixture() {
-  const [fixtures, setFixtures] = useState<Match[]>();
   const [competition, setCompetition] = useState<string>("");
   const [matchday, setMatchday] = useState<number>(0);
 
-  useEffect(() => {
-    if (competition) {
-      setMatchday(0);
-      setFixtures(undefined);
+  usePromise(
+    async (competition) => {
+      return competition ? await getCurrentGameWeek(competition) : undefined;
+    },
+    [competition],
+    {
+      onData: (gameweek: Gameweek | undefined) => {
+        setMatchday(gameweek?.week ?? 0);
+      },
+    },
+  );
 
-      getCurrentGameWeek(competition).then((gameweek) => {
-        setMatchday(gameweek.week);
-      });
-    }
-  }, [competition]);
-
-  useEffect(() => {
-    if (matchday) {
-      showToast({
-        title: "Loading...",
-        style: Toast.Style.Animated,
-      });
-      getMatches(competition, matchday).then((data) => {
-        setFixtures(data);
-        showToast({
-          title: "Completed",
-          style: Toast.Style.Success,
-        });
-      });
-    }
-  }, [matchday]);
+  const { data: fixtures, isLoading } = usePromise((week) => getMatches(competition, week), [matchday]);
 
   const days = groupBy(fixtures, (m) => {
-    return format(new Date(m.date), "eee dd.MM.yyyy");
+    return m.date ? formatDate(m.date, "eee dd.MM.yyyy") : "Postponed";
   });
 
   const action = (
@@ -69,8 +56,8 @@ export default function Fixture() {
   return (
     <List
       throttle
-      isLoading={!fixtures}
-      navigationTitle={fixtures ? `Matchday ${matchday} | Fixtures & Results` : "Fixtures & Results"}
+      isLoading={isLoading}
+      navigationTitle={!isLoading ? `Matchday ${matchday} | Fixtures & Results` : "Fixtures & Results"}
       searchBarAccessory={<CompetitionDropdown selected={competition} onSelect={setCompetition} />}
     >
       {Object.entries(days).map(([day, matches]) => {

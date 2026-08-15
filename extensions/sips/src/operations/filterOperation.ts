@@ -5,11 +5,11 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-dd 00:32:49
- * Last modified  : 2024-06-26 21:37:46
  */
 
+import { applyBasicFilter } from "../utilities/filters";
 import { Filter } from "../utilities/types";
-import { getDestinationPaths, moveImageResultsToFinalDestination } from "../utilities/utils";
+import { expandTilde, getDestinationPaths, moveImageResultsToFinalDestination } from "../utilities/utils";
 
 /**
  * Applies the specified filter to images, storing the results according to the user's preferences.
@@ -20,13 +20,15 @@ import { getDestinationPaths, moveImageResultsToFinalDestination } from "../util
  */
 export default async function applyFilter(sourcePaths: string[], filter: Filter) {
   const resultPaths = [];
-  for (const imageFilePath of sourcePaths) {
+  const expandedPaths = sourcePaths.map((path) => expandTilde(path));
+  for (const imageFilePath of expandedPaths) {
     const newPath = (
       await getDestinationPaths([imageFilePath], false, imageFilePath.endsWith(".pdf") ? "pdf" : "png")
     )[0];
-    await filter.applyMethod(imageFilePath, newPath, filter.CIFilterName);
+    await applyBasicFilter(imageFilePath, newPath, filter);
     resultPaths.push(newPath);
   }
 
   await moveImageResultsToFinalDestination(resultPaths);
+  return resultPaths;
 }

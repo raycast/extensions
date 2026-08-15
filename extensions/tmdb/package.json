@@ -7,10 +7,12 @@
   "author": "Aayush9029",
   "contributors": [
     "andreaselia",
-    "thomaslombart",
     "j3lte",
     "joeynotjoe",
     "VBenny42"
+  ],
+  "pastContributors": [
+    "thomaslombart"
   ],
   "categories": [
     "Media",
@@ -100,5 +102,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
+  },
+  "overrides": {
+    "axios": "^1.18.0"
   }
 }

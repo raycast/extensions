@@ -1,5 +1,4 @@
 import { OAuth } from "@raycast/api";
-import fetch from "node-fetch";
 
 // Create an OAuth client ID via https://console.developers.google.com/apis/credentials
 // As application type choose "iOS" (required for PKCE)

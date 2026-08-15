@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "compressx",
-  "title": "CompressX",
-  "description": "Compress the selected video in Finder with CompressX.",
+  "title": "Compresto",
+  "description": "Compress files easily, with up to 90% file size reduction",
   "icon": "compressx-icon.png",
   "author": "hieudinh",
   "categories": [
@@ -12,21 +12,28 @@
   "commands": [
     {
       "name": "compressVideo",
-      "title": "Compress Video",
-      "subtitle": "CompressX",
-      "description": "Compress selected video with CompressX",
+      "title": "Compress Files",
+      "subtitle": "Compresto",
+      "description": "Compress selected files with Compresto",
+      "mode": "view"
+    },
+    {
+      "name": "importFiles",
+      "title": "Import Files",
+      "subtitle": "Compresto",
+      "description": "Import selected files into Compresto",
       "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.63.0",
+    "@raycast/api": "^1.100.2",
     "open": "^9.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/open": "^6.2.1",
-    "@types/react": "18.2.27",
+    "@types/react": "^19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.1.0",
     "typescript": "^5.2.2"

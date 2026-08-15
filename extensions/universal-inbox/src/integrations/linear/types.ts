@@ -2,6 +2,15 @@ export type LinearNotification =
   | { type: "IssueNotification"; content: LinearIssueNotification }
   | { type: "ProjectNotification"; content: LinearProjectNotification };
 
+export function getLinearNotificationHtmlUrl(notification: LinearNotification): string {
+  switch (notification.type) {
+    case "IssueNotification":
+      return notification.content.issue.url;
+    case "ProjectNotification":
+      return notification.content.project.url;
+  }
+}
+
 export interface LinearIssueNotification {
   id: string;
   type: string;
@@ -37,6 +46,10 @@ export interface LinearIssue {
   labels: Array<LinearLabel>;
   description: string;
   team: LinearTeam;
+}
+
+export function getLinearIssueHtmlUrl(linearIssue: LinearIssue): string {
+  return linearIssue.url;
 }
 
 export enum LinearIssuePriority {

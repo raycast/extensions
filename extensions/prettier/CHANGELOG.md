@@ -1,5 +1,7 @@
 # Prettier Changelog
 
+## [Maintenance Release] - 2024-10-02
+
 ## [New Icon] - 2023-04-25
 
 ## [Add support for new commands and config options] - 2023-04-21

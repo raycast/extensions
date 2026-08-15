@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, LaunchType, Toast, launchCommand, open, showToast } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchType, Toast, launchCommand, open, showToast, Keyboard } from "@raycast/api";
 import { MutatePromise, usePromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
@@ -9,7 +9,7 @@ import { NotificationWithIcon } from "../notifications";
 type NotificationActionsProps = {
   notification: NotificationWithIcon;
   userId?: string;
-  mutateList: MutatePromise<NotificationWithIcon[] | undefined>;
+  mutateList: MutatePromise<NotificationWithIcon[] | undefined> | MutatePromise<NotificationWithIcon[]>;
 };
 
 export default function NotificationActions({ notification, userId, mutateList }: NotificationActionsProps) {
@@ -36,6 +36,27 @@ export default function NotificationActions({ notification, userId, mutateList }
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed marking notification as read",
+        message: getErrorMessage(error),
+      });
+    }
+  }
+
+  async function markNotificationAsDone() {
+    await showToast({ style: Toast.Style.Animated, title: "Marking notification as done" });
+
+    try {
+      await octokit.activity.markThreadAsDone({ thread_id: parseInt(notification.id) });
+      await mutateList();
+      await launchCommand({ name: "unread-notifications", type: LaunchType.UserInitiated });
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Marked notification as done",
+      });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed marking notification as done",
         message: getErrorMessage(error),
       });
     }
@@ -147,9 +168,16 @@ export default function NotificationActions({ notification, userId, mutateList }
       ) : null}
 
       <Action
+        title="Mark as Done"
+        icon={Icon.Circle}
+        onAction={markNotificationAsDone}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      />
+
+      <Action
         title="Unsubscribe"
         icon={Icon.BellDisabled}
-        shortcut={{ modifiers: ["cmd"], key: "." }}
+        shortcut={Keyboard.Shortcut.Common.Pin}
         onAction={unsubscribe}
       />
       <ActionPanel.Section>
@@ -172,7 +200,7 @@ export default function NotificationActions({ notification, userId, mutateList }
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutateList}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
     </ActionPanel>

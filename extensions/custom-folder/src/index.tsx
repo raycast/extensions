@@ -1,4 +1,4 @@
-import CreateForm from "./createForm";
+import CreateForm from "./components/createForm";
 
 export default function Command() {
   return <CreateForm />;

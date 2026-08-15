@@ -31,7 +31,7 @@ export default function RestoreData() {
 
       showToast(Toast.Style.Success, `Restored ${restoredCount} app${restoredCount > 1 ? "s" : ""}`);
       push(<AppsView />);
-    } catch (error) {
+    } catch {
       showToast(Toast.Style.Failure, "Failed to restore backup");
     }
   };

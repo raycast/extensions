@@ -15,12 +15,12 @@ const Details = (props: { task: Task }) => {
   const { task } = props;
 
   const initialColors = (Object.values(Color) as Color[]).filter(
-    (color) => color !== Color.PrimaryText && color !== Color.SecondaryText
+    (color) => color !== Color.PrimaryText && color !== Color.SecondaryText,
   );
 
   const assignRandomColorsToTags = (tags: string[]): Map<string, Color> => {
     const tagColorMap = new Map<string, Color>();
-    const availableColors = [...initialColors];
+    const availableColors: Color[] = [...initialColors];
 
     tags.forEach((tag) => {
       if (availableColors.length === 0) {
@@ -31,7 +31,7 @@ const Details = (props: { task: Task }) => {
       tagColorMap.set(tag, randomColor);
 
       // Remove the used color
-      const index = availableColors.indexOf(randomColor);
+      const index = availableColors.indexOf(randomColor as (typeof availableColors)[number]);
       availableColors.splice(index, 1);
     });
 

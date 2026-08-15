@@ -1,10 +1,8 @@
 import { Action, ActionPanel, Icon, List, Toast, getFrontmostApplication, showToast } from "@raycast/api";
 import { useFetch, usePromise } from "@raycast/utils";
-import { Buffer } from "buffer";
-import * as cheerio from "cheerio";
-import { decode } from "iconv-lite";
 import { useMemo, useState } from "react";
-import { Article, Law } from "../types";
+import { parseArticles } from "../services/lawService";
+import { Law } from "../types";
 import { escapeRegex, removeDiacritics } from "../utils";
 
 interface ArticleListDetailsProps {
@@ -23,6 +21,8 @@ export default function ArticleListDetail({ law }: ArticleListDetailsProps) {
   } = useFetch<string>(law.url, {
     parseResponse: async (response: Response) => {
       const arrayBuffer = await response.arrayBuffer();
+      const { decode } = await import("iconv-lite");
+      const { Buffer } = await import("buffer");
       return decode(Buffer.from(arrayBuffer), "iso-8859-1");
     },
   });
@@ -33,39 +33,7 @@ export default function ArticleListDetail({ law }: ArticleListDetailsProps) {
 
   const articles = useMemo(() => {
     if (!lawData) return [];
-
-    const $ = cheerio.load(lawData);
-    const scrapedArticles: Article[] = [];
-    let currentArticle: Article | null = null;
-
-    $("p").each((_, element) => {
-      let content = $(element).text();
-      content = content.replace(/\s+/g, " ").trim();
-      content = content.replace(/(?<=(Art\.|§)\s\d+)\s?o /g, "º ");
-
-      if (content.startsWith("Art.")) {
-        const titleMatch = content.match(/(Art\.\s\d+(\.\d+)*(º|°)?(-[A-Z])?)/);
-        let title = "";
-        if (titleMatch) {
-          title = titleMatch[0];
-        }
-
-        if (title && content) {
-          currentArticle = { title: title.trim(), content: content.trim() };
-          scrapedArticles.push(currentArticle);
-        }
-      } else if (
-        currentArticle &&
-        (content.startsWith("§") ||
-          /^[IVXLCDM]+\s-\s/.test(content) ||
-          content.startsWith("Parágrafo único") ||
-          /^[a-z]\)/.test(content))
-      ) {
-        currentArticle.content += `\n\n${content.trim()}`;
-      }
-    });
-
-    return scrapedArticles;
+    return parseArticles(lawData);
   }, [lawData]);
 
   const filteredArticles = useMemo(() => {

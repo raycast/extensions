@@ -22,13 +22,15 @@ export default function Command() {
   const tld = preferences.top_level_domain;
   const mid = MARKETPLACE_IDS[tld];
 
-  const url = `https://completion.amazon.${tld}/api/2017/suggestions?alias=aps&mid=${mid}&prefix=${encodeURIComponent(
-    searchText,
-  )}`;
+  const url = `https://www.amazon.${tld}/suggestions?alias=aps&mid=${mid}&prefix=${encodeURIComponent(searchText)}`;
 
   const { isLoading, data } = useFetch<AutocompleteResponse>(url, {
     execute: searchText.length > 0,
     keepPreviousData: true,
+    parseResponse: async (response): Promise<AutocompleteResponse> => {
+      if (response.status >= 500) return { suggestions: [] };
+      return response.json() as Promise<AutocompleteResponse>;
+    },
   });
 
   const handleSearchOpen = (text: string) => {
@@ -56,12 +58,16 @@ export default function Command() {
     }
   };
 
-  const suggestions = data ? data.suggestions.map((suggestion) => suggestion.value) : [];
+  const suggestions = data
+    ? data.suggestions.map((suggestion) => suggestion.value).includes(searchText)
+      ? data.suggestions.map((suggestion) => suggestion.value)
+      : [searchText, ...data.suggestions.map((suggestion) => suggestion.value)]
+    : [];
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Search Amazon..."
+      searchBarPlaceholder="Search Amazon"
       searchText={searchText}
       onSearchTextChange={setSearchText}
       throttle
@@ -69,7 +75,7 @@ export default function Command() {
       {searchText.length > 0 && (
         <List.Section title="Suggestions" subtitle={`${suggestions.length}`}>
           {suggestions.map((item, index) => (
-            <SuggestionListItem key={index} item={item} tld={tld} searchText={searchText} onOpen={handleSearchOpen} />
+            <SuggestionListItem key={index} item={item} tld={tld} onOpen={handleSearchOpen} />
           ))}
         </List.Section>
       )}

@@ -1,4 +1,5 @@
 import { ActionPanel, Form, Action } from "@raycast/api";
+import { ENVIRONMENT_TARGET_OPTIONS, getEnvironmentTargets } from "../../environment";
 import type { Environment } from "../../types";
 
 type Props = {
@@ -7,17 +8,8 @@ type Props = {
 
 const NewEnvironmentVariable = ({ createEnvVar }: Props) => {
   const onSubmit = (values: Form.Values) => {
-    const targets = () => {
-      const target = [];
-      if (values["edit-form-development"]) target.push("development");
-      if (values["edit-form-preview"]) target.push("preview");
-      if (values["edit-form-production"]) target.push("production");
-      return target;
-    };
-
     const formedValues: Partial<Environment> = {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      target: targets() as any,
+      target: getEnvironmentTargets(values),
       key: values.key,
       value: values.value,
     };
@@ -36,9 +28,9 @@ const NewEnvironmentVariable = ({ createEnvVar }: Props) => {
       <Form.TextField id="key" title="Environment variable key" placeholder="YOUR_KEY" />
       <Form.TextField id="value" title="Environment variable value" placeholder="your_value" />
       <Form.Separator />
-      <Form.Checkbox id="edit-form-production" label="Production" />
-      <Form.Checkbox id="edit-form-preview" label="Preview" />
-      <Form.Checkbox id="edit-form-development" label="Development" />
+      {ENVIRONMENT_TARGET_OPTIONS.map(({ id, label }) => (
+        <Form.Checkbox key={id} id={id} label={label} />
+      ))}
     </Form>
   );
 };

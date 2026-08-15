@@ -8,20 +8,24 @@ import {
   LaunchType,
   openCommandPreferences,
   getPreferenceValues,
+  Keyboard,
 } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 
-import { Todo, getListTodos, getLists, setTodoProperty, updateTodo } from './api';
+import { getListTodos, getCollections, setTodoProperty, updateTodo, handleError, updateProject } from './api';
 import { listItems, menuBarStatusIcons } from './helpers';
+import { Todo } from './types';
 
 const TASK_NAME_LENGTH_LIMIT = 30;
 
 export default function ShowTodayInMenuBar() {
   const { shouldShowShortcuts, displayTodo } = getPreferenceValues<Preferences.ShowTodayInMenuBar>();
   const { data: todos, isLoading, mutate } = useCachedPromise(() => getListTodos('today'));
-  const { data: lists } = useCachedPromise(() => getLists());
+  const { data } = useCachedPromise(() => getCollections('lists'));
+  const lists = data?.lists;
 
-  const tooltip = todos && todos.length > 0 ? todos[0].name : '';
+  const firstIncompleteTodo = todos?.find((item) => item.status === 'open');
+  const tooltip = firstIncompleteTodo?.name || '';
 
   let title = '';
   if (displayTodo) {
@@ -40,23 +44,43 @@ export default function ShowTodayInMenuBar() {
   }
 
   async function schedule(todo: Todo, when: string) {
-    await updateTodo(todo.id, { when });
-    await mutate();
-    await showToast({ style: Toast.Style.Success, title: 'Scheduled to-do' });
+    try {
+      if (todo.isProject) {
+        await updateProject(todo.id, { when });
+      } else {
+        await updateTodo(todo.id, { when });
+      }
+      await mutate();
+      await showToast({ style: Toast.Style.Success, title: 'Scheduled to-do' });
+    } catch (error) {
+      await handleError(error);
+    }
   }
 
   async function moveTo(todo: Todo, listId: string) {
-    await updateTodo(todo.id, { 'list-id': listId });
-    await mutate();
-    await showToast({ style: Toast.Style.Success, title: 'Moved to-do' });
+    try {
+      if (todo.isProject) {
+        await updateProject(todo.id, { 'area-id': listId });
+      } else {
+        await updateTodo(todo.id, { 'list-id': listId });
+      }
+      await mutate();
+      await showToast({ style: Toast.Style.Success, title: 'Moved to-do' });
+    } catch (error) {
+      await handleError(error);
+    }
   }
 
   return (
     <MenuBarExtra icon="things-flat.png" title={title} tooltip={tooltip} isLoading={isLoading}>
       {todos && todos.length > 0 ? (
         <>
-          {displayTodo ? (
-            <MenuBarExtra.Item title="Complete" icon={Icon.CheckCircle} onAction={() => completeTodo(todos[0])} />
+          {displayTodo && firstIncompleteTodo ? (
+            <MenuBarExtra.Item
+              title="Complete"
+              icon={Icon.CheckCircle}
+              onAction={() => completeTodo(firstIncompleteTodo)}
+            />
           ) : null}
           <MenuBarExtra.Section>
             <MenuBarExtra.Item title="Today" />
@@ -82,15 +106,17 @@ export default function ShowTodayInMenuBar() {
 
                 {lists && lists.length > 0 ? (
                   <MenuBarExtra.Submenu title="Move To" icon={Icon.ArrowRight}>
-                    {lists.map((list) => {
-                      return (
-                        <MenuBarExtra.Item
-                          key={list.id}
-                          {...listItems.list(list)}
-                          onAction={() => moveTo(todo, list.id)}
-                        />
-                      );
-                    })}
+                    {lists
+                      .filter((list) => (todo.isProject ? list.type === 'area' : true))
+                      .map((list) => {
+                        return (
+                          <MenuBarExtra.Item
+                            key={list.id}
+                            {...listItems.list(list)}
+                            onAction={() => moveTo(todo, list.id)}
+                          />
+                        );
+                      })}
                   </MenuBarExtra.Submenu>
                 ) : null}
               </MenuBarExtra.Submenu>
@@ -106,32 +132,32 @@ export default function ShowTodayInMenuBar() {
           <MenuBarExtra.Section>
             <MenuBarExtra.Item
               {...listItems.inbox}
-              shortcut={{ modifiers: ['cmd'], key: 'i' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 'i' }}
               onAction={() => open('things:///show?id=inbox')}
             />
             <MenuBarExtra.Item
               {...listItems.today}
-              shortcut={{ modifiers: ['cmd'], key: 't' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 't' }}
               onAction={() => open('things:///show?id=today')}
             />
             <MenuBarExtra.Item
               {...listItems.upcoming}
-              shortcut={{ modifiers: ['cmd'], key: 'u' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 'u' }}
               onAction={() => open('things:///show?id=upcoming')}
             />
             <MenuBarExtra.Item
               {...listItems.anytime}
-              shortcut={{ modifiers: ['cmd'], key: 'a' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 'a' }}
               onAction={() => open('things:///show?id=anytime')}
             />
             <MenuBarExtra.Item
               {...listItems.someday}
-              shortcut={{ modifiers: ['cmd'], key: 's' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 's' }}
               onAction={() => open('things:///show?id=someday')}
             />
             <MenuBarExtra.Item
               {...listItems.logbook}
-              shortcut={{ modifiers: ['cmd'], key: 'l' }}
+              shortcut={{ modifiers: ['cmd', 'alt'], key: 'l' }}
               onAction={() => open('things:///show?id=logbook')}
             />
           </MenuBarExtra.Section>
@@ -166,7 +192,7 @@ export default function ShowTodayInMenuBar() {
         <MenuBarExtra.Item
           title="Add New To-Do"
           icon={Icon.Plus}
-          shortcut={{ modifiers: ['cmd'], key: 'n' }}
+          shortcut={Keyboard.Shortcut.Common.New}
           onAction={() => {
             launchCommand({ name: 'add-new-todo', type: LaunchType.UserInitiated, context: { list: 'today' } });
           }}
@@ -175,7 +201,7 @@ export default function ShowTodayInMenuBar() {
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
-          shortcut={{ modifiers: ['cmd'], key: ',' }}
+          shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
           onAction={openCommandPreferences}
         />
       </MenuBarExtra.Section>

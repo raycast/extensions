@@ -1,15 +1,35 @@
-import { ActionPanel, Color, Icon, List, showToast, Action, Image, LocalStorage, Toast, Detail } from "@raycast/api";
-import { Feed, getFeeds } from "./feeds";
-import AddFeedForm from "./subscription-form";
-import Parser from "rss-parser";
+import {
+  ActionPanel,
+  Color,
+  Icon,
+  List,
+  showToast,
+  Action,
+  type Image,
+  LocalStorage,
+  Toast,
+  Detail,
+  Cache,
+} from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
+import { randomUUID } from "crypto";
 import { NodeHtmlMarkdown } from "node-html-markdown";
-import { nanoid } from "nanoid";
-import { useCachedPromise } from "@raycast/utils";
 import React from "react";
+import Parser from "rss-parser";
+import { type Feed, getFeeds } from "./feeds";
+import AddFeedForm from "./subscription-form";
 
 const parser = new Parser({});
+const storiesCache = new Cache({ namespace: "stories" });
+const STORIES_FILTER_CACHE_KEY = "selected-filter";
+const STORIES_FILTER_TTL_MS = 15 * 60 * 1000;
+
+type CachedFilter = {
+  value: string;
+  savedAt: number;
+};
 
 interface Story {
   guid: string;
@@ -21,11 +41,47 @@ interface Story {
   isNew: boolean;
   date: number;
   fromFeed: string;
+  lastRead?: number;
 }
 
+type StoryLastRead = {
+  [key: string]: number;
+};
 type FeedLastViewed = {
   [key: string]: number;
 };
+
+function getCachedFilter() {
+  const raw = storiesCache.get(STORIES_FILTER_CACHE_KEY);
+  if (!raw) {
+    return undefined;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as CachedFilter;
+    const isFresh = Date.now() - parsed.savedAt < STORIES_FILTER_TTL_MS;
+
+    if (!isFresh) {
+      storiesCache.remove(STORIES_FILTER_CACHE_KEY);
+      return undefined;
+    }
+
+    return parsed.value;
+  } catch {
+    storiesCache.remove(STORIES_FILTER_CACHE_KEY);
+    return undefined;
+  }
+}
+
+function setCachedFilter(value: string) {
+  storiesCache.set(
+    STORIES_FILTER_CACHE_KEY,
+    JSON.stringify({
+      value,
+      savedAt: Date.now(),
+    } satisfies CachedFilter),
+  );
+}
 
 TimeAgo.addDefaultLocale(en);
 const timeAgo = new TimeAgo("en-US");
@@ -49,6 +105,12 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
         </ActionPanel>
       }
       accessories={[
+        props.item.lastRead
+          ? {
+              icon: Icon.Eye,
+              tooltip: `Last Read: ${new Date(props.item.lastRead).toDateString()}`,
+            }
+          : { icon: Icon.EyeDisabled, tooltip: "Last Read: never" },
         {
           text: timeAgo.format(props.item.date) as string,
           icon: props.item.isNew ? { source: Icon.Dot, tintColor: Color.Green } : undefined,
@@ -58,14 +120,27 @@ function StoryListItem(props: { item: Story; refresh: () => void }) {
   );
 }
 
+async function updateLastRead(props: { item: Story }) {
+  const lastRead = new Date().valueOf();
+  const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
+  const storyLastRead: StoryLastRead = await JSON.parse(storyLastViewedString ?? "{}");
+  storyLastRead[props.item.guid] = lastRead;
+  await LocalStorage.setItem("storyLastRead", JSON.stringify(storyLastRead));
+}
+
 function ReadStory(props: { item: Story }) {
   return props.item.content ? (
-    <Action.Push icon={Icon.Book} title="Read Story" target={<StoryDetail item={props.item} />} />
+    <Action.Push
+      icon={Icon.Book}
+      title="Read Story"
+      target={<StoryDetail item={props.item} />}
+      onPush={() => updateLastRead(props)}
+    />
   ) : null;
 }
 
 function OpenStory(props: { item: Story }) {
-  return props.item.link ? <Action.OpenInBrowser url={props.item.link} /> : null;
+  return props.item.link ? <Action.OpenInBrowser url={props.item.link} onOpen={() => updateLastRead(props)} /> : null;
 }
 
 function CopyStory(props: { item: Story }) {
@@ -77,7 +152,7 @@ function CopyStory(props: { item: Story }) {
 function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
   const date = item.pubDate ? Date.parse(item.pubDate) : 0;
   return {
-    guid: item.guid || nanoid(),
+    guid: item.guid || randomUUID(),
     title: item.title || "No title",
     subtitle: feed.title,
     link: item.link,
@@ -90,12 +165,12 @@ function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
 }
 
 async function getStories(feeds: Feed[]) {
-  const feedLastViewedString = (await LocalStorage.getItem("feedLastViewed")) as string;
-  const feedLastViewed = feedLastViewedString
-    ? (JSON.parse(feedLastViewedString) as FeedLastViewed)
-    : ({} as FeedLastViewed);
+  const feedLastViewedString = await LocalStorage.getItem<string>("feedLastViewed");
+  const feedLastViewed: FeedLastViewed = JSON.parse(feedLastViewedString ?? "{}");
 
   const storyItems: Story[] = [];
+  const storyLastViewedString = await LocalStorage.getItem<string>("storyLastRead");
+  const storyLastRead: StoryLastRead = JSON.parse(storyLastViewedString ?? "{}");
 
   for (const feedItem of feeds) {
     const lastViewed = feedLastViewed[feedItem.url] || 0;
@@ -103,10 +178,13 @@ async function getStories(feeds: Feed[]) {
       const feed = await parser.parseURL(feedItem.url);
       const stories: Story[] = [];
       feed.items.forEach((item) => {
-        stories.push(ItemToStory(item, feedItem, lastViewed));
+        const story = ItemToStory(item, feedItem, lastViewed);
+        const lastRead = storyLastRead[story.guid] || 0;
+        stories.push({ ...story, lastRead });
       });
       feedLastViewed[feedItem.url] = stories.at(0)?.date || lastViewed;
       storyItems.push(...stories);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
@@ -122,31 +200,52 @@ async function getStories(feeds: Feed[]) {
 
 export function StoriesList(props: { feeds?: Feed[] }) {
   async function fetchStories(feeds?: Feed[]) {
-    if (typeof feeds == "undefined") {
+    if (typeof feeds === "undefined") {
       feeds = await getFeeds();
     }
 
     return { feeds, stories: await getStories(feeds) };
   }
   const { data, isLoading, revalidate } = useCachedPromise(fetchStories, [props.feeds]);
-  const [filter, setFilter] = React.useState("all");
+  const [filter, setFilter] = React.useState(() => getCachedFilter() ?? "all");
+
+  React.useEffect(() => {
+    if (!data?.feeds) {
+      return;
+    }
+
+    const validFilters = new Set(["all", "read", "unread", ...data.feeds.map((feed) => feed.url)]);
+    if (!validFilters.has(filter)) {
+      setFilter("all");
+      storiesCache.remove(STORIES_FILTER_CACHE_KEY);
+    }
+  }, [data?.feeds, filter]);
+
+  const handleFilterChange = React.useCallback((newFilter: string) => {
+    setFilter(newFilter);
+    setCachedFilter(newFilter);
+  }, []);
 
   return (
     <List
       isLoading={isLoading}
       searchBarAccessory={
-        data?.feeds.length && data.feeds.length > 1 ? (
-          <List.Dropdown onChange={setFilter} tooltip="Subscription">
+        <List.Dropdown onChange={handleFilterChange} tooltip="Subscription" value={filter}>
+          <List.Dropdown.Section>
+            <List.Dropdown.Item icon={Icon.Globe} title="All Subscriptions" value="all" />
+          </List.Dropdown.Section>
+          {data?.feeds && data.feeds.length > 1 && (
             <List.Dropdown.Section>
-              <List.Dropdown.Item icon={Icon.Globe} title="All Subscriptions" value="all" />
-            </List.Dropdown.Section>
-            <List.Dropdown.Section>
-              {data?.feeds.map((feed) => (
+              {data.feeds.map((feed) => (
                 <List.Dropdown.Item key={feed.url} icon={feed.icon} title={feed.title} value={feed.url} />
               ))}
             </List.Dropdown.Section>
-          </List.Dropdown>
-        ) : null
+          )}
+          <List.Dropdown.Section>
+            <List.Dropdown.Item icon={Icon.Eye} title="Read" value="read" />
+            <List.Dropdown.Item icon={Icon.EyeDisabled} title="Unread" value="unread" />
+          </List.Dropdown.Section>
+        </List.Dropdown>
       }
       actions={
         !props?.feeds && (
@@ -162,7 +261,11 @@ export function StoriesList(props: { feeds?: Feed[] }) {
       }
     >
       {data?.stories
-        .filter((story) => filter === "all" || story.fromFeed === filter)
+        .filter((story) => {
+          if (filter === "read") return story.lastRead;
+          if (filter === "unread") return !story.lastRead;
+          return filter === "all" || story.fromFeed === filter;
+        })
         .map((story) => (
           <StoryListItem key={story.guid} item={story} refresh={revalidate} />
         ))}

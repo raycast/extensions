@@ -3,7 +3,7 @@ import { Notification, getNotificationHtmlUrl, isNotificationBuiltFromTask } fro
 import { Action, ActionPanel, Icon, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { Page, UniversalInboxPreferences } from "../types";
 import { MutatePromise } from "@raycast/utils";
-import { useMemo, ReactElement } from "react";
+import { useMemo, ReactNode } from "react";
 import { PlanTask } from "./PlanTask";
 import { handleErrors } from "../api";
 import { TaskStatus } from "../task";
@@ -11,7 +11,7 @@ import fetch from "node-fetch";
 
 interface NotificationTaskActionsProps {
   notification: Notification;
-  detailsTarget: ReactElement;
+  detailsTarget: ReactNode;
   mutate: MutatePromise<Page<Notification> | undefined>;
 }
 
@@ -22,8 +22,8 @@ export function NotificationTaskActions({ notification, detailsTarget, mutate }:
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser url={notificationHtmlUrl} />
       <Action.Push title="Show Details" icon={Icon.AppWindowSidebarRight} target={detailsTarget} />
+      <Action.OpenInBrowser url={notificationHtmlUrl} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
       <Action
         title="Delete Notification"
         icon={Icon.Trash}
@@ -31,7 +31,7 @@ export function NotificationTaskActions({ notification, detailsTarget, mutate }:
         onAction={() => deleteNotification(notification, mutate)}
       />
       <Action
-        title="Unsubscribe From Notification"
+        title="Unsubscribe from Notification"
         icon={Icon.BellDisabled}
         shortcut={{ modifiers: ["ctrl"], key: "u" }}
         onAction={() => unsubscribeFromNotification(notification, mutate)}
@@ -49,7 +49,7 @@ export function NotificationTaskActions({ notification, detailsTarget, mutate }:
         onAction={() => completeTask(notification, mutate)}
       />
       <Action.Push
-        title="Plan Task..."
+        title="Plan Task…"
         icon={Icon.Calendar}
         shortcut={{ modifiers: ["ctrl"], key: "t" }}
         target={<PlanTask notification={notification} mutate={mutate} />}
@@ -68,7 +68,7 @@ async function completeTask(notification: Notification, mutate: MutatePromise<Pa
   try {
     await mutate(
       handleErrors(
-        fetch(`${preferences.universalInboxBaseUrl}/api/tasks/${notification.task.id}`, {
+        fetch(`${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/tasks/${notification.task.id}`, {
           method: "PATCH",
           body: JSON.stringify({ status: TaskStatus.Done }),
           headers: {

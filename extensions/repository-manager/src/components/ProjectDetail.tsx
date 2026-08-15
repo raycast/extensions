@@ -7,6 +7,7 @@ import { Copy } from './Copy'
 import Git from './Git'
 import React, { useState } from 'react'
 import Config from './Config'
+import { GenerateAIRepoBriefAction } from './AIRepoBrief'
 
 type ProjectDetailProps = {
     project: Project
@@ -78,14 +79,14 @@ function MetadataUrls({ project }: { project: Project }) {
 
     return (
         <React.Fragment>
-            {Object.entries(project.config.urls).map(([key, value]) => {
+            {Object.entries(project.config.urls).map(([key, value], i) => {
                 if (!value) {
                     return null
                 }
 
                 return (
                     <Detail.Metadata.Link
-                        key={key}
+                        key={key + i}
                         title=""
                         target={value}
                         text={key}
@@ -99,10 +100,10 @@ function MetadataUrls({ project }: { project: Project }) {
 function MetadataGitRemotes({ project }: { project: Project }) {
     return (
         <React.Fragment>
-            {project.gitRemotes.map((remote) => {
+            {project.gitRemotes.map((remote, i) => {
                 return (
                     <Detail.Metadata.Link
-                        key={remote.name}
+                        key={remote.name + i}
                         title=""
                         target={remote.url}
                         text={`${remote.hostDisplayName} (${remote.name})`}
@@ -158,6 +159,7 @@ export default function ProjectDetail({ project }: ProjectDetailProps) {
                         onAction={() => setIsShowingConfig(!isShowingConfig)}
                     />
                     <Config project={project} />
+                    <GenerateAIRepoBriefAction project={project} />
                     <OpenUrl project={project} />
                     <OpenGitRemotes project={project} />
                     <Copy project={project} />

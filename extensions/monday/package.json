@@ -5,6 +5,13 @@
   "description": "Quickly navigate to your latest monday.com boards and create items",
   "icon": "command-icon.png",
   "author": "freak4pc",
+  "contributors": [
+    "oribarak",
+    "xmok"
+  ],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -49,7 +56,8 @@
           "type": "textfield",
           "required": true,
           "title": "Board ID",
-          "description": "ID of the board to quick-add items to"
+          "description": "ID of the board to quick-add items to",
+          "placeholder": "00000000"
         }
       ]
     }
@@ -60,28 +68,30 @@
       "type": "password",
       "required": true,
       "title": "monday.com API Token",
-      "description": "You can get a token on your monday account's 'Developer' section (or going to `/apps/manage/tokens` under your monday account)"
+      "description": "You can get a token on your monday account's 'Developer' section (or going to `/apps/manage/tokens` under your monday account)",
+      "placeholder": "ey...Xx"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.29.1",
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.18.0",
     "node-fetch": "^3.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.5",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "react": "^18.2.0",
+    "typescript": "^5.7.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

@@ -26,11 +26,11 @@ export default function AddSubscription() {
       if (urlError) return;
       try {
         setIsLoading(true);
-        showToast(Toast.Style.Animated, "Finding Feeds..");
+        showToast(Toast.Style.Animated, "Finding feeds...");
         const results = await apiServer.discoverFeed({ url });
 
         if (results.length === 0) {
-          showToast(Toast.Style.Success, `no feeds found`);
+          showToast(Toast.Style.Failure, "No feeds found");
         } else {
           showToast(Toast.Style.Success, `${results.length} feeds found`);
           setFeeds(results);
@@ -50,7 +50,7 @@ export default function AddSubscription() {
     if (url.length > 0) {
       setUrlError(undefined);
     } else {
-      setUrlError("The field should not be empty!");
+      setUrlError("The field should not be empty");
     }
   };
 

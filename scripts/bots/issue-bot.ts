@@ -15,14 +15,16 @@ type API = {
   core: typeof Core;
 };
 
-const newMatch = /### Extension\s*https:\/\/(?:www\.)?raycast\.com\/([^\/]+)\/([^\/\s]+)/;
+const newMatch = /### Extension\s*(?:https:\/\/)?(?:www\.)?raycast\.com\/([^\/]+)\/([^\/\s]+)/;
 const newMatchGitHub =
-  /### Extension\s*https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
+  /### Extension\s*(?:https:\/\/)?(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)/;
 const oldMatchGithub =
   /# Extension – \[[^\]]*\]\(https:\/\/(?:www\.)?github\.com\/raycast\/extensions\/[^\s]*extensions\/([^\/\s]+)\/\)/;
+const osVersionMatch = /### OS Version\s*\n+\s*(\S+)/;
 
 const closeIssueMatch = /@raycastbot close this issue/;
 const closeIssueAsNotPlannedMatch = /@raycastbot close as not planned/;
+const closeIssueAsDuplicateMatch = /@raycastbot close as duplicate/;
 const reopenIssueMatch = /@raycastbot reopen this issue/;
 const renameIssueMatch = /@raycastbot rename this issue to "(.+)"/;
 const assignMeMatch = /@raycastbot assign me/;
@@ -62,7 +64,7 @@ export default async ({ github, context }: API) => {
       newMatchGitHub.exec(context.payload.issue.body) || oldMatchGithub.exec(context.payload.issue.body) || [];
     extensionFolder = x;
 
-    extension = Object.values(extensionName2Folder).find(([_, folder]) => folder === extensionFolder)?.[0];
+    extension = Object.entries(extensionName2Folder).find(([, folder]) => folder === extensionFolder)?.[0];
 
     if (!extension) {
       console.log(`could not find the extension in the body`);
@@ -103,12 +105,7 @@ export default async ({ github, context }: API) => {
     // we don't want to label the issue here, only answer to a comment
 
     // if the one who posts a comment is an owner of the extension related to the issue
-    if (
-      context.payload.comment.user &&
-      (owners.indexOf(context.payload.comment.user.login) !== -1 ||
-        // also allow the OP to close the issue that way
-        context.payload.comment.user.login === context.payload.issue.user.login)
-    ) {
+    if (context.payload.comment.user && owners.indexOf(context.payload.comment.user.login) !== -1) {
       if (closeIssueMatch.test(context.payload.comment.body)) {
         console.log(`closing #${context.payload.issue.number}`);
         await github.rest.issues.update({
@@ -125,6 +122,15 @@ export default async ({ github, context }: API) => {
           repo: context.repo.repo,
           state: "closed",
           state_reason: "not_planned",
+        });
+      } else if (closeIssueAsDuplicateMatch.test(context.payload.comment.body)) {
+        console.log(`closing #${context.payload.issue.number} as duplicate`);
+        await github.rest.issues.update({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          state: "closed",
+          state_reason: "duplicate",
         });
       } else if (reopenIssueMatch.test(context.payload.comment.body)) {
         console.log(`reopening #${context.payload.issue.number}`);
@@ -170,6 +176,19 @@ export default async ({ github, context }: API) => {
       } else {
         console.log(`didn't find the right comment`);
       }
+    } else if (
+      // also allow the OP to close the issue that way
+      context.payload.comment.user &&
+      context.payload.comment.user.login === context.payload.issue.user.login &&
+      closeIssueMatch.test(context.payload.comment.body)
+    ) {
+      console.log(`closing #${context.payload.issue.number}`);
+      await github.rest.issues.update({
+        issue_number: context.payload.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        state: "closed",
+      });
     } else {
       console.log(`${context.payload.comment.user.login} is not an owner`);
     }
@@ -182,6 +201,53 @@ export default async ({ github, context }: API) => {
     repo: context.repo.repo,
     labels: [extensionLabel(extension, extensionName2Folder)],
   });
+
+  // Extract platform from OS Version field (first word: macOS or Windows)
+  const osVersionLineMatch = context.payload.issue.body && osVersionMatch.exec(context.payload.issue.body);
+  const os =
+    osVersionLineMatch?.[1] === "macOS" || osVersionLineMatch?.[1] === "Windows" ? osVersionLineMatch[1] : null;
+  if (os) {
+    const platformLabel = `platform: ${os}`;
+    const oppositePlatformLabel = os === "macOS" ? "platform: Windows" : "platform: macOS";
+
+    if (context.payload.action === "edited") {
+      try {
+        await github.rest.issues.removeLabel({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          name: oppositePlatformLabel,
+        });
+      } catch {
+        // ignore, it might not be there
+      }
+    }
+
+    console.log(`Adding platform label: ${platformLabel}`);
+    try {
+      await github.rest.issues.addLabels({
+        issue_number: context.payload.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: [platformLabel],
+      });
+    } catch (error) {
+      console.error(`Failed to add platform label ${platformLabel}:`, error);
+    }
+  } else if (context.payload.action === "edited") {
+    for (const label of ["platform: macOS", "platform: Windows"]) {
+      try {
+        await github.rest.issues.removeLabel({
+          issue_number: context.payload.issue.number,
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          name: label,
+        });
+      } catch {
+        // ignore, it might not be there
+      }
+    }
+  }
 
   try {
     await github.rest.issues.removeLabel({
@@ -228,6 +294,7 @@ The author and contributors of \`${extension}\` can trigger bot actions by comme
 
 - \`@raycastbot close this issue\` Closes the issue.
 - \`@raycastbot close as not planned\` Closes the issue as not planned.
+- \`@raycastbot close as duplicate\` Closes the issue as duplicate.
 - \`@raycastbot rename this issue to "Awesome new title"\` Renames the issue.
 - \`@raycastbot reopen this issue\` Reopens the issue.
 - \`@raycastbot assign me\` Assigns yourself to the issue.

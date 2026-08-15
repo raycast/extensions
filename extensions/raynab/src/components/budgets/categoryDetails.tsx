@@ -1,25 +1,25 @@
 import { ActionPanel, Detail } from '@raycast/api';
 import { OpenInYnabAction } from '@components/actions';
-import { useLocalStorage } from '@hooks/useLocalStorage';
 import { CurrencyFormat, Category } from '@srcTypes';
-import { formatToReadablePrice } from '@lib/utils';
+import { formatToReadableAmount } from '@lib/utils';
+import { useLocalStorage } from '@raycast/utils';
 
 export function CategoryDetails({ category }: { category: Category }) {
-  const [activeBudgetCurrency] = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
+  const { value: activeBudgetCurrency } = useLocalStorage<CurrencyFormat | null>('activeBudgetCurrency', null);
 
   const markdown = `
-  # ${category.name} — ${formatToReadablePrice({ amount: category.balance, currency: activeBudgetCurrency })} left
+  # ${category.name} — ${formatToReadableAmount({ amount: category.balance, currency: activeBudgetCurrency })} left
 
   ${
     category.goal_type
-      ? `- **Goal**: ${formatToReadablePrice({
+      ? `- **Goal**: ${formatToReadableAmount({
           amount: category.goal_target ?? 0,
           currency: activeBudgetCurrency,
         })} — ${category.goal_under_funded ? 'Underfunded' : category.goal_overall_left ? 'On Track' : 'Funded'}`
       : ''
   }
-  - **Budgeted**: ${formatToReadablePrice({ amount: category.budgeted, currency: activeBudgetCurrency })}
-  - **Activity this month**: ${formatToReadablePrice({ amount: category.activity, currency: activeBudgetCurrency })}
+  - **Budgeted**: ${formatToReadableAmount({ amount: category.budgeted, currency: activeBudgetCurrency })}
+  - **Activity this month**: ${formatToReadableAmount({ amount: category.activity, currency: activeBudgetCurrency })}
   `;
   return (
     <Detail

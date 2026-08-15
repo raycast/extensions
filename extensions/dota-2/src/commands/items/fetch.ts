@@ -13,7 +13,7 @@ const itemsSchema = z.record(
 		cost: z.number().int().min(0).nullable(),
 		mc: z.preprocess(
 			(mc) => (mc === false ? null : mc),
-			z.number().int().min(0).nullable()
+			z.number().int().min(0).nullable(),
 		),
 		lore: z.string(),
 		attrib: z.array(
@@ -21,15 +21,15 @@ const itemsSchema = z.record(
 				footer: z.string().optional(),
 				header: z.string().optional(),
 				value: z.union([z.array(z.unknown()), z.string()]),
-			})
+			}),
 		),
 		hint: z.array(z.string()).default(() => []),
-	})
+	}),
 )
 
 export const fetchItems = async (): Promise<Item[]> => {
 	const responseItems = await axios.get(
-		"https://api.opendota.com/api/constants/items"
+		"https://api.opendota.com/api/constants/items",
 	)
 
 	const items = itemsSchema.parse(responseItems.data)
@@ -52,7 +52,7 @@ export const fetchItems = async (): Promise<Item[]> => {
 								? a.value.join(", ")
 								: a.value
 							: Dashes.EmDash,
-					})
+					}),
 				),
 				lore: item.lore || null,
 				hints: item.hint.map((h) => h.replace(/%+[a-zA-Z_]+%+/g, "?")),

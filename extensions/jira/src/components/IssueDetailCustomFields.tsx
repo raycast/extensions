@@ -1,5 +1,5 @@
 import { Detail } from "@raycast/api";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 import { User } from "../api/users";
 import { getUserAvatar } from "../helpers/avatars";
@@ -15,6 +15,45 @@ import {
 type IssueDetailCustomFieldsProps = {
   fields: ReturnType<typeof getCustomFieldsForDetail>["customMetadataFields"];
 };
+
+function sprintDisplayName(s: Sprint) {
+  return s.name?.trim() ? s.name : `Sprint ${s.id}`;
+}
+
+function SprintFieldMetadata({ title, sprints }: { title: string; sprints: Sprint[] }) {
+  const [expanded, setExpanded] = useState(false);
+
+  if (sprints.length === 0) {
+    return <Detail.Metadata.Label title={title} text="None" />;
+  }
+
+  if (sprints.length === 1) {
+    return (
+      <Detail.Metadata.TagList title={title}>
+        <Detail.Metadata.TagList.Item text={sprintDisplayName(sprints[0])} />
+      </Detail.Metadata.TagList>
+    );
+  }
+
+  if (!expanded) {
+    const more = sprints.length - 1;
+    return (
+      <Detail.Metadata.TagList title={title}>
+        <Detail.Metadata.TagList.Item text={sprintDisplayName(sprints[0])} />
+        <Detail.Metadata.TagList.Item text={`+${more}`} onAction={() => setExpanded(true)} />
+      </Detail.Metadata.TagList>
+    );
+  }
+
+  return (
+    <Detail.Metadata.TagList title={title}>
+      {sprints.map((s, index) => (
+        <Detail.Metadata.TagList.Item key={String(s.id ?? s.name ?? index)} text={sprintDisplayName(s)} />
+      ))}
+      <Detail.Metadata.TagList.Item text="−" onAction={() => setExpanded(false)} />
+    </Detail.Metadata.TagList>
+  );
+}
 
 export default function IssueDetailCustomFields({ fields }: IssueDetailCustomFieldsProps) {
   return (
@@ -86,9 +125,9 @@ export default function IssueDetailCustomFields({ fields }: IssueDetailCustomFie
             break;
           }
           case CustomFieldSchema.sprint: {
-            const typedValue = value as Sprint[];
-            // For some reasons, a single sprint can be associated to a Jira ticket but an array is returned
-            component = <Detail.Metadata.Label title={name} text={typedValue[0].name} />;
+            const raw = value as Sprint | Sprint[] | null | undefined;
+            const sprints = Array.isArray(raw) ? raw : raw ? [raw] : [];
+            component = <SprintFieldMetadata title={name} sprints={sprints} />;
             break;
           }
           case CustomFieldSchema.userPicker: {

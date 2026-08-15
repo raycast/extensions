@@ -1,6 +1,6 @@
 import { List, updateCommandMetadata } from "@raycast/api";
 import { oura } from "./utils/ouraData";
-import { today } from "./utils/datetime";
+import { getDate } from "./utils/datetime";
 import { ReadinessResponse } from "./types";
 import { getProgressStatus } from "./utils/measurement";
 import Unauthorized from "./unauthorized";
@@ -9,7 +9,7 @@ const loading = `Loading...`;
 
 export default function Command() {
   const readiness = oura(
-    `usercollection/daily_readiness?start_date=${today()}&end_date=${today()}`,
+    `usercollection/daily_readiness?start_date=${getDate()}&end_date=${getDate()}`,
   ) as ReadinessResponse;
 
   if (readiness.isLoading) {

@@ -1,8 +1,10 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Model, ModelHook } from "../type";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
+import { Model, ModelHook, ReasoningEffort } from "../type";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
 import { useProxy } from "./useProxy";
+
+type StoredModel = Partial<Model> & Pick<Model, "id">;
 
 export const DEFAULT_MODEL: Model = {
   id: "default",
@@ -10,20 +12,56 @@ export const DEFAULT_MODEL: Model = {
   created_at: new Date().toISOString(),
   name: "Default",
   prompt: "You are a helpful assistant.",
-  option: "gpt-3.5-turbo",
+  option: "gpt-5-nano",
   temperature: "1",
+  enableReasoningEffortChange: false,
+  reasoningEffort: "medium",
   pinned: false,
   vision: false,
 };
 
+const REASONING_EFFORT_OPTIONS: ReasoningEffort[] = ["none", "low", "medium", "high"];
+
+function isReasoningEffort(value: unknown): value is ReasoningEffort {
+  return typeof value === "string" && REASONING_EFFORT_OPTIONS.includes(value as ReasoningEffort);
+}
+
+function normalizeModel(model: StoredModel): Model {
+  const now = new Date().toISOString();
+  return {
+    ...DEFAULT_MODEL,
+    ...model,
+    id: model.id,
+    created_at: model.created_at ?? now,
+    updated_at: model.updated_at ?? now,
+    temperature: String(model.temperature ?? DEFAULT_MODEL.temperature),
+    enableReasoningEffortChange: Boolean(model.enableReasoningEffortChange),
+    reasoningEffort: isReasoningEffort(model.reasoningEffort) ? model.reasoningEffort : DEFAULT_MODEL.reasoningEffort,
+    vision: model.vision ?? false,
+    pinned: model.pinned ?? false,
+  };
+}
+
+function normalizeModels(models: Record<string, StoredModel>): Record<string, Model> {
+  const normalized = Object.values(models).reduce<Record<string, Model>>((acc, model) => {
+    acc[model.id] = normalizeModel(model);
+    return acc;
+  }, {});
+  if (!normalized[DEFAULT_MODEL.id]) {
+    normalized[DEFAULT_MODEL.id] = DEFAULT_MODEL;
+  }
+  return normalized;
+}
+
 export function useModel(): ModelHook {
-  const [data, setData] = useState<Model[]>([]);
+  const [data, setData] = useState<Record<string, Model>>({});
   const [isLoading, setLoading] = useState<boolean>(true);
   const [isFetching, setFetching] = useState<boolean>(true);
   const gpt = useChatGPT();
   const proxy = useProxy();
   const { useAzure, isCustomModel } = getConfiguration();
-  const [option, setOption] = useState<Model["option"][]>(["gpt-3.5-turbo", "gpt-3.5-turbo-0301"]);
+  const [option, setOption] = useState<Model["option"][]>(["gpt-5-nano", "gpt-5.2-chat-latest"]);
+  const isInitialMount = useRef(true);
 
   useEffect(() => {
     if (isCustomModel) {
@@ -42,11 +80,11 @@ export function useModel(): ModelHook {
             try {
               const body = JSON.parse((res as unknown as { body: string }).body);
               models = body.data;
-            } catch (e) {
+            } catch {
               // ignore try to parse it
             }
           }
-          setOption(models.filter((m) => m.id.startsWith("gpt")).map((x) => x.id));
+          setOption(models.map((x) => x.id));
         })
         .catch(async (err) => {
           console.error(err);
@@ -64,7 +102,7 @@ export function useModel(): ModelHook {
                   title: "Error",
                   message: err.message,
                   style: Toast.Style.Failure,
-                }
+                },
           );
         })
         .finally(() => {
@@ -77,18 +115,34 @@ export function useModel(): ModelHook {
 
   useEffect(() => {
     (async () => {
-      const storedModels = await LocalStorage.getItem<string>("models");
+      const storedModels: StoredModel[] | Record<string, StoredModel> = JSON.parse(
+        (await LocalStorage.getItem<string>("models")) || "{}",
+      );
+      const storedModelsLength = ((models: Record<string, StoredModel> | StoredModel[]): number =>
+        Array.isArray(models) ? models.length : Object.keys(models).length)(storedModels);
 
-      if (!storedModels) {
-        setData([DEFAULT_MODEL]);
+      if (storedModelsLength === 0) {
+        setData({ [DEFAULT_MODEL.id]: DEFAULT_MODEL });
       } else {
-        setData((previous) => [...previous, ...JSON.parse(storedModels)]);
+        let modelsById: Record<string, StoredModel>;
+        // Support for old data structure
+        if (Array.isArray(storedModels)) {
+          modelsById = storedModels.reduce((acc, model) => ({ ...acc, [model.id]: model }), {});
+        } else {
+          modelsById = storedModels;
+        }
+        setData(normalizeModels(modelsById));
       }
       setLoading(false);
+      isInitialMount.current = false;
     })();
   }, []);
 
   useEffect(() => {
+    // Avoid saving when initial loading
+    if (isInitialMount.current) {
+      return;
+    }
     LocalStorage.setItem("models", JSON.stringify(data));
   }, [data]);
 
@@ -98,40 +152,51 @@ export function useModel(): ModelHook {
         title: "Saving your model...",
         style: Toast.Style.Animated,
       });
-      const newModel: Model = { ...model, created_at: new Date().toISOString() };
-      setData([...data, newModel]);
+      setData((prevData) => ({
+        ...prevData,
+        [model.id]: normalizeModel({ ...model, created_at: new Date().toISOString() }),
+      }));
       toast.title = "Model saved!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData],
   );
 
   const update = useCallback(
     async (model: Model) => {
-      setData((prev) => {
-        return prev.map((x) => {
-          if (x.id === model.id) {
-            return model;
-          }
-          return x;
-        });
+      const toast = await showToast({
+        title: "Updating your model...",
+        style: Toast.Style.Animated,
       });
+      setData((prevData) => ({
+        ...prevData,
+        [model.id]: normalizeModel({
+          ...prevData[model.id],
+          ...model,
+          updated_at: new Date().toISOString(),
+        }),
+      }));
+      toast.title = "Model updated!";
+      toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData],
   );
 
   const remove = useCallback(
     async (model: Model) => {
       const toast = await showToast({
-        title: "Remove your model...",
+        title: "Removing your model...",
         style: Toast.Style.Animated,
       });
-      const newModels: Model[] = data.filter((oldModel) => oldModel.id !== model.id);
-      setData(newModels);
+      setData((prevData) => {
+        const newData = { ...prevData };
+        delete newData[model.id];
+        return newData;
+      });
       toast.title = "Model removed!";
       toast.style = Toast.Style.Success;
     },
-    [setData, data]
+    [setData],
   );
 
   const clear = useCallback(async () => {
@@ -139,14 +204,20 @@ export function useModel(): ModelHook {
       title: "Clearing your models ...",
       style: Toast.Style.Animated,
     });
-    const newModels: Model[] = data.filter((oldModel) => oldModel.id === DEFAULT_MODEL.id);
-    setData(newModels);
+    setData({ [DEFAULT_MODEL.id]: DEFAULT_MODEL });
     toast.title = "Models cleared!";
     toast.style = Toast.Style.Success;
   }, [setData]);
 
+  const setModels = useCallback(
+    async (models: Record<string, Model>) => {
+      setData(normalizeModels(models));
+    },
+    [setData],
+  );
+
   return useMemo(
-    () => ({ data, isLoading, option, add, update, remove, clear, isFetching }),
-    [data, isLoading, option, add, update, remove, clear, isFetching]
+    () => ({ data, isLoading, option, add, update, remove, clear, setModels, isFetching }),
+    [data, isLoading, option, add, update, remove, clear, setModels, isFetching],
   );
 }

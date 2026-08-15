@@ -1,33 +1,13 @@
 import { List, Action, ActionPanel } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { getOwnershipCode } from "./utils/api";
-import { Response } from "./utils/types";
 import { OPTIONAL_OWNERSHIP_DNS_RECORDS, REQUIRED_OWNERSHIP_DNS_RECORDS } from "./utils/constants";
 import ErrorComponent from "./components/ErrorComponent";
-import { useCachedState } from "@raycast/utils";
+import { useOwnershipCode } from "./utils/hooks";
 
 export default function GetOwnershipCode() {
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [ownershipCode, setOwnershipCode] = useCachedState<string>("ownership-code");
-
-  useEffect(() => {
-    async function getFromApi() {
-      const response: Response = await getOwnershipCode();
-
-      if (response.type === "error") {
-        setError(response.message);
-      } else {
-        setOwnershipCode(response.result.code);
-      }
-      setIsLoading(false);
-    }
-
-    getFromApi();
-  }, []);
+  const { isLoading, data: ownershipCode, error } = useOwnershipCode();
 
   return error ? (
-    <ErrorComponent error={error} />
+    <ErrorComponent error={error.message} />
   ) : (
     <List isLoading={isLoading}>
       <List.Section title="Required">

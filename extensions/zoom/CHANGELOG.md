@@ -1,5 +1,26 @@
 # Zoom Changelog
 
+## [Personal Meeting ID Support] - 2026-08-10
+
+- Added a `Personal Meeting ID` preference to the Start Meeting command so you can always start your own personal meeting room with a consistent meeting ID.
+
+## [Improvements] - 2026-06-29
+
+- Retry meeting list requests when Zoom rate limits the API
+- Improve reliability when loading upcoming meetings concurrently
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Windows Support] - 2026-01-05
+
+- Added Windows support for starting, joining, and scheduling Zoom meetings.
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Added AI tools for creating and editing meetings.
+
 ## [Log out the user if re-authentication fails] - 2024-07-11
 
 - Automatically log out users if re-authentication fails, instead of displaying an error message.

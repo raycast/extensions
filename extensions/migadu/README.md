@@ -15,10 +15,10 @@ This is a Raycast extension for [Migadu](https://migadu.com/). With this extensi
     a. `Sign in` to your Migadu Account at [this link](https://admin.migadu.com/public/login)
 
     b. `Navigate` to [API Keys](https://admin.migadu.com/account/api/keys)
-    
+
     c. `Create API Key` and `copy` the secret
     <img src="./assets/migadu-create-api-key.png" alt="Create API Key" />
-  
+
     d. Enter `API Key` and `Username` in Preferences OR at first prompt
 
 3. **Add Domains**: You will need to add each domain:
@@ -47,6 +47,7 @@ This extension provides the following commands:
         - Create Mailbox Identity
         - Update Mailbox Identity
         - Delete Mailbox Identity
+- Create Anonymous Identity (allows quick identity generation, can be used like Apple's "Hide My Email")
 - Aliases
     - View Aliases
     - Create Alias

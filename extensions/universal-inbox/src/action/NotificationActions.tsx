@@ -5,7 +5,7 @@ import { LinkNotificationToTask } from "./LinkNotificationToTask";
 import { Page, UniversalInboxPreferences } from "../types";
 import { default as dayjs, extend } from "dayjs";
 import { MutatePromise } from "@raycast/utils";
-import { useMemo, ReactElement } from "react";
+import { useMemo, ReactNode } from "react";
 import { handleErrors } from "../api";
 import { TaskStatus } from "../task";
 import utc from "dayjs/plugin/utc";
@@ -15,7 +15,7 @@ extend(utc);
 
 interface NotificationActionsProps {
   notification: Notification;
-  detailsTarget: ReactElement;
+  detailsTarget: ReactNode;
   mutate: MutatePromise<Page<Notification> | undefined>;
 }
 
@@ -26,8 +26,8 @@ export function NotificationActions({ notification, detailsTarget, mutate }: Not
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser url={notificationHtmlUrl} />
       <Action.Push title="Show Details" icon={Icon.AppWindowSidebarRight} target={detailsTarget} />
+      <Action.OpenInBrowser url={notificationHtmlUrl} shortcut={{ modifiers: ["cmd"], key: "enter" }} />
       <Action
         title="Delete Notification"
         icon={Icon.Trash}
@@ -35,7 +35,7 @@ export function NotificationActions({ notification, detailsTarget, mutate }: Not
         onAction={() => deleteNotification(notification, mutate)}
       />
       <Action
-        title="Unsubscribe From Notification"
+        title="Unsubscribe from Notification"
         icon={Icon.BellDisabled}
         shortcut={{ modifiers: ["ctrl"], key: "u" }}
         onAction={() => unsubscribeFromNotification(notification, mutate)}
@@ -47,13 +47,13 @@ export function NotificationActions({ notification, detailsTarget, mutate }: Not
         onAction={() => snoozeNotification(notification, mutate)}
       />
       <Action.Push
-        title="Create Task..."
+        title="Create Task…"
         icon={Icon.Calendar}
         shortcut={{ modifiers: ["ctrl"], key: "t" }}
         target={<CreateTaskFromNotification notification={notification} mutate={mutate} />}
       />
       <Action.Push
-        title="Link to Task..."
+        title="Link to Task…"
         icon={Icon.Link}
         shortcut={{ modifiers: ["ctrl"], key: "l" }}
         target={<LinkNotificationToTask notification={notification} mutate={mutate} />}
@@ -72,7 +72,7 @@ export async function deleteNotification(
     if (isNotificationBuiltFromTask(notification) && notification.task) {
       await mutate(
         handleErrors(
-          fetch(`${preferences.universalInboxBaseUrl}/api/tasks/${notification.task.id}`, {
+          fetch(`${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/tasks/${notification.task.id}`, {
             method: "PATCH",
             body: JSON.stringify({ status: TaskStatus.Deleted }),
             headers: {
@@ -93,7 +93,7 @@ export async function deleteNotification(
     } else {
       await mutate(
         handleErrors(
-          fetch(`${preferences.universalInboxBaseUrl}/api/notifications/${notification.id}`, {
+          fetch(`${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/notifications/${notification.id}`, {
             method: "PATCH",
             body: JSON.stringify({ status: NotificationStatus.Deleted }),
             headers: {
@@ -132,7 +132,7 @@ export async function unsubscribeFromNotification(
   try {
     await mutate(
       handleErrors(
-        fetch(`${preferences.universalInboxBaseUrl}/api/notifications/${notification.id}`, {
+        fetch(`${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/notifications/${notification.id}`, {
           method: "PATCH",
           body: JSON.stringify({ status: NotificationStatus.Unsubscribed }),
           headers: {
@@ -171,7 +171,7 @@ export async function snoozeNotification(
     const snoozeTime = computeSnoozedUntil(new Date(), 1, 6);
     await mutate(
       handleErrors(
-        fetch(`${preferences.universalInboxBaseUrl}/api/notifications/${notification.id}`, {
+        fetch(`${preferences.universalInboxBaseUrl.replace(/\/$/, "")}/api/notifications/${notification.id}`, {
           method: "PATCH",
           body: JSON.stringify({ snoozed_until: snoozeTime }),
           headers: {

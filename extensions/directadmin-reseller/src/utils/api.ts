@@ -19,23 +19,27 @@ import {
   SuspendOrUnsuspendUserRequest,
   ChangeUserTicketingEmailRequest,
 } from "../types";
-import fetch, { Response } from "node-fetch";
-import { API_URL, RESELLER_PASSWORD, RESELLER_USERNAME, RESELLER_API_TOKEN } from "./constants";
+import { API_URL } from "./constants";
 import { showFailureToast } from "@raycast/utils";
+import { Panel } from "../types/panel";
+import { generateApiToken } from "./functions";
 
-const callApi = async (endpoint: string, animatedToastMessage = "", body?: BodyRequest, userToImpersonate = "") => {
-  const token =
-    userToImpersonate === ""
-      ? RESELLER_API_TOKEN
-      : btoa(`${RESELLER_USERNAME}|${userToImpersonate}:${RESELLER_PASSWORD}`);
+const callApi = async (
+  endpoint: string,
+  animatedToastMessage = "",
+  body?: BodyRequest,
+  userToImpersonate = "",
+  panel?: Panel,
+) => {
+  const token = generateApiToken(userToImpersonate, panel);
   const headers = { Authorization: `Basic ${token}` };
 
   await showToast(Toast.Style.Animated, "Processing...", animatedToastMessage);
-
+  const url = !panel ? API_URL : new URL(panel.directadmin_url) + "CMD_API_";
   let apiResponse;
-  if (!body) apiResponse = await fetch(API_URL + endpoint, { headers, method: "POST" });
+  if (!body) apiResponse = await fetch(url + endpoint, { headers, method: "POST" });
   else
-    apiResponse = await fetch(API_URL + endpoint, {
+    apiResponse = await fetch(url + endpoint, {
       headers,
       method: "POST",
       body: JSON.stringify(body),
@@ -134,26 +138,18 @@ export async function changeUserTicketingEmail(body: ChangeUserTicketingEmailReq
 }
 
 //
-export async function getResellerIPs() {
-  return await callApi("SHOW_RESELLER_IPS", "Fetching Reseller IPs");
-}
-export async function getResellerIPInformation(ip: string) {
-  const params = new URLSearchParams({ ip });
-  return await callApi(`SHOW_RESELLER_IPS?${params}`, "Fetching Reseller IP Information");
-}
+// Moved to Hooks
 
 // PACKAGES
 // Moved to Hooks
 
 // DOMAINS
-export async function getDomains() {
-  return await callApi("SHOW_DOMAINS", "Fetching Domains");
-}
+// export async function getDomains() {
 export async function createDomain(body: CreateNewDomainRequest, userToImpersonate = "") {
   return await callApi("DOMAIN", "Creating Domain", body, userToImpersonate);
 }
-export async function getSubdomains(domain: string, userToImpersonate = "") {
-  return await callApi("SUBDOMAINS", "Fetching Subdomains", { domain }, userToImpersonate);
+export async function getSubdomains(domain: string, userToImpersonate = "", panel?: Panel) {
+  return await callApi("SUBDOMAINS", "Fetching Subdomains", { domain }, userToImpersonate, panel);
 }
 export async function createSubdomain(body: CreateSubdomainRequest, userToImpersonate = "") {
   return await callApi("SUBDOMAINS", "Creating Subdomain", body, userToImpersonate);
@@ -163,9 +159,9 @@ export async function deleteSubdomain(body: DeleteSubdomainRequest, userToImpers
 }
 
 // Databases
-export async function getDatabases(userToImpersonate = "") {
-  return await callApi("DATABASES", "Fetching Databases", undefined, userToImpersonate);
-}
+// export async function getDatabases(userToImpersonate = "") {
+//   return await callApi("DATABASES", "Fetching Databases", undefined, userToImpersonate);
+// }
 export async function createDatabase(body: CreateDatabaseRequest, userToImpersonate = "") {
   return await callApi("DATABASES", "Creating Database", body, userToImpersonate);
 }
@@ -179,8 +175,8 @@ export async function getSession(body: GetSessionRequest) {
 }
 
 // Emails
-export async function getEmailAccounts(body: GetEmailAccountsRequest, userToImpersonate = "") {
-  return await callApi("POP", "Fetching Email Accounts", body, userToImpersonate);
+export async function getEmailAccounts(body: GetEmailAccountsRequest, userToImpersonate = "", panel?: Panel) {
+  return await callApi("POP", "Fetching Email Accounts", body, userToImpersonate, panel);
 }
 export async function changeEmailAccountPassword(body: ChangeEmailAccountPasswordRequest, userToImpersonate = "") {
   return await callApi("CHANGE_EMAIL_PASSWORD", "Changing Email Account Password", body, userToImpersonate);

@@ -1,82 +1,36 @@
-import { useEffect, useState } from "react";
-import { Action, ActionPanel, Alert, Color, confirmAlert, Form, Icon, List, showToast, Toast } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { createContact, deleteContact, getAudiences, getContacts, updateContact } from "./utils/api";
+import { useState } from "react";
 import {
-  Audience,
-  Contact,
-  CreateContactRequestForm,
-  ErrorResponse,
-  GetContactsResponse,
-  UpdateContactRequestForm,
-} from "./utils/types";
+  Action,
+  ActionPanel,
+  Alert,
+  Color,
+  confirmAlert,
+  Form,
+  Icon,
+  List,
+  showToast,
+  Toast,
+  useNavigation,
+} from "@raycast/api";
+import { FormValidation, useForm } from "@raycast/utils";
+import { isApiError } from "./utils/api";
+import { CreateContactRequestForm, UpdateContactRequestForm } from "./utils/types";
 import ErrorComponent from "./components/ErrorComponent";
+import { onError, useAudiences, useContacts } from "./lib/hooks";
+import { Segment, Contact } from "resend";
+import { getResend, withResend } from "./lib/oauth";
 
-export default function Audiences() {
-  const [audience, setAudience] = useState<Audience | undefined>();
-  const [audiences, setAudiences] = useState<Audience[]>([]);
-  const [isLoadingContacts, setIsLoadingContacts] = useState<boolean>(false);
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [error, setError] = useState("");
+export default withResend(Audiences);
+function Audiences() {
+  const [audience, setAudience] = useState<Segment | undefined>();
 
-  const { isLoading: isLoadingAudience } = useCachedPromise(() => getAudiences(), [], {
-    onData: (data) => {
-      if (data && "data" in data) {
-        setAudiences(data.data);
-      }
-    },
-    onError: (error) => {
-      if (error.name === "validation_error" || error.name === "restricted_api_key") {
-        setError(error.message);
-      }
-    },
-  });
-
-  useEffect(() => {
-    if (audience) {
-      setIsLoadingContacts(true);
-
-      const { id } = audience;
-      const contactsData: Promise<ErrorResponse | GetContactsResponse> = getContacts(id);
-
-      contactsData
-        .then((response) => {
-          if ("statusCode" in response) {
-            // The response is an ErrorResponse
-            setError(`Error ${response.statusCode}: ${response.message}`);
-          } else {
-            // The response is a GetContactsResponse
-            if (response && "data" in response) {
-              setContacts(response.data);
-            }
-          }
-        })
-        .catch((error) => {
-          if (error instanceof Error) {
-            setError(error.message);
-          } else {
-            // The error is of an unknown type or structure
-            setError("An unknown error occurred");
-          }
-        })
-        .finally(() => {
-          setIsLoadingContacts(false);
-        });
-    }
-  }, [audience]);
-
-  async function getContactsFromApi(audienceId: string) {
-    setIsLoadingContacts(true);
-
-    const response = await getContacts(audienceId);
-    if (!("statusCode" in response)) {
-      setContacts(response.data);
-    } else if (response.name === "validation_error" || response.name === "restricted_api_key") {
-      setError(response.message);
-    }
-
-    setIsLoadingContacts(false);
-  }
+  const { isLoading: isLoadingAudience, audiences, error: errorAudiences } = useAudiences();
+  const {
+    isLoading: isLoadingContacts,
+    contacts,
+    error: errorContacts,
+    mutate: mutateContacts,
+  } = useContacts(audience?.id);
 
   async function confirmAndDelete(audienceId: string, contact: Contact) {
     if (
@@ -86,15 +40,31 @@ export default function Audiences() {
         primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
       })
     ) {
-      const response = await deleteContact(audienceId, contact.id);
-      if (!("statusCode" in response)) {
-        await showToast(Toast.Style.Success, "Deleted Domain");
-        await getContactsFromApi(audienceId);
+      const toast = await showToast(Toast.Style.Animated, "Deleting Contact", contact.id);
+      try {
+        const resend = getResend();
+
+        await mutateContacts(
+          resend.contacts.remove({ audienceId, id: contact.id }).then(({ error }) => {
+            if (error) throw new Error(error.message, { cause: error.name });
+          }),
+          {
+            optimisticUpdate(data) {
+              return data.filter((c) => c.id !== contact.id);
+            },
+            shouldRevalidateAfter: false,
+          },
+        );
+        toast.style = Toast.Style.Success;
+        toast.title = "Deleted Contact";
+      } catch (error) {
+        onError(error as Error);
       }
     }
   }
 
-  return error ? (
+  const error = errorAudiences || errorContacts;
+  return error && isApiError(error) ? (
     <ErrorComponent error={error} />
   ) : (
     <List
@@ -106,7 +76,7 @@ export default function Audiences() {
             <Action.Push
               title="Create Contact"
               icon={Icon.Plus}
-              target={<CreateContact audience={audience} getContactsFromApi={getContactsFromApi} />}
+              target={<CreateContact audience={audience} onCreated={mutateContacts} />}
             />
           )}
         </ActionPanel>
@@ -130,7 +100,7 @@ export default function Audiences() {
                 <Action.Push
                   title="Create Contact"
                   icon={Icon.Plus}
-                  target={<CreateContact audience={audience} getContactsFromApi={getContactsFromApi} />}
+                  target={<CreateContact audience={audience} onCreated={mutateContacts} />}
                 />
               )}
               {audience && (
@@ -138,7 +108,7 @@ export default function Audiences() {
                   title="Edit Contact"
                   icon={Icon.Pencil}
                   shortcut={{ modifiers: ["cmd"], key: "e" }}
-                  target={<UpdateContact contact={contact} audience={audience} />}
+                  target={<UpdateContact contact={contact} audience={audience} onUpdated={mutateContacts} />}
                 />
               )}
               {audience && (
@@ -157,7 +127,7 @@ export default function Audiences() {
                   title="Refresh Contacts"
                   icon={Icon.Redo}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
-                  onAction={() => getContactsFromApi(audience.id)}
+                  onAction={mutateContacts}
                 />
               )}
             </ActionPanel>
@@ -168,7 +138,7 @@ export default function Audiences() {
   );
 }
 
-export function AudienceDropdown(props: { audiences: Audience[]; setAudience: (audience: Audience) => void }) {
+export function AudienceDropdown(props: { audiences: Segment[]; setAudience: (audience: Segment) => void }) {
   const { audiences, setAudience } = props;
 
   const onAudienceChange = (newValue: string) => {
@@ -195,20 +165,24 @@ export function AudienceDropdown(props: { audiences: Audience[]; setAudience: (a
   );
 }
 
-function CreateContact(props: { audience: Audience; getContactsFromApi: (audienceId: string) => void }) {
-  const { audience, getContactsFromApi } = props;
-
+function CreateContact({ audience, onCreated }: { audience: Segment; onCreated: () => void }) {
+  const { pop } = useNavigation();
   const { handleSubmit, itemProps } = useForm<CreateContactRequestForm>({
     validation: {
       email: FormValidation.Required,
     },
-    async onSubmit(values: CreateContactRequestForm) {
-      const contact = await createContact(audience.id, values);
-      if (!("statusCode" in contact)) {
-        getContactsFromApi(audience.id);
-        showToast(Toast.Style.Success, "Created Contact", contact.email);
-      } else {
-        showToast(Toast.Style.Failure, "Error", contact.message);
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Creating Contact", values.email);
+      try {
+        const resend = getResend();
+        const { error } = await resend.contacts.create({ ...values, audienceId: audience.id });
+        if (error) throw new Error(error.message, { cause: error.name });
+        toast.style = Toast.Style.Success;
+        toast.title = "Created Contact";
+        onCreated();
+        pop();
+      } catch (error) {
+        onError(error as Error);
       }
     },
   });
@@ -222,32 +196,43 @@ function CreateContact(props: { audience: Audience; getContactsFromApi: (audienc
       }
     >
       <Form.TextField title="Email" {...itemProps.email} placeholder="john.doe@example.com" />
-      <Form.TextField title="First Name" {...itemProps.first_name} placeholder="John" />
-      <Form.TextField title="Last Name" {...itemProps.last_name} placeholder="Doe" />
+      <Form.TextField title="First Name" {...itemProps.firstName} placeholder="John" />
+      <Form.TextField title="Last Name" {...itemProps.lastName} placeholder="Doe" />
       <Form.Checkbox label="Unsubscribed" {...itemProps.unsubscribed} />
     </Form>
   );
 }
 
-function UpdateContact(props: { contact: Contact; audience: Audience }) {
-  const { contact, audience } = props;
+function UpdateContact(props: { contact: Contact; audience: Segment; onUpdated: () => void }) {
+  const { pop } = useNavigation();
+  const { contact, audience, onUpdated } = props;
 
-  const { itemProps, handleSubmit } = useForm<UpdateContactRequestForm>({
+  const { itemProps, handleSubmit } = useForm<
+    UpdateContactRequestForm & {
+      firstName: string | undefined;
+      lastName: string | undefined;
+    }
+  >({
     initialValues: {
       email: contact.email,
-      first_name: contact.first_name,
-      last_name: contact.last_name,
+      firstName: contact.first_name || undefined,
+      lastName: contact.last_name || undefined,
       unsubscribed: contact.unsubscribed,
     },
     validation: {
       email: FormValidation.Required,
     },
-    async onSubmit(values: UpdateContactRequestForm) {
-      const response = await updateContact(audience.id, contact.id, values);
-      if (!("statusCode" in response)) {
-        showToast(Toast.Style.Success, "Updated Contact", contact.email);
-      } else {
-        showToast(Toast.Style.Failure, "Error", response.message);
+    async onSubmit(values) {
+      const toast = await showToast(Toast.Style.Animated, "Updating Contact", values.email);
+      try {
+        const resend = getResend();
+        await resend.contacts.update({ ...values, audienceId: audience.id });
+        toast.style = Toast.Style.Success;
+        toast.title = "Updated Contact";
+        onUpdated();
+        pop();
+      } catch (error) {
+        onError(error as Error);
       }
     },
   });
@@ -261,8 +246,8 @@ function UpdateContact(props: { contact: Contact; audience: Audience }) {
       }
     >
       <Form.TextField title="Email" {...itemProps.email} placeholder="john.doe@example.com" />
-      <Form.TextField title="First Name" {...itemProps.first_name} placeholder="John" />
-      <Form.TextField title="Last Name" {...itemProps.last_name} placeholder="Doe" />
+      <Form.TextField title="First Name" {...itemProps.firstName} placeholder="John" />
+      <Form.TextField title="Last Name" {...itemProps.lastName} placeholder="Doe" />
       <Form.Checkbox label="Unsubscribed" {...itemProps.unsubscribed} />
     </Form>
   );

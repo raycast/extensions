@@ -13,6 +13,8 @@ import {
   popToRoot,
   confirmAlert,
   Color,
+  environment,
+  Keyboard,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
 import { getProgressIcon } from '@raycast/utils';
@@ -21,10 +23,10 @@ import { MoveDir } from './store';
 import { readDataFromQRCodeOnScreen, getCurrentSeconds, splitStrToParts, ScanType, parseUrl } from './utils';
 import { TOKEN_TIME, generateToken } from './totp';
 import { extractAccountsFromMigrationUrl } from './google-authenticator';
-import { config } from './config';
 
 type Preferences = {
   passwordVisibility?: boolean;
+  primaryAction?: 'copy' | 'paste';
 };
 
 export default () => {
@@ -35,6 +37,8 @@ export default () => {
   const [timer, setTimer] = useState(0);
   const [accounts, setAccounts] = useState<store.Account[]>([]);
   const [qrCodeScanType, setQRCodeScanType] = useState<ScanType>(null);
+
+  const { theme } = environment;
 
   async function loadAccounts() {
     if (accounts.length === 0) setLoading(true);
@@ -94,23 +98,31 @@ export default () => {
   async function scanQRCode(type: ScanType) {
     if (qrCodeScanType) return;
 
-    setQRCodeScanType(type);
-    const response = await readDataFromQRCodeOnScreen(type);
-    setQRCodeScanType(null);
+    try {
+      setQRCodeScanType(type);
+      const response = await readDataFromQRCodeOnScreen(type);
+      setQRCodeScanType(null);
 
-    if (!response?.data) {
+      if (!response?.data) {
+        throw new Error('Unable to read QR code');
+      }
+
+      if (response.isGoogleAuthenticatorMigration) {
+        await handleGoogleAuthenticatorMigration(response.data);
+        await loadAccounts();
+      } else {
+        navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={response.data} />);
+      }
+    } catch (err: unknown) {
+      let message = 'Unknown error';
+      if (err instanceof Error) {
+        message = err.message;
+      }
       showToast({
         style: Toast.Style.Failure,
         title: 'QR code detection failed',
+        message,
       });
-      return;
-    }
-
-    if (response.isGoogleAuthenticatorMigration) {
-      await handleGoogleAuthenticatorMigration(response.data);
-      await loadAccounts();
-    } else {
-      navigation.push(<SetupKey onSubmit={handleFormSubmit} secret={response.data} />);
     }
   }
 
@@ -139,7 +151,7 @@ export default () => {
       try {
         const token = generateToken(secret);
         return splitStrToParts(token);
-      } catch (err) {
+      } catch {
         return 'Invalid secret';
       }
     }
@@ -148,20 +160,23 @@ export default () => {
   function getCopyToClipboardContent(secret: string) {
     try {
       return generateToken(secret);
-    } catch (err) {
+    } catch {
       return '';
     }
   }
 
   const globalActions = (
     <ActionPanel.Section>
-      <ActionPanel.Submenu title="Create New" icon={Icon.Plus} shortcut={{ modifiers: ['cmd'], key: 'n' }}>
+      <ActionPanel.Submenu title="Create New" icon={Icon.Plus} shortcut={Keyboard.Shortcut.Common.New}>
         <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
         <Action.Push title="Enter a Setup Key" icon={Icon.Keyboard} target={<SetupKey onSubmit={handleFormSubmit} />} />
         <Action
           title="Select a QR Code"
           icon={Icon.Camera}
-          shortcut={{ modifiers: ['cmd'], key: 'i' }}
+          shortcut={{
+            macOS: { modifiers: ['cmd'], key: 'i' },
+            Windows: { modifiers: ['ctrl'], key: 'i' },
+          }}
           onAction={() => scanQRCode('select')}
         />
       </ActionPanel.Submenu>
@@ -189,7 +204,12 @@ export default () => {
         {accounts.map((account, index) => (
           <List.Item
             key={account.id}
-            icon={{ source: Icon.Key, tintColor: config.colors.key }}
+            icon={{
+              source: `https://cdn.simpleicons.org/${account.issuer?.toLowerCase() || account.name?.toLowerCase()}/${
+                theme === 'dark' ? 'white' : 'black'
+              }`,
+              fallback: Icon.Key,
+            }}
             title={account.name}
             subtitle={displayToken(account.secret)}
             keywords={[account.issuer ?? '', account.name]}
@@ -202,8 +222,16 @@ export default () => {
             ]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard content={getCopyToClipboardContent(account.secret)} />
-                <Action.Paste content={getCopyToClipboardContent(account.secret)} />
+                {...[
+                  <Action.CopyToClipboard
+                    content={getCopyToClipboardContent(account.secret)}
+                    onCopy={() => store.setLastUsedAccountId(account.id)}
+                  />,
+                  <Action.Paste
+                    content={getCopyToClipboardContent(account.secret)}
+                    onPaste={() => store.setLastUsedAccountId(account.id)}
+                  />,
+                ][preferences.primaryAction === 'paste' ? 'reverse' : 'slice']()}
                 {index > 0 && (
                   <Action
                     title="Move up"
@@ -212,23 +240,29 @@ export default () => {
                       await store.moveAccount(account.id, MoveDir.UP);
                       await loadAccounts();
                     }}
-                    shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowUp' }}
+                    shortcut={{
+                      macOS: { modifiers: ['cmd', 'opt'], key: 'arrowUp' },
+                      Windows: { modifiers: ['ctrl', 'alt'], key: 'arrowUp' },
+                    }}
                   />
                 )}
                 {index < accounts.length - 1 && (
                   <Action
-                    title="Move down"
+                    title="Move Down"
                     icon={Icon.ArrowDown}
                     onAction={async () => {
                       await store.moveAccount(account.id, MoveDir.DOWN);
                       await loadAccounts();
                     }}
-                    shortcut={{ modifiers: ['cmd', 'opt'], key: 'arrowDown' }}
+                    shortcut={{
+                      macOS: { modifiers: ['cmd', 'opt'], key: 'arrowDown' },
+                      Windows: { modifiers: ['ctrl', 'alt'], key: 'arrowDown' },
+                    }}
                   />
                 )}
                 <Action.Push
                   title="Edit Account"
-                  shortcut={{ modifiers: ['cmd'], key: 'e' }}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
                   icon={Icon.Pencil}
                   target={
                     <SetupKey id={account.id} name={account.name} secret={account.secret} onSubmit={handleFormSubmit} />
@@ -238,7 +272,10 @@ export default () => {
                   title="Remove Account"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
-                  shortcut={{ modifiers: ['cmd'], key: 'backspace' }}
+                  shortcut={{
+                    macOS: { modifiers: ['cmd'], key: 'backspace' },
+                    Windows: { modifiers: ['ctrl'], key: 'backspace' },
+                  }}
                   onAction={() => handleRemoveAccount(account)}
                 />
                 {globalActions}
@@ -260,21 +297,29 @@ export default () => {
                     { icon: Icon.Keyboard, tag: 'Enter Setup Key' },
                   ]
                 : qrCodeScanType === 'scan'
-                ? [{ text: 'Scanning QR Code...' }]
-                : [{ text: 'Select a QR Code' }]
+                  ? [{ text: 'Scanning QR Code...' }]
+                  : [{ text: 'Select a QR Code' }]
             }
             actions={
               <ActionPanel>
-                <Action title="Scan a QR Code" icon={Icon.Camera} onAction={() => scanQRCode('scan')} />
                 <Action.Push
                   title="Enter a Setup Key"
                   icon={Icon.Keyboard}
                   target={<SetupKey onSubmit={handleFormSubmit} />}
                 />
                 <Action
+                  title="Scan a QR Code"
+                  icon={Icon.Camera}
+                  onAction={() => scanQRCode('scan')}
+                  shortcut={{
+                    macOS: { modifiers: ['cmd'], key: 'i' },
+                    Windows: { modifiers: ['ctrl'], key: 'i' },
+                  }}
+                />
+                <Action
                   title="Select a QR Code"
                   icon={Icon.Camera}
-                  shortcut={{ modifiers: ['cmd'], key: 'i' }}
+                  shortcut={Keyboard.Shortcut.Common.Save}
                   onAction={() => scanQRCode('select')}
                 />
               </ActionPanel>

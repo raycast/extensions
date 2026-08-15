@@ -23,9 +23,8 @@ type ViewPreviousRunsActionProps = {
 
 /**
  * Action to view previous runs of a command.
- * @returns {JSX.Element} An Action.Push component, or null if the action is disabled.
  */
-export default function ViewPreviousRunsAction(props: ViewPreviousRunsActionProps): JSX.Element | null {
+export default function ViewPreviousRunsAction(props: ViewPreviousRunsActionProps) {
   const { command, setCommands, settings } = props;
 
   if (!isActionEnabled("ViewPreviousRunsAction", settings)) {

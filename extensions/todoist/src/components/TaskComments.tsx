@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Icon, List, confirmAlert, showToast, Toast, Color } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { formatDistanceToNow } from "date-fns";
 import removeMarkdown from "remove-markdown";
 
-import { Task, Comment, deleteComment as apiDeleteComment, handleError } from "../api";
+import { Task, Comment, deleteComment as apiDeleteComment } from "../api";
 import { getCollaboratorIcon, getUserIcon } from "../helpers/collaborators";
 import useCachedData from "../hooks/useCachedData";
 
@@ -31,7 +32,7 @@ export default function TaskComments({ task }: TaskCommentsProps) {
         await apiDeleteComment(comment.id, { data, setData });
         await showToast({ style: Toast.Style.Success, title: "Comment deleted" });
       } catch (error) {
-        handleError({ error, title: "Unable to delete comment" });
+        await showFailureToast(error, { title: "Unable to delete comment" });
       }
     }
   }

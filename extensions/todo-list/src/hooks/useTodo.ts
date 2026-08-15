@@ -1,5 +1,16 @@
-import { TodoItem, TodoSections, editingAtom, searchBarTextAtom, todoAtom } from "../atoms";
-import { compare, insertIntoSection } from "../utils";
+import {
+  TodoItem,
+  TodoSections,
+  editingAtom,
+  editingTagAtom,
+  editingTagNameAtom,
+  searchBarTextAtom,
+  todoAtom,
+  editingDueDateAtom,
+  editingDueDateValueAtom,
+} from "../atoms";
+import { compare, insertIntoSection, confetti } from "../utils";
+import { preferences } from "../config";
 
 import _ from "lodash";
 import { useAtom } from "jotai";
@@ -7,6 +18,10 @@ import { useAtom } from "jotai";
 export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number; sectionKey: keyof TodoSections }) => {
   const [todoSections, setTodoSections] = useAtom(todoAtom);
   const [, setEditing] = useAtom(editingAtom);
+  const [, setEditingTag] = useAtom(editingTagAtom);
+  const [, setEditingTagName] = useAtom(editingTagNameAtom);
+  const [, setEditingDueDate] = useAtom(editingDueDateAtom);
+  const [, setEditingDueDateValue] = useAtom(editingDueDateValueAtom);
   const [, setSearchBarText] = useAtom(searchBarTextAtom);
 
   const setClone = () => {
@@ -40,11 +55,13 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
 
   // don't change section if pinned
   const markCompleted = () => {
+    const { useConfetti } = preferences;
     if (sectionKey === "pinned") {
       toggleCompleted(true);
     } else {
       moveToSection("completed");
     }
+    if (useConfetti) confetti();
   };
 
   // don't change section if pinned
@@ -57,7 +74,8 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
   };
 
   const toggleTodo = () => {
-    item.completed ? markTodo() : markCompleted();
+    if (item.completed) markTodo();
+    else markCompleted();
   };
 
   const deleteTodo = () => {
@@ -73,10 +91,38 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
     setSearchBarText(item.title);
   };
 
+  const editTodoTag = () => {
+    setEditingTag({
+      sectionKey,
+      index: idx,
+    });
+    setEditingTagName(item.tag ?? "");
+  };
+
+  const editTodoDueDate = () => {
+    setEditingDueDate({
+      sectionKey,
+      index: idx,
+    });
+    setEditingDueDateValue(item.dueDate ?? 0);
+  };
+
   const setPriority = (priority?: 1 | 2 | 3) => {
     item.priority = priority;
     setClone();
   };
 
-  return { editTodo, deleteTodo, markTodo, markCompleted, pin, unPin, toggleCompleted, toggleTodo, setPriority };
+  return {
+    editTodo,
+    editTodoTag,
+    editTodoDueDate,
+    deleteTodo,
+    markTodo,
+    markCompleted,
+    pin,
+    unPin,
+    toggleCompleted,
+    toggleTodo,
+    setPriority,
+  };
 };

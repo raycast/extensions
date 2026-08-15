@@ -1,17 +1,17 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import fetch, { Response } from "node-fetch";
-import urljoin from "url-join";
-import { getErrorMessage } from "./utils";
 import fs from "fs";
-import { pipeline } from "stream";
-import util from "util";
+import { Connection } from "home-assistant-js-websocket";
 import { Agent } from "https";
-import { getWifiSSIDSync } from "./wifi";
+import fetch, { Response } from "node-fetch";
 import * as ping from "ping";
+import { pipeline } from "stream";
 import { URL } from "url";
+import urljoin from "url-join";
+import util from "util";
 import { queryMdns } from "./mdns";
 import { generateMobileDeviceRegistration, HAMobileDeviceRegistrationResponse } from "./mobiledevice";
-import { Connection } from "home-assistant-js-websocket";
+import { getErrorMessage } from "./utils";
+import { getWifiSSIDSync } from "./wifi";
 const streamPipeline = util.promisify(pipeline);
 
 function paramString(params: { [key: string]: string }): string {
@@ -34,6 +34,7 @@ export class State {
   public attributes: Record<string, any> = {};
   public last_updated = "";
   public last_changed = "";
+  public area_name?: string;
 }
 
 export interface HomeAssistantOptions {
@@ -41,6 +42,7 @@ export interface HomeAssistantOptions {
   wifiSSIDs?: string[];
   usePing?: boolean;
   preferCompanionApp?: boolean;
+  customHeaders?: Record<string, string>;
 }
 
 export class HomeAssistant {
@@ -53,6 +55,7 @@ export class HomeAssistant {
   private usePing = true;
   private messageSubscription?: object | null;
   public preferCompanionApp = false;
+  public customHeaders: Record<string, string> | undefined;
 
   constructor(url: string, token: string, ignoreCerts: boolean, options: HomeAssistantOptions | undefined = undefined) {
     this.token = token;
@@ -62,6 +65,7 @@ export class HomeAssistant {
     this.usePing = options?.usePing ?? true;
     this._ignoreCerts = ignoreCerts;
     this.preferCompanionApp = options?.preferCompanionApp === undefined ? false : options.preferCompanionApp;
+    this.customHeaders = options?.customHeaders;
   }
 
   private httpsAgent(url: string): Agent | undefined {
@@ -97,14 +101,14 @@ export class HomeAssistant {
     if (ssid) {
       console.log("Current SSID: ", ssid);
       if (!this.wifiSSIDs || this.wifiSSIDs.length <= 0) {
-        console.log("No WiFi SSIDs are specified for the internal url");
+        console.log("No Wi-Fi SSIDs are specified for the internal URL");
       }
       if (this.wifiSSIDs && this.wifiSSIDs.includes(ssid)) {
         return true;
       } else {
         console.log(
           `Current SSID (${ssid}) is not in home network list (${
-            this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDS defined"
+            this.wifiSSIDs && this.wifiSSIDs.length > 0 ? this.wifiSSIDs.join(", ") : "No SSIDs defined"
           })`,
         );
       }
@@ -121,7 +125,10 @@ export class HomeAssistant {
         extra: ["-i", "1", "-c", "1"],
       });
       return res.alive;
-    } catch (error) {
+    } catch (
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      error
+    ) {
       return false;
     }
   }
@@ -137,7 +144,9 @@ export class HomeAssistant {
     if (hostname.endsWith(".local")) {
       const mdnsHost = await queryMdns(hostname);
       if (mdnsHost) {
-        return url.replace(hostname, mdnsHost);
+        // IPv6 literals need brackets to be valid in a URL
+        const host = mdnsHost.includes(":") ? `[${mdnsHost}]` : mdnsHost;
+        return url.replace(hostname, host);
       } else {
         throw Error(`Could not resolve mDNS address ${url}`);
       }
@@ -153,7 +162,7 @@ export class HomeAssistant {
       return this._nearestURL;
     }
     if (!this.url || this.url.length <= 0) {
-      throw Error("No Home Assistant Url defined");
+      throw Error("No Home Assistant URL defined");
     }
     if (this.urlInternal && this.urlInternal.length > 0) {
       if (this.isHomeSSIDActive()) {
@@ -186,6 +195,7 @@ export class HomeAssistant {
         agent: this.httpsAgent(fullUrl),
         method: "GET",
         headers: {
+          ...this.customHeaders,
           "Content-Type": "application/json",
           Authorization: `Bearer ${this.token}`,
         },
@@ -208,6 +218,7 @@ export class HomeAssistant {
       agent: this.httpsAgent(fullUrl),
       method: "POST",
       headers: {
+        ...this.customHeaders,
         "Content-Type": "application/json",
         Authorization: `Bearer ${this.token}`,
       },
@@ -225,7 +236,6 @@ export class HomeAssistant {
     return response;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async callService(
     domain: string,
     service: string,
@@ -335,8 +345,16 @@ export class HomeAssistant {
     return await this.callService("climate", "set_temperature", { entity_id: entityID, temperature: value });
   }
 
-  async setClimateOperation(entityID: string, value: string) {
+  async setClimateOperationMode(entityID: string, value: string) {
     return await this.callService("climate", "set_hvac_mode", { entity_id: entityID, hvac_mode: value });
+  }
+
+  async setClimateFanMode(entityID: string, value: string) {
+    return await this.callService("climate", "set_fan_mode", { entity_id: entityID, fan_mode: value });
+  }
+
+  async setClimateSwingMode(entityID: string, value: string) {
+    return await this.callService("climate", "set_swing_mode", { entity_id: entityID, swing_mode: value });
   }
 
   async setClimatePreset(entityID: string, value: string) {
@@ -384,6 +402,7 @@ export class HomeAssistant {
     const response = await fetch(fullUrl, {
       method: "GET",
       headers: {
+        ...this.customHeaders,
         "Content-Type": "application/json",
         Authorization: `Bearer ${this.token}`,
       },

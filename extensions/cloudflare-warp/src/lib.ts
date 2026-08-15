@@ -1,117 +1,85 @@
 import { getPreferenceValues } from "@raycast/api";
-import { exec } from "child_process";
-import util from "util";
-const execPromise = util.promisify(exec);
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
+import { ConnectionStatus, StatusResult, VirtualNetwork, VNetResult } from "./types";
 
-const preferences: { wrapCliPath: string } = getPreferenceValues();
+const execPromise = promisify(exec);
+
+const { wrapCliPath } = getPreferenceValues<Preferences>();
 const DEFAULT_WRAP_CLI_PATH = "/Applications/Cloudflare WARP.app/Contents/Resources/warp-cli";
-const wrapCliCmd = preferences.wrapCliPath ?? DEFAULT_WRAP_CLI_PATH;
+const wrapCliCmd = wrapCliPath ?? DEFAULT_WRAP_CLI_PATH;
 
-export function execCommand(cmd: string) {
-  return execPromise(`"${wrapCliCmd}" ${cmd}`);
+export async function execCommand<T>(cmd: string): Promise<T> {
+  const { stdout } = await execPromise(`"${wrapCliCmd}" -j ${cmd}`);
+  return JSON.parse(stdout);
 }
 
-export async function connectToWarp(): Promise<boolean> {
+export async function toggleWarpConnection(command: "connect" | "disconnect"): Promise<boolean> {
   try {
-    const { stdout } = await execCommand("connect");
-    if (stdout.includes("Success")) {
-      return true;
-    }
-    throw new Error("Failed to connect");
-  } catch (e) {
-    console.error(e);
+    const { status } = await execCommand<{ status: string }>(command);
+    if (status === "Success") return true;
+
+    throw new Error(`Failed to ${command}`);
+  } catch (error) {
+    console.error(error);
     return false;
   }
 }
 
-export async function disconnectFromWarp(): Promise<boolean> {
-  try {
-    const { stdout } = await execCommand("disconnect");
-    if (stdout.includes("Success")) {
-      return true;
-    }
-    throw new Error("Failed to connect");
-  } catch (e) {
-    console.error(e);
-    return false;
-  }
-}
-
-export enum ConnectionStatus {
-  Connected = "connected",
-  Disconnected = "disconnected",
-  Unknown = "unknown",
-}
-export type StatusResult = {
-  status: ConnectionStatus;
-  disconnectReason: string;
-};
 export async function getWarpStatus(): Promise<StatusResult> {
-  const { stdout } = await execCommand("status");
-  const lines = stdout.trim().split("\n");
-  if (lines.length < 2) {
-    return { status: ConnectionStatus.Disconnected, disconnectReason: "unknown" };
-  }
-  if (lines[1].includes("Disconnected")) {
-    return {
-      status: ConnectionStatus.Disconnected,
-      disconnectReason: lines[1].substring("Status update: Disconnected. Reason: ".length),
-    };
-  }
-  if (lines[1].includes("Connected")) {
-    return { status: ConnectionStatus.Connected, disconnectReason: "" };
-  }
-  return { status: ConnectionStatus.Unknown, disconnectReason: "unknown" };
-}
+  const { status, reason } = await execCommand<{ status: string; reason?: string }>("status");
 
-export type VirtualNetwork = {
-  id: string;
-  name: string;
-  comment: string;
-  default: boolean;
-  active: boolean;
-};
+  switch (status) {
+    case "Disconnected": {
+      return {
+        status: ConnectionStatus.Disconnected,
+        disconnectReason: reason ?? "unknown",
+      };
+    }
+    case "Connected": {
+      return { status: ConnectionStatus.Connected, disconnectReason: "" };
+    }
+    default: {
+      return { status: ConnectionStatus.Unknown, disconnectReason: "unknown" };
+    }
+  }
+}
 
 export async function getVirtualNetworks(): Promise<VirtualNetwork[]> {
-  const { stdout } = await execCommand("get-virtual-networks");
-  const lines = stdout.trim().split("\n");
-  const currentlySelected = lines[1].split(" ")[2]?.trim() ?? "";
-  const rawData = lines.slice(2).filter((line) => line !== "");
+  const { active_vnet_id: activeVnetId, virtual_networks: virtualNetwork } = await execCommand<VNetResult>("vnet");
 
-  const networks = [];
-  let i = 0;
-  while (i < rawData.length) {
-    if (i + 4 > rawData.length) break;
-    const [id, name, comment, defaultNetwork] = rawData.slice(i, i + 4);
-    networks.push({
-      id: id.substring(4),
-      name: name.substring(6),
-      comment: comment.substring(8),
-      default: defaultNetwork.substring(9) === "true",
-      active: id.substring(4) === currentlySelected,
-    });
-    i += 4;
+  return virtualNetwork.map((network) => ({
+    ...network,
+    active: network.id === activeVnetId,
+  }));
+}
+
+export async function getMDMProfiles(): Promise<{ available: string[]; active: string }> {
+  return await execCommand<{ available: string[]; active: string }>("mdm get-configs");
+}
+
+async function runCommandWithReconnect(command: string, errorMessage: string): Promise<boolean> {
+  try {
+    const disconnected = await toggleWarpConnection("disconnect");
+    if (!disconnected) throw new Error("Failed to disconnect");
+
+    const { status } = await execCommand<{ status: string }>(command);
+    if (status !== "Success") throw new Error(errorMessage);
+
+    const connected = await toggleWarpConnection("connect");
+    if (!connected) throw new Error("Failed to reconnect");
+
+    return true;
+  } catch (error) {
+    console.error(error);
+    return false;
   }
-  return networks;
 }
 
 export async function switchVirtualNetwork(id: string): Promise<boolean> {
-  try {
-    const disconnected = await disconnectFromWarp();
-    if (!disconnected) {
-      throw new Error("Failed to disconnect");
-    }
-    const { stdout } = await execCommand(`set-virtual-network ${id}`);
-    if (!stdout.includes("Success")) {
-      throw new Error("Failed to switch network");
-    }
-    const connectStatus = await connectToWarp();
-    if (!connectStatus) {
-      throw new Error("Failed to connect");
-    }
-    return true;
-  } catch (e) {
-    console.error(e);
-    return false;
-  }
+  return runCommandWithReconnect(`vnet ${id}`, "Failed to switch network");
+}
+
+export async function setMDMProfile(profile: string): Promise<boolean> {
+  return runCommandWithReconnect(`mdm set-config ${profile}`, "Failed to set MDM profile");
 }

@@ -20,7 +20,7 @@ export const loadAllPullsFromStore = (): Promise<PullStore> =>
     }))
     .then(({ updatedPulls, recentlyVisitedPulls }) => {
       console.debug(
-        `loadAllPullsFromStore updated=${updatedPulls.length} ` + `recentlyVisited=${recentlyVisitedPulls.length} `
+        `loadAllPullsFromStore updated=${updatedPulls.length} ` + `recentlyVisited=${recentlyVisitedPulls.length} `,
       );
 
       return { updatedPulls, recentlyVisitedPulls };
@@ -33,10 +33,10 @@ export const loadAllPullsFromRemote = (defaultFilters: string[]): Promise<PullRe
       Promise.all([
         searchPullRequestsWithDependencies(defaultFilters.concat(["author:@me"]).join(" ")),
         searchPullRequestsWithDependencies(defaultFilters.concat(["review-requested:@me"]).join(" ")),
-      ])
+      ]),
     )
     .then(([authoredPulls, reviewRequestedPulls]: [PullRequestShort[], PullRequestShort[]]) =>
-      authoredPulls.concat(reviewRequestedPulls)
+      authoredPulls.concat(reviewRequestedPulls),
     )
     .then((pulls: PullRequestShort[]) =>
       pulls.reduce((acc, current) => {
@@ -46,7 +46,7 @@ export const loadAllPullsFromRemote = (defaultFilters: string[]): Promise<PullRe
         } else {
           return acc;
         }
-      }, [] as PullRequestShort[])
+      }, [] as PullRequestShort[]),
     )
     .then((pulls: PullRequestShort[]) => {
       console.debug(`loadAllPullsFromRemote updated=${pulls.length}`);

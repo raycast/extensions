@@ -4,7 +4,13 @@
   "description": "A Raycast Extension for managing passwordstore.org passwords",
   "icon": "password-store.png",
   "author": "afok",
-  "categories": ["Security"],
+  "contributors": [
+    "tim.shilov",
+    "sereinne"
+  ],
+  "categories": [
+    "Security"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -30,6 +36,14 @@
       "type": "password",
       "default": "",
       "required": false
+    },
+    {
+      "name": "ADDITIONAL_PATH",
+      "title": "Additional paths to append to PATH",
+      "description": "If your 'pass' or 'gpg' executables are located in a non-standard location, you can add it here. To specify multiple paths, separate them with ':'",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin",
+      "required": false
     }
   ],
   "dependencies": {
@@ -54,5 +68,8 @@
     "eslint-config-prettier": "^9.1.0",
     "prettier": "^3.3.1",
     "typescript": "^5.4.5"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -1,6 +1,6 @@
 # Matter
 
-View your saved for later articles from Matter inside [Raycast](https://www.raycast.com/).
+View your saved for later articles from [Matter](https://web.getmatter.com/) inside [Raycast](https://www.raycast.com/).
 
 <a href="https://www.raycast.com/zan/matter"><img src="https://www.raycast.com/zan/matter/install_button@2x.png" height="64" alt="" style="height: 64px;"></a>
 
@@ -8,6 +8,7 @@ View your saved for later articles from Matter inside [Raycast](https://www.rayc
 
 - 📰 view your saved for later articles
 - 🔢 word count displayed
+- ⏳ reading time in mins displayed
 - ⭐️ favorite articles straight from the extension
 - 🗜️ filter your favorite articles
 

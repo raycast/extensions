@@ -58,5 +58,8 @@
       "description": "Close the currently active tab and open its URL in an Incognito window.",
       "mode": "no-view"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

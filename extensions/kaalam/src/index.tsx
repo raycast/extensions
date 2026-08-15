@@ -38,6 +38,12 @@ export default function Command() {
     subtitle: format,
   }));
 
+  const iso8601Formats = ["YYYY-MM-DD", "YYYY-MM-DDTHH:mm:ss", "YYYY-MM-DDTHH:mm:ssZ", "YYYYMMDDTHHmmss[Z]"];
+  const itemsISO8601 = iso8601Formats.map((format) => ({
+    title: dayjs().format(format),
+    subtitle: format,
+  }));
+
   return (
     <List isLoading={false} searchBarPlaceholder="Filter by title...">
       <List.Section title="12-hour formats">
@@ -58,6 +64,22 @@ export default function Command() {
       </List.Section>
       <List.Section title="24-hour formats">
         {items24.map((item, index) => (
+          <List.Item
+            key={index}
+            icon="list-icon.png"
+            title={item.title}
+            subtitle={item.subtitle}
+            accessories={[{ icon: Icon.Clock }]}
+            actions={
+              <ActionPanel>
+                <Action.CopyToClipboard content={item.title} />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+      <List.Section title="ISO 8601">
+        {itemsISO8601.map((item, index) => (
           <List.Item
             key={index}
             icon="list-icon.png"

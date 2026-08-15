@@ -10,8 +10,10 @@ import {
   WorkflowState,
 } from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
-import { LabelResult } from "./getLabels";
+
 import { getLinearClient } from "../api/linearClient";
+
+import { LabelResult } from "./getLabels";
 import { getPaginated, PageInfo } from "./pagination";
 
 const DEFAULT_PAGE_SIZE = 50;
@@ -182,12 +184,12 @@ export async function getLastUpdatedIssues(after?: string) {
 export async function searchIssues(query: string, after?: string) {
   const { graphQLClient } = getLinearClient();
   const { data } = await graphQLClient.rawRequest<
-    { issueSearch: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
-    { query: string; after?: string }
+    { searchIssues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
+    { term: string; after?: string; first?: number; includeArchived?: boolean }
   >(
     `
-      query($query: String!, $after: String) {
-        issueSearch(first: 25, query: $query, after: $after${getCompletedIssuesFilter()}) {
+      query($term: String!, $after: String, $first: Int, $includeArchived: Boolean) {
+        searchIssues(first: $first, term: $term, after: $after, includeArchived: $includeArchived) {
           nodes {
             ${IssueFragment}
           }
@@ -198,10 +200,35 @@ export async function searchIssues(query: string, after?: string) {
         }
       }
     `,
-    { query, after },
+    { term: query, after, first: 25, includeArchived: false },
   );
 
-  return { issues: data?.issueSearch.nodes, pageInfo: data?.issueSearch.pageInfo };
+  return { issues: data?.searchIssues.nodes, pageInfo: data?.searchIssues.pageInfo };
+}
+
+export async function filterIssues(filter: string, after?: string) {
+  const { graphQLClient } = getLinearClient();
+  const { data } = await graphQLClient.rawRequest<
+    { issues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
+    { filter: string; after?: string }
+  >(
+    `
+      query($filter: IssueFilter!, $after: String) {
+        issues(first: 25, filter: $filter, after: $after${getCompletedIssuesFilter()}) {
+          nodes {
+            ${IssueFragment}
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+    `,
+    { filter: JSON.parse(filter), after },
+  );
+
+  return { issues: data?.issues.nodes, pageInfo: data?.issues.pageInfo };
 }
 
 export async function getLastCreatedIssues() {
@@ -263,6 +290,51 @@ export async function getCreatedIssues() {
   );
 
   return data?.viewer.createdIssues.nodes;
+}
+
+export async function getSubscribedIssues() {
+  const { graphQLClient } = getLinearClient();
+
+  const { pageSize, pageLimit } = getPageLimits();
+
+  return getPaginated(
+    async (cursor) =>
+      graphQLClient.rawRequest<{ issues: { nodes: IssueResult[]; pageInfo: PageInfo } }, Record<string, unknown>>(
+        `
+          query($cursor: String) {
+            issues(first: ${pageSize}, after: $cursor, orderBy: updatedAt, filter: { subscribers: { some: { isMe: { eq: true } } }${getCompletedIssuesFilter(
+              { inFilterBlock: true, addComma: true },
+            )} }) {
+              nodes {
+                ${IssueFragment}
+              }
+              pageInfo {
+                hasNextPage
+                endCursor
+              }
+            }
+          }
+        `,
+        { cursor },
+      ),
+    (r) => r.data?.issues.pageInfo,
+    (accumulator: IssueResult[], currentValue) => accumulator.concat(currentValue.data?.issues.nodes || []),
+    [],
+    pageLimit,
+  );
+}
+
+export type MyIssuesView = "assigned" | "created" | "subscribed";
+
+export function getMyIssuesByView(view: MyIssuesView) {
+  switch (view) {
+    case "assigned":
+      return getMyIssues();
+    case "created":
+      return getCreatedIssues();
+    case "subscribed":
+      return getSubscribedIssues();
+  }
 }
 
 export async function getActiveCycleIssues(cycleId?: string) {

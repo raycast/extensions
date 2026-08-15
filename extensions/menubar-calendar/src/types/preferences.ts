@@ -1,28 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  weekStart: string;
-  menubarStyle: string;
-  menubarIconStyle: string;
-  menubarItemIconStyle: string;
-  showEventsInMenubar: string;
-  largeCalendar: boolean;
-  highlightCalendar: boolean;
-  showWeekNumber: boolean;
-  showCalendar: boolean;
-  dateFormat: string;
-  calendarView: string;
-  remindersView: string;
-  showReminders: boolean;
-  showSettings: boolean;
-}
-
 export const {
   weekStart,
   menubarStyle,
   menubarIconStyle,
   menubarItemIconStyle,
   showEventsInMenubar,
+  titleTruncateLength,
   largeCalendar,
   highlightCalendar,
   showWeekNumber,
@@ -32,7 +16,7 @@ export const {
   showCalendar,
   showReminders,
   showSettings,
-} = getPreferenceValues<Preferences>();
+} = getPreferenceValues<Preferences.Index>();
 
 export enum WeekStart {
   Monday = "1",

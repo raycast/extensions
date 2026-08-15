@@ -1,3 +1,7 @@
+<p align="center">
+    <img src="./media/contentful-icon.png" width="200" height="200" />
+</p>
+
 # Contentful
 
 Browse and search Contentful content and assets library.

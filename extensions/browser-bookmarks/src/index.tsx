@@ -7,31 +7,44 @@ import {
   LocalStorage,
   Toast,
   getPreferenceValues,
+  open,
   showToast,
 } from "@raycast/api";
-import { getFavicon, useCachedPromise, useCachedState } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import Fuse from "fuse.js";
-import { useState, useMemo, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import PermissionErrorScreen from "./components/PermissionErrorScreen";
 import SelectBrowsers from "./components/SelectBrowsers";
 import useArcBookmarks from "./hooks/useArcBookmarks";
-import useAvailableBrowsers, { BROWSERS_BUNDLE_ID } from "./hooks/useAvailableBrowsers";
+import useAvailableBrowsers, { BROWSERS_BUNDLE_ID, BrowserApplication } from "./hooks/useAvailableBrowsers";
 import useBraveBetaBookmarks from "./hooks/useBraveBetaBookmarks";
 import useBraveBookmarks from "./hooks/useBraveBookmarks";
 import useBraveNightlyBookmarks from "./hooks/useBraveNightlyBookmarks";
+import useChatGPTAtlasBookmarks from "./hooks/useChatGPTAtlasBookmarks";
 import useChromeBetaBookmarks from "./hooks/useChromeBetaBookmarks";
 import useChromeBookmarks from "./hooks/useChromeBookmarks";
 import useChromeDevBookmarks from "./hooks/useChromeDevBookmarks";
+import useCometBookmarks from "./hooks/useCometBookmarks";
+import useDiaBookmarks from "./hooks/useDiaBookmarks";
 import useEdgeBookmarks from "./hooks/useEdgeBookmarks";
 import useEdgeCanaryBookmarks from "./hooks/useEdgeCanaryBookmarks";
 import useEdgeDevBookmarks from "./hooks/useEdgeDevBookmarks";
 import useFirefoxBookmarks from "./hooks/useFirefoxBookmarks";
+import useGhostBrowserBookmarks from "./hooks/useGhostBrowserBookmarks";
+import useHeliumBookmarks from "./hooks/useHeliumBookmarks";
+import useIslandBookmarks from "./hooks/useIslandBookmarks";
+import useLibreWolfBookmarks from "./hooks/useLibreWolfBookmarks";
+import usePrismaAccessBookmarks from "./hooks/usePrismaAccessBookmarks";
 import useSafariBookmarks from "./hooks/useSafariBookmarks";
 import useSidekickBookmarks from "./hooks/useSidekickBookmarks";
 import useVivaldiBookmarks from "./hooks/useVivaldiBrowser";
-import { getMacOSDefaultBrowser } from "./utils/browsers";
+import useVivaldiSnapshotBookmarks from "./hooks/useVivaldiSnapshotBrowser";
+import useWhaleBookmarks from "./hooks/useWhaleBookmarks";
+import useZenBookmarks from "./hooks/useZenBookmarks";
+import { getInitialBrowserSelection } from "./utils/browsers";
 // Note: frecency is intentionally misspelled: https://wiki.mozilla.org/User:Jesse/NewFrecency.
+import { getBookmarkIcon } from "./utils/icons";
 import { BookmarkFrecency, getBookmarkFrecency } from "./utils/frecency";
 
 type Bookmark = {
@@ -51,8 +64,19 @@ type Folder = {
   title: string;
 };
 
+const LEGACY_WINDOWS_BROWSER_IDS: Record<string, string> = {
+  chrome: BROWSERS_BUNDLE_ID.chrome,
+  edge: BROWSERS_BUNDLE_ID.edge,
+  brave: BROWSERS_BUNDLE_ID.brave,
+};
+
+function normalizeStoredBrowsers(browsers: string[]) {
+  return browsers.map((browser) => LEGACY_WINDOWS_BROWSER_IDS[browser] ?? browser);
+}
+
 export default function Command() {
-  const { data: availableBrowsers } = useAvailableBrowsers();
+  const { data: availableBrowsers, isLoading: isLoadingAvailableBrowsers } = useAvailableBrowsers();
+  const availableBrowserIdsKey = availableBrowsers?.map((browser) => browser.browserId).join("|") ?? "__pending__";
 
   const { showDomain, openBookmarkBrowser } = getPreferenceValues<Preferences>();
 
@@ -61,19 +85,33 @@ export default function Command() {
     isLoading: isLoadingBrowsers,
     mutate: mutateBrowsers,
   } = useCachedPromise(
-    async (browsers) => {
-      // If the user only has one browser, let's not bother with LocalStorage stuff
-      if (browsers && browsers.length === 1) {
-        return [browsers[0].bundleId as string];
+    async (browserIdsKey: string) => {
+      if (browserIdsKey === "__pending__" || !availableBrowsers) {
+        return undefined;
       }
 
-      // We pull the default browser to enable it to eliminate the need for the user to select this on first run
-      const defaultBrowser = await getMacOSDefaultBrowser();
       const browsersItem = await LocalStorage.getItem("browsers");
 
-      return browsersItem ? (JSON.parse(browsersItem.toString()) as string[]) : [defaultBrowser];
+      if (browsersItem) {
+        const originalBrowsers = JSON.parse(browsersItem.toString()) as string[];
+        const parsedBrowsers = normalizeStoredBrowsers(originalBrowsers);
+
+        if (JSON.stringify(parsedBrowsers) !== JSON.stringify(originalBrowsers)) {
+          await LocalStorage.setItem("browsers", JSON.stringify(parsedBrowsers));
+        }
+
+        return parsedBrowsers;
+      }
+
+      const initialBrowsers = await getInitialBrowserSelection(availableBrowsers);
+
+      if (initialBrowsers.length > 0) {
+        await LocalStorage.setItem("browsers", JSON.stringify(initialBrowsers));
+      }
+
+      return initialBrowsers;
     },
-    [availableBrowsers],
+    [availableBrowserIdsKey],
   );
 
   async function setBrowsers(browsers: string[]) {
@@ -103,32 +141,54 @@ export default function Command() {
   const hasBrave = browsers.includes(BROWSERS_BUNDLE_ID.brave) ?? false;
   const hasBraveBeta = browsers.includes(BROWSERS_BUNDLE_ID.braveBeta) ?? false;
   const hasBraveNightly = browsers.includes(BROWSERS_BUNDLE_ID.braveNightly) ?? false;
+  const hasChatGPTAtlas = browsers.includes(BROWSERS_BUNDLE_ID.chatGPTAtlas) ?? false;
   const hasChrome = browsers.includes(BROWSERS_BUNDLE_ID.chrome) ?? false;
   const hasChromeBeta = browsers.includes(BROWSERS_BUNDLE_ID.chromeBeta) ?? false;
   const hasChromeDev = browsers.includes(BROWSERS_BUNDLE_ID.chromeDev) ?? false;
+  const hasComet = browsers.includes(BROWSERS_BUNDLE_ID.comet) ?? false;
+  const hasDia = browsers.includes(BROWSERS_BUNDLE_ID.dia) ?? false;
   const hasEdge = browsers.includes(BROWSERS_BUNDLE_ID.edge) ?? false;
   const hasEdgeCanary = browsers.includes(BROWSERS_BUNDLE_ID.edgeCanary) ?? false;
   const hasEdgeDev = browsers.includes(BROWSERS_BUNDLE_ID.edgeDev) ?? false;
   const hasFirefox = browsers.includes(BROWSERS_BUNDLE_ID.firefox) ?? false;
   const hasFirefoxDev = browsers.includes(BROWSERS_BUNDLE_ID.firefoxDev) ?? false;
+  const hasGhostBrowser = browsers.includes(BROWSERS_BUNDLE_ID.ghostBrowser) ?? false;
+  const hasHelium = browsers.includes(BROWSERS_BUNDLE_ID.helium) ?? false;
+  const hasIsland = browsers.includes(BROWSERS_BUNDLE_ID.island) ?? false;
+  const hasLibreWolf = browsers.includes(BROWSERS_BUNDLE_ID.libreWolf) ?? false;
+  const hasPrismaAccess = browsers.includes(BROWSERS_BUNDLE_ID.prismaAccess) ?? false;
   const hasSafari = browsers.includes(BROWSERS_BUNDLE_ID.safari) ?? false;
   const hasSidekick = browsers.includes(BROWSERS_BUNDLE_ID.sidekick) ?? false;
   const hasVivaldi = browsers.includes(BROWSERS_BUNDLE_ID.vivaldi) ?? false;
+  const hasVivaldiSnapshot = browsers.includes(BROWSERS_BUNDLE_ID.vivaldiSnapshot) ?? false;
+  const hasWhale = browsers.includes(BROWSERS_BUNDLE_ID.whale) ?? false;
+  const hasZen = browsers.includes(BROWSERS_BUNDLE_ID.zen) ?? false;
 
   const arc = useArcBookmarks(hasArc);
   const brave = useBraveBookmarks(hasBrave);
   const braveBeta = useBraveBetaBookmarks(hasBraveBeta);
   const braveNightly = useBraveNightlyBookmarks(hasBraveNightly);
+  const chatGPTAtlas = useChatGPTAtlasBookmarks(hasChatGPTAtlas);
   const chrome = useChromeBookmarks(hasChrome);
   const chromeBeta = useChromeBetaBookmarks(hasChromeBeta);
   const chromeDev = useChromeDevBookmarks(hasChromeDev);
+  const comet = useCometBookmarks(hasComet);
+  const dia = useDiaBookmarks(hasDia);
   const edge = useEdgeBookmarks(hasEdge);
   const edgeCanary = useEdgeCanaryBookmarks(hasEdgeCanary);
   const edgeDev = useEdgeDevBookmarks(hasEdgeDev);
   const firefox = useFirefoxBookmarks(hasFirefox || hasFirefoxDev);
+  const ghostBrowser = useGhostBrowserBookmarks(hasGhostBrowser);
+  const helium = useHeliumBookmarks(hasHelium);
+  const island = useIslandBookmarks(hasIsland);
+  const libreWolf = useLibreWolfBookmarks(hasLibreWolf);
+  const prismaAccess = usePrismaAccessBookmarks(hasPrismaAccess);
   const safari = useSafariBookmarks(hasSafari);
   const sidekick = useSidekickBookmarks(hasSidekick);
   const vivaldi = useVivaldiBookmarks(hasVivaldi);
+  const vivaldiSnapshot = useVivaldiSnapshotBookmarks(hasVivaldiSnapshot);
+  const whale = useWhaleBookmarks(hasWhale);
+  const zen = useZenBookmarks(hasZen);
 
   const [bookmarks, setBookmarks] = useCachedState<Bookmark[]>("bookmarks", []);
   const [folders, setFolders] = useCachedState<Folder[]>("folders", []);
@@ -139,22 +199,33 @@ export default function Command() {
       ...brave.bookmarks,
       ...braveBeta.bookmarks,
       ...braveNightly.bookmarks,
+      ...chatGPTAtlas.bookmarks,
       ...chrome.bookmarks,
       ...chromeBeta.bookmarks,
       ...chromeDev.bookmarks,
+      ...comet.bookmarks,
+      ...dia.bookmarks,
       ...edge.bookmarks,
       ...edgeCanary.bookmarks,
       ...edgeDev.bookmarks,
       ...firefox.bookmarks,
+      ...ghostBrowser.bookmarks,
+      ...helium.bookmarks,
+      ...island.bookmarks,
+      ...libreWolf.bookmarks,
+      ...prismaAccess.bookmarks,
       ...safari.bookmarks,
       ...sidekick.bookmarks,
       ...vivaldi.bookmarks,
+      ...vivaldiSnapshot.bookmarks,
+      ...whale.bookmarks,
+      ...zen.bookmarks,
     ]
       .map((item) => {
         let domain;
         try {
           domain = new URL(item.url).hostname;
-        } catch (error) {
+        } catch {
           console.error(`Invalid URL: ${item.url}`);
           domain = "";
         }
@@ -187,16 +258,27 @@ export default function Command() {
     brave.bookmarks,
     braveBeta.bookmarks,
     braveNightly.bookmarks,
+    chatGPTAtlas.bookmarks,
     chrome.bookmarks,
     chromeBeta.bookmarks,
     chromeDev.bookmarks,
+    comet.bookmarks,
+    dia.bookmarks,
     edge.bookmarks,
     edgeCanary.bookmarks,
     edgeDev.bookmarks,
     firefox.bookmarks,
+    ghostBrowser.bookmarks,
+    helium.bookmarks,
+    island.bookmarks,
+    libreWolf.bookmarks,
+    prismaAccess.bookmarks,
     safari.bookmarks,
     sidekick.bookmarks,
     vivaldi.bookmarks,
+    vivaldiSnapshot.bookmarks,
+    whale.bookmarks,
+    zen.bookmarks,
     frecencies,
     setBookmarks,
   ]);
@@ -207,16 +289,27 @@ export default function Command() {
       ...brave.folders,
       ...braveBeta.folders,
       ...braveNightly.folders,
+      ...chatGPTAtlas.folders,
       ...chrome.folders,
       ...chromeBeta.folders,
       ...chromeDev.folders,
+      ...comet.folders,
+      ...dia.folders,
       ...edge.folders,
       ...edgeCanary.folders,
       ...edgeDev.folders,
       ...firefox.folders,
+      ...ghostBrowser.folders,
+      ...helium.folders,
+      ...island.folders,
+      ...libreWolf.folders,
+      ...prismaAccess.folders,
       ...safari.folders,
       ...sidekick.folders,
       ...vivaldi.folders,
+      ...vivaldiSnapshot.folders,
+      ...whale.folders,
+      ...zen.folders,
     ];
 
     setFolders(folders);
@@ -225,16 +318,27 @@ export default function Command() {
     brave.folders,
     braveBeta.folders,
     braveNightly.folders,
+    chatGPTAtlas.folders,
     chrome.folders,
     chromeBeta.folders,
     chromeDev.folders,
+    comet.folders,
+    dia.folders,
     edge.folders,
     edgeCanary.folders,
     edgeDev.folders,
     firefox.folders,
+    ghostBrowser.folders,
+    helium.folders,
+    island.folders,
+    libreWolf.folders,
+    prismaAccess.folders,
     safari.folders,
     sidekick.folders,
     vivaldi.folders,
+    vivaldiSnapshot.folders,
+    whale.folders,
+    zen.folders,
     setFolders,
   ]);
 
@@ -322,6 +426,9 @@ export default function Command() {
     if (hasBraveNightly) {
       braveNightly.mutate();
     }
+    if (hasChatGPTAtlas) {
+      chatGPTAtlas.mutate();
+    }
     if (hasChrome) {
       chrome.mutate();
     }
@@ -331,17 +438,38 @@ export default function Command() {
     if (hasChromeDev) {
       chromeDev.mutate();
     }
+    if (hasComet) {
+      comet.mutate();
+    }
+    if (hasDia) {
+      dia.mutate();
+    }
     if (hasEdge) {
       edge.mutate();
     }
     if (hasEdgeCanary) {
-      edge.mutate();
+      edgeCanary.mutate();
     }
     if (hasEdgeDev) {
-      edge.mutate();
+      edgeDev.mutate();
     }
     if (hasFirefox || hasFirefoxDev) {
       firefox.mutate();
+    }
+    if (hasGhostBrowser) {
+      ghostBrowser.mutate();
+    }
+    if (hasHelium) {
+      helium.mutate();
+    }
+    if (hasIsland) {
+      island.mutate();
+    }
+    if (hasLibreWolf) {
+      libreWolf.mutate();
+    }
+    if (hasPrismaAccess) {
+      prismaAccess.mutate();
     }
     if (hasSafari) {
       safari.mutate();
@@ -351,6 +479,15 @@ export default function Command() {
     }
     if (hasVivaldi) {
       vivaldi.mutate();
+    }
+    if (hasVivaldiSnapshot) {
+      vivaldiSnapshot.mutate();
+    }
+    if (hasWhale) {
+      whale.mutate();
+    }
+    if (hasZen) {
+      zen.mutate();
     }
   }
 
@@ -383,30 +520,43 @@ export default function Command() {
     return <PermissionErrorScreen />;
   }
 
-  // Get the browser name from the bundle ID to open the bookmark's in its associated browser
-  function browserBundleToName(bundleId: string) {
-    return availableBrowsers?.find((browser) => browser.bundleId === bundleId)?.name;
+  // Get the browser Application from the browser ID to open the bookmark in its associated browser
+  function browserBundleToApp(bundleId: string) {
+    const app = availableBrowsers?.find((browser) => browser.browserId === bundleId);
+    return app?.path ? app : undefined;
   }
 
   return (
     <List
       isLoading={
         isLoadingBrowsers ||
+        isLoadingAvailableBrowsers ||
         isLoadingFrecencies ||
         arc.isLoading ||
         brave.isLoading ||
         braveBeta.isLoading ||
         braveNightly.isLoading ||
+        chatGPTAtlas.isLoading ||
         chrome.isLoading ||
         chromeBeta.isLoading ||
         chromeDev.isLoading ||
+        comet.isLoading ||
+        dia.isLoading ||
         edge.isLoading ||
         edgeCanary.isLoading ||
         edgeDev.isLoading ||
         firefox.isLoading ||
+        ghostBrowser.isLoading ||
+        helium.isLoading ||
+        island.isLoading ||
+        libreWolf.isLoading ||
+        prismaAccess.isLoading ||
         safari.isLoading ||
         sidekick.isLoading ||
-        vivaldi.isLoading
+        vivaldi.isLoading ||
+        vivaldiSnapshot.isLoading ||
+        whale.isLoading ||
+        zen.isLoading
       }
       searchBarPlaceholder="Search by title, domain name, or folder name"
       onSearchTextChange={setQuery}
@@ -433,21 +583,28 @@ export default function Command() {
         return (
           <List.Item
             key={item.id}
-            icon={getFavicon(item.url)}
+            icon={getBookmarkIcon(item.url)}
             title={item.title}
             subtitle={showDomain ? item.domain : ""}
             accessories={item.folder ? [{ icon: Icon.Folder, tag: item.folder }] : []}
             actions={
               <ActionPanel>
                 {openBookmarkBrowser ? (
-                  <Action.Open
+                  <Action
                     title="Open in Browser"
-                    application={openBookmarkBrowser ? browserBundleToName(item.browser) : undefined}
-                    target={item.url}
-                    onOpen={() => updateFrecency(item)}
+                    onAction={async () => {
+                      await open(item.url, browserBundleToApp(item.browser));
+                      await updateFrecency(item);
+                    }}
                   />
                 ) : (
-                  <Action.OpenInBrowser url={item.url} onOpen={() => updateFrecency(item)} />
+                  <Action
+                    title="Open in Browser"
+                    onAction={async () => {
+                      await open(item.url);
+                      await updateFrecency(item);
+                    }}
+                  />
                 )}
 
                 <Action.CopyToClipboard title="Copy Link" content={item.url} onCopy={() => updateFrecency(item)} />
@@ -460,6 +617,7 @@ export default function Command() {
                   ) : null}
 
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.arc}
                     name="Arc"
                     icon="arc.png"
@@ -469,6 +627,7 @@ export default function Command() {
                     setCurrentProfile={arc.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.brave}
                     name="Brave"
                     icon="brave.png"
@@ -478,24 +637,37 @@ export default function Command() {
                     setCurrentProfile={brave.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.braveBeta}
                     name="Brave Beta"
-                    icon="brave.png"
+                    icon="brave-beta.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
                     profiles={braveBeta.profiles}
                     currentProfile={braveBeta.currentProfile}
                     setCurrentProfile={braveBeta.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.braveNightly}
                     name="Brave Nightly"
-                    icon="brave.png"
+                    icon="brave-nightly.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
                     profiles={braveNightly.profiles}
                     currentProfile={braveNightly.currentProfile}
                     setCurrentProfile={braveNightly.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.chatGPTAtlas}
+                    name="ChatGPT Atlas"
+                    icon="chatgpt-atlas.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+                    profiles={chatGPTAtlas.profiles}
+                    currentProfile={chatGPTAtlas.currentProfile}
+                    setCurrentProfile={chatGPTAtlas.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.chrome}
                     name="Chrome"
                     icon="chrome.png"
@@ -505,6 +677,7 @@ export default function Command() {
                     setCurrentProfile={chrome.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.chromeBeta}
                     name="Chrome Beta"
                     icon="chrome-beta.png"
@@ -514,6 +687,7 @@ export default function Command() {
                     setCurrentProfile={chromeBeta.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.chromeDev}
                     name="Chrome Dev"
                     icon="chrome-dev.png"
@@ -523,6 +697,27 @@ export default function Command() {
                     setCurrentProfile={chromeDev.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.comet}
+                    name="Comet"
+                    icon="comet.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+                    profiles={comet.profiles}
+                    currentProfile={comet.currentProfile}
+                    setCurrentProfile={comet.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.dia}
+                    name="Dia"
+                    icon="dia.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                    profiles={dia.profiles}
+                    currentProfile={dia.currentProfile}
+                    setCurrentProfile={dia.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.edge}
                     name="Edge"
                     icon="edge.png"
@@ -532,24 +727,27 @@ export default function Command() {
                     setCurrentProfile={edge.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.edgeCanary}
                     name="Edge Canary"
-                    icon="edge.png"
+                    icon="edgeCanary.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                     profiles={edgeCanary.profiles}
                     currentProfile={edgeCanary.currentProfile}
                     setCurrentProfile={edgeCanary.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.edgeDev}
                     name="Edge Dev"
-                    icon="edge.png"
+                    icon="edgeDev.png"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                     profiles={edgeDev.profiles}
                     currentProfile={edgeDev.currentProfile}
                     setCurrentProfile={edgeDev.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.firefox}
                     name="Firefox"
                     icon="firefox.png"
@@ -559,15 +757,58 @@ export default function Command() {
                     setCurrentProfile={firefox.setCurrentProfile}
                   />
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.firefoxDev}
                     name="Firefox Dev"
                     icon="firefoxDev.png"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                     profiles={firefox.profiles}
                     currentProfile={firefox.currentProfile}
                     setCurrentProfile={firefox.setCurrentProfile}
                   />
+                  {/* Note: Ghost Browser doesn't seem to have a profile feature - no profile switching submenu added for it. */}
                   <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.helium}
+                    name="Helium"
+                    icon="helium.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+                    profiles={helium.profiles}
+                    currentProfile={helium.currentProfile}
+                    setCurrentProfile={helium.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.island}
+                    name="Island"
+                    icon="island.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+                    profiles={island.profiles}
+                    currentProfile={island.currentProfile}
+                    setCurrentProfile={island.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.libreWolf}
+                    name="LibreWolf"
+                    icon="LibreWolf.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                    profiles={libreWolf.profiles}
+                    currentProfile={libreWolf.currentProfile}
+                    setCurrentProfile={libreWolf.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.prismaAccess}
+                    name="Prisma Access"
+                    icon="prisma-access.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    profiles={prismaAccess.profiles}
+                    currentProfile={prismaAccess.currentProfile}
+                    setCurrentProfile={prismaAccess.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
                     bundleId={BROWSERS_BUNDLE_ID.vivaldi}
                     name="Vivaldi"
                     icon="vivaldi.png"
@@ -575,6 +816,48 @@ export default function Command() {
                     profiles={vivaldi.profiles}
                     currentProfile={vivaldi.currentProfile}
                     setCurrentProfile={vivaldi.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.vivaldiSnapshot}
+                    name="Vivaldi Snapshot"
+                    icon="vivaldi.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+                    profiles={vivaldiSnapshot.profiles}
+                    currentProfile={vivaldiSnapshot.currentProfile}
+                    setCurrentProfile={vivaldiSnapshot.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.whale}
+                    name="Whale"
+                    icon="whale.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                    profiles={whale.profiles}
+                    currentProfile={whale.currentProfile}
+                    setCurrentProfile={whale.setCurrentProfile}
+                  />
+                  <SelectProfileSubmenu
+                    availableBrowsers={availableBrowsers}
+                    bundleId={BROWSERS_BUNDLE_ID.zen}
+                    name="Zen"
+                    icon="zen.png"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "z" }}
+                    profiles={zen.profiles}
+                    currentProfile={zen.currentProfile}
+                    setCurrentProfile={zen.setCurrentProfile}
+                  />
+                </ActionPanel.Section>
+
+                <ActionPanel.Section>
+                  <Action.CreateQuicklink
+                    title="Create Quicklink"
+                    icon={Icon.Link}
+                    quicklink={{
+                      name: item.title,
+                      link: item.url,
+                    }}
+                    shortcut={{ modifiers: ["cmd"], key: "s" }}
                   />
                 </ActionPanel.Section>
 
@@ -631,6 +914,7 @@ type SelectProfileSubmenuProps = {
   profiles: { path: string; name: string }[];
   currentProfile: string;
   setCurrentProfile: (path: string) => void;
+  availableBrowsers?: BrowserApplication[];
 };
 
 function SelectProfileSubmenu({
@@ -641,10 +925,9 @@ function SelectProfileSubmenu({
   profiles,
   currentProfile,
   setCurrentProfile,
+  availableBrowsers,
 }: SelectProfileSubmenuProps) {
-  const { data: availableBrowsers } = useAvailableBrowsers();
-
-  const hasBrowser = availableBrowsers?.map((browser) => browser.bundleId).includes(bundleId);
+  const hasBrowser = availableBrowsers?.map((browser) => browser.browserId as string).includes(bundleId);
   if (!hasBrowser || profiles.length <= 1) {
     return null;
   }

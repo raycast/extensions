@@ -1,9 +1,89 @@
 # Kill Process Changelog
 
+## [Improvements] - 2026-06-25
+
+- App grouping is now enabled by default and groups processes by `.app` bundle path for more accurate CPU and memory totals (fixes #25095)
+- Killing a grouped app now terminates all related child processes, not just the main process
+- Grouped apps show how many processes they include in the subtitle
+- Auto-refresh is disabled when the extension launches in the background, preventing timeout errors while idle (fixes #28391)
+- The loading indicator only appears on the initial fetch; background refreshes no longer flash the list
+- Added empty states for failed fetches and when no processes are found
+
+## [Bugfix] - 2026-05-27
+
+- Prevented background refreshes from overlapping and surfacing timeout errors while the process list is left open.
+
+## [Added Restart Action] - 2026-04-08
+
+- Added `Restart` and `Force Restart` actions for restartable processes
+
+## [Added Kill All action] - 2026-04-01
+
+- Added action to kill all processes with the same name
+- Added AI tool `killall-process` to allow natural-language "kill all <process>" commands via AI
+
+## [UX Improvements] - 2026-02-11
+
+- Removed the redundant **Default Sort By** preference (sorting is now persisted via the command dropdown)
+
+## [UX Improvements] - 2026-02-10
+
+- Reorganized preferences into clearer sections
+- Avoid showing a redundant subtitle when it matches the process name
+
+## [Preferences] - 2026-02-04
+
+- Added preference to skip kill confirmation dialogs
+
+## [Fixes and Improvements] - 2026-01-13
+
+- Added shortcut for the **Copy Path** action
+- Added shortcut for the **Reload** action to the Windows version
+
+## [Windows Fix] - 2026-01-12
+
+- Fix powershell command on Windows by adding -NoProfile
+
+## [Fixed Force Kill in MacOS] - 2025-12-16
+
+- Fixed force kill for MacOS by encapsulating the kill command within a zsh shell
+
+## [Windows Fix] - 2025-12-02
+
+- Fix CPU and Memory values on Windows
+
+## [AI Updates] - 2025-11-27
+
+- Extract AI instructions from package.json into dedicated `ai.yaml` file
+- Fix and clarify AI eval criteria wording, and improve the instructions for some edge cases
+
+## [Windows Support] - 2025-08-29
+
+- Add support for Windows
+
+## [Added Force Kill] - 2025-06-10
+
+- Force kills the chosen process with sudo (requires enabling sudo authentication with fingerprint)
+
+## [✨ AI Enhancements] - 2025-02-21
+
+- Added AI Extensions support allowing natural language interaction with the extension
+
+## [Improvements] - 2024-09-05
+
+- Adopted separate accessories for CPU and memory usage, including icons
+- Added a dropdown to the command list for sorting processes by CPU or memory usage
+- Added a section title for the command list
+- Removed the checkmark emoji from toast message to avoid redundancy with the success toast style
+- Shortened the extension description to fit the space of the Store extension
+- Improved the description of preferences for better clarity
+
 ## [Back Root Search After Process Kiled] - 2024-03-01
+
 - Added preference to go back to root search after a process is killed
 
 ## [Kill Multiple] - 2023-11-09
+
 - Added preference to kill multiple processes without reopening Raycast
 
 ## [Sort by memory and App aggregation] - 2023-06-22
@@ -21,7 +101,7 @@
 
 ## [Kill Process Improvements] - 2021-10-27
 
-- Some tweaks and adjustments behind the scenes.
+- Some tweaks and adjustments behind the scenes
 
 ## [Add Extension] - 2021-10-25
 

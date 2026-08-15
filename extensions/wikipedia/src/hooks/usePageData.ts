@@ -1,8 +1,16 @@
-import { Toast, popToRoot, showToast } from "@raycast/api";
+import { popToRoot, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
-import wiki from "wikijs";
 
-import { PageSummary, getApiUrl, getApiOptions, WikiNode } from "@/utils/api";
+import {
+  getApiOptions,
+  getApiUrl,
+  getPageContent,
+  getPageLangLinks,
+  getPageLinks,
+  getPageMetadata,
+  type PageMetadata,
+  PageSummary,
+} from "@/utils/api";
 
 export function usePageSummary(title: string, language: string, onError?: (error: Error) => void) {
   return useFetch<PageSummary>(`${getApiUrl(language)}api/rest_v1/page/summary/${encodeURIComponent(title)}`, {
@@ -13,63 +21,28 @@ export function usePageSummary(title: string, language: string, onError?: (error
 
 function usePageContent(title: string, language: string) {
   return useCachedPromise(
-    (title: string, language: string) =>
-      wiki({
-        apiUrl: `${getApiUrl(language)}w/api.php`,
-        headers: getApiOptions(language)?.headers,
-      })
-        .page(title)
-        .then((page) => {
-          return page.content() as unknown as WikiNode[];
-        })
-        .catch(() => []),
+    (title: string, language: string) => getPageContent(title, language).catch(() => []),
     [title, language],
   );
 }
 
-export type PageMetadata = Record<string, unknown>;
-
 function usePageMetadata(title: string, language: string) {
   return useCachedPromise(
     (title: string, language: string) =>
-      wiki({
-        apiUrl: `${getApiUrl(language)}w/api.php`,
-        headers: getApiOptions(language)?.headers,
-      })
-        .page(title)
-        .then((page) => {
-          return page.fullInfo() as Promise<{ general?: PageMetadata }>;
-        })
-        .then((data) => (data.general ?? {}) as PageMetadata)
+      getPageMetadata(title, language)
+        .then((data) => ((data as { general?: PageMetadata }).general ?? {}) as PageMetadata)
         .catch(() => {}),
     [title, language],
   );
 }
 
 function usePageLinks(title: string, language: string) {
-  return useCachedPromise(
-    (title: string, language: string) =>
-      wiki({
-        apiUrl: `${getApiUrl(language)}w/api.php`,
-        headers: getApiOptions(language)?.headers,
-      })
-        .page(title)
-        .then((page) => page.links())
-        .catch(() => [] as string[]),
-    [title, language],
-  );
+  return useCachedPromise((title: string, language: string) => getPageLinks(title, language), [title, language]);
 }
 
-export function useAvalableLanguages(title: string, language: string) {
+export function useAvailableLanguages(title: string, language: string) {
   return useCachedPromise(
-    (title: string, language: string) =>
-      wiki({
-        apiUrl: `${getApiUrl(language)}w/api.php`,
-        headers: getApiOptions(language)?.headers,
-      })
-        .page(title)
-        .then((page) => page.langlinks().then((items) => items.flatMap((item) => item.lang)))
-        .catch(() => [language]),
+    (title: string, language: string) => getPageLangLinks(title, language).catch(() => [{ lang: language, title }]),
     [title, language],
   );
 }

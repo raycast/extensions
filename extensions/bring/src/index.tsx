@@ -1,16 +1,17 @@
-import { useRef, useState, useEffect, useMemo } from "react";
+import { getPreferenceValues, Grid, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { Grid, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { BringAPI, BringCustomItem, BringList, Translations, BringListInfo } from "./lib/bringAPI";
-import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Item, ItemsGrid, Section } from "./components/ItemsGrid";
-import { getOrCreateCustomSection, getSectionsFromData, getListData, getTranslationsData } from "./lib/bringService";
+import { BringAPI, BringCustomItem, BringList, BringListInfo, Translations } from "./lib/bringAPI";
+import { getListData, getOrCreateCustomSection, getSectionsFromData, getTranslationsData } from "./lib/bringService";
+import { getIconPlaceholder, getImageUrl, getLocaleForListFromSettings } from "./lib/helpers";
 
 export default function Command() {
   const bringApiRef = useRef(new BringAPI());
   const [selectedList, setSelectedList] = useCachedState<BringListInfo | undefined>("selectedList");
   const [locale, setLocale] = useCachedState<string | undefined>("locale");
   const [search, setSearch] = useState<string>("");
+  const [purchaseStyle, setPurchaseStyle] = useState<string>("ungrouped");
 
   const { data: lists = [], isLoading: isLoadingLists } = useCachedPromise(async () => {
     const bringApi = await getBringApi();
@@ -37,6 +38,7 @@ export default function Command() {
   const {
     data: [listDetail, customItems],
     isLoading: isLoadingItems,
+    error: itemsError,
     mutate,
   } = useCachedPromise(
     async (selectedList?: BringListInfo) => {
@@ -48,7 +50,13 @@ export default function Command() {
       const locale = await bringApi.getUserSettings().then(getLocaleForListFromSettings(selectedList.listUuid));
       setLocale(locale);
 
-      return getListData(bringApi, selectedList.listUuid);
+      const userSettings = await bringApi.getUserSettings();
+      const fetchedPurchaseStyle =
+        userSettings.usersettings.find((setting) => setting.key === "purchaseStyle")?.value || "grouped";
+      setPurchaseStyle(fetchedPurchaseStyle);
+
+      const [listData, customItemsData] = await getListData(bringApi, selectedList.listUuid);
+      return [listData, customItemsData];
     },
     [selectedList],
     {
@@ -80,7 +88,6 @@ export default function Command() {
       const toast = await showToast({ style: Toast.Style.Animated, title: `Adding ${item.name} to ${list.name}` });
       try {
         const bringApi = await getBringApi();
-        if (!bringApi) return;
         await mutate(bringApi.addItemToList(list.listUuid, item.itemId, specification), {
           optimisticUpdate: (data) => {
             const [list, customItems] = data as [BringList, BringCustomItem[]];
@@ -106,7 +113,6 @@ export default function Command() {
       const toast = await showToast({ style: Toast.Style.Animated, title: `Removing ${item.name} from ${list.name}` });
       try {
         const bringApi = await getBringApi();
-        if (!bringApi) return;
         await mutate(bringApi.removeItemFromList(list.listUuid, item.itemId), {
           optimisticUpdate: (data) => {
             const [list, customItems] = data as [BringList, BringCustomItem[]];
@@ -126,13 +132,20 @@ export default function Command() {
   }
 
   useEffect(() => {
+    if (itemsError) {
+      showToast({ style: Toast.Style.Failure, title: "Could not load list", message: itemsError.message });
+    }
+  }, [itemsError]);
+
+  useEffect(() => {
     if (!selectedList && lists.length > 0) {
       setSelectedList(lists[0]);
     }
   }, [lists, selectedList, setSelectedList]);
 
   const sections = useMemo(() => {
-    const sections = getSectionsFromData(catalog, listDetail, customItems, translations);
+    if (!listDetail || !("uuid" in listDetail) || !Array.isArray(customItems)) return [];
+    const sections = getSectionsFromData(catalog, listDetail as BringList, customItems, translations);
     return addNewItemToSectionBasedOnSearch(sections, search, translations);
   }, [catalog, listDetail, customItems, translations, search]);
 
@@ -145,11 +158,11 @@ export default function Command() {
         sections={sections}
         searchText={search}
         isLoading={isLoadingLists || isLoadingItems}
-        showAddedItemsOnTop={search.length === 0}
         onSearchTextChange={setSearch}
         onAddAction={addToList(selectedList)}
         onRemoveAction={removeFromList(selectedList)}
         DropdownComponent={DropdownComponent}
+        purchaseStyle={purchaseStyle}
       />
     );
   }

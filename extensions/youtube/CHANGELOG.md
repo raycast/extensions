@@ -1,5 +1,30 @@
 # YouTube Changelog
 
+## [Fix View Count Sorting] - 2026-06-29
+
+- Fixed the view count filter not sorting results correctly by ordering search results client-side after statistics are loaded, since the YouTube search API does not reliably honor `order=viewCount` (Fixes #25829)
+
+## [Enhancements] - 2025-10-20
+
+- Added new `Search Live Streams` command to search for live YouTube broadcasts
+- Improved empty view messages with more engaging copy for `Search Videos` and `Search Channels` commands
+- Updated icons for `Remove from Pinned Videos` and `Remove from Pinned Channels` actions
+- Fixed error messages to remove HTML tags for cleaner toast notifications
+
+## [Chore: Updated README] - 2025-10-17
+
+## [Fix] - 2025-05-20
+
+- Fixed missing call to add recent video when opening with IINA from video details
+
+## [Enhancement] - 2024-10-22
+
+- Update the cache in the `Search Videos` and `Search Channels` commands to use local storage
+
+## [Chore] - 2024-09-02
+
+- Added missing contributor
+
 ## [Enhancement] - 2024-03-17
 
 - Update shortcuts for remove/clear actions to conform with Raycast's `⌃X` and `⌃⇧X` convention for such operations.
@@ -39,7 +64,7 @@
 
 ## [Search from Root] - 2023-02-08
 
-- Add query parameter to Search Videos and Search Channels commands
+- Add query parameter to `Search Videos` and `Search Channels` commands
 
 ## [README update] - 2023-01-17
 

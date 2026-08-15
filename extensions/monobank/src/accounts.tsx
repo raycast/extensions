@@ -16,6 +16,7 @@ import {
   calculateTotal,
   getAccountAccessories,
   getJarAccessories,
+  getFlagImage,
 } from "./utils";
 
 enum Category {
@@ -119,7 +120,7 @@ export default function Command() {
           account.title,
           account.currency.code,
           account.type,
-          account.maskedPan.length ? account.maskedPan[0] : account.iban
+          account.maskedPan.length ? account.maskedPan[0] : account.iban,
         );
       }
 
@@ -127,15 +128,15 @@ export default function Command() {
     }) as (Account | Jar)[];
 
   const filteredCards = filterOutPinnedItems({ category, items: cards, pinned }).filter((card) =>
-    satisfiesTexts(searchText, card.title, card.currency.code, card.type, card.maskedPan[0])
+    satisfiesTexts(searchText, card.title, card.currency.code, card.type, card.maskedPan[0]),
   );
 
   const filteredFops = filterOutPinnedItems({ category, items: fops, pinned }).filter((fop) =>
-    satisfiesTexts(searchText, fop.title, fop.currency.code, fop.type, fop.iban)
+    satisfiesTexts(searchText, fop.title, fop.currency.code, fop.type, fop.iban),
   );
 
   const filteredJars = filterOutPinnedItems({ category, items: jars, pinned }).filter((jar) =>
-    satisfiesTexts(searchText, jar.title, jar.currency.code)
+    satisfiesTexts(searchText, jar.title, jar.currency.code),
   );
 
   const totalAmount = calculateTotal([...cards, ...fops, ...jars], rates);
@@ -158,6 +159,7 @@ export default function Command() {
             <List.Item
               key={account.id}
               id={account.id}
+              icon={getFlagImage(account.currency.code)}
               title={getTitle(account)}
               subtitle={getSubtitle(account)}
               detail={
@@ -210,6 +212,7 @@ export default function Command() {
             <List.Item
               key={card.id}
               id={card.id}
+              icon={getFlagImage(card.currency.code)}
               title={getTitle(card)}
               subtitle={getSubtitle(card)}
               detail={<AccountDetail account={card} />}
@@ -234,6 +237,7 @@ export default function Command() {
             <List.Item
               key={fop.id}
               id={fop.id}
+              icon={getFlagImage(fop.currency.code)}
               title={getTitle(fop)}
               subtitle={getSubtitle(fop)}
               detail={<AccountDetail account={fop} />}
@@ -258,6 +262,7 @@ export default function Command() {
             <List.Item
               key={jar.id}
               id={jar.id}
+              icon={getFlagImage(jar.currency.code)}
               title={getTitle(jar)}
               subtitle={getSubtitle(jar)}
               detail={<JarDetail jar={jar} />}
@@ -282,7 +287,7 @@ function CategoryDropdown(props: { onCategoryChange: (newValue: Category) => voi
   const { onCategoryChange } = props;
 
   const commonCategories = Object.values(Category).filter((category) =>
-    [Category.ALL, Category.PINNED].includes(category)
+    [Category.ALL, Category.PINNED].includes(category),
   );
   const otherCategories = Object.values(Category).filter((category) => !commonCategories.includes(category));
 
@@ -303,10 +308,10 @@ function renderCategoryDropdownItems(categories: Category[]) {
 function getTitle(item: Account | Jar) {
   if (isAccount(item)) {
     const panOrIban = item.maskedPan.length ? item.maskedPan[0] : item.iban;
-    return `${item.currency.flag} ${item.title || panOrIban}`;
+    return `${item.title || panOrIban}`;
   }
 
-  return `${item.currency.flag} ${item.title}`;
+  return item.title;
 }
 
 function getSubtitle(item: Account | Jar) {

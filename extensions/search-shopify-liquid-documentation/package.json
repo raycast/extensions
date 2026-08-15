@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "search-shopify-liquid-documentation",
-  "title": "Search Shopify Liquid Documentation",
+  "title": "Shopify Liquid Documentation",
   "description": "Search Shopify's Liquid Documentation Directly From Raycast",
   "icon": "shopify-icon.png",
   "author": "maximedaraize",

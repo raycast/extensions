@@ -1,9 +1,8 @@
 import { List } from "@raycast/api";
 import { useState } from "react";
-import { useCache } from "../cache";
+import { useCachedPromise } from "@raycast/utils";
 import { gitlab } from "../common";
 import { Issue } from "../gitlabapi";
-import { daysInSeconds, getErrorMessage, hashRecord, showErrorToast } from "../utils";
 import {
   IssueListEmptyView,
   IssueListItem,
@@ -13,37 +12,24 @@ import {
   injectQueryNamedParameters,
 } from "./issues";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export function SearchMyIssues(): JSX.Element {
+export function SearchMyIssues() {
   const [scope, setScope] = useState<string>(IssueScope.created_by_me);
   const state = IssueState.all;
-  const [search, setSearch] = useState<string>();
-  const params: Record<string, any> = { state, scope };
-  const qd = getIssueQuery(search);
-  params.search = qd.query || "";
-  injectQueryNamedParameters(params, qd, scope as IssueScope, false);
-  injectQueryNamedParameters(params, qd, scope as IssueScope, true);
-
-  const paramsHash = hashRecord(params);
-  const { data, isLoading, error, performRefetch } = useCache<Issue[] | undefined>(
-    `myissuessearch_${paramsHash}`,
-    async (): Promise<Issue[] | undefined> => {
-      return await gitlab.getIssues(params);
+  const [search, setSearch] = useState<string>("");
+  const { data, isLoading, revalidate } = useCachedPromise(
+    async (scope: string, state: IssueState, query: string): Promise<Issue[]> => {
+      const params: Record<string, any> = { state, scope };
+      const parsedQuery = getIssueQuery(query);
+      params.search = parsedQuery.query || "";
+      injectQueryNamedParameters(params, parsedQuery, scope as IssueScope, false);
+      injectQueryNamedParameters(params, parsedQuery, scope as IssueScope, true);
+      return gitlab.getIssues(params);
     },
-    {
-      deps: [scope, state, search],
-      secondsToRefetch: 1,
-      secondsToInvalid: daysInSeconds(7),
-    }
+    [scope, state, search],
+    { initialData: [] },
   );
-  if (error) {
-    showErrorToast(getErrorMessage(error), "Could not fetch Issues");
-  }
-  if (isLoading === undefined) {
-    return <List isLoading={true} searchBarPlaceholder="" />;
-  }
-  const title = search ? "Search Results" : "Created Recently";
   return (
     <List
       isLoading={isLoading}
@@ -51,15 +37,16 @@ export function SearchMyIssues(): JSX.Element {
       onSearchTextChange={setSearch}
       throttle
       searchBarAccessory={
-        <List.Dropdown tooltip="Scope" onChange={setScope}>
+        <List.Dropdown tooltip="Scope" onChange={setScope} storeValue>
           <List.Dropdown.Item title="Created By Me" value={IssueScope.created_by_me} />
+          <List.Dropdown.Item title="Assigned To Me" value={IssueScope.assigned_to_me} />
           <List.Dropdown.Item title="All" value={IssueScope.all} />
         </List.Dropdown>
       }
     >
-      <List.Section title={title} subtitle={data ? `${data.length}` : undefined}>
-        {data?.map((i) => (
-          <IssueListItem key={i.id} issue={i} refreshData={performRefetch} />
+      <List.Section title={search ? "Search Results" : "Created Recently"} subtitle={`${data.length}`}>
+        {data.map((issue) => (
+          <IssueListItem key={issue.id} issue={issue} refreshData={revalidate} />
         ))}
       </List.Section>
       <IssueListEmptyView />

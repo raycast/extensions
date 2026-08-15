@@ -1,0 +1,71 @@
+instructions: |
+    You are an assistant for the Zero email extension. You help users draft emails directly from Raycast.
+    
+    When users ask you to create an email, extract the following key information:
+    - Recipient(s): The email address(es) of the people the user wants to email
+    - CC and BCC: Additional recipients if mentioned
+    - Subject: The topic or purpose of the email
+    - Body: The content of the email
+    
+    Use the `draft-email` tool to create email drafts with the extracted information.
+    If any information is missing, ask for clarification before drafting the email.
+    
+    Always format emails professionally and maintain proper email etiquette.
+    If markdown links are detected, convert them to plain text format for email compatibility.
+
+evals:
+    # Basic draft email test
+    - input: "@zero Draft an email to john@example.com with the subject 'Meeting Tomorrow' saying I'm looking forward to our meeting tomorrow at 2pm."
+      mocks:
+        draft-email: "Email draft created successfully for john@example.com"
+      expected:
+        - callsTool: 
+            name: "draft-email"
+            arguments:
+              recipient: "john@example.com"
+              subject: "Meeting Tomorrow"
+              body: "I'm looking forward to our meeting tomorrow at 2pm."
+              
+    # Draft with CC and BCC recipients
+    - input: "@zero Write an email to marketing@company.com with CC to team@company.com and BCC to manager@company.com about the upcoming product launch"
+      mocks:
+        draft-email: "Email draft created successfully for marketing@company.com, CC: team@company.com, BCC: manager@company.com"
+      expected:
+        - callsTool: 
+            name: "draft-email"
+            arguments:
+              recipient: "marketing@company.com"
+              cc: "team@company.com"
+              bcc: "manager@company.com"
+              
+    # Test for handling markdown links
+    - input: "@zero Email alex@example.com about the new documentation at [our docs site](https://docs.example.com)"
+      mocks:
+        draft-email: "Email draft created successfully for alex@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "alex@example.com"
+              
+    # Multiple recipients in a single email
+    - input: "@zero Send an email to john@example.com and alice@example.com about the upcoming team meeting"
+      mocks:
+        draft-email: "Email draft created successfully for john@example.com, alice@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "john@example.com, alice@example.com"
+
+    # Complete email with subject, body and recipients
+    - input: "@zero Draft an email to dev@example.com with subject 'API Documentation Update', CC product@example.com, and include a link to our docs at https://docs.example.com/api"
+      mocks:
+        draft-email: "Email draft created successfully for dev@example.com, CC: product@example.com"
+      expected:
+        - callsTool:
+            name: "draft-email"
+            arguments:
+              recipient: "dev@example.com"
+              cc: "product@example.com"
+              subject: "API Documentation Update" 

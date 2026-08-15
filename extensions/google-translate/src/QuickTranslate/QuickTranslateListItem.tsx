@@ -1,75 +1,56 @@
-import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import { getLanguageFlag, supportedLanguagesByCode } from "../languages";
-import { simpleTranslate } from "../simple-translate";
-import { LanguageCodeSet } from "../types";
+import React from "react";
+import { ActionPanel, List } from "@raycast/api";
+import { supportedLanguagesByCode } from "../languages";
+import { SimpleTranslateResult } from "../simple-translate";
 import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "../actions";
 
 export function QuickTranslateListItem(props: {
   debouncedText: string;
-  languageSet: LanguageCodeSet;
+  result: SimpleTranslateResult;
   isShowingDetail: boolean;
   setIsShowingDetail: (isShowingDetail: boolean) => void;
-  setIsLoading: (isLoading: boolean) => void;
+  originalSourceLanguage: string;
 }) {
-  let langFrom = supportedLanguagesByCode[props.languageSet.langFrom];
-  const langTo = supportedLanguagesByCode[props.languageSet.langTo];
+  const langFrom = supportedLanguagesByCode[props.result.langFrom];
+  const langTo = supportedLanguagesByCode[props.result.langTo];
 
-  const { data: result, isLoading: isLoading } = usePromise(simpleTranslate, [props.debouncedText, props.languageSet], {
-    onWillExecute() {
-      props.setIsLoading(true);
-    },
-    onData() {
-      props.setIsLoading(false);
-    },
-    onError(error) {
-      props.setIsLoading(false);
-      showToast({
-        style: Toast.Style.Failure,
-        title: `Could not translate to ${langTo.name}`,
-        message: error.toString(),
-      });
-    },
-  });
-
-  if (isLoading) {
-    return (
-      <List.Item
-        title={`Translating to ${langTo.name}...`}
-        accessories={[
-          {
-            text: `${getLanguageFlag(langTo, langTo?.code)}`,
-            tooltip: `${langFrom.name} -> ${langTo.name}`,
-          },
-        ]}
-      />
-    );
-  }
-
-  if (!result) {
-    return null;
-  }
-
-  // Reassigning langFrom to the detected language in case it was auto-detected
-  langFrom = supportedLanguagesByCode[result.langFrom];
+  const pronunciationMarkdown = props.result.pronunciationText
+    ? `\`\`\`\n${props.result.pronunciationText}\n\`\`\`\n\n`
+    : "";
 
   return (
     <List.Item
-      key={langTo.code}
-      title={result.translatedText}
+      title={props.result.translatedText}
       accessories={[
         {
-          text: `${getLanguageFlag(langTo, langTo?.code)}`,
+          text: langTo.name,
           tooltip: `${langFrom.name} -> ${langTo.name}`,
         },
       ]}
-      detail={<List.Item.Detail markdown={result.translatedText} />}
+      detail={
+        <List.Item.Detail
+          markdown={props.result.translatedText + "\n\n\n" + pronunciationMarkdown}
+          metadata={
+            <List.Item.Detail.Metadata>
+              <List.Item.Detail.Metadata.TagList title="Source Language">
+                {props.originalSourceLanguage === "auto" && (
+                  <List.Item.Detail.Metadata.TagList.Item text={supportedLanguagesByCode.auto.name} color={"#FECD57"} />
+                )}
+                <List.Item.Detail.Metadata.TagList.Item text={langFrom.name} color={"#A0D468"} />
+              </List.Item.Detail.Metadata.TagList>
+              <List.Item.Detail.Metadata.TagList title="Target Language">
+                <List.Item.Detail.Metadata.TagList.Item text={langTo.name} color={"#B3A5EF"} />
+              </List.Item.Detail.Metadata.TagList>
+            </List.Item.Detail.Metadata>
+          }
+        />
+      }
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={result.translatedText} />
+            <ConfigurableCopyPasteActions defaultActionsPrefix="Translation" value={props.result.translatedText} />
             <ToggleFullTextAction onAction={() => props.setIsShowingDetail(!props.isShowingDetail)} />
-            <OpenOnGoogleTranslateWebsiteAction translationText={props.debouncedText} translation={result} />
+            <OpenOnGoogleTranslateWebsiteAction translationText={props.debouncedText} translation={props.result} />
           </ActionPanel.Section>
         </ActionPanel>
       }

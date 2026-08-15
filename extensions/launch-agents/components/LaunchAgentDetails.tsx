@@ -2,16 +2,20 @@ import {
   Action,
   ActionPanel,
   Alert,
+  captureException,
   Color,
   confirmAlert,
   Detail,
   Icon,
   Keyboard,
+  open,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execSync } from "child_process";
+import fs from "fs";
 import { useEffect, useState } from "react";
 import {
   getLaunchAgentRecurrence,
@@ -21,7 +25,6 @@ import {
   unloadLaunchAgent,
 } from "../lib/plist";
 import { getFileName } from "../lib/utils";
-
 export default function LaunchAgentDetails({
   selectedFile,
   refreshList,
@@ -31,9 +34,22 @@ export default function LaunchAgentDetails({
 }) {
   const { pop } = useNavigation();
   const [isFileLoaded, setIsFileLoaded] = useState<boolean>(false);
+  const fileExists = fs.existsSync(selectedFile);
 
-  const fileName = getFileName(selectedFile);
+  useEffect(() => {
+    if (!fileExists) {
+      showFailureToast("The selected launch agent file does not exist.", { title: "File Not Found" });
+      refreshList();
+      pop();
+    }
+  }, [fileExists, pop, refreshList]);
+
+  if (!fileExists) {
+    return null;
+  }
+
   const isFileValid = isLaunchAgentOK(selectedFile);
+  const fileName = getFileName(selectedFile);
   const recurrence = getLaunchAgentRecurrence(selectedFile);
 
   const markdown = `
@@ -116,6 +132,17 @@ export default function LaunchAgentDetails({
     }
   };
 
+  const handleOpenFile = async () => {
+    const app = "code";
+
+    try {
+      await open(selectedFile, "code");
+    } catch (e: unknown) {
+      captureException(e);
+      showFailureToast(e, { title: `Could not open file in ${app}` });
+    }
+  };
+
   useEffect(() => {
     updateIsFileLoaded();
   }, [selectedFile]);
@@ -130,7 +157,7 @@ export default function LaunchAgentDetails({
             title={isFileLoaded ? "Unload" : "Load"}
             onAction={loadOrUnloadFile}
           />
-          <Action icon={Icon.Folder} title="Open" onAction={() => execSync(`code ${selectedFile}`)} />
+          <Action icon={Icon.Folder} title="Open with Visual Studio Code" onAction={handleOpenFile} />
           <Action
             title="Remove"
             icon={Icon.Trash}

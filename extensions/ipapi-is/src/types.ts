@@ -26,22 +26,24 @@ type Company = {
   network: string;
   whois: string;
 };
-type ASN = {
+export type ASN = {
   asn: number;
+  abuser_score: string;
   descr: string;
   country: string;
   active: boolean;
-  org: string;
-  domain: string;
-  abuse: string;
-  type: CompanyOrAsnType;
-  created: string;
-  updated: string;
-  rir: string;
+  org?: string;
+  domain?: string;
+  abuse?: string | string[];
+  type?: CompanyOrAsnType;
+  created?: string;
+  updated?: string;
+  rir?: string;
   whois: string;
   route?: string;
 };
 type Location = {
+  is_eu_member: boolean;
   continent: string;
   country: string;
   country_code: string;
@@ -56,13 +58,27 @@ type Location = {
   is_dst: boolean;
   other?: string[];
 };
+type VPN = {
+  region: string;
+  last_seen: number;
+  type: string;
+  service: string;
+  url: string;
+};
+type Abuse = {
+  name: string;
+  address: string;
+  country?: string;
+  email: string;
+  phone: string;
+};
 
-type ASNRespones = ASN & {
+export type ASNRespones = ASN & {
   elapsed_ms: number;
-  prefixes: string[];
+  prefixes?: string[];
   prefixesIPv6?: string[];
 };
-type IPResponse = {
+export type IPResponse = {
   ip: string;
   rir: "AFRNIC" | "APNIC" | "ARIN" | "LACNIC" | "RIPE NCC";
   is_bogon: boolean;
@@ -74,9 +90,11 @@ type IPResponse = {
   is_vpn: boolean;
   is_abuser: boolean;
   datacenter?: Datacenter;
-  company?: Company;
-  asn?: ASN;
-  location?: Location;
+  company?: Company | null;
+  asn?: ASN | null;
+  location?: Location | null;
+  vpn?: VPN | null;
+  abuse?: Abuse | null;
   elapsed_ms: number;
 };
 export type SuccessResponse = IPResponse | ASNRespones;

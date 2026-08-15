@@ -6,7 +6,11 @@
   "icon": "Eudic.png",
   "author": "isfeng",
   "license": "MIT",
-  "contributors": [],
+  "contributors": [
+    "ViGeng",
+    "maxchang3",
+    "litomore"
+  ],
   "commands": [
     {
       "name": "easydict",
@@ -30,6 +34,13 @@
       "subtitle": "Query text from image",
       "description": "Screenshot OCR, and query text from image.",
       "mode": "no-view"
+    },
+    {
+      "name": "favorites",
+      "title": "Favorite Words",
+      "subtitle": "Easydict",
+      "description": "Browse and manage words you saved from Easydict.",
+      "mode": "view"
     }
   ],
   "categories": [
@@ -49,62 +60,63 @@
     "youdao",
     "baidu",
     "tencent",
-    "eudic",
-    "openai"
+    "openai",
+    "gemini"
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.0",
-    "@vitalets/google-translate-api": "^9.1.0",
-    "axios": "^1.7.4",
-    "cheerio": "^1.0.0-rc.12",
-    "crypto-js": "^4.2.0",
-    "eventsource": "^2.0.2",
-    "eventsource-parser": "^0.1.0",
-    "execa": "^7.1.0",
-    "file-type": "^18.2.0",
-    "franc": "^6.1.0",
-    "hpagent": "^1.2.0",
-    "mac-system-proxy": "^1.0.4",
-    "node-fetch": "^3.3.0",
-    "node-html-parser": "^6.1.5",
-    "play-sound": "^1.1.6",
-    "qs": "^6.11.0",
-    "run-applescript": "^6.1.0",
-    "tencentcloud-sdk-nodejs-tmt": "^4.0.559"
+    "@deeplx/core": "^0.2.2",
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
+    "@xsai/shared-chat": "^0.5.0-beta.6",
+    "@xsai/stream-text": "^0.5.0-beta.6",
+    "franc": "^6.2.0",
+    "native-say": "^0.0.2",
+    "node-html-parser": "^7.0.2",
+    "ofetch": "^1.5.1",
+    "tinyexec": "^1.2.4"
   },
   "devDependencies": {
-    "@commitlint/cli": "^17.4.4",
-    "@commitlint/config-conventional": "^17.4.4",
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/crypto-js": "^4.1.1",
-    "@types/eventsource": "^1.1.11",
-    "@types/node": "^20.8.10",
-    "@types/play-sound": "^1.1.0",
-    "@types/qs": "^6.9.7",
-    "@types/react": "^18.2.27",
-    "@typescript-eslint/eslint-plugin": "^6.18.0",
-    "eslint": "^8.36.0",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^13.2.0",
-    "prettier": "^2.8.4",
-    "react": "^18.2.0",
-    "typescript": "^4.9.5"
+    "@commitlint/cli": "^21.0.1",
+    "@commitlint/config-conventional": "^21.0.1",
+    "@raycast/eslint-config": "^2.2.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "automd": "^0.4.3",
+    "eslint": "^10.8.0",
+    "eslint-plugin-import-x": "^4.17.1",
+    "eslint-plugin-simple-import-sort": "^13.0.0",
+    "eslint-plugin-unused-imports": "^4.4.1",
+    "jsdom": "^29.1.1",
+    "nano-staged": "^1.0.2",
+    "prettier": "^3.8.1",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.4",
+    "simple-git-hooks": "^2.13.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "build-swift": "swift build --configuration=release --arch arm64 --arch x86_64 && mv .build/apple/Products/Release/recognizeText assets",
+    "build:swift": "node scripts/build-swift.mjs",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "lint-staged": "lint-staged",
-    "prepare": "cd .. && cd .. && husky install extensions/easydict/.huskyrc",
-    "eslint": "eslint src/** --fix --ext .ts,.tsx,.js,.jsx"
+    "postinstall": "npx simple-git-hooks",
+    "eslint": "eslint src/ --fix",
+    "docs:gen": "automd",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": "npm run eslint",
+  "simple-git-hooks": {
+    "pre-commit": "./node_modules/.bin/nano-staged",
+    "commit-msg": "npx --no-install commitlint --edit $1"
+  },
+  "nano-staged": {
+    "*.{ts,tsx,js,jsx}": "eslint --fix",
     "**/*": [
-      "prettier --write . --ignore-unknown"
+      "prettier --write --ignore-unknown"
     ]
   },
   "preferences": [
@@ -287,6 +299,10 @@
         {
           "title": "Burmese",
           "value": "my"
+        },
+        {
+          "title": "Norwegian",
+          "value": "no"
         },
         {
           "title": "Georgian",
@@ -491,6 +507,10 @@
           "value": "my"
         },
         {
+          "title": "Norwegian",
+          "value": "no"
+        },
+        {
           "title": "Georgian",
           "value": "ka"
         },
@@ -509,6 +529,29 @@
         {
           "title": "Hebrew",
           "value": "he"
+        }
+      ]
+    },
+    {
+      "title": "Bing Host",
+      "name": "bingHost",
+      "type": "dropdown",
+      "label": "Bing Host",
+      "required": false,
+      "description": "Bing Host Type",
+      "default": "",
+      "data": [
+        {
+          "title": "Auto",
+          "value": ""
+        },
+        {
+          "title": "cn.bing.com",
+          "value": "cn.bing.com"
+        },
+        {
+          "title": "www.bing.com",
+          "value": "www.bing.com"
         }
       ]
     },
@@ -538,14 +581,6 @@
       "default": true
     },
     {
-      "name": "enableBaiduLanguageDetect",
-      "type": "checkbox",
-      "label": "Enable Baidu Language Detect",
-      "required": false,
-      "description": "⚠️ If turn off it, the language detection will be slower, even cause timeout.",
-      "default": true
-    },
-    {
       "name": "enableAutomaticPlayWordAudio",
       "type": "checkbox",
       "label": "Play Word Pronunciation Automatically",
@@ -562,11 +597,28 @@
       "default": false
     },
     {
-      "name": "enableSystemProxy",
+      "title": "Language Detection",
+      "name": "enableBaiduLanguageDetect",
       "type": "checkbox",
-      "label": "Use System Proxy",
+      "label": "Enable Baidu Language Detect",
       "required": false,
-      "description": "⚠️ Note that it should only be enabled if needed, as it can slow down requests.",
+      "description": "Turn on/off Baidu Language Detect.",
+      "default": true
+    },
+    {
+      "name": "enableTencentLanguageDetect",
+      "type": "checkbox",
+      "label": "Enable Tencent Language Detect",
+      "required": false,
+      "description": "Turn on/off Tencent Language Detect.",
+      "default": false
+    },
+    {
+      "name": "enableVolcanoLanguageDetect",
+      "type": "checkbox",
+      "label": "Enable Volcano Language Detect",
+      "required": false,
+      "description": "Turn on/off Volcano Language Detect.",
       "default": false
     },
     {
@@ -575,7 +627,16 @@
       "type": "checkbox",
       "label": "Apple Translate",
       "required": false,
-      "description": "⚠️ An `Apple Translate` shortcut needs to be installed, please see README for more details.",
+      "description": "⚠️ (macOS only) An `Apple Translate` shortcut needs to be installed, please see README for more details.",
+      "default": false
+    },
+    {
+      "title": "Display Options",
+      "name": "flagsAreNotLanguages",
+      "type": "checkbox",
+      "label": "Flags are not languages",
+      "required": false,
+      "description": "Hide country flags next to language names, respecting that flags represent countries, not languages.",
       "default": false
     },
     {
@@ -601,7 +662,15 @@
       "name": "enableOpenAITranslate",
       "label": "OpenAI Translate",
       "required": false,
-      "description": "Turn on/off OpenAI Translate. Use system proxy by default. App Key is required.",
+      "description": "Turn on/off OpenAI Translate. App Key is required.",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "name": "enableGeminiTranslate",
+      "label": "Gemini Translate",
+      "required": false,
+      "description": "Turn on/off Gemini Translate. App Key is required.",
       "default": false
     },
     {
@@ -609,15 +678,23 @@
       "name": "enableDeepLTranslate",
       "label": "DeepL Translate",
       "required": false,
-      "description": "Turn on/off DeepL Translate. Use system proxy by default. App Key is required.",
+      "description": "Turn on/off DeepL Translate. App Key is required.",
       "default": false
+    },
+    {
+      "type": "checkbox",
+      "name": "enableDeepLXTranslate",
+      "label": "DeepLX Translate",
+      "required": false,
+      "description": "Turn on/off DeepLX Translate. Free DeepL translation service without API key required.",
+      "default": true
     },
     {
       "name": "enableGoogleTranslate",
       "type": "checkbox",
       "label": "Google Translate",
       "required": false,
-      "description": "⚠️ Use system proxy by default. A proxy is required to use Google if you are in China.",
+      "description": "⚠️ A proxy is required to use Google if you are in China.",
       "default": false
     },
     {
@@ -642,7 +719,7 @@
       "label": "Tencent Translate",
       "required": false,
       "description": "Turn on/off Tencent Translate. App Key is required.",
-      "default": true
+      "default": false
     },
     {
       "name": "enableVolcanoTranslate",
@@ -673,17 +750,16 @@
       "name": "servicesOrder",
       "type": "textfield",
       "required": false,
-      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, OpenAI, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun",
+      "description": "Separate by comma, default is Youao Dictionary, Linguee Dictionary, OpenAI, Gemini, DeepL, Google, Bing, Apple, Baidu, Tencent, Volcano, Youdao, Caiyun",
       "default": "",
-      "placeholder": "youdao dictionary, linguee dictionary, openai, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun"
+      "placeholder": "youdao dictionary, linguee dictionary, openai, gemini, deepl, google, bing, apple, baidu, tencent, volcano, youdao, caiyun"
     },
     {
       "title": "OpenAI API Key",
       "name": "openAIAPIKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
-      "description": "Your OpenAI API Key",
-      "default": ""
+      "description": "Your OpenAI API Key"
     },
     {
       "title": "OpenAI Endpoint",
@@ -691,8 +767,8 @@
       "type": "textfield",
       "required": false,
       "description": "Custom OpenAI API URL",
-      "default": "https://api.openai.com/v1/chat/completions",
-      "placeholder": "https://api.openai.com/v1/chat/completions"
+      "default": "https://api.openai.com/v1",
+      "placeholder": "https://api.openai.com/v1"
     },
     {
       "title": "OpenAI Model",
@@ -703,12 +779,43 @@
       "default": "gpt-4o-mini"
     },
     {
-      "title": "DeepL Auth Key",
-      "name": "deepLAuthKey",
+      "title": "Force max_completion_tokens",
+      "name": "forceMaxCompletionTokens",
+      "type": "checkbox",
+      "label": "Always use max_completion_tokens",
+      "required": false,
+      "description": "Force using max_completion_tokens instead of max_tokens. Useful for reasoning models (e.g., o1, o3, gpt-5) or providers that require it. May break compatibility with some OpenAI-compatible APIs.",
+      "default": false
+    },
+    {
+      "title": "Gemini API Key",
+      "name": "geminiAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Your Gemini API Key"
+    },
+    {
+      "title": "Gemini Endpoint",
+      "name": "geminiAPIURL",
       "type": "textfield",
       "required": false,
-      "description": "Your DeepL Auth Key",
-      "default": ""
+      "description": "Custom Gemini API URL",
+      "default": "https://generativelanguage.googleapis.com"
+    },
+    {
+      "title": "Gemini Model",
+      "name": "geminiModel",
+      "type": "textfield",
+      "required": false,
+      "description": "Gemini Model",
+      "default": "gemini-2.5-flash"
+    },
+    {
+      "title": "DeepL Auth Key",
+      "name": "deepLAuthKey",
+      "type": "password",
+      "required": false,
+      "description": "Your DeepL Auth Key"
     },
     {
       "title": "DeepL API URL",
@@ -724,56 +831,63 @@
       "name": "baiduAppId",
       "type": "textfield",
       "required": false,
-      "description": "Your Baidu App ID",
-      "default": ""
+      "description": "Your Baidu App ID"
     },
     {
       "title": "Baidu App Secret",
       "name": "baiduAppSecret",
-      "type": "textfield",
+      "type": "password",
       "required": false,
-      "description": "Your Baidu App Secret",
-      "default": ""
+      "description": "Your Baidu App Secret"
     },
     {
       "title": "Tencent SecretId",
       "name": "tencentSecretId",
       "type": "textfield",
       "required": false,
-      "description": "Your Tencent SecretId",
+      "description": "Your Tencent SecretId (for Translate & Detect)",
       "default": ""
     },
     {
       "title": "Tencent SecretKey",
       "name": "tencentSecretKey",
-      "type": "textfield",
+      "type": "password",
       "required": false,
-      "description": "Your Tencent SecretKey",
-      "default": ""
+      "description": "Your Tencent SecretKey (for Translate & Detect)"
     },
     {
       "title": "Volcano Access Key ID",
       "name": "volcanoAccessKeyId",
       "type": "textfield",
       "required": false,
-      "description": "Your Volcano Access Key ID",
+      "description": "Your Volcano Access Key ID (for Translate & Detect)",
       "default": ""
     },
     {
       "title": "Volcano Access Key Secret",
       "name": "volcanoAccessKeySecret",
-      "type": "textfield",
+      "type": "password",
       "required": false,
-      "description": "Your Volcano Access Key Secret",
-      "default": ""
+      "description": "Your Volcano Access Key Secret (for Translate & Detect)"
     },
     {
       "title": "Caiyun Token",
       "name": "caiyunToken",
-      "type": "textfield",
+      "type": "password",
       "required": false,
-      "description": "Your Caiyun Token",
-      "default": ""
+      "description": "Your Caiyun Token"
     }
-  ]
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "allowScripts": {
+    "simple-git-hooks@2.13.1": true,
+    "esbuild@0.27.7": true,
+    "@parcel/watcher@2.5.6": true,
+    "fsevents@2.3.3": true,
+    "unrs-resolver@1.12.2": true
+  },
+  "packageManager": "npm@11.17.0"
 }

@@ -1,8 +1,8 @@
 import { List, updateCommandMetadata } from "@raycast/api";
 import { oura } from "./utils/ouraData";
-import { today, tomorrow } from "./utils/datetime";
+import { getDate } from "./utils/datetime";
 import { ActivityResponse } from "./types";
-import { minutedFormatted, convertMeters, numberWithCommas } from "./utils/measurement";
+import { minutesFormatted, convertMeters, numberWithCommas } from "./utils/measurement";
 import { Color } from "@raycast/api";
 import { getProgressStatus } from "./utils/measurement";
 import Unauthorized from "./unauthorized";
@@ -20,7 +20,7 @@ function distanceToGoal(distance: number) {
 
 export default function Command() {
   const activity = oura(
-    `usercollection/daily_activity?start_date=${today()}&end_date=${tomorrow()}`,
+    `usercollection/daily_activity?start_date=${getDate()}&end_date=${getDate(1)}`,
   ) as ActivityResponse;
 
   if (activity.isLoading) {
@@ -77,27 +77,27 @@ export default function Command() {
       <List.Item
         title={`Activity Workout`}
         accessories={[
-          { tag: { value: `High: ${minutedFormatted(aToday.high_activity_time / 60)}`, color: Color.Green } },
-          { tag: { value: `Medium: ${minutedFormatted(aToday.medium_activity_time / 60)}`, color: Color.Yellow } },
-          { tag: { value: `Low: ${minutedFormatted(aToday.low_activity_time / 60)}`, color: Color.Magenta } },
+          { tag: { value: `High: ${minutesFormatted(aToday.high_activity_time / 60)}`, color: Color.Green } },
+          { tag: { value: `Medium: ${minutesFormatted(aToday.medium_activity_time / 60)}`, color: Color.Yellow } },
+          { tag: { value: `Low: ${minutesFormatted(aToday.low_activity_time / 60)}`, color: Color.Magenta } },
         ]}
       />
       <List.Item
         title={`Activity Met`}
         accessories={[
-          { tag: { value: `High: ${minutedFormatted(aToday.high_activity_met_minutes / 60)}`, color: Color.Green } },
+          { tag: { value: `High: ${minutesFormatted(aToday.high_activity_met_minutes / 60)}`, color: Color.Green } },
           {
-            tag: { value: `Medium: ${minutedFormatted(aToday.medium_activity_met_minutes / 60)}`, color: Color.Yellow },
+            tag: { value: `Medium: ${minutesFormatted(aToday.medium_activity_met_minutes / 60)}`, color: Color.Yellow },
           },
-          { tag: { value: `Low: ${minutedFormatted(aToday.low_activity_met_minutes / 60)}`, color: Color.Magenta } },
+          { tag: { value: `Low: ${minutesFormatted(aToday.low_activity_met_minutes / 60)}`, color: Color.Magenta } },
         ]}
       />
       <List.Item
         title={`Relax Time`}
         accessories={[
-          { tag: { value: `Resting: ${minutedFormatted(aToday.resting_time / 60)}`, color: Color.SecondaryText } },
-          { tag: { value: `Sedentary: ${minutedFormatted(aToday.sedentary_time / 60)}`, color: Color.SecondaryText } },
-          { tag: { value: `Not wearing: ${minutedFormatted(aToday.non_wear_time / 60)}`, color: Color.SecondaryText } },
+          { tag: { value: `Resting: ${minutesFormatted(aToday.resting_time / 60)}`, color: Color.SecondaryText } },
+          { tag: { value: `Sedentary: ${minutesFormatted(aToday.sedentary_time / 60)}`, color: Color.SecondaryText } },
+          { tag: { value: `Not wearing: ${minutesFormatted(aToday.non_wear_time / 60)}`, color: Color.SecondaryText } },
         ]}
       />
       <List.Item

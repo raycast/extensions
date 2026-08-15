@@ -339,26 +339,34 @@
       "description": "Move the focused window to the top right of the current display",
       "subtitle": "Rectangle",
       "mode": "no-view"
+    },
+    {
+      "name": "cascade-all",
+      "title": "Cascade All",
+      "icon": "window-positions/cascadeAllTemplate.png",
+      "description": "Cascade all windows",
+      "subtitle": "Rectangle",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.76.0"
+    "@raycast/api": "^1.88.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
+    "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "react-devtools": "^4.28.4",
-    "typescript": "^5.2.2",
-    "vitest": "^1.6.0"
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.1"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest"
   }

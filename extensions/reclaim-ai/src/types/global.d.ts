@@ -11,3 +11,6 @@ interface ErrorConstructor {
   new (message?: string, options?: ErrorOptions): Error;
   (message?: string, options?: ErrorOptions): Error;
 }
+
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
+type Constructor<T> = Function & { prototype: T };

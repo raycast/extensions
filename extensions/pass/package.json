@@ -6,6 +6,10 @@
   "description": "An extension to handle the standard unix password manager in a convenient way using Raycast",
   "icon": "command-icon.png",
   "author": "capipo",
+  "contributors": [
+    "camiloaromero23",
+    "mthies_2023"
+  ],
   "categories": [
     "Security",
     "Productivity"
@@ -46,8 +50,14 @@
       "default": "paste",
       "required": false,
       "data": [
-        { "value": "paste", "title": "Paste" },
-        { "value": "copy", "title": "Copy" }
+        {
+          "value": "paste",
+          "title": "Paste"
+        },
+        {
+          "value": "copy",
+          "title": "Copy"
+        }
       ]
     }
   ],
@@ -57,5 +67,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

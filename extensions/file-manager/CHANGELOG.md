@@ -1,6 +1,30 @@
 # File Manager Changelog
 
+## [Fixes] - 2026-04-04
+
+- Improved sorting to use natural numeric order.
+- Added broken symlink detection and display.
+- Added more error handling.
+- Fixed gitignore and hidden file filters not reapplying after refresh.
+
+## [Update] - 2025-05-22
+
+- Added a preferences to enable search by file permissions
+
+## [Fixes] - 2025-01-30
+
+- Fixed shell command errors caused by filenames containing single quotes.
+
+## [Fixes] - 2025-01-29
+
+- Fixed issue with show hidden files preference.
+
+## [Features] - 2025-01-28
+
+- Added the preference to show hidden files.
+
 ## [Gitignore and Rayignore] - 2024-07-24
+
 - Added support respecting `.gitignore` and `.rayignore` files.
 
 ## [Features] - 2023-02-22

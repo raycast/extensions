@@ -4,37 +4,38 @@
   "title": "Ask Dust",
   "description": "Query dust.tt AI agents",
   "icon": "dust.png",
-  "author": "vineus",
+  "author": "albandum",
   "contributors": [
-    "henry_fontanier"
+    "vineus",
+    "henry_fontanier",
+    "stang",
+    "sebastien_flory",
+    "adrien_simon"
   ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "apiKey",
-      "description": "Your Dust API key",
-      "type": "password",
-      "required": true,
-      "title": "API key",
-      "placeholder": "sk-xxxxxxxxxxxxxxxxxxxxxx"
-    },
-    {
-      "name": "workspaceId",
-      "description": "Your Dust workspace ID",
-      "type": "textfield",
-      "required": true,
-      "title": "Workspace ID",
-      "placeholder": "xxxxxxxx"
-    }
-  ],
+  "preferences": [],
   "commands": [
     {
       "name": "ask",
       "title": "Ask Dust",
-      "description": "Query dust.tt",
+      "description": "Query @Dust on dust.tt",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Ask a question",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "askClaude",
+      "title": "Ask Claude-4",
+      "description": "Query @claude-4 on Dust.tt",
       "mode": "view",
       "arguments": [
         {
@@ -47,8 +48,8 @@
     },
     {
       "name": "askGpt",
-      "title": "Ask GPT-4",
-      "description": "Query gpt-4 on Dust.tt",
+      "title": "Ask GPT-5",
+      "description": "Query @gpt-5 on Dust.tt",
       "mode": "view",
       "arguments": [
         {
@@ -62,27 +63,39 @@
     {
       "name": "history",
       "title": "Questions History",
+      "subtitle": "Show the questions and answers of the last 30 days",
       "description": "Show the questions and answers of the last 30 days",
       "mode": "view"
     },
     {
       "name": "askAgent",
-      "title": "Ask a Dust Agent",
-      "description": "Select an agent to ask a question",
+      "title": "Ask ...",
+      "subtitle": "Select one of your assistants to ask a question",
+      "description": "Select one of your assistants to ask a question",
+      "mode": "view"
+    },
+    {
+      "name": "pickWorkspace",
+      "title": "Select Workspace",
+      "subtitle": "Select a workspace to use",
+      "description": "Select a workspace to use",
       "mode": "view"
     }
   ],
   "dependencies": {
+    "@dust-tt/client": "^1.1.16",
+    "@emoji-mart/data": "^1.1.2",
     "@raycast/api": "^1.70.3",
-    "@raycast/utils": "^1.10.1",
+    "@raycast/utils": "^1.18.0",
     "date-fns": "^3.0.0-alpha.2",
     "eventsource-parser": "^1.1.1",
-    "node-fetch": "^3.3.2"
+    "jwt-decode": "^4.0.0",
+    "undici": "^6.20.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
+    "@types/node": "22.14.0",
+    "@types/react": "19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
     "typescript": "^5.2.2"
@@ -93,5 +106,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

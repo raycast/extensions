@@ -1,5 +1,120 @@
 # Safari Changelog
 
+## [Fix] - 2026-08-12
+
+- Handle large Safari bookmark libraries without parser limit errors.
+
+## [Fix] - 2026-08-12
+
+- Restore fast, complete local tab loading while preserving tabs with empty titles or URLs.
+- Avoid querying iCloud tabs when they are disabled.
+- Handle `blob:` tab favicons without invalid URL errors.
+
+## [New Command] - 2026-07-24
+
+- Add `Search Tabs, Bookmarks and History` command to search open tabs, bookmarks and history in one place.
+- Replace `pinyin` with the much lighter `pinyin-pro` to fix commands crashing against the extension memory limit (bundle size reduced from ~28 MB to ~6 MB per command).
+
+## [Bugfix] - 2026-05-22
+
+- Clarify the Full Disk Access requirement when Safari history cannot be opened.
+
+## [Fix] - 2026-05-06
+
+- Fix `Search History` command failing with `no such column: "%...%"` by using single-quoted string literals for search terms in the SQL query.
+
+## [Fix] - 2026-04-28
+
+- Fix `Search History` command failing with `no such column: "unixepoch"` by using single-quoted string literals in the SQL query.
+
+## [Performance] - 2026-01-12
+
+- Significantly improved `Search Tabs` loading speed by replacing JXA with native Swift ScriptingBridge (˜4x faster load). 
+
+## [Update] - 2025-06-19
+
+- Fixes for `Search Tabs` command:
+  - allows the components that display the tab list to re-render when device data changes.
+  - allows the obtention of the local tabs even when the `areRemoteTabsUsed` ("iCloud devices" option) is set to `false`.
+
+## [Update] - 2025-05-19
+
+- Added a command to close all other tabs, leaving the current tab open.
+
+## [Update] - 2025-03-18
+
+- Fix for `Copy Title as Link to Clipboard` command: Prevent profile or tab group name being added to the start of the page title
+
+## [Update] - 2025-03-05
+
+- Added a fuzzy search option that can be enabled/disabled via preferences
+- Improved search to match terms anywhere within bookmarks and other items
+
+## [Update] - 2025-03-01
+
+### New Tab Management Tools
+
+- Added new AI tools for Safari tab management:
+  - `get-all-tabs`: View all open tabs across all Safari windows
+  - `get-tab-contents`: Retrieve text or HTML content from specific tabs
+  - `close-tab`: Close specific tabs or the currently active tab
+  - `get-focused-tab`: Get information about the currently active tab
+
+## [Chore: Moved contributor to past contributors list] - 2025-02-27
+
+## [Update] - 2025-02-21
+
+AI Tools to;
+
+- Search Bookmarks
+- Search History
+- Search Reading List
+- Add to Reading List
+- Open (in Safari)
+
+## [Update] - 2025-02-14
+
+- Added a preference to enable pinyin search for Chinese characters.
+
+## [Update] - 2025-02-12
+
+- Add an action to set the color of a bookmark tag.
+
+## [Chore: Moved contributor to past contributors list] - 2025-01-15
+
+## [Update] - 2025-01-12
+
+- Adds a preference to "Copy Title as Link to Clipboard" command to clean up titles with AI.
+
+## [Update] - 2025-01-07
+
+- Adds a "Copy Title as Link to Clipboard" command to copy the current Safari tab in Markdown format.
+
+## [Update] - 2025-01-06
+
+- Adds a "Copy to Clipboard" command to copy the current Safari tab url.
+
+## [Chore: Renamed title in Dropdown] - 2024-12-20
+
+## [Improve] - 2024-12-13
+
+- Add a preference for `Search Reading List` to hide items that have already been read.
+
+## [Update] - 2024-12-03
+
+- Added `pinyin` support for searching tab
+- improved:
+  - Added cache for formatted string
+  - Reduced re-render times for `CloudTabs`
+
+## [Improve] 2024-09-27
+
+- Adds a preference to select between different fallback search types for the `Search Tabs` command.
+
+## [Improve] - 2024-09-11
+
+- Changed the behavior of the `Add to Reading List` command to add the current tab to the Reading List.
+
 ## [Improve] - 2024-08-09
 
 - Changed fuzzy search weights

@@ -1,7 +1,12 @@
 # Humaans Changelog
 
-## 2024-04-08
-- Transferred extension to Humaans Organisation
+## [Update] - 2025-01-30
+
+Fixed URL to open person in directory
+
+## [Chore] - 2024-04-08
+
+Transferred extension to Humaans Organisation
 
 ## [Added "Clock In"/"Clock Out" Commands] - 2024-03-01
 
