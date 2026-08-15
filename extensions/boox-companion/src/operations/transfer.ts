@@ -120,8 +120,11 @@ async function replaceStorageFile(
     try {
       const page = await client.listStorage(destination, 0, 10_000);
       observedReplacement = page.list.find((entry) => entry.name === existing.name && entry.path !== backup.path);
-    } catch {
-      // A failed inspection leaves the original backup untouched unless its name can be restored directly.
+    } catch (inspectionError) {
+      throw new Error(
+        `${describeBooxError(uploadError)}. The upload outcome could not be verified: ${describeBooxError(inspectionError)}. ` +
+          `The original remains as ${backupName}; no recovery change was attempted`
+      );
     }
 
     if (observedReplacement && !observedReplacement.dir && observedReplacement.size === localSize) {

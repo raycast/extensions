@@ -126,6 +126,32 @@ describe("file transfers", () => {
     expect(client.renameStorage).toHaveBeenCalledTimes(1);
   });
 
+  it("leaves the backup untouched when an ambiguous upload cannot be inspected", async () => {
+    const file = await createFile("book.epub", "new");
+    const existing = storageFile("book.epub");
+    const client = mockClient({ duplicates: ["book.epub"], entries: [existing] });
+    vi.mocked(client.listStorage)
+      .mockResolvedValueOnce(storagePage([existing]))
+      .mockRejectedValueOnce(new Error("device offline"));
+    vi.mocked(client.uploadStorage).mockRejectedValue(new Error("response lost"));
+
+    const result = await transferFiles({
+      client,
+      paths: [file],
+      mode: "storage",
+      destination: "/Books",
+      conflictPolicy: "replace",
+    });
+
+    const backupName = vi.mocked(client.renameStorage).mock.calls[0][1];
+    expect(result).toMatchObject({ uploaded: 0, skipped: 0, failed: 1 });
+    expect(result.items[0].error).toMatch(
+      new RegExp(`upload outcome could not be verified: device offline.*original remains as ${backupName}`)
+    );
+    expect(client.renameStorage).toHaveBeenCalledTimes(1);
+    expect(client.deleteStorage).not.toHaveBeenCalled();
+  });
+
   it("keeps a completed replacement when only the upload response was lost", async () => {
     const file = await createFile("book.epub", "new");
     const existing = storageFile("book.epub");
