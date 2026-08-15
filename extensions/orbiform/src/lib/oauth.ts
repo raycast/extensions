@@ -16,15 +16,16 @@
  * redirect URI internally (based on redirectMethod), and that exact string
  * must be pre-registered on the Orbiform side before /oauth/authorize will
  * accept it. Rather than guess/hardcode that URI, we ask the PKCEClient
- * for it once, register a client with it via the existing DCR endpoint,
- * and cache the returned client_id in LocalStorage — every run after the
- * first is just a cache read, no extra request.
+ * for it once, register a client with it via the existing DCR endpoint.
  */
 import { LocalStorage, OAuth } from "@raycast/api";
 
 export const BASE_URL = "https://orbiform.cc";
 
-const CLIENT_ID_KEY = "orbiform_oauth_client_id";
+// Best-effort cache to avoid re-registering a DCR client on every first
+// run. NOT the source of truth for which client_id issued the currently
+// stored tokens — see the scope-encoding comment below for why.
+const CLIENT_ID_CACHE_KEY = "orbiform_oauth_client_id";
 const SCOPE = "mcp";
 
 const client = new OAuth.PKCEClient({
@@ -43,22 +44,43 @@ interface TokenResponse {
   scope?: string;
 }
 
+// Raycast's OAuth.PKCEClient stores accessToken/refreshToken/scope/expiresIn
+// together as ONE atomic write per setTokens() call. Two commands that both
+// complete their first-run flow around the same time each call setTokens()
+// independently — whichever call lands last simply wins outright, which is
+// fine (a full, internally-consistent tuple either way). The bug this
+// extension used to have was pairing the tokens with a client_id kept in a
+// *separate* LocalStorage key, written by a *separate* call: two flows'
+// setItem/setTokens pairs could then interleave and leave one flow's
+// client_id stored next to the other flow's refresh_token. Fix: don't keep
+// client_id anywhere separate. Smuggle it inside the `scope` string that's
+// already part of the same setTokens() call, so it can never be torn apart
+// from the tokens it belongs to. `scope` here is purely local bookkeeping —
+// it's never sent back to the server (token requests send client_id
+// directly), so repurposing it is safe.
+const SCOPE_CLIENT_ID_SEPARATOR = "::cid=";
+
+function encodeScope(scope: string | undefined, clientId: string): string {
+  return `${scope ?? SCOPE}${SCOPE_CLIENT_ID_SEPARATOR}${clientId}`;
+}
+
+function decodeScope(encoded: string | undefined): { scope?: string; clientId?: string } {
+  if (!encoded) return {};
+  const i = encoded.indexOf(SCOPE_CLIENT_ID_SEPARATOR);
+  if (i === -1) return { scope: encoded };
+  return { scope: encoded.slice(0, i), clientId: encoded.slice(i + SCOPE_CLIENT_ID_SEPARATOR.length) };
+}
+
 /**
  * Registers (once) a Raycast OAuth client via Orbiform's existing Dynamic
  * Client Registration endpoint, using the exact redirect URI Raycast
  * itself computed for this extension. Result is cached after the first
- * successful call.
- *
- * Note: two commands launched for the very first time within the same
- * instant can both observe an empty cache and both register a client here
- * — LocalStorage has no compare-and-swap, so a true lock isn't available.
- * That race is made harmless by `authorize()` re-pinning CLIENT_ID_KEY to
- * whichever client_id it actually used right before it stores that flow's
- * tokens, so the last-written client_id always matches the last-written
- * tokens. See the comment there.
+ * successful call purely to avoid extra registration requests on later
+ * runs — see the note on CLIENT_ID_CACHE_KEY above for why this cache
+ * being stale or lost under a race is harmless rather than corrupting.
  */
 async function getOrRegisterClientId(redirectUri: string): Promise<string> {
-  const cached = await LocalStorage.getItem<string>(CLIENT_ID_KEY);
+  const cached = await LocalStorage.getItem<string>(CLIENT_ID_CACHE_KEY);
   if (cached) return cached;
 
   const response = await fetch(`${BASE_URL}/api/mcp/register`, {
@@ -74,7 +96,7 @@ async function getOrRegisterClientId(redirectUri: string): Promise<string> {
     throw new Error(`Orbiform client registration failed (${response.status}): ${detail.slice(0, 200)}`);
   }
   const data = (await response.json()) as { client_id: string };
-  await LocalStorage.setItem(CLIENT_ID_KEY, data.client_id);
+  await LocalStorage.setItem(CLIENT_ID_CACHE_KEY, data.client_id);
   return data.client_id;
 }
 
@@ -124,24 +146,22 @@ export async function authorize(): Promise<string> {
   const existing = await client.getTokens();
   if (existing?.accessToken) {
     if (existing.refreshToken && existing.isExpired()) {
-      const clientId = await LocalStorage.getItem<string>(CLIENT_ID_KEY);
+      const { clientId } = decodeScope(existing.scope);
       if (!clientId) throw new Error("Orbiform client_id not found — please reconnect.");
       try {
         const refreshed = await refreshTokens(existing.refreshToken, clientId);
         await client.setTokens({
           accessToken: refreshed.access_token,
           refreshToken: refreshed.refresh_token,
-          scope: refreshed.scope,
+          scope: encodeScope(refreshed.scope, clientId),
           expiresIn: refreshed.expires_in,
         });
         return refreshed.access_token;
       } catch (refreshError) {
-        // A stored refresh_token that no longer matches the stored
-        // client_id (e.g. from the concurrent-first-run race described
-        // above) fails here every time otherwise. Clear both so the next
+        // A stored refresh_token that no longer matches its paired
+        // client_id fails here every time otherwise. Clear it so the next
         // call runs a full fresh authorize() instead of looping on a
         // refresh that can never succeed.
-        await LocalStorage.removeItem(CLIENT_ID_KEY);
         await client.removeTokens();
         throw refreshError;
       }
@@ -167,15 +187,12 @@ export async function authorize(): Promise<string> {
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await fetchTokens(authRequest, authorizationCode, clientId);
 
-  // Re-pin the client_id this flow actually used right before storing its
-  // tokens, so if a concurrent first-run raced us on registration, the
-  // last write here still leaves CLIENT_ID_KEY matching the tokens we're
-  // about to store (not some other flow's client_id).
-  await LocalStorage.setItem(CLIENT_ID_KEY, clientId);
+  // clientId travels inside `scope`, written in this single setTokens()
+  // call — there is no separate write for it to race against.
   await client.setTokens({
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token,
-    scope: tokens.scope,
+    scope: encodeScope(tokens.scope, clientId),
     expiresIn: tokens.expires_in,
   });
   return tokens.access_token;
