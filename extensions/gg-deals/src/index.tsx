@@ -213,7 +213,7 @@ function useSearch() {
           populateDeals(
             $,
             "section[id=deals-presets] div[class*=mp-col]:nth-of-type(3) div.list > div",
-            historicalLows,
+            historicalLows
           );
         }
 
@@ -235,7 +235,7 @@ function useSearch() {
         }
       }
     },
-    [setState],
+    [setState]
   );
 
   useEffect(() => {
@@ -273,7 +273,7 @@ function populateSearch($: CheerioAPI, selector: string, deals: DealEntry[]) {
       .toArray();
 
     deals.push(
-      new DealEntry(gameName, imageUrl, priceText, priceKeyshop, url, releaseDate, genres, discount, platforms),
+      new DealEntry(gameName, imageUrl, priceText, priceKeyshop, url, releaseDate, genres, discount, platforms)
     );
   });
 }

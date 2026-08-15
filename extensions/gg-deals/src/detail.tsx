@@ -168,6 +168,6 @@ function parseDetails(html: string): DetailEntry {
     pricesByPriceLabels,
     pricesByTimeLabels,
     editions,
-    platforms,
+    platforms
   );
 }

@@ -18,7 +18,7 @@ export class DealEntry {
     releaseDate: string,
     genres: string,
     discount: string,
-    platforms: string[],
+    platforms: string[]
   ) {
     this.gameName = gameName;
     this.imageUrl = imageUrl;
@@ -71,7 +71,7 @@ export class DetailEntry {
     pricesByPriceLabels: [string, string, string][],
     pricesByTimeLabels: [string, string, string][],
     editions: string[],
-    platforms: string[],
+    platforms: string[]
   ) {
     this.gameName = gameName;
     this.imageUrl = imageUrl;

@@ -116,7 +116,7 @@ function getCurrentLowest(prices?: GamePrices) {
   }
 
   const values = [toNumber(prices.currentRetail), toNumber(prices.currentKeyshops)].filter(
-    (value): value is number => value !== null && value >= 0,
+    (value): value is number => value !== null && value >= 0
   );
 
   return values.length ? Math.min(...values) : null;
@@ -128,7 +128,7 @@ function getAllTimeLow(prices?: GamePrices) {
   }
 
   const values = [toNumber(prices.historicalRetail), toNumber(prices.historicalKeyshops)].filter(
-    (value): value is number => value !== null && value >= 0,
+    (value): value is number => value !== null && value >= 0
   );
 
   return values.length ? Math.min(...values) : null;
