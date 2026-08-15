@@ -1,5 +1,15 @@
 # Twos Changelog
 
+## [Open results in the desktop app] - 2026-08-15
+
+- **Search Things** now opens results in the NewTwos desktop app when it's
+  installed, instead of always going to the browser. Opening a thing lands on
+  its list scrolled to that row, and the browser stays available on `⌘↵`.
+- New **Open Results In** preference: Automatic (the new default — desktop app
+  if installed, browser otherwise), NewTwos Desktop App, or Browser.
+- Opening a thing in the browser now scrolls to it as well, rather than landing
+  at the top of its list.
+
 ## [Rebuilt on the Twos public API] - 2026-07-16
 
 - Rewrote the extension against Twos's documented public API at

@@ -1,6 +1,17 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Application,
+  Color,
+  getPreferenceValues,
+  Icon,
+  List,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { api, listWebUrl, TwosList, TwosThing } from "./api";
+import { api, listDeepLink, listWebUrl, TwosList, TwosThing } from "./api";
+import { resolveOpenTarget, useDesktopApp } from "./useDesktopApp";
 
 // Search matches the mobile app's behavior (apps/mobile/components/SearchResults.tsx):
 //   - Both lists AND things are shown; lists rank above things.
@@ -21,7 +32,48 @@ type ThingRow = {
 };
 type Row = ListRow | ThingRow;
 
+/**
+ * The open actions for one row, in priority order — whichever comes first is
+ * what Enter does.
+ *
+ * When NewTwos is installed we lead with the desktop app: it opens the list
+ * scrolled to and flashing the matched thing, which the browser can't do as
+ * well. The browser stays on ⌘↵. When it isn't installed the app action is
+ * hidden entirely, since firing an unhandled `twos://` URL raises a system
+ * "no app registered for this URL" dialog.
+ */
+function OpenActions(props: {
+  listId?: string | null;
+  thingId?: string | null;
+  target: "app" | "browser";
+  app: Application | null;
+  browserTitle: string;
+}) {
+  const { listId, thingId, target, app, browserTitle } = props;
+  const deepLink = listDeepLink(listId, thingId);
+  const browser = <Action.OpenInBrowser url={listWebUrl(listId, thingId)} title={browserTitle} />;
+  // No deep link means the thing has no parent list to open — browser only.
+  if (target !== "app" || !deepLink) return browser;
+  return (
+    <>
+      <Action.Open
+        target={deepLink}
+        // Pin to the detected bundle so a stale local dev build that also
+        // claims the twos: scheme can't intercept. Undefined when the user
+        // forced "app" without us detecting one — then the system decides.
+        application={app?.path}
+        title="Open in NewTwos"
+        icon={Icon.AppWindow}
+      />
+      {browser}
+    </>
+  );
+}
+
 export default function SearchThings() {
+  const { openIn } = getPreferenceValues<Preferences.SearchThings>();
+  const { app, ready } = useDesktopApp();
+  const target = resolveOpenTarget(openIn, app, ready);
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(false);
@@ -152,7 +204,7 @@ export default function SearchThings() {
               accessories={[{ tag: "List" }]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={listWebUrl(list.id)} title="Open List in Twos" />
+                  <OpenActions listId={list.id} target={target} app={app} browserTitle="Open List in Browser" />
                   <Action.CopyToClipboard content={list.title} title="Copy Title" />
                 </ActionPanel>
               }
@@ -180,7 +232,15 @@ export default function SearchThings() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={listWebUrl(thing.list_id)} title="Open List in Twos" />
+                  {/* Passing the thing id opens the parent list AND scrolls to
+                      + flashes this exact row, in the app or the browser. */}
+                  <OpenActions
+                    listId={thing.list_id}
+                    thingId={thing.id}
+                    target={target}
+                    app={app}
+                    browserTitle="Open in Browser"
+                  />
                   {thing.type === "todo" &&
                     (thing.completed ? (
                       <Action title="Mark Incomplete" icon={Icon.Circle} onAction={() => setCompleted(thing, false)} />
