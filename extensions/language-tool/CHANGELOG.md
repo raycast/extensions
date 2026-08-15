@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fix Premium Accounts] - {PR_MERGE_DATE}
+## [Fix Premium Accounts] - 2026-08-15
 
 ### Fixed
 - Authenticated requests now go to the Premium API host. Filling in Username/Email and API Key previously made every check fail with "Credentials provided, but server isn't configured to support this", because the credentials were sent to the free endpoint, which rejects them.
