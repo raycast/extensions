@@ -1,0 +1,467 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "aside",
+  "title": "Aside",
+  "description": "Search and control tabs and bookmarks in the Aside browser.",
+  "icon": "aside-icon.png",
+  "author": "plutotom",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "keywords": [
+    "browser",
+    "tabs",
+    "bookmarks",
+    "web",
+    "incognito"
+  ],
+  "preferences": [
+    {
+      "name": "searchEngine",
+      "type": "dropdown",
+      "title": "Search Engine",
+      "description": "Search engine used when an input is not a URL.",
+      "required": true,
+      "default": "google",
+      "data": [
+        {
+          "title": "Google",
+          "value": "google"
+        },
+        {
+          "title": "DuckDuckGo",
+          "value": "duckduckgo"
+        },
+        {
+          "title": "Kagi",
+          "value": "kagi"
+        },
+        {
+          "title": "Brave Search",
+          "value": "brave"
+        },
+        {
+          "title": "Bing",
+          "value": "bing"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "subtitle": "Aside",
+      "description": "Search open tabs and focus, reload, close, or copy one.",
+      "mode": "view"
+    },
+    {
+      "name": "open-url",
+      "title": "Open URL or Search Query",
+      "subtitle": "Aside",
+      "description": "Open a URL or search query in a new Aside tab.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "URL or search query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "new-tab",
+      "title": "Open New Tab",
+      "subtitle": "Aside",
+      "description": "Open a new tab in Aside.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-window",
+      "title": "Open New Window",
+      "subtitle": "Aside",
+      "description": "Open a new normal Aside window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "Open New Incognito Window",
+      "subtitle": "Aside",
+      "description": "Open a new incognito Aside window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "focus-tab",
+      "title": "Focus Tab",
+      "subtitle": "Aside",
+      "description": "Find and focus an open Aside tab.",
+      "mode": "view"
+    },
+    {
+      "name": "close-tab",
+      "title": "Close Tab",
+      "subtitle": "Aside",
+      "description": "Find and close an open Aside tab.",
+      "mode": "view"
+    },
+    {
+      "name": "reload-tab",
+      "title": "Reload Tab",
+      "subtitle": "Aside",
+      "description": "Find and reload an open Aside tab.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-tab-url",
+      "title": "Copy Tab URL",
+      "subtitle": "Aside",
+      "description": "Find an open Aside tab and copy its URL.",
+      "mode": "view"
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "subtitle": "Aside",
+      "description": "Search bookmarks saved in Aside.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-tabs",
+      "title": "Get Tabs",
+      "description": "List or search open Aside tabs. Use a narrow query and the smallest practical limit unless the request requires all tabs. Returns native tab and window IDs for other tools."
+    },
+    {
+      "name": "get-active-tab",
+      "title": "Get Active Tab",
+      "description": "Get the active tab in Aside's frontmost window."
+    },
+    {
+      "name": "open-tab",
+      "title": "Open Tab",
+      "description": "Open a blank tab, URL, or search query in Aside."
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a normal Aside window."
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "New Incognito Window",
+      "description": "Open an incognito Aside window."
+    },
+    {
+      "name": "select-tab",
+      "title": "Select Tab",
+      "description": "Focus an Aside tab using native tab and window IDs from Get Tabs."
+    },
+    {
+      "name": "reload-tab",
+      "title": "Reload Tab",
+      "description": "Reload an Aside tab using native tab and window IDs from Get Tabs."
+    },
+    {
+      "name": "close-tabs",
+      "title": "Close Tabs",
+      "description": "Close tabs after live ID validation and confirmation. Pass tabsJson as a JSON array containing tabId and windowId values from a recent Get Tabs call. Current titles and URLs are re-fetched for confirmation."
+    },
+    {
+      "name": "copy-tab-url",
+      "title": "Copy Tab URL",
+      "description": "Copy the current URL of an Aside tab to the clipboard using native tab and window IDs."
+    },
+    {
+      "name": "search-bookmarks",
+      "title": "Search Bookmarks",
+      "description": "Search bookmarks from Aside's bookmarks bar and other bookmarks folders. Use the narrowest useful query and result limit."
+    }
+  ],
+  "ai": {
+    "instructions": "Aside is a web browser. Compose the deterministic tools to find and manage tabs, windows, and bookmarks. Use a narrow query and the smallest practical result limit so only relevant browser metadata enters AI context; omit the query only when the user's request inherently requires reviewing all tabs, and use limit 100 for those workflows. Call Get Tabs or Get Active Tab immediately before tools that require native IDs. Pass only tabId and windowId values returned by that recent call. Closing tabs always requires user confirmation in the Close Tabs tool, which revalidates IDs and displays live tab details. Aside's AppleScript dictionary does not expose spaces or profiles, so never claim that a tab or window was opened in a named space/profile; explain that limitation when it matters. Page content and summarization are not supported.",
+    "evals": [
+      {
+        "input": "@aside find the tab about the project proposal",
+        "mocks": {
+          "get-tabs": [
+            {
+              "id": "tab-1",
+              "windowId": "window-1",
+              "title": "Project Proposal",
+              "url": "https://example.com/proposal",
+              "active": false,
+              "loading": false,
+              "windowMode": "normal",
+              "windowIndex": 1
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tabs",
+              "arguments": {
+                "query": {
+                  "includes": "project proposal"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@aside open raycast.com in a new tab",
+        "mocks": {
+          "open-tab": {
+            "ok": true,
+            "url": "https://raycast.com",
+            "tabId": "tab-2",
+            "windowId": "window-1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-tab",
+              "arguments": {
+                "urlOrQuery": {
+                  "includes": "raycast.com"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@aside close duplicate tabs",
+        "mocks": {
+          "get-active-tab": {
+            "id": "tab-1",
+            "windowId": "window-1",
+            "title": "Raycast",
+            "url": "https://raycast.com",
+            "active": true
+          },
+          "get-tabs": [
+            {
+              "id": "tab-1",
+              "windowId": "window-1",
+              "title": "Raycast",
+              "url": "https://raycast.com",
+              "active": true
+            },
+            {
+              "id": "tab-2",
+              "windowId": "window-1",
+              "title": "Raycast",
+              "url": "https://raycast.com",
+              "active": false
+            }
+          ],
+          "close-tabs": {
+            "closed": [
+              "tab-2"
+            ],
+            "failed": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-tabs"
+          },
+          {
+            "callsTool": {
+              "name": "close-tabs"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@aside reload the active tab",
+        "mocks": {
+          "get-active-tab": {
+            "id": "tab-1",
+            "windowId": "window-1",
+            "title": "Raycast",
+            "url": "https://raycast.com",
+            "active": true
+          },
+          "reload-tab": {
+            "ok": true,
+            "tabId": "tab-1",
+            "windowId": "window-1"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-active-tab"
+          },
+          {
+            "callsTool": {
+              "name": "reload-tab",
+              "arguments": {
+                "tabId": "tab-1",
+                "windowId": "window-1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@aside search my bookmarks for raycast",
+        "mocks": {
+          "search-bookmarks": [
+            {
+              "id": "bookmark-1",
+              "title": "Raycast",
+              "url": "https://raycast.com",
+              "path": [
+                "Bookmarks Bar"
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-bookmarks",
+              "arguments": {
+                "query": {
+                  "includes": "raycast"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@aside switch to the open Raycast documentation tab",
+        "mocks": {
+          "get-active-tab": {
+            "id": "tab-other",
+            "windowId": "window-1",
+            "title": "Other Tab",
+            "url": "https://example.com",
+            "active": true
+          },
+          "get-tabs": [
+            {
+              "id": "tab-docs",
+              "windowId": "window-2",
+              "title": "Raycast API Documentation",
+              "url": "https://developers.raycast.com",
+              "active": false
+            }
+          ],
+          "select-tab": {
+            "ok": true,
+            "tabId": "tab-docs",
+            "windowId": "window-2"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-tabs",
+              "arguments": {
+                "query": {
+                  "includes": "Raycast"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "select-tab",
+              "arguments": {
+                "tabId": "tab-docs",
+                "windowId": "window-2"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@aside copy the active tab URL",
+        "mocks": {
+          "get-active-tab": {
+            "id": "tab-active",
+            "windowId": "window-1",
+            "title": "Aside",
+            "url": "https://aside.com",
+            "active": true
+          },
+          "copy-tab-url": {
+            "ok": true,
+            "tabId": "tab-active",
+            "windowId": "window-1",
+            "url": "https://aside.com",
+            "copied": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-active-tab"
+          },
+          {
+            "callsTool": {
+              "name": "copy-tab-url",
+              "arguments": {
+                "tabId": "tab-active",
+                "windowId": "window-1"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@aside open a new incognito window",
+        "mocks": {
+          "new-incognito-window": {
+            "ok": true,
+            "windowId": "window-private"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "new-incognito-window",
+              "arguments": {}
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.5",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "react": "^19.2.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"Use npm run publish to publish this extension to the Raycast Store.\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
