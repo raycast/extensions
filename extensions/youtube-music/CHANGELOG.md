@@ -1,6 +1,6 @@
 # YouTube Music Changelog
 
-## [Fix AppleScript Error Handling] - {PR_MERGE_DATE}
+## [Fix AppleScript Error Handling] - 2026-08-15
 
 - Fixed: `runJSInYouTubeMusicTab` now wraps `runAppleScript` in a try/catch block — previously, any AppleScript error (permissions, browser not running, invalid browser selection) was thrown unhandled and swallowed by empty catch blocks in commands, resulting in silent failures or "Unknown Error" HUD messages.
 - Added: `handleAppleScriptError` function that detects specific failure modes:
