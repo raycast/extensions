@@ -14,6 +14,9 @@ struct CameraPreviewError: LocalizedError, CustomStringConvertible {
       "Camera access is denied. Enable Raycast under System Settings › Privacy & Security › Camera."
   )
   static let noDevice = Self(description: "No camera device was found.")
+  static let cannotOpen = Self(
+    description: "The camera could not be opened. It may be in use by another app."
+  )
 }
 
 struct CameraInfo: Encodable {
@@ -56,7 +59,7 @@ struct CameraInfo: Encodable {
   guard await hasCameraAccess() else { throw CameraPreviewError.accessDenied }
   guard !discoverDevices().isEmpty else { throw CameraPreviewError.noDevice }
 
-  try spawnPreviewProcess()
+  try await spawnPreviewProcess()
 }
 
 /// Requests camera access on first run. The permission is granted to Raycast, the parent app.
@@ -102,8 +105,14 @@ func discoverDevices() -> [AVCaptureDevice] {
   ).devices
 }
 
-/// Re-launches this same executable with the same arguments, flagged as the child.
-func spawnPreviewProcess() throws {
+/// Re-launches this same executable with the same arguments, flagged as the child, and waits for
+/// it to confirm the window is on screen.
+///
+/// The confirmation matters because the child outlives this command. Without it, a child that
+/// finds every camera unopenable at startup would exit after this function had already reported
+/// success — no window, and no error in Raycast either. The child writes one byte to its stdout
+/// once the window is up; dying before that closes the pipe instead.
+func spawnPreviewProcess() async throws {
   let process = Process()
   process.executableURL = URL(fileURLWithPath: CommandLine.arguments[0])
   process.arguments = Array(CommandLine.arguments.dropFirst())
@@ -112,9 +121,21 @@ func spawnPreviewProcess() throws {
   environment[childProcessMarker] = "1"
   process.environment = environment
 
+  let readiness = Pipe()
   process.standardInput = FileHandle.nullDevice
-  process.standardOutput = FileHandle.nullDevice
+  process.standardOutput = readiness
   process.standardError = FileHandle.nullDevice
 
   try process.run()
+
+  let reader = readiness.fileHandleForReading
+  let confirmed = await withCheckedContinuation {
+    (continuation: CheckedContinuation<Bool, Never>) in
+    DispatchQueue.global().async {
+      // One byte when the window is up; EOF (empty data) when the child died before that.
+      let data = reader.readData(ofLength: 1)
+      continuation.resume(returning: !data.isEmpty)
+    }
+  }
+  guard confirmed else { throw CameraPreviewError.cannotOpen }
 }

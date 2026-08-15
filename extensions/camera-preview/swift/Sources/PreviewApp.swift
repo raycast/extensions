@@ -436,17 +436,29 @@ final class PreviewWindow: NSWindow {
   /// The list is captured at launch, so a camera plugged in afterwards — or one that went away —
   /// would otherwise stay invisible until the preview is reopened.
   func stepDevice(by step: Int) {
-    refreshDevices()
-    selectDevice(from: index + step, step: step)
+    if refreshDevices() {
+      selectDevice(from: index + step, step: step)
+    } else {
+      // The camera on screen is gone and `index` now points at its replacement. Stepping past it
+      // would skip that replacement in one direction and land beyond it in the other.
+      selectDevice(from: index, step: step)
+    }
   }
 
-  /// Re-reads the connected cameras, keeping the one on screen selected if it is still there.
-  private func refreshDevices() {
+  /// Re-reads the connected cameras, and reports whether the one on screen is still among them.
+  /// When it is not, `index` is left pointing at the first camera as the replacement to try.
+  private func refreshDevices() -> Bool {
     let currentId = devices.indices.contains(index) ? devices[index].uniqueID : nil
     let latest = discoverDevices()
-    guard !latest.isEmpty else { return }
+    // Nothing connected at all: keep the stale list so the current picture stays up.
+    guard !latest.isEmpty else { return true }
     devices = latest
-    index = currentId.flatMap { id in latest.firstIndex { $0.uniqueID == id } } ?? 0
+    if let currentId, let found = latest.firstIndex(where: { $0.uniqueID == currentId }) {
+      index = found
+      return true
+    }
+    index = 0
+    return false
   }
 
   /// Shows the camera at `start`, or the next one that opens when walking the list by `step`.
@@ -596,5 +608,9 @@ final class PreviewWindow: NSWindow {
     window.makeKeyAndOrderFront(nil)
     window.makeFirstResponder(cameraView)
     NSApp.activate(ignoringOtherApps: true)
+
+    // Tell the parent the window is up — it holds the Raycast command open until this byte
+    // arrives, so a failure above still surfaces as an error instead of nothing happening.
+    FileHandle.standardOutput.write(Data([0x0A]))
   }
 }
