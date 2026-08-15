@@ -419,7 +419,6 @@ export class BooxClient {
 export function normalizeHost(input: string, port = 8085): string {
   const withScheme = /^https?:\/\//i.test(input.trim()) ? input.trim() : `http://${input.trim()}`;
   const url = new URL(withScheme);
-  url.protocol = "http:";
   url.port = String(port);
   url.pathname = "/";
   url.search = "";

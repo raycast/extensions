@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { displayRemotePath, isLibraryDocument, normalizeRemotePath, validateUploadName } from "../src/lib/paths";
+import path from "node:path";
+import {
+  displayRemotePath,
+  isLibraryDocument,
+  normalizeRemotePath,
+  resolveDownloadPath,
+  validateUploadName,
+} from "../src/lib/paths";
 
 describe("BOOX paths", () => {
   it("maps user paths to internal storage", () => {
@@ -19,5 +26,18 @@ describe("BOOX paths", () => {
     expect(isLibraryDocument("paper.docx")).toBe(true);
     expect(isLibraryDocument("book.epub")).toBe(true);
     expect(isLibraryDocument("archive.dmg")).toBe(false);
+  });
+
+  it("keeps device-provided download names inside the selected directory", () => {
+    const directory = path.join(path.sep, "safe", "downloads");
+
+    expect(resolveDownloadPath(directory, "../../private/report.pdf")).toBe(
+      path.join(directory, "report.pdf")
+    );
+    expect(resolveDownloadPath(directory, "..\\..\\private\\report.pdf")).toBe(
+      path.join(directory, "report.pdf")
+    );
+    expect(resolveDownloadPath(directory, "bad:name?.pdf")).toBe(path.join(directory, "bad-name-.pdf"));
+    expect(() => resolveDownloadPath(directory, "..")).toThrow("invalid file name");
   });
 });

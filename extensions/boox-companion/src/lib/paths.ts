@@ -33,6 +33,21 @@ export function validateUploadName(name: string): string | undefined {
   return undefined;
 }
 
+export function resolveDownloadPath(directory: string, remoteName: string): string {
+  const root = path.resolve(directory);
+  const baseName = path.basename(remoteName.replace(/\\/g, "/"));
+  const safeName = Array.from(baseName, (character) =>
+    character.charCodeAt(0) < 32 || INVALID_FILENAME_CHARACTERS.test(character) ? "-" : character
+  )
+    .join("")
+    .trim();
+  if (!safeName || safeName === "." || safeName === "..") throw new Error("BOOX returned an invalid file name");
+
+  const destination = path.resolve(root, safeName);
+  if (path.dirname(destination) !== root) throw new Error("BOOX returned a file name outside the download directory");
+  return destination;
+}
+
 export function isLibraryDocument(name: string): boolean {
   const extension = path.extname(name).slice(1).toLowerCase();
   return new Set([

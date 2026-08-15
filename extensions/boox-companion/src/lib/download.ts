@@ -5,6 +5,7 @@ import { BooxClient } from "../api/boox-client";
 import { getDownloadDirectory } from "./preferences";
 import { BooxNote, StorageEntry } from "../models/boox";
 import { describeBooxError } from "./errors";
+import { resolveDownloadPath } from "./paths";
 
 export async function downloadStorageEntry(client: BooxClient, entry: StorageEntry): Promise<void> {
   const toast = await showToast({ style: Toast.Style.Animated, title: `Downloading ${entry.name}` });
@@ -13,7 +14,7 @@ export async function downloadStorageEntry(client: BooxClient, entry: StorageEnt
     await mkdir(directory, { recursive: true });
     const remotePath = entry.dir ? await client.packageStorage([entry]) : entry.path;
     const fileName = entry.dir ? `${entry.name}.zip` : entry.name;
-    const destination = path.join(directory, fileName);
+    const destination = resolveDownloadPath(directory, fileName);
     const localPath = await client.downloadFile(remotePath, destination);
     toast.style = Toast.Style.Success;
     toast.title = "Downloaded from BOOX";
@@ -32,8 +33,7 @@ export async function downloadNote(client: BooxClient, note: BooxNote): Promise<
   try {
     const directory = getDownloadDirectory();
     await mkdir(directory, { recursive: true });
-    const safeTitle = note.title.replace(/[\\/:*?"<>|]/g, "-");
-    const localPath = await client.downloadNote(note, path.join(directory, `${safeTitle}.pdf`));
+    const localPath = await client.downloadNote(note, resolveDownloadPath(directory, `${note.title}.pdf`));
     toast.style = Toast.Style.Success;
     toast.title = "Note Exported";
     toast.message = path.basename(localPath);
@@ -53,7 +53,7 @@ export async function backupNotes(client: BooxClient): Promise<void> {
     await mkdir(directory, { recursive: true });
     const remotePath = await client.createNoteBackup();
     const remoteName = path.basename(remotePath) || `BOOX Notes ${new Date().toISOString().slice(0, 10)}.zip`;
-    const localPath = await client.downloadNoteBackup(remotePath, path.join(directory, remoteName));
+    const localPath = await client.downloadNoteBackup(remotePath, resolveDownloadPath(directory, remoteName));
     toast.style = Toast.Style.Success;
     toast.title = "Notes Backup Downloaded";
     toast.message = path.basename(localPath);

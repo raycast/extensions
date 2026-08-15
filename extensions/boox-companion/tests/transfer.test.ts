@@ -37,7 +37,7 @@ describe("file transfers", () => {
     expect(progress).toHaveBeenCalledWith(1, 1, "book.epub");
   });
 
-  it("deletes an existing storage file before replacing it", async () => {
+  it("preserves an existing storage file until its replacement uploads", async () => {
     const file = await createFile("book.epub", "new");
     const existing = {
       dir: false,
@@ -58,11 +58,111 @@ describe("file transfers", () => {
 
     expect(result).toMatchObject({ uploaded: 1, skipped: 0, failed: 0 });
     expect(client.listStorage).toHaveBeenCalledWith("/storage/emulated/0/Books", 0, 10_000);
-    expect(client.deleteStorage).toHaveBeenCalledWith(existing);
+    const backupName = vi.mocked(client.renameStorage).mock.calls[0][1];
+    const backup = vi.mocked(client.deleteStorage).mock.calls[0][0];
+    expect(backupName).toMatch(/^BOOX-Backup-/);
+    expect(client.renameStorage).toHaveBeenCalledWith(existing, backupName);
+    expect(backup).toMatchObject({ name: backupName, path: `/storage/emulated/0/Books/${backupName}` });
     expect(client.uploadStorage).toHaveBeenCalledWith(file, "/storage/emulated/0/Books");
-    expect(vi.mocked(client.deleteStorage).mock.invocationCallOrder[0]).toBeLessThan(
+    expect(vi.mocked(client.renameStorage).mock.invocationCallOrder[0]).toBeLessThan(
       vi.mocked(client.uploadStorage).mock.invocationCallOrder[0]
     );
+    expect(vi.mocked(client.uploadStorage).mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(client.deleteStorage).mock.invocationCallOrder[0]
+    );
+  });
+
+  it("restores the original storage file when replacement upload fails", async () => {
+    const file = await createFile("book.epub", "new");
+    const existing = storageFile("book.epub");
+    const client = mockClient({ duplicates: ["book.epub"], entries: [existing] });
+    vi.mocked(client.uploadStorage).mockRejectedValue(new Error("connection reset"));
+
+    const result = await transferFiles({
+      client,
+      paths: [file],
+      mode: "storage",
+      destination: "/Books",
+      conflictPolicy: "replace",
+    });
+
+    const backupName = vi.mocked(client.renameStorage).mock.calls[0][1];
+    expect(result).toMatchObject({ uploaded: 0, skipped: 0, failed: 1 });
+    expect(client.renameStorage).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ name: backupName }),
+      "book.epub"
+    );
+    expect(client.deleteStorage).not.toHaveBeenCalled();
+  });
+
+  it("removes an ambiguous partial upload before restoring the original", async () => {
+    const file = await createFile("book.epub", "new");
+    const existing = storageFile("book.epub");
+    const partial = { ...existing, size: 4 };
+    const client = mockClient({ duplicates: ["book.epub"], entries: [existing] });
+    vi.mocked(client.listStorage)
+      .mockResolvedValueOnce(storagePage([existing]))
+      .mockResolvedValueOnce(storagePage([partial]));
+    vi.mocked(client.uploadStorage).mockRejectedValue(new Error("response lost"));
+    vi.mocked(client.renameStorage)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("name conflict"))
+      .mockResolvedValueOnce(undefined);
+
+    const result = await transferFiles({
+      client,
+      paths: [file],
+      mode: "storage",
+      destination: "/Books",
+      conflictPolicy: "replace",
+    });
+
+    expect(result.failed).toBe(1);
+    expect(client.deleteStorage).toHaveBeenCalledWith(partial);
+    expect(client.renameStorage).toHaveBeenCalledTimes(3);
+    expect(vi.mocked(client.renameStorage).mock.calls[2][1]).toBe("book.epub");
+  });
+
+  it("reports a preserved backup when automatic restoration cannot finish", async () => {
+    const file = await createFile("book.epub", "new");
+    const existing = storageFile("book.epub");
+    const client = mockClient({ duplicates: ["book.epub"], entries: [existing] });
+    vi.mocked(client.uploadStorage).mockRejectedValue(new Error("disk full"));
+    vi.mocked(client.renameStorage)
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockRejectedValueOnce(new Error("offline"));
+
+    const result = await transferFiles({
+      client,
+      paths: [file],
+      mode: "storage",
+      destination: "/Books",
+      conflictPolicy: "replace",
+    });
+
+    expect(result.failed).toBe(1);
+    expect(result.items[0].error).toMatch(/original remains as BOOX-Backup-.*automatic restoration failed: offline/);
+  });
+
+  it("reports a successful replacement whose preserved backup cannot be cleaned up", async () => {
+    const file = await createFile("book.epub", "new");
+    const existing = storageFile("book.epub");
+    const client = mockClient({ duplicates: ["book.epub"], entries: [existing] });
+    vi.mocked(client.deleteStorage).mockRejectedValue(new Error("permission denied"));
+
+    const result = await transferFiles({
+      client,
+      paths: [file],
+      mode: "storage",
+      destination: "/Books",
+      conflictPolicy: "replace",
+    });
+
+    expect(result.failed).toBe(1);
+    expect(result.items[0].error).toMatch(/Replacement uploaded, but the preserved backup BOOX-Backup-/);
+    expect(result.items[0].error).toContain("permission denied");
   });
 
   it("refuses to replace a same-name folder", async () => {
@@ -178,8 +278,23 @@ function mockClient(options: { duplicates?: string[]; entries?: StorageEntry[] }
       list: options.entries ?? [],
     }),
     deleteStorage: vi.fn().mockResolvedValue(undefined),
+    renameStorage: vi.fn().mockResolvedValue(undefined),
     uploadStorage: vi.fn().mockResolvedValue(undefined),
     uploadLibrary: vi.fn().mockResolvedValue(undefined),
     getLibrary: vi.fn().mockResolvedValue({ books: [], shelves: [], bookCount: 0, shelfCount: 0 }),
   } as unknown as BooxClient;
+}
+
+function storageFile(name: string): StorageEntry {
+  return {
+    dir: false,
+    name,
+    path: `/storage/emulated/0/Books/${name}`,
+    size: 3,
+    updatedAt: 0,
+  };
+}
+
+function storagePage(entries: StorageEntry[]) {
+  return { count: entries.length, fileCount: entries.length, folderCount: 0, list: entries };
 }

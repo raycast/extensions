@@ -1,9 +1,10 @@
+import { randomUUID } from "node:crypto";
 import { stat } from "node:fs/promises";
 import path from "node:path";
 import { BooxClient } from "../api/boox-client";
 import { describeBooxError } from "../lib/errors";
 import { isLibraryDocument, normalizeRemotePath, validateUploadName } from "../lib/paths";
-import { ConflictPolicy, TransferMode, TransferResult } from "../models/boox";
+import { ConflictPolicy, StorageEntry, TransferMode, TransferResult } from "../models/boox";
 
 const MAX_FILE_SIZE = 32 * 1024 ** 3;
 const MAX_FILE_COUNT = 500;
@@ -61,13 +62,17 @@ export async function transferFiles(options: {
       if (options.mode === "library") {
         await options.client.uploadLibrary(file.path, options.libraryParentId);
       } else {
+        let replaced = false;
         if (duplicates.has(file.name)) {
           const page = await options.client.listStorage(destination, 0, 10_000);
           const existing = page.list.find((entry) => entry.name === file.name);
           if (existing?.dir) throw new Error(`${file.name} is an existing folder and cannot be replaced`);
-          if (existing) await options.client.deleteStorage(existing);
+          if (existing) {
+            await replaceStorageFile(options.client, file.path, destination, existing);
+            replaced = true;
+          }
         }
-        await options.client.uploadStorage(file.path, destination);
+        if (!replaced) await options.client.uploadStorage(file.path, destination);
       }
       let indexed: boolean | undefined;
       if (options.mode === "library") {
@@ -91,6 +96,59 @@ export async function transferFiles(options: {
     skipped: items.filter((item) => item.status === "skipped").length,
     failed: items.filter((item) => item.status === "failed").length,
   };
+}
+
+async function replaceStorageFile(
+  client: BooxClient,
+  localPath: string,
+  destination: string,
+  existing: StorageEntry
+): Promise<void> {
+  const backupName = `BOOX-Backup-${randomUUID()}`;
+  const backup = {
+    ...existing,
+    name: backupName,
+    path: path.posix.join(path.posix.dirname(existing.path), backupName),
+  };
+
+  await client.renameStorage(existing, backupName);
+  try {
+    await client.uploadStorage(localPath, destination);
+  } catch (uploadError) {
+    try {
+      await restoreStorageBackup(client, backup, existing.name, destination);
+    } catch (restoreError) {
+      throw new Error(
+        `${describeBooxError(uploadError)}. The original remains as ${backupName}, but automatic restoration failed: ${describeBooxError(restoreError)}`
+      );
+    }
+    throw uploadError;
+  }
+
+  try {
+    await client.deleteStorage(backup);
+  } catch (cleanupError) {
+    throw new Error(
+      `Replacement uploaded, but the preserved backup ${backupName} could not be removed: ${describeBooxError(cleanupError)}`
+    );
+  }
+}
+
+async function restoreStorageBackup(
+  client: BooxClient,
+  backup: StorageEntry,
+  originalName: string,
+  destination: string
+): Promise<void> {
+  try {
+    await client.renameStorage(backup, originalName);
+    return;
+  } catch {
+    const page = await client.listStorage(destination, 0, 10_000);
+    const ambiguousUpload = page.list.find((entry) => entry.name === originalName && entry.path !== backup.path);
+    if (ambiguousUpload) await client.deleteStorage(ambiguousUpload);
+    await client.renameStorage(backup, originalName);
+  }
 }
 
 async function waitForLibraryIndex(client: BooxClient, fileName: string): Promise<boolean> {

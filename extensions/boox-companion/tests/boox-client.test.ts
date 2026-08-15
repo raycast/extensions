@@ -3,7 +3,7 @@ import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { BooxClient } from "../src/api/boox-client";
+import { BooxClient, normalizeHost } from "../src/api/boox-client";
 import { transferFiles } from "../src/operations/transfer";
 
 afterEach(() => {
@@ -11,6 +11,22 @@ afterEach(() => {
 });
 
 describe("BOOX client protocol", () => {
+  it("preserves an explicitly configured HTTPS protocol", () => {
+    expect(normalizeHost("https://reader.example:9443/path?token=ignored")).toBe("https://reader.example:8085");
+    expect(normalizeHost("reader.local")).toBe("http://reader.local:8085");
+    expect(new BooxClient("https://reader.example").screenHost).toBe("https://reader.example:8086");
+  });
+
+  it("keeps authenticated API requests on configured HTTPS transport", async () => {
+    const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response("ok", { status: 200 }));
+    vi.stubGlobal("fetch", fetchMock);
+
+    await new BooxClient("https://reader.example", "secret").requirePing();
+
+    expect(String(fetchMock.mock.calls[0][0])).toBe("https://reader.example:8085/api/ping");
+    expect(new Headers(fetchMock.mock.calls[0][1]?.headers).get("Authorization")).toBe("Basic OnNlY3JldA==");
+  });
+
   it("uses libraryUniqueId and recognizes note folders", async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(
       jsonResponse({
