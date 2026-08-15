@@ -5,14 +5,38 @@ import { fetchForecast, type ForecastSnapshot, type ForecastStore } from "../src
 class MemoryStore implements ForecastStore {
   snapshot: ForecastSnapshot | undefined;
   writes: ForecastSnapshot[] = [];
+  lastSuccessfulRequest:
+    | { at: string; etag?: string; responseFetchedAt: string }
+    | undefined;
 
   read() {
     return this.snapshot;
   }
 
+  readLastSuccessfulRequestAt(snapshot: ForecastSnapshot) {
+    const record = this.lastSuccessfulRequest;
+    if (
+      !record ||
+      record.etag !== snapshot.etag ||
+      record.responseFetchedAt !== snapshot.response.fetchedAt
+    ) {
+      return undefined;
+    }
+
+    return record.at;
+  }
+
   write(snapshot: ForecastSnapshot) {
     this.writes.push(snapshot);
     this.snapshot = snapshot;
+  }
+
+  writeLastSuccessfulRequestAt(snapshot: ForecastSnapshot, timestamp: string) {
+    this.lastSuccessfulRequest = {
+      at: timestamp,
+      etag: snapshot.etag,
+      responseFetchedAt: snapshot.response.fetchedAt,
+    };
   }
 }
 
@@ -34,6 +58,7 @@ describe("fetchForecast", () => {
     expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
     expect(store.snapshot?.etag).toBe('W/"forecast-1"');
     expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
+    expect(store.lastSuccessfulRequest?.at).toBe("2026-08-11T02:00:00.000Z");
   });
 
   it("sends the cached ETag and reuses data after a 304", async () => {
@@ -55,6 +80,37 @@ describe("fetchForecast", () => {
     expect(result.isStale).toBe(false);
     expect(result.response.forecast.score).toBe(64);
     expect(result.response.fetchedAt).toBe(validFixture.fetchedAt);
+    expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
+    expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
+    expect(store.lastSuccessfulRequest?.at).toBe("2026-08-11T03:00:00.000Z");
+    expect(store.writes).toHaveLength(1);
+  });
+
+  it("preserves a successful 304 timestamp for a later stale fallback", async () => {
+    const store = new MemoryStore();
+    await fetchForecast({
+      store,
+      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(
+        new Response(JSON.stringify(validFixture), {
+          status: 200,
+          headers: { etag: 'W/"forecast-1"' },
+        }),
+      ),
+      now,
+    });
+    await fetchForecast({
+      store,
+      fetchImpl: vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 304 })),
+      now: () => new Date("2026-08-11T03:00:00.000Z"),
+    });
+
+    const result = await fetchForecast({
+      store,
+      fetchImpl: vi.fn<typeof fetch>().mockRejectedValue(new Error("offline")),
+      now: () => new Date("2026-08-11T04:00:00.000Z"),
+    });
+
+    expect(result.isStale).toBe(true);
     expect(result.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
     expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T02:00:00.000Z");
     expect(store.writes).toHaveLength(1);
@@ -103,6 +159,7 @@ describe("fetchForecast", () => {
     expect(store.snapshot?.response.forecast.score).toBe(85);
     expect(store.snapshot?.etag).toBe('W/"forecast-2"');
     expect(store.snapshot?.lastSuccessfulRequestAt).toBe("2026-08-11T03:00:00.000Z");
+    expect(store.readLastSuccessfulRequestAt(store.snapshot!)).toBeUndefined();
     expect(store.writes).toHaveLength(1);
   });
 

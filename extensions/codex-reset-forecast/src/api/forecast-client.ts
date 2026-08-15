@@ -10,7 +10,9 @@ export type ForecastSnapshot = {
 
 export interface ForecastStore {
   read(): ForecastSnapshot | undefined;
+  readLastSuccessfulRequestAt(snapshot: ForecastSnapshot): string | undefined;
   write(snapshot: ForecastSnapshot): void;
+  writeLastSuccessfulRequestAt(snapshot: ForecastSnapshot, timestamp: string): void;
 }
 
 type ForecastLoadResult = {
@@ -54,12 +56,11 @@ export async function fetchForecast({
 
       // A 304 carries no representation and must never rewrite the shared snapshot.
       // Only a 200 response owns the cached forecast and ETag.
+      store.writeLastSuccessfulRequestAt(cached, now().toISOString());
       const latest = store.read() ?? cached;
-      const requestVersionIsLatest =
-        latest.etag === cached.etag && latest.response.fetchedAt === cached.response.fetchedAt;
       return {
         response: latest.response,
-        lastSuccessfulRequestAt: requestVersionIsLatest ? now().toISOString() : latest.lastSuccessfulRequestAt,
+        lastSuccessfulRequestAt: store.readLastSuccessfulRequestAt(latest) ?? latest.lastSuccessfulRequestAt,
         isStale: false,
       };
     }
@@ -74,6 +75,7 @@ export async function fetchForecast({
       lastSuccessfulRequestAt,
     };
     store.write(snapshot);
+    store.writeLastSuccessfulRequestAt(snapshot, lastSuccessfulRequestAt);
 
     return {
       response: parsed,
@@ -83,9 +85,11 @@ export async function fetchForecast({
   } catch (error) {
     if (!cached) throw error;
 
+    const latest = store.read() ?? cached;
+
     return {
-      response: cached.response,
-      lastSuccessfulRequestAt: cached.lastSuccessfulRequestAt,
+      response: latest.response,
+      lastSuccessfulRequestAt: store.readLastSuccessfulRequestAt(latest) ?? latest.lastSuccessfulRequestAt,
       isStale: true,
       warning: errorMessage(error),
     };
