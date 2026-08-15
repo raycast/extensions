@@ -7,22 +7,14 @@ import { usePromise } from "@raycast/utils";
 
 export function useWindowSearch(searchText = ""): SearchResult<ChromeWindow> & { data: NonNullable<ChromeWindow[]> } {
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
-  const [isEmpty, setIsEmpty] = useState<boolean>(false);
 
   const { isLoading, data: windowData } = usePromise(
-    async (query: string) => {
+    async () => {
       const windows = await getOpenWindows();
       setErrorView(undefined);
-      setIsEmpty(windows.length === 0);
-
-      if (!query) {
-        return windows;
-      }
-
-      const lowerQuery = query.toLowerCase();
-      return windows.filter((win) => win.title.toLowerCase().includes(lowerQuery));
+      return windows;
     },
-    [searchText],
+    [],
     {
       onError(error) {
         if (error.message === NOT_INSTALLED_MESSAGE) {
@@ -34,6 +26,10 @@ export function useWindowSearch(searchText = ""): SearchResult<ChromeWindow> & {
     },
   );
 
-  const data = isEmpty ? [] : windowData || [];
+  const rawData = windowData || [];
+  const data = searchText
+    ? rawData.filter((win) => win.title.toLowerCase().includes(searchText.toLowerCase()))
+    : rawData;
+
   return { data, isLoading, errorView };
 }
