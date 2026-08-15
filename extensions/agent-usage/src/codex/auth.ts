@@ -129,6 +129,17 @@ export function resolveCodexHome(env: NodeJS.ProcessEnv = process.env): string |
   return isExistingDirectory(codexHome) ? codexHome : null;
 }
 
+export function parseAdditionalCodexHomes(value: string, homeDir: string = os.homedir()): string[] {
+  const homes = value
+    .split(/[\n,]/)
+    .map((entry) => entry.trim())
+    .filter(Boolean)
+    .map((entry) => (entry === "~" ? homeDir : entry.startsWith("~/") ? path.join(homeDir, entry.slice(2)) : entry))
+    .map((entry) => path.resolve(entry));
+
+  return [...new Set(homes)];
+}
+
 function readCodexLoginAuth(authFilePath: string): CodexAuthData {
   try {
     if (!fs.existsSync(authFilePath)) {

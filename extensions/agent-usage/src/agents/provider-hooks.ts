@@ -13,7 +13,7 @@ import { fetchClinePassUsage } from "../clinepass/fetcher.ts";
 import { clearClineLocalCredential, loadClineLocalCredential, saveClineLocalCredential } from "../clinepass/storage.ts";
 import type { ClinePassError, ClinePassUsage } from "../clinepass/types.ts";
 import { buildCodexAccountCandidates } from "../codex/accounts.ts";
-import { listCodexOAuthAccounts } from "../codex/auth.ts";
+import { listCodexOAuthAccounts, parseAdditionalCodexHomes } from "../codex/auth.ts";
 import { fetchCodexUsage } from "../codex/fetcher.ts";
 import type { CodexError, CodexUsage } from "../codex/types.ts";
 import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "../copilot/auth.ts";
@@ -56,6 +56,7 @@ import { readOpencodeAuthToken } from "./opencode-auth.ts";
 
 // Root-level preferences shared by both commands.
 type SharedPrefs = {
+  additionalCodexHomes?: string;
   copilotAuthToken?: string;
   cursorCookieHeader?: string;
   deepseekApiKey?: string;
@@ -244,7 +245,18 @@ export const useCodexAccounts = createAccountsHook<
   ReturnType<typeof buildCodexAccountCandidates>[number]
 >({
   agentId: "codex",
-  getAccounts: async () => buildCodexAccountCandidates(listCodexOAuthAccounts(), await loadAccounts("codex")),
+  getAccounts: async () => {
+    const defaultAccounts = listCodexOAuthAccounts();
+    const additionalAccounts = parseAdditionalCodexHomes(prefValue("additionalCodexHomes")).flatMap(
+      (codexHome, homeIndex) =>
+        listCodexOAuthAccounts({ codexHome }).map((account) => ({
+          ...account,
+          id: `codex-home-${homeIndex}-${account.id}`,
+        })),
+    );
+
+    return buildCodexAccountCandidates([...defaultAccounts, ...additionalAccounts], await loadAccounts("codex"));
+  },
   fetcher: async (account) => {
     if (account.needsAccountId) {
       return {
