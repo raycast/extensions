@@ -3,6 +3,7 @@
 ## [Mirror Website Forecast Copy] - {PR_MERGE_DATE}
 
 - Show the source website's state-specific headline, summary, and advice in forecast details.
+- Restore source-post quote styling and bullet lists so long updates remain readable.
 - Remove redundant quota and reset-detection caveats.
 
 ## [Initial Version] - {PR_MERGE_DATE}

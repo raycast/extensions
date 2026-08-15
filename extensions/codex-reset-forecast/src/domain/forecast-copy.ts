@@ -14,6 +14,42 @@ function escapeMarkdown(value: string): string {
     .replace(/\]/g, "\\]");
 }
 
+function escapedProse(value: string): string {
+  return value
+    .split(/\n{2,}/)
+    .map((paragraph) => escapeMarkdown(paragraph).replace(/\n/g, "  \n"))
+    .join("\n\n");
+}
+
+function blockquote(markdown: string): string {
+  return markdown
+    .split("\n")
+    .map((line) => (line ? `> ${line}` : ">"))
+    .join("\n");
+}
+
+function sourcePostMarkdown(value: string): string {
+  const normalized = value.replace(/\r\n?/g, "\n").trim();
+  const divider = /(?:^|\s)={3,}(?=\s|$)/.exec(normalized);
+
+  if (!divider) return blockquote(escapedProse(normalized));
+
+  const introduction = normalized.slice(0, divider.index).trim();
+  const remainder = normalized.slice(divider.index + divider[0].length).trim();
+  const bulletItems = remainder.startsWith("-")
+    ? remainder
+        .split(/(?:^|\s)-\s+(?=\S)/)
+        .map((item) => item.trim())
+        .filter(Boolean)
+    : [];
+  const body =
+    bulletItems.length > 0
+      ? bulletItems.map((item) => `- ${escapeMarkdown(item)}`).join("\n")
+      : escapedProse(remainder);
+
+  return blockquote([escapedProse(introduction), body].filter(Boolean).join("\n\n"));
+}
+
 export function forecastSummary(
   response: ForecastResponse,
   lastSuccessfulRequestAt = response.fetchedAt,
@@ -93,7 +129,7 @@ export function historyDetailMarkdown(entry: ForecastHistoryEntry): string {
     const delta = `${change.delta > 0 ? "+" : ""}${change.delta} pts`;
     const lines = [`## ${escapeMarkdown(change.label)}`, `**${escapeMarkdown(delta)}**`];
 
-    if (source?.name) lines.push(`> ${escapeMarkdown(source.name)}`);
+    if (source?.name) lines.push("### Source Post", sourcePostMarkdown(source.name));
     for (const detail of explanations) {
       lines.push(`**${escapeMarkdown(detail.action)}:** ${escapeMarkdown(detail.name)}`);
     }

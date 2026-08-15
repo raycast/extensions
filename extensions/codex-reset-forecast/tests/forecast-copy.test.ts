@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import validFixture from "./fixtures/forecast-valid.json";
 import { parseForecastResponse, type ForecastResponse } from "../src/api/forecast-schema";
-import { forecastNarrative } from "../src/domain/forecast-copy";
+import { forecastNarrative, historyDetailMarkdown } from "../src/domain/forecast-copy";
 
 const baseForecast = parseForecastResponse(validFixture);
 
@@ -44,5 +44,44 @@ describe("forecast narrative", () => {
     [25, "Probably not today."],
   ])("uses the website score bands after the cooldown for %i%%", (score, title) => {
     expect(forecastNarrative(responseWith(score), new Date("2026-08-13T00:28:16.000Z")).title).toBe(title);
+  });
+});
+
+describe("history detail markdown", () => {
+  it("recovers a bullet list from a flattened source-post divider", () => {
+    const entry = {
+      ...baseForecast.history[0],
+      changes: [
+        {
+          delta: 10,
+          label: "OpenAI event hint",
+          details: [
+            {
+              action: "Source post",
+              name: "Intro with **literal emphasis**. ===== - First item. - Second item.",
+              url: "https://example.com/post",
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(historyDetailMarkdown(entry)).toContain(
+      [
+        "### Source Post",
+        "",
+        "> Intro with \\*\\*literal emphasis\\*\\*\\.",
+        ">",
+        "> - First item\\.",
+        "> - Second item\\.",
+      ].join("\n"),
+    );
+    expect(historyDetailMarkdown(entry)).not.toContain("=====");
+  });
+
+  it("keeps ordinary source-post text as escaped prose", () => {
+    const markdown = historyDetailMarkdown(baseForecast.history[0]);
+
+    expect(markdown).toContain("### Source Post\n\n> Usage limits have been reset\\.");
   });
 });
