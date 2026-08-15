@@ -88,6 +88,17 @@ describe("content search large files", () => {
     expect(results[0].title).toBe("Wide Frontmatter");
   });
 
+  it("still finds YAML tags when a flow collection stays open past the 1 MiB cap", async () => {
+    const largePath = path.join(tempDir, "tagged-open-flow.md");
+    fs.writeFileSync(largePath, `---\ntags: [existing, ${"x".repeat(1024 * 1024 + 64)}]\n---\nbody`);
+
+    const notes = [noteFor(tempDir, "tagged-open-flow.md", "Open Flow Collection")];
+    const results = await searchNotesWithContent(notes, "tag:existing");
+
+    expect(results.length).toBe(1);
+    expect(results[0].title).toBe("Open Flow Collection");
+  });
+
   it("still finds YAML tags when a quoted scalar stays open past the 1 MiB cap", async () => {
     const largePath = path.join(tempDir, "tagged-quoted-open-scalar.md");
     fs.writeFileSync(

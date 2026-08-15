@@ -238,13 +238,21 @@ async function readTagSearchContent(filePath: string, fileSize: number): Promise
 
 /**
  * A bare `\\n---\\n` closer is enough for block scalars, but a 1 MiB cut inside a
- * quoted YAML scalar leaves the document invalid and YAML.parse drops every tag
- * already read. Try cheap repairs until the existing frontmatter parser accepts
- * the prefix.
+ * quoted YAML scalar or flow collection leaves the document invalid and YAML.parse
+ * drops every tag already read. Try cheap repairs until the existing frontmatter
+ * parser accepts the prefix.
  */
 function withSyntheticFrontmatterCloser(content: string): string {
   const trimmed = content.replace(/\s*$/, "");
+  const flowClosers = unmatchedFlowCollectionClosers(trimmed);
   const candidates = [`${trimmed}\n---\n`, `${trimmed}"\n---\n`, `${trimmed}'\n---\n`];
+  if (flowClosers) {
+    candidates.push(
+      `${trimmed}${flowClosers}\n---\n`,
+      `${trimmed}"${flowClosers}\n---\n`,
+      `${trimmed}'${flowClosers}\n---\n`
+    );
+  }
 
   const lastNewline = trimmed.lastIndexOf("\n");
   if (lastNewline > 0) {
@@ -258,4 +266,55 @@ function withSyntheticFrontmatterCloser(content: string): string {
   }
 
   return candidates[0];
+}
+
+/**
+ * Return the `]` / `}` suffix needed to close flow collections opened in the
+ * prefix. Brackets inside quoted scalars are ignored so a cut like
+ * `tags: [existing, "partial` still yields `]`.
+ */
+function unmatchedFlowCollectionClosers(prefix: string): string {
+  const stack: string[] = [];
+  let inDoubleQuote = false;
+  let inSingleQuote = false;
+
+  for (let i = 0; i < prefix.length; i++) {
+    const ch = prefix[i];
+
+    if (inDoubleQuote) {
+      if (ch === "\\" && i + 1 < prefix.length) {
+        i += 1;
+        continue;
+      }
+      if (ch === '"') {
+        inDoubleQuote = false;
+      }
+      continue;
+    }
+
+    if (inSingleQuote) {
+      if (ch === "'") {
+        if (prefix[i + 1] === "'") {
+          i += 1;
+        } else {
+          inSingleQuote = false;
+        }
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inDoubleQuote = true;
+    } else if (ch === "'") {
+      inSingleQuote = true;
+    } else if (ch === "[") {
+      stack.push("]");
+    } else if (ch === "{") {
+      stack.push("}");
+    } else if ((ch === "]" || ch === "}") && stack[stack.length - 1] === ch) {
+      stack.pop();
+    }
+  }
+
+  return stack.reverse().join("");
 }
