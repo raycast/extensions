@@ -34,7 +34,6 @@ function AliasesIndex({ domain }: AliasesIndexProps) {
     isLoading,
     data: aliases,
     error,
-    revalidate,
     mutate,
   } = useCachedPromise(
     async () => {
@@ -79,7 +78,7 @@ function AliasesIndex({ domain }: AliasesIndexProps) {
         });
         toast.style = Toast.Style.Success;
         toast.title = "Deleted alias";
-      } catch (error) {
+      } catch {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not delete alias";
       }
@@ -119,7 +118,7 @@ function AliasesIndex({ domain }: AliasesIndexProps) {
                     <Action
                       title="Reload Aliases"
                       icon={Icon.Redo}
-                      onAction={revalidate}
+                      onAction={mutate}
                       shortcut={Keyboard.Shortcut.Common.Refresh}
                     />
                   </ActionPanel.Section>
@@ -148,7 +147,7 @@ function AliasesIndex({ domain }: AliasesIndexProps) {
             icon={Icon.Redo}
             actions={
               <ActionPanel>
-                <Action title="Reload Aliases" icon={Icon.Redo} onAction={revalidate} />
+                <Action title="Reload Aliases" icon={Icon.Redo} onAction={mutate} />
               </ActionPanel>
             }
           />
@@ -181,7 +180,7 @@ function AliasesCreate({ domain, mutate }: AliasesCreateProps) {
         toast.style = Toast.Style.Success;
         toast.title = "Created alias";
         pop();
-      } catch (error) {
+      } catch {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not create alias";
       } finally {
@@ -202,7 +201,7 @@ function AliasesCreate({ domain, mutate }: AliasesCreateProps) {
           <Action.SubmitForm icon={Icon.Check} onSubmit={handleSubmit} />
           <Action.OpenInBrowser
             icon={Icon.Globe}
-            title="Go To API Reference"
+            title="Go to API Reference"
             url="https://mailwip.com/api/?javascript#email-aliases"
           />
         </ActionPanel>

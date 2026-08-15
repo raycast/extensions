@@ -8,7 +8,6 @@ import {
   Email,
   DomainDelete,
 } from "./types";
-import fetch from "node-fetch";
 import { API_HEADERS, API_URL } from "./constants";
 
 const callApi = async <T>(endpoint: string, method: APIMethod = "GET", body?: BodyRequest) => {
@@ -24,7 +23,7 @@ const callApi = async <T>(endpoint: string, method: APIMethod = "GET", body?: Bo
     if (contentType === "text/html" || contentType === "application/json") throw response.statusText;
 
     const result = (await response.json()) as ErrorResponse;
-    if ("errors" in result) throw Array.from(result.errors).join(" | ");
+    if ("errors" in result) throw Array.isArray(result.errors) ? result.errors.join(" | ") : result.errors;
     if ("message" in result) throw result.message;
     throw result.error;
   }

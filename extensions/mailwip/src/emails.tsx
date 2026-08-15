@@ -56,7 +56,7 @@ export default function Emails() {
           <Action.SubmitForm icon={Icon.Check} onSubmit={handleSubmit} />
           <Action.OpenInBrowser
             icon={Icon.Globe}
-            title="Go To API Reference"
+            title="Go to API Reference"
             url="https://mailwip.com/api/?javascript#fetch-aliases-http-response"
           />
         </ActionPanel>

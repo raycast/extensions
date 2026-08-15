@@ -70,7 +70,7 @@ export default function Domains() {
             actions={
               <ActionPanel>
                 <Action
-                  title="Delete Domain From Mailwip"
+                  title="Delete Domain from Mailwip"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   onAction={() => confirmAndDelete(domain)}

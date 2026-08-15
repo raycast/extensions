@@ -17,7 +17,7 @@ Please add domains locally to get started.`}
         actions={
           <ActionPanel>
             <Action
-              title="Go To Domains"
+              title="Go to Domains"
               icon={Icon.CommandSymbol}
               onAction={async () => await launchCommand({ name: "domains", type: LaunchType.UserInitiated })}
             />
