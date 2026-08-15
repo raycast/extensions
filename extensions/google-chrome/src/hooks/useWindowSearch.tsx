@@ -1,13 +1,10 @@
 import { ReactNode, useState } from "react";
 import { getOpenWindows } from "../actions";
-import { ChromeWindow, SearchResult } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";
-import { usePromise, MutatePromise } from "@raycast/utils";
+import { usePromise } from "@raycast/utils";
 
-export function useWindowSearch(
-  searchText = "",
-): SearchResult<ChromeWindow> & { data: NonNullable<ChromeWindow[]>; mutate: MutatePromise<ChromeWindow[]> } {
+export function useWindowSearch(searchText = "") {
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
 
   const {
