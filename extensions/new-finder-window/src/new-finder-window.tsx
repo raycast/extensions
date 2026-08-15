@@ -1,3 +1,4 @@
+import { homedir } from "node:os";
 import { getPreferenceValues } from "@raycast/api";
 import { runAppleScript, showFailureToast } from "@raycast/utils";
 
@@ -13,11 +14,15 @@ const script = `
   end run
 `;
 
+function expandHomePath(value: string): string {
+  return value.replace(/^~(?=\/|$)/, homedir());
+}
+
 export default async function Command() {
   const { directory } = getPreferenceValues<Preferences.NewFinderWindow>();
 
   try {
-    await runAppleScript(script, [directory]);
+    await runAppleScript(script, [expandHomePath(directory)]);
   } catch (error) {
     await showFailureToast(error, { title: "Could Not Open Finder Window" });
   }
