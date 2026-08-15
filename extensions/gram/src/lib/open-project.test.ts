@@ -15,4 +15,15 @@ describe("openProject", () => {
 
     expect(calls).toEqual(["open", "close"]);
   });
+
+  it("succeeds when closing Raycast fails after opening the project", async () => {
+    const open = vi.fn(async () => undefined);
+    const close = vi.fn(async () => {
+      throw new Error("could not close Raycast");
+    });
+
+    await expect(openProject(open, close)).resolves.toBeUndefined();
+    expect(open).toHaveBeenCalledOnce();
+    expect(close).toHaveBeenCalledOnce();
+  });
 });
