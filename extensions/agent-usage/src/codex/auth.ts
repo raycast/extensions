@@ -170,7 +170,9 @@ function formatStoredAccountLabel(fileName: string, accountId: string, userId: s
   return normalized || accountId;
 }
 
-function getCodexAccountDedupeKeys(account: CodexOAuthAccount): string[] {
+export function getCodexAccountDedupeKeys(
+  account: Pick<CodexOAuthAccount, "token" | "userId" | "accountId">,
+): string[] {
   const keys = [`token:${account.token}`];
   if (account.userId && account.accountId) {
     keys.unshift(`user-account:${account.userId}:${account.accountId}`);
