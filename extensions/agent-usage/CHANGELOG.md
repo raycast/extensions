@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add support for multiple CODEX_HOME] - {PR_MERGE_DATE}
+## [Add support for multiple CODEX_HOME] - 2026-08-15
 
 - Support additional CODEX_HOME in preferences, letting users read from multiple active codex account
 
