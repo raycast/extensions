@@ -278,17 +278,31 @@ export async function getOpenWindows(): Promise<ChromeWindow[]> {
       set _rec_sep to character id ${ChromeWindow.WINDOW_RECORD_SEPARATOR.charCodeAt(0)}
       set _field_sep to character id ${ChromeWindow.WINDOW_FIELD_SEPARATOR.charCodeAt(0)}
       set _output to ""
+      
       tell application "Google Chrome"
-        repeat with w in windows
-          set _w_id to get id of w
-          set _title to get title of w
-          set _active_tab_url to ""
+        -- 1. Bulk fetch properties into parallel lists
+        set _ids to id of windows
+        set _titles to title of windows
+        
+        set _urls to {}
+        try
+          set _urls to URL of active tab of windows
+        end try
+        
+        -- 2. Iterate using a shared index (i)
+        repeat with i from 1 to length of _ids
+          set _w_id to item i of _ids
+          set _title to item i of _titles
+          
+          set _url to ""
           try
-            set _active_tab_url to URL of active tab of w
+            set _url to item i of _urls
           end try
-          set _output to (_output & _w_id & _field_sep & _title & _field_sep & _active_tab_url & _rec_sep)
+          
+          set _output to _output & _w_id & _field_sep & _title & _field_sep & _url & _rec_sep
         end repeat
       end tell
+      
       return _output
     `);
 
