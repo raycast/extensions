@@ -13,6 +13,12 @@ The extension is designed for macOS users who keep their RDM connections in the 
 - Refresh the connection list without restarting Raycast.
 - Keep credentials and passwords inside Remote Desktop Manager.
 
+## Scope and distinction
+
+This is a Raycast companion for [Devolutions Remote Desktop Manager](https://devolutions.net/remote-desktop-manager/), not a standalone remote-session client. It searches the connections that already exist in RDM, preserves their folder hierarchy, and asks the installed RDM application to open the selected entry.
+
+Unlike generic SSH, RDP, PuTTY, or SecureCRT launchers, this extension does not create or manage sessions for those tools, store connection credentials, or replace RDM's connection manager. RDM remains responsible for the protocol, credentials, VPNs, gateways, jump hosts, and session security.
+
 ## Requirements
 
 - macOS.
