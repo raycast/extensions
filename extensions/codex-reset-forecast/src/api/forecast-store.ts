@@ -16,8 +16,6 @@ const snapshotSchema = z.object({
 
 const lastSuccessfulRequestSchema = z.object({
   at: timestampSchema,
-  etag: z.string().optional(),
-  responseFetchedAt: timestampSchema,
 });
 
 function createRaycastForecastStore(cache = new Cache()): ForecastStore {
@@ -33,15 +31,13 @@ function createRaycastForecastStore(cache = new Cache()): ForecastStore {
         return undefined;
       }
     },
-    readLastSuccessfulRequestAt(snapshot: ForecastSnapshot) {
+    readLastSuccessfulRequestAt() {
       const serialized = cache.get(LAST_SUCCESSFUL_REQUEST_KEY);
       if (!serialized) return undefined;
 
       try {
         const record = lastSuccessfulRequestSchema.parse(JSON.parse(serialized));
-        const matchesSnapshot =
-          record.etag === snapshot.etag && record.responseFetchedAt === snapshot.response.fetchedAt;
-        return matchesSnapshot ? record.at : undefined;
+        return record.at;
       } catch {
         cache.remove(LAST_SUCCESSFUL_REQUEST_KEY);
         return undefined;
@@ -50,15 +46,8 @@ function createRaycastForecastStore(cache = new Cache()): ForecastStore {
     write(snapshot: ForecastSnapshot) {
       cache.set(CACHE_KEY, JSON.stringify(snapshot));
     },
-    writeLastSuccessfulRequestAt(snapshot: ForecastSnapshot, timestamp: string) {
-      cache.set(
-        LAST_SUCCESSFUL_REQUEST_KEY,
-        JSON.stringify({
-          at: timestamp,
-          etag: snapshot.etag,
-          responseFetchedAt: snapshot.response.fetchedAt,
-        }),
-      );
+    writeLastSuccessfulRequestAt(timestamp: string) {
+      cache.set(LAST_SUCCESSFUL_REQUEST_KEY, JSON.stringify({ at: timestamp }));
     },
   };
 }
