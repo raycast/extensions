@@ -3,18 +3,25 @@ import { getOpenWindows } from "../actions";
 import { ChromeWindow, SearchResult } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";
-import { usePromise } from "@raycast/utils";
+import { usePromise, MutatePromise } from "@raycast/utils";
 
-export function useWindowSearch(searchText = ""): SearchResult<ChromeWindow> & { data: NonNullable<ChromeWindow[]> } {
+export function useWindowSearch(
+  searchText = "",
+): SearchResult<ChromeWindow> & { data: NonNullable<ChromeWindow[]>; mutate: MutatePromise<ChromeWindow[]> } {
   const [errorView, setErrorView] = useState<ReactNode | undefined>();
 
-  const { isLoading, data: windowData } = usePromise(
-    async () => {
+  const {
+    isLoading,
+    data: windowData,
+    mutate,
+  } = usePromise(
+    async (searchText: string) => {
       const windows = await getOpenWindows();
       setErrorView(undefined);
-      return windows;
+      if (!searchText) return windows;
+      return windows.filter((win) => win.title.toLowerCase().includes(searchText.toLowerCase()));
     },
-    [],
+    [searchText],
     {
       onError(error) {
         if (error.message === NOT_INSTALLED_MESSAGE) {
@@ -26,10 +33,7 @@ export function useWindowSearch(searchText = ""): SearchResult<ChromeWindow> & {
     },
   );
 
-  const rawData = windowData || [];
-  const data = searchText
-    ? rawData.filter((win) => win.title.toLowerCase().includes(searchText.toLowerCase()))
-    : rawData;
+  const data = windowData || [];
 
-  return { data, isLoading, errorView };
+  return { data, isLoading, errorView, mutate };
 }

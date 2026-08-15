@@ -1,5 +1,14 @@
 import { ReactElement } from "react";
-import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Keyboard, Icon } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  closeMainWindow,
+  getPreferenceValues,
+  Keyboard,
+  Icon,
+  Toast,
+  showToast,
+} from "@raycast/api";
 import {
   closeActiveTab,
   openNewTab,
@@ -184,15 +193,30 @@ function ReloadTab(props: { tab: Tab }) {
   );
 }
 
-function WindowListActions({ window }: { window: ChromeWindow }): ReactElement {
+function WindowListActions({
+  window,
+  refreshWindowsListOnFailure,
+}: {
+  window: ChromeWindow;
+  refreshWindowsListOnFailure?: () => void;
+}): ReactElement {
   return (
     <ActionPanel title={window.title}>
       <Action
         title="Focus Window"
         icon={{ source: Icon.Window }}
         onAction={async () => {
-          await setActiveWindow(window.id);
-          await closeMainWindow();
+          try {
+            await setActiveWindow(window.id);
+            await closeMainWindow();
+          } catch {
+            await showToast({
+              style: Toast.Style.Failure,
+              title: "Failed to focus window",
+              message: "Window may have been closed",
+            });
+            if (refreshWindowsListOnFailure) refreshWindowsListOnFailure();
+          }
         }}
       />
     </ActionPanel>

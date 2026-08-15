@@ -77,7 +77,7 @@ function TabListItem(props: { tab: Tab; useOriginalFavicon: boolean; onTabClosed
   );
 }
 
-function WindowListItem(props: { window: ChromeWindow }) {
+function WindowListItem(props: { window: ChromeWindow; refreshWindowsListOnFailure?: () => void }) {
   let icon: List.Item.Props["icon"] = Icon.Window;
   if (props.window.activeTabUrl) {
     const safeFavicon = getSafeFavicon(props.window.activeTabUrl);
@@ -85,6 +85,15 @@ function WindowListItem(props: { window: ChromeWindow }) {
   }
 
   return (
-    <List.Item title={props.window.title} icon={icon} actions={<ChromeActions.WindowList window={props.window} />} />
+    <List.Item
+      title={props.window.title}
+      icon={icon}
+      actions={
+        <ChromeActions.WindowList
+          window={props.window}
+          refreshWindowsListOnFailure={props.refreshWindowsListOnFailure}
+        />
+      }
+    />
   );
 }

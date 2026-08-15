@@ -5,13 +5,13 @@ import { useWindowSearch } from "./hooks/useWindowSearch";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-  const { data, errorView, isLoading } = useWindowSearch(searchText);
+  const { data, errorView, isLoading, mutate } = useWindowSearch(searchText);
 
   return (
     errorView ?? (
       <List isLoading={isLoading} onSearchTextChange={setSearchText} searchBarPlaceholder="Search chrome windows">
         {data.map((win) => (
-          <ChromeListItems.WindowList key={win.id} window={win} />
+          <ChromeListItems.WindowList key={win.id} window={win} refreshWindowsListOnFailure={() => mutate()} />
         ))}
       </List>
     )
