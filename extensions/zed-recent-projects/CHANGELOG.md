@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Fix Project Launch in Raycast 2] - {PR_MERGE_DATE}
+## [Fix Project Launch in Raycast 2] - 2026-08-15
 
 - Open projects before closing Raycast so CLI launches complete reliably.
 
