@@ -520,6 +520,78 @@ fn find_session_by_index(
     Ok(entries[pos].session.clone())
 }
 
+// Some desktop apps register their App User Model ID — the exact string SMTC
+// reports — under HKCU\Software\Classes\AppUserModelId\<aumid> (or the HKCR
+// equivalent) with the executable path as the default value. This lets us
+// reveal apps whose AUMID doesn't match their process name. Only a path that
+// resolves to an existing .exe is trusted: some apps point the key at a data
+// folder, and launching that would open Explorer at the wrong location.
+unsafe fn exe_path_from_aumid(aumid: &str) -> Option<String> {
+    use windows::core::HSTRING;
+    use windows::Win32::System::Registry::{
+        RegCloseKey, RegOpenKeyExW, RegQueryValueExW, HKEY, HKEY_CLASSES_ROOT, HKEY_CURRENT_USER,
+        KEY_READ, REG_EXPAND_SZ, REG_SZ,
+    };
+
+    const ERROR_MORE_DATA: u32 = 234;
+
+    let roots: &[(HKEY, &str)] = &[
+        (HKEY_CURRENT_USER, "Software\\Classes\\AppUserModelId"),
+        (HKEY_CLASSES_ROOT, "AppUserModelId"),
+    ];
+
+    for &(root, base) in roots {
+        let subkey = HSTRING::from(format!("{}\\{}", base, aumid));
+        let mut key = HKEY(std::ptr::null_mut());
+        if !RegOpenKeyExW(root, &subkey, 0u32, KEY_READ, &mut key).is_ok() {
+            continue;
+        }
+
+        let mut capacity = 256u32;
+        loop {
+            let mut buf = vec![0u16; capacity as usize];
+            let mut bytes = (buf.len() * 2) as u32;
+            let mut ty = REG_SZ;
+            let result =
+                RegQueryValueExW(key, None, None, Some(&mut ty), Some(buf.as_mut_ptr() as *mut u8), Some(&mut bytes));
+            if result.0 == ERROR_MORE_DATA {
+                capacity = ((bytes as usize / 2) + 1) as u32;
+                continue;
+            }
+            let _ = RegCloseKey(key);
+            if !result.is_ok() || (ty != REG_SZ && ty != REG_EXPAND_SZ) {
+                break;
+            }
+            let value = String::from_utf16_lossy(&buf[..(bytes as usize / 2)]).trim_end_matches('\0').to_string();
+            if !value.is_empty() && value.to_lowercase().ends_with(".exe") && std::path::Path::new(&value).is_file() {
+                return Some(value);
+            }
+            break;
+        }
+    }
+    None
+}
+
+// Full executable path for a running process, used to relaunch apps whose
+// process matched but had no visible window to bring to the front.
+unsafe fn exe_path_from_pid(pid: u32) -> Option<String> {
+    use windows::Win32::Foundation::CloseHandle;
+    use windows::Win32::System::Threading::{
+        OpenProcess, PROCESS_NAME_WIN32, PROCESS_QUERY_LIMITED_INFORMATION, QueryFullProcessImageNameW,
+    };
+
+    let handle = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid).ok()?;
+    let mut buf = [0u16; 1024];
+    let mut size = (buf.len() * 2) as u32;
+    let ok = QueryFullProcessImageNameW(handle, PROCESS_NAME_WIN32, windows::core::PWSTR(buf.as_mut_ptr()), &mut size);
+    let _ = CloseHandle(handle);
+    if ok.is_ok() && size > 0 {
+        Some(String::from_utf16_lossy(&buf[..(size as usize / 2)]).trim_end_matches('\0').to_string())
+    } else {
+        None
+    }
+}
+
 #[raycast]
 fn reveal_application(target_app_id: String) -> Result<(), String> {
     use std::sync::atomic::{AtomicUsize, Ordering};
@@ -575,6 +647,7 @@ fn reveal_application(target_app_id: String) -> Result<(), String> {
         entry.dwSize = std::mem::size_of::<PROCESSENTRY32W>() as u32;
 
         let mut pids: Vec<u32> = Vec::new();
+        let mut parents: std::collections::HashMap<u32, u32> = std::collections::HashMap::new();
         if Process32FirstW(snapshot, &mut entry).is_ok() {
             loop {
                 let name = String::from_utf16_lossy(&entry.szExeFile)
@@ -591,6 +664,7 @@ fn reveal_application(target_app_id: String) -> Result<(), String> {
                 if matched {
                     pids.push(entry.th32ProcessID);
                 }
+                parents.insert(entry.th32ProcessID, entry.th32ParentProcessID);
                 if Process32NextW(snapshot, &mut entry).is_err() {
                     break;
                 }
@@ -628,12 +702,80 @@ fn reveal_application(target_app_id: String) -> Result<(), String> {
                 bring_to_front(hwnd);
                 return Ok(());
             }
+
+            // The matched processes are headless (e.g. an embedded playback
+            // engine). Walk up the parent chain to the host app and look for
+            // its visible window instead of giving up.
+            let mut ancestors: Vec<u32> = Vec::new();
+            for &pid in &pids {
+                let mut cur = pid;
+                for _ in 0..8 {
+                    let parent = match parents.get(&cur) {
+                        Some(&p) if p != 0 && p != cur => p,
+                        _ => break,
+                    };
+                    ancestors.push(parent);
+                    cur = parent;
+                }
+            }
+            for &pid in &ancestors {
+                TARGET_PID.store(pid as usize, Ordering::SeqCst);
+                FOUND_HWND.store(0, Ordering::SeqCst);
+                let _ = EnumWindows(Some(enum_by_pid), LPARAM(0));
+                if FOUND_HWND.load(Ordering::SeqCst) != 0 {
+                    let hwnd = HWND(FOUND_HWND.load(Ordering::SeqCst) as *mut _);
+                    bring_to_front(hwnd);
+                    return Ok(());
+                }
+            }
+
+            // Nothing visible anywhere in the tree: relaunch the matched or
+            // host executable to surface it instead of giving up.
+            for pid in pids.iter().chain(ancestors.iter()) {
+                if let Some(path) = exe_path_from_pid(*pid) {
+                    let r = ShellExecuteW(None, &HSTRING::from("open"), &HSTRING::from(&path), None, None, SW_SHOWNORMAL);
+                    if (r.0 as isize) > 32 {
+                        return Ok(());
+                    }
+                }
+            }
         }
 
+        // AUMID may not match the process name; resolve it through the
+        // registered AppUserModelId and launch the executable directly.
+        if let Some(exe_path) = exe_path_from_aumid(&target_app_id) {
+            let r = ShellExecuteW(None, &HSTRING::from("open"), &HSTRING::from(&exe_path), None, None, SW_SHOWNORMAL);
+            if (r.0 as isize) > 32 {
+                return Ok(());
+            }
+        }
+
+        // Packaged apps launch via shell:AppsFolder\<aumid>. Desktop apps whose
+        // AUMID is (or contains) the executable name launch directly.
+        let mut last_error: isize;
         let path = format!("shell:AppsFolder\\{}", target_app_id);
         let result = ShellExecuteW(None, &HSTRING::from("open"), &HSTRING::from(&path), None, None, SW_SHOWNORMAL);
-        if (result.0 as isize) <= 32 {
-            return Err(format!("ShellExecuteW failed with code: {}", result.0 as isize));
+        last_error = result.0 as isize;
+        if last_error <= 32 {
+            let r = ShellExecuteW(None, &HSTRING::from("open"), &HSTRING::from(&target_app_id), None, None, SW_SHOWNORMAL);
+            if (r.0 as isize) > 32 {
+                return Ok(());
+            }
+            last_error = r.0 as isize;
+            if !target_app_id.to_lowercase().ends_with(".exe") {
+                let exe_candidate = format!("{}.exe", target_app_id);
+                let r = ShellExecuteW(None, &HSTRING::from("open"), &HSTRING::from(&exe_candidate), None, None, SW_SHOWNORMAL);
+                if (r.0 as isize) > 32 {
+                    return Ok(());
+                }
+                last_error = r.0 as isize;
+            }
+        }
+        if last_error <= 32 {
+            return Err(format!(
+                "Could not reveal {}: no window, process, or launchable AppUserModelId found (last error code: {})",
+                target_app_id, last_error
+            ));
         }
         Ok(())
     }
@@ -750,9 +892,7 @@ fn format_app_name(app_id: &str) -> String {
         return "Unknown".to_string();
     }
 
-    // Adjust Apple User Model IDs to reflect the name the user actually sees.
-    // Some internally-named AUMIDs (e.g. Windows 11 Media Player's legacy
-    // "ZuneMusic" identifier) are confusing when shown verbatim.
+    // Map internally-named AUMIDs to the names users actually see.
     let overrides: &[(&str, &str)] = &[
         ("Microsoft.ZuneMusic_", "Media Player"),
         ("Microsoft.ZuneVideo_", "Movies & TV"),
