@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Form, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { useAtom } from "jotai";
-import { Note, notesAtom } from "./services/atoms";
+import { Note, notesAtom, tagsAtom, Tag } from "./services/atoms";
 import { parseMarkdownNote } from "./utils/frontmatter";
-import { getTintColor } from "./utils/utils";
+import { getInitialValuesFromFile, getRandomColor, getTintColor } from "./utils/utils";
+import { TAGS_FILE_PATH } from "./services/config";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -56,6 +57,7 @@ const importFile = (filePath: string, takenTitles: Set<string>, takenDates: Set<
 
 export default function ImportNotes() {
   const [notes, setNotes] = useAtom(notesAtom);
+  const [, setTags] = useAtom(tagsAtom);
 
   return (
     <Form
@@ -87,6 +89,17 @@ export default function ImportNotes() {
                 } catch {
                   failed.push(path.basename(file));
                 }
+              }
+
+              // Register tags found in imported frontmatter so they show up in Manage Tags and the filter dropdown
+              const tags = getInitialValuesFromFile(TAGS_FILE_PATH) as Tag[];
+              const knownTags = new Set(tags.map((tag) => tag.name));
+              const importedTags = imported.flatMap((note) => note.tags).filter((tag) => !knownTags.has(tag));
+              if (importedTags.length > 0) {
+                await setTags([
+                  ...tags,
+                  ...[...new Set(importedTags)].map((name) => ({ name, color: getRandomColor().name })),
+                ]);
               }
 
               await setNotes([...notes, ...imported]);

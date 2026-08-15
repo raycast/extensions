@@ -136,7 +136,7 @@ const Actions = ({
                   title: "Open Extension Settings",
                   onAction: () => openExtensionPreferences(),
                 };
-                if (!preferences.autoSaveLocation) {
+                if (!preferences.fileLocation) {
                   await showToast({
                     style: Toast.Style.Failure,
                     title: "No Auto Save Location Set",
@@ -145,7 +145,7 @@ const Actions = ({
                   });
                   return;
                 }
-                if (!fs.existsSync(preferences.autoSaveLocation)) {
+                if (!fs.existsSync(preferences.fileLocation)) {
                   await showToast({
                     style: Toast.Style.Failure,
                     title: "Auto Save Location Not Found",
@@ -154,7 +154,7 @@ const Actions = ({
                   });
                   return;
                 }
-                const notePath = path.join(preferences.autoSaveLocation, `${slugify(`${title}`)}.md`);
+                const notePath = path.join(preferences.fileLocation, `${slugify(`${title}`)}.md`);
                 if (!fs.existsSync(notePath)) {
                   await showToast({
                     style: Toast.Style.Failure,

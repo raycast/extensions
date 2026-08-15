@@ -50,11 +50,11 @@ export const notesAtom = atom(
      * - If a note is renamed, delete the old note file as title is the filename
      * - If a note is deleted, delete the note file
      */
-    if (preferences.autoSaveLocation) {
+    if (preferences.fileLocation) {
       const differentTitles = getOldRenamedTitles(get(notes), newNotes);
       if (differentTitles.length > 0) {
         try {
-          await deleteNotesInFolder(preferences.autoSaveLocation, differentTitles);
+          await deleteNotesInFolder(preferences.fileLocation, differentTitles);
         } catch (e) {
           console.error(`Error deleting note: ${e}`);
         }
@@ -63,7 +63,7 @@ export const notesAtom = atom(
       if (deletedNotes.length > 0) {
         try {
           await deleteNotesInFolder(
-            preferences.autoSaveLocation,
+            preferences.fileLocation,
             deletedNotes.map((note) => note.title),
           );
         } catch (e) {
@@ -79,9 +79,9 @@ export const notesAtom = atom(
     fs.writeFileSync(TODO_FILE_PATH, JSON.stringify(newNotes, null, 2));
 
     // Write notes to file system if autosave is enabled
-    if (preferences.autoSaveLocation) {
+    if (preferences.fileLocation) {
       try {
-        await exportNotes(preferences.autoSaveLocation, newNotes);
+        await exportNotes(preferences.fileLocation, newNotes);
       } catch (e) {
         console.error(`Error exporting notes: ${e}`);
       }
@@ -107,9 +107,9 @@ export const tagsAtom = atom(
       // Update the notes
       set(notes, newNotes);
       fs.writeFileSync(TODO_FILE_PATH, JSON.stringify(newNotes, null, 2));
-      if (preferences.autoSaveLocation) {
+      if (preferences.fileLocation) {
         try {
-          await exportNotes(preferences.autoSaveLocation, newNotes);
+          await exportNotes(preferences.fileLocation, newNotes);
         } catch (e) {
           console.error(`Error exporting notes: ${e}`);
         }

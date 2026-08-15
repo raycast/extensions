@@ -5,7 +5,7 @@ import { Tag } from "./services/atoms";
 import fs from "node:fs";
 
 export default async function Command() {
-  const filePath = preferences.autoSaveLocation;
+  const filePath = preferences.fileLocation;
   if (!filePath) {
     await showToast({
       style: Toast.Style.Failure,

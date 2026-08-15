@@ -52,7 +52,7 @@ The frontmatter and generated H1 stay in the file only — they're stripped back
 | Clear AI Summary | `⌘`+`⌥`+`A` | `Ctrl`+`Alt`+`A` |
 | Apply / Remove Tag | `⌘`+`⇧`+`T` | `Ctrl`+`⇧`+`T` |
 | New Tag | `⌘`+`⇧`+`N` | `Ctrl`+`⇧`+`N` |
-| Toggle Info Panel | `⌘`+`⇧`+`N` | `Ctrl`+`⇧`+`N` |
+| Toggle Info Panel | `⌘`+`I` | `Ctrl`+`I` |
 | Sort | `⌘`+`S` | `Ctrl`+`S` |
 
 ### Create Note Arguments
