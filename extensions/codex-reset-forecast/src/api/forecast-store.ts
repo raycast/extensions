@@ -4,7 +4,7 @@ import { forecastResponseSchema } from "./forecast-schema";
 import type { ForecastSnapshot, ForecastStore } from "./forecast-client";
 
 const CACHE_KEY = "forecast-snapshot-v1";
-const LAST_SUCCESSFUL_REQUEST_KEY = "forecast-last-successful-request-v1";
+const LAST_SUCCESSFUL_REQUEST_KEY_PREFIX = "forecast-last-successful-request-v2";
 
 const timestampSchema = z.string().refine((value) => !Number.isNaN(Date.parse(value)));
 
@@ -14,9 +14,12 @@ const snapshotSchema = z.object({
   lastSuccessfulRequestAt: timestampSchema,
 });
 
-const lastSuccessfulRequestSchema = z.object({
-  at: timestampSchema,
-});
+function lastSuccessfulRequestKey(snapshot: ForecastSnapshot): string {
+  // Version-specific keys prevent a delayed 304 from replacing freshness
+  // metadata for a newer 200 response without rewriting either snapshot.
+  const identity = `${snapshot.etag ?? ""}\n${snapshot.response.fetchedAt}`;
+  return `${LAST_SUCCESSFUL_REQUEST_KEY_PREFIX}:${encodeURIComponent(identity)}`;
+}
 
 function createRaycastForecastStore(cache = new Cache()): ForecastStore {
   return {
@@ -31,23 +34,23 @@ function createRaycastForecastStore(cache = new Cache()): ForecastStore {
         return undefined;
       }
     },
-    readLastSuccessfulRequestAt() {
-      const serialized = cache.get(LAST_SUCCESSFUL_REQUEST_KEY);
-      if (!serialized) return undefined;
+    readLastSuccessfulRequestAt(snapshot: ForecastSnapshot) {
+      const key = lastSuccessfulRequestKey(snapshot);
+      const timestamp = cache.get(key);
+      if (!timestamp) return undefined;
 
       try {
-        const record = lastSuccessfulRequestSchema.parse(JSON.parse(serialized));
-        return record.at;
+        return timestampSchema.parse(timestamp);
       } catch {
-        cache.remove(LAST_SUCCESSFUL_REQUEST_KEY);
+        cache.remove(key);
         return undefined;
       }
     },
     write(snapshot: ForecastSnapshot) {
       cache.set(CACHE_KEY, JSON.stringify(snapshot));
     },
-    writeLastSuccessfulRequestAt(timestamp: string) {
-      cache.set(LAST_SUCCESSFUL_REQUEST_KEY, JSON.stringify({ at: timestamp }));
+    writeLastSuccessfulRequestAt(snapshot: ForecastSnapshot, timestamp: string) {
+      cache.set(lastSuccessfulRequestKey(snapshot), timestamp);
     },
   };
 }
