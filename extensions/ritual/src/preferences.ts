@@ -1,13 +1,12 @@
 import { getPreferenceValues } from "@raycast/api";
 import { discoverBinary, makeCli, RitualCliError, type Cli } from "./api/cli";
 
-export type QuickCaptureDestination = "inbox" | "today";
-
-type Preferences = {
-  cliPath?: string;
-  quickCaptureDestination?: QuickCaptureDestination;
-  deadlineLeadDays?: string;
-};
+/// The shape of these comes from `raycast-env.d.ts`, which Raycast generates
+/// from package.json's `preferences` — `Preferences` is an ambient global, so
+/// there is nothing to import and nothing to keep in step. A hand-written copy
+/// used to sit here; it was a second declaration of the same manifest that a
+/// new preference would silently leave behind.
+export type QuickCaptureDestination = Preferences["quickCaptureDestination"];
 
 /// The seam between Raycast and the api layer. Nothing under `api/` reads
 /// preferences, which is what lets vitest exercise it without the Raycast

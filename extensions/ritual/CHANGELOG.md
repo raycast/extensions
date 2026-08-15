@@ -1,6 +1,6 @@
 # Ritual Changelog
 
-## [Initial release] - {PR_MERGE_DATE}
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Add Task takes the title as an argument, so capture never draws a form — type, Enter, done
 - Today and Upcoming, with a scope switcher (Today, Upcoming, Inbox, All) without leaving the list

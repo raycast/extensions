@@ -3,6 +3,19 @@
 Capture, review and complete [Ritual](https://ritual.from81.app) tasks without
 leaving Raycast.
 
+## How this differs from the other task extensions
+
+Every other task extension in the Store is a client for a hosted service: it
+authenticates against an API and your tasks live on someone's server. Ritual
+has no server to authenticate against. It is local-first — your tasks are a
+SQLite store on your own Mac — so this extension reads and writes that store
+through Ritual's own command-line tool. There is no account, no API key, and
+nothing to log into, and it works with no network at all.
+
+It also covers **habits and routines** alongside tasks, which task-only clients
+do not: the Habits command checks in today's routine habits from the same
+window you triage your Inbox in.
+
 ## Requirements
 
 The Ritual Mac app, which provides the `ritual` command-line tool this extension
