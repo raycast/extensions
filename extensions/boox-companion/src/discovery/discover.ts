@@ -70,13 +70,13 @@ export async function probeHost(
 ): Promise<ConnectedBoox | undefined> {
   let host: string;
   try {
-    host = normalizeHost(input, 8085);
+    host = normalizeHost(input, 8085, password ? "https" : "http");
   } catch (error) {
     if (reportError) throw new BooxError("The configured BOOX address is invalid", undefined, error);
     return undefined;
   }
-  const client = new BooxClient(host, password);
   try {
+    const client = new BooxClient(host, password);
     await client.requirePing(timeoutMs);
     return { client, device: await client.getDevice() };
   } catch (error) {

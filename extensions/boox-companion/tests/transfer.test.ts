@@ -99,7 +99,7 @@ describe("file transfers", () => {
     expect(client.deleteStorage).not.toHaveBeenCalled();
   });
 
-  it("removes an ambiguous partial upload before restoring the original", async () => {
+  it("preserves both files when an ambiguous upload has a different reported size", async () => {
     const file = await createFile("book.epub", "new");
     const existing = storageFile("book.epub");
     const partial = { ...existing, size: 4 };
@@ -117,10 +117,13 @@ describe("file transfers", () => {
       conflictPolicy: "replace",
     });
 
+    const backupName = vi.mocked(client.renameStorage).mock.calls[0][1];
     expect(result.failed).toBe(1);
-    expect(client.deleteStorage).toHaveBeenCalledWith(partial);
-    expect(client.renameStorage).toHaveBeenCalledTimes(2);
-    expect(vi.mocked(client.renameStorage).mock.calls[1][1]).toBe("book.epub");
+    expect(result.items[0].error).toMatch(
+      new RegExp(`same-name file may have completed uploading.*original remains as ${backupName}`)
+    );
+    expect(client.deleteStorage).not.toHaveBeenCalled();
+    expect(client.renameStorage).toHaveBeenCalledTimes(1);
   });
 
   it("keeps a completed replacement when only the upload response was lost", async () => {

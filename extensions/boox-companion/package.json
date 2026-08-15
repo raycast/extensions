@@ -60,10 +60,10 @@
     {
       "name": "manualHost",
       "title": "Device Address",
-      "description": "Optional BOOXDrop address. Leave empty to discover devices automatically.",
+      "description": "Optional BOOXDrop address. Leave empty to discover devices automatically. Passwords require HTTPS.",
       "type": "textfield",
       "required": false,
-      "placeholder": "http://192.168.1.100:8085"
+      "placeholder": "192.168.1.100 or https://boox.local"
     },
     {
       "name": "password",

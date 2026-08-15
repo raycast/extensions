@@ -17,6 +17,13 @@ describe("BOOX client protocol", () => {
     expect(new BooxClient("https://reader.example").screenHost).toBe("https://reader.example:8086");
   });
 
+  it("defaults password-protected bare addresses to HTTPS and rejects explicit HTTP", () => {
+    expect(new BooxClient("reader.local", "secret").host).toBe("https://reader.local:8085");
+    expect(() => new BooxClient("http://reader.local", "secret")).toThrow(
+      "BOOXDrop passwords require an HTTPS device address"
+    );
+  });
+
   it("keeps authenticated API requests on configured HTTPS transport", async () => {
     const fetchMock = vi.fn<typeof fetch>().mockResolvedValue(new Response("ok", { status: 200 }));
     vi.stubGlobal("fetch", fetchMock);

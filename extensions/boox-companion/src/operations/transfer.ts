@@ -117,11 +117,9 @@ async function replaceStorageFile(
     await client.uploadStorage(localPath, destination);
   } catch (uploadError) {
     let observedReplacement: StorageEntry | undefined;
-    let inspectionSucceeded = false;
     try {
       const page = await client.listStorage(destination, 0, 10_000);
       observedReplacement = page.list.find((entry) => entry.name === existing.name && entry.path !== backup.path);
-      inspectionSucceeded = true;
     } catch {
       // A failed inspection leaves the original backup untouched unless its name can be restored directly.
     }
@@ -131,9 +129,14 @@ async function replaceStorageFile(
       return;
     }
 
+    if (observedReplacement) {
+      throw new Error(
+        `${describeBooxError(uploadError)}. A same-name file may have completed uploading and was left untouched; the original remains as ${backupName}`
+      );
+    }
+
     try {
-      if (observedReplacement && !observedReplacement.dir) await client.deleteStorage(observedReplacement);
-      if (inspectionSucceeded || !observedReplacement) await client.renameStorage(backup, existing.name);
+      await client.renameStorage(backup, existing.name);
     } catch (restoreError) {
       throw new Error(
         `${describeBooxError(uploadError)}. The original remains as ${backupName}, but automatic restoration failed: ${describeBooxError(restoreError)}`

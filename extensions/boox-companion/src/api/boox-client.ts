@@ -91,8 +91,12 @@ export class BooxClient {
     host: string,
     private readonly password?: string
   ) {
-    this.host = normalizeHost(host, 8085);
-    this.screenHost = normalizeHost(host, 8086);
+    const defaultProtocol = password ? "https" : "http";
+    this.host = normalizeHost(host, 8085, defaultProtocol);
+    this.screenHost = normalizeHost(host, 8086, defaultProtocol);
+    if (password && new URL(this.host).protocol !== "https:") {
+      throw new BooxError("BOOXDrop passwords require an HTTPS device address");
+    }
   }
 
   private headers(extra?: RequestInit["headers"]): Headers {
@@ -416,8 +420,8 @@ export class BooxClient {
   }
 }
 
-export function normalizeHost(input: string, port = 8085): string {
-  const withScheme = /^https?:\/\//i.test(input.trim()) ? input.trim() : `http://${input.trim()}`;
+export function normalizeHost(input: string, port = 8085, defaultProtocol: "http" | "https" = "http"): string {
+  const withScheme = /^https?:\/\//i.test(input.trim()) ? input.trim() : `${defaultProtocol}://${input.trim()}`;
   const url = new URL(withScheme);
   url.port = String(port);
   url.pathname = "/";
