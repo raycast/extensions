@@ -3,11 +3,8 @@
 ## [Windows support] - {PR_MERGE_DATE}
 
 - Add support for Windows platform
-- Convert main command to TypeScript
-- Remove Swift dependency in favor of `systeminformation`
 - Show installed memory and physical disk info on Windows
 - Add Windows build number and kernel version
-- Bump all dependencies to the latest
 
 ## [AI Tools] - 2025-04-29
 - Interact and perform the same functionality as the extension but simply with AI tools.

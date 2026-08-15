@@ -48,12 +48,12 @@ const getStorageInfo = async () => {
     };
   }
 
-  const fs = await si.fsSize();
-  const root = fs.find((f) => f.mount === "/") || fs[0];
+  const { getStorageInfo } = await import("swift:../swift");
+  const info = await getStorageInfo();
   return {
     title: "Macintosh HD",
     model: "",
-    text: `${formatStorage(root.used)} used of ${formatStorage(root.size)} (${formatStorage(root.available)} available)`,
+    text: `${info.used.toFixed(2)} GB used of ${info.total.toFixed(2)} GB (${info.free.toFixed(2)} GB available)`,
   };
 };
 
