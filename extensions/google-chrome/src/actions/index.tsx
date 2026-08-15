@@ -315,7 +315,7 @@ export async function getOpenWindows(): Promise<ChromeWindow[]> {
       LocalStorage.removeItem("is-installed");
     }
     await checkAppInstalled();
-    return [];
+    throw err;
   }
 }
 
