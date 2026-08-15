@@ -35,8 +35,7 @@ export function validateUploadName(name: string): string | undefined {
 
 export function resolveDownloadPath(directory: string, remoteName: string): string {
   const root = path.resolve(directory);
-  const baseName = path.basename(remoteName.replace(/\\/g, "/"));
-  const safeName = Array.from(baseName, (character) =>
+  const safeName = Array.from(remoteName, (character) =>
     character.charCodeAt(0) < 32 || INVALID_FILENAME_CHARACTERS.test(character) ? "-" : character
   )
     .join("")

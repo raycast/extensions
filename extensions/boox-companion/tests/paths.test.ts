@@ -32,12 +32,18 @@ describe("BOOX paths", () => {
     const directory = path.join(path.sep, "safe", "downloads");
 
     expect(resolveDownloadPath(directory, "../../private/report.pdf")).toBe(
-      path.join(directory, "report.pdf")
+      path.join(directory, "..-..-private-report.pdf")
     );
     expect(resolveDownloadPath(directory, "..\\..\\private\\report.pdf")).toBe(
-      path.join(directory, "report.pdf")
+      path.join(directory, "..-..-private-report.pdf")
     );
     expect(resolveDownloadPath(directory, "bad:name?.pdf")).toBe(path.join(directory, "bad-name-.pdf"));
+    expect(resolveDownloadPath(directory, "Research/chapter.pdf")).toBe(
+      path.join(directory, "Research-chapter.pdf")
+    );
+    expect(resolveDownloadPath(directory, "Archive\\chapter.pdf")).toBe(
+      path.join(directory, "Archive-chapter.pdf")
+    );
     expect(() => resolveDownloadPath(directory, "..")).toThrow("invalid file name");
   });
 });
