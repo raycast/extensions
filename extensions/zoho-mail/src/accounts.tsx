@@ -10,7 +10,11 @@ import { API_URL, getZohoHeaders, PAGE_LIMIT, parseZohoResponse } from "./zoho";
 export default withAccessToken(provider)(Accounts);
 
 function Accounts() {
-  const { isLoading, data: accounts } = useFetch(API_URL + "/accounts", {
+  const {
+    isLoading,
+    data: accounts,
+    error,
+  } = useFetch(API_URL + "/accounts", {
     headers: getZohoHeaders(),
     parseResponse: parseZohoResponse<Account[]>,
     initialData: [],
@@ -18,28 +22,40 @@ function Accounts() {
 
   return (
     <List isLoading={isLoading}>
-      {accounts.map((account) => (
-        <List.Section key={account.accountId} title={account.displayName}>
-          {account.emailAddress.map((address) => (
-            <List.Item
-              key={address.mailId}
-              icon={getAvatarIcon(`${address.mailId[0]} ${address.mailId[1]}`)}
-              title={address.mailId}
-              accessories={[
-                {
-                  icon: account.role === "super_admin" && address.isPrimary ? Icon.Crown : undefined,
-                  tooltip: "Super Administrator",
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action.Push icon={Icon.Envelope} title="Emails" target={<Emails account={account} />} />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      ))}
+      {!isLoading && !accounts.length && !error ? (
+        <List.EmptyView
+          icon={Icon.TwoPeople}
+          title="Please go online and add an account to get started"
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url="https://mailadmin.zoho.com/cpanel/home.do#dashboard" />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        accounts.map((account) => (
+          <List.Section key={account.accountId} title={account.displayName}>
+            {account.emailAddress.map((address) => (
+              <List.Item
+                key={address.mailId}
+                icon={getAvatarIcon(`${address.mailId[0]} ${address.mailId[1]}`)}
+                title={address.mailId}
+                accessories={[
+                  {
+                    icon: account.role === "super_admin" && address.isPrimary ? Icon.Crown : undefined,
+                    tooltip: "Super Administrator",
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action.Push icon={Icon.Envelope} title="Emails" target={<Emails account={account} />} />
+                  </ActionPanel>
+                }
+              />
+            ))}
+          </List.Section>
+        ))
+      )}
     </List>
   );
 }

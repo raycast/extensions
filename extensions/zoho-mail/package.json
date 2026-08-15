@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "zoho-mail",
   "title": "Zoho Mail",
-  "description": "Manage Zoho Mail",
+  "description": "Manage Zoho Mail - View Domains, Accounts, Emails and Content",
   "icon": "zoho-mail.png",
   "author": "xmok",
   "platforms": [
@@ -16,13 +16,13 @@
   "commands": [
     {
       "name": "accounts",
-      "title": "Accounts",
+      "title": "View Accounts",
       "description": "View Accounts, Emails and Content",
       "mode": "view"
     },
     {
       "name": "domains",
-      "title": "Domains",
+      "title": "View Domains",
       "description": "View Organization Domains",
       "mode": "view"
     }
