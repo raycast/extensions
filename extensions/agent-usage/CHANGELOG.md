@@ -1,5 +1,9 @@
 # Agent Usage Changelog
 
+## [Add support for multiple CODEX_HOME] - 2026-08-15
+
+- Support additional CODEX_HOME in preferences, letting users read from multiple active codex account
+
 ## [Add DeepSeek Usage] - 2026-08-14
 
 - Add DeepSeek balance monitoring to the main list and menu bar

@@ -166,3 +166,46 @@ test("buildCodexAccountCandidates lets discovered Codex entries without account 
   assert.equal(candidates[0].accountId, null);
   assert.equal(candidates[0].needsAccountId, false);
 });
+
+test("buildCodexAccountCandidates dedupes discovered accounts that share an OAuth credential across homes", () => {
+  const aliasedHomeAccount: CodexOAuthAccount = {
+    id: "codex-home-0-codex-active",
+    label: "Active",
+    token: "active-token",
+    accountId: "acct_active",
+    userId: "user_active",
+    source: "active",
+    authFilePath: "/tmp/.codex-alias/auth.json",
+  };
+  const refreshedTokenSameIdentity: CodexOAuthAccount = {
+    id: "codex-home-1-codex-active",
+    label: "Active",
+    token: "refreshed-token",
+    accountId: "acct_active",
+    userId: "user_active",
+    source: "active",
+    authFilePath: "/tmp/.codex-other/auth.json",
+  };
+  const distinctUserSameAccount: CodexOAuthAccount = {
+    id: "codex-home-2-codex-other",
+    label: "Other User",
+    token: "other-user-token",
+    accountId: "acct_active",
+    userId: "user_other",
+    source: "stored",
+    authFilePath: "/tmp/.codex-other/accounts/other.auth.json",
+  };
+
+  const candidates = buildCodexAccountCandidates(
+    [discoveredAccount, aliasedHomeAccount, refreshedTokenSameIdentity, distinctUserSameAccount],
+    [],
+  );
+
+  assert.deepEqual(
+    candidates.map((candidate) => ({ id: candidate.id, token: candidate.token })),
+    [
+      { id: "codex-active", token: "active-token" },
+      { id: "codex-home-2-codex-other", token: "other-user-token" },
+    ],
+  );
+});

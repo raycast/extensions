@@ -11,7 +11,8 @@
     "alexi.build",
     "adrianbonpin",
     "garrick_zhang",
-    "EDM115"
+    "EDM115",
+    "chingweih"
   ],
   "type": "module",
   "scripts": {
@@ -103,6 +104,14 @@
       "label": "Show Codex",
       "description": "Show Codex usage in the list",
       "default": true,
+      "required": false
+    },
+    {
+      "name": "additionalCodexHomes",
+      "type": "textfield",
+      "title": "Additional Codex Homes (Optional)",
+      "placeholder": "~/.codex-personal, ~/.codex-work",
+      "description": "Comma-separated CODEX_HOME directories to include in addition to the default Codex home",
       "required": false
     },
     {
