@@ -275,6 +275,8 @@ export async function getOpenWindows(): Promise<ChromeWindow[]> {
   await checkAppInstalled();
   try {
     const openWindows = await runAppleScript(`
+      set _rec_sep to character id ${ChromeWindow.WINDOW_RECORD_SEPARATOR.charCodeAt(0)}
+      set _field_sep to character id ${ChromeWindow.WINDOW_FIELD_SEPARATOR.charCodeAt(0)}
       set _output to ""
       tell application "Google Chrome"
         repeat with w in windows
@@ -284,14 +286,14 @@ export async function getOpenWindows(): Promise<ChromeWindow[]> {
           try
             set _active_tab_url to URL of active tab of w
           end try
-          set _output to (_output & _w_id & "${ChromeWindow.WINDOW_CONTENTS_SEPARATOR}" & _title & "${ChromeWindow.WINDOW_CONTENTS_SEPARATOR}" & _active_tab_url & "\\n")
+          set _output to (_output & _w_id & _field_sep & _title & _field_sep & _active_tab_url & _rec_sep)
         end repeat
       end tell
       return _output
     `);
 
     return openWindows
-      .split("\n")
+      .split(ChromeWindow.WINDOW_RECORD_SEPARATOR)
       .filter((line) => line.length !== 0)
       .map((line) => ChromeWindow.parse(line));
   } catch (err) {

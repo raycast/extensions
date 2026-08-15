@@ -115,7 +115,8 @@ export interface ChromeProfile {
 }
 
 export class ChromeWindow {
-  static readonly WINDOW_CONTENTS_SEPARATOR: string = "~~~";
+  static readonly WINDOW_FIELD_SEPARATOR: string = "\x1F";
+  static readonly WINDOW_RECORD_SEPARATOR: string = "\x1E";
 
   constructor(
     public readonly id: number,
@@ -124,7 +125,7 @@ export class ChromeWindow {
   ) {}
 
   static parse(line: string): ChromeWindow {
-    const parts = line.split(this.WINDOW_CONTENTS_SEPARATOR);
+    const parts = line.split(this.WINDOW_FIELD_SEPARATOR);
     return new ChromeWindow(+parts[0], parts[1], parts[2] || "");
   }
 }
