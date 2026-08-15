@@ -302,8 +302,8 @@ export default function Command() {
           currentPrice === null
             ? "No price"
             : originalPrice !== null && currentPrice < originalPrice && sameCurrency
-              ? `${formatPrice(originalPrice, steam.price?.currency)} → ${formatPrice(currentPrice, currency)}`
-              : formatPrice(currentPrice, currency);
+            ? `${formatPrice(originalPrice, steam.price?.currency)} → ${formatPrice(currentPrice, currency)}`
+            : formatPrice(currentPrice, currency);
 
         const ggUrl = gg?.url;
 
