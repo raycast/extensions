@@ -117,7 +117,7 @@ function messageFor(status: number, body: ApiErrorBody): string {
 }
 
 export function getAuthHeaders(): Record<string, string> {
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   return { Authorization: `Bearer ${apiKey.trim()}` };
 }
 

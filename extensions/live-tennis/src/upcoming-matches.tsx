@@ -1,32 +1,43 @@
 import { Action, ActionPanel, Icon, Keyboard, List, openExtensionPreferences } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
-import { BASE_URL, Fixture, Tour, getAuthHeaders, parseListResponse } from "./api";
+import { BASE_URL, Fixture, ListResponse, Tour, getAuthHeaders, parseListResponse } from "./api";
 import { TOUR_TITLES, capitalize, fixtureTitle, formatStartTime } from "./format";
 
 const TOURS = Object.keys(TOUR_TITLES) as Tour[];
+const PAGE_SIZE = 50;
 
 export default function UpcomingMatches() {
   const [tour, setTour] = useState<string>("all");
 
   // Fixture.tour is documented as an opaque granular value (e.g. "challenger_men"),
-  // so tour filtering must go through the server's ?tour= parameter.
-  const url = new URL(`${BASE_URL}/fixtures`);
-  url.searchParams.set("limit", "200");
-  if (tour !== "all") {
-    url.searchParams.set("tour", tour);
-  }
-
-  const { isLoading, data, error, revalidate } = useFetch(url.toString(), {
-    headers: getAuthHeaders(),
-    parseResponse: (response) => parseListResponse<Fixture>(response),
-    keepPreviousData: true,
-    failureToastOptions: { title: "Could not load fixtures" },
-  });
+  // so tour filtering must go through the server's ?tour= parameter. Pages are
+  // fetched lazily (offset pagination) so a long schedule never truncates at
+  // one page, and quota is only spent when the user actually scrolls.
+  const { isLoading, data, error, revalidate, pagination } = useFetch(
+    (options) => {
+      const url = new URL(`${BASE_URL}/fixtures`);
+      url.searchParams.set("limit", String(PAGE_SIZE));
+      url.searchParams.set("offset", String(options.page * PAGE_SIZE));
+      if (tour !== "all") {
+        url.searchParams.set("tour", tour);
+      }
+      return url.toString();
+    },
+    {
+      headers: getAuthHeaders(),
+      parseResponse: (response) => parseListResponse<Fixture>(response),
+      mapResult: (result: ListResponse<Fixture>) => ({ data: result.data, hasMore: result.meta.has_more }),
+      initialData: [],
+      keepPreviousData: true,
+      failureToastOptions: { title: "Could not load fixtures" },
+    },
+  );
 
   return (
     <List
       isLoading={isLoading}
+      pagination={pagination}
       searchBarPlaceholder="Filter by player or tournament"
       searchBarAccessory={
         <List.Dropdown tooltip="Tour" storeValue onChange={setTour}>
@@ -56,7 +67,7 @@ export default function UpcomingMatches() {
             title="No Upcoming Fixtures"
             description="Nothing scheduled right now."
           />
-          {(data?.data ?? []).map((fixture) => (
+          {(data ?? []).map((fixture) => (
             <FixtureItem key={fixture.id} fixture={fixture} onRefresh={revalidate} />
           ))}
         </>

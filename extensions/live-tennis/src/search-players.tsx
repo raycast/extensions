@@ -108,14 +108,16 @@ function subtitleFor(player: Player): string | undefined {
 }
 
 function ageFrom(birthday: string): number | null {
-  const born = new Date(birthday);
-  if (Number.isNaN(born.getTime())) {
+  // The API serves a date-only value; compare its literal Y-M-D against the
+  // user's local calendar date so the age never shifts across time zones.
+  const parsed = /^(\d{4})-(\d{2})-(\d{2})/.exec(birthday);
+  if (!parsed) {
     return null;
   }
+  const [year, month, day] = [Number(parsed[1]), Number(parsed[2]), Number(parsed[3])];
   const now = new Date();
-  let age = now.getFullYear() - born.getFullYear();
-  const beforeBirthday =
-    now.getMonth() < born.getMonth() || (now.getMonth() === born.getMonth() && now.getDate() < born.getDate());
+  let age = now.getFullYear() - year;
+  const beforeBirthday = now.getMonth() + 1 < month || (now.getMonth() + 1 === month && now.getDate() < day);
   if (beforeBirthday) {
     age -= 1;
   }

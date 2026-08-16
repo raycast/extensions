@@ -16,7 +16,7 @@ import { TOUR_TITLES, capitalize, isBreakPoint, matchTitle, scoreSummary } from 
 const TOURS = Object.keys(TOUR_TITLES) as Tour[];
 
 export default function LiveMatches() {
-  const { refreshInterval } = getPreferenceValues<{ refreshInterval: string }>();
+  const { refreshInterval } = getPreferenceValues<Preferences.LiveMatches>();
   const [tourFilter, setTourFilter] = useState<string>("all");
   const [showingDetail, setShowingDetail] = useState(false);
 
