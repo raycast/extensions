@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Detail, Icon, showToast, Toast } from "@raycast/api";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { completeTask, reopenTask } from "../api/mutations";
 import type { ProjectRecord, TaskRecord } from "../api/types";
+import { revalidateAfterMutation } from "../helpers/revalidate";
 import { formatDate, getTaskState } from "../helpers/task-helpers";
 import { useChecklistItems } from "../hooks/use-checklist-items";
 
@@ -13,14 +14,15 @@ interface TaskDetailProps {
 }
 
 export default function TaskDetail({ task, projects, revalidate }: TaskDetailProps) {
+  const [currentTask, setCurrentTask] = useState(task);
   const { checklistItems } = useChecklistItems(task.id);
-  const state = getTaskState(task);
-  const project = task.projectId ? projects.find((p) => p.id === task.projectId) : undefined;
+  const state = getTaskState(currentTask);
+  const project = currentTask.projectId ? projects.find((p) => p.id === currentTask.projectId) : undefined;
 
-  let markdown = `# ${task.title}\n\n`;
+  let markdown = `# ${currentTask.title}\n\n`;
 
-  if (task.description) {
-    markdown += `${task.description}\n\n`;
+  if (currentTask.description) {
+    markdown += `${currentTask.description}\n\n`;
   }
 
   if (checklistItems.length > 0) {
@@ -32,45 +34,51 @@ export default function TaskDetail({ task, projects, revalidate }: TaskDetailPro
   }
 
   const handleComplete = useCallback(async () => {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Completing task...",
+    });
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Completing task...",
-      });
       await completeTask(task.id);
+    } catch {
       await showToast({
-        style: Toast.Style.Success,
-        title: "Task completed",
-      });
-      revalidate();
-    } catch (error) {
-      await showToast({
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: "Check your connection and try again.",
         style: Toast.Style.Failure,
-        title: "Failed to complete task",
+        title: "Couldn't complete task",
       });
+      return;
     }
+
+    setCurrentTask((value) => ({ ...value, completedAt: new Date().toISOString() }));
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Task completed",
+    });
+    await revalidateAfterMutation(revalidate);
   }, [task.id, revalidate]);
 
   const handleReopen = useCallback(async () => {
+    await showToast({
+      style: Toast.Style.Animated,
+      title: "Reopening task...",
+    });
     try {
-      await showToast({
-        style: Toast.Style.Animated,
-        title: "Reopening task...",
-      });
       await reopenTask(task.id);
+    } catch {
       await showToast({
-        style: Toast.Style.Success,
-        title: "Task reopened",
-      });
-      revalidate();
-    } catch (error) {
-      await showToast({
-        message: error instanceof Error ? error.message : "Unknown error",
+        message: "Check your connection and try again.",
         style: Toast.Style.Failure,
-        title: "Failed to reopen task",
+        title: "Couldn't reopen task",
       });
+      return;
     }
+
+    setCurrentTask((value) => ({ ...value, completedAt: null }));
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Task reopened",
+    });
+    await revalidateAfterMutation(revalidate);
   }, [task.id, revalidate]);
 
   return (
@@ -82,7 +90,7 @@ export default function TaskDetail({ task, projects, revalidate }: TaskDetailPro
               icon={Icon.CheckCircle}
               onAction={handleComplete}
               shortcut={{ key: "d", modifiers: ["cmd"] }}
-              title="Mark as Completed"
+              title="Complete Task"
             />
           )}
           {state === "done" && (
@@ -93,8 +101,8 @@ export default function TaskDetail({ task, projects, revalidate }: TaskDetailPro
               title="Reopen Task"
             />
           )}
-          <Action.CopyToClipboard content={task.title} title="Copy Title" />
-          <Action.CopyToClipboard content={task.id} title="Copy ID" />
+          <Action.CopyToClipboard content={currentTask.title} title="Copy Title" />
+          <Action.CopyToClipboard content={currentTask.id} title="Copy ID" />
         </ActionPanel>
       }
       markdown={markdown}
@@ -102,11 +110,15 @@ export default function TaskDetail({ task, projects, revalidate }: TaskDetailPro
         <Detail.Metadata>
           <Detail.Metadata.Label text={state} title="Status" />
           {project && <Detail.Metadata.Label text={project.name} title="Project" />}
-          {task.deadlineAt && <Detail.Metadata.Label text={formatDate(task.deadlineAt)} title="Deadline" />}
-          {task.startDate && <Detail.Metadata.Label text={formatDate(task.startDate)} title="Start Date" />}
-          <Detail.Metadata.Label text={formatDate(task.createdAt)} title="Created" />
+          {currentTask.deadlineAt && (
+            <Detail.Metadata.Label text={formatDate(currentTask.deadlineAt)} title="Deadline" />
+          )}
+          {currentTask.startDate && (
+            <Detail.Metadata.Label text={formatDate(currentTask.startDate)} title="Start Date" />
+          )}
+          <Detail.Metadata.Label text={formatDate(currentTask.createdAt)} title="Created" />
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label text={task.id} title="ID" />
+          <Detail.Metadata.Label text={currentTask.id} title="ID" />
         </Detail.Metadata>
       }
     />
