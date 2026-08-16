@@ -15,11 +15,13 @@ export function isValidIP(ip: string): boolean {
   const groups = doubleColonParts.flatMap((part) => (part === "" ? [] : part.split(":")));
 
   // An IPv4-mapped or IPv4-embedded tail ("::ffff:192.0.2.1") is a dotted quad in the last
-  // group, standing in for two hextets (RFC 4291 §2.5.5).
+  // group, standing in for two hextets (RFC 4291 §2.5.5). It must sit in the final 32 bits:
+  // after splitting on "::" the dotted quad can end up last in `groups` even when the
+  // address really ends with "::" ("192.0.2.1::"), so also check it ends the address.
   let hextetCount = groups.length;
   const lastGroup = groups[groups.length - 1];
   if (lastGroup !== undefined && lastGroup.includes(".")) {
-    if (!IPV4_PATTERN.test(lastGroup)) return false;
+    if (!address.endsWith(lastGroup) || !IPV4_PATTERN.test(lastGroup)) return false;
     groups.pop();
     hextetCount += 1;
   }
