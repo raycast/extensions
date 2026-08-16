@@ -1,6 +1,6 @@
 # Cron Changelog
 
-## [Windows Support & Bug Fixes] - {PR_MERGE_DATE}
+## [Windows Support & Bug Fixes] - 2026-08-16
 
 1. Add support for Raycast on Windows and update dependencies
 2. Fix calendar days, weekday names, and time rendering as clipped or invisible text
