@@ -3,7 +3,7 @@ import path from "path";
 import os from "os";
 import { spawn } from "child_process";
 import { CompressionOptions, CompressionResult } from "./types";
-import { generateOutputPath, calculateCompressionRatio } from "../utils/format";
+import { generateOutputPath, calculateCompressionRatio, formatBytes } from "../utils/format";
 import { getAugmentedEnv } from "../utils/system";
 
 interface VideoProbeResult {
@@ -289,6 +289,11 @@ export async function compressVideo(options: CompressionOptions): Promise<Compre
 
     const finalStats = fs.statSync(outputPath);
     if (finalStats.size > targetBytes) {
+      try {
+        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+      } catch {
+        // Ignore
+      }
       throw new Error(
         `Could not compress video below target size of ${targetSizeMB} MB (${formatBytes(finalStats.size)}). The video duration is too long for this target size at acceptable video quality.`
       );

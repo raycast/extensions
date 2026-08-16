@@ -2,7 +2,7 @@ import fs from "fs";
 import { spawn } from "child_process";
 import { PDFDocument } from "pdf-lib";
 import { CompressionOptions, CompressionResult } from "./types";
-import { generateOutputPath, calculateCompressionRatio } from "../utils/format";
+import { generateOutputPath, calculateCompressionRatio, formatBytes } from "../utils/format";
 import { getAugmentedEnv } from "../utils/system";
 
 async function isGhostscriptAvailable(): Promise<string | null> {
@@ -69,6 +69,11 @@ export async function compressPdf(options: CompressionOptions): Promise<Compress
     }
 
     if (finalStats.size > targetBytes) {
+      try {
+        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+      } catch {
+        // Ignore
+      }
       throw new Error(
         `Could not compress PDF below target size of ${targetSizeMB} MB (${formatBytes(finalStats.size)}).`
       );
@@ -101,6 +106,11 @@ export async function compressPdf(options: CompressionOptions): Promise<Compress
 
     const finalStats = fs.statSync(outputPath);
     if (finalStats.size > targetBytes) {
+      try {
+        if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+      } catch {
+        // Ignore
+      }
       throw new Error(
         `Could not compress PDF below target size of ${targetSizeMB} MB (${formatBytes(finalStats.size)}). Install Ghostscript for deep PDF compression.`
       );

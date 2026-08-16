@@ -1,7 +1,7 @@
 import fs from "fs";
 import { spawn } from "child_process";
 import { CompressionOptions, CompressionResult } from "./types";
-import { generateOutputPath, calculateCompressionRatio } from "../utils/format";
+import { generateOutputPath, calculateCompressionRatio, formatBytes } from "../utils/format";
 import { getAugmentedEnv } from "../utils/system";
 
 function probeAudioDuration(filePath: string): Promise<number> {
@@ -110,6 +110,11 @@ export async function compressAudio(options: CompressionOptions): Promise<Compre
 
   const finalStats = fs.statSync(outputPath);
   if (finalStats.size > targetBytes) {
+    try {
+      if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath);
+    } catch {
+      // Ignore
+    }
     throw new Error(
       `Could not compress audio below target size of ${targetSizeMB} MB (${formatBytes(finalStats.size)}). File duration is too long for this target size at acceptable audio quality.`
     );
