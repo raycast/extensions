@@ -1,6 +1,6 @@
 # Search Router Changelog
 
-## [Fix Missing Query Prompt on Shortcut Launch] - {PR_MERGE_DATE}
+## [Fix Missing Query Prompt on Shortcut Launch] - 2026-08-16
 
 - Fix the issue where executing the command "Search the Web" via a shortcut key would bypass the ability to enter a search query altogether (because the `query` argument is no longer required). It now shows a query form when "Search the Web" is launched from a keyboard shortcut, while preserving fallback search.
 
