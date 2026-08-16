@@ -1,6 +1,6 @@
 # Done Bear Changelog
 
-## [AI Task Creation] - {PR_MERGE_DATE}
+## [AI Task Creation] - 2026-08-16
 
 - Added an AI-powered Create Task command that turns one sentence into a reviewable task
 - Added natural-language support for dates, lists, projects, teams, and deadlines with an offline fallback
