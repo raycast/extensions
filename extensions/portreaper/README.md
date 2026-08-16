@@ -14,6 +14,20 @@ Portreaper is not a generic port viewer. Its job is to **decide which listeners 
 - **Detail on demand:** launcher chain, uptime, memory, and subtree CPU — a headless browser burns CPU in child processes while its own row reads ~0%, so the subtree total is what tells you it is actually spinning.
 - **Star anything to exempt it permanently.** A daemon you detached on purpose is behaviorally identical to an accidental zombie; star it once and it stops being flagged.
 
+## How this differs from a port viewer
+
+The Store already covers the "port 3000 is taken, free it" case — [Port Manager](https://www.raycast.com/diegoleteliers10/ports) is the closest one. If that is your whole problem, a plain port viewer is the simpler tool, and you should use it.
+
+Portreaper answers a different question: **which of these processes is nobody's responsibility?**
+
+- A port viewer lists what is listening and lets you kill it. Deciding what is safe to kill is left to you.
+- Portreaper decides first. Every row carries a verdict — `confirmed` / `likely` / `possible` — the evidence behind it, and automatic exemptions for anything `launchd`, `brew services`, or `pm2` is already looking after. A dev server with a live terminal behind it is never flagged.
+- It also surfaces orphaned dev processes holding **no port at all**, which a port scan cannot see by definition.
+- Killing is guarded rather than immediate: the process creation time is re-checked in the instant before the signal (a recycled PID is refused), and "terminated" is established by re-scanning, not assumed from an exit code.
+- The verdict engine is a Rust binary shared with the Portreaper desktop app, so the two frontends agree on the classification and on your stars.
+
+If what you want is a list of ports, this is a heavy way to get one. If what you want is to know which dev servers are ghosts, that is the entire point of it.
+
 ## Terminating is safe by construction
 
 The engine captures each process's creation time during the scan and **re-checks it immediately before killing**. If it moved, the kill is refused. That closes the window where a PID gets recycled between the moment you look at the list and the moment you press Enter — killing a recycled PID would mean terminating an unrelated process.
