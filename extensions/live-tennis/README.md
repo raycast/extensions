@@ -2,6 +2,8 @@
 
 Live tennis scores, upcoming fixtures and player rankings — ATP, WTA, Challenger, ITF and Juniors — right from Raycast, powered by the [Live Tennis API](https://livetennisapi.com).
 
+> **How is this different from Tennis Standings?** [Tennis Standings](https://www.raycast.com/Zalgo_123/tennis-standings) shows the ATP/WTA ranking tables. Live Tennis covers the live layer instead: matches currently in play with serving and break-point state, upcoming fixtures, and per-player lookup — different data, different commands, and the two extensions complement each other.
+
 ## Commands
 
 - **Live Matches** — every match currently in play, with the set/game score, the current game's points, who is serving, and a red **BP** tag whenever the returner has a break point. A detail pane (⌘ + Enter on "Show Details") shows rankings, surface, round and format. Filter by tour from the dropdown.
