@@ -10,7 +10,10 @@
     "Finance"
   ],
   "icon": "bitcoin-tools-app-icon.png",
-  "author": "luke_lorenzo",
+  "author": "rohenaz",
+  "contributors": [
+    "luke_lorenzo"
+  ],
   "license": "MIT",
   "repository": "https://github.com/b-open-io/raycast-bsv",
   "platforms": [
@@ -84,7 +87,7 @@
       "mode": "view"
     },
     {
-      "name": "bitcoin-tools",
+      "name": "bsv-price-menu-bar",
       "title": "BSV Price in Menu Bar",
       "description": "See the current BSV price and block height in the menu bar",
       "mode": "menu-bar",
@@ -104,10 +107,12 @@
     "@raycast/utils": "^2.2.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.4",
-    "@types/node": "^22.20.1",
-    "@types/react": "^19.2.17",
-    "typescript": "^7.0.2"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
   },
   "overrides": {
     "esbuild": "^0.28.1"
@@ -118,9 +123,8 @@
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "format": "biome format --write src tests package.json tsconfig.json biome.json",
-    "lint": "biome check src tests package.json tsconfig.json biome.json",
-    "lint:fix": "biome check --write src tests package.json tsconfig.json biome.json",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "typecheck": "ray build -e dist && tsc --noEmit",
     "publish": "npx @raycast/api@latest publish"

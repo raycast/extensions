@@ -4,17 +4,17 @@ Bitcoin Tools is a Raycast extension for common BSV key, address, script, transa
 
 ## Commands
 
-| Command | Behavior |
-| --- | --- |
-| Copy Address from WIF | Converts a mainnet or testnet WIF to the matching address and copies it. |
-| Create P2PKH Script | Converts a BSV address to an ASM or hexadecimal locking script. |
-| Create Address from Public Key Hash | Converts a 20-byte hexadecimal hash to a mainnet address. |
-| Generate BSV Address | Generates a random mainnet address. |
-| Generate Private Key (WIF) | Generates a random mainnet WIF. |
-| Generate BIP32 XPUB / XPRIV | Generates random BIP32 extended keys. |
-| Decode Transaction | Parses raw transaction hex and shows inputs, outputs, scripts, values, and metadata. |
-| BSV Price in Menu Bar | Shows the current USD price and latest available block height. |
-| Bitcoin Price | Shows current price, 24-hour change, volume, market cap, and block height. |
+| Command                             | Behavior                                                                             |
+| ----------------------------------- | ------------------------------------------------------------------------------------ |
+| Copy Address from WIF               | Converts a mainnet or testnet WIF to the matching address and copies it.             |
+| Create P2PKH Script                 | Converts a BSV address to an ASM or hexadecimal locking script.                      |
+| Create Address from Public Key Hash | Converts a 20-byte hexadecimal hash to a mainnet address.                            |
+| Generate BSV Address                | Generates a random mainnet address.                                                  |
+| Generate Private Key (WIF)          | Generates a random mainnet WIF.                                                      |
+| Generate BIP32 XPUB / XPRIV         | Generates random BIP32 extended keys.                                                |
+| Decode Transaction                  | Parses raw transaction hex and shows inputs, outputs, scripts, values, and metadata. |
+| BSV Price in Menu Bar               | Shows the current USD price and latest available block height.                       |
+| Bitcoin Price                       | Shows current price, 24-hour change, volume, market cap, and block height.           |
 
 Generated values can be inserted into the focused application, copied to the clipboard, or both. Configure this behavior in the extension preferences.
 

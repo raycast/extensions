@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { loadMarketState } from "./lib/market-cache";
 import { COINPAPRIKA_BSV_URL } from "./lib/market-data";
 
@@ -16,7 +16,7 @@ const integerCurrency = new Intl.NumberFormat("en-US", {
 });
 
 export default function Command() {
-  const { data, isLoading, revalidate } = usePromise(loadMarketState, []);
+  const { data, isLoading, revalidate } = useCachedPromise(loadMarketState);
   const snapshot = data?.snapshot;
 
   const markdown = snapshot

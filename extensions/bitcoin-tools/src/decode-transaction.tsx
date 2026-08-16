@@ -5,6 +5,7 @@ import {
   Form,
   Icon,
   useNavigation,
+  Keyboard,
 } from "@raycast/api";
 import { useState } from "react";
 import { type DecodedTransaction, decodeTransaction } from "./lib/bitcoin";
@@ -89,7 +90,7 @@ function TransactionDetail({
           <Action.CopyToClipboard
             title="Copy Raw Transaction"
             content={transaction.rawTransaction}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.Copy}
           />
         </ActionPanel>
       }
