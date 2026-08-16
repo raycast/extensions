@@ -1,6 +1,6 @@
 # Twos Changelog
 
-## [Photo results and opening in the desktop app] - {PR_MERGE_DATE}
+## [Photo results and opening in the desktop app] - 2026-08-16
 
 - **Search Things** now finds things by the text inside their photos. A
   receipt, whiteboard, or screenshot is searchable by what it says.
