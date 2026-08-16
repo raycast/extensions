@@ -15,13 +15,16 @@ import {
   SUPPORTED_FORMALITY_LANGUAGES,
   SourceLanguage,
   TargetLanguage,
+  copyTranslatedText,
   getSelection,
+  pasteTranslatedText,
   sendTranslateRequest,
   source_languages,
   target_languages,
   delayedCloseWindow,
 } from "./utils";
 import TranslationView from "./components/TranslationView";
+import { htmlToDisplayText } from "./hyperlinks";
 import transliterate from "@sindresorhus/transliterate";
 
 interface Values {
@@ -47,6 +50,7 @@ function SwitchLanguagesAction(props: { onSwitchLanguages: () => void }) {
 type LaunchContext = {
   translation?: string;
   sourceLanguage?: SourceLanguage;
+  isHtml?: boolean;
 };
 
 const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
@@ -54,7 +58,9 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   if (props?.launchContext?.translation) {
     const translation = props?.launchContext?.translation;
     const sourceLanguage = props?.launchContext?.sourceLanguage;
-    return <TranslationView translation={translation} sourceLanguage={sourceLanguage} />;
+    return (
+      <TranslationView translation={translation} sourceLanguage={sourceLanguage} isHtml={props.launchContext?.isHtml} />
+    );
   }
   const {
     defaultTargetLanguage,
@@ -66,6 +72,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   const [loading, setLoading] = useState(false);
   const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
   const [translation, setTranslation] = useState("");
+  const [htmlTranslation, setHtmlTranslation] = useState<string>();
   const [sourceLanguage, setSourceLanguage] = useState<SourceLanguage | "">("");
   const [targetLanguage, setTargetLanguage] = useState<TargetLanguage>(defaultTargetLanguage);
   const [detectedSourceLanguage, setDetectedSourceLanguage] = useState<SourceLanguage>();
@@ -96,8 +103,9 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
 
     if (!response) return;
 
-    const { translation, detectedSourceLanguage } = response;
-    setTranslation(translation);
+    const { translation, detectedSourceLanguage, isHtml } = response;
+    setTranslation(isHtml ? htmlToDisplayText(translation) : translation);
+    setHtmlTranslation(isHtml ? translation : undefined);
     setDetectedSourceLanguage(detectedSourceLanguage);
   };
 
@@ -128,6 +136,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
       const newTranslation = sourceText;
       setSourceText(newSourceText);
       setTranslation(newTranslation);
+      setHtmlTranslation(undefined);
     } else {
       // Should never happen
       await showToast(
@@ -143,7 +152,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
 
   const handleCopyToClipboard = async () => {
     try {
-      await Clipboard.copy(translation);
+      await copyTranslatedText(htmlTranslation ?? translation, Boolean(htmlTranslation));
       await showToast(Toast.Style.Success, "Translation copied to clipboard!");
       await delayedCloseWindow(closeRaycastAfterTranslation);
     } catch (error) {
@@ -154,7 +163,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
 
   const handlePasteInFrontmostApp = async () => {
     try {
-      await Clipboard.paste(translation);
+      await pasteTranslatedText(htmlTranslation ?? translation, Boolean(htmlTranslation));
       await showToast(Toast.Style.Success, "Translation pasted!");
       await delayedCloseWindow(closeRaycastAfterTranslation);
     } catch (error) {

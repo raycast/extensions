@@ -1,6 +1,11 @@
 # Deepcast Changelog
 
+## [Hyperlinks] - {PR_MERGE_DATE}
+
+- Preserve hyperlinks when translating copied HTML or markdown links, including copy and paste as rich text.
+
 ## [Newlines] - 2025-12-16
+
 - Fixed issue where newlines in translations were not displayed correctly in the Raycast detail view because markdown requires double newlines for line breaks.
 
 ## [Maintenance] - 2025-11-12

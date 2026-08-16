@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import got, { HTTPError, RequestError } from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
+import { htmlToPlainText, prepareFromClipboardHtml, prepareFromText, toClipboardHtml } from "./hyperlinks";
 
 const { returnToRootState } = getPreferenceValues<Preferences>();
 function isPro(key: string) {
@@ -92,6 +93,31 @@ export async function readContent() {
   }
 }
 
+async function resolveTranslatePayload(text: string) {
+  try {
+    const clipboard = await Clipboard.read();
+    return prepareFromClipboardHtml(text, clipboard.text, clipboard.html);
+  } catch {
+    return prepareFromText(text);
+  }
+}
+
+export async function copyTranslatedText(translation: string, isHtml: boolean) {
+  if (isHtml) {
+    await Clipboard.copy({ html: toClipboardHtml(translation), text: htmlToPlainText(translation) });
+    return;
+  }
+  await Clipboard.copy(translation);
+}
+
+export async function pasteTranslatedText(translation: string, isHtml: boolean) {
+  if (isHtml) {
+    await Clipboard.paste({ html: toClipboardHtml(translation), text: htmlToPlainText(translation) });
+    return;
+  }
+  await Clipboard.paste(translation);
+}
+
 export async function sendTranslateRequest({
   text: initialText,
   sourceLanguage,
@@ -110,7 +136,8 @@ export async function sendTranslateRequest({
     const { key, closeRaycastAfterTranslation } = prefs;
     onTranslateAction ??= prefs.onTranslateAction;
 
-    const text = initialText || (await readContent());
+    const rawText = initialText || (await readContent()) || "";
+    const { text, isHtml } = await resolveTranslatePayload(rawText);
 
     const toast = await showToast(Toast.Style.Animated, "Fetching translation...");
     try {
@@ -126,12 +153,13 @@ export async function sendTranslateRequest({
             source_lang: sourceLanguage,
             target_lang: targetLanguage,
             formality,
+            ...(isHtml ? { tag_handling: "html" } : {}),
           },
         })
         .json<{ translations: { text: string; detected_source_language: SourceLanguage }[] }>();
       switch (onTranslateAction) {
         case "clipboard":
-          await Clipboard.copy(translation);
+          await copyTranslatedText(translation, isHtml);
           await showToast(Toast.Style.Success, "The translation was copied to your clipboard.");
           await delayedCloseWindow(closeRaycastAfterTranslation);
           break;
@@ -143,6 +171,7 @@ export async function sendTranslateRequest({
               context: {
                 translation,
                 sourceLanguage: detectedSourceLanguage,
+                isHtml,
               },
             });
           } catch {
@@ -156,14 +185,14 @@ export async function sendTranslateRequest({
           break;
         case "paste":
           await closeMainWindow();
-          await Clipboard.paste(translation);
+          await pasteTranslatedText(translation, isHtml);
           break;
         default:
           toast.hide();
           await delayedCloseWindow(closeRaycastAfterTranslation, 500);
           break;
       }
-      return { translation, detectedSourceLanguage };
+      return { translation, detectedSourceLanguage, isHtml };
     } catch (error) {
       await showToast(Toast.Style.Failure, "Something went wrong", gotErrorToString(error));
     }
