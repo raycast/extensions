@@ -37,19 +37,17 @@ export function DayDetails({ day, currentMonth, currentYear }: DayDetailsProps) 
 
   useEffect(() => {
     async function fetchLocationAndHolidays() {
-      try {
-        const loc = await getCurrentLocation();
-        setLocation(`${loc.city}, ${loc.countryCode}`);
+      const loc = await getCurrentLocation();
+      setLocation(`${loc.city}, ${loc.countryCode}`);
 
-        if (loc.countryCode === "Unknown") {
-          setHolidays([]);
-          return;
-        }
+      if (loc.countryCode === "Unknown") {
+        setHolidays([]);
+        return;
+      }
 
         const holidays = await getHolidays(currentYear, loc.countryCode);
         setHolidays(holidays as { name: unknown; date: string }[]);
       } catch {
-        setLocation("Location unavailable");
         setHolidays([]);
       }
     }
