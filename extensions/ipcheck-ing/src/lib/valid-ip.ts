@@ -14,9 +14,19 @@ export function isValidIP(ip: string): boolean {
   const hasCompressedGroup = doubleColonParts.length === 2;
   const groups = doubleColonParts.flatMap((part) => (part === "" ? [] : part.split(":")));
 
+  // An IPv4-mapped or IPv4-embedded tail ("::ffff:192.0.2.1") is a dotted quad in the last
+  // group, standing in for two hextets (RFC 4291 §2.5.5).
+  let hextetCount = groups.length;
+  const lastGroup = groups[groups.length - 1];
+  if (lastGroup !== undefined && lastGroup.includes(".")) {
+    if (!IPV4_PATTERN.test(lastGroup)) return false;
+    groups.pop();
+    hextetCount += 1;
+  }
+
   if (groups.some((group) => !/^[0-9a-f]{1,4}$/i.test(group))) return false;
 
-  return hasCompressedGroup ? groups.length < 8 : groups.length === 8;
+  return hasCompressedGroup ? hextetCount < 8 : hextetCount === 8;
 }
 
 /** The ':' separator only exists in v6. Does not validate — run isValidIP first. */
@@ -110,6 +120,7 @@ function describeReservedV6(ip: string): string | undefined {
 
   if (address === "::1") return "Loopback (RFC 4291)";
   if (address === "::") return "Unspecified (RFC 4291)";
+  if (/^::ffff:/i.test(address)) return "IPv4-mapped (RFC 4291)";
   if (h0 >= 0xfe80 && h0 <= 0xfebf) return "Link-local (RFC 4291)";
   if (h0 >= 0xfc00 && h0 <= 0xfdff) return "Unique local (RFC 4193)";
   if (h0 >= 0xff00) return "Multicast (RFC 4291)";
