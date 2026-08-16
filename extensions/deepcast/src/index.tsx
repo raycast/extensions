@@ -8,6 +8,7 @@ import {
   LaunchProps,
   getPreferenceValues,
   Clipboard,
+  useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
@@ -24,7 +25,7 @@ import {
   delayedCloseWindow,
 } from "./utils";
 import TranslationView from "./components/TranslationView";
-import { htmlToDisplayText } from "./hyperlinks";
+import { htmlToPlainText } from "./hyperlinks";
 import transliterate from "@sindresorhus/transliterate";
 
 interface Values {
@@ -69,6 +70,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     closeRaycastAfterTranslation,
     defaultFormality,
   } = getPreferenceValues<Preferences>();
+  const { push } = useNavigation();
   const [loading, setLoading] = useState(false);
   const [sourceText, setSourceText] = useState(props.fallbackText ?? "");
   const [translation, setTranslation] = useState("");
@@ -83,7 +85,7 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
   useEffect(() => {
     if (props.fallbackText) return;
     getSelection().then((content) => {
-      setSourceText(content ?? "");
+      setSourceText((currentText) => currentText || content || "");
     });
   }, []);
 
@@ -104,9 +106,13 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
     if (!response) return;
 
     const { translation, detectedSourceLanguage, isHtml } = response;
-    setTranslation(isHtml ? htmlToDisplayText(translation) : translation);
+    setTranslation(isHtml ? htmlToPlainText(translation) : translation);
     setHtmlTranslation(isHtml ? translation : undefined);
     setDetectedSourceLanguage(detectedSourceLanguage);
+
+    if (isHtml) {
+      push(<TranslationView translation={translation} sourceLanguage={detectedSourceLanguage} isHtml={true} />);
+    }
   };
 
   const switchLanguages = async () => {
@@ -193,13 +199,13 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
           <ActionPanel.Section>
             <Action
               icon={Icon.CopyClipboard}
-              title="Copy Translation"
+              title="Copy Rich Text"
               shortcut={{ modifiers: ["cmd"], key: "." }}
               onAction={handleCopyToClipboard}
             />
             <Action
               icon={Icon.Document}
-              title="Paste in Frontmost App"
+              title="Paste Translation"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
               onAction={handlePasteInFrontmostApp}
             />
@@ -210,6 +216,21 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
               onAction={handleCopyTransliteration}
             />
           </ActionPanel.Section>
+          {translation.length > 0 && (
+            <ActionPanel.Section>
+              <Action.Push
+                icon={Icon.Eye}
+                title="View Formatted Translation"
+                target={
+                  <TranslationView
+                    translation={htmlTranslation ?? translation}
+                    sourceLanguage={detectedSourceLanguage}
+                    isHtml={Boolean(htmlTranslation)}
+                  />
+                }
+              />
+            </ActionPanel.Section>
+          )}
           <ActionPanel.Section>
             <Action.OpenInBrowser title="Free API Key" url="https://www.deepl.com/pro-api" />
             <SwitchLanguagesAction onSwitchLanguages={switchLanguages} />
@@ -259,12 +280,12 @@ const Command = (props: LaunchProps<{ launchContext?: LaunchContext }>) => {
           </Form.Dropdown>
         </>
       )}
-      <Form.TextArea id="translation" value={translation} />
+      <Form.TextArea id="translation" title="Translation" value={translation} />
+      {translation.length > 0 && (
+        <Form.Description title="Copied" text="Rich text is on the clipboard. Paste with ⌘V." />
+      )}
       {(showTransliteration == "always" || (showTransliteration == "whenProvided" && transliteration.length > 0)) && (
-        <>
-          <Form.TextArea id="translation" value={translation} />
-          <Form.Description title="Transliteration" text={transliteration} />
-        </>
+        <Form.Description title="Transliteration" text={transliteration} />
       )}
     </Form>
   );

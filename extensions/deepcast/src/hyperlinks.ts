@@ -1,7 +1,13 @@
 const HTML_HYPERLINK_PATTERN = /<a\b[^>]*\bhref\s*=/i;
+const HTML_MARKUP_PATTERN =
+  /<\/?(?:a|abbr|b|br|div|em|font|h[1-6]|i|li|ol|p|span|strong|table|td|th|tr|u|ul|blockquote|pre|code|img|sub|sup)(?:\s|\/|>)/i;
 const MARKDOWN_HYPERLINK_PATTERN = /(?<!!)\[([^\]]+)\]\((https?:\/\/[^)\s]+|mailto:[^)\s]+|www\.[^)\s]+)\)/;
 const MARKDOWN_HYPERLINK_GLOBAL_PATTERN = /(?<!!)\[([^\]]+)\]\((https?:\/\/[^)\s]+|mailto:[^)\s]+|www\.[^)\s]+)\)/g;
 const HTML_ANCHOR_GLOBAL_PATTERN = /<a\b[^>]*\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))[^>]*>([\s\S]*?)<\/a>/gi;
+
+export function containsHtmlMarkup(text: string): boolean {
+  return HTML_MARKUP_PATTERN.test(text);
+}
 
 export function containsHtmlHyperlinks(text: string): boolean {
   return HTML_HYPERLINK_PATTERN.test(text);
@@ -81,11 +87,33 @@ export function htmlToDisplayText(html: string): string {
   return htmlToPlainText(htmlLinksToMarkdown(html));
 }
 
-export function toClipboardHtml(fragment: string): string {
-  if (/<html[\s>]/i.test(fragment)) {
+export function toRichClipboardContent(fragment: string): { html: string } {
+  return { html: extractHtmlFragment(fragment) };
+}
+
+export function clipboardMarkupForText(
+  text: string,
+  clipboardText: string | undefined,
+  clipboardHtml: string | undefined,
+): string | undefined {
+  if (!clipboardHtml || !normalizeForCompare(text)) {
+    return undefined;
+  }
+
+  const fragment = extractHtmlFragment(clipboardHtml);
+  if (!containsHtmlMarkup(fragment)) {
+    return undefined;
+  }
+
+  const textNorm = normalizeForCompare(text);
+  const clipboardNorm = clipboardText ? normalizeForCompare(clipboardText) : "";
+  const visibleNorm = normalizeForCompare(htmlToPlainText(fragment));
+
+  if (clipboardNorm === textNorm || visibleNorm === textNorm) {
     return fragment;
   }
-  return `<html><body>${fragment}</body></html>`;
+
+  return undefined;
 }
 
 export function prepareFromText(text: string): { text: string; isHtml: boolean } {
@@ -98,14 +126,10 @@ export function prepareFromText(text: string): { text: string; isHtml: boolean }
   return { text, isHtml: false };
 }
 
-export function prepareFromClipboardHtml(
-  text: string,
-  clipboardText: string | undefined,
-  clipboardHtml: string | undefined,
-): { text: string; isHtml: boolean } {
-  if (clipboardHtml && clipboardText && normalizeForCompare(text) === normalizeForCompare(clipboardText)) {
-    const fragment = extractHtmlFragment(clipboardHtml);
-    if (containsHtmlHyperlinks(fragment)) {
+export function prepareTranslationPayload(text: string, sourceHtml?: string): { text: string; isHtml: boolean } {
+  if (sourceHtml) {
+    const fragment = extractHtmlFragment(sourceHtml);
+    if (containsHtmlMarkup(fragment)) {
       return { text: fragment, isHtml: true };
     }
   }

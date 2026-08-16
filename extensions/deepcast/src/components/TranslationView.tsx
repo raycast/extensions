@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Detail, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { htmlToDisplayText } from "../hyperlinks";
 import {
   SourceLanguage,
@@ -46,8 +46,8 @@ export const TranslationView = (props: { translation: string | null; sourceLangu
       markdown={displayedTranslation}
       actions={
         <ActionPanel>
-          <Action title="Copy to Clipboard" onAction={handleCopyToClipboard} />
-          <Action title="Paste in Frontmost App" onAction={handlePasteInFrontmostApp} />
+          <Action icon={Icon.CopyClipboard} title="Copy Rich Text" onAction={handleCopyToClipboard} />
+          <Action icon={Icon.Document} title="Paste Translation" onAction={handlePasteInFrontmostApp} />
         </ActionPanel>
       }
     />

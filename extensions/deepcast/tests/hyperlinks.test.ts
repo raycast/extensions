@@ -2,15 +2,17 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   containsHtmlHyperlinks,
+  containsHtmlMarkup,
   containsMarkdownHyperlinks,
   extractHtmlFragment,
   htmlLinksToMarkdown,
   htmlToDisplayText,
   htmlToPlainText,
   markdownLinksToHtml,
-  prepareFromClipboardHtml,
+  clipboardMarkupForText,
   prepareFromText,
-  toClipboardHtml,
+  prepareTranslationPayload,
+  toRichClipboardContent,
 } from "../src/hyperlinks.ts";
 
 describe("extractHtmlFragment", () => {
@@ -36,6 +38,12 @@ describe("link detection", () => {
     assert.equal(containsHtmlHyperlinks("see https://x.com"), false);
     assert.equal(containsMarkdownHyperlinks("[x](https://x.com)"), true);
     assert.equal(containsMarkdownHyperlinks("![x](https://x.com/a.png)"), false);
+  });
+
+  it("detects Gmail-style markup without treating autolinks as tags", () => {
+    assert.equal(containsHtmlMarkup(`<div dir="ltr">Hello <a href="https://x.com">x</a></div>`), true);
+    assert.equal(containsHtmlMarkup(`<span style="font-family:Arial">Hi</span>`), true);
+    assert.equal(containsHtmlMarkup("see <https://example.com>"), false);
   });
 });
 
@@ -74,37 +82,69 @@ describe("prepareFromText", () => {
   });
 });
 
-describe("prepareFromClipboardHtml", () => {
-  it("uses clipboard HTML when the plain text matches", () => {
-    const result = prepareFromClipboardHtml(
-      "Visit this site",
-      "Visit this site",
-      `<html><body><!--StartFragment-->Visit <a href="https://example.com">this site</a><!--EndFragment--></body></html>`,
-    );
-    assert.deepEqual(result, {
+describe("prepareTranslationPayload", () => {
+  it("uses source HTML only when it is provided", () => {
+    const html = `<html><body><!--StartFragment-->Visit <a href="https://example.com">this site</a><!--EndFragment--></body></html>`;
+    assert.deepEqual(prepareTranslationPayload("Visit this site", html), {
       text: `Visit <a href="https://example.com">this site</a>`,
       isHtml: true,
     });
   });
 
-  it("falls back to the typed text when clipboard content differs", () => {
-    const result = prepareFromClipboardHtml(
-      "something else [docs](https://example.com)",
-      "Visit this site",
-      `<a href="https://example.com">this site</a>`,
-    );
-    assert.deepEqual(result, {
-      text: `something else <a href="https://example.com">docs</a>`,
+  it("does not apply unrelated HTML when none was provided with the source", () => {
+    assert.deepEqual(prepareTranslationPayload("Visit this site"), {
+      text: "Visit this site",
+      isHtml: false,
+    });
+  });
+
+  it("preserves non-link HTML formatting when it is provided", () => {
+    assert.deepEqual(prepareTranslationPayload("hello", "<p>hello</p>"), {
+      text: "<p>hello</p>",
+      isHtml: true,
+    });
+  });
+
+  it("still converts markdown links in the source text", () => {
+    assert.deepEqual(prepareTranslationPayload("see [docs](https://example.com)"), {
+      text: `see <a href="https://example.com">docs</a>`,
       isHtml: true,
     });
   });
 });
 
-describe("toClipboardHtml", () => {
-  it("wraps fragments in a document", () => {
+describe("clipboardMarkupForText", () => {
+  it("uses clipboard HTML when the pasted text matches", () => {
+    const html = `<html><body><!--StartFragment-->Visit <a href="https://example.com">this site</a><!--EndFragment--></body></html>`;
     assert.equal(
-      toClipboardHtml(`<a href="https://example.com">Docs</a>`),
-      `<html><body><a href="https://example.com">Docs</a></body></html>`,
+      clipboardMarkupForText("Visit this site", "Visit this site", html),
+      `Visit <a href="https://example.com">this site</a>`,
+    );
+  });
+
+  it("uses Gmail-style HTML when clipboard text matches even if wrappers differ", () => {
+    const html = `<html><body><!--StartFragment--><div dir="ltr">Hello <a href="https://example.com">world</a></div><!--EndFragment--></body></html>`;
+    assert.equal(
+      clipboardMarkupForText("Hello world", "Hello world", html),
+      `<div dir="ltr">Hello <a href="https://example.com">world</a></div>`,
+    );
+  });
+
+  it("does not use HTML for different visible text", () => {
+    assert.equal(
+      clipboardMarkupForText("something else", "Visit this site", `<a href="https://example.com">this site</a>`),
+      undefined,
+    );
+  });
+});
+
+describe("toRichClipboardContent", () => {
+  it("publishes an HTML fragment without a plain-text flavor", () => {
+    assert.deepEqual(
+      toRichClipboardContent(
+        `<html><body><!--StartFragment--><a href="https://example.com">Docs</a><!--EndFragment--></body></html>`,
+      ),
+      { html: `<a href="https://example.com">Docs</a>` },
     );
   });
 });

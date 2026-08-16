@@ -2,7 +2,7 @@
 
 ## [Hyperlinks] - {PR_MERGE_DATE}
 
-- Preserve hyperlinks when translating copied HTML or markdown links, including copy and paste as rich text.
+- Preserve original HTML formatting and hyperlinks when translating copied rich text, then copy the result as rich text so it can be pasted back with ⌘V.
 
 ## [Newlines] - 2025-12-16
 
