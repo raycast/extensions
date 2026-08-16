@@ -8,15 +8,7 @@ function probeAudioDuration(filePath: string): Promise<number> {
   return new Promise((resolve, reject) => {
     const ffprobe = spawn(
       "ffprobe",
-      [
-        "-v",
-        "error",
-        "-show_entries",
-        "format=duration:stream=duration",
-        "-of",
-        "json",
-        filePath,
-      ],
+      ["-v", "error", "-show_entries", "format=duration:stream=duration", "-of", "json", filePath],
       { env: getAugmentedEnv() }
     );
 
@@ -60,9 +52,7 @@ function probeAudioDuration(filePath: string): Promise<number> {
   });
 }
 
-export async function compressAudio(
-  options: CompressionOptions
-): Promise<CompressionResult> {
+export async function compressAudio(options: CompressionOptions): Promise<CompressionResult> {
   const { inputPath, targetSizeMB, onProgress } = options;
   const originalStats = fs.statSync(inputPath);
   const originalSizeBytes = originalStats.size;
@@ -84,25 +74,12 @@ export async function compressAudio(
 
   const outputPath = options.outputPath || generateOutputPath(inputPath, "m4a");
 
-  onProgress?.(
-    30,
-    `Encoding audio at ${Math.round(targetBitrateBps / 1000)} kbps...`
-  );
+  onProgress?.(30, `Encoding audio at ${Math.round(targetBitrateBps / 1000)} kbps...`);
 
   await new Promise<void>((resolve, reject) => {
     const ffmpeg = spawn(
       "ffmpeg",
-      [
-        "-y",
-        "-i",
-        inputPath,
-        "-vn",
-        "-c:a",
-        "aac",
-        "-b:a",
-        `${targetBitrateBps}`,
-        outputPath,
-      ],
+      ["-y", "-i", inputPath, "-vn", "-c:a", "aac", "-b:a", `${targetBitrateBps}`, outputPath],
       { env: getAugmentedEnv() }
     );
 
@@ -132,10 +109,13 @@ export async function compressAudio(
   });
 
   const finalStats = fs.statSync(outputPath);
-  const { ratioPercent } = calculateCompressionRatio(
-    originalSizeBytes,
-    finalStats.size
-  );
+  if (finalStats.size > targetBytes) {
+    throw new Error(
+      `Could not compress audio below target size of ${targetSizeMB} MB (${formatBytes(finalStats.size)}). File duration is too long for this target size at acceptable audio quality.`
+    );
+  }
+
+  const { ratioPercent } = calculateCompressionRatio(originalSizeBytes, finalStats.size);
 
   onProgress?.(100, "Done!");
 

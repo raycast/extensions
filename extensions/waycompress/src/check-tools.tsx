@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  Color,
-  Clipboard,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, Clipboard, showToast, Toast } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { checkAllSystemTools } from "./utils/system";
 import { SystemToolStatus } from "./engines/types";
@@ -27,10 +18,7 @@ export default function CheckToolsCommand() {
   }, []);
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Compression Engine Diagnostics"
-    >
+    <List isLoading={isLoading} navigationTitle="Compression Engine Diagnostics">
       <List.Section title="Installed Compression Engines & Dependencies">
         {tools.map((tool) => (
           <List.Item
@@ -54,9 +42,7 @@ export default function CheckToolsCommand() {
                     title="Copy Tool Info"
                     icon={Icon.CopyClipboard}
                     onAction={async () => {
-                      await Clipboard.copy(
-                        `${tool.name}: ${tool.version}\n${tool.notes}`
-                      );
+                      await Clipboard.copy(`${tool.name}: ${tool.version}\n${tool.notes}`);
                       await showToast({
                         style: Toast.Style.Success,
                         title: "Copied Info",
@@ -68,10 +54,7 @@ export default function CheckToolsCommand() {
                       title="Copy Install Command (winget/brew)"
                       icon={Icon.Terminal}
                       onAction={async () => {
-                        const cmd =
-                          process.platform === "win32"
-                            ? "winget install Gyan.FFmpeg"
-                            : "brew install ffmpeg";
+                        const cmd = process.platform === "win32" ? "winget install Gyan.FFmpeg" : "brew install ffmpeg";
                         await Clipboard.copy(cmd);
                         await showToast({
                           style: Toast.Style.Success,

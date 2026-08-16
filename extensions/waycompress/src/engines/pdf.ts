@@ -22,9 +22,7 @@ async function isGhostscriptAvailable(): Promise<string | null> {
   return null;
 }
 
-export async function compressPdf(
-  options: CompressionOptions
-): Promise<CompressionResult> {
+export async function compressPdf(options: CompressionOptions): Promise<CompressionResult> {
   const { inputPath, targetSizeMB, onProgress } = options;
   const originalStats = fs.statSync(inputPath);
   const originalSizeBytes = originalStats.size;
@@ -70,10 +68,13 @@ export async function compressPdf(
       finalStats = fs.statSync(outputPath);
     }
 
-    const { ratioPercent } = calculateCompressionRatio(
-      originalSizeBytes,
-      finalStats.size
-    );
+    if (finalStats.size > targetBytes) {
+      throw new Error(
+        `Could not compress PDF below target size of ${targetSizeMB} MB (${formatBytes(finalStats.size)}).`
+      );
+    }
+
+    const { ratioPercent } = calculateCompressionRatio(originalSizeBytes, finalStats.size);
     onProgress?.(100, "Done!");
 
     return {
@@ -99,10 +100,13 @@ export async function compressPdf(
     fs.writeFileSync(outputPath, pdfBytes);
 
     const finalStats = fs.statSync(outputPath);
-    const { ratioPercent } = calculateCompressionRatio(
-      originalSizeBytes,
-      finalStats.size
-    );
+    if (finalStats.size > targetBytes) {
+      throw new Error(
+        `Could not compress PDF below target size of ${targetSizeMB} MB (${formatBytes(finalStats.size)}). Install Ghostscript for deep PDF compression.`
+      );
+    }
+
+    const { ratioPercent } = calculateCompressionRatio(originalSizeBytes, finalStats.size);
     onProgress?.(100, "Done!");
 
     return {

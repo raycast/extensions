@@ -47,12 +47,7 @@ try {
 } catch {}
 `.trim();
 
-    const proc = spawn("powershell.exe", [
-      "-NoProfile",
-      "-NonInteractive",
-      "-Command",
-      psScript,
-    ]);
+    const proc = spawn("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", psScript]);
     let output = "";
 
     proc.stdout.on("data", (d) => {
@@ -86,9 +81,7 @@ try {
 /**
  * Cross-platform detection of active selected file in Windows Explorer or macOS Finder
  */
-export async function getActiveFileManagerSelectedFile(): Promise<
-  string | null
-> {
+export async function getActiveFileManagerSelectedFile(): Promise<string | null> {
   if (process.platform === "win32") {
     return await getSelectedWindowsExplorerFile();
   } else {
@@ -173,16 +166,11 @@ export async function checkAllSystemTools(): Promise<SystemToolStatus[]> {
     name: "FFprobe (Stream Analyzer)",
     available: ffprobeCheck.available,
     version: ffprobeCheck.version || "Not found",
-    notes: ffprobeCheck.available
-      ? "Ready for stream, resolution & bitrate analysis"
-      : "Bundled with FFmpeg",
+    notes: ffprobeCheck.available ? "Ready for stream, resolution & bitrate analysis" : "Bundled with FFmpeg",
   });
 
   // Check Ghostscript
-  const gsCheck = await checkCliCommand(
-    process.platform === "win32" ? "gswin64c" : "gs",
-    "--version"
-  );
+  const gsCheck = await checkCliCommand(process.platform === "win32" ? "gswin64c" : "gs", "--version");
   tools.push({
     name: "Ghostscript (Advanced PDF)",
     available: gsCheck.available,

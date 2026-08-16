@@ -56,12 +56,8 @@ export function probeVideo(filePath: string): Promise<VideoProbeResult> {
         let hasAudio = false;
         let audioBitrate = 128000;
 
-        const videoStream = data.streams?.find(
-          (s: { codec_type: string }) => s.codec_type === "video"
-        );
-        const audioStream = data.streams?.find(
-          (s: { codec_type: string }) => s.codec_type === "audio"
-        );
+        const videoStream = data.streams?.find((s: { codec_type: string }) => s.codec_type === "video");
+        const audioStream = data.streams?.find((s: { codec_type: string }) => s.codec_type === "audio");
 
         if (videoStream) {
           width = videoStream.width || 1920;
@@ -116,15 +112,8 @@ function parseFfmpegTime(timeStr: string): number {
   return 0;
 }
 
-export async function compressVideo(
-  options: CompressionOptions
-): Promise<CompressionResult> {
-  const {
-    inputPath,
-    targetSizeMB,
-    qualityMode = "smart_auto",
-    onProgress,
-  } = options;
+export async function compressVideo(options: CompressionOptions): Promise<CompressionResult> {
+  const { inputPath, targetSizeMB, qualityMode = "smart_auto", onProgress } = options;
   const originalStats = fs.statSync(inputPath);
   const originalSizeBytes = originalStats.size;
   const targetBytes = Math.floor(targetSizeMB * 1024 * 1024);
@@ -169,9 +158,7 @@ export async function compressVideo(
   let scaleFilter = "scale=trunc(iw/2)*2:trunc(ih/2)*2";
 
   if (qualityMode !== "strict_resolution") {
-    const bpp =
-      chosenVideoBitrate /
-      (probe.width * probe.height * Math.max(24, probe.fps));
+    const bpp = chosenVideoBitrate / (probe.width * probe.height * Math.max(24, probe.fps));
 
     if (bpp < 0.05) {
       // Need downscaling to prevent macroblocking
@@ -195,12 +182,7 @@ export async function compressVideo(
   const passLogPrefix = path.join(os.tmpdir(), `waycompress_${Date.now()}`);
 
   // Helper to run ffmpeg pass
-  const runFfmpegPass = (
-    args: string[],
-    passNumber: number,
-    weight: number,
-    offset: number
-  ) => {
+  const runFfmpegPass = (args: string[], passNumber: number, weight: number, offset: number) => {
     return new Promise<void>((resolve, reject) => {
       const ffmpeg = spawn("ffmpeg", args, { env: getAugmentedEnv() });
 
@@ -209,14 +191,8 @@ export async function compressVideo(
         const timeMatch = text.match(/time=(\d{2}:\d{2}:\d{2}(?:\.\d+)?)/);
         if (timeMatch && probe.duration > 0) {
           const currentTime = parseFfmpegTime(timeMatch[1]);
-          const passPercent = Math.min(
-            100,
-            (currentTime / probe.duration) * 100
-          );
-          const totalPercent = Math.min(
-            99,
-            Math.round(offset + passPercent * weight)
-          );
+          const passPercent = Math.min(100, (currentTime / probe.duration) * 100);
+          const totalPercent = Math.min(99, Math.round(offset + passPercent * weight));
           onProgress?.(
             totalPercent,
             `Pass ${passNumber}/2: ${Math.round(passPercent)}% (Bitrate: ${Math.round(chosenVideoBitrate / 1000)}k)...`
@@ -228,9 +204,7 @@ export async function compressVideo(
         if (code === 0) {
           resolve();
         } else {
-          reject(
-            new Error(`FFmpeg pass ${passNumber} failed with code ${code}`)
-          );
+          reject(new Error(`FFmpeg pass ${passNumber} failed with code ${code}`));
         }
       });
 
@@ -291,13 +265,7 @@ export async function compressVideo(
       passLogPrefix,
       ...(scaleFilter ? ["-vf", scaleFilter] : []),
       ...(probe.hasAudio
-        ? [
-            "-c:a",
-            "aac",
-            "-b:a",
-            `${chosenAudioBitrate}`,
-            ...(chosenAudioBitrate <= 48000 ? ["-ac", "1"] : []),
-          ]
+        ? ["-c:a", "aac", "-b:a", `${chosenAudioBitrate}`, ...(chosenAudioBitrate <= 48000 ? ["-ac", "1"] : [])]
         : ["-an"]),
       "-pix_fmt",
       "yuv420p",
@@ -311,10 +279,7 @@ export async function compressVideo(
 
     // Clean up temporary 2-pass log files
     try {
-      const passFiles = [
-        `${passLogPrefix}-0.log`,
-        `${passLogPrefix}-0.log.mbtree`,
-      ];
+      const passFiles = [`${passLogPrefix}-0.log`, `${passLogPrefix}-0.log.mbtree`];
       for (const pf of passFiles) {
         if (fs.existsSync(pf)) fs.unlinkSync(pf);
       }
@@ -323,10 +288,13 @@ export async function compressVideo(
     }
 
     const finalStats = fs.statSync(outputPath);
-    const { ratioPercent } = calculateCompressionRatio(
-      originalSizeBytes,
-      finalStats.size
-    );
+    if (finalStats.size > targetBytes) {
+      throw new Error(
+        `Could not compress video below target size of ${targetSizeMB} MB (${formatBytes(finalStats.size)}). The video duration is too long for this target size at acceptable video quality.`
+      );
+    }
+
+    const { ratioPercent } = calculateCompressionRatio(originalSizeBytes, finalStats.size);
 
     onProgress?.(100, "Compression complete!");
 
@@ -350,10 +318,7 @@ export async function compressVideo(
   } catch (err: unknown) {
     // Clean up temporary log files on error
     try {
-      const passFiles = [
-        `${passLogPrefix}-0.log`,
-        `${passLogPrefix}-0.log.mbtree`,
-      ];
+      const passFiles = [`${passLogPrefix}-0.log`, `${passLogPrefix}-0.log.mbtree`];
       for (const pf of passFiles) {
         if (fs.existsSync(pf)) fs.unlinkSync(pf);
       }

@@ -12,18 +12,9 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import fs from "fs";
-import {
-  compressFile,
-  QualityMode,
-  CompressionResult,
-  getDetectedFileInfo,
-  DetectedFileInfo,
-} from "./engines";
+import { compressFile, QualityMode, CompressionResult, getDetectedFileInfo, DetectedFileInfo } from "./engines";
 import { formatBytes, calculateCompressionRatio } from "./utils/format";
-import {
-  getActiveFileManagerSelectedFile,
-  revealInFileManager,
-} from "./utils/system";
+import { getActiveFileManagerSelectedFile, revealInFileManager } from "./utils/system";
 
 interface FormValues {
   files: string[];
@@ -84,8 +75,7 @@ export default function CompressFileCommand() {
   const handleSubmit = async (values: FormValues) => {
     if (isLoading) return;
 
-    const inputPath =
-      values.files && values.files.length > 0 ? values.files[0] : selectedFile;
+    const inputPath = values.files && values.files.length > 0 ? values.files[0] : selectedFile;
 
     if (!inputPath || !fs.existsSync(inputPath)) {
       await showToast({
@@ -96,9 +86,7 @@ export default function CompressFileCommand() {
       return;
     }
 
-    const rawTargetStr = (values.targetMB || targetMB || "")
-      .trim()
-      .replace(",", ".");
+    const rawTargetStr = (values.targetMB || targetMB || "").trim().replace(",", ".");
     const targetNum = parseFloat(rawTargetStr);
     if (isNaN(targetNum) || targetNum <= 0) {
       await showToast({
@@ -133,10 +121,7 @@ export default function CompressFileCommand() {
 
       setIsLoading(false);
 
-      const ratio = calculateCompressionRatio(
-        res.originalSizeBytes,
-        res.compressedSizeBytes
-      );
+      const ratio = calculateCompressionRatio(res.originalSizeBytes, res.compressedSizeBytes);
 
       toast.style = Toast.Style.Success;
       toast.title = "Compression Complete!";
@@ -163,11 +148,7 @@ export default function CompressFileCommand() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Start Compression"
-            icon={Icon.Play}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Start Compression" icon={Icon.Play} onSubmit={handleSubmit} />
           {selectedFile && (
             <Action
               title={`Reveal Selected in ${fileManagerName}`}
@@ -201,47 +182,14 @@ export default function CompressFileCommand() {
 
       <Form.Separator />
 
-      <Form.Dropdown
-        id="preset"
-        title="Quick Presets"
-        defaultValue="20"
-        onChange={handlePresetChange}
-      >
-        <Form.Dropdown.Item
-          value="20"
-          title="Discord Free Limit (20 MB)"
-          icon={Icon.Message}
-        />
-        <Form.Dropdown.Item
-          value="16"
-          title="WhatsApp Limit (16 MB)"
-          icon={Icon.Phone}
-        />
-        <Form.Dropdown.Item
-          value="10"
-          title="Email Attachment (10 MB)"
-          icon={Icon.Envelope}
-        />
-        <Form.Dropdown.Item
-          value="8"
-          title="Legacy Discord (8 MB)"
-          icon={Icon.Document}
-        />
-        <Form.Dropdown.Item
-          value="50"
-          title="Large Share (50 MB)"
-          icon={Icon.HardDrive}
-        />
-        <Form.Dropdown.Item
-          value="100"
-          title="Video Share (100 MB)"
-          icon={Icon.Video}
-        />
-        <Form.Dropdown.Item
-          value="custom"
-          title="Custom MB Value..."
-          icon={Icon.Pencil}
-        />
+      <Form.Dropdown id="preset" title="Quick Presets" defaultValue="20" onChange={handlePresetChange}>
+        <Form.Dropdown.Item value="20" title="Discord Free Limit (20 MB)" icon={Icon.Message} />
+        <Form.Dropdown.Item value="16" title="WhatsApp Limit (16 MB)" icon={Icon.Phone} />
+        <Form.Dropdown.Item value="10" title="Email Attachment (10 MB)" icon={Icon.Envelope} />
+        <Form.Dropdown.Item value="8" title="Legacy Discord (8 MB)" icon={Icon.Document} />
+        <Form.Dropdown.Item value="50" title="Large Share (50 MB)" icon={Icon.HardDrive} />
+        <Form.Dropdown.Item value="100" title="Video Share (100 MB)" icon={Icon.Video} />
+        <Form.Dropdown.Item value="custom" title="Custom MB Value..." icon={Icon.Pencil} />
       </Form.Dropdown>
 
       <Form.TextField
@@ -279,10 +227,7 @@ export default function CompressFileCommand() {
 }
 
 function CompressionResultView({ result }: { result: CompressionResult }) {
-  const ratio = calculateCompressionRatio(
-    result.originalSizeBytes,
-    result.compressedSizeBytes
-  );
+  const ratio = calculateCompressionRatio(result.originalSizeBytes, result.compressedSizeBytes);
 
   const fileManagerName = process.platform === "win32" ? "Explorer" : "Finder";
 
@@ -322,11 +267,7 @@ ${result.details ? `### Technical Details\n* ${result.details}` : ""}
             icon={Icon.Finder}
             onAction={() => revealInFileManager(result.outputPath)}
           />
-          <Action
-            title="Open Compressed File"
-            icon={Icon.Document}
-            onAction={() => open(result.outputPath)}
-          />
+          <Action title="Open Compressed File" icon={Icon.Document} onAction={() => open(result.outputPath)} />
           <Action
             title="Copy Output Path"
             icon={Icon.CopyClipboard}

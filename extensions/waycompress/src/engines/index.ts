@@ -15,9 +15,7 @@ export * from "./pdf";
 /**
  * Main compression dispatcher that routes to the appropriate engine
  */
-export async function compressFile(
-  options: CompressionOptions
-): Promise<CompressionResult> {
+export async function compressFile(options: CompressionOptions): Promise<CompressionResult> {
   const fileInfo = getDetectedFileInfo(options.inputPath);
   if (!fileInfo) {
     throw new Error(`File not found or inaccessible: ${options.inputPath}`);

@@ -32,31 +32,11 @@ const IMAGE_EXTS = new Set([
   ".svg",
 ]);
 
-const AUDIO_EXTS = new Set([
-  ".mp3",
-  ".wav",
-  ".m4a",
-  ".aac",
-  ".ogg",
-  ".flac",
-  ".opus",
-  ".wma",
-  ".aiff",
-]);
+const AUDIO_EXTS = new Set([".mp3", ".wav", ".m4a", ".aac", ".ogg", ".flac", ".opus", ".wma", ".aiff"]);
 
 const PDF_EXTS = new Set([".pdf"]);
 
-const ARCHIVE_EXTS = new Set([
-  ".zip",
-  ".rar",
-  ".7z",
-  ".tar",
-  ".gz",
-  ".bz2",
-  ".xz",
-  ".zst",
-  ".iso",
-]);
+const ARCHIVE_EXTS = new Set([".zip", ".rar", ".7z", ".tar", ".gz", ".bz2", ".xz", ".zst", ".iso"]);
 
 export function detectFileCategory(filePath: string): FileCategory {
   const ext = path.extname(filePath).toLowerCase();

@@ -42,12 +42,8 @@ export function formatDuration(seconds: number): string {
 /**
  * Calculate saved percentage and ratio
  */
-export function calculateCompressionRatio(
-  originalBytes: number,
-  newBytes: number
-) {
-  if (originalBytes <= 0)
-    return { ratioPercent: 100, savedBytes: 0, savedPercent: 0 };
+export function calculateCompressionRatio(originalBytes: number, newBytes: number) {
+  if (originalBytes <= 0) return { ratioPercent: 100, savedBytes: 0, savedPercent: 0 };
   const savedBytes = Math.max(0, originalBytes - newBytes);
   const savedPercent = Math.round((savedBytes / originalBytes) * 100);
   const ratioPercent = Math.round((newBytes / originalBytes) * 100);
@@ -61,10 +57,7 @@ export function calculateCompressionRatio(
 /**
  * Generate output path safely handling directory paths with dots (e.g. C:\John.Doe\file.mp4)
  */
-export function generateOutputPath(
-  inputPath: string,
-  customExt?: string
-): string {
+export function generateOutputPath(inputPath: string, customExt?: string): string {
   const dir = path.dirname(inputPath);
   const ext = path.extname(inputPath);
   const baseName = path.basename(inputPath, ext);

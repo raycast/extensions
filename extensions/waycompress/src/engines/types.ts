@@ -1,5 +1,4 @@
-export type FileCategory =
-  "video" | "image" | "audio" | "pdf" | "archive" | "unknown";
+export type FileCategory = "video" | "image" | "audio" | "pdf" | "archive" | "unknown";
 
 export type QualityMode = "smart_auto" | "strict_resolution" | "max_quality";
 

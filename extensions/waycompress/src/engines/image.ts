@@ -15,17 +15,7 @@ export function probeImage(filePath: string): Promise<ImageProbeResult> {
   return new Promise((resolve) => {
     const ffprobe = spawn(
       "ffprobe",
-      [
-        "-v",
-        "error",
-        "-select_streams",
-        "v:0",
-        "-show_entries",
-        "stream=width,height",
-        "-of",
-        "json",
-        filePath,
-      ],
+      ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "json", filePath],
       { env: getAugmentedEnv() }
     );
 
@@ -67,27 +57,19 @@ function runFfmpegImageEncode(
 
     if (outputExt === "gif") {
       const scaleStr =
-        scale < 0.99
-          ? `scale=trunc(iw*${scale.toFixed(3)}/2)*2:trunc(ih*${scale.toFixed(3)}/2)*2:flags=lanczos,`
-          : "";
+        scale < 0.99 ? `scale=trunc(iw*${scale.toFixed(3)}/2)*2:trunc(ih*${scale.toFixed(3)}/2)*2:flags=lanczos,` : "";
       args.push(
         "-vf",
         `fps=15,${scaleStr}split[s0][s1];[s0]palettegen=max_colors=128[p];[s1][p]paletteuse=dither=bayer`
       );
     } else {
       if (scale < 0.99) {
-        args.push(
-          "-vf",
-          `scale=trunc(iw*${scale.toFixed(3)}/2)*2:trunc(ih*${scale.toFixed(3)}/2)*2`
-        );
+        args.push("-vf", `scale=trunc(iw*${scale.toFixed(3)}/2)*2:trunc(ih*${scale.toFixed(3)}/2)*2`);
       }
 
       if (outputExt === "jpg" || outputExt === "jpeg") {
         // ffmpeg jpeg quality: 2 (best) to 31 (lowest)
-        const qv = Math.max(
-          2,
-          Math.min(31, Math.round(31 - (qualityPercent / 100) * 29))
-        );
+        const qv = Math.max(2, Math.min(31, Math.round(31 - (qualityPercent / 100) * 29)));
         args.push("-q:v", `${qv}`);
       } else if (outputExt === "webp") {
         args.push("-c:v", "libwebp", "-quality", `${qualityPercent}`);
@@ -108,15 +90,8 @@ function runFfmpegImageEncode(
  * Universal FFmpeg Image Compression Engine
  * Zero native C++ addon dependencies, 100% reliable on Windows, macOS & Linux.
  */
-export async function compressImage(
-  options: CompressionOptions
-): Promise<CompressionResult> {
-  const {
-    inputPath,
-    targetSizeMB,
-    qualityMode = "smart_auto",
-    onProgress,
-  } = options;
+export async function compressImage(options: CompressionOptions): Promise<CompressionResult> {
+  const { inputPath, targetSizeMB, qualityMode = "smart_auto", onProgress } = options;
   const targetBytes = Math.floor(targetSizeMB * 1024 * 1024);
   const originalStats = fs.statSync(inputPath);
   const originalSizeBytes = originalStats.size;
@@ -129,16 +104,12 @@ export async function compressImage(
 
   // If input is PNG/BMP and significant reduction is needed, use WebP or JPG for high visual quality
   if (outputExt === "png" || outputExt === "bmp") {
-    if (
-      qualityMode === "max_quality" ||
-      originalSizeBytes > targetBytes * 1.5
-    ) {
+    if (qualityMode === "max_quality" || originalSizeBytes > targetBytes * 1.5) {
       outputExt = "jpg";
     }
   }
 
-  const outputPath =
-    options.outputPath || generateOutputPath(inputPath, outputExt);
+  const outputPath = options.outputPath || generateOutputPath(inputPath, outputExt);
 
   // If already under target size
   if (originalSizeBytes <= targetBytes) {
@@ -163,10 +134,7 @@ export async function compressImage(
 
   onProgress?.(15, "Optimizing image quality...");
 
-  const tempOut = path.join(
-    os.tmpdir(),
-    `waycompress_temp_${Date.now()}.${outputExt}`
-  );
+  const tempOut = path.join(os.tmpdir(), `waycompress_temp_${Date.now()}.${outputExt}`);
   let bestScale = 1.0;
   let bestQuality = 85;
   let successUnderTarget = false;
@@ -183,18 +151,9 @@ export async function compressImage(
 
     for (let iter = 0; iter < 4; iter++) {
       const midQ = Math.round((lowQ + highQ) / 2);
-      onProgress?.(
-        Math.min(85, 20 + sIdx * 8 + iter * 2),
-        `Optimizing: Quality ${midQ}% (${currentW}x${currentH})...`
-      );
+      onProgress?.(Math.min(85, 20 + sIdx * 8 + iter * 2), `Optimizing: Quality ${midQ}% (${currentW}x${currentH})...`);
 
-      const ok = await runFfmpegImageEncode(
-        inputPath,
-        tempOut,
-        scale,
-        midQ,
-        outputExt
-      );
+      const ok = await runFfmpegImageEncode(inputPath, tempOut, scale, midQ, outputExt);
       if (!ok || !fs.existsSync(tempOut)) continue;
 
       const size = fs.statSync(tempOut).size;
@@ -216,16 +175,21 @@ export async function compressImage(
 
   // Fallback if extreme compression is required
   if (!successUnderTarget || !fs.existsSync(outputPath)) {
+    if (qualityMode === "strict_resolution") {
+      try {
+        if (fs.existsSync(tempOut)) fs.unlinkSync(tempOut);
+      } catch {
+        // Ignore
+      }
+      throw new Error(
+        `Cannot compress image below ${targetSizeMB} MB in Strict Resolution mode without downscaling dimensions. Please choose 'Smart Balanced' mode or select a larger target size.`
+      );
+    }
+
     onProgress?.(88, "Applying aggressive optimization...");
     let aggressiveScale = 0.3;
     while (aggressiveScale >= 0.05) {
-      await runFfmpegImageEncode(
-        inputPath,
-        tempOut,
-        aggressiveScale,
-        25,
-        outputExt
-      );
+      await runFfmpegImageEncode(inputPath, tempOut, aggressiveScale, 25, outputExt);
       if (fs.existsSync(tempOut)) {
         const size = fs.statSync(tempOut).size;
         if (size <= targetBytes || aggressiveScale <= 0.08) {
@@ -247,16 +211,17 @@ export async function compressImage(
   }
 
   if (!fs.existsSync(outputPath)) {
-    throw new Error(
-      "FFmpeg failed to generate compressed image. Please ensure FFmpeg is properly installed."
-    );
+    throw new Error("FFmpeg failed to generate compressed image. Please ensure FFmpeg is properly installed.");
   }
 
   const finalStats = fs.statSync(outputPath);
-  const { ratioPercent } = calculateCompressionRatio(
-    originalSizeBytes,
-    finalStats.size
-  );
+  if (finalStats.size > targetBytes) {
+    throw new Error(
+      `Could not compress image below target size of ${targetSizeMB} MB (${formatBytes(finalStats.size)}). Please choose a larger target size.`
+    );
+  }
+
+  const { ratioPercent } = calculateCompressionRatio(originalSizeBytes, finalStats.size);
   const finalW = Math.max(64, Math.round(probe.width * bestScale));
   const finalH = Math.max(64, Math.round(probe.height * bestScale));
 
