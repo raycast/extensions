@@ -45,6 +45,7 @@ export function DayDetails({ day, currentMonth, currentYear }: DayDetailsProps) 
         return;
       }
 
+      try {
         const holidays = await getHolidays(currentYear, loc.countryCode);
         setHolidays(holidays as { name: unknown; date: string }[]);
       } catch {
