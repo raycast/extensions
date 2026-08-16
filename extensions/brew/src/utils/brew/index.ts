@@ -64,6 +64,7 @@ export {
   brewUnpinFormula,
   brewDoctor,
 } from "./actions";
+export type { BrewInstallOptions } from "./actions";
 
 // Upgrade with progress
 export { brewUpgradeWithProgress } from "./upgrade";
@@ -94,6 +95,7 @@ export {
   isCask,
   brewCompare,
   brewInstallCommand,
+  brewAdoptCommand,
   brewUninstallCommand,
   brewUpgradeCommand,
 } from "./helpers";

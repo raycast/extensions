@@ -13,16 +13,33 @@ import { brewIdentifier, brewCaskOption, isCask } from "./helpers";
 import { ExecError } from "../types";
 
 /**
+ * Options for installing a package.
+ */
+export interface BrewInstallOptions {
+  /** Reclaim an existing externally-installed package via `brew install --adopt` */
+  adopt?: boolean;
+}
+
+function brewInstallCommand(installable: Cask | Formula, options?: BrewInstallOptions): string {
+  return `install ${options?.adopt ? "--adopt " : ""}${brewCaskOption(installable)} ${brewIdentifier(installable)}`;
+}
+
+/**
  * Install a package.
  */
-export async function brewInstall(installable: Cask | Formula, cancel?: AbortSignal): Promise<void> {
+export async function brewInstall(
+  installable: Cask | Formula,
+  cancel?: AbortSignal,
+  options?: BrewInstallOptions,
+): Promise<void> {
   const identifier = brewIdentifier(installable);
   const isCaskType = isCask(installable);
   actionsLogger.log("Installing package", {
     identifier,
     type: isCaskType ? "cask" : "formula",
+    adopt: options?.adopt,
   });
-  await execBrew(`install ${brewCaskOption(installable)} ${identifier}`, cancel ? { signal: cancel } : undefined);
+  await execBrew(brewInstallCommand(installable, options), cancel ? { signal: cancel } : undefined);
   if (isCaskType) {
     (installable as Cask).installed = (installable as Cask).version;
   } else {
@@ -40,14 +57,16 @@ export async function brewInstallWithProgress(
   installable: Cask | Formula,
   onProgress?: ProgressCallback,
   cancel?: AbortSignal,
+  options?: BrewInstallOptions,
 ): Promise<void> {
   const identifier = brewIdentifier(installable);
   const isCaskType = isCask(installable);
   actionsLogger.log("Installing package with progress", {
     identifier,
     type: isCaskType ? "cask" : "formula",
+    adopt: options?.adopt,
   });
-  await execBrewWithProgress(`install ${brewCaskOption(installable)} ${identifier}`, onProgress, cancel);
+  await execBrewWithProgress(brewInstallCommand(installable, options), onProgress, cancel);
   if (isCaskType) {
     (installable as Cask).installed = (installable as Cask).version;
   } else {

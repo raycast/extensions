@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
 import {
+  brewAdoptCommand,
   brewInstallCommand,
   brewInstallPath,
   brewIsInstalled,
@@ -136,6 +137,7 @@ export function CaskActionPanel(props: {
           )}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
           {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
+          <Actions.FormulaAdoptAction formula={cask} onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
@@ -150,6 +152,17 @@ export function CaskActionPanel(props: {
             icon={terminalIcon}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={() => runCommandInTerminal(brewInstallCommand(cask))}
+          />
+          <Action.CopyToClipboard
+            title="Copy Adopt Command"
+            content={brewAdoptCommand(cask)}
+            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Adopt in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={() => runCommandInTerminal(brewAdoptCommand(cask))}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>
@@ -272,6 +285,7 @@ export function FormulaActionPanel(props: {
           )}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
           {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
+          <Actions.FormulaAdoptAction formula={formula} onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard
@@ -290,6 +304,17 @@ export function FormulaActionPanel(props: {
             icon={terminalIcon}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={() => runCommandInTerminal(brewInstallCommand(formula))}
+          />
+          <Action.CopyToClipboard
+            title="Copy Adopt Command"
+            content={brewAdoptCommand(formula)}
+            shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
+          />
+          <Action
+            title={`Run Adopt in ${terminalName}`}
+            icon={terminalIcon}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={() => runCommandInTerminal(brewAdoptCommand(formula))}
           />
         </ActionPanel.Section>
         <ActionPanel.Section>

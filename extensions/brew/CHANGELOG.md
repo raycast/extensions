@@ -1,5 +1,10 @@
 # Brew Changelog
 
+## [Adopt] - {PR_MERGE_DATE}
+
+- Added an "Adopt" action (⌘⇧I) in Search for packages not yet managed by Homebrew. It runs `brew install --adopt` to reclaim an externally-installed package (e.g. installed via a .dmg or another package manager) into Homebrew so it is covered by `brew upgrade`.
+- Includes "Copy Adopt Command" (⌘⇧⌥C) and "Run Adopt in <terminal>" (⌘⇧↵) variants for parity with the existing Install actions.
+
 ## [Pin visibility, outdated tags, detail pane] - 2026-08-04
 
 - Show Installed: pinned formulae now render in their own "Pinned Formulae" section at the bottom of the list, with the count as the section subtitle, instead of sitting unlabelled among the other formulae

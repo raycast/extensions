@@ -1,6 +1,7 @@
 import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { useBrewDependencies } from "../hooks/useBrewDependencies";
 import {
+  type BrewInstallOptions,
   type BrewProgress,
   brewInstallWithProgress,
   brewName,
@@ -28,6 +29,19 @@ export function FormulaInstallAction(props: { formula: Cask | Formula; onAction:
       shortcut={{ modifiers: ["cmd"], key: "i" }}
       onAction={async () => {
         props.onAction(await install(props.formula));
+      }}
+    />
+  );
+}
+
+export function FormulaAdoptAction(props: { formula: Cask | Formula; onAction: (result: boolean) => void }) {
+  return (
+    <Action
+      title="Adopt"
+      icon={Icon.Link}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
+      onAction={async () => {
+        props.onAction(await install(props.formula, { adopt: true }));
       }}
     />
   );
@@ -112,10 +126,11 @@ export function FormulaShowAllInstalled(props: { onAction: (result: boolean) => 
 
 /// Utilties
 
-async function install(formula: Cask | Formula): Promise<boolean> {
+async function install(formula: Cask | Formula, options?: BrewInstallOptions): Promise<boolean> {
   const name = brewName(formula);
+  const adopt = options?.adopt;
   const handle = showActionToast({
-    title: `Installing ${name}`,
+    title: `${adopt ? "Adopting" : "Installing"} ${name}`,
     message: "",
     cancelable: true,
   });
@@ -127,16 +142,17 @@ async function install(formula: Cask | Formula): Promise<boolean> {
         handle.updateMessage(progress.message);
       },
       handle.abort?.signal,
+      options,
     );
     // Use HUD for success - persists even if Raycast is closed
-    await handle.showSuccessHUD(`Installed ${name}`);
+    await handle.showSuccessHUD(`${adopt ? "Adopted" : "Installed"} ${name}`);
     return true;
   } catch (err) {
     const error = ensureError(err);
     // Show HUD for failure if user might have closed Raycast
-    await handle.showFailureHUD(`Failed to install ${name}`);
+    await handle.showFailureHUD(`Failed to ${adopt ? "adopt" : "install"} ${name}`);
     // Also show detailed toast if Raycast is still open
-    showBrewFailureToast("Install failed", error);
+    showBrewFailureToast(adopt ? "Adopt failed" : "Install failed", error);
     return false;
   }
 }
