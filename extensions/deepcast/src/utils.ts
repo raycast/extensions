@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import got, { HTTPError, RequestError } from "got";
 import { StatusCodes, getReasonPhrase } from "http-status-codes";
-import { clipboardMarkupForText, prepareTranslationPayload, toRichClipboardContent } from "./hyperlinks";
+import { prepareTranslationPayload, toRichClipboardContent } from "./hyperlinks";
 
 const { returnToRootState } = getPreferenceValues<Preferences>();
 function isPro(key: string) {
@@ -89,7 +89,7 @@ async function readClipboard() {
 // Get the text, matching preferences.
 // If selected text is the preferred source, it will try selected text but fallback to clipboard.
 // If clipboard is the preferred source, it will try clipboard but fallback to selected text.
-// Clipboard HTML is included when it is a marked-up rendering of the same visible text.
+// Clipboard HTML is only used when clipboard text is the actual source, never by text matching.
 export async function readContent() {
   const preferredSource = getPreferenceValues<Preferences>().source;
   const clipboard = await readClipboard();
@@ -103,10 +103,7 @@ export async function readContent() {
   }
 
   if (selected) {
-    return {
-      text: selected,
-      html: clipboardMarkupForText(selected, clipboard.text, clipboard.html),
-    };
+    return { text: selected };
   }
 
   return { text: clipboard.text || "", html: clipboard.html };
@@ -146,13 +143,7 @@ export async function sendTranslateRequest({
     const { key, closeRaycastAfterTranslation } = prefs;
     onTranslateAction ??= prefs.onTranslateAction;
 
-    const clipboard = await readClipboard();
-    const source: { text: string; html?: string } = initialText
-      ? {
-          text: initialText,
-          html: clipboardMarkupForText(initialText, clipboard.text, clipboard.html),
-        }
-      : await readContent();
+    const source: { text: string; html?: string } = initialText ? { text: initialText } : await readContent();
     const { text, isHtml } = prepareTranslationPayload(source.text, source.html);
 
     await showToast(Toast.Style.Animated, "Fetching translation...");

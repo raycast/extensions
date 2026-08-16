@@ -17,10 +17,6 @@ export function containsMarkdownHyperlinks(text: string): boolean {
   return MARKDOWN_HYPERLINK_PATTERN.test(text);
 }
 
-export function normalizeForCompare(text: string): string {
-  return text.replace(/\s+/g, " ").trim();
-}
-
 export function extractHtmlFragment(html: string): string {
   const fragment = html.match(/<!--StartFragment-->([\s\S]*?)<!--EndFragment-->/);
   if (fragment?.[1]) {
@@ -89,31 +85,6 @@ export function htmlToDisplayText(html: string): string {
 
 export function toRichClipboardContent(fragment: string): { html: string } {
   return { html: extractHtmlFragment(fragment) };
-}
-
-export function clipboardMarkupForText(
-  text: string,
-  clipboardText: string | undefined,
-  clipboardHtml: string | undefined,
-): string | undefined {
-  if (!clipboardHtml || !normalizeForCompare(text)) {
-    return undefined;
-  }
-
-  const fragment = extractHtmlFragment(clipboardHtml);
-  if (!containsHtmlMarkup(fragment)) {
-    return undefined;
-  }
-
-  const textNorm = normalizeForCompare(text);
-  const clipboardNorm = clipboardText ? normalizeForCompare(clipboardText) : "";
-  const visibleNorm = normalizeForCompare(htmlToPlainText(fragment));
-
-  if (clipboardNorm === textNorm || visibleNorm === textNorm) {
-    return fragment;
-  }
-
-  return undefined;
 }
 
 export function prepareFromText(text: string): { text: string; isHtml: boolean } {

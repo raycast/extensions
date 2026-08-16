@@ -9,7 +9,6 @@ import {
   htmlToDisplayText,
   htmlToPlainText,
   markdownLinksToHtml,
-  clipboardMarkupForText,
   prepareFromText,
   prepareTranslationPayload,
   toRichClipboardContent,
@@ -98,6 +97,13 @@ describe("prepareTranslationPayload", () => {
     });
   });
 
+  it("does not infer HTML from matching plain text alone", () => {
+    assert.deepEqual(prepareTranslationPayload("Visit this site", undefined), {
+      text: "Visit this site",
+      isHtml: false,
+    });
+  });
+
   it("preserves non-link HTML formatting when it is provided", () => {
     assert.deepEqual(prepareTranslationPayload("hello", "<p>hello</p>"), {
       text: "<p>hello</p>",
@@ -110,31 +116,6 @@ describe("prepareTranslationPayload", () => {
       text: `see <a href="https://example.com">docs</a>`,
       isHtml: true,
     });
-  });
-});
-
-describe("clipboardMarkupForText", () => {
-  it("uses clipboard HTML when the pasted text matches", () => {
-    const html = `<html><body><!--StartFragment-->Visit <a href="https://example.com">this site</a><!--EndFragment--></body></html>`;
-    assert.equal(
-      clipboardMarkupForText("Visit this site", "Visit this site", html),
-      `Visit <a href="https://example.com">this site</a>`,
-    );
-  });
-
-  it("uses Gmail-style HTML when clipboard text matches even if wrappers differ", () => {
-    const html = `<html><body><!--StartFragment--><div dir="ltr">Hello <a href="https://example.com">world</a></div><!--EndFragment--></body></html>`;
-    assert.equal(
-      clipboardMarkupForText("Hello world", "Hello world", html),
-      `<div dir="ltr">Hello <a href="https://example.com">world</a></div>`,
-    );
-  });
-
-  it("does not use HTML for different visible text", () => {
-    assert.equal(
-      clipboardMarkupForText("something else", "Visit this site", `<a href="https://example.com">this site</a>`),
-      undefined,
-    );
   });
 });
 
