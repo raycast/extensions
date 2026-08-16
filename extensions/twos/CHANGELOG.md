@@ -1,7 +1,12 @@
 # Twos Changelog
 
-## [Open results in the desktop app] - 2026-08-15
+## [Photo results and opening in the desktop app] - 2026-08-16
 
+- **Search Things** now finds things by the text inside their photos. A
+  receipt, whiteboard, or screenshot is searchable by what it says.
+- Photo results are labelled with the text read out of the image (or "Photo"
+  when the picture has no readable text) instead of showing as "(empty)", and
+  carry an image icon. **Copy Text** copies what the row displays.
 - **Search Things** now opens results in the NewTwos desktop app when it's
   installed, instead of always going to the browser. Opening a thing lands on
   its list scrolled to that row, and the browser stays available on `⌘↵`.

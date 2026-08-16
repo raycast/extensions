@@ -47,6 +47,14 @@ export interface TwosThing {
   completed: boolean;
   created?: string;
   updated?: string;
+  /** Hosted image URLs attached to this thing. */
+  photos?: string[];
+  /**
+   * Text a vision model read out of `photos` (read-only, server-written).
+   * Search matches on it, so a thing can come back whose own `text` is empty —
+   * use this to label the row instead of rendering it blank.
+   */
+  photo_text?: string;
 }
 
 // Web URL for a list. Passing a thing id appends ?focus=<id>, which the list
