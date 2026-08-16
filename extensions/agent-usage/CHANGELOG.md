@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Show Cursor Auto and API percentages] - {PR_MERGE_DATE}
+## [Show Cursor Auto and API percentages] - 2026-08-16
 
 ### Improvements
 
