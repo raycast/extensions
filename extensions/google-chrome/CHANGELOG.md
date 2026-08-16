@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Add Search Windows Command] - {PR_MERGE_DATE}
+## [Add Search Windows Command] - 2026-08-16
 
 - Add a new Search Windows command to search and select open Google Chrome windows.
 
