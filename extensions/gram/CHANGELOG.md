@@ -1,6 +1,6 @@
 # Gram Changelog
 
-## [Fix Local Project Launch in Raycast v2] - {PR_MERGE_DATE}
+## [Fix Local Project Launch in Raycast v2] - 2026-08-16
 
 - Open projects before closing Raycast so CLI launches complete reliably. From [PR #30174](https://github.com/raycast/extensions/pull/30174)
 - Update Raycast SDK, utilities, and development dependencies.
