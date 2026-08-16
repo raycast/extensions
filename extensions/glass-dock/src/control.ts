@@ -6,10 +6,6 @@ import { promisify } from "node:util";
 
 const executeFile = promisify(execFile);
 
-type Preferences = {
-  controlExecutable?: string;
-};
-
 export type DaemonState = "running" | "starting" | "stopped" | "unhealthy";
 
 export type ContainerSummary = {

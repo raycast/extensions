@@ -24,7 +24,7 @@
   "preferences": [
     {
       "name": "controlExecutable",
-      "title": "glassdockctl Executable",
+      "title": "Glass Dock Control Executable",
       "description": "Optional absolute path to glassdockctl. Standard install locations are detected automatically.",
       "type": "textfield",
       "required": false,

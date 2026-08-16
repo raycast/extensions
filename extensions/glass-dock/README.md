@@ -15,7 +15,7 @@ The extension checks these standard command locations:
 - `/opt/homebrew/bin/glassdockctl`
 - `/usr/local/bin/glassdockctl`
 
-If the command is elsewhere, set **glassdockctl Executable** in the extension
+If the command is elsewhere, set **Glass Dock Control Executable** in the extension
 preferences to its absolute path.
 
 ## Command

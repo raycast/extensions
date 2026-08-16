@@ -30,6 +30,12 @@ export default function GlassDock() {
     });
     try {
       const result = await runAction(arguments_);
+      if (!result.succeeded) {
+        toast.style = Toast.Style.Failure;
+        toast.title = `${subject} action failed`;
+        toast.message = result.message;
+        return;
+      }
       toast.style = Toast.Style.Success;
       toast.title = result.message;
       await revalidate();
@@ -169,6 +175,7 @@ function StatusDetail({
   const running = snapshot.containers.filter(
     (container) => container.state === "running",
   ).length;
+  const canMutateManagedDaemon = snapshot.daemon.managed && running === 0;
   return (
     <Detail
       navigationTitle="Glass Dock Status"
@@ -225,7 +232,7 @@ function StatusDetail({
               icon={Icon.Play}
               onAction={() => perform(["daemon", "start"], "Glass Dock")}
             />
-          ) : snapshot.daemon.managed ? (
+          ) : canMutateManagedDaemon ? (
             <>
               <Action
                 title="Restart Glass Dock"
