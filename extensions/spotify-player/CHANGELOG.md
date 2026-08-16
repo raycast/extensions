@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Fix Your Library Memory Usage] - {PR_MERGE_DATE}
+## [Fix Your Library Memory Usage] - 2026-08-16
 
 - Load only liked songs when rendering the liked songs entry instead of fetching every library category.
 
