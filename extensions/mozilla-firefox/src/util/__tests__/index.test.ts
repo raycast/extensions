@@ -6,7 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // getPreferenceValues is imported by the module under test — stub it before the
 // module is loaded so every call returns a controllable value.
 vi.mock("@raycast/api", () => ({
-  getPreferenceValues: vi.fn(() => ({ profileDirectorySuffix: "default-release" })),
+  getPreferenceValues: vi.fn(() => ({ profileDirectorySuffix: "default-release", browserApp: "Firefox" })),
 }));
 
 import { getPreferenceValues } from "@raycast/api";
@@ -20,7 +20,8 @@ import { getBookmarksDirectoryPath, getHistoryDbPath } from "../index";
 
 const PROFILES_BASE = "/fake-home/Library/Application Support/Firefox/Profiles";
 
-const setPrefs = (suffix: string) => vi.mocked(getPreferenceValues).mockReturnValue({ profileDirectorySuffix: suffix });
+const setPrefs = (suffix: string, browserApp = "Firefox") =>
+  vi.mocked(getPreferenceValues).mockReturnValue({ profileDirectorySuffix: suffix, browserApp });
 
 const mockProfiles = (entries: string[]) => vi.spyOn(fs, "readdirSync").mockReturnValue(entries as never);
 
@@ -176,6 +177,47 @@ describe("getProfileName (via getHistoryDbPath)", () => {
     expect(result).toBe(path.join(PROFILES_BASE, "good.profile", "places.sqlite"));
   });
 
+  // --- browserApp variant selection -----------------------------------------
+  // These tests verify that selecting a non-release variant always reads from
+  // that variant's own profile, even when a release profile is also present on
+  // disk and the suffix preference has not been customised.
+
+  it("selects the nightly profile when browserApp is Firefox Nightly", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release", "def.default-nightly"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE, "def.default-nightly", "places.sqlite"));
+  });
+
+  it("selects the ESR profile when browserApp is Firefox ESR", () => {
+    setPrefs("default-release", "Firefox ESR");
+    mockProfiles(["abc.default-release", "def.default-esr"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE, "def.default-esr", "places.sqlite"));
+  });
+
+  it("selects the dev-edition profile when browserApp is Firefox Developer Edition", () => {
+    setPrefs("default-release", "Firefox Developer Edition");
+    mockProfiles(["abc.default-release", "def.dev-edition-default"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE, "def.dev-edition-default", "places.sqlite"));
+  });
+
+  it("explicit custom suffix overrides browserApp variant selection", () => {
+    setPrefs("my-custom-profile", "Firefox Nightly");
+    mockProfiles(["abc.default-nightly", "def.my-custom-profile"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE, "def.my-custom-profile", "places.sqlite"));
+  });
+
   // --- Public API surface (bookmarks path delegates to same logic) ----------
 
   it("getBookmarksDirectoryPath uses the same profile resolution", () => {
@@ -261,8 +303,37 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
     expect(result).toBe(path.join(PROFILES_BASE_WIN, "abc123.default-esr", "places.sqlite"));
   });
 
+  // --- browserApp variant selection (Windows) --------------------------------
+
+  it("selects the nightly profile when browserApp is Firefox Nightly on Windows", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release", "def.default-nightly"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "def.default-nightly", "places.sqlite"));
+  });
+
+  it("selects the ESR profile when browserApp is Firefox ESR on Windows", () => {
+    setPrefs("default-release", "Firefox ESR");
+    mockProfiles(["abc.default-release", "def.default-esr"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "def.default-esr", "places.sqlite"));
+  });
+
+  it("selects the dev-edition profile when browserApp is Firefox Developer Edition on Windows", () => {
+    setPrefs("default-release", "Firefox Developer Edition");
+    mockProfiles(["abc.default-release", "def.dev-edition-default"]);
+
+    const result = getHistoryDbPath();
+
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "def.dev-edition-default", "places.sqlite"));
+  });
+
   it("getBookmarksDirectoryPath uses APPDATA on Windows", () => {
-    setPrefs("default-release");
+    setPrefs("default-release")
     mockProfiles(["abc123.default-release"]);
 
     const result = getBookmarksDirectoryPath();

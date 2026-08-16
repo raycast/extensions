@@ -1,7 +1,7 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Preferences } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
   if (process.platform === "win32") {
@@ -18,6 +18,8 @@ const userDataDirectoryPath = () => {
 
 const NON_PROFILE_ENTRIES = new Set(["Crash Reports", "Pending Pings", "installs.ini", "profiles.ini"]);
 
+const DEFAULT_PROFILE_SUFFIX = "default-release";
+
 const getProfileName = (userDirectoryPath: string) => {
   let profiles: string[];
   try {
@@ -28,14 +30,17 @@ const getProfileName = (userDirectoryPath: string) => {
 
   const preferences = getPreferenceValues<Preferences>();
 
-  const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
-  if (customProfile) return customProfile;
+  const suffix = preferences.profileDirectorySuffix;
+  if (suffix && suffix !== DEFAULT_PROFILE_SUFFIX) {
+    const customProfile = profiles.find((profile) => profile.endsWith(suffix));
+    if (customProfile) return customProfile;
+  }
 
-  const releaseProfile = profiles.filter((profile) => profile.endsWith(".default-release"))[0];
-  const nightlyProfile = profiles.filter((profile) => profile.endsWith(".default-nightly"))[0];
-  const esrProfile = profiles.filter((profile) => profile.endsWith(".default-esr"))[0];
-  const devProfile = profiles.filter((profile) => profile.endsWith(".dev-edition-default"))[0];
-  const defaultProfile = profiles.filter((profile) => profile.endsWith(".default"))[0];
+  const releaseProfile = profiles.find((profile) => profile.endsWith(".default-release"));
+  const nightlyProfile = profiles.find((profile) => profile.endsWith(".default-nightly"));
+  const esrProfile = profiles.find((profile) => profile.endsWith(".default-esr"));
+  const devProfile = profiles.find((profile) => profile.endsWith(".dev-edition-default"));
+  const defaultProfile = profiles.find((profile) => profile.endsWith(".default"));
 
   const browserApp = preferences.browserApp;
   if (browserApp === "Firefox Nightly" && nightlyProfile) return nightlyProfile;
