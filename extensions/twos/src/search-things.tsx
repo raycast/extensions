@@ -214,49 +214,70 @@ export default function SearchThings() {
       )}
       {thingRows.length > 0 && (
         <List.Section title="Things">
-          {thingRows.map(({ thing, listTitle, urlMatched }) => (
-            <List.Item
-              key={`thing-${thing.id}`}
-              icon={
-                thing.completed
-                  ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                  : thing.type === "todo"
-                    ? Icon.Circle
-                    : Icon.Dot
-              }
-              title={thing.text || "(empty)"}
-              subtitle={listTitle}
-              accessories={[
-                ...(urlMatched ? [{ text: thing.url, icon: Icon.Link }] : []),
-                ...(thing.tags?.map((t) => ({ tag: `#${t}` })) || []),
-              ]}
-              actions={
-                <ActionPanel>
-                  {/* Passing the thing id opens the parent list AND scrolls to
+          {thingRows.map(({ thing, listTitle, urlMatched }) => {
+            // A thing can be JUST a photo — empty `text`. Search matches the text
+            // read out of the image, so those rows come back and rendered as
+            // "(empty)", which looks like a bug rather than a photo. Fall back to
+            // that OCR text, then to a plain "Photo" label when the image has no
+            // legible text (it matched on what the picture depicts instead).
+            const hasPhotos = (thing.photos?.length ?? 0) > 0;
+            const ocr = (thing.photo_text || "").replace(/\s+/g, " ").trim();
+            const title = thing.text?.trim() || ocr || (hasPhotos ? "Photo" : "(empty)");
+            return (
+              <List.Item
+                key={`thing-${thing.id}`}
+                icon={
+                  thing.completed
+                    ? { source: Icon.CheckCircle, tintColor: Color.Green }
+                    : hasPhotos && !thing.text?.trim()
+                      ? Icon.Image
+                      : thing.type === "todo"
+                        ? Icon.Circle
+                        : Icon.Dot
+                }
+                title={title}
+                subtitle={listTitle}
+                accessories={[
+                  ...(urlMatched ? [{ text: thing.url, icon: Icon.Link }] : []),
+                  // Mark rows carrying a photo whose own text is what's displayed,
+                  // so it's clear there's an image behind the result.
+                  ...(hasPhotos && thing.text?.trim() ? [{ icon: Icon.Image }] : []),
+                  ...(thing.tags?.map((t) => ({ tag: `#${t}` })) || []),
+                ]}
+                actions={
+                  <ActionPanel>
+                    {/* Passing the thing id opens the parent list AND scrolls to
                       + flashes this exact row, in the app or the browser. */}
-                  <OpenActions
-                    listId={thing.list_id}
-                    thingId={thing.id}
-                    target={target}
-                    app={app}
-                    browserTitle="Open in Browser"
-                  />
-                  {thing.type === "todo" &&
-                    (thing.completed ? (
-                      <Action title="Mark Incomplete" icon={Icon.Circle} onAction={() => setCompleted(thing, false)} />
-                    ) : (
-                      <Action
-                        title="Mark Complete"
-                        icon={Icon.CheckCircle}
-                        onAction={() => setCompleted(thing, true)}
-                      />
-                    ))}
-                  <Action.CopyToClipboard content={thing.text} title="Copy Text" />
-                  {thing.url ? <Action.OpenInBrowser url={thing.url} title="Open Hyperlink" /> : null}
-                </ActionPanel>
-              }
-            />
-          ))}
+                    <OpenActions
+                      listId={thing.list_id}
+                      thingId={thing.id}
+                      target={target}
+                      app={app}
+                      browserTitle="Open in Browser"
+                    />
+                    {thing.type === "todo" &&
+                      (thing.completed ? (
+                        <Action
+                          title="Mark Incomplete"
+                          icon={Icon.Circle}
+                          onAction={() => setCompleted(thing, false)}
+                        />
+                      ) : (
+                        <Action
+                          title="Mark Complete"
+                          icon={Icon.CheckCircle}
+                          onAction={() => setCompleted(thing, true)}
+                        />
+                      ))}
+                    {/* Copy whatever the row is actually showing — on a photo-only
+                      thing `text` is empty, so copying it silently yielded "". */}
+                    <Action.CopyToClipboard content={thing.text?.trim() || ocr} title="Copy Text" />
+                    {thing.url ? <Action.OpenInBrowser url={thing.url} title="Open Hyperlink" /> : null}
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
         </List.Section>
       )}
       {!loading && rows.length === 0 && (
