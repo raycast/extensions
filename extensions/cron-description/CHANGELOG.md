@@ -1,6 +1,6 @@
 # Cron Description Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-08-16
 
 - Added support for Raycast on Windows
 
