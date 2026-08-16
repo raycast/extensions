@@ -29,22 +29,21 @@ const getProfileName = (userDirectoryPath: string) => {
   const preferences = getPreferenceValues<Preferences>();
 
   const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
+  if (customProfile) return customProfile;
+
   const releaseProfile = profiles.filter((profile) => profile.endsWith(".default-release"))[0];
   const nightlyProfile = profiles.filter((profile) => profile.endsWith(".default-nightly"))[0];
   const esrProfile = profiles.filter((profile) => profile.endsWith(".default-esr"))[0];
+  const devProfile = profiles.filter((profile) => profile.endsWith(".dev-edition-default"))[0];
   const defaultProfile = profiles.filter((profile) => profile.endsWith(".default"))[0];
 
-  if (customProfile) {
-    return customProfile;
-  } else if (releaseProfile) {
-    return releaseProfile;
-  } else if (nightlyProfile) {
-    return nightlyProfile;
-  } else if (esrProfile) {
-    return esrProfile;
-  } else if (defaultProfile) {
-    return defaultProfile;
-  }
+  const browserApp = preferences.browserApp;
+  if (browserApp === "Firefox Nightly" && nightlyProfile) return nightlyProfile;
+  if (browserApp === "Firefox ESR" && esrProfile) return esrProfile;
+  if (browserApp === "Firefox Developer Edition" && devProfile) return devProfile;
+
+  const variantProfile = releaseProfile ?? nightlyProfile ?? esrProfile ?? devProfile ?? defaultProfile;
+  if (variantProfile) return variantProfile;
 
   const fallback = profiles
     .filter((entry) => !NON_PROFILE_ENTRIES.has(entry))
@@ -89,12 +88,7 @@ export const getSessionInactivePath = (): string => {
 
 export const getSessionActivePath = (): string => {
   const userDirectoryPath = userDataDirectoryPath();
-  return path.join(
-    userDirectoryPath,
-    getProfileName(userDirectoryPath),
-    "sessionstore-backups",
-    "recovery.jsonlz4",
-  );
+  return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "sessionstore-backups", "recovery.jsonlz4");
 };
 
 export function decodeLZ4(buffer: Buffer) {
