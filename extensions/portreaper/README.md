@@ -16,17 +16,18 @@ Portreaper is not a generic port viewer. Its job is to **decide which listeners 
 
 ## How this differs from a port viewer
 
-The Store already covers the "port 3000 is taken, free it" case — [Port Manager](https://www.raycast.com/diegoleteliers10/ports) is the closest one. If that is your whole problem, a plain port viewer is the simpler tool, and you should use it.
+A port viewer answers **"what is on port 3000?"** — you already know something is in your way, and you need to find it and free it. The Store covers that case well; [Port Manager](https://www.raycast.com/dleteliers_/ports) is the closest one, and for that job a plain port viewer is the more direct tool.
 
-Portreaper answers a different question: **which of these processes is nobody's responsibility?**
+Portreaper answers a different question: **"what is still running that nobody is responsible for?"** You are not looking up a port you already care about — you are finding out what the last three days of development left behind.
 
-- A port viewer lists what is listening and lets you kill it. Deciding what is safe to kill is left to you.
-- Portreaper decides first. Every row carries a verdict — `confirmed` / `likely` / `possible` — the evidence behind it, and automatic exemptions for anything `launchd`, `brew services`, or `pm2` is already looking after. A dev server with a live terminal behind it is never flagged.
-- It also surfaces orphaned dev processes holding **no port at all**, which a port scan cannot see by definition.
-- Killing is guarded rather than immediate: the process creation time is re-checked in the instant before the signal (a recycled PID is refused), and "terminated" is established by re-scanning, not assumed from an exit code.
-- The verdict engine is a Rust binary shared with the Portreaper desktop app, so the two frontends agree on the classification and on your stars.
+Everything in the design follows from that:
 
-If what you want is a list of ports, this is a heavy way to get one. If what you want is to know which dev servers are ghosts, that is the entire point of it.
+- **Rows are verdicts, not entries.** Each one is tiered `confirmed` / `likely` / `possible` and carries the signals behind the call. A list you still have to interpret has not answered the question.
+- **Processes holding no port at all are included.** An orphaned `electron-vite` main process listens on nothing. Under "free this port" it is out of scope by definition; under "what did I leave behind" it is the whole point.
+- **Anything with an owner is left alone.** `launchd`, `brew services`, `pm2`, standard install locations, and dev servers with a live terminal behind them are exempt automatically — deciding what _not_ to flag is most of the work.
+- **The verdict comes from a Rust engine shared with the Portreaper desktop app**, so both frontends agree on the classification and on your stars.
+
+The two overlap where the questions overlap: a zombie squatting on port 3000 shows up in either tool. Everywhere else, they are answering different things.
 
 ## Terminating is safe by construction
 
