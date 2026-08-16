@@ -1,90 +1,109 @@
-# WayCompress - Precision Target-Size Media & Document Compressor for Raycast
+# WayCompress
 
-**WayCompress** is a fast, offline-capable Raycast extension that compresses any **Video**, **Image**, **Audio**, or **PDF** file directly to an exact target size in Megabytes (e.g. Discord 20MB / 8MB limit, WhatsApp 16MB, Email 10MB) while preserving maximum visual quality, framerate, and resolution.
+WayCompress is a local file compression extension for Raycast on macOS and Windows. It allows you to compress videos, images, audio files, and PDFs directly to a specific target size in Megabytes (such as a 20 MB Discord limit or a 10 MB email attachment cap) while retaining the highest possible visual and audio quality.
 
-Works seamlessly across **Windows** and **macOS**.
-
----
-
-## ✨ Features
-
-- 🎯 **Target MB Compression**: Simply set your desired file size in MB (e.g., `20`, `16`, `8.5`, `0.5`) and WayCompress automatically calculates optimal bitrates and quality levels.
-- 🎬 **Video Engine (2-Pass H.264 / MP4)**: High-efficiency 2-pass encoding with dynamic bitrate allocation and intelligent downscaling protection to eliminate macroblocking.
-- 🖼️ **Image Engine (Smart Binary Optimization)**: Fast iterative search for optimal JPEG, WebP, PNG, or GIF quality with zero quality loss whenever possible.
-- 🎵 **Audio Engine (AAC / M4A)**: Smart audio bit budget calculation ensuring crisp sound even with tight limits.
-- 📄 **PDF Engine**: Dual-mode engine utilizing Ghostscript for deep PDF compression and built-in stream optimizer fallback.
-- ⚡ **Auto-Detection from Explorer / Finder**: Instantly detects and selects the file you currently have highlighted in Windows Explorer or macOS Finder when opening the command.
-- 🛠️ **System Diagnostics**: Includes a built-in `Compression Engine Diagnostics` command to check FFmpeg / Ghostscript availability and copy one-click install commands.
-- 🔒 **100% Local & Private**: All compression is performed locally on your machine. No files or metadata ever leave your computer.
+All processing runs locally on your system using open-source engines without sending any files or metadata to external servers.
 
 ---
 
-## 🚀 Quick Presets
+## Why WayCompress? (Comparison with Other Extensions)
 
-| Preset | Target Size | Ideal For |
-| :--- | :--- | :--- |
-| **Discord Free** | `20 MB` | Current Discord free file upload limit |
-| **WhatsApp** | `16 MB` | WhatsApp media sharing limit |
-| **Email Attachment** | `10 MB` | Standard corporate email attachment limit |
-| **Legacy Discord** | `8 MB` | Legacy Discord Nitro-free limit |
-| **Large Share** | `50 MB` | Quick cloud / link sharing |
-| **Video Share** | `100 MB` | High-quality long clip sharing |
-| **Custom Size** | *Custom* | Any floating point MB value (e.g., `2.5`, `25`, `120`) |
+Most compression tools available in the Store use fixed quality percentage presets (e.g., "Low", "Medium", "High") or convert formats without guaranteeing a specific output size. This often results in trial-and-error when trying to fit media under platform upload limits.
+
+WayCompress differs in several key ways:
+
+- **Exact Target Size Targeting**: Instead of vague quality sliders, you specify an exact target size (e.g., `20` MB for Discord, `16` MB for WhatsApp, `10` MB for email, or any custom value). The extension calculates the exact bitrate budgets required to fit that size.
+- **Two-Pass Video Encoding**: For video files, WayCompress runs a 2-pass H.264 encode with duration-based bitrate distribution and bits-per-pixel analysis, preserving original resolution whenever bitrate headroom permits.
+- **Multi-Format Coverage in One Tool**: Handles Video (MP4/H.264), Images (JPEG, WebP, PNG, GIF), Audio (AAC/M4A), and PDF documents in a single workflow.
+- **Cross-Platform File Detection**: Automatically detects the currently selected file in macOS Finder or Windows Explorer upon opening the command.
+- **Strict Resolution Protection**: Includes dedicated compression strategies allowing you to lock image/video dimensions so they are never downscaled.
 
 ---
 
-## ⚙️ Prerequisites & Installation
+## Features
 
-WayCompress uses industry-standard, lightweight CLI engines under the hood.
+- **Target Size Control**: Set target file size in MB. The extension handles bitrate calculation, quantization, and container overhead adjustments.
+- **Video Compression**: 2-pass MP4 encoding with automatic audio downmixing at tight budgets to prevent video artifacts.
+- **Image Compression**: Iterative binary search across compression levels for JPEG, WebP, PNG, and GIF.
+- **Audio Compression**: Dynamic AAC bitrate scaling based on duration.
+- **PDF Compression**: Dual-engine support using Ghostscript for deep compression or built-in stream optimization.
+- **Active File Selection**: Reads the currently highlighted file from Finder (macOS) or Explorer (Windows) when the command launches.
+- **Built-in Diagnostics**: Includes a diagnostic command to check local CLI tool dependencies and provide install commands.
 
-### 1. FFmpeg (Required for Video, Image & Audio)
+---
 
-- **Windows**:
-  ```powershell
-  winget install Gyan.FFmpeg
-  ```
-  *(or via Chocolatey: `choco install ffmpeg` / Scoop: `scoop install ffmpeg`)*
+## Quick Presets
 
-- **macOS**:
+| Preset           | Target Size | Common Use Case                           |
+| :--------------- | :---------- | :---------------------------------------- |
+| Discord Free     | 20 MB       | Discord standard upload limit             |
+| WhatsApp         | 16 MB       | WhatsApp media sharing limit              |
+| Email Attachment | 10 MB       | Standard corporate email attachment limit |
+| Legacy Discord   | 8 MB        | Legacy Discord upload limit               |
+| Large Share      | 50 MB       | Quick cloud/link sharing                  |
+| Video Share      | 100 MB      | Higher bitrate video sharing              |
+| Custom           | Custom MB   | Any target size (e.g., 2.5, 35, 150)      |
+
+---
+
+## Requirements and Installation
+
+WayCompress relies on standard CLI tools for media processing.
+
+### 1. FFmpeg (Required for Video, Image, and Audio)
+
+- **macOS** (via Homebrew):
+
   ```bash
   brew install ffmpeg
   ```
 
-### 2. Ghostscript (Optional, for Advanced PDF Compression)
+- **Windows** (via winget):
+  ```powershell
+  winget install Gyan.FFmpeg
+  ```
+  _(or `choco install ffmpeg` / `scoop install ffmpeg`)_
+
+### 2. Ghostscript (Optional, for deep PDF compression)
+
+- **macOS**:
+
+  ```bash
+  brew install ghostscript
+  ```
 
 - **Windows**:
   ```powershell
   winget install ArtifexSoftware.GhostScript
   ```
-- **macOS**:
-  ```bash
-  brew install ghostscript
-  ```
-*(Note: If Ghostscript is not installed, WayCompress automatically falls back to its built-in PDF stream optimizer).*
+
+_If Ghostscript is not installed, WayCompress automatically falls back to its built-in PDF stream optimizer._
 
 ---
 
-## 📖 Usage Guide
+## Quality Strategies
 
-1. Open Raycast (`Alt+Space` or `Cmd+Space`).
-2. Run **`Compress to Target Size`** (`waycompress`).
-3. If you have a file selected in Explorer or Finder, it will automatically populate. Otherwise, select any file via the file picker.
-4. Choose a Quick Preset or enter a custom target MB size.
-5. Select a **Quality Strategy**:
-   - **Smart Balanced (Auto)**: Automatically protects resolution while reducing bitrate and fine-tuning quantization.
-   - **Strict Resolution**: Never downscales width/height dimensions.
-   - **Maximum Efficiency**: Converts image/media formats to modern high-efficiency codecs.
-6. Press `Enter` or click **Start Compression**.
-7. Once finished, inspect the compression summary and click **Reveal in Explorer / Finder** or **Open Compressed File**.
+When compressing a file, you can choose from three quality strategies:
+
+1. **Smart Balanced (Default)**: Protects original resolution and framerate, only downscaling dimensions if the target bitrate falls below acceptable visual density thresholds.
+2. **Strict Resolution**: Never alters width or height dimensions. If the file cannot reach the target size without downscaling, the extension alerts you rather than reducing resolution.
+3. **Maximum Efficiency**: Prioritizes file size reduction and uses modern, high-efficiency encoding parameters.
 
 ---
 
-## 🛠️ Diagnostics Command
+## Usage
 
-Run **`Compression Engine Diagnostics`** in Raycast anytime to check which CLI tools are installed and operational on your system.
+1. Open Raycast and run **Compress to Target Size**.
+2. If a file is selected in Finder or Explorer, it will be selected automatically. Otherwise, choose a file with the file picker.
+3. Choose a preset or enter a custom target size in MB.
+4. Select your preferred Quality Strategy.
+5. Press Enter to start compression.
+6. When finished, use the action menu to reveal the output file in Finder/Explorer, open it directly, or copy its path.
+
+To verify your local environment setup, run the **Compression Engine Diagnostics** command in Raycast at any time.
 
 ---
 
-## 📄 License
+## License
 
-MIT License. See [LICENSE](./LICENSE) for details.
+MIT
