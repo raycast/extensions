@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "minds",
+  "title": "Minds",
+  "description": "Plan research, ask synthetic audiences, and monitor Panel studies from Raycast",
+  "icon": "minds.png",
+  "author": "lexdoudkin",
+  "license": "MIT",
+  "categories": [
+    "Data",
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "list-groups",
+      "title": "Browse Research Groups",
+      "subtitle": "Minds",
+      "description": "Browse and search your synthetic audience Groups.",
+      "mode": "view"
+    },
+    {
+      "name": "ask-group",
+      "title": "Ask a Research Group",
+      "subtitle": "Minds",
+      "description": "Ask one question of an existing synthetic audience Group.",
+      "mode": "view"
+    },
+    {
+      "name": "plan-study",
+      "title": "Plan a Panel Study",
+      "subtitle": "Minds",
+      "description": "Create a reviewable research plan without starting the study.",
+      "mode": "view"
+    },
+    {
+      "name": "panel-status",
+      "title": "Check Panel Status",
+      "subtitle": "Minds",
+      "description": "Check the progress and results of a Panel study.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "Minds API Key",
+      "description": "Create an API key in Minds, then paste it here.",
+      "placeholder": "minds_..."
+    },
+    {
+      "name": "endpoint",
+      "type": "textfield",
+      "required": true,
+      "title": "MCP Endpoint",
+      "description": "The production Minds MCP endpoint.",
+      "default": "https://getminds.ai/mcp",
+      "placeholder": "https://getminds.ai/mcp"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.21",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.1.0",
+    "@types/react": "19.2.17",
+    "eslint": "^10.6.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "engines": {
+    "node": ">=24"
+  }
+}
