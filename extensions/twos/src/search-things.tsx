@@ -271,7 +271,7 @@ export default function SearchThings() {
                       ))}
                     {/* Copy whatever the row is actually showing — on a photo-only
                       thing `text` is empty, so copying it silently yielded "". */}
-                    <Action.CopyToClipboard content={thing.text?.trim() || ocr} title="Copy Text" />
+                    <Action.CopyToClipboard content={title} title="Copy Text" />
                     {thing.url ? <Action.OpenInBrowser url={thing.url} title="Open Hyperlink" /> : null}
                   </ActionPanel>
                 }
