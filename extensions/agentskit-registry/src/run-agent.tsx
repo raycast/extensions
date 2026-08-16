@@ -8,6 +8,7 @@ import {
   openExtensionPreferences,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { fetchRunnableDefinition, installCommand, type Agent } from "./registry";
 import {
@@ -84,9 +85,11 @@ function RunResult({ agent, values }: { agent: Agent; values: RunFormValues }) {
       } catch (error) {
         if (!controller.signal.aborted) {
           clearTimeout(timeout);
+          const message = safeErrorMessage(error, [preferences.openrouterApiKey, preferences.geminiApiKey]);
+          void showFailureToast(error, { title: "Could not run agent", message });
           setState({
             status: "error",
-            message: safeErrorMessage(error, [preferences.openrouterApiKey, preferences.geminiApiKey]),
+            message,
           });
         }
       }
@@ -98,7 +101,15 @@ function RunResult({ agent, values }: { agent: Agent; values: RunFormValues }) {
       controller.abort();
       controllerRef.current = undefined;
     };
-  }, [agent.id, preferences.geminiApiKey, preferences.ollamaBaseUrl, preferences.openrouterApiKey, values]);
+  }, [
+    agent.id,
+    preferences.geminiApiKey,
+    preferences.ollamaBaseUrl,
+    preferences.openrouterApiKey,
+    values.task,
+    values.provider,
+    values.model,
+  ]);
 
   if (state.status === "running") {
     return (
@@ -167,7 +178,9 @@ function RunResult({ agent, values }: { agent: Agent; values: RunFormValues }) {
 
 export function RunAgent({ agent }: { agent: Agent }) {
   const preferences = getPreferenceValues<Preferences>();
-  const preferredProvider: Provider = preferences.defaultProvider;
+  const preferredProvider: Provider = isProvider(preferences.defaultProvider)
+    ? preferences.defaultProvider
+    : "openrouter";
   const [provider, setProvider] = useState<Provider>(preferredProvider);
   const [model, setModel] = useState(DEFAULT_MODELS[preferredProvider]);
   const { push } = useNavigation();

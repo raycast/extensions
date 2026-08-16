@@ -13,3 +13,6 @@ compiled_raycast_rust
 # misc
 .DS_Store
 *.log
+
+# test coverage
+coverage/

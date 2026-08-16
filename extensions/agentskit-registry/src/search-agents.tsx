@@ -15,7 +15,9 @@ function AgentActions({ agent }: { agent: Agent }) {
       )}
       <Action.OpenInBrowser title="Open Agent Page" url={agentPageUrl(agent)} icon={Icon.Globe} />
       <ActionPanel.Section>
-        <Action.CopyToClipboard title="Copy Agent ID" content={agent.id} icon={Icon.Clipboard} />
+        {agent.installable ? (
+          <Action.CopyToClipboard title="Copy Agent ID" content={agent.id} icon={Icon.Clipboard} />
+        ) : null}
         <Action.OpenInBrowser title="Open JSON Definition" url={agentDefinitionUrl(agent)} icon={Icon.Code} />
         <Action.OpenInBrowser title="Open AgentsKit Registry" url={REGISTRY_URL} icon={Icon.Link} />
       </ActionPanel.Section>
@@ -118,7 +120,7 @@ export default function Command() {
         visibleAgents.map((agent) => (
           <List.Item
             key={agent.id}
-            icon={{ source: "icon.png" }}
+            icon={agent.runnable ? Icon.Play : Icon.Box}
             title={agent.title}
             subtitle={agent.id}
             keywords={[agent.category, ...agent.tags, ...agent.packages]}
