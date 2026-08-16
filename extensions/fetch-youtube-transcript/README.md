@@ -9,6 +9,7 @@ Fetch YouTube Transcript is a Raycast extension that allows you to easily fetch 
 - Quickly retrieve transcripts for YouTube videos
 - Customizable download location
 - Simple and intuitive interface
+- Works with Raycast AI, so you can summarize a video or turn it into notes
 
 ## ⚠️ Important Prerequisite: `yt-dlp` Installation
 
@@ -44,6 +45,25 @@ Install this extension through the Raycast Store.
    - Provide the full YouTube video URL (e.g., <https://www.youtube.com/watch?v=exampleID> or <https://youtu.be/exampleID>)
 6. **It will automatically fetch the transcript and save it to the downloads folder.**
 7. You can change your preferred download folder and preferred language in Raycast extension settings.
+
+## Using It with Raycast AI
+
+The extension also exposes its transcript fetching to Raycast AI, so you can work with a video's contents in plain English instead of opening the saved file yourself.
+
+Type `@fetch-youtube-transcript` in Raycast AI, or just paste a link and ask for what you want:
+
+- "Summarize this video: <https://www.youtube.com/watch?v=exampleID>"
+- "What are the key points of <https://youtu.be/exampleID>?"
+- "Get the Hindi transcript of this video and translate the main ideas to English"
+
+Because the AI receives the transcript as text, it can pass it on to your other extensions — for example, writing the summary straight into your notes app.
+
+A few things worth knowing:
+
+- `yt-dlp` is required here too (see Prerequisites above).
+- The AI can request a specific language for a single question without changing your Default Language preference.
+- For long videos the AI reads the transcript in chunks. If it has only seen part of a video, it is told so, so it can say the summary is partial rather than presenting it as complete.
+- This does not change the regular command. Transcripts saved to your download folder are still saved in full, whatever the length of the video.
 
 ## Author
 
