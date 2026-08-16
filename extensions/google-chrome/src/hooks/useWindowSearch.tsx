@@ -23,24 +23,28 @@ export function useWindowSearch(searchText = "") {
     [],
     {
       onError(error) {
-        if (error.message === NOT_INSTALLED_MESSAGE) {
-          setErrorView(<NotInstalledError />);
-        } else {
-          setErrorView(<UnknownError />);
-        }
+        setErrorView((current) => {
+          if (current) {
+            return current;
+          }
+          if (error.message === NOT_INSTALLED_MESSAGE) {
+            return <NotInstalledError />;
+          }
+          return <UnknownError />;
+        });
       },
     },
   );
 
   useEffect(() => {
-    if (errorView || isLoading) {
+    if (isLoading) {
       return;
     }
 
     const intervalId = setInterval(revalidate, WINDOW_REFRESH_INTERVAL_MS);
 
     return () => clearInterval(intervalId);
-  }, [errorView, isLoading, revalidate]);
+  }, [isLoading, revalidate]);
 
   const rawData = windowData || [];
   const data = searchText
