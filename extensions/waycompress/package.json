@@ -1,0 +1,53 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "waycompress",
+  "title": "WayCompress",
+  "description": "Compress any video, image, audio, or PDF to a target MB size while preserving maximum quality and resolution on Windows & macOS.",
+  "icon": "icon.png",
+  "author": "hermes",
+  "categories": [
+    "Media",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "compress-file",
+      "title": "Compress to Target Size",
+      "subtitle": "WayCompress",
+      "description": "Select any file from Explorer/Finder or file picker and compress it to an exact target MB size.",
+      "mode": "view"
+    },
+    {
+      "name": "check-tools",
+      "title": "Compression Engine Diagnostics",
+      "subtitle": "WayCompress",
+      "description": "Check status of FFmpeg and compression capabilities on your system.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.0",
+    "@raycast/utils": "^1.17.0",
+    "pdf-lib": "^1.17.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.14.9",
+    "@types/react": "18.2.79",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
+  },
+  "overrides": {
+    "@types/react": "18.2.79"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
