@@ -34,6 +34,7 @@ type Input = {
   offset?: number;
 };
 
+const OMITTED_BEFORE_MARKER = "[... earlier part of transcript omitted ...]\n\n";
 const TRUNCATION_MARKER = "\n\n[... transcript truncated ...]";
 
 /**
@@ -57,29 +58,42 @@ export default async function tool(input: Input) {
   // can see the true size of the video even when it only receives a slice.
   const totalCharacters = transcript.length;
 
-  const offset = Math.max(0, Math.trunc(input.offset ?? 0));
+  const start = Math.min(Math.max(0, Math.trunc(input.offset ?? 0)), totalCharacters);
   const maxLength = input.maxLength !== undefined ? Math.max(1, Math.trunc(input.maxLength)) : undefined;
+  const end = maxLength !== undefined ? Math.min(start + maxLength, totalCharacters) : totalCharacters;
 
-  const end = maxLength !== undefined ? offset + maxLength : totalCharacters;
-  const window = transcript.slice(offset, end);
-  const truncated = end < totalCharacters;
+  // A window can be incomplete at either edge: `offset` skips text before it,
+  // and `maxLength` cuts text after it. Both must be reported, otherwise a
+  // request such as `{ offset: 500 }` with no `maxLength` would return the tail
+  // of a transcript while claiming to be the whole thing.
+  const omittedBefore = start > 0;
+  const omittedAfter = end < totalCharacters;
+
+  let text = transcript.slice(start, end);
+  if (omittedBefore) {
+    text = OMITTED_BEFORE_MARKER + text;
+  }
+  if (omittedAfter) {
+    text = text + TRUNCATION_MARKER;
+  }
 
   return {
     title,
     videoId,
     language,
     /** The transcript text for the requested window. */
-    transcript: truncated ? window + TRUNCATION_MARKER : window,
+    transcript: text,
     /** Length of the complete transcript, regardless of how much was returned. */
     totalCharacters,
     /** Character position this window started at. */
-    offset,
-    /** Character position the next chunk should start at, or null if this is the end. */
-    nextOffset: truncated ? end : null,
+    offset: start,
+    /** Character position the next chunk should start at, or null if this window reaches the end. */
+    nextOffset: omittedAfter ? end : null,
     /**
-     * True when the returned text stops before the end of the transcript.
+     * True when the returned text is not the complete transcript, whether
+     * because text before it was skipped or text after it was cut off.
      * Do not describe the video as fully covered while this is true.
      */
-    truncated,
+    truncated: omittedBefore || omittedAfter,
   };
 }
