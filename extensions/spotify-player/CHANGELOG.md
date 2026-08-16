@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix Your Library Memory Usage] - {PR_MERGE_DATE}
+
+- Load only liked songs when rendering the liked songs entry instead of fetching every library category.
+
 ## [Copy Embed Code Action] - 2026-07-10
 
 - Add a "Copy Embed Code" action to the action panel and the menu bar
