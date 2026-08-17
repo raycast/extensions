@@ -67,7 +67,6 @@ export const translations = {
       deleting: "Deleting...",
       deleteSuccess: "Deleted successfully",
       deleteFailed: "Delete failed",
-      deleteCancel: "Delete cancelled",
       viewInBrowser: "View in Browser",
       copyId: "Copy ID",
       open: "Open",
@@ -92,7 +91,12 @@ export const translations = {
       create: "Create Bookmark",
       creating: "Creating bookmark...",
       createSuccess: "Bookmark created successfully",
-      createFailed: "Creation failed",
+      createFailed: "Couldn't create bookmark",
+      // Saving is up to four separate writes. Once the bookmark itself exists,
+      // a later failure must not claim nothing was saved.
+      savedListFailed: "Bookmark saved, but couldn't add to list",
+      savedTagsFailed: "Bookmark saved, but couldn't add tags",
+      savedTitleFailed: "Bookmark saved, but couldn't edit title",
 
       // Types and Fields
       type: "Type",
@@ -116,8 +120,12 @@ export const translations = {
       customTitle: "Custom Title",
       titlePlaceholder: "Enter title",
       createTitle: "Title",
-      createTitlePlaceholder: "Leave empty to use the page title",
+      createTitlePlaceholder: "Set custom title or leave blank to use generated title",
       titleTooLong: "Title cannot exceed 1000 characters",
+      // Filling this field creates a user title that permanently shadows the one
+      // Karakeep crawls, so it stays opt-in rather than being pre-filled.
+      usePageTitle: "Use Page Title",
+      usePageTitleFailed: "Couldn't read the page title",
       list: "List",
       defaultListPlaceholder: "Default",
       defaultListFilter: "Show All Bookmarks",
@@ -722,7 +730,6 @@ export const translations = {
       deleting: "删除中...",
       deleteSuccess: "删除成功",
       deleteFailed: "删除失败",
-      deleteCancel: "已取消删除",
       viewInBrowser: "在浏览器中查看",
       copyId: "复制 ID",
       open: "打开",
@@ -747,7 +754,10 @@ export const translations = {
       create: "创建书签",
       creating: "创建中...",
       createSuccess: "创建成功",
-      createFailed: "创建失败",
+      createFailed: "无法创建书签",
+      savedListFailed: "书签已保存，但无法添加到列表",
+      savedTagsFailed: "书签已保存，但无法添加标签",
+      savedTitleFailed: "书签已保存，但无法修改标题",
 
       // 类型和字段
       type: "类型",
@@ -771,7 +781,9 @@ export const translations = {
       customTitle: "自定义标题",
       titlePlaceholder: "输入标题",
       createTitle: "标题",
-      createTitlePlaceholder: "留空即使用页面标题",
+      createTitlePlaceholder: "设置自定义标题，或留空以使用生成的标题",
+      usePageTitle: "使用页面标题",
+      usePageTitleFailed: "无法读取页面标题",
       titleTooLong: "标题长度不得超过1000个字符",
 
       list: "列表",

@@ -29,6 +29,22 @@ export function markToastFailed(toast: Toast, title: string, error: unknown) {
   };
 }
 
+/**
+ * Give a Failure toast something to copy when there is no Error to unwrap.
+ *
+ * `markToastFailed` covers the usual case: something threw, and the message is
+ * the payload. Some failures have no exception at all — a status field flipped
+ * server-side, or a call returned an empty result. House Style still requires a
+ * Failure toast to be copyable, so the caller supplies the state worth pasting
+ * into a bug report.
+ */
+export function attachCopyDetail(toast: Toast, detail: string) {
+  toast.primaryAction = {
+    title: getTranslator()("connection.copyError"),
+    onAction: () => Clipboard.copy(detail),
+  };
+}
+
 export async function runWithToast<T>(options: {
   loading: { title: string; message?: string };
   success: { title: string; message?: string };
