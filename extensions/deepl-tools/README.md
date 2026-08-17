@@ -10,6 +10,10 @@ Fast two-way DeepL translation for Raycast. Pick your primary and secondary lang
 
 Short translations appear as a compact notification. Longer translations open in a readable detail view.
 
+## Why DeepL Tools?
+
+Deepcast is useful when you want to choose among many target languages. DeepL Tools is intentionally optimized for one everyday language pair: configure it once, then translate selected, typed, or clipboard text in either direction without opening a language picker. Short results appear immediately, while every longer result remains available in the full copy-and-paste view.
+
 ## Setup
 
 The first time you run a command:

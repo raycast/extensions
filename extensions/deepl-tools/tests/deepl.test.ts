@@ -63,6 +63,24 @@ test("constrains ambiguous short text to the configured language pair", async (c
   assert.equal(requests[1].get("source_lang"), "EN");
 });
 
+test("does not force the first detected language onto later chunks", async (context) => {
+  const requests: URLSearchParams[] = [];
+  context.mock.method(globalThis, "fetch", async (_input, init) => {
+    requests.push(init?.body as URLSearchParams);
+    return requests.length === 1 ? deepLResponse("EN", "собака") : deepLResponse("RU", "cat");
+  });
+
+  const result = await translate("dog\n\nкот", preferences);
+
+  assert.equal(result.translatedText, "собака\n\ncat");
+  assert.equal(result.sourceLang, undefined);
+  assert.equal(requests.length, 2);
+  assert.deepEqual(
+    requests.map((body) => body.get("source_lang")),
+    [null, null],
+  );
+});
+
 test("uses the API Free endpoint and sends the key in the authorization header", async (context) => {
   let requestedUrl = "";
   let authorization = "";

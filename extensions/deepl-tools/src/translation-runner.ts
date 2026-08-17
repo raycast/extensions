@@ -16,7 +16,7 @@ import { spawn } from "child_process";
 import { existsSync } from "fs";
 import path from "path";
 import { translate } from "./deepl";
-import { isCompactText, previewText } from "./translation-display";
+import { isCompactText, previewText, shouldShowCompactTranslation } from "./translation-display";
 import { CompletedTranslation, createTranslationStorageKey } from "./translation-payload";
 import { getConfiguredPreferences } from "./preferences";
 
@@ -108,7 +108,7 @@ async function translateAndShow(sourceText: string) {
   try {
     const result = await translate(sourceText, preferences);
 
-    if (isCompactText(sourceText) || isCompactText(result.translatedText)) {
+    if (shouldShowCompactTranslation(result.translatedText)) {
       if (!sourceIsCompact) {
         await closeMainWindow({ clearRootSearch: true });
       }

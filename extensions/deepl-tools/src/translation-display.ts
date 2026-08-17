@@ -9,6 +9,10 @@ export function isCompactText(text: string) {
   return compactText(text).length <= COMPACT_TRANSLATION_LIMIT;
 }
 
+export function shouldShowCompactTranslation(translatedText: string) {
+  return isCompactText(translatedText);
+}
+
 export function previewText(text: string) {
   const compactTranslation = compactText(text);
   if (compactTranslation.length <= COMPACT_TRANSLATION_PREVIEW_LIMIT) {

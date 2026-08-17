@@ -110,7 +110,7 @@ export async function translate(text: string, preferences: AppPreferences) {
 
   async function translateChunks(activeDirection: Direction, sourceLanguage?: string) {
     const translatedChunks: string[] = [];
-    let detectedSourceLang: string | undefined;
+    const detectedSourceLanguages = new Set<string>();
 
     for (const chunk of chunks) {
       if (!chunk.trim()) {
@@ -120,16 +120,21 @@ export async function translate(text: string, preferences: AppPreferences) {
 
       const translatedChunk = await translateChunk(chunk, preferences, activeDirection, sourceLanguage);
       translatedChunks.push(translatedChunk.translatedText);
-      detectedSourceLang ||= translatedChunk.sourceLang;
+      if (translatedChunk.sourceLang) {
+        detectedSourceLanguages.add(sourceLanguageCode(translatedChunk.sourceLang));
+      }
     }
 
-    return { translatedText: translatedChunks.join(""), sourceLang: detectedSourceLang };
+    const sourceLang = detectedSourceLanguages.size === 1 ? [...detectedSourceLanguages][0] : undefined;
+    return { translatedText: translatedChunks.join(""), sourceLang };
   }
 
   let result = await translateChunks(direction);
   const primarySource = sourceLanguageCode(preferences.primaryLanguage);
   const secondarySource = sourceLanguageCode(preferences.secondaryLanguage);
   const detectedSource = sourceLanguageCode(result.sourceLang || "");
+  const translatableChunkCount = chunks.filter((chunk) => chunk.trim()).length;
+  const canConstrainSource = translatableChunkCount === 1;
 
   if (direction.isUncertain && detectedSource === primarySource) {
     direction = {
@@ -137,8 +142,8 @@ export async function translate(text: string, preferences: AppPreferences) {
       rule: `DeepL detected ${languageName(primarySource)} → ${languageName(preferences.secondaryLanguage)}`,
       isUncertain: false,
     };
-    result = await translateChunks(direction, primarySource);
-  } else if (direction.isUncertain && detectedSource !== secondarySource) {
+    result = await translateChunks(direction, canConstrainSource ? primarySource : undefined);
+  } else if (direction.isUncertain && detectedSource !== secondarySource && canConstrainSource) {
     direction = {
       ...direction,
       rule: `Short text treated as ${languageName(secondarySource)} → ${languageName(preferences.primaryLanguage)}`,

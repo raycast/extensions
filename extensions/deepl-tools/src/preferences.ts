@@ -32,6 +32,6 @@ export async function getConfiguredPreferences(): Promise<AppPreferences | undef
   const languages = await getLanguagePreferences();
   if (!languages) return undefined;
 
-  const { apiKey } = getPreferenceValues<{ apiKey: string }>();
+  const { apiKey } = getPreferenceValues<Preferences>();
   return { apiKey, ...languages };
 }
