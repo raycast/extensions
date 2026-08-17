@@ -24,7 +24,11 @@ import {
   resolveWhisperCliPath,
   transcribe,
 } from "./lib/transcribe";
-import { RecordingState } from "./lib/types";
+import {
+  DomContextBridgeState,
+  ProcessIdentity,
+  RecordingState,
+} from "./lib/types";
 
 async function setRecordingStatus(subtitle: string): Promise<void> {
   try {
@@ -32,6 +36,37 @@ async function setRecordingStatus(subtitle: string): Promise<void> {
   } catch {
     // Recording should still work if Raycast cannot persist command metadata.
   }
+}
+
+function terminateProcess(
+  identity: ProcessIdentity | undefined,
+  signal: NodeJS.Signals,
+): void {
+  if (!identity || !isSameProcess(identity)) return;
+  try {
+    process.kill(identity.pid, signal);
+  } catch {
+    // Startup cleanup is best-effort and should continue for other processes.
+  }
+}
+
+async function cleanUpFailedStart(
+  recorder: ProcessIdentity | undefined,
+  frameCapture: ProcessIdentity | undefined,
+  domContext: DomContextBridgeState | undefined,
+): Promise<void> {
+  terminateProcess(frameCapture, "SIGTERM");
+  stopDomContextBridge(domContext);
+  if (recorder && isSameProcess(recorder)) {
+    terminateProcess(recorder, "SIGINT");
+    try {
+      await waitForProcessExit(recorder, 3_000);
+    } catch {
+      terminateProcess(recorder, "SIGTERM");
+    }
+  }
+  clearState();
+  await setRecordingStatus("Ready to Record");
 }
 
 async function startRecording(
@@ -62,53 +97,54 @@ async function startRecording(
     application = undefined;
   }
 
-  const recorderLogPath = join(sessionDir, "recorder.log");
-  const recorder = await spawnDetached(
-    "/usr/sbin/screencapture",
-    ["-v", "-g", "-k", "-C", `-D${display}`, videoPath],
-    recorderLogPath,
-  );
-  const domContext = await startDomContextBridge(sessionDir, recorder.pid);
-  const frameCapture = await spawnDetached(
-    "/bin/sh",
-    [
-      join(environment.assetsPath, "capture-frames.sh"),
-      String(recorder.pid),
-      join(sessionDir, "automatic"),
-      String(display),
-    ],
-    join(sessionDir, "frame-capture.log"),
-  );
-  const state: RecordingState = {
-    recorder,
-    frameCapture,
-    domContext,
-    startedAt: new Date().toISOString(),
-    sessionDir,
-    videoPath,
-    sourceApplication: application?.name,
-    sourceBundleId: application?.bundleId,
-  };
-  writeState(state);
-  writeFileSync(
-    join(sessionDir, "session.json"),
-    JSON.stringify(state, null, 2),
-  );
-  await setRecordingStatus("● Recording — Run to Stop");
-  await new Promise((resolve) => setTimeout(resolve, 800));
-  if (!isSameProcess(recorder)) {
-    if (isSameProcess(frameCapture)) {
-      process.kill(frameCapture.pid, "SIGTERM");
-    }
-    stopDomContextBridge(domContext);
-    clearState();
-    await setRecordingStatus("Ready to Record");
-    await showHUD(
-      "⚠️ Allow Raycast in Screen & System Audio Recording settings",
+  let recorder: ProcessIdentity | undefined;
+  let frameCapture: ProcessIdentity | undefined;
+  let domContext: DomContextBridgeState | undefined;
+  try {
+    recorder = await spawnDetached(
+      "/usr/sbin/screencapture",
+      ["-v", "-g", "-k", "-C", `-D${display}`, videoPath],
+      join(sessionDir, "recorder.log"),
     );
-    return;
+    domContext = await startDomContextBridge(sessionDir, recorder.pid);
+    frameCapture = await spawnDetached(
+      "/bin/sh",
+      [
+        join(environment.assetsPath, "capture-frames.sh"),
+        String(recorder.pid),
+        join(sessionDir, "automatic"),
+        String(display),
+      ],
+      join(sessionDir, "frame-capture.log"),
+    );
+    const state: RecordingState = {
+      recorder,
+      frameCapture,
+      domContext,
+      startedAt: new Date().toISOString(),
+      sessionDir,
+      videoPath,
+      sourceApplication: application?.name,
+      sourceBundleId: application?.bundleId,
+    };
+    writeState(state);
+    writeFileSync(
+      join(sessionDir, "session.json"),
+      JSON.stringify(state, null, 2),
+    );
+    await setRecordingStatus("● Recording — Run to Stop");
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    if (!isSameProcess(recorder)) {
+      throw new Error(
+        "Allow Raycast in Screen & System Audio Recording settings",
+      );
+    }
+    await showHUD("🔴 Recording started — run this command again to stop");
+  } catch (error) {
+    await cleanUpFailedStart(recorder, frameCapture, domContext);
+    const message = error instanceof Error ? error.message : String(error);
+    await showHUD(`⚠️ Could not start recording: ${message}`);
   }
-  await showHUD("🔴 Recording started — run this command again to stop");
 }
 
 async function stopRecording(

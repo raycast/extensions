@@ -113,7 +113,7 @@ For richer feedback on a website you are developing, add this development-only l
 </script>
 ```
 
-The bridge listens only on `127.0.0.1:43127`, starts and stops with each recording, and uses a new session token every time. A small **AF recording** badge appears in the top-right when connected; hover capture does not outline or restyle page elements. If the loader is absent or disconnected, screen, voice, transcript, and screenshot capture continue normally.
+The bridge listens only on `127.0.0.1:43127`, starts and stops with each recording, and uses a new session token every time. The page using the loader must itself be served from `localhost`, `127.0.0.1`, or `[::1]`; the bridge rejects public and file-page origins. A small **AF recording** badge appears in the top-right when connected; hover capture does not outline or restyle page elements. If the loader is absent or disconnected, screen, voice, transcript, and screenshot capture continue normally.
 
 Only include the loader in local development. Do not ship it in a public production build. Chrome supports this loopback workflow; browser security policy may prevent it in Safari.
 

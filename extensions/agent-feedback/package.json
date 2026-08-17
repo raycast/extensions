@@ -52,17 +52,16 @@
   "preferences": [
     {
       "name": "whisperModelPath",
-      "type": "textfield",
+      "type": "file",
       "required": false,
       "title": "Whisper Model Path",
       "description": "Optional path to an existing whisper.cpp .bin model. Leave empty to use the model downloaded by this extension."
     },
     {
       "name": "whisperCliPath",
-      "type": "textfield",
+      "type": "file",
       "required": false,
       "title": "Whisper CLI Path",
-      "placeholder": "/opt/homebrew/bin/whisper-cli",
       "description": "Optional path to whisper-cli. Homebrew installations on Apple silicon and Intel are detected automatically."
     },
     {

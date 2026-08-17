@@ -7,8 +7,14 @@ const {
   writeFileSync,
 } = require("node:fs");
 
-const [portArgument, eventsPath, statusPath, scriptPath, token, recorderPidArgument] =
-  process.argv.slice(2);
+const [
+  portArgument,
+  eventsPath,
+  statusPath,
+  scriptPath,
+  token,
+  recorderPidArgument,
+] = process.argv.slice(2);
 const port = Number(portArgument);
 const recorderPid = Number(recorderPidArgument);
 const source = readFileSync(scriptPath, "utf8").replaceAll(
@@ -30,13 +36,26 @@ function writeStatus() {
   renameSync(temporaryPath, statusPath);
 }
 
-function headers(request) {
+function isAllowedOrigin(origin) {
+  if (typeof origin !== "string") return false;
+  try {
+    const url = new URL(origin);
+    return (
+      (url.protocol === "http:" || url.protocol === "https:") &&
+      (url.hostname === "localhost" ||
+        url.hostname === "127.0.0.1" ||
+        url.hostname === "[::1]")
+    );
+  } catch {
+    return false;
+  }
+}
+
+function headers(origin) {
   return {
-    "Access-Control-Allow-Origin": request.headers.origin || "*",
+    "Access-Control-Allow-Origin": origin,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-    "Access-Control-Allow-Headers":
-      "Content-Type, X-Agent-Feedback-Token",
-    "Access-Control-Allow-Private-Network": "true",
+    "Access-Control-Allow-Headers": "Content-Type, X-Agent-Feedback-Token",
     "Cache-Control": "no-store",
     Vary: "Origin",
   };
@@ -103,7 +122,13 @@ const server = createServer((request, response) => {
     request.url || "/",
     `http://${request.headers.host || `127.0.0.1:${port}`}`,
   );
-  const responseHeaders = headers(request);
+  const origin = request.headers.origin;
+  if (!isAllowedOrigin(origin)) {
+    response.writeHead(403, { "Cache-Control": "no-store", Vary: "Origin" });
+    response.end();
+    return;
+  }
+  const responseHeaders = headers(origin);
 
   if (request.method === "OPTIONS") {
     response.writeHead(204, responseHeaders);
