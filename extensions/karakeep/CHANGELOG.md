@@ -1,6 +1,6 @@
 # Karakeep Changelog
 
-## [2.4.4] - {PR_MERGE_DATE}
+## [2.4.4] - 2026-08-17
 
 - Fixed a custom title being applied to an existing bookmark even when the rest of the submission failed. Adding a bookmark whose URL is already saved renames it, and that rename now happens only after the list and tag steps have succeeded, so a failure leaves the existing bookmark untouched
 - Create Bookmark no longer reports "Creation failed" when the bookmark was saved and only a later step failed. The toast now says which part didn't apply (the list, the tags, or the title) and the form stays open so you can retry without retyping anything
