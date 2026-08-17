@@ -26,14 +26,23 @@ import {
   type SearchFail,
 } from "./gadak";
 
-type Prefs = { gadakPath?: string; profile?: string; showLatency?: boolean };
+/** Mirrored Jira/Confluence text is data, not markup: escape CommonMark
+ *  punctuation so a title containing `*` or `#` renders literally. */
+function escapeMd(text: string): string {
+  return text.replace(/([\\`*_{}[\]()#+\-.!~>|])/g, "\\$1");
+}
 
 /** Bold every occurrence of the query in a snippet. Markdown is the only place
- *  Raycast will render emphasis, so this is the one real highlight we get. */
+ *  Raycast will render emphasis, so this is the one real highlight we get.
+ *  Split on the query first, then escape each piece — escaping first would
+ *  insert backslashes that break the match. */
 function emphasize(text: string, q: string): string {
-  if (!q) return text;
+  if (!q) return escapeMd(text);
   const safe = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  return text.replace(new RegExp(safe, "gi"), (hit) => `**${hit}**`);
+  return text
+    .split(new RegExp(`(${safe})`, "gi"))
+    .map((part, i) => (i % 2 === 1 ? `**${escapeMd(part)}**` : escapeMd(part)))
+    .join("");
 }
 
 const FIELD_COLOR: Record<string, Color> = {
@@ -86,7 +95,7 @@ function SearchErrorView({ fail }: { fail: SearchFail }) {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences.Search>();
   const bin = resolveGadakBinary(prefs.gadakPath);
   const profile = prefs.profile?.trim() ?? "";
   const showLatency = Boolean(prefs.showLatency);
@@ -198,7 +207,7 @@ export default function Command() {
                     detail={
                       <List.Item.Detail
                         markdown={[
-                          `## ${it.summary}`,
+                          `## ${escapeMd(it.summary)}`,
                           "",
                           m
                             ? `> ${emphasize(m.snippet, q)}`
@@ -277,7 +286,7 @@ export default function Command() {
                   detail={
                     <List.Item.Detail
                       markdown={[
-                        `## ${p.title}`,
+                        `## ${escapeMd(p.title)}`,
                         "",
                         `> ${emphasize(p.excerpt, q)}`,
                       ].join("\n")}
