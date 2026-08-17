@@ -1,6 +1,5 @@
 import { Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { logger } from "@chrismessina/raycast-logger";
-import type { Preferences } from "../types";
 import { getPortFromUrl, isApiReachable, isLocalHost } from "./connection";
 import { findContainerByPort, findDockerPath, isDockerRunning, startContainer, waitForApi } from "./docker";
 import { getTranslator } from "../i18n/standalone";
