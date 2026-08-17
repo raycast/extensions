@@ -115,6 +115,21 @@ function RecipeOutput({
   );
 }
 
+// A `+` or `*` param accepts multiple positional arguments. This code splits
+// the field's space-separated text into separate array entries, not one
+// merged argument.
+function argsFromFormValues(
+  recipe: JustRecipe,
+  typed: Record<string, string>,
+): string[] {
+  return recipe.params.flatMap((p) => {
+    const value = typed[p.name] ?? "";
+    if (p.kind === "singular") return [value];
+    const tokens = value.trim().split(/\s+/).filter(Boolean);
+    return tokens;
+  });
+}
+
 function RecipeParamForm({
   recipe,
   onSubmit,
@@ -146,8 +161,7 @@ function RecipeParamForm({
                 setErrors(newErrors);
                 return false;
               }
-              const args = recipe.params.map((p) => typed[p.name] ?? "");
-              onSubmit(args);
+              onSubmit(argsFromFormValues(recipe, typed));
             }}
           />
           <Action.SubmitForm
@@ -155,7 +169,7 @@ function RecipeParamForm({
             shortcut={Keyboard.Shortcut.Common.Copy}
             onSubmit={(values) => {
               const typed = values as Record<string, string>;
-              const args = recipe.params.map((p) => typed[p.name] ?? "");
+              const args = argsFromFormValues(recipe, typed);
               void Clipboard.copy(buildRecipeCmd(recipe, args));
               void showHUD("Command copied");
             }}
