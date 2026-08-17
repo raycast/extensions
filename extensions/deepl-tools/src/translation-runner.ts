@@ -94,11 +94,7 @@ async function showCompactTranslation(text: string) {
 }
 
 async function translateAndShow(sourceText: string) {
-  const preferences = await getConfiguredPreferences();
-  if (!preferences) {
-    await launchCommand({ name: "configure-languages", type: LaunchType.UserInitiated });
-    return;
-  }
+  const preferences = getConfiguredPreferences();
   const sourceIsCompact = isCompactText(sourceText);
 
   if (sourceIsCompact) {

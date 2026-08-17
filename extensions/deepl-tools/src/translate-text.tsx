@@ -2,7 +2,6 @@ import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, LocalStorage } fr
 import { showFailureToast } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import { translate } from "./deepl";
-import { LanguageSetup } from "./language-setup";
 import { languageName } from "./languages";
 import { AppPreferences, getConfiguredPreferences } from "./preferences";
 import {
@@ -176,26 +175,5 @@ function TranslateTextCommand({ props, preferences }: { props: TranslateTextProp
 }
 
 export default function Command(props: TranslateTextProps) {
-  const [preferences, setPreferences] = useState<AppPreferences | null>();
-
-  useEffect(() => {
-    void getConfiguredPreferences().then((value) => setPreferences(value || null));
-  }, []);
-
-  if (preferences === undefined) {
-    return <Detail isLoading markdown="# Loading DeepL Tools…" />;
-  }
-
-  if (preferences === null) {
-    return (
-      <LanguageSetup
-        onSaved={async () => {
-          const configuredPreferences = await getConfiguredPreferences();
-          setPreferences(configuredPreferences || null);
-        }}
-      />
-    );
-  }
-
-  return <TranslateTextCommand props={props} preferences={preferences} />;
+  return <TranslateTextCommand props={props} preferences={getConfiguredPreferences()} />;
 }

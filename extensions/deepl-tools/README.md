@@ -16,10 +16,7 @@ Deepcast is useful when you want to choose among many target languages. DeepL To
 
 ## Setup
 
-The first time you run a command:
-
-1. Raycast securely asks for your DeepL API key.
-2. DeepL Tools asks for your primary and secondary languages.
+The first time you run a command, Raycast asks for your DeepL API key plus your primary and secondary languages in one setup screen.
 
 To get the key:
 
@@ -30,7 +27,7 @@ To get the key:
 
 The extension itself is free; DeepL API Free includes a monthly character allowance subject to DeepL's current limits. DeepL also documents authentication in its [API quick start](https://developers.deepl.com/docs/getting-started/auth).
 
-The extension uses the DeepL API Free endpoint. Run **Configure Languages** whenever you want to change your pair; change the API key in Raycast's extension preferences.
+The extension uses the DeepL API Free endpoint. Change the language pair or API key at any time in Raycast's extension preferences.
 
 ## Share with friends
 
@@ -56,4 +53,10 @@ npm install
 npm run lint
 npm test
 npm run build
+```
+
+The compact notification helper is built from the checked-in Swift source. To reproduce the universal macOS binary:
+
+```bash
+npm run build:toast
 ```

@@ -9,6 +9,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "preferences": [
     {
       "name": "apiKey",
@@ -17,15 +20,101 @@
       "type": "password",
       "placeholder": "Paste your DeepL API key",
       "required": true
+    },
+    {
+      "name": "primaryLanguage",
+      "title": "Primary Language",
+      "description": "Your main language and the fallback translation target",
+      "type": "dropdown",
+      "required": true,
+      "default": "RU",
+      "data": [
+        { "title": "Arabic", "value": "AR" },
+        { "title": "Bulgarian", "value": "BG" },
+        { "title": "Chinese (Simplified)", "value": "ZH-HANS" },
+        { "title": "Chinese (Traditional)", "value": "ZH-HANT" },
+        { "title": "Czech", "value": "CS" },
+        { "title": "Danish", "value": "DA" },
+        { "title": "Dutch", "value": "NL" },
+        { "title": "English (American)", "value": "EN-US" },
+        { "title": "English (British)", "value": "EN-GB" },
+        { "title": "Estonian", "value": "ET" },
+        { "title": "Finnish", "value": "FI" },
+        { "title": "French", "value": "FR" },
+        { "title": "German", "value": "DE" },
+        { "title": "Greek", "value": "EL" },
+        { "title": "Hebrew", "value": "HE" },
+        { "title": "Hungarian", "value": "HU" },
+        { "title": "Indonesian", "value": "ID" },
+        { "title": "Italian", "value": "IT" },
+        { "title": "Japanese", "value": "JA" },
+        { "title": "Korean", "value": "KO" },
+        { "title": "Latvian", "value": "LV" },
+        { "title": "Lithuanian", "value": "LT" },
+        { "title": "Norwegian Bokmål", "value": "NB" },
+        { "title": "Polish", "value": "PL" },
+        { "title": "Portuguese (Brazilian)", "value": "PT-BR" },
+        { "title": "Portuguese (European)", "value": "PT-PT" },
+        { "title": "Romanian", "value": "RO" },
+        { "title": "Russian", "value": "RU" },
+        { "title": "Slovak", "value": "SK" },
+        { "title": "Slovenian", "value": "SL" },
+        { "title": "Spanish", "value": "ES" },
+        { "title": "Swedish", "value": "SV" },
+        { "title": "Thai", "value": "TH" },
+        { "title": "Turkish", "value": "TR" },
+        { "title": "Ukrainian", "value": "UK" },
+        { "title": "Vietnamese", "value": "VI" }
+      ]
+    },
+    {
+      "name": "secondaryLanguage",
+      "title": "Secondary Language",
+      "description": "Text in your primary language is translated here",
+      "type": "dropdown",
+      "required": true,
+      "default": "EN-US",
+      "data": [
+        { "title": "Arabic", "value": "AR" },
+        { "title": "Bulgarian", "value": "BG" },
+        { "title": "Chinese (Simplified)", "value": "ZH-HANS" },
+        { "title": "Chinese (Traditional)", "value": "ZH-HANT" },
+        { "title": "Czech", "value": "CS" },
+        { "title": "Danish", "value": "DA" },
+        { "title": "Dutch", "value": "NL" },
+        { "title": "English (American)", "value": "EN-US" },
+        { "title": "English (British)", "value": "EN-GB" },
+        { "title": "Estonian", "value": "ET" },
+        { "title": "Finnish", "value": "FI" },
+        { "title": "French", "value": "FR" },
+        { "title": "German", "value": "DE" },
+        { "title": "Greek", "value": "EL" },
+        { "title": "Hebrew", "value": "HE" },
+        { "title": "Hungarian", "value": "HU" },
+        { "title": "Indonesian", "value": "ID" },
+        { "title": "Italian", "value": "IT" },
+        { "title": "Japanese", "value": "JA" },
+        { "title": "Korean", "value": "KO" },
+        { "title": "Latvian", "value": "LV" },
+        { "title": "Lithuanian", "value": "LT" },
+        { "title": "Norwegian Bokmål", "value": "NB" },
+        { "title": "Polish", "value": "PL" },
+        { "title": "Portuguese (Brazilian)", "value": "PT-BR" },
+        { "title": "Portuguese (European)", "value": "PT-PT" },
+        { "title": "Romanian", "value": "RO" },
+        { "title": "Russian", "value": "RU" },
+        { "title": "Slovak", "value": "SK" },
+        { "title": "Slovenian", "value": "SL" },
+        { "title": "Spanish", "value": "ES" },
+        { "title": "Swedish", "value": "SV" },
+        { "title": "Thai", "value": "TH" },
+        { "title": "Turkish", "value": "TR" },
+        { "title": "Ukrainian", "value": "UK" },
+        { "title": "Vietnamese", "value": "VI" }
+      ]
     }
   ],
   "commands": [
-    {
-      "name": "configure-languages",
-      "title": "Configure Languages",
-      "description": "Choose the two languages used for smart translation",
-      "mode": "view"
-    },
     {
       "name": "translate-clipboard",
       "title": "Translate Clipboard",
@@ -68,7 +157,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.93.2",
+    "@raycast/api": "1.104.24",
     "@raycast/utils": "^1.17.0",
     "franc-min": "^6.2.0"
   },
@@ -87,6 +176,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
+    "build:toast": "scripts/build-translation-toast.sh",
     "test": "tsx --test tests/*.test.ts"
   }
 }
