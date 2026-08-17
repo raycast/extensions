@@ -22,6 +22,6 @@ export async function runMenuCloakAction(action: string, confirmation: string): 
     return;
   }
 
-  await open(`menucloak://${action}`);
+  await open(`menucloak://${action}`, bundleId);
   await showHUD(confirmation);
 }
