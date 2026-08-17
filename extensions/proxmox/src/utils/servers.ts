@@ -46,6 +46,7 @@ async function writeStoredServer(server: StoredServer) {
 const LOCK_DIR = "server-locks";
 const LOCK_STALE_MS = 8_000;
 const LOCK_WAIT_MS = 5_000;
+const LEGACY_MIGRATION_LOCK_ID = "legacy-migration";
 
 function sleep(ms: number) {
   return new Promise<void>((resolve) => setTimeout(resolve, ms));
@@ -100,21 +101,30 @@ async function migrateLegacyServers() {
     return;
   }
 
-  try {
-    const legacyServers = JSON.parse(raw);
-    if (Array.isArray(legacyServers)) {
-      // The index keeps the order the servers were originally added in
-      await Promise.all(
-        legacyServers
-          .filter((server) => typeof server?.id === "string")
-          .map((server, index) => writeStoredServer({ ...server, addedAt: index })),
-      );
+  // Re-read under the lock: another instance may have already migrated, and
+  // the user may have edited or removed a server, since the check above.
+  await withSharedServerLock(LEGACY_MIGRATION_LOCK_ID, async () => {
+    const lockedRaw = await LocalStorage.getItem<string>(LEGACY_SERVERS_KEY);
+    if (typeof lockedRaw !== "string" || lockedRaw === "") {
+      return;
     }
-  } catch {
-    // Drop an unreadable legacy value instead of failing every read
-  }
 
-  await LocalStorage.removeItem(LEGACY_SERVERS_KEY);
+    try {
+      const legacyServers = JSON.parse(lockedRaw);
+      if (Array.isArray(legacyServers)) {
+        // The index keeps the order the servers were originally added in
+        await Promise.all(
+          legacyServers
+            .filter((server) => typeof server?.id === "string")
+            .map((server, index) => writeStoredServer({ ...server, addedAt: index })),
+        );
+      }
+    } catch {
+      // Drop an unreadable legacy value instead of failing every read
+    }
+
+    await LocalStorage.removeItem(LEGACY_SERVERS_KEY);
+  });
 }
 
 async function readStoredServers(): Promise<PveServer[]> {
