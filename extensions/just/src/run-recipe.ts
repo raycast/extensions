@@ -11,12 +11,9 @@ import {
   expandPath,
 } from "./just-utils";
 
-interface CommandArguments {
-  folder?: string;
-  recipe?: string;
-}
-
-export default async function Command(props: { arguments: CommandArguments }) {
+export default async function Command(props: {
+  arguments: Arguments.RunRecipe;
+}) {
   const { folder: folderArgument, recipe: recipeArgument } = props.arguments;
 
   if (!folderArgument || !recipeArgument) {
@@ -24,9 +21,7 @@ export default async function Command(props: { arguments: CommandArguments }) {
     return;
   }
 
-  const { justfileFolders } = getPreferenceValues<{
-    justfileFolders: string;
-  }>();
+  const { justfileFolders = "" } = getPreferenceValues<Preferences>();
   const parseErrors: string[] = [];
   const onError = (jf: string, e: unknown) =>
     parseErrors.push(`${path.basename(path.dirname(jf))}: ${String(e)}`);
@@ -56,7 +51,10 @@ export default async function Command(props: { arguments: CommandArguments }) {
   const recipe = matches[0];
 
   if (
-    recipe.params.some((p) => p.kind === "singular" && p.defaultValue === null)
+    recipe.params.some(
+      (p) =>
+        (p.kind === "singular" || p.kind === "plus") && p.defaultValue === null,
+    )
   ) {
     await showHUD(`${recipe.name} requires parameters — use Browse Justfiles`);
     return;

@@ -18,7 +18,6 @@ import {
 } from "@raycast/api";
 import React, { useState, useEffect } from "react";
 import { execFile } from "node:child_process";
-import path from "node:path";
 import {
   getUserShell,
   getAllJustfileFolders,
@@ -33,10 +32,6 @@ import {
   expandPath,
   type JustRecipe,
 } from "./just-utils";
-
-interface Preferences {
-  justfileFolders: string;
-}
 
 function buildDetailMarkdown(recipe: JustRecipe): string {
   const parts: string[] = [];
@@ -141,8 +136,8 @@ function RecipeParamForm({
               const newErrors: Record<string, string | undefined> = {};
               for (const p of recipe.params) {
                 const required =
-                  (p.kind === "singular" && p.defaultValue === null) ||
-                  p.kind === "plus";
+                  (p.kind === "singular" || p.kind === "plus") &&
+                  p.defaultValue === null;
                 if (required && !typed[p.name]?.trim()) {
                   newErrors[p.name] = "Required";
                 }
@@ -161,10 +156,7 @@ function RecipeParamForm({
             onSubmit={(values) => {
               const typed = values as Record<string, string>;
               const args = recipe.params.map((p) => typed[p.name] ?? "");
-              const quotedArgs = args.map((a) => JSON.stringify(a)).join(" ");
-              void Clipboard.copy(
-                `cd "${path.dirname(recipe.filePath)}" && just ${recipe.name}${quotedArgs ? " " + quotedArgs : ""}`,
-              );
+              void Clipboard.copy(buildRecipeCmd(recipe, args));
               void showHUD("Command copied");
             }}
           />
@@ -261,19 +253,15 @@ function ManageFoldersForm({
   );
 }
 
-interface CommandArguments {
-  folder?: string;
-  recipe?: string;
-  silent?: string;
-}
-
-export default function Command(props: { arguments: CommandArguments }) {
+export default function Command(props: {
+  arguments: Arguments.BrowseJustfiles;
+}) {
   const {
     folder: folderArgument,
     recipe: recipeArgument,
     silent: silentArgument,
   } = props.arguments;
-  const { justfileFolders } = getPreferenceValues<Preferences>();
+  const { justfileFolders = "" } = getPreferenceValues<Preferences>();
   const [recipes, setRecipes] = useState<JustRecipe[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchText, setSearchText] = useState(
@@ -408,15 +396,15 @@ export default function Command(props: { arguments: CommandArguments }) {
 
     const allRecipes: JustRecipe[] = [];
     for (const justfile of justfiles) {
-      const parsed = parseRecipes(justfile);
-      if (parsed.length === 0) {
+      try {
+        allRecipes.push(...parseRecipes(justfile));
+      } catch {
         showToast({
           style: Toast.Style.Failure,
           title: "Could not parse",
           message: justfile,
         });
       }
-      allRecipes.push(...parsed);
     }
 
     setRecipes(allRecipes);
@@ -442,7 +430,24 @@ export default function Command(props: { arguments: CommandArguments }) {
         ),
       );
       if (matches.length === 1) {
-        void runRecipe(matches[0], [], silentArgument ? true : undefined);
+        const recipe = matches[0];
+        const hasUnfulfilledRequired = recipe.params.some(
+          (p) =>
+            (p.kind === "singular" || p.kind === "plus") &&
+            p.defaultValue === null,
+        );
+        if (hasUnfulfilledRequired) {
+          navigation.push(
+            <RecipeParamForm
+              recipe={recipe}
+              onSubmit={(args) => {
+                void runRecipe(recipe, args, silentArgument ? true : undefined);
+              }}
+            />,
+          );
+        } else {
+          void runRecipe(recipe, [], silentArgument ? true : undefined);
+        }
       }
     }
   }, [effectivePaths]);
@@ -484,7 +489,7 @@ export default function Command(props: { arguments: CommandArguments }) {
             />
             <Action.CopyToClipboard
               title="Copy Command"
-              content={`cd "${path.dirname(recipe.filePath)}" && just ${recipe.name}`}
+              content={buildRecipeCmd(recipe, [])}
               shortcut={Keyboard.Shortcut.Common.Copy}
             />
             <Action

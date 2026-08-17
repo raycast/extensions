@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { homedir, userInfo } from "node:os";
 import path from "node:path";
 import { LocalStorage } from "@raycast/api";
@@ -19,11 +19,22 @@ export function findJustfiles(folders: string[]): string[] {
   const files: string[] = [];
   for (const folder of folders) {
     try {
-      const result = execSync(
-        `find -L "${folder}" -maxdepth 1 \\( -name justfile -o -name Justfile \\) 2>/dev/null`,
-        {
-          encoding: "utf8",
-        },
+      const result = execFileSync(
+        "find",
+        [
+          "-L",
+          folder,
+          "-maxdepth",
+          "1",
+          "(",
+          "-name",
+          "justfile",
+          "-o",
+          "-name",
+          "Justfile",
+          ")",
+        ],
+        { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
       );
       files.push(...result.trim().split("\n").filter(Boolean));
     } catch {
@@ -105,7 +116,7 @@ const EXEC_ENV = {
 // json dump keys recipes by a BTreeMap (always alphabetical), so scrape the
 // plain `just --dump` output for declaration order instead.
 function getDeclarationOrder(justfilePath: string): string[] {
-  const dump = execSync(`just --dump --justfile "${justfilePath}"`, {
+  const dump = execFileSync("just", ["--dump", "--justfile", justfilePath], {
     encoding: "utf8",
     env: EXEC_ENV,
   });
@@ -123,8 +134,9 @@ function getDeclarationOrder(justfilePath: string): string[] {
 
 export function parseRecipes(justfilePath: string): JustRecipe[] {
   try {
-    const jsonOutput = execSync(
-      `just --dump --dump-format json --justfile "${justfilePath}"`,
+    const jsonOutput = execFileSync(
+      "just",
+      ["--dump", "--dump-format", "json", "--justfile", justfilePath],
       {
         encoding: "utf8",
         env: EXEC_ENV,
@@ -321,7 +333,13 @@ export function matchRecipes(
   );
 }
 
+// Double quotes don't stop shell command substitution (`$(...)`, backticks),
+// so wrap in single quotes instead; escape embedded single quotes as '\''.
+export function shellQuote(s: string): string {
+  return `'${s.replace(/'/g, `'\\''`)}'`;
+}
+
 export function buildRecipeCmd(recipe: JustRecipe, args: string[]): string {
-  const quotedArgs = args.map((a) => JSON.stringify(a)).join(" ");
-  return `cd ${JSON.stringify(path.dirname(recipe.filePath))} && just --yes --justfile ${JSON.stringify(recipe.filePath)} ${JSON.stringify(recipe.name)}${quotedArgs ? " " + quotedArgs : ""}`;
+  const quotedArgs = args.map(shellQuote).join(" ");
+  return `cd ${shellQuote(path.dirname(recipe.filePath))} && just --yes --justfile ${shellQuote(recipe.filePath)} ${shellQuote(recipe.name)}${quotedArgs ? " " + quotedArgs : ""}`;
 }
