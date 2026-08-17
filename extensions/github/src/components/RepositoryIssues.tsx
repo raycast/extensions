@@ -41,7 +41,6 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
     cacheNamespace: "github-repo-issue",
   });
   const repoFilter = props.repo && props.repo.length > 0 ? `repo:${props.repo}` : "";
-  const statusQuery = statusFilter === "all" ? "" : `is:${statusFilter}`;
 
   const {
     data,
@@ -49,14 +48,17 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
     mutate: mutateList,
     pagination,
   } = useCachedPromise(
-    (searchText, sortTxt, statusQuery) => async (options: { page: number; cursor?: string }) => {
+    (searchText, sortTxt, statusFilter) => async (options: { page: number; cursor?: string }) => {
+      const statusQuery = statusFilter === "all" ? "" : `is:${statusFilter}`;
       const lookup = parseIssueNumberLookup(searchText, props.repo);
       if (lookup && options.page === 0) {
         try {
           const exact = await github.issueByNumber(lookup);
-          if (exact.repository?.issue) {
+          const issue = exact.repository?.issue;
+          const matchesStatus = statusFilter === "all" || (statusFilter === "closed" ? issue?.closed : !issue?.closed);
+          if (issue && matchesStatus) {
             return {
-              data: [exact.repository.issue as IssueFieldsFragment],
+              data: [issue as IssueFieldsFragment],
               hasMore: false,
             };
           }
@@ -78,7 +80,7 @@ export function RepositoryIssueList(props: { repo: string }): JSX.Element {
         cursor: result.search.pageInfo.endCursor ?? undefined,
       };
     },
-    [searchText, sortQuery, statusQuery],
+    [searchText, sortQuery, statusFilter],
   );
 
   return (
