@@ -101,3 +101,33 @@ test("the CLI waits for a live writer whose lock is old", async () => {
   );
   assert.deepEqual(new Set(texts), new Set(["slow", "after-slow"]));
 });
+
+test("the CLI reclaims an old lock without a process fingerprint", async () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "tenfour-cli-"));
+  const store = path.join(root, "shelf.json");
+  const lock = `${store}.lock`;
+  fs.writeFileSync(store, "[]");
+  fs.writeFileSync(
+    lock,
+    JSON.stringify({
+      pid: process.pid,
+      fingerprint: true,
+      startedAt: null,
+      token: "missing-fingerprint",
+    }),
+  );
+  fs.utimesSync(lock, new Date(0), new Date(Date.now() - 3000));
+
+  const child = spawn(process.execPath, [CLI, "reclaimed"], {
+    env: { ...process.env, TENFOUR_FILE: store },
+    stdio: ["ignore", "ignore", "pipe"],
+  });
+  const exitCode = await Promise.race([
+    new Promise((resolve) => child.on("close", resolve)),
+    new Promise((resolve) => setTimeout(() => resolve("timeout"), 500)),
+  ]);
+  if (exitCode === "timeout") child.kill();
+
+  assert.equal(exitCode, 0, "CLI remained blocked by a missing fingerprint");
+  assert.equal(JSON.parse(fs.readFileSync(store, "utf8"))[0].text, "reclaimed");
+});

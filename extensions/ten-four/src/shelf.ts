@@ -157,8 +157,8 @@ function withLock<T>(fn: () => T): T {
               process.kill(owner.pid, 0);
               ownerAlive =
                 owner.fingerprint &&
-                (owner.startedAt === null ||
-                  processStartTime(owner.pid) === owner.startedAt);
+                typeof owner.startedAt === "string" &&
+                processStartTime(owner.pid) === owner.startedAt;
             } catch (error) {
               ownerAlive = (error as NodeJS.ErrnoException).code === "EPERM";
             }

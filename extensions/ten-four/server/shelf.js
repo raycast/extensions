@@ -120,8 +120,8 @@ async function withLock(fn) {
               process.kill(owner.pid, 0);
               ownerAlive =
                 owner.fingerprint &&
-                (owner.startedAt === null ||
-                  processStartTime(owner.pid) === owner.startedAt);
+                typeof owner.startedAt === "string" &&
+                processStartTime(owner.pid) === owner.startedAt;
             } catch (error) {
               ownerAlive = error.code === "EPERM";
             }
