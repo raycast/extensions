@@ -1,5 +1,7 @@
 # Ten Four — Remote Shelf Service (design)
 
+> **Superseded on 2026-08-17.** This document's "service-only, no local-file fallback" constraint no longer holds. The shelf now has two backends behind one interface, chosen by whether the **Shelf URL** preference is set: blank means the local file, set means this service. Kept as a record of the original design.
+
 **Date:** 2026-06-30
 **Status:** Approved, ready for implementation plan
 

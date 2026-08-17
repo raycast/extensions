@@ -1,5 +1,7 @@
 # Remote Shelf Service Implementation Plan
 
+> **Superseded on 2026-08-17.** This document's "service-only, no local-file fallback" constraint no longer holds. The shelf now has two backends behind one interface, chosen by whether the **Shelf URL** preference is set: blank means the local file, set means this service. Kept as a record of the original design.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Replace Ten Four's local-file shelf transport with a tailnet-hosted HTTP service so a push from the remote box (Guppy) appears in Raycast on the Mac.
