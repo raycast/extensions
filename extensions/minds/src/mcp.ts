@@ -1,9 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-type Preferences = {
-  apiKey: string;
-  endpoint: string;
-};
+const MINDS_MCP_ENDPOINT = "https://getminds.ai/mcp";
 
 type JsonRpcResponse<T> = {
   result?: T;
@@ -43,10 +40,8 @@ class MindsMcpClient {
 
   constructor() {
     const preferences = getPreferenceValues<Preferences>();
-    const url = new URL(preferences.endpoint);
-    if (url.protocol !== "https:") throw new Error("The Minds MCP endpoint must use HTTPS.");
     if (!preferences.apiKey.trim()) throw new Error("Add a Minds API key in the extension preferences.");
-    this.endpoint = url.toString();
+    this.endpoint = MINDS_MCP_ENDPOINT;
     this.apiKey = preferences.apiKey.trim();
   }
 

@@ -1,6 +1,6 @@
 # Minds Changelog
 
-## [Initial Version] - 2026-08-16
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Browse and search research Groups.
 - Ask an existing Group a question.

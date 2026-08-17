@@ -48,20 +48,10 @@
       "title": "Minds API Key",
       "description": "Create an API key in Minds, then paste it here.",
       "placeholder": "minds_..."
-    },
-    {
-      "name": "endpoint",
-      "type": "textfield",
-      "required": true,
-      "title": "MCP Endpoint",
-      "description": "The production Minds MCP endpoint.",
-      "default": "https://getminds.ai/mcp",
-      "placeholder": "https://getminds.ai/mcp"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.21",
-    "@raycast/utils": "^2.2.7"
+    "@raycast/api": "^1.104.21"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
