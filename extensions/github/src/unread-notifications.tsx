@@ -185,8 +185,6 @@ function UnreadNotifications() {
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
-          // Reserved OpenPreferences keys, but this is the Configure Command action — keep custom binding.
-          // eslint-disable-next-line
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openCommandPreferences}
           alternate={

@@ -183,9 +183,7 @@ export default function NotificationActions({ notification, userId, mutateList }
       <Action
         title="Unsubscribe"
         icon={Icon.BellDisabled}
-        // Same keys as Common.Pin, but action is Unsubscribe — keep custom binding.
-        // eslint-disable-next-line
-        shortcut={{ modifiers: ["cmd"], key: "." }}
+        shortcut={Keyboard.Shortcut.Common.Pin}
         onAction={unsubscribe}
       />
       <ActionPanel.Section>

@@ -1,4 +1,13 @@
-import { Action, ActionPanel, Icon, Toast, confirmAlert, openExtensionPreferences, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  Toast,
+  confirmAlert,
+  openExtensionPreferences,
+  showToast,
+  Keyboard,
+} from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
@@ -84,9 +93,7 @@ export default function ProjectActions({ project, children, mutateList, mutateDe
             <Action
               title="Close Project"
               icon={Icon.Lock}
-              // Same keys as Common.Copy, but action is Close Project — keep custom binding.
-              // eslint-disable-next-line
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
               style={Action.Style.Destructive}
               onAction={async () => {
                 if (
@@ -104,9 +111,7 @@ export default function ProjectActions({ project, children, mutateList, mutateDe
             <Action
               title="Reopen Project"
               icon={Icon.LockUnlocked}
-              // Same keys as Common.OpenWith, but action is Reopen Project — keep custom binding.
-              // eslint-disable-next-line
-              shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.OpenWith}
               style={Action.Style.Destructive}
               onAction={async () => {
                 if (

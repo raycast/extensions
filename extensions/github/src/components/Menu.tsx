@@ -132,8 +132,6 @@ export function MenuBarItemConfigureCommand(): JSX.Element {
   return (
     <MenuBarExtra.Item
       title="Configure Command"
-      // Reserved OpenPreferences keys, but this is the Configure Command action — keep custom binding.
-      // eslint-disable-next-line
       shortcut={{ modifiers: ["cmd"], key: "," }}
       icon={Icon.Gear}
       onAction={() => openCommandPreferences()}

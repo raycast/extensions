@@ -132,9 +132,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
               onVisit(repository);
               cloneAndOpen(repository);
             }}
-            // Same keys as Common.CopyName, but action is Clone and Open — keep custom binding.
-            // eslint-disable-next-line
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
           />
         )}
         <Action.Push
@@ -161,9 +159,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
           icon={{ source: "vscode.svg", tintColor: Color.PrimaryText }}
           title="Clone in VS Code"
           url={`${editorScheme}://vscode.git/clone?url=${repository.url}`}
-          // Same keys as Common.Copy, but action is Clone in VS Code — keep custom binding.
-          // eslint-disable-next-line
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          shortcut={Keyboard.Shortcut.Common.Copy}
           onOpen={() => onVisit(repository)}
         />
 
