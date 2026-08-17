@@ -1,7 +1,7 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { getPreferenceValues, Preferences } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
   if (process.platform === "win32") {
