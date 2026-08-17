@@ -1,6 +1,6 @@
 # Deepcast Changelog
 
-## [Hyperlinks] - {PR_MERGE_DATE}
+## [Hyperlinks] - 2026-08-17
 
 - Preserve original HTML formatting and hyperlinks when translating copied rich text, then copy the result as rich text so it can be pasted back with ⌘V.
 
