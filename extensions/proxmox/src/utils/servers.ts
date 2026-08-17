@@ -41,7 +41,8 @@ async function writeStoredServer(server: StoredServer) {
 /**
  * Command instances do not share module state, and LocalStorage has no CAS, so
  * overlapping update/remove of one server is coordinated with an exclusive
- * lock file under the extension support path.
+ * lock file under the extension support path. Legacy migration writes those
+ * same keys and must take the same per-server lock.
  */
 const LOCK_DIR = "server-locks";
 const LOCK_STALE_MS = 8_000;
@@ -95,6 +96,37 @@ async function withSharedServerLock<T>(id: string, mutation: () => Promise<T>): 
   throw new Error("Timed out waiting to update this server");
 }
 
+async function readStoredServer(id: string): Promise<StoredServer | undefined> {
+  const raw = await LocalStorage.getItem<string>(storageKey(id));
+  if (typeof raw !== "string" || raw === "") {
+    return undefined;
+  }
+
+  try {
+    return JSON.parse(raw) as StoredServer;
+  } catch {
+    return undefined;
+  }
+}
+
+async function writeLegacyServerUnlessMutated(server: StoredServer) {
+  await withSharedServerLock(server.id, async () => {
+    if (await readStoredServer(server.id)) {
+      // Keep a concurrent edit, or a value written by a previous partial migration
+      return;
+    }
+
+    // Another instance already finished migrating; a missing key is then a
+    // concurrent removal, not an unmigrated server.
+    const legacy = await LocalStorage.getItem<string>(LEGACY_SERVERS_KEY);
+    if (typeof legacy !== "string" || legacy === "") {
+      return;
+    }
+
+    await writeStoredServer(server);
+  });
+}
+
 async function migrateLegacyServers() {
   const raw = await LocalStorage.getItem<string>(LEGACY_SERVERS_KEY);
   if (typeof raw !== "string" || raw === "") {
@@ -112,12 +144,17 @@ async function migrateLegacyServers() {
     try {
       const legacyServers = JSON.parse(lockedRaw);
       if (Array.isArray(legacyServers)) {
+        const seenIds = new Set<string>();
+        const writes: Promise<void>[] = [];
         // The index keeps the order the servers were originally added in
-        await Promise.all(
-          legacyServers
-            .filter((server) => typeof server?.id === "string")
-            .map((server, index) => writeStoredServer({ ...server, addedAt: index })),
-        );
+        for (const [index, server] of legacyServers.entries()) {
+          if (typeof server?.id !== "string" || seenIds.has(server.id)) {
+            continue;
+          }
+          seenIds.add(server.id);
+          writes.push(writeLegacyServerUnlessMutated({ ...server, addedAt: index }));
+        }
+        await Promise.all(writes);
       }
     } catch {
       // Drop an unreadable legacy value instead of failing every read
@@ -151,19 +188,6 @@ async function readStoredServers(): Promise<PveServer[]> {
   return storedServers
     .sort((a, b) => (a.addedAt ?? 0) - (b.addedAt ?? 0))
     .map(({ id, name, url, tokenId, tokenSecret }) => ({ id, name, url, tokenId, tokenSecret }));
-}
-
-async function readStoredServer(id: string): Promise<StoredServer | undefined> {
-  const raw = await LocalStorage.getItem<string>(storageKey(id));
-  if (typeof raw !== "string" || raw === "") {
-    return undefined;
-  }
-
-  try {
-    return JSON.parse(raw) as StoredServer;
-  } catch {
-    return undefined;
-  }
 }
 
 export function isPreferencesServer(server: PveServer): boolean {
@@ -216,6 +240,9 @@ export const useServers = () => {
   }, []);
 
   const updateServer = useCallback(async (server: PveServer) => {
+    // Finish migrating first so this lock and the migration writes use the
+    // same order (legacy lock, then per-server lock) and cannot deadlock.
+    await migrateLegacyServers();
     await withSharedServerLock(server.id, async () => {
       const stored = await readStoredServer(server.id);
       if (!stored) {
@@ -228,6 +255,7 @@ export const useServers = () => {
   }, []);
 
   const removeServer = useCallback(async (server: PveServer) => {
+    await migrateLegacyServers();
     await withSharedServerLock(server.id, async () => {
       await LocalStorage.removeItem(storageKey(server.id));
       notifyServersChanged();
