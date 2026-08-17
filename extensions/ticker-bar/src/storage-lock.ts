@@ -9,53 +9,95 @@ type LeaseOptions = {
   heartbeatMs: number;
   waitTimeoutMs: number;
   retryMs?: number;
+  contentionMs?: number;
 };
+
+type LockWork<Value> = (signal: AbortSignal) => Promise<Value>;
 
 export async function withLeaseLock<Value>(
   storage: LeaseStorage,
   key: string,
-  work: () => Promise<Value>,
+  work: LockWork<Value>,
   options: LeaseOptions,
 ): Promise<Value> {
   const owner = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   const retryMs = options.retryMs ?? 50;
+  const contentionMs = options.contentionMs ?? Math.min(15, retryMs);
   const deadline = Date.now() + options.waitTimeoutMs;
 
   while (Date.now() <= deadline) {
-    const current = parseLease(await storage.getItem(key));
-    if (!current || current.expiresAt <= Date.now()) {
-      await storage.setItem(key, serializeLease(owner, options.leaseMs));
-      const confirmed = parseLease(await storage.getItem(key));
-      if (confirmed?.owner === owner) {
-        let renewal = Promise.resolve();
-        const heartbeat = setInterval(() => {
-          renewal = renewal
-            .then(async () => {
-              const latest = parseLease(await storage.getItem(key));
-              if (latest?.owner === owner) {
-                await storage.setItem(
-                  key,
-                  serializeLease(owner, options.leaseMs),
-                );
-              }
-            })
-            .catch(() => undefined);
-        }, options.heartbeatMs);
-
-        try {
-          return await work();
-        } finally {
-          clearInterval(heartbeat);
-          await renewal;
-          const latest = parseLease(await storage.getItem(key));
-          if (latest?.owner === owner) await storage.removeItem(key);
-        }
-      }
+    if (await tryAcquire(storage, key, owner, options.leaseMs, contentionMs)) {
+      return holdLease(storage, key, owner, options, work);
     }
     await wait(retryMs);
   }
 
   throw new Error("Another Ticker Bar operation is already running");
+}
+
+async function tryAcquire(
+  storage: LeaseStorage,
+  key: string,
+  owner: string,
+  leaseMs: number,
+  contentionMs: number,
+) {
+  const current = parseLease(await storage.getItem(key));
+  if (isHeldByOther(current, owner)) return false;
+
+  await storage.setItem(key, serializeLease(owner, leaseMs));
+  await wait(contentionMs);
+  const confirmed = parseLease(await storage.getItem(key));
+  return confirmed?.owner === owner;
+}
+
+async function holdLease<Value>(
+  storage: LeaseStorage,
+  key: string,
+  owner: string,
+  options: LeaseOptions,
+  work: LockWork<Value>,
+) {
+  const abort = new AbortController();
+  let renewal = Promise.resolve();
+  const heartbeat = setInterval(() => {
+    renewal = renewal
+      .then(async () => {
+        const latest = parseLease(await storage.getItem(key));
+        if (latest?.owner === owner) {
+          await storage.setItem(key, serializeLease(owner, options.leaseMs));
+          return;
+        }
+        abort.abort();
+      })
+      .catch(() => undefined);
+  }, options.heartbeatMs);
+
+  try {
+    const result = await work(abort.signal);
+    if (abort.signal.aborted || !(await isOwner(storage, key, owner))) {
+      throw new Error("Another Ticker Bar operation is already running");
+    }
+    return result;
+  } finally {
+    clearInterval(heartbeat);
+    await renewal;
+    if (await isOwner(storage, key, owner)) await storage.removeItem(key);
+  }
+}
+
+function isHeldByOther(
+  current: { owner: string; expiresAt: number } | undefined,
+  owner: string,
+) {
+  return Boolean(
+    current && current.owner !== owner && current.expiresAt > Date.now(),
+  );
+}
+
+async function isOwner(storage: LeaseStorage, key: string, owner: string) {
+  const latest = parseLease(await storage.getItem(key));
+  return latest?.owner === owner;
 }
 
 function parseLease(value: string | undefined) {

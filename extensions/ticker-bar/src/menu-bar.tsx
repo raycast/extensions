@@ -8,7 +8,8 @@ import {
   launchCommand,
   open,
 } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 import { marketLogo } from "./market-logo";
 import {
   Quote,
@@ -30,98 +31,69 @@ import {
 } from "./market";
 import { formatAge, quoteFreshness, truncateText } from "./market-format";
 
+type MenuBarState = {
+  ids: string[];
+  quotes: Record<string, Quote>;
+  statuses: Record<string, QuoteStatus>;
+  primary?: string;
+  menuBarStyle: MenuBarStyle;
+  logoDisplay: LogoDisplay;
+};
+
+async function loadMenuBarState(): Promise<MenuBarState> {
+  const [ids, quotes, primary, statuses, menuBarStyle, logoDisplay] =
+    await Promise.all([
+      getWatchlist(),
+      getCachedQuotes(),
+      getPrimaryAssetId(),
+      getQuoteStatuses(),
+      getMenuBarStyle(),
+      getLogoDisplay(),
+    ]);
+  return { ids, quotes, primary, statuses, menuBarStyle, logoDisplay };
+}
+
 export default function Command(
   props: LaunchProps<{ launchContext?: { renderOnly?: boolean } }>,
 ) {
-  const [quotes, setQuotes] = useState<Record<string, Quote>>({});
-  const [statuses, setStatuses] = useState<Record<string, QuoteStatus>>({});
-  const [watchlist, setWatchlist] = useState<string[]>([]);
-  const [primaryAssetId, setPrimaryAssetId] = useState<string>();
-  const [menuBarStyle, setMenuBarStyleValue] =
-    useState<MenuBarStyle>("primary");
-  const [logoDisplay, setLogoDisplayValue] = useState<LogoDisplay>("menu-bar");
-  const [isLoading, setIsLoading] = useState(true);
+  const renderOnly = props.launchContext?.renderOnly === true;
+  const backgroundRefresh =
+    environment.launchType === LaunchType.Background && !renderOnly;
 
-  // Read the cached watchlist/quotes/primary into state. Cheap (LocalStorage
-  // only), so it is safe in any render -- including a user-opened menu, where
-  // clicking an item closes the menu and force-unloads the worker.
-  const hydrateState = useCallback(async () => {
-    const [ids, cached, primary, quoteStatuses, displayStyle, logoPreference] =
-      await Promise.all([
-        getWatchlist(),
-        getCachedQuotes(),
-        getPrimaryAssetId(),
-        getQuoteStatuses(),
-        getMenuBarStyle(),
-        getLogoDisplay(),
-      ]);
-    setWatchlist(ids);
-    setPrimaryAssetId(primary);
-    setQuotes(cached);
-    setStatuses(quoteStatuses);
-    setMenuBarStyleValue(displayStyle);
-    setLogoDisplayValue(logoPreference);
-    return { ids, cached };
-  }, []);
-
-  // Cache-only render: user opened the menu, or another command already
-  // refreshed the cache and just wants a repaint (renderOnly bounce).
-  const loadFromCache = useCallback(async () => {
-    const { cached } = await hydrateState();
-    // Cold cache on first run: kick the refresher to hydrate it. Awaited inside
-    // isLoading so the launch IPC cannot outlive the worker.
-    if (Object.keys(cached).length === 0) {
-      try {
-        await launchCommand({
-          name: "refresh-prices",
-          type: LaunchType.Background,
-        });
-      } catch {
-        // refresh-prices disabled -- nothing to hydrate with.
+  const { data, isLoading, mutate } = useCachedPromise(async () => {
+    const state = await loadMenuBarState();
+    if (!backgroundRefresh) {
+      if (Object.keys(state.quotes).length === 0) {
+        try {
+          await launchCommand({
+            name: "refresh-prices",
+            type: LaunchType.Background,
+          });
+        } catch {
+          // refresh-prices disabled -- nothing to hydrate with.
+        }
       }
+      return state;
     }
-    setIsLoading(false);
-  }, [hydrateState]);
 
-  // Background-only refresh: the 1-minute scheduled interval (the only timer
-  // Raycast actually schedules for this extension) and refreshMenuBar() bounces
-  // after a watchlist edit. Safe to fetch here -- no open menu to close out
-  // from under the worker -- as long as isLoading stays true for the whole
-  // fetch so Raycast keeps the worker alive until the cache write lands.
-  const loadAndRefresh = useCallback(async () => {
-    setIsLoading(true);
     try {
-      const { ids } = await hydrateState();
-      const refreshed = await refreshQuotes(ids);
-      setQuotes(refreshed.quotes);
+      const refreshed = await refreshQuotes(state.ids);
+      return { ...state, quotes: refreshed.quotes };
     } catch {
       // A concurrent manual refresh may own the cross-worker refresh lock.
       // Keep rendering the last good cache; the winning worker will repaint.
-    } finally {
-      setIsLoading(false);
+      return state;
     }
-  }, [hydrateState]);
+  });
 
-  useEffect(() => {
-    // Fetch only on background renders. Opening the menu is UserInitiated, and a
-    // subsequent click closes the menu and force-unloads the worker -- an
-    // in-flight fetch there is what threw "Error: Worker unloaded". A renderOnly
-    // bounce (from refresh-prices, which already fetched) just repaints.
-    const renderOnly = props.launchContext?.renderOnly === true;
-    if (environment.launchType === LaunchType.Background && !renderOnly) {
-      loadAndRefresh();
-    } else {
-      loadFromCache();
-    }
-  }, [loadAndRefresh, loadFromCache, props.launchContext?.renderOnly]);
+  const watchlist = data?.ids ?? [];
+  const quotes = data?.quotes ?? {};
+  const statuses = data?.statuses ?? {};
+  const primaryAssetId = data?.primary;
+  const menuBarStyle = data?.menuBarStyle ?? "primary";
+  const logoDisplay = data?.logoDisplay ?? "menu-bar";
 
-  // Manual refresh: hand the slow work to refresh-prices (its own session, which
-  // unlike the menu-bar worker has a real execution budget) and only hold this
-  // worker alive (isLoading) for the brief Background launch IPC. Background
-  // avoids the foreground openRaycastCommand handshake that times out for a
-  // no-view command launched from a menu-bar popover.
-  const requestRefresh = useCallback(async () => {
-    setIsLoading(true);
+  const requestRefresh = async () => {
     try {
       await launchCommand({
         name: "refresh-prices",
@@ -129,10 +101,8 @@ export default function Command(
       });
     } catch {
       // refresh-prices disabled; nothing to launch.
-    } finally {
-      setIsLoading(false);
     }
-  }, []);
+  };
 
   const resolvedPrimaryId = primaryAssetId ?? watchlist[0];
   const primaryQuote = quotes[resolvedPrimaryId] ?? quotes[watchlist[0]];
@@ -248,7 +218,7 @@ export default function Command(
               key={value}
               title={label}
               icon={value === menuBarStyle ? Icon.Checkmark : undefined}
-              onAction={() => updateMenuBarStyle(value, setMenuBarStyleValue)}
+              onAction={() => updateMenuBarStyle(value, mutate)}
             />
           ))}
           <MenuBarExtra.Item
@@ -257,7 +227,7 @@ export default function Command(
             onAction={() =>
               updateLogoDisplay(
                 logoDisplay === "menu-bar" ? "off" : "menu-bar",
-                setLogoDisplayValue,
+                mutate,
               )
             }
           />
@@ -281,10 +251,9 @@ function menuBarStyleLabel(style: MenuBarStyle) {
 
 async function updateMenuBarStyle(
   style: MenuBarStyle,
-  updateState: (style: MenuBarStyle) => void,
+  mutate: (update: Promise<MenuBarState>) => Promise<MenuBarState>,
 ) {
-  await setMenuBarStyle(style);
-  updateState(style);
+  await mutate(setMenuBarStyle(style).then(() => loadMenuBarState()));
 }
 
 function logoDisplayLabel(display: LogoDisplay) {
@@ -302,10 +271,9 @@ function logoDisplayLabel(display: LogoDisplay) {
 
 async function updateLogoDisplay(
   display: LogoDisplay,
-  updateState: (display: LogoDisplay) => void,
+  mutate: (update: Promise<MenuBarState>) => Promise<MenuBarState>,
 ) {
-  await setLogoDisplay(display);
-  updateState(display);
+  await mutate(setLogoDisplay(display).then(() => loadMenuBarState()));
 }
 
 function titleFor(quote: Quote) {

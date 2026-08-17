@@ -10,7 +10,9 @@ const storage: LeaseStorage = {
   removeItem: (key) => LocalStorage.removeItem(key),
 };
 
-export function withRefreshLock<Value>(work: () => Promise<Value>) {
+export function withRefreshLock<Value>(
+  work: (signal: AbortSignal) => Promise<Value>,
+) {
   return withLeaseLock(storage, REFRESH_LOCK_KEY, work, {
     leaseMs: 60_000,
     heartbeatMs: 10_000,
@@ -18,7 +20,9 @@ export function withRefreshLock<Value>(work: () => Promise<Value>) {
   });
 }
 
-export function withMarketStateLock<Value>(work: () => Promise<Value>) {
+export function withMarketStateLock<Value>(
+  work: (signal: AbortSignal) => Promise<Value>,
+) {
   return withLeaseLock(storage, MARKET_STATE_LOCK_KEY, work, {
     leaseMs: 5_000,
     heartbeatMs: 1_000,

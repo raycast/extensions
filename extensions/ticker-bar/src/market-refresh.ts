@@ -27,12 +27,15 @@ export async function refreshQuotes(
   ids?: string[],
   options: { force?: boolean } = {},
 ): Promise<RefreshReport> {
-  return withRefreshLock(() => refreshQuotesUnlocked(ids, options));
+  return withRefreshLock((signal) =>
+    refreshQuotesUnlocked(ids, options, signal),
+  );
 }
 
 async function refreshQuotesUnlocked(
   ids?: string[],
   options: { force?: boolean } = {},
+  signal?: AbortSignal,
 ): Promise<RefreshReport> {
   const watchlist = ids ?? (await getWatchlist());
   const cached = await getCachedQuotes();
@@ -52,11 +55,17 @@ async function refreshQuotesUnlocked(
   });
   const skippedIds = watchlist.filter((id) => !dueIds.includes(id));
   const results = await allSettledWithConcurrency(dueIds, 8, fetchQuote);
+  if (signal?.aborted) {
+    throw new Error("Another Ticker Bar operation is already running");
+  }
 
   const failures: RefreshFailure[] = [];
   const updatedIds: string[] = [];
 
   const next = await withMarketStateLock(async () => {
+    if (signal?.aborted) {
+      throw new Error("Another Ticker Bar operation is already running");
+    }
     // Network requests can take several seconds. Re-read state only when the
     // results are ready so a concurrent watchlist edit or detail refresh is
     // never overwritten by the snapshot captured before the requests began.

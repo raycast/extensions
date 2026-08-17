@@ -68,7 +68,7 @@ Bare stock symbols such as `SPY` and bare EVM contract addresses are normalized 
 
 ## Data behavior
 
-Ticker Bar stores the watchlist and quote cache locally through Raycast. It sends only the identifiers needed for quote and search requests to the selected data providers. A failed refresh never replaces the last valid quote; instead, the cached quote is marked stale with the provider error and last successful update time.
+Ticker Bar stores the watchlist and quote cache locally through Raycast. It sends only the identifiers needed for quote and search requests to the selected public data providers; no account or API key is required. Those providers may rate-limit heavy watchlists. A failed refresh never replaces the last valid quote; instead, the cached quote is marked stale with the provider error and last successful update time.
 
 Provider-specific cache windows range from one to five minutes. Manual refresh bypasses those windows, while rate-limit cooldowns are still respected to avoid repeatedly hammering a throttled service.
 

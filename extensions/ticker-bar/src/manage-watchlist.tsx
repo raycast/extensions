@@ -257,6 +257,15 @@ async function removeAndReload(
 }
 
 async function resetAndReload(reload: () => Promise<void>) {
+  const confirmed = await confirmAlert({
+    title: "Reset Watchlist",
+    message: "Replace the current watchlist with the default assets?",
+    primaryAction: {
+      title: "Reset",
+      style: Alert.ActionStyle.Destructive,
+    },
+  });
+  if (!confirmed) return;
   await resetWatchlistToDefaults();
   await reload();
   await refreshMenuBar({ renderOnly: true });
