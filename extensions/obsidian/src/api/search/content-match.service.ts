@@ -1,6 +1,6 @@
 import { Note, ObsidianUtils } from "@/obsidian";
 import {
-  findTitleMatches,
+  findTitleOrPathMatches,
   MAX_CONTENT_SEARCH_RESULTS,
   readNoteContentForSearch,
   SearchableNoteContentResult,
@@ -206,7 +206,7 @@ export async function searchNotesWithMatches(
   if (tagSearchMatch) {
     const analyzedNotes = await analyzeTaggedNotes(notes, tagSearchMatch[1].trim(), contentQuery, shouldCancel);
     const taggedNotes = analyzedNotes.map(({ note }) => note);
-    const titleMatches = findTitleMatches(taggedNotes, contentQuery);
+    const titleMatches = findTitleOrPathMatches(taggedNotes, contentQuery);
     const titleMatchPaths = new Set(titleMatches.map((note) => note.path));
     const analyzedByPath = new Map(analyzedNotes.map((analyzedNote) => [analyzedNote.note.path, analyzedNote]));
 
@@ -226,7 +226,7 @@ export async function searchNotesWithMatches(
     return [...contentResults, ...literalTitleOrPathResults];
   }
 
-  const titleMatches = findTitleMatches(notes, contentQuery);
+  const titleMatches = findTitleOrPathMatches(notes, contentQuery);
   const titleMatchPaths = new Set(titleMatches.map((note) => note.path));
 
   for (const note of titleMatches) {

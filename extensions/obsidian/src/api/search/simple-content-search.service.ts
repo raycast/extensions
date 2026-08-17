@@ -45,11 +45,11 @@ export async function readSearchableNoteContent(note: Note): Promise<string | un
   return result.status === "available" ? result.content : undefined;
 }
 
-export function findTitleMatches(notes: Note[], query: string, limit = MAX_CONTENT_SEARCH_RESULTS): Note[] {
+export function findTitleOrPathMatches(notes: Note[], query: string, limit = MAX_CONTENT_SEARCH_RESULTS): Note[] {
   if (limit <= 0) return [];
 
   const titleFuse = new Fuse(notes, {
-    keys: ["title"],
+    keys: ["title", "path"],
     threshold: 0.3,
     ignoreLocation: true,
     includeScore: true,
@@ -101,7 +101,7 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
   const queryLower = remainingQuery.toLowerCase();
 
   // Step 1: Quick filter by title/path first (no file I/O)
-  const titleMatches = findTitleMatches(filteredNotes, remainingQuery);
+  const titleMatches = findTitleOrPathMatches(filteredNotes, remainingQuery);
   logger.info(`Found ${titleMatches.length} title/path matches`);
 
   // Step 2: Search remaining notes by content (read files one at a time)

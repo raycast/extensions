@@ -181,6 +181,25 @@ describe("searchNotesWithMatches", () => {
     expect(results[1].match).toBeUndefined();
   });
 
+  it("keeps notes that match only by directory path", async () => {
+    const matchingDirectory = path.join(tempDir, "path-target");
+    fs.mkdirSync(matchingDirectory);
+    const notePath = path.join(matchingDirectory, "unrelated.md");
+    fs.writeFileSync(notePath, "No occurrence in the body");
+    const notes: Note[] = [
+      {
+        title: "Unrelated",
+        path: notePath,
+        lastModified: new Date(),
+        bookmarked: false,
+      },
+    ];
+
+    const results = await searchNotesWithMatches(notes, "path-target");
+
+    expect(results).toEqual([{ id: notePath, note: notes[0] }]);
+  });
+
   it("reads each matching note at most once", async () => {
     const titlePath = path.join(tempDir, "target-title.md");
     const contentPath = path.join(tempDir, "content-only.md");
