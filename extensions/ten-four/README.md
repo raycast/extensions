@@ -14,15 +14,12 @@ intended, with no wrapping and no leading spaces.
   <img src="https://www.raycast.com/jaymcc/ten-four/install_button@2x.png" height="64" alt="Add Ten Four to Raycast" />
 </a>
 
-> The button above works once the extension is approved on the Raycast Store.
-> Until then, install from source (below).
-
 ## Demo
 
 Claude Code answers a question and pushes the SQL query onto the shelf on its
 own. You grab it from Raycast and paste it, clean, into your SQL console.
 
-![Ten Four in action: Claude Code pushes a SQL query to the shelf, then it is copied from Raycast and pasted cleanly into a SQL console](assets/demo.gif)
+![Ten Four in action: Claude Code pushes a SQL query to the shelf, then it is copied from Raycast and pasted cleanly into a SQL console](media/demo.gif)
 
 ## How it works
 
@@ -55,12 +52,12 @@ of Raycast with pristine formatting.
 
 ## Install
 
-### Option A: Raycast Store (one click, once approved)
+### Option A: Raycast Store (one click)
 
 Click **Add to Raycast** above, or search "Ten Four" in the Raycast Store. Then
 run the **Install Ten Four CLI** command to add the `tenfour` writer.
 
-### Option B: From source (works today)
+### Option B: From source
 
 Requires [Node.js](https://nodejs.org) and the [Raycast](https://raycast.com)
 app.
