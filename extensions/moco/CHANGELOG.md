@@ -1,6 +1,6 @@
 # MOCO Changelog
 
-## [v1.1.4] - 2026-08-17
+## [v1.1.4] - {PR_MERGE_DATE}
 
 - Fixed malformed API base URLs
 
