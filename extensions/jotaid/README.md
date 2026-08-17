@@ -7,6 +7,13 @@ Requires Jotaid 1.1.3 or later — a Markdown notes app for macOS with
 backlinks, a knowledge graph and a co-occurrence matrix. The app does not need to be running:
 saving a note launches it in the background if necessary.
 
+**This extension works only with Jotaid.** It reads Jotaid's own library and files notes through
+Jotaid's URL scheme, so it cannot be pointed at another app — if you keep your notes elsewhere,
+look for that app's own extension. Two things follow from being app-specific rather than generic:
+searching knows about Jotaid's structure (a note's project, its three-level hierarchy), and
+captures are filed by Jotaid itself, which means they inherit its own handling — the Inbox, the
+`clipping` tag, and the title its AI fills in for you.
+
 ## Commands
 
 | Command | What it does |
