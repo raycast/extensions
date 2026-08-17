@@ -86,7 +86,8 @@ export async function fetchSpaces(): Promise<Location[]> {
   return data.locations;
 }
 
-export async function fetchAvailableSeats(
+/** Returns all seats for the room and timeframe, regardless of availability. */
+export async function fetchRoomSeats(
   roomId: string,
   dateStr: string,
   fromTime: string,
@@ -101,6 +102,16 @@ export async function fetchAvailableSeats(
     })
   );
   return (await response.json()) as Resource[];
+}
+
+export async function fetchAvailableSeats(
+  roomId: string,
+  dateStr: string,
+  fromTime: string,
+  untilTime: string
+): Promise<Resource[]> {
+  const seats = await fetchRoomSeats(roomId, dateStr, fromTime, untilTime);
+  return seats.filter((seat) => seat.availability !== "notAllowed" && seat.availability !== "occupied");
 }
 
 export async function bookSeat(date: Date, resourceId: string, fromTime: string, untilTime: string): Promise<void> {
@@ -148,7 +159,16 @@ export async function fetchPresentResources(locationId: string, date: string): P
 export async function checkInBooking(bookingId: string): Promise<void> {
   const res = await desklyFetch(`/en/api/dayBooking/${bookingId}/checkin`, { method: "PUT" });
   if (res.status === 403) throw new Error("Check-in is not available yet. Try again closer to your booking time.");
-  await assertOk(res);
+  if (!res.ok) {
+    const body = await res.text();
+    let title: string | undefined;
+    try {
+      title = (JSON.parse(body) as { title?: string }).title;
+    } catch {
+      // Non-JSON error body — fall through to the generic message below.
+    }
+    throw new Error(title ?? `${res.status} ${res.statusText}: ${body}`);
+  }
 }
 
 export async function deleteBooking(bookingId: string): Promise<void> {
