@@ -20,6 +20,7 @@ const ALL_FANS = "all";
 
 interface SetFanSpeedFormProps {
   readonly fans: readonly Fan[];
+  readonly initialFanIndex?: number;
   readonly onDone: () => void;
 }
 
@@ -49,10 +50,12 @@ function validateRPM(
 }
 
 export function SetFanSpeedForm(props: SetFanSpeedFormProps): ReactElement {
-  const { fans, onDone } = props;
+  const { fans, initialFanIndex, onDone } = props;
   const { pop } = useNavigation();
   const [rpmError, setRpmError] = useState<string | undefined>();
-  const [selectedFan, setSelectedFan] = useState<string>(ALL_FANS);
+  const [selectedFan, setSelectedFan] = useState<string>(
+    initialFanIndex === undefined ? ALL_FANS : String(initialFanIndex),
+  );
 
   async function handleSubmit(values: FormValues): Promise<void> {
     const fanIndex = toFanIndex(values.fan);

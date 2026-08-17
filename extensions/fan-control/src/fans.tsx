@@ -175,7 +175,11 @@ export default function Command(): ReactElement {
                       title="Set Fan Speed…"
                       icon={Icon.Pencil}
                       target={
-                        <SetFanSpeedForm fans={data.fans} onDone={revalidate} />
+                        <SetFanSpeedForm
+                          fans={data.fans}
+                          initialFanIndex={fan.index}
+                          onDone={revalidate}
+                        />
                       }
                     />
                   </ActionPanel.Section>
