@@ -8,7 +8,11 @@ import {
   queryWithoutTagFilter,
   searchNotesWithMatches,
 } from "../api/search/content-match.service";
-import { MAX_SEARCH_FILE_SIZE_BYTES, readSearchableNoteContent } from "../api/search/simple-content-search.service";
+import {
+  MAX_CONTENT_SEARCH_RESULTS,
+  MAX_SEARCH_FILE_SIZE_BYTES,
+  readSearchableNoteContent,
+} from "../api/search/simple-content-search.service";
 import { Note } from "@/obsidian";
 
 describe("content matches", () => {
@@ -187,6 +191,25 @@ describe("searchNotesWithMatches", () => {
     expect(results).toHaveLength(2);
     expect(open.mock.calls.filter(([file]) => file === titlePath)).toHaveLength(1);
     expect(open.mock.calls.filter(([file]) => file === contentPath)).toHaveLength(1);
+  });
+
+  it("limits title candidates before reading note content", async () => {
+    const notes: Note[] = Array.from({ length: MAX_CONTENT_SEARCH_RESULTS + 1 }, (_, index) => {
+      const notePath = path.join(tempDir, `target-${index}.md`);
+      fs.writeFileSync(notePath, "No occurrence in the body");
+      return {
+        title: `Target ${index}`,
+        path: notePath,
+        lastModified: new Date(),
+        bookmarked: false,
+      };
+    });
+    const open = vi.spyOn(fs.promises, "open");
+
+    const results = await searchNotesWithMatches(notes, "target");
+
+    expect(open).toHaveBeenCalledTimes(MAX_CONTENT_SEARCH_RESULTS);
+    expect(results).toHaveLength(MAX_CONTENT_SEARCH_RESULTS);
   });
 
   it("reads tagged notes once while filtering and matching content", async () => {

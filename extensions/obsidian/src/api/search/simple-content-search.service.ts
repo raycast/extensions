@@ -35,7 +35,9 @@ export async function readSearchableNoteContent(note: Note): Promise<string | un
   }
 }
 
-export function findTitleMatches(notes: Note[], query: string): Note[] {
+export function findTitleMatches(notes: Note[], query: string, limit = MAX_CONTENT_SEARCH_RESULTS): Note[] {
+  if (limit <= 0) return [];
+
   const titleFuse = new Fuse(notes, {
     keys: ["title"],
     threshold: 0.3,
@@ -44,7 +46,7 @@ export function findTitleMatches(notes: Note[], query: string): Note[] {
   });
 
   return titleFuse
-    .search(query)
+    .search(query, { limit })
     .sort((a, b) => (a.score || 0) - (b.score || 0))
     .map((result) => result.item);
 }
