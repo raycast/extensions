@@ -1,6 +1,6 @@
 # Raycast ElevenLabs TTS Changelog
 
-## [Fix Repeated Already Reading] - {PR_MERGE_DATE}
+## [Fix Repeated Already Reading] - 2026-08-17
 
 ### Fixed
 
