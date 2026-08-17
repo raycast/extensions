@@ -115,7 +115,7 @@ Prettier is configured for 120-character line width with double quotes (see [.pr
 
 ## Changelog
 
-[CHANGELOG.md](CHANGELOG.md) entries are titled `## [<version>] - {PR_MERGE_DATE}`. Use the literal placeholder
+[CHANGELOG.md](CHANGELOG.md) entries are titled `## [<Version title>] - {PR_MERGE_DATE}`. Use the literal placeholder
 string `{PR_MERGE_DATE}` for the date — Raycast's publish process fills in the actual merge date automatically;
 do not hand-write a date.
 
