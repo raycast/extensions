@@ -14,8 +14,12 @@ export async function readSearchableNoteContent(note: Note): Promise<string | un
   try {
     const stats = await file.stat();
     if (!stats.isFile()) return undefined;
+    if (stats.size > MAX_SEARCH_FILE_SIZE_BYTES) {
+      logger.debug(`Skipping content search for oversized note ${note.path} (${stats.size} bytes)`);
+      return undefined;
+    }
 
-    const bytesToRead = Math.min(stats.size, MAX_SEARCH_FILE_SIZE_BYTES);
+    const bytesToRead = stats.size;
     const buffer = Buffer.allocUnsafe(bytesToRead);
     let totalBytesRead = 0;
 
@@ -23,10 +27,6 @@ export async function readSearchableNoteContent(note: Note): Promise<string | un
       const { bytesRead } = await file.read(buffer, totalBytesRead, bytesToRead - totalBytesRead, totalBytesRead);
       if (bytesRead === 0) break;
       totalBytesRead += bytesRead;
-    }
-
-    if (stats.size > MAX_SEARCH_FILE_SIZE_BYTES) {
-      logger.debug(`Prefix-reading oversized note ${note.path} (${stats.size} bytes)`);
     }
 
     return buffer.subarray(0, totalBytesRead).toString("utf-8");

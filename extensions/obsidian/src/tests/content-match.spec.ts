@@ -2,7 +2,12 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { findContentMatches, queryWithoutTagFilter, searchNotesWithMatches } from "../api/search/content-match.service";
+import {
+  findContentMatches,
+  MAX_CONTEXT_LINE_LENGTH,
+  queryWithoutTagFilter,
+  searchNotesWithMatches,
+} from "../api/search/content-match.service";
 import { MAX_SEARCH_FILE_SIZE_BYTES, readSearchableNoteContent } from "../api/search/simple-content-search.service";
 import { Note } from "@/obsidian";
 
@@ -16,9 +21,9 @@ describe("content matches", () => {
     expect(match.endLine).toBe(2);
     expect(match.endColumn).toBe(9);
     expect(match.context).toEqual([
-      { line: 1, text: "first line" },
-      { line: 2, text: "A target is here" },
-      { line: 3, text: "last line" },
+      { line: 1, text: "first line", startColumn: 1 },
+      { line: 2, text: "A target is here", startColumn: 1 },
+      { line: 3, text: "last line", startColumn: 1 },
     ]);
   });
 
@@ -30,6 +35,22 @@ describe("content matches", () => {
       [1, 1],
       [2, 7],
     ]);
+  });
+
+  it("bounds long context lines without losing a distant match", () => {
+    const longAdjacentLine = "a".repeat(MAX_CONTEXT_LINE_LENGTH * 3);
+    const longMatchingLine = `${"b".repeat(MAX_CONTEXT_LINE_LENGTH * 2)}target`;
+
+    const [match] = findContentMatches(`heading target\n${longAdjacentLine}\n${longMatchingLine}`, "target", 2, 2);
+    const adjacentContext = match.context.find((line) => line.line === 2);
+    const distantMatch = findContentMatches(longMatchingLine, "target")[0];
+    const matchingContext = distantMatch.context[0];
+
+    expect(adjacentContext?.text).toHaveLength(MAX_CONTEXT_LINE_LENGTH);
+    expect(matchingContext.text).toHaveLength(MAX_CONTEXT_LINE_LENGTH);
+    expect(matchingContext.text).toContain("target");
+    expect(matchingContext.startColumn).toBeGreaterThan(1);
+    expect(distantMatch.column).toBe(MAX_CONTEXT_LINE_LENGTH * 2 + 1);
   });
 
   it("removes tag filters from the content query", () => {
@@ -170,7 +191,7 @@ describe("searchNotesWithMatches", () => {
     expect(open.mock.calls.filter(([file]) => file === notePath)).toHaveLength(1);
   });
 
-  it("strictly bounds content reads for oversized files", async () => {
+  it("skips content reads for oversized files", async () => {
     const notePath = path.join(tempDir, "oversized.md");
     fs.writeFileSync(notePath, `${"x".repeat(MAX_SEARCH_FILE_SIZE_BYTES)}not-in-prefix`);
     const note: Note = {
@@ -182,16 +203,31 @@ describe("searchNotesWithMatches", () => {
 
     const content = await readSearchableNoteContent(note);
 
-    expect(Buffer.byteLength(content ?? "", "utf-8")).toBe(MAX_SEARCH_FILE_SIZE_BYTES);
-    expect(content).not.toContain("not-in-prefix");
+    expect(content).toBeUndefined();
   });
 
-  it("keeps literal title matches when the content match is beyond the read limit", async () => {
+  it("reads content at the exact file-size boundary", async () => {
+    const notePath = path.join(tempDir, "at-limit.md");
+    fs.writeFileSync(notePath, `target${"x".repeat(MAX_SEARCH_FILE_SIZE_BYTES - "target".length)}`);
+    const note: Note = {
+      title: "At Limit",
+      path: notePath,
+      lastModified: new Date(),
+      bookmarked: false,
+    };
+
+    const content = await readSearchableNoteContent(note);
+
+    expect(Buffer.byteLength(content ?? "", "utf-8")).toBe(MAX_SEARCH_FILE_SIZE_BYTES);
+    expect(content?.startsWith("target")).toBe(true);
+  });
+
+  it("keeps oversized fuzzy title matches without a content match", async () => {
     const notePath = path.join(tempDir, "large-clipping.md");
-    fs.writeFileSync(notePath, `${"x".repeat(MAX_SEARCH_FILE_SIZE_BYTES)}target`);
+    fs.writeFileSync(notePath, `target-inside-limit\n${"x".repeat(MAX_SEARCH_FILE_SIZE_BYTES)}`);
     const notes: Note[] = [
       {
-        title: "Target Clipping",
+        title: "target-after-limit",
         path: notePath,
         lastModified: new Date(),
         bookmarked: false,
@@ -199,9 +235,28 @@ describe("searchNotesWithMatches", () => {
     ];
     const open = vi.spyOn(fs.promises, "open");
 
-    const results = await searchNotesWithMatches(notes, "target");
+    const results = await searchNotesWithMatches(notes, "target-i");
 
     expect(results).toEqual([{ id: notePath, note: notes[0] }]);
     expect(open.mock.calls.filter(([file]) => file === notePath)).toHaveLength(1);
+  });
+
+  it("stops reading notes when the search becomes stale", async () => {
+    const notes = ["one", "two", "three"].map((title) => {
+      const notePath = path.join(tempDir, `${title}.md`);
+      fs.writeFileSync(notePath, "No matching content");
+      return {
+        title,
+        path: notePath,
+        lastModified: new Date(),
+        bookmarked: false,
+      };
+    });
+    const open = vi.spyOn(fs.promises, "open");
+    let cancellationChecks = 0;
+
+    await searchNotesWithMatches(notes, "target", () => cancellationChecks++ >= 1);
+
+    expect(open).toHaveBeenCalledOnce();
   });
 });

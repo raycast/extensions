@@ -7,10 +7,12 @@ import {
 
 const DEFAULT_CONTEXT_LINES = 2;
 const MAX_MATCHES_PER_NOTE = 20;
+export const MAX_CONTEXT_LINE_LENGTH = 500;
 
 export interface MatchContextLine {
   line: number;
   text: string;
+  startColumn: number;
 }
 
 export interface ContentMatch {
@@ -66,9 +68,20 @@ export function findContentMatches(
     const context: MatchContextLine[] = [];
 
     for (let line = firstContextLine; line <= lastContextLine; line++) {
+      const lineText = lines[line - 1] ?? "";
+      let contextStart = 0;
+      if (lineText.length > MAX_CONTEXT_LINE_LENGTH && line >= start.line && line <= end.line) {
+        const matchStart = line === start.line ? start.column - 1 : 0;
+        contextStart = Math.min(
+          Math.max(0, matchStart - Math.floor(MAX_CONTEXT_LINE_LENGTH / 2)),
+          lineText.length - MAX_CONTEXT_LINE_LENGTH
+        );
+      }
+
       context.push({
         line,
-        text: lines[line - 1] ?? "",
+        text: lineText.slice(contextStart, contextStart + MAX_CONTEXT_LINE_LENGTH),
+        startColumn: contextStart + 1,
       });
     }
 
@@ -89,7 +102,10 @@ export function findContentMatches(
 interface AnalyzedNote {
   note: Note;
   matches: ContentMatch[];
+  contentAvailable: boolean;
 }
+
+type ShouldCancelSearch = () => boolean;
 
 function isLiteralTitleOrPathMatch(note: Note, normalizedQuery: string): boolean {
   return (
@@ -97,22 +113,29 @@ function isLiteralTitleOrPathMatch(note: Note, normalizedQuery: string): boolean
   );
 }
 
-async function analyzeNote(note: Note, query: string): Promise<ContentMatch[]> {
+async function analyzeNote(note: Note, query: string): Promise<Omit<AnalyzedNote, "note">> {
   try {
     const content = await readSearchableNoteContent(note);
-    return content === undefined ? [] : findContentMatches(content, query);
+    return content === undefined
+      ? { matches: [], contentAvailable: false }
+      : { matches: findContentMatches(content, query), contentAvailable: true };
   } catch {
     // Notes can be moved while a search is running.
-    return [];
+    return { matches: [], contentAvailable: false };
   }
 }
 
-async function analyzeTaggedNotes(notes: Note[], tagQuery: string, contentQuery: string): Promise<AnalyzedNote[]> {
+async function analyzeTaggedNotes(
+  notes: Note[],
+  tagQuery: string,
+  contentQuery: string,
+  shouldCancel: ShouldCancelSearch
+): Promise<AnalyzedNote[]> {
   const normalizedTag = tagQuery.startsWith("#") ? tagQuery.slice(1).toLowerCase() : tagQuery.toLowerCase();
   const analyzedNotes: AnalyzedNote[] = [];
 
   for (const note of notes) {
-    if (analyzedNotes.length >= MAX_CONTENT_SEARCH_RESULTS) break;
+    if (shouldCancel() || analyzedNotes.length >= MAX_CONTENT_SEARCH_RESULTS) break;
 
     try {
       const content = await readSearchableNoteContent(note);
@@ -123,6 +146,7 @@ async function analyzeTaggedNotes(notes: Note[], tagQuery: string, contentQuery:
         analyzedNotes.push({
           note,
           matches: contentQuery ? findContentMatches(content, contentQuery) : [],
+          contentAvailable: true,
         });
       }
     } catch {
@@ -139,7 +163,7 @@ function appendAnalyzedResult(
   contentResults: NoteSearchResult[],
   literalTitleOrPathResults: NoteSearchResult[]
 ): void {
-  const { note, matches } = analyzedNote;
+  const { note, matches, contentAvailable } = analyzedNote;
 
   if (matches.length > 0) {
     contentResults.push(
@@ -149,12 +173,16 @@ function appendAnalyzedResult(
         match,
       }))
     );
-  } else if (isLiteralTitleOrPathMatch(note, normalizedQuery)) {
+  } else if (!contentAvailable || isLiteralTitleOrPathMatch(note, normalizedQuery)) {
     literalTitleOrPathResults.push({ id: note.path, note });
   }
 }
 
-export async function searchNotesWithMatches(notes: Note[], query: string): Promise<NoteSearchResult[]> {
+export async function searchNotesWithMatches(
+  notes: Note[],
+  query: string,
+  shouldCancel: ShouldCancelSearch = () => false
+): Promise<NoteSearchResult[]> {
   const contentQuery = queryWithoutTagFilter(query);
   const tagSearchMatch = query.match(/tag:(\S+)/i);
 
@@ -163,7 +191,7 @@ export async function searchNotesWithMatches(notes: Note[], query: string): Prom
       return notes.map((note) => ({ id: note.path, note }));
     }
 
-    const taggedNotes = await analyzeTaggedNotes(notes, tagSearchMatch[1].trim(), "");
+    const taggedNotes = await analyzeTaggedNotes(notes, tagSearchMatch[1].trim(), "", shouldCancel);
     return taggedNotes.map(({ note }) => ({ id: note.path, note }));
   }
 
@@ -172,7 +200,7 @@ export async function searchNotesWithMatches(notes: Note[], query: string): Prom
   const normalizedQuery = contentQuery.toLocaleLowerCase();
 
   if (tagSearchMatch) {
-    const analyzedNotes = await analyzeTaggedNotes(notes, tagSearchMatch[1].trim(), contentQuery);
+    const analyzedNotes = await analyzeTaggedNotes(notes, tagSearchMatch[1].trim(), contentQuery, shouldCancel);
     const taggedNotes = analyzedNotes.map(({ note }) => note);
     const titleMatches = findTitleMatches(taggedNotes, contentQuery);
     const titleMatchPaths = new Set(titleMatches.map((note) => note.path));
@@ -198,21 +226,23 @@ export async function searchNotesWithMatches(notes: Note[], query: string): Prom
   const titleMatchPaths = new Set(titleMatches.map((note) => note.path));
 
   for (const note of titleMatches) {
-    const matches = await analyzeNote(note, contentQuery);
-    appendAnalyzedResult({ note, matches }, normalizedQuery, contentResults, literalTitleOrPathResults);
+    if (shouldCancel()) break;
+    const analysis = await analyzeNote(note, contentQuery);
+    appendAnalyzedResult({ note, ...analysis }, normalizedQuery, contentResults, literalTitleOrPathResults);
   }
 
   if (titleMatches.length < MAX_CONTENT_SEARCH_RESULTS) {
     let contentMatchCount = 0;
 
     for (const note of notes) {
+      if (shouldCancel()) break;
       if (titleMatchPaths.has(note.path)) continue;
       if (titleMatches.length + contentMatchCount >= MAX_CONTENT_SEARCH_RESULTS) break;
 
-      const matches = await analyzeNote(note, contentQuery);
-      if (matches.length > 0) {
+      const analysis = await analyzeNote(note, contentQuery);
+      if (analysis.matches.length > 0) {
         contentMatchCount++;
-        appendAnalyzedResult({ note, matches }, normalizedQuery, contentResults, literalTitleOrPathResults);
+        appendAnalyzedResult({ note, ...analysis }, normalizedQuery, contentResults, literalTitleOrPathResults);
       }
     }
   }

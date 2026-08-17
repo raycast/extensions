@@ -10,22 +10,24 @@ import {
 } from "../../../utils/utils";
 import { SearchNotePreferences } from "../../../utils/preferences";
 import { invalidateNotesCache } from "../../../api/cache/cache.service";
-import { NoteActions, OpenNoteActions } from "../../../utils/actions";
+import { NoteActions, OpenNoteActions, OpenPathInObsidianAction } from "../../../utils/actions";
 import { useNoteContent } from "../../../utils/hooks";
 import { useState } from "react";
 import { Note, ObsidianVault, ObsidianUtils } from "@/obsidian";
 import { ContentMatch, NoteSearchResult } from "@/api/search/content-match.service";
 import { normalizeRelativePath } from "@/utils/utils";
+import { shouldLoadNoteContentForList } from "@/api/search/note-preview.service";
+import { MAX_SEARCH_FILE_SIZE_BYTES } from "@/api/search/simple-content-search.service";
 
 function escapeMarkdown(text: string): string {
   return text.replace(/([\\`*_[\]{}()<>#+.!|-])/g, "\\$1");
 }
 
-function highlightedLine(text: string, line: number, match: ContentMatch): string {
+function highlightedLine(text: string, line: number, startColumn: number, match: ContentMatch): string {
   if (line < match.line || line > match.endLine) return escapeMarkdown(text);
 
-  const start = line === match.line ? match.column - 1 : 0;
-  const end = line === match.endLine ? match.endColumn - 1 : text.length;
+  const start = line === match.line ? Math.max(0, match.column - startColumn) : 0;
+  const end = line === match.endLine ? Math.min(text.length, match.endColumn - startColumn) : text.length;
   return `${escapeMarkdown(text.slice(0, start))}**${escapeMarkdown(text.slice(start, end))}**${escapeMarkdown(
     text.slice(end)
   )}`;
@@ -34,7 +36,7 @@ function highlightedLine(text: string, line: number, match: ContentMatch): strin
 function matchPreview(note: Note, vault: ObsidianVault, match: ContentMatch): string {
   const relativePath = normalizeRelativePath(note.path, vault.path);
   const context = match.context
-    .map((item) => `> \`${item.line}\` ${highlightedLine(item.text, item.line, match) || " "}`)
+    .map((item) => `> \`${item.line}\` ${highlightedLine(item.text, item.line, item.startColumn, match) || " "}`)
     .join("\n>\n");
 
   return `# ${escapeMarkdown(note.title)}\n\n${escapeMarkdown(relativePath)}\n\n**Line ${match.line}, Column ${
@@ -87,9 +89,17 @@ export function NoteListItem(props: {
 
   const [isBookmarked, setIsBookmarked] = useState(note.bookmarked);
   const isSelected = props.selectedItemId === result.id;
-  const { noteContent, isLoading } = useNoteContent(note, { enabled: isSelected });
+  let fileSize = 0;
+  let noteHasBeenMoved = false;
+  try {
+    fileSize = fs.statSync(note.path).size;
+  } catch {
+    noteHasBeenMoved = true;
+  }
+  const isOversized = fileSize > MAX_SEARCH_FILE_SIZE_BYTES;
+  const shouldLoadNoteContent = shouldLoadNoteContentForList(isSelected, match !== undefined, fileSize);
+  const { noteContent, isLoading } = useNoteContent(note, { enabled: shouldLoadNoteContent });
 
-  const noteHasBeenMoved = !fs.existsSync(note.path);
   if (noteHasBeenMoved) {
     invalidateNotesCache(vault.path);
   }
@@ -115,44 +125,48 @@ export function NoteListItem(props: {
         },
       ]}
       detail={
-        <List.Item.Detail
-          isLoading={isLoading}
-          markdown={
-            match
-              ? matchPreview(note, vault, match)
-              : noteContent
-              ? ObsidianUtils.renderCallouts(filterContent(noteContent))
-              : ""
-          }
-          metadata={
-            noteContent && pref.showMetadata ? (
-              <NoteListItemMetadata note={note} content={noteContent} vault={vault} />
-            ) : null
-          }
-        />
+        isOversized ? undefined : (
+          <List.Item.Detail
+            isLoading={isLoading}
+            markdown={
+              match
+                ? matchPreview(note, vault, match)
+                : noteContent
+                ? ObsidianUtils.renderCallouts(filterContent(noteContent))
+                : ""
+            }
+            metadata={
+              noteContent && pref.showMetadata ? (
+                <NoteListItemMetadata note={note} content={noteContent} vault={vault} />
+              ) : null
+            }
+          />
+        )
       }
       actions={
-        noteContent && (
-          <ActionPanel>
-            <OpenNoteActions note={{ content: noteContent, ...updatedNote }} vault={vault} match={match} />
-            <NoteActions
-              note={{ content: noteContent, ...updatedNote }}
-              vault={vault}
-              onNoteAction={(actionType) => {
-                switch (actionType) {
-                  case "bookmark":
-                    setIsBookmarked(true);
-                    break;
-                  case "unbookmark":
-                    setIsBookmarked(false);
-                    break;
-                }
-              }}
-              onNoteUpdated={onNoteUpdated}
-              onDelete={onDelete}
-            />
-          </ActionPanel>
-        )
+        <ActionPanel>
+          {isOversized ? (
+            <OpenPathInObsidianAction path={updatedNote.path} />
+          ) : (
+            <OpenNoteActions note={updatedNote} vault={vault} match={match} />
+          )}
+          <NoteActions
+            note={noteContent ? { content: noteContent, ...updatedNote } : updatedNote}
+            vault={vault}
+            onNoteAction={(actionType) => {
+              switch (actionType) {
+                case "bookmark":
+                  setIsBookmarked(true);
+                  break;
+                case "unbookmark":
+                  setIsBookmarked(false);
+                  break;
+              }
+            }}
+            onNoteUpdated={onNoteUpdated}
+            onDelete={onDelete}
+          />
+        </ActionPanel>
       }
     />
   );
