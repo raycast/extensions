@@ -1,0 +1,12 @@
+[Unit]
+Description=Ten Four shelf service
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/env node %h/code/ten-four/server/shelf.js
+Restart=on-failure
+Environment=PORT=7801
+
+[Install]
+WantedBy=default.target
