@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "digikey",
   "title": "DigiKey",
-  "description": "",
+  "description": "Get product details from DigiKey",
   "icon": "digikey.png",
   "author": "xmok",
   "platforms": [

@@ -1,7 +1,7 @@
 import { OAuth, getPreferenceValues } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
-const {client_id, client_secret, is_sandbox} = getPreferenceValues<ExtensionPreferences>()
+const { client_id, client_secret, is_sandbox } = getPreferenceValues<ExtensionPreferences>();
 
 const BASE_URL = is_sandbox ? "https://sandbox-api.digikey.com/v1/oauth2" : "https://api.digikey.com/v1/oauth2";
 
@@ -21,6 +21,6 @@ export const provider = new OAuthService({
   tokenUrl: BASE_URL + "/token",
   bodyEncoding: "url-encoded",
   extraParameters: {
-    clientSecret: client_secret
-  }
+    clientSecret: client_secret,
+  },
 });
