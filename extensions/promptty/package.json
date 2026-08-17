@@ -15,12 +15,22 @@
     "Applications",
     "Productivity"
   ],
+  "keywords": [
+    "prompts",
+    "snippets",
+    "prompt library",
+    "ai prompts"
+  ],
   "commands": [
     {
       "name": "search-promptty",
       "title": "Search Promptty",
       "description": "Search, paste, and copy saved prompts",
       "mode": "view",
+      "keywords": [
+        "prompts",
+        "snippets"
+      ],
       "preferences": [
         {
           "name": "snapshotFile",

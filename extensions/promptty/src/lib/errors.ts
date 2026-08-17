@@ -36,8 +36,8 @@ export function emptyStateCopy(error: SnapshotError): { title: string; descripti
   switch (error.kind) {
     case "missing":
       return {
-        title: "Update or Open Promptty",
-        description: `Promptty ${MINIMUM_PROMPTTY_VERSION} or later is required. Update Promptty for Mac, then open it once to make your prompts available.`,
+        title: "Open Promptty",
+        description: `Open Promptty for Mac ${MINIMUM_PROMPTTY_VERSION} or later once so it can create the local snapshot this command reads. If Promptty is missing or outdated, update it from the App Store first.`,
       };
     case "permission":
       return {
@@ -67,6 +67,10 @@ export function emptyStateCopy(error: SnapshotError): { title: string; descripti
         title: "Promptty Snapshot Unavailable",
         description: "Open Promptty for Mac and try again.",
       };
+    default: {
+      const _exhaustive: never = error.kind;
+      return _exhaustive;
+    }
   }
 }
 

@@ -17,10 +17,7 @@
         "iconName": "hammer",
         "colorHex": "#7C5CFC"
       },
-      "tags": [
-        "Swift",
-        "Review"
-      ]
+      "tags": ["Swift", "Review"]
     },
     {
       "id": "20000000-0000-4000-8000-000000000000",
@@ -36,10 +33,7 @@
         "iconName": "briefcase",
         "colorHex": "#32ADE6"
       },
-      "tags": [
-        "Meetings",
-        "Planning"
-      ]
+      "tags": ["Meetings", "Planning"]
     },
     {
       "id": "30000000-0000-4000-8000-000000000000",
@@ -55,9 +49,7 @@
         "iconName": "text.quote",
         "colorHex": "#FF9F0A"
       },
-      "tags": [
-        "Copywriting"
-      ]
+      "tags": ["Copywriting"]
     }
   ]
 }

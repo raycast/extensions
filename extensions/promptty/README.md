@@ -40,24 +40,6 @@ Default snapshot:
 
 If the snapshot is missing, open Promptty for Mac once and return to Raycast.
 
-If Raycast reports a permission error:
-
-1. Open the **Search Promptty** command preferences.
-2. Choose **Snapshot File**.
-3. Select Promptty’s `prompts-v1.json`.
+If Raycast reports a permission error, use **Open Command Preferences** from the empty state (or open the **Search Promptty** command preferences), then choose **Snapshot File** and select Promptty’s `prompts-v1.json`.
 
 The preference is an explicit fallback only. The extension never scans broad filesystem locations and never writes into Promptty’s App Group.
-
-## Development
-
-Use the Node.js version required by the pinned Raycast API, currently Node 22.22.2 or newer.
-
-```sh
-npm install
-npm test
-npm run typecheck
-npm run lint
-npm run build
-```
-
-Before Store publication, set `author` in `package.json` to the submitting Raycast account’s registered username and log the Raycast CLI into that account.

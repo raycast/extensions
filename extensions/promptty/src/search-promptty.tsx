@@ -1,56 +1,57 @@
-import { useEffect, useMemo, useState } from "react";
-import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
-import { useFrecencySorting } from "@raycast/utils";
+import { useMemo, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  getApplications,
+  getPreferenceValues,
+  Icon,
+  Keyboard,
+  List,
+  open,
+  openCommandPreferences,
+} from "@raycast/api";
+import { useFrecencySorting, usePromise } from "@raycast/utils";
 
 import { PromptDetail } from "./components/PromptDetail.js";
 import { RaycastSnapshotCache } from "./lib/cache.js";
-import { MINIMUM_PROMPTTY_VERSION } from "./lib/compatibility.js";
 import { emptyStateCopy, SnapshotError } from "./lib/errors.js";
 import { resolveSnapshotPath } from "./lib/paths.js";
 import { applyPrimaryOrdering, comparePromptFallback, promptFrecencyKey, searchPrompts } from "./lib/search.js";
 import { isSnapshotStale, loadSnapshotWithCache, type LoadedSnapshot } from "./lib/snapshot.js";
 import type { PromptRecord } from "./types/snapshot.js";
 
-interface CommandState {
-  isLoading: boolean;
-  loaded?: LoadedSnapshot;
-  error?: SnapshotError;
+interface SearchPrompttyPreferences {
+  snapshotFile?: string | string[];
 }
 
 const snapshotCache = new RaycastSnapshotCache();
 const PROMPTTY_APP_STORE_URL = "https://apps.apple.com/us/app/promptty/id6751414013";
+const PROMPTTY_BUNDLE_ID = "codes.kos.Promptty";
+const PROMPTTY_APP_NAME = "Promptty";
+
+async function loadSnapshot(path: string): Promise<LoadedSnapshot> {
+  return loadSnapshotWithCache(path, snapshotCache);
+}
 
 export default function SearchPrompttyCommand() {
-  const preferences = getPreferenceValues<Preferences.SearchPromptty>();
+  const preferences = getPreferenceValues<SearchPrompttyPreferences>();
   const snapshotPath = resolveSnapshotPath(preferences.snapshotFile);
   const [searchText, setSearchText] = useState("");
-  const [state, setState] = useState<CommandState>({ isLoading: true });
-
-  useEffect(() => {
-    let cancelled = false;
-    setState({ isLoading: true });
-    loadSnapshotWithCache(snapshotPath, snapshotCache)
-      .then((loaded) => {
-        if (!cancelled) setState({ isLoading: false, loaded });
-      })
-      .catch((error: unknown) => {
-        if (cancelled) return;
-        setState({
-          isLoading: false,
-          error:
-            error instanceof SnapshotError
-              ? error
-              : new SnapshotError("unavailable", "The Promptty snapshot could not be loaded."),
-        });
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [snapshotPath]);
+  const {
+    data: loaded,
+    isLoading,
+    error,
+    revalidate,
+  } = usePromise(loadSnapshot, [snapshotPath], {
+    onError() {
+      // Expected snapshot states are shown in List.EmptyView instead of a toast.
+    },
+  });
+  const snapshotError = error ? snapshotErrorFromUnknown(error) : undefined;
 
   const filteredPrompts = useMemo(
-    () => searchPrompts(state.loaded?.snapshot.prompts ?? [], searchText),
-    [searchText, state.loaded?.snapshot.prompts],
+    () => searchPrompts(loaded?.snapshot.prompts ?? [], searchText),
+    [searchText, loaded?.snapshot.prompts],
   );
   const { data: frecencySortedPrompts, visitItem } = useFrecencySorting(filteredPrompts, {
     namespace: "promptty-prompts-v1",
@@ -62,29 +63,30 @@ export default function SearchPrompttyCommand() {
     [frecencySortedPrompts, searchText],
   );
 
-  const emptyCopy = getEmptyCopy(state);
-  const warning = state.loaded ? warningText(state.loaded) : undefined;
+  const emptyCopy = getEmptyCopy(snapshotError, loaded);
+  const warning = loaded ? warningText(loaded) : undefined;
+  const isEmptyLibrary = Boolean(loaded && loaded.snapshot.prompts.length === 0);
 
   return (
     <List
       filtering={false}
-      isLoading={state.isLoading}
+      isLoading={isLoading}
       isShowingDetail
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search prompts…"
       throttle
     >
-      {!state.isLoading && displayedPrompts.length === 0 ? (
+      {!isLoading && displayedPrompts.length === 0 ? (
         <List.EmptyView
           icon={Icon.Text}
           title={emptyCopy.title}
           description={emptyCopy.description}
-          actions={emptyStateActions(state)}
+          actions={emptyStateActions(snapshotError, isEmptyLibrary, revalidate)}
         />
       ) : (
         <List.Section title={warning}>
           {displayedPrompts.map((prompt) => (
-            <PromptItem key={prompt.id} prompt={prompt} onVisit={() => visitItem(prompt)} />
+            <PromptItem key={prompt.id} prompt={prompt} onReload={revalidate} onVisit={() => visitItem(prompt)} />
           ))}
         </List.Section>
       )}
@@ -92,7 +94,15 @@ export default function SearchPrompttyCommand() {
   );
 }
 
-function PromptItem({ prompt, onVisit }: { prompt: PromptRecord; onVisit: () => Promise<void> }) {
+function PromptItem({
+  prompt,
+  onReload,
+  onVisit,
+}: {
+  prompt: PromptRecord;
+  onReload: () => void;
+  onVisit: () => Promise<void>;
+}) {
   return (
     <List.Item
       title={prompt.title}
@@ -102,15 +112,29 @@ function PromptItem({ prompt, onVisit }: { prompt: PromptRecord; onVisit: () => 
         <ActionPanel>
           <Action.Paste title="Paste Prompt" content={prompt.content} onPaste={onVisit} />
           <Action.CopyToClipboard title="Copy Prompt" content={prompt.content} onCopy={onVisit} />
+          <ActionPanel.Section>
+            <Action
+              title="Reload Snapshot"
+              icon={Icon.ArrowClockwise}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
+              onAction={onReload}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
   );
 }
 
-function getEmptyCopy(state: CommandState): { title: string; description: string } {
-  if (state.error) return emptyStateCopy(state.error);
-  if (state.loaded?.snapshot.prompts.length === 0) {
+function getEmptyCopy(
+  error: SnapshotError | undefined,
+  loaded: LoadedSnapshot | undefined,
+): {
+  title: string;
+  description: string;
+} {
+  if (error) return emptyStateCopy(error);
+  if (loaded?.snapshot.prompts.length === 0) {
     return {
       title: "No Prompts Yet",
       description: "Create your first prompt in Promptty.",
@@ -122,19 +146,61 @@ function getEmptyCopy(state: CommandState): { title: string; description: string
   };
 }
 
-function emptyStateActions(state: CommandState) {
-  if (state.error?.kind !== "missing" && state.error?.kind !== "unsupportedPrompttyVersion") {
+function emptyStateActions(error: SnapshotError | undefined, isEmptyLibrary: boolean, revalidate: () => void) {
+  if (!error && !isEmptyLibrary) {
     return undefined;
   }
+
   return (
     <ActionPanel>
-      <Action.OpenInBrowser
-        title={`Update Promptty to ${MINIMUM_PROMPTTY_VERSION}+`}
-        url={PROMPTTY_APP_STORE_URL}
-        icon={Icon.Download}
+      {error ? errorActions(error) : <Action title="Open Promptty" icon={Icon.AppWindow} onAction={openPromptty} />}
+      <Action
+        title="Reload Snapshot"
+        icon={Icon.ArrowClockwise}
+        shortcut={Keyboard.Shortcut.Common.Refresh}
+        onAction={revalidate}
       />
     </ActionPanel>
   );
+}
+
+function errorActions(error: SnapshotError) {
+  const openPrompttyAction = <Action title="Open Promptty" icon={Icon.AppWindow} onAction={openPromptty} />;
+  const updatePrompttyAction = (
+    <Action.OpenInBrowser title="Update Promptty" url={PROMPTTY_APP_STORE_URL} icon={Icon.Download} />
+  );
+
+  switch (error.kind) {
+    case "missing":
+      return (
+        <ActionPanel.Section>
+          {openPrompttyAction}
+          {updatePrompttyAction}
+        </ActionPanel.Section>
+      );
+    case "unsupportedPrompttyVersion":
+      return (
+        <ActionPanel.Section>
+          {updatePrompttyAction}
+          {openPrompttyAction}
+        </ActionPanel.Section>
+      );
+    case "permission":
+      return (
+        <ActionPanel.Section>
+          <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
+          {openPrompttyAction}
+        </ActionPanel.Section>
+      );
+    case "malformed":
+    case "unavailable":
+    case "incompatible":
+      return <ActionPanel.Section>{openPrompttyAction}</ActionPanel.Section>;
+    default: {
+      const _exhaustive: never = error.kind;
+      return _exhaustive;
+    }
+  }
 }
 
 function warningText(loaded: LoadedSnapshot): string | undefined {
@@ -157,7 +223,8 @@ function warningText(loaded: LoadedSnapshot): string | undefined {
 }
 
 function cacheFallbackWarning(issue: SnapshotError | undefined): string {
-  switch (issue?.kind) {
+  const kind = issue?.kind;
+  switch (kind) {
     case "permission":
       return "Current export is not accessible; showing last-known-good local snapshot";
     case "incompatible":
@@ -171,10 +238,27 @@ function cacheFallbackWarning(issue: SnapshotError | undefined): string {
     case "unavailable":
     case undefined:
       return "Current export is unavailable; showing last-known-good local snapshot";
+    default: {
+      const _exhaustive: never = kind;
+      return _exhaustive;
+    }
   }
 }
 
 function formatRelativeDate(value: string): string {
   const date = new Date(value);
   return new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+
+function snapshotErrorFromUnknown(error: unknown): SnapshotError {
+  if (error instanceof SnapshotError) return error;
+  return new SnapshotError("unavailable", "The Promptty snapshot could not be loaded.");
+}
+
+async function openPromptty(): Promise<void> {
+  const applications = await getApplications();
+  const promptty = applications.find(
+    (application) => application.bundleId === PROMPTTY_BUNDLE_ID || application.name === PROMPTTY_APP_NAME,
+  );
+  await open(promptty?.path ?? PROMPTTY_APP_STORE_URL);
 }
