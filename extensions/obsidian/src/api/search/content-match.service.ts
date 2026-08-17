@@ -38,6 +38,10 @@ function positionAt(content: string, offset: number): { line: number; column: nu
   };
 }
 
+function escapeRegExp(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export function queryWithoutTagFilter(query: string): string {
   return query.replace(/tag:\S+/gi, "").trim();
 }
@@ -51,18 +55,17 @@ export function findContentMatches(
   const trimmedQuery = query.trim();
   if (!trimmedQuery || maxMatches <= 0) return [];
 
-  const contentLower = content.toLocaleLowerCase();
-  const queryLower = trimmedQuery.toLocaleLowerCase();
+  const matcher = new RegExp(escapeRegExp(trimmedQuery), "giu");
   const lines = content.split("\n");
   const matches: ContentMatch[] = [];
-  let searchFrom = 0;
 
   while (matches.length < maxMatches) {
-    const offset = contentLower.indexOf(queryLower, searchFrom);
-    if (offset === -1) break;
+    const result = matcher.exec(content);
+    if (!result) break;
 
+    const offset = result.index;
     const start = positionAt(content, offset);
-    const end = positionAt(content, offset + trimmedQuery.length);
+    const end = positionAt(content, offset + result[0].length);
     const firstContextLine = Math.max(1, start.line - contextLines);
     const lastContextLine = Math.min(lines.length, end.line + contextLines);
     const context: MatchContextLine[] = [];
@@ -92,8 +95,6 @@ export function findContentMatches(
       endColumn: end.column,
       context,
     });
-
-    searchFrom = offset + Math.max(trimmedQuery.length, 1);
   }
 
   return matches;

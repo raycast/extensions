@@ -37,6 +37,24 @@ describe("content matches", () => {
     ]);
   });
 
+  it("keeps offsets tied to the original text when an earlier character expands during lowercasing", () => {
+    const matches = findContentMatches("İ target target", "TARGET");
+
+    expect(matches.map((match) => [match.column, match.endColumn])).toEqual([
+      [3, 9],
+      [10, 16],
+    ]);
+  });
+
+  it("selects the original characters when the query changes length during lowercasing", () => {
+    const matches = findContentMatches("AİB İ", "İ");
+
+    expect(matches.map((match) => [match.column, match.endColumn])).toEqual([
+      [2, 3],
+      [5, 6],
+    ]);
+  });
+
   it("bounds long context lines without losing a distant match", () => {
     const longAdjacentLine = "a".repeat(MAX_CONTEXT_LINE_LENGTH * 3);
     const longMatchingLine = `${"b".repeat(MAX_CONTEXT_LINE_LENGTH * 2)}target`;
