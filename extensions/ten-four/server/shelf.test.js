@@ -225,6 +225,56 @@ test("a live long-running writer is not treated as stale", async () => {
   assert.ok(ids.has("after-slow"), "missing waiting writer");
 });
 
+test("an old lock from a reused PID is reclaimed", async () => {
+  const store = path.join(TMP, "reused-pid.json");
+  const lock = `${store}.lock`;
+  fs.writeFileSync(store, "[]");
+  // The test process is alive, but did not create this old lock. This models a
+  // crashed writer whose PID has been assigned to an unrelated process.
+  fs.writeFileSync(
+    lock,
+    JSON.stringify({
+      pid: process.pid,
+      fingerprint: true,
+      startedAt: "a different process start time",
+      token: "reused",
+    }),
+  );
+  fs.utimesSync(lock, new Date(0), new Date(Date.now() - 3000));
+
+  const shelfPath = require.resolve("./shelf.js");
+  const child = spawn(
+    process.execPath,
+    [
+      "-e",
+      `
+      const { modify } = require(${JSON.stringify(shelfPath)});
+      modify(() => [{ id: "reclaimed" }]).then(
+        () => process.exit(0),
+        (err) => {
+          console.error(err);
+          process.exit(1);
+        }
+      );
+      `,
+    ],
+    {
+      env: { ...process.env, TENFOUR_FILE: store },
+      stdio: ["ignore", "ignore", "pipe"],
+    },
+  );
+
+  const exitCode = await Promise.race([
+    new Promise((resolve) => child.on("close", resolve)),
+    new Promise((resolve) => setTimeout(() => resolve("timeout"), 500)),
+  ]);
+  if (exitCode === "timeout") child.kill();
+  assert.equal(exitCode, 0, "writer remained blocked by a reused PID");
+  assert.deepEqual(JSON.parse(fs.readFileSync(store, "utf8")), [
+    { id: "reclaimed" },
+  ]);
+});
+
 test("a local-file writer overlapping a POST keeps both items", async () => {
   await fetch(`${base}/shelf`, { method: "DELETE" });
   const child = fileWriter("cli", 150);

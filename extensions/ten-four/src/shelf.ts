@@ -1,4 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
+import { execFileSync } from "child_process";
 import { homedir } from "os";
 import { join, dirname } from "path";
 import {
@@ -76,12 +77,62 @@ function writeLocal(items: Item[]) {
   renameSync(tmp, LOCAL_FILE);
 }
 
+function processStartTime(pid: number): string | null {
+  try {
+    return (
+      execFileSync("ps", ["-o", "lstart=", "-p", String(pid)], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim() || null
+    );
+  } catch {
+    return null;
+  }
+}
+
+function lockToken(): string {
+  return JSON.stringify({
+    pid: process.pid,
+    fingerprint: true,
+    startedAt: processStartTime(process.pid),
+    token: Math.random().toString(36).slice(2),
+  });
+}
+
+function lockOwner(token: string): {
+  pid: number;
+  fingerprint: boolean;
+  startedAt: string | null;
+} {
+  try {
+    const { pid, fingerprint, startedAt } = JSON.parse(token) as {
+      pid: unknown;
+      fingerprint: unknown;
+      startedAt: unknown;
+    };
+    if (typeof pid === "number" && Number.isInteger(pid) && pid > 0) {
+      return {
+        pid,
+        fingerprint: fingerprint === true,
+        startedAt: typeof startedAt === "string" ? startedAt : null,
+      };
+    }
+  } catch {
+    // Locks written before ownership fingerprints used the PID prefix only.
+  }
+  return {
+    pid: Number(token.split("-", 1)[0]),
+    fingerprint: false,
+    startedAt: null,
+  };
+}
+
 function withLock<T>(fn: () => T): T {
   mkdirSync(dirname(LOCAL_FILE), { recursive: true });
   for (;;) {
     try {
       const fd = openSync(LOCK_FILE, "wx");
-      const token = `${process.pid}-${Math.random().toString(36).slice(2)}`;
+      const token = lockToken();
       writeFileSync(fd, token);
       try {
         return fn();
@@ -99,11 +150,15 @@ function withLock<T>(fn: () => T): T {
       try {
         if (Date.now() - statSync(LOCK_FILE).mtimeMs > LOCK_STALE_MS) {
           const token = readFileSync(LOCK_FILE, "utf8");
-          const ownerPid = Number(token.split("-", 1)[0]);
-          let ownerAlive = Number.isInteger(ownerPid) && ownerPid > 0;
+          const owner = lockOwner(token);
+          let ownerAlive = Number.isInteger(owner.pid) && owner.pid > 0;
           if (ownerAlive) {
             try {
-              process.kill(ownerPid, 0);
+              process.kill(owner.pid, 0);
+              ownerAlive =
+                owner.fingerprint &&
+                (owner.startedAt === null ||
+                  processStartTime(owner.pid) === owner.startedAt);
             } catch (error) {
               ownerAlive = (error as NodeJS.ErrnoException).code === "EPERM";
             }

@@ -15,6 +15,7 @@
  * Store: ~/.ten-four.json  (override TENFOUR_FILE)
  * Port:  7801             (override PORT or TENFOUR_PORT)
  */
+const { execFileSync } = require("child_process");
 const http = require("http");
 const fs = require("fs");
 const os = require("os");
@@ -48,12 +49,54 @@ function writeStore(items) {
   fs.renameSync(tmp, STORE);
 }
 
+function processStartTime(pid) {
+  try {
+    return (
+      execFileSync("ps", ["-o", "lstart=", "-p", String(pid)], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "ignore"],
+      }).trim() || null
+    );
+  } catch {
+    return null;
+  }
+}
+
+function lockToken() {
+  return JSON.stringify({
+    pid: process.pid,
+    fingerprint: true,
+    startedAt: processStartTime(process.pid),
+    token: Math.random().toString(36).slice(2),
+  });
+}
+
+function lockOwner(token) {
+  try {
+    const { pid, fingerprint, startedAt } = JSON.parse(token);
+    if (Number.isInteger(pid) && pid > 0) {
+      return {
+        pid,
+        fingerprint: fingerprint === true,
+        startedAt: typeof startedAt === "string" ? startedAt : null,
+      };
+    }
+  } catch {
+    // Locks written before ownership fingerprints used the PID prefix only.
+  }
+  return {
+    pid: Number(token.split("-", 1)[0]),
+    fingerprint: false,
+    startedAt: null,
+  };
+}
+
 async function withLock(fn) {
   fs.mkdirSync(path.dirname(STORE), { recursive: true });
   for (;;) {
     try {
       const fd = fs.openSync(LOCK, "wx");
-      const token = `${process.pid}-${Math.random().toString(36).slice(2)}`;
+      const token = lockToken();
       fs.writeFileSync(fd, token);
       try {
         return fn();
@@ -70,11 +113,15 @@ async function withLock(fn) {
       try {
         if (Date.now() - fs.statSync(LOCK).mtimeMs > LOCK_STALE_MS) {
           const token = fs.readFileSync(LOCK, "utf8");
-          const ownerPid = Number(token.split("-", 1)[0]);
-          let ownerAlive = Number.isInteger(ownerPid) && ownerPid > 0;
+          const owner = lockOwner(token);
+          let ownerAlive = Number.isInteger(owner.pid) && owner.pid > 0;
           if (ownerAlive) {
             try {
-              process.kill(ownerPid, 0);
+              process.kill(owner.pid, 0);
+              ownerAlive =
+                owner.fingerprint &&
+                (owner.startedAt === null ||
+                  processStartTime(owner.pid) === owner.startedAt);
             } catch (error) {
               ownerAlive = error.code === "EPERM";
             }

@@ -44,9 +44,23 @@ test("the CLI waits for a live writer whose lock is old", async () => {
       "-e",
       `
         const fs = require("fs");
+        const { execFileSync } = require("child_process");
         const [store, lock] = process.argv.slice(1);
         const fd = fs.openSync(lock, "wx");
-        fs.writeFileSync(fd, \`\${process.pid}-writer\`);
+        const startedAt = execFileSync(
+          "ps",
+          ["-o", "lstart=", "-p", String(process.pid)],
+          { encoding: "utf8" },
+        ).trim();
+        fs.writeFileSync(
+          fd,
+          JSON.stringify({
+            pid: process.pid,
+            fingerprint: true,
+            startedAt,
+            token: "writer",
+          }),
+        );
         const snapshot = JSON.parse(fs.readFileSync(store, "utf8"));
         fs.utimesSync(lock, new Date(0), new Date(Date.now() - 3000));
         setTimeout(() => {
