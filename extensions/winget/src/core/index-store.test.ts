@@ -13,6 +13,7 @@ import {
   isCatalogFresh,
   loadIndex,
   markUpdateNotApplicable,
+  markUpgradeFailed,
   migrateLegacyIndex,
   patchMutable,
   type IndexPaths,
@@ -127,9 +128,45 @@ describe("not-applicable markers", () => {
     commitCatalog(paths, env, catalog(1));
     const raw = loadIndex(paths)! as unknown as Record<string, unknown>;
     delete raw.notApplicable;
+    delete raw.failedUpgrades;
     writeFileSync(paths.indexPath, JSON.stringify(raw));
 
     expect(loadIndex(paths)!.notApplicable).toEqual({});
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({});
+  });
+});
+
+describe("failed-upgrade markers", () => {
+  const marker = { version: "2.0", message: "Installer failed with exit code 3221225477" };
+
+  it("keeps the marker while winget offers the same version", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpgradeFailed(paths, env, { id: "zed", source: "winget" }, marker);
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({ "winget|zed": marker });
+
+    patchMutable(paths, env, { stampMutableAt: true }, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({ "winget|zed": marker });
+  });
+
+  it("clears the marker when winget offers a different version", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpgradeFailed(paths, env, { id: "zed", source: "winget" }, marker);
+
+    patchMutable(paths, env, {}, (s) => ({
+      ...s,
+      upgradable: [{ ...upgradable("zed"), available: "2.1" }],
+    }));
+
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({});
+  });
+
+  it("clears the marker when the row leaves the upgradable list", () => {
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [upgradable("zed")] }));
+    markUpgradeFailed(paths, env, { id: "zed", source: "winget" }, marker);
+
+    patchMutable(paths, env, {}, (s) => ({ ...s, upgradable: [] }));
+
+    expect(loadIndex(paths)!.failedUpgrades).toEqual({});
   });
 });
 

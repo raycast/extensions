@@ -51,7 +51,7 @@
       "name": "upgrade-all",
       "title": "Upgrade All Packages",
       "subtitle": "WinGet",
-      "description": "Upgrade all packages with available updates. Also runs this extension's install/uninstall operations in the background, so keep it enabled.",
+      "description": "Upgrade all packages with available updates",
       "mode": "no-view"
     },
     {

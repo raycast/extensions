@@ -126,9 +126,12 @@ function PackageActions({
       return <Action title="Install" icon={Icon.Plus} onAction={install} />;
     }
     if (pkg.isInstalled && pkg.hasUpdate && !pkg.isPinned) {
-      return (
-        <Action title="Upgrade" icon={Icon.ArrowUp} shortcut={{ modifiers: ["cmd"], key: "u" }} onAction={upgrade} />
-      );
+      // No explicit shortcut: Upgrade only ever exists as the primary action,
+      // so Enter is its shortcut — an explicit one would replace the ↵ hint
+      // in the action panel. (Uninstall keeps its shortcut even when primary:
+      // it also appears as a secondary action, and the binding must not
+      // depend on the row's state.)
+      return <Action title="Upgrade" icon={Icon.ArrowUp} onAction={upgrade} />;
     }
     if (pkg.isInstalled && pkg.isPinned) {
       return <Action title="Unpin" icon={Icon.PinDisabled} onAction={unpin} />;
