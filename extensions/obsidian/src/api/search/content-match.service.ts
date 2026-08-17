@@ -1,6 +1,9 @@
-import fs from "fs";
-import { Note } from "@/obsidian";
-import { searchNotesWithContent } from "./simple-content-search.service";
+import { Note, ObsidianUtils } from "@/obsidian";
+import {
+  findTitleMatches,
+  MAX_CONTENT_SEARCH_RESULTS,
+  readSearchableNoteContent,
+} from "./simple-content-search.service";
 
 const DEFAULT_CONTEXT_LINES = 2;
 const MAX_MATCHES_PER_NOTE = 20;
@@ -83,40 +86,134 @@ export function findContentMatches(
   return matches;
 }
 
+interface AnalyzedNote {
+  note: Note;
+  matches: ContentMatch[];
+}
+
+function isLiteralTitleOrPathMatch(note: Note, normalizedQuery: string): boolean {
+  return (
+    note.title.toLocaleLowerCase().includes(normalizedQuery) || note.path.toLocaleLowerCase().includes(normalizedQuery)
+  );
+}
+
+async function analyzeNote(note: Note, query: string): Promise<ContentMatch[]> {
+  try {
+    const content = await readSearchableNoteContent(note);
+    return content === undefined ? [] : findContentMatches(content, query);
+  } catch {
+    // Notes can be moved while a search is running.
+    return [];
+  }
+}
+
+async function analyzeTaggedNotes(notes: Note[], tagQuery: string, contentQuery: string): Promise<AnalyzedNote[]> {
+  const normalizedTag = tagQuery.startsWith("#") ? tagQuery.slice(1).toLowerCase() : tagQuery.toLowerCase();
+  const analyzedNotes: AnalyzedNote[] = [];
+
+  for (const note of notes) {
+    if (analyzedNotes.length >= MAX_CONTENT_SEARCH_RESULTS) break;
+
+    try {
+      const content = await readSearchableNoteContent(note);
+      if (content === undefined) continue;
+
+      const hasMatchingTag = ObsidianUtils.getAllTags(content).some((tag) => tag.toLowerCase() === normalizedTag);
+      if (hasMatchingTag) {
+        analyzedNotes.push({
+          note,
+          matches: contentQuery ? findContentMatches(content, contentQuery) : [],
+        });
+      }
+    } catch {
+      // Notes can be moved while a search is running.
+    }
+  }
+
+  return analyzedNotes;
+}
+
+function appendAnalyzedResult(
+  analyzedNote: AnalyzedNote,
+  normalizedQuery: string,
+  contentResults: NoteSearchResult[],
+  literalTitleOrPathResults: NoteSearchResult[]
+): void {
+  const { note, matches } = analyzedNote;
+
+  if (matches.length > 0) {
+    contentResults.push(
+      ...matches.map((match) => ({
+        id: `${note.path}:${match.line}:${match.column}`,
+        note,
+        match,
+      }))
+    );
+  } else if (isLiteralTitleOrPathMatch(note, normalizedQuery)) {
+    literalTitleOrPathResults.push({ id: note.path, note });
+  }
+}
+
 export async function searchNotesWithMatches(notes: Note[], query: string): Promise<NoteSearchResult[]> {
-  const matchingNotes = await searchNotesWithContent(notes, query);
   const contentQuery = queryWithoutTagFilter(query);
+  const tagSearchMatch = query.match(/tag:(\S+)/i);
 
   if (!contentQuery) {
-    return matchingNotes.map((note) => ({ id: note.path, note }));
+    if (!tagSearchMatch) {
+      return notes.map((note) => ({ id: note.path, note }));
+    }
+
+    const taggedNotes = await analyzeTaggedNotes(notes, tagSearchMatch[1].trim(), "");
+    return taggedNotes.map(({ note }) => ({ id: note.path, note }));
   }
 
   const contentResults: NoteSearchResult[] = [];
   const literalTitleOrPathResults: NoteSearchResult[] = [];
   const normalizedQuery = contentQuery.toLocaleLowerCase();
 
-  for (const note of matchingNotes) {
-    try {
-      const content = await fs.promises.readFile(note.path, "utf-8");
-      const matches = findContentMatches(content, contentQuery);
+  if (tagSearchMatch) {
+    const analyzedNotes = await analyzeTaggedNotes(notes, tagSearchMatch[1].trim(), contentQuery);
+    const taggedNotes = analyzedNotes.map(({ note }) => note);
+    const titleMatches = findTitleMatches(taggedNotes, contentQuery);
+    const titleMatchPaths = new Set(titleMatches.map((note) => note.path));
+    const analyzedByPath = new Map(analyzedNotes.map((analyzedNote) => [analyzedNote.note.path, analyzedNote]));
 
-      if (matches.length > 0) {
-        contentResults.push(
-          ...matches.map((match) => ({
-            id: `${note.path}:${match.line}:${match.column}`,
-            note,
-            match,
-          }))
-        );
-      } else if (
-        note.title.toLocaleLowerCase().includes(normalizedQuery) ||
-        note.path.toLocaleLowerCase().includes(normalizedQuery)
-      ) {
-        // Keep literal title/path matches, but discard fuzzy-only candidates.
-        literalTitleOrPathResults.push({ id: note.path, note });
+    for (const note of titleMatches) {
+      const analyzedNote = analyzedByPath.get(note.path);
+      if (analyzedNote) {
+        appendAnalyzedResult(analyzedNote, normalizedQuery, contentResults, literalTitleOrPathResults);
       }
-    } catch {
-      // The original search tolerates notes being moved while a search is running.
+    }
+
+    for (const analyzedNote of analyzedNotes) {
+      if (!titleMatchPaths.has(analyzedNote.note.path) && analyzedNote.matches.length > 0) {
+        appendAnalyzedResult(analyzedNote, normalizedQuery, contentResults, literalTitleOrPathResults);
+      }
+    }
+
+    return [...contentResults, ...literalTitleOrPathResults];
+  }
+
+  const titleMatches = findTitleMatches(notes, contentQuery);
+  const titleMatchPaths = new Set(titleMatches.map((note) => note.path));
+
+  for (const note of titleMatches) {
+    const matches = await analyzeNote(note, contentQuery);
+    appendAnalyzedResult({ note, matches }, normalizedQuery, contentResults, literalTitleOrPathResults);
+  }
+
+  if (titleMatches.length < MAX_CONTENT_SEARCH_RESULTS) {
+    let contentMatchCount = 0;
+
+    for (const note of notes) {
+      if (titleMatchPaths.has(note.path)) continue;
+      if (titleMatches.length + contentMatchCount >= MAX_CONTENT_SEARCH_RESULTS) break;
+
+      const matches = await analyzeNote(note, contentQuery);
+      if (matches.length > 0) {
+        contentMatchCount++;
+        appendAnalyzedResult({ note, matches }, normalizedQuery, contentResults, literalTitleOrPathResults);
+      }
     }
   }
 

@@ -5,7 +5,49 @@ import { ObsidianUtils, Note } from "../../obsidian";
 
 const logger = new Logger("ContentSearch");
 
-const MIN_RESULTS = 50; // Stop content search after finding this many matches
+export const MAX_CONTENT_SEARCH_RESULTS = 50;
+export const MAX_SEARCH_FILE_SIZE_BYTES = 1024 * 1024;
+
+export async function readSearchableNoteContent(note: Note): Promise<string | undefined> {
+  const file = await fs.promises.open(note.path, "r");
+
+  try {
+    const stats = await file.stat();
+    if (!stats.isFile()) return undefined;
+
+    const bytesToRead = Math.min(stats.size, MAX_SEARCH_FILE_SIZE_BYTES);
+    const buffer = Buffer.allocUnsafe(bytesToRead);
+    let totalBytesRead = 0;
+
+    while (totalBytesRead < bytesToRead) {
+      const { bytesRead } = await file.read(buffer, totalBytesRead, bytesToRead - totalBytesRead, totalBytesRead);
+      if (bytesRead === 0) break;
+      totalBytesRead += bytesRead;
+    }
+
+    if (stats.size > MAX_SEARCH_FILE_SIZE_BYTES) {
+      logger.debug(`Prefix-reading oversized note ${note.path} (${stats.size} bytes)`);
+    }
+
+    return buffer.subarray(0, totalBytesRead).toString("utf-8");
+  } finally {
+    await file.close();
+  }
+}
+
+export function findTitleMatches(notes: Note[], query: string): Note[] {
+  const titleFuse = new Fuse(notes, {
+    keys: ["title"],
+    threshold: 0.3,
+    ignoreLocation: true,
+    includeScore: true,
+  });
+
+  return titleFuse
+    .search(query)
+    .sort((a, b) => (a.score || 0) - (b.score || 0))
+    .map((result) => result.item);
+}
 
 /**
  * Memory-efficient content search
@@ -47,17 +89,7 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
   const queryLower = remainingQuery.toLowerCase();
 
   // Step 1: Quick filter by title/path first (no file I/O)
-  const titleFuse = new Fuse(filteredNotes, {
-    keys: ["title"],
-    threshold: 0.3,
-    ignoreLocation: true,
-    includeScore: true,
-  });
-
-  const titleMatches = titleFuse
-    .search(remainingQuery)
-    .sort((a, b) => (a.score || 0) - (b.score || 0))
-    .map((r) => r.item);
+  const titleMatches = findTitleMatches(filteredNotes, remainingQuery);
   logger.info(`Found ${titleMatches.length} title/path matches`);
 
   // Step 2: Search remaining notes by content (read files one at a time)
@@ -65,7 +97,7 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
   let filesChecked = 0;
 
   // Early exit if we already have enough matches from title/path
-  if (titleMatches.length >= MIN_RESULTS) {
+  if (titleMatches.length >= MAX_CONTENT_SEARCH_RESULTS) {
     logger.info(`Already have ${titleMatches.length} title/path matches, skipping content search`);
     return titleMatches;
   }
@@ -77,20 +109,16 @@ export async function searchNotesWithContent(notes: Note[], query: string): Prom
     }
 
     // Stop if we have enough total results
-    if (titleMatches.length + contentMatches.length >= MIN_RESULTS) {
-      logger.info(`Reached ${MIN_RESULTS} results after checking ${filesChecked} files, stopping early`);
+    if (titleMatches.length + contentMatches.length >= MAX_CONTENT_SEARCH_RESULTS) {
+      logger.info(`Reached ${MAX_CONTENT_SEARCH_RESULTS} results after checking ${filesChecked} files, stopping early`);
       break;
     }
 
     try {
-      if (!fs.existsSync(note.path)) {
-        continue;
-      }
-
       filesChecked++;
 
-      // Read file content
-      const content = await fs.promises.readFile(note.path, "utf-8");
+      const content = await readSearchableNoteContent(note);
+      if (content === undefined) continue;
       const contentLower = content.toLowerCase();
 
       // Simple substring match for content
@@ -127,20 +155,16 @@ async function searchNotesByTag(notes: Note[], tagQuery: string): Promise<Note[]
 
   for (const note of notes) {
     // Stop if we have enough results
-    if (matches.length >= MIN_RESULTS) {
-      logger.info(`Reached ${MIN_RESULTS} results after checking ${filesChecked} files, stopping early`);
+    if (matches.length >= MAX_CONTENT_SEARCH_RESULTS) {
+      logger.info(`Reached ${MAX_CONTENT_SEARCH_RESULTS} results after checking ${filesChecked} files, stopping early`);
       break;
     }
 
     try {
-      if (!fs.existsSync(note.path)) {
-        continue;
-      }
-
       filesChecked++;
 
-      // Read file content
-      const content = await fs.promises.readFile(note.path, "utf-8");
+      const content = await readSearchableNoteContent(note);
+      if (content === undefined) continue;
 
       // Extract tags from the file (both inline and YAML frontmatter)
       const tags = ObsidianUtils.getAllTags(content);
