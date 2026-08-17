@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, open, stat, unlink } from "node:fs/promises";
+import { mkdir, open, readFile, stat, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { useCallback, useEffect, useMemo } from "react";
 import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
@@ -66,11 +66,26 @@ async function withSharedServerLock<T>(id: string, mutation: () => Promise<T>): 
   while (Date.now() < deadline) {
     try {
       const handle = await open(path, "wx");
+      const ownerToken = randomUUID();
+      let heartbeat: ReturnType<typeof setInterval> | undefined;
       try {
+        await handle.writeFile(ownerToken);
+        heartbeat = setInterval(() => {
+          void handle.utimes(new Date(), new Date()).catch(() => undefined);
+        }, LOCK_STALE_MS / 2);
         return await mutation();
       } finally {
+        if (heartbeat) {
+          clearInterval(heartbeat);
+        }
         await handle.close().catch(() => undefined);
-        await unlink(path).catch(() => undefined);
+        try {
+          if ((await readFile(path, "utf8")) === ownerToken) {
+            await unlink(path);
+          }
+        } catch {
+          // The lock may have been replaced after this owner went stale.
+        }
       }
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
@@ -147,7 +162,8 @@ async function migrateLegacyServers() {
         const seenIds = new Set<string>();
         const writes: Promise<void>[] = [];
         // The index keeps the order the servers were originally added in
-        for (const [index, server] of legacyServers.entries()) {
+        for (let index = 0; index < legacyServers.length; index += 1) {
+          const server = legacyServers[index];
           if (typeof server?.id !== "string" || seenIds.has(server.id)) {
             continue;
           }
