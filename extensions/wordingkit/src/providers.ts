@@ -1,4 +1,5 @@
 import type { EditingMode } from "./modes.ts";
+import { getUiStrings } from "./i18n.ts";
 import { getProviderDefinition } from "./provider-registry.ts";
 import {
   buildOllamaRequest,
@@ -49,7 +50,7 @@ export function validateRewriteResult(
   systemPrompt: string,
 ): string {
   if (result.trim() === systemPrompt.trim()) {
-    throw new Error("Модель вернула системную инструкцию вместо результата.");
+    throw new Error(getUiStrings().echoedSystemPrompt);
   }
   return result;
 }

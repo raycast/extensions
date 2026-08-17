@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { registerHooks } from "node:module";
 import test from "node:test";
 import { buildOllamaRequest, extractOllamaContent } from "../src/ollama.ts";
+import { UI_STRINGS } from "../src/i18n.ts";
 import {
   buildAnthropicRequest,
   buildOpenAICompatibleRequest,
@@ -1055,18 +1056,32 @@ test("rewriteText reports an unknown provider clearly", async () => {
 });
 
 test("validateRewriteResult rejects an echoed system prompt", () => {
+  assert.equal(
+    UI_STRINGS.echoedSystemPrompt,
+    "The model returned the system prompt instead of rewritten text.",
+  );
   assert.throws(
     () =>
       validateRewriteResult(
         "Полная системная инструкция",
         "Полная системная инструкция",
       ),
-    /системн.*инструкц/i,
+    new Error("The model returned the system prompt instead of rewritten text."),
   );
   assert.equal(
     validateRewriteResult("Готовый текст", "Полная системная инструкция"),
     "Готовый текст",
   );
+});
+
+test("provider validation sources its user-facing error from i18n", async () => {
+  const providers = await readFile(
+    new URL("../src/providers.ts", import.meta.url),
+    "utf8",
+  );
+
+  assert.match(providers, /getUiStrings\(\)\.echoedSystemPrompt/);
+  assert.doesNotMatch(providers, /Модель вернула/);
 });
 
 test("retryEchoedSystemPrompt retries one echoed system prompt", async () => {

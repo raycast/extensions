@@ -10,6 +10,7 @@ type UiStrings = {
   selectedTextTooLong: (length: number, maximum: number) => string;
   configureApiKey: string;
   rewriteCancelled: string;
+  echoedSystemPrompt: string;
   editingModes: string;
   english: string;
   russian: string;
@@ -58,6 +59,8 @@ export const UI_STRINGS: UiStrings = {
     `Selected text is too long (${length} characters). Maximum: ${maximum}.`,
   configureApiKey: "Configure an API key in Preferences",
   rewriteCancelled: "Processing was cancelled or exceeded 60 seconds.",
+  echoedSystemPrompt:
+    "The model returned the system prompt instead of rewritten text.",
   editingModes: "Editing Modes",
   english: "English",
   russian: "Russian",

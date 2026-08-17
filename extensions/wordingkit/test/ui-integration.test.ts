@@ -115,10 +115,17 @@ test("runtime UI is US English only", async () => {
 
 test("rewrite command presents an empty-mode route to Settings", async () => {
   const index = await source("../src/index.tsx");
+  const emptyRoute = index.slice(
+    index.indexOf('if (viewState === "empty")'),
+    index.indexOf("\n  return (\n    <List\n      isLoading", index.indexOf('if (viewState === "empty")')),
+  );
 
   assert.match(index, /ui\.noModes/);
   assert.match(index, /ui\.openSettings/);
   assert.match(index, /getRewriteViewState/);
+  assert.match(emptyRoute, /launchCommand\(\{[\s\S]*name:\s*["']settings["']/);
+  assert.match(emptyRoute, /type:\s*LaunchType\.UserInitiated/);
+  assert.doesNotMatch(emptyRoute, /openExtensionPreferences/);
 });
 
 test("rewrite items render in sorted order only after selected text and modes are ready", async () => {

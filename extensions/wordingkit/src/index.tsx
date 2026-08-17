@@ -7,6 +7,8 @@ import {
   getPreferenceValues,
   getSelectedText,
   Icon,
+  launchCommand,
+  LaunchType,
   List,
   openExtensionPreferences,
   PopToRootType,
@@ -175,7 +177,12 @@ export default function Command() {
               <Action
                 title={ui.openSettings}
                 icon={Icon.Gear}
-                onAction={openExtensionPreferences}
+                onAction={() =>
+                  launchCommand({
+                    name: "settings",
+                    type: LaunchType.UserInitiated,
+                  })
+                }
               />
             </ActionPanel>
           }
