@@ -123,6 +123,41 @@ test("a save leaves no temp or lock file behind", async () => {
   assert.deepEqual(stray, []);
 });
 
+test("first mutation creates a missing store directory", async () => {
+  const store = path.join(TMP, "not-created", "yet", "shelf.json");
+  const shelfPath = require.resolve("./shelf.js");
+  const child = spawn(
+    process.execPath,
+    [
+      "-e",
+      `
+      const { modify } = require(${JSON.stringify(shelfPath)});
+      modify(() => [{ id: "first" }]).then(
+        () => process.exit(0),
+        (err) => {
+          console.error(err);
+          process.exit(1);
+        }
+      );
+      `,
+    ],
+    {
+      env: { ...process.env, TENFOUR_FILE: store },
+      stdio: ["ignore", "ignore", "pipe"],
+    },
+  );
+  let err = "";
+  child.stderr.on("data", (d) => {
+    err += d;
+  });
+  await new Promise((resolve, reject) => {
+    child.on("close", (code) =>
+      code === 0 ? resolve() : reject(new Error(err || `exit ${code}`)),
+    );
+  });
+  assert.deepEqual(JSON.parse(fs.readFileSync(store, "utf8")), [{ id: "first" }]);
+});
+
 function fileWriter(id, holdMs) {
   const shelfPath = require.resolve("./shelf.js");
   return new Promise((resolve, reject) => {
@@ -171,6 +206,23 @@ test("overlapping process writes keep both items", async () => {
   const ids = new Set(items.map((i) => i.id));
   assert.ok(ids.has("w1"), "missing w1");
   assert.ok(ids.has("w2"), "missing w2");
+});
+
+test("a live long-running writer is not treated as stale", async () => {
+  await fetch(`${base}/shelf`, { method: "DELETE" });
+  const first = fileWriter("slow", 2300);
+  const lock = `${process.env.TENFOUR_FILE}.lock`;
+  const start = Date.now();
+  while (!fs.existsSync(lock)) {
+    if (Date.now() - start > 2000) throw new Error("first writer never locked");
+    await new Promise((r) => setTimeout(r, 5));
+  }
+  await fileWriter("after-slow", 0);
+  await first;
+  const items = await (await fetch(`${base}/shelf`)).json();
+  const ids = new Set(items.map((item) => item.id));
+  assert.ok(ids.has("slow"), "missing slow writer");
+  assert.ok(ids.has("after-slow"), "missing waiting writer");
 });
 
 test("a local-file writer overlapping a POST keeps both items", async () => {

@@ -11,6 +11,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getShelf, sortItems, type Item } from "./shelf";
+import { createRefreshQueue } from "./refresh-queue";
 
 const shelf = getShelf();
 
@@ -41,51 +42,40 @@ export default function Command() {
   const [showDetail, setShowDetail] = useState(true);
   const lastGood = useRef<Item[]>([]);
   const reachable = useRef(true);
-  const inflight = useRef<Promise<void> | null>(null);
-  const queued = useRef(false);
+  const refreshQueue = useRef<ReturnType<typeof createRefreshQueue> | null>(
+    null,
+  );
 
-  async function refresh() {
-    // Polls fire every second and actions also refresh. If each tick started
-    // a new request while a slower one was still in flight, every response
-    // would be stale by the time it landed and the list would never populate.
-    // Coalesce: one load at a time, and if another refresh arrived during it,
-    // run exactly one more so a pin or push is not stuck behind a skipped poll.
-    queued.current = true;
-    if (inflight.current) return inflight.current;
-
-    inflight.current = (async () => {
-      try {
-        while (queued.current) {
-          queued.current = false;
-          try {
-            const data = await shelf.load();
-            lastGood.current = data;
-            setItems(data);
-            reachable.current = true;
-          } catch (error) {
-            // Keep showing the last-known list instead of blanking, and only
-            // toast on the transition from reachable -> unreachable.
-            if (reachable.current) {
-              showToast({
-                style: Toast.Style.Failure,
-                title: shelf.isRemote
-                  ? "Can't reach shelf"
-                  : "Can't read shelf",
-                message: error instanceof Error ? error.message : String(error),
-              });
-            }
-            reachable.current = false;
-            setItems(lastGood.current);
+  function refresh(followUp = false) {
+    if (!refreshQueue.current) {
+      refreshQueue.current = createRefreshQueue(async () => {
+        // Polls coalesce with an in-flight load. Actions request one follow-up
+        // load, so they observe their completed mutation without allowing
+        // one-second remote polls to keep this queue alive indefinitely.
+        try {
+          const data = await shelf.load();
+          lastGood.current = data;
+          setItems(data);
+          reachable.current = true;
+        } catch (error) {
+          // Keep showing the last-known list instead of blanking, and only
+          // toast on the transition from reachable -> unreachable.
+          if (reachable.current) {
+            showToast({
+              style: Toast.Style.Failure,
+              title: shelf.isRemote ? "Can't reach shelf" : "Can't read shelf",
+              message: error instanceof Error ? error.message : String(error),
+            });
           }
+          reachable.current = false;
+          setItems(lastGood.current);
         }
-      } finally {
-        inflight.current = null;
-        setIsLoading(false);
-        if (queued.current) await refresh();
-      }
-    })();
+      });
+    }
 
-    return inflight.current;
+    return refreshQueue.current({ followUp }).finally(() => {
+      setIsLoading(false);
+    });
   }
 
   useEffect(() => {
@@ -104,7 +94,7 @@ export default function Command() {
   async function togglePin(item: Item) {
     try {
       await shelf.setPinned(item, !item.pinned);
-      await refresh();
+      await refresh(true);
     } catch (error) {
       toastError(error);
     }
@@ -113,7 +103,7 @@ export default function Command() {
   async function remove(item: Item) {
     try {
       await shelf.remove(item);
-      await refresh();
+      await refresh(true);
       showToast({ style: Toast.Style.Success, title: "Removed" });
     } catch (error) {
       toastError(error);
@@ -132,7 +122,7 @@ export default function Command() {
     if (!ok) return;
     try {
       await shelf.clear();
-      await refresh();
+      await refresh(true);
       showToast({ style: Toast.Style.Success, title: "Shelf cleared" });
     } catch (error) {
       toastError(error);

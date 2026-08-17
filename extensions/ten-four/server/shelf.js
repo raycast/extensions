@@ -49,26 +49,41 @@ function writeStore(items) {
 }
 
 async function withLock(fn) {
-  const giveUp = Date.now() + LOCK_STALE_MS;
+  fs.mkdirSync(path.dirname(STORE), { recursive: true });
   for (;;) {
     try {
       const fd = fs.openSync(LOCK, "wx");
+      const token = `${process.pid}-${Math.random().toString(36).slice(2)}`;
+      fs.writeFileSync(fd, token);
       try {
         return fn();
       } finally {
         fs.closeSync(fd);
         try {
-          fs.unlinkSync(LOCK);
+          if (fs.readFileSync(LOCK, "utf8") === token) fs.unlinkSync(LOCK);
         } catch {
           // already released
         }
       }
     } catch (err) {
       if (err.code !== "EEXIST") throw err;
-      if (Date.now() > giveUp) throw new Error("shelf is locked");
       try {
         if (Date.now() - fs.statSync(LOCK).mtimeMs > LOCK_STALE_MS) {
-          fs.unlinkSync(LOCK);
+          const token = fs.readFileSync(LOCK, "utf8");
+          const ownerPid = Number(token.split("-", 1)[0]);
+          let ownerAlive = Number.isInteger(ownerPid) && ownerPid > 0;
+          if (ownerAlive) {
+            try {
+              process.kill(ownerPid, 0);
+            } catch (error) {
+              ownerAlive = error.code === "EPERM";
+            }
+          }
+          if (!ownerAlive) {
+            const stale = `${LOCK}.${process.pid}.${Math.random().toString(36).slice(2)}.stale`;
+            fs.renameSync(LOCK, stale);
+            fs.unlinkSync(stale);
+          }
         }
       } catch {
         // lock vanished or we raced with the holder releasing it
