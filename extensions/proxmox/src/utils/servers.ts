@@ -1,6 +1,8 @@
 import { randomUUID } from "node:crypto";
+import { mkdir, open, stat, unlink } from "node:fs/promises";
+import { join } from "node:path";
 import { useCallback, useEffect, useMemo } from "react";
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { LocalStorage, environment, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import type { PveServer } from "@/types";
 
@@ -37,26 +39,59 @@ async function writeStoredServer(server: StoredServer) {
 }
 
 /**
- * LocalStorage has no compare-and-swap, so overlapping update/remove of the
- * same key must run one at a time. Per-server keys already isolate different
- * servers; this queue only serializes mutations that share an id.
+ * Command instances do not share module state, and LocalStorage has no CAS, so
+ * overlapping update/remove of one server is coordinated with an exclusive
+ * lock file under the extension support path.
  */
-const mutationQueues = new Map<string, Promise<unknown>>();
+const LOCK_DIR = "server-locks";
+const LOCK_STALE_MS = 8_000;
+const LOCK_WAIT_MS = 5_000;
 
-function enqueueServerMutation<T>(id: string, mutation: () => Promise<T>): Promise<T> {
-  const previous = mutationQueues.get(id) ?? Promise.resolve();
-  const result = previous.then(mutation, mutation);
-  const settled = result.then(
-    () => undefined,
-    () => undefined,
-  );
-  mutationQueues.set(id, settled);
-  void settled.then(() => {
-    if (mutationQueues.get(id) === settled) {
-      mutationQueues.delete(id);
+function sleep(ms: number) {
+  return new Promise<void>((resolve) => setTimeout(resolve, ms));
+}
+
+function serverLockPath(id: string): string {
+  const safeId = id.replace(/[^a-zA-Z0-9._-]/g, "_");
+  return join(environment.supportPath, LOCK_DIR, `${safeId}.lock`);
+}
+
+async function withSharedServerLock<T>(id: string, mutation: () => Promise<T>): Promise<T> {
+  await mkdir(join(environment.supportPath, LOCK_DIR), { recursive: true });
+  const path = serverLockPath(id);
+  const deadline = Date.now() + LOCK_WAIT_MS;
+
+  while (Date.now() < deadline) {
+    try {
+      const handle = await open(path, "wx");
+      try {
+        return await mutation();
+      } finally {
+        await handle.close().catch(() => undefined);
+        await unlink(path).catch(() => undefined);
+      }
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "EEXIST") {
+        throw error;
+      }
+
+      try {
+        const { mtimeMs } = await stat(path);
+        if (Date.now() - mtimeMs > LOCK_STALE_MS) {
+          await unlink(path).catch(() => undefined);
+          continue;
+        }
+      } catch (statError) {
+        if ((statError as NodeJS.ErrnoException).code !== "ENOENT") {
+          throw statError;
+        }
+      }
+
+      await sleep(20 + Math.random() * 40);
     }
-  });
-  return result;
+  }
+
+  throw new Error("Timed out waiting to update this server");
 }
 
 async function migrateLegacyServers() {
@@ -171,7 +206,7 @@ export const useServers = () => {
   }, []);
 
   const updateServer = useCallback(async (server: PveServer) => {
-    await enqueueServerMutation(server.id, async () => {
+    await withSharedServerLock(server.id, async () => {
       const stored = await readStoredServer(server.id);
       if (!stored) {
         throw new Error("This server was removed");
@@ -183,7 +218,7 @@ export const useServers = () => {
   }, []);
 
   const removeServer = useCallback(async (server: PveServer) => {
-    await enqueueServerMutation(server.id, async () => {
+    await withSharedServerLock(server.id, async () => {
       await LocalStorage.removeItem(storageKey(server.id));
       notifyServersChanged();
     });
