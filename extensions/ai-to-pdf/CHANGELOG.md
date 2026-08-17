@@ -11,4 +11,6 @@
 - Pick any Illustrator PDF preset, including custom ones
 - Two no-view commands that convert the current Finder selection with one hotkey
 - Illustrator is brought to the front when a conversion starts
+- A document already open in Illustrator is converted through a working copy, leaving the open document untouched
+- The exported PDF is measured and rejected if its bleed does not match what was requested
 - Batch conversion, configurable output folder, filename suffixes and overwrite behaviour

@@ -1,6 +1,6 @@
-import { showToast, Toast } from "@raycast/api";
-import { existsSync, statSync } from "fs";
+import { existsSync, statSync, unlinkSync } from "fs";
 import { basename, dirname, extname, join } from "path";
+import { detectBleed } from "./ai-file";
 import { describeBleedPt, resolveBleed, type BleedChoice } from "./bleed";
 import { convertFile, presetUsesDocumentBleed } from "./illustrator";
 import type { Settings } from "./settings";
@@ -11,7 +11,6 @@ export type Job = {
   input: string;
   bleed: BleedChoice;
   preset: string;
-  multipleArtboards: boolean;
   destination?: string;
 };
 
@@ -31,9 +30,8 @@ export function buildOutputPath(input: string, suffix: string, settings: Setting
   const folder = destination ?? settings.destination ?? dirname(input);
   const stem = basename(input, extname(input)) + suffix;
 
-  const candidate = join(folder, `${stem}.pdf`);
-  if (settings.overwrite || !existsSync(candidate)) {
-    return candidate;
+  if (settings.overwrite || !existsSync(join(folder, `${stem}.pdf`))) {
+    return join(folder, `${stem}.pdf`);
   }
   for (let n = 2; n < 1000; n++) {
     const numbered = join(folder, `${stem} ${n}.pdf`);
@@ -41,7 +39,33 @@ export function buildOutputPath(input: string, suffix: string, settings: Setting
       return numbered;
     }
   }
-  return candidate;
+  return join(folder, `${stem}.pdf`);
+}
+
+/**
+ * Checks the PDF really came out with the bleed that was asked for. Illustrator's
+ * current settings — the option that applies no preset — can carry "Use Document
+ * Bleed Settings" without any way to read that beforehand, and a wrong bleed is
+ * not something a print file should be trusted to have silently.
+ */
+function verifyBleed(output: string, expectedPt: number): void {
+  const produced = detectBleed(output);
+  if (!produced) {
+    return;
+  }
+  if (Math.abs(produced.maxPt - expectedPt) > 0.5) {
+    // A print file with the wrong bleed is worse than no file, so it does not
+    // get to sit on disk looking finished.
+    try {
+      unlinkSync(output);
+    } catch {
+      // Leaving it is still better than failing the conversion for a second reason.
+    }
+    throw new Error(
+      `The PDF came out with ${describeBleedPt(produced.maxPt)} instead of ${describeBleedPt(expectedPt)}. ` +
+        `The PDF settings in use override the bleed — pick an explicit PDF preset instead of Illustrator's current settings.`,
+    );
+  }
 }
 
 export async function runJob(job: Job, settings: Settings): Promise<JobResult> {
@@ -68,9 +92,13 @@ export async function runJob(job: Job, settings: Settings): Promise<JobResult> {
       output,
       bleedPt: requestPt,
       preset: job.preset,
-      multipleArtboards: job.multipleArtboards,
       timeoutMs: settings.timeoutMs,
     });
+
+    if (!existsSync(output)) {
+      throw new Error("Illustrator reported success but no PDF was written.");
+    }
+    verifyBleed(output, actualPt);
     return { input: job.input, output, bleedPt: actualPt, exact, source: job.bleed.mode };
   } catch (error) {
     return { input: job.input, error: error instanceof Error ? error.message : String(error) };
@@ -100,30 +128,4 @@ export function summarize(results: JobResult[]): { succeeded: JobResult[]; faile
 /** Describes the bleed actually applied to a converted file. */
 export function describeBleed(result: JobResult): string {
   return "error" in result ? "" : describeBleedPt(result.bleedPt);
-}
-
-export async function showSummary(results: JobResult[]) {
-  const { succeeded, failed } = summarize(results);
-
-  if (failed.length === 0) {
-    const first = succeeded[0];
-    await showToast({
-      style: Toast.Style.Success,
-      title: succeeded.length === 1 ? "PDF created" : `${succeeded.length} PDFs created`,
-      message:
-        succeeded.length === 1 && "output" in first ? `${basename(first.output)} — ${describeBleed(first)}` : undefined,
-    });
-    return;
-  }
-
-  await showToast({
-    style: Toast.Style.Failure,
-    title:
-      succeeded.length > 0
-        ? `${succeeded.length} converted, ${failed.length} failed`
-        : failed.length === 1
-          ? "Conversion failed"
-          : `${failed.length} conversions failed`,
-    message: `${basename(failed[0].input)}: ${failed[0].error}`,
-  });
 }

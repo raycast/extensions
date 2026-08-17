@@ -57,13 +57,7 @@ export default function Command() {
   const presetOptions = Array.from(new Set([...(presets ?? []), settings.pdfPreset].filter(Boolean)));
   const detected = describeDetected(files);
 
-  async function handleSubmit(values: {
-    bleed: string;
-    customBleedMm: string;
-    preset: string;
-    multipleArtboards: boolean;
-    destination: string[];
-  }) {
+  async function handleSubmit(values: { bleed: string; customBleedMm: string; preset: string; destination: string[] }) {
     const aiFiles = files.filter(isAiFile);
     if (aiFiles.length === 0) {
       setFileError("Pick at least one .ai file");
@@ -90,7 +84,6 @@ export default function Command() {
       input,
       bleed,
       preset: values.preset === KEEP_CURRENT_SETTINGS ? "" : values.preset,
-      multipleArtboards: values.multipleArtboards,
       destination: values.destination?.[0],
     }));
 
@@ -210,14 +203,6 @@ export default function Command() {
         canChooseFiles={false}
         defaultValue={settings.destination ? [settings.destination] : []}
         info="Leave empty to save the PDF next to the .ai file."
-      />
-
-      <Form.Checkbox
-        id="multipleArtboards"
-        title="Artboards"
-        label="Save every artboard as its own PDF"
-        defaultValue={false}
-        storeValue
       />
     </Form>
   );

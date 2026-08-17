@@ -52,13 +52,11 @@ export type ConvertOptions = {
   bleedPt: number;
   /** Illustrator PDF preset name, brackets included. Empty string keeps Illustrator's current settings. */
   preset: string;
-  /** Write one PDF per artboard instead of a single multi-page PDF. */
-  multipleArtboards: boolean;
   timeoutMs: number;
 };
 
 export type ConvertResult = {
-  /** Path Illustrator was told to write. With `multipleArtboards` it is the base name. */
+  /** Path Illustrator was told to write. */
   output: string;
   /** Milliseconds Illustrator spent on the file. */
   durationMs: number;
@@ -178,30 +176,36 @@ export async function convertFile(options: ConvertOptions): Promise<ConvertResul
     output: options.output,
     bleed: options.bleedPt,
     preset: options.preset,
-    multipleArtboards: options.multipleArtboards,
+    // Only used when the source is already open in Illustrator; see the script below.
+    scratchName: `~ai-to-pdf-${process.pid}-${Date.now()}.ai`,
   };
 
   const jsx = `${JSX_PRELUDE}
 var P = ${JSON.stringify(params)};
-var doc = null, wasOpen = false, reopenPath = null, error = null;
+var doc = null, scratch = null, error = null;
 
 try {
   var source = new File(P.input);
   if (!source.exists) throw new Error("File not found: " + P.input);
 
-  // Reuse the document if it is already open, so the same .ai is never loaded twice.
+  var openDoc = null;
   for (var i = 0; i < app.documents.length; i++) {
     var candidate = app.documents[i], candidatePath = null;
     try { candidatePath = candidate.fullName.fsName; } catch (e) { candidatePath = null; }
-    if (candidatePath && candidatePath === source.fsName) { doc = candidate; wasOpen = true; break; }
+    if (candidatePath && candidatePath === source.fsName) { openDoc = candidate; break; }
   }
 
-  if (doc) {
-    if (!doc.saved) {
-      throw new Error("This file is open in Illustrator with unsaved changes. Save it first, then convert.");
-    }
-    reopenPath = source.fsName;
-    app.activeDocument = doc;
+  if (openDoc) {
+    // saveAs would rebind the user's own document to the PDF, costing them their
+    // selection, undo history and window. Convert a copy instead, and put it in the
+    // same folder so linked images resolve exactly as they do for the original.
+    //
+    // The copy comes from disk, so unsaved edits are not in the PDF. Illustrator
+    // offers no reliable way to know: doc.saved already reads false after nothing
+    // more than a selection, so blocking on it would refuse most open documents.
+    scratch = new File(source.path + "/" + P.scratchName);
+    if (!source.copy(scratch)) throw new Error("Could not create a working copy next to the file.");
+    doc = app.open(scratch);
   } else {
     doc = app.open(source);
   }
@@ -221,21 +225,22 @@ try {
   opts.colorBars = false;
   opts.pageInformation = false;
   opts.offset = 0;
-  opts.saveMultipleArtboards = P.multipleArtboards;
 
-  // saveAs rebinds the open document to the PDF, so the original .ai on disk is
-  // left untouched and we close without saving afterwards.
+  // saveAs rebinds this document to the PDF, so the .ai it came from is left
+  // untouched on disk and we close without saving afterwards.
   doc.saveAs(new File(P.output), opts);
   doc.close(SaveOptions.DONOTSAVECHANGES);
   doc = null;
-
-  if (wasOpen && reopenPath) { app.open(new File(reopenPath)); }
 } catch (e) {
   error = (e && e.message) ? e.message : String(e);
-  // Only clean up documents we opened ourselves; one the user already had open stays open.
-  if (doc && !wasOpen) {
+  if (doc) {
     try { doc.close(SaveOptions.DONOTSAVECHANGES); } catch (e2) {}
   }
+}
+
+// The working copy goes whether the conversion worked or not.
+if (scratch && scratch.exists) {
+  try { scratch.remove(); } catch (e3) {}
 }
 
 error === null ? '{"ok":true}' : '{"ok":false,"error":' + q(error) + '}';

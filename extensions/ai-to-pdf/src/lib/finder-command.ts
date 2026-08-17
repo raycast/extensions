@@ -1,6 +1,15 @@
 import { getSelectedFinderItems, showHUD, showInFinder, showToast, Toast } from "@raycast/api";
 import { basename } from "path";
-import { describeChoice, isAiFile, runJobs, showSummary, summarize, type BleedChoice, type Job } from "./convert";
+import {
+  describeBleed,
+  describeChoice,
+  isAiFile,
+  runJobs,
+  summarize,
+  type BleedChoice,
+  type Job,
+  type JobResult,
+} from "./convert";
 import { getSettings } from "./settings";
 
 /** Shared body of the no-view commands that act on the current Finder selection. */
@@ -35,7 +44,6 @@ export async function convertFinderSelection(bleed: BleedChoice) {
     input,
     bleed,
     preset: settings.pdfPreset,
-    multipleArtboards: false,
   }));
 
   const results = await runJobs(jobs, settings, (done, total, current) => {
@@ -52,4 +60,31 @@ export async function convertFinderSelection(bleed: BleedChoice) {
   if (settings.revealInFinder && failed.length === 0 && succeeded.length > 0 && "output" in succeeded[0]) {
     await showInFinder(succeeded[0].output);
   }
+}
+
+/** Reports the outcome of a Finder-selection run as a toast. */
+async function showSummary(results: JobResult[]) {
+  const { succeeded, failed } = summarize(results);
+
+  if (failed.length === 0) {
+    const first = succeeded[0];
+    await showToast({
+      style: Toast.Style.Success,
+      title: succeeded.length === 1 ? "PDF created" : `${succeeded.length} PDFs created`,
+      message:
+        succeeded.length === 1 && "output" in first ? `${basename(first.output)} — ${describeBleed(first)}` : undefined,
+    });
+    return;
+  }
+
+  await showToast({
+    style: Toast.Style.Failure,
+    title:
+      succeeded.length > 0
+        ? `${succeeded.length} converted, ${failed.length} failed`
+        : failed.length === 1
+          ? "Conversion failed"
+          : `${failed.length} conversions failed`,
+    message: `${basename(failed[0].input)}: ${failed[0].error}`,
+  });
 }
