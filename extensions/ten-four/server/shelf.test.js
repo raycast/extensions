@@ -8,7 +8,7 @@ const path = require("path");
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "tenfour-"));
 process.env.TENFOUR_FILE = path.join(TMP, "shelf.json");
 
-const { createServer, truncate } = require("./shelf.js");
+const { createServer, truncate, hostIsAllowed } = require("./shelf.js");
 
 let server;
 let base;
@@ -98,4 +98,34 @@ test("truncate keeps all pinned plus MAX_ITEMS unpinned", () => {
   const out = truncate(items);
   assert.equal(out.filter((i) => i.pinned).length, 1);
   assert.equal(out.filter((i) => !i.pinned).length, 200);
+});
+
+test("concurrent adds all survive", async () => {
+  await fetch(`${base}/shelf`, { method: "DELETE" });
+  // Fire the writes together: each handler must load and save without another
+  // handler slipping in between, or one of these snippets goes missing.
+  await Promise.all(
+    Array.from({ length: 20 }, (_, i) => post({ label: `c${i}`, text: `c${i}` })),
+  );
+  const items = await (await fetch(`${base}/shelf`)).json();
+  assert.equal(items.length, 20);
+  assert.equal(new Set(items.map((i) => i.label)).size, 20);
+});
+
+test("a save leaves no temp file behind", async () => {
+  await post({ text: "tidy" });
+  const stray = fs
+    .readdirSync(TMP)
+    .filter((f) => f.endsWith(".tmp"));
+  assert.deepEqual(stray, []);
+});
+
+test("hostIsAllowed only permits loopback unless overridden", () => {
+  assert.equal(hostIsAllowed("127.0.0.1", undefined), true);
+  assert.equal(hostIsAllowed("::1", undefined), true);
+  assert.equal(hostIsAllowed("localhost", undefined), true);
+  assert.equal(hostIsAllowed("0.0.0.0", undefined), false);
+  assert.equal(hostIsAllowed("192.168.1.10", undefined), false);
+  // Explicit opt-in for an already-trusted network.
+  assert.equal(hostIsAllowed("0.0.0.0", "1"), true);
 });

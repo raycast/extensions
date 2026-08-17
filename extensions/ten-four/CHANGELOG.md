@@ -7,6 +7,8 @@
 - The bundled `tenfour` CLI follows the same rule: it pushes to `TENFOUR_URL` when that is set, and writes the local file when it is not.
 - The CLI gained `--source` / `-s` for optional provenance on a snippet.
 - The empty state now names the backend it is reading, so a blank or mistyped Shelf URL is obvious at a glance.
+- Reads are stamped and stale ones discarded, so a slow response can no longer briefly revert a pin, a removal, or a clear you just made.
+- Writes to the local file go through a temp file and a rename, so a reader polling mid-write never sees an empty shelf.
 
 ## [Initial Release] - 2026-08-10
 

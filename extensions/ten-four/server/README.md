@@ -12,6 +12,12 @@ node server/shelf.js        # listens on 127.0.0.1:7801
 
 Override with `PORT`, `TENFOUR_FILE`, `TENFOUR_HOST`.
 
+The API has no authentication of its own: the boundary is the tunnel in front of
+it (see "Expose on the tailnet" below). So the server binds loopback and refuses
+to start on any other address unless you set `TENFOUR_ALLOW_ANY_HOST=1` to say
+the network is already trusted. Binding it openly without that would let anyone
+who can reach the port read, alter, or clear your snippets.
+
 ## Run as a service (systemd, user unit)
 
 ```sh

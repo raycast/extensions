@@ -41,14 +41,23 @@ export default function Command() {
   const [showDetail, setShowDetail] = useState(true);
   const lastGood = useRef<Item[]>([]);
   const reachable = useRef(true);
+  const latest = useRef(0);
 
   async function refresh() {
+    // Reads can overlap: the poll fires every second, and every action kicks
+    // off its own refresh. Responses are not guaranteed to land in the order
+    // they were sent, so stamp each read and drop any that a newer read has
+    // already superseded. Otherwise a slow response can revert a pin, a
+    // removal, or a clear that the user just watched happen.
+    const mine = ++latest.current;
     try {
       const data = await shelf.load();
+      if (mine !== latest.current) return;
       lastGood.current = data;
       setItems(data);
       reachable.current = true;
     } catch (error) {
+      if (mine !== latest.current) return;
       // Keep showing the last-known list instead of blanking, and only toast
       // on the transition from reachable -> unreachable.
       if (reachable.current) {
@@ -61,7 +70,7 @@ export default function Command() {
       reachable.current = false;
       setItems(lastGood.current);
     } finally {
-      setIsLoading(false);
+      if (mine === latest.current) setIsLoading(false);
     }
   }
 

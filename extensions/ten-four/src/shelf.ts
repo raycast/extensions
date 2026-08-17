@@ -4,6 +4,7 @@ import { join, dirname } from "path";
 import {
   readFileSync,
   writeFileSync,
+  renameSync,
   mkdirSync,
   watchFile,
   unwatchFile,
@@ -59,7 +60,12 @@ function readLocal(): Item[] {
 
 function writeLocal(items: Item[]) {
   mkdirSync(dirname(LOCAL_FILE), { recursive: true });
-  writeFileSync(LOCAL_FILE, JSON.stringify(items, null, 2));
+  // Write then rename, which is atomic within a directory. The CLI pushes to
+  // this same file, and the list polls it, so a plain write would let a reader
+  // catch a half-written file and see an empty shelf.
+  const tmp = `${LOCAL_FILE}.${process.pid}.tmp`;
+  writeFileSync(tmp, JSON.stringify(items, null, 2));
+  renameSync(tmp, LOCAL_FILE);
 }
 
 function localShelf(): Shelf {
@@ -146,7 +152,7 @@ function remoteShelf(shelfUrl: string): Shelf {
 }
 
 export function getShelf(): Shelf {
-  const { shelfUrl } = getPreferenceValues<{ shelfUrl?: string }>();
+  const { shelfUrl } = getPreferenceValues<Preferences>();
   const url = shelfUrl?.trim();
   return url ? remoteShelf(url) : localShelf();
 }

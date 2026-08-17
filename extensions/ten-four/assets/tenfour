@@ -65,7 +65,11 @@ function load() {
 
 function save(items) {
   fs.mkdirSync(path.dirname(STORE), { recursive: true });
-  fs.writeFileSync(STORE, JSON.stringify(items, null, 2));
+  // Write then rename, which is atomic within a directory, so the extension
+  // polling this file never catches a half-written store.
+  const tmp = `${STORE}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(items, null, 2));
+  fs.renameSync(tmp, STORE);
 }
 
 function sortItems(items) {

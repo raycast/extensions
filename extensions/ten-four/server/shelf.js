@@ -37,7 +37,14 @@ function load() {
 
 function save(items) {
   fs.mkdirSync(path.dirname(STORE), { recursive: true });
-  fs.writeFileSync(STORE, JSON.stringify(items, null, 2));
+  // Write then rename, which is atomic within a directory, so a reader never
+  // catches a half-written store. Each request handler loads and saves without
+  // awaiting in between, so mutations inside this process cannot interleave;
+  // the rename protects against readers, and against a CLI writing the same
+  // file directly when it is run on the host in local mode.
+  const tmp = `${STORE}.${process.pid}.tmp`;
+  fs.writeFileSync(tmp, JSON.stringify(items, null, 2));
+  fs.renameSync(tmp, STORE);
 }
 
 function sortItems(items) {
@@ -134,10 +141,27 @@ function createServer() {
   return http.createServer(handle);
 }
 
+// The API is deliberately unauthenticated: the security boundary is the tunnel
+// in front of it (`tailscale serve`), not the service. Binding anywhere but
+// loopback throws that boundary away and hands every read and mutation to
+// anything that can reach the port, so refuse unless it is asked for by name.
+function hostIsAllowed(host, allowAny = process.env.TENFOUR_ALLOW_ANY_HOST) {
+  const loopback = ["127.0.0.1", "::1", "localhost"];
+  return loopback.includes(host) || allowAny === "1";
+}
+
 if (require.main === module) {
+  if (!hostIsAllowed(HOST)) {
+    console.error(
+      `ten-four-shelf: refusing to bind ${HOST}. This API has no authentication ` +
+        `and expects a tunnel such as 'tailscale serve' in front of it. Bind ` +
+        `127.0.0.1, or set TENFOUR_ALLOW_ANY_HOST=1 if the network is already trusted.`
+    );
+    process.exit(1);
+  }
   createServer().listen(PORT, HOST, () => {
     console.log(`ten-four-shelf on http://${HOST}:${PORT} (store: ${STORE})`);
   });
 }
 
-module.exports = { createServer, load, save, sortItems, firstLine, truncate, makeId };
+module.exports = { createServer, load, save, sortItems, firstLine, truncate, makeId, hostIsAllowed };
