@@ -1,6 +1,7 @@
 export type LeaseStorage = {
   getItem(key: string): Promise<string | undefined>;
   setItem(key: string, value: string): Promise<void>;
+  removeItem(key: string): Promise<void>;
 };
 
 type LeaseOptions = {
@@ -12,6 +13,8 @@ type LeaseOptions = {
 };
 
 type LockWork<Value> = (signal: AbortSignal) => Promise<Value>;
+
+const keyLocks = new WeakMap<LeaseStorage, Map<string, Promise<void>>>();
 
 export async function withLeaseLock<Value>(
   storage: LeaseStorage,
@@ -25,7 +28,10 @@ export async function withLeaseLock<Value>(
   const deadline = Date.now() + options.waitTimeoutMs;
 
   while (Date.now() <= deadline) {
-    if (await tryAcquire(storage, key, owner, options.leaseMs, contentionMs)) {
+    const acquired = await withKeyLock(storage, key, () =>
+      tryAcquire(storage, key, owner, options.leaseMs, contentionMs),
+    );
+    if (acquired) {
       return holdLease(storage, key, owner, options, work);
     }
     await wait(retryMs);
@@ -61,14 +67,16 @@ async function holdLease<Value>(
   let renewal = Promise.resolve();
   const heartbeat = setInterval(() => {
     renewal = renewal
-      .then(async () => {
-        const latest = parseLease(await storage.getItem(key));
-        if (latest?.owner === owner) {
-          await storage.setItem(key, serializeLease(owner, options.leaseMs));
-          return;
-        }
-        abort.abort();
-      })
+      .then(() =>
+        withKeyLock(storage, key, async () => {
+          const latest = parseLease(await storage.getItem(key));
+          if (latest?.owner === owner) {
+            await storage.setItem(key, serializeLease(owner, options.leaseMs));
+            return;
+          }
+          abort.abort();
+        }),
+      )
       .catch(() => undefined);
   }, options.heartbeatMs);
 
@@ -79,6 +87,9 @@ async function holdLease<Value>(
   } finally {
     clearInterval(heartbeat);
     await renewal;
+    await withKeyLock(storage, key, async () => {
+      if (await isOwner(storage, key, owner)) await storage.removeItem(key);
+    });
   }
 }
 
@@ -89,6 +100,38 @@ function isHeldByOther(
   return Boolean(
     current && current.owner !== owner && current.expiresAt > Date.now(),
   );
+}
+
+async function isOwner(storage: LeaseStorage, key: string, owner: string) {
+  const latest = parseLease(await storage.getItem(key));
+  return latest?.owner === owner;
+}
+
+async function withKeyLock<Value>(
+  storage: LeaseStorage,
+  key: string,
+  work: () => Promise<Value>,
+) {
+  let locks = keyLocks.get(storage);
+  if (!locks) {
+    locks = new Map();
+    keyLocks.set(storage, locks);
+  }
+
+  const previous = locks.get(key) ?? Promise.resolve();
+  let release: () => void;
+  const current = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  locks.set(key, current);
+
+  await previous;
+  try {
+    return await work();
+  } finally {
+    release!();
+    if (locks.get(key) === current) locks.delete(key);
+  }
 }
 
 function parseLease(value: string | undefined) {
