@@ -7,7 +7,6 @@ const MARKET_STATE_LOCK_KEY = "market-state-lock.v1";
 const storage: LeaseStorage = {
   getItem: (key) => LocalStorage.getItem<string>(key),
   setItem: (key, value) => LocalStorage.setItem(key, value),
-  removeItem: (key) => LocalStorage.removeItem(key),
 };
 
 export function withRefreshLock<Value>(

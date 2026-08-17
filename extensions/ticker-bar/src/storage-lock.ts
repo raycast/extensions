@@ -1,7 +1,6 @@
 export type LeaseStorage = {
   getItem(key: string): Promise<string | undefined>;
   setItem(key: string, value: string): Promise<void>;
-  removeItem(key: string): Promise<void>;
 };
 
 type LeaseOptions = {
@@ -80,7 +79,6 @@ async function holdLease<Value>(
   } finally {
     clearInterval(heartbeat);
     await renewal;
-    if (await isOwner(storage, key, owner)) await storage.removeItem(key);
   }
 }
 
@@ -91,11 +89,6 @@ function isHeldByOther(
   return Boolean(
     current && current.owner !== owner && current.expiresAt > Date.now(),
   );
-}
-
-async function isOwner(storage: LeaseStorage, key: string, owner: string) {
-  const latest = parseLease(await storage.getItem(key));
-  return latest?.owner === owner;
 }
 
 function parseLease(value: string | undefined) {

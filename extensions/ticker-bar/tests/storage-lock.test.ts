@@ -9,9 +9,6 @@ function memoryStorage(): LeaseStorage {
     setItem: async (key, value) => {
       values.set(key, value);
     },
-    removeItem: async (key) => {
-      values.delete(key);
-    },
   };
 }
 
@@ -76,6 +73,22 @@ test("completed work still returns after heartbeat lease loss", async () => {
   assert.ok(latest?.startsWith("intruder|"));
 });
 
+test("completion leaves the lease to expire instead of deleting a successor", async () => {
+  const storage = memoryStorage();
+  const key = "refresh";
+
+  await withLeaseLock(storage, key, async () => undefined, {
+    leaseMs: 80,
+    heartbeatMs: 20,
+    waitTimeoutMs: 20,
+    retryMs: 5,
+  });
+
+  // Deleting after a separate ownership read can erase a lease written by a
+  // successor in between. Expiration makes that cleanup unnecessary.
+  assert.ok(await storage.getItem(key));
+});
+
 test("concurrent acquires never run protected work at the same time", async () => {
   const values = new Map<string, string>();
   const storage: LeaseStorage = {
@@ -83,9 +96,6 @@ test("concurrent acquires never run protected work at the same time", async () =
     setItem: async (key, value) => {
       await wait(20);
       values.set(key, value);
-    },
-    removeItem: async (key) => {
-      values.delete(key);
     },
   };
 
