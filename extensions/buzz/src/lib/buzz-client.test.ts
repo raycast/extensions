@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { createHash } from "node:crypto";
 import { BuzzClient, RelayError, __resetReplaceableClock, __nextReplaceableCreatedAt } from "./buzz-client";
 import { parseSecretKey, signEvent, getPublicKeyHex } from "./nostr";
-import type { NostrEvent } from "./types";
+import type { Filter, NostrEvent } from "./types";
 
 const SK = parseSecretKey("0000000000000000000000000000000000000000000000000000000000000001");
 const fetchMock = () => globalThis.fetch as unknown as ReturnType<typeof vi.fn>;
@@ -1178,13 +1178,12 @@ describe("lookupProfiles", () => {
 describe("listDirectMessages", () => {
   it("lists conversations, naming them by the other participants", async () => {
     const me = ownPubkey();
-    const { client, calls } = clientWithResponses([
+    const { client } = clientWithResponses([
       [dmEvent("chan-1", [me, "aa".repeat(32)])],
       [profileEvent("aa".repeat(32), '{"display_name":"Ada"}')],
     ]);
     const dms = await client.listDirectMessages();
 
-    expect(calls[0].body).toEqual([{ kinds: [39000], limit: 500 }]);
     expect(dms).toEqual([{ channelId: "chan-1", participants: ["aa".repeat(32)], name: "Ada" }]);
   });
 
@@ -1242,9 +1241,11 @@ describe("listDirectMessages", () => {
   });
 
   it("does not look up profiles when there is nobody to name", async () => {
-    const { client, calls } = clientWithResponses([[]]);
+    // Two empty answers: the narrowed query, then the unfiltered retry it
+    // falls back to. Neither yields a participant, so no kind:0 query follows.
+    const { client, calls } = clientWithResponses([[], []]);
     expect(await client.listDirectMessages()).toEqual([]);
-    expect(calls).toHaveLength(1);
+    expect(calls.map((call) => (call.body as Filter[])[0].kinds)).toEqual([[39000], [39000]]);
   });
 
   it("omits a p tag with no value rather than crashing on it", async () => {
@@ -1371,6 +1372,23 @@ describe("listDirectMessages", () => {
     const { client } = clientWithResponses([[withValuelessTags], [profileEvent("aa".repeat(32), '{"name":"Ada"}')]]);
     const dms = await client.listDirectMessages();
     expect(dms).toEqual([{ channelId: "chan-13", participants: ["aa".repeat(32)], name: "Ada" }]);
+  });
+
+  it("asks the relay for our own conversations rather than the whole 39000 space", async () => {
+    const me = ownPubkey();
+    const { client, calls } = clientWithResponses([[dmEvent("chan-narrow", [me])]]);
+    await client.listDirectMessages();
+    expect(calls[0].body).toEqual([{ kinds: [39000], "#p": [me], "#t": ["dm"], limit: 500 }]);
+  });
+
+  it("falls back to the unfiltered query when the narrowed one comes back empty", async () => {
+    const me = ownPubkey();
+    // A relay that does not support the tag filters answers the narrowed query
+    // with nothing rather than an error, which would silently empty the list.
+    const { client, calls } = clientWithResponses([[], [dmEvent("chan-fallback", [me])]]);
+    const dms = await client.listDirectMessages();
+    expect(calls[1].body).toEqual([{ kinds: [39000], limit: 500 }]);
+    expect(dms.map((dm) => dm.channelId)).toEqual(["chan-fallback"]);
   });
 });
 

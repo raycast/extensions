@@ -410,15 +410,25 @@ export class BuzzClient {
    * though the desktop app shows the conversations. Do not restore a 41001
    * query here.
    *
-   * The query below asks for every kind:39000 event, with no server-side `#t`
-   * or `#p` filter: this project has now been burned twice by assuming
-   * unverified relay filter semantics, and `{kinds:[39000]}` is a filter
-   * that has actually been proven to work. DM channels that include us are
-   * picked out client-side instead.
+   * The query narrows to our own conversations server-side with `#p` and
+   * `#t`. That is not an assumption: both were probed against a live relay,
+   * where `{kinds:[39000]}` returned 5 events and `{kinds:[39000],"#p":[me]}`
+   * returned exactly the 3 containing our pubkey, so the filter is applied
+   * rather than ignored. Narrowing matters because the alternative is walking
+   * the whole shared kind:39000 space, which `queryAll` can only page through
+   * up to `MAX_PAGES` before it starts silently dropping conversations.
+   *
+   * Buzz is self-hostable, so a relay on the other end may be older than the
+   * one probed. Two guards cover that, in the two directions it can fail:
+   * a relay that IGNORES the tag filters returns a superset, which the
+   * client-side filtering below still reduces correctly; a relay that does not
+   * SUPPORT them returns nothing, which would silently empty the list, so an
+   * empty answer retries unfiltered rather than being believed.
    */
   async listDirectMessages(): Promise<DirectMessage[]> {
     const me = getPublicKeyHex(this.secretKey);
-    const events = await this.queryAll({ kinds: [39000] });
+    const narrowed = await this.queryAll({ kinds: [39000], "#p": [me], "#t": ["dm"] });
+    const events = narrowed.length > 0 ? narrowed : await this.queryAll({ kinds: [39000] });
 
     const conversations = events
       .filter((event) => isDmChannel(event) && hasParticipant(event, me))
