@@ -10,7 +10,7 @@ Portreaper is not a generic port viewer. Its job is to **decide which listeners 
 
 - **Every TCP listener**, plus **orphaned dev processes that hold no port at all**. A leftover `electron-vite` main process — adopted by launchd after its parent `node` died, listening on nothing — is invisible to a port scan, but it is exactly the kind of residue worth clearing.
 - **A verdict with its evidence.** Suspects are tiered `confirmed` / `likely` / `possible`, and every row shows the signals behind the call: reparented to PID 1, launcher chain ends at a dead shell, dead terminal session, dev-server command line, duplicate instance of the same project.
-- **Exemptions applied automatically.** Processes managed by `launchd`, `brew services`, or `pm2`, and anything installed in a standard location, are never flagged.
+- **Exemptions applied automatically.** Processes managed by `launchd`, `brew services`, or `pm2`, and apps installed in a standard location, are never flagged. Identity beats location, though: a script runtime is judged by its script and a headless automation browser by its command line — so an orphaned `python app.py`, or a Playwright Chrome nobody cleaned up, is still caught even when the binary sits in a standard path.
 - **Detail on demand:** launcher chain, uptime, memory, and subtree CPU — a headless browser burns CPU in child processes while its own row reads ~0%, so the subtree total is what tells you it is actually spinning.
 - **Star anything to exempt it permanently.** A daemon you detached on purpose is behaviorally identical to an accidental zombie; star it once and it stops being flagged.
 
@@ -23,8 +23,8 @@ Portreaper answers a different question: **"what is still running that nobody is
 Everything in the design follows from that:
 
 - **Rows are verdicts, not entries.** Each one is tiered `confirmed` / `likely` / `possible` and carries the signals behind the call. A list you still have to interpret has not answered the question.
-- **Processes holding no port at all are included.** An orphaned `electron-vite` main process listens on nothing. Under "free this port" it is out of scope by definition; under "what did I leave behind" it is the whole point.
-- **Anything with an owner is left alone.** `launchd`, `brew services`, `pm2`, standard install locations, and dev servers with a live terminal behind them are exempt automatically — deciding what _not_ to flag is most of the work.
+- **Orphaned dev processes holding no port at all are included.** An orphaned `electron-vite` main process listens on nothing. Under "free this port" it is out of scope by definition; under "what did I leave behind" it is the whole point.
+- **Anything with an owner is left alone.** `launchd`, `brew services`, `pm2`, apps in standard install locations, and dev servers with a live terminal behind them are exempt automatically — deciding what _not_ to flag is most of the work.
 - **The verdict comes from a Rust engine shared with the Portreaper desktop app**, so both frontends agree on the classification and on your stars.
 
 The two overlap where the questions overlap: a zombie squatting on port 3000 shows up in either tool. Everywhere else, they are answering different things.
