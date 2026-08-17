@@ -64,7 +64,6 @@ export {
   brewUnpinFormula,
   brewDoctor,
 } from "./actions";
-export type { BrewInstallOptions } from "./actions";
 
 // Upgrade with progress
 export { brewUpgradeWithProgress } from "./upgrade";

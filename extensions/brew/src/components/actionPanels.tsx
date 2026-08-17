@@ -137,7 +137,6 @@ export function CaskActionPanel(props: {
           )}
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
           {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
-          <Actions.FormulaAdoptAction formula={cask} onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Cask ID" content={cask.token} shortcut={Keyboard.Shortcut.Common.Copy} />
@@ -285,7 +284,6 @@ export function FormulaActionPanel(props: {
           )}
           <Actions.FormulaInstallAction formula={formula} onAction={props.onAction} />
           {props.onToggleDetails && <ToggleDetailsAction onToggleDetails={props.onToggleDetails} />}
-          <Actions.FormulaAdoptAction formula={formula} onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.CopyToClipboard
