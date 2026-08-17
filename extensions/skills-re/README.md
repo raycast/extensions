@@ -13,4 +13,4 @@ Search and manage agent skills from skills.re.
 
 API-token setup is optional. Generate a token at `https://skills.re/dashboard/settings`, then save it with the Configure API Token command to enable AI Search, Saved Skills, and saving skills.
 
-You can skip setup and continue using public keyword search without a token.
+You can skip setup and continue using public keyword search without a token. Without a token, AI Search and Saved Skills show a setup screen instead of results; those commands are not broken.

@@ -1,89 +1,56 @@
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { Action, ActionPanel, Detail, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 
 import { getActiveCredential, listSavedSkills, skillPath } from "./api";
-import type { AuthCredential, SavedSkill } from "./api";
 import { getErrorMessage } from "./api-error";
 import { ApiTokenForm } from "./auth";
-import { createSingleFlight } from "./request-generation";
 import { SkillDetail } from "./skill-detail";
 import { SkillActions } from "./skill-actions";
 import { authorLabelForSkill, keywordsForSkill, savedAccessoriesForSkill } from "./skill-list-metadata";
 
+const PAGE_SIZE = 25;
+
 const missingApiTokenMarkdown =
   "# Saved Skills\n\nAdd a skills.re API token to view and manage your saved skills from Raycast.";
 
-export default function Command() {
-  const [credential, setCredential] = useState<AuthCredential | null>(null);
-  const [skills, setSkills] = useState<SavedSkill[]>([]);
-  const [cursor, setCursor] = useState("");
-  const [isDone, setIsDone] = useState(true);
-  const [isLoading, setIsLoading] = useState(true);
-  const [runLoadMore] = useState(createSingleFlight);
+const fetchSavedSkillsPage = (token: string) => async (options: { cursor?: string }) => {
+  const result = await listSavedSkills({ cursor: options.cursor, limit: PAGE_SIZE, token });
 
-  const refresh = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const activeCredential = await getActiveCredential();
-      if (!activeCredential) {
-        setCredential(null);
-        setSkills([]);
-        setCursor("");
-        setIsDone(true);
-        return;
-      }
-      setCredential(activeCredential);
-      const result = await listSavedSkills({ limit: 25, token: activeCredential.token });
-      setSkills(result.page);
-      setCursor(result.continueCursor);
-      setIsDone(result.isDone);
-    } catch (error) {
-      await showToast({
-        message: getErrorMessage(error),
-        style: Toast.Style.Failure,
-        title: "Could not load saved skills",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
-
-  const loadMore = async () => {
-    if (!credential || !cursor || isDone) {
-      return;
-    }
-
-    await runLoadMore(async () => {
-      setIsLoading(true);
-      try {
-        const result = await listSavedSkills({ cursor, limit: 25, token: credential.token });
-        setSkills((current) => [...current, ...result.page]);
-        setCursor(result.continueCursor);
-        setIsDone(result.isDone);
-      } catch (error) {
-        await showToast({
-          message: getErrorMessage(error),
-          style: Toast.Style.Failure,
-          title: "Could not load more saved skills",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    });
+  return {
+    cursor: result.continueCursor,
+    data: result.page,
+    hasMore: !result.isDone,
   };
+};
 
-  if (!isLoading && !credential) {
+export default function Command() {
+  const {
+    data: credential,
+    isLoading: isCredentialLoading,
+    revalidate: revalidateCredential,
+  } = useCachedPromise(getActiveCredential);
+  const {
+    data,
+    error,
+    isLoading: isSkillsLoading,
+    pagination,
+    revalidate,
+  } = useCachedPromise(fetchSavedSkillsPage, [credential?.token ?? ""], {
+    execute: Boolean(credential?.token),
+    failureToastOptions: { title: "Could not load saved skills" },
+    keepPreviousData: true,
+  });
+
+  const skills = data ?? [];
+
+  if (!isCredentialLoading && !credential) {
     return (
       <Detail
         markdown={missingApiTokenMarkdown}
         actions={
           <ActionPanel>
             <Action.Push icon={Icon.Key} title="Configure API Token" target={<ApiTokenForm />} />
-            <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={refresh} />
+            <Action icon={Icon.ArrowClockwise} title="Refresh" onAction={revalidateCredential} />
           </ActionPanel>
         }
       />
@@ -91,7 +58,16 @@ export default function Command() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Filter saved skills">
+    <List
+      isLoading={isCredentialLoading || isSkillsLoading}
+      pagination={pagination}
+      searchBarPlaceholder="Filter saved skills"
+    >
+      <List.EmptyView
+        description={error ? getErrorMessage(error) : "Save a skill from Search Skills to see it here."}
+        icon={error ? Icon.Warning : Icon.Star}
+        title={error ? "Could Not Load Saved Skills" : "No Saved Skills"}
+      />
       {skills.map((skill) => (
         <List.Item
           key={skill.id}
@@ -105,22 +81,11 @@ export default function Command() {
               credential={credential}
               detailTarget={<SkillDetail credential={credential} skill={skill} />}
               skill={skill}
-              onChanged={refresh}
+              onChanged={revalidate}
             />
           }
         />
       ))}
-      {isDone ? null : (
-        <List.Item
-          icon={Icon.ArrowDownCircle}
-          title="Load More"
-          actions={
-            <ActionPanel>
-              <Action icon={Icon.ArrowDownCircle} title="Load More" onAction={loadMore} />
-            </ActionPanel>
-          }
-        />
-      )}
     </List>
   );
 }
