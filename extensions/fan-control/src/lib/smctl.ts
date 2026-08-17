@@ -48,10 +48,6 @@ export class DaemonNotRunningError extends Error {
   }
 }
 
-interface Preferences {
-  readonly smctlPath?: string;
-}
-
 function resolveBinaryPath(): string {
   const { smctlPath } = getPreferenceValues<Preferences>();
   const candidates = smctlPath?.trim()
@@ -171,4 +167,31 @@ export async function setFanProfile(profile: FanProfile): Promise<void> {
 
 export function formatRPM(rpm: number): string {
   return `${Math.round(rpm).toLocaleString("en-US")} RPM`;
+}
+
+export interface RPMRange {
+  readonly min: number;
+  readonly max: number;
+}
+
+/**
+ * The RPM range a request must satisfy: the selected fan's own range, or the
+ * intersection of every fan's range when targeting all fans. Returns undefined
+ * when no fans are known (nothing to validate against).
+ */
+export function allowedRange(
+  fans: readonly Fan[],
+  fanIndex?: number,
+): RPMRange | undefined {
+  const targeted =
+    fanIndex === undefined
+      ? fans
+      : fans.filter((fan) => fan.index === fanIndex);
+  if (targeted.length === 0) {
+    return undefined;
+  }
+  return {
+    min: Math.max(...targeted.map((fan) => fan.minimumRPM)),
+    max: Math.min(...targeted.map((fan) => fan.maximumRPM)),
+  };
 }

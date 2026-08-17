@@ -44,7 +44,7 @@
     {
       "name": "smctlPath",
       "type": "textfield",
-      "title": "smctl Path",
+      "title": "Smctl Path",
       "description": "Full path to the smctl binary. Leave empty to auto-detect (Homebrew locations).",
       "required": false,
       "placeholder": "/opt/homebrew/bin/smctl"

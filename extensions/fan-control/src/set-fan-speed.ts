@@ -2,6 +2,7 @@ import { Clipboard, LaunchProps, Toast, showToast } from "@raycast/api";
 import {
   DaemonNotRunningError,
   INSTALL_DAEMON_COMMAND,
+  allowedRange,
   getFanSnapshot,
   setFanSpeed,
 } from "./lib/smctl";
@@ -24,11 +25,10 @@ export default async function Command(props: CommandProps): Promise<void> {
   });
   try {
     const snapshot = await getFanSnapshot();
-    const min = Math.min(...snapshot.fans.map((fan) => fan.minimumRPM));
-    const max = Math.max(...snapshot.fans.map((fan) => fan.maximumRPM));
-    if (snapshot.fans.length > 0 && (rpm < min || rpm > max)) {
+    const range = allowedRange(snapshot.fans);
+    if (range && (rpm < range.min || rpm > range.max)) {
       toast.style = Toast.Style.Failure;
-      toast.title = `RPM out of range (${min}–${max})`;
+      toast.title = `RPM out of range (${range.min}–${range.max})`;
       return;
     }
     await setFanSpeed(rpm);

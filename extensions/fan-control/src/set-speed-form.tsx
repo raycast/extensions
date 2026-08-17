@@ -12,6 +12,7 @@ import {
   DaemonNotRunningError,
   Fan,
   INSTALL_DAEMON_COMMAND,
+  allowedRange,
   setFanSpeed,
 } from "./lib/smctl";
 
@@ -27,15 +28,22 @@ interface FormValues {
   readonly fan: string;
 }
 
-function validateRPM(rpm: string, fans: readonly Fan[]): string | undefined {
+function toFanIndex(selection: string): number | undefined {
+  return selection === ALL_FANS ? undefined : Number(selection);
+}
+
+function validateRPM(
+  rpm: string,
+  fans: readonly Fan[],
+  fanIndex: number | undefined,
+): string | undefined {
   const value = Number(rpm);
   if (!rpm.trim() || !Number.isInteger(value)) {
     return "Enter a whole number";
   }
-  const min = Math.min(...fans.map((fan) => fan.minimumRPM));
-  const max = Math.max(...fans.map((fan) => fan.maximumRPM));
-  if (value < min || value > max) {
-    return `Must be between ${min} and ${max}`;
+  const range = allowedRange(fans, fanIndex);
+  if (range && (value < range.min || value > range.max)) {
+    return `Must be between ${range.min} and ${range.max}`;
   }
   return undefined;
 }
@@ -44,15 +52,16 @@ export function SetFanSpeedForm(props: SetFanSpeedFormProps): ReactElement {
   const { fans, onDone } = props;
   const { pop } = useNavigation();
   const [rpmError, setRpmError] = useState<string | undefined>();
+  const [selectedFan, setSelectedFan] = useState<string>(ALL_FANS);
 
   async function handleSubmit(values: FormValues): Promise<void> {
-    const validationError = validateRPM(values.rpm, fans);
+    const fanIndex = toFanIndex(values.fan);
+    const validationError = validateRPM(values.rpm, fans, fanIndex);
     if (validationError) {
       setRpmError(validationError);
       return;
     }
     const rpm = Number(values.rpm);
-    const fanIndex = values.fan === ALL_FANS ? undefined : Number(values.fan);
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Setting ${rpm} RPM…`,
@@ -76,10 +85,10 @@ export function SetFanSpeedForm(props: SetFanSpeedFormProps): ReactElement {
     }
   }
 
-  const rangeHint =
-    fans.length > 0
-      ? `Supported range: ${Math.min(...fans.map((fan) => fan.minimumRPM))}–${Math.max(...fans.map((fan) => fan.maximumRPM))} RPM`
-      : undefined;
+  const range = allowedRange(fans, toFanIndex(selectedFan));
+  const rangeHint = range
+    ? `Supported range: ${range.min}–${range.max} RPM`
+    : undefined;
 
   return (
     <Form
@@ -98,7 +107,15 @@ export function SetFanSpeedForm(props: SetFanSpeedFormProps): ReactElement {
         error={rpmError}
         onChange={() => setRpmError(undefined)}
       />
-      <Form.Dropdown id="fan" title="Fan" defaultValue={ALL_FANS}>
+      <Form.Dropdown
+        id="fan"
+        title="Fan"
+        value={selectedFan}
+        onChange={(newValue) => {
+          setSelectedFan(newValue);
+          setRpmError(undefined);
+        }}
+      >
         <Form.Dropdown.Item value={ALL_FANS} title="All Fans" />
         {fans.map((fan) => (
           <Form.Dropdown.Item
