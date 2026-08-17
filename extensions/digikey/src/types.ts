@@ -73,7 +73,7 @@ export interface ProductResult {
       //   null
       // ]
     };
-    DateLastBuyChance: "2026-08-17T04:37:35.466Z";
+    DateLastBuyChance: string;
     ManufacturerLeadWeeks: string;
     ManufacturerPublicQuantity: number;
     Series: {
