@@ -15,10 +15,11 @@ test("rewrite command loads, sorts, and sends the selected full mode", async () 
   );
   assert.match(
     index,
-    /const\s+\{\s*modes,\s*sortMode\s*\}\s*=\s*await\s+loadModeSettings\(\)/,
+    /const\s+\{\s*modes,\s*sortMode,\s*usageGeneration\s*\}\s*=\s*await\s+loadModeSettings\(\)/,
   );
   assert.match(index, /setModes\(modes\)/);
   assert.match(index, /setSortMode\(sortMode\)/);
+  assert.match(index, /setUsageGeneration\(usageGeneration\)/);
   assert.match(index, /getUiStrings\(\)/);
   assert.match(
     index,
@@ -28,7 +29,7 @@ test("rewrite command loads, sorts, and sends the selected full mode", async () 
   assert.match(index, /onAction=\{\(\)\s*=>\s*rewrite\(mode\)\}/);
   assert.match(
     index,
-    /const\s+usedMode\s*=\s*await\s+recordModeUsage\(mode\.id\)/,
+    /const\s+usedMode\s*=\s*await\s+recordModeUsage\(mode\.id,\s*usageGeneration\)/,
   );
   assert.match(
     index,
@@ -44,6 +45,14 @@ test("rewrite command loads, sorts, and sends the selected full mode", async () 
     index.indexOf("const result = await rewriteText") <
       index.indexOf("const usedMode = await recordModeUsage"),
   );
+  const afterProviderResponse = index.slice(
+    index.indexOf("const result = await rewriteText"),
+    index.indexOf(
+      "if (controller.signal.aborted) return;",
+      index.indexOf("const result = await rewriteText"),
+    ),
+  );
+  assert.match(afterProviderResponse, /clearTimeout\(timeoutId\)/);
   const deliveryStages = [
     "const result = await rewriteText",
     "const usedMode = await recordModeUsage",
@@ -51,7 +60,11 @@ test("rewrite command loads, sorts, and sends the selected full mode", async () 
     "await closeMainWindow",
     "await Clipboard.paste",
   ];
-  for (let indexOfStage = 0; indexOfStage < deliveryStages.length - 1; indexOfStage += 1) {
+  for (
+    let indexOfStage = 0;
+    indexOfStage < deliveryStages.length - 1;
+    indexOfStage += 1
+  ) {
     const interval = index.slice(
       index.indexOf(deliveryStages[indexOfStage]!),
       index.indexOf(deliveryStages[indexOfStage + 1]!),
@@ -117,7 +130,10 @@ test("rewrite command presents an empty-mode route to Settings", async () => {
   const index = await source("../src/index.tsx");
   const emptyRoute = index.slice(
     index.indexOf('if (viewState === "empty")'),
-    index.indexOf("\n  return (\n    <List\n      isLoading", index.indexOf('if (viewState === "empty")')),
+    index.indexOf(
+      "\n  return (\n    <List\n      isLoading",
+      index.indexOf('if (viewState === "empty")'),
+    ),
   );
 
   assert.match(index, /ui\.noModes/);

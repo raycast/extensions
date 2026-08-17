@@ -132,11 +132,13 @@ function storedDocument(
   modes: unknown,
   sortMode = "custom",
   language = "en",
+  usageGeneration = 0,
 ): string {
   return JSON.stringify({
     version: MODE_STORAGE_VERSION,
     language,
     sortMode,
+    usageGeneration,
     modes,
   });
 }
@@ -163,7 +165,7 @@ test("default editing modes provide the universal rewrite preset", () => {
   const modes = createDefaultModes("ru");
 
   assert.equal(MODE_STORAGE_KEY, "editing-modes");
-  assert.equal(MODE_STORAGE_VERSION, 3);
+  assert.equal(MODE_STORAGE_VERSION, 4);
   assert.deepEqual(
     modes.map(
       ({
@@ -413,6 +415,7 @@ test("loadModes initializes defaults only when storage is absent", async () => {
     version: MODE_STORAGE_VERSION,
     language: "en",
     sortMode: "custom",
+    usageGeneration: 0,
     modes: initialized,
   });
 
@@ -431,6 +434,7 @@ test("loadModes initializes defaults when LocalStorage returns null", async () =
     version: MODE_STORAGE_VERSION,
     language: "en",
     sortMode: "custom",
+    usageGeneration: 0,
     modes: initialized,
   });
 });
@@ -441,12 +445,14 @@ test("loadModeSettings migrates version 1 modes to custom sorting", async () => 
   assert.deepEqual(await loadModeSettings(), {
     language: "en",
     sortMode: "custom",
+    usageGeneration: 0,
     modes: [validMode],
   });
   assert.deepEqual(JSON.parse(writes[0]?.value as string), {
-    version: 3,
+    version: 4,
     language: "en",
     sortMode: "custom",
+    usageGeneration: 0,
     modes: [validMode],
   });
 });
@@ -459,13 +465,46 @@ test("loadModeSettings migrates version 2 modes and sorting preference", async (
   assert.deepEqual(await loadModeSettings(), {
     language: "en",
     sortMode: "last-used",
+    usageGeneration: 0,
     modes: [validMode],
   });
   assert.deepEqual(JSON.parse(writes[0]?.value as string), {
-    version: 3,
+    version: 4,
     language: "en",
     sortMode: "last-used",
+    usageGeneration: 0,
     modes: [validMode],
+  });
+});
+
+test("loadModeSettings migrates version 3 usage metadata", async () => {
+  const timestamp = "2026-06-24T12:00:00.000Z";
+  resetStorage(
+    JSON.stringify({
+      version: 3,
+      language: "ru",
+      sortMode: "last-used",
+      modes: [validMode],
+    }),
+  );
+  storage.set(modeUsageKey(validMode.id), timestamp);
+
+  assert.deepEqual(await loadModeSettings(), {
+    language: "ru",
+    sortMode: "last-used",
+    usageGeneration: 0,
+    modes: [{ ...validMode, lastUsedAt: timestamp }],
+  });
+  assert.deepEqual(JSON.parse(writes[0]?.value as string), {
+    version: 4,
+    language: "ru",
+    sortMode: "last-used",
+    usageGeneration: 0,
+    modes: [validMode],
+  });
+  assert.deepEqual(writes[1], {
+    key: modeUsageKey(validMode.id),
+    value: JSON.stringify({ usageGeneration: 0, lastUsedAt: timestamp }),
   });
 });
 
@@ -499,6 +538,7 @@ test("resetModes intentionally replaces corrupted storage with default modes", a
     version: MODE_STORAGE_VERSION,
     language: "en",
     sortMode: "custom",
+    usageGeneration: 1,
     modes: reset,
   });
   assert.equal(reset.length, 12);
@@ -588,13 +628,51 @@ test("usage updates from another command do not overwrite settings changes", asy
     title: "Обновлён",
   });
   await settingsWriteStarted;
-  await rewriteCommand.markModeUsed(validMode.id, timestamp);
+  await rewriteCommand.markModeUsed(validMode.id, timestamp, 0);
   releaseSettingsWrite!();
   await settingsUpdate;
 
   const settings = await rewriteCommand.loadModeSettings();
   assert.equal(settings.modes[0]?.title, "Обновлён");
   assert.equal(settings.modes[0]?.lastUsedAt, timestamp);
+});
+
+test("reset ignores a late usage write from an earlier mode generation", async () => {
+  const presetMode = createDefaultModes("en")[0]!;
+  resetStorage(storedDocument([presetMode]));
+  const settingsCommand = await import(
+    new URL("../src/modes.ts?reset-command", import.meta.url).href
+  );
+  const rewriteCommand = await import(
+    new URL("../src/modes.ts?late-rewrite-command", import.meta.url).href
+  );
+  const timestamp = "2026-06-24T12:00:00.000Z";
+  let releaseUsageWrite: () => void;
+  let signalUsageWrite: () => void;
+  const usageWriteStarted = new Promise<void>((resolve) => {
+    signalUsageWrite = resolve;
+  });
+  const usageWriteReleased = new Promise<void>((resolve) => {
+    releaseUsageWrite = resolve;
+  });
+  beforeNextStorageWrite = async () => {
+    signalUsageWrite!();
+    await usageWriteReleased;
+  };
+
+  const usageUpdate = rewriteCommand.markModeUsed(presetMode.id, timestamp, 0);
+  await usageWriteStarted;
+  await settingsCommand.resetModes("en");
+  releaseUsageWrite!();
+  await usageUpdate;
+
+  assert.deepEqual(
+    JSON.parse(storage.get(modeUsageKey(presetMode.id)) as string),
+    { usageGeneration: 0, lastUsedAt: timestamp },
+  );
+
+  const settings = await settingsCommand.loadModeSettings();
+  assert.equal(settings.modes[0]?.lastUsedAt, undefined);
 });
 
 test("first-run load initialization does not overwrite a queued create", async () => {
@@ -662,6 +740,7 @@ test("deleteMode rewrites a validated list and permits an empty list", async () 
     version: MODE_STORAGE_VERSION,
     language: "en",
     sortMode: "custom",
+    usageGeneration: 0,
     modes: [],
   });
 });
@@ -672,12 +751,14 @@ test("setSortMode validates and persists the requested display order", async () 
   assert.deepEqual(await setSortMode("last-used"), {
     language: "en",
     sortMode: "last-used",
+    usageGeneration: 0,
     modes: [validMode],
   });
   assert.deepEqual(JSON.parse(writes[0]?.value as string), {
     version: MODE_STORAGE_VERSION,
     language: "en",
     sortMode: "last-used",
+    usageGeneration: 0,
     modes: [validMode],
   });
 
@@ -723,27 +804,34 @@ test("markModeUsed records a valid ISO timestamp for a known mode", async () => 
   resetStorage(storedDocument([validMode]));
   const timestamp = "2026-06-24T12:00:00.000Z";
 
-  assert.deepEqual(await markModeUsed(validMode.id, timestamp), {
+  assert.deepEqual(await markModeUsed(validMode.id, timestamp, 0), {
     ...validMode,
     lastUsedAt: timestamp,
   });
-  assert.deepEqual(writes, [{ key: modeUsageKey(validMode.id), value: timestamp }]);
-  assert.deepEqual(
-    JSON.parse(storage.get(MODE_STORAGE_KEY) as string).modes,
-    [validMode],
-  );
+  assert.deepEqual(writes, [
+    {
+      key: modeUsageKey(validMode.id),
+      value: JSON.stringify({ usageGeneration: 0, lastUsedAt: timestamp }),
+    },
+  ]);
+  assert.deepEqual(JSON.parse(storage.get(MODE_STORAGE_KEY) as string).modes, [
+    validMode,
+  ]);
 
-  await assert.rejects(markModeUsed("missing", timestamp), /Mode not found/i);
   await assert.rejects(
-    markModeUsed(validMode.id, "not-a-date"),
+    markModeUsed("missing", timestamp, 0),
+    /Mode not found/i,
+  );
+  await assert.rejects(
+    markModeUsed(validMode.id, "not-a-date", 0),
     /last used date/i,
   );
   await assert.rejects(
-    markModeUsed(validMode.id, "2026-06-24"),
+    markModeUsed(validMode.id, "2026-06-24", 0),
     /last used date/i,
   );
   await assert.rejects(
-    markModeUsed(validMode.id, "2026-06-24T12:00:00Z"),
+    markModeUsed(validMode.id, "2026-06-24T12:00:00Z", 0),
     /last used date/i,
   );
 });
@@ -754,12 +842,12 @@ test("loadModeSettings overlays valid per-mode usage and ignores invalid values"
   resetStorage(
     storedDocument([{ ...validMode, lastUsedAt: embeddedTimestamp }]),
   );
-  storage.set(modeUsageKey(validMode.id), usageTimestamp);
-
-  assert.equal(
-    (await loadModeSettings()).modes[0]?.lastUsedAt,
-    usageTimestamp,
+  storage.set(
+    modeUsageKey(validMode.id),
+    JSON.stringify({ usageGeneration: 0, lastUsedAt: usageTimestamp }),
   );
+
+  assert.equal((await loadModeSettings()).modes[0]?.lastUsedAt, usageTimestamp);
 
   storage.set(modeUsageKey(validMode.id), "not-a-date");
   assert.equal(
@@ -1066,7 +1154,9 @@ test("validateRewriteResult rejects an echoed system prompt", () => {
         "Полная системная инструкция",
         "Полная системная инструкция",
       ),
-    new Error("The model returned the system prompt instead of rewritten text."),
+    new Error(
+      "The model returned the system prompt instead of rewritten text.",
+    ),
   );
   assert.equal(
     validateRewriteResult("Готовый текст", "Полная системная инструкция"),

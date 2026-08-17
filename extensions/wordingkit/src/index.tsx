@@ -27,9 +27,12 @@ import { getProviderDefinition } from "./provider-registry";
 const MAX_TEXT_LENGTH = 20_000;
 const REQUEST_TIMEOUT_MS = 60_000;
 
-async function recordModeUsage(id: string): Promise<EditingMode | undefined> {
+async function recordModeUsage(
+  id: string,
+  usageGeneration: number,
+): Promise<EditingMode | undefined> {
   try {
-    return await markModeUsed(id, new Date().toISOString());
+    return await markModeUsed(id, new Date().toISOString(), usageGeneration);
   } catch {
     return undefined;
   }
@@ -40,6 +43,7 @@ export default function Command() {
   const [text, setText] = useState<string>();
   const [modes, setModes] = useState<EditingMode[]>([]);
   const [sortMode, setSortMode] = useState<"custom" | "last-used">("custom");
+  const [usageGeneration, setUsageGeneration] = useState(0);
   const [error, setError] = useState<string>();
   const [isTextLoading, setIsTextLoading] = useState(true);
   const [isModesLoading, setIsModesLoading] = useState(true);
@@ -59,9 +63,10 @@ export default function Command() {
   useEffect(() => {
     async function loadSavedModes() {
       try {
-        const { modes, sortMode } = await loadModeSettings();
+        const { modes, sortMode, usageGeneration } = await loadModeSettings();
         setModes(modes);
         setSortMode(sortMode);
+        setUsageGeneration(usageGeneration);
       } catch (reason) {
         setError(String(reason));
       } finally {
@@ -112,9 +117,10 @@ export default function Command() {
         ollamaUrl: preferences.ollamaUrl,
       };
       const result = await rewriteText(options, controller.signal);
+      clearTimeout(timeoutId);
       if (controller.signal.aborted) return;
 
-      const usedMode = await recordModeUsage(mode.id);
+      const usedMode = await recordModeUsage(mode.id, usageGeneration);
       if (controller.signal.aborted) return;
       if (usedMode) {
         setModes((currentModes) =>
