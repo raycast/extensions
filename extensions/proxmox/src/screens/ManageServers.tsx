@@ -1,10 +1,13 @@
+import { useRef } from "react";
 import { Action, ActionPanel, Alert, Icon, List, confirmAlert, openExtensionPreferences } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import type { PveServer } from "@/types";
 import { isPreferencesServer, useServers } from "@/utils/servers";
 import { ServerForm } from "@/screens/ServerForm";
 
 export const ManageServers = () => {
   const { servers, isLoading, addServer, updateServer, removeServer } = useServers();
+  const pendingRemovalIds = useRef(new Set<string>());
 
   const addServerAction = (
     <Action.Push
@@ -14,6 +17,21 @@ export const ManageServers = () => {
       target={<ServerForm onSave={addServer} />}
     />
   );
+
+  const handleUpdate = async (server: PveServer, values: Omit<PveServer, "id">) => {
+    if (pendingRemovalIds.current.has(server.id)) {
+      const error = new Error("This server was removed");
+      await showFailureToast(error, { title: "Failed to Update Server" });
+      throw error;
+    }
+
+    try {
+      await updateServer({ id: server.id, ...values });
+    } catch (error) {
+      await showFailureToast(error, { title: "Failed to Update Server" });
+      throw error;
+    }
+  };
 
   const handleRemove = async (server: PveServer) => {
     const confirmed = await confirmAlert({
@@ -25,8 +43,16 @@ export const ManageServers = () => {
       },
     });
 
-    if (confirmed) {
+    if (!confirmed) {
+      return;
+    }
+
+    pendingRemovalIds.current.add(server.id);
+    try {
       await removeServer(server);
+    } catch (error) {
+      pendingRemovalIds.current.delete(server.id);
+      await showFailureToast(error, { title: "Failed to Remove Server" });
     }
   };
 
@@ -62,7 +88,7 @@ export const ManageServers = () => {
                 <Action.Push
                   title="Edit Server"
                   icon={Icon.Pencil}
-                  target={<ServerForm server={server} onSave={(values) => updateServer({ ...server, ...values })} />}
+                  target={<ServerForm server={server} onSave={(values) => handleUpdate(server, values)} />}
                 />
               )}
               {addServerAction}

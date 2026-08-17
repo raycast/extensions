@@ -36,6 +36,29 @@ async function writeStoredServer(server: StoredServer) {
   await LocalStorage.setItem(storageKey(server.id), JSON.stringify(server));
 }
 
+/**
+ * LocalStorage has no compare-and-swap, so overlapping update/remove of the
+ * same key must run one at a time. Per-server keys already isolate different
+ * servers; this queue only serializes mutations that share an id.
+ */
+const mutationQueues = new Map<string, Promise<unknown>>();
+
+function enqueueServerMutation<T>(id: string, mutation: () => Promise<T>): Promise<T> {
+  const previous = mutationQueues.get(id) ?? Promise.resolve();
+  const result = previous.then(mutation, mutation);
+  const settled = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  mutationQueues.set(id, settled);
+  void settled.then(() => {
+    if (mutationQueues.get(id) === settled) {
+      mutationQueues.delete(id);
+    }
+  });
+  return result;
+}
+
 async function migrateLegacyServers() {
   const raw = await LocalStorage.getItem<string>(LEGACY_SERVERS_KEY);
   if (typeof raw !== "string" || raw === "") {
@@ -148,14 +171,22 @@ export const useServers = () => {
   }, []);
 
   const updateServer = useCallback(async (server: PveServer) => {
-    const stored = await readStoredServer(server.id);
-    await writeStoredServer({ ...server, addedAt: stored?.addedAt ?? Date.now() });
-    notifyServersChanged();
+    await enqueueServerMutation(server.id, async () => {
+      const stored = await readStoredServer(server.id);
+      if (!stored) {
+        throw new Error("This server was removed");
+      }
+
+      await writeStoredServer({ ...server, addedAt: stored.addedAt });
+      notifyServersChanged();
+    });
   }, []);
 
   const removeServer = useCallback(async (server: PveServer) => {
-    await LocalStorage.removeItem(storageKey(server.id));
-    notifyServersChanged();
+    await enqueueServerMutation(server.id, async () => {
+      await LocalStorage.removeItem(storageKey(server.id));
+      notifyServersChanged();
+    });
   }, []);
 
   return {
