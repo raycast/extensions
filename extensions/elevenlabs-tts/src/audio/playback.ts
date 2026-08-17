@@ -180,8 +180,11 @@ async function isPlaybackProcessRunning(record: PlaybackRecord): Promise<boolean
       timeout: 1000,
     });
     return isOwnedPlaybackCommand(stdout, record.audioFile);
-  } catch {
-    return false;
+  } catch (error) {
+    // ps exits 1 when the pid is gone; on any other failure (timeout, spawn error)
+    // fall back to a liveness probe instead of assuming the player exited
+    if ((error as { code?: number | string }).code === 1) return false;
+    return !isProcessGone(record.pid);
   }
 }
 

@@ -13,7 +13,7 @@ const config: StreamConfig = {
 interface AudioManagerInternals {
   streamState: { isPlaying: boolean; chunksReceived: number; streamComplete: boolean; playbackComplete: boolean };
   handleWebSocketMessage(data: Buffer): Promise<void>;
-  handleWebSocketClose(): void;
+  handleWebSocketClose(code: number): void;
 }
 
 function createManager(): { manager: AudioManager; internals: AudioManagerInternals } {
@@ -39,17 +39,63 @@ describe("AudioManager stream completion", () => {
     expect(internals.streamState.streamComplete).toBe(true);
   });
 
-  it("completes when the socket closes during playback without a final marker", async () => {
+  it("completes when the socket closes normally during playback without a final marker", async () => {
     const { manager, internals } = createManager();
     internals.streamState.isPlaying = true;
     internals.streamState.playbackComplete = true;
     internals.streamState.chunksReceived = 3;
 
     const complete = completion(manager);
-    internals.handleWebSocketClose();
+    internals.handleWebSocketClose(1000);
 
     await complete;
     expect(internals.streamState.streamComplete).toBe(true);
+  });
+
+  it.each([1005, 1006])("fails when the socket closes with code %i during playback", async (code) => {
+    const { manager, internals } = createManager();
+    internals.streamState.isPlaying = true;
+    internals.streamState.playbackComplete = true;
+    internals.streamState.chunksReceived = 3;
+
+    const failure = new Promise<Error>((resolve) => manager.once("error", resolve));
+    internals.handleWebSocketClose(code);
+
+    await expect(failure).resolves.toEqual(new Error(`Connection closed unexpectedly (code ${code})`));
+    expect(internals.streamState.streamComplete).toBe(false);
+  });
+
+  it("fails when the socket closes abnormally before playback starts", async () => {
+    const { manager, internals } = createManager();
+    internals.streamState.chunksReceived = 3;
+
+    const failure = new Promise<Error>((resolve) => manager.once("error", resolve));
+    internals.handleWebSocketClose(1006);
+
+    await expect(failure).resolves.toEqual(new Error("Connection closed unexpectedly (code 1006)"));
+  });
+
+  it("completes when the socket closes normally before playback starts", async () => {
+    const { manager, internals } = createManager();
+    internals.streamState.chunksReceived = 3;
+
+    const complete = completion(manager);
+    internals.handleWebSocketClose(1000);
+
+    await complete;
+  });
+
+  it("ignores the close after the final marker when playback has not started yet", async () => {
+    const { manager, internals } = createManager();
+    internals.streamState.chunksReceived = 3;
+    internals.streamState.streamComplete = true;
+
+    const listener = jest.fn();
+    manager.once("error", listener);
+    manager.once("complete", listener);
+    internals.handleWebSocketClose(1005);
+
+    expect(listener).not.toHaveBeenCalled();
   });
 
   it("waits for playback to finish when the final marker arrives first", async () => {
