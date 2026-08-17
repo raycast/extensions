@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gadak",
+  "title": "Gadak",
+  "description": "Search Jira and Confluence from a local mirror — instant, offline, and one Enter from the Gadak app.",
+  "icon": "icon.png",
+  "author": "midagedev",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Issues and Docs",
+      "subtitle": "Gadak",
+      "description": "Search Jira issues and wiki pages in the local gadak mirror; Enter opens the hit in the Gadak app.",
+      "mode": "view",
+      "keywords": [
+        "jira",
+        "confluence",
+        "issue"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "gadakPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Gadak Binary",
+      "description": "Absolute path to the gadak binary. Leave empty to use Homebrew or Gadak.app.",
+      "placeholder": "/opt/homebrew/bin/gadak"
+    },
+    {
+      "name": "profile",
+      "type": "textfield",
+      "required": false,
+      "title": "Profile",
+      "description": "gadak profile. Leave empty for gadak's default profile."
+    },
+    {
+      "name": "showLatency",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Search Latency",
+      "label": "Show milliseconds in the results header",
+      "description": "Include the search time in milliseconds in the results header.",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.0.0",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "jira",
+    "confluence",
+    "atlassian",
+    "issues",
+    "search",
+    "offline",
+    "sqlite"
+  ]
+}
