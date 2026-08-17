@@ -139,20 +139,14 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
           icon={Icon.Terminal}
           title="Clone with Options (Choose Path)"
           target={<CloneRepositoryForm repository={repository} />}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "opt", "shift"], key: "c" },
-            Windows: { modifiers: ["ctrl", "alt", "shift"], key: "c" },
-          }}
+          shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
           onPush={() => onVisit(repository)}
         />
         <Action.Push
           icon={Icon.Download}
           title="Download as ZIP"
           target={<DownloadRepositoryForm repository={repository} />}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "d" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "d" },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
           onPush={() => onVisit(repository)}
         />
         <Action.OpenInBrowser
@@ -174,50 +168,35 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
         <Action.Push
           title="Show Readme"
           icon={Icon.Book}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "opt"], key: "r" },
-            Windows: { modifiers: ["ctrl", "alt"], key: "r" },
-          }}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
           target={<RepositoryReadme repository={repository} />}
           onPush={() => onVisit(repository)}
         />
         <Action.Push
           title="Show Issues"
           icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
-          shortcut={{
-            macOS: { modifiers: ["cmd"], key: "i" },
-            Windows: { modifiers: ["ctrl"], key: "i" },
-          }}
+          shortcut={{ modifiers: ["cmd"], key: "i" }}
           target={<RepositoryIssueList repo={repository.nameWithOwner} />}
           onPush={() => onVisit(repository)}
         />
         <Action.Push
           title="Show Pull Requests"
           icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
-          shortcut={{
-            macOS: { modifiers: ["cmd"], key: "m" },
-            Windows: { modifiers: ["ctrl"], key: "m" },
-          }}
+          shortcut={{ modifiers: ["cmd"], key: "m" }}
           target={<RepositoryPullRequestList repo={repository.nameWithOwner} />}
           onPush={() => onVisit(repository)}
         />
         <Action.Push
           icon={Icon.List}
           title="Show Releases"
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "r" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "r" },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
           target={<RepositoryReleases repository={repository} />}
           onPush={() => onVisit(repository)}
         />
         <Action.Push
           icon={Icon.SpeechBubble}
           title="Show Discussions"
-          shortcut={{
-            macOS: { modifiers: ["cmd", "ctrl", "opt"], key: "d" },
-            Windows: { modifiers: ["ctrl", "alt"], key: "d" },
-          }}
+          shortcut={{ modifiers: ["cmd", "ctrl", "opt"], key: "d" }}
           target={<RepositoryDiscussionList repository={repository.nameWithOwner} />}
           onPush={() => onVisit(repository)}
         />
@@ -228,10 +207,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
           icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
           title="Open Pull Requests"
           url={`${repository.url}/pulls`}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "m" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "m" },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
           onOpen={() => onVisit(repository)}
         />
 
@@ -239,10 +215,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
           icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
           title="Open Issues"
           url={`${repository.url}/issues`}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "i" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "i" },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           onOpen={() => onVisit(repository)}
         />
 
@@ -250,10 +223,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
           icon={{ source: "book.svg", tintColor: Color.PrimaryText }}
           title="Open Wiki"
           url={`${repository.url}/wiki`}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "w" },
-            Windows: { modifiers: ["ctrl", "shift"], key: "w" },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
           onOpen={() => onVisit(repository)}
         />
 
@@ -261,10 +231,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
           icon={{ source: "project.svg", tintColor: Color.PrimaryText }}
           title="Open Projects"
           url={`${repository.url}/projects`}
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift", "opt"], key: "p" },
-            Windows: { modifiers: ["ctrl", "shift", "alt"], key: "p" },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "p" }}
           onOpen={() => onVisit(repository)}
         />
         <Action.OpenInBrowser
@@ -285,10 +252,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
         <Action.CopyToClipboard
           content={buildCloneCommand(repository.nameWithOwner, repositoryCloneProtocol)}
           title="Copy Clone Command"
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "." },
-            Windows: { modifiers: ["ctrl", "shift"], key: "." },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
 
         <Action.CopyToClipboard

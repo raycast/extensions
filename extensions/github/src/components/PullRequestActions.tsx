@@ -363,10 +363,7 @@ export default function PullRequestActions({
       <Action.Push
         icon={Icon.Document}
         title="Add Review"
-        shortcut={{
-          macOS: { modifiers: ["cmd", "shift"], key: "r" },
-          Windows: { modifiers: ["ctrl", "shift"], key: "r" },
-        }}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
         target={<AddPullRequestReview pullRequest={pullRequest} mutate={mutate} />}
       />
 
@@ -400,10 +397,7 @@ export default function PullRequestActions({
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
               }}
-              shortcut={{
-                macOS: { modifiers: ["cmd", "shift"], key: "enter" },
-                Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
-              }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               onAction={() => addPullRequestToMergeQueue()}
             />
           )}
@@ -414,10 +408,7 @@ export default function PullRequestActions({
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
               }}
-              shortcut={{
-                macOS: { modifiers: ["cmd", "shift"], key: "enter" },
-                Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
-              }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
               onAction={() => removePullRequestFromMergeQueue()}
             />
           )}
@@ -431,10 +422,7 @@ export default function PullRequestActions({
                     source: "pull-request-merged.svg",
                     tintColor: Color.PrimaryText,
                   }}
-                  shortcut={{
-                    macOS: { modifiers: ["cmd", "shift"], key: "enter" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
-                  }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
                   onAction={() => mergePullRequest(PullRequestMergeMethod.Merge)}
                 />
               ) : null}
@@ -446,10 +434,7 @@ export default function PullRequestActions({
                     source: "pull-request-merged.svg",
                     tintColor: Color.PrimaryText,
                   }}
-                  shortcut={{
-                    macOS: { modifiers: ["ctrl", "shift"], key: "enter" },
-                    Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
-                  }}
+                  shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
                   onAction={() => mergePullRequest(PullRequestMergeMethod.Squash)}
                 />
               ) : null}
@@ -513,10 +498,7 @@ export default function PullRequestActions({
           <Action
             title={isAssignedToMe ? "Unassign from Me" : "Assign to Me"}
             icon={viewerUser.icon}
-            shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "i" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "i" },
-            }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
             onAction={() => (isAssignedToMe ? unassignFromMe(viewer.id) : assignToMe(viewer.id))}
           />
         ) : null}
@@ -538,10 +520,7 @@ export default function PullRequestActions({
               source: "pull-request-open.svg",
               tintColor: Color.PrimaryText,
             }}
-            shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "d" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "d" },
-            }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
             onAction={() => markReadyForReview()}
           />
         ) : null}
@@ -571,48 +550,33 @@ export default function PullRequestActions({
         <Action.CopyToClipboard
           content={pullRequest.number}
           title="Copy Pull Request Number"
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "." },
-            Windows: { modifiers: ["ctrl", "shift"], key: "." },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
         />
 
         {pullRequest.headRef ? (
           <Action.CopyToClipboard
             content={pullRequest.headRef.name}
             title="Copy Branch Name"
-            shortcut={{
-              macOS: { modifiers: ["ctrl", "shift"], key: "." },
-              Windows: { modifiers: ["ctrl", "shift"], key: "." },
-            }}
+            shortcut={{ modifiers: ["ctrl", "shift"], key: "." }}
           />
         ) : null}
 
         <Action.CopyToClipboard
           content={pullRequest.permalink}
           title="Copy Pull Request URL"
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: "," },
-            Windows: { modifiers: ["ctrl", "shift"], key: "," },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
         />
 
         <Action.CopyToClipboard
           content={pullRequest.title}
           title="Copy Pull Request Title"
-          shortcut={{
-            macOS: { modifiers: ["ctrl", "shift"], key: "," },
-            Windows: { modifiers: ["ctrl", "shift"], key: "," },
-          }}
+          shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
         />
 
         <Action.CopyToClipboard
           content={`[${pullRequest.title}](${pullRequest.permalink})`}
           title="Copy Markdown URL"
-          shortcut={{
-            macOS: { modifiers: ["cmd", "shift"], key: ";" },
-            Windows: { modifiers: ["ctrl", "shift"], key: ";" },
-          }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: ";" }}
         />
       </ActionPanel.Section>
 
@@ -684,10 +648,7 @@ function RequestReviewSubmenu({ pullRequest, mutate }: SubmenuProps) {
     <ActionPanel.Submenu
       title="Request Review"
       icon={Icon.AddPerson}
-      shortcut={{
-        macOS: { modifiers: ["ctrl", "shift"], key: "r" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "r" },
-      }}
+      shortcut={{ modifiers: ["ctrl", "shift"], key: "r" }}
       onOpen={() => setLoad(true)}
       onSearchTextChange={setSearchQuery}
       isLoading={isLoading}
@@ -768,10 +729,7 @@ function AddAssigneeSubmenu({ pullRequest, mutate }: SubmenuProps) {
     <ActionPanel.Submenu
       title="Add Assignee"
       icon={Icon.AddPerson}
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "a" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "a" },
-      }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
@@ -847,10 +805,7 @@ function AddProjectSubmenu({ pullRequest, mutate }: SubmenuProps) {
     <ActionPanel.Submenu
       title="Add to Project"
       icon={{ source: "project.svg", tintColor: Color.PrimaryText }}
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "p" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "p" },
-      }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
@@ -948,10 +903,7 @@ function SetMilestoneSubmenu({ pullRequest, mutate }: SubmenuProps) {
     <ActionPanel.Submenu
       title="Set Milestone"
       icon={{ source: "milestone.svg", tintColor: Color.PrimaryText }}
-      shortcut={{
-        macOS: { modifiers: ["cmd", "shift"], key: "m" },
-        Windows: { modifiers: ["ctrl", "shift"], key: "m" },
-      }}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
       onOpen={() => setLoad(true)}
     >
       {isLoading ? (
@@ -1016,10 +968,7 @@ function OpenPreviewSubmenu({ pullRequest }: SubmenuProps) {
         data && (
           <Action.OpenInBrowser
             title="Open Vercel Preview"
-            shortcut={{
-              macOS: { modifiers: ["cmd", "shift"], key: "v" },
-              Windows: { modifiers: ["ctrl", "shift"], key: "v" },
-            }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
             url={data}
             icon={{ source: "vercel.svg", tintColor: Color.PrimaryText }}
           />
