@@ -1,5 +1,4 @@
 import { List, ActionPanel } from "@raycast/api";
-import fs from "fs";
 import {
   readingTime,
   wordCount,
@@ -9,7 +8,6 @@ import {
   filterContent,
 } from "../../../utils/utils";
 import { SearchNotePreferences } from "../../../utils/preferences";
-import { invalidateNotesCache } from "../../../api/cache/cache.service";
 import { NoteActions, OpenNoteActions, OpenPathInObsidianAction } from "../../../utils/actions";
 import { useNoteContent } from "../../../utils/hooks";
 import { useState } from "react";
@@ -89,25 +87,15 @@ export function NoteListItem(props: {
 
   const [isBookmarked, setIsBookmarked] = useState(note.bookmarked);
   const isSelected = props.selectedItemId === result.id;
-  let fileSize = 0;
-  let noteHasBeenMoved = false;
-  try {
-    fileSize = fs.statSync(note.path).size;
-  } catch {
-    noteHasBeenMoved = true;
-  }
-  const isOversized = fileSize > MAX_SEARCH_FILE_SIZE_BYTES;
-  const shouldLoadNoteContent = shouldLoadNoteContentForList(isSelected, match !== undefined, fileSize);
+  const fileSize = note.fileSize;
+  const isOversized = fileSize !== undefined && fileSize > MAX_SEARCH_FILE_SIZE_BYTES;
+  const shouldBypassInlineContent = match === undefined && (fileSize === undefined || isOversized);
+  const shouldLoadNoteContent =
+    fileSize !== undefined && shouldLoadNoteContentForList(isSelected, match !== undefined, fileSize);
   const { noteContent, isLoading } = useNoteContent(note, { enabled: shouldLoadNoteContent });
-
-  if (noteHasBeenMoved) {
-    invalidateNotesCache(vault.path);
-  }
 
   // Create a modified note object with the current bookmark state
   const updatedNote = { ...note, bookmarked: isBookmarked };
-
-  if (noteHasBeenMoved) return null;
 
   return (
     <List.Item
@@ -125,7 +113,7 @@ export function NoteListItem(props: {
         },
       ]}
       detail={
-        isOversized ? undefined : (
+        shouldBypassInlineContent ? undefined : (
           <List.Item.Detail
             isLoading={isLoading}
             markdown={
@@ -145,7 +133,7 @@ export function NoteListItem(props: {
       }
       actions={
         <ActionPanel>
-          {isOversized ? (
+          {shouldBypassInlineContent ? (
             <OpenPathInObsidianAction path={updatedNote.path} />
           ) : (
             <OpenNoteActions note={updatedNote} vault={vault} match={match} />

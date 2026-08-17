@@ -107,7 +107,7 @@ export function AppendSelectedTextToNoteAction(props: {
         if (done) {
           // Update cache with new metadata
           const stats = fs.statSync(note.path);
-          const updates = { lastModified: stats.mtime };
+          const updates = { lastModified: stats.mtime, createdAt: stats.birthtime, fileSize: stats.size };
           updateNoteInCache(vault.path, note.path, updates);
           onNoteUpdated?.(note.path, updates);
         }
@@ -244,7 +244,7 @@ export function DeleteNoteAction(props: {
   );
 }
 
-export function QuickLookAction(props: { note: NoteWithContent; vault: ObsidianVault }) {
+export function QuickLookAction(props: { note: Note; vault: ObsidianVault }) {
   const { note, vault } = props;
   return (
     <Action.Push
@@ -452,13 +452,14 @@ export function CopyCodeAction(props: { note: NoteWithContent }) {
 type NoteActionType = "bookmark" | "unbookmark" | "edit" | "append" | "appendSelected";
 
 export function NoteActions(props: {
-  note: NoteWithContent;
+  note: Note | NoteWithContent;
   vault: ObsidianVault;
   onNoteAction?: (actionType: NoteActionType) => void;
   onNoteUpdated?: (notePath: string, updates: Partial<Note>) => void;
   onDelete?: (note: Note, vault: ObsidianVault) => void;
 }) {
   const { note, vault, onNoteAction, onNoteUpdated, onDelete } = props;
+  const noteWithContent = "content" in note ? note : undefined;
 
   return (
     <>
@@ -469,14 +470,14 @@ export function NoteActions(props: {
       ) : (
         <BookmarkNoteAction note={note} vault={vault} onBookmark={() => onNoteAction?.("bookmark")} />
       )}
-      <CopyCodeAction note={note} />
-      <EditNoteAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
+      {noteWithContent && <CopyCodeAction note={noteWithContent} />}
+      {noteWithContent && <EditNoteAction note={noteWithContent} vault={vault} onNoteUpdated={onNoteUpdated} />}
       <AppendToNoteAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
       <AppendSelectedTextToNoteAction note={note} vault={vault} onNoteUpdated={onNoteUpdated} />
-      <CopyNoteAction note={note} />
+      {noteWithContent && <CopyNoteAction note={noteWithContent} />}
       <CopyNoteTitleAction note={note} />
       <CopyNotePathAction note={note} />
-      <PasteNoteAction note={note} />
+      {noteWithContent && <PasteNoteAction note={noteWithContent} />}
       <CopyMarkdownLinkAction note={note} />
       <CopyObsidianURIAction note={note} />
       <DeleteNoteAction note={note} vault={vault} onDelete={onDelete} />
@@ -488,7 +489,7 @@ export function NoteActions(props: {
 }
 
 export function OpenNoteActions(props: {
-  note: NoteWithContent;
+  note: Note;
   vault: ObsidianVault;
   match?: ContentMatch;
   showQuickLook?: boolean;
