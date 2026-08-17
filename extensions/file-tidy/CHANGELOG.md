@@ -4,6 +4,7 @@
 
 - A refreshed extension icon, with the Store screenshots re-shot to match.
 - Previewing a plan no longer writes anything to the destination. The perceptual-hash cache used by similar-image detection was saved during analysis — before you confirm anything — which could create the destination folder (and a `.tidy` folder inside it) just for looking at a plan. The cache is now written only after a run completes, keyed by where each image actually landed.
+- Images moved to a destination on another volume now keep their modification time, so the hash cache still recognizes them on the next run instead of decoding them again; saving the cache also merges with what is already on disk rather than overwriting entries another run wrote in the meantime.
 
 ## [Look-Alike Report] - 2026-08-09
 
