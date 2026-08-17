@@ -80,12 +80,13 @@ export function NoteList(props: NoteListProps) {
     // Debounce search
     const timeoutId = setTimeout(() => {
       setIsSearching(true);
+      const isStale = () => cancelled;
       void runSearchRequest({
         search: async () => {
           let results: NoteSearchResult[];
           if (pref.searchContent) {
             // Search title, path, and individual content occurrences.
-            results = await searchNotesWithMatches(notes, inputText);
+            results = await searchNotesWithMatches(notes, inputText, isStale);
           } else {
             // Search only title and path (fast)
             results = resultsForNotes(filterNotesFuzzy(notes, inputText));
@@ -93,7 +94,7 @@ export function NoteList(props: NoteListProps) {
           const sorted = sortSearchResults(results, sortOrder);
           return sorted.slice(0, MAX_RENDERED_NOTES);
         },
-        isStale: () => cancelled,
+        isStale,
         onResults: setFilteredResults,
         onSettled: () => setIsSearching(false),
       });
