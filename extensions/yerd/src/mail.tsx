@@ -166,7 +166,7 @@ export default function Mail() {
                     content={mail.subject}
                   />
                   <Action.CopyToClipboard
-                    title="Copy from"
+                    title="Copy Sender"
                     content={mail.from}
                   />
                   <Action

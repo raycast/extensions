@@ -3,6 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 ### Added
+
 - Search Sites command: searchable list of all Yerd sites with open, HTTPS toggle, PHP pin, domain management, tunnel sharing, and unpark/unlink actions
 - Manage PHP & Tools command: PHP version management, extensions, settings, and dev-tool install/uninstall
 - Manage Services & Databases command: service control (start/stop/restart/logs) and database lifecycle (create/backup/drop/restore)

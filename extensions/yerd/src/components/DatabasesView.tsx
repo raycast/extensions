@@ -7,6 +7,7 @@ import {
   List,
   Toast,
   confirmAlert,
+  showInFinder,
   showToast,
   useNavigation,
 } from "@raycast/api";
@@ -76,6 +77,12 @@ export function DatabasesView({ serviceId }: { serviceId: string }) {
       toast.style = Toast.Style.Success;
       toast.title = "Backup saved";
       toast.message = destination;
+      toast.primaryAction = {
+        title: "Show in Finder",
+        onAction: () => {
+          showInFinder(destination);
+        },
+      };
     } catch (e) {
       await showFailureToast(e, { title: failureTitle(e) });
     }

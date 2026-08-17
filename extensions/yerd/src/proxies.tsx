@@ -1,6 +1,6 @@
 // Proxies command: whole-host proxies + per-site path rules with add/remove.
 //
-// Argv verified against fixtures/raw/help/proxy.txt:
+// Argv verified against Yerd CLI `proxy --help`:
 //   list:   `yerd proxy list` → ProxiesResponse { proxies: [], rules: [] }
 //   add:    two args = whole-host (`yerd proxy add reverb http://localhost:8080`);
 //           three args = path rule (`yerd proxy add myapp /app http://…`) — the
@@ -150,7 +150,7 @@ export default function Proxies() {
       title: `Removing ${name}…`,
     });
     try {
-      // Whole-host proxy: one positional (fixtures/raw/help/proxy.txt)
+      // Whole-host proxy: one positional
       await runYerd(["proxy", "remove", name], { timeoutMs: TIMEOUTS.mutate });
       toast.style = Toast.Style.Success;
       toast.title = `Proxy ${name} removed`;
@@ -172,7 +172,7 @@ export default function Proxies() {
       title: "Removing rule…",
     });
     try {
-      // Path rule: two positionals — site then prefix (fixtures/raw/help/proxy.txt)
+      // Path rule: two positionals — site then prefix
       await runYerd(["proxy", "remove", site, prefix], {
         timeoutMs: TIMEOUTS.mutate,
       });

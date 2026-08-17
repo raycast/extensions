@@ -1,10 +1,10 @@
 // Sites command: searchable list of Yerd sites (linked + parked) with open,
 // copy, secure/unsecure, and per-site PHP version actions.
 //
-// Argv verified against fixtures/raw/help/:
+// Argv verified against Yerd CLI help:
 //   secure/unsecure:  `yerd secure <name>` / `yerd unsecure <name>`
-//   site PHP pin:     `yerd use <site> <version>`  (use.txt — NOT `set php`,
-//                     which is a global ini default per set.txt)
+//   site PHP pin:     `yerd use <site> <version>`  (NOT `set php`, which is a
+//                     global ini default)
 //   "global default": Yerd has no site-level PHP unset; `yerd use <site> default`
 //                     exits 2. The closest operation is pinning the site to the
 //                     current global default from `list php`.
@@ -72,15 +72,12 @@ export default function Sites() {
   );
 
   const { data: tunnelData } = useCachedPromise(
-    async () => {
-      try {
-        return await runYerd<TunnelStatusResponse>(["tunnel", "status"]);
-      } catch {
-        return null;
-      }
-    },
+    () => runYerd<TunnelStatusResponse>(["tunnel", "status"]),
     [],
-    { keepPreviousData: true },
+    {
+      keepPreviousData: true,
+      failureToastOptions: { title: "Tunnel status unavailable" },
+    },
   );
 
   const isLoading = sitesLoading || statusLoading || phpLoading;
@@ -108,7 +105,7 @@ export default function Sites() {
   }
 
   async function setPhp(name: string, version: string) {
-    // Verified argv: `yerd use <site> <version>` (fixtures/raw/help/use.txt)
+    // Verified argv: `yerd use <site> <version>`
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: `Setting PHP ${version} for ${name}…`,
@@ -275,7 +272,7 @@ export default function Sites() {
       <List.Item
         key={site.name}
         title={site.name}
-        subtitle={url ?? `${site.name}.test`}
+        subtitle={url ?? `${site.name}.${report?.tld ?? "test"}`}
         icon={Icon.Globe}
         accessories={accessories}
         detail={

@@ -1,8 +1,4 @@
 node_modules
 dist
-.codegraph/
-.codegraph
-fixtures/raw/
-.omo/evidence/
-.omo/
-/.DS_Store
+.DS_Store
+raycast-env.d.ts

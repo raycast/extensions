@@ -68,29 +68,18 @@ export default function Status() {
   } = useCachedPromise(() => runYerd<StatusResponse>(["status"]), [], {
     keepPreviousData: true,
   });
-  // Sharing probes are best-effort: render "Unavailable" instead of failing
-  // the whole dashboard when tunnel/lan sub-commands error.
-  const { data: tunnelData } = useCachedPromise(
-    async () => {
-      try {
-        return await runYerd<TunnelStatusResponse>(["tunnel", "status"]);
-      } catch {
-        return null;
-      }
-    },
+  // Sharing probes are optional: swallow the hook toast so a missing
+  // tunnel/lan sub-command does not fail the whole dashboard. Errors still
+  // land on the hook so the Sharing section can render "Unavailable".
+  const { data: tunnelData, error: tunnelError } = useCachedPromise(
+    () => runYerd<TunnelStatusResponse>(["tunnel", "status"]),
     [],
-    { keepPreviousData: true },
+    { keepPreviousData: true, onError: () => undefined },
   );
-  const { data: lanData } = useCachedPromise(
-    async () => {
-      try {
-        return await runYerd<LanStatusResponse>(["lan", "status"]);
-      } catch {
-        return null;
-      }
-    },
+  const { data: lanData, error: lanError } = useCachedPromise(
+    () => runYerd<LanStatusResponse>(["lan", "status"]),
     [],
-    { keepPreviousData: true },
+    { keepPreviousData: true, onError: () => undefined },
   );
 
   const report = statusData?.report;
@@ -262,19 +251,21 @@ export default function Status() {
             <StatusRow
               title="LAN"
               value={
-                lanData?.lan_enabled
-                  ? `Enabled (${lanData.lan_ip ?? "unknown IP"})`
-                  : "Disabled"
+                lanError
+                  ? "Unavailable"
+                  : lanData?.lan_enabled
+                    ? `Enabled (${lanData.lan_ip ?? "unknown IP"})`
+                    : "Disabled"
               }
             />
             <StatusRow
               title="Tunnel"
               value={
-                tunnelData
-                  ? tunnelData.cloudflared.installed
+                tunnelError || !tunnelData
+                  ? "Unavailable"
+                  : tunnelData.cloudflared.installed
                     ? `Cloudflared ${tunnelData.cloudflared.version ?? "installed"}`
                     : "Not installed"
-                  : "Unavailable"
               }
             />
           </List.Section>

@@ -1,5 +1,5 @@
 // Types pinned against live `yerd --json` output captured on 2026-07-29
-// (daemon_version 2.0.4) via scripts/capture-fixtures.mjs → fixtures/raw/.
+// (daemon_version 2.0.4).
 // Every response carries a `type` discriminator EXCEPT `lan status`.
 
 // ---------------------------------------------------------------------------

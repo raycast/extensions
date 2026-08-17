@@ -4,14 +4,14 @@ Manage your [Yerd](https://yerd.app) local PHP development environment directly 
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| **Search Sites** | Search and manage all local Yerd sites — open in browser, toggle HTTPS, pin PHP version, manage domains, share via Cloudflare Tunnel |
-| **Manage PHP & Tools** | Install, update, and configure PHP versions and dev tools (Composer, Node, Bun, Laravel installer, WP-CLI) |
-| **Manage Services & Databases** | Start, stop, and restart services (Redis, MySQL, MariaDB, PostgreSQL, Meilisearch); create, backup, and drop databases |
-| **View Captured Mail** | Browse mail captured by Yerd's built-in SMTP sink; view message bodies |
-| **Manage Proxies** | Add, remove, and list whole-host proxies and path rules |
-| **Yerd Status & Doctor** | Live daemon health dashboard with diagnostics and repair |
+| Command                         | Description                                                                                                                          |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **Search Sites**                | Search and manage all local Yerd sites — open in browser, toggle HTTPS, pin PHP version, manage domains, share via Cloudflare Tunnel |
+| **Manage PHP & Tools**          | Install, update, and configure PHP versions and dev tools (Composer, Node, Bun, Laravel installer, WP-CLI)                           |
+| **Manage Services & Databases** | Start, stop, and restart services (Redis, MySQL, MariaDB, PostgreSQL, Meilisearch); create, backup, and drop databases               |
+| **View Captured Mail**          | Browse mail captured by Yerd's built-in SMTP sink; view message bodies                                                               |
+| **Manage Proxies**              | Add, remove, and list whole-host proxies and path rules                                                                              |
+| **Yerd Status & Doctor**        | Live daemon health dashboard with diagnostics and repair                                                                             |
 
 ## Requirements
 
@@ -46,4 +46,4 @@ Everything stays local. The extension only shells out to your own `yerd` binary 
 
 ## Icon
 
-The extension icon is derived from the [Yerd](https://github.com/forjedio/yerd) logo, used under the MIT License.
+The extension icon is derived from the [Yerd](https://github.com/forjedio/yerd) logo, used under the [MIT License](https://github.com/forjedio/yerd/blob/main/LICENSE.md).
