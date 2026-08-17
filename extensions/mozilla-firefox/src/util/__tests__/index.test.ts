@@ -229,8 +229,9 @@ describe("getProfileName (via getHistoryDbPath)", () => {
 
     const result = getHistoryDbPath();
 
-    // abc.default-release is excluded by catch-all (variant-specific suffix); xyz.default is picked.
-    expect(result).toBe(path.join(PROFILES_BASE, "xyz.default", "places.sqlite"));
+    // Both abc.default-release (variant-specific suffix) and xyz.default (legacy release profile)
+    // are excluded from the catch-all for non-release variants; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE, "places.sqlite"));
   });
 
   it("does not fall back to the release profile when Firefox ESR has no ESR profile", () => {
@@ -240,7 +241,8 @@ describe("getProfileName (via getHistoryDbPath)", () => {
 
     const result = getHistoryDbPath();
 
-    expect(result).toBe(path.join(PROFILES_BASE, "xyz.default", "places.sqlite"));
+    // Both abc.default-release and xyz.default are excluded; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE, "places.sqlite"));
   });
 
   it("does not fall back to the release profile when Firefox Developer Edition has no dev profile", () => {
@@ -250,7 +252,8 @@ describe("getProfileName (via getHistoryDbPath)", () => {
 
     const result = getHistoryDbPath();
 
-    expect(result).toBe(path.join(PROFILES_BASE, "xyz.default", "places.sqlite"));
+    // Both abc.default-release and xyz.default are excluded; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE, "places.sqlite"));
   });
 
   it("falls back to catch-all excluding other-variant profiles when non-release has no matching or default profile", () => {
@@ -399,8 +402,9 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
 
     const result = getHistoryDbPath();
 
-    // abc.default-release is excluded by catch-all (variant-specific suffix); xyz.default is picked.
-    expect(result).toBe(path.join(PROFILES_BASE_WIN, "xyz.default", "places.sqlite"));
+    // Both abc.default-release (variant-specific suffix) and xyz.default (legacy release profile)
+    // are excluded from the catch-all for non-release variants; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
   });
 
   it("does not fall back to the release profile when Firefox ESR has no ESR profile on Windows", () => {
@@ -410,7 +414,8 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
 
     const result = getHistoryDbPath();
 
-    expect(result).toBe(path.join(PROFILES_BASE_WIN, "xyz.default", "places.sqlite"));
+    // Both abc.default-release and xyz.default are excluded; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
   });
 
   it("does not fall back to the release profile when Firefox Developer Edition has no dev profile on Windows", () => {
@@ -420,7 +425,8 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
 
     const result = getHistoryDbPath();
 
-    expect(result).toBe(path.join(PROFILES_BASE_WIN, "xyz.default", "places.sqlite"));
+    // Both abc.default-release and xyz.default are excluded; no valid profile remains.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
   });
 
   it("falls back to catch-all excluding other-variant profiles when non-release has no matching or default profile on Windows", () => {

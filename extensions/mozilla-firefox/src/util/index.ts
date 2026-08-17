@@ -60,6 +60,7 @@ const getProfileName = (userDirectoryPath: string) => {
     .filter((entry) => !NON_PROFILE_ENTRIES.has(entry))
     .filter((entry) => {
       if (isNonReleaseVariant && VARIANT_SPECIFIC_SUFFIXES.some((s) => entry.endsWith(s))) return false;
+      if (isNonReleaseVariant && entry.endsWith(".default")) return false;
       return true;
     })
     .filter((entry) => {
