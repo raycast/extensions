@@ -236,8 +236,17 @@ export class AudioManager extends EventEmitter {
         return;
       }
 
-      // Skip non-audio messages (e.g., acknowledgments)
       if (!message.audio) {
+        // The final stream marker arrives without audio, so conclude before the audio guard
+        if (message.isFinal) {
+          console.log(`Stream complete after ${this.streamState.chunksReceived} chunks`);
+          this.streamState.streamComplete = true;
+          this.ws?.close();
+          this.checkAndEmitComplete();
+          return;
+        }
+
+        // Skip other non-audio messages (e.g., acknowledgments)
         console.log("Received non-audio message:", JSON.stringify(message));
         return;
       }
@@ -391,18 +400,24 @@ export class AudioManager extends EventEmitter {
    */
   private handleWebSocketClose(): void {
     console.log("WebSocket connection closed");
-    if (!this.streamState.isPlaying) {
-      // If connection closed without receiving any audio chunks, emit error
-      // chunksReceived = -1 means an error was already emitted
-      if (this.streamState.chunksReceived === 0) {
-        console.error("Connection closed without receiving any audio chunks");
-        this.emit("error", new Error("No audio received"));
-      } else if (this.streamState.chunksReceived > 0) {
-        // Stream completed but playback never started - mark as complete
-        this.emit("complete");
-      }
-      // If chunksReceived is -1, error was already emitted, do nothing
+    if (this.streamState.isPlaying) {
+      // The server may close without sending isFinal; treat the close as end of stream
+      // so the command can finish (and release its speech session) once playback ends
+      this.streamState.streamComplete = true;
+      this.checkAndEmitComplete();
+      return;
     }
+
+    // If connection closed without receiving any audio chunks, emit error
+    // chunksReceived = -1 means an error was already emitted
+    if (this.streamState.chunksReceived === 0) {
+      console.error("Connection closed without receiving any audio chunks");
+      this.emit("error", new Error("No audio received"));
+    } else if (this.streamState.chunksReceived > 0) {
+      // Stream completed but playback never started - mark as complete
+      this.emit("complete");
+    }
+    // If chunksReceived is -1, error was already emitted, do nothing
   }
 
   /**

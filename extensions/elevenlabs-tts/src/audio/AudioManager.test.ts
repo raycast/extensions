@@ -1,0 +1,67 @@
+import { AudioManager } from "./AudioManager";
+import { StreamConfig } from "./types";
+
+const config: StreamConfig = {
+  sessionId: "test-session",
+  text: "Hello there",
+  voiceId: "voice",
+  apiKey: "key",
+  settings: { stability: 0.5, similarity_boost: 0.5 },
+  playbackSpeed: "1.00",
+};
+
+interface AudioManagerInternals {
+  streamState: { isPlaying: boolean; chunksReceived: number; streamComplete: boolean; playbackComplete: boolean };
+  handleWebSocketMessage(data: Buffer): Promise<void>;
+  handleWebSocketClose(): void;
+}
+
+function createManager(): { manager: AudioManager; internals: AudioManagerInternals } {
+  const manager = new AudioManager(config);
+  return { manager, internals: manager as unknown as AudioManagerInternals };
+}
+
+function completion(manager: AudioManager): Promise<void> {
+  return new Promise((resolve) => manager.once("complete", () => resolve()));
+}
+
+describe("AudioManager stream completion", () => {
+  it("completes when the final marker arrives without audio", async () => {
+    const { manager, internals } = createManager();
+    internals.streamState.isPlaying = true;
+    internals.streamState.playbackComplete = true;
+    internals.streamState.chunksReceived = 3;
+
+    const complete = completion(manager);
+    await internals.handleWebSocketMessage(Buffer.from(JSON.stringify({ isFinal: true })));
+
+    await complete;
+    expect(internals.streamState.streamComplete).toBe(true);
+  });
+
+  it("completes when the socket closes during playback without a final marker", async () => {
+    const { manager, internals } = createManager();
+    internals.streamState.isPlaying = true;
+    internals.streamState.playbackComplete = true;
+    internals.streamState.chunksReceived = 3;
+
+    const complete = completion(manager);
+    internals.handleWebSocketClose();
+
+    await complete;
+    expect(internals.streamState.streamComplete).toBe(true);
+  });
+
+  it("waits for playback to finish when the final marker arrives first", async () => {
+    const { manager, internals } = createManager();
+    internals.streamState.isPlaying = true;
+    internals.streamState.chunksReceived = 3;
+
+    const listener = jest.fn();
+    manager.once("complete", listener);
+    await internals.handleWebSocketMessage(Buffer.from(JSON.stringify({ isFinal: true })));
+
+    expect(internals.streamState.streamComplete).toBe(true);
+    expect(listener).not.toHaveBeenCalled();
+  });
+});
