@@ -1,5 +1,17 @@
 # Changelog
 
+## [Free/Plus/Pro Plans] - 2026-08-17
+
+- Plans are now Free, Plus, and Pro. Total cards are capped per plan: Free
+  holds up to 300 cards, Plus up to 1,000, and Pro is unlimited
+- Your plan (Free, Plus, or Pro) shows as a badge in the header next to
+  your email
+- New "Upgrade Plan" action in the actions menu that opens the Inoh plans
+  page (Inoh Plus and Inoh Pro) in your browser; paid plans get a
+  "Manage Subscription" action that opens your account settings on inoh.app
+- Hitting your plan's limit shows an "Upgrade Plan" action right on the toast
+- Pronunciation practice quotas are now monthly pools (Plus 1,000/month, Pro 10,000/month)
+
 ## [Apps Section] - 2026-08-10
 
 - New "Apps" section in the actions menu linking to the other Inoh apps

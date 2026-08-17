@@ -1,31 +1,7 @@
 import { createEmptyCard, State } from "ts-fsrs";
 import { supabase } from "./supabase";
+import { isCardLimitViolation, isUniqueViolation, stripCardLimitMarker } from "./postgres-errors";
 import type { DictionaryEntry, AddCardResult, RemoveCardResult, CardState } from "../types";
-
-const POSTGRESQL_UNIQUE_VIOLATION = "23505";
-
-/** Sentinel returned when the server-side trigger rejects an over-limit insert. */
-export const PLAN_LIMIT_ERROR = "PLAN_LIMIT";
-
-/**
- * Reason: the `enforce_free_card_limit` trigger raises an exception whose message
- * contains "FREE_CARD_LIMIT" when a free user exceeds the cap.
- */
-function _isPlanLimitViolation(error: { message?: string }): boolean {
-  return !!error.message?.includes("FREE_CARD_LIMIT");
-}
-
-/**
- * Reason: Supabase may return the violation as a postgres code or as a message string
- * depending on the client version and error context.
- */
-function _isDuplicateViolation(error: { code?: string; message?: string }): boolean {
-  return (
-    error.code === POSTGRESQL_UNIQUE_VIOLATION ||
-    !!error.message?.includes("duplicate") ||
-    !!error.message?.includes("unique")
-  );
-}
 
 /**
  * Maps FSRS State enum to our CardState string type.
@@ -101,12 +77,12 @@ export async function addCardToDeck(userId: string, entry: DictionaryEntry, deck
     .single();
 
   if (insertError) {
-    if (_isDuplicateViolation(insertError)) {
+    if (isUniqueViolation(insertError)) {
       return { success: false, error: "This card is already in your deck" };
     }
 
-    if (_isPlanLimitViolation(insertError)) {
-      return { success: false, error: PLAN_LIMIT_ERROR };
+    if (isCardLimitViolation(insertError)) {
+      return { success: false, error: stripCardLimitMarker(insertError.message), isPlanLimit: true };
     }
 
     return { success: false, error: "Failed to add card to deck" };
