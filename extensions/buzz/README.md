@@ -1,4 +1,4 @@
-# Buzz for Raycast
+# Buzz
 
 ![Raycast](https://img.shields.io/badge/Raycast-black?logo=raycast&style=flat)
 ![React](https://img.shields.io/badge/React-black?logo=react&style=flat)
