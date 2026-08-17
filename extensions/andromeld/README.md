@@ -1,4 +1,4 @@
-# AndroMeld for Raycast
+# AndroMeld
 
 Search the apps on your connected Android device and open them on the Mac.
 
