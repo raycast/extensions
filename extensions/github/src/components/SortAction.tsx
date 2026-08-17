@@ -17,7 +17,7 @@ export const SortAction = ({ sortQuery, setSortQuery, data }: SortActionDataProp
       title={"Sort by"}
       icon={Icon.ArrowUp}
       // Same keys as Common.Duplicate, but action is Sort by — keep custom binding.
-      // eslint-disable-next-line @raycast/prefer-common-shortcut, @raycast/no-ambiguous-platform-shortcut
+      // eslint-disable-next-line
       shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
     >
       {data

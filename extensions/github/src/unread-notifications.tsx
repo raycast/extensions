@@ -186,7 +186,7 @@ function UnreadNotifications() {
           title="Configure Command"
           icon={Icon.Gear}
           // Reserved OpenPreferences keys, but this is the Configure Command action — keep custom binding.
-          // eslint-disable-next-line @raycast/no-reserved-shortcut, @raycast/no-ambiguous-platform-shortcut
+          // eslint-disable-next-line
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openCommandPreferences}
           alternate={

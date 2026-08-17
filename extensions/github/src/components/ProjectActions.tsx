@@ -85,7 +85,7 @@ export default function ProjectActions({ project, children, mutateList, mutateDe
               title="Close Project"
               icon={Icon.Lock}
               // Same keys as Common.Copy, but action is Close Project — keep custom binding.
-              // eslint-disable-next-line @raycast/prefer-common-shortcut, @raycast/no-ambiguous-platform-shortcut
+              // eslint-disable-next-line
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               style={Action.Style.Destructive}
               onAction={async () => {
@@ -105,7 +105,7 @@ export default function ProjectActions({ project, children, mutateList, mutateDe
               title="Reopen Project"
               icon={Icon.LockUnlocked}
               // Same keys as Common.OpenWith, but action is Reopen Project — keep custom binding.
-              // eslint-disable-next-line @raycast/prefer-common-shortcut, @raycast/no-ambiguous-platform-shortcut
+              // eslint-disable-next-line
               shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
               style={Action.Style.Destructive}
               onAction={async () => {

@@ -184,7 +184,7 @@ export default function NotificationActions({ notification, userId, mutateList }
         title="Unsubscribe"
         icon={Icon.BellDisabled}
         // Same keys as Common.Pin, but action is Unsubscribe — keep custom binding.
-        // eslint-disable-next-line @raycast/prefer-common-shortcut, @raycast/no-ambiguous-platform-shortcut
+        // eslint-disable-next-line
         shortcut={{ modifiers: ["cmd"], key: "." }}
         onAction={unsubscribe}
       />

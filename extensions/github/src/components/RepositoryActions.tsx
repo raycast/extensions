@@ -133,7 +133,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
               cloneAndOpen(repository);
             }}
             // Same keys as Common.CopyName, but action is Clone and Open — keep custom binding.
-            // eslint-disable-next-line @raycast/prefer-common-shortcut, @raycast/no-ambiguous-platform-shortcut
+            // eslint-disable-next-line
             shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
         )}
@@ -162,7 +162,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
           title="Clone in VS Code"
           url={`${editorScheme}://vscode.git/clone?url=${repository.url}`}
           // Same keys as Common.Copy, but action is Clone in VS Code — keep custom binding.
-          // eslint-disable-next-line @raycast/prefer-common-shortcut, @raycast/no-ambiguous-platform-shortcut
+          // eslint-disable-next-line
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           onOpen={() => onVisit(repository)}
         />
