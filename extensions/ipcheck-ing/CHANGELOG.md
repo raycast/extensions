@@ -12,7 +12,7 @@
 - Show why a source is unavailable instead of listing a fake "Get IP Failed" entry
 - Answer reserved and private addresses locally, without any network request
 - Cap every request with a timeout so an unreachable source can no longer hang the command
-- Resolve all locations in one batched request, and send a proper User-Agent to every service
+- Resolve list locations over HTTPS, and send a proper User-Agent to every service
 - Modernize the internals: the runtime's built-in fetch instead of node-fetch, @raycast/utils hooks, flat ESLint config
 
 ## [Version 1.1] - 2025-01-02

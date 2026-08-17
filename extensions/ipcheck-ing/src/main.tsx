@@ -124,7 +124,7 @@ function IPListItem({
   allIPs: string;
   onRefresh: () => void;
 }) {
-  const location = geo?.[entry.ip]?.label ?? fallbackLocation(entry);
+  const location = locationLabel(entry, geo);
 
   return (
     <List.Item
@@ -150,8 +150,27 @@ function IPListItem({
 }
 
 /**
- * Until ip-api.com answers, external entries can still show the country their own trace
- * response reported — so the list is never blank while a lookup is in flight.
+ * City-level labels come from the HTTPS lookup. If the source already reported a country
+ * over TLS (the Cloudflare / IPCheck.ing trace), a mismatched lookup is ignored — that is
+ * the last line of defense against a forged location sitting in the cache.
+ */
+function locationLabel(entry: IPEntry, geo: GeoMap | undefined): string {
+  const info = geo?.[entry.ip];
+  if (info?.label && countriesAgree(entry.countryCode, info.countryCode)) {
+    return info.label;
+  }
+
+  return fallbackLocation(entry);
+}
+
+function countriesAgree(traceCode: string | undefined, lookupCode: string | undefined): boolean {
+  if (!traceCode || !lookupCode) return true;
+  return traceCode.toUpperCase() === lookupCode.toUpperCase();
+}
+
+/**
+ * Until the HTTPS lookup answers, external entries can still show the country their own
+ * trace response reported — so the list is never blank while a lookup is in flight.
  */
 function fallbackLocation(entry: IPEntry): string {
   if (entry.kind === "local") {

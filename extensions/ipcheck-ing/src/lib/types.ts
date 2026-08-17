@@ -35,6 +35,8 @@ export interface GeoInfo {
   place: string;
   /** "City, Country 🇺🇸" — ready to display. */
   label: string;
+  /** ISO 3166-1 alpha-2, when the lookup returned a usable code. */
+  countryCode?: string;
 }
 
 /** Geo lookup results, keyed by IP. */

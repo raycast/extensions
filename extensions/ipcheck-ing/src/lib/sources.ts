@@ -93,7 +93,7 @@ export async function fetchFromSource(source: IPSource): Promise<SourceResult> {
 
 /**
  * `/cdn-cgi/trace` is a flat `key=value` body. Besides the IP it carries `loc` — the country
- * Cloudflare places the client in — enough to label a result without spending an ip-api.com
+ * Cloudflare places the client in — enough to label a result without spending a geolocation
  * lookup.
  */
 function parseTrace(body: string): TraceInfo {

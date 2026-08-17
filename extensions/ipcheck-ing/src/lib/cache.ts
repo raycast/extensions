@@ -42,8 +42,7 @@ class TTLCache {
 }
 
 /**
- * Cached ip-api.com responses (geo lookups and IP details) — the one service we talk to
- * that is rate limited. The `cdn-cgi/trace` sources are never cached: they exist to answer
- * "what is my IP right now".
+ * Cached geolocation and IP-detail lookups — the services we talk to that are rate limited.
+ * The `cdn-cgi/trace` sources are never cached: they exist to answer "what is my IP right now".
  */
 export const lookupCache = new TTLCache("lookups");

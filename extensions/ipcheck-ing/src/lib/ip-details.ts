@@ -2,8 +2,9 @@ import { lookupCache } from "./cache";
 import { requestText } from "./http";
 import { IPDetails } from "./types";
 
-// Same free (HTTP-only) ip-api.com service used for the list's location column, asked for
-// the full field set instead of just city and country.
+// ip-api.com's free tier is HTTP-only; TLS is paid, and free HTTPS alternatives omit the
+// mobile / proxy / hosting flags this detail view is built around. The list's city column
+// uses a separate HTTPS lookup — this path is only hit when the user asks for a full record.
 const FIELDS = [
   "status",
   "message",
