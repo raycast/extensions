@@ -18,6 +18,8 @@ const userDataDirectoryPath = () => {
 
 const NON_PROFILE_ENTRIES = new Set(["Crash Reports", "Pending Pings", "installs.ini", "profiles.ini"]);
 
+const VARIANT_SPECIFIC_SUFFIXES = [".default-release", ".default-nightly", ".default-esr", ".dev-edition-default"];
+
 const DEFAULT_PROFILE_SUFFIX = "default-release";
 
 const getProfileName = (userDirectoryPath: string) => {
@@ -56,6 +58,10 @@ const getProfileName = (userDirectoryPath: string) => {
 
   const fallback = profiles
     .filter((entry) => !NON_PROFILE_ENTRIES.has(entry))
+    .filter((entry) => {
+      if (isNonReleaseVariant && VARIANT_SPECIFIC_SUFFIXES.some((s) => entry.endsWith(s))) return false;
+      return true;
+    })
     .filter((entry) => {
       try {
         return fs.statSync(path.join(userDirectoryPath, entry)).isDirectory();

@@ -249,16 +249,27 @@ describe("getProfileName (via getHistoryDbPath)", () => {
     expect(result).toBe(path.join(PROFILES_BASE, "xyz.default", "places.sqlite"));
   });
 
-  it("falls back to catch-all when a non-release variant has no matching or default profile", () => {
+  it("falls back to catch-all excluding other-variant profiles when non-release has no matching or default profile", () => {
     setPrefs("default-release", "Firefox Nightly");
     mockProfiles(["abc.default-release", "real.profile"]);
     mockStatIsDir(["abc.default-release", "real.profile"]);
 
     const result = getHistoryDbPath();
 
-    // .default-release is a real directory but belongs to the release variant;
-    // catch-all picks alphabetically first — "abc.default-release" sorts before "real.profile"
-    expect(result).toBe(path.join(PROFILES_BASE, "abc.default-release", "places.sqlite"));
+    // .default-release belongs to the release variant and must be excluded from
+    // the catch-all when a non-release variant is selected; "real.profile" is picked.
+    expect(result).toBe(path.join(PROFILES_BASE, "real.profile", "places.sqlite"));
+  });
+
+  it("returns empty when non-release variant has no matching profile and only other-variant directories exist", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release"]);
+    mockStatIsDir(["abc.default-release"]);
+
+    const result = getHistoryDbPath();
+
+    // No valid profile for Nightly — safer to return empty than silently read release data.
+    expect(result).toBe(path.join(PROFILES_BASE, "places.sqlite"));
   });
 
   // --- Public API surface (bookmarks path delegates to same logic) ----------
@@ -402,6 +413,29 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
     const result = getHistoryDbPath();
 
     expect(result).toBe(path.join(PROFILES_BASE_WIN, "xyz.default", "places.sqlite"));
+  });
+
+  it("falls back to catch-all excluding other-variant profiles when non-release has no matching or default profile on Windows", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release", "real.profile"]);
+    mockStatIsDir(["abc.default-release", "real.profile"]);
+
+    const result = getHistoryDbPath();
+
+    // .default-release belongs to the release variant and must be excluded from
+    // the catch-all when a non-release variant is selected; "real.profile" is picked.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "real.profile", "places.sqlite"));
+  });
+
+  it("returns empty when non-release variant has no matching profile and only other-variant directories exist on Windows", () => {
+    setPrefs("default-release", "Firefox Nightly");
+    mockProfiles(["abc.default-release"]);
+    mockStatIsDir(["abc.default-release"]);
+
+    const result = getHistoryDbPath();
+
+    // No valid profile for Nightly — safer to return empty than silently read release data.
+    expect(result).toBe(path.join(PROFILES_BASE_WIN, "places.sqlite"));
   });
 
   it("getBookmarksDirectoryPath uses APPDATA on Windows", () => {
