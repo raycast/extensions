@@ -24,7 +24,10 @@ async function _fetchDecks(userId: string): Promise<Deck[]> {
  * Only executes when a valid userId is provided.
  */
 export function useDecks(userId: string | null) {
-  const { data, isLoading, error } = useCachedPromise((id: string) => _fetchDecks(id), [userId!], {
+  // Reason: the empty-string fallback is never fetched — `execute` gates the
+  // call until a real userId exists. It only satisfies the argument type
+  // without a non-null assertion.
+  const { data, isLoading, error } = useCachedPromise((id: string) => _fetchDecks(id), [userId ?? ""], {
     execute: !!userId,
   });
 

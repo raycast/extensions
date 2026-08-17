@@ -1,39 +1,49 @@
-import { List, Action, ActionPanel, Color, showToast, Toast, useNavigation, Icon } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { List, Action, ActionPanel, open, showToast, Toast, useNavigation, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useDecks } from "../hooks/useDecks";
 import { useDictionarySearch } from "../hooks/useDictionarySearch";
 import { useUserCardIds } from "../hooks/useUserCardIds";
-import { isProUser } from "../lib/pro-gate";
-import { addCardToDeck, removeCardFromDeck, PLAN_LIMIT_ERROR } from "../lib/card";
+import { useSubscriptionState } from "../hooks/useSubscriptionState";
+import { TIER_DISPLAY_NAMES } from "../lib/subscription";
+import type { SubscriptionTier } from "../lib/subscription";
+import { PLANS_URL } from "../constants";
+import { addCardToDeck, removeCardFromDeck } from "../lib/card";
 import { pronounceWord } from "../lib/audio";
-import { CHROME_EXTENSION_URL, FREE_CARD_LIMIT, OBSIDIAN_PLUGIN_URL, WEBSITE_URL } from "../constants";
+import { AccountActionSection } from "./AccountActionSection";
+import { AppsActionSection } from "./AppsActionSection";
 import { EntryDetail } from "./EntryDetail";
 import { RequestCardForm } from "./RequestCardForm";
-import { UpgradeToPro } from "./UpgradeToPro";
 import { SignInView } from "./SignInView";
 import type { DictionaryEntry } from "../types";
+
+/**
+ * Header text: the account, plus a plan badge once the plan has been read
+ * (e.g. "Inoh · me@example.com · Plus"). The header is the one place a List
+ * shows something at all times without spending a row, so it carries the
+ * badge; the matching Upgrade/Manage action lives in the Account section.
+ */
+function _buildNavigationTitle(email: string | undefined, tier: SubscriptionTier | undefined): string | undefined {
+  if (!email) return undefined;
+  const parts = ["Inoh", email];
+  if (tier) parts.push(TIER_DISPLAY_NAMES[tier]);
+  return parts.join(" · ");
+}
 
 /**
  * Shared root component for all commands.
  * Uses a single persistent List to prevent Raycast from resetting the search bar.
  *
- * Search is free for everyone — no account required. Authentication and the
- * Pro/free card limit only come into play when adding a card to a deck.
+ * Search is free for everyone — no account required. Authentication only comes
+ * into play when adding a card to a deck, and total cards are capped per plan
+ * (Free 300 / Plus 1,000 / Pro unlimited).
  */
-function showComingSoonToast(appName: string) {
-  void showToast({ title: "Coming soon", message: `${appName} isn't available yet — stay tuned!` });
-}
-
 export function CommandRoot({ initialSearchText }: { initialSearchText?: string }) {
   const [searchText, setSearchText] = useState(initialSearchText ?? "");
   const { push, pop } = useNavigation();
   const { user, isLoading: isAuthLoading, error: authError, refresh: refreshAuth, signOut } = useAuth();
 
-  const { data: hasPro } = useCachedPromise((id: string) => isProUser(id), [user?.id ?? ""], {
-    execute: !!user,
-  });
+  const { subscriptionState } = useSubscriptionState(user?.id ?? null);
 
   const { decks, isLoading: isDecksLoading } = useDecks(user?.id ?? null);
   const [selectedDeckId, setSelectedDeckId] = useState<string>(decks[0]?.id ?? "");
@@ -69,54 +79,12 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
     push(<SignInView onAuthenticated={handleAuthenticated} />);
   }
 
-  async function handleSignOut() {
-    try {
-      await signOut();
-      await showToast({ style: Toast.Style.Success, title: "Signed out" });
-    } catch (signOutError) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Couldn't sign out",
-        message: (signOutError as Error).message,
-      });
-    }
-  }
-
-  // Account email + sign-out, shown in the ActionPanel only when signed in.
   // Reason: keyed off `user` (not `isSignedIn`) so TypeScript narrows away null.
   const accountActions = user ? (
-    <ActionPanel.Section title="Account">
-      <Action.CopyToClipboard title={user.email ?? "Account"} content={user.email ?? ""} icon={Icon.Person} />
-      <Action title="Sign Out" icon={Icon.Logout} style={Action.Style.Destructive} onAction={handleSignOut} />
-    </ActionPanel.Section>
+    <AccountActionSection user={user} subscriptionState={subscriptionState} onSignOut={signOut} />
   ) : null;
 
-  // Cross-promotion links to the other Inoh apps, shown in every ActionPanel.
-  // iOS (App Store listing mid-rebrand) has no public page, so it toasts
-  // instead of linking. Brand marks are Simple Icons SVGs in assets/, tinted
-  // to match the theme.
-  const appsActions = (
-    <ActionPanel.Section title="Apps">
-      {/* eslint-disable @raycast/prefer-title-case -- "iOS" is Apple's casing; the rule also mangles "(Coming Soon)" */}
-      <Action
-        title="iOS App (Coming Soon)"
-        icon={{ source: "apple.svg", tintColor: Color.PrimaryText }}
-        onAction={() => showComingSoonToast("The iOS app")}
-      />
-      {/* eslint-enable @raycast/prefer-title-case */}
-      <Action.OpenInBrowser title="Web App" icon={Icon.Globe} url={WEBSITE_URL} />
-      <Action.OpenInBrowser
-        title="Chrome Extension"
-        icon={{ source: "googlechrome.svg", tintColor: Color.PrimaryText }}
-        url={CHROME_EXTENSION_URL}
-      />
-      <Action.OpenInBrowser
-        title="Obsidian Plugin"
-        icon={{ source: "obsidian.svg", tintColor: Color.PrimaryText }}
-        url={OBSIDIAN_PLUGIN_URL}
-      />
-    </ActionPanel.Section>
-  );
+  const appsActions = <AppsActionSection />;
 
   // Reason: `refreshAuth` loads the session before popping the sign-in view,
   // so the search list renders signed-in state immediately.
@@ -142,13 +110,6 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
         title: "Already in deck",
         message: `"${entry.word}" is already in your deck`,
       });
-      return;
-    }
-
-    // Free-plan card limit. The server-side trigger is the source of truth; this
-    // client check just avoids a doomed insert and shows the upsell immediately.
-    if (hasPro === false && userCardIds.size >= FREE_CARD_LIMIT) {
-      push(<UpgradeToPro />);
       return;
     }
 
@@ -185,22 +146,26 @@ export function CommandRoot({ initialSearchText }: { initialSearchText?: string 
       return;
     }
 
-    if (result.error === PLAN_LIMIT_ERROR) {
-      await toast.hide();
-      push(<UpgradeToPro />);
-      return;
-    }
-
     toast.style = Toast.Style.Failure;
     toast.title = "Failed to add card";
     toast.message = result.error;
+
+    if (result.isPlanLimit) {
+      toast.primaryAction = {
+        title: "Upgrade Plan",
+        onAction: async (limitToast) => {
+          await open(PLANS_URL);
+          await limitToast.hide();
+        },
+      };
+    }
   }
 
   return (
     <List
       isLoading={isLoading}
       isShowingDetail={hasResults}
-      navigationTitle={user?.email ? `Inoh · ${user.email}` : undefined}
+      navigationTitle={_buildNavigationTitle(user?.email, subscriptionState?.tier)}
       searchText={searchText}
       searchBarPlaceholder="Search for a word..."
       onSearchTextChange={setSearchText}
