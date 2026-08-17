@@ -1,6 +1,6 @@
 # IPCheck Changelog
 
-## [Version 1.2] - {PR_MERGE_DATE}
+## [Version 1.2] - 2026-08-17
 
 - Add Windows support
 - Add a Query IP command — look up the location, ISP and network behind any IPv4 or IPv6 address, straight from root search
