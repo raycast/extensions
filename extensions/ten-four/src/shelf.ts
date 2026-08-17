@@ -9,6 +9,10 @@ import {
   watchFile,
   unwatchFile,
   existsSync,
+  openSync,
+  closeSync,
+  unlinkSync,
+  statSync,
 } from "fs";
 
 export type Item = {
@@ -45,6 +49,8 @@ export type Shelf = {
 
 const LOCAL_FILE =
   process.env.TENFOUR_FILE || join(homedir(), ".ten-four.json");
+const LOCK_FILE = `${LOCAL_FILE}.lock`;
+const LOCK_STALE_MS = 2000;
 const WATCH_MS = 400;
 const POLL_MS = 1000;
 
@@ -62,18 +68,55 @@ function writeLocal(items: Item[]) {
   mkdirSync(dirname(LOCAL_FILE), { recursive: true });
   // Write then rename, which is atomic within a directory. The CLI pushes to
   // this same file, and the list polls it, so a plain write would let a reader
-  // catch a half-written file and see an empty shelf.
+  // catch a half-written file and see an empty shelf. Rename does not make
+  // read-modify-write atomic across processes; withLock around the whole
+  // mutation does that.
   const tmp = `${LOCAL_FILE}.${process.pid}.tmp`;
   writeFileSync(tmp, JSON.stringify(items, null, 2));
   renameSync(tmp, LOCAL_FILE);
+}
+
+function withLock<T>(fn: () => T): T {
+  const giveUp = Date.now() + LOCK_STALE_MS;
+  for (;;) {
+    try {
+      const fd = openSync(LOCK_FILE, "wx");
+      try {
+        return fn();
+      } finally {
+        closeSync(fd);
+        try {
+          unlinkSync(LOCK_FILE);
+        } catch {
+          // already released
+        }
+      }
+    } catch (err) {
+      const code = (err as NodeJS.ErrnoException).code;
+      if (code !== "EEXIST") throw err;
+      if (Date.now() > giveUp) throw new Error("shelf is locked");
+      try {
+        if (Date.now() - statSync(LOCK_FILE).mtimeMs > LOCK_STALE_MS) {
+          unlinkSync(LOCK_FILE);
+        }
+      } catch {
+        // lock vanished or we raced with the holder releasing it
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 20);
+    }
+  }
 }
 
 function localShelf(): Shelf {
   // Mutations re-read the file first so a snippet pushed between render and
   // action isn't clobbered by a stale in-memory list. Pin and remove only ever
   // shrink or rewrite the list, so trimming is the pusher's job, not ours.
+  // Take the same lock the CLI and shelf service use so overlapping writers
+  // cannot each load one snapshot and rename away the other's update.
   function mutate(fn: (items: Item[]) => Item[]) {
-    writeLocal(fn(readLocal()));
+    withLock(() => {
+      writeLocal(fn(readLocal()));
+    });
   }
 
   return {
@@ -111,7 +154,7 @@ function localShelf(): Shelf {
       mutate((items) => items.filter((i) => i.id !== item.id));
     },
     async clear() {
-      writeLocal([]);
+      withLock(() => writeLocal([]));
     },
   };
 }

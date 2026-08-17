@@ -31,6 +31,8 @@ const VERSION = "2.1.0";
 const REMOTE = (process.env.TENFOUR_URL || "").replace(/\/$/, "");
 const STORE =
   process.env.TENFOUR_FILE || path.join(os.homedir(), ".ten-four.json");
+const LOCK = `${STORE}.lock`;
+const LOCK_STALE_MS = 2000;
 const MAX_ITEMS = 200;
 
 function readStdin() {
@@ -43,7 +45,10 @@ function readStdin() {
 
 function firstLine(text, max = 60) {
   const line =
-    text.replace(/\r/g, "").split("\n").find((l) => l.trim()) || text;
+    text
+      .replace(/\r/g, "")
+      .split("\n")
+      .find((l) => l.trim()) || text;
   const t = line.trim();
   return t.length > max ? t.slice(0, max - 1) + "…" : t;
 }
@@ -66,10 +71,41 @@ function load() {
 function save(items) {
   fs.mkdirSync(path.dirname(STORE), { recursive: true });
   // Write then rename, which is atomic within a directory, so the extension
-  // polling this file never catches a half-written store.
+  // polling this file never catches a half-written store. Rename does not
+  // serialize read-modify-write across processes; withLock does that.
   const tmp = `${STORE}.${process.pid}.tmp`;
   fs.writeFileSync(tmp, JSON.stringify(items, null, 2));
   fs.renameSync(tmp, STORE);
+}
+
+function withLock(fn) {
+  const giveUp = Date.now() + LOCK_STALE_MS;
+  for (;;) {
+    try {
+      const fd = fs.openSync(LOCK, "wx");
+      try {
+        return fn();
+      } finally {
+        fs.closeSync(fd);
+        try {
+          fs.unlinkSync(LOCK);
+        } catch {
+          // already released
+        }
+      }
+    } catch (err) {
+      if (err.code !== "EEXIST") throw err;
+      if (Date.now() > giveUp) throw new Error("shelf is locked");
+      try {
+        if (Date.now() - fs.statSync(LOCK).mtimeMs > LOCK_STALE_MS) {
+          fs.unlinkSync(LOCK);
+        }
+      } catch {
+        // lock vanished or we raced with the holder releasing it
+      }
+      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 20);
+    }
+  }
 }
 
 function sortItems(items) {
@@ -126,10 +162,10 @@ const shelf = REMOTE
           pinned: false,
           ...(source ? { source: String(source).slice(0, 120) } : {}),
         };
-        save(truncate([item, ...load()]));
+        withLock(() => save(truncate([item, ...load()])));
         return item;
       },
-      clear: async () => save([]),
+      clear: async () => withLock(() => save([])),
     };
 
 async function main() {
@@ -142,7 +178,7 @@ async function main() {
     const items = await shelf.list();
     if (!items.length) return console.log("Ten Four shelf is empty.");
     items.forEach((it, i) =>
-      console.log(`${i + 1}. [${it.label}] ${firstLine(it.text, 80)}`)
+      console.log(`${i + 1}. [${it.label}] ${firstLine(it.text, 80)}`),
     );
     return;
   }
@@ -176,7 +212,7 @@ async function main() {
 
   if (!text.trim()) {
     console.error(
-      'tenfour: nothing to add. Usage: tenfour [--label "X"] "text"  |  echo … | tenfour -'
+      'tenfour: nothing to add. Usage: tenfour [--label "X"] "text"  |  echo … | tenfour -',
     );
     process.exit(1);
   }

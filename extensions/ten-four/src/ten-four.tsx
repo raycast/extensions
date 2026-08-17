@@ -41,37 +41,51 @@ export default function Command() {
   const [showDetail, setShowDetail] = useState(true);
   const lastGood = useRef<Item[]>([]);
   const reachable = useRef(true);
-  const latest = useRef(0);
+  const inflight = useRef<Promise<void> | null>(null);
+  const queued = useRef(false);
 
   async function refresh() {
-    // Reads can overlap: the poll fires every second, and every action kicks
-    // off its own refresh. Responses are not guaranteed to land in the order
-    // they were sent, so stamp each read and drop any that a newer read has
-    // already superseded. Otherwise a slow response can revert a pin, a
-    // removal, or a clear that the user just watched happen.
-    const mine = ++latest.current;
-    try {
-      const data = await shelf.load();
-      if (mine !== latest.current) return;
-      lastGood.current = data;
-      setItems(data);
-      reachable.current = true;
-    } catch (error) {
-      if (mine !== latest.current) return;
-      // Keep showing the last-known list instead of blanking, and only toast
-      // on the transition from reachable -> unreachable.
-      if (reachable.current) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: shelf.isRemote ? "Can't reach shelf" : "Can't read shelf",
-          message: error instanceof Error ? error.message : String(error),
-        });
+    // Polls fire every second and actions also refresh. If each tick started
+    // a new request while a slower one was still in flight, every response
+    // would be stale by the time it landed and the list would never populate.
+    // Coalesce: one load at a time, and if another refresh arrived during it,
+    // run exactly one more so a pin or push is not stuck behind a skipped poll.
+    queued.current = true;
+    if (inflight.current) return inflight.current;
+
+    inflight.current = (async () => {
+      try {
+        while (queued.current) {
+          queued.current = false;
+          try {
+            const data = await shelf.load();
+            lastGood.current = data;
+            setItems(data);
+            reachable.current = true;
+          } catch (error) {
+            // Keep showing the last-known list instead of blanking, and only
+            // toast on the transition from reachable -> unreachable.
+            if (reachable.current) {
+              showToast({
+                style: Toast.Style.Failure,
+                title: shelf.isRemote
+                  ? "Can't reach shelf"
+                  : "Can't read shelf",
+                message: error instanceof Error ? error.message : String(error),
+              });
+            }
+            reachable.current = false;
+            setItems(lastGood.current);
+          }
+        }
+      } finally {
+        inflight.current = null;
+        setIsLoading(false);
+        if (queued.current) await refresh();
       }
-      reachable.current = false;
-      setItems(lastGood.current);
-    } finally {
-      if (mine === latest.current) setIsLoading(false);
-    }
+    })();
+
+    return inflight.current;
   }
 
   useEffect(() => {

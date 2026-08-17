@@ -104,7 +104,9 @@ When you output a snippet I'm likely to want to copy (a URL, token, command,
 path, or code block), wrap it in a sentinel marker:
 
   <!--shelf:Short Label-->
-  ... the exact text ...
+
+... the exact text ...
+
   <!--/shelf-->
 
 The markers render as nothing in the terminal, so I still see a clean snippet.
@@ -115,7 +117,13 @@ Then wire the hook in `~/.claude/settings.json` so it fires on every turn:
 ```json
 {
   "hooks": {
-    "Stop": [{ "hooks": [{ "type": "command", "command": "~/.claude/hooks/shelf-push.sh" }] }]
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "~/.claude/hooks/shelf-push.sh" }
+        ]
+      }
+    ]
   }
 }
 ```

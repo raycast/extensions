@@ -3,6 +3,7 @@ const assert = require("node:assert");
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
+const { spawn } = require("child_process");
 
 // Point the store at a temp file BEFORE requiring the server (STORE is read at load).
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "tenfour-"));
@@ -105,19 +106,88 @@ test("concurrent adds all survive", async () => {
   // Fire the writes together: each handler must load and save without another
   // handler slipping in between, or one of these snippets goes missing.
   await Promise.all(
-    Array.from({ length: 20 }, (_, i) => post({ label: `c${i}`, text: `c${i}` })),
+    Array.from({ length: 20 }, (_, i) =>
+      post({ label: `c${i}`, text: `c${i}` }),
+    ),
   );
   const items = await (await fetch(`${base}/shelf`)).json();
   assert.equal(items.length, 20);
   assert.equal(new Set(items.map((i) => i.label)).size, 20);
 });
 
-test("a save leaves no temp file behind", async () => {
+test("a save leaves no temp or lock file behind", async () => {
   await post({ text: "tidy" });
   const stray = fs
     .readdirSync(TMP)
-    .filter((f) => f.endsWith(".tmp"));
+    .filter((f) => f.endsWith(".tmp") || f.endsWith(".lock"));
   assert.deepEqual(stray, []);
+});
+
+function fileWriter(id, holdMs) {
+  const shelfPath = require.resolve("./shelf.js");
+  return new Promise((resolve, reject) => {
+    const child = spawn(
+      process.execPath,
+      [
+        "-e",
+        `
+        const { modify } = require(${JSON.stringify(shelfPath)});
+        modify((items) => {
+          const end = Date.now() + ${Number(holdMs)};
+          while (Date.now() < end) {}
+          items.push({
+            id: ${JSON.stringify(id)},
+            label: ${JSON.stringify(id)},
+            text: ${JSON.stringify(id)},
+            ts: Date.now(),
+            pinned: false,
+          });
+          return items;
+        }).then(
+          () => process.exit(0),
+          (err) => {
+            console.error(err);
+            process.exit(1);
+          }
+        );
+        `,
+      ],
+      { env: process.env, stdio: ["ignore", "ignore", "pipe"] },
+    );
+    let err = "";
+    child.stderr.on("data", (d) => {
+      err += d;
+    });
+    child.on("close", (code) =>
+      code === 0 ? resolve() : reject(new Error(err || `exit ${code}`)),
+    );
+  });
+}
+
+test("overlapping process writes keep both items", async () => {
+  await fetch(`${base}/shelf`, { method: "DELETE" });
+  await Promise.all([fileWriter("w1", 120), fileWriter("w2", 120)]);
+  const items = await (await fetch(`${base}/shelf`)).json();
+  const ids = new Set(items.map((i) => i.id));
+  assert.ok(ids.has("w1"), "missing w1");
+  assert.ok(ids.has("w2"), "missing w2");
+});
+
+test("a local-file writer overlapping a POST keeps both items", async () => {
+  await fetch(`${base}/shelf`, { method: "DELETE" });
+  const child = fileWriter("cli", 150);
+  const lock = `${process.env.TENFOUR_FILE}.lock`;
+  const start = Date.now();
+  while (!fs.existsSync(lock)) {
+    if (Date.now() - start > 2000) throw new Error("child never locked");
+    await new Promise((r) => setTimeout(r, 5));
+  }
+  const res = await post({ text: "from-http" });
+  assert.equal(res.status, 201);
+  await child;
+  const items = await (await fetch(`${base}/shelf`)).json();
+  assert.ok(items.some((i) => i.id === "cli"));
+  assert.ok(items.some((i) => i.text === "from-http"));
 });
 
 test("hostIsAllowed only permits loopback unless overridden", () => {
