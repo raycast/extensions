@@ -1,5 +1,22 @@
 # Linear Changelog
 
+## [Attachment Upload Fix] - {PR_MERGE_DATE}
+
+- Fix attachments added while creating an issue failing to upload.
+
+## [My Issues Sub Views] - 2026-07-30
+
+- Add a dropdown to the "My Issues" command to switch between the Assigned, Created, and Subscribed sub views, matching the Linear app. Assigned stays the default.
+
+## [Add Copy Shortcuts] - 2026-07-18
+
+- Add `Cmd/Ctrl + Shift + U` shortcut to the "Copy Issue URL" action.
+- Add `Cmd/Ctrl + Shift + T` shortcut to the "Copy Title as Link" action.
+
+## [AI Comment Attachments] - 2026-07-14
+
+- Add local file attachments to the AI tools for creating and updating comments. Images are embedded in the comment, while other files are added as links.
+
 ## [Templates, Copy Title as Link, and Auth Fix] - 2026-06-17
 
 - Add template support to the Create Issue command. Let users pick a Linear issue template to auto-populate the title, description, labels, project, status, priority, assignee, estimate, due date, and cycle. See https://github.com/raycast/extensions/issues/27138

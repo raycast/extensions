@@ -4,5 +4,5 @@ declare module "file-type" {
     readonly mime: string;
   };
 
-  export function fileTypeFromFile(filePath: string): Promise<FileTypeResult | undefined>;
+  export function fileTypeFromBuffer(buffer: Uint8Array): Promise<FileTypeResult | undefined>;
 }

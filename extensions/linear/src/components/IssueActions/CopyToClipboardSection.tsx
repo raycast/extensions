@@ -44,7 +44,14 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
         title="Copy Formatted Issue URL"
         shortcut={Keyboard.Shortcut.Common.CopyPath}
       />
-      <Action.CopyToClipboard content={issue.url} title="Copy Issue URL" />
+      <Action.CopyToClipboard
+        content={issue.url}
+        title="Copy Issue URL"
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "u" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "u" },
+        }}
+      />
       <Action.CopyToClipboard
         content={issue.title}
         title="Copy Issue Title"
@@ -53,7 +60,14 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
           Windows: { modifiers: ["ctrl", "shift"], key: "'" },
         }}
       />
-      <Action.CopyToClipboard content={getTitleLink(issue)} title="Copy Title as Link" />
+      <Action.CopyToClipboard
+        content={getTitleLink(issue)}
+        title="Copy Title as Link"
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "t" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "t" },
+        }}
+      />
       <Action.CopyToClipboard
         content={issue.branchName}
         title="Copy Git Branch Name"
