@@ -51,7 +51,7 @@ const getProfileName = (userDirectoryPath: string) => {
     browserApp === "Firefox Nightly" || browserApp === "Firefox ESR" || browserApp === "Firefox Developer Edition";
   const variantProfile = isNonReleaseVariant
     ? defaultProfile
-    : releaseProfile ?? nightlyProfile ?? esrProfile ?? devProfile ?? defaultProfile;
+    : (releaseProfile ?? nightlyProfile ?? esrProfile ?? devProfile ?? defaultProfile);
   if (variantProfile) return variantProfile;
 
   const fallback = profiles
