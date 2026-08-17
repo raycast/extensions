@@ -1,6 +1,6 @@
 # Changelog
 
-## [Free/Plus/Pro Plans] - {PR_MERGE_DATE}
+## [Free/Plus/Pro Plans] - 2026-08-17
 
 - Plans are now Free, Plus, and Pro. Total cards are capped per plan: Free
   holds up to 300 cards, Plus up to 1,000, and Pro is unlimited
