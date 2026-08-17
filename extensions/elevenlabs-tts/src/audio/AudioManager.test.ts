@@ -75,14 +75,17 @@ describe("AudioManager stream completion", () => {
     await expect(failure).resolves.toEqual(new Error("Connection closed unexpectedly (code 1006)"));
   });
 
-  it("completes when the socket closes normally before playback starts", async () => {
+  it("defers completion to playback when the socket closes normally before playback starts", () => {
     const { manager, internals } = createManager();
     internals.streamState.chunksReceived = 3;
 
-    const complete = completion(manager);
+    const listener = jest.fn();
+    manager.once("complete", listener);
+    manager.once("error", listener);
     internals.handleWebSocketClose(1000);
 
-    await complete;
+    expect(internals.streamState.streamComplete).toBe(true);
+    expect(listener).not.toHaveBeenCalled();
   });
 
   it("ignores the close after the final marker when playback has not started yet", async () => {

@@ -396,45 +396,34 @@ export class AudioManager extends EventEmitter {
 
   /**
    * Handles WebSocket connection close
-   * Ensures cleanup if playback hasn't started
+   * Concludes the stream so the command always settles and releases its session
    */
   private handleWebSocketClose(code: number): void {
     console.log(`WebSocket connection closed (code ${code})`);
-    if (this.streamState.isPlaying) {
-      if (this.streamState.streamComplete) return;
+    // The close is expected once the stream concluded; completion arrives when playback finishes
+    if (this.streamState.streamComplete) return;
 
-      // Anything but a normal closure (1000) means the stream may have been truncated
-      // — including 1005, a close without a status code — so surface it as a failure
-      if (code !== 1000) {
-        this.emit("error", new Error(`Connection closed unexpectedly (code ${code})`));
-        return;
-      }
-
-      // The server may close normally without sending isFinal; treat the close as end
-      // of stream so the command can finish (and release its speech session)
-      this.streamState.streamComplete = true;
-      this.checkAndEmitComplete();
-      return;
-    }
-
-    // If connection closed without receiving any audio chunks, emit error
     // chunksReceived = -1 means an error was already emitted
+    if (this.streamState.chunksReceived === -1) return;
+
     if (this.streamState.chunksReceived === 0) {
       console.error("Connection closed without receiving any audio chunks");
       this.emit("error", new Error("No audio received"));
-    } else if (this.streamState.chunksReceived > 0) {
-      // A pending audio write may not have started playback yet; once isFinal was
-      // received the close is expected and completion arrives when playback finishes
-      if (this.streamState.streamComplete) return;
-
-      if (code !== 1000) {
-        this.emit("error", new Error(`Connection closed unexpectedly (code ${code})`));
-      } else {
-        // Stream completed but playback never started - mark as complete
-        this.emit("complete");
-      }
+      return;
     }
-    // If chunksReceived is -1, error was already emitted, do nothing
+
+    // Anything but a normal closure (1000) means the stream may have been truncated
+    // — including 1005, a close without a status code — so surface it as a failure
+    if (code !== 1000) {
+      this.emit("error", new Error(`Connection closed unexpectedly (code ${code})`));
+      return;
+    }
+
+    // The server may close normally without sending isFinal; mark the stream complete
+    // and let the complete event fire once playback (started or pending a chunk write,
+    // which always follows a received chunk) finishes
+    this.streamState.streamComplete = true;
+    this.checkAndEmitComplete();
   }
 
   /**
