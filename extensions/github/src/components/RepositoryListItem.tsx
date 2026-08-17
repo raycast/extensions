@@ -1,4 +1,4 @@
-import { Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { differenceInHours, format, formatDistanceToNow, isToday } from "date-fns";
 
@@ -11,6 +11,8 @@ import { SortActionProps, SortTypesDataProps } from "./SortAction";
 type RepositoryListItemProps<T = ExtendedRepositoryFieldsFragment[] | undefined> = {
   repository: ExtendedRepositoryFieldsFragment;
   onVisit: (repository: ExtendedRepositoryFieldsFragment) => void;
+  onUpdate?: (repository: ExtendedRepositoryFieldsFragment) => void;
+  onRemove?: (repository: ExtendedRepositoryFieldsFragment) => void;
   mutateList: MutatePromise<T>;
 } & SortActionProps &
   SortTypesDataProps;
@@ -19,12 +21,12 @@ export default function RepositoryListItem<T = ExtendedRepositoryFieldsFragment[
   repository,
   mutateList,
   onVisit,
+  onUpdate,
+  onRemove,
   sortQuery,
   setSortQuery,
   sortTypesData,
 }: RepositoryListItemProps<T>) {
-  const preferences = getPreferenceValues<Preferences.SearchRepositories>();
-
   const owner = getGitHubUser(repository.owner);
   const numberOfStars = repository.stargazerCount;
   const updatedAt = repository.pushedAt
@@ -75,7 +77,7 @@ export default function RepositoryListItem<T = ExtendedRepositoryFieldsFragment[
   return (
     <List.Item
       icon={owner.icon}
-      title={`${preferences.displayOwnerName ? `${repository.owner.login}/` : ""}${repository.name}`}
+      title={repository.nameWithOwner}
       {...(numberOfStars > 0
         ? {
             subtitle: {
@@ -85,7 +87,11 @@ export default function RepositoryListItem<T = ExtendedRepositoryFieldsFragment[
           }
         : {})}
       accessories={accessories}
-      actions={<RepositoryActions {...{ repository, onVisit, mutateList, sortQuery, setSortQuery, sortTypesData }} />}
+      actions={
+        <RepositoryActions
+          {...{ repository, onVisit, onUpdate, onRemove, mutateList, sortQuery, setSortQuery, sortTypesData }}
+        />
+      }
     />
   );
 }

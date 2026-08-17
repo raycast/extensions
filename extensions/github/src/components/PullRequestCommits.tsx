@@ -81,25 +81,37 @@ export default function PullRequestCommits({ pullRequest }: PullRequestCommitsPr
                   <Action.CopyToClipboard
                     content={commit.url}
                     title="Copy Commit URL"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "," },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "," },
+                    }}
                   />
 
                   <Action.CopyToClipboard
                     content={commit.oid}
                     title="Copy Commit Hash"
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "shift"], key: "." },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "." },
+                    }}
                   />
 
                   <Action.CopyToClipboard
                     content={commit.treeUrl}
                     title="Copy Commit Tree URL"
-                    shortcut={{ modifiers: ["ctrl", "shift"], key: "," }}
+                    shortcut={{
+                      macOS: { modifiers: ["ctrl", "shift"], key: "," },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "," },
+                    }}
                   />
 
                   <Action.CopyToClipboard
                     content={commit.message}
                     title="Copy Commit Message"
-                    shortcut={{ modifiers: ["ctrl", "shift"], key: "." }}
+                    shortcut={{
+                      macOS: { modifiers: ["ctrl", "shift"], key: "." },
+                      Windows: { modifiers: ["ctrl", "shift"], key: "." },
+                    }}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

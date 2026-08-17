@@ -125,6 +125,8 @@ function MyStatsMenu() {
               <MenuBarItem
                 title="Mark All as Seen"
                 icon={Icon.Check}
+                // Reserved OpenActionPanel keys, but this is Mark All as Seen — keep custom binding.
+                // eslint-disable-next-line @raycast/no-reserved-shortcut, @raycast/no-ambiguous-platform-shortcut
                 shortcut={{ modifiers: ["cmd"], key: "k" }}
                 onAction={markAllSeen}
               />

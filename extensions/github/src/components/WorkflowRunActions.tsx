@@ -135,7 +135,10 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
           title="Rerun Workflow Failed Jobs"
           icon={Icon.Redo}
           onAction={rerunWorkflowFailedJobs}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "f" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+          }}
         />
       ) : null}
 
@@ -148,7 +151,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
         title="Delete Run"
         style={Action.Style.Destructive}
         onAction={deleteRun}
-        shortcut={{ modifiers: ["ctrl"], key: "x" }}
+        shortcut={{ macOS: { modifiers: ["ctrl"], key: "x" }, Windows: { modifiers: ["ctrl"], key: "x" } }}
       />
 
       <ActionPanel.Section>

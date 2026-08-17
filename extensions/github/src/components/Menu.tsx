@@ -132,6 +132,8 @@ export function MenuBarItemConfigureCommand(): JSX.Element {
   return (
     <MenuBarExtra.Item
       title="Configure Command"
+      // Reserved OpenPreferences keys, but this is the Configure Command action — keep custom binding.
+      // eslint-disable-next-line @raycast/no-reserved-shortcut, @raycast/no-ambiguous-platform-shortcut
       shortcut={{ modifiers: ["cmd"], key: "," }}
       icon={Icon.Gear}
       onAction={() => openCommandPreferences()}

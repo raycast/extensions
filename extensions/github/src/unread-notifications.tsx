@@ -171,7 +171,7 @@ function UnreadNotifications() {
           <MenuBarExtra.Item
             title="Mark All as Read"
             icon={Icon.Checkmark}
-            shortcut={{ /* gmail uses shift-i to mark as read */ modifiers: ["cmd"], key: "i" }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "i" }, Windows: { modifiers: ["ctrl"], key: "i" } }}
             onAction={markAllNotificationsAsRead}
           />
         ) : null}
@@ -185,6 +185,8 @@ function UnreadNotifications() {
         <MenuBarExtra.Item
           title="Configure Command"
           icon={Icon.Gear}
+          // Reserved OpenPreferences keys, but this is the Configure Command action — keep custom binding.
+          // eslint-disable-next-line @raycast/no-reserved-shortcut, @raycast/no-ambiguous-platform-shortcut
           shortcut={{ modifiers: ["cmd"], key: "," }}
           onAction={openCommandPreferences}
           alternate={
