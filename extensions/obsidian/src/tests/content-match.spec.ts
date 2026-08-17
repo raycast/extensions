@@ -138,6 +138,22 @@ describe("searchNotesWithMatches", () => {
     expect(results[0].match?.line).toBe(1);
   });
 
+  it("discards fuzzy-only title matches when note content cannot be read", async () => {
+    const notePath = path.join(tempDir, "missing-sqlite.md");
+    const notes: Note[] = [
+      {
+        title: "sqlite",
+        path: notePath,
+        lastModified: new Date(),
+        bookmarked: false,
+      },
+    ];
+
+    const results = await searchNotesWithMatches(notes, "split");
+
+    expect(results).toEqual([]);
+  });
+
   it("keeps literal title matches after content occurrences", async () => {
     const titlePath = path.join(tempDir, "split-reference.md");
     const contentPath = path.join(tempDir, "linux.md");

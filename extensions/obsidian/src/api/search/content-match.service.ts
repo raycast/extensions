@@ -2,7 +2,8 @@ import { Note, ObsidianUtils } from "@/obsidian";
 import {
   findTitleMatches,
   MAX_CONTENT_SEARCH_RESULTS,
-  readSearchableNoteContent,
+  readNoteContentForSearch,
+  SearchableNoteContentResult,
 } from "./simple-content-search.service";
 
 const DEFAULT_CONTEXT_LINES = 2;
@@ -103,7 +104,7 @@ export function findContentMatches(
 interface AnalyzedNote {
   note: Note;
   matches: ContentMatch[];
-  contentAvailable: boolean;
+  contentStatus: SearchableNoteContentResult["status"];
 }
 
 type ShouldCancelSearch = () => boolean;
@@ -116,13 +117,13 @@ function isLiteralTitleOrPathMatch(note: Note, normalizedQuery: string): boolean
 
 async function analyzeNote(note: Note, query: string): Promise<Omit<AnalyzedNote, "note">> {
   try {
-    const content = await readSearchableNoteContent(note);
-    return content === undefined
-      ? { matches: [], contentAvailable: false }
-      : { matches: findContentMatches(content, query), contentAvailable: true };
+    const result = await readNoteContentForSearch(note);
+    return result.status === "available"
+      ? { matches: findContentMatches(result.content, query), contentStatus: result.status }
+      : { matches: [], contentStatus: result.status };
   } catch {
     // Notes can be moved while a search is running.
-    return { matches: [], contentAvailable: false };
+    return { matches: [], contentStatus: "unavailable" };
   }
 }
 
@@ -139,15 +140,17 @@ async function analyzeTaggedNotes(
     if (shouldCancel() || analyzedNotes.length >= MAX_CONTENT_SEARCH_RESULTS) break;
 
     try {
-      const content = await readSearchableNoteContent(note);
-      if (content === undefined) continue;
+      const result = await readNoteContentForSearch(note);
+      if (result.status !== "available") continue;
 
-      const hasMatchingTag = ObsidianUtils.getAllTags(content).some((tag) => tag.toLowerCase() === normalizedTag);
+      const hasMatchingTag = ObsidianUtils.getAllTags(result.content).some(
+        (tag) => tag.toLowerCase() === normalizedTag
+      );
       if (hasMatchingTag) {
         analyzedNotes.push({
           note,
-          matches: contentQuery ? findContentMatches(content, contentQuery) : [],
-          contentAvailable: true,
+          matches: contentQuery ? findContentMatches(result.content, contentQuery) : [],
+          contentStatus: result.status,
         });
       }
     } catch {
@@ -164,7 +167,7 @@ function appendAnalyzedResult(
   contentResults: NoteSearchResult[],
   literalTitleOrPathResults: NoteSearchResult[]
 ): void {
-  const { note, matches, contentAvailable } = analyzedNote;
+  const { note, matches, contentStatus } = analyzedNote;
 
   if (matches.length > 0) {
     contentResults.push(
@@ -174,7 +177,7 @@ function appendAnalyzedResult(
         match,
       }))
     );
-  } else if (!contentAvailable || isLiteralTitleOrPathMatch(note, normalizedQuery)) {
+  } else if (contentStatus === "oversized" || isLiteralTitleOrPathMatch(note, normalizedQuery)) {
     literalTitleOrPathResults.push({ id: note.path, note });
   }
 }

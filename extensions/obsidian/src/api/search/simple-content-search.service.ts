@@ -8,15 +8,20 @@ const logger = new Logger("ContentSearch");
 export const MAX_CONTENT_SEARCH_RESULTS = 50;
 export const MAX_SEARCH_FILE_SIZE_BYTES = 1024 * 1024;
 
-export async function readSearchableNoteContent(note: Note): Promise<string | undefined> {
+export type SearchableNoteContentResult =
+  | { status: "available"; content: string }
+  | { status: "oversized" }
+  | { status: "unavailable" };
+
+export async function readNoteContentForSearch(note: Note): Promise<SearchableNoteContentResult> {
   const file = await fs.promises.open(note.path, "r");
 
   try {
     const stats = await file.stat();
-    if (!stats.isFile()) return undefined;
+    if (!stats.isFile()) return { status: "unavailable" };
     if (stats.size > MAX_SEARCH_FILE_SIZE_BYTES) {
       logger.debug(`Skipping content search for oversized note ${note.path} (${stats.size} bytes)`);
-      return undefined;
+      return { status: "oversized" };
     }
 
     const bytesToRead = stats.size;
@@ -29,10 +34,15 @@ export async function readSearchableNoteContent(note: Note): Promise<string | un
       totalBytesRead += bytesRead;
     }
 
-    return buffer.subarray(0, totalBytesRead).toString("utf-8");
+    return { status: "available", content: buffer.subarray(0, totalBytesRead).toString("utf-8") };
   } finally {
     await file.close();
   }
+}
+
+export async function readSearchableNoteContent(note: Note): Promise<string | undefined> {
+  const result = await readNoteContentForSearch(note);
+  return result.status === "available" ? result.content : undefined;
 }
 
 export function findTitleMatches(notes: Note[], query: string, limit = MAX_CONTENT_SEARCH_RESULTS): Note[] {
