@@ -7,6 +7,7 @@ import { SearchNotePreferences } from "../../utils/preferences";
 import { CreateNoteView } from "./CreateNoteView";
 import { filterNotesFuzzy } from "../../api/search/search.service";
 import { NoteSearchResult, searchNotesWithMatches } from "../../api/search/content-match.service";
+import { runSearchRequest } from "../../api/search/search-request.service";
 import { SearchArguments } from "../../utils/interfaces";
 import { sortNotes, SortOrder } from "../../utils/sorting";
 import { Note, ObsidianVault } from "@/obsidian";
@@ -67,32 +68,41 @@ export function NoteList(props: NoteListProps) {
 
   // Search with or without content based on preference
   useEffect(() => {
+    let cancelled = false;
+
     if (!inputText.trim()) {
       const sorted = sortNotes(notes, sortOrder);
       setFilteredResults(resultsForNotes(sorted.slice(0, MAX_RENDERED_NOTES)));
+      setIsSearching(false);
       return;
     }
 
     // Debounce search
-    const timeoutId = setTimeout(async () => {
+    const timeoutId = setTimeout(() => {
       setIsSearching(true);
-      try {
-        let results: NoteSearchResult[];
-        if (pref.searchContent) {
-          // Search title, path, and individual content occurrences.
-          results = await searchNotesWithMatches(notes, inputText);
-        } else {
-          // Search only title and path (fast)
-          results = resultsForNotes(filterNotesFuzzy(notes, inputText));
-        }
-        const sorted = sortSearchResults(results, sortOrder);
-        setFilteredResults(sorted.slice(0, MAX_RENDERED_NOTES));
-      } finally {
-        setIsSearching(false);
-      }
+      void runSearchRequest({
+        search: async () => {
+          let results: NoteSearchResult[];
+          if (pref.searchContent) {
+            // Search title, path, and individual content occurrences.
+            results = await searchNotesWithMatches(notes, inputText);
+          } else {
+            // Search only title and path (fast)
+            results = resultsForNotes(filterNotesFuzzy(notes, inputText));
+          }
+          const sorted = sortSearchResults(results, sortOrder);
+          return sorted.slice(0, MAX_RENDERED_NOTES);
+        },
+        isStale: () => cancelled,
+        onResults: setFilteredResults,
+        onSettled: () => setIsSearching(false),
+      });
     }, 300);
 
-    return () => clearTimeout(timeoutId);
+    return () => {
+      cancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [notes, inputText, pref.searchContent, sortOrder]);
 
   if (filteredResults.length === 0 && inputText.trim() !== "" && !isSearching && !isLoading) {
