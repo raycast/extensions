@@ -60,7 +60,7 @@ async function readCatalog(): Promise<Catalog> {
 function AndroMeldAction() {
   return (
     <ActionPanel>
-      <Action.OpenInBrowser title="Open Andromeld Website" url={ANDROMELD_URL} />
+      <Action.OpenInBrowser title="Open AndroMeld Website" url={ANDROMELD_URL} />
     </ActionPanel>
   );
 }
