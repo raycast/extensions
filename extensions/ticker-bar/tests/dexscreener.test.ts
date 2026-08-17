@@ -20,10 +20,7 @@ test("uses artwork from another pool when the deepest pool omits it", async () =
 
   try {
     const [result] = await searchTokens("token");
-    assert.equal(
-      result.imageUrl,
-      "https://cdn.dexscreener.com/token.png",
-    );
+    assert.equal(result.imageUrl, "https://cdn.dexscreener.com/token.png");
   } finally {
     globalThis.fetch = originalFetch;
   }

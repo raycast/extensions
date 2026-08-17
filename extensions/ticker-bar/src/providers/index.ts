@@ -35,6 +35,10 @@ export async function fetchQuote(id: string): Promise<Quote | undefined> {
       return fetchBinanceQuote(asset);
     case "binanceperp":
       return fetchBinancePerpQuote(asset);
+    default: {
+      const exhaustive: never = asset.kind;
+      return exhaustive;
+    }
   }
 }
 

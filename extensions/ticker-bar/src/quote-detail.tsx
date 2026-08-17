@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Detail, Icon, open } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 import { marketLogo } from "./market-logo";
 import { getCachedQuotes, Quote, refreshQuotes } from "./market";
 import {
@@ -16,44 +17,28 @@ export function QuoteDetail({
   id: string;
   initialQuote?: Quote;
 }) {
-  const [quote, setQuote] = useState(initialQuote);
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState(!initialQuote);
-
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const cached = (await getCachedQuotes())[id];
-        if (!cancelled && cached) setQuote(cached);
-        const report = await refreshQuotes([id]);
-        const fresh = report.quotes[id];
-        if (!cancelled && fresh) setQuote(fresh);
-        if (!cancelled && report.failures[0])
-          setError(report.failures[0].message);
-        if (!fresh && !cached) throw new Error("No quote was returned");
-      } catch (loadError) {
-        if (!cancelled) {
-          setError(
-            loadError instanceof Error
-              ? loadError.message
-              : "The quote could not be loaded",
-          );
-        }
-      } finally {
-        if (!cancelled) setIsLoading(false);
+  const { data, isLoading, error } = useCachedPromise(
+    async (assetId: string) => {
+      const cached = (await getCachedQuotes())[assetId];
+      const report = await refreshQuotes([assetId]);
+      const quote = report.quotes[assetId] ?? cached;
+      if (!quote) {
+        throw new Error(report.failures[0]?.message ?? "No quote was returned");
       }
-    }
-    load();
-    return () => {
-      cancelled = true;
-    };
-  }, [id]);
+      return { quote, failure: report.failures[0]?.message };
+    },
+    [id],
+    initialQuote
+      ? { initialData: { quote: initialQuote, failure: undefined } }
+      : undefined,
+  );
+  const quote = data?.quote;
+  const failure = data?.failure ?? error?.message;
 
   const markdown = useMemo(() => {
     if (!quote) {
-      return error
-        ? `# Quote unavailable\n\n${escapeMarkdown(error)}`
+      return failure
+        ? `# Quote unavailable\n\n${escapeMarkdown(failure)}`
         : "# Loading quote…";
     }
     const change =
@@ -61,26 +46,23 @@ export function QuoteDetail({
         ? ` ${formatPercent(quote.changePercent)}`
         : "";
     const status =
-      error || quoteFreshness(quote) === "stale"
-        ? `> ⚠️ Cached quote — ${escapeMarkdown(error ?? quote.error ?? "the latest refresh failed")}`
+      failure || quoteFreshness(quote) === "stale"
+        ? `> ⚠️ Cached quote — ${escapeMarkdown(failure ?? quote.error ?? "the latest refresh failed")}`
         : `Updated ${formatAge(quote.lastSuccessAt ?? quote.asOf)}`;
     return `# ${escapeMarkdown(quote.symbol)} ${escapeMarkdown(quote.priceLabel)}${change}\n\n${status}`;
-  }, [error, quote]);
+  }, [failure, quote]);
 
   return (
     <Detail
       isLoading={isLoading}
+      navigationTitle={quote?.symbol ?? "Market Details"}
       markdown={markdown}
       metadata={quote ? <QuoteMetadata quote={quote} /> : undefined}
       actions={
         quote ? (
           <ActionPanel>
             {quote.url ? (
-              <Action
-                title="Open Market"
-                icon={Icon.Globe}
-                onAction={() => open(quote.url!)}
-              />
+              <Action.OpenInBrowser title="Open Market" url={quote.url} />
             ) : null}
             <Action.CopyToClipboard
               title="Copy Price"

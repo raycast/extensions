@@ -1,21 +1,21 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   Icon,
   LaunchType,
   List,
+  confirmAlert,
   launchCommand,
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { marketLogo } from "./market-logo";
 import { formatAge, quoteFreshness } from "./market-format";
 import { QuoteDetail } from "./quote-detail";
 import {
-  Quote,
-  QuoteStatus,
   assetFromId,
   getCachedQuotes,
   getPrimaryAssetId,
@@ -29,30 +29,26 @@ import {
   setPrimaryAssetId,
 } from "./market";
 
+async function loadWatchlist() {
+  const [ids, quotes, primary, statuses] = await Promise.all([
+    getWatchlist(),
+    getCachedQuotes(),
+    getPrimaryAssetId(),
+    getQuoteStatuses(),
+  ]);
+  return { ids, quotes, primary, statuses };
+}
+
 export default function Command() {
-  const [watchlist, setWatchlist] = useState<string[]>([]);
-  const [primaryAssetId, setPrimaryAssetIdValue] = useState<string>();
-  const [quotes, setQuotes] = useState<Record<string, Quote>>({});
-  const [statuses, setStatuses] = useState<Record<string, QuoteStatus>>({});
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isLoading, mutate } = useCachedPromise(loadWatchlist);
+  const watchlist = data?.ids ?? [];
+  const quotes = data?.quotes ?? {};
+  const primaryAssetId = data?.primary;
+  const statuses = data?.statuses ?? {};
 
   async function reload() {
-    const [ids, cached, primary, quoteStatuses] = await Promise.all([
-      getWatchlist(),
-      getCachedQuotes(),
-      getPrimaryAssetId(),
-      getQuoteStatuses(),
-    ]);
-    setWatchlist(ids);
-    setQuotes(cached);
-    setPrimaryAssetIdValue(primary);
-    setStatuses(quoteStatuses);
-    setIsLoading(false);
+    await mutate(loadWatchlist());
   }
-
-  useEffect(() => {
-    reload();
-  }, []);
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter watchlist">
@@ -108,10 +104,12 @@ export default function Command() {
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                  onAction={() => removeAndReload(id, reload)}
+                  onAction={() =>
+                    removeAndReload(id, quote?.name ?? id, reload)
+                  }
                 />
                 <Action
-                  title="Refresh Prices"
+                  title="Update Market Data"
                   icon={Icon.ArrowClockwise}
                   onAction={() => refreshAndReload(watchlist, reload)}
                 />
@@ -153,39 +151,41 @@ export default function Command() {
           />
         );
       })}
-      <List.EmptyView
-        title="No watchlist items"
-        description="Browse markets to add stocks, crypto, tokens, or Polymarket outcomes."
-        actions={
-          <ActionPanel>
-            <Action
-              title="Browse Markets"
-              icon={Icon.MagnifyingGlass}
-              onAction={() =>
-                launchCommand({
-                  name: "search-market",
-                  type: LaunchType.UserInitiated,
-                })
-              }
-            />
-            <Action
-              title="Advanced Watchlist Editor"
-              icon={Icon.Gear}
-              onAction={() =>
-                launchCommand({
-                  name: "configure-ticker-bar",
-                  type: LaunchType.UserInitiated,
-                })
-              }
-            />
-            <Action
-              title="Reset to Defaults"
-              icon={Icon.RotateClockwise}
-              onAction={() => resetAndReload(reload)}
-            />
-          </ActionPanel>
-        }
-      />
+      {data && watchlist.length === 0 ? (
+        <List.EmptyView
+          title="No watchlist items"
+          description="Browse markets to add stocks, crypto, tokens, or Polymarket outcomes."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Browse Markets"
+                icon={Icon.MagnifyingGlass}
+                onAction={() =>
+                  launchCommand({
+                    name: "search-market",
+                    type: LaunchType.UserInitiated,
+                  })
+                }
+              />
+              <Action
+                title="Advanced Watchlist Editor"
+                icon={Icon.Gear}
+                onAction={() =>
+                  launchCommand({
+                    name: "configure-ticker-bar",
+                    type: LaunchType.UserInitiated,
+                  })
+                }
+              />
+              <Action
+                title="Reset to Defaults"
+                icon={Icon.RotateClockwise}
+                onAction={() => resetAndReload(reload)}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
     </List>
   );
 }
@@ -213,7 +213,7 @@ async function moveAndReload(
 async function refreshAndReload(ids: string[], reload: () => Promise<void>) {
   await showToast({
     style: Toast.Style.Animated,
-    title: "Refreshing Ticker Bar",
+    title: "Updating market data",
   });
   const report = await refreshQuotes(ids, { force: true });
   await reload();
@@ -233,7 +233,20 @@ async function refreshAndReload(ids: string[], reload: () => Promise<void>) {
   );
 }
 
-async function removeAndReload(id: string, reload: () => Promise<void>) {
+async function removeAndReload(
+  id: string,
+  name: string,
+  reload: () => Promise<void>,
+) {
+  const confirmed = await confirmAlert({
+    title: "Remove from Watchlist",
+    message: `Remove ${name} from Ticker Bar?`,
+    primaryAction: {
+      title: "Remove",
+      style: Alert.ActionStyle.Destructive,
+    },
+  });
+  if (!confirmed) return;
   await removeFromWatchlist(id);
   await reload();
   await refreshMenuBar({ renderOnly: true });

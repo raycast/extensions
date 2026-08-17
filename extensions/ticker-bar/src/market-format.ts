@@ -99,17 +99,21 @@ export function formatMenuTitle(
   quote: Quote | undefined,
   style: MenuBarStyle,
 ): string | undefined {
+  if (!quote) return undefined;
   const staleMarker = quoteFreshness(quote) === "stale" ? " ⚠" : "";
-  if (style === "primary" && quote)
-    return `${quote.symbol} ${quote.priceLabel}${staleMarker}`;
-  if (style === "primary-change" && quote) {
-    const change =
-      typeof quote.changePercent === "number"
-        ? ` ${formatPercent(quote.changePercent)}`
-        : "";
-    return `${quote.symbol} ${quote.priceLabel}${change}${staleMarker}`;
+  switch (style) {
+    case "primary":
+      return `${quote.symbol} ${quote.priceLabel}${staleMarker}`;
+    case "primary-change": {
+      const change =
+        typeof quote.changePercent === "number"
+          ? ` ${formatPercent(quote.changePercent)}`
+          : "";
+      return `${quote.symbol} ${quote.priceLabel}${change}${staleMarker}`;
+    }
+    default: {
+      const exhaustive: never = style;
+      return exhaustive;
+    }
   }
-  return quote
-    ? `${quote.symbol} ${quote.priceLabel}${staleMarker}`
-    : undefined;
 }

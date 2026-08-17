@@ -22,38 +22,46 @@ export function normalizeAssetId(raw: string): string | undefined {
     return `token:any:${value.toLowerCase()}`;
 
   const [rawKind] = value.split(":");
-  const kind = rawKind.toLowerCase() as AssetKind;
-  if (!KINDS.has(kind)) return undefined;
+  const kind = rawKind.toLowerCase();
+  if (!isAssetKind(kind)) return undefined;
 
   const parts = value.split(":");
-  if (kind === "stock") {
-    const symbol = parts[1]?.trim().toUpperCase();
-    return symbol && /^[A-Z0-9.^-]{1,20}$/.test(symbol)
-      ? `stock:${symbol}`
-      : undefined;
+  switch (kind) {
+    case "stock": {
+      const symbol = parts[1]?.trim().toUpperCase();
+      return symbol && /^[A-Z0-9.^-]{1,20}$/.test(symbol)
+        ? `stock:${symbol}`
+        : undefined;
+    }
+    case "crypto": {
+      const id = parts.slice(1).join(":").trim().toLowerCase();
+      return /^[a-z0-9][a-z0-9-]{0,99}$/.test(id) ? `crypto:${id}` : undefined;
+    }
+    case "token": {
+      const chain = parts[1]?.trim().toLowerCase();
+      const address = parts.slice(2).join(":").trim();
+      if (!chain || !/^[a-z0-9_-]{1,40}$/i.test(chain)) return undefined;
+      if (!address || !/^[a-z0-9._:-]{3,160}$/i.test(address)) return undefined;
+      return `token:${chain}:${address.toLowerCase()}`;
+    }
+    case "polymarket": {
+      const marketId = parts[1]?.trim();
+      const outcome = parts.slice(2).join(":").trim().toLowerCase() || "yes";
+      if (!marketId || !/^[a-z0-9_-]{1,100}$/i.test(marketId)) return undefined;
+      if (!/^[a-z0-9 ._'-]{1,100}$/i.test(outcome)) return undefined;
+      return `polymarket:${marketId}:${outcome}`;
+    }
+    case "binance":
+    case "binanceperp": {
+      const pair = parts[1]?.trim().toUpperCase();
+      if (!pair || !/^[A-Z0-9]{5,30}$/.test(pair)) return undefined;
+      return `${kind}:${pair}`;
+    }
+    default: {
+      const exhaustive: never = kind;
+      return exhaustive;
+    }
   }
-  if (kind === "crypto") {
-    const id = parts.slice(1).join(":").trim().toLowerCase();
-    return /^[a-z0-9][a-z0-9-]{0,99}$/.test(id) ? `crypto:${id}` : undefined;
-  }
-  if (kind === "token") {
-    const chain = parts[1]?.trim().toLowerCase();
-    const address = parts.slice(2).join(":").trim();
-    if (!chain || !/^[a-z0-9_-]{1,40}$/i.test(chain)) return undefined;
-    if (!address || !/^[a-z0-9._:-]{3,160}$/i.test(address)) return undefined;
-    return `token:${chain}:${address.toLowerCase()}`;
-  }
-  if (kind === "polymarket") {
-    const marketId = parts[1]?.trim();
-    const outcome = parts.slice(2).join(":").trim().toLowerCase() || "yes";
-    if (!marketId || !/^[a-z0-9_-]{1,100}$/i.test(marketId)) return undefined;
-    if (!/^[a-z0-9 ._'-]{1,100}$/i.test(outcome)) return undefined;
-    return `polymarket:${marketId}:${outcome}`;
-  }
-
-  const pair = parts[1]?.trim().toUpperCase();
-  if (!pair || !/^[A-Z0-9]{5,30}$/.test(pair)) return undefined;
-  return `${kind}:${pair}`;
 }
 
 export function parseWatchlist(value: string): string[] {
@@ -81,70 +89,83 @@ export function assetFromId(id: string): Asset | undefined {
   const normalized = normalizeAssetId(id);
   if (!normalized) return undefined;
   const parts = normalized.split(":");
-  const kind = parts[0] as AssetKind;
+  const kind = parts[0];
+  if (!isAssetKind(kind)) return undefined;
 
-  if (kind === "stock") {
-    const symbol = parts[1];
-    return {
-      id: normalized,
-      kind,
-      symbol,
-      name: symbol,
-      provider: "Yahoo Finance",
-      query: symbol,
-    };
+  switch (kind) {
+    case "stock": {
+      const symbol = parts[1];
+      return {
+        id: normalized,
+        kind,
+        symbol,
+        name: symbol,
+        provider: "Yahoo Finance",
+        query: symbol,
+      };
+    }
+    case "crypto": {
+      const coinId = parts[1];
+      return {
+        id: normalized,
+        kind,
+        symbol: coinId.toUpperCase(),
+        name: coinId,
+        provider: "CoinGecko",
+        query: coinId,
+      };
+    }
+    case "token": {
+      const chain = parts[1];
+      const address = parts.slice(2).join(":");
+      return {
+        id: normalized,
+        kind,
+        symbol: address.slice(0, 6),
+        name: `${chain}:${address.slice(0, 10)}`,
+        provider: "DEX Screener",
+        query: address,
+        chain,
+      };
+    }
+    case "polymarket": {
+      const marketId = parts[1];
+      const outcome = parts.slice(2).join(":") || "yes";
+      return {
+        id: normalized,
+        kind,
+        symbol: "POLY",
+        name: `Polymarket ${marketId}`,
+        provider: "Polymarket",
+        query: marketId,
+        outcome,
+      };
+    }
+    case "binance":
+    case "binanceperp": {
+      const pair = parts[1];
+      const base = binancePairBase(pair);
+      return {
+        id: normalized,
+        kind,
+        symbol: base,
+        name:
+          kind === "binanceperp"
+            ? `${base} Perpetual`
+            : `${base} / ${pair.slice(base.length) || "USDT"}`,
+        provider: kind === "binanceperp" ? "Binance Futures" : "Binance",
+        query: pair,
+      };
+    }
+    default: {
+      const exhaustive: never = kind;
+      return exhaustive;
+    }
   }
-  if (kind === "crypto") {
-    const coinId = parts[1];
-    return {
-      id: normalized,
-      kind,
-      symbol: coinId.toUpperCase(),
-      name: coinId,
-      provider: "CoinGecko",
-      query: coinId,
-    };
-  }
-  if (kind === "token") {
-    const chain = parts[1];
-    const address = parts.slice(2).join(":");
-    return {
-      id: normalized,
-      kind,
-      symbol: address.slice(0, 6),
-      name: `${chain}:${address.slice(0, 10)}`,
-      provider: "DEX Screener",
-      query: address,
-      chain,
-    };
-  }
-  if (kind === "polymarket") {
-    const marketId = parts[1];
-    const outcome = parts.slice(2).join(":") || "yes";
-    return {
-      id: normalized,
-      kind,
-      symbol: "POLY",
-      name: `Polymarket ${marketId}`,
-      provider: "Polymarket",
-      query: marketId,
-      outcome,
-    };
-  }
+}
 
-  const pair = parts[1];
-  const base = binancePairBase(pair);
-  return {
-    id: normalized,
-    kind,
-    symbol: base,
-    name:
-      kind === "binanceperp"
-        ? `${base} Perpetual`
-        : `${base} / ${pair.slice(base.length) || "USDT"}`,
-    provider: kind === "binanceperp" ? "Binance Futures" : "Binance",
-    query: pair,
-  };
+function isAssetKind(value: string): value is AssetKind {
+  return KINDS.has(value as AssetKind);
 }
 
 const BINANCE_QUOTE_ASSETS = [

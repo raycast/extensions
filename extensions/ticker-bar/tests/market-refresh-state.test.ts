@@ -9,13 +9,10 @@ test("a full refresh retains current additions and removes deleted assets", () =
     "stock:AAPL": "added during refresh",
   };
 
-  assert.deepEqual(
-    retainCurrentRecords(latest, ["stock:SPY", "stock:AAPL"]),
-    {
-      "stock:SPY": "latest SPY",
-      "stock:AAPL": "added during refresh",
-    },
-  );
+  assert.deepEqual(retainCurrentRecords(latest, ["stock:SPY", "stock:AAPL"]), {
+    "stock:SPY": "latest SPY",
+    "stock:AAPL": "added during refresh",
+  });
 });
 
 test("an explicit asset refresh preserves records outside the request", () => {

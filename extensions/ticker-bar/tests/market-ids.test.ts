@@ -10,9 +10,7 @@ test("normalizes every supported asset kind", () => {
   assert.equal(normalizeAssetId("aapl"), "stock:AAPL");
   assert.equal(normalizeAssetId("crypto:Bitcoin"), "crypto:bitcoin");
   assert.equal(
-    normalizeAssetId(
-      "token:base:0x4200000000000000000000000000000000000006",
-    ),
+    normalizeAssetId("token:base:0x4200000000000000000000000000000000000006"),
     "token:base:0x4200000000000000000000000000000000000006",
   );
   assert.equal(
@@ -20,10 +18,7 @@ test("normalizes every supported asset kind", () => {
     "polymarket:540817:yes",
   );
   assert.equal(normalizeAssetId("binance:btcusdt"), "binance:BTCUSDT");
-  assert.equal(
-    normalizeAssetId("binanceperp:ethusdt"),
-    "binanceperp:ETHUSDT",
-  );
+  assert.equal(normalizeAssetId("binanceperp:ethusdt"), "binanceperp:ETHUSDT");
 });
 
 test("rejects malformed and unknown asset IDs", () => {
@@ -60,10 +55,7 @@ test("creates exact provider assets from normalized IDs", () => {
     query: "ETHUSDT",
   });
   assert.equal(
-    assetFromId(
-      "token:base:0x4200000000000000000000000000000000000006",
-    )?.chain,
+    assetFromId("token:base:0x4200000000000000000000000000000000000006")?.chain,
     "base",
   );
 });
-

@@ -7,7 +7,8 @@ import {
   popToRoot,
   showToast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import {
   DEFAULT_WATCHLIST,
   MAX_WATCHLIST_SIZE,
@@ -25,15 +26,9 @@ type FormValues = {
 };
 
 export default function Command() {
-  const [watchlist, setWatchlistValue] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    getWatchlist().then((ids) => {
-      setWatchlistValue(ids.join("\n"));
-      setIsLoading(false);
-    });
-  }, []);
+  const { data: storedIds, isLoading } = useCachedPromise(getWatchlist);
+  const [draft, setDraft] = useState<string>();
+  const watchlist = draft ?? storedIds?.join("\n") ?? "";
 
   return (
     <Form
@@ -48,7 +43,7 @@ export default function Command() {
           <Action
             title="Reset to Defaults"
             icon={Icon.RotateClockwise}
-            onAction={() => setWatchlistValue(DEFAULT_WATCHLIST.join("\n"))}
+            onAction={() => setDraft(DEFAULT_WATCHLIST.join("\n"))}
           />
         </ActionPanel>
       }
@@ -57,7 +52,7 @@ export default function Command() {
         id="watchlist"
         title="Watchlist"
         value={watchlist}
-        onChange={setWatchlistValue}
+        onChange={setDraft}
         placeholder="stock:SPY&#10;crypto:bitcoin&#10;token:base:0x...&#10;polymarket:540817:yes"
       />
       <Form.Description text="Use one asset per line. Supported prefixes: stock, crypto, token, polymarket, binance, and binanceperp." />

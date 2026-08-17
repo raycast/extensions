@@ -1,15 +1,18 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   Icon,
   List,
   launchCommand,
   LaunchType,
+  confirmAlert,
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import { marketLogo } from "./market-logo";
 import { QuoteDetail } from "./quote-detail";
 import {
@@ -26,83 +29,44 @@ import {
 
 export default function Command() {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
-  const [popular, setPopular] = useState<SearchResult[]>([]);
-  const [watchlist, setWatchlist] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingPopular, setIsLoadingPopular] = useState(true);
-  const visibleResults = query.trim() ? results : popular;
-
-  useEffect(() => {
-    getWatchlist().then(setWatchlist);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoadingPopular(true);
-    popularMarkets()
-      .then((items) => {
-        if (!cancelled) setPopular(items);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoadingPopular(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      if (!query.trim()) {
-        setResults([]);
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        const matches = await searchMarkets(query, controller.signal);
-        if (!cancelled) setResults(matches);
-      } catch (error) {
-        if (!cancelled) {
-          await showToast({
-            style: Toast.Style.Failure,
-            title: "Market search failed",
-            message:
-              error instanceof Error ? error.message : "Please try again",
-          });
-        }
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }, 250);
-
-    return () => {
-      cancelled = true;
-      controller.abort();
-      clearTimeout(timer);
-    };
-  }, [query]);
+  const abortable = useRef<AbortController | null>(null);
+  const trimmedQuery = query.trim();
+  const { data: watchlist = [], mutate: mutateWatchlist } =
+    useCachedPromise(getWatchlist);
+  const { data: popular = [], isLoading: isLoadingPopular } =
+    useCachedPromise(popularMarkets);
+  const { data: results = [], isLoading } = useCachedPromise(
+    (searchQuery: string) =>
+      searchMarkets(searchQuery, abortable.current?.signal),
+    [trimmedQuery],
+    {
+      abortable,
+      execute: trimmedQuery.length > 0,
+      keepPreviousData: true,
+      failureToastOptions: { title: "Market search failed" },
+    },
+  );
+  const visibleResults = trimmedQuery ? results : popular;
 
   return (
     <List
-      isLoading={isLoading || (!query.trim() && isLoadingPopular)}
+      isLoading={isLoading || (!trimmedQuery && isLoadingPopular)}
+      filtering={false}
+      throttle
       searchText={query}
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search AAPL, BTC, token address, or Polymarket topic"
     >
       <List.EmptyView
-        title={query.trim() ? "No matches" : "No trending markets"}
+        title={trimmedQuery ? "No matches" : "No trending markets"}
         description={
-          query.trim()
+          trimmedQuery
             ? "Try a ticker, coin, token address, or Polymarket topic"
             : "Search for a ticker, coin, token, or Polymarket topic"
         }
         icon={Icon.MagnifyingGlass}
       />
-      <List.Section title={query.trim() ? "Results" : "Trending"}>
+      <List.Section title={trimmedQuery ? "Results" : "Trending"}>
         {visibleResults.map((result) => {
           const isAdded = watchlist.includes(result.id);
           return (
@@ -127,14 +91,14 @@ export default function Command() {
                       <Action
                         title="Set as Primary Ticker"
                         icon={Icon.Star}
-                        onAction={() => setPrimary(result, setWatchlist)}
+                        onAction={() => setPrimary(result, mutateWatchlist)}
                       />
                       <Action
                         title="Remove from Watchlist"
                         icon={Icon.Trash}
                         style={Action.Style.Destructive}
                         shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                        onAction={() => remove(result, setWatchlist)}
+                        onAction={() => remove(result, mutateWatchlist)}
                       />
                     </>
                   ) : (
@@ -142,12 +106,12 @@ export default function Command() {
                       <Action
                         title="Add to Watchlist"
                         icon={Icon.Plus}
-                        onAction={() => add(result, false, setWatchlist)}
+                        onAction={() => add(result, false, mutateWatchlist)}
                       />
                       <Action
                         title="Add and Set as Primary"
                         icon={Icon.Star}
-                        onAction={() => add(result, true, setWatchlist)}
+                        onAction={() => add(result, true, mutateWatchlist)}
                       />
                     </>
                   )}
@@ -187,7 +151,7 @@ export default function Command() {
 async function add(
   result: SearchResult,
   setPrimary: boolean,
-  setWatchlist: (ids: string[]) => void,
+  reloadWatchlist: (update: Promise<string[]>) => Promise<string[]>,
 ) {
   let id: string | undefined;
   try {
@@ -203,7 +167,7 @@ async function add(
   if (!id) return;
   if (setPrimary) await setPrimaryAssetId(id);
   const report = await refreshQuotes([id], { force: true });
-  setWatchlist(await getWatchlist());
+  await reloadWatchlist(getWatchlist());
   await refreshMenuBar({ renderOnly: true });
   await showToast({
     style: report.failures.length ? Toast.Style.Failure : Toast.Style.Success,
@@ -218,11 +182,11 @@ async function add(
 
 async function setPrimary(
   result: SearchResult,
-  setWatchlist: (ids: string[]) => void,
+  reloadWatchlist: (update: Promise<string[]>) => Promise<string[]>,
 ) {
   await setPrimaryAssetId(result.id);
   const report = await refreshQuotes([result.id], { force: true });
-  setWatchlist(await getWatchlist());
+  await reloadWatchlist(getWatchlist());
   await refreshMenuBar({ renderOnly: true });
   await showToast({
     style: report.failures.length ? Toast.Style.Failure : Toast.Style.Success,
@@ -235,10 +199,19 @@ async function setPrimary(
 
 async function remove(
   result: SearchResult,
-  setWatchlist: (ids: string[]) => void,
+  reloadWatchlist: (update: Promise<string[]>) => Promise<string[]>,
 ) {
+  const confirmed = await confirmAlert({
+    title: "Remove from Watchlist",
+    message: `Remove ${result.symbol} from Ticker Bar?`,
+    primaryAction: {
+      title: "Remove",
+      style: Alert.ActionStyle.Destructive,
+    },
+  });
+  if (!confirmed) return;
   await removeFromWatchlist(result.id);
-  setWatchlist(await getWatchlist());
+  await reloadWatchlist(getWatchlist());
   await refreshMenuBar({ renderOnly: true });
   await showToast({
     style: Toast.Style.Success,
@@ -248,19 +221,43 @@ async function remove(
 }
 
 function iconFor(kind: SearchResult["kind"]) {
-  if (kind === "stock") return Icon.BankNote;
-  if (kind === "crypto") return Icon.Coins;
-  if (kind === "token") return Icon.Link;
-  if (kind === "binance") return Icon.Coins;
-  if (kind === "binanceperp") return Icon.LineChart;
-  return Icon.BarChart;
+  switch (kind) {
+    case "stock":
+      return Icon.BankNote;
+    case "crypto":
+      return Icon.Coins;
+    case "token":
+      return Icon.Link;
+    case "binance":
+      return Icon.Coins;
+    case "binanceperp":
+      return Icon.LineChart;
+    case "polymarket":
+      return Icon.BarChart;
+    default: {
+      const exhaustive: never = kind;
+      return exhaustive;
+    }
+  }
 }
 
 function colorFor(kind: SearchResult["kind"]) {
-  if (kind === "stock") return Color.Blue;
-  if (kind === "crypto") return Color.Yellow;
-  if (kind === "token") return Color.Green;
-  if (kind === "binance") return Color.Orange;
-  if (kind === "binanceperp") return Color.Yellow;
-  return Color.Purple;
+  switch (kind) {
+    case "stock":
+      return Color.Blue;
+    case "crypto":
+      return Color.Yellow;
+    case "token":
+      return Color.Green;
+    case "binance":
+      return Color.Orange;
+    case "binanceperp":
+      return Color.Yellow;
+    case "polymarket":
+      return Color.Purple;
+    default: {
+      const exhaustive: never = kind;
+      return exhaustive;
+    }
+  }
 }

@@ -20,4 +20,3 @@ test("rejects every request when the batch loader fails", async () => {
   });
   await assert.rejects(Promise.all([load("a"), load("b")]), /provider down/);
 });
-

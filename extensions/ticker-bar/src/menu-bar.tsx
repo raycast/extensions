@@ -205,7 +205,7 @@ export default function Command(
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item
-          title="Refresh Prices"
+          title="Update Market Data"
           icon={Icon.ArrowClockwise}
           onAction={requestRefresh}
         />
@@ -288,7 +288,16 @@ async function updateMenuBarStyle(
 }
 
 function logoDisplayLabel(display: LogoDisplay) {
-  return display === "menu-bar" ? "On" : "Off";
+  switch (display) {
+    case "menu-bar":
+      return "On";
+    case "off":
+      return "Off";
+    default: {
+      const exhaustive: never = display;
+      return exhaustive;
+    }
+  }
 }
 
 async function updateLogoDisplay(

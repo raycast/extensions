@@ -51,10 +51,7 @@ test("marks old quotes stale", () => {
 test("menu bar styles produce distinct titles", () => {
   const primary = quote("hype", 1);
   assert.equal(formatMenuTitle(primary, "primary"), "HYPE $1.00");
-  assert.equal(
-    formatMenuTitle(primary, "primary-change"),
-    "HYPE $1.00 +1.0%",
-  );
+  assert.equal(formatMenuTitle(primary, "primary-change"), "HYPE $1.00 +1.0%");
 });
 
 test("explicit refresh errors mark cached quotes stale", () => {

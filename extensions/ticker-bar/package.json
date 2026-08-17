@@ -11,6 +11,20 @@
   "categories": [
     "Finance"
   ],
+  "keywords": [
+    "stocks",
+    "crypto",
+    "bitcoin",
+    "ethereum",
+    "ticker",
+    "watchlist",
+    "menu bar",
+    "yahoo finance",
+    "coingecko",
+    "binance",
+    "polymarket",
+    "dexscreener"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -74,7 +88,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.24"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^1.19.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",

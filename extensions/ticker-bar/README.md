@@ -4,12 +4,12 @@ Track the markets you care about from the macOS menu bar. Ticker Bar combines st
 
 ## Preview
 
-| Browse markets                                                                                    | Manage your watchlist                                                              |
-| ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Browse markets                                                                                 | Manage your watchlist                                                           |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
 | ![Browse stocks, crypto, tokens, futures, and prediction markets](media/01-browse-markets.png) | ![Manage, reorder, and inspect watchlist assets](media/02-manage-watchlist.png) |
 
-| Advanced editor                                                                  | Menu bar                                                                       |
-| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Advanced editor                                                               | Menu bar                                                                    |
+| ----------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
 | ![Bulk edit exact market identifiers](media/03-advanced-watchlist-editor.png) | ![View live prices from the macOS menu bar](media/04-menu-bar-dropdown.png) |
 
 ## Highlights
@@ -84,26 +84,6 @@ Provider-specific cache windows range from one to five minutes. Manual refresh b
 
 Availability and fields vary by provider and market. Ticker Bar labels the provider on every quote.
 
-## Install locally
-
-Ticker Bar currently installs as a development extension while the public
-Raycast Store submission is prepared.
-
-Requirements:
-
-- macOS with [Raycast](https://www.raycast.com) installed
-- Node.js 22 or newer
-
-After cloning or downloading the repository:
-
-```bash
-npm install
-npm run dev
-```
-
-Raycast will register the local extension and keep it updated while the
-development process is running.
-
 ## Development
 
 ```bash
@@ -154,7 +134,7 @@ npm run build
 
 ## Troubleshooting
 
-- **A quote shows a warning:** open Market Details to see the last successful update and provider error, then try Refresh Prices after the cooldown.
+- **A quote shows a warning:** open Market Details to see the last successful update and provider error, then run Update Market Data after the cooldown.
 - **A symbol is not found:** search in Browse Markets first. The advanced editor accepts exact provider identifiers, not fuzzy names.
 - **A DEX token resolves incorrectly:** use the chain-qualified form, such as `token:base:0x…`.
 - **The menu title is empty:** choose a text-based Menu Bar Style and set a primary asset in Manage Watchlist.

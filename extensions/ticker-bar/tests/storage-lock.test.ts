@@ -22,17 +22,12 @@ test("a heartbeat keeps a lease owned beyond its initial expiry", async () => {
     releaseFirst = resolve;
   });
 
-  const first = withLeaseLock(
-    storage,
-    "refresh",
-    () => firstCanFinish,
-    {
-      leaseMs: 80,
-      heartbeatMs: 20,
-      waitTimeoutMs: 20,
-      retryMs: 5,
-    },
-  );
+  const first = withLeaseLock(storage, "refresh", () => firstCanFinish, {
+    leaseMs: 80,
+    heartbeatMs: 20,
+    waitTimeoutMs: 20,
+    retryMs: 5,
+  });
 
   await new Promise((resolve) => setTimeout(resolve, 140));
   await assert.rejects(
