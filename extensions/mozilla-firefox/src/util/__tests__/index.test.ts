@@ -333,7 +333,7 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
   });
 
   it("getBookmarksDirectoryPath uses APPDATA on Windows", () => {
-    setPrefs("default-release")
+    setPrefs("default-release");
     mockProfiles(["abc123.default-release"]);
 
     const result = getBookmarksDirectoryPath();
