@@ -1,5 +1,10 @@
 # File Tidy Changelog
 
+## [New Icon, and Previews That Leave No Trace] - {PR_MERGE_DATE}
+
+- A refreshed extension icon, with the Store screenshots re-shot to match.
+- Previewing a plan no longer writes anything to the destination. The perceptual-hash cache used by similar-image detection was saved during analysis — before you confirm anything — which could create the destination folder (and a `.tidy` folder inside it) just for looking at a plan. The cache is now written only after a run completes, keyed by where each image actually landed.
+
 ## [Look-Alike Report] - 2026-08-09
 
 - Near-duplicates and similar images are still only flagged and still archived normally — but the grouping no longer disappears when the plan closes. A run that flags anything now writes `.tidy/similar.md` in the destination, listing each group and where its files ended up, so you can work through them later instead of having to act while the plan is open. The success toast offers to open it.

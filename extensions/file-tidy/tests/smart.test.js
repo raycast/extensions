@@ -563,6 +563,42 @@ test("phash: the cache hits on path+size+mtime and survives a round trip to disk
   assert.equal(again.get(p), first.get(p));
 });
 
+test("phash: a preview against a missing destination leaves no trace on disk", async () => {
+  const src = tmp();
+  const dest = path.join(tmp(), "archive"); // never created
+  makeJpeg(src, "a.jpg", {});
+
+  await analyze({
+    sourceDir: src,
+    destDir: dest,
+    config: cfg({ detect: { similar: false, health: false, perceptual: true } }),
+  });
+  // The hash cache used to be saved during analysis, mkdir-ing dest/.tidy into
+  // existence before any confirmation — so a dry run had a lasting side effect
+  // and the adapters' "destination doesn't exist, create it?" prompt never
+  // fired, its existence check finding the directory already there.
+  assert.equal(fs.existsSync(dest), false);
+});
+
+test("phash: a successful run persists the cache to dest/.tidy, keyed to where each image landed", async () => {
+  const src = tmp();
+  const dest = tmp();
+  const orig = makeJpeg(src, "a.jpg", {});
+
+  const config = cfg({ detect: { similar: false, health: false, perceptual: true } });
+  const { entries, hashCache } = await analyze({ sourceDir: src, destDir: dest, config });
+  assert.ok(!fs.existsSync(path.join(dest, ".tidy", "phash-cache.json"))); // analysis alone wrote nothing
+
+  executePlan(entries, { destDir: dest, sourceDir: src, hashCache });
+  const archived = path.join(dest, "ft_Images", ym, "a.jpg");
+  assert.ok(fs.existsSync(archived));
+  const loaded = loadHashCache(dest);
+  // Remapped to the post-move path — an entry still keyed to the emptied
+  // source would never hit again
+  assert.equal(loaded.get(archived).hash, hashCache.cache.get(orig).hash);
+  assert.ok(!loaded.has(orig));
+});
+
 test("phash: the whole pass is skipped when the source batch holds no hashable image", async () => {
   const src = tmp();
   const dest = tmp();
