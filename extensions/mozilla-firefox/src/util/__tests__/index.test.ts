@@ -225,15 +225,18 @@ describe("getProfileName (via getHistoryDbPath)", () => {
   it("does not fall back to the release profile when Firefox Nightly has no nightly profile", () => {
     setPrefs("default-release", "Firefox Nightly");
     mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
 
     const result = getHistoryDbPath();
 
+    // abc.default-release is excluded by catch-all (variant-specific suffix); xyz.default is picked.
     expect(result).toBe(path.join(PROFILES_BASE, "xyz.default", "places.sqlite"));
   });
 
   it("does not fall back to the release profile when Firefox ESR has no ESR profile", () => {
     setPrefs("default-release", "Firefox ESR");
     mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
 
     const result = getHistoryDbPath();
 
@@ -243,6 +246,7 @@ describe("getProfileName (via getHistoryDbPath)", () => {
   it("does not fall back to the release profile when Firefox Developer Edition has no dev profile", () => {
     setPrefs("default-release", "Firefox Developer Edition");
     mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
 
     const result = getHistoryDbPath();
 
@@ -391,15 +395,18 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
   it("does not fall back to the release profile when Firefox Nightly has no nightly profile on Windows", () => {
     setPrefs("default-release", "Firefox Nightly");
     mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
 
     const result = getHistoryDbPath();
 
+    // abc.default-release is excluded by catch-all (variant-specific suffix); xyz.default is picked.
     expect(result).toBe(path.join(PROFILES_BASE_WIN, "xyz.default", "places.sqlite"));
   });
 
   it("does not fall back to the release profile when Firefox ESR has no ESR profile on Windows", () => {
     setPrefs("default-release", "Firefox ESR");
     mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
 
     const result = getHistoryDbPath();
 
@@ -409,6 +416,7 @@ describe("getProfileName on Windows (via getHistoryDbPath)", () => {
   it("does not fall back to the release profile when Firefox Developer Edition has no dev profile on Windows", () => {
     setPrefs("default-release", "Firefox Developer Edition");
     mockProfiles(["abc.default-release", "xyz.default"]);
+    mockStatIsDir(["abc.default-release", "xyz.default"]);
 
     const result = getHistoryDbPath();
 
