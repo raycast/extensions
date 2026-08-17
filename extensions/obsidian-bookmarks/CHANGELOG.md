@@ -1,8 +1,14 @@
 # Obsidian Bookmarks Changelog
 
+## [Save From Little Arc] - {PR_MERGE_DATE}
+
+- Fix the save form prefilling the page of the full Arc window behind when invoked from a Little Arc window. Arc doesn't expose Little Arc windows to scripting, so reading the right page relies on the [Raycast Browser Extension](https://www.raycast.com/browser-extension) when it is installed; without it, the previous behaviour remains.
+- When several browser windows are open, the Browser Extension path now picks the tab of the window actually in front instead of the first active tab it finds.
+
 ## [Fix Notes Gaining a Copy of Their Frontmatter] - {PR_MERGE_DATE}
 
 - Fix saving a bookmark — marking it as read, favoriting it — writing a copy of the note's own frontmatter into its body. The body was cut from the note using `bodyBegin`, which counts lines, as if it were a character offset. Run "Clear Cache" once after updating, as cached bookmarks still hold the broken body.
+- Re-read the note body from disk before favoriting, reordering favorites or toggling read state, so a stale cached body — including one holding that duplicated frontmatter — is never written back.
 
 ## [Favorite Bookmarks] - {PR_MERGE_DATE}
 
@@ -19,12 +25,14 @@
 
 - Rank URL matches (ignoring query parameters) ahead of title, tag and note matches when searching bookmarks
 - Filter results by tag with `#tag` tokens, on their own or alongside search terms (for example `raycast #dev`)
-- Suggest matching tags while typing `#`, completed with Tab or Enter
+- Suggest matching tags while typing `#`, completed by selecting the suggestion and pressing Enter
+- Match more strictly, so a search stops returning nearly every bookmark: the default fuzziness matches almost anything on a field as long as a note body
 - Fix bookmark search not matching titles, tags and URLs: those keys pointed at fields that don't exist on the indexed object, so only note contents were searched
 
 ## [Edit Bookmarks] - {PR_MERGE_DATE}
 
 - Add an "Edit Bookmark" action (<kbd>⌘</kbd>+<kbd>E</kbd>) to search results. It reopens the save form, prefilled with the bookmark's URL, title, favicon, tags and notes, and writes the changes back to the same note — its filename, save date and read state are left untouched.
+- "Fetch Page Content" on the edit form only pulls from the active browser tab when it is the bookmarked page, instead of grabbing whatever tab is in front.
 
 ## [Favicons] - {PR_MERGE_DATE}
 

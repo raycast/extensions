@@ -239,7 +239,7 @@ export default function DetailsActions({
   showDetail,
   setShowDetail,
   onFileUpdated,
-}: DetailsActionsProps): JSX.Element {
+}: DetailsActionsProps): React.JSX.Element {
   const { value: obsidianFileIcon } = useFileIcon("Obsidian");
   const { value: defaultAction } = usePreference("defaultItemAction");
   const { push } = useNavigation();

@@ -12,6 +12,7 @@ import {
 } from "@raycast/api";
 import { useCallback, useMemo } from "react";
 import { asFile, asUpdatedFile } from "../helpers/save-to-obsidian";
+import { sanitizeUrl } from "../helpers/url-sanitizer";
 import { useFileIcon } from "../hooks/use-applications";
 import { LinkFormState } from "../hooks/use-link-form";
 import { usePreference } from "../hooks/use-preferences";
@@ -24,8 +25,18 @@ const saveFile = (values: LinkFormState["values"]) => asFile(values).then((f) =>
 const delay = (ms: number) => new Promise<void>((res) => setTimeout(res, ms));
 const popAndShowHUD = (message: string) => popToRoot().then(() => showHUD(message));
 
-async function fetchPageContent(): Promise<string> {
+async function fetchPageContent(expectedUrl?: string): Promise<string> {
   try {
+    // When editing, the content must come from the bookmarked page — not from
+    // whatever tab happens to be in front, which is usually Raycast's caller.
+    if (expectedUrl) {
+      const tabs = await BrowserExtension.getTabs();
+      const activeTab = tabs.find((tab) => tab.active);
+      if (!activeTab?.url || sanitizeUrl(activeTab.url) !== sanitizeUrl(expectedUrl)) {
+        throw new Error("Open this bookmark's page in your browser first, then try again.");
+      }
+    }
+
     const content = await BrowserExtension.getContent({ format: "markdown" });
     return `\n\n# Page Content\n\n${content}`;
   } catch (error) {
@@ -36,7 +47,8 @@ async function fetchPageContent(): Promise<string> {
 
 const createContentActions = (
   values: LinkFormState["values"],
-  setValues: (values: LinkFormState["values"]) => void
+  setValues: (values: LinkFormState["values"]) => void,
+  isEditing: boolean
 ): ActionGroup<FormActionPreference> => ({
   key: "content",
   useDivider: "unless-first",
@@ -50,7 +62,7 @@ const createContentActions = (
         shortcut: { modifiers: ["cmd"], key: "g" },
         onAction: async () => {
           try {
-            const content = await fetchPageContent();
+            const content = await fetchPageContent(isEditing ? values.url : undefined);
             setValues({
               ...values,
               description: values.description + content,
@@ -223,7 +235,7 @@ export type FormActionsProps = {
   onSaved?: (file: File) => void;
 };
 
-export default function FormActions({ values, setValues, file, onSaved }: FormActionsProps): JSX.Element {
+export default function FormActions({ values, setValues, file, onSaved }: FormActionsProps): React.JSX.Element {
   const { value: obsidianIcon } = useFileIcon("Obsidian");
   const { value: defaultAction } = usePreference("defaultFormAction");
   const { pop } = useNavigation();
@@ -239,7 +251,10 @@ export default function FormActions({ values, setValues, file, onSaved }: FormAc
 
   const obsidianActions = useMemo(() => createObsidianActions(values, obsidianIcon), [values, obsidianIcon]);
   const browserActions = useMemo(() => createBrowserActions(values), [values]);
-  const contentActions = useMemo(() => createContentActions(values, setValues), [values, setValues]);
+  const contentActions = useMemo(
+    () => createContentActions(values, setValues, file != null),
+    [values, setValues, file]
+  );
   const destructiveActions = useMemo(() => createDestructiveActions(), []);
   const updateActions = useMemo(
     () => (file ? createUpdateActions(values, file, onUpdated, obsidianIcon) : undefined),

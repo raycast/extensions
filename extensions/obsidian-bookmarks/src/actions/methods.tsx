@@ -4,6 +4,7 @@ import { Dispatch, SetStateAction } from "react";
 import copyUrlToClipboard from "../helpers/copy-url-to-clipboard";
 import openObsidianFileOrig, { createObsidianUri } from "../helpers/open-obsidian-file";
 import openUrlInCurrentWindowHelper from "../helpers/open-in-browser";
+import { withFreshBody } from "../helpers/read-bookmark-body";
 import saveToObsidian from "../helpers/save-to-obsidian";
 import { File } from "../types";
 
@@ -70,8 +71,9 @@ export async function saveFavorites(files: File[]): Promise<File[]> {
   if (files.length === 0) return files;
 
   try {
-    await Promise.all(files.map((file) => saveToObsidian(file)));
-    return files;
+    const fresh = await Promise.all(files.map(withFreshBody));
+    await Promise.all(fresh.map((file) => saveToObsidian(file)));
+    return fresh;
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -82,8 +84,9 @@ export async function saveFavorites(files: File[]): Promise<File[]> {
   }
 }
 
-const markAs = (read: boolean) => (file: File) => {
-  const newFile: File = { ...file, attributes: { ...file.attributes, read } };
+const markAs = (read: boolean) => async (file: File) => {
+  const fresh = await withFreshBody(file);
+  const newFile: File = { ...fresh, attributes: { ...fresh.attributes, read } };
   return saveFile(newFile);
 };
 export const markAsRead = markAs(true);

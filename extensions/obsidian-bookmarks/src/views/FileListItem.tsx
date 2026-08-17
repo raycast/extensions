@@ -13,7 +13,7 @@ type Props = {
   setShowDetail: Dispatch<SetStateAction<boolean>>;
   onFileUpdated?: (file: File) => void;
 };
-export default function FileListItem({ file, files, loading, ...actionProps }: Props): JSX.Element {
+export default function FileListItem({ file, files, loading, ...actionProps }: Props): React.JSX.Element {
   const favorite = file.attributes.favorite;
   const tags = (file.attributes.tags || []).map((tag) => ({ text: tag }));
 

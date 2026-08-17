@@ -11,6 +11,10 @@ import path from "node:path";
 
 const MAX_TAG_SUGGESTIONS = 6;
 
+// Fuse's default threshold of 0.6 lets almost anything match on a field as long
+// as a note body, so results drown in near misses. This still forgives typos.
+const MATCH_THRESHOLD = 0.3;
+
 const ONE_DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 function midnight(daysAgo: number): Date {
@@ -51,7 +55,7 @@ export default function SearchBookmarks() {
   const urlFuse = useMemo(() => {
     return new Fuse<File>(files, {
       ignoreLocation: true,
-      threshold: 0.4,
+      threshold: MATCH_THRESHOLD,
       keys: [{ name: "url", getFn: (file) => sanitizeUrl(file.attributes.source) }],
     });
   }, [files]);
@@ -60,6 +64,7 @@ export default function SearchBookmarks() {
     return new Fuse<File>(files, {
       fieldNormWeight: 1,
       ignoreLocation: true,
+      threshold: MATCH_THRESHOLD,
       keys: [
         { name: "title", weight: 5, getFn: (file) => file.attributes.title },
         { name: "tags", weight: 2, getFn: (file) => file.attributes.tags },
@@ -183,7 +188,6 @@ export default function SearchBookmarks() {
                   <Action
                     title="Complete Tag"
                     icon={Icon.Hashtag}
-                    shortcut={{ modifiers: [], key: "tab" }}
                     onAction={() => setSearch(completeTag(search, tag))}
                   />
                 </ActionPanel>
