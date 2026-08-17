@@ -1,4 +1,4 @@
-## [Add Search Sitemap Command] - {PR_MERGE_DATE}
+## [Add Search Sitemap Command] - 2026-08-17
 
 - Search sitemaps from a URL or the active browser tab
 - Support nested indexes, robots.txt discovery, and gzip-compressed sitemaps
