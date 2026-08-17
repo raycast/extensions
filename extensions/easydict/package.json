@@ -34,6 +34,13 @@
       "subtitle": "Query text from image",
       "description": "Screenshot OCR, and query text from image.",
       "mode": "no-view"
+    },
+    {
+      "name": "favorites",
+      "title": "Favorite Words",
+      "subtitle": "Easydict",
+      "description": "Browse and manage words you saved from Easydict.",
+      "mode": "view"
     }
   ],
   "categories": [
@@ -58,8 +65,8 @@
   ],
   "dependencies": {
     "@deeplx/core": "^0.2.2",
-    "@raycast/api": "^1.104.23",
-    "@raycast/utils": "^2.2.6",
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0",
     "@xsai/shared-chat": "^0.5.0-beta.6",
     "@xsai/stream-text": "^0.5.0-beta.6",
     "franc": "^6.2.0",

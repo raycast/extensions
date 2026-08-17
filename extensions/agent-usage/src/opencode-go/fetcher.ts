@@ -1,5 +1,5 @@
-import type { OpencodegoUsage, OpencodegoError } from "./types.ts";
 import { parseOpencodegoHtml } from "./parser.ts";
+import type { OpencodegoUsage, OpencodegoError } from "./types.ts";
 
 function buildUrl(workspaceId: string): string {
   const id = workspaceId.trim();

@@ -1,5 +1,6 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
+
 import { getInitialSelectedRowId, sortByDefaultAgentOrder } from "./order.ts";
 import type { AgentId } from "./types.ts";
 
@@ -13,6 +14,7 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
     { id: "grok", rowId: "grok" },
     { id: "gemini", rowId: "gemini" },
     { id: "droid", rowId: "droid" },
+    { id: "deepseek", rowId: "deepseek" },
     { id: "cursor", rowId: "cursor" },
     { id: "copilot", rowId: "copilot" },
     { id: "codex", rowId: "codex-1" },
@@ -34,6 +36,7 @@ test("sortByDefaultAgentOrder uses the canonical provider order and keeps provid
       "codex-2",
       "copilot",
       "cursor",
+      "deepseek",
       "droid",
       "gemini",
       "grok",

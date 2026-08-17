@@ -1,9 +1,8 @@
 import { List } from "@raycast/api";
 import { Fragment } from "react";
-import type { CodexUsage, CodexError } from "./types.ts";
-import { effectiveRemainingPercent } from "./effective-remaining.ts";
-import type { Accessory } from "../agents/types.ts";
+
 import { formatDuration, formatResetTime, parseDate } from "../agents/format.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -12,6 +11,8 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
+import { effectiveRemainingPercent } from "./effective-remaining.ts";
+import type { CodexUsage, CodexError } from "./types.ts";
 
 export function formatCodexUsageText(usage: CodexUsage | null, error: CodexError | null): string {
   const fallback = formatErrorOrNoData("Codex", usage, error);

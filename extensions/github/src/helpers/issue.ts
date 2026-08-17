@@ -51,3 +51,64 @@ export const ISSUE_SORT_TYPES_TO_QUERIES = [
 ];
 
 export const ISSUE_DEFAULT_SORT_QUERY = "sort:updated-desc";
+
+const REPO_QUALIFIER_REGEX = /\brepo:([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)\b/i;
+const REPO_ISSUE_REFERENCE_REGEX =
+  /(?:https?:\/\/github\.com\/)?([A-Za-z0-9_.-]+)\/([A-Za-z0-9_.-]+)(?:\/issues\/|#)(\d+)\b/i;
+const SEARCH_QUALIFIER_REGEX =
+  /\b(?:repo|author|assignee|mentions|commenter|involves|team|label|milestone|project|status|head|base|language|is|type|state|user|org|sort|archived|no|review|draft|created|updated|closed|linked|in|comments|interactions|reactions):[^\s]+/gi;
+
+export type IssueNumberLookup = {
+  owner: string;
+  name: string;
+  issueNumber: number;
+};
+
+/**
+ * GitHub's issue search API has no number qualifier, so `#123` never matches
+ * issue 123. When the query points at a specific repository, look the issue up
+ * with `repository.issue(number:)` instead.
+ */
+export function parseIssueNumberLookup(
+  searchText: string,
+  repositoryNameWithOwner?: string | null,
+): IssueNumberLookup | null {
+  const referenceMatch = searchText.match(REPO_ISSUE_REFERENCE_REGEX);
+  if (referenceMatch) {
+    return {
+      owner: referenceMatch[1],
+      name: referenceMatch[2],
+      issueNumber: Number.parseInt(referenceMatch[3], 10),
+    };
+  }
+
+  const repoQualifierMatch = searchText.match(REPO_QUALIFIER_REGEX);
+  const hintedRepo = repositoryNameWithOwner?.replace(/^repo:/, "");
+  const repo = repoQualifierMatch
+    ? `${repoQualifierMatch[1]}/${repoQualifierMatch[2]}`
+    : hintedRepo?.includes("/")
+      ? hintedRepo
+      : null;
+
+  if (!repo) {
+    return null;
+  }
+
+  const remainder = searchText.replace(SEARCH_QUALIFIER_REGEX, " ").replace(/\s+/g, " ").trim();
+  const numberMatch = remainder.match(/^#?(\d+)$/) ?? searchText.match(/(?:^|\s)#(\d+)(?:\s|$)/);
+  if (!numberMatch) {
+    return null;
+  }
+
+  const [owner, name] = repo.split("/");
+  if (!owner || !name) {
+    return null;
+  }
+
+  return { owner, name, issueNumber: Number.parseInt(numberMatch[1], 10) };
+}
+
+/** `#123` is not a search qualifier; keep the digits so text search can still run as a fallback. */
+export function normalizeIssueSearchText(searchText: string): string {
+  return searchText.replace(/(^|\s)#(\d+)(?=\s|$)/g, "$1$2").trim();
+}

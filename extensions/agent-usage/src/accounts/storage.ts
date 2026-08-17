@@ -1,6 +1,8 @@
+import { randomUUID } from "crypto";
+
 // src/accounts/storage.ts
 import { LocalStorage } from "@raycast/api";
-import { randomUUID } from "crypto";
+
 import type { AccountEntry, AccountsProvider } from "./types.ts";
 import { ACCOUNTS_STORAGE_KEYS } from "./types.ts";
 

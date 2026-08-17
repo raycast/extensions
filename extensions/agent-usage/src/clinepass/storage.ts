@@ -1,4 +1,5 @@
 import { LocalStorage } from "@raycast/api";
+
 import type { ClinePassCredential } from "./types.ts";
 
 const CLINE_LOCAL_CREDENTIAL_KEY = "clinepass-refreshed-credential-v1";

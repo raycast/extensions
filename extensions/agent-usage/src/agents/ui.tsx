@@ -1,8 +1,9 @@
-import { environment, Image, List } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
 import * as fs from "fs";
 import * as path from "path";
-import type { Accessory } from "./types.ts";
+
+import { environment, Image, List } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
+
 import {
   getDarkListIconAssetName,
   invertMonochromeSvg,
@@ -11,6 +12,7 @@ import {
   selectSourceForAppearance,
   shouldInvertListIcon,
 } from "./icon-svg.ts";
+import type { Accessory } from "./types.ts";
 export { generateAsciiBar } from "./detail-format.ts";
 
 type ErrorLike = { type: string; message: string };

@@ -14,7 +14,6 @@
       "placeholder": "https://app.vanguardbackup.com/",
       "description": "URL of your Vanguard Instance",
       "required": true,
-      "default": "https://app.vanguardbackup.com/",
       "type": "textfield"
     },
     {

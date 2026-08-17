@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 test("formatRemainingPercent formats valid percentages", async () => {
   const { formatRemainingPercent } = await import("./percentage.ts");

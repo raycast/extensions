@@ -1,5 +1,5 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 
 test("mapAntigravityError maps probe not_running to user-facing error", async () => {
   const { mapAntigravityError } = await import("./fetcher.ts");

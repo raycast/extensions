@@ -3,12 +3,19 @@ import { Clipboard, LocalStorage, Toast, confirmAlert, openExtensionPreferences,
 import * as api from "./api.js";
 import { catchError } from "./errors.js";
 import * as git from "./git.js";
+import { formatRepositoryCleanupResult } from "./repository-maintenance.js";
+import type { RepositoryCleanupPreview } from "./repository-maintenance.js";
 import { getCloudSyncedPathRoot, getCommitsText, simplifyPath } from "./utils.js";
 
 /**
  * The storage key prefix for acknowledged cloud-synced repository path warnings.
  */
 const cloudSyncedRepositoryPathWarningStorageKey = "cloud-synced-repository-path-warning:";
+
+type SpawnOptions<T> = {
+  requiresCleanStatus?: boolean;
+  getCompletedMessage?: (result: T) => string | Toast.Options;
+};
 
 /**
  * Class to manage operations related to forked extensions.
@@ -141,6 +148,20 @@ class Operation {
   pull = async () => this.spawn(async () => git.pullFork(), "Pulling changes", "Pulled successfully");
 
   /**
+   * Cleans up and optimizes the managed repository object database.
+   * @param preview Repository statistics captured before user confirmation.
+   */
+  cleanUpRepository = async (preview: RepositoryCleanupPreview) =>
+    this.spawn(() => git.cleanUpRepository(preview), "Cleaning up repository", undefined, {
+      requiresCleanStatus: false,
+      getCompletedMessage: (result) => ({
+        title: "Repository Cleaned Up",
+        message: formatRepositoryCleanupResult(result),
+        style: Toast.Style.Success,
+      }),
+    });
+
+  /**
    * Forks an extension by adding it to the sparse-checkout list.
    * @param extensionFolder The folder of the extension to fork.
    */
@@ -261,14 +282,16 @@ class Operation {
 
   /**
    * Executes a task with a loading toast and handles success or failure.
-   * @param task The task to execute, which returns a promise with void or string.
+   * @param task The task to execute.
    * @param loadingMessage The message to show while the task is loading.
    * @param completedMessage Optional message to show when the task completes successfully. If not provided, the string result of the task will be used. Otherwise, the toast will be hidden.
+   * @param options Optional operation behavior and result formatting.
    */
   private spawn = async <T>(
     task: () => Promise<T>,
     loadingMessage: string,
     completedMessage?: string | Toast.Options,
+    options: SpawnOptions<T> = {},
   ) => {
     if (this.isOperating) {
       await this.showOperationBusyToast();
@@ -276,12 +299,13 @@ class Operation {
     }
     try {
       this.isOperating = true;
-      await git.checkIfStatusClean();
+      if (options.requiresCleanStatus !== false) await git.checkIfStatusClean();
       this.showToast({ title: loadingMessage });
       const result = await task();
-      if (completedMessage) {
-        if (typeof completedMessage === "string") this.completeToast(completedMessage);
-        else this.showToast(completedMessage, true);
+      const resolvedCompletedMessage = options.getCompletedMessage?.(result) ?? completedMessage;
+      if (resolvedCompletedMessage) {
+        if (typeof resolvedCompletedMessage === "string") this.completeToast(resolvedCompletedMessage);
+        else this.showToast(resolvedCompletedMessage, true);
       } else if (typeof result === "string") {
         this.completeToast(result);
       } else {

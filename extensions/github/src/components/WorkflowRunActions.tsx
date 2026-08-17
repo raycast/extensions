@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import { getGitHubClient } from "../api/githubClient";
@@ -156,7 +156,7 @@ export function WorkflowRunActions({ workflowRun, repository, mutateList }: Work
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutateList}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
     </ActionPanel>

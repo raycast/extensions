@@ -1,5 +1,5 @@
 import type { AccountEntry } from "../accounts/types.ts";
-import type { CodexOAuthAccount } from "./auth.ts";
+import { getCodexAccountDedupeKeys, type CodexOAuthAccount } from "./auth.ts";
 
 export type CodexAccountCandidateSource = "codex-home" | "manual";
 
@@ -19,6 +19,7 @@ export function buildCodexAccountCandidates(
   const candidates: CodexAccountCandidate[] = [];
   const seenTokens = new Set<string>();
   const seenAccountIds = new Set<string>();
+  const seenDiscoveredCredentials = new Set<string>();
   // Candidates added without an account ID, keyed by token. A later entry that
   // supplies an explicit account ID for the same token enriches one of these
   // rather than adding a redundant token-default entry.
@@ -35,6 +36,16 @@ export function buildCodexAccountCandidates(
   };
 
   for (const account of discoveredAccounts) {
+    // Additional CODEX_HOME entries can alias the default home or repeat the same
+    // OAuth credential under a different discovered ID — keep the first only.
+    const dedupeKeys = getCodexAccountDedupeKeys(account);
+    if (dedupeKeys.some((key) => seenDiscoveredCredentials.has(key))) {
+      continue;
+    }
+    for (const key of dedupeKeys) {
+      seenDiscoveredCredentials.add(key);
+    }
+
     registerCandidate({
       id: account.id,
       label: account.label,

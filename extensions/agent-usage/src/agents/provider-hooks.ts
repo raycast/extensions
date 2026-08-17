@@ -1,8 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import { createAccountsHook, createUsageHook } from "./hooks.ts";
-import { readOpencodeAuthToken } from "./opencode-auth.ts";
-import { loadAccounts } from "../accounts/storage.ts";
 
+import { loadAccounts } from "../accounts/storage.ts";
 import { fetchAmpUsage } from "../amp/fetcher.ts";
 import type { AmpError, AmpUsage } from "../amp/types.ts";
 import { fetchAntigravityUsage } from "../antigravity/fetcher.ts";
@@ -15,7 +13,7 @@ import { fetchClinePassUsage } from "../clinepass/fetcher.ts";
 import { clearClineLocalCredential, loadClineLocalCredential, saveClineLocalCredential } from "../clinepass/storage.ts";
 import type { ClinePassError, ClinePassUsage } from "../clinepass/types.ts";
 import { buildCodexAccountCandidates } from "../codex/accounts.ts";
-import { listCodexOAuthAccounts } from "../codex/auth.ts";
+import { listCodexOAuthAccounts, parseAdditionalCodexHomes } from "../codex/auth.ts";
 import { fetchCodexUsage } from "../codex/fetcher.ts";
 import type { CodexError, CodexUsage } from "../codex/types.ts";
 import { resolveCopilotAuthTokens, shouldFallbackToPreferenceToken } from "../copilot/auth.ts";
@@ -23,6 +21,9 @@ import { fetchCopilotUsage } from "../copilot/fetcher.ts";
 import type { CopilotError, CopilotUsage } from "../copilot/types.ts";
 import { fetchCursorUsage, resolveCursorCredential } from "../cursor/fetcher.ts";
 import type { CursorError, CursorUsage } from "../cursor/types.ts";
+import { resolveDeepSeekApiKey } from "../deepseek/auth.ts";
+import { fetchDeepSeekUsage } from "../deepseek/fetcher.ts";
+import type { DeepSeekError, DeepSeekUsage } from "../deepseek/types.ts";
 import { resolveDroidAuth } from "../droid/auth.ts";
 import { fetchDroidUsage } from "../droid/fetcher.ts";
 import type { DroidError, DroidUsage } from "../droid/types.ts";
@@ -42,6 +43,8 @@ import type { SyntheticError, SyntheticUsage } from "../synthetic/types.ts";
 import { resolveZaiAuthTokens } from "../zai/auth.ts";
 import { fetchZaiUsage, ZAI_OPENCODE_KEY } from "../zai/fetcher.ts";
 import type { ZaiError, ZaiUsage } from "../zai/types.ts";
+import { createAccountsHook, createUsageHook } from "./hooks.ts";
+import { readOpencodeAuthToken } from "./opencode-auth.ts";
 
 /**
  * Provider hooks are the Raycast adapter layer: they combine Raycast-only
@@ -53,8 +56,10 @@ import type { ZaiError, ZaiUsage } from "../zai/types.ts";
 
 // Root-level preferences shared by both commands.
 type SharedPrefs = {
+  additionalCodexHomes?: string;
   copilotAuthToken?: string;
   cursorCookieHeader?: string;
+  deepseekApiKey?: string;
   kimiAuthToken?: string;
   syntheticApiToken?: string;
   zaiApiToken?: string;
@@ -123,6 +128,25 @@ export const useCursorUsage = createUsageHook<CursorUsage, CursorError>({
   agentId: "cursor",
   resolveAuthKey: async () => resolveCursorCredential(prefValue("cursorCookieHeader"))?.cookieHeader ?? "",
   fetcher: () => fetchCursorUsage(prefValue("cursorCookieHeader")),
+});
+
+export const useDeepSeekUsage = createUsageHook<DeepSeekUsage, DeepSeekError>({
+  agentId: "deepseek",
+  resolveAuthKey: async () => (await resolveDeepSeekApiKey(prefValue("deepseekApiKey"))) ?? "",
+  fetcher: async () => {
+    const apiKey = await resolveDeepSeekApiKey(prefValue("deepseekApiKey"));
+    if (!apiKey) {
+      return {
+        usage: null,
+        error: {
+          type: "not_configured",
+          message:
+            "DeepSeek API key not configured. Add it in extension settings (Cmd+,), log in through OpenCode, or set DEEPSEEK_API_KEY in your shell.",
+        },
+      };
+    }
+    return fetchDeepSeekUsage(apiKey);
+  },
 });
 
 export const useDroidUsage = createUsageHook<DroidUsage, DroidError>({
@@ -221,7 +245,18 @@ export const useCodexAccounts = createAccountsHook<
   ReturnType<typeof buildCodexAccountCandidates>[number]
 >({
   agentId: "codex",
-  getAccounts: async () => buildCodexAccountCandidates(listCodexOAuthAccounts(), await loadAccounts("codex")),
+  getAccounts: async () => {
+    const defaultAccounts = listCodexOAuthAccounts();
+    const additionalAccounts = parseAdditionalCodexHomes(prefValue("additionalCodexHomes")).flatMap(
+      (codexHome, homeIndex) =>
+        listCodexOAuthAccounts({ codexHome }).map((account) => ({
+          ...account,
+          id: `codex-home-${homeIndex}-${account.id}`,
+        })),
+    );
+
+    return buildCodexAccountCandidates([...defaultAccounts, ...additionalAccounts], await loadAccounts("codex"));
+  },
   fetcher: async (account) => {
     if (account.needsAccountId) {
       return {

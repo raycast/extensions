@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import type { GeminiUsage, GeminiError } from "./types.ts";
+
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
@@ -9,6 +9,7 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
+import type { GeminiUsage, GeminiError } from "./types.ts";
 
 export function formatGeminiUsageText(usage: GeminiUsage | null, error: GeminiError | null): string {
   const fallback = formatErrorOrNoData("Gemini", usage, error);

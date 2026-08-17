@@ -1,5 +1,5 @@
 import { List } from "@raycast/api";
-import type { DroidUsage, DroidError } from "./types.ts";
+
 import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
@@ -9,6 +9,7 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
+import type { DroidUsage, DroidError } from "./types.ts";
 
 function formatDate(timestamp: number): string {
   if (!timestamp) return "N/A";

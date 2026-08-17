@@ -1,5 +1,34 @@
 # Agent Usage Changelog
 
+## [Show Cursor Auto and API percentages] - 2026-08-16
+
+### Improvements
+
+- Show Auto and API remaining percentages together on the Cursor list and menu bar when both windows are available
+- Color the Cursor usage pie from the tighter of the two windows
+
+## [Add support for multiple CODEX_HOME] - 2026-08-15
+
+- Support additional CODEX_HOME in preferences, letting users read from multiple active codex account
+
+## [Add DeepSeek Usage] - 2026-08-14
+
+- Add DeepSeek balance monitoring to the main list and menu bar
+- Show total, topped-up, and granted balances
+- Automatically detect API keys from OpenCode or environment variables, with manual setup available in Preferences
+
+## [Fix Antigravity detection on 2.7+] - 2026-08-13
+
+### Bug Fixes
+
+- Detect the suffix-less `language_server` binary shipped by Antigravity 2.7+, which left the Antigravity row stuck on "Not Running" while the app was running
+
+## [Fix ClinePass usage limits windows] - 2026-08-12
+
+### Bug Fixes
+
+- Restore the 5h Limit "Resets At" field, display the full usage limit window when no value have been returned (when the window haven't been consumed yet)
+
 ## [Add support for ClinePass] - 2026-08-10
 
 ### New Features

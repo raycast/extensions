@@ -118,7 +118,7 @@
     "@types/react": "19.0.10",
     "@vitest/coverage-v8": "^4.1.0",
     "eslint": "^9.22.0",
-    "jsdom": "^27.4.0",
+    "jsdom": "^28.0.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",
     "vitest": "^4.1.0"

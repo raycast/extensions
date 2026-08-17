@@ -1,6 +1,6 @@
-import type { CodexUsage, CodexError, CodexAdditionalRateLimit, CodexRateLimitWindow } from "./types.ts";
-import { httpFetch } from "../agents/http.ts";
 import { parseDate } from "../agents/format.ts";
+import { httpFetch } from "../agents/http.ts";
+import type { CodexUsage, CodexError, CodexAdditionalRateLimit, CodexRateLimitWindow } from "./types.ts";
 
 const CODEX_USAGE_API = "https://chatgpt.com/backend-api/wham/usage";
 const CODEX_RESET_CREDITS_API = "https://chatgpt.com/backend-api/wham/rate-limit-reset-credits";

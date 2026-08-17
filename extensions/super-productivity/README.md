@@ -37,6 +37,8 @@ npm run dev   # opens Raycast dev with the extension live-reloading
 
 The default preference `apiBaseUrl` is `http://127.0.0.1:3876`. Change it in Raycast preferences if your SP instance runs elsewhere.
 
+🔑 You will also need to enter the "Access Token" from local REST API settings.
+
 ---
 
 ## Auto-focus on tracking

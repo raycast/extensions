@@ -1,5 +1,7 @@
-import React from "react";
 import { List } from "@raycast/api";
+import React from "react";
+
+import type { Accessory } from "../agents/types.ts";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
@@ -8,9 +10,8 @@ import {
   generatePieIcon,
   generateAsciiBar,
 } from "../agents/ui.tsx";
-import type { AntigravityError, AntigravityUsage } from "./types.ts";
 import { effectiveAntigravityPercent } from "./effective-remaining.ts";
-import type { Accessory } from "../agents/types.ts";
+import type { AntigravityError, AntigravityUsage } from "./types.ts";
 
 export function formatAntigravityUsageText(usage: AntigravityUsage | null, error: AntigravityError | null): string {
   const fallback = formatErrorOrNoData("Antigravity", usage, error);
