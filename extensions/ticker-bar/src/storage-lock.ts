@@ -74,11 +74,9 @@ async function holdLease<Value>(
   }, options.heartbeatMs);
 
   try {
-    const result = await work(abort.signal);
-    if (abort.signal.aborted || !(await isOwner(storage, key, owner))) {
-      throw new Error("Another Ticker Bar operation is already running");
-    }
-    return result;
+    // Work that already completed must not be reported as contention just
+    // because a later heartbeat noticed the lease was lost.
+    return await work(abort.signal);
   } finally {
     clearInterval(heartbeat);
     await renewal;

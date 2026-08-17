@@ -48,6 +48,34 @@ test("a heartbeat keeps a lease owned beyond its initial expiry", async () => {
   await first;
 });
 
+test("completed work still returns after heartbeat lease loss", async () => {
+  const storage = memoryStorage();
+  const key = "refresh";
+
+  const result = await withLeaseLock(
+    storage,
+    key,
+    async (signal) => {
+      // Steal the lease so the next heartbeat aborts the holder.
+      await storage.setItem(key, `intruder|${Date.now() + 60_000}`);
+      await wait(40);
+      assert.equal(signal.aborted, true);
+      return "committed";
+    },
+    {
+      leaseMs: 80,
+      heartbeatMs: 15,
+      waitTimeoutMs: 20,
+      retryMs: 5,
+    },
+  );
+
+  assert.equal(result, "committed");
+  // Intruder still owns the lease; holder must not clear a foreign lock.
+  const latest = await storage.getItem(key);
+  assert.ok(latest?.startsWith("intruder|"));
+});
+
 test("concurrent acquires never run protected work at the same time", async () => {
   const values = new Map<string, string>();
   const storage: LeaseStorage = {
