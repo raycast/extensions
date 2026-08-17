@@ -77,16 +77,18 @@ function writeLocal(items: Item[]) {
 }
 
 function withLock<T>(fn: () => T): T {
-  const giveUp = Date.now() + LOCK_STALE_MS;
+  mkdirSync(dirname(LOCAL_FILE), { recursive: true });
   for (;;) {
     try {
       const fd = openSync(LOCK_FILE, "wx");
+      const token = `${process.pid}-${Math.random().toString(36).slice(2)}`;
+      writeFileSync(fd, token);
       try {
         return fn();
       } finally {
         closeSync(fd);
         try {
-          unlinkSync(LOCK_FILE);
+          if (readFileSync(LOCK_FILE, "utf8") === token) unlinkSync(LOCK_FILE);
         } catch {
           // already released
         }
@@ -94,10 +96,23 @@ function withLock<T>(fn: () => T): T {
     } catch (err) {
       const code = (err as NodeJS.ErrnoException).code;
       if (code !== "EEXIST") throw err;
-      if (Date.now() > giveUp) throw new Error("shelf is locked");
       try {
         if (Date.now() - statSync(LOCK_FILE).mtimeMs > LOCK_STALE_MS) {
-          unlinkSync(LOCK_FILE);
+          const token = readFileSync(LOCK_FILE, "utf8");
+          const ownerPid = Number(token.split("-", 1)[0]);
+          let ownerAlive = Number.isInteger(ownerPid) && ownerPid > 0;
+          if (ownerAlive) {
+            try {
+              process.kill(ownerPid, 0);
+            } catch (error) {
+              ownerAlive = (error as NodeJS.ErrnoException).code === "EPERM";
+            }
+          }
+          if (!ownerAlive) {
+            const stale = `${LOCK_FILE}.${process.pid}.${Math.random().toString(36).slice(2)}.stale`;
+            renameSync(LOCK_FILE, stale);
+            unlinkSync(stale);
+          }
         }
       } catch {
         // lock vanished or we raced with the holder releasing it
