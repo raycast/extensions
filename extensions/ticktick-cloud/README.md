@@ -2,7 +2,15 @@
 
 Manage your [TickTick](https://ticktick.com/) tasks from Raycast on Windows, connected directly to TickTick's official cloud API — no desktop app required.
 
-This extension is an independent, cloud-only implementation for Windows. It is not affiliated with the macOS-only [TickTick extension](https://www.raycast.com/appest/ticktick) by Appest, whose command structure inspired this one (MIT licensed — thank you!). The two differ materially: this extension talks to TickTick's official remote MCP service with OAuth, while the original automates the local TickTick for Mac application.
+## How This Differs From Other TickTick Extensions
+
+The existing Store extensions — [TickTick](https://www.raycast.com/appest/ticktick) and [TickTick+](https://www.raycast.com/ysrazsingh/ticktick-plus) — both declare `platforms: ["macOS"]` and are unavailable on Windows.
+
+- **Platform** — TickTick Cloud declares `platforms: ["Windows"]`. It is a Windows counterpart, not a replacement: there is no platform overlap with either existing extension.
+- **Integration** — TickTick Cloud talks directly to TickTick's official cloud API over HTTPS, so no TickTick desktop app is required. The original TickTick extension instead automates the locally installed TickTick for Mac application via AppleScript, which cannot work on Windows.
+- **Authentication** — OAuth (PKCE, no embedded client secret) by default, with an API-token fallback.
+
+TickTick Cloud is an independent implementation and is not affiliated with either extension. Its command structure was inspired by the original TickTick extension (MIT licensed — thank you!).
 
 ## Commands
 
