@@ -5,12 +5,11 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 import type { Application } from "@raycast/api";
 import { getHerdrPreferences } from "./preferences";
-import { resolveHerdrBinary, runHerdrJson } from "./herdr";
+import { resolveHerdrBinary, runHerdr, runHerdrJson } from "./herdr";
 import { lookupHerdrClientTtys } from "./process-lookup";
 import { shellQuote } from "./parsers";
 import { detectTerminalKind, expandCustomLauncher } from "./terminal-config";
 import {
-  buildGhosttyClearMarkerScript,
   buildGhosttyFocusScript,
   buildITermFocusScript,
   buildTerminalFocusScript,
@@ -100,13 +99,18 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
 
   if (kind === "ghostty") {
     const marker = `herdr-raycast-${randomUUID()}`;
-    let changedTitle = false;
+    // Marked before the set is awaited: a client-side timeout can leave the
+    // title changed server-side, and clearing an unchanged title is harmless.
+    let mustClearTitle = false;
     try {
+      mustClearTitle = true;
       const title = await runHerdrJson<{ changed: boolean; reason: string }>(["terminal", "title", "set", marker], {
         timeout: FAST_FOCUS_TIMEOUT_MS,
       });
-      if (!title.changed) return title.reason === "no_foreground_client" ? "missing" : "unavailable";
-      changedTitle = true;
+      if (!title.changed) {
+        mustClearTitle = false;
+        return title.reason === "no_foreground_client" ? "missing" : "unavailable";
+      }
 
       const script = buildGhosttyFocusScript(marker);
       const result = await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
@@ -115,13 +119,12 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
     } catch {
       return "unavailable";
     } finally {
-      if (changedTitle) {
-        const script = buildGhosttyClearMarkerScript(marker);
-        const cleared = await tryExecCapture("/usr/bin/osascript", ["-e", script], FAST_FOCUS_TIMEOUT_MS);
-        // Fast attempt may time out if Ghostty/AppleScript is briefly slow; retry once with
-        // a generous timeout so the marker title doesn't get stuck permanently.
-        if (cleared === undefined) {
-          await tryExecCapture("/usr/bin/osascript", ["-e", script], 5_000);
+      if (mustClearTitle) {
+        try {
+          await runHerdr(["terminal", "title", "clear"], { timeout: FAST_FOCUS_TIMEOUT_MS });
+        } catch {
+          // Retry generously so the marker title does not stick.
+          await runHerdr(["terminal", "title", "clear"], { timeout: 5_000 }).catch(() => undefined);
         }
       }
     }
@@ -180,8 +183,14 @@ export async function launchHerdrInTerminal(
 ): Promise<void> {
   const binary = await resolveHerdrBinary();
   const application = selectedApplication();
-  const sessionName = options.includePreferredSession === false ? undefined : getHerdrPreferences().sessionName?.trim();
-  const sessionArgs = sessionName && sessionName !== "default" ? ["--session", sessionName, ...args] : args;
+  // Launched clients inherit the Raycast process environment, where a leaked
+  // HERDR_SESSION would retarget them, so the session is always named. The
+  // opt-out branches on the option alone: an unset preference is also
+  // undefined and must still produce the flag.
+  const sessionArgs =
+    options.includePreferredSession === false
+      ? args
+      : ["--session", getHerdrPreferences().sessionName?.trim() || "default", ...args];
   const command = [binary, ...sessionArgs].map(shellQuote).join(" ");
   const customLauncher = getHerdrPreferences().customTerminalLauncher?.trim();
   if (customLauncher) {
