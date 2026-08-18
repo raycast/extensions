@@ -40,15 +40,21 @@ export default function PublishPost() {
       });
       try {
         // Resolve placements against a FRESH fetch for the currently-selected profiles (single-
-        // profile networks only), so a stale/out-of-order load or another profile's placement can't
-        // leak in.
+        // profile networks only). A placement is mandatory for these networks, so require an
+        // explicit valid choice — never silently substitute a destination the user didn't pick.
         const eligibleNow = eligiblePlacementProfiles(profiles.filter((p) => v.profiles.includes(p.id)));
         const fresh = eligibleNow.length > 0 ? await loadPlacementsByNetwork(eligibleNow) : {};
         const resolved: Record<string, string> = {};
         for (const [net, list] of Object.entries(fresh)) {
           const validIds = new Set(list.map((placement) => placement.id ?? ""));
           const chosen = networkPlacements[net];
-          resolved[net] = chosen !== undefined && validIds.has(chosen) ? chosen : (list[0]?.id ?? "");
+          if (chosen === undefined || !validIds.has(chosen)) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "Placement required";
+            toast.message = `Choose a ${PLACEMENT_META[net]?.label ?? net} and try again.`;
+            return;
+          }
+          resolved[net] = chosen;
         }
         const result = await createPost({
           body: v.body,
