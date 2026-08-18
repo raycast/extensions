@@ -8,6 +8,15 @@ your plan, and keep your current block in the menu bar, all without a browser.
 over OAuth. It never holds an admin token; row-level permissions enforce
 ownership on the server.
 
+## How it differs from calendar tools
+
+This is **not** a calendar assistant or a standalone scheduler. It requires a
+[Reassign](https://reassign.app) account and mirrors your Reassign plan — its
+time blocks, areas, activities, and reflections. Unlike tools that create events
+in Google or Outlook Calendar (for example Reclaim) or that manage their own
+weekly schedule, this extension is a keyboard surface for the Reassign planner
+you already use: glance at your dial day, capture blocks, and check them off.
+
 ## Commands
 
 - **Agenda** — your plan for the week (default) or a single day (`⌘⇧W` toggles).

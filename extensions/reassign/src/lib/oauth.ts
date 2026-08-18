@@ -39,6 +39,20 @@ interface TokenResponse {
 /** Coalesce concurrent refreshes so parallel calls do not race the endpoint. */
 let refreshInFlight: Promise<string> | null = null;
 
+// Bumped on every sign-out. A refresh that started before a sign-out must not
+// store new tokens after it (that would silently undo the logout).
+let logoutEpoch = 0;
+
+/** A token-endpoint failure that carries the HTTP status (undefined = network). */
+class TokenEndpointError extends Error {
+  status?: number;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "TokenEndpointError";
+    this.status = status;
+  }
+}
+
 /** Run the full sign-in: authorize in the browser, then exchange the code. */
 export async function signIn(): Promise<void> {
   const authRequest = await client.authorizationRequest({
@@ -58,6 +72,7 @@ export async function signIn(): Promise<void> {
 
 /** Clear the stored session. The next call forces a new sign-in. */
 export async function signOut(): Promise<void> {
+  logoutEpoch += 1;
   refreshInFlight = null;
   await client.removeTokens();
 }
@@ -94,12 +109,17 @@ async function refresh(refreshToken: string): Promise<string> {
   if (refreshInFlight) {
     return refreshInFlight;
   }
+  const epoch = logoutEpoch;
   refreshInFlight = (async () => {
     try {
       const tokens = await exchangeRefresh(refreshToken);
       // Keep the old refresh token when the server omits a new one, or the next
       // refresh finds no token and forces an unneeded sign-in.
       if (!tokens.refresh_token) tokens.refresh_token = refreshToken;
+      // A sign-out happened while this refresh was in flight — do not re-store.
+      if (logoutEpoch !== epoch) {
+        throw new NotAuthorizedError("Signed out during refresh");
+      }
       await client.setTokens(tokens);
       return tokens.access_token;
     } finally {
@@ -136,9 +156,15 @@ async function exchangeRefresh(refreshToken: string): Promise<TokenResponse> {
   try {
     return await postToken(body);
   } catch (error) {
-    // A refused refresh means the grant is dead. Force a fresh sign-in.
-    await signOut();
-    throw new NotAuthorizedError(error instanceof Error ? error.message : "Refresh failed");
+    const status = error instanceof TokenEndpointError ? error.status : undefined;
+    // Only a 4xx means the grant is dead — sign out and force a fresh sign-in.
+    // A network error or a 5xx is transient: keep the session and report it, so
+    // a flaky connection does not log the user out.
+    if (status !== undefined && status >= 400 && status < 500) {
+      await signOut();
+      throw new NotAuthorizedError(error instanceof Error ? error.message : "Refresh failed");
+    }
+    throw error;
   }
 }
 
@@ -150,7 +176,7 @@ async function postToken(body: URLSearchParams): Promise<TokenResponse> {
   });
   if (!response.ok) {
     const text = await response.text().catch(() => "");
-    throw new Error(`Token endpoint ${response.status}: ${text}`);
+    throw new TokenEndpointError(`Token endpoint ${response.status}: ${text}`, response.status);
   }
   return (await response.json()) as TokenResponse;
 }

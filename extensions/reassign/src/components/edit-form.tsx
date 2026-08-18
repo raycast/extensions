@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import type { Scope, UpdateEventPatch } from "../lib/api";
 import type { ActivityType, Area, ScheduleEvent } from "../lib/schedule-model";
-import { resolveActivity, resolveArea } from "../lib/schedule-model";
+import { minutesFromClock, resolveActivity, resolveArea } from "../lib/schedule-model";
 
 interface EditFormValues {
   name: string;
@@ -48,6 +48,12 @@ export function EditForm(props: {
         return;
       }
       patch.end = end;
+      // An end at or before the start crosses midnight — mark it, or the server
+      // reads the wrapped range as invalid. Send the flag either way, so moving
+      // an end back to the same day also clears a previous overnight marker.
+      const startMin = minutesFromClock(event.start);
+      const endMin = minutesFromClock(end);
+      if (startMin !== null && endMin !== null) patch.endNextDay = endMin <= startMin;
     }
     if (values.areaId && values.areaId !== (currentArea?.id ?? "")) patch.areaId = values.areaId;
     if (values.activityTypeId && values.activityTypeId !== (currentActivity?.id ?? "")) {
