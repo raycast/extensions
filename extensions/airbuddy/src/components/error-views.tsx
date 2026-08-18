@@ -47,7 +47,7 @@ export function ErrorView({ error, onRetry }: { error: Error; onRetry: () => voi
       <List.EmptyView
         icon={Icon.Lock}
         title="Turn on Scripting in AirBuddy"
-        description="AirBuddy Settings → Advanced → Security → “Enable Apple Script for automation”"
+        description="AirBuddy Settings → General → Security → “Enable Apple Script for automation”"
         actions={
           <ActionPanel>
             <Action
