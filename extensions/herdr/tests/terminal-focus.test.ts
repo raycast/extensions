@@ -15,10 +15,11 @@ ttys001  herdr     herdr
 ttys002  herdr     herdr --session work
 ttys003  herdr     herdr session attach review
 ttys004  zsh       zsh
+ttys005  herdr     herdr --session default
 `;
 
-  it("finds only default-session Herdr clients", () => {
-    expect(parseHerdrClientTtys(processes, "/opt/herdr", "default")).toEqual(["/dev/ttys001"]);
+  it("finds bare and explicitly default-session Herdr clients", () => {
+    expect(parseHerdrClientTtys(processes, "/opt/herdr", "default")).toEqual(["/dev/ttys001", "/dev/ttys005"]);
   });
 
   it("finds the requested named session", () => {

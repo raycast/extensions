@@ -11,11 +11,13 @@ function appleScriptString(value: string): string {
 }
 
 function sessionMatches(args: string, sessionName?: string): boolean {
-  const session = sessionName?.trim();
   const namedSession = args.match(/(?:^|\s)--session(?:=|\s+)([^\s]+)/)?.[1];
   const attachedSession = args.match(/(?:^|\s)session\s+attach\s+([^\s]+)/)?.[1];
-  if (!session || session === "default") return !namedSession && !attachedSession;
-  return namedSession === session || attachedSession === session;
+  // A bare client reads as default. Argv cannot reveal a client that joined a
+  // named session through an inherited HERDR_SESSION, so such clients are
+  // misread as default. Clients this extension launches always carry the flag.
+  const clientSession = namedSession || attachedSession || "default";
+  return clientSession === (sessionName?.trim() || "default");
 }
 
 export function parseHerdrClientTtys(output: string, binary: string, sessionName?: string): string[] {

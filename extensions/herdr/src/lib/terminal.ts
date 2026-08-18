@@ -186,7 +186,10 @@ export async function launchHerdrInTerminal(
   const binary = await resolveHerdrBinary();
   const application = selectedApplication();
   const sessionName = options.includePreferredSession === false ? undefined : getHerdrPreferences().sessionName?.trim();
-  const sessionArgs = sessionName && sessionName !== "default" ? ["--session", sessionName, ...args] : args;
+  // The launched client names its session explicitly, including the default:
+  // terminal launchers inherit the Raycast process environment, and the CLI
+  // falls back to an inherited HERDR_SESSION when no --session flag is given.
+  const sessionArgs = sessionName === undefined ? args : ["--session", sessionName || "default", ...args];
   const command = [binary, ...sessionArgs].map(shellQuote).join(" ");
   const customLauncher = getHerdrPreferences().customTerminalLauncher?.trim();
   if (customLauncher) {
