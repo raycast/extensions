@@ -164,6 +164,8 @@
     "macOS"
   ],
   "overrides": {
-    "brace-expansion": "5.0.9"
+    "brace-expansion@1": "1.1.16",
+    "brace-expansion@2": "2.1.2",
+    "brace-expansion@5": "5.0.9"
   }
 }
