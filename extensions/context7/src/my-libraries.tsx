@@ -7,8 +7,8 @@ import { Context7ApiError } from "./lib/context7";
 import { showErrorToast, toErrorMessage } from "./lib/error-utils";
 import { loadLibraryDocs } from "./lib/library-docs";
 import { buildCapturedAccessory, buildLibraryAccessories } from "./lib/library-format";
-import { pruneCachedLibraries, readCachedAt } from "./lib/library-cache";
-import { clearMyLibraries, getMyLibraries } from "./lib/my-libraries";
+import { readCachedAt } from "./lib/library-cache";
+import { clearMyLibraries, getMyLibraries, pruneOrphanedCaches } from "./lib/my-libraries";
 import { countOf, toTimestamp } from "./lib/text";
 import type { SavedLibrary } from "./lib/types";
 
@@ -154,8 +154,9 @@ export default function MyLibrariesCommand() {
       );
       setCachedAt(Object.fromEntries(freshness.filter(([, at]) => at)) as Record<string, string>);
 
-      // Self-heals payloads orphaned by a removal that raced an in-flight refresh.
-      await pruneCachedLibraries(saved.map((library) => library.id));
+      // Self-heals payloads orphaned by a removal that raced an in-flight refresh. This reads
+      // the manifest again under its lock, since `saved` can be stale by the time we prune.
+      await pruneOrphanedCaches();
     } catch (error) {
       await showErrorToast("Could Not Load My Libraries", error);
     } finally {

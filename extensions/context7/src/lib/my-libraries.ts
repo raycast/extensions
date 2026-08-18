@@ -86,6 +86,19 @@ export async function clearMyLibraries() {
   );
 }
 
+/**
+ * Removes cache files with no current manifest entry. The manifest read and deletion share the
+ * mutation lock: a caller snapshot can be stale by the time it reaches the filesystem, which
+ * would otherwise let this cleanup delete a cache a concurrent command has just saved.
+ */
+export async function pruneOrphanedCaches() {
+  return withFileLock(LOCK_RESOURCE, async () => {
+    const libraries = parseStored(await readRaw());
+
+    return pruneCachedLibraries(libraries.map((library) => library.id));
+  });
+}
+
 function applyAdd(libraries: SavedLibrary[], library: LibrarySummary) {
   if (libraries.some((saved) => saved.id === library.id)) {
     return libraries;
