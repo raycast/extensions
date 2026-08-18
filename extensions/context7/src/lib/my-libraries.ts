@@ -1,7 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { logger } from "@chrismessina/raycast-logger";
 
-import { createWriteQueue } from "./write-queue";
+import { compareAndSwap, createWriteQueue } from "./write-queue";
 
 import { pruneCachedLibraries, removeCachedLibrary } from "./library-cache";
 import type { LibrarySummary, SavedLibrary } from "./types";
@@ -81,31 +81,57 @@ export async function toggleLibrary(library: LibrarySummary) {
   });
 }
 
+/** The raw stored value, used as the compare-and-swap revision marker. */
+async function readRaw() {
+  return (
+    (await LocalStorage.getItem<string>(STORAGE_KEY)) ?? (await LocalStorage.getItem<string>(LEGACY_STORAGE_KEY)) ?? ""
+  );
+}
+
+function parseRaw(raw: string): SavedLibrary[] {
+  return raw
+    ? parseLibraries(raw).map((library) => ({ ...library, addedAt: library.addedAt ?? library.favoritedAt }))
+    : [];
+}
+
+const store = {
+  readRaw,
+  parse: parseRaw,
+  write: async (next: SavedLibrary[]) => LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next)),
+};
+
 // The `*Unqueued` pair carries the actual work. They must only ever be called from inside
 // `enqueueWrite` — calling one of the queued wrappers from within a queued operation would
 // wait on a queue that cannot drain until the caller returns.
 async function addUnqueued(library: LibrarySummary) {
-  const libraries = await getMyLibraries();
+  return compareAndSwap({
+    ...store,
+    apply: (libraries) => {
+      if (libraries.some((saved) => saved.id === library.id)) {
+        return { next: libraries, result: libraries };
+      }
 
-  if (libraries.some((saved) => saved.id === library.id)) {
-    return libraries;
-  }
+      const next = [...libraries, { ...library, addedAt: new Date().toISOString() }];
+      logger.log("Added library", { libraryId: library.id, total: next.length });
 
-  const next = [...libraries, { ...library, addedAt: new Date().toISOString() }];
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  logger.log("Added library", { libraryId: library.id, total: next.length });
-
-  return next;
+      return { next, result: next };
+    },
+  });
 }
 
 async function removeUnqueued(libraryId: string) {
-  const libraries = await getMyLibraries();
-  const next = libraries.filter((library) => library.id !== libraryId);
+  const next = await compareAndSwap({
+    ...store,
+    apply: (libraries) => {
+      const remaining = libraries.filter((library) => library.id !== libraryId);
+      logger.log("Removed library", { libraryId, total: remaining.length });
 
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-  // The payload is dropped with the entry — a cache no manifest references is dead weight.
+      return { next: remaining, result: remaining };
+    },
+  });
+
+  // Dropped after the manifest commits — a cache no manifest references is dead weight.
   await removeCachedLibrary(libraryId);
-  logger.log("Removed library", { libraryId, total: next.length });
 
   return next;
 }

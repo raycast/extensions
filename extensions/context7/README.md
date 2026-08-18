@@ -1,6 +1,6 @@
 # Context7
 
-Search Context7 libraries and documentation directly from Raycast.
+Search up-to-date documentation for any library, framework, or SDK — keep the ones you use offline, and ask Raycast AI about them.
 
 ## Commands
 

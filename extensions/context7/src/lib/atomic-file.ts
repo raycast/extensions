@@ -1,5 +1,60 @@
-import { mkdir, rename, unlink, writeFile } from "node:fs/promises";
+import { mkdir, open, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
+
+/** Long enough to outlast any real read-modify-write here; short enough that a crash self-heals. */
+const LOCK_STALE_MS = 10_000;
+const LOCK_RETRY_MS = 20;
+const LOCK_ATTEMPTS = 100;
+
+/**
+ * Serializes a whole read-modify-write across command PROCESSES, which the in-process write
+ * queue cannot do.
+ *
+ * `open(path, "wx")` is the primitive that makes this work: creating a file exclusively is
+ * atomic at the filesystem level, so exactly one process wins the race and the rest wait.
+ * Compare-and-swap alone is NOT sufficient here — it still leaves a window between the
+ * verification read and the write, which a lockstep interleave lands in every time.
+ *
+ * A lock older than `LOCK_STALE_MS` is treated as abandoned (the holder crashed) and broken,
+ * so a dead process cannot wedge the store permanently.
+ */
+export async function withFileLock<T>(target: string, operation: () => Promise<T>): Promise<T> {
+  const lockPath = `${target}.lock`;
+  await mkdir(dirname(target), { recursive: true });
+
+  for (let attempt = 0; attempt < LOCK_ATTEMPTS; attempt += 1) {
+    let handle;
+
+    try {
+      handle = await open(lockPath, "wx");
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException)?.code !== "EEXIST") {
+        throw error;
+      }
+
+      // Held by someone else — unless they died holding it.
+      const age = await stat(lockPath)
+        .then((stats) => Date.now() - stats.mtimeMs)
+        .catch(() => 0);
+
+      if (age > LOCK_STALE_MS) {
+        await unlink(lockPath).catch(() => undefined);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, LOCK_RETRY_MS));
+      continue;
+    }
+
+    try {
+      return await operation();
+    } finally {
+      await handle.close().catch(() => undefined);
+      await unlink(lockPath).catch(() => undefined);
+    }
+  }
+
+  throw new Error("Could not save — another Context7 command is still writing. Try again.");
+}
 
 /**
  * Raycast runs each command in its own process, so the in-process write queues in the stores

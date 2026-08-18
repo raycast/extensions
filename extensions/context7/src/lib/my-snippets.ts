@@ -1,11 +1,11 @@
 import { environment } from "@raycast/api";
 import { logger } from "@chrismessina/raycast-logger";
 
-import { createWriteQueue } from "./write-queue";
+import { compareAndSwap, createWriteQueue } from "./write-queue";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-import { writeFileAtomic } from "./atomic-file";
+import { withFileLock, writeFileAtomic } from "./atomic-file";
 
 import type { ContextSnippet, SavedSnippet } from "./types";
 
@@ -82,35 +82,73 @@ export async function toggleSnippet(snippet: ContextSnippet, library: { id: stri
   });
 }
 
+/** The raw file contents, used as the compare-and-swap revision marker. */
+async function readRaw() {
+  try {
+    return await readFile(SNIPPETS_FILE, "utf8");
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException)?.code === "ENOENT") {
+      return "";
+    }
+
+    throw error;
+  }
+}
+
+function parseRaw(raw: string): SavedSnippet[] {
+  if (!raw) {
+    return [];
+  }
+
+  const parsed = JSON.parse(raw) as SavedSnippet[];
+
+  if (!Array.isArray(parsed)) {
+    throw new Error("The saved snippets file is not a list.");
+  }
+
+  return parsed;
+}
+
+const store = { readRaw, parse: parseRaw, write: persist };
+
 // Only ever call these from inside `enqueueWrite`; a queued wrapper called from within a
 // queued operation waits on a queue that cannot drain until the caller returns.
 async function addUnqueued(snippet: ContextSnippet, library: { id: string; name: string }) {
   const key = snippetKey(snippet, library.id);
-  const snippets = await getMySnippets();
 
-  if (snippets.some((saved) => saved.key === key)) {
-    return snippets;
-  }
+  return withFileLock(SNIPPETS_FILE, () =>
+    compareAndSwap({
+      ...store,
+      apply: (snippets) => {
+        if (snippets.some((saved) => saved.key === key)) {
+          return { next: snippets, result: snippets };
+        }
 
-  const next: SavedSnippet[] = [
-    ...snippets,
-    { ...snippet, key, libraryId: library.id, libraryName: library.name, savedAt: new Date().toISOString() },
-  ];
+        const next: SavedSnippet[] = [
+          ...snippets,
+          { ...snippet, key, libraryId: library.id, libraryName: library.name, savedAt: new Date().toISOString() },
+        ];
+        // `key` is in the logger's credential-key set and would print as "***".
+        logger.log("Added snippet", { snippetId: key, total: next.length });
 
-  await persist(next);
-  // `key` is in the logger's credential-key set and would print as "***".
-  logger.log("Added snippet", { snippetId: key, total: next.length });
-
-  return next;
+        return { next, result: next };
+      },
+    }),
+  );
 }
 
 async function removeUnqueued(key: string) {
-  const next = (await getMySnippets()).filter((saved) => saved.key !== key);
+  return withFileLock(SNIPPETS_FILE, () =>
+    compareAndSwap({
+      ...store,
+      apply: (snippets) => {
+        const next = snippets.filter((saved) => saved.key !== key);
+        logger.log("Removed snippet", { snippetId: key, total: next.length });
 
-  await persist(next);
-  logger.log("Removed snippet", { snippetId: key, total: next.length });
-
-  return next;
+        return { next, result: next };
+      },
+    }),
+  );
 }
 
 export async function clearMySnippets() {

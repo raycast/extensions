@@ -1,10 +1,19 @@
-import { Action, ActionPanel, Icon, LaunchProps, List, Toast, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  LaunchProps,
+  LaunchType,
+  List,
+  Toast,
+  launchCommand,
+  showToast,
+} from "@raycast/api";
 import { logger } from "@chrismessina/raycast-logger";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { searchContext } from "./lib/context7";
 import { AllLibrariesSearch } from "./components/all-libraries-search";
-import { createSearchLibrariesDeeplink } from "./lib/deeplink";
 import { isAbortError, showErrorToast, toErrorMessage } from "./lib/error-utils";
 import {
   MAX_LOCAL_MATCHES,
@@ -70,7 +79,7 @@ export default function SearchDocumentationCommand(props: SearchContextProps) {
           description="Add a library to My Libraries and it appears in the picker here."
           actions={
             <ActionPanel>
-              <Action.Open title="Open Search Libraries" target={createSearchLibrariesDeeplink()} />
+              <OpenSearchLibrariesAction />
             </ActionPanel>
           }
         />
@@ -353,7 +362,7 @@ export function SearchDocumentationView(props: {
           description="Pick a library in Search Libraries first, or launch this command from a Quicklink."
           actions={
             <ActionPanel>
-              <Action.Open title="Open Search Libraries" target={createSearchLibrariesDeeplink()} />
+              <OpenSearchLibrariesAction />
             </ActionPanel>
           }
         />
@@ -414,6 +423,27 @@ export function SearchDocumentationView(props: {
       {hasQuery ? renderSection("Documentation", docResults) : null}
       {hasQuery ? renderSection("Code Snippets", codeResults) : null}
     </List>
+  );
+}
+
+/**
+ * `launchCommand` is the API for launching a sibling command — it reports a real error when
+ * the command is disabled, where a `raycast://` deeplink just fails opaquely. Quicklinks are
+ * the exception and still need a URL, so `createSearchContextDeeplink` stays.
+ */
+function OpenSearchLibrariesAction() {
+  return (
+    <Action
+      title="Open Search Libraries"
+      icon={Icon.MagnifyingGlass}
+      onAction={async () => {
+        try {
+          await launchCommand({ name: "search-libraries", type: LaunchType.UserInitiated });
+        } catch (error) {
+          await showErrorToast("Could Not Open Search Libraries", error);
+        }
+      }}
+    />
   );
 }
 
