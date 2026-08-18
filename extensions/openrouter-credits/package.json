@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "openrouter-credits",
   "title": "OpenRouter Credits",
   "description": "Show your OpenRouter credit balance in the menu bar and get low-balance alerts.",

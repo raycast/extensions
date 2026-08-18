@@ -9,12 +9,6 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { CreditsData, fetchCredits, formatCurrency } from "./openrouter";
 
-interface Preferences {
-  apiKey?: string;
-  lowBalanceNotifications?: boolean;
-  lowBalanceThreshold?: string;
-}
-
 function parseLowBalanceThreshold(value: string | undefined): number | null {
   const threshold = Number(value?.trim() || "5");
   return Number.isFinite(threshold) && threshold >= 0 ? threshold : null;

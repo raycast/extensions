@@ -10,6 +10,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { createHash } from "crypto";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   CreditsData,
@@ -24,12 +25,7 @@ const LOW_BALANCE_NOTIFICATION_KEY = "openrouter_low_balance_notification";
 
 interface CachedCredits {
   data: CreditsData;
-}
-
-interface Preferences {
-  apiKey: string;
-  lowBalanceNotifications?: boolean;
-  lowBalanceThreshold?: string;
+  apiKeyHash: string;
 }
 
 function parseLowBalanceThreshold(value: string | undefined): number | null {
@@ -39,17 +35,24 @@ function parseLowBalanceThreshold(value: string | undefined): number | null {
   return Number.isFinite(threshold) && threshold >= 0 ? threshold : null;
 }
 
-function parseCachedCredits(value: string | undefined): CreditsData | null {
+function hashApiKey(apiKey: string): string {
+  return createHash("sha256").update(apiKey).digest("hex");
+}
+
+function parseCachedCredits(
+  value: string | undefined,
+  apiKeyHash: string,
+): CreditsData | null {
   if (!value) return null;
 
   try {
     const parsed: unknown = JSON.parse(value);
 
-    if (isCreditsData(parsed)) return parsed;
     if (
       parsed &&
       typeof parsed === "object" &&
-      isCreditsData((parsed as CachedCredits).data)
+      isCreditsData((parsed as CachedCredits).data) &&
+      (parsed as CachedCredits).apiKeyHash === apiKeyHash
     ) {
       return (parsed as CachedCredits).data;
     }
@@ -65,7 +68,11 @@ export default function Command() {
   const [isCacheLoaded, setIsCacheLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const lowBalanceCheckInFlight = useRef(false);
+  const lowBalanceNotification = useRef({
+    isProcessing: false,
+    pendingRemaining: null as number | null,
+  });
+  const requestId = useRef(0);
   const { apiKey, lowBalanceNotifications, lowBalanceThreshold } =
     getPreferenceValues<Preferences>();
   const alertThreshold = parseLowBalanceThreshold(lowBalanceThreshold);
@@ -73,53 +80,86 @@ export default function Command() {
   const needsApiKey = !apiKey;
 
   useEffect(() => {
+    requestId.current += 1;
+    setCredits(null);
+    setError(null);
+    setIsCacheLoaded(false);
+
+    if (!apiKey) {
+      void LocalStorage.removeItem(CACHE_KEY).finally(() => {
+        setIsCacheLoaded(true);
+      });
+      return;
+    }
+
+    let cancelled = false;
+    const apiKeyHash = hashApiKey(apiKey);
+
     void LocalStorage.getItem<string>(CACHE_KEY)
       .then((cached) => {
-        const cachedCredits = parseCachedCredits(cached);
-        if (cachedCredits) setCredits(cachedCredits);
+        const cachedCredits = parseCachedCredits(cached, apiKeyHash);
+        if (!cancelled && cachedCredits) setCredits(cachedCredits);
       })
       .catch(() => {
         // A cache failure should never prevent a live API request.
       })
-      .finally(() => setIsCacheLoaded(true));
-  }, []);
+      .finally(() => {
+        if (!cancelled) setIsCacheLoaded(true);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [apiKey]);
 
   const updateLowBalanceNotification = useCallback(
     async (remaining: number) => {
-      if (lowBalanceCheckInFlight.current) return;
+      const notification = lowBalanceNotification.current;
+      notification.pendingRemaining = remaining;
+      if (notification.isProcessing) return;
 
-      lowBalanceCheckInFlight.current = true;
+      notification.isProcessing = true;
 
       try {
-        if (
-          !alertsEnabled ||
-          alertThreshold === null ||
-          remaining > alertThreshold
-        ) {
-          await LocalStorage.removeItem(LOW_BALANCE_NOTIFICATION_KEY);
-          return;
+        while (notification.pendingRemaining !== null) {
+          const latestRemaining = notification.pendingRemaining;
+          notification.pendingRemaining = null;
+
+          if (
+            !alertsEnabled ||
+            alertThreshold === null ||
+            latestRemaining > alertThreshold
+          ) {
+            await LocalStorage.removeItem(LOW_BALANCE_NOTIFICATION_KEY);
+            continue;
+          }
+
+          const notificationThreshold = formatCurrency(alertThreshold);
+          const notifiedAtThreshold = await LocalStorage.getItem<string>(
+            LOW_BALANCE_NOTIFICATION_KEY,
+          );
+
+          // Process a newer refresh instead of presenting an obsolete alert.
+          if (notification.pendingRemaining !== null) continue;
+          if (notifiedAtThreshold === notificationThreshold) continue;
+
+          await LocalStorage.setItem(
+            LOW_BALANCE_NOTIFICATION_KEY,
+            notificationThreshold,
+          );
+
+          if (notification.pendingRemaining !== null) continue;
+
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "OpenRouter balance is low",
+            message: `${formatCurrency(latestRemaining)} remaining (alert at ${notificationThreshold})`,
+          });
         }
-
-        const notificationThreshold = formatCurrency(alertThreshold);
-        const notifiedAtThreshold = await LocalStorage.getItem<string>(
-          LOW_BALANCE_NOTIFICATION_KEY,
-        );
-
-        if (notifiedAtThreshold === notificationThreshold) return;
-
-        await LocalStorage.setItem(
-          LOW_BALANCE_NOTIFICATION_KEY,
-          notificationThreshold,
-        );
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "OpenRouter balance is low",
-          message: `${formatCurrency(remaining)} remaining (alert at ${notificationThreshold})`,
-        });
       } catch {
         // A notification failure must not affect balance updates.
       } finally {
-        lowBalanceCheckInFlight.current = false;
+        notification.isProcessing = false;
       }
     },
     [alertThreshold, alertsEnabled],
@@ -127,30 +167,41 @@ export default function Command() {
 
   const fetchCredits = useCallback(async () => {
     if (!apiKey) {
+      setCredits(null);
       setError("Management API key not configured");
       setIsLoading(false);
       return;
     }
 
+    const currentRequestId = ++requestId.current;
     setIsLoading(true);
 
     try {
       const updatedCredits = await fetchOpenRouterCredits(apiKey);
+      if (currentRequestId !== requestId.current) return;
+
       setCredits(updatedCredits);
       setError(null);
       void LocalStorage.setItem(
         CACHE_KEY,
-        JSON.stringify({ data: updatedCredits }),
+        JSON.stringify({
+          data: updatedCredits,
+          apiKeyHash: hashApiKey(apiKey),
+        }),
       );
       void updateLowBalanceNotification(
         updatedCredits.total_credits - updatedCredits.total_usage,
       );
     } catch (error) {
+      if (currentRequestId !== requestId.current) return;
+
+      setCredits(null);
+      void LocalStorage.removeItem(CACHE_KEY);
       setError(
         error instanceof Error ? error.message : "Couldn't fetch balance",
       );
     } finally {
-      setIsLoading(false);
+      if (currentRequestId === requestId.current) setIsLoading(false);
     }
   }, [apiKey, updateLowBalanceNotification]);
 
