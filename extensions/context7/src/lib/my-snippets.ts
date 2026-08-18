@@ -1,12 +1,10 @@
 import { environment } from "@raycast/api";
 import { logger } from "@chrismessina/raycast-logger";
-
-import { compareAndSwap, createWriteQueue } from "./write-queue";
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { withFileLock, writeFileAtomic } from "./atomic-file";
-
+import { createWriteQueue } from "./write-queue";
 import type { ContextSnippet, SavedSnippet } from "./types";
 
 /**
@@ -16,6 +14,7 @@ import type { ContextSnippet, SavedSnippet } from "./types";
  */
 const SNIPPETS_FILE = join(environment.supportPath, "my-snippets.json");
 
+/** Orders writes within this process; `withFileLock` orders them across processes. */
 const enqueueWrite = createWriteQueue();
 
 /**
@@ -56,110 +55,70 @@ export function snippetKey(snippet: ContextSnippet, libraryId: string) {
 
 export async function isSavedSnippet(snippet: ContextSnippet, libraryId: string) {
   const key = snippetKey(snippet, libraryId);
-  const snippets = await getMySnippets();
 
-  return snippets.some((saved) => saved.key === key);
-}
-
-export async function addSnippet(snippet: ContextSnippet, library: { id: string; name: string }) {
-  return enqueueWrite(() => addUnqueued(snippet, library));
-}
-
-export async function removeSnippet(key: string) {
-  return enqueueWrite(() => removeUnqueued(key));
+  return (await getMySnippets()).some((saved) => saved.key === key);
 }
 
 /**
- * Read, decide, and write in ONE queued operation — see the same note in `my-libraries.ts`.
- * Two rapid toggles would otherwise both observe "not saved" and both add.
+ * The single mutation path. `apply` runs INSIDE the lock, so read, decide, and write are one
+ * indivisible step. Every mutator goes through here — a bypass (as `clearMySnippets` once
+ * was) can discard a concurrent write no matter how careful the others are.
  */
-export async function toggleSnippet(snippet: ContextSnippet, library: { id: string; name: string }) {
-  return enqueueWrite(async () => {
-    const key = snippetKey(snippet, library.id);
-    const snippets = await getMySnippets();
+async function mutate(apply: (snippets: SavedSnippet[]) => SavedSnippet[]) {
+  return enqueueWrite(() =>
+    withFileLock(SNIPPETS_FILE, async () => {
+      const next = apply(await getMySnippets());
+      await writeFileAtomic(SNIPPETS_FILE, JSON.stringify(next));
 
-    return snippets.some((saved) => saved.key === key) ? removeUnqueued(key) : addUnqueued(snippet, library);
-  });
-}
-
-/** The raw file contents, used as the compare-and-swap revision marker. */
-async function readRaw() {
-  try {
-    return await readFile(SNIPPETS_FILE, "utf8");
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException)?.code === "ENOENT") {
-      return "";
-    }
-
-    throw error;
-  }
-}
-
-function parseRaw(raw: string): SavedSnippet[] {
-  if (!raw) {
-    return [];
-  }
-
-  const parsed = JSON.parse(raw) as SavedSnippet[];
-
-  if (!Array.isArray(parsed)) {
-    throw new Error("The saved snippets file is not a list.");
-  }
-
-  return parsed;
-}
-
-const store = { readRaw, parse: parseRaw, write: persist };
-
-// Only ever call these from inside `enqueueWrite`; a queued wrapper called from within a
-// queued operation waits on a queue that cannot drain until the caller returns.
-async function addUnqueued(snippet: ContextSnippet, library: { id: string; name: string }) {
-  const key = snippetKey(snippet, library.id);
-
-  return withFileLock(SNIPPETS_FILE, () =>
-    compareAndSwap({
-      ...store,
-      apply: (snippets) => {
-        if (snippets.some((saved) => saved.key === key)) {
-          return { next: snippets, result: snippets };
-        }
-
-        const next: SavedSnippet[] = [
-          ...snippets,
-          { ...snippet, key, libraryId: library.id, libraryName: library.name, savedAt: new Date().toISOString() },
-        ];
-        // `key` is in the logger's credential-key set and would print as "***".
-        logger.log("Added snippet", { snippetId: key, total: next.length });
-
-        return { next, result: next };
-      },
+      return next;
     }),
   );
 }
 
-async function removeUnqueued(key: string) {
-  return withFileLock(SNIPPETS_FILE, () =>
-    compareAndSwap({
-      ...store,
-      apply: (snippets) => {
-        const next = snippets.filter((saved) => saved.key !== key);
-        logger.log("Removed snippet", { snippetId: key, total: next.length });
+export async function addSnippet(snippet: ContextSnippet, library: { id: string; name: string }) {
+  return mutate((snippets) => applyAdd(snippets, snippet, library));
+}
 
-        return { next, result: next };
-      },
-    }),
+export async function removeSnippet(key: string) {
+  return mutate((snippets) => applyRemove(snippets, key));
+}
+
+export async function toggleSnippet(snippet: ContextSnippet, library: { id: string; name: string }) {
+  const key = snippetKey(snippet, library.id);
+
+  return mutate((snippets) =>
+    snippets.some((saved) => saved.key === key) ? applyRemove(snippets, key) : applyAdd(snippets, snippet, library),
   );
 }
 
 export async function clearMySnippets() {
-  return enqueueWrite(async () => {
-    await persist([]);
+  return mutate(() => {
     logger.log("Cleared all saved snippets");
 
-    return [] as SavedSnippet[];
+    return [];
   });
 }
 
-async function persist(snippets: SavedSnippet[]) {
-  await writeFileAtomic(SNIPPETS_FILE, JSON.stringify(snippets));
+function applyAdd(snippets: SavedSnippet[], snippet: ContextSnippet, library: { id: string; name: string }) {
+  const key = snippetKey(snippet, library.id);
+
+  if (snippets.some((saved) => saved.key === key)) {
+    return snippets;
+  }
+
+  const next: SavedSnippet[] = [
+    ...snippets,
+    { ...snippet, key, libraryId: library.id, libraryName: library.name, savedAt: new Date().toISOString() },
+  ];
+  // `key` is in the logger's credential-key set and would print as "***".
+  logger.log("Added snippet", { snippetId: key, total: next.length });
+
+  return next;
+}
+
+function applyRemove(snippets: SavedSnippet[], key: string) {
+  const next = snippets.filter((saved) => saved.key !== key);
+  logger.log("Removed snippet", { snippetId: key, total: next.length });
+
+  return next;
 }
