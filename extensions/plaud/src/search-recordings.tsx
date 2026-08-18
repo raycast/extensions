@@ -62,8 +62,8 @@ export default function SearchRecordings() {
           ]}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard title="Copy Link" content={webLink(rec.id)} />
               <Action.OpenInBrowser url={webLink(rec.id)} />
+              <Action.CopyToClipboard title="Copy Link" content={webLink(rec.id)} />
               <Action.CopyToClipboard title="Copy Title" content={rec.name} shortcut={Keyboard.Shortcut.Common.Copy} />
             </ActionPanel>
           }
