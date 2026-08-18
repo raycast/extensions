@@ -75,13 +75,25 @@ export function loadHashCache(destDir) {
   }
 }
 
-/** Persist the cache, keeping only entries for `files` — moved/deleted paths drop out. */
+/**
+ * Persist the cache, keeping only entries for `files` — moved/deleted paths
+ * drop out. Merges over what is on disk at save time, not what this run loaded:
+ * between load and save another run against the same destination may have
+ * archived images and saved their hashes, and overwriting with this run's
+ * snapshot would throw those entries away. On shared keys this run's entry
+ * wins (a stale one just misses its size+mtime check next run and is
+ * re-hashed); a disk-only entry survives if its file still exists — the
+ * existence check is what keeps the dead-path pruning an overwrite provided.
+ */
 export function saveHashCache(destDir, cache, files) {
   const keep = new Set(files.map((f) => f.path));
+  const toJSON = (e) => ({ size: e.size, mtimeMs: e.mtimeMs, hash: e.hash === null ? null : e.hash.toString(16) });
   const entries = {};
+  for (const [p, e] of loadHashCache(destDir)) {
+    if (!keep.has(p) && fs.existsSync(p)) entries[p] = toJSON(e);
+  }
   for (const [p, e] of cache) {
-    if (keep.has(p))
-      entries[p] = { size: e.size, mtimeMs: e.mtimeMs, hash: e.hash === null ? null : e.hash.toString(16) };
+    if (keep.has(p)) entries[p] = toJSON(e);
   }
   try {
     const file = tidyPath(destDir, CACHE_NAME);

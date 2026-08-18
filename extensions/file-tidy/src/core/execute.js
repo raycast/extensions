@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { tidyPath } from "./config.js";
 import { moveFile } from "./move.js";
+import { saveHashCache } from "./phash.js";
 import { firstFreeName } from "./plan.js";
 
 /**
@@ -13,11 +14,13 @@ import { firstFreeName } from "./plan.js";
  * when the run flagged any, to the similar-files report (formatDupBlock and
  * formatSimilarBlock let adapters localize their text). Neither append can fail
  * the run — both happen after the last move, so they come back in reportErrors.
+ * `hashCache` is analyze()'s perceptual-hash cache state; it is persisted here
+ * rather than during analysis so a preview never writes into the destination.
  * Returns { moved, manifestPath, similarReportPath, reportErrors }.
  */
 export function executePlan(
   entries,
-  { destDir, sourceDir, formatDupBlock = defaultDupBlock, formatSimilarBlock = defaultSimilarBlock },
+  { destDir, sourceDir, hashCache = null, formatDupBlock = defaultDupBlock, formatSimilarBlock = defaultSimilarBlock },
 ) {
   const runsDir = tidyPath(destDir, "runs");
   fs.mkdirSync(runsDir, { recursive: true });
@@ -79,6 +82,21 @@ export function executePlan(
   // already in the destination — is already final and maps to itself.
   const finalPath = new Map(moved.map((e) => [e.from, e.to]));
   const atFinalPath = (p) => finalPath.get(p) ?? p;
+
+  // The perceptual-hash cache was only read during analyze — writing it there
+  // would create destDir/.tidy as a side effect of a mere preview, before any
+  // confirmation and silently past the adapters' "destination doesn't exist,
+  // create it?" consent prompt. It lands here instead, keyed to where each
+  // image actually ended up, so the next run's archive scan still hits the
+  // cache. saveHashCache is best-effort and never throws.
+  if (hashCache) {
+    const cache = new Map([...hashCache.cache].map(([p, e]) => [atFinalPath(p), e]));
+    saveHashCache(
+      destDir,
+      cache,
+      hashCache.images.map((f) => ({ ...f, path: atFinalPath(f.path) })),
+    );
+  }
 
   // Both records below are appended once every move has already happened, so a
   // failure here costs a record, not a file. Throwing would report a finished
