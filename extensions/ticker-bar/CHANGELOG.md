@@ -1,6 +1,6 @@
 # Ticker Bar Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-18
 
 - Track stocks, crypto, Binance Spot pairs, Binance perpetual futures, on-chain tokens, and Polymarket outcomes from the macOS menu bar.
 - Show the primary ticker, optional daily change, and optional provider artwork in the menu bar.
