@@ -1,6 +1,6 @@
 # Context7
 
-## [My Libraries, My Snippets, and Wider Search] - {PR_MERGE_DATE}
+## [My Libraries, My Snippets, and Wider Search] - 2026-08-18
 
 - Added **My Libraries** — save a library and its documentation is kept on disk, so opening it is instant and works offline. Shows when each library was last captured, with Refresh and Refresh All actions
 - Added **My Snippets** — save individual snippets from any library and search them all in one place. Saved snippets are snapshots, so they survive a library refresh
