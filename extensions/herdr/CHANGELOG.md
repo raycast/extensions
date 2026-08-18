@@ -1,6 +1,6 @@
 # Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-08-18
 
 - Show a readable name for unnamed agents instead of the status-line glyph.
 - Select the configured session with the `--session` flag on every CLI call and terminal launch, including the default session.
