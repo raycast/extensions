@@ -1,0 +1,13 @@
+# Raycast
+.raycast/
+raycast-env.d.ts
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Logs & OS
+*.log
+.DS_Store

@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "postproxy",
+  "title": "Postproxy",
+  "description": "Publish posts, manage comments, and answer DMs across your social profiles with Postproxy.",
+  "icon": "icon.png",
+  "author": "dmitrysereda",
+  "categories": ["Productivity", "Communication"],
+  "keywords": [
+    "social media",
+    "scheduler",
+    "instagram",
+    "facebook",
+    "tiktok",
+    "linkedin",
+    "youtube",
+    "threads",
+    "comments",
+    "direct messages",
+    "analytics",
+    "postproxy"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Postproxy API key. Create one at https://app.postproxy.dev (Settings → API).",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "status",
+      "title": "Status",
+      "description": "See what's happening — posts published, engagement, and what's awaiting your reply.",
+      "mode": "view"
+    },
+    {
+      "name": "profiles",
+      "title": "Profiles",
+      "description": "View connected profiles grouped by profile group, with stats.",
+      "mode": "view"
+    },
+    {
+      "name": "publish-post",
+      "title": "Publish Post",
+      "description": "Create, schedule, or draft a post across your profiles.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-posts",
+      "title": "Recent Posts",
+      "description": "Browse recent posts and manage their comments.",
+      "mode": "view"
+    },
+    {
+      "name": "recent-comments",
+      "title": "Recent Comments",
+      "description": "Browse recent comments across your posts and reply.",
+      "mode": "view"
+    },
+    {
+      "name": "direct-messages",
+      "title": "Direct Messages",
+      "description": "Read and reply to direct messages.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
