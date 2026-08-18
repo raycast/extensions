@@ -4,15 +4,11 @@ import { join } from "node:path";
 
 import { withFileLock } from "./atomic-file";
 import { pruneCachedLibraries, removeCachedLibrary } from "./library-cache";
-import { createWriteQueue } from "./write-queue";
 import type { LibrarySummary, SavedLibrary } from "./types";
 
 const STORAGE_KEY = "my-libraries";
 /** Written by the versions of this extension that called the feature "favorites". */
 const LEGACY_STORAGE_KEY = "favorite-libraries";
-
-/** Orders writes within this process; `withFileLock` orders them across processes. */
-const enqueueWrite = createWriteQueue();
 
 /**
  * The manifest lives in LocalStorage, which offers no compare-and-swap and no lock of its
@@ -41,28 +37,16 @@ export async function isSavedLibrary(libraryId: string) {
  * both observe "not saved" and both add.
  */
 async function mutate(apply: (libraries: SavedLibrary[]) => SavedLibrary[]) {
-  return enqueueWrite(() =>
-    withFileLock(LOCK_RESOURCE, async () => {
-      const next = apply(parseStored(await readRaw()));
-      await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+  return withFileLock(LOCK_RESOURCE, async () => {
+    const next = apply(parseStored(await readRaw()));
+    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
 
-      return next;
-    }),
-  );
+    return next;
+  });
 }
 
 export async function addLibrary(library: LibrarySummary) {
   return mutate((libraries) => applyAdd(libraries, library));
-}
-
-export async function removeLibrary(libraryId: string) {
-  const next = await mutate((libraries) => applyRemove(libraries, libraryId));
-
-  // Outside the lock deliberately: the cache is a separate resource, and holding the manifest
-  // lock across unrelated disk I/O is what makes the stale-lock window reachable.
-  await removeCachedLibrary(libraryId);
-
-  return next;
 }
 
 export async function toggleLibrary(library: LibrarySummary) {

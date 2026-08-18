@@ -125,7 +125,7 @@ function buildTrustScoreAccessory(trustScore?: number): List.Item.Accessory | un
   };
 }
 
-export function formatCompactNumber(value: number) {
+function formatCompactNumber(value: number) {
   return new Intl.NumberFormat("en-US", {
     notation: value >= 1000 ? "compact" : "standard",
     maximumFractionDigits: 1,

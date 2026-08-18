@@ -4,7 +4,6 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 import { withFileLock, writeFileAtomic } from "./atomic-file";
-import { createWriteQueue } from "./write-queue";
 import type { ContextSnippet, SavedSnippet } from "./types";
 
 /**
@@ -13,9 +12,6 @@ import type { ContextSnippet, SavedSnippet } from "./types";
  * disk with the library payloads rather than in LocalStorage for the same size reason.
  */
 const SNIPPETS_FILE = join(environment.supportPath, "my-snippets.json");
-
-/** Orders writes within this process; `withFileLock` orders them across processes. */
-const enqueueWrite = createWriteQueue();
 
 /**
  * A missing file is the normal "nothing saved yet" path. Anything else — unreadable file,
@@ -53,26 +49,18 @@ export function snippetKey(snippet: ContextSnippet, libraryId: string) {
   return snippet.source || `${libraryId}#${snippet.title}`;
 }
 
-export async function isSavedSnippet(snippet: ContextSnippet, libraryId: string) {
-  const key = snippetKey(snippet, libraryId);
-
-  return (await getMySnippets()).some((saved) => saved.key === key);
-}
-
 /**
  * The single mutation path. `apply` runs INSIDE the lock, so read, decide, and write are one
  * indivisible step. Every mutator goes through here — a bypass (as `clearMySnippets` once
  * was) can discard a concurrent write no matter how careful the others are.
  */
 async function mutate(apply: (snippets: SavedSnippet[]) => SavedSnippet[]) {
-  return enqueueWrite(() =>
-    withFileLock(SNIPPETS_FILE, async () => {
-      const next = apply(await getMySnippets());
-      await writeFileAtomic(SNIPPETS_FILE, JSON.stringify(next));
+  return withFileLock(SNIPPETS_FILE, async () => {
+    const next = apply(await getMySnippets());
+    await writeFileAtomic(SNIPPETS_FILE, JSON.stringify(next));
 
-      return next;
-    }),
-  );
+    return next;
+  });
 }
 
 export async function addSnippet(snippet: ContextSnippet, library: { id: string; name: string }) {
@@ -81,14 +69,6 @@ export async function addSnippet(snippet: ContextSnippet, library: { id: string;
 
 export async function removeSnippet(key: string) {
   return mutate((snippets) => applyRemove(snippets, key));
-}
-
-export async function toggleSnippet(snippet: ContextSnippet, library: { id: string; name: string }) {
-  const key = snippetKey(snippet, library.id);
-
-  return mutate((snippets) =>
-    snippets.some((saved) => saved.key === key) ? applyRemove(snippets, key) : applyAdd(snippets, snippet, library),
-  );
 }
 
 export async function clearMySnippets() {

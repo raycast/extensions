@@ -2,6 +2,7 @@ import { URL } from "node:url";
 import { logger } from "@chrismessina/raycast-logger";
 
 import { isAbortError } from "./error-utils";
+import { LIBRARY_TOKEN_BUDGET } from "./library-cache";
 import { getApiKey } from "./preferences";
 import type {
   BrowseDocsResponse,
@@ -17,8 +18,6 @@ import type {
 
 const API_BASE_URL = "https://context7.com";
 const MAX_REDIRECTS = 1;
-/** Enough to fill the browse list without pulling the ~200 KB a large library will happily return. */
-const BROWSE_TOKEN_BUDGET = 10_000;
 
 export class Context7ApiError extends Error {
   status: number;
@@ -159,7 +158,7 @@ export async function searchContext(libraryId: string, query: string, signal?: A
 export async function browseLibraryDocs(libraryId: string, signal?: AbortSignal) {
   const url = new URL(`/api/v1${libraryId}`, API_BASE_URL);
   url.searchParams.set("type", "json");
-  url.searchParams.set("tokens", String(BROWSE_TOKEN_BUDGET));
+  url.searchParams.set("tokens", String(LIBRARY_TOKEN_BUDGET));
 
   const response = await requestJson<BrowseDocsResponse>(url, signal);
 
