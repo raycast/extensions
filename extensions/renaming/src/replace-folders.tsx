@@ -1,5 +1,5 @@
 /**
- * Replace in Folder Names command — the Replace File(s) Characters flow
+ * Replace in Folder Names command — the Replace in File Names flow
  * filtered to the folders in the Finder selection.
  */
 

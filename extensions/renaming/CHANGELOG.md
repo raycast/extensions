@@ -2,8 +2,9 @@
 
 ## [Folder Commands] - {PR_MERGE_DATE}
 
-- ⚠️ Breaking: Rename File(s) and Replace File(s) Characters now act only on files — folders in the selection are left untouched instead of being renamed, and a selection holding no files reports that rather than renaming anything
+- ⚠️ Breaking: Rename File(s) and Replace in File Names now act only on files — folders in the selection are left untouched instead of being renamed, and a selection holding no files reports that rather than renaming anything
 - Add Rename Folder(s) and Replace in Folder Names commands, the folder counterparts of the two file commands, targeting only the folders in the Finder selection
+- Retitle Replace File(s) Characters to Replace in File Names, matching its folder counterpart — the command itself is unchanged, and shortcuts and aliases keep working
 - Add an "Apply to" scope to Advanced Batch Rename — Files (default), Folders, or Files & Folders — with the preview list showing exactly what the current scope will rename
 - Name the right thing everywhere: toasts, confirmations and history entries say files, folders, or items according to what was actually renamed
 

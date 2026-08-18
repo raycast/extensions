@@ -7,7 +7,7 @@ Rename files and folders in a batch, directly from Raycast.
 | Command                                                                                                                                      | Acts on                 |
 | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
 | **Rename File(s)** — rename the selected files in a batch.                                                                                   | Files                   |
-| **Replace File(s) Characters** — replace characters in the names of the selected files.                                                      | Files                   |
+| **Replace in File Names** — replace characters in the names of the selected files.                                                           | Files                   |
 | **Rename Folder(s)** — rename the selected folders in a batch.                                                                               | Folders                 |
 | **Replace in Folder Names** — replace characters in the names of the selected folders.                                                       | Folders                 |
 | **Advanced Batch Rename** — rename using a rule-based engine that chains find & replace, case transforms, prefixes, suffixes, and numbering. | Your choice — see below |
@@ -17,7 +17,7 @@ Rename files and folders in a batch, directly from Raycast.
 
 Each rename command targets exactly one kind of Finder item, so a batch never touches something you did not mean to rename.
 
-- **Rename File(s)** and **Replace File(s) Characters** act on **files only**. In a mixed selection they rename just the files and leave every folder alone; a selection holding no files says so rather than renaming anything.
+- **Rename File(s)** and **Replace in File Names** (previously *Replace File(s) Characters*) act on **files only**. In a mixed selection they rename just the files and leave every folder alone; a selection holding no files says so rather than renaming anything.
 - **Rename Folder(s)** and **Replace in Folder Names** act on **folders only**, symmetrically — mixed selections rename just the folders, and every message names folders rather than files.
 
 > **Changed behaviour:** the file commands used to rename whatever was selected, folders included. They no longer do. To rename folders, use **Rename Folder(s)** or **Replace in Folder Names**; to rename files and folders together in one pass, use **Advanced Batch Rename** with **Apply to** set to _Files & Folders_.

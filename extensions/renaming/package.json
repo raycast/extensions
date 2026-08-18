@@ -36,7 +36,7 @@
     },
     {
       "name": "replace",
-      "title": "Replace File(s) Characters",
+      "title": "Replace in File Names",
       "description": "Replace characters in file(s) names.",
       "mode": "view"
     },
