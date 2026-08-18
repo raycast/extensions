@@ -23,9 +23,8 @@ export async function prepareAgentPane(destination: AgentDestination, options: T
     if (!focusedPaneId) {
       throw new HerdrError("No focused pane is available to split.", "no_focused_pane");
     }
-    // The split target is named explicitly: without it the server splits its
-    // own focused pane, which another client may have moved since the user
-    // chose this destination.
+    // Without an explicit target the server splits its own focused pane, which
+    // another client may have moved since the user chose this destination.
     args.push("pane", "split", focusedPaneId, "--direction", destination === "split-right" ? "right" : "down");
     args.push("--ratio", "0.5");
   }

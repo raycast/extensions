@@ -12,8 +12,6 @@ describe("agentName", () => {
 
   // Regression: unnamed agents rendered the display_agent Nerd Font glyph
   // ("󰚩") as their title because the fallback chain used it as text.
-  // agentName's parameter type omits display_agent entirely, so this also
-  // documents that the glyph field can no longer reach the label.
   it("labels unnamed agents by their working directory", () => {
     const name = agentName({ agent: "claude", cwd: "/home/user/src/project" });
     expect(name).toBe("project");

@@ -99,9 +99,8 @@ export function agentTitle(value?: string): string {
     .replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-// display_agent is a Nerd Font glyph for herdr's own status line, so it never
-// works as text in Raycast. Unnamed agents are identified by their working
-// directory instead, which is usually a repo or worktree name.
+// display_agent is a Nerd Font glyph for herdr's own status line and never
+// renders as text in Raycast, so unnamed agents show their working directory.
 export function agentName(agent: Pick<PaneInfo, "name" | "agent" | "cwd" | "foreground_cwd">): string {
   const name = agent.name?.trim();
   if (name) return name;

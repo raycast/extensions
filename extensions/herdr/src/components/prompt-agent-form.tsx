@@ -96,9 +96,8 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
     () => agents.find((agent) => agent.pane_id === initialAgentId)?.pane_id || agents[0]?.pane_id || "",
     [agents, initialAgentId],
   );
-  // The agents list refreshes while the form is open, so the target is derived
-  // at render: state seeded once from the mount-time list can go stale and
-  // route the prompt to the wrong agent.
+  // Derived at render: the agents list refreshes while the form is open, and
+  // state seeded at mount can go stale and route the prompt to the wrong agent.
   const [selectedPane, setSelectedPane] = useState<string>();
   const targetPane = selectedPane && agents.some((agent) => agent.pane_id === selectedPane) ? selectedPane : initial;
   const [prompt, setPrompt] = useState(initialPrompt);
@@ -122,8 +121,7 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
       onSuccess: onSent,
     });
     if (!sent) return;
-    // The prompt is already delivered, so a history write failure must not
-    // report the send as failed and invite a duplicate re-send.
+    // A history write failure must not report the delivered prompt as failed.
     await addPromptHistory(agent, target, text).catch(() => undefined);
 
     if (getHerdrPreferences().closeAfterPrompt !== false) {

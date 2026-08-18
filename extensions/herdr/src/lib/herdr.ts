@@ -83,9 +83,8 @@ export async function resolveHerdrBinary(): Promise<string> {
   );
 }
 
-// Only stderr is scanned: commands like `pane read` return raw terminal text
-// on stdout, which could itself be a JSON document with a top-level `error`
-// key. Real CLI errors always arrive as a JSON envelope on stderr.
+// Only stderr is scanned. `pane read` returns raw terminal text on stdout that
+// could itself be JSON with a top-level `error` key.
 function extractCliError(stderr: string): HerdrError | undefined {
   const candidate = stderr.trim();
   if (!candidate) return undefined;
@@ -104,10 +103,9 @@ export async function runHerdr(args: string[], options: RunOptions = {}): Promis
   const binary = await resolveHerdrBinary();
   const preferences = getHerdrPreferences();
   const selectedSession = options.session ?? (preferences.sessionName?.trim() || "default");
-  // The session is always named explicitly with the --session global flag:
-  // without it the CLI falls back to an inherited HERDR_SESSION, so an env
-  // var leaking into the Raycast process could silently retarget every
-  // command. An empty session opts out for commands that span sessions.
+  // Without --session the CLI falls back to an inherited HERDR_SESSION, so the
+  // session is always named explicitly. An empty session opts out for
+  // commands that span sessions.
   const sessionArgs = selectedSession ? ["--session", selectedSession] : [];
 
   return new Promise<string>((resolve, reject) => {

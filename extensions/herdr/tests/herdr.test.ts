@@ -55,8 +55,7 @@ describe("runHerdr", () => {
 
   // Regression: without a --session flag the CLI falls back to an inherited
   // HERDR_SESSION, so a value leaking into the Raycast process environment
-  // could silently retarget every command. Each command names its session
-  // explicitly, including the default.
+  // could silently retarget every command.
   it("selects the configured session with the --session flag", async () => {
     preferences.sessionName = "work";
     mockExecFileSuccess();

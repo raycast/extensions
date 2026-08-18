@@ -14,8 +14,7 @@ function sessionMatches(args: string, sessionName?: string): boolean {
   const namedSession = args.match(/(?:^|\s)--session(?:=|\s+)([^\s]+)/)?.[1];
   const attachedSession = args.match(/(?:^|\s)session\s+attach\s+([^\s]+)/)?.[1];
   // A bare client reads as default. Argv cannot reveal a client that joined a
-  // named session through an inherited HERDR_SESSION, so such clients are
-  // misread as default. Clients this extension launches always carry the flag.
+  // named session through an inherited HERDR_SESSION.
   const clientSession = namedSession || attachedSession || "default";
   return clientSession === (sessionName?.trim() || "default");
 }

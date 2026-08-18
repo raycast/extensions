@@ -100,8 +100,7 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
   if (kind === "ghostty") {
     const marker = `herdr-raycast-${randomUUID()}`;
     // Marked before the set is awaited: a client-side timeout can leave the
-    // title changed server-side, and clearing an unchanged title is harmless
-    // while a stuck marker title is not.
+    // title changed server-side, and clearing an unchanged title is harmless.
     let mustClearTitle = false;
     try {
       mustClearTitle = true;
@@ -124,8 +123,7 @@ async function focusExistingHerdrClient(): Promise<ClientFocusResult> {
         try {
           await runHerdr(["terminal", "title", "clear"], { timeout: FAST_FOCUS_TIMEOUT_MS });
         } catch {
-          // The fast attempt can time out while the server is briefly busy;
-          // retry once generously so the marker title does not stick.
+          // Retry generously so the marker title does not stick.
           await runHerdr(["terminal", "title", "clear"], { timeout: 5_000 }).catch(() => undefined);
         }
       }
@@ -185,11 +183,10 @@ export async function launchHerdrInTerminal(
 ): Promise<void> {
   const binary = await resolveHerdrBinary();
   const application = selectedApplication();
-  // The launched client names its session explicitly, including the default:
-  // terminal launchers inherit the Raycast process environment, and the CLI
-  // falls back to an inherited HERDR_SESSION when no --session flag is given.
-  // The opt-out branches on the option alone, because an unset preference
-  // also reads as undefined and must still produce the flag.
+  // Launched clients inherit the Raycast process environment, where a leaked
+  // HERDR_SESSION would retarget them, so the session is always named. The
+  // opt-out branches on the option alone: an unset preference is also
+  // undefined and must still produce the flag.
   const sessionArgs =
     options.includePreferredSession === false
       ? args

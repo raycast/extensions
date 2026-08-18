@@ -4,8 +4,7 @@ import { formatHerdrError } from "./herdr";
 import type { AgentStatus, TabInfo } from "./types";
 export { shortcuts } from "./shortcuts";
 
-// Herdr defaults a tab's label to its number, which identifies nothing in
-// lists that span workspaces, so default labels are treated as unlabeled.
+// Herdr defaults a tab's label to its number, which identifies nothing.
 export function tabLabel(tab?: TabInfo): string | undefined {
   if (!tab || tab.label === String(tab.number)) return undefined;
   return tab.label;

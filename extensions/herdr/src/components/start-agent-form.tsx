@@ -91,9 +91,8 @@ export function StartAgentForm({
 
   async function submit(values: Form.Values) {
     if (!data) return;
-    // The kind/focusAfter fields are uncontrolled so storeValue can restore the
-    // last selection, so read the submitted values rather than closure state,
-    // which may still hold their initial defaults.
+    // kind/focusAfter are uncontrolled so storeValue can restore the last
+    // selection. Closure state may still hold their initial defaults.
     const submittedKind = (values.kind as AgentKind | undefined) ?? kind;
     const submittedFocusAfter = (values.focusAfter as boolean | undefined) ?? focusAfter;
     const agentName = name.trim() || defaultAgentName(submittedKind, data.agents);
@@ -141,8 +140,7 @@ export function StartAgentForm({
         ];
         if (extraArguments.length) args.push("--", ...extraArguments);
         await runHerdr(args, { timeout: 70_000 });
-        // The pane id resolves unambiguously, unlike a name another live agent
-        // may share.
+        // The pane id resolves unambiguously. A name may be shared.
         if (prompt.trim()) await sendAgentPrompt(startedPaneId, prompt.trim());
       },
       { success: `${agentName} Started` },
@@ -157,7 +155,7 @@ export function StartAgentForm({
         await focusResource("agent", startedPaneId);
         shouldCloseRaycast = await revealFocusedHerdr();
       } catch {
-        // Focus is cosmetic once the agent is started.
+        // Ignored.
       }
     }
 
