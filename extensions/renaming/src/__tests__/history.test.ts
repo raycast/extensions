@@ -897,6 +897,73 @@ describe("directory-and-children batch undo", () => {
   });
 });
 
+describe("timestamp collisions", () => {
+  it("keeps both entries when another instance stamped the same millisecond", async () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1000);
+    try {
+      const theirs = { timestamp: 1000, description: "theirs", operations: [] };
+      mockStorage.getItem.mockResolvedValue(JSON.stringify([theirs]));
+
+      await saveToHistory("mine", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt" }]);
+
+      const stored = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
+      expect(stored).toHaveLength(2);
+      // Ours steps forward instead of evicting the colliding entry, and each
+      // timestamp still names exactly one entry (the UI's key).
+      expect(stored.map((e: { description: string }) => e.description)).toEqual(["mine", "theirs"]);
+      expect(stored[0].timestamp).toBe(1001);
+      expect(stored[1].timestamp).toBe(1000);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it("steps past every colliding timestamp already stored", async () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1000);
+    try {
+      mockStorage.getItem.mockResolvedValue(
+        JSON.stringify([
+          { timestamp: 1000, description: "theirs a", operations: [] },
+          { timestamp: 1001, description: "theirs b", operations: [] },
+        ]),
+      );
+
+      await saveToHistory("mine", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt" }]);
+
+      const stored = JSON.parse(mockStorage.setItem.mock.calls[0][1]);
+      expect(stored).toHaveLength(3);
+      expect(stored[0].timestamp).toBe(1002);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+
+  it("stays idempotent when a retry re-reads a state that already holds our entry", async () => {
+    const nowSpy = vi.spyOn(Date, "now").mockReturnValue(1000);
+    try {
+      mockStorage.getItem.mockResolvedValue(JSON.stringify([]));
+      // The first write is clobbered by a winner that merged our entry into
+      // its own state — the retry must neither duplicate ours nor bump it
+      // again on account of the copy of itself it finds.
+      mockStorage.setItem.mockImplementationOnce(async (_key: string, value: string) => {
+        const ours = JSON.parse(value)[0];
+        mockStorage.getItem.mockResolvedValue(
+          JSON.stringify([{ timestamp: 500, description: "theirs", operations: [] }, ours]),
+        );
+      });
+
+      await saveToHistory("mine", [{ oldPath: "/dir/a.txt", newPath: "/dir/b.txt" }]);
+
+      expect(mockStorage.setItem).toHaveBeenCalledTimes(2);
+      const stored = JSON.parse(mockStorage.setItem.mock.calls[1][1]);
+      expect(stored.map((e: { description: string }) => e.description)).toEqual(["mine", "theirs"]);
+      expect(stored[0].timestamp).toBe(1000);
+    } finally {
+      nowSpy.mockRestore();
+    }
+  });
+});
+
 describe("write verification", () => {
   it("re-merges and rewrites when another write lands between the write and its verification", async () => {
     mockStorage.getItem.mockResolvedValue(JSON.stringify([]));
