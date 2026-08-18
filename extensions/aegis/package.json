@@ -124,7 +124,7 @@
     "@types/qrcode": "^1.5.5",
     "eslint": "^8.11.0",
     "fast-glob": "^3.2.11",
-    "sharp": "^0.33.4",
+    "sharp": "^0.35.3",
     "simple-icons": "^6.14.0",
     "typescript": "^4.6.2"
   },
@@ -134,5 +134,9 @@
     "lint": "ray lint",
     "make-assets": "./make-assets.js",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "sharp": "^0.35.3"
   }
 }

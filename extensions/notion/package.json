@@ -298,7 +298,8 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-    "katex": "^0.16.21"
+    "katex": "^0.16.21",
+    "brace-expansion": "5.0.9"
   },
   "scripts": {
     "build": "ray build",

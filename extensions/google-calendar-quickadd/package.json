@@ -266,8 +266,6 @@
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
     "eslint": "^9.35.0",
-    "i": "^0.3.7",
-    "npm": "^11.6.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
@@ -281,5 +279,10 @@
   },
   "platforms": [
     "macOS"
-  ]
+  ],
+  "overrides": {
+    "tar": "7.5.22",
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }

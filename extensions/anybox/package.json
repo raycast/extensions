@@ -212,5 +212,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
+  }
 }
