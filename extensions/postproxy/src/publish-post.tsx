@@ -28,21 +28,28 @@ export default function PublishPost() {
     initialValues: { body: "", profiles: [], media: [], scheduledAt: null, draft: false, platformParams: "" },
     async onSubmit(v) {
       const scheduled = v.scheduledAt ?? undefined;
-      const activePlacements = Object.fromEntries(
-        Object.entries(networkPlacements).filter(([net]) => placementNetworks.includes(net)),
-      );
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: v.draft ? "Saving draft…" : scheduled ? "Scheduling…" : "Publishing…",
       });
       try {
+        // Resolve placements against a FRESH fetch for the currently-selected profiles, so a stale
+        // or out-of-order placement load can't send another profile's page/board/org/channel ID.
+        const targetsNow = profiles.filter((p) => v.profiles.includes(p.id) && supportsPlacements(p.platform));
+        const fresh = targetsNow.length > 0 ? await loadPlacementsByNetwork(targetsNow) : {};
+        const resolved: Record<string, string> = {};
+        for (const [net, list] of Object.entries(fresh)) {
+          const validIds = new Set(list.map((placement) => placement.id ?? ""));
+          const chosen = networkPlacements[net];
+          resolved[net] = chosen !== undefined && validIds.has(chosen) ? chosen : (list[0]?.id ?? "");
+        }
         const result = await createPost({
           body: v.body,
           profiles: v.profiles,
           media: v.media,
           scheduledAt: scheduled?.toISOString(),
           draft: v.draft,
-          platforms: buildPlatforms(v.platformParams, activePlacements),
+          platforms: buildPlatforms(v.platformParams, resolved),
         });
         toast.style = Toast.Style.Success;
         toast.title = v.draft ? "Draft saved" : `Post ${result.status}`;
