@@ -7,14 +7,6 @@
   "icon": "icon.png",
   "author": "koushik",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/wicolian/commit-sounds.git"
-  },
-  "bugs": {
-    "url": "https://github.com/wicolian/commit-sounds/issues"
-  },
-  "homepage": "https://github.com/wicolian/commit-sounds#readme",
   "categories": [
     "Developer Tools"
   ],
@@ -29,7 +21,6 @@
     "audio",
     "sound"
   ],
-  "main": "dist/index.js",
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",

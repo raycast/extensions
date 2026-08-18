@@ -7,6 +7,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
+import { isHookInstallCancelled } from "./confirm-hook-install";
 import {
   CommitSoundAuthor,
   SaveAuthorInput,
@@ -58,6 +59,7 @@ export function AuthorSoundForm({ author, onSaved }: AuthorSoundFormProps) {
       });
       pop();
     } catch (error) {
+      if (isHookInstallCancelled(error)) return;
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not save author sound",
@@ -85,7 +87,7 @@ export function AuthorSoundForm({ author, onSaved }: AuthorSoundFormProps) {
       <Form.TextField
         id="name"
         title="Author Name"
-        placeholder="Koushik"
+        placeholder="Jane Doe"
         defaultValue={author?.name}
       />
       <Form.TextField
@@ -106,7 +108,7 @@ export function AuthorSoundForm({ author, onSaved }: AuthorSoundFormProps) {
         id="audioUrl"
         title="Audio Link"
         placeholder="https://example.com/author-tag.mp3"
-        info="Use this instead of Audio File. HTTPS is recommended; max 20 MB."
+        info="Use this instead of Audio File. HTTPS is required; max 20 MB."
       />
       <Form.Dropdown
         id="volume"

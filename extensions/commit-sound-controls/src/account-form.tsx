@@ -7,6 +7,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useState } from "react";
+import { isHookInstallCancelled } from "./confirm-hook-install";
 import {
   CommitSoundAccount,
   SaveAccountInput,
@@ -63,6 +64,7 @@ export function AccountForm({
       });
       pop();
     } catch (error) {
+      if (isHookInstallCancelled(error)) return;
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not save account",
@@ -114,7 +116,7 @@ export function AccountForm({
         id="audioUrl"
         title="Audio Link"
         placeholder="https://example.com/producer-tag.mp3"
-        info="Use this instead of Audio File. HTTPS is recommended; max 20 MB."
+        info="Use this instead of Audio File. HTTPS is required; max 20 MB."
       />
       <Form.Dropdown
         id="volume"

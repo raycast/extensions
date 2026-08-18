@@ -90,6 +90,7 @@ export type CommitSoundsConfig = {
 export type InstallationState = {
   config: CommitSoundsConfig;
   hookInstalled: boolean;
+  ownsGlobalHooksPath: boolean;
   conflictingHookPath?: string;
   missingSoundIds: string[];
   defaultAuthorEmail?: string;
@@ -255,28 +256,6 @@ function validateConfigValue(value: string): string {
   return value;
 }
 
-function legacyAccounts(values: Map<string, string>): CommitSoundAccount[] {
-  const legacy = [
-    ["koushik-databrain", values.get("koushik_sound")],
-    ["wicolian", values.get("wicolian_sound")],
-  ] as const;
-
-  return legacy.flatMap(([owner, soundPath]) =>
-    soundPath
-      ? [
-          {
-            id: owner,
-            owner,
-            soundPath,
-            source: "Migrated from the original setup",
-            volume: 1,
-            managed: false,
-          },
-        ]
-      : [],
-  );
-}
-
 function emptyConfig(): CommitSoundsConfig {
   return {
     enabled: false,
@@ -322,7 +301,7 @@ export async function readConfig(): Promise<CommitSoundsConfig> {
         connectedGitHubAccounts: legacyLogin
           ? [{ login: legacyLogin, tokenSlot: "legacy", retiredTokenSlots: [] }]
           : [],
-        accounts: legacyAccounts(values),
+        accounts: [],
         authorPlaybackMode: "anyone",
         selectedAuthorEmails: [],
         playbackCooldownSeconds: 5,
@@ -667,6 +646,7 @@ export async function getState(): Promise<InstallationState> {
   return {
     config,
     hookInstalled: configuredHooksPath === hooksDirectory && hookExists,
+    ownsGlobalHooksPath: configuredHooksPath === hooksDirectory,
     conflictingHookPath:
       configuredHooksPath && configuredHooksPath !== hooksDirectory
         ? configuredHooksPath
@@ -676,6 +656,13 @@ export async function getState(): Promise<InstallationState> {
     ),
     defaultAuthorEmail,
   };
+}
+
+async function ensureWindowsPlayer(): Promise<void> {
+  await mkdir(supportDirectory, { recursive: true, mode: 0o700 });
+  await writeFile(windowsPlayerPath, windowsPlayerContents, {
+    mode: 0o600,
+  });
 }
 
 export async function installOrRepairHook(): Promise<void> {
@@ -691,9 +678,7 @@ export async function installOrRepairHook(): Promise<void> {
   await chmod(hookPath, 0o755);
   await mkdir(soundsDirectory, { recursive: true, mode: 0o700 });
   if (process.platform === "win32") {
-    await writeFile(windowsPlayerPath, windowsPlayerContents, {
-      mode: 0o600,
-    });
+    await ensureWindowsPlayer();
   }
 
   if (!(await pathExists(configPath))) {
@@ -710,6 +695,20 @@ export async function installOrRepairHook(): Promise<void> {
     "--global",
     "core.hooksPath",
     hooksDirectory,
+  ]);
+}
+
+export async function uninstallGlobalHook(): Promise<void> {
+  const configuredHooksPath = await getGlobalHooksPath();
+  if (configuredHooksPath !== hooksDirectory) {
+    return;
+  }
+
+  await execFileAsync("git", [
+    "config",
+    "--global",
+    "--unset",
+    "core.hooksPath",
   ]);
 }
 
@@ -754,13 +753,18 @@ async function copyAudioFile(
 
 async function downloadAudioFile(url: string, owner: string): Promise<string> {
   const parsedUrl = new URL(url);
-  if (parsedUrl.protocol !== "https:" && parsedUrl.protocol !== "http:") {
-    throw new Error("Audio links must use http:// or https://.");
+  if (parsedUrl.protocol !== "https:") {
+    throw new Error("Audio links must use https://.");
   }
 
   const response = await fetch(parsedUrl, { redirect: "follow" });
   if (!response.ok) {
     throw new Error(`Audio download failed (${response.status}).`);
+  }
+
+  const finalUrl = new URL(response.url);
+  if (finalUrl.protocol !== "https:") {
+    throw new Error("Audio links must use https://.");
   }
 
   const extension = audioExtension(basename(parsedUrl.pathname));
@@ -1001,9 +1005,7 @@ export async function playSound(path: string, volume: number): Promise<void> {
     throw new Error(`Could not find ${path}`);
   }
   if (process.platform === "win32") {
-    if (!(await pathExists(windowsPlayerPath))) {
-      await installOrRepairHook();
-    }
+    await ensureWindowsPlayer();
     await execFileAsync("powershell.exe", [
       "-NoProfile",
       "-NonInteractive",

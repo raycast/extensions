@@ -1,12 +1,9 @@
 import { AccountForm } from "./account-form";
-import {
-  CommitSoundAccount,
-  installOrRepairHook,
-  upsertSoundRule,
-} from "./lib/commit-sounds";
+import { confirmAndInstallHook } from "./confirm-hook-install";
+import { CommitSoundAccount, upsertSoundRule } from "./lib/commit-sounds";
 
 async function addOrReplaceRule(account: CommitSoundAccount): Promise<void> {
-  await installOrRepairHook();
+  await confirmAndInstallHook();
   await upsertSoundRule(account);
 }
 

@@ -8,15 +8,15 @@ For example, one `example-org` rule covers every current and future repository w
 
 ## What you can control
 
-| Control                            | What it does                                                                                                         |
-| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| GitHub owner or organization rules | Play a unique sound for any GitHub user or organization. One organization rule covers all of its repos.              |
-| Audio source                       | Upload an MP3, M4A, WAV, AIFF, or AAC file, or provide a direct HTTP(S) audio link. Linked audio is downloaded once. |
-| Volume                             | Set a separate playback volume for every owner and author sound.                                                     |
-| Playback cooldown                  | Collapse rapid agent commits into one sound; the default is five seconds and can be changed in Raycast.              |
-| Author policy                      | Play sounds for every local commit author, or only a set of selected Git email addresses.                            |
-| Author overrides                   | Give a specific Git author email its own sound while keeping the same organization rule.                             |
-| GitHub connections                 | Optionally connect multiple GitHub identities, choose a default owner, and select organizations from each identity.  |
+| Control                            | What it does                                                                                                        |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| GitHub owner or organization rules | Play a unique sound for any GitHub user or organization. One organization rule covers all of its repos.             |
+| Audio source                       | Upload an MP3, M4A, WAV, AIFF, or AAC file, or provide a direct HTTPS audio link. Linked audio is downloaded once.  |
+| Volume                             | Set a separate playback volume for every owner and author sound.                                                    |
+| Playback cooldown                  | Collapse rapid agent commits into one sound; the default is five seconds and can be changed in Raycast.             |
+| Author policy                      | Play sounds for every local commit author, or only a set of selected Git email addresses.                           |
+| Author overrides                   | Give a specific Git author email its own sound while keeping the same organization rule.                            |
+| GitHub connections                 | Optionally connect multiple GitHub identities, choose a default owner, and select organizations from each identity. |
 
 The extension only reacts to commits made on the same computer. It cannot play a sound when a teammate commits from their machine or when a pull request is merged on GitHub.
 
@@ -50,12 +50,12 @@ git config --get remote.origin.url
 
 Examples:
 
-| Remote                                          | Rule to add   |
-| ----------------------------------------------- | ------------- |
-| `https://github.com/wicolian/commit-sounds.git` | `wicolian`    |
-| `git@github.com:example-org/project.git`        | `example-org` |
+| Remote                                       | Rule to add   |
+| -------------------------------------------- | ------------- |
+| `https://github.com/octocat/Hello-World.git` | `octocat`     |
+| `git@github.com:example-org/project.git`     | `example-org` |
 
-After saving the first rule, the extension installs a global `post-commit` hook. Your next successful local commit in a matching repository plays the sound.
+After saving the first rule, the extension asks to set Git's global `core.hooksPath` and installs a `post-commit` hook. Your next successful local commit in a matching repository plays the sound.
 
 ## Organizations, including new repositories
 

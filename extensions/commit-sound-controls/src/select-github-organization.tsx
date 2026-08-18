@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useMemo } from "react";
 import { AccountForm } from "./account-form";
 import {
   CommitSoundAccount,
@@ -21,46 +22,24 @@ export function SelectGitHubOrganization({
   soundRules,
   onSaved,
 }: SelectGitHubOrganizationProps) {
-  const [organizations, setOrganizations] = useState<GitHubOrganization[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string>();
+  const { data, isLoading, error } = usePromise(
+    (accounts: ConnectedGitHubAccount[]) =>
+      Promise.all(
+        accounts.map((account) => listGitHubOrganizations(account.tokenSlot)),
+      ),
+    [connectedAccounts],
+    { onError: () => undefined },
+  );
 
-  useEffect(() => {
-    let cancelled = false;
-    async function load() {
-      try {
-        const results = await Promise.all(
-          connectedAccounts.map((account) =>
-            listGitHubOrganizations(account.tokenSlot),
-          ),
-        );
-        if (cancelled) return;
-
-        const uniqueOrganizations = new Map<string, GitHubOrganization>();
-        results.flat().forEach((organization) => {
-          uniqueOrganizations.set(
-            organization.login.toLowerCase(),
-            organization,
-          );
-        });
-        setOrganizations(
-          [...uniqueOrganizations.values()].sort((left, right) =>
-            left.login.localeCompare(right.login),
-          ),
-        );
-      } catch (reason) {
-        if (!cancelled) {
-          setError(reason instanceof Error ? reason.message : String(reason));
-        }
-      } finally {
-        if (!cancelled) setIsLoading(false);
-      }
-    }
-    void load();
-    return () => {
-      cancelled = true;
-    };
-  }, [connectedAccounts]);
+  const organizations = useMemo(() => {
+    const uniqueOrganizations = new Map<string, GitHubOrganization>();
+    (data ?? []).flat().forEach((organization) => {
+      uniqueOrganizations.set(organization.login.toLowerCase(), organization);
+    });
+    return [...uniqueOrganizations.values()].sort((left, right) =>
+      left.login.localeCompare(right.login),
+    );
+  }, [data]);
 
   return (
     <List
@@ -76,7 +55,7 @@ export function SelectGitHubOrganization({
           }
           description={
             error
-              ? `${error} Disconnect and connect the GitHub account again to grant organization access, or add the organization manually.`
+              ? `${error.message} Disconnect and connect the GitHub account again to grant organization access, or add the organization manually.`
               : "Connect the GitHub account that belongs to the organization, or add its GitHub owner name manually."
           }
         />

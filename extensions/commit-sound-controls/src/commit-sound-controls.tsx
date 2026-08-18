@@ -1,52 +1,51 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Color,
   Icon,
   List,
   Toast,
+  confirmAlert,
   showToast,
 } from "@raycast/api";
-import { useCallback, useEffect, useState } from "react";
+import { usePromise } from "@raycast/utils";
+import { useCallback } from "react";
 import { AccountForm } from "./account-form";
 import { AuthorPlaybackSettings } from "./author-playback-settings";
 import { AuthorSoundForm } from "./author-sound-form";
 import { ConnectGitHubAccount } from "./connect-github-account";
+import {
+  confirmAndInstallHook,
+  isHookInstallCancelled,
+} from "./confirm-hook-install";
 import { SelectGitHubOrganization } from "./select-github-organization";
 import {
   CommitSoundAccount,
   CommitSoundAuthor,
   finalizeGitHubAccountDisconnect,
   getState,
-  installOrRepairHook,
-  InstallationState,
+  hooksDirectory,
   mutateConfig,
   playSound,
   removeAuthorSound,
   removeSoundRule,
   selectConnectedGitHubAccount,
   supportDirectory,
+  uninstallGlobalHook,
   upsertAuthorSound,
   upsertSoundRule,
 } from "./lib/commit-sounds";
 import { signOutGitHubAccount } from "./lib/github-oauth";
 
 export default function CommitSoundControls() {
-  const [state, setState] = useState<InstallationState>();
-  const [isLoading, setIsLoading] = useState(true);
-
-  const refresh = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      setState(await getState());
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    void refresh();
-  }, [refresh]);
+  const {
+    data: state,
+    isLoading,
+    error,
+    revalidate,
+    mutate,
+  } = usePromise(getState);
 
   const run = useCallback(
     async (
@@ -56,27 +55,30 @@ export default function CommitSoundControls() {
     ) => {
       const toast = await showToast({ style: Toast.Style.Animated, title });
       try {
-        await operation();
+        await mutate(operation());
         toast.style = Toast.Style.Success;
         toast.title = successMessage;
-        await refresh();
-      } catch (error) {
+      } catch (reason) {
+        if (isHookInstallCancelled(reason)) {
+          await toast.hide();
+          return;
+        }
         toast.style = Toast.Style.Failure;
         toast.title = "Could not update commit sounds";
-        toast.message = error instanceof Error ? error.message : String(error);
-        await refresh();
+        toast.message =
+          reason instanceof Error ? reason.message : String(reason);
       }
     },
-    [refresh],
+    [mutate],
   );
 
   const saveAccount = useCallback(
     async (account: CommitSoundAccount) => {
-      await installOrRepairHook();
+      await confirmAndInstallHook();
       await upsertSoundRule(account);
-      await refresh();
+      revalidate();
     },
-    [refresh],
+    [revalidate],
   );
 
   const removeAccount = useCallback(async (account: CommitSoundAccount) => {
@@ -85,12 +87,24 @@ export default function CommitSoundControls() {
 
   const saveAuthor = useCallback(
     async (author: CommitSoundAuthor) => {
-      await installOrRepairHook();
+      await confirmAndInstallHook();
       await upsertAuthorSound(author);
-      await refresh();
+      revalidate();
     },
-    [refresh],
+    [revalidate],
   );
+
+  if (error && !state) {
+    return (
+      <List isLoading={isLoading}>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load commit sounds"
+          description={error.message}
+        />
+      </List>
+    );
+  }
 
   const installed = state?.hookInstalled ?? false;
   const enabled = state?.config.enabled ?? false;
@@ -158,7 +172,7 @@ export default function CommitSoundControls() {
                         ? "Enabling commit sounds"
                         : "Installing global Git hook",
                       async () => {
-                        if (!installed) await installOrRepairHook();
+                        if (!installed) await confirmAndInstallHook();
                         await mutateConfig((config) => ({
                           config: { ...config, enabled: true },
                           result: undefined,
@@ -174,7 +188,7 @@ export default function CommitSoundControls() {
               <Action
                 title="Refresh Status"
                 icon={Icon.ArrowClockwise}
-                onAction={refresh}
+                onAction={revalidate}
               />
             </ActionPanel>
           }
@@ -199,7 +213,13 @@ export default function CommitSoundControls() {
               <Action.Push
                 title="Connect Another GitHub Account"
                 icon={Icon.AddPerson}
-                target={<ConnectGitHubAccount onConnected={refresh} />}
+                target={
+                  <ConnectGitHubAccount
+                    onConnected={async () => {
+                      revalidate();
+                    }}
+                  />
+                }
               />
             </ActionPanel>
           }
@@ -251,7 +271,16 @@ export default function CommitSoundControls() {
                       title="Disconnect GitHub Account"
                       icon={Icon.Logout}
                       style={Action.Style.Destructive}
-                      onAction={() =>
+                      onAction={async () => {
+                        const confirmed = await confirmAlert({
+                          title: "Disconnect GitHub Account",
+                          message: `Sign out ${account.login} and remove its saved GitHub credentials from this computer.`,
+                          primaryAction: {
+                            title: "Disconnect Account",
+                            style: Alert.ActionStyle.Destructive,
+                          },
+                        });
+                        if (!confirmed) return;
                         run(
                           `Signing out ${account.login}`,
                           async () => {
@@ -286,8 +315,8 @@ export default function CommitSoundControls() {
                             }
                           },
                           `${account.login} disconnected`,
-                        )
-                      }
+                        );
+                      }}
                     />
                   </ActionPanel>
                 }
@@ -418,13 +447,22 @@ export default function CommitSoundControls() {
                     title="Remove Account Rule"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    onAction={() =>
+                    onAction={async () => {
+                      const confirmed = await confirmAlert({
+                        title: "Remove Account Rule",
+                        message: `Remove the sound rule for ${account.owner}. Managed audio for this rule will be deleted.`,
+                        primaryAction: {
+                          title: "Remove Rule",
+                          style: Alert.ActionStyle.Destructive,
+                        },
+                      });
+                      if (!confirmed) return;
                       run(
                         `Removing ${account.owner}`,
                         () => removeAccount(account),
                         "Account rule removed",
-                      )
-                    }
+                      );
+                    }}
                   />
                 </ActionPanel>
               }
@@ -456,7 +494,9 @@ export default function CommitSoundControls() {
                     <AuthorPlaybackSettings
                       config={state.config}
                       defaultEmail={state.defaultAuthorEmail}
-                      onSaved={refresh}
+                      onSaved={async () => {
+                        revalidate();
+                      }}
                     />
                   ) : null
                 }
@@ -521,13 +561,22 @@ export default function CommitSoundControls() {
                     title="Remove Author Sound"
                     icon={Icon.Trash}
                     style={Action.Style.Destructive}
-                    onAction={() =>
+                    onAction={async () => {
+                      const confirmed = await confirmAlert({
+                        title: "Remove Author Sound",
+                        message: `Remove the author sound for ${author.name} (${author.email}). Managed audio for this override will be deleted.`,
+                        primaryAction: {
+                          title: "Remove Sound",
+                          style: Alert.ActionStyle.Destructive,
+                        },
+                      });
+                      if (!confirmed) return;
                       run(
                         `Removing ${author.name}`,
                         () => removeAuthorSound(author.id),
                         "Author sound removed",
-                      )
-                    }
+                      );
+                    }}
                   />
                 </ActionPanel>
               }
@@ -549,11 +598,34 @@ export default function CommitSoundControls() {
                 onAction={() =>
                   run(
                     "Installing global Git hook",
-                    installOrRepairHook,
+                    confirmAndInstallHook,
                     "Global Git hook installed",
                   )
                 }
               />
+              {state?.ownsGlobalHooksPath && (
+                <Action
+                  title="Uninstall Global Hook"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  onAction={async () => {
+                    const confirmed = await confirmAlert({
+                      title: "Uninstall Global Git Hook",
+                      message: `This unsets \`git config --global core.hooksPath\` because it currently equals ${hooksDirectory}. Other Git repositories will stop using the Commit Sounds hook.`,
+                      primaryAction: {
+                        title: "Unset core.hooksPath",
+                        style: Alert.ActionStyle.Destructive,
+                      },
+                    });
+                    if (!confirmed) return;
+                    run(
+                      "Uninstalling global Git hook",
+                      uninstallGlobalHook,
+                      "Global Git hook uninstalled",
+                    );
+                  }}
+                />
+              )}
               <Action.ShowInFinder
                 path={supportDirectory}
                 title="Open Support Folder"

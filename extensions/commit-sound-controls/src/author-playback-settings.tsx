@@ -8,9 +8,12 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import {
+  confirmAndInstallHook,
+  isHookInstallCancelled,
+} from "./confirm-hook-install";
+import {
   AuthorPlaybackMode,
   CommitSoundsConfig,
-  installOrRepairHook,
   setAuthorPlaybackSettings,
 } from "./lib/commit-sounds";
 
@@ -51,7 +54,7 @@ export function AuthorPlaybackSettings({
   async function submit(values: FormValues) {
     setIsSubmitting(true);
     try {
-      await installOrRepairHook();
+      await confirmAndInstallHook();
       await setAuthorPlaybackSettings(
         values.playbackMode,
         values.playbackMode === "selected"
@@ -69,6 +72,7 @@ export function AuthorPlaybackSettings({
       });
       pop();
     } catch (error) {
+      if (isHookInstallCancelled(error)) return;
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not save playback settings",
