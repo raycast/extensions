@@ -4,15 +4,15 @@
 
 import { useEffect, useState } from "react";
 import { useCachedState } from "@raycast/utils";
-import { Form, ActionPanel, Action, popToRoot, showToast, Toast, getSelectedFinderItems } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { dirname, join } from "path";
-import { getFileInfo } from "./lib/files";
 import { batchRename, checkConflicts } from "./lib/batch";
 import { openRenameHistory, recordRenameHistory } from "./lib/history-nav";
+import { itemNoun, loadSelection } from "./lib/selection";
 import { log } from "./lib/logger";
 import type { FileInfo, RenameOperation } from "./types";
 
-export default function Command() {
+export default function Command({ foldersOnly = false }: { foldersOnly?: boolean } = {}) {
   const [files, setFiles] = useState<FileInfo[]>([]);
   const [newName, setNewName] = useState<string>("");
   const [prefix, setPrefix] = useState<string>("");
@@ -23,34 +23,15 @@ export default function Command() {
   const [indexSeparator, setIndexSeparator] = useState<string>("-");
 
   const getSelectedFiles = async () => {
-    try {
-      const selectedItems = await getSelectedFinderItems();
-      const filePaths = selectedItems.map((file) => file.path);
-      log.rename.debug("Fetched files", filePaths);
-
-      if (filePaths.length === 0) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Please select at least one file or open a Finder window",
-        });
-        popToRoot();
-        return;
-      }
-
-      const fileInfos = await Promise.all(filePaths.map((p) => getFileInfo(p)));
-      if (fileInfos.length === 1) {
-        setPreserveName(false);
-      }
-      setFiles(fileInfos);
-    } catch (error) {
-      log.rename.error("Failed to fetch files", error);
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to fetch files",
-        message: "Please make sure a Finder window is open and files are selected",
-      });
-      popToRoot();
+    const fileInfos = await loadSelection(foldersOnly);
+    if (!fileInfos) {
+      return;
     }
+
+    if (fileInfos.length === 1) {
+      setPreserveName(false);
+    }
+    setFiles(fileInfos);
   };
 
   const handleSeparatorChange = async (separatorType: "separator" | "indexSeparator", value: string) => {
@@ -118,7 +99,7 @@ export default function Command() {
         await showToast({
           style: Toast.Style.Failure,
           title: "New name cannot be empty",
-          message: "Please enter a name for the file",
+          message: `Please enter a name for the ${itemNoun(foldersOnly, 1)}`,
         });
         return;
       }
@@ -138,8 +119,10 @@ export default function Command() {
       const results = await batchRename(operations);
 
       const successfulOps = results.filter((r) => r.success).map(({ oldPath, newPath }) => ({ oldPath, newPath }));
-      const noun = successfulOps.length === 1 ? "file" : "files";
-      const historySaved = await recordRenameHistory(`Renamed ${successfulOps.length} ${noun}`, successfulOps);
+      const historySaved = await recordRenameHistory(
+        `Renamed ${successfulOps.length} ${itemNoun(foldersOnly, successfulOps.length)}`,
+        successfulOps,
+      );
 
       const successCount = successfulOps.length;
       const failureCount = results.filter((r) => !r.success).length;
@@ -148,7 +131,7 @@ export default function Command() {
         setPreserveName(false);
         await showToast({
           style: Toast.Style.Success,
-          title: `Renamed ${successCount} file${successCount !== 1 ? "s" : ""}`,
+          title: `Renamed ${successCount} ${itemNoun(foldersOnly, successCount)}`,
           // An empty batch records no history by design — only warn when
           // there was something to save and saving failed.
           message: successCount > 0 && !historySaved ? "History could not be saved" : undefined,
@@ -157,13 +140,13 @@ export default function Command() {
       } else if (successCount > 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: `Renamed ${successCount} of ${results.length} files`,
+          title: `Renamed ${successCount} of ${results.length} ${itemNoun(foldersOnly, results.length)}`,
           message: results.find((r) => !r.success)?.error,
         });
       } else {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Failed to rename files",
+          title: `Failed to rename ${itemNoun(foldersOnly, results.length)}`,
           message: results.find((r) => !r.success)?.error,
         });
       }
@@ -172,7 +155,7 @@ export default function Command() {
 
       await showToast({
         style: Toast.Style.Failure,
-        title: "Failed to rename files",
+        title: `Failed to rename ${itemNoun(foldersOnly, files.length)}`,
         message: (error as Error).message,
       });
     }

@@ -51,6 +51,18 @@
       "title": "Rename History",
       "description": "View and undo recent rename operations.",
       "mode": "view"
+    },
+    {
+      "name": "rename-folders",
+      "title": "Rename Folder(s)",
+      "description": "Rename the folders selected in Finder in a batch.",
+      "mode": "view"
+    },
+    {
+      "name": "replace-folders",
+      "title": "Replace in Folder Names",
+      "description": "Replace characters in the names of the selected folders.",
+      "mode": "view"
     }
   ],
   "dependencies": {
