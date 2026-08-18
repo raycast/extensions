@@ -143,18 +143,17 @@ export default function Command() {
           if (notification.pendingRemaining !== null) continue;
           if (notifiedAtThreshold === notificationThreshold) continue;
 
-          await LocalStorage.setItem(
-            LOW_BALANCE_NOTIFICATION_KEY,
-            notificationThreshold,
-          );
-
-          if (notification.pendingRemaining !== null) continue;
-
           await showToast({
             style: Toast.Style.Failure,
             title: "OpenRouter balance is low",
             message: `${formatCurrency(latestRemaining)} remaining (alert at ${notificationThreshold})`,
           });
+
+          // Record the threshold only after the alert has been delivered.
+          await LocalStorage.setItem(
+            LOW_BALANCE_NOTIFICATION_KEY,
+            notificationThreshold,
+          );
         }
       } catch {
         // A notification failure must not affect balance updates.
