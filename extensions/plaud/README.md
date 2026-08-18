@@ -17,4 +17,4 @@ plaud login
 
 ## Commands
 
-- **Search Recordings** — browse and search your recordings; copy a link (↵), open in browser, or copy the title (⌘⇧C)
+- **Search Recordings** — browse and search your recordings; open in browser (↵), copy a link (⌘↵), or copy the title (⌘⇧C)
