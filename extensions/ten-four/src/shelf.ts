@@ -199,8 +199,14 @@ function withLock<T>(fn: () => T): T {
           }
           if (!ownerAlive) {
             const stale = `${LOCK_FILE}.${process.pid}.${Math.random().toString(36).slice(2)}.stale`;
-            renameSync(LOCK_FILE, stale);
-            unlinkSync(stale);
+            try {
+              if (readFileSync(LOCK_FILE, "utf8") === token) {
+                renameSync(LOCK_FILE, stale);
+                unlinkSync(stale);
+              }
+            } catch {
+              // lock vanished or a successor acquired it
+            }
           }
         }
       } catch {

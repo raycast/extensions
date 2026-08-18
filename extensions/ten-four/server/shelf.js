@@ -162,8 +162,14 @@ async function withLock(fn) {
           }
           if (!ownerAlive) {
             const stale = `${LOCK}.${process.pid}.${Math.random().toString(36).slice(2)}.stale`;
-            fs.renameSync(LOCK, stale);
-            fs.unlinkSync(stale);
+            try {
+              if (fs.readFileSync(LOCK, "utf8") === token) {
+                fs.renameSync(LOCK, stale);
+                fs.unlinkSync(stale);
+              }
+            } catch {
+              // lock vanished or a successor acquired it
+            }
           }
         }
       } catch {
