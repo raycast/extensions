@@ -1,6 +1,6 @@
 # Laravel Forge Changelog
 
-## [Forge API v2] - {PR_MERGE_DATE}
+## [Forge API v2] - 2026-08-18
 - Move every request to the Forge API v2, which replaces v1 on August 31, 2026
 - Servers are now listed per organization, across all organizations a token can see
 - Asks for a new API token, since v2 tokens are scoped — see the README for which scopes to tick
