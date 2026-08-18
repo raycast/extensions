@@ -29,13 +29,15 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fs;
 use std::hash::{Hash, Hasher};
-use std::io::Read;
+use std::net::IpAddr;
+use std::io::{Cursor, Read};
 use std::path::PathBuf;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Mutex;
 use std::time::Duration;
 
 use raycast_rust_macros::raycast;
+use ureq::tls::{RootCerts, TlsConfig, TlsProvider};
 use windows::Win32::System::Com::{CoCreateInstance, CoInitializeEx, CLSCTX_ALL, COINIT_MULTITHREADED};
 use windows_core::{Interface, GUID, HSTRING};
 
@@ -59,7 +61,11 @@ const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/
 /// A single request may not hang the run: an unreachable vendor host would
 /// otherwise hold a worker until the OS gives up. Short, because a slow host
 /// costs its row an icon for this pass either way.
-const REQUEST_TIMEOUT: Duration = Duration::from_millis(1_500);
+const REQUEST_TIMEOUT: Duration = Duration::from_millis(2_500);
+/// Caps on what a remote source may cost: bytes read, and the surface an
+/// image is allowed to decode to.
+const MAX_DOWNLOAD_BYTES: u64 = 4 * 1024 * 1024;
+const MAX_ICON_PIXELS: u32 = 2_048;
 
 /// Write each package's icon into `cache_dir`, named after the package.
 /// Callers pass whatever is on screen, so plenty of ids are not in the winget
@@ -181,7 +187,10 @@ fn resolve_icons(packages: &[(String, CatalogPackage)], cache_dir: &str) {
             .DefaultInstallVersion()
             .and_then(|version| version.GetCatalogPackageMetadata())
         else {
-            publish(id, None, cache_dir);
+            // Reading the manifest is a network call, so a failure here says
+            // nothing about whether the package has an icon. Publishing "no
+            // icon" would make a moment's connectivity permanent; leaving it
+            // unpublished costs one more lookup later.
             return;
         };
 
@@ -288,12 +297,15 @@ fn homepage_icon(homepage: &str, cache_dir: &str) -> Option<PathBuf> {
     if let Some(path) = cache_png(&[format!("{origin}/favicon.ico")], &stem, cache_dir) {
         return Some(path);
     }
+    if !is_public_https(&origin) {
+        return None;
+    }
     let declared = http_agent()
-        .get(homepage)
+        .get(&origin)
         .header("User-Agent", USER_AGENT)
         .call()
         .ok()
-        .and_then(|response| response.into_body().read_to_string().ok())
+        .and_then(|response| response.into_body().with_config().limit(MAX_DOWNLOAD_BYTES).read_to_string().ok())
         .map(|html| declared_icons(&html, &origin))
         .unwrap_or_default();
     cache_png(&declared, &stem, cache_dir)
@@ -356,6 +368,35 @@ fn absolute_url(href: &str, origin: &str) -> Option<String> {
     Some(format!("{origin}/{href}"))
 }
 
+/// Refuse anything but a public HTTPS destination. Icon and homepage URLs
+/// come from package metadata, which the package author controls, so they
+/// must not be able to point this process at the machine's own network.
+fn is_public_https(url: &str) -> bool {
+    if !url.starts_with("https://") {
+        return false;
+    }
+    let Some(host) = host_of(url) else { return false };
+    if host == "localhost" || host.ends_with(".localhost") {
+        return false;
+    }
+    match host.trim_start_matches('[').trim_end_matches(']').parse::<IpAddr>() {
+        Ok(IpAddr::V4(address)) => {
+            !(address.is_loopback() || address.is_private() || address.is_link_local() || address.is_unspecified())
+        }
+        Ok(IpAddr::V6(address)) => {
+            let leading = address.segments()[0];
+            // Unique-local (fc00::/7) and link-local (fe80::/10) have no
+            // stable predicates yet.
+            !(address.is_loopback()
+                || address.is_unspecified()
+                || leading & 0xfe00 == 0xfc00
+                || leading & 0xffc0 == 0xfe80)
+        }
+        // A name, not an address: it resolves publicly or not at all.
+        Err(_) => true,
+    }
+}
+
 /// The host a homepage points at, lowercased and without credentials or port.
 fn host_of(homepage: &str) -> Option<String> {
     let host = homepage
@@ -379,6 +420,17 @@ fn http_agent() -> ureq::Agent {
     ureq::Agent::new_with_config(
         ureq::Agent::config_builder()
             .timeout_global(Some(REQUEST_TIMEOUT))
+            // SChannel, the platform's own TLS. The alternative pulls in a
+            // C library, which cannot be cross-compiled by the extension CI's
+            // macOS runners. Its roots have to come from the platform too:
+            // against the bundled set, SChannel rejects perfectly ordinary
+            // chains it cannot terminate there (gitkraken.com, for one).
+            .tls_config(
+                TlsConfig::builder()
+                    .provider(TlsProvider::NativeTls)
+                    .root_certs(RootCerts::PlatformVerifier)
+                    .build(),
+            )
             .build(),
     )
 }
@@ -416,14 +468,33 @@ fn cache_png(sources: &[String], stem: &str, cache_dir: &str) -> Option<PathBuf>
 
     let agent = http_agent();
     for url in sources {
+        if !is_public_https(url) {
+            continue;
+        }
         let Ok(response) = agent.get(url).header("User-Agent", USER_AGENT).call() else {
             continue;
         };
+        // An icon is a few kilobytes; anything beyond the cap is not one, and
+        // the body arrives from wherever package metadata pointed.
         let mut body = Vec::new();
-        if response.into_body().into_reader().read_to_end(&mut body).is_err() {
+        if response
+            .into_body()
+            .into_reader()
+            .take(MAX_DOWNLOAD_BYTES)
+            .read_to_end(&mut body)
+            .is_err()
+        {
             continue;
         }
-        let Ok(decoded) = image::load_from_memory(&body) else { continue };
+        let Ok(reader) = image::ImageReader::new(Cursor::new(&body)).with_guessed_format() else {
+            continue;
+        };
+        let Ok(decoded) = reader.decode() else { continue };
+        // A small image that decodes to an enormous surface is the other way
+        // a remote file can cost more than it looks.
+        if decoded.width() > MAX_ICON_PIXELS || decoded.height() > MAX_ICON_PIXELS {
+            continue;
+        }
         if decoded.save_with_format(&path, image::ImageFormat::Png).is_ok() {
             return Some(path);
         }

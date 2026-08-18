@@ -14,7 +14,9 @@ raycast-rust-runtime = { git = "https://github.com/raycast/extensions-rust-tools
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 tokio = { version = "1.0", features = ["full"] }
-ureq = { version = "3.4.0", default-features = false, features = ["rustls"] }
+# native-tls means SChannel on Windows: pure bindings, no C to compile,
+# which keeps the crate cross-compilable from the extension CI's macOS runners.
+ureq = { version = "3.4.0", default-features = false, features = ["gzip", "native-tls"] }
 windows = { version = "0.62.2", features = ["Win32_System_Com"] }
 windows-collections = "0.3.2"
 windows-core = "0.62.2"
