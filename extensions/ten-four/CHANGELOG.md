@@ -1,6 +1,6 @@
 # Ten Four Changelog
 
-## [Optional remote shelf] - {PR_MERGE_DATE}
+## [Optional remote shelf] - 2026-08-18
 
 - New optional **Shelf URL** preference. Leave it blank and nothing changes: the shelf stays a local file, `~/.ten-four.json`, on your Mac.
 - Set it to a Ten Four shelf service endpoint and the extension reads that instead, so snippets pushed from another machine (a dev box, a container, Claude Code on a server) land on your Mac. Copy, paste, pin, remove and clear all work the same in either mode.
