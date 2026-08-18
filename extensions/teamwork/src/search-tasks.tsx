@@ -301,7 +301,7 @@ function TaskItem({
               title="Remove from Recents"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={() => onRemove(task)}
             />
           ) : null}

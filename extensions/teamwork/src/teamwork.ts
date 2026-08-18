@@ -114,6 +114,48 @@ function relatedName<T extends { id?: number; name?: string }>(
   );
 }
 
+function mapRawTask(
+  raw: Record<string, unknown>,
+  included?: Included,
+): TeamworkTask {
+  const id = Number(raw.id);
+  // Teamwork API omits projectId from task response; retrieve it from the tasklist instead.
+  const tasklistId = Number(raw.tasklistId ?? 0);
+  const tasklist = included?.tasklists?.[String(tasklistId)];
+  const projectId = Number(tasklist?.projectId ?? 0);
+  return {
+    id,
+    name: String(raw.name ?? `Task ${id}`),
+    projectId,
+    projectName: relatedName(included?.projects, projectId),
+    tasklistName: relatedName(included?.tasklists, tasklistId),
+    dueDate: typeof raw.dueDate === "string" ? raw.dueDate : undefined,
+    status: typeof raw.status === "string" ? raw.status : undefined,
+  };
+}
+
+function mapRawTimer(
+  raw: Record<string, unknown>,
+  included?: Included,
+): TeamworkTimer {
+  const taskId = Number(raw.taskId ?? 0);
+  const projectId = Number(raw.projectId ?? 0);
+  return {
+    id: Number(raw.id),
+    taskId,
+    projectId,
+    description:
+      typeof raw.description === "string" ? raw.description : undefined,
+    running: Boolean(raw.running ?? raw.isRunning),
+    duration: typeof raw.duration === "number" ? raw.duration : undefined,
+    lastStartedAt:
+      typeof raw.lastStartedAt === "string" ? raw.lastStartedAt : undefined,
+    serverTime: typeof raw.serverTime === "string" ? raw.serverTime : undefined,
+    taskName: relatedName(included?.tasks, taskId),
+    projectName: relatedName(included?.projects, projectId),
+  };
+}
+
 let cachedUserId: number | undefined;
 async function getMyUserId(): Promise<number> {
   if (cachedUserId) return cachedUserId;
@@ -139,19 +181,7 @@ export async function fetchTask(
   }>(`/projects/api/v3/tasks/${taskId}.json?${params}`);
   const raw = data.task;
   if (!raw) return undefined;
-  const id = Number(raw.id);
-  const tasklistId = Number(raw.tasklistId ?? 0);
-  const tasklist = data.included?.tasklists?.[String(tasklistId)];
-  const projectId = Number(tasklist?.projectId ?? 0);
-  return {
-    id,
-    name: String(raw.name ?? `Task ${id}`),
-    projectId,
-    projectName: relatedName(data.included?.projects, projectId),
-    tasklistName: relatedName(data.included?.tasklists, tasklistId),
-    dueDate: typeof raw.dueDate === "string" ? raw.dueDate : undefined,
-    status: typeof raw.status === "string" ? raw.status : undefined,
-  };
+  return mapRawTask(raw, data.included);
 }
 
 export async function searchTasks(
@@ -176,22 +206,7 @@ export async function searchTasks(
     included?: Included;
   }>(`/projects/api/v3/tasks.json?${params}`);
 
-  const tasks = (data.tasks ?? []).map((raw) => {
-    const id = Number(raw.id);
-    // Teamwork API omits projectId from task response; retrieve it from the tasklist instead.
-    const tasklistId = Number(raw.tasklistId ?? 0);
-    const tasklist = data.included?.tasklists?.[String(tasklistId)];
-    const projectId = Number(tasklist?.projectId ?? 0);
-    return {
-      id,
-      name: String(raw.name ?? `Task ${id}`),
-      projectId,
-      projectName: relatedName(data.included?.projects, projectId),
-      tasklistName: relatedName(data.included?.tasklists, tasklistId),
-      dueDate: typeof raw.dueDate === "string" ? raw.dueDate : undefined,
-      status: typeof raw.status === "string" ? raw.status : undefined,
-    };
-  });
+  const tasks = (data.tasks ?? []).map((raw) => mapRawTask(raw, data.included));
 
   return tasks.filter((task) =>
     completed ? task.status === "completed" : task.status !== "completed",
@@ -218,22 +233,7 @@ export async function getRunningTimer(): Promise<TeamworkTimer | undefined> {
   );
   if (!raw) return undefined;
 
-  const taskId = Number(raw.taskId ?? 0);
-  const projectId = Number(raw.projectId ?? 0);
-  return {
-    id: Number(raw.id),
-    taskId,
-    projectId,
-    description:
-      typeof raw.description === "string" ? raw.description : undefined,
-    running: Boolean(raw.running ?? raw.isRunning),
-    duration: typeof raw.duration === "number" ? raw.duration : undefined,
-    lastStartedAt:
-      typeof raw.lastStartedAt === "string" ? raw.lastStartedAt : undefined,
-    serverTime: typeof raw.serverTime === "string" ? raw.serverTime : undefined,
-    taskName: relatedName(data.included?.tasks, taskId),
-    projectName: relatedName(data.included?.projects, projectId),
-  };
+  return mapRawTimer(raw, data.included);
 }
 
 export type TimerState = {
@@ -255,26 +255,6 @@ export async function getTimerState(): Promise<TimerState> {
     included?: Included;
   }>(`/projects/api/v3/me/timers.json?${params}`);
 
-  const toTimer = (raw: Record<string, unknown>): TeamworkTimer => {
-    const taskId = Number(raw.taskId ?? 0);
-    const projectId = Number(raw.projectId ?? 0);
-    return {
-      id: Number(raw.id),
-      taskId,
-      projectId,
-      description:
-        typeof raw.description === "string" ? raw.description : undefined,
-      running: Boolean(raw.running ?? raw.isRunning),
-      duration: typeof raw.duration === "number" ? raw.duration : undefined,
-      lastStartedAt:
-        typeof raw.lastStartedAt === "string" ? raw.lastStartedAt : undefined,
-      serverTime:
-        typeof raw.serverTime === "string" ? raw.serverTime : undefined,
-      taskName: relatedName(data.included?.tasks, taskId),
-      projectName: relatedName(data.included?.projects, projectId),
-    };
-  };
-
   const timers = data.timers ?? [];
   const running = timers.find(
     (t) => t.running === true || t.isRunning === true,
@@ -284,8 +264,8 @@ export async function getTimerState(): Promise<TimerState> {
   );
 
   return {
-    running: running ? toTimer(running) : undefined,
-    paused: paused.map(toTimer),
+    running: running ? mapRawTimer(running, data.included) : undefined,
+    paused: paused.map((timer) => mapRawTimer(timer, data.included)),
   };
 }
 

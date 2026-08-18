@@ -20,17 +20,17 @@
     "fix-lint": "ray lint --fix"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.18",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.15.0",
-    "@types/react": "^19.1.0",
-    "eslint": "^9.25.0",
-    "prettier": "^3.5.3",
-    "react": "^19.1.0",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "react": "^19.2.8",
+    "typescript": "^5.9.3"
   },
   "preferences": [
     {
@@ -93,5 +93,9 @@
   ],
   "allowScripts": {
     "esbuild@0.27.7": true
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
