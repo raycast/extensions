@@ -1,10 +1,10 @@
 /**
- * Finder-selection loading shared by the rename commands.
+ * Finder-selection loading and scoping shared by the rename commands.
  *
- * Every rename command resolves the same Finder selection; the folder-only
- * variants differ only in filtering out non-directories and in the noun their
- * user-visible strings use. Keeping both in one place means a folder batch can
- * never report "files".
+ * Every rename command resolves the same Finder selection and then narrows it
+ * to one target type: the file commands act on files, the folder commands on
+ * folders, and Advanced Batch Rename lets the user pick. Keeping the filter and
+ * the noun in one place means a folder batch can never report "files".
  */
 
 import { getSelectedFinderItems, popToRoot, showToast, Toast } from "@raycast/api";
@@ -13,22 +13,53 @@ import { log } from "./logger";
 import type { FileInfo } from "../types";
 
 /**
- * The noun for the command's mode, singular or plural for the given count:
- * "file" / "files" / "folder" / "folders".
+ * What a rename acts on. `"both"` exists only for Advanced Batch Rename, whose
+ * scope is chosen in the UI; the single-target commands use a
+ * {@link SelectionMode}.
  */
-export function itemNoun(foldersOnly: boolean, count: number): string {
-  const noun = foldersOnly ? "folder" : "file";
-  return count === 1 ? noun : `${noun}s`;
+export type RenameScope = "files" | "folders" | "both";
+
+/** The scope of a command that targets exactly one entry type. */
+export type SelectionMode = Exclude<RenameScope, "both">;
+
+const NOUNS: Record<RenameScope, { readonly one: string; readonly many: string }> = {
+  files: { one: "file", many: "files" },
+  folders: { one: "folder", many: "folders" },
+  both: { one: "item", many: "items" },
+};
+
+/**
+ * The noun for the given scope, singular or plural for the given count:
+ * "file" / "files", "folder" / "folders", or "item" / "items" when the scope
+ * covers both.
+ */
+export function itemNoun(scope: RenameScope, count: number): string {
+  const noun = NOUNS[scope];
+  return count === 1 ? noun.one : noun.many;
 }
 
 /**
- * Resolve the current Finder selection, keeping only directories when
- * `foldersOnly` is set — a mixed selection then acts on just its folders.
+ * Keep only the entries the scope targets: files, folders, or everything.
+ */
+export function filterByScope<T extends { readonly isDirectory: boolean }>(
+  items: readonly T[],
+  scope: RenameScope,
+): T[] {
+  if (scope === "both") {
+    return [...items];
+  }
+  const wantDirectory = scope === "folders";
+  return items.filter((item) => item.isDirectory === wantDirectory);
+}
+
+/**
+ * Resolve the current Finder selection, keeping only the entries the mode
+ * targets — a mixed selection acts on just its files, or just its folders.
  *
  * Returns null when there is nothing to act on: the failure toast naming the
  * right noun has already been shown and the command has popped to root.
  */
-export async function loadSelection(foldersOnly: boolean): Promise<FileInfo[] | null> {
+export async function loadSelection(mode: SelectionMode): Promise<FileInfo[] | null> {
   try {
     const selectedItems = await getSelectedFinderItems();
     const filePaths = selectedItems.map((item) => item.path);
@@ -37,20 +68,20 @@ export async function loadSelection(foldersOnly: boolean): Promise<FileInfo[] | 
     if (filePaths.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: `Please select at least one ${itemNoun(foldersOnly, 1)} or open a Finder window`,
+        title: `Please select at least one ${itemNoun(mode, 1)} or open a Finder window`,
       });
       await popToRoot();
       return null;
     }
 
     const allInfos = await Promise.all(filePaths.map((p) => getFileInfo(p)));
-    const fileInfos = foldersOnly ? allInfos.filter((info) => info.isDirectory) : allInfos;
+    const fileInfos = filterByScope(allInfos, mode);
 
-    // Only reachable in folder mode: an unfiltered selection is non-empty here.
+    // Reachable whenever the selection holds nothing of the targeted type.
     if (fileInfos.length === 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: `Please select at least one ${itemNoun(foldersOnly, 1)} in Finder`,
+        title: `Please select at least one ${itemNoun(mode, 1)} in Finder`,
       });
       await popToRoot();
       return null;
@@ -61,8 +92,8 @@ export async function loadSelection(foldersOnly: boolean): Promise<FileInfo[] | 
     log.rename.error("Failed to fetch files", error);
     await showToast({
       style: Toast.Style.Failure,
-      title: `Failed to fetch ${itemNoun(foldersOnly, 2)}`,
-      message: `Please make sure a Finder window is open and ${itemNoun(foldersOnly, 2)} are selected`,
+      title: `Failed to fetch ${itemNoun(mode, 2)}`,
+      message: `Please make sure a Finder window is open and ${itemNoun(mode, 2)} are selected`,
     });
     await popToRoot();
     return null;

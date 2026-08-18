@@ -8,11 +8,12 @@ import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { dirname, join } from "path";
 import { batchRename, checkConflicts } from "./lib/batch";
 import { openRenameHistory, recordRenameHistory } from "./lib/history-nav";
-import { itemNoun, loadSelection } from "./lib/selection";
+import { itemNoun, loadSelection, type SelectionMode } from "./lib/selection";
 import { log } from "./lib/logger";
 import type { FileInfo, RenameOperation } from "./types";
 
 export default function Command({ foldersOnly = false }: { foldersOnly?: boolean } = {}) {
+  const mode: SelectionMode = foldersOnly ? "folders" : "files";
   const [files, setFiles] = useState<FileInfo[]>([]);
   const [newName, setNewName] = useState<string>("");
   const [prefix, setPrefix] = useState<string>("");
@@ -23,7 +24,7 @@ export default function Command({ foldersOnly = false }: { foldersOnly?: boolean
   const [indexSeparator, setIndexSeparator] = useState<string>("-");
 
   const getSelectedFiles = async () => {
-    const fileInfos = await loadSelection(foldersOnly);
+    const fileInfos = await loadSelection(mode);
     if (!fileInfos) {
       return;
     }
@@ -99,7 +100,7 @@ export default function Command({ foldersOnly = false }: { foldersOnly?: boolean
         await showToast({
           style: Toast.Style.Failure,
           title: "New name cannot be empty",
-          message: `Please enter a name for the ${itemNoun(foldersOnly, 1)}`,
+          message: `Please enter a name for the ${itemNoun(mode, 1)}`,
         });
         return;
       }
@@ -120,7 +121,7 @@ export default function Command({ foldersOnly = false }: { foldersOnly?: boolean
 
       const successfulOps = results.filter((r) => r.success).map(({ oldPath, newPath }) => ({ oldPath, newPath }));
       const historySaved = await recordRenameHistory(
-        `Renamed ${successfulOps.length} ${itemNoun(foldersOnly, successfulOps.length)}`,
+        `Renamed ${successfulOps.length} ${itemNoun(mode, successfulOps.length)}`,
         successfulOps,
       );
 
@@ -131,7 +132,7 @@ export default function Command({ foldersOnly = false }: { foldersOnly?: boolean
         setPreserveName(false);
         await showToast({
           style: Toast.Style.Success,
-          title: `Renamed ${successCount} ${itemNoun(foldersOnly, successCount)}`,
+          title: `Renamed ${successCount} ${itemNoun(mode, successCount)}`,
           // An empty batch records no history by design — only warn when
           // there was something to save and saving failed.
           message: successCount > 0 && !historySaved ? "History could not be saved" : undefined,
@@ -140,13 +141,13 @@ export default function Command({ foldersOnly = false }: { foldersOnly?: boolean
       } else if (successCount > 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: `Renamed ${successCount} of ${results.length} ${itemNoun(foldersOnly, results.length)}`,
+          title: `Renamed ${successCount} of ${results.length} ${itemNoun(mode, results.length)}`,
           message: results.find((r) => !r.success)?.error,
         });
       } else {
         await showToast({
           style: Toast.Style.Failure,
-          title: `Failed to rename ${itemNoun(foldersOnly, results.length)}`,
+          title: `Failed to rename ${itemNoun(mode, results.length)}`,
           message: results.find((r) => !r.success)?.error,
         });
       }
@@ -155,7 +156,7 @@ export default function Command({ foldersOnly = false }: { foldersOnly?: boolean
 
       await showToast({
         style: Toast.Style.Failure,
-        title: `Failed to rename ${itemNoun(foldersOnly, files.length)}`,
+        title: `Failed to rename ${itemNoun(mode, files.length)}`,
         message: (error as Error).message,
       });
     }
