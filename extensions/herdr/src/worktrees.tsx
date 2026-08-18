@@ -8,9 +8,7 @@ import { ErrorView, runAction, shortcuts } from "./lib/ui";
 export default function Command() {
   const snapshot = useHerdrSnapshot();
   if (snapshot.error && !snapshot.data) return <ErrorView error={snapshot.error} onRetry={snapshot.revalidate} />;
-  const worktrees = (snapshot.data?.workspaces || []).filter(
-    (workspace) => workspace.worktree?.is_linked_worktree,
-  );
+  const worktrees = (snapshot.data?.workspaces || []).filter((workspace) => workspace.worktree?.is_linked_worktree);
 
   async function remove(workspaceId: string, label: string, force: boolean) {
     if (
