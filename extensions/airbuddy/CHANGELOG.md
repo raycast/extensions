@@ -1,3 +1,3 @@
-# Raycast AirBuddy Changelog
+# AirBuddy
 
 ## [Initial Release] - {PR_MERGE_DATE}

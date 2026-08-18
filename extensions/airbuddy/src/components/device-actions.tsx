@@ -3,7 +3,7 @@ import {
   connectDevice,
   disconnectDevice,
   getAppState,
-  getDevices,
+  getLiveDevices,
   setFavorite,
   setListeningMode,
   setPinned,
@@ -48,7 +48,7 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
       // `applied: true` reflects the completed Bluetooth operation, not necessarily the row's
       // settle state this UI reads from — still poll the real postcondition.
       await pollUntil(
-        () => getDevices(),
+        () => getLiveDevices(),
         (devices) => devices.find((d) => d.id === device.id)?.connected === true,
         { description: `${device.name} never connected` },
       );
@@ -72,7 +72,7 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
       assertApplied(result);
 
       await pollUntil(
-        () => getDevices(),
+        () => getLiveDevices(),
         (devices) => devices.find((d) => d.id === device.id)?.connected !== true,
         { description: `${device.name} never disconnected` },
       );
@@ -127,7 +127,7 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
       // stale (the poll interval), so it can disagree with reality. Trusting it could report
       // "Already Noise Cancellation" for a device AirBuddy had already switched to Transparency —
       // skipping the real setListeningMode call the user asked for.
-      const current = await getDevices();
+      const current = await getLiveDevices();
       if (current.find((d) => d.id === device.id)?.listeningMode === mode) {
         toast.style = Toast.Style.Success;
         toast.title = `Already ${LISTENING_MODE_LABELS[mode]}`;
@@ -138,7 +138,7 @@ export function DeviceActions({ device, onRefresh }: { device: Device; onRefresh
       assertApplied(result);
 
       await pollUntil(
-        () => getDevices(),
+        () => getLiveDevices(),
         (devices) => devices.find((d) => d.id === device.id)?.listeningMode === mode,
         { description: `${device.name} never switched to ${LISTENING_MODE_LABELS[mode]}` },
       );

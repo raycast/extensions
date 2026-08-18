@@ -17,7 +17,7 @@ export function ErrorView({ error, onRetry }: { error: Error; onRetry: () => voi
         description="This extension controls AirBuddy 3.0 or later."
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Get Airbuddy" url={AIRBUDDY_URL} />
+            <Action.OpenInBrowser title="Get AirBuddy" url={AIRBUDDY_URL} />
           </ActionPanel>
         }
       />
@@ -32,7 +32,7 @@ export function ErrorView({ error, onRetry }: { error: Error; onRetry: () => voi
         description="Launch AirBuddy, then try again."
         actions={
           <ActionPanel>
-            <Action title="Open Airbuddy" icon={Icon.Play} onAction={() => open("/Applications/AirBuddy.app")} />
+            <Action title="Open AirBuddy" icon={Icon.Play} onAction={() => open("/Applications/AirBuddy.app")} />
             <Action title="Try Again" icon={Icon.Repeat} onAction={onRetry} />
           </ActionPanel>
         }
@@ -51,7 +51,7 @@ export function ErrorView({ error, onRetry }: { error: Error; onRetry: () => voi
         actions={
           <ActionPanel>
             <Action
-              title="Open Airbuddy Settings"
+              title="Open AirBuddy Settings"
               icon={Icon.Gear}
               onAction={() => open("/Applications/AirBuddy.app")}
             />

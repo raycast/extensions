@@ -1,7 +1,9 @@
-# AirBuddy for Raycast
+# AirBuddy
 
-Control [AirBuddy](https://airbuddy.app) from Raycast — see live devices and batteries, connect and
-disconnect, switch listening and Spatial Audio modes, and manage battery alerts.
+for Raycast
+
+Control [AirBuddy](https://airbuddy.app) — see live devices and batteries, connect and disconnect,
+switch listening and Spatial Audio modes, and manage battery alerts.
 
 Requires **AirBuddy 3.0 (build 913) or later**.
 
