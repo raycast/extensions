@@ -2,8 +2,10 @@
 
 ## [Folder Commands] - {PR_MERGE_DATE}
 
-- Add Rename Folder(s) and Replace in Folder Names commands, targeting only the folders in the Finder selection
-- Act on just the folders of a mixed selection, and name folders rather than files in every toast and history entry
+- ⚠️ Breaking: Rename File(s) and Replace File(s) Characters now act only on files — folders in the selection are left untouched instead of being renamed, and a selection holding no files reports that rather than renaming anything
+- Add Rename Folder(s) and Replace in Folder Names commands, the folder counterparts of the two file commands, targeting only the folders in the Finder selection
+- Add an "Apply to" scope to Advanced Batch Rename — Files (default), Folders, or Files & Folders — with the preview list showing exactly what the current scope will rename
+- Name the right thing everywhere: toasts, confirmations and history entries say files, folders, or items according to what was actually renamed
 
 ## [Undo History] - 2026-08-10
 
