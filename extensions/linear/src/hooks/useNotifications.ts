@@ -2,9 +2,17 @@ import { useCachedPromise } from "@raycast/utils";
 import { chain } from "lodash";
 
 import { getNotifications } from "../api/getNotifications";
+import { useWorkspaces } from "../components/WorkspaceContext";
 
 export default function useNotifications() {
-  const { data, error, isLoading, mutate } = useCachedPromise(getNotifications);
+  const { workspaceKey } = useWorkspaces();
+  const { data, error, isLoading, mutate } = useCachedPromise(
+    (key: string) => {
+      void key;
+      return getNotifications();
+    },
+    [workspaceKey],
+  );
 
   const { notifications, urlKey } = data || {};
 

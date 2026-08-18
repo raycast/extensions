@@ -1,10 +1,12 @@
 import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
+import { useEffect, useRef } from "react";
 
 import { getLinearClient } from "../api/linearClient";
 import { getErrorMessage } from "../helpers/errors";
 import { getProjectIcon } from "../helpers/projects";
 import useProjects from "../hooks/useProjects";
+import { useWorkspaceCachedState } from "../hooks/useWorkspaceCachedState";
 
 export type CreateMilestoneValues = {
   projectId: string;
@@ -19,7 +21,7 @@ export default function CreateMilestoneForm({ projectId }: { projectId?: string 
 
   const { projects, isLoadingProjects } = useProjects();
 
-  const { handleSubmit, itemProps, focus, reset } = useForm<CreateMilestoneValues>({
+  const { handleSubmit, itemProps, values, setValue, focus, reset } = useForm<CreateMilestoneValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating Milestone" });
 
@@ -63,6 +65,27 @@ export default function CreateMilestoneForm({ projectId }: { projectId?: string 
     },
   });
 
+  const [storedProject, setStoredProject] = useWorkspaceCachedState<string>("create-milestone-project", "");
+  const restoredRef = useRef(false);
+
+  // Persist the Project selection per workspace (replaces the old Form.Dropdown
+  // persistence prop, §4.5/B6). This dropdown has no "no project" option, so an empty
+  // value is never an intentional choice — only non-empty values are worth remembering.
+  useEffect(() => {
+    if (!restoredRef.current) return;
+    if (values.projectId) setStoredProject(values.projectId);
+  }, [values.projectId]);
+
+  // Restore once per mount, validated against THIS workspace's data; an explicit
+  // projectId prop (e.g. opened from a project's context) wins over the stored default.
+  useEffect(() => {
+    if (restoredRef.current || isLoadingProjects || !projects) return;
+    restoredRef.current = true;
+    if (!projectId && storedProject && projects.some((project) => project.id === storedProject)) {
+      setValue("projectId", storedProject);
+    }
+  }, [isLoadingProjects, projects]);
+
   return (
     <Form
       isLoading={isLoadingProjects}
@@ -72,7 +95,7 @@ export default function CreateMilestoneForm({ projectId }: { projectId?: string 
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Project" storeValue {...itemProps.projectId}>
+      <Form.Dropdown title="Project" {...itemProps.projectId}>
         {projects?.map((project) => (
           <Form.Dropdown.Item value={project.id} key={project.id} title={project.name} icon={getProjectIcon(project)} />
         ))}

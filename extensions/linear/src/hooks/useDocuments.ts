@@ -1,13 +1,19 @@
 import { useCachedPromise } from "@raycast/utils";
 
+import { useWorkspaces } from "../components/WorkspaceContext";
 import { getDocumentContent } from "../tools/get-document-content";
 import { DocumentEntity, getDocuments } from "../tools/get-documents";
 
 export function useDocuments(query: string = "", entity: DocumentEntity = { projectId: "" }) {
-  const { data, error, isLoading, mutate } = useCachedPromise(getDocuments, [query, entity], {
-    failureToastOptions: { title: "Failed to load documents" },
-    keepPreviousData: true,
-  });
+  const { workspaceKey } = useWorkspaces();
+  const { data, error, isLoading, mutate } = useCachedPromise(
+    (key: string, query: string, entity: DocumentEntity) => getDocuments(query, entity),
+    [workspaceKey, query, entity],
+    {
+      failureToastOptions: { title: "Failed to load documents" },
+      keepPreviousData: true,
+    },
+  );
 
   return {
     docs: data?.docs,
@@ -19,9 +25,14 @@ export function useDocuments(query: string = "", entity: DocumentEntity = { proj
 }
 
 export function useDocumentContent(documentId: string) {
-  const { data, error, isLoading, mutate } = useCachedPromise(getDocumentContent, [documentId], {
-    failureToastOptions: { title: "Failed to load document content" },
-  });
+  const { workspaceKey } = useWorkspaces();
+  const { data, error, isLoading, mutate } = useCachedPromise(
+    (key: string, documentId: string) => getDocumentContent(documentId),
+    [workspaceKey, documentId],
+    {
+      failureToastOptions: { title: "Failed to load document content" },
+    },
+  );
 
   return {
     doc: data,

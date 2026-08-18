@@ -4,6 +4,7 @@ import {
   Issue,
   IssueLabel,
   IssueRelation,
+  LinearClient,
   Project,
   ProjectMilestone,
   Team,
@@ -12,7 +13,7 @@ import {
 } from "@linear/sdk";
 import { getPreferenceValues } from "@raycast/api";
 
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
 import { LabelResult } from "./getLabels";
 import { getPaginated, PageInfo } from "./pagination";
@@ -157,8 +158,8 @@ export type IssueResult = Pick<
   projectMilestone?: Pick<ProjectMilestone, "id" | "name" | "targetDate">;
 };
 
-export async function getLastUpdatedIssues(after?: string) {
-  const { graphQLClient } = getLinearClient();
+export async function getLastUpdatedIssues(after?: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<
     { issues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
     Record<string, unknown>
@@ -182,8 +183,8 @@ export async function getLastUpdatedIssues(after?: string) {
   return { issues: data?.issues.nodes, pageInfo: data?.issues.pageInfo };
 }
 
-export async function searchIssues(query: string, after?: string, first = 25) {
-  const { graphQLClient } = getLinearClient();
+export async function searchIssues(query: string, after?: string, first = 25, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<
     { searchIssues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
     { term: string; after?: string; first?: number; includeArchived?: boolean }
@@ -207,8 +208,8 @@ export async function searchIssues(query: string, after?: string, first = 25) {
   return { issues: data?.searchIssues.nodes, pageInfo: data?.searchIssues.pageInfo };
 }
 
-export async function filterIssues(filter: string, after?: string, first = 25) {
-  const { graphQLClient } = getLinearClient();
+export async function filterIssues(filter: string, after?: string, first = 25, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<
     { issues: { nodes: IssueResult[]; pageInfo: { endCursor: string; hasNextPage: boolean } } },
     { filter: string; after?: string; first?: number }
@@ -232,8 +233,8 @@ export async function filterIssues(filter: string, after?: string, first = 25) {
   return { issues: data?.issues.nodes, pageInfo: data?.issues.pageInfo };
 }
 
-export async function getLastCreatedIssues() {
-  const { graphQLClient } = getLinearClient();
+export async function getLastCreatedIssues(client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
     `
       query {
@@ -249,8 +250,8 @@ export async function getLastCreatedIssues() {
   return data?.issues.nodes;
 }
 
-export async function getMyIssues() {
-  const { graphQLClient } = getLinearClient();
+export async function getMyIssues(client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<
     { viewer: { assignedIssues: { nodes: IssueResult[] } } },
     Record<string, unknown>
@@ -271,8 +272,8 @@ export async function getMyIssues() {
   return data?.viewer.assignedIssues.nodes;
 }
 
-export async function getCreatedIssues() {
-  const { graphQLClient } = getLinearClient();
+export async function getCreatedIssues(client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<
     { viewer: { createdIssues: { nodes: IssueResult[] } } },
     Record<string, unknown>
@@ -293,8 +294,8 @@ export async function getCreatedIssues() {
   return data?.viewer.createdIssues.nodes;
 }
 
-export async function getSubscribedIssues() {
-  const { graphQLClient } = getLinearClient();
+export async function getSubscribedIssues(client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const { pageSize, pageLimit } = getPageLimits();
 
@@ -338,12 +339,12 @@ export function getMyIssuesByView(view: MyIssuesView) {
   }
 }
 
-export async function getActiveCycleIssues(cycleId?: string) {
+export async function getActiveCycleIssues(cycleId?: string, client?: LinearClient) {
   if (!cycleId) {
     return [];
   }
 
-  const { graphQLClient } = getLinearClient();
+  const { graphQLClient } = resolveClient(client);
 
   const { pageSize, pageLimit } = getPageLimits();
 
@@ -379,8 +380,8 @@ export async function getActiveCycleIssues(cycleId?: string) {
   return nodes;
 }
 
-export async function getProjectIssues(projectId: string) {
-  const { graphQLClient } = getLinearClient();
+export async function getProjectIssues(projectId: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
     `
       query($projectId: ID) {
@@ -400,8 +401,8 @@ export async function getProjectIssues(projectId: string) {
   return data?.issues.nodes;
 }
 
-export async function getProjectMilestoneIssues(milestoneId: string) {
-  const { graphQLClient } = getLinearClient();
+export async function getProjectMilestoneIssues(milestoneId: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<{ issues: { nodes: IssueResult[] } }, Record<string, unknown>>(
     `
       query($milestoneId: ID) {
@@ -421,8 +422,8 @@ export async function getProjectMilestoneIssues(milestoneId: string) {
   return data?.issues.nodes;
 }
 
-export async function getSubIssues(issueId: string) {
-  const { graphQLClient } = getLinearClient();
+export async function getSubIssues(issueId: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
   const { data } = await graphQLClient.rawRequest<
     { issue: { children: { nodes: IssueResult[] } } },
     Record<string, unknown>
@@ -460,7 +461,7 @@ export type IssuePromptResult = Pick<Issue, "identifier" | "title" | "branchName
 };
 
 export async function getIssuePromptData(issueId: string) {
-  const { graphQLClient } = getLinearClient();
+  const { graphQLClient } = resolveClient();
 
   const { data } = await graphQLClient.rawRequest<{ issue: IssuePromptResult }, Record<string, unknown>>(
     `
@@ -513,8 +514,8 @@ export type CommentResult = Pick<Comment, "id" | "body" | "createdAt" | "url"> &
   user: Pick<User, "id" | "displayName" | "avatarUrl" | "email">;
 };
 
-export async function getComments(issueId: string) {
-  const { graphQLClient } = getLinearClient();
+export async function getComments(issueId: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const { data } = await graphQLClient.rawRequest<
     { issue: { comments: { nodes: CommentResult[] } } },
@@ -577,8 +578,8 @@ export type IssueDetailResult = IssueResult &
     };
   };
 
-export async function getIssueDetail(issueId: string) {
-  const { graphQLClient } = getLinearClient();
+export async function getIssueDetail(issueId: string, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const { data } = await graphQLClient.rawRequest<{ issue: IssueDetailResult }, Record<string, unknown>>(
     `

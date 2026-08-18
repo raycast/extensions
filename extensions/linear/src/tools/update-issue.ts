@@ -1,9 +1,8 @@
-import { withAccessToken } from "@raycast/utils";
-
-import { getLinearClient, linear } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 import { updateIssue } from "../api/updateIssue";
 
 import { formatConfirmation } from "./formatConfirmation";
+import { describeToolWorkspace, resolveToolClient, withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   /**
@@ -45,11 +44,16 @@ type Input = {
 
   /** A detailed description of the issue */
   description?: string;
+
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async (inputs: Input) => {
-  const { issueId, ...update } = inputs;
-  const result = await updateIssue(issueId, update);
+export default withToolAuth(async (inputs: Input) => {
+  const client = await resolveToolClient(inputs.workspaceId);
+  const { issueId, workspaceId, ...update } = inputs;
+  void workspaceId; // destructured only to exclude it from `update`
+  const result = await updateIssue(issueId, update, client);
 
   if (!result.success) {
     throw new Error("Failed to update issue");
@@ -58,21 +62,28 @@ export default withAccessToken(linear)(async (inputs: Input) => {
   return result;
 });
 
-export const confirmation = withAccessToken(linear)(async (inputs: Input) => {
-  const { issueId, ...fieldsToUpdate } = inputs;
-  const { linearClient } = getLinearClient();
+export const confirmation = withToolAuth(async (inputs: Input) => {
+  const workspaceName = await describeToolWorkspace(inputs.workspaceId);
+  const client = await resolveToolClient(inputs.workspaceId);
+  const { issueId, workspaceId, ...fieldsToUpdate } = inputs;
+  void workspaceId; // destructured only to exclude it from `fieldsToUpdate`
+  const { linearClient } = resolveClient(client);
 
   const issue = await linearClient.issue(issueId);
 
   const details = await Promise.all(
     Object.keys(fieldsToUpdate).map((key) => {
       const name = key as keyof typeof fieldsToUpdate;
-      return formatConfirmation({ name, value: fieldsToUpdate[name] });
+      return formatConfirmation({ name, value: fieldsToUpdate[name], client });
     }),
   );
 
   return {
     message: `Are you sure you want to update the [issue](${issue.url})?`,
-    info: [{ name: "Issue", value: issue.title }, ...details],
+    info: [
+      ...(workspaceName ? [{ name: "Workspace", value: workspaceName }] : []),
+      { name: "Issue", value: issue.title },
+      ...details,
+    ],
   };
 });

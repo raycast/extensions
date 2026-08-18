@@ -1,14 +1,14 @@
-import { Notification } from "@linear/sdk";
+import { LinearClient, Notification } from "@linear/sdk";
 
-import { getLinearClient } from "../api/linearClient";
+import { resolveClient } from "../api/linearClient";
 
 export type UpdateNotificationPayload = {
   id: Notification["id"];
   readAt: Date | null;
 };
 
-export async function updateNotification(payload: UpdateNotificationPayload) {
-  const { graphQLClient } = getLinearClient();
+export async function updateNotification(payload: UpdateNotificationPayload, client?: LinearClient) {
+  const { graphQLClient } = resolveClient(client);
 
   const { data } = await graphQLClient.rawRequest<
     { notificationUpdate: { success: boolean } },

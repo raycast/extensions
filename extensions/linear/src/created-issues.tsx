@@ -4,6 +4,7 @@ import { getCreatedIssues } from "./api/getIssues";
 import CreateIssueForm from "./components/CreateIssueForm";
 import StateIssueList from "./components/StateIssueList";
 import View from "./components/View";
+import { WorkspaceListDropdown } from "./components/WorkspaceDropdown";
 import useIssues from "./hooks/useIssues";
 import useMe from "./hooks/useMe";
 import usePriorities from "./hooks/usePriorities";
@@ -18,6 +19,7 @@ function CreatedIssues() {
       isLoading={isLoadingIssues || isLoadingPriorities || isLoadingMe}
       searchBarPlaceholder="Filter by ID, title, status, assignee or priority"
       filtering={{ keepSectionOrder: true }}
+      searchBarAccessory={<WorkspaceListDropdown />}
     >
       <List.EmptyView
         title="No issues"

@@ -1,6 +1,6 @@
-import { withAccessToken } from "@raycast/utils";
+import { resolveClient } from "../api/linearClient";
 
-import { getLinearClient, linear } from "../api/linearClient";
+import { describeToolWorkspace, resolveToolClient, withToolAuth } from "./resolveToolWorkspace";
 
 type Input = {
   /** The ID of the project update to modify. */
@@ -14,10 +14,14 @@ type Input = {
 
   /** The new target date of the milestone in ISO date format (e.g., '2023-12-31') */
   targetDate?: string;
+
+  /** The workspace to act in: a workspaceId value returned by the get-workspaces tool. Omit to use the active workspace. */
+  workspaceId?: string;
 };
 
-export default withAccessToken(linear)(async ({ milestoneId, ...inputs }: Input) => {
-  const { linearClient } = getLinearClient();
+export default withToolAuth(async ({ milestoneId, workspaceId, ...inputs }: Input) => {
+  const client = await resolveToolClient(workspaceId);
+  const { linearClient } = resolveClient(client);
   const result = await linearClient.updateProjectMilestone(milestoneId, inputs);
 
   if (!result.success) {
@@ -27,12 +31,17 @@ export default withAccessToken(linear)(async ({ milestoneId, ...inputs }: Input)
   return JSON.stringify(result.projectMilestone);
 });
 
-export const confirmation = withAccessToken(linear)(async ({ milestoneId }: Input) => {
-  const { linearClient } = getLinearClient();
+export const confirmation = withToolAuth(async ({ milestoneId, workspaceId }: Input) => {
+  const workspaceName = await describeToolWorkspace(workspaceId);
+  const client = await resolveToolClient(workspaceId);
+  const { linearClient } = resolveClient(client);
 
   const milestone = await linearClient.projectMilestone(milestoneId);
 
   return {
-    info: [{ name: "Name", value: milestone.name }],
+    info: [
+      ...(workspaceName ? [{ name: "Workspace", value: workspaceName }] : []),
+      { name: "Name", value: milestone.name },
+    ],
   };
 });

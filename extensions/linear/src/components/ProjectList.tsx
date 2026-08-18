@@ -7,11 +7,15 @@ import { useInitiatives } from "../hooks/useInitiatives";
 import useMe from "../hooks/useMe";
 import usePriorities from "../hooks/usePriorities";
 import useProjects from "../hooks/useProjects";
+import { useWorkspaceCachedState } from "../hooks/useWorkspaceCachedState";
 
 import Project from "./Project";
+import { useWorkspaces } from "./WorkspaceContext";
+import { isWorkspaceDropdownValue, workspaceValueToKey, WorkspaceDropdownSection } from "./WorkspaceDropdown";
 
 export default function ProjectList() {
-  const [initiativeId, setInitiativeId] = useState<string>("");
+  const { showSwitcher, switchWorkspace } = useWorkspaces();
+  const [storedInitiative, setStoredInitiative] = useWorkspaceCachedState<string>("project-list-initiative", "");
   const [searchText, setSearchText] = useState<string>("");
   const { projects, isLoadingProjects, mutateProjects, pagination } = useProjects(undefined, {
     searchText,
@@ -20,6 +24,8 @@ export default function ProjectList() {
   const { initiatives, isLoadingInitiatives } = useInitiatives();
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
+
+  const initiativeId = (initiatives ?? []).some((i) => i.id === storedInitiative) ? storedInitiative : "";
 
   const filteredProjects = useMemo(() => {
     if (!projects) {
@@ -48,22 +54,35 @@ export default function ProjectList() {
   return (
     <List
       isLoading={isLoadingProjects || isLoadingInitiatives || isLoadingPriorities || isLoadingMe}
-      {...((initiatives ?? []).length > 0
+      {...((initiatives ?? []).length > 0 || showSwitcher
         ? {
             searchBarAccessory: (
-              <List.Dropdown tooltip="Change Initiative" onChange={setInitiativeId} storeValue>
+              <List.Dropdown
+                tooltip="Change Initiative"
+                value={initiativeId}
+                onChange={(value) => {
+                  if (isWorkspaceDropdownValue(value)) {
+                    switchWorkspace(workspaceValueToKey(value));
+                    return;
+                  }
+                  if (value !== initiativeId) setStoredInitiative(value);
+                }}
+              >
+                <WorkspaceDropdownSection />
                 <List.Dropdown.Item value="" title="All Projects" />
 
-                <List.Dropdown.Section title="Initiatives">
-                  {initiatives?.map((initiative) => (
-                    <List.Dropdown.Item
-                      key={initiative.id}
-                      value={initiative.id}
-                      title={initiative.name}
-                      icon={getInitiativeIcon(initiative)}
-                    />
-                  ))}
-                </List.Dropdown.Section>
+                {(initiatives ?? []).length > 0 && (
+                  <List.Dropdown.Section title="Initiatives">
+                    {initiatives?.map((initiative) => (
+                      <List.Dropdown.Item
+                        key={initiative.id}
+                        value={initiative.id}
+                        title={initiative.name}
+                        icon={getInitiativeIcon(initiative)}
+                      />
+                    ))}
+                  </List.Dropdown.Section>
+                )}
               </List.Dropdown>
             ),
           }
