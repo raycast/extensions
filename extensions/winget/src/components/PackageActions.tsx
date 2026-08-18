@@ -22,6 +22,7 @@ interface PackageActionsProps {
   gate: OperationGate;
   ops: Pick<UseOperationResult, "launchDetached" | "runInline" | "cancelActive">;
   onUpdateIndex: () => void;
+  onCleanIndex: () => void;
   homepage?: string;
   moniker?: string;
   /** Upgradable view: all non-pinned upgradable targets for Upgrade All. */
@@ -50,6 +51,7 @@ function PackageActions({
   gate,
   ops,
   onUpdateIndex,
+  onCleanIndex,
   homepage,
   moniker,
   upgradeAllTargets,
@@ -82,6 +84,17 @@ function PackageActions({
         ...singleRequest("uninstall", pkg),
         version: versioned,
       });
+    }
+  };
+  const cleanIndex = async () => {
+    const confirmed = await confirmAlert({
+      title: "Clean the index?",
+      message: "The cached package index and every downloaded icon are discarded, then rebuilt from winget.",
+      icon: Icon.Trash,
+      primaryAction: { title: "Clean", style: Alert.ActionStyle.Destructive },
+    });
+    if (confirmed) {
+      onCleanIndex();
     }
   };
   const upgradeAll = () => {
@@ -227,6 +240,12 @@ function PackageActions({
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
           onAction={onUpdateIndex}
+        />
+        <Action
+          title="Clean Index"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={() => void cleanIndex()}
         />
       </ActionPanel.Section>
 

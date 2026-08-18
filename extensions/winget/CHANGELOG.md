@@ -2,6 +2,10 @@
 
 ## [Resilience and UX Fixes] - {PR_MERGE_DATE}
 
+### Added
+- Package icons in every list, taken from the package's manifest or its homepage
+- Clean Index action, discarding the cached index and icons so both rebuild
+
 ### Fixed
 - A package that winget still reports as installed right after its uninstaller claimed success (slow uninstallers) no longer lingers in lists for the whole cache window — the next view opening re-checks it
 - Package data queries that fail transiently are retried once before reporting an error

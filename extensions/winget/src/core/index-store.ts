@@ -161,6 +161,23 @@ function withIndexWrite<T>(
   }
 }
 
+/**
+ * Reset the index to empty through the same write lock as every other
+ * mutation, rather than deleting the file under a concurrent writer. Views
+ * reload on the revision bump, and the empty catalog reads as stale.
+ *
+ * The mutation epoch survives: a refresher that recorded an epoch before this
+ * ran is still holding a snapshot of the old contents, and restarting the
+ * count would let a later mutation reach that same number and admit the stale
+ * commit the fence exists to reject.
+ */
+function clearIndex(paths: IndexPaths, env: LockEnvironment): void {
+  withIndexWrite(paths, env, (current) => ({
+    next: { ...EMPTY_INDEX, mutationEpoch: current.mutationEpoch },
+    result: undefined,
+  }));
+}
+
 /** Called when a mutation acquires the op-lock: fences in-flight refresh snapshots. */
 function bumpMutationEpoch(paths: IndexPaths, env: LockEnvironment): number {
   return withIndexWrite(paths, env, (current) => ({
@@ -330,6 +347,7 @@ function migrateLegacyIndex(paths: IndexPaths, env: LockEnvironment, legacyPath:
 
 export {
   bumpMutationEpoch,
+  clearIndex,
   commitCatalog,
   currentMutationEpoch,
   EMPTY_INDEX,

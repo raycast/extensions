@@ -1,5 +1,5 @@
 /**
- * One package row, shared by all list views. Icon priority is
+ * One package row, shared by all list views. Accessory icon priority is
  * pinned > update available > installed > none, with per-view suppression:
  * Installed/Upgradable views don't show the implicit Installed check. Version
  * is shown as a right-side accessory, only when the display name is ambiguous
@@ -11,6 +11,7 @@ import { Color, Icon, List } from "@raycast/api";
 import { type WingetPackageDetails } from "../cli/types";
 import { type OperationGate } from "../core/operations";
 import { type DetailTarget } from "../hooks/useDetails";
+import { packageIcon } from "../hooks/usePackageIcons";
 import { type PackageInfo } from "../utils/packages";
 
 import { type ViewKind } from "./PackageActions";
@@ -106,6 +107,7 @@ function PackageListItem({
     <List.Item
       id={itemId}
       title={pkg.name}
+      icon={packageIcon(pkg.id)}
       keywords={[pkg.id]}
       accessories={accessories(pkg, viewKind, gate, duplicateNames.has(pkg.name))}
       detail={
