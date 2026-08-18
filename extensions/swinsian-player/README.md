@@ -1,7 +1,6 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/deathrashed/gupload/main/Uploads/Images/graf-banner-swinsian.png" width="" alt="Swinsian Player logo">
 
-
 # Swinsian Player
 
 _The ultimate Swinsian controller for Raycast_
@@ -117,4 +116,3 @@ TheAudioDB in `Tools` also provides native Copy JSON and Save Markdown actions.
 <div align="center">
   Made by deathrashed
 </div>
-

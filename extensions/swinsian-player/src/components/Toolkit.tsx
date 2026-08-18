@@ -173,7 +173,6 @@ export function CopyList({ track, type }: { track: ToolkitTrack; type: "metadata
     </List>
   );
 }
-
 export function WindowsList() {
   const windows = [
     { title: "Show Main Window", icon: Icon.Window, action: showMainWindow },

@@ -90,8 +90,14 @@ test("album facets keep same-titled releases separate by effective artist", asyn
 
     const alphaTracks = await queryLibraryTracksByFacet(fixture.databasePath, "album", "One", "", 20, "Alpha");
     const betaTracks = await queryLibraryTracksByFacet(fixture.databasePath, "album", "One", "", 20, "Beta");
-    assert.deepEqual(alphaTracks.map((track) => track.name), ["First", "Second"]);
-    assert.deepEqual(betaTracks.map((track) => track.name), ["Other"]);
+    assert.deepEqual(
+      alphaTracks.map((track) => track.name),
+      ["First", "Second"],
+    );
+    assert.deepEqual(
+      betaTracks.map((track) => track.name),
+      ["Other"],
+    );
   } finally {
     fixture.cleanup();
   }

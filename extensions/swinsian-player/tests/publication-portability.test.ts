@@ -70,9 +70,7 @@ test("public menu labels and Swinsian window commands match the product UI", () 
 });
 
 test("Store metadata and boundary-safe integrations are present", () => {
-  const metadata = fs
-    .readdirSync(path.join(projectRoot, "metadata"))
-    .filter((entry) => /\.png$/i.test(entry));
+  const metadata = fs.readdirSync(path.join(projectRoot, "metadata")).filter((entry) => /\.png$/i.test(entry));
   assert(metadata.length >= 2, "Store metadata needs at least two screenshots");
 
   const swinsian = fs.readFileSync(path.join(projectRoot, "src/helpers/swinsian.ts"), "utf8");
