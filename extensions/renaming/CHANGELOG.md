@@ -1,5 +1,10 @@
 # Rename Changelog
 
+## [Folder Commands] - {PR_MERGE_DATE}
+
+- Add Rename Folder(s) and Replace in Folder Names commands, targeting only the folders in the Finder selection
+- Act on just the folders of a mixed selection, and name folders rather than files in every toast and history entry
+
 ## [Undo History] - 2026-08-10
 
 - Add Rename History command to view and undo recent rename operations

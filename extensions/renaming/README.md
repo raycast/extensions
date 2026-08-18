@@ -8,6 +8,12 @@ Rename files in a batch, directly from Raycast.
 - **Replace File(s) Characters** — replace characters in the names of the selected files.
 - **Advanced Batch Rename** — rename files using a rule-based engine that chains find & replace, case transforms, prefixes, suffixes, and numbering.
 - **Rename History** — view recent rename operations and undo them.
+- **Rename Folder(s)** — rename the folders selected in Finder in a batch.
+- **Replace in Folder Names** — replace characters in the names of the selected folders.
+
+## Folder commands
+
+**Rename Folder(s)** and **Replace in Folder Names** are the two rename flows targeting only the folders in the Finder selection. A mixed selection of files and folders acts on just the folders, and every message names folders rather than files. Select nothing but files and the command says so instead of renaming them.
 
 ## Rename History
 
