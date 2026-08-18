@@ -25,19 +25,24 @@
 )]
 mod bindings;
 
+use std::borrow::Cow;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::fs;
 use std::hash::{Hash, Hasher};
-use std::net::IpAddr;
 use std::io::{Cursor, Read};
-use std::path::PathBuf;
+use std::net::IpAddr;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Mutex;
-use std::time::Duration;
+use std::sync::{Mutex, OnceLock};
+use std::time::{Duration, Instant};
 
 use raycast_rust_macros::raycast;
+use ureq::config::Config;
+use ureq::http::Uri;
 use ureq::tls::{RootCerts, TlsConfig, TlsProvider};
+use ureq::unversioned::resolver::{DefaultResolver, ResolvedSocketAddrs, Resolver};
+use ureq::unversioned::transport::{DefaultConnector, NextTimeout};
 use windows::Win32::System::Com::{CoCreateInstance, CoInitializeEx, CLSCTX_ALL, COINIT_MULTITHREADED};
 use windows_core::{Interface, GUID, HSTRING};
 
@@ -58,9 +63,9 @@ const METADATA: &[u8] = include_bytes!("../metadata/Microsoft.Management.Deploym
 /// Sites commonly refuse requests without one.
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
-/// A single request may not hang the run: an unreachable vendor host would
-/// otherwise hold a worker until the OS gives up. Short, because a slow host
-/// costs its row an icon for this pass either way.
+/// What one source may cost, redirects included: an unreachable vendor host
+/// would otherwise hold a worker until the OS gives up. Short, because a slow
+/// host costs its row an icon for this pass either way.
 const REQUEST_TIMEOUT: Duration = Duration::from_millis(2_500);
 /// Caps on what a remote source may cost: bytes read, and the surface an
 /// image is allowed to decode to.
@@ -196,26 +201,34 @@ fn resolve_icons(packages: &[(String, CatalogPackage)], cache_dir: &str) {
             return;
         };
 
-        // The manifest's own icon first — one request to a CDN that answers —
+        // The manifest's own icons first — requests to a CDN that answers —
         // then the package's own site.
-        let mut outcome = match manifest_icon(&metadata) {
-            Some(url) => cache_png(&[url.clone()], &url_stem(&url), cache_dir),
-            None => Outcome::Nothing,
+        let declared = manifest_icons(&metadata);
+        let mut outcome = if declared.is_empty() {
+            Outcome::Nothing
+        } else {
+            cache_png(&declared, &source_stem(&declared), cache_dir)
         };
         if !outcome.is_found() {
             let homepage = metadata.PackageUrl().map(|url| url.to_string()).unwrap_or_default();
             if let Some(host) = host_of(&homepage) {
                 let known = sites.lock().ok().and_then(|sites| sites.get(&host).cloned());
-                outcome = match known {
+                let from_site = match known {
                     Some(cached) => cached,
                     None => {
                         let fetched = homepage_icon(&homepage, cache_dir);
                         if let Ok(mut sites) = sites.lock() {
-                            sites.insert(host, fetched.clone());
+                            // Settled answers only: a site that could not be
+                            // reached once would otherwise stay that way for
+                            // every package behind it in this call.
+                            if !matches!(fetched, Outcome::Unreachable) {
+                                sites.insert(host, fetched.clone());
+                            }
                         }
                         fetched
                     }
                 };
+                outcome = outcome.or(from_site);
             }
         }
 
@@ -242,6 +255,18 @@ enum Outcome {
 impl Outcome {
     fn is_found(&self) -> bool {
         matches!(self, Outcome::Found(_))
+    }
+
+    /// What two lookups for the same package add up to. A package has no icon
+    /// only when every source said so, so one source failing to answer leaves
+    /// the answer open rather than settling it as "none".
+    fn or(self, other: Outcome) -> Outcome {
+        match (&self, &other) {
+            (Outcome::Found(_), _) => self,
+            (_, Outcome::Found(_)) => other,
+            (Outcome::Unreachable, _) | (_, Outcome::Unreachable) => Outcome::Unreachable,
+            _ => Outcome::Nothing,
+        }
     }
 }
 
@@ -282,11 +307,18 @@ fn in_parallel<T: Sync>(items: &[T], work: impl Fn(&T) + Sync) {
 // Icon sources
 // ---------------------------------------------------------------------------
 
-/// The best icon a manifest declares: a format Raycast renders (PNG over
-/// ICO), then a theme-neutral one, then the largest.
-fn manifest_icon(metadata: &bindings::Microsoft::Management::Deployment::CatalogPackageMetadata) -> Option<String> {
-    let icons = metadata.Icons().ok()?;
-    let mut best: Option<((u8, u8, i32), String)> = None;
+/// The icons a manifest declares, best first: a format Raycast renders (PNG
+/// over ICO), then a theme-neutral one, then the largest.
+///
+/// All of them, not just the winner, because the ranking can leave several
+/// tied — winget's catalog hands a few packages two icons that are alike in
+/// every field it reports — and what separates those is only visible once
+/// they are fetched.
+fn manifest_icons(metadata: &bindings::Microsoft::Management::Deployment::CatalogPackageMetadata) -> Vec<String> {
+    let Ok(icons) = metadata.Icons() else {
+        return Vec::new();
+    };
+    let mut ranked: Vec<((u8, u8, i32), String)> = Vec::new();
     for index in 0..icons.Size().unwrap_or(0) {
         let Ok(icon) = icons.GetAt(index) else { continue };
         let (Ok(url), Ok(file_type), Ok(theme), Ok(resolution)) =
@@ -300,20 +332,22 @@ fn manifest_icon(metadata: &bindings::Microsoft::Management::Deployment::Catalog
             _ => 2,
         };
         let theme_rank = if theme == IconTheme::Default { 0 } else { 1 };
-        let rank = (format_rank, theme_rank, -resolution.0);
-        if best.as_ref().is_none_or(|(current, _)| rank < *current) {
-            best = Some((rank, url.to_string()));
-        }
+        ranked.push(((format_rank, theme_rank, -resolution.0), url.to_string()));
     }
-    best.map(|(_, url)| url)
+    // A stable sort, so icons the ranking cannot separate stay in the order
+    // the manifest declared them.
+    ranked.sort_by_key(|(rank, _)| *rank);
+    ranked.into_iter().map(|(_, url)| url).collect()
 }
 
-/// The icon a package's own homepage offers, for packages whose manifest
-/// declares none. Nothing about any particular site is assumed.
+/// The icon a package's own site offers, for packages whose manifest declares
+/// none. Nothing about any particular site is assumed.
 ///
 /// The conventional location is tried first because it is one request and
 /// most sites answer it; reading the page to find what it declares costs a
-/// second request and a far larger download, so it is the fallback.
+/// second request and a far larger download, so it is the fallback. Both the
+/// answer and the file it is cached under are keyed by host, so what is read
+/// is the site's root rather than whichever page the package links to.
 fn homepage_icon(homepage: &str, cache_dir: &str) -> Outcome {
     let Some(host) = host_of(homepage) else {
         return Outcome::Nothing;
@@ -328,7 +362,11 @@ fn homepage_icon(homepage: &str, cache_dir: &str) -> Outcome {
         return conventional;
     }
     match fetch(&origin) {
-        Ok(body) => cache_png(&declared_icons(&String::from_utf8_lossy(&body), &origin), &stem, cache_dir),
+        Ok(body) => conventional.or(cache_png(
+            &declared_icons(&String::from_utf8_lossy(&body), &origin),
+            &stem,
+            cache_dir,
+        )),
         // The page itself could not be read, so what it declares is unknown.
         Err(Outcome::Unreachable) => Outcome::Unreachable,
         Err(_) => conventional,
@@ -374,8 +412,10 @@ fn attribute(tag: &str, lowered: &str, name: &str) -> Option<String> {
     Some(rest.split_whitespace().next()?.trim_end_matches('>').to_string())
 }
 
-/// Turn an href found in a page into an absolute URL.
-fn absolute_url(href: &str, origin: &str) -> Option<String> {
+/// Turn an href into an absolute URL, resolved against the URL it was found
+/// at: a leading slash against that URL's origin, anything else against the
+/// directory it names, as RFC 3986 requires.
+fn absolute_url(href: &str, base: &str) -> Option<String> {
     let href = href.trim();
     if href.is_empty() {
         return None;
@@ -386,10 +426,14 @@ fn absolute_url(href: &str, origin: &str) -> Option<String> {
     if let Some(rest) = href.strip_prefix("//") {
         return Some(format!("https://{rest}"));
     }
+    let base = base.split(['?', '#']).next()?;
+    let authority = base.find("://")? + "://".len();
+    let root = authority + base.get(authority..)?.find('/').unwrap_or(base.len() - authority);
     if href.starts_with('/') {
-        return Some(format!("{origin}{href}"));
+        return Some(format!("{}{href}", base.get(..root)?));
     }
-    Some(format!("{origin}/{href}"))
+    let directory = base.get(root..)?.rfind('/').map_or(root, |at| root + at);
+    Some(format!("{}/{href}", base.get(..directory)?))
 }
 
 /// Refuse anything but a public HTTPS destination. Icon and homepage URLs
@@ -403,11 +447,32 @@ fn is_public_https(url: &str) -> bool {
     if host == "localhost" || host.ends_with(".localhost") {
         return false;
     }
-    match host.trim_start_matches('[').trim_end_matches(']').parse::<IpAddr>() {
-        Ok(IpAddr::V4(address)) => {
-            !(address.is_loopback() || address.is_private() || address.is_link_local() || address.is_unspecified())
+    match host.parse::<IpAddr>() {
+        Ok(address) => is_public_address(&address),
+        // A name says nothing about where it points until it is resolved,
+        // which `PublicOnly` does before a connection is made.
+        Err(_) => true,
+    }
+}
+
+/// The addresses this process may talk to: everything except the machine
+/// itself and the network it sits on.
+fn is_public_address(address: &IpAddr) -> bool {
+    match address {
+        IpAddr::V4(address) => {
+            !(address.is_loopback()
+                || address.is_private()
+                || address.is_link_local()
+                || address.is_unspecified()
+                || address.is_broadcast()
+                || address.is_documentation())
         }
-        Ok(IpAddr::V6(address)) => {
+        IpAddr::V6(address) => {
+            // A mapped address is an IPv4 one wearing IPv6 notation, and the
+            // IPv6 predicates say nothing about what it maps to.
+            if let Some(mapped) = address.to_ipv4_mapped() {
+                return is_public_address(&IpAddr::V4(mapped));
+            }
             let leading = address.segments()[0];
             // Unique-local (fc00::/7) and link-local (fe80::/10) have no
             // stable predicates yet.
@@ -416,28 +481,47 @@ fn is_public_https(url: &str) -> bool {
                 || leading & 0xfe00 == 0xfc00
                 || leading & 0xffc0 == 0xfe80)
         }
-        // A name, not an address: it resolves publicly or not at all.
-        Err(_) => true,
     }
 }
 
-/// The scheme and host of a URL, as a base for resolving a relative path.
-fn origin_of(url: &str) -> Option<String> {
-    Some(format!("https://{}", host_of(url)?))
+/// Name resolution that hands back public addresses only.
+///
+/// The URL check refuses a private destination written as an address, but a
+/// name carries no such evidence: a package can name a host that resolves to
+/// the loopback interface or to something on the machine's own network.
+/// Filtering what the name resolved to applies the same rule where the
+/// connection is actually made, leaving no gap between check and connect.
+#[derive(Debug)]
+struct PublicOnly(DefaultResolver);
+
+impl Resolver for PublicOnly {
+    fn resolve(&self, uri: &Uri, config: &Config, timeout: NextTimeout) -> Result<ResolvedSocketAddrs, ureq::Error> {
+        let resolved = self.0.resolve(uri, config, timeout)?;
+        let mut public = self.empty();
+        for address in resolved.iter().filter(|address| is_public_address(&address.ip())) {
+            public.push(*address);
+        }
+        if public.is_empty() {
+            return Err(ureq::Error::HostNotFound);
+        }
+        Ok(public)
+    }
 }
 
-/// The host a homepage points at, lowercased and without credentials or port.
-fn host_of(homepage: &str) -> Option<String> {
-    let host = homepage
-        .split("://")
-        .last()?
-        .split('/')
-        .next()?
-        .rsplit('@')
-        .next()?
-        .split(':')
-        .next()?
-        .to_ascii_lowercase();
+/// The host a URL points at, lowercased and without credentials, port, or the
+/// brackets an IPv6 address is written in.
+fn host_of(url: &str) -> Option<String> {
+    let authority = url.split_once("://").map_or(url, |(_, rest)| rest);
+    let authority = authority.split(['/', '?', '#']).next()?;
+    let authority = authority.rsplit_once('@').map_or(authority, |(_, host)| host);
+    let host = match authority.strip_prefix('[') {
+        // Everything to the closing bracket is the address; only what follows
+        // it can be a port.
+        Some(literal) => literal.split(']').next()?,
+        None => authority.split(':').next()?,
+    };
+    // A trailing dot names the same host to a resolver.
+    let host = host.trim_end_matches('.').to_ascii_lowercase();
     (!host.is_empty()).then_some(host)
 }
 
@@ -445,29 +529,36 @@ fn host_of(homepage: &str) -> Option<String> {
 // Cache
 // ---------------------------------------------------------------------------
 
-fn http_agent() -> ureq::Agent {
-    ureq::Agent::new_with_config(
-        ureq::Agent::config_builder()
-            .timeout_global(Some(REQUEST_TIMEOUT))
-            // fetch() follows redirects itself so it can check each hop, and
-            // reads the status itself: a 404 is an answer ("no icon here"),
-            // while the error the client would raise instead is
-            // indistinguishable from the connection never landing.
-            .max_redirects(0)
-            .http_status_as_error(false)
-            // SChannel, the platform's own TLS. The alternative pulls in a
-            // C library, which cannot be cross-compiled by the extension CI's
-            // macOS runners. Its roots have to come from the platform too:
-            // against the bundled set, SChannel rejects perfectly ordinary
-            // chains it cannot terminate there (gitkraken.com, for one).
-            .tls_config(
-                TlsConfig::builder()
-                    .provider(TlsProvider::NativeTls)
-                    .root_certs(RootCerts::PlatformVerifier)
-                    .build(),
-            )
-            .build(),
-    )
+/// One agent for the process: it owns the connection pool, so the several
+/// requests a single site costs — its conventional icon, its page, then what
+/// the page declares — share one connection and one TLS handshake.
+fn http_agent() -> &'static ureq::Agent {
+    static AGENT: OnceLock<ureq::Agent> = OnceLock::new();
+    AGENT.get_or_init(build_agent)
+}
+
+fn build_agent() -> ureq::Agent {
+    let config = ureq::Agent::config_builder()
+        .timeout_global(Some(REQUEST_TIMEOUT))
+        // fetch() follows redirects itself so it can check each hop, and
+        // reads the status itself: a 404 is an answer ("no icon here"),
+        // while the error the client would raise instead is
+        // indistinguishable from the connection never landing.
+        .max_redirects(0)
+        .http_status_as_error(false)
+        // SChannel, the platform's own TLS. The alternative pulls in a
+        // C library, which cannot be cross-compiled by the extension CI's
+        // macOS runners. Its roots have to come from the platform too:
+        // against the bundled set, SChannel rejects perfectly ordinary
+        // chains it cannot terminate there (gitkraken.com, for one).
+        .tls_config(
+            TlsConfig::builder()
+                .provider(TlsProvider::NativeTls)
+                .root_certs(RootCerts::PlatformVerifier)
+                .build(),
+        )
+        .build();
+    ureq::Agent::with_parts(config, DefaultConnector::new(), PublicOnly(DefaultResolver::default()))
 }
 
 /// Downloaded images live in their own subdirectory, keyed by where they came
@@ -487,6 +578,16 @@ fn url_stem(url: &str) -> String {
     format!("{:016x}", hasher.finish())
 }
 
+/// The key a set of candidates caches under. The whole set, because which one
+/// wins depends on all of them: two packages that share a first choice but
+/// not a second would otherwise read each other's answer.
+fn source_stem(sources: &[String]) -> String {
+    match sources {
+        [only] => url_stem(only),
+        _ => url_stem(&sources.join("\n")),
+    }
+}
+
 /// Fetch a URL that package metadata supplied, refusing any destination that
 /// is not public HTTPS.
 ///
@@ -498,13 +599,28 @@ fn url_stem(url: &str) -> String {
 /// answer, which says nothing about whether an icon exists.
 fn fetch(url: &str) -> Result<Vec<u8>, Outcome> {
     let agent = http_agent();
+    let deadline = Instant::now() + REQUEST_TIMEOUT;
     let mut target = url.to_string();
 
     for _ in 0..=MAX_REDIRECTS {
         if !is_public_https(&target) {
             return Err(Outcome::Nothing);
         }
-        let Ok(response) = agent.get(&target).header("User-Agent", USER_AGENT).call() else {
+        // The agent's timeout is per request, and each hop is one; spending
+        // what is left of the source's budget keeps a redirect chain from
+        // costing a multiple of it.
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            return Err(Outcome::Unreachable);
+        }
+        let Ok(response) = agent
+            .get(&target)
+            .config()
+            .timeout_global(Some(remaining))
+            .build()
+            .header("User-Agent", USER_AGENT)
+            .call()
+        else {
             return Err(Outcome::Unreachable);
         };
         let status = response.status();
@@ -513,7 +629,7 @@ fn fetch(url: &str) -> Result<Vec<u8>, Outcome> {
                 .headers()
                 .get("location")
                 .and_then(|location| location.to_str().ok())
-                .and_then(|location| origin_of(&target).and_then(|origin| absolute_url(location, &origin)));
+                .and_then(|location| absolute_url(location, &target));
             match next {
                 Some(location) => {
                     target = location;
@@ -529,25 +645,38 @@ fn fetch(url: &str) -> Result<Vec<u8>, Outcome> {
             return Err(Outcome::Nothing);
         }
         // An icon is a few kilobytes; anything past the cap is not one.
+        // Reading one byte past it is what tells a body that ended from a
+        // body that was cut off, which would decode to a mangled image.
         let mut body = Vec::new();
         if response
             .into_body()
             .into_reader()
-            .take(MAX_DOWNLOAD_BYTES)
+            .take(MAX_DOWNLOAD_BYTES + 1)
             .read_to_end(&mut body)
             .is_err()
         {
             return Err(Outcome::Unreachable);
         }
+        if body.len() as u64 > MAX_DOWNLOAD_BYTES {
+            return Err(Outcome::Nothing);
+        }
         return Ok(body);
     }
-    // Redirected in circles: an answer of a kind, and retrying repeats it.
+    // A chain this long is not leading anywhere, and retrying repeats it.
     Err(Outcome::Nothing)
 }
 
-/// Download the first source that answers, transcode it to PNG, and cache it.
-/// Storing PNG rather than what the site served also spares the renderer ICO
-/// decoding, which it handles poorly.
+/// Download a source, transcode it to PNG, and cache it. Storing PNG rather
+/// than what the site served also spares the renderer ICO decoding, which it
+/// handles poorly.
+///
+/// Sources are in order of preference, and the first that answers with an
+/// icon settles it — except that an icon is drawn in a square slot, so a
+/// source that is not square is kept only until a square one turns up. Where
+/// a package offers several icons and nothing in the metadata separates them,
+/// which winget's catalog does for a handful of packages, that shape is the
+/// only thing left to tell a drawn icon from whatever else was extracted
+/// alongside it.
 fn cache_png(sources: &[String], stem: &str, cache_dir: &str) -> Outcome {
     if stem.is_empty() {
         return Outcome::Nothing;
@@ -562,6 +691,7 @@ fn cache_png(sources: &[String], stem: &str, cache_dir: &str) -> Outcome {
     }
 
     let mut unreachable = false;
+    let mut best = None;
     for url in sources {
         let body = match fetch(url) {
             Ok(body) => body,
@@ -586,17 +716,146 @@ fn cache_png(sources: &[String], stem: &str, cache_dir: &str) -> Outcome {
         reader.limits(limits);
 
         let Ok(decoded) = reader.decode() else { continue };
-        if decoded.save_with_format(&path, image::ImageFormat::Png).is_ok() {
-            return Outcome::Found(path);
+        if decoded.width() == decoded.height() {
+            best = Some(decoded);
+            break;
+        }
+        // Not the shape of an icon, so keep looking — but do not come back
+        // empty-handed if nothing better answers.
+        best.get_or_insert(decoded);
+    }
+    let Some(icon) = best else {
+        // Every source answered and none of them held an icon — unless one
+        // never answered at all, which is worth another try later.
+        return if unreachable { Outcome::Unreachable } else { Outcome::Nothing };
+    };
+    if icon.save_with_format(&path, image::ImageFormat::Png).is_err() {
+        return Outcome::Nothing;
+    }
+    // Plenty of icons are a dark glyph on transparency — GitHub's among them,
+    // which stands in for every package that names GitHub as its site — and
+    // those disappear against a dark window. A light backing is written
+    // alongside for the view to use when the theme calls for it.
+    let drawn = icon.into_rgba8();
+    if hides_on_dark(&drawn) {
+        let _ = on_light_backing(&drawn).save_with_format(backed_path(&path), image::ImageFormat::Png);
+    }
+    Outcome::Found(path)
+}
+
+/// The light-backed companion to a cached image, by convention its
+/// neighbour. Both the source cache and the published files use it.
+fn backed_path(path: &Path) -> PathBuf {
+    path.with_extension("backed.png")
+}
+
+/// Whether an icon would be all but invisible against a dark window: next to
+/// none of what it draws stands out from the background behind it.
+///
+/// Contrast rather than brightness, because the two disagree on the cases
+/// that matter: a saturated red glyph is dark by any brightness measure and
+/// perfectly legible on black, while a near-black one is neither. Transparent
+/// pixels are not part of the drawing, so they are not counted.
+fn hides_on_dark(icon: &image::RgbaImage) -> bool {
+    /// Relative luminance of the window a dark-theme row is drawn on.
+    const BACKGROUND: f32 = 0.0075;
+    /// WCAG's ratio for large text, and about where a shape stops reading as
+    /// separate from what is behind it.
+    const CONTRAST: f32 = 3.0;
+    /// Below this share of the drawing standing out, there is nothing to see.
+    const STANDS_OUT: f32 = 0.05;
+    /// Anything fainter than this is background, not the drawing.
+    const OPAQUE_ENOUGH: u8 = 128;
+
+    // sRGB is not linear in light, and luminance is a sum of light. A channel
+    // has 256 values, so the conversion is a table rather than a power per
+    // pixel — an icon at the decode cap is four million of them.
+    static LINEAR: OnceLock<[f32; 256]> = OnceLock::new();
+    let linear = LINEAR.get_or_init(|| {
+        std::array::from_fn(|value| {
+            let channel = value as f32 / 255.0;
+            if channel <= 0.04045 {
+                channel / 12.92
+            } else {
+                ((channel + 0.055) / 1.055).powf(2.4)
+            }
+        })
+    });
+
+    let mut drawn: u32 = 0;
+    let mut standing_out: u32 = 0;
+    for pixel in icon.pixels() {
+        let [red, green, blue, alpha] = pixel.0;
+        if alpha < OPAQUE_ENOUGH {
+            continue;
+        }
+        drawn += 1;
+        let luminance =
+            0.2126 * linear[red as usize] + 0.7152 * linear[green as usize] + 0.0722 * linear[blue as usize];
+        // WCAG's ratio, which both directions of the comparison feed into: a
+        // pixel lighter than the window stands out, and so does a darker one.
+        if (luminance.max(BACKGROUND) + 0.05) / (luminance.min(BACKGROUND) + 0.05) >= CONTRAST {
+            standing_out += 1;
         }
     }
-    // Every source answered and none of them held an icon — unless one never
-    // answered at all, which is worth another try later.
-    if unreachable {
-        Outcome::Unreachable
+    drawn > 0 && (standing_out as f32) < STANDS_OUT * drawn as f32
+}
+
+/// The icon centred on a white rounded square, in Raycast's proportions.
+fn on_light_backing(icon: &image::RgbaImage) -> image::RgbaImage {
+    /// Fractions of the backing's size: the inset the icon sits in, and the
+    /// corner radius, both matching how Raycast draws app icons.
+    const INSET: f32 = 0.14;
+    const RADIUS: f32 = 0.225;
+    /// The backing is only ever drawn at row size. Building it from an icon
+    /// at the decode cap would cost a surface twice that on every worker, for
+    /// detail nothing renders.
+    const MAX_SIDE: u32 = 512;
+
+    let side = icon.width().max(icon.height());
+    let icon = if side > MAX_SIDE {
+        let scale = MAX_SIDE as f32 / side as f32;
+        let scaled = |length: u32| ((length as f32 * scale).round() as u32).max(1);
+        Cow::Owned(image::imageops::resize(
+            icon,
+            scaled(icon.width()),
+            scaled(icon.height()),
+            image::imageops::FilterType::Lanczos3,
+        ))
     } else {
-        Outcome::Nothing
+        Cow::Borrowed(icon)
+    };
+
+    let side = icon.width().max(icon.height());
+    let backing_side = ((side as f32) / (1.0 - 2.0 * INSET)).round().max(1.0) as u32;
+    let radius = backing_side as f32 * RADIUS;
+
+    let mut backing = image::RgbaImage::new(backing_side, backing_side);
+    for (x, y, pixel) in backing.enumerate_pixels_mut() {
+        *pixel = image::Rgba(if inside_rounded_square(x, y, backing_side, radius) {
+            [255, 255, 255, 255]
+        } else {
+            [0, 0, 0, 0]
+        });
     }
+
+    let left = (backing_side - icon.width()) / 2;
+    let top = (backing_side - icon.height()) / 2;
+    image::imageops::overlay(&mut backing, icon.as_ref(), left as i64, top as i64);
+    backing
+}
+
+/// Whether a pixel falls inside a square with rounded corners: outside the
+/// corner boxes it always does, inside one it depends on the arc.
+fn inside_rounded_square(x: u32, y: u32, side: u32, radius: f32) -> bool {
+    let (x, y, side) = (x as f32 + 0.5, y as f32 + 0.5, side as f32);
+    let from_left = x.min(side - x);
+    let from_top = y.min(side - y);
+    if from_left >= radius || from_top >= radius {
+        return true;
+    }
+    let (dx, dy) = (radius - from_left, radius - from_top);
+    dx * dx + dy * dy <= radius * radius
 }
 
 /// Publish a package's outcome where the view can see it immediately: the
@@ -619,11 +878,123 @@ fn publish(id: &str, image: Option<&PathBuf>, cache_dir: &str) {
     match image {
         // Copied rather than linked: the view lists this one directory, and a
         // few kilobytes cost nothing.
+        // The backing goes first: the view keys on the icon itself, so
+        // writing that last means whatever a repaint finds is complete.
         Some(source) => {
+            let backed = backed_path(source);
+            if backed.exists() {
+                let _ = fs::copy(&backed, dir.join(format!("{stem}.backed.png")));
+            }
             let _ = fs::copy(source, dir.join(format!("{stem}.png")));
         }
         None => {
             let _ = fs::write(dir.join(format!("{stem}.none")), []);
         }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn reads_the_host_a_url_actually_contacts() {
+        assert_eq!(host_of("https://example.com/icon.png").as_deref(), Some("example.com"));
+        assert_eq!(host_of("https://EXAMPLE.com:8443/x").as_deref(), Some("example.com"));
+        assert_eq!(host_of("https://user:pass@example.com/x").as_deref(), Some("example.com"));
+        // A trailing dot is the same host to a resolver.
+        assert_eq!(host_of("https://localhost./x").as_deref(), Some("localhost"));
+        // An address in brackets, whose colons are not a port.
+        assert_eq!(host_of("https://[::1]:443/x").as_deref(), Some("::1"));
+        // The scheme separator can appear again inside the path.
+        assert_eq!(
+            host_of("https://example.com/r?url=https://internal/").as_deref(),
+            Some("example.com")
+        );
+        assert_eq!(host_of("https:///x"), None);
+    }
+
+    #[test]
+    fn refuses_destinations_off_the_public_internet() {
+        assert!(is_public_https("https://example.com/icon.png"));
+        assert!(is_public_https("https://93.184.216.34/icon.png"));
+
+        assert!(!is_public_https("http://example.com/icon.png"));
+        assert!(!is_public_https("https://localhost/icon.png"));
+        assert!(!is_public_https("https://localhost./icon.png"));
+        assert!(!is_public_https("https://api.localhost/icon.png"));
+        assert!(!is_public_https("https://127.0.0.1/icon.png"));
+        assert!(!is_public_https("https://10.1.2.3/icon.png"));
+        assert!(!is_public_https("https://192.168.0.1/icon.png"));
+        assert!(!is_public_https("https://169.254.169.254/icon.png"));
+        assert!(!is_public_https("https://[::1]/icon.png"));
+        assert!(!is_public_https("https://[fe80::1]/icon.png"));
+        assert!(!is_public_https("https://[fd00::1]/icon.png"));
+        // An IPv4 address in IPv6 notation is still that address.
+        assert!(!is_public_https("https://[::ffff:127.0.0.1]/icon.png"));
+    }
+
+    #[test]
+    fn resolves_hrefs_against_the_url_they_were_found_at() {
+        let page = "https://example.com/products/editor/";
+        assert_eq!(
+            absolute_url("https://cdn.example.com/logo.png", page).as_deref(),
+            Some("https://cdn.example.com/logo.png")
+        );
+        assert_eq!(
+            absolute_url("//cdn.example.com/logo.png", page).as_deref(),
+            Some("https://cdn.example.com/logo.png")
+        );
+        assert_eq!(
+            absolute_url("/favicon.ico", page).as_deref(),
+            Some("https://example.com/favicon.ico")
+        );
+        assert_eq!(
+            absolute_url("logo.png", page).as_deref(),
+            Some("https://example.com/products/editor/logo.png")
+        );
+        // A relative destination is relative to the directory, not the file.
+        assert_eq!(
+            absolute_url("logo-v2.png", "https://cdn.example.com/assets/icons/logo.png").as_deref(),
+            Some("https://cdn.example.com/assets/icons/logo-v2.png")
+        );
+        assert_eq!(
+            absolute_url("logo.png", "https://example.com").as_deref(),
+            Some("https://example.com/logo.png")
+        );
+        assert_eq!(absolute_url("   ", page), None);
+    }
+
+    #[test]
+    fn keeps_the_stronger_of_two_answers() {
+        let found = || Outcome::Found(PathBuf::from("icon.png"));
+        assert!(found().or(Outcome::Nothing).is_found());
+        assert!(Outcome::Unreachable.or(found()).is_found());
+        // One source that never answered leaves the package unsettled, so it
+        // is looked at again rather than recorded as having no icon.
+        assert!(matches!(Outcome::Unreachable.or(Outcome::Nothing), Outcome::Unreachable));
+        assert!(matches!(Outcome::Nothing.or(Outcome::Unreachable), Outcome::Unreachable));
+        assert!(matches!(Outcome::Nothing.or(Outcome::Nothing), Outcome::Nothing));
+    }
+
+    #[test]
+    fn backs_only_what_a_dark_window_would_swallow() {
+        let square = |pixel: [u8; 4]| image::RgbaImage::from_pixel(8, 8, image::Rgba(pixel));
+        // A black glyph on transparency: GitHub's, and every package that
+        // names GitHub as its site.
+        let mut glyph = image::RgbaImage::new(8, 8);
+        glyph.put_pixel(4, 4, image::Rgba([26, 26, 26, 255]));
+        assert!(hides_on_dark(&glyph));
+        assert!(hides_on_dark(&square([0, 0, 0, 255])));
+
+        // Dark by brightness, legible on black.
+        assert!(!hides_on_dark(&square([255, 0, 0, 255])));
+        assert!(!hides_on_dark(&square([255, 255, 255, 255])));
+        // Nothing drawn at all.
+        assert!(!hides_on_dark(&image::RgbaImage::new(8, 8)));
     }
 }

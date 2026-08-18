@@ -4,10 +4,11 @@
  *
  * The icon cache directory IS the store. `rust/winget-com` writes each icon
  * there under the package's id the moment it resolves it — plus an empty
- * `.none` marker for packages it looked at and found nothing for — and this
- * hook watches the directory, so an icon shows up as soon as it exists rather
- * than when the batch it belonged to finishes. That is also why there is no
- * separate index of icons to keep in step: the files are the truth, and
+ * `.none` marker for packages it looked at and found nothing for, and a
+ * `.backed.png` companion for the icons that need one in a dark theme — and
+ * this hook watches the directory, so an icon shows up as soon as it exists
+ * rather than when the batch it belonged to finishes. That is also why there
+ * is no separate index of icons to keep in step: the files are the truth, and
  * clearing the directory clears everything.
  */
 
@@ -16,7 +17,7 @@ import { join } from "node:path";
 
 import { useEffect, useState } from "react";
 
-import { Icon, Image } from "@raycast/api";
+import { environment, Icon, Image } from "@raycast/api";
 
 import { supportPath } from "../core/paths";
 
@@ -31,8 +32,6 @@ const BATCH_SIZE = 24;
 const SETTLE_MS = 250;
 /** Coalesces the burst of file events a batch produces. */
 const WATCH_SETTLE_MS = 100;
-/** Long enough for a slow batch, short enough to notice a wedged server. */
-const RESOLVER_TIMEOUT_MS = 60_000;
 
 /** Package ids reach the filesystem as names; `publish` in Rust encodes to match. */
 function fileStem(id: string): string {
@@ -67,10 +66,16 @@ function cachedIcons(): Set<string> {
 
 /** The row icon for a package, or a neutral placeholder. */
 function packageIcon(id: string): Image.ImageLike {
-  const name = `${fileStem(id)}.png`;
-  if (!cachedIcons().has(name)) {
+  const stem = fileStem(id);
+  if (!cachedIcons().has(`${stem}.png`)) {
     return Icon.Box;
   }
+  // Icons that would disappear against a dark window — a dark glyph on
+  // transparency, which every package that names GitHub as its site ends up
+  // with — have a light-backed copy beside them. The theme is read as the row
+  // is drawn, so a theme change shows up on the next repaint.
+  const backed = `${stem}.backed.png`;
+  const name = environment.appearance === "dark" && cachedIcons().has(backed) ? backed : `${stem}.png`;
   // Handed over as a file URL: a Windows path is not recognized as absolute
   // (that check is a leading "/"), so it would be looked for in the
   // extension's assets folder and never found.
@@ -173,17 +178,15 @@ function usePackageIcons(ids: string[], paused: boolean): void {
         try {
           const { package_icons: resolveIcons } = await import("rust:../../rust/winget-com");
           try {
-            // Neither the COM query nor the manifest reads behind it can be
-            // cancelled or time out, so a wedged winget server would otherwise
-            // leave `running` set and quietly end icons for this worker. The
-            // call is left to finish on its own; its results still land on
-            // disk, and the watcher picks them up.
-            await Promise.race([
-              resolveIcons(batch, iconDirectory()),
-              new Promise((_, reject) => setTimeout(() => reject(new Error("timed out")), RESOLVER_TIMEOUT_MS)),
-            ]);
+            // Waited on to the end rather than given a deadline here. The call
+            // cannot be cancelled — neither the COM query nor the manifest
+            // reads behind it can be — so giving up on it would not stop it,
+            // it would only let a second resolver start alongside the first
+            // and compete with it for the same server. Every request it makes
+            // is bounded on its side.
+            await resolveIcons(batch, iconDirectory());
           } catch {
-            // This run failed or overran; the rows stay eligible for the next.
+            // This run failed; the rows stay eligible for the next.
             for (const id of batch) {
               requested.delete(id);
             }
