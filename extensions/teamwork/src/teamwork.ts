@@ -1,11 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import type { TeamworkTask, TeamworkTimer } from "./types";
 
-type Preferences = {
-  siteUrl: string;
-  apiToken: string;
-};
-
 type Included = {
   projects?: Record<string, { id?: number; name?: string }>;
   tasks?: Record<string, { id?: number; name?: string; tasklistId?: number }>;

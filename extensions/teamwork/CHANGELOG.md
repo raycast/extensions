@@ -1,11 +1,5 @@
 # Teamwork Changelog
 
-## [Update] - {PR_MERGE_DATE}
-
-- **Starred Tasks** — star any task to pin it permanently above recents; starred tasks persist independently and are excluded from the recents list to avoid duplicates
-- **Star Task** / **Remove Star** actions available on all tasks in every section
-- Friendly error message when attempting to start a timer on a task that already has one running
-
 ## [Initial Release] - {PR_MERGE_DATE}
 
 - Search tasks assigned to you with active/completed filter
@@ -21,3 +15,5 @@
 - Configurable recent tasks limit (default: 5) via extension preferences
 - **Refresh Task** action on recent items to sync latest name, status, and due date from Teamwork
 - **Remove from Recents** action to manually remove a task from the recents list
+- **Starred Tasks** — star any task to pin it permanently above recents; starred tasks persist independently and are excluded from the recents list to avoid duplicates
+- **Star Task** / **Remove Star** actions available on all tasks in every section

@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "teamwork",
   "version": "0.1.0",
   "type": "module",

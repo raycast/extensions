@@ -127,8 +127,7 @@ export default function Command() {
 
   const recentLimit = Math.max(
     1,
-    parseInt(getPreferenceValues<{ recentLimit: string }>().recentLimit, 10) ||
-      5,
+    parseInt(getPreferenceValues<Preferences>().recentLimit, 10) || 5,
   );
   const showRecents =
     query.length === 0 && filter === "active" && recents.length > 0;
