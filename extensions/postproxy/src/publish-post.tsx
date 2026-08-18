@@ -170,7 +170,7 @@ export default function PublishPost() {
             .map(platformLabel)
             .join(
               ", ",
-            )} — you selected multiple profiles on that network. Publish them separately, or set the page/board/organization/channel ID per profile in Platform Parameters below.`}
+            )} — you selected multiple profiles on that network, and the API applies one placement per network. To target different pages/boards/organizations/channels, publish those profiles in separate posts.`}
         />
       ) : null}
 
