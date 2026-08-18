@@ -43,13 +43,18 @@ export function buildPlatforms(
   rawJson: string,
   networkPlacements: Record<string, string>,
 ): Record<string, Record<string, unknown>> | undefined {
-  let platforms: Record<string, Record<string, unknown>> = {};
+  const platforms: Record<string, Record<string, unknown>> = {};
   const trimmed = rawJson?.trim();
   if (trimmed && trimmed !== "{}") {
     try {
       const parsed = JSON.parse(trimmed);
       if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
-        platforms = parsed as Record<string, Record<string, unknown>>;
+        // Only keep platform entries whose value is itself a JSON object.
+        for (const [net, value] of Object.entries(parsed as Record<string, unknown>)) {
+          if (value && typeof value === "object" && !Array.isArray(value)) {
+            platforms[net] = { ...(value as Record<string, unknown>) };
+          }
+        }
       }
     } catch {
       // form validation blocks submit on invalid JSON; ignore here

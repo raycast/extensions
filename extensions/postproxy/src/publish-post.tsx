@@ -57,11 +57,17 @@ export default function PublishPost() {
       platformParams: (value) => {
         const raw = (value ?? "").trim();
         if (!raw || raw === "{}") return undefined;
+        let parsed: unknown;
         try {
-          const parsed = JSON.parse(raw);
-          if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return "Must be a JSON object";
+          parsed = JSON.parse(raw);
         } catch {
           return "Invalid JSON";
+        }
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return "Must be a JSON object";
+        for (const val of Object.values(parsed as Record<string, unknown>)) {
+          if (!val || typeof val !== "object" || Array.isArray(val)) {
+            return "Each platform must map to a JSON object";
+          }
         }
         return undefined;
       },
@@ -81,20 +87,22 @@ export default function PublishPost() {
     ? Object.keys(placementsByNetwork).filter((n) => PLACEMENT_META[n])
     : [];
 
-  // Placement is mandatory (except LinkedIn's null-id personal profile), so default each
-  // network's selection to its first available placement once they load.
+  // Placement is mandatory (except LinkedIn's null-id personal profile). Reconcile the selection
+  // against the currently-available placements: keep it only if still valid for the selected
+  // profiles, otherwise default to the first available; drop networks no longer in play.
   useEffect(() => {
     if (!placementsByNetwork) return;
     setNetworkPlacements((prev) => {
-      let changed = false;
-      const next = { ...prev };
+      const next: Record<string, string> = {};
       for (const [net, list] of Object.entries(placementsByNetwork)) {
-        if (next[net] === undefined && list.length > 0) {
-          next[net] = list[0].id ?? "";
-          changed = true;
-        }
+        const validIds = new Set(list.map((placement) => placement.id ?? ""));
+        const current = prev[net];
+        next[net] = current !== undefined && validIds.has(current) ? current : (list[0]?.id ?? "");
       }
-      return changed ? next : prev;
+      const unchanged =
+        Object.keys(next).length === Object.keys(prev).length &&
+        Object.entries(next).every(([net, value]) => prev[net] === value);
+      return unchanged ? prev : next;
     });
   }, [placementsByNetwork]);
 
