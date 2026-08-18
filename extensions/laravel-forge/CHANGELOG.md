@@ -1,5 +1,13 @@
 # Laravel Forge Changelog
 
+## [Forge API v2] - 2026-08-18
+- Move every request to the Forge API v2, which replaces v1 on August 31, 2026
+- Servers are now listed per organization, across all organizations a token can see
+- Asks for a new API token, since v2 tokens are scoped — see the README for which scopes to tick
+- Add site logs, server events, and start/stop alongside reboot for services
+- Show the last deployment's outcome on the deploy row
+- Update dependencies to Raycast's current stack
+
 ## [Fix] - 2023-05-12
 - Fixes bug in displaying the ssh:// protocol string
 ## [Fix] - 2023-05-04

@@ -474,6 +474,7 @@
 /extensions/commit-issue-parser                                     @JulesJuul
 /extensions/commit-message-formatter                                @zrr1999
 /extensions/commit-message-generator                                @rokartur @dphelan
+/extensions/commit-sound-controls                                   @wicolian
 /extensions/commit-streak                                           @aundurraga
 /extensions/commitlint                                              @lardissone
 /extensions/common-directory                                        @koinzhang
@@ -643,7 +644,7 @@
 /extensions/devutils                                                @vietanhlehuu
 /extensions/dex-screener                                            @wp-lai
 /extensions/dexcom-reader                                           @jmedina21
-/extensions/dia                                                     @tleo19 @daat21 @thomaspaulmann @pernielsentikaer @loris @xmok @hetommy
+/extensions/dia                                                     @tleo19 @daat21 @thomaspaulmann @pernielsentikaer @loris @xmok @hetommy @christianmagill
 /extensions/dia-skills                                              @Visual-Studio-Coder @pernielsentikaer
 /extensions/dice-and-coin                                           @yonbergman @xmok
 /extensions/dice-tiles                                              @Jumitti @pernielsentikaer
@@ -2702,6 +2703,7 @@
 /extensions/team-time                                               @DavidNaak @0xdhrv @DylanPenney
 /extensions/teamgantt                                               @knownasilya
 /extensions/teamup-rooms                                            @drewwatkins11
+/extensions/teamwork                                                @workeffortwaste
 /extensions/techcrunch                                              @khlebobul
 /extensions/techmeme                                                @Tien-Lam
 /extensions/telegram                                                @ikupenov

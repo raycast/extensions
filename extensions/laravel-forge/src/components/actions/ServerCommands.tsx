@@ -11,7 +11,7 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
       <Action.OpenInBrowser title="Open on Laravel Forge" url={`https://forge.laravel.com/servers/${server.id}`} />
       <Action.OpenInBrowser
         icon={Icon.Terminal}
-        // eslint-disable-next-line @raycast/prefer-title-case
+
         title={`Open SSH Connection (${server.ssh_user})`}
         url={`ssh://${server.ssh_user}@${server.ip_address}`}
       />
@@ -20,7 +20,7 @@ export const ServerCommands = ({ server }: { server: IServer }) => {
         title="Reboot Server"
         onAction={() => {
           showToast(Toast.Style.Animated, "Rebooting server...");
-          Server.reboot({ serverId: server.id, token }).catch(() => {
+          Server.runAction({ server, token }).catch(() => {
             showToast(Toast.Style.Failure, "Failed to reboot server");
           });
         }}
