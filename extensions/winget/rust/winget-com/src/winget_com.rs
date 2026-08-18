@@ -65,7 +65,9 @@ const REQUEST_TIMEOUT: Duration = Duration::from_millis(2_500);
 /// Caps on what a remote source may cost: bytes read, and the surface an
 /// image is allowed to decode to.
 const MAX_DOWNLOAD_BYTES: u64 = 4 * 1024 * 1024;
+const MAX_DECODE_BYTES: u64 = 64 * 1024 * 1024;
 const MAX_ICON_PIXELS: u32 = 2_048;
+const MAX_REDIRECTS: u8 = 3;
 
 /// Write each package's icon into `cache_dir`, named after the package.
 /// Callers pass whatever is on screen, so plenty of ids are not in the winget
@@ -297,16 +299,8 @@ fn homepage_icon(homepage: &str, cache_dir: &str) -> Option<PathBuf> {
     if let Some(path) = cache_png(&[format!("{origin}/favicon.ico")], &stem, cache_dir) {
         return Some(path);
     }
-    if !is_public_https(&origin) {
-        return None;
-    }
-    let declared = http_agent()
-        .get(&origin)
-        .header("User-Agent", USER_AGENT)
-        .call()
-        .ok()
-        .and_then(|response| response.into_body().with_config().limit(MAX_DOWNLOAD_BYTES).read_to_string().ok())
-        .map(|html| declared_icons(&html, &origin))
+    let declared = fetch(&origin)
+        .map(|body| declared_icons(&String::from_utf8_lossy(&body), &origin))
         .unwrap_or_default();
     cache_png(&declared, &stem, cache_dir)
 }
@@ -397,6 +391,11 @@ fn is_public_https(url: &str) -> bool {
     }
 }
 
+/// The scheme and host of a URL, as a base for resolving a relative path.
+fn origin_of(url: &str) -> Option<String> {
+    Some(format!("https://{}", host_of(url)?))
+}
+
 /// The host a homepage points at, lowercased and without credentials or port.
 fn host_of(homepage: &str) -> Option<String> {
     let host = homepage
@@ -420,6 +419,8 @@ fn http_agent() -> ureq::Agent {
     ureq::Agent::new_with_config(
         ureq::Agent::config_builder()
             .timeout_global(Some(REQUEST_TIMEOUT))
+            // fetch() follows redirects itself so it can check each hop.
+            .max_redirects(0)
             // SChannel, the platform's own TLS. The alternative pulls in a
             // C library, which cannot be cross-compiled by the extension CI's
             // macOS runners. Its roots have to come from the platform too:
@@ -452,6 +453,40 @@ fn url_stem(url: &str) -> String {
     format!("{:016x}", hasher.finish())
 }
 
+/// Fetch a URL that package metadata supplied, refusing any destination that
+/// is not public HTTPS.
+///
+/// Redirects are followed by hand: the client would otherwise chase them
+/// itself, and a public URL that redirects inward would reach exactly the
+/// hosts the check exists to keep this process away from.
+fn fetch(url: &str) -> Option<Vec<u8>> {
+    let agent = http_agent();
+    let mut target = url.to_string();
+
+    for _ in 0..=MAX_REDIRECTS {
+        if !is_public_https(&target) {
+            return None;
+        }
+        let response = agent.get(&target).header("User-Agent", USER_AGENT).call().ok()?;
+        if response.status().is_redirection() {
+            let location = response.headers().get("location")?.to_str().ok()?;
+            // A relative Location stays on a host already checked.
+            target = absolute_url(location, &origin_of(&target)?)?;
+            continue;
+        }
+        // An icon is a few kilobytes; anything past the cap is not one.
+        let mut body = Vec::new();
+        response
+            .into_body()
+            .into_reader()
+            .take(MAX_DOWNLOAD_BYTES)
+            .read_to_end(&mut body)
+            .ok()?;
+        return Some(body);
+    }
+    None
+}
+
 /// Download the first source that answers, transcode it to PNG, and cache it.
 /// Storing PNG rather than what the site served also spares the renderer ICO
 /// decoding, which it handles poorly.
@@ -466,35 +501,23 @@ fn cache_png(sources: &[String], stem: &str, cache_dir: &str) -> Option<PathBuf>
     }
     fs::create_dir_all(&dir).ok()?;
 
-    let agent = http_agent();
     for url in sources {
-        if !is_public_https(url) {
-            continue;
-        }
-        let Ok(response) = agent.get(url).header("User-Agent", USER_AGENT).call() else {
-            continue;
-        };
-        // An icon is a few kilobytes; anything beyond the cap is not one, and
-        // the body arrives from wherever package metadata pointed.
-        let mut body = Vec::new();
-        if response
-            .into_body()
-            .into_reader()
-            .take(MAX_DOWNLOAD_BYTES)
-            .read_to_end(&mut body)
-            .is_err()
-        {
-            continue;
-        }
-        let Ok(reader) = image::ImageReader::new(Cursor::new(&body)).with_guessed_format() else {
+        let Some(body) = fetch(url) else { continue };
+
+        // The limits go to the decoder rather than the decoded image: a small
+        // file can describe an enormous surface, and checking afterwards
+        // means the allocation has already happened — sixteen of those at
+        // once would be the whole worker's memory.
+        let Ok(mut reader) = image::ImageReader::new(Cursor::new(&body)).with_guessed_format() else {
             continue;
         };
+        let mut limits = image::Limits::default();
+        limits.max_image_width = Some(MAX_ICON_PIXELS);
+        limits.max_image_height = Some(MAX_ICON_PIXELS);
+        limits.max_alloc = Some(MAX_DECODE_BYTES);
+        reader.limits(limits);
+
         let Ok(decoded) = reader.decode() else { continue };
-        // A small image that decodes to an enormous surface is the other way
-        // a remote file can cost more than it looks.
-        if decoded.width() > MAX_ICON_PIXELS || decoded.height() > MAX_ICON_PIXELS {
-            continue;
-        }
         if decoded.save_with_format(&path, image::ImageFormat::Png).is_ok() {
             return Some(path);
         }

@@ -85,6 +85,15 @@ function packageIcon(id: string): Image.ImageLike {
 /** Ids already requested in this worker, so a repaint cannot re-request them. */
 const requested = new Set<string>();
 /**
+ * How many times one package may be looked up here. A resolver call can come
+ * back having resolved nothing for a package — its manifest is a network read
+ * that can fail — and those deserve another go rather than staying blank for
+ * as long as the view lives. Bounded, so a package that never resolves does
+ * not become a loop.
+ */
+const MAX_ATTEMPTS = 2;
+const attempts = new Map<string, number>();
+/**
  * Cleared once the resolver itself cannot be loaded — a missing or unbuildable
  * binary, which will not fix itself while this worker lives. A failed CALL is
  * different: winget's catalog refuses connections while its source updates,
@@ -184,6 +193,17 @@ function usePackageIcons(ids: string[], paused: boolean): void {
         }
         running = false;
         cached = scanCache();
+        for (const id of batch) {
+          const stem = fileStem(id);
+          if (cached.has(`${stem}.png`) || cached.has(`${stem}.none`)) {
+            continue;
+          }
+          const tried = (attempts.get(id) ?? 0) + 1;
+          attempts.set(id, tried);
+          if (tried < MAX_ATTEMPTS) {
+            requested.delete(id);
+          }
+        }
         // Also the signal to pick up the next rows, current ones included.
         repaint((counter) => counter + 1);
       })();
@@ -208,6 +228,7 @@ function clearIconCache(): void {
   }
   cached = null;
   requested.clear();
+  attempts.clear();
   resolverAvailable = true;
 }
 
