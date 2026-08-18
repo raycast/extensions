@@ -109,7 +109,7 @@ export default function Command({ foldersOnly = false }: { foldersOnly?: boolean
       } else {
         await showToast({
           style: Toast.Style.Failure,
-          title: `Failed to replace ${itemNoun(mode, 1)} characters`,
+          title: `Failed to replace characters in ${itemNoun(mode, 1)} names`,
           message: results.find((r) => !r.success)?.error,
         });
       }
@@ -118,7 +118,7 @@ export default function Command({ foldersOnly = false }: { foldersOnly?: boolean
 
       await showToast({
         style: Toast.Style.Failure,
-        title: `Failed to replace ${itemNoun(mode, 1)} characters`,
+        title: `Failed to replace characters in ${itemNoun(mode, 1)} names`,
         message: (error as Error).message,
       });
     }
