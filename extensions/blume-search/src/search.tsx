@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  getPreferenceValues,
-  Icon,
-  List,
-  openExtensionPreferences,
-  type Application,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 
 import { createBlumeSearchClient, SearchSupersededError, type BlumeSearchClient } from "./blumeSearchClient.ts";
@@ -21,10 +12,6 @@ import {
   SEARCH_CATEGORY_LABELS,
   type SearchCategoryFilter,
 } from "./searchModel.ts";
-
-interface Preferences {
-  application?: Application;
-}
 
 export default function SearchBlume(): React.JSX.Element {
   const preferences = getPreferenceValues<Preferences>();

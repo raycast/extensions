@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "blume-search",
   "title": "Blume Search",
   "description": "Search projects, conversations, messages, setup, and suggestions in Blume.",
@@ -16,8 +17,7 @@
     "dev": "ray develop",
     "lint": "ray lint --non-interactive",
     "publish": "ray publish",
-    "test": "node --experimental-strip-types --test src/*.test.ts",
-    "typecheck": "tsc --noEmit"
+    "test": "node --experimental-strip-types --test src/*.test.ts"
   },
   "commands": [
     {
@@ -38,7 +38,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.23",
+    "@raycast/api": "^1.104.25",
     "react": "19.0.0"
   },
   "devDependencies": {

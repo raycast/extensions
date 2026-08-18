@@ -71,7 +71,15 @@ export class BlumeSearchClient {
     this.child.once("exit", (code) => {
       if (this.disposed) return;
       const detail = this.stderrBuffer.trim();
-      this.fail(new Error(detail || `Blume search helper exited${code === null ? "" : ` with code ${code}`}.`));
+      const helperMissing =
+        detail.includes("raycastSearch.js") && /Cannot find module|MODULE_NOT_FOUND|not found/i.test(detail);
+      this.fail(
+        new Error(
+          helperMissing
+            ? "Blume does not include Raycast search yet. Update Blume and try again."
+            : detail || `Blume search helper exited${code === null ? "" : ` with code ${code}`}.`,
+        ),
+      );
     });
     this.readyTimer = setTimeout(() => {
       if (this.readySettled) return;
@@ -150,11 +158,11 @@ export class BlumeSearchClient {
       return;
     }
     if (response.type === "ready") {
-      if (this.readySettled) return;
       if (!response.supportedVersions.includes(RAYCAST_SEARCH_PROTOCOL_VERSION)) {
         this.fail(new Error("Update Blume or this extension to a compatible search version."));
         return;
       }
+      if (this.readySettled) return;
       this.readySettled = true;
       if (this.readyTimer) clearTimeout(this.readyTimer);
       this.readyTimer = null;

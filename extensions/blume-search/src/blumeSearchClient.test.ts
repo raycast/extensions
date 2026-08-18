@@ -32,19 +32,40 @@ test("Raycast launches the helper shipped inside Blume with its bundled Node run
   }
 });
 
-test("Raycast reports an outdated Blume app without the helper", () => {
-  const directory = mkdtempSync(join(tmpdir(), "blume-raycast-old-app-"));
+test("Raycast lets Electron resolve a helper entry inside a packaged ASAR archive", () => {
+  const directory = mkdtempSync(join(tmpdir(), "blume-raycast-asar-app-"));
+  const applicationPath = join(directory, "Blume.app");
+  const executable = join(applicationPath, "Contents", "MacOS", "Blume");
+  const archive = join(applicationPath, "Contents", "Resources", "app.asar");
+  mkdirSync(join(applicationPath, "Contents", "MacOS"), { recursive: true });
+  mkdirSync(join(applicationPath, "Contents", "Resources"), { recursive: true });
+  writeFileSync(executable, "");
+  writeFileSync(archive, "packaged archive");
   try {
-    assert.throws(
-      () =>
-        helperLaunchForApplication({
-          name: "Blume",
-          path: join(directory, "Blume.app"),
-          bundleId: "page.blume.sidecar",
-        }),
-      /does not include Raycast search yet/,
-    );
+    const launch = helperLaunchForApplication({
+      name: "Blume",
+      path: applicationPath,
+      bundleId: "page.blume.sidecar",
+    });
+    assert.equal(launch.command, executable);
+    assert.deepEqual(launch.args, [join(archive, "out", "main", "raycastSearch.js")]);
   } finally {
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("Raycast reports an outdated Blume app when Electron cannot load the helper", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "blume-raycast-old-app-"));
+  const script = join(directory, "old-blume.mjs");
+  writeFileSync(
+    script,
+    `process.stderr.write("Error: Cannot find module '/Blume.app/Contents/Resources/app.asar/out/main/raycastSearch.js'\\ncode: MODULE_NOT_FOUND\\n"); process.exit(1);\n`,
+  );
+  const client = new BlumeSearchClient({ command: process.execPath, args: [script], env: process.env });
+  try {
+    await assert.rejects(client.ready(), /does not include Raycast search yet/);
+  } finally {
+    client.dispose();
     rmSync(directory, { recursive: true, force: true });
   }
 });
@@ -90,6 +111,23 @@ test("Raycast falls back to the additive legacy v1 helper protocol", async () =>
       results: [],
       truncated: false,
     });
+  } finally {
+    client.dispose();
+    rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test("Raycast rejects a delayed ready frame with an incompatible protocol", async () => {
+  const directory = mkdtempSync(join(tmpdir(), "blume-raycast-delayed-ready-"));
+  const script = join(directory, "helper.mjs");
+  writeFileSync(
+    script,
+    `process.stdin.resume(); setTimeout(() => process.stdout.write(JSON.stringify({ version: 1, type: "ready", supportedVersions: [2] }) + "\\n"), 650);\n`,
+  );
+  const client = new BlumeSearchClient({ command: process.execPath, args: [script], env: process.env });
+  try {
+    await client.ready();
+    await assert.rejects(client.search({ query: "project", categories: ["projects"] }), /compatible search version/);
   } finally {
     client.dispose();
     rmSync(directory, { recursive: true, force: true });

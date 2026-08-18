@@ -1,4 +1,4 @@
-## [Initial Release] - 2026-08-14
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search local Blume projects, conversations, messages, setup artifacts, and suggestions.
 - Filter results using Blume's entity icons and colors.
