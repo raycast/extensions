@@ -179,7 +179,7 @@ fn resolve_icons(packages: &[(String, CatalogPackage)], cache_dir: &str) {
     // What each site turned out to offer, so packages sharing one do not each
     // re-derive it. Concurrent first-comers can still overlap; the point of
     // this map is the packages that arrive after the answer is known.
-    let sites: Mutex<HashMap<String, Option<PathBuf>>> = Mutex::new(HashMap::new());
+    let sites: Mutex<HashMap<String, Outcome>> = Mutex::new(HashMap::new());
 
     in_parallel(packages, |(id, package)| {
         // Reading the manifest is by far the most expensive step: over a
@@ -198,12 +198,15 @@ fn resolve_icons(packages: &[(String, CatalogPackage)], cache_dir: &str) {
 
         // The manifest's own icon first — one request to a CDN that answers —
         // then the package's own site.
-        let mut image = manifest_icon(&metadata).and_then(|url| cache_png(&[url.clone()], &url_stem(&url), cache_dir));
-        if image.is_none() {
+        let mut outcome = match manifest_icon(&metadata) {
+            Some(url) => cache_png(&[url.clone()], &url_stem(&url), cache_dir),
+            None => Outcome::Nothing,
+        };
+        if !outcome.is_found() {
             let homepage = metadata.PackageUrl().map(|url| url.to_string()).unwrap_or_default();
             if let Some(host) = host_of(&homepage) {
                 let known = sites.lock().ok().and_then(|sites| sites.get(&host).cloned());
-                image = match known {
+                outcome = match known {
                     Some(cached) => cached,
                     None => {
                         let fetched = homepage_icon(&homepage, cache_dir);
@@ -216,8 +219,30 @@ fn resolve_icons(packages: &[(String, CatalogPackage)], cache_dir: &str) {
             }
         }
 
-        publish(id, image.as_ref(), cache_dir);
+        match outcome {
+            Outcome::Found(path) => publish(id, Some(&path), cache_dir),
+            Outcome::Nothing => publish(id, None, cache_dir),
+            // Something was there to fetch and the network got in the way.
+            // Recording "no icon" would outlast the outage.
+            Outcome::Unreachable => {}
+        }
     });
+}
+
+/// What a lookup concluded. The distinction that matters is between a
+/// package that has no icon anywhere — worth recording, so it is not looked
+/// up again — and one whose icon could not be reached just now.
+#[derive(Clone)]
+enum Outcome {
+    Found(PathBuf),
+    Nothing,
+    Unreachable,
+}
+
+impl Outcome {
+    fn is_found(&self) -> bool {
+        matches!(self, Outcome::Found(_))
+    }
 }
 
 /// Run `work` over the items on several threads, each taking the next item
@@ -289,20 +314,25 @@ fn manifest_icon(metadata: &bindings::Microsoft::Management::Deployment::Catalog
 /// The conventional location is tried first because it is one request and
 /// most sites answer it; reading the page to find what it declares costs a
 /// second request and a far larger download, so it is the fallback.
-fn homepage_icon(homepage: &str, cache_dir: &str) -> Option<PathBuf> {
-    let host = host_of(homepage)?;
+fn homepage_icon(homepage: &str, cache_dir: &str) -> Outcome {
+    let Some(host) = host_of(homepage) else {
+        return Outcome::Nothing;
+    };
     let origin = format!("https://{host}");
     let stem = format!("site-{}", url_stem(&host));
 
     // cache_png answers from disk before touching the network, so a site
     // fetched by an earlier run costs nothing here.
-    if let Some(path) = cache_png(&[format!("{origin}/favicon.ico")], &stem, cache_dir) {
-        return Some(path);
+    let conventional = cache_png(&[format!("{origin}/favicon.ico")], &stem, cache_dir);
+    if conventional.is_found() {
+        return conventional;
     }
-    let declared = fetch(&origin)
-        .map(|body| declared_icons(&String::from_utf8_lossy(&body), &origin))
-        .unwrap_or_default();
-    cache_png(&declared, &stem, cache_dir)
+    match fetch(&origin) {
+        Ok(body) => cache_png(&declared_icons(&String::from_utf8_lossy(&body), &origin), &stem, cache_dir),
+        // The page itself could not be read, so what it declares is unknown.
+        Err(Outcome::Unreachable) => Outcome::Unreachable,
+        Err(_) => conventional,
+    }
 }
 
 /// Icon URLs a page declares, in document order.
@@ -419,8 +449,12 @@ fn http_agent() -> ureq::Agent {
     ureq::Agent::new_with_config(
         ureq::Agent::config_builder()
             .timeout_global(Some(REQUEST_TIMEOUT))
-            // fetch() follows redirects itself so it can check each hop.
+            // fetch() follows redirects itself so it can check each hop, and
+            // reads the status itself: a 404 is an answer ("no icon here"),
+            // while the error the client would raise instead is
+            // indistinguishable from the connection never landing.
             .max_redirects(0)
+            .http_status_as_error(false)
             // SChannel, the platform's own TLS. The alternative pulls in a
             // C library, which cannot be cross-compiled by the extension CI's
             // macOS runners. Its roots have to come from the platform too:
@@ -459,50 +493,84 @@ fn url_stem(url: &str) -> String {
 /// Redirects are followed by hand: the client would otherwise chase them
 /// itself, and a public URL that redirects inward would reach exactly the
 /// hosts the check exists to keep this process away from.
-fn fetch(url: &str) -> Option<Vec<u8>> {
+/// `Nothing` means the destination answered and had nothing to give — it was
+/// refused, or it is gone. `Unreachable` means the request never got an
+/// answer, which says nothing about whether an icon exists.
+fn fetch(url: &str) -> Result<Vec<u8>, Outcome> {
     let agent = http_agent();
     let mut target = url.to_string();
 
     for _ in 0..=MAX_REDIRECTS {
         if !is_public_https(&target) {
-            return None;
+            return Err(Outcome::Nothing);
         }
-        let response = agent.get(&target).header("User-Agent", USER_AGENT).call().ok()?;
-        if response.status().is_redirection() {
-            let location = response.headers().get("location")?.to_str().ok()?;
-            // A relative Location stays on a host already checked.
-            target = absolute_url(location, &origin_of(&target)?)?;
-            continue;
+        let Ok(response) = agent.get(&target).header("User-Agent", USER_AGENT).call() else {
+            return Err(Outcome::Unreachable);
+        };
+        let status = response.status();
+        if status.is_redirection() {
+            let next = response
+                .headers()
+                .get("location")
+                .and_then(|location| location.to_str().ok())
+                .and_then(|location| origin_of(&target).and_then(|origin| absolute_url(location, &origin)));
+            match next {
+                Some(location) => {
+                    target = location;
+                    continue;
+                }
+                None => return Err(Outcome::Nothing),
+            }
+        }
+        if status.is_server_error() {
+            return Err(Outcome::Unreachable);
+        }
+        if !status.is_success() {
+            return Err(Outcome::Nothing);
         }
         // An icon is a few kilobytes; anything past the cap is not one.
         let mut body = Vec::new();
-        response
+        if response
             .into_body()
             .into_reader()
             .take(MAX_DOWNLOAD_BYTES)
             .read_to_end(&mut body)
-            .ok()?;
-        return Some(body);
+            .is_err()
+        {
+            return Err(Outcome::Unreachable);
+        }
+        return Ok(body);
     }
-    None
+    // Redirected in circles: an answer of a kind, and retrying repeats it.
+    Err(Outcome::Nothing)
 }
 
 /// Download the first source that answers, transcode it to PNG, and cache it.
 /// Storing PNG rather than what the site served also spares the renderer ICO
 /// decoding, which it handles poorly.
-fn cache_png(sources: &[String], stem: &str, cache_dir: &str) -> Option<PathBuf> {
+fn cache_png(sources: &[String], stem: &str, cache_dir: &str) -> Outcome {
     if stem.is_empty() {
-        return None;
+        return Outcome::Nothing;
     }
     let dir = source_dir(cache_dir);
     let path = dir.join(format!("{stem}.png"));
     if path.exists() {
-        return Some(path);
+        return Outcome::Found(path);
     }
-    fs::create_dir_all(&dir).ok()?;
+    if fs::create_dir_all(&dir).is_err() {
+        return Outcome::Unreachable;
+    }
 
+    let mut unreachable = false;
     for url in sources {
-        let Some(body) = fetch(url) else { continue };
+        let body = match fetch(url) {
+            Ok(body) => body,
+            Err(Outcome::Unreachable) => {
+                unreachable = true;
+                continue;
+            }
+            Err(_) => continue,
+        };
 
         // The limits go to the decoder rather than the decoded image: a small
         // file can describe an enormous surface, and checking afterwards
@@ -519,10 +587,16 @@ fn cache_png(sources: &[String], stem: &str, cache_dir: &str) -> Option<PathBuf>
 
         let Ok(decoded) = reader.decode() else { continue };
         if decoded.save_with_format(&path, image::ImageFormat::Png).is_ok() {
-            return Some(path);
+            return Outcome::Found(path);
         }
     }
-    None
+    // Every source answered and none of them held an icon — unless one never
+    // answered at all, which is worth another try later.
+    if unreachable {
+        Outcome::Unreachable
+    } else {
+        Outcome::Nothing
+    }
 }
 
 /// Publish a package's outcome where the view can see it immediately: the
