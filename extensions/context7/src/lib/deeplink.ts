@@ -10,3 +10,7 @@ export function createSearchContextDeeplink(library: LibrarySummary) {
     },
   });
 }
+
+export function createSearchLibrariesDeeplink() {
+  return createDeeplink({ command: "search-libraries" });
+}
