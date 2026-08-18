@@ -2,7 +2,7 @@
 
 ## [OutageDeck Support] - {PR_MERGE_DATE}
 
-- Add OutageDeck provider URLs for normalized live status, service details, and active incidents across more than 170 cloud and SaaS providers
+- Add OutageDeck provider URLs for normalized vendor-published status, service details, and active incidents across cloud and SaaS providers
 
 ## [Statuspage Uptime Accuracy] - 2026-07-26
 
