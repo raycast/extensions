@@ -24,7 +24,7 @@ export function useFileSelection() {
         }));
         setFiles(fileItems);
       } catch (e) {
-        showToast({ style: Toast.Style.Failure, title: "Failed to read files", message: String(e) });
+        showToast({ style: Toast.Style.Failure, title: "Failed to read Finder selection", message: String(e) });
       } finally {
         setLoading(false);
       }

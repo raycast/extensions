@@ -533,15 +533,15 @@ describe("describeUndoPreview", () => {
       { restorable: 3, missing: 0, occupied: 0, replaced: 0, total: 3 },
       '"Renamed 3 files"',
     );
-    expect(message).toBe('This will restore the original names of 3 files from "Renamed 3 files"');
+    expect(message).toBe('This will restore the original names of 3 items from "Renamed 3 files"');
   });
 
-  it("uses the singular for a single file", () => {
+  it("uses the singular for a single item", () => {
     const message = describeUndoPreview(
       { restorable: 1, missing: 0, occupied: 0, replaced: 0, total: 1 },
       '"Renamed 1 file"',
     );
-    expect(message).toContain("of 1 file from");
+    expect(message).toContain("of 1 item from");
   });
 
   it("summarizes all three conflict kinds and the skip behavior", () => {
@@ -549,11 +549,11 @@ describe("describeUndoPreview", () => {
       { restorable: 15, missing: 2, occupied: 1, replaced: 1, total: 19 },
       '"Renamed 19 files"',
     );
-    expect(message).toContain('15 of 19 files from "Renamed 19 files" can be restored');
+    expect(message).toContain('15 of 19 items from "Renamed 19 files" can be restored');
     expect(message).toContain("2 were moved or deleted");
     expect(message).toContain("1 has the original name taken");
-    expect(message).toContain("1 is not verifiably the renamed file");
-    expect(message).toContain("Conflicted files will be skipped and can be retried later");
+    expect(message).toContain("1 is not verifiably the renamed item");
+    expect(message).toContain("Conflicted items will be skipped and can be retried later");
   });
 });
 

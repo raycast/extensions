@@ -296,10 +296,13 @@ export async function previewUndo(operations: ReadonlyArray<HistoryOperation>): 
 
 /**
  * Human-readable confirmation message for an undo about to cover `preview`.
+ * Says "items", not "files": an entry records whatever its command renamed —
+ * files, folders, or (from Advanced Batch Rename) a mix — and the entry does
+ * not store which.
  */
 export function describeUndoPreview(preview: UndoPreview, source: string): string {
   if (preview.missing === 0 && preview.occupied === 0 && preview.replaced === 0) {
-    return `This will restore the original names of ${preview.total} file${preview.total !== 1 ? "s" : ""} from ${source}`;
+    return `This will restore the original names of ${preview.total} item${preview.total !== 1 ? "s" : ""} from ${source}`;
   }
 
   const conflicts: string[] = [];
@@ -311,12 +314,12 @@ export function describeUndoPreview(preview: UndoPreview, source: string): strin
   }
   if (preview.replaced > 0) {
     conflicts.push(
-      `${preview.replaced} ${preview.replaced === 1 ? "is" : "are"} not verifiably the renamed file${preview.replaced === 1 ? "" : "s"}`,
+      `${preview.replaced} ${preview.replaced === 1 ? "is" : "are"} not verifiably the renamed item${preview.replaced === 1 ? "" : "s"}`,
     );
   }
   return (
-    `${preview.restorable} of ${preview.total} file${preview.total !== 1 ? "s" : ""} from ${source} can be restored. ` +
-    `${conflicts.join("; ")}. Conflicted files will be skipped and can be retried later.`
+    `${preview.restorable} of ${preview.total} item${preview.total !== 1 ? "s" : ""} from ${source} can be restored. ` +
+    `${conflicts.join("; ")}. Conflicted items will be skipped and can be retried later.`
   );
 }
 
