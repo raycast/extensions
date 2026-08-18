@@ -1,5 +1,9 @@
 # Dia Changelog
 
+## [Close Tab] - 2026-08-18
+
+- Added Close Tab action to Search Dia and Search Tabs.
+
 ## [Configurable Search Engine] - 2026-06-11
 
 - Added a search engine preference for Search Dia suggestions and web search fallback actions.

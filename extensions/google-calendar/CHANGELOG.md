@@ -1,5 +1,14 @@
 # Google Calendar Changelog
 
+## [Create All-Day Events] - 2026-08-14
+
+- Add all-day event creation to Create Event and Create Quick Event, including natural-language date-only phrases and “all day”
+- Create all-day events using Google Calendar's date fields and correct exclusive end-date semantics
+
+## [Show Event Location in List Events] - 2026-08-06
+
+- Add an opt-in "Show location" preference to the List Events command that shows the event's location as an accessory, with the full location in the tooltip
+
 ## [Expand AI Calendar API Support] - 2026-07-20
 
 - Expand the AI extension to support rich event creation and editing, including all-day and recurring events, attendees, reminders, visibility, availability, conferencing, attachments, special event types, imports, and recurring instances

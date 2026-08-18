@@ -13,9 +13,24 @@ import type {
   SignalLevel,
 } from "../src/lib/dictation-types";
 import { emptySignal } from "../src/lib/recording-view";
-import { deferred, flushPromises } from "./helpers/async";
+import { deferred, flushPromises, waitFor } from "./helpers/async";
 
 describe("dictation controller", () => {
+  it("waits for queued setup before asserting controller state", async () => {
+    let ready = false;
+    let attempts = 0;
+    queueMicrotask(() => {
+      ready = true;
+    });
+
+    await waitFor(() => {
+      attempts++;
+      expect(ready).toBe(true);
+    });
+
+    expect(attempts).toBeGreaterThan(1);
+  });
+
   it("runs the happy path and copies the trimmed transcript", async () => {
     const deps = createDeps();
     const { states, toasts } = deps;
@@ -123,6 +138,46 @@ describe("dictation controller", () => {
     });
   });
 
+  it("names a broken install differently from a missing one (#647)", async () => {
+    const deps = createDeps({
+      preflight: vi.fn(async () => ({
+        ok: false,
+        reason: "unusable" as const,
+        hint: "Run `kesha install --no-cache` to re-download the engine.",
+      })),
+    });
+    const { states } = deps;
+
+    const session = startDictationSession({}, deps.setState, deps);
+    await session.done;
+
+    expect(deps.startRecorder).not.toHaveBeenCalled();
+    expect(states.at(-1)).toEqual({
+      status: "error",
+      message: "Kesha's engine is installed but not working.",
+      hint: "Run `kesha install --no-cache` to re-download the engine.",
+    });
+  });
+
+  it("does not blame the engine for a CLI/extension version skew (#647)", async () => {
+    const deps = createDeps({
+      preflight: vi.fn(async () => ({
+        ok: false,
+        reason: "contract" as const,
+        hint: "Update the kesha CLI and this extension to matching versions.",
+      })),
+    });
+    const { states } = deps;
+
+    const session = startDictationSession({}, deps.setState, deps);
+    await session.done;
+
+    expect(deps.startRecorder).not.toHaveBeenCalled();
+    const last = states.at(-1);
+    expect(last?.message).toBe("Kesha CLI and this extension are out of sync.");
+    expect(last?.message).not.toContain("engine");
+  });
+
   it("falls back to the not-found hint when preflight fails without one", async () => {
     const deps = createDeps({
       preflight: vi.fn(async () => ({ ok: false })),
@@ -185,7 +240,7 @@ describe("dictation controller", () => {
     const { states } = deps;
 
     const session = startDictationSession({}, deps.setState, deps);
-    await vi.waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
+    await waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
     session.stopRecording();
     session.cancel();
     recorder.resolve();
@@ -208,7 +263,7 @@ describe("dictation controller", () => {
     });
 
     const session = startDictationSession({}, deps.setState, deps);
-    await vi.waitFor(() => expect(deps.current().status).toBe("recording"));
+    await waitFor(() => expect(deps.current().status).toBe("recording"));
 
     session.stopRecording();
     expect(deps.startRecorder).not.toHaveBeenCalled();
@@ -238,7 +293,7 @@ describe("dictation controller", () => {
     });
 
     const session = startDictationSession({}, deps.setState, deps);
-    await vi.waitFor(() => expect(deps.current().status).toBe("recording"));
+    await waitFor(() => expect(deps.current().status).toBe("recording"));
 
     session.cancel();
     recordingToast.resolve();
@@ -284,7 +339,7 @@ describe("dictation controller", () => {
     const { states } = deps;
 
     const session = startDictationSession({}, deps.setState, deps);
-    await vi.waitFor(() => expect(states.at(-1)?.status).toBe("transcribing"));
+    await waitFor(() => expect(states.at(-1)?.status).toBe("transcribing"));
 
     expect(states.at(-1)).toMatchObject({
       status: "transcribing",
@@ -316,7 +371,7 @@ describe("dictation controller", () => {
     const { states } = deps;
 
     const session = startDictationSession({}, deps.setState, deps);
-    await vi.waitFor(() => expect(states.at(-1)?.status).toBe("transcribing"));
+    await waitFor(() => expect(states.at(-1)?.status).toBe("transcribing"));
 
     session.cancelTranscription();
     transcribingToast.resolve();
@@ -344,7 +399,7 @@ describe("dictation controller", () => {
     });
 
     const session = startDictationSession({}, deps.setState, deps);
-    await vi.waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
+    await waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
 
     emit({ signal: emptySignal("listening") });
     clock = 30_000;
@@ -382,7 +437,7 @@ describe("dictation controller", () => {
     });
 
     const session = startDictationSession({}, deps.setState, deps);
-    await vi.waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
+    await waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
 
     emit({ signal: emptySignal("listening") });
     clock = 30_000;
@@ -420,7 +475,7 @@ describe("dictation controller", () => {
     });
 
     const session = startDictationSession({}, deps.setState, deps);
-    await vi.waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
+    await waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
 
     const warning = expect.objectContaining({
       style: "failure",
@@ -470,7 +525,7 @@ describe("dictation controller", () => {
     });
 
     const session = startDictationSession({}, deps.setState, deps);
-    await vi.waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
+    await waitFor(() => expect(deps.startRecorder).toHaveBeenCalled());
 
     emit({ signal: signalTick() });
     clock = 9_000;

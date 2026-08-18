@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 
+import { GalleryActionSection } from "../actions/gallery";
 import { RevealInFinderAction } from "../actions/reveal-in-finder";
 import { INDEX_PATH } from "../utils/index-file";
 import type { IndexProblem } from "../types/artifact";
@@ -40,6 +41,7 @@ export function NotInstalledEmptyView() {
           <Action.OpenInBrowser title="View Setup Instructions" icon={Icon.Book} url={SETUP_DOCS_URL} />
           <Action.CopyToClipboard title="Copy Hook Configuration" icon={Icon.Clipboard} content={HOOK_SNIPPET} />
           <Action.CopyToClipboard title="Copy Index Path" icon={Icon.Finder} content={INDEX_PATH} />
+          <GalleryActionSection />
         </ActionPanel>
       }
     />
@@ -59,6 +61,7 @@ export function MalformedEmptyView({ errorMessage }: { errorMessage?: string }) 
           <RevealInFinderAction title="Reveal Index File" path={INDEX_PATH} />
           <Action.CopyToClipboard title="Copy Error" icon={Icon.Clipboard} content={detail} />
           <Action.CopyToClipboard title="Copy Index Path" icon={Icon.Document} content={INDEX_PATH} />
+          <GalleryActionSection />
         </ActionPanel>
       }
     />
@@ -74,25 +77,33 @@ export function NoArtifactsEmptyView() {
       description="Publish an artifact in Claude Code and it will appear here."
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser
-            title="Open Artifacts Gallery"
-            icon={Icon.Globe}
-            url="https://claude.ai/code/artifacts"
-          />
           <Action.OpenInBrowser title="View Setup Instructions" icon={Icon.Book} url={SETUP_DOCS_URL} />
+          <GalleryActionSection />
         </ActionPanel>
       }
     />
   );
 }
 
-/** A query or project filter matched nothing — distinct from an empty index. */
+/**
+ * A query or project filter matched nothing — distinct from an empty index.
+ *
+ * Carries the gallery actions because "no match" has two very different causes:
+ * the search term is wrong, or the artifact was never recorded here at all
+ * (published from the chat app, or from another machine). Only the galleries
+ * resolve the second, and without them this state is a dead end.
+ */
 export function NoMatchesEmptyView() {
   return (
     <List.EmptyView
       icon={Icon.MagnifyingGlass}
       title="No Matching Artifacts"
-      description="Try a different search term or project filter."
+      description="Try a different search term, or look in the galleries on claude.ai."
+      actions={
+        <ActionPanel>
+          <GalleryActionSection />
+        </ActionPanel>
+      }
     />
   );
 }

@@ -38,6 +38,40 @@ export function buildPlatforms(content: string, platforms: PlatformKey[], mediaI
   return result;
 }
 
+/**
+ * Updating a platform replaces the whole platform object, so settings absent from the
+ * payload are dropped. Carry the draft's stored settings over to keep X options such as
+ * reply_to_url, community_id, and share_with_followers intact.
+ */
+export function preserveExistingSettings(platforms: DraftCreatePlatforms, existing: DraftDetail): DraftCreatePlatforms {
+  for (const platform of PLATFORM_KEYS) {
+    const target = platforms[platform];
+    const settings = existing.platforms?.[platform]?.settings;
+    if (target && "posts" in target && settings) target.settings = settings;
+  }
+  return platforms;
+}
+
+export type XPostOptions = {
+  quote_post_url?: string;
+  paid_partnership?: boolean;
+  made_with_ai?: boolean;
+};
+
+/**
+ * Disclosure labels describe the whole thread, so they apply to every post. A quote targets
+ * one post, so it attaches to the first post only, the same rule buildPlatforms uses for
+ * media_ids. Values already present on later posts are carried through untouched.
+ */
+export function applyXPostOptions(posts: Post[], options: XPostOptions): Post[] {
+  return posts.map((post, index) => ({
+    ...post,
+    ...(index === 0 && options.quote_post_url ? { quote_post_url: options.quote_post_url } : {}),
+    ...(options.paid_partnership ? { paid_partnership: true } : {}),
+    ...(options.made_with_ai ? { made_with_ai: true } : {}),
+  }));
+}
+
 export function sanitizePost(post: Post, platform: PlatformKey): Post {
   const clean: Post = { text: post.text };
   if (post.media_ids?.length) clean.media_ids = post.media_ids;

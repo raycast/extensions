@@ -1,14 +1,14 @@
-import { List, Icon, Color, Action } from "@raycast/api";
+import { Action, Color, Icon, List } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import { DiggerResult, FontAsset } from "../types";
-import { getFontDisplayName } from "../utils/fontUtils";
 import { Actions } from "../actions";
 import { ResourcesViewActions } from "../actions/ResourceViewActions";
-import { truncateText } from "../utils/formatters";
+import { DiggerResult, FontAsset } from "../types";
 import { getDeniedAccessMessage } from "../utils/botDetection";
-import { ResourcesListView } from "./ResourcesListView";
-import { ImagesGridView, getUniqueImageCount } from "./ImagesGridView";
+import { getFontDisplayName } from "../utils/fontUtils";
+import { truncateText } from "../utils/formatters";
 import { resolveUrl } from "../utils/urlUtils";
+import { getUniqueImageCount, ImagesGridView } from "./ImagesGridView";
+import { ResourcesListView } from "./ResourcesListView";
 
 interface ResourcesAssetsProps {
   data: DiggerResult | null;

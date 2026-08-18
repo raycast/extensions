@@ -2,8 +2,10 @@ import { Tool } from "@raycast/api";
 import { THREAD_PLATFORMS, type PlatformKey } from "../lib/constants";
 import { getDraft, updateDraft } from "../lib/api";
 import {
+  applyXPostOptions,
   buildPlatforms,
   draftResult,
+  preserveExistingSettings,
   resolveToolPlatforms,
   resolveToolSocialSetId,
   sanitizePost,
@@ -80,16 +82,11 @@ export default async function tool(input: Input) {
         };
       }
     } else {
-      payload.platforms = newPlatforms;
+      payload.platforms = preserveExistingSettings(newPlatforms, existing);
     }
 
     if (payload.platforms.x && "posts" in payload.platforms.x) {
-      payload.platforms.x.posts = payload.platforms.x.posts.map((post) => ({
-        ...post,
-        ...(input.quote_post_url ? { quote_post_url: input.quote_post_url } : {}),
-        ...(input.paid_partnership ? { paid_partnership: true } : {}),
-        ...(input.made_with_ai ? { made_with_ai: true } : {}),
-      }));
+      payload.platforms.x.posts = applyXPostOptions(payload.platforms.x.posts, input);
     } else if (input.quote_post_url || input.paid_partnership || input.made_with_ai) {
       throw new Error("Quote and disclosure options require X to be updated.");
     }
@@ -99,15 +96,13 @@ export default async function tool(input: Input) {
     const platforms: DraftCreatePlatforms = {
       x: {
         enabled: true,
-        posts: xPosts.map((post) => ({
-          ...sanitizePost(post, "x"),
-          ...(input.quote_post_url ? { quote_post_url: input.quote_post_url } : {}),
-          ...(input.paid_partnership ? { paid_partnership: true } : {}),
-          ...(input.made_with_ai ? { made_with_ai: true } : {}),
-        })),
+        posts: applyXPostOptions(
+          xPosts.map((post) => sanitizePost(post, "x")),
+          input,
+        ),
       },
     };
-    payload.platforms = platforms;
+    payload.platforms = preserveExistingSettings(platforms, existing);
   }
 
   if (input.title !== undefined) payload.draft_title = input.title;

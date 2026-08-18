@@ -97,31 +97,29 @@ export async function searchPages(query: string, language: string) {
     .then((r) => r.query.search);
 }
 
-export async function getPageMetadata(title: string, language: string) {
+function getWikiPage(title: string, language: string) {
   return wiki({
     apiUrl: `${getApiUrl(language)}w/api.php`,
     headers: getApiOptions(language)?.headers,
-  })
-    .page(title)
-    .then((page) => page.fullInfo());
+  }).page(title);
+}
+
+export async function getPageMetadata(title: string, language: string) {
+  return getWikiPage(title, language).then((page) => page.fullInfo());
 }
 
 export function getPageContent(title: string, language: string) {
-  return wiki({
-    apiUrl: `${getApiUrl(language)}w/api.php`,
-    headers: getApiOptions(language)?.headers,
-  })
-    .page(title)
+  return getWikiPage(title, language)
     .then((page) => page.content())
     .then((result) => result as unknown as WikiNode[]);
 }
 
 export function getPageLinks(title: string, language: string) {
-  return wiki({
-    apiUrl: `${getApiUrl(language)}w/api.php`,
-    headers: getApiOptions(language)?.headers,
-  })
-    .page(title)
+  return getWikiPage(title, language)
     .then((page) => page.links())
     .catch(() => [] as string[]);
+}
+
+export function getPageLangLinks(title: string, language: string) {
+  return getWikiPage(title, language).then((page) => page.langlinks());
 }

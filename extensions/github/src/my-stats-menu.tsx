@@ -1,4 +1,4 @@
-import { Color, getPreferenceValues, Icon, Image, open } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, Image, open, Keyboard } from "@raycast/api";
 import { formatDistanceToNowStrict } from "date-fns";
 
 import {
@@ -347,7 +347,7 @@ function MyStatsMenu() {
         <MenuBarItem
           title="Open Profile on GitHub"
           icon={Icon.Globe}
-          shortcut={{ modifiers: ["cmd"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.Open}
           onAction={() => open(profileUrl)}
         />
         <MenuBarItemConfigureCommand />

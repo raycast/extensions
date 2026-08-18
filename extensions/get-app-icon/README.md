@@ -20,7 +20,7 @@ The command lists all installed macOS applications (sorted alphabetically) in a 
 
 Icons are extracted using macOS `NSWorkspace`, which resolves the correct icon for every app — including those using Asset Catalogs — just like Finder does.
 
-Each app gets its own folder under the configured output path, with format-specific subdirectories (PNG, JPEG, ICNS).
+Each app gets its own folder under the configured output path, named with the app's version (e.g. `Bleep 3.4.0 App Icons`), with format-specific subdirectories (PNG, JPEG, ICNS). Because the version is part of the folder name, exporting again after an app updates keeps the older icons instead of replacing them.
 
 ![Get App Icon List View](media/get-app-icon-list.png)
 
@@ -40,6 +40,9 @@ Each app gets its own folder under the configured output path, with format-speci
 - **Export Icons** (`⌘E`): Exports the configured **Default Size** to the app's folder in the enabled formats.
 - **Export All Sizes** (`⌘⇧E`): Exports every size (16–1024) regardless of preferences, as a one-off.
 - **Export Icon Size…**: Opens a submenu to pick a single size, then exports just that one. ICNS is skipped here, since an `.icns` file always contains every size.
+- **Export Icons As…**: Opens a submenu to pick a single format (PNG, JPEG, or ICNS), then exports the **Default Size** in just that format — handy when your default is PNG but you occasionally want only the ICNS, without changing preferences.
+
+Exports overwrite files of the same name. Since folders are versioned, that only affects re-exporting the *same* version of an app — which is what you want when repairing a partial export.
 
 ### Copy
 
@@ -57,7 +60,7 @@ Each app gets its own folder under the configured output path, with format-speci
 
 - **Show in Finder**: Reveals the app in Finder.
 - **Show Info in Finder** (`⌘I`): Opens the Finder info window for the app.
-- **Show Export Folder in Finder** (`⌘F`): Opens the app's export folder in Finder, falling back to your output folder if you haven't exported this app yet.
+- **Show Export Folder in Finder** (`⌘F`): Opens the export folder for the installed version, falling back to an older unversioned export, then to your output folder if you haven't exported this app yet.
 
 ## Limitations
 

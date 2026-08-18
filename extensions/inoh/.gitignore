@@ -1,0 +1,16 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+
+# Raycast
+.raycast
+
+# Local backend overrides for development (never submitted to the store)
+assets/local-config.json
+
+# build
+build
+
+# macOS
+.DS_Store

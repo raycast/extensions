@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { Tab } from "../types";
 import { getTabUrl, getTitle, getUrlDomain } from "../utils";
@@ -7,6 +7,19 @@ import CopyMarkdownLinkAction from "./CopyMarkdownLinkAction";
 import CopyTitleAction from "./CopyTitleAction";
 import CopyUrlAction from "./CopyUrlAction";
 import OpenTabAction from "./OpenTabAction";
+
+const getTabFavicon = (url: string) => {
+  if (!url.startsWith("blob:")) {
+    return getFavicon(url);
+  }
+
+  try {
+    const origin = new URL(url).origin;
+    return origin === "null" ? Icon.Link : getFavicon(origin);
+  } catch {
+    return Icon.Link;
+  }
+};
 
 const Actions = (props: { tab: Tab; refresh: () => void }) => (
   <ActionPanel>
@@ -36,7 +49,7 @@ export default function TabListItem(props: { tab: Tab; refresh: () => void }) {
   return (
     <List.Item
       title={getTitle(props.tab)}
-      icon={getFavicon(props.tab.url)}
+      icon={getTabFavicon(props.tab.url)}
       actions={<Actions tab={props.tab} refresh={props.refresh} />}
       accessories={[
         {

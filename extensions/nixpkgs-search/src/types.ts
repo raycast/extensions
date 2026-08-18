@@ -9,6 +9,7 @@ export interface SearchResult {
   outputs: string[];
   defaultOutput: string | null;
   platforms: string[];
+  system: string | null;
   licenses: { name: string; url: string | null }[];
 }
 
@@ -26,6 +27,7 @@ export interface ElasticsearchResponse {
         package_homepage: string[];
         package_pversion: string;
         package_platforms: string[];
+        package_system?: string;
         package_position: string;
         package_license: { fullName: string; url: string | null }[];
       };

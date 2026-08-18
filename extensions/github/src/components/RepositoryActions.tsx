@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, getPreferenceValues, Icon, List, showToast, Toast, Keyboard } from "@raycast/api";
 import { getFavicon, MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 
@@ -12,6 +12,7 @@ import DownloadRepositoryForm from "./DownloadRepositoryForm";
 import { RepositoryDiscussionList } from "./RepositoryDiscussions";
 import { RepositoryIssueList } from "./RepositoryIssues";
 import { RepositoryPullRequestList } from "./RepositoryPullRequest";
+import RepositoryReadme from "./RepositoryReadme";
 import RepositoryReleases from "./RepositoryReleases";
 import { SortAction, SortActionProps, SortTypesDataProps } from "./SortAction";
 
@@ -31,6 +32,8 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
 }: RepositoryActionProps<T> & SortActionProps & SortTypesDataProps) {
   const { github } = getGitHubClient();
   const { baseClonePath, repositoryCloneProtocol, application } = getPreferenceValues<Preferences.SearchRepositories>();
+  const { vscodeBuild } = getPreferenceValues<Preferences>();
+  const editorScheme = vscodeBuild || "vscode";
 
   const updatedAt = new Date(repository.updatedAt);
 
@@ -113,6 +116,7 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
               icon={ide.icon || getFavicon(ide.baseUrl)}
               key={ide.title}
               url={ide.baseUrl + repository.nameWithOwner}
+              shortcut={ide.shortcut}
               onOpen={() => onVisit(repository)}
             />
           ))}
@@ -121,28 +125,28 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
         {baseClonePath && application && (
           <Action
             icon={Icon.Terminal}
-            title="Clone and Open"
+            title="Clone and Open (Default Path)"
             onAction={() => cloneAndOpen(repository)}
-            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
           />
         )}
         <Action.Push
           icon={Icon.Terminal}
-          title="Clone with Options"
+          title="Clone with Options (Choose Path)"
           target={<CloneRepositoryForm repository={repository} />}
           shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "c" }}
         />
         <Action.Push
           icon={Icon.Download}
-          title="Download with Options"
+          title="Download as ZIP"
           target={<DownloadRepositoryForm repository={repository} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
         />
         <Action.OpenInBrowser
           icon={{ source: "vscode.svg", tintColor: Color.PrimaryText }}
           title="Clone in VS Code"
-          url={`vscode://vscode.git/clone?url=${repository.url}`}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          url={`${editorScheme}://vscode.git/clone?url=${repository.url}`}
+          shortcut={Keyboard.Shortcut.Common.Copy}
         />
 
         {repository.viewerHasStarred ? (
@@ -158,6 +162,13 @@ export default function RepositoryActions<T = ExtendedRepositoryFieldsFragment[]
       </ActionPanel.Section>
 
       <ActionPanel.Section title="Open in Raycast">
+        <Action.Push
+          title="Show Readme"
+          icon={Icon.Book}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+          target={<RepositoryReadme repository={repository} />}
+          onPush={() => onVisit(repository)}
+        />
         <Action.Push
           title="Show Issues"
           icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}

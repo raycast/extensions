@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, Keyboard } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { usePromise } from "@raycast/utils";
 import { Commit, CommitFileChange } from "../../types";
@@ -223,7 +223,7 @@ function RefreshHistoryAction({ revalidate }: { revalidate: () => void }) {
       title="Refresh"
       onAction={revalidate}
       icon={Icon.ArrowClockwise}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
+      shortcut={Keyboard.Shortcut.Common.Refresh}
     />
   );
 }

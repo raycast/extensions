@@ -203,6 +203,7 @@ describe("probeEngineAvailability", () => {
     }));
     expect(await probeEngineAvailability(kesha, { execFile })).toEqual({
       ok: false,
+      reason: "missing",
       hint: "Run `kesha install` to download the engine and models.",
     });
   });
@@ -224,6 +225,7 @@ describe("probeEngineAvailability", () => {
     });
     expect(await probeEngineAvailability(kesha, { execFile })).toEqual({
       ok: false,
+      reason: "missing",
       hint: "Run `kesha install` to download the engine and models.",
     });
   });

@@ -123,3 +123,26 @@ export function getRootResourceUrl(resourcePath: string, baseUrl: string): strin
     return undefined;
   }
 }
+
+/**
+ * Strips the query string and fragment from a URL for logging.
+ *
+ * Use this for any URL going to `logger.warn`/`.error`, which are NOT gated on
+ * the Debug Logging preference and therefore emit for every user. The logger's
+ * redactor only scrubs credential-shaped keys (`token=`, `apiKey=`, userinfo);
+ * it leaves arbitrary query values alone, so `?email=someone@example.com`
+ * reaches the console verbatim. Digger analyses whatever URL the user hands it,
+ * and a query string is the most likely place for something personal to hide.
+ *
+ * Origin and path are kept: they are what makes a warning actionable, and they
+ * are already visible in the UI. Falls back to the origin alone, then to a
+ * constant, so logging can never throw on a malformed URL.
+ */
+export function redactUrlForLog(url: string): string {
+  try {
+    const urlObj = new URL(url);
+    return `${urlObj.origin}${urlObj.pathname}`;
+  } catch {
+    return "<unparseable url>";
+  }
+}

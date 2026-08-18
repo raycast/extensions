@@ -21,7 +21,8 @@
     "islam_hassan",
     "shashank_rm",
     "heyflorentin",
-    "ridemountainpig"
+    "ridemountainpig",
+    "12ian34"
   ],
   "platforms": [
     "macOS",
@@ -791,6 +792,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test tests/hyperlinks.test.ts"
   }
 }

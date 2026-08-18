@@ -346,6 +346,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "webhound",
+    title: "Webhound",
+    description:
+      "Run private, budgeted reports and datasets with Hound, Webhound's research harness built with DeepSeek V4 Pro and GPT-5.4. The user's dollar budget controls research effort, and each connection authenticates to that user's own Webhound account through OAuth.",
+    icon: "https://www.webhound.ai/favicon.ico",
+    homepage: "https://github.com/WebhoundAI/webhound-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://api.webhound.ai/api/v2/mcp"],
+    },
+  },
+  {
     name: "sanity",
     title: "Sanity",
     description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
@@ -773,6 +785,65 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.agentcard.sh/mcp"],
+    },
+  },
+  {
+    name: "usemycontext",
+    title: "UseMyContext",
+    description:
+      "The personal context layer for AI: one user-owned profile plus files, read by any MCP client so you never re-introduce yourself. Tools for profile, file search and reads, cited answers from your documents, and exact table queries. Connects to the remote UseMyContext server over OAuth 2.1.",
+    icon: "usemycontext.svg",
+    homepage: "https://usemycontext.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.usemycontext.ai/mcp"],
+    },
+  },
+  {
+    name: "jobyap",
+    title: "JobYap",
+    description:
+      "Search job postings aggregated from companies' official careers sites — salaries, locations, and a community discussion thread on every job. Remote Streamable HTTP MCP server; no auth required.",
+    icon: "https://raw.githubusercontent.com/jobyap/agent-skills/main/assets/logo.png",
+    homepage: "https://jobyap.com/agents",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.jobyap.com/mcp"],
+    },
+  },
+  {
+    name: "tendem",
+    title: "Tendem",
+    description:
+      "Delegate tasks to vetted human experts - research, competitive analysis, fact-checking, copywriting, editing, design review, presentation polish, data cleaning and list building. Submit a task in natural language; Tendem's orchestrator scopes it and quotes a transparent price, and after explicit approval a vetted human expert executes it and returns verified results as markdown plus files. Remote Streamable HTTP MCP server with OAuth 2.0 sign-in on first use.",
+    icon: "https://framerusercontent.com/images/EGNlwavPB2tW8etz63vecfpJu0.png",
+    homepage: "https://github.com/Toloka/tendem-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.tendem.ai/mcp?utm_hash=66fdb1535f"],
+    },
+  },
+  {
+    name: "structured",
+    title: "Structured",
+    description:
+      "Structured is an all-in-one day planner that combines tasks and to-dos in a visual timeline. Its MCP server lets AI assistants view schedules and inbox tasks, and create, update, complete, delete, and manage recurring tasks. Remote Streamable HTTP server with Structured Cloud OAuth sign-in; some features require Structured Pro.",
+    icon: "https://web.structured.app/logo512.png",
+    homepage: "https://mcp.structured.app",
+    configuration: {
+      command: "npx",
+      args: [
+        "-y",
+        "mcp-remote",
+        "https://mcp.structured.app/mcp",
+        "36933",
+        "--transport",
+        "http-only",
+        "--static-oauth-client-info",
+        '{"client_id":"4b33fb93-0eac-489f-974b-1a9fa108f4e9"}',
+        "--static-oauth-client-metadata",
+        '{"scope":"email"}',
+      ],
     },
   },
 ];

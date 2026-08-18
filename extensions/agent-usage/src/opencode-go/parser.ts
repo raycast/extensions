@@ -1,4 +1,4 @@
-import type { OpencodegoUsage, OpencodegoError } from "./types";
+import type { OpencodegoUsage, OpencodegoError } from "./types.ts";
 
 interface SolidHydrationData {
   billing?: {

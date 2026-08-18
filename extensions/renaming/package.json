@@ -45,6 +45,12 @@
       "title": "Advanced Batch Rename",
       "description": "Rename files using a powerful rule-based engine.",
       "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Rename History",
+      "description": "View and undo recent rename operations.",
+      "mode": "view"
     }
   ],
   "dependencies": {

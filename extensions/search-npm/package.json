@@ -151,11 +151,29 @@
       "value": "30"
     },
     {
+      "name": "searchResultsProvider",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "npmjs.com",
+          "value": "npmjs"
+        },
+        {
+          "title": "npmx.dev",
+          "value": "npmx"
+        }
+      ],
+      "title": "Search Results Provider",
+      "description": "The website used for external package search results",
+      "required": false,
+      "default": "npmjs"
+    },
+    {
       "name": "showLinkToSearchResultsInListView",
       "type": "checkbox",
       "label": "Show link in list view",
-      "title": "Show link to npmjs.com results in list view",
-      "description": "Show link to npmjs.com search results in list view",
+      "title": "Show external search results in list view",
+      "description": "Show a link to the selected search results provider in list view",
       "required": false,
       "value": true,
       "default": true

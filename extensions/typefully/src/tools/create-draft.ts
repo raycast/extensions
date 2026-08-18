@@ -1,6 +1,12 @@
 import { Tool } from "@raycast/api";
 import { createDraft } from "../lib/api";
-import { buildPlatforms, draftResult, resolveToolPlatforms, resolveToolSocialSetId } from "../lib/tool-helpers";
+import {
+  applyXPostOptions,
+  buildPlatforms,
+  draftResult,
+  resolveToolPlatforms,
+  resolveToolSocialSetId,
+} from "../lib/tool-helpers";
 
 type Input = {
   /** Exact post text. Use --- on its own line to split a thread. */
@@ -23,7 +29,7 @@ type Input = {
   share?: boolean;
   /** X post URL to reply to. X only. */
   reply_to_url?: string;
-  /** X post URL to quote. X only. */
+  /** X post URL to quote from the first post. X only. */
   quote_post_url?: string;
   /** X community ID. X only. */
   community_id?: string;
@@ -54,12 +60,7 @@ export default async function tool(input: Input) {
 
   const platforms = buildPlatforms(input.content, platformKeys, input.media_ids);
   if (platforms.x && "posts" in platforms.x) {
-    platforms.x.posts = platforms.x.posts.map((post) => ({
-      ...post,
-      ...(input.quote_post_url ? { quote_post_url: input.quote_post_url } : {}),
-      ...(input.paid_partnership ? { paid_partnership: true } : {}),
-      ...(input.made_with_ai ? { made_with_ai: true } : {}),
-    }));
+    platforms.x.posts = applyXPostOptions(platforms.x.posts, input);
     if (input.reply_to_url || input.community_id) {
       platforms.x.settings = {
         ...(input.reply_to_url ? { reply_to_url: input.reply_to_url } : {}),

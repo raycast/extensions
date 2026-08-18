@@ -1,5 +1,12 @@
 # Unsplash Changelog
 
+## [Fix Windows OAuth] - 2026-08-06
+
+- Fixed OAuth token exchange failing with "Bad Request" on Windows by pinning a consistent redirect URI, setting explicit `Content-Type` on the token request, and trimming API keys
+- Surfaced Unsplash's real error message when authentication fails instead of a generic "Bad Request"
+- Allowed public API calls (e.g. Set Random Wallpaper) to use Client-ID auth so wallpaper works without completing OAuth
+- Fixed Windows file path handling for wallpaper, clipboard, and downloads (`path.join`, curl `-L`)
+
 ## [Unsplash API ToS Compliance] - 2026-07-08
 
 - Call `photo.links.download_location` endpoint on all download-like actions (copy to clipboard, save image, set wallpaper) to properly track downloads with Unsplash
