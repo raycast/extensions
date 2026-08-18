@@ -167,6 +167,7 @@ function withLock(fn) {
       if (err.code !== "EEXIST") throw err;
       try {
         if (Date.now() - fs.statSync(LOCK).mtimeMs > LOCK_STALE_MS) {
+          const lockStat = fs.statSync(LOCK);
           const token = fs.readFileSync(LOCK, "utf8");
           const owner = lockOwner(token);
           let ownerAlive = false;
@@ -189,11 +190,13 @@ function withLock(fn) {
             }
           }
           if (!ownerAlive) {
-            const stale = `${LOCK}.${process.pid}.${Math.random().toString(36).slice(2)}.stale`;
             try {
-              if (fs.readFileSync(LOCK, "utf8") === token) {
-                fs.renameSync(LOCK, stale);
-                fs.unlinkSync(stale);
+              const currentStat = fs.statSync(LOCK);
+              if (
+                currentStat.mtimeMs === lockStat.mtimeMs &&
+                fs.readFileSync(LOCK, "utf8") === token
+              ) {
+                fs.unlinkSync(LOCK);
               }
             } catch {
               // lock vanished or a successor acquired it

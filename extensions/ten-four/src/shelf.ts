@@ -176,6 +176,7 @@ function withLock<T>(fn: () => T): T {
       if (code !== "EEXIST") throw err;
       try {
         if (Date.now() - statSync(LOCK_FILE).mtimeMs > LOCK_STALE_MS) {
+          const lockStat = statSync(LOCK_FILE);
           const token = readFileSync(LOCK_FILE, "utf8");
           const owner = lockOwner(token);
           let ownerAlive = false;
@@ -198,11 +199,13 @@ function withLock<T>(fn: () => T): T {
             }
           }
           if (!ownerAlive) {
-            const stale = `${LOCK_FILE}.${process.pid}.${Math.random().toString(36).slice(2)}.stale`;
             try {
-              if (readFileSync(LOCK_FILE, "utf8") === token) {
-                renameSync(LOCK_FILE, stale);
-                unlinkSync(stale);
+              const currentStat = statSync(LOCK_FILE);
+              if (
+                currentStat.mtimeMs === lockStat.mtimeMs &&
+                readFileSync(LOCK_FILE, "utf8") === token
+              ) {
+                unlinkSync(LOCK_FILE);
               }
             } catch {
               // lock vanished or a successor acquired it
