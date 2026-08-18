@@ -62,7 +62,7 @@ The RSS fallback is checked last and covers pages whose APIs and HTML are blocke
 
 The AWS adapter reads the Health Dashboard's public `currentevents` endpoint (UTF-16 JSON) plus the 12-month `historyevents.json` S3 export. Components cover service–region pairs that have reported events; services with no events in the window don't appear.
 
-The OutageDeck adapter accepts any `outagedeck.com/providers/{slug}` URL and reads the keyless public API. It provides a consistent status, service breakdown, and active-incident shape for more than 170 cloud and SaaS providers, including sources that do not expose a Statuspage-compatible endpoint.
+The OutageDeck adapter accepts any `outagedeck.com/providers/{slug}` URL and reads the keyless public API. It provides a consistent vendor-published status, service breakdown, and active-incident shape for cloud and SaaS providers, based on their official status feeds.
 
 The Salesforce Trust adapter uses the public `api.status.salesforce.com/v1` API and covers any product page on [status.salesforce.com](https://status.salesforce.com) (Heroku, Tableau, Mulesoft, Slack, …). Add `https://status.salesforce.com/products/{Product}` to monitor one product; the bare domain maps to the core Salesforce Services product. `status.heroku.com` is deprecated in favor of Salesforce Trust, so it maps to the Heroku product automatically.
 
