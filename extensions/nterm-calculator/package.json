@@ -1,19 +1,30 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "nterm-calculator",
-  "title": "N-Term Cijfercalculator",
-  "description": "Bereken examencijfers via de N-term normering (CvTE-methode)",
+  "title": "N-Term Grade Calculator",
+  "description": "Calculate Dutch exam grades with the official N-term (CvTE) formula.",
   "icon": "extension-icon.png",
   "author": "maarten_boelens",
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "n-term",
+    "exam",
+    "grade",
+    "cvte",
+    "dutch"
+  ],
   "commands": [
     {
       "name": "nterm-calculator",
-      "title": "N-Term Cijfercalculator",
-      "description": "Genereer een punten-cijfer tabel op basis van de N-term",
+      "title": "N-Term Grade Calculator",
+      "description": "Calculate Dutch exam grades with the official N-term (CvTE) formula.",
       "mode": "view"
     }
   ],
@@ -22,7 +33,6 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.2.0",
-    "@raycast/utils": "^1.19.1",
     "@types/node": "^22.19.17",
     "@types/react": "^19.2.17",
     "eslint": "^9.39.5",

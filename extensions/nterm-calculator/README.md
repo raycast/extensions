@@ -1,10 +1,10 @@
-# N-Term Cijfercalculator
+# N-Term Grade Calculator
 
-Bereken examencijfers volgens de officiële N-term normering (zoals gebruikt door het CvTE), inclusief de hoofdrelatie én de grensrelaties uit [nl.wikipedia.org/wiki/N-term](https://nl.wikipedia.org/wiki/N-term).
+Calculate Dutch exam grades using the official N-term normalization (as used by CvTE), including the main formula and boundary relations from [nl.wikipedia.org/wiki/N-term](https://nl.wikipedia.org/wiki/N-term).
 
-## Gebruik
+## Usage
 
-1. Open het commando **N-Term Cijfercalculator**.
-2. Vul het maximum aantal punten van de toets in.
-3. Kies of je een N-term wilt kiezen (→ tabel met alle punten en cijfers) of behaalde punten wilt invoeren (→ tabel met alle N-termen en cijfers).
-4. In de tabel kun je met `⇧⌘↑` / `⇧⌘↓` de N-term of de behaalde punten aanpassen, en via de actie "Wijzig Maximum Punten" het maximum wijzigen — de tabel werkt live bij.
+1. Open the **N-Term Grade Calculator** command.
+2. Enter the maximum number of points for the exam.
+3. Choose whether to pick an N-term (→ table with all points and grades) or enter points scored (→ table with all N-terms and grades).
+4. In the table, use `⇧⌘↑` / `⇧⌘↓` to adjust the N-term or points scored, and use the **Change Maximum Points** action to update the maximum — the table updates live.

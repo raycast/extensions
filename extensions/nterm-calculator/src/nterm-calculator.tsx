@@ -28,6 +28,7 @@ import {
   Toast,
   Color,
   Icon,
+  Keyboard,
 } from "@raycast/api";
 import { useState } from "react";
 
@@ -62,7 +63,7 @@ function gradeColor(cijfer: number): Color {
 }
 
 function fmt(n: number): string {
-  return n.toFixed(1).replace(".", ",");
+  return n.toFixed(1);
 }
 
 // Strikt: wijst "75.5" en "75abc" af in plaats van ze stilzwijgend af te kappen tot 75.
@@ -79,49 +80,39 @@ const N_TERMEN = Array.from({ length: 26 }, (_, i) => Math.round(i * 10) / 100);
 
 // ─── Maximum punten wijzigen (herbruikbaar formulier) ─────────────────────────
 
-function WijzigMaxPuntenForm({
-  huidigeMax,
-  onWijzig,
-}: {
-  huidigeMax: number;
-  onWijzig: (nieuw: number) => void;
-}) {
+function WijzigMaxPuntenForm({ huidigeMax, onWijzig }: { huidigeMax: number; onWijzig: (nieuw: number) => void }) {
   const { pop } = useNavigation();
   const [error, setError] = useState<string | undefined>();
 
   function handleSubmit(values: { maxPunten: string }) {
     const nieuw = parseGeheelGetal(values.maxPunten);
     if (nieuw === null || nieuw <= 0 || nieuw > 500) {
-      setError("Voer een geheel getal in tussen 1 en 500");
+      setError("Enter a whole number between 1 and 500");
       return;
     }
     onWijzig(nieuw);
     showToast({
       style: Toast.Style.Success,
-      title: `Maximum punten: ${nieuw}`,
+      title: `Maximum Points: ${nieuw}`,
     });
     pop();
   }
 
   return (
     <Form
-      navigationTitle="Maximum punten wijzigen"
+      navigationTitle="Change Maximum Points"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Wijzig Maximum"
-            icon={Icon.Pencil}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Change Maximum" icon={Icon.Pencil} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="maxPunten"
-        title="Maximum punten"
-        placeholder="bijv. 75"
+        title="Maximum Points"
+        placeholder="e.g. 75"
         defaultValue={String(huidigeMax)}
-        info="Het maximaal te behalen aantal scorepunten op de toets"
+        info="The maximum achievable score points on the exam"
         error={error}
         onChange={() => setError(undefined)}
       />
@@ -131,13 +122,7 @@ function WijzigMaxPuntenForm({
 
 // ─── Modus 1: punten → cijfer (voor één N-term) ───────────────────────────────
 
-function TabelNterm({
-  maxPunten: startMaxPunten,
-  nTerm: startNTerm,
-}: {
-  maxPunten: number;
-  nTerm: number;
-}) {
+function TabelNterm({ maxPunten: startMaxPunten, nTerm: startNTerm }: { maxPunten: number; nTerm: number }) {
   const [maxPunten, setMaxPunten] = useState(startMaxPunten);
   const [nTerm, setNTerm] = useState(startNTerm);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -167,112 +152,54 @@ function TabelNterm({
   }));
 
   async function kopieerCSV() {
-    const csv =
-      "Punten,Cijfer\n" +
-      rijen.map((r) => `${r.punten},${fmt(r.cijfer)}`).join("\n");
+    const csv = "Points,Grade\n" + rijen.map((r) => `${r.punten},${fmt(r.cijfer)}`).join("\n");
     await Clipboard.copy(csv);
-    await showHUD("Tabel gekopieerd als CSV");
+    await showHUD("Table copied as CSV");
   }
 
   return (
     <List
-      navigationTitle={`Punten → Cijfer  |  N = ${fmt(nTerm)}  |  max = ${maxPunten} pt`}
-      searchBarPlaceholder="Typ een aantal punten om ernaartoe te springen…"
+      navigationTitle={`Points → Grade  |  N = ${fmt(nTerm)}  |  max = ${maxPunten} pt`}
+      searchBarPlaceholder="Type a number of points to jump to…"
       filtering={false}
       onSearchTextChange={springNaarPunten}
       selectedItemId={selectedId ?? undefined}
       onSelectionChange={setSelectedId}
     >
-      <List.Section title="Sneltoetsen">
-        <List.Item
-          id="nterm-hint"
-          icon={Icon.Keyboard}
-          title="Gebruik ⇧⌘↑ / ⇧⌘↓ om de N-term te wijzigen"
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Wijzig Maximum Punten"
-                icon={Icon.Pencil}
-                target={
-                  <WijzigMaxPuntenForm
-                    huidigeMax={maxPunten}
-                    onWijzig={setMaxPunten}
-                  />
-                }
-              />
-              <Action
-                title="Verhoog N-Term"
-                icon={Icon.ArrowUpCircleFilled}
-                // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.MoveUp/MoveDown broke this shortcut in testing
-                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-                onAction={verhoogNTerm}
-              />
-              <Action
-                title="Verlaag N-Term"
-                icon={Icon.ArrowDownCircleFilled}
-                // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.MoveUp/MoveDown broke this shortcut in testing
-                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
-                onAction={verlaagNTerm}
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-      <List.Section
-        title={`N-term: ${fmt(nTerm)}  ·  Maximum: ${maxPunten} punten`}
-      >
+      <List.Section title={`N-Term: ${fmt(nTerm)}  ·  Maximum: ${maxPunten} points`}>
         {rijen.map(({ punten, cijfer }) => {
           return (
             <List.Item
               key={punten}
               id={String(punten)}
               icon={{ source: Icon.Circle, tintColor: gradeColor(cijfer) }}
-              title={`${punten} punt${punten !== 1 ? "en" : ""}`}
-              accessories={[
-                { tag: { value: fmt(cijfer), color: gradeColor(cijfer) } },
-              ]}
+              title={`${punten} point${punten !== 1 ? "s" : ""}`}
+              accessories={[{ tag: { value: fmt(cijfer), color: gradeColor(cijfer) } }]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action
-                      title="Kopieer Tabel Als CSV"
-                      icon={Icon.CopyClipboard}
-                      onAction={kopieerCSV}
-                    />
-                    <Action.CopyToClipboard
-                      title="Kopieer Dit Cijfer"
-                      content={fmt(cijfer)}
-                    />
+                    <Action title="Copy Table as CSV" icon={Icon.CopyClipboard} onAction={kopieerCSV} />
+                    <Action.CopyToClipboard title="Copy This Grade" content={fmt(cijfer)} />
                   </ActionPanel.Section>
-                  <ActionPanel.Section title="N-term aanpassen">
+                  <ActionPanel.Section title="Adjust N-Term">
                     <Action
-                      title="Verhoog N-Term"
+                      title="Increase N-Term"
                       icon={Icon.ArrowUpCircleFilled}
-                      // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.MoveUp/MoveDown broke this shortcut in testing
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                      shortcut={Keyboard.Shortcut.Common.MoveUp}
                       onAction={verhoogNTerm}
                     />
                     <Action
-                      title="Verlaag N-Term"
+                      title="Decrease N-Term"
                       icon={Icon.ArrowDownCircleFilled}
-                      // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.MoveUp/MoveDown broke this shortcut in testing
-                      shortcut={{
-                        modifiers: ["cmd", "shift"],
-                        key: "arrowDown",
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.MoveDown}
                       onAction={verlaagNTerm}
                     />
                   </ActionPanel.Section>
-                  <ActionPanel.Section title="Maximum aanpassen">
+                  <ActionPanel.Section title="Adjust Maximum">
                     <Action.Push
-                      title="Wijzig Maximum Punten"
+                      title="Change Maximum Points"
                       icon={Icon.Pencil}
-                      target={
-                        <WijzigMaxPuntenForm
-                          huidigeMax={maxPunten}
-                          onWijzig={setMaxPunten}
-                        />
-                      }
+                      target={<WijzigMaxPuntenForm huidigeMax={maxPunten} onWijzig={setMaxPunten} />}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
@@ -307,21 +234,19 @@ function TabelPunten({
     if (!tekst.trim()) return;
     const getal = parseFloat(tekst.replace(",", "."));
     if (isNaN(getal)) return;
-    const doel = N_TERMEN.reduce((dichtsbij, n) =>
-      Math.abs(n - getal) < Math.abs(dichtsbij - getal) ? n : dichtsbij,
-    );
+    const doel = N_TERMEN.reduce((dichtsbij, n) => (Math.abs(n - getal) < Math.abs(dichtsbij - getal) ? n : dichtsbij));
     setSelectedId(fmt(doel));
   }
 
   function verhoogPunten() {
     const nieuw = Math.min(maxPunten, behaaldePunten + 1);
     setBehaaldePunten(nieuw);
-    showToast({ style: Toast.Style.Success, title: `Punten: ${nieuw}` });
+    showToast({ style: Toast.Style.Success, title: `Points: ${nieuw}` });
   }
   function verlaagPunten() {
     const nieuw = Math.max(0, behaaldePunten - 1);
     setBehaaldePunten(nieuw);
-    showToast({ style: Toast.Style.Success, title: `Punten: ${nieuw}` });
+    showToast({ style: Toast.Style.Success, title: `Points: ${nieuw}` });
   }
 
   const rijen = N_TERMEN.map((n) => ({
@@ -330,62 +255,23 @@ function TabelPunten({
   }));
 
   async function kopieerCSV() {
-    const csv =
-      "N-term,Cijfer\n" +
-      rijen.map((r) => `${fmt(r.nTerm)},${fmt(r.cijfer)}`).join("\n");
+    const csv = "N-Term,Grade\n" + rijen.map((r) => `${fmt(r.nTerm)},${fmt(r.cijfer)}`).join("\n");
     await Clipboard.copy(csv);
-    await showHUD("Tabel gekopieerd als CSV");
+    await showHUD("Table copied as CSV");
   }
 
   const pct = Math.round((behaaldePunten / maxPunten) * 100);
 
   return (
     <List
-      navigationTitle={`N-term → Cijfer  |  S = ${behaaldePunten} / ${maxPunten}  (${pct}%)`}
-      searchBarPlaceholder="Typ een N-term om ernaartoe te springen…"
+      navigationTitle={`N-Term → Grade  |  S = ${behaaldePunten} / ${maxPunten}  (${pct}%)`}
+      searchBarPlaceholder="Type an N-term to jump to…"
       filtering={false}
       onSearchTextChange={springNaarNTerm}
       selectedItemId={selectedId ?? undefined}
       onSelectionChange={setSelectedId}
     >
-      <List.Section title="Sneltoetsen">
-        <List.Item
-          id="punten-hint"
-          icon={Icon.Keyboard}
-          title="Gebruik ⇧⌘↑ / ⇧⌘↓ om de behaalde punten te wijzigen"
-          actions={
-            <ActionPanel>
-              <Action.Push
-                title="Wijzig Maximum Punten"
-                icon={Icon.Pencil}
-                target={
-                  <WijzigMaxPuntenForm
-                    huidigeMax={maxPunten}
-                    onWijzig={wijzigMaxPunten}
-                  />
-                }
-              />
-              <Action
-                title="Verhoog Punten"
-                icon={Icon.ArrowUpCircleFilled}
-                // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.MoveUp/MoveDown broke this shortcut in testing
-                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
-                onAction={verhoogPunten}
-              />
-              <Action
-                title="Verlaag Punten"
-                icon={Icon.ArrowDownCircleFilled}
-                // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.MoveUp/MoveDown broke this shortcut in testing
-                shortcut={{ modifiers: ["cmd", "shift"], key: "arrowDown" }}
-                onAction={verlaagPunten}
-              />
-            </ActionPanel>
-          }
-        />
-      </List.Section>
-      <List.Section
-        title={`Score: ${behaaldePunten} van ${maxPunten} punten  (${pct}%)`}
-      >
+      <List.Section title={`Score: ${behaaldePunten} of ${maxPunten} points  (${pct}%)`}>
         {rijen.map(({ nTerm, cijfer }) => {
           return (
             <List.Item
@@ -393,51 +279,32 @@ function TabelPunten({
               id={fmt(nTerm)}
               icon={{ source: Icon.Circle, tintColor: gradeColor(cijfer) }}
               title={`N = ${fmt(nTerm)}`}
-              accessories={[
-                { tag: { value: fmt(cijfer), color: gradeColor(cijfer) } },
-              ]}
+              accessories={[{ tag: { value: fmt(cijfer), color: gradeColor(cijfer) } }]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action
-                      title="Kopieer Tabel Als CSV"
-                      icon={Icon.CopyClipboard}
-                      onAction={kopieerCSV}
-                    />
-                    <Action.CopyToClipboard
-                      title="Kopieer Dit Cijfer"
-                      content={fmt(cijfer)}
-                    />
+                    <Action title="Copy Table as CSV" icon={Icon.CopyClipboard} onAction={kopieerCSV} />
+                    <Action.CopyToClipboard title="Copy This Grade" content={fmt(cijfer)} />
                   </ActionPanel.Section>
-                  <ActionPanel.Section title="Punten aanpassen">
+                  <ActionPanel.Section title="Adjust Points">
                     <Action
-                      title="Verhoog Punten"
+                      title="Increase Points"
                       icon={Icon.ArrowUpCircleFilled}
-                      // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.MoveUp/MoveDown broke this shortcut in testing
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}
+                      shortcut={Keyboard.Shortcut.Common.MoveUp}
                       onAction={verhoogPunten}
                     />
                     <Action
-                      title="Verlaag Punten"
+                      title="Decrease Points"
                       icon={Icon.ArrowDownCircleFilled}
-                      // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.MoveUp/MoveDown broke this shortcut in testing
-                      shortcut={{
-                        modifiers: ["cmd", "shift"],
-                        key: "arrowDown",
-                      }}
+                      shortcut={Keyboard.Shortcut.Common.MoveDown}
                       onAction={verlaagPunten}
                     />
                   </ActionPanel.Section>
-                  <ActionPanel.Section title="Maximum aanpassen">
+                  <ActionPanel.Section title="Adjust Maximum">
                     <Action.Push
-                      title="Wijzig Maximum Punten"
+                      title="Change Maximum Points"
                       icon={Icon.Pencil}
-                      target={
-                        <WijzigMaxPuntenForm
-                          huidigeMax={maxPunten}
-                          onWijzig={wijzigMaxPunten}
-                        />
-                      }
+                      target={<WijzigMaxPuntenForm huidigeMax={maxPunten} onWijzig={wijzigMaxPunten} />}
                     />
                   </ActionPanel.Section>
                 </ActionPanel>
@@ -457,22 +324,15 @@ export default function Command() {
   const [maxPuntenError, setMaxPuntenError] = useState<string | undefined>();
   const [puntenError, setPuntenError] = useState<string | undefined>();
 
-  const nTermOpties = N_TERMEN.map((n) => (
-    <Form.Dropdown.Item key={fmt(n)} value={String(n)} title={fmt(n)} />
-  ));
+  const nTermOpties = N_TERMEN.map((n) => <Form.Dropdown.Item key={fmt(n)} value={String(n)} title={fmt(n)} />);
 
   // Beide velden zijn altijd gerenderd om navigatieproblemen met conditionele
   // rendering in Raycast te vermijden. handleSubmit leest values.modus om te
   // bepalen welk veld relevant is.
-  function handleSubmit(values: {
-    maxPunten: string;
-    modus: string;
-    nTerm: string;
-    behaaldePunten: string;
-  }) {
+  function handleSubmit(values: { maxPunten: string; modus: string; nTerm: string; behaaldePunten: string }) {
     const max = parseGeheelGetal(values.maxPunten);
     if (max === null || max <= 0 || max > 500) {
-      setMaxPuntenError("Voer een geheel getal in tussen 1 en 500");
+      setMaxPuntenError("Enter a whole number between 1 and 500");
       return;
     }
 
@@ -482,7 +342,7 @@ export default function Command() {
     } else {
       const p = parseGeheelGetal(values.behaaldePunten);
       if (p === null || p < 0 || p > max) {
-        setPuntenError(`Voer een geheel getal in tussen 0 en ${max}`);
+        setPuntenError(`Enter a whole number between 0 and ${max}`);
         return;
       }
       setPuntenError(undefined);
@@ -492,45 +352,35 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle="N-term Cijfercalculator"
+      navigationTitle="N-Term Grade Calculator"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Genereer Tabel"
-            icon={Icon.List}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title="Generate Table" icon={Icon.List} onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="maxPunten"
-        title="Maximum punten"
-        placeholder="bijv. 75"
+        title="Maximum Points"
+        placeholder="e.g. 75"
         defaultValue="100"
-        info="Het maximaal te behalen aantal scorepunten op de toets"
+        info="The maximum achievable score points on the exam"
         error={maxPuntenError}
         onChange={() => setMaxPuntenError(undefined)}
       />
 
       <Form.Dropdown
         id="modus"
-        title="Tabeltype"
+        title="Table Type"
         defaultValue="nterm"
-        info="Kies wat je wilt invullen"
+        info="Choose what to enter"
         onChange={() => {
           setMaxPuntenError(undefined);
           setPuntenError(undefined);
         }}
       >
-        <Form.Dropdown.Item
-          value="nterm"
-          title="Kies een N-term → tabel met alle punten en cijfers"
-        />
-        <Form.Dropdown.Item
-          value="punten"
-          title="Voer behaalde punten in → tabel met alle N-termen en cijfers"
-        />
+        <Form.Dropdown.Item value="nterm" title="Choose an N-Term → table with all points and grades" />
+        <Form.Dropdown.Item value="punten" title="Enter points scored → table with all N-terms and grades" />
       </Form.Dropdown>
 
       <Form.Separator />
@@ -538,9 +388,9 @@ export default function Command() {
       {/* N-term: alleen relevant bij modus "nterm" */}
       <Form.Dropdown
         id="nTerm"
-        title="N-term"
+        title="N-Term"
         defaultValue="1"
-        info="Gebruikt bij tabeltype 'Kies een N-term' · < 1 = strenger, 1 = standaard, > 1 = gunstiger"
+        info="Used with table type 'Choose an N-Term' · < 1 = stricter, 1 = standard, > 1 = more lenient"
       >
         {nTermOpties}
       </Form.Dropdown>
@@ -548,10 +398,10 @@ export default function Command() {
       {/* Behaalde punten: alleen relevant bij modus "punten" */}
       <Form.TextField
         id="behaaldePunten"
-        title="Behaalde punten"
-        placeholder="bijv. 35"
+        title="Points Scored"
+        placeholder="e.g. 35"
         defaultValue="50"
-        info="Gebruikt bij tabeltype 'Voer behaalde punten in'"
+        info="Used with table type 'Enter points scored'"
         error={puntenError}
         onChange={() => setPuntenError(undefined)}
       />
