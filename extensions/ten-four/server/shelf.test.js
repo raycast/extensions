@@ -333,11 +333,10 @@ test("a stale pid-only lock is reclaimed when the PID is reused", async () => {
       fingerprint: true,
       pidOnly: true,
       startedAt: null,
-      createdAt: Date.now() - 60_000,
       token: "stale-pid-only",
     }),
   );
-  fs.utimesSync(lock, new Date(0), new Date(Date.now() - 3000));
+  fs.utimesSync(lock, new Date(0), new Date(Date.now() - 31_000));
 
   const shelfPath = require.resolve("./shelf.js");
   const child = spawn(

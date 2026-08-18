@@ -14,6 +14,7 @@ import {
   closeSync,
   unlinkSync,
   statSync,
+  utimesSync,
 } from "fs";
 
 export type Item = {
@@ -52,7 +53,7 @@ const LOCAL_FILE =
   process.env.TENFOUR_FILE || join(homedir(), ".ten-four.json");
 const LOCK_FILE = `${LOCAL_FILE}.lock`;
 const LOCK_STALE_MS = 2000;
-const PID_ONLY_MAX_HOLD_MS = 30000;
+const PID_ONLY_STALE_MS = 30000;
 const WATCH_MS = 400;
 const POLL_MS = 1000;
 
@@ -99,7 +100,6 @@ function lockToken(): string {
     // Do not reclaim a live lock if `ps` is temporarily unavailable.
     pidOnly: startedAt === null,
     startedAt,
-    createdAt: Date.now(),
     token: Math.random().toString(36).slice(2),
   });
 }
@@ -143,9 +143,27 @@ function withLock<T>(fn: () => T): T {
       const fd = openSync(LOCK_FILE, "wx");
       const token = lockToken();
       writeFileSync(fd, token);
+      let parsed: { pidOnly?: boolean };
+      try {
+        parsed = JSON.parse(token) as { pidOnly?: boolean };
+      } catch {
+        parsed = {};
+      }
+      let heartbeat: ReturnType<typeof setInterval> | undefined;
+      if (parsed.pidOnly) {
+        const touch = () => {
+          try {
+            utimesSync(LOCK_FILE, new Date(), new Date());
+          } catch {
+            // lock released
+          }
+        };
+        heartbeat = setInterval(touch, PID_ONLY_STALE_MS / 3);
+      }
       try {
         return fn();
       } finally {
+        if (heartbeat) clearInterval(heartbeat);
         closeSync(fd);
         try {
           if (readFileSync(LOCK_FILE, "utf8") === token) unlinkSync(LOCK_FILE);
@@ -162,17 +180,9 @@ function withLock<T>(fn: () => T): T {
           const owner = lockOwner(token);
           let ownerAlive = false;
           if (owner.pidOnly) {
-            let createdAt = Date.now();
-            try {
-              const parsed = JSON.parse(token) as { createdAt?: unknown };
-              if (typeof parsed.createdAt === "number") createdAt = parsed.createdAt;
-            } catch {
-              // Legacy pid-only locks without a timestamp fall back to mtime.
-              createdAt = statSync(LOCK_FILE).mtimeMs;
-            }
-            ownerAlive = Date.now() - createdAt < PID_ONLY_MAX_HOLD_MS;
+            ownerAlive =
+              Date.now() - statSync(LOCK_FILE).mtimeMs <= PID_ONLY_STALE_MS;
           } else if (Number.isInteger(owner.pid) && owner.pid > 0) {
-            ownerAlive = true;
             try {
               process.kill(owner.pid, 0);
               ownerAlive =
@@ -180,7 +190,11 @@ function withLock<T>(fn: () => T): T {
                 typeof owner.startedAt === "string" &&
                 processStartTime(owner.pid) === owner.startedAt;
             } catch (error) {
-              ownerAlive = (error as NodeJS.ErrnoException).code === "EPERM";
+              ownerAlive =
+                (error as NodeJS.ErrnoException).code === "EPERM" &&
+                owner.fingerprint &&
+                typeof owner.startedAt === "string" &&
+                processStartTime(owner.pid) === owner.startedAt;
             }
           }
           if (!ownerAlive) {
