@@ -1,6 +1,6 @@
 # Commit Sounds Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-18
 
 - Add GitHub owner-specific commit sounds with local upload or HTTPS audio-link support.
 - Add global post-commit hook installation with confirmation, uninstall, enable/disable controls, testing, and rule management.
