@@ -36,10 +36,15 @@ export async function isSavedLibrary(libraryId: string) {
  * indivisible step — deciding before acquiring the lock is what let two concurrent toggles
  * both observe "not saved" and both add.
  */
-async function mutate(apply: (libraries: SavedLibrary[]) => SavedLibrary[]) {
+async function mutate(apply: (libraries: SavedLibrary[]) => SavedLibrary[], afterCommit?: () => Promise<void>) {
   return withFileLock(LOCK_RESOURCE, async () => {
     const next = apply(parseStored(await readRaw()));
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+
+    // Payload cleanup runs INSIDE the lock, after the manifest commits. Releasing first lets a
+    // concurrent save slip in between, and the cleanup then deletes the cache that save had
+    // just written — leaving a library saved but with no offline copy.
+    await afterCommit?.();
 
     return next;
   });
@@ -52,30 +57,33 @@ export async function addLibrary(library: LibrarySummary) {
 export async function toggleLibrary(library: LibrarySummary) {
   let removed = false;
 
-  const next = await mutate((libraries) => {
-    removed = libraries.some((saved) => saved.id === library.id);
+  return mutate(
+    (libraries) => {
+      removed = libraries.some((saved) => saved.id === library.id);
 
-    return removed ? applyRemove(libraries, library.id) : applyAdd(libraries, library);
-  });
-
-  if (removed) {
-    await removeCachedLibrary(library.id);
-  }
-
-  return next;
+      return removed ? applyRemove(libraries, library.id) : applyAdd(libraries, library);
+    },
+    // Set by `apply` above, which has already run by the time this is called.
+    async () => {
+      if (removed) {
+        await removeCachedLibrary(library.id);
+      }
+    },
+  );
 }
 
 export async function clearMyLibraries() {
-  const next = await mutate(() => {
-    logger.log("Cleared all saved libraries");
+  return mutate(
+    () => {
+      logger.log("Cleared all saved libraries");
 
-    return [];
-  });
-
-  await LocalStorage.removeItem(LEGACY_STORAGE_KEY);
-  await pruneCachedLibraries([]);
-
-  return next;
+      return [];
+    },
+    async () => {
+      await LocalStorage.removeItem(LEGACY_STORAGE_KEY);
+      await pruneCachedLibraries([]);
+    },
+  );
 }
 
 function applyAdd(libraries: SavedLibrary[], library: LibrarySummary) {
