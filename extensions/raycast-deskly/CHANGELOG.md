@@ -1,6 +1,6 @@
 # desk.ly Changelog
 
-## [Seat Availability + Descriptive Errors] - {PR_MERGE_DATE}
+## [Seat Availability + Descriptive Errors] - 2026-08-18
 
 - Book a Seat: seat list now correctly excludes seats that are occupied or not allowed to be booked
 - Check-in failure toast now shows the API's human-readable error title instead of the raw error response
