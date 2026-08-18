@@ -19,6 +19,7 @@ Each rename command targets exactly one kind of Finder item, so a batch never to
 
 - **Rename File(s)** and **Replace in File Names** (previously *Replace File(s) Characters*) act on **files only**. In a mixed selection they rename just the files and leave every folder alone; a selection holding no files says so rather than renaming anything.
 - **Rename Folder(s)** and **Replace in Folder Names** act on **folders only**, symmetrically — mixed selections rename just the folders, and every message names folders rather than files.
+- macOS **packages** (app bundles, `.pages`/`.key` documents, and similar) are directories on disk, so they count as **folders** here even though Finder shows them as files.
 
 > **Changed behaviour:** the file commands used to rename whatever was selected, folders included. They no longer do. To rename folders, use **Rename Folder(s)** or **Replace in Folder Names**; to rename files and folders together in one pass, use **Advanced Batch Rename** with **Apply to** set to _Files & Folders_.
 

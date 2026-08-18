@@ -18,7 +18,12 @@ export default function Command({ foldersOnly = false }: { foldersOnly?: boolean
   const [newName, setNewName] = useState<string>("");
   const [prefix, setPrefix] = useState<string>("");
   const [suffix, setSuffix] = useState<string>("");
-  const [preserveName, setPreserveName] = useCachedState<boolean>("preserveName", false);
+  // Keyed by mode: Rename File(s) and Rename Folder(s) share this component,
+  // and one command's toggle must not leak into the other's cached state.
+  const [preserveName, setPreserveName] = useCachedState<boolean>(
+    foldersOnly ? "preserveName-folders" : "preserveName",
+    false,
+  );
   const [preview, setPreview] = useState<string>("");
   const [separator, setSeparator] = useState<string>("_");
   const [indexSeparator, setIndexSeparator] = useState<string>("-");

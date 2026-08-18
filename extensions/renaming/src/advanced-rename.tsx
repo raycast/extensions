@@ -128,7 +128,15 @@ export default function AdvancedRenameCommand() {
       isShowingDetail
       isLoading={loading}
       searchBarAccessory={
-        <List.Dropdown tooltip="Apply to" value={scope} onChange={(newValue) => setScope(newValue as RenameScope)}>
+        <List.Dropdown
+          tooltip="Apply to"
+          value={scope}
+          onChange={(newValue) => {
+            if (newValue === "files" || newValue === "folders" || newValue === "both") {
+              setScope(newValue);
+            }
+          }}
+        >
           <List.Dropdown.Item title="Files" value="files" icon={Icon.Document} />
           <List.Dropdown.Item title="Folders" value="folders" icon={Icon.Folder} />
           <List.Dropdown.Item title="Files & Folders" value="both" icon={Icon.List} />
