@@ -130,6 +130,26 @@ function argsFromFormValues(
   });
 }
 
+function hasUnfulfilledRequired(recipe: JustRecipe): boolean {
+  return recipe.params.some(
+    (p) =>
+      (p.kind === "singular" || p.kind === "plus") && p.defaultValue === null,
+  );
+}
+
+function findMissingRequiredParams(
+  recipe: JustRecipe,
+  typed: Record<string, string>,
+): string[] {
+  return recipe.params
+    .filter(
+      (p) =>
+        (p.kind === "singular" || p.kind === "plus") && p.defaultValue === null,
+    )
+    .filter((p) => !typed[p.name]?.trim())
+    .map((p) => p.name);
+}
+
 function RecipeParamForm({
   recipe,
   onSubmit,
@@ -148,17 +168,11 @@ function RecipeParamForm({
             title="Run Recipe"
             onSubmit={(values) => {
               const typed = values as Record<string, string>;
-              const newErrors: Record<string, string | undefined> = {};
-              for (const p of recipe.params) {
-                const required =
-                  (p.kind === "singular" || p.kind === "plus") &&
-                  p.defaultValue === null;
-                if (required && !typed[p.name]?.trim()) {
-                  newErrors[p.name] = "Required";
-                }
-              }
-              if (Object.keys(newErrors).length > 0) {
-                setErrors(newErrors);
+              const missing = findMissingRequiredParams(recipe, typed);
+              if (missing.length > 0) {
+                setErrors(
+                  Object.fromEntries(missing.map((n) => [n, "Required"])),
+                );
                 return false;
               }
               onSubmit(argsFromFormValues(recipe, typed));
@@ -169,6 +183,13 @@ function RecipeParamForm({
             shortcut={Keyboard.Shortcut.Common.Copy}
             onSubmit={(values) => {
               const typed = values as Record<string, string>;
+              const missing = findMissingRequiredParams(recipe, typed);
+              if (missing.length > 0) {
+                setErrors(
+                  Object.fromEntries(missing.map((n) => [n, "Required"])),
+                );
+                return false;
+              }
               const args = argsFromFormValues(recipe, typed);
               void Clipboard.copy(buildRecipeCmd(recipe, args));
               void showHUD("Command copied");
@@ -445,12 +466,7 @@ export default function Command(props: {
       );
       if (matches.length === 1) {
         const recipe = matches[0];
-        const hasUnfulfilledRequired = recipe.params.some(
-          (p) =>
-            (p.kind === "singular" || p.kind === "plus") &&
-            p.defaultValue === null,
-        );
-        if (hasUnfulfilledRequired) {
+        if (hasUnfulfilledRequired(recipe)) {
           navigation.push(
             <RecipeParamForm
               recipe={recipe}
@@ -501,11 +517,19 @@ export default function Command(props: {
               title="Run Recipe"
               onAction={() => handleRunAction(recipe)}
             />
-            <Action.CopyToClipboard
-              title="Copy Command"
-              content={buildRecipeCmd(recipe, [])}
-              shortcut={Keyboard.Shortcut.Common.Copy}
-            />
+            {hasUnfulfilledRequired(recipe) ? (
+              <Action.Push
+                title="Copy Command"
+                shortcut={Keyboard.Shortcut.Common.Copy}
+                target={<RecipeParamForm recipe={recipe} onSubmit={() => {}} />}
+              />
+            ) : (
+              <Action.CopyToClipboard
+                title="Copy Command"
+                content={buildRecipeCmd(recipe, [])}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
+            )}
             <Action
               title={
                 isEffectivelySilent(recipe) ? "Run with Output" : "Run Silently"
