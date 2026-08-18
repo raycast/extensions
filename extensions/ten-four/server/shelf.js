@@ -26,6 +26,7 @@ const STORE =
   process.env.TENFOUR_FILE || path.join(os.homedir(), ".ten-four.json");
 const LOCK = `${STORE}.lock`;
 const LOCK_STALE_MS = 2000;
+const PID_ONLY_MAX_HOLD_MS = 30000;
 const PORT = Number(process.env.PORT || process.env.TENFOUR_PORT || 7801);
 const HOST = process.env.TENFOUR_HOST || "127.0.0.1";
 const AUTH_TOKEN = process.env.TENFOUR_TOKEN || "";
@@ -73,6 +74,7 @@ function lockToken() {
     // writer can still reclaim this lock if the PID is no longer alive.
     pidOnly: startedAt === null,
     startedAt,
+    createdAt: Date.now(),
     token: Math.random().toString(36).slice(2),
   });
 }
@@ -122,15 +124,24 @@ async function withLock(fn) {
         if (Date.now() - fs.statSync(LOCK).mtimeMs > LOCK_STALE_MS) {
           const token = fs.readFileSync(LOCK, "utf8");
           const owner = lockOwner(token);
-          let ownerAlive = Number.isInteger(owner.pid) && owner.pid > 0;
-          if (ownerAlive) {
+          let ownerAlive = false;
+          if (owner.pidOnly) {
+            let createdAt = Date.now();
+            try {
+              const parsed = JSON.parse(token);
+              if (typeof parsed.createdAt === "number") createdAt = parsed.createdAt;
+            } catch {
+              createdAt = fs.statSync(LOCK).mtimeMs;
+            }
+            ownerAlive = Date.now() - createdAt < PID_ONLY_MAX_HOLD_MS;
+          } else if (Number.isInteger(owner.pid) && owner.pid > 0) {
+            ownerAlive = true;
             try {
               process.kill(owner.pid, 0);
               ownerAlive =
-                owner.pidOnly ||
-                (owner.fingerprint &&
-                  typeof owner.startedAt === "string" &&
-                  processStartTime(owner.pid) === owner.startedAt);
+                owner.fingerprint &&
+                typeof owner.startedAt === "string" &&
+                processStartTime(owner.pid) === owner.startedAt;
             } catch (error) {
               ownerAlive = error.code === "EPERM";
             }

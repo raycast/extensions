@@ -66,6 +66,20 @@ test("the remote CLI sends the shelf bearer token", async () => {
   }
 });
 
+test("the remote CLI rejects plaintext non-loopback URLs", async () => {
+  await assert.rejects(
+    () =>
+      run(process.execPath, [CLI, "secret"], {
+        env: {
+          ...process.env,
+          TENFOUR_URL: "http://example.com/shelf",
+          TENFOUR_TOKEN: "cli-test-token",
+        },
+      }),
+    /HTTPS/,
+  );
+});
+
 test("the CLI waits for a live writer whose lock is old", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "tenfour-cli-"));
   const store = path.join(root, "shelf.json");

@@ -322,6 +322,56 @@ test("an old lock from a reused PID is reclaimed", async () => {
   ]);
 });
 
+test("a stale pid-only lock is reclaimed when the PID is reused", async () => {
+  const store = path.join(TMP, "stale-pid-only.json");
+  const lock = `${store}.lock`;
+  fs.writeFileSync(store, "[]");
+  fs.writeFileSync(
+    lock,
+    JSON.stringify({
+      pid: process.pid,
+      fingerprint: true,
+      pidOnly: true,
+      startedAt: null,
+      createdAt: Date.now() - 60_000,
+      token: "stale-pid-only",
+    }),
+  );
+  fs.utimesSync(lock, new Date(0), new Date(Date.now() - 3000));
+
+  const shelfPath = require.resolve("./shelf.js");
+  const child = spawn(
+    process.execPath,
+    [
+      "-e",
+      `
+      const { modify } = require(${JSON.stringify(shelfPath)});
+      modify(() => [{ id: "reclaimed" }]).then(
+        () => process.exit(0),
+        (err) => {
+          console.error(err);
+          process.exit(1);
+        }
+      );
+      `,
+    ],
+    {
+      env: { ...process.env, TENFOUR_FILE: store },
+      stdio: ["ignore", "ignore", "pipe"],
+    },
+  );
+
+  const exitCode = await Promise.race([
+    new Promise((resolve) => child.on("close", resolve)),
+    new Promise((resolve) => setTimeout(() => resolve("timeout"), 500)),
+  ]);
+  if (exitCode === "timeout") child.kill();
+  assert.equal(exitCode, 0, "writer remained blocked by a reused pid-only lock");
+  assert.deepEqual(JSON.parse(fs.readFileSync(store, "utf8")), [
+    { id: "reclaimed" },
+  ]);
+});
+
 test("an old lock without a process fingerprint is reclaimed", async () => {
   const store = path.join(TMP, "missing-fingerprint.json");
   const lock = `${store}.lock`;

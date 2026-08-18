@@ -52,6 +52,7 @@ const LOCAL_FILE =
   process.env.TENFOUR_FILE || join(homedir(), ".ten-four.json");
 const LOCK_FILE = `${LOCAL_FILE}.lock`;
 const LOCK_STALE_MS = 2000;
+const PID_ONLY_MAX_HOLD_MS = 30000;
 const WATCH_MS = 400;
 const POLL_MS = 1000;
 
@@ -98,6 +99,7 @@ function lockToken(): string {
     // Do not reclaim a live lock if `ps` is temporarily unavailable.
     pidOnly: startedAt === null,
     startedAt,
+    createdAt: Date.now(),
     token: Math.random().toString(36).slice(2),
   });
 }
@@ -158,15 +160,25 @@ function withLock<T>(fn: () => T): T {
         if (Date.now() - statSync(LOCK_FILE).mtimeMs > LOCK_STALE_MS) {
           const token = readFileSync(LOCK_FILE, "utf8");
           const owner = lockOwner(token);
-          let ownerAlive = Number.isInteger(owner.pid) && owner.pid > 0;
-          if (ownerAlive) {
+          let ownerAlive = false;
+          if (owner.pidOnly) {
+            let createdAt = Date.now();
+            try {
+              const parsed = JSON.parse(token) as { createdAt?: unknown };
+              if (typeof parsed.createdAt === "number") createdAt = parsed.createdAt;
+            } catch {
+              // Legacy pid-only locks without a timestamp fall back to mtime.
+              createdAt = statSync(LOCK_FILE).mtimeMs;
+            }
+            ownerAlive = Date.now() - createdAt < PID_ONLY_MAX_HOLD_MS;
+          } else if (Number.isInteger(owner.pid) && owner.pid > 0) {
+            ownerAlive = true;
             try {
               process.kill(owner.pid, 0);
               ownerAlive =
-                owner.pidOnly ||
-                (owner.fingerprint &&
-                  typeof owner.startedAt === "string" &&
-                  processStartTime(owner.pid) === owner.startedAt);
+                owner.fingerprint &&
+                typeof owner.startedAt === "string" &&
+                processStartTime(owner.pid) === owner.startedAt;
             } catch (error) {
               ownerAlive = (error as NodeJS.ErrnoException).code === "EPERM";
             }
@@ -237,8 +249,25 @@ function localShelf(): Shelf {
   };
 }
 
+function validateRemoteUrl(raw: string): string {
+  let parsed: URL;
+  try {
+    parsed = new URL(raw);
+  } catch {
+    throw new Error("Shelf URL must be a valid URL");
+  }
+  const loopback = new Set(["localhost", "127.0.0.1", "::1"]);
+  if (parsed.protocol === "https:") return raw.replace(/\/$/, "");
+  if (parsed.protocol === "http:" && loopback.has(parsed.hostname)) {
+    return raw.replace(/\/$/, "");
+  }
+  throw new Error(
+    "Shelf URL must use HTTPS. HTTP is only allowed for loopback testing (127.0.0.1).",
+  );
+}
+
 function remoteShelf(shelfUrl: string, shelfToken: string): Shelf {
-  const base = shelfUrl.replace(/\/$/, "");
+  const base = validateRemoteUrl(shelfUrl);
 
   async function api(suffix = "", init?: RequestInit): Promise<Response> {
     const headers = new Headers(init?.headers);
