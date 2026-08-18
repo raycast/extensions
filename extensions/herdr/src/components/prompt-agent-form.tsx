@@ -13,7 +13,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { agentIcon } from "../lib/agent-appearance";
+import { agentIcon, agentName } from "../lib/agent-appearance";
 import { addPromptHistory, clearPromptHistory, getPromptHistory } from "../lib/prompt-history";
 import { getAgentTarget, sendAgentPrompt } from "../lib/herdr";
 import { getHerdrPreferences } from "../lib/preferences";
@@ -114,7 +114,7 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
     }
     const target = getAgentTarget(agent);
     const sent = await runAction(
-      `Prompting ${agent.name || agent.display_agent || agent.agent}`,
+      `Prompting ${agentName(agent)}`,
       async () => {
         await sendAgentPrompt(target, text);
         await addPromptHistory(agent, target, text);
@@ -178,8 +178,8 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
           <Form.Dropdown.Item
             key={agent.pane_id}
             value={agent.pane_id}
-            title={`${agent.name || agent.display_agent || agent.agent} — ${statusTitle(agent.agent_status)}`}
-            icon={agentIcon(agent.agent || agent.display_agent)}
+            title={`${agentName(agent)} — ${statusTitle(agent.agent_status)}`}
+            icon={agentIcon(agent.agent)}
           />
         ))}
       </Form.Dropdown>

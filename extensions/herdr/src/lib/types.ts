@@ -106,6 +106,7 @@ export interface PromptHistoryItem {
 
 export const AGENT_KINDS = [
   "claude",
+  "antigravity",
   "codex",
   "gemini",
   "cursor",

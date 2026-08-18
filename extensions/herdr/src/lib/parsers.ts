@@ -70,3 +70,23 @@ export function markdownCode(value: string): string {
   const fence = "`".repeat(Math.max(3, longestRun + 1));
   return `${fence}\n${value}\n${fence}`;
 }
+
+export interface IntegrationStatusLine {
+  name: string;
+  status: string;
+  detail?: string;
+}
+
+// `herdr integration status` lines can carry a version group and a path group,
+// e.g. "claude: current (v7) (~/.claude/hooks/herdr-agent-state.sh)".
+// Both are optional parens, so this matches up to two trailing groups and
+// keeps only the last (the path) as the detail.
+const INTEGRATION_STATUS_LINE = /^([a-z0-9_-]+):\s+([^()]+?)(?:\s+\(([^()]*)\))?(?:\s+\(([^()]*)\))?$/i;
+
+export function parseIntegrationStatus(output: string): IntegrationStatusLine[] {
+  return output
+    .split(/\r?\n/)
+    .map((line) => line.match(INTEGRATION_STATUS_LINE))
+    .filter((match): match is RegExpMatchArray => Boolean(match))
+    .map((match) => ({ name: match[1], status: match[2].trim(), detail: match[4] || match[3] }));
+}

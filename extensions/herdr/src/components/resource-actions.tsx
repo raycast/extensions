@@ -8,6 +8,7 @@ import {
   confirmAlert,
   openExtensionPreferences,
 } from "@raycast/api";
+import { agentName } from "../lib/agent-appearance";
 import { focusResource, getAgentTarget, runHerdr, sendAgentKeys, sendPaneKeys } from "../lib/herdr";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "../lib/terminal";
 import type { AgentInfo, PaneInfo, TabInfo, WorkspaceInfo } from "../lib/types";
@@ -20,7 +21,7 @@ import { CreateWorktreeForm } from "./create-worktree-form";
 import { StartAgentForm } from "./start-agent-form";
 
 function displayAgent(agent: AgentInfo): string {
-  return agent.name || agent.display_agent || agent.agent || agent.pane_id;
+  return agentName(agent);
 }
 
 function UtilityActions({ onRefresh }: { onRefresh?: () => void | Promise<void> }) {

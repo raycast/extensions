@@ -22,7 +22,7 @@ export function CreateWorktreeForm({
   const [branchError, setBranchError] = useState<string>();
 
   if (snapshot.error && !snapshot.data) return <ErrorView error={snapshot.error} onRetry={snapshot.revalidate} />;
-  const workspaces = snapshot.data?.workspaces || [];
+  const workspaces = (snapshot.data?.workspaces || []).filter((workspace) => workspace.worktree);
   const selectedWorkspace = workspaceId || workspaces[0]?.workspace_id || "";
 
   async function submit() {
