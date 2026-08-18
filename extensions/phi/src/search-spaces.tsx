@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { runPhiCommand, runPhiCommandAction } from "./command-compatibility";
 import { activateSpace, getSpaces } from "./phi";
@@ -27,9 +27,17 @@ export default function SearchSpaces() {
         <List.Item
           key={space.id}
           title={space.title}
-          subtitle={space.profileName}
           keywords={[space.profileId, space.profileName]}
           icon={resolveSpaceIcon(space.iconData)}
+          accessories={[
+            {
+              tag: {
+                value: space.profileName,
+                color: Color.Blue,
+              },
+              tooltip: `Profile: ${space.profileName}`,
+            },
+          ]}
           actions={
             <ActionPanel>
               <Action
@@ -57,6 +65,13 @@ export default function SearchSpaces() {
           }
         />
       ))}
+      {spaces.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Spaces Found"
+          description="No Phi Spaces are currently available."
+          icon={Icon.AppWindowGrid2x2}
+        />
+      ) : null}
     </List>
   );
 }

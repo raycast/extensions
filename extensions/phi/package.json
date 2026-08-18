@@ -20,7 +20,7 @@
       "title": "Phi Application",
       "description": "Use Phi Canary while developing this extension and Phi for production.",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "default": "stable",
       "data": [
         {

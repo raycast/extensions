@@ -18,6 +18,7 @@ import {
 import { PhiBookmark, PhiPinnedTab, PhiSpace, PhiTab } from "../types";
 import { resolveSpaceIcon } from "../space-icon";
 import {
+  hasTabSearchResults,
   pinnedTabDisplaySpace,
   removeTabFromSearchData,
   resolveTabFaviconURL,
@@ -107,6 +108,7 @@ export function SearchTabsBase({ command, scope }: Props) {
   const bookmarks = data?.bookmarks ?? [];
   const spaces = data?.spaces ?? [];
   const spacesById = spaceById(spaces);
+  const hasResults = hasTabSearchResults({ tabs, pinnedTabs, bookmarks });
 
   async function close(tab: PhiTab) {
     await runViewAction(
@@ -333,6 +335,13 @@ export function SearchTabsBase({ command, scope }: Props) {
             );
           })}
         </List.Section>
+      ) : null}
+      {!hasResults && !isLoading ? (
+        <List.EmptyView
+          title="No Tabs Found"
+          description="No open tabs, pinned tabs, or bookmarks were found."
+          icon={Icon.AppWindowList}
+        />
       ) : null}
     </List>
   );

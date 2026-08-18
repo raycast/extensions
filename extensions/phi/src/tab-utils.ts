@@ -8,6 +8,16 @@ export interface TabSearchData {
   spaces: PhiSpace[];
 }
 
+export function hasTabSearchResults(
+  data: Pick<TabSearchData, "tabs" | "pinnedTabs" | "bookmarks">,
+): boolean {
+  return (
+    data.tabs.length > 0 ||
+    data.pinnedTabs.length > 0 ||
+    data.bookmarks.length > 0
+  );
+}
+
 export function groupTabsBySpace(
   tabs: PhiTab[],
   spaces: PhiSpace[],

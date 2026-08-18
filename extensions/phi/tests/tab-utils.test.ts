@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
 import {
   groupTabsBySpace,
+  hasTabSearchResults,
   pinnedTabDisplaySpace,
   removeTabFromSearchData,
   resolveOpenTabAddress,
   resolveSpaceArgument,
   resolveTabFaviconURL,
 } from "../src/tab-utils";
-import { PhiPinnedTab, PhiSpace, PhiTab } from "../src/types";
+import { PhiBookmark, PhiPinnedTab, PhiSpace, PhiTab } from "../src/types";
 
 const spaces: PhiSpace[] = [
   {
@@ -111,6 +112,36 @@ describe("tab grouping", () => {
     ]);
     expect(original.tabs).toHaveLength(3);
     expect(updated.spaces).toBe(original.spaces);
+  });
+});
+
+describe("tab search results", () => {
+  const emptyResults = {
+    tabs: [],
+    pinnedTabs: [],
+    bookmarks: [],
+  };
+
+  it("reports an empty result when every supported row type is absent", () => {
+    expect(hasTabSearchResults(emptyResults)).toBe(false);
+  });
+
+  it("reports results for open tabs, pinned tabs, and bookmarks", () => {
+    expect(hasTabSearchResults({ ...emptyResults, tabs: [{} as PhiTab] })).toBe(
+      true,
+    );
+    expect(
+      hasTabSearchResults({
+        ...emptyResults,
+        pinnedTabs: [{} as PhiPinnedTab],
+      }),
+    ).toBe(true);
+    expect(
+      hasTabSearchResults({
+        ...emptyResults,
+        bookmarks: [{} as PhiBookmark],
+      }),
+    ).toBe(true);
   });
 });
 
