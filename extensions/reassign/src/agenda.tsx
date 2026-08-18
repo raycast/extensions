@@ -430,8 +430,12 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
         <List.Section key={day.date} title={relativeDayLabel(day.date, todayIso)} subtitle={String(events.length)}>
           {events.length === 0 ? (
             <List.Item
-              icon={Icon.Calendar}
-              title="Nothing planned — press Enter to add a block"
+              icon={day.model.events.length > 0 ? Icon.EyeDisabled : Icon.Calendar}
+              title={
+                day.model.events.length > 0
+                  ? "All blocks hidden by the filter"
+                  : "Nothing planned — press Enter to add a block"
+              }
               actions={placeholderActions(day.date)}
             />
           ) : (

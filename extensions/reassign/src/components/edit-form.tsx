@@ -53,7 +53,7 @@ export function EditForm(props: {
       // an end back to the same day also clears a previous overnight marker.
       const startMin = minutesFromClock(event.start);
       const endMin = minutesFromClock(end);
-      if (startMin !== null && endMin !== null) patch.endNextDay = endMin <= startMin;
+      if (startMin !== null && endMin !== null) patch.endNextDay = endMin < startMin;
     }
     if (values.areaId && values.areaId !== (currentArea?.id ?? "")) patch.areaId = values.areaId;
     if (values.activityTypeId && values.activityTypeId !== (currentActivity?.id ?? "")) {

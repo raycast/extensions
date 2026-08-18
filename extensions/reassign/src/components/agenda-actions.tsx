@@ -21,7 +21,6 @@ import {
   ApiResult,
   BatchReceipt,
   eventsBatch,
-  sendFeedback,
   undo,
   updateEvent,
   UpdateEventPatch,
@@ -31,6 +30,7 @@ import { applyUndoToast, failToast, showApiError } from "../lib/feedback";
 import { ActivityType, Area, eventMeeting, ScheduleEvent, ScheduleResponse } from "../lib/schedule-model";
 import { WEB_BASE, webDayUrl } from "../lib/wire";
 import { EditForm } from "./edit-form";
+import { FeedbackForm } from "./feedback-form";
 import { MoveForm } from "./move-form";
 
 /** The day-view cache shape. Other views pass their own cache type to the hook. */
@@ -292,14 +292,7 @@ export function AgendaActions(props: {
           />
         )}
         <Action.OpenInBrowser title="Open Reassign" url={WEB_BASE} />
-        <Action
-          title="Send Feedback"
-          icon={Icon.Envelope}
-          onAction={async () => {
-            const result = await sendFeedback("Sent from the Raycast extension.");
-            if (!result.ok) await showApiError(result);
-          }}
-        />
+        <Action title="Send Feedback" icon={Icon.Envelope} onAction={() => push(<FeedbackForm />)} />
       </ActionPanel.Section>
       {nav}
     </ActionPanel>

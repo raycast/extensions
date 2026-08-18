@@ -31,6 +31,9 @@ interface TokenResponse {
 
 /** Coalesce concurrent refreshes so parallel calls do not race the endpoint. */
 let refreshInFlight: Promise<string> | null = null;
+// Identifies the current in-flight refresh, so its cleanup never nulls a
+// successor that a sign-out let start in the meantime.
+let refreshId = 0;
 
 // Bumped on every sign-out. A refresh that started before a sign-out must not
 // store new tokens after it (that would silently undo the logout).
@@ -52,6 +55,19 @@ class TokenEndpointError extends Error {
   }
 }
 
+// Serialize every token-store mutation — sign-in, the refresh write, and
+// sign-out — so a guard check and its write can never straddle a concurrent
+// logout. Callers await the previous mutation before running, then release.
+// (Raycast runs each command in its own process, so this orders writes within a
+// command; cross-command safety is bounded by the token store, which is all the
+// API exposes.)
+let tokenLockTail: Promise<unknown> = Promise.resolve();
+function withTokenLock<T>(fn: () => Promise<T>): Promise<T> {
+  const result = tokenLockTail.then(fn, fn);
+  tokenLockTail = result.catch(() => undefined);
+  return result;
+}
+
 /** Run the full sign-in: authorize in the browser, then exchange the code. */
 export async function signIn(): Promise<void> {
   const authRequest = await client.authorizationRequest({
@@ -62,16 +78,20 @@ export async function signIn(): Promise<void> {
   });
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await exchangeCode(authorizationCode, authRequest.redirectURI, authRequest.codeVerifier);
-  await client.setTokens(tokens);
-  signedOut = false;
+  await withTokenLock(async () => {
+    signedOut = false;
+    await client.setTokens(tokens);
+  });
 }
 
 /** Clear the stored session. The next call forces a new sign-in. */
 export async function signOut(): Promise<void> {
+  // Set the guards synchronously so a refresh that starts now already sees them;
+  // the removal itself runs under the lock, serialized with any refresh write.
   signedOut = true;
   logoutEpoch += 1;
   refreshInFlight = null;
-  await client.removeTokens();
+  await withTokenLock(() => client.removeTokens());
 }
 
 /** True when a token set is stored (it may still need a refresh). */
@@ -107,22 +127,27 @@ async function refresh(refreshToken: string): Promise<string> {
     return refreshInFlight;
   }
   const epoch = logoutEpoch;
+  const id = ++refreshId;
   refreshInFlight = (async () => {
     try {
       const tokens = await exchangeRefresh(refreshToken);
       // Keep the old refresh token when the server omits a new one, or the next
       // refresh finds no token and forces an unneeded sign-in.
       if (!tokens.refresh_token) tokens.refresh_token = refreshToken;
-      // A sign-out happened while this refresh was in flight (or during it) — do
-      // not re-store. The flag catches a refresh that started inside signOut's
-      // window; the epoch catches one that started before an intervening logout.
-      if (signedOut || logoutEpoch !== epoch) {
-        throw new NotAuthorizedError("Signed out during refresh");
-      }
-      await client.setTokens(tokens);
-      return tokens.access_token;
+      // Guard and write under the lock, so a logout cannot land between them.
+      // `signedOut` catches a refresh that started during/after a sign-out; the
+      // epoch catches one that started before a sign-out then intervening state.
+      return await withTokenLock(async () => {
+        if (signedOut || logoutEpoch !== epoch) {
+          throw new NotAuthorizedError("Signed out during refresh");
+        }
+        await client.setTokens(tokens);
+        return tokens.access_token;
+      });
     } finally {
-      refreshInFlight = null;
+      // Clear only our own slot. A sign-out may have already nulled it and a
+      // later refresh may own it now — do not clobber that successor.
+      if (refreshId === id) refreshInFlight = null;
     }
   })();
   return refreshInFlight;

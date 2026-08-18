@@ -111,7 +111,21 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
     if (values.start) {
       const date = todayISO(values.start);
       const start = clockHM(values.start);
-      const minutes = parseDuration(durationText)?.minutes ?? 30;
+      // An empty duration defaults to 30 min; a non-empty but unreadable one is
+      // an error, like the no-start path — never a silent fallback.
+      let minutes = 30;
+      if (durationText) {
+        const parsed = parseDuration(durationText)?.minutes;
+        if (!parsed) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Could not read the duration",
+            message: "Try 90m, 1h30, or 2h.",
+          });
+          return;
+        }
+        minutes = parsed;
+      }
       const end = addMinutesHM(start, minutes);
       // Flag an overnight block, or the server reads end < start as a bad range.
       const endNextDay = (minutesFromClock(start) ?? 0) + minutes >= 24 * 60;
@@ -142,7 +156,7 @@ export default function Command(props: LaunchProps<{ arguments: { text?: string 
       }
       await runFlexible({
         name: finalName,
-        date: parsed?.date ?? todayISO(),
+        date: parsed?.date ?? ctxDate ?? todayISO(),
         minutes,
         earliest: parsed?.earliest,
         latest: parsed?.latest,
