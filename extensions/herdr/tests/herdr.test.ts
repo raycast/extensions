@@ -53,9 +53,10 @@ describe("runHerdr", () => {
     return vi.mocked(execFile).mock.calls[0][1];
   }
 
-  // Regression: the extension used to select the session by setting the
-  // HERDR_SESSION environment variable, which the CLI only exports into panes
-  // it spawns, so the preference silently targeted the default session.
+  // Regression: without a --session flag the CLI falls back to an inherited
+  // HERDR_SESSION, so a value leaking into the Raycast process environment
+  // could silently retarget every command. Each command names its session
+  // explicitly, including the default.
   it("selects the configured session with the --session flag", async () => {
     preferences.sessionName = "work";
     mockExecFileSuccess();
@@ -64,11 +65,19 @@ describe("runHerdr", () => {
     expect(executedArgs()).toEqual(["--session", "work", "pane", "list"]);
   });
 
-  it("omits the session flag for the default session", async () => {
-    preferences.sessionName = "default";
+  it("names the default session explicitly when no session is configured", async () => {
+    preferences.sessionName = undefined;
     mockExecFileSuccess();
 
     await runHerdr(["pane", "list"]);
-    expect(executedArgs()).toEqual(["pane", "list"]);
+    expect(executedArgs()).toEqual(["--session", "default", "pane", "list"]);
+  });
+
+  it("omits the session flag when a command opts out with an empty session", async () => {
+    preferences.sessionName = "work";
+    mockExecFileSuccess();
+
+    await runHerdr(["session", "list", "--json"], { session: "" });
+    expect(executedArgs()).toEqual(["session", "list", "--json"]);
   });
 });

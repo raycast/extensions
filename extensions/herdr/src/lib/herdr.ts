@@ -103,11 +103,12 @@ function extractCliError(stderr: string): HerdrError | undefined {
 export async function runHerdr(args: string[], options: RunOptions = {}): Promise<string> {
   const binary = await resolveHerdrBinary();
   const preferences = getHerdrPreferences();
-  const selectedSession = options.session ?? preferences.sessionName?.trim();
-  // Session selection is the --session global flag. The CLI treats
-  // HERDR_SESSION purely as an export into panes it spawns, so setting it here
-  // would select nothing.
-  const sessionArgs = selectedSession && selectedSession !== "default" ? ["--session", selectedSession] : [];
+  const selectedSession = options.session ?? (preferences.sessionName?.trim() || "default");
+  // The session is always named explicitly with the --session global flag:
+  // without it the CLI falls back to an inherited HERDR_SESSION, so an env
+  // var leaking into the Raycast process could silently retarget every
+  // command. An empty session opts out for commands that span sessions.
+  const sessionArgs = selectedSession ? ["--session", selectedSession] : [];
 
   return new Promise<string>((resolve, reject) => {
     execFile(
