@@ -269,25 +269,16 @@ export function getSchedule(date: string, compact = false): Promise<ApiResult<Sc
 }
 
 /** Read a contiguous [from, to] date range in one call. Response groups days[]. */
-export function getScheduleRange(
-  from: string,
-  to: string,
-  compact = false,
-): Promise<ApiResult<ScheduleResponse>> {
+export function getScheduleRange(from: string, to: string, compact = false): Promise<ApiResult<ScheduleResponse>> {
   return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ from, to, compact }));
 }
 
 /** Read a day plus the parked-block inbox. The backlog needs includeBacklog=true. */
 export function getScheduleWithBacklog(date: string): Promise<ApiResult<ScheduleResponse>> {
-  return request<ScheduleResponse>(
-    "GET",
-    PATHS.schedule + scheduleQuery({ date, includeBacklog: true }),
-  );
+  return request<ScheduleResponse>("GET", PATHS.schedule + scheduleQuery({ date, includeBacklog: true }));
 }
 
-export function createEvent(
-  op: Extract<WriteOp, { op: "create" }>,
-): Promise<ApiResult<BatchReceipt>> {
+export function createEvent(op: Extract<WriteOp, { op: "create" }>): Promise<ApiResult<BatchReceipt>> {
   return request<BatchReceipt>("POST", PATHS.events, { ops: [op] });
 }
 

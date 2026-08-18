@@ -28,13 +28,7 @@ import {
   WriteOp,
 } from "../lib/api";
 import { applyUndoToast, failToast, showApiError } from "../lib/feedback";
-import {
-  ActivityType,
-  Area,
-  eventMeeting,
-  ScheduleEvent,
-  ScheduleResponse,
-} from "../lib/schedule-model";
+import { ActivityType, Area, eventMeeting, ScheduleEvent, ScheduleResponse } from "../lib/schedule-model";
 import { WEB_BASE, webDayUrl } from "../lib/wire";
 import { EditForm } from "./edit-form";
 import { MoveForm } from "./move-form";
@@ -90,12 +84,7 @@ export function useAgendaMutations<T = ScheduleData>(options: AgendaMutationOpti
   // Edit path (PATCH /events/{id}). It revalidates rather than updating
   // optimistically — an edit is rarer than a reflect / shift, and the changed
   // fields (area, name) do not map to a simple local transform.
-  async function applyEdit(
-    loading: string,
-    success: string,
-    id: string,
-    patch: UpdateEventPatch,
-  ): Promise<void> {
+  async function applyEdit(loading: string, success: string, id: string, patch: UpdateEventPatch): Promise<void> {
     const toast = await showToast({ style: Toast.Style.Animated, title: loading });
     const result = await updateEvent(id, patch);
     if (!result.ok) {
@@ -152,11 +141,7 @@ function isApiError(error: unknown): error is ApiError {
 }
 
 /** The detail-toggle + refresh pair shared by every agenda command's Navigate section. */
-export function AgendaNavActions(props: {
-  showingDetail: boolean;
-  onToggleDetail: () => void;
-  onRefresh: () => void;
-}) {
+export function AgendaNavActions(props: { showingDetail: boolean; onToggleDetail: () => void; onRefresh: () => void }) {
   return (
     <>
       <Action
@@ -221,11 +206,7 @@ export function AgendaActions(props: {
             onAction={() => open(meeting.url)}
           />
         )}
-        <Action
-          title="Open Block in Reassign"
-          icon={Icon.Globe}
-          onAction={() => open(webDayUrl(date, event.id))}
-        />
+        <Action title="Open Block in Reassign" icon={Icon.Globe} onAction={() => open(webDayUrl(date, event.id))} />
         {editable && (
           <>
             <Action
@@ -233,9 +214,7 @@ export function AgendaActions(props: {
               icon={Icon.CheckCircle}
               shortcut={{ modifiers: ["cmd"], key: "d" }}
               onAction={() =>
-                mutate("Marking as kept…", "Marked as kept", [
-                  { op: "reflect", id: event.id, status: "kept" },
-                ])
+                mutate("Marking as kept…", "Marked as kept", [{ op: "reflect", id: event.id, status: "kept" }])
               }
             />
             <Action
@@ -243,9 +222,7 @@ export function AgendaActions(props: {
               icon={Icon.XMarkCircle}
               shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
               onAction={() =>
-                mutate("Marking as skipped…", "Marked as skipped", [
-                  { op: "reflect", id: event.id, status: "skipped" },
-                ])
+                mutate("Marking as skipped…", "Marked as skipped", [{ op: "reflect", id: event.id, status: "skipped" }])
               }
             />
           </>
@@ -273,32 +250,21 @@ export function AgendaActions(props: {
             icon={Icon.Clock}
             shortcut={{ modifiers: ["cmd"], key: "m" }}
             onAction={() =>
-              push(
-                <MoveForm
-                  event={event}
-                  onMove={(op) => mutate("Moving…", "Moved the block", [op])}
-                />,
-              )
+              push(<MoveForm event={event} onMove={(op) => mutate("Moving…", "Moved the block", [op])} />)
             }
           />
           <Action
             title="Shift 15 Min Later"
             icon={Icon.ChevronDown}
             shortcut={Keyboard.Shortcut.Common.MoveDown}
-            onAction={() =>
-              mutate("Shifting…", "Shifted 15 min later", [
-                { op: "shift", id: event.id, byMinutes: 15 },
-              ])
-            }
+            onAction={() => mutate("Shifting…", "Shifted 15 min later", [{ op: "shift", id: event.id, byMinutes: 15 }])}
           />
           <Action
             title="Shift 15 Min Earlier"
             icon={Icon.ChevronUp}
             shortcut={Keyboard.Shortcut.Common.MoveUp}
             onAction={() =>
-              mutate("Shifting…", "Shifted 15 min earlier", [
-                { op: "shift", id: event.id, byMinutes: -15 },
-              ])
+              mutate("Shifting…", "Shifted 15 min earlier", [{ op: "shift", id: event.id, byMinutes: -15 }])
             }
           />
           <Action
@@ -306,9 +272,7 @@ export function AgendaActions(props: {
             icon={Icon.Trash}
             style={Action.Style.Destructive}
             shortcut={{ modifiers: ["ctrl"], key: "x" }}
-            onAction={() =>
-              mutate("Deleting…", "Deleted the block", [{ op: "delete", id: event.id }])
-            }
+            onAction={() => mutate("Deleting…", "Deleted the block", [{ op: "delete", id: event.id }])}
           />
         </ActionPanel.Section>
       )}

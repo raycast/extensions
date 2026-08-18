@@ -64,9 +64,7 @@ function optionalFields(values: FormValues): {
  * other. A named day with no time ("lunch tomorrow") defaults to Schedule so the
  * user picks a time.
  */
-export default function Command(
-  props: LaunchProps<{ arguments: { text?: string }; launchContext?: ScheduleContext }>,
-) {
+export default function Command(props: LaunchProps<{ arguments: { text?: string }; launchContext?: ScheduleContext }>) {
   const ctx = props.launchContext;
   const argText = props.arguments?.text?.trim() ?? "";
   const initial = argText || (ctx?.name ?? "");
@@ -74,16 +72,10 @@ export default function Command(
   const { push } = useNavigation();
 
   // The areas and activity types for the pickers. A compact read is enough.
-  const {
-    data: taxonomy,
-    isLoading,
-    revalidate,
-  } = useCachedPromise((d: string) => getSchedule(d, true), [todayISO()]);
+  const { data: taxonomy, isLoading, revalidate } = useCachedPromise((d: string) => getSchedule(d, true), [todayISO()]);
   const areas = taxonomy?.ok ? (taxonomy.data.areas ?? []) : [];
   const activityTypes = taxonomy?.ok ? (taxonomy.data.activityTypes ?? []) : [];
-  const [name, setName] = useState(
-    ctx?.name ?? (parsed?.name && parsed.name !== "(untitled)" ? parsed.name : initial),
-  );
+  const [name, setName] = useState(ctx?.name ?? (parsed?.name && parsed.name !== "(untitled)" ? parsed.name : initial));
 
   // U5: nothing seeded the name, so offer the current selection.
   useEffect(() => {
@@ -105,8 +97,7 @@ export default function Command(
       : "";
   // Pre-fill the Start only when the text gave an exact time. Otherwise leave it
   // empty, so a duration alone fits a slot and the user can pick a time.
-  const startDefault =
-    parsed?.start && parsed.date ? combineDateTime(parsed.date, parsed.start) : null;
+  const startDefault = parsed?.start && parsed.date ? combineDateTime(parsed.date, parsed.start) : null;
 
   // A capture with no start and no named day is an Inbox idea by default.
   const primaryIsInbox = Boolean(parsed) && !parsed?.start && !parsed?.dateExplicit && !ctxDate;
@@ -176,11 +167,7 @@ export default function Command(
     const minutes = parseDuration(values.duration.trim())?.minutes;
     const durationHours = minutes ? Math.round((minutes / 60) * 100) / 100 : ctx?.durationHours;
     // Keep a chosen or named day as the planned date; do not tag with today by default.
-    const plannedDate = values.start
-      ? todayISO(values.start)
-      : parsed?.dateExplicit
-        ? parsed.date
-        : ctxDate;
+    const plannedDate = values.start ? todayISO(values.start) : parsed?.dateExplicit ? parsed.date : ctxDate;
     const { notes, areaId, activityTypeId } = optionalFields(values);
     await runMutation("Saving…", `Saved “${finalName}” to Inbox`, () =>
       backlogCapture({
@@ -223,12 +210,8 @@ export default function Command(
     );
   }
 
-  const scheduleAction = (
-    <Action.SubmitForm title="Schedule Block" icon={Icon.Calendar} onSubmit={handleSchedule} />
-  );
-  const inboxAction = (
-    <Action.SubmitForm title="Save to Inbox" icon={Icon.Tray} onSubmit={handleInbox} />
-  );
+  const scheduleAction = <Action.SubmitForm title="Schedule Block" icon={Icon.Calendar} onSubmit={handleSchedule} />;
+  const inboxAction = <Action.SubmitForm title="Save to Inbox" icon={Icon.Tray} onSubmit={handleInbox} />;
 
   return (
     <Form
@@ -252,12 +235,7 @@ export default function Command(
     >
       {parsed && <Form.Description title="Preview" text={parsed.preview} />}
       <Form.TextField id="name" title="Name" value={name} onChange={setName} />
-      <Form.DatePicker
-        id="start"
-        title="Start"
-        type={Form.DatePicker.Type.DateTime}
-        defaultValue={startDefault}
-      />
+      <Form.DatePicker id="start" title="Start" type={Form.DatePicker.Type.DateTime} defaultValue={startDefault} />
       <Form.TextField
         id="duration"
         title="Duration"
@@ -428,9 +406,7 @@ function ProposalsList(props: { name: string; request: PlanRequest; initial: Pro
       await replan(toast);
       return;
     }
-    const result = await confirmSchedule([
-      { token: state.commitToken, choice: option.choice ?? index },
-    ]);
+    const result = await confirmSchedule([{ token: state.commitToken, choice: option.choice ?? index }]);
     if (result.ok) {
       toast.style = Toast.Style.Success;
       toast.title = `Scheduled “${props.name}”`;
@@ -450,11 +426,7 @@ function ProposalsList(props: { name: string; request: PlanRequest; initial: Pro
           accessories={option.date ? [{ text: option.date }] : []}
           actions={
             <ActionPanel>
-              <Action
-                title="Use This Slot"
-                icon={Icon.Check}
-                onAction={() => confirm(option, index)}
-              />
+              <Action title="Use This Slot" icon={Icon.Check} onAction={() => confirm(option, index)} />
             </ActionPanel>
           }
         />

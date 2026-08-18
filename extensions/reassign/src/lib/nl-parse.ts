@@ -55,9 +55,7 @@ export function parseCapture(input: string, ref = new Date()): ParsedCapture {
     // A bare time ("3pm") sets a date, but the text did not name a day. Mark the
     // date explicit only when chrono is certain of a day component.
     dateExplicit =
-      result.start.isCertain("day") ||
-      result.start.isCertain("weekday") ||
-      result.start.isCertain("month");
+      result.start.isCertain("day") || result.start.isCertain("weekday") || result.start.isCertain("month");
     if (result.start.isCertain("hour")) start = toHM(result.start.date());
     if (result.end?.isCertain("hour")) end = toHM(result.end.date());
   }

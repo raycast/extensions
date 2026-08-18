@@ -17,14 +17,7 @@ import { refusalView } from "./components/states";
 import { getScheduleWithBacklog, manageBacklog } from "./lib/api";
 import { runMutation } from "./lib/feedback";
 import { humanHours, isIsoDate, relativeDayLabel, todayISO } from "./lib/format";
-import {
-  Area,
-  ActivityType,
-  areaActivityNames,
-  BacklogItem,
-  resolveActivity,
-  resolveArea,
-} from "./lib/schedule-model";
+import { Area, ActivityType, areaActivityNames, BacklogItem, resolveActivity, resolveArea } from "./lib/schedule-model";
 import { WEB_BASE } from "./lib/wire";
 
 export default function Command() {
@@ -36,9 +29,7 @@ export default function Command() {
 
   // Place a parked item with the `schedule` op, then refresh the list.
   async function scheduleItem(id: string, date: string, start: string) {
-    await runMutation("Scheduling…", "Scheduled the block", () =>
-      manageBacklog([{ op: "schedule", id, date, start }]),
-    );
+    await runMutation("Scheduling…", "Scheduled the block", () => manageBacklog([{ op: "schedule", id, date, start }]));
     revalidate();
   }
 
@@ -69,12 +60,7 @@ export default function Command() {
           title="Schedule This Idea…"
           icon={Icon.Calendar}
           onAction={() =>
-            push(
-              <BacklogScheduleForm
-                item={item}
-                onSubmit={(date, start) => scheduleItem(item.id, date, start)}
-              />,
-            )
+            push(<BacklogScheduleForm item={item} onSubmit={(date, start) => scheduleItem(item.id, date, start)} />)
           }
         />
         <Action.OpenInBrowser title="Open Reassign" url={WEB_BASE} />
@@ -90,9 +76,7 @@ export default function Command() {
           style={Action.Style.Destructive}
           shortcut={{ modifiers: ["ctrl"], key: "x" }}
           onAction={async () => {
-            await runMutation("Removing…", "Removed the idea", () =>
-              manageBacklog([{ op: "remove", id: item.id }]),
-            );
+            await runMutation("Removing…", "Removed the idea", () => manageBacklog([{ op: "remove", id: item.id }]));
             revalidate();
           }}
         />
@@ -118,12 +102,7 @@ export default function Command() {
           accessories={showingDetail ? undefined : accessories(item, areas, todayIso)}
           detail={
             showingDetail ? (
-              <BacklogDetail
-                item={item}
-                areas={areas}
-                activityTypes={activityTypes}
-                todayIso={todayIso}
-              />
+              <BacklogDetail item={item} areas={areas} activityTypes={activityTypes} todayIso={todayIso} />
             ) : undefined
           }
           actions={itemActions(item)}
@@ -156,12 +135,7 @@ export default function Command() {
 }
 
 /** The right-hand pane: notes plus a duration / planned-date / area table. */
-function BacklogDetail(props: {
-  item: BacklogItem;
-  areas: Area[];
-  activityTypes: ActivityType[];
-  todayIso: string;
-}) {
+function BacklogDetail(props: { item: BacklogItem; areas: Area[]; activityTypes: ActivityType[]; todayIso: string }) {
   const { item, areas, activityTypes, todayIso } = props;
   const title = item.name || "(untitled)";
   const notes = typeof item.notes === "string" ? item.notes.trim() : "";
@@ -182,9 +156,7 @@ function BacklogDetail(props: {
               <List.Item.Detail.Metadata.TagList.Item text={area.name} color={area.color} />
             </List.Item.Detail.Metadata.TagList>
           ) : null}
-          {activity ? (
-            <List.Item.Detail.Metadata.Label title="Activity" text={activity.name} />
-          ) : null}
+          {activity ? <List.Item.Detail.Metadata.Label title="Activity" text={activity.name} /> : null}
         </List.Item.Detail.Metadata>
       }
     />

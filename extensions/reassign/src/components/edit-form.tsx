@@ -105,11 +105,7 @@ export function EditForm(props: {
         </Form.Dropdown>
       )}
       {activityTypes.length > 0 && (
-        <Form.Dropdown
-          id="activityTypeId"
-          title="Activity"
-          defaultValue={currentActivity?.id ?? ""}
-        >
+        <Form.Dropdown id="activityTypeId" title="Activity" defaultValue={currentActivity?.id ?? ""}>
           <Form.Dropdown.Item value="" title="None" />
           {activityTypes.map((type) => (
             <Form.Dropdown.Item key={type.id} value={type.id} title={type.name} />

@@ -131,9 +131,7 @@ export type ReflectStatus = "kept" | "skipped" | "changed" | "added";
 /** The terminal reflect state of a block, or null when it is still open. */
 export function reflectState(event: ScheduleEvent): ReflectStatus | null {
   const state = event.reflect?.state ?? event.reflect?.status;
-  return state === "kept" || state === "skipped" || state === "changed" || state === "added"
-    ? state
-    : null;
+  return state === "kept" || state === "skipped" || state === "changed" || state === "added" ? state : null;
 }
 
 /** True when the block carries a terminal reflect state. */
@@ -147,10 +145,7 @@ export function isBlockingKind(event: ScheduleEvent): boolean {
 }
 
 /** Resolve an area from an inline value or an `areaId` join. Works for events and backlog items. */
-export function resolveArea(
-  item: { area?: Area | null; areaId?: string },
-  areas: Area[],
-): Area | null {
+export function resolveArea(item: { area?: Area | null; areaId?: string }, areas: Area[]): Area | null {
   if (item.area) return item.area;
   if (item.areaId) return areas.find((a) => a.id === item.areaId) ?? null;
   return null;
@@ -358,11 +353,7 @@ export function collectAgendaFilters(model: TodayModel): {
 }
 
 /** True when the event matches the filter value ("all" | "area:<id>" | "activity:<id>"). */
-export function eventMatchesFilter(
-  event: ScheduleEvent,
-  model: TodayModel,
-  filter: string,
-): boolean {
+export function eventMatchesFilter(event: ScheduleEvent, model: TodayModel, filter: string): boolean {
   if (filter === "all") return true;
   const sep = filter.indexOf(":");
   if (sep === -1) return true;
@@ -374,11 +365,7 @@ export function eventMatchesFilter(
 }
 
 /** False when the block's kind is currently hidden by a kind toggle. */
-export function passesKindFilter(
-  event: ScheduleEvent,
-  hideNonBlocking: boolean,
-  hideReference: boolean,
-): boolean {
+export function passesKindFilter(event: ScheduleEvent, hideNonBlocking: boolean, hideReference: boolean): boolean {
   if (hideNonBlocking && event.kind === "non-blocking") return false;
   if (hideReference && event.kind === "reference") return false;
   return true;

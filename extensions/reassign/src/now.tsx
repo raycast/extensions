@@ -34,13 +34,9 @@ interface Prefs {
 
 export default function Command() {
   const prefs = getPreferenceValues<Prefs>();
-  const { data, isLoading, revalidate } = useCachedPromise(
-    (date: string) => getSchedule(date, true),
-    [todayISO()],
-    {
-      keepPreviousData: true,
-    },
-  );
+  const { data, isLoading, revalidate } = useCachedPromise((date: string) => getSchedule(date, true), [todayISO()], {
+    keepPreviousData: true,
+  });
 
   // Fire block-transition notifications on each background tick.
   useEffect(() => {
@@ -170,17 +166,9 @@ export default function Command() {
             onAction={() => launchCommand({ name: "inbox", type: LaunchType.UserInitiated })}
           />
         )}
-        <MenuBarExtra.Item
-          title="Open Reassign"
-          icon={Icon.Globe}
-          onAction={() => open(WEB_BASE)}
-        />
+        <MenuBarExtra.Item title="Open Reassign" icon={Icon.Globe} onAction={() => open(WEB_BASE)} />
         <MenuBarExtra.Item title="Refresh Now" icon={Icon.ArrowClockwise} onAction={revalidate} />
-        <MenuBarExtra.Item
-          title="Preferences…"
-          icon={Icon.Gear}
-          onAction={openCommandPreferences}
-        />
+        <MenuBarExtra.Item title="Preferences…" icon={Icon.Gear} onAction={openCommandPreferences} />
         <MenuBarExtra.Item
           title="Log Out"
           icon={Icon.Logout}
@@ -201,9 +189,7 @@ function barTitle(
   showName: boolean,
 ): { title: string; icon: { source: Icon; tintColor: Color | string } } {
   if (current) {
-    const label = showName
-      ? `${current.name || "block"} · until ${current.end}`
-      : `until ${current.end}`;
+    const label = showName ? `${current.name || "block"} · until ${current.end}` : `until ${current.end}`;
     return { title: label, icon: { source: Icon.CircleFilled, tintColor: Color.Green } };
   }
   if (next) {

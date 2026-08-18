@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  launchCommand,
-  LaunchType,
-  List,
-  open,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, launchCommand, LaunchType, List, open, useNavigation } from "@raycast/api";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { useState } from "react";
 import {
@@ -55,19 +46,10 @@ interface KindFilter {
 /** The Agenda command: a single day (default) or the next week, one toggle apart. */
 export default function Command() {
   // Persist the scope and kind toggles across launches (useState resets on close).
-  const { value: storedScope, setValue: setScope } = useLocalStorage<AgendaScope>(
-    "agenda.scope",
-    "week",
-  );
+  const { value: storedScope, setValue: setScope } = useLocalStorage<AgendaScope>("agenda.scope", "week");
   const scope = storedScope ?? "week";
-  const { value: hideNonBlocking, setValue: setHideNonBlocking } = useLocalStorage(
-    "agenda.hideNonBlocking",
-    false,
-  );
-  const { value: hideReference, setValue: setHideReference } = useLocalStorage(
-    "agenda.hideReference",
-    false,
-  );
+  const { value: hideNonBlocking, setValue: setHideNonBlocking } = useLocalStorage("agenda.hideNonBlocking", false);
+  const { value: hideReference, setValue: setHideReference } = useLocalStorage("agenda.hideReference", false);
   const onToggleScope = () => setScope(scope === "day" ? "week" : "day");
   const hideNB = hideNonBlocking ?? false;
   const hideRef = hideReference ?? false;
@@ -198,9 +180,7 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
           [
             key,
             model.sections[key].filter(
-              (e) =>
-                eventMatchesFilter(e, model, filter) &&
-                passesKindFilter(e, hideNonBlocking, hideReference),
+              (e) => eventMatchesFilter(e, model, filter) && passesKindFilter(e, hideNonBlocking, hideReference),
             ),
           ] as const,
       )
@@ -234,11 +214,7 @@ function DayView(props: { scope: AgendaScope; onToggleScope: () => void; kind: K
             {filterOptions.activities.length > 0 && (
               <List.Dropdown.Section title="Activities">
                 {filterOptions.activities.map((activity) => (
-                  <List.Dropdown.Item
-                    key={activity.id}
-                    title={activity.name}
-                    value={`activity:${activity.id}`}
-                  />
+                  <List.Dropdown.Item key={activity.id} title={activity.name} value={`activity:${activity.id}`} />
                 ))}
               </List.Dropdown.Section>
             )}
@@ -351,8 +327,7 @@ function transformEvents(events: ScheduleEvent[], op: OptimisticOp): ScheduleEve
     if (event.id !== op.id) return event;
     // Set both fields: reflectState reads `state` first, so a re-reflect of an
     // already-reflected block must overwrite `state`, not only `status`.
-    if (op.op === "reflect")
-      return { ...event, reflect: { ...event.reflect, state: op.status, status: op.status } };
+    if (op.op === "reflect") return { ...event, reflect: { ...event.reflect, state: op.status, status: op.status } };
     return {
       ...event,
       start: addMinutesHM(event.start, op.byMinutes),
@@ -438,11 +413,7 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
           icon={Icon.Plus}
           onAction={() => launchCommand({ name: "add", type: LaunchType.UserInitiated })}
         />
-        <Action
-          title="Open Day in Reassign"
-          icon={Icon.Globe}
-          onAction={() => open(webDayUrl(date))}
-        />
+        <Action title="Open Day in Reassign" icon={Icon.Globe} onAction={() => open(webDayUrl(date))} />
         {navSection()}
       </ActionPanel>
     );
@@ -456,11 +427,7 @@ function WeekView(props: { scope: AgendaScope; onToggleScope: () => void; kind: 
       searchBarPlaceholder="Filter blocks by name, area, or activity"
     >
       {filteredDays.map(({ day, events }) => (
-        <List.Section
-          key={day.date}
-          title={relativeDayLabel(day.date, todayIso)}
-          subtitle={String(events.length)}
-        >
+        <List.Section key={day.date} title={relativeDayLabel(day.date, todayIso)} subtitle={String(events.length)}>
           {events.length === 0 ? (
             <List.Item
               icon={Icon.Calendar}

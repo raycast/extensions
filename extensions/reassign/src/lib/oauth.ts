@@ -1,12 +1,5 @@
 import { OAuth } from "@raycast/api";
-import {
-  AUTHORIZE_URL,
-  CLIENT_ID,
-  OAUTH_RESOURCE,
-  RAYCAST_REDIRECT,
-  SCOPES,
-  TOKEN_URL,
-} from "./wire";
+import { AUTHORIZE_URL, CLIENT_ID, OAUTH_RESOURCE, RAYCAST_REDIRECT, SCOPES, TOKEN_URL } from "./wire";
 
 // The `resource` (RFC 8707) audience must ride the authorize and token calls,
 // but never the refresh call. Without it the token endpoint defaults the
@@ -43,6 +36,12 @@ let refreshInFlight: Promise<string> | null = null;
 // store new tokens after it (that would silently undo the logout).
 let logoutEpoch = 0;
 
+// Set synchronously on sign-out, cleared only on a fresh sign-in. It closes the
+// window where a refresh starts during `signOut`'s async token removal: that
+// refresh reads the still-stored token and captures the new epoch, so only this
+// flag (checked before `setTokens`) stops it from re-authenticating.
+let signedOut = false;
+
 /** A token-endpoint failure that carries the HTTP status (undefined = network). */
 class TokenEndpointError extends Error {
   status?: number;
@@ -62,16 +61,14 @@ export async function signIn(): Promise<void> {
     extraParameters: { resource: OAUTH_RESOURCE },
   });
   const { authorizationCode } = await client.authorize(authRequest);
-  const tokens = await exchangeCode(
-    authorizationCode,
-    authRequest.redirectURI,
-    authRequest.codeVerifier,
-  );
+  const tokens = await exchangeCode(authorizationCode, authRequest.redirectURI, authRequest.codeVerifier);
   await client.setTokens(tokens);
+  signedOut = false;
 }
 
 /** Clear the stored session. The next call forces a new sign-in. */
 export async function signOut(): Promise<void> {
+  signedOut = true;
   logoutEpoch += 1;
   refreshInFlight = null;
   await client.removeTokens();
@@ -116,8 +113,10 @@ async function refresh(refreshToken: string): Promise<string> {
       // Keep the old refresh token when the server omits a new one, or the next
       // refresh finds no token and forces an unneeded sign-in.
       if (!tokens.refresh_token) tokens.refresh_token = refreshToken;
-      // A sign-out happened while this refresh was in flight — do not re-store.
-      if (logoutEpoch !== epoch) {
+      // A sign-out happened while this refresh was in flight (or during it) — do
+      // not re-store. The flag catches a refresh that started inside signOut's
+      // window; the epoch catches one that started before an intervening logout.
+      if (signedOut || logoutEpoch !== epoch) {
         throw new NotAuthorizedError("Signed out during refresh");
       }
       await client.setTokens(tokens);
@@ -130,11 +129,7 @@ async function refresh(refreshToken: string): Promise<string> {
 }
 
 /** Exchange the authorization code for a token set. Sends `resource`. */
-async function exchangeCode(
-  code: string,
-  redirectURI: string,
-  codeVerifier: string,
-): Promise<TokenResponse> {
+async function exchangeCode(code: string, redirectURI: string, codeVerifier: string): Promise<TokenResponse> {
   const body = new URLSearchParams({
     grant_type: "authorization_code",
     code,

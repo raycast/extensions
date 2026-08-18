@@ -35,9 +35,7 @@ export function AgendaItem(props: {
       keywords={eventKeywords(event, areas, activityTypes ?? [])}
       accessories={isShowingDetail ? undefined : accessories(event, areas)}
       detail={
-        isShowingDetail ? (
-          <BlockDetail event={event} areas={areas} activityTypes={activityTypes ?? []} />
-        ) : undefined
+        isShowingDetail ? <BlockDetail event={event} areas={areas} activityTypes={activityTypes ?? []} /> : undefined
       }
       actions={actions}
     />
@@ -45,11 +43,7 @@ export function AgendaItem(props: {
 }
 
 /** The right-hand detail pane: a title/notes body and a metadata table. */
-export function BlockDetail(props: {
-  event: ScheduleEvent;
-  areas: Area[];
-  activityTypes: ActivityType[];
-}) {
+export function BlockDetail(props: { event: ScheduleEvent; areas: Area[]; activityTypes: ActivityType[] }) {
   const { event, areas, activityTypes } = props;
   const title = event.name || "(untitled)";
   const area = resolveArea(event, areas);
@@ -66,10 +60,7 @@ export function BlockDetail(props: {
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Time" text={formatRange(event)} />
-          <List.Item.Detail.Metadata.Label
-            title="Duration"
-            text={humanDuration(event.durationMinutes)}
-          />
+          <List.Item.Detail.Metadata.Label title="Duration" text={humanDuration(event.durationMinutes)} />
           {meeting ? (
             <List.Item.Detail.Metadata.Link
               title="Meeting"
@@ -77,22 +68,16 @@ export function BlockDetail(props: {
               text={meeting.label ? `Join ${meeting.label}` : "Join"}
             />
           ) : null}
-          {locationText ? (
-            <List.Item.Detail.Metadata.Label title="Location" text={locationText} />
-          ) : null}
+          {locationText ? <List.Item.Detail.Metadata.Label title="Location" text={locationText} /> : null}
           {area ? (
             <List.Item.Detail.Metadata.TagList title="Area">
               <List.Item.Detail.Metadata.TagList.Item text={area.name} color={area.color} />
             </List.Item.Detail.Metadata.TagList>
           ) : null}
-          {activity ? (
-            <List.Item.Detail.Metadata.Label title="Activity" text={activity.name} />
-          ) : null}
+          {activity ? <List.Item.Detail.Metadata.Label title="Activity" text={activity.name} /> : null}
           {source ? <List.Item.Detail.Metadata.Label title="Source" text={source} /> : null}
           {status ? <List.Item.Detail.Metadata.Label title="Status" text={status} /> : null}
-          {event.warning ? (
-            <List.Item.Detail.Metadata.Label title="Warning" text={event.warning} />
-          ) : null}
+          {event.warning ? <List.Item.Detail.Metadata.Label title="Warning" text={event.warning} /> : null}
         </List.Item.Detail.Metadata>
       }
     />
@@ -100,11 +85,7 @@ export function BlockDetail(props: {
 }
 
 /** Search keywords for a row: the area, activity, and source names, when present. */
-function eventKeywords(
-  event: ScheduleEvent,
-  areas: Area[],
-  activityTypes: ActivityType[],
-): string[] {
+function eventKeywords(event: ScheduleEvent, areas: Area[], activityTypes: ActivityType[]): string[] {
   const words = areaActivityNames(event, areas, activityTypes);
   const source = eventSource(event);
   if (source) words.push(source);

@@ -15,14 +15,10 @@ import { refusalView } from "./states";
 export function SearchView(props: { initialQuery?: string }) {
   const [text, setText] = useState(props.initialQuery ?? "");
   const query = text.trim();
-  const { data, isLoading, revalidate } = useCachedPromise(
-    (q: string) => searchEvents(q),
-    [query],
-    {
-      execute: query.length > 0,
-      keepPreviousData: true,
-    },
-  );
+  const { data, isLoading, revalidate } = useCachedPromise((q: string) => searchEvents(q), [query], {
+    execute: query.length > 0,
+    keepPreviousData: true,
+  });
 
   if (data && !data.ok) return refusalView(data, revalidate);
 
@@ -40,11 +36,7 @@ export function SearchView(props: { initialQuery?: string }) {
       searchBarPlaceholder="Search every block by name or notes"
     >
       {groups.map(([date, rows]) => (
-        <List.Section
-          key={date}
-          title={relativeDayLabel(date, todayIso)}
-          subtitle={String(rows.length)}
-        >
+        <List.Section key={date} title={relativeDayLabel(date, todayIso)} subtitle={String(rows.length)}>
           {rows.map((event) => (
             <List.Item
               key={`${event.id}-${event.start}`}

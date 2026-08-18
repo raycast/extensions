@@ -1,5 +1,5 @@
 # Reassign Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - First release.

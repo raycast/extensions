@@ -45,12 +45,7 @@ export function BacklogScheduleForm(props: {
       }
     >
       <Form.Description title="Idea" text={item.name || "(untitled)"} />
-      <Form.DatePicker
-        id="date"
-        title="Date"
-        type={Form.DatePicker.Type.Date}
-        defaultValue={isoToDate(defaultDate)}
-      />
+      <Form.DatePicker id="date" title="Date" type={Form.DatePicker.Type.Date} defaultValue={isoToDate(defaultDate)} />
       <Form.TextField id="start" title="Start" placeholder="HH:MM" />
     </Form>
   );
