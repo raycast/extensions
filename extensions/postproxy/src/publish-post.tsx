@@ -9,6 +9,7 @@ import {
   eligiblePlacementProfiles,
   loadPlacementsByNetwork,
   PLACEMENT_META,
+  resolvePlacements,
 } from "./lib/placements";
 import { createPost } from "./lib/postproxy";
 import { platformIcon, platformLabel } from "./lib/platforms";
@@ -39,22 +40,16 @@ export default function PublishPost() {
         title: v.draft ? "Saving draft…" : scheduled ? "Scheduling…" : "Publishing…",
       });
       try {
-        // Resolve placements against a FRESH fetch for the currently-selected profiles (single-
-        // profile networks only). A placement is mandatory for these networks, so require an
-        // explicit valid choice — never silently substitute a destination the user didn't pick.
+        // Resolve placements fresh for the currently-selected (single-profile) networks. Mandatory
+        // placements that can't be loaded (failed/empty request) or whose selection is no longer
+        // valid produce a clear error instead of publishing without one or to a wrong destination.
         const eligibleNow = eligiblePlacementProfiles(profiles.filter((p) => v.profiles.includes(p.id)));
-        const fresh = eligibleNow.length > 0 ? await loadPlacementsByNetwork(eligibleNow) : {};
-        const resolved: Record<string, string> = {};
-        for (const [net, list] of Object.entries(fresh)) {
-          const validIds = new Set(list.map((placement) => placement.id ?? ""));
-          const chosen = networkPlacements[net];
-          if (chosen === undefined || !validIds.has(chosen)) {
-            toast.style = Toast.Style.Failure;
-            toast.title = "Placement required";
-            toast.message = `Choose a ${PLACEMENT_META[net]?.label ?? net} and try again.`;
-            return;
-          }
-          resolved[net] = chosen;
+        const resolution = await resolvePlacements(eligibleNow, networkPlacements);
+        if (!resolution.ok) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Placement required";
+          toast.message = resolution.message;
+          return;
         }
         const result = await createPost({
           body: v.body,
@@ -62,7 +57,7 @@ export default function PublishPost() {
           media: v.media,
           scheduledAt: scheduled?.toISOString(),
           draft: v.draft,
-          platforms: buildPlatforms(v.platformParams, resolved),
+          platforms: buildPlatforms(v.platformParams, resolution.placements),
         });
         toast.style = Toast.Style.Success;
         toast.title = v.draft ? "Draft saved" : `Post ${result.status}`;

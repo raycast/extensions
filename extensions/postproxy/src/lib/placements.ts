@@ -64,6 +64,64 @@ export async function loadPlacementsByNetwork(profiles: Profile[]): Promise<Reco
   return byNetwork;
 }
 
+/** LinkedIn's placement is optional (defaults to the personal profile); the others are mandatory. */
+const OPTIONAL_PLACEMENT_NETWORKS = new Set(["linkedin"]);
+
+export type ResolvedPlacements = { ok: true; placements: Record<string, string> } | { ok: false; message: string };
+
+/**
+ * Resolve a valid placement id per network for the given (single-profile-per-network) profiles,
+ * fetched fresh at call time. Returns a user-facing error instead of guessing when a mandatory
+ * placement can't be loaded (failed/empty request) or the chosen one is no longer valid — so a post
+ * is never published to a destination the user didn't select, or without a required placement.
+ */
+export async function resolvePlacements(
+  eligibleProfiles: Profile[],
+  chosenByNetwork: Record<string, string>,
+): Promise<ResolvedPlacements> {
+  const placements: Record<string, string> = {};
+  for (const profile of eligibleProfiles) {
+    const net = profile.platform.toLowerCase();
+    const meta = PLACEMENT_META[net];
+    if (!meta) continue;
+    const optional = OPTIONAL_PLACEMENT_NETWORKS.has(net);
+
+    let list: Placement[] | null = null;
+    try {
+      const response = await fetch(api(`/profiles/${profile.id}/placements`), { headers: authHeaders() });
+      if (response.ok) list = normalizeList<Placement>(await response.json());
+    } catch {
+      list = null;
+    }
+
+    if (list === null) {
+      if (optional) {
+        placements[net] = "";
+        continue;
+      }
+      return { ok: false, message: `Couldn't load ${meta.label} options — check your connection and try again.` };
+    }
+    if (list.length === 0) {
+      if (optional) {
+        placements[net] = "";
+        continue;
+      }
+      return { ok: false, message: `No ${meta.label} is available for the selected profile.` };
+    }
+
+    const validIds = new Set(list.map((placement) => placement.id ?? ""));
+    const chosen = chosenByNetwork[net];
+    if (chosen !== undefined && validIds.has(chosen)) {
+      placements[net] = chosen;
+    } else if (optional) {
+      placements[net] = "";
+    } else {
+      return { ok: false, message: `Choose a ${meta.label} and try again.` };
+    }
+  }
+  return { ok: true, placements };
+}
+
 /** Merge raw platform-params JSON with per-network placement selections into the `platforms` object. */
 export function buildPlatforms(
   rawJson: string,
