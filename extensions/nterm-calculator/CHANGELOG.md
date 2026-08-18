@@ -1,6 +1,6 @@
 # N-Term Grade Calculator Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-18
 
 - Calculate exam grades using the N-term main formula and boundary relations
 - Live table from points to grade or N-term to grade
