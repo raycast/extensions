@@ -13,6 +13,32 @@ export function supportsPlacements(platform: string | undefined): boolean {
   return Boolean(PLACEMENT_META[(platform ?? "").toLowerCase()]);
 }
 
+function placementNetworkCounts(profiles: Profile[]): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const profile of profiles) {
+    if (!supportsPlacements(profile.platform)) continue;
+    const net = profile.platform.toLowerCase();
+    counts[net] = (counts[net] ?? 0) + 1;
+  }
+  return counts;
+}
+
+/**
+ * Placements are per-network in the API (one `page_id`/`board_id`/… for the whole network), so a
+ * placement is only unambiguous when a single selected profile is on that network. Returns the
+ * placement-supporting profiles whose network has exactly one selected profile.
+ */
+export function eligiblePlacementProfiles(profiles: Profile[]): Profile[] {
+  const counts = placementNetworkCounts(profiles);
+  return profiles.filter((p) => supportsPlacements(p.platform) && counts[p.platform.toLowerCase()] === 1);
+}
+
+/** Networks with 2+ selected profiles — placements can't be applied unambiguously for these. */
+export function ambiguousPlacementNetworks(profiles: Profile[]): string[] {
+  const counts = placementNetworkCounts(profiles);
+  return Object.keys(counts).filter((net) => counts[net] > 1);
+}
+
 /** Fetch placements for the given profiles, merged & de-duped by network. */
 export async function loadPlacementsByNetwork(profiles: Profile[]): Promise<Record<string, Placement[]>> {
   const byNetwork: Record<string, Placement[]> = {};

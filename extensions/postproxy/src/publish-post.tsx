@@ -3,9 +3,15 @@ import { FormValidation, showFailureToast, useForm, usePromise } from "@raycast/
 import { useEffect, useMemo, useState } from "react";
 import { groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
-import { buildPlatforms, loadPlacementsByNetwork, PLACEMENT_META, supportsPlacements } from "./lib/placements";
+import {
+  ambiguousPlacementNetworks,
+  buildPlatforms,
+  eligiblePlacementProfiles,
+  loadPlacementsByNetwork,
+  PLACEMENT_META,
+} from "./lib/placements";
 import { createPost } from "./lib/postproxy";
-import { platformIcon } from "./lib/platforms";
+import { platformIcon, platformLabel } from "./lib/platforms";
 
 interface FormValues {
   body: string;
@@ -33,10 +39,11 @@ export default function PublishPost() {
         title: v.draft ? "Saving draft…" : scheduled ? "Scheduling…" : "Publishing…",
       });
       try {
-        // Resolve placements against a FRESH fetch for the currently-selected profiles, so a stale
-        // or out-of-order placement load can't send another profile's page/board/org/channel ID.
-        const targetsNow = profiles.filter((p) => v.profiles.includes(p.id) && supportsPlacements(p.platform));
-        const fresh = targetsNow.length > 0 ? await loadPlacementsByNetwork(targetsNow) : {};
+        // Resolve placements against a FRESH fetch for the currently-selected profiles (single-
+        // profile networks only), so a stale/out-of-order load or another profile's placement can't
+        // leak in.
+        const eligibleNow = eligiblePlacementProfiles(profiles.filter((p) => v.profiles.includes(p.id)));
+        const fresh = eligibleNow.length > 0 ? await loadPlacementsByNetwork(eligibleNow) : {};
         const resolved: Record<string, string> = {};
         for (const [net, list] of Object.entries(fresh)) {
           const validIds = new Set(list.map((placement) => placement.id ?? ""));
@@ -81,14 +88,16 @@ export default function PublishPost() {
     },
   });
 
-  // Placements for the currently-selected profiles on placement-supporting networks.
+  // Placements only for networks where exactly one profile is selected (per-network API limitation).
   const selectedIds = values.profiles ?? [];
-  const placementProfiles = profiles.filter((p) => selectedIds.includes(p.id) && supportsPlacements(p.platform));
-  const placementKey = placementProfiles
+  const selectedProfiles = profiles.filter((p) => selectedIds.includes(p.id));
+  const eligibleProfiles = eligiblePlacementProfiles(selectedProfiles);
+  const ambiguousNetworks = ambiguousPlacementNetworks(selectedProfiles);
+  const placementKey = eligibleProfiles
     .map((p) => p.id)
     .sort()
     .join(",");
-  const placementTargets = useMemo(() => placementProfiles, [placementKey]);
+  const placementTargets = useMemo(() => eligibleProfiles, [placementKey]);
   const { data: placementsByNetwork } = usePromise(loadPlacementsByNetwork, [placementTargets]);
   const placementNetworks = placementsByNetwork
     ? Object.keys(placementsByNetwork).filter((n) => PLACEMENT_META[n])
@@ -136,7 +145,7 @@ export default function PublishPost() {
         )}
       </Form.TagPicker>
 
-      {placementNetworks.length > 0 ? <Form.Separator /> : null}
+      {placementNetworks.length > 0 || ambiguousNetworks.length > 0 ? <Form.Separator /> : null}
       {placementNetworks.map((net) => (
         <Form.Dropdown
           key={net}
@@ -155,6 +164,15 @@ export default function PublishPost() {
           ))}
         </Form.Dropdown>
       ))}
+      {ambiguousNetworks.length > 0 ? (
+        <Form.Description
+          text={`Placement selection is hidden for ${ambiguousNetworks
+            .map(platformLabel)
+            .join(
+              ", ",
+            )} — you selected multiple profiles on that network. Publish them separately, or set the page/board/organization/channel ID per profile in Platform Parameters below.`}
+        />
+      ) : null}
 
       <Form.Separator />
       <Form.FilePicker title="Media" allowMultipleSelection {...itemProps.media} />
