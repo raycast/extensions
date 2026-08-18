@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { NotLoggedInError, listRecordings, webLink } from "./plaud";
+import { NotLoggedInError, PAGE_SIZE, listRecordings, webLink } from "./plaud";
 
 function formatDuration(ms: number): string {
   if (!ms || ms < 0) return "–";
@@ -12,13 +12,20 @@ function formatDuration(ms: number): string {
 }
 
 export default function SearchRecordings() {
-  const { data, isLoading, error, revalidate } = usePromise(listRecordings, [], {
-    onError: (err) => {
-      if (!(err instanceof NotLoggedInError)) {
-        showFailureToast(err, { title: "Could not load recordings" });
-      }
+  const { data, isLoading, error, revalidate, pagination } = usePromise(
+    () => async (options: { page: number }) => {
+      const recordings = await listRecordings(options.page + 1);
+      return { data: recordings, hasMore: recordings.length === PAGE_SIZE };
     },
-  });
+    [],
+    {
+      onError: (err) => {
+        if (!(err instanceof NotLoggedInError)) {
+          showFailureToast(err, { title: "Could not load recordings" });
+        }
+      },
+    },
+  );
 
   if (error instanceof NotLoggedInError) {
     return (
@@ -42,7 +49,7 @@ export default function SearchRecordings() {
   }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search recordings…">
+    <List isLoading={isLoading} pagination={pagination} searchBarPlaceholder="Search recordings…">
       <List.EmptyView icon={Icon.Microphone} title="No recordings" description="Nothing found in your Plaud account" />
       {data?.map((rec) => (
         <List.Item

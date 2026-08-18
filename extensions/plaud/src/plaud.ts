@@ -93,10 +93,12 @@ function demoRecordings(): PlaudRecording[] {
   }));
 }
 
-export async function listRecordings(): Promise<PlaudRecording[]> {
-  if (existsSync(DEMO_FLAG)) return demoRecordings();
+export const PAGE_SIZE = 100;
+
+export async function listRecordings(page: number): Promise<PlaudRecording[]> {
+  if (existsSync(DEMO_FLAG)) return page === 1 ? demoRecordings() : [];
   const token = await getToken();
-  const res = await fetch(`${API_BASE}/open/third-party/files/?page=1&page_size=100`, {
+  const res = await fetch(`${API_BASE}/open/third-party/files/?page=${page}&page_size=${PAGE_SIZE}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (res.status === 401 || res.status === 403) throw new NotLoggedInError();
