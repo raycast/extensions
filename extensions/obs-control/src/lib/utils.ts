@@ -2,6 +2,12 @@ import type { Alert } from "@raycast/api";
 import { confirmAlert, getApplications, open, popToRoot } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
+export async function getObsApplication() {
+  const applications = await getApplications();
+
+  return applications.find((app) => app.bundleId === "com.obsproject.obs-studio");
+}
+
 export const appNotInstallAlertDialog = async () => {
   const options: Alert.Options = {
     title: "OBS Studio is Not Installed",
@@ -24,7 +30,16 @@ export const showWebsocketConnectionErrorToast = async () => {
 };
 
 export async function appInstalled() {
-  const applications = await getApplications();
+  return !!(await getObsApplication());
+}
 
-  return !!applications.find((app) => app.bundleId === "com.obsproject.obs-studio");
+export async function openObsStudio() {
+  const app = await getObsApplication();
+
+  if (app?.path) {
+    await open(app.path);
+    return;
+  }
+
+  await open("obs");
 }
