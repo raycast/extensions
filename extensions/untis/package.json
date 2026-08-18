@@ -68,6 +68,7 @@
   "dependencies": {
     "@raycast/api": "^1.104.13",
     "@raycast/utils": "^2.2.4",
+    "https-proxy-agent": "^5.0.1",
     "otplib": "^12.0.1",
     "webuntis": "^2.2.1"
   },
