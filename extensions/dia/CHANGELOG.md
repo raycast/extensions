@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Close Tab] - {PR_MERGE_DATE}
+## [Close Tab] - 2026-08-18
 
 - Added Close Tab action to Search Dia and Search Tabs.
 
