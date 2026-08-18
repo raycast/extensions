@@ -67,6 +67,12 @@ export async function loadPlacementsByNetwork(profiles: Profile[]): Promise<Reco
 /** LinkedIn's placement is optional (defaults to the personal profile); the others are mandatory. */
 const OPTIONAL_PLACEMENT_NETWORKS = new Set(["linkedin"]);
 
+/** True when the network mandates a placement (publishing fails without one). */
+export function requiresPlacement(platform: string | undefined): boolean {
+  const net = (platform ?? "").toLowerCase();
+  return Boolean(PLACEMENT_META[net]) && !OPTIONAL_PLACEMENT_NETWORKS.has(net);
+}
+
 export type ResolvedPlacements = { ok: true; placements: Record<string, string> } | { ok: false; message: string };
 
 /**

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { FormValidation, showFailureToast, useForm, usePromise } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
 import {
@@ -9,6 +9,7 @@ import {
   eligiblePlacementProfiles,
   loadPlacementsByNetwork,
   PLACEMENT_META,
+  requiresPlacement,
   resolvePlacements,
 } from "./lib/placements";
 import { createPost } from "./lib/postproxy";
@@ -104,25 +105,6 @@ export default function PublishPost() {
     ? Object.keys(placementsByNetwork).filter((n) => PLACEMENT_META[n])
     : [];
 
-  // Placement is mandatory (except LinkedIn's null-id personal profile). Reconcile the selection
-  // against the currently-available placements: keep it only if still valid for the selected
-  // profiles, otherwise default to the first available; drop networks no longer in play.
-  useEffect(() => {
-    if (!placementsByNetwork) return;
-    setNetworkPlacements((prev) => {
-      const next: Record<string, string> = {};
-      for (const [net, list] of Object.entries(placementsByNetwork)) {
-        const validIds = new Set(list.map((placement) => placement.id ?? ""));
-        const current = prev[net];
-        next[net] = current !== undefined && validIds.has(current) ? current : (list[0]?.id ?? "");
-      }
-      const unchanged =
-        Object.keys(next).length === Object.keys(prev).length &&
-        Object.entries(next).every(([net, value]) => prev[net] === value);
-      return unchanged ? prev : next;
-    });
-  }, [placementsByNetwork]);
-
   return (
     <Form
       isLoading={isLoading}
@@ -155,6 +137,10 @@ export default function PublishPost() {
           value={networkPlacements[net] ?? ""}
           onChange={(value) => setNetworkPlacements((prev) => ({ ...prev, [net]: value }))}
         >
+          {/* Mandatory networks start unselected so the user must choose (no silent default). */}
+          {requiresPlacement(net) ? (
+            <Form.Dropdown.Item value="" title={`Choose a ${PLACEMENT_META[net].label}…`} />
+          ) : null}
           {(placementsByNetwork?.[net] ?? []).map((placement) => (
             <Form.Dropdown.Item
               key={placement.id ?? placement.name}
