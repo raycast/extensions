@@ -2,12 +2,16 @@ import { describe, expect, it } from "vitest";
 import { markdownCode, parseEnvironment, parseIntegrationStatus, parseShellWords, shellQuote } from "../src/lib/parsers";
 
 describe("parseEnvironment", () => {
-  it("accepts lines, commas, comments, and values containing equals", () => {
-    expect(parseEnvironment("FOO=one\n# comment\nBAR=two=three, EMPTY=")).toEqual([
+  it("accepts lines, comments, and values containing equals", () => {
+    expect(parseEnvironment("FOO=one\n# comment\nBAR=two=three\nEMPTY=")).toEqual([
       "FOO=one",
       "BAR=two=three",
       "EMPTY=",
     ]);
+  });
+
+  it("keeps commas inside values", () => {
+    expect(parseEnvironment("NO_PROXY=localhost,127.0.0.1")).toEqual(["NO_PROXY=localhost,127.0.0.1"]);
   });
 
   it("rejects invalid keys and missing equals signs", () => {

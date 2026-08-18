@@ -11,7 +11,7 @@ import { ErrorView, abbreviatePath, statusIcon, statusTitle, tabLabel } from "./
 type Scope = "all" | "attention" | "workspaces" | "tabs" | "panes" | "agents";
 
 function paneLabel(pane: PaneInfo): string {
-  return pane.title || pane.terminal_title_stripped || pane.terminal_title || "Shell";
+  return pane.label || pane.terminal_title_stripped || pane.terminal_title || "Shell";
 }
 
 export default function Command() {

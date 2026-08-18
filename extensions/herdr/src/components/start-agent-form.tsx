@@ -22,7 +22,7 @@ function getDestinationTitle(destination: AgentDestination, snapshot?: HerdrSnap
     return `New Tab in ${workspace?.label || "Workspace"}`;
   }
   const pane = snapshot?.panes.find((item) => item.pane_id === destination.slice(5));
-  return pane?.title || pane?.terminal_title_stripped || pane?.cwd || "Selected Pane";
+  return pane?.label || pane?.terminal_title_stripped || pane?.cwd || "Selected Pane";
 }
 
 export function StartAgentForm({
@@ -194,7 +194,7 @@ export function StartAgentForm({
               <Form.Dropdown.Item
                 key={pane.pane_id}
                 value={`pane:${pane.pane_id}`}
-                title={pane.title || pane.terminal_title_stripped || pane.cwd || pane.pane_id}
+                title={pane.label || pane.terminal_title_stripped || pane.cwd || pane.pane_id}
                 icon={Icon.Terminal}
               />
             ))}

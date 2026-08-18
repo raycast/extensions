@@ -1,6 +1,8 @@
+// Entries split on newlines only: env values like NO_PROXY=localhost,127.0.0.1
+// legitimately contain commas.
 export function parseEnvironment(input: string): string[] {
   const values: string[] = [];
-  for (const rawLine of input.split(/\r?\n|,/)) {
+  for (const rawLine of input.split(/\r?\n/)) {
     const line = rawLine.trim();
     if (!line || line.startsWith("#")) continue;
     const equals = line.indexOf("=");

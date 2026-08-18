@@ -9,6 +9,7 @@ import type { HerdrSession, HerdrSnapshot, PaneInfo } from "./types";
 interface RunOptions {
   timeout?: number;
   session?: string;
+  signal?: AbortSignal;
 }
 
 interface CliEnvelope<T> {
@@ -39,9 +40,16 @@ async function isExecutable(path: string): Promise<boolean> {
   }
 }
 
+function expandHomePrefix(path: string): string {
+  if (path === "~") return homedir();
+  if (path.startsWith("~/")) return join(homedir(), path.slice(2));
+  if (path.startsWith("$HOME/")) return join(homedir(), path.slice("$HOME/".length));
+  return path;
+}
+
 export async function resolveHerdrBinary(): Promise<string> {
   const preference = getHerdrPreferences().herdrPath?.trim();
-  const configured = preference?.startsWith("~/") ? join(homedir(), preference.slice(2)) : preference;
+  const configured = preference ? expandHomePrefix(preference) : preference;
   if (configured) {
     if (await isExecutable(configured)) return configured;
     throw new HerdrError(
@@ -75,17 +83,19 @@ export async function resolveHerdrBinary(): Promise<string> {
   );
 }
 
-function extractCliError(stdout: string, stderr: string): HerdrError | undefined {
-  for (const candidate of [stderr.trim(), stdout.trim()]) {
-    if (!candidate) continue;
-    try {
-      const parsed = JSON.parse(candidate) as CliEnvelope<unknown>;
-      if (parsed.error) {
-        return new HerdrError(parsed.error.message || "Herdr command failed", parsed.error.code, candidate);
-      }
-    } catch {
-      // The CLI also returns human-readable errors. They are handled by the caller.
+// Only stderr is scanned: commands like `pane read` return raw terminal text
+// on stdout, which could itself be a JSON document with a top-level `error`
+// key. Real CLI errors always arrive as a JSON envelope on stderr.
+function extractCliError(stderr: string): HerdrError | undefined {
+  const candidate = stderr.trim();
+  if (!candidate) return undefined;
+  try {
+    const parsed = JSON.parse(candidate) as CliEnvelope<unknown>;
+    if (parsed.error) {
+      return new HerdrError(parsed.error.message || "Herdr command failed", parsed.error.code, candidate);
     }
+  } catch {
+    // The CLI also returns human-readable errors. They are handled by the caller.
   }
   return undefined;
 }
@@ -94,17 +104,23 @@ export async function runHerdr(args: string[], options: RunOptions = {}): Promis
   const binary = await resolveHerdrBinary();
   const preferences = getHerdrPreferences();
   const selectedSession = options.session ?? preferences.sessionName?.trim();
-  const env = { ...process.env };
-  if (selectedSession && selectedSession !== "default") env.HERDR_SESSION = selectedSession;
-  else delete env.HERDR_SESSION;
+  // Session selection is the --session global flag. The CLI treats
+  // HERDR_SESSION purely as an export into panes it spawns, so setting it here
+  // would select nothing.
+  const sessionArgs = selectedSession && selectedSession !== "default" ? ["--session", selectedSession] : [];
 
   return new Promise<string>((resolve, reject) => {
     execFile(
       binary,
-      args,
-      { env, timeout: options.timeout ?? 30_000, maxBuffer: 16 * 1024 * 1024, encoding: "utf8" },
+      [...sessionArgs, ...args],
+      {
+        timeout: options.timeout ?? 30_000,
+        maxBuffer: 16 * 1024 * 1024,
+        encoding: "utf8",
+        signal: options.signal,
+      },
       (error, stdout, stderr) => {
-        const cliError = extractCliError(stdout, stderr);
+        const cliError = extractCliError(stderr);
         if (cliError) return reject(cliError);
         if (error) {
           const detail = stderr.trim() || stdout.trim() || error.message;
@@ -135,8 +151,8 @@ export async function runHerdrJson<T>(args: string[], options: RunOptions = {}):
   }
 }
 
-export async function getSnapshot(): Promise<HerdrSnapshot> {
-  const result = await runHerdrJson<{ snapshot: HerdrSnapshot }>(["api", "snapshot"]);
+export async function getSnapshot(signal?: AbortSignal): Promise<HerdrSnapshot> {
+  const result = await runHerdrJson<{ snapshot: HerdrSnapshot }>(["api", "snapshot"], { signal });
   if (!result.snapshot) throw new HerdrError("Herdr did not return a session snapshot", "invalid_snapshot");
   return result.snapshot;
 }
