@@ -1,6 +1,6 @@
 # File Tidy Changelog
 
-## [New Icon, and Previews That Leave No Trace] - {PR_MERGE_DATE}
+## [New Icon, and Previews That Leave No Trace] - 2026-08-18
 
 - A refreshed extension icon, with the Store screenshots re-shot to match.
 - Previewing a plan no longer writes anything to the destination. The perceptual-hash cache used by similar-image detection was saved during analysis — before you confirm anything — which could create the destination folder (and a `.tidy` folder inside it) just for looking at a plan. The cache is now written only after a run completes, keyed by where each image actually landed.
