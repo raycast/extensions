@@ -1,6 +1,6 @@
 # Teamwork Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-08-18
 
 - Search tasks assigned to you with active/completed filter
 - Recent tasks list for quick re-access
