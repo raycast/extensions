@@ -96,7 +96,11 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
     () => agents.find((agent) => agent.pane_id === initialAgentId)?.pane_id || agents[0]?.pane_id || "",
     [agents, initialAgentId],
   );
-  const [targetPane, setTargetPane] = useState(initial);
+  // The agents list refreshes while the form is open, so the target is derived
+  // at render: state seeded once from the mount-time list can go stale and
+  // route the prompt to the wrong agent.
+  const [selectedPane, setSelectedPane] = useState<string>();
+  const targetPane = selectedPane && agents.some((agent) => agent.pane_id === selectedPane) ? selectedPane : initial;
   const [prompt, setPrompt] = useState(initialPrompt);
   const [error, setError] = useState<string>();
   const { pop } = useNavigation();
@@ -113,15 +117,14 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
       return;
     }
     const target = getAgentTarget(agent);
-    const sent = await runAction(
-      `Prompting ${agentName(agent)}`,
-      async () => {
-        await sendAgentPrompt(target, text);
-        await addPromptHistory(agent, target, text);
-      },
-      { success: "Prompt Sent", onSuccess: onSent },
-    );
+    const sent = await runAction(`Prompting ${agentName(agent)}`, () => sendAgentPrompt(target, text), {
+      success: "Prompt Sent",
+      onSuccess: onSent,
+    });
     if (!sent) return;
+    // The prompt is already delivered, so a history write failure must not
+    // report the send as failed and invite a duplicate re-send.
+    await addPromptHistory(agent, target, text).catch(() => undefined);
 
     if (getHerdrPreferences().closeAfterPrompt !== false) {
       await closeMainWindow({ clearRootSearch: true });
@@ -173,7 +176,7 @@ export function PromptAgentForm({ agents, initialAgentId, initialPrompt = "", on
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="agent" title="Agent" value={targetPane} onChange={setTargetPane}>
+      <Form.Dropdown id="agent" title="Agent" value={targetPane} onChange={setSelectedPane}>
         {agents.map((agent) => (
           <Form.Dropdown.Item
             key={agent.pane_id}

@@ -5,7 +5,7 @@ import { focusResource, getAgentTarget } from "./lib/herdr";
 import { getHerdrPreferences } from "./lib/preferences";
 import { launchHerdrInTerminal, revealFocusedHerdr } from "./lib/terminal";
 import type { AgentInfo, AgentStatus, HerdrSnapshot } from "./lib/types";
-import { statusIcon, statusTitle } from "./lib/ui";
+import { runAction, statusIcon, statusTitle } from "./lib/ui";
 
 const DISPLAYED_STATUSES: AgentStatus[] = ["blocked", "done", "working", "unknown"];
 
@@ -18,8 +18,18 @@ function agentLocation(agent: AgentInfo, snapshot: HerdrSnapshot): string {
 }
 
 async function focusAgent(agent: AgentInfo): Promise<void> {
-  await focusResource("agent", getAgentTarget(agent));
-  await revealFocusedHerdr();
+  await runAction(
+    `Focusing ${agentName(agent)}`,
+    async () => {
+      await focusResource("agent", getAgentTarget(agent));
+      await revealFocusedHerdr();
+    },
+    { success: `Focused ${agentName(agent)}` },
+  );
+}
+
+function openHerdr(): Promise<boolean> {
+  return runAction("Opening Herdr", () => launchHerdrInTerminal(), { success: "Herdr Opened" });
 }
 
 function AgentItem({ agent, snapshot }: { agent: AgentInfo; snapshot: HerdrSnapshot }) {
@@ -80,7 +90,7 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Herdr Unavailable — Open Herdr"
           icon={Icon.ExclamationMark}
-          onAction={() => void launchHerdrInTerminal()}
+          onAction={() => void openHerdr()}
         />
       ) : null}
 
@@ -137,7 +147,7 @@ export default function Command() {
           title="Open Herdr"
           icon={Icon.Terminal}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
-          onAction={() => void launchHerdrInTerminal()}
+          onAction={() => void openHerdr()}
         />
         <MenuBarExtra.Item
           title="Refresh"

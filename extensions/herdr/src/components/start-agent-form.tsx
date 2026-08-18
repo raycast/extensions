@@ -8,10 +8,21 @@ import { focusResource, runHerdr, sendAgentPrompt } from "../lib/herdr";
 import { parseEnvironment, parseShellWords } from "../lib/parsers";
 import type { StartAgentPreset } from "../lib/start-agent-preset";
 import { revealFocusedHerdr } from "../lib/terminal";
-import { AGENT_KINDS, type AgentKind, type HerdrSnapshot } from "../lib/types";
+import { AGENT_KINDS, type AgentInfo, type AgentKind, type HerdrSnapshot } from "../lib/types";
 import { ErrorView, runAction } from "../lib/ui";
 
 const NAME_PATTERN = /^[a-z][a-z0-9_-]{0,31}$/;
+
+// Herdr rejects a name any live agent already holds, so a defaulted name (the
+// kind) gets a numeric suffix instead of failing the launch.
+function defaultAgentName(kind: AgentKind, agents: AgentInfo[]): string {
+  const taken = new Set(agents.map((agent) => agent.name).filter(Boolean));
+  if (!taken.has(kind)) return kind;
+  for (let suffix = 2; ; suffix++) {
+    const candidate = `${kind}-${suffix}`;
+    if (!taken.has(candidate)) return candidate;
+  }
+}
 
 function getDestinationTitle(destination: AgentDestination, snapshot?: HerdrSnapshot): string {
   if (destination === "new-workspace") return "New Workspace";
@@ -85,7 +96,7 @@ export function StartAgentForm({
     // which may still hold their initial defaults.
     const submittedKind = (values.kind as AgentKind | undefined) ?? kind;
     const submittedFocusAfter = (values.focusAfter as boolean | undefined) ?? focusAfter;
-    const agentName = name.trim() || submittedKind;
+    const agentName = name.trim() || defaultAgentName(submittedKind, data.agents);
     if (!NAME_PATTERN.test(agentName)) {
       setNameError("Use 1–32 lowercase letters, numbers, underscores, or hyphens; start with a letter.");
       return;
@@ -108,27 +119,47 @@ export function StartAgentForm({
       return;
     }
 
-    let shouldCloseRaycast = false;
+    let startedPaneId = "";
     const success = await runAction(
       `Starting ${agentTitle(submittedKind)}`,
       async () => {
-        const paneId = await prepareAgentPane(destination, {
+        startedPaneId = await prepareAgentPane(destination, {
           name: agentName,
           cwd: createsDestination ? cwd[0] : undefined,
           environment: environmentValues,
         });
-        const args = ["agent", "start", agentName, "--kind", submittedKind, "--pane", paneId, "--timeout", "60000"];
+        const args = [
+          "agent",
+          "start",
+          agentName,
+          "--kind",
+          submittedKind,
+          "--pane",
+          startedPaneId,
+          "--timeout",
+          "60000",
+        ];
         if (extraArguments.length) args.push("--", ...extraArguments);
         await runHerdr(args, { timeout: 70_000 });
-        if (prompt.trim()) await sendAgentPrompt(agentName, prompt.trim());
-        if (submittedFocusAfter) {
-          await focusResource("agent", agentName);
-          shouldCloseRaycast = await revealFocusedHerdr();
-        }
+        // The pane id resolves unambiguously, unlike a name another live agent
+        // may share.
+        if (prompt.trim()) await sendAgentPrompt(startedPaneId, prompt.trim());
       },
       { success: `${agentName} Started` },
     );
     if (!success) return;
+
+    let shouldCloseRaycast = false;
+    if (submittedFocusAfter) {
+      // The agent is already running, so a focus failure must not surface as a
+      // launch failure: re-submitting would create a duplicate destination.
+      try {
+        await focusResource("agent", startedPaneId);
+        shouldCloseRaycast = await revealFocusedHerdr();
+      } catch {
+        // Focus is cosmetic once the agent is started.
+      }
+    }
 
     if (shouldCloseRaycast) {
       void onDone?.();

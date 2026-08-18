@@ -97,21 +97,6 @@ export function buildGhosttyFocusScript(title: string): string {
 end tell`;
 }
 
-export function buildGhosttyClearMarkerScript(marker: string): string {
-  const targetMarker = appleScriptString(marker);
-  return `tell application "Ghostty"
-  ignoring case
-    repeat with t in terminals
-      if (name of t as text) is ${targetMarker} then
-        set name of t to "herdr"
-        return "cleared"
-      end if
-    end repeat
-  end ignoring
-  return "miss"
-end tell`;
-}
-
 export function selectWezTermPane(output: string, ttys: string[]): string | undefined {
   let panes: WezTermPane[];
   try {

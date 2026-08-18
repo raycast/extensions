@@ -29,7 +29,7 @@ export default function Command() {
     await runAction(
       "Removing worktree",
       () =>
-        runHerdr(["worktree", "remove", "--workspace", workspaceId, ...(force ? ["--force"] : []), "--json"], {
+        runHerdr(["worktree", "remove", "--workspace", workspaceId, ...(force ? ["--force"] : [])], {
           timeout: 120_000,
         }).then(() => undefined),
       {

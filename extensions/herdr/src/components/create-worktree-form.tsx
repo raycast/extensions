@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, Icon, List, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { useHerdrSnapshot } from "../hooks/use-herdr-snapshot";
 import { runHerdr } from "../lib/herdr";
@@ -30,6 +30,10 @@ export function CreateWorktreeForm({
       setBranchError("Enter a branch name.");
       return;
     }
+    if (!selectedWorkspace) {
+      await showToast({ style: Toast.Style.Failure, title: "Choose a source workspace" });
+      return;
+    }
     const success = await runAction(
       "Creating worktree",
       async () => {
@@ -37,7 +41,7 @@ export function CreateWorktreeForm({
         if (base.trim()) args.push("--base", base.trim());
         if (path.trim()) args.push("--path", path.trim());
         if (label.trim()) args.push("--label", label.trim());
-        args.push(focus ? "--focus" : "--no-focus", "--json");
+        args.push(focus ? "--focus" : "--no-focus");
         await runHerdr(args, { timeout: 120_000 });
       },
       { success: "Worktree Created", onSuccess: onDone },

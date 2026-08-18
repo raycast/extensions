@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  buildGhosttyClearMarkerScript,
   buildGhosttyFocusScript,
   buildITermFocusScript,
   buildTerminalFocusScript,
@@ -41,12 +40,6 @@ describe("terminal focus adapters", () => {
     expect(script).toContain('if (name of t as text) is "herdr-raycast-session"');
     expect(script).not.toContain('is "herdr"');
     expect(script).not.toContain("id of t");
-  });
-
-  it("clears the Ghostty marker title on the matching terminal only", () => {
-    const script = buildGhosttyClearMarkerScript("herdr-raycast-session");
-    expect(script).toContain('if (name of t as text) is "herdr-raycast-session"');
-    expect(script).toContain('set name of t to "herdr"');
   });
 
   it("selects the first WezTerm pane with an exact Herdr TTY", () => {
