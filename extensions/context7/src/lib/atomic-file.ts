@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { mkdir, open, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
+import { mkdir, open, readFile, rename, stat, unlink, utimes, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 
 /**
@@ -31,6 +31,9 @@ export async function writeFileAtomic(filePath: string, contents: string) {
 
 /** Long enough to outlast any real read-modify-write here; short enough that a crash self-heals. */
 const LOCK_STALE_MS = 10_000;
+// Critical sections are only local reads and writes. Refresh well before the stale threshold so
+// a live holder is not mistaken for a crashed one while the process is otherwise healthy.
+const LOCK_HEARTBEAT_MS = 1_000;
 const LOCK_RETRY_MS = 20;
 const LOCK_ATTEMPTS = 100;
 
@@ -44,11 +47,11 @@ const LOCK_ATTEMPTS = 100;
  * the write that a lockstep interleave lands in every time (measured: 1 of 8 concurrent writes
  * survived without a lock, 8 of 8 with one).
  *
- * **Every lock carries an ownership token, and no process ever deletes a lock it does not
- * own.** Without that, two failure modes silently restore lost updates: two processes both
- * judge one stale lock and the second's delete removes a *third* process's fresh lock; and a
- * holder whose lock was broken for being slow deletes its successor's lock on the way out.
- * Both end with two processes inside the critical section at once.
+ * Every lock carries an ownership token. Normal release checks it before deleting, and a
+ * heartbeat keeps a live holder younger than the stale threshold. Node's portable filesystem
+ * API has no conditional-unlink operation, so stale reclamation still has a very small
+ * compare/unlink race between two reclaimers of an already-dead holder; avoiding a live holder
+ * ever entering that path is therefore essential.
  */
 export async function withFileLock<T>(resource: string, operation: () => Promise<T>): Promise<T> {
   // The lock is `<resource>.lock`. `resource` is only a NAME — it need not exist, and need
@@ -60,9 +63,11 @@ export async function withFileLock<T>(resource: string, operation: () => Promise
 
   for (let attempt = 0; attempt < LOCK_ATTEMPTS; attempt += 1) {
     let acquired = false;
+    let created = false;
 
     try {
       const handle = await open(lockPath, "wx");
+      created = true;
 
       try {
         await handle.writeFile(token, "utf8");
@@ -72,17 +77,30 @@ export async function withFileLock<T>(resource: string, operation: () => Promise
 
       acquired = true;
     } catch (error) {
+      // `open("wx")` succeeded but writing the ownership token failed. Nothing else can own
+      // this just-created path yet, so remove it instead of leaving a fresh empty lock behind
+      // until stale-lock recovery runs.
+      if (created) {
+        await unlink(lockPath).catch(() => undefined);
+        throw error;
+      }
+
       if ((error as NodeJS.ErrnoException)?.code !== "EEXIST") {
         throw error;
       }
     }
 
     if (acquired) {
+      const stopHeartbeat = startLockHeartbeat(lockPath, token);
+
       try {
         return await operation();
       } finally {
-        // Only ever remove OUR lock. If it was broken while we ran, the file now belongs to
-        // a successor and deleting it would put two writers in the critical section.
+        // Do not let an already-scheduled refresh touch a successor after release. This also
+        // clears the timer when `operation` throws.
+        await stopHeartbeat();
+        // A matching token makes ordinary release a no-op after a successor has replaced the
+        // lease. See the function-level note for the residual stale-reclaimer TOCTOU window.
         await removeLockIfOwned(lockPath, token);
       }
     }
@@ -94,7 +112,45 @@ export async function withFileLock<T>(resource: string, operation: () => Promise
   throw new Error("Could not save — another Context7 command is still writing. Try again.");
 }
 
-/** Reclaims a lock whose holder died, without touching a lock that has since been replaced. */
+/** Keeps an active lease fresh and waits for any in-flight refresh before releasing it. */
+function startLockHeartbeat(lockPath: string, token: string) {
+  let stopped = false;
+  let refresh = Promise.resolve();
+
+  const tick = () => {
+    refresh = refresh
+      .then(async () => {
+        if (!stopped) {
+          await refreshLockIfOwned(lockPath, token);
+        }
+      })
+      .catch(() => undefined);
+  };
+
+  const timer = setInterval(tick, LOCK_HEARTBEAT_MS);
+  timer.unref();
+
+  return async () => {
+    stopped = true;
+    clearInterval(timer);
+    await refresh;
+  };
+}
+
+async function refreshLockIfOwned(lockPath: string, token: string) {
+  try {
+    if ((await readFile(lockPath, "utf8")) === token) {
+      const now = new Date();
+      await utimes(lockPath, now, now);
+    }
+  } catch {
+    // A crash/reclaimer may have removed the lease. The owner check makes this a harmless
+    // no-op, and the caller will avoid deleting a successor during its final cleanup.
+  }
+}
+
+/** Reclaims a lock whose holder died. The token avoids ordinary successor deletion, but cannot
+ * make the final pathname unlink conditional on that token with portable Node filesystem APIs. */
 async function breakLockIfStale(lockPath: string) {
   const [holder, age] = await Promise.all([
     readFile(lockPath, "utf8").catch(() => undefined),
