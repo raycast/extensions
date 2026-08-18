@@ -307,9 +307,9 @@ if (require.main === module) {
   }
   if (!hostIsAllowed(HOST)) {
     console.error(
-      `ten-four-shelf: refusing to bind ${HOST}. This API has no authentication ` +
-        `and expects a tunnel such as 'tailscale serve' in front of it. Bind ` +
-        `127.0.0.1, or set TENFOUR_ALLOW_ANY_HOST=1 if the network is already trusted.`,
+      `ten-four-shelf: refusing to bind ${HOST}. Bind 127.0.0.1 and expose it ` +
+        `with a tunnel such as 'tailscale serve', or set TENFOUR_ALLOW_ANY_HOST=1 ` +
+        `if the network is already trusted.`,
     );
     process.exit(1);
   }

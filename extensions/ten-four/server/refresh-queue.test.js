@@ -64,3 +64,19 @@ test("an action after the final follow-up check starts another refresh", async (
   await Promise.all([first, action]);
   assert.equal(calls, 2);
 });
+
+test("a follow-up queued while the loop is exiting still runs", async () => {
+  const loads = [deferred(), deferred()];
+  let calls = 0;
+  const refresh = createRefreshQueue(() => loads[calls++].promise);
+
+  const first = refresh();
+  loads[0].promise.then(() => {
+    refresh({ followUp: true });
+  });
+  loads[0].resolve();
+
+  await first;
+  assert.equal(calls, 2);
+  loads[1].resolve();
+});

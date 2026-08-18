@@ -15,9 +15,13 @@ function createRefreshQueue(load) {
           await load();
         } while (followUpQueued);
       } finally {
-        // Clear this before the promise settles. A follow-up action queued after
-        // the loop's final check then starts its own load instead of attaching to
-        // a completed promise.
+        // A follow-up can land after the last `while` check but before we drop
+        // `inflight`. Drain it here so callers awaiting this promise still see
+        // the action's completed mutation.
+        while (followUpQueued) {
+          followUpQueued = false;
+          await load();
+        }
         inflight = null;
       }
     })();
