@@ -163,9 +163,37 @@ async function breakLockIfStale(lockPath: string) {
     return;
   }
 
-  // Keyed on the token we just judged stale: if another process already reclaimed it, the
-  // token differs and this is a no-op instead of deleting the new holder's lock.
-  await removeLockIfOwned(lockPath, holder);
+  await removeStaleLock(lockPath, holder);
+}
+
+/**
+ * Reclaims a dead holder's lock, re-checking BOTH the token and the age immediately before
+ * unlinking.
+ *
+ * The token alone is not enough. Two processes can judge the same stale lock, the first
+ * reclaims it, a third acquires the freed path — and the second's delete then removes that
+ * *successor's* lock, putting two writers in the critical section. Re-reading the token
+ * narrows that window but does not close it.
+ *
+ * Age closes the reachable part: a successor's lock is by definition brand new, so deleting
+ * one would require this process to stall for longer than the stale threshold between the
+ * stat and the unlink below — at which point it is itself the hung process. Node's portable
+ * filesystem API has no conditional unlink, so this is as tight as it gets without a
+ * platform-specific advisory lock; `rename`-to-claim and `link`-based schemes move the same
+ * window rather than removing it.
+ */
+async function removeStaleLock(lockPath: string, staleToken: string) {
+  try {
+    const [content, stats] = await Promise.all([readFile(lockPath, "utf8"), stat(lockPath)]);
+
+    if (content !== staleToken || Date.now() - stats.mtimeMs <= LOCK_STALE_MS) {
+      return;
+    }
+
+    await unlink(lockPath);
+  } catch {
+    // Already reclaimed by someone else, or gone — nothing to do either way.
+  }
 }
 
 async function removeLockIfOwned(lockPath: string, token: string) {
