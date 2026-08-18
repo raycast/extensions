@@ -7,20 +7,26 @@ it over the tailnet.
 ## Run
 
 ```sh
+export TENFOUR_TOKEN="$(openssl rand -hex 32)"
 node server/shelf.js        # listens on 127.0.0.1:7801
 ```
 
-Override with `PORT`, `TENFOUR_FILE`, `TENFOUR_HOST`.
+`TENFOUR_TOKEN` is required and protects requests that reach the loopback
+listener, including from other local users or processes. Configure the same
+value as the Raycast **Shelf Token** preference and in `TENFOUR_TOKEN` for
+remote CLI commands. Override the listener with `PORT`, `TENFOUR_FILE`, and
+`TENFOUR_HOST`.
 
-The API has no authentication of its own: the boundary is the tunnel in front of
-it (see "Expose on the tailnet" below). So the server binds loopback and refuses
-to start on any other address unless you set `TENFOUR_ALLOW_ANY_HOST=1` to say
-the network is already trusted. Binding it openly without that would let anyone
-who can reach the port read, alter, or clear your snippets.
+The service also binds loopback and refuses to start on any other address unless
+you set `TENFOUR_ALLOW_ANY_HOST=1` to say the network is already trusted.
 
 ## Run as a service (systemd, user unit)
 
 ```sh
+mkdir -p ~/.config/ten-four
+chmod 700 ~/.config/ten-four
+printf 'TENFOUR_TOKEN=%s\n' "$(openssl rand -hex 32)" > ~/.config/ten-four/shelf.env
+chmod 600 ~/.config/ten-four/shelf.env
 mkdir -p ~/.config/systemd/user
 cp server/ten-four-shelf.service ~/.config/systemd/user/
 systemctl --user daemon-reload

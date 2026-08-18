@@ -30,6 +30,7 @@ const path = require("path");
 
 const VERSION = "2.1.0";
 const REMOTE = (process.env.TENFOUR_URL || "").replace(/\/$/, "");
+const TOKEN = process.env.TENFOUR_TOKEN || "";
 const STORE =
   process.env.TENFOUR_FILE || path.join(os.homedir(), ".ten-four.json");
 const LOCK = `${STORE}.lock`;
@@ -93,21 +94,25 @@ function processStartTime(pid) {
 }
 
 function lockToken() {
+  const startedAt = processStartTime(process.pid);
   return JSON.stringify({
     pid: process.pid,
-    fingerprint: true,
-    startedAt: processStartTime(process.pid),
+    fingerprint: startedAt !== null,
+    // Do not reclaim a live lock if `ps` is temporarily unavailable.
+    pidOnly: startedAt === null,
+    startedAt,
     token: Math.random().toString(36).slice(2),
   });
 }
 
 function lockOwner(token) {
   try {
-    const { pid, fingerprint, startedAt } = JSON.parse(token);
+    const { pid, fingerprint, pidOnly, startedAt } = JSON.parse(token);
     if (Number.isInteger(pid) && pid > 0) {
       return {
         pid,
         fingerprint: fingerprint === true,
+        pidOnly: pidOnly === true,
         startedAt: typeof startedAt === "string" ? startedAt : null,
       };
     }
@@ -117,6 +122,7 @@ function lockOwner(token) {
   return {
     pid: Number(token.split("-", 1)[0]),
     fingerprint: false,
+    pidOnly: false,
     startedAt: null,
   };
 }
@@ -149,9 +155,10 @@ function withLock(fn) {
             try {
               process.kill(owner.pid, 0);
               ownerAlive =
-                owner.fingerprint &&
-                typeof owner.startedAt === "string" &&
-                processStartTime(owner.pid) === owner.startedAt;
+                owner.pidOnly ||
+                (owner.fingerprint &&
+                  typeof owner.startedAt === "string" &&
+                  processStartTime(owner.pid) === owner.startedAt);
             } catch (error) {
               ownerAlive = error.code === "EPERM";
             }
@@ -189,7 +196,10 @@ function truncate(items) {
 async function api(method, suffix = "", body) {
   const res = await fetch(REMOTE + suffix, {
     method,
-    headers: body ? { "Content-Type": "application/json" } : undefined,
+    headers: {
+      ...(body ? { "Content-Type": "application/json" } : {}),
+      ...(TOKEN ? { Authorization: `Bearer ${TOKEN}` } : {}),
+    },
     body: body ? JSON.stringify(body) : undefined,
   });
   if (!res.ok) {

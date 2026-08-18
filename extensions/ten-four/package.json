@@ -33,6 +33,13 @@
       "type": "textfield",
       "required": false,
       "placeholder": "https://your-host.ts.net/shelf"
+    },
+    {
+      "name": "shelfToken",
+      "title": "Shelf Token",
+      "description": "Required when Shelf URL is set. Must match TENFOUR_TOKEN on the shelf service.",
+      "type": "password",
+      "required": false
     }
   ],
   "dependencies": {

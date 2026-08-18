@@ -16,6 +16,7 @@
  * Port:  7801             (override PORT or TENFOUR_PORT)
  */
 const { execFileSync } = require("child_process");
+const { timingSafeEqual } = require("crypto");
 const http = require("http");
 const fs = require("fs");
 const os = require("os");
@@ -27,6 +28,7 @@ const LOCK = `${STORE}.lock`;
 const LOCK_STALE_MS = 2000;
 const PORT = Number(process.env.PORT || process.env.TENFOUR_PORT || 7801);
 const HOST = process.env.TENFOUR_HOST || "127.0.0.1";
+const AUTH_TOKEN = process.env.TENFOUR_TOKEN || "";
 const MAX_ITEMS = 200;
 
 function load() {
@@ -63,21 +65,26 @@ function processStartTime(pid) {
 }
 
 function lockToken() {
+  const startedAt = processStartTime(process.pid);
   return JSON.stringify({
     pid: process.pid,
-    fingerprint: true,
-    startedAt: processStartTime(process.pid),
+    fingerprint: startedAt !== null,
+    // Keep a live owner safe when `ps` is temporarily unavailable. A later
+    // writer can still reclaim this lock if the PID is no longer alive.
+    pidOnly: startedAt === null,
+    startedAt,
     token: Math.random().toString(36).slice(2),
   });
 }
 
 function lockOwner(token) {
   try {
-    const { pid, fingerprint, startedAt } = JSON.parse(token);
+    const { pid, fingerprint, pidOnly, startedAt } = JSON.parse(token);
     if (Number.isInteger(pid) && pid > 0) {
       return {
         pid,
         fingerprint: fingerprint === true,
+        pidOnly: pidOnly === true,
         startedAt: typeof startedAt === "string" ? startedAt : null,
       };
     }
@@ -87,6 +94,7 @@ function lockOwner(token) {
   return {
     pid: Number(token.split("-", 1)[0]),
     fingerprint: false,
+    pidOnly: false,
     startedAt: null,
   };
 }
@@ -119,9 +127,10 @@ async function withLock(fn) {
             try {
               process.kill(owner.pid, 0);
               ownerAlive =
-                owner.fingerprint &&
-                typeof owner.startedAt === "string" &&
-                processStartTime(owner.pid) === owner.startedAt;
+                owner.pidOnly ||
+                (owner.fingerprint &&
+                  typeof owner.startedAt === "string" &&
+                  processStartTime(owner.pid) === owner.startedAt);
             } catch (error) {
               ownerAlive = error.code === "EPERM";
             }
@@ -192,7 +201,26 @@ function json(res, code, body) {
   res.end(JSON.stringify(body));
 }
 
+function requestIsAuthorized(req) {
+  const authorization = req.headers.authorization;
+  if (
+    !AUTH_TOKEN ||
+    typeof authorization !== "string" ||
+    !authorization.startsWith("Bearer ")
+  ) {
+    return false;
+  }
+  const provided = Buffer.from(authorization.slice("Bearer ".length));
+  const expected = Buffer.from(AUTH_TOKEN);
+  return (
+    provided.length === expected.length && timingSafeEqual(provided, expected)
+  );
+}
+
 async function handle(req, res) {
+  if (!requestIsAuthorized(req)) {
+    return json(res, 401, { error: "unauthorized" });
+  }
   const url = new URL(req.url, "http://localhost");
   const parts = url.pathname.split("/").filter(Boolean); // ["shelf", id?]
   if (parts[0] !== "shelf") return json(res, 404, { error: "not found" });
@@ -262,16 +290,21 @@ function createServer() {
   return http.createServer(handle);
 }
 
-// The API is deliberately unauthenticated: the security boundary is the tunnel
-// in front of it (`tailscale serve`), not the service. Binding anywhere but
-// loopback throws that boundary away and hands every read and mutation to
-// anything that can reach the port, so refuse unless it is asked for by name.
+// The token protects the loopback listener from other local processes. Binding
+// anywhere but loopback still exposes the service to the network, so refuse
+// unless an operator has explicitly opted in.
 function hostIsAllowed(host, allowAny = process.env.TENFOUR_ALLOW_ANY_HOST) {
   const loopback = ["127.0.0.1", "::1", "localhost"];
   return loopback.includes(host) || allowAny === "1";
 }
 
 if (require.main === module) {
+  if (!AUTH_TOKEN) {
+    console.error(
+      "ten-four-shelf: TENFOUR_TOKEN is required to protect the local API.",
+    );
+    process.exit(1);
+  }
   if (!hostIsAllowed(HOST)) {
     console.error(
       `ten-four-shelf: refusing to bind ${HOST}. This API has no authentication ` +
@@ -295,4 +328,5 @@ module.exports = {
   truncate,
   makeId,
   hostIsAllowed,
+  requestIsAuthorized,
 };

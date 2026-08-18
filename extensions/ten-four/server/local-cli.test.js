@@ -1,6 +1,7 @@
 const { test } = require("node:test");
 const assert = require("node:assert/strict");
 const fs = require("fs");
+const http = require("http");
 const os = require("os");
 const path = require("path");
 const { spawn } = require("child_process");
@@ -31,6 +32,38 @@ test("the CLI creates a missing local-store directory", async () => {
   });
 
   assert.equal(JSON.parse(fs.readFileSync(store, "utf8"))[0].text, "first");
+});
+
+test("the remote CLI sends the shelf bearer token", async () => {
+  let authorization;
+  const server = http.createServer((req, res) => {
+    authorization = req.headers.authorization;
+    res.writeHead(201, { "Content-Type": "application/json" });
+    res.end(
+      JSON.stringify({
+        id: "remote",
+        label: "remote text",
+        text: "remote text",
+        ts: 0,
+        pinned: false,
+      }),
+    );
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+
+  try {
+    const url = `http://127.0.0.1:${server.address().port}/shelf`;
+    await run(process.execPath, [CLI, "remote text"], {
+      env: {
+        ...process.env,
+        TENFOUR_URL: url,
+        TENFOUR_TOKEN: "cli-test-token",
+      },
+    });
+    assert.equal(authorization, "Bearer cli-test-token");
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
 });
 
 test("the CLI waits for a live writer whose lock is old", async () => {

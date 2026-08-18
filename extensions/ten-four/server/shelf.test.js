@@ -8,6 +8,7 @@ const { spawn } = require("child_process");
 // Point the store at a temp file BEFORE requiring the server (STORE is read at load).
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), "tenfour-"));
 process.env.TENFOUR_FILE = path.join(TMP, "shelf.json");
+process.env.TENFOUR_TOKEN = "test-token";
 
 const { createServer, truncate, hostIsAllowed } = require("./shelf.js");
 
@@ -22,15 +23,29 @@ before(async () => {
 
 after(() => server.close());
 
+const request = (path, init = {}) =>
+  fetch(`${base}${path}`, {
+    ...init,
+    headers: {
+      Authorization: "Bearer test-token",
+      ...init.headers,
+    },
+  });
+
 const post = (body) =>
-  fetch(`${base}/shelf`, {
+  request("/shelf", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
 
-test("GET /shelf is empty initially", async () => {
+test("GET /shelf rejects a request without the bearer token", async () => {
   const res = await fetch(`${base}/shelf`);
+  assert.equal(res.status, 401);
+});
+
+test("GET /shelf is empty initially", async () => {
+  const res = await request("/shelf");
   assert.equal(res.status, 200);
   assert.deepEqual(await res.json(), []);
 });
@@ -57,8 +72,8 @@ test("POST with blank text is 400", async () => {
 });
 
 test("PATCH pins an item", async () => {
-  const id = (await (await fetch(`${base}/shelf`)).json())[0].id;
-  const res = await fetch(`${base}/shelf/${id}`, {
+  const id = (await (await request("/shelf")).json())[0].id;
+  const res = await request(`/shelf/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ pinned: true }),
@@ -68,7 +83,7 @@ test("PATCH pins an item", async () => {
 });
 
 test("PATCH on unknown id is 404", async () => {
-  const res = await fetch(`${base}/shelf/nope`, {
+  const res = await request("/shelf/nope", {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ pinned: true }),
@@ -77,18 +92,18 @@ test("PATCH on unknown id is 404", async () => {
 });
 
 test("DELETE /shelf/:id removes one", async () => {
-  const id = (await (await fetch(`${base}/shelf`)).json())[0].id;
-  const res = await fetch(`${base}/shelf/${id}`, { method: "DELETE" });
+  const id = (await (await request("/shelf")).json())[0].id;
+  const res = await request(`/shelf/${id}`, { method: "DELETE" });
   assert.equal(res.status, 200);
-  const after = await (await fetch(`${base}/shelf`)).json();
+  const after = await (await request("/shelf")).json();
   assert.ok(!after.some((i) => i.id === id));
 });
 
 test("DELETE /shelf clears all", async () => {
   await post({ text: "a" });
-  const res = await fetch(`${base}/shelf`, { method: "DELETE" });
+  const res = await request("/shelf", { method: "DELETE" });
   assert.equal(res.status, 200);
-  assert.deepEqual(await (await fetch(`${base}/shelf`)).json(), []);
+  assert.deepEqual(await (await request("/shelf")).json(), []);
 });
 
 test("truncate keeps all pinned plus MAX_ITEMS unpinned", () => {
@@ -102,7 +117,7 @@ test("truncate keeps all pinned plus MAX_ITEMS unpinned", () => {
 });
 
 test("concurrent adds all survive", async () => {
-  await fetch(`${base}/shelf`, { method: "DELETE" });
+  await request("/shelf", { method: "DELETE" });
   // Fire the writes together: each handler must load and save without another
   // handler slipping in between, or one of these snippets goes missing.
   await Promise.all(
@@ -110,7 +125,7 @@ test("concurrent adds all survive", async () => {
       post({ label: `c${i}`, text: `c${i}` }),
     ),
   );
-  const items = await (await fetch(`${base}/shelf`)).json();
+  const items = await (await request("/shelf")).json();
   assert.equal(items.length, 20);
   assert.equal(new Set(items.map((i) => i.label)).size, 20);
 });
@@ -158,7 +173,12 @@ test("first mutation creates a missing store directory", async () => {
   assert.deepEqual(JSON.parse(fs.readFileSync(store, "utf8")), [{ id: "first" }]);
 });
 
-function fileWriter(id, holdMs) {
+function fileWriter(
+  id,
+  holdMs,
+  store = process.env.TENFOUR_FILE,
+  withoutStartFingerprint = false,
+) {
   const shelfPath = require.resolve("./shelf.js");
   return new Promise((resolve, reject) => {
     const child = spawn(
@@ -166,6 +186,11 @@ function fileWriter(id, holdMs) {
       [
         "-e",
         `
+        ${
+          withoutStartFingerprint
+            ? 'require("child_process").execFileSync = () => { throw new Error("ps unavailable"); };'
+            : ""
+        }
         const { modify } = require(${JSON.stringify(shelfPath)});
         modify((items) => {
           const end = Date.now() + ${Number(holdMs)};
@@ -187,7 +212,10 @@ function fileWriter(id, holdMs) {
         );
         `,
       ],
-      { env: process.env, stdio: ["ignore", "ignore", "pipe"] },
+      {
+        env: { ...process.env, TENFOUR_FILE: store },
+        stdio: ["ignore", "ignore", "pipe"],
+      },
     );
     let err = "";
     child.stderr.on("data", (d) => {
@@ -200,16 +228,16 @@ function fileWriter(id, holdMs) {
 }
 
 test("overlapping process writes keep both items", async () => {
-  await fetch(`${base}/shelf`, { method: "DELETE" });
+  await request("/shelf", { method: "DELETE" });
   await Promise.all([fileWriter("w1", 120), fileWriter("w2", 120)]);
-  const items = await (await fetch(`${base}/shelf`)).json();
+  const items = await (await request("/shelf")).json();
   const ids = new Set(items.map((i) => i.id));
   assert.ok(ids.has("w1"), "missing w1");
   assert.ok(ids.has("w2"), "missing w2");
 });
 
 test("a live long-running writer is not treated as stale", async () => {
-  await fetch(`${base}/shelf`, { method: "DELETE" });
+  await request("/shelf", { method: "DELETE" });
   const first = fileWriter("slow", 2300);
   const lock = `${process.env.TENFOUR_FILE}.lock`;
   const start = Date.now();
@@ -219,10 +247,29 @@ test("a live long-running writer is not treated as stale", async () => {
   }
   await fileWriter("after-slow", 0);
   await first;
-  const items = await (await fetch(`${base}/shelf`)).json();
+  const items = await (await request("/shelf")).json();
   const ids = new Set(items.map((item) => item.id));
   assert.ok(ids.has("slow"), "missing slow writer");
   assert.ok(ids.has("after-slow"), "missing waiting writer");
+});
+
+test("a live writer without a start fingerprint is not reclaimed", async () => {
+  const store = path.join(TMP, "no-start-fingerprint.json");
+  const lock = `${store}.lock`;
+  fs.writeFileSync(store, "[]");
+  const first = fileWriter("no-fingerprint", 2300, store, true);
+  const start = Date.now();
+  while (!fs.existsSync(lock)) {
+    if (Date.now() - start > 2000) throw new Error("first writer never locked");
+    await new Promise((r) => setTimeout(r, 5));
+  }
+
+  await fileWriter("after-no-fingerprint", 0, store);
+  await first;
+
+  const ids = new Set(JSON.parse(fs.readFileSync(store, "utf8")).map((item) => item.id));
+  assert.ok(ids.has("no-fingerprint"), "missing live writer");
+  assert.ok(ids.has("after-no-fingerprint"), "missing waiting writer");
 });
 
 test("an old lock from a reused PID is reclaimed", async () => {
@@ -327,7 +374,7 @@ test("an old lock without a process fingerprint is reclaimed", async () => {
 });
 
 test("a local-file writer overlapping a POST keeps both items", async () => {
-  await fetch(`${base}/shelf`, { method: "DELETE" });
+  await request("/shelf", { method: "DELETE" });
   const child = fileWriter("cli", 150);
   const lock = `${process.env.TENFOUR_FILE}.lock`;
   const start = Date.now();
@@ -338,7 +385,7 @@ test("a local-file writer overlapping a POST keeps both items", async () => {
   const res = await post({ text: "from-http" });
   assert.equal(res.status, 201);
   await child;
-  const items = await (await fetch(`${base}/shelf`)).json();
+  const items = await (await request("/shelf")).json();
   assert.ok(items.some((i) => i.id === "cli"));
   assert.ok(items.some((i) => i.text === "from-http"));
 });

@@ -91,10 +91,13 @@ function processStartTime(pid: number): string | null {
 }
 
 function lockToken(): string {
+  const startedAt = processStartTime(process.pid);
   return JSON.stringify({
     pid: process.pid,
-    fingerprint: true,
-    startedAt: processStartTime(process.pid),
+    fingerprint: startedAt !== null,
+    // Do not reclaim a live lock if `ps` is temporarily unavailable.
+    pidOnly: startedAt === null,
+    startedAt,
     token: Math.random().toString(36).slice(2),
   });
 }
@@ -102,18 +105,21 @@ function lockToken(): string {
 function lockOwner(token: string): {
   pid: number;
   fingerprint: boolean;
+  pidOnly: boolean;
   startedAt: string | null;
 } {
   try {
-    const { pid, fingerprint, startedAt } = JSON.parse(token) as {
+    const { pid, fingerprint, pidOnly, startedAt } = JSON.parse(token) as {
       pid: unknown;
       fingerprint: unknown;
+      pidOnly: unknown;
       startedAt: unknown;
     };
     if (typeof pid === "number" && Number.isInteger(pid) && pid > 0) {
       return {
         pid,
         fingerprint: fingerprint === true,
+        pidOnly: pidOnly === true,
         startedAt: typeof startedAt === "string" ? startedAt : null,
       };
     }
@@ -123,6 +129,7 @@ function lockOwner(token: string): {
   return {
     pid: Number(token.split("-", 1)[0]),
     fingerprint: false,
+    pidOnly: false,
     startedAt: null,
   };
 }
@@ -156,9 +163,10 @@ function withLock<T>(fn: () => T): T {
             try {
               process.kill(owner.pid, 0);
               ownerAlive =
-                owner.fingerprint &&
-                typeof owner.startedAt === "string" &&
-                processStartTime(owner.pid) === owner.startedAt;
+                owner.pidOnly ||
+                (owner.fingerprint &&
+                  typeof owner.startedAt === "string" &&
+                  processStartTime(owner.pid) === owner.startedAt);
             } catch (error) {
               ownerAlive = (error as NodeJS.ErrnoException).code === "EPERM";
             }
@@ -229,11 +237,13 @@ function localShelf(): Shelf {
   };
 }
 
-function remoteShelf(shelfUrl: string): Shelf {
+function remoteShelf(shelfUrl: string, shelfToken: string): Shelf {
   const base = shelfUrl.replace(/\/$/, "");
 
   async function api(suffix = "", init?: RequestInit): Promise<Response> {
-    const res = await fetch(base + suffix, init);
+    const headers = new Headers(init?.headers);
+    headers.set("Authorization", `Bearer ${shelfToken}`);
+    const res = await fetch(base + suffix, { ...init, headers });
     if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
     return res;
   }
@@ -265,9 +275,9 @@ function remoteShelf(shelfUrl: string): Shelf {
 }
 
 export function getShelf(): Shelf {
-  const { shelfUrl } = getPreferenceValues<Preferences>();
+  const { shelfUrl, shelfToken } = getPreferenceValues<Preferences>();
   const url = shelfUrl?.trim();
-  return url ? remoteShelf(url) : localShelf();
+  return url ? remoteShelf(url, shelfToken?.trim() || "") : localShelf();
 }
 
 export function sortItems(items: Item[]): Item[] {

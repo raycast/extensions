@@ -9,13 +9,18 @@ function createRefreshQueue(load) {
     }
 
     inflight = (async () => {
-      do {
-        followUpQueued = false;
-        await load();
-      } while (followUpQueued);
-    })().finally(() => {
-      inflight = null;
-    });
+      try {
+        do {
+          followUpQueued = false;
+          await load();
+        } while (followUpQueued);
+      } finally {
+        // Clear this before the promise settles. A follow-up action queued after
+        // the loop's final check then starts its own load instead of attaching to
+        // a completed promise.
+        inflight = null;
+      }
+    })();
 
     return inflight;
   };

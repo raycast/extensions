@@ -43,3 +43,24 @@ test("an action refresh waits for one follow-up load", async () => {
   await Promise.all([first, action]);
   assert.equal(calls, 2);
 });
+
+test("an action after the final follow-up check starts another refresh", async () => {
+  const loads = [deferred(), deferred()];
+  let calls = 0;
+  const refresh = createRefreshQueue(() => loads[calls++].promise);
+
+  const first = refresh();
+  let action;
+  loads[0].promise.then(() => {
+    action = refresh({ followUp: true });
+  });
+  loads[0].resolve();
+
+  await Promise.resolve();
+  await Promise.resolve();
+  assert.equal(calls, 2);
+  loads[1].resolve();
+
+  await Promise.all([first, action]);
+  assert.equal(calls, 2);
+});

@@ -7,6 +7,7 @@ Type=simple
 ExecStart=/usr/bin/env node %h/code/ten-four/server/shelf.js
 Restart=on-failure
 Environment=PORT=7801
+EnvironmentFile=%h/.config/ten-four/shelf.env
 
 [Install]
 WantedBy=default.target

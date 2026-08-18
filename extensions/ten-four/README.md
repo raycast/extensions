@@ -147,6 +147,9 @@ Local mode needs no configuration at all. For remote mode:
 
 - **CLI endpoint:** set `TENFOUR_URL` to your shelf service URL (e.g.
   `https://<your-host>.ts.net/shelf`). Unset, the CLI writes the local file.
+- **Shelf token:** generate and set `TENFOUR_TOKEN` on the shelf service, then
+  set that same value in `TENFOUR_TOKEN` for remote CLI commands and Raycast's
+  **Shelf Token** preference.
 - **Extension endpoint:** set the **Shelf URL** preference in Raycast to the same
   URL. Blank, the extension reads the local file.
 - **Storage:** snippets live at `~/.ten-four.json` (override with
