@@ -1,6 +1,7 @@
 /**
- * Tests for the shared Finder-selection loader and its noun helper — the
- * folder-only filter, the empty-selection guard, and the mode-aware wording.
+ * Tests for the shared Finder-selection loader, the scope filter and the noun
+ * helper — one target type per command, the empty-selection guards both ways,
+ * and the scope-aware wording.
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
@@ -16,7 +17,7 @@ vi.mock("../lib/files", () => ({
   getFileInfo: mockGetFileInfo,
 }));
 
-import { itemNoun, loadSelection } from "../lib/selection";
+import { filterByScope, itemNoun, loadSelection } from "../lib/selection";
 
 const mockGetSelectedFinderItems = getSelectedFinderItems as ReturnType<typeof vi.fn>;
 const mockShowToast = showToast as ReturnType<typeof vi.fn>;
@@ -52,29 +53,60 @@ beforeEach(() => {
 });
 
 describe("itemNoun", () => {
-  it("uses the file noun when not in folder mode", () => {
-    expect(itemNoun(false, 1)).toBe("file");
-    expect(itemNoun(false, 2)).toBe("files");
-    expect(itemNoun(false, 0)).toBe("files");
+  it("uses the file noun in files scope", () => {
+    expect(itemNoun("files", 1)).toBe("file");
+    expect(itemNoun("files", 2)).toBe("files");
+    expect(itemNoun("files", 0)).toBe("files");
   });
 
-  it("uses the folder noun in folder mode", () => {
-    expect(itemNoun(true, 1)).toBe("folder");
-    expect(itemNoun(true, 2)).toBe("folders");
-    expect(itemNoun(true, 0)).toBe("folders");
+  it("uses the folder noun in folders scope", () => {
+    expect(itemNoun("folders", 1)).toBe("folder");
+    expect(itemNoun("folders", 2)).toBe("folders");
+    expect(itemNoun("folders", 0)).toBe("folders");
+  });
+
+  it("uses the neutral noun when the scope covers both", () => {
+    expect(itemNoun("both", 1)).toBe("item");
+    expect(itemNoun("both", 2)).toBe("items");
+    expect(itemNoun("both", 0)).toBe("items");
+  });
+});
+
+describe("filterByScope", () => {
+  const mixed = [MOCK_JPG, MOCK_DIR, MOCK_TXT, SECOND_DIR];
+
+  it("keeps only files in files scope", () => {
+    expect(filterByScope(mixed, "files")).toEqual([MOCK_JPG, MOCK_TXT]);
+  });
+
+  it("keeps only folders in folders scope", () => {
+    expect(filterByScope(mixed, "folders")).toEqual([MOCK_DIR, SECOND_DIR]);
+  });
+
+  it("keeps everything when the scope covers both", () => {
+    expect(filterByScope(mixed, "both")).toEqual(mixed);
+  });
+
+  it("returns a copy rather than the input array", () => {
+    expect(filterByScope(mixed, "both")).not.toBe(mixed);
+  });
+
+  it("yields an empty working set when nothing matches", () => {
+    expect(filterByScope([MOCK_DIR, SECOND_DIR], "files")).toEqual([]);
+    expect(filterByScope([MOCK_JPG, MOCK_TXT], "folders")).toEqual([]);
   });
 });
 
 describe("loadSelection filtering", () => {
-  it("keeps only directories in folder mode", async () => {
+  it("keeps only directories in folders mode", async () => {
     selectItems([MOCK_JPG, MOCK_DIR, MOCK_TXT, SECOND_DIR]);
-    expect(await loadSelection(true)).toEqual([MOCK_DIR, SECOND_DIR]);
+    expect(await loadSelection("folders")).toEqual([MOCK_DIR, SECOND_DIR]);
     expect(mockShowToast).not.toHaveBeenCalled();
   });
 
-  it("keeps everything when not in folder mode", async () => {
-    selectItems([MOCK_JPG, MOCK_DIR, MOCK_TXT]);
-    expect(await loadSelection(false)).toEqual([MOCK_JPG, MOCK_DIR, MOCK_TXT]);
+  it("filters directories out in files mode", async () => {
+    selectItems([MOCK_JPG, MOCK_DIR, MOCK_TXT, SECOND_DIR]);
+    expect(await loadSelection("files")).toEqual([MOCK_JPG, MOCK_TXT]);
     expect(mockShowToast).not.toHaveBeenCalled();
   });
 });
@@ -82,21 +114,28 @@ describe("loadSelection filtering", () => {
 describe("loadSelection empty-selection guard", () => {
   it("aborts with a folder-worded toast when the selection holds no folders", async () => {
     selectItems([MOCK_JPG, MOCK_TXT]);
-    expect(await loadSelection(true)).toBeNull();
+    expect(await loadSelection("folders")).toBeNull();
     expect(lastToastTitle()).toBe("Please select at least one folder in Finder");
     expect(mockPopToRoot).toHaveBeenCalled();
   });
 
-  it("aborts with the folder noun when nothing is selected in folder mode", async () => {
+  it("aborts with a file-worded toast when the selection holds no files", async () => {
+    selectItems([MOCK_DIR, SECOND_DIR]);
+    expect(await loadSelection("files")).toBeNull();
+    expect(lastToastTitle()).toBe("Please select at least one file in Finder");
+    expect(mockPopToRoot).toHaveBeenCalled();
+  });
+
+  it("aborts with the folder noun when nothing is selected in folders mode", async () => {
     selectItems([]);
-    expect(await loadSelection(true)).toBeNull();
+    expect(await loadSelection("folders")).toBeNull();
     expect(lastToastTitle()).toBe("Please select at least one folder or open a Finder window");
     expect(mockPopToRoot).toHaveBeenCalled();
   });
 
-  it("aborts with the file noun when nothing is selected in file mode", async () => {
+  it("aborts with the file noun when nothing is selected in files mode", async () => {
     selectItems([]);
-    expect(await loadSelection(false)).toBeNull();
+    expect(await loadSelection("files")).toBeNull();
     expect(lastToastTitle()).toBe("Please select at least one file or open a Finder window");
     expect(mockPopToRoot).toHaveBeenCalled();
   });
@@ -105,7 +144,7 @@ describe("loadSelection empty-selection guard", () => {
 describe("loadSelection failures", () => {
   it("reports a Finder failure with the file noun", async () => {
     mockGetSelectedFinderItems.mockRejectedValue(new Error("no Finder window"));
-    expect(await loadSelection(false)).toBeNull();
+    expect(await loadSelection("files")).toBeNull();
     expect(mockShowToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Failed to fetch files",
@@ -117,7 +156,7 @@ describe("loadSelection failures", () => {
 
   it("reports a Finder failure with the folder noun", async () => {
     mockGetSelectedFinderItems.mockRejectedValue(new Error("no Finder window"));
-    expect(await loadSelection(true)).toBeNull();
+    expect(await loadSelection("folders")).toBeNull();
     expect(mockShowToast).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Failed to fetch folders",
@@ -129,7 +168,7 @@ describe("loadSelection failures", () => {
   it("reports a stat failure rather than renaming a partial selection", async () => {
     mockGetSelectedFinderItems.mockResolvedValue([{ path: MOCK_DIR.path }]);
     mockGetFileInfo.mockRejectedValue(new Error("ENOENT"));
-    expect(await loadSelection(true)).toBeNull();
+    expect(await loadSelection("folders")).toBeNull();
     expect(lastToastTitle()).toBe("Failed to fetch folders");
   });
 });
