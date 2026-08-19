@@ -1,5 +1,11 @@
 # Apple Reminders Changelog
 
+## [Fix natural-language due dates] - {PR_MERGE_DATE}
+
+- Restore relative due-date parsing in Create Reminder for `1h`, `1 hour`, `3 hours`, `in 10 minutes`, `3:45 pm`, `3 days`, and `1 year`.
+- Treat the `h` shortcut as hours instead of months.
+- Harden Quick Add Reminder: parse fenced AI JSON, drop invalid list IDs, fill missing dates from natural language, and fall back to local parsing when AI fails.
+
 ## [Tighten AI reminder defaults] - 2026-06-16
 
 - Prevent AI tool calls from defaulting title-only reminders to dated, prioritized, or recurring reminders.
