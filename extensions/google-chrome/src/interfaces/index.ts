@@ -32,10 +32,10 @@ export type GroupedEntries = Map<string, HistoryEntry[]>;
 
 export class Tab {
   // Unit/record separators, matching ChromeWindow below. A page controls its own
-  // title, so a printable delimiter like "~~~" (or a newline) can be embedded in it
-  // to shift every later field — which would put page-controlled text into `tabId`,
-  // and that is interpolated into AppleScript. Control characters cannot appear in
-  // a title or URL.
+  // title, so a printable delimiter like "~~~" (or a newline) could be embedded in
+  // it to shift every later field — which would put page-controlled text into
+  // `tabId`, and that is interpolated into AppleScript. Chrome replaces control
+  // characters in titles with spaces, so these cannot be embedded.
   static readonly TAB_CONTENTS_SEPARATOR: string = "\x1F";
   static readonly TAB_RECORD_SEPARATOR: string = "\x1E";
 
@@ -54,10 +54,18 @@ export class Tab {
     public readonly sourceLine: string,
   ) {}
 
+  /**
+   * Field order is deliberate: the identifiers Chrome controls come first, and the
+   * page-controlled strings last. Even if a delimiter did reach a title, it could
+   * only corrupt the trailing fields, never shift `tabId` — the one value that is
+   * interpolated into AppleScript and used to target destructive actions. The
+   * title reclaims any trailing fields so an embedded delimiter survives display.
+   */
   static parse(line: string): Tab {
     const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
+    const [tabId, windowsId, tabIndex, url, favicon, ...titleParts] = parts;
 
-    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4], parts[5], line);
+    return new Tab(titleParts.join(this.TAB_CONTENTS_SEPARATOR), url, favicon, +windowsId, +tabIndex, tabId, line);
   }
 
   key(): string {

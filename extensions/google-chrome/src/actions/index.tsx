@@ -36,7 +36,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
           repeat with i from 1 to count of _props
             set _p to item i of _props
             ${faviconStatement}
-            set _output to (_output & (title of _p) & _field_sep & (URL of _p) & _field_sep & _favicon & _field_sep & _w_id & _field_sep & i & _field_sep & (id of _p) & _rec_sep)
+            set _output to (_output & (id of _p) & _field_sep & _w_id & _field_sep & i & _field_sep & (URL of _p) & _field_sep & _favicon & _field_sep & (title of _p) & _rec_sep)
           end repeat
         end repeat
       end tell
