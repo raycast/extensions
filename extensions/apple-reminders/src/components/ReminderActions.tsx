@@ -322,7 +322,12 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
           </ActionPanel.Submenu>
         ) : null}
 
-        <ActionPanel.Submenu title="Sort by" icon={Icon.BulletPoints} shortcut={Keyboard.Shortcut.Common.Duplicate}>
+        <ActionPanel.Submenu
+          title="Sort by"
+          icon={Icon.BulletPoints}
+          // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.Duplicate is ⌘D on macOS; keep the existing ⌘⇧S chord
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        >
           {viewProps.sortBy.options.map((option) => {
             return (
               <Action
@@ -368,7 +373,8 @@ export default function ReminderActions({ reminder, listId, viewProps, mutate }:
         <Action.CopyToClipboard
           title="Copy Reminder Title"
           content={reminder.title}
-          shortcut={Keyboard.Shortcut.Common.Pin}
+          // eslint-disable-next-line @raycast/prefer-common-shortcut -- Common.Pin is ⌘⇧P on macOS; keep the existing ⌘. chord
+          shortcut={{ modifiers: ["cmd"], key: "." }}
         />
         <Action.CopyToClipboard
           title="Copy Reminder Notes"

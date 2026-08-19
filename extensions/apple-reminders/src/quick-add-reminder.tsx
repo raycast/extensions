@@ -214,6 +214,9 @@ function toNewReminder(parsed: ParsedQuickAddReminder, notes?: string): NewRemin
     dueDate: parsed.dueDate,
     notes: notes ?? parsed.notes,
     priority: parsed.priority,
+    address: parsed.address,
+    proximity: parsed.proximity,
+    radius: parsed.radius,
   };
 
   if (parsed.recurrence) {

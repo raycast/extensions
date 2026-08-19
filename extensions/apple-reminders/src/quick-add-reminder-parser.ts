@@ -12,6 +12,9 @@ export type ParsedQuickAddReminder = {
     interval: number;
     endDate?: string;
   };
+  address?: string;
+  proximity?: string;
+  radius?: number;
 };
 
 export type QuickAddList = {
