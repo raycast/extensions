@@ -1,5 +1,12 @@
 # Coffee Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed future caffeination schedules not activating automatically.
+- Kept the schedule dashboard status in sync while it remains open.
+- Ensured schedules started inside an active time range stop at the configured end time.
+- Improved the guidance shown when schedule times are missing.
+
 ## [Enhancement] - 2026-08-14
 
 - Added an "instant on" feature: when the new *Start caffeination when Raycast starts* preference is enabled, Coffee automatically keeps your Mac awake (indefinitely) shortly after Raycast launches. Manual decaffeination persists until the next Raycast restart.

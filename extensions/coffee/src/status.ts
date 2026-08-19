@@ -1,8 +1,29 @@
-import { getPreferenceValues, LocalStorage, updateCommandMetadata } from "@raycast/api";
+import { getPreferenceValues, launchCommand, LaunchType, LocalStorage, updateCommandMetadata } from "@raycast/api";
 import { execFileSync } from "node:child_process";
 import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning } from "./utils";
 
 const AUTO_CAFFEINATE_PID_KEY = "autoCaffeinateRaycastPid";
+const SCHEDULE_MONITOR_ACTIVATED_KEY = "scheduleMonitorActivated";
+
+/** Opens the status command once so Raycast activates its recurring background refresh. */
+export async function activateScheduleMonitor(returnToSchedule = false): Promise<boolean> {
+  try {
+    await launchCommand({
+      name: "status",
+      type: LaunchType.UserInitiated,
+      context: { activateScheduleMonitor: true, returnToSchedule },
+    });
+    return true;
+  } catch (error) {
+    console.error("Failed to launch the caffeination schedule monitor:", error);
+    return false;
+  }
+}
+
+export async function isScheduleMonitorActivated(): Promise<boolean> {
+  const value = await LocalStorage.getItem(SCHEDULE_MONITOR_ACTIVATED_KEY);
+  return value === true || value === "true";
+}
 
 /**
  * Returns a session identifier for the currently-running Raycast instance.
@@ -58,8 +79,11 @@ async function handleScheduledCaffeinate(schedule: Schedule): Promise<boolean> {
 
   // If the current time is within scheduled time, start caffeination
   if (isWithinSchedule === true && schedule.IsRunning === false) {
-    const duration = (endHour - startHour) * 3600 + (endMinute - startMinute) * 60;
-    await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${duration}`);
+    const endTime = new Date(currentDate);
+    endTime.setHours(endHour, endMinute, 0, 0);
+    const remainingSeconds = Math.ceil((endTime.getTime() - currentDate.getTime()) / 1000);
+
+    await startCaffeinate({ menubar: true, status: true }, undefined, `-t ${remainingSeconds}`);
     schedule.IsRunning = true;
     await LocalStorage.setItem(schedule.day, JSON.stringify(schedule));
     return true;
@@ -116,7 +140,13 @@ export async function maybeAutoCaffeinate(isScheduled?: boolean): Promise<boolea
   return true;
 }
 
-export default async function Command() {
+export default async function Command(props: {
+  launchContext?: { activateScheduleMonitor?: boolean; returnToSchedule?: boolean };
+}) {
+  if (props.launchContext?.activateScheduleMonitor) {
+    await LocalStorage.setItem(SCHEDULE_MONITOR_ACTIVATED_KEY, "true");
+  }
+
   const isCaffeinated = isCaffeinateRunning();
   const isScheduled = await checkSchedule();
   const autoStarted = await maybeAutoCaffeinate(isScheduled);
@@ -127,5 +157,9 @@ export default async function Command() {
     subtitle = "✔ Caffeinated";
   }
 
-  updateCommandMetadata({ subtitle });
+  await updateCommandMetadata({ subtitle });
+
+  if (props.launchContext?.returnToSchedule) {
+    await launchCommand({ name: "addSchedule", type: LaunchType.UserInitiated });
+  }
 }
