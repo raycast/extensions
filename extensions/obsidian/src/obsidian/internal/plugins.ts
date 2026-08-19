@@ -14,13 +14,13 @@ export interface VaultPluginCheckParams {
 export function readCommunityPlugins(vaultPath: string): string[] | undefined {
   const { configFileName } = getPreferenceValues();
   const path = `${vaultPath}/${configFileName || ".obsidian"}/community-plugins.json`;
-  if (!fs.existsSync(path)) return;
-  const content = fs.readFileSync(path, "utf-8");
   try {
+    if (!fs.existsSync(path)) return;
+    const content = fs.readFileSync(path, "utf-8");
     const plugins: string[] = JSON.parse(content);
     return plugins;
   } catch (error) {
-    logger.error(`Failed to parse community-plugins.json for vault ${vaultPath}: ${error}`);
+    logger.error(`Failed to read community-plugins.json for vault ${vaultPath}: ${error}`);
     return undefined;
   }
 }
@@ -31,13 +31,13 @@ export function readCommunityPlugins(vaultPath: string): string[] | undefined {
 export function readCorePlugins(vaultPath: string): Record<string, boolean> | undefined {
   const { configFileName } = getPreferenceValues();
   const path = `${vaultPath}/${configFileName || ".obsidian"}/core-plugins.json`;
-  if (!fs.existsSync(path)) return;
-  const content = fs.readFileSync(path, "utf-8");
   try {
+    if (!fs.existsSync(path)) return;
+    const content = fs.readFileSync(path, "utf-8");
     const plugins: Record<string, boolean> = JSON.parse(content);
     return plugins;
   } catch (error) {
-    logger.error(`Failed to parse core-plugins.json for vault ${vaultPath}: ${error}`);
+    logger.error(`Failed to read core-plugins.json for vault ${vaultPath}: ${error}`);
     return undefined;
   }
 }

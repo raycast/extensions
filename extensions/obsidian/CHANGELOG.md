@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Fix Plugin Configuration Permission Errors] - 2026-08-19
+
+- Prevent plugin checks from crashing when Obsidian configuration files cannot be read
+
 ## [Fix AI searchNote OOM on oversized Markdown] - 2026-08-15
 
 - Skip Markdown files larger than 1 MiB during full-content search instead of reading them into the 100 MB extension heap

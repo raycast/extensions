@@ -31,6 +31,7 @@ describe("plugins", () => {
     if (tempVaultData) {
       tempVaultData.cleanup();
     }
+    vi.restoreAllMocks();
   });
 
   describe("readCommunityPlugins", () => {
@@ -57,6 +58,16 @@ describe("plugins", () => {
 
       const result = readCommunityPlugins(tempVaultData.vault.path);
       expect(result).toEqual([]);
+    });
+
+    it("should return undefined when community-plugins.json cannot be read", () => {
+      const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "community-plugins.json");
+      fs.writeFileSync(pluginsPath, JSON.stringify(["plugin1"]));
+      vi.spyOn(fs, "readFileSync").mockImplementationOnce(() => {
+        throw Object.assign(new Error("operation not permitted"), { code: "EPERM" });
+      });
+
+      expect(readCommunityPlugins(tempVaultData.vault.path)).toBeUndefined();
     });
   });
 
@@ -89,6 +100,16 @@ describe("plugins", () => {
 
       const result = readCorePlugins(tempVaultData.vault.path);
       expect(result).toEqual({});
+    });
+
+    it("should return undefined when core-plugins.json cannot be read", () => {
+      const pluginsPath = path.join(tempVaultData.vault.path, ".obsidian", "core-plugins.json");
+      fs.writeFileSync(pluginsPath, JSON.stringify({ "daily-notes": true }));
+      vi.spyOn(fs, "readFileSync").mockImplementationOnce(() => {
+        throw Object.assign(new Error("operation not permitted"), { code: "EPERM" });
+      });
+
+      expect(readCorePlugins(tempVaultData.vault.path)).toBeUndefined();
     });
   });
 
