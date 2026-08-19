@@ -179,6 +179,9 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       setValue("location", "");
       setValue("address", "");
       setValue("radius", "");
+      setDateText("");
+      nlpParseRef.current = null;
+      setValue("dueDate", selectTodayAsDefault ? addMilliseconds(startOfToday(), 1) : null);
 
       focus("title");
     } catch (error) {
@@ -237,7 +240,11 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
     if (parsed) {
       nlpParseRef.current = parsed;
       setValue("dueDate", parsed.date);
+      return;
     }
+
+    nlpParseRef.current = null;
+    setValue("dueDate", null);
   }
 
   async function submitWithOptions(values: CreateReminderValues, options?: SubmitOptions) {

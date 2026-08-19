@@ -129,25 +129,30 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
 
     const inputText = props.fallbackText ?? props.arguments.text;
 
-    try {
-      const { description, ...newReminder } = await askAI(prompt);
-      const resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists);
+    let description: string | undefined;
+    let resolvedReminder: ParsedQuickAddReminder;
 
-      if (resolvedReminder.dueDate && resolvedReminder.dueDate.includes("T")) {
+    try {
+      const { description: aiDescription, ...newReminder } = await askAI(prompt);
+      description = aiDescription;
+      resolvedReminder = resolveQuickAddReminder(newReminder, inputText, data.lists);
+
+      if (newReminder.dueDate && resolvedReminder.dueDate?.includes("T")) {
         resolvedReminder.dueDate = applyAiLocalTimezone(resolvedReminder.dueDate);
       }
-
-      await createReminder(toNewReminder(resolvedReminder, props.arguments.notes));
-      await runStoredPostCreateActions();
-
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Added reminder: " + (description ?? resolvedReminder.title),
-      });
     } catch (error) {
       console.log(error);
       await addReminderFromText(inputText, props.arguments.notes);
+      return;
     }
+
+    await createReminder(toNewReminder(resolvedReminder, props.arguments.notes));
+    await runStoredPostCreateActions();
+
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Added reminder: " + (description ?? resolvedReminder.title),
+    });
   } catch (error) {
     console.log(error);
     const message = error instanceof Error ? error.message : JSON.stringify(error);
