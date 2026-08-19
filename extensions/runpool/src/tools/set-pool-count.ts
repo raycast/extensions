@@ -7,10 +7,12 @@ type Input = {
   /**
    * How many runners the pool should have. A positive whole number.
    *
-   * More runners is not more throughput. A single test job commonly forks one
-   * worker per CPU core, so several jobs at once can oversubscribe the machine
-   * and make everything slower rather than faster. If the user has not said
-   * what they want, ask rather than guessing.
+   * More runners may not mean more throughput. A single test job commonly
+   * forks one worker per CPU core, so several at once can oversubscribe the
+   * machine rather than get through the work faster. That is the standard
+   * argument rather than a measurement, and `runpool stats` is what settles
+   * it for a given machine. If the user has not said what they want, ask
+   * rather than guessing.
    */
   count: number;
 };

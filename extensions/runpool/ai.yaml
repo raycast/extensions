@@ -12,10 +12,13 @@ instructions: |
   The one genuine fault is a pool GitHub does not have registered, because jobs
   then queue against it forever; get-status reports that in the state field.
 
-  Runner count is not a throughput dial. A single test job commonly forks one
-  worker per CPU core, so several at once can oversubscribe the machine and make
-  every job slower. If asked to "add more runners to make CI faster", say that
-  the opposite is often true and ask what problem they are seeing.
+  Runner count is not a simple throughput dial. A single test job commonly
+  forks one worker per CPU core, so several at once may oversubscribe the
+  machine rather than get through the work faster. Treat that as the standard
+  argument rather than an established fact: it depends on the machine and the
+  workload, and `runpool stats` is what measures it. If asked to "add more
+  runners to make CI faster", say it may not help and ask what problem they
+  are seeing.
 
   Never guess a pool name. If the user is ambiguous and there is more than one
   pool, ask which.

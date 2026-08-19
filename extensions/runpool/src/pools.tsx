@@ -179,7 +179,11 @@ export default function Command() {
               </ActionPanel.Section>
 
               <ActionPanel.Section title="Capacity">
-                {[2, 4, 6, 8]
+                {/* A plain range rather than a curated list. Which number is
+                    right for a given machine is genuinely unmeasured, so
+                    offering 2, 4, 6, 8 implied a view this has no basis for
+                    and put 1 and 3 out of reach for no reason. */}
+                {[1, 2, 3, 4, 5, 6]
                   .filter((n) => n !== pool.count)
                   .map((n) => (
                     <Action
