@@ -7,6 +7,7 @@ export const PLACEMENT_META: Record<string, { key: string; label: string }> = {
   linkedin: { key: "organization_id", label: "LinkedIn Organization" },
   pinterest: { key: "board_id", label: "Pinterest Board" },
   telegram: { key: "chat_id", label: "Telegram Channel" },
+  google_business: { key: "location_id", label: "Google Business Location" },
 };
 
 export function supportsPlacements(platform: string | undefined): boolean {
@@ -71,6 +72,14 @@ const OPTIONAL_PLACEMENT_NETWORKS = new Set(["linkedin"]);
 export function requiresPlacement(platform: string | undefined): boolean {
   const net = (platform ?? "").toLowerCase();
   return Boolean(PLACEMENT_META[net]) && !OPTIONAL_PLACEMENT_NETWORKS.has(net);
+}
+
+/**
+ * Networks that can't be published in this selection: a placement is mandatory but 2+ profiles on the
+ * network are selected, so no single placement can be applied per profile. Publish those separately.
+ */
+export function blockedPlacementNetworks(profiles: Profile[]): string[] {
+  return ambiguousPlacementNetworks(profiles).filter((net) => requiresPlacement(net));
 }
 
 export type ResolvedPlacements = { ok: true; placements: Record<string, string> } | { ok: false; message: string };

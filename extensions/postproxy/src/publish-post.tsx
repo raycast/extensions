@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
 import {
-  ambiguousPlacementNetworks,
+  blockedPlacementNetworks,
   buildPlatforms,
   eligiblePlacementProfiles,
   loadPlacementsByNetwork,
@@ -41,10 +41,24 @@ export default function PublishPost() {
         title: v.draft ? "Saving draft…" : scheduled ? "Scheduling…" : "Publishing…",
       });
       try {
+        const selectedNow = profiles.filter((p) => v.profiles.includes(p.id));
+        // Block publishing when a mandatory-placement network has 2+ selected profiles: the API takes
+        // one placement per network, so those profiles can't each get their required destination.
+        const blocked = blockedPlacementNetworks(selectedNow);
+        if (blocked.length > 0) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Publish separately";
+          toast.message = `${blocked
+            .map(platformLabel)
+            .join(
+              ", ",
+            )}: multiple profiles on this network each need their own placement. Publish them in separate posts.`;
+          return;
+        }
         // Resolve placements fresh for the currently-selected (single-profile) networks. Mandatory
         // placements that can't be loaded (failed/empty request) or whose selection is no longer
         // valid produce a clear error instead of publishing without one or to a wrong destination.
-        const eligibleNow = eligiblePlacementProfiles(profiles.filter((p) => v.profiles.includes(p.id)));
+        const eligibleNow = eligiblePlacementProfiles(selectedNow);
         const resolution = await resolvePlacements(eligibleNow, networkPlacements);
         if (!resolution.ok) {
           toast.style = Toast.Style.Failure;
@@ -94,7 +108,7 @@ export default function PublishPost() {
   const selectedIds = values.profiles ?? [];
   const selectedProfiles = profiles.filter((p) => selectedIds.includes(p.id));
   const eligibleProfiles = eligiblePlacementProfiles(selectedProfiles);
-  const ambiguousNetworks = ambiguousPlacementNetworks(selectedProfiles);
+  const blockedNetworks = blockedPlacementNetworks(selectedProfiles);
   const placementKey = eligibleProfiles
     .map((p) => p.id)
     .sort()
@@ -128,7 +142,7 @@ export default function PublishPost() {
         )}
       </Form.TagPicker>
 
-      {placementNetworks.length > 0 || ambiguousNetworks.length > 0 ? <Form.Separator /> : null}
+      {placementNetworks.length > 0 || blockedNetworks.length > 0 ? <Form.Separator /> : null}
       {placementNetworks.map((net) => (
         <Form.Dropdown
           key={net}
@@ -151,13 +165,13 @@ export default function PublishPost() {
           ))}
         </Form.Dropdown>
       ))}
-      {ambiguousNetworks.length > 0 ? (
+      {blockedNetworks.length > 0 ? (
         <Form.Description
-          text={`Placement selection is hidden for ${ambiguousNetworks
+          text={`${blockedNetworks
             .map(platformLabel)
             .join(
               ", ",
-            )} — you selected multiple profiles on that network, and the API applies one placement per network. To target different pages/boards/organizations/channels, publish those profiles in separate posts.`}
+            )}: you selected multiple profiles on this network, and the API applies one placement per network. Publishing is blocked — post those profiles in separate posts to target different pages/boards/organizations/channels.`}
         />
       ) : null}
 
