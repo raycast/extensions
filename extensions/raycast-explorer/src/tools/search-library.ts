@@ -65,7 +65,7 @@ export default async function searchLibrary(input: Input): Promise<{
   const settled = await Promise.allSettled(types.map(fetchCatalog));
   const results = settled.flatMap((outcome) => (outcome.status === "fulfilled" ? outcome.value : []));
 
-  if (results.length === 0 && settled.some((outcome) => outcome.status === "rejected")) {
+  if (settled.every((outcome) => outcome.status === "rejected")) {
     const firstRejection = settled.find((outcome): outcome is PromiseRejectedResult => outcome.status === "rejected");
     throw firstRejection?.reason instanceof Error
       ? firstRejection.reason
