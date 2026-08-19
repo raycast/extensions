@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { FormValidation, MutatePromise, useForm } from "@raycast/utils";
 import { addMilliseconds, format, startOfToday } from "date-fns";
-import { ReactElement, useEffect, useRef, useState } from "react";
+import { ReactElement, useRef, useState } from "react";
 import { createReminder } from "swift:../swift/AppleReminders";
 
 import LocationForm from "./components/LocationForm";
@@ -79,22 +79,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
   const { locations, addLocation } = useLocations();
   const [dateText, setDateText] = useState("");
   const nlpParseRef = useRef<ParsedDueDate | null>(null);
-  const dueDateParseTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  function clearDueDateParseTimeout() {
-    if (dueDateParseTimeoutRef.current) {
-      clearTimeout(dueDateParseTimeoutRef.current);
-      dueDateParseTimeoutRef.current = null;
-    }
-  }
-
-  useEffect(() => {
-    return () => {
-      if (dueDateParseTimeoutRef.current) {
-        clearTimeout(dueDateParseTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const defaultList = data?.lists.find((list) => list.isDefault);
 
@@ -195,7 +179,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       setValue("location", "");
       setValue("address", "");
       setValue("radius", "");
-      clearDueDateParseTimeout();
       setDateText("");
       nlpParseRef.current = null;
       setValue("dueDate", selectTodayAsDefault ? addMilliseconds(startOfToday(), 1) : null);
@@ -246,7 +229,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
 
   function handleDueDateTextChange(value: string) {
     setDateText(value);
-    clearDueDateParseTimeout();
 
     if (!value.trim()) {
       nlpParseRef.current = null;
@@ -261,10 +243,8 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
       return;
     }
 
-    dueDateParseTimeoutRef.current = setTimeout(() => {
-      nlpParseRef.current = null;
-      setValue("dueDate", null);
-    }, 300);
+    nlpParseRef.current = null;
+    setValue("dueDate", null);
   }
 
   async function submitWithOptions(values: CreateReminderValues, options?: SubmitOptions) {
@@ -354,7 +334,6 @@ export function CreateReminderForm({ draftValues, listId, mutate }: CreateRemind
             title="Calendar"
             type={Form.DatePicker.Type.DateTime}
             onChange={(value) => {
-              clearDueDateParseTimeout();
               nlpParseRef.current = null;
               itemProps.dueDate.onChange?.(value);
             }}
