@@ -141,8 +141,12 @@ export async function maybeAutoCaffeinate(isScheduled?: boolean): Promise<boolea
   return true;
 }
 
-export default async function Command(props: { launchContext?: { returnToSchedule?: boolean } }) {
-  await LocalStorage.setItem(SCHEDULE_MONITOR_LAST_RUN_KEY, Date.now());
+export default async function Command(props: {
+  launchContext?: { returnToSchedule?: boolean; skipScheduleMonitorHeartbeat?: boolean };
+}) {
+  if (!props.launchContext?.skipScheduleMonitorHeartbeat) {
+    await LocalStorage.setItem(SCHEDULE_MONITOR_LAST_RUN_KEY, Date.now());
+  }
 
   const isCaffeinated = isCaffeinateRunning();
   const isScheduled = await checkSchedule();
