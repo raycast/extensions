@@ -9,7 +9,7 @@ import {
   CustomFieldSchema,
   getCustomFieldValue,
   isTeamFieldRejection,
-  wrapTeamFieldValueAsObject,
+  unwrapTeamFieldValue,
 } from "../helpers/customFields";
 
 import { Project } from "./projects";
@@ -109,10 +109,11 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
   try {
     return await sendCreate();
   } catch (error) {
-    // The Team custom field is sent as the documented plain-string Team ID, but some Jira sites
-    // reject that and require an `{ id }` object instead. If the create failed specifically because
-    // of the team field, retry once with the object shape. This keeps string-expecting sites
-    // working unchanged while still supporting object-expecting ones.
+    // The Team custom field is sent as an `{ id }` object (the shape known to reliably persist the
+    // team), but some Jira sites — e.g. older Advanced Roadmaps teams — reject that with a 400 and
+    // require the plain-string Team ID instead. If the create failed specifically because of the
+    // team field, retry once with the string shape. This keeps object-expecting sites working while
+    // still supporting string-expecting ones.
     const message = error instanceof Error ? error.message : String(error);
 
     if (
@@ -122,7 +123,7 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
       )
     ) {
       for (const { key, teamId } of teamFields) {
-        jsonValues[key] = wrapTeamFieldValueAsObject(teamId);
+        jsonValues[key] = unwrapTeamFieldValue(teamId);
       }
       return sendCreate();
     }

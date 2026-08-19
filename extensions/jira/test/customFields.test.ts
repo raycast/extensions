@@ -5,14 +5,14 @@ import {
   CustomFieldSchema,
   getCustomFieldValue,
   isTeamFieldRejection,
-  wrapTeamFieldValueAsObject,
+  unwrapTeamFieldValue,
 } from "../src/helpers/customFields.ts";
 
 describe("getCustomFieldValue", () => {
-  it("returns the plain Team ID string for the team field", () => {
-    // The documented shape when creating/updating an issue is a plain string Team ID.
+  it("returns an { id } object for the team field", () => {
+    // The `{ id }` object is the shape known to reliably persist the team on issue creation.
     const result = getCustomFieldValue(CustomFieldSchema.team, "abc-123-team-uuid");
-    assert.equal(result, "abc-123-team-uuid");
+    assert.deepEqual(result, { id: "abc-123-team-uuid" });
   });
 
   it("returns { id } for userPicker", () => {
@@ -70,9 +70,9 @@ describe("getCustomFieldValue", () => {
   });
 });
 
-describe("wrapTeamFieldValueAsObject", () => {
-  it("wraps a Team ID in an { id } object for the fallback shape", () => {
-    assert.deepEqual(wrapTeamFieldValueAsObject("abc-123-team-uuid"), { id: "abc-123-team-uuid" });
+describe("unwrapTeamFieldValue", () => {
+  it("returns the plain Team ID string for the fallback shape", () => {
+    assert.equal(unwrapTeamFieldValue("abc-123-team-uuid"), "abc-123-team-uuid");
   });
 });
 
