@@ -1,5 +1,10 @@
 # Coffee Changelog
 
+## [Enhancement] - {PR_MERGE_DATE}
+
+- Added a "Hide Menu Bar Item" action to the menu bar dropdown so the icon can be hidden in one click.
+- Re-running the "Caffeinate Status Menu Bar" command from Raycast brings the icon back.
+
 ## [Enhancement] - 2026-08-14
 
 - Added an "instant on" feature: when the new *Start caffeination when Raycast starts* preference is enabled, Coffee automatically keeps your Mac awake (indefinitely) shortly after Raycast launches. Manual decaffeination persists until the next Raycast restart.

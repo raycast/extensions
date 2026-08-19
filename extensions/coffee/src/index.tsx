@@ -1,15 +1,17 @@
 import {
+  Cache,
   Color,
   Icon,
   LaunchProps,
   LaunchType,
+  LocalStorage,
   MenuBarExtra,
   getPreferenceValues,
   launchCommand,
   showHUD,
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { formatDuration, startCaffeinate, stopCaffeinate } from "./utils";
 import { maybeAutoCaffeinate } from "./status";
 
@@ -35,6 +37,9 @@ interface CaffeinateInfo {
   totalSeconds: number | null;
   startTime: number | null;
 }
+
+const HIDE_MENU_BAR_KEY = "hideMenuBarItem";
+const cache = new Cache();
 
 const DURATION_PRESETS: { label: string; seconds: number }[] = [
   { label: "10 Minutes", seconds: 10 * 60 },
@@ -86,8 +91,38 @@ export default function Command(props: LaunchProps) {
 
   const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState<boolean | null>(null);
   const [, setTick] = useState(0);
+  const restoreHandledRef = useRef(false);
+  // Start as null (unknown) to avoid a flash when the Cache is cold (e.g. after
+  // a bundle update or dev rebuild) but LocalStorage still holds the hidden flag.
+  // We render nothing until the async LocalStorage read below resolves.
+  const [menuBarHidden, setMenuBarHidden] = useState<boolean | null>(
+    // Fast path: if the Cache already has the flag we can render immediately.
+    // The effect below will still run and sync Cache ↔ LocalStorage as needed.
+    cache.get(HIDE_MENU_BAR_KEY) !== undefined ? cache.get(HIDE_MENU_BAR_KEY) === "true" : null,
+  );
 
   const displayCaffeinateStatus = localCaffeinateStatus ?? caffeinateStatus;
+
+  // LocalStorage is the durable source of truth (it survives bundle updates and
+  // dev rebuilds, which reset the Cache). A hidden icon can only be brought back
+  // from the root search, since the menu bar item itself is not clickable
+  // anymore, so a user-initiated launch while hidden means "show it again".
+  useEffect(() => {
+    if (restoreHandledRef.current) return;
+    restoreHandledRef.current = true;
+    void (async () => {
+      const stored = (await LocalStorage.getItem(HIDE_MENU_BAR_KEY)) === "true";
+      if (props.launchType === LaunchType.UserInitiated && stored) {
+        cache.remove(HIDE_MENU_BAR_KEY);
+        await LocalStorage.removeItem(HIDE_MENU_BAR_KEY);
+        setMenuBarHidden(false);
+        return;
+      }
+      // Always sync the cache and resolve the null (unknown) initial state.
+      cache.set(HIDE_MENU_BAR_KEY, stored ? "true" : "false");
+      setMenuBarHidden(stored);
+    })();
+  }, [props.launchType]);
 
   useEffect(() => {
     setLocalCaffeinateStatus(null);
@@ -147,6 +182,20 @@ export default function Command(props: LaunchProps) {
     }
   };
 
+  const handleHideMenuBarItem = async () => {
+    cache.set(HIDE_MENU_BAR_KEY, "true");
+    void LocalStorage.setItem(HIDE_MENU_BAR_KEY, "true");
+    setMenuBarHidden(true);
+    await showHUD("Menu bar icon hidden");
+  };
+
+  // Render nothing while the hidden state is still being resolved from
+  // LocalStorage (null = unknown). This is the main guard against the
+  // cold-cache flash.
+  if (menuBarHidden === null || menuBarHidden) {
+    return null;
+  }
+
   if (preferences.hidenWhenDecaffeinated && !displayCaffeinateStatus && !isLoading) {
     return null;
   }
@@ -193,6 +242,9 @@ export default function Command(props: LaunchProps) {
                   : () => launchCommand({ name: "caffeinateUntil", type: LaunchType.UserInitiated })
               }
             />
+          </MenuBarExtra.Section>
+          <MenuBarExtra.Section>
+            <MenuBarExtra.Item title="Hide Menu Bar Item" icon={Icon.EyeSlash} onAction={handleHideMenuBarItem} />
           </MenuBarExtra.Section>
         </>
       )}

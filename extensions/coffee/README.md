@@ -77,6 +77,8 @@ Get the current state of caffeination.
 
 Get the status of current caffeination in your menu bar.
 
+To quickly remove the icon from your menu bar, select **Hide Menu Bar Item** in the dropdown. Re-run the *Caffeinate Status Menu Bar* command from Raycast to show it again.
+
 ### 8. **Auto-Caffeinate on Launch**
 
 Optionally have Coffee start caffeinating your Mac (indefinitely) automatically whenever Raycast launches. Enable the **Start caffeination when Raycast starts** toggle under the **Launch** section in the extension's preferences.
