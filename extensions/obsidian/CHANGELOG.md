@@ -1,6 +1,6 @@
 # Obsidian Changelog
 
-## [Fix Plugin Configuration Permission Errors] - 2026-08-19
+## [Fix Plugin Configuration Permission Errors] - {PR_MERGE_DATE}
 
 - Prevent plugin checks from crashing when Obsidian configuration files cannot be read
 
