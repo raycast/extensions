@@ -7,25 +7,15 @@ import type {
   SearchMode,
 } from "../types/preferences";
 
-/** Raw manifest values as stored by Raycast; any of them may be missing or garbage. */
-export interface RawPreferences {
-  defaultDirectory?: string;
-  noFinderBehavior?: string;
-  preferredEngine?: string;
-  defaultCaseMode?: string;
-  defaultSearchMode?: string;
-  defaultMaxDepth?: string;
-  maxResults?: string;
-  maxFileSizeMb?: string;
-  previewContextLines?: string;
-  showMatchPreview?: boolean;
-  searchHiddenFiles?: boolean;
-  respectIgnoreFiles?: boolean;
-  excludedDirectories?: string;
-  includedExtensions?: string;
-  debounceMs?: string;
-  preferredEditor?: string;
-}
+/**
+ * Raw manifest values as stored by Raycast; any of them may be missing or garbage,
+ * so every field is optional and widened to its primitive. Keys derive from the
+ * generated `Preferences.SearchContent` type so manifest changes surface as type
+ * errors here instead of drifting silently.
+ */
+export type RawPreferences = {
+  [K in keyof Preferences.SearchContent]?: Preferences.SearchContent[K] extends boolean ? boolean : string;
+};
 
 export const DEFAULT_EXCLUDED_DIRECTORIES = [
   ".git",

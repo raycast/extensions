@@ -1,5 +1,6 @@
 import { basename, isAbsolute, relative, resolve } from "node:path";
 import type { RipgrepEvent, SearchResult } from "../types/search.ts";
+import { materializeLine } from "./fallback-search.ts";
 
 type ResultEmitter = (results: SearchResult[]) => void;
 
@@ -40,7 +41,7 @@ function matchResults(data: unknown, directory: string, contextBefore: string[])
 
   const filePath = isAbsolute(rawPath) ? rawPath : resolve(directory, rawPath);
   const relativePath = relative(directory, filePath) || basename(filePath);
-  const lineText = withoutLineEnding(rawLine);
+  const lineText = materializeLine(withoutLineEnding(rawLine));
   const results: SearchResult[] = [];
 
   for (const submatch of data.submatches) {
@@ -63,7 +64,7 @@ function matchResults(data: unknown, directory: string, contextBefore: string[])
 function contextLine(data: unknown): string | undefined {
   if (!isRecord(data)) return undefined;
   const lines = decodeRipgrepText(data.lines);
-  return lines === undefined ? undefined : withoutLineEnding(lines);
+  return lines === undefined ? undefined : materializeLine(withoutLineEnding(lines));
 }
 
 /**

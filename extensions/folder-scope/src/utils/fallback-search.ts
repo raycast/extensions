@@ -72,13 +72,31 @@ export function splitLines(content: string): string[] {
   return lines.map((line) => (line.endsWith("\r") ? line.slice(0, -1) : line));
 }
 
+/** Longest line stored on a result; longer lines are cut (match highlighting degrades gracefully). */
+export const MAX_STORED_LINE_CHARS = 4096;
+
+/**
+ * Copies (and caps) a line before it is stored on a result. V8's `split` and
+ * `slice` return sliced strings that pin the whole file content in memory for
+ * as long as a result is alive; the Buffer round-trip forces a compact copy
+ * so the file content can be garbage-collected.
+ */
+export function materializeLine(line: string): string {
+  const capped = line.length > MAX_STORED_LINE_CHARS ? line.slice(0, MAX_STORED_LINE_CHARS) : line;
+  return Buffer.from(capped, "utf8").toString("utf8");
+}
+
+function materializeLines(lines: string[]): string[] {
+  return lines.map(materializeLine);
+}
+
 function toMatch(lines: string[], index: number, column: number, bounds: ScanBounds): FileMatch {
-  const match: FileMatch = { line: index + 1, column, lineText: lines[index] ?? "" };
+  const match: FileMatch = { line: index + 1, column, lineText: materializeLine(lines[index] ?? "") };
   if (bounds.contextBefore > 0 && index > 0) {
-    match.contextBefore = lines.slice(Math.max(0, index - bounds.contextBefore), index);
+    match.contextBefore = materializeLines(lines.slice(Math.max(0, index - bounds.contextBefore), index));
   }
   if (bounds.contextAfter > 0 && index + 1 < lines.length) {
-    match.contextAfter = lines.slice(index + 1, index + 1 + bounds.contextAfter);
+    match.contextAfter = materializeLines(lines.slice(index + 1, index + 1 + bounds.contextAfter));
   }
   return match;
 }
@@ -147,13 +165,13 @@ export function scanMultiline(
     const match: FileMatch = {
       line: startLine + 1,
       column: found.index - lineStarts[startLine] + 1,
-      lineText: lines[startLine] ?? "",
+      lineText: materializeLine(lines[startLine] ?? ""),
     };
     if (bounds.contextBefore > 0 && startLine > 0) {
-      match.contextBefore = lines.slice(Math.max(0, startLine - bounds.contextBefore), startLine);
+      match.contextBefore = materializeLines(lines.slice(Math.max(0, startLine - bounds.contextBefore), startLine));
     }
     if (bounds.contextAfter > 0 && endLine + 1 < lines.length) {
-      match.contextAfter = lines.slice(endLine + 1, endLine + 1 + bounds.contextAfter);
+      match.contextAfter = materializeLines(lines.slice(endLine + 1, endLine + 1 + bounds.contextAfter));
     }
     matches.push(match);
     if (found[0].length === 0) matcher.regex.lastIndex += 1;
@@ -163,17 +181,19 @@ export function scanMultiline(
 
 export interface CompiledGlob {
   regex: RegExp;
-  /** Pattern had no slash → gitignore-style basename match at any depth. */
+  /** Pattern had no slash and no leading `/` → gitignore-style basename match at any depth. */
   matchBase: boolean;
 }
 
 /**
  * Minimal glob support: `*`, `**`, and `?`. Character classes and brace
  * alternation are treated literally — a documented divergence from ripgrep.
+ * A leading `/` anchors the pattern to the root of the matched path.
  * Returns null for patterns that cannot compile.
  */
 export function compileGlob(glob: string): CompiledGlob | null {
-  const pattern = glob.startsWith("/") ? glob.slice(1) : glob;
+  const anchored = glob.startsWith("/");
+  const pattern = anchored ? glob.slice(1) : glob;
   if (pattern.length === 0) return null;
   let source = "";
   let index = 0;
@@ -196,7 +216,7 @@ export function compileGlob(glob: string): CompiledGlob | null {
     }
   }
   try {
-    return { regex: new RegExp(`^${source}$`), matchBase: !pattern.includes("/") };
+    return { regex: new RegExp(`^${source}$`), matchBase: !anchored && !pattern.includes("/") };
   } catch {
     return null;
   }

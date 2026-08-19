@@ -7,6 +7,7 @@ import {
   globMatches,
   isIgnoredByRules,
   looksBinary,
+  MAX_STORED_LINE_CHARS,
   parseIgnoreContent,
   scanLines,
   scanMultiline,
@@ -147,6 +148,23 @@ test("globs match basename without a slash and full path with one", () => {
   assert.equal(globMatches(byTree, "packages/app/dist/x.js"), true);
   assert.equal(globMatches(byTree, "dist/x.js"), true);
   assert.equal(globMatches(byTree, "src/x.js"), false);
+});
+
+test("stored lines are capped at the display limit", () => {
+  const longLine = "samp " + "x".repeat(MAX_STORED_LINE_CHARS + 500);
+  const matcher = compileQueryMatcher("samp", options());
+  const lines = splitLines(longLine + "\n");
+  const matches = scanLines(lines, 0, 1, matcher, NO_CONTEXT);
+  assert.equal(matches.length, 1);
+  assert.equal(matches[0].lineText.length, MAX_STORED_LINE_CHARS);
+});
+
+test("root-anchored ignore rules match only at the root", () => {
+  const rules = parseIgnoreContent("/build/\n/.env\n");
+  assert.equal(isIgnoredByRules(rules, "build", true), true);
+  assert.equal(isIgnoredByRules(rules, "nested/build", true), false);
+  assert.equal(isIgnoredByRules(rules, ".env", false), true);
+  assert.equal(isIgnoredByRules(rules, "sub/.env", false), false);
 });
 
 test("parses ignore content, skipping comments, blanks, and negations", () => {

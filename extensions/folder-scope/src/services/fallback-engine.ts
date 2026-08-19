@@ -19,8 +19,14 @@ import {
 } from "../utils/fallback-search.ts";
 
 // ponytail: per-directory file pool; a global worker pool if throughput matters.
-// Memory ceiling is FILE_CONCURRENCY × maxFileSizeBytes for whole-file reads.
 const FILE_CONCURRENCY = 4;
+/**
+ * Total bytes of file content allowed in flight at once. Whole-file reads cost
+ * roughly 3× the file size (read buffer + decoded string + line array), so this
+ * keeps the scan's peak well under Raycast's 100 MB extension heap limit even
+ * with FILE_CONCURRENCY maximum-size files.
+ */
+const MAX_IN_FLIGHT_BYTES = 16 * 1024 * 1024;
 /** Lines scanned between event-loop yields so large files cannot block the UI. */
 const LINES_PER_CHUNK = 2000;
 /** ripgrep also reads `.rgignore`; two names cover the common cases (documented divergence). */
@@ -136,43 +142,58 @@ export class FallbackEngine implements SearchEngine {
       return rules.length > 0 ? [...dir.ignores, { directory: dir.path, rules }] : dir.ignores;
     };
 
+    let inFlightBytes = 0;
+
     const scanFile = async (filePath: string): Promise<void> => {
       if (stopped()) return;
       let content: string;
+      let reservedBytes = 0;
       try {
-        const handle = await open(filePath, "r");
         try {
-          const stats = await handle.stat();
-          if (!stats.isFile() || stats.size > options.maxFileSizeBytes) return;
-          const size = Number(stats.size);
-          if (size === 0) {
-            content = "";
-          } else {
-            const buffer = Buffer.alloc(size);
-            const { bytesRead } = await handle.read(buffer, 0, size, 0);
-            const data = bytesRead < size ? buffer.subarray(0, bytesRead) : buffer;
-            if (!options.includeBinary && looksBinary(data)) return;
-            content = data.toString("utf8");
+          const handle = await open(filePath, "r");
+          try {
+            const stats = await handle.stat();
+            if (!stats.isFile() || stats.size > options.maxFileSizeBytes) return;
+            const size = Number(stats.size);
+            // The reservation is held until scanning ends: the decoded string
+            // and its line array live for the whole scan, not just the read.
+            while (inFlightBytes > 0 && inFlightBytes + size > MAX_IN_FLIGHT_BYTES) {
+              if (stopped()) return;
+              await yieldToEventLoop();
+            }
+            reservedBytes = size;
+            inFlightBytes += size;
+            if (size === 0) {
+              content = "";
+            } else {
+              const buffer = Buffer.alloc(size);
+              const { bytesRead } = await handle.read(buffer, 0, size, 0);
+              const data = bytesRead < size ? buffer.subarray(0, bytesRead) : buffer;
+              if (!options.includeBinary && looksBinary(data)) return;
+              content = data.toString("utf8");
+            }
+          } finally {
+            await handle.close();
           }
-        } finally {
-          await handle.close();
+        } catch {
+          return; // Unreadable or deleted while scanning — skip and continue.
         }
-      } catch {
-        return; // Unreadable or deleted while scanning — skip and continue.
-      }
-      if (stopped()) return;
+        if (stopped()) return;
 
-      const relativePath = relative(directory, filePath) || basename(filePath);
-      const context = { contextBefore: options.contextBefore, contextAfter: options.contextAfter };
-      const lines = splitLines(content);
-      if (matcher.multiline) {
-        emit(filePath, relativePath, scanMultiline(content, lines, matcher, { ...context, maxMatches: remaining() }));
-        return;
-      }
-      for (let start = 0; start < lines.length && !stopped(); start += LINES_PER_CHUNK) {
-        const end = Math.min(start + LINES_PER_CHUNK, lines.length);
-        emit(filePath, relativePath, scanLines(lines, start, end, matcher, { ...context, maxMatches: remaining() }));
-        if (end < lines.length) await yieldToEventLoop();
+        const relativePath = relative(directory, filePath) || basename(filePath);
+        const context = { contextBefore: options.contextBefore, contextAfter: options.contextAfter };
+        const lines = splitLines(content);
+        if (matcher.multiline) {
+          emit(filePath, relativePath, scanMultiline(content, lines, matcher, { ...context, maxMatches: remaining() }));
+          return;
+        }
+        for (let start = 0; start < lines.length && !stopped(); start += LINES_PER_CHUNK) {
+          const end = Math.min(start + LINES_PER_CHUNK, lines.length);
+          emit(filePath, relativePath, scanLines(lines, start, end, matcher, { ...context, maxMatches: remaining() }));
+          if (end < lines.length) await yieldToEventLoop();
+        }
+      } finally {
+        inFlightBytes -= reservedBytes;
       }
     };
 

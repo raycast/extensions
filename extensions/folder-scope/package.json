@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "folder-scope",
   "title": "Folder Scope",
-  "description": "Search text instantly inside files in your active Finder folder.",
+  "description": "Search the contents of files in your active Finder folder or any folder you select.",
   "icon": "icon.png",
   "author": "omer_aydemir",
   "platforms": [
@@ -59,8 +59,8 @@
       "default": "automatic",
       "data": [
         { "title": "Automatic", "value": "automatic" },
-        { "title": "Bundled ripgrep", "value": "bundled" },
-        { "title": "System ripgrep", "value": "system" },
+        { "title": "Bundled Ripgrep", "value": "bundled" },
+        { "title": "System Ripgrep", "value": "system" },
         { "title": "Node.js Fallback", "value": "node" }
       ]
     },
