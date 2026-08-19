@@ -1,6 +1,6 @@
 # App Icon Generator Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2026-08-19
 
 - Added Windows support
 - Fixed ICO icon generation when the ICO platform is selected
