@@ -3,7 +3,8 @@ import { execFileSync } from "node:child_process";
 import { Schedule, startCaffeinate, getSchedule, stopCaffeinate, isCaffeinateRunning } from "./utils";
 
 const AUTO_CAFFEINATE_PID_KEY = "autoCaffeinateRaycastPid";
-const SCHEDULE_MONITOR_ACTIVATED_KEY = "scheduleMonitorActivated";
+const SCHEDULE_MONITOR_LAST_RUN_KEY = "scheduleMonitorLastRun";
+const SCHEDULE_MONITOR_STALE_AFTER_MS = 2 * 60 * 1000;
 
 /** Opens the status command once so Raycast activates its recurring background refresh. */
 export async function activateScheduleMonitor(returnToSchedule = false): Promise<boolean> {
@@ -11,7 +12,7 @@ export async function activateScheduleMonitor(returnToSchedule = false): Promise
     await launchCommand({
       name: "status",
       type: LaunchType.UserInitiated,
-      context: { activateScheduleMonitor: true, returnToSchedule },
+      context: { returnToSchedule },
     });
     return true;
   } catch (error) {
@@ -21,8 +22,8 @@ export async function activateScheduleMonitor(returnToSchedule = false): Promise
 }
 
 export async function isScheduleMonitorActivated(): Promise<boolean> {
-  const value = await LocalStorage.getItem(SCHEDULE_MONITOR_ACTIVATED_KEY);
-  return value === true || value === "true";
+  const lastRun = await LocalStorage.getItem<number>(SCHEDULE_MONITOR_LAST_RUN_KEY);
+  return typeof lastRun === "number" && Date.now() - lastRun <= SCHEDULE_MONITOR_STALE_AFTER_MS;
 }
 
 /**
@@ -140,12 +141,8 @@ export async function maybeAutoCaffeinate(isScheduled?: boolean): Promise<boolea
   return true;
 }
 
-export default async function Command(props: {
-  launchContext?: { activateScheduleMonitor?: boolean; returnToSchedule?: boolean };
-}) {
-  if (props.launchContext?.activateScheduleMonitor) {
-    await LocalStorage.setItem(SCHEDULE_MONITOR_ACTIVATED_KEY, "true");
-  }
+export default async function Command(props: { launchContext?: { returnToSchedule?: boolean } }) {
+  await LocalStorage.setItem(SCHEDULE_MONITOR_LAST_RUN_KEY, Date.now());
 
   const isCaffeinated = isCaffeinateRunning();
   const isScheduled = await checkSchedule();

@@ -142,7 +142,7 @@ export default function Command() {
   };
 
   const handlePauseSchedule = async (schedule: Schedule) => {
-    changeScheduleState("decaffeinate", schedule);
+    await changeScheduleState("decaffeinate", schedule);
     await showToast(
       Toast.Style.Success,
       `Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now paused`,
@@ -159,7 +159,7 @@ export default function Command() {
   };
 
   const handleResumeSchedule = async (schedule: Schedule) => {
-    changeScheduleState("caffeinate", schedule);
+    await changeScheduleState("caffeinate", schedule);
     await showToast(
       Toast.Style.Success,
       `Schedule for ${schedule.day.charAt(0).toUpperCase() + schedule.day.slice(1).toLowerCase()} is now resumed`,
