@@ -5,15 +5,11 @@ import { CustomFieldSchema, getCustomFieldValue } from "../src/helpers/customFie
 
 describe("getCustomFieldValue", () => {
   it("returns the plain Team ID string for the Advanced Roadmaps team field", () => {
-    // The Advanced Roadmaps Team field (rm-teams-custom-field-team) is persisted only when sent as
-    // a plain string Team ID (not an `{ id }` object).
     const result = getCustomFieldValue(CustomFieldSchema.team, "abc-123-team-uuid");
     assert.equal(result, "abc-123-team-uuid");
   });
 
   it("returns the plain Team ID string for the Atlassian Teams platform field", () => {
-    // The newer Atlassian Teams platform field (atlassian-team) also persists only when sent as a
-    // plain string Team ID (confirmed against a live site).
     assert.equal(getCustomFieldValue(CustomFieldSchema.atlassianTeam, "team-uuid-99"), "team-uuid-99");
   });
 
