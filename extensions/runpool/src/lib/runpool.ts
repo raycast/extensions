@@ -165,17 +165,17 @@ export function fraction(pool: Pool): string {
 }
 
 /**
- * The fill variant for a given proportion of work. Assets exist at 0, 25, 50,
- * 75 and 100, and `prefix` selects the padded set or the tighter menu bar one.
+ * The fill variant for a given proportion of work, rounded to the nearest
+ * quarter. Assets exist at 0, 25, 50, 75 and 100, plus `bar-off` for disabled.
  *
  * Always driven by the same figure as `fraction`, so the icon and the text can
  * never contradict each other. An earlier version filled by runners awake,
  * which put a full pool next to the word "Idle".
  */
-export function fillAsset(busy: number, total: number, prefix: "pool" | "bar" = "pool"): string {
+export function fillAsset(busy: number, total: number): string {
   const level = total === 0 ? 0 : busy / total;
   const step = Math.round(Math.min(1, Math.max(0, level)) * 4) * 25;
-  return `${prefix}-${step}.png`;
+  return `bar-${step}.png`;
 }
 
 /**

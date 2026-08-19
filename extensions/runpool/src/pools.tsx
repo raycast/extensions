@@ -153,6 +153,20 @@ export default function Command() {
                 )}
               </ActionPanel.Section>
 
+              {/* The global switch sits with the pool's own start and stop,
+                  because it is the same decision at a wider scope. Capacity
+                  follows: it is changed rarely, and putting it above the
+                  switch buried the thing people actually come here for. */}
+              <ActionPanel.Section title="Local CI">
+                <Action
+                  title={status.paused ? "Enable Local CI" : "Disable Local CI"}
+                  icon={status.paused ? Icon.Play : Icon.Pause}
+                  style={status.paused ? Action.Style.Regular : Action.Style.Destructive}
+                  onAction={() => togglePause(status.paused)}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                />
+              </ActionPanel.Section>
+
               <ActionPanel.Section title="Capacity">
                 {[2, 4, 6, 8]
                   .filter((n) => n !== pool.count)
@@ -172,14 +186,7 @@ export default function Command() {
                   ))}
               </ActionPanel.Section>
 
-              <ActionPanel.Section title="Local CI">
-                <Action
-                  title={status.paused ? "Enable Local CI" : "Disable Local CI"}
-                  icon={status.paused ? Icon.Play : Icon.Pause}
-                  style={status.paused ? Action.Style.Regular : Action.Style.Destructive}
-                  onAction={() => togglePause(status.paused)}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                />
+              <ActionPanel.Section>
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}

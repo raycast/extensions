@@ -16,14 +16,14 @@
     {
       "name": "pools",
       "title": "Show Runner Pools",
-      "subtitle": "runpool",
+      "subtitle": "RunPool",
       "description": "See every runner pool, start and stop them, and change how many runners each has",
       "mode": "view"
     },
     {
       "name": "status",
       "title": "Runner Status",
-      "subtitle": "runpool",
+      "subtitle": "RunPool",
       "description": "Keep a live summary of the pools in this command's subtitle",
       "mode": "no-view",
       "interval": "1m"
@@ -31,7 +31,7 @@
     {
       "name": "menubar",
       "title": "Runner Status in Menu Bar",
-      "subtitle": "runpool",
+      "subtitle": "RunPool",
       "description": "Show how much of the pool is awake in the menu bar, as a fill level",
       "mode": "menu-bar",
       "interval": "1m",

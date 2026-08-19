@@ -36,7 +36,7 @@ export default function Command() {
   // Monochrome by default, tinted to the menu bar's own text colour so it is
   // dark on a light bar and light on a dark one, the way every native item
   // behaves. A flat single-colour mark tints cleanly.
-  const source = status?.paused ? "bar-off.png" : fillAsset(busy, slots, "bar");
+  const source = status?.paused ? "bar-off.png" : fillAsset(busy, slots);
   const icon = colourIcon ? { source } : { source, tintColor: Color.PrimaryText };
 
   return (
@@ -51,8 +51,8 @@ export default function Command() {
             key={pool.name}
             icon={
               colourIcon
-                ? { source: fillAsset(pool.busy, pool.count, "bar") }
-                : { source: fillAsset(pool.busy, pool.count, "bar"), tintColor: Color.SecondaryText }
+                ? { source: fillAsset(pool.busy, pool.count) }
+                : { source: fillAsset(pool.busy, pool.count), tintColor: Color.SecondaryText }
             }
             title={pool.name}
             // A fault is the one thing that earns different treatment: a
