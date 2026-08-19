@@ -1,6 +1,6 @@
 # Claude Changelog
 
-## [API compatibility fixes] - {PR_MERGE_DATE}
+## [API compatibility fixes] - 2026-08-19
 
 - Fix: Asking a question on Claude Opus 4.7 or newer (including Opus 4.7, Sonnet 5, and Opus 5) failed with a 400 error. Sampling parameters were removed on those models, and the extension was still sending `temperature` on every request.
 - Fix: With "Stream Responses" turned off, requests could fail outright instead of answering — and on Opus 4 and 4.1 the failure left the loading indicator spinning with no error shown. Non-streaming requests are now capped at the limit the API accepts, and if a particular model rejects even that, the request is retried at a smaller size rather than failing — so a long answer comes back shorter rather than not at all, and nothing is left hanging.
