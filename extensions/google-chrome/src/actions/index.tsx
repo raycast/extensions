@@ -10,11 +10,17 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   // attributes as separate lists would be a similar win, but they would be separate
   // snapshots: a tab opened or closed in between shifts one list against the others
   // and a row would end up carrying another tab's id. The favicon still needs one
-  // event per tab, so it is only evaluated when the preference is on.
-  const faviconFormula = useOriginalFavicon
-    ? `execute tab i of w javascript ¬
-        "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
-    : '""';
+  // event per tab, so it is only evaluated when the preference is on. That event
+  // addresses the tab by id rather than by position, so it cannot pick up a
+  // different tab's icon if the window changed since the snapshot, and it is
+  // wrapped in a `try` so one unreachable tab cannot abort the whole listing.
+  const faviconStatement = useOriginalFavicon
+    ? `set _favicon to ""
+            try
+              set _favicon to execute (first tab of w whose id is (id of _p)) javascript ¬
+                "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"
+            end try`
+    : `set _favicon to ""`;
 
   await checkAppInstalled();
 
@@ -27,7 +33,7 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
           set _props to properties of tabs of w
           repeat with i from 1 to count of _props
             set _p to item i of _props
-            set _favicon to ${faviconFormula}
+            ${faviconStatement}
             set _output to (_output & (title of _p) & "${Tab.TAB_CONTENTS_SEPARATOR}" & (URL of _p) & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & i & "${Tab.TAB_CONTENTS_SEPARATOR}" & (id of _p) & "\\n")
           end repeat
         end repeat
@@ -154,18 +160,25 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
-      repeat with w in windows
-        set _tab_ids to id of tabs of w
-        repeat with i from 1 to count of _tab_ids
-          if (item i of _tab_ids as text) is "${tab.tabId}" then
-            set index of w to 1
-            set active tab index of w to i
-            -- Confirm the index still resolved to the intended tab; if the tab moved
-            -- in between, fail loudly rather than leaving another tab activated.
-            if (id of active tab of w as text) is not "${tab.tabId}" then error "Tab moved while activating"
-            return true
-          end if
+      repeat 3 times
+        set _seen to false
+        repeat with w in windows
+          set _tab_ids to id of tabs of w
+          repeat with i from 1 to count of _tab_ids
+            if (item i of _tab_ids as text) is "${tab.tabId}" then
+              set _seen to true
+              set index of w to 1
+              set active tab index of w to i
+              -- Confirm the index still resolved to the intended tab. If the list
+              -- shifted in between, retry from a fresh scan rather than leaving a
+              -- different tab activated.
+              if (id of active tab of w as text) is "${tab.tabId}" then return true
+              exit repeat
+            end if
+          end repeat
+          if _seen then exit repeat
         end repeat
+        if not _seen then exit repeat
       end repeat
       error "Tab not found"
     end tell
