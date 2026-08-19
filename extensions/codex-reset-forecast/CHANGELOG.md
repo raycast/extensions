@@ -3,7 +3,7 @@
 ## [Mirror Website Forecast Copy] - {PR_MERGE_DATE}
 
 - Show the source website's state-specific headline, summary, and advice in forecast details.
-- Restore source-post quote styling and bullet lists so long updates remain readable.
+- Restore source-post quote styling, lists, and code blocks across event lifecycle updates.
 - Keep the last-checked time accurate after an unchanged refresh and later offline fallback.
 - Remove redundant quota and reset-detection caveats.
 

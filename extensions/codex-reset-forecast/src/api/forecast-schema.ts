@@ -6,6 +6,7 @@ const timestampSchema = z.string().refine((value) => !Number.isNaN(Date.parse(va
 
 const forecastDetailSchema = z.looseObject({
   action: z.string(),
+  kind: z.string().optional(),
   name: z.string(),
   url: z.string().optional(),
 });

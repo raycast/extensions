@@ -34,6 +34,49 @@ describe("history classification", () => {
     expect(getSourceDetail(entry)?.url).toBe("https://x.com/example/status/1");
   });
 
+  it("keeps treating a tweet as the source when its lifecycle action changes", () => {
+    const entry = {
+      ...forecast.history[0],
+      changes: [
+        {
+          delta: -10,
+          label: "OpenAI event hint",
+          details: [
+            {
+              action: "Signal expired after 48h",
+              kind: "tweet",
+              name: "Original post body",
+              url: "https://x.com/example/status/2",
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(getSourceDetail(entry)?.url).toBe("https://x.com/example/status/2");
+  });
+
+  it("does not mistake an incident link for a source post", () => {
+    const entry = {
+      ...forecast.history[0],
+      changes: [
+        {
+          delta: -4,
+          label: "other incidents",
+          details: [
+            {
+              action: "Resolved",
+              name: "Elevated errors",
+              url: "https://status.openai.com/incidents/example",
+            },
+          ],
+        },
+      ],
+    };
+
+    expect(getSourceDetail(entry)).toBeUndefined();
+  });
+
   it("rejects non-HTTPS source URLs", () => {
     expect(isSafeSourceUrl("http://example.com/post")).toBe(false);
     expect(isSafeSourceUrl("not a URL")).toBe(false);

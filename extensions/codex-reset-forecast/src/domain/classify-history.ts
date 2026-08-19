@@ -4,9 +4,14 @@ type HistoryKind = "confirmed-reset" | "announcement" | "ordinary";
 
 const CONFIRMED_RESET_LABEL = "confirmed reset";
 const RESET_ANNOUNCEMENT_LABEL = "public reset announcement";
+const SOURCE_POST_KIND = "tweet";
 
 function normalizedLabel(change: ForecastChange): string {
   return change.label.trim().toLocaleLowerCase("en-US");
+}
+
+function normalizedDetailValue(value: string | undefined): string {
+  return value?.trim().toLocaleLowerCase("en-US") ?? "";
 }
 
 function changePriority(change: ForecastChange): number {
@@ -34,7 +39,15 @@ export function getPrimaryChange(entry: ForecastHistoryEntry): ForecastChange | 
 export function getSourceDetail(entry: ForecastHistoryEntry): ForecastDetail | undefined {
   return entry.changes
     .flatMap((change) => change.details ?? [])
-    .find((detail) => detail.action.trim().toLocaleLowerCase("en-US") === "source post" && isSafeSourceUrl(detail.url));
+    .find((detail) => isSourcePostDetail(detail) && isSafeSourceUrl(detail.url));
+}
+
+export function isSourcePostDetail(detail: ForecastDetail): boolean {
+  return hasSourcePostAction(detail) || normalizedDetailValue(detail.kind) === SOURCE_POST_KIND;
+}
+
+export function hasSourcePostAction(detail: ForecastDetail): boolean {
+  return normalizedDetailValue(detail.action) === "source post";
 }
 
 export function isSafeSourceUrl(value: string | undefined): value is string {

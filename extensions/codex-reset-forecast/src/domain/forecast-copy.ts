@@ -1,4 +1,5 @@
 import type { ForecastHistoryEntry, ForecastResponse } from "../api/forecast-schema";
+import { hasSourcePostAction, isSourcePostDetail } from "./classify-history";
 import { formatDateTime, formatPercentage, formatRelativeTime, scoreTransition } from "./format-forecast";
 
 type ForecastNarrative = {
@@ -7,11 +8,12 @@ type ForecastNarrative = {
   title: string;
 };
 
+const MARKDOWN_LITERAL_CHARACTERS = new Set("&\\`*_{}<>#+-.!|[]$~");
+
 function escapeMarkdown(value: string): string {
-  return value
-    .replace(/([\\`*_{}<>#+\-.!|])/g, "\\$1")
-    .replace(/\[/g, "\\[")
-    .replace(/\]/g, "\\]");
+  return Array.from(value, (character) =>
+    MARKDOWN_LITERAL_CHARACTERS.has(character) ? `&#${character.charCodeAt(0)};` : character,
+  ).join("");
 }
 
 function escapedProse(value: string): string {
@@ -28,11 +30,35 @@ function blockquote(markdown: string): string {
     .join("\n");
 }
 
+function restoreFlattenedCode(value: string): string {
+  const code = value.trim();
+
+  if (/^[A-Za-z_][\w.-]*\s*=/.test(code)) {
+    return code.replace(/\s+(?=[A-Za-z_][\w.-]*\s*=)/g, "\n");
+  }
+
+  return code.replace(/\s+\\\s+(?=-)/g, " \\\n");
+}
+
+function sourceProseMarkdown(value: string): string {
+  const segments = value.split("```");
+  if (segments.length < 3 || segments.length % 2 === 0) return escapedProse(value);
+
+  return segments
+    .map((segment, index) => {
+      if (!segment.trim()) return "";
+      if (index % 2 === 0) return escapedProse(segment.trim());
+      return `\`\`\`\n${restoreFlattenedCode(segment)}\n\`\`\``;
+    })
+    .filter(Boolean)
+    .join("\n\n");
+}
+
 function sourcePostMarkdown(value: string): string {
   const normalized = value.replace(/\r\n?/g, "\n").trim();
   const divider = /(?:^|\s)={3,}(?=\s|$)/.exec(normalized);
 
-  if (!divider) return blockquote(escapedProse(normalized));
+  if (!divider) return blockquote(sourceProseMarkdown(normalized));
 
   const introduction = normalized.slice(0, divider.index).trim();
   const remainder = normalized.slice(divider.index + divider[0].length).trim();
@@ -45,9 +71,9 @@ function sourcePostMarkdown(value: string): string {
   const body =
     bulletItems.length > 0
       ? bulletItems.map((item) => `- ${escapeMarkdown(item)}`).join("\n")
-      : escapedProse(remainder);
+      : sourceProseMarkdown(remainder);
 
-  return blockquote([escapedProse(introduction), body].filter(Boolean).join("\n\n"));
+  return blockquote([sourceProseMarkdown(introduction), body].filter(Boolean).join("\n\n"));
 }
 
 export function forecastSummary(
@@ -122,14 +148,18 @@ export function forecastNarrative(response: ForecastResponse, now = new Date()):
 
 export function historyDetailMarkdown(entry: ForecastHistoryEntry): string {
   const sections = entry.changes.map((change) => {
-    const source = change.details?.find((detail) => detail.action.trim().toLocaleLowerCase("en-US") === "source post");
-    const explanations = (change.details ?? []).filter(
-      (detail) => detail.action.trim().toLocaleLowerCase("en-US") !== "source post",
-    );
+    const source = change.details?.find(isSourcePostDetail);
+    const explanations = (change.details ?? []).filter((detail) => !isSourcePostDetail(detail));
     const delta = `${change.delta > 0 ? "+" : ""}${change.delta} pts`;
     const lines = [`## ${escapeMarkdown(change.label)}`, `**${escapeMarkdown(delta)}**`];
 
-    if (source?.name) lines.push("### Source Post", sourcePostMarkdown(source.name));
+    if (source?.name) {
+      lines.push("### Source Post");
+      if (!hasSourcePostAction(source)) {
+        lines.push(`**${escapeMarkdown(source.action)}**`);
+      }
+      lines.push(sourcePostMarkdown(source.name));
+    }
     for (const detail of explanations) {
       lines.push(`**${escapeMarkdown(detail.action)}:** ${escapeMarkdown(detail.name)}`);
     }

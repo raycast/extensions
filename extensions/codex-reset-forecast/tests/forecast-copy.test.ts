@@ -70,10 +70,10 @@ describe("history detail markdown", () => {
       [
         "### Source Post",
         "",
-        "> Intro with \\*\\*literal emphasis\\*\\*\\.",
+        "> Intro with &#42;&#42;literal emphasis&#42;&#42;&#46;",
         ">",
-        "> - First item\\.",
-        "> - Second item\\.",
+        "> - First item&#46;",
+        "> - Second item&#46;",
       ].join("\n"),
     );
     expect(historyDetailMarkdown(entry)).not.toContain("=====");
@@ -82,6 +82,63 @@ describe("history detail markdown", () => {
   it("keeps ordinary source-post text as escaped prose", () => {
     const markdown = historyDetailMarkdown(baseForecast.history[0]);
 
-    expect(markdown).toContain("### Source Post\n\n> Usage limits have been reset\\.");
+    expect(markdown).toContain("### Source Post\n\n> Usage limits have been reset&#46;");
+  });
+
+  it("renders an expired tweet as a source post and restores flattened code fences", () => {
+    const entry = {
+      ...baseForecast.history[0],
+      changes: [
+        {
+          delta: -10,
+          label: "OpenAI event hint",
+          details: [
+            {
+              action: "Signal expired after 48h",
+              kind: "tweet",
+              name: [
+                "Open ~/.codex/config.toml before any [section] headers:",
+                '``` model = "gpt-5.6-sol" model_context_window = 1000000 model_auto_compact_token_limit = 900000 ```',
+                "For one CLI session:",
+                "``` codex -m gpt-5.6-sol \\ -c model_context_window=1000000 \\ -c model_auto_compact_token_limit=900000 ```",
+              ].join(" "),
+              url: "https://x.com/example/status/3",
+            },
+            {
+              action: "Why it counted",
+              name: 'Matched event language: "million".',
+            },
+          ],
+        },
+      ],
+    };
+
+    const markdown = historyDetailMarkdown(entry);
+
+    expect(markdown).toContain("### Source Post\n\n**Signal expired after 48h**\n\n> Open");
+    expect(markdown).toContain("Open &#126;/&#46;codex/config&#46;toml before any &#91;section&#93; headers:");
+    expect(markdown).toContain(
+      [
+        "> ```",
+        '> model = "gpt-5.6-sol"',
+        "> model_context_window = 1000000",
+        "> model_auto_compact_token_limit = 900000",
+        "> ```",
+      ].join("\n"),
+    );
+    expect(markdown).toContain(
+      [
+        "> ```",
+        "> codex -m gpt-5.6-sol \\",
+        "> -c model_context_window=1000000 \\",
+        "> -c model_auto_compact_token_limit=900000",
+        "> ```",
+      ].join("\n"),
+    );
+    expect(markdown).toContain('**Why it counted:** Matched event language: "million"&#46;');
+    expect(markdown).not.toContain("\\[");
+    expect(markdown).not.toContain("\\.");
+    expect(markdown).not.toContain("\\-");
+    expect(markdown).not.toContain("**Signal expired after 48h:**");
   });
 });
