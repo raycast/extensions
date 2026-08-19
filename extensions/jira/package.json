@@ -594,7 +594,6 @@
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
     "prettier": "^3.7.3",
-    "tsx": "^4.22.4",
     "typescript": "^5.9.3"
   },
   "scripts": {
