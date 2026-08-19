@@ -1,5 +1,9 @@
 # Dia Changelog
 
+[Security: Address dependabot alert] - {PR_MERGE_DATE}
+
+- Updated package-lock.json to fix https://github.com/raycast/extensions/security/dependabot/76383
+
 ## [Close Tab] - 2026-08-18
 
 - Added Close Tab action to Search Dia and Search Tabs.
