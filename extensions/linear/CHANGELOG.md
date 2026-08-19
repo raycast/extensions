@@ -1,6 +1,6 @@
 # Linear Changelog
 
-## [Copy as Prompt] - {PR_MERGE_DATE}
+## [Copy as Prompt] - 2026-08-19
 
 - Add a "Copy as Prompt" action to issue copy actions, matching Linear's native action of the same name. Copies the issue as a structured prompt for coding agents, including its description, team, labels, project, and parent or sub-issues.
 
