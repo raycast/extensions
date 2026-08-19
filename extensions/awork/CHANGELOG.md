@@ -1,6 +1,6 @@
 # awork Changelog
 
-## [Create and edit tasks] - {PR_MERGE_DATE}
+## [Create and edit tasks] - 2026-08-19
 
 - Added the **Create Task** command for project and private tasks, including status, task list, parent task, assignees, dates, planned effort and priority. Press `⌘⏎` to create a task or `⌘⇧⏎` to create it and open it in the browser. Use `⌃C` in the project or task search to create a task or subtask.
 - Added the **Edit Task** action `⌃E` in the task search. The form opens prefilled with all task details and can turn a task into a subtask or back into a standalone task.
