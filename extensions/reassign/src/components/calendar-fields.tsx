@@ -1,5 +1,6 @@
 import { Form, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 import { listCalendars } from "../lib/api";
 import type { Calendar } from "../lib/schedule-model";
 
@@ -38,6 +39,7 @@ export function calendarCreateFields(values: CalendarFormValues): CalendarWriteF
   const out: CalendarWriteFields = {};
   if (values.calendarId === CALENDAR_NONE) out.syncTo = null;
   else if (values.calendarId) out.syncTo = values.calendarId;
+  // The mirror picker hides for a Reassign-only block, so no mirrors ride.
   const mirrors = (values.mirrorIds ?? []).filter((id) => id !== values.calendarId);
   if (mirrors.length > 0) out.mirrorTo = mirrors;
   return out;
@@ -56,9 +58,11 @@ export function calendarEditFields(
     out.syncTo = values.calendarId === CALENDAR_NONE ? null : values.calendarId;
   }
   const home = out.syncTo ?? current.calendarId;
-  // A hidden mirror picker (one writable calendar) keeps the current mirrors.
-  if (values.mirrorIds === undefined) return out;
-  const mirrors = values.mirrorIds.filter((id) => id !== home);
+  // The mirror picker hides for a Reassign-only block (then the mirrors go) and
+  // when only one calendar is writable (then the current mirrors stay).
+  const picked = values.mirrorIds ?? (values.calendarId === CALENDAR_NONE ? [] : undefined);
+  if (picked === undefined) return out;
+  const mirrors = picked.filter((id) => id !== home);
   if (!sameSet(mirrors, current.mirrorIds ?? [])) out.mirrorTo = mirrors;
   return out;
 }
@@ -76,7 +80,8 @@ function sameSet(a: string[], b: string[]): boolean {
 
 /**
  * The "Calendar" and "Mirror to" form fields. Renders nothing without a writable
- * calendar. The mirror picker needs a second writable calendar to mirror to.
+ * calendar. The mirror picker shows only when the block has a calendar home and
+ * a second writable calendar exists; the home itself is not a mirror choice.
  * `allowDefault` adds a "Default" choice for a create (an edit knows the home).
  */
 export function CalendarFields(props: {
@@ -87,14 +92,20 @@ export function CalendarFields(props: {
   mirrorDefault: string[];
 }) {
   const { writable, defaultId, allowDefault, calendarDefault, mirrorDefault } = props;
+  // Controlled, so the mirror picker can follow the chosen home.
+  const [chosen, setChosen] = useState(calendarDefault);
   if (writable.length === 0) return null;
   const home = writable.find((c) => c.id === defaultId) ?? writable.find((c) => c.isDefault);
+  const homeId = chosen === CALENDAR_DEFAULT ? home?.id : chosen;
+  const mirrorChoices = writable.filter((c) => c.id !== homeId);
+  const showMirrors = chosen !== CALENDAR_NONE && mirrorChoices.length > 0;
   return (
     <>
       <Form.Dropdown
         id="calendarId"
         title="Calendar"
-        defaultValue={calendarDefault}
+        value={chosen}
+        onChange={setChosen}
         info="Publish the block to a connected calendar, or keep it in Reassign only."
       >
         {allowDefault && (
@@ -114,14 +125,14 @@ export function CalendarFields(props: {
           />
         ))}
       </Form.Dropdown>
-      {writable.length > 1 && (
+      {showMirrors && (
         <Form.TagPicker
           id="mirrorIds"
           title="Mirror to"
-          defaultValue={mirrorDefault}
+          defaultValue={mirrorDefault.filter((id) => id !== homeId)}
           info="Also send a one-way copy to these calendars."
         >
-          {writable.map((calendar) => (
+          {mirrorChoices.map((calendar) => (
             <Form.TagPicker.Item
               key={calendar.id}
               value={calendar.id}
