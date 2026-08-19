@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Fix natural-language due dates] - {PR_MERGE_DATE}
+## [Fix natural-language due dates] - 2026-08-19
 
 - Restore relative due-date parsing in Create Reminder for `1h`, `1 hour`, `3 hours`, `in 10 minutes`, `3:45 pm`, `3 days`, and `1 year`.
 - Treat the `h` shortcut as hours instead of months.
