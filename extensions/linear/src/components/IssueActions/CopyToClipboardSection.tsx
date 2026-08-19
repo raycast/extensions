@@ -1,6 +1,8 @@
-import { ActionPanel, Action, getPreferenceValues, Keyboard } from "@raycast/api";
+import { ActionPanel, Action, Clipboard, getPreferenceValues, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 
-import { IssueResult } from "../../api/getIssues";
+import { getIssuePromptData, IssueResult } from "../../api/getIssues";
+import { getErrorMessage } from "../../helpers/errors";
+import { getIssuePrompt } from "../../helpers/prompts";
 
 type ISSUE_KEY = "title" | "identifier" | "url" | "branchName";
 
@@ -28,6 +30,23 @@ function getTitleLink(issue: IssueResult) {
 
 export default function CopyToClipboardSection({ issue }: { issue: IssueResult }) {
   const { issueCustomCopyAction } = getPreferenceValues<Preferences>();
+
+  async function copyIssueAsPrompt() {
+    // Unlike the other copy actions this one waits on a request, so show that it's working.
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Copying prompt" });
+
+    try {
+      // The prompt needs the description plus the issue's hierarchy, none of which the
+      // list and detail queries carry, so it always gets its own fetch.
+      await Clipboard.copy(getIssuePrompt(await getIssuePromptData(issue.id)));
+      toast.style = Toast.Style.Success;
+      toast.title = "Copied prompt to clipboard";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed copying prompt";
+      toast.message = getErrorMessage(error);
+    }
+  }
 
   return (
     <ActionPanel.Section>
@@ -72,6 +91,15 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
         content={issue.branchName}
         title="Copy Git Branch Name"
         shortcut={Keyboard.Shortcut.Common.CopyName}
+      />
+      <Action
+        icon={Icon.Clipboard}
+        title="Copy as Prompt"
+        onAction={copyIssueAsPrompt}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "p" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+        }}
       />
       {issueCustomCopyAction && issueCustomCopyAction !== "" ? (
         <Action.CopyToClipboard
