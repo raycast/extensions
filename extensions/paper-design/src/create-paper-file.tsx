@@ -7,79 +7,75 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useState } from "react";
+import { useForm } from "@raycast/utils";
 
-import { createPaperFile, getPaperFileUrl } from "./paper-mcp";
+import {
+  createPaperFile,
+  getPaperErrorMessage,
+  getPaperFileUrl,
+} from "./paper-mcp";
 
 type CreatePaperFileFormValues = {
   name: string;
 };
 
 export default function CreatePaperFileCommand() {
-  const [name, setName] = useState("");
-  const [nameError, setNameError] = useState<string>();
+  const { handleSubmit, itemProps } = useForm<CreatePaperFileFormValues>({
+    async onSubmit({ name }) {
+      const fileName = name.trim();
 
-  async function createAndOpenFile({ name }: CreatePaperFileFormValues) {
-    const fileName = name.trim();
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Creating Paper file",
+      });
 
-    if (!fileName) {
-      setNameError("Enter a file name.");
-      return;
-    }
+      let fileId: string;
+      try {
+        fileId = await createPaperFile(fileName);
+      } catch (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Could not create Paper file";
+        toast.message = getPaperErrorMessage(error);
+        return;
+      }
 
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      title: "Creating Paper file",
-    });
-
-    let fileId: string;
-    try {
-      fileId = await createPaperFile(fileName);
-    } catch {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Could not create Paper file";
-      toast.message =
-        "Open Paper Desktop with any Paper file loaded, then try again.";
-      return;
-    }
-
-    try {
-      await open(getPaperFileUrl(fileId));
-      toast.style = Toast.Style.Success;
-      toast.title = `Created “${fileName}” in Paper`;
-    } catch {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Paper file created but could not be opened";
-      toast.message = "Open it from Paper Desktop.";
-    }
-  }
+      try {
+        await open(getPaperFileUrl(fileId));
+        toast.style = Toast.Style.Success;
+        toast.title = `Created “${fileName}” in Paper`;
+      } catch {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Paper file created but could not be opened";
+        toast.message = "Open it from Paper Desktop.";
+      }
+    },
+    validation: {
+      name: (value) => {
+        if (!value?.trim()) {
+          return "Enter a file name.";
+        }
+      },
+    },
+  });
 
   return (
     <Form
-      navigationTitle="Create File"
       actions={
         <ActionPanel>
           <Action.SubmitForm
             title="Create and Open"
             icon={Icon.Plus}
-            onSubmit={createAndOpenFile}
+            onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
     >
       <Form.TextField
-        id="name"
         title="Name"
+        placeholder="Landing page"
         info="Creates the file in your active Paper team."
         autoFocus
-        value={name}
-        error={nameError}
-        onChange={(value) => {
-          setName(value);
-          if (value.trim()) {
-            setNameError(undefined);
-          }
-        }}
+        {...itemProps.name}
       />
     </Form>
   );

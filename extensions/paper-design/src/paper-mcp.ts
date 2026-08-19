@@ -67,9 +67,32 @@ class PaperMcpResponseError extends Error {
 type PaperMcpSession = {
   protocolVersion: string;
   sessionId?: string;
+  signal?: AbortSignal;
 };
 
-export async function listPaperFiles(): Promise<PaperFile[]> {
+export function isOpenInPaper(file: PaperFile): boolean {
+  return file.open === true || file.active === true;
+}
+
+export function getPaperErrorMessage(error: unknown): string {
+  if (error instanceof PaperMcpUnavailableError) {
+    return "Open Paper Desktop with any Paper file loaded, then try again.";
+  }
+
+  if (error instanceof PaperMcpResponseError) {
+    return "Paper Desktop returned an unexpected response. Make sure a Paper file is loaded, then try again.";
+  }
+
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return "Open Paper Desktop with a Paper file loaded and try again.";
+}
+
+export async function listPaperFiles(
+  signal?: AbortSignal,
+): Promise<PaperFile[]> {
   return withPaperMcpSession(async (session) => {
     const listFilesResponse = await postPaperMcpRequest(
       {
@@ -87,10 +110,13 @@ export async function listPaperFiles(): Promise<PaperFile[]> {
     return parseListFilesToolResult(
       await parseJsonRpcResult(listFilesResponse, 2),
     ).files;
-  });
+  }, signal);
 }
 
-export async function createPaperFile(name: string): Promise<string> {
+export async function createPaperFile(
+  name: string,
+  signal?: AbortSignal,
+): Promise<string> {
   return withPaperMcpSession(async (session) => {
     const createFileResponse = await postPaperMcpRequest(
       {
@@ -108,10 +134,13 @@ export async function createPaperFile(name: string): Promise<string> {
     return parseCreatedPaperFileId(
       await parseJsonRpcResult(createFileResponse, 2),
     );
-  });
+  }, signal);
 }
 
-export async function listPaperTokens(fileId: string): Promise<PaperToken[]> {
+export async function listPaperTokens(
+  fileId: string,
+  signal?: AbortSignal,
+): Promise<PaperToken[]> {
   return withPaperMcpSession(async (session) => {
     const getTokensResponse = await postPaperMcpRequest(
       {
@@ -129,12 +158,13 @@ export async function listPaperTokens(fileId: string): Promise<PaperToken[]> {
     return parsePaperTokens(
       parseJson(parseToolText(await parseJsonRpcResult(getTokensResponse, 2))),
     );
-  });
+  }, signal);
 }
 
 export async function createPaperToken(
   fileId: string,
   token: CreatePaperTokenInput,
+  signal?: AbortSignal,
 ): Promise<void> {
   return withPaperMcpSession(async (session) => {
     const createTokensResponse = await postPaperMcpRequest(
@@ -155,12 +185,13 @@ export async function createPaperToken(
         parseToolText(await parseJsonRpcResult(createTokensResponse, 2)),
       ),
     );
-  });
+  }, signal);
 }
 
 export async function updatePaperToken(
   fileId: string,
   token: UpdatePaperTokenInput,
+  signal?: AbortSignal,
 ): Promise<void> {
   return withPaperMcpSession(async (session) => {
     const setTokensResponse = await postPaperMcpRequest(
@@ -179,12 +210,13 @@ export async function updatePaperToken(
     parsePaperTokenMutation(
       parseJson(parseToolText(await parseJsonRpcResult(setTokensResponse, 2))),
     );
-  });
+  }, signal);
 }
 
 export async function deletePaperToken(
   fileId: string,
   name: string,
+  signal?: AbortSignal,
 ): Promise<void> {
   return withPaperMcpSession(async (session) => {
     const setTokensResponse = await postPaperMcpRequest(
@@ -203,7 +235,7 @@ export async function deletePaperToken(
     parsePaperTokenMutation(
       parseJson(parseToolText(await parseJsonRpcResult(setTokensResponse, 2))),
     );
-  });
+  }, signal);
 }
 
 export function getPaperFileUrl(fileId: string): string {
@@ -212,28 +244,35 @@ export function getPaperFileUrl(fileId: string): string {
 
 async function withPaperMcpSession<T>(
   operation: (session: PaperMcpSession) => Promise<T>,
+  signal?: AbortSignal,
 ): Promise<T> {
   let session: PaperMcpSession | undefined;
 
   try {
-    const initializeResponse = await postPaperMcpRequest({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "initialize",
-      params: {
-        protocolVersion: mcpProtocolVersion,
-        capabilities: {},
-        clientInfo: {
-          name: "paper-design",
-          version: "1.0.0",
-        },
-      },
-    });
-
     session = {
       protocolVersion: mcpProtocolVersion,
-      sessionId: initializeResponse.headers.get("mcp-session-id") ?? undefined,
+      signal,
     };
+
+    const initializeResponse = await postPaperMcpRequest(
+      {
+        jsonrpc: "2.0",
+        id: 1,
+        method: "initialize",
+        params: {
+          protocolVersion: mcpProtocolVersion,
+          capabilities: {},
+          clientInfo: {
+            name: "paper-design",
+            version: "1.0.0",
+          },
+        },
+      },
+      session,
+    );
+
+    session.sessionId =
+      initializeResponse.headers.get("mcp-session-id") ?? undefined;
     session.protocolVersion = parseNegotiatedProtocolVersion(
       await parseJsonRpcResult(initializeResponse, 1),
     );
@@ -252,24 +291,30 @@ async function postPaperMcpRequest(
   payload: object,
   session?: PaperMcpSession,
 ): Promise<Response> {
-  return fetchPaperMcp({
-    method: "POST",
-    headers: createPaperMcpHeaders(session),
-    body: JSON.stringify(payload),
-  });
+  return fetchPaperMcp(
+    {
+      method: "POST",
+      headers: createPaperMcpHeaders(session),
+      body: JSON.stringify(payload),
+    },
+    session?.signal,
+  );
 }
 
 async function notifyPaperMcpInitialized(
   session: PaperMcpSession,
 ): Promise<void> {
-  await fetchPaperMcp({
-    method: "POST",
-    headers: createPaperMcpHeaders(session),
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      method: "notifications/initialized",
-    }),
-  });
+  await fetchPaperMcp(
+    {
+      method: "POST",
+      headers: createPaperMcpHeaders(session),
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        method: "notifications/initialized",
+      }),
+    },
+    session.signal,
+  );
 }
 
 async function closePaperMcpSession(session: PaperMcpSession): Promise<void> {
@@ -283,15 +328,23 @@ async function closePaperMcpSession(session: PaperMcpSession): Promise<void> {
   }
 }
 
-async function fetchPaperMcp(init: RequestInit): Promise<Response> {
+async function fetchPaperMcp(
+  init: RequestInit,
+  signal?: AbortSignal,
+): Promise<Response> {
   let response: Response;
 
   try {
+    const timeoutSignal = AbortSignal.timeout(paperMcpRequestTimeoutMs);
     response = await fetch(paperMcpEndpoint, {
       ...init,
-      signal: AbortSignal.timeout(paperMcpRequestTimeoutMs),
+      signal: signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal,
     });
-  } catch {
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw error;
+    }
+
     throw new PaperMcpUnavailableError();
   }
 
@@ -590,6 +643,10 @@ function isPaperTokenType(value: unknown): value is PaperTokenType {
     typeof value === "string" &&
     (paperTokenTypes as readonly string[]).includes(value)
   );
+}
+
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && error.name === "AbortError";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

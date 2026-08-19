@@ -8,7 +8,7 @@ Paper Design is a focused Raycast companion for Paper Desktop. It lets you brows
 
 | Command              | Description                                                                          |
 | :------------------- | :----------------------------------------------------------------------------------- |
-| Recent Files         | Browse, search, and open files Paper Desktop reports as open or recent.              |
+| Search Recent Files  | Browse, search, and open files Paper Desktop reports as open or recent.              |
 | Create File          | Create a named file in the active Paper team and open it in Paper Desktop.           |
 | Manage Design Tokens | Browse, copy, create, edit, or delete design tokens in an open or recent Paper file. |
 

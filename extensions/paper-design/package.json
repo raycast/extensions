@@ -27,7 +27,8 @@
   "commands": [
     {
       "name": "recent-paper-files",
-      "title": "Recent Files",
+      "title": "Search Recent Files",
+      "subtitle": "Paper Desktop",
       "description": "Browse and open recent Paper Desktop files.",
       "mode": "view",
       "keywords": [
@@ -40,6 +41,7 @@
     {
       "name": "create-paper-file",
       "title": "Create File",
+      "subtitle": "Paper Desktop",
       "description": "Create and open a new Paper Desktop file.",
       "mode": "view",
       "keywords": [
@@ -52,6 +54,7 @@
     {
       "name": "manage-design-tokens",
       "title": "Manage Design Tokens",
+      "subtitle": "Paper Desktop",
       "description": "Browse, copy, create, edit, and delete design tokens in Paper files.",
       "mode": "view",
       "keywords": [

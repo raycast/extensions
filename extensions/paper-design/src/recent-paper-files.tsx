@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 
 import {
   getPaperFileUrl,
+  isOpenInPaper,
   listPaperFiles,
   PaperMcpUnavailableError,
   type PaperFile,
@@ -12,10 +13,11 @@ const paperIcon = "extension-icon.png";
 const paperFileIcon = Icon.AppWindowGrid2x2;
 
 export default function Command() {
-  const { data, error, isLoading, revalidate } = usePromise(
+  const { data, error, isLoading, revalidate } = useCachedPromise(
     listPaperFiles,
     [],
     {
+      keepPreviousData: true,
       onError: () => undefined,
     },
   );
@@ -25,7 +27,6 @@ export default function Command() {
 
   return (
     <List
-      navigationTitle="Recent Files"
       searchBarPlaceholder="Search files..."
       isLoading={isLoading}
       filtering={{ keepSectionOrder: true }}
@@ -88,7 +89,7 @@ function PaperErrorState({
       }
       description={
         isUnavailable
-          ? "Open Paper Desktop and refresh to see recent files"
+          ? "Open Paper Desktop and refresh to see recent files."
           : "Make sure Paper Desktop is running with a Paper file loaded, then refresh."
       }
       actions={<RefreshActionPanel onRefresh={onRefresh} />}
@@ -136,7 +137,11 @@ function PaperFileItem({
       accessories={accessories}
       actions={
         <ActionPanel>
-          <Action.Open title="Open" target={paperLink} icon={Icon.AppWindow} />
+          <Action.Open
+            title="Open in Paper"
+            target={paperLink}
+            icon={Icon.AppWindow}
+          />
           <Action.CopyToClipboard title="Copy Paper Link" content={paperLink} />
           <Action
             title="Refresh"
@@ -161,8 +166,4 @@ function RefreshActionPanel({ onRefresh }: { onRefresh: () => void }) {
       />
     </ActionPanel>
   );
-}
-
-function isOpenInPaper(file: PaperFile): boolean {
-  return file.open === true || file.active === true;
 }

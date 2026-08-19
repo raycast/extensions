@@ -1,8 +1,9 @@
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
 import {
+  isOpenInPaper,
   listPaperFiles,
   listPaperTokens,
   PaperMcpUnavailableError,
@@ -10,7 +11,7 @@ import {
   type PaperToken,
   type PaperTokenType,
 } from "./paper-mcp";
-import { TokenForm } from "./token-form";
+import { deletePaperTokenWithConfirm, TokenForm } from "./token-form";
 
 type TokenSection = {
   title: string;
@@ -42,7 +43,10 @@ export default function ManageDesignTokensCommand() {
     error: filesError,
     isLoading: isFilesLoading,
     revalidate: revalidateFiles,
-  } = usePromise(listPaperFiles, [], { onError: () => undefined });
+  } = useCachedPromise(listPaperFiles, [], {
+    keepPreviousData: true,
+    onError: () => undefined,
+  });
   const files = filesData ?? [];
   const openFiles = files.filter(isOpenInPaper);
   const recentFiles = files.filter((file) => !isOpenInPaper(file));
@@ -56,7 +60,9 @@ export default function ManageDesignTokensCommand() {
     error: tokensError,
     isLoading: isTokensLoading,
     revalidate: revalidateTokens,
-  } = usePromise(listTokensForFile, [selectedFile?.id], {
+  } = useCachedPromise(listPaperTokens, [selectedFile?.id as string], {
+    execute: selectedFile !== undefined,
+    keepPreviousData: true,
     onError: () => undefined,
   });
   const tokens = tokensData ?? [];
@@ -74,9 +80,6 @@ export default function ManageDesignTokensCommand() {
 
   return (
     <List
-      navigationTitle={
-        selectedFile ? `Tokens in ${selectedFile.name}` : "Manage Design Tokens"
-      }
       searchBarPlaceholder="Search tokens..."
       searchBarAccessory={
         files.length > 0 ? (
@@ -121,7 +124,7 @@ export default function ManageDesignTokensCommand() {
         <List.EmptyView
           icon={paperIcon}
           title="No Paper files"
-          description="Open Paper Desktop and refresh to see files"
+          description="Open Paper Desktop and refresh to see files."
           actions={<RefreshActionPanel onRefresh={refresh} />}
         />
       ) : !isLoading && selectedFile && tokens.length === 0 ? (
@@ -275,6 +278,21 @@ function TokenActionPanel({
         shortcut={Keyboard.Shortcut.Common.Refresh}
         onAction={onRefresh}
       />
+      {token ? (
+        <ActionPanel.Section>
+          <Action
+            title="Delete Token"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={Keyboard.Shortcut.Common.Remove}
+            onAction={async () => {
+              if (await deletePaperTokenWithConfirm(file, token.name)) {
+                await onChanged();
+              }
+            }}
+          />
+        </ActionPanel.Section>
+      ) : null}
     </ActionPanel>
   );
 }
@@ -298,7 +316,7 @@ function TokenErrorState({
       }
       description={
         isUnavailable
-          ? "Open Paper Desktop and refresh to manage tokens"
+          ? "Open Paper Desktop and refresh to manage tokens."
           : "Make sure Paper Desktop is running with a Paper file loaded, then refresh."
       }
       actions={<RefreshActionPanel onRefresh={onRefresh} />}
@@ -335,15 +353,26 @@ function getTokenIcon(token: PaperToken): Image.ImageLike {
     return Icon.Link;
   }
 
-  if (token.type === "spacing" || token.type === "radius") {
-    return Icon.Ruler;
+  switch (token.type) {
+    case "color":
+      return Icon.CircleFilled;
+    case "spacing":
+    case "radius":
+      return Icon.Ruler;
+    case "breakpoint":
+    case "container":
+      return Icon.Box;
+    case "fontFamily":
+    case "fontSize":
+    case "fontWeight":
+    case "letterSpacing":
+    case "lineHeight":
+      return Icon.Text;
+    default: {
+      const exhaustive: never = token.type;
+      return exhaustive;
+    }
   }
-
-  if (token.type === "breakpoint" || token.type === "container") {
-    return Icon.Box;
-  }
-
-  return Icon.Text;
 }
 
 function isColorValue(value: string | number): value is string {
@@ -355,14 +384,4 @@ function isColorValue(value: string | number): value is string {
 
 function isTokenAlias(value: string | number): boolean {
   return typeof value === "string" && /^var\(\s*--/.test(value.trim());
-}
-
-async function listTokensForFile(
-  fileId: string | undefined,
-): Promise<PaperToken[]> {
-  return fileId ? listPaperTokens(fileId) : [];
-}
-
-function isOpenInPaper(file: PaperFile): boolean {
-  return file.open === true || file.active === true;
 }
