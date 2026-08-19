@@ -34,8 +34,9 @@ export default async function Command() {
 | :--- | :--- | :--- |
 | appearance<mark style="color:red;">*</mark> | The appearance used by the Raycast application. | <code>"dark"</code> or <code>"light"</code> |
 | assetsPath<mark style="color:red;">*</mark> | The absolute path to the assets directory of the extension. | <code>string</code> |
-| commandMode<mark style="color:red;">*</mark> | The mode of the launched command, as specified in package.json | <code>"view"</code> or <code>"no-view"</code> or <code>"menu-bar"</code> |
-| commandName<mark style="color:red;">*</mark> | The name of the launched command, as specified in package.json | <code>string</code> |
+| entryPointMode<mark style="color:red;">*</mark> | The mode of the launched entry point, as specified in package.json | <code>"view"</code> or <code>"no-view"</code> or <code>"menu-bar"</code> |
+| entryPointName<mark style="color:red;">*</mark> | The name of the launched entry point, as specified in package.json | <code>string</code> |
+| entryPointType<mark style="color:red;">*</mark> | The type of the launched entry point | <code>"command"</code> or <code>"tool"</code> |
 | extensionName<mark style="color:red;">*</mark> | The name of the extension, as specified in package.json | <code>string</code> |
 | isDevelopment<mark style="color:red;">*</mark> | Indicates whether the command is a development command (vs. an installed command from the Store). | <code>boolean</code> |
 | launchType<mark style="color:red;">*</mark> | The type of launch for the command (user initiated or background). | <code>[LaunchType](environment.md#launchtype)</code> |
