@@ -48,3 +48,16 @@ export function prepareModel(model?: string, fallback?: string): string | undefi
   const normalizedModel = model && /^".*"$/.test(model) ? model.slice(1, -1) : model;
   return normalizedModel || fallback;
 }
+
+export function addModifiersToKeyword({
+  keyword,
+  start,
+  end,
+}: {
+  keyword: string;
+  start: Preferences.ExploreSnippets["startModifier"];
+  end: Preferences.ExploreSnippets["endModifier"];
+}) {
+  if (!keyword) return keyword;
+  return `${start === "none" ? "" : start}${keyword}${end === "none" ? "" : end}`;
+}

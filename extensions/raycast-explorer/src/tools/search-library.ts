@@ -1,4 +1,6 @@
-import { raycastProtocol } from "../helpers";
+import { getPreferenceValues } from "@raycast/api";
+
+import { addModifiersToKeyword, raycastProtocol } from "../helpers";
 
 type ContentType = "all" | "prompts" | "presets" | "quicklinks" | "snippets" | "themes";
 
@@ -60,7 +62,16 @@ export default async function searchLibrary(input: Input): Promise<{
   const contentType = input.contentType ?? "all";
   const limit = Math.min(10, Math.max(1, input.limit ?? 5));
   const types = contentType === "all" ? catalogTypes : [contentType];
-  const results = (await Promise.all(types.map(fetchCatalog))).flat();
+  const settled = await Promise.allSettled(types.map(fetchCatalog));
+  const results = settled.flatMap((outcome) => (outcome.status === "fulfilled" ? outcome.value : []));
+
+  if (results.length === 0 && settled.some((outcome) => outcome.status === "rejected")) {
+    const firstRejection = settled.find((outcome): outcome is PromiseRejectedResult => outcome.status === "rejected");
+    throw firstRejection?.reason instanceof Error
+      ? firstRejection.reason
+      : new Error("Could not load Raycast Explorer catalogs");
+  }
+
   const matches = results
     .map((result) => ({ result, score: scoreResult(result, query) }))
     .filter(({ score }) => score > 0)
@@ -165,11 +176,21 @@ function importUrl(type: Exclude<ContentType, "all" | "themes">, entry: Record<s
     return `${raycastProtocol}quicklinks/import?quicklinks=${encodeURIComponent(JSON.stringify(quicklink))}`;
   }
 
+  const snippetType = stringValue(entry.type);
+  const keyword = stringValue(entry.keyword);
+  const { startModifier = "!", endModifier = "none" } = getPreferenceValues<Preferences.ExploreSnippets>();
   const snippet = {
     name: stringValue(entry.name),
     text: stringValue(entry.text),
-    keyword: stringValue(entry.keyword),
-    type: stringValue(entry.type),
+    keyword:
+      snippetType === "spelling"
+        ? keyword
+        : addModifiersToKeyword({
+            keyword,
+            start: startModifier,
+            end: endModifier,
+          }),
+    type: snippetType,
   };
   return `${raycastProtocol}snippets/import?snippet=${encodeURIComponent(JSON.stringify(snippet))}`;
 }

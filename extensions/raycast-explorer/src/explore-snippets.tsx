@@ -15,22 +15,9 @@ import {
   useCatalogSelection,
 } from "./catalog";
 import { SnippetCategory } from "./data/snippets";
-import { platformShortcut, wrapInCodeBlock } from "./helpers";
+import { addModifiersToKeyword, platformShortcut, wrapInCodeBlock } from "./helpers";
 
 type Props = LaunchProps<{ launchContext: string[] }>;
-
-function addModifiersToKeyword({
-  keyword,
-  start,
-  end,
-}: {
-  keyword: string;
-  start: Preferences.ExploreSnippets["startModifier"];
-  end: Preferences.ExploreSnippets["endModifier"];
-}) {
-  if (!keyword) return keyword;
-  return `${start === "none" ? "" : start}${keyword}${end === "none" ? "" : end}`;
-}
 
 export default function ExploreSnippets(props: Props) {
   const { data: rawCategories, isLoading } = useFetch<SnippetCategory[]>(`https://ray.so/api/snippets`);
