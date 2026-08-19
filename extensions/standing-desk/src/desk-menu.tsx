@@ -11,6 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ensureDiagnosticLog } from "./diagnostics";
 import { defaultConfiguration, formatHeight } from "./model";
 import { NativeEvent, readDesk } from "./native";
+import { positionIcons } from "./position-icons";
 import {
   CachedDeskStatus,
   getCachedDeskStatus,
@@ -177,7 +178,7 @@ export default function Command() {
 
       <MenuBarExtra.Section title="Positions">
         <MenuBarExtra.Item
-          icon={Icon.Person}
+          icon={positionIcons.sit}
           title="Sit"
           subtitle={formatHeight(presets.sit)}
           shortcut={{ modifiers: ["cmd"], key: "1" }}
@@ -186,7 +187,7 @@ export default function Command() {
           }
         />
         <MenuBarExtra.Item
-          icon={Icon.PersonCircle}
+          icon={positionIcons.stand}
           title="Stand"
           subtitle={formatHeight(presets.stand)}
           shortcut={{ modifiers: ["cmd"], key: "2" }}

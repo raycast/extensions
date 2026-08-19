@@ -23,6 +23,7 @@ import {
   validateTarget,
 } from "./model";
 import { moveDesk, NativeEvent, nudgeDesk, readDesk, stopDesk } from "./native";
+import { positionIcons } from "./position-icons";
 import SettingsForm from "./settings-form";
 import {
   DeskSettings,
@@ -332,7 +333,7 @@ export default function Command() {
 
       <List.Section title="Positions">
         <List.Item
-          icon={{ source: Icon.Person, tintColor: Color.Blue }}
+          icon={{ source: positionIcons.sit, tintColor: Color.Blue }}
           title="Sit"
           subtitle="Saved sitting position"
           accessories={[{ text: formatHeight(presets.sit) }]}
@@ -355,7 +356,7 @@ export default function Command() {
           }
         />
         <List.Item
-          icon={{ source: Icon.PersonCircle, tintColor: Color.Green }}
+          icon={{ source: positionIcons.stand, tintColor: Color.Green }}
           title="Stand"
           subtitle="Saved standing position"
           accessories={[{ text: formatHeight(presets.stand) }]}
