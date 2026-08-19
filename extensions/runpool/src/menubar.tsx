@@ -1,5 +1,5 @@
 import { Color, Icon, MenuBarExtra, getPreferenceValues, launchCommand, LaunchType, open } from "@raycast/api";
-import { fillAsset, fraction, isUnreachable, stateLabel } from "./lib/runpool";
+import { errorMessage, fillAsset, fraction, isUnreachable, stateLabel } from "./lib/runpool";
 import { useStatus } from "./hooks/useStatus";
 
 /**
@@ -16,7 +16,7 @@ import { useStatus } from "./hooks/useStatus";
  */
 export default function Command() {
   const { colourIcon } = getPreferenceValues<Preferences.Menubar>();
-  const { status, isLoading, installed } = useStatus({ local: true });
+  const { status, isLoading, installed, error } = useStatus({ local: true });
 
   if (!installed) {
     return (
@@ -25,6 +25,21 @@ export default function Command() {
           title="Install RunPool"
           subtitle="brew install aicayzer/tap/runpool"
           onAction={() => open("https://github.com/aicayzer/runpool")}
+        />
+      </MenuBarExtra>
+    );
+  }
+
+  // A failed read is not an empty pool. Falling through would draw the mark
+  // empty with no rows beneath it, which says "you have no pools" when the
+  // truth is "I could not ask". Retries on the next tick either way.
+  if (error && !status) {
+    return (
+      <MenuBarExtra icon={Icon.ExclamationMark} tooltip="RunPool: could not read pools">
+        <MenuBarExtra.Item
+          title="Could Not Read Pools"
+          subtitle={errorMessage(error)}
+          onAction={() => launchCommand({ name: "pools", type: LaunchType.UserInitiated })}
         />
       </MenuBarExtra>
     );

@@ -214,6 +214,19 @@ export function loadLabel(machine: Machine): string {
 }
 
 /**
+ * The useful half of a failed runpool invocation.
+ *
+ * A rejected `execFile` leads with "Command failed:" and the entire command
+ * line, which buries the one line worth reading. runpool writes its own
+ * complaint to stderr, so prefer that.
+ */
+export function errorMessage(error: unknown): string {
+  const stderr = (error as { stderr?: string } | null)?.stderr?.trim();
+  if (stderr) return stderr;
+  return error instanceof Error ? error.message : String(error);
+}
+
+/**
  * The GitHub avatar of whoever owns the pool: the organisation, or the user
  * who owns the repository. Far more legible in a list than a generic glyph,
  * and it makes the org-versus-personal distinction visible without a word of

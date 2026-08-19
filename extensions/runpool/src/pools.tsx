@@ -9,6 +9,7 @@ import {
   List,
   confirmAlert,
   open,
+  openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -16,7 +17,17 @@ import { showFailureToast } from "@raycast/utils";
 import { NotInstalled } from "./components/NotInstalled";
 import { PoolDetail } from "./components/PoolDetail";
 import { useStatus } from "./hooks/useStatus";
-import { fraction, isUnreachable, ownerAvatar, Pool, poolState, runpool, stateLabel, Status } from "./lib/runpool";
+import {
+  errorMessage,
+  fraction,
+  isUnreachable,
+  ownerAvatar,
+  Pool,
+  poolState,
+  runpool,
+  stateLabel,
+  Status,
+} from "./lib/runpool";
 
 /**
  * Colour carries the state.
@@ -42,7 +53,7 @@ function stateColor(pool: Pool, paused: boolean): Color {
 }
 
 export default function Command() {
-  const { status, isLoading, hasFetched, installed, revalidate } = useStatus();
+  const { status, isLoading, hasFetched, installed, error, revalidate } = useStatus();
 
   if (!installed) return <NotInstalled />;
 
@@ -175,13 +186,27 @@ export default function Command() {
                       key={n}
                       title={`Set to ${n} Runners`}
                       icon={Icon.Gauge}
-                      onAction={() =>
+                      style={n < pool.count ? Action.Style.Destructive : Action.Style.Regular}
+                      onAction={async () => {
+                        // Shrinking deregisters the surplus runners from
+                        // GitHub rather than merely stopping them, which is
+                        // why the AI tool for this same operation asks first.
+                        // Growing only ever adds, so it needs no ceremony.
+                        if (n < pool.count) {
+                          const confirmed = await confirmAlert({
+                            title: `Reduce ${pool.name} to ${n} runners?`,
+                            message:
+                              "The surplus runners are deregistered from GitHub, not just stopped. Growing the pool again registers new ones.",
+                            primaryAction: { title: "Reduce", style: Alert.ActionStyle.Destructive },
+                          });
+                          if (!confirmed) return;
+                        }
                         act(
                           () => runpool(["set-count", pool.name, String(n)]),
                           `Resizing to ${n}…`,
                           `${pool.name} now has ${n} runners`,
-                        )
-                      }
+                        );
+                      }}
                     />
                   ))}
               </ActionPanel.Section>
@@ -205,10 +230,28 @@ export default function Command() {
         />
       ))}
 
-      {/* Two empty states, not one. Checking only isLoading shows "no pools"
+      {/* Three empty states, not one. Checking only isLoading shows "no pools"
           for a frame before the first result lands, which reads as if nothing
-          is configured. */}
-      {!hasFetched && <List.EmptyView icon={Icon.Clock} title="Reading Pools" />}
+          is configured; and a read that fails outright is neither loading nor
+          empty. Without the last case the list sits on "Reading Pools" for
+          good once the failure toast has faded.
+
+          All three are gated on having no data at all. A refresh that fails
+          while previous results are on screen should leave them there. */}
+      {!hasFetched && error && (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Could Not Read Pools"
+          description={errorMessage(error)}
+          actions={
+            <ActionPanel>
+              <Action title="Try Again" icon={Icon.ArrowClockwise} onAction={revalidate} />
+              <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            </ActionPanel>
+          }
+        />
+      )}
+      {!hasFetched && !error && <List.EmptyView icon={Icon.Clock} title="Reading Pools" />}
       {hasFetched && status?.pools.length === 0 && (
         <List.EmptyView
           icon={Icon.Plus}
