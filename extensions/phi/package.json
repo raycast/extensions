@@ -1,0 +1,124 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "phi",
+  "title": "Phi",
+  "description": "Search and control live Phi Spaces and tabs.",
+  "icon": "icon.png",
+  "author": "phibrowser",
+  "license": "MIT",
+  "categories": [
+    "Applications",
+    "Productivity",
+    "Web"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "applicationChannel",
+      "title": "Phi Application",
+      "description": "Use Phi Canary while developing this extension and Phi for production.",
+      "type": "dropdown",
+      "required": false,
+      "default": "stable",
+      "data": [
+        {
+          "title": "Phi Canary",
+          "value": "canary"
+        },
+        {
+          "title": "Phi",
+          "value": "stable"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-spaces",
+      "title": "Search Spaces",
+      "description": "Search and activate Phi Spaces",
+      "mode": "view"
+    },
+    {
+      "name": "search-history",
+      "title": "Search History",
+      "description": "Search your Phi browsing history",
+      "mode": "view"
+    },
+    {
+      "name": "search-tabs",
+      "title": "Search Tabs",
+      "description": "Search open tabs, pinned tabs, and bookmarks across all Phi Spaces",
+      "mode": "view"
+    },
+    {
+      "name": "search-current-space-tabs",
+      "title": "Search Current Space Tabs",
+      "description": "Search open tabs, pinned tabs, and bookmarks in the current Phi Space",
+      "mode": "view"
+    },
+    {
+      "name": "phi-actions",
+      "title": "Phi Actions",
+      "description": "Run actions on the active Phi page",
+      "mode": "view"
+    },
+    {
+      "name": "new-tab",
+      "title": "Open New Tab",
+      "description": "Open a URL or search in Phi",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "URL",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "space",
+          "placeholder": "Space",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "new-window",
+      "title": "New Window",
+      "description": "Open a new window",
+      "mode": "no-view"
+    },
+    {
+      "name": "new-incognito-window",
+      "title": "New Incognito Window",
+      "description": "Open a new incognito window",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.23",
+    "@raycast/utils": "2.2.7",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "9.39.4",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}
