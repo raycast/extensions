@@ -92,14 +92,18 @@ export default function Command(props: LaunchProps) {
   const [localCaffeinateStatus, setLocalCaffeinateStatus] = useState<boolean | null>(null);
   const [, setTick] = useState(0);
   const restoreHandledRef = useRef(false);
-  // Start as null (unknown) to avoid a flash when the Cache is cold (e.g. after
-  // a bundle update or dev rebuild) but LocalStorage still holds the hidden flag.
-  // We render nothing until the async LocalStorage read below resolves.
-  const [menuBarHidden, setMenuBarHidden] = useState<boolean | null>(
-    // Fast path: if the Cache already has the flag we can render immediately.
-    // The effect below will still run and sync Cache ↔ LocalStorage as needed.
-    cache.get(HIDE_MENU_BAR_KEY) !== undefined ? cache.get(HIDE_MENU_BAR_KEY) === "true" : null,
-  );
+
+  const [menuBarHidden, setMenuBarHidden] = useState<boolean | null>(() => {
+    const cached = cache.get(HIDE_MENU_BAR_KEY);
+    // Fast-path for the warm-cache visible case — no flicker on background polls.
+    if (cached === "false") return false;
+    // For Background launches, the restore path never runs, so "true" is safe to
+    // use directly — avoids a loading-shell flash every 1-minute poll while hidden.
+    // For UserInitiated launches, defer to null so the useEffect restore path can
+    // run and un-hide the icon when the user re-opens the command from root search.
+    if (cached === "true" && props.launchType === LaunchType.Background) return true;
+    return null;
+  });
 
   const displayCaffeinateStatus = localCaffeinateStatus ?? caffeinateStatus;
 
@@ -111,7 +115,8 @@ export default function Command(props: LaunchProps) {
     if (restoreHandledRef.current) return;
     restoreHandledRef.current = true;
     void (async () => {
-      const stored = (await LocalStorage.getItem(HIDE_MENU_BAR_KEY)) === "true";
+      const rawStored = await LocalStorage.getItem(HIDE_MENU_BAR_KEY);
+      const stored = rawStored === "true";
       if (props.launchType === LaunchType.UserInitiated && stored) {
         cache.remove(HIDE_MENU_BAR_KEY);
         await LocalStorage.removeItem(HIDE_MENU_BAR_KEY);
@@ -189,10 +194,22 @@ export default function Command(props: LaunchProps) {
     await showHUD("Menu bar icon hidden");
   };
 
-  // Render nothing while the hidden state is still being resolved from
-  // LocalStorage (null = unknown). This is the main guard against the
-  // cold-cache flash.
-  if (menuBarHidden === null || menuBarHidden) {
+  // While waiting for the LocalStorage read, render a loading shell instead of
+  // null. Returning null immediately would cause Raycast to terminate the process
+  // before the useEffect restore path has a chance to run. Background polls never
+  // restore the icon, so keep the shell icon-less there — an explicit icon would
+  // flash the hidden Coffee icon while the storage read resolves.
+  if (menuBarHidden === null) {
+    if (props.launchType === LaunchType.Background) {
+      return <MenuBarExtra isLoading={true} />;
+    }
+    return (
+      <MenuBarExtra isLoading={true} icon={{ source: `${preferences.icon}-empty.svg`, tintColor: Color.PrimaryText }} />
+    );
+  }
+
+  // Hidden state is resolved — safely return null now.
+  if (menuBarHidden) {
     return null;
   }
 
