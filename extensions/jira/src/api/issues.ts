@@ -5,7 +5,12 @@ import FormData from "form-data";
 import { markdownToAdf } from "marklassian";
 
 import { IssueFormValues } from "../components/CreateIssueForm";
-import { CustomFieldSchema, getCustomFieldValue } from "../helpers/issues";
+import {
+  CustomFieldSchema,
+  getCustomFieldValue,
+  isTeamFieldRejection,
+  wrapTeamFieldValueAsObject,
+} from "../helpers/customFields";
 
 import { Project } from "./projects";
 import { autocomplete, getAuthenticatedUri, request } from "./request";
@@ -79,25 +84,51 @@ export async function createIssue(values: IssueFormValues, { customFields }: Cre
     jsonValues.duedate = format(values.dueDate, "yyyy-MM-dd");
   }
 
+  const teamFields: { key: string; teamId: string }[] = [];
+
   if (customFields) {
     Object.entries(values).forEach(([key, value]) => {
       // TODO: add prefix
       if (key.startsWith("customfield_") && value) {
         const fieldSchema = customFields[key].schema.custom as CustomFieldSchema;
         jsonValues[key] = getCustomFieldValue(fieldSchema, value);
+
+        if (fieldSchema === CustomFieldSchema.team) {
+          teamFields.push({ key, teamId: value as string });
+        }
       }
     });
   }
 
-  const body = {
-    update: {},
-    fields: jsonValues,
-  };
+  const sendCreate = () =>
+    request<CreateIssueResponse>("/issue", {
+      method: "POST",
+      body: JSON.stringify({ update: {}, fields: jsonValues }),
+    });
 
-  return request<CreateIssueResponse>("/issue", {
-    method: "POST",
-    body: JSON.stringify(body),
-  });
+  try {
+    return await sendCreate();
+  } catch (error) {
+    // The Team custom field is sent as the documented plain-string Team ID, but some Jira sites
+    // reject that and require an `{ id }` object instead. If the create failed specifically because
+    // of the team field, retry once with the object shape. This keeps string-expecting sites
+    // working unchanged while still supporting object-expecting ones.
+    const message = error instanceof Error ? error.message : String(error);
+
+    if (
+      isTeamFieldRejection(
+        message,
+        teamFields.map(({ key }) => key),
+      )
+    ) {
+      for (const { key, teamId } of teamFields) {
+        jsonValues[key] = wrapTeamFieldValueAsObject(teamId);
+      }
+      return sendCreate();
+    }
+
+    throw error;
+  }
 }
 
 export enum StatusCategoryKey {

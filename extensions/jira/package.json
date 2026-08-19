@@ -587,16 +587,14 @@
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.21",
     "@types/node": "24.10.1",
     "@types/react": "19.2.7",
     "@types/remove-markdown": "^0.3.4",
     "eslint": "^9.39.1",
     "eslint-plugin-import": "^2.32.0",
-    "jest": "^29.7.0",
     "prettier": "^3.7.3",
-    "ts-jest": "^29.2.5",
+    "tsx": "^4.22.4",
     "typescript": "^5.9.3"
   },
   "scripts": {
@@ -605,7 +603,7 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish",
-    "test": "jest"
+    "test": "node --import tsx --test \"test/*.test.ts\""
   },
   "platforms": [
     "macOS",
