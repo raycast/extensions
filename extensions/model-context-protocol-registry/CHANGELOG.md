@@ -1,6 +1,6 @@
 # Model Context Protocol Registry Changelog
 
-## [Add Tripsy MCP Server] - {PR_MERGE_DATE}
+## [Add Tripsy MCP Server] - 2026-08-19
 
 Add Tripsy to the official registry, enabling AI assistants to create trips and manage flights, stays, activities, expenses, and itinerary details. The remote Streamable HTTP server uses Tripsy OAuth sign-in through an `mcp-remote` bridge.
 
