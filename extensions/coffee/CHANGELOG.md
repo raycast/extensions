@@ -2,10 +2,7 @@
 
 ## [Fix] - {PR_MERGE_DATE}
 
-- Fixed future caffeination schedules not activating automatically.
-- Kept the schedule dashboard status in sync while it remains open.
-- Ensured schedules started inside an active time range stop at the configured end time.
-- Improved the guidance shown when schedule times are missing.
+- Fixed future caffeination schedules not activating automatically and ensured they stop at the configured end time.
 
 ## [Enhancement] - 2026-08-14
 
