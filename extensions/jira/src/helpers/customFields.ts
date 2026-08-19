@@ -64,11 +64,6 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
     }
     case CustomFieldSchema.team:
     case CustomFieldSchema.atlassianTeam: {
-      // Both Team field types — the Advanced Roadmaps field
-      // (`com.atlassian.teams:rm-teams-custom-field-team`) and the newer Atlassian Teams platform
-      // field (`com.atlassian.jira.plugin.system.customfieldtypes:atlassian-team`) — persist the
-      // team only when the Team ID is sent as a plain string. Sending an `{ id }` object is
-      // silently dropped (confirmed against a live site).
       const typedValue = value as string;
       return typedValue;
     }
