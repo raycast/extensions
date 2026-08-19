@@ -1,6 +1,6 @@
 # Short.io Changelog
 
-## [Windows Support & Cross-Platform Shortcuts] - {PR_MERGE_DATE}
+## [Windows Support & Cross-Platform Shortcuts] - 2026-08-19
 
 - Add Windows support
 - Update keyboard shortcuts to work correctly on both macOS and Windows
