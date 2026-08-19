@@ -14,7 +14,7 @@ default, and the extension will show you which one is missing.
 
 ### 1. Enable scripting in AirBuddy
 
-AirBuddy → Settings → Advanced → Security → turn on **"Enable Apple Script for automation."**
+AirBuddy → Settings → General → Security → turn on **"Enable Apple Script for automation."**
 
 ### 2. Allow Raycast to control AirBuddy
 
@@ -62,6 +62,8 @@ reports that immediately instead of waiting out a timeout.
 **AirBuddy** is by [Gui Rambo](https://www.rambo.codes/). This extension is an unofficial companion to it and
 is not affiliated with or endorsed by AirBuddy. The extension icon is AirBuddy's own app icon, used to
 identify the app this extension controls.
+
+<a href="https://www.producthunt.com/products/airbuddy-2?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-airbuddy-3-4" target="_blank" rel="noopener noreferrer"><img alt="AirBuddy 3 - Easily manage devices and switch them between Macs | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1223171&amp;theme=neutral&amp;t=1787080026411"></a>
 
 **Device icons are [SF Symbols](https://developer.apple.com/sf-symbols/)**, provided by Apple and used
 under the [SF Symbols license](https://developer.apple.com/fonts/).
