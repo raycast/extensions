@@ -1,6 +1,6 @@
 # MenuCloak Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-19
 
 - Set the MenuCloak focus text from Raycast.
 - Turn MenuCloak on or off.
