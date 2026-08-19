@@ -33,7 +33,6 @@
     {
       "name": "digger",
       "title": "Digger",
-      "subtitle": "Digger",
       "description": "Get comprehensive website intelligence and metadata",
       "mode": "view",
       "arguments": [
@@ -76,18 +75,19 @@
     }
   ],
   "dependencies": {
-    "@chrismessina/raycast-logger": "^1.2.1",
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2",
+    "@chrismessina/raycast-logger": "^1.3.0",
+    "@raycast/api": "^1.104.24",
+    "@raycast/utils": "^2.2.7",
     "cheerio": "^1.2.0",
     "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@ianvs/prettier-plugin-sort-imports": "^4.7.0",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
-    "eslint": "^9.22.0",
-    "prettier": "^3.8.1",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
     "typescript": "^5.8.2"
   },
   "scripts": {

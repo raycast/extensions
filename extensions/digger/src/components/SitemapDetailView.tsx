@@ -1,8 +1,8 @@
-import { Detail, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
 import * as cheerio from "cheerio";
-import { truncateText, formatDate } from "../utils/formatters";
+import { Action, ActionPanel, Detail, Icon, Keyboard } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import { LIMITS } from "../utils/config";
+import { formatDate, truncateText } from "../utils/formatters";
 
 interface SitemapEntry {
   loc: string;

@@ -20,9 +20,13 @@ import {
   parseSources,
   parseEvals,
   parseSetopts,
+  parsePathEntries,
+  parseFpathEntries,
+  parseKeybindings,
 } from "../utils/parsers";
 import { SharedActionsSection } from "./shared-actions";
 import { deleteItem } from "./delete-item";
+import { deriveLabel, disambiguate } from "./labels";
 import EditAlias, { aliasConfig } from "../edit-alias";
 import EditExport, { exportConfig } from "../edit-export";
 
@@ -31,7 +35,9 @@ import EditExport, { exportConfig } from "../edit-export";
  */
 export interface SearchResult {
   id: string;
-  type: "alias" | "export" | "function" | "plugin" | "source" | "eval" | "setopt";
+  type: "alias" | "export" | "function" | "plugin" | "source" | "eval" | "setopt" | "path" | "fpath" | "keybinding";
+  /** Shortest unambiguous identifier — the list row title (see lib/labels) */
+  label: string;
   title: string;
   subtitle: string;
   keywords: string[];
@@ -57,7 +63,7 @@ export interface SearchResult {
  * section label so edits from search stay in the right section
  */
 export function createSearchResults(sections: readonly LogicalSection[]): SearchResult[] {
-  const results: SearchResult[] = [];
+  const results: Omit<SearchResult, "label">[] = [];
   // Identity-based ids: reveal state is keyed by id, so ids must stay with
   // their item when the file is edited and results shift position. A counter
   // disambiguates genuine duplicates (same name, same section).
@@ -205,9 +211,67 @@ export function createSearchResults(sections: readonly LogicalSection[]): Search
         isSecret: false,
       });
     });
+
+    parsePathEntries(section.content).forEach((entry) => {
+      results.push({
+        ...makeIdentity("path", section.label, entry.entry),
+        type: "path",
+        title: entry.entry,
+        subtitle: "path",
+        keywords: [entry.entry.toLowerCase(), "path"],
+        icon: { source: Icon.Tree, tintColor: MODERN_COLORS.neutral },
+        copyValue: entry.entry,
+        name: entry.entry,
+        value: entry.entry,
+        rawValue: entry.entry,
+        section: section.label,
+        isSecret: false,
+      });
+    });
+
+    parseFpathEntries(section.content).forEach((entry) => {
+      results.push({
+        ...makeIdentity("fpath", section.label, entry.entry),
+        type: "fpath",
+        title: entry.entry,
+        subtitle: "fpath",
+        keywords: [entry.entry.toLowerCase(), "fpath"],
+        icon: { source: Icon.Folder, tintColor: MODERN_COLORS.neutral },
+        copyValue: entry.entry,
+        name: entry.entry,
+        value: entry.entry,
+        rawValue: entry.entry,
+        section: section.label,
+        isSecret: false,
+      });
+    });
+
+    parseKeybindings(section.content).forEach((binding) => {
+      results.push({
+        ...makeIdentity("keybinding", section.label, binding.key),
+        type: "keybinding",
+        title: binding.key,
+        subtitle: binding.command,
+        keywords: [binding.key.toLowerCase(), binding.command.toLowerCase(), "keybinding", "bindkey"],
+        icon: { source: Icon.Keyboard, tintColor: MODERN_COLORS.neutral },
+        copyValue: `bindkey '${binding.key}' ${binding.command}`,
+        name: binding.key,
+        value: binding.command,
+        rawValue: binding.command,
+        section: section.label,
+        isSecret: false,
+      });
+    });
   });
 
-  return results;
+  // Row titles follow the labelling rule: shortest unambiguous identifier.
+  // Keybindings keep the key itself — shortening a key sequence would
+  // change what it means.
+  const labelled: SearchResult[] = results.map((result) => ({
+    ...result,
+    label: result.type === "keybinding" ? result.name : deriveLabel(result.name),
+  }));
+  return disambiguate(labelled, (result) => result.name);
 }
 
 /**
@@ -249,6 +313,28 @@ export function getTypeDisplayName(type: string): string {
     source: "Sources",
     eval: "Evals",
     setopt: "Setopts",
+    path: "PATH Entries",
+    fpath: "FPATH Entries",
+    keybinding: "Keybindings",
+  };
+  return names[type] || type;
+}
+
+/**
+ * Gets singular display name for result type
+ */
+export function getTypeSingularName(type: string): string {
+  const names: Record<string, string> = {
+    alias: "Alias",
+    export: "Export",
+    function: "Function",
+    plugin: "Plugin",
+    source: "Source",
+    eval: "Eval",
+    setopt: "Setopt",
+    path: "PATH entry",
+    fpath: "FPATH entry",
+    keybinding: "Keybinding",
   };
   return names[type] || type;
 }
@@ -258,6 +344,37 @@ interface SearchResultListItemProps {
   refresh: () => void;
   revealed: boolean;
   onToggleReveal: () => void;
+  /** Renders the detail pane (thin code block + metadata) when true */
+  showDetail?: boolean;
+  /** Renders the value as the row subtitle (only when the pane is hidden) */
+  showSubtitle?: boolean;
+  /** Called when the user acts on the row (frecency tracking) */
+  onVisit?: (() => void) | undefined;
+}
+
+/**
+ * Detail pane for a search result: a thin code block holding the value
+ * only (the name is already the row title), plus metadata spent on facts
+ * not already on screen.
+ */
+function SearchResultDetail({ result, revealed }: { result: SearchResult; revealed: boolean }) {
+  const shownValue = result.isSecret && !revealed ? maskValue(result.value) : result.value;
+  return (
+    <List.Item.Detail
+      markdown={`\`\`\`zsh\n${shownValue}\n\`\`\``}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Type" text={getTypeSingularName(result.type)} />
+          <List.Item.Detail.Metadata.Label title="Section" text={result.section} icon={Icon.Folder} />
+          {result.isSecret && (
+            <List.Item.Detail.Metadata.TagList title="Sensitivity">
+              <List.Item.Detail.Metadata.TagList.Item text="Secret" color={Color.Red} icon={Icon.Lock} />
+            </List.Item.Detail.Metadata.TagList>
+          )}
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
 }
 
 /**
@@ -266,10 +383,20 @@ interface SearchResultListItemProps {
  * Copy Value / Copy Name / Copy Definition, Reveal Value, Open, Refresh
  * everywhere. Secret export values render masked until revealed.
  */
-export function SearchResultListItem({ result, refresh, revealed, onToggleReveal }: SearchResultListItemProps) {
+export function SearchResultListItem({
+  result,
+  refresh,
+  revealed,
+  onToggleReveal,
+  showDetail = false,
+  showSubtitle = true,
+  onVisit,
+}: SearchResultListItemProps) {
   const displaySubtitle =
     result.isSecret && !revealed ? maskValue(result.subtitle) : truncateValueMiddle(result.subtitle, 50);
-  const accessories: List.Item.Accessory[] = [{ tag: result.type }];
+  // Section appears exactly once: in the pane's metadata when it is
+  // shown, as a row accessory when it is not
+  const accessories: List.Item.Accessory[] = showDetail ? [] : [{ text: result.section, tooltip: "Section" }];
   if (result.isSecret) {
     accessories.unshift({
       icon: { source: Icon.Lock, tintColor: Color.Red },
@@ -308,13 +435,15 @@ export function SearchResultListItem({ result, refresh, revealed, onToggleReveal
       }
     : undefined;
 
+  const hasSubtitle = showSubtitle && result.subtitle !== result.type;
   return (
     <List.Item
       key={result.id}
-      title={result.title}
-      subtitle={result.subtitle !== result.type ? displaySubtitle : ""}
+      title={result.label}
+      subtitle={hasSubtitle ? displaySubtitle : ""}
       icon={result.icon}
       accessories={accessories}
+      detail={showDetail ? <SearchResultDetail result={result} revealed={revealed} /> : undefined}
       actions={
         <ActionPanel>
           <SharedActionsSection
@@ -330,6 +459,7 @@ export function SearchResultListItem({ result, refresh, revealed, onToggleReveal
               isSecret: result.isSecret,
               revealed,
               onToggleReveal: result.isSecret ? onToggleReveal : undefined,
+              onVisit,
             }}
           />
         </ActionPanel>

@@ -1,6 +1,7 @@
 import { LocalStorage } from "@raycast/api";
 import { Schedule } from "../interfaces";
 import { useEffect, useRef } from "react";
+import { parseSchedule } from "../utils";
 
 const dayOrder: { [key: string]: number } = {
   sunday: 0,
@@ -35,7 +36,9 @@ export function useLoadStoredSchedules(
 
       if (!isMounted) return;
 
-      const schedules: Schedule[] = Object.values(allStoredItems).map((item) => JSON.parse(item) as Schedule);
+      const schedules: Schedule[] = Object.values(allStoredItems)
+        .map(parseSchedule)
+        .filter((schedule): schedule is Schedule => schedule !== undefined);
 
       if (schedules.length > 0) {
         schedules.sort((a, b) => (dayOrder[a.day] ?? -1) - (dayOrder[b.day] ?? -1));

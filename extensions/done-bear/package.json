@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "done-bear",
   "private": true,
-  "description": "Search and manage your Done Bear tasks from Raycast",
+  "description": "A local-first GTD task manager for Raycast: capture, search, and complete tasks, plan your Today list, and manage projects — synced with the Done Bear web, desktop, iOS, and CLI apps.",
   "categories": [
     "Productivity"
   ],
@@ -33,61 +33,57 @@
     {
       "name": "show-today",
       "title": "Show Today List",
-      "description": "Search and manage your today tasks",
+      "subtitle": "Done Bear",
+      "description": "See and complete the tasks and to-dos you planned for today",
+      "keywords": ["today", "task", "todo", "to-do", "gtd", "agenda", "due", "plan"],
       "mode": "view"
     },
     {
-      "name": "show-inbox",
-      "title": "Show Inbox List",
-      "description": "Search and manage your inbox tasks",
-      "mode": "view"
-    },
-    {
-      "name": "show-anytime",
-      "title": "Show Anytime List",
-      "description": "Search and manage your anytime tasks",
-      "mode": "view"
-    },
-    {
-      "name": "show-upcoming",
-      "title": "Show Upcoming List",
-      "description": "Search and manage your upcoming tasks",
-      "mode": "view"
-    },
-    {
-      "name": "show-someday",
-      "title": "Show Someday List",
-      "description": "Search and manage your someday tasks",
+      "name": "browse-tasks",
+      "title": "Browse Tasks",
+      "subtitle": "Done Bear",
+      "description": "Open Today, Inbox, Anytime, Upcoming, and Someday from one command",
+      "keywords": ["browse", "inbox", "anytime", "upcoming", "someday", "task", "todo", "gtd"],
       "mode": "view"
     },
     {
       "name": "search-tasks",
       "title": "Search Tasks",
-      "description": "Search tasks globally across all projects",
+      "subtitle": "Done Bear",
+      "description": "Search all your tasks and to-dos across every project",
+      "keywords": ["search", "find", "task", "todo", "filter", "gtd"],
+      "mode": "view"
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Create Task",
+      "subtitle": "Done Bear",
+      "description": "Create a task from one sentence with AI, then review every detail",
+      "keywords": ["quick add", "natural language", "capture", "task", "todo", "tomorrow", "deadline", "reminder"],
       "mode": "view"
     },
     {
       "name": "create-task",
-      "title": "Create Task",
-      "description": "Create a task with all fields",
-      "mode": "view"
-    },
-    {
-      "name": "search-projects",
-      "title": "Search Projects",
-      "description": "Search and manage your projects",
+      "title": "Create Detailed Task",
+      "subtitle": "Done Bear",
+      "description": "Create a task with a description, dates, project, team, and checklist",
+      "keywords": ["create", "add", "new", "task", "todo", "details", "checklist", "project", "team"],
       "mode": "view"
     },
     {
       "name": "create-project",
       "title": "Create Project",
-      "description": "Create a new project",
+      "subtitle": "Done Bear",
+      "description": "Create a new project to organize your tasks",
+      "keywords": ["create", "add", "new", "project", "organize"],
       "mode": "view"
     },
     {
       "name": "menu-bar-today",
       "title": "Show Today in Menu Bar",
-      "description": "See your Today list in the menu bar",
+      "subtitle": "Done Bear",
+      "description": "Keep your Today task list in the macOS menu bar",
+      "keywords": ["today", "menu bar", "menubar", "task", "todo", "agenda"],
       "mode": "menu-bar"
     }
   ],

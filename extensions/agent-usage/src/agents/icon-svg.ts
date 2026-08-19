@@ -6,6 +6,35 @@ const IGNORED_PAINT = new Set(["none", "transparent", "inherit", "initial", "uns
 
 const PAINT_ATTR_PATTERN = /(?:fill|stroke)\s*=\s*["']([^"']+)["']/gi;
 const PAINT_CSS_PATTERN = /(?:fill|stroke)\s*:\s*([^;}"'\s]+)/gi;
+const PAINT_ATTR_REPLACE_PATTERN = /((?:fill|stroke)\s*=\s*["'])([^"']+)(["'])/gi;
+const PAINT_CSS_REPLACE_PATTERN = /((?:fill|stroke)\s*:\s*)([^;}"'\s]+)/gi;
+
+export const DARK_MODE_INVERTED_LIST_ICONS = [
+  "clinepass-icon.svg",
+  "codex-icon.svg",
+  "copilot-icon.svg",
+  "cursor-icon.svg",
+  "droid-icon.svg",
+  "grok-icon.svg",
+  "opencode-go-icon.svg",
+  "synthetic-icon.svg",
+  "zai-icon.svg",
+] as const;
+
+const darkModeInvertedListIconSet = new Set<string>(DARK_MODE_INVERTED_LIST_ICONS);
+
+export function shouldInvertListIcon(assetName: string): boolean {
+  return darkModeInvertedListIconSet.has(assetName);
+}
+
+export function getDarkListIconAssetName(assetName: string): string {
+  const extension = assetName.slice(assetName.lastIndexOf("."));
+  return `${assetName.slice(0, -extension.length)}@dark${extension}`;
+}
+
+export function selectSourceForAppearance<T>(light: T, dark: T, appearance: "light" | "dark"): T {
+  return appearance === "dark" ? dark : light;
+}
 
 /**
  * Returns true when every paint color in the SVG is monochrome (black/white/currentColor)
@@ -61,6 +90,21 @@ export function invertMonochromeSvg(svg: string): string | null {
     .replace(/\bwhite\b/gi, "__MONO_PAPER__")
     .replace(/__MONO_INK__/g, "#fff")
     .replace(/__MONO_PAPER__/g, "#000");
+}
+
+/** Invert every explicit solid SVG paint color for a requested dark-mode variant. */
+export function invertSvgColors(svg: string): string {
+  if (collectPaintValues(svg).length === 0) {
+    return injectRootFill(svg, "#fff");
+  }
+
+  return svg
+    .replace(PAINT_ATTR_REPLACE_PATTERN, (_match, prefix: string, paint: string, suffix: string) => {
+      return `${prefix}${invertPaint(paint)}${suffix}`;
+    })
+    .replace(PAINT_CSS_REPLACE_PATTERN, (_match, prefix: string, paint: string) => {
+      return `${prefix}${invertPaint(paint)}`;
+    });
 }
 
 /** Set or replace fill on the root <svg> element (used for paint-less monochrome icons). */
@@ -126,6 +170,35 @@ function isMonochromePaint(value: string): boolean {
 
   const hex = parseHexColor(normalized);
   return hex === "000000" || hex === "ffffff";
+}
+
+function invertPaint(value: string): string {
+  const normalized = value.trim().toLowerCase();
+  if (isIgnoredPaint(normalized)) {
+    return value;
+  }
+  if (normalized === "currentcolor" || normalized === "black") {
+    return "#fff";
+  }
+  if (normalized === "white") {
+    return "#000";
+  }
+
+  const hex = parseHexColor(normalized);
+  if (!hex) {
+    return value;
+  }
+  if (hex === "000000") {
+    return "#fff";
+  }
+  if (hex === "ffffff") {
+    return "#000";
+  }
+
+  const inverted = [0, 2, 4]
+    .map((offset) => (255 - Number.parseInt(hex.slice(offset, offset + 2), 16)).toString(16).padStart(2, "0"))
+    .join("");
+  return `#${inverted}`;
 }
 
 function parseHexColor(value: string): string | null {

@@ -182,5 +182,9 @@
     "fix-lint": "ray lint --fix",
     "publish": "npx @raycast/api@latest publish",
     "lint": "ray lint"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9",
+    "js-yaml@4": "4.3.1"
   }
 }

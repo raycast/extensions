@@ -19,11 +19,7 @@ describe("bang index cache", () => {
     await getBangIndex("https://services.helium.imput.net");
 
     expect(fetchMock).toHaveBeenCalledTimes(2);
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      1,
-      "https://services.helium.imput.net/bangs.json",
-      expect.any(Object),
-    );
+    expect(fetchMock).toHaveBeenNthCalledWith(1, "https://services.helium.imput.net/bangs.json", expect.any(Object));
     expect(fetchMock).toHaveBeenNthCalledWith(2, "https://custom.example/bangs.json", expect.any(Object));
   });
 });

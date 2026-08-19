@@ -76,3 +76,11 @@ Get the current state of caffeination.
 ### 7. **Caffeinate Status Menu Bar**
 
 Get the status of current caffeination in your menu bar.
+
+### 8. **Auto-Caffeinate on Launch**
+
+Optionally have Coffee start caffeinating your Mac (indefinitely) automatically whenever Raycast launches. Enable the **Start caffeination when Raycast starts** toggle under the **Launch** section in the extension's preferences.
+
+> **Requirements:** Either the *Caffeinate Status* command (15 s background interval) or the *Caffeinate Status Menu Bar* command (1 m background interval) must be enabled in Raycast — the auto-start feature piggybacks on these background ticks.
+
+**How session detection works:** Coffee tracks the Raycast process PID. A new PID means Raycast actually relaunched, so the Mac is caffeinated automatically. Putting the Mac to sleep and waking it does **not** trigger a re-caffeination, because the PID stays the same — your manual decaffeination is honoured until you truly restart Raycast.

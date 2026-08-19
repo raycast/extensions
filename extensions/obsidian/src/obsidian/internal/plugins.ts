@@ -11,6 +11,12 @@ export interface VaultPluginCheckParams {
   corePlugins?: string[];
 }
 
+export interface VaultPluginCheckResult {
+  vaultsWithPlugin: ObsidianVault[];
+  vaultsWithoutPlugin: ObsidianVault[];
+  cacheable: boolean;
+}
+
 export function readCommunityPlugins(vaultPath: string): string[] | undefined {
   const { configFileName } = getPreferenceValues();
   const path = `${vaultPath}/${configFileName || ".obsidian"}/community-plugins.json`;
@@ -42,23 +48,38 @@ export function readCorePlugins(vaultPath: string): Record<string, boolean> | un
   }
 }
 
-export function vaultPluginCheck(params: VaultPluginCheckParams) {
+export function vaultPluginCheck(params: VaultPluginCheckParams): VaultPluginCheckResult {
   const vaultsWithoutPlugin: ObsidianVault[] = [];
+  let cacheable = true;
   const vaultsWithPlugin = params.vaults.filter((vault: ObsidianVault) => {
     const toCheckCommunityPlugins = params.communityPlugins;
     const toCheckCorePlugins = params.corePlugins;
 
     if (toCheckCommunityPlugins) {
-      const plugins = readCommunityPlugins(vault.path);
-      if (!plugins || !toCheckCommunityPlugins.every((c) => plugins.includes(c))) {
+      let plugins: string[] | undefined;
+      try {
+        plugins = readCommunityPlugins(vault.path);
+      } catch (error) {
+        logger.error(`Failed to read community-plugins.json for vault ${vault.path}: ${error}`);
+        cacheable = false;
+      }
+      const availablePlugins = plugins;
+      if (!availablePlugins || !toCheckCommunityPlugins.every((c) => availablePlugins.includes(c))) {
         vaultsWithoutPlugin.push(vault);
         return false;
       }
     }
 
     if (toCheckCorePlugins) {
-      const plugins = readCorePlugins(vault.path);
-      if (!plugins || !toCheckCorePlugins.every((c) => c in plugins && plugins[c])) {
+      let plugins: Record<string, boolean> | undefined;
+      try {
+        plugins = readCorePlugins(vault.path);
+      } catch (error) {
+        logger.error(`Failed to read core-plugins.json for vault ${vault.path}: ${error}`);
+        cacheable = false;
+      }
+      const availablePlugins = plugins;
+      if (!availablePlugins || !toCheckCorePlugins.every((c) => c in availablePlugins && availablePlugins[c])) {
         vaultsWithoutPlugin.push(vault);
         return false;
       }
@@ -67,5 +88,5 @@ export function vaultPluginCheck(params: VaultPluginCheckParams) {
     return true;
   });
   logger.info(`Vaults with requested plugins: ${vaultsWithPlugin.map((v) => v.name).join(", ")}`);
-  return [vaultsWithPlugin, vaultsWithoutPlugin];
+  return { vaultsWithPlugin, vaultsWithoutPlugin, cacheable };
 }

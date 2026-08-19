@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast, trash } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Keyboard, showHUD } from "@raycast/api";
 import { TryDirectory } from "../types";
 import { formatRelativeTime, touchDirectory } from "../lib/utils";
 import { CreateForm } from "./CreateForm";
@@ -10,35 +10,6 @@ interface TryListItemProps {
 }
 
 export function TryListItem({ directory, onRefresh }: TryListItemProps) {
-  const handleDelete = async () => {
-    const confirmed = await confirmAlert({
-      title: "Delete Directory",
-      message: `Are you sure you want to delete "${directory.name}"? This cannot be undone.`,
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-
-    if (confirmed) {
-      try {
-        await trash(directory.path);
-        showToast({
-          style: Toast.Style.Success,
-          title: "Deleted",
-          message: directory.name,
-        });
-        onRefresh();
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to delete",
-          message: String(error),
-        });
-      }
-    }
-  };
-
   return (
     <List.Item
       icon={Icon.Folder}
@@ -53,7 +24,7 @@ export function TryListItem({ directory, onRefresh }: TryListItemProps) {
             <Action.CopyToClipboard
               title="Copy Path"
               content={directory.path}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.CopyPath}
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
@@ -71,12 +42,22 @@ export function TryListItem({ directory, onRefresh }: TryListItemProps) {
             />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action
-              title="Delete"
+            <Action.Trash
+              title="Move to Trash"
               icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
-              onAction={handleDelete}
+              paths={directory.path}
+              shortcut={Keyboard.Shortcut.Common.Remove}
+              // Action.Trash closes the main window once the move completes, so a Toast
+              // here would detach into a floating overlay — the exact behaviour we just
+              // fixed in CreateForm. showHUD is the primitive meant for post-close
+              // feedback and dismisses itself.
+              //
+              // onTrash is typed `=> void`, so this must not be async: returning a promise
+              // into a void callback leaves any rejection unobserved rather than actionable.
+              onTrash={() => {
+                onRefresh();
+                showHUD(`Moved "${directory.name}" to Trash`).catch(() => undefined);
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

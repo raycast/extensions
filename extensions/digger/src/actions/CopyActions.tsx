@@ -23,13 +23,19 @@ export function CopyActions({ data, url }: CopyActionsProps) {
         title="Copy as JSON"
         content={jsonContent}
         icon={Icon.Code}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "j" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "j" },
+        }}
       />
       <Action.CopyToClipboard
         title="Copy as Markdown"
         content={markdownContent}
         icon={Icon.Document}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "m" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+        }}
       />
     </>
   );
@@ -51,7 +57,10 @@ export function CopyIndividualActions({ title, description, ogImage, favicon, ca
           title="Copy Title"
           content={title}
           icon={Icon.Text}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "t" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "opt"], key: "t" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "t" },
+          }}
         />
       )}
       {description && (
@@ -59,7 +68,10 @@ export function CopyIndividualActions({ title, description, ogImage, favicon, ca
           title="Copy Description"
           content={description}
           icon={Icon.Text}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "d" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "opt"], key: "d" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "d" },
+          }}
         />
       )}
       {ogImage && (
@@ -67,7 +79,10 @@ export function CopyIndividualActions({ title, description, ogImage, favicon, ca
           title="Copy OG Image URL"
           content={ogImage}
           icon={Icon.Image}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "i" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "opt"], key: "i" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "i" },
+          }}
         />
       )}
       {favicon && (
@@ -75,7 +90,10 @@ export function CopyIndividualActions({ title, description, ogImage, favicon, ca
           title="Copy Favicon URL"
           content={favicon}
           icon={Icon.Image}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "f" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "opt"], key: "f" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "f" },
+          }}
         />
       )}
       {canonical && (
@@ -83,7 +101,10 @@ export function CopyIndividualActions({ title, description, ogImage, favicon, ca
           title="Copy Canonical URL"
           content={canonical}
           icon={Icon.Link}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "opt"], key: "u" },
+            Windows: { modifiers: ["ctrl", "alt"], key: "u" },
+          }}
         />
       )}
     </>

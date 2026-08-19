@@ -1,5 +1,9 @@
 # Zed Recent Projects Changelog
 
+## [Fix Project Launch in Raycast 2] - 2026-08-15
+
+- Open projects before closing Raycast so CLI launches complete reliably.
+
 ## [Fix Nix aware `$PATH` lookup] - 2026-07-21
 
 - Fix an issue where nix-managed language tooling (e.g. LSPs) could never be resolved from `$PATH` due to the missing `$USER` env var

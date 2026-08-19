@@ -1,4 +1,15 @@
-import { Action, ActionPanel, Alert, Clipboard, Color, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Clipboard,
+  Color,
+  Icon,
+  Toast,
+  confirmAlert,
+  showToast,
+  Keyboard,
+} from "@raycast/api";
 import { MutatePromise, useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 
@@ -339,7 +350,7 @@ export default function IssueActions({
           icon={Icon.ArrowClockwise}
           title="Refresh"
           onAction={mutate}
-          shortcut={{ modifiers: ["cmd"], key: "r" }}
+          shortcut={Keyboard.Shortcut.Common.Refresh}
         />
       </ActionPanel.Section>
     </ActionPanel>

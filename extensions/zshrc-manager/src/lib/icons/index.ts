@@ -43,11 +43,11 @@ export function getSectionIcon(sectionName: string): {
   const simpleIconMatch = findBestSimpleIcon(sectionName, normalized);
   if (simpleIconMatch) {
     const hex = String(simpleIconMatch.icon.hex || "").toUpperCase();
-    // Bake the brand color into the SVG: simple-icons ship black paths, and
-    // relying on tintColor leaves the icon invisible if tinting fails
-    const coloredSvg = simpleIconMatch.icon.svg.replace("<svg ", `<svg fill="#${hex}" `);
+    // Bake the brand color into the SVG before encoding: simple-icons ship
+    // black paths, and relying on tintColor leaves the icon invisible if
+    // tinting fails
     return {
-      icon: svgToDataUrl(coloredSvg),
+      icon: svgToDataUrl(simpleIconMatch.icon.svg, hex),
       color: hex,
     };
   }

@@ -1,4 +1,4 @@
-import type { CopilotError, CopilotUsage } from "./types";
+import type { CopilotError, CopilotUsage } from "./types.ts";
 
 const COPILOT_USAGE_API = "https://api.github.com/copilot_internal/user";
 

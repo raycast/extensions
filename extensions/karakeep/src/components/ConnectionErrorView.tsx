@@ -49,11 +49,13 @@ export function ConnectionErrorView({ error, onRetry }: ConnectionErrorViewProps
   // on-screen description deliberately leaves out.
   const detail = describeConnectionError(error, apiUrl);
   // Must match what ensureReachable will actually DO: it only starts a
-  // container that is stopped (`!container.running`). Gating on mere existence
-  // offers "Press ↵ to start it" for a container that is already up — the API
-  // is dead for some other reason, the start is skipped, and the action
-  // silently does nothing.
-  const canStart = Boolean(container && !container.running) && dockerRunning;
+  // container `docker start` can act on. Gating on mere existence offers
+  // "Press ↵ to start it" for a container that is already up — the API is dead
+  // for some other reason, the start is skipped, and the action silently does
+  // nothing. `startable` rather than `!running` for the same reason one step
+  // down: paused, restarting and dead are all "not running" but none of them
+  // can be started.
+  const canStart = Boolean(container?.startable) && dockerRunning;
 
   const title = isRecovering
     ? t("connection.starting")

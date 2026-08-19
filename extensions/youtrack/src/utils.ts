@@ -1,20 +1,7 @@
 import type { DurationPresentation } from "youtrack-client";
-import type { Comment, CustomField, EnumValue, Issue, IssueExtended, IssueTag, Project } from "./interfaces";
+import type { Comment, CustomField, EnumValue, IssueExtended, IssueTag, Project, SearchSuggestion } from "./interfaces";
 
 type PreparedFavorites = { cached: Project[]; toFetch: string[] };
-export function getEmptyIssue(): Issue {
-  return {
-    id: "",
-    summary: "Connecting to YouTrack...",
-    date: "",
-    created: "",
-    description: "",
-    resolved: false,
-    project: null,
-    customFields: [],
-  };
-}
-
 export const issueStates = {
   ISSUE_RESOLVED: "Resolved",
   ISSUE_OPEN: "Open",
@@ -131,4 +118,9 @@ export function getPriorityFieldValue(customFields: CustomField[]): EnumValue | 
 
 export function getUserAvatar(avatarUrl: string, host: string): string {
   return isURL(avatarUrl) ? avatarUrl : `${host}${avatarUrl}`;
+}
+
+export function applySearchSuggestion(query: string, suggestion: SearchSuggestion): string {
+  const completion = `${suggestion.prefix}${suggestion.option}${suggestion.suffix}`;
+  return `${query.slice(0, suggestion.completionStart)}${completion}${query.slice(suggestion.completionEnd)}`;
 }

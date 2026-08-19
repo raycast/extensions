@@ -145,9 +145,13 @@ Form.TextField = ({ children, value, onChange, ...props }: any) => {
   );
 };
 
-Form.Dropdown = ({ children, ...props }: any) => {
+const FormDropdown = ({ children, ...props }: any) => {
   return React.createElement("select", { "data-testid": "form-dropdown", ...props }, children);
 };
+FormDropdown.Item = ({ title, value, ...props }: any) => {
+  return React.createElement("option", { "data-testid": "form-dropdown-item", value, ...props }, title);
+};
+Form.Dropdown = FormDropdown;
 
 Form.TextArea = ({ children, ...props }: any) => {
   return React.createElement("textarea", { "data-testid": "form-textarea", ...props }, children);
@@ -163,6 +167,18 @@ export const List = (props: any) => {
   // Render navigationTitle as visible text for testing
   if (props.navigationTitle) {
     content.push(React.createElement("div", { key: "navigation-title" }, props.navigationTitle));
+  }
+  // Render a search input so tests can drive onSearchTextChange
+  if (props.onSearchTextChange) {
+    content.push(
+      React.createElement("input", {
+        key: "search-bar",
+        "data-testid": "search-bar",
+        value: props.searchText ?? "",
+        placeholder: props.searchBarPlaceholder,
+        onChange: (e: any) => props.onSearchTextChange(e.target.value),
+      }),
+    );
   }
   if (props.searchBarAccessory) {
     content.push(
@@ -190,6 +206,10 @@ List.Item = ({ children, title, subtitle, accessories, detail, actions, ...props
       .map((accessory: any, index: number) => {
         if (accessory.text) {
           return React.createElement("div", { key: `accessory-text-${index}` }, accessory.text);
+        }
+        if (accessory.tag) {
+          const tagValue = typeof accessory.tag === "string" ? accessory.tag : accessory.tag.value;
+          return React.createElement("div", { key: `accessory-tag-${index}` }, tagValue);
         }
         if (accessory.icon) {
           return React.createElement("div", { key: `accessory-icon-${index}` }, "icon");
@@ -231,6 +251,10 @@ const ListItemDetail = ({ children, markdown, metadata, ...props }: any) => {
   }
   if (children) content.push(children);
   return React.createElement("div", { "data-testid": "list-item-detail-metadata-label", ...props }, content);
+};
+
+(ListItemDetail as any).Metadata.Separator = (props: any) => {
+  return React.createElement("hr", { "data-testid": "metadata-separator", ...props });
 };
 
 (ListItemDetail as any).Metadata.TagList = ({ children, ...props }: any) => {

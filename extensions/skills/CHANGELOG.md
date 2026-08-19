@@ -1,5 +1,7 @@
 # Skills Changelog
 
+## [Updated contributor] - 2026-08-18
+
 ## [Fix Runtime Detection and Skill Lookup] - 2026-07-30
 
 - Detect `bun`/`node` installed outside a version manager or Homebrew, so "Unable to find a working bunx or npx command" no longer appears for Bun's official installer (`~/.bun/bin`), Nix / nix-darwin profiles, mise, and asdf

@@ -99,5 +99,9 @@
       "required": false,
       "title": "Token (memo >= 0.22.0)"
     }
-  ]
+  ],
+  "overrides": {
+    "brace-expansion": "5.0.8",
+    "js-yaml@4": "4.3.1"
+  }
 }

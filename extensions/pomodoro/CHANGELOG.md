@@ -1,5 +1,7 @@
 # Pomodoro Changelog
 
+## [Updated contributor] - 2026-08-18
+
 ## [Fixes] - 2026-05-16
 
 - Fix Slack menu-bar command erroring when user is logged out, and show a clean "Sign in to Slack" option instead

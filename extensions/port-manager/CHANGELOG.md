@@ -1,5 +1,10 @@
 # Port Manager Changelog
 
+## [Windows Support] - 2026-08-13
+
+- Added Windows support for listing and killing processes listening on TCP ports
+- The menu bar command remains macOS-only
+
 ## [Fixed lsof Process Cleanup] - 2026-05-29
 
 - Improved port refreshes to prevent long-running `lsof` processes from piling up when port detection stalls
@@ -10,7 +15,7 @@
 
 ## [New Command] - 2024-03-14
 
-- Added a new command to quickly kill a port 
+- Added a new command to quickly kill a port
 
 ## [Improved Menu Bar Command] - 2024-01-18
 
@@ -31,12 +36,12 @@
 
 ## [New Actions] - 2022-07-15
 
-- *Show Info* action (`⌘` + `i`) to display process information
-- *Show in Finder* action (`⌘` + `f`) to reveal the executable of a process in Finder
-- *Kill Parent* action (`⌘` + `p`) to kill the parent process of a process opening a port
-  - For obvious reasons *not available* if the PID of the parent process is either `0` (`kernel`) or `1` (`launchd`)
+- _Show Info_ action (`⌘` + `i`) to display process information
+- _Show in Finder_ action (`⌘` + `f`) to reveal the executable of a process in Finder
+- _Kill Parent_ action (`⌘` + `p`) to kill the parent process of a process opening a port
+  - For obvious reasons _not available_ if the PID of the parent process is either `0` (`kernel`) or `1` (`launchd`)
 - Some changed wording
-  - Navigation title of *Kill Port* command is now, well, *Kill Port*
+  - Navigation title of _Kill Port_ command is now, well, _Kill Port_
   - Improved description of the extension
 - Improved README
 - Added a changelog

@@ -8,8 +8,11 @@ import { PortInfo, ProcessInfo } from "./interfaces";
 const LSOF_TIMEOUT = 10_000;
 const NETSTAT_TIMEOUT = 3_000;
 const PS_TIMEOUT = 2_000;
+const WINDOWS_PS_TIMEOUT = 10_000;
+const WINDOWS_PROCESS_QUERY_CHUNK_SIZE = 40;
 const LSOF_ARGS = ["-n", "+c0", "-iTCP", "-w", "-sTCP:LISTEN", "-P", "-FpcRuLPn"];
 const NETSTAT_ARGS = ["-anv", "-p", "tcp"];
+const WINDOWS_NETSTAT_ARGS = ["-ano", "-p", "TCP"];
 
 let currentProcessesRequest: Promise<Process[]> | undefined;
 
@@ -28,7 +31,7 @@ export default class Process implements ProcessInfo {
     public readonly uid?: number,
     public readonly protocol?: string,
     public readonly portInfo?: PortInfo[],
-    public readonly internetProtocol?: string
+    public readonly internetProtocol?: string,
   ) {}
 
   private static parsePortInfo(value: string, namedPorts: NamedPortRecord): PortInfo | undefined {
@@ -68,12 +71,16 @@ export default class Process implements ProcessInfo {
     }
 
     try {
+      if (process.platform === "win32") {
+        return await Process.getWindowsProcessDetails(uniquePids);
+      }
+
       const { stdout } = await runCommand(
         "/bin/ps",
         ["-p", uniquePids.join(","), "-o", "pid=", "-o", "ppid=", "-o", "uid=", "-o", "user=", "-o", "comm="],
         {
           timeout: PS_TIMEOUT,
-        }
+        },
       );
 
       for (const line of stdout.split("\n")) {
@@ -97,6 +104,65 @@ export default class Process implements ProcessInfo {
       if (process.parentPid !== undefined) {
         process.parentPath = details.get(process.parentPid)?.path;
       }
+    }
+
+    return details;
+  }
+
+  private static async getWindowsProcessDetails(pids: number[]) {
+    const details = new Map<number, ProcessDetails>();
+
+    for (let index = 0; index < pids.length; index += WINDOWS_PROCESS_QUERY_CHUNK_SIZE) {
+      const chunk = pids.slice(index, index + WINDOWS_PROCESS_QUERY_CHUNK_SIZE);
+      const chunkDetails = await Process.queryWindowsProcessDetails(chunk);
+      for (const [pid, value] of chunkDetails) {
+        details.set(pid, value);
+      }
+    }
+
+    for (const process of details.values()) {
+      if (process.parentPid !== undefined) {
+        process.parentPath = details.get(process.parentPid)?.path;
+      }
+    }
+
+    return details;
+  }
+
+  private static async queryWindowsProcessDetails(pids: number[]) {
+    const processFilter = pids.map((pid) => `ProcessId = ${pid}`).join(" OR ");
+    const script = [
+      `Get-CimInstance Win32_Process -Filter "${processFilter}" -ErrorAction SilentlyContinue`,
+      "Select-Object ProcessId, ParentProcessId, Name, ExecutablePath",
+      "ConvertTo-Json -Compress",
+    ].join(" | ");
+    const { stdout } = await runCommand("powershell.exe", ["-NoProfile", "-NonInteractive", "-Command", script], {
+      timeout: WINDOWS_PS_TIMEOUT,
+    });
+    const details = new Map<number, ProcessDetails>();
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(stdout.replace(/^\uFEFF/, "").trim() || "[]");
+    } catch {
+      return details;
+    }
+    const entries = Array.isArray(parsed) ? parsed : [parsed];
+
+    for (const entry of entries) {
+      if (typeof entry !== "object" || entry === null) continue;
+
+      const values = entry as Record<string, unknown>;
+      const pid = Number(values.ProcessId);
+      const parentPid = Number(values.ParentProcessId);
+      const processPath = typeof values.ExecutablePath === "string" ? values.ExecutablePath : undefined;
+      const name = typeof values.Name === "string" ? values.Name : undefined;
+      if (!Number.isFinite(pid) || pid <= 0) continue;
+
+      details.set(pid, {
+        name,
+        parentPid: Number.isFinite(parentPid) && parentPid > 0 ? parentPid : undefined,
+        path: processPath,
+      });
     }
 
     return details;
@@ -199,6 +265,31 @@ export default class Process implements ProcessInfo {
     return Array.from(valuesByPid.values());
   }
 
+  private static parseWindowsNetstat(stdout: string) {
+    const namedPorts = getNamedPorts();
+    const valuesByPid = new Map<number, ProcessInfo>();
+
+    for (const line of stdout.split("\n")) {
+      const [protocol, localAddress, , state, pidValue] = line.trim().split(/\s+/);
+      const pid = Number(pidValue);
+      if (protocol !== "TCP" || state !== "LISTENING" || !Number.isFinite(pid) || pid <= 0) continue;
+
+      const portInfo = Process.parsePortInfo(localAddress, namedPorts);
+      if (portInfo === undefined) continue;
+
+      const values = valuesByPid.get(pid) ?? {
+        pid,
+        protocol: "TCP",
+        internetProtocol: localAddress.includes("[") ? "IPv6" : "IPv4",
+        portInfo: [],
+      };
+      values.portInfo?.push(portInfo);
+      valuesByPid.set(pid, values);
+    }
+
+    return Array.from(valuesByPid.values());
+  }
+
   private static async loadFromLsof() {
     const { stdout } = await runCommand("/usr/sbin/lsof", LSOF_ARGS, {
       timeout: LSOF_TIMEOUT,
@@ -209,6 +300,14 @@ export default class Process implements ProcessInfo {
   }
 
   private static async loadFromNetstat() {
+    if (process.platform === "win32") {
+      const { stdout } = await runCommand("netstat.exe", WINDOWS_NETSTAT_ARGS, {
+        timeout: NETSTAT_TIMEOUT,
+        killProcessGroup: true,
+      });
+      return Process.parseWindowsNetstat(stdout);
+    }
+
     const { stdout } = await runCommand("/usr/sbin/netstat", NETSTAT_ARGS, {
       timeout: NETSTAT_TIMEOUT,
       killProcessGroup: true,
@@ -222,19 +321,22 @@ export default class Process implements ProcessInfo {
 
     try {
       processes = await Process.loadFromNetstat();
-    } catch {
+    } catch (error) {
+      if (process.platform === "win32") {
+        throw error;
+      }
       processes = [];
     }
 
-    if (processes.length === 0) {
+    if (processes.length === 0 && process.platform !== "win32") {
       processes = await Process.loadFromLsof();
     }
 
     const processDetails = await Process.getProcessDetails(processes.map((process) => process.pid));
     const processAndParentDetails = await Process.getProcessDetails(
       Array.from(processDetails.values()).flatMap((process) =>
-        process.parentPid === undefined ? [] : [process.parentPid]
-      )
+        process.parentPid === undefined ? [] : [process.parentPid],
+      ),
     );
 
     for (const [pid, details] of processDetails) {
@@ -251,7 +353,7 @@ export default class Process implements ProcessInfo {
         values.uid ?? details?.uid,
         values.protocol,
         values.portInfo,
-        values.internetProtocol
+        values.internetProtocol,
       );
 
       process.path = values.path ?? details?.path;
@@ -260,6 +362,24 @@ export default class Process implements ProcessInfo {
 
       return process;
     });
+  }
+
+  public static async getListeningPids(port: string) {
+    if (process.platform === "win32") {
+      const { stdout } = await runCommand("netstat.exe", WINDOWS_NETSTAT_ARGS, {
+        timeout: NETSTAT_TIMEOUT,
+        killProcessGroup: true,
+      });
+      return Process.parseWindowsNetstat(stdout)
+        .filter((process) => process.portInfo?.some((portInfo) => portInfo.port === Number(port)))
+        .map((process) => String(process.pid));
+    }
+
+    const { stdout } = await runCommand("/usr/sbin/lsof", ["-n", `-iTCP:${port}`, "-sTCP:LISTEN", "-t"], {
+      timeout: 5_000,
+      killProcessGroup: true,
+    });
+    return stdout.split(/\s+/).filter(Boolean);
   }
 
   public static async getCurrent() {

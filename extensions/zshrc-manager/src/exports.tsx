@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { useState, type ReactElement } from "react";
+import { useCallback, useState, type ReactElement } from "react";
 import { parseExports } from "./utils/parsers";
 import { truncateValueMiddle } from "./utils/formatters";
 import EditExport, { exportConfig } from "./edit-export";
@@ -90,13 +90,21 @@ export default function Exports({ searchBarAccessory }: ExportsProps) {
       itemTypePlural="exports"
       parser={parseExports}
       searchFields={["variable", "searchableValue", "section"]}
-      postProcessItems={(items) =>
-        items.map((item) => ({ ...item, searchableValue: searchableValue(item.variable, realValue(item)) }))
-      }
+      postProcessItems={useCallback(
+        (items: ExportItem[]) =>
+          items.map((item) => ({
+            ...item,
+            searchableValue: searchableValue(item.variable, stripSurroundingQuotes(item.value)),
+          })),
+        [],
+      )}
       searchBarAccessory={searchBarAccessory}
       warningGenerator={generateExportWarning}
       showWarningFilter={!searchBarAccessory}
       generateTitle={(exportItem) => exportItem.variable}
+      getItemName={(exportItem) => exportItem.variable}
+      getItemValue={realValue}
+      getDisplayValue={displayValue}
       generateOverviewMarkdown={(_, allExports, grouped) => `
 # Export Summary
 
@@ -115,48 +123,18 @@ Exports are environment variables that configure your shell environment and are 
 - Group related exports in the same section
 - Consider using conditional exports for different environments
       `}
-      generateItemMarkdown={(exportItem) => `
-# Export: \`${exportItem.variable}\`
-
-## 📦 Value
-\`\`\`bash
-${displayValue(exportItem)}
-\`\`\`
-
-## 📍 Location
-- **Section**: ${exportItem.section}
-- **File**: ~/.zshrc
-- **Section Start**: Line ${exportItem.sectionStartLine}
-
-## 🔧 Usage
-This environment variable is available to all processes:
-\`\`\`bash
-echo $${exportItem.variable}
-\`\`\`
-
-## 💡 Common Uses
-- **PATH**: Add directories to executable search path
-- **NODE_ENV**: Set Node.js environment (development/production)
-- **EDITOR**: Set default text editor
-- **Custom**: Application-specific configuration
-      `}
-      generateMetadata={(exportItem) => (
+      omitValueMarkdown={true}
+      generateMetadata={(exportItem, displayedValue) => (
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label
-            title="Variable Name"
+            title="Variable"
             text={exportItem.variable}
-            icon={{
-              source: Icon.Upload,
-              tintColor: MODERN_COLORS.primary,
-            }}
+            icon={{ source: Icon.Upload, tintColor: MODERN_COLORS.primary }}
           />
           <List.Item.Detail.Metadata.Label
             title="Value"
-            text={truncateValueMiddle(displayValue(exportItem), 60)}
-            icon={{
-              source: Icon.Code,
-              tintColor: MODERN_COLORS.success,
-            }}
+            text={truncateValueMiddle(displayedValue, 60)}
+            icon={{ source: Icon.Code, tintColor: MODERN_COLORS.primary }}
           />
           {isSecretName(exportItem.variable) && (
             <List.Item.Detail.Metadata.TagList title="Sensitivity">
@@ -171,14 +149,8 @@ echo $${exportItem.variable}
               tintColor: MODERN_COLORS.neutral,
             }}
           />
-          <List.Item.Detail.Metadata.Label
-            title="File"
-            text="~/.zshrc"
-            icon={{
-              source: Icon.Document,
-              tintColor: MODERN_COLORS.neutral,
-            }}
-          />
+          <List.Item.Detail.Metadata.Label title="Section Starts" text={`Line ${exportItem.sectionStartLine}`} />
+          <List.Item.Detail.Metadata.Label title="File" text="~/.zshrc" icon={Icon.Document} />
         </List.Item.Detail.Metadata>
       )}
       generateOverviewActions={(_, refresh) => (

@@ -13,10 +13,13 @@ import {
 import { useRef, useState } from "react";
 import { canonicalPath } from "./core/config.js";
 import { getLastRun, undoRun } from "./core/undo.js";
+import { describeError } from "./errors.js";
 
 export default function UndoTidyCommand() {
   const { defaultDest } = getPreferenceValues<Preferences.UndoTidy>();
   const [destError, setDestError] = useState<string | undefined>();
+  // A ref, not the state flag: two Enter presses land in the same render pass,
+  // and both would still see `loading === false`.
   const submittingRef = useRef(false);
   const [loading, setLoading] = useState(false);
 
@@ -51,6 +54,8 @@ export default function UndoTidyCommand() {
       if (!ok) return;
 
       toast = await showToast({ style: Toast.Style.Animated, title: "Undoing…" });
+      // Undo the run that was described in the prompt, not "whatever is last
+      // now" — another run may have finished while the alert was open.
       const result = undoRun(destDir, run.manifestPath);
       if (!result) {
         toast.style = Toast.Style.Failure;
@@ -65,13 +70,11 @@ export default function UndoTidyCommand() {
         toast.style = Toast.Style.Failure;
         toast.title = "Partial undo";
         toast.message =
-          `${result?.restored ?? 0} moved back, ${result?.failures.length ?? 0} failed ` +
+          `${result.restored} moved back, ${result.failures.length} failed ` +
           "(already moved, or a name clash at the original spot). The record is kept — you can retry.";
       }
     } catch (err) {
-      const code = err instanceof Error ? (err as NodeJS.ErrnoException).code : undefined;
-      const title = code === "MANIFEST_CORRUPT" ? "Invalid tidy record" : "Undo failed";
-      const message = err instanceof Error ? err.message : String(err);
+      const { title, message } = describeError(err, "Undo failed");
       if (toast) {
         toast.style = Toast.Style.Failure;
         toast.title = title;

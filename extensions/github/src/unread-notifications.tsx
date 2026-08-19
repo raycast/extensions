@@ -11,6 +11,7 @@ import {
   openExtensionPreferences,
   showToast,
   Toast,
+  Keyboard,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
@@ -43,8 +44,10 @@ function UnreadNotifications() {
   }, [preferences.repositoryList]);
 
   const { data, isLoading, mutate } = useCachedPromise(async () => {
-    const response = await octokit.activity.listNotificationsForAuthenticatedUser();
-    let notifications = response.data;
+    const notificationsPage = await octokit.paginate(octokit.activity.listNotificationsForAuthenticatedUser, {
+      per_page: 50,
+    });
+    let notifications = notificationsPage;
 
     if (preferences.repositoryFilterMode !== "all" && repositoryListArray.length > 0) {
       if (preferences.repositoryFilterMode === "include") {
@@ -128,7 +131,7 @@ function UnreadNotifications() {
       <MenuBarExtra.Item
         icon={getGitHubIcon()}
         title="Open GitHub Notifications"
-        shortcut={{ modifiers: ["cmd"], key: "o" }}
+        shortcut={Keyboard.Shortcut.Common.Open}
         onAction={() => open("https://github.com/notifications")}
       />
 
@@ -175,7 +178,7 @@ function UnreadNotifications() {
         <MenuBarExtra.Item
           title="View All Notifications"
           icon={Icon.Eye}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          shortcut={Keyboard.Shortcut.Common.OpenWith}
           onAction={() => launchCommand({ name: "notifications", type: LaunchType.UserInitiated })}
         />
 

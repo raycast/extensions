@@ -1,6 +1,7 @@
 import { List } from "@raycast/api";
-import { formatResetTime } from "../agents/format";
-import type { Accessory } from "../agents/types";
+
+import { formatResetTime } from "../agents/format.ts";
+import type { Accessory } from "../agents/types.ts";
 import {
   formatErrorOrNoData,
   generateAsciiBar,
@@ -8,18 +9,15 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   renderErrorOrNoData,
-} from "../agents/ui";
-import type { CursorError, CursorRateWindow, CursorUsage } from "./types";
+} from "../agents/ui.tsx";
+import { formatCursorAccessory, formatPercent } from "./accessory.ts";
+import type { CursorError, CursorRateWindow, CursorUsage } from "./types.ts";
 
 const usdFormatter = new Intl.NumberFormat("en-US", {
   style: "currency",
   currency: "USD",
   maximumFractionDigits: 2,
 });
-
-function formatPercent(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(1).replace(/\.0$/, "");
-}
 
 function formatUsd(value: number): string {
   return usdFormatter.format(value);
@@ -168,11 +166,10 @@ export function getCursorAccessory(
     return getNoDataAccessory();
   }
 
-  const remaining = usage.total.percentageRemaining;
-  const label = usage.legacyRequests ? "Requests" : "Total";
+  const badge = formatCursorAccessory(usage);
   return {
-    icon: generatePieIcon(remaining),
-    text: `${formatPercent(remaining)}%`,
-    tooltip: `${label}: ${formatPercent(remaining)}% remaining`,
+    icon: generatePieIcon(badge.remainingForIcon),
+    text: badge.text,
+    tooltip: badge.tooltip,
   };
 }
