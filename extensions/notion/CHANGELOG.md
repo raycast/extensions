@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Add Note Command] - {PR_MERGE_DATE}
+## [Add Note Command] - 2026-08-19
 
 - Add a new `Add Note` command that appends a note to a page titled with the current date, nested inside a notes page (`NOTES` by default)
 - Create the notes page and the daily page automatically when they don't exist yet
