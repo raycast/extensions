@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { runPhiCommand, runPhiCommandAction } from "./command-compatibility";
 import { activateSpace, getSpaces } from "./phi";
@@ -29,15 +29,6 @@ export default function SearchSpaces() {
           title={space.title}
           keywords={[space.profileId, space.profileName]}
           icon={resolveSpaceIcon(space.iconData)}
-          accessories={[
-            {
-              tag: {
-                value: space.profileName,
-                color: Color.Blue,
-              },
-              tooltip: `Profile: ${space.profileName}`,
-            },
-          ]}
           actions={
             <ActionPanel>
               <Action
