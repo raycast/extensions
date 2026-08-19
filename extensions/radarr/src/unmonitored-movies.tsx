@@ -79,7 +79,11 @@ export default function UnmonitoredMovies() {
                     onAction={() => switchToInstance(instance)}
                   />
                 ))}
-                <Action.Open title="Open Preferences" target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`} icon={Icon.Gear} />
+                <Action.Open
+                  title="Open Preferences"
+                  target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`}
+                  icon={Icon.Gear}
+                />
               </ActionPanel.Section>
             )}
           </ActionPanel>
@@ -101,7 +105,11 @@ export default function UnmonitoredMovies() {
           icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
-              <Action.Open title="Open Preferences" target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`} icon={Icon.Gear} />
+              <Action.Open
+                title="Open Preferences"
+                target={`${process.env.RAYCAST_SCHEME ?? "raycast"}://extensions/preferences`}
+                icon={Icon.Gear}
+              />
             </ActionPanel>
           }
         />

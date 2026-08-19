@@ -121,7 +121,8 @@
     "axios": "^1.8.4",
     "minimatch": "^10.0.1",
     "picomatch": "^4.0.4",
-    "brace-expansion": "5.0.8"
+    "brace-expansion": "5.0.8",
+    "js-yaml@4": "4.3.1"
   },
   "platforms": [
     "macOS"

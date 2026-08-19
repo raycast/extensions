@@ -491,7 +491,8 @@
   },
   "overrides": {
     "whatwg-url": "^14.2.0",
-    "tr46": "^5.1.1"
+    "tr46": "^5.1.1",
+    "brace-expansion": "5.0.9"
   },
   "scripts": {
     "dev": "ray develop",

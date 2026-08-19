@@ -326,5 +326,8 @@
     "publish": "npx @raycast/api@latest publish",
     "test": "vitest run",
     "test:watch": "vitest"
+  },
+  "overrides": {
+    "brace-expansion": "5.0.9"
   }
 }
