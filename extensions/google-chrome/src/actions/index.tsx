@@ -181,6 +181,14 @@ export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
+      -- Remember what was active, so a run that ends up failing does not leave some
+      -- other tab selected as a side effect.
+      set _prev_window_id to missing value
+      set _prev_tab_id to missing value
+      try
+        set _prev_window_id to id of front window
+        set _prev_tab_id to (id of active tab of front window) as text
+      end try
       repeat 3 times
         set _seen to false
         repeat with w in windows
@@ -201,6 +209,20 @@ export async function setActiveTab(tab: Tab): Promise<void> {
         end repeat
         if not _seen then exit repeat
       end repeat
+      -- Every attempt failed; put the previously active tab back before reporting.
+      if _prev_window_id is not missing value then
+        try
+          set _pw to first window whose id is _prev_window_id
+          set _prev_ids to id of tabs of _pw
+          repeat with j from 1 to count of _prev_ids
+            if (item j of _prev_ids as text) is _prev_tab_id then
+              set index of _pw to 1
+              set active tab index of _pw to j
+              exit repeat
+            end if
+          end repeat
+        end try
+      end if
       error "Tab not found"
     end tell
   `);
