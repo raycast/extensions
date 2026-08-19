@@ -1,0 +1,106 @@
+instructions: |
+  runpool manages pools of self-hosted GitHub Actions runners on this Mac.
+
+  A pool is a set of runners bound to one GitHub scope. Pools are on-demand:
+  they wake within about a minute of a job queueing and stand down when idle.
+
+  Read the state before changing it. get-status is cheap and tells you the pool
+  names, which the other tools need.
+
+  A pool with no runners up is RESTING, which is the normal and correct state.
+  Never describe it as broken, down in a worrying sense, or in need of starting.
+  The one genuine fault is a pool GitHub does not have registered, because jobs
+  then queue against it forever; get-status reports that in the state field.
+
+  Runner count is not a throughput dial. A single test job commonly forks one
+  worker per CPU core, so several at once can oversubscribe the machine and make
+  every job slower. If asked to "add more runners to make CI faster", say that
+  the opposite is often true and ask what problem they are seeing.
+
+  Never guess a pool name. If the user is ambiguous and there is more than one
+  pool, ask which.
+
+evals:
+  - input: "@runpool what's the state of my runners?"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: marfa
+            scope: org
+            target: withmarfa
+            runnersConfigured: 4
+            runnersUp: 4
+            jobsInFlight: 2
+            state: running jobs
+    expected:
+      - callsTool: get-status
+      - meetsCriteria: "Reports that jobs are running, and does not describe the pool as broken"
+
+  - input: "@runpool is anything building right now?"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: arbr
+            scope: repo
+            target: aicayzer/arbr
+            runnersConfigured: 2
+            runnersUp: 0
+            jobsInFlight: 0
+            state: resting, will wake when a job queues
+    expected:
+      - callsTool: get-status
+      - meetsCriteria: "Says nothing is building, and presents the resting pool as normal rather than as a problem"
+
+  - input: "@runpool stop the marfa pool"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: marfa
+            scope: org
+            target: withmarfa
+            runnersConfigured: 4
+            runnersUp: 4
+            jobsInFlight: 0
+            state: up but idle
+      stop-pool: "Stood down pool \"marfa\". It stays registered and will wake when a job queues."
+    expected:
+      - callsTool:
+          name: stop-pool
+          arguments:
+            pool: marfa
+
+  - input: "@runpool set marfa to 6 runners"
+    mocks:
+      get-status:
+        paused: false
+        pools:
+          - name: marfa
+            scope: org
+            target: withmarfa
+            runnersConfigured: 4
+            runnersUp: 0
+            jobsInFlight: 0
+            state: resting, will wake when a job queues
+      set-pool-count: "Pool \"marfa\" now has 6 runners, changed from 4."
+    expected:
+      - callsTool:
+          name: set-pool-count
+          arguments:
+            pool: marfa
+            count: 6
+
+  - input: "@runpool pause local CI, I need the machine"
+    mocks:
+      get-status:
+        paused: false
+        pools: []
+      toggle-pause: "Paused. Every runner is down and jobs will queue until you resume."
+    expected:
+      - callsTool:
+          name: toggle-pause
+          arguments:
+            action: pause
+      - meetsCriteria: "Mentions that jobs will queue until CI is resumed"
