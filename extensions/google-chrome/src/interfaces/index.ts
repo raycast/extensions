@@ -31,7 +31,13 @@ export interface HistoryEntry {
 export type GroupedEntries = Map<string, HistoryEntry[]>;
 
 export class Tab {
-  static readonly TAB_CONTENTS_SEPARATOR: string = "~~~";
+  // Unit/record separators, matching ChromeWindow below. A page controls its own
+  // title, so a printable delimiter like "~~~" (or a newline) can be embedded in it
+  // to shift every later field — which would put page-controlled text into `tabId`,
+  // and that is interpolated into AppleScript. Control characters cannot appear in
+  // a title or URL.
+  static readonly TAB_CONTENTS_SEPARATOR: string = "\x1F";
+  static readonly TAB_RECORD_SEPARATOR: string = "\x1E";
 
   constructor(
     public readonly title: string,

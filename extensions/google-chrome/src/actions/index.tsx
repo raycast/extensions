@@ -26,6 +26,8 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
 
   try {
     const openTabs = await runAppleScript(`
+      set _field_sep to character id ${Tab.TAB_CONTENTS_SEPARATOR.charCodeAt(0)}
+      set _rec_sep to character id ${Tab.TAB_RECORD_SEPARATOR.charCodeAt(0)}
       set _output to ""
       tell application "Google Chrome"
         repeat with w in windows
@@ -34,17 +36,22 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
           repeat with i from 1 to count of _props
             set _p to item i of _props
             ${faviconStatement}
-            set _output to (_output & (title of _p) & "${Tab.TAB_CONTENTS_SEPARATOR}" & (URL of _p) & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & i & "${Tab.TAB_CONTENTS_SEPARATOR}" & (id of _p) & "\\n")
+            set _output to (_output & (title of _p) & _field_sep & (URL of _p) & _field_sep & _favicon & _field_sep & _w_id & _field_sep & i & _field_sep & (id of _p) & _rec_sep)
           end repeat
         end repeat
       end tell
       return _output
   `);
 
-    return openTabs
-      .split("\n")
-      .filter((line) => line.length !== 0)
-      .map((line) => Tab.parse(line));
+    return (
+      openTabs
+        .split(Tab.TAB_RECORD_SEPARATOR)
+        // Anything without a field separator is not a record — notably the trailing
+        // newline osascript appends, which is not empty and would otherwise parse
+        // into a tab with no url and no id.
+        .filter((line) => line.includes(Tab.TAB_CONTENTS_SEPARATOR))
+        .map((line) => Tab.parse(line))
+    );
   } catch (err) {
     if ((err as Error).message.includes('Can\'t get application "Google Chrome"')) {
       LocalStorage.removeItem("is-installed");
@@ -129,22 +136,30 @@ export async function openNewTab({
   }
 }
 
-// The actions below address tabs by Chrome's tab id rather than by position, and
-// search every window rather than only the one the tab was listed in. A listed
-// tab's position is only valid for the instant it was read: tabs opened, closed,
-// reordered or dragged to another window afterwards would otherwise make an action
-// hit a different live tab — or, for `closeActiveTab`, close the wrong one.
-// Tabs are located by Chrome's own tab id and every window is scanned: a tab may
-// have been reordered within its window, and the window it was listed in is not
-// necessarily the one it now lives in.
+// The actions below address tabs by Chrome's own tab id rather than by position,
+// and scan every window rather than only the one the tab was listed in: a listed
+// tab's position is valid only for the instant it was read, and the tab may since
+// have been reordered, or moved to another window entirely. Acting on a stale
+// position means activating the wrong tab — or, for `closeActiveTab`, closing it.
 //
 // `close` and `reload` act on a tab reference resolved by Chrome, so no positional
-// index is involved at any point. `setActiveTab` must go through
-// `active tab index` — the only activation Chrome exposes — so it uses the index
-// in the very iteration that produced it, and re-derives it on every call.
+// index is involved at any point. `setActiveTab` has to go through
+// `active tab index`, the only activation Chrome exposes, so it consumes the index
+// in the very iteration that produced it and re-derives it on every attempt.
+
+// Defence in depth: `tabId` is the only field interpolated into these scripts, so
+// it is checked to be what Chrome actually returns — digits — rather than trusted
+// because the delimiters should have kept page-controlled text out of it.
+const tabIdForScript = (tabId: string) => {
+  if (!/^\d+$/.test(tabId)) {
+    throw new Error(`Unexpected Chrome tab id: ${JSON.stringify(tabId)}`);
+  }
+  return tabId;
+};
+
 const actOnTabById = (tabId: string, action: string) => `
       repeat with w in windows
-        set _matches to (every tab of w whose id is "${tabId}")
+        set _matches to (every tab of w whose id is "${tabIdForScript(tabId)}")
         if (count of _matches) > 0 then
           set _t to item 1 of _matches
           set index of w to 1
@@ -165,14 +180,14 @@ export async function setActiveTab(tab: Tab): Promise<void> {
         repeat with w in windows
           set _tab_ids to id of tabs of w
           repeat with i from 1 to count of _tab_ids
-            if (item i of _tab_ids as text) is "${tab.tabId}" then
+            if (item i of _tab_ids as text) is "${tabIdForScript(tab.tabId)}" then
               set _seen to true
               set index of w to 1
               set active tab index of w to i
               -- Confirm the index still resolved to the intended tab. If the list
               -- shifted in between, retry from a fresh scan rather than leaving a
               -- different tab activated.
-              if (id of active tab of w as text) is "${tab.tabId}" then return true
+              if (id of active tab of w as text) is "${tabIdForScript(tab.tabId)}" then return true
               exit repeat
             end if
           end repeat
