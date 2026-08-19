@@ -25,7 +25,7 @@
     {
       "name": "client_secret",
       "title": "Client Secret",
-      "type": "textfield",
+      "type": "password",
       "description": "The client secret for your DigiKey account",
       "required": true,
       "placeholder": "xXX...xXX"

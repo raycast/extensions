@@ -31,9 +31,10 @@ function GetProductDetails(props: LaunchProps<{ arguments: Arguments.GetProductD
           const err = result as ErrorResult;
           throw new Error(err.detail, { cause: err.title });
         }
-        const newItem = { query: product_number, date: new Date().toUTCString(), ...result };
+        const res = result as ProductResult;
+        const newItem = { query: product_number, date: new Date().toUTCString(), ...res };
         await setHistory([newItem, ...history]);
-        return result as ProductResult;
+        return res;
       },
       onError(error) {
         showFailureToast(error, { title: `${error.cause || "Something went wrong"}` });
