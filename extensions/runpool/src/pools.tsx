@@ -4,6 +4,7 @@ import {
   Alert,
   Color,
   Icon,
+  Image,
   Keyboard,
   List,
   confirmAlert,
@@ -93,6 +94,9 @@ export default function Command() {
           icon={{
             source: ownerAvatar(pool),
             fallback: pool.scope === "org" ? Icon.TwoPeople : Icon.Person,
+            // Softened corners. A square photograph at this size looks pasted
+            // in next to Raycast's own rounded iconography.
+            mask: Image.Mask.RoundedRectangle,
           }}
           title={pool.name}
           subtitle={fraction(pool)}

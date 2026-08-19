@@ -49,7 +49,11 @@ export default function Command() {
         {status?.pools.map((pool) => (
           <MenuBarExtra.Item
             key={pool.name}
-            icon={{ source: fillAsset(pool.busy, pool.count) }}
+            icon={
+              colourIcon
+                ? { source: fillAsset(pool.busy, pool.count, "bar") }
+                : { source: fillAsset(pool.busy, pool.count, "bar"), tintColor: Color.SecondaryText }
+            }
             title={pool.name}
             // A fault is the one thing that earns different treatment: a
             // fraction would say "0/2" and hide that nothing can ever pick up.

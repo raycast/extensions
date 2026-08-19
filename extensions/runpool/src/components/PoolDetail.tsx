@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
 import { Pool } from "../lib/runpool";
 
 /**
@@ -30,7 +30,11 @@ export function PoolDetail({ pool }: { pool: Pool }) {
         {repos.map((repo) => (
           <List.Item
             key={repo}
-            icon={Icon.Book}
+            icon={{
+              source: `https://github.com/${repo.split("/")[0]}.png?size=64`,
+              fallback: Icon.Book,
+              mask: Image.Mask.RoundedRectangle,
+            }}
             title={repo}
             actions={
               <ActionPanel>
