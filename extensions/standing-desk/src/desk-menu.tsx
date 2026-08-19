@@ -156,7 +156,7 @@ export default function Command() {
   return (
     <MenuBarExtra
       icon={{ source: "menu-bar-icon.svg", tintColor: Color.PrimaryText }}
-      tooltip="IDÅSEN Desk"
+      tooltip="Standing Desk"
       isLoading={isInitializing || isRefreshing}
     >
       <MenuBarExtra.Section>

@@ -22,7 +22,7 @@ The menu displays the last reported height without connecting first. Select **Re
 
 ## Bluetooth access is denied
 
-Open **System Settings > Privacy & Security > Bluetooth**. Enable access for **IDÅSEN Desk Bluetooth Helper**.
+Open **System Settings > Privacy & Security > Bluetooth**. Enable access for **Standing Desk Bluetooth Helper**.
 
 If the helper is absent, run **Manage Standing Desk** once to trigger the permission request.
 

@@ -5,14 +5,14 @@
   <key>CFBundleIdentifier</key>
   <string>com.cristian.raycast-standing-desk-helper</string>
   <key>CFBundleName</key>
-  <string>IDÅSEN Desk Bluetooth Helper</string>
+  <string>Standing Desk Bluetooth Helper</string>
   <key>CFBundleVersion</key>
   <string>1</string>
   <key>CFBundleShortVersionString</key>
   <string>1.0</string>
   <key>NSBluetoothAlwaysUsageDescription</key>
-  <string>IDÅSEN Desk uses Bluetooth to read and change your desk height.</string>
+  <string>Standing Desk uses Bluetooth to read and change your desk height.</string>
   <key>NSBluetoothPeripheralUsageDescription</key>
-  <string>IDÅSEN Desk uses Bluetooth to read and change your desk height.</string>
+  <string>Standing Desk uses Bluetooth to read and change your desk height.</string>
 </dict>
 </plist>

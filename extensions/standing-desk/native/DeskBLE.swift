@@ -381,7 +381,7 @@ private final class DeskClient: NSObject, CBCentralManagerDelegate, CBPeripheral
                 findDesk()
             }
         case .unauthorized:
-            fail("Bluetooth access is denied. Allow IDÅSEN Desk Bluetooth Helper in System Settings > Privacy & Security > Bluetooth.")
+            fail("Bluetooth access is denied. Allow Standing Desk Bluetooth Helper in System Settings > Privacy & Security > Bluetooth.")
         case .poweredOff:
             fail("Bluetooth is turned off.")
         case .unsupported:

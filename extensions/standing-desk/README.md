@@ -1,4 +1,4 @@
-# IDÅSEN Desk for Raycast
+# Standing Desk for Raycast
 
 Control an IKEA IDÅSEN standing desk from Raycast through Bluetooth Low Energy (BLE).
 
@@ -8,7 +8,7 @@ The menu opens immediately with the last reported height. Sit, Stand, Raise, and
 
 The extension is self-contained. It does not require Python, Bluetility, or a manually copied Bluetooth identifier.
 
-![IDÅSEN Desk extension icon](assets/idasen-desk-icon.png)
+![Standing Desk extension icon](assets/standing-desk-icon.png)
 
 ## Commands
 
@@ -34,7 +34,7 @@ The management view also supports a custom target height, settings, diagnostics,
 
 ## Install
 
-1. Install **IDÅSEN Desk** from the Raycast Store.
+1. Install **Standing Desk** from the Raycast Store.
 2. Approve Bluetooth access when macOS asks.
 3. Hold the desk Bluetooth button until its light flashes.
 4. Open **Manage Standing Desk**, then open **Desk Settings** and select the desk.
