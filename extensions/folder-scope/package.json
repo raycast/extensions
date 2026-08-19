@@ -1,0 +1,212 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "folder-scope",
+  "title": "Folder Scope",
+  "description": "Search text instantly inside files in your active Finder folder.",
+  "icon": "icon.png",
+  "author": "omer_aydemir",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "grep",
+    "ripgrep",
+    "content search",
+    "find in files",
+    "text search",
+    "code search",
+    "finder"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-content",
+      "title": "Search Content",
+      "description": "Search text inside files in the active Finder folder.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultDirectory",
+      "title": "Default Search Directory",
+      "description": "Used when no Finder directory can be detected.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "noFinderBehavior",
+      "title": "When No Finder Directory Is Available",
+      "description": "What to do when Finder has no usable selection or window.",
+      "type": "dropdown",
+      "required": false,
+      "default": "home",
+      "data": [
+        { "title": "Ask Me to Pick a Directory", "value": "prompt" },
+        { "title": "Use the Default Search Directory", "value": "default-directory" },
+        { "title": "Use My Home Directory", "value": "home" }
+      ]
+    },
+    {
+      "name": "preferredEngine",
+      "title": "Search Engine",
+      "description": "Automatic tries bundled ripgrep, then system ripgrep, then the built-in Node.js engine.",
+      "type": "dropdown",
+      "required": false,
+      "default": "automatic",
+      "data": [
+        { "title": "Automatic", "value": "automatic" },
+        { "title": "Bundled ripgrep", "value": "bundled" },
+        { "title": "System ripgrep", "value": "system" },
+        { "title": "Node.js Fallback", "value": "node" }
+      ]
+    },
+    {
+      "name": "defaultCaseMode",
+      "title": "Default Case Sensitivity",
+      "description": "Smart case is case-insensitive unless the query contains an uppercase letter.",
+      "type": "dropdown",
+      "required": false,
+      "default": "smart",
+      "data": [
+        { "title": "Smart Case", "value": "smart" },
+        { "title": "Case Sensitive", "value": "sensitive" },
+        { "title": "Case Insensitive", "value": "insensitive" }
+      ]
+    },
+    {
+      "name": "defaultSearchMode",
+      "title": "Default Search Mode",
+      "description": "Plain text treats the query literally; regular expression uses ripgrep-style syntax.",
+      "type": "dropdown",
+      "required": false,
+      "default": "text",
+      "data": [
+        { "title": "Plain Text", "value": "text" },
+        { "title": "Regular Expression", "value": "regex" }
+      ]
+    },
+    {
+      "name": "defaultMaxDepth",
+      "title": "Default Search Depth",
+      "description": "Maximum directory depth. Leave empty for unlimited; 1 searches only the current directory.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Unlimited"
+    },
+    {
+      "name": "maxResults",
+      "title": "Maximum Results",
+      "description": "Stop after this many results.",
+      "type": "textfield",
+      "required": false,
+      "default": "250"
+    },
+    {
+      "name": "maxFileSizeMb",
+      "title": "Maximum File Size (MB)",
+      "description": "Files larger than this are skipped.",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "previewContextLines",
+      "title": "Preview Context Lines",
+      "description": "Context lines above and below the matched line (0–10). For example, 1 shows three lines in total. Also used by “Copy Line with Context”.",
+      "type": "textfield",
+      "required": false,
+      "default": "0"
+    },
+    {
+      "name": "showMatchPreview",
+      "title": "Match Preview",
+      "label": "Show the match preview by default",
+      "description": "Start with the detail preview open. Toggle it anytime with “Show/Hide Match Preview” in the action panel.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "searchHiddenFiles",
+      "title": "Hidden Files",
+      "label": "Search hidden files and directories",
+      "description": "Include dotfiles and hidden directories in the search.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "respectIgnoreFiles",
+      "title": "Ignore Files",
+      "label": "Respect .gitignore and other ignore files",
+      "description": "Skip files matched by .gitignore, .ignore, and similar files.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "excludedDirectories",
+      "title": "Excluded Directories",
+      "description": "Comma-separated directory names that are never searched.",
+      "type": "textfield",
+      "required": false,
+      "default": ".git, node_modules, bin, obj, .next, dist, build, Library, .cache, .turbo, DerivedData"
+    },
+    {
+      "name": "includedExtensions",
+      "title": "Default File Extensions",
+      "description": "Comma-separated extensions to search (for example: ts, tsx, md). Leave empty for all files.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "All files"
+    },
+    {
+      "name": "debounceMs",
+      "title": "Search Debounce (ms)",
+      "description": "Delay after typing before the search starts (50–1000 ms).",
+      "type": "textfield",
+      "required": false,
+      "default": "200"
+    },
+    {
+      "name": "preferredEditor",
+      "title": "Preferred Code Editor",
+      "description": "Used by the “Open in Editor” action to jump to the matching line.",
+      "type": "dropdown",
+      "required": false,
+      "default": "vscode",
+      "data": [
+        { "title": "Visual Studio Code", "value": "vscode" },
+        { "title": "Cursor", "value": "cursor" },
+        { "title": "Zed", "value": "zed" },
+        { "title": "Sublime Text", "value": "sublime" },
+        { "title": "JetBrains Rider", "value": "rider" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.20",
+    "@raycast/utils": "^2.2.7"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.5.0",
+    "prettier": "^3.8.5",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --test \"src/**/*.test.ts\"",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
