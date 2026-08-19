@@ -121,24 +121,37 @@ export async function openNewTab({
   }
 }
 
-// The three actions below address tabs by Chrome's tab id rather than by position.
-// A listed tab's position is only valid for the instant it was read: if tabs are
-// opened, closed or reordered afterwards, a positional index points at a different
-// live tab — which for `closeActiveTab` means closing the wrong one.
+// The actions below address tabs by Chrome's tab id rather than by position, and
+// search every window rather than only the one the tab was listed in. A listed
+// tab's position is only valid for the instant it was read: tabs opened, closed,
+// reordered or dragged to another window afterwards would otherwise make an action
+// hit a different live tab — or, for `closeActiveTab`, close the wrong one.
+// Chrome reports tab ids as text, so they must be compared as text — an unquoted
+// numeric literal never matches and the loop would silently fall through.
+const locateTabById = (tabId: string) => `
+      set _found_window_id to missing value
+      set _found_index to 0
+      repeat with w in windows
+        set _tab_ids to id of tabs of w
+        repeat with i from 1 to count of _tab_ids
+          if item i of _tab_ids is "${tabId}" then
+            set _found_window_id to id of w
+            set _found_index to i
+            exit repeat
+          end if
+        end repeat
+        if _found_window_id is not missing value then exit repeat
+      end repeat
+      if _found_window_id is missing value then error "Tab not found"
+      set _wnd to first window whose id is _found_window_id
+      set index of _wnd to 1
+      set active tab index of _wnd to _found_index`;
 
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
-      set _wnd to first window where id is ${tab.windowsId}
-      set index of _wnd to 1
-      set _tab_ids to id of tabs of _wnd
-      repeat with i from 1 to count of _tab_ids
-        if item i of _tab_ids is ${tab.tabId} then
-          set active tab index of _wnd to i
-          exit repeat
-        end if
-      end repeat
+      ${locateTabById(tab.tabId)}
     end tell
     return true
   `);
@@ -148,9 +161,8 @@ export async function closeActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
-      set _wnd to first window where id is ${tab.windowsId}
-      set index of _wnd to 1
-      close (first tab of _wnd whose id is ${tab.tabId})
+      ${locateTabById(tab.tabId)}
+      close active tab of _wnd
     end tell
     return true
   `);
@@ -160,9 +172,8 @@ export async function reloadTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
-      set _wnd to first window where id is ${tab.windowsId}
-      set index of _wnd to 1
-      tell (first tab of _wnd whose id is ${tab.tabId}) to reload
+      ${locateTabById(tab.tabId)}
+      tell active tab of _wnd to reload
     end tell
     return true
   `);
