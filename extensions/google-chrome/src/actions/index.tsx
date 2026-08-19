@@ -23,9 +23,10 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
           set _w_id to get id of w as inches as string
           set _titles to title of tabs of w
           set _urls to URL of tabs of w
+          set _tab_ids to id of tabs of w
           repeat with i from 1 to count of _titles
             set _favicon to ${faviconFormula}
-            set _output to (_output & item i of _titles & "${Tab.TAB_CONTENTS_SEPARATOR}" & item i of _urls & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & i & "\\n")
+            set _output to (_output & item i of _titles & "${Tab.TAB_CONTENTS_SEPARATOR}" & item i of _urls & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & i & "${Tab.TAB_CONTENTS_SEPARATOR}" & item i of _tab_ids & "\\n")
           end repeat
         end repeat
       end tell
@@ -120,13 +121,24 @@ export async function openNewTab({
   }
 }
 
+// The three actions below address tabs by Chrome's tab id rather than by position.
+// A listed tab's position is only valid for the instant it was read: if tabs are
+// opened, closed or reordered afterwards, a positional index points at a different
+// live tab — which for `closeActiveTab` means closing the wrong one.
+
 export async function setActiveTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"
       activate
       set _wnd to first window where id is ${tab.windowsId}
       set index of _wnd to 1
-      set active tab index of _wnd to ${tab.tabIndex}
+      set _tab_ids to id of tabs of _wnd
+      repeat with i from 1 to count of _tab_ids
+        if item i of _tab_ids is ${tab.tabId} then
+          set active tab index of _wnd to i
+          exit repeat
+        end if
+      end repeat
     end tell
     return true
   `);
@@ -138,8 +150,7 @@ export async function closeActiveTab(tab: Tab): Promise<void> {
       activate
       set _wnd to first window where id is ${tab.windowsId}
       set index of _wnd to 1
-      set active tab index of _wnd to ${tab.tabIndex}
-      close active tab of _wnd
+      close (first tab of _wnd whose id is ${tab.tabId})
     end tell
     return true
   `);
@@ -151,8 +162,7 @@ export async function reloadTab(tab: Tab): Promise<void> {
       activate
       set _wnd to first window where id is ${tab.windowsId}
       set index of _wnd to 1
-      set active tab index of _wnd to ${tab.tabIndex}
-      tell active tab of _wnd to reload
+      tell (first tab of _wnd whose id is ${tab.tabId}) to reload
     end tell
     return true
   `);

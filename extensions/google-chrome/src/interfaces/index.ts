@@ -39,17 +39,19 @@ export class Tab {
     public readonly favicon: string,
     public readonly windowsId: number,
     public readonly tabIndex: number,
+    /** Chrome's own tab id. Unlike `tabIndex` it survives tabs being opened, closed or reordered. */
+    public readonly tabId: number,
     public readonly sourceLine: string,
   ) {}
 
   static parse(line: string): Tab {
     const parts = line.split(this.TAB_CONTENTS_SEPARATOR);
 
-    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4], line);
+    return new Tab(parts[0], parts[1], parts[2], +parts[3], +parts[4], +parts[5], line);
   }
 
   key(): string {
-    return `${this.windowsId}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabIndex}`;
+    return `${this.windowsId}${Tab.TAB_CONTENTS_SEPARATOR}${this.tabId}`;
   }
 
   urlWithoutScheme(): string {
