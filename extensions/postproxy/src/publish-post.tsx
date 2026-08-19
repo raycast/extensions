@@ -4,13 +4,13 @@ import { useMemo, useState } from "react";
 import { groupProfiles, profileOptionTitle } from "./lib/grouping";
 import { useProfileGroups, useProfiles } from "./lib/hooks";
 import {
-  blockedPlacementNetworks,
   buildPlatforms,
   eligiblePlacementProfiles,
   loadPlacementsByNetwork,
+  overSelectedMandatoryNetworks,
   PLACEMENT_META,
   requiresPlacement,
-  resolvePlacements,
+  validatePlacementPayload,
 } from "./lib/placements";
 import { createPost } from "./lib/postproxy";
 import { platformIcon, platformLabel } from "./lib/platforms";
@@ -42,28 +42,15 @@ export default function PublishPost() {
       });
       try {
         const selectedNow = profiles.filter((p) => v.profiles.includes(p.id));
-        // Block publishing when a mandatory-placement network has 2+ selected profiles: the API takes
-        // one placement per network, so those profiles can't each get their required destination.
-        const blocked = blockedPlacementNetworks(selectedNow);
-        if (blocked.length > 0) {
+        const platforms = buildPlatforms(v.platformParams, networkPlacements);
+        // Single validation choke point over the FINAL payload (dropdown + raw JSON merged): a
+        // placement may be sent only when one profile of the network is selected, and mandatory
+        // networks must have one. Catches multi-profile ambiguity and raw-JSON placements alike.
+        const placementError = validatePlacementPayload(platforms, selectedNow);
+        if (placementError) {
           toast.style = Toast.Style.Failure;
-          toast.title = "Publish separately";
-          toast.message = `${blocked
-            .map(platformLabel)
-            .join(
-              ", ",
-            )}: multiple profiles on this network each need their own placement. Publish them in separate posts.`;
-          return;
-        }
-        // Resolve placements fresh for the currently-selected (single-profile) networks. Mandatory
-        // placements that can't be loaded (failed/empty request) or whose selection is no longer
-        // valid produce a clear error instead of publishing without one or to a wrong destination.
-        const eligibleNow = eligiblePlacementProfiles(selectedNow);
-        const resolution = await resolvePlacements(eligibleNow, networkPlacements);
-        if (!resolution.ok) {
-          toast.style = Toast.Style.Failure;
-          toast.title = "Placement required";
-          toast.message = resolution.message;
+          toast.title = "Placement";
+          toast.message = placementError;
           return;
         }
         const result = await createPost({
@@ -72,7 +59,7 @@ export default function PublishPost() {
           media: v.media,
           scheduledAt: scheduled?.toISOString(),
           draft: v.draft,
-          platforms: buildPlatforms(v.platformParams, resolution.placements),
+          platforms,
         });
         toast.style = Toast.Style.Success;
         toast.title = v.draft ? "Draft saved" : `Post ${result.status}`;
@@ -108,7 +95,7 @@ export default function PublishPost() {
   const selectedIds = values.profiles ?? [];
   const selectedProfiles = profiles.filter((p) => selectedIds.includes(p.id));
   const eligibleProfiles = eligiblePlacementProfiles(selectedProfiles);
-  const blockedNetworks = blockedPlacementNetworks(selectedProfiles);
+  const overSelectedNetworks = overSelectedMandatoryNetworks(selectedProfiles);
   const placementKey = eligibleProfiles
     .map((p) => p.id)
     .sort()
@@ -142,7 +129,7 @@ export default function PublishPost() {
         )}
       </Form.TagPicker>
 
-      {placementNetworks.length > 0 || blockedNetworks.length > 0 ? <Form.Separator /> : null}
+      {placementNetworks.length > 0 || overSelectedNetworks.length > 0 ? <Form.Separator /> : null}
       {placementNetworks.map((net) => (
         <Form.Dropdown
           key={net}
@@ -165,9 +152,9 @@ export default function PublishPost() {
           ))}
         </Form.Dropdown>
       ))}
-      {blockedNetworks.length > 0 ? (
+      {overSelectedNetworks.length > 0 ? (
         <Form.Description
-          text={`${blockedNetworks
+          text={`${overSelectedNetworks
             .map(platformLabel)
             .join(
               ", ",

@@ -1,7 +1,12 @@
 import { api, authHeaders, normalizeList } from "./postproxy";
 import type { Placement, Profile } from "./types";
 
-/** Networks that support a "placement" (which page / org / board / channel to post to). */
+/**
+ * Networks that support a "placement" — which page / organization / board / channel / location a post
+ * targets. Per the API a placement is ONE shared value for the whole network in a single post
+ * (`platforms.<network>.<key>`), so it can only be applied when a single profile of that network is
+ * in the post. See https://postproxy.dev/reference/platforms/*#placements.
+ */
 export const PLACEMENT_META: Record<string, { key: string; label: string }> = {
   facebook: { key: "page_id", label: "Facebook Page" },
   linkedin: { key: "organization_id", label: "LinkedIn Organization" },
@@ -10,8 +15,17 @@ export const PLACEMENT_META: Record<string, { key: string; label: string }> = {
   google_business: { key: "location_id", label: "Google Business Location" },
 };
 
+/** LinkedIn's placement is optional (omit → personal profile); the others are mandatory. */
+const OPTIONAL_PLACEMENT_NETWORKS = new Set(["linkedin"]);
+
 export function supportsPlacements(platform: string | undefined): boolean {
   return Boolean(PLACEMENT_META[(platform ?? "").toLowerCase()]);
+}
+
+/** True when the network mandates a placement (publishing fails without one). */
+export function requiresPlacement(platform: string | undefined): boolean {
+  const net = (platform ?? "").toLowerCase();
+  return Boolean(PLACEMENT_META[net]) && !OPTIONAL_PLACEMENT_NETWORKS.has(net);
 }
 
 function placementNetworkCounts(profiles: Profile[]): Record<string, number> {
@@ -24,23 +38,19 @@ function placementNetworkCounts(profiles: Profile[]): Record<string, number> {
   return counts;
 }
 
-/**
- * Placements are per-network in the API (one `page_id`/`board_id`/… for the whole network), so a
- * placement is only unambiguous when a single selected profile is on that network. Returns the
- * placement-supporting profiles whose network has exactly one selected profile.
- */
+/** Placement-supporting profiles whose network has exactly one selected profile (dropdown-eligible). */
 export function eligiblePlacementProfiles(profiles: Profile[]): Profile[] {
   const counts = placementNetworkCounts(profiles);
   return profiles.filter((p) => supportsPlacements(p.platform) && counts[p.platform.toLowerCase()] === 1);
 }
 
-/** Networks with 2+ selected profiles — placements can't be applied unambiguously for these. */
-export function ambiguousPlacementNetworks(profiles: Profile[]): string[] {
+/** Mandatory-placement networks with 2+ selected profiles — can't be published together (UI note). */
+export function overSelectedMandatoryNetworks(profiles: Profile[]): string[] {
   const counts = placementNetworkCounts(profiles);
-  return Object.keys(counts).filter((net) => counts[net] > 1);
+  return Object.keys(counts).filter((net) => counts[net] > 1 && requiresPlacement(net));
 }
 
-/** Fetch placements for the given profiles, merged & de-duped by network. */
+/** Fetch placements for the given profiles, merged & de-duped by network (for the pickers). */
 export async function loadPlacementsByNetwork(profiles: Profile[]): Promise<Record<string, Placement[]>> {
   const byNetwork: Record<string, Placement[]> = {};
   await Promise.all(
@@ -63,78 +73,6 @@ export async function loadPlacementsByNetwork(profiles: Profile[]): Promise<Reco
     }),
   );
   return byNetwork;
-}
-
-/** LinkedIn's placement is optional (defaults to the personal profile); the others are mandatory. */
-const OPTIONAL_PLACEMENT_NETWORKS = new Set(["linkedin"]);
-
-/** True when the network mandates a placement (publishing fails without one). */
-export function requiresPlacement(platform: string | undefined): boolean {
-  const net = (platform ?? "").toLowerCase();
-  return Boolean(PLACEMENT_META[net]) && !OPTIONAL_PLACEMENT_NETWORKS.has(net);
-}
-
-/**
- * Networks that can't be published in this selection: a placement is mandatory but 2+ profiles on the
- * network are selected, so no single placement can be applied per profile. Publish those separately.
- */
-export function blockedPlacementNetworks(profiles: Profile[]): string[] {
-  return ambiguousPlacementNetworks(profiles).filter((net) => requiresPlacement(net));
-}
-
-export type ResolvedPlacements = { ok: true; placements: Record<string, string> } | { ok: false; message: string };
-
-/**
- * Resolve a valid placement id per network for the given (single-profile-per-network) profiles,
- * fetched fresh at call time. Returns a user-facing error instead of guessing when a mandatory
- * placement can't be loaded (failed/empty request) or the chosen one is no longer valid — so a post
- * is never published to a destination the user didn't select, or without a required placement.
- */
-export async function resolvePlacements(
-  eligibleProfiles: Profile[],
-  chosenByNetwork: Record<string, string>,
-): Promise<ResolvedPlacements> {
-  const placements: Record<string, string> = {};
-  for (const profile of eligibleProfiles) {
-    const net = profile.platform.toLowerCase();
-    const meta = PLACEMENT_META[net];
-    if (!meta) continue;
-    const optional = OPTIONAL_PLACEMENT_NETWORKS.has(net);
-
-    let list: Placement[] | null = null;
-    try {
-      const response = await fetch(api(`/profiles/${profile.id}/placements`), { headers: authHeaders() });
-      if (response.ok) list = normalizeList<Placement>(await response.json());
-    } catch {
-      list = null;
-    }
-
-    if (list === null) {
-      if (optional) {
-        placements[net] = "";
-        continue;
-      }
-      return { ok: false, message: `Couldn't load ${meta.label} options — check your connection and try again.` };
-    }
-    if (list.length === 0) {
-      if (optional) {
-        placements[net] = "";
-        continue;
-      }
-      return { ok: false, message: `No ${meta.label} is available for the selected profile.` };
-    }
-
-    const validIds = new Set(list.map((placement) => placement.id ?? ""));
-    const chosen = chosenByNetwork[net];
-    if (chosen !== undefined && validIds.has(chosen)) {
-      placements[net] = chosen;
-    } else if (optional) {
-      placements[net] = "";
-    } else {
-      return { ok: false, message: `Choose a ${meta.label} and try again.` };
-    }
-  }
-  return { ok: true, placements };
 }
 
 /** Merge raw platform-params JSON with per-network placement selections into the `platforms` object. */
@@ -166,4 +104,34 @@ export function buildPlatforms(
     platforms[net] = { ...(platforms[net] ?? {}), [meta.key]: placementId };
   }
   return Object.keys(platforms).length > 0 ? platforms : undefined;
+}
+
+/**
+ * The single validation choke point: check the FINAL platforms payload (dropdown + raw JSON merged)
+ * against the selection. A placement is one shared value per network per post, so:
+ *  - it may only be sent when exactly one profile of that network is selected;
+ *  - mandatory networks additionally require it.
+ * Returns a user-facing error message, or null when the payload is safe to publish.
+ */
+export function validatePlacementPayload(
+  platforms: Record<string, Record<string, unknown>> | undefined,
+  selectedProfiles: Profile[],
+): string | null {
+  const counts = placementNetworkCounts(selectedProfiles);
+  for (const [net, meta] of Object.entries(PLACEMENT_META)) {
+    const count = counts[net] ?? 0;
+    if (count === 0) continue;
+    const hasPlacement = Boolean(platforms?.[net]?.[meta.key]);
+    if (count > 1) {
+      if (hasPlacement) {
+        return `${meta.label}: a placement can't be shared across multiple profiles. Select a single profile on this network, or publish them in separate posts.`;
+      }
+      if (requiresPlacement(net)) {
+        return `${meta.label}: multiple profiles are selected and each needs its own placement. Publish them in separate posts.`;
+      }
+    } else if (requiresPlacement(net) && !hasPlacement) {
+      return `Choose a ${meta.label} to publish.`;
+    }
+  }
+  return null;
 }
