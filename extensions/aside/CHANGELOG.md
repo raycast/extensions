@@ -1,6 +1,6 @@
 # Aside Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-19
 
 - Added search, focus, duplicate, close, and deduplication workflows for open Aside tabs.
 - Added bookmark search with nested folders, frecency ranking, and profile selection.
