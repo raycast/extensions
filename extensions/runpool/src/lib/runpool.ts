@@ -51,25 +51,27 @@ export class RunpoolNotFoundError extends Error {
 }
 
 // A Raycast command does not inherit an interactive shell, so PATH is minimal
-// and `runpool` alone will usually not resolve. Look in tiers: what the user
-// told us, then what the system says, then the two places it actually installs
-// to. Resolved once per command launch.
+// and `runpool` alone will usually not resolve. Look where it actually
+// installs to, after whatever the user told us.
 const CANDIDATE_PATHS = [`${homedir()}/.local/bin/runpool`, "/opt/homebrew/bin/runpool", "/usr/local/bin/runpool"];
 
-let cachedPath: string | null | undefined;
-
-function resolve(): string | null {
+/**
+ * Where the executable is, resolved on every call rather than memoised.
+ *
+ * Preference values are tied to the moment a command launched, and Raycast
+ * makes no promise that changing them remounts a view command. Caching this
+ * meant that correcting the path in preferences and pressing "Try Again" ran
+ * the same broken executable until the command was relaunched, which is
+ * precisely the moment it needs to work. A handful of `existsSync` calls are
+ * not worth that.
+ */
+export function findRunpool(): string | null {
   const { runpoolPath } = getPreferenceValues<Preferences>();
   if (runpoolPath && runpoolPath.trim().length > 0) {
     const explicit = runpoolPath.trim();
     return existsSync(explicit) ? explicit : null;
   }
   return CANDIDATE_PATHS.find((p) => existsSync(p)) ?? null;
-}
-
-export function findRunpool(): string | null {
-  if (cachedPath === undefined) cachedPath = resolve();
-  return cachedPath;
 }
 
 /** Absolute path to the executable, or throw so the caller can offer install help. */
