@@ -23,6 +23,7 @@ export enum CustomFieldSchema {
   textfield = "com.atlassian.jira.plugin.system.customfieldtypes:textfield",
   userPicker = "com.atlassian.jira.plugin.system.customfieldtypes:userpicker",
   team = "com.atlassian.teams:rm-teams-custom-field-team",
+  atlassianTeam = "com.atlassian.jira.plugin.system.customfieldtypes:atlassian-team",
 }
 
 export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unknown) {
@@ -61,12 +62,13 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
       const typedValue = value as string;
       return { id: typedValue };
     }
-    case CustomFieldSchema.team: {
-      // The Team field (`com.atlassian.teams:rm-teams-custom-field-team`) expects the Team ID as a
-      // plain string when creating/updating an issue, per Atlassian's docs and confirmed against a
-      // live site (older Advanced Roadmaps teams behave the same, rejecting an object with a 400
-      // "operation must be string"). Sending it as an `{ id }` object causes the team to be dropped:
-      // https://developer.atlassian.com/platform/teams/components/team-field-in-jira-rest-api/#creating-or-updating-an-issue-with-team
+    case CustomFieldSchema.team:
+    case CustomFieldSchema.atlassianTeam: {
+      // Both Team field types — the Advanced Roadmaps field
+      // (`com.atlassian.teams:rm-teams-custom-field-team`) and the newer Atlassian Teams platform
+      // field (`com.atlassian.jira.plugin.system.customfieldtypes:atlassian-team`) — persist the
+      // team only when the Team ID is sent as a plain string. Sending an `{ id }` object is
+      // silently dropped (confirmed against a live site).
       const typedValue = value as string;
       return typedValue;
     }

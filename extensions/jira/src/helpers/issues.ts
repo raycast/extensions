@@ -170,6 +170,7 @@ const supportedCustomFieldsForCreateIssue = [
   CustomFieldSchema.textfield,
   CustomFieldSchema.userPicker,
   CustomFieldSchema.team,
+  CustomFieldSchema.atlassianTeam,
 ];
 
 export function getCustomFieldsForCreateIssue(issueType: IssueTypeWithCustomFields) {

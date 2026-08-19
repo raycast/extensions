@@ -2,7 +2,8 @@
 
 ## [Fixed team field on issue creation] - {PR_MERGE_DATE}
 
-- Fixed the team not being set on newly created issues: the Team custom field is now sent as the plain-string Team ID that Jira expects, instead of an `{ id }` object (which Jira silently dropped)
+- Fixed the Team field showing up under "Unknown fields" (and not rendering as a dropdown) on the create-issue form for sites using the newer Atlassian Teams field (`atlassian-team`), so a team can now be selected and set on new issues
+- Added support for both Team field types: the Atlassian Teams platform field (`atlassian-team`) and the Advanced Roadmaps Team field (`rm-teams-custom-field-team`), both sent as a plain-string Team ID (an `{ id }` object is silently dropped)
 - Added unit tests for custom field value handling (run with `npm test` via Node's built-in `node:test` runner)
 
 ## [Fix Jira HTML response errors] - 2026-06-29
