@@ -1,6 +1,6 @@
 # WinGet Changelog
 
-## [Resilience and UX Fixes] - {PR_MERGE_DATE}
+## [Resilience and UX Fixes] - 2026-08-19
 
 ### Added
 - Package icons in every list, taken from the package's manifest or its homepage
