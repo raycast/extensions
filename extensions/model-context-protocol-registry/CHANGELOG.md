@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add PostEverywhere MCP Server] - {PR_MERGE_DATE}
+
+- Added PostEverywhere (social media publishing to 11 platforms) to the official registry entries
+
 ## [Add Tripsy MCP Server] - 2026-08-19
 
 Add Tripsy to the official registry, enabling AI assistants to create trips and manage flights, stays, activities, expenses, and itinerary details. The remote Streamable HTTP server uses Tripsy OAuth sign-in through an `mcp-remote` bridge.
