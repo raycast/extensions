@@ -1,5 +1,9 @@
 # bmrks Changelog
 
+## [Fix crash on command launch] - {PR_MERGE_DATE}
+
+- Fixed all commands crashing with "native WebSocket not found" by providing a WebSocket transport (`ws`) to the Supabase client, since Raycast's Node runtime has no global WebSocket
+
 ## [Improved reliability and UX] - 2026-03-04
 
 - Fixed auth error handling for better consistency
