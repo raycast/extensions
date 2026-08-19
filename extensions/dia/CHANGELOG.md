@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Security: Address dependabot alert] - {PR_MERGE_DATE}
+## [Security: Address dependabot alert] - 2026-08-19
 
 - Updated package-lock.json to fix https://github.com/raycast/extensions/security/dependabot/76383
 
