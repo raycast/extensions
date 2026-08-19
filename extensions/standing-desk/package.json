@@ -1,0 +1,103 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "standing-desk",
+  "title": "IDÅSEN Desk",
+  "description": "Control an IKEA IDÅSEN standing desk over Bluetooth",
+  "keywords": [
+    "IKEA",
+    "IDÅSEN",
+    "standing desk",
+    "LINAK",
+    "Bluetooth"
+  ],
+  "icon": "idasen-desk-icon.png",
+  "author": "cristian",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "commands": [
+    {
+      "name": "desk-menu",
+      "title": "Standing Desk Menu",
+      "description": "Control the desk from a menu bar icon and see its height in the menu",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "manage-desk",
+      "title": "Manage Standing Desk",
+      "description": "View the height and control every desk action",
+      "mode": "view"
+    },
+    {
+      "name": "sit",
+      "title": "Move Desk to Sit",
+      "description": "Move the desk to the saved sitting position",
+      "mode": "no-view"
+    },
+    {
+      "name": "stand",
+      "title": "Move Desk to Stand",
+      "description": "Move the desk to the saved standing position",
+      "mode": "no-view"
+    },
+    {
+      "name": "raise",
+      "title": "Raise Desk",
+      "description": "Raise the desk by the configured step",
+      "mode": "no-view"
+    },
+    {
+      "name": "lower",
+      "title": "Lower Desk",
+      "description": "Lower the desk by the configured step",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop",
+      "title": "Stop Desk",
+      "description": "Stop active desk movement",
+      "mode": "no-view"
+    },
+    {
+      "name": "save-sit",
+      "title": "Save Current Height as Sit",
+      "description": "Replace the sitting position with the current desk height",
+      "mode": "no-view"
+    },
+    {
+      "name": "save-stand",
+      "title": "Save Current Height as Stand",
+      "description": "Replace the standing position with the current desk height",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.104.25"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.2.0",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.0"
+  },
+  "scripts": {
+    "build:native": "./scripts/build-native.sh",
+    "predev": "npm run build:native",
+    "dev": "ray develop",
+    "prebuild": "npm run build:native",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run && npm run build:native && ./assets/deskctl self-test",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
