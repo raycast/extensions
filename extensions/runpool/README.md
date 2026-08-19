@@ -1,4 +1,4 @@
-# Runpool
+# RunPool
 
 Manage on-demand self-hosted GitHub Actions runner pools on your Mac, from Raycast.
 
@@ -10,27 +10,31 @@ brew install aicayzer/tap/runpool
 
 The extension tells you how to install it if it is missing, so there is no harm in trying it first.
 
-## What it does
+## Commands
 
-**Show Runner Pools** lists every pool against its owner's GitHub avatar, with what it is doing. From there you can start and stop a pool, change how many runners it has, disable local CI entirely, and open the log. Press return on a pool to see which repositories it serves.
+**Show Runner Pools** lists every pool against its owner's GitHub avatar, with how many of its runner slots are busy. Start and stop a pool, change its runner count, disable local CI, and open the log. Press return to see which repositories a pool serves.
 
-**Runner Pool Status** keeps a live summary in its own subtitle in Raycast's root search, refreshed every minute.
+**Runner Status** keeps a live summary in its own subtitle in Raycast's root search, refreshed every minute.
 
-**Runner Pools in Menu Bar** is off by default. Turn it on and the menu bar shows the mark filled to the proportion of runners that are awake: empty when nothing is running, full when everything is.
+**Runner Status in Menu Bar** is off by default. Turn it on and the menu bar shows the mark filled to the proportion of runner slots in use. Monochrome by default; there is a preference for the RunPool blue.
 
-## Reading the states
+**Machine Load** is off by default. It reports the machine's load average against its core count, which is what tells you whether a failing test was the code or a contended machine.
 
-The words are GitHub's own, as shown on its runners settings page.
+## Reading it
 
-- **Offline** — no runners connected. For an on-demand pool this is the normal resting state rather than a fault, and it is styled neutrally for that reason. It wakes within about a minute of a job queueing.
-- **Idle** — runners are connected but nothing is running. They stand down on their own.
-- **Active** — jobs are in flight, with the count.
-- **Not registered** — GitHub has no runners for this pool, so jobs will queue against it forever. This is the one state worth acting on, and the extension offers to re-register.
+Every pool shows **`2/4`**: jobs running out of total runner slots. The icon fills to the same fraction, so the picture and the number always agree.
+
+The state tags use GitHub's own words, as shown on its runners settings page.
+
+- **Active** — jobs running.
+- **Idle** — runners connected, nothing running.
+- **Offline** — no runners connected. For an on-demand pool this is the normal resting state, not a fault, and it is styled neutrally. It wakes within about a minute of a job queueing.
+- **Unreachable** — GitHub has no online runners, so jobs will queue against this pool forever. The one state worth acting on, and the extension offers to re-register.
 
 ## AI
 
-Ask Raycast AI things like "what are my runner pools doing", "stop the marfa pool", or "pause local CI". Anything that changes capacity asks first.
+Ask Raycast AI things like "what are my runner pools doing", "stop the marfa pool", or "disable local CI". Anything that changes capacity asks first.
 
 ## Preferences
 
-**runpool Executable** — only needed if `runpool` is installed somewhere unusual. Left empty, the extension looks in the standard locations.
+**Executable Path** — only if `runpool` is installed somewhere unusual. Left empty, the extension looks in the standard locations.

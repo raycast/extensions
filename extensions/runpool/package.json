@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "runpool",
-  "title": "Runpool",
+  "title": "RunPool",
   "description": "Manage on-demand self-hosted GitHub Actions runner pools on your Mac",
   "icon": "icon.png",
   "author": "aic",
@@ -22,7 +22,7 @@
     },
     {
       "name": "status",
-      "title": "Runner Pool Status",
+      "title": "Runner Status",
       "subtitle": "runpool",
       "description": "Keep a live summary of the pools in this command's subtitle",
       "mode": "no-view",
@@ -30,10 +30,30 @@
     },
     {
       "name": "menubar",
-      "title": "Runner Pools in Menu Bar",
+      "title": "Runner Status in Menu Bar",
       "subtitle": "runpool",
       "description": "Show how much of the pool is awake in the menu bar, as a fill level",
       "mode": "menu-bar",
+      "interval": "1m",
+      "disabledByDefault": true,
+      "preferences": [
+        {
+          "name": "colourIcon",
+          "title": "Appearance",
+          "label": "Use the RunPool blue",
+          "description": "Off by default, so the icon matches the other items in your menu bar.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        }
+      ]
+    },
+    {
+      "name": "load",
+      "title": "Machine Load",
+      "subtitle": "RunPool",
+      "description": "Keep the machine's load average in this command's subtitle",
+      "mode": "no-view",
       "interval": "1m",
       "disabledByDefault": true
     }
@@ -41,8 +61,8 @@
   "preferences": [
     {
       "name": "runpoolPath",
-      "title": "runpool Executable",
-      "description": "Only needed if runpool is installed somewhere unusual. Left empty, the extension asks the system where it is.",
+      "title": "Executable Path",
+      "description": "Only if runpool is installed somewhere unusual.",
       "type": "textfield",
       "required": false
     }

@@ -15,7 +15,7 @@ import { showFailureToast } from "@raycast/utils";
 import { NotInstalled } from "./components/NotInstalled";
 import { PoolDetail } from "./components/PoolDetail";
 import { useStatus } from "./hooks/useStatus";
-import { isUnreachable, ownerAvatar, Pool, poolState, runpool, stateLabel, Status } from "./lib/runpool";
+import { fraction, isUnreachable, ownerAvatar, Pool, poolState, runpool, stateLabel, Status } from "./lib/runpool";
 
 /**
  * Colour carries the state.
@@ -95,7 +95,7 @@ export default function Command() {
             fallback: pool.scope === "org" ? Icon.TwoPeople : Icon.Person,
           }}
           title={pool.name}
-          subtitle={`${pool.count} ${pool.count === 1 ? "runner" : "runners"}`}
+          subtitle={fraction(pool)}
           accessories={[
             { text: pool.target },
             {

@@ -25,10 +25,19 @@ export interface Pool {
   watch: string[];
 }
 
+export interface Machine {
+  /** One-minute load average: processes running or waiting for a CPU. */
+  load: number;
+  cores: number;
+  /** The contention threshold runpool itself warns above. */
+  load_warn: number;
+}
+
 export interface Status {
   paused: boolean;
   /** True when the GitHub query was skipped, so the github_* fields are null. */
   local: boolean;
+  machine: Machine;
   paths: { base: string; log: string; log_dir: string; telemetry: string };
   pools: Pool[];
 }
@@ -64,7 +73,7 @@ export function findRunpool(): string | null {
 }
 
 /** Absolute path to the executable, or throw so the caller can offer install help. */
-export function requireRunpool(): string {
+function requireRunpool(): string {
   const bin = findRunpool();
   if (!bin) throw new RunpoolNotFoundError();
   return bin;
@@ -129,9 +138,9 @@ export function stateLabel(pool: Pool, paused: boolean): string {
     case "paused":
       return "Paused";
     case "unreachable":
-      return "Not registered";
+      return "Unreachable";
     case "active":
-      return `Active · ${pool.busy} ${pool.busy === 1 ? "job" : "jobs"}`;
+      return "Active";
     case "idle":
       return "Idle";
     case "offline":
@@ -139,15 +148,34 @@ export function stateLabel(pool: Pool, paused: boolean): string {
   }
 }
 
-/** Proportion of a pool's runners that are up, for the fill-level icon. */
-export function fillLevel(pool: Pool): number {
-  return pool.count === 0 ? 0 : pool.running / pool.count;
+/**
+ * Jobs running out of total runner slots, as `2/4`.
+ *
+ * One number, one meaning, everywhere. Jobs is the figure worth showing
+ * because `busy` is always at most `running`, which is always at most `count`:
+ * an awake but idle runner is a polling process costing nothing, while a
+ * running job is what actually consumes the machine.
+ *
+ * The cost is that idle and offline both read `0/4`. That is correct for a
+ * glance — both mean nothing is happening — and the list carries a state tag
+ * for the times the difference matters.
+ */
+export function fraction(pool: Pool): string {
+  return `${pool.busy}/${pool.count}`;
 }
 
-/** Nearest rendered fill variant. Assets exist at 0, 25, 50, 75 and 100. */
-export function fillAsset(level: number): string {
+/**
+ * The fill variant for a given proportion of work. Assets exist at 0, 25, 50,
+ * 75 and 100, and `prefix` selects the padded set or the tighter menu bar one.
+ *
+ * Always driven by the same figure as `fraction`, so the icon and the text can
+ * never contradict each other. An earlier version filled by runners awake,
+ * which put a full pool next to the word "Idle".
+ */
+export function fillAsset(busy: number, total: number, prefix: "pool" | "bar" = "pool"): string {
+  const level = total === 0 ? 0 : busy / total;
   const step = Math.round(Math.min(1, Math.max(0, level)) * 4) * 25;
-  return `pool-${step}.png`;
+  return `${prefix}-${step}.png`;
 }
 
 /**
@@ -161,14 +189,28 @@ export function isUnreachable(pool: Pool): boolean {
   return pool.running > 0 && pool.github_online === 0;
 }
 
-/** One line summarising the whole machine, for a command subtitle or a HUD. */
+/** One line summarising the whole machine, for a command subtitle. */
 export function summarise(status: Status): string {
   if (status.paused) return "Paused";
   const running = status.pools.reduce((n, p) => n + p.running, 0);
   const busy = status.pools.reduce((n, p) => n + p.busy, 0);
+  const slots = status.pools.reduce((n, p) => n + p.count, 0);
+  if (busy > 0) return `Active ${busy}/${slots}`;
   if (running === 0) return "Offline";
-  if (busy > 0) return `Active · ${busy} ${busy === 1 ? "job" : "jobs"}`;
   return "Idle";
+}
+
+/**
+ * Load average against core count.
+ *
+ * Both numbers, spelled out, because neither means anything alone: 38.9 is
+ * unreadable without knowing the machine, and a bare core count is a fact
+ * nobody needs. Written as prose rather than a fraction on purpose, since a
+ * fraction implies the numerator cannot exceed the denominator and load
+ * routinely does.
+ */
+export function loadLabel(machine: Machine): string {
+  return `Load ${machine.load.toFixed(1)} across ${machine.cores} cores`;
 }
 
 /**
