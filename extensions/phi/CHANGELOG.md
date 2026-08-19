@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-08-19
 
 - Search and activate Phi Spaces.
 - Search Phi browsing history across local Chromium profiles.
