@@ -1,6 +1,6 @@
 # Rename Changelog
 
-## [Folder Commands] - {PR_MERGE_DATE}
+## [Folder Commands] - 2026-08-19
 
 - ⚠️ Breaking: Rename File(s) and Replace in File Names now act only on files — folders in the selection are left untouched instead of being renamed, and a selection holding no files reports that rather than renaming anything
 - Add Rename Folder(s) and Replace in Folder Names commands, the folder counterparts of the two file commands, targeting only the folders in the Finder selection
