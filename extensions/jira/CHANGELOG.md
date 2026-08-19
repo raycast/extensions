@@ -2,8 +2,8 @@
 
 ## [Fixed team field on issue creation] - {PR_MERGE_DATE}
 
-- Fixed Jira rejecting/silently dropping team custom field values during issue creation: the team is now sent as the `{ id }` object shape that reliably persists it, with an automatic fallback to the plain-string Team ID for sites that require it, so both Jira variants are supported
-- Added unit tests for custom field value handling and the team field fallback (run with `npm test` via Node's built-in `node:test` runner)
+- Fixed the team not being set on newly created issues: the Team custom field is now sent as the plain-string Team ID that Jira expects, instead of an `{ id }` object (which Jira silently dropped)
+- Added unit tests for custom field value handling (run with `npm test` via Node's built-in `node:test` runner)
 
 ## [Fix Jira HTML response errors] - 2026-06-29
 

@@ -1,18 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
-import {
-  CustomFieldSchema,
-  getCustomFieldValue,
-  isTeamFieldRejection,
-  unwrapTeamFieldValue,
-} from "../src/helpers/customFields.ts";
+import { CustomFieldSchema, getCustomFieldValue } from "../src/helpers/customFields.ts";
 
 describe("getCustomFieldValue", () => {
-  it("returns an { id } object for the team field", () => {
-    // The `{ id }` object is the shape known to reliably persist the team on issue creation.
+  it("returns the plain Team ID string for the team field", () => {
+    // The Team field is persisted only when sent as a plain string Team ID (not an `{ id }` object).
     const result = getCustomFieldValue(CustomFieldSchema.team, "abc-123-team-uuid");
-    assert.deepEqual(result, { id: "abc-123-team-uuid" });
+    assert.equal(result, "abc-123-team-uuid");
   });
 
   it("returns { id } for userPicker", () => {
@@ -67,35 +62,5 @@ describe("getCustomFieldValue", () => {
 
   it("returns null for an unknown schema", () => {
     assert.equal(getCustomFieldValue(CustomFieldSchema.unknown, "anything"), null);
-  });
-});
-
-describe("unwrapTeamFieldValue", () => {
-  it("returns the plain Team ID string for the fallback shape", () => {
-    assert.equal(unwrapTeamFieldValue("abc-123-team-uuid"), "abc-123-team-uuid");
-  });
-});
-
-describe("isTeamFieldRejection", () => {
-  const teamKeys = ["customfield_10001"];
-
-  it("returns true when the error body reports the team field", () => {
-    const message = JSON.stringify({ errorMessages: [], errors: { customfield_10001: "operation must be string" } });
-    assert.equal(isTeamFieldRejection(message, teamKeys), true);
-  });
-
-  it("returns false when the error is about a different field", () => {
-    const message = JSON.stringify({ errorMessages: [], errors: { summary: "is required" } });
-    assert.equal(isTeamFieldRejection(message, teamKeys), false);
-  });
-
-  it("returns false when there are no team fields to retry", () => {
-    const message = JSON.stringify({ errors: { customfield_10001: "operation must be string" } });
-    assert.equal(isTeamFieldRejection(message, []), false);
-  });
-
-  it("falls back to substring matching for non-JSON error messages", () => {
-    assert.equal(isTeamFieldRejection("failed on customfield_10001", teamKeys), true);
-    assert.equal(isTeamFieldRejection("some unrelated failure", teamKeys), false);
   });
 });

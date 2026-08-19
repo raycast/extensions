@@ -62,50 +62,15 @@ export function getCustomFieldValue(fieldSchema: CustomFieldSchema, value: unkno
       return { id: typedValue };
     }
     case CustomFieldSchema.team: {
-      // The Team field (`com.atlassian.teams:rm-teams-custom-field-team`) accepts different shapes
-      // on different Jira sites:
-      //  - Some sites (like the one this fix originated from) only persist the team when it is sent
-      //    as an `{ id }` object, and silently drop a plain-string value (the issue is created with
-      //    no team, without any error).
-      //  - Others — including older Advanced Roadmaps teams and per Atlassian's docs — expect a
-      //    plain string Team ID and reject the object with a 400 "operation must be string":
-      //    https://developer.atlassian.com/platform/teams/components/team-field-in-jira-rest-api/#creating-or-updating-an-issue-with-team
-      //
-      // We send the `{ id }` object first because that is the shape we know reliably persists the
-      // team (and a wrong string can fail silently, which we could not detect). `createIssue` then
-      // falls back to the plain string only when a site explicitly rejects the object (see
-      // `unwrapTeamFieldValue` / `isTeamFieldRejection`), so string-expecting sites are not
-      // regressed.
+      // The Team field (`com.atlassian.teams:rm-teams-custom-field-team`) expects the Team ID as a
+      // plain string when creating/updating an issue, per Atlassian's docs and confirmed against a
+      // live site (older Advanced Roadmaps teams behave the same, rejecting an object with a 400
+      // "operation must be string"). Sending it as an `{ id }` object causes the team to be dropped:
+      // https://developer.atlassian.com/platform/teams/components/team-field-in-jira-rest-api/#creating-or-updating-an-issue-with-team
       const typedValue = value as string;
-      return { id: typedValue };
+      return typedValue;
     }
     default:
       return null;
-  }
-}
-
-/** Plain-string shape some Jira sites require for the Team custom field, used as a create fallback. */
-export function unwrapTeamFieldValue(teamId: string) {
-  return teamId;
-}
-
-/**
- * Returns true when a failed create/update response indicates the given team custom field(s) were
- * rejected, so the caller can retry with the alternate (plain-string) shape.
- *
- * Jira returns field-specific errors as `{ "errors": { "customfield_10001": "..." } }`; the error
- * message forwarded by `parseJiraResponse` is the JSON-stringified body.
- */
-export function isTeamFieldRejection(errorMessage: string, teamFieldKeys: string[]): boolean {
-  if (teamFieldKeys.length === 0) {
-    return false;
-  }
-
-  try {
-    const parsed = JSON.parse(errorMessage) as { errors?: Record<string, unknown> };
-    const errorKeys = Object.keys(parsed?.errors ?? {});
-    return teamFieldKeys.some((key) => errorKeys.includes(key));
-  } catch {
-    return teamFieldKeys.some((key) => errorMessage.includes(key));
   }
 }
