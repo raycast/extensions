@@ -13,7 +13,7 @@ import {
 import { useFetch } from "@raycast/utils";
 import { useEffect } from "react";
 
-const { port } = getPreferenceValues<Preferences>();
+const { port } = getPreferenceValues<Preferences.List>();
 const API_BASE = `http://localhost:${port}`;
 
 type VM = {
