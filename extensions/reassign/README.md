@@ -27,7 +27,7 @@ you already use: glance at your dial day, capture blocks, and check them off.
 - **Schedule a Block** — one capture. An explicit date and time schedules the
   block; a bare idea saves to the Inbox. Set the area, activity, type, and notes.
   With a connected calendar, pick the calendar the block publishes to (or keep
-  it on the dial only) and the calendars that get a one-way mirror copy.
+  it in Reassign only) and the calendars that get a one-way mirror copy.
 - **Inbox** — your saved ideas with no time yet; schedule or remove them.
 - **Now** — the current block in the menu bar, with the time remaining, check-off
   and Join actions, and a heads-up notification before each block starts.

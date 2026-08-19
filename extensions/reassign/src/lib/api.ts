@@ -34,7 +34,7 @@ export type WriteOp =
       areaName?: string;
       activityTypeName?: string;
       kind?: string;
-      // Calendar publish targets (Pro). `syncTo: null` forces a dial-only block.
+      // Calendar publish targets (Pro). `syncTo: null` keeps it in Reassign only.
       syncTo?: string | null;
       mirrorTo?: string[];
     }

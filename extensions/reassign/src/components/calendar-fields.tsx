@@ -4,7 +4,7 @@ import { listCalendars } from "../lib/api";
 import type { Calendar } from "../lib/schedule-model";
 
 // Picker values that are not calendar ids. "" keeps the server default (omit
-// `syncTo`); NONE forces a dial-only block (`syncTo: null`).
+// `syncTo`); NONE keeps the block in Reassign only (`syncTo: null`).
 export const CALENDAR_DEFAULT = "";
 export const CALENDAR_NONE = "__none";
 
@@ -95,7 +95,7 @@ export function CalendarFields(props: {
         id="calendarId"
         title="Calendar"
         defaultValue={calendarDefault}
-        info="Publish the block to a connected calendar, or keep it on the dial only."
+        info="Publish the block to a connected calendar, or keep it in Reassign only."
       >
         {allowDefault && (
           <Form.Dropdown.Item
@@ -104,7 +104,7 @@ export function CalendarFields(props: {
             icon={Icon.Calendar}
           />
         )}
-        <Form.Dropdown.Item value={CALENDAR_NONE} title="Dial only" icon={Icon.Circle} />
+        <Form.Dropdown.Item value={CALENDAR_NONE} title="Reassign" icon="icon.png" />
         {writable.map((calendar) => (
           <Form.Dropdown.Item
             key={calendar.id}

@@ -76,7 +76,7 @@ export function BlockDetail(props: { event: ScheduleEvent; areas: Area[]; activi
             </List.Item.Detail.Metadata.TagList>
           ) : null}
           {activity ? <List.Item.Detail.Metadata.Label title="Activity" text={activity.name} /> : null}
-          {source ? <List.Item.Detail.Metadata.Label title="Calendar" text={source} /> : null}
+          <List.Item.Detail.Metadata.Label title="Calendar" text={source || "Reassign"} />
           {mirrors ? <List.Item.Detail.Metadata.Label title="Mirrored to" text={mirrors} /> : null}
           {status ? <List.Item.Detail.Metadata.Label title="Status" text={status} /> : null}
           {event.warning ? <List.Item.Detail.Metadata.Label title="Warning" text={event.warning} /> : null}
@@ -114,7 +114,7 @@ function accessories(event: ScheduleEvent, areas: Area[]): List.Item.Accessory[]
 }
 
 /**
- * The calendar a block lives in, or "" for a dial-only block. A published
+ * The calendar a block lives in, or "" for a Reassign-only block. A published
  * native block carries `calendar`; a synced one may carry only `source`.
  */
 function eventSource(event: ScheduleEvent): string {
