@@ -1,11 +1,5 @@
 import { IssuePromptRelative, IssuePromptResult } from "../api/getIssues";
 
-/**
- * Mirrors Linear's "Copy as prompt" action. Linear renders the identifier, branch name, title,
- * description, team, labels, project and the issue's immediate hierarchy - state, priority,
- * assignee and milestone are deliberately left out, and tags for empty values are omitted
- * rather than emitted blank.
- */
 export function getIssuePrompt(issue: IssuePromptResult) {
   const lines = [`Work on Linear issue ${issue.identifier}:`, ""];
 
@@ -51,7 +45,6 @@ export function getIssuePrompt(issue: IssuePromptResult) {
   return lines.join("\n");
 }
 
-/** The parent and each sub-issue are rendered as a trimmed-down issue carrying its UUID. */
 function getRelativeLines(tag: "parent-issue" | "sub-issue", issue: IssuePromptRelative) {
   return [
     `<${tag} identifier="${escapeAttribute(issue.identifier)}">`,
@@ -62,7 +55,7 @@ function getRelativeLines(tag: "parent-issue" | "sub-issue", issue: IssuePromptR
   ];
 }
 
-/** Single-line descriptions sit inline, multi-line ones get their own opening and closing lines. */
+// Linear inlines single-line descriptions and puts multi-line ones on their own lines.
 function getDescriptionLines(description?: string | null) {
   if (!description) {
     return [];
@@ -73,10 +66,7 @@ function getDescriptionLines(description?: string | null) {
     : [`<description>${description}</description>`];
 }
 
-/**
- * Teams can prefix branch names with the assignee's username (e.g. `samuelkraft/glaze-834-…`),
- * but the prompt only carries the issue part of the branch.
- */
+// Teams can prefix branch names with the assignee's username, which the prompt leaves out.
 function getSuggestedBranchName(branchName?: string) {
   if (!branchName) {
     return branchName;

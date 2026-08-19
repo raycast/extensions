@@ -32,12 +32,9 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
   const { issueCustomCopyAction } = getPreferenceValues<Preferences>();
 
   async function copyIssueAsPrompt() {
-    // Unlike the other copy actions this one waits on a request, so show that it's working.
     const toast = await showToast({ style: Toast.Style.Animated, title: "Copying prompt" });
 
     try {
-      // The prompt needs the description plus the issue's hierarchy, none of which the
-      // list and detail queries carry, so it always gets its own fetch.
       await Clipboard.copy(getIssuePrompt(await getIssuePromptData(issue.id)));
       toast.style = Toast.Style.Success;
       toast.title = "Copied prompt to clipboard";
@@ -92,15 +89,6 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
         title="Copy Git Branch Name"
         shortcut={Keyboard.Shortcut.Common.CopyName}
       />
-      <Action
-        icon={Icon.Clipboard}
-        title="Copy as Prompt"
-        onAction={copyIssueAsPrompt}
-        shortcut={{
-          macOS: { modifiers: ["cmd", "shift"], key: "p" },
-          Windows: { modifiers: ["ctrl", "shift"], key: "p" },
-        }}
-      />
       {issueCustomCopyAction && issueCustomCopyAction !== "" ? (
         <Action.CopyToClipboard
           content={issueCustomCopyAction?.replace(/\{(.*?)\}/g, (substring, variable) => {
@@ -114,6 +102,15 @@ export default function CopyToClipboardSection({ issue }: { issue: IssueResult }
           }}
         />
       ) : null}
+      <Action
+        icon={Icon.Clipboard}
+        title="Copy as Prompt"
+        onAction={copyIssueAsPrompt}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "opt", "shift"], key: "p" },
+          Windows: { modifiers: ["ctrl", "alt", "shift"], key: "p" },
+        }}
+      />
     </ActionPanel.Section>
   );
 }

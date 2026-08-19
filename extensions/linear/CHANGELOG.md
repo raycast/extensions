@@ -2,7 +2,7 @@
 
 ## [Copy as Prompt] - {PR_MERGE_DATE}
 
-- Add a "Copy as Prompt" action to issue copy actions, matching Linear's native action of the same name. Copies the issue as a structured prompt for coding agents, including its description, team, labels, project, and parent or sub-issues. The shortcut is `Cmd/Ctrl + Shift + P`, since `Cmd/Ctrl + Alt + P` is already taken by `Set Priority`.
+- Add a "Copy as Prompt" action to issue copy actions, matching Linear's native action of the same name. Copies the issue as a structured prompt for coding agents, including its description, team, labels, project, and parent or sub-issues.
 
 ## [My Issues Sub Views] - 2026-07-30
 

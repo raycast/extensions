@@ -459,7 +459,6 @@ export type IssuePromptResult = Pick<Issue, "identifier" | "title" | "branchName
   children: { nodes: IssuePromptRelative[] };
 };
 
-/** Fetches exactly the fields Linear's "Copy as prompt" renders, and nothing else. */
 export async function getIssuePromptData(issueId: string) {
   const { graphQLClient } = getLinearClient();
 
