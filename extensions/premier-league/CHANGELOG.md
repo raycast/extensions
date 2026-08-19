@@ -1,5 +1,11 @@
 # Premier League Changelog
 
+## [Current Season Kickoff] - {PR_MERGE_DATE}
+
+- Use the Premier League's active season and matchweek so Matches and Tables show the current season as soon as it becomes available.
+- Show an empty state in Awards when a season has no published awards yet.
+- Show loading indicators while season, matchweek, and command data is fetched.
+
 ## [Endpoint Exodus] - 2025-11-05
 
 - Upgrade to new Premier League API with cursor pagination and updated IDs.

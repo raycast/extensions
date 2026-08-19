@@ -1,10 +1,10 @@
 import { Color, Icon, Image, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState } from "react";
-import { getSeasons, getTables } from "./api";
-import SearchBarSeason from "./components/searchbar_season";
+import { getTables } from "./api";
+import SearchBarSeason, {
+  useSeasonSelection,
+} from "./components/searchbar_season";
 import { convertISOToLocalTime, getClubLogo } from "./utils";
-import { competitions } from "./components/searchbar_competition";
 
 const qualificationColor: Record<string, string> = {
   5: Color.Blue, // UEFA Champions League
@@ -13,12 +13,15 @@ const qualificationColor: Record<string, string> = {
 };
 
 export default function EPLTables() {
-  const [seasonId, setSeasonId] = useState<string>();
+  const {
+    seasonId,
+    setSeasonId,
+    seasons,
+    isLoading: isLoadingSeasons,
+  } = useSeasonSelection();
+  const currentSeason = seasons.find((s) => s.seasonId === seasonId);
 
-  const { data: seasons } = usePromise(getSeasons, [competitions[0].value]);
-  const currentSeason = seasons?.find((s) => s.seasonId === seasonId);
-
-  const { data: tables, isLoading } = usePromise(
+  const { data: tables, isLoading: isLoadingTables } = usePromise(
     async (season) => {
       return season ? await getTables(season) : [];
     },
@@ -29,9 +32,14 @@ export default function EPLTables() {
     <List
       throttle
       searchBarAccessory={
-        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
+        <SearchBarSeason
+          selected={seasonId}
+          onSelect={setSeasonId}
+          seasons={seasons}
+          isLoading={isLoadingSeasons}
+        />
       }
-      isLoading={isLoading}
+      isLoading={isLoadingSeasons || isLoadingTables}
       isShowingDetail={true}
     >
       {tables?.map((table, idx) => {

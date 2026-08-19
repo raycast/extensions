@@ -27,9 +27,11 @@ export default function MatchCommentary(props: {
   match: Fixture;
   title: string;
 }) {
-  const { data: fixture, revalidate: refetch } = usePromise(getMatch, [
-    props.match.matchId,
-  ]);
+  const {
+    data: fixture,
+    isLoading: isLoadingFixture,
+    revalidate: refetch,
+  } = usePromise(getMatch, [props.match.matchId]);
   const { data, isLoading, pagination, revalidate } = usePromise(
     (matchId) =>
       async ({ cursor }) => {
@@ -38,9 +40,10 @@ export default function MatchCommentary(props: {
     [props.match.matchId],
   );
 
-  const { data: referee } = usePromise(getMatchOfficials, [
-    props.match.matchId,
-  ]);
+  const { data: referee, isLoading: isLoadingReferee } = usePromise(
+    getMatchOfficials,
+    [props.match.matchId],
+  );
 
   const navigationTitle =
     !fixture || fixture.period === "PreMatch"
@@ -102,7 +105,7 @@ export default function MatchCommentary(props: {
   return (
     <List
       throttle
-      isLoading={isLoading}
+      isLoading={isLoadingFixture || isLoading || isLoadingReferee}
       pagination={pagination}
       navigationTitle={`${navigationTitle} | ${subtitle}`}
     >

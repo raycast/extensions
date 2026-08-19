@@ -34,17 +34,23 @@ export default function EPLMatchday() {
   const [team, setTeam] = useState<string>("");
 
   const [matchweek, setMatchweek] = useState<number>(0);
+  const [isLoadingMatchweek, setIsLoadingMatchweek] = useState(true);
   const [month, setMonth] = useState<number>(getMonth(new Date()));
 
   useEffect(() => {
-    getMatchweek().then(setMatchweek);
+    getMatchweek()
+      .then(setMatchweek)
+      .finally(() => setIsLoadingMatchweek(false));
   }, []);
 
-  const { data: seasons = [] } = usePromise(getSeasons);
+  const { data: seasons = [], isLoading: isLoadingSeasons } =
+    usePromise(getSeasons);
 
   const season = useMemo(() => seasons[0]?.seasonId, [seasons]);
 
-  const { data: clubs } = usePromise(getClubs, [season]);
+  const { data: clubs, isLoading: isLoadingClubs } = usePromise(getClubs, [
+    season,
+  ]);
 
   const props = useMemo(() => {
     if (isEPL) {
@@ -132,7 +138,12 @@ export default function EPLMatchday() {
   return (
     <List
       throttle
-      isLoading={isLoading}
+      isLoading={
+        isLoading ||
+        isLoadingSeasons ||
+        isLoadingMatchweek ||
+        (filter === "club" && isLoadingClubs)
+      }
       navigationTitle={
         isEPL
           ? `Matchweek ${matchweek} | Fixtures & Live Matches`

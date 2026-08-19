@@ -1,10 +1,9 @@
 import { Action, ActionPanel, Detail, Grid, Icon, List } from "@raycast/api";
-import { useState } from "react";
 import { Player, PlayerSeasonId } from "../types";
 import { formatDate, getFlagEmoji, getProfileImg } from "../utils";
 import { usePromise } from "@raycast/utils";
 import { getPlayerInformation, getPlayerStats, getSeasons } from "../api";
-import SearchBarSeason from "./searchbar_season";
+import SearchBarSeason, { useSeasonSelection } from "./searchbar_season";
 
 const toPercentage = (success: number = 0, unsuccess: number = 0) => {
   const total = success + unsuccess;
@@ -14,9 +13,14 @@ const toPercentage = (success: number = 0, unsuccess: number = 0) => {
 };
 
 export const PlayerStats = (props: { id: PlayerSeasonId }) => {
-  const [seasonId, setSeasonId] = useState<string>();
+  const {
+    seasonId,
+    setSeasonId,
+    seasons,
+    isLoading: isLoadingSeasons,
+  } = useSeasonSelection();
 
-  const { data: stats, isLoading } = usePromise(
+  const { data: stats, isLoading: isLoadingStats } = usePromise(
     async (season, playerId) =>
       season ? await getPlayerStats(season, playerId) : undefined,
     [seasonId, props.id.playerId],
@@ -24,13 +28,18 @@ export const PlayerStats = (props: { id: PlayerSeasonId }) => {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoadingSeasons || isLoadingStats}
       navigationTitle={`${stats?.player.name} | Statistics`}
       searchBarAccessory={
-        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
+        <SearchBarSeason
+          selected={seasonId}
+          onSelect={setSeasonId}
+          seasons={seasons}
+          isLoading={isLoadingSeasons}
+        />
       }
     >
-      {!stats && (
+      {!isLoadingSeasons && !isLoadingStats && !stats && (
         <List.EmptyView
           icon="premier-league.svg"
           title="No stats available yet"
@@ -195,85 +204,80 @@ export const PlayerStats = (props: { id: PlayerSeasonId }) => {
 };
 
 export const PlayerProfile = (props: { id: string }) => {
-  const { data: seasons } = usePromise(getSeasons);
-  const { data: player } = usePromise(
+  const { data: seasons, isLoading: isLoadingSeasons } = usePromise(getSeasons);
+  const { data: player, isLoading: isLoadingPlayer } = usePromise(
     async (season, playerId) =>
       season ? await getPlayerInformation(season, playerId) : undefined,
     [seasons?.[0].seasonId, props.id],
   );
 
+  if (!player) {
+    return <Detail isLoading={isLoadingSeasons || isLoadingPlayer} />;
+  }
+
   return (
-    player && (
-      <Detail
-        navigationTitle={`${player.name.display} | Profile & Stats`}
-        markdown={`## ${player.name.display}
+    <Detail
+      isLoading={isLoadingSeasons || isLoadingPlayer}
+      navigationTitle={`${player.name.display} | Profile & Stats`}
+      markdown={`## ${player.name.display}
 <img src="${getProfileImg(props.id)}" alt="${player.name.display}" width="220" height="280" />
 `}
-        metadata={
-          <Detail.Metadata>
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label
+            title="Date of Birth"
+            text={formatDate(player.dates.birth, "yyyy-MM-dd", "dd MMM yyyy")}
+          />
+          <Detail.Metadata.Label title="Position" text={player.position} />
+          <Detail.Metadata.Label
+            title="Nationality"
+            icon={getFlagEmoji(player.country.isoCode)}
+            text={player.country.country}
+          />
+          <Detail.Metadata.Label
+            title="Place of Birth"
+            text={player.countryOfBirth}
+          />
+          <Detail.Metadata.Separator />
+          {player.height && (
+            <Detail.Metadata.Label title="Height" text={`${player.height}cm`} />
+          )}
+          {player.weight && (
+            <Detail.Metadata.Label title="Weight" text={`${player.weight}kg`} />
+          )}
+          <Detail.Metadata.Label
+            title="Shirt Number"
+            text={player.shirtNum?.toString()}
+          />
+          <Detail.Metadata.Label
+            title="Preferred Foot"
+            text={player.preferredFoot}
+          />
+          {player.dates.joinedClub && (
             <Detail.Metadata.Label
-              title="Date of Birth"
-              text={formatDate(player.dates.birth, "yyyy-MM-dd", "dd MMM yyyy")}
+              title="Joined Date"
+              text={formatDate(
+                player.dates.joinedClub,
+                "yyyy-MM-dd",
+                "dd MMM yyyy",
+              )}
             />
-            <Detail.Metadata.Label title="Position" text={player.position} />
-            <Detail.Metadata.Label
-              title="Nationality"
-              icon={getFlagEmoji(player.country.isoCode)}
-              text={player.country.country}
-            />
-            <Detail.Metadata.Label
-              title="Place of Birth"
-              text={player.countryOfBirth}
-            />
-            <Detail.Metadata.Separator />
-            {player.height && (
-              <Detail.Metadata.Label
-                title="Height"
-                text={`${player.height}cm`}
-              />
-            )}
-            {player.weight && (
-              <Detail.Metadata.Label
-                title="Weight"
-                text={`${player.weight}kg`}
-              />
-            )}
-            <Detail.Metadata.Label
-              title="Shirt Number"
-              text={player.shirtNum?.toString()}
-            />
-            <Detail.Metadata.Label
-              title="Preferred Foot"
-              text={player.preferredFoot}
-            />
-            {player.dates.joinedClub && (
-              <Detail.Metadata.Label
-                title="Joined Date"
-                text={formatDate(
-                  player.dates.joinedClub,
-                  "yyyy-MM-dd",
-                  "dd MMM yyyy",
-                )}
-              />
-            )}
-          </Detail.Metadata>
-        }
-        actions={
-          <ActionPanel>
-            <Action.Push
-              title="Player Stats"
-              icon={Icon.Info}
-              target={
-                <PlayerStats id={player.id as unknown as PlayerSeasonId} />
-              }
-            />
-            <Action.OpenInBrowser
-              url={`https://www.premierleague.com/en/players/${props.id}/${player.name.display.toLowerCase().replace(/ /g, "-")}/overview`}
-            />
-          </ActionPanel>
-        }
-      />
-    )
+          )}
+        </Detail.Metadata>
+      }
+      actions={
+        <ActionPanel>
+          <Action.Push
+            title="Player Stats"
+            icon={Icon.Info}
+            target={<PlayerStats id={player.id as unknown as PlayerSeasonId} />}
+          />
+          <Action.OpenInBrowser
+            url={`https://www.premierleague.com/en/players/${props.id}/${player.name.display.toLowerCase().replace(/ /g, "-")}/overview`}
+          />
+        </ActionPanel>
+      }
+    />
   );
 };
 

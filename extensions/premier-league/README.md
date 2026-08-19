@@ -10,12 +10,12 @@ Get instant access to Premier League data right from your Raycast menu. Easily s
 
 ### Features
 
-* **Standings:** Access detailed standings information, including played matches, goals for/against, goal difference, points, and form.
-* **Fixtures and Results:** Access upcoming and past match fixtures, results, and match details.
-* **Clubs:** Explore individual team profiles with information on players, managers, and recent performance.
-* **Players:** Search for player profiles, including statistics, career highlights, and transfer history.
-* **Managers:** View manager profiles with information on teams managed and career achievements.
-* **Awards:** Explore a list of Premier League individual and team awards, including winners and statistics.
+- **Standings:** Access detailed standings information, including played matches, goals for/against, goal difference, points, and form.
+- **Fixtures and Results:** Access upcoming and past match fixtures, results, and match details.
+- **Clubs:** Explore individual team profiles with information on players, managers, and recent performance.
+- **Players:** Search for player profiles, including statistics, career highlights, and transfer history.
+- **Managers:** View manager profiles with information on teams managed and career achievements.
+- **Awards:** Explore a list of Premier League individual and team awards, including winners and statistics.
 
 ## Issues
 

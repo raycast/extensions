@@ -7,7 +7,8 @@ import { positions } from "../utils";
 import { PositionSection } from "./player";
 
 export default function ClubSquad(club: Club) {
-  const { data: seasons = [] } = usePromise(getSeasons);
+  const { data: seasons = [], isLoading: isLoadingSeasons } =
+    usePromise(getSeasons);
 
   const { data, isLoading } = usePromise(
     async (season) => {
@@ -21,7 +22,7 @@ export default function ClubSquad(club: Club) {
   return (
     <Grid
       throttle
-      isLoading={isLoading}
+      isLoading={isLoadingSeasons || isLoading}
       navigationTitle={`Squad | ${club.name} | Club`}
     >
       {positions.map((position) => {

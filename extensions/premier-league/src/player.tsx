@@ -23,7 +23,7 @@ export default function EPLPlayer() {
   return (
     <Grid
       throttle
-      isLoading={isLoading}
+      isLoading={terms.length >= 3 && isLoading}
       pagination={pagination}
       searchText={terms}
       onSearchTextChange={setTerms}

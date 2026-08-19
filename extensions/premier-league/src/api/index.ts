@@ -29,12 +29,42 @@ import { competitions } from "../components/searchbar_competition";
 const epl = competitions[0].value;
 
 const endpoint = "https://sdp-prem-prod.premier-league-prod.pulselive.com/api";
+const website = "https://www.premierleague.com/";
+
+interface ActiveSeason {
+  seasonId: string;
+  matchweek: number;
+}
 
 interface Pagination<T> {
   data: T[];
   hasMore: boolean;
   cursor?: string | null;
 }
+
+const getActiveSeason = async (): Promise<ActiveSeason> => {
+  const { data }: AxiosResponse<string> = await axios.get(website);
+  const seasonId = data.match(
+    /ACTIVE_PL_SEASON_ID\s*=\s*["']([^"']+)["']/,
+  )?.[1];
+  const matchweek = data.match(
+    /ACTIVE_PL_MATCHWEEK_ID\s*=\s*["']([^"']+)["']/,
+  )?.[1];
+
+  if (!seasonId || !matchweek) {
+    throw new Error("Could not determine the active Premier League season");
+  }
+
+  return { seasonId, matchweek: Number(matchweek) };
+};
+
+const createSeason = (seasonId: string): Season => ({
+  seasonId,
+  label: `${seasonId}/${String(Number(seasonId) + 1).slice(-2)}`,
+  annotations: [],
+  qualification: [],
+  relegation: [],
+});
 
 export const getSeasons = async (comp: string = "8"): Promise<Season[]> => {
   const config: AxiosRequestConfig = {
@@ -43,9 +73,40 @@ export const getSeasons = async (comp: string = "8"): Promise<Season[]> => {
   };
 
   try {
-    const { data }: AxiosResponse<EPLCompetition> = await axios(config);
+    const seasonsRequest = axios<EPLCompetition>(config).then(
+      ({ data }) => data.seasons,
+    );
 
-    return data.seasons;
+    if (comp !== epl) {
+      return await seasonsRequest;
+    }
+
+    const [seasonsResult, activeSeasonResult] = await Promise.allSettled([
+      seasonsRequest,
+      getActiveSeason(),
+    ]);
+
+    if (
+      seasonsResult.status === "rejected" &&
+      activeSeasonResult.status === "rejected"
+    ) {
+      throw seasonsResult.reason;
+    }
+
+    const seasons =
+      seasonsResult.status === "fulfilled" ? seasonsResult.value : [];
+
+    if (activeSeasonResult.status === "rejected") {
+      return seasons;
+    }
+
+    const activeSeason = activeSeasonResult.value;
+
+    if (!seasons.some((season) => season.seasonId === activeSeason.seasonId)) {
+      return [createSeason(activeSeason.seasonId), ...seasons];
+    }
+
+    return seasons;
   } catch (e) {
     showFailureToast(e);
 
@@ -54,15 +115,10 @@ export const getSeasons = async (comp: string = "8"): Promise<Season[]> => {
 };
 
 export const getMatchweek = async (): Promise<number> => {
-  const config: AxiosRequestConfig = {
-    method: "GET",
-    url: "https://resources.premierleague.com/premierleague25/config/current-gameweek.json",
-  };
-
   try {
-    const { data } = await axios(config);
+    const { matchweek } = await getActiveSeason();
 
-    return data.matchweek;
+    return matchweek;
   } catch (e) {
     showFailureToast(e);
 
@@ -81,6 +137,10 @@ export const getAwards = async (season: string) => {
 
     return data;
   } catch (e) {
+    if (axios.isAxiosError(e) && e.response?.status === 404) {
+      return { manager_awards: [], player_awards: [] };
+    }
+
     showFailureToast(e);
 
     return undefined;

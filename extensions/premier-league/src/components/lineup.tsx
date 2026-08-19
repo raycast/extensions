@@ -56,10 +56,16 @@ function getAccessories(events: MatchEvent[] = []) {
 export default function MatchLineups(props: { match: Fixture; title: string }) {
   const { match, title } = props;
 
-  const { data, isLoading } = usePromise(getMatchLineups, [match.matchId]);
-  const { data: matchEvents } = usePromise(getMatchEvents, [match.matchId]);
+  const { data, isLoading: isLoadingLineups } = usePromise(getMatchLineups, [
+    match.matchId,
+  ]);
+  const { data: matchEvents, isLoading: isLoadingMatchEvents } = usePromise(
+    getMatchEvents,
+    [match.matchId],
+  );
 
   const [teamId, setTeamId] = useState<string>(match.homeTeam.id);
+  const isLoading = isLoadingLineups || isLoadingMatchEvents;
 
   const teamLineup = useMemo(() => {
     return data?.home_team.teamId === teamId ? data.home_team : data?.away_team;
@@ -159,12 +165,12 @@ export default function MatchLineups(props: { match: Fixture; title: string }) {
             }}
           />
         </List.Section>
-      ) : (
+      ) : !isLoading ? (
         <List.EmptyView
           icon="premier-league.svg"
           title="No pitch view available yet"
         />
-      )}
+      ) : null}
 
       {teamLineup && teamLineup.formation
         ? teamLineup.formation.lineup.map((group, idx) => {

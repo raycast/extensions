@@ -1,17 +1,19 @@
 import { Action, ActionPanel, Detail, Grid, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
-import { useState } from "react";
 import { getClubMetadata, getClubs } from "./api";
-import SearchBarSeason from "./components/searchbar_season";
+import SearchBarSeason, {
+  useSeasonSelection,
+} from "./components/searchbar_season";
 import ClubSquad from "./components/squad";
 import { Club } from "./types";
 import { getClubLogo } from "./utils";
 
 function ClubProfile(props: Club) {
-  const { data: metadata } = usePromise(getClubMetadata, [props.id]);
+  const { data: metadata, isLoading } = usePromise(getClubMetadata, [props.id]);
   return (
     <Detail
+      isLoading={isLoading}
       navigationTitle={`${props.name} | Club`}
       markdown={json2md([
         { h1: props.name },
@@ -80,9 +82,14 @@ function ClubProfile(props: Club) {
 }
 
 export default function EPLClub() {
-  const [seasonId, setSeasonId] = useState<string>();
+  const {
+    seasonId,
+    setSeasonId,
+    seasons,
+    isLoading: isLoadingSeasons,
+  } = useSeasonSelection();
 
-  const { data: clubs, isLoading } = usePromise(
+  const { data: clubs, isLoading: isLoadingClubs } = usePromise(
     async (season) => (season ? await getClubs(season) : undefined),
     [seasonId],
   );
@@ -91,10 +98,15 @@ export default function EPLClub() {
     <Grid
       throttle
       columns={4}
-      isLoading={isLoading}
+      isLoading={isLoadingSeasons || isLoadingClubs}
       inset={Grid.Inset.Small}
       searchBarAccessory={
-        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
+        <SearchBarSeason
+          selected={seasonId}
+          onSelect={setSeasonId}
+          seasons={seasons}
+          isLoading={isLoadingSeasons}
+        />
       }
     >
       {clubs?.map((team) => {

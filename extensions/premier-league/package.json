@@ -7,7 +7,8 @@
   "author": "anhthang",
   "license": "MIT",
   "contributors": [
-    "stelo"
+    "stelo",
+    "0xdhrv"
   ],
   "categories": [
     "Data",
@@ -72,20 +73,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.6",
-    "@raycast/utils": "^2.2.2",
-    "axios": "^1.13.2",
-    "date-fns": "^4.1.0",
+    "@raycast/api": "^1.104.25",
+    "@raycast/utils": "^2.3.0",
+    "axios": "^1.19.0",
+    "date-fns": "^4.4.0",
     "json2md": "^2.0.3",
     "lodash.groupby": "^4.6.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.2.0",
     "@types/json2md": "^1.5.4",
     "@types/lodash.groupby": "^4.6.9",
-    "@types/react": "^19.2.2",
-    "eslint": "^9.39.1",
-    "prettier": "^3.6.2",
+    "@types/react": "^19.2.18",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
     "typescript": "^5.9.3"
   },
   "scripts": {

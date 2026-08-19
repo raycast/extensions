@@ -1,21 +1,34 @@
 import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useState } from "react";
 import groupBy from "lodash.groupby";
 import { getAwards } from "./api";
 import { PlayerProfile } from "./components/player";
-import SearchBarSeason from "./components/searchbar_season";
+import SearchBarSeason, {
+  useSeasonSelection,
+} from "./components/searchbar_season";
 import { awardMap, formatDate, getProfileImg } from "./utils";
 import { Player } from "./types";
 
 export default function EPLAward() {
-  const [seasonId, setSeasonId] = useState<string>();
+  const {
+    seasonId,
+    setSeasonId,
+    seasons,
+    isLoading: isLoadingSeasons,
+  } = useSeasonSelection();
 
-  const { data, isLoading } = usePromise(
-    async (season) => (season ? await getAwards(season) : undefined),
+  const { data: awardsResult, isLoading: isLoadingAwards } = usePromise(
+    async (season) =>
+      season ? { seasonId: season, data: await getAwards(season) } : undefined,
     [seasonId],
   );
 
+  const isLoading =
+    isLoadingSeasons ||
+    !seasonId ||
+    isLoadingAwards ||
+    awardsResult?.seasonId !== seasonId;
+  const data = awardsResult?.data;
   const awards = data?.player_awards?.concat(data?.manager_awards ?? []) ?? [];
 
   const getAwardGrids = (awards: Player[] | undefined) => {
@@ -51,9 +64,21 @@ export default function EPLAward() {
       isLoading={isLoading}
       columns={4}
       searchBarAccessory={
-        <SearchBarSeason selected={seasonId} onSelect={setSeasonId} />
+        <SearchBarSeason
+          selected={seasonId}
+          onSelect={setSeasonId}
+          seasons={seasons}
+          isLoading={isLoadingSeasons}
+        />
       }
     >
+      {!isLoading && awards.length === 0 && (
+        <Grid.EmptyView
+          icon="premier-league.svg"
+          title="No Awards Announced Yet"
+          description="Awards for this season will appear here when they are announced."
+        />
+      )}
       {Object.entries(groupBy(awards, "date"))
         .reverse()
         .map(([date, monthAwards]) => {
