@@ -160,6 +160,12 @@ const tabIdForScript = (tabId: string) => {
 const actOnTabById = (tabId: string, action: string) => `
       repeat with w in windows
         set _matches to (every tab of w whose id is "${tabIdForScript(tabId)}")
+        if (count of _matches) = 0 then
+          -- Chrome reports ids as text, but match numerically as well so a build
+          -- that hands them back as numbers still resolves. Safe to interpolate
+          -- unquoted: the id has been validated to be digits.
+          set _matches to (every tab of w whose id is ${tabIdForScript(tabId)})
+        end if
         if (count of _matches) > 0 then
           set _t to item 1 of _matches
           set index of w to 1
