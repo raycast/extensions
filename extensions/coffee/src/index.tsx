@@ -184,7 +184,7 @@ export default function Command(props: LaunchProps) {
 
   const handleHideMenuBarItem = async () => {
     cache.set(HIDE_MENU_BAR_KEY, "true");
-    void LocalStorage.setItem(HIDE_MENU_BAR_KEY, "true");
+    await LocalStorage.setItem(HIDE_MENU_BAR_KEY, "true");
     setMenuBarHidden(true);
     await showHUD("Menu bar icon hidden");
   };
