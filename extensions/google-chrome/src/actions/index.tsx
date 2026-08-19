@@ -5,9 +5,12 @@ import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
-  // Reading `title of tabs` / `URL of tabs` fetches a whole window in one Apple Event,
-  // instead of two round-trips per tab. The favicon still needs one event per tab,
-  // so it is only evaluated when the preference is on.
+  // `properties of tabs` returns every tab's title, URL and id for a whole window in
+  // a single Apple Event, instead of two round-trips per tab. Reading the three
+  // attributes as separate lists would be a similar win, but they would be separate
+  // snapshots: a tab opened or closed in between shifts one list against the others
+  // and a row would end up carrying another tab's id. The favicon still needs one
+  // event per tab, so it is only evaluated when the preference is on.
   const faviconFormula = useOriginalFavicon
     ? `execute tab i of w javascript ¬
         "document.head.querySelector('link[rel~=icon]') ? document.head.querySelector('link[rel~=icon]').href : '';"`
@@ -21,12 +24,11 @@ export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
       tell application "Google Chrome"
         repeat with w in windows
           set _w_id to get id of w as inches as string
-          set _titles to title of tabs of w
-          set _urls to URL of tabs of w
-          set _tab_ids to id of tabs of w
-          repeat with i from 1 to count of _titles
+          set _props to properties of tabs of w
+          repeat with i from 1 to count of _props
+            set _p to item i of _props
             set _favicon to ${faviconFormula}
-            set _output to (_output & item i of _titles & "${Tab.TAB_CONTENTS_SEPARATOR}" & item i of _urls & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & i & "${Tab.TAB_CONTENTS_SEPARATOR}" & item i of _tab_ids & "\\n")
+            set _output to (_output & (title of _p) & "${Tab.TAB_CONTENTS_SEPARATOR}" & (URL of _p) & "${Tab.TAB_CONTENTS_SEPARATOR}" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _w_id & "${Tab.TAB_CONTENTS_SEPARATOR}" & i & "${Tab.TAB_CONTENTS_SEPARATOR}" & (id of _p) & "\\n")
           end repeat
         end repeat
       end tell
@@ -158,6 +160,9 @@ export async function setActiveTab(tab: Tab): Promise<void> {
           if (item i of _tab_ids as text) is "${tab.tabId}" then
             set index of w to 1
             set active tab index of w to i
+            -- Confirm the index still resolved to the intended tab; if the tab moved
+            -- in between, fail loudly rather than leaving another tab activated.
+            if (id of active tab of w as text) is not "${tab.tabId}" then error "Tab moved while activating"
             return true
           end if
         end repeat
